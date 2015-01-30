@@ -92,12 +92,23 @@ generate_presigned_url(OrgId, Lifetime, Method, Checksum, ExternalUrl) ->
 
 generate_presigned_url(OrgId, Bucket, Lifetime, Method, Checksum, AwsConfig) ->
     Headers = headers_for_type(Method, Checksum),
+    Expiry = case application:get_env(chef_objects, s3_url_expiry_window_size) of
+        {ok, {X, percent}} ->
+            Interval = round((X / 100) * Lifetime),
+            {Lifetime, Interval};
+        {ok, {X, minutes}} ->
+            %% Convert X to seconds
+            {Lifetime, (X * 60)};
+        _ ->
+            Lifetime
+    end,
+
     mini_s3:s3_url(Method,
-                       as_string(Bucket),
-                       make_key(OrgId, Checksum),
-                       Lifetime,
-                       Headers,
-                       AwsConfig).
+                   as_string(Bucket),
+                   make_key(OrgId, Checksum),
+                   Expiry,
+                   Headers,
+                   AwsConfig).
 
 %% @doc Utility function to normalize inputs to Erlang strings.  Needed to bridge our binary
 %% string standard with mini_s3's string standard.
@@ -125,7 +136,7 @@ base64_checksum(Checksum) ->
 -spec bucket() -> string().
 bucket() ->
     envy:get(chef_objects, s3_platform_bucket_name, string).
-   
+
 -spec headers_for_type(http_verb(), Checksum::binary()) -> [ {string(), string()} ].
 %% @doc helper function for generating headers for the S3 URL
 %%
@@ -174,4 +185,3 @@ s3_external_url(VHostUrl) ->
         BadUrl ->
             {invalid_s3_url, BadUrl}
     end.
-

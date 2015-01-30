@@ -58,7 +58,7 @@
                      "8f3f6a3a30730b193cc340a8885a960586dc98de"}},
        {mini_s3,".*",
                 {git,"https://github.com/opscode/mini_s3",
-                     "b32b9e92d3cc00def658e3c45231f00d5b7aaf55"}},
+                     "1cf296868077caefa6791f4996145a369c49091b"}},
        {opscoderl_folsom,".*",
                          {git,"https://github.com/opscode/opscoderl_folsom",
                               "d493429f895a904e9fd86d12a68f7075dfa8e227"}},
