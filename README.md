@@ -16,7 +16,7 @@ Following is a list of key components of Chef Server. This is not yet an exhaust
 
 ### Commonly-Modified Components
 
-* [opscode-omnibus](http://github.com/opscode/opscode-omnibus): Configuration for the Chef Server installation, nd the [Omnibus](http://github.com/opscode/omnibus) project definition for building it. 
+* [opscode-omnibus](http://github.com/opscode/opscode-omnibus): Configuration for the Chef Server installation, and the [Omnibus](http://github.com/opscode/omnibus) project definition for building it. 
 * [oc_erchef](http://github.com/opscode/oc_erchef), the REST API server. 
 * [oc-chef-pedant](http://github.com/opscode/oc-chef-pedant), Chef Server tests specific to formerly closed-source features such as multi-tenancy and RBAC. 
 
