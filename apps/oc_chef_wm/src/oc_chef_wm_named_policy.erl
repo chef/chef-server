@@ -1,7 +1,8 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Stephen Delano <stephen@chef.io>
-%% Copyright 2013-2014 Chef Software, Inc. All Rights Reserved.
+%% @author Oliver Ferrigni <oliver@chef.io>
+%% @author Jean Rouge <jean@chef.io>
+%% Copyright 2013-2015 Chef Software, Inc. All Rights Reserved.
 
 -module(oc_chef_wm_named_policy).
 
@@ -34,35 +35,6 @@
          validate_request/3,
          conflict_message/1,
          post_is_create/2]).
-
--define(VALIDATION_CONSTRAINTS,
-        {[{<<"name">>, {string_match, chef_regex:regex_for(policy_file_name)}},
-
-          {<<"run_list">>, chef_json_validator:run_list_spec()},
-
-          {<<"cookbook_locks">>,
-           {object_map, {
-              {keys, {string_match, chef_regex:regex_for(cookbook_name)}},
-              {values,
-               %% apparently there's no cleaner way to do that with `ej:valid' (??)
-               {fun_match, {fun valid_cookbook_lock/1, object,
-                            <<"Invalid cookbook_lock constraint">>}}}}}}
-         ]}).
-
--define(COOKBOOK_LOCK_VAIDATION_CONSTRAINTS,
-        {[{<<"dotted_decimal_identifier">>,
-           chef_cookbook_version:single_cookbook_version_spec()},
-          {<<"identifier">>,
-           {string_match, chef_regex:regex_for(policy_identifier)}},
-
-          {{opt, <<"version">>},
-           chef_cookbook_version:single_cookbook_version_spec()}]}).
-
-valid_cookbook_lock(CookbookLockJson) ->
-    case ej:valid(?COOKBOOK_LOCK_VAIDATION_CONSTRAINTS, CookbookLockJson) of
-        ok -> ok;
-        _Bad -> error
-    end.
 
 init(Config) ->
     oc_chef_wm_base:init(?MODULE, Config).
@@ -114,12 +86,7 @@ validate_json(Req) ->
     Body = wrq:req_body(Req),
     {ok, Policy} = oc_chef_policy:parse_binary_json(Body),
     ok = validate_name(Req, Policy),
-    case ej:valid(?VALIDATION_CONSTRAINTS, Policy) of
-        ok ->
-            Policy;
-        Bad ->
-            throw(Bad)
-    end.
+		Policy.
 
 validate_name(Req, Policy) ->
     NameFromReq = wrq:path_info(policy_name, Req),
@@ -204,8 +171,8 @@ from_json(Req, #base_state{resource_state = #policy_state{
     oc_chef_wm_base:create_from_json(Req, State, oc_chef_policy, {authz_id, AuthzId},
                                      UpdatedPolicyData).
 
-conflict_message(_Name) ->
-    {[{<<"error">>, <<"Policy already exists">>}]}.
+conflict_message(Name) ->
+    {[{<<"error">>, list_to_binary("Policy already exists " ++ Name)}]}.
 
 
 delete_resource(Req, #base_state{

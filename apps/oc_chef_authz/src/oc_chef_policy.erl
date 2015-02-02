@@ -1,7 +1,22 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Stephen Delano <stephen@opscode.com>
-%% Copyright 2013 Opscode, Inc. All Rights Reserved.
+%% @author Oliver Ferrigni <oliver@chef.io>
+%% Copyright 2012-2015 Opscode, Inc. All Rights Reserved.
+%%
+%% This file is provided to you under the Apache License,
+%% Version 2.0 (the "License"); you may not use this file
+%% except in compliance with the License.  You may obtain
+%% a copy of the License at
+%%
+%%   http://www.apache.org/licenses/LICENSE-2.0
+%%
+%% Unless required by applicable law or agreed to in writing,
+%% software distributed under the License is distributed on an
+%% "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+%% KIND, either express or implied.  See the License for the
+%% specific language governing permissions and limitations
+%% under the License.
+%%
 
 -module(oc_chef_policy).
 
@@ -46,6 +61,35 @@
          update/2,
          fetch/2
         ]).
+
+-define(VALIDATION_CONSTRAINTS,
+        {[{<<"name">>, {string_match, chef_regex:regex_for(policy_file_name)}},
+
+          {<<"run_list">>, chef_json_validator:run_list_spec()},
+
+          {<<"cookbook_locks">>,
+           {object_map, {
+              {keys, {string_match, chef_regex:regex_for(cookbook_name)}},
+              {values,
+               %% apparently there's no cleaner way to do that with `ej:valid' (??)
+               {fun_match, {fun valid_cookbook_lock/1, object,
+                            <<"Invalid cookbook_lock constraint">>}}}}}}
+         ]}).
+
+-define(COOKBOOK_LOCK_VAIDATION_CONSTRAINTS,
+        {[{<<"dotted_decimal_identifier">>,
+           chef_cookbook_version:single_cookbook_version_spec()},
+          {<<"identifier">>,
+           {string_match, chef_regex:regex_for(policy_identifier)}},
+
+          {{opt, <<"version">>},
+           chef_cookbook_version:single_cookbook_version_spec()}]}).
+
+valid_cookbook_lock(CookbookLockJson) ->
+    case ej:valid(?COOKBOOK_LOCK_VAIDATION_CONSTRAINTS, CookbookLockJson) of
+        ok -> ok;
+        _Bad -> error
+    end.
 
 id(#oc_chef_policy{id = Id}) ->
     Id.
@@ -148,7 +192,13 @@ update(#oc_chef_policy{
 
 
 parse_binary_json(Bin) ->
-    {ok, chef_json:decode_body(Bin)}.
+    Policy = chef_json:decode_body(Bin),
+    case ej:valid(?VALIDATION_CONSTRAINTS, Policy) of
+        ok ->
+			{ok, Policy};
+        Bad ->
+            throw(Bad)
+    end.
 
 
 fetch(#oc_chef_policy{} = Record, CallbackFun) ->

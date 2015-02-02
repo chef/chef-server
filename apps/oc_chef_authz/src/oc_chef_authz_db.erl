@@ -152,7 +152,7 @@ statements(pgsql) ->
      {find_policy_by_orgid_name_group,
       <<"SELECT id, authz_id, org_id, name, last_updated_by, serialized_object"
         " FROM policies"
-        " WHERE (name = $1 AND policy_group = $2 AND org_id = $3) LIMIT 1">>},
+        " WHERE (name = $1 AND policy_group = $2 AND org_id = $3)">>},
      {insert_policy,
       <<"INSERT INTO policies (id, authz_id, org_id, name, policy_group,"
         " last_updated_by, serialized_object) VALUES"

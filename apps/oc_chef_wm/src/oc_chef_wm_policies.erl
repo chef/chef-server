@@ -1,6 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Stephen Delano <stephen@chef.io>
+%% @author Oliver Ferrigni <oliver@chef.io>
+%% @author Jean Rouge <jean@chef.io>
 %% Copyright 2013-2014 Chef Software, Inc. All Rights Reserved.
 
 -module(oc_chef_wm_policies).
@@ -96,12 +97,10 @@ malformed_request_message(Any, _Req, _State) ->
 conflict_message(_Name) ->
     {[{<<"error">>, [<<"Policy already exists">>]}]}.
 
--define(VALID_NAME_REGEX, "^[a-z0-9\-_]+$").
-
 validate_policy_name(undefined) ->
     missing;
 validate_policy_name(Name) ->
-    {ok, CompiledRegex} = re:compile(?VALID_NAME_REGEX),
+	{CompiledRegex, _Msg} = chef_regex:regex_for(policy_file_name),
     case re:run(Name, CompiledRegex) of
         {match, _} ->
             valid;
