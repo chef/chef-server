@@ -56,7 +56,7 @@ insert_cbv_null_id() ->
                                              meta_deps= <<"">>,
                                              meta_long_desc= <<"">>,
                                              metadata= <<"">>,
-                                             last_updated_by= itest_util:actor_id(),
+                                             last_updated_by= chef_test_suite_helper:actor_id(),
                                              created_at= {datetime, {{2011,10,1},{16,47,46}}},
                                              updated_at= {datetime, {{2011,10,1},{16,47,46}}},
                                              serialized_object= <<"">>,
@@ -64,26 +64,6 @@ insert_cbv_null_id() ->
 
     {error, Reason} = chef_sql:create_cookbook_version(CookbookVersion),
     Reason.
-
-insert_cbv_no_id() ->
-    {AuthzId, OrgId, Name} = itest_cookbook_util:make_cookbook(<<"insert_invalid">>),
-    %% This record is missing an 'id' field
-    CookbookVersion = #chef_cookbook_version{
-      authz_id=AuthzId,
-      org_id=OrgId,
-      name=Name,
-      major=0, minor=0, patch=0, frozen=false,
-      meta_attributes= <<"">>,
-      meta_deps= <<"">>,
-      meta_long_desc= <<"">>,
-      metadata= <<"">>,
-      last_updated_by= itest_util:actor_id(),
-      created_at= {datetime, {{2011,10,1},{16,47,46}}},
-      updated_at= {datetime, {{2011,10,1},{16,47,46}}},
-      serialized_object= <<"">>,
-      checksums = [] },
-      ?assertError({undefined_in_record, CookbookVersion},
-                 chef_sql:create_cookbook_version(CookbookVersion)).
 
 insert_cbv_with_unknown_checksums() ->
     Cookbook = itest_cookbook_util:make_cookbook(<<"insert_unknown">>),
@@ -118,8 +98,8 @@ fetch_cookbook_version_no_checksums() ->
 fetch_cookbook_version_checksums() ->
     Cookbook = itest_cookbook_util:make_cookbook(<<"fetch_checksums">>),
     CookbookVersion0 = itest_cookbook_util:make_cookbook_version(<<"001fetch_checksums">>, 0, Cookbook),
-    Checksums = [ itest_util:make_id(<<"checksum1">>),
-                  itest_util:make_id(<<"checksum2">>)],
+    Checksums = [ chef_test_suite_helper:make_id(<<"checksum1">>),
+                  chef_test_suite_helper:make_id(<<"checksum2">>)],
     CookbookVersion = CookbookVersion0#chef_cookbook_version{checksums=Checksums},
     ok = chef_sql:mark_checksums_as_uploaded(CookbookVersion#chef_cookbook_version.org_id,
                                              Checksums),
@@ -147,7 +127,7 @@ fetch_cookbook_version_different_version() ->
     ?assertEqual(Expected, Got).
 
 fetch_cookbook_versions() ->
-    OrgId = itest_util:the_org_id(),
+    OrgId = chef_test_suite_helper:the_org_id(),
     {ok, Versions} = chef_sql:fetch_cookbook_versions(OrgId),
     %% FIXME Hard to test the exact return value given we don't have
     %% a clean state.  For now check the shape of the returned
@@ -161,7 +141,7 @@ fetch_cookbook_versions() ->
       end || Row <- Versions].
 
 fetch_cookbook_versions_single_cookbook_no_versions() ->
-    OrgId = itest_util:the_org_id(),
+    OrgId = chef_test_suite_helper:the_org_id(),
     {ok, Versions} = chef_sql:fetch_cookbook_versions(OrgId, <<"does_not_exist">>),
     ?assertEqual([], Versions).
 
@@ -205,29 +185,29 @@ fetch_latest_cookbook_version_different_versions() ->
 update_cookbook_version_checksums() ->
     Cookbook = itest_cookbook_util:make_cookbook(<<"update_checksums">>),
     ExistingVersion = itest_cookbook_util:make_cookbook_version(<<"update_version_01">>, 1, Cookbook),
-    Checksums = [ itest_util:make_id(<<"1checksum2">>),
-                  itest_util:make_id(<<"1checksum1">>) ],
+    Checksums = [ chef_test_suite_helper:make_id(<<"1checksum2">>),
+                  chef_test_suite_helper:make_id(<<"1checksum1">>) ],
     update_cookbook_version_checksums(ExistingVersion, Checksums, Checksums).
 
 update_cookbook_version_checksums_with_deletions() ->
     Cookbook = itest_cookbook_util:make_cookbook(<<"update_checksums">>),
     ExistingVersion = itest_cookbook_util:make_cookbook_version(<<"update_version_02">>, 2, Cookbook),
-    ExistingChecksums = [ itest_util:make_id(<<"2checksum2_2">>), itest_util:make_id(<<"2checksum1">>), itest_util:make_id(<<"2checksum3">>) ],
-    UpdatedChecksums = [ itest_util:make_id(<<"2checksum1">>) ],
+    ExistingChecksums = [ chef_test_suite_helper:make_id(<<"2checksum2_2">>), chef_test_suite_helper:make_id(<<"2checksum1">>), chef_test_suite_helper:make_id(<<"2checksum3">>) ],
+    UpdatedChecksums = [ chef_test_suite_helper:make_id(<<"2checksum1">>) ],
     update_cookbook_version_checksums(ExistingVersion, ExistingChecksums, UpdatedChecksums).
 
 update_cookbook_version_checksums_with_additions() ->
     Cookbook = itest_cookbook_util:make_cookbook(<<"update_checksums">>),
     ExistingVersion = itest_cookbook_util:make_cookbook_version(<<"update_version_03">>, 3, Cookbook),
-    ExistingChecksums = [ itest_util:make_id(<<"3checksum2">>) ],
-    UpdatedChecksums = [ itest_util:make_id(<<"3checksum1">>), itest_util:make_id(<<"3checksum2">>), itest_util:make_id(<<"3checksum0">>) ],
+    ExistingChecksums = [ chef_test_suite_helper:make_id(<<"3checksum2">>) ],
+    UpdatedChecksums = [ chef_test_suite_helper:make_id(<<"3checksum1">>), chef_test_suite_helper:make_id(<<"3checksum2">>), chef_test_suite_helper:make_id(<<"3checksum0">>) ],
     update_cookbook_version_checksums(ExistingVersion, ExistingChecksums, UpdatedChecksums).
 
 update_cookbook_version_checksums_with_deletions_and_additions() ->
     Cookbook = itest_cookbook_util:make_cookbook(<<"update_checksums">>),
     ExistingVersion = itest_cookbook_util:make_cookbook_version(<<"update_version_04">>, 4, Cookbook),
-    ExistingChecksums = [ itest_util:make_id(<<"4checksum2">>), itest_util:make_id(<<"4checksum1">>), itest_util:make_id(<<"4checksums6">>) ],
-    UpdatedChecksums = [ itest_util:make_id(<<"4checksums6">>), itest_util:make_id(<<"4checksum5">>), itest_util:make_id(<<"4checksum0">>) ],
+    ExistingChecksums = [ chef_test_suite_helper:make_id(<<"4checksum2">>), chef_test_suite_helper:make_id(<<"4checksum1">>), chef_test_suite_helper:make_id(<<"4checksums6">>) ],
+    UpdatedChecksums = [ chef_test_suite_helper:make_id(<<"4checksums6">>), chef_test_suite_helper:make_id(<<"4checksum5">>), chef_test_suite_helper:make_id(<<"4checksum0">>) ],
     update_cookbook_version_checksums(ExistingVersion, ExistingChecksums, UpdatedChecksums).
 
 
@@ -279,9 +259,9 @@ update_cookbook_version_checksums_with_missing_checksums() ->
     %% get the full CB including checksums
     Cookbook = itest_cookbook_util:make_cookbook(<<"update_checksums">>),
     ExistingVersion = itest_cookbook_util:make_cookbook_version(<<"update_version_05">>, 5, Cookbook),
-    MissingChecksum = itest_util:make_id(<<"5missing1">>),
-    ExistingChecksums = [ itest_util:make_id(<<"5checksum2">>), itest_util:make_id(<<"5checksum1">>), itest_util:make_id(<<"5checksums6">>) ],
-    UpdatedChecksums = [ itest_util:make_id(<<"5checksums2">>), MissingChecksum ],
+    MissingChecksum = chef_test_suite_helper:make_id(<<"5missing1">>),
+    ExistingChecksums = [ chef_test_suite_helper:make_id(<<"5checksum2">>), chef_test_suite_helper:make_id(<<"5checksum1">>), chef_test_suite_helper:make_id(<<"5checksums6">>) ],
+    UpdatedChecksums = [ chef_test_suite_helper:make_id(<<"5checksums2">>), MissingChecksum ],
 
     UpdatedVersion = ExistingVersion#chef_cookbook_version{ meta_long_desc = <<"Updated Description">>, checksums = UpdatedChecksums },
 
@@ -305,10 +285,10 @@ update_cookbook_version_checksums_with_shared_checksums() ->
     OlderVersion    = itest_cookbook_util:make_cookbook_version(<<"update_version_06">>, 6, Cookbook),
     ExistingVersion = itest_cookbook_util:make_cookbook_version(<<"update_version_07">>, 7, Cookbook),
 
-    SharedChecksum = itest_util:make_id(<<"shared-1">>),
-    OlderChecksums = [ itest_util:make_id(<<"v6-1">>), itest_util:make_id(<<"v6-2">>), SharedChecksum ],
-    ExistingChecksums = [ itest_util:make_id(<<"v7-1">>), itest_util:make_id(<<"v7-2">>), SharedChecksum ],
-    UpdatedChecksums = [ itest_util:make_id(<<"v7-3">>), itest_util:make_id(<<"v7-2">>) ],
+    SharedChecksum = chef_test_suite_helper:make_id(<<"shared-1">>),
+    OlderChecksums = [ chef_test_suite_helper:make_id(<<"v6-1">>), chef_test_suite_helper:make_id(<<"v6-2">>), SharedChecksum ],
+    ExistingChecksums = [ chef_test_suite_helper:make_id(<<"v7-1">>), chef_test_suite_helper:make_id(<<"v7-2">>), SharedChecksum ],
+    UpdatedChecksums = [ chef_test_suite_helper:make_id(<<"v7-3">>), chef_test_suite_helper:make_id(<<"v7-2">>) ],
 
     UpdatedVersion = ExistingVersion#chef_cookbook_version{ meta_long_desc = <<"Updated Description">>, checksums = UpdatedChecksums },
 
@@ -331,8 +311,8 @@ update_cookbook_version_checksums_with_shared_checksums() ->
     #chef_db_cb_version_update{
         added_checksums=AddedChecksums,
         deleted_checksums=DeletedChecksums} = chef_sql:update_cookbook_version(UpdatedVersion),
-    ?assertEqual([itest_util:make_id(<<"v7-3">>)] , AddedChecksums),
-    ?assertEqual([itest_util:make_id(<<"v7-1">>)], DeletedChecksums),
+    ?assertEqual([chef_test_suite_helper:make_id(<<"v7-3">>)] , AddedChecksums),
+    ?assertEqual([chef_test_suite_helper:make_id(<<"v7-1">>)], DeletedChecksums),
 
     Updated = chef_sql:fetch_cookbook_version(UpdatedVersion#chef_cookbook_version.org_id,
                                                {UpdatedVersion#chef_cookbook_version.name,
@@ -389,8 +369,8 @@ delete_cookbook_multiple_versions() ->
 
     CookbookVersion0 = itest_cookbook_util:make_cookbook_version(<<"000delete_multiple">>, 0, {AuthzId, OrgId, Name}),
     CookbookVersion1 = itest_cookbook_util:make_cookbook_version(<<"001delete_multiple">>, 1, {AuthzId, OrgId, Name}),
-    Checksums = [ itest_util:make_id(<<"checksum1">>),
-                  itest_util:make_id(<<"checksum2">>)],
+    Checksums = [ chef_test_suite_helper:make_id(<<"checksum1">>),
+                  chef_test_suite_helper:make_id(<<"checksum2">>)],
     CookbookVersion20 = CookbookVersion0#chef_cookbook_version{checksums=Checksums},
     CookbookVersion21 = CookbookVersion1#chef_cookbook_version{checksums=Checksums},
     ok = chef_sql:mark_checksums_as_uploaded(CookbookVersion20#chef_cookbook_version.org_id,
@@ -439,7 +419,7 @@ delete_cookbook_multiple_versions() ->
 
 %% Cover the case where nothing exists in the DB
 cookbook_create_from_scratch() ->
-    OrgId = itest_util:the_org_id(),
+    OrgId = chef_test_suite_helper:the_org_id(),
     Name = <<"cookbook_itest_create">>,
 
     %% Step 1.
@@ -447,7 +427,7 @@ cookbook_create_from_scratch() ->
     ?assertEqual(not_found, chef_sql:fetch_cookbook_authz(OrgId, Name)),
 
     %% Step 2b. - AUTHZ
-    AzId = itest_util:make_az_id(<<"itest_create">>),
+    AzId = chef_test_suite_helper:make_az_id(<<"itest_create">>),
     Cookbook = {AzId, OrgId, Name},
 
     %% Step 3.
@@ -459,11 +439,11 @@ cookbook_create_from_scratch() ->
 
 %% Cover the case where the cookbook exists, but not the actual cookbook version
 cookbook_create_new_version() ->
-    OrgId = itest_util:the_org_id(),
+    OrgId = chef_test_suite_helper:the_org_id(),
     Name = <<"cookbook_itest_create_new">>,
 
     %% Setup - upload a different version of the Cookbook
-    Cookbook0 = {itest_util:make_az_id(<<"itest_create_new">>), OrgId, Name},
+    Cookbook0 = {chef_test_suite_helper:make_az_id(<<"itest_create_new">>), OrgId, Name},
     CbVersion0 = itest_cookbook_util:make_cookbook_version(<<"000itest_create_new">>, 0, Cookbook0),
     ?assertEqual({ok, 1}, chef_sql:create_cookbook_version(CbVersion0)),
 

@@ -10,10 +10,10 @@
 %%% DATA BAG ITEMS
 %%%======================================================================
 make_data_bag_item(Prefix, BagName) ->
-    Id = itest_util:make_id(Prefix),
+    Id = chef_test_suite_helper:make_id(Prefix),
     Name = <<"item_", Prefix/binary>>,
-    #chef_data_bag_item{id= Id, org_id= itest_util:the_org_id(), item_name= Name, data_bag_name= BagName,
-                        last_updated_by= itest_util:actor_id(),
+    #chef_data_bag_item{id= Id, org_id= chef_test_suite_helper:the_org_id(), item_name= Name, data_bag_name= BagName,
+                        last_updated_by= chef_test_suite_helper:actor_id(),
                         created_at= {datetime, {{2011,10,1},{16,47,46}}},
                         updated_at= {datetime, {{2011,10,1},{16,47,46}}},
                         serialized_object= Prefix }.
@@ -33,7 +33,7 @@ insert_data_bag_item_data() ->
 
 fetch_data_bag_items() ->
     DBS = data_bag_items(),
-    Expected = [ Db#chef_data_bag_item.item_name || Db <- DBS, Db#chef_data_bag_item.org_id =:= itest_util:the_org_id(),
+    Expected = [ Db#chef_data_bag_item.item_name || Db <- DBS, Db#chef_data_bag_item.org_id =:= chef_test_suite_helper:the_org_id(),
                                                     Db#chef_data_bag_item.data_bag_name =:= <<"data_bag_02">> ],
     Results = itest_util:list_records(hd(DBS)),
     ?assertEqual(Expected, Results).
@@ -48,9 +48,9 @@ fetch_data_bag_item()->
 fetch_data_bag_item_ids() ->
     Expected = [ Db#chef_data_bag_item.id ||
                    Db <- data_bag_items(),
-                   Db#chef_data_bag_item.org_id =:= itest_util:the_org_id(),
+                   Db#chef_data_bag_item.org_id =:= chef_test_suite_helper:the_org_id(),
                    Db#chef_data_bag_item.data_bag_name =:= <<"data_bag_02">>],
-    {ok, Results} = chef_sql:fetch_data_bag_item_ids(itest_util:the_org_id(), <<"data_bag_02">>),
+    {ok, Results} = chef_sql:fetch_data_bag_item_ids(chef_test_suite_helper:the_org_id(), <<"data_bag_02">>),
     ?assertEqual(Expected,Results).
 
 bulk_get_data_bag_items()-> ok.
@@ -58,7 +58,7 @@ bulk_get_data_bag_items()-> ok.
 update_data_bag_item()->
     [Old | _T] = [ Db ||
                      Db <- data_bag_items(),
-                     Db#chef_data_bag_item.org_id =:= itest_util:the_org_id(),
+                     Db#chef_data_bag_item.org_id =:= chef_test_suite_helper:the_org_id(),
                      Db#chef_data_bag_item.data_bag_name =:= <<"data_bag_02">>],
     NewData = <<"new object">>,
     New = Old#chef_data_bag_item{serialized_object= NewData},

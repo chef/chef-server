@@ -13,7 +13,7 @@ test_all() ->
 test_latest_cookbooks(Description, Specs, NumVersions, Expected) ->
     ct:pal("~s", [Description]),
     itest_cookbook_util:cookbook_setup(Specs),
-    {ok, Actual} = chef_sql:fetch_latest_cookbook_versions(itest_util:the_org_id(),
+    {ok, Actual} = chef_sql:fetch_latest_cookbook_versions(chef_test_suite_helper:the_org_id(),
                                                            all, NumVersions),
     ?assertEqual(Expected, Actual),
     itest_cookbook_util:cookbook_cleanup(a, a).

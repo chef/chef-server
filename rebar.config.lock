@@ -1,10 +1,11 @@
 %% THIS FILE IS GENERATED. DO NOT EDIT IT MANUALLY %%
 
 {sub_dirs,["rel","apps/chef_index","apps/chef_objects","apps/chef_db",
-           "apps/oc_chef_authz","apps/oc_chef_wm","apps/depsolver"]}.
+           "apps/oc_chef_authz","apps/oc_chef_wm","apps/depsolver",
+           "apps/chef_test"]}.
 {lib_dirs,["deps","apps","apps/chef_objects","apps/oc_chef_authz",
            "apps/chef_index","apps/oc_chef_wm","apps/chef_db",
-           "apps/depsolver"]}.
+           "apps/depsolver","apps/chef_test"]}.
 {deps,[{goldrush,".*",
                  {git,"git://github.com/DeadZen/goldrush.git",
                       "1d883423ac360b3536ca52dc733a0164bacf3109"}},

@@ -1,3 +1,24 @@
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
+%% ex: ts=4 sw=4 et
+%% @author Tyler Cloke <tyler@chef.io>
+%%
+%% Copyright 2011-2015 Chef, Inc. All Rights Reserved.
+%%
+%% This file is provided to you under the Apache License,
+%% Version 2.0 (the "License"); you may not use this file
+%% except in compliance with the License.  You may obtain
+%% a copy of the License at
+%%
+%%   http://www.apache.org/licenses/LICENSE-2.0
+%%
+%% Unless required by applicable law or agreed to in writing,
+%% software distributed under the License is distributed on an
+%% "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+%% KIND, either express or implied.  See the License for the
+%% specific language governing permissions and limitations
+%% under the License.
+%%
+
 -module(chef_db_SUITE).
 
 -include_lib("common_test/include/ct.hrl").
@@ -13,23 +34,43 @@ all() -> [node_ops, user_ops, client_ops, data_bag_ops, data_bag_item_ops,
           cookbook_version_deps,
           environment_filtered_cookbooks_and_recipes].
 
-init_per_suite(Config) ->
-    ct:pal("hi from init~n"),
-    Dir = ?config(priv_dir, Config),
-    Port = pg_test_util:random_bogus_port(),
-    SchemaDir = code:priv_dir(chef_db),
-    Schema = filename:join([SchemaDir, "pgsql_schema.sql"]),
-    DbConfig = pg_test_util:init_pg_db(Dir, "chef_db_test_db", Schema, Port),
-    Config1 = DbConfig ++ Config,
-    setup_chef_db(Config1),
-    Config1.
+needed_apps() ->
+    [crypto, public_key, ssl, epgsql, pooler, stats_hero, asn1, sqerl].
+
+%% append to the chef_sql statements with some test statements we'll need
+statements() ->
+    ChefDbStatements = oc_chef_sql:statements(pgsql),
+    [{delete_cookbook_versions,
+      <<"DELETE FROM cookbook_versions">>},
+     {delete_cookbook_version_checksums,
+      <<"DELETE FROM cookbook_version_checksums">>},
+     {delete_cookbooks,
+      <<"DELETE FROM cookbooks">>},
+     {find_checksum_by_id,
+      <<"SELECT checksum FROM checksums WHERE org_id = $1 AND checksum = $2">>}]
+        ++ ChefDbStatements.
+
+init_per_suite(LastConfig) ->
+    %% Define statements for sqerl
+    NewConfig = [{statements, {chef_db_SUITE, statements, []}} | LastConfig],
+    Config = chef_test_db_helper:start_db(NewConfig, "oc_chef_authz_itests"),
+    start_server(Config).
+
+start_server(Config) ->
+    chef_test_suite_helper:set_app_env(stats_hero),
+    chef_test_suite_helper:set_app_env(pooler),
+
+    %% In production we use 5, but I'm using 2 here for the time being
+    %% to exercise the joining together of multiple database calls.  See the TODO
+    %% in the "Environment-filtered Recipes Tests" section for more.
+    application:set_env(chef_db, bulk_fetch_batch_size, 2),
+    application:set_env(chef_db, couchdb_host, "localhost"),
+    application:set_env(chef_db, couchdb_port, chef_test_suite_helper:random_bogus_port()),
+    [ chef_test_suite_helper:ensure_started(App) || App <- needed_apps() ],
+    Config.
 
 end_per_suite(Config) ->
-    ct:pal("bye from init~n"),
-    PgDir = ?config(pg_data, Config),
-    cleanup_chef_db(),
-    pg_test_util:stop_pg_db(PgDir),
-    ok.
+    chef_test_suite_helper:stop_server(Config, needed_apps()).
 
 node_ops(_Config) ->
     chef_sql_nodes:insert_node_data().
@@ -38,22 +79,18 @@ user_ops(_Config) ->
     %% Always run fetch user list first, so no users
     %% yet exist in DB, so results are predictable,
     %% since we don't clean up after every test
-    %% TODO FIXME lots of broken tests in here
-    %%chef_sql_users:fetch_user_list(),
-    %%chef_sql_users:insert_user_data(),
-    %%chef_sql_users:fetch_user_data(),
-    %%chef_sql_users:update_user_data(),
-    %%chef_sql_users:delete_user_data(),
-    %%chef_sql_users:count_admin_users().
-    skip.
+    chef_sql_users:fetch_user_list(),
+    chef_sql_users:insert_user_data(),
+    chef_sql_users:fetch_user_data(),
+    chef_sql_users:update_user_data(),
+    chef_sql_users:delete_user_data(),
+    chef_sql_users:count_admin_users().
 
 client_ops(_Config) ->
-    %% TODO FIXME we need to pull in enterprise-chef-server-schema
-    %% chef_sql_clients:insert_client_data(),
-    %% chef_sql_clients:fetch_client_data(),
-    %% chef_sql_clients:bulk_fetch_client_data(),
-    %% chef_sql_clients:delete_client_data().
-    skip.
+    chef_sql_clients:insert_client_data(),
+    chef_sql_clients:fetch_client_data(),
+    chef_sql_clients:bulk_fetch_client_data(),
+    chef_sql_clients:delete_client_data().
 
 data_bag_ops(_Config) ->
     chef_sql_data_bag:insert_data_bag_data(),
@@ -85,8 +122,6 @@ cookbook_ops(_Config) ->
 cookbook_version_ops(_Config) ->
     chef_sql_cookbook_versions:insert_cookbook_version_data(),
     chef_sql_cookbook_versions:insert_cbv_null_id(),
-    %% TODO FIXME
-    %%chef_sql_cookbook_versions:insert_cbv_no_id(),
     chef_sql_cookbook_versions:insert_cbv_with_unknown_checksums(),
     chef_sql_cookbook_versions:insert_cbv_with_frozen(),
     chef_sql_cookbook_versions:fetch_cookbook_version_not_exist(),
@@ -123,78 +158,4 @@ cookbook_version_deps(_Config) ->
 environment_filtered_cookbooks_and_recipes(_Config) ->
     chef_sql_environment_cookbooks:test_all().
 
-setup_chef_db(Config) ->
-    itest_util:set_env(sqerl,
-                       [{db_host, "localhost"},
-                        {db_port, ?config(pg_port, Config)},
-                        {db_user, os:getenv("USER")},
-                        %% ignored since we are connecting locally as owning user
-                        {db_pass, "sesame-ignored"},
-                        {db_name, ?config(pg_name, Config)},
-                        {idle_check, 10000},
-                        {prepared_statements, {?MODULE, statements, [pgsql]}},
-                        {column_transforms,
-                         [{<<"created_at">>, fun sqerl_transformers:convert_YMDHMS_tuple_to_datetime/1},
-                        {<<"updated_at">>, fun sqerl_transformers:convert_YMDHMS_tuple_to_datetime/1}]}
-                       ]),
-
-    itest_util:set_env(stats_hero,
-                       [{udp_socket_pool_size, 1},
-                        {estatsd_host, "localhost"},
-                        {estatsd_port, 3001}]),
-
-    %% In production we use 5, but I'm using 2 here for the time being
-    %% to exercise the joining together of multiple database calls.  See the TODO
-    %% in the "Environment-filtered Recipes Tests" section for more.
-    ok = application:set_env(chef_db, bulk_fetch_batch_size, 2),
-
-    PoolConfig = [{name, sqerl},
-                  {max_count, 3},
-                  {init_count, 1},
-                  {start_mfa, {sqerl_client, start_link, []}}],
-    ok = application:set_env(pooler, pools, [PoolConfig]),
-    [ ensure_started(App) || App <- app_list() ],
-    %% error_logger:tty(false),
-    ok = application:start(asn1),
-    ok = application:start(public_key),
-    ok = application:start(ssl),
-    ok = application:start(epgsql),
-    ok = application:start(sqerl),
-    ok.
-    %% error_logger:tty(true).
-
-%% @doc Shutdown all the infrastructure that was started up by
-%% setup_env/0.  Use as a final cleanup function for test suites.
-cleanup_chef_db() ->
-    %% Suppress output of logging for shutdowns... it muddies up the output
-    error_logger:tty(false),
-    application:stop(sqerl),
-    [ application:stop(App) || App <- lists:reverse(app_list()) ],
-    error_logger:tty(true).
-
-app_list() ->
-    [crypto, public_key, ssl, epgsql, pooler, stats_hero].
-
-ensure_started(App) ->
-    case application:start(App) of
-        ok ->
-            ok;
-        {error, {already_started, App}} ->
-            ok;
-        Error ->
-            Error
-    end.
-
-statements(pgsql) ->
-    ChefDbFile = filename:join([code:priv_dir(chef_db), "pgsql_statements.config"]),
-    {ok, ChefDbStatements} = file:consult(ChefDbFile),
-    [{delete_cookbook_versions,
-      <<"DELETE FROM cookbook_versions">>},
-     {delete_cookbook_version_checksums,
-      <<"DELETE FROM cookbook_version_checksums">>},
-     {delete_cookbooks,
-      <<"DELETE FROM cookbooks">>},
-     {find_checksum_by_id,
-      <<"SELECT checksum FROM checksums WHERE org_id = $1 AND checksum = $2">>}]
-        ++ ChefDbStatements.
 

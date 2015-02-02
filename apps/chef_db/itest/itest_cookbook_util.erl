@@ -1,3 +1,24 @@
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
+%% ex: ts=4 sw=4 et
+%% @author Tyler Cloke <tyler@chef.io>
+%%
+%% Copyright 2015 Chef, Inc. All Rights Reserved.
+%%
+%% This file is provided to you under the Apache License,
+%% Version 2.0 (the "License"); you may not use this file
+%% except in compliance with the License.  You may obtain
+%% a copy of the License at
+%%
+%%   http://www.apache.org/licenses/LICENSE-2.0
+%%
+%% Unless required by applicable law or agreed to in writing,
+%% software distributed under the License is distributed on an
+%% "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+%% KIND, either express or implied.  See the License for the
+%% specific language governing permissions and limitations
+%% under the License.
+%%
+
 -module(itest_cookbook_util).
 
 -compile([export_all]).
@@ -10,8 +31,8 @@
 %% Cookbook-related Helper Functions
 %%------------------------------------------------------------------------------
 make_cookbook(Prefix) ->
-    AzId = itest_util:make_az_id(Prefix),
-    OrgId = itest_util:the_org_id(),
+    AzId = chef_test_suite_helper:make_az_id(Prefix),
+    OrgId = chef_test_suite_helper:the_org_id(),
     Name = cookbook_name_from_prefix(Prefix),
     {AzId, OrgId, Name}.
 
@@ -184,12 +205,6 @@ version_tuple_to_binary({Major, Minor, Patch}) ->
                       integer_to_binary(Minor), <<".">>,
                       integer_to_binary(Patch)]).
 
-%% @doc Does what it says.
-%%
-%% Example: 1 -> <<"1">>
-integer_to_binary(Int) when is_integer(Int) ->
-    list_to_binary(integer_to_list(Int)).
-
 -spec recipes_from_cookbook_specs([cookbook_spec()]) -> [QualifiedRecipeName::binary()].
 recipes_from_cookbook_specs(Specs) ->
     Unfolded = unfold_specs(Specs),
@@ -263,7 +278,7 @@ make_cookbook_version(Prefix, Version, Cookbook) when is_integer(Version);
 %% More can be added in the future as needed.
 make_cookbook_version(Prefix, Version, {AuthzId, OrgId, Name}, Properties) when is_integer(Version);
                                                                                 is_tuple(Version) ->
-    Id = itest_util:make_id(Prefix),
+    Id = chef_test_suite_helper:make_id(Prefix),
     {Major, Minor, Patch} = version_tuple(Version),
 
     #chef_cookbook_version{id=Id,
@@ -275,7 +290,7 @@ make_cookbook_version(Prefix, Version, {AuthzId, OrgId, Name}, Properties) when 
                            meta_deps= process_property(dependencies, Properties),
                            meta_long_desc= <<"">>,
                            metadata=Prefix,
-                           last_updated_by= itest_util:actor_id(),
+                           last_updated_by= chef_test_suite_helper:actor_id(),
                            created_at= {datetime, {{2011,10,1},{16,47,46}}},
                            updated_at= {datetime, {{2011,10,1},{16,47,46}}},
                            serialized_object= process_property(serialized_object, Properties),
@@ -315,7 +330,7 @@ cookbook_version_list(Cookbook) ->
 -spec checksum_exists(OrgId :: binary(), ChecksumId :: binary()) ->
                              boolean() | {error, term()}.
 checksum_exists(OrgId, ChecksumId) ->
-    case sqerl:select(find_checksum_by_id, [OrgId, ChecksumId], first_as_scalar, [checksum]) of
+    case sqerl:select(<<"SELECT checksum FROM checksums WHERE org_id = $1 AND checksum = $2">>, [OrgId, ChecksumId], first_as_scalar, [checksum]) of
         {ok, Checksum} -> Checksum =/= none;
         {error, Reason} -> {error, Reason}
     end.

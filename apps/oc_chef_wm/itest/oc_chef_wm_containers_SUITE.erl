@@ -1,7 +1,24 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Stephen Delano <stephen@opscode.com>
-%% Copyright 2013 Opscode, Inc. All Rights Reserved.
+%% @author Stephen Delano <stephen@chef.io>
+%% @author Tyler Cloke <tyler@chef.io>
+%%
+%% Copyright 2013-2015 Chef, Inc. All Rights Reserved.
+%%
+%% This file is provided to you under the Apache License,
+%% Version 2.0 (the "License"); you may not use this file
+%% except in compliance with the License.  You may obtain
+%% a copy of the License at
+%%
+%%   http://www.apache.org/licenses/LICENSE-2.0
+%%
+%% Unless required by applicable law or agreed to in writing,
+%% software distributed under the License is distributed on an
+%% "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+%% KIND, either express or implied.  See the License for the
+%% specific language governing permissions and limitations
+%% under the License.
+%%
 
 -module(oc_chef_wm_containers_SUITE).
 
@@ -20,8 +37,9 @@
 -define(AUTHZ_ID, <<"00000000000000000000000000000001">>).
 -define(CLIENT_NAME, <<"test-client">>).
 
-init_per_suite(Config) ->
-    Config2 = setup_helper:start_server(Config),
+init_per_suite(LastConfig) ->
+    Config = chef_test_db_helper:start_db(LastConfig, "oc_chef_wm_itests"),
+    setup_helper:start_server(Config),
 
     OrganizationRecord = chef_object:new_record(oc_chef_organization,
                                                 nil,
@@ -30,7 +48,7 @@ init_per_suite(Config) ->
                                                   {<<"full_name">>, <<"org">>}]}),
     Result2 = chef_db:create(OrganizationRecord,
                    #context{reqid = <<"fake-req-id">>},
-                   <<"00000000000000000000000000000001">>),
+                   ?AUTHZ_ID),
     io:format("Organization Create Result ~p~n", [Result2]),
 
     % get the OrgId from the database that was generated during Org object creation
@@ -53,13 +71,12 @@ init_per_suite(Config) ->
     io:format("ClientRecord ~p~n", [ClientRecord]),
     ok = chef_db:create(ClientRecord,
                         #context{reqid = <<"fake-req-id">>},
-                        <<"00000000000000000000000000000001">>),
+                        ?AUTHZ_ID),
 
-    Config2.
+    Config.
 
 end_per_suite(Config) ->
-    Config2 = setup_helper:stop_server(Config),
-    Config2.
+    chef_test_suite_helper:stop_server(Config, setup_helper:needed_apps()).
 
 all() ->
     [

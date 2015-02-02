@@ -14,7 +14,7 @@ test_all() ->
 test_deps_retrieval(Description, Specs, Expected) ->
     ct:pal("~s", [Description]),
     itest_cookbook_util:cookbook_setup(Specs),
-    {ok, Actual} = chef_sql:fetch_all_cookbook_version_dependencies(itest_util:the_org_id()),
+    {ok, Actual} = chef_sql:fetch_all_cookbook_version_dependencies(chef_test_suite_helper:the_org_id()),
     ?assertEqual(Expected, Actual),
     itest_cookbook_util:cookbook_cleanup(a, a).
 

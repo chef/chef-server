@@ -12,13 +12,13 @@ oc_chef_authz_cleanup_test_() ->
     Mods = [ oc_chef_authz_http ],
     {foreach,
      fun() ->
-             oc_chef_authz_tests:start_apps(),             
+             oc_chef_authz_tests:start_apps(),
              application:set_env(oc_chef_authz, cleanup_interval, ?INTERVAL),
              application:set_env(oc_chef_authz, cleanup_batch_size, ?BATCH_SIZE),
              application:set_env(oc_chef_authz, authz_superuser_id, ?SUPER_USER_AUTHZ_ID),
              %% Cancel the current timer so we can test state transitions individually
              oc_chef_authz_cleanup:stop(),
-             [ meck:new(Mod) || Mod <- Mods]                
+             [ meck:new(Mod) || Mod <- Mods]
      end,
      fun(_) ->
              oc_chef_authz_tests:stop_apps(),
@@ -64,10 +64,10 @@ oc_chef_authz_cleanup_test_() ->
        end},
       {"add_authz_ids should delete from bifrost after interval when smaller than batch size",
       fun() ->
-              Actors = [ test_utils:make_az_id(integer_to_list(In)) || In <- lists:seq(0,3) ],
-              Groups = [ test_utils:make_az_id(integer_to_list(In)) || In <- lists:seq(0,3) ],
+              Actors = [ chef_test_suite_helper:make_az_id(integer_to_list(In)) || In <- lists:seq(0,3) ],
+              Groups = [ chef_test_suite_helper:make_az_id(integer_to_list(In)) || In <- lists:seq(0,3) ],
               expect_delete(Actors, Groups),
-              
+
               oc_chef_authz_cleanup:add_authz_ids(Actors, Groups),
               oc_chef_authz_cleanup:start(),
               timer:sleep(30)

@@ -58,7 +58,7 @@
 -callback fetch(object_rec(), select_callback()) -> select_return().
 -callback update(object_rec(), select_callback()) ->
      update_return().
-    
+
 
 -callback new_record(OrgId :: object_id(),
                      AuthzId :: object_id() | unset,

@@ -46,9 +46,6 @@
          fetch_object_names/1,
          fetch/1,
 
-         %%user ops
-         count_user_admins/0,
-
          %% checksum ops
          mark_checksums_as_uploaded/2,
          non_uploaded_checksums/2,
@@ -181,15 +178,6 @@ is_user_in_org(UserName, OrgName) ->
         {error, Error} ->
             {error, Error}
     end.
-
-%%
-%% chef user ops
-%%
-
--spec count_user_admins() -> {ok, none} | {ok, integer()} | {error, _}.
-%% Return a count of the user admins
-count_user_admins() ->
-    sqerl:select(count_user_admins, [], first_as_scalar, [count]).
 
 %%
 %% key ops

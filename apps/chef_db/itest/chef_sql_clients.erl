@@ -10,10 +10,10 @@
 %%% CLIENTS
 %%%======================================================================
 make_client(Prefix) ->
-    AzId = itest_util:make_az_id(Prefix),
+    AzId = chef_test_suite_helper:make_az_id(Prefix),
     #chef_client{
 	    id = AzId,
-	    org_id = itest_util:the_org_id(),
+	    org_id = chef_test_suite_helper:the_org_id(),
 	    name = AzId,
 	    authz_id = AzId,
             admin = true,
@@ -27,7 +27,7 @@ make_client(Prefix) ->
 	      "KxavHMeCuSgyReDZpsFOn2Saie26jvLxWrGyn870yIh36wMvCvWKwUQPnluSnstJ"
 	      "xwIDAQAB">>,
 	    pubkey_version = 1,
-	    last_updated_by = itest_util:actor_id(),
+	    last_updated_by = chef_test_suite_helper:actor_id(),
 	    created_at = {datetime, {{2011,10,1},{16,47,46}}},
 	    updated_at = {datetime, {{2011,10,1},{16,47,46}}}
     }.

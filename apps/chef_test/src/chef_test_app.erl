@@ -1,5 +1,8 @@
-%% -*- mode:erlang, erlang-indent-level: 4;indent-tabs-mode: nil -*-
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
+%% ex: ts=4 sw=4 et
+%% @author Tyler Cloke <tyler@chef.io>
+%%
+%% Copyright 2015 Chef, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -16,14 +19,19 @@
 %% under the License.
 %%
 
-{find_user_by_username,
- <<"SELECT id, authz_id, username, email, public_key,
-      'DUMMY_PASSWORD_NOT_USED' AS  hashed_password,
-      'DUMMY_SALT_NOT_USED' AS salt,
-      'DUMMY_HASH_TYPE_NOT_USED' AS hash_type,
-       last_updated_by,
-       created_at,
-       updated_at,
-      'EXTERNAL_AUTH_ID_NOT_USED' AS external_authentication_uid,
-       recovery_authentication_enabled, admin
-       FROM users WHERE username = ?">>}.
+-module(chef_test_app).
+
+-behaviour(application).
+
+%% Application callbacks
+-export([start/2, stop/1]).
+
+%% ===================================================================
+%% Application callbacks
+%% ===================================================================
+
+start(_StartType, _StartArgs) ->
+    chef_test_sup:start_link().
+
+stop(_State) ->
+    ok.

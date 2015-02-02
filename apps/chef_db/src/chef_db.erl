@@ -53,7 +53,6 @@
          mark_checksums_as_uploaded/3,
 
          %% user ops
-         count_user_admins/1,
          node_record_to_authz_id/2,
 
          %% role ops
@@ -233,14 +232,6 @@ update(ObjectRec, #context{reqid = ReqId}, ActorId) ->
 
 darklaunch_from_context(#context{darklaunch = Darklaunch}) ->
     Darklaunch.
-
--spec count_user_admins(#context{}) -> integer() | {error, term()}.
-count_user_admins(#context{reqid = ReqId}) ->
-  case stats_hero:ctime(ReqId, {chef_sql, count_user_admins},
-                        fun() -> chef_sql:count_user_admins() end) of
-       {ok, Count} -> Count;
-       Other -> Other
-  end.
 
 -spec user_record_to_authz_id(#context{}, #chef_user{} | not_found) -> id().
 user_record_to_authz_id(#context{}, #chef_user{} = UserRecord) ->

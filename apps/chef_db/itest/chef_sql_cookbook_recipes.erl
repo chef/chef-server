@@ -13,7 +13,7 @@ test_one(Description, Specs) ->
     ct:pal("~s", [Description]),
     itest_cookbook_util:cookbook_setup(Specs),
     Expected = itest_cookbook_util:recipes_from_cookbook_specs(Specs),
-    {ok, Actual} = chef_sql:fetch_latest_cookbook_recipes(itest_util:the_org_id()),
+    {ok, Actual} = chef_sql:fetch_latest_cookbook_recipes(chef_test_suite_helper:the_org_id()),
     ?assertEqual(Expected, Actual),
     itest_cookbook_util:cookbook_cleanup(a, a).
 
