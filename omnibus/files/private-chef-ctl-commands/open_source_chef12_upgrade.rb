@@ -359,21 +359,33 @@ EOF
     Dir.mkdir(dir, permissions) unless File.directory?(dir)
   end
 
-  # TODO(jmink) Add error handling
+  # Any config not specified on the command line
+  # should be pulled from /etc/chef-server/chef-server-running.json
   def pull_chef11_db_credentials
-    # This code pulled from knife-ec-backup and adapted
-    log "Pulling open source Chef 11 database credentials"
-    if !File.exists?("/etc/chef-server/chef-server-running.json")
-      log "Failed to find /etc/chef-server/chef-server-running.json"
-      exit 1
-    end
+    sql_host = @options.sql_host
+    sql_port = @options.sql_port
+    sql_pass = @options.sql_pass
+    sql_user = @options.sql_user
 
-    running_config = JSON.parse(File.read("/etc/chef-server/chef-server-running.json"))
-    sql_host = running_config['chef_server']['postgresql']['vip']
-    sql_port = running_config['chef_server']['postgresql']['port']
-    sql_user = running_config['chef_server']['postgresql']['sql_user']
-    sql_password = running_config['chef_server']['postgresql']['sql_password']
-    [sql_host, sql_port, sql_user, sql_password]
+    if !(sql_host && sql_port && sql_pass && sql_user)
+      log "Reading SQL configuration from /etc/chef-server/chef-server-running.json"
+      begin
+        running_config = JSON.parse(File.read("/etc/chef-server/chef-server-running.json"))
+        sql_host ||= running_config['chef_server']['postgresql']['vip']
+        sql_port ||= running_config['chef_server']['postgresql']['port']
+        sql_user ||= running_config['chef_server']['postgresql']['sql_user']
+        sql_pass ||= running_config['chef_server']['postgresql']['sql_password']
+      rescue Errno::ENOENT
+        log "Failed to find /etc/chef-server/chef-server-running.json"
+        exit 1
+      rescue Errno::EACCES
+        log "Failed to read /etc/chef-server/chef-server-running.json"
+        exit 1
+      end
+    else
+      log "SQL configuration fully specified on the command line"
+    end
+    [sql_host, sql_port, sql_user, sql_pass]
   end
 
   def create_chef11_key_file(key_file)
