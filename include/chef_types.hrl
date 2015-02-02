@@ -202,7 +202,6 @@
         'serialized_object'                 %%
        }).
 
-
 %% Not a true chef object, but corresponds to  the view keys_by_type.
 -record(chef_requestor, {
           'id' :: object_id(),
@@ -215,6 +214,16 @@
           'key_version' :: ?KEY_VERSION | ?CERT_VERSION
          }
        ).
+
+%% Not a true chef object either
+-record(chef_key, {
+	  'id',  :: object_id(),    %% guid of user or client, unique with key_name
+	  'key_name',               %% user named string describing key
+	  'public_key',             %% PKCS#1 public key or a certificate
+	  'key_version',            %% 0 for public_key, 1 for cert
+          'created_at' :: binary(), %% time created at
+          'updated_at' :: binary()  %% time created at
+	 }).
 
 %% These types and records are just convenient shorthands for subsets of our
 %% records that are used in the SQL layers.
