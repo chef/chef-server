@@ -71,7 +71,7 @@ class OpenSourceChef11Upgrade
 
   def download_chef11_data_download(chef11_data_dir, key_file)
 
-    wait_for_ready_server("Chef 11")
+    wait_for_ready_server("Chef 11") unless @options.skip_setup
 
     log "Preparing knife to download data from the open source Chef 11 server"
 
