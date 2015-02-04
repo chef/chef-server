@@ -1,6 +1,6 @@
 # Chef Server Changelog
 
-## 12.0.3 (unreleased)
+## 12.0.3 (2015-02-04)
 
 ### enterprise-chef-common 0.5.1
 * Add preliminary systemd support
@@ -23,6 +23,15 @@
 * Updated nginx's logrotate config with proper log ownership.
 * Nginx logs $http_x_forwarded_for instead of $remote_addr if
   nginx['log_x_forwarded_for'] is true. The default is false
+* Log an error and exit when DRBD mount attempts are
+  exhausted rather than entering an infinite loop.
+* Fix installation errors caused by PERL5LIB environment
+  variable
+* chef-server-ctl now returns non-zero exit codes for errors
+  during user and organization-related commands.
+* Use -D for --download-only option in
+  chef12-upgrade-download command, avoiding option name conflict.
+
 
 ### oc\_erchef 1.2.0
 * add basic multikey/key rotation support. This is not yet exposed via
