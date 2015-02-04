@@ -28,19 +28,19 @@
          ejson_for_indexing/2,
          update_from_ejson/2,
          set_created/2,
-         set_updated/2,
          fields_for_update/1,
          fields_for_fetch/1,
          record_fields/0,
-	 list/2,
+         list/2,
 	 %% TODO can we use default fetch and update?
          %%fetch/2,
 	 %%update/2,
+         set_updated/2,
          new_record/3,
          name/1,
          id/1,
          org_id/1,
-         type_name/1,
+         type_name/1
         ]).
 
 %% database named queries
@@ -49,8 +49,8 @@
          update_query/0,
          delete_query/0,
          find_query/0,
-         bulk_get_query/0
-         list_query/0,
+         bulk_get_query/0,
+         list_query/0
         ]).
 
 %% TODO can we use default fetch and update?
@@ -76,36 +76,31 @@ is_indexed() ->
 ejson_for_indexing(#chef_key{}, _) ->
     error(not_indexed).
 
-update_from_ejson() ->
+update_from_ejson(_, _) ->
     error(need_to_implement).
 
-set_created(#chef_key{}, ActorId) ->
+set_created(#chef_key{}, _ActorId) ->
     error(need_to_implement).
 
-set_updated(#chef_node{} = Object, ActorId) ->
+set_updated(#chef_key{} = _Object, _ActorId) ->
     error(need_to_implement).
 
 fields_for_update(#chef_key{}) ->
     error(need_to_implement).
 
-fields_for_fetch(#chef_key{id = Id,
-		           key_name = KeyName}) ->
+fields_for_fetch(#chef_key{id = Id, key_name = KeyName}) ->
     [Id, KeyName].
 
 record_fields() ->
     record_info(fields, chef_key).
 
-list(#chef_key{id = Id}) ->
-    %% TODO do we populate the URI here?
-    %% supposed to return
-    %% [{ "name" : "KEYNAME", "uri" : "URI" }, ..., { "name" : "KEYNAME_N", "uri" : "URI_N" }]
-    CallbackFun({list_query(), [Id], [key_name]}).
+list(#chef_key{id = Id}, CallbackFun) when is_binary(Id) ->
+    CallbackFun({list_query(), [Id], rows}).
 
-%% TODO: need to also populate the expired field? can we use the default fetch?
 find_query() ->
     find_key_by_id_and_name.
 
-new_record(_OrgId, AuthzId, KeyData) ->
+new_record(_OrgId, _AuthzId, _KeyData) ->
     error(need_to_implement).
 
 name(#chef_key{key_name = KeyName}) ->
@@ -136,8 +131,6 @@ update_query() ->
 delete_query() ->
     error(need_to_implement).
 
-find_query() ->
-    error(need_to_implement).
 
 bulk_get_query() ->
     error(need_to_implement).
