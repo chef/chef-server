@@ -239,7 +239,11 @@ object_name(user, Req) ->
 object_name(organization, Req) ->
     extract_from_path(organization_id, Req);
 object_name(invitation, Req) ->
-    extract_from_path(invitation_id, Req).
+    extract_from_path(invitation_id, Req);
+object_name(client_key, Req) ->
+    extract_from_path(keyname, Req);
+object_name(user_key, Req) ->
+    extract_from_path(keyname, Req).
 
 %% @doc Private utility function to extract a path element as a binary.  Returns the atom
 %% `undefined' if no such value exists.
