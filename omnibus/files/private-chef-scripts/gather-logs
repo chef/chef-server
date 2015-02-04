@@ -42,10 +42,24 @@ then
     fi
 
     echo "Gathering logs from Open Source Chef server."
+elif [[ $type == 'Analytics' ]];
+then
+    path='opscode-analytics'
+    ctl_cmd='opscode-analytics-ctl'
+    config_name='opscode-analytics.rb'
+
+    if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
+    then
+       echo "ERROR: Analytics server may not be installed."
+       exit 1
+    fi
+
+    echo "Gathering logs from Analytics server."
 else
-    echo "Usage: gather-logs [ CS | OSC ]"
+    echo "Usage: gather-logs [ CS | OSC | Analytics ]"
     echo "CS - Enterprise or Chef server (default)"
     echo "OSC - Open Source Chef server"
+    echo "Analytics - Opscode Analytics server"
     exit 1
 fi
 
@@ -60,7 +74,7 @@ mkdir -p "$tmpdir"
 for i in /opt/{chef,$path}*/version-manifest.txt \
     /opt/$path/pc-version.txt \
     /etc/$path/$config_name \
-    /etc/$path/chef-server-running.json \
+    /etc/${path}*/*-running.json \
     /var/log/syslog \
     /var/log/messages; do
     if [[ -e "$i" ]]; then
@@ -69,7 +83,7 @@ for i in /opt/{chef,$path}*/version-manifest.txt \
     fi
 done
 
-for i in `find /var/log/$path*/ -type f -mmin -"$modified_within_last_x_minutes"`; do
+for i in `find /var/log/${path}* -type f -mmin -"$modified_within_last_x_minutes"`; do
     if [[ -e "$i" ]]; then
 	mkdir -p "$tmpdir/`dirname ${i:1}`"
 	tail -"$tail_lines" "$i" > "$tmpdir/${i:1}"
@@ -98,12 +112,23 @@ fi
 # would be cool, but my sense is that this is OK for now.
 
 if [[ -S "/tmp/.s.PGSQL.5432" ]]; then
-    echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | su -l $POSTGRESQL_UNIX_USER -c 'psql opscode_chef' > "$tmpdir/pg_stat_activity.txt"
+    if [[ $type == 'CS' ]];
+    then
+	echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | su -l $POSTGRESQL_UNIX_USER -c 'psql opscode_chef' > "$tmpdir/pg_stat_activity.txt"
 
-    echo "SELECT * FROM sqitch.tags;" | su -l $POSTGRESQL_UNIX_USER -c 'psql opscode_chef' > "$tmpdir/opscode_chef_sqitch_tags.txt"
-    echo "SELECT * FROM sqitch.tags;" | su -l $POSTGRESQL_UNIX_USER -c 'psql bifrost' > "$tmpdir/bifrost_sqitch_tags.txt"
+	echo "SELECT * FROM sqitch.tags;" | su -l $POSTGRESQL_UNIX_USER -c 'psql opscode_chef' > "$tmpdir/opscode_chef_sqitch_tags.txt"
+	echo "SELECT * FROM sqitch.tags;" | su -l $POSTGRESQL_UNIX_USER -c 'psql bifrost' > "$tmpdir/bifrost_sqitch_tags.txt"
 
-    sudo -u opscode-pgsql -i ulimit -a > "$tmpdir/ulimit_a_opscode-pgsql.txt"
+	su -m $POSTGRESQL_UNIX_USER -c 'ulimit -a' > "$tmpdir/ulimit_a_opscode-pgsql.txt"
+    fi
+   if [[ $type == 'Analytics' ]];
+   then
+      echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | su -l chef-pgsql -c 'psql actions' > "$tmpdir/pg_stat_activity.txt"
+
+      echo "SELECT * FROM schema_migrations;" | su -l chef-pgsql -c 'psql actions' > "$tmpdir/actions_schema_migrations.txt"
+
+      su -m chef-pgsql -c 'ulimit -a'> "$tmpdir/ulimit_a_chef-pgsql.txt"
+   fi
 fi
 
 # Retrieve Platform and Platform Version
@@ -141,7 +166,7 @@ then
    /opt/opscode-reporting/bin/opscode-reporting-ctl status > "$tmpdir/opscode-reporting-ctl_status.txt"
 fi
 
-sudo -u opscode -i ulimit -a > "$tmpdir/ulimit_a_opscode.txt"
+su -m opscode -c 'ulimit -a' > "$tmpdir/ulimit_a_opscode.txt"
 
 ip addr show > "$tmpdir/ip_addr_show.txt"
 
@@ -187,13 +212,37 @@ echo '## /etc/hosts' >> "$name_resolution_file"
 cat /etc/hosts >> "$name_resolution_file"
 add_footer "$name_resolution_file"
 
-for fileperms in \
-  /var/opt/opscode \
-  /var/log/opscode; do
-  ls -altuhR $fileperms > "$tmpdir/perms.txt"
+if [[ $type == 'CS' ]];
+then
+    fqdn="api_fqdn"
+    config_file_path="/etc/opscode/chef-server.rb"
+elif [[ $type == 'Analytics' ]];
+then
+    fqdn="analytics_fqdn"
+    config_file_path="/etc/opscode-analytics/opscode-analytics.rb"
+fi
+tempname=`grep -E $fqdn $config_file_path | cut -d \" -f2`
+
+#Didnt find a hostname above, so fallback
+if [[ -z $tempname ]];
+then
+    tempname=$hostname
+fi
+
+echo '## Resolved Name + Time' >> "$name_resolution_file"
+echo $tempname >> "$name_resolution_file"
+for interval in `seq 1 5`; do
+    { time /opt/$path/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$tempname\")" ; } >> "$name_resolution_file" 2>&1
+    sleep 2;
 done
 
-tar -C "${tmpdir%/*/*}" -cjf "$hostname-$timestamp.tbz2" "$hostname/$timestamp/"
+for fileperms in \
+    /var/opt/$path* \
+    /var/log/$path*; do
+    ls -altuhR "$fileperms" >> "$tmpdir/perms.txt"
+done
+
+tar -C "${tmpdir%/*/*}" -cjpf "$hostname-$timestamp.tbz2" "$hostname/$timestamp/"
 
 rm -rf "${tmpdir%/*/*}"
 
