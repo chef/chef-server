@@ -48,13 +48,14 @@ do_signed_url_authorization(RequestId, Req0, #context{reqid = ReqId} = Context) 
     Path  = wrq:path(Req0),
     AccessKey = bksw_conf:access_key_id(Context),
     SecretKey = bksw_conf:secret_access_key(Context),
+    ExpireDiff = expire_diff(Expires),
     case make_signed_url_authorization(SecretKey,
                                        Method,
                                        Path,
                                        Expires,
                                        Headers) of
         {StringToSign, Signature} ->
-            case is_expired(Expires) of
+            case ExpireDiff =< 0 of
                 true ->
                     ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p",
                                [ReqId, Expires, Path]),
@@ -65,7 +66,9 @@ do_signed_url_authorization(RequestId, Req0, #context{reqid = ReqId} = Context) 
                           erlang:iolist_to_binary(Signature) ==
                               erlang:iolist_to_binary(IncomingSignature)) of
                         true ->
-                            {true, Req0, Context};
+                            MaxAge = "max-age=" ++ integer_to_list(ExpireDiff),
+                            Req1 = wrq:set_resp_header("Cache-Control", MaxAge, Req0),
+                            {true, Req1, Context};
                         false ->
                             ?LOG_DEBUG("req_id=~p signing error for ~p", [ReqId, Path]),
                             encode_sign_error_response(AWSAccessKeyId, IncomingSignature, RequestId,
@@ -125,10 +128,11 @@ do_standard_authorization(RequestId, IncomingAuth, Req0, Context) ->
                                        RequestId, StringToSign, Req0, Context)
     end.
 
--spec is_expired(binary()) -> boolean().
-is_expired(Expires) ->
+-spec expire_diff(undefined | binary()) -> integer().
+expire_diff(undefined) -> 1;
+expire_diff(Expires) ->
     Now = calendar:datetime_to_gregorian_seconds(erlang:universaltime()),
-    bksw_util:to_integer(Expires) < (Now - ?SECONDS_AT_EPOCH).
+    bksw_util:to_integer(Expires) - (Now - ?SECONDS_AT_EPOCH).
 
 %% get_bucket([Bucket, _, _]) ->
 %%     Bucket.
