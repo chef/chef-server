@@ -1,6 +1,6 @@
 # Chef Server Changelog
 
-## 12.0.3 (unreleased)
+## 12.0.3 (2015-02-04)
 
 ### enterprise-chef-common 0.5.1
 * Add preliminary systemd support

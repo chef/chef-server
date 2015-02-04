@@ -1,6 +1,6 @@
 # Chef Server Release Notes
 
-## 12.0.3 (unreleased)
+## 12.0.3 (2015-02-04)
 
 ### What's New:
 
