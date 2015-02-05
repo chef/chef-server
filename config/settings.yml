@@ -6,5 +6,6 @@ doorkeeper:
   administrators:
     - rainbowdash
 secret_key_base: CHANGE ME
+sign_up_url: https://manage.chef.io/signup?ref=community
 zendesk:
   subdomain: getchef
