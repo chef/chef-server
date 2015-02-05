@@ -165,11 +165,13 @@ df -i >  "$tmpdir/df_i.txt"
 if [[ -e /opt/opscode-manage/bin/opscode-manage-ctl ]];
 then
    /opt/opscode-manage/bin/opscode-manage-ctl status > "$tmpdir/opscode-manage-ctl_status.txt"
+  found_manage=true
 fi
 
 if [[ -e /opt/opscode-reporting/bin/opscode-reporting-ctl ]];
 then
    /opt/opscode-reporting/bin/opscode-reporting-ctl status > "$tmpdir/opscode-reporting-ctl_status.txt"
+   found_reporting=true
 fi
 
 su -m opscode -c 'ulimit -a' > "$tmpdir/ulimit_a_opscode.txt"
