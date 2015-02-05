@@ -15,6 +15,12 @@ then
     type=$1
 fi
 
+#Lets have a way to avoid things that take a while, like DNS
+if [[ -n $2  ]];
+then
+    testing=true
+fi
+
 if [[ $type == 'CS' ]];
 then
     path='opscode'
@@ -174,9 +180,9 @@ ip addr show > "$tmpdir/ip_addr_show.txt"
 #RHEL5 only has netstat
 if which ss > /dev/null 2>&1
 then
-  ss -ontap > "$tmpdir/ss_ontap.txt"
+    ss -ontap > "$tmpdir/ss_ontap.txt"
 else
-  netstat -alntp > "$tmpdir/netstat_alntp.txt"
+    netstat -alntp > "$tmpdir/netstat_alntp.txt"
 fi
 
 sysctl -a > "$tmpdir/sysctl_a.txt" 2>&1
@@ -188,29 +194,34 @@ function add_footer (){
   echo ""    >> "$1"
 }
 
-name_resolution_file="$tmpdir/name-resolution.txt"
+if [[ -z $testing ]];
+then
 
-if which dig > /dev/null 2>&1; then
-    echo '## dig hostname -f' > "$name_resolution_file"
-    dig `hostname -f` >> "$name_resolution_file"
+    name_resolution_file="$tmpdir/name-resolution.txt"
+
+    if which dig > /dev/null 2>&1; then
+	echo '## dig hostname -f' > "$name_resolution_file"
+	dig `hostname -f` >> "$name_resolution_file"
+	add_footer "$name_resolution_file"
+    fi
+
+    echo '## /etc/resolv.conf' >> "$name_resolution_file"
+    cat /etc/resolv.conf >> "$name_resolution_file"
+    add_footer "$name_resolution_file"
+
+    echo '## ping hostname' >> "$name_resolution_file"
+    ping -c 2 `hostname` >> "$name_resolution_file"
+    add_footer "$name_resolution_file"
+
+    echo '## ping hostname -f' >> "$name_resolution_file"
+    ping -c 2 `hostname -f` >> "$name_resolution_file"
+    add_footer "$name_resolution_file"
+
+    echo '## /etc/hosts' >> "$name_resolution_file"
+    cat /etc/hosts >> "$name_resolution_file"
+    add_footer "$name_resolution_file"
+
 fi
-add_footer "$name_resolution_file"
-
-echo '## /etc/resolv.conf' >> "$name_resolution_file"
-cat /etc/resolv.conf >> "$name_resolution_file"
-add_footer "$name_resolution_file"
-
-echo '## ping hostname' >> "$name_resolution_file"
-ping -c 2 `hostname` >> "$name_resolution_file"
-add_footer "$name_resolution_file"
-
-echo '## ping hostname -f' >> "$name_resolution_file"
-ping -c 2 `hostname -f` >> "$name_resolution_file"
-add_footer "$name_resolution_file"
-
-echo '## /etc/hosts' >> "$name_resolution_file"
-cat /etc/hosts >> "$name_resolution_file"
-add_footer "$name_resolution_file"
 
 if [[ $type == 'CS' ]];
 then
@@ -229,12 +240,17 @@ then
     tempname=$hostname
 fi
 
-echo '## Resolved Name + Time' >> "$name_resolution_file"
-echo $tempname >> "$name_resolution_file"
-for interval in `seq 1 5`; do
-    { time /opt/$path/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$tempname\")" ; } >> "$name_resolution_file" 2>&1
-    sleep 2;
-done
+if [[ -z $testing ]];
+then
+
+    echo '## Resolved Name + Time' >> "$name_resolution_file"
+    echo $tempname >> "$name_resolution_file"
+    for interval in `seq 1 5`; do
+	{ time /opt/$path/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$tempname\")" ; } >> "$name_resolution_file" 2>&1
+	sleep 2;
+    done
+
+fi
 
 for fileperms in \
     /var/opt/$path* \
