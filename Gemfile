@@ -18,6 +18,7 @@ gem 'omniauth-chef', github: 'opscode/omniauth-chef', branch: 'master'
 gem 'nokogiri', '~> 1.6.2'
 gem 'pg'
 gem 'mixlib-authentication', '~> 1.3.0'
+gem 'sentry-raven'
 
 gem 'doorkeeper', '~> 1.4.0'
 
