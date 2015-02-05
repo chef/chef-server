@@ -113,7 +113,7 @@ to_json(Req, #base_state{ chef_db_context = DbContext,
         Keys when is_list(Keys) ->
             KeyType = list_to_existing_atom(atom_to_list(Type) ++ "_key"),
             RouteFun = oc_chef_wm_routes:bulk_route_fun(KeyType, ObjectName, Req),
-            EJ = [ {[{<<"uri">>, RouteFun(Name)}, {<<"name">>, Name}, {<<"expired">>, Expired}]} || [Name, Expired] <- Keys],
+            EJ = chef_key:ejson_from_list(Keys, RouteFun),
             {chef_json:encode(EJ), Req, State};
         Error ->
             {{halt, 500}, Req, State#base_state{log_msg = Error }}

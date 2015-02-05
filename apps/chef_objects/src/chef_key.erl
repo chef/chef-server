@@ -30,11 +30,9 @@
          set_created/2,
          fields_for_update/1,
          fields_for_fetch/1,
+         ejson_from_list/2,
          record_fields/0,
          list/2,
-	 %% TODO can we use default fetch and update?
-         %%fetch/2,
-	 %%update/2,
          set_updated/2,
          new_record/3,
          name/1,
@@ -53,7 +51,6 @@
          list_query/0
         ]).
 
-%% TODO can we use default fetch and update?
 -include_lib("mixer/include/mixer.hrl").
 -mixin([{chef_object,[
                      {default_fetch/2, fetch},
@@ -93,6 +90,11 @@ fields_for_fetch(#chef_key{id = Id, key_name = KeyName}) ->
 
 record_fields() ->
     record_info(fields, chef_key).
+
+ejson_from_list(KeysList, URIDecorator) ->
+    [ {[{<<"uri">>, URIDecorator(Name)},
+        {<<"name">>, Name},
+        {<<"expired">>, Expired}]} || [Name, Expired] <- KeysList ].
 
 list(#chef_key{id = Id}, CallbackFun) when is_binary(Id) ->
     CallbackFun({list_query(), [Id], rows}).
