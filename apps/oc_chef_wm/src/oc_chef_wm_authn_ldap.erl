@@ -21,6 +21,9 @@
 
 -export([auth_method/1, authenticate/2]).
 
+-ifdef(TEST).
+-compile(export_all).
+-endif.
 
 %% Determines auth method to use for this request based on
 %% configuration and any override present in the request data.
