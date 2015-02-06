@@ -21,7 +21,8 @@
 -define(CLIENT_NAME, <<"test-client">>).
 -define(ORG_NAME, <<"org1">>).
 
-init_per_suite(Config) ->
+init_per_suite(LastConfig) ->
+    Config = chef_test_db_helper:start_db(LastConfig, "oc_chef_wm_itests"),
     Config2 = setup_helper:start_server(Config),
 
     OrganizationRecord = chef_object:new_record(oc_chef_organization,
@@ -209,7 +210,7 @@ http_update_policy(Name, Ejson) ->
     http_request(put, "/group_name/" ++ UrlEncodedName, ejson:encode(Ejson)).
 
 http_request(Method, RouteSuffix, Body) ->
-    Url = "http://localhost:8000/organizations/org/policies" ++ RouteSuffix,
+    Url = "http://localhost:8000/organizations/org1/policies" ++ RouteSuffix,
     ibrowse:send_req(Url,
                      [{"x-ops-userid", "test-client"},
                       {"accept", "application/json"},
