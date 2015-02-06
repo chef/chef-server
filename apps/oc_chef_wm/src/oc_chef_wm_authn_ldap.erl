@@ -192,7 +192,7 @@ close(_) ->
     ok.
 
 value_of(Key, Data, Default) ->
-    [R] = proplists:get_value(Key, Data, [Default]),
+    [R|_] = proplists:get_value(Key, Data, [Default]),
     characters_to_binary(R).
 
 characters_to_binary(Characters) when is_list(Characters);
