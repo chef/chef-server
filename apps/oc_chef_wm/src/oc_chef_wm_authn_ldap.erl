@@ -142,21 +142,26 @@ maybe_encrypt_session(start_tls, {ok, Session}, Timeout) ->
 maybe_encrypt_session(_, {ok, Session}, _) ->
     {ok, Session}.
 
-
+-spec canonical_username(string()) -> binary().
+canonical_username(Username) ->
+    characters_to_binary(
+      re:replace(string:to_lower(Username),
+                 "[^a-z0-9_-]",
+                 "_",
+                 [{return, list}, global])).
 
 result_to_user_ejson(_, UserName, []) ->
     lager:info("User ~p not found in LDAP", [UserName]),
     {error, unauthorized};
-result_to_user_ejson(LoginAttr, _, [{eldap_entry, CN, DataIn}|_]) ->
+result_to_user_ejson(LoginAttr, UserName, [{eldap_entry, CN, DataIn}|_]) ->
 
     % No guarantees on casing, so let's not make assumptions:
     Data = [ { string:to_lower(Key), Value} || {Key, Value} <- DataIn ],
 
-    % loginattr was used to find this record, so we know it must exist
-    [UserName0] = proplists:get_value(LoginAttr, Data),
-    UserName1 = string:to_lower(UserName0),
-    UserName2 = re:replace(UserName1, "[^0-z0-9_-]", "_", [{return, list}, global]),
-    UserName = characters_to_binary(UserName2),
+    % loginattr was used to find this record, so we know it must exist;
+    % however, multiple LoginAttr fields may exist in the LDAP record, take
+    % the first
+    [CanonicalUserName|_] = [ canonical_username(U) || U <- proplists:get_value(LoginAttr, Data) ],
 
     % If you are debugging an issue where a new user has authenticated successfully
     % via opscode-manage , but received an odd 400 message when trying to create a
@@ -176,10 +181,10 @@ result_to_user_ejson(LoginAttr, _, [{eldap_entry, CN, DataIn}|_]) ->
                     {"mail", <<"email">>} ],
 
     Terms = [ {Name, value_of(Key, Data, "unknown") } || {Key, Name} <- LookupFields ],
-    Result = Terms ++ [ { <<"username">>, UserName },
+    Result = Terms ++ [ { <<"username">>, CanonicalUserName },
                         { <<"external_authentication_uid">>, UserName },
                         { <<"recovery_authentication_enabled">>, false } ],
-    {CN, UserName, {Result}}.
+    {CN, CanonicalUserName, {Result}}.
 
 close({ok, Session}) ->
     eldap:close(Session);
@@ -196,4 +201,3 @@ characters_to_binary(Characters) when is_list(Characters);
 % In case of unexpected value, don't crash the auth process:
 characters_to_binary(Atom) when is_atom(Atom) ->
     atom_to_binary(Atom, utf8).
-
