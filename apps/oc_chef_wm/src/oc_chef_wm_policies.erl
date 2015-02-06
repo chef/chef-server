@@ -36,8 +36,7 @@
          to_json/2]).
 
 %% Shared functions
--export([validate_policy_name/1,
-         policy_name_invalid/2 ]).
+-export([ policy_name_invalid/2 ]).
 
 init(Config) ->
     oc_chef_wm_base:init(?MODULE, Config).
@@ -72,12 +71,7 @@ auth_info(Req, State) ->
 auth_info('GET', Req, State ) ->
     {{container, policies}, Req, State};
 auth_info('POST', Req, State = #base_state{resource_state = #policy_state{policy_data = Json}}) ->
-    case validate_policy_name(fetch_id_name_from_json(Json)) of
-        valid ->
-            {{create_in_container, policies}, Req, State};
-        _ ->
-            policy_name_invalid(Req, State)
-    end.
+    {{create_in_container, policies}, Req, State}.
 
 resource_exists(Req, State) ->
     {true, Req, State}.
@@ -96,17 +90,6 @@ malformed_request_message(Any, _Req, _State) ->
 -spec conflict_message(binary()) -> ejson_term().
 conflict_message(_Name) ->
     {[{<<"error">>, [<<"Policy already exists">>]}]}.
-
-validate_policy_name(undefined) ->
-    missing;
-validate_policy_name(Name) ->
-	{CompiledRegex, _Msg} = chef_regex:regex_for(policy_file_name),
-    case re:run(Name, CompiledRegex) of
-        {match, _} ->
-            valid;
-        nomatch  ->
-            invalid
-    end.
 
 policy_name_invalid(Req, State) ->
     Msg = <<"Invalid policy name.">>,

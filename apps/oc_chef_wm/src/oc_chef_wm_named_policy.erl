@@ -109,11 +109,11 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
     PolicyName = chef_wm_util:extract_from_path(policy_name, Req),
     case wrq:method(Req) of
         PostOrPut when PostOrPut =:= 'POST'; PostOrPut =:= 'PUT' ->
-            validate_policy(true, OrgId, PolicyName, DbContext, Req, State, PolicyState);
+            policy_permissions(true, OrgId, PolicyName, DbContext, Req, State, PolicyState);
         _DeleteOrGet ->
-            validate_policy(false, OrgId, PolicyName, DbContext, Req, State, PolicyState)
+            policy_permissions(false, OrgId, PolicyName, DbContext, Req, State, PolicyState)
     end.
-validate_policy(CanCreate, _OrgId, PolicyName, DbContext, Req,
+policy_permissions(CanCreate, _OrgId, PolicyName, DbContext, Req,
                 #base_state{} = State, PolicyState = #policy_state{
                                                         oc_chef_policy = InputPolicy
                                                        }) ->
