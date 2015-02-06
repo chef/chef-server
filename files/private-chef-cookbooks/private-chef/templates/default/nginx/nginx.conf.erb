@@ -68,7 +68,8 @@ http {
 
   # external lb config for Chef API
   <%- if node['private_chef']['lb']['enable'] -%>
-    proxy_cache_path  <%= File.join(@dir, "cache") %> levels=1:2 keys_zone=webui-cache:50m max_size=<%= @cache_max_size %> inactive=600m;
+    proxy_cache_path  <%= File.join(@dir, "cache", "webui") %> levels=1:2 keys_zone=webui-cache:50m max_size=<%= @cache_max_size %> inactive=600m;
+    proxy_cache_path  <%= File.join(@dir, "cache", "cookbooks") %> levels=1:2 keys_zone=cookbooks:50m max_size=<%= @cache_max_size %> inactive=600m;
     proxy_temp_path <%= File.join(@dir, "cache-tmp") %>;
 
     # We support three options: serve nothing on non_ssl_port (80),

@@ -1,5 +1,18 @@
 # Chef Server Changelog
 
+## 12.0.4 (unreleased)
+
+### opscode-omnibus
+* nginx bookshelf caching, enabled with
+  `opscode_erchef['nginx_bookshelf_caching'] = :on`
+* s3 URL expiry window setting,
+  `opscode_erchef['s3_url_expiry_window_size']`, which can have values
+  in minutes (e.g. `"15m"`), percentage (e.g. `"15%"`), or just be
+  `:off`.
+
+### oc\_erchef 1.2.2
+* Add `s3_url_expiry_window_size` setting for s3 URL caching
+
 ## 12.0.3 (2015-02-04)
 
 ### enterprise-chef-common 0.5.1
