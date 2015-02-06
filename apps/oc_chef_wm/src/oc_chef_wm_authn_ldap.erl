@@ -88,7 +88,18 @@ find_and_authenticate_user(Session, User, Password, Config) ->
     Filter = {filter, eldap:equalityMatch(LoginAttr, User)},
 
     % Auth so we can search for the user
-    ok = bind(Session, BindDN, BindPass),
+    ok = case {BindDN, BindPass} of
+             {"", ""} ->
+                 % This is a workaround for an upstream eldap bug.
+                 % eldap does not correctly process the anon_auth configuration,
+                 % however, passing anon for both the BindDN and BindPass bypasses the
+                 %
+                 % TODO: Remove once a fix is accepted upstream and we can upgrade our
+                 % erlang version to pull in the fix.
+                 bind(Session, anon, anon);
+             _ ->
+                 bind(Session, BindDN, BindPass)
+         end,
 
     % And then search
     {ok, Result} = search_result(eldap:search(Session, [Base, Filter])),
@@ -118,7 +129,7 @@ bind(Session, BindDN, BindPassword) ->
     case eldap:simple_bind(Session, BindDN, BindPassword) of
         ok -> ok;
         {error, Error} ->
-            lager:error("Could not bind as ~p, please check private-chef.rb for correct bind_dn, bind_password, host, port and encrpytion values. Error: ", [BindDN, Error]),
+            lager:error("Could not bind as ~p, please check private-chef.rb for correct bind_dn, bind_password, host, port and encrpytion values. Error: ~p", [BindDN, Error]),
             {error, Error}
     end.
 
