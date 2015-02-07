@@ -42,8 +42,9 @@ node['private_chef']['addons']['packages'].each do |pkg|
   end
 end
 
-if (node['private_chef']['addons']['path'])
-  include_recipe "private-chef::add_ons_local"
-else
+# chef-solo and chef-client -z return different things :(
+if (node['private_chef']['addons']['path'] == nil) || (node['private_chef']['addons']['path'] == {})
   include_recipe "private-chef::add_ons_remote"
+else
+  include_recipe "private-chef::add_ons_local"
 end

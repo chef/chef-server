@@ -18,7 +18,7 @@ add_command_under_category "install", "general", "Install addon package by name,
   end
 
   attributes_path = "#{base_path}/embedded/cookbooks/install_params.json"
-  command = ["chef-solo",
+  command = ["chef-client -z",
     "--config #{base_path}/embedded/cookbooks/solo.rb",
     "--json-attributes #{attributes_path}",
     "--log_level fatal"]

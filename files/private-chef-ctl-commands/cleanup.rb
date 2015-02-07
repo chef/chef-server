@@ -5,7 +5,7 @@ add_command_under_category "cleanup", "general", "Perform post-upgrade removal o
   use_why_run_mode = ARGV.include?("--no-op")
 
   # Our cleanup process is really just a special chef run
-  command = ["chef-solo",
+  command = ["chef-client -z",
              "--config #{base_path}/embedded/cookbooks/solo.rb",
              "--json-attributes #{base_path}/embedded/cookbooks/post_upgrade_cleanup.json",
              "--log_level fatal"] # yes, that's an underscore in log_level

@@ -38,7 +38,7 @@ override :'chef-gem', version: "12.0.3"
 dependency "preparation"
 
 # global
-dependency "chef-gem" # for embedded chef-solo
+dependency "chef-gem" # for embedded chef-client -z runs
 dependency "private-chef-scripts" # assorted scripts used by installed instance
 dependency "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
 dependency "ctl-man" # install man page
