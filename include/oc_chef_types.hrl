@@ -30,6 +30,16 @@
           auth_side_groups = []
           }).
 
+-record(oc_chef_policy, {
+          id,
+          name,
+          policy_group,
+          org_id,
+          authz_id,
+          last_updated_by,
+          serialized_object
+          }).
+
 -record(oc_chef_organization, {
           id,
           authz_id,

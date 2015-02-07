@@ -1,7 +1,7 @@
 DEPS = $(CURDIR)/deps
 
 # TODO automate managing this revision
-EC_SCHEMA_VERSION = 2.5.3
+EC_SCHEMA_VERSION = 2.6.0
 DIALYZER_OPTS = -Wunderspecs
 ITEST_DEPS = $(CURDIR)/itest/common/deps
 # List dependencies that should be included in a cached dialyzer PLT file.
@@ -102,7 +102,7 @@ itest_compile: clean itest_deps
         # recompile, setting TEST define so we can play with
         # unexported functions.
 	@echo "Recompiling with -DTEST ..."
-	@rebar compile -DTEST
+	cd ../../; rebar skip_deps=true compile -DTEST; cd -
 	@mkdir -p itest/ct_logs
 
 itest: itest_compile

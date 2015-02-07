@@ -27,6 +27,7 @@
          authz_id/1,
          base_cookbook_name/1,
          constraint_map_spec/1,
+         single_cookbook_version_spec/0,
          ejson_for_indexing/2,
          extract_checksums/1,
          fields_for_update/1,
@@ -300,8 +301,11 @@ extract_checksums_from_segment(Segment) ->
 constraint_map_spec(RegexName) ->
     {object_map,
      {{keys, {string_match, chef_regex:regex_for(RegexName)}},
-      {values, {fun_match, {fun valid_cookbook_constraint/1, string,
-                            <<"Invalid version constraint">>}}}}}.
+      {values, single_cookbook_version_spec()}}}.
+
+single_cookbook_version_spec() ->
+    {fun_match, {fun valid_cookbook_constraint/1, string,
+                 <<"Invalid version constraint">>}}.
 
 valid_cookbook_constraint(Str) when is_binary(Str) ->
     case chef_object_base:parse_constraint(Str) of
@@ -332,7 +336,7 @@ is_valid_version(Version) ->
 
 %% @doc Given a binary parse it to a valid cookbook version tuple {Major, Minor, Patch} or
 %% raise a `badarg' error. Each of `Major', `Minor', and `Patch' must be non-negative
-%% integer values less than 2147483647 (max size of value in pg int column). It is
+%% integer values less than `?MAX_VERSION' (max size of value in pg int column). It is
 %% acceptable to provide a value with one or two dots (1.0 is the same as 1.0.0). Less 
 %% than one dot or more than two dots is an error.
 %%
