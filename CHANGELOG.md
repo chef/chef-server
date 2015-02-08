@@ -9,6 +9,8 @@
   `opscode_erchef['s3_url_expiry_window_size']`, which can have values
   in minutes (e.g. `"15m"`), percentage (e.g. `"15%"`), or just be
   `:off`.
+* Ensure shell metacharacters in arguments to chef-server-ctl user-
+  and org- commands are properly handled.
 
 ### oc\_erchef 1.2.2
 * Add `s3_url_expiry_window_size` setting for s3 URL caching

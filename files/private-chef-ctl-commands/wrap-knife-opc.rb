@@ -1,8 +1,19 @@
 #
 # Copyright:: Copyright (c) 2014 Chef Software, Inc.
 #
-# All Rights Reserved
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+require 'shellwords'
 
 knife_config = "/etc/opscode/pivotal.rb"
 knife_cmd    = "/opt/opscode/embedded/bin/knife"
@@ -27,7 +38,8 @@ cmds.each do |cmd, args|
   opc_noun = args[1]
   description = args[2]
   add_command_under_category cmd, "organization-and-user-management", description, 2 do
-    status = run_command("#{knife_cmd} opc #{opc_noun} #{opc_cmd} #{cmd_args.join(' ')} -c #{knife_config}")
+    escaped_args = cmd_args.map {|a| Shellwords.escape(a) }.join(' ')
+    status = run_command("#{knife_cmd} opc #{opc_noun} #{opc_cmd} #{escaped_args} -c #{knife_config}")
     exit status.exitstatus
   end
 end
