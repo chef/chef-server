@@ -21,6 +21,9 @@
 
 -export([auth_method/1, authenticate/2]).
 
+-ifdef(TEST).
+-compile(export_all).
+-endif.
 
 %% Determines auth method to use for this request based on
 %% configuration and any override present in the request data.
@@ -82,10 +85,27 @@ find_and_authenticate_user(Session, User, Password, Config) ->
     BaseDN = proplists:get_value(base_dn, Config),
     LoginAttr = proplists:get_value(login_attribute, Config, "samaccountname"),
     Base = {base, BaseDN},
-    Filter = {filter, eldap:equalityMatch(LoginAttr, User)},
+
+    % Add support for an optional group_dn filter
+    GroupDN = proplists:get_value(group_dn, Config, ""),
+    Filter = case GroupDN of
+                 "" -> {filter, eldap:equalityMatch(LoginAttr, User)};
+                 _ -> {filter,eldap:'and'([eldap:equalityMatch(LoginAttr, User), eldap:equalityMatch("memberOf",GroupDN)])}
+             end,
 
     % Auth so we can search for the user
-    ok = bind(Session, BindDN, BindPass),
+    ok = case {BindDN, BindPass} of
+             {"", ""} ->
+                 % This is a workaround for an upstream eldap bug.
+                 % eldap does not correctly process the anon_auth configuration,
+                 % however, passing anon for both the BindDN and BindPass bypasses the
+                 %
+                 % TODO: Remove once a fix is accepted upstream and we can upgrade our
+                 % erlang version to pull in the fix.
+                 bind(Session, anon, anon);
+             _ ->
+                 bind(Session, BindDN, BindPass)
+         end,
 
     % And then search
     {ok, Result} = search_result(eldap:search(Session, [Base, Filter])),
@@ -115,7 +135,7 @@ bind(Session, BindDN, BindPassword) ->
     case eldap:simple_bind(Session, BindDN, BindPassword) of
         ok -> ok;
         {error, Error} ->
-            lager:error("Could not bind as ~p, please check private-chef.rb for correct bind_dn, bind_password, host, port and encrpytion values. Error: ", [BindDN, Error]),
+            lager:error("Could not bind as ~p, please check private-chef.rb for correct bind_dn, bind_password, host, port and encrpytion values. Error: ~p", [BindDN, Error]),
             {error, Error}
     end.
 
@@ -142,21 +162,30 @@ maybe_encrypt_session(start_tls, {ok, Session}, Timeout) ->
 maybe_encrypt_session(_, {ok, Session}, _) ->
     {ok, Session}.
 
-
+-spec canonical_username(string()) -> binary().
+canonical_username(Username) ->
+    characters_to_binary(
+      re:replace(string:to_lower(Username),
+                 "[^a-z0-9_-]",
+                 "_",
+                 [{return, list}, global])).
 
 result_to_user_ejson(_, UserName, []) ->
     lager:info("User ~p not found in LDAP", [UserName]),
     {error, unauthorized};
-result_to_user_ejson(LoginAttr, _, [{eldap_entry, CN, DataIn}|_]) ->
+result_to_user_ejson(LoginAttr, UserName, [{eldap_entry, CN, DataIn}|_]) ->
 
     % No guarantees on casing, so let's not make assumptions:
     Data = [ { string:to_lower(Key), Value} || {Key, Value} <- DataIn ],
 
-    % loginattr was used to find this record, so we know it must exist
-    [UserName0] = proplists:get_value(LoginAttr, Data),
-    UserName1 = string:to_lower(UserName0),
-    UserName2 = re:replace(UserName1, "[^0-z0-9_-]", "_", [{return, list}, global]),
-    UserName = characters_to_binary(UserName2),
+    % Since we just downcased the entire response, we need to downcase
+    % the LoginAttr to ensure it doesn't blow up and throw an exception
+    LCLoginAttr = string:to_lower(LoginAttr),
+
+    % loginattr was used to find this record, so we know it must exist;
+    % however, multiple LoginAttr fields may exist in the LDAP record, take
+    % the first
+    [CanonicalUserName|_] = [ canonical_username(U) || U <- proplists:get_value(LCLoginAttr, Data) ],
 
     % If you are debugging an issue where a new user has authenticated successfully
     % via opscode-manage , but received an odd 400 message when trying to create a
@@ -176,10 +205,10 @@ result_to_user_ejson(LoginAttr, _, [{eldap_entry, CN, DataIn}|_]) ->
                     {"mail", <<"email">>} ],
 
     Terms = [ {Name, value_of(Key, Data, "unknown") } || {Key, Name} <- LookupFields ],
-    Result = Terms ++ [ { <<"username">>, UserName },
+    Result = Terms ++ [ { <<"username">>, CanonicalUserName },
                         { <<"external_authentication_uid">>, UserName },
                         { <<"recovery_authentication_enabled">>, false } ],
-    {CN, UserName, {Result}}.
+    {CN, CanonicalUserName, {Result}}.
 
 close({ok, Session}) ->
     eldap:close(Session);
@@ -187,7 +216,7 @@ close(_) ->
     ok.
 
 value_of(Key, Data, Default) ->
-    [R] = proplists:get_value(Key, Data, [Default]),
+    [R|_] = proplists:get_value(Key, Data, [Default]),
     characters_to_binary(R).
 
 characters_to_binary(Characters) when is_list(Characters);
@@ -196,4 +225,3 @@ characters_to_binary(Characters) when is_list(Characters);
 % In case of unexpected value, don't crash the auth process:
 characters_to_binary(Atom) when is_atom(Atom) ->
     atom_to_binary(Atom, utf8).
-
