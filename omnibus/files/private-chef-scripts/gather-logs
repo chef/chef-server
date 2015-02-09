@@ -260,6 +260,16 @@ for fileperms in \
     ls -altuhR "$fileperms" >> "$tmpdir/perms.txt"
 done
 
+if [[ $type == 'CS' || $type == 'OSC' ]]; then
+    migration_level_file="$tmpdir/migration-level.txt"
+    migration_level_file_location="/var/opt/$path/upgrades/migration-level"
+    if [[ -f $migration_level_file_location  ]]; then
+	cat $migration_level_file_location >> "$migration_level_file"
+    else
+	echo "!!! Migration level file not found  !!!">> "$migration_level_file";
+    fi
+fi
+
 ##
 ## Plain entries to construct reporting passwords for comparison
 ## echo "select passwd from pg_shadow where usename='opscode_reporting';" | su - $POSTGRESQL_UNIX_USER -c 'psql -U opscode-pgsql postgres -t -A' | sed 's/md5//' >> "$service_passwords_file"
