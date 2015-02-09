@@ -472,6 +472,22 @@ default['private_chef']['oc_id']['db_pool_size'] = '20'
 
 default['private_chef']['oc_id']['administrators'] = []
 
+# Use to define predefined applications that can authenticate with the server.
+# Entries are a hash with the key being the name of the application and the
+# value being a hash with a 'redirect_uri' key. Example:
+#
+#     oc_id['applications'] = {
+#       'supermarket' => {
+#         'redirect_uri' => 'http://supermarket.mycorp/auth/chef_oauth2/callback'
+#       },
+#       'another_app' => {
+#         'redirect_uri' => 'http://anotherapp.mycorp/auth/chef_oauth2/callback'
+#       }
+#     }
+#
+# Default value: `{}`.
+default['private_chef']['oc_id']['applications'] = {}
+
 ###
 # Dark Launch
 ###
