@@ -1,8 +1,9 @@
 # Enterprise Chef Changelog
 
-## 11.2.8 (Unreleased)
+## 11.2.7 (Unreleased)
 
 * Ensure nginx restarts on frontends after lua-related changes
+* Backport the export of oc-id analytics configuration information in `actions-source.json`
 
 ## 11.2.6 (2014-12-17)
 * Add an OmnibusHelper method to provide an owner and group hash
@@ -20,7 +21,7 @@
 ## 11.2.5 (2013-11-03)
 
 ### oc_erchef
-* Upgrade to 0.28.3 and then revert to 0.25.14.2 for addon compatibility.  The issue was that changing the darklaunch default from couchdb to postgresql changes behavior for addons that don't go through the external LB.  Once the addons have been upgraded to respect the full darklaunch flagset we'll be able to upgrade oc_erchef. 
+* Upgrade to 0.28.3 and then revert to 0.25.14.2 for addon compatibility.  The issue was that changing the darklaunch default from couchdb to postgresql changes behavior for addons that don't go through the external LB.  Once the addons have been upgraded to respect the full darklaunch flagset we'll be able to upgrade oc_erchef.
 
 ### oc-chef-pedant
 * Upgrade to 1.0.62, but revert to 1.0.29.5 for addon compatibility

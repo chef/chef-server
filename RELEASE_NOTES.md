@@ -1,6 +1,21 @@
 # Enterprise Chef Release Notes
 
-## 11.2.6 (Unreleased)
+## 11.2.8 (unreleased)
+
+### What's New
+
+### Bug Fixes:
+
+The following items are new for Enterprise Chef 11.2.8 and/or are
+changes from previous versions:
+
+* Support the use of Chef Analytics 1.1 with Enterprise Chef 11
+
+The following items are the set of bug fixes that have been applied since Enterprise Chef 11.2.6:
+
+* Ensure nginx restarts on frontends after lua-related changes
+
+## 11.2.6 (2014-12-17)
 
 ### What's New
 
@@ -11,7 +26,7 @@ changes from previous versions:
 
 * [OC-11712] Adjust perms to 0750 for all service's log dirs
 
-The following items are the set of bug fixes that have been applied since Enterprise Chef 11.2.6:
+The following items are the set of bug fixes that have been applied since Enterprise Chef 11.2.5:
 
 
 ## 11.2.5 (2014-11-03)
@@ -31,7 +46,7 @@ The following items are the set of bug fixes that have been applied since Enterp
 
 * [OC-11769] make oc_chef_authz a tunable in private-chef.rb
 * Fix oc_chef_authz timeout tunable
-* The 'gather-logs' script now obeys the attribute for postsgresql['username'] 
+* The 'gather-logs' script now obeys the attribute for postgresql['username']
 * oc_erchef 0.25.14.2 - Reverting to previous version for addon compatibility
 
 ## 11.2.4 (Never Released)
