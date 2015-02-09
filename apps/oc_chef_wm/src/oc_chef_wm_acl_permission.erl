@@ -126,9 +126,9 @@ update_from_json(#acl_state{type = Type, authz_id = AuthzId, acl_data = Data},
         throw:forbidden ->
             forbidden;
         throw:bad_actor ->
-            forbidden;
+            bad_actor;
         throw:bad_group ->
-            forbidden
+            bad_group
     end.
 
 
