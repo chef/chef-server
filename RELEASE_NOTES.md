@@ -1,5 +1,12 @@
 # Chef Server Release Notes
 
+## 12.0.4 (UNRELEASED)
+
+### What's New:
+
+* oc\_erchef
+  * Add incubation feature for policyfiles. Feature flag off by default.
+
 ## 12.0.3 (2015-02-04)
 
 ### What's New:
