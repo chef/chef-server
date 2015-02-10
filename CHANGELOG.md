@@ -12,6 +12,9 @@
 * Ensure shell metacharacters in arguments to chef-server-ctl user-
   and org- commands are properly handled.
 
+### oc\_erchef 1.3.1
+* Add incubation feature for policyfiles. Feature flag off by default.
+
 ### oc\_erchef 1.2.2
 * Add `s3_url_expiry_window_size` setting for s3 URL caching
 
