@@ -39,7 +39,7 @@ ejson_from_list_test_() ->
      {"Resulting ejson converts to json correctly",
       fun() ->
         EJ = chef_key:ejson_from_list(valid_keys_input_list(), URIDecorator),
-        ?assertEqual(EJ, chef_json:encode(EJ))
+        ?assertMatch(true, is_binary(chef_json:encode(EJ)))
       end}
     ].
 
