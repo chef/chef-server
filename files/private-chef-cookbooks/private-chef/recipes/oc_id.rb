@@ -1,6 +1,6 @@
 #
 # Author:: James Casey <james@getchef.com>
-# Copyright:: Copyright (c) 2014 Chef, Inc.
+# Copyright:: Copyright (c) 2014-2015 Chef Software, Inc.
 #
 # All Rights Reserved
 
@@ -12,7 +12,9 @@ app_settings = {
   },
   'doorkeeper' => {
     'administrators' => node['private_chef']['oc_id']['administrators'] || []
-  }
+  },
+  'sentry_dsn' => node['private_chef']['oc_id']['sentry_dsn'],
+  'sign_up_url' => node['private_chef']['oc_id']['sign_up_url'],
 }
 
 oc_id_dir = node['private_chef']['oc_id']['dir']
@@ -112,7 +114,7 @@ execute "oc_id_schema" do
 
   # There are other recipes that depend on having a VERSION environment
   # variable. If that environment variable is set when we run `rake db:migrate`,
-  # and it is set to something the the migrations do not expect, this will
+  # and it is set to something the migrations do not expect, this will
   # break.
   #
   # We want to migrate to the latest version, which we can get by looking at the
