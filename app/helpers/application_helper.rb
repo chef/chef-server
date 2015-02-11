@@ -1,4 +1,5 @@
 module ApplicationHelper
+  delegate :sign_up_url, :to => "Settings"
 
   def bootstrap_class_for(flash_type)
 

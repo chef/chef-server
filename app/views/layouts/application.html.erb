@@ -20,7 +20,7 @@
             <li><a>Signed in as: <%= current_user.username %></a></li>
             <li><%= link_to "Sign Out", signout_path, method: "delete" %></li>
           <% elsif controller.controller_name == 'sessions' %>
-            <li><%= link_to "Sign Up", 'https://manage.opscode.com/signup?ref=community', target: '_blank' %></li>
+            <li><%= link_to "Sign Up", sign_up_url, :target => "_blank" %></li>
           <% else %>
             <li><%= link_to "Sign In", signin_path %></li>
           <% end %>
