@@ -1,5 +1,10 @@
-oc-id Changelog
-===============
+# Chef Identity Change Log
+
+## 0.5.0 (Unreleased)
+
+* Update sign up URL and make it configurable
+* Add support for Sentry
+* Add maintainers file
 
 ## 0.4.4 (2014-12-17)
 
