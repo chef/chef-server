@@ -1,6 +1,7 @@
 #
-# Author:: Adam Jacob (<adam@opscode.com>)
-# Copyright:: Copyright (c) 2011 Opscode, Inc.
+# Author:: Adam Jacob (<adam@chef.io>)
+# Author:: Tyler Cloke (<tyler@chef.io>)
+# Copyright:: Copyright (c) 2011-2015 Opscode, Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +24,10 @@ rabbitmq_etc_dir = File.join(rabbitmq_dir, "etc")
 rabbitmq_data_dir = rabbitmq['data_dir']
 rabbitmq_data_dir_symlink = File.join(rabbitmq_dir, "db")
 rabbitmq_log_dir = rabbitmq['log_directory']
+
+# path needed for rabbitmqctl to run
+rabbitmq_path = rabbitmq['env_path']
+rabbitmq_env = ENV.to_hash.merge("PATH" => rabbitmq_path)
 
 [ rabbitmq_dir, rabbitmq_etc_dir, rabbitmq_data_dir, rabbitmq_log_dir ].each do |dir_name|
   directory dir_name do
@@ -78,36 +83,42 @@ if is_data_master?
   rmq_ctl_chpost = "/opt/opscode/embedded/bin/chpst -u #{opc_username} -U #{opc_username} #{rmq_ctl}"
 
   execute "#{opc_ctl} start rabbitmq" do
+    environment rabbitmq_env
     retries 20
   end
 
   execute "#{rmq_ctl_chpost} wait #{rabbitmq_data_dir}/rabbit@localhost.pid" do
+    environment rabbitmq_env
     retries 10
   end
 
   [ rabbitmq['vhost'], rabbitmq['reindexer_vhost'], rabbitmq['jobs_vhost'], rabbitmq['actions_vhost'] ].each do |vhost|
     execute "#{rmq_ctl} add_vhost #{vhost}" do
+      environment (rabbitmq_env)
       user opc_username
-      not_if "#{rmq_ctl_chpost} list_vhosts| grep #{vhost}"
+      not_if "#{rmq_ctl_chpost} list_vhosts| grep #{vhost}", :environment => rabbitmq_env, :user => "root"
       retries 20
     end
   end
   # create chef user for the queue
   execute "#{rmq_ctl} add_user #{rabbitmq['user']} #{rabbitmq['password']}" do
-    not_if "#{rmq_ctl_chpost} list_users |grep #{rabbitmq['user']}"
+    environment (rabbitmq_env)
+    not_if "#{rmq_ctl_chpost} list_users |grep #{rabbitmq['user']}", :environment => rabbitmq_env, :user => "root"
     user opc_username
     retries 10
   end
 
   execute "#{rmq_ctl} add_user #{rabbitmq['jobs_user']} #{rabbitmq['jobs_password']}" do
+    environment (rabbitmq_env)
     user opc_username
-    not_if "#{rmq_ctl_chpost} list_users |grep #{rabbitmq['jobs_user']}"
+    not_if "#{rmq_ctl_chpost} list_users |grep #{rabbitmq['jobs_user']}", :environment => rabbitmq_env, :user => "root"
     retries 10
   end
 
   execute "#{rmq_ctl} add_user #{rabbitmq['actions_user']} #{rabbitmq['actions_password']}" do
+    environment (rabbitmq_env)
     user opc_username
-    not_if "#{rmq_ctl_chpost} list_users |grep #{rabbitmq['actions_user']}"
+    not_if "#{rmq_ctl_chpost} list_users |grep #{rabbitmq['actions_user']}", :environment => rabbitmq_env, :user => "root"
     retries 10
   end
 
@@ -117,32 +128,37 @@ if is_data_master?
   # the three regex's map to config, write, read permissions respectively
   #
   execute "#{rmq_ctl} set_permissions -p #{rabbitmq['vhost']} #{rabbitmq['user']} \".*\" \".*\" \".*\"" do
+    environment (rabbitmq_env)
     user opc_username
-    not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['user']}|grep #{rabbitmq['vhost']}"
+    not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['user']}|grep #{rabbitmq['vhost']}", :environment => rabbitmq_env, :user => "root"
     retries 10
   end
 
   execute "#{rmq_ctl} set_permissions -p #{rabbitmq['reindexer_vhost']} #{rabbitmq['user']} \".*\" \".*\" \".*\"" do
+    environment (rabbitmq_env)
     user opc_username
-    not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['user']}|grep #{rabbitmq['reindexer_vhost']}"
+    not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['user']}|grep #{rabbitmq['reindexer_vhost']}", :environment => rabbitmq_env, :user => "root"
     retries 10
   end
 
   execute "#{rmq_ctl} set_permissions -p #{rabbitmq['jobs_vhost']} #{rabbitmq['jobs_user']} \".*\" \".*\" \".*\"" do
+    environment (rabbitmq_env)
     user opc_username
-    not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['jobs_user']}|grep #{rabbitmq['jobs_vhost']}"
+    not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['jobs_user']}|grep #{rabbitmq['jobs_vhost']}", :environment => rabbitmq_env, :user => "root"
     retries 10
   end
 
   execute "#{rmq_ctl} set_permissions -p #{rabbitmq['actions_vhost']} #{rabbitmq['user']} \".*\" \".*\" \".*\"" do
+    environment (rabbitmq_env)
     user opc_username
-    not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['user']}|grep #{rabbitmq['actions_vhost']}"
+    not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['user']}|grep #{rabbitmq['actions_vhost']}", :environment => rabbitmq_env, :user => "root"
     retries 10
   end
 
   execute "#{rmq_ctl} set_permissions -p #{rabbitmq['actions_vhost']} #{rabbitmq['actions_user']} \".*\" \".*\" \".*\"" do
+    environment (rabbitmq_env)
     user opc_username
-    not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['actions_user']}|grep #{rabbitmq['actions_vhost']}"
+    not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['actions_user']}|grep #{rabbitmq['actions_vhost']}", :environment => rabbitmq_env, :user => "root"
     retries 10
   end
 end

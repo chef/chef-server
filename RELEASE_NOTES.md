@@ -7,6 +7,15 @@
 * oc\_erchef
   * Add incubation feature for policyfiles. Feature flag off by default.
 
+* knife-ec-backup
+  * Key rotation support.
+
+* Chef 12.0.3
+  * Chef 12.0.3 was vendored into the server.
+
+* Ruby 2.1.4
+  * Ruby 2.1.4 was vendored into the server.
+
 ## 12.0.3 (2015-02-04)
 
 ### What's New:

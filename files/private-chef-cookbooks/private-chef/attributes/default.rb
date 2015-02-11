@@ -105,6 +105,7 @@ default['private_chef']['rabbitmq']['node_port'] = '5672'
 default['private_chef']['rabbitmq']['nodename'] = 'rabbit@localhost'
 default['private_chef']['rabbitmq']['vip'] = '127.0.0.1'
 default['private_chef']['rabbitmq']['consumer_id'] = 'hotsauce'
+default['private_chef']['rabbitmq']['env_path'] = "/opt/opscode/bin:/opt/opscode/embedded/bin:/usr/bin:/bin"
 
 ####
 # Jetty dummy for logs
