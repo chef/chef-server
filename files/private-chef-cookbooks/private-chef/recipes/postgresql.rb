@@ -76,7 +76,7 @@ if File.directory?("/etc/sysctl.d") && File.exists?("/etc/init.d/procps")
     owner "root"
     mode  "0644"
     variables(node['private_chef']['postgresql'].to_hash)
-    notifies :start, 'service[procps]', :immediately
+    notifies :restart, 'service[procps]', :immediately
   end
 else
   # hope this works...
