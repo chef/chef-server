@@ -42,7 +42,7 @@ start_server(Config) ->
              {cleanup_interval, 60000},
              {cleanup_batch_size, 100}]),
 
-    [ ok = chef_test_suite_helper:ensure_started(A) || A <- needed_apps() ],
+    [ {ok, _} = application:ensure_all_started(A) || A <- needed_apps() ],
     Config.
 
 needed_apps() ->

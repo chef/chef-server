@@ -69,7 +69,7 @@ start_server(Config) ->
                          }]),
     application:set_env(chef_index, disable_rabbitmq, true),
 
-    [ ok = chef_test_suite_helper:ensure_started(A) || A <- needed_apps() ],
+    [ {ok, _} = application:ensure_all_started(A) || A <- needed_apps() ],
     Config.
 
 needed_apps() ->
