@@ -1,13 +1,13 @@
 #!/opt/chef/embedded/bin/ruby
 
 require 'rubygems'
-require 'yajl'
+require 'chef/json_compat'
 
 class OhNo
   def ohai
     if !@ohai
       raw = `ohai -lerror`
-      @ohai = Yajl::Parser.new.parse(raw)
+      @ohai = Chef::JSONCompat.parse(raw)
     end
     @ohai
   end
