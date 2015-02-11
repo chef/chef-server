@@ -7,7 +7,7 @@ class OhNo
   def ohai
     if !@ohai
       raw = `ohai -lerror`
-      @ohai = Chef::JSONCompat.parse(raw)
+      @ohai = Chef::JSONCompat.from_json(raw)
     end
     @ohai
   end
@@ -29,4 +29,3 @@ class OhNo
 end
 
 OhNo.new.write("machine_info")
-
