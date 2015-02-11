@@ -11,12 +11,29 @@
   `:off`.
 * Ensure shell metacharacters in arguments to chef-server-ctl user-
   and org- commands are properly handled.
+* Pull in chef-client 12.0.3.
+* Update rabbitmq cookbook to be compatible with modern chef-client.
+* Update pivotal and knife-ec-backup knife configs to be compatible with modern chef-client.
+* Use chef-client -z instead of chef-solo in the server.
 
 ### oc\_erchef 1.3.1
 * Add incubation feature for policyfiles. Feature flag off by default.
 
 ### oc\_erchef 1.2.2
-* Add `s3_url_expiry_window_size` setting for s3 URL caching
+* Add `s3_url_expiry_window_size` setting for s3 URL caching.
+
+### omnibus-ctl 0.3.2
+* Use chef-client -z instead of chef-solo.
+* Reference chef-client via base_path.
+
+### knife-ec-backup 2.0.1
+* Added keys table / key rotation support.
+
+### ruby 2.1.4
+* Needed for ohai >= 2.
+
+### chef-gem 12.0.3
+* [chef-client 12 changelog](https://docs.chef.io/release_notes.html#what-s-new).
 
 ## 12.0.3 (2015-02-04)
 
