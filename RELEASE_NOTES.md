@@ -5,7 +5,8 @@
 ### What's New:
 
 * oc\_erchef
-  * Add incubation feature for policyfiles. Feature flag off by default.
+  * 1.4.0 - keys API: new GET support for `/users/$user/keys` and `/organizations/$org/clients/$client/keys`
+  * 1.3.1 - policyfile: Add incubation feature for policyfiles. Feature flag off by default.
 
 * knife-ec-backup
   * Key rotation support.

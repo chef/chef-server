@@ -16,15 +16,22 @@
 * Update pivotal and knife-ec-backup knife configs to be compatible with modern chef-client.
 * Use chef-client -z instead of chef-solo in the server.
 
+### oc\_erchef 1.4.0
+* keys API: new GET support for `/users/$user/keys` and `/organizations/$org/clients/$client/keys`
+* module epgsql brought up to current.
+
 ### oc\_erchef 1.3.1
 * Add incubation feature for policyfiles. Feature flag off by default.
 
 ### oc\_erchef 1.2.2
 * Add `s3_url_expiry_window_size` setting for s3 URL caching.
 
+### oc-chef-pedant 1.0.76
+* test support for keys API endpoing (GET)
+
 ### omnibus-ctl 0.3.2
 * Use chef-client -z instead of chef-solo.
-* Reference chef-client via base_path.
+* Reference chef-client via `base_path`.
 
 ### knife-ec-backup 2.0.1
 * Added keys table / key rotation support.
