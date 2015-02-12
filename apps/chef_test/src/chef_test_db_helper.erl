@@ -24,8 +24,6 @@
 
 -include_lib("common_test/include/ct.hrl").
 
--compile([{parse_transform, lager_transform}]).
-
 -export([
          start_db/2,
          stop_db/1,
@@ -50,18 +48,18 @@ start_db(Config, DbName) ->
             ["rm -rf", ?config(data_dir, Config)],
             ["mkdir -p", DataDir],
             ["initdb -D", PgData],
-            ["pg_ctl -D", PgData, "-l", PgLog, "-o \"-p", PortStr, "\" start"],
+            ["pg_ctl -D", PgData, "-l", PgLog, "-o \"-h localhost -p ", PortStr,   "-k '' \" start"],
             %% db start is async, sleep? :(
-            ["sleep 5 && createdb -p", PortStr, DbName],
+            ["sleep 5 && createdb -h localhost -p ", PortStr, DbName],
             ["cd", OSCSchema, "&& sqitch --engine pg --db-name", DbName,
-             "--db-port", PortStr, "deploy"],
+             "--db-port", PortStr, " --db-host localhost deploy"],
             ["cd", ECSchema, "&& sqitch --engine pg --db-name", DbName,
-             "--db-port", PortStr, "deploy"],
-            ["psql -p", PortStr, DbName, "<", Schema]
+             "--db-port", PortStr, " --db-host localhost deploy"],
+            ["psql -p", PortStr, DbName, " -h localhost <", Schema]
            ],
     CmdsResult = chef_test_suite_helper:run_cmds(CMDS),
-
-    lager:info("db_start:~n~s~n", [CmdsResult]),
+    % make sure it's seen in output, don't use lager.
+    ct:pal("db_start: ~n~p~n", [CmdsResult]),
 
     Statements = case ?config(statements, Config) of
                      undefined ->
@@ -90,7 +88,7 @@ stop_db(Config) ->
             ["pg_ctl -D", PgData, "-m fast", "stop"]
            ],
     CmdsResult = chef_test_suite_helper:run_cmds(CMDS),
-    lager:info("db_stop:~n~s~n", [CmdsResult]),
+    ct:pal("stop_db results:~n~s~n", [CmdsResult]),
     ok.
 
 delete_all_from_table(TableName) ->
