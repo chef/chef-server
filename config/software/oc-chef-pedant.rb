@@ -16,7 +16,7 @@
 
 name "oc-chef-pedant"
 
-default_version "1.0.75"
+default_version "1.0.76"
 
 source git: "git@github.com:opscode/oc-chef-pedant.git"
 

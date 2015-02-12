@@ -64,10 +64,12 @@ local p_runs = P"runs"
 local p_principals = P"principals"
 local p_internal_organizations_base = P"/internal-organizations"
 local p_controls = P"controls"
+local p_keys = P"keys"
 <% if @xdl_defaults['policies'] %>
 local p_policyfile = P"policies"
 local p_cookbook_artifacts = P"cookbook_artifacts"
 <% end %>
+
 
 -- Composite patterns
 local p_maybe_sep = p_sep^-1
@@ -108,9 +110,11 @@ local c_maybe_identifier = (p_sep * c_identifier)^-1
 local p_erchef_endpoint = p_cookbooks + p_data + p_roles + p_sandboxes +
                           p_environments + p_clients + p_nodes + p_principals +
                           p_groups + p_containers + p_controls
-<% if @xdl_defaults['policies'] %>
-  + p_policyfile + p_cookbook_artifacts
-<% end %>
+-- template portion below prefixed with lua comment to prevent
+-- errors when using un-rendered in tests.
+-- <% if @xdl_defaults['policies'] %>
+                          + p_policyfile + p_cookbook_artifacts
+-- <% end %>
 
 
 -- endpoints that map directly to erchef
@@ -128,10 +132,16 @@ local p_erchef_users = (p_sep * Cendpoint(p_users) * p_trailing_sep) +
                        (p_sep * Cendpoint(p_auth_user) * p_trailing_sep) +
                        (p_sep * Cendpoint(p_system_recovery) * p_trailing_sep)
 
+local p_keys_route = ((p_named_org_prefix * p_clients * p_sep * p_identifier * Cendpoint(p_keys)) +
+                      (p_sep * p_users * p_sep * p_identifier * p_sep * Cendpoint(p_keys))) *
+                        ((p_sep * c_identifier)^-1 * p_trailing_sep)
+
+
 local p_license_route = (p_sep * Cendpoint(p_license) * p_trailing_sep)
 
 -- Everything that gets sent to erchef
-local p_erchef = (p_named_org_prefix * p_erchef_direct) +
+local p_erchef = p_keys_route +
+                 (p_named_org_prefix * p_erchef_direct) +
                  p_erchef_users +
                  p_license_route
 
@@ -171,7 +181,8 @@ local p_acl_endpoint = (p_named_org_prefix * p_all_until_acl * Cendpoint(p_acl) 
 
 
 -- Default org endpoints. This is to help with migrating from OSC 11 to Chef Server 12
-local p_default_org_endpoints = p_search + p_nodes + p_cookbooks + p_data + p_roles + p_sandboxes + p_environments + p_clients + p_runs + p_principals + p_groups + p_containers
+local p_default_org_endpoints = p_search + p_nodes + p_cookbooks + p_data + p_roles + p_sandboxes +
+      p_environments + p_clients + p_runs + p_principals + p_groups + p_containers
 
 -- acct_erchef endpoints that are also routed to internal_acct
 local p_internal_acct_erchef_endpoints = p_acct_users + p_org_endpoint
