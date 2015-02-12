@@ -1,8 +1,8 @@
 %% THIS FILE IS GENERATED. DO NOT EDIT IT MANUALLY %%
 
-{sub_dirs,["rel","apps/chef_index","apps/chef_objects","apps/chef_db",
-           "apps/oc_chef_authz","apps/oc_chef_wm","apps/depsolver",
-           "apps/chef_test"]}.
+{sub_dirs,["rel","apps/chef_test","apps/chef_index","apps/chef_objects",
+           "apps/chef_db","apps/oc_chef_authz","apps/oc_chef_wm",
+           "apps/depsolver"]}.
 {lib_dirs,["deps","apps","apps/chef_objects","apps/oc_chef_authz",
            "apps/chef_index","apps/oc_chef_wm","apps/chef_db",
            "apps/depsolver","apps/chef_test"]}.
@@ -31,14 +31,14 @@
                    {git,"https://github.com/opscode/chef_authn",
                         "e7850d0925b01761d8085ee8b44dafbbe1b297a4"}},
        {epgsql,".*",
-               {git,"git://github.com/epgsql/epgsql.git",
-                    "f060df99c6c99fcd41dc57c106fae9de69d6f9ad"}},
+               {git,"git://github.com/chef/epgsql-1.git",
+                    "14f35271b49dc634142cb1157985521215b0b311"}},
        {pooler,".*",
                {git,"https://github.com/seth/pooler",
                     "7bb8ab83c6f60475e6ef8867d3d5afa0b1dd4013"}},
        {sqerl,".*",
               {git,"https://github.com/opscode/sqerl",
-                   "a7b64daa2205a5e5d4529e0f8291e5f21384539d"}},
+                   "cd8f9588699f872dfdf80f6316c9ef8286ad501b"}},
        {meck,".*",
              {git,"https://github.com/eproxus/meck",
                   "98cdc40fe6ae7780491ed8d0db691dd15625e9b2"}},
@@ -89,7 +89,7 @@
                 "c683084665e1220616e611639fb13797b91281c6"}},
        {jiffy,".*",
               {git,"https://github.com/davisp/jiffy",
-                   "a16918da46a39a3d0791889f61f62b1265955d8d"}},
+                   "137d3d94b6ee10001d761d412cbbe7f665680c98"}},
        {gen_server2,".*",
                     {git,"git://github.com/mdaguete/gen_server2.git",
                          "992650004c81ee921183488cb8115de4777e7bd9"}},
@@ -107,7 +107,7 @@
                               "fd40c960c7912193631d948fe962e1162a8d1334"}},
        {erlware_commons,".*",
                         {git,"https://github.com/erlware/erlware_commons.git",
-                             "02ab88513f9b0a80607170077938218b1457f6be"}},
+                             "05b956da26788f30b3cb793fa6ace02b75f481d0"}},
        {darklaunch,".*",
                    {git,"https://github.com/opscode/opscode-darklaunch-erlang",
                         "23dcf1eea0bd699b118ac56a54f662b66c018704"}},
