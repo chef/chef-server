@@ -93,7 +93,7 @@
 
            %% users
            {add_acl,
-            [mk_tl(container, [cookbooks, data, nodes, roles, environments, policies])],
+            [mk_tl(container, [cookbooks, data, nodes, roles, environments, policies, cookbook_artifacts])],
             [create, read, update, delete], [{group, users}]},
            {add_acl, [{container, policies}], [read], [{group, clients}]},
            {add_acl, [{container, cookbook_artifacts}], [read], [{group, clients}]},
