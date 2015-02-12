@@ -109,6 +109,7 @@
 
 -include_lib("sqerl/include/sqerl.hrl").
 -include("../../include/chef_types.hrl").
+-include("../../include/oc_chef_types.hrl").
 
 -type delete_query() :: delete_cookbook_version_by_id |
                         delete_user_by_id |
@@ -941,6 +942,18 @@ create_object(#chef_sandbox{id=SandboxId,
             Error
     end.
 -spec create_object(atom(), tuple() | list()) -> {ok, non_neg_integer()} | {error, term()} | {conflict, term()}.
+%% okay, that's pretty ugly, but no more so than all the hacks in here and
+%% chef_db for plain old cookbooks, their versions, and their checksums
+%% and at least, it's in a transaction
+create_object(insert_cookbook_artifact_version = QueryName, Args) when is_list(Args) ->
+    case sqerl:select(QueryName, Args) of
+        {ok, [_Row]} -> {ok, 1};
+        {ok, Else} -> {error, {unexpected_response, Else}};
+        %% special error code for missing checksums
+        {error, {<<"CS001">>, _}} -> {error, invalid_checksum};
+        {error, _Why} = Error -> Error;
+        {conflict, _Why} = Conflict -> Conflict
+    end;
 create_object(QueryName, Args) when is_atom(QueryName), is_list(Args) ->
     sqerl:statement(QueryName, Args, count);
 create_object(QueryName, Record) when is_atom(QueryName) ->

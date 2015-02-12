@@ -96,18 +96,13 @@ org_route(policy, Req, Args) -> route_organization_rest_object("policies", Req, 
 org_route(group, Req, Args) -> route_organization_rest_object("groups", Req, Args);
 org_route(association, Req, Args) -> route_organization_rest_object("users", Req, Args);
 org_route(invite, Req, Args) -> route_organization_rest_object("association_requests", Req, Args);
+org_route(cookbook_version, Req, Args) -> route_organization_rest_object("cookbooks", Req, Args);
+org_route(cookbook_artifact_version, Req, Args) -> route_organization_rest_object("cookbook_artifacts", Req, Args);
 org_route(sandbox, Req, Args) ->
     Org = org_name(Req),
     {id, Id} = lists:keyfind(id, 1, Args),
     Template = "/organizations/~s/sandboxes/~s",
     TemplateArgs = [Org, Id],
-    render_template(Template, Req, TemplateArgs);
-org_route(cookbook_version, Req, Args) ->
-    Org = org_name(Req),
-    {name, Name} = lists:keyfind(name, 1, Args),
-    Template = "/organizations/~s/cookbooks/~s",
-    TemplateArgs = [Org, Name],
-    {name, Name} = lists:keyfind(name, 1, Args),
     render_template(Template, Req, TemplateArgs);
 org_route(organization, Req, Args) ->
     {name, Name} = lists:keyfind(name, 1, Args),

@@ -27,53 +27,18 @@
 -include("../../../include/oc_chef_types.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
--record(context, {reqid :: binary(),
-                  otto_connection,
-                  darklaunch = undefined}).
-
 -compile([export_all, {parse_transform, lager_transform}]).
 
 -define(ORG_AUTHZ_ID, <<"10000000000000000000000000000000">>).
 -define(AUTHZ_ID, <<"00000000000000000000000000000001">>).
 -define(CLIENT_NAME, <<"test-client">>).
 
-init_per_suite(LastConfig) ->
-    Config = chef_test_db_helper:start_db(LastConfig, "oc_chef_wm_itests"),
-    setup_helper:start_server(Config),
-
-    OrganizationRecord = chef_object:new_record(oc_chef_organization,
-                                                nil,
-                                                ?ORG_AUTHZ_ID,
-                                                {[{<<"name">>, <<"org">>},
-                                                  {<<"full_name">>, <<"org">>}]}),
-    Result2 = chef_db:create(OrganizationRecord,
-                   #context{reqid = <<"fake-req-id">>},
-                   ?AUTHZ_ID),
-    io:format("Organization Create Result ~p~n", [Result2]),
-
-    % get the OrgId from the database that was generated during Org object creation
-    % so we can associate the client with the org.
-    {ok, OrgObject} = chef_sql:fetch_object(chef_object:fields_for_fetch(OrganizationRecord),
-                                element(1, OrganizationRecord),
-                                chef_object:find_query(OrganizationRecord),
-                                chef_object:record_fields(OrganizationRecord)
-                               ),
-    OrgId = OrgObject#oc_chef_organization.id,
-
-    %% create the test client
-    ClientRecord = chef_object:new_record(chef_client,
-                                          OrgId,
-                                          ?AUTHZ_ID,
-                                          {[{<<"name">>, ?CLIENT_NAME},
-                                            {<<"validator">>, true},
-                                            {<<"admin">>, true},
-                                            {<<"public_key">>, <<"stub-pub">>}]}),
-    io:format("ClientRecord ~p~n", [ClientRecord]),
-    ok = chef_db:create(ClientRecord,
-                        #context{reqid = <<"fake-req-id">>},
-                        ?AUTHZ_ID),
-
-    Config.
+init_per_suite(Config) ->
+    setup_helper:base_init_per_suite([{org_name, <<"org">>},
+                                   {org_authz_id, ?ORG_AUTHZ_ID},
+                                   {authz_id, ?AUTHZ_ID},
+                                   {client_name, ?CLIENT_NAME}
+                                   | Config]).
 
 end_per_suite(Config) ->
     chef_test_suite_helper:stop_server(Config, setup_helper:needed_apps()).

@@ -59,6 +59,10 @@ start_db(Config, DbName) ->
              "--db-port", PortStr, "deploy"],
             ["psql -p", PortStr, DbName, "<", Schema]
            ],
+    %% FIXME: we should fail explicitely here if any of the commands above
+    %% fail
+    %% FIXME: we're never stopping the pgsql instance we launch here. We should
+    %% see to that
     CmdsResult = chef_test_suite_helper:run_cmds(CMDS),
 
     lager:info("db_start:~n~s~n", [CmdsResult]),

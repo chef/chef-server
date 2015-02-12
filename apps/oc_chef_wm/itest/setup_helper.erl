@@ -23,11 +23,17 @@
 -module(setup_helper).
 
 -include_lib("common_test/include/ct.hrl").
+-include_lib("eunit/include/eunit.hrl").
+-include("test_types.hrl").
 
 -export([
          start_server/1,
-         needed_apps/0
+         needed_apps/0,
+         base_init_per_suite/1,
+         get_config/2
         ]).
+
+-define(TEST_DB_NAME, "oc_chef_wm_itests").
 
 start_server(Config) ->
     chef_test_suite_helper:set_app_env(stats_hero),
@@ -105,3 +111,57 @@ needed_apps() ->
      oc_chef_authz,
      oc_chef_wm].
 
+%% @doc Does the setup common to all CT suites in this app:
+%% starts the server, create an org, and a client for it
+%% Expects the Config to define the following keys:
+%% org_name, org_authz_id, authz_id, client_name
+base_init_per_suite(Config0) ->
+    OrgName = get_config(org_name, Config0),
+    OrgAuthzId = get_config(org_authz_id, Config0),
+    AuthzId = get_config(authz_id, Config0),
+    ClientName = get_config(client_name, Config0),
+
+    Config1 = chef_test_db_helper:start_db(Config0, ?TEST_DB_NAME),
+    Config2 = start_server(Config1),
+
+    FakeContext = #context{reqid = <<"fake-req-id">>},
+    OrganizationRecord = chef_object:new_record(oc_chef_organization,
+                                                nil,
+                                                OrgAuthzId,
+                                                {[{<<"name">>, OrgName},
+                                                  {<<"full_name">>, OrgName}]}),
+    ok = chef_db:create(OrganizationRecord,
+                        FakeContext,
+                        AuthzId),
+
+    %% create the test client
+    OrgId = oc_chef_organization:id(OrganizationRecord),
+    ClientRecord = chef_object:new_record(chef_client,
+                                          OrgId,
+                                          AuthzId,
+                                          {[{<<"name">>, ClientName},
+                                            {<<"validator">>, true},
+                                            {<<"admin">>, true},
+                                            {<<"public_key">>, <<"stub-pub">>}]}),
+    io:format("ClientRecord ~p~n", [ClientRecord]),
+    ok = chef_db:create(ClientRecord,
+                        FakeContext,
+                        AuthzId),
+
+    [{context, FakeContext},
+     {org, OrganizationRecord},
+     {org_id, OrgId},
+     {client, ClientRecord}
+     | Config2].
+
+%% @doc Returns a value from the config, making sure it's defined
+-spec get_config(atom(), CtConfig :: [{atom(), any()}]) -> any().
+get_config(Key, Config) ->
+    Value = ?config(Key, Config),
+    case Value =:= undefined of
+        true ->
+            ct:pal("You need to define the ~p in your CT config", [Key]),
+            ?assertNotEqual(undefined, Value);
+        false ->
+            Value
+    end.

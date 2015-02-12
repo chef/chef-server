@@ -40,6 +40,19 @@
           serialized_object
           }).
 
+-record(oc_chef_cookbook_artifact_version, {
+          id,
+          identifier,
+          metadata,
+          serialized_object,
+          created_at,
+          created_by,
+          org_id,
+          name,
+          authz_id,
+          checksums :: [ Checksum::binary() ]
+         }).
+
 -record(oc_chef_organization, {
           id,
           authz_id,

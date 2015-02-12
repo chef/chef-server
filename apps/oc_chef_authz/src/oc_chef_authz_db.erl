@@ -172,8 +172,35 @@ statements(pgsql) ->
      {find_group_name_in_authz_ids,
       <<"SELECT name, authz_id FROM groups WHERE authz_id = ANY($1)">>},
      {find_group_authz_id_in_names,
-      <<"SELECT authz_id FROM groups WHERE org_id = $1 AND name = ANY($2)">>}
+      <<"SELECT authz_id FROM groups WHERE org_id = $1 AND name = ANY($2)">>},
+
+      %% cookbook artifact versions
+     {insert_cookbook_artifact_version,
+      <<"SELECT * FROM insert_cookbook_artifact_version($1, $2, $3, $4, $5, $6, $7, $8, $9)">>},
+     {find_cookbook_artifact_version_by_org_name_identifier,
+      <<"SELECT cav.id, cav.identifier, cav.metadata, cav.serialized_object, cav.created_at, cav.created_by,"
+               "ca.org_id, ca.name, ca.authz_id, ARRAY_AGG(cavc.checksum) AS checksums "
+        "FROM cookbook_artifact_versions AS cav "
+        "JOIN cookbook_artifacts AS ca "
+          "ON cav.cookbook_artifact_id = ca.id "
+        "JOIN cookbook_artifact_version_checksums AS cavc "
+          "ON cavc.cookbook_artifact_version_id = cav.id "
+       "WHERE ca.org_id = $1 "
+         "AND ca.name = $2 "
+         "AND cav.identifier = $3 "
+    "GROUP BY cav.id, ca.org_id, ca.name, ca.authz_id;">>},
+      {list_cookbook_artifact_versions_by_org_id,
+       <<"SELECT cav.id, cav.identifier, cav.metadata, cav.serialized_object, cav.created_at, cav.created_by,"
+                "ca.org_id, ca.name, ca.authz_id, ARRAY_AGG(cavc.checksum) AS checksums "
+         "FROM cookbook_artifact_versions AS cav "
+         "JOIN cookbook_artifacts AS ca "
+           "ON cav.cookbook_artifact_id = ca.id "
+         "JOIN cookbook_artifact_version_checksums AS cavc "
+           "ON cavc.cookbook_artifact_version_id = cav.id "
+        "WHERE ca.org_id = $1 "
+        "GROUP BY cav.id, ca.org_id, ca.name, ca.authz_id;">>}
     ].
+
 %
 % Opscode Chef_views.
 %

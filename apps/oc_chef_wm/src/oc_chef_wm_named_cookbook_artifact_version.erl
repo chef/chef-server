@@ -1,0 +1,153 @@
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
+%% ex: ts=4 sw=4 et
+%% @author Jean Rouge <jean@chef.io>
+%% Copyright 2013-2015 Chef Software, Inc. All Rights Reserved.
+
+-module(oc_chef_wm_named_cookbook_artifact_version).
+
+-include("../../include/oc_chef_wm.hrl").
+
+-behaviour(chef_wm).
+
+%% Webmachine resource callbacks
+-mixin([{oc_chef_wm_base, [content_types_accepted/2,
+                           content_types_provided/2,
+                           finish_request/2,
+                           malformed_request/2,
+                           ping/2,
+                           forbidden/2,
+                           is_authorized/2,
+                           service_available/2]}]).
+
+-export([validate_request/3,
+         auth_info/2,
+         init_resource_state/1,
+         init/1,
+         request_type/0,
+         allowed_methods/2,
+         post_is_create/2,
+         from_json/2,
+         resource_exists/2,
+         to_json/2,
+         create_path/2,
+         malformed_request_message/3,
+         conflict_message/1]).
+
+init(Config) ->
+    oc_chef_wm_base:init(?MODULE, Config).
+
+init_resource_state(_Config) ->
+    {ok, #cookbook_artifact_version_state{}}.
+
+request_type() ->
+    "cookbook_artifact_versions".
+
+allowed_methods(Req, State) ->
+    {['GET', 'POST'], Req, State}.
+
+post_is_create(Req, State) ->
+    {true, Req, State}.
+
+create_path(Req, State) ->
+    Name = wrq:path_info(name, Req),
+    {Name, Req, State}.
+
+resource_exists(Req, State) ->
+    {true, Req, State}.
+
+validate_request('GET', Req, State) ->
+    valid_request(Req, State);
+validate_request('POST', Req, #base_state{resource_state = CAVState} = State) ->
+    CAVData = validate_json(Req),
+    NewResourceState = CAVState#cookbook_artifact_version_state{cookbook_artifact_version_data = CAVData},
+    valid_request(Req, State#base_state{resource_state = NewResourceState}).
+
+validate_json(Req) ->
+    Body = wrq:req_body(Req),
+    Ejson = chef_json:decode_body(Body),
+    [validate_url_param(Req, Ejson, Param) || Param <- [name, identifier]],
+    case oc_chef_cookbook_artifact_version:validate_json(Ejson) of
+        ok -> Ejson;
+        Invalid -> throw(Invalid)
+    end.
+
+validate_url_param(Req, Ejson, Param) ->
+    FromReq = erlang:list_to_binary(wrq:path_info(Param, Req)),
+    ParamBin = erlang:atom_to_binary(Param, utf8),
+    FromEjson = ej:get({ParamBin}, Ejson),
+    case FromReq =:= FromEjson of
+        true ->
+            ok;
+        false ->
+            erlang:throw({mismatch, {ParamBin, FromEjson, FromReq}})
+    end.
+
+valid_request(Req, #base_state{organization_guid = OrgId,
+                               resource_state = ResourceState} = State) ->
+    Name = wrq:path_info(name, Req),
+    Identifier = wrq:path_info(identifier, Req),
+    CAVRec = #oc_chef_cookbook_artifact_version{org_id = OrgId,
+                                                name = Name,
+                                                identifier = Identifier},
+    NewResourceState = ResourceState#cookbook_artifact_version_state{oc_chef_cookbook_artifact_version = CAVRec},
+    NewState = State#base_state{superuser_bypasses_checks = true,
+                                resource_state = NewResourceState},
+    {Req, NewState}.
+
+auth_info(Req, #base_state{chef_db_context = DbContext,
+                           resource_state = #cookbook_artifact_version_state{
+                               oc_chef_cookbook_artifact_version = CAVRec
+                           } = ResourceState} = State) ->
+    Method = wrq:method(Req),
+    auth_info(Req, State, ResourceState, Method, DbContext, CAVRec).
+
+auth_info(Req, State, ResourceState, Method, DbContext, CAVRec) ->
+    case {chef_db:fetch(CAVRec, DbContext), Method} of
+        {not_found, 'POST'} ->
+            {{create_in_container, cookbook_artifact}, Req, State};
+        {not_found, 'GET'} ->
+            forbidden(Req, State, 404, "not found", cookbook_artifact_not_found);
+        {forbidden, _} ->
+            forbidden(Req, State, 403, "forbidden", cookbook_artifact_forbidden);
+        {#oc_chef_cookbook_artifact_version{authz_id = AuthzId} = CAV, _} ->
+            NewResourceState = ResourceState#cookbook_artifact_version_state{oc_chef_cookbook_artifact_version = CAV},
+            State1 = State#base_state{resource_state = NewResourceState},
+            {{object, AuthzId}, Req, State1}
+    end.
+
+forbidden(Req, State, RespCode, RespMessage, LogMsg) ->
+    Message = chef_wm_util:error_message_envelope(
+                erlang:iolist_to_binary(RespMessage)),
+    Req1 = chef_wm_util:set_json_body(Req, Message),
+    {{halt, RespCode}, Req1, State#base_state{log_msg = LogMsg}}.
+
+to_json(Req, #base_state{resource_state = #cookbook_artifact_version_state{
+                             oc_chef_cookbook_artifact_version = CAVRec
+                         }} = State) ->
+    ExternalUrl = chef_wm_util:base_uri(Req),
+    Ejson = oc_chef_cookbook_artifact_version:to_json(CAVRec, ExternalUrl),
+    {jiffy:encode(Ejson), Req, State}.
+
+from_json(Req, #base_state{resource_state = #cookbook_artifact_version_state{
+                               authz_id = AuthzId,
+                               cookbook_artifact_version_data = CAVData
+                         }} = State) ->
+    case oc_chef_wm_base:create_from_json(Req, State,
+                                          oc_chef_cookbook_artifact_version,
+                                          {authz_id, AuthzId},
+                                          CAVData) of
+        {_, Req1, #base_state{log_msg = {error, invalid_checksum}} = State1} ->
+            %% that's a bit ugly, but looks like the only way to catch this
+            %% case without massive changes
+            Msg = <<"Manifest has a checksum that hasn't been uploaded.">>,
+            JsonError = chef_wm_util:error_message_envelope(Msg),
+            {{halt, 400}, chef_wm_util:set_json_body(Req1, JsonError), State1};
+        Else ->
+            Else
+    end.
+
+malformed_request_message(Any, _Req, _state) ->
+    error({unexpected_malformed_request_message, Any}).
+
+conflict_message(_Name) ->
+    {[{<<"error">>, <<"Cookbook artifact already exists">>}]}.
