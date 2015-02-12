@@ -21,7 +21,6 @@
 -module(oc_chef_wm_keys).
 
 -include("../../include/oc_chef_wm.hrl").
-%-include("include/oc_chef_wm.hrl").
 
 -mixin([{oc_chef_wm_base, [content_types_accepted/2,
                            content_types_provided/2,

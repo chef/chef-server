@@ -1,6 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil -*-
 %% ex: ts=4 sw=4 et
 %% @author Tyler Cloke <tyler@chef.io>
+%% @author Marc Paradise <marc@chef.io>
 %% Copyright 2015 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -62,7 +63,6 @@
 -endif.
 
 -include("../../include/chef_types.hrl").
--include_lib("eunit/include/eunit.hrl").
 
 authz_id(#chef_key{}) ->
     error(not_implemented).
