@@ -34,7 +34,7 @@ module Pedant
     end
 
 
-    DEFAULT_ORG_REWRITE = /^\/?(search|nodes|cookbooks|data|roles|sandboxes|environments|clients|principals|runs|groups|containers)/
+    DEFAULT_ORG_REWRITE = /^\/?(search|nodes|cookbooks|data|roles|sandboxes|environments|clients|principals|runs|groups|containers|keys)/
     def map_to_default_orgname?(path_fragment)
       return false unless Pedant::Config.use_default_org # Don't even bother unless we are in default_orgname mode
       return false if path_fragment =~ /_acl/            # False if _acl appears anywhere
@@ -111,7 +111,6 @@ module Pedant
         puts "Pedant did not create the user #{user.name}, and will not delete it"
       else
         puts "Deleting user #{user.name} ..."
-        ## TODO: use api_url
         r = delete("#{@server}/users/#{user.name}", @superuser)
         if r.code != 200
           puts "Unexpected response #{r.code}: #{r}"
@@ -145,20 +144,8 @@ module Pedant
       end
     end
 
-    # def delete_user_from_config(user_key)
-    #   user = Pedant::Config[:users][user_key]
-    #   name = user[:name]
-    #   if user[:create_me]
-    #     delete_user(name)
-    #   else
-    #     puts "Pedant did not create user #{name}, and will not delete it"
-    #   end
-    # end
-
-
     def create_client(name)
       clientname = name.to_s
-      puts "Creating client #{clientname}..."
       payload = { "name" => clientname }
 
       r = post(api_url('/clients'), @test_org.validator, :payload => payload)
@@ -190,7 +177,6 @@ module Pedant
     end
 
     def delete_client(client, org = self.test_org)
-      puts "Deleting client #{client.name} ..."
       r = delete("#{@server}/organizations/#{org.name}/clients/#{client.name}", self.admin_user)
       if r.code != 200
         puts "Unexpected response #{r.code}: #{r}"
@@ -249,7 +235,6 @@ module Pedant
     def associate_user_with_org(orgname, user)
       # TODO under ruby, we need to use the old invite/accept method,
       # while under erchef we will need to use the new POST method.
-      puts "Associating user #{user.name} with org #{orgname} ..."
       payload = { "user" => user.name }
       # TODO under erlang, we now support superuser direct POST of { username: "user" } to /organizations/X/users
       # which means we don't need to do the multi-part create-and-accept process.
