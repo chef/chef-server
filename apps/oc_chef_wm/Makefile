@@ -67,7 +67,7 @@ itest_mocks:
 
 itest_deps: itest_db itest_mocks
 
-itest: test itest_deps
+itest: compile test itest_deps
 	@$(REBAR) skip_deps=true ct
 
 .PHONY: all clean allclean distclean compile dialyzer eunit test doc tags itest_deps itest_mocks itest_db itest

@@ -5,7 +5,7 @@
 %% @author Seth Falcon <seth@chef.io>
 %% @author many more...
 %%
-%% Copyright 2011-2014 Chef Software, Inc. All Rights Reserved.
+%% Copyright 2011-2015 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -305,6 +305,12 @@
           organization_authz_id,
           oc_chef_organization :: #oc_chef_organization{}
          }).
+-record(keys_state, {
+          type,
+          id,
+          authz_id,
+          name}
+       ).
 
 -define(gv(X,L), proplists:get_value(X, L)).
 -define(gv(X,L, D), proplists:get_value(X, L, D)).

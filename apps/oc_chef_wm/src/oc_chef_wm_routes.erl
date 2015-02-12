@@ -146,11 +146,18 @@ bulk_route_fun(Type, Req) ->
     org_bulk_route_fun(Type, Req).
 
 bulk_route_fun(Type, Name, Req) when Type =:= data_bag_item;
-                                     Type =:= cookbook_version ->
+                                     Type =:= cookbook_version;
+                                     Type =:= client_key ->
     {BaseURI, Org} = extract_from_req(Req),
     Template = template_for_type(Type),
     fun(SubName) ->
             render_template(Template, BaseURI, [Org, Name, SubName])
+    end;
+bulk_route_fun(Type, Name, Req) when Type =:= user_key ->
+    BaseURI = chef_wm_util:base_uri(Req),
+    Template = template_for_type(Type),
+    fun(SubName) ->
+            render_template(Template, BaseURI, [Name, SubName])
     end.
 
 
@@ -229,7 +236,12 @@ template_for_type(association) ->
 template_for_type(organization) ->
     "/organizations/~s";
 template_for_type(user) ->
-    "/users/~s".
+    "/users/~s";
+template_for_type(user_key) ->
+    "/users/~s/keys/~s";
+template_for_type(client_key) ->
+    "/organizations/~s/clients/~s/keys/~s".
+
 
 
 %% This is extracted from search, needs more cleanup
