@@ -9,7 +9,11 @@
 
 ### oc\_erchef
 * 1.8.0
-  * API v1 introduced, affecting users, clients, and principals endpoints.
+  * API v1 introduced, affecting users, clients, and principals
+  endpoints.
+
+### opscode-omnibus
+* Remove install message from postinst package script
 
 ## 12.0.8 (2015-04-20)
 

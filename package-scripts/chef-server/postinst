@@ -40,8 +40,6 @@ if [ -e /etc/opscode/chef-server-running.json ]; then
   echo
   echo "(Add the '--no-op' option to see what would be removed by"
   echo "this command)"
-else
-  echo -e "\033[1mThank you for installing Chef Server!\033[0m"
 fi
 
 exit 0
