@@ -19,6 +19,7 @@
 ### oc\_erchef 1.4.0
 * keys API: new GET support for `/users/$user/keys` and `/organizations/$org/clients/$client/keys`
 * module epgsql brought up to current.
+* Fix LDAP regressions related to multiple fields, anonymous bind, and group_dn
 
 ### oc\_erchef 1.3.1
 * Add incubation feature for policyfiles. Feature flag off by default.
