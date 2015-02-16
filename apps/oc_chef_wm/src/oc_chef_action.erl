@@ -65,6 +65,7 @@ log_action(Req, #base_state{resource_state = ResourceState,
         is_record(ResourceState, node_state);
         is_record(ResourceState, role_state);
         is_record(ResourceState, user_state) ->
+    %TODO - do we want to capture keys actions?
     case wrq:method(Req) of
         'GET' ->
             ok;

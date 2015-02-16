@@ -1,8 +1,9 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
-%% @author Christopher Maier <cm@opscode.com>
-%% @author Seth Falcon <seth@opscode.com>
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% @author Christopher Maier <cm@chef.io>
+%% @author Seth Falcon <seth@chef.io>
+%% @author Tyler Cloke <tyler@chef.io>
+%% Copyright 2012-2015 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -47,7 +48,9 @@
          sql_date/1,
          throw_invalid_fun_match/1,
          valid_public_key/1,
-         set_default_values/2
+         set_default_values/2,
+         validate_ejson/2,
+         public_key_spec/0
         ]).
 
 %% In order to fully test things
@@ -93,6 +96,8 @@ set_created(#chef_cookbook_version{} = Object, ActorId) ->
     Object#chef_cookbook_version{created_at = Now, updated_at = Now,
                                  last_updated_by = ActorId}.
 
+% TODO why is this here when it seems every object also has a set_updated/set_created
+% callback?
 
 -spec set_updated(chef_object() |
                   #chef_user{} |
@@ -128,8 +133,12 @@ set_updated(#chef_cookbook_version{} = Object, ActorId) ->
 
 -spec sql_date(now | {non_neg_integer(), non_neg_integer(), non_neg_integer()}) -> binary().
 %% @doc Convert an Erlang timestamp (see `os:timestamp/0') to DATETIME friendly format.
+
 sql_date(now) ->
     sql_date(os:timestamp());
+
+sql_date(DateString) when is_binary(DateString) ->
+    DateString;
 sql_date({_,_,_} = TS) ->
     {{Year,Month,Day},{Hour,Minute,Second}} = calendar:now_to_universal_time(TS),
     iolist_to_binary(io_lib:format("~4w-~2..0w-~2..0w ~2..0w:~2..0w:~2..0w",
@@ -447,7 +456,6 @@ throw_invalid_fun_match(Message) ->
     throw(#ej_invalid{type = fun_match, msg = Message}).
 
 
-
 %% Walks through ejson term and set default values
 %% Factored out from monkey copied code in most objects
 -spec set_default_values( ejson_term(), list({binary(), any()}) ) -> ejson_term().
@@ -461,3 +469,19 @@ set_default_values(Object, Defaults) ->
                 end,
                 Object,
                 Defaults).
+
+%% Helper function that accepts a spec
+%% and raises an error if ej:valid fails for the
+%% spec and data
+validate_ejson(Ejson, Spec) ->
+  case ej:valid(Spec, Ejson) of
+    ok ->
+      {ok, Ejson};
+    BadSpec ->
+      throw(BadSpec)
+  end.
+
+public_key_spec() ->
+    {[
+        {{opt,<<"public_key">>}, {fun_match, {fun valid_public_key/1, string,
+                                              <<"Public Key must be a valid key.">>}}} ]}.

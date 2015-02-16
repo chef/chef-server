@@ -48,7 +48,9 @@ all() ->
      list_client_multiple_keys,
      list_user_multiple_keys,
      list_client_no_keys,
-     list_user_no_keys
+     list_user_no_keys,
+     post_user_new_valid_key,
+     post_client_new_valid_key
      ].
 
 %% Test cases.
@@ -94,6 +96,16 @@ list_user_no_keys(_) ->
     ?assertMatch({ok, "200", _, "[]"} , Result),
     ok.
 
+post_client_new_valid_key(_) ->
+    Body = chef_json:encode(new_key_ejson(<<"test1">>, <<"2099 22:49:08">>)),
+    Result = http_keys_request(post, client, ?ADMIN_USER_NAME, Body),
+    ?assertMatch({ok, "201", _, _}, Result).
+
+post_user_new_valid_key(_) ->
+    Body = chef_json:encode(new_key_ejson(<<"test1">>, <<"2099 22:49:08">>)),
+    Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
+    ?assertMatch({ok, "201", _, _}, Result).
+
 %% Test case initializers
 init_per_testcase(list_user_default_key,  Config) ->
     OrgId = proplists:get_value(org_id, Config),
@@ -132,8 +144,9 @@ init_per_testcase(list_user_no_keys, Config) ->
     make_user(OrgId, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
     Temp = chef_db:fetch(#chef_user{username = ?ADMIN_USER_NAME}, context()),
     ct:pal("USER IS ~p~n", [Temp]),
+    Config;
+init_per_testcase(_, Config) ->
     Config.
-
 
 %% Test case cleanup
 end_per_testcase(_, Config) ->
@@ -198,7 +211,8 @@ user_id(Name) ->
     #chef_user{id = UserId} = chef_db:fetch(#chef_user{username = Name}, context()),
     UserId.
 
-%% Expected Results
+%% Expected Results and Inputs
+%%
 user_key_list_ejson(Name, KeyInfo) ->
     Base = <<"http://localhost:8000/users/">>,
     Keys = <<"/keys/">>,
@@ -212,4 +226,7 @@ key_list_ejson(BaseURI, KeyInfo) ->
     [ {[{<<"uri">>, <<BaseURI/binary,KeyName/binary>>},
         {<<"name">>, KeyName},
         {<<"expired">>, Expired}] } || {KeyName, Expired} <- KeyInfo].
+
+new_key_ejson(Name, Expiration) ->
+    {[{name, Name}, {public_key, ?PUBKEY}, {expiration_date, Expiration}]}.
 

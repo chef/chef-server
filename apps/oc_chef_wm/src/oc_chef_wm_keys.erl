@@ -58,9 +58,14 @@ request_type() ->
     "keys".
 
 allowed_methods(Req, State) ->
-    {['GET'], Req, State}.
+    {['GET', 'POST'], Req, State}.
 
 validate_request('GET', Req, #base_state{resource_args = ObjectType, chef_db_context = Ctx, organization_guid = OrgId} = State) ->
+    ObjectName = chef_wm_util:object_name(ObjectType, Req),
+    ResourceState = make_resource_state_for_object(Ctx, ObjectType, ObjectName, OrgId),
+    {Req, State#base_state{resource_state = ResourceState }};
+validate_request('POST', Req, #base_state{resource_args = ObjectType, chef_db_context = Ctx, organization_guid = OrgId} = State) ->
+    % TODO EJ = chef_key:parse_binary_json
     ObjectName = chef_wm_util:object_name(ObjectType, Req),
     ResourceState = make_resource_state_for_object(Ctx, ObjectType, ObjectName, OrgId),
     {Req, State#base_state{resource_state = ResourceState }}.
