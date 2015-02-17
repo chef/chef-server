@@ -24,7 +24,6 @@
 
 -include_lib("common_test/include/ct.hrl").
 -include_lib("eunit/include/eunit.hrl").
--include("test_types.hrl").
 
 -export([
          start_server/1,
@@ -34,6 +33,10 @@
         ]).
 
 -define(TEST_DB_NAME, "oc_chef_wm_itests").
+
+-record(context, {reqid :: binary(),
+                  otto_connection,
+                  darklaunch = undefined}).
 
 start_server(Config) ->
     chef_test_suite_helper:set_app_env(stats_hero),
