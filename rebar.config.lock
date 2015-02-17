@@ -47,7 +47,7 @@
                         "7677c240f4a7ed020f4bab48278224966bb42311"}},
        {opscoderl_wm,".*",
                      {git,"git://github.com/opscode/opscoderl_wm.git",
-                          "a236acddfd987df4ad9cc785640330fa89a51774"}},
+                          "5336f57fbeca42248d45da4caa18e575e2441206"}},
        {rebar_lock_deps_plugin,".*",
                                {git,"git://github.com/seth/rebar_lock_deps_plugin.git",
                                     "2a8d2e803f8a110cac2f13e6f013b4d8e4b06c60"}}]}.
