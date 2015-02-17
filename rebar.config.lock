@@ -16,7 +16,7 @@
                         "7677c240f4a7ed020f4bab48278224966bb42311"}},
        {opscoderl_wm,".*",
                      {git,"git://github.com/opscode/opscoderl_wm.git",
-                          "a236acddfd987df4ad9cc785640330fa89a51774"}},
+                          "5336f57fbeca42248d45da4caa18e575e2441206"}},
        {erlsom,".*",
                {git,"git://github.com/opscode/erlsom.git",
                     "c5ca9fca1257f563d78b048e35ac60832ec80584"}},
