@@ -1,6 +1,6 @@
 # Enterprise Chef Release Notes
 
-## 11.2.8 (unreleased)
+## 11.3.0 (unreleased)
 
 ### What's New
 
