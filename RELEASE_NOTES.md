@@ -22,7 +22,9 @@ For specific breakdown of breakdown of updated components, refer to CHANGELOG.md
   in arguments to user- and org- commands.
 * `knife-ec-backup` has been updated with key rotation support
 * `chef-server.rb` tunables
-  * `ldap['bind_dn']` can now be left unspecified for anonymous binds
+  * `ldap['bind_dn']` can now be left unspecified for anonymous binds if
+    your LDAP server supports them.  If you wish to use anonymous binding,
+    also ensure that `ldap['bind_pass']` is not set.
   * `ldap['group_dn']` set this to the DN of a group to to restrict Chef logins
      to members of a particular group. This feature filters based on the memberOf
      attribute and only works with LDAP servers that provide such an attribute.
