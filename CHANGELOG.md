@@ -1,6 +1,6 @@
 # Chef Server Changelog
 
-## 12.0.4 (unreleased)
+## 12.0.4 (2014-02-19)
 
 ### opscode-omnibus
 * nginx bookshelf caching, enabled with
@@ -19,7 +19,7 @@
 ### oc\_erchef 1.4.0
 * keys API: new GET support for `/users/$user/keys` and `/organizations/$org/clients/$client/keys`
 * module epgsql brought up to current.
-* Fix LDAP regressions related to multiple fields, anonymous bind, and group_dn
+* Fix LDAP regressions related to multiple fields, anonymous bind, and group\_dn
 
 ### oc\_erchef 1.3.1
 * Add incubation feature for policyfiles. Feature flag off by default.
@@ -28,7 +28,10 @@
 * Add `s3_url_expiry_window_size` setting for s3 URL caching.
 
 ### oc-chef-pedant 1.0.76
-* test support for keys API endpoing (GET)
+* test support for keys API endpoint (GET)
+
+### oc-chef-pedant 1.0.75
+* test support for policyfile endpoints
 
 ### omnibus-ctl 0.3.2
 * Use chef-client -z instead of chef-solo.
