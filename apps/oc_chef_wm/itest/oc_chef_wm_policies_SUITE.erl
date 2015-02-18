@@ -24,6 +24,9 @@ init_per_suite(Config) ->
                                    {client_name, ?CLIENT_NAME}
                                    | Config]).
 
+end_per_suite(Config) ->
+    chef_test_suite_helper:stop_server(Config, setup_helper:needed_apps()).
+
 all() ->
     [
      list_when_no_policies,

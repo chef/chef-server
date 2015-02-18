@@ -202,7 +202,6 @@
         'serialized_object'                 %%
        }).
 
-
 %% Not a true chef object, but corresponds to  the view keys_by_type.
 -record(chef_requestor, {
           'id' :: object_id(),
@@ -216,6 +215,17 @@
          }
        ).
 
+%% Not a true chef object either, keys are owned by their associated user
+%% or client object and are managed in that context.
+-record(chef_key, {
+	  'id'  :: object_id(),     %% guid of user or client, unique with key_name
+	  'key_name',               %% user named string describing key
+	  'public_key',             %% PKCS#1 public key or a certificate
+	  'key_version',            %% 0 for public_key, 1 for cert
+      'created_at' :: binary(), %% time created at
+      'expires_at' :: binary()  %% expiration time (utc)
+	 }).
+
 %% These types and records are just convenient shorthands for subsets of our
 %% records that are used in the SQL layers.
 
@@ -225,7 +235,9 @@
                        #chef_client{} |
                        #chef_role{} |
                        #chef_node{} |
-                       #chef_user{}.
+                       #chef_user{} |
+                       #chef_requestor{} |
+                       #chef_key{}.
 
 -type chef_indexable_object() :: #chef_environment{} |
                                  #chef_data_bag_item{} |
