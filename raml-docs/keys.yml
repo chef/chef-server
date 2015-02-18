@@ -1,0 +1,170 @@
+#%RAML 0.8
+---
+title: Keys API
+baseUri: https://chef.example
+version: 0
+mediaType: application/json
+documentation:
+  - title: Keys API
+    content: |
+      Users and clients may have multiple active keys. This API
+      provides a means of managing these keys.
+
+/users/{user}/keys:
+  description:
+    View and add keys for the named user
+  uriParameters:
+    user:
+      displayName: user
+      description: name of the user who owns the keys
+      type: string
+  get:
+    description: |
+      Retrieves all of the user's key identifers and their associated
+      URIs and expiry states.
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              [ { "name" : "default",
+                  "uri" : "https://chef.example/users/user1/keys/default",
+                  "expired" : false },
+                { "name" : "key1",
+                  "uri" : "https://chef.example/users/user1/keys/key1",
+                  "expired" : false} ]
+  post:
+    body:
+      application/json:
+        example: !include examples/keys-post.json
+        schema: !include schemas/keys-post.json
+    description:
+      Add a new key for the named user.
+    responses:
+      201:
+        body:
+          application/json:
+            example: |
+              { "uri" : "https://chef.example/users/user1/keys/key1" }
+        headers:
+          Location:
+            displayName: Location
+            description: location of newly-created resource
+      400:
+        description: Validation failure
+      409:
+
+/users/{user}/keys/{key}:
+  description:
+    View and add keys for the named user
+  uriParameters:
+    user:
+      displayName: user
+      description: name of the user who owns the keys
+      type: string
+    key:
+      displayName: key
+      description: name of the key owned by the user
+      type: string
+  get:
+    description: |
+      Retrieves the specified public key and it's associated data.
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include examples/named-key-example.json
+  put:
+    description: update one or more attributes of a key for a user
+    body:
+      application/json:
+        example: !include examples/keys-post.json
+        schema: !include schemas/keys-put.json
+    responses:
+      200:
+        description: received when the existing resource has been updated.
+      201:
+        description: |
+          received when the resource has been updated with a new name, and a new URI generated.
+          If a response code 201 is received, the original URI used to access the named key
+          is no longer valid.
+        headers:
+          Location:
+            displayName: Location
+            description: location of newly-created resource
+        body:
+          application/json:
+            example: |
+              { "uri" : "https://chef.example/users/user1/keys/key1" }
+      400:
+      404:
+        description: the named key or the named user does not exist.
+      409:
+  delete:
+    description: delete the named key
+    responses:
+      200:
+      400:
+      401:
+      403:
+      404:
+
+
+
+
+
+
+
+
+
+/organizations/{organization}/clients/{client}/keys:
+  description:
+    View and add keys for the named client
+  uriParameters:
+    organization:
+      displayName: organization
+      description: the named organization to which the client belongs
+      type: string
+    client:
+      displayName: client
+      description: the named client who owns the keys
+      type: string
+  get:
+    description:
+      Retrieves all of the client's key identifers and their associated
+      URIs and expiry states.
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              [ { "name" : "default",
+                  "uri" : "https://chef.example/organizations/example/client/client1/keys/default",
+                  "expired" : false },
+                { "name" : "key1",
+                  "uri" : "https://chef.example/organizations/example/client/client1/keys/key1",
+                  "expired" : true } ]
+      401:
+      403:
+
+  post:
+    body:
+      application/json:
+        example: !include examples/keys-post.json
+        schema: !include schemas/keys-post.json
+    description:
+      Add a new key for the named client.
+    responses:
+      201:
+        body:
+          application/json:
+            example: |
+              { "uri" : "https://chef.example/organizations/example/clients/client1/keys/key1" }
+        headers:
+          Location:
+            displayName: Location
+            description: location of newly-created resource
+      400:
+      401:
+      403:
+      409:
