@@ -228,6 +228,7 @@ fi
 if [[ $type == 'CS' ]];
 then
     fqdn="api_fqdn"
+    backend_vip="backend_vip"
     config_file_path="/etc/opscode/chef-server.rb"
 elif [[ $type == 'Analytics' ]];
 then
@@ -235,6 +236,7 @@ then
     config_file_path="/etc/opscode-analytics/opscode-analytics.rb"
 fi
 tempname=`grep -E $fqdn $config_file_path | cut -d \" -f2`
+backend_fqdn=`grep -E $backend_vip $config_file_path | cut -d \" -f2`
 
 #Didnt find a hostname above, so fallback
 if [[ -z $tempname ]];
@@ -249,6 +251,12 @@ then
     echo $tempname >> "$name_resolution_file"
     for interval in `seq 1 5`; do
 	{ time /opt/$path/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$tempname\")" ; } >> "$name_resolution_file" 2>&1
+	sleep 2;
+    done
+
+    echo $backend_fqdn >> "$name_resolution_file"
+    for interval in `seq 1 5`; do
+	{ time /opt/$path/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$backend_fqdn\")" ; } >> "$name_resolution_file" 2>&1
 	sleep 2;
     done
 
