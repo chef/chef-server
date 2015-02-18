@@ -27,6 +27,7 @@ The core chef REST API server, packaging/installation,  and its primary dependen
 
 * [Marc Paradise](http://github.com/marcparadise)
 * [Mark Anderson](http://github.com/manderson26)
+* [Tyler Cloke](http://github.com/tylercloke)
 
 ### Maintainers
 
