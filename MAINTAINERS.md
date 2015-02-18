@@ -30,6 +30,8 @@ The core chef REST API server, packaging/installation,  and its primary dependen
 
 ### Maintainers
 
+* [Oliver Ferrigni](http://github.com/oferrigni)
+
 # Supporting Components
 
 ## Knife EC Backup
