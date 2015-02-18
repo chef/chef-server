@@ -1,21 +1,60 @@
 # Chef Server Release Notes
 
-## 12.0.4 (UNRELEASED)
+## 12.0.4 (2014-02-19)
 
 ### What's New:
 
+The following items are new since Enterprise Chef 12.0.3 and/or are changes from previous versions.
+For specific breakdown of breakdown of updated components, refer to CHANGELOG.md
+
 * oc\_erchef
-  * 1.4.0 - keys API: new GET support for `/users/$user/keys` and `/organizations/$org/clients/$client/keys`
-  * 1.3.1 - policyfile: Add incubation feature for policyfiles. Feature flag off by default.
+  * Cookbook caching is now available. It is off by default - see chef-server.rb tunables
+    below for information on how to enable this.
+  * Keys API support to list client and user keys. (See API Changes, below.)
+  * Policyfile initial API support. (See API Changes, below.)
+  * LDAP:
+    * multiple values for the same LDAP field no longer cause errors
+    * anonymous binds now work properly.
+    * re-enhancement: re-added support for `group_dn` ldap attribute to require users to be in the named group.
+      This change was originally in 12.0.1 but was lost in our transition to a new repository.
+      Thanks to Brian Felton for the original enhancement.
+* `chef-server-ctl` has been fixed to properly escape shell metacharacters
+  in arguments to user- and org- commands.
+* `knife-ec-backup` has been updated with key rotation support
+* `chef-server.rb` tunables
+  * `ldap['bind_dn']` can now be left unspecified for anonymous binds
+  * `ldap['group_dn']` set this to the DN of a group to to restrict Chef logins
+     to members of a particular group. This feature filters based on the memberOf
+     attribute and only works with LDAP servers that provide such an attribute.
+  * Cookbook Caching:
+    * This is off by default. To fully enable, configure both of the settings
+      below:
+    * `opscode_erchef['nginx_bookshelf_caching']` is a new setting that is
+       configured `:off` by default. To enable, set it to `:on` in your
+       `chef-server.rb`.
+    * `opscode_erchef['s3_url_expiry_window_size']` is a new setting
+      that is set to `:off` by default. For details on valid values and their effects,
+      see this [blog post](https://chef.io/blog/2015/02/18/cookbook-caching).
+      and [this comment](https://github.com/chef/oc_erchef/blob/master/apps/chef_objects/src/chef_objects.app.src#L89)
 
-* knife-ec-backup
-  * Key rotation support.
+### Bug Fixes
+  * [chef-server-84](https://github.com/chef/chef-server/issues/84)
+  * [chef-server-68](https://github.com/chef/chef-server/issues/68)
+  * [chef-server-71](https://github.com/chef/chef-server/issues/71)
 
-* Chef 12.0.3
-  * Chef 12.0.3 was vendored into the server.
+### Component Upgrades
+  * Ruby 2.1.4
+  * Chef 12.0.3 - Chef Server is now internally using Chef Client 12 in local mode
+    for its installation and configuration.
 
-* Ruby 2.1.4
-  * Ruby 2.1.4 was vendored into the server.
+### API Changes and Additions
+  * new: `GET` to `/organizations/ORGNAME/clients/CLIENTNAME/keys`
+    returns a list of keys for a client, and their expiration status.
+  * new: `GET` to `/users/USERNAME/keys`
+    returns a list of keys for a user, and their expiration status.
+  * new: [Policyfile](https://github.com/chef/chef-rfc/pull/91) initial API support.
+    This is disabled by default, stay tuned for further updates in this
+    space.
 
 ## 12.0.3 (2015-02-04)
 
@@ -94,7 +133,7 @@ The following items are new since Enterprise Chef 11.2.1 and/or are changes from
   * `chef-server-ctl` replaces `private-chef-ctl` though
     `private-chef-ctl` will also work in CS12.
   * Several commands added related to the management of users and
-    organizations, allowing allowing management of organizations without the management console
+    organizations, allowing management of organizations without the management console
     or original webui. You can find information about these commands via `chef-server-ctl help`.
     and looking under "Organization and User Management Commands".  You can find usage
     examples at this location: https://docs.getchef.com/install_server.html
