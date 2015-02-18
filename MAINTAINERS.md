@@ -32,6 +32,7 @@ The core chef REST API server, packaging/installation,  and its primary dependen
 ### Maintainers
 
 * [Oliver Ferrigni](http://github.com/oferrigni)
+* [Steven Danna](https://github.com/stevendanna)
 
 # Supporting Components
 
@@ -41,6 +42,8 @@ The core chef REST API server, packaging/installation,  and its primary dependen
 
 ### Lieutenants
 
+* [Steven Danna](https://github.com/stevendanna)
+
 ### Maintainers
 
 ## Knife OPC
@@ -48,5 +51,7 @@ The core chef REST API server, packaging/installation,  and its primary dependen
 [knife-opc](http://github.com/opscode/knife-opc) provides  administrative command-line control to the Chef Server from the console
 
 ### Lieutenants
+
+* [Steven Danna](https://github.com/stevendanna)
 
 ### Maintainers
