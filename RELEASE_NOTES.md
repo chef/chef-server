@@ -4,7 +4,7 @@
 
 ### What's New
 
-The following items are new for Enterprise Chef 11.2.8 and/or are
+The following items are new for Enterprise Chef 11.2.6 and/or are
 changes from previous versions:
 
 * Support the use of Chef Analytics 1.1 with Enterprise Chef 11
