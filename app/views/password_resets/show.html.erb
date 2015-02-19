@@ -1,0 +1,10 @@
+<h1>Reset Your Password</h1>
+<%= form_tag(password_reset_path, { method: 'put', class: 'form-inline' }) do -%>
+  <%= password_field_tag :password, nil, required: true,
+                                         placeholder: 'Password',
+                                         autocomplete: 'off' %>
+  <%= button_tag 'Change Password', class: 'btn btn-primary' %>
+  <%= hidden_field_tag :expires, params[:expires] %>
+  <%= hidden_field_tag :signature, params[:signature] %>
+  <%= hidden_field_tag :username, params[:username] %>
+<% end -%>

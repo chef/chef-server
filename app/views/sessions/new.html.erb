@@ -1,7 +1,7 @@
 <div class="page-header">
   <h1>Sign In</h1>
 </div>
-<div> 
+<div>
   <%= form_tag(auth_chef_callback_path, :method => :post, :class => 'sign-in') do %>
     <div class="form-group">
       <%= label_tag :username %>
@@ -15,7 +15,7 @@
       <%= submit_tag "Sign In", class: "btn btn-large btn-primary" %>
     </div>
     <div class="form-group">
-      <%= link_to "Forgot your password?", new_password_reset_url, target: '_blank' %>
+      <%= link_to "Forgot your password?", new_password_reset_path %>
     </div>
   <% end %>
 </div>

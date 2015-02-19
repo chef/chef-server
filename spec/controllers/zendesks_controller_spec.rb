@@ -4,7 +4,7 @@ describe ZendesksController do
   describe '#show' do
     context 'when zendesk is enabled' do
       before :each do
-        controller.stub(:zendesk_enabled?).and_return true
+        allow(controller).to receive(:zendesk_enabled?).and_return(true)
       end
 
       context 'when not signed in' do
@@ -30,9 +30,9 @@ describe ZendesksController do
 
       context 'when signed in' do
         before :each do
-          controller.stub(:signed_in?).and_return true
-          controller.stub(:current_user).and_return('testuser')
-          controller.stub(:zendesk_sso_url).and_return('http://test')
+          allow(controller).to receive(:signed_in?).and_return(true)
+          allow(controller).to receive(:current_user).and_return('testuser')
+          allow(controller).to receive(:zendesk_sso_url).and_return('http://test')
         end
 
         it 'redirects to the zendesk SSO URL' do
@@ -44,7 +44,7 @@ describe ZendesksController do
 
     context 'when Zendesk is disabled' do
       it 'renders a 404' do
-        controller.stub(:zendesk_enabled?).and_return false
+        allow(controller).to receive(:zendesk_enabled?).and_return(false)
         get 'show'
         expect(response.status).to eq 404
       end
@@ -54,7 +54,7 @@ describe ZendesksController do
   describe '#signout' do
     context 'when Zendesk is enabled' do
       before :each do
-        controller.stub(:zendesk_enabled?).and_return true
+        allow(controller).to receive(:zendesk_enabled?).and_return(true)
       end
 
       it 'signs out' do
@@ -70,7 +70,7 @@ describe ZendesksController do
 
     context 'when Zendesk is disabled' do
       it 'renders a 404' do
-        controller.stub(:zendesk_enabled?).and_return false
+        allow(controller).to receive(:zendesk_enabled?).and_return(false)
         get 'signout'
         expect(response.status).to eq 404
       end

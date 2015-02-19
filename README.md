@@ -94,6 +94,10 @@ A [community cookbook for Chef identity](https://supermarket.getchef.com/cookboo
 is available on Supermarket. It is not created by or maintained by Chef
 Software, but should work for running the app.
 
+## MailCatcher
+
+[MailCatcher](http://mailcatcher.me/) is a useful tool that can  be used to intercept and inspect email sent from the app in development mode. It is installed when running bundle install, so it ready for use. Run ```bundle exec mailcatcher``` and go to http://localhost:1080 to see messages.
+
 ## License
 
 Chef identity

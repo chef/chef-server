@@ -7,8 +7,8 @@ gem 'coffee-rails', '~> 4.0.0'
 gem 'jbuilder', '~> 1.2'
 gem 'jquery-rails', '~> 3.1.0'
 gem 'jwt' # For Zendesk SSO
-gem 'rails_config', '~> 0.3.3'
-gem 'rb-readline', '~> 0.4.2', require: false
+gem 'rails_config', '~> 0.4.2'
+gem 'rb-readline', '~> 0.5.2', require: false
 gem 'sass-rails', '~> 4.0.0'
 gem 'turbolinks', '~> 2.2.1'
 gem 'uglifier', '~> 2.4.0'
@@ -27,8 +27,8 @@ group :development, :test do
   # https://github.com/nixme/jazz_hands/issues/25
   gem 'jazz_hands', github: 'nixme/jazz_hands', branch: 'bring-your-own-debugger'
   gem 'pry-byebug'
-
-  gem 'rspec-rails', '~> 2.14.2'
+  gem 'mailcatcher'
+  gem 'rspec-rails', '~> 3.2'
 end
 
 group :development do
@@ -43,7 +43,8 @@ group :doc do
 end
 
 group :test do
-  gem 'capybara', '~> 2.1.0'
+  gem 'capybara', '~> 2.4.4'
   gem 'factory_girl_rails', '~> 4.4.0'
   gem 'selenium-webdriver', '2.35.1'
+  gem 'timecop'
 end

@@ -6,12 +6,20 @@ class User
   include ActiveModel::AttributeMethods
   include ChefResource
 
-  attr_accessor :username, :password, :first_name, :last_name, :email, :public_key
+  ATTRIBUTES = [
+    :username,
+    :first_name,
+    :last_name,
+    :email,
+    :public_key,
+    :display_name,
+    :password
+  ]
+
+  attr_accessor *ATTRIBUTES
 
   def initialize(attrs={})
-    attrs.each do |k,v|
-      instance_variable_set("@#{k}", v) unless v.nil?
-    end
+    set_attributes(attrs)
   end
 
   def id
@@ -20,6 +28,11 @@ class User
 
   def to_param
     username
+  end
+
+  def set_attributes(attrs={})
+    attrs.symbolize_keys!
+    ATTRIBUTES.each { |a| instance_variable_set("@#{a}", attrs[a]) unless attrs[a].nil? }
   end
 
   def public
@@ -34,13 +47,6 @@ class User
     "users/#{username}"
   end
 
-  def assign_attributes(resource)
-    @first_name = resource['first_name']
-    @last_name = resource['last_name']
-    @public_key = resource['public_key']
-    @email = resource['email']
-  end
-
   def organizations
     chef.get("users/#{username}/organizations").map do |organizations|
       organizations['organization']
@@ -49,8 +55,16 @@ class User
 
   end
 
-  def update_attributes(attrs)
-    assign_attributes(attrs) # And then save
+  def update_attributes(attrs={})
+    current_attrs = ATTRIBUTES.reduce({}) do |res, key|
+      val = instance_variable_get("@#{key}".to_sym)
+      res[key.to_s] = val unless val.nil?
+      res
+    end
+
+    new_attrs = current_attrs.merge(attrs)
+    chef.put_rest(url, new_attrs)
+    set_attributes(new_attrs)
   end
 
   class << self
