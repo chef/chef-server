@@ -1,6 +1,6 @@
 # Enterprise Chef Release Notes
 
-## 11.3.0 (unreleased)
+## 11.3.0 (2015-02-19)
 
 ### What's New
 

@@ -1,6 +1,6 @@
 # Enterprise Chef Changelog
 
-## 11.3.0 (Unreleased)
+## 11.3.0 (2015-02-19)
 
 * Ensure nginx restarts on frontends after lua-related changes
 * Backport the export of oc-id analytics configuration information in `actions-source.json`
