@@ -21,7 +21,9 @@ DIALYZER_DEPS = deps/chef_authn/ebin \
 # :'(
 DEPS_PLT = oc_chef_wm.plt
 # TODO automate managing this revision
-EC_SCHEMA_VERSION = 2.8.0
+EC_SCHEMA_VERSION = mp/keys-add-last-updater
+#2.8.0
+
 ITEST_DEPS = $(CURDIR)/itest/common/deps
 
 REBAR = REBAR_PARENT=$(CURDIR)/rebar.config rebar

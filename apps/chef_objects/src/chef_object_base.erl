@@ -1,5 +1,5 @@
-%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% @author Christopher Maier <cm@chef.io>
 %% @author Seth Falcon <seth@chef.io>
 %% @author Tyler Cloke <tyler@chef.io>
@@ -50,7 +50,7 @@
          valid_public_key/1,
          set_default_values/2,
          validate_ejson/2,
-         public_key_spec/0
+         public_key_spec/1
         ]).
 
 %% In order to fully test things
@@ -481,7 +481,7 @@ validate_ejson(Ejson, Spec) ->
       throw(BadSpec)
   end.
 
-public_key_spec() ->
-    {[
-        {{opt,<<"public_key">>}, {fun_match, {fun valid_public_key/1, string,
-                                              <<"Public Key must be a valid key.">>}}} ]}.
+-spec public_key_spec( req | opt ) -> term().
+public_key_spec(OptOrRequired) ->
+    {[{{OptOrRequired,<<"public_key">>}, {fun_match, {fun valid_public_key/1, string,
+                                            <<"Public Key must be a valid key.">>}}} ]}.

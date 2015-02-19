@@ -222,10 +222,10 @@
 	  'key_name',               %% user named string describing key
 	  'public_key',             %% PKCS#1 public key or a certificate
 	  'key_version',            %% 0 for public_key, 1 for cert
-      'expires_at' :: binary(), %% expiration time (utc)
-      'last_updated_by' :: binary(), %% authz id of updater
-      'created_at' :: binary(), %% when created
-      'updated_at' :: binary()  %% when last updated
+	  'expires_at' :: binary(), %% expiration time (utc)
+	  'last_updated_by' :: binary(), %% authz id of updater
+	  'created_at' :: binary(), %% when created
+	  'updated_at' :: binary()  %% when last updated
 	 }).
 
 %% These types and records are just convenient shorthands for subsets of our

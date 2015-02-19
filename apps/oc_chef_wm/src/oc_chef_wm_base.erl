@@ -850,11 +850,9 @@ create_from_json(#wm_reqdata{} = Req,
     %% not add or update any fields.
     ObjectRec = chef_object:new_record(RecType, OrgId, maybe_authz_id(AuthzId), ObjectEjson),
     Name = chef_object:name(ObjectRec),
-    TypeName = chef_object:type_name(ObjectRec),
 
     %% Perform any additional platform-specific work on the object
     ObjectRec = object_creation_hook(ObjectRec, State),
-
     %% We send the object data to solr for indexing *first*. If it fails, we'll error out on
     %% a 500 and client can retry. If we succeed and the db call fails or conflicts, we can
     %% safely send a delete to solr since this is a new object with a unique ID unknown to
@@ -872,7 +870,9 @@ create_from_json(#wm_reqdata{} = Req,
              State#base_state{log_msg = LogMsg}};
         ok ->
             LogMsg = {created, Name},
-            Uri = oc_chef_wm_routes:route(TypeName, Req, [{name, Name}]),
+            {TypeName, Args} = call_if_exported(ResourceMod, route_args,
+                                                [ObjectRec, State], fun route_args/2),
+            Uri = oc_chef_wm_routes:route(TypeName, Req, Args),
             {true,
              chef_wm_util:set_uri_of_created_resource(Uri, Req),
              State#base_state{log_msg = LogMsg}};
@@ -1110,5 +1110,16 @@ list_objects_json(Req, #base_state{chef_db_context = DbContext,
     UriMap= [{Name, RouteFun(Name)} || Name <- Names],
     {chef_json:encode({UriMap}), Req, State}.
 
+call_if_exported(Mod, FunName, Args, DefaultFun) ->
+    case erlang:function_exported(Mod, FunName, length(Args)) of
+        true ->
+            erlang:apply(Mod, FunName, Args);
+        false  ->
+            erlang:apply(DefaultFun, Args)
+    end.
 
+
+route_args(ObjectRec,_State) ->
+        TypeName = chef_object:type_name(ObjectRec),
+        {TypeName, [{name, chef_object:name(ObjectRec)}]}.
 

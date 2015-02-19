@@ -20,7 +20,6 @@
 -define(USER_NAME, <<"user1">>).
 -define(ADMIN_USER_NAME, <<"admin">>).
 -define(ORG_NAME, <<"testorg">>).
--define(PUBKEY, <<"-----BEGIN PUBLIC KEYAnd the rest doesn't matter">>).
 
 -define(KEY1NAME, <<"key1">>).
 -define(KEY1EXPIRE, {datetime, {{2099,12,31},{00,00,00}}}).
@@ -31,13 +30,13 @@
 -define(KEY_1_ENTRY, { ?KEY1NAME, false } ).
 -define(KEY_2_ENTRY, { ?KEY2NAME, true } ).
 
-
 init_per_suite(LastConfig) ->
     Config = chef_test_db_helper:start_db(LastConfig, "oc_chef_wm_itests"),
     Config2 = setup_helper:start_server(Config),
     make_org(),
     OrgId = chef_db:fetch_org_id(context(), ?ORG_NAME),
-    [{org_id, OrgId}] ++ Config2.
+    {ok, PubKey} = file:read_file("../../spki_public.pem"),
+    [{org_id, OrgId}, {pubkey, PubKey}] ++ Config2.
 
 end_per_suite(Config) ->
     setup_helper:base_end_per_suite(Config).
@@ -96,54 +95,56 @@ list_user_no_keys(_) ->
     ?assertMatch({ok, "200", _, "[]"} , Result),
     ok.
 
-post_client_new_valid_key(_) ->
-    Body = chef_json:encode(new_key_ejson(<<"test1">>, <<"2099 22:49:08">>)),
+post_client_new_valid_key(Config) ->
+    Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-24T22:49:08">>)),
     Result = http_keys_request(post, client, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "201", _, _}, Result).
 
-post_user_new_valid_key(_) ->
-    Body = chef_json:encode(new_key_ejson(<<"test1">>, <<"2099 22:49:08">>)),
+post_user_new_valid_key(Config) ->
+    Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-25T22:49:08">>)),
     Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "201", _, _}, Result).
 
 %% Test case initializers
 init_per_testcase(list_user_default_key,  Config) ->
-    OrgId = proplists:get_value(org_id, Config),
-    make_user(OrgId, ?USER_NAME, ?USER_AUTHZ_ID),
+    make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
     Config;
 init_per_testcase(list_client_default_key, Config) ->
-    OrgId = proplists:get_value(org_id, Config),
-    make_client(OrgId, ?CLIENT_NAME),
+    make_client(Config, ?CLIENT_NAME),
     Config;
 init_per_testcase(list_client_multiple_keys, Config) ->
-    OrgId = proplists:get_value(org_id, Config),
-    make_client(OrgId, ?CLIENT_NAME),
-    ClientId = client_id(OrgId, ?CLIENT_NAME),
-    add_key(ClientId, ?KEY1NAME, ?KEY1EXPIRE),
-    add_key(ClientId, ?KEY2NAME, ?KEY2EXPIRE),
+    make_client(Config, ?CLIENT_NAME),
+    ClientId = client_id(Config, ?CLIENT_NAME),
+    add_key(Config, ClientId, ?KEY1NAME, ?KEY1EXPIRE),
+    add_key(Config, ClientId, ?KEY2NAME, ?KEY2EXPIRE),
     Config;
 init_per_testcase(list_user_multiple_keys, Config) ->
-    OrgId = proplists:get_value(org_id, Config),
-    make_user(OrgId, ?USER_NAME, ?USER_AUTHZ_ID),
+    make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
     UserId = user_id(?USER_NAME),
-    add_key(UserId, ?KEY1NAME, ?KEY1EXPIRE),
-    add_key(UserId, ?KEY2NAME, ?KEY2EXPIRE),
+    add_key(Config, UserId, ?KEY1NAME, ?KEY1EXPIRE),
+    add_key(Config, UserId, ?KEY2NAME, ?KEY2EXPIRE),
     Config;
 init_per_testcase(list_client_no_keys, Config) ->
-    OrgId = proplists:get_value(org_id, Config),
-    make_client(OrgId, ?CLIENT_NAME),
+    make_client(Config, ?CLIENT_NAME),
     sqerl:adhoc_delete(<<"keys">>, all),
     % make this user after clearing keys, so that we have a user
     % who can make the request.
-    make_user(OrgId, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
+    make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
     Config;
 init_per_testcase(list_user_no_keys, Config) ->
-    OrgId = proplists:get_value(org_id, Config),
-    make_user(OrgId, ?USER_NAME, ?USER_AUTHZ_ID),
+    make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
     sqerl:adhoc_delete(<<"keys">>, all),
-    make_user(OrgId, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
-    Temp = chef_db:fetch(#chef_user{username = ?ADMIN_USER_NAME}, context()),
-    ct:pal("USER IS ~p~n", [Temp]),
+    make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
+    %chef_db:fetch(#chef_user{username = ?ADMIN_USER_NAME}, context()),
+    Config;
+init_per_testcase(post_client_new_valid_key, Config) ->
+    make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
+    make_client(Config, ?CLIENT_NAME),
+    Config;
+init_per_testcase(post_user_new_valid_key, Config) ->
+    make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
+    make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
+    make_client(Config, ?CLIENT_NAME),
     Config;
 init_per_testcase(_, Config) ->
     Config.
@@ -175,27 +176,33 @@ make_org() ->
                                  {[{<<"name">>, ?ORG_NAME}, {<<"full_name">>, ?ORG_NAME}]}),
     chef_db:create(Org, context(), ?ORG_AUTHZ_ID).
 
-make_client(OrgId, Name) ->
+make_client(Config, Name) ->
+    OrgId = proplists:get_value(org_id, Config),
+    PubKey = proplists:get_value(pubkey, Config),
     Client = chef_object:new_record(chef_client, OrgId, ?CLIENT_AUTHZ_ID,
                                     {[{<<"name">>, Name},
                                       {<<"validator">>, true},
                                       {<<"admin">>, true},
-                                      {<<"public_key">>, ?PUBKEY}]}),
+                                      {<<"public_key">>, PubKey}]}),
     chef_db:create(Client, context(), ?CLIENT_AUTHZ_ID).
 
-make_user(OrgId, Name, AuthzId) ->
+make_user(Config, Name, AuthzId) ->
+    OrgId = proplists:get_value(org_id, Config),
+    PubKey = proplists:get_value(pubkey, Config),
     Dom = <<"@somewhere.com">>,
     User = chef_object:new_record(chef_user, OrgId, AuthzId,
                                    {[{<<"username">>, Name},
                                      {<<"password">>, <<"zuperzecret">>},
                                      {<<"email">>, <<Name/binary,Dom/binary>>},
-                                     {<<"public_key">>, ?PUBKEY},
+                                     {<<"public_key">>, PubKey},
                                      {<<"display_name">>, <<"someone">>}]}),
     chef_db:create(User, context(), ?USER_AUTHZ_ID).
 
-add_key(Id, KeyName, ExpirationDate) ->
-    sqerl:execute(<<"INSERT INTO KEYS (id, key_name, public_key, key_version, created_at, expires_at)
-                     VALUES ($1, $2, $3, 1, CURRENT_TIMESTAMP, $4)">>, [Id, KeyName, ?PUBKEY, ExpirationDate]).
+add_key(Config, Id, KeyName, ExpirationDate) ->
+    PubKey = proplists:get_value(pubkey, Config),
+    {ok, 1} = sqerl:execute(<<"INSERT INTO KEYS (id, key_name, public_key, key_version, created_at, expires_at, last_updated_by, updated_at)
+                               VALUES ($1, $2, $3, 1, CURRENT_TIMESTAMP, $4, 'me', CURRENT_TIMESTAMP )">>,
+                  [Id, KeyName, PubKey, ExpirationDate]).
 
 response_body({_, _, _, Body}) ->
     Body.
@@ -203,7 +210,8 @@ response_body({_, _, _, Body}) ->
 context() ->
     chef_db:make_context(<<"AB">>).
 
-client_id(OrgId, Name) ->
+client_id(Config, Name) ->
+    OrgId = proplists:get_value(org_id, Config),
     #chef_client{id = ClientId} = chef_db:fetch(#chef_client{org_id = OrgId, name = Name}, context()),
     ClientId.
 
@@ -227,6 +235,7 @@ key_list_ejson(BaseURI, KeyInfo) ->
         {<<"name">>, KeyName},
         {<<"expired">>, Expired}] } || {KeyName, Expired} <- KeyInfo].
 
-new_key_ejson(Name, Expiration) ->
-    {[{name, Name}, {public_key, ?PUBKEY}, {expiration_date, Expiration}]}.
+new_key_ejson(Config, Name, Expiration) ->
+    PubKey = proplists:get_value(pubkey, Config),
+    {[{name, Name}, {public_key, PubKey}, {expiration_date, Expiration}]}.
 

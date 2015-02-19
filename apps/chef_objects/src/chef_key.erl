@@ -40,7 +40,7 @@
          id/1,
          org_id/1,
          type_name/1,
-         parse_binary_json/1
+         parse_binary_json/2
         ]).
 
 %% database named queries
@@ -107,15 +107,15 @@ find_query() ->
 
 
 new_record(_OrgId, _AuthzId, {Id, KeyData}) ->
-    PubKey = ej:get(<<"public_key">>, KeyData),
+    PubKey = ej:get({<<"public_key">>}, KeyData),
     PubKeyVersion = chef_object_base:key_version(PubKey),
-    Expires = case ej:get(<<"expiration">>, KeyData) of
+    Expires = case ej:get({<<"expiration_date">>}, KeyData) of
                   undefined ->
                       <<"infinity">>;
                   Value ->
                       Value
               end,
-    #chef_key{ id = Id, key_name = ej:get(<<"name">>, KeyData),
+    #chef_key{ id = Id, key_name = ej:get({<<"name">>}, KeyData),
                public_key = PubKey, key_version = PubKeyVersion,
                expires_at = Expires}.
 
@@ -138,19 +138,22 @@ list_query() ->
 create_query() ->
     insert_key_for_actor.
 
-parse_binary_json(Bin) ->
+parse_binary_json(_Bin, #chef_key{} = _ExistingObject) ->
+    % TODO according to rfc23, updates of individual fields are supported,
+    % so we'll validate each as optional and then verify that at least one is present.
+    error(unsupported);
+parse_binary_json(Bin, undefined) ->
     EJ = chef_json:decode(Bin),
+
     % validate public_key field
-    chef_object_base:validate_ejson(EJ, chef_object_base:public_key_spec()),
+    chef_object_base:validate_ejson(EJ, chef_object_base:public_key_spec(opt)),
 
     % validate name field
-    chef_object_base:validate_ejson(EJ, {[ {{opt,<<"name">>}, string} ]}),
+    chef_object_base:validate_ejson(EJ, {[ {{req, <<"name">>}, string},
+                                           {{req, <<"expiration_date">>}, string} ]}),
 
-    % validate expiration_date
-    % TODO: do we expect this to be a string?
-    chef_object_base:validate_ejson(EJ, {[ {{opt,<<"expiration_date">>}, string} ]}),
     %% this will raise if expiration_date isn't a valid datetime
-    Datetime = ec_date:parse(ej:get({<<"expiration_date">>}, EJ)),
+    Datetime = ec_date:parse(binary_to_list(ej:get({<<"expiration_date">>}, EJ))),
     %% set expiration_date to a datetime and return the parsed binary
     ej:set({<<"expiration_date">>}, EJ, Datetime).
 

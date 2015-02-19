@@ -41,6 +41,7 @@
          malformed_request_message/3,
          request_type/0,
          validate_request/3,
+         route_args/2,
          to_json/2 ]).
 
 -export([allowed_methods/2,
@@ -65,10 +66,11 @@ validate_request('GET', Req, #base_state{resource_args = ObjectType, chef_db_con
     ResourceState = make_resource_state_for_object(Ctx, ObjectType, ObjectName, OrgId),
     {Req, State#base_state{resource_state = ResourceState }};
 validate_request('POST', Req, #base_state{resource_args = ObjectType, chef_db_context = Ctx, organization_guid = OrgId} = State) ->
-    % TODO EJ = chef_key:parse_binary_json
+    EJ = chef_key:parse_binary_json(wrq:req_body(Req), undefined),
     ObjectName = chef_wm_util:object_name(ObjectType, Req),
     ResourceState = make_resource_state_for_object(Ctx, ObjectType, ObjectName, OrgId),
-    {Req, State#base_state{resource_state = ResourceState }}.
+    ResourceState1 = ResourceState#keys_state{ejson = EJ},
+    {Req, State#base_state{resource_state = ResourceState1 }}.
 
 make_resource_state_for_object(DbContext, client, Name, OrgId) ->
     make_resource_state_for_object(client, chef_db:fetch(#chef_client{name = Name, org_id = OrgId}, DbContext));
@@ -108,26 +110,41 @@ auth_info('GET', Req, #base_state{resource_state = #keys_state{ authz_id = Authz
 auth_info(_Method, Req, #base_state{resource_state = #keys_state{ authz_id = AuthzId}}= State) ->
     {{actor, AuthzId, update}, Req, State}.
 
-create_path(_Req, _State) ->
-    error(unsupported).
+create_path(Req, #base_state{resource_state = KeysState}=State) ->
+    #keys_state{ejson = Ejson} = KeysState,
+    Name = ej:get({<<"name">>}, Ejson),
+    {binary_to_list(Name), Req, State}.
 
 to_json(Req, #base_state{ chef_db_context = DbContext,
                           resource_state = #keys_state{type = Type, id = Id, name = ObjectName} } = State) ->
     case chef_db:list(#chef_key{id = Id}, DbContext) of
         Keys when is_list(Keys) ->
-            KeyType = list_to_existing_atom(atom_to_list(Type) ++ "_key"),
+            KeyType = type_to_atom(Type),
             RouteFun = oc_chef_wm_routes:bulk_route_fun(KeyType, ObjectName, Req),
             EJ = chef_key:ejson_from_list(Keys, RouteFun),
             {chef_json:encode(EJ), Req, State};
         Error ->
             {{halt, 500}, Req, State#base_state{log_msg = Error }}
     end.
+from_json(Req, #base_state{resource_state = #keys_state{ejson = EJ, id = ActorId}} = State) ->
+    oc_chef_wm_base:create_from_json(Req, State, chef_key, {authz_id, undefined}, {ActorId, EJ}).
 
+
+% TODO it seems this doesn't even get called anywhere.
+malformed_request_message({ec_date, {bad_date, _Input}}, _Req, _State) ->
+    {[{<<"error">>, <<"expiration_date must be a valid date in ISO-8601 form, eg 2099-02-28T01:00:00">>}]};
 malformed_request_message(Any, Req, State) ->
     chef_wm_malformed:malformed_request_message(Any, Req, State).
-conflict_message(_Name) ->
-    ok.
 
-from_json(_, _) ->
-    error(unsupported).
+conflict_message(Name) ->
+    % if we had Req, we could do better than 'actor'...
+    {[{<<"error">>, iolist_to_binary([<<"a key with the name '">>,
+                                      Name, <<"' already exists for this actor.">>])}]}.
 
+route_args(#chef_key{key_name = Name},
+           #base_state{ resource_state = #keys_state{type = Type, name = ObjectName} } ) ->
+    TypeName = type_to_atom(Type),
+    {TypeName, [{name, Name}, {object_name, ObjectName}] }.
+
+type_to_atom(Type) ->
+    list_to_existing_atom(atom_to_list(Type) ++ "_key").

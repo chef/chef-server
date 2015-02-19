@@ -315,7 +315,8 @@
           type,
           id,
           authz_id,
-          name}
+          name,
+          ejson}
        ).
 
 -define(gv(X,L), proplists:get_value(X, L)).

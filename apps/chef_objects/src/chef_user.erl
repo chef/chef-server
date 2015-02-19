@@ -272,7 +272,7 @@ parse_binary_json(Bin, Operation, User) ->
         true ->
             ej:delete({<<"public_key">>}, EJ);
         _ ->
-            validate_user(EJ, chef_object_base:public_key_spec()),
+            validate_user(EJ, chef_object_base:public_key_spec(opt)),
             EJ
     end,
 
