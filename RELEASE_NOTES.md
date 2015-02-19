@@ -4,12 +4,12 @@
 
 ### What's New
 
-### Bug Fixes:
-
 The following items are new for Enterprise Chef 11.2.8 and/or are
 changes from previous versions:
 
 * Support the use of Chef Analytics 1.1 with Enterprise Chef 11
+
+### Bug Fixes:
 
 The following items are the set of bug fixes that have been applied since Enterprise Chef 11.2.6:
 
