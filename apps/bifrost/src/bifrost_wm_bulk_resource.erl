@@ -5,7 +5,10 @@
 
 -mixin([{bifrost_wm_base, [create_path/2]}]).
 
--export([process_post/2]).
+-export([
+    post_is_create/2,
+    process_post/2
+    ]).
 
 init(Config) ->
     bifrost_wm_base:init(?MODULE, Config).
@@ -79,9 +82,7 @@ valid_type(_) -> error.
 
 regex_for(authz_id) ->
     {ok, Regex} = re:compile("^[a-fA-F0-9]{32}$"),
-    {Regex, <<"invalid authz ID, must be 32-digit hex string">>};
-regex_for(_) ->
-    error.
+    {Regex, <<"invalid authz ID, must be 32-digit hex string">>}.
 
 bulk_spec() ->
     {[
