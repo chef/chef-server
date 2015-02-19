@@ -96,6 +96,7 @@
 
 -include("../../include/chef_db.hrl").
 -include("../../include/chef_types.hrl").
+-include("../../include/oc_chef_types.hrl").
 -include("../../include/chef_osc_defaults.hrl").
 -include_lib("stats_hero/include/stats_hero.hrl").
 
@@ -188,6 +189,21 @@ delete(#chef_cookbook_version{org_id = OrgId} = CookbookVersion,
             end;
         Result -> Result %% not_found or {error, _}
     end;
+delete(#oc_chef_cookbook_artifact_version{org_id = OrgId} = CAVRec,
+       #context{reqid = ReqId}) ->
+    chef_object:delete(CAVRec, fun({QueryName, Params}) ->
+        case sqerl:select(QueryName, Params, rows_as_scalars, [checksum_to_delete]) of
+            {ok, none} ->
+                %% no checksum deleted, but we did delete the artifact version, still
+                {ok, 1};
+            {ok, ChecksumsToDelete} when erlang:is_list(ChecksumsToDelete) ->
+                %% let's delete these files from storage
+                ?SH_TIME(ReqId, chef_s3, delete_checksums, (OrgId, ChecksumsToDelete)),
+                {ok, 1};
+            {error, _Why} = Error ->
+                Error
+        end
+    end);
 delete(ObjectRec, #context{reqid = ReqId}) ->
     stats_hero:ctime(ReqId, {chef_sql, delete_object},
                      fun() -> chef_sql:delete_object(ObjectRec) end).

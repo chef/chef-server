@@ -80,8 +80,7 @@ update_query() ->
     erlang:error(not_supported).
 
 delete_query() ->
-    %% TODO: do we need this?
-    erlang:error(not_supported).
+    delete_cookbook_artifact_version_by_id.
 
 find_query() ->
     find_cookbook_artifact_version_by_org_name_identifier.

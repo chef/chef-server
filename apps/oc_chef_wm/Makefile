@@ -21,7 +21,7 @@ DIALYZER_DEPS = deps/chef_authn/ebin \
 # :'(
 DEPS_PLT = oc_chef_wm.plt
 # TODO automate managing this revision
-EC_SCHEMA_VERSION = 2.6.0
+EC_SCHEMA_VERSION = 75461b2877eafcd8ee5f7c09e7e874707c2ebf4b # temporary to make CT tests pass in travis
 
 ITEST_DEPS = $(CURDIR)/itest/common/deps
 

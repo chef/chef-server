@@ -1,7 +1,7 @@
 DEPS = $(CURDIR)/deps
 
 # TODO automate managing this revision
-EC_SCHEMA_VERSION = 31048bf983361c7b4a3f19e8aeb836a31c95cee6 # temporary to make CT tests pass in travis
+EC_SCHEMA_VERSION = 2.6.0
 DIALYZER_OPTS = -Wunderspecs
 ITEST_DEPS = $(CURDIR)/itest/common/deps
 # List dependencies that should be included in a cached dialyzer PLT file.

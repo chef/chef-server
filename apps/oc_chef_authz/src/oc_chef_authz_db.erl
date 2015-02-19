@@ -198,7 +198,9 @@ statements(pgsql) ->
          "JOIN cookbook_artifact_version_checksums AS cavc "
            "ON cavc.cookbook_artifact_version_id = cav.id "
         "WHERE ca.org_id = $1 "
-        "GROUP BY cav.id, ca.org_id, ca.name, ca.authz_id;">>}
+        "GROUP BY cav.id, ca.org_id, ca.name, ca.authz_id;">>},
+      {delete_cookbook_artifact_version_by_id,
+       <<"SELECT * FROM delete_cookbook_artifact_version($1)">>}
     ].
 
 %

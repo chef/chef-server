@@ -32,7 +32,29 @@ init_per_suite(Config) ->
 
     Config2.
 
+init_per_testcase(http_delete, Config) ->
+    Config2 = base_init_per_testcase(Config),
+    OrgId = ?config(org_id, Config),
+
+    NewChecksum = <<"b804944c17edc107073d6a1f27aa3842">>,
+    ok = chef_sql:mark_checksums_as_uploaded(OrgId,
+                                             [NewChecksum]),
+
+    ok = meck:expect(chef_s3, delete_checksums, 2,
+                     fun(ArgOrgId, ArgChecksums) ->
+                         ?assertEqual({OrgId, [NewChecksum]},
+                                      {ArgOrgId, ArgChecksums}),
+                         {{ok, ArgChecksums},
+                          {missing, []},
+                          {timeout, []},
+                          {error, []}}
+                      end),
+
+    [{new_checksum, NewChecksum} | Config2];
 init_per_testcase(_, Config) ->
+    base_init_per_testcase(Config).
+
+base_init_per_testcase(Config) ->
     ok = meck:new(chef_s3),
     ok = meck:expect(chef_s3, generate_presigned_url, 5,
                      fun(_, _, _, Checksum, _) ->
@@ -51,7 +73,8 @@ all() ->
       http_round_trip,
       http_get_nonexistant,
       http_post_conflict,
-      http_missing_checksum
+      http_missing_checksum,
+      http_delete
     ].
 
 %% this tests that low level DB ops (create and fetch)
@@ -150,6 +173,31 @@ http_missing_checksum(_Config) ->
     ?assertEqual({"400", ExpectedErrorJson},
                  http_create_cookbook_artifact(Name, Identifier, CorruptJson)).
 
+http_delete(Config) ->
+    NewChecksum = ?config(new_checksum, Config),
+
+    Name = "http_delete_name",
+    Identifier = "http_delete_identifier",
+
+    %% first, create it, with a different checksum
+    %% that no other version references
+    CreateEjson = change_first_checksum(Name, Identifier, NewChecksum),
+    ?assertMatch({"201", _},
+                 http_create_cookbook_artifact(Name, Identifier, CreateEjson)),
+
+    %% then delete it
+    ?assertMatch({"200", _},
+                 http_delete_cookbook_artifact(Name, Identifier)),
+    %% which should have triggered a call to `chef_s3:delete_checksums'
+    ?assertEqual(1,
+                 meck:num_calls(chef_s3, delete_checksums, '_')),
+
+    %% now both DELETE and GET should return 404
+    ?assertMatch({"404", _},
+                 http_fetch_cookbook_artifact(Name, Identifier)),
+    ?assertMatch({"404", _},
+                 http_delete_cookbook_artifact(Name, Identifier)).
+
 %% Helper funs
 
 artifact_version_rec_from_json(Config, Json) ->
@@ -162,6 +210,9 @@ http_create_cookbook_artifact(Name, Identifier, Ejson) ->
 
 http_fetch_cookbook_artifact(Name, Identifier) ->
     http_request(get, route_suffix_for(Name, Identifier), null).
+
+http_delete_cookbook_artifact(Name, Identifier) ->
+    http_request(delete, route_suffix_for(Name, Identifier), null).
 
 route_suffix_for(Name, Identifier) ->
     "/" ++ Name ++ "/" ++ Identifier.
@@ -269,9 +320,12 @@ canonical_example_checksums() ->
     chef_cookbook_version:extract_checksums(canonical_example()).
 
 missing_checksum_example(Name, Identifier) ->
+    change_first_checksum(Name, Identifier,
+                          <<"75b4a4edd63e6a9988d4927599010fb3">>).
+
+change_first_checksum(Name, Identifier, Checksum) ->
     Ejson = canonical_example(Name, Identifier),
     [FirstDefinition | OtherDefinitions] = ej:get({<<"definitions">>}, Ejson),
-    CorruptDefinition = ej:set({<<"checksum">>}, FirstDefinition,
-                               <<"730ef25567f94a63ecd6e0393b9eaa87">>),
-    CorruptDefinitions = [CorruptDefinition | OtherDefinitions],
-    ej:set({<<"definitions">>}, Ejson, CorruptDefinitions).
+    NewDefinition = ej:set({<<"checksum">>}, FirstDefinition, Checksum),
+    NewDefinitions = [NewDefinition | OtherDefinitions],
+    ej:set({<<"definitions">>}, Ejson, NewDefinitions).

@@ -269,4 +269,3 @@ do_delete(ObjectRec, CallbackFun) ->
     QueryName = delete_query(ObjectRec),
     Id = id(ObjectRec),
     CallbackFun({QueryName, [Id]}).
-
