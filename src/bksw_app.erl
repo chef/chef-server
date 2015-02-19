@@ -33,9 +33,11 @@
          ssl,
          inets,
          erlsom,
+         xmerl,
+         compiler,
+         syntax_tools,
          mochiweb,
          webmachine,
-         xmerl,
          ibrowse,
          mini_s3,
          bookshelf]).
