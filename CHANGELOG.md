@@ -1,6 +1,6 @@
 # Chef Server Changelog
 
-## 12.0.5 (TBD)
+## 12.0.5 (2014-02-26)
 
 ### bookshelf 1.1.6
 * Updated to webmachine 1.10.8
@@ -8,8 +8,16 @@
 ### oc\_bifrost 1.4.5
 * Updated to webmachine 1.10.8
 
+### oc\_erchef 1.5.0
+* Keys API POST support: /organizations/$ORG/clients/$CLIENT/keys and
+  /users/$USER/keys
+
+### oc\_erchef 1.4.2
+* the fields `external_authentication_uid` and `recovery_auth_enabled`
+  are now preserved on user PUT when they are not provided.
+
 ### oc\_erchef 1.4.1
-* New GET/POST BASE_URL/cookbook_artifacts/NAME/IDENTIFIER endpoint
+* New GET/POST `BASE_URL/cookbook_artifacts/NAME/IDENTIFIER` endpoint
 * Updated to webmachine 1.10.8
 
 ## 12.0.4 (2014-02-19)
