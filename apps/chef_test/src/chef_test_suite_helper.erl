@@ -28,7 +28,6 @@
          stop_server/2,
          run_cmds/1,
          space_join/1,
-         ensure_started/1,
          set_app_env/1,
          make_id/1,
          make_az_id/1,
@@ -74,16 +73,6 @@ run_cmds(CMDS) ->
 
 space_join(L) ->
     [ [Elt, " "] || Elt <- L ].
-
-ensure_started(App) ->
-    case application:start(App) of
-        ok ->
-            ok;
-        {error, {already_started, App}} ->
-            ok;
-        E ->
-            E
-    end.
 
 set_app_env(stats_hero) ->
     set_env(stats_hero, [{estatsd_host, "localhost"},
