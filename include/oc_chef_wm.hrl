@@ -189,6 +189,12 @@
           num_versions :: non_neg_integer() | all | undefined
          }).
 
+-record(cookbook_artifact_version_state, {
+          authz_id,
+          cookbook_artifact_version_data,
+          oc_chef_cookbook_artifact_version :: #oc_chef_cookbook_artifact_version{}
+         }).
+
 -record(data_state, {
           data_bag_name,
           data_bag_item_name,

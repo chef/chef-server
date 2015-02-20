@@ -36,7 +36,9 @@
                           | 'chef_cookbook_version'
                           | 'cookbook_meta_attributes'
                           | 'cookbook_metadata'
-                          | 'cookbook_long_desc'.
+                          | 'cookbook_long_desc'
+                          | 'chef_cookbook_artifact_version'
+                          | 'cookbook_artifact_metadata'.
 
 %% Define CHEF_UNCOMPRESSED_NODE_DATA at compile time if your schema requires uncompressed
 %% node data.

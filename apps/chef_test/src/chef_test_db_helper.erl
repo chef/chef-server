@@ -57,6 +57,8 @@ start_db(Config, DbName) ->
              "--db-port", PortStr, " --db-host localhost deploy"],
             ["psql -p", PortStr, DbName, " -h localhost <", Schema]
            ],
+    %% FIXME: we should fail explicitely here if any of the commands above
+    %% fail
     CmdsResult = chef_test_suite_helper:run_cmds(CMDS),
     % make sure it's seen in output, don't use lager.
     ct:pal("db_start: ~n~p~n", [CmdsResult]),

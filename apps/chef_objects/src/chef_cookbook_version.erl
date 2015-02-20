@@ -24,6 +24,7 @@
 
 -export([
          assemble_cookbook_ejson/2,
+         annotate_with_s3_urls/3,
          authz_id/1,
          base_cookbook_name/1,
          constraint_map_spec/1,
@@ -288,6 +289,7 @@ file_list_spec() ->
                             <<"root_files">>,
                             <<"templates">>]).
 
+-spec extract_checksums(ejson_term()) -> [binary()].
 extract_checksums(CBJson) ->
     Sums = [ begin
                  Segment = ej:get({SegName}, CBJson, []),
@@ -436,7 +438,8 @@ minimal_cookbook_ejson(#chef_cookbook_version{org_id = OrgId,
                                               frozen=Frozen,
                                               serialized_object=XCookbookJSON,
                                               metadata=XMetadataJSON,
-                                              meta_deps=DependenciesJSON}, ExternalUrl) ->
+                                              meta_deps=DependenciesJSON},
+                       ExternalUrl) ->
     %% The serialized_object is everything but the metadata, and metadata in turn is all the
     %% metadata except the attributes and long description.  We do not add in the sub pieces
     %% of the metadata when merging
@@ -455,6 +458,8 @@ minimal_cookbook_ejson(#chef_cookbook_version{org_id = OrgId,
                  {<<"metadata">>, Metadata}]).
 
 %% @doc Add S3 download URLs for all files in the cookbook
+%% Expects the whole cookbook JSON
+-spec annotate_with_s3_urls(ejson_term(), object_id(), string()) -> ejson_term().
 annotate_with_s3_urls(Ejson, OrgId, ExternalUrl) ->
     lists:foldl(fun(Segment, CB) ->
                     case ej:get({Segment}, CB) of

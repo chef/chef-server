@@ -84,7 +84,9 @@
                                  'role' |
                                  'sandboxes' |
                                  'search' |
-                                 'user'.
+                                 'user' |
+                                 'policies' |
+                                 'cookbook_artifacts'.
 
 -spec ping() -> pong | pang.
 ping() ->
@@ -572,19 +574,20 @@ pluralize_resource(group)     -> <<"groups">>;
 pluralize_resource(object)    -> <<"objects">>.
 
 -spec object_type_to_container_name(contained_object_name()) -> <<_:32,_:_*8>>.
-object_type_to_container_name(client)      -> <<"clients">>;
-object_type_to_container_name(container)   -> <<"containers">>;
-object_type_to_container_name(cookbook)    -> <<"cookbooks">>;
-object_type_to_container_name(data)        -> <<"data">>; % breaks the simple atom() + s strategy
-object_type_to_container_name(environment) -> <<"environments">>;
-object_type_to_container_name(group)       -> <<"groups">>;
-object_type_to_container_name(node)        -> <<"nodes">>;
-object_type_to_container_name(organization) -> <<"organizations">>;
-object_type_to_container_name(role)        -> <<"roles">>;
-object_type_to_container_name(sandbox)     -> <<"sandboxes">>;
-object_type_to_container_name(search)      -> <<"search">>;
-object_type_to_container_name(user)        -> <<"users">>;
-object_type_to_container_name(policies)        -> <<"policies">>.
+object_type_to_container_name(client)            -> <<"clients">>;
+object_type_to_container_name(container)         -> <<"containers">>;
+object_type_to_container_name(cookbook)          -> <<"cookbooks">>;
+object_type_to_container_name(data)              -> <<"data">>; % breaks the simple atom() + s strategy
+object_type_to_container_name(environment)       -> <<"environments">>;
+object_type_to_container_name(group)             -> <<"groups">>;
+object_type_to_container_name(node)              -> <<"nodes">>;
+object_type_to_container_name(organization)      -> <<"organizations">>;
+object_type_to_container_name(role)              -> <<"roles">>;
+object_type_to_container_name(sandbox)           -> <<"sandboxes">>;
+object_type_to_container_name(search)            -> <<"search">>;
+object_type_to_container_name(user)              -> <<"users">>;
+object_type_to_container_name(policies)          -> <<"policies">>;
+object_type_to_container_name(cookbook_artifact) -> <<"cookbook_artifacts">>.
 
 %% @doc The authz system needs to know the resource type as part of the API. This maps chef
 %% object types into their appropriate authz resource types.

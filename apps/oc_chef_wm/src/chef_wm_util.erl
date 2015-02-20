@@ -55,6 +55,7 @@ base_mods() ->
 %% @doc Returns the base URI for the server as called by the client as a string.
 %% By default, use the Host: header value, or if configured with the atom 'host_header'
 %% Otherwise, use the configured url.
+-spec base_uri(wm_req()) -> string().
 base_uri(Req) ->
     case application:get_env(oc_chef_wm, base_resource_url) of
         undefined         -> scheme(Req) ++ "://" ++ vhost(Req);
@@ -159,7 +160,7 @@ not_found_message(invitation, Id) ->
 
 %% "Cannot load data bag item not_really_there for data bag sack"
 
-
+-spec error_message_envelope(binary() | ejson_term()) -> ejson_term().
 error_message_envelope(Message) when is_binary(Message) orelse
                                      is_tuple(Message) ->
     %% Tuple guard is really intended for grabbing EJson-encoded json objects, but we don't
