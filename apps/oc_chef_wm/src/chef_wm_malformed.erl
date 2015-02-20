@@ -65,8 +65,8 @@ malformed_request_message({error, invalid_json}, _Req, _State) ->
     %% chef_json/jiffy, but thus far nothing specific enough to beat out this. Also, would
     %% not passing internal library error messages out to the user when possible.
     {[{<<"error">>, [<<"invalid JSON">>]}]};
-malformed_request_message({mismatch, {FieldName, _Pat, _Val}}, _Req, _State) ->
-    {[{<<"error">>, [iolist_to_binary(["Field '", FieldName, "' invalid"])]}]};
+malformed_request_message({mismatch, {FieldName, Pat, Val}}, _Req, _State) ->
+    {[{<<"error">>, [iolist_to_binary(["Field '", FieldName, "' invalid : ", Val, " does not match ", Pat])]}]};
 malformed_request_message({missing, FieldName}, _Req, _State) ->
     {[{<<"error">>, [iolist_to_binary(["Field '", FieldName, "' missing"])]}]};
 malformed_request_message({both_missing, Field1, _Field2}, _Req, _State) ->
