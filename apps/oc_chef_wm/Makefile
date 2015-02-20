@@ -21,8 +21,7 @@ DIALYZER_DEPS = deps/chef_authn/ebin \
 # :'(
 DEPS_PLT = oc_chef_wm.plt
 # TODO automate managing this revision
-EC_SCHEMA_VERSION = 31048bf983361c7b4a3f19e8aeb836a31c95cee6 # temporary to make CT tests pass in travis
-
+EC_SCHEMA_VERSION = 2.8.0
 ITEST_DEPS = $(CURDIR)/itest/common/deps
 
 REBAR = REBAR_PARENT=$(CURDIR)/rebar.config rebar
