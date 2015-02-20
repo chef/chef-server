@@ -22,10 +22,13 @@
 
 init_per_suite(Config) ->
     setup_helper:base_init_per_suite([{org_name, ?ORG_NAME},
-                                   {org_authz_id, ?ORG_AUTHZ_ID},
-                                   {authz_id, ?AUTHZ_ID},
-                                   {client_name, ?CLIENT_NAME}
-                                   | Config]).
+                                      {org_authz_id, ?ORG_AUTHZ_ID},
+                                      {authz_id, ?AUTHZ_ID},
+                                      {client_name, ?CLIENT_NAME}
+                                      | Config]).
+
+end_per_suite(Config) ->
+    setup_helper:base_end_per_suite(Config).
 
 init_per_testcase(TestName, Config) ->
     %% we don't have bookshelf around, and don't want to pollute

@@ -29,6 +29,7 @@
          start_server/1,
          needed_apps/0,
          base_init_per_suite/1,
+         base_end_per_suite/1,
          get_config/2
         ]).
 
@@ -168,3 +169,6 @@ get_config(Key, Config) ->
         false ->
             Value
     end.
+
+base_end_per_suite(Config) ->
+    chef_test_suite_helper:stop_server(Config, needed_apps()).

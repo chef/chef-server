@@ -59,8 +59,6 @@ start_db(Config, DbName) ->
            ],
     %% FIXME: we should fail explicitely here if any of the commands above
     %% fail
-    %% FIXME: we're never stopping the pgsql instance we launch here. We should
-    %% see to that
     CmdsResult = chef_test_suite_helper:run_cmds(CMDS),
     % make sure it's seen in output, don't use lager.
     ct:pal("db_start: ~n~p~n", [CmdsResult]),

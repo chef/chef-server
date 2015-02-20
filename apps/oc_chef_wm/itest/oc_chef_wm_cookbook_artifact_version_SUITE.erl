@@ -32,6 +32,9 @@ init_per_suite(Config) ->
 
     Config2.
 
+end_per_suite(Config) ->
+    setup_helper:base_end_per_suite(Config).
+
 init_per_testcase(_, Config) ->
     ok = meck:new(chef_s3),
     ok = meck:expect(chef_s3, generate_presigned_url, 5,

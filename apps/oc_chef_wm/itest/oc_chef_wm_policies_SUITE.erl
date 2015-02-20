@@ -25,7 +25,7 @@ init_per_suite(Config) ->
                                    | Config]).
 
 end_per_suite(Config) ->
-    chef_test_suite_helper:stop_server(Config, setup_helper:needed_apps()).
+    setup_helper:base_end_per_suite(Config).
 
 all() ->
     [

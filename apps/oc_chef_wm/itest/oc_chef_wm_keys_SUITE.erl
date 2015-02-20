@@ -32,7 +32,6 @@
 -define(KEY_2_ENTRY, { ?KEY2NAME, true } ).
 
 
-
 init_per_suite(LastConfig) ->
     Config = chef_test_db_helper:start_db(LastConfig, "oc_chef_wm_itests"),
     Config2 = setup_helper:start_server(Config),
@@ -41,7 +40,7 @@ init_per_suite(LastConfig) ->
     [{org_id, OrgId}] ++ Config2.
 
 end_per_suite(Config) ->
-    chef_test_suite_helper:stop_server(Config, setup_helper:needed_apps()).
+    setup_helper:base_end_per_suite(Config).
 
 all() ->
     [list_client_default_key,
