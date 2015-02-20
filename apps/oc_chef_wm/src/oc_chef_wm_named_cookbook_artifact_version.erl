@@ -49,8 +49,8 @@ post_is_create(Req, State) ->
     {true, Req, State}.
 
 create_path(Req, State) ->
-    Name = wrq:path_info(name, Req),
-    {Name, Req, State}.
+    Identifier = wrq:path_info(identifier, Req),
+    {Identifier, Req, State}.
 
 resource_exists(Req, State) ->
     {true, Req, State}.
@@ -64,12 +64,9 @@ validate_request('POST', Req, #base_state{resource_state = CAVState} = State) ->
 
 validate_json(Req) ->
     Body = wrq:req_body(Req),
-    Ejson = chef_json:decode_body(Body),
+    Ejson = oc_chef_cookbook_artifact_version:parse_binary_json(Body),
     [validate_url_param(Req, Ejson, Param) || Param <- [name, identifier]],
-    case oc_chef_cookbook_artifact_version:validate_json(Ejson) of
-        ok -> Ejson;
-        Invalid -> throw(Invalid)
-    end.
+    Ejson.
 
 validate_url_param(Req, Ejson, Param) ->
     FromReq = erlang:list_to_binary(wrq:path_info(Param, Req)),

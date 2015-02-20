@@ -35,10 +35,6 @@
 
 -define(TEST_DB_NAME, "oc_chef_wm_itests").
 
--record(context, {reqid :: binary(),
-                  otto_connection,
-                  darklaunch = undefined}).
-
 start_server(Config) ->
     chef_test_suite_helper:set_app_env(stats_hero),
     chef_test_suite_helper:set_app_env(pooler),
@@ -128,7 +124,7 @@ base_init_per_suite(Config0) ->
     Config1 = chef_test_db_helper:start_db(Config0, ?TEST_DB_NAME),
     Config2 = start_server(Config1),
 
-    FakeContext = #context{reqid = <<"fake-req-id">>},
+    FakeContext = chef_db:make_context(<<"fake-req-id">>),
     OrganizationRecord = chef_object:new_record(oc_chef_organization,
                                                 nil,
                                                 OrgAuthzId,

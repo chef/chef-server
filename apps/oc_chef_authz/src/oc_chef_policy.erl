@@ -25,7 +25,7 @@
 
 -behaviour(chef_object).
 
--define(DEFAULT_HEADERS, []).
+-mixin([{chef_object,[{default_fetch/2, fetch}]}]).
 
 -export([
          parse_binary_json/1,
@@ -58,8 +58,7 @@
          type_name/1,
          update_from_ejson/2,
          update_query/0,
-         update/2,
-         fetch/2
+         update/2
         ]).
 
 -define(VALIDATION_CONSTRAINTS,
@@ -199,11 +198,6 @@ parse_binary_json(Bin) ->
         Bad ->
             throw(Bad)
     end.
-
-
-fetch(#oc_chef_policy{} = Record, CallbackFun) ->
-    chef_object:default_fetch(Record, CallbackFun).
-
 
 flatten(#oc_chef_policy{
           id = Id,
