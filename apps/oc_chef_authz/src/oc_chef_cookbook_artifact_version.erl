@@ -54,7 +54,6 @@
          flatten/1]).
 
 -export([validate_json/1,
-         fetch/4,
          to_json/2]).
 
 id(#oc_chef_cookbook_artifact_version{id = Id}) ->
@@ -140,20 +139,6 @@ fields_for_fetch(#oc_chef_cookbook_artifact_version{org_id = OrgId,
                                                     name = Name,
                                                     identifier = Identifier}) ->
     [OrgId, Name, Identifier].
-
-%% @doc Fetches a single record
--spec fetch(DbContext :: chef_db:db_context(),
-            OrgId :: object_id(),
-            Name :: binary(),
-            Identifier :: binary()) ->
-                   #oc_chef_cookbook_artifact_version{} |
-                   not_found |
-                   {error, term()}.
-fetch(DbContext, OrgId, Name, Identifier) ->
-    chef_db:fetch(#oc_chef_cookbook_artifact_version{org_id = OrgId,
-                                                     name = Name,
-                                                     identifier = Identifier},
-                  DbContext).
 
 fetch(#oc_chef_cookbook_artifact_version{} = Record, CallbackFun) ->
     chef_object:default_fetch(Record, CallbackFun).

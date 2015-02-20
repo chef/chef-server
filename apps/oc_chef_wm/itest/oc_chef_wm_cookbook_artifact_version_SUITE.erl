@@ -74,8 +74,8 @@ db_round_trip(Config) ->
     ?assertEqual(ok, chef_db:create(CBAVRecord, Context, ?AUTHZ_ID)),
 
     %% and then fetch it
-    RecFromDB = oc_chef_cookbook_artifact_version:fetch(Context, OrgId,
-                                                        Name, Identifier),
+    RecFromDB = chef_db:fetch(CBAVRecord, Context),
+
     %% the one from the DB should have an ID
     RecIDFromDB = oc_chef_cookbook_artifact_version:id(RecFromDB),
     ?assert(erlang:is_integer(RecIDFromDB)),
