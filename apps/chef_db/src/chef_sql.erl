@@ -109,7 +109,6 @@
 
 -include_lib("sqerl/include/sqerl.hrl").
 -include("../../include/chef_types.hrl").
--include("../../include/oc_chef_types.hrl").
 
 -type delete_query() :: delete_cookbook_version_by_id |
                         delete_user_by_id |
