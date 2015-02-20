@@ -29,14 +29,11 @@
          start_server/1,
          needed_apps/0,
          base_init_per_suite/1,
+         base_end_per_suite/1,
          get_config/2
         ]).
 
 -define(TEST_DB_NAME, "oc_chef_wm_itests").
-
--record(context, {reqid :: binary(),
-                  otto_connection,
-                  darklaunch = undefined}).
 
 start_server(Config) ->
     chef_test_suite_helper:set_app_env(stats_hero),
@@ -78,7 +75,7 @@ start_server(Config) ->
                          }]),
     application:set_env(chef_index, disable_rabbitmq, true),
 
-    [ ok = chef_test_suite_helper:ensure_started(A) || A <- needed_apps() ],
+    [ {ok, _} = application:ensure_all_started(A) || A <- needed_apps() ],
     Config.
 
 needed_apps() ->
@@ -127,7 +124,7 @@ base_init_per_suite(Config0) ->
     Config1 = chef_test_db_helper:start_db(Config0, ?TEST_DB_NAME),
     Config2 = start_server(Config1),
 
-    FakeContext = #context{reqid = <<"fake-req-id">>},
+    FakeContext = chef_db:make_context(<<"fake-req-id">>),
     OrganizationRecord = chef_object:new_record(oc_chef_organization,
                                                 nil,
                                                 OrgAuthzId,
@@ -168,3 +165,6 @@ get_config(Key, Config) ->
         false ->
             Value
     end.
+
+base_end_per_suite(Config) ->
+    chef_test_suite_helper:stop_server(Config, needed_apps()).
