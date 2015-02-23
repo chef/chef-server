@@ -49,7 +49,15 @@ all() ->
      list_client_no_keys,
      list_user_no_keys,
      post_user_new_valid_key,
-     post_client_new_valid_key
+     post_client_new_valid_key,
+     post_key_with_invalid_date,
+     post_key_with_infinity_date,
+     post_key_with_invalid_key_name,
+     post_key_with_invalid_public_key,
+     post_conflicting_user_key,
+     post_conflicting_client_key,
+     post_multiple_valid_user_keys,
+     post_multiple_valid_client_keys
      ].
 
 %% Test cases.
@@ -105,6 +113,55 @@ post_user_new_valid_key(Config) ->
     Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "201", _, _}, Result).
 
+post_key_with_invalid_date(Config) ->
+    Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"invalid-date">>)),
+    Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
+    ?assertMatch({ok, "400", _, _}, Result).
+
+post_key_with_infinity_date(Config) ->
+    Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"infinity">>)),
+    Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
+    ?assertMatch({ok, "201", _, _}, Result).
+
+post_key_with_invalid_key_name(Config) ->
+    Body = chef_json:encode(new_key_ejson(Config, <<"invalid^character">>, <<"2099-10-25T22:49:08">>)),
+    Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
+    ?assertMatch({ok, "400", _, _}, Result).
+
+post_key_with_invalid_public_key(Config) ->
+    Ejson = {[{name, <<"test1">>}, {public_key, <<"-----BEGIN PUBLIC KEY-----\ninvalid_key\n-----END PUBLIC KEY-----">>}, {expiration_date, <<"2099-10-25T22:49:08">>}]},
+    Body = chef_json:encode(Ejson),
+    Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
+    ?assertMatch({ok, "400", _, _}, Result).
+
+post_conflicting_user_key(Config) ->
+    Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-25T22:49:08">>)),
+    http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
+    Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
+    ?assertMatch({ok, "409", _, _}, Result).
+
+post_conflicting_client_key(Config) ->
+    Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-24T22:49:08">>)),
+    http_keys_request(post, client, ?ADMIN_USER_NAME, Body),
+    Result = http_keys_request(post, client, ?ADMIN_USER_NAME, Body),
+    ?assertMatch({ok, "409", _, _}, Result).
+
+post_multiple_valid_user_keys(Config) ->
+    Body1 = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-25T22:49:08">>)),
+    Result1 = http_keys_request(post, user, ?ADMIN_USER_NAME, Body1),
+    ?assertMatch({ok, "201", _, _}, Result1),
+    Body2 = chef_json:encode(new_key_ejson(Config, <<"test2">>, <<"2099-10-25T22:49:08">>)),
+    Result2 = http_keys_request(post, user, ?ADMIN_USER_NAME, Body2),
+    ?assertMatch({ok, "201", _, _}, Result2).
+
+post_multiple_valid_client_keys(Config) ->
+    Body1 = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-24T22:49:08">>)),
+    Result1 = http_keys_request(post, client, ?ADMIN_USER_NAME, Body1),
+    ?assertMatch({ok, "201", _, _}, Result1),
+    Body2 = chef_json:encode(new_key_ejson(Config, <<"test2">>, <<"2099-10-24T22:49:08">>)),
+    Result2 = http_keys_request(post, client, ?ADMIN_USER_NAME, Body2),
+    ?assertMatch({ok, "201", _, _}, Result2).
+
 %% Test case initializers
 init_per_testcase(list_user_default_key,  Config) ->
     make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
@@ -138,14 +195,25 @@ init_per_testcase(list_user_no_keys, Config) ->
     %chef_db:fetch(#chef_user{username = ?ADMIN_USER_NAME}, context()),
     Config;
 init_per_testcase(post_client_new_valid_key, Config) ->
-    make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
-    make_client(Config, ?CLIENT_NAME),
-    Config;
+    make_admin_and_client(Config);
+init_per_testcase(post_conflicting_client_key, Config) ->
+    make_admin_and_client(Config);
+init_per_testcase(post_multiple_valid_client_keys, Config) ->
+    make_admin_and_client(Config);
 init_per_testcase(post_user_new_valid_key, Config) ->
-    make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
-    make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
-    make_client(Config, ?CLIENT_NAME),
-    Config;
+    make_admin_non_admin_and_client(Config);
+init_per_testcase(post_key_with_invalid_date, Config) ->
+    make_admin_non_admin_and_client(Config);
+init_per_testcase(post_key_with_infinity_date, Config) ->
+    make_admin_non_admin_and_client(Config);
+init_per_testcase(post_key_with_invalid_key_name, Config) ->
+    make_admin_non_admin_and_client(Config);
+init_per_testcase(post_key_with_invalid_public_key, Config) ->
+    make_admin_non_admin_and_client(Config);
+init_per_testcase(post_conflicting_user_key, Config) ->
+    make_admin_non_admin_and_client(Config);
+init_per_testcase(post_multiple_valid_user_keys, Config) ->
+    make_admin_non_admin_and_client(Config);
 init_per_testcase(_, Config) ->
     Config.
 
@@ -153,6 +221,17 @@ init_per_testcase(_, Config) ->
 end_per_testcase(_, Config) ->
     sqerl:adhoc_delete("clients", all),
     sqerl:adhoc_delete("users", all),
+    Config.
+
+make_admin_non_admin_and_client(Config) ->
+    make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
+    make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
+    make_client(Config, ?CLIENT_NAME),
+    Config.
+
+make_admin_and_client(Config) ->
+    make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
+    make_client(Config, ?CLIENT_NAME),
     Config.
 
 http_keys_request(Method, Type, Requestor) ->
