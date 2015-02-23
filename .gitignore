@@ -7,3 +7,7 @@ coverage.xml
 *.app
 rel/bookshelf
 bookshelf.plt
+.concrete
+_rel
+.rebar
+relx
