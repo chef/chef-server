@@ -249,7 +249,14 @@ extract_entity_info_test_() ->
                Ret = oc_chef_action:extract_entity_info(req, State),
                Expected = entity({[{<<"name">>, <<"webserver">>}]}, <<"user">>, <<"webserver">>),
                ?assertEqual(Expected, Ret)
-             end}
+             end},
+     {"keys entity info",
+      fun() -> State = #keys_state{ejson = {[{<<"name">>,<<"new-key">> }]} },
+               meck:expect(chef_wm_util,object_name, fun(user_key, req) -> undefined end),
+               Ret = oc_chef_action:extract_entity_info(req, State),
+               Expected = entity({[{<<"name">>, <<"new-key">>}]}, <<"key">>, <<"new-key">>),
+               ?assertEqual(Expected, Ret)
+      end}
      ]
     }.
 

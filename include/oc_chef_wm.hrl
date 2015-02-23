@@ -312,6 +312,8 @@
           oc_chef_organization :: #oc_chef_organization{}
          }).
 -record(keys_state, {
+          %% TODO: use keys_data instead of ejson as all other chef objects do
+          %%keys_data,
           type,
           id,
           authz_id,

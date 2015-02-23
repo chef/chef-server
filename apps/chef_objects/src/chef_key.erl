@@ -137,7 +137,6 @@ type_name(#chef_key{}) ->
 list_query() ->
     list_keys_for_actor.
 
-%% TODO: need to actually implement queries in pgsql_statements
 create_query() ->
     insert_key_for_actor.
 
