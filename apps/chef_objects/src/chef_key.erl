@@ -65,6 +65,8 @@
 
 -include("../../include/chef_types.hrl").
 
+%% TODO this will likely move into sqerl
+-define(INFINITY_TIMESTAMP, {{294277,1,9},{4,0,54.775807}}).
 authz_id(#chef_key{}) ->
     error(not_implemented).
 
@@ -153,8 +155,12 @@ parse_binary_json(Bin, undefined) ->
                                            {{req, <<"expiration_date">>}, string} ]}),
 
     %% this will raise if expiration_date isn't a valid datetime
-    Datetime = ec_date:parse(binary_to_list(ej:get({<<"expiration_date">>}, EJ))),
-    %% set expiration_date to a datetime and return the parsed binary
+    Datetime = case ej:get({<<"expiration_date">>}, EJ) of
+                   <<"infinity">> ->
+                       ?INFINITY_TIMESTAMP;
+                   Expiration ->
+                       ec_date:parse(binary_to_list(Expiration))
+               end,
     ej:set({<<"expiration_date">>}, EJ, Datetime).
 
 update_query() ->

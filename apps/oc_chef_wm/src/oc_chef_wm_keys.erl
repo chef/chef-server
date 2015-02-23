@@ -132,7 +132,7 @@ from_json(Req, #base_state{resource_state = #keys_state{ejson = EJ, id = ActorId
 
 % TODO it seems this doesn't even get called anywhere.
 malformed_request_message({ec_date, {bad_date, _Input}}, _Req, _State) ->
-    {[{<<"error">>, <<"expiration_date must be a valid date in ISO-8601 form, eg 2099-02-28T01:00:00">>}]};
+    {[{<<"error">>, <<"expiration_date must be a valid date in ISO-8601 form, eg 2099-02-28T01:00:00, or the string \"infinity\".">>}]};
 malformed_request_message(Any, Req, State) ->
     chef_wm_malformed:malformed_request_message(Any, Req, State).
 
