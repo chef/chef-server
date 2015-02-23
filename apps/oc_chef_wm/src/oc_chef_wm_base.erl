@@ -1018,6 +1018,7 @@ handle_rename(ObjectRec, Req, true) ->
                      {_ParentName, ObjName} -> ObjName; % ugh, special case for databag items
                      ObjName -> ObjName
                  end,
+    % TODO will need to revisit this when PUTing to keys.
     Uri = oc_chef_wm_routes:route(TypeName, Req, [{name, ObjectName}]),
     wrq:set_resp_header("Location", binary_to_list(Uri), Req).
 

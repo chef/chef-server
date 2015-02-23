@@ -162,7 +162,6 @@ parse_binary_json(Bin, undefined) ->
                        %% this will raise if expiration_date isn't a valid datetime
                        ec_date:parse(binary_to_list(Expiration))
                end,
-    io:fwrite("Parsed datetime is ~p~n", [Datetime]),
     ej:set({<<"expiration_date">>}, EJ, Datetime).
 
 update_query() ->

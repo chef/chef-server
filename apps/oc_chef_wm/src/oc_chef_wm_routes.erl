@@ -111,17 +111,17 @@ org_route(organization, Req, Args) ->
     render_template(Template, Req, TemplateArgs);
 org_route(client_key, Req, Args) ->
     Org = org_name(Req),
+    {object_name, ParentName} = lists:keyfind(object_name, 1, Args),
     {name, Name} = lists:keyfind(name, 1, Args),
-    {object_name, SubName} = lists:keyfind(object_name, 1, Args),
     {BaseURI, Org} = extract_from_req(Req),
     Template = template_for_type(client_key),
-    render_template(Template, BaseURI, [Org, Name, SubName]);
+    render_template(Template, BaseURI, [Org, ParentName, Name]);
 org_route(user_key, Req, Args) ->
+    {object_name, ParentName} = lists:keyfind(object_name, 1, Args),
     {name, Name} = lists:keyfind(name, 1, Args),
-    {object_name, SubName} = lists:keyfind(object_name, 1, Args),
     BaseURI = chef_wm_util:base_uri(Req),
     Template = template_for_type(user_key),
-    render_template(Template, BaseURI, [Name, SubName]).
+    render_template(Template, BaseURI, [ParentName, Name]).
 
 route_organization_rest_object(ParentName, Req, Args) ->
     Org = org_name(Req),
