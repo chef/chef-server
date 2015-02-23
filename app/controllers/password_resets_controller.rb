@@ -58,7 +58,7 @@ class PasswordResetsController < ApplicationController
           flash[:alert] = "User '#{params[:username]}' not found"
           redirect_to action: 'new'
         elsif e.response.code.to_i == 400
-          flash.now[:alert] = parsed_json_for_error(e)['error']
+          flash.now[:alert] = error_from_json(e)['error']
           render 'show', status: e.response.code
         else
           raise
@@ -93,7 +93,7 @@ class PasswordResetsController < ApplicationController
     ).valid_for?(params[:signature])
   end
 
-  def parsed_json_for_error(error)
+  def error_from_json(error)
     JSON.parse(error.response.body)
   rescue JSON::ParserError
     { 'error' => error.message }

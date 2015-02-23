@@ -230,7 +230,7 @@ describe PasswordResetsController do
               r = Net::HTTPBadRequest.new('1.0', '400', 'Bad Request')
               e = Net::HTTPServerException.new('fake exception', r)
               allow(User).to receive(:find).and_raise(e)
-              allow(controller).to receive(:parsed_json_for_error).and_return({
+              allow(controller).to receive(:error_from_json).and_return({
                 'error' => 'oh no!'
               })
               put :update, password: 'haha', signature: signature, expires: expires, username: name
