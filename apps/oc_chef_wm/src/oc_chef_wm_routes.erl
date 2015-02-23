@@ -142,6 +142,7 @@ bulk_route_fun(Type, Req) ->
 
 bulk_route_fun(Type, Name, Req) when Type =:= data_bag_item;
                                      Type =:= cookbook_version;
+                                     Type =:= cookbook_artifact_version;
                                      Type =:= client_key ->
     {BaseURI, Org} = extract_from_req(Req),
     Template = template_for_type(Type),
@@ -184,6 +185,12 @@ org_bulk_route_fun(cookbook_version, Req) ->
     fun(CookbookName, VersionString) ->
             render_template(Template, BaseURI, [Org, CookbookName, VersionString])
     end;
+org_bulk_route_fun(cookbook_artifact_version, Req) ->
+    {BaseURI, Org} = extract_from_req(Req),
+    Template = template_for_type(cookbook_artifact_version),
+    fun(CookbookName, Identifier) ->
+            render_template(Template, BaseURI, [Org, CookbookName, Identifier])
+    end;
 org_bulk_route_fun(policy, Req) ->
     {BaseURI, Org} = extract_from_req(Req),
     Template = template_for_type(policy),
@@ -198,7 +205,6 @@ org_bulk_route_fun(Type, Req) ->
     end.
 
 
-
 template_for_type(node) ->
     "/organizations/~s/nodes/~s";
 template_for_type(role) ->
@@ -207,6 +213,10 @@ template_for_type(cookbook) ->
     "/organizations/~s/cookbooks/~s";
 template_for_type(cookbook_version) ->
     "/organizations/~s/cookbooks/~s/~s";
+template_for_type(cookbook_artifact) ->
+    "/organizations/~s/cookbook_artifacts/~s";
+template_for_type(cookbook_artifact_version) ->
+    "/organizations/~s/cookbook_artifacts/~s/~s";
 template_for_type(environment) ->
     "/organizations/~s/environments/~s";
 template_for_type(principal) ->

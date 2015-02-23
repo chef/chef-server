@@ -45,6 +45,7 @@
          fetch_object/4,
          fetch_object_names/1,
          fetch/1,
+         fetch_multi/3,
 
          %% checksum ops
          mark_checksums_as_uploaded/2,
@@ -738,9 +739,13 @@ statements() ->
     {ok, Statements} = file:consult(Path),
     Statements.
 
--spec(fetch(chef_object:object_rec()) -> chef_object:object_rec()).
+-spec fetch(chef_object:object_rec()) -> chef_object:object_rec() | not_found | {error, _Why}.
 fetch(Record) ->
     chef_object:fetch(Record, fun select_rows/1).
+
+-spec fetch_multi(atom(), atom(), list()) -> [chef_object:object_rec()] | not_found | {error, _Why}.
+fetch_multi(RecModule, QueryName, QueryParams) ->
+    chef_object:fetch_multi(RecModule, QueryName, QueryParams, fun select_rows/1).
 
 -spec select_rows(
         {QueryName, BindParameters } |

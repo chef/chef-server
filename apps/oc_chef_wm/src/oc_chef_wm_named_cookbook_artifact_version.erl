@@ -104,16 +104,16 @@ auth_info(Req, State, ResourceState, Method, DbContext, CAVRec) ->
         {not_found, 'POST'} ->
             {{create_in_container, cookbook_artifact}, Req, State};
         {not_found, GetOrDelete} when GetOrDelete =:= 'GET'; GetOrDelete =:= 'DELETE' ->
-            forbidden(Req, State, 404, "not found", cookbook_artifact_not_found);
+            fail_with(Req, State, 404, "not found", cookbook_artifact_version_not_found);
         {forbidden, _} ->
-            forbidden(Req, State, 403, "forbidden", cookbook_artifact_forbidden);
+            fail_with(Req, State, 403, "forbidden", cookbook_artifact_version_forbidden);
         {#oc_chef_cookbook_artifact_version{authz_id = AuthzId} = CAV, _} ->
             NewResourceState = ResourceState#cookbook_artifact_version_state{oc_chef_cookbook_artifact_version = CAV},
             State1 = State#base_state{resource_state = NewResourceState},
             {{object, AuthzId}, Req, State1}
     end.
 
-forbidden(Req, State, RespCode, RespMessage, LogMsg) ->
+fail_with(Req, State, RespCode, RespMessage, LogMsg) ->
     Message = chef_wm_util:error_message_envelope(
                 erlang:iolist_to_binary(RespMessage)),
     Req1 = chef_wm_util:set_json_body(Req, Message),

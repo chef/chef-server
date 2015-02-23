@@ -40,6 +40,14 @@
           serialized_object
           }).
 
+-record(oc_chef_cookbook_artifact, {
+          id,
+          org_id,
+          name,
+          authz_id,
+          version_identifiers :: [ Identifier::binary() ]
+         }).
+
 -record(oc_chef_cookbook_artifact_version, {
           id,
           identifier,

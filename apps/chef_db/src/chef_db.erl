@@ -90,6 +90,7 @@
          list/2,
          update/3,
          fetch/2,
+         fetch_multi/4,
          bulk_get/4,
          data_bag_exists/3,
          environment_exists/3]).
@@ -217,6 +218,20 @@ fetch(ObjectRec, #context{reqid = ReqId}) ->
     stats_hero:ctime(ReqId, {chef_sql, fetch},
                           fun() ->
                                   chef_sql:fetch(ObjectRec)
+                          end).
+
+%% @doc Meant to be used for a query that fetches multiple objects
+-spec fetch_multi(RecModule :: atom(),
+                  DbContext :: #context{},
+                  QueryName :: atom(),
+                  QueryParams :: list()) ->
+                      [object_rec()] |
+                      not_found |
+                      {error, term()}.
+fetch_multi(RecModule, #context{reqid = ReqId}, QueryName, QueryParams) ->
+    stats_hero:ctime(ReqId, {chef_sql, fetch_multi, QueryName},
+                          fun() ->
+                                  chef_sql:fetch_multi(RecModule, QueryName, QueryParams)
                           end).
 
 -spec list(object_rec(), #context{}) -> [binary()] | {error, _}.

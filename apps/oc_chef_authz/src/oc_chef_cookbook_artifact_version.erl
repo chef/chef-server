@@ -86,10 +86,9 @@ find_query() ->
     find_cookbook_artifact_version_by_org_name_identifier.
 
 list_query() ->
-    list_cookbook_artifact_versions_by_org_id.
+    erlang:error(not_supported).
 
 bulk_get_query() ->
-    %% TODO: do we need this?
     erlang:error(not_supported).
 
 is_indexed() ->
@@ -140,8 +139,8 @@ fields_for_fetch(#oc_chef_cookbook_artifact_version{org_id = OrgId,
                                                     identifier = Identifier}) ->
     [OrgId, Name, Identifier].
 
-list(#oc_chef_cookbook_artifact_version{org_id = OrgId}, CallbackFun) ->
-    CallbackFun({list_query(), [OrgId], rows}).
+list(#oc_chef_cookbook_artifact_version{}, _CallbackFun) ->
+    erlang:error(not_supported).
 
 record_fields() ->
     record_info(fields, oc_chef_cookbook_artifact_version).
