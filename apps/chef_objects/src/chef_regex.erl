@@ -100,6 +100,10 @@ regex_for(cookbook_name) ->
 regex_for(environment_name) ->
     generate_regex_msg_tuple(?ANCHOR_REGEX(?NAME_REGEX),
                              <<"Malformed environment name. Must only contain A-Z, a-z, 0-9, _ or -">>);
+regex_for(key_name) ->
+    % This might be the same as nodename -- nodename seems to allow ':' as well
+    generate_regex_msg_tuple(?ANCHOR_REGEX(?NAME_REGEX),
+                             <<"Malformed key name.  Must be A-Z, a-z, 0-9, _, -, or .">>);
 regex_for(client_name) ->
     % This might be the same as nodename -- nodename seems to allow ':' as well
     generate_regex_msg_tuple(?ANCHOR_REGEX(?NAME_REGEX),

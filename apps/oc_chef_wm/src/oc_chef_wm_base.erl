@@ -619,7 +619,12 @@ object_creation_error_hook(#chef_data_bag_item{}, _RequestorId) ->
 object_creation_error_hook(#chef_cookbook_version{}, _RequestorId) ->
     ok;
 object_creation_error_hook(Object, RequestorId) ->
-    oc_chef_authz:delete_resource(RequestorId, object, chef_object:authz_id(Object)),
+    case chef_object:authz_id(Object) of
+        undefined ->
+            ok;
+        AuthzId ->
+            oc_chef_authz:delete_resource(RequestorId, object, AuthzId)
+    end,
     ok.
 
 %% Evaluates if user is a direct member of a group
