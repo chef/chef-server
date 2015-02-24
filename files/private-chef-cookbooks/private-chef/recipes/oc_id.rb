@@ -8,7 +8,7 @@
 #
 # We don't have a clear way to detect whether Manage is installed or running or
 # whether it's running on an alternate host/port, short of slurping the
-# manage-running.json, so there's not an easy way to detect whay the *actual*
+# manage-running.json, so there's not an easy way to detect what the *actual*
 # sign up URL is or whether we have one (which we won't if Manage is not
 # installed), so we use the api_fqdn by default, which is the default location
 # if Manage is installed with its default settings.
