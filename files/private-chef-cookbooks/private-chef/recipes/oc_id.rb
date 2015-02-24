@@ -1,8 +1,28 @@
 #
 # Author:: James Casey <james@getchef.com>
-# Copyright:: Copyright (c) 2014 Chef, Inc.
+# Copyright:: Copyright (c) 2014-2015 Chef Software, Inc.
 #
 # All Rights Reserved
+
+# If no sign_up_url is defined, use the server URL.
+#
+# We don't have a clear way to detect whether Manage is installed or running or
+# whether it's running on an alternate host/port, short of slurping the
+# manage-running.json, so there's not an easy way to detect what the *actual*
+# sign up URL is or whether we have one (which we won't if Manage is not
+# installed), so we use the api_fqdn by default, which is the default location
+# if Manage is installed with its default settings.
+#
+# In the long term, sign up is going to be moved into oc-id anyway, so this will
+# not be an issue. In the short term, we will provide a way to disable sign up
+# (see https://github.com/chef/oc-id/issues/41.)
+#
+# For now, if the sign up URL for Manage is anything different than what we
+# default to here, you'll need to define it explicitly.
+sign_up_url = node['private_chef']['oc_id']['sign_up_url']
+unless sign_up_url
+  sign_up_url = "https://#{node['private_chef']['api_fqdn']}/signup"
+end
 
 app_settings = {
   'chef' => {
@@ -12,7 +32,9 @@ app_settings = {
   },
   'doorkeeper' => {
     'administrators' => node['private_chef']['oc_id']['administrators'] || []
-  }
+  },
+  'sentry_dsn' => node['private_chef']['oc_id']['sentry_dsn'],
+  'sign_up_url' => sign_up_url,
 }
 
 oc_id_dir = node['private_chef']['oc_id']['dir']
@@ -112,7 +134,7 @@ execute "oc_id_schema" do
 
   # There are other recipes that depend on having a VERSION environment
   # variable. If that environment variable is set when we run `rake db:migrate`,
-  # and it is set to something the the migrations do not expect, this will
+  # and it is set to something the migrations do not expect, this will
   # break.
   #
   # We want to migrate to the latest version, which we can get by looking at the
