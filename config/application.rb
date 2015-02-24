@@ -41,5 +41,12 @@ module OcId
     # config.before_initialize do
     #   puts Settings.yay.me
     # end
+
+    config.action_mailer.default_url_options = {
+      host: Settings.origin,
+      port: Settings.port,
+      protocol: Settings.protocol
+    }
+    config.action_mailer.delivery_method = :sendmail
   end
 end

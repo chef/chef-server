@@ -5,6 +5,8 @@ chef:
 doorkeeper:
   administrators:
     - rainbowdash
+email_from_address: 'Chef Notifications <notifications@chef.io>'
+protocol: https
 secret_key_base: CHANGE ME
 sign_up_url: https://manage.chef.io/signup?ref=community
 zendesk:

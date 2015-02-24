@@ -1,8 +1,7 @@
 FactoryGirl.define do
-
   factory :user do
     username 'applejack'
-    password 'applejack'
+    password 'password'
     first_name 'Apple'
     last_name 'Jack'
     email 'applejack@ponyville.com'
@@ -19,7 +18,7 @@ SQIDAQAB
 
   factory :administrator, parent: :user do
     username 'rainbowdash'
-    password 'rainbowdash'
+    password 'password'
     first_name 'Rainbow'
     last_name 'Dash'
     email 'rainbowdash@ponyville.com'
@@ -33,5 +32,4 @@ F6dutenFO3xjG+s12x8iU8MQLzsBMtFa9V1hr189xqUwAW0DBoiKBXjkQ20DKC/T
 SQIDAQAB
 -----END PUBLIC KEY-----}
   end
-  
 end
