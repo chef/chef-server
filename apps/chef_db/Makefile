@@ -13,6 +13,7 @@ DIALYZER_DEPS = deps/chef_objects/ebin \
                 deps/stats_hero/ebin
 DEPS_PLT = chef_db.plt
 ITEST_DEPS = $(CURDIR)/itest/common/deps
+EC_SCHEMA_VERSION?=master
 
 ## Set the environment variable $DB_TYPE to either mysql or pgsql
 ## to run the correct integration tests.

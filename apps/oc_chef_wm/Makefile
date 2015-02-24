@@ -20,9 +20,7 @@ DIALYZER_DEPS = deps/chef_authn/ebin \
 # ec_gb_trees.erl:72: Polymorphic opaque types not supported yet
 # :'(
 DEPS_PLT = oc_chef_wm.plt
-# TODO automate managing this revision
-EC_SCHEMA_VERSION = mp/keys-add-last-updater
-#2.8.0
+EC_SCHEMA_VERSION?=master
 
 ITEST_DEPS = $(CURDIR)/itest/common/deps
 
