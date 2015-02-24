@@ -266,7 +266,7 @@ extract_entity_info(Req, #key_state{key_data = FullActionPayload, parent_name = 
     {FullActionPayload, <<"key">>, [{<<"entity_type">>, <<"key">>},
                                     {<<"entity_name">>, Name },
                                     {<<"parent_type">>, atom_to_binary(ParentType, utf8)},
-                                    {<<"parent_name">>, list_to_binary(ParentName)}
+                                    {<<"parent_name">>, ParentName}
                                    ]}.
 
 get_corrected_name(undefined, NameKey, FullActionPayload) ->
