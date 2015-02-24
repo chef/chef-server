@@ -61,6 +61,9 @@
 %% for data bags, data bag items, roles, nodes, and keys.
 -define(ALTERNATIVE_NAME_REGEX, "[.[:alnum:]_\:-]+").
 
+%% Policy names are similar to data bags et al., but are limited to 255 Chars.
+-define(NAME_REGEX_MAX_255, "[.[:alnum:]_\:-]{1,255}").
+
 %% Username validation regex
 -define(USERNAME_REGEX, "[a-z0-9\-_]+").
 
@@ -74,6 +77,10 @@
 
 %% Sometimes, recipe names can have version qualifiers as well.
 -define(VERSIONED_RECIPE_REGEX, ?COOKBOOK_QUALIFIED_RECIPE_REGEX ++ ?RECIPE_VERSION_REGEX).
+
+%% Policyfile run list items must be **fully** qualified (both cookbook name
+%% and recipe name must be present), and do not allow version qualifiers.
+-define(POLICY_FULLY_QUALIFIED_RECIPE_REGEX, "^recipe\\[" ++ ?NAME_REGEX ++ "::" ++ ?NAME_REGEX ++ "\\]$").
 
 %% A SHA1 hash
 -define(SHA1_HASH_REGEX, "[a-fA-F0-9]{40}").
@@ -133,6 +140,9 @@ regex_for(qualified_recipe) ->
 regex_for(unqualified_recipe) ->
   generate_regex_msg_tuple(?ANCHOR_REGEX(?VERSIONED_RECIPE_REGEX),
                            <<"Malformed recipe">>);
+regex_for(policy_fully_qualified_recipe) ->
+    generate_regex_msg_tuple(?POLICY_FULLY_QUALIFIED_RECIPE_REGEX,
+                             <<"Malformed run list item. Policies can only contain fully qualified recipe items.">>);
 
 regex_for(user_name) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?USERNAME_REGEX),
@@ -140,10 +150,13 @@ regex_for(user_name) ->
 regex_for(non_blank_string) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?NON_BLANK_REGEX), <<"Field must have a non-empty string value">>);
 
+regex_for(policy_file_revision_id) ->
+    generate_regex_msg_tuple(?ANCHOR_REGEX(?NAME_REGEX_MAX_255),
+                             <<"Malformed policy name. Must be A-Z, a-z, 0-9, _, -, :, or .">>);
 regex_for(policy_file_name) ->
-    generate_regex_msg_tuple(?ANCHOR_REGEX(?NAME_REGEX),
-                             <<"Malformed policy name. Must be A-Z, a-z, 0-9, _, -, or .">>);
+    generate_regex_msg_tuple(?ANCHOR_REGEX(?NAME_REGEX_MAX_255),
+                             <<"Malformed policy name. Must be A-Z, a-z, 0-9, _, -, :, or .">>);
 
 regex_for(policy_identifier) ->
-    generate_regex_msg_tuple(?ANCHOR_REGEX(?SHA1_HASH_REGEX),
-                             <<"Malformed policy identifier. Must be a valid SHA1 signature">>).
+    generate_regex_msg_tuple(?ANCHOR_REGEX(?NAME_REGEX_MAX_255),
+                             <<"Malformed policy name. Must be A-Z, a-z, 0-9, _, -, :, or .">>).

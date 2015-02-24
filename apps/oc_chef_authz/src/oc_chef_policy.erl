@@ -62,9 +62,11 @@
         ]).
 
 -define(VALIDATION_CONSTRAINTS,
-        {[{<<"name">>, {string_match, chef_regex:regex_for(policy_file_name)}},
+        {[{<<"revision_id">>, {string_match, chef_regex:regex_for(policy_file_revision_id)}},
 
-          {<<"run_list">>, chef_json_validator:run_list_spec()},
+          {<<"name">>, {string_match, chef_regex:regex_for(policy_file_name)}},
+
+          {<<"run_list">>, chef_json_validator:policy_run_list_spec()},
 
           {<<"cookbook_locks">>,
            {object_map, {
@@ -76,18 +78,24 @@
          ]}).
 
 -define(COOKBOOK_LOCK_VAIDATION_CONSTRAINTS,
-        {[{<<"dotted_decimal_identifier">>,
-           chef_cookbook_version:single_cookbook_version_spec()},
-          {<<"identifier">>,
+        {[{<<"identifier">>,
            {string_match, chef_regex:regex_for(policy_identifier)}},
 
-          {{opt, <<"version">>},
-           chef_cookbook_version:single_cookbook_version_spec()}]}).
+          {{opt, <<"dotted_decimal_identifier">>},
+           valid_cookbook_version_spec(<<"Field 'dotted_decimal_identifier' is not a valid version">>)},
+
+          {<<"version">>,
+           valid_cookbook_version_spec(<<"Field 'version' is not a valid version">>)}]}).
+
+valid_cookbook_version_spec(Message) ->
+    {fun_match, {fun chef_cookbook_version:valid_cookbook_constraint/1, string,
+                 Message}}.
+
 
 valid_cookbook_lock(CookbookLockJson) ->
     case ej:valid(?COOKBOOK_LOCK_VAIDATION_CONSTRAINTS, CookbookLockJson) of
         ok -> ok;
-        _Bad -> error
+        Bad -> throw(Bad)
     end.
 
 id(#oc_chef_policy{id = Id}) ->
