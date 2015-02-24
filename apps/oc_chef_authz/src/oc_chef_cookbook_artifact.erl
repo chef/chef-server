@@ -53,7 +53,8 @@
          record_fields/0,
          flatten/1]).
 
--export([exists_by_authz_id/1]).
+-export([exists_by_authz_id/1,
+         filter_checksums_to_delete/2]).
 
 id(#oc_chef_cookbook_artifact{id = Id}) ->
     Id.
@@ -127,11 +128,37 @@ flatten(#oc_chef_cookbook_artifact{}) ->
     erlang:error(not_supported).
 
 %% @doc Checks if a cookbook artifact with the given `AuthzId' exists
--spec exists_by_authz_id(binary()) -> boolean | {error, _Why}.
+-spec exists_by_authz_id(AuthzId :: object_id()) -> boolean | {error, _Why}.
 exists_by_authz_id(AuthzId) ->
     case chef_sql:select_rows({check_cookbook_artifact_exists_by_authz_id,
                                [AuthzId]}) of
         not_found -> false;
         [[{<<"authz_id">>, AuthzId}]] -> true;
         {error, _Why} = Error -> Error
+    end.
+
+%% @doc This is meant to be called when deleting files from
+%% storage after deleting or updating a cookbook version
+%% This will remove from `Checksums' all those that are still
+%% referenced by a cookbook artifact; and then return the list
+%% of checksums that should indeed be deleted from storage.
+%% Note that the reverse check (i.e. not deleting files that
+%% are still referenced by a cookbook version when deleting a
+%% cookbook artifact version) is handled directly in the DB:
+%% https://github.com/chef/enterprise-chef-server-schema/blob/2.8.0/deploy/delete_cookbook_artifact_version.sql#L68-L72
+-spec filter_checksums_to_delete(OrgId :: object_id(),
+                                 Checksums :: [binary()]) -> [binary()] | {error, _Why}.
+filter_checksums_to_delete(OrgId, Checksums) ->
+    case sqerl:select(checksums_referenced_by_cookbook_artifact_versions,
+                      [OrgId, Checksums],
+                      rows_as_scalars,
+                      [checksum]) of
+        {ok, none} ->
+            Checksums;
+        {ok, ChecksumsStillReferenced} ->
+            ChecksumsToDelete = sets:subtract(sets:from_list(Checksums),
+                                              sets:from_list(ChecksumsStillReferenced)),
+            sets:to_list(ChecksumsToDelete);
+        {error, _Why} = Error ->
+            Error
     end.

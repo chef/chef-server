@@ -1204,6 +1204,9 @@ unlink_all_checksums_from_cbv(OrgId, CookbookVersionId) ->
 -spec delete_orphaned_checksums(OrgId::binary(),
 				Checksums::[binary()]) -> [binary()].
 delete_orphaned_checksums(OrgId, Checksums) ->
+    %% we don't want to delete checksums associated with
+    %% cookbook artifact versions
+    FilteredChecksums = oc_chef_cookbook_artifact:filter_checksums_to_delete(OrgId, Checksums),
     lists:foldl(fun(Checksum, Acc) ->
             case sqerl:statement(delete_checksum_by_id, [OrgId, Checksum]) of
                 {ok, N} when is_integer(N) -> %% pretend there is 1
@@ -1220,7 +1223,7 @@ delete_orphaned_checksums(OrgId, Checksums) ->
             end
       end,
       [],
-      Checksums).
+      FilteredChecksums).
 
 %% @doc try and delete the row from cookbooks table.  It is protected by a
 %% ON DELETE RESTRICT from cookbook_versions so we get a FK violation if there

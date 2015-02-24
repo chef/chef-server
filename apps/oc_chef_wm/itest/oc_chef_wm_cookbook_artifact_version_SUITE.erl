@@ -61,6 +61,12 @@ init_per_testcase(_, Config) ->
                       end),
     Config.
 
+end_per_testcase(http_delete_then_fetch_all_cookbook_artifacts, Config) ->
+    OrgId = ?config(org_id, Config),
+    %% we restore those for subsequent tests
+    ok = chef_sql:mark_checksums_as_uploaded(OrgId,
+                                             canonical_example_checksums()),
+    end_per_testcase(generic, Config);
 end_per_testcase(_, Config) ->
     ok = meck:unload(chef_s3),
     Config.
@@ -77,7 +83,8 @@ all() ->
       http_get_cookbook_artifact,
       http_get_cookbook_artifacts,
       http_get_missing_cookbook_artifact,
-      http_delete_then_fetch_all_cookbook_artifacts
+      http_delete_then_fetch_all_cookbook_artifacts,
+      filter_checksums_to_delete
     ].
 
 %% this tests that low level DB ops (create and fetch)
@@ -255,7 +262,47 @@ http_delete_then_fetch_all_cookbook_artifacts(Config) ->
     ?assertEqual({"200", {[]}},
                  http_fetch_cookbook_artifacts()).
 
-%% Helper funs
+%% This tests `oc_chef_cookbook_artifact:filter_checksums_to_delete/2'
+%% It's more of a unit test, but it still needs the DB around...
+filter_checksums_to_delete(Config) ->
+    OrgId = ?config(org_id, Config),
+
+    ReferencedChecksums = canonical_example_checksums(),
+    %% let's make sure that they are indeed still referenced
+    %% regardless of the tests above
+    Name = "filter_checksums_to_delete_name",
+    Identifier = "filter_checksums_to_delete_identifier",
+
+    CreateEjson = canonical_example(Name, Identifier),
+    ?assertMatch({"201", _},
+                 http_create_cookbook_artifact_version(Name, Identifier, CreateEjson)),
+
+    %% then let's select a few of them
+    %% (each with probability 80%)
+    RandomReferencedChecksums = lists:foldl(
+        fun(Candidate, Acc) ->
+            case random:uniform(5) =:= 1 of
+                true -> Acc;
+                false -> [Candidate | Acc]
+            end
+        end,
+        [],
+        ReferencedChecksums
+    ),
+    %% now let's build a random list of 20 checksums
+    RandomChecksums = lists:map(
+        fun(_) -> chef_object_base:make_guid() end,
+        lists:seq(1, 20)
+    ),
+    %% then let's shuffle em all
+    AllChecksums = RandomChecksums ++ RandomReferencedChecksums,
+    ChecksumsToDelete = [X || {_, X} <- lists:sort([ {random:uniform(), C} || C <- AllChecksums ])],
+    ActualResult = oc_chef_cookbook_artifact:filter_checksums_to_delete(OrgId, ChecksumsToDelete),
+    %% and these 2 should be equal modulo the order!
+    ?assertEqual(lists:sort(RandomChecksums),
+                 lists:sort(ActualResult)).
+
+%%% Helper funs
 
 artifact_version_rec_from_json(Config, Json) ->
     OrgId = ?config(org_id, Config),

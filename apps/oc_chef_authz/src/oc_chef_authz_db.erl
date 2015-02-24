@@ -211,7 +211,16 @@ statements(pgsql) ->
       {check_cookbook_artifact_exists_by_authz_id,
       <<"SELECT authz_id "
           "FROM cookbook_artifacts "
-         "WHERE authz_id = $1">>}
+         "WHERE authz_id = $1">>},
+      %% $2 should be an array of checksums to check
+      %% then this query returns all checksums from there
+      %% that are referenced by cookbook artifact versions
+      {checksums_referenced_by_cookbook_artifact_versions,
+       <<"SELECT checksum "
+           "FROM cookbook_artifact_version_checksums "
+          "WHERE org_id = $1 "
+            "AND checksum = ANY($2) "
+       "GROUP BY checksum">>}
     ].
 
 %
