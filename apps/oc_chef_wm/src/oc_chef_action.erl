@@ -65,7 +65,7 @@ log_action(Req, #base_state{resource_state = ResourceState,
         is_record(ResourceState, node_state);
         is_record(ResourceState, role_state);
         is_record(ResourceState, user_state);
-        is_record(ResourceState, keys_state) ->
+        is_record(ResourceState, key_state) ->
     case wrq:method(Req) of
         'GET' ->
             ok;
@@ -261,14 +261,13 @@ extract_entity_info(Req, #user_state{user_data = FullActionPayload}) ->
     {FullActionPayload, <<"user">>, [{<<"entity_type">>, <<"user">>},
                                      {<<"entity_name">>, CorrectedName}
                                     ]};
-extract_entity_info(Req, #keys_state{ejson = FullActionPayload}) ->
-    %% TODO, not sure if user_key vs client_key matters here.
-    %% If so, we should see what the type field is from keys_state
-    %% If not, we should add a generic impl object_name(key) to chef_wm_util
-    Name = req_or_data_name(chef_wm_util:object_name(user_key, Req), FullActionPayload),
+extract_entity_info(Req, #key_state{key_data = FullActionPayload, parent_name = ParentName, type = ParentType}) ->
+    Name = req_or_data_name(chef_wm_util:object_name(key, Req), FullActionPayload),
     {FullActionPayload, <<"key">>, [{<<"entity_type">>, <<"key">>},
-                                     {<<"entity_name">>, Name}
-                                    ]}.
+                                    {<<"entity_name">>, Name },
+                                    {<<"parent_type">>, atom_to_binary(ParentType, utf8)},
+                                    {<<"parent_name">>, list_to_binary(ParentName)}
+                                   ]}.
 
 get_corrected_name(undefined, NameKey, FullActionPayload) ->
     ej:get({NameKey}, FullActionPayload);
