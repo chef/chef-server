@@ -15,7 +15,7 @@
 #
 
 name "bookshelf"
-default_version "1.1.6"
+default_version "1.1.7"
 
 source git: "git://github.com/opscode/bookshelf.git"
 
@@ -28,6 +28,6 @@ build do
   make "distclean", env: env
   make "rel", env: env
 
-  sync "#{project_dir}/rel/bookshelf/", "#{install_dir}/embedded/service/bookshelf/"
+  sync "#{project_dir}/_rel/bookshelf/", "#{install_dir}/embedded/service/bookshelf/"
   delete "#{install_dir}/embedded/service/bookshelf/log"
 end
