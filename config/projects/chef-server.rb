@@ -95,9 +95,6 @@ dependency "enterprise-chef-server-schema"
 dependency "private-chef-cookbooks"
 dependency "chef-ha-plugin-config"
 
-# version manifest file
-dependency "version-manifest"
-
 package :rpm do
   signing_passphrase ENV['OMNIBUS_RPM_SIGNING_PASSPHRASE']
 end
