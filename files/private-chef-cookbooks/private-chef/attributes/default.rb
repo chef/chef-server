@@ -463,6 +463,8 @@ default['private_chef']['oc_id']['sql_database'] = "oc_id"
 default['private_chef']['oc_id']['sql_user'] = "oc_id"
 default['private_chef']['oc_id']['sql_password'] = "snakepliskin"
 default['private_chef']['oc_id']['db_pool_size'] = '20'
+default['private_chef']['oc_id']['sentry_dsn'] = nil
+default['private_chef']['oc_id']['sign_up_url'] = nil
 
 default['private_chef']['oc_id']['administrators'] = []
 
