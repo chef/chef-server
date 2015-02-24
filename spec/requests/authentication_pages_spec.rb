@@ -12,7 +12,7 @@ describe 'Authentication' do
     it { should have_button 'Sign In' }
     it { should have_link 'Forgot your password?' }
     it { should have_link 'Sign Up' }
-    
+
     describe 'success' do
       let(:user) { FactoryGirl.build(:user) }
 
