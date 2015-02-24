@@ -144,6 +144,22 @@ new_record(OrgId, AuthzId, Data) ->
                serialized_object = chef_json:encode(SerializedObject)
     }.
 
+undef_as_null(Value) ->
+    case Value of
+        undefined ->
+            null;
+        V ->
+            V
+    end.
+
+value_or_existing(Key, Data, Existing) ->
+    case value_or_null(Key, Data) of
+        null ->
+            undef_as_null(Existing);
+        Value ->
+            Value
+    end.
+
 value_or_null(Key, Data) ->
     Value = ej:get(Key, Data),
     case Value of
@@ -347,8 +363,12 @@ update_from_ejson(#chef_user{} = User, UserEJson) ->
     end,
     Name = username_from_ejson(UserEJson),
     Email = ej:get({<<"email">>}, UserEJson),
-    ExternalAuthenticationUid = value_or_null({<<"external_authentication_uid">>}, UserEJson),
-    RecoveryAuthenticationEnabled = ej:get({<<"recovery_authentication_enabled">>}, UserEJson) =:= true,
+    ExternalAuthenticationUid = value_or_existing({<<"external_authentication_uid">>},
+                                                  UserEJson,
+                                                  User#chef_user.external_authentication_uid),
+    RecoveryAuthenticationEnabled = value_or_existing({<<"recovery_authentication_enabled">>},
+                                                      UserEJson,
+                                                      User#chef_user.recovery_authentication_enabled) =:= true,
     {Key, Version} = chef_object_base:cert_or_key(UserEJson),
 
     User2 = case Key of

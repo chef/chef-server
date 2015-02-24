@@ -223,9 +223,13 @@ update_record_test_() ->
         UpdatePassword = {[ {<<"password">>, <<"a new password">>} ]},
         ExtAuthUpdate = [{<<"external_authentication_uid">>, <<"bob">>},
                           {<<"recovery_authentication_enabled">>, true}],
+        SerializedObject = chef_json:encode({base_user_record_as_ejson()
+                                             ++ persisted_serializable_fields()}),
+        UserWithExtAuthData = make_valid_user_record_with_external_auth(SerializedObject),
         User1 = chef_user:update_from_ejson(User, UpdateAsEJson),
         User2 = chef_user:update_from_ejson(User, UpdatePassword),
         User3 = chef_user:update_from_ejson(User, ExtAuthUpdate),
+        User4 = chef_user:update_from_ejson(UserWithExtAuthData, UpdateAsEJson),
         [{"changed values are changed",
            fun() ->
                 ?assertEqual(<<"new_email@somewhere.com">>, User1#chef_user.email),
@@ -278,7 +282,13 @@ update_record_test_() ->
                 ?assertEqual(false, User1#chef_user.recovery_authentication_enabled)
            end
         },
-        {"external authentication data is updated when it should be",
+        {"external authentication data is not updated when it should not be",
+           fun() ->
+                ?assertEqual(<<"amoney">>, User4#chef_user.external_authentication_uid),
+                ?assertEqual(true, User4#chef_user.recovery_authentication_enabled)
+           end
+        },
+         {"external authentication data is updated when it should be",
            fun() ->
                 ?assertEqual(<<"bob">>, User3#chef_user.external_authentication_uid),
                 ?assertEqual(true, User3#chef_user.recovery_authentication_enabled)
@@ -318,6 +328,18 @@ make_valid_user_record() ->
 make_valid_user_record(SerializedObject) ->
     {HashedPassword, Salt ,Type} = chef_password:encrypt("a password"),
     #chef_user{username = <<"alice">>,
+               email = <<"test@test.com">>,
+               authz_id = <<"1234">>,
+               public_key = public_key_data(),
+               hashed_password = HashedPassword,
+               salt = Salt,
+               hash_type = Type,
+               serialized_object = SerializedObject}.
+make_valid_user_record_with_external_auth(SerializedObject) ->
+    {HashedPassword, Salt ,Type} = chef_password:encrypt("a password"),
+    #chef_user{username = <<"alice">>,
+               external_authentication_uid = <<"amoney">>,
+               recovery_authentication_enabled = true,
                email = <<"test@test.com">>,
                authz_id = <<"1234">>,
                public_key = public_key_data(),
