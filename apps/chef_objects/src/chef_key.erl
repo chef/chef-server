@@ -89,6 +89,7 @@ set_updated(#chef_key{} = Object, ActorId) ->
     Object#chef_key{updated_at = Now, last_updated_by = ActorId}.
 
 fields_for_update(#chef_key{}) ->
+    %% NOTE: we must do the same date parse here that we do in flatten
     error(need_to_implement).
 
 fields_for_fetch(#chef_key{id = Id, key_name = KeyName}) ->
@@ -112,15 +113,17 @@ find_query() ->
 new_record(_OrgId, _AuthzId, {Id, KeyData}) ->
     PubKey = ej:get({<<"public_key">>}, KeyData),
     PubKeyVersion = chef_object_base:key_version(PubKey),
-    Expires = case ej:get({<<"expiration_date">>}, KeyData) of
-                  undefined ->
-                      <<"infinity">>;
-                  Value ->
-                      Value
-              end,
+    Expires = parse_expiration(ej:get({<<"expiration_date">>}, KeyData)),
     #chef_key{ id = Id, key_name = ej:get({<<"name">>}, KeyData),
                public_key = PubKey, key_version = PubKeyVersion,
                expires_at = Expires}.
+
+parse_expiration(Expiration) when Expiration =:= undefined;
+                                  Expiration =:= <<"infinity">> ->
+   ?INFINITY_TIMESTAMP;
+parse_expiration(Expiration) when is_binary(Expiration) ->
+    ec_date:parse(binary_to_list(Expiration)).
+
 
 name(#chef_key{key_name = KeyName}) ->
     KeyName.
@@ -154,14 +157,9 @@ parse_binary_json(Bin, undefined) ->
     chef_object_base:validate_ejson(EJ, {[ {<<"name">>, {string_match, chef_regex:regex_for(key_name)}},
                                            {{req, <<"expiration_date">>}, string} ]}),
 
-    Datetime = case ej:get({<<"expiration_date">>}, EJ) of
-                   <<"infinity">> ->
-                       ?INFINITY_TIMESTAMP;
-                   Expiration ->
-                       %% this will raise if expiration_date isn't a valid datetime
-                       ec_date:parse(binary_to_list(Expiration))
-               end,
-    ej:set({<<"expiration_date">>}, EJ, Datetime).
+    %% this will raise if expiration_date isn't a valid datetime
+    parse_expiration(ej:get({<<"expiration_date">>}, EJ)),
+    EJ.
 
 update_query() ->
     error(need_to_implement).
