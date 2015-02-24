@@ -16,7 +16,7 @@ To run this app you'll need:
 * Node.js (if you're compiling assets to run in production)
 * The `bundler` gem
 * A Postgres database instance
-* A reachable Enterprise Chef 11 server URL
+* A reachable Enterprise Chef 11 or Chef 12 server URL
 * A privileged key for that Chef server (usually stored in
   /etc/opscode/webui_priv.pem on the Chef server)
 
@@ -53,8 +53,15 @@ usually something like `https://host:port/auth/chef_oauth2/callback`.
 
 ## Development
 
-If you have all the requirements ready, you should be able to run the app in
-development mode using the usual Rails workflow:
+You'll need all the requirements listed above. Once you have everything setup
+copy the webui\_priv.pem to the config directory of oc-id. Then update the
+settings.yml file, replacing the endpoint setting with the URL of the Chef Server
+you'll be using for development. Alternately, you can edit the development.yml
+file in the config/settings directory and ensure it has the endpoint setting
+set. If development.yml has the endpoint setting set this will override what is
+found in settings.yml.
+
+You can then run the app in development mode using the usual Rails workflow:
 
     bundle install
     bin/rake db:create
