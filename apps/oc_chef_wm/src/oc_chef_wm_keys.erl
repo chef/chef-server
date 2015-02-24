@@ -53,7 +53,7 @@ init(Config) ->
     oc_chef_wm_base:init(?MODULE, Config).
 
 init_resource_state(_Config) ->
-    {ok, #keys_state{}}.
+    {ok, #key_state{}}.
 
 request_type() ->
     "keys".
@@ -69,7 +69,7 @@ validate_request('POST', Req, #base_state{resource_args = ObjectType, chef_db_co
     EJ = chef_key:parse_binary_json(wrq:req_body(Req), undefined),
     ObjectName = chef_wm_util:object_name(ObjectType, Req),
     ResourceState = make_resource_state_for_object(Ctx, ObjectType, ObjectName, OrgId),
-    ResourceState1 = ResourceState#keys_state{ejson = EJ},
+    ResourceState1 = ResourceState#key_state{key_data = EJ},
     {Req, State#base_state{resource_state = ResourceState1 }}.
 
 make_resource_state_for_object(DbContext, client, Name, OrgId) ->
@@ -78,9 +78,11 @@ make_resource_state_for_object(DbContext, user, Name, _OrgId) ->
     make_resource_state_for_object(user, chef_db:fetch(#chef_user{username = Name}, DbContext)).
 
 make_resource_state_for_object(_Type, not_found) ->
-    #keys_state{};
+    #key_state{};
 make_resource_state_for_object(Type, Object) ->
-    #keys_state{type = Type, name = chef_object:name(Object), authz_id = chef_object:authz_id(Object), id = chef_object:id(Object)}.
+    FullType = list_to_existing_atom(atom_to_list(Type) ++ "_key"),
+    #key_state{type = Type, full_type = FullType, parent_name = chef_object:name(Object),
+               parent_authz_id = chef_object:authz_id(Object), parent_id = chef_object:id(Object)}.
 
 
 %% Permissions:
@@ -93,40 +95,39 @@ make_resource_state_for_object(Type, Object) ->
 %%   * If requestor is a user and target is self, requestor gets full permissions without specific acl checks.
 %%
 %% Before proceeding to authorize, first ensure that the owning actor (client or user) specified in the url exists.
-auth_info(Req, #base_state{resource_args = TargetType, resource_state = #keys_state{id = undefined}} = State) ->
+auth_info(Req, #base_state{resource_args = TargetType, resource_state = #key_state{parent_id = undefined}} = State) ->
     Name = chef_wm_util:object_name(TargetType, Req),
     Message = chef_wm_util:not_found_message(TargetType, Name),
     Req1 = chef_wm_util:set_json_body(Req, Message),
     {{halt, 404}, Req1, State#base_state{log_msg = {TargetType, not_found}}};
 %% If requestor is a user and target is self, requestor is authorized
 auth_info(Req, #base_state{ requestor_id = RequestorAuthzId,
-                            resource_state = #keys_state{authz_id = RequestorAuthzId}} = State) ->
+                            resource_state = #key_state{parent_authz_id = RequestorAuthzId}} = State) ->
     {authorized, Req, State};
 auth_info(Req, State) ->
     auth_info(wrq:method(Req), Req, State).
 
-auth_info('GET', Req, #base_state{resource_state = #keys_state{ authz_id = AuthzId }}= State) ->
+auth_info('GET', Req, #base_state{resource_state = #key_state{ parent_authz_id = AuthzId }}= State) ->
     {{actor, AuthzId}, Req, State};
-auth_info(_Method, Req, #base_state{resource_state = #keys_state{ authz_id = AuthzId}}= State) ->
+auth_info(_Method, Req, #base_state{resource_state = #key_state{ parent_authz_id = AuthzId}}= State) ->
     {{actor, AuthzId, update}, Req, State}.
 
 create_path(Req, #base_state{resource_state = KeysState}=State) ->
-    #keys_state{ejson = Ejson} = KeysState,
+    #key_state{key_data = Ejson} = KeysState,
     Name = ej:get({<<"name">>}, Ejson),
     {binary_to_list(Name), Req, State}.
 
 to_json(Req, #base_state{ chef_db_context = DbContext,
-                          resource_state = #keys_state{type = Type, id = Id, name = ObjectName} } = State) ->
+                          resource_state = #key_state{full_type = FullType, parent_id = Id, parent_name = ObjectName} } = State) ->
     case chef_db:list(#chef_key{id = Id}, DbContext) of
         Keys when is_list(Keys) ->
-            KeyType = type_to_atom(Type),
-            RouteFun = oc_chef_wm_routes:bulk_route_fun(KeyType, ObjectName, Req),
+            RouteFun = oc_chef_wm_routes:bulk_route_fun(FullType, ObjectName, Req),
             EJ = chef_key:ejson_from_list(Keys, RouteFun),
             {chef_json:encode(EJ), Req, State};
         Error ->
             {{halt, 500}, Req, State#base_state{log_msg = Error }}
     end.
-from_json(Req, #base_state{resource_state = #keys_state{ejson = EJ, id = ActorId}} = State) ->
+from_json(Req, #base_state{resource_state = #key_state{key_data = EJ, parent_id = ActorId}} = State) ->
     oc_chef_wm_base:create_from_json(Req, State, chef_key, {authz_id, undefined}, {ActorId, EJ}).
 
 
@@ -142,9 +143,6 @@ conflict_message(Name) ->
                                       Name, <<"' already exists for this actor.">>])}]}.
 
 route_args(#chef_key{key_name = Name},
-           #base_state{ resource_state = #keys_state{type = Type, name = ObjectName} } ) ->
-    TypeName = type_to_atom(Type),
-    {TypeName, [{name, Name}, {object_name, ObjectName}] }.
+           #base_state{ resource_state = #key_state{full_type = FullType, parent_name = ObjectName} } ) ->
+    {FullType, [{name, Name}, {object_name, ObjectName}] }.
 
-type_to_atom(Type) ->
-    list_to_existing_atom(atom_to_list(Type) ++ "_key").

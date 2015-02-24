@@ -311,14 +311,13 @@
           organization_authz_id,
           oc_chef_organization :: #oc_chef_organization{}
          }).
--record(keys_state, {
-          %% TODO: use keys_data instead of ejson as all other chef objects do
-          %%keys_data,
+-record(key_state, {
           type,
-          id,
-          authz_id,
-          name,
-          ejson}
+          full_type,
+          parent_id,
+          parent_authz_id,
+          parent_name,
+          key_data}
        ).
 
 -define(gv(X,L), proplists:get_value(X, L)).
