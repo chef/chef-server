@@ -663,7 +663,8 @@ finish_request(Req, #base_state{reqid = ReqId,
         end
     catch
         X:Y ->
-            lager:error({X, Y, erlang:get_stacktrace()}),
+            lager:error("Error: ~p:~p. Stack trace follows.", [X, Y]),
+            lager:error("Stack Trace: ~p",  [erlang:get_stacktrace()]),
             % If a failure occurs anywhere above, the request is completed (and changes
             % potentially made) but our bookkeeping has failed. Let's not crash the request
             % resulting in a 500 - which would indicate that the request should be retried.
