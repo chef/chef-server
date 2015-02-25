@@ -1,0 +1,19 @@
+{
+  "type" : "object",
+  "required" : true,
+  "notes" : "At least one of public_key, expiration_date, or name must be provided",
+  "properties" : {
+    "public_key" :
+      { "type" : "string",
+        "description" : "A valid public key",
+        "required" : false},
+    "name" :
+      { "type" : "string",
+        "description" : "A unique name for this key",
+        "required" : false},
+    "expiration_date" :
+      { "type" : "date",
+        "description" : "Date in ISO-8601 form, or the string 'infinity'",
+        "required" : false}
+  }
+}

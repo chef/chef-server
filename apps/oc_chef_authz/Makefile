@@ -1,7 +1,6 @@
 DEPS = $(CURDIR)/deps
 
-# TODO automate managing this revision
-EC_SCHEMA_VERSION = 2.8.0
+EC_SCHEMA_VERSION?=master
 DIALYZER_OPTS = -Wunderspecs
 ITEST_DEPS = $(CURDIR)/itest/common/deps
 # List dependencies that should be included in a cached dialyzer PLT file.

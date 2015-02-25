@@ -1,0 +1,5 @@
+{
+  "name" : "key1",
+  "public_key" : "-------- BEGIN PUBLIC KEY ----and a valid key here",
+  "expiration_date" : "infinity"
+}

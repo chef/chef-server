@@ -172,10 +172,6 @@ value_or_null(Key, Data) ->
 password_validator() ->
     {fun_match, {fun valid_password/1, string, <<"Password must have at least 6 characters">>}}.
 
-public_key_spec() ->
-    {[
-        {{opt,<<"public_key">>}, {fun_match, {fun chef_object_base:valid_public_key/1, string,
-                                              <<"Public Key must be a valid key.">>}}} ]}.
 user_spec(common) ->
     {[
         {<<"display_name">>, string}, %% FIXME as an always-required field this belongs in the schema
@@ -276,7 +272,7 @@ parse_binary_json(Bin, Operation, User) ->
         true ->
             ej:delete({<<"public_key">>}, EJ);
         _ ->
-            validate_user(EJ, public_key_spec()),
+            validate_user(EJ, chef_object_base:public_key_spec(opt)),
             EJ
     end,
 
@@ -313,12 +309,7 @@ undefined_or_value(Value) -> Value.
 %%-spec validate_user(ejson_term(), ejson_term()) -> {ok, ejson_term()}. % or throw
 validate_user(User, Spec) ->
   validate_user_name(User),
-  case ej:valid(Spec, User) of
-    ok ->
-      {ok, User};
-    BadSpec ->
-      throw(BadSpec)
-  end.
+  chef_object_base:validate_ejson(User, Spec).
 
 % Our user spec does not include 'username' because one of
 % 'name'|'username' may be present. Check for either/or here,

@@ -64,7 +64,8 @@ log_action(Req, #base_state{resource_state = ResourceState,
         is_record(ResourceState, organization_state);
         is_record(ResourceState, node_state);
         is_record(ResourceState, role_state);
-        is_record(ResourceState, user_state) ->
+        is_record(ResourceState, user_state);
+        is_record(ResourceState, key_state) ->
     case wrq:method(Req) of
         'GET' ->
             ok;
@@ -259,7 +260,14 @@ extract_entity_info(Req, #user_state{user_data = FullActionPayload}) ->
     CorrectedName = get_corrected_name(Name, "username", FullActionPayload),
     {FullActionPayload, <<"user">>, [{<<"entity_type">>, <<"user">>},
                                      {<<"entity_name">>, CorrectedName}
-                                    ]}.
+                                    ]};
+extract_entity_info(Req, #key_state{key_data = FullActionPayload, parent_name = ParentName, type = ParentType}) ->
+    Name = req_or_data_name(chef_wm_util:object_name(key, Req), FullActionPayload),
+    {FullActionPayload, <<"key">>, [{<<"entity_type">>, <<"key">>},
+                                    {<<"entity_name">>, Name },
+                                    {<<"parent_type">>, atom_to_binary(ParentType, utf8)},
+                                    {<<"parent_name">>, ParentName}
+                                   ]}.
 
 get_corrected_name(undefined, NameKey, FullActionPayload) ->
     ej:get({NameKey}, FullActionPayload);

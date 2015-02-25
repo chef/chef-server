@@ -50,7 +50,7 @@ start_db(Config, DbName) ->
             ["initdb -D", PgData],
             ["pg_ctl -D", PgData, "-l", PgLog, "-o \"-h localhost -p ", PortStr,   "-k '' \" start"],
             %% db start is async, sleep? :(
-            ["sleep 5 && createdb -h localhost -p ", PortStr, DbName],
+            ["sleep 1 && createdb -h localhost -p ", PortStr, DbName],
             ["cd", OSCSchema, "&& sqitch --engine pg --db-name", DbName,
              "--db-port", PortStr, " --db-host localhost deploy"],
             ["cd", ECSchema, "&& sqitch --engine pg --db-name", DbName,
