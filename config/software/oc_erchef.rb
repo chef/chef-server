@@ -23,6 +23,8 @@ source git: "git@github.com:opscode/oc_erchef"
 dependency "erlang"
 dependency "rebar"
 dependency "gecode"
+dependency "sqitch"
+dependency "perl_pg_driver"
 
 # RUBY DEPSOLVER - REMOVE FOR ROLLBACK #
 dependency "ruby"
