@@ -58,7 +58,7 @@
 -define(NAME_REGEX, "[.[:alnum:]_-]+").
 
 %% This is very similar to NAME_REGEX (differs only with the addition of ':').  This is used
-%% for data bags, data bag items, roles, and nodes.
+%% for data bags, data bag items, roles, nodes, and keys.
 -define(ALTERNATIVE_NAME_REGEX, "[.[:alnum:]_\:-]+").
 
 %% Username validation regex
@@ -93,17 +93,16 @@ generate_regex_msg_tuple(Pattern, Message) ->
 regex_for(recipe_name) ->
     %% Note that this does NOT include a version suffix!
     generate_regex_msg_tuple(?ANCHOR_REGEX(?COOKBOOK_QUALIFIED_RECIPE_REGEX),
-                             <<"Invalid recipe name. Must only contain A-Z, a-z, 0-9, _ or -">>);
+                             <<"Invalid recipe name. Must only contain A-Z, a-z, 0-9, _, . or -">>);
 regex_for(cookbook_name) ->
     generate_regex_msg_tuple(?ANCHOR_REGEX(?NAME_REGEX),
-                             <<"Malformed cookbook name. Must only contain A-Z, a-z, 0-9, _ or -">>);
+                             <<"Malformed cookbook name. Must only contain A-Z, a-z, 0-9, _, . or -">>);
 regex_for(environment_name) ->
     generate_regex_msg_tuple(?ANCHOR_REGEX(?NAME_REGEX),
-                             <<"Malformed environment name. Must only contain A-Z, a-z, 0-9, _ or -">>);
+                             <<"Malformed environment name. Must only contain A-Z, a-z, 0-9, _, . or -">>);
 regex_for(key_name) ->
-    % This might be the same as nodename -- nodename seems to allow ':' as well
-    generate_regex_msg_tuple(?ANCHOR_REGEX(?NAME_REGEX),
-                             <<"Malformed key name.  Must be A-Z, a-z, 0-9, _, -, or .">>);
+    generate_regex_msg_tuple(?ANCHOR_REGEX(?ALTERNATIVE_NAME_REGEX),
+                             <<"Malformed key name.  A key name can contain only A-Z, a-z, 0-9, _, -, :, or .">>);
 regex_for(client_name) ->
     % This might be the same as nodename -- nodename seems to allow ':' as well
     generate_regex_msg_tuple(?ANCHOR_REGEX(?NAME_REGEX),
