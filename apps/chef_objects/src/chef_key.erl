@@ -65,11 +65,8 @@
 
 -include("../../include/chef_types.hrl").
 
--define(INFINITY_TIMESTAMP, {{294277,1,9},{4,0,54.775807}}).
-
 authz_id(#chef_key{}) ->
     undefined.
-
 
 is_indexed() ->
     false.
@@ -109,10 +106,14 @@ list(#chef_key{id = Id}, CallbackFun) when is_binary(Id) ->
 find_query() ->
     find_key_by_id_and_name.
 
-
 new_record(_OrgId, _AuthzId, {Id, KeyData}) ->
     PubKey = ej:get({<<"public_key">>}, KeyData),
-    PubKeyVersion = chef_object_base:key_version(PubKey),
+    %% return a more useful error if key_version fails
+    PubKeyVersion = try chef_object_base:key_version(PubKey) of
+        Result -> Result
+    catch
+        _:_ -> throw(invalid_public_key)
+    end,
     Expires = parse_expiration(ej:get({<<"expiration_date">>}, KeyData)),
     #chef_key{ id = Id, key_name = ej:get({<<"name">>}, KeyData),
                public_key = PubKey, key_version = PubKeyVersion,
