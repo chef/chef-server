@@ -1,10 +1,38 @@
 # Chef Server Release Notes
 
+## 12.0.5 (2014-02-26)
+
+### What's New
+
+The following items are new since Chef Server 12.0.4 and/or are changes from previous versions.
+For specific breakdown of updated components, refer to CHANGELOG.md
+
+* oc\_erchef
+  * Updates to user records will no longer clear the
+    `external_authentication_uid` and `recovery_auth_enabled` fields if
+    those fields are not included in the request.
+  * Key API support to post client and user keys. (See API Changes, below)
+  * Policyfile API additions. (See API Changes, below.)
+
+### Closed Issues
+* [chef-server-110][https://github.com/chef/chef-server/issues/110]
+* [chef-server-66][https://github.com/chef/chef-server/issues/66]
+
+### API Changes and Additions
+* new: `POST` to `/organizations/ORGNAME/clients/CLIENTNAME/keys`
+  can be used to add a client key.
+* new: `POST` to `/users/USERNAME/keys`
+  can be used to add a user key.
+* new: [Policyfile](https://github.com/chef/chef-rfc/pull/91) support to
+  `GET` and `POST` to/from `/organization/ORGNAME/cookbook_artifacts/NAME/IDENTIFIER`.
+  Policyfile is disabled by default, stay tuned for further updates in this
+  space.
+
 ## 12.0.4 (2014-02-19)
 
 ### What's New:
 
-The following items are new since Enterprise Chef 12.0.3 and/or are changes from previous versions.
+The following items are new since Chef Server 12.0.3 and/or are changes from previous versions.
 For specific breakdown of breakdown of updated components, refer to CHANGELOG.md
 
 * oc\_erchef
