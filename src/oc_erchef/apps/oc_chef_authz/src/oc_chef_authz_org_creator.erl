@@ -34,7 +34,7 @@
                      groups, nodes, roles, sandboxes, policies, policy_groups,
                      cookbook_artifacts]).
 
--define(GROUPS, [admins, 'billing-admins', clients, users]).
+-define(GROUPS, [admins, 'billing-admins', clients, users, 'read-only-users']).
 
 -define(ALL_PERMS, [create, read, update, delete, grant]).
 
@@ -85,7 +85,7 @@
 
            %% Admins
            {add_acl,
-            [mk_tl(container, ?CONTAINERS), mk_tl(group, [admins, clients, users]), {organization}],
+            [mk_tl(container, ?CONTAINERS), mk_tl(group, [admins, clients, users, 'read-only-users']), {organization}],
             ?ALL_PERMS, [{group, admins}]},
 
            %% users
@@ -95,6 +95,12 @@
            {add_acl, [{container, clients}], [read, delete], [{group, users}]},
            {add_acl, [mk_tl(container, [groups, containers]), {organization}], [read], [{group, users}]},
            {add_acl, [{container, sandboxes}], [create], [{group, users}]},
+
+           %% read only users
+           {add_acl,
+            [mk_tl(container, [cookbooks, data, nodes, roles, environments, policies, cookbook_artifacts, clients, groups, containers])],
+            [read], [{group, 'read-only-users'}]},
+           {add_acl, [{organization}], [read], [{group, 'read-only-users'}]},
 
            %% clients
 
