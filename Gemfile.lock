@@ -1,7 +1,7 @@
 GIT
   remote: git://github.com/opscode/chef-pedant.git
-  revision: 180c6cef3a3371fe6376d52509c418b77ad13181
-  branch: keys-api-POST
+  revision: 5c542f46aa5f741588fb3c4929990450530bf624
+  branch: master
   specs:
     chef-pedant (1.0.44)
       activesupport (~> 3.2.8)
@@ -28,7 +28,7 @@ GIT
 PATH
   remote: .
   specs:
-    oc-chef-pedant (1.0.77)
+    oc-chef-pedant (1.0.78)
       chef-pedant (>= 1.0.0)
 
 GEM
