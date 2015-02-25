@@ -103,7 +103,9 @@
            {add_acl, [{container, policy_groups}], [read], [{group, clients}]},
            {add_acl, [{container, cookbook_artifacts}], [read], [{group, clients}]},
            {add_acl, [{container, data}], [read], [{group, clients}]},
-           {add_acl, mk_tl(container, [cookbooks, environments, roles]), [read] , [{group, clients}]}
+           {add_acl, mk_tl(container, [cookbooks, environments, roles]), [read] , [{group, clients}]},
+           {add_acl, [{container, policies}], [read], [{group, clients}]},
+           {add_acl, [{container, cookbook_artifacts}], [read], [{group, clients}]}
           ]
          }
         ]).
