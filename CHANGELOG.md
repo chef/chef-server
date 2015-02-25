@@ -8,6 +8,10 @@
 ### oc\_bifrost 1.4.5
 * Updated to webmachine 1.10.8
 
+### oc\_chef\_pedant 1.0.79
+* New keys API tests
+* New cookbook artifact API tests
+
 ### oc\_erchef 1.5.0
 * Keys API POST support: /organizations/$ORG/clients/$CLIENT/keys and
   /users/$USER/keys
