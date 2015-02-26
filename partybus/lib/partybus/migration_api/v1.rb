@@ -97,6 +97,17 @@ EOF
         runner.run_command(command, options)
       end
 
+      def run_sqitch(ec_target, osc_target="@1.0.4")
+        inner_cmd = "cd deps/chef-server-schema && sqitch deploy --to-target #{osc_target} --verify"
+        inner_cmd << " && cd ../.. && sqitch deploy --to-target #{ec_target} --verify;"
+        cmd = "su -l #{Partybus.config.database_unix_user} -c \"#{inner_cmd}\""
+        run_command(cmd,
+                    :cwd => "/opt/opscode/embedded/service/opscode-erchef/schema",
+                    :env => {"DB_USER" => Partybus.config.database_unix_user})
+      end
+
+
+
       def clean_mover_logs
         log("\tCleaning migration related logs to prep for new migration")
         migration_util = Partybus::MigrationUtil.new
@@ -107,7 +118,7 @@ EOF
         if !Partybus.config.is_data_master
           log <<EOF
 ****
-ERROR: 
+ERROR:
 ****
 The bootstrap server must be the HA-master at the time of upgrade.
 If the bootstrap server is not currently the HA-master, please see the

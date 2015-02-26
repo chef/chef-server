@@ -5,9 +5,6 @@ define_upgrade do
     must_be_data_master
 
     # run 2.2.4 migration which includes schema upgrade for migration state
-    run_command("make deploy",
-                :cwd => "/opt/opscode/embedded/service/opscode-erchef/schema",
-                :env => {"EC_TARGET" => "@2.2.4", "OSC_TARGET" => "@1.0.4", "DB_USER" => Partybus.config.database_unix_user}
-                )
+    run_sqitch("@2.2.4", "@1.0.4")
   end
 end
