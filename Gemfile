@@ -1,10 +1,8 @@
-source 'https://rubygems.org/'
+source "https://rubygems.org"
 
 gemspec
-
-# Specify a Github repo for this, since it isn't in Rubygems yet
-gem 'rspec', '~> 3.1.0'
 gem "rest-client", :git => "git://github.com/opscode/rest-client.git"
 
-gem 'chef-pedant', git: "git://github.com/opscode/chef-pedant.git", branch: 'master'
-
+# If you want to load debugging tools into the bundle exec sandbox,
+# # add these additional dependencies into Gemfile.local
+eval(IO.read(__FILE__ + '.local'), binding) if File.exists?(__FILE__ + '.local')
