@@ -1,7 +1,9 @@
 # Chef Identity Change Log
 
-## 0.5.0 (Unreleased)
+## 0.5.0
 
+* Clarify setup instructions in README
+* Add forgot password functionality
 * Update sign up URL and make it configurable
 * Add support for Sentry
 * Add maintainers file
