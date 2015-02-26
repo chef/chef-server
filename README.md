@@ -87,22 +87,7 @@ make bundle # this installs dep_selector
 
 ##### Running Integration Tests
 
-
 `rebar skip_deps=true ct`
-
-By default, 'master' of enterprise-chef-server-schema will be used in
-tests that require the schema.
-
-In order to use a specific schema tag or branch, specify it by
-name in an environment variable:
-
-`EC_SCHEMA_VERSION=my/branch rebar skip_deps=true ct`
-
-Note that if you push changes to the schema branch you will need to
-delete it from itest dependencices directory for your tests in order to
-see the updates. For example:
-
-`rm -rf apps/oc_chef_wm/itest/common/deps/enterprise-chef-server-schema`
 
 You can see the output of test results by open the itest index files in your browser for the `oc_chef_authz`, `chef_db`, and `oc_chef_wm` apps:
 

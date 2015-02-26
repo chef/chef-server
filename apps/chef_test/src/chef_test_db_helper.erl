@@ -38,7 +38,7 @@ start_db(Config, DbName) ->
     DataDir = ?config(data_dir, Config),
     CommonDir = filename:join([DataDir, "../common"]),
     Schema = filename:join([CommonDir, "schema.sql"]),
-    ECSchema = filename:join([CommonDir, "deps", "enterprise-chef-server-schema"]),
+    ECSchema = filename:join([DataDir, "../../../../schema"]),
     OSCSchema = filename:join([ECSchema, "deps", "chef-server-schema"]),
     PgData = filename:join(DataDir, "pg_data"),
     PgLog = filename:join(DataDir, "pg.log"),
