@@ -100,7 +100,7 @@ validate_name(Req, Policy) ->
         true ->
             ok;
         false ->
-            erlang:throw({mismatch, {<<"Name">>, NameFromJson, NameFromReq}})
+            erlang:throw({mismatch, {<<"name">>, NameFromJson, NameFromReq}})
     end.
 
 auth_info(Req, #base_state{chef_db_context = DbContext,

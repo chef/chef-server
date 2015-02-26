@@ -24,7 +24,8 @@
 -export([
          attribute_spec/0,
          env_run_lists_spec/0,
-         run_list_spec/0
+         run_list_spec/0,
+         policy_run_list_spec/0
         ]).
 
 -ifdef(TEST).
@@ -53,6 +54,16 @@ run_list_spec() ->
                   string,
                   <<"Invalid run list entry">>}}}.
 
+%% @doc `ej:valid/2` spec for validating a run list.  This can be used
+%% for nodes and roles.
+%%
+%% Note that it is valid for a run list to be empty.
+policy_run_list_spec() ->
+    {array_map,
+     {fun_match, {fun valid_policy_run_list_item/1,
+                  string,
+                  <<"Invalid policyfile run list entry">>}}}.
+
 %% @doc `ej:valid/2` spec for validating an `env_run_lists` map of a role.
 %%
 %% Keys must be valid environment names, and values must be valid run
@@ -77,6 +88,16 @@ valid_run_list_item(Item) when is_binary(Item) ->
         nomatch -> error
     end;
 valid_run_list_item(_) ->
+    error.
+
+-spec valid_policy_run_list_item(Item :: any()) -> ok | error.
+valid_policy_run_list_item(Item) when is_binary(Item) ->
+    {RegEx, _Msg} = chef_regex:regex_for(policy_fully_qualified_recipe),
+    case re:run(Item, RegEx, [{capture, none}]) of
+        match -> ok;
+        nomatch -> error
+    end;
+valid_policy_run_list_item(_) ->
     error.
 
 -spec item_type(binary()) -> qualified_recipe | qualified_role | unqualified_recipe.
