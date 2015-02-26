@@ -26,7 +26,7 @@ describe "Environments API Endpoint", :environments do
 
   context 'with no additional environments' do
 
-    before(:suite) { delete_environment(admin_user, new_environment_name) }
+    before(:each) { delete_environment(admin_user, new_environment_name) }
     after(:each) { delete_environment(admin_user, new_environment_name) }
 
 

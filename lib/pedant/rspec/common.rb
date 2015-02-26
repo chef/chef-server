@@ -22,9 +22,6 @@ require 'pedant/rspec/common_responses'
 require 'pedant/rspec/http_status_codes'
 
 # Temporary, until knife tests are activated for non-open-source platforms
-def open_source?
-  Pedant::Config.pedant_platform.class == Pedant::OpenSourcePlatform
-end
 
 module Pedant
   module RSpec
@@ -323,12 +320,6 @@ module Pedant
           not ruby?
         end
 
-        # Temporary until knife tests for non-open-source platforms are fixed
-        #def self.open_source?
-        #  Pedant::Config.pedant_platform.class == Pedant::OpenSourcePlatform
-        #end
-        #let(:open_source?) { self.class.open_source? }
-
         # Timestamp suffixes
         # Suffix unique between runs. Timestamp is generated once per pedant run
         shared(:pedant_suffix) { suffix_for_names.(platform.pedant_run_timestamp) }
@@ -511,13 +502,8 @@ module Pedant
         shared(:outside_client)   { platform.bad_client }
         shared(:validator_client) { platform.validator_client }
 
-        # TODO: Pedant is currently configured to use the admin for the pedant_admin
-        # Since we run smoke tests against production systems, we don't actually want
-        # to create knife files against that. The solution is to make admin the superuser
-        # again and have a dedicated pedant_admin. This way, we can test knife against
-        # user credentials rather than client credentials.
-        shared(:knife_admin)      { admin_client }
-        shared(:knife_user)       { normal_user }
+        shared(:knife_admin)      {  admin_user }
+        shared(:knife_user)       { normal_user}
 
         # TODO: Ultimately, I'd like to see all access to the superuser go
         # away, and all tasks that require its use become methods on the

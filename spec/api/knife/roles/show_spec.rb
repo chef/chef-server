@@ -16,7 +16,7 @@
 require 'pedant/rspec/knife_util'
 require 'securerandom'
 
-describe 'knife', knife: true, skip: !open_source? do
+describe 'knife', :knife do
   context 'role' do
     context 'show [ROLE]' do
       include Pedant::RSpec::KnifeUtil
@@ -37,8 +37,6 @@ describe 'knife', knife: true, skip: !open_source? do
             # Runs knife role from file
             should have_outcome :status => 0, :stdout => /name:\s+#{role_name}/
           end
-
-          skip 'should have attributes pulled in from file'
         end
       end
 
@@ -49,7 +47,7 @@ describe 'knife', knife: true, skip: !open_source? do
           let(:requestor) { knife_admin }
 
           it 'should fail' do
-            should have_outcome :status => 100, :stdout => /Cannot load role #{role_name}/
+            should have_outcome :status => 100, :stderr => /The object you are looking for could not be found/
           end
         end
       end

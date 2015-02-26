@@ -16,7 +16,7 @@
 require 'pedant/rspec/auth_headers_util'
 require 'pedant/rspec/environment_util'
 
-describe "Environments API Endpoint", :environments do
+describe "OSS Environments API Endpoint", :environments do
   include Pedant::RSpec::EnvironmentUtil
   include Pedant::RSpec::AuthHeadersUtil
 
@@ -27,7 +27,7 @@ describe "Environments API Endpoint", :environments do
 
   context 'with no additional environments' do
 
-    before(:suite) { delete_environment(admin_user, new_environment_name) }
+    before(:each) { delete_environment(admin_user, new_environment_name) }
     after(:each) { delete_environment(admin_user, new_environment_name) }
 
     context 'DELETE /environments' do

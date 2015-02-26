@@ -141,6 +141,7 @@ module Pedant
 
           let(:node_data) do
             {
+              'name' => node_name,
               'node_name' => node_name,
               'override' => node_override,
               'normal' => node_normal,

@@ -64,8 +64,7 @@ module Pedant
     def self.fixture_path(path, &blk)
       Pedant::Gem.fixture_directories.each do |fixture_dir|
         candidate_path = File.expand_path(File.join(fixture_dir, path))
-        next unless File.exists?(candidate_path)
-
+        next unless File.directory?(candidate_path)
         if blk
           return yield candidate_path
         else

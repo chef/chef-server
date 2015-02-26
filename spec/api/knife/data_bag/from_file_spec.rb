@@ -16,7 +16,7 @@
 require 'pedant/rspec/knife_util'
 require 'securerandom'
 
-describe 'knife', knife: true, skip: !open_source? do
+describe 'knife', :knife do
   context 'data bag' do
     context 'from file' do
       include Pedant::RSpec::KnifeUtil
@@ -35,7 +35,7 @@ describe 'knife', knife: true, skip: !open_source? do
           knife "data bag create #{bag_name} -c #{knife_config}"
 
           # Runs knife data bag from file
-          should have_outcome :status => 0, :stdout => /Updated data_bag_item/
+          should have_outcome :status => 0, :stderr => /Updated data_bag_item/
         end
       end
 

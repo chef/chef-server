@@ -24,7 +24,7 @@ describe "Org Creation", :org_creation do
     let(:group_to_url) { ->(x) { [x, platform.api_url("/groups/#{x}", org)] } }
 
     it 'should have default groups' do
-      parsed_response.should loosely_match default_group_hash
+      expect(parsed_response).to loosely_match default_group_hash
     end
 
     def self.should_have_group_for(resource, &additional_examples)
@@ -90,7 +90,7 @@ describe "Org Creation", :org_creation do
       # we're just going to check for the presence of group names with
       # hexdecimals.
       it 'should have a USAG', :usags do
-        member_groups.select { |g| g =~ /^[0-9a-f]+$/ }.should_not be_empty
+        expect(member_groups.select { |g| g =~ /^[0-9a-f]+$/ }).not_to be_empty
       end
     end
 

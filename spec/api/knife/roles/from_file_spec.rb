@@ -16,7 +16,7 @@
 require 'pedant/rspec/knife_util'
 require 'securerandom'
 
-describe 'knife', knife: true, skip: !open_source? do
+describe 'knife', :knife do
   context 'role' do
     context 'from file ROLE' do
       include Pedant::RSpec::KnifeUtil
@@ -33,10 +33,8 @@ describe 'knife', knife: true, skip: !open_source? do
             assume_fixture_file!
 
             # Runs knife role from file
-            should have_outcome :status => 0, :stdout => /Updated Role\s+#{role_name}/
+            should have_outcome :status => 0, :stderr => /Updated Role\s+#{role_name}/
           end
-
-          skip 'should have attributes pulled in from file'
         end
       end
 

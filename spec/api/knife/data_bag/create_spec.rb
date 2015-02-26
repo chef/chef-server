@@ -15,7 +15,7 @@
 
 require 'pedant/rspec/knife_util'
 
-describe 'knife', knife: true, skip: !open_source? do
+describe 'knife', :knife do
   context 'data bag' do
     context 'create' do
       include Pedant::RSpec::KnifeUtil
@@ -29,7 +29,7 @@ describe 'knife', knife: true, skip: !open_source? do
           let(:requestor) { knife_admin }
 
           it 'should succeed' do
-            should have_outcome :status => 0, :stdout => /Created data_bag\[#{bag_name}\]/
+            should have_outcome :status => 0, :stderr => /Created data_bag\[#{bag_name}\]/
           end
         end
       end
@@ -43,7 +43,7 @@ describe 'knife', knife: true, skip: !open_source? do
             knife "data bag create #{bag_name} -c #{knife_config}"
 
             # Run knife a second time
-            should have_outcome :status => 0, :stdout => /Data bag #{bag_name} already exists/
+            should have_outcome :status => 0, :stderr => /Data bag #{bag_name} already exists/
           end
         end
       end

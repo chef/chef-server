@@ -18,7 +18,7 @@ require 'pedant/rspec/environment_util'
 require 'pedant/rspec/search_util'
 require 'pedant/rspec/role_util'
 
-describe "Environments API Endpoint", :environments do
+describe "OSS Environments API Endpoint", :environments do
   include Pedant::RSpec::EnvironmentUtil
   include Pedant::RSpec::SearchUtil
   include Pedant::RSpec::AuthHeadersUtil
@@ -72,7 +72,6 @@ describe "Environments API Endpoint", :environments do
       should_respond_with 200, 'and an index of all the available environments'
     end
 
-    skip 'GET /environments open-source permissions', :platform => :open_source
   end # GET /environments
 
 

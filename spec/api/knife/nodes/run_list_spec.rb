@@ -16,7 +16,7 @@
 require 'pedant/rspec/knife_util'
 require 'securerandom'
 
-describe 'knife', knife: true, skip: !open_source? do
+describe 'knife', :knife do
   context 'node' do
     context 'run_list' do
       include Pedant::RSpec::KnifeUtil
@@ -60,7 +60,7 @@ describe 'knife', knife: true, skip: !open_source? do
             let(:requestor) { knife_admin }
 
             it 'should fail' do
-              should have_outcome :status => 100, :stdout => /node '#{node_name}' not found/
+              should have_outcome :status => 100, :stderr => /node '#{node_name}' not found/
             end
           end
         end
@@ -90,7 +90,7 @@ describe 'knife', knife: true, skip: !open_source? do
             let(:requestor) { knife_admin }
 
             it 'should fail' do
-              should have_outcome :status => 100, :stdout => /node '#{node_name}' not found/
+              should have_outcome :status => 100, :stderr => /node '#{node_name}' not found/
             end
           end
         end

@@ -15,7 +15,7 @@
 
 require 'pedant/rspec/knife_util'
 
-describe 'knife', knife: true, skip: !open_source? do
+describe 'knife', :knife do
   context 'data bag' do
     context 'delete' do
       include Pedant::RSpec::KnifeUtil
@@ -30,7 +30,7 @@ describe 'knife', knife: true, skip: !open_source? do
 
           it 'should fail' do
             should have_outcome :status => 100,
-              :stdout => /Cannot load data bag #{bag_name}/,
+              :sstdout => /Cannot load data bag #{bag_name}/,
               :stderr => /The object you are looking for could not be found/
           end
         end

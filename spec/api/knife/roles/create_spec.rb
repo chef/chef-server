@@ -15,7 +15,7 @@
 
 require 'pedant/rspec/knife_util'
 
-describe 'knife', knife: true, skip: !open_source? do
+describe 'knife', :knife do
   context 'role' do
     context 'create [ROLE]' do
       include Pedant::RSpec::KnifeUtil
@@ -38,14 +38,12 @@ describe 'knife', knife: true, skip: !open_source? do
         context 'as an admin' do
           let(:requestor) { knife_admin }
 
-          it 'should fail' do
-            skip 'CHEF-982: `knife role create` does not report name conflicts'
+          it 'should fail' do skip 'CHEF-982: `knife role create` does not report name conflicts'
             # Create a role with the same name
-            #knife "role create #{role_name} -c #{knife_config} --disable-editing"
-            post(api_url("/roles"), platform.admin_user, payload: { "name" => role_name })
+            knife "role create #{role_name} -c #{knife_config} --disable-editing"
 
             # Run knife a second time
-            should have_outcome :status => 0, :stdout => /Node #{role_name} already exists/
+            should have_outcome :status => 0, :stderr => /Role #{role_name} already exists/
           end
         end
       end

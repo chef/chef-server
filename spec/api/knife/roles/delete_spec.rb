@@ -15,7 +15,7 @@
 
 require 'pedant/rspec/knife_util'
 
-describe 'knife', knife: true, skip: !open_source? do
+describe 'knife', :knife do
   context 'role' do
     context 'delete [ROLE]' do
       include Pedant::RSpec::KnifeUtil
@@ -30,7 +30,7 @@ describe 'knife', knife: true, skip: !open_source? do
 
           it 'should fail' do
             should have_outcome :status => 100,
-              :stdout => /Cannot load role #{role_name}/,
+              :stderr => /Cannot load role #{role_name}/,
               :stderr => /The object you are looking for could not be found/
           end
         end

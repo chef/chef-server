@@ -15,7 +15,7 @@
 
 require 'pedant/rspec/knife_util'
 
-describe 'knife', knife: true, skip: !open_source? do
+describe 'knife', :knife do
   context 'node' do
     context 'create' do
       include Pedant::RSpec::KnifeUtil
@@ -45,7 +45,7 @@ describe 'knife', knife: true, skip: !open_source? do
             post(api_url("/nodes"), platform.admin_user, payload: { "name" => node_name })
 
             # Run knife a second time
-            should have_outcome :status => 0, :stdout => /Node #{node_name} already exists/
+            should have_outcome :status => 0, :stderr => /Node #{node_name} already exists/
           end
         end
       end

@@ -17,7 +17,7 @@
 require 'pedant/rspec/auth_headers_util'
 require 'pedant/rspec/environment_util'
 
-describe "Environments API Endpoint", :environments do
+describe "OSS Environments API Endpoint", :environments do
   include Pedant::RSpec::EnvironmentUtil
   include Pedant::RSpec::AuthHeadersUtil
 
@@ -43,7 +43,7 @@ describe "Environments API Endpoint", :environments do
     respects_maximum_payload_size
 
     context 'with no additional environments' do
-      before(:suite) { delete_environment(admin_user, new_environment_name) }
+      before(:each) { delete_environment(admin_user, new_environment_name) }
       after(:each) { delete_environment(admin_user, new_environment_name) }
 
 
@@ -164,14 +164,9 @@ describe "Environments API Endpoint", :environments do
           # ejson:decode call which is eating it silently
           # OSC is not using ejson anymore.
           # Test works on OSC, but unknown if it works on the other platforms
-          if open_source?
+          context 'ejson:decode eats nulls', :skip do
             fails_with_value("name", "abc\u0000123",
                              "Field 'name' invalid")
-          else
-            context 'ejson:decode eats nulls', :skip do
-              fails_with_value("name", "abc\u0000123",
-                               "Field 'name' invalid")
-            end
           end
 
           fails_with_value("name", "大爆発",

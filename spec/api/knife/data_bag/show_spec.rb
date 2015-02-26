@@ -16,7 +16,7 @@
 require 'pedant/rspec/knife_util'
 require 'securerandom'
 
-describe 'knife', knife: true, skip: !open_source? do
+describe 'knife', :knife do
   context 'data bag' do
     context 'show [ITEM]' do
       include Pedant::RSpec::KnifeUtil
@@ -49,7 +49,7 @@ describe 'knife', knife: true, skip: !open_source? do
               knife "data bag create #{bag_name} -c #{knife_config}"
 
               # Runs knife data bag from file
-              should have_outcome :status => 100, :stdout => /Cannot load data bag item #{item_name} for data bag #{bag_name}/
+              should have_outcome :status => 100, :stderr => /Cannot load data bag item #{item_name} for data bag #{bag_name}/
             end
           end
         end
@@ -62,7 +62,7 @@ describe 'knife', knife: true, skip: !open_source? do
           let(:requestor) { knife_admin }
 
           it 'should fail' do
-            should have_outcome :status => 100, :stdout => /Cannot load data bag item #{item_name} for data bag #{bag_name}/
+            should have_outcome :status => 100, :stderr => /Cannot load data bag item #{item_name} for data bag #{bag_name}/
           end
         end
       end

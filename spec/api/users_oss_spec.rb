@@ -17,7 +17,7 @@ require 'pedant/rspec/user_util'
 require 'pedant/rspec/validations'
 require 'securerandom'
 
-describe "Open Source /users endpoint", :users => true, :platform => :open_source do
+describe "OSS /users endpoint", :users => true, :platform => :open_source do
   include Pedant::RSpec::UserUtil
 
   # TODO: Open-Source Chef pretends that "admin_user" is a user when it is a client

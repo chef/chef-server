@@ -238,14 +238,14 @@ RSpec::Matchers.define :look_like do |expected_response_spec|
 
       # Test the HTTP Status Code, if given
       if expected_response_spec[:status]
-        response.should have_status_code expected_response_spec[:status]
+        expect(response).to have_status_code expected_response_spec[:status]
       end
 
       # If you want to check the raw, unprocessed body for some
       # reason.  Mainly useful for asserting a response has a
       # completely empty body.
       if expected_response_spec[:body_raw]
-        response.should eq expected_response_spec[:body_raw]
+        expect(response).to eq expected_response_spec[:body_raw]
       end
 
       # Test the headers
@@ -274,15 +274,15 @@ RSpec::Matchers.define :look_like do |expected_response_spec|
           # untested, i.e., you test everything that's there
           if expected_body_spec.is_a?(Hash)
             if expected_response_spec[:body_exact]
-              parsed_json.should strictly_match expected_body_spec
+              expect(parsed_json).to strictly_match expected_body_spec
             else # just a body spec (looser)
-              parsed_json.should loosely_match expected_body_spec
+              expect(parsed_json).to loosely_match expected_body_spec
             end
           else
             if expected_body_spec.is_a?(Array)
-              parsed_json.should =~ expected_body_spec
+              expect(parsed_json).to =~ expected_body_spec
             else
-              parsed_json.should == expected_body_spec
+              expect(parsed_json).to == expected_body_spec
             end
           end
         end

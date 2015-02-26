@@ -15,7 +15,7 @@
 
 require 'pedant/rspec/knife_util'
 
-describe 'knife', knife: true, skip: !open_source? do
+describe 'knife', :knife do
   context 'node' do
     context 'delete' do
       include Pedant::RSpec::KnifeUtil
@@ -30,7 +30,7 @@ describe 'knife', knife: true, skip: !open_source? do
 
           it 'should fail' do
             should have_outcome :status => 100,
-              :stdout => /node '#{node_name}' not found/,
+              :stderr => /node '#{node_name}' not found/,
               :stderr => /The object you are looking for could not be found/
           end
         end

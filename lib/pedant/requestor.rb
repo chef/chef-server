@@ -64,7 +64,7 @@ module Pedant
     end
 
     def knife_dir
-      @_knife_dir ||= Dir.mktmpdir
+      @_knife_dir ||= Dir.mktmpdir('dot-chef-', File.join(Dir.tmpdir, "oc-chef-pedant"))
     end
 
     def knife_rb_path
@@ -74,14 +74,13 @@ module Pedant
     # Generate a knife.rb file from a template for a given user.
     # Prefer calling +populate_dot_chef+ over calling this directly.
     def generate_knife_files!
-
       # The template file is currently located right next to this
       # source file... seemed like the sanest place for it at the time
-      template = File.read(Pathname.new(__FILE__).dirname.join("knife.rb.erb"))
-
-      template = Erubis::Eruby.new(template)
+      template_data = File.read(Pathname.new(__FILE__).dirname.join("knife.rb.erb"))
+      template = Erubis::Eruby.new(template_data)
       File.open(knife_rb_path, 'w') do |f|
-        f.write(template.result(knife_user:          name,
+        f.write(template.result(org_name:            platform.org_name,
+                                knife_user:          name,
                                 key_dir:             knife_dir,
                                 server_url:          platform.api_url,
                                 test_repository_dir: platform.test_repository_path))

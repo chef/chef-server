@@ -16,7 +16,7 @@
 require 'pedant/rspec/knife_util'
 require 'securerandom'
 
-describe 'knife', knife: true, skip: !open_source? do
+describe 'knife', :knife do
   context 'node' do
     context 'show [NODE]' do
       include Pedant::RSpec::KnifeUtil
@@ -39,14 +39,12 @@ describe 'knife', knife: true, skip: !open_source? do
         context 'as an admin' do
           let(:requestor) { knife_admin }
 
-          it 'should succeed' do #, skip: "ERROR: Method not allowed when using node from file?" do
+          it 'should succeed' do
             assume_existing_node!
 
             # Runs knife node from file
             should have_outcome :status => 0, :stdout => /Node Name:\s+#{node_name}/
           end
-
-          skip 'should have attributes pulled in from file'
         end
       end
 
@@ -57,7 +55,7 @@ describe 'knife', knife: true, skip: !open_source? do
           let(:requestor) { knife_admin }
 
           it 'should fail' do
-            should have_outcome :status => 100, :stdout => /node '#{node_name}' not found/
+            should have_outcome :status => 100, :stderr => /node '#{node_name}' not found/
           end
         end
       end

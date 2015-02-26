@@ -17,7 +17,7 @@
 require 'pedant/rspec/auth_headers_util'
 require 'pedant/rspec/environment_util'
 
-describe "Environments API Endpoint", :environments do
+describe "OSS Environments API Endpoint", :environments do
   include Pedant::RSpec::EnvironmentUtil
   include Pedant::RSpec::AuthHeadersUtil
 
@@ -29,7 +29,7 @@ describe "Environments API Endpoint", :environments do
 
   context 'with no additional environments' do
 
-    before(:suite) { delete_environment(admin_user, new_environment_name) }
+    before(:each) { delete_environment(admin_user, new_environment_name) }
     after(:each) { delete_environment(admin_user, new_environment_name) }
 
 
@@ -176,14 +176,10 @@ describe "Environments API Endpoint", :environments do
           # ejson:decode call which is eating it silently
           # OSC is not using ejson anymore.
           # Test works on OSC, but unknown if it works on the other platforms
-          if open_source?
+          # TODO find out if this is actually failing....
+          context 'ejson:decode eats nulls' do
             fails_with_value("name", "abc\u0000123",
                              "Field 'name' invalid", true)
-          else
-            context 'ejson:decode eats nulls', :skip do
-              fails_with_value("name", "abc\u0000123",
-                               "Field 'name' invalid", true)
-            end
           end
 
           fails_with_value("name", "大爆発",
@@ -488,7 +484,9 @@ describe "Environments API Endpoint", :environments do
       end
 
       # TODO: Use OSC permissions tests
-      skip 'permissions', :platform => :open_source
+      # TODO figure out if this refers to something, and implement it instead.
+      # No value to skip, so:
+      # skip 'permissions', :platform => :open_source
     end
   end
 end
