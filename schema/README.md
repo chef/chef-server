@@ -1,28 +1,22 @@
-Enterprise Chef Server PostgreSQL Schema
-========================================
+Chef Server PostgreSQL Schema
+=============================
 
-This repository defines additions to the
-[Open Source Chef Server schema][] that will create an Enterprise Chef
-database schema.
+This directory defines the Chef Server schema.  It depends upon the
+schema present in the baseline/ directory being applied first.
 
 *NOTE*: This _does not_ turn an Open Source database into an
  Enterprise database.  This _does not_ provide some kind of "upgrade"
  path from the one to the other.  If you try to use it that way, your
  resulting sadness is all on you.
 
-All instructions for the open source Chef Server schema apply for
-this repository as well; perform all the setup as instructed there.
+## History
 
-You do not need to have a local checkout of the open source schema
-repository to work with this one.  The Makefile will perform a local
-checkout of the open source schema, stored in the `deps` directory.
-If you want to do local hacking, try setting up a symlink to your
-local checkout.
+This directory was originally the enterprise-chef-server-schema at
+tag 2.9.0.  All schema changes since that tag have happened here and
+not in the older repository.
 
-Note that the specific version of the open source schema you depend on
-is defined at the top of the Makefile.
-
-[Open Source Chef Server schema]:http://github.com/opscode/chef-server-schema
+The baseline/ directory is the chef-server-schema directory as of
+tag 1.0.4.
 
 ## License
 

@@ -39,7 +39,7 @@ start_db(Config, DbName) ->
     CommonDir = filename:join([DataDir, "../common"]),
     Schema = filename:join([CommonDir, "schema.sql"]),
     ECSchema = filename:join([DataDir, "../../../../schema"]),
-    OSCSchema = filename:join([ECSchema, "deps", "chef-server-schema"]),
+    OSCSchema = filename:join([ECSchema, "baseline"]),
     PgData = filename:join(DataDir, "pg_data"),
     PgLog = filename:join(DataDir, "pg.log"),
     Port = chef_test_suite_helper:random_bogus_port(),

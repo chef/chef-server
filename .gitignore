@@ -1,6 +1,5 @@
 rel/oc_erchef
 deps
-!schema/deps
 .DS_Store
 TAGS
 .rebar
