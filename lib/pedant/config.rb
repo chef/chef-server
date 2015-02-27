@@ -89,7 +89,7 @@ module Pedant
       format_args = if junit_file
                       %W[-r rspec_junit_formatter -f RspecJunitFormatter -o #{junit_file} -f documentation]
                     else
-                      %w[ --color --tty]
+                      %w[ --color -f progress --tty]
                     end
 
       # Always use the failures formatter, in case we want to rerun failures
