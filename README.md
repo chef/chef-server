@@ -1,6 +1,8 @@
 oc-id
 =====
 
+[![Build Status](https://travis-ci.org/chef/oc-id.svg?branch=nls%2FVI-39-travis)](https://travis-ci.org/chef/oc-id)
+
 Chef identity: An [OAuth 2](http://oauth.net/2/) provider for Chef.
 
 
