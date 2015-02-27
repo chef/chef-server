@@ -1,0 +1,11 @@
+-- -*- mode: sql -*-
+
+BEGIN;
+
+SELECT no_plan();
+
+-- Runs all functions that start with "test"
+SELECT do_tap();
+SELECT finish();
+
+ROLLBACK;

@@ -21,10 +21,6 @@ DIALYZER_DEPS = deps/chef_authn/ebin \
 # :'(
 DEPS_PLT = oc_chef_wm.plt
 
-EC_SCHEMA_VERSION?=master
-
-ITEST_DEPS = $(CURDIR)/itest/common/deps
-
 REBAR = REBAR_PARENT=$(CURDIR)/rebar.config rebar
 
 all: compile eunit dialyzer
@@ -53,21 +49,12 @@ dialyzer: $(DEPS_PLT)
 $(DEPS_PLT):
 	@dialyzer --build_plt $(DIALYZER_DEPS) --output_plt $(DEPS_PLT)
 
-$(ITEST_DEPS):
-	mkdir -p $(ITEST_DEPS)
-
-$(ITEST_DEPS)/enterprise-chef-server-schema: | $(ITEST_DEPS)
-	cd $(ITEST_DEPS); git clone -b $(EC_SCHEMA_VERSION) https://github.com/opscode/enterprise-chef-server-schema
-
-itest_db: | $(ITEST_DEPS)/enterprise-chef-server-schema
-	cd $(ITEST_DEPS)/enterprise-chef-server-schema; make install
-
 itest_mocks:
 	@erlc -pa '../*/ebin' -pa '../../deps/*/ebin' -pa ebin -I '..' -I '../../deps' -o itest/mocks/ itest/mocks/*.erl
 
-itest_deps: itest_db itest_mocks
+itest_deps: itest_mocks
 
 itest: compile test itest_deps
 	@$(REBAR) skip_deps=true ct
 
-.PHONY: all clean allclean distclean compile dialyzer eunit test doc tags itest_deps itest_mocks itest_db itest
+.PHONY: all clean allclean distclean compile dialyzer eunit test doc tags itest_deps itest_mocks itest

@@ -1,0 +1,20 @@
+-- Deploy opc_customers
+
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS opc_customers(
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  display_name TEXT NOT NULL,
+  domain TEXT UNIQUE,
+  contact TEXT NOT NULL,
+  priority INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+  updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+  osc_customer BOOLEAN NOT NULL DEFAULT FALSE,
+  ohc_customer BOOLEAN NOT NULL DEFAULT FALSE,
+  opc_customer BOOLEAN NOT NULL DEFAULT FALSE,
+  support_plan TEXT NOT NULL DEFAULT ''
+);
+
+COMMIT;
