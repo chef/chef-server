@@ -91,7 +91,6 @@ dependency "opscode-chef-mover"
 dependency "oc_erchef"
 dependency "oc-chef-pedant"
 dependency "private-chef-upgrades"
-dependency "enterprise-chef-server-schema"
 dependency "private-chef-cookbooks"
 dependency "chef-ha-plugin-config"
 

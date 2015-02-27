@@ -16,13 +16,15 @@
 
 name "oc_erchef"
 
-default_version "1.5.0"
+default_version "1.6.0"
 
 source git: "git@github.com:opscode/oc_erchef"
 
 dependency "erlang"
 dependency "rebar"
 dependency "gecode"
+dependency "sqitch"
+dependency "perl_pg_driver"
 
 # RUBY DEPSOLVER - REMOVE FOR ROLLBACK #
 dependency "ruby"

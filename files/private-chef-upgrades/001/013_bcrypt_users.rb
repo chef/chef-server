@@ -8,12 +8,12 @@ define_upgrade do
 
     # Dependent OSS schema
     run_command("#{sqitch} deploy --to-target @1.0.4",
-                :cwd => "/opt/opscode/embedded/service/enterprise-chef-server-schema/deps/chef-server-schema")
+                :cwd => "/opt/opscode/embedded/service/opscode-erchef/schema/baseline")
 
     # Technically, only @2.1.0 contains the bcrypt schema change. However,
     # the later versions of omnibus are built with additional schema changes,
     # so we'll go ahead and upgrade thos as well.
     run_command("#{sqitch} deploy --to-target @2.2.3",
-                :cwd => "/opt/opscode/embedded/service/enterprise-chef-server-schema")
+                :cwd => "/opt/opscode/embedded/service/opscode-erchef/schema")
   end
 end
