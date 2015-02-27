@@ -1,7 +1,23 @@
-
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 80 -*-
 %% ex: ts=4 sw=4 et
-%% @author Stephen Delano <stephen@opscode.com>
-%% Copyright 2013 Opscode, Inc. All Rights Reserved.
+%% @author Tyler Cloke <tyler@chef.io>
+%% @author Marc Paradise <marc@chef.io>
+%% Copyright 2015 Chef Software, Inc. All Rights Reserved.
+%%
+%% This file is provided to you under the Apache License,
+%% Version 2.0 (the "License"); you may not use this file
+%% except in compliance with the License.  You may obtain
+%% a copy of the License at
+%%
+%%   http://www.apache.org/licenses/LICENSE-2.0
+%%
+%% Unless required by applicable law or agreed to in writing,
+%% software distributed under the License is distributed on an
+%% "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+%% KIND, either express or implied.  See the License for the
+%% specific language governing permissions and limitations
+%% under the License.
+%%
 
 -module(oc_chef_wm_keys_SUITE).
 
@@ -12,19 +28,27 @@
 
 -compile([export_all, {parse_transform, lager_transform}]).
 
--define(ORG_AUTHZ_ID, <<"10000000000000000000000000000002">>).
--define(CLIENT_AUTHZ_ID, <<"00000000000000000000000000000003">>).
--define(USER_AUTHZ_ID, <<"00000000000000000000000000000004">>).
--define(ADMIN_AUTHZ_ID, <<"90000000000000000000000000000004">>).
 -define(CLIENT_NAME, <<"client1">>).
+-define(CLIENT_NAME2, <<"client2">>).
+-define(CLIENT_AUTHZ_ID, <<"00000000000000000000000000000003">>).
+-define(CLIENT2_AUTHZ_ID, <<"00000000000000000000000000000005">>).
+
 -define(USER_NAME, <<"user1">>).
+-define(USER_NAME2, <<"user2">>).
 -define(ADMIN_USER_NAME, <<"admin">>).
+-define(USER_AUTHZ_ID, <<"00000000000000000000000000000004">>).
+-define(USER2_AUTHZ_ID, <<"00000000000000000000000000000006">>).
+-define(ADMIN_AUTHZ_ID, <<"90000000000000000000000000000004">>).
+
 -define(ORG_NAME, <<"testorg">>).
+-define(ORG_AUTHZ_ID, <<"10000000000000000000000000000002">>).
 
 -define(KEY1NAME, <<"key1">>).
 -define(KEY1EXPIRE, {datetime, {{2099,12,31},{00,00,00}}}).
+-define(KEY1EXPIRESTRING, <<"2099-12-31T0:00:00Z">>).
 -define(KEY2NAME, <<"key2">>).
 -define(KEY2EXPIRE, {datetime, {{2010,12,31},{00,00,00}}}).
+-define(KEY2EXPIRESTRING, <<"2010-12-31T0:00:00Z">>).
 
 -define(DEFAULT_KEY_ENTRY, {<<"default">>, false}).
 -define(KEY_1_ENTRY, { ?KEY1NAME, false } ).
@@ -33,7 +57,7 @@
 init_per_suite(LastConfig) ->
     Config = chef_test_db_helper:start_db(LastConfig, "oc_chef_wm_itests"),
     Config2 = setup_helper:start_server(Config),
-    make_org(),
+    make_org(?ORG_NAME, ?ORG_AUTHZ_ID),
     OrgId = chef_db:fetch_org_id(context(), ?ORG_NAME),
     {ok, PubKey} = file:read_file("../../spki_public.pem"),
     [{org_id, OrgId}, {pubkey, PubKey}] ++ Config2.
@@ -48,6 +72,14 @@ all() ->
      list_user_multiple_keys,
      list_client_no_keys,
      list_user_no_keys,
+     get_client_default_key,
+     get_user_default_key,
+     get_client_multiple_keys,
+     get_user_multiple_keys,
+     get_client_no_keys,
+     get_user_no_keys,
+     get_client_wrong_key,
+     get_user_wrong_key,
      post_user_new_valid_key,
      post_client_new_valid_key,
      post_key_with_invalid_date,
@@ -60,7 +92,7 @@ all() ->
      post_multiple_valid_client_keys
      ].
 
-%% Test cases.
+%% GET /organizations/org/clients/client/keys && GET /users/client/keys
 list_client_default_key(_) ->
     Result = http_keys_request(get, client, ?CLIENT_NAME),
     ?assertMatch({ok, "200", _, _} , Result),
@@ -103,6 +135,76 @@ list_user_no_keys(_) ->
     ?assertMatch({ok, "200", _, "[]"} , Result),
     ok.
 
+%% GET /organizations/org/clients/client/keys/key && GET /users/client/keys/key
+get_client_default_key(Config) ->
+    Result = http_named_key_request(get, client, ?CLIENT_NAME, "default"),
+    ?assertMatch({ok, "200", _, _}, Result),
+    BodyEJ = chef_json:decode(response_body(Result)),
+    ExpectedEJ = new_key_ejson(Config, <<"default">>, <<"infinity">>),
+    ?assertMatch(ExpectedEJ, BodyEJ),
+    ok.
+
+get_user_default_key(Config) ->
+    Result = http_named_key_request(get, user, ?USER_NAME, "default"),
+    ?assertMatch({ok, "200", _, _}, Result),
+    BodyEJ = chef_json:decode(response_body(Result)),
+    ExpectedEJ = new_key_ejson(Config, <<"default">>, <<"infinity">>),
+    ?assertMatch(ExpectedEJ, BodyEJ),
+    ok.
+
+get_client_multiple_keys(Config) ->
+    %% KEY1
+    Result = http_named_key_request(get, client, ?CLIENT_NAME, ?KEY1NAME),
+    ?assertMatch({ok, "200", _, _}, Result),
+    BodyEJ = chef_json:decode(response_body(Result)),
+    ExpectedEJ = new_key_ejson(Config, ?KEY1NAME, ?KEY1EXPIRESTRING),
+    ?assertMatch(ExpectedEJ, BodyEJ),
+
+    %% KEY2
+    Result2 = http_named_key_request(get, client, ?CLIENT_NAME, ?KEY2NAME),
+    ?assertMatch({ok, "200", _, _} , Result2),
+    BodyEJ2 = chef_json:decode(response_body(Result2)),
+    ExpectedEJ2 = new_key_ejson(Config, ?KEY2NAME, ?KEY2EXPIRESTRING),
+    ?assertMatch(ExpectedEJ2, BodyEJ2),
+    ok.
+
+get_user_multiple_keys(Config) ->
+    %% KEY1
+    Result = http_named_key_request(get, user, ?USER_NAME, ?KEY1NAME),
+    ?assertMatch({ok, "200", _, _}, Result),
+    BodyEJ = chef_json:decode(response_body(Result)),
+    ExpectedEJ = new_key_ejson(Config, ?KEY1NAME, ?KEY1EXPIRESTRING),
+    ?assertMatch(ExpectedEJ, BodyEJ),
+
+    %% KEY2
+    Result2 = http_named_key_request(get, user, ?USER_NAME, ?KEY2NAME),
+    ?assertMatch({ok, "200", _, _}, Result2),
+    BodyEJ2 = chef_json:decode(response_body(Result2)),
+    ExpectedEJ2 = new_key_ejson(Config, ?KEY2NAME, ?KEY2EXPIRESTRING),
+    ?assertMatch(ExpectedEJ2, BodyEJ2),
+    ok.
+
+get_client_no_keys(_) ->
+    Result = http_named_key_request(get, client, ?ADMIN_USER_NAME, "default"),
+    ?assertMatch({ok, "404", _, _} , Result),
+    ok.
+
+get_user_no_keys(_) ->
+    Result = http_named_key_request(get, user, ?ADMIN_USER_NAME, "default"),
+    ?assertMatch({ok, "404", _, _} , Result),
+    ok.
+
+get_client_wrong_key(_) ->
+    Result = http_named_key_request(get, client, ?ADMIN_USER_NAME, "wrong_key"),
+    ?assertMatch({ok, "404", _, _} , Result),
+    ok.
+
+get_user_wrong_key(_) ->
+    Result = http_named_key_request(get, user, ?ADMIN_USER_NAME, "wrong_key"),
+    ?assertMatch({ok, "404", _, _} , Result),
+    ok.
+
+%% POST /organizations/org/clients/client/keys && POST /users/client/keys
 post_client_new_valid_key(Config) ->
     Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-24T22:49:08">>)),
     Result = http_keys_request(post, client, ?ADMIN_USER_NAME, Body),
@@ -194,6 +296,44 @@ init_per_testcase(list_user_no_keys, Config) ->
     make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
     %chef_db:fetch(#chef_user{username = ?ADMIN_USER_NAME}, context()),
     Config;
+init_per_testcase(get_user_default_key,  Config) ->
+    make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
+    Config;
+init_per_testcase(get_client_default_key, Config) ->
+    make_client(Config, ?CLIENT_NAME),
+    Config;
+init_per_testcase(get_client_multiple_keys, Config) ->
+    make_client(Config, ?CLIENT_NAME),
+    ClientId = client_id(Config, ?CLIENT_NAME),
+    add_key(Config, ClientId, ?KEY1NAME, ?KEY1EXPIRE),
+    add_key(Config, ClientId, ?KEY2NAME, ?KEY2EXPIRE),
+    Config;
+init_per_testcase(get_user_multiple_keys, Config) ->
+    make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
+    UserId = user_id(?USER_NAME),
+    add_key(Config, UserId, ?KEY1NAME, ?KEY1EXPIRE),
+    add_key(Config, UserId, ?KEY2NAME, ?KEY2EXPIRE),
+    Config;
+init_per_testcase(get_client_no_keys, Config) ->
+    make_client(Config, ?CLIENT_NAME),
+    sqerl:adhoc_delete(<<"keys">>, all),
+    % make this user after clearing keys, so that we have a user
+    % who can make the request.
+    make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
+    Config;
+init_per_testcase(get_user_no_keys, Config) ->
+    make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
+    sqerl:adhoc_delete(<<"keys">>, all),
+    make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
+    Config;
+init_per_testcase(get_client_wrong_key, Config) ->
+    make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
+    make_client(Config, ?CLIENT_NAME),
+    Config;
+init_per_testcase(get_user_wrong_key, Config) ->
+    make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
+    make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
+    Config;
 init_per_testcase(post_client_new_valid_key, Config) ->
     make_admin_and_client(Config);
 init_per_testcase(post_conflicting_client_key, Config) ->
@@ -248,25 +388,50 @@ http_keys_request(Method, client, Requestor, Body) ->
                            {"accept", "application/json"},
                            {"content-type", "application/json"}], Method, Body).
 
-% Some helpers to keep noise out of the tests...
+http_named_key_request(Method, Type, Requestor, Name) ->
+    http_named_keys_request(Method, Type, Requestor, Name, <<>>).
 
-make_org() ->
-    Org = chef_object:new_record(oc_chef_organization, nil, ?ORG_AUTHZ_ID,
-                                 {[{<<"name">>, ?ORG_NAME}, {<<"full_name">>, ?ORG_NAME}]}),
-    chef_db:create(Org, context(), ?ORG_AUTHZ_ID).
+http_named_keys_request(Method, user, Requestor, Name, Body) ->
+    Url = "http://localhost:8000/users/user1/keys/" ++ Name,
+    ibrowse:send_req(Url, [{"x-ops-userid", binary_to_list(Requestor)},
+                           {"accept", "application/json"},
+                           {"content-type", "application/json"}], Method, Body);
+http_named_keys_request(Method, client, Requestor, Name, Body) ->
+    Url = "http://localhost:8000/organizations/testorg/clients/client1/keys/" ++ Name,
+    ibrowse:send_req(Url, [{"x-ops-userid", binary_to_list(Requestor)},
+                           {"accept", "application/json"},
+                           {"content-type", "application/json"}], Method, Body).
+
+% Some helpers to keep noise out of the tests...
+make_org(OrgName, OrgAuthzId) ->
+    Org = chef_object:new_record(oc_chef_organization, nil, OrgAuthzId,
+                                 {[{<<"name">>, OrgName}, {<<"full_name">>, OrgName}]}),
+    chef_db:create(Org, context(), OrgAuthzId).
 
 make_client(Config, Name) ->
+    make_client(Config, Name, ?CLIENT_AUTHZ_ID).
+
+make_client(Config, Name, Authzid) ->
     OrgId = proplists:get_value(org_id, Config),
+    make_client(Config, Name, Authzid, OrgId).
+
+make_client(Config, Name, Authzid, OrgId) ->
     PubKey = proplists:get_value(pubkey, Config),
-    Client = chef_object:new_record(chef_client, OrgId, ?CLIENT_AUTHZ_ID,
+    Client = chef_object:new_record(chef_client, OrgId, Authzid,
                                     {[{<<"name">>, Name},
                                       {<<"validator">>, true},
                                       {<<"admin">>, true},
                                       {<<"public_key">>, PubKey}]}),
-    chef_db:create(Client, context(), ?CLIENT_AUTHZ_ID).
+                           {<<"validator">>, true},
+                           {<<"admin">>, true},
+                           {<<"public_key">>, PubKey}]}]),
+    chef_db:create(Client, context(), Authzid).
 
 make_user(Config, Name, AuthzId) ->
     OrgId = proplists:get_value(org_id, Config),
+    make_user(Config, Name, AuthzId, OrgId).
+
+make_user(Config, Name, AuthzId, OrgId) ->
     PubKey = proplists:get_value(pubkey, Config),
     Dom = <<"@somewhere.com">>,
     User = chef_object:new_record(chef_user, OrgId, AuthzId,
@@ -277,6 +442,7 @@ make_user(Config, Name, AuthzId) ->
                                      {<<"display_name">>, <<"someone">>}]}),
     chef_db:create(User, context(), ?USER_AUTHZ_ID).
 
+%% TODO: should this be updated to use the POST endpoint?
 add_key(Config, Id, KeyName, ExpirationDate) ->
     PubKey = proplists:get_value(pubkey, Config),
     {ok, 1} = sqerl:execute(<<"INSERT INTO KEYS (id, key_name, public_key, key_version, created_at, expires_at, last_updated_by, updated_at)
@@ -316,5 +482,5 @@ key_list_ejson(BaseURI, KeyInfo) ->
 
 new_key_ejson(Config, Name, Expiration) ->
     PubKey = proplists:get_value(pubkey, Config),
-    {[{name, Name}, {public_key, PubKey}, {expiration_date, Expiration}]}.
+    {[{<<"name">>, Name}, {<<"public_key">>, PubKey}, {<<"expiration_date">>, Expiration}]}.
 

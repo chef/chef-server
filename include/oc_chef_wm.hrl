@@ -317,8 +317,9 @@
           parent_id,
           parent_authz_id,
           parent_name,
-          key_data}
-       ).
+          key_data,
+          chef_key :: #chef_key{}
+         }).
 
 -define(gv(X,L), proplists:get_value(X, L)).
 -define(gv(X,L, D), proplists:get_value(X, L, D)).
