@@ -103,6 +103,26 @@ module Pedant
           end
         end
 
+        def can_perform_a_search_that_is_acl_filtered_for(object_type)
+          valid_object_type?(object_type)
+          it "should return filtered results when ACL on #{object_type}s exist", skip: !Pedant::Config.search_acls? do
+            restrict_permissions_to "/#{object_type}s/#{base_object_name}_3",
+                                    normal_user => ["delete"],
+                                    admin_user => ["read"]
+
+            # A little bit of confirmation that the ACL has applied correctly
+            n = get(api_url("/#{object_type}s/#{base_object_name}_3"), normal_user)
+            n.should look_like({:status => 403})
+
+            with_search_polling do
+              admin_response = get("#{request_url}/?q=name:*", admin_user)
+              parse(admin_response)["rows"].any? {|row| row["name"] == "#{base_object_name}_3"}.should be true
+              r = get("#{request_url}/?q=name:*", normal_user)
+              parse(r)["rows"].any? {|row| row["name"] == "#{base_object_name}_3"}.should be false
+            end
+          end
+        end
+
         def perform_a_search_that_returns_no_results(object_type)
           valid_object_type?(object_type)
           context 'a search that should return no results' do
@@ -433,6 +453,23 @@ module Pedant
             performing_a_search "should succeed, and return multiple #{object_type}s"
           end
         end # can_perform_basic_partial_search_for
+
+        def can_perform_a_partial_search_that_is_acl_filtered_for(object_type)
+          valid_object_type? object_type
+          it "should return filtered results when ACLs exist", skip: !Pedant::Config.search_acls? do
+            restrict_permissions_to "/#{object_type}s/#{base_object_name}_3",
+                                    normal_user => ["delete"],
+                                    admin_user => ["read"]
+
+            payload = { "name" => ["name"] }
+            with_search_polling do
+              admin_response = post("#{request_url}?q=name:*", admin_user, {payload: payload})
+              parse(admin_response)["rows"].any? {|row| row["data"]["name"] == "#{base_object_name}_3"}.should be true
+              r = post("#{request_url}?q=name:*", normal_user, {payload: payload})
+              parse(r)["rows"].any? {|row| row["data"]["name"] == "#{base_object_name}_3"}.should be false
+            end
+          end
+        end
 
         # Helper method to determine the "real" search path that
         # should be submitted in the partial search request body.

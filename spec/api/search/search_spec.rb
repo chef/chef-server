@@ -64,12 +64,15 @@ describe 'Search API endpoint', :search do
     context 'GET' do
       let(:request_method){:GET}
       can_perform_basic_searches_for :environment
+      can_perform_a_search_that_is_acl_filtered_for :environment
     end # GET
 
     context 'POST'  do
       let(:request_method){:POST}
 
       test_bad_partial_search_bodies
+
+      can_perform_a_partial_search_that_is_acl_filtered_for :environment
 
       can_perform_basic_partial_search_for(:environment,
                                            :default_attributes,
@@ -91,6 +94,8 @@ describe 'Search API endpoint', :search do
     context 'GET' do
       let(:request_method){:GET}
       can_perform_basic_searches_for :node
+
+      can_perform_a_search_that_is_acl_filtered_for :node
 
       unless Pedant.config['old_runlists_and_search']
         recipe_variants("pedant_testing_cookbook", "1.0.0").each do |run_list_recipe|
@@ -120,6 +125,8 @@ describe 'Search API endpoint', :search do
                                            {"top"=>{"middle" => {"bottom" => "found_it"}}},
                                            :attribute_path => ["top", "middle", "bottom"],
                                            :smoke => true)
+
+      can_perform_a_partial_search_that_is_acl_filtered_for :node
 
       # Node Attribute Priority Tests
       #
@@ -280,6 +287,7 @@ describe 'Search API endpoint', :search do
     context 'GET' do
       let(:request_method){:GET}
       can_perform_basic_searches_for :role
+      can_perform_a_search_that_is_acl_filtered_for :role
     end # GET
 
     # Partial Search
@@ -287,6 +295,8 @@ describe 'Search API endpoint', :search do
       let(:request_method){:POST}
 
       test_bad_partial_search_bodies
+
+      can_perform_a_partial_search_that_is_acl_filtered_for :role
 
       can_perform_basic_partial_search_for(:role,
                                            :override_attributes,
@@ -299,6 +309,7 @@ describe 'Search API endpoint', :search do
 
   context '/search/client' do
     let(:request_url){api_url("/search/client")}
+    # let(:requestor){superuser}
 
     # Utility methods to help populate search result bodies
     def fetch_client(name)
@@ -398,6 +409,17 @@ describe 'Search API endpoint', :search do
             let(:search_result_items) { [] } # We should not get anything back
 
             performing_a_search 'should return no results'
+          end
+        end
+
+        it "should return no results to an unauthorized user", skip: !Pedant::Config.search_acls? do
+          restrict_permissions_to "/data/#{data_bag_name}",
+                                  normal_user => [],
+                                  admin_user => ["read", "delete"]
+
+          with_search_polling do
+            r = get(api_url("/search/#{data_bag_name}?q=id:*"), normal_user)
+            parse(r)["rows"].should eq([])
           end
         end
 
