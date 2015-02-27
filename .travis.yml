@@ -1,3 +1,5 @@
 cache: bundler
+rvm:
+  - 2.1.4 # This is what's bundled with chef-server: https://github.com/chef/opscode-omnibus/blob/ea8d07ce6e80a98acc6cc4e4fd9f6cae443ec282/config/projects/chef-server.rb#L33
 script: bundle exec rake travis:ci
 sudo: false
