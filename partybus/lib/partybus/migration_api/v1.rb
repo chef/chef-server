@@ -98,8 +98,9 @@ EOF
       end
 
       def run_sqitch(ec_target, osc_target="@1.0.4")
-        inner_cmd = "cd deps/chef-server-schema && sqitch deploy --to-target #{osc_target} --verify"
-        inner_cmd << " && cd ../.. && sqitch deploy --to-target #{ec_target} --verify;"
+        inner_cmd = "cd /opt/opscode/embedded/service/opscode-erchef/schema"
+        inner_cmd << " && cd baseline && sqitch deploy --to-target #{osc_target} --verify"
+        inner_cmd << " && cd .. && sqitch deploy --to-target #{ec_target} --verify;"
         cmd = "su -l #{Partybus.config.database_unix_user} -c \"#{inner_cmd}\""
         run_command(cmd,
                     :cwd => "/opt/opscode/embedded/service/opscode-erchef/schema",
