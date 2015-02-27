@@ -279,11 +279,8 @@ RSpec::Matchers.define :look_like do |expected_response_spec|
               expect(parsed_json).to loosely_match expected_body_spec
             end
           else
-            if expected_body_spec.is_a?(Array)
-              expect(parsed_json).to =~ expected_body_spec
-            else
-              expect(parsed_json).to == expected_body_spec
-            end
+            # TODO this may fall down on ordering.
+            expect(parse_json).to eql(expected_body_spec)
           end
         end
       end
