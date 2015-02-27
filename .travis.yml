@@ -1,0 +1,3 @@
+cache: bundler
+script: bundle exec rake travis:ci
+sudo: false
