@@ -1,5 +1,11 @@
 cache: bundler
+notifications:
+  hipchat:
+    rooms:
+      # Chef Visual Interaction
+      secure: Ar0L/Sf7qxW2hwWrYTOfZWq0vqtVQt+2zkRU0m2XG/OTcyZ1GRybdC4eKFdRIdc6z6WbufOjjdtCuCju8icVphSIuk/+Dflpbc4yH4z7F8wLbrf88rTBB5hmFa7YLVyslzX34vk93cuMdSr0IY+MGoI9WodRIxPI/KakuyWpID8=
 rvm:
   - 2.1.4 # This is what's bundled with chef-server: https://github.com/chef/opscode-omnibus/blob/ea8d07ce6e80a98acc6cc4e4fd9f6cae443ec282/config/projects/chef-server.rb#L33
 script: bundle exec rake travis:ci
 sudo: false
+
