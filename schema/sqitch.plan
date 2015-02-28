@@ -68,3 +68,4 @@ keys_update_tracking [multiple_keys] 2015-02-24T18:57:08Z Marc Paradise <marc@ch
 @2.9.0 2015-02-24T18:57:42Z Marc Paradise <marc@chef.io># tag 2.9.0 for  keys update  tracking fields
 
 policy_groups [policies] 2015-02-27T22:52:25Z Daniel DeLeo <ddeleo@lorentz.local># Add policy_groups table
+policy_revisions [policy_groups] 2015-02-27T23:39:16Z Daniel DeLeo <ddeleo@lorentz.local># Create separte policy revisions table
