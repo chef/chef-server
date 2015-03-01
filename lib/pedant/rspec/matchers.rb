@@ -280,7 +280,7 @@ RSpec::Matchers.define :look_like do |expected_response_spec|
             end
           else
             # TODO this may fall down on ordering.
-            expect(parse_json).to eql(expected_body_spec)
+            expect(parsed_json).to eql(expected_body_spec)
           end
         end
       end
