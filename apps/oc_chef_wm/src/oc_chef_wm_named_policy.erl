@@ -45,9 +45,11 @@ init_resource_state(_Config) ->
 request_type() ->
     "policies".
 
+%% TODO: we shouldn't accept POST
 allowed_methods(Req, State) ->
     {['GET', 'PUT', 'POST', 'DELETE'], Req, State}.
 
+%% TODO: we shouldn't accept POST
 post_is_create(Req, State) ->
     {true, Req, State}.
 
