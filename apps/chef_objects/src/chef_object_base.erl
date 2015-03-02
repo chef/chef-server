@@ -50,7 +50,9 @@
          valid_public_key/1,
          set_default_values/2,
          validate_ejson/2,
-         public_key_spec/1
+         public_key_spec/1,
+	 validate_and_sanitize_date_field/2,
+	 parse_expiration/1
         ]).
 
 %% In order to fully test things
@@ -485,3 +487,42 @@ validate_ejson(Ejson, Spec) ->
 public_key_spec(OptOrRequired) ->
     {[{{OptOrRequired,<<"public_key">>}, {fun_match, {fun valid_public_key/1, string,
                                             <<"Public Key must be a valid key.">>}}} ]}.
+
+% validate that the expiration_date field is a ISO8601 UTC timestring (ending in Z) and that
+% ec_date can parse it, and then turn it into a format sqerl's deps can handle.
+%
+% FieldBinary must be a binary of the format <<"YYYY-MM-DDThh:mm:ssZ">> or <<"infinity">>.
+validate_and_sanitize_date_field(EJ, FieldBinary) ->
+    try
+        chef_object_base:validate_ejson(EJ, {[
+                                              {{req, FieldBinary},
+                                               {string_match, chef_regex:regex_for(date)}}
+                                             ]}),
+        parse_expiration(ej:get({FieldBinary}, EJ)),
+
+        %% We want all timestring inputs to the API to be in a valid ISO8601 UTC format which is
+	%% YYYY-MM-DDThh:mm:sZ eg. 2015-02-28T20:16:12Z. Note that the timestring ends in Z.
+	%% This is both the most correct way to interpert ISO and what ruby clients will want to
+	%% pass by default:
+	%%
+	%% irb> Time.now.utc.iso8601
+	%% => "2015-03-03T20:03:53Z"
+	%%
+	%% Post validation, we should remove the Z from timestrings so that when trying to input to
+	%% postgres via sqerl, epgsql_idatetime doesn't blow up (as it does for valid UTC timestamps
+	%% ending in Z).
+        SafeTimestring = re:replace(ej:get({FieldBinary}, EJ), "Z", "",[global,{return,binary}]),
+        ej:set({FieldBinary}, EJ, SafeTimestring)
+    catch % if validation fails, throw proper date error
+        throw:{ej_invalid,string_match,FieldBinary,_,_,_,_} ->
+            throw({bad_date, FieldBinary});
+        throw:{ec_date, {bad_date, _}} ->
+            throw(bad_date)
+    end.
+
+parse_expiration(Expiration) when Expiration =:= undefined;
+                                  Expiration =:= <<"infinity">> ->
+   ?INFINITY_TIMESTAMP;
+parse_expiration(Expiration) when is_binary(Expiration) ->
+    ec_date:parse(binary_to_list(Expiration)).
+

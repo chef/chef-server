@@ -24,11 +24,17 @@
 -include("../../include/chef_types.hrl").
 
 -define(KEY_NAME, <<"test_key">>).
--define(DEFAULT_EXPIRATION, <<"2099-10-24T22:49:08">>).
--define(PARSED_DEFAULT_EXPIRATION, {{2099,10,24},{22,49,08}}).
+-define(DEFAULT_EXPIRATION, <<"2099-10-24T22:49:08Z">>).
+%% note the Z has been parsed out post parse_binary_json
+-define(DEFAULT_VALIDATED_EXPIRATION, <<"2099-10-24T22:49:08">>).
+%% The extra zero denotes UTC
+-define(PARSED_DEFAULT_EXPIRATION, {{2099,10,24},{22,49,08,0}}).
 
+%% example post parse_binary_json
 example_key() ->
     example_key(?DEFAULT_EXPIRATION, undefined).
+example_parsed_key() ->
+    example_key(?DEFAULT_VALIDATED_EXPIRATION, undefined).
 
 example_key(Expiration, undefined) ->
     {ok, PublicKey} = file:read_file("../test/spki_public.pem"),
@@ -89,25 +95,18 @@ new_record_test_() ->
      }
     ].
 
-parse_expiration_test_() ->
-    [{"check that parse_expiration handles infinity properly",
-      fun() ->
-	      ?assertEqual(?INFINITY_TIMESTAMP, chef_key:parse_expiration(<<"infinity">>))
-      end
-     }].
-
 parse_binary_json_test_() ->
     [{"check that a valid key is accepted",
       fun() ->
 	      Key = example_key(),
 	      EncodedKey = jiffy:encode(Key),
-	      ?assertEqual(Key, chef_key:parse_binary_json(EncodedKey, undefined))
+	      ?assertEqual(example_parsed_key(), chef_key:parse_binary_json(EncodedKey, undefined))
       end},
      {"check that a valid key with an infinity expiration is accepted",
       fun() ->
 	      Key = example_key(<<"infinity">>, undefined),
 	      EncodedKey = jiffy:encode(Key),
-	      ?assertEqual(Key, chef_key:parse_binary_json(EncodedKey, undefined))
+	      ?assertEqual(example_key(<<"infinity">>, undefined), chef_key:parse_binary_json(EncodedKey, undefined))
       end},
      {"check that key with an invalid name is rejected",
       fun() ->
@@ -120,7 +119,7 @@ parse_binary_json_test_() ->
       fun() ->
 	      Key = example_key(<<"not-a-valid-date">>, undefined),
 	      EncodedKey = jiffy:encode(Key),
-	      ?assertThrow({ec_date,{bad_date,_}}, chef_key:parse_binary_json(EncodedKey, undefined))
+	      ?assertThrow({bad_date, <<"expiration_date">>}, chef_key:parse_binary_json(EncodedKey, undefined))
       end},
      {"check that key with an invalid public_key is rejected",
       fun() ->

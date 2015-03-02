@@ -22,8 +22,7 @@
 -module(oc_chef_wm_keys_SUITE).
 
 -include_lib("common_test/include/ct.hrl").
--include("../../../include/chef_types.hrl").
--include("../../../include/oc_chef_types.hrl").
+-include("../../../include/oc_chef_wm.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -compile([export_all, {parse_transform, lager_transform}]).
@@ -45,10 +44,10 @@
 
 -define(KEY1NAME, <<"key1">>).
 -define(KEY1EXPIRE, {datetime, {{2099,12,31},{00,00,00}}}).
--define(KEY1EXPIRESTRING, <<"2099-12-31T0:00:00Z">>).
+-define(KEY1EXPIRESTRING, <<"2099-12-31T00:00:00Z">>).
 -define(KEY2NAME, <<"key2">>).
 -define(KEY2EXPIRE, {datetime, {{2010,12,31},{00,00,00}}}).
--define(KEY2EXPIRESTRING, <<"2010-12-31T0:00:00Z">>).
+-define(KEY2EXPIRESTRING, <<"2010-12-31T00:00:00Z">>).
 
 -define(DEFAULT_KEY_ENTRY, {<<"default">>, false}).
 -define(KEY_1_ENTRY, { ?KEY1NAME, false } ).
@@ -80,9 +79,13 @@ all() ->
      get_user_no_keys,
      get_client_wrong_key,
      get_user_wrong_key,
+     get_key_for_nonexistant_user,
+     get_key_for_nonexistant_client,
      post_user_new_valid_key,
      post_client_new_valid_key,
-     post_key_with_invalid_date,
+     post_new_key_invalid_date,
+     post_new_key_invalid_utc_date,
+     post_new_key_invalid_digits_date,
      post_key_with_infinity_date,
      post_key_with_invalid_key_name,
      post_key_with_invalid_public_key,
@@ -204,21 +207,56 @@ get_user_wrong_key(_) ->
     ?assertMatch({ok, "404", _, _} , Result),
     ok.
 
+get_key_for_nonexistant_user(_) ->
+    Result = http_named_key_request(get, user, ?ADMIN_USER_NAME, "default"),
+    ?assertMatch({ok, "404", _, _} , Result),
+    ok.
+
+get_key_for_nonexistant_client(_) ->
+    Result = http_named_key_request(get, client, ?ADMIN_USER_NAME, "default"),
+    ?assertMatch({ok, "404", _, _} , Result),
+    ok.
+
 %% POST /organizations/org/clients/client/keys && POST /users/client/keys
 post_client_new_valid_key(Config) ->
-    Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-24T22:49:08">>)),
+    Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-24T22:49:08Z">>)),
     Result = http_keys_request(post, client, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "201", _, _}, Result).
 
 post_user_new_valid_key(Config) ->
-    Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-25T22:49:08">>)),
+    Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-25T22:49:08Z">>)),
     Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "201", _, _}, Result).
 
-post_key_with_invalid_date(Config) ->
-    Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"invalid-date">>)),
+post_new_key_invalid_date(Config) ->
+    Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"bad-date">>)),
     Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
-    ?assertMatch({ok, "400", _, _}, Result).
+    ?assertMatch({ok, "400", _, _}, Result),
+
+    {_, _, _, UnparsedMessage} = Result,
+    [ParsedMessage] = ej:get({<<"error">>},chef_json:decode(UnparsedMessage)),
+    ExpectedMessage = ?BAD_DATE_MESSAGE(<<"expiration_date">>),
+    ?assertMatch(ExpectedMessage, ParsedMessage).
+
+post_new_key_invalid_utc_date(Config) ->
+    Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-24T22:49:08">>)),
+    Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
+    ?assertMatch({ok, "400", _, _}, Result),
+
+    {_, _, _, UnparsedMessage} = Result,
+    [ParsedMessage] = ej:get({<<"error">>},chef_json:decode(UnparsedMessage)),
+    ExpectedMessage = ?BAD_DATE_MESSAGE(<<"expiration_date">>),
+    ?assertMatch(ExpectedMessage, ParsedMessage).
+
+post_new_key_invalid_digits_date(Config) ->
+    Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2-1-2T2:4:0Z">>)),
+    Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
+    ?assertMatch({ok, "400", _, _}, Result),
+
+    {_, _, _, UnparsedMessage} = Result,
+    [ParsedMessage] = ej:get({<<"error">>},chef_json:decode(UnparsedMessage)),
+    ExpectedMessage = ?BAD_DATE_MESSAGE(<<"expiration_date">>),
+    ?assertMatch(ExpectedMessage, ParsedMessage).
 
 post_key_with_infinity_date(Config) ->
     Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"infinity">>)),
@@ -226,41 +264,41 @@ post_key_with_infinity_date(Config) ->
     ?assertMatch({ok, "201", _, _}, Result).
 
 post_key_with_invalid_key_name(Config) ->
-    Body = chef_json:encode(new_key_ejson(Config, <<"invalid^character">>, <<"2099-10-25T22:49:08">>)),
+    Body = chef_json:encode(new_key_ejson(Config, <<"invalid^character">>, <<"2099-10-25T22:49:08Z">>)),
     Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "400", _, _}, Result).
 
-post_key_with_invalid_public_key(Config) ->
-    Ejson = {[{name, <<"test1">>}, {public_key, <<"-----BEGIN PUBLIC KEY-----\ninvalid_key\n-----END PUBLIC KEY-----">>}, {expiration_date, <<"2099-10-25T22:49:08">>}]},
+post_key_with_invalid_public_key(_) ->
+    Ejson = {[{name, <<"test1">>}, {public_key, <<"-----BEGIN PUBLIC KEY-----\ninvalid_key\n-----END PUBLIC KEY-----">>}, {expiration_date, <<"2099-10-25T22:49:08Z">>}]},
     Body = chef_json:encode(Ejson),
     Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "400", _, _}, Result).
 
 post_conflicting_user_key(Config) ->
-    Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-25T22:49:08">>)),
+    Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-25T22:49:08Z">>)),
     http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
     Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "409", _, _}, Result).
 
 post_conflicting_client_key(Config) ->
-    Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-24T22:49:08">>)),
+    Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-24T22:49:08Z">>)),
     http_keys_request(post, client, ?ADMIN_USER_NAME, Body),
     Result = http_keys_request(post, client, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "409", _, _}, Result).
 
 post_multiple_valid_user_keys(Config) ->
-    Body1 = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-25T22:49:08">>)),
+    Body1 = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-25T22:49:08Z">>)),
     Result1 = http_keys_request(post, user, ?ADMIN_USER_NAME, Body1),
     ?assertMatch({ok, "201", _, _}, Result1),
-    Body2 = chef_json:encode(new_key_ejson(Config, <<"test2">>, <<"2099-10-25T22:49:08">>)),
+    Body2 = chef_json:encode(new_key_ejson(Config, <<"test2">>, <<"2099-10-25T22:49:08Z">>)),
     Result2 = http_keys_request(post, user, ?ADMIN_USER_NAME, Body2),
     ?assertMatch({ok, "201", _, _}, Result2).
 
 post_multiple_valid_client_keys(Config) ->
-    Body1 = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-24T22:49:08">>)),
+    Body1 = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-24T22:49:08Z">>)),
     Result1 = http_keys_request(post, client, ?ADMIN_USER_NAME, Body1),
     ?assertMatch({ok, "201", _, _}, Result1),
-    Body2 = chef_json:encode(new_key_ejson(Config, <<"test2">>, <<"2099-10-24T22:49:08">>)),
+    Body2 = chef_json:encode(new_key_ejson(Config, <<"test2">>, <<"2099-10-24T22:49:08Z">>)),
     Result2 = http_keys_request(post, client, ?ADMIN_USER_NAME, Body2),
     ?assertMatch({ok, "201", _, _}, Result2).
 
@@ -334,15 +372,25 @@ init_per_testcase(get_user_wrong_key, Config) ->
     make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
     make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
     Config;
+init_per_testcase(get_key_for_nonexistant_user, Config) ->
+    make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
+    Config;
+init_per_testcase(get_key_for_nonexistant_client, Config) ->
+    make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
+    Config;
 init_per_testcase(post_client_new_valid_key, Config) ->
     make_admin_and_client(Config);
+init_per_testcase(post_new_key_invalid_date, Config) ->
+    make_admin_non_admin_and_client(Config);
+init_per_testcase(post_new_key_invalid_utc_date, Config) ->
+    make_admin_non_admin_and_client(Config);
+init_per_testcase(post_new_key_invalid_digits_date, Config) ->
+    make_admin_non_admin_and_client(Config);
 init_per_testcase(post_conflicting_client_key, Config) ->
     make_admin_and_client(Config);
 init_per_testcase(post_multiple_valid_client_keys, Config) ->
     make_admin_and_client(Config);
 init_per_testcase(post_user_new_valid_key, Config) ->
-    make_admin_non_admin_and_client(Config);
-init_per_testcase(post_key_with_invalid_date, Config) ->
     make_admin_non_admin_and_client(Config);
 init_per_testcase(post_key_with_infinity_date, Config) ->
     make_admin_non_admin_and_client(Config);
@@ -422,9 +470,6 @@ make_client(Config, Name, Authzid, OrgId) ->
                                       {<<"validator">>, true},
                                       {<<"admin">>, true},
                                       {<<"public_key">>, PubKey}]}),
-                           {<<"validator">>, true},
-                           {<<"admin">>, true},
-                           {<<"public_key">>, PubKey}]}]),
     chef_db:create(Client, context(), Authzid).
 
 make_user(Config, Name, AuthzId) ->

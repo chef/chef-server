@@ -32,7 +32,6 @@
 -include_lib("stats_hero/include/stats_hero.hrl").
 
 -ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
 -compile([export_all]).
 -endif.
 %% Since CS12, we have a default-org mode. Under this mode,
@@ -60,6 +59,8 @@
         "organizations"
     ]
 ).
+
+-define(BAD_DATE_MESSAGE(FieldName), erlang:iolist_to_binary([<<"Field ">>,FieldName,<<" is invalid. ">>,<<"All dates must be a valid date in ISO8601 form of exactly YYYY-MM-DDThh:mm:ss, eg 2099-02-28T01:00:00, or the string \"infinity\". All times are assumed UTC, so do not include a Z on the end of your date.">>])).
 
 -type permission() :: create | delete | read | update.
 

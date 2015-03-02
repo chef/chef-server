@@ -96,9 +96,6 @@ to_json(Req, #base_state{ chef_db_context = DbContext,
 from_json(Req, #base_state{resource_state = #key_state{key_data = EJ, parent_id = ActorId}} = State) ->
     oc_chef_wm_base:create_from_json(Req, State, chef_key, {authz_id, undefined}, {ActorId, EJ}).
 
-% TODO it seems this doesn't even get called anywhere.
-malformed_request_message({ec_date, {bad_date, _Input}}, _Req, _State) ->
-    {[{<<"error">>, <<"expiration_date must be a valid date in ISO-8601 form, eg 2099-02-28T01:00:00, or the string \"infinity\".">>}]};
 malformed_request_message(Any, Req, State) ->
     chef_wm_malformed:malformed_request_message(Any, Req, State).
 
