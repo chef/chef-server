@@ -62,8 +62,8 @@ module Pedant
 
           string_to_sign = options[:string_to_sign] ||
             "Method:#{http_method.to_s.upcase}\nHashed Path:#{hashed_path}\n" +
-          "X-Ops-Content-Hash:#{hashed_body}\nX-Ops-Timestamp:#{timestamp}\n" +
-          "X-Ops-UserId:#{user_id}"
+            "X-Ops-Content-Hash:#{hashed_body}\nX-Ops-Timestamp:#{timestamp}\n" +
+            "X-Ops-UserId:#{user_id}"
           signature = options.include?(:signature) ?
             options[:signature] :
             Base64.encode64(private_key.private_encrypt(string_to_sign)).chomp

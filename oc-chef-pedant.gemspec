@@ -1,13 +1,13 @@
 Gem::Specification.new do |s|
   s.name          = 'oc-chef-pedant'
   s.version       = '2.0.0'
-  s.date          = '2015-02-27'
+  s.date          = '2015-03-01'
   s.summary       = "Enterprise Chef API Testing Framework"
   s.authors       = ["Chef Software Engineering"]
   s.email         = 'dev@chef.io'
   s.require_paths = ['lib', 'spec']
   s.files         = Dir['lib/**/*.rb'] + Dir['spec/**/*_spec.rb']
-  s.homepage      = 'http://chef.io'
+  s.homepage      = 'https://chef.io'
 
   s.bindir        = 'bin'
   s.executables   = ['oc-chef-pedant']

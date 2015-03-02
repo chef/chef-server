@@ -1,7 +1,8 @@
 require 'pedant/rspec/common'
+require 'pedant/acl'
 
 describe "ACL API", :acl do
-
+  include Pedant::ACL
   def self.ruby?
     Pedant::Config.ruby_acl_endpoint?
   end
@@ -1017,7 +1018,6 @@ describe "ACL API", :acl do
                     :payload => {"id" => missing_group}).should look_like({:status => 201})
 
               # add the group to the read ace
-              payload = { "read" => updated_read }
               put("#{request_url}/read",
                   platform.admin_user,
                   :payload => { "read" => updated_read }).should look_like(:status => 200)

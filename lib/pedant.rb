@@ -56,12 +56,7 @@ module Pedant
     configure_logging
     puts "Creating platform..."
     create_platform
-
-    # If we need more hooks, we should have a general hook infrastructure
-    # This is needed for oc-chef-pedant
-    if config.pedant_platform.respond_to?(:before_configure_rspec)
-      config.pedant_platform.before_configure_rspec
-    end
+    config.pedant_platform.before_configure_rspec
 
     puts "Starting Pedant Run: #{config.pedant_platform.pedant_run_timestamp}"
     configure_rspec
@@ -81,12 +76,9 @@ module Pedant
   end
 
   def self.create_platform
-    platform_class = config.platform_class
-    raise "Must specify an implementation class of Pedant::Platform!  Use the `platform_class` key in your Pedant config file" unless platform_class
-
-    config.pedant_platform = platform_class.new(config.chef_server,
-                                                config.superuser_key,
-                                                config.superuser_name)
+    config.pedant_platform = Pedant::Platform.new(config.chef_server,
+                                                  config.superuser_key,
+                                                  config.superuser_name)
   end
 
   def self.configure_rspec

@@ -4,11 +4,8 @@ require 'bundler/setup' # so we don't need to type 'bundle exec' to run it
 
 require 'rspec/core'
 require 'pedant'
-require 'pedant/opensource/platform'
-require 'pedant/multitenant'
 require 'pedant/organization'
 
-Pedant.config.platform_class = Pedant::MultiTenantPlatform
 Pedant.config.suite = "api"
 Pedant.setup(ARGV)
 puts Pedant::UI.new.info_banner

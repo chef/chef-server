@@ -32,7 +32,7 @@ module Pedant
       let(:default_user_password) { 'opensesame123' }
       let(:default_user_attributes) do
           {
-            "name" => default_user_name,
+            "username" => default_user_name,
             "password" => default_user_password,
             "admin" => true
           }

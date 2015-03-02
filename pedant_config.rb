@@ -165,34 +165,6 @@ requestors({
 
 
 
-# users({
-
-#     # A "normal" (non-admin) user in the testing organization
-#     :user => {
-#       :name => "pedant-normal",
-#       :create_me => true
-#     },
-
-#     # A user that is not a member of the testing organization
-#     :non_org_user => {
-#       :name => "pedant-nobody",
-#       :create_me => true
-#     },
-
-#     # An administrator in the testing organization
-#     :admin_user => {
-#       :name => "pedant-admin",
-#       :create_me => true
-#     },
-
-
-#     # A user for Knife tests.  A knife.rb and key files will be set up
-#     # for this user
-#     :knife_user => {
-#       :name => "knifey",
-#       :create_me => true
-#     }
-#   })
 
 # To facilitate testing as we transition from Ruby to Erlang endpoint
 # implementations, you can specify in your configuration which
@@ -201,6 +173,6 @@ requestors({
 # necessary.  A common reason is to take into account different error
 # message formatting between the two implementations.
 #
-ruby_users_endpoint? true
-ruby_org_assoc? true
-ruby_org_acl_endpoint? true
+ruby_users_endpoint? false
+ruby_org_assoc? false
+ruby_org_acl_endpoint? false

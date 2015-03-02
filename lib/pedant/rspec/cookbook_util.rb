@@ -111,6 +111,7 @@ module Pedant
       # Concern is included here to make it easy to extend the example group using
       # module ClassMethods
 
+
       let(:named_cookbook_url) { api_url(named_cookbook_path) }
       let(:named_cookbook_path) { "/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}" }
 
