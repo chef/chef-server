@@ -22,6 +22,8 @@
 
 -module(chef_test_suite_helper).
 
+-include_lib("eunit/include/eunit.hrl").
+
 -export([
          set_env/2,
          random_bogus_port/0,
@@ -31,10 +33,21 @@
          set_app_env/1,
          make_id/1,
          make_az_id/1,
+         make_orgs/0,
          actor_id/0,
+         org_name/0,
+         other_org_name/0,
          the_org_id/0,
          other_org_id/0
         ]).
+
+-define(ORG_AUTHZ_ID, <<"10000000000000000000000000000002">>).
+-define(ORG_NAME, <<"testorg">>).
+
+-define(OTHER_ORG_AUTHZ_ID, <<"99999999999999999999999999999999">>).
+-define(OTHER_ORG_NAME, <<"other_testorg">>).
+
+
 
 set_env(App, AppConfig) ->
     [ application:set_env(App, Key, Value) || {Key, Value} <- AppConfig ].
@@ -105,6 +118,51 @@ make_az_id(Prefix) ->
 
 actor_id() ->
     make_az_id(<<"ffff">>).
+
+make_orgs() ->
+    make_org(),
+    make_other_org(),
+    OrgConfig = org_config(),
+    confirm_org_setup(OrgConfig),
+    OrgConfig.
+
+make_org() ->
+    Org = chef_object:new_record(oc_chef_organization, nil, ?ORG_AUTHZ_ID,
+                                 {[{<<"name">>, ?ORG_NAME}, {<<"full_name">>, ?ORG_NAME}]}),
+    ok = chef_db:create(Org, context(), ?ORG_AUTHZ_ID).
+
+make_other_org() ->
+    Org = chef_object:new_record(oc_chef_organization, nil, ?OTHER_ORG_AUTHZ_ID,
+                                 {[{<<"name">>, ?OTHER_ORG_NAME}, {<<"full_name">>, ?OTHER_ORG_NAME}]}),
+    ok = chef_db:create(Org, context(), ?OTHER_ORG_AUTHZ_ID).
+
+org_config() ->
+    OrgId = chef_db:fetch_org_id(context(), ?ORG_NAME),
+    OtherOrgID = chef_db:fetch_org_id(context(), ?OTHER_ORG_NAME),
+    ct:pal("Other org: ~p", [OtherOrgID]),
+    [{org_id, OrgId}, {other_org_id, OtherOrgID}].
+
+confirm_org_setup(Config) ->
+    ExpectedOrgId = proplists:get_value(org_id, Config),
+    ExpectedOtherOrgId = proplists:get_value(other_org_id, Config),
+
+    ct:pal("ORG: ~p~n", [ExpectedOrgId]),
+    ct:pal("OTHER ORG: ~p~n", [ExpectedOtherOrgId]),
+
+    ActualMainOrg = chef_db:fetch_org_id(context(), ?ORG_NAME),
+    ActualOtherOrg = chef_db:fetch_org_id(context(), ?OTHER_ORG_NAME),
+    ?assertEqual(ExpectedOrgId, ActualMainOrg),
+    ?assertEqual(ExpectedOtherOrgId, ActualOtherOrg).
+
+
+org_name() ->
+    ?ORG_NAME.
+
+other_org_name() ->
+    ?OTHER_ORG_NAME.
+
+context() ->
+    chef_db:make_context(<<"AB">>).
 
 the_org_id() ->
     make_id(<<"aa1">>).

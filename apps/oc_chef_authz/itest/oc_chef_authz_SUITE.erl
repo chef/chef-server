@@ -28,16 +28,6 @@
 
 -compile([export_all]).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% TODO: These macros copy-pasta from oc_chef_wv/itest/oc_chef_wm_keys_SUITE.erl
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
--define(ORG_AUTHZ_ID, <<"10000000000000000000000000000002">>).
--define(ORG_NAME, <<"testorg">>).
-
--define(OTHER_ORG_AUTHZ_ID, <<"99999999999999999999999999999999">>).
--define(OTHER_ORG_NAME, <<"other_testorg">>).
-
 %% Note: this is also defined in the schema test data
 %% TODO: this is NOT the id of the org we make in init_per_suite/1, which is
 %% probably confusing... this seems unused, delete it?
@@ -49,17 +39,14 @@ all() -> [fetch_container_sql,
 
 init_per_suite(LastConfig) ->
     %% TODO: tell chef_otto that couchdb is dead
+    %% TODO: move this to chef_test_db_helper
     application:set_env(chef_db, couchdb_host, "localhost"),
     application:set_env(chef_db, couchdb_port, 6984),
 
     Config = chef_test_db_helper:start_db(LastConfig, "oc_chef_authz_itests"),
     suite_helper:start_server(Config),
-    make_org(),
-    make_other_org(),
-    OrgId = chef_db:fetch_org_id(context(), ?ORG_NAME),
-    OtherOrgID = chef_db:fetch_org_id(context(), ?OTHER_ORG_NAME),
-    ct:pal("Other org: ~p", [OtherOrgID]),
-    [{org_id, OrgId}, {other_org_id, OtherOrgID}] ++ Config.
+    OrgsConfig = chef_test_suite_helper:make_orgs(),
+    OrgsConfig ++ Config.
 
 end_per_suite(Config) ->
     chef_test_suite_helper:stop_server(Config, suite_helper:needed_apps()).
@@ -81,23 +68,10 @@ fetch_container_sql(_Config) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 policy_ops(Config) ->
-    confirm_suite_setup(Config),
     insert_policy_data(Config),
     list_policies(Config),
     show_policy(Config),
     delete_policies(Config).
-
-confirm_suite_setup(Config) ->
-    ExpectedOrgId = proplists:get_value(org_id, Config),
-    ExpectedOtherOrgId = proplists:get_value(other_org_id, Config),
-
-    ct:pal("ORG: ~p~n", [ExpectedOrgId]),
-    ct:pal("OTHER ORG: ~p~n", [ExpectedOtherOrgId]),
-
-    ActualMainOrg = chef_db:fetch_org_id(context(), ?ORG_NAME),
-    ActualOtherOrg = chef_db:fetch_org_id(context(), ?OTHER_ORG_NAME),
-    ?assertEqual(ExpectedOrgId, ActualMainOrg),
-    ?assertEqual(ExpectedOtherOrgId, ActualOtherOrg).
 
 insert_policy_data(Config) ->
     Policies = primary_org_policy_fixtures(Config) ++ other_org_policy_fixtures(Config),
@@ -146,22 +120,8 @@ other_org_policy_fixtures(Config) ->
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% TODO: This is all copy-pasta from oc_chef_wv/itest/oc_chef_wm_keys_SUITE.erl
+%% TODO: This is all copy-pasta from oc_chef_wm/itest/oc_chef_wm_keys_SUITE.erl
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-make_org() ->
-    Org = chef_object:new_record(oc_chef_organization, nil, ?ORG_AUTHZ_ID,
-                                 {[{<<"name">>, ?ORG_NAME}, {<<"full_name">>, ?ORG_NAME}]}),
-    ok = chef_db:create(Org, context(), ?ORG_AUTHZ_ID).
-
-make_other_org() ->
-    Org = chef_object:new_record(oc_chef_organization, nil, ?OTHER_ORG_AUTHZ_ID,
-                                 {[{<<"name">>, ?OTHER_ORG_NAME}, {<<"full_name">>, ?OTHER_ORG_NAME}]}),
-    ok = chef_db:create(Org, context(), ?OTHER_ORG_AUTHZ_ID).
-
-
-context() ->
-    chef_db:make_context(<<"AB">>).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
