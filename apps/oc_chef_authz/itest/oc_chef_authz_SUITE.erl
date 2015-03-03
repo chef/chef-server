@@ -38,11 +38,6 @@ all() -> [fetch_container_sql,
          ].
 
 init_per_suite(LastConfig) ->
-    %% TODO: tell chef_otto that couchdb is dead
-    %% TODO: move this to chef_test_db_helper
-    application:set_env(chef_db, couchdb_host, "localhost"),
-    application:set_env(chef_db, couchdb_port, 6984),
-
     Config = chef_test_db_helper:start_db(LastConfig, "oc_chef_authz_itests"),
     suite_helper:start_server(Config),
     OrgsConfig = chef_test_suite_helper:make_orgs(),
@@ -118,10 +113,6 @@ other_org_policy_fixtures(Config) ->
     [make_policy(<<"4">>, OtherOrgId)].
 
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% TODO: This is all copy-pasta from oc_chef_wm/itest/oc_chef_wm_keys_SUITE.erl
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
