@@ -91,12 +91,10 @@ module Pedant
       admin  = requestor_spec[:admin]
 
       if create_me
-        puts "Creating user: #{name}"
         create_user(name, admin: admin, associate: associate).tap do |user|
           user.populate_dot_chef! if requestor_spec[:create_knife]
         end
       else
-        puts "Existing user: #{name}"
         Pedant::User.new(name, key_file, platform: self, preexisting: true)
       end
     end
@@ -114,7 +112,6 @@ module Pedant
         create_org(name)
       else
         key = org[:validator_key]
-        puts "Using pre-created org. Skipping org creation validation tests."
         Pedant::Organization.new(name, key)
       end
     end
@@ -147,7 +144,6 @@ module Pedant
     end
 
     def setup(requestors=Pedant::Config.requestors)
-      puts "***** SETUP REQUESTORS AND CONFIG"
       requestors[:clients].each do |kind, client_hash|
 
         key = cache_key(kind, :client)
@@ -179,7 +175,6 @@ module Pedant
     end
 
     def cleanup
-      puts "*** CLEANUP"
       cleanup_requestors
       delete_org_from_config
       delete_user(@test_org_owner)
@@ -187,13 +182,11 @@ module Pedant
 
     def create_client(name, org = self.test_org)
       clientname = name.to_s
-      puts "Creating client #{clientname} in #{org.name}"
       payload = { "name" => clientname }
 
       r = post(api_url('/clients'), org.validator, :payload => payload)
 
       if r.code == 409
-        puts "The client #{clientname} already exists... regenerating a key for it now"
         payload["private_key"] = true
         r = put(api_url("/clients/#{clientname}"), org.validator, :payload => payload)
       end
@@ -265,7 +258,6 @@ module Pedant
     # Similar logic holds for users as well.
     def create_requestor_accessor(cache_key)
       accessor = self.class.send(:define_method, cache_key, lambda{requestor_cache[cache_key]})
-      puts "Created accessor: #{accessor}"
       accessor
     end
 
@@ -347,7 +339,6 @@ module Pedant
     end
     # TODO: expose the entire payload as an input parameter
     def create_user(username, options = {})
-      puts "Creating user #{username}"
       payload = {
         "username" => username,
         "email" => "#{username}@opscode.com",
@@ -378,7 +369,6 @@ module Pedant
       if user.preexisting
         puts "Pedant did not create the user #{user.name}, and will not delete it"
       else
-        puts "Deleting user #{user.name} ..."
         r = delete("#{@server}/users/#{user.name}", @superuser)
         if r.code != 200
           puts "Unexpected response #{r.code}: #{r}"
@@ -488,9 +478,7 @@ module Pedant
       # Create a path for all of our generated content. Makes it easier
       # to do a final cleanup pass
       FileUtils.mkpath File.join(Dir.tmpdir, "oc-chef-pedant")
-        puts "****** Configuring RSpec for Multi-Tenant Tests"
       ::RSpec.configure do |c|
-        puts "****** 2 Configuring RSpec for Multi-Tenant Tests"
         c.run_all_when_everything_filtered = true
         c.filter_run_excluding :intermittent_failure => true
         c.include Pedant::ResponseBodies

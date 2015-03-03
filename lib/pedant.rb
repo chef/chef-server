@@ -114,7 +114,6 @@ module Pedant
 
       platform = Pedant::Config.pedant_platform
 
-      puts "setting up rspec config for #{platform}"
       platform.configure_rspec
 
       c.before(:suite) do

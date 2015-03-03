@@ -43,7 +43,6 @@ module Pedant
         let(:required_client_attributes) { { 'name' => client_name } }
         let(:default_client_attributes) do
           required_client_attributes.
-            with('admin',     client_is_admin).
             with('validator', client_is_validator)
         end
         let(:original_resource_attributes) { default_client_attributes.except('private_key') }
@@ -62,7 +61,6 @@ module Pedant
       end # shared context
 
       let(:pedant_admin_client_name){Pedant.config.requestors[:clients][:admin][:name]}
-      let(:pedant_nonadmin_client_name){Pedant.config.requestors[:clients][:non_admin][:name]}
       let(:pedant_nonexistent_client_name){"non-existent"}
 
       # These will be used all over the place
@@ -72,10 +70,10 @@ module Pedant
 
       let(:client_not_found_response) { resource_not_found_response }
 
-      let(:expected_public_key) { /^(-----BEGIN RSA PUBLIC KEY-----|-----BEGIN PUBLIC KEY-----)/ }
-      let(:fetch_admin_client_success_response)     { ok_response.with(body_exact: new_client(client_name, admin: true).with('public_key', expected_public_key)) }
-      let(:fetch_validator_client_success_response) { ok_response.with(body_exact: new_client(client_name, admin: false, validator: true).with('public_key', expected_public_key)) }
-      let(:fetch_nonadmin_client_success_response)  { ok_response.with(body_exact: new_client(client_name, admin: false).with('public_key', expected_public_key)) }
+      let(:expected_public_key) { /^(-----BEGIN (RSA )?PUBLIC KEY)/ }
+      let(:expected_private_key) { /^(-----BEGIN (RSA )?PRIVATE KEY)/ }
+      let(:fetch_validator_client_success_response) { ok_response.with(body_exact: new_client(client_name, validator: true).with('public_key', expected_public_key)) }
+      let(:fetch_nonadmin_client_success_response)  { ok_response.with(body_exact: new_client(client_name).with('public_key', expected_public_key)) }
 
       let(:delete_client_success_response) { ok_response.with(body: { 'name' => client_name }) }
       let(:delete_client_as_non_admin_response) { open_source_not_allowed_response }
@@ -156,6 +154,7 @@ module Pedant
       end
 
       module ClassMethods
+
         def with_another_validator_client(&examples)
           context 'with another validator client' do
             let(:client_is_validator) { true }
@@ -294,9 +293,8 @@ module Pedant
               let(:public_key) { created_public_key }
 
               should_respond_with 200, 'and generates a new keypair' do
-                created_public_key.should_not be_nil
-                created_private_key.should_not be_nil
-                created_private_key.should_not be_false
+                created_public_key.should =~ expected_public_key
+                created_private_key.should =~ expected_private_key
 
                 # Now verify that you can retrieve it again
                 persisted_resource_response.should look_like updated_response
@@ -315,9 +313,8 @@ module Pedant
               let(:updated_resource) { required_attributes.with('public_key', created_public_key).except('password') }
 
               should_respond_with 200, 'and generates a new keypair' do
-                created_public_key.should_not be_nil
-                created_private_key.should_not be_nil
-                created_private_key.should_not be_false
+                created_public_key.should =~ expected_public_key
+                created_private_key.should =~ expected_private_key
 
                 # Now verify that you can retrieve it again
                 persisted_resource_response.should look_like updated_response
@@ -358,7 +355,7 @@ module Pedant
 
             should_respond_with 200, 'and update the public key' do
               parsed_response['public_key'].should_not be_nil
-              parsed_response.member?('private_key').should be(false) # Make sure private_key is not returned at all
+              parsed_response['private_key'].should be(false)
 
               # Now verify that you can retrieve it again
               persisted_resource_response.should look_like updated_response
@@ -380,10 +377,7 @@ module Pedant
 
                 # Make sure we did not change the public key
                 parsed_response['public_key'].should eql test_client_public_key
-
-                # Make sure private_key is not returned at all
-                parsed_response.member?('private_key').should be(false)
-
+                parsed_response['private_key'].should be(false)
                 # Now verify that you can retrieve it again
                 persisted_resource_response.should look_like updated_response
 
@@ -405,9 +399,8 @@ module Pedant
 
                 # Make sure we did not change the public key
                 parsed_response['public_key'].should eql test_client_public_key
-
-                # Make sure private_key is not returned at all
-                parsed_response.member?('private_key').should be(false)
+                # Nor generate a private key
+                parsed_response['private_key'].should be(false)
 
                 # Now verify that you can retrieve it again
                 persisted_resource_response.should look_like updated_response

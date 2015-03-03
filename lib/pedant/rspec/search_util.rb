@@ -543,7 +543,6 @@ module Pedant
       # for can_perform_basic_partial_search_for.  Currently this method is only
       # used in that macro.
       def possibly_nested_target(object, original_key, sub_path)
-        puts "possibly_nested_target #{object} #{original_key} #{sub_path}"
         ([original_key.to_s] + sub_path).reduce(object){|obj, elem|
           lookup = obj[elem]
           return if lookup.nil? # the value could be false!!
