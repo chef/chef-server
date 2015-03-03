@@ -28,23 +28,16 @@
 -include("../../include/chef_types.hrl").
 
 create_record(Record) ->
-    Query = chef_object:create_query(Record),
-    FlattenedRecord = chef_object:flatten(Record),
-    chef_sql:create_object(Query, FlattenedRecord).
+    chef_test_suite_helper:create_record(Record).
 
 fetch_record(Record) ->
-    chef_sql:fetch_object(
-      chef_object:fields_for_fetch(Record),
-      element(1, Record),
-      chef_object:find_query(Record),
-      chef_object:record_fields(Record)
-     ).
+    chef_test_suite_helper:fetch_record(Record).
 
 update_record(Record) ->
-    chef_sql:do_update(chef_object:update_query(Record), chef_object:fields_for_update(Record)).
+    chef_test_suite_helper:update_record(Record).
 
 delete_record(Record) ->
-    chef_sql:delete_object(chef_object:delete_query(Record), chef_object:id(Record)).
+    chef_test_suite_helper:delete_record(Record).
 
 list_records(Record) ->
-    chef_sql:fetch_object_names(Record).
+    chef_test_suite_helper:list_records(Record).
