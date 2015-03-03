@@ -1,15 +1,19 @@
-oc_erchef - Opscode PRIVATE Chef API
-====================================
+oc_erchef - Chef Server API
+===========================
 
 
-This is the top-level project for the Erlang implementation of OPC's
-REST API. It corresponds to the `erchef` project in OSC but includes
-additional support for multitenancy and role based access controls
-(authz).
+This is the top-level project for the Erlang implementation of the
+Chef Server's REST API.
 
 This project exists to build the `oc_erchef` OTP release system and
 manage the complete list of dependencies that constitute an
 `oc_erchef` release.
+
+# Chef 11
+
+In Chef 11, the `erchef` project held the equivalent code for the Open
+Source Chef Server. In Chef 12, the Enterprise and Open Source Chef
+Server code-bases merged and this became the main repository.
 
 ## License
 
