@@ -1,5 +1,9 @@
 # Chef Identity Change Log
 
+## 0.5.1 (Unreleased)
+
+* Run specs on Travis CI
+
 ## 0.5.0
 
 * Clarify setup instructions in README

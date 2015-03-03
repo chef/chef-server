@@ -1,3 +1,4 @@
+require 'factory_girl'
 require 'spec_helper'
 
 describe Doorkeeper::ApplicationsController do

@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'timecop'
 
 describe PasswordResetsController do
   describe 'GET #new' do
