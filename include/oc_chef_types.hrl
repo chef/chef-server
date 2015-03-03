@@ -33,11 +33,9 @@
 -record(oc_chef_policy, {
           id,
           name,
-          policy_group,
           org_id,
           authz_id,
-          last_updated_by,
-          serialized_object
+          last_updated_by
           }).
 
 -record(oc_chef_cookbook_artifact_version, {

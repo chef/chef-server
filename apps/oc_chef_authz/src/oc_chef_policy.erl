@@ -30,7 +30,6 @@
 -export([
          parse_binary_json/1,
          flatten/1,
-         assemble_policy_ejson/2,
          delete/2,
          create_record/3
         ]).
@@ -104,9 +103,6 @@ id(#oc_chef_policy{id = Id}) ->
 name(#oc_chef_policy{name = Name}) ->
     Name.
 
-policy_group(#oc_chef_policy{policy_group = PolicyGroup}) ->
-    PolicyGroup.
-
 org_id(#oc_chef_policy{org_id = OrgId}) ->
     OrgId.
 
@@ -124,10 +120,10 @@ update_query() ->
     update_policy_by_id.
 
 delete_query() ->
-    delete_policy_by_name_group_org_id.
+    delete_policy_by_id.
 
 find_query() ->
-    find_policy_by_orgid_name_group.
+    find_policy_by_orgid_name.
 
 list_query() ->
     list_policies_for_org.
@@ -139,14 +135,11 @@ bulk_get_query() ->
 new_record(OrgId, AuthzId, PolicyData) ->
     Name = ej:get({<<"name">>}, PolicyData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
-    PolicyGroup = list_to_binary(ej:get({<<"policy_group">>}, PolicyData)),
     #oc_chef_policy{
-       id = Id,
-       authz_id = AuthzId,
-                       org_id = OrgId,
-                       name = Name,
-                       policy_group = PolicyGroup,
-      serialized_object = ej:delete({<<"policy_group">>}, PolicyData)}.
+        id = Id,
+        authz_id = AuthzId,
+        org_id = OrgId,
+        name = Name}.
 
 create_record(OrgId, Name, RequestingActorId) ->
     Policy = #oc_chef_policy{
@@ -168,21 +161,17 @@ ejson_for_indexing(#oc_chef_policy{}, _EjsonTerm) ->
 
 update_from_ejson(#oc_chef_policy{} = Policy, PolicyData) ->
     Name = ej:get({<<"name">>}, PolicyData, name(Policy)),
-    Policy#oc_chef_policy{
-             name = Name,
-             serialized_object = PolicyData
-						 }.
+    Policy#oc_chef_policy{name = Name}.
 
 fields_for_update(#oc_chef_policy{
                      id = Id,
-                     last_updated_by = LastUpdatedBy,
-                     serialized_object = SerializedObject
+                     last_updated_by = LastUpdatedBy
                                  } = Policy) ->
-    [LastUpdatedBy, name(Policy), policy_group(Policy), chef_db_compression:compress(oc_chef_policy, jiffy:encode(SerializedObject)), Id].
+    [LastUpdatedBy, name(Policy), Id].
 
 
 fields_for_fetch(#oc_chef_policy{org_id = OrgId} = Policy) ->
-    [name(Policy), policy_group(Policy), OrgId].
+    [name(Policy), OrgId].
 
 record_fields() ->
     record_info(fields, oc_chef_policy).
@@ -212,21 +201,13 @@ flatten(#oc_chef_policy{
           authz_id = AuthzId,
           org_id = OrgId,
           name = Name,
-          policy_group = Group,
-          last_updated_by = LastUpdatedBy,
-          serialized_object = SerializedObject}) ->
-	Compressed = chef_db_compression:compress(oc_chef_policy, jiffy:encode(ej:delete({<<"policy_group">>}, SerializedObject))),
-    [Id, AuthzId, OrgId, Name, Group, LastUpdatedBy, Compressed].
+          last_updated_by = LastUpdatedBy}) ->
+    [Id, AuthzId, OrgId, Name, LastUpdatedBy].
 
-
-assemble_policy_ejson(#oc_chef_policy{
-                         serialized_object = SerializedObject
-                        }, _OrgName) ->
-    jiffy:decode(chef_db_compression:decompress(SerializedObject)).
 
 delete(ObjectRec = #oc_chef_policy{
                       org_id = OrgId,
                       last_updated_by = _AuthzId,
                       authz_id = _PolicyAuthzId
                      }, CallbackFun) ->
-    CallbackFun({delete_query(), [name(ObjectRec), policy_group(ObjectRec), OrgId]}).
+    CallbackFun({delete_query(), [name(ObjectRec), OrgId]}).

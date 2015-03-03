@@ -148,19 +148,21 @@ statements(pgsql) ->
       <<"UPDATE groups SET last_updated_by= $1, updated_at= $2, name= $3"
         "WHERE id= $4">>},
      {delete_group_by_id, <<"DELETE FROM groups WHERE id= $1">>},
-     {list_policies_for_org, <<"SELECT name, policy_group FROM policies WHERE org_id= $1">>},
-     {find_policy_by_orgid_name_group,
-      <<"SELECT id, authz_id, org_id, name, last_updated_by, serialized_object"
+
+     {list_policies_for_org, <<"SELECT name FROM policies WHERE org_id= $1">>},
+     {find_policy_by_orgid_name,
+      <<"SELECT id, authz_id, org_id, name, last_updated_by"
         " FROM policies"
-        " WHERE (name = $1 AND policy_group = $2 AND org_id = $3)">>},
+        " WHERE (name = $1 AND org_id = $2)">>},
      {insert_policy,
-      <<"INSERT INTO policies (id, authz_id, org_id, name, policy_group,"
-        " last_updated_by, serialized_object) VALUES"
-        " ($1, $2, $3, $4, $5, $6, $7)">>},
+      <<"INSERT INTO policies (id, authz_id, org_id, name,"
+        " last_updated_by) VALUES"
+        " ($1, $2, $3, $4, $5)">>},
      {update_policy_by_id,
-      <<"UPDATE policies SET last_updated_by= $1, name = $2, policy_group=$3, serialized_object=$4"
+      <<"UPDATE policies SET last_updated_by= $1, name = $2, policy_group=$3"
         "WHERE id = $5">>},
-     {delete_policy_by_name_group_org_id, <<"DELETE FROM policies WHERE name= $1 AND policy_group= $2 AND org_id= $3">>},
+     {delete_policy_by_name_org_id, <<"DELETE FROM policies WHERE name= $1 AND org_id= $2">>},
+     {delete_policy_by_id, <<"DELETE FROM policies WHERE id= $1">>},
      {find_client_name_in_authz_ids,
       <<"SELECT name, authz_id FROM clients WHERE authz_id = ANY($1)">>},
      {find_client_authz_id_in_names,
