@@ -303,7 +303,7 @@ module Pedant
             context 'impersonating failed user', :authentication do
               let(:user) { impersonate(failure_user) }
               it 'fails' do
-                response.should look_like failure_user_impersonation_response
+                response.should look_like forbidden_response
               end
             end
           else

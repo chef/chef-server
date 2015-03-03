@@ -220,9 +220,11 @@ module Pedant
         end
       end # shared context
 
-
-      # Cross-platform response bodies
       # Override as needed
+      # let(:create_role_as_non_admin_response) { create_role_success_response }
+      #let(:update_role_as_non_admin_response) { update_role_success_response }
+      #let(:delete_role_as_non_admin_response) { delete_role_success_response }
+
       let(:fetch_role_success_response) do
         {
           :status => 200,
@@ -272,13 +274,10 @@ module Pedant
         }
       end
 
-      # opensource/response_bodies overrides this for osc/ruby
-      let(:invalid_role_response) { erlang_invalid_role_response }
-
-      let(:erlang_invalid_role_response) do
+      let(:invalid_role_response) do
         {
-          status: 400,
-          body:   { "error" => invalid_role_error_message }
+          :status => 400,
+          :body =>   { "error" => invalid_role_error_message }
         }
       end
 

@@ -90,23 +90,23 @@ module Pedant
         let(:http_415_response) { { status: 415 } }
         let(:http_500_response) { { status: 500 } }
 
+        let(:multi_tenant_user_not_associated_text) { "'#{outside_user.name}' not associated with organization '#{org}'" }
+        let(:multi_tenant_user_not_associated_response) do
+          {
+            status: 403,
+            body_exact: { "error" => [multi_tenant_user_not_associated_text] }
+          }
+        end
         # Cross-endpoint responses
-        let(:unauthorized_access_credential_response) { fail 'Override this in opensource/response_bodies' }
-        let(:invalid_credential_response) { invalid_access_credential_exact_response }
+        let(:unauthorized_access_credential_response) { multi_tenant_user_not_associated_response }
+        let(:invalid_credential_error_message) { ["Failed to authenticate as 'invalid'. Ensure that your node_name and client key are correct."] }
         let(:invalid_credential_exact_response) { http_401_response.with(:body_exact, "error" => invalid_credential_error_message) }
-        let(:invalid_access_credential_exact_response) { fail 'Override this in opensource/response_bodies' }
-        let(:invalid_credential_error_message) { fail 'Override this in opensource/response_bodies' }
+        let(:invalid_access_credential_exact_response) { fail 'Override this in response_bodies' }
 
         let(:forbidden_action_response) { http_403_response.with(:body_exact, "error"=> forbidden_action_error_message) }
-        let(:forbidden_action_error_message) { fail "Override this in opensource/response_bodies" }
+        let(:forbidden_action_error_message) { ["missing delete permission"] }
 
-        # Sandbox Responses
-        let(:sandbox_not_found_error_message) { fail "Define this in opensource/response_bodies" }
-
-        # Impersonation Responses
-        let(:failure_user_impersonation_response) do
-          fail "Must 'failure_user_impersonation_response' for your platform"
-        end
+        let(:sandbox_not_found_error_message) { ["Listing sandboxes not supported."] }
 
       end
     end

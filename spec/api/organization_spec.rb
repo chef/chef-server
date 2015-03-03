@@ -137,7 +137,7 @@ describe "/organizations", :organizations do
           :status => 400
         )
       end
-      it "it should fail when 'name' is invalid" do
+      it "it should fail when 'name' is invalid", :validation do
         post("#{platform.server}/organizations", superuser, :payload => org_with_bad_name).should look_like(
           :status => 400
         )
@@ -245,7 +245,7 @@ describe "/organizations", :organizations do
 
     context "when the user updates fields in the organization with valid data" do
       let(:payload) do
-        payload = {
+        {
           'name' => orgname,
           'org_type' => "Pleasure",
           'full_name' => "A Real Org Name"

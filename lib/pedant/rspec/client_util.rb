@@ -248,7 +248,7 @@ module Pedant
             let(:updated_resource) { required_attributes.with('public_key', test_client_public_key) }
 
             should_respond_with 400, 'and does not generate a new key pair' do
-              parsed_response['private_key'].should be(false)
+              parsed_response['private_key'].should be(nil)
 
               # Now verify that you can retrieve it again
               persisted_resource_response.should look_like http_200_response.with(:body, updated_resource)
