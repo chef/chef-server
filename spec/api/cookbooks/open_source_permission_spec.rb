@@ -15,7 +15,7 @@
 
 require 'api/cookbooks_shared/open_source_permission'
 
-describe 'Cookbooks Endpoint Open Source Permission Checks', :platform => :open_source do
+describe 'Cookbooks Endpoint Open Source Permission Checks', :focus do
 
   let(:cookbook_url_base) { "cookbooks" }
 

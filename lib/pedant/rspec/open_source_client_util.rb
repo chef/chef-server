@@ -70,18 +70,6 @@ module Pedant
       let(:client_name) { fail "Please specify a 'client_name' first" }
       let(:named_client_url){api_url("/clients/#{client_name}")}
 
-      let(:fetch_prepopulated_clients_success_response) do
-        {
-          :status => 200,
-          :body_exact => {
-            open_source_validator_client_name => api_url("/clients/#{platform.validator_client_name}"),
-            pedant_admin_client_name => api_url("/clients/#{pedant_admin_client_name}"),
-            pedant_nonadmin_client_name => api_url("/clients/#{pedant_nonadmin_client_name}"),
-            webui_admin_client_name => api_url("/clients/#{platform.admin_client_name}")
-          }
-        }
-      end
-
       let(:client_not_found_response) { resource_not_found_response }
 
       let(:expected_public_key) { /^(-----BEGIN RSA PUBLIC KEY-----|-----BEGIN PUBLIC KEY-----)/ }
@@ -147,9 +135,10 @@ module Pedant
         _options[:validator] ||= false
         {
           "name" => name,
+          "clientname" => name,
           "chef_type" => "client",
+          "orgname" => platform.org_name,
           "json_class" => "Chef::ApiClient",
-          "admin" => _options[:admin],
           "validator" => _options[:validator],
         }
       end

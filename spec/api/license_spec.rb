@@ -5,17 +5,19 @@
 
 require 'pedant/rspec/node_util'
 
-describe 'license' do
+describe 'license', :license do
   include Pedant::RSpec::NodeUtil
 
   let (:request_url) { "#{platform.server}/license" }
 
   let (:node_count) { 0 }
 
+  # TODO this should be in pedant config and rendered from attribute
+  MAX_NODE_COUNT = 25
   let (:response_body) {
     {
-      "limit_exceeded" => (node_count > 25) ? true : false,
-      "node_license" => 25,
+      "limit_exceeded" => (node_count > MAX_NODE_COUNT ) ? true : false,
+      "node_license" => MAX_NODE_COUNT,
       "node_count" => node_count,
       "upgrade_url" => /^http\:\/\.*/
     }}
@@ -72,7 +74,7 @@ describe 'license' do
 
         after :each do
           nodes.each do |n|
-            delete_node(platform.admin_user, n['name'])
+            delete_node(platform.admin_user, n['name']).should look_like ({:response_code => 200})
           end
         end
 
@@ -87,8 +89,8 @@ describe 'license' do
           end
         end # with one node
 
-        context "with twenty-five nodes (license not exceeded)" do
-          let(:node_count) { 25 }
+        context "with #{MAX_NODE_COUNT} nodes (license not exceeded)" do
+          let(:node_count) { MAX_NODE_COUNT }
 
           it "should return correct body for license status" do
             get(request_url, superuser).should look_like(
@@ -96,11 +98,10 @@ describe 'license' do
               :status => 200
               )
           end
-        end # with twenty nodes
+        end
 
-        context "with twenty-six nodes (license exceeded)" do
-          let(:node_count) { 26 }
-
+        context "with  #{MAX_NODE_COUNT + 1} (license exceeded)" do
+          let(:node_count) { MAX_NODE_COUNT + 1}
           it "should return correct body for license status" do
             get(request_url, superuser).should look_like(
               :body_exact => response_body,

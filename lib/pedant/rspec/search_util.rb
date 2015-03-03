@@ -453,7 +453,7 @@ module Pedant
         # Exercise node attribute overrides via partial search. In
         # principle, there's no reason this necessarily needs to be a
         # partial search, but it further exercises that functionality,
-        # and it's easy to check.
+        #Thi and it's easy to check.
         #
         # Must be executed in a context where `request_method` is set
         # to :POST and `request_url` is set to api_url("/search/node")
@@ -543,6 +543,7 @@ module Pedant
       # for can_perform_basic_partial_search_for.  Currently this method is only
       # used in that macro.
       def possibly_nested_target(object, original_key, sub_path)
+        puts "possibly_nested_target #{object} #{original_key} #{sub_path}"
         ([original_key.to_s] + sub_path).reduce(object){|obj, elem|
           lookup = obj[elem]
           return if lookup.nil? # the value could be false!!

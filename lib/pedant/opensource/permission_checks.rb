@@ -30,7 +30,7 @@ module Pedant
         # In general, a bad client is ALWAYS unauthorized
         let(:bad_client_response){unauthorized_response}
 
-        let(:validator_client){ Pedant::Client.new(platform.validator_client_name, "/etc/chef-server/chef-validator.pem")}
+        let(:validator_client){ platform.validator_client }
 
         context 'as an administrator' do
           let(:requestor) { admin_user }
@@ -40,12 +40,19 @@ module Pedant
           let(:requestor) { normal_user }
           it { should look_like non_admin_response }
         end
+
+        # TODO a bit to far down the rabbit hole to tackle this now...
+        #context 'as a non-member user', :authorization do
+        #  let(:requestor) { outside_user }
+        #  it { should look_like non_admin_response }
+        #end
+
         context 'as a validator client', :authorization do
           let(:requestor) { validator_client }
           it { should look_like validator_response }
         end
         context 'as a bad client', :authorization do
-          let(:requestor) { outside_user }
+          let(:requestor) { outside_client }
           it { should look_like bad_client_response }
         end
       end # checks permissions

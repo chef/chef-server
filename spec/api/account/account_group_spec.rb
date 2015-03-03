@@ -2,6 +2,7 @@
 require 'pedant/rspec/common'
 
 describe "opscode-account groups", :groups do
+  let(:org)        { platform.test_org.name }
 
   def self.ruby?
     Pedant::Config.ruby_group_endpoint?
@@ -49,7 +50,7 @@ describe "opscode-account groups", :groups do
 
       context "outside user" do
         it "returns 403", :authorization, :smoke do
-          get(request_url, outside_user).should look_like({
+          get(request_url, platform.bad_user).should look_like({
               :status => 403
             })
         end

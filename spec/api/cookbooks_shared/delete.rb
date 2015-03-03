@@ -100,8 +100,7 @@ RSpec.shared_examples "Cookbook Delete" do
     context "with permissions for" do
       let(:cookbook_name) {"delete-cookbook"}
       let(:cookbook_version) { "0.0.1" }
-      let(:not_found_msg) {
-        ["Cannot find a cookbook named delete-cookbook with version 0.0.1"] }
+      let(:not_found_msg) { ["Cannot find a cookbook named delete-cookbook with version 0.0.1"] }
 
       before(:each) { make_cookbook(admin_user, cookbook_name, cookbook_version) }
       after(:each) { delete_cookbook(admin_user, cookbook_name, cookbook_version) }
@@ -116,12 +115,13 @@ RSpec.shared_examples "Cookbook Delete" do
       end # as admin user
 
       context 'as normal user', :authorization do
-        let(:requestor) { normal_user }
+        let(:expected_response) { delete_cookbook_success_response }
 
-        it "should respond with 403 (\"Forbidden\") and does not delete cookbook", :platform => :open_source do
-          should look_like open_source_not_allowed_response
-          should_not_be_deleted
-        end # responds with 403
+        let(:requestor) { normal_user }
+        it "should respond with 200 (\"OK\") and be deleted" do
+          should look_like expected_response
+          should_be_deleted
+        end # it admin user returns 200
       end # with normal user
 
       context 'as a user outside of the organization', :authorization do

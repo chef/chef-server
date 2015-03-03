@@ -8,7 +8,7 @@
 
 require 'pedant/rspec/common'
 
-describe "private chef authorization checks" do
+describe "chef server authorization checks", :authorization do
   def self.authorization_tests(resource_type)
     context "without starting resource" do
       before :each do

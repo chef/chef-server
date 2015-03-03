@@ -1,6 +1,6 @@
 require 'pedant/rspec/common'
 
-describe "opscode-account endpoint", :clients => true do
+describe "opscode-account endpoint", :clients do
   let(:requestor){ platform.admin_user}
 
   context "Client ACLs" do

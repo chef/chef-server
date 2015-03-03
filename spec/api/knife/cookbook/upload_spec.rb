@@ -34,13 +34,21 @@ describe 'knife', :knife do
           should have_outcome :status => 0, :stderr => /Uploaded 1 cookbook/
         end
       end
-
-      # Only admin clients can upload cookbooks on Open Source Chef
-      context 'as a normal client', :platform => :open_source do
+      context 'as a normal user' do
         let(:requestor) { knife_user }
 
+        it 'should succeed' do
+          should have_outcome :status => 0, :stderr => /Uploaded 1 cookbook/
+        end
+      end
+
+      # clients can't upload cookbooks, only users can.
+      # TODO hopefully this is covered in cookbooks? If so, let's delete this one.and any similar?
+      context 'as a normal client' do
+        let(:requestor) { normal_client }
+
         it 'should fail', :authorization do
-          should have_outcome :status => 100, :stderr => /You are not allowed to take this action/
+          should have_outcome :status => 100, :stderr => /missing create permission/
         end
       end
 

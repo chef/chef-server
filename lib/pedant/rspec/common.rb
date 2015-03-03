@@ -56,7 +56,7 @@ module Pedant
         let(:request_query_parameters){ nil } # This should be a string, like "foo=bar"
 
         # Pedant-created requestors:
-        let(:pedant_clients) { ([ platform.validator_client_name, platform.admin_client_name ] + pedant_created_clients).sort }
+        let(:pedant_clients) { ([ platform.validator_client_name ] + pedant_created_clients).sort }
         let(:pedant_created_clients) { platform.clients.reject(&:bogus?).map(&:name).sort }
         let(:pedant_users)   { (['admin'] + platform.users.map(&:name)).sort }
 
@@ -427,12 +427,7 @@ module Pedant
           platform.server
         end
 
-        # Intelligently construct a complete API URL based on the
-        # pre-configured server and platform information.  URLs targeted for
-        # multi-tenant platforms (i.e. Hosted Chef) prepend
-        # "/organizations/#{org}" to the given path fragment, while
-        # single-tenant targeted URLs (i.e., Open Source Chef and Private
-        # Chef) do not.
+        # construct a complete API URL based on the pre-configured server information
         def api_url(path_fragment)
           platform.api_url(path_fragment)
         end
@@ -490,12 +485,16 @@ module Pedant
         ################################################################################
 
         # If these are referenced in before(:all) blocks, use shared() instead of let()
+        shared(:organization)     { platform.test_org }
+        shared(:org)              { platform.test_org.name }
         shared(:admin_user)       { platform.admin_user }
         shared(:normal_user)      { platform.non_admin_user }
 
         shared(:outside_user)     { platform.bad_user}
 
+        # TODO no such thing - eliminate tests referring to it!
         shared(:admin_client)     { platform.admin_client }
+        # TODO all non-validator clients are normal clients.
         shared(:normal_client)    { platform.non_admin_client }
         shared(:outside_client)   { platform.bad_client }
         shared(:validator_client) { platform.validator_client }

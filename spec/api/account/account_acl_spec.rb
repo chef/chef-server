@@ -3,6 +3,7 @@ require 'pedant/acl'
 
 describe "ACL API", :acl do
   include Pedant::ACL
+
   def self.ruby?
     Pedant::Config.ruby_acl_endpoint?
   end

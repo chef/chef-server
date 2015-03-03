@@ -941,6 +941,7 @@ describe "opscode-account user association", :association do
     context "DELETE /organizations/<org>/users/<name>" do
       let(:username) { "test-#{Time.now.to_i}-#{Process.pid}" }
       let(:test_user) { platform.create_user(username) }
+      let(:org) { platform.test_org.name }
 
       before :each do
         platform.associate_user_with_org(org, test_user)

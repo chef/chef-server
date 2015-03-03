@@ -298,7 +298,7 @@ describe 'Search API endpoint', :search do
     end # POST
   end # /search/role
 
-  context '/search/client', :platform => :open_source do
+  context '/search/client' do
     let(:request_url){api_url("/search/client")}
 
     # Utility methods to help populate search result bodies
@@ -326,21 +326,17 @@ describe 'Search API endpoint', :search do
         performing_a_search 'returns the correct client'
       end # searching by name
 
-      context 'searching by admin' do
-        let(:request_query_parameters){ "q=admin:true" }
-        let(:search_result_items){ fetch_clients(['pedant_admin_client', platform.admin_client_name])}
-        performing_a_search 'returns the correct clients'
-      end # searching by admin
-
       perform_a_search_that_returns_no_results :client
     end # GET
 
     context 'POST' do
       let(:request_method){:POST}
-      setup_multiple_objects :client
 
+      setup_multiple_objects :client
       # Do a smoke test for a partial search for an admin client
-      can_perform_basic_partial_search_for(:client, :admin, true, :smoke => true)
+      # Note that these tests were original OSC only - modified 'admin' to 'validator'
+      # for purposes of ensuring a valid search.
+      can_perform_basic_partial_search_for(:client, :validator, false, :smoke => true)
 
       test_bad_partial_search_bodies
     end
@@ -594,6 +590,7 @@ describe 'Search API endpoint', :search do
                 'url' => /roles/,
                 'data' => { 'goal' => 'found_it' }
               }
+              # TODO this seems wrong, sine we're discarding the actual expected result...
               want_results = 10.times.map { |i| want_result }
               response.should look_like({:status => 200,
                                           :body => {'total' => 10}})

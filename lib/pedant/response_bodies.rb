@@ -7,7 +7,10 @@ module Pedant
     included do
       include Pedant::ACL
 
+      # TODO why not just put this in common_responses?
+      #
       # Cross-endpoint Responses
+      let(:open_source_not_allowed_response) { forbidden_action_response }
       let(:unauthorized_access_credential_response) { multi_tenant_user_not_associated_response }
       let(:invalid_credential_error_message) { ["Failed to authenticate as 'invalid'. Ensure that your node_name and client key are correct."] }
       let(:forbidden_action_error_message) { ["missing delete permission"] }

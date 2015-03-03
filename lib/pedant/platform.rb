@@ -15,18 +15,22 @@
 
 require 'uri'
 require 'pathname'
+require 'fileutils'
+
+require 'pedant/response_bodies'
 
 module Pedant
 
-  # Abstraction of an Opscode Chef Server platform
+  # Representation of the Chef Server platform
   class Platform
     include Pedant::Request
 
     GLOBAL_OBJECTS = ['users', 'organizations']
     MAX_ATTEMPTS = 5
 
-    attr_reader :server, :superuser, :superuser_key_file
-    attr_reader :test_org, :test_org_owner, :validate_org, :internal_account_url, :ldap, :ldap_testing
+    attr_reader :test_org, :test_org_owner, :validate_org, :internal_account_url,
+                :ldap, :ldap_testing,
+                :server, :superuser, :superuser_key_file
 
     # Create a Platform object for a given server (specified by
     # protocol, hostname, and port ONLY).  You must supply the
@@ -63,10 +67,6 @@ module Pedant
       path_prefix = (map_to_default_orgname?(path_fragment) ? '' : "/organizations/#{org.name}")
       slash = path_fragment.start_with?('/') ? '' : '/'
       "#{server}#{path_prefix}#{slash}#{path_fragment}"
-    end
-
-    def org_name
-      test_org.name
     end
 
     ################################################################################
@@ -106,7 +106,8 @@ module Pedant
       # If default_orgname is set, override the settings for org
       name = pedant_orgname
       if Pedant::Config.use_default_org
-        @validate_org = true
+        #@validate_org = true
+        @validate_org = !!Pedant::Config.validate_org_creation
         create_org(name)
       elsif org[:create_me]
         @validate_org = !!Pedant::Config.validate_org_creation
@@ -122,25 +123,22 @@ module Pedant
       if Pedant.config[:org][:create_me] && Pedant.config[:delete_org]
         delete_org(pedant_orgname)
       else
-        puts "Pedant did not create the org, so will it not delete it"
+        puts "Pedant did not create the org, so will not delete it"
       end
     end
-
+    # TODO can these just live in 'rspec/common'?
     def org_name
-      path = Pathname(URI(server).path)
-      if !path.root? && !path.parent.root? && path.parent.basename.to_s == 'organizations'
-        path.basename.to_s
-      else
-        'chef'
-      end
+      test_org.name
     end
-
+    def validator_client
+      test_org.validator
+    end
     def validator_client_name
       "#{org_name}-validator"
     end
 
     def admin_client_name
-      "#{org_name}-webui"
+      admin_client.name
     end
 
     # Since Erchef will now return URLs based upon the Host: header, and it receives
@@ -193,6 +191,7 @@ module Pedant
 
     def create_client(name, org = self.test_org)
       clientname = name.to_s
+      puts "Creating client #{clientname} in #{org.name}"
       payload = { "name" => clientname }
 
       r = post(api_url('/clients'), org.validator, :payload => payload)
@@ -340,7 +339,7 @@ module Pedant
 
     def delete_org(orgname)
       puts "Deleting validator client #{orgname}-validator ...."
-      r = delete("#{@server}/organizations/#{orgname}/clients/#{@orgname}-validator", superuser)
+      r = delete("#{@server}/organizations/#{orgname}/clients/#{orgname}-validator", superuser)
       if r.code != 200
         puts "Unexpected response when deleting org validator: #{r.code}: #{r}"
       end
@@ -485,11 +484,23 @@ module Pedant
     end
 
 
-
-    # When this is defined, pedant will run this before running anything else.
     def before_configure_rspec
       validate_created_org(test_org) if validate_org
     end
+
+    def configure_rspec
+      # Create a path for all of our generated content. Makes it easier
+      # to do a final cleanup pass
+      FileUtils.mkpath File.join(Dir.tmpdir, "oc-chef-pedant")
+        puts "****** Configuring RSpec for Multi-Tenant Tests"
+      ::RSpec.configure do |c|
+        puts "****** 2 Configuring RSpec for Multi-Tenant Tests"
+        c.run_all_when_everything_filtered = true
+        c.filter_run_excluding :intermittent_failure => true
+        c.include Pedant::ResponseBodies
+      end
+    end
+
 
     def validate_created_org(org)
       puts "Validating Org Creation"

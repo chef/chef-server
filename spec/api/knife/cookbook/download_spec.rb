@@ -42,21 +42,17 @@ describe 'knife', :knife do
       context 'as an admin' do
         let(:requestor) { knife_admin }
 
-        it 'should succeed', :slow => false do
+        it 'should succeed' do
           should have_outcome :status => 0, :stderr => /Cookbook downloaded to.*#{cookbook_name}/
         end
       end
 
-      # Only admin clients can upload cookbooks on Open Source Chef
-      # However, normal clients can still download cookbooks
-      context 'as a normal client', :platform => :open_source do
+      context 'as a normal user' do
         let(:requestor) { knife_user }
-
-        it 'should fail', :authorization do
+        it 'should succeed' do
           should have_outcome :status => 0, :stderr => /Cookbook downloaded to.*#{cookbook_name}/
         end
       end
-
     end
   end
 end
