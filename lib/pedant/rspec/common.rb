@@ -488,6 +488,7 @@ module Pedant
         shared(:organization)     { platform.test_org }
         shared(:org)              { platform.test_org.name }
         shared(:admin_user)       { platform.admin_user }
+        shared(:org_admin)        { platform.test_org_owner }
         shared(:normal_user)      { platform.non_admin_user }
 
         shared(:outside_user)     { platform.bad_user}
@@ -523,7 +524,7 @@ module Pedant
         # Use this when both admin user and admin client have the same behavior
         def self.as_an_admin_requestor(&examples)
           [:user, :client].each do |_requestor|
-            context "as an admin #{_requestor}" do
+            context "as an admin #{_requestor}", :focus do
               let(:requestor) { send "admin_#{_requestor}" }
               instance_eval(&examples)
             end
@@ -532,12 +533,14 @@ module Pedant
 
         # Use this when both admin user and admin client have the same behavior
         def self.as_a_normal_requestor(&examples)
-          [:user, :client].each do |_requestor|
-            context "as a normal #{_requestor}" do
-              let(:requestor) { send "normal_#{_requestor}" }
+            context "as a normal user", :focus do
+              let(:requestor) { send "normal_user" }
               instance_eval(&examples)
             end
-          end
+            context "as a client", :focus do
+              let(:requestor) { send "normal_client" }
+              instance_eval(&examples)
+            end
         end
 
         ################################################################################

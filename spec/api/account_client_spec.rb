@@ -3,7 +3,7 @@ require 'pedant/rspec/common'
 describe "opscode-account endpoint", :clients do
   let(:requestor){ platform.admin_user}
 
-  context "Client ACLs" do
+  context "Client ACLs", :acls do
     context "the initial validator client" do
       let(:client){ platform.test_org.validator.name }
 
@@ -69,7 +69,7 @@ describe "opscode-account endpoint", :clients do
     end
   end
 
-  context "Admin User Group" do
+  context "Admin User Group",:groups do
     let(:default_pedant_admin_names) { default_pedant_admins.map(&:name)}
     let(:default_pedant_admins) { [ platform.superuser ] + default_pedant_org_admins }
 
@@ -93,7 +93,7 @@ describe "opscode-account endpoint", :clients do
   end
 
 
-  context "Client Group" do
+  context "Client Group", :groups do
     let(:group_name){ "clients" }
 
     context "group retrieval" do
@@ -145,7 +145,7 @@ describe "opscode-account endpoint", :clients do
     end
   end
 
-  context "Client Container" do
+  context "Client Container", :containers do
     let(:container_name){ "clients" }
 
     it "retrieves the Clients container" do

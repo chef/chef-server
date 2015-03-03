@@ -162,7 +162,8 @@ describe "Client API endpoint", :clients do
       def self.should_not_create_client_when(_options = {})
         context "when creating #{client_type(_options)} client" do
           # This is really a 403 Forbidden
-          let(:expected_response) { open_source_not_allowed_response }
+          let(:fobidden_action_error_message) { ["missing create permission"] }
+          let(:expected_response) { forbidden_response }
           let(:request_payload) { { "name" => client_name, 'validator' => _options[:validator] || false } }
 
           should_respond_with 403 do
@@ -198,22 +199,6 @@ describe "Client API endpoint", :clients do
     let(:request_method) { :GET }
     let(:request_url)    { named_client_url }
 
-    context 'with Pedant-created clients' do
-      context 'the Pedant admin client', :smoke  do
-        let(:client_name) { pedant_admin_client_name }
-        it { should look_like fetch_admin_client_success_response }
-      end
-      context 'the Pedant non-admin client', :smoke do
-        let(:client_name) { pedant_nonadmin_client_name }
-        it { should look_like fetch_nonadmin_client_success_response }
-      end
-
-      context 'the Pedant validator client' do
-        let(:client_name) { platform.validator_client_name }
-        it { should look_like fetch_validator_client_success_response }
-      end
-    end
-
     context 'without an existing client' do
       let(:request_url) { api_url "/clients/#{pedant_nonexistent_client_name}" }
       it { should look_like not_found_response }
@@ -246,20 +231,18 @@ describe "Client API endpoint", :clients do
       context 'as a validator client' do
         let(:requestor) { validator_client}
 
-        with_another_admin_client     { forbids_fetching }
         with_another_validator_client { forbids_fetching }
         with_another_normal_client    { forbids_fetching }
 
         with_self do
           let(:client_is_validator) { true }
-          should_fetch_client
+          forbids_fetching
         end
       end
 
       # Normal clients can only fetch themselves
       context 'as a normal client' do
         let(:requestor) { normal_client }
-        with_another_admin_client     { forbids_fetching }
         with_another_validator_client { forbids_fetching }
         with_another_normal_client    { forbids_fetching }
         with_self                     { should_fetch_client }
@@ -267,7 +250,6 @@ describe "Client API endpoint", :clients do
 
       context 'as a user' do
         let(:requestor) { normal_user }
-        with_another_admin_client     { should_fetch_client }
         with_another_validator_client { should_fetch_client }
         with_another_normal_client    { should_fetch_client }
       end
@@ -303,7 +285,7 @@ describe "Client API endpoint", :clients do
 
       it { should look_like client_not_found_response }
     end
-# TODO further unwind these - most of the 'admin client' behaviors
+    # TODO further unwind these - most of the 'admin client' behaviors
     # are not valid under CS12
     def self.should_update_client_when(_options = {})
       context "when updating to #{client_type(_options)} client" do
@@ -426,20 +408,10 @@ describe "Client API endpoint", :clients do
     #
     context "as an admin requestor" do
       let(:requestor) { org_admin }
-      with_another_admin_client do
-        should_update_client_when admin: false
-        should_update_client_when admin: true
-        should_update_client_when admin: false, validator: true
-
-        should_rename_client
-        should_generate_new_keys
-        should_update_public_key
-      end
 
       with_another_validator_client do
-        should_update_client_when validator: false
-        should_update_client_when validator: true
-        should_update_client_when validator: false, admin: true
+        forbids_update_when validator: false
+        forbids_update_when validator: true
 
         should_rename_client
         should_generate_new_keys
@@ -447,8 +419,7 @@ describe "Client API endpoint", :clients do
       end
 
       with_another_normal_client do
-        should_update_client_when admin: false, validator: false
-        should_update_client_when admin: true
+        should_update_client_when validator: false
         should_update_client_when validator: true
 
         should_rename_client
@@ -473,23 +444,14 @@ describe "Client API endpoint", :clients do
     context 'as a validator client' do
       let(:requestor) { validator_client }
 
-      with_another_admin_client do
-        forbids_update_when admin: false
-        forbids_update_when admin: false, validator: true
-
-        forbids_renaming
-      end
-
       with_another_validator_client do
         forbids_update_when validator: false
-        forbids_update_when validator: false, admin: true
 
         forbids_renaming
       end
 
       with_another_normal_client do
-        forbids_update_when admin: false, validator: false
-        forbids_update_when admin: true
+        forbids_update_when validator: false
         forbids_update_when validator: true
 
         forbids_renaming
@@ -502,10 +464,10 @@ describe "Client API endpoint", :clients do
         should_update_client_when validator: true
 
         # Validator can downgrade to a normal client
-        should_update_client_when validator: false
+# TODO         should_update_client_when validator: false
 
-        # Validators cannot upgrade themselves to an admin
-        forbids_update_when validator: false, admin: true
+        # Validators cannot change themsleves
+        forbids_update_when validator: false
 
         # Otherwise, validators can update themselves
         should_rename_client
@@ -518,23 +480,13 @@ describe "Client API endpoint", :clients do
     context 'as a normal client' do
       let(:requestor) { normal_client }
 
-      with_another_admin_client do
-        forbids_update_when admin: false
-        forbids_update_when admin: false, validator: true
-
-        forbids_renaming
-      end
-
       with_another_validator_client do
-        forbids_update_when validator: false
-        forbids_update_when validator: false, admin: true
-
+        should_update_client_when validator: false
         forbids_renaming
       end
 
       with_another_normal_client do
-        forbids_update_when admin: false, validator: false
-        forbids_update_when admin: true
+        forbids_update_when validator: false
         forbids_update_when validator: true
 
         forbids_renaming
@@ -605,7 +557,6 @@ describe "Client API endpoint", :clients do
 
     # Admins can delete any client
     as_an_admin_requestor do
-      with_another_admin_client     { should_delete_client }
       with_another_validator_client { should_delete_client }
       with_another_normal_client    { should_delete_client }
 
@@ -615,17 +566,16 @@ describe "Client API endpoint", :clients do
       end
     end
 
-    # Validators can only delete itself
+    # Validators can't even delete itself
     context 'as a validator client' do
       let(:requestor) { validator_client }
 
-      with_another_admin_client     { forbids_deletion }
       with_another_validator_client { forbids_deletion }
       with_another_normal_client    { forbids_deletion }
 
       with_self do
         let(:client_is_validator) { true }
-        should_delete_client
+        forbids_deletion
       end
     end
 
@@ -633,7 +583,6 @@ describe "Client API endpoint", :clients do
     context 'as a normal client' do
       let(:requestor) { normal_client }
 
-      with_another_admin_client     { forbids_deletion }
       with_another_validator_client { forbids_deletion }
       with_another_normal_client    { forbids_deletion }
       with_self                     { should_delete_client }

@@ -106,7 +106,7 @@ module Pedant
       # If default_orgname is set, override the settings for org
       name = pedant_orgname
       if Pedant::Config.use_default_org
-        #@validate_org = true
+        ## Always respect validate org setting:
         @validate_org = !!Pedant::Config.validate_org_creation
         create_org(name)
       elsif org[:create_me]
@@ -135,10 +135,6 @@ module Pedant
     end
     def validator_client_name
       "#{org_name}-validator"
-    end
-
-    def admin_client_name
-      admin_client.name
     end
 
     # Since Erchef will now return URLs based upon the Host: header, and it receives
