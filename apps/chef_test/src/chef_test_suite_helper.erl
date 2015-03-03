@@ -33,12 +33,20 @@
          set_app_env/1,
          make_id/1,
          make_az_id/1,
-         make_orgs/0,
          actor_id/0,
+
+         make_orgs/0,
          org_name/0,
          other_org_name/0,
+
          the_org_id/0,
-         other_org_id/0
+         other_org_id/0,
+
+         create_record/1,
+         list_records/1,
+         update_record/1,
+         fetch_record/1,
+         delete_record/1
         ]).
 
 -define(ORG_AUTHZ_ID, <<"10000000000000000000000000000002">>).
@@ -169,3 +177,40 @@ the_org_id() ->
 
 other_org_id() ->
     make_id(<<"bb2">>).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Common database queries
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+create_record(Record) ->
+    Query = chef_object:create_query(Record),
+    FlattenedRecord = chef_object:flatten(Record),
+    chef_sql:create_object(Query, FlattenedRecord).
+
+fetch_record(Record) ->
+    chef_sql:fetch_object(
+      chef_object:fields_for_fetch(Record),
+      element(1, Record),
+      chef_object:find_query(Record),
+      chef_object:record_fields(Record)
+     ).
+
+update_record(Record) ->
+    chef_sql:do_update(chef_object:update_query(Record), chef_object:fields_for_update(Record)).
+
+%% Delete the database row associated with the Record. Note that the
+%% corresponding database query must delete by id (e.g.,
+%% "delete from table where id= $1"). Use a custom helper for other kinds of
+%% delete queries.
+delete_record(Record) ->
+    ct:pal("delete record arg: ~p", [Record]),
+    Query = chef_object:delete_query(Record),
+    Id = chef_object:id(Record),
+
+    ct:pal("delete object args: ~p~p~n", [{query, Query},{id, Id}]),
+
+    chef_sql:delete_object(Query, Id).
+
+list_records(Record) ->
+    chef_sql:fetch_object_names(Record).
+

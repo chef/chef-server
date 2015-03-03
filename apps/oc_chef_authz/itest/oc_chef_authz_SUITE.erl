@@ -70,7 +70,7 @@ policy_ops(Config) ->
 
 insert_policy_data(Config) ->
     Policies = primary_org_policy_fixtures(Config) ++ other_org_policy_fixtures(Config),
-    Results = [ create_record(Policy) || Policy <- Policies ],
+    Results = [ chef_test_suite_helper:create_record(Policy) || Policy <- Policies ],
     Expected = lists:duplicate(length(Policies), {ok, 1}),
     ?assertEqual(Expected, Results).
 
@@ -78,20 +78,20 @@ list_policies(Config) ->
     ExistingPolicies = primary_org_policy_fixtures(Config),
     Names = [ [ Policy#oc_chef_policy.name ] || Policy <- ExistingPolicies],
     Expected = Names,
-    Actual = list_records(hd(ExistingPolicies)),
+    Actual = chef_test_suite_helper:list_records(hd(ExistingPolicies)),
     ?assertEqual(Expected, Actual).
 
 show_policy(Config) ->
     PolicyFixture = hd(primary_org_policy_fixtures(Config)),
-    {ok, Got} = fetch_record(PolicyFixture),
+    {ok, Got} = chef_test_suite_helper:fetch_record(PolicyFixture),
     ?assertEqual(PolicyFixture, Got).
 
 delete_policies(Config) ->
     Policies = primary_org_policy_fixtures(Config),
-    Results = [ delete_record(Policy) || Policy <- Policies ],
+    Results = [ chef_test_suite_helper:delete_record(Policy) || Policy <- Policies ],
     Expected = lists:duplicate(length(Policies), {ok, 1}),
     ?assertEqual(Expected, Results),
-    ListResult = list_records(hd(Policies)),
+    ListResult = chef_test_suite_helper:list_records(hd(Policies)),
     ?assertEqual([], ListResult).
 
 
@@ -112,40 +112,4 @@ other_org_policy_fixtures(Config) ->
     OtherOrgId = proplists:get_value(other_org_id, Config),
     [make_policy(<<"4">>, OtherOrgId)].
 
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% TODO: This is all copy-pasta from chef_db/itest/itest_util.erl
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-create_record(Record) ->
-    Query = chef_object:create_query(Record),
-    FlattenedRecord = chef_object:flatten(Record),
-    chef_sql:create_object(Query, FlattenedRecord).
-
-fetch_record(Record) ->
-    chef_sql:fetch_object(
-      chef_object:fields_for_fetch(Record),
-      element(1, Record),
-      chef_object:find_query(Record),
-      chef_object:record_fields(Record)
-     ).
-
-update_record(Record) ->
-    chef_sql:do_update(chef_object:update_query(Record), chef_object:fields_for_update(Record)).
-
-delete_record(Record) ->
-    ct:pal("delete record arg: ~p", [Record]),
-    Query = chef_object:delete_query(Record),
-    Id = chef_object:id(Record),
-
-    ct:pal("delete object args: ~p~p~n", [{query, Query},{id, Id}]),
-
-    chef_sql:delete_object(Query, Id).
-
-list_records(Record) ->
-    chef_sql:fetch_object_names(Record).
-
-%% END COPYPASTA
 
