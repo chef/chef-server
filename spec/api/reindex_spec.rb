@@ -3,7 +3,7 @@ require 'pedant/rspec/role_util'
 require 'pedant/rspec/search_util'
 require 'pedant/rspec/node_util'
 require 'pedant/rspec/environment_util'
-require 'pedant/rspec/open_source_client_util'
+require 'pedant/rspec/client_util'
 
 describe "Server-side reindexing" do
   include Pedant::RSpec::DataBagUtil

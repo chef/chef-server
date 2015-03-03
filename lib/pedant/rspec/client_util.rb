@@ -18,7 +18,7 @@ require 'rspec/core/shared_context'
 
 module Pedant
   module RSpec
-    module OpenSourceClientUtil
+    module ClientUtil
       extend ::RSpec::Core::SharedContext
       extend Pedant::Concern
 
@@ -76,7 +76,6 @@ module Pedant
       let(:fetch_nonadmin_client_success_response)  { ok_response.with(body_exact: new_client(client_name).with('public_key', expected_public_key)) }
 
       let(:delete_client_success_response) { ok_response.with(body: { 'name' => client_name }) }
-      let(:delete_client_as_non_admin_response) { open_source_not_allowed_response }
 
       let(:create_client_success_response) do
         {
@@ -123,10 +122,6 @@ module Pedant
           }
         }
       end
-
-      let(:create_client_as_non_admin_response) { open_source_not_allowed_response }
-      let(:update_client_as_non_admin_response) { open_source_not_allowed_response }
-
 
       def new_client(name, _options = {})
         _options[:admin] ||= false

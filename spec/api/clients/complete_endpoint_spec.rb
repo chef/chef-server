@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/open_source_client_util'
+require 'pedant/rspec/client_util'
 require 'pedant/rspec/validations'
 
 describe "Client API endpoint", :clients do
-  include Pedant::RSpec::OpenSourceClientUtil
+  include Pedant::RSpec::ClientUtil
 
   # Just until we rename the requestors
   let(:admin_requestor)  { org_admin }

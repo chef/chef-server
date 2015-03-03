@@ -19,18 +19,17 @@ require 'pedant/rspec/role_util'
 require 'pedant/rspec/search_util'
 require 'pedant/rspec/node_util'
 require 'pedant/rspec/environment_util'
-require 'pedant/rspec/open_source_client_util'
+require 'pedant/rspec/client_util'
 require 'pedant/rspec/chef_data'
 
 describe 'Search API endpoint', :search do
 
-  #  include Pedant::RSpec::ClientUtil
   include Pedant::RSpec::DataBagUtil
   include Pedant::RSpec::RoleUtil
   include Pedant::RSpec::SearchUtil
   include Pedant::RSpec::NodeUtil
   include Pedant::RSpec::EnvironmentUtil
-  include Pedant::RSpec::OpenSourceClientUtil
+  include Pedant::RSpec::ClientUtil
   include Pedant::RSpec::ChefData
 
   # TODO: until we rename requestors
