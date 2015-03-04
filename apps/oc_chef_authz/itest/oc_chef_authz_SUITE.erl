@@ -34,7 +34,8 @@
 -define(ORG_ID, <<"33330000000000000000000000000000">>).
 
 all() -> [fetch_container_sql,
-          policy_ops
+          policy_ops,
+          policy_group_ops
          ].
 
 init_per_suite(LastConfig) ->
@@ -112,4 +113,51 @@ other_org_policy_fixtures(Config) ->
     OtherOrgId = proplists:get_value(other_org_id, Config),
     [make_policy(<<"4">>, OtherOrgId)].
 
+policy_group_ops(Config) ->
+    insert_policy_group_data(Config),
+    list_policy_groups(Config),
+    show_policy_group(Config),
+    delete_policy_groups(Config).
 
+insert_policy_group_data(Config) ->
+    PolicyGroups = primary_org_policy_group_fixtures(Config) ++ other_org_policy_group_fixtures(Config),
+    Results = [ chef_test_suite_helper:create_record(PolicyGroup) || PolicyGroup <- PolicyGroups ],
+    Expected = lists:duplicate(length(PolicyGroups), {ok, 1}),
+    ?assertEqual(Expected, Results).
+
+list_policy_groups(Config) ->
+    ExistingPolicyGroups = primary_org_policy_group_fixtures(Config),
+    Names = [ [ PolicyGroup#oc_chef_policy_group.name ] || PolicyGroup <- ExistingPolicyGroups],
+    Expected = Names,
+    Actual = chef_test_suite_helper:list_records(hd(ExistingPolicyGroups)),
+    ?assertEqual(Expected, Actual).
+
+show_policy_group(Config) ->
+    PolicyGroupFixture = hd(primary_org_policy_group_fixtures(Config)),
+    {ok, Got} = chef_test_suite_helper:fetch_record(PolicyGroupFixture),
+    ?assertEqual(PolicyGroupFixture, Got).
+
+delete_policy_groups(Config) ->
+    PolicyGroups = primary_org_policy_group_fixtures(Config),
+    Results = [ chef_test_suite_helper:delete_record(PolicyGroup) || PolicyGroup <- PolicyGroups ],
+    Expected = lists:duplicate(length(PolicyGroups), {ok, 1}),
+    ?assertEqual(Expected, Results),
+    ListResult = chef_test_suite_helper:list_records(hd(PolicyGroups)),
+    ?assertEqual([], ListResult).
+
+primary_org_policy_group_fixtures(Config) ->
+    OrgId = proplists:get_value(org_id, Config),
+    [make_policy_group(<<"1">>, OrgId),
+     make_policy_group(<<"2">>, OrgId),
+     make_policy_group(<<"3">>, OrgId)].
+
+other_org_policy_group_fixtures(Config) ->
+    OtherOrgId = proplists:get_value(other_org_id, Config),
+    [make_policy_group(<<"4">>, OtherOrgId)].
+
+make_policy_group(Prefix, OrgId) ->
+    Id = chef_test_suite_helper:make_id(Prefix),
+    AzId = chef_test_suite_helper:make_az_id(Prefix),
+    Name = <<"policy_group", Prefix/binary>>,
+    #oc_chef_policy_group{id = Id, authz_id = AzId, org_id = OrgId, name = Name,
+                    last_updated_by = chef_test_suite_helper:actor_id()}.
