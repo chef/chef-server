@@ -489,7 +489,7 @@ module Pedant
     def validate_created_org(org)
       puts "Validating Org Creation"
 
-      @test_org_owner = create_user("#{org.name}_owner", associate: true, admin: true)
+      @test_org_owner = create_user("#{org.name}_owner", associate: true)
       requestor_cache[:owner] = @test_org_owner
       make_owner(self.test_org_owner, org)
 
