@@ -487,8 +487,9 @@ module Pedant
         # If these are referenced in before(:all) blocks, use shared() instead of let()
         shared(:organization)     { platform.test_org }
         shared(:org)              { platform.test_org.name }
+        # TODO look at how these are set up - is accurate?
         shared(:admin_user)       { platform.admin_user }
-        shared(:org_admin)        { platform.test_org_owner }
+        shared(:org_admin)        { platform.admin_user}
         shared(:normal_user)      { platform.non_admin_user }
 
         shared(:outside_user)     { platform.bad_user}

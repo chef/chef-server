@@ -517,7 +517,7 @@ describe "Client API endpoint", :clients do
 
     # Admins can delete any client
     context "as an org admin" do
-      let(:requestor) { platform.test_org_owner }
+      let(:requestor) { admin_requestor }
       with_another_validator_client { should_delete_client }
       with_another_normal_client    { should_delete_client }
     end
