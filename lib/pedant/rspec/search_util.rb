@@ -453,7 +453,7 @@ module Pedant
         # Exercise node attribute overrides via partial search. In
         # principle, there's no reason this necessarily needs to be a
         # partial search, but it further exercises that functionality,
-        #Thi and it's easy to check.
+        # and it's easy to check.
         #
         # Must be executed in a context where `request_method` is set
         # to :POST and `request_url` is set to api_url("/search/node")
