@@ -119,7 +119,6 @@ module Pedant
     end
 
     def delete!
-      puts "**** Deleting User #{self.name}"
       platform.delete_user(self)
     end
   end
@@ -132,7 +131,6 @@ module Pedant
     end
 
     def delete!
-      puts "**** Deleting Client #{self.name}"
       platform.delete_client(self)
     end
   end

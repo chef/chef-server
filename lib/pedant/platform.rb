@@ -16,9 +16,7 @@
 require 'uri'
 require 'pathname'
 require 'fileutils'
-
-require 'pedant/response_bodies'
-
+require 'pedant/acl'
 module Pedant
 
   # Representation of the Chef Server platform
@@ -104,8 +102,9 @@ module Pedant
       # If default_orgname is set, override the settings for org
       name = pedant_orgname
       if Pedant::Config.use_default_org
-        ## Always respect validate org setting:
-        @validate_org = !!Pedant::Config.validate_org_creation
+        # org validation also associates a pedant org owner
+        # with the org as an admin. This is eq
+        @validate_org = true
         create_org(name)
       elsif org[:create_me]
         @validate_org = !!Pedant::Config.validate_org_creation
@@ -177,7 +176,6 @@ module Pedant
     def cleanup
       cleanup_requestors
       delete_org_from_config
-      delete_user(@test_org_owner) if @test_org_owner
     end
 
     def create_client(name, org = self.test_org)
@@ -471,6 +469,8 @@ module Pedant
 
 
     def before_configure_rspec
+      # Note that validate_created_org is also responsible for associating an
+      # owner with the org.
       validate_created_org(test_org) if validate_org
     end
 
@@ -481,7 +481,7 @@ module Pedant
       ::RSpec.configure do |c|
         c.run_all_when_everything_filtered = true
         c.filter_run_excluding :intermittent_failure => true
-        c.include Pedant::ResponseBodies
+        c.include Pedant::ACL
       end
     end
 
@@ -489,7 +489,7 @@ module Pedant
     def validate_created_org(org)
       puts "Validating Org Creation"
 
-      @test_org_owner = create_user("#{org.name}_owner", associate: true)
+      @test_org_owner = create_user("#{org.name}_owner", associate: true, admin: true)
       requestor_cache[:owner] = @test_org_owner
       make_owner(self.test_org_owner, org)
 
@@ -513,7 +513,7 @@ module Pedant
 
       if ::RSpec::Core::Runner.run(args.flatten) > 0
         delete_org_from_config
-        delete_user(@test_org_owner)
+        delete_user(@test_org_owner) if @test_org_owner
         puts "Error: unable to validate testing org"
         exit 2
       end
