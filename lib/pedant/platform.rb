@@ -93,6 +93,8 @@ module Pedant
           user.populate_dot_chef! if requestor_spec[:create_knife]
         end
       else
+        # the user is expected to exist, so we won't actually create it in chef
+        # server, but still allowing us to use it as a requestor.
         Pedant::User.new(name, key_file, platform: self, preexisting: true)
       end
     end
