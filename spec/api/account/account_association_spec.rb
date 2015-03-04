@@ -226,7 +226,7 @@ describe "opscode-account user association", :association do
       end
     end
 
-    context "invoking as " do
+    context "invoking as", :authorization do
       it "superuser succeeds" do
         get(user_org_url, platform.superuser).should look_like({:status => 200})
       end
@@ -270,7 +270,7 @@ describe "opscode-account user association", :association do
     end
   end
 
-  context "when org admin is attempting to view user associations" do
+  context "when org admin is attempting to view user associations", :authorization do
     let(:user_assoc_url) { "#{users_url}/#{platform.bad_user.name}/association_requests" }
     let(:read_fail_message) { ruby? ? "You are not allowed to view association requests for #{platform.bad_user.name}" : ["missing read permission"] }
     it "does not permit admin to view associations", :authorization do

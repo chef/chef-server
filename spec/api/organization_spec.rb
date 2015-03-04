@@ -126,7 +126,7 @@ describe "/organizations", :organizations do
       end
     end
 
-    context "when the user attempts to create a new org with invalid data" do
+    context "when the user attempts to create a new org with invalid data", :validation do
       it "it should fail when 'name' is missing" do
         post("#{platform.server}/organizations", superuser, :payload => org_with_no_name ).should look_like(
           :status => 400
@@ -203,7 +203,7 @@ describe "/organizations", :organizations do
       end
     end
 
-    context "when the user updates the organization object update should fail when" do
+    context "when the user updates the organization object update should fail when", :validation do
       let(:orgname) { "test-#{Time.now.to_i}-#{Process.pid}" }
       let(:post_request_body) do
         {
