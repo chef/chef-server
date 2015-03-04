@@ -8,13 +8,10 @@
            "apps/depsolver","apps/chef_test"]}.
 {deps,[{goldrush,".*",
                  {git,"git://github.com/DeadZen/goldrush.git",
-                      "1d883423ac360b3536ca52dc733a0164bacf3109"}},
+                      "71e63212f12c25827e0c1b4198d37d5d018a7fec"}},
        {lager,".*",
               {git,"https://github.com/basho/lager",
-                   "ad400896af5b1ad8b4f7a4d34e609b5a990640bb"}},
-       {rebar_lock_deps_plugin,".*",
-                               {git,"https://github.com/seth/rebar_lock_deps_plugin",
-                                    "7a5835029c42b8138325405237ea7e8516a84800"}},
+                   "d33ccf3b69de09a628fe38b4d7981bb8671b8a4f"}},
        {mochiweb,".*",
                  {git,"git://github.com/basho/mochiweb.git",
                       "ade2a9b29a11034eb550c1d79b4f991bf5ca05ba"}},
@@ -122,8 +119,12 @@
                        "0395a10b94472ccbe38b62bbfa9d0fc1ddac1dd7"}},
        {uuid,".*",
              {git,"https://github.com/okeuday/uuid",
-                  "f7c141c8359cd690faba0d2684b449a07db8e915"}}]}.
-{plugins,[rebar_lock_deps_plugin]}.
+                  "f7c141c8359cd690faba0d2684b449a07db8e915"}},
+       {rebar_lock_deps_plugin,".*",
+                               {git,"git://github.com/seth/rebar_lock_deps_plugin.git",
+                                    "7a5835029c42b8138325405237ea7e8516a84800"}}]}.
+{use_lock_deps,true}.
+{use_edown,true}.
 {cover_enabled,true}.
 {cover_print_enabled,true}.
 {erl_opts,[{d,'OC_CHEF'},

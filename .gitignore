@@ -10,3 +10,7 @@ chef_db_SUITE_data
 *.so
 tags
 *.dump
+_rel
+.concrete
+relx
+deps.plt

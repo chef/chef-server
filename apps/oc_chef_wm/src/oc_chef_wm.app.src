@@ -1,3 +1,6 @@
+%% -*- mode: erlang -*-
+%% -*- tab-width: 4;erlang-indent-level: 4;indent-tabs-mode: nil -*-
+%% ex: ts=4 sw=4 ft=erlang et
 {application, oc_chef_wm,
  [
   {description, "Base bits needed to write Web Machine API endpoints"},
@@ -14,8 +17,7 @@
                   couchbeam,
                   darklaunch,
                   chef_index,
-                  mochiweb,
-                  webmachine,
+                  opscoderl_wm,
                   oc_chef_authz,
                   folsom,
                   chef_objects,

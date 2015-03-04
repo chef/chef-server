@@ -6,6 +6,8 @@ cache:
 language: erlang
 otp_release:
   - R16B03-1
+install:
+  - ./rebar get-deps -C rebar.config.lock
 before_script:
   - sudo apt-get update -qq
   - sudo apt-get install -y cpanminus perl libdbd-pg-perl build-essential
@@ -14,8 +16,7 @@ addons:
   postgresql: "9.3"
 script:
   - sudo chmod 777 /var/run/postgresql/
-  - make
   - make bundle
+  - make
   - ./rebar skip_deps=true ct
   - ./rebar skip_deps=true eunit
-
