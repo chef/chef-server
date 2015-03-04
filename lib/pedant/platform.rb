@@ -255,8 +255,7 @@ module Pedant
     #
     # Similar logic holds for users as well.
     def create_requestor_accessor(cache_key)
-      accessor = self.class.send(:define_method, cache_key, lambda{requestor_cache[cache_key]})
-      accessor
+      self.class.send(:define_method, cache_key, lambda{requestor_cache[cache_key]})
     end
 
     def cleanup_requestors
