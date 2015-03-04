@@ -28,7 +28,6 @@ module RSpec
 
     class PedantHashComparator
       def initialize(expected, mode=:strict)
-
         @expected = expected
         @mode = mode
       end
@@ -40,14 +39,24 @@ module RSpec
       end
 
       def matches?(actual)
+        return false unless actual.class == @expected.class
+        if actual.is_a? Hash
+          hash_matches?(actual)
+        elsif actual.is_a? Array
+          @expected = {:hashwrapper => @expected}
+          result = hash_matches?({ :hashwrapper => actual } )
+          @expected = @expected[:hashwrapper]
+          result
+        else
+          return false
+        end
+      end # matches?
 
+      def hash_matches?(actual)
         @actual = actual
-
-        return false unless actual.is_a? Hash
 
         if strict?
           keys_match = (expected.keys.sort == actual.keys.sort)
-
           # if they keys don't match, we can short-circuit here
           return false unless keys_match
         end
@@ -82,7 +91,6 @@ module RSpec
               # need to cut short the rest of the logic to provide a
               # better message
               return false if @actual.nil?
-
               size_is_same = (spec.size == value.size)
               all_items_included = spec.all? { |item| value.include?(item) }
               size_is_same && all_items_included
@@ -95,7 +103,8 @@ module RSpec
             spec == value
           end
         end
-      end # matches?
+
+      end
 
       def description
         if strict?
@@ -271,15 +280,15 @@ RSpec::Matchers.define :look_like do |expected_response_spec|
           expected_body_spec = expected_response_spec[:body] || expected_response_spec[:body_exact]
 
           # :body_exact implies that there should be no keys that are
-          # untested, i.e., you test everything that's there
-          if expected_body_spec.is_a?(Hash)
+          # untested, i.e., you test everything that's there. It does not
+          # imply ordering.
+          if expected_body_spec.is_a?(Hash) or expected_body_spec.is_a?(Array)
             if expected_response_spec[:body_exact]
               expect(parsed_json).to strictly_match expected_body_spec
             else # just a body spec (looser)
               expect(parsed_json).to loosely_match expected_body_spec
             end
           else
-            # TODO this may fall down on ordering.
             expect(parsed_json).to eql(expected_body_spec)
           end
         end
