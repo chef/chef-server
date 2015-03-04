@@ -15,7 +15,6 @@
 
 require 'pedant/request'
 require 'rspec/core/shared_context'
-# TODO comment this out and see if it breaks.
 require 'active_support/core_ext/hash/keys'
 require 'pedant/concern'
 
