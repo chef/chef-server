@@ -177,7 +177,7 @@ module Pedant
     def cleanup
       cleanup_requestors
       delete_org_from_config
-      delete_user(@test_org_owner)
+      delete_user(@test_org_owner) if @test_org_owner
     end
 
     def create_client(name, org = self.test_org)
