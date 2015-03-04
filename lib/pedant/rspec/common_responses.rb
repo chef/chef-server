@@ -108,6 +108,8 @@ module Pedant
 
         let(:sandbox_not_found_error_message) { ["Listing sandboxes not supported."] }
 
+        let(:invalid_cookbook_version_error_message ) { ["Invalid cookbook version '#{cookbook_version}'."] }
+
       end
     end
   end
