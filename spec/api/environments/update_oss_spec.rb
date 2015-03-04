@@ -17,7 +17,7 @@
 require 'pedant/rspec/auth_headers_util'
 require 'pedant/rspec/environment_util'
 
-describe "OSS Environments API Endpoint", :environments do
+describe "Environments API Endpoint", :environments do
   include Pedant::RSpec::EnvironmentUtil
   include Pedant::RSpec::AuthHeadersUtil
 

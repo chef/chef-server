@@ -18,7 +18,7 @@ require 'pedant/rspec/environment_util'
 require 'pedant/rspec/search_util'
 require 'pedant/rspec/role_util'
 
-describe "OSS Environments API Endpoint", :environments do
+describe "Environments API Endpoint", :environments do
   include Pedant::RSpec::EnvironmentUtil
   include Pedant::RSpec::SearchUtil
   include Pedant::RSpec::AuthHeadersUtil
