@@ -3,7 +3,7 @@
 # Author:: Douglas Triggs (<doug@getchef.com>)
 # Copyright:: Copyright (c) 2014 Chef, Inc.
 
-describe "Headers" do
+describe "Headers", :headers do
   let (:request_url) { api_url("users") }
   let (:requestor) { platform.admin_user }
 

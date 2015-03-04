@@ -138,7 +138,7 @@ module Pedant
                 clients depsolver search knife validation authentication authorization
                 principals acl containers groups association omnibus organizations
                 usags internal_orgs rename_org controls keys cookbook_artifacts
-                license)
+                license headers)
       export_options(opts, tags)
     end
 
