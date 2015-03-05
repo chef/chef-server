@@ -111,7 +111,14 @@
               {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>}
             ]},
   {chef_authn, [
-                {keyring, [{default, "/etc/opscode/webui_pub.pem"}]}
+                {keyring, [{default, "/etc/opscode/webui_pub.pem"}]},
+                <% unless node['private_chef']['opscode-erchef']['keygen_cache_workers'] == :auto -%>
+                {keygen_cache_workers, <%= node['private_chef']['opscode-erchef']['keygen_cache_workers'] %>},
+                <% end -%>
+                {keygen_cache_size, <%= node['private_chef']['opscode-erchef']['keygen_cache_size'] %>},
+                {keygen_start_size, <%= node['private_chef']['opscode-erchef']['keygen_start_size'] %>},
+                {keygen_timeout, <%= node['private_chef']['opscode-erchef']['keygen_timeout'] %>},
+                {keygen_size, <%= node['private_chef']['opscode-erchef']['keygen_key_size'] %>}
                ]},
   {oc_chef_authz, [
                 {authz_root_url, "http://<%= @helper.vip_for_uri('oc_bifrost') %>:<%= node['private_chef']['oc_bifrost']['port'] %>" },
