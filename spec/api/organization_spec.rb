@@ -85,7 +85,7 @@ describe "/organizations", :organizations do
   describe "POST /organizations" do
     let(:orgname) { "test-#{Time.now.to_i}-#{Process.pid}" }
     after :each do
-      delete("#{platform.server}/organizations/#{orgname}", superuser)
+      platform.delete_org(orgname)
     end
 
     let(:request_body) do
@@ -161,7 +161,7 @@ describe "/organizations", :organizations do
     end
 
     after do
-      delete("#{platform.server}/organizations/#{orgname}", superuser)
+      platform.delete_org(orgname)
     end
 
     context "when the user updates the organization object" do
@@ -198,7 +198,7 @@ describe "/organizations", :organizations do
         # Because ruby permits this - and pedant runs the pended test to ensure it fails -
         # we'll now have an orphan org that we need to make sure we delete.
         if ruby?
-          delete("#{platform.server}/organizations/#{new_orgname}", superuser)
+          platform.delete_org(new_orgname)
         end
       end
     end
@@ -218,7 +218,7 @@ describe "/organizations", :organizations do
       end
 
       after do
-        delete("#{platform.server}/organizations/#{orgname}", superuser)
+        platform.delete_org(orgname)
       end
 
       it "'name' is missing" do

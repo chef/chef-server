@@ -326,7 +326,7 @@ module Pedant
 
     def delete_org(orgname)
       r = delete("#{@server}/organizations/#{orgname}/clients/#{orgname}-validator", superuser)
-      if r.code != 200
+      if r.code != 200 and r.code != 404
         puts "Unexpected response when deleting org validator: #{r.code}: #{r}"
       end
       puts "Deleting organization #{orgname} ..."
