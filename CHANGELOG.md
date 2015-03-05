@@ -1,5 +1,10 @@
 # Chef Server Changelog
 
+## 12.0.6 (undetermined)
+
+### oc-chef-pedant 2.0.0
+* Integrates chef-pedant into oc-chef-pedant.
+
 ## 12.0.5 (2014-02-26)
 
 ### bookshelf 1.1.6
@@ -8,7 +13,7 @@
 ### oc\_bifrost 1.4.5
 * Updated to webmachine 1.10.8
 
-### oc\_chef\_pedant 1.0.79
+### oc-chef-pedant 1.0.79
 * New keys API tests
 * New cookbook artifact API tests
 
