@@ -41,9 +41,13 @@ init_per_testcase(http_delete, Config) ->
     ok = chef_sql:mark_checksums_as_uploaded(OrgId,
                                              [NewChecksum]),
 
-    Config2 = [{new_checksum, NewChecksum} | Config],
-    init_per_testcase(generic, Config2);
+    mock_chef_s3(true, [{new_checksum, NewChecksum} | Config]);
+init_per_testcase(http_delete_then_fetch_all_cookbook_artifacts, Config) ->
+    mock_chef_s3(true, Config);
 init_per_testcase(_, Config) ->
+    mock_chef_s3(false, Config).
+
+mock_chef_s3(MockChefS3Delete, Config) ->
     OrgId = ?config(org_id, Config),
 
     ok = meck:new(chef_s3),
@@ -51,14 +55,19 @@ init_per_testcase(_, Config) ->
                      fun(_, _, _, Checksum, _) ->
                          <<"http://fake.url/for/", Checksum/binary>>
                      end),
-    ok = meck:expect(chef_s3, delete_checksums, 2,
-                     fun(ArgOrgId, ArgChecksums) ->
-                         ?assertEqual(OrgId, ArgOrgId),
-                         {{ok, ArgChecksums},
-                          {missing, []},
-                          {timeout, []},
-                          {error, []}}
-                      end),
+    case MockChefS3Delete of
+        true ->
+            ok = meck:expect(chef_s3, delete_checksums, 2,
+                             fun(ArgOrgId, ArgChecksums) ->
+                                 ?assertEqual(OrgId, ArgOrgId),
+                                 {{ok, ArgChecksums},
+                                  {missing, []},
+                                  {timeout, []},
+                                  {error, []}}
+                              end);
+        false ->
+            ok
+    end,
     Config.
 
 end_per_testcase(http_delete_then_fetch_all_cookbook_artifacts, Config) ->

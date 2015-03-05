@@ -128,11 +128,6 @@ policy_permissions(CanCreate, _OrgId, PolicyName, DbContext, Req,
                         iolist_to_binary(["Cannot load policy ", PolicyName])),
             Req1 = chef_wm_util:set_json_body(Req, Message),
             {{halt, 404}, Req1, State#base_state{log_msg = policy_not_found}};
-        {forbidden, _} ->
-            Message = chef_wm_util:error_message_envelope(
-                        iolist_to_binary(["No permission for policy ", PolicyName])),
-            Req1 = chef_wm_util:set_json_body(Req, Message),
-            {{halt, 403}, Req1, State#base_state{log_msg = policy_not_found}};
         {#oc_chef_policy{authz_id = AuthzId} = Policy, _} ->
             PolicyState1 = PolicyState#policy_state{oc_chef_policy = Policy},
             State1 = State#base_state{resource_state = PolicyState1},

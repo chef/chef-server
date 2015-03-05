@@ -48,9 +48,9 @@ auth_info(Req, #base_state{organization_guid = OrgId,
                                          name = Name},
     case chef_db:fetch(BaseRec, DbContext) of
         not_found ->
-            fail_with(Req, State, 404, "not found", cookbook_artifact_not_found);
-        forbidden ->
-            fail_with(Req, State, 403, "forbidden", cookbook_artifact_forbidden);
+            Message = chef_wm_util:error_message_envelope(<<"not_found">>),
+            Req1 = chef_wm_util:set_json_body(Req, Message),
+            {{halt, 404}, Req1, State#base_state{log_msg = cookbook_artifact_not_found}};
         #oc_chef_cookbook_artifact{} = CookbookArtifactRec ->
             auth_info_succeeded([CookbookArtifactRec], Req, State)
     end;
@@ -63,8 +63,6 @@ auth_info(Req, #base_state{organization_guid = OrgId,
                              [OrgId]) of
         not_found ->
             auth_info_succeeded([], Req, State);
-        forbidden ->
-            fail_with(Req, State, 403, "forbidden", cookbook_artifact_forbidden);
         CookbookArtifactRecs when erlang:is_list(CookbookArtifactRecs) ->
             auth_info_succeeded(CookbookArtifactRecs, Req, State)
     end.
@@ -73,12 +71,6 @@ auth_info_succeeded(Recs, Req, #base_state{resource_state = ResourceState} = Sta
     NewResourceState = ResourceState#cookbook_artifacts_state{oc_chef_cookbook_artifacts = Recs},
     State1 = State#base_state{resource_state = NewResourceState},
     {{container, cookbook_artifact}, Req, State1}.
-
-fail_with(Req, State, RespCode, RespMessage, LogMsg) ->
-    Message = chef_wm_util:error_message_envelope(
-                erlang:iolist_to_binary(RespMessage)),
-    Req1 = chef_wm_util:set_json_body(Req, Message),
-    {{halt, RespCode}, Req1, State#base_state{log_msg = LogMsg}}.
 
 to_json(Req, #base_state{resource_state = #cookbook_artifacts_state{
                              oc_chef_cookbook_artifacts = CookbookArtifactRecs
