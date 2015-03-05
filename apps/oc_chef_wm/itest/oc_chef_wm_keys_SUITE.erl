@@ -30,7 +30,6 @@
 -define(CLIENT_NAME, <<"client1">>).
 -define(CLIENT_NAME2, <<"client2">>).
 -define(CLIENT_AUTHZ_ID, <<"00000000000000000000000000000003">>).
--define(CLIENT2_AUTHZ_ID, <<"00000000000000000000000000000005">>).
 
 -define(USER_NAME, <<"user1">>).
 -define(USER_NAME2, <<"user2">>).
@@ -303,6 +302,21 @@ post_multiple_valid_client_keys(Config) ->
     ?assertMatch({ok, "201", _, _}, Result2).
 
 %% Test case initializers
+init_per_testcase(TestCase, Config) when TestCase =:= post_new_key_invalid_date;
+                                         TestCase =:= post_new_key_invalid_digits_date;
+                                         TestCase =:= post_new_key_invalid_utc_date ->
+    make_admin_non_admin_and_client(Config);
+init_per_testcase(TestCase, Config) when TestCase =:= post_client_new_valid_key;
+                                         TestCase =:= post_conflicting_client_key;
+                                         TestCase =:= post_multiple_valid_client_keys ->
+    make_admin_and_client(Config);
+init_per_testcase(TestCase, Config) when TestCase =:= post_user_new_valid_key;
+                                         TestCase =:= post_key_with_infinity_date;
+                                         TestCase =:= post_key_with_invalid_key_name;
+                                         TestCase =:= post_key_with_invalid_public_key;
+                                         TestCase =:= post_conflicting_user_key;
+                                         TestCase =:= post_multiple_valid_user_keys ->
+    make_admin_non_admin_and_client(Config);
 init_per_testcase(list_user_default_key,  Config) ->
     make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
     Config;
@@ -332,7 +346,6 @@ init_per_testcase(list_user_no_keys, Config) ->
     make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
     sqerl:adhoc_delete(<<"keys">>, all),
     make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
-    %chef_db:fetch(#chef_user{username = ?ADMIN_USER_NAME}, context()),
     Config;
 init_per_testcase(get_user_default_key,  Config) ->
     make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
@@ -378,30 +391,6 @@ init_per_testcase(get_key_for_nonexistant_user, Config) ->
 init_per_testcase(get_key_for_nonexistant_client, Config) ->
     make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
     Config;
-init_per_testcase(post_client_new_valid_key, Config) ->
-    make_admin_and_client(Config);
-init_per_testcase(post_new_key_invalid_date, Config) ->
-    make_admin_non_admin_and_client(Config);
-init_per_testcase(post_new_key_invalid_utc_date, Config) ->
-    make_admin_non_admin_and_client(Config);
-init_per_testcase(post_new_key_invalid_digits_date, Config) ->
-    make_admin_non_admin_and_client(Config);
-init_per_testcase(post_conflicting_client_key, Config) ->
-    make_admin_and_client(Config);
-init_per_testcase(post_multiple_valid_client_keys, Config) ->
-    make_admin_and_client(Config);
-init_per_testcase(post_user_new_valid_key, Config) ->
-    make_admin_non_admin_and_client(Config);
-init_per_testcase(post_key_with_infinity_date, Config) ->
-    make_admin_non_admin_and_client(Config);
-init_per_testcase(post_key_with_invalid_key_name, Config) ->
-    make_admin_non_admin_and_client(Config);
-init_per_testcase(post_key_with_invalid_public_key, Config) ->
-    make_admin_non_admin_and_client(Config);
-init_per_testcase(post_conflicting_user_key, Config) ->
-    make_admin_non_admin_and_client(Config);
-init_per_testcase(post_multiple_valid_user_keys, Config) ->
-    make_admin_non_admin_and_client(Config);
 init_per_testcase(_, Config) ->
     Config.
 
@@ -457,20 +446,14 @@ make_org(OrgName, OrgAuthzId) ->
     chef_db:create(Org, context(), OrgAuthzId).
 
 make_client(Config, Name) ->
-    make_client(Config, Name, ?CLIENT_AUTHZ_ID).
-
-make_client(Config, Name, Authzid) ->
     OrgId = proplists:get_value(org_id, Config),
-    make_client(Config, Name, Authzid, OrgId).
-
-make_client(Config, Name, Authzid, OrgId) ->
     PubKey = proplists:get_value(pubkey, Config),
-    Client = chef_object:new_record(chef_client, OrgId, Authzid,
+    Client = chef_object:new_record(chef_client, OrgId, ?CLIENT_AUTHZ_ID,
                                     {[{<<"name">>, Name},
                                       {<<"validator">>, true},
                                       {<<"admin">>, true},
                                       {<<"public_key">>, PubKey}]}),
-    chef_db:create(Client, context(), Authzid).
+    chef_db:create(Client, context(), ?CLIENT_AUTHZ_ID).
 
 make_user(Config, Name, AuthzId) ->
     OrgId = proplists:get_value(org_id, Config),

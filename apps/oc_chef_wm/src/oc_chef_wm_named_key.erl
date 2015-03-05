@@ -31,16 +31,19 @@
                            is_authorized/2,
                            service_available/2]}]).
 
--mixin([{oc_chef_wm_key_util, [auth_info/2]}]).
+-mixin([{oc_chef_wm_keys, [
+                           auth_info/2,
+                           auth_info/3,
+                           validate_request/3
+                          ]
+        }]).
 
 %% chef_wm behavior callbacks
 -behavior(chef_wm).
 -export([init/1,
          init_resource_state/1,
          malformed_request_message/3,
-         request_type/0,
-         auth_info/3,
-         validate_request/3]).
+         request_type/0]).
 
 -export([allowed_methods/2,
          delete_resource/2,
@@ -58,12 +61,6 @@ request_type() ->
 
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
-
-validate_request('GET', Req, #base_state{resource_args = ObjectType, chef_db_context = Ctx, organization_guid = OrgId} = State) ->
-    oc_chef_wm_key_util:validate_get_request(Req, State, Ctx, ObjectType, OrgId).
-
-auth_info('GET', Req, #base_state{resource_state = #key_state{parent_authz_id = AuthzId}}= State) ->
-    {{actor, AuthzId}, Req, State}.
 
 to_json(Req, #base_state{chef_db_context = DbContext,
                          resource_state = #key_state{parent_id = Id,
