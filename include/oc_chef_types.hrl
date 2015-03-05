@@ -38,6 +38,25 @@
           last_updated_by
           }).
 
+-record(oc_chef_policy_group, {
+          id,
+          name,
+          org_id,
+          authz_id,
+          last_updated_by
+          %% NOTE: the schema has a serialized_object field but it's not
+          %% currently used.
+          }).
+
+-record(oc_chef_policy_revision, {
+          id,
+          org_id,
+          name,
+          revision_id,
+          serialized_object,
+          last_updated_by
+          }).
+
 -record(oc_chef_cookbook_artifact_version, {
           id,
           identifier,

@@ -35,7 +35,8 @@
 
 all() -> [fetch_container_sql,
           policy_ops,
-          policy_group_ops
+          policy_group_ops,
+          policy_revision_ops
          ].
 
 init_per_suite(LastConfig) ->
@@ -88,12 +89,14 @@ show_policy(Config) ->
     ?assertEqual(PolicyFixture, Got).
 
 delete_policies(Config) ->
-    Policies = primary_org_policy_fixtures(Config),
+    Policies = primary_org_policy_fixtures(Config) ++ other_org_policy_fixtures(Config),
     Results = [ chef_test_suite_helper:delete_record(Policy) || Policy <- Policies ],
     Expected = lists:duplicate(length(Policies), {ok, 1}),
     ?assertEqual(Expected, Results),
     ListResult = chef_test_suite_helper:list_records(hd(Policies)),
-    ?assertEqual([], ListResult).
+    ?assertEqual([], ListResult),
+    OtherOrgList = chef_test_suite_helper:list_records(lists:last(Policies)),
+    ?assertEqual([], OtherOrgList).
 
 
 make_policy(Prefix, OrgId) ->
@@ -138,12 +141,14 @@ show_policy_group(Config) ->
     ?assertEqual(PolicyGroupFixture, Got).
 
 delete_policy_groups(Config) ->
-    PolicyGroups = primary_org_policy_group_fixtures(Config),
+    PolicyGroups = primary_org_policy_group_fixtures(Config) ++ other_org_policy_group_fixtures(Config),
     Results = [ chef_test_suite_helper:delete_record(PolicyGroup) || PolicyGroup <- PolicyGroups ],
     Expected = lists:duplicate(length(PolicyGroups), {ok, 1}),
     ?assertEqual(Expected, Results),
     ListResult = chef_test_suite_helper:list_records(hd(PolicyGroups)),
-    ?assertEqual([], ListResult).
+    ?assertEqual([], ListResult),
+    OtherOrgList = chef_test_suite_helper:list_records(lists:last(PolicyGroups)),
+    ?assertEqual([], OtherOrgList).
 
 primary_org_policy_group_fixtures(Config) ->
     OrgId = proplists:get_value(org_id, Config),
@@ -161,3 +166,91 @@ make_policy_group(Prefix, OrgId) ->
     Name = <<"policy_group", Prefix/binary>>,
     #oc_chef_policy_group{id = Id, authz_id = AzId, org_id = OrgId, name = Name,
                     last_updated_by = chef_test_suite_helper:actor_id()}.
+
+policy_revision_ops(Config) ->
+    % setup (needed for FK constraints)
+    insert_policy_data(Config),
+    insert_policy_group_data(Config),
+    % test policy revisions
+    insert_policy_revision_data(Config),
+    list_policy_revisions_by_name(Config),
+    find_policy_revisions(Config),
+    % create join to group
+    % fetch by org_id, name, join to group (GET policies/:group_name/:policy_name)
+    % figure out where multi-table logic goes, need to test PUT policies/:group_name/:policy_name for:
+    % * group doesn't exist, policy name doesn't exist
+    % * group exists, policy name doesn't exist
+    % * group doesn't exist, policy name does exist
+    % * group and policy name exist
+    % * also for revision_id does/doesn't exist (idempotent operation, does that validate content?)
+
+    delete_policy_revisions(Config),
+    % delete policy name or group when not empty -- cascade? error? provide cascading force delete?
+
+    % cleanup other fixtures
+    delete_policy_groups(Config),
+    delete_policies(Config).
+
+insert_policy_revision_data(Config) ->
+    Revisions = policy_revisions_in_policy1(Config) ++
+                policy_revisions_in_policy2(Config) ++
+                policy_revisions_in_policy4(Config),
+    Results = [ chef_test_suite_helper:create_record(Revision) || Revision <- Revisions ],
+    Expected = lists:duplicate(length(Revisions), {ok, 1}),
+    ?assertEqual(Expected, Results).
+
+list_policy_revisions_by_name(Config) ->
+    PolicyRevisionsInPolicy1 = policy_revisions_in_policy1(Config),
+    RevisionIDs = [ [ PolicyRevision#oc_chef_policy_revision.revision_id ] || PolicyRevision <- PolicyRevisionsInPolicy1],
+    Expected = RevisionIDs,
+    Actual = chef_test_suite_helper:list_records(hd(PolicyRevisionsInPolicy1)),
+    ?assertEqual(Expected, Actual),
+    OrgId = proplists:get_value(org_id, Config),
+    PolicyRevisionInOtherOrg = hd(policy_revisions_in_policy4(Config)),
+    PolicyRevisionInWrongOrg = PolicyRevisionInOtherOrg#oc_chef_policy_revision{org_id = OrgId},
+    Results = chef_test_suite_helper:list_records(PolicyRevisionInWrongOrg),
+    ?assertEqual([], Results).
+
+find_policy_revisions(Config) ->
+    PolicyToFind = hd(policy_revisions_in_policy1(Config)),
+    {ok, CompresedRow} = chef_test_suite_helper:fetch_record(PolicyToFind),
+    Got = oc_chef_policy_revision:decompress_record(CompresedRow),
+    ?assertEqual(PolicyToFind, Got).
+
+delete_policy_revisions(Config) ->
+    Revisions = policy_revisions_in_policy1(Config) ++
+                policy_revisions_in_policy2(Config) ++
+                policy_revisions_in_policy4(Config),
+    Results = [ chef_test_suite_helper:delete_record(PolicyRevision) || PolicyRevision <- Revisions ],
+    Expected = lists:duplicate(length(Revisions), {ok, 1}),
+    ?assertEqual(Expected, Results),
+    ListResult = chef_test_suite_helper:list_records(hd(Revisions)),
+    ?assertEqual([], ListResult),
+    OtherOrgList = chef_test_suite_helper:list_records(lists:last(Revisions)),
+    ?assertEqual([], OtherOrgList).
+
+policy_revisions_in_policy1(Config) ->
+    OrgId = proplists:get_value(org_id, Config),
+    [make_policy_revision(<<"11">>, <<"1">>, OrgId),
+     make_policy_revision(<<"12">>, <<"1">>, OrgId),
+     make_policy_revision(<<"13">>, <<"1">>, OrgId)].
+
+policy_revisions_in_policy2(Config) ->
+    OrgId = proplists:get_value(org_id, Config),
+    [make_policy_revision(<<"21">>, <<"2">>, OrgId),
+     make_policy_revision(<<"22">>, <<"2">>, OrgId)].
+
+policy_revisions_in_policy4(Config) ->
+    OtherOrgId = proplists:get_value(other_org_id, Config),
+    [make_policy_revision(<<"41">>, <<"4">>, OtherOrgId)].
+
+
+make_policy_revision(Prefix, PolicyPrefix, OrgId) ->
+    Id = chef_test_suite_helper:make_id(Prefix),
+    PolicyName = <<"policy", PolicyPrefix/binary>>,
+    RevisionId = <<"policy_revision_id", Prefix/binary>>,
+    #oc_chef_policy_revision{id = Id, org_id = OrgId, name = PolicyName,
+                          revision_id = RevisionId,
+                          last_updated_by = chef_test_suite_helper:actor_id(),
+                          serialized_object = Prefix}.
+
