@@ -8,10 +8,10 @@
 
 require 'pedant/rspec/common'
 
-describe "private chef authorization checks" do
+describe "chef server authorization checks", :authorization do
   def self.authorization_tests(resource_type)
     context "without starting resource" do
-      before :suite do
+      before :each do
         delete(api_url("/#{resource_type}/#{new_name}"), admin_user)
       end
 

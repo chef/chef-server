@@ -19,7 +19,7 @@ describe "Org Creation", :org_creation do
 
     it 'should have default containers' do
       # This also tests to make sure there are no extraneous containers in the response
-      parsed_response.should eql(default_container_hash)
+      expect(parsed_response).to eql(default_container_hash)
     end
 
     def self.should_have_container_for(resource)
