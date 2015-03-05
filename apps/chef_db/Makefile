@@ -12,7 +12,6 @@ DIALYZER_DEPS = deps/chef_objects/ebin \
                 deps/sqerl/ebin \
                 deps/stats_hero/ebin
 DEPS_PLT = chef_db.plt
-ITEST_DEPS = $(CURDIR)/itest/common/deps
 
 ## Set the environment variable $DB_TYPE to either mysql or pgsql
 ## to run the correct integration tests.
@@ -53,19 +52,10 @@ doc:
 tags:
 	find src deps -name "*.[he]rl" -print | etags -
 
-$(ITEST_DEPS):
-	mkdir -p $(ITEST_DEPS)
-
-$(ITEST_DEPS)/enterprise-chef-server-schema: $(ITEST_DEPS)
-	cd $(ITEST_DEPS); git clone https://github.com/opscode/enterprise-chef-server-schema; cd enterprise-chef-server-schema; git checkout $(EC_SCHEMA_VERSION); $(MAKE) install
-
-
-itest_deps: $(ITEST_DEPS)/enterprise-chef-server-schema
-
 itest_util: itest_compile
 	@erlc -pa '../*/ebin' -pa '../../deps/*/ebin' -pa ebin -I '..' -I '../../deps' -o itest/ itest/*.erl
 
-itest_compile: clean itest_deps
+itest_compile: clean
         # recompile, setting TEST define so we can play with
         # unexported functions.
 	@echo "Recompiling with -DTEST ..."
@@ -76,4 +66,4 @@ itest: itest_compile
 	@ct_run -spec itest/spec.spec -pa deps/*/ebin -pa ebin
 	@echo "Review results with: open itest/ct_logs/index.html"
 
-.PHONY: all clean allclean distclean compile dialyzer eunit test doc tags itest_deps itest_util itest_compile itest
+.PHONY: all clean allclean distclean compile dialyzer eunit test doc tags itest_util itest_compile itest

@@ -1,0 +1,32 @@
+%syntax-version=1.0.0-b2
+%project=oss_chef
+%uri=https://github.com/opscode/chef-server-schema
+
+osc_users 2013-09-04T13:54:01Z Christopher Maier <cm@opscode.com> # Open Source users table
+nodes 2013-09-04T14:07:22Z Christopher Maier <cm@opscode.com> # Nodes table
+clients 2013-09-04T14:46:05Z Christopher Maier <cm@opscode.com> # Clients table
+roles 2013-09-04T15:03:17Z Christopher Maier <cm@opscode.com> # Roles table
+data_bags 2013-09-04T15:09:09Z Christopher Maier <cm@opscode.com> # Data bags table
+data_bag_items [data_bags] 2013-09-04T15:21:33Z Christopher Maier <cm@opscode.com> # Data bag items table
+environments 2013-09-04T15:46:43Z Christopher Maier <cm@opscode.com> # Environments table
+checksums 2013-09-04T17:44:45Z Christopher Maier <cm@opscode.com> # Checksums table
+sandboxed_checksums 2013-09-04T17:52:21Z Christopher Maier <cm@opscode.com> # Sandboxed checksums table
+cookbooks 2013-09-04T18:31:20Z Christopher Maier <cm@opscode.com> # Cookbooks table
+cookbook_versions [cookbooks] 2013-09-04T18:40:34Z Christopher Maier <cm@opscode.com> # Cookbook versions table
+cookbook_version_checksums [cookbook_versions checksums] 2013-09-04T19:01:53Z Christopher Maier <cm@opscode.com> # Cookbook version checksums table
+cookbook_versions_by_rank [cookbook_versions cookbooks] 2013-09-04T19:19:14Z Christopher Maier <cm@opscode.com> # Add cookbook_versions_by_rank view
+cookbook_version_dependencies [cookbook_versions cookbooks] 2013-09-04T19:26:20Z Christopher Maier <cm@opscode.com> # Add cookbook_version_dependencies view
+joined_cookbook_version [cookbook_versions cookbooks] 2013-09-04T21:02:02Z Christopher Maier <cm@opscode.com> # Add joined_cookbook_version view
+@1.0.0 2013-09-04T21:58:35Z Christopher Maier <cm@opscode.com> # Use Sqitch for schema management
+
+cookbook_version_checksums_by_org_id_checksum_index [cookbook_version_checksums] 2013-09-05T18:59:21Z Christopher Maier <cm@opscode.com> # Add org_id / checksum index to cookbook_version_checksums table
+@1.0.1 2013-09-05T19:03:52Z Christopher Maier <cm@opscode.com> # Add org_id / checksum index to cookbook_version_checksums table
+
+node_external_storage [nodes] 2013-09-05T21:30:08Z Christopher Maier <cm@opscode.com> # Ensure node.serialized_object storage is external
+@1.0.2 2013-09-05T19:04:52Z Christopher Maier <cm@opscode.com> # Ensure node.serialized_object storage is external
+
+purge_sequel 2013-09-05T21:00:09Z Christopher Maier <cm@opscode.com> # Remove Sequel metadata
+@1.0.3 2013-09-05T19:05:52Z Christopher Maier <cm@opscode.com> # Purge Sequel metadata
+
+cookbook_versions_cookbook_id_index [cookbook_versions] 2013-10-09T15:06:07Z Oliver Ferrigni <oliver@opscode.com># Add index cookbook_versions(cookbook_id)
+@1.0.4 2013-10-10T18:36:12Z Oliver Ferrigni <oliver@opscode.com># Tagging with 1.0.4 for index creation

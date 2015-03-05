@@ -30,6 +30,7 @@ match(Str, {RE, _Msg}) ->
     end.
 
 regex_for_names_test_() ->
+
     NameTests = fun(Type) ->
         Regex = chef_regex:regex_for(Type),
         ?assertEqual(nomatch, match(<<"">>, Regex)),
@@ -50,13 +51,31 @@ regex_for_names_test_() ->
         ?assertEqual(ok, match(<<"foo.bar">>, Regex)),
         ?assertEqual(ok, match(<<"foo_bar-123.a">>, Regex))
     end,
+    AltNameTests = fun(Type) ->
+        Regex = chef_regex:regex_for(Type),
+        ?assertEqual(ok, match(<<"a:b">>, Regex)),
+        ?assertEqual(ok, match(<<":">>, Regex)),
+        NameTests(Type)
+    end,
     [
+        {"Ensure node names are properly matched",
+         fun() -> AltNameTests(node_name) end},
+        {"Ensure key names are properly matched",
+         fun() -> AltNameTests(key_name) end},
+        {"Ensure data bag names are properly matched",
+         fun() -> AltNameTests(data_bag_name) end},
+        {"Ensure data bag item ids are properly matched",
+         fun() -> AltNameTests(data_bag_item_id) end},
+        {"Ensure role names are properly matched",
+         fun() -> AltNameTests(role_name) end},
         {"Ensure cookbook names are properly matched",
          fun() -> NameTests(cookbook_name) end},
         {"Ensure environment names are properly matched",
          fun() -> NameTests(environment_name) end},
         {"Ensure recipe names are properly matched",
          fun() -> NameTests(recipe_name) end},
+        {"Ensure client names are properly matched",
+         fun() -> NameTests(client_name) end},
         {"Extra recipe checks",
          fun() ->
              Regex = chef_regex:regex_for(recipe_name),

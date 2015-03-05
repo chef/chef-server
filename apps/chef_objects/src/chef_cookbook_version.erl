@@ -29,6 +29,7 @@
          base_cookbook_name/1,
          constraint_map_spec/1,
          single_cookbook_version_spec/0,
+         valid_cookbook_constraint/1,
          ejson_for_indexing/2,
          extract_checksums/1,
          fields_for_update/1,

@@ -131,9 +131,14 @@ validate_identifiers(_) ->
                      http_create_with_modified_cookbook_lock("cookbook_identifiers",
                                                              <<"identifier">>,
                                                              Identifier))
-     end || Identifier <- [<<"f04cc40faf628253fe7d9566d66a1733fb1afbe">>,
-                           <<"f04cc40faf628253fe7d9566d66a1733fb1afbe9a">>,
-                           <<"G04cc40faf628253fe7d9566d66a1733fb1afbe9">>]].
+     end || Identifier <- [
+                           % Empty is invalid
+                           <<"">>,
+                           % 255 is the maximum size
+                           <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
+                           <<"bang!is!invalid">>,
+                           <<"plus+is+invalid">>,
+                           <<"spaces are invalid">>]].
 
 %% Helper fun to post a new policy file with the first cookbook_lock
 %% being modified with given key and value
@@ -182,6 +187,7 @@ http_request(Method, RouteSuffix, Body) ->
 
 -define(POLICY_FILE_CANONICAL_EXAMPLE, <<"
     {
+      \"revision_id\": \"909c26701e291510eacdc6c06d626b9fa5350d25\",
       \"name\": \"some_policy_name\",
       \"run_list\": [
         \"recipe[policyfile_demo::default]\"
@@ -225,6 +231,7 @@ http_request(Method, RouteSuffix, Body) ->
 
 -define(POLICY_FILE_MINIMAL_EXAMPLE, <<"
     {
+      \"revision_id\": \"909c26701e291510eacdc6c06d626b9fa5350d25\",
       \"name\": \"some_policy_name\",
       \"run_list\": [
         \"recipe[policyfile_demo::default]\"
@@ -232,7 +239,7 @@ http_request(Method, RouteSuffix, Body) ->
       \"cookbook_locks\": {
         \"policyfile_demo\": {
           \"identifier\": \"f04cc40faf628253fe7d9566d66a1733fb1afbe9\",
-          \"dotted_decimal_identifier\": \"67638399371010690.23642238397896298.25512023620585\"
+          \"version\": \"1.2.3\"
         }
       }
     }

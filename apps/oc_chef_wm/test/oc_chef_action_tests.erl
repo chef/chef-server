@@ -249,7 +249,14 @@ extract_entity_info_test_() ->
                Ret = oc_chef_action:extract_entity_info(req, State),
                Expected = entity({[{<<"name">>, <<"webserver">>}]}, <<"user">>, <<"webserver">>),
                ?assertEqual(Expected, Ret)
-             end}
+             end},
+     {"keys entity info",
+      fun() -> State = #key_state{key_data= {[{<<"name">>,<<"new-key">> }]}, parent_name = <<"bob">>, type = client},
+               meck:expect(chef_wm_util,object_name, fun(key, req) -> undefined end),
+               Ret = oc_chef_action:extract_entity_info(req, State),
+               Expected = parent_entity({[{<<"name">>, <<"new-key">>}]}, <<"client">>, <<"bob">>, <<"key">>, <<"new-key">>),
+               ?assertEqual(Expected, Ret)
+      end}
      ]
     }.
 
@@ -354,7 +361,7 @@ end_to_end_test_() ->
        fun() -> ExpectedMsg = msg(<<"delete">>),
                 meck:expect(wrq, method, fun(req) -> 'DELETE' end),
                 AssertPublishDataCorrect =
-                   fun(_ServerName, RoutingKey, Message) ->
+                   fun(_ServerName, RoutingKey, _Message) ->
                        ?assertEqual(<<"erchef.node.delete">>, RoutingKey),
                        ok
                    end,
@@ -373,7 +380,7 @@ end_to_end_test_() ->
        fun() -> ExpectedMsg = msg_with_payload(<<"delete">>),
                 meck:expect(wrq, method, fun(req) -> 'DELETE' end),
                 AssertPublishDataCorrect =
-                    fun(_ServerName, RoutingKey, Message) ->
+                    fun(_ServerName, RoutingKey, _Message) ->
                         ?assertEqual(<<"erchef.node.delete">>, RoutingKey),
                         ok
                     end,
