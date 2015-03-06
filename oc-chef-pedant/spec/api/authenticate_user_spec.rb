@@ -3,14 +3,6 @@ require 'pedant/rspec/common'
 require 'json'
 
 describe 'authenticate_user', :users do
-  def self.ruby?
-    Pedant::Config.ruby_users_endpoint?
-  end
-
-  def invalid_verb_response_code
-    ruby? ? 404 : 405
-  end
-
   let(:username) {
     if platform.ldap_testing
       platform.ldap[:account_name]
@@ -69,40 +61,34 @@ describe 'authenticate_user', :users do
         'email' => platform.non_admin_user.name + "@opscode.com",
         'username' => platform.non_admin_user.name
       }} }
-  let(:authentication_error_msg) {
-    if ruby?
-      "Failed to authenticate: Username and password incorrect"
-    else
-      ["Failed to authenticate: Username and password incorrect"]
-    end
-  }
+  let(:authentication_error_msg) { ["Failed to authenticate: Username and password incorrect"] }
 
   context 'GET /authenticate_user' do
 
     # We'd just loop this, but unfortunately, superuser et al aren't available outside
     # of test scope, so easier just to do multiple similar tests
 
-    it 'returns 404 ("Not Found") for superuser' do
+    it 'returns 405 for superuser' do
       get(request_url, superuser).should look_like({
-          :status => invalid_verb_response_code
+          :status => 405
         })
     end
 
-    it 'returns 404 ("Not Found") for admin/different user' do
+    it 'returns 405 for admin/different user' do
       get(request_url, platform.admin_user).should look_like({
-          :status => invalid_verb_response_code
+          :status => 405
         })
     end
 
-    it 'returns 404 ("Not Found") for non-admin/same user' do
+    it 'returns 405 for non-admin/same user' do
       get(request_url, platform.non_admin_user).should look_like({
-          :status => invalid_verb_response_code
+          :status => 405
         })
     end
 
-    it 'returns 404 ("Not Found") for invalid user' do
+    it 'returns 405 for invalid user' do
       get(request_url, invalid_user).should look_like({
-          :status => invalid_verb_response_code
+          :status => 405
         })
     end
 
@@ -110,25 +96,25 @@ describe 'authenticate_user', :users do
 
   context 'PUT /authenticate_user' do
 
-    it 'returns 404 ("Not Found") for superuser' do
+    it 'returns 405 for superuser' do
       put(request_url, superuser, :payload => body).should look_like({
-          :status => invalid_verb_response_code
+          :status => 405
         })
     end
 
-    it 'returns 404 ("Not Found") for admin/different user' do
+    it 'returns 405 for admin/different user' do
       put(request_url, platform.admin_user, :payload => body).should look_like({
           :status => invalid_verb_response_code
         })
     end
 
-    it 'returns 404 ("Not Found") for non-admin/same user' do
+    it 'returns 405 for non-admin/same user' do
       put(request_url, platform.non_admin_user, :payload => body).should look_like({
           :status => invalid_verb_response_code
         })
     end
 
-    it 'returns 404 ("Not Found") for invalid user' do
+    it 'returns 405 for invalid user' do
       put(request_url, invalid_user, :payload => body).should look_like({
           :status => invalid_verb_response_code
         })
@@ -456,9 +442,9 @@ describe 'authenticate_user', :users do
           })
       end
 
-      it 'invalid user returns 401 ("Unauthorized") (ruby) or 400 ("Bad Request") (erlang)', :authentication, :validation do
+      it 'invalid user returns  400 ("Bad Request")', :validation do
         post(request_url, invalid_user).should look_like({
-            :status => ruby? ? 401 : 400
+            :status => 400
           })
       end
     end
@@ -509,11 +495,6 @@ describe 'authenticate_user', :users do
       end
 
       it "should return Forbidden", :authorization do
-
-        # Under ruby we should expect:
-        #     "error" => "Password authentication as the superuser is prohibited."
-        # But the oc_chef_wm_base framework doesn't support customized error messages
-        # when a 403 occurs during forbidden check.
         post(request_url, superuser, :payload => request_body).should look_like(
           :status => 403
         )
@@ -524,27 +505,27 @@ describe 'authenticate_user', :users do
   context 'DELETE /authenticate_user' do
     # This should do nothing0
 
-    it 'returns 404 ("Not Found") for superuser' do
+    it 'returns 405 for superuser' do
       delete(request_url, superuser).should look_like({
-          :status => invalid_verb_response_code
+          :status => 405
         })
     end
 
-    it 'returns 404 ("Not Found") for admin/different user' do
+    it 'returns 405 for admin/different user' do
       delete(request_url, platform.admin_user).should look_like({
-          :status => invalid_verb_response_code
+          :status => 405
         })
     end
 
-    it 'returns 404 ("Not Found") for non-admin/same user' do
+    it 'returns 405 for non-admin/same user' do
       delete(request_url, platform.non_admin_user).should look_like({
-          :status => invalid_verb_response_code
+          :status => 405
         })
     end
 
-    it 'returns 404 ("Not Found") for invalid user' do
+    it 'returns 405 for invalid user' do
       delete(request_url, invalid_user).should look_like({
-          :status => invalid_verb_response_code
+          :status => 405
         })
     end
 

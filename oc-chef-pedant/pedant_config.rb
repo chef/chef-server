@@ -195,24 +195,7 @@ debug_org_creation false
 # necessary.  A common reason is to take into account different error
 # message formatting between the two implementations.
 #
-ruby_environment_endpoint? false
-ruby_sandbox_endpoint?     false
-ruby_data_endpoint?        false
-ruby_role_endpoint?        false
-ruby_cookbook_endpoint?    false
-ruby_client_endpoint?      false
-ruby_users_endpoint?       false
-ruby_container_endpoint?   false
-ruby_container_endpoint_in_sql? true
-ruby_group_endpoint?       false
-ruby_acl_endpoint?         false
-ruby_system_recovery_endpoint? false
-ruby_org_acl_endpoint?     false
-ruby_org_assoc?            false
-ruby_organizations_endpoint? false
-chef_12?                   true
 policies?                  true
-
 old_runlists_and_search true
 
 

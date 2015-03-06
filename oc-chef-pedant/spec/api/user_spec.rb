@@ -2,17 +2,8 @@
 require 'pedant/rspec/common'
 
 describe "users", :users do
-  def self.ruby?
-    Pedant::Config.ruby_users_endpoint?
-  end
-
-  def ruby_org_assoc?
-    Pedant::Config.ruby_org_assoc?
-  end
 
   let(:public_key_regex) do
-    # Because of a difference in the OpenSSL library between ruby 1.8.7
-    # (actually 1.9.2) and 1.9.3, we have to accept multiple patterns here:
     /^-----BEGIN (RSA )?PUBLIC KEY-----/
   end
 
@@ -129,10 +120,9 @@ describe "users", :users do
 
     context "PUT /users" do
       context "admin user" do
-        # A 405 here would be fine (and is no doubt coming with erlang)
-        it "returns  404[ruby]/405[erlang]" do
+        it "returns  405" do
           put(request_url, platform.admin_user).should look_like({
-              :status => ruby? ? 404 : 405
+              :status => 405
             })
         end
       end
@@ -241,8 +231,6 @@ describe "users", :users do
           end
 
           it "returns 201 when password is not provided" do
-            skip("work in flight on users endpoint - ruby incompat") if ruby?
-
             post(request_url, platform.superuser, :payload => request_body).should look_like({
                    :status => 201
                  })
@@ -328,7 +316,6 @@ describe "users", :users do
           end
 
           it "returns 201" do
-            skip("work in flight on users endpoint - ruby incompat") if ruby?
             post(request_url, platform.superuser,
                  :payload => request_body).should look_like({
                    :status => 201
@@ -575,9 +562,9 @@ describe "users", :users do
 
     context "DELETE /users" do
       context "admin user" do
-        it "returns  404[ruby]/405[erlang]" do
+        it "returns  405" do
           delete(request_url, platform.admin_user).should look_like({
-              :status => ruby? ? 404 : 405
+              :status => 405
             })
         end
       end
@@ -662,49 +649,47 @@ describe "users", :users do
     end # context GET /users/<name>
 
     context "PUT /users/<name> when user created w/ external auth enabled" do
-      skip("work in flight on users endpoint - ruby incompat", :if => ruby?) do
-        let(:username) { "test-#{Process.pid}" }
+      let(:username) { "test-#{Process.pid}" }
+      let(:request_body) do
+        {
+          "username" => username,
+          "email" => "#{username}@opscode.com",
+          "first_name" => username,
+          "last_name" => username,
+          "display_name" => "new name",
+          "external_authentication_uid" => username
+        }
+      end
+      before :each do
+        response = post("#{platform.server}/users", platform.superuser,
+                        :payload => {
+                          "username" => username,
+                          "first_name" => username,
+                          "last_name" => username,
+                          "display_name" => username,
+                          "external_authentication_uid" => username
+                        })
+        response.should look_like({ :status => 201 })
+      end
+
+      after :each do
+        delete("#{platform.server}/users/#{username}", platform.superuser)
+      end
+
+
+      context "without email and without specifying external auth uid" do
         let(:request_body) do
           {
             "username" => username,
-            "email" => "#{username}@opscode.com",
-            "first_name" => username,
-            "last_name" => username,
-            "display_name" => "new name",
-            "external_authentication_uid" => username
+            "display_name" => username
           }
         end
-        before :each do
-          response = post("#{platform.server}/users", platform.superuser,
-                          :payload => {
-                            "username" => username,
-                            "first_name" => username,
-                            "last_name" => username,
-                            "display_name" => username,
-                            "external_authentication_uid" => username
-                          })
-          response.should look_like({ :status => 201 })
-        end
 
-        after :each do
-          delete("#{platform.server}/users/#{username}", platform.superuser)
-        end
-
-
-        context "without email and without specifying external auth uid" do
-          let(:request_body) do
-            {
-              "username" => username,
-              "display_name" => username
-            }
-          end
-
-          it "returns 200" do
-            put(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                                                             :status => 200
-                                                           })
-          end
+        it "returns 200" do
+          put(request_url, platform.superuser,
+              :payload => request_body).should look_like({
+                                                           :status => 200
+                                                         })
         end
       end
     end
@@ -1068,8 +1053,6 @@ EOF
             }
           end
           it "returns 200" do
-            skip("ruby returns 400 - pended") if ruby?
-
             put(request_url, platform.superuser,
               :payload => request_body).should look_like({
                 :status => 200
@@ -1291,8 +1274,6 @@ EOF
           end
 
           it "accepts the public key and subsequently responds with it" do
-            skip("Pending in ruby") if ruby?
-
             put_response = put(request_url, platform.superuser, :payload => request_body)
             put_response.should look_like({
                                             :status => 200,
@@ -1466,8 +1447,6 @@ EOF
           end
 
           it "returns 400", :validation do
-            skip("ruby returns 200") if ruby?
-
             response = put(request_url, platform.superuser, :payload => request_body)
             response.should look_like({
                                         :status => 400,
@@ -1634,8 +1613,6 @@ EOF
           end
 
           it "returns 409" do
-            skip("actually returns 403") if ruby?
-
             put(request_url, platform.superuser,
               :payload => request_body).should look_like({
                 :status => 409
@@ -1651,10 +1628,9 @@ EOF
 
     context "POST /users/<name>" do
       context "admin user" do
-        # A 405 here would be fine (and is no doubt coming with erlang)
-        it "returns  404[ruby]/405[erlang]" do
+        it "returns  405" do
           post(request_url, platform.admin_user).should look_like({
-              :status => ruby? ? 404 : 405
+              :status => 405
             })
         end
       end
