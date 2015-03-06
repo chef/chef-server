@@ -57,53 +57,61 @@ create_path(Req, State) ->
     Name = wrq:path_info(policy_name, Req),
     {Name, Req, State}.
 
-validate_request(Method, Req,
-                 State = #base_state{organization_guid = OrgId})
-  when Method == 'GET'; Method == 'DELETE' ->
-    Name = wrq:path_info(policy_name, Req),
-    Group = wrq:path_info(policy_group, Req),
-    {Req, State#base_state{superuser_bypasses_checks = true,
-               resource_state = #policy_state{
-                     oc_chef_policy = #oc_chef_policy{
-                         org_id = OrgId,
-                         name = Name,
-                         policy_group = Group}
-                     }
-              }
-    };
-validate_request(_PostOrPut, Req, #base_state{organization_guid = OrgId,
-                                              resource_state = PolicyState
-                                             } = State) ->
-    Policy = validate_json(Req),
-    Group = wrq:path_info(policy_group, Req),
-    {Req, State#base_state{
-            superuser_bypasses_checks = true,
-            resource_state = PolicyState#policy_state{
-                               oc_chef_policy = #oc_chef_policy{org_id = OrgId,
-                                                                policy_group = Group
-                                                               },
-                               policy_data = Policy}}}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% TODO!!! set back to real validate_request functionality
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-validate_json(Req) ->
-    Body = wrq:req_body(Req),
-    {ok, Policy} = oc_chef_policy:parse_binary_json(Body),
-    ok = validate_name(Req, Policy),
-		Policy.
+validate_request(_Method, Req, State) ->
+    {Req, State}.
 
-validate_name(Req, Policy) ->
-    NameFromReq = wrq:path_info(policy_name, Req),
-    NameFromJson = erlang:binary_to_list(
-                     ej:get({<<"name">>}, Policy, list_to_binary(
-                                                    wrq:path_info(policy_name, Req)
-                                                   )
-                           )
-                    ),
-    case ibrowse_lib:url_encode(NameFromJson) =:= ibrowse_lib:url_encode(NameFromReq) of
-        true ->
-            ok;
-        false ->
-            erlang:throw({mismatch, {<<"name">>, NameFromJson, NameFromReq}})
-    end.
+%%%% validate_request(Method, Req,
+%%%%                  State = #base_state{organization_guid = OrgId})
+%%%%   when Method == 'GET'; Method == 'DELETE' ->
+%%%%     Name = wrq:path_info(policy_name, Req),
+%%%%     Group = wrq:path_info(policy_group, Req),
+%%%%     {Req, State#base_state{superuser_bypasses_checks = true,
+%%%%                resource_state = #policy_state{
+%%%%                      oc_chef_policy = #oc_chef_policy{
+%%%%                          org_id = OrgId,
+%%%%                          name = Name,
+%%%%                          policy_group = Group}
+%%%%                      }
+%%%%               }
+%%%%     };
+%%%% validate_request(_PostOrPut, Req, #base_state{organization_guid = OrgId,
+%%%%                                               resource_state = PolicyState
+%%%%                                              } = State) ->
+%%%%     Policy = validate_json(Req),
+%%%%     Group = wrq:path_info(policy_group, Req),
+%%%%     {Req, State#base_state{
+%%%%             superuser_bypasses_checks = true,
+%%%%             resource_state = PolicyState#policy_state{
+%%%%                                oc_chef_policy = #oc_chef_policy{org_id = OrgId,
+%%%%                                                                 policy_group = Group
+%%%%                                                                },
+%%%%                                policy_data = Policy}}}.
+%%%%
+
+%%%% validate_json(Req) ->
+%%%%     Body = wrq:req_body(Req),
+%%%%     {ok, Policy} = oc_chef_policy:parse_binary_json(Body),
+%%%%     ok = validate_name(Req, Policy),
+%%%% 		Policy.
+%%%% 
+%%%% validate_name(Req, Policy) ->
+%%%%     NameFromReq = wrq:path_info(policy_name, Req),
+%%%%     NameFromJson = erlang:binary_to_list(
+%%%%                      ej:get({<<"name">>}, Policy, list_to_binary(
+%%%%                                                     wrq:path_info(policy_name, Req)
+%%%%                                                    )
+%%%%                            )
+%%%%                     ),
+%%%%     case ibrowse_lib:url_encode(NameFromJson) =:= ibrowse_lib:url_encode(NameFromReq) of
+%%%%         true ->
+%%%%             ok;
+%%%%         false ->
+%%%%             erlang:throw({mismatch, {<<"name">>, NameFromJson, NameFromReq}})
+%%%%     end.
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            resource_state = PolicyState = #policy_state{},
@@ -153,45 +161,60 @@ to_json(Req, #base_state{
 
     {jiffy:encode(Ejson), Req, State}.
 
-from_json(Req, #base_state{resource_state = #policy_state{
-                                               create_policy = false,
-                                               oc_chef_policy = Policy,
-                                               policy_data = PolicyData
-                                              }
-                          } = State) ->
-    Group = wrq:path_info(policy_group, Req),
-    UpdatedPolicy = Policy#oc_chef_policy{policy_group = list_to_binary(Group)},
-    oc_chef_wm_base:update_from_json(Req, State, UpdatedPolicy, PolicyData);
-from_json(Req, #base_state{resource_state = #policy_state{
-                                               create_policy = true,
-                                               policy_authz_id = AuthzId,
-                                               policy_data = PolicyData
-                                              }
-                          } = State) ->
-    Group = wrq:path_info(policy_group, Req),
-    UpdatedPolicyData = ej:set({<<"policy_group">>}, PolicyData, Group),
-    oc_chef_wm_base:create_from_json(Req, State, oc_chef_policy, {authz_id, AuthzId},
-                                     UpdatedPolicyData).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% TODO!!! set back to real functionality
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+from_json(Req, State) ->
+    {Req, State}.
+
+
+%%%% from_json(Req, #base_state{resource_state = #policy_state{
+%%%%                                                create_policy = false,
+%%%%                                                oc_chef_policy = Policy,
+%%%%                                                policy_data = PolicyData
+%%%%                                               }
+%%%%                           } = State) ->
+%%%%     Group = wrq:path_info(policy_group, Req),
+%%%%     UpdatedPolicy = Policy#oc_chef_policy{policy_group = list_to_binary(Group)},
+%%%%     oc_chef_wm_base:update_from_json(Req, State, UpdatedPolicy, PolicyData);
+%%%% from_json(Req, #base_state{resource_state = #policy_state{
+%%%%                                                create_policy = true,
+%%%%                                                policy_authz_id = AuthzId,
+%%%%                                                policy_data = PolicyData
+%%%%                                               }
+%%%%                           } = State) ->
+%%%%     Group = wrq:path_info(policy_group, Req),
+%%%%     UpdatedPolicyData = ej:set({<<"policy_group">>}, PolicyData, Group),
+%%%%     oc_chef_wm_base:create_from_json(Req, State, oc_chef_policy, {authz_id, AuthzId},
+%%%%                                      UpdatedPolicyData).
 
 conflict_message(Name) ->
     {[{<<"error">>, list_to_binary("Policy already exists " ++ Name)}]}.
 
 
-delete_resource(Req, #base_state{
-                        organization_name = OrgName,
-                        chef_db_context = DbContext,
-                        requestor_id = RequestorId,
-                        resource_state = #policy_state{
-                                            oc_chef_policy = InputPolicy }
-                       } = State) ->
-    Group = wrq:path_info(policy_group, Req),
-    Policy = InputPolicy#oc_chef_policy{
-               last_updated_by = RequestorId,
-               policy_group = Group
-              },
-    ok = oc_chef_wm_base:delete_object(DbContext, Policy, RequestorId),
-    Ejson = oc_chef_policy:assemble_policy_ejson(Policy, OrgName),
-    {true, chef_wm_util:set_json_body(Req, Ejson), State}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% TODO!!! set back to real functionality
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+delete_resource(Req, State) ->
+    {Req, State}.
+
+%%%% delete_resource(Req, #base_state{
+%%%%                         organization_name = OrgName,
+%%%%                         chef_db_context = DbContext,
+%%%%                         requestor_id = RequestorId,
+%%%%                         resource_state = #policy_state{
+%%%%                                             oc_chef_policy = InputPolicy }
+%%%%                        } = State) ->
+%%%%     Group = wrq:path_info(policy_group, Req),
+%%%%     Policy = InputPolicy#oc_chef_policy{
+%%%%                last_updated_by = RequestorId,
+%%%%                policy_group = Group
+%%%%               },
+%%%%     ok = oc_chef_wm_base:delete_object(DbContext, Policy, RequestorId),
+%%%%     Ejson = oc_chef_policy:assemble_policy_ejson(Policy, OrgName),
+%%%%     {true, chef_wm_util:set_json_body(Req, Ejson), State}.
 
 malformed_request_message(Any, _Req, _state) ->
     error({unexpected_malformed_request_message, Any}).
