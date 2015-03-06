@@ -20,10 +20,6 @@
 # that pedant is the wrong place to do such an infrastructure / service-interactive test.
 describe 'system_recovery', :users do
 
-  def self.ruby?
-    Pedant::Config.ruby_system_recovery_endpoint?
-  end
-
   let(:external_auth_id) {
     "#{Time.now.to_i}-#{Process.pid}"  }
 
@@ -89,15 +85,9 @@ describe 'system_recovery', :users do
           }
         }
 
-        if (ruby?)
-          let(:error_message) {
-            "Failed to authenticate: "
-          }
-        else
-          let(:error_message) {
-            ["Failed to authenticate: Username and password incorrect"]
-          }
-        end
+        let(:error_message) {
+          ["Failed to authenticate: Username and password incorrect"]
+        }
 
         it "should return 401 with an error message" do
           post(request_url, superuser, :payload => wrong_pw_user_body).should look_like(
@@ -109,15 +99,9 @@ describe 'system_recovery', :users do
 
       context "when a non-superuser is the requestor" do
 
-        if (ruby?)
-          let(:error_message) {
-            "#{username} not authorized for verify_password"
-          }
-        else
-          let(:error_message) {
-            ["missing create permission"]
-          }
-        end
+        let(:error_message) {
+          ["missing create permission"]
+        }
 
         # TODO: the error string from opscode-account returns
         # the user in the body and not the requestor user
@@ -154,15 +138,7 @@ describe 'system_recovery', :users do
         }
       }
 
-      if (ruby?)
-        let(:error_message) {
-          "User is not allowed to take this action"
-        }
-      else
-        let(:error_message) {
-          ["System recovery disabled for this user"]
-        }
-      end
+      let(:error_message) { ["System recovery disabled for this user"] }
 
       # create a new recovery_authentication_enabled:false user
       before :each do
@@ -195,41 +171,22 @@ describe 'system_recovery', :users do
         }
       }
 
-      if (ruby?)
-        let(:error_message) {
-          "User is not found in the system"
-        }
-      else
-        let(:error_message) {
-          ["System recovery disabled for this user"]
-        }
-      end
+      let(:error_message) { ["System recovery disabled for this user"] }
 
       it "should return 404 with an error message" do
         post(request_url, superuser, :payload => user_body).should look_like(
           :body => {
             "error" => error_message
           },
-          :status => ruby? ? 404 : 403
+          :status => 403
         )
       end # should return 404 with an error message
     end # when a user that does not exist is requested by the superuser
 
     context "when the request is missing the username field" do
 
-      let(:missing_username_body) {
-        { 'password' => "foobar" }
-      }
-
-      if (ruby?)
-        let(:error_body) {{
-            "error" => "username and password are required"
-          }}
-      else
-        let(:error_body) {{
-            "error" => ["Field 'username' missing"]
-          }}
-      end
+      let(:missing_username_body) { { 'password' => "foobar" } }
+      let(:error_body) {{ "error" => ["Field 'username' missing"] }}
 
       it "should return 400 with an error message", :validation do
         post(request_url, superuser, :payload => missing_username_body).should look_like(
@@ -245,15 +202,7 @@ describe 'system_recovery', :users do
         { "username" => username }
       }
 
-      if (ruby?)
-        let(:error_body) {{
-            "error" => "username and password are required"
-          }}
-      else
-        let(:error_body) {{
-            "error" => ["Field 'password' missing"]
-          }}
-      end
+      let(:error_body) {{ "error" => ["Field 'password' missing"] }}
 
       it "should return 400 with an error message", :validation do
         post(request_url, superuser, :payload => missing_username_body).should look_like(

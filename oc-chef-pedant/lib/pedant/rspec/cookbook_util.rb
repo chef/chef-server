@@ -415,6 +415,7 @@ module Pedant
       # with keys `:name` and `:content`, where the content key is a
       # string that will be used as the recipe file contents.
       #
+      # TODO - but no dependency on ruby flag, so...
       # NOTE: Recipe names are sorted here to accommodate differences
       # between the Ruby and Erlang implementations; when retrieving
       # recipe names (e.g. /environments/ENVIRONMENT/recipes), the results
@@ -573,25 +574,6 @@ module Pedant
           should_fail_to_change(key, value, error, message, false, true)
         end
 
-        # This is used when the key/value pair change/addition for a
-        # cookbook create results in an internal server error -- this should
-        # only really be relevant for testing agains ruby endpoint
-        #   key:     key to change
-        #   value:   value to use
-        def create_should_crash_server(key, value)
-          # Well, obviously it SHOULD'T, but that's what the ruby endpoint does!  Yay!
-          should_fail_to_change(key, value, 500, nil, true, true)
-        end
-
-        # This is used when the key/value pair change/addition for a
-        # cookbook update results in an internal server error -- this should
-        # only really be relevant for testing agains ruby endpoint
-        #   key:     key to change
-        #   value:   value to use
-        def update_should_crash_server(key, value)
-          should_fail_to_change(key, value, 500, nil, true)
-        end
-
         # This is used when the update operation is expected to fail; the
         # key/value pair is added/modified in the default new_cookbook, but
         # the error and message are expected instead of 200 (success) and a
@@ -725,24 +707,6 @@ module Pedant
         #   message: error message expected
         def should_fail_to_create_metadata(key, value, error, message)
           should_fail_to_change_metadata(key, value, error, message, true)
-        end
-
-        # This is used for cases where metadata changes to the default
-        # cookbook on creation cause internal server errors -- this is only
-        # really relevant for the ruby endpoint
-        #   key:     key to change
-        #   value:   value to use
-        def create_metadata_should_crash_server(key, value)
-          should_fail_to_change_metadata(key, value, 500, nil, true, true)
-        end
-
-        # This is used for cases where metadata changes to the default
-        # cookbook on update cause internal server errors -- this is only
-        # really relevant for the ruby endpoint
-        #   key:     key to change
-        #   value:   value to use
-        def update_metadata_should_crash_server(key, value)
-          should_fail_to_change_metadata(key, value, 500, nil, false, true)
         end
 
         # This is used for testing updates with changes to the default
