@@ -859,9 +859,9 @@ describe "/keys endpoint", :keys do
             end
             context "when GET is called on the URIs that are returned" do
               it "should return status 200" do
-                keys = list_client_keys($org['name'], org_client_name, superuser)
-                JSON.parse(keys).each do |key|
-                  get(key[:uri], superuser).should look_like({:status => 200})
+                client_keys = list_client_keys($org['name'], org_client_name, superuser)
+                JSON.parse(client_keys).each do |key|
+                  get(key["uri"], superuser).should look_like({:status => 200})
                 end
               end
             end
@@ -914,9 +914,9 @@ describe "/keys endpoint", :keys do
             end
             context "when GET is called on the URIs that are returned" do
               it "should return status 200" do
-                keys = list_user_keys(org_user_name, superuser)
-                JSON.parse(keys).each do |key|
-                  get(key[:uri], superuser).should look_like({:status => 200})
+                user_keys = list_user_keys(org_user_name, superuser)
+                JSON.parse(user_keys).each do |key|
+                  get(key["uri"], superuser).should look_like({:status => 200})
                 end
               end
             end
