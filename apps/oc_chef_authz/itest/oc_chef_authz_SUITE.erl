@@ -186,7 +186,12 @@ policy_revision_ops(Config) ->
     delete_policies(Config).
 
 policy_group_revision_association_ops(Config) ->
-    insert_policy_group_association(Config),
+    verify_insert_policy_group_association(Config),
+    verify_insert_policy_group_association_missing_rev(Config),
+    verify_insert_policy_group_association_missing_group(Config),
+    verify_insert_policy_group_association_missing_policy_and_rev(Config),
+    verify_insert_policy_group_association_missing_policy_and_rev_and_group(Config),
+    insert_policy_group_policy_revision_association(Config),
     fetch_policy_via_group_association(Config),
     % insert policy with association (neither thing exists)
     % insert policy with association (group exists)
@@ -194,16 +199,62 @@ policy_group_revision_association_ops(Config) ->
     % fetch those back
     % update existing association, creating policy rev
     % update existing association, policy rev exists
-    % delete associations
-    ok.
+    cleanup_associations(Config).
 
-make_policy_group_association(Config) ->
-    Id = chef_test_suite_helper:make_id(<<"111">>),
-    OrgId = proplists:get_value(org_id, Config),
+pgr_assoc_has_all_deps(Config) ->
+    Prefix = <<"111">>,
+
+    Policy = hd(primary_org_policy_fixtures(Config)),
+    Group = hd(primary_org_policy_group_fixtures(Config)),
     Revision = hd(policy_revisions_in_policy1(Config)),
+    make_policy_group_association(Config, Prefix, Policy, Group, Revision).
+
+pgr_assoc_missing_rev(Config) ->
+    OrgId = proplists:get_value(org_id, Config),
+
+    Prefix = <<"222">>,
+
+    Policy = hd(primary_org_policy_fixtures(Config)),
+    Group = hd(primary_org_policy_group_fixtures(Config)),
+    Revision = make_policy_revision(<<"90">>, <<"1">>, OrgId),
+    make_policy_group_association(Config, Prefix, Policy, Group, Revision).
+
+pgr_assoc_missing_rev_and_policy(Config) ->
+    OrgId = proplists:get_value(org_id, Config),
+
+    Prefix = <<"222">>,
+
+    Policy = make_policy(<<"9">>, OrgId),
+    Group = hd(primary_org_policy_group_fixtures(Config)),
+    Revision = make_policy_revision(<<"91">>, <<"1">>, OrgId),
+    make_policy_group_association(Config, Prefix, Policy, Group, Revision).
+
+pgr_assoc_missing_group(Config) ->
+    OrgId = proplists:get_value(org_id, Config),
+
+    Prefix = <<"111">>,
+
+    Policy = hd(primary_org_policy_fixtures(Config)),
+    Group = make_policy_group(<<"9">>, OrgId),
+    Revision = hd(policy_revisions_in_policy1(Config)),
+    make_policy_group_association(Config, Prefix, Policy, Group, Revision).
+
+pgr_assoc_missing_rev_and_policy_and_group(Config) ->
+    OrgId = proplists:get_value(org_id, Config),
+
+    Prefix = <<"222">>,
+
+    Policy = make_policy(<<"9">>, OrgId),
+    Group = make_policy_group(<<"9">>, OrgId),
+    Revision = make_policy_revision(<<"91">>, <<"1">>, OrgId),
+    make_policy_group_association(Config, Prefix, Policy, Group, Revision).
+
+
+make_policy_group_association(Config, Prefix, Policy, Group, Revision) ->
+    Id = chef_test_suite_helper:make_id(Prefix),
+    OrgId = proplists:get_value(org_id, Config),
     #oc_chef_policy_revision{name = PolicyName, revision_id = RevisionId} = Revision,
 
-    Group = hd(primary_org_policy_group_fixtures(Config)),
     #oc_chef_policy_group{name = GroupName} = Group,
 
     #oc_chef_policy_group_revision_association{
@@ -212,16 +263,81 @@ make_policy_group_association(Config) ->
                 policy_revision_name = PolicyName,
                 policy_revision_revision_id = RevisionId,
                 policy_group_name = GroupName,
-                last_updated_by = chef_test_suite_helper:actor_id()
+                last_updated_by = chef_test_suite_helper:actor_id(),
+
+                policy = Policy,
+                policy_revision = Revision,
+                policy_group = Group
             }.
 
-insert_policy_group_association(Config) ->
-    Assoc = make_policy_group_association(Config),
+insert_policy_group_policy_revision_association(Config) ->
+    Assoc = pgr_assoc_has_all_deps(Config),
     Result = oc_chef_policy_group_revision_association:insert_association(Assoc),
     ?assertEqual({ok,1}, Result).
 
+verify_insert_policy_group_association(Config) ->
+    Assoc = pgr_assoc_has_all_deps(Config),
+    Result = oc_chef_policy_group_revision_association:insert_association(Assoc),
+    ?assertEqual({ok,1}, Result),
+    % clean up so we don't have to worry about violating unique constraints in
+    % other insert tests:
+    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc),
+    ?assertEqual({ok, 1}, DeleteResult).
+
+verify_insert_policy_group_association_missing_rev(Config) ->
+    Assoc = pgr_assoc_missing_rev(Config),
+    Result = oc_chef_policy_group_revision_association:insert_association(Assoc),
+    ?assertEqual({ok,1}, Result),
+    % clean up so we don't have to worry about violating unique constraints in
+    % other insert tests:
+    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc),
+    ?assertEqual({ok, 1}, DeleteResult),
+    DeleteRevResult = chef_test_suite_helper:delete_record(Assoc#oc_chef_policy_group_revision_association.policy_revision),
+    ?assertEqual({ok, 1}, DeleteRevResult).
+
+verify_insert_policy_group_association_missing_group(Config)->
+    Assoc = pgr_assoc_missing_group(Config),
+    Result = oc_chef_policy_group_revision_association:insert_association(Assoc),
+    ?assertEqual({ok,1}, Result),
+    % clean up so we don't have to worry about violating unique constraints in
+    % other insert tests:
+    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc),
+    ?assertEqual({ok, 1}, DeleteResult),
+    DeleteGroupResult = chef_test_suite_helper:delete_record(Assoc#oc_chef_policy_group_revision_association.policy_group),
+    ?assertEqual({ok, 1}, DeleteGroupResult).
+
+%% Note, there is a fk constraint on policy_revisions so you can't have a
+%% revision w/ no policy
+verify_insert_policy_group_association_missing_policy_and_rev(Config) ->
+    Assoc = pgr_assoc_missing_rev_and_policy(Config),
+    Result = oc_chef_policy_group_revision_association:insert_association(Assoc),
+    ?assertEqual({ok,1}, Result),
+    % clean up so we don't have to worry about violating unique constraints in
+    % other insert tests:
+    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc),
+    ?assertEqual({ok, 1}, DeleteResult),
+    DeleteRevResult = chef_test_suite_helper:delete_record(Assoc#oc_chef_policy_group_revision_association.policy_revision),
+    ?assertEqual({ok, 1}, DeleteRevResult),
+    DeletePolicyResult = chef_test_suite_helper:delete_record(Assoc#oc_chef_policy_group_revision_association.policy),
+    ?assertEqual({ok, 1}, DeletePolicyResult).
+
+verify_insert_policy_group_association_missing_policy_and_rev_and_group(Config) ->
+    Assoc = pgr_assoc_missing_rev_and_policy_and_group(Config),
+    Result = oc_chef_policy_group_revision_association:insert_association(Assoc),
+    ?assertEqual({ok,1}, Result),
+    % clean up so we don't have to worry about violating unique constraints in
+    % other insert tests:
+    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc),
+    ?assertEqual({ok, 1}, DeleteResult),
+    DeleteRevResult = chef_test_suite_helper:delete_record(Assoc#oc_chef_policy_group_revision_association.policy_revision),
+    ?assertEqual({ok, 1}, DeleteRevResult),
+    DeletePolicyResult = chef_test_suite_helper:delete_record(Assoc#oc_chef_policy_group_revision_association.policy),
+    ?assertEqual({ok, 1}, DeletePolicyResult),
+    DeleteGroupResult = chef_test_suite_helper:delete_record(Assoc#oc_chef_policy_group_revision_association.policy_group),
+    ?assertEqual({ok, 1}, DeleteGroupResult).
+
 fetch_policy_via_group_association(Config) ->
-    Assoc = make_policy_group_association(Config),
+    Assoc = pgr_assoc_has_all_deps(Config),
     {ok, Returned} = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(Assoc),
 
     % not all fields are returned by the join query so pick them out to compare:
@@ -249,6 +365,11 @@ fetch_policy_via_group_association(Config) ->
                 ExpectedPolicyRevisionName, ExpectedPolicyGroupName, ExpectedObject},
 
     ?assertEqual(Expected, Actual).
+
+cleanup_associations(Config) ->
+    Assoc = pgr_assoc_has_all_deps(Config),
+    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc),
+    ?assertEqual({ok, 1}, DeleteResult).
 
 insert_policy_revision_data(Config) ->
     Revisions = policy_revisions_in_policy1(Config) ++

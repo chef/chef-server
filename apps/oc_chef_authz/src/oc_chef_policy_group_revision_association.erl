@@ -24,10 +24,13 @@
 
 -export([find_policy_revision_by_orgid_name_group_name/1,
          insert_association/1,
+         delete_association/1,
 
+         id/1,
          fields_for_fetch/1,
          find_query/0,
          create_query/0,
+         delete_query/0,
          record_fields/0,
          flatten/1,
          is_indexed/0,
@@ -46,10 +49,63 @@ find_policy_revision_by_orgid_name_group_name(Record) ->
         Any -> Any
     end.
 
-insert_association(Record) ->
+insert_association(#oc_chef_policy_group_revision_association{} = Record) ->
+    ok = ensure_policy_exists(Record),
+    ok = ensure_policy_group_exists(Record),
+    ok = ensure_policy_revision_exists(Record),
     Query = chef_object:create_query(Record),
     FlattenedRecord = chef_object:flatten(Record),
     chef_sql:create_object(Query, FlattenedRecord).
+
+delete_association(#oc_chef_policy_group_revision_association{} = Assoc) ->
+    Query = chef_object:delete_query(Assoc),
+    Id = chef_object:id(Assoc),
+    chef_sql:delete_object(Query, Id).
+
+ensure_policy_exists(#oc_chef_policy_group_revision_association{policy = Policy}) ->
+    QueryResult = fetch_associated_object(Policy),
+    case QueryResult of
+      {ok, #oc_chef_policy{}} -> ok;
+      {ok, not_found} ->
+        create_associated_object(Policy),
+        ok;
+      Bad -> {error, Bad}
+    end.
+
+ensure_policy_group_exists(#oc_chef_policy_group_revision_association{policy_group = PolicyGroup}) ->
+    QueryResult = fetch_associated_object(PolicyGroup),
+    case QueryResult of
+      {ok, #oc_chef_policy_group{}} -> ok;
+      {ok, not_found} ->
+        create_associated_object(PolicyGroup),
+        ok;
+      Bad -> {error, Bad}
+    end.
+
+ensure_policy_revision_exists(#oc_chef_policy_group_revision_association{policy_revision = PolicyRevision}) ->
+    QueryResult = fetch_associated_object(PolicyRevision),
+    case QueryResult of
+      {ok, #oc_chef_policy_revision{}} -> ok;
+      {ok, not_found} ->
+        create_associated_object(PolicyRevision),
+        ok;
+      Bad -> {error, Bad}
+    end.
+
+create_associated_object(QueryRecord) ->
+    Query = chef_object:create_query(QueryRecord),
+    FlattenedRecord = chef_object:flatten(QueryRecord),
+    {ok, 1} = chef_sql:create_object(Query, FlattenedRecord).
+
+fetch_associated_object(QueryRecord) ->
+    chef_sql:fetch_object(chef_object:fields_for_fetch(QueryRecord),
+                          element(1, QueryRecord),
+                          chef_object:find_query(QueryRecord),
+                          chef_object:record_fields(QueryRecord)
+                         ).
+
+id(#oc_chef_policy_group_revision_association{id = ID}) ->
+    ID.
 
 fields_for_fetch(#oc_chef_policy_group_revision_association{
                   org_id = OrgID,
@@ -62,6 +118,9 @@ find_query() ->
 
 create_query() ->
     insert_policy_group_policy_revision_association.
+
+delete_query() ->
+    delete_policy_group_policy_revision_association_by_id.
 
 record_fields() ->
     record_info(fields, oc_chef_policy_group_revision_association).

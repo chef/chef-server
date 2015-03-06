@@ -58,6 +58,7 @@
           }).
 
 -record(oc_chef_policy_group_revision_association, {
+          % Database fields
           id,
           org_id,
           policy_revision_revision_id,
@@ -66,7 +67,13 @@
           last_updated_by,
 
           % "virtual", populated by JOIN, belongs to policy_revision
-          serialized_object
+          serialized_object,
+
+          % records that represent the objects we're joining in this table. We
+          % need them so we can do on-demand creates
+          policy,
+          policy_revision,
+          policy_group
          }).
 
 -record(oc_chef_cookbook_artifact_version, {
