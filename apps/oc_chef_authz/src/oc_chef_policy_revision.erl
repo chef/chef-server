@@ -203,10 +203,6 @@ parse_binary_json(Bin) ->
             throw(Bad)
     end.
 
-%% TODO: this ignores revision_id so it's wrong
-%      <<"INSERT INTO policy_revisions (id, org_id, revision_id, name,"
-%        " serialized_object, last_updated_by) VALUES"
-%        " ($1, $2, $3, $4, $5, $6)">>},
 flatten(#oc_chef_policy_revision{
                 id = Id,
                 org_id = OrgId,

@@ -189,6 +189,17 @@ statements(pgsql) ->
         " WHERE (name = $1 AND org_id = $2 AND revision_id = $3)">>},
      {delete_policy_revision_by_id, <<"DELETE FROM policy_revisions WHERE id= $1">>},
 
+     {insert_policy_group_policy_revision_association,
+      <<"INSERT INTO policy_revisions_policy_groups_association (id, org_id, policy_revision_revision_id, policy_revision_name,"
+        " policy_group_name, last_updated_by) VALUES"
+        " ($1, $2, $3, $4, $5, $6)">>},
+
+     {find_policy_by_group_asoc_and_name,
+      <<"SELECT g.id, g.org_id, g.policy_group_name, g.policy_revision_revision_id, g.policy_revision_name, r.serialized_object
+           FROM policy_revisions_policy_groups_association AS g
+      LEFT JOIN policy_revisions AS r ON (g.policy_revision_revision_id = r.revision_id)
+          WHERE (g.org_id = $1 AND g.policy_group_name = $2 AND r.name = $3 )">>},
+
      {find_client_name_in_authz_ids,
       <<"SELECT name, authz_id FROM clients WHERE authz_id = ANY($1)">>},
      {find_client_authz_id_in_names,

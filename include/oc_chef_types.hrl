@@ -57,6 +57,18 @@
           last_updated_by
           }).
 
+-record(oc_chef_policy_group_revision_association, {
+          id,
+          org_id,
+          policy_revision_revision_id,
+          policy_revision_name,
+          policy_group_name,
+          last_updated_by,
+
+          % "virtual", populated by JOIN, belongs to policy_revision
+          serialized_object
+         }).
+
 -record(oc_chef_cookbook_artifact_version, {
           id,
           identifier,
