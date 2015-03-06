@@ -129,8 +129,8 @@ to_json(Req, #base_state{ chef_db_context = DbContext,
 from_json(Req, #base_state{resource_state = #key_state{key_data = EJ, parent_id = ActorId}} = State) ->
     oc_chef_wm_base:create_from_json(Req, State, chef_key, {authz_id, undefined}, {ActorId, EJ}).
 
-malformed_request_message(Any, Req, State) ->
-    chef_wm_malformed:malformed_request_message(Any, Req, State).
+malformed_request_message(Any, _Req, _State) ->
+    error({unexpected_malformed_request_message, Any}).
 
 conflict_message(Name) ->
     % if we had Req, we could do better than 'actor'...

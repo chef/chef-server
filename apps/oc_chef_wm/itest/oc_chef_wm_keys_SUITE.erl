@@ -85,6 +85,7 @@ all() ->
      post_new_key_invalid_date,
      post_new_key_invalid_utc_date,
      post_new_key_invalid_digits_date,
+     post_new_key_well_formed_invalid_date,
      post_key_with_infinity_date,
      post_key_with_invalid_key_name,
      post_key_with_invalid_public_key,
@@ -257,6 +258,16 @@ post_new_key_invalid_digits_date(Config) ->
     ExpectedMessage = ?BAD_DATE_MESSAGE(<<"expiration_date">>),
     ?assertMatch(ExpectedMessage, ParsedMessage).
 
+post_new_key_well_formed_invalid_date(Config) ->
+    Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2010-01-35T00:00:00Z">>)),
+    Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
+    ?assertMatch({ok, "400", _, _}, Result),
+
+    {_, _, _, UnparsedMessage} = Result,
+    [ParsedMessage] = ej:get({<<"error">>},chef_json:decode(UnparsedMessage)),
+    ExpectedMessage = ?BAD_DATE_MESSAGE(<<"expiration_date">>),
+    ?assertMatch(ExpectedMessage, ParsedMessage).
+
 post_key_with_infinity_date(Config) ->
     Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"infinity">>)),
     Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
@@ -304,6 +315,7 @@ post_multiple_valid_client_keys(Config) ->
 %% Test case initializers
 init_per_testcase(TestCase, Config) when TestCase =:= post_new_key_invalid_date;
                                          TestCase =:= post_new_key_invalid_digits_date;
+                                         TestCase =:= post_new_key_well_formed_invalid_date;
                                          TestCase =:= post_new_key_invalid_utc_date ->
     make_admin_non_admin_and_client(Config);
 init_per_testcase(TestCase, Config) when TestCase =:= post_client_new_valid_key;

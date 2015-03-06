@@ -517,7 +517,7 @@ validate_and_sanitize_date_field(EJ, FieldBinary) ->
         throw:{ej_invalid,string_match,FieldBinary,_,_,_,_} ->
             throw({bad_date, FieldBinary});
         throw:{ec_date, {bad_date, _}} ->
-            throw(bad_date)
+            throw({bad_date, FieldBinary})
     end.
 
 parse_expiration(Expiration) when Expiration =:= undefined;
