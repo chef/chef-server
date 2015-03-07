@@ -193,13 +193,9 @@ policy_group_revision_association_ops(Config) ->
     verify_insert_policy_group_association_missing_policy_and_rev_and_group(Config),
     insert_policy_group_policy_revision_association(Config),
     fetch_policy_via_group_association(Config),
-    % insert policy with association (neither thing exists)
-    % insert policy with association (group exists)
-    % insert policy with association (policy exists)
-    % fetch those back
-    % update existing association, creating policy rev
-    % update existing association, policy rev exists
-    cleanup_associations(Config).
+    update_policy_group_policy_revision_association(Config),
+    update_policy_group_policy_revision_association_create_revision(Config),
+    ok.
 
 pgr_assoc_has_all_deps(Config) ->
     Prefix = <<"111">>,
@@ -208,6 +204,14 @@ pgr_assoc_has_all_deps(Config) ->
     Group = hd(primary_org_policy_group_fixtures(Config)),
     Revision = hd(policy_revisions_in_policy1(Config)),
     make_policy_group_association(Config, Prefix, Policy, Group, Revision).
+
+updated_pgr_assoc_has_all_deps(Config) ->
+    BaseAssoc = pgr_assoc_has_all_deps(Config),
+    NewRevision = lists:last(policy_revisions_in_policy1(Config)),
+    #oc_chef_policy_revision{revision_id = RevisionId} = NewRevision,
+    BaseAssoc#oc_chef_policy_group_revision_association{
+        policy_revision = NewRevision,
+        policy_revision_revision_id = RevisionId}.
 
 pgr_assoc_missing_rev(Config) ->
     OrgId = proplists:get_value(org_id, Config),
@@ -218,6 +222,15 @@ pgr_assoc_missing_rev(Config) ->
     Group = hd(primary_org_policy_group_fixtures(Config)),
     Revision = make_policy_revision(<<"90">>, <<"1">>, OrgId),
     make_policy_group_association(Config, Prefix, Policy, Group, Revision).
+
+updated_pgr_assoc_new_policy_rev(Config) ->
+    OrgId = proplists:get_value(org_id, Config),
+    BaseAssoc = pgr_assoc_has_all_deps(Config),
+    NewRevision = make_policy_revision(<<"91">>, <<"1">>, OrgId),
+    #oc_chef_policy_revision{revision_id = RevisionId} = NewRevision,
+    BaseAssoc#oc_chef_policy_group_revision_association{
+        policy_revision = NewRevision,
+        policy_revision_revision_id = RevisionId}.
 
 pgr_assoc_missing_rev_and_policy(Config) ->
     OrgId = proplists:get_value(org_id, Config),
@@ -340,16 +353,46 @@ fetch_policy_via_group_association(Config) ->
     Assoc = pgr_assoc_has_all_deps(Config),
     {ok, Returned} = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(Assoc),
 
-    % not all fields are returned by the join query so pick them out to compare:
+    #oc_chef_policy_revision{serialized_object = ExpectedObject} = hd(policy_revisions_in_policy1(Config)),
+    assert_pgr_associations_match(Assoc, ExpectedObject, Returned).
+
+update_policy_group_policy_revision_association(Config) ->
+    Assoc = updated_pgr_assoc_has_all_deps(Config),
+
+    Result = oc_chef_policy_group_revision_association:update_association(Assoc),
+    ?assertEqual({ok,1}, Result),
+
+    {ok, Returned} = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(Assoc),
+    #oc_chef_policy_revision{serialized_object = ExpectedObject} = hd(policy_revisions_in_policy1(Config)),
+    assert_pgr_associations_match(Assoc, ExpectedObject, Returned).
+
+update_policy_group_policy_revision_association_create_revision(Config) ->
+    Assoc = updated_pgr_assoc_new_policy_rev(Config),
+
+    Result = oc_chef_policy_group_revision_association:update_association(Assoc),
+    ?assertEqual({ok,1}, Result),
+
+    {ok, Returned} = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(Assoc),
+    #oc_chef_policy_revision{serialized_object = ExpectedObject} = hd(policy_revisions_in_policy1(Config)),
+    assert_pgr_associations_match(Assoc, ExpectedObject, Returned),
+    % clean up so we don't have to worry about violating unique constraints in
+    % other insert tests:
+    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc),
+    ?assertEqual({ok, 1}, DeleteResult),
+    DeleteRevResult = chef_test_suite_helper:delete_record(Assoc#oc_chef_policy_group_revision_association.policy_revision),
+    ?assertEqual({ok, 1}, DeleteRevResult).
+
+% not all fields are returned by the join query so pick them out to compare:
+assert_pgr_associations_match(Expected, _ExpectedObject, Actual) ->
     #oc_chef_policy_group_revision_association{
         id = ActualId,
         org_id = ActualOrgId,
         policy_revision_revision_id = ActualPolicyRevisionRevisionId,
         policy_revision_name = ActualPolicyRevisionName,
         policy_group_name = ActualPolicyGroupName,
-        serialized_object = ActualObject} = Returned,
+        serialized_object = ActualObject} = Actual,
 
-    Actual = {ActualId, ActualOrgId, ActualPolicyRevisionRevisionId,
+    ActualFields = {ActualId, ActualOrgId, ActualPolicyRevisionRevisionId,
               ActualPolicyRevisionName, ActualPolicyGroupName, ActualObject},
 
     #oc_chef_policy_group_revision_association{
@@ -357,19 +400,15 @@ fetch_policy_via_group_association(Config) ->
         org_id = ExpectedOrgId,
         policy_revision_revision_id = ExpectedPolicyRevisionRevisionId,
         policy_revision_name = ExpectedPolicyRevisionName,
-        policy_group_name = ExpectedPolicyGroupName} = Assoc,
+        policy_group_name = ExpectedPolicyGroupName,
+        policy_revision = ExpectedPolicyRevision} = Expected,
+    #oc_chef_policy_revision{serialized_object = ExpectedObject} = ExpectedPolicyRevision,
 
-    #oc_chef_policy_revision{serialized_object = ExpectedObject} = hd(policy_revisions_in_policy1(Config)),
 
-    Expected = {ExpectedId, ExpectedOrgId, ExpectedPolicyRevisionRevisionId,
+    ExpectedFields = {ExpectedId, ExpectedOrgId, ExpectedPolicyRevisionRevisionId,
                 ExpectedPolicyRevisionName, ExpectedPolicyGroupName, ExpectedObject},
 
-    ?assertEqual(Expected, Actual).
-
-cleanup_associations(Config) ->
-    Assoc = pgr_assoc_has_all_deps(Config),
-    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc),
-    ?assertEqual({ok, 1}, DeleteResult).
+    ?assertEqual(ExpectedFields, ActualFields).
 
 insert_policy_revision_data(Config) ->
     Revisions = policy_revisions_in_policy1(Config) ++

@@ -24,12 +24,15 @@
 
 -export([find_policy_revision_by_orgid_name_group_name/1,
          insert_association/1,
+         update_association/1,
          delete_association/1,
 
          id/1,
          fields_for_fetch/1,
+         fields_for_update/1,
          find_query/0,
          create_query/0,
+         update_query/0,
          delete_query/0,
          record_fields/0,
          flatten/1,
@@ -56,6 +59,13 @@ insert_association(#oc_chef_policy_group_revision_association{} = Record) ->
     Query = chef_object:create_query(Record),
     FlattenedRecord = chef_object:flatten(Record),
     chef_sql:create_object(Query, FlattenedRecord).
+
+update_association(#oc_chef_policy_group_revision_association{} = Record) ->
+    % if the association exists, then the policy and policy_group must exist.
+    % The policy_revision might be new.
+    ok = ensure_policy_revision_exists(Record),
+    chef_sql:do_update(chef_object:update_query(Record), chef_object:fields_for_update(Record)).
+
 
 delete_association(#oc_chef_policy_group_revision_association{} = Assoc) ->
     Query = chef_object:delete_query(Assoc),
@@ -113,11 +123,20 @@ fields_for_fetch(#oc_chef_policy_group_revision_association{
                   policy_revision_name = PolicyRevisionName}) ->
     [OrgID, PolicyGroupName, PolicyRevisionName].
 
+fields_for_update(#oc_chef_policy_group_revision_association{
+        id = ID,
+        policy_revision_revision_id = PolicyRevisionRevisionId,
+        last_updated_by = LastUpdatedBy}) ->
+    [PolicyRevisionRevisionId, LastUpdatedBy, ID].
+
 find_query() ->
     find_policy_by_group_asoc_and_name.
 
 create_query() ->
     insert_policy_group_policy_revision_association.
+
+update_query() ->
+    update_policy_group_policy_revision_association.
 
 delete_query() ->
     delete_policy_group_policy_revision_association_by_id.
