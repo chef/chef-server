@@ -2,8 +2,14 @@
 
 ## 12.0.6 (undetermined)
 
-### oc-chef-pedant 2.0.0
+### oc-chef-pedant 2.0.1
+* Adds tests for keys named get
 * Integrates chef-pedant into oc-chef-pedant.
+
+### oc\_erchef 1.6.1
+* Integrates schema into oc\_erchef itself
+* Adds policyfile validation support
+* License and readme updates
 
 ## 12.0.5 (2014-02-26)
 
@@ -17,6 +23,9 @@
 * New keys API tests
 * New cookbook artifact API tests
 
+### oc\_erchef 1.5.0
+* Keys API POST support: /organizations/$ORG/clients/$CLIENT/keys and
+  /users/$USER/keys
 ### oc\_erchef 1.5.0
 * Keys API POST support: /organizations/$ORG/clients/$CLIENT/keys and
   /users/$USER/keys
