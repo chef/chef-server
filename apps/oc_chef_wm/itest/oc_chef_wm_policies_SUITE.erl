@@ -163,7 +163,7 @@ http_fetch_policy(Name) ->
 
 http_create_policy(Name, Json) ->
     UrlEncodedName = ibrowse_lib:url_encode(Name),
-    http_request(post, "/group_name/" ++ UrlEncodedName, ejson:encode(Json)).
+    http_request(put, "/group_name/" ++ UrlEncodedName, ejson:encode(Json)).
 
 http_create_policy(Name) ->
     http_create_policy(Name, canonical_example_policy_json(Name)).

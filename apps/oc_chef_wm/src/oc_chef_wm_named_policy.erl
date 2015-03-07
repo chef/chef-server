@@ -113,6 +113,15 @@ validate_request(_Method, Req, State) ->
 %%%%             erlang:throw({mismatch, {<<"name">>, NameFromJson, NameFromReq}})
 %%%%     end.
 
+% TODO: this is a callback from oc_chef_wm_base:forbidden/2. Reading the code
+% there, we see that it does not check more than one container or object at a
+% time. Creating a policy revision (via this endpoint) requires create in two
+% containers, policy_groups and policies (if those don't exist), or update on
+% two objects, the policy_group and policy. Note that one object might exist
+% and the other not, so, for example, you could need CREATE on the groups
+% container and UPDATE on a policy object if the policy exists but the group
+% doesn't. Likewise, for read, you need read on those two objects.
+%
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            resource_state = PolicyState = #policy_state{},
                            organization_guid = OrgId} =State) ->
@@ -123,11 +132,20 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
         _DeleteOrGet ->
             policy_permissions(false, OrgId, PolicyName, DbContext, Req, State, PolicyState)
     end.
+
+%% TODO: figure out if we should prefer 403 to 404 to prevent leakage of
+%% object names. If not, we can return 404 more efficiently for GET if any of
+%% the policy or policy_group or group-revision association don't exist.
 policy_permissions(CanCreate, _OrgId, PolicyName, DbContext, Req,
                 #base_state{} = State, PolicyState = #policy_state{
                                                         oc_chef_policy = InputPolicy
                                                        }) ->
+    %% This should be #oc_chef_policy_group_revision_association
     PolicyWithName = InputPolicy#oc_chef_policy{name = PolicyName},
+    %% TODO: access the set of objects that this request pertains to via
+    %% oc_chef_policy_group_revision_association. That module needs to be
+    %% have a function which returns all the authz info we need for the
+    %% request.
     case {chef_db:fetch(PolicyWithName, DbContext), CanCreate} of
         {not_found, true} ->
             {{create_in_container, policies}, Req,
@@ -149,6 +167,8 @@ policy_permissions(CanCreate, _OrgId, PolicyName, DbContext, Req,
             {{object, AuthzId}, Req, State1}
     end.
 
+%% TODO: If we always do this because we determine 404 in the forbidden/2 callback,
+%% why is it not a mixin?
 resource_exists(Req, State) ->
     {true, Req, State}.
 
@@ -157,6 +177,8 @@ to_json(Req, #base_state{
                 resource_state = #policy_state{
                                     oc_chef_policy = Policy
                                    }} = State) ->
+    % TODO: return document is actually a policy_revision need to implement any
+    % required JSON munging in that module.
     Ejson = oc_chef_policy:assemble_policy_ejson(Policy, OrgName),
 
     {jiffy:encode(Ejson), Req, State}.
