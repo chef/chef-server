@@ -20,6 +20,7 @@
 
 -module(chef_wm_malformed).
 
+-include("../../include/chef_regex.hrl").
 -include("../../include/oc_chef_wm.hrl").
 
 -export([
@@ -47,6 +48,8 @@ malformed_request_message(bad_clock, Req, State) ->
     Msg = iolist_to_binary([<<"Failed to authenticate as ">>, User,
                             <<". Synchronize the clock on your host.">>]),
     {[{<<"error">>, [Msg]}]};
+malformed_request_message({bad_date, Field}, _Req, _State) ->
+    {[{<<"error">>, [?BAD_DATE_MESSAGE(Field)]}]};
 malformed_request_message(bad_sign_desc, _Req, _State) ->
     Msg = <<"Unsupported authentication protocol version">>,
     {[{<<"error">>, [Msg]}]};

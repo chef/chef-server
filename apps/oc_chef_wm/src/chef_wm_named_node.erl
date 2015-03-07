@@ -1,4 +1,4 @@
-%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 80 -*-
 %% ex: ts=4 sw=4 et
 %% @author Seth Falcon <seth@chef.io>
 %% @author Mark Mzyk <mmzyk@chef.io>

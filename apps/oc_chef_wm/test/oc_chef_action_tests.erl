@@ -18,6 +18,7 @@
 -module(oc_chef_action_tests).
 
 -include("../../include/oc_chef_wm.hrl").
+-include_lib("eunit/include/eunit.hrl").
 
 msg(Task) ->
     {[{<<"message_type">>, <<"action">>},

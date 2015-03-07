@@ -47,6 +47,9 @@
 %% See http://wiki.opscode.com/display/chef/Version+Constraints
 -define(VERSION_REGEX, "[[:digit:]]+(\\.[[:digit:]]+){1,2}").
 
+%% Standard ISO8601 UTC format
+-define(DATE_REGEX, "^([[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}T[[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2}Z|infinity)$").
+
 %% A version is always optional for recipes
 -define(RECIPE_VERSION_REGEX, "(?:@" ++ ?VERSION_REGEX ++ ")?").
 
@@ -114,7 +117,9 @@ regex_for(client_name) ->
     % This might be the same as nodename -- nodename seems to allow ':' as well
     generate_regex_msg_tuple(?ANCHOR_REGEX(?NAME_REGEX),
                              <<"Malformed client name.  Must be A-Z, a-z, 0-9, _, -, or .">>);
-
+regex_for(date) ->
+    generate_regex_msg_tuple(?DATE_REGEX,
+                             <<"Malformed date. Must be a valid ISO8601 date atom ending in Z.">>);
 regex_for(data_bag_name) ->
     generate_regex_msg_tuple(?ANCHOR_REGEX(?ALTERNATIVE_NAME_REGEX),
                              <<"Malformed data bag name.  Must only contain A-Z, a-z, 0-9, _, :, ., or -">>);
