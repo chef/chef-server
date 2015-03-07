@@ -290,7 +290,10 @@
           policy_data,
           policy_authz_id,
           create_policy = false,
-          oc_chef_policy :: #oc_chef_policy{}
+          oc_chef_policy :: #oc_chef_policy{},
+          oc_chef_policy_group :: #oc_chef_policy_group{},
+          oc_chef_policy_revision :: #oc_chef_policy_revision{},
+          oc_chef_policy_group_revision_association :: #oc_chef_policy_group_revision_association{}
          }).
 
 -record(acl_state, {
