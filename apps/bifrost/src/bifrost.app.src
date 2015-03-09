@@ -11,6 +11,11 @@
                   lager,
                   sasl,
                   stats_hero,
+                  eper,
+                  ej,
+                  jiffy,
+                  mixer,
+                  envy,
                   sqerl,
-                  webmachine
+                  opscoderl_wm
                  ]}]}.

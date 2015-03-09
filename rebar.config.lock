@@ -1,17 +1,16 @@
 %% THIS FILE IS GENERATED. DO NOT EDIT IT MANUALLY %%
 
 {sub_dirs,["rel","apps/bifrost"]}.
-{erl_opts,[{debug_info}]}.
-{deps,[{meck,".*",{git,"git://github.com/eproxus/meck.git",{branch,"master"}}},
-       {goldrush,".*",
+{erl_opts,[warnings_as_errors,{parse_transform,lager_transform},debug_info]}.
+{deps,[{goldrush,".*",
                  {git,"git://github.com/DeadZen/goldrush.git",
-                      "879c69874a555b2c13498aa4a3da6f6bbbb6a031"}},
+                      "71e63212f12c25827e0c1b4198d37d5d018a7fec"}},
        {lager,".*",
               {git,"https://github.com/basho/lager.git",
-                   "169cffd94759e99e2e8870b125861a91e3c1482a"}},
+                   "d33ccf3b69de09a628fe38b4d7981bb8671b8a4f"}},
        {eper,".*",
              {git,"git://github.com/massemanet/eper.git",
-                  "5d4c3e9c91bd96b67a92cbdac4601c43340e1d88"}},
+                  "80e7cd6446d26d2423f2acd37253826bb3152964"}},
        {jiffy,".*",
               {git,"git://github.com/davisp/jiffy.git",
                    "3b6a1327d418f7594ecb23aa8d7874c3986f433e"}},
@@ -19,11 +18,11 @@
            {git,"git://github.com/seth/ej.git",
                 "c683084665e1220616e611639fb13797b91281c6"}},
        {mixer,".*",
-              {git,"git://github.com/opscode/mixer.git",
+              {git,"git://github.com/chef/mixer.git",
                    "58ded93d5c47675899d8e5e1589270f340ea66c5"}},
        {epgsql,".*",
                {git,"git://github.com/chef/epgsql-1.git",
-                    "04a2103d618e1cf988f2331f5f7716b0c0790a73"}},
+                    "14f35271b49dc634142cb1157985521215b0b311"}},
        {pooler,".*",
                {git,"git://github.com/seth/pooler.git",
                     "7bb8ab83c6f60475e6ef8867d3d5afa0b1dd4013"}},
@@ -31,13 +30,16 @@
              {git,"git://github.com/manderson26/envy.git",
                   "d62cb227b9000ee866c8bcc724ddf68d87621dea"}},
        {sqerl,".*",
-              {git,"git://github.com/opscode/sqerl.git",
+              {git,"git://github.com/chef/sqerl.git",
                    "cd8f9588699f872dfdf80f6316c9ef8286ad501b"}},
+       {meck,".*",
+             {git,"git://github.com/eproxus/meck.git",
+                  "98cdc40fe6ae7780491ed8d0db691dd15625e9b2"}},
        {edown,".*",
               {git,"git://github.com/seth/edown.git",
                    "30a9f7867d615af45783235faa52742d11a9348e"}},
        {stats_hero,".*",
-                   {git,"git://github.com/opscode/stats_hero.git",
+                   {git,"git://github.com/chef/stats_hero.git",
                         "12cbd38e9d4405628e498cf37992da15930ba1aa"}},
        {mochiweb,".*",
                  {git,"git://github.com/basho/mochiweb.git",
@@ -46,12 +48,13 @@
                    {git,"git://github.com/basho/webmachine",
                         "7677c240f4a7ed020f4bab48278224966bb42311"}},
        {opscoderl_wm,".*",
-                     {git,"git://github.com/opscode/opscoderl_wm.git",
-                          "5336f57fbeca42248d45da4caa18e575e2441206"}},
+                     {git,"git://github.com/chef/opscoderl_wm.git",
+                          "64db62e070da58cf7bb0caebde7a3f11c2e3cbbb"}},
        {rebar_lock_deps_plugin,".*",
                                {git,"git://github.com/seth/rebar_lock_deps_plugin.git",
-                                    "2a8d2e803f8a110cac2f13e6f013b4d8e4b06c60"}}]}.
+                                    "7a5835029c42b8138325405237ea7e8516a84800"}}]}.
+{use_lock_deps,true}.
+{use_edown,true}.
 {eunit_opts,[verbose,{report,{eunit_surefire,[{dir,"."}]}}]}.
 {cover_enabled,true}.
-{plugins,[rebar_lock_deps_plugin]}.
 

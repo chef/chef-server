@@ -17,3 +17,8 @@ deps
 .eunit
 ebin
 erl_crash.dump
+.rebar
+.concrete
+relx
+_rel
+deps.plt
