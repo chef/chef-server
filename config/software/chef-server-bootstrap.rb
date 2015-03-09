@@ -17,7 +17,7 @@
 #
 
 name "chef-server-bootstrap"
-default_version "1.0.0"
+default_version "1.0.1"
 
 source git: "git@github.com:opscode/chef-server-bootstrap"
 

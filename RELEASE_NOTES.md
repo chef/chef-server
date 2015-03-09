@@ -5,6 +5,9 @@
 The following items are new since Chef Server 12.0.4 and/or are changes from previous versions.
 For specific breakdown of updated components, refer to CHANGELOG.md
 
+### opscode-omnibus
+* Use a cert instead of a public key for the superuser.
+* No longer generate /etc/opscode/pivotal.cert as it is no longer used. Now the public key for the superuser lives in the database and no longer exists on disk.
 * oc\_erchef
   * Key API Updates - GET, PUT and DELETE  of named keys now supported
   * Policyfile validation support. (See API Changes, below.)
