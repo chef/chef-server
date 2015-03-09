@@ -22,8 +22,8 @@ BEGIN
   RETURN QUERY SELECT col_is_unique('policy_revisions_policy_groups_association', ARRAY['org_id', 'policy_revision_name', 'policy_group_name']);
 
   RETURN QUERY SELECT fk_ok('policy_revisions_policy_groups_association', 'org_id', 'orgs', 'id');
-  RETURN QUERY SELECT fk_ok('policy_revisions_policy_groups_association', ARRAY['org_id', 'policy_group_name'],
-             'policy_groups', ARRAY['org_id', 'name']);
+  RETURN QUERY SELECT fk_ok('policy_revisions_policy_groups_association', ARRAY['org_id', 'policy_group_authz_id', 'policy_group_name'],
+             'policy_groups', ARRAY['org_id', 'authz_id', 'name']);
 
   RETURN QUERY SELECT fk_ok('policy_revisions_policy_groups_association', ARRAY['org_id', 'policy_revision_name', 'policy_revision_revision_id'],
              'policy_revisions', ARRAY['org_id', 'name', 'revision_id']);

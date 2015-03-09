@@ -16,8 +16,8 @@ BEGIN
   RETURN QUERY SELECT col_is_unique('policy_revisions', ARRAY['org_id', 'name', 'revision_id']);
 
   RETURN QUERY SELECT fk_ok('policy_revisions', 'org_id', 'orgs', 'id');
-  RETURN QUERY SELECT fk_ok('policy_revisions', ARRAY['org_id', 'name'],
-             'policies', ARRAY['org_id', 'name']);
+  RETURN QUERY SELECT fk_ok('policy_revisions', ARRAY['org_id', 'policy_authz_id', 'name'],
+             'policies', ARRAY['org_id', 'authz_id', 'name']);
 
 END;
 $$

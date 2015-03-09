@@ -155,8 +155,9 @@ flatten(#oc_chef_policy_group_revision_association{
         policy_revision_name = PolicyName,
         policy_revision_revision_id = RevisionId,
         policy_group_name = GroupName,
+        policy_group_authz_id = PolicyGroupAuthzID,
         last_updated_by = LastUpdatedBy}) ->
-    [Id, OrgId, RevisionId, PolicyName, GroupName, LastUpdatedBy].
+    [Id, OrgId, RevisionId, PolicyName, GroupName, PolicyGroupAuthzID, LastUpdatedBy].
 
 is_indexed() ->
     false.

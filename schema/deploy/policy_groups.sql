@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS policy_groups(
   last_updated_by CHAR(32) NOT NULL,
   serialized_object bytea,
   CONSTRAINT policy_groups_org_id_name_unique UNIQUE(org_id, name),
+  CONSTRAINT policy_groups_org_id_authz_id_name_unique UNIQUE(org_id, authz_id, name),
   CONSTRAINT policies_org_id_fkey
     FOREIGN KEY (org_id)
     REFERENCES orgs(id)

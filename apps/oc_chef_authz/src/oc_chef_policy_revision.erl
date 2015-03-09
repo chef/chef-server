@@ -208,10 +208,11 @@ flatten(#oc_chef_policy_revision{
                 org_id = OrgId,
                 revision_id = RevisionId,
                 name = Name,
+                policy_authz_id = PolicyAuthzID,
                 last_updated_by = LastUpdatedBy,
                 serialized_object = SerializedObject}) ->
 	Compressed = chef_db_compression:compress(oc_chef_policy_revision, jiffy:encode(SerializedObject)),
-    [Id, OrgId, RevisionId, Name, Compressed, LastUpdatedBy].
+    [Id, OrgId, RevisionId, Name, PolicyAuthzID, Compressed, LastUpdatedBy].
 
 
 decompress_record(#oc_chef_policy_revision{

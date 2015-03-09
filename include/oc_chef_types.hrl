@@ -52,6 +52,7 @@
           id,
           org_id,
           name,
+          policy_authz_id,
           revision_id,
           serialized_object,
           last_updated_by
@@ -61,6 +62,8 @@
           % Database fields
           id,
           org_id,
+
+          policy_group_authz_id,
           policy_revision_revision_id,
           policy_revision_name,
           policy_group_name,

@@ -12,5 +12,6 @@ BEGIN
   RETURN QUERY SELECT fk_ok('policy_groups', 'org_id', 'orgs', 'id');
   RETURN QUERY SELECT chef_pgtap.col_is_uuid('policy_groups', 'last_updated_by');
   RETURN QUERY SELECT chef_pgtap.has_index('policy_groups', 'policy_groups_org_id_name_unique', ARRAY['org_id', 'name']);
+  RETURN QUERY SELECT chef_pgtap.has_index('policy_groups', 'policy_groups_org_id_authz_id_name_unique', ARRAY['org_id', 'authz_id', 'name']);
 END;
 $$

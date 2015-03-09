@@ -176,23 +176,23 @@ statements(pgsql) ->
      {delete_policy_group_by_id, <<"DELETE FROM policy_groups WHERE id= $1">>},
 
      {insert_policy_revision,
-      <<"INSERT INTO policy_revisions (id, org_id, revision_id, name,"
+      <<"INSERT INTO policy_revisions (id, org_id, revision_id, name, policy_authz_id,"
         " serialized_object, last_updated_by) VALUES"
-        " ($1, $2, $3, $4, $5, $6)">>},
+        " ($1, $2, $3, $4, $5, $6, $7)">>},
      {list_policy_revisions_by_orgid_name,
       <<"SELECT revision_id"
         " FROM policy_revisions"
         " WHERE (name = $1 AND org_id = $2)">>},
      {find_policy_revision_by_orgid_name_revision_id,
-      <<"SELECT id, org_id, revision_id, name, serialized_object, last_updated_by"
+      <<"SELECT id, org_id, revision_id, name, policy_authz_id, serialized_object, last_updated_by"
         " FROM policy_revisions"
         " WHERE (name = $1 AND org_id = $2 AND revision_id = $3)">>},
      {delete_policy_revision_by_id, <<"DELETE FROM policy_revisions WHERE id= $1">>},
 
      {insert_policy_group_policy_revision_association,
       <<"INSERT INTO policy_revisions_policy_groups_association (id, org_id, policy_revision_revision_id, policy_revision_name,"
-        " policy_group_name, last_updated_by) VALUES"
-        " ($1, $2, $3, $4, $5, $6)">>},
+        " policy_group_name, policy_group_authz_id, last_updated_by) VALUES"
+        " ($1, $2, $3, $4, $5, $6, $7)">>},
      {update_policy_group_policy_revision_association,
       <<"UPDATE policy_revisions_policy_groups_association SET policy_revision_revision_id = $1, last_updated_by = $2
          WHERE id = $3">>},
@@ -200,7 +200,7 @@ statements(pgsql) ->
       <<"DELETE FROM policy_revisions_policy_groups_association WHERE id = $1">>},
 
      {find_policy_by_group_asoc_and_name,
-      <<"SELECT g.id, g.org_id, g.policy_group_name, g.policy_revision_revision_id, g.policy_revision_name, r.serialized_object
+      <<"SELECT g.id, g.org_id, g.policy_group_name, g.policy_group_authz_id, g.policy_revision_revision_id, g.policy_revision_name, r.serialized_object
            FROM policy_revisions_policy_groups_association AS g
       LEFT JOIN policy_revisions AS r ON (g.policy_revision_revision_id = r.revision_id)
           WHERE (g.org_id = $1 AND g.policy_group_name = $2 AND r.name = $3 )">>},

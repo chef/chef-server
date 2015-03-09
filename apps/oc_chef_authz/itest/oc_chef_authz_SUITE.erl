@@ -186,6 +186,7 @@ policy_revision_ops(Config) ->
     delete_policies(Config).
 
 policy_group_revision_association_ops(Config) ->
+    fetch_policy_via_group_association_not_existing(Config),
     verify_insert_policy_group_association(Config),
     verify_insert_policy_group_association_missing_rev(Config),
     verify_insert_policy_group_association_missing_group(Config),
@@ -196,6 +197,13 @@ policy_group_revision_association_ops(Config) ->
     update_policy_group_policy_revision_association(Config),
     update_policy_group_policy_revision_association_create_revision(Config),
     ok.
+
+pgr_assoc_doesnt_exist(Config) ->
+    Prefix = <<"000">>,
+    Policy = hd(primary_org_policy_fixtures(Config)),
+    Group = hd(primary_org_policy_group_fixtures(Config)),
+    Revision = hd(policy_revisions_in_policy1(Config)),
+    make_policy_group_association(Config, Prefix, Policy, Group, Revision).
 
 pgr_assoc_has_all_deps(Config) ->
     Prefix = <<"111">>,
@@ -263,7 +271,7 @@ pgr_assoc_missing_rev_and_policy_and_group(Config) ->
     make_policy_group_association(Config, Prefix, Policy, Group, Revision).
 
 
-make_policy_group_association(Config, Prefix, Policy, Group, Revision) ->
+make_policy_group_association(Config, Prefix, Policy, #oc_chef_policy_group{authz_id = GroupAzID} = Group, Revision) ->
     Id = chef_test_suite_helper:make_id(Prefix),
     OrgId = proplists:get_value(org_id, Config),
     #oc_chef_policy_revision{name = PolicyName, revision_id = RevisionId} = Revision,
@@ -276,6 +284,7 @@ make_policy_group_association(Config, Prefix, Policy, Group, Revision) ->
                 policy_revision_name = PolicyName,
                 policy_revision_revision_id = RevisionId,
                 policy_group_name = GroupName,
+                policy_group_authz_id = GroupAzID,
                 last_updated_by = chef_test_suite_helper:actor_id(),
 
                 policy = Policy,
@@ -356,6 +365,11 @@ fetch_policy_via_group_association(Config) ->
     #oc_chef_policy_revision{serialized_object = ExpectedObject} = hd(policy_revisions_in_policy1(Config)),
     assert_pgr_associations_match(Assoc, ExpectedObject, Returned).
 
+fetch_policy_via_group_association_not_existing(Config) ->
+    Assoc = pgr_assoc_doesnt_exist(Config),
+    {ok, Returned} = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(Assoc),
+    ?assertEqual(not_found, Returned).
+
 update_policy_group_policy_revision_association(Config) ->
     Assoc = updated_pgr_assoc_has_all_deps(Config),
 
@@ -390,10 +404,11 @@ assert_pgr_associations_match(Expected, _ExpectedObject, Actual) ->
         policy_revision_revision_id = ActualPolicyRevisionRevisionId,
         policy_revision_name = ActualPolicyRevisionName,
         policy_group_name = ActualPolicyGroupName,
+        policy_group_authz_id = ActualPolicyGroupAuthzID,
         serialized_object = ActualObject} = Actual,
 
     ActualFields = {ActualId, ActualOrgId, ActualPolicyRevisionRevisionId,
-              ActualPolicyRevisionName, ActualPolicyGroupName, ActualObject},
+                    ActualPolicyRevisionName, ActualPolicyGroupName, ActualPolicyGroupAuthzID, ActualObject},
 
     #oc_chef_policy_group_revision_association{
         id = ExpectedId,
@@ -401,12 +416,13 @@ assert_pgr_associations_match(Expected, _ExpectedObject, Actual) ->
         policy_revision_revision_id = ExpectedPolicyRevisionRevisionId,
         policy_revision_name = ExpectedPolicyRevisionName,
         policy_group_name = ExpectedPolicyGroupName,
+        policy_group_authz_id = ExpectedPolicyGroupAuthzID,
         policy_revision = ExpectedPolicyRevision} = Expected,
     #oc_chef_policy_revision{serialized_object = ExpectedObject} = ExpectedPolicyRevision,
 
 
     ExpectedFields = {ExpectedId, ExpectedOrgId, ExpectedPolicyRevisionRevisionId,
-                ExpectedPolicyRevisionName, ExpectedPolicyGroupName, ExpectedObject},
+                ExpectedPolicyRevisionName, ExpectedPolicyGroupName, ExpectedPolicyGroupAuthzID, ExpectedObject},
 
     ?assertEqual(ExpectedFields, ActualFields).
 
@@ -466,11 +482,13 @@ policy_revisions_in_policy4(Config) ->
 
 make_policy_revision(Prefix, PolicyPrefix, OrgId) ->
     Id = chef_test_suite_helper:make_id(Prefix),
+    PolicyAzId = chef_test_suite_helper:make_az_id(PolicyPrefix),
     PolicyName = <<"policy", PolicyPrefix/binary>>,
     RevisionId = <<"policy_revision_id", Prefix/binary>>,
     SerializedObject = <<"policy_revision_serialized_object_", Prefix/binary>>,
     #oc_chef_policy_revision{id = Id, org_id = OrgId, name = PolicyName,
-                          revision_id = RevisionId,
-                          last_updated_by = chef_test_suite_helper:actor_id(),
-                          serialized_object = SerializedObject}.
+                             policy_authz_id = PolicyAzId,
+                             revision_id = RevisionId,
+                             last_updated_by = chef_test_suite_helper:actor_id(),
+                             serialized_object = SerializedObject}.
 
