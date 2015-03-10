@@ -1,3 +1,6 @@
+%% -*- mode: erlang -*-
+%% -*- tab-width: 4;erlang-indent-level: 4;indent-tabs-mode: nil -*-
+%% ex: ts=4 sw=4 ft=erlang et
 {application, oc_erchef,
  [
   {description, ""},
@@ -5,7 +8,42 @@
   {registered, []},
   {applications, [
                   kernel,
-                  stdlib
+                  stdlib,
+                  chef_db,
+                  chef_index,
+                  chef_objects,
+                  depsolver,
+                  oc_chef_authz,
+                  oc_chef_wm
+
+                  %% TODO: The following deps should be pulled in by the above
+                  %% apps, but they aren't. Isn't that sad? We should fix it!
+                  ,
+                  bear,
+                  chef_authn,
+                  %% edoc,
+                  ej,
+                  envy,
+                  eper,
+                  erlware_commons,
+                  et,
+                  %% eunit,
+                  folsom_graphite,
+                  gs,
+                  %% hipe,
+                  jiffy,
+                  mini_s3,
+                  %% mnesia,
+                  oauth,
+                  observer,
+                  opscoderl_folsom,
+                  opscoderl_httpc,
+                  quickrand,
+                  runtime_tools,
+                  tools,
+                  uuid,
+                  webtool,
+                  wx
                  ]},
   {mod, { oc_erchef_app, []}},
   {env, []}
