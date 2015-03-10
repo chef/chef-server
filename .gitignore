@@ -11,3 +11,5 @@ bookshelf.plt
 _rel
 .rebar
 relx
+deps.plt
+erl_crash.dump

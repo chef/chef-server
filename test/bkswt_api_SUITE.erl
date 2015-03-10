@@ -29,6 +29,28 @@
 
 -define(STR_CHARS, "abcdefghijklmnopqrstuvwxyz").
 
+start_bookshelf() ->
+    %% For common test, we don't want to stop sasl or else we end up not getting
+    %% complete logs in the test reports. So we ensure sasl is started, but omit
+    %% it from the ?APPS list so that we don't start/stop on each test.
+    application:start(sasl),
+
+    %% we start lager since we depend on it for the release. However,
+    %% we want to keep error_logger on its own so that we continue to
+    %% see messages in common test output.
+    lager_common_test_backend:bounce(debug),
+
+    case application:ensure_all_started(bookshelf) of
+        {ok, Apps} ->
+            ct:pal("Apps Started: ~p", [Apps]),
+            {ok, Apps};
+        {error, Es} ->
+            erlang:error({application_start_failed, Es})
+    end.
+
+stop_bookshelf(Config) ->
+    [application:stop(A)|| A <- ?config(apps, Config)].
+
 %%====================================================================
 %% TEST SERVER CALLBACK FUNCTIONS
 %%====================================================================
@@ -73,7 +95,7 @@ init_per_testcase(upgrade_from_v0, Config) ->
     application:set_env(bookshelf, keys, {AccessKeyID, SecretAccessKey}),
     application:set_env(bookshelf, log_dir, LogDir),
     application:set_env(bookshelf, stream_download, true),
-    ok = bksw_app:manual_start(),
+    {ok, Apps} = start_bookshelf(),
     %% force webmachine to pickup new dispatch_list. I don't understand why it
     %% isn't enough to do application:stop/start for webmachine, but it isn't.
     bksw_conf:reset_dispatch(),
@@ -86,7 +108,7 @@ init_per_testcase(upgrade_from_v0, Config) ->
                           lists:flatten(io_lib:format("http://127.0.0.1:~p",
                                                       [Port])),
                           path),
-    [{s3_conf, S3State}, {disk_store, DiskStore} | Config];
+    [{s3_conf, S3State}, {disk_store, DiskStore}, {apps, lists:reverse(Apps)} | Config];
 init_per_testcase(_TestCase, Config) ->
     %% This fixes another rebar brokenness. We cant specify any options to
     %% common test in rebar
@@ -106,7 +128,7 @@ init_per_testcase(_TestCase, Config) ->
     application:set_env(bookshelf, keys, {AccessKeyID, SecretAccessKey}),
     application:set_env(bookshelf, log_dir, LogDir),
     application:set_env(bookshelf, stream_download, true),
-    ok = bksw_app:manual_start(),
+    {ok, Apps} = start_bookshelf(),
     %% force webmachine to pickup new dispatch_list. I don't understand why it
     %% isn't enough to do application:stop/start for webmachine, but it isn't.
     bksw_conf:reset_dispatch(),
@@ -119,10 +141,10 @@ init_per_testcase(_TestCase, Config) ->
                           lists:flatten(io_lib:format("http://127.0.0.1:~p",
                                                       [Port])),
                           path),
-    [{s3_conf, S3State}, {disk_store, DiskStore} | Config].
+    [{s3_conf, S3State}, {disk_store, DiskStore}, {apps, lists:reverse(Apps)} | Config].
 
-end_per_testcase(_TestCase, _Config) ->
-    bksw_app:manual_stop(),
+end_per_testcase(_TestCase, Config) ->
+    stop_bookshelf(Config),
     ok.
 
 all(doc) ->

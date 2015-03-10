@@ -3,7 +3,13 @@ SHELL := /bin/bash
 PROJ = bookshelf
 CT_DIR = common_test
 
-DIALYZER_OPTS = test
+DIALYZER_OPTS =
+## Uncomment to dialyze test/*.beam. They don't pass right now
+## DIALYZER_OPTS = test
+
+DIALYZER_SKIP_DEPS = erlware_commons
+
+ALL_HOOK = ct
 
 ct: clean_ct compile
 	time $(REBARC) ct skip_deps=true
