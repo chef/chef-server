@@ -70,6 +70,7 @@
           last_updated_by,
 
           % "virtual", populated by JOIN, belongs to policy_revision
+          policy_authz_id,
           serialized_object,
 
           % records that represent the objects we're joining in this table. We

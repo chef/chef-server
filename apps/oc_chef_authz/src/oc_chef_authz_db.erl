@@ -200,7 +200,7 @@ statements(pgsql) ->
       <<"DELETE FROM policy_revisions_policy_groups_association WHERE id = $1">>},
 
      {find_policy_by_group_asoc_and_name,
-      <<"SELECT g.id, g.org_id, g.policy_group_name, g.policy_group_authz_id, g.policy_revision_revision_id, g.policy_revision_name, r.serialized_object
+      <<"SELECT g.id, g.org_id, g.policy_group_name, g.policy_group_authz_id, g.policy_revision_revision_id, g.policy_revision_name, r.policy_authz_id, r.serialized_object
            FROM policy_revisions_policy_groups_association AS g
       LEFT JOIN policy_revisions AS r ON (g.policy_revision_revision_id = r.revision_id)
           WHERE (g.org_id = $1 AND g.policy_group_name = $2 AND r.name = $3 )">>},

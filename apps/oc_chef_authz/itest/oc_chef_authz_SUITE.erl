@@ -271,7 +271,9 @@ pgr_assoc_missing_rev_and_policy_and_group(Config) ->
     make_policy_group_association(Config, Prefix, Policy, Group, Revision).
 
 
-make_policy_group_association(Config, Prefix, Policy, #oc_chef_policy_group{authz_id = GroupAzID} = Group, Revision) ->
+make_policy_group_association(Config, Prefix, Policy,
+                              #oc_chef_policy_group{authz_id = GroupAzID} = Group,
+                              #oc_chef_policy_revision{policy_authz_id = PolicyAuthzID} = Revision) ->
     Id = chef_test_suite_helper:make_id(Prefix),
     OrgId = proplists:get_value(org_id, Config),
     #oc_chef_policy_revision{name = PolicyName, revision_id = RevisionId} = Revision,
@@ -283,6 +285,7 @@ make_policy_group_association(Config, Prefix, Policy, #oc_chef_policy_group{auth
                 org_id = OrgId,
                 policy_revision_name = PolicyName,
                 policy_revision_revision_id = RevisionId,
+                policy_authz_id = PolicyAuthzID,
                 policy_group_name = GroupName,
                 policy_group_authz_id = GroupAzID,
                 last_updated_by = chef_test_suite_helper:actor_id(),
@@ -421,18 +424,21 @@ assert_pgr_associations_match(Expected, _ExpectedObject, Actual) ->
         org_id = ActualOrgId,
         policy_revision_revision_id = ActualPolicyRevisionRevisionId,
         policy_revision_name = ActualPolicyRevisionName,
+        policy_authz_id = ActualPolicyAuthzID,
         policy_group_name = ActualPolicyGroupName,
         policy_group_authz_id = ActualPolicyGroupAuthzID,
         serialized_object = ActualObject} = Actual,
 
     ActualFields = {ActualId, ActualOrgId, ActualPolicyRevisionRevisionId,
-                    ActualPolicyRevisionName, ActualPolicyGroupName, ActualPolicyGroupAuthzID, ActualObject},
+                    ActualPolicyRevisionName, ActualPolicyAuthzID, ActualPolicyGroupName,
+                    ActualPolicyGroupAuthzID, ActualObject},
 
     #oc_chef_policy_group_revision_association{
         id = ExpectedId,
         org_id = ExpectedOrgId,
         policy_revision_revision_id = ExpectedPolicyRevisionRevisionId,
         policy_revision_name = ExpectedPolicyRevisionName,
+        policy_authz_id = ExpectedPolicyAuthzID,
         policy_group_name = ExpectedPolicyGroupName,
         policy_group_authz_id = ExpectedPolicyGroupAuthzID,
         policy_revision = ExpectedPolicyRevision} = Expected,
@@ -440,7 +446,8 @@ assert_pgr_associations_match(Expected, _ExpectedObject, Actual) ->
 
 
     ExpectedFields = {ExpectedId, ExpectedOrgId, ExpectedPolicyRevisionRevisionId,
-                ExpectedPolicyRevisionName, ExpectedPolicyGroupName, ExpectedPolicyGroupAuthzID, ExpectedObject},
+                      ExpectedPolicyRevisionName, ExpectedPolicyAuthzID, ExpectedPolicyGroupName,
+                      ExpectedPolicyGroupAuthzID, ExpectedObject},
 
     ?assertEqual(ExpectedFields, ActualFields).
 
