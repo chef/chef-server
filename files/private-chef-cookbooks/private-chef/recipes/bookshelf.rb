@@ -17,7 +17,7 @@ template cookbook_migration do
 end
 
 #
-# We need to create all of these directories up front 
+# We need to create all of these directories up front
 # Note that data_path will not be a subdir of bookshelf_dir in HA configurations
 #
 bookshelf_dir = node['private_chef']['bookshelf']['dir']
@@ -49,16 +49,7 @@ link "/opt/opscode/embedded/service/bookshelf/log" do
   to bookshelf_log_dir
 end
 
-template "/opt/opscode/embedded/service/bookshelf/bin/bookshelf" do
-  source "bookshelf.erb"
-  owner OmnibusHelper.new(node).ownership['owner']
-  group OmnibusHelper.new(node).ownership['group']
-  mode "0755"
-  variables(node['private_chef']['bookshelf'].to_hash)
-  notifies :restart, 'runit_service[bookshelf]' if is_data_master?
-end
-
-bookshelf_config = File.join(bookshelf_etc_dir, "app.config")
+bookshelf_config = File.join(bookshelf_dir, "sys.config")
 
 template bookshelf_config do
   source "bookshelf.config.erb"
@@ -69,7 +60,7 @@ template bookshelf_config do
   notifies :restart, 'runit_service[bookshelf]' if is_data_master?
 end
 
-link "/opt/opscode/embedded/service/bookshelf/etc/app.config" do
+link "/opt/opscode/embedded/service/bookshelf/sys.config" do
   to bookshelf_config
 end
 

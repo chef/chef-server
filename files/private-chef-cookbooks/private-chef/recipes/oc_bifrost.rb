@@ -47,16 +47,7 @@ link "/opt/opscode/embedded/service/oc_bifrost/log" do
   to oc_bifrost_log_dir
 end
 
-template "/opt/opscode/embedded/service/oc_bifrost/bin/oc_bifrost" do
-  source "oc_bifrost.erb"
-  owner "root"
-  group "root"
-  mode "0755"
-  variables(node['private_chef']['oc_bifrost'].to_hash)
-  notifies :restart, 'runit_service[oc_bifrost]' unless backend_secondary?
-end
-
-oc_bifrost_config = File.join(oc_bifrost_etc_dir, "sys.config")
+oc_bifrost_config = File.join(oc_bifrost_dir, "sys.config")
 
 template oc_bifrost_config do
   source "oc_bifrost.config.erb"
@@ -67,7 +58,7 @@ template oc_bifrost_config do
   notifies :restart, 'runit_service[oc_bifrost]' unless backend_secondary?
 end
 
-link "/opt/opscode/embedded/service/oc_bifrost/etc/sys.config" do
+link "/opt/opscode/embedded/service/oc_bifrost/sys.config" do
   to oc_bifrost_config
 end
 

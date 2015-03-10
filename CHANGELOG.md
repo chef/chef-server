@@ -2,6 +2,18 @@
 
 ## 12.0.6 (undetermined)
 
+### bookshelf 1.1.7
+* Uses relx for Erlang application releases
+* Upgraded to lager 2.1.1
+
+### oc\_bifrost 1.4.6
+* Uses relx for Erlang application releases
+* Upgraded to lager 2.1.1
+
+### oc\_erchef 1.6.2
+* Uses relx for Erlang application releases
+* Upgraded to lager 2.1.1
+
 ### oc-chef-pedant 2.0.1
 * Adds tests for keys named get
 * Integrates chef-pedant into oc-chef-pedant.

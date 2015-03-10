@@ -15,7 +15,7 @@
 #
 
 name "oc_bifrost"
-default_version "1.4.5"
+default_version "1.4.6"
 
 source git: "git@github.com:opscode/oc_bifrost"
 
@@ -29,7 +29,7 @@ build do
   make "distclean", env: env
   make "rel", env: env
 
-  sync "#{project_dir}/rel/oc_bifrost/", "#{install_dir}/embedded/service/oc_bifrost/"
+  sync "#{project_dir}/_rel/oc_bifrost/", "#{install_dir}/embedded/service/oc_bifrost/"
   sync "#{project_dir}/schema", "#{install_dir}/embedded/service/oc_bifrost/db/"
   delete "#{install_dir}/embedded/service/oc_bifrost/log"
 end

@@ -16,7 +16,7 @@
 
 name "oc_erchef"
 
-default_version "1.6.1"
+default_version "1.6.2"
 
 source git: "git@github.com:opscode/oc_erchef"
 
@@ -36,8 +36,10 @@ build do
   env['USE_SYSTEM_GECODE'] = "1"
 
   make "distclean", env: env
+  make "compile", env: env
+  make "bundle", env: env
   make "rel", env: env
 
-  sync "#{project_dir}/rel/oc_erchef/", "#{install_dir}/embedded/service/opscode-erchef/", exclude: ['**/.git', '**/.gitignore']
+  sync "#{project_dir}/_rel/oc_erchef/", "#{install_dir}/embedded/service/opscode-erchef/", exclude: ['**/.git', '**/.gitignore']
   delete "#{install_dir}/embedded/service/opscode-erchef/log"
 end
