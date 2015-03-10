@@ -166,7 +166,7 @@ filter_permitted_results(ReqId, RequestorId, OrgId, DbContext, {data_bag, BagNam
     case chef_db:fetch(#chef_data_bag{org_id = OrgId, name = BagName}, DbContext) of
         not_found -> [];
         #chef_data_bag{authz_id = AuthzId} ->
-            case ?SH_TIME(oc_chef_authz, is_authorized_on_resource, (RequestorId, object, AuthzId, actor, RequestorId, read)) of
+            case ?SH_TIME(ReqId, oc_chef_authz, is_authorized_on_resource, (RequestorId, object, AuthzId, actor, RequestorId, read)) of
                 false -> [];
                 true -> Ids;
                 Error ->
@@ -185,8 +185,8 @@ filter_permitted_results(ReqId, RequestorId, _OrgId, DbContext, IndexType, Ids) 
     case ?SH_TIME(ReqId, oc_chef_authz, bulk_actor_is_authorized, (ReqId, RequestorId, Type, AuthzIds, read)) of
         true ->
             Ids;
-        {false, NoAuthzList} ->
-            [ Id || Id <- Ids, not lists:member(Id, NoAuthzList)];
+        {false, {_NoAuthzList, AuthzList}} ->
+            AuthzList;
         {error, Why} ->
             lager:error("failed to check permissions due to ~p on ~p~n", [Why, AuthzIds])
     end.

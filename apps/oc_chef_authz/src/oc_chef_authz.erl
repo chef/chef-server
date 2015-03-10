@@ -264,13 +264,15 @@ set_acl(RequestorId, AuthzType, ObjectId, [{Method, ACE}|Rest]) when AuthzType =
                                ActorId,
                                ResourceType,
                                Resources,
-                               Permission) -> true | {false, [ResourceData]} |
+                               Permission) -> true | {false, {Denied, Permitted}} |
                                               {error, _} when
       ReqId :: binary(),
       ActorId :: actor_id(),
       ResourceType :: resource_type(),
       Resources :: [{oc_authz_id(), ResourceData}],
       ResourceData :: any(),
+      Denied :: [any()],
+      Permitted :: [any()],
       Permission :: access_method().
 bulk_actor_is_authorized(ReqId, ActorId, ResourceType, Resources, Permission) ->
     Url = <<"bulk">>,
@@ -308,7 +310,7 @@ make_bulk_request_body(RequestorId, Permission, ResourceType, AuthzIds) ->
 
 get_data_for_id(Ids, Resources) ->
     %% Sorting the lists lets us do the extraction in a single pass through the list.
-    get_data_for_id(lists:sort(Ids), lists:sort(Resources), []).
+    get_data_for_id(lists:sort(Ids), lists:sort(Resources), [], []).
 
 %% Two cases that might be suggested by symmetry should cause a bad match, because they would only happen if
 %% we got an id that wasn't found on the resource list
@@ -318,15 +320,15 @@ get_data_for_id(Ids, Resources) ->
 %%   get_data_for_id(Ids, OResources, Acc);
 
 %% We've found all the ids.
-get_data_for_id([], _, Acc) ->
-    Acc;
+get_data_for_id([], _, Denied, Permitted) ->
+    {Denied, Permitted};
 %% We found a match for the id
-get_data_for_id([Id | Ids], [{Id, RData} | Resources], Acc) ->
-    get_data_for_id(Ids, Resources, [RData | Acc]);
+get_data_for_id([Id | Ids], [{Id, RData} | Resources], Denied, Permitted) ->
+    get_data_for_id(Ids, Resources, [RData | Denied], Permitted);
 %% If the current id on the id list sorts later than the one on the resource list, then skip
 %% to next entry on resource list
-get_data_for_id([Id | _Ids] = OIds , [{RId, _RData} | Resources], Acc ) when Id > RId ->
-    get_data_for_id(OIds, Resources, Acc).
+get_data_for_id([Id | _Ids] = OIds , [{RId, RData} | Resources], Denied, Permitted ) when Id > RId ->
+    get_data_for_id(OIds, Resources, Denied, [RData | Permitted]).
 
 %
 % Test if an actor is authorized
