@@ -60,6 +60,7 @@
          update/2
         ]).
 
+
 -define(VALIDATION_CONSTRAINTS,
         {[{<<"revision_id">>, {string_match, chef_regex:regex_for(policy_file_revision_id)}},
 

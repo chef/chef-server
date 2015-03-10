@@ -25,6 +25,8 @@
 -include_lib("eunit/include/eunit.hrl").
 
 -export([
+         context/0,
+
          set_env/2,
          random_bogus_port/0,
          stop_server/2,

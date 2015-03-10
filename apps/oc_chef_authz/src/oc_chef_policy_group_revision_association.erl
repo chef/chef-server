@@ -22,12 +22,18 @@
 
 -include("../../include/oc_chef_types.hrl").
 
--export([find_policy_revision_by_orgid_name_group_name/1,
-         insert_association/1,
-         update_association/1,
-         delete_association/1,
+-include_lib("mixer/include/mixer.hrl").
+-mixin([{chef_object,[{default_fetch/2, fetch},
+                      {default_update/2, update}]}]).
+
+-export([find_policy_revision_by_orgid_name_group_name/2,
+         insert_association/3,
+         update_association/3,
+         delete_association/2,
 
          id/1,
+         set_created/2,
+         set_updated/2,
          fields_for_fetch/1,
          fields_for_update/1,
          find_query/0,
@@ -39,83 +45,72 @@
          is_indexed/0,
          ejson_for_indexing/2]).
 
-find_policy_revision_by_orgid_name_group_name(Record) ->
-    case chef_sql:fetch_object(
-      chef_object:fields_for_fetch(Record),
-      element(1, Record),
-      chef_object:find_query(Record),
-      chef_object:record_fields(Record)
-      ) of
-        {ok, #oc_chef_policy_group_revision_association{} = Assoc} ->
-          Decompressed = decompress_record(Assoc),
-          {ok, Decompressed};
+find_policy_revision_by_orgid_name_group_name(Record, DBContext) ->
+    case chef_db:fetch(Record, DBContext) of
+        #oc_chef_policy_group_revision_association{} = Assoc ->
+          decompress_record(Assoc);
         Any -> Any
     end.
 
-insert_association(#oc_chef_policy_group_revision_association{} = Record) ->
-    ok = ensure_policy_exists(Record),
-    ok = ensure_policy_group_exists(Record),
-    ok = ensure_policy_revision_exists(Record),
-    Query = chef_object:create_query(Record),
-    FlattenedRecord = chef_object:flatten(Record),
-    chef_sql:create_object(Query, FlattenedRecord).
+insert_association(#oc_chef_policy_group_revision_association{} = Record, DBContext, ActorID) ->
+    ok = ensure_policy_exists(Record, DBContext, ActorID),
+    ok = ensure_policy_group_exists(Record, DBContext, ActorID),
+    ok = ensure_policy_revision_exists(Record, DBContext, ActorID),
+    chef_db:create(Record, DBContext, ActorID).
 
-update_association(#oc_chef_policy_group_revision_association{} = Record) ->
+update_association(#oc_chef_policy_group_revision_association{} = Record, DBContext, ActorID) ->
     % if the association exists, then the policy and policy_group must exist.
     % The policy_revision might be new.
-    ok = ensure_policy_revision_exists(Record),
-    chef_sql:do_update(chef_object:update_query(Record), chef_object:fields_for_update(Record)).
+    ok = ensure_policy_revision_exists(Record, DBContext, ActorID),
+    chef_db:update(Record, DBContext, ActorID).
 
+delete_association(#oc_chef_policy_group_revision_association{} = Assoc, DBContext) ->
+    chef_db:delete(Assoc, DBContext).
 
-delete_association(#oc_chef_policy_group_revision_association{} = Assoc) ->
-    Query = chef_object:delete_query(Assoc),
-    Id = chef_object:id(Assoc),
-    chef_sql:delete_object(Query, Id).
-
-ensure_policy_exists(#oc_chef_policy_group_revision_association{policy = Policy}) ->
-    QueryResult = fetch_associated_object(Policy),
+ensure_policy_exists(#oc_chef_policy_group_revision_association{policy = Policy}, DBContext, ActorID) ->
+    QueryResult = fetch_associated_object(Policy, DBContext),
     case QueryResult of
-      {ok, #oc_chef_policy{}} -> ok;
-      {ok, not_found} ->
-        create_associated_object(Policy),
+      #oc_chef_policy{} -> ok;
+      not_found ->
+        create_associated_object(Policy, DBContext, ActorID),
         ok;
       Bad -> {error, Bad}
     end.
 
-ensure_policy_group_exists(#oc_chef_policy_group_revision_association{policy_group = PolicyGroup}) ->
-    QueryResult = fetch_associated_object(PolicyGroup),
+ensure_policy_group_exists(#oc_chef_policy_group_revision_association{policy_group = PolicyGroup}, DBContext, ActorID) ->
+    QueryResult = fetch_associated_object(PolicyGroup, DBContext),
     case QueryResult of
-      {ok, #oc_chef_policy_group{}} -> ok;
-      {ok, not_found} ->
-        create_associated_object(PolicyGroup),
+      #oc_chef_policy_group{} -> ok;
+      not_found ->
+        create_associated_object(PolicyGroup, DBContext, ActorID),
         ok;
       Bad -> {error, Bad}
     end.
 
-ensure_policy_revision_exists(#oc_chef_policy_group_revision_association{policy_revision = PolicyRevision}) ->
-    QueryResult = fetch_associated_object(PolicyRevision),
+ensure_policy_revision_exists(#oc_chef_policy_group_revision_association{policy_revision = PolicyRevision}, DBContext, ActorID) ->
+    QueryResult = fetch_associated_object(PolicyRevision, DBContext),
     case QueryResult of
-      {ok, #oc_chef_policy_revision{}} -> ok;
-      {ok, not_found} ->
-        create_associated_object(PolicyRevision),
+      #oc_chef_policy_revision{} -> ok;
+      not_found ->
+        create_associated_object(PolicyRevision, DBContext, ActorID),
         ok;
       Bad -> {error, Bad}
     end.
 
-create_associated_object(QueryRecord) ->
-    Query = chef_object:create_query(QueryRecord),
-    FlattenedRecord = chef_object:flatten(QueryRecord),
-    {ok, 1} = chef_sql:create_object(Query, FlattenedRecord).
+create_associated_object(QueryRecord, DBContext, ActorID) ->
+    ok = chef_db:create(QueryRecord, DBContext, ActorID).
 
-fetch_associated_object(QueryRecord) ->
-    chef_sql:fetch_object(chef_object:fields_for_fetch(QueryRecord),
-                          element(1, QueryRecord),
-                          chef_object:find_query(QueryRecord),
-                          chef_object:record_fields(QueryRecord)
-                         ).
+fetch_associated_object(QueryRecord, DBContext) ->
+    chef_db:fetch(QueryRecord, DBContext).
 
 id(#oc_chef_policy_group_revision_association{id = ID}) ->
     ID.
+
+set_created(#oc_chef_policy_group_revision_association{} = Object, ActorId) ->
+    Object#oc_chef_policy_group_revision_association{last_updated_by = ActorId}.
+
+set_updated(#oc_chef_policy_group_revision_association{} = Object, ActorId) ->
+    Object#oc_chef_policy_group_revision_association{last_updated_by = ActorId}.
 
 fields_for_fetch(#oc_chef_policy_group_revision_association{
                   org_id = OrgID,
@@ -166,43 +161,3 @@ ejson_for_indexing(#oc_chef_policy_group_revision_association{}, _EjsonTerm) ->
    {[]}.
 
 
-%% Things this should implement:
-%% ## GET /policy_groups/:policy_group_name/policies/:policy_name
-%% ### SQL Stuff
-%% * find policy_revision by policy name and (join) policy group name
-%% ### Authz Stuff
-%% * read on policy group
-%% * read on policy
-%%
-%% ### Statement
-%% SELECT g.group_authz_id, rev.policy_authz_id, rev.serialized_object
-%%   FROM policy_revisions_policy_groups g"
-%% LEFT JOIN policy_revisions r ON (g.policy_revision_revision_id = r.revision_id)
-%%  WHERE (g.org_id = $1 AND g.name = $2 AND r.name = $3 )">>},
-%%
-%% ## PUT /policy_groups/:policy_group_name/policies/:policy_name
-%% ### SQL Stuff
-%% * create policy group if needed
-%% * create policy if needed
-%% * create policy_revision if needed
-%% * associate policy_revision to group
-%% ### Authz Stuff
-%% * create on policy group container or update on policy group
-%% * create on policies container or update on policy
-%%
-%% ## POST /policy_groups/:policy_group_name/policies/:policy_name
-%% ### SQL Stuff
-%% * create policy group if needed
-%% * policy must exist
-%% * policy revision must exist
-%% * associate policy_revision to groop
-%% ### Authz stuff
-%% * create on policy groups container or update on policy group
-%% * read on policy
-%%
-%% ## DELETE /policy_groups/:policy_group_name/policies/:policy_name
-%% ### SQL stuff
-%% * remove policy_revision to policy group association
-%% ### Authz Stuff
-%% * update on policy group
-%%

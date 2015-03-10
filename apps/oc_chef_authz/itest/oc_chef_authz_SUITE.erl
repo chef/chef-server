@@ -294,37 +294,45 @@ make_policy_group_association(Config, Prefix, Policy, #oc_chef_policy_group{auth
 
 insert_policy_group_policy_revision_association(Config) ->
     Assoc = pgr_assoc_has_all_deps(Config),
-    Result = oc_chef_policy_group_revision_association:insert_association(Assoc),
-    ?assertEqual({ok,1}, Result).
+    Context = chef_test_suite_helper:context(),
+    Actor = chef_test_suite_helper:actor_id(),
+    Result = oc_chef_policy_group_revision_association:insert_association(Assoc, Context, Actor),
+    ?assertEqual(ok, Result).
 
 verify_insert_policy_group_association(Config) ->
     Assoc = pgr_assoc_has_all_deps(Config),
-    Result = oc_chef_policy_group_revision_association:insert_association(Assoc),
-    ?assertEqual({ok,1}, Result),
+    Context = chef_test_suite_helper:context(),
+    Actor = chef_test_suite_helper:actor_id(),
+    Result = oc_chef_policy_group_revision_association:insert_association(Assoc, Context, Actor),
+    ?assertEqual(ok, Result),
     % clean up so we don't have to worry about violating unique constraints in
     % other insert tests:
-    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc),
-    ?assertEqual({ok, 1}, DeleteResult).
+    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc, Context),
+    ?assertEqual(1, DeleteResult).
 
 verify_insert_policy_group_association_missing_rev(Config) ->
     Assoc = pgr_assoc_missing_rev(Config),
-    Result = oc_chef_policy_group_revision_association:insert_association(Assoc),
-    ?assertEqual({ok,1}, Result),
+    Context = chef_test_suite_helper:context(),
+    Actor = chef_test_suite_helper:actor_id(),
+    Result = oc_chef_policy_group_revision_association:insert_association(Assoc, Context, Actor),
+    ?assertEqual(ok, Result),
     % clean up so we don't have to worry about violating unique constraints in
     % other insert tests:
-    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc),
-    ?assertEqual({ok, 1}, DeleteResult),
+    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc, Context),
+    ?assertEqual(1, DeleteResult),
     DeleteRevResult = chef_test_suite_helper:delete_record(Assoc#oc_chef_policy_group_revision_association.policy_revision),
     ?assertEqual({ok, 1}, DeleteRevResult).
 
 verify_insert_policy_group_association_missing_group(Config)->
     Assoc = pgr_assoc_missing_group(Config),
-    Result = oc_chef_policy_group_revision_association:insert_association(Assoc),
-    ?assertEqual({ok,1}, Result),
+    Context = chef_test_suite_helper:context(),
+    Actor = chef_test_suite_helper:actor_id(),
+    Result = oc_chef_policy_group_revision_association:insert_association(Assoc, Context, Actor),
+    ?assertEqual(ok, Result),
     % clean up so we don't have to worry about violating unique constraints in
     % other insert tests:
-    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc),
-    ?assertEqual({ok, 1}, DeleteResult),
+    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc, Context),
+    ?assertEqual(1, DeleteResult),
     DeleteGroupResult = chef_test_suite_helper:delete_record(Assoc#oc_chef_policy_group_revision_association.policy_group),
     ?assertEqual({ok, 1}, DeleteGroupResult).
 
@@ -332,12 +340,14 @@ verify_insert_policy_group_association_missing_group(Config)->
 %% revision w/ no policy
 verify_insert_policy_group_association_missing_policy_and_rev(Config) ->
     Assoc = pgr_assoc_missing_rev_and_policy(Config),
-    Result = oc_chef_policy_group_revision_association:insert_association(Assoc),
-    ?assertEqual({ok,1}, Result),
+    Context = chef_test_suite_helper:context(),
+    Actor = chef_test_suite_helper:actor_id(),
+    Result = oc_chef_policy_group_revision_association:insert_association(Assoc, Context, Actor),
+    ?assertEqual(ok, Result),
     % clean up so we don't have to worry about violating unique constraints in
     % other insert tests:
-    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc),
-    ?assertEqual({ok, 1}, DeleteResult),
+    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc, Context),
+    ?assertEqual(1, DeleteResult),
     DeleteRevResult = chef_test_suite_helper:delete_record(Assoc#oc_chef_policy_group_revision_association.policy_revision),
     ?assertEqual({ok, 1}, DeleteRevResult),
     DeletePolicyResult = chef_test_suite_helper:delete_record(Assoc#oc_chef_policy_group_revision_association.policy),
@@ -345,12 +355,14 @@ verify_insert_policy_group_association_missing_policy_and_rev(Config) ->
 
 verify_insert_policy_group_association_missing_policy_and_rev_and_group(Config) ->
     Assoc = pgr_assoc_missing_rev_and_policy_and_group(Config),
-    Result = oc_chef_policy_group_revision_association:insert_association(Assoc),
-    ?assertEqual({ok,1}, Result),
+    Context = chef_test_suite_helper:context(),
+    Actor = chef_test_suite_helper:actor_id(),
+    Result = oc_chef_policy_group_revision_association:insert_association(Assoc, Context, Actor),
+    ?assertEqual(ok, Result),
     % clean up so we don't have to worry about violating unique constraints in
     % other insert tests:
-    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc),
-    ?assertEqual({ok, 1}, DeleteResult),
+    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc, Context),
+    ?assertEqual(1, DeleteResult),
     DeleteRevResult = chef_test_suite_helper:delete_record(Assoc#oc_chef_policy_group_revision_association.policy_revision),
     ?assertEqual({ok, 1}, DeleteRevResult),
     DeletePolicyResult = chef_test_suite_helper:delete_record(Assoc#oc_chef_policy_group_revision_association.policy),
@@ -360,39 +372,45 @@ verify_insert_policy_group_association_missing_policy_and_rev_and_group(Config) 
 
 fetch_policy_via_group_association(Config) ->
     Assoc = pgr_assoc_has_all_deps(Config),
-    {ok, Returned} = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(Assoc),
+    Context = chef_test_suite_helper:context(),
+    Returned = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(Assoc, Context),
 
     #oc_chef_policy_revision{serialized_object = ExpectedObject} = hd(policy_revisions_in_policy1(Config)),
     assert_pgr_associations_match(Assoc, ExpectedObject, Returned).
 
 fetch_policy_via_group_association_not_existing(Config) ->
     Assoc = pgr_assoc_doesnt_exist(Config),
-    {ok, Returned} = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(Assoc),
+    Context = chef_test_suite_helper:context(),
+    Returned = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(Assoc, Context),
     ?assertEqual(not_found, Returned).
 
 update_policy_group_policy_revision_association(Config) ->
     Assoc = updated_pgr_assoc_has_all_deps(Config),
 
-    Result = oc_chef_policy_group_revision_association:update_association(Assoc),
-    ?assertEqual({ok,1}, Result),
+    Context = chef_test_suite_helper:context(),
+    Actor = chef_test_suite_helper:actor_id(),
+    Result = oc_chef_policy_group_revision_association:update_association(Assoc, Context, Actor),
+    ?assertEqual(ok, Result),
 
-    {ok, Returned} = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(Assoc),
+    Returned = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(Assoc, Context),
     #oc_chef_policy_revision{serialized_object = ExpectedObject} = hd(policy_revisions_in_policy1(Config)),
     assert_pgr_associations_match(Assoc, ExpectedObject, Returned).
 
 update_policy_group_policy_revision_association_create_revision(Config) ->
     Assoc = updated_pgr_assoc_new_policy_rev(Config),
 
-    Result = oc_chef_policy_group_revision_association:update_association(Assoc),
-    ?assertEqual({ok,1}, Result),
+    Context = chef_test_suite_helper:context(),
+    Actor = chef_test_suite_helper:actor_id(),
+    Result = oc_chef_policy_group_revision_association:update_association(Assoc, Context, Actor),
+    ?assertEqual(ok, Result),
 
-    {ok, Returned} = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(Assoc),
+    Returned = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(Assoc, Context),
     #oc_chef_policy_revision{serialized_object = ExpectedObject} = hd(policy_revisions_in_policy1(Config)),
     assert_pgr_associations_match(Assoc, ExpectedObject, Returned),
     % clean up so we don't have to worry about violating unique constraints in
     % other insert tests:
-    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc),
-    ?assertEqual({ok, 1}, DeleteResult),
+    DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc, Context),
+    ?assertEqual(1, DeleteResult),
     DeleteRevResult = chef_test_suite_helper:delete_record(Assoc#oc_chef_policy_group_revision_association.policy_revision),
     ?assertEqual({ok, 1}, DeleteRevResult).
 
