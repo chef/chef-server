@@ -4,10 +4,10 @@
 {erl_dep_retries,10}.
 {deps,[{goldrush,".*",
                  {git,"git://github.com/DeadZen/goldrush.git",
-                      "879c69874a555b2c13498aa4a3da6f6bbbb6a031"}},
+                      "71e63212f12c25827e0c1b4198d37d5d018a7fec"}},
        {lager,".*",
               {git,"git://github.com/basho/lager",
-                   "169cffd94759e99e2e8870b125861a91e3c1482a"}},
+                   "d33ccf3b69de09a628fe38b4d7981bb8671b8a4f"}},
        {mochiweb,".*",
                  {git,"git://github.com/basho/mochiweb.git",
                       "ade2a9b29a11034eb550c1d79b4f991bf5ca05ba"}},
@@ -16,7 +16,7 @@
                         "7677c240f4a7ed020f4bab48278224966bb42311"}},
        {opscoderl_wm,".*",
                      {git,"git://github.com/opscode/opscoderl_wm.git",
-                          "5336f57fbeca42248d45da4caa18e575e2441206"}},
+                          "64db62e070da58cf7bb0caebde7a3f11c2e3cbbb"}},
        {erlsom,".*",
                {git,"git://github.com/opscode/erlsom.git",
                     "c5ca9fca1257f563d78b048e35ac60832ec80584"}},
@@ -40,12 +40,17 @@
                      "1cf296868077caefa6791f4996145a369c49091b"}},
        {eper,".*",
              {git,"git://github.com/massemanet/eper.git",
-                  "5d4c3e9c91bd96b67a92cbdac4601c43340e1d88"}},
+                  "80e7cd6446d26d2423f2acd37253826bb3152964"}},
        {rebar_lock_deps_plugin,".*",
                                {git,"git://github.com/seth/rebar_lock_deps_plugin.git",
-                                    "2a8d2e803f8a110cac2f13e6f013b4d8e4b06c60"}}]}.
-{erl_opts,[debug_info,warnings_as_errors]}.
+                                    "7a5835029c42b8138325405237ea7e8516a84800"}},
+       {edown,".*",
+              {git,"git://github.com/seth/edown.git",
+                   "30a9f7867d615af45783235faa52742d11a9348e"}}]}.
+{erl_opts,[debug_info,{parse_transform,lager_transform},warnings_as_errors]}.
 {xref_checks,[exports_not_used,undefined_function_calls]}.
+{use_lock_deps,true}.
+{use_edown,true}.
 {plugins,[rebar_lock_deps_plugin]}.
 {cover_enabled,true}.
 

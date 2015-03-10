@@ -22,6 +22,20 @@
   {vsn, "1.1.6"},
   {mod, {bksw_app, []}},
   {registered, [bksw_sup]},
-  {applications , [kernel, stdlib, sasl, crypto,
-                   public_key, ssl, mochiweb, webmachine, erlsom,
-                   mini_s3, inets, lager]}]}.
+  {applications , [
+                    kernel,
+                    stdlib,
+                    sasl,
+                    crypto,
+                    public_key,
+                    ssl,
+                    mochiweb,
+                    webmachine,
+                    erlsom,
+                    mini_s3,
+                    inets,
+                    lager,
+                    opscoderl_wm,
+                    iso8601,
+                    eper
+                  ]}]}.
