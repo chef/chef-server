@@ -171,9 +171,13 @@ policy_revision_ops(Config) ->
 policy_group_revision_association_ops(Config) ->
     fetch_policy_via_group_association_not_existing(Config),
     verify_insert_policy_group_association(Config),
+    fetch_prereq_objects_when_all_exist(Config),
     verify_insert_policy_group_association_missing_rev(Config),
+    fetch_prereq_objects_when_missing_rev(Config),
     verify_insert_policy_group_association_missing_group(Config),
+    fetch_prereq_objects_when_missing_policy_and_rev(Config),
     verify_insert_policy_group_association_missing_policy_and_rev(Config),
+    fetch_prereq_objects_when_missing_policy_and_rev_and_group(Config),
     verify_insert_policy_group_association_missing_policy_and_rev_and_group(Config),
     insert_policy_group_policy_revision_association(Config),
     fetch_policy_via_group_association(Config),
@@ -296,6 +300,16 @@ verify_insert_policy_group_association(Config) ->
     DeleteResult = oc_chef_policy_group_revision_association:delete_association(Assoc, Context),
     ?assertEqual(1, DeleteResult).
 
+fetch_prereq_objects_when_all_exist(Config) ->
+    Assoc = pgr_assoc_has_all_deps(Config),
+    Context = chef_test_suite_helper:context(),
+    Result = oc_chef_policy_group_revision_association:fetch_prereq_objects(Assoc, Context),
+    #oc_chef_policy_group_revision_association{policy = ExpectedPolicy,
+                                               policy_group = ExpectedPolicyGroup,
+                                               policy_revision = ExpectedPolicyRevision} = Assoc,
+    Expected = [{policy, ExpectedPolicy}, {policy_group, ExpectedPolicyGroup}, {policy_revision, ExpectedPolicyRevision}],
+    ?assertEqual(Expected, Result).
+
 verify_insert_policy_group_association_missing_rev(Config) ->
     Assoc = pgr_assoc_missing_rev(Config),
     Context = chef_test_suite_helper:context(),
@@ -308,6 +322,16 @@ verify_insert_policy_group_association_missing_rev(Config) ->
     ?assertEqual(1, DeleteResult),
     DeleteRevResult = chef_test_suite_helper:delete_record(Assoc#oc_chef_policy_group_revision_association.policy_revision),
     ?assertEqual({ok, 1}, DeleteRevResult).
+
+fetch_prereq_objects_when_missing_rev(Config) ->
+    Assoc = pgr_assoc_missing_rev(Config),
+    Context = chef_test_suite_helper:context(),
+    Result = oc_chef_policy_group_revision_association:fetch_prereq_objects(Assoc, Context),
+    #oc_chef_policy_group_revision_association{policy = ExpectedPolicy,
+                                               policy_group = ExpectedPolicyGroup} = Assoc,
+    Expected = [{policy, ExpectedPolicy}, {policy_group, ExpectedPolicyGroup}, {policy_revision, not_found}],
+    ?assertEqual(Expected, Result).
+
 
 verify_insert_policy_group_association_missing_group(Config)->
     Assoc = pgr_assoc_missing_group(Config),
@@ -339,6 +363,15 @@ verify_insert_policy_group_association_missing_policy_and_rev(Config) ->
     DeletePolicyResult = chef_test_suite_helper:delete_record(Assoc#oc_chef_policy_group_revision_association.policy),
     ?assertEqual({ok, 1}, DeletePolicyResult).
 
+
+fetch_prereq_objects_when_missing_policy_and_rev(Config) ->
+    Assoc = pgr_assoc_missing_rev_and_policy(Config),
+    Context = chef_test_suite_helper:context(),
+    Result = oc_chef_policy_group_revision_association:fetch_prereq_objects(Assoc, Context),
+    #oc_chef_policy_group_revision_association{policy_group = ExpectedPolicyGroup} = Assoc,
+    Expected = [{policy, not_found}, {policy_group, ExpectedPolicyGroup}, {policy_revision, not_found}],
+    ?assertEqual(Expected, Result).
+
 verify_insert_policy_group_association_missing_policy_and_rev_and_group(Config) ->
     Assoc = pgr_assoc_missing_rev_and_policy_and_group(Config),
     Context = chef_test_suite_helper:context(),
@@ -355,6 +388,13 @@ verify_insert_policy_group_association_missing_policy_and_rev_and_group(Config) 
     ?assertEqual({ok, 1}, DeletePolicyResult),
     DeleteGroupResult = chef_test_suite_helper:delete_record(Assoc#oc_chef_policy_group_revision_association.policy_group),
     ?assertEqual({ok, 1}, DeleteGroupResult).
+
+fetch_prereq_objects_when_missing_policy_and_rev_and_group(Config) ->
+    Assoc = pgr_assoc_missing_rev_and_policy_and_group(Config),
+    Context = chef_test_suite_helper:context(),
+    Result = oc_chef_policy_group_revision_association:fetch_prereq_objects(Assoc, Context),
+    Expected = [{policy, not_found}, {policy_group, not_found}, {policy_revision, not_found}],
+    ?assertEqual(Expected, Result).
 
 fetch_policy_via_group_association(Config) ->
     Assoc = pgr_assoc_has_all_deps(Config),

@@ -149,15 +149,11 @@ make_other_org() ->
 org_config() ->
     OrgId = chef_db:fetch_org_id(context(), ?ORG_NAME),
     OtherOrgID = chef_db:fetch_org_id(context(), ?OTHER_ORG_NAME),
-    ct:pal("Other org: ~p", [OtherOrgID]),
     [{org_id, OrgId}, {other_org_id, OtherOrgID}].
 
 confirm_org_setup(Config) ->
     ExpectedOrgId = proplists:get_value(org_id, Config),
     ExpectedOtherOrgId = proplists:get_value(other_org_id, Config),
-
-    ct:pal("ORG: ~p~n", [ExpectedOrgId]),
-    ct:pal("OTHER ORG: ~p~n", [ExpectedOtherOrgId]),
 
     ActualMainOrg = chef_db:fetch_org_id(context(), ?ORG_NAME),
     ActualOtherOrg = chef_db:fetch_org_id(context(), ?OTHER_ORG_NAME),
@@ -205,11 +201,8 @@ update_record(Record) ->
 %% "delete from table where id= $1"). Use a custom helper for other kinds of
 %% delete queries.
 delete_record(Record) ->
-    ct:pal("delete record arg: ~p", [Record]),
     Query = chef_object:delete_query(Record),
     Id = chef_object:id(Record),
-
-    ct:pal("delete object args: ~p~p~n", [{query, Query},{id, Id}]),
 
     chef_sql:delete_object(Query, Id).
 

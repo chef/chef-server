@@ -27,6 +27,7 @@
                       {default_update/2, update}]}]).
 
 -export([find_policy_revision_by_orgid_name_group_name/2,
+         fetch_prereq_objects/2,
          insert_association/3,
          update_association/3,
          delete_association/2,
@@ -51,6 +52,27 @@ find_policy_revision_by_orgid_name_group_name(Record, DBContext) ->
           decompress_record(Assoc);
         Any -> Any
     end.
+
+%% In the WM resources, we optimisticially try to fetch the revision
+%% association. When creating a new association, we might also need to create
+%% the policy, revision, and policy group. In order to do the right authz
+%% things, we need to try to fetch all of these objects so the layer above us
+%% can tell if we're creating a new thing or need update permissions on an
+%% existing thing.
+fetch_prereq_objects(#oc_chef_policy_group_revision_association{
+                    policy = PolicyQuery,
+                    policy_group = PolicyGroupQuery,
+                    policy_revision = PolicyRevisionQuery
+                }, DBContext) ->
+    MaybePolicy = fetch_associated_object(PolicyQuery, DBContext),
+    MaybePolicyGroup = fetch_associated_object(PolicyGroupQuery, DBContext),
+    MaybePolicyRevisionCompressed = fetch_associated_object(PolicyRevisionQuery, DBContext),
+    MaybePolicyRevision = case MaybePolicyRevisionCompressed of
+        #oc_chef_policy_revision{} ->
+            oc_chef_policy_revision:decompress_record(MaybePolicyRevisionCompressed);
+        Any -> Any
+    end,
+    [{policy, MaybePolicy}, {policy_group, MaybePolicyGroup}, {policy_revision, MaybePolicyRevision}].
 
 insert_association(#oc_chef_policy_group_revision_association{} = Record, DBContext, ActorID) ->
     ok = ensure_policy_exists(Record, DBContext, ActorID),
