@@ -34,7 +34,7 @@
 %-endif.
 
 -define(CONTAINERS, [clients, containers, cookbooks, data, environments,
-                     groups, nodes, roles, sandboxes, policies,
+                     groups, nodes, roles, sandboxes, policies, policy_groups,
                      cookbook_artifacts]).
 
 -define(GROUPS, [admins, 'billing-admins', clients, users]).
@@ -93,18 +93,18 @@
 
            %% users
            {add_acl,
-            [mk_tl(container, [cookbooks, data, nodes, roles, environments, policies, cookbook_artifacts])],
+            [mk_tl(container, [cookbooks, data, nodes, roles, environments, policies, policy_groups, cookbook_artifacts])],
             [create, read, update, delete], [{group, users}]},
-           {add_acl, [{container, policies}], [read], [{group, clients}]},
-           {add_acl, [{container, cookbook_artifacts}], [read], [{group, clients}]},
            {add_acl, [{container, clients}], [read, delete], [{group, users}]},
            {add_acl, [mk_tl(container, [groups, containers]), {organization}], [read], [{group, users}]},
            {add_acl, [{container, sandboxes}], [create], [{group, users}]},
 
            %% clients
 
-           %% TODO: add read for policies for clients.
            {add_acl, [{container, nodes}], [read, create], [{group, clients}]},
+           {add_acl, [{container, policies}], [read], [{group, clients}]},
+           {add_acl, [{container, policy_groups}], [read], [{group, clients}]},
+           {add_acl, [{container, cookbook_artifacts}], [read], [{group, clients}]},
            {add_acl, [{container, data}], [read], [{group, clients}]},
            {add_acl, mk_tl(container, [cookbooks, environments, roles]), [read] , [{group, clients}]}
           ]
