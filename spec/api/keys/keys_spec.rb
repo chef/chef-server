@@ -19,7 +19,7 @@ describe "/keys endpoint", :keys do
 
   # Noise reducer.
   def requestor(who, key)
-    Pedant::Requestor.new(who, key)
+    Pedant::Requestor.new(who, key, preexisting: false)
   end
 
   shared(:keys) {@keys}
@@ -587,7 +587,7 @@ describe "/keys endpoint", :keys do
   context "managing keys" do
     shared(:name_suffix) { "#{Time.now.to_i}" }
     shared(:org_admin_name) {"pedant-keys-admin-#{name_suffix}" }
-    shared(:org_admin) {requestor(org_admin_name, keys[:org_admin][:private]) }
+    shared(:org_admin_user) {requestor(org_admin_name, keys[:org_admin][:private]) }
     shared(:org_user_name) {"pedant-keys-user-#{name_suffix}" }
     shared(:org_user) {requestor(org_user_name, keys[:org_user][:private]) }
     shared(:org_client_name) {"pedant-keys-client-#{name_suffix}" }
@@ -643,16 +643,16 @@ describe "/keys endpoint", :keys do
       # Leave it up to the tests to determine if they need it associated
       platform.create_min_user(org_user_name, overrides: org_user_payload).should look_like({:status => 201} )
       platform.create_min_user(org_admin_name, overrides: org_admin_payload).should look_like({:status => 201} )
-      platform.associate_user_with_org($org_name, org_admin)
-      platform.add_user_to_group($org_name, org_admin, "admins")
+      platform.associate_user_with_org($org_name, org_admin_user)
+      platform.add_user_to_group($org_name, org_admin_user, "admins")
       platform.create_org(other_org_name)
       platform.create_min_user(other_org_user_name, overrides: other_org_user_payload).should look_like({:status => 201})
       platform.associate_user_with_org(other_org_name, other_org_user)
     end
 
     after :all do
-      platform.remove_user_from_group($org_name, org_admin, "admins", superuser)
-      platform.delete_user(org_admin)
+      platform.remove_user_from_group($org_name, org_admin_user, "admins", superuser)
+      platform.delete_user(org_admin_user)
       platform.delete_user(org_user)
       platform.delete_user(other_org_user)
       platform.delete_org(other_org_name)
@@ -753,7 +753,7 @@ describe "/keys endpoint", :keys do
           end
           context "as an org admin of a member org" do
             it "succeeds" do
-              post("#{org_base_url}/clients/#{org_client_name}/keys", org_admin, :payload => key_payload).should look_like({:status => 201})
+              post("#{org_base_url}/clients/#{org_client_name}/keys", org_admin_user, :payload => key_payload).should look_like({:status => 201})
             end
           end
         end
@@ -794,7 +794,7 @@ describe "/keys endpoint", :keys do
           end
           context "an org admin of a member org" do
             it "fails with 403" do
-              post("#{platform.server}/users/#{org_user_name}/keys", org_admin, :payload => key_payload).should look_like({:status => 403})
+              post("#{platform.server}/users/#{org_user_name}/keys", org_admin_user, :payload => key_payload).should look_like({:status => 403})
             end
           end
         end
@@ -880,7 +880,7 @@ describe "/keys endpoint", :keys do
           end
 
           it "the org admin should succeed" do
-            delete_client_key($org_name, org_client_name, "alt_key", requestor: org_admin).should look_like({:status => 200})
+            delete_client_key($org_name, org_client_name, "alt_key", requestor: org_admin_user).should look_like({:status => 200})
           end
         end
       end
@@ -955,7 +955,7 @@ describe "/keys endpoint", :keys do
           end
 
           it "the org admin should fail with a 403" do
-            delete_user_key(org_user_name, "alt_key", requestor: org_admin).should look_like({:status => 403})
+            delete_user_key(org_user_name, "alt_key", requestor: org_admin_user).should look_like({:status => 403})
           end
         end
       end
@@ -1123,41 +1123,41 @@ describe "/keys endpoint", :keys do
 
         context "when GET /organizations/org/clients/client/keys is called" do
           it "for a client that is a member of the same org succeeds with a 200" do
-            list_client_keys($org_name, org_client_name, org_admin).should look_like({:status => 200})
+            list_client_keys($org_name, org_client_name, org_admin_user).should look_like({:status => 200})
           end
 
           it "for a client that is a member of a different org fails with a 403" do
-            list_client_keys(other_org_name, other_org_client_name, org_admin).should look_like({:status => 403})
+            list_client_keys(other_org_name, other_org_client_name, org_admin_user).should look_like({:status => 403})
           end
         end
 
         context "when GET /users/user/keys is called" do
           it "for a user that is a member of the same org succeeds with a 200" do
-            list_user_keys(org_user_name, org_admin).should look_like({:status => 200})
+            list_user_keys(org_user_name, org_admin_user).should look_like({:status => 200})
           end
 
           it "for a user that is not a member of the same org fails with a 403" do
-            list_user_keys(other_org_user_name, org_admin).should look_like({:status => 403})
+            list_user_keys(other_org_user_name, org_admin_user).should look_like({:status => 403})
           end
         end
 
         context "when GET /organizations/org/clients/client/keys/key is called" do
           it "for a client that is a member of the same org succeeds with a 200" do
-            get_client_key($org_name, org_client_name, org_admin, "default").should look_like({:status => 200})
+            get_client_key($org_name, org_client_name, org_admin_user, "default").should look_like({:status => 200})
           end
 
           it "for a client that is a member of a different org fails with a 403" do
-            get_client_key(other_org_name, other_org_client_name, org_admin, "default").should look_like({:status => 403})
+            get_client_key(other_org_name, other_org_client_name, org_admin_user, "default").should look_like({:status => 403})
           end
         end
 
         context "when GET /users/user/keys/key is called" do
           it "for a user that is a member of the same org succeeds with a 200" do
-            get_user_key(org_user_name, org_admin, "default").should look_like({:status => 200})
+            get_user_key(org_user_name, org_admin_user, "default").should look_like({:status => 200})
           end
 
           it "for a user that is not a member of the same org fails with a 403" do
-            get_user_key(other_org_user_name, org_admin, "default").should look_like({:status => 403})
+            get_user_key(other_org_user_name, org_admin_user, "default").should look_like({:status => 403})
           end
         end
 
