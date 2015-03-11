@@ -25,7 +25,7 @@ authenticate_user_request(_GetHeader,
                           _Body,
                           _PublicKey,
                           _TimeSkew) ->
-    {name, <<"mock_user">>, #chef_requestor{authz_id = ?AUTHZ_ID, type = <<"client">> }}.
+    {name, <<"mock_user">>, #chef_requestor{name = <<"default">>, authz_id = ?AUTHZ_ID, type = <<"client">> }}.
 
 validate_headers(_GetHeader, _TimeSkew) ->
     [{'algorithm', <<"SHA1">>},

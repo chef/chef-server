@@ -78,8 +78,8 @@ all() ->
      get_user_no_keys,
      get_client_wrong_key,
      get_user_wrong_key,
-     get_key_for_nonexistant_user,
-     get_key_for_nonexistant_client,
+     get_key_for_nonexistent_user,
+     get_key_for_nonexistent_client,
      post_user_new_valid_key,
      post_client_new_valid_key,
      post_new_key_invalid_date,
@@ -92,7 +92,15 @@ all() ->
      post_conflicting_user_key,
      post_conflicting_client_key,
      post_multiple_valid_user_keys,
-     post_multiple_valid_client_keys
+     post_multiple_valid_client_keys,
+     % delete_authing_user_key_with_different_user,
+     % delete_authing_user_key,
+     delete_valid_user_key,
+     delete_invalid_user_key,
+     % delete_authing_client_key_with_different_user,
+     % delete_authing_client_key,
+     delete_valid_client_key,
+     delete_invalid_client_key
      ].
 
 %% GET /organizations/org/clients/client/keys && GET /users/client/keys
@@ -207,15 +215,66 @@ get_user_wrong_key(_) ->
     ?assertMatch({ok, "404", _, _} , Result),
     ok.
 
-get_key_for_nonexistant_user(_) ->
+get_key_for_nonexistent_user(_) ->
     Result = http_named_key_request(get, user, ?ADMIN_USER_NAME, "default"),
     ?assertMatch({ok, "404", _, _} , Result),
     ok.
 
-get_key_for_nonexistant_client(_) ->
+get_key_for_nonexistent_client(_) ->
     Result = http_named_key_request(get, client, ?ADMIN_USER_NAME, "default"),
     ?assertMatch({ok, "404", _, _} , Result),
     ok.
+
+delete_valid_client_key(Config) ->
+    Result = http_named_key_request(delete, client, ?CLIENT_NAME, ?KEY1NAME),
+    ?assertMatch({ok, "200", _, _}, Result),
+    BodyEJ = chef_json:decode(response_body(Result)),
+    ExpectedEJ = new_key_ejson(Config, ?KEY1NAME, ?KEY1EXPIRESTRING),
+    ?assertMatch(BodyEJ, ExpectedEJ).
+
+delete_invalid_client_key(_Config) ->
+    Result = http_named_key_request(delete, client, ?CLIENT_NAME, "invalid_key"),
+    ?assertMatch({ok, "404", _, _}, Result).
+
+% TODO - authing reuestor
+% I'm leaving this commented out but present, because I'd like to find a way to make it work.
+% Currently, our stubbed chef_authn mock can't populate a requestor id, which means
+% our check to see if keyname + requestor id matches current auth will always pass without
+% matching, because required id is never populated.
+% I think we can do this by making our mock chef_authn a stateful process (gen_server would be simplest)
+% which would allow us to set the requestor id to mock for each request.  We could also then extend it
+% to perform better authz behavior validation throughout our tests
+%delete_authing_client_key(_Config) ->
+    %Result = http_named_key_request(delete, client, ?CLIENT_NAME, "default"),
+    %?assertMatch({ok, "403", _, _}, Result).
+
+%delete_authing_client_key_with_different_user(_Config) ->
+    %% This is specifically intended to validate that we can use a different user's
+    %% "default" key to authenticate, and delete the client's "default" key without
+    %% failing simply because the key name matched. (The stubbed authz check
+    %% will match on key 'default')
+    %Result = http_named_key_request(delete, client, ?ADMIN_USER_NAME, "default"),
+    %?assertMatch({ok, "200", _, _}, Result).
+
+delete_valid_user_key(Config) ->
+    Result = http_named_key_request(delete, user, ?USER_NAME, ?KEY1NAME),
+    ?assertMatch({ok, "200", _, _}, Result),
+    BodyEJ = chef_json:decode(response_body(Result)),
+    ExpectedEJ = new_key_ejson(Config, ?KEY1NAME, ?KEY1EXPIRESTRING),
+    ?assertMatch(BodyEJ, ExpectedEJ).
+
+delete_invalid_user_key(_Config) ->
+    Result = http_named_key_request(delete, user, ?USER_NAME, "invalid_key"),
+    ?assertMatch({ok, "404", _, _}, Result).
+
+%delete_authing_user_key(_Config) ->
+    %Result = http_named_key_request(delete, user, ?USER_NAME, "default"),
+    %?assertMatch({ok, "403", _, _}, Result).
+
+%delete_authing_user_key_with_different_user(_Config) ->
+    %Result = http_named_key_request(delete, user, ?ADMIN_USER_NAME, "default"),
+    %?assertMatch({ok, "200", _, _}, Result).
+
 
 %% POST /organizations/org/clients/client/keys && POST /users/client/keys
 post_client_new_valid_key(Config) ->
@@ -312,6 +371,7 @@ post_multiple_valid_client_keys(Config) ->
     Result2 = http_keys_request(post, client, ?ADMIN_USER_NAME, Body2),
     ?assertMatch({ok, "201", _, _}, Result2).
 
+
 %% Test case initializers
 init_per_testcase(TestCase, Config) when TestCase =:= post_new_key_invalid_date;
                                          TestCase =:= post_new_key_invalid_digits_date;
@@ -397,14 +457,46 @@ init_per_testcase(get_user_wrong_key, Config) ->
     make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
     make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
     Config;
-init_per_testcase(get_key_for_nonexistant_user, Config) ->
+init_per_testcase(get_key_for_nonexistent_user, Config) ->
     make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
     Config;
-init_per_testcase(get_key_for_nonexistant_client, Config) ->
+init_per_testcase(get_key_for_nonexistent_client, Config) ->
     make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
     Config;
-init_per_testcase(_, Config) ->
+init_per_testcase(Case, Config) when Case =:= delete_invalid_client_key;
+                                     Case =:= delete_valid_client_key ->
+    make_client(Config, ?CLIENT_NAME),
+    ClientId = client_id(Config, ?CLIENT_NAME),
+    add_key(Config, ClientId, ?KEY1NAME, ?KEY1EXPIRE),
+    Config;
+% TODO see "TODO - authing user" above.
+%init_per_testcase(delete_authing_client_key, Config) ->
+    %make_client(Config, ?CLIENT_NAME),
+    %Config;
+%init_per_testcase(delete_authing_client_key_with_different_user, Config) ->
+    %make_admin_and_client(Config),
+    %ClientId = client_id(Config, ?CLIENT_NAME),
+    %add_key(Config, ClientId, ?KEY1NAME, ?KEY1EXPIRE),
+    %Config;
+init_per_testcase(Case, Config) when Case =:= delete_invalid_user_key;
+                                     Case =:= delete_valid_user_key ->
+    make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
+    UserId = user_id(?USER_NAME),
+    add_key(Config, UserId, ?KEY1NAME, ?KEY1EXPIRE),
     Config.
+
+% TODO see "TODO - authing user" above.
+%init_per_testcase(delete_authing_user_key, Config) ->
+%    make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
+%    Config;
+%init_per_testcase(delete_authing_user_key_with_different_user, Config) ->
+%    make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
+%    make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
+%    UserId = user_id(?USER_NAME),
+%    add_key(Config, UserId, ?KEY1NAME, ?KEY1EXPIRE),
+%    Config;
+%init_per_testcase(_, Config) ->
+%    Config.
 
 %% Test case cleanup
 end_per_testcase(_, Config) ->
