@@ -91,7 +91,24 @@ module RSpec
               # need to cut short the rest of the logic to provide a
               # better message
               return false if @actual.nil?
-              size_is_same = (spec.size == value.size)
+
+              # A note here - when we're handling a key of :hashwrapper this means that
+              # this was a top-level array handed in for comparison. In that case,
+              # we will drive exactness of array match based on the strict?
+              # setting, since if the caller wanted an exact match of the array elements
+              # they would use body_exact (strict? == true)
+              if (key == :hashwrapper)
+                if strict?
+                  size_is_same = (spec.size == value.size)
+                else
+                  size_is_same = true # don't compare sizes, only the required elements
+                end
+              else
+                # In this case this is just one field among many contained in a hash - existing
+                # behavior expects this to match exactly even if we're not strictly matching
+                size_is_same = (spec.size == value.size)
+              end
+
               all_items_included = spec.all? { |item| value.include?(item) }
               size_is_same && all_items_included
             end
