@@ -305,9 +305,8 @@ fetch_prereq_objects_when_all_exist(Config) ->
     Context = chef_test_suite_helper:context(),
     Result = oc_chef_policy_group_revision_association:fetch_prereq_objects(Assoc, Context),
     #oc_chef_policy_group_revision_association{policy = ExpectedPolicy,
-                                               policy_group = ExpectedPolicyGroup,
-                                               policy_revision = ExpectedPolicyRevision} = Assoc,
-    Expected = [{policy, ExpectedPolicy}, {policy_group, ExpectedPolicyGroup}, {policy_revision, ExpectedPolicyRevision}],
+                                               policy_group = ExpectedPolicyGroup} = Assoc,
+    Expected = [{policy, ExpectedPolicy}, {policy_group, ExpectedPolicyGroup}],
     ?assertEqual(Expected, Result).
 
 verify_insert_policy_group_association_missing_rev(Config) ->
@@ -329,7 +328,7 @@ fetch_prereq_objects_when_missing_rev(Config) ->
     Result = oc_chef_policy_group_revision_association:fetch_prereq_objects(Assoc, Context),
     #oc_chef_policy_group_revision_association{policy = ExpectedPolicy,
                                                policy_group = ExpectedPolicyGroup} = Assoc,
-    Expected = [{policy, ExpectedPolicy}, {policy_group, ExpectedPolicyGroup}, {policy_revision, not_found}],
+    Expected = [{policy, ExpectedPolicy}, {policy_group, ExpectedPolicyGroup}],
     ?assertEqual(Expected, Result).
 
 
@@ -369,7 +368,7 @@ fetch_prereq_objects_when_missing_policy_and_rev(Config) ->
     Context = chef_test_suite_helper:context(),
     Result = oc_chef_policy_group_revision_association:fetch_prereq_objects(Assoc, Context),
     #oc_chef_policy_group_revision_association{policy_group = ExpectedPolicyGroup} = Assoc,
-    Expected = [{policy, not_found}, {policy_group, ExpectedPolicyGroup}, {policy_revision, not_found}],
+    Expected = [{policy, not_found}, {policy_group, ExpectedPolicyGroup}],
     ?assertEqual(Expected, Result).
 
 verify_insert_policy_group_association_missing_policy_and_rev_and_group(Config) ->
@@ -393,7 +392,7 @@ fetch_prereq_objects_when_missing_policy_and_rev_and_group(Config) ->
     Assoc = pgr_assoc_missing_rev_and_policy_and_group(Config),
     Context = chef_test_suite_helper:context(),
     Result = oc_chef_policy_group_revision_association:fetch_prereq_objects(Assoc, Context),
-    Expected = [{policy, not_found}, {policy_group, not_found}, {policy_revision, not_found}],
+    Expected = [{policy, not_found}, {policy_group, not_found}],
     ?assertEqual(Expected, Result).
 
 fetch_policy_via_group_association(Config) ->

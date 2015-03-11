@@ -54,25 +54,17 @@ find_policy_revision_by_orgid_name_group_name(Record, DBContext) ->
     end.
 
 %% In the WM resources, we optimisticially try to fetch the revision
-%% association. When creating a new association, we might also need to create
-%% the policy, revision, and policy group. In order to do the right authz
-%% things, we need to try to fetch all of these objects so the layer above us
-%% can tell if we're creating a new thing or need update permissions on an
-%% existing thing.
+%% association. If we don't find it, and we're trying to create a revision
+%% association, we need to check authz against the policy and policy group; if
+%% either of those doesn't exist, the WM resource will have to create authz IDs
+%% for them.
 fetch_prereq_objects(#oc_chef_policy_group_revision_association{
                     policy = PolicyQuery,
-                    policy_group = PolicyGroupQuery,
-                    policy_revision = PolicyRevisionQuery
+                    policy_group = PolicyGroupQuery
                 }, DBContext) ->
     MaybePolicy = fetch_associated_object(PolicyQuery, DBContext),
     MaybePolicyGroup = fetch_associated_object(PolicyGroupQuery, DBContext),
-    MaybePolicyRevisionCompressed = fetch_associated_object(PolicyRevisionQuery, DBContext),
-    MaybePolicyRevision = case MaybePolicyRevisionCompressed of
-        #oc_chef_policy_revision{} ->
-            oc_chef_policy_revision:decompress_record(MaybePolicyRevisionCompressed);
-        Any -> Any
-    end,
-    [{policy, MaybePolicy}, {policy_group, MaybePolicyGroup}, {policy_revision, MaybePolicyRevision}].
+    [{policy, MaybePolicy}, {policy_group, MaybePolicyGroup}].
 
 insert_association(#oc_chef_policy_group_revision_association{} = Record, DBContext, ActorID) ->
     ok = ensure_policy_exists(Record, DBContext, ActorID),
