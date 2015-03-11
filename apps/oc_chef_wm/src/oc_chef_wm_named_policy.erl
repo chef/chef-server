@@ -33,8 +33,11 @@
          malformed_request_message/3,
          request_type/0,
          validate_request/3,
-         conflict_message/1,
-         post_is_create/2]).
+         conflict_message/1]).
+
+-ifdef(TEST).
+-compile([export_all]).
+-endif.
 
 init(Config) ->
     oc_chef_wm_base:init(?MODULE, Config).
@@ -45,130 +48,123 @@ init_resource_state(_Config) ->
 request_type() ->
     "policies".
 
-%% TODO: we shouldn't accept POST
 allowed_methods(Req, State) ->
-    {['GET', 'PUT', 'POST', 'DELETE'], Req, State}.
-
-%% TODO: we shouldn't accept POST
-post_is_create(Req, State) ->
-    {true, Req, State}.
+    {['GET', 'PUT', 'DELETE'], Req, State}.
 
 create_path(Req, State) ->
     Name = wrq:path_info(policy_name, Req),
     {Name, Req, State}.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% TODO!!! set back to real validate_request functionality
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+validate_request(Method, Req,
+                 State = #base_state{organization_guid = OrgId})
+  when Method == 'GET'; Method == 'DELETE' ->
+    Name = wrq:path_info(policy_name, Req),
+    Group = wrq:path_info(policy_group, Req),
+    {Req, State#base_state{superuser_bypasses_checks = true,
+               resource_state = #policy_state{
+                     oc_chef_policy_group_revision_association = create_input_pgr_assoc_record(OrgId, Name, Group)
+                     }
+              }
+    };
+validate_request('PUT', Req, #base_state{organization_guid = OrgId,
+                                              resource_state = PolicyState
+                                             } = State) ->
+    Name = wrq:path_info(policy_name, Req),
+    Group = wrq:path_info(policy_group, Req),
+    Body = wrq:req_body(Req),
+    PolicyRevision = validate_json(Body, Name),
+    %% TODO: move this into something we can "unit" test.
+    %% need to ensure that policy/policy_group/policy_rev records are created
+    {Req, State#base_state{
+            superuser_bypasses_checks = true,
+            resource_state = PolicyState#policy_state{
+                oc_chef_policy_group_revision_association = create_input_pgr_assoc_record(OrgId, Name, Group),
+                policy_data = PolicyRevision}}}.
 
-validate_request(_Method, Req, State) ->
-    {Req, State}.
+create_input_pgr_assoc_record(OrgID, PolicyName, GroupName) ->
+    #oc_chef_policy_group_revision_association{
+        org_id = OrgID,
+        policy_revision_name = PolicyName,
+        policy_group_name = GroupName,
+        policy = #oc_chef_policy{ name = PolicyName },
+        policy_group = #oc_chef_policy_group{ name = GroupName }
+        }.
 
-%%%% validate_request(Method, Req,
-%%%%                  State = #base_state{organization_guid = OrgId})
-%%%%   when Method == 'GET'; Method == 'DELETE' ->
-%%%%     Name = wrq:path_info(policy_name, Req),
-%%%%     Group = wrq:path_info(policy_group, Req),
-%%%%     {Req, State#base_state{superuser_bypasses_checks = true,
-%%%%                resource_state = #policy_state{
-%%%%                      oc_chef_policy = #oc_chef_policy{
-%%%%                          org_id = OrgId,
-%%%%                          name = Name,
-%%%%                          policy_group = Group}
-%%%%                      }
-%%%%               }
-%%%%     };
-%%%% validate_request(_PostOrPut, Req, #base_state{organization_guid = OrgId,
-%%%%                                               resource_state = PolicyState
-%%%%                                              } = State) ->
-%%%%     Policy = validate_json(Req),
-%%%%     Group = wrq:path_info(policy_group, Req),
-%%%%     {Req, State#base_state{
-%%%%             superuser_bypasses_checks = true,
-%%%%             resource_state = PolicyState#policy_state{
-%%%%                                oc_chef_policy = #oc_chef_policy{org_id = OrgId,
-%%%%                                                                 policy_group = Group
-%%%%                                                                },
-%%%%                                policy_data = Policy}}}.
-%%%%
 
-%%%% validate_json(Req) ->
-%%%%     Body = wrq:req_body(Req),
-%%%%     {ok, Policy} = oc_chef_policy:parse_binary_json(Body),
-%%%%     ok = validate_name(Req, Policy),
-%%%% 		Policy.
-%%%% 
-%%%% validate_name(Req, Policy) ->
-%%%%     NameFromReq = wrq:path_info(policy_name, Req),
-%%%%     NameFromJson = erlang:binary_to_list(
-%%%%                      ej:get({<<"name">>}, Policy, list_to_binary(
-%%%%                                                     wrq:path_info(policy_name, Req)
-%%%%                                                    )
-%%%%                            )
-%%%%                     ),
-%%%%     case ibrowse_lib:url_encode(NameFromJson) =:= ibrowse_lib:url_encode(NameFromReq) of
-%%%%         true ->
-%%%%             ok;
-%%%%         false ->
-%%%%             erlang:throw({mismatch, {<<"name">>, NameFromJson, NameFromReq}})
-%%%%     end.
+validate_json(Body, NameFromReq) ->
+    {ok, Policy} = oc_chef_policy_revision:parse_binary_json(Body),
+    ok = validate_name(NameFromReq, Policy),
+	Policy.
 
-% TODO: this is a callback from oc_chef_wm_base:forbidden/2. Reading the code
-% there, we see that it does not check more than one container or object at a
-% time. Creating a policy revision (via this endpoint) requires create in two
-% containers, policy_groups and policies (if those don't exist), or update on
-% two objects, the policy_group and policy. Note that one object might exist
-% and the other not, so, for example, you could need CREATE on the groups
-% container and UPDATE on a policy object if the policy exists but the group
-% doesn't. Likewise, for read, you need read on those two objects.
-%
+validate_name(NameFromReq, Policy) ->
+    NameFromJson = erlang:binary_to_list(ej:get({<<"name">>}, Policy)),
+    case ibrowse_lib:url_encode(NameFromJson) =:= ibrowse_lib:url_encode(NameFromReq) of
+        true ->
+            ok;
+        false ->
+            erlang:throw({mismatch, {<<"name">>, NameFromJson, NameFromReq}})
+    end.
+
 auth_info(Req, #base_state{chef_db_context = DbContext,
-                           resource_state = PolicyState = #policy_state{},
-                           organization_guid = OrgId} =State) ->
-    PolicyName = chef_wm_util:extract_from_path(policy_name, Req),
-    case wrq:method(Req) of
-        PostOrPut when PostOrPut =:= 'POST'; PostOrPut =:= 'PUT' ->
-            policy_permissions(true, OrgId, PolicyName, DbContext, Req, State, PolicyState);
-        _DeleteOrGet ->
-            policy_permissions(false, OrgId, PolicyName, DbContext, Req, State, PolicyState)
+                           resource_state = #policy_state{oc_chef_policy_group_revision_association = QueryRecord}
+                           } = State) ->
+    PolicyAssoc = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(QueryRecord, DbContext),
+    PermissionsListOrHalt = policy_permissions(wrq:method(Req), PolicyAssoc, QueryRecord, DbContext),
+    case PermissionsListOrHalt of
+        {halt, 404, Message} ->
+            ReqWithBody = chef_wm_util:set_json_body(Req, Message),
+            {{halt, 404}, ReqWithBody, State#base_state{log_msg = policy_not_found}};
+        PermissionsList ->
+            %% TODO: code path for oc_chef_wm_base:forbidden will go to
+            %% multi_auth_check when we return a list. That function doesn't support
+            %% create_in_container, which we need. Also, create_in_container isn't set
+            %% up to support multiple creates; we need to set different fields in our
+            %% resource state for each authzid so we can tell them apart.
+            {PermissionsList, Req, State}
     end.
 
-%% TODO: figure out if we should prefer 403 to 404 to prevent leakage of
-%% object names. If not, we can return 404 more efficiently for GET if any of
-%% the policy or policy_group or group-revision association don't exist.
-policy_permissions(CanCreate, _OrgId, PolicyName, DbContext, Req,
-                #base_state{} = State, PolicyState = #policy_state{
-                                                        oc_chef_policy = InputPolicy
-                                                       }) ->
-    %% This should be #oc_chef_policy_group_revision_association
-    PolicyWithName = InputPolicy#oc_chef_policy{name = PolicyName},
-    %% TODO: access the set of objects that this request pertains to via
-    %% oc_chef_policy_group_revision_association. That module needs to be
-    %% have a function which returns all the authz info we need for the
-    %% request.
-    case {chef_db:fetch(PolicyWithName, DbContext), CanCreate} of
-        {not_found, true} ->
-            {{create_in_container, policies}, Req,
-             State#base_state{resource_state =
-                                  PolicyState#policy_state{create_policy = true}}};
-        {not_found, false} ->
-            Message = chef_wm_util:error_message_envelope(
-                        iolist_to_binary(["Cannot load policy ", PolicyName])),
-            Req1 = chef_wm_util:set_json_body(Req, Message),
-            {{halt, 404}, Req1, State#base_state{log_msg = policy_not_found}};
-        {forbidden, _} ->
-            Message = chef_wm_util:error_message_envelope(
-                        iolist_to_binary(["No permission for policy ", PolicyName])),
-            Req1 = chef_wm_util:set_json_body(Req, Message),
-            {{halt, 403}, Req1, State#base_state{log_msg = policy_not_found}};
-        {#oc_chef_policy{authz_id = AuthzId} = Policy, _} ->
-            PolicyState1 = PolicyState#policy_state{oc_chef_policy = Policy},
-            State1 = State#base_state{resource_state = PolicyState1},
-            {{object, AuthzId}, Req, State1}
-    end.
 
-%% TODO: If we always do this because we determine 404 in the forbidden/2 callback,
-%% why is it not a mixin?
+
+%% policy_permissions(Method, DBResult, QueryRecord, DbContext) -> PermissionsListOrHalt
+%% TODO: 4XX cases need to update request state for logging stuff
+policy_permissions(_AnyMethod,
+                   #oc_chef_policy_group_revision_association{
+                        policy_authz_id = PolicyAuthzId, policy_group_authz_id = PolicyGroupAuthzID},
+                   _QueryRecord, _DbContext) ->
+    %% This means that delete will need delete on the policy and group, even
+    %% though you're not deleting anything.
+    [{object, PolicyAuthzId}, {object, PolicyGroupAuthzID}];
+policy_permissions('PUT', not_found, QueryRecord, DbContext) ->
+    PrereqObjects = oc_chef_policy_group_revision_association:fetch_prereq_objects(QueryRecord, DbContext),
+    prereq_objects_to_permissions(PrereqObjects);
+policy_permissions(_GetOrDelete, not_found,
+                   #oc_chef_policy_group_revision_association{
+                        policy_revision_name = PolicyName,
+                        policy_group_name = PolicyGroupName},
+                   _DbContext) ->
+    Message = chef_wm_util:error_message_envelope(
+                iolist_to_binary(["Cannot load policy ", PolicyName, " in policy group ", PolicyGroupName])),
+    {halt, 404, Message}.
+
+prereq_objects_to_permissions(PrereqObjects) ->
+    prereq_objects_to_permissions(PrereqObjects, []).
+
+prereq_objects_to_permissions([], PermissionsList) ->
+    PermissionsList;
+prereq_objects_to_permissions([PrereqObject|Rest], PermissionsList) ->
+    RequiredPermission = prereq_object_permission(PrereqObject),
+    UpdatedPermissionList = [RequiredPermission | PermissionsList ],
+    prereq_objects_to_permissions(Rest, UpdatedPermissionList).
+
+prereq_object_permission({policy, not_found}) ->
+    {create_in_container, policies};
+prereq_object_permission({policy, #oc_chef_policy{authz_id = AuthzID}}) ->
+    {object, AuthzID};
+prereq_object_permission({policy_group, not_found}) ->
+    {create_in_container, policy_groups};
+prereq_object_permission({policy_group, #oc_chef_policy_group{authz_id = AuthzID}}) ->
+    {object, AuthzID}.
+
 resource_exists(Req, State) ->
     {true, Req, State}.
 

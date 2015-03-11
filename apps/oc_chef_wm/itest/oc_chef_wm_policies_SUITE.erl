@@ -10,12 +10,77 @@
 -include("../../../include/oc_chef_types.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
--compile([export_all, {parse_transform, lager_transform}]).
+%%-compile([export_all, {parse_transform, lager_transform}]).
+-compile([export_all]).
 
+-define(ORG_ID, <<"10000000000000000000000000000001">>).
 -define(ORG_AUTHZ_ID, <<"10000000000000000000000000000002">>).
 -define(AUTHZ_ID, <<"00000000000000000000000000000003">>).
+-define(AUTHZ_ID4, <<"00000000000000000000000000000004">>).
+-define(AUTHZ_ID5, <<"00000000000000000000000000000005">>).
+-define(AUTHZ_ID6, <<"00000000000000000000000000000006">>).
 -define(CLIENT_NAME, <<"test-client">>).
 -define(ORG_NAME, <<"org1">>).
+
+-define(POLICY_FILE_CANONICAL_EXAMPLE, <<"
+    {
+      \"revision_id\": \"909c26701e291510eacdc6c06d626b9fa5350d25\",
+      \"name\": \"some_policy_name\",
+      \"run_list\": [
+        \"recipe[policyfile_demo::default]\"
+      ],
+      \"named_run_lists\": {
+        \"update_jenkins\": [
+          \"recipe[policyfile_demo::other_recipe]\"
+        ]
+      },
+      \"cookbook_locks\": {
+        \"policyfile_demo\": {
+          \"version\": \"0.1.0\",
+          \"identifier\": \"f04cc40faf628253fe7d9566d66a1733fb1afbe9\",
+          \"dotted_decimal_identifier\": \"67638399371010690.23642238397896298.25512023620585\",
+          \"source\": \"cookbooks/policyfile_demo\",
+          \"cache_key\": null,
+          \"scm_info\": {
+            \"scm\": \"git\",
+            \"remote\": \"git@github.com:danielsdeleo/policyfile-jenkins-demo.git\",
+            \"revision\": \"edd40c30c4e0ebb3658abde4620597597d2e9c17\",
+            \"working_tree_clean\": false,
+            \"published\": false,
+            \"synchronized_remote_branches\": [
+
+            ]
+          },
+          \"source_options\": {
+            \"path\": \"cookbooks/policyfile_demo\"
+          }
+        }
+      },
+      \"solution_dependencies\": {
+        \"Policyfile\": [
+          [ \"policyfile_demo\", \">= 0.0.0\" ]
+        ],
+        \"dependencies\": {
+          \"policyfile_demo (0.1.0)\": []
+        }
+      }
+    }">>).
+
+-define(POLICY_FILE_MINIMAL_EXAMPLE, <<"
+    {
+      \"revision_id\": \"909c26701e291510eacdc6c06d626b9fa5350d25\",
+      \"name\": \"some_policy_name\",
+      \"run_list\": [
+        \"recipe[policyfile_demo::default]\"
+      ],
+      \"cookbook_locks\": {
+        \"policyfile_demo\": {
+          \"identifier\": \"f04cc40faf628253fe7d9566d66a1733fb1afbe9\",
+          \"version\": \"1.2.3\"
+        }
+      }
+    }
+    ">>).
 
 init_per_suite(Config) ->
     setup_helper:base_init_per_suite([{org_name, ?ORG_NAME},
@@ -28,7 +93,8 @@ end_per_suite(Config) ->
     setup_helper:base_end_per_suite(Config).
 
 all() ->
-    [
+    [functional_tests,
+
      list_when_no_policies,
      list_when_created_policies,
      create_policy,
@@ -42,19 +108,197 @@ all() ->
      validate_identifiers
     ].
 
+%% setup/teardown
+
 init_per_testcase(_, Config) ->
-    delete_all_policies(),
+    delete_all_policy_data(),
     Config.
 
-delete_all_policies() ->
-    Result = case sqerl:adhoc_delete("policies", all) of
+delete_all_policy_data() ->
+    nuke_table_data("policies"),
+    nuke_table_data("policy_groups").
+
+nuke_table_data(Table) ->
+    case sqerl:adhoc_delete(Table, all) of
         {ok, Count} ->
             Count;
         Error ->
             throw(Error)
     end,
-    lager:info("Delete policies: ~p", [Result]),
     ok.
+
+%% "functional" testing - poke functions individually.
+
+functional_tests(Config) ->
+    test_init(Config),
+    test_create_input_record(Config),
+    test_validate_json(Config),
+    test_policy_permissions_get_404(Config),
+    test_policy_permissions_delete_404(Config),
+    test_policy_permissions_put_404_prereqs_exist(Config),
+    test_policy_permissions_put_404_prereqs_dont_exist(Config),
+    test_policy_permissions_get_when_exists(Config),
+    test_policy_permissions_put_when_exists(Config),
+    ok.
+
+test_init(_Config) ->
+    {OkOrError, _State} = oc_chef_wm_named_policy:init([]),
+    ?assertEqual(ok, OkOrError).
+
+test_create_input_record(_Config) ->
+    Result = oc_chef_wm_named_policy:create_input_pgr_assoc_record(?ORG_ID, <<"policy_name">>, <<"group_name">>),
+    Expected = #oc_chef_policy_group_revision_association{
+            org_id = ?ORG_ID,
+            policy_revision_name = <<"policy_name">>,
+            policy_group_name = <<"group_name">>,
+            policy = #oc_chef_policy{ name = <<"policy_name">> },
+            policy_group = #oc_chef_policy_group{ name = <<"group_name">> }},
+    ?assertEqual(Expected, Result).
+
+test_validate_json(_Config) ->
+    Result = oc_chef_wm_named_policy:validate_json(?POLICY_FILE_MINIMAL_EXAMPLE, "some_policy_name"),
+    Expected = jiffy:decode(?POLICY_FILE_MINIMAL_EXAMPLE),
+    ?assertEqual(Expected, Result),
+    Result2 = oc_chef_wm_named_policy:validate_json(?POLICY_FILE_CANONICAL_EXAMPLE, "some_policy_name"),
+    Expected2 = jiffy:decode(?POLICY_FILE_CANONICAL_EXAMPLE),
+    ?assertEqual(Expected2, Result2),
+    ok.
+
+make_query_record_404(Config) ->
+    OrgID = proplists:get_value(org_id, Config),
+    #oc_chef_policy_group_revision_association{
+        org_id = OrgID,
+        policy_revision_name = <<"nope">>,
+        policy_group_name = <<"nope">>,
+
+        policy = #oc_chef_policy{ name = <<"nope">> },
+        policy_group = #oc_chef_policy_group{ name = <<"nope">> }
+    }.
+
+test_policy_permissions_get_404(Config) ->
+    DbContext = proplists:get_value(context, Config),
+    QueryRecord = make_query_record_404(Config),
+    % 404s
+    Result = oc_chef_wm_named_policy:policy_permissions('GET', not_found, QueryRecord, DbContext),
+    Expected = {halt, 404, {[{<<"error">>, [<<"Cannot load policy nope in policy group nope">>]}]}},
+    ?assertEqual(Expected, Result),
+    ok.
+
+test_policy_permissions_delete_404(Config) ->
+    DbContext = proplists:get_value(context, Config),
+    QueryRecord = make_query_record_404(Config),
+    % 404s
+    Result = oc_chef_wm_named_policy:policy_permissions('DELETE', not_found, QueryRecord, DbContext),
+    Expected = {halt, 404, {[{<<"error">>, [<<"Cannot load policy nope in policy group nope">>]}]}},
+    ?assertEqual(Expected, Result),
+    ok.
+
+test_policy_permissions_put_404_prereqs_dont_exist(Config) ->
+    DbContext = proplists:get_value(context, Config),
+    QueryRecord = make_query_record_404(Config),
+    % 404s
+    Result = oc_chef_wm_named_policy:policy_permissions('PUT', not_found, QueryRecord, DbContext),
+    Expected = [{create_in_container, policy_groups}, {create_in_container, policies}],
+    ?assertEqual(Expected, Result),
+    ok.
+
+make_prereq_records(Config) ->
+    OrgID = proplists:get_value(org_id, Config),
+    DbContext = proplists:get_value(context, Config),
+    PolicyName = <<"some_policy_name">>,
+    PolicyGroupName = <<"some_policy_group_name">>,
+    PolicyRevisionID = <<"909c26701e291510eacdc6c06d626b9fa5350d25">>,
+
+    PolicyDbId = chef_object_base:make_org_prefix_id(OrgID, PolicyName),
+    PolicyGroupDbId = chef_object_base:make_org_prefix_id(OrgID, PolicyGroupName),
+    PolicyRevDbId = chef_object_base:make_org_prefix_id(OrgID, PolicyRevisionID),
+
+    Policy = #oc_chef_policy{
+            org_id = OrgID,
+            id = PolicyDbId,
+            name = PolicyName,
+            authz_id = ?AUTHZ_ID4
+            },
+    PolicyGroup = #oc_chef_policy_group{
+            org_id = OrgID,
+            id = PolicyGroupDbId,
+            name = PolicyGroupName,
+            authz_id = ?AUTHZ_ID5
+            },
+
+    PolicyRevision = #oc_chef_policy_revision{
+            id = PolicyRevDbId,
+            org_id = OrgID,
+
+            revision_id = PolicyRevisionID,
+            name = PolicyName,
+            policy_authz_id = ?AUTHZ_ID4,
+            serialized_object = ?POLICY_FILE_MINIMAL_EXAMPLE
+            },
+    ok = chef_db:create(Policy, DbContext, ?AUTHZ_ID),
+    ok = chef_db:create(PolicyGroup, DbContext, ?AUTHZ_ID),
+    ok = chef_db:create(PolicyRevision, DbContext, ?AUTHZ_ID),
+    {Policy, PolicyGroup, PolicyRevision}.
+
+make_query_record_exists(Config) ->
+    OrgID = proplists:get_value(org_id, Config),
+    DbContext = proplists:get_value(context, Config),
+    PolicyName = <<"some_policy_name">>,
+    PolicyGroupName = <<"some_policy_group_name">>,
+    PolicyRevisionID = <<"909c26701e291510eacdc6c06d626b9fa5350d25">>,
+
+    {Policy, PolicyGroup, PolicyRevision} = make_prereq_records(Config),
+
+    PolicyAssocDbId = chef_object_base:make_org_prefix_id(OrgID, <<PolicyGroupName/binary, PolicyName/binary, PolicyRevisionID/binary>>),
+
+    PolicyRevisionAssoc = #oc_chef_policy_group_revision_association{
+            org_id = OrgID,
+            id = PolicyAssocDbId,
+            policy_group_authz_id = ?AUTHZ_ID5,
+            policy_revision_revision_id = PolicyRevisionID,
+            policy_revision_name = PolicyName,
+            policy_group_name = PolicyGroupName,
+
+            policy = Policy,
+            policy_group = PolicyGroup,
+            policy_revision = PolicyRevision
+            },
+
+    Result = oc_chef_policy_group_revision_association:insert_association(PolicyRevisionAssoc, DbContext, ?AUTHZ_ID),
+    ?assertEqual(ok, Result),
+    PolicyRevisionAssoc.
+
+test_policy_permissions_put_404_prereqs_exist(Config) ->
+    DbContext = proplists:get_value(context, Config),
+    {Policy, PolicyGroup, _PolicyRevision} = make_prereq_records(Config),
+    QueryAssoc = #oc_chef_policy_group_revision_association{
+            policy = Policy,
+            policy_group = PolicyGroup
+            },
+    Result = oc_chef_wm_named_policy:policy_permissions('PUT', not_found, QueryAssoc, DbContext),
+    % These get reversed by list head-tail stuff compared to the asssociation exists case
+    Expected = [{object, ?AUTHZ_ID5}, {object, ?AUTHZ_ID4}],
+    ?assertEqual(Expected, Result),
+    delete_all_policy_data().
+
+test_policy_permissions_get_when_exists(Config) ->
+    DbContext = proplists:get_value(context, Config),
+    CreatedAssocWithObjects = make_query_record_exists(Config),
+    ReturnedAssoc = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(CreatedAssocWithObjects, DbContext),
+    Result = oc_chef_wm_named_policy:policy_permissions('GET', ReturnedAssoc, CreatedAssocWithObjects, DbContext),
+    Expected = [{object, ?AUTHZ_ID4}, {object, ?AUTHZ_ID5}],
+    ?assertEqual(Expected, Result),
+    delete_all_policy_data().
+
+test_policy_permissions_put_when_exists(Config) ->
+    DbContext = proplists:get_value(context, Config),
+    CreatedAssocWithObjects = make_query_record_exists(Config),
+    ReturnedAssoc = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(CreatedAssocWithObjects, DbContext),
+    Result = oc_chef_wm_named_policy:policy_permissions('PUT', ReturnedAssoc, CreatedAssocWithObjects, DbContext),
+    Expected = [{object, ?AUTHZ_ID4}, {object, ?AUTHZ_ID5}],
+    ?assertEqual(Expected, Result),
+    delete_all_policy_data().
+%% HTTP round-trip tests
 
 list_when_no_policies(_) ->
     Result = http_list_policies(),
@@ -184,66 +428,6 @@ http_request(Method, RouteSuffix, Body) ->
                       {"accept", "application/json"},
                       {"content-type", "application/json"}
                      ], Method, Body).
-
--define(POLICY_FILE_CANONICAL_EXAMPLE, <<"
-    {
-      \"revision_id\": \"909c26701e291510eacdc6c06d626b9fa5350d25\",
-      \"name\": \"some_policy_name\",
-      \"run_list\": [
-        \"recipe[policyfile_demo::default]\"
-      ],
-      \"named_run_lists\": {
-        \"update_jenkins\": [
-          \"recipe[policyfile_demo::other_recipe]\"
-        ]
-      },
-      \"cookbook_locks\": {
-        \"policyfile_demo\": {
-          \"version\": \"0.1.0\",
-          \"identifier\": \"f04cc40faf628253fe7d9566d66a1733fb1afbe9\",
-          \"dotted_decimal_identifier\": \"67638399371010690.23642238397896298.25512023620585\",
-          \"source\": \"cookbooks/policyfile_demo\",
-          \"cache_key\": null,
-          \"scm_info\": {
-            \"scm\": \"git\",
-            \"remote\": \"git@github.com:danielsdeleo/policyfile-jenkins-demo.git\",
-            \"revision\": \"edd40c30c4e0ebb3658abde4620597597d2e9c17\",
-            \"working_tree_clean\": false,
-            \"published\": false,
-            \"synchronized_remote_branches\": [
-
-            ]
-          },
-          \"source_options\": {
-            \"path\": \"cookbooks/policyfile_demo\"
-          }
-        }
-      },
-      \"solution_dependencies\": {
-        \"Policyfile\": [
-          [ \"policyfile_demo\", \">= 0.0.0\" ]
-        ],
-        \"dependencies\": {
-          \"policyfile_demo (0.1.0)\": []
-        }
-      }
-    }">>).
-
--define(POLICY_FILE_MINIMAL_EXAMPLE, <<"
-    {
-      \"revision_id\": \"909c26701e291510eacdc6c06d626b9fa5350d25\",
-      \"name\": \"some_policy_name\",
-      \"run_list\": [
-        \"recipe[policyfile_demo::default]\"
-      ],
-      \"cookbook_locks\": {
-        \"policyfile_demo\": {
-          \"identifier\": \"f04cc40faf628253fe7d9566d66a1733fb1afbe9\",
-          \"version\": \"1.2.3\"
-        }
-      }
-    }
-    ">>).
 
 canonical_example_policy_json(Name) ->
     BaseJson = ejson:decode(?POLICY_FILE_CANONICAL_EXAMPLE),
