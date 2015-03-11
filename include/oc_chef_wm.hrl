@@ -289,6 +289,7 @@
 -record(policy_state, {
           policy_data,
           policy_authz_id,
+          policy_group_authz_id,
           create_policy = false,
           oc_chef_policy :: #oc_chef_policy{},
           oc_chef_policy_group :: #oc_chef_policy_group{},
