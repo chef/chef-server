@@ -23,8 +23,7 @@
 
 -behaviour(chef_object).
 
--export([
-         authz_id/1,
+-export([authz_id/1,
          is_indexed/0,
          ejson_for_indexing/2,
          update_from_ejson/2,
@@ -32,7 +31,7 @@
          fields_for_update/1,
          fields_for_fetch/1,
          ejson_from_list/2,
-         ejson_from_find/1,
+         ejson_from_key/1,
          record_fields/0,
          list/2,
          set_updated/2,
@@ -41,6 +40,7 @@
          id/1,
          org_id/1,
          type_name/1,
+         delete/2,
          parse_binary_json/2
         ]).
 
@@ -101,7 +101,7 @@ ejson_from_list(KeysList, URIDecorator) ->
         {<<"name">>, Name},
         {<<"expired">>, Expired}]} || [Name, Expired] <- KeysList ].
 
-ejson_from_find(#chef_key{key_name = Name, public_key = PublicKey, expires_at = UnparsedExpirationDate}) ->
+ejson_from_key(#chef_key{key_name = Name, public_key = PublicKey, expires_at = UnparsedExpirationDate}) ->
     ExpirationDate = case UnparsedExpirationDate of
         ?INFINITY_TIMESTAMP -> <<"infinity">>;
         _ -> list_to_binary(ec_date:format("Y-m-dTH:i:sZ", UnparsedExpirationDate))
@@ -169,7 +169,11 @@ update_query() ->
     error(need_to_implement).
 
 delete_query() ->
-    error(need_to_implement).
+    delete_key_by_id_and_name.
+
+delete(#chef_key{id = Id, key_name = Name}, CallbackFun) ->
+    CallbackFun({delete_query(), [Id, Name]}).
 
 bulk_get_query() ->
-    error(need_to_implement).
+    error(unsupported).
+
