@@ -48,7 +48,6 @@
          list/2,
          list_query/0,
          name/1,
-         new_record/2,
          new_record/3,
          org_id/1,
          record_fields/0,
@@ -152,19 +151,17 @@ bulk_get_query() ->
     %% TODO: do we need this?
     ok.
 
-new_record(OrgId, PolicyData) ->
+new_record(OrgId, PolicyAuthzID, PolicyData) ->
     Name = ej:get({<<"name">>}, PolicyData),
     RevisionId = ej:get({<<"revision_id">>}, PolicyData),
-    Id = chef_object_base:make_org_prefix_id(OrgId, Name),
+    Id = chef_object_base:make_org_prefix_id(OrgId, <<Name/binary, RevisionId/binary>>),
     #oc_chef_policy_revision{
         id = Id,
         org_id = OrgId,
+        policy_authz_id = PolicyAuthzID,
         name = Name,
         revision_id = RevisionId,
         serialized_object = ej:delete({<<"policy_group">>}, PolicyData)}.
-
-new_record(_OrgID, _AuthzID, _PolicyData) ->
-    error(not_implemented).
 
 create_record(OrgId, Name, RequestingActorId) ->
     Policy = #oc_chef_policy_revision{

@@ -49,7 +49,8 @@
          is_superuser/1,
          is_user_in_org/4,
          set_forbidden_msg/3,
-         user_in_group/3]).
+         user_in_group/3,
+         http_method_to_authz_perm/1]).
 
 %% Helpers for webmachine callbacks
 -export([create_from_json/5,

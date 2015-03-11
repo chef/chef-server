@@ -133,8 +133,7 @@ bulk_get_query() ->
     %% TODO: do we need this?
     ok.
 
-new_record(OrgId, AuthzId, PolicyData) ->
-    Name = ej:get({<<"name">>}, PolicyData),
+new_record(OrgId, AuthzId, Name) ->
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     #oc_chef_policy{
         id = Id,

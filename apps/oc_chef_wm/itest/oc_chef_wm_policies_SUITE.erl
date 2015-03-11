@@ -151,8 +151,8 @@ test_create_input_record(_Config) ->
             org_id = ?ORG_ID,
             policy_revision_name = <<"policy_name">>,
             policy_group_name = <<"group_name">>,
-            policy = #oc_chef_policy{ name = <<"policy_name">> },
-            policy_group = #oc_chef_policy_group{ name = <<"group_name">> }},
+            policy = #oc_chef_policy{org_id = ?ORG_ID, name = <<"policy_name">> },
+            policy_group = #oc_chef_policy_group{org_id = ?ORG_ID, name = <<"group_name">> }},
     ?assertEqual(Expected, Result).
 
 test_validate_json(_Config) ->
@@ -179,7 +179,7 @@ test_policy_permissions_get_404(Config) ->
     DbContext = proplists:get_value(context, Config),
     QueryRecord = make_query_record_404(Config),
     % 404s
-    Result = oc_chef_wm_named_policy:policy_permissions('GET', not_found, QueryRecord, DbContext),
+    Result = oc_chef_wm_named_policy:policy_permissions_objects('GET', not_found, QueryRecord, DbContext),
     Expected = {halt, 404, {[{<<"error">>, [<<"Cannot load policy nope in policy group nope">>]}]}},
     ?assertEqual(Expected, Result),
     ok.
@@ -188,7 +188,7 @@ test_policy_permissions_delete_404(Config) ->
     DbContext = proplists:get_value(context, Config),
     QueryRecord = make_query_record_404(Config),
     % 404s
-    Result = oc_chef_wm_named_policy:policy_permissions('DELETE', not_found, QueryRecord, DbContext),
+    Result = oc_chef_wm_named_policy:policy_permissions_objects('DELETE', not_found, QueryRecord, DbContext),
     Expected = {halt, 404, {[{<<"error">>, [<<"Cannot load policy nope in policy group nope">>]}]}},
     ?assertEqual(Expected, Result),
     ok.
@@ -197,7 +197,7 @@ test_policy_permissions_put_404_prereqs_dont_exist(Config) ->
     DbContext = proplists:get_value(context, Config),
     QueryRecord = make_query_record_404(Config),
     % 404s
-    Result = oc_chef_wm_named_policy:policy_permissions('PUT', not_found, QueryRecord, DbContext),
+    Result = oc_chef_wm_named_policy:policy_permissions_objects('PUT', not_found, QueryRecord, DbContext),
     Expected = [{create_in_container, policy_groups}, {create_in_container, policies}],
     ?assertEqual(Expected, Result),
     ok.
@@ -275,9 +275,9 @@ test_policy_permissions_put_404_prereqs_exist(Config) ->
             policy = Policy,
             policy_group = PolicyGroup
             },
-    Result = oc_chef_wm_named_policy:policy_permissions('PUT', not_found, QueryAssoc, DbContext),
+    Result = oc_chef_wm_named_policy:policy_permissions_objects('PUT', not_found, QueryAssoc, DbContext),
     % These get reversed by list head-tail stuff compared to the asssociation exists case
-    Expected = [{object, ?AUTHZ_ID5}, {object, ?AUTHZ_ID4}],
+    Expected = [{policy_group, ?AUTHZ_ID5}, {policy, ?AUTHZ_ID4}],
     ?assertEqual(Expected, Result),
     delete_all_policy_data().
 
@@ -285,8 +285,8 @@ test_policy_permissions_get_when_exists(Config) ->
     DbContext = proplists:get_value(context, Config),
     CreatedAssocWithObjects = make_query_record_exists(Config),
     ReturnedAssoc = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(CreatedAssocWithObjects, DbContext),
-    Result = oc_chef_wm_named_policy:policy_permissions('GET', ReturnedAssoc, CreatedAssocWithObjects, DbContext),
-    Expected = [{object, ?AUTHZ_ID4}, {object, ?AUTHZ_ID5}],
+    Result = oc_chef_wm_named_policy:policy_permissions_objects('GET', ReturnedAssoc, CreatedAssocWithObjects, DbContext),
+    Expected = [{policy, ?AUTHZ_ID4}, {policy_group, ?AUTHZ_ID5}],
     ?assertEqual(Expected, Result),
     delete_all_policy_data().
 
@@ -294,8 +294,8 @@ test_policy_permissions_put_when_exists(Config) ->
     DbContext = proplists:get_value(context, Config),
     CreatedAssocWithObjects = make_query_record_exists(Config),
     ReturnedAssoc = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(CreatedAssocWithObjects, DbContext),
-    Result = oc_chef_wm_named_policy:policy_permissions('PUT', ReturnedAssoc, CreatedAssocWithObjects, DbContext),
-    Expected = [{object, ?AUTHZ_ID4}, {object, ?AUTHZ_ID5}],
+    Result = oc_chef_wm_named_policy:policy_permissions_objects('PUT', ReturnedAssoc, CreatedAssocWithObjects, DbContext),
+    Expected = [{policy, ?AUTHZ_ID4}, {policy_group, ?AUTHZ_ID5}],
     ?assertEqual(Expected, Result),
     delete_all_policy_data().
 %% HTTP round-trip tests
@@ -338,7 +338,7 @@ delete_policy(_) ->
 fetch_non_existant_policy(_) ->
     Result = {ok, _, _, ResponseBody} = http_fetch_policy("bar"),
     ?assertMatch({ok, "404", _, ResponseBody} , Result),
-    ?assertEqual([<<"Cannot load policy bar">>], ej:get({"error"}, ejson:decode(ResponseBody))),
+    ?assertEqual([<<"Cannot load policy bar in policy group group_name">>], ej:get({"error"}, ejson:decode(ResponseBody))),
     ok.
 
 fetch_existant_policy(_) ->

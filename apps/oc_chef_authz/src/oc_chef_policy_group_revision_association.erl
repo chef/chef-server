@@ -42,6 +42,7 @@
          update_query/0,
          delete_query/0,
          record_fields/0,
+         new_record/6,
          flatten/1,
          is_indexed/0,
          ejson_for_indexing/2]).
@@ -152,6 +153,29 @@ delete_query() ->
 
 record_fields() ->
     record_info(fields, oc_chef_policy_group_revision_association).
+
+new_record(OrgID, PolicyName, PolicyAuthzID, PolicyGroupName, PolicyGroupAuthzID, PolicyData) ->
+    %% POLICY:   name, org_id, authz_id
+    Policy = oc_chef_policy:new_record(OrgID, PolicyAuthzID, PolicyName),
+    %% GROUP:    name, org_id, authz_id
+    PolicyGroup = oc_chef_policy_group:new_record(OrgID, PolicyGroupAuthzID, PolicyGroupName),
+    %% Revision: name, ord_id, policy_authz_id, revision_id, serialized_object
+    PolicyRevision = oc_chef_policy_revision:new_record(OrgID, PolicyAuthzID, PolicyData),
+    %% PGRA:     org_id, policy_group_authz_id, revision_id, revision_name, policy_group_name, associated records
+    #oc_chef_policy_revision{revision_id = RevisionID} = PolicyRevision,
+
+    Id = chef_object_base:make_org_prefix_id(OrgID, <<PolicyName/binary, PolicyGroupName/binary, RevisionID/binary>>),
+    #oc_chef_policy_group_revision_association{
+        id = Id,
+        org_id = OrgID,
+        policy_group_authz_id = PolicyGroupAuthzID,
+        policy_revision_revision_id = RevisionID,
+        policy_revision_name = PolicyName,
+        policy_group_name = PolicyGroupName,
+        policy = Policy,
+        policy_group = PolicyGroup,
+        policy_revision = PolicyRevision
+        }.
 
 decompress_record(#oc_chef_policy_group_revision_association{
                   serialized_object = CompressedSerializedObject} = Assoc) ->
