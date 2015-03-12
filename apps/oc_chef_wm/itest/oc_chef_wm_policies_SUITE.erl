@@ -311,9 +311,8 @@ list_when_created_policies(_) ->
     {ok, ResponseCode, _, ResponseBody} = http_list_policies(),
     ?assertEqual("200", ResponseCode),
     Ejson = ejson:decode(ResponseBody),
-    {PolicyList} = Ejson,
-    ?assertEqual( [{list_to_binary(Policy), <<"group_name">>} || Policy <- Policies ],
-                  PolicyList).
+    ?assertEqual( [<<"bar">>, <<"foo">>],
+                  Ejson).
 
 create_policy(_) ->
 	{ok, ResultCode, _, _} = http_create_policy("foo"),

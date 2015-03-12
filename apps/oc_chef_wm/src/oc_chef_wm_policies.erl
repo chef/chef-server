@@ -20,7 +20,6 @@
                            service_available/2]}]).
 
 -export([allowed_methods/2,
-         from_json/2,
          resource_exists/2 ]).
 
 %% chef_wm behavior callbacks
@@ -32,9 +31,6 @@
          request_type/0,
          validate_request/3,
          to_json/2]).
-
-%% Shared functions
--export([ policy_name_invalid/2 ]).
 
 init(Config) ->
     oc_chef_wm_base:init(?MODULE, Config).
@@ -61,22 +57,11 @@ auth_info('GET', Req, State ) ->
 resource_exists(Req, State) ->
     {true, Req, State}.
 
-from_json(Req, #base_state{resource_state = #policy_state{policy_data = PolicyData,
-                                                             policy_authz_id = AuthzId}} = State) ->
-    oc_chef_wm_base:create_from_json(Req, State, oc_chef_policy, {authz_id, AuthzId}, PolicyData).
-
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
-
-
-policy_name_invalid(Req, State) ->
-    Msg = <<"Invalid policy name.">>,
-    JsonError = {[{<<"error">>, [Msg]}]},
-    {{halt, 400}, chef_wm_util:set_json_body(Req, JsonError), State}.
-
 
 to_json(Req, #base_state{chef_db_context = DbContext,
                          resource_state = StubRec
                         } = State) ->
     Names = chef_db:list(StubRec, DbContext),
-    {chef_json:encode({[ {Name, Group} || [Name, Group] <- Names]}), Req, State}.
+    {chef_json:encode(lists:sort([ hd(NameAsList) ||NameAsList <- Names])), Req, State}.
