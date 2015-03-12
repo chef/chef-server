@@ -253,6 +253,7 @@ end
 # :headers => a map of header names and expected values.  Only tests
 #     the specified headers, and makes no assumptions about
 #     unspecified headers.
+# :no_headers => an array of header names that should NOT be present
 
 RSpec::Matchers.define :look_like do |expected_response_spec|
   include ::Pedant::JSON
@@ -274,12 +275,19 @@ RSpec::Matchers.define :look_like do |expected_response_spec|
         expect(response).to eq expected_response_spec[:body_raw]
       end
 
+      actual_headers = response.raw_headers
       # Test the headers
       if expected_response_spec[:headers]
         headers = expected_response_spec[:headers]
-        actual_headers = response.raw_headers
         headers.each do |header, value|
           actual_headers[header].should eq value
+        end
+      end
+
+      # Test headers that shouldn't be
+      if expected_response_spec[:no_headers]
+        expected_response_spec[:no_headers].each do |header|
+          actual_headers.key?(header).should be(false)
         end
       end
 
