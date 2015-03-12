@@ -61,9 +61,15 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET', 'POST'], Req, State}.
 
-%% This export is mixed into oc_chef_wm_named_key
+%% This export is mixed into oc_chef_wm_named_key -
+validate_request('PUT', Req, #base_state{resource_args = ObjectType, chef_db_context = Ctx, organization_guid = OrgId} = State) ->
+    EJ = chef_key:parse_binary_json(wrq:req_body(Req), existing),
+    ObjectName = chef_wm_util:object_name(ObjectType, Req),
+    ResourceState = make_resource_state_for_object(Ctx, ObjectType, ObjectName, OrgId),
+    ResourceState1 = ResourceState#key_state{key_data = EJ},
+    {Req, State#base_state{resource_state = ResourceState1 }};
 validate_request('POST', Req, #base_state{resource_args = ObjectType, chef_db_context = Ctx, organization_guid = OrgId} = State) ->
-    EJ = chef_key:parse_binary_json(wrq:req_body(Req), undefined),
+    EJ = chef_key:parse_binary_json(wrq:req_body(Req), new),
     ObjectName = chef_wm_util:object_name(ObjectType, Req),
     ResourceState = make_resource_state_for_object(Ctx, ObjectType, ObjectName, OrgId),
     ResourceState1 = ResourceState#key_state{key_data = EJ},

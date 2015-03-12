@@ -35,7 +35,9 @@
                            service_available/2]}]).
 
 -mixin([{oc_chef_wm_keys, [auth_info/2,
-                           validate_request/3]}]).
+                           validate_request/3,
+                           conflict_message/1,
+                           route_args/2]}]).
 
 %% chef_wm behavior callbacks
 -behavior(chef_wm).
@@ -60,7 +62,7 @@ request_type() ->
     "keys".
 
 allowed_methods(Req, State) ->
-    {['GET', 'DELETE'], Req, State}.
+    {['GET', 'DELETE', 'PUT'], Req, State}.
 
 % auth requirements are shared between this module and oc_chef_wm_key,
 % but we additionally need to verify that the user isn't attempting to remove the
@@ -71,9 +73,17 @@ auth_info(Method, Req, #base_state{chef_db_context = Ctx,
                                    resource_state = #key_state{parent_id = ParentId} = ResourceState} = State) ->
 
     Name = chef_wm_util:object_name(key, Req),
-    ct:pal("~p ~p ~p~n", [Name, RequestorId, Method]),
+    % TODO cleanup
+    io:fwrite("~p ~p ~p~n", [Name, RequestorId, Method]),
+
     case {Name, RequestorId, Method} of
         {AuthenticatedKeyName, ParentId, 'DELETE'} ->
+            key_in_use_response(Name, Req, State);
+        {AuthenticatedKeyName, ParentId, 'PUT'} ->
+            % TODO consider allowing updates to authenticating key
+            % that wouldn't break auth:
+            % - not to an expired date or date to expire soon
+            % - not to a new public_key.
             key_in_use_response(Name, Req, State);
         _ ->
             case chef_db:fetch(#chef_key{id = ParentId, key_name = Name}, Ctx) of
@@ -94,15 +104,14 @@ key_in_use_response(Name, Req, #base_state{resource_state = #key_state{parent_na
 key_not_found_response(Name, Req, #base_state{resource_state = #key_state{parent_name = ParentName}} = State) ->
     Message = chef_wm_util:not_found_message(key, {ParentName, Name}),
     Req1 = chef_wm_util:set_json_body(Req, Message),
-    {{halt, 404}, Req1, State#base_state{log_msg={key_not_found, {ParentName, Name}}}}.
 
+    {{halt, 404}, Req1, State#base_state{log_msg={key_not_found, {ParentName, Name}}}}.
 to_json(Req, #base_state{resource_state = #key_state{chef_key = Key}} = State) ->
     EJ = chef_key:ejson_from_key(Key),
     {chef_json:encode(EJ), Req, State}.
 
-%% TODO: needed for PUT
-from_json(_Req, #base_state{}) ->
-    error(not_implemented).
+from_json(Req, #base_state{resource_state = #key_state{chef_key = Key, key_data = EJ}} = State) ->
+    oc_chef_wm_base:update_from_json(Req, State, Key, EJ).
 
 delete_resource(Req, #base_state{requestor_id = RequestorId, chef_db_context = Ctx,
                                  resource_state = #key_state{chef_key = Key}} = State) ->
@@ -111,5 +120,7 @@ delete_resource(Req, #base_state{requestor_id = RequestorId, chef_db_context = C
     Req1 = chef_wm_util:set_json_body(Req, EJ),
     {true, Req1, State}.
 
-malformed_request_message(Any, _Req, _state) ->
+malformed_request_message(missing_required_field, _Req, _State) ->
+    {[{<<"error">>, <<"At least one of 'name', 'expiration_date', or 'public_key' must be specified">>}]};
+malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
