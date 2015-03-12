@@ -15,7 +15,7 @@
 #
 
 name "knife-opc"
-default_version "0.2.1"
+default_version "0.3.0"
 
 source git: "git://github.com/opscode/knife-opc.git"
 
