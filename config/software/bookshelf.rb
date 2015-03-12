@@ -24,7 +24,8 @@ dependency "rebar"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
-
+  # Override REL_HOOK to avoid running tests during the build
+  env['REL_HOOK'] = ".concrete/DEV_MODE compile"
   make "distclean", env: env
   make "rel", env: env
 
