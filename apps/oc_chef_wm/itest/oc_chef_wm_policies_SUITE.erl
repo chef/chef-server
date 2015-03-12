@@ -22,6 +22,10 @@
 -define(CLIENT_NAME, <<"test-client">>).
 -define(ORG_NAME, <<"org1">>).
 
+-define(ALTERNATE_REV_ID_1, <<"1352e6cedfed34ebc3828762d521742b9fa677b7">>).
+-define(ALTERNATE_REV_ID_2, <<"2a50600f68ede3463f0b490a8816e71c605ca997">>).
+-define(ALTERNATE_REV_ID_3, <<"3b0c789fa7305a147404364e4b14324814e82925">>).
+
 -define(POLICY_FILE_CANONICAL_EXAMPLE, <<"
     {
       \"revision_id\": \"909c26701e291510eacdc6c06d626b9fa5350d25\",
@@ -98,6 +102,7 @@ all() ->
      list_when_no_policies,
      list_when_created_policies,
      create_policy,
+     update_policy,
      create_with_bad_name,
      delete_policy,
      fetch_non_existant_policy,
@@ -307,7 +312,7 @@ list_when_no_policies(_) ->
 
 list_when_created_policies(_) ->
     Policies = ["foo", "bar"],
-    [ ?assertMatch({ok, "201", _, _}, http_create_policy(Policy)) || Policy <- Policies ],
+    [ ?assertMatch({ok, "201", _, _}, http_create_modified_policy(Policy)) || Policy <- Policies ],
     {ok, ResponseCode, _, ResponseBody} = http_list_policies(),
     ?assertEqual("200", ResponseCode),
     Ejson = ejson:decode(ResponseBody),
@@ -315,20 +320,33 @@ list_when_created_policies(_) ->
                   Ejson).
 
 create_policy(_) ->
-	{ok, ResultCode, _, _} = http_create_policy("foo"),
+	{ok, ResultCode, _, _} = http_create_modified_policy("foo"),
     {ok, _, _, ResponseBody} = http_fetch_policy("foo"),
 	ExpectedJson = canonical_example_policy_json("foo"),
 	?assertEqual("201", ResultCode),
 	?assertEqual(ExpectedJson, jiffy:decode(ResponseBody)),
     ok.
 
+update_policy(_) ->
+	{ok, CreateResultCode, _, _} = http_create_modified_policy("foo"),
+	?assertEqual("201", CreateResultCode),
+    {ok, ResultCode, _, ResponseBody} = http_create_modified_policy("foo", ?ALTERNATE_REV_ID_1),
+    ?assertEqual("200", ResultCode),
+    ExpectedEJSON = canonical_example_policy_json("foo", ?ALTERNATE_REV_ID_1),
+    ActualEJSON = jiffy:decode(ResponseBody),
+    ?assertEqual(ExpectedEJSON, ActualEJSON),
+    {ok, FetchResponseCode, _, FetchResponseBody} = http_fetch_policy("foo"),
+	?assertEqual("200", FetchResponseCode),
+	?assertEqual(ExpectedEJSON, jiffy:decode(FetchResponseBody)),
+    ok.
+
 create_with_bad_name(_) ->
-    Result = http_create_policy("name with spaces"),
+    Result = http_create_modified_policy("name with spaces"),
     ?assertMatch({ok, "400", _, _}, Result),
     ok.
 
 delete_policy(_) ->
-    http_create_policy("foo"),
+    http_create_modified_policy("foo"),
     Result = http_delete_policy("foo"),
     ?assertMatch({ok, "200", _, _} , Result),
 	?assertMatch({ok, "404", _, _}, http_fetch_policy("foo")),
@@ -341,7 +359,7 @@ fetch_non_existant_policy(_) ->
     ok.
 
 fetch_existant_policy(_) ->
-    http_create_policy("foo"),
+    http_create_modified_policy("foo"),
     {ok, ResponseCode, _, ResponseBody} = http_fetch_policy("foo"),
     ?assertEqual("200", ResponseCode),
 	ExpectedJson = canonical_example_policy_json("foo"),
@@ -404,12 +422,15 @@ http_fetch_policy(Name) ->
     UrlEncodedName = ibrowse_lib:url_encode(Name),
     http_request(get, "/group_name/" ++ UrlEncodedName, <<>>).
 
+http_create_modified_policy(Name) ->
+    http_create_policy(Name, canonical_example_policy_json(Name)).
+
+http_create_modified_policy(Name, RevisionID) ->
+    http_create_policy(Name, canonical_example_policy_json(Name, RevisionID)).
+
 http_create_policy(Name, Json) ->
     UrlEncodedName = ibrowse_lib:url_encode(Name),
     http_request(put, "/group_name/" ++ UrlEncodedName, ejson:encode(Json)).
-
-http_create_policy(Name) ->
-    http_create_policy(Name, canonical_example_policy_json(Name)).
 
 http_delete_policy(Name) ->
     UrlEncodedName = ibrowse_lib:url_encode(Name),
@@ -430,7 +451,12 @@ http_request(Method, RouteSuffix, Body) ->
 
 canonical_example_policy_json(Name) ->
     BaseJson = ejson:decode(?POLICY_FILE_CANONICAL_EXAMPLE),
-    ej:set({<<"name">>}, BaseJson, list_to_binary(Name)).
+    ej:set({<<"name">>}, BaseJson, iolist_to_binary(Name)).
+
+canonical_example_policy_json(Name, RevisionID) ->
+    BaseJson = ejson:decode(?POLICY_FILE_CANONICAL_EXAMPLE),
+    WithNewName = ej:set({<<"name">>}, BaseJson, iolist_to_binary(Name)),
+    ej:set({<<"revision_id">>}, WithNewName, iolist_to_binary(RevisionID)).
 
 minimal_example_policy_json(Name) ->
     BaseJson = ejson:decode(?POLICY_FILE_MINIMAL_EXAMPLE),

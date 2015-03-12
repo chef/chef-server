@@ -291,7 +291,7 @@
           policy_authz_id,
           policy_group_authz_id,
           policy_data_for_response,
-          create_policy = false,
+          policy_assoc_exists = false,
           oc_chef_policy_group_revision_association :: #oc_chef_policy_group_revision_association{}
          }).
 

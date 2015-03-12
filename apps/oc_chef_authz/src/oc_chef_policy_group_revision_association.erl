@@ -43,6 +43,7 @@
          delete_query/0,
          record_fields/0,
          new_record/6,
+         update_record/7,
          flatten/1,
          is_indexed/0,
          ejson_for_indexing/2]).
@@ -174,6 +175,21 @@ new_record(OrgID, PolicyName, PolicyAuthzID, PolicyGroupName, PolicyGroupAuthzID
         policy_group_name = PolicyGroupName,
         policy = Policy,
         policy_group = PolicyGroup,
+        policy_revision = PolicyRevision
+        }.
+
+update_record(ID, OrgID, PolicyName, PolicyAuthzID, PolicyGroupName, PolicyGroupAuthzID, PolicyData) ->
+    %% Policy and PolicyGroup must exist or else you'll run afoul of FK constraints.
+    PolicyRevision = oc_chef_policy_revision:new_record(OrgID, PolicyAuthzID, PolicyData),
+    #oc_chef_policy_revision{revision_id = RevisionID} = PolicyRevision,
+    #oc_chef_policy_group_revision_association{
+        id = ID,
+        org_id = OrgID,
+        policy_group_authz_id = PolicyGroupAuthzID,
+        policy_revision_revision_id = RevisionID,
+        policy_revision_name = PolicyName,
+        policy_group_name = PolicyGroupName,
+
         policy_revision = PolicyRevision
         }.
 

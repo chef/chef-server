@@ -113,16 +113,14 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
     %% for GET and DELETE we want to save the serialized object in here.
     PolicyAssoc = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(QueryRecord, DbContext),
     StateWithResponse = case PolicyAssoc of
-        #oc_chef_policy_group_revision_association{serialized_object = Object} ->
-            PolicyStateWithResponseData = PolicyState#policy_state{policy_data_for_response = Object},
+        #oc_chef_policy_group_revision_association{id = ID, serialized_object = Object} ->
+            PolicyStateWithResponseData = PolicyState#policy_state{
+                    policy_assoc_exists = ID,
+                    policy_data_for_response = Object},
             State#base_state{resource_state = PolicyStateWithResponseData};
         _Any -> State
     end,
 
-    %% TODO: need to store whether the pgra exists, so we know if we're updating
-    %% TODO: it's possible that the policy and group exist but there's no assoc
-    %% record. b/c we denormalize authz ids, in the case of PUT we must know
-    %% what the prereq objects are so we can store their authz_ids
     PermissionsObjects = policy_permissions_objects(wrq:method(Req), PolicyAssoc, QueryRecord, DbContext),
     StateWithAuthzIDs = stash_permissions_objects_authz_ids(PermissionsObjects, StateWithResponse),
     PermissionsListOrHalt = permissions_with_actions(PermissionsObjects, Req),
@@ -132,11 +130,6 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
             ReqWithBody = chef_wm_util:set_json_body(Req, Message),
             {{halt, 404}, ReqWithBody, StateWithAuthzIDs#base_state{log_msg = policy_not_found}};
         PermissionsList ->
-            %% TODO: code path for oc_chef_wm_base:forbidden will go to
-            %% multi_auth_check when we return a list. That function doesn't support
-            %% create_in_container, which we need. Also, create_in_container isn't set
-            %% up to support multiple creates; we need to set different fields in our
-            %% resource state for each authzid so we can tell them apart.
             {PermissionsList, Req, StateWithAuthzIDs}
     end.
 
@@ -219,35 +212,58 @@ resource_exists(Req, State) ->
 to_json(Req, #base_state{resource_state = #policy_state{policy_data_for_response = PolicyData}} = State) ->
     {jiffy:encode(PolicyData), Req, State}.
 
-%% TODO: needs to handle the update case.
 from_json(Req, #base_state{organization_guid = OrgID,
                            chef_db_context = DbContext,
                            requestor_id = RequestorId,
                            resource_state = #policy_state{policy_data = PolicyData,
                                                           policy_authz_id = PolicyAuthzID,
-                                                          policy_group_authz_id = PolicyGroupAuthzID
+                                                          policy_group_authz_id = PolicyGroupAuthzID,
+                                                          policy_assoc_exists = MaybeAssocID
                                                          }} = State) ->
 
     PolicyName = iolist_to_binary(wrq:path_info(policy_name, Req)),
     PolicyGroupName = iolist_to_binary(wrq:path_info(policy_group, Req)),
-    CreateRecord =  oc_chef_policy_group_revision_association:new_record(OrgID,
-                                                                         PolicyName,
-                                                                         PolicyAuthzID,
-                                                                         PolicyGroupName,
-                                                                         PolicyGroupAuthzID,
-                                                                         PolicyData),
 
-    Result = oc_chef_policy_group_revision_association:insert_association(CreateRecord, DbContext, RequestorId),
-    case Result of
-        ok ->
-            %% Not strictly true...
-            LogMsg = {created, PolicyName},
-            Uri = oc_chef_wm_routes:route(policy, Req, [{name, PolicyName}]),
-            ReqWithURI = chef_wm_util:set_uri_of_created_resource(Uri, Req),
-            ReqWithBody = chef_wm_util:set_json_body(ReqWithURI, PolicyData),
-            {true, ReqWithBody, State#base_state{log_msg = LogMsg}}
-        %% TODO: {conflict, _} ->
+    case MaybeAssocID of
+        false ->
+            CreateRecord =  oc_chef_policy_group_revision_association:new_record(OrgID,
+                                                                                 PolicyName,
+                                                                                 PolicyAuthzID,
+                                                                                 PolicyGroupName,
+                                                                                 PolicyGroupAuthzID,
+                                                                                 PolicyData),
+            R = oc_chef_policy_group_revision_association:insert_association(CreateRecord, DbContext, RequestorId),
+            handle_create_result(R, PolicyName, PolicyData, Req, State);
+        AssocId ->
+            UpdateRecord = oc_chef_policy_group_revision_association:update_record(AssocId,
+                                                                                   OrgID,
+                                                                                   PolicyName,
+                                                                                   PolicyAuthzID,
+                                                                                   PolicyGroupName,
+                                                                                   PolicyGroupAuthzID,
+                                                                                   PolicyData),
+            R = oc_chef_policy_group_revision_association:update_association(UpdateRecord, DbContext, RequestorId),
+            handle_update_result(R, PolicyName, PolicyData, Req, State)
     end.
+
+handle_create_result(ok, PolicyName, PolicyData, Req, State) ->
+    %% Not strictly true...
+    LogMsg = {created, PolicyName},
+    Uri = oc_chef_wm_routes:route(policy, Req, [{name, PolicyName}]),
+    %% TODO: don't set this for update
+    ReqWithURI = chef_wm_util:set_uri_of_created_resource(Uri, Req),
+    ReqWithBody = chef_wm_util:set_json_body(ReqWithURI, PolicyData),
+    {true, ReqWithBody, State#base_state{log_msg = LogMsg}};
+handle_create_result(ERROR, _PolicyName, _PolicyData, Req, State) ->
+    {{halt, 500}, Req, State#base_state{log_msg = ERROR}}.
+
+handle_update_result(ok, PolicyName, PolicyData, Req, State) ->
+    %% Not strictly true...
+    LogMsg = {updated, PolicyName},
+    ReqWithBody = chef_wm_util:set_json_body(Req, PolicyData),
+    {true, ReqWithBody, State#base_state{log_msg = LogMsg}};
+handle_update_result(ERROR, _PolicyName, _PolicyData, Req, State) ->
+    {{halt, 500}, Req, State#base_state{log_msg = ERROR}}.
 
 
 conflict_message(Name) ->
@@ -279,3 +295,4 @@ delete_resource(Req, State) ->
 
 malformed_request_message(Any, _Req, _state) ->
     error({unexpected_malformed_request_message, Any}).
+
