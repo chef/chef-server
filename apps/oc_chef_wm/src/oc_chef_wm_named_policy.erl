@@ -247,10 +247,8 @@ from_json(Req, #base_state{organization_guid = OrgID,
     end.
 
 handle_create_result(ok, PolicyName, PolicyData, Req, State) ->
-    %% Not strictly true...
     LogMsg = {created, PolicyName},
     Uri = oc_chef_wm_routes:route(policy, Req, [{name, PolicyName}]),
-    %% TODO: don't set this for update
     ReqWithURI = chef_wm_util:set_uri_of_created_resource(Uri, Req),
     ReqWithBody = chef_wm_util:set_json_body(ReqWithURI, PolicyData),
     {true, ReqWithBody, State#base_state{log_msg = LogMsg}};
@@ -258,7 +256,6 @@ handle_create_result(ERROR, _PolicyName, _PolicyData, Req, State) ->
     {{halt, 500}, Req, State#base_state{log_msg = ERROR}}.
 
 handle_update_result(ok, PolicyName, PolicyData, Req, State) ->
-    %% Not strictly true...
     LogMsg = {updated, PolicyName},
     ReqWithBody = chef_wm_util:set_json_body(Req, PolicyData),
     {true, ReqWithBody, State#base_state{log_msg = LogMsg}};
@@ -270,28 +267,19 @@ conflict_message(Name) ->
     {[{<<"error">>, list_to_binary("Policy already exists " ++ Name)}]}.
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% TODO!!! set back to real functionality
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-delete_resource(Req, State) ->
-    {true, Req, State}.
-
-%%%% delete_resource(Req, #base_state{
-%%%%                         organization_name = OrgName,
-%%%%                         chef_db_context = DbContext,
-%%%%                         requestor_id = RequestorId,
-%%%%                         resource_state = #policy_state{
-%%%%                                             oc_chef_policy = InputPolicy }
-%%%%                        } = State) ->
-%%%%     Group = wrq:path_info(policy_group, Req),
-%%%%     Policy = InputPolicy#oc_chef_policy{
-%%%%                last_updated_by = RequestorId,
-%%%%                policy_group = Group
-%%%%               },
-%%%%     ok = oc_chef_wm_base:delete_object(DbContext, Policy, RequestorId),
-%%%%     Ejson = oc_chef_policy:assemble_policy_ejson(Policy, OrgName),
-%%%%     {true, chef_wm_util:set_json_body(Req, Ejson), State}.
+delete_resource(Req, #base_state{chef_db_context = DbContext,
+                                 resource_state = #policy_state{policy_assoc_exists = AssocID,
+                                                                policy_data_for_response = PolicyData}} = State) ->
+    AssocToDelete = #oc_chef_policy_group_revision_association{ id = AssocID },
+    DeleteResult = oc_chef_policy_group_revision_association:delete_association(AssocToDelete, DbContext),
+    case DeleteResult of
+        % Delete returns integer
+        1 ->
+            {true, chef_wm_util:set_json_body(Req, PolicyData), State};
+        ERROR ->
+            {{halt, 500}, Req, State#base_state{log_msg = ERROR}}
+    end.
 
 malformed_request_message(Any, _Req, _state) ->
     error({unexpected_malformed_request_message, Any}).
