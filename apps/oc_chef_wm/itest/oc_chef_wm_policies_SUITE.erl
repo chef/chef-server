@@ -136,7 +136,6 @@ nuke_table_data(Table) ->
 
 functional_tests(Config) ->
     test_init(Config),
-    test_create_input_record(Config),
     test_validate_json(Config),
     test_policy_permissions_get_404(Config),
     test_policy_permissions_delete_404(Config),
@@ -149,16 +148,6 @@ functional_tests(Config) ->
 test_init(_Config) ->
     {OkOrError, _State} = oc_chef_wm_named_policy:init([]),
     ?assertEqual(ok, OkOrError).
-
-test_create_input_record(_Config) ->
-    Result = oc_chef_wm_named_policy:create_input_pgr_assoc_record(?ORG_ID, <<"policy_name">>, <<"group_name">>),
-    Expected = #oc_chef_policy_group_revision_association{
-            org_id = ?ORG_ID,
-            policy_revision_name = <<"policy_name">>,
-            policy_group_name = <<"group_name">>,
-            policy = #oc_chef_policy{org_id = ?ORG_ID, name = <<"policy_name">> },
-            policy_group = #oc_chef_policy_group{org_id = ?ORG_ID, name = <<"group_name">> }},
-    ?assertEqual(Expected, Result).
 
 test_validate_json(_Config) ->
     Result = oc_chef_wm_named_policy:validate_json(?POLICY_FILE_MINIMAL_EXAMPLE, "some_policy_name"),

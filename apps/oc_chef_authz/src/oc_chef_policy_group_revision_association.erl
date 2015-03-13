@@ -42,6 +42,7 @@
          update_query/0,
          delete_query/0,
          record_fields/0,
+         record_for_find/3,
          new_record/6,
          update_record/7,
          flatten/1,
@@ -154,6 +155,15 @@ delete_query() ->
 
 record_fields() ->
     record_info(fields, oc_chef_policy_group_revision_association).
+
+record_for_find(OrgID, PolicyName, GroupName) ->
+    #oc_chef_policy_group_revision_association{
+        org_id = OrgID,
+        policy_revision_name = PolicyName,
+        policy_group_name = GroupName,
+        policy = #oc_chef_policy{org_id = OrgID, name = PolicyName },
+        policy_group = #oc_chef_policy_group{org_id = OrgID, name = GroupName }
+        }.
 
 new_record(OrgID, PolicyName, PolicyAuthzID, PolicyGroupName, PolicyGroupAuthzID, PolicyData) ->
     %% POLICY:   name, org_id, authz_id

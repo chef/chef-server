@@ -185,6 +185,16 @@ policy_group_revision_association_ops(Config) ->
     update_policy_group_policy_revision_association_create_revision(Config),
     ok.
 
+create_pgr_find_query_record(_Config) ->
+    Result = oc_chef_policy_group_revision_association:record_for_find(?ORG_ID, <<"policy_name">>, <<"group_name">>),
+    Expected = #oc_chef_policy_group_revision_association{
+            org_id = ?ORG_ID,
+            policy_revision_name = <<"policy_name">>,
+            policy_group_name = <<"group_name">>,
+            policy = #oc_chef_policy{org_id = ?ORG_ID, name = <<"policy_name">> },
+            policy_group = #oc_chef_policy_group{org_id = ?ORG_ID, name = <<"group_name">> }},
+    ?assertEqual(Expected, Result).
+
 pgr_assoc_doesnt_exist(Config) ->
     Prefix = <<"000">>,
     Policy = hd(primary_org_policy_fixtures(Config)),

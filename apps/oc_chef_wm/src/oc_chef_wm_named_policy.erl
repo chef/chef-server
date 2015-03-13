@@ -33,11 +33,8 @@
          malformed_request_message/3,
          request_type/0,
          validate_request/3,
+         validate_json/2,
          conflict_message/1]).
-
--ifdef(TEST).
--compile([export_all]).
--endif.
 
 init(Config) ->
     oc_chef_wm_base:init(?MODULE, Config).
@@ -80,14 +77,7 @@ validate_request('PUT', Req, #base_state{organization_guid = OrgId,
                 policy_data = PolicyRevision}}}.
 
 create_input_pgr_assoc_record(OrgID, PolicyName, GroupName) ->
-    #oc_chef_policy_group_revision_association{
-        org_id = OrgID,
-        policy_revision_name = PolicyName,
-        policy_group_name = GroupName,
-        policy = #oc_chef_policy{org_id = OrgID, name = PolicyName },
-        policy_group = #oc_chef_policy_group{org_id = OrgID, name = GroupName }
-        }.
-
+    oc_chef_policy_group_revision_association:record_for_find(OrgID, PolicyName, GroupName).
 
 validate_json(Body, NameFromReq) ->
     {ok, Policy} = oc_chef_policy_revision:parse_binary_json(Body),
