@@ -34,6 +34,7 @@
          request_type/0,
          validate_request/3,
          validate_json/2,
+         policy_permissions_objects/4,
          conflict_message/1]).
 
 init(Config) ->
