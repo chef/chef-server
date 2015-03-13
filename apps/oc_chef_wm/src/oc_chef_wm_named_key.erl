@@ -73,9 +73,6 @@ auth_info(Method, Req, #base_state{chef_db_context = Ctx,
                                    resource_state = #key_state{parent_id = ParentId} = ResourceState} = State) ->
 
     Name = chef_wm_util:object_name(key, Req),
-    % TODO cleanup
-    io:fwrite("~p ~p ~p~n", [Name, RequestorId, Method]),
-
     case {Name, RequestorId, Method} of
         {AuthenticatedKeyName, ParentId, 'DELETE'} ->
             key_in_use_response(Name, Req, State);

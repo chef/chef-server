@@ -173,24 +173,21 @@ list_query() ->
 create_query() ->
     insert_key_for_actor.
 
-parse_binary_json(Bin, existing) ->
-  % In this case, any and all fields CAN be updated, but
-  % minimum one is required. Because there are only three possible fields,
-  % we can keep this simple:
+parse_binary_json(Bin, update) ->
   EJ = chef_json:decode(Bin),
+  % At least one field must be present:
   OneOf = [<<"expiration_date">>, <<"public_key">>, <<"name">>],
-  case [ej:get({Field}, EJ) || Field <- OneOf] of
-    [undefined,undefined,undefined] ->
-      throw(missing_required_field);
-    _ ->
-      chef_object_base:validate_ejson(EJ, name_and_public_key_validation_spec(opt)),
-      validate_expiration_date(opt, EJ)
+  case lists:filter(fun(X) -> X =/= undefined end, [ej:get({Field}, EJ) || Field <- OneOf]) of
+      [] ->
+          throw(missing_required_field);
+      _ ->
+          chef_object_base:validate_ejson(EJ, name_and_public_key_validation_spec(opt)),
+          validate_expiration_date(opt, EJ)
   end;
-parse_binary_json(Bin, new) ->
+parse_binary_json(Bin, create) ->
   EJ = chef_json:decode(Bin),
   chef_object_base:validate_ejson(EJ, name_and_public_key_validation_spec(req)),
   validate_expiration_date(req, EJ).
-
 
 validate_expiration_date(Required, EJ) ->
   case {Required, ej:get({<<"expiration_date">>}, EJ)} of
@@ -212,11 +209,10 @@ delete(#chef_key{id = Id, key_name = Name}, CallbackFun) ->
     CallbackFun({delete_query(), [Id, Name]}).
 
 flatten(#chef_key{} = Key) ->
+    %% Drop off the first and last fielFirst is record name, and
+    %% last is one that isn't in the DB (for internal use)
     [_|Tail] = tuple_to_list(Key),
-    %% The last field is an internal field that isn't in the DB,
-    %% so drop it.
     lists:reverse(tl(lists:reverse(Tail))).
-    % Erlang 17+ : lists:droplast(Tail).
 
 bulk_get_query() ->
     error(unsupported).
