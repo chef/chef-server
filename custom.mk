@@ -31,11 +31,11 @@ ct_%: clean_ct
 	@ SUITE=$$(if [ -f "$(CT_DIR)/$*_SUITE.erl" ]; then \
 		echo "$*"; \
 	else \
-		FIND_RESULT=$$(find "$(CT_DIR)" -name "*$**_SUITE\.erl"); \
+		FIND_RESULT=$$(find "." -name "*$**_SUITE\.erl"); \
 		[ -z "$$FIND_RESULT" ] && echo "No suite found with input '$*'" 1>&2 && exit 1; \
-		NB_MACTHES=$$(echo "$$FIND_RESULT" | wc -l) && [[ $$NB_MACTHES != 1 ]] && echo -e "Found $$NB_MACTHES suites matching input:\n$$FIND_RESULT" 1>&2 && exit 1; \
+		NB_MACTHES=$$(echo "$$FIND_RESULT" | wc -l) && [[ $$NB_MACTHES != "       1" ]] && echo -e "Found $$NB_MACTHES suites matching input:\n$$FIND_RESULT" 1>&2 && exit 1; \
 		echo "$$FIND_RESULT" | perl -wlne 'print $$1 if /\/([^\/]+)_SUITE\.erl/'; \
-	fi) && COMMAND="time $(REBARC) ct suite=$$SUITE" && echo $$COMMAND && eval $$COMMAND;
+	fi) && COMMAND="time $(REBAR) ct suite=$$SUITE skip_deps=true" && echo $$COMMAND && eval $$COMMAND;
 
 clean_ct:
 	@rm -f $(CT_DIR)/*.beam
