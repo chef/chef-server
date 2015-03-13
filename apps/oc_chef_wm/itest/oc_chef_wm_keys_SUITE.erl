@@ -58,7 +58,8 @@ init_per_suite(LastConfig) ->
     make_org(?ORG_NAME, ?ORG_AUTHZ_ID),
     OrgId = chef_db:fetch_org_id(context(), ?ORG_NAME),
     {ok, PubKey} = file:read_file("../../spki_public.pem"),
-    [{org_id, OrgId}, {pubkey, PubKey}] ++ Config2.
+    {ok, AltPubKey} = file:read_file("../../public.pem"),
+    [{org_id, OrgId}, {pubkey, PubKey}, {alt_pubkey, AltPubKey}] ++ Config2.
 
 end_per_suite(Config) ->
     setup_helper:base_end_per_suite(Config).
@@ -93,142 +94,140 @@ all() ->
      post_conflicting_client_key,
      post_multiple_valid_user_keys,
      post_multiple_valid_client_keys,
+     % put_authing_user_key_with_different_user,
+     % put_authing_user_key,
      % delete_authing_user_key_with_different_user,
      % delete_authing_user_key,
      delete_valid_user_key,
      delete_invalid_user_key,
      % delete_authing_client_key_with_different_user,
      % delete_authing_client_key,
+     % put_authing_client_key_with_different_user,
+     % put_authing_client_key,
      delete_valid_client_key,
-     delete_invalid_client_key
+     delete_invalid_client_key,
+     put_valid_partial_client_key,
+     put_valid_partial_user_key,
+     put_rename_client_key,
+     put_rename_user_key,
+     put_rename_duplicate_client_key,
+     put_rename_duplicate_user_key,
+     put_invalid_partial_client_key,
+     put_invalid_partial_user_key,
+     put_full_client_key,
+     put_full_user_key
      ].
 
 %% GET /organizations/org/clients/client/keys && GET /users/client/keys
 list_client_default_key(_) ->
-    Result = http_keys_request(get, client, ?CLIENT_NAME),
+    Result = http_key_request(get, client, ?CLIENT_NAME),
     ?assertMatch({ok, "200", _, _} , Result),
-    BodyEJ = chef_json:decode(response_body(Result)),
+    BodyEJ = decoded_response_body(Result),
     ExpectedEJ = client_key_list_ejson(?CLIENT_NAME, [?DEFAULT_KEY_ENTRY]),
-    ?assertMatch(ExpectedEJ, BodyEJ),
-    ok.
+    ?assertMatch(ExpectedEJ, BodyEJ).
 
 list_user_default_key(_) ->
-    Result = http_keys_request(get, user, ?USER_NAME),
+    Result = http_key_request(get, user, ?USER_NAME),
     ?assertMatch({ok, "200", _, _} , Result),
-    BodyEJ = chef_json:decode(response_body(Result)),
+    BodyEJ = decoded_response_body(Result),
     ExpectedEJ = user_key_list_ejson(?USER_NAME, [?DEFAULT_KEY_ENTRY]),
-    ?assertMatch(ExpectedEJ, BodyEJ),
-    ok.
+    ?assertMatch(ExpectedEJ, BodyEJ).
 
 list_client_multiple_keys(_) ->
-    Result = http_keys_request(get, client, ?CLIENT_NAME),
+    Result = http_key_request(get, client, ?CLIENT_NAME),
     ?assertMatch({ok, "200", _, _} , Result),
-    BodyEJ = chef_json:decode(response_body(Result)),
+    BodyEJ = decoded_response_body(Result),
     ExpectedEJ = client_key_list_ejson(?CLIENT_NAME, [?DEFAULT_KEY_ENTRY, ?KEY_1_ENTRY, ?KEY_2_ENTRY]),
-    ?assertMatch(ExpectedEJ, BodyEJ),
-    ok.
+    ?assertMatch(ExpectedEJ, BodyEJ).
 
 list_user_multiple_keys(_) ->
-    Result = http_keys_request(get, user, ?USER_NAME),
+    Result = http_key_request(get, user, ?USER_NAME),
     ?assertMatch({ok, "200", _, _} , Result),
-    BodyEJ = chef_json:decode(response_body(Result)),
+    BodyEJ = decoded_response_body(Result),
     ExpectedEJ = user_key_list_ejson(?USER_NAME, [?DEFAULT_KEY_ENTRY, ?KEY_1_ENTRY, ?KEY_2_ENTRY]),
-    ?assertMatch(ExpectedEJ, BodyEJ),
-    ok.
+    ?assertMatch(ExpectedEJ, BodyEJ).
 
 list_client_no_keys(_) ->
-    Result = http_keys_request(get, client, ?ADMIN_USER_NAME),
-    ?assertMatch({ok, "200", _, "[]"} , Result),
-    ok.
+    Result = http_key_request(get, client, ?ADMIN_USER_NAME),
+    ?assertMatch({ok, "200", _, "[]"} , Result).
 
 list_user_no_keys(_) ->
-    Result = http_keys_request(get, user, ?ADMIN_USER_NAME),
-    ?assertMatch({ok, "200", _, "[]"} , Result),
-    ok.
+    Result = http_key_request(get, user, ?ADMIN_USER_NAME),
+    ?assertMatch({ok, "200", _, "[]"} , Result).
 
 %% GET /organizations/org/clients/client/keys/key && GET /users/client/keys/key
 get_client_default_key(Config) ->
     Result = http_named_key_request(get, client, ?CLIENT_NAME, "default"),
     ?assertMatch({ok, "200", _, _}, Result),
-    BodyEJ = chef_json:decode(response_body(Result)),
+    BodyEJ = decoded_response_body(Result),
     ExpectedEJ = new_key_ejson(Config, <<"default">>, <<"infinity">>),
-    ?assertMatch(ExpectedEJ, BodyEJ),
-    ok.
+    ?assertMatch(ExpectedEJ, BodyEJ).
 
 get_user_default_key(Config) ->
     Result = http_named_key_request(get, user, ?USER_NAME, "default"),
     ?assertMatch({ok, "200", _, _}, Result),
-    BodyEJ = chef_json:decode(response_body(Result)),
+    BodyEJ = decoded_response_body(Result),
     ExpectedEJ = new_key_ejson(Config, <<"default">>, <<"infinity">>),
-    ?assertMatch(ExpectedEJ, BodyEJ),
-    ok.
+    ?assertMatch(ExpectedEJ, BodyEJ).
 
 get_client_multiple_keys(Config) ->
     %% KEY1
     Result = http_named_key_request(get, client, ?CLIENT_NAME, ?KEY1NAME),
     ?assertMatch({ok, "200", _, _}, Result),
-    BodyEJ = chef_json:decode(response_body(Result)),
+    BodyEJ = decoded_response_body(Result),
     ExpectedEJ = new_key_ejson(Config, ?KEY1NAME, ?KEY1EXPIRESTRING),
     ?assertMatch(ExpectedEJ, BodyEJ),
 
     %% KEY2
     Result2 = http_named_key_request(get, client, ?CLIENT_NAME, ?KEY2NAME),
     ?assertMatch({ok, "200", _, _} , Result2),
-    BodyEJ2 = chef_json:decode(response_body(Result2)),
+    BodyEJ2 = decoded_response_body(Result2),
     ExpectedEJ2 = new_key_ejson(Config, ?KEY2NAME, ?KEY2EXPIRESTRING),
-    ?assertMatch(ExpectedEJ2, BodyEJ2),
-    ok.
+    ?assertMatch(ExpectedEJ2, BodyEJ2).
 
 get_user_multiple_keys(Config) ->
     %% KEY1
     Result = http_named_key_request(get, user, ?USER_NAME, ?KEY1NAME),
     ?assertMatch({ok, "200", _, _}, Result),
-    BodyEJ = chef_json:decode(response_body(Result)),
+    BodyEJ = decoded_response_body(Result),
     ExpectedEJ = new_key_ejson(Config, ?KEY1NAME, ?KEY1EXPIRESTRING),
     ?assertMatch(ExpectedEJ, BodyEJ),
 
     %% KEY2
     Result2 = http_named_key_request(get, user, ?USER_NAME, ?KEY2NAME),
     ?assertMatch({ok, "200", _, _}, Result2),
-    BodyEJ2 = chef_json:decode(response_body(Result2)),
+    BodyEJ2 = decoded_response_body(Result2),
     ExpectedEJ2 = new_key_ejson(Config, ?KEY2NAME, ?KEY2EXPIRESTRING),
-    ?assertMatch(ExpectedEJ2, BodyEJ2),
-    ok.
+    ?assertMatch(ExpectedEJ2, BodyEJ2).
 
 get_client_no_keys(_) ->
     Result = http_named_key_request(get, client, ?ADMIN_USER_NAME, "default"),
-    ?assertMatch({ok, "404", _, _} , Result),
-    ok.
+    ?assertMatch({ok, "404", _, _} , Result).
 
 get_user_no_keys(_) ->
     Result = http_named_key_request(get, user, ?ADMIN_USER_NAME, "default"),
-    ?assertMatch({ok, "404", _, _} , Result),
-    ok.
+    ?assertMatch({ok, "404", _, _} , Result).
 
 get_client_wrong_key(_) ->
     Result = http_named_key_request(get, client, ?ADMIN_USER_NAME, "wrong_key"),
-    ?assertMatch({ok, "404", _, _} , Result),
-    ok.
+    ?assertMatch({ok, "404", _, _} , Result).
 
 get_user_wrong_key(_) ->
     Result = http_named_key_request(get, user, ?ADMIN_USER_NAME, "wrong_key"),
-    ?assertMatch({ok, "404", _, _} , Result),
-    ok.
+    ?assertMatch({ok, "404", _, _} , Result).
 
 get_key_for_nonexistent_user(_) ->
     Result = http_named_key_request(get, user, ?ADMIN_USER_NAME, "default"),
-    ?assertMatch({ok, "404", _, _} , Result),
-    ok.
+    ?assertMatch({ok, "404", _, _} , Result).
 
 get_key_for_nonexistent_client(_) ->
     Result = http_named_key_request(get, client, ?ADMIN_USER_NAME, "default"),
-    ?assertMatch({ok, "404", _, _} , Result),
-    ok.
+    ?assertMatch({ok, "404", _, _} , Result).
 
 delete_valid_client_key(Config) ->
     Result = http_named_key_request(delete, client, ?CLIENT_NAME, ?KEY1NAME),
     ?assertMatch({ok, "200", _, _}, Result),
-    BodyEJ = chef_json:decode(response_body(Result)),
+    BodyEJ = decoded_response_body(Result),
     ExpectedEJ = new_key_ejson(Config, ?KEY1NAME, ?KEY1EXPIRESTRING),
     ?assertMatch(BodyEJ, ExpectedEJ).
 
@@ -236,14 +235,51 @@ delete_invalid_client_key(_Config) ->
     Result = http_named_key_request(delete, client, ?CLIENT_NAME, "invalid_key"),
     ?assertMatch({ok, "404", _, _}, Result).
 
-% TODO - authing reuestor
+put_rename_client_key(_Config) ->
+    validate_rename(client , "201", "404").
+
+put_rename_duplicate_client_key(_Config) ->
+    validate_rename(client, "409", "200").
+
+put_rename_user_key(_Config) ->
+    validate_rename(user, "201", "404").
+
+put_rename_duplicate_user_key(_Config) ->
+    validate_rename(user, "409", "200").
+
+put_full_client_key(Config) ->
+    validate_put_full_key(Config, client).
+
+put_full_user_key(Config) ->
+    validate_put_full_key(Config, user).
+
+put_valid_partial_user_key(Config) ->
+    validate_put_partial_key_valid(Config, user, <<"expiration_date">>, ?KEY2EXPIRESTRING),
+    validate_put_partial_key_valid(Config, user, <<"public_key">>, proplists:get_value(alt_pubkey, Config)).
+
+put_valid_partial_client_key(Config) ->
+    validate_put_partial_key_valid(Config, client, <<"expiration_date">>, ?KEY2EXPIRESTRING),
+    validate_put_partial_key_valid(Config, client, <<"public_key">>, proplists:get_value(alt_pubkey, Config)).
+
+put_invalid_partial_user_key(_Config) ->
+    validate_put_partial_key_invalid(user, <<"name">>, <<"bob^was^here">>),
+    validate_put_partial_key_invalid(user, <<"expiration_date">>, <<"yesterday">>),
+    validate_put_partial_key_invalid(user, <<"public_key">>, <<"bad key">>).
+
+put_invalid_partial_client_key(_Config) ->
+    validate_put_partial_key_invalid(client, <<"name">>, <<"bob^was^here">>),
+    validate_put_partial_key_invalid(client, <<"expiration_date">>, <<"yesterday">>),
+    validate_put_partial_key_invalid(client, <<"public_key">>, <<"bad key">>).
+
+% TODO - authing requestor
 % I'm leaving this commented out but present, because I'd like to find a way to make it work.
 % Currently, our stubbed chef_authn mock can't populate a requestor id, which means
 % our check to see if keyname + requestor id matches current auth will always pass without
 % matching, because required id is never populated.
 % I think we can do this by making our mock chef_authn a stateful process (gen_server would be simplest)
-% which would allow us to set the requestor id to mock for each request.  We could also then extend it
+% which would allow us to set the requestor id to mock for each reque We could also then extend it
 % to perform better authz behavior validation throughout our tests
+% We'll want to add similar tests for PUT.
 %delete_authing_client_key(_Config) ->
     %Result = http_named_key_request(delete, client, ?CLIENT_NAME, "default"),
     %?assertMatch({ok, "403", _, _}, Result).
@@ -251,7 +287,7 @@ delete_invalid_client_key(_Config) ->
 %delete_authing_client_key_with_different_user(_Config) ->
     %% This is specifically intended to validate that we can use a different user's
     %% "default" key to authenticate, and delete the client's "default" key without
-    %% failing simply because the key name matched. (The stubbed authz check
+    %% failing simply because the key name match(The stubbed authz check
     %% will match on key 'default')
     %Result = http_named_key_request(delete, client, ?ADMIN_USER_NAME, "default"),
     %?assertMatch({ok, "200", _, _}, Result).
@@ -259,7 +295,7 @@ delete_invalid_client_key(_Config) ->
 delete_valid_user_key(Config) ->
     Result = http_named_key_request(delete, user, ?USER_NAME, ?KEY1NAME),
     ?assertMatch({ok, "200", _, _}, Result),
-    BodyEJ = chef_json:decode(response_body(Result)),
+    BodyEJ = decoded_response_body(Result),
     ExpectedEJ = new_key_ejson(Config, ?KEY1NAME, ?KEY1EXPIRESTRING),
     ?assertMatch(BodyEJ, ExpectedEJ).
 
@@ -267,6 +303,7 @@ delete_invalid_user_key(_Config) ->
     Result = http_named_key_request(delete, user, ?USER_NAME, "invalid_key"),
     ?assertMatch({ok, "404", _, _}, Result).
 
+% see "TODO - authing requestor" above
 %delete_authing_user_key(_Config) ->
     %Result = http_named_key_request(delete, user, ?USER_NAME, "default"),
     %?assertMatch({ok, "403", _, _}, Result).
@@ -275,21 +312,20 @@ delete_invalid_user_key(_Config) ->
     %Result = http_named_key_request(delete, user, ?ADMIN_USER_NAME, "default"),
     %?assertMatch({ok, "200", _, _}, Result).
 
-
 %% POST /organizations/org/clients/client/keys && POST /users/client/keys
 post_client_new_valid_key(Config) ->
     Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-24T22:49:08Z">>)),
-    Result = http_keys_request(post, client, ?ADMIN_USER_NAME, Body),
+    Result = http_key_request(post, client, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "201", _, _}, Result).
 
 post_user_new_valid_key(Config) ->
     Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-25T22:49:08Z">>)),
-    Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
+    Result = http_key_request(post, user, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "201", _, _}, Result).
 
 post_new_key_invalid_date(Config) ->
     Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"bad-date">>)),
-    Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
+    Result = http_key_request(post, user, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "400", _, _}, Result),
 
     {_, _, _, UnparsedMessage} = Result,
@@ -299,7 +335,7 @@ post_new_key_invalid_date(Config) ->
 
 post_new_key_invalid_utc_date(Config) ->
     Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-24T22:49:08">>)),
-    Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
+    Result = http_key_request(post, user, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "400", _, _}, Result),
 
     {_, _, _, UnparsedMessage} = Result,
@@ -309,7 +345,7 @@ post_new_key_invalid_utc_date(Config) ->
 
 post_new_key_invalid_digits_date(Config) ->
     Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2-1-2T2:4:0Z">>)),
-    Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
+    Result = http_key_request(post, user, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "400", _, _}, Result),
 
     {_, _, _, UnparsedMessage} = Result,
@@ -319,7 +355,7 @@ post_new_key_invalid_digits_date(Config) ->
 
 post_new_key_well_formed_invalid_date(Config) ->
     Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2010-01-35T00:00:00Z">>)),
-    Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
+    Result = http_key_request(post, user, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "400", _, _}, Result),
 
     {_, _, _, UnparsedMessage} = Result,
@@ -329,46 +365,46 @@ post_new_key_well_formed_invalid_date(Config) ->
 
 post_key_with_infinity_date(Config) ->
     Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"infinity">>)),
-    Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
+    Result = http_key_request(post, user, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "201", _, _}, Result).
 
 post_key_with_invalid_key_name(Config) ->
     Body = chef_json:encode(new_key_ejson(Config, <<"invalid^character">>, <<"2099-10-25T22:49:08Z">>)),
-    Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
+    Result = http_key_request(post, user, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "400", _, _}, Result).
 
 post_key_with_invalid_public_key(_) ->
     Ejson = {[{name, <<"test1">>}, {public_key, <<"-----BEGIN PUBLIC KEY-----\ninvalid_key\n-----END PUBLIC KEY-----">>}, {expiration_date, <<"2099-10-25T22:49:08Z">>}]},
     Body = chef_json:encode(Ejson),
-    Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
+    Result = http_key_request(post, user, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "400", _, _}, Result).
 
 post_conflicting_user_key(Config) ->
     Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-25T22:49:08Z">>)),
-    http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
-    Result = http_keys_request(post, user, ?ADMIN_USER_NAME, Body),
+    http_key_request(post, user, ?ADMIN_USER_NAME, Body),
+    Result = http_key_request(post, user, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "409", _, _}, Result).
 
 post_conflicting_client_key(Config) ->
     Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-24T22:49:08Z">>)),
-    http_keys_request(post, client, ?ADMIN_USER_NAME, Body),
-    Result = http_keys_request(post, client, ?ADMIN_USER_NAME, Body),
+    http_key_request(post, client, ?ADMIN_USER_NAME, Body),
+    Result = http_key_request(post, client, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "409", _, _}, Result).
 
 post_multiple_valid_user_keys(Config) ->
     Body1 = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-25T22:49:08Z">>)),
-    Result1 = http_keys_request(post, user, ?ADMIN_USER_NAME, Body1),
+    Result1 = http_key_request(post, user, ?ADMIN_USER_NAME, Body1),
     ?assertMatch({ok, "201", _, _}, Result1),
     Body2 = chef_json:encode(new_key_ejson(Config, <<"test2">>, <<"2099-10-25T22:49:08Z">>)),
-    Result2 = http_keys_request(post, user, ?ADMIN_USER_NAME, Body2),
+    Result2 = http_key_request(post, user, ?ADMIN_USER_NAME, Body2),
     ?assertMatch({ok, "201", _, _}, Result2).
 
 post_multiple_valid_client_keys(Config) ->
     Body1 = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-24T22:49:08Z">>)),
-    Result1 = http_keys_request(post, client, ?ADMIN_USER_NAME, Body1),
+    Result1 = http_key_request(post, client, ?ADMIN_USER_NAME, Body1),
     ?assertMatch({ok, "201", _, _}, Result1),
     Body2 = chef_json:encode(new_key_ejson(Config, <<"test2">>, <<"2099-10-24T22:49:08Z">>)),
-    Result2 = http_keys_request(post, client, ?ADMIN_USER_NAME, Body2),
+    Result2 = http_key_request(post, client, ?ADMIN_USER_NAME, Body2),
     ?assertMatch({ok, "201", _, _}, Result2).
 
 
@@ -395,19 +431,22 @@ init_per_testcase(list_user_default_key,  Config) ->
 init_per_testcase(list_client_default_key, Config) ->
     make_client(Config, ?CLIENT_NAME),
     Config;
-init_per_testcase(list_client_multiple_keys, Config) ->
+init_per_testcase(Case, Config) when Case =:= list_client_multiple_keys;
+                                     Case =:= put_rename_duplicate_client_key ->
     make_client(Config, ?CLIENT_NAME),
     ClientId = client_id(Config, ?CLIENT_NAME),
     add_key(Config, ClientId, ?KEY1NAME, ?KEY1EXPIRE),
     add_key(Config, ClientId, ?KEY2NAME, ?KEY2EXPIRE),
     Config;
-init_per_testcase(list_user_multiple_keys, Config) ->
+init_per_testcase(Case, Config) when Case =:= list_user_multiple_keys;
+                                     Case =:= put_rename_duplicate_user_key->
     make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
     UserId = user_id(?USER_NAME),
     add_key(Config, UserId, ?KEY1NAME, ?KEY1EXPIRE),
     add_key(Config, UserId, ?KEY2NAME, ?KEY2EXPIRE),
     Config;
-init_per_testcase(list_client_no_keys, Config) ->
+init_per_testcase(TestCase, Config) when TestCase =:= get_client_no_keys;
+                                         TestCase =:= list_client_no_keys ->
     make_client(Config, ?CLIENT_NAME),
     sqerl:adhoc_delete(<<"keys">>, all),
     % make this user after clearing keys, so that we have a user
@@ -437,13 +476,6 @@ init_per_testcase(get_user_multiple_keys, Config) ->
     add_key(Config, UserId, ?KEY1NAME, ?KEY1EXPIRE),
     add_key(Config, UserId, ?KEY2NAME, ?KEY2EXPIRE),
     Config;
-init_per_testcase(get_client_no_keys, Config) ->
-    make_client(Config, ?CLIENT_NAME),
-    sqerl:adhoc_delete(<<"keys">>, all),
-    % make this user after clearing keys, so that we have a user
-    % who can make the request.
-    make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
-    Config;
 init_per_testcase(get_user_no_keys, Config) ->
     make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
     sqerl:adhoc_delete(<<"keys">>, all),
@@ -464,12 +496,16 @@ init_per_testcase(get_key_for_nonexistent_client, Config) ->
     make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
     Config;
 init_per_testcase(Case, Config) when Case =:= delete_invalid_client_key;
-                                     Case =:= delete_valid_client_key ->
+                                     Case =:= delete_valid_client_key;
+                                     Case =:= put_rename_client_key;
+                                     Case =:= put_valid_partial_client_key;
+                                     Case =:= put_invalid_partial_client_key;
+                                     Case =:= put_full_client_key ->
     make_client(Config, ?CLIENT_NAME),
     ClientId = client_id(Config, ?CLIENT_NAME),
     add_key(Config, ClientId, ?KEY1NAME, ?KEY1EXPIRE),
     Config;
-% TODO see "TODO - authing user" above.
+% TODO see "TODO - authing requestor" above.
 %init_per_testcase(delete_authing_client_key, Config) ->
     %make_client(Config, ?CLIENT_NAME),
     %Config;
@@ -479,13 +515,18 @@ init_per_testcase(Case, Config) when Case =:= delete_invalid_client_key;
     %add_key(Config, ClientId, ?KEY1NAME, ?KEY1EXPIRE),
     %Config;
 init_per_testcase(Case, Config) when Case =:= delete_invalid_user_key;
-                                     Case =:= delete_valid_user_key ->
+                                     Case =:= delete_valid_user_key;
+                                     Case =:= put_rename_user_key;
+                                     Case =:= put_rename_duplicate_user_key;
+                                     Case =:= put_valid_partial_user_key;
+                                     Case =:= put_invalid_partial_user_key;
+                                     Case =:= put_full_user_key ->
     make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
     UserId = user_id(?USER_NAME),
     add_key(Config, UserId, ?KEY1NAME, ?KEY1EXPIRE),
     Config.
 
-% TODO see "TODO - authing user" above.
+% TODO see "TODO - authing requestor" above.
 %init_per_testcase(delete_authing_user_key, Config) ->
 %    make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
 %    Config;
@@ -515,35 +556,35 @@ make_admin_and_client(Config) ->
     make_client(Config, ?CLIENT_NAME),
     Config.
 
-http_keys_request(Method, Type, Requestor) ->
-    http_keys_request(Method, Type, Requestor, <<>>).
+http_key_request(Method, Type, Requestor) ->
+    http_key_request(Method, Type, Requestor, <<>>).
 
-http_keys_request(Method, user, Requestor, Body) ->
+http_key_request(Method, user, Requestor, Body) ->
     Url = "http://localhost:8000/users/user1/keys",
     ibrowse:send_req(Url, [{"x-ops-userid", binary_to_list(Requestor)},
                            {"accept", "application/json"},
                            {"content-type", "application/json"}], Method, Body);
-http_keys_request(Method, client, Requestor, Body) ->
+http_key_request(Method, client, Requestor, Body) ->
     Url = "http://localhost:8000/organizations/testorg/clients/client1/keys",
     ibrowse:send_req(Url, [{"x-ops-userid", binary_to_list(Requestor)},
                            {"accept", "application/json"},
                            {"content-type", "application/json"}], Method, Body).
 
 http_named_key_request(Method, Type, Requestor, Name) ->
-    http_named_keys_request(Method, Type, Requestor, Name, <<>>).
+    http_named_key_request(Method, Type, Requestor, Name, <<>>).
 
-http_named_keys_request(Method, user, Requestor, Name, Body) ->
+http_named_key_request(Method, user, Requestor, Name, Body) ->
     Url = "http://localhost:8000/users/user1/keys/" ++ Name,
     ibrowse:send_req(Url, [{"x-ops-userid", binary_to_list(Requestor)},
                            {"accept", "application/json"},
                            {"content-type", "application/json"}], Method, Body);
-http_named_keys_request(Method, client, Requestor, Name, Body) ->
+http_named_key_request(Method, client, Requestor, Name, Body) ->
     Url = "http://localhost:8000/organizations/testorg/clients/client1/keys/" ++ Name,
     ibrowse:send_req(Url, [{"x-ops-userid", binary_to_list(Requestor)},
                            {"accept", "application/json"},
                            {"content-type", "application/json"}], Method, Body).
 
-% Some helpers to keep noise out of the tests...
+% Some helpers to keep noise out of the tes.
 make_org(OrgName, OrgAuthzId) ->
     Org = chef_object:new_record(oc_chef_organization, nil, OrgAuthzId,
                                  {[{<<"name">>, OrgName}, {<<"full_name">>, OrgName}]}),
@@ -565,7 +606,7 @@ make_user(Config, Name, AuthzId) ->
 
 make_user(Config, Name, AuthzId, OrgId) ->
     PubKey = proplists:get_value(pubkey, Config),
-    Dom = <<"@somewhere.com">>,
+    Dom = <<"@somewheom">>,
     User = chef_object:new_record(chef_user, OrgId, AuthzId,
                                    {[{<<"username">>, Name},
                                      {<<"password">>, <<"zuperzecret">>},
@@ -581,8 +622,8 @@ add_key(Config, Id, KeyName, ExpirationDate) ->
                                VALUES ($1, $2, $3, 1, CURRENT_TIMESTAMP, $4, 'me', CURRENT_TIMESTAMP )">>,
                   [Id, KeyName, PubKey, ExpirationDate]).
 
-response_body({_, _, _, Body}) ->
-    Body.
+decoded_response_body({_, _, _, Body}) ->
+    chef_json:decode(Body).
 
 context() ->
     chef_db:make_context(<<"AB">>).
@@ -595,6 +636,46 @@ client_id(Config, Name) ->
 user_id(Name) ->
     #chef_user{id = UserId} = chef_db:fetch(#chef_user{username = Name}, context()),
     UserId.
+
+%% The guts of some repetitive tests.
+validate_put_full_key(Config, ClientOrUser) ->
+    UpdateEJ = new_key_ejson(Config, ?KEY2NAME, ?KEY2EXPIRESTRING, alt_pubkey),
+    PutResult = http_named_key_request(put, ClientOrUser, default_requestor(ClientOrUser), ?KEY1NAME, chef_json:encode(UpdateEJ)),
+    ?assertMatch({ok, "201", _, _}, PutResult),
+    PutResultEJ = decoded_response_body(PutResult),
+    ?assertMatch(UpdateEJ, PutResultEJ),
+
+    GetResult = http_named_key_request(get, ClientOrUser, default_requestor(ClientOrUser), ?KEY2NAME),
+    ?assertMatch({ok, "200", _, _}, GetResult),
+    ActualGetKeyEJ = decoded_response_body(GetResult),
+    ?assertMatch(UpdateEJ, ActualGetKeyEJ).
+
+validate_rename(ClientOrUser, RenameCode, GetOldNameCode) ->
+    PutResult = http_named_key_request(put, ClientOrUser, default_requestor(ClientOrUser), ?KEY1NAME, chef_json:encode({[{<<"name">>, ?KEY2NAME}]})),
+    ?assertMatch({ok, RenameCode, _, _}, PutResult),
+    GetResult1 = http_named_key_request(get, ClientOrUser, default_requestor(ClientOrUser), ?KEY1NAME),
+    ?assertMatch({ok, GetOldNameCode, _, _}, GetResult1),
+    GetResult2 = http_named_key_request(get, ClientOrUser, default_requestor(ClientOrUser), ?KEY2NAME),
+    % one way or another, KEY2 will exist
+    ?assertMatch({ok, "200", _, _}, GetResult2).
+
+validate_put_partial_key_valid(Config, ClientOrUser, Field, Value) ->
+    UpdateEJ = {[{Field, Value}]},
+    PutResult = http_named_key_request(put, ClientOrUser, default_requestor(ClientOrUser), ?KEY1NAME, chef_json:encode(UpdateEJ)),
+    ?assertMatch({ok, "200", _, _}, PutResult),
+    PutResultEJ = decoded_response_body(PutResult),
+    ?assertMatch(UpdateEJ, PutResultEJ),
+
+    ExpectedGetKeyEJ = ej:set({Field},  new_key_ejson(Config, ?KEY1NAME, ?KEY2EXPIRESTRING), Value),
+    GetResult = http_named_key_request(get, ClientOrUser, default_requestor(ClientOrUser), ?KEY1NAME),
+    ?assertMatch({ok, "200", _, _}, GetResult),
+    ActualGetKeyEJ = decoded_response_body(GetResult),
+    ?assertMatch(ExpectedGetKeyEJ, ActualGetKeyEJ).
+
+validate_put_partial_key_invalid(ClientOrUser, Field, Value) ->
+    UpdateEJ = {[{Field, Value}]},
+    PutResult = http_named_key_request(put, ClientOrUser, default_requestor(ClientOrUser), ?KEY1NAME, chef_json:encode(UpdateEJ)),
+    ?assertMatch({ok, "400", _, _}, PutResult).
 
 %% Expected Results and Inputs
 %%
@@ -612,7 +693,16 @@ key_list_ejson(BaseURI, KeyInfo) ->
         {<<"name">>, KeyName},
         {<<"expired">>, Expired}] } || {KeyName, Expired} <- KeyInfo].
 
+
 new_key_ejson(Config, Name, Expiration) ->
-    PubKey = proplists:get_value(pubkey, Config),
+    new_key_ejson(Config, Name, Expiration, pubkey).
+new_key_ejson(Config, Name, Expiration, Key) ->
+    PubKey = proplists:get_value(Key, Config),
+    ct:pal("PubKey ~p~n", [PubKey]),
     {[{<<"name">>, Name}, {<<"public_key">>, PubKey}, {<<"expiration_date">>, Expiration}]}.
+
+default_requestor(client) ->
+    ?CLIENT_NAME;
+default_requestor(user) ->
+    ?USER_NAME.
 
