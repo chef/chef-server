@@ -16,7 +16,7 @@
 
 name "oc_erchef"
 
-default_version "1.6.2"
+default_version "policy-groups-policy-revs"
 
 source git: "git@github.com:opscode/oc_erchef"
 
