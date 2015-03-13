@@ -35,6 +35,7 @@ describe "Policies API endpoint", :policies do
   let(:minimum_valid_policy_payload) do
     <<-PAYLOAD
       {
+        "revision_id": "909c26701e291510eacdc6c06d626b9fa5350d25",
         "name": "some_policy_name",
         "run_list": [
           "recipe[policyfile_demo::default]"
@@ -42,7 +43,7 @@ describe "Policies API endpoint", :policies do
         "cookbook_locks": {
           "policyfile_demo": {
             "identifier": "f04cc40faf628253fe7d9566d66a1733fb1afbe9",
-            "dotted_decimal_identifier": "67638399371010690.23642238397896298.25512023620585"
+            "version": "1.2.3"
           }
         }
       }
@@ -52,6 +53,7 @@ describe "Policies API endpoint", :policies do
   let(:canonical_policy_payload) do
     <<-PAYLOAD
       {
+        "revision_id": "cf0885f3f2f5edaa44bf8d5e5de4c4d0efa51411",
         "name": "some_policy_name",
         "run_list": [
           "recipe[policyfile_demo::default]"
@@ -154,22 +156,107 @@ describe "Policies API endpoint", :policies do
 
         context "with a payload demonstrating validation edge conditions for 'name'" do
 
-          let(:name_with_all_valid_chars) { 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:.' }
+          context "when the name contains every valid character" do
+            let(:name_with_all_valid_chars) { 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:.' }
 
-          # Have to override the URL or else we will hit validation that name in
-          # document matches the one in URL
-          let(:static_named_policy_url) { api_url("/policies/some_policy_group/#{name_with_all_valid_chars}") }
+            # Have to override the URL or else we will hit validation that name in
+            # document matches the one in URL
+            let(:static_named_policy_url) { api_url("/policies/some_policy_group/#{name_with_all_valid_chars}") }
 
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) { |p| p["name"] = name_with_all_valid_chars }
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) { |p| p["name"] = name_with_all_valid_chars }
+            end
+
+            it "PUT /policies/:group/:name returns 201" do
+              expect(response.code).to eq(201)
+            end
           end
 
-          it "PUT /policies/:group/:name returns 201" do
-              skip "Full spectrum valid name not implemented yet" do
-                expect(response.code).to eq(201)
+          context "when the name is close to the maximum size" do
+
+            # On Chef Zero, some backends will append `.json` to a file name,
+            # which can exceed the common limit of 255 characters.
+            let(:max_size_name) { 'a' * 250 }
+
+            # Have to override the URL or else we will hit validation that name in
+            # document matches the one in URL
+            let(:static_named_policy_url) { api_url("/policies/some_policy_group/#{max_size_name}") }
+
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) { |p| p["name"] = max_size_name }
+            end
+
+            it "PUT /policies/:group/:name returns 201" do
+              expect(response.code).to eq(201)
+            end
+          end
+
+          context "when a revision_id is the maximum size" do
+
+            let(:max_size_revision_id) { 'a' * 255 }
+
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) do |policy|
+                policy["revision_id"] = max_size_revision_id
               end
+            end
+
+            it "PUT /policies/:group/:name returns 201" do
+              expect(response.code).to eq(201)
+            end
           end
 
+          context "when a revision_id contains every valid character" do
+
+            let(:revision_id_with_all_valid_chars) { 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:.' }
+
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) do |policy|
+                policy["revision_id"] = revision_id_with_all_valid_chars
+              end
+            end
+
+
+            it "PUT /policies/:group/:name returns 201" do
+              expect(response.code).to eq(201)
+            end
+          end
+
+          context "when a cookbook identifier is the maximum size" do
+
+            let(:max_size_identifier) { 'a' * 255 }
+
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) do |policy|
+                policy["cookbook_locks"]["edge_case"] = {
+                  "identifier" => max_size_identifier,
+                  "version" => "1.2.3"
+                }
+              end
+            end
+
+            it "PUT /policies/:group/:name returns 201" do
+              expect(response.code).to eq(201)
+            end
+          end
+
+          context "when a cookbook identifier contains every valid character" do
+
+            let(:identifier_with_all_valid_chars) { 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:.' }
+
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) do |policy|
+                policy["cookbook_locks"]["edge_case"] = {
+                  "identifier" => identifier_with_all_valid_chars,
+                  "version" => "1.2.3"
+                }
+              end
+            end
+
+            it "PUT /policies/:group/:name returns 201" do
+              expect(response.code).to eq(201)
+            end
+          end
         end
 
         context "when the request body is invalid" do
@@ -186,21 +273,18 @@ describe "Policies API endpoint", :policies do
             end
 
             it "PUT /policies/:group/:name returns 400" do
-              skip "Bad request not implemented yet" do
-                expect(response.code).to eq(400)
-              end
+              expect(response.code).to eq(400)
             end
 
             it "PUT /policies/:group/:name body contains a well-formed error message" do
-              skip "Bad request not implemented yet" do
-                expect(error_message).to eq(expected_error_message)
-              end
+              expect(error_message).to eq(expected_error_message)
             end
 
           end
 
           ## MANDATORY FIELDS AND FORMATS
-          # * `name`: String, other validation?
+          # * `revision_id`: String; Must be < 255 chars, matches /^[\-[:alnum:]_\.\:]+$/
+          # * `name`: String; Must match name in URI; Must be < 255 chars, matches /^[\-[:alnum:]_\.\:]+$/
           # * `run_list`: Array
           # * `run_list[i]`: Fully Qualified Recipe Run List Item
           # * `cookbook_locks`: JSON Object
@@ -209,13 +293,68 @@ describe "Policies API endpoint", :policies do
           # * `cookbook_locks[item]["identifier"]`: varchar(255) ?
           # * `cookbook_locks[item]["dotted_decimal_identifier"]` ChefCompatibleVersionNumber
 
+          context "because of missing revision id field" do
+
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) { |p| p.delete("revision_id") }
+            end
+
+            let(:expected_error_message) { "Field 'revision_id' missing" }
+
+            include_examples "an invalid policy document"
+
+          end
+
+          context "because revision id field is an empty string" do
+
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) { |p| p["revision_id"] = "" }
+            end
+
+            let(:expected_error_message) { "Field 'revision_id' invalid" }
+
+            include_examples "an invalid policy document"
+
+          end
+
+          context "because revision id field is larger than 255 characters" do
+
+            let(:long_revision_id_is_long) { "f" * 256 }
+
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) { |p| p["revision_id"] = long_revision_id_is_long }
+            end
+
+            let(:expected_error_message) { "Field 'revision_id' invalid" }
+
+            include_examples "an invalid policy document"
+
+          end
+
+          [ ' ', '+', '!' ].each do |invalid_char|
+            context "because the revision_id contains invalid character #{invalid_char}" do
+
+              let(:invalid_revision_id) { "invalid" + invalid_char + "invalid" }
+
+              let(:request_payload) do
+                mutate_json(minimum_valid_policy_payload) { |p| p["revision_id"] = invalid_revision_id }
+              end
+
+              let(:expected_error_message) { "Field 'revision_id' invalid" }
+
+              include_examples "an invalid policy document"
+
+            end
+          end
+
+
           context "because of missing name field" do
 
             let(:request_payload) do
               mutate_json(minimum_valid_policy_payload) { |p| p.delete("name") }
             end
 
-            let(:expected_error_message) { "Must specify 'name' in JSON" }
+            let(:expected_error_message) { "Field 'name' missing" }
 
             include_examples "an invalid policy document"
 
@@ -227,7 +366,7 @@ describe "Policies API endpoint", :policies do
               mutate_json(minimum_valid_policy_payload) { |p| p["name"] = "monkeypants" }
             end
 
-            let(:expected_error_message) { "'name' field in JSON must match the policy name in the URL" }
+            let(:expected_error_message) { "Field 'name' invalid : some_policy_name does not match monkeypants" }
 
             include_examples "an invalid policy document"
 
@@ -245,14 +384,14 @@ describe "Policies API endpoint", :policies do
               mutate_json(minimum_valid_policy_payload) { |p| p["name"] = long_name_is_long }
             end
 
-            let(:expected_error_message) { "'name' field in JSON must be 255 characters or fewer" }
+            let(:expected_error_message) { "Field 'name' invalid" }
 
             include_examples "an invalid policy document"
 
           end
 
           [ ' ', '+', '!' ].each do |invalid_char|
-            context "because the name contains invalid character #{invalid_char}" do
+            context "because the name contains invalid character '#{invalid_char}'" do
 
               let(:invalid_policy_name) { "invalid" + invalid_char + "invalid" }
 
@@ -266,7 +405,7 @@ describe "Policies API endpoint", :policies do
                 mutate_json(minimum_valid_policy_payload) { |p| p["name"] = invalid_policy_name }
               end
 
-              let(:expected_error_message) { "'name' field in JSON must be contain only alphanumeric, hypen, underscore, and dot characters" }
+              let(:expected_error_message) { "Field 'name' invalid" }
 
               include_examples "an invalid policy document"
 
@@ -279,7 +418,7 @@ describe "Policies API endpoint", :policies do
               mutate_json(minimum_valid_policy_payload) { |p| p.delete("run_list") }
             end
 
-            let(:expected_error_message) { "Must specify 'run_list' in JSON" }
+            let(:expected_error_message) { "Field 'run_list' missing" }
 
             include_examples "an invalid policy document"
 
@@ -291,7 +430,7 @@ describe "Policies API endpoint", :policies do
               mutate_json(minimum_valid_policy_payload) { |p| p["run_list"] = {} }
             end
 
-            let(:expected_error_message) { "'run_list' must be an Array of run list items" }
+            let(:expected_error_message) { "Field 'run_list' is not a valid run list" }
 
             include_examples "an invalid policy document"
 
@@ -307,7 +446,7 @@ describe "Policies API endpoint", :policies do
                 mutate_json(minimum_valid_policy_payload) { |p| p["run_list"] = [ invalid_run_list_item ] }
               end
 
-              let(:expected_error_message) { "Items in run_list must be strings in fully qualified recipe format, like recipe[cookbook::recipe]" }
+              let(:expected_error_message) { "Field 'run_list' is not a valid run list" }
 
               include_examples "an invalid policy document"
 
@@ -321,7 +460,7 @@ describe "Policies API endpoint", :policies do
               mutate_json(minimum_valid_policy_payload) { |p| p.delete("cookbook_locks") }
             end
 
-            let(:expected_error_message) { "Must specify 'cookbook_locks' in JSON" }
+            let(:expected_error_message) { "Field 'cookbook_locks' missing" }
 
             include_examples "an invalid policy document"
 
@@ -333,7 +472,7 @@ describe "Policies API endpoint", :policies do
               mutate_json(minimum_valid_policy_payload) { |p| p["cookbook_locks"] = [] }
             end
 
-            let(:expected_error_message) { "'cookbook_locks' must be a JSON object of cookbook_name: lock_data pairs" }
+            let(:expected_error_message) { "Field 'cookbook_locks' invalid" }
 
             include_examples "an invalid policy document"
 
@@ -345,9 +484,14 @@ describe "Policies API endpoint", :policies do
               mutate_json(minimum_valid_policy_payload) { |p| p["cookbook_locks"]["invalid_member"] = [] }
             end
 
-            let(:expected_error_message) { "cookbook_lock entries must be a JSON object" }
+            let(:expected_error_message) { "Field 'cookbook_locks' invalid" }
 
-            include_examples "an invalid policy document"
+            # TODO: customizing the 400 message for this is currently difficult
+            # in erchef, so we skip validating the message.
+
+            it "PUT /policies/:group/:name returns 400" do
+              expect(response.code).to eq(400)
+            end
 
           end
 
@@ -359,7 +503,7 @@ describe "Policies API endpoint", :policies do
               end
             end
 
-            let(:expected_error_message) { "cookbook_lock entries must contain an 'identifier' field" }
+            let(:expected_error_message) { "Field 'identifier' missing" }
 
             include_examples "an invalid policy document"
 
@@ -372,7 +516,7 @@ describe "Policies API endpoint", :policies do
             let(:invalid_lock) do
               {
                 "identifier" => long_identifier,
-                "dotted_decimal_identifier" => "1.2.3"
+                "version" => "1.2.3"
               }
             end
 
@@ -382,22 +526,22 @@ describe "Policies API endpoint", :policies do
               end
             end
 
-            let(:expected_error_message) { "cookbook_lock entries 'identifier' field must be 255 or fewer characters" }
+            let(:expected_error_message) { "Field 'identifier' invalid" }
 
             include_examples "an invalid policy document"
 
           end
 
 
-          context "because cookbook_locks contains an entry that is missing the dotted_decimal_identifier field" do
+          context "because cookbook_locks contains an entry with an invalid dotted_decimal_identifier field" do
 
             let(:request_payload) do
               mutate_json(minimum_valid_policy_payload) do |policy|
-                policy["cookbook_locks"]["invalid_member"] = { "identifier" => "123def" }
+                policy["cookbook_locks"]["invalid_member"] = { "identifier" => "123def", "version" => "1.2.3", "dotted_decimal_identifier" => "foo" }
               end
             end
 
-            let(:expected_error_message) { "cookbook_lock entries must contain an 'dotted_decimal_identifier' field" }
+            let(:expected_error_message) { "Field 'dotted_decimal_identifier' is not a valid version" }
 
             include_examples "an invalid policy document"
 
@@ -499,4 +643,5 @@ describe "Policies API endpoint", :policies do
     end
   end
 end
+
 
