@@ -203,7 +203,7 @@ test_policy_permissions_put_404_prereqs_dont_exist(Config) ->
     QueryRecord = make_query_record_404(Config),
     % 404s
     Result = oc_chef_wm_named_policy:policy_permissions_objects('PUT', not_found, QueryRecord, DbContext),
-    Expected = [{create_in_container, policy_groups}, {create_in_container, policies}],
+    Expected = [{create_in_container, policy_group}, {create_in_container, policies}],
     ?assertEqual(Expected, Result),
     ok.
 

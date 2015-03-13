@@ -202,7 +202,7 @@ prereq_object_permission({policy, not_found}) ->
 prereq_object_permission({policy, #oc_chef_policy{authz_id = AuthzID}}) ->
     {policy, AuthzID};
 prereq_object_permission({policy_group, not_found}) ->
-    {create_in_container, policy_groups};
+    {create_in_container, policy_group};
 prereq_object_permission({policy_group, #oc_chef_policy_group{authz_id = AuthzID}}) ->
     {policy_group, AuthzID}.
 
