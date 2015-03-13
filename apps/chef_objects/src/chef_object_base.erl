@@ -153,7 +153,7 @@ sql_date({_,_,_} = TS) ->
 %% If given a JSON binary, it is assumed that the string represents ONLY a dependencies /
 %% constraint hash (i.e., it's just a mapping of name to constraint string).  It is assumed
 %% that the given input (either JSON or Environment) have been previously validated.
--spec depsolver_constraints(#chef_environment{}
+-spec depsolver_constraints(#chef_environment{serialized_object::binary()}
                             | binary()   % JSON string
                             | {[{Name::binary(), ConstraintString::binary()}]}) %% EJson hash
                            -> [ chef_depsolver:constraint() ].
@@ -529,4 +529,3 @@ parse_date(Date) when is_binary(Date) ->
     %% Longer term we will need to submit an upstream PR to get epgsql_?datetime to behave properly.
     [Date2|_] = re:split(Date, "[Zz+]"),
     ec_date:parse(binary_to_list(Date2)).
-
