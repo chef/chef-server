@@ -103,10 +103,10 @@ valid_cookbook_lock(CookbookLockJson) ->
 
 %%%%%%%%%%%%%%%%%%%%
 %% Unused chef_object behavior callbacks
+%%
+%% Revisions cannot be updated and have no authz_id of their own.
 %%%%%%%%%%%%%%%%%%%%
 
-% update_from_ejson/2 (behaviour 'chef_object')
-% update_query/0 (behaviour 'chef_object')
 
 authz_id(#oc_chef_policy_revision{}) ->
     error(not_implemented).
@@ -181,7 +181,6 @@ is_indexed() ->
 ejson_for_indexing(#oc_chef_policy_revision{}, _EjsonTerm) ->
    {[]}.
 
-%% TODO: this is probably wrong
 fields_for_fetch(#oc_chef_policy_revision{org_id = OrgId, name = Name, revision_id = RevisionId}) ->
     [Name, OrgId, RevisionId].
 
@@ -218,7 +217,6 @@ decompress_record(#oc_chef_policy_revision{
     SerializedObject = jiffy:decode(chef_db_compression:decompress(CompressedSerializedObject)),
     Revision#oc_chef_policy_revision{serialized_object = SerializedObject}.
 
-%% TODO: this ignores revision_id and is wrong
 delete(ObjectRec = #oc_chef_policy_revision{
                       org_id = OrgId,
                       last_updated_by = _AuthzId
