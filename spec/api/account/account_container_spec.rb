@@ -30,6 +30,7 @@ describe "opscode-account containers", :containers do
           "roles" => "#{request_url}/roles",
           "sandboxes" => "#{request_url}/sandboxes",
           "policies" => "#{request_url}/policies",
+          "policy_groups" => "#{request_url}/policy_groups",
           "cookbook_artifacts" => "#{request_url}/cookbook_artifacts"
         }}
 
@@ -103,6 +104,7 @@ describe "opscode-account containers", :containers do
           "roles" => "#{request_url}/roles",
           "sandboxes" => "#{request_url}/sandboxes",
           "policies" => "#{request_url}/policies",
+          "policy_groups" => "#{request_url}/policy_groups",
           "cookbook_artifacts" => "#{request_url}/cookbook_artifacts"
         }}
 
@@ -117,6 +119,7 @@ describe "opscode-account containers", :containers do
           "roles" => "#{request_url}/roles",
           "sandboxes" => "#{request_url}/sandboxes",
           "policies" => "#{request_url}/policies",
+          "policy_groups" => "#{request_url}/policy_groups",
           "cookbook_artifacts" => "#{request_url}/cookbook_artifacts",
           new_container => "#{request_url}\/#{new_container}",
         }}

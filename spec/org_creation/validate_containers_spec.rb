@@ -13,7 +13,7 @@ describe "Org Creation", :org_creation do
   context "when validating default containers" do
     let(:request_url)    { api_url("/containers") }
 
-    let(:default_containers) { %w(clients containers cookbooks data environments groups nodes roles sandboxes policies cookbook_artifacts) }
+    let(:default_containers) { %w(clients containers cookbooks data environments groups nodes roles sandboxes policies policy_groups cookbook_artifacts) }
     let(:default_container_hash) { Hash[*default_containers.map(&container_to_url).flatten]  }
     let(:container_to_url) { ->(x) { [x, platform.api_url("/containers/#{x}", org)] } }
 
@@ -49,6 +49,10 @@ describe "Org Creation", :org_creation do
     should_have_container_for :nodes
     should_have_container_for :roles
     should_have_container_for :sandboxes
+    should_have_container_for :policies
+    should_have_container_for :policy_groups
+    should_have_container_for :cookbook_artifacts
+
   end
 
 end
