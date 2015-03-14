@@ -575,6 +575,7 @@ describe "Policies API endpoint", :policies do
 
         let(:updated_canonical_policy_payload) do
           mutate_json(canonical_policy_payload) do |policy|
+            policy["revision_id"] = "d4991d020462724edcf05f572e1d856cc5927803"
             policy["cookbook_locks"]["policyfile_demo"]["identifier"] = "2a42abea88dc847bf6d3194af8bf899908642421"
             policy["cookbook_locks"]["policyfile_demo"]["dotted_decimal_identifier"] = "11895255163526276.34892808658286783.151290363782177"
           end
