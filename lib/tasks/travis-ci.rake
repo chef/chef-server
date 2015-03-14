@@ -1,4 +1,5 @@
 begin
+  require 'rspec/core/rake_task'
 
   namespace :travis do
     desc "Run all specs in except for the request specs"
