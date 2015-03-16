@@ -11,7 +11,6 @@ s3_bucket      'opscode-omnibus-cache'
 
 # Customize compiler bits
 # ------------------------------
-solaris_compiler 'gcc'
 build_retries 3
 fetcher_read_timeout 120
 
