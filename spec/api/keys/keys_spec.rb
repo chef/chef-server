@@ -79,15 +79,15 @@ describe "/keys endpoint", :keys do
     ]
   end
 
-  let(:unexpired_date_2) do
+  shared(:unexpired_date_2) do
     "2049-12-24T21:00:00Z"
   end
 
-  let(:unexpired_date) do
+  shared(:unexpired_date) do
     "2050-12-24T21:00:00Z"
   end
 
-  let(:expired_date) do
+  shared(:expired_date) do
     "2012-01-01T00:00:00Z"
   end
 
@@ -1054,6 +1054,154 @@ describe "/keys endpoint", :keys do
 
           it "the org admin should fail with a 403" do
             delete_user_key(org_user_name, "alt_key", requestor: org_admin_user).should look_like(status: 403)
+          end
+        end
+      end
+    end
+
+    context "PUT", :authorization do
+      context "/organizations/:org/clients/:client/keys/:key" do
+        before(:all) do
+          post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
+          add_client_key($org_name, org_client_name, :alt_key, "alt_key").should look_like({:status=>201})
+          @key_url = "#{org_base_url}/clients/#{org_client_name}/keys/alt_key"
+        end
+        after(:all) do
+          delete("#{org_base_url}/clients/#{org_client_name}", superuser).should look_like(status: 200)
+          delete_client_key($org_name, org_client_name, "alt_key")
+        end
+
+        it "to a key for an invalid actor fails with 404" do
+          put("#{org_base_url}/clients/bobclient/keys/default", superuser, payload: key_payload).should look_like(status: 404)
+        end
+
+        it "to a key for a valid actor, but the key does not exist" do
+          put("#{org_base_url}/clients/#{org_client_name}/keys/badkey", superuser, payload: key_payload).should look_like(status: 404)
+        end
+
+        context "as..." do
+          it "the client itself, authenticating with a different key should succeed" do
+            put(@key_url, org_client, payload: key_payload).should look_like(status: 200)
+          end
+
+          it "the client itself, authenticating with the key it is trying update should fail with 403" do
+            r = put(@key_url, requestor(org_client_name, keys[:alt_key][:private]),  payload: key_payload)
+            r.should look_like({:status => 403,
+                                :body_exact => { "error" => "The key 'alt_key' was used to authenticate this request and cannot be modified or deleted."}})
+          end
+
+          context "a client in the same org" do
+            before do
+              post("#{org_base_url}/clients", superuser, payload: other_org_client_payload ).should look_like(status: 201)
+            end
+            after do
+              delete("#{org_base_url}/clients/#{other_org_client_name}", superuser).should look_like(status: 200)
+            end
+            it "should fail with a 403" do
+              put(@key_url, other_org_client, payload: key_payload).should look_like(status: 403)
+            end
+          end
+
+          context "a client in a different org", :authentication do
+            before do
+              post("#{platform.server}/organizations/#{other_org_name}/clients", superuser, payload: other_org_client_payload).should look_like({:status =>201})
+            end
+            after do
+              delete("#{platform.server}/organizations/#{other_org_name}/clients/#{other_org_client_name}", superuser).should look_like({:status =>200})
+            end
+            it "should fail with a 401" do
+              put(@key_url, other_org_client, payload: key_payload).should look_like(status: 401)
+            end
+          end
+
+          context "a user in the same org" do
+            before do
+              platform.associate_user_with_org($org_name, org_user).should look_like(status: 201)
+            end
+            after do
+              platform.remove_user_from_org($org_name, org_user)
+            end
+            it "should fail with a 403" do
+              put(@key_url, org_user, payload: key_payload).should look_like(status: 403)
+            end
+
+          end
+
+          it "a user not affiliated with the org should fail with a 403" do
+            put(@key_url, other_org_user, payload: key_payload).should look_like(status: 403)
+          end
+
+          it "the org admin should succeed" do
+            put(@key_url, org_admin_user, payload: key_payload).should look_like(status: 200)
+          end
+        end
+      end
+
+      context "/users/:user/keys/:key" do
+        before(:all) do
+          post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
+          add_user_key(org_user_name, :alt_key, "alt_key", :expires =>  unexpired_date).should look_like({:status=>201})
+          @key_url = "#{platform.server}/users/#{org_user_name}/keys/alt_key"
+        end
+        after(:all) do
+          delete("#{org_base_url}/clients/#{org_client_name}", superuser).should look_like(status: 200)
+          delete_user_key(org_user_name, "alt_key")
+        end
+        it "and the user does not exist it fails with a 404" do
+          put("#{platform.server}/users/bob/keys/default", superuser, payload: key_payload).should look_like(status: 404)
+        end
+
+        it "and the key does not exist it fails with a 404" do
+          put("#{platform.server}/users/#{org_user_name}/keys/badkey", superuser, payload: key_payload).should look_like(status: 404)
+        end
+
+        context "as..." do
+          it "the user itself, authenticating with a different key should succeed" do
+            put(@key_url, org_user, payload: key_payload).should look_like(status: 200)
+          end
+
+          it "the user itself, authenticating with the key it is trying to delete should fail with 403" do
+            r = put(@key_url, requestor(org_user_name, keys[:alt_key][:private]), payload: key_payload)
+            r.should look_like({:status => 403,
+                                :body_exact => { "error" => "The key 'alt_key' was used to authenticate this request and cannot be modified or deleted."}})
+          end
+
+          context "a client in the same org" do
+            it "should fail with a 401" do
+              put(@key_url, org_client, payload: key_payload).should look_like(status: 401)
+            end
+          end
+
+          context "a client in a different org", :authentication do
+            before do
+              post("#{platform.server}/organizations/#{other_org_name}/clients", superuser, payload: other_org_client_payload).should look_like({:status =>201})
+            end
+            after do
+              delete("#{platform.server}/organizations/#{other_org_name}/clients/#{other_org_client_name}", superuser).should look_like({:status =>200})
+            end
+            it "should fail with a 401" do
+              put(@key_url, other_org_client, payload: key_payload).should look_like(status: 401)
+            end
+          end
+
+          context "a user in the same org" do
+            before do
+              platform.associate_user_with_org($org_name, other_org_user).should look_like(status: 201)
+            end
+            after do
+              platform.remove_user_from_org($org_name, other_org_user).should look_like(status: 200)
+            end
+            it "should fail with a 403" do
+              put(@key_url, other_org_user, payload: key_payload).should look_like(status: 403)
+            end
+          end
+
+          it "a user not affiliated with the org should fail with a 403" do
+            put(@key_url, other_org_user, payload: key_payload).should look_like(status: 403)
+          end
+
+          it "the org admin should fail with a 403" do
+            put(@key_url, org_admin_user, payload: key_payload).should look_like(status: 403)
           end
         end
       end
