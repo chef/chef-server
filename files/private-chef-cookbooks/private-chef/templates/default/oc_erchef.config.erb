@@ -108,7 +108,8 @@
               {health_ping_timeout, 400},
               {health_ping_modules, [oc_chef_authz, chef_sql, chef_solr]},
               {base_resource_url, <%= @helper.erl_atom_or_string(node['private_chef']['opscode-erchef']['base_resource_url']) %>},
-              {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>}
+              {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
+              {strict_search_result_acls, <%= @strict_search_result_acls %>}
             ]},
   {chef_authn, [
                 {keyring, [{default, "/etc/opscode/webui_pub.pem"}]},

@@ -1,5 +1,10 @@
 # Chef Server Changelog
 
+## 12.0.7 (Undetermined)
+
+### oc\_erchef 1.6.3
+* Search results respect ACLs.
+
 ## 12.0.6 (2015-03-19)
 
 ### opscode-omnibus

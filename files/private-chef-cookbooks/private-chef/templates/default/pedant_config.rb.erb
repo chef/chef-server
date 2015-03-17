@@ -175,7 +175,8 @@ ruby_org_acl_endpoint?     false
 ruby_org_assoc?            false
 ruby_organizations_endpoint? false
 chef_12?                   true
-policies?                   <%= node['private_chef']['lb']['xdl_defaults']['policies'] %>
+policies?                  <%= node['private_chef']['lb']['xdl_defaults']['policies'] %>
+search_acls?               <%= node['private_chef']['opscode-erchef']['strict_search_result_acls'] %>
 
 old_runlists_and_search true
 

@@ -1,5 +1,14 @@
 # Chef Server Release Notes
 
+## 12.0.7 (Undetermined)
+
+The following items are new since Chef Server 12.0.6 and/or are changes from previous versions.
+For specific breakdown of updated components, refer to CHANGELOG.md
+
+  * Search results respect ACLs. (Disabled by default)
+    To enable, ensure that `opscode_erchef['strict_search_result_acls']`
+    is set to `true` in `chef-server.rb`.
+
 ## 12.0.6 (2015-03-19)
 
 The following items are new since Chef Server 12.0.5 and/or are changes from previous versions.

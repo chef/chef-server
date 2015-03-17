@@ -201,6 +201,7 @@ default['private_chef']['opscode-erchef']['keygen_start_size'] = 0
 default['private_chef']['opscode-erchef']['keygen_cache_workers'] = :auto
 default['private_chef']['opscode-erchef']['keygen_timeout'] = 1000
 default['private_chef']['opscode-erchef']['keygen_key_size'] = 2048
+default['private_chef']['opscode-erchef']['strict_search_result_acls'] = false
 
 ###
 # Legacy path (required for cookbok migration)
