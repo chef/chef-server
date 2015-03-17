@@ -22,7 +22,8 @@ package_name    "chef-server-core"
 replace         "private-chef"
 conflict        "private-chef"
 install_dir     "/opt/opscode"
-build_version   Omnibus::BuildVersion.new.semver
+# last released version is 12.0.5
+build_version   "12.0.6"
 build_iteration 1
 
 override :cacerts, version: '2014.08.20'
