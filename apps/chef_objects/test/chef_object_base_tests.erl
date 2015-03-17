@@ -25,20 +25,6 @@
 -include_lib("eunit/include/eunit.hrl").
 -include("../../include/chef_types.hrl").
 
-set_created_test_() ->
-    ActorId = <<"12121212121212121212121212121212">>,
-    [?_assertMatch(<<_Year:4/binary, "-", _Month:2/binary, "-", _Day:2/binary,
-                     " ", _H:2/binary, ":", _M:2/binary, ":", _S:2/binary>>,
-                   (chef_object_base:set_created(#chef_node{}, ActorId))#chef_node.created_at),
-     fun() ->
-             Obj = chef_object_base:set_created(#chef_role{}, ActorId),
-             ?assertMatch(<<_Year:4/binary, "-", _Month:2/binary, "-", _Day:2/binary,
-                            " ", _H:2/binary, ":", _M:2/binary, ":", _S:2/binary>>,
-                          Obj#chef_role.created_at),
-             ?assertEqual(Obj#chef_role.created_at, Obj#chef_role.updated_at),
-             ?assertEqual(ActorId, Obj#chef_role.last_updated_by)
-     end].
-
 depsolver_constraints_test_() ->
     {foreachx,
      fun(_) -> ok end,
