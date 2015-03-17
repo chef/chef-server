@@ -1,6 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Oliver Ferrigni <oliver@chef.io>
+%% @author Daniel DeLeo <dan@chef.io>
 %% Copyright 2012-2015 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -18,7 +18,7 @@
 %% under the License.
 %%
 
--module(oc_chef_policy).
+-module(oc_chef_policy_group).
 
 -include("../../include/oc_chef_types.hrl").
 -include_lib("mixer/include/mixer.hrl").
@@ -60,74 +60,39 @@
          update/2
         ]).
 
-
 -define(VALIDATION_CONSTRAINTS,
-        {[{<<"revision_id">>, {string_match, chef_regex:regex_for(policy_file_revision_id)}},
+        {[{<<"name">>, {string_match, chef_regex:regex_for(policy_file_name)}}]}).
 
-          {<<"name">>, {string_match, chef_regex:regex_for(policy_file_name)}},
-
-          {<<"run_list">>, chef_json_validator:policy_run_list_spec()},
-
-          {<<"cookbook_locks">>,
-           {object_map, {
-              {keys, {string_match, chef_regex:regex_for(cookbook_name)}},
-              {values,
-               %% apparently there's no cleaner way to do that with `ej:valid' (??)
-               {fun_match, {fun valid_cookbook_lock/1, object,
-                            <<"Invalid cookbook_lock constraint">>}}}}}}
-         ]}).
-
--define(COOKBOOK_LOCK_VAIDATION_CONSTRAINTS,
-        {[{<<"identifier">>,
-           {string_match, chef_regex:regex_for(policy_identifier)}},
-
-          {{opt, <<"dotted_decimal_identifier">>},
-           valid_cookbook_version_spec(<<"Field 'dotted_decimal_identifier' is not a valid version">>)},
-
-          {<<"version">>,
-           valid_cookbook_version_spec(<<"Field 'version' is not a valid version">>)}]}).
-
-valid_cookbook_version_spec(Message) ->
-    {fun_match, {fun chef_cookbook_version:valid_cookbook_constraint/1, string,
-                 Message}}.
-
-
-valid_cookbook_lock(CookbookLockJson) ->
-    case ej:valid(?COOKBOOK_LOCK_VAIDATION_CONSTRAINTS, CookbookLockJson) of
-        ok -> ok;
-        Bad -> throw(Bad)
-    end.
-
-id(#oc_chef_policy{id = Id}) ->
+id(#oc_chef_policy_group{id = Id}) ->
     Id.
 
-name(#oc_chef_policy{name = Name}) ->
+name(#oc_chef_policy_group{name = Name}) ->
     Name.
 
-org_id(#oc_chef_policy{org_id = OrgId}) ->
+org_id(#oc_chef_policy_group{org_id = OrgId}) ->
     OrgId.
 
-type_name(#oc_chef_policy{}) ->
+type_name(#oc_chef_policy_group{}) ->
     policy.
 
-authz_id(#oc_chef_policy{authz_id = AuthzId}) ->
+authz_id(#oc_chef_policy_group{authz_id = AuthzId}) ->
     AuthzId.
 
 
 create_query() ->
-    insert_policy.
+    insert_policy_group.
 
 update_query() ->
-    update_policy_by_id.
+    update_policy_group_by_id.
 
 delete_query() ->
-    delete_policy_by_id.
+    delete_policy_group_by_id.
 
 find_query() ->
-    find_policy_by_orgid_name.
+    find_policy_group_by_orgid_name.
 
 list_query() ->
-    list_policies_for_org.
+    list_policy_groups_for_org.
 
 bulk_get_query() ->
     %% TODO: do we need this?
@@ -135,68 +100,68 @@ bulk_get_query() ->
 
 new_record(OrgId, AuthzId, Name) ->
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
-    #oc_chef_policy{
+    #oc_chef_policy_group{
         id = Id,
         authz_id = AuthzId,
         org_id = OrgId,
         name = Name}.
 
 create_record(OrgId, Name, RequestingActorId) ->
-    Policy = #oc_chef_policy{
+    Policy = #oc_chef_policy_group{
                            org_id = OrgId,
                            name = Name},
     set_created(Policy, RequestingActorId).
 
-set_created(#oc_chef_policy{} = Object, ActorId) ->
-    Object#oc_chef_policy{last_updated_by = ActorId}.
+set_created(#oc_chef_policy_group{} = Object, ActorId) ->
+    Object#oc_chef_policy_group{last_updated_by = ActorId}.
 
-set_updated(#oc_chef_policy{} = Object, ActorId) ->
-    Object#oc_chef_policy{last_updated_by = ActorId}.
+set_updated(#oc_chef_policy_group{} = Object, ActorId) ->
+    Object#oc_chef_policy_group{last_updated_by = ActorId}.
 
 is_indexed() ->
     false.
 
-ejson_for_indexing(#oc_chef_policy{}, _EjsonTerm) ->
+ejson_for_indexing(#oc_chef_policy_group{}, _EjsonTerm) ->
    {[]}.
 
-update_from_ejson(#oc_chef_policy{} = Policy, PolicyData) ->
-    Name = ej:get({<<"name">>}, PolicyData, name(Policy)),
-    Policy#oc_chef_policy{name = Name}.
+update_from_ejson(#oc_chef_policy_group{} = Policy, PolicyGroupData) ->
+    Name = ej:get({<<"name">>}, PolicyGroupData, name(Policy)),
+    Policy#oc_chef_policy_group{name = Name}.
 
-fields_for_update(#oc_chef_policy{
+fields_for_update(#oc_chef_policy_group{
                      id = Id,
                      last_updated_by = LastUpdatedBy
-                                 } = Policy) ->
-    [LastUpdatedBy, name(Policy), Id].
+                                 } = PolicyGroup) ->
+    [LastUpdatedBy, name(PolicyGroup), Id].
 
 
-fields_for_fetch(#oc_chef_policy{org_id = OrgId} = Policy) ->
-    [name(Policy), OrgId].
+fields_for_fetch(#oc_chef_policy_group{org_id = OrgId} = PolicyGroup) ->
+    [name(PolicyGroup), OrgId].
 
 record_fields() ->
-    record_info(fields, oc_chef_policy).
+    record_info(fields, oc_chef_policy_group).
 
-list(#oc_chef_policy{org_id = OrgId}, CallbackFun) ->
+list(#oc_chef_policy_group{org_id = OrgId}, CallbackFun) ->
     CallbackFun({list_query(), [OrgId], rows}).
 
-update(#oc_chef_policy{
+update(#oc_chef_policy_group{
                       org_id = _OrgId,
-                      authz_id = _PolicyAuthzId,
+                      authz_id = _PolicyGroupAuthzId,
                       last_updated_by = _AuthzId
                      } = Record, CallbackFun) ->
 	chef_object:default_update(Record, CallbackFun).
 
 
 parse_binary_json(Bin) ->
-    Policy = chef_json:decode_body(Bin),
-    case ej:valid(?VALIDATION_CONSTRAINTS, Policy) of
+    PolicyGroup = chef_json:decode_body(Bin),
+    case ej:valid(?VALIDATION_CONSTRAINTS, PolicyGroup) of
         ok ->
-			{ok, Policy};
+			{ok, PolicyGroup};
         Bad ->
             throw(Bad)
     end.
 
-flatten(#oc_chef_policy{
+flatten(#oc_chef_policy_group{
           id = Id,
           authz_id = AuthzId,
           org_id = OrgId,
@@ -205,9 +170,10 @@ flatten(#oc_chef_policy{
     [Id, AuthzId, OrgId, Name, LastUpdatedBy].
 
 
-delete(ObjectRec = #oc_chef_policy{
+delete(ObjectRec = #oc_chef_policy_group{
                       org_id = OrgId,
                       last_updated_by = _AuthzId,
                       authz_id = _PolicyAuthzId
                      }, CallbackFun) ->
     CallbackFun({delete_query(), [name(ObjectRec), OrgId]}).
+

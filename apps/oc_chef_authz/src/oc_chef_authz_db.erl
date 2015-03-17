@@ -148,19 +148,63 @@ statements(pgsql) ->
       <<"UPDATE groups SET last_updated_by= $1, updated_at= $2, name= $3"
         "WHERE id= $4">>},
      {delete_group_by_id, <<"DELETE FROM groups WHERE id= $1">>},
-     {list_policies_for_org, <<"SELECT name, policy_group FROM policies WHERE org_id= $1">>},
-     {find_policy_by_orgid_name_group,
-      <<"SELECT id, authz_id, org_id, name, last_updated_by, serialized_object"
+
+     {list_policies_for_org, <<"SELECT name FROM policies WHERE org_id= $1">>},
+     {find_policy_by_orgid_name,
+      <<"SELECT id, authz_id, org_id, name, last_updated_by"
         " FROM policies"
-        " WHERE (name = $1 AND policy_group = $2 AND org_id = $3)">>},
+        " WHERE (name = $1 AND org_id = $2)">>},
      {insert_policy,
-      <<"INSERT INTO policies (id, authz_id, org_id, name, policy_group,"
-        " last_updated_by, serialized_object) VALUES"
-        " ($1, $2, $3, $4, $5, $6, $7)">>},
+      <<"INSERT INTO policies (id, authz_id, org_id, name,"
+        " last_updated_by) VALUES"
+        " ($1, $2, $3, $4, $5)">>},
      {update_policy_by_id,
-      <<"UPDATE policies SET last_updated_by= $1, name = $2, policy_group=$3, serialized_object=$4"
+      <<"UPDATE policies SET last_updated_by= $1, name = $2, policy_group=$3"
         "WHERE id = $5">>},
-     {delete_policy_by_name_group_org_id, <<"DELETE FROM policies WHERE name= $1 AND policy_group= $2 AND org_id= $3">>},
+     {delete_policy_by_name_org_id, <<"DELETE FROM policies WHERE name= $1 AND org_id= $2">>},
+     {delete_policy_by_id, <<"DELETE FROM policies WHERE id= $1">>},
+
+     {insert_policy_group,
+      <<"INSERT INTO policy_groups (id, authz_id, org_id, name,"
+        " last_updated_by) VALUES"
+        " ($1, $2, $3, $4, $5)">>},
+     {list_policy_groups_for_org, <<"SELECT name FROM policy_groups WHERE org_id= $1">>},
+     {find_policy_group_by_orgid_name,
+      <<"SELECT id, authz_id, org_id, name, last_updated_by"
+        " FROM policy_groups"
+        " WHERE (name = $1 AND org_id = $2)">>},
+     {delete_policy_group_by_id, <<"DELETE FROM policy_groups WHERE id= $1">>},
+
+     {insert_policy_revision,
+      <<"INSERT INTO policy_revisions (id, org_id, revision_id, name, policy_authz_id,"
+        " serialized_object, last_updated_by) VALUES"
+        " ($1, $2, $3, $4, $5, $6, $7)">>},
+     {list_policy_revisions_by_orgid_name,
+      <<"SELECT revision_id"
+        " FROM policy_revisions"
+        " WHERE (name = $1 AND org_id = $2)">>},
+     {find_policy_revision_by_orgid_name_revision_id,
+      <<"SELECT id, org_id, revision_id, name, policy_authz_id, serialized_object, last_updated_by"
+        " FROM policy_revisions"
+        " WHERE (name = $1 AND org_id = $2 AND revision_id = $3)">>},
+     {delete_policy_revision_by_id, <<"DELETE FROM policy_revisions WHERE id= $1">>},
+
+     {insert_policy_group_policy_revision_association,
+      <<"INSERT INTO policy_revisions_policy_groups_association (id, org_id, policy_revision_revision_id, policy_revision_name,"
+        " policy_group_name, policy_group_authz_id, last_updated_by) VALUES"
+        " ($1, $2, $3, $4, $5, $6, $7)">>},
+     {update_policy_group_policy_revision_association,
+      <<"UPDATE policy_revisions_policy_groups_association SET policy_revision_revision_id = $1, last_updated_by = $2
+         WHERE id = $3">>},
+     {delete_policy_group_policy_revision_association_by_id,
+      <<"DELETE FROM policy_revisions_policy_groups_association WHERE id = $1">>},
+
+     {find_policy_by_group_asoc_and_name,
+      <<"SELECT g.id, g.org_id, g.policy_group_name, g.policy_group_authz_id, g.policy_revision_revision_id, g.policy_revision_name, r.policy_authz_id, r.serialized_object
+           FROM policy_revisions_policy_groups_association AS g
+      LEFT JOIN policy_revisions AS r ON (g.policy_revision_revision_id = r.revision_id)
+          WHERE (g.org_id = $1 AND g.policy_group_name = $2 AND r.name = $3 )">>},
+
      {find_client_name_in_authz_ids,
       <<"SELECT name, authz_id FROM clients WHERE authz_id = ANY($1)">>},
      {find_client_authz_id_in_names,

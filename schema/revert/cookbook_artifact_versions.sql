@@ -2,6 +2,6 @@
 
 BEGIN;
 
-DROP TABLE IF EXISTS cookbook_artifact_versions;
+DROP TABLE IF EXISTS cookbook_artifact_versions CASCADE;
 
 COMMIT;
