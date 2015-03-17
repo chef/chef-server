@@ -121,7 +121,12 @@ to_json(Req, #base_state{chef_db_context = DbContext,
             IndexType = Query#chef_solr_query.index,
             Paths = SearchState#search_state.partial_paths,
             BulkGetFun = make_bulk_get_fun(DbContext, OrgName, IndexType, Paths, Req),
-            FilteredIds = filter_permitted_results(ReqId, RequestorId, OrgId, DbContext, IndexType, Ids),
+
+            FilteredIds = case envy:get(oc_chef_wm, strict_search_result_acls, false, boolean) of
+                             true ->
+                                 filter_permitted_results(ReqId, RequestorId, OrgId, DbContext, IndexType, Ids);
+                             false -> Ids
+                         end,
             {DbNumFound, Ans} = make_search_results(BulkGetFun, FilteredIds, BatchSize,
                                                     Start, SolrNumFound),
             State1 = State#base_state{log_msg = search_log_msg(SolrNumFound,
