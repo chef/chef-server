@@ -45,7 +45,9 @@ migrate(timeout, #state{processor_args = ProcessorArgs, callback_module = Callba
         Error ->
             stop_with_failure(State#state{results = Error}, Error, migrate)
     catch
-        _ErrorType:Reason ->
+        ErrorType:Reason ->
+            io:fwrite("died in mover_transient_worker:migrate/2:~n~p~n~p~n", [ErrorType, Reason]),
+            io:fwrite("~p~n", [erlang:get_stacktrace()]),
             stop_with_failure(State#state{results = Reason}, Reason, migrate)
     end.
 
