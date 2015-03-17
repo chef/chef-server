@@ -47,6 +47,7 @@ local p_org_base = P"/organizations"
 local p_auth_user = P"authenticate_user"
 local p_system_recovery = P"system_recovery"
 local p_license = P"license"
+local p_api_version = P"server_api_version"
 local p_acl = P"/_acl"
 local p_search = P"search"
 local p_nodes = P"nodes"
@@ -139,12 +140,14 @@ local p_keys_route = ((p_named_org_prefix * p_clients * p_sep * p_identifier * C
 
 
 local p_license_route = (p_sep * Cendpoint(p_license) * p_trailing_sep)
+local p_server_api_version_route = (p_sep * Cendpoint(p_api_version) * p_trailing_sep)
 
 -- Everything that gets sent to erchef
 local p_erchef = p_keys_route +
                  (p_named_org_prefix * p_erchef_direct) +
                  p_erchef_users +
-                 p_license_route
+                 p_license_route +
+                 p_server_api_version_route
 
 -- erchef routing rules for chef_internal, which includes an additional
 -- principals endpoint not exposed via the api rules
