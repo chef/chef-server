@@ -55,6 +55,8 @@
 %% Helpers for webmachine callbacks
 -export([create_from_json/5,
          init/2,
+         multi_auth_check/3,
+         multi_auth_check_to_wm_response/1,
          list_objects_json/2, % Can also be used in lieu of to_json  in a resource module.
          update_from_json/4]).
 
@@ -135,31 +137,36 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
                     {true, Req2, State2}
             end;
         {AuthTuples, Req1, State1} when is_list(AuthTuples)->
-            case multi_auth_check(AuthTuples, Req1, State1) of
-                {true, UpdatedReq, UpdatedState} ->
-                    %% All auth checks out, so we're not forbidden
-                    {false, UpdatedReq, UpdatedState};
-                {false, {create_in_container, _Container}, ReqWithError, StateWithError} ->
-                    %% do_create_in_container sets the forbidden message. Since
-                    %% it fails early, we don't know if the user would have
-                    %% needed other permissions to complete the request, but
-                    %% this is better than nothing.
-                    {true, ReqWithError, StateWithError};
-                {false, {_AuthzObjectType, _AuthzId, Permission}, _Req, _State} ->
-                    %% NOTE: No specific message for the auth check that failed (but this is
-                    %% the same behavior we had before)
-                    {Req2, State2} = set_forbidden_msg(Permission, Req1, State1),
-                    {true, Req2, State2};
-                {Error, {AuthzObjectType, AuthzId, Permission}} ->
-                    #base_state{requestor_id=RequestorId} = State1,
-                    %% TODO: Extract this logging message, as it is used elsewhere, too
-                    lager:error("is_authorized_on_resource failed (~p, ~p, ~p): ~p~n",
-                                           [Permission, {AuthzObjectType, AuthzId}, RequestorId, Error]),
-                    {{halt, 500}, Req, State1#base_state{log_msg={error, is_authorized_on_resource}}}
-            end;
+            MultiAuthResult = multi_auth_check(AuthTuples, Req1, State1),
+            multi_auth_check_to_wm_response(MultiAuthResult);
         {authorized, Req1, State1} ->
             {false, Req1, State1}
     end.
+
+%% @doc Handles the return from multi_auth_check/3 and converts it to a
+%% Webmachine-friendly return value. This is used by the named policy resource
+%% so it can define forbidden/2 for itself and add custom error handling.
+multi_auth_check_to_wm_response({true, UpdatedReq, UpdatedState}) ->
+    %% All auth checks out, so we're not forbidden
+    {false, UpdatedReq, UpdatedState};
+multi_auth_check_to_wm_response({false, {create_in_container, _Container}, ReqWithError, StateWithError}) ->
+    %% do_create_in_container sets the forbidden message. Since
+    %% it fails early, we don't know if the user would have
+    %% needed other permissions to complete the request, but
+    %% this is better than nothing.
+    {true, ReqWithError, StateWithError};
+multi_auth_check_to_wm_response({false, {_AuthzObjectType, _AuthzId, Permission}, Req, State}) ->
+    %% NOTE: No specific message for the auth check that failed (but this is
+    %% the same behavior we had before)
+    {Req2, State2} = set_forbidden_msg(Permission, Req, State),
+    {true, Req2, State2};
+multi_auth_check_to_wm_response({Error, {AuthzObjectType, AuthzId, Permission}, Req, State}) ->
+    #base_state{requestor_id=RequestorId} = State,
+    %% TODO: Extract this logging message, as it is used elsewhere, too
+    lager:error("is_authorized_on_resource failed (~p, ~p, ~p): ~p~n",
+                           [Permission, {AuthzObjectType, AuthzId}, RequestorId, Error]),
+    {{halt, 500}, Req, State#base_state{log_msg={error, is_authorized_on_resource}}}.
+
 
 %% @doc Performs multiple authorization checks in sequence.  If all pass, returns true.  The
 %% first check that is false or returns an error, however, halts short-circuits any further
@@ -188,9 +195,9 @@ multi_auth_check([CurrentTuple|Rest], Req, State) ->
         {false, ReqWithError, StateWithError} ->
             %% That one failed; no need to continue
             {false, CurrentTuple, ReqWithError, StateWithError};
-        {Error, _Req, _State} ->
+        {Error, Req, State} ->
             %% That one REALLY failed; send it out for use in error messages
-            {Error, CurrentTuple}
+            {Error, CurrentTuple, Req, State}
     end.
 
 %% @doc Performs individual auth checks for multi_auth_check/3. Req or State
@@ -499,9 +506,9 @@ set_authz_id(Id, #container_state{} = C, container) ->
 set_authz_id(Id, #group_state{} = G, group) ->
     G#group_state{group_authz_id = Id};
 set_authz_id(Id, #policy_state{} = P, policy_group) ->
-    P#policy_state{policy_group_authz_id = Id};
+    P#policy_state{policy_group_authz_id = Id, created_policy_group = true};
 set_authz_id(Id, #policy_state{} = P, policies) ->
-    P#policy_state{policy_authz_id = Id};
+    P#policy_state{policy_authz_id = Id, created_policy = true};
 set_authz_id(Id, #organization_state{} = O, organization) ->
     O#organization_state{organization_authz_id = Id};
 set_authz_id(Id, #user_state{} = U, user) ->

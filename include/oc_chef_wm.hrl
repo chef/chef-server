@@ -289,7 +289,9 @@
 -record(policy_state, {
           policy_data,
           policy_authz_id,
+          created_policy = false,
           policy_group_authz_id,
+          created_policy_group = false,
           policy_data_for_response,
           policy_assoc_exists = false,
           oc_chef_policy_group_revision_association :: #oc_chef_policy_group_revision_association{}

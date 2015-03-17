@@ -14,11 +14,11 @@
                            finish_request/2,
                            malformed_request/2,
                            ping/2,
-                           forbidden/2,
                            is_authorized/2,
                            service_available/2]}]).
 
 -export([allowed_methods/2,
+         forbidden/2,
          delete_resource/2,
          from_json/2,
          resource_exists/2,
@@ -94,10 +94,22 @@ validate_name(NameFromReq, Policy) ->
             erlang:throw({mismatch, {<<"name">>, NameFromJson, NameFromReq}})
     end.
 
-%% TODO: may be easier to just define forbidden/3 ourselves and go straight to
-%% muli_auth_check (which probably needs to be exported). That should make it
-%% simpler to invoke a cleanup for orphaned authz_ids if we hit an error in the
-%% process.
+forbidden(Req, State) ->
+    case auth_info(Req, State) of
+        {{halt, Code}, Req1, State1} ->
+            {{halt, Code}, Req1, State1};
+        {AuthTuples, Req1, State1} ->
+            MultiAuthResult = oc_chef_wm_base:multi_auth_check(AuthTuples, Req1, State1),
+            case MultiAuthResult of
+                {true, _Req, _State} ->
+                    oc_chef_wm_base:multi_auth_check_to_wm_response(MultiAuthResult);
+                {_Error, _AuthCheck, _Req, #base_state{resource_state = PolicyState, requestor_id = RequestorId}} ->
+                    cleanup_orphaned_authz_ids(PolicyState#policy_state.created_policy, RequestorId, PolicyState#policy_state.policy_authz_id),
+                    cleanup_orphaned_authz_ids(PolicyState#policy_state.created_policy_group, RequestorId, PolicyState#policy_state.policy_group_authz_id),
+                    oc_chef_wm_base:multi_auth_check_to_wm_response(MultiAuthResult)
+            end
+    end.
+
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            resource_state = #policy_state{oc_chef_policy_group_revision_association = QueryRecord} = PolicyState
                            } = State) ->
@@ -124,6 +136,7 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
             {PermissionsList, Req, StateWithAuthzIDs}
     end.
 
+
 stash_permissions_objects_authz_ids(Halt, State) when is_tuple(Halt) ->
     State;
 stash_permissions_objects_authz_ids([], State) ->
@@ -139,8 +152,11 @@ stash_permissions_objects_authz_ids([{policy,AzID}|Rest], #base_state{resource_s
     UpdatedBaseState = State#base_state{resource_state = UpdatedPolicyState},
     stash_permissions_objects_authz_ids(Rest, UpdatedBaseState).
 
-
-
+cleanup_orphaned_authz_ids(false, _RequestorId, _AuthzID) ->
+    ok;
+cleanup_orphaned_authz_ids(true, RequestorId, AuthzId) ->
+    oc_chef_authz:delete_resource(RequestorId, object, AuthzId),
+    ok.
 
 permissions_with_actions(Halt, _Req) when is_tuple(Halt) ->
     Halt;
