@@ -37,8 +37,15 @@
     <% end %>
     <%= yield %>
     <footer>
-      &copy; 2014 Chef Software, Inc.
+      &copy; <%= Time.now.strftime('%Y') %> Chef Software, Inc.
     </footer>
   </div>
+  <script>
+    $(document).chef({
+      assets: {
+        images: '<%= Rails.application.config.assets.prefix %>'
+      }
+    });
+  </script>
 </body>
 </html>
