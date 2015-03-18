@@ -7,6 +7,8 @@ ALL_HOOK = bundle
 
 REL_HOOK = compile bundle
 
+PRECOMPILE_HOOK = lucene
+
 CT_DIR = common_test
 
 DIALYZER_OPTS =
@@ -53,5 +55,12 @@ include devvm.mk
 bundle:
 	@echo bundling up depselector, This might take a while...
 	@cd apps/chef_objects/priv/depselector_rb; rm -rf .bundle; bundle install --deployment --path .bundle
+
+NEOTOMA=deps/neotoma/neotoma
+$(NEOTOMA):
+	@(cd deps/neotoma; rebar compile; rebar escriptize)
+
+lucene: $(DEPS) $(NEOTOMA)
+	@$(NEOTOMA) apps/chef_index/priv/lucene.peg -module chef_lucene -output apps/chef_index/src -transform_module lucene_txfm
 
 DEVVM_DIR = $(DEVVM_ROOT)/_rel/oc_erchef

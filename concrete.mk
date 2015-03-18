@@ -136,7 +136,7 @@ clean:
 allclean:
 	@($(REBARC) --help 2>&1|grep -q recursive && $(REBARC) -r clean) || $(REBARC) clean
 
-compile: $(DEPS)
+compile: $(DEPS) $(PRECOMPILE_HOOK)
 	@$(REBARC) compile
 
 $(DEPS):
