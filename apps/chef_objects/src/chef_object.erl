@@ -37,7 +37,7 @@
 -type update_return() :: pos_integer() | not_found | {conflict, _} | {error, _}.
 
 
--callback authz_id(object_rec()) -> object_id().
+-callback authz_id(object_rec()) -> object_id() | undefined.
 -callback is_indexed() -> boolean().
 -callback ejson_for_indexing(object_rec(), ejson_term()) -> ejson_term().
 -callback update_from_ejson(object_rec(), any()) -> object_rec().
@@ -74,7 +74,7 @@
 -callback id(object_rec()) ->
     object_id().
 
--callback org_id(object_rec()) -> object_id().
+-callback org_id(object_rec()) -> object_id() | undefined.
 
 -callback type_name(object_rec()) ->
     atom().
@@ -269,4 +269,3 @@ do_delete(ObjectRec, CallbackFun) ->
     QueryName = delete_query(ObjectRec),
     Id = id(ObjectRec),
     CallbackFun({QueryName, [Id]}).
-

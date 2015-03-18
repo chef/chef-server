@@ -283,5 +283,3 @@ ejson_from_list_test() ->
                  {[{<<"uri">>, <<"hello name2">>}, {<<"name">>, <<"name2">>}, {<<"expired">>, false}]}
                ],
     ?assertMatch(Expected, chef_key:ejson_from_list(List, Decorator)).
-
-
