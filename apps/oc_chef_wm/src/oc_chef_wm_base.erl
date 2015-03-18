@@ -2,7 +2,8 @@
 %% ex: ts=4 sw=4 et
 %% @author Kevin Smith
 %% @author Seth Falcon <seth@chef.io>
-%% Copyright 2012-2014 Chef Software, Inc. All Rights Reserved.
+%% @author Marc Paradise <marc@chef.io>
+%% Copyright 2012-2015 Chef Software, Inc.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -57,6 +58,8 @@
          init/2,
          multi_auth_check/3,
          multi_auth_check_to_wm_response/1,
+         default_malformed_request_message/3, % fails when called, mix in for malformed_request_message if you have no custom messages.
+         allow_all/2, % mix in for auth_info when any actor can use the resource.
          list_objects_json/2, % Can also be used in lieu of to_json  in a resource module.
          update_from_json/4]).
 
@@ -69,7 +72,12 @@ service_available(Req, State) ->
     State1 = maybe_with_default_org(Req, State0),
     spawn_stats_hero_worker(Req, State1),
     {_GetHeader, State2} = chef_wm_util:get_header_fun(Req, State1),
-    {true, Req, State2}.
+    case server_api_version(Req, State2,  wrq:get_req_header("X-Ops-Server-API-Version", Req)) of
+        #base_state{} = State3 ->
+            {true, Req, State3};
+        ErrorResponse ->
+            ErrorResponse
+    end.
 
 set_req_contexts(Req, #base_state{reqid_header_name = HeaderName} = State) ->
     ReqId = read_req_id(HeaderName, Req),
@@ -666,12 +674,14 @@ user_in_group(#base_state{organization_guid = OrgId, chef_db_context = DbContext
 
 finish_request(Req, #base_state{reqid = ReqId,
                                 organization_name = OrgName,
+                                server_api_version = APIVersion,
                                 darklaunch = Darklaunch}=State) ->
     try
         Code = wrq:response_code(Req),
         PerfTuples = stats_hero:snapshot(ReqId, agg),
         UserId = wrq:get_req_header("x-ops-userid", Req),
         Req0 = oc_wm_request:add_notes([{req_id, ReqId},
+                                        {req_api_version, APIVersion},
                                         {user, UserId},
                                         {perf_stats, PerfTuples}], Req),
         Req1 = maybe_annotate_log_msg(Req0, State),
@@ -811,6 +821,32 @@ api_info_header_value(#base_state{}=State) ->
 %% information (more useful for debugging purposes).
 add_api_info_header(Req, State) ->
     wrq:set_resp_header("X-Ops-API-Info", api_info_header_value(State), Req).
+
+%% @doc Validate the requested X-Ops-Server-API-Version value and populate base_state,
+%% or fail with a 406 if it's not supported. Replies with base_state on success.
+server_api_version(_Req, State, undefined) ->
+    State#base_state{server_api_version = ?API_MIN_VER};
+server_api_version(Req, State, RequestedVersion) ->
+    try list_to_integer(RequestedVersion) of
+        Version when Version < ?API_MIN_VER ->
+            invalid_server_api_version_response(Req, State, RequestedVersion);
+        Version when Version > ?API_MAX_VER ->
+            invalid_server_api_version_response(Req, State, RequestedVersion);
+        Version ->
+            State#base_state{server_api_version = Version}
+    catch
+        error:badarg ->
+            invalid_server_api_version_response(Req, State, RequestedVersion)
+    end.
+
+invalid_server_api_version_response(Req, State, RequestedVersion) ->
+    LogMsg = {invalid_server_api_version_requested, RequestedVersion},
+    Req2 = chef_wm_util:set_json_body(Req, {[{<<"error">>, <<"invalid-x-ops-server-api-version">>},
+                                             {<<"message">>, iolist_to_binary([ <<"Specified version ">>, RequestedVersion, <<" not supported">>])},
+                                             {<<"min_version">>, ?API_MIN_VER},
+                                             {<<"max_version">>, ?API_MAX_VER}]}),
+    {{halt, 406}, Req2, State#base_state{log_msg = LogMsg}}.
+
 
 -spec verify_request_signature(#wm_reqdata{}, #base_state{}) ->
                                       {boolean(), #wm_reqdata{}, #base_state{}}.
@@ -1123,6 +1159,7 @@ maybe_authz_id(B) ->
     B.
 
 
+
 -spec authz_id(#chef_requestor{} | #chef_user{} | #chef_client{}) -> object_id().
 authz_id(#chef_requestor{authz_id = AuthzId}) -> AuthzId;
 authz_id(#chef_client{authz_id = AuthzId}) -> AuthzId;
@@ -1153,12 +1190,14 @@ call_if_exported(Mod, FunName, Args, DefaultFun) ->
             erlang:apply(DefaultFun, Args)
     end.
 
-% Default route_args consist of {TypeName, [{name, ObjectName}]
-% unless overridden by a resource module.
+%% Default route_args consist of {TypeName, [{name, ObjectName}]
+% %unless overridden by a resource module.
 route_args(ObjectRec,_State) ->
     TypeName = chef_object:type_name(ObjectRec),
     {TypeName, [{name, chef_object:name(ObjectRec)}]}.
 
+default_malformed_request_message(Any, _Req, _State) ->
+    error({unexpected_malformed_request_message, Any}).
 
-
-
+allow_all(Req, State) ->
+    {authorized, Req, State}.

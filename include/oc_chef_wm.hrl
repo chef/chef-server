@@ -28,6 +28,7 @@
 -include_lib("mixer/include/mixer.hrl").
 -include_lib("ej/include/ej.hrl").
 -include("oc_chef_types.hrl").
+-include("chef_wm_server_version.hrl").
 
 -include_lib("stats_hero/include/stats_hero.hrl").
 
@@ -90,8 +91,17 @@
           %% balancer
           reqid_header_name :: string(),
 
-          %% String containing API version info for the chef server
+          %% String containing chef server product version.
+          %% TODO this is also set as part of x-ops-api-info, which could be confusing.
+          %% Let's make this reporting of version a versioned change itself:
           api_version :: string(),
+
+          %% This represents the version which which the server API is expected
+          %% to comply, as agreed upon between client and server.
+          %% We will not allow it to be
+          %% undefined by default, because in error conditions where it does not get set we will
+          %% still attempt to capture it to log in finish_request.
+          server_api_version  = -1 :: integer(),
 
           %% OTP information for the Erchef server in {ReleaseName, OtpVersion} form.
           otp_info :: {string(), string()},
