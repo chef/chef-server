@@ -8,13 +8,10 @@
            "apps/depsolver","apps/chef_test"]}.
 {deps,[{goldrush,".*",
                  {git,"git://github.com/DeadZen/goldrush.git",
-                      "1d883423ac360b3536ca52dc733a0164bacf3109"}},
+                      "71e63212f12c25827e0c1b4198d37d5d018a7fec"}},
        {lager,".*",
               {git,"https://github.com/basho/lager",
-                   "ad400896af5b1ad8b4f7a4d34e609b5a990640bb"}},
-       {rebar_lock_deps_plugin,".*",
-                               {git,"https://github.com/seth/rebar_lock_deps_plugin",
-                                    "2a8d2e803f8a110cac2f13e6f013b4d8e4b06c60"}},
+                   "d33ccf3b69de09a628fe38b4d7981bb8671b8a4f"}},
        {mochiweb,".*",
                  {git,"git://github.com/basho/mochiweb.git",
                       "ade2a9b29a11034eb550c1d79b4f991bf5ca05ba"}},
@@ -23,7 +20,7 @@
                         "7677c240f4a7ed020f4bab48278224966bb42311"}},
        {opscoderl_wm,".*",
                      {git,"https://github.com/opscode/opscoderl_wm",
-                          "5336f57fbeca42248d45da4caa18e575e2441206"}},
+                          "64db62e070da58cf7bb0caebde7a3f11c2e3cbbb"}},
        {envy,".*",
              {git,"https://github.com/manderson26/envy",
                   "d62cb227b9000ee866c8bcc724ddf68d87621dea"}},
@@ -44,7 +41,7 @@
                   "98cdc40fe6ae7780491ed8d0db691dd15625e9b2"}},
        {eper,".*",
              {git,"https://github.com/massemanet/eper",
-                  "5d4c3e9c91bd96b67a92cbdac4601c43340e1d88"}},
+                  "80e7cd6446d26d2423f2acd37253826bb3152964"}},
        {bear,".*",
              {git,"git://github.com/boundary/bear.git",
                   "b1882d7ee88e775d961a2678e4fafecef7f77705"}},
@@ -122,8 +119,12 @@
                        "0395a10b94472ccbe38b62bbfa9d0fc1ddac1dd7"}},
        {uuid,".*",
              {git,"https://github.com/okeuday/uuid",
-                  "f7c141c8359cd690faba0d2684b449a07db8e915"}}]}.
-{plugins,[rebar_lock_deps_plugin]}.
+                  "f7c141c8359cd690faba0d2684b449a07db8e915"}},
+       {rebar_lock_deps_plugin,".*",
+                               {git,"git://github.com/seth/rebar_lock_deps_plugin.git",
+                                    "7a5835029c42b8138325405237ea7e8516a84800"}}]}.
+{use_lock_deps,true}.
+{use_edown,true}.
 {cover_enabled,true}.
 {cover_print_enabled,true}.
 {erl_opts,[{d,'OC_CHEF'},

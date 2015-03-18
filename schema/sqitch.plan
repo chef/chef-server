@@ -66,3 +66,7 @@ delete_cookbook_artifact_version [cookbook_artifact_version_checksums] 2015-02-0
 
 keys_update_tracking [multiple_keys] 2015-02-24T18:57:08Z Marc Paradise <marc@chef.io># keys_update_tracking - add last_updated_by and updated_at fields to keys
 @2.9.0 2015-02-24T18:57:42Z Marc Paradise <marc@chef.io># tag 2.9.0 for  keys update  tracking fields
+
+policy_groups [policies] 2015-02-27T22:52:25Z Daniel DeLeo <ddeleo@lorentz.local># Add policy_groups table
+policy_revisions [policy_groups] 2015-02-27T23:39:16Z Daniel DeLeo <ddeleo@lorentz.local># Create separte policy revisions table
+policy_revisions_policy_groups_association 2015-03-05T20:57:56Z Daniel DeLeo <ddeleo@lorentz.local># Add join between policy groups and revisions

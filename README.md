@@ -68,6 +68,8 @@ branch).
 Development
 -----------
 
+We have started to put together a development guide with some best practices and suggestions [here](https://github.com/chef/oc_erchef/blob/master/DEVELOPMENT_GUIDE.md).
+
 #### Dependencies
 
 The following should be installed on the development system and in your path.

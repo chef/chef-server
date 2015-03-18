@@ -32,6 +32,7 @@
          fields_for_update/1,
          fields_for_fetch/1,
          ejson_from_list/2,
+         ejson_from_find/1,
          record_fields/0,
          list/2,
          set_updated/2,
@@ -100,6 +101,15 @@ ejson_from_list(KeysList, URIDecorator) ->
         {<<"name">>, Name},
         {<<"expired">>, Expired}]} || [Name, Expired] <- KeysList ].
 
+ejson_from_find(#chef_key{key_name = Name, public_key = PublicKey, expires_at = UnparsedExpirationDate}) ->
+    ExpirationDate = case UnparsedExpirationDate of
+        ?INFINITY_TIMESTAMP -> <<"infinity">>;
+        _ -> list_to_binary(ec_date:format("Y-m-dTH:i:sZ", UnparsedExpirationDate))
+    end,
+    {[{<<"name">>, Name},
+      {<<"public_key">>, PublicKey},
+      {<<"expiration_date">>, ExpirationDate}]}.
+
 list(#chef_key{id = Id}, CallbackFun) when is_binary(Id) ->
     CallbackFun({list_query(), [Id], rows}).
 
@@ -114,17 +124,10 @@ new_record(_OrgId, _AuthzId, {Id, KeyData}) ->
     catch
         _:_ -> throw(invalid_public_key)
     end,
-    Expires = parse_expiration(ej:get({<<"expiration_date">>}, KeyData)),
+    Expires = chef_object_base:parse_expiration(ej:get({<<"expiration_date">>}, KeyData)),
     #chef_key{ id = Id, key_name = ej:get({<<"name">>}, KeyData),
                public_key = PubKey, key_version = PubKeyVersion,
                expires_at = Expires}.
-
-parse_expiration(Expiration) when Expiration =:= undefined;
-                                  Expiration =:= <<"infinity">> ->
-   ?INFINITY_TIMESTAMP;
-parse_expiration(Expiration) when is_binary(Expiration) ->
-    ec_date:parse(binary_to_list(Expiration)).
-
 
 name(#chef_key{key_name = KeyName}) ->
     KeyName.
@@ -155,12 +158,12 @@ parse_binary_json(Bin, undefined) ->
     chef_object_base:validate_ejson(EJ, chef_object_base:public_key_spec(req)),
 
     % validate name field
-    chef_object_base:validate_ejson(EJ, {[ {<<"name">>, {string_match, chef_regex:regex_for(key_name)}},
-                                           {{req, <<"expiration_date">>}, string} ]}),
+    chef_object_base:validate_ejson(EJ, {[
+                                           {<<"name">>, {string_match, chef_regex:regex_for(key_name)}}
+                                         ]}),
 
-    %% this will raise if expiration_date isn't a valid datetime
-    parse_expiration(ej:get({<<"expiration_date">>}, EJ)),
-    EJ.
+    % validate expiration_date and make is safe for sqerl
+    chef_object_base:validate_and_sanitize_date_field(EJ, <<"expiration_date">>).
 
 update_query() ->
     error(need_to_implement).

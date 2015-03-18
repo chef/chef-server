@@ -1,4 +1,4 @@
-%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 80. -*-
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 80 -*-
 %% ex: ts=4 sw=4 et
 %% @author Marc Paradise <marc@chef.io>
 %% Copyright 2015 Chef Software, Inc. All Rights Reserved.
@@ -32,17 +32,17 @@
                            is_authorized/2,
                            service_available/2]}]).
 
-
 %% chef_wm behaviour callbacks
 -behaviour(chef_wm).
--export([auth_info/2,
-         init/1,
+-export([init/1,
          init_resource_state/1,
          malformed_request_message/3,
          request_type/0,
          validate_request/3,
+         auth_info/3,
          route_args/2,
-         to_json/2 ]).
+         to_json/2,
+         auth_info/2]).
 
 -export([allowed_methods/2,
          create_path/2,
@@ -64,7 +64,7 @@ allowed_methods(Req, State) ->
 validate_request('GET', Req, #base_state{resource_args = ObjectType, chef_db_context = Ctx, organization_guid = OrgId} = State) ->
     ObjectName = chef_wm_util:object_name(ObjectType, Req),
     ResourceState = make_resource_state_for_object(Ctx, ObjectType, ObjectName, OrgId),
-    {Req, State#base_state{resource_state = ResourceState }};
+    {Req, State#base_state{resource_state = ResourceState}};
 validate_request('POST', Req, #base_state{resource_args = ObjectType, chef_db_context = Ctx, organization_guid = OrgId} = State) ->
     EJ = chef_key:parse_binary_json(wrq:req_body(Req), undefined),
     ObjectName = chef_wm_util:object_name(ObjectType, Req),
@@ -84,9 +84,8 @@ make_resource_state_for_object(Type, Object) ->
     #key_state{type = Type, full_type = FullType, parent_name = chef_object:name(Object),
                parent_authz_id = chef_object:authz_id(Object), parent_id = chef_object:id(Object)}.
 
-
 %% Permissions:
-%% The permissios model here and in named_key will be the same
+%% The permissions model is the same between oc_chef_wm_keys and oc_chef_wm_named_key
 %% Keys are considered an attribute of the object that owns them:
 %%   * target object (user or client) must exist
 %%   * In order to view a target's keys, requestor will need read access to that target. (handled in default is_authorized)
@@ -104,12 +103,12 @@ auth_info(Req, #base_state{resource_args = TargetType, resource_state = #key_sta
 auth_info(Req, #base_state{ requestor_id = RequestorAuthzId,
                             resource_state = #key_state{parent_authz_id = RequestorAuthzId}} = State) ->
     {authorized, Req, State};
-auth_info(Req, State) ->
-    auth_info(wrq:method(Req), Req, State).
+auth_info(Req, #base_state{ resource_mod = Mod } = State) ->
+    Mod:auth_info(wrq:method(Req), Req, State).
 
-auth_info('GET', Req, #base_state{resource_state = #key_state{ parent_authz_id = AuthzId }}= State) ->
+auth_info('GET', Req, #base_state{resource_state = #key_state{parent_authz_id = AuthzId}}= State) ->
     {{actor, AuthzId}, Req, State};
-auth_info(_Method, Req, #base_state{resource_state = #key_state{ parent_authz_id = AuthzId}}= State) ->
+auth_info(_Method, Req, #base_state{resource_state = #key_state{parent_authz_id = AuthzId}}= State) ->
     {{actor, AuthzId, update}, Req, State}.
 
 create_path(Req, #base_state{resource_state = KeysState}=State) ->
@@ -130,12 +129,8 @@ to_json(Req, #base_state{ chef_db_context = DbContext,
 from_json(Req, #base_state{resource_state = #key_state{key_data = EJ, parent_id = ActorId}} = State) ->
     oc_chef_wm_base:create_from_json(Req, State, chef_key, {authz_id, undefined}, {ActorId, EJ}).
 
-
-% TODO it seems this doesn't even get called anywhere.
-malformed_request_message({ec_date, {bad_date, _Input}}, _Req, _State) ->
-    {[{<<"error">>, <<"expiration_date must be a valid date in ISO-8601 form, eg 2099-02-28T01:00:00, or the string \"infinity\".">>}]};
-malformed_request_message(Any, Req, State) ->
-    chef_wm_malformed:malformed_request_message(Any, Req, State).
+malformed_request_message(Any, _Req, _State) ->
+    error({unexpected_malformed_request_message, Any}).
 
 conflict_message(Name) ->
     % if we had Req, we could do better than 'actor'...

@@ -33,12 +33,52 @@
 -record(oc_chef_policy, {
           id,
           name,
-          policy_group,
           org_id,
           authz_id,
-          last_updated_by,
-          serialized_object
+          last_updated_by
           }).
+
+-record(oc_chef_policy_group, {
+          id,
+          name,
+          org_id,
+          authz_id,
+          last_updated_by
+          %% NOTE: the schema has a serialized_object field but it's not
+          %% currently used.
+          }).
+
+-record(oc_chef_policy_revision, {
+          id,
+          org_id,
+          name,
+          policy_authz_id,
+          revision_id,
+          serialized_object,
+          last_updated_by
+         }).
+
+-record(oc_chef_policy_group_revision_association, {
+          % Database fields
+          id,
+          org_id,
+
+          policy_group_authz_id,
+          policy_revision_revision_id,
+          policy_revision_name,
+          policy_group_name,
+          last_updated_by,
+
+          % "virtual", populated by JOIN, belongs to policy_revision
+          policy_authz_id,
+          serialized_object,
+
+          % records that represent the objects we're joining in this table. We
+          % need them so we can do on-demand creates
+          policy,
+          policy_revision,
+          policy_group
+         }).
 
 -record(oc_chef_cookbook_artifact, {
           id,

@@ -49,11 +49,14 @@
          is_superuser/1,
          is_user_in_org/4,
          set_forbidden_msg/3,
-         user_in_group/3]).
+         user_in_group/3,
+         http_method_to_authz_perm/1]).
 
 %% Helpers for webmachine callbacks
 -export([create_from_json/5,
          init/2,
+         multi_auth_check/3,
+         multi_auth_check_to_wm_response/1,
          list_objects_json/2, % Can also be used in lieu of to_json  in a resource module.
          update_from_json/4]).
 
@@ -134,33 +137,46 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
                     {true, Req2, State2}
             end;
         {AuthTuples, Req1, State1} when is_list(AuthTuples)->
-            %% NOTE: multi_auth_check does not handle create_in_container yet, and expects
-            %% each auth tuple to have a permission.  This code path is currently only used
-            %% by the depsolver endpoint.
-            case multi_auth_check(AuthTuples, Req1, State1) of
-                true ->
-                    %% All auth checks out, so we're not forbidden
-                    {false, Req1, State1};
-                {false, {_AuthzObjectType, _AuthzId, Permission}} ->
-                    %% NOTE: No specific message for the auth check that failed (but this is
-                    %% the same behavior we had before)
-                    {Req2, State2} = set_forbidden_msg(Permission, Req1, State1),
-                    {true, Req2, State2};
-                {Error, {AuthzObjectType, AuthzId, Permission}} ->
-                    #base_state{requestor_id=RequestorId} = State1,
-                    %% TODO: Extract this logging message, as it is used elsewhere, too
-                    lager:error("is_authorized_on_resource failed (~p, ~p, ~p): ~p~n",
-                                           [Permission, {AuthzObjectType, AuthzId}, RequestorId, Error]),
-                    {{halt, 500}, Req, State1#base_state{log_msg={error, is_authorized_on_resource}}}
-            end;
+            MultiAuthResult = multi_auth_check(AuthTuples, Req1, State1),
+            multi_auth_check_to_wm_response(MultiAuthResult);
         {authorized, Req1, State1} ->
             {false, Req1, State1}
     end.
+
+%% @doc Handles the return from multi_auth_check/3 and converts it to a
+%% Webmachine-friendly return value. This is used by the named policy resource
+%% so it can define forbidden/2 for itself and add custom error handling.
+multi_auth_check_to_wm_response({true, UpdatedReq, UpdatedState}) ->
+    %% All auth checks out, so we're not forbidden
+    {false, UpdatedReq, UpdatedState};
+multi_auth_check_to_wm_response({false, {create_in_container, _Container}, ReqWithError, StateWithError}) ->
+    %% do_create_in_container sets the forbidden message. Since
+    %% it fails early, we don't know if the user would have
+    %% needed other permissions to complete the request, but
+    %% this is better than nothing.
+    {true, ReqWithError, StateWithError};
+multi_auth_check_to_wm_response({false, {_AuthzObjectType, _AuthzId, Permission}, Req, State}) ->
+    %% NOTE: No specific message for the auth check that failed (but this is
+    %% the same behavior we had before)
+    {Req2, State2} = set_forbidden_msg(Permission, Req, State),
+    {true, Req2, State2};
+multi_auth_check_to_wm_response({Error, {AuthzObjectType, AuthzId, Permission}, Req, State}) ->
+    #base_state{requestor_id=RequestorId} = State,
+    %% TODO: Extract this logging message, as it is used elsewhere, too
+    lager:error("is_authorized_on_resource failed (~p, ~p, ~p): ~p~n",
+                           [Permission, {AuthzObjectType, AuthzId}, RequestorId, Error]),
+    {{halt, 500}, Req, State#base_state{log_msg={error, is_authorized_on_resource}}}.
+
 
 %% @doc Performs multiple authorization checks in sequence.  If all pass, returns true.  The
 %% first check that is false or returns an error, however, halts short-circuits any further
 %% checks and returns the result along with the auth_tuple() of the failing authorization
 %% check (useful for error message generation).
+%%
+%% This function does not clean up any authz_ids that might have been created
+%% if any of the auth checks specifies {create_in_container, Container}. Only
+%% the named policy endpoint uses multi_auth_check this way, so no
+%% general-purpose solution for this is provided right now.
 -spec multi_auth_check(AuthChecks :: [auth_tuple()],
                        Req :: wm_req(),
                        State :: #base_state{}) -> true |
@@ -168,44 +184,54 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
                                                    FailingTuple :: auth_tuple()} |
                                                   {Error :: term(),
                                                    FailingTuple :: auth_tuple()}.
-multi_auth_check([], _Req, _State) ->
+multi_auth_check([], Req, State) ->
     %% Nothing left to check, must be OK
-    true;
+    {true, Req, State};
 multi_auth_check([CurrentTuple|Rest], Req, State) ->
     case auth_check(CurrentTuple, Req, State) of
-        true ->
+        {true, UpdatedReq, UpdatedState} ->
             %% That one checked out; check the rest
-            multi_auth_check(Rest, Req, State);
-        false ->
+            multi_auth_check(Rest, UpdatedReq, UpdatedState);
+        {false, ReqWithError, StateWithError} ->
             %% That one failed; no need to continue
-            {false, CurrentTuple};
-        Error ->
+            {false, CurrentTuple, ReqWithError, StateWithError};
+        {Error, Req, State} ->
             %% That one REALLY failed; send it out for use in error messages
-            {Error, CurrentTuple}
+            {Error, CurrentTuple, Req, State}
     end.
 
-%% @doc Perform a simple authorization check.  Only indicates whether the requested
-%% permission is allowed or not; does no manipulation of either Req or State.
+%% @doc Performs individual auth checks for multi_auth_check/3. Req or State
+%% may be updated (in particular, create_in_container updates State with new
+%% authz_ids).
 %%
-%% No function head for the `create_in_container` check, because that's not needed at this
-%% time.  Further refactorings may change this.
 %% -spec auth_check(AuthCheck :: auth_tuple(),
 %%                  Req :: wm_req(),
-%%                  State :: #base_state{}) -> true | false | Error :: term().
+%%                  State :: #base_state{}) -> { true | false | Error :: term(), Req :: wm_req(), State :: #base_state{} }.
+auth_check({create_in_container, Container}, Req, State) ->
+    %% caller of auth_check expects true to mean "has permission to do X",
+    %% create_in_container returns true to mean "is forbidden to do X"
+    case create_in_container(Container, Req, State) of
+        {true, UpdatedReq, UpdatedState} -> {false, UpdatedReq, UpdatedState};
+        {false, UpdatedReq, UpdatedState} -> {true, UpdatedReq, UpdatedState};
+        Error -> Error
+    end;
 auth_check({container, Container, Permission}, Req, State) ->
     ContainerId = fetch_container_id(Container, Req, State),
-    has_permission(container, ContainerId, Permission, Req, State);
+    Result = has_permission(container, ContainerId, Permission, Req, State),
+    {Result, Req, State};
 auth_check({object, ObjectId, Permission}, Req, State) ->
-    has_permission(object, ObjectId, Permission, Req, State);
+    Result = has_permission(object, ObjectId, Permission, Req, State),
+    {Result, Req, State};
 auth_check({actor, ObjectId, Permission}, Req, State) ->
-    has_permission(actor, ObjectId, Permission, Req, State).
+    Result = has_permission(actor, ObjectId, Permission, Req, State),
+    {Result, Req, State}.
 
 %% Called by forbidden/2 when the resource module wants to create a
 %% new Chef Object within the container specified by the return value
 %% of the resource module's auth_info function. We attempt to create
 %% the authz object and return 403 if this fails due to lack of CREATE
 %% permission. Otherwise, the created AuthzId is stored in the
-%% resource_state record using set_authz_id/2 (which knows how to deal
+%% resource_state record using set_authz_id/3 (which knows how to deal
 %% with the different resource_state records).
 create_in_container(client, Req, #base_state{chef_db_context = Ctx,
                                              organization_guid = OrgId,
@@ -274,7 +300,7 @@ do_create_in_container(Container, Req,
     case oc_chef_authz:create_entity_if_authorized(AuthzContext, OrgId,
                                                    EffectiveRequestorId, Container) of
         {ok, AuthzId} ->
-            State1 = State#base_state{resource_state = set_authz_id(AuthzId, RS)},
+            State1 = State#base_state{resource_state = set_authz_id(AuthzId, RS, Container)},
             %% return forbidden: false
             {false, Req, State1};
         {error, forbidden} ->
@@ -459,33 +485,34 @@ get_user(Req, #base_state{superuser_bypasses_checks = SuperuserBypassesChecks}) 
     BypassesChecks = SuperuserBypassesChecks andalso is_superuser(UserName),
     {UserName, BypassesChecks}.
 
-set_authz_id(Id, #client_state{}=Cl) ->
+set_authz_id(Id, #client_state{}=Cl, client) ->
     Cl#client_state{client_authz_id = Id};
-set_authz_id(Id, #cookbook_state{}=C) ->
+set_authz_id(Id, #cookbook_state{}=C, cookbook) ->
     C#cookbook_state{authz_id = Id};
-set_authz_id(Id, #cookbook_artifact_version_state{} = C) ->
+set_authz_id(Id, #cookbook_artifact_version_state{} = C, cookbook_artifact) ->
     C#cookbook_artifact_version_state{authz_id = Id};
-set_authz_id(Id, #environment_state{}=E) ->
+set_authz_id(Id, #environment_state{}=E, environment) ->
     E#environment_state{environment_authz_id = Id};
-set_authz_id(Id, #node_state{}=N) ->
+set_authz_id(Id, #node_state{}=N, node) ->
     N#node_state{node_authz_id = Id};
-set_authz_id(Id, #role_state{}=R) ->
+set_authz_id(Id, #role_state{}=R, role) ->
     R#role_state{role_authz_id = Id};
-set_authz_id(Id, #sandbox_state{}=S) ->
+set_authz_id(Id, #sandbox_state{}=S, sandbox) ->
     S#sandbox_state{sandbox_authz_id = Id};
-set_authz_id(Id, #data_state{}=D) ->
+set_authz_id(Id, #data_state{}=D, data) ->
     D#data_state{data_bag_authz_id = Id};
-set_authz_id(Id, #container_state{} = C) ->
+set_authz_id(Id, #container_state{} = C, container) ->
     C#container_state{container_authz_id = Id};
-set_authz_id(Id, #group_state{} = G) ->
+set_authz_id(Id, #group_state{} = G, group) ->
     G#group_state{group_authz_id = Id};
-set_authz_id(Id, #policy_state{} = P) ->
-    P#policy_state{policy_authz_id = Id};
-set_authz_id(Id, #organization_state{} = O) ->
+set_authz_id(Id, #policy_state{} = P, policy_group) ->
+    P#policy_state{policy_group_authz_id = Id, created_policy_group = true};
+set_authz_id(Id, #policy_state{} = P, policies) ->
+    P#policy_state{policy_authz_id = Id, created_policy = true};
+set_authz_id(Id, #organization_state{} = O, organization) ->
     O#organization_state{organization_authz_id = Id};
-set_authz_id(Id, #user_state{} = U) ->
+set_authz_id(Id, #user_state{} = U, user) ->
     U#user_state{user_authz_id = Id}.
-
 
 
 %%------------------------------------------------------------------------------
@@ -1129,4 +1156,7 @@ call_if_exported(Mod, FunName, Args, DefaultFun) ->
 route_args(ObjectRec,_State) ->
         TypeName = chef_object:type_name(ObjectRec),
         {TypeName, [{name, chef_object:name(ObjectRec)}]}.
+
+
+
 

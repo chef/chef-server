@@ -1,97 +1,42 @@
-DEPS=$(CURDIR)/deps
-XCHECK_APPS=chef_authn oc_chef_authz chef_certgen chef_db chef_index chef_objects chef_wm \
-	    oc_chef_wm sqerl chef_test
+# This Makefile written by concrete
+#
+# {concrete_makefile_version, 3}
+#
+# ANY CHANGES TO THIS FILE WILL BE OVERWRITTEN on `concrete update`
+# IF YOU WANT TO CHANGE ANY OF THESE LINES BELOW, COPY THEM INTO
+# custom.mk FIRST
 
-# The release branch should have a file named USE_REBAR_LOCKED
-use_locked_config = $(wildcard USE_REBAR_LOCKED)
-ifeq ($(use_locked_config),USE_REBAR_LOCKED)
-  rebar_config = rebar.config.lock
-else
-  rebar_config = rebar.config
+# Use this to override concrete's default dialyzer options of
+# -Wunderspecs
+# DIALYZER_OPTS = ...
+
+# List dependencies that you do NOT want to be included in the
+# dialyzer PLT for the project here.  Typically, you would list a
+# dependency here if it isn't spec'd well and doesn't play nice with
+# dialyzer or otherwise mucks things up.
+#
+# DIALYZER_SKIP_DEPS = bad_dep_1 \
+#                      bad_dep_2
+
+# If you want to add dependencies to the default "all" target provided
+# by concrete, add them here (along with make rules to build them if needed)
+# ALL_HOOK = ...
+
+## .DEFAULT_GOAL can be overridden in custom.mk if "all" is not the desired
+## default
+.DEFAULT_GOAL := all
+
+# custom.mk is totally optional
+custom_rules_file = $(wildcard custom.mk)
+ifeq ($(custom_rules_file),custom.mk)
+    include custom.mk
 endif
-REBAR = REBAR_PARENT=$(CURDIR)/rebar.config rebar -C $(rebar_config)
 
-all: compile
-
-# Jenkins build target
-ci: compile xcheck
-
-compile: $(DEPS)
-	@$(REBAR) compile
-
-compile_skip:
-	@$(REBAR) compile skip_deps=true
-
-xcheck:
-	@scripts/xcheck $(XCHECK_APPS)
-clean:
-	@$(REBAR) clean
-
-# clean and allclean do the same thing now. Leaving allclean for now
-# in case there are scripts that depend on it.
-allclean:
-	@$(REBAR) clean
-
-update: compile
-	@cd rel/oc_erchef;bin/oc_erchef restart
-
-distclean: relclean
-	@rm -rf deps
-	@$(REBAR) clean
-
-tags: TAGS
-
-TAGS:
-	find deps -name "*.[he]rl" -print | etags -
-
-BUMP ?= patch
-prepare_release: distclean unlocked_deps unlocked_compile update_locked_config rel
-	@echo 'release prepared, bumping version'
-	@$(REBAR) bump-rel-version version=$(BUMP)
-
-unlocked_deps:
-	@echo 'Fetching deps as: rebar -C rebar.config'
-	@rebar -C rebar.config get-deps
-
-# When running the prepare_release target, we have to ensure that a
-# compile occurs using the unlocked rebar.config. If a dependency has
-# been removed, then using the locked version that contains the stale
-# dep will cause a compile error.
-unlocked_compile:
-	@rebar -C rebar.config compile
-
-update_locked_config:
-	@rebar lock-deps skip_deps=true
-
-rel: rel/oc_erchef
-
-devrel: rel
-	@/bin/echo -n Symlinking deps and apps into release
-	@$(foreach dep,$(wildcard deps/* apps/*), /bin/echo -n .;rm -rf rel/oc_erchef/lib/$(shell basename $(dep))-* \
-	   && ln -sf $(abspath $(dep)) rel/oc_erchef/lib;)
-	@/bin/echo done.
-	@/bin/echo  Run \'make update\' to pick up changes in a running VM.
-
-rel/oc_erchef: compile bundle
-	@/bin/echo 'building OTP release package for oc_erchef'
-	@/bin/echo "using rebar as: $(REBAR)"
-	@$(REBAR) generate
-	@/bin/echo '                             _          _  '
-	@/bin/echo '                            | |        | | '
-	@/bin/echo '  __   __     _   ,_    __  | |     _  | | '
-	@/bin/echo ' /  \_/      |/  /  |  /    |/ \   |/  |/  '
-	@/bin/echo ' \__/ \___/  |__/   |_/\___/|   |_/|__/|__/'
-	@/bin/echo '                                       |\  '
-	@/bin/echo '                                       |/  '
-
-bundle:
-	@cd apps/chef_objects/priv/depselector_rb; rm -rf .bundle; bundle install --deployment --path .bundle
-
-relclean:
-	@rm -rf rel/oc_erchef
-
-$(DEPS):
-	@echo "Fetching deps as: $(REBAR)"
-	@$(REBAR) get-deps
-
-.PHONY: distclean remove_lock set_lock prepare_release update_locked_config update clean compile compile_skip allclean tags relclean unlocked_deps
+concrete_rules_file = $(wildcard concrete.mk)
+ifeq ($(concrete_rules_file),concrete.mk)
+    include concrete.mk
+else
+    all:
+	@echo "ERROR: missing concrete.mk"
+	@echo "  run: concrete update"
+endif

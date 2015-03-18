@@ -109,7 +109,8 @@ verify_user(UserName, Password, ldap, _, #base_state{chef_db_context = Ctx}) ->
             {false, 504};
         {error, unauthorized} ->
             {false, 401};
-        {ExtAuthUid, AuthUserEJ} ->
+        {_ChefUid, AuthUserEJ} ->
+            ExtAuthUid = ej:get({<<"external_authentication_uid">>}, AuthUserEJ),
             case chef_db:fetch(#chef_user{external_authentication_uid = ext_auth_id(ExtAuthUid)}, Ctx) of
                 not_found ->
                     user_json(<<"unlinked">>, AuthUserEJ);
@@ -151,4 +152,3 @@ auth_fail_message(401) ->
     chef_wm_util:error_message_envelope(<<"Failed to authenticate: Username and password incorrect">>);
 auth_fail_message(504) ->
     chef_wm_util:error_message_envelope(<<"Authentication server is unavailable.">>).
-

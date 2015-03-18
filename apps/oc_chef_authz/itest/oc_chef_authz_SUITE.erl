@@ -21,6 +21,7 @@
 
 -module(oc_chef_authz_SUITE).
 
+-include_lib("eunit/include/eunit.hrl").
 -include_lib("common_test/include/ct.hrl").
 -include("../../include/oc_chef_authz.hrl").
 -include("../../include/oc_chef_types.hrl").
@@ -28,13 +29,17 @@
 -compile([export_all]).
 
 %% Note: this is also defined in the schema test data
+%% TODO: this is NOT the id of the org we make in init_per_suite/1, which is
+%% probably confusing... this seems unused, delete it?
 -define(ORG_ID, <<"33330000000000000000000000000000">>).
 
 all() -> [fetch_container_sql].
 
 init_per_suite(LastConfig) ->
     Config = chef_test_db_helper:start_db(LastConfig, "oc_chef_authz_itests"),
-    suite_helper:start_server(Config).
+    suite_helper:start_server(Config),
+    OrgsConfig = chef_test_suite_helper:make_orgs(),
+    OrgsConfig ++ Config.
 
 end_per_suite(Config) ->
     chef_test_suite_helper:stop_server(Config, suite_helper:needed_apps()).
@@ -50,3 +55,4 @@ fetch_container_sql(_Config) ->
         Bad ->
             erlang:error({unexpected_result, Bad})
     end.
+
