@@ -335,8 +335,8 @@ module Pedant
         puts "Unexpected response when deleting org: #{r.code}: #{r}"
       end
     end
-    # TODO: expose the entire payload as an input parameter
-    def create_user(username, options = {})
+
+    def create_min_user(username, options = {})
       payload = {
         "username" => username,
         "email" => "#{username}@opscode.com",
@@ -345,21 +345,22 @@ module Pedant
         "display_name" => username,
         "password" => "foobar"
       }
-
-      users_url = "#{@server}/users"
-
-      r = post(users_url, @superuser, :payload => payload)
-      if r.code == 409
-        puts "The user #{username} already exists... regenerating a key for it now"
-        payload["private_key"] = true
-        r = put("#{users_url}/#{username}", @superuser, :payload => payload)
+      if options.has_key?(:overrides)
+        payload = payload.merge(options[:overrides])
       end
+      users_url = "#{@server}/users"
+      post(users_url, @superuser, :payload => payload)
 
+    end
+    def create_user(username, options = {})
+      r = create_min_user(username, options)
+      raise "Could not create user #{username}: #{r}" unless r.code == 201
       private_key = parse(r)["private_key"]
 
       # The "admin" and "associate" options here are more of a metadata
       # than actually creating an admin or associating. This allows
       # Pedant tests to succeed even if the users config table has changed.
+
       Pedant::User.new(username, private_key, platform: self, preexisting: false, admin: options[:admin], associate: options[:associate])
     end
 
@@ -369,17 +370,32 @@ module Pedant
       else
         r = delete("#{@server}/users/#{user.name}", @superuser)
         if r.code != 200
-          puts "Unexpected response #{r.code}: #{r}"
+          puts "Unexpected response deleting user #{user.name} - #{r.code}: #{r}"
+        end
+        r
+      end
+    end
+
+    def remove_user_from_org(orgname, user)
+      delete("#{@server}/organizations/#{orgname}/users/#{user.name}", superuser)
+    end
+
+    def associate_user_with_org(orgname, user)
+      if Pedant::Config.ruby_org_assoc?
+        associate_user_with_org_rubynam_style(orgname, user)
+      else
+        payload = { "username" => user.name }
+        r = post("#{@server}/organizations/#{orgname}/users", superuser, :payload => payload )
+        if r.code == 201 or r.code == 409
+          r
+        else
+          raise "Bad response #{r.code} from POST /organizations/#{orgname}/users with #{payload} :#{r}"
         end
       end
     end
 
-    def associate_user_with_org(orgname, user)
-      # TODO under ruby, we need to use the old invite/accept method,
-      # while under erchef we will need to use the new POST method.
+    def associate_user_with_org_rubynam_style(orgname, user)
       payload = { "user" => user.name }
-      # TODO under erlang, we now support superuser direct POST of { username: "user" } to /organizations/X/users
-      # which means we don't need to do the multi-part create-and-accept process.
       association_requests_url = "#{@server}/organizations/#{orgname}/association_requests"
       r = post("#{association_requests_url}",  superuser, :payload => payload)
       if r.code == 201 # Created
