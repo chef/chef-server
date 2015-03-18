@@ -2,8 +2,20 @@
 # configuration settings available to you.  It is separate from the
 # actual Pedant::Config class because not all settings have sane
 # defaults, and not all settings are appropriate in all settings.
-
+#
+# The defaults in this file are designed to work out of the box when developing
+# Chef Server 12+ using the "Dev VM" tool, but they should work in other
+# contexts as long as the Chef Server is running on localhost.
+#
 ################################################################################
+
+# A unique identification string used to create orgs and users specific
+# to a each single chef server's nodes' OS. Simply using "Process.pid"
+# proved to not be unique enough when running pedant simultaneously
+# on multiple nodes of the same chef server when the generated pedant
+# config file could have been copied across during the setup of that
+# chef server.
+chef_server_uid = "private-chef_#{Process.pid}"
 
 # Specify a testing organization if you are testing a multi-tenant
 # instance of a Chef Server (e.g., Private Chef, Hosted Chef).  If you
@@ -11,23 +23,24 @@
 # DO NOT include this parameter
 #
 # Due to how the current org cache operates, it is best to use a
-# randomized name for your testing organization (hence the embedded
-# Process.pid).  If you do not use a randomized name and run tests
-# several times (destroying the organization between runs) you will
-# likely get inconsistent results.
+# unique name for your testing organization. If you do not use a
+# unique name and run tests several times (destroying the organization
+# between runs) you will likely get inconsistent results.
 #
 # If you wish Pedant to create the organization for you at test time,
 # include the `:create_me => true` pair.  If you wish to use an
 # existing organization for tests, you should supply a `:validator_key
 # => "/full/path/to/key.pem"` pair
-org({:name => "pedant-testorg-#{Process.pid}",
+org({:name => "pedant_testorg_#{chef_server_uid}",
      :create_me => true})
+
+validate_org_creation true
 
 # org({:name => "existing_org",
 #      :validator_key => "/etc/opscode/existing_org-validator.pem"})
 
 # account internal URL
-internal_account_url "http://localhost:9685"
+internal_account_url "http://127.0.0.1:9685"
 
 # If you want Pedant to delete the testing organization when it is
 # done, use this parameter.  Note that this only has an effect if
@@ -38,6 +51,11 @@ delete_org true
 # sent to.  Only specify protocol, hostname, and port.
 chef_server "https://#{`hostname -f`.strip}"
 
+# This configration specifies the default orgname. Note that it does *not*
+# mean that Pedant will test things with default org urls. To do that,
+# pass --use-default-org on the command line
+default_orgname nil
+
 # If you are doing development testing, you can specify the address of
 # the Solr server.  The presence of this parameter will enable tests
 # to force commits to Solr, greatly decreasing the amout of time
@@ -47,7 +65,7 @@ chef_server "https://#{`hostname -f`.strip}"
 # testing location, you should not specify a value for this parameter.
 # The tests will still run, albeit slower, as they will now need to
 # poll for a period to ensure they are querying committed results.
-search_server "http://localhost:8983"
+search_server "http://127.0.0.1:8983"
 
 # Related to the 'search_server' parameter, this specifies the maximum
 # amout of time (in seconds) that search endpoint requests should be
@@ -102,6 +120,9 @@ ldap({
        :recovery_authentication_enabled => false
      })
 
+# SSL protocol version to use for secure communications
+# with the load balancer
+ssl_version :TLSv1
 
 # Test users.  The five users specified below are required; their
 # names (:user, :non_org_user, etc.) are indicative of their role
@@ -111,30 +132,26 @@ ldap({
 # which should be the fully-qualified path /on the machine Pedant is
 # running on/ to a private key for that user.
 
-
 superuser_name 'pivotal'
 superuser_key  '/etc/opscode/pivotal.pem'
-
 webui_key '/etc/opscode/webui_priv.pem'
 
 requestors({
              :clients => {
-               # The the admin user, for the purposes of getting things rolling
                :admin => {
-                 :name => "pedant_admin_client",
+                 :name => "pedant_admin_client_#{chef_server_uid}",
                  :create_me => true,
                  :create_knife => true,
                  :admin => true
                },
                :non_admin => {
-                 :name => 'pedant_client',
+                 :name => "pedant_client_#{chef_server_uid}",
                  :create_me => true,
                  :create_knife => true,
                },
                :bad => {
-                 :name => 'bad_client',
+                 :name => "bad_client_#{chef_server_uid}",
                  :create_me => true,
-                 :create_knife => true,
                  :bogus => true
                }
              },
@@ -142,20 +159,22 @@ requestors({
              :users => {
                # An administrator in the testing organization
                :admin => {
-                 :name => "pedant_admin_user",
+                 :name => "pedant_admin_user_#{chef_server_uid}",
                  :create_me => true,
-                 :create_knife => true
+                 :create_knife => true,
+                 :admin => true
                },
 
                :non_admin => {
-                 :name => "pedant_user",
+                 :name => "pedant_user_#{chef_server_uid}",
                  :create_me => true,
-                 :create_knife => true
+                 :create_knife => true,
+                 :admin => false
                },
 
                # A user that is not a member of the testing organization
                :bad => {
-                 :name => "pedant-nobody",
+                 :name => "pedant_nobody_#{chef_server_uid}",
                  :create_me => true,
                  :create_knife => true,
                  :associate => false
@@ -163,8 +182,11 @@ requestors({
              }
            })
 
-
-
+# To facilitate testing, we have added a org creation validation tests.
+# These tests run before the main Pedant tests, so their output has been
+# suppressed. To make it easier to debug org creation, you can turn this
+# on and get the full output
+debug_org_creation false
 
 # To facilitate testing as we transition from Ruby to Erlang endpoint
 # implementations, you can specify in your configuration which
@@ -173,6 +195,26 @@ requestors({
 # necessary.  A common reason is to take into account different error
 # message formatting between the two implementations.
 #
-ruby_users_endpoint? false
-ruby_org_assoc? false
-ruby_org_acl_endpoint? false
+ruby_environment_endpoint? false
+ruby_sandbox_endpoint?     false
+ruby_data_endpoint?        false
+ruby_role_endpoint?        false
+ruby_cookbook_endpoint?    false
+ruby_client_endpoint?      false
+ruby_users_endpoint?       false
+ruby_container_endpoint?   false
+ruby_container_endpoint_in_sql? true
+ruby_group_endpoint?       false
+ruby_acl_endpoint?         false
+ruby_system_recovery_endpoint? false
+ruby_org_acl_endpoint?     false
+ruby_org_assoc?            false
+ruby_organizations_endpoint? false
+chef_12?                   true
+policies?                   false
+
+old_runlists_and_search true
+
+
+# Log HTTP Requests
+log_file "/var/log/opscode/oc-chef-pedant/http-traffic.log"
