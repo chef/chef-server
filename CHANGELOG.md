@@ -18,6 +18,12 @@
 * Adds tests for keys named get
 * Integrates chef-pedant into oc-chef-pedant.
 
+### oc-chef-pedant 2.0.3
+* Adds tests for keys named delete and put
+
+### oc\_erchef 1.6.5
+* Support to GET, PUT, and DELETE a named key
+
 ### oc\_erchef 1.6.1
 * Integrates schema into oc\_erchef itself
 * Adds policyfile validation support
@@ -35,9 +41,6 @@
 * New keys API tests
 * New cookbook artifact API tests
 
-### oc\_erchef 1.5.0
-* Keys API POST support: /organizations/$ORG/clients/$CLIENT/keys and
-  /users/$USER/keys
 ### oc\_erchef 1.5.0
 * Keys API POST support: /organizations/$ORG/clients/$CLIENT/keys and
   /users/$USER/keys

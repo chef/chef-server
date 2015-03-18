@@ -6,22 +6,21 @@ The following items are new since Chef Server 12.0.4 and/or are changes from pre
 For specific breakdown of updated components, refer to CHANGELOG.md
 
 * oc\_erchef
-  * Key API Updates - GET of named keys now supported
+  * Key API Updates - GET, PUT and DELETE  of named keys now supported
   * Policyfile validation support. (See API Changes, below.)
 
 ### Closed Issues
+
 *
 
 ### API Changes and Additions
-* new: `GET` to `/organizations/ORGNAME/clients/CLIENTNAME/keys/KEYNAME`
-  can be used to get a client key.
-* new: `GET` to `/users/USERNAME/keys/KEYNAME`
-  can be used to get a user key.
+* new: `GET`/`PUT`/`DELETE` to `/users/USERNAME/keys/KEYNAME` can be used to get
+  view, update or delete a user key.
+* new: `GET`/`PUT`/`DELETE` to  `/organizations/ORGNAME/clients/CLIENTNAME/keys/KEYNAME` can be
+  used to get view, update or delete a client key.
 * new: [Policyfile](https://github.com/chef/chef-rfc/pull/91) support
   for Policfyile validation.  Policyfile is disabled by default, stay tuned for
   further updates in this space.
-
-
 
 ## 12.0.5 (2014-02-26)
 
