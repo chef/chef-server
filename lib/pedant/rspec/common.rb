@@ -41,10 +41,10 @@ module Pedant
 
         # Request/Response
         subject { response } # By default, we are always testing responses
-        let(:response) { authenticated_request(request_method, request_url_with_query_parameters, requestor, request_options) }
+        let(:response) { authenticated_request(request_method, request_url_with_query_parameters, requestor, request_options.merge({server_api_version: request_version })) }
         let(:request_url_with_query_parameters){ request_url + (request_query_parameters ? "?#{request_query_parameters}" : "") }
         let(:parsed_response) { parse(response) }
-
+        let(:request_version) { Pedant::Config.server_api_version }
         let(:request_method) { fail "Define one of the following: :GET, :POST, :PUT, :DELETE" }
         let(:requestor)      { fail "Define requestor (ex: admin_user, normal_user, etc.)" }
         let(:request_url)    { fail "Define url" }

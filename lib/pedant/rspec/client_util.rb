@@ -149,7 +149,6 @@ module Pedant
       end
 
       module ClassMethods
-
         def with_another_validator_client(&examples)
           context 'with another validator client' do
             let(:client_is_validator) { true }
@@ -323,8 +322,7 @@ module Pedant
               # Use the original public key
               #let(:updated_resource) { required_attributes.with('public_key', public_key) }
 
-              # TODO - we do not appear to confirm that the key is valid in non-OSC
-              rejects_public_key_on_create_with "well-formed, bogus", public_key: Proc.new { bogus_key }
+              rejects_public_key_on_create_with "well-formed, bogus (private key)", public_key: Proc.new { bogus_key }
               rejects_public_key_on_create_with "mal-formed", public_key: "-----BEGIN PUBLIC KEY-----You have been trolled :-)-----END PUBLIC KEY-----"
               rejects_public_key_on_create_with "mal-formed RSA", public_key: "-----BEGIN RSA PUBLIC KEY-----You have been trolled :-)-----END RSA PUBLIC KEY-----"
               rejects_public_key_on_create_with "mal-formed cert", public_key: "-----BEGIN CERTIFICATE-----You have been trolled :-)-----END CERTIFICATE-----"
@@ -429,14 +427,12 @@ module Pedant
             let(:public_key) { instance_eval_if_proc(_options[:public_key]) }
             let(:expected_response) { bad_request_response }
 
-            skip "client key validation appears broken" do
-              should_respond_with 400, 'and does not create the client' do
-                # Make sure the resource has not been persisted
-                persisted_resource_response.should look_like not_found_response
+            should_respond_with 400, 'and does not create the client' do
+              # Make sure the resource has not been persisted
+              persisted_resource_response.should look_like not_found_response
 
-                # Make sure we cannot use this credential
-                get(resource_url, created_requestor).should look_like unauthorized_response
-              end
+              # Make sure we cannot use this credential
+              get(resource_url, created_requestor).should look_like unauthorized_response
             end
           end
         end
@@ -446,14 +442,12 @@ module Pedant
             let(:requestor) { platform.admin_user }
             let(:public_key) { instance_eval_if_proc(_options[:public_key]) }
             let(:expected_response) { bad_request_response }
-            skip "client key validation appears broken" do
-              should_respond_with 400, 'and does not update the client' do
-                # Verify nothing has changed
-                persisted_resource_response.should look_like updated_response
+            should_respond_with 400, 'and does not update the client' do
+              # Verify nothing has changed
+              persisted_resource_response.should look_like updated_response
 
-                # Verify that we can use the original credentials
-                get(resource_url, test_client_requestor).should look_like updated_response
-              end
+              # Verify that we can use the original credentials
+              get(resource_url, test_client_requestor).should look_like updated_response
             end
           end
         end

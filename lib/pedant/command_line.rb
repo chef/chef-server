@@ -114,6 +114,7 @@ module Pedant
       opts.on("--ssl-version VERSION", "Specify SSL version to use when connecting to an ssl-enabled endpoint. Defaults to TLSv1 if not specified") do |v|
         self.ssl_version = f.split(/ /).first.to_sym
       end
+
       opts.on("-V", "--server-api-version VERSION", "Set the Server API version to use in requests to the server") do |v|
         self.server_api_version = v
       end

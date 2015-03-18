@@ -72,6 +72,10 @@ module Pedant
     # authentication headers are applied last, and thus have priority
     # over any headers set in this hash.
     #
+    # :server_api_version => allows you to specify server api version to
+    # use for the request. Set to nil if you want to omit the default
+    # version header from the request.
+    #
     # :payload => the body of the request.  This is required for all PUT
     # and POST requests.  It should be given in its final form (i.e., as
     # a String, not a Ruby hash or anything else)
@@ -155,6 +159,5 @@ module Pedant
     def delete(url, requestor, opts={}, &validator)
       authenticated_request :DELETE, url, requestor, opts, &validator
     end
-
   end
 end
