@@ -50,7 +50,7 @@ validate_request('POST', Req, #base_state{resource_state = UserState} = State) -
       Body  when Body == undefined orelse Body == <<>> ->
           throw({error, missing_body});
       Body ->
-          UserData = ejson:decode(Body),
+          UserData = chef_json:decode(Body),
           case ej:valid(valid_user_data(), UserData) of
               ok ->
                   UserState1 = UserState#user_state{user_data = UserData},

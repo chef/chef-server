@@ -118,12 +118,12 @@ auth_info(Req, State) ->
 to_json(Req, #base_state{server_api_version = ?API_v0, resource_state = Principal,
                          chef_db_context = DbContext, organization_name = OrgName} = State) ->
     EJson = assemble_principal_ejson(Principal, OrgName, DbContext),
-    Json = ejson:encode(EJson),
+    Json = chef_json:encode(EJson),
     {Json, Req, State};
 to_json(Req, #base_state{resource_state = Principals,
                          chef_db_context = DbContext, organization_name = OrgName} = State) ->
     EJ = [ assemble_principal_ejson(Principal, OrgName, DbContext) || Principal <- Principals ],
-    Json = ejson:encode({[{ <<"principals">>, EJ}]} ),
+    Json = chef_json:encode({[{ <<"principals">>, EJ}]} ),
     {Json, Req, State}.
 
 assemble_principal_ejson(#principal_state{name = Name,
