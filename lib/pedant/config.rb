@@ -130,5 +130,10 @@ module Pedant
 
     # Default orgname is nil by default
     default_orgname(nil)
+
+    # Default API version is zero. Note that this value
+    # is expected to be updated when minimum supported
+    # API version of the server changes.
+    server_api_version(0)
   end
 end

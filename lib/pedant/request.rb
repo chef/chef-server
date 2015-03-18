@@ -89,6 +89,7 @@ module Pedant
     # carry out any validation tests of the response.
     def authenticated_request(method, url, requestor, opts={}, &validator)
       user_headers = opts[:headers] || {}
+      version = opts[:server_api_version]
       payload_raw = opts[:payload] || ""
 
       payload = if payload_raw.class == Hash
@@ -96,6 +97,18 @@ module Pedant
                 else
                   payload_raw
                 end
+
+      # Provide a means to explicitly delete version header for test purposes
+      version_headers = if opts.has_key?(:api_version)
+                          version = opts[:api_version]
+                          if version.nil?
+                            {}
+                          else
+                            {"X-Ops-Server-API-Version" =>  version}
+                          end
+                        else
+                          {"X-Ops-Server-API-Version" => Pedant::Config.server_api_version}
+                        end
 
       auth_headers = opts[:auth_headers] || requestor.signing_headers(method, url, payload)
 
@@ -108,6 +121,7 @@ module Pedant
       final_headers = standard_headers.
         merge(auth_headers).
         merge(user_headers).
+        merge(version_headers).
         merge({'Host' => host})
 
       response_handler = lambda{|response, request, result| response}

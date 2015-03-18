@@ -17,7 +17,9 @@ require 'optparse'
 
 module Pedant
 
-  class CommandLine < Struct.new(:junit_file, :config_file, :log_file, :include_internal, :only_internal, :run_all, :exclude_internal_orgs, :only_internal_orgs, :verify_error_messages, :bell_on_completion, :rerun, :use_default_org, :ssl_version)
+  class CommandLine < Struct.new(:junit_file, :config_file, :log_file, :include_internal, :only_internal,
+                                 :run_all, :exclude_internal_orgs, :only_internal_orgs, :verify_error_messages,
+                                 :bell_on_completion, :rerun, :use_default_org, :ssl_version, :server_api_version)
 
     def initialize(argv)
       @argv = argv.dup
@@ -109,9 +111,11 @@ module Pedant
       opts.on("--rerun", "Run tests that failed the last time") do
         self.rerun = true
       end
-
       opts.on("--ssl-version VERSION", "Specify SSL version to use when connecting to an ssl-enabled endpoint. Defaults to TLSv1 if not specified") do |v|
         self.ssl_version = f.split(/ /).first.to_sym
+      end
+      opts.on("-V", "--server-api-version VERSION", "Set the Server API version to use in requests to the server") do |v|
+        self.server_api_version = v
       end
     end
 
@@ -121,13 +125,13 @@ module Pedant
       # --help does not actually sort these, so ordering is important.
       sorted.each do |tag|
         opts.on("--focus-#{tag}", "Run only #{tag} tests") do
-          self.foci << tag
+          self.foci << tag.gsub("-", "_") # allow hyphenated tags that resolve to symbols/tags with underscores
         end
       end
 
       sorted.each do |tag|
         opts.on("--skip-#{tag}", "Skip #{tag} tests") do
-          self.skip << tag
+          self.skip << tag.gsub("-", "_")
         end
       end
 
@@ -138,7 +142,7 @@ module Pedant
                 clients depsolver search knife validation authentication authorization
                 principals acl containers groups association omnibus organizations
                 usags internal_orgs rename_org controls keys cookbook_artifacts
-                license headers)
+                license headers server-api-version)
       export_options(opts, tags)
     end
 
