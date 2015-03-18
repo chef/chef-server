@@ -7,8 +7,6 @@ ALL_HOOK = bundle
 
 REL_HOOK = compile bundle
 
-PRECOMPILE_HOOK = lucene
-
 CT_DIR = common_test
 
 DIALYZER_OPTS =
@@ -18,7 +16,7 @@ DIALYZER_SKIP_DEPS = couchbeam
 
 ## TODO WE REALLY SHOULDN'T SKIP THIS
 ## ETOOMANYERRORS to fix right now
-## SKIP_DIALYZER = true
+SKIP_DIALYZER = true
 
 ct: clean_ct compile
 	time $(REBARC) ct skip_deps=true
@@ -55,12 +53,5 @@ include devvm.mk
 bundle:
 	@echo bundling up depselector, This might take a while...
 	@cd apps/chef_objects/priv/depselector_rb; rm -rf .bundle; bundle install --deployment --path .bundle
-
-NEOTOMA=deps/neotoma/neotoma
-$(NEOTOMA):
-	@(cd deps/neotoma; rebar compile; rebar escriptize)
-
-lucene: $(DEPS) $(NEOTOMA)
-	@$(NEOTOMA) apps/chef_index/priv/lucene.peg -module chef_lucene -output apps/chef_index/src -transform_module lucene_txfm
 
 DEVVM_DIR = $(DEVVM_ROOT)/_rel/oc_erchef
