@@ -3,7 +3,7 @@
 %% @author Jean Rouge <jean@chef.io>
 %% Copyright 2013-2015 Chef Software, Inc. All Rights Reserved.
 
--module(oc_chef_wm_cookbook_artifacts).
+-module(oc_chef_wm_named_cookbook_artifact).
 
 -include("../../include/oc_chef_wm.hrl").
 

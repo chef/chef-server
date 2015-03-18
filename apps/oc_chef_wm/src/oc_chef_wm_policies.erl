@@ -70,7 +70,7 @@ auth_info(Req, State) ->
 
 auth_info('GET', Req, State ) ->
     {{container, policies}, Req, State};
-auth_info('POST', Req, State = #base_state{resource_state = #policy_state{policy_data = Json}}) ->
+auth_info('POST', Req, State = #base_state{resource_state = #policy_state{}}) ->
     {{create_in_container, policies}, Req, State}.
 
 resource_exists(Req, State) ->

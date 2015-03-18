@@ -113,12 +113,6 @@ auth_info(Req, State, ResourceState, Method, DbContext, CAVRec) ->
             {{object, AuthzId}, Req, State1}
     end.
 
-fail_with(Req, State, RespCode, RespMessage, LogMsg) ->
-    Message = chef_wm_util:error_message_envelope(
-                erlang:iolist_to_binary(RespMessage)),
-    Req1 = chef_wm_util:set_json_body(Req, Message),
-    {{halt, RespCode}, Req1, State#base_state{log_msg = LogMsg}}.
-
 to_json(Req, #base_state{resource_state = #cookbook_artifact_version_state{
                              oc_chef_cookbook_artifact_version = CAVRec
                          }} = State) ->
