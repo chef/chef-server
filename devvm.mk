@@ -5,7 +5,7 @@ SHELL := /bin/bash
 
 ## DEV VM Targets
 DEVVM_PROJ ?= $(notdir $(CURDIR))
-DEVVM_ROOT ?= /srv/piab/mounts/$(DEVVM_PROJ)
+DEVVM_ROOT ?= /srv/piab/mounts/$(notdir $(CURDIR))
 DEVVM_DIR ?= $(DEVVM_ROOT)/_rel/$(PROJ)
 
 bummer:
@@ -15,11 +15,11 @@ bummer:
 	@/bin/echo Then \'make devvm\' will get you running
 
 devvm_stop:
-	private-chef-ctl stop $(PROJ)
+	private-chef-ctl stop $(DEVVM_PROJ)
 
 devvm_link:
 	rm -f $(DEVVM_DIR)/sys.config
-	ln -s  /var/opt/opscode/opscode-erchef/sys.config $(DEVVM_DIR)/sys.config
+	ln -s  /var/opt/opscode/$(DEVVM_PROJ)/sys.config $(DEVVM_DIR)/sys.config
 
 devvm: devvm_stop devrel devvm_link
 

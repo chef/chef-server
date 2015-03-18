@@ -1,6 +1,7 @@
 SHELL := /bin/bash
 
 PROJ = oc_erchef
+DEVVM_PROJ = opscode-erchef
 
 ALL_HOOK = bundle
 
@@ -13,10 +14,9 @@ DIALYZER_OPTS =
 DIALYZER_SRC = -r apps/chef_db/ebin -r apps/chef_index/ebin -r apps/chef_objects/ebin -r apps/depsolver/ebin -r apps/oc_chef_authz/ebin -r apps/oc_chef_wm/ebin
 DIALYZER_SKIP_DEPS = couchbeam
 
-
 ## TODO WE REALLY SHOULDN'T SKIP THIS
 ## ETOOMANYERRORS to fix right now
-SKIP_DIALYZER = true
+## SKIP_DIALYZER = true
 
 ct: clean_ct compile
 	time $(REBARC) ct skip_deps=true
