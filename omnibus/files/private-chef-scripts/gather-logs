@@ -233,6 +233,7 @@ then
 elif [[ $type == 'Analytics' ]];
 then
     fqdn="analytics_fqdn"
+    backend_vip="backend_vip"
     config_file_path="/etc/opscode-analytics/opscode-analytics.rb"
 fi
 tempname=`grep -E $fqdn $config_file_path | cut -d \" -f2`
