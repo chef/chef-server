@@ -24,13 +24,15 @@
 
 -include_lib("common_test/include/ct.hrl").
 -include_lib("eunit/include/eunit.hrl").
+-include("../../../include/chef_osc_defaults.hrl").
 
 -export([
          start_server/1,
          needed_apps/0,
          base_init_per_suite/1,
          base_end_per_suite/1,
-         get_config/2
+         get_config/2,
+         make_user/3
         ]).
 
 -define(TEST_DB_NAME, "oc_chef_wm_itests").
@@ -60,6 +62,8 @@ start_server(Config) ->
     application:set_env(oc_chef_wm, root_metric_key, "chefAPI"),
     application:set_env(oc_chef_wm, authz_timeout, 1000),
     application:set_env(oc_chef_wm, authz_fanout, 20),
+    application:set_env(oc_chef_wm, node_license, 25),
+    application:set_env(oc_chef_wm, upgrade_url, <<"https://nowhere">>),
 
     application:set_env(chef_wm, local_key_gen, {true, 1024}),
 
@@ -148,10 +152,12 @@ base_init_per_suite(Config0) ->
                         FakeContext,
                         AuthzId),
 
+    {ok, PubKey} = file:read_file("../../spki_public.pem"),
     [{context, FakeContext},
      {org, OrganizationRecord},
      {org_id, OrgId},
-     {client, ClientRecord}
+     {client, ClientRecord},
+     {pubkey, PubKey}
      | Config2].
 
 %% @doc Returns a value from the config, making sure it's defined
@@ -168,3 +174,15 @@ get_config(Key, Config) ->
 
 base_end_per_suite(Config) ->
     chef_test_suite_helper:stop_server(Config, needed_apps()).
+
+make_user(Config, Name, AuthzId) ->
+    User = chef_object:new_record(chef_user, ?OSC_ORG_ID, AuthzId,
+                                   {[{<<"username">>, Name},
+                                     {<<"password">>, <<"zuperzecret">>},
+                                     {<<"email">>, iolist_to_binary([Name, <<"@somewhere.com">>])},
+                                     {<<"public_key">>, ?config(pubkey, Config)},
+                                     {<<"display_name">>, Name}]}),
+    Response = chef_db:create(User, ?config(context, Config), AuthzId),
+    ?assertEqual(Response, ok),
+    User.
+
