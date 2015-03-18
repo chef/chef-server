@@ -150,7 +150,7 @@
           requestor_id :: object_id(),
 
           %% Details for The actor making the request.
-          requestor :: #chef_client{} | #chef_user{},
+          requestor :: #chef_requestor{},
 
           %% A record containing resource-specific state.
           resource_state :: tuple(),

@@ -23,7 +23,7 @@
                           "64db62e070da58cf7bb0caebde7a3f11c2e3cbbb"}},
        {envy,".*",
              {git,"https://github.com/manderson26/envy",
-                  "d62cb227b9000ee866c8bcc724ddf68d87621dea"}},
+                  "e6ba39664a1016ed309ea44269247943de2eb16b"}},
        {chef_authn,".*",
                    {git,"https://github.com/opscode/chef_authn",
                         "e7850d0925b01761d8085ee8b44dafbbe1b297a4"}},
@@ -130,5 +130,6 @@
 {erl_opts,[{d,'OC_CHEF'},
            {d,'CHEF_DB_DARKLAUNCH',xdarklaunch_req},
            {d,'CHEF_WM_DARKLAUNCH',xdarklaunch_req},
-           {parse_transform,lager_transform}]}.
+           {parse_transform,lager_transform},
+           debug_info]}.
 

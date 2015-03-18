@@ -914,6 +914,9 @@ create_from_json(#wm_reqdata{} = Req,
             %% FIXME: created authz_id is leaked for this case, cleanup?
             oc_chef_object_db:delete_from_solr(ObjectRec),
             object_creation_error_hook(ObjectRec, ActorId),
+            % 500 logging sanitizes responses to avoid exposing sensitive data -
+            % TODO - parse sql error to get minimal meaningful message,
+            % without exposing sensitive data
             {{halt, 500}, Req, State#base_state{log_msg = What}}
     end.
 
@@ -950,7 +953,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
             case chef_db:update(ObjectRec, DbContext, ActorId) of
                 ok ->
                     IsRename = chef_object:name(OrigObjectRec) =/= chef_object:name(ObjectRec),
-                    Req1 = handle_rename(ObjectRec, Req, IsRename),
+                    Req1 = handle_rename(ObjectRec, Req, State, IsRename),
                     {true, chef_wm_util:set_json_body(Req1, ObjectEjson), State};
                 not_found ->
                     %% We will get this if no rows were affected by the query. This could
@@ -981,6 +984,8 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                      State#base_state{log_msg = LogMsg}};
                 Why ->
                     State1 = State#base_state{log_msg = Why},
+                    % TODO - parse sql error to get minimal meaningful message,
+                    % without exposing sensitive data
                     {{halt, 500}, Req, State1}
             end
     end.
@@ -1038,16 +1043,12 @@ maybe_annotate_log_msg(Req, #base_state{log_msg = Msg}) ->
 %% When we rename an object, we want to return 201 because the location of the object
 %% has now changed. Setting the location header here to correspond to the new name
 %% will force webmachine to return 201.
-handle_rename(_ObjectRec, Req, false) ->
+handle_rename(_ObjectRec, Req, _State, false) ->
     Req;
-handle_rename(ObjectRec, Req, true) ->
-    TypeName = chef_object:type_name(ObjectRec),
-    ObjectName = case chef_object:name(ObjectRec) of
-                     {_ParentName, ObjName} -> ObjName; % ugh, special case for databag items
-                     ObjName -> ObjName
-                 end,
-    % TODO will need to revisit this when PUTing to keys.
-    Uri = oc_chef_wm_routes:route(TypeName, Req, [{name, ObjectName}]),
+handle_rename(ObjectRec, Req, #base_state{resource_mod = ResourceMod} = State, true) ->
+    {TypeName, Args} = call_if_exported(ResourceMod, route_args,
+                                        [ObjectRec, State], fun route_args/2),
+    Uri = oc_chef_wm_routes:route(TypeName, Req, Args),
     wrq:set_resp_header("Location", binary_to_list(Uri), Req).
 
 %%% @doc Return appropriate public key based on request source
@@ -1152,10 +1153,11 @@ call_if_exported(Mod, FunName, Args, DefaultFun) ->
             erlang:apply(DefaultFun, Args)
     end.
 
-
+% Default route_args consist of {TypeName, [{name, ObjectName}]
+% unless overridden by a resource module.
 route_args(ObjectRec,_State) ->
-        TypeName = chef_object:type_name(ObjectRec),
-        {TypeName, [{name, chef_object:name(ObjectRec)}]}.
+    TypeName = chef_object:type_name(ObjectRec),
+    {TypeName, [{name, chef_object:name(ObjectRec)}]}.
 
 
 

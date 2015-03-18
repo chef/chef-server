@@ -23,8 +23,7 @@
 
 -behaviour(chef_object).
 
--export([
-         authz_id/1,
+-export([authz_id/1,
          is_indexed/0,
          ejson_for_indexing/2,
          update_from_ejson/2,
@@ -32,7 +31,7 @@
          fields_for_update/1,
          fields_for_fetch/1,
          ejson_from_list/2,
-         ejson_from_find/1,
+         ejson_from_key/1,
          record_fields/0,
          list/2,
          set_updated/2,
@@ -41,7 +40,9 @@
          id/1,
          org_id/1,
          type_name/1,
-         parse_binary_json/2
+         delete/2,
+         parse_binary_json/2,
+         flatten/1
         ]).
 
 %% database named queries
@@ -75,33 +76,55 @@ is_indexed() ->
 ejson_for_indexing(#chef_key{}, _) ->
     error(not_indexed).
 
-update_from_ejson(_, _) ->
-    error(need_to_implement).
+-spec update_from_ejson(#chef_key{}, ejson_term()) -> #chef_key{}.
+update_from_ejson(#chef_key{key_name = OldName, key_version = OldPubKeyVersion,
+                            public_key = OldPubKey, expires_at = OldExpirationDate} = Key, EJ) ->
+  {NewVersion, NewPubKey} = case ej:get({<<"public_key">>}, EJ) of
+                              undefined ->
+                                {OldPubKeyVersion, OldPubKey};
+                              PK ->
+                                {safe_key_version(PK), PK}
+                            end,
+  NewExpiration = case ej:get({<<"expiration_date">>}, EJ) of
+                    undefined ->
+                      OldExpirationDate;
+                    Exp ->
+                      chef_object_base:parse_date(Exp)
+                  end,
+  Key#chef_key{key_name = ej:get({<<"name">>}, EJ, OldName),
+               key_version = NewVersion,
+               public_key = NewPubKey,
+               expires_at = NewExpiration,
+               % We need to preserve the old name for any update to be applied
+               old_name = OldName}.
 
-set_created(#chef_key{} = Object, ActorId) ->
+set_created(#chef_key{} = Key, ActorId) ->
     Now = chef_object_base:sql_date(now),
-    Object#chef_key{created_at = Now, updated_at = Now, last_updated_by = ActorId}.
+    Key#chef_key{created_at = Now, updated_at = Now, last_updated_by = ActorId}.
 
-set_updated(#chef_key{} = Object, ActorId) ->
+set_updated(#chef_key{} = Key, ActorId) ->
     Now = chef_object_base:sql_date(now),
-    Object#chef_key{updated_at = Now, last_updated_by = ActorId}.
+    Key#chef_key{updated_at = Now, last_updated_by = ActorId}.
 
-fields_for_update(#chef_key{}) ->
-    %% NOTE: we must do the same date parse here that we do in flatten
-    error(need_to_implement).
+fields_for_update(#chef_key{id = Id, key_name = NewName, old_name = OldName,
+                            key_version = PubKeyVersion, public_key = PublicKey,
+                            expires_at = ExpirationDate, updated_at = UpdatedAt,
+                            last_updated_by = ActorId}) ->
+  [Id, OldName, NewName, PublicKey, PubKeyVersion, ExpirationDate, ActorId, UpdatedAt].
+
 
 fields_for_fetch(#chef_key{id = Id, key_name = KeyName}) ->
-    [Id, KeyName].
+  [Id, KeyName].
 
 record_fields() ->
-    record_info(fields, chef_key).
+  record_info(fields, chef_key).
 
 ejson_from_list(KeysList, URIDecorator) ->
-    [ {[{<<"uri">>, URIDecorator(Name)},
-        {<<"name">>, Name},
-        {<<"expired">>, Expired}]} || [Name, Expired] <- KeysList ].
+  [ {[{<<"uri">>, URIDecorator(Name)},
+      {<<"name">>, Name},
+      {<<"expired">>, Expired}]} || [Name, Expired] <- KeysList ].
 
-ejson_from_find(#chef_key{key_name = Name, public_key = PublicKey, expires_at = UnparsedExpirationDate}) ->
+ejson_from_key(#chef_key{key_name = Name, public_key = PublicKey, expires_at = UnparsedExpirationDate}) ->
     ExpirationDate = case UnparsedExpirationDate of
         ?INFINITY_TIMESTAMP -> <<"infinity">>;
         _ -> list_to_binary(ec_date:format("Y-m-dTH:i:sZ", UnparsedExpirationDate))
@@ -119,15 +142,18 @@ find_query() ->
 new_record(_OrgId, _AuthzId, {Id, KeyData}) ->
     PubKey = ej:get({<<"public_key">>}, KeyData),
     %% return a more useful error if key_version fails
-    PubKeyVersion = try chef_object_base:key_version(PubKey) of
-        Result -> Result
-    catch
-        _:_ -> throw(invalid_public_key)
-    end,
-    Expires = chef_object_base:parse_expiration(ej:get({<<"expiration_date">>}, KeyData)),
+    PubKeyVersion = safe_key_version(PubKey),
+    Expires = chef_object_base:parse_date(ej:get({<<"expiration_date">>}, KeyData)),
     #chef_key{ id = Id, key_name = ej:get({<<"name">>}, KeyData),
                public_key = PubKey, key_version = PubKeyVersion,
                expires_at = Expires}.
+
+safe_key_version(PublicKey) ->
+    try chef_object_base:key_version(PublicKey) of
+        Result -> Result
+    catch
+        _:_ -> throw(invalid_public_key)
+    end.
 
 name(#chef_key{key_name = KeyName}) ->
     KeyName.
@@ -147,29 +173,47 @@ list_query() ->
 create_query() ->
     insert_key_for_actor.
 
-parse_binary_json(_Bin, #chef_key{} = _ExistingObject) ->
-    % TODO according to rfc23, updates of individual fields are supported,
-    % so we'll validate each as optional and then verify that at least one is present.
-    error(unsupported);
-parse_binary_json(Bin, undefined) ->
-    EJ = chef_json:decode(Bin),
+parse_binary_json(Bin, update) ->
+  EJ = chef_json:decode(Bin),
+  % At least one field must be present:
+  OneOf = [<<"expiration_date">>, <<"public_key">>, <<"name">>],
+  case lists:filter(fun(X) -> X =/= undefined end, [ej:get({Field}, EJ) || Field <- OneOf]) of
+      [] ->
+          throw(missing_required_field);
+      _ ->
+          chef_object_base:validate_ejson(EJ, name_and_public_key_validation_spec(opt)),
+          validate_expiration_date(opt, EJ)
+  end;
+parse_binary_json(Bin, create) ->
+  EJ = chef_json:decode(Bin),
+  chef_object_base:validate_ejson(EJ, name_and_public_key_validation_spec(req)),
+  validate_expiration_date(req, EJ).
 
-    % validate public_key field
-    chef_object_base:validate_ejson(EJ, chef_object_base:public_key_spec(req)),
+validate_expiration_date(Required, EJ) ->
+  case {Required, ej:get({<<"expiration_date">>}, EJ)} of
+    {opt, undefined} -> EJ;
+    _ -> chef_object_base:validate_date_field(EJ, <<"expiration_date">>)
+  end.
 
-    % validate name field
-    chef_object_base:validate_ejson(EJ, {[
-                                           {<<"name">>, {string_match, chef_regex:regex_for(key_name)}}
-                                         ]}),
-
-    % validate expiration_date and make is safe for sqerl
-    chef_object_base:validate_and_sanitize_date_field(EJ, <<"expiration_date">>).
+name_and_public_key_validation_spec(Req) ->
+  {[ chef_object_base:public_key_spec(Req),
+     {{Req, <<"name">>}, {string_match, chef_regex:regex_for(key_name)}} ]}.
 
 update_query() ->
-    error(need_to_implement).
+  update_key_by_id_and_name.
 
 delete_query() ->
-    error(need_to_implement).
+  delete_key_by_id_and_name.
+
+delete(#chef_key{id = Id, key_name = Name}, CallbackFun) ->
+    CallbackFun({delete_query(), [Id, Name]}).
+
+flatten(#chef_key{} = Key) ->
+    %% Drop off the first and last fielFirst is record name, and
+    %% last is one that isn't in the DB (for internal use)
+    [_|Tail] = tuple_to_list(Key),
+    lists:reverse(tl(lists:reverse(Tail))).
 
 bulk_get_query() ->
-    error(need_to_implement).
+    error(unsupported).
+
