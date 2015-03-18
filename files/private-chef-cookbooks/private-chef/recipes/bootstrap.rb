@@ -49,7 +49,6 @@ execute "bootstrap-platform" do
   notifies :restart, 'service[opscode-erchef]'
 end
 
-#
 # Once we've bootstrapped the Enterprise Chef server
 # we can delete the bootstrap script that contains
 # the superuser password. Although this password cannot
@@ -58,8 +57,12 @@ end
 # trigger the delete from the execute resource immediately
 # above so that we can ensure that bootstrap scripts from
 # previous installs are also cleaned up.
-#
 template bootstrap_script do
+  action :delete
+end
+
+# Once we've bootstrapped, we can also delete pivotal.pub
+file "/etc/opscode/pivotal.pub" do
   action :delete
 end
 

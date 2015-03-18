@@ -2,6 +2,11 @@
 
 ## 12.0.6 (undetermined)
 
+### opscode-omnibus
+* Use a cert instead of a public key for pivotal.
+* No longer generate /etc/opscode/pivotal.cert as it is no longer used.
+* Remove the public key we now use for bootstrapping (/etc/opscode/pivotal.pub) post bootstrap so that it only lives in the database.
+
 ### bookshelf 1.1.7
 * Uses relx for Erlang application releases
 * Upgraded to lager 2.1.1
@@ -13,6 +18,9 @@
 ### oc\_erchef 1.6.2
 * Uses relx for Erlang application releases
 * Upgraded to lager 2.1.1
+
+### chef-server-bootstrap 1.0.1
+* Updated to use public key instead of certificate for pivotal on bootstrap.
 
 ### oc-chef-pedant 2.0.1
 * Adds tests for keys named get

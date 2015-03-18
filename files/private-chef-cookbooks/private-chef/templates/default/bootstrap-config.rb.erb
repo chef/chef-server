@@ -9,5 +9,5 @@ bifrost_host: '<%= node['private_chef']['oc_bifrost']['vip'] %>'
 bifrost_port: '<%= node['private_chef']['oc_bifrost']['port'] %>'
 bifrost_superuser_id: '<%= node['private_chef']['oc_bifrost']['superuser_id'] %>'
 
-superuser_cert: '/etc/opscode/pivotal.cert'
+superuser_public_key : '/etc/opscode/pivotal.pub'
 superuser_key : '/etc/opscode/pivotal.pem'
