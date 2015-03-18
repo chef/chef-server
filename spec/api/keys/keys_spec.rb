@@ -734,7 +734,7 @@ describe "/keys endpoint", :keys do
             post("#{org_base_url}/clients/bob/keys", superuser, payload: key_payload).should look_like(status: 404)
         end
 
-        context "as...", :authorization do
+        context "POST /organizations/:org/clients/:client/keys as...", :authorization do
           it "an invalid user fails with 401", :authentication do
             post("#{org_base_url}/clients/#{org_client_name}/keys", requestor("bob", user['private_key']), payload: key_payload).should look_like(status: 401)
           end
@@ -770,7 +770,7 @@ describe "/keys endpoint", :keys do
         it "that doesn't exist" do
             post("#{platform.server}/users/bob/keys", superuser, payload: key_payload).should look_like(status: 404)
         end
-        context "as...", :authorization do
+        context "POST /users/:user/keys jas...", :authorization do
           before (:all) do
             platform.associate_user_with_org($org_name, org_user).should look_like(status: 201)
           end
@@ -904,7 +904,7 @@ describe "/keys endpoint", :keys do
     end
 
     context "DELETE", :authorization do
-      context "/organizations/:org/clients/:client/keys/:default" do
+      context "/organizations/:org/clients/:client/keys/:key" do
         before(:all) do
           post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
         end
@@ -925,7 +925,7 @@ describe "/keys endpoint", :keys do
           delete("#{org_base_url}/clients/#{org_client_name}/keys/badkey", superuser).should look_like(status: 404)
         end
 
-        context "as..." do
+        context "as..." do # DELETE $endpoint as
           it "the client itself, authenticating with a different key should succeed" do
             delete_client_key($org_name, org_client_name, "alt_key",  requestor: org_client).should look_like(status: 200)
           end
@@ -1079,7 +1079,7 @@ describe "/keys endpoint", :keys do
           put("#{org_base_url}/clients/#{org_client_name}/keys/badkey", superuser, payload: key_payload).should look_like(status: 404)
         end
 
-        context "as..." do
+        context "as..." do # PUT $endpoint as
           it "the client itself, authenticating with a different key should succeed" do
             put(@key_url, org_client, payload: key_payload).should look_like(status: 200)
           end
@@ -1155,7 +1155,7 @@ describe "/keys endpoint", :keys do
           put("#{platform.server}/users/#{org_user_name}/keys/badkey", superuser, payload: key_payload).should look_like(status: 404)
         end
 
-        context "as..." do
+        context "as..." do # PUT $endpoint as
           it "the user itself, authenticating with a different key should succeed" do
             put(@key_url, org_user, payload: key_payload).should look_like(status: 200)
           end
