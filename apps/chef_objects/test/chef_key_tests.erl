@@ -50,7 +50,6 @@ load_public_key(alternate) ->
 
 update_from_ejson_test_() ->
     OriginalKey = chef_key:new_record(unused, unused, {<<"A">>, example_key()}),
-    % TODO fail on bad key test because of late validation
     [{"check that update_from_ejson returns the updated chef_key when fields are updated",
       fun() ->
               NewKey = load_public_key(alternate),
@@ -78,16 +77,14 @@ ejson_from_key_test_() ->
       fun() ->
           ExampleKey = example_key(<<"infinity">>, undefined),
           ChefKey = chef_key:new_record(unused, unused, {<<"A">>, ExampleKey}),
-          ?assertMatch(ExampleKey, chef_key:ejson_from_key(ChefKey)),
-          ?assertEqual(todo, todo)
+          ?assertMatch(ExampleKey, chef_key:ejson_from_key(ChefKey))
       end
      },
      {"check that ejson_from_key replies in correct form with normal expiration",
       fun() ->
           ExampleKey = example_key(),
           ChefKey = chef_key:new_record(unused, unused, {<<"A">>, ExampleKey }),
-          ?assertMatch(ExampleKey, chef_key:ejson_from_key(ChefKey)),
-          ?assertEqual(todo, todo)
+          ?assertMatch(ExampleKey, chef_key:ejson_from_key(ChefKey))
       end
      }
     ].
