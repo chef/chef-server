@@ -1,14 +1,13 @@
 # Chef Server Changelog
 
-## 12.0.6 (undetermined)
+## 12.0.6 (2015-03-19)
 
 ### opscode-omnibus
 * Use a cert instead of a public key for pivotal.
 * No longer generate /etc/opscode/pivotal.cert as it is no longer used.
 * Remove the public key we now use for bootstrapping (/etc/opscode/pivotal.pub) post bootstrap so that it only lives in the database.
 * Disable jmxremote in solr4's Java options
-* Configuration options for the key cache are not exposed to
-/etc/opscode/chef-server.rb
+* Configuration options for the key cache are now exposed in /etc/opscode/chef-server.rb
 
 ### knife-opc 0.3.0
 

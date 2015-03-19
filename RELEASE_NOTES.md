@@ -1,20 +1,24 @@
 # Chef Server Release Notes
 
-## 12.0.6 (TBD)
+## 12.0.6 (2015-03-19)
 
-The following items are new since Chef Server 12.0.4 and/or are changes from previous versions.
+The following items are new since Chef Server 12.0.5 and/or are changes from previous versions.
 For specific breakdown of updated components, refer to CHANGELOG.md
 
-### opscode-omnibus
-* Use a cert instead of a public key for the superuser.
-* No longer generate /etc/opscode/pivotal.cert as it is no longer used. Now the public key for the superuser lives in the database and no longer exists on disk.
+* opscode-omnibus
+  * Use a cert instead of a public key for the superuser.
+  * No longer generate /etc/opscode/pivotal.cert as it is no longer used. Now the public key for the superuser lives in the database and no longer exists on disk.
 * oc\_erchef
   * Key API Updates - GET, PUT and DELETE  of named keys now supported
   * Policyfile validation support. (See API Changes, below.)
 
 ### Closed Issues
+* [chef-server-115](https://github.com/chef/chef-server/issues/115)
+* [chef-server-119](https://github.com/chef/chef-server/issues/119)
+* [chef-server-97](https://github.com/chef/chef-server/issues/97)
+* [chef-server-17](https://github.com/chef/chef-server/issues/17)
+* [opscode-omnibus-648](https://github.com/chef/opscode-omnibus/issues/648)
 
-*
 
 ### API Changes and Additions
 * new: `GET`/`PUT`/`DELETE` to `/users/USERNAME/keys/KEYNAME` can be used to get
@@ -49,8 +53,8 @@ For specific breakdown of updated components, refer to CHANGELOG.md
   * Policyfile API additions. (See API Changes, below.)
 
 ### Closed Issues
-* [chef-server-110][https://github.com/chef/chef-server/issues/110]
-* [chef-server-66][https://github.com/chef/chef-server/issues/66]
+* [chef-server-110](https://github.com/chef/chef-server/issues/110)
+* [chef-server-66](https://github.com/chef/chef-server/issues/66)
 
 ### API Changes and Additions
 * new: `POST` to `/organizations/ORGNAME/clients/CLIENTNAME/keys`
