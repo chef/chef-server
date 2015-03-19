@@ -38,6 +38,15 @@ the required gems are installed:
 $ bundle install --binstubs
 ```
 
+Testing
+-------
+To run the unit tests:
+
+```
+bundle install --binstubs
+./bin/rake test:csc
+```
+
 Usage
 -----
 ### Build
