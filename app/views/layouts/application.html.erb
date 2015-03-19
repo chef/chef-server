@@ -35,9 +35,9 @@
   </div>
   <div class="row">
     <% flash.each do |key, value| %>
-      <div data-alert class="alert-box radius alert">
-        <button class="button alert">&times;</button>
+      <div data-alert class="alert-box radius <%= chef_class_for(key) %>">
         <%= value %>
+        <a href="#" class="close">&times;</a>
       </div>
     <% end %>
     <%= yield %>
