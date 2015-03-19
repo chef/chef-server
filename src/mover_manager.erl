@@ -210,8 +210,9 @@ ready({start, NumObjects, NumWorkers, Worker}, _From, CurrentState) ->
                    worker = #migration_worker{callback_module = CallbackMod } = Worker},
     call_if_exported(CallbackMod, migration_init, [], fun no_op/0),
     {reply, {ok, burning_couches}, working, State, 0};
-ready(create_account_dets, _From, State = #state{ acct_info = Acct} ) ->
-    NewAccount = create_dets_files(Acct),
+ready(create_account_dets, _From, State = #state{ acct_info = _Acct} ) ->
+    %%NewAccount = create_dets_files(Acct),
+    NewAccount = couchdb_is_dead_yo,
     {reply, NewAccount, ready, State#state{acct_info = NewAccount}}.
 
 working(timeout, #state{objects_remaining = 0} = State) ->
