@@ -37,6 +37,7 @@ REBARC = $(REBAR) -C $(REBAR_CONFIG)
 
 # For use on Travis CI, skip dialyzer for R14 and R15. Newer versions
 # have a faster dialyzer that is less likely to cause a build timeout.
+SKIP_DIALYZER ?= false
 DIALYZER = dialyzer
 R14 = $(findstring R14,$(TRAVIS_OTP_RELEASE))
 R15 = $(findstring R15,$(TRAVIS_OTP_RELEASE))
@@ -46,7 +47,7 @@ endif
 ifneq ($(R15),)
 DIALYZER = echo "SKIPPING dialyzer"
 endif
-ifneq ($(SKIP_DIALYZER),)
+ifneq ($(SKIP_DIALYZER),false)
 DIALYZER = echo "SKIPPING dialyzer"
 endif
 
@@ -115,7 +116,7 @@ endif
 all: .concrete/DEV_MODE $(DEPS)
 	@$(MAKE) all_but_dialyzer dialyzer
 
-all_but_dialyzer: .concrete/DEV_MODE compile eunit $(ALL_HOOK)
+all_but_dialyzer: .concrete/DEV_MODE compile $(ALL_HOOK) eunit
 
 $(REBAR):
 	curl -Lo rebar $(REBAR_URL) || wget $(REBAR_URL)
@@ -136,7 +137,7 @@ clean:
 allclean:
 	@($(REBARC) --help 2>&1|grep -q recursive && $(REBARC) -r clean) || $(REBARC) clean
 
-compile: $(DEPS) $(PRECOMPILE_HOOK)
+compile: $(DEPS)
 	@$(REBARC) compile
 
 $(DEPS):

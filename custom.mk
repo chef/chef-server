@@ -16,7 +16,7 @@ DIALYZER_SKIP_DEPS = couchbeam
 
 ## TODO WE REALLY SHOULDN'T SKIP THIS
 ## ETOOMANYERRORS to fix right now
-SKIP_DIALYZER = true
+SKIP_DIALYZER ?= true
 
 ct: clean_ct compile
 	time $(REBARC) ct skip_deps=true
