@@ -25,6 +25,15 @@ For specific breakdown of updated components, refer to CHANGELOG.md
   for Policfyile validation.  Policyfile is disabled by default, stay tuned for
   further updates in this space.
 
+### Security Updates
+
+* OpenSSL 1.0.1m - CVE-2015-0286: Segmentation fault in ASN1_TYPE_cmp fix
+* OpenSSL 1.0.1m - CVE-2015-0287: ASN.1 structure reuse memory corruption fix
+* OpenSSL 1.0.1m - CVE-2015-0289: PKCS7 NULL pointer dereferences fix
+* OpenSSL 1.0.1m - CVE-2015-0293: DoS via reachable assert in SSLv2 servers fix
+* OpenSSL 1.0.1m - CVE-2015-0209: Use After Free following d2i_ECPrivatekey error fix
+* OpenSSL 1.0.1m - CVE-2015-0288: X509_to_X509_REQ NULL pointer deref fix
+
 ## 12.0.5 (2014-02-26)
 
 ### What's New
