@@ -6,6 +6,16 @@
 * Use a cert instead of a public key for pivotal.
 * No longer generate /etc/opscode/pivotal.cert as it is no longer used.
 * Remove the public key we now use for bootstrapping (/etc/opscode/pivotal.pub) post bootstrap so that it only lives in the database.
+* Disable jmxremote in solr4's Java options
+* Configuration options for the key cache are not exposed to
+/etc/opscode/chef-server.rb
+
+### knife-opc 0.3.0
+
+* Ensure keyfile is writable before creating a user.
+* Add --input option to user-edit command
+* Add user to billing-admins group with --admin is passed
+* Print new private-key when user-edit results in a key generation
 
 ### bookshelf 1.1.7
 * Uses relx for Erlang application releases
