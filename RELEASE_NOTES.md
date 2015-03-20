@@ -13,7 +13,6 @@ For specific breakdown of updated components, refer to CHANGELOG.md
   * Policyfile validation support. (See API Changes, below.)
 
 ### Closed Issues
-* [chef-server-115](https://github.com/chef/chef-server/issues/115)
 * [chef-server-119](https://github.com/chef/chef-server/issues/119)
 * [chef-server-97](https://github.com/chef/chef-server/issues/97)
 * [chef-server-17](https://github.com/chef/chef-server/issues/17)
