@@ -12,6 +12,7 @@
 	 migration_start_worker_args/2,
 	 migration_action/2,
 	 migration_type/0,
+     needs_account_dets/0,
 	 supervisor/0,
 	 error_halts_migration/0,
 	 reconfigure_object/2,
@@ -38,6 +39,9 @@ migration_action(OrgName, AcctInfo) ->
 			[OrgName, Exception, Reason, erlang:get_stacktrace()]),
             ok
     end.
+
+needs_account_dets() ->
+    true.
 
 migration_type() ->
     <<"org_migration">>.

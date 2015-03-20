@@ -62,7 +62,7 @@
           migrate_user_password_storage/2,
           status/0,
           halt_actions/0,
-          create_account_dets/0,
+          create_account_dets/1,
           get_account_dets/0]).
 
 -ifdef(TEST).
@@ -168,8 +168,8 @@ set_concurrency(BadValue) ->
 halt_actions() ->
     gen_fsm:sync_send_all_state_event(?SERVER, halt).
 
-create_account_dets() ->
-    gen_fsm:sync_send_event(?SERVER, create_account_dets, infinity).
+create_account_dets(CallbackModule) ->
+    gen_fsm:sync_send_event(?SERVER, {create_account_dets, CallbackModule}, infinity).
 
 get_account_dets() ->
     gen_fsm:sync_send_all_state_event(?SERVER, get_account_dets).
@@ -210,9 +210,11 @@ ready({start, NumObjects, NumWorkers, Worker}, _From, CurrentState) ->
                    worker = #migration_worker{callback_module = CallbackMod } = Worker},
     call_if_exported(CallbackMod, migration_init, [], fun no_op/0),
     {reply, {ok, burning_couches}, working, State, 0};
-ready(create_account_dets, _From, State = #state{ acct_info = _Acct} ) ->
-    %%NewAccount = create_dets_files(Acct),
-    NewAccount = couchdb_is_dead_yo,
+ready({create_account_dets, CallbackMod}, _From, State = #state{ acct_info = Acct } ) ->
+    NewAccount = case call_if_exported(CallbackMod, needs_account_dets, [], fun always_false/0) of
+       true -> create_dets_files(Acct);
+       false -> account_dets_not_opened
+    end,
     {reply, NewAccount, ready, State#state{acct_info = NewAccount}}.
 
 working(timeout, #state{objects_remaining = 0} = State) ->
@@ -380,3 +382,6 @@ call_if_exported(Mod, FunName, Args, DefaultFun) ->
 
 no_op() ->
     no_op.
+
+always_false() ->
+    false.

@@ -26,7 +26,7 @@ migration_init() ->
 migration_start_worker_args(Object, AcctInfo) ->
     [Object, AcctInfo].
 
-migration_action(Object, AcctInfo) ->
+migration_action(Object, _AcctInfo) ->
     {UserGuid, OrgGuid, LastUpdatedBy, UserBody} = Object,
     try
 	moser_org_converter:insert_org_user_invite(UserGuid, OrgGuid, LastUpdatedBy, UserBody)

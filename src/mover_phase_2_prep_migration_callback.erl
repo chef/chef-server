@@ -3,6 +3,7 @@
 -export([
 	  migration_init/0,
          migration_type/0,
+         needs_account_dets/0,
          supervisor/0,
          migration_start_worker_args/2,
          error_halts_migration/0,
@@ -54,6 +55,9 @@ next_object() ->
 
 migration_type() ->
     <<"phase_2_migration_prep">>.
+
+needs_account_dets() ->
+    true.
 
 supervisor() ->
     mover_transient_worker_sup.

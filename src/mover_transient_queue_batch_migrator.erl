@@ -22,7 +22,7 @@ migrate_all(CallbackMod) ->
     application:set_env(mover, sleep_time, 0),
 
     % Build dets tables
-    mover_manager:create_account_dets(),
+    mover_manager:create_account_dets(CallbackMod),
 
     run_migration(CallbackMod).
 
