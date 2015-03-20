@@ -544,7 +544,7 @@ check_cookbook_authz(Cookbooks, _Req, #base_state{reqid = ReqId,
             Report = {check_cookbook_authz, {Why, ReqId}},
             lager:error("~p", [Report]),
             error(Report);
-        {false, NoAuthzList} ->
+        {false, {NoAuthzList, _AuthzList}} ->
             {error, {[{<<"message">>, <<"Read permission is not granted for one or more cookbooks">>},
                       {<<"unauthorized_cookbooks">>, NoAuthzList}]}}
     end.
