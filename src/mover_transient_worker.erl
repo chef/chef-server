@@ -46,8 +46,11 @@ migrate(timeout, #state{processor_args = ProcessorArgs, callback_module = Callba
             stop_with_failure(State#state{results = Error}, Error, migrate)
     catch
         ErrorType:Reason ->
-            io:fwrite("died in mover_transient_worker:migrate/2:~n~p~n~p~n", [ErrorType, Reason]),
-            io:fwrite("~p~n", [erlang:get_stacktrace()]),
+            HeadlineIoList = io_lib:fwrite("Error in ~p:migration_action", [CallbackModule]),
+            Headline = lists:flatten(HeadlineIoList),
+            error_logger:error_report({migration_action, Headline}),
+            error_logger:error_msg("migration_action args~n~p~n", [ProcessorArgs]),
+            error_logger:error_msg("~p~n~p~n~p~n", [ErrorType, Reason, erlang:get_stacktrace()]),
             stop_with_failure(State#state{results = Reason}, Reason, migrate)
     end.
 

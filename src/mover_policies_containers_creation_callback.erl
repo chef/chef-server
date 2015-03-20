@@ -74,7 +74,6 @@ migration_init() ->
     {ok, SuperuserResults} = sqerl:adhoc_select([username, id, authz_id], users, {username, equals, <<"pivotal">>}),
     Superuser = db_results_to_requestor(hd(SuperuserResults)),
 
-    %% Should do this for each container type and uniq the orgs just in case a migration partially bombs (?)
     FindOrgsWithNoPoliciesContainer = <<"SELECT orgs.name, orgs.id, orgs.authz_id FROM orgs "
                                         "LEFT JOIN containers ON orgs.id = org_id AND containers.name='policies' "
                                         "WHERE containers.name IS NULL;">>,
@@ -105,25 +104,7 @@ next_object() ->
     mover_transient_migration_queue:next(?MODULE).
 
 migration_action(Org, _AcctInfo) ->
-    try
-        upgrade_org(Org)
-    catch
-        exit:Wat ->
-            mv_oc_chef_authz_http:delete_pool(),
-            io:fwrite("Error: ~p~n", [Wat]),
-            io:fwrite("~p~n", [erlang:get_stacktrace()]),
-            {exit, Wat};
-        throw:Wat ->
-            mv_oc_chef_authz_http:delete_pool(),
-            io:fwrite("Error: ~p~n", [Wat]),
-            io:fwrite("~p~n", [erlang:get_stacktrace()]),
-            {throw, Wat};
-        error:Wat ->
-            mv_oc_chef_authz_http:delete_pool(),
-            io:fwrite("Error: ~p~n", [Wat]),
-            io:fwrite("~p~n", [erlang:get_stacktrace()]),
-            {error, Wat}
-    end.
+    upgrade_org(Org).
 
 migration_type() ->
     <<"policies_containers_creation">>.
