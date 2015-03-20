@@ -12,6 +12,7 @@
 	]).
 
 -include("mover.hrl").
+-include("mv_oc_chef_authz.hrl").
 
 -record(mover_org, {id, authz_id, name, superuser}).
 -record(mover_requestor, {id, authz_id, username}).
@@ -20,9 +21,6 @@
 -record(mover_hr_ace, {clients = [],
                  users = [],
                  groups = []}).
-
-%% NOTE: This record is copied from oc_erchef's oc_authz.hrl
--record(authz_ace,  {actors = [], groups = []}).
 
 -record(mover_chef_container, {
           id,
@@ -71,7 +69,7 @@ migration_init() ->
 
     %% TODO: this fails if the pool is already created. Should be tolerant of
     %% errors and also should tear this down after the migration
-    oc_chef_authz_http:create_pool(),
+    mv_oc_chef_authz_http:create_pool(),
     %% TODO: superuser name is somewhat configurable, it's set in oc_erchef's sys.config
     {ok, SuperuserResults} = sqerl:adhoc_select([username, id, authz_id], users, {username, equals, <<"pivotal">>}),
     Superuser = db_results_to_requestor(hd(SuperuserResults)),
@@ -111,17 +109,17 @@ migration_action(Org, _AcctInfo) ->
         upgrade_org(Org)
     catch
         exit:Wat ->
-            oc_chef_authz_http:delete_pool(),
+            mv_oc_chef_authz_http:delete_pool(),
             io:fwrite("Error: ~p~n", [Wat]),
             io:fwrite("~p~n", [erlang:get_stacktrace()]),
             {exit, Wat};
         throw:Wat ->
-            oc_chef_authz_http:delete_pool(),
+            mv_oc_chef_authz_http:delete_pool(),
             io:fwrite("Error: ~p~n", [Wat]),
             io:fwrite("~p~n", [erlang:get_stacktrace()]),
             {throw, Wat};
         error:Wat ->
-            oc_chef_authz_http:delete_pool(),
+            mv_oc_chef_authz_http:delete_pool(),
             io:fwrite("Error: ~p~n", [Wat]),
             io:fwrite("~p~n", [erlang:get_stacktrace()]),
             {error, Wat}
@@ -201,7 +199,7 @@ process_policy_step({set_acl_expanded, Object, Acl},
     Acl1 = [{Action, ace_to_authz(Cache, ACE)} || {Action, ACE} <- Acl],
     %% TODO: Error check authz results
     %% FURTHER TODO: this probably won't work with our hacked ace records :'(
-    [ oc_chef_authz:set_ace_for_entity(superuser, ResourceType, AuthzId, Method, ACE) ||
+    [ mv_oc_chef_authz:set_ace_for_entity(superuser, ResourceType, AuthzId, Method, ACE) ||
         {Method, ACE} <- Acl1],
     {Cache, []};
 process_policy_step({acls, Steps}, _Org, _User, Cache) ->
@@ -240,7 +238,7 @@ create_helper(OrgId, RequestorId, Type, Name) when is_atom(Name) ->
     BinaryName = atom_to_binary(Name, utf8),
     create_helper(OrgId, RequestorId, Type, BinaryName);
 create_helper(OrgId, RequestorId, Type, Name) ->
-    case oc_chef_authz:create_resource(RequestorId, Type) of
+    case mv_oc_chef_authz:create_resource(RequestorId, Type) of
         {ok, AuthzId} ->
             create_chef_side(OrgId, RequestorId, Type, Name, AuthzId);
         {error, _} = Error ->
@@ -357,10 +355,10 @@ init_cache(#mover_org{authz_id=OrgAuthzId},
     lists:foldl(InsertFun, dict:new(), Elements).
 
 add_cache(C, {Type, Object}, AuthzId) ->
-    Resource = oc_chef_authz:object_type_to_resource(Type),
+    Resource = mv_oc_chef_authz:object_type_to_resource(Type),
     set({Type, Object}, {Resource, AuthzId}, C);
 add_cache(C, {Type}, AuthzId) ->
-    Resource = oc_chef_authz:object_type_to_resource(Type),
+    Resource = mv_oc_chef_authz:object_type_to_resource(Type),
     set({Type}, {Resource, AuthzId}, C).
 
 
