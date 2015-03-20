@@ -2,6 +2,7 @@
 
 -export([
 	 migration_init/0,
+	 migration_complete/0,
 	 migration_type/0,
 	 supervisor/0,
 	 migration_start_worker_args/2,
@@ -80,6 +81,9 @@ migration_init() ->
     {ok, OrgsToMigrateResults} = sqerl:execute(FindOrgsWithNoPoliciesContainer),
     OrgsToMigrate = [ db_results_to_org(OrgDbRow, Superuser) || OrgDbRow <- OrgsToMigrateResults],
     mover_transient_migration_queue:initialize_queue(?MODULE, OrgsToMigrate).
+
+migration_complete() ->
+    mv_oc_chef_authz_http:delete_pool().
 
 db_results_to_requestor(FieldsValues) ->
     {<<"username">>, Name} = proplists:lookup(<<"username">>, FieldsValues),
