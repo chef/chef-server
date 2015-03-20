@@ -64,10 +64,6 @@
         ]).
 
 migration_init() ->
-    %% TODO: remove this when testing is complete:
-    Nuke = <<"delete from containers where name in ('policies', 'policy_groups', 'cookbook_artifacts');">>,
-    sqerl:execute(Nuke),
-
     %% TODO: this fails if the pool is already created. Should be tolerant of
     %% errors and also should tear this down after the migration
     mv_oc_chef_authz_http:create_pool(),
