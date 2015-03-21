@@ -28,7 +28,7 @@ describe "Policies API endpoint", :policies do
 
   let(:policies_url) { api_url("/policies") }
 
-  let(:static_named_policy_url) { api_url("/policies/some_policy_group/some_policy_name") }
+  let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/some_policy_name") }
 
   let(:request_url) { static_named_policy_url }
 
@@ -161,7 +161,7 @@ describe "Policies API endpoint", :policies do
 
             # Have to override the URL or else we will hit validation that name in
             # document matches the one in URL
-            let(:static_named_policy_url) { api_url("/policies/some_policy_group/#{name_with_all_valid_chars}") }
+            let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/#{name_with_all_valid_chars}") }
 
             let(:request_payload) do
               mutate_json(minimum_valid_policy_payload) { |p| p["name"] = name_with_all_valid_chars }
@@ -180,7 +180,7 @@ describe "Policies API endpoint", :policies do
 
             # Have to override the URL or else we will hit validation that name in
             # document matches the one in URL
-            let(:static_named_policy_url) { api_url("/policies/some_policy_group/#{max_size_name}") }
+            let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/#{max_size_name}") }
 
             let(:request_payload) do
               mutate_json(minimum_valid_policy_payload) { |p| p["name"] = max_size_name }
@@ -378,7 +378,7 @@ describe "Policies API endpoint", :policies do
 
             # Have to override the URL or else we might only hit validation that
             # name in document matches the one in URL
-            let(:static_named_policy_url) { api_url("/policies/some_policy_group/#{long_name_is_long}") }
+            let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/#{long_name_is_long}") }
 
             let(:request_payload) do
               mutate_json(minimum_valid_policy_payload) { |p| p["name"] = long_name_is_long }
@@ -399,7 +399,7 @@ describe "Policies API endpoint", :policies do
 
               # Have to override the URL or else we might only hit validation that
               # name in document matches the one in URL
-              let(:static_named_policy_url) { api_url("/policies/some_policy_group/#{encoded_invalid_name}") }
+              let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/#{encoded_invalid_name}") }
 
               let(:request_payload) do
                 mutate_json(minimum_valid_policy_payload) { |p| p["name"] = invalid_policy_name }
