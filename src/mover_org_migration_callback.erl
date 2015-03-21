@@ -8,15 +8,15 @@
 -include_lib("moser/include/moser.hrl").
 
 -export([
-	 migration_init/0,
-	 migration_start_worker_args/2,
-	 migration_action/2,
-	 migration_type/0,
-     needs_account_dets/0,
-	 supervisor/0,
-	 error_halts_migration/0,
-	 reconfigure_object/2,
-	 next_object/0
+         migration_init/0,
+         migration_start_worker_args/2,
+         migration_action/2,
+         migration_type/0,
+         needs_account_dets/0,
+         supervisor/0,
+         error_halts_migration/0,
+         reconfigure_object/2,
+         next_object/0
 	 ]).
 
 migration_init() ->

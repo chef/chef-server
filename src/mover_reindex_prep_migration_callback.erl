@@ -1,3 +1,5 @@
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil;fill-column: 92 -*-
+%% ex: ts=4 sw=4 et
 -module(mover_reindex_prep_migration_callback).
 
 -export([
