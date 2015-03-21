@@ -67,6 +67,7 @@ local p_controls = P"controls"
 local p_keys = P"keys"
 <% if @xdl_defaults['policies'] %>
 local p_policyfile = P"policies"
+local p_policy_groups = P"policy_groups"
 local p_cookbook_artifacts = P"cookbook_artifacts"
 <% end %>
 
@@ -113,7 +114,7 @@ local p_erchef_endpoint = p_cookbooks + p_data + p_roles + p_sandboxes +
 -- template portion below prefixed with lua comment to prevent
 -- errors when using un-rendered in tests.
 -- <% if @xdl_defaults['policies'] %>
-                          + p_policyfile + p_cookbook_artifacts
+                          + p_policy_groups + p_policyfile + p_cookbook_artifacts
 -- <% end %>
 
 
