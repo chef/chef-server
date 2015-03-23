@@ -38,10 +38,7 @@
          parse_binary_json/1
         ]).
 
--mixin([
-        {chef_object, [{default_fetch/2, fetch},
-                       {default_update/2, update}]}
-       ]).
+-mixin([{chef_object_default_callbacks, [ fetch/2, update/2 ]}]).
 
 %% We don't have a class for 'organizations' on the client yet, but eventually we may want
 %% to send a json_class Chef::ApiOrganization or the like.

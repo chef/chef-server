@@ -22,6 +22,10 @@
 
 -module(chef_environment).
 
+-include_lib("mixer/include/mixer.hrl").
+-include_lib("ej/include/ej.hrl").
+-include("../../include/chef_types.hrl").
+
 -export([
          authz_id/1,
          ejson_for_indexing/2,
@@ -38,7 +42,8 @@
          set_default_values/1,
          set_updated/2,
          type_name/1,
-         update_from_ejson/2
+         update_from_ejson/2,
+         list/2
         ]).
 
 %% database named queries
@@ -47,21 +52,11 @@
          create_query/0,
          delete_query/0,
          find_query/0,
-         list_query/0,         
+         list_query/0,
          update_query/0
         ]).
 
--include_lib("mixer/include/mixer.hrl").
--mixin([{chef_object,[
-                      {default_fetch/2, fetch},
-                      {default_update/2, update}
-                     ]}]).
--export([
-         list/2
-         ]).
--include_lib("ej/include/ej.hrl").
-
--include("../../include/chef_types.hrl").
+-mixin([{chef_object_default_callbacks, [ fetch/2, update/2 ]}]).
 
 -define(DEFAULT_FIELD_VALUES,
         [

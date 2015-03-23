@@ -21,6 +21,10 @@
 
 -module(chef_node).
 
+-include("../../include/chef_types.hrl").
+-include_lib("eunit/include/eunit.hrl").
+-include_lib("mixer/include/mixer.hrl").
+
 -export([
          authz_id/1,
          ejson_for_indexing/2,
@@ -40,7 +44,8 @@
          set_updated/2,
          type_name/1,
          update_from_ejson/2,
-         validate_json_node/2
+         validate_json_node/2,
+         list/2
         ]).
 
 %% database named queries
@@ -53,20 +58,12 @@
          update_query/0
         ]).
 
--include_lib("mixer/include/mixer.hrl").
--mixin([{chef_object,[
-                      {default_fetch/2, fetch},
-                      {default_update/2, update}
-                     ]}]).
--export([
-         list/2
-         ]).
+-mixin([{chef_object_default_callbacks, [ fetch/2, update/2 ]}]).
+
 -ifdef(TEST).
 -compile(export_all).
 -endif.
 
--include("../../include/chef_types.hrl").
--include_lib("eunit/include/eunit.hrl").
 
 -define(VALIDATION_CONSTRAINTS,
         {[{<<"name">>, {string_match, chef_regex:regex_for(node_name)}},

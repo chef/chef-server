@@ -25,11 +25,8 @@
 
 -behaviour(chef_object).
 
--mixin([{chef_object,[{default_fetch/2, fetch}]}]).
-
 -export([
          parse_binary_json/1,
-         flatten/1,
          delete/2,
          create_record/3,
          decompress_record/1
@@ -43,6 +40,7 @@
          delete_query/0,
          ejson_for_indexing/2,
          fields_for_fetch/1,
+         fields_for_insert/1,
          find_query/0,
          is_indexed/0,
          list/2,
@@ -63,6 +61,8 @@
          update_from_ejson/2,
          update_query/0
         ]).
+
+-mixin([{chef_object_default_callbacks, [fetch/2]}]).
 
 -define(VALIDATION_CONSTRAINTS,
         {[{<<"revision_id">>, {string_match, chef_regex:regex_for(policy_file_revision_id)}},
@@ -199,7 +199,7 @@ parse_binary_json(Bin) ->
             throw(Bad)
     end.
 
-flatten(#oc_chef_policy_revision{
+fields_for_insert(#oc_chef_policy_revision{
                 id = Id,
                 org_id = OrgId,
                 revision_id = RevisionId,

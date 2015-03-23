@@ -20,6 +20,11 @@
 %%
 -module(chef_client).
 
+-include_lib("ej/include/ej.hrl").
+-include("../../include/chef_types.hrl").
+-include("../../include/chef_osc_defaults.hrl").
+-include_lib("mixer/include/mixer.hrl").
+
 -export([
          authz_id/1,
          add_authn_fields/2,
@@ -38,7 +43,8 @@
          set_created/2,
          set_updated/2,
          type_name/1,
-         update_from_ejson/2
+         update_from_ejson/2,
+         list/2
         ]).
 
 %% database named queries
@@ -51,19 +57,8 @@
          update_query/0
         ]).
 
--include_lib("mixer/include/mixer.hrl").
--mixin([{chef_object,[
-                      {default_fetch/2, fetch},
-                      {default_update/2, update}
-                     ]}]).
+-mixin([{chef_object_default_callbacks, [ fetch/2, update/2 ]}]).
 
--export([
-         list/2
-         ]).
-
--include_lib("ej/include/ej.hrl").
--include("../../include/chef_types.hrl").
--include("../../include/chef_osc_defaults.hrl").
 
 -define(DEFAULT_FIELD_VALUES, [
                                {<<"json_class">>, <<"Chef::ApiClient">>},

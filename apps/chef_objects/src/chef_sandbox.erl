@@ -140,7 +140,7 @@ fetch(#chef_sandbox{org_id = OrgId, id = SandboxID}, CallbackFun) ->
     end.
 
 
- 
+
 %% @doc Transforms a collection of proplists representing a sandbox / checksum join query
 %% result and collapses them all into a single sandbox record.  There is a row for each
 %% checksum.  A checksum tuple is extracted from each row; sandbox information is extracted

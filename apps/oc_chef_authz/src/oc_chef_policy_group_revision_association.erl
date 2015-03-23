@@ -20,11 +20,8 @@
 
 -module(oc_chef_policy_group_revision_association).
 
--include("../../include/oc_chef_types.hrl").
-
 -include_lib("mixer/include/mixer.hrl").
--mixin([{chef_object,[{default_fetch/2, fetch},
-                      {default_update/2, update}]}]).
+-include("../../include/oc_chef_types.hrl").
 
 -export([find_policy_revision_by_orgid_name_group_name/2,
          fetch_prereq_objects/2,
@@ -45,9 +42,11 @@
          record_for_find/3,
          new_record/6,
          update_record/7,
-         flatten/1,
+         fields_for_insert/1,
          is_indexed/0,
          ejson_for_indexing/2]).
+
+-mixin([{chef_object_default_callbacks, [fetch/2, update/2]}]).
 
 find_policy_revision_by_orgid_name_group_name(Record, DBContext) ->
     case chef_db:fetch(Record, DBContext) of
@@ -208,7 +207,7 @@ decompress_record(#oc_chef_policy_group_revision_association{
     SerializedObject = jiffy:decode(chef_db_compression:decompress(CompressedSerializedObject)),
     Assoc#oc_chef_policy_group_revision_association{serialized_object = SerializedObject}.
 
-flatten(#oc_chef_policy_group_revision_association{
+fields_for_insert(#oc_chef_policy_group_revision_association{
         id = Id,
         org_id = OrgId,
         policy_revision_name = PolicyName,

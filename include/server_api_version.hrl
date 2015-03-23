@@ -18,3 +18,5 @@
 -define(API_MIN_VER, ?API_v0).
 -define(API_MAX_VER, ?API_v1).
 
+-type api_version() :: non_neg_integer() | -1.
+

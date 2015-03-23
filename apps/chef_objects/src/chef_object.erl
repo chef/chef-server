@@ -60,7 +60,8 @@
      update_return().
 
 
--callback new_record(OrgId :: object_id(),
+-callback new_record(ApiVersion :: api_version(),
+                     OrgId :: object_id(),
                      AuthzId :: object_id() | unset,
                      ObjectEjson :: ejson_term() |
                                     binary() |
@@ -100,16 +101,14 @@
 
          fields_for_fetch/1,
          fields_for_update/1,
+         fields_for_insert/1,
          record_fields/1,
-         flatten/1,
 
          list/2,
          fetch/2,
          fetch_multi/4,
          update/3,
-         delete/2,
-         default_fetch/2,
-         default_update/2
+         delete/2
         ]).
 
 -export_type([
@@ -151,27 +150,28 @@ authz_id(Rec) ->
 
 -spec ejson_for_indexing(object_rec(), ejson_term()) -> ejson_term().
 ejson_for_indexing(Rec, Data) ->
-    Mod = callback_mod(Rec),
+    Mod = element(1, Rec),
     Mod:ejson_for_indexing(Rec, Data).
 
 -spec update_from_ejson(object_rec(), any()) -> object_rec().
 update_from_ejson(Rec, Data) ->
-    Mod = callback_mod(Rec),
+    Mod = element(1, Rec),
     Mod:update_from_ejson(Rec, Data).
 
 -spec set_updated(object_rec(), object_id()) -> object_rec().
 set_updated(Rec, ActorId) ->
-    Mod = callback_mod(Rec),
+    Mod = element(1, Rec),
     Mod:set_updated(Rec, ActorId).
 
 -spec set_created(object_rec(), object_id()) -> object_rec().
 set_created(Rec, ActorId) ->
-    Mod = callback_mod(Rec),
+    Mod = element(1, Rec),
     Mod:set_created(Rec, ActorId).
 
 -spec record_fields(object_rec()) -> list(atom()).
 record_fields(Rec) ->
-    call0(Rec, record_fields).
+    Mod = element(1, Rec),
+    Mod:record_fields().
 
 create_query(Rec) ->
     call0(Rec, create_query).
@@ -217,61 +217,28 @@ update(Rec, ActorId, CallbackFun) ->
     Mod:update(chef_object:set_updated(Rec, ActorId), CallbackFun).
 
 delete(Rec, CallbackFun) ->
-    call_if_exported(Rec, delete, [Rec, CallbackFun], fun do_delete/2).
-
-%% Return the callback module for a given object record type. We're putting the abstraction
-%% in place in case we need to do something other than the identity mapping of record name
-%% to callback module name that we're doing there. If we needed to swap in something else,
-%% we could do that mapping here.
-callback_mod(Rec) ->
-    element(1, Rec).
+    call_if_exported(Rec, delete, [Rec, CallbackFun], fun chef_object_default_callbacks:delete/2).
 
 call(Rec, Fun) ->
-    Mod = callback_mod(Rec),
+    Mod = element(1, Rec),
     Mod:Fun(Rec).
 
 call0(Rec, Fun) ->
-    Mod = callback_mod(Rec),
+    Mod = element(1, Rec),
     Mod:Fun().
 
 
-default_fetch(Rec, CallbackFun) ->
-    CallbackFun({call0(Rec, find_query),
-            call(Rec, fields_for_fetch),
-            {first_as_record, [element(1, Rec), call0(Rec, record_fields)]}}).
-
-default_update(ObjectRec, CallbackFun) ->
-    QueryName = chef_object:update_query(ObjectRec),
-    UpdatedFields = chef_object:fields_for_update(ObjectRec),
-    CallbackFun({QueryName, UpdatedFields}).
-
-flatten(ObjectRec) ->
-    call_if_exported(ObjectRec, flatten, [ObjectRec], fun default_flatten/1).
+fields_for_insert(ObjectRec) ->
+    call_if_exported(ObjectRec, fields_for_insert, [ObjectRec],
+                     fun chef_object_default_callbacks:fields_for_insert/1).
 
 call_if_exported(ObjectRec, FunName, Args, DefaultFun) ->
-    Mod = callback_mod(ObjectRec),
+    Mod = element(1, ObjectRec),
     case erlang:function_exported(Mod, FunName, length(Args)) of
         true ->
             erlang:apply(Mod, FunName, Args);
         false  ->
             erlang:apply(DefaultFun, Args)
     end.
-default_flatten(ObjectRec) ->
-    [_RecName|Tail] = tuple_to_list(ObjectRec),
-    %% We detect if any of the fields in the record have not been set
-    %% and throw an error
-    case lists:any(fun is_undefined/1, Tail) of
-        true -> error({undefined_in_record, ObjectRec});
-        false -> ok
-    end,
-    Tail.
 
-is_undefined(undefined) ->
-    true;
-is_undefined(_) ->
-    false.
 
-do_delete(ObjectRec, CallbackFun) ->
-    QueryName = delete_query(ObjectRec),
-    Id = id(ObjectRec),
-    CallbackFun({QueryName, [Id]}).

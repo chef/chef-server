@@ -88,6 +88,7 @@
 %% These records are used in either the authz or SQL layers
 
 -record(chef_client, {
+          'server_api_version' :: api_version(), % Internal use, api version level expected by server
           'id' :: object_id(),              % guid for object (unique)
           'authz_id' :: object_id(),        % authorization guid (unique)
           'org_id' :: object_id(),          % organization guid
@@ -103,6 +104,7 @@
          }).
 
 -record(chef_cookbook_version, {
+          'server_api_version' :: api_version(), % Internal use, api version level expected by server
           'id',                % guid for object (unique)
           'major',             % major version
           'minor',             % minor version
@@ -126,6 +128,7 @@
          }).
 
 -record(chef_data_bag, {
+          'server_api_version' :: api_version(), % Internal use, api version level expected by server
           'id',               % guid for object (unique)
           'authz_id',         % authorization guid (unique)
           'org_id',           % organization guid
@@ -136,6 +139,7 @@
          }).
 
 -record(chef_data_bag_item, {
+          'server_api_version' :: api_version(), % Internal use, api version level expected by server
           'id',               % guid for object (unique)
           %% right now authz for items is done via the parent data_bag
           %% 'authz_id',         % authorization guid (unique)
@@ -149,6 +153,7 @@
          }).
 
 -record(chef_environment, {
+          'server_api_version' :: api_version(), % Internal use, api version level expected by server
           'id',               % guid for object (unique)
           'authz_id',         % authorization guid (unique)
           'org_id',           % organization guid
@@ -160,6 +165,7 @@
          }).
 
 -record(chef_node, {
+          'server_api_version' :: api_version(), % Internal use, api version level expected by server
           'id',               % guid for object (unique)
           'authz_id',         % authorization guid (unique)
           'org_id',           % organization guid
@@ -172,6 +178,7 @@
          }).
 
 -record(chef_role, {
+          'server_api_version' :: api_version(), % Internal use, api version level expected by server
           'id',               % guid for object (unique)
           'authz_id',         % authorization guid (unique)
           'org_id',           % organization guid
@@ -183,6 +190,7 @@
          }).
 
 -record(chef_sandbox, {
+          'server_api_version' :: api_version(), % Internal use, api version level expected by server
           'id' :: binary(),         %% sandbox id, 32-char hex string
           'org_id' :: binary(),     %% organization guid,
           'created_at', %% time record was created; useful mainly for debugging / garbage collection
@@ -190,6 +198,7 @@
          }).
 
 -record(chef_user, {
+        'server_api_version' :: api_version(), % Internal use, api version level expected by server
         'id',                               %% guid for object (unique)
         'authz_id',                         %% authorization guid (placeholder - not used)
         'username',                         %% username
@@ -210,6 +219,7 @@
 
 %% Not a true chef object, but corresponds to  the view keys_by_type.
 -record(chef_requestor, {
+          'server_api_version' :: api_version(), % Internal use, api version level expected by server
           'id' :: object_id(),
           'org_id' :: object_id() | global,
           'name',
@@ -224,6 +234,7 @@
 %% Not a true chef object either, keys are owned by their associated user
 %% or client object and are managed in that context.
 -record(chef_key, {
+          'server_api_version' :: api_version(), % Internal use, api version level expected by server
           'id'  :: object_id(),     %% guid of user or client, unique with key_name
           'key_name',               %% user named string describing key
           'public_key',             %% PKCS#1 public key or a certificate

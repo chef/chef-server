@@ -41,10 +41,7 @@
          update_query/0
         ]).
 
--mixin([
-        {chef_object, [{default_fetch/2, fetch},
-                       {default_update/2, update}]}
-       ]).
+-mixin([{chef_object_default_callbacks, [ fetch/2, update/2 ]}]).
 
 name(#oc_chef_container{name = Name}) ->
     Name.

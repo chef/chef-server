@@ -14,7 +14,6 @@
 
 -export([
          parse_binary_json/1,
-         flatten/1,
          assemble_group_ejson/2,
          delete/2,
          handle_error_for_update_ops/2,
@@ -35,6 +34,7 @@
          ejson_for_indexing/2,
          fields_for_fetch/1,
          fields_for_update/1,
+         fields_for_insert/1,
          find_query/0,
          id/1,
          is_indexed/0,
@@ -56,6 +56,7 @@
 % TODO: move these somewhere generic; also used by oc_chef_wm_acl
 -export([
          fetch_bare/2,
+         fetch_new/2,
          find_clients_names/2,
          find_client_authz_ids/3,
          find_groups_names/2,
@@ -393,7 +394,7 @@ query_and_diff_authz_ids(QueryName, AuthzIds, CallbackFun) ->
             {[], []}
     end.
 
-flatten(#oc_chef_group{id = Id,
+fields_for_insert(#oc_chef_group{id = Id,
           authz_id = AuthzId,
           org_id = OrgId,
           name = Name,

@@ -19,7 +19,7 @@
          update_from_ejson/2,
          set_created/2,
          set_updated/2,
-         flatten/1,
+         fields_for_insert/1,
          delete/2,
          create_query/0,
          update_query/0,
@@ -39,10 +39,7 @@
          type_name/1
         ]).
 
--mixin([
-        {chef_object, [{default_fetch/2, fetch},
-                       {default_update/2, update}]}
-       ]).
+-mixin([{chef_object_default_callbacks, [fetch/2, update/2]}]).
 
 org_user_association_spec() ->
     {[
@@ -95,7 +92,7 @@ ejson_from_list(Associations) ->
    [ {[{ <<"user">>, {[{<<"username">>, Name}]} }]} || Name <- Associations ].
 
 
-flatten(#oc_chef_org_user_association{ org_id = OrgId, user_id = UserId,
+fields_for_insert(#oc_chef_org_user_association{ org_id = OrgId, user_id = UserId,
                                        last_updated_by = LastUpdatedBy,
                                        created_at = CreatedAt,
                                        updated_at = UpdatedAt} ) ->

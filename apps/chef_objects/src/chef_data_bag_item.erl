@@ -22,6 +22,9 @@
 
 -module(chef_data_bag_item).
 
+-include_lib("mixer/include/mixer.hrl").
+-include("../../include/chef_types.hrl").
+
 -export([
          add_type_and_bag/2,
          authz_id/1,
@@ -39,7 +42,8 @@
          set_updated/2,
          type_name/1,
          update_from_ejson/2,
-         wrap_item/3
+         wrap_item/3,
+         list/2
         ]).
 
 %% database named queries
@@ -52,20 +56,12 @@
          update_query/0
         ]).
 
--include_lib("mixer/include/mixer.hrl").
--mixin([{chef_object,[
-                      {default_fetch/2, fetch},
-                      {default_update/2, update}
-                     ]}]).
--export([
-         list/2
-         ]).
+-mixin([{chef_object_default_callbacks, [ fetch/2, update/2 ]}]).
 
 -ifdef(TEST).
 -compile(export_all).
 -endif.
 
--include("../../include/chef_types.hrl").
 
 %% Describes the valid structure of a data bag item for use with `ej:valid/2`.
 -define(VALIDATION_CONSTRAINTS,
@@ -240,4 +236,4 @@ is_wrapped_item(Ejson) ->
 -spec(list(#chef_data_bag_item{}, chef_object:select_callback()) -> chef_object:select_return()).
 list(#chef_data_bag_item{org_id = OrgId, data_bag_name = DataBagName}, CallBackFun) ->
     CallBackFun({list_query(), [OrgId, DataBagName], [item_name]}).
-    
+

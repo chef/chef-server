@@ -20,6 +20,10 @@
 %
 -module(chef_user).
 
+-include_lib("mixer/include/mixer.hrl").
+-include_lib("ej/include/ej.hrl").
+-include("../../include/chef_types.hrl").
+
 -export([
          assemble_user_ejson/2,
          authz_id/1,
@@ -43,7 +47,8 @@
          type_name/1,
          update_from_ejson/2,
          validate_user_name/1,
-         serialized_field_value/2
+         serialized_field_value/2,
+         list/2
         ]).
 
 %% database named queries
@@ -56,14 +61,7 @@
          update_query/0
         ]).
 
--export([ list/2 ]).
-
--include_lib("mixer/include/mixer.hrl").
--mixin([{chef_object,[ {default_update/2, update} ]}]).
-
--include("../../include/chef_types.hrl").
-
--include_lib("ej/include/ej.hrl").
+-mixin([{chef_object_default_callbacks, [ update/2 ]}]).
 
 -behaviour(chef_object).
 

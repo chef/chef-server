@@ -22,6 +22,10 @@
 
 -module(chef_role).
 
+
+-include_lib("mixer/include/mixer.hrl").
+-include("../../include/chef_types.hrl").
+
 -export([
          authz_id/1,
          ejson_for_indexing/2,
@@ -38,7 +42,8 @@
          set_created/2,
          set_updated/2,
          type_name/1,
-         update_from_ejson/2
+         update_from_ejson/2,
+         list/2
         ]).
 
 %% database named queries
@@ -51,19 +56,11 @@
          update_query/0
         ]).
 
--include_lib("mixer/include/mixer.hrl").
--mixin([{chef_object,[
-                      {default_fetch/2, fetch},
-                      {default_update/2, update}
-                     ]}]).
--export([
-         list/2
-         ]).
+-mixin([{chef_object_default_callbacks, [ fetch/2, update/2 ]}]).
+
 -ifdef(TEST).
 -compile(export_all).
 -endif.
-
--include("../../include/chef_types.hrl").
 
 -behaviour(chef_object).
 
@@ -92,7 +89,7 @@
           {<<"env_run_lists">>, chef_json_validator:env_run_lists_spec()}
          ]}).
 
--define(VALID_KEYS, 
+-define(VALID_KEYS,
         [<<"chef_type">>, <<"default_attributes">>, <<"description">>,
          <<"env_run_lists">>, <<"json_class">>, <<"name">>, <<"override_attributes">>,
          <<"run_list">> ]).

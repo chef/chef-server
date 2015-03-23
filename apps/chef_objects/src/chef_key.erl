@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil -*-
 %% ex: ts=4 sw=4 et
 %% @author Tyler Cloke <tyler@chef.io>
-%% @author Marc Paradise <marc@chef.io>
+% @author Marc Paradise <marc@chef.io>
 %% Copyright 2015 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -20,6 +20,9 @@
 %%
 
 -module(chef_key).
+
+-include_lib("mixer/include/mixer.hrl").
+-include("../../include/chef_types.hrl").
 
 -behaviour(chef_object).
 
@@ -42,7 +45,7 @@
          type_name/1,
          delete/2,
          parse_binary_json/2,
-         flatten/1
+         fields_for_insert/1
         ]).
 
 %% database named queries
@@ -55,17 +58,11 @@
          list_query/0
         ]).
 
--include_lib("mixer/include/mixer.hrl").
--mixin([{chef_object,[
-                     {default_fetch/2, fetch},
-                     {default_update/2, update}
-                    ]}]).
+-mixin([{chef_object_default_callbacks, [fetch/2, update/2]}]).
 
 -ifdef(TEST).
 -compile(export_all).
 -endif.
-
--include("../../include/chef_types.hrl").
 
 authz_id(#chef_key{}) ->
     undefined.
@@ -208,7 +205,7 @@ delete_query() ->
 delete(#chef_key{id = Id, key_name = Name}, CallbackFun) ->
     CallbackFun({delete_query(), [Id, Name]}).
 
-flatten(#chef_key{} = Key) ->
+fields_for_insert(#chef_key{} = Key) ->
     %% Drop off the first and last fielFirst is record name, and
     %% last is one that isn't in the DB (for internal use)
     [_|Tail] = tuple_to_list(Key),

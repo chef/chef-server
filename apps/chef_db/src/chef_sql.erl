@@ -917,7 +917,7 @@ bulk_get_authz_ids(Type, Ids) ->
 %% and insert into the DB as appropriate.  Note this depends
 %% on the stability of the record order!
 create_object(#chef_cookbook_version{checksums = Checksums}=CookbookVersion) ->
-    Fields = cookbook_version_fields_for_insert(CookbookVersion),
+    Fields = chef_object:fields_for_insert(CookbookVersion),
     case create_object(insert_cookbook_version, Fields) of
         {ok, 1} ->
             case insert_cookbook_checksums(Checksums,
@@ -981,42 +981,8 @@ create_object(insert_cookbook_artifact_version = QueryName, Args) when is_list(A
 create_object(QueryName, Args) when is_atom(QueryName), is_list(Args) ->
     sqerl:statement(QueryName, Args, count);
 create_object(QueryName, Record) when is_atom(QueryName) ->
-    List = flatten_record(Record),
+    List = chef_object:fields_for_insert(Record),
     create_object(QueryName, List).
-
--spec cookbook_version_fields_for_insert(CookbookVersion::#chef_cookbook_version{}) -> list().
-cookbook_version_fields_for_insert(#chef_cookbook_version{
-                                      'id' = Id,
-                                      'major' = Major,
-                                      'minor' = Minor,
-                                      'patch' = Patch,
-                                      'frozen' = Frozen,
-                                      'meta_attributes' = MetaAttributes,
-                                      'meta_deps' = MetaDeps,
-                                      'meta_long_desc' = MetaLongDesc,
-                                      'metadata' = Metadata,
-                                      'serialized_object' = SerializedObject,
-                                      'last_updated_by' = LastUpdatedBy,
-                                      'created_at' = CreatedAt,
-                                      'updated_at' = UpdatedAt,
-                                      'org_id' = OrgId,
-                                      'name' = Name
-                                     }) ->
-    [Id,
-     Major,
-     Minor,
-     Patch,
-     Frozen,
-     MetaAttributes,
-     MetaDeps,
-     MetaLongDesc,
-     Metadata,
-     SerializedObject,
-     LastUpdatedBy,
-     CreatedAt,
-     UpdatedAt,
-     OrgId,
-     Name].
 
 %% @doc Inserts FK references to checksums into the database
 %%
@@ -1086,9 +1052,6 @@ delete_object(delete_cookbook_by_orgid_name = Query, OrgId, Name) ->
         Error ->
             Error
     end.
-
-flatten_record(Rec) ->
-    chef_object:flatten(Rec).
 
 update(ObjectRec, ActorId) ->
     chef_object:update(ObjectRec, ActorId, fun select_rows/1).

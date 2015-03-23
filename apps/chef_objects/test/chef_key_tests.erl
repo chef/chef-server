@@ -228,7 +228,7 @@ chef_object_callbacks_test_() ->
     ChefKey = chef_key:new_record(unused, unused, {<<"A">>, example_key()}),
     OkFun = fun(_) -> ok end,
     [
-        ?_assertEqual(true, is_list(chef_key:flatten(ChefKey))),
+        ?_assertEqual(true, is_list(chef_key:fields_for_insert(ChefKey))),
         ?_assertEqual(true, is_list(chef_key:fields_for_update(ChefKey))),
         ?_assertEqual(ChefKey#chef_key.key_name, chef_key:name(ChefKey)),
         ?_assertEqual(ChefKey#chef_key.id, chef_key:id(ChefKey)),

@@ -32,7 +32,7 @@
          fields_for_update/1,
          record_fields/0,
          list/2,
-         flatten/1,
+         fields_for_insert/1,
          new_record/3,
          name/1,
          id/1,
@@ -40,10 +40,7 @@
          type_name/1
         ]).
 
--mixin([
-        {chef_object, [{default_fetch/2, fetch},
-                       {default_update/2, update}]}
-       ]).
+-mixin([{chef_object_default_callbacks, [fetch/2, update/2]}]).
 
 authz_id(#oc_chef_org_user_invite{}) ->
     erlang:error(not_implemented).
@@ -137,7 +134,7 @@ fields_for_update(#oc_chef_org_user_invite{}) ->
 fields_for_fetch(#oc_chef_org_user_invite{id = Id}) ->
     [Id].
 
-flatten(#oc_chef_org_user_invite{ id = Id,
+fields_for_insert(#oc_chef_org_user_invite{ id = Id,
                                   org_id = OrgId,
                                   user_id = UserId,
                                   last_updated_by = LastUpdatedBy,
