@@ -28,7 +28,6 @@
 -include_lib("mixer/include/mixer.hrl").
 -include_lib("ej/include/ej.hrl").
 -include("oc_chef_types.hrl").
--include("chef_wm_server_version.hrl").
 
 -include_lib("stats_hero/include/stats_hero.hrl").
 

@@ -16,6 +16,8 @@
 %% under the License.
 %%
 
+-include("server_api_version.hrl").
+
 
 %% Authentication Macros
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

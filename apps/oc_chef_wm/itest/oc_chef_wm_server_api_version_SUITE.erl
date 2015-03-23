@@ -19,7 +19,7 @@
 %%
 -module(oc_chef_wm_server_api_version_SUITE).
 
--include("../../../include/chef_wm_server_version.hrl").
+-include("../../../include/server_api_version.hrl").
 -include_lib("common_test/include/ct.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
