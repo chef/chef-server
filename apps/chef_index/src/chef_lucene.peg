@@ -1,0 +1,122 @@
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
+%% ex: ts=4 sw=4 et
+
+query <- star_star / (expression / space)* %{
+    ?i2b(Node)
+%};
+
+star_star <- "*:*" ~;
+
+expression <- operation / group / field_phrase / field / field_range / term / string ~;
+
+term <- keyword valid_letter+ / !keyword valid_letter+ ~;
+
+field <- name:field_name ":" arg:(fuzzy_op / term / group / string) %{
+    [<<"content:">>, ?gv(name, Node), <<"__=__">>, ?gv(arg, Node)]
+%};
+
+field_phrase <- name:field_name ':' '"' str:(term (space term)*) '"' %{
+    P = ?gv(str, Node),
+    [<<"content:\"">>, ?gv(name, Node), <<"__=__">>, P, <<"\"">>]
+%};
+
+field_range <- field_name ":" (("[" range_entry " TO " range_entry "]") /
+                               ("{" range_entry " TO " range_entry "}")) %{
+    [ FieldName, _, [Open, Start, _, End, Close] ] = Node,
+    convert_range_expression(FieldName, Open, Start, End, Close)
+%};
+
+field_name <- !keyword valid_letter+ ~;
+
+range_entry <- "*" / valid_letter+ ~;
+
+group <- '(' query ')' ~;
+
+operation <- binary_op / unary_op / fuzzy_op / boost_op ~;
+
+binary_op <- lhs:(group / field_phrase / field  / field_range / term) space? op:bool_op space? rhs:query %{
+    [?gv(lhs, Node), <<" ">>, ?gv(op, Node), <<" ">>, ?gv(rhs, Node)]
+%};
+
+bool_op <- 'AND' / '&&' / 'OR' / '||' ~;
+
+unary_op <- not_op / required_op / prohibited_op ~;
+
+not_op <- ('NOT' space / '!' space?) (group / field / field_range / term / string) ~;
+
+required_op <- !valid_letter '+' (term / string) ~;
+
+prohibited_op <- !valid_letter '-' (field / field_range / term / string) ~;
+
+boost_op <- (term / string) '^' fuzzy_param ~;
+
+fuzzy_op <- (term / string) '~' fuzzy_param? ~;
+
+fuzzy_param <- [0-9]+ ('.' [0-9])? ~;
+
+string <- '"' (term (space term)*) '"' ~;
+
+keyword <- "AND" / "OR" / "NOT" ~;
+
+
+valid_letter <- start_letter+ ([a-zA-Z0-9*?@_+./-] / '\\' special_char)* ~;
+
+start_letter <- [a-zA-Z0-9_.*/] / '\\' special_char ~;
+
+space <- [ \t]+ ~;
+
+special_char <- '[' / ']' / '\\' / '"' / [!(){}^~*?:] ~;
+
+%{
+%% @author Seth Falcon <seth@opscode.com>
+%% Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
+%%
+%% This file is provided to you under the Apache License,
+%% Version 2.0 (the "License"); you may not use this file
+%% except in compliance with the License.  You may obtain
+%% a copy of the License at
+%%
+%%   http://www.apache.org/licenses/LICENSE-2.0
+%%
+%% Unless required by applicable law or agreed to in writing,
+%% software distributed under the License is distributed on an
+%% "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+%% KIND, either express or implied.  See the License for the
+%% specific language governing permissions and limitations
+%% under the License.
+%%
+
+-define(i2b(X), iolist_to_binary(X)).
+-define(gv(X, L), proplists:get_value(X, L)).
+
+% make sure these atoms are available.
+-define(or_op1, 'OR').
+-define(or_op2, '||').
+-define(and_op1, 'AND').
+-define(and_op2, '&&').
+-define(not_op, 'NOT').
+-define(not_bang_op, '!').
+
+-spec convert_range_expression(binary(), binary(), binary(), binary(), binary()) -> iolist().
+convert_range_expression(FieldName, _, <<"*">>, <<"*">>, _) ->
+    [<<"content:">>, FieldName, <<"__=__*">>];
+
+convert_range_expression(FieldName, Open, Start, <<"*">>, Close) ->
+    [<<"content:">>,
+     Open, FieldName, <<"__=__">>, Start,
+     <<" TO ">>,
+     FieldName, <<"__=__\\ufff0">>, Close];
+
+convert_range_expression(FieldName, Open, <<"*">>, End, Close) ->
+    [<<"content:">>,
+     Open, FieldName, <<"__=__">>,
+     <<" TO ">>,
+     FieldName, <<"__=__">>, End, Close];
+
+convert_range_expression(FieldName, Open, Start, End, Close) ->
+    [<<"content:">>,
+     Open, FieldName, <<"__=__">>, Start,
+     <<" TO ">>,
+     FieldName, <<"__=__">>, End, Close].
+
+%}

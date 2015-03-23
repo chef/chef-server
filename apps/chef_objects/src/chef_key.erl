@@ -124,10 +124,10 @@ ejson_from_list(KeysList, URIDecorator) ->
       {<<"name">>, Name},
       {<<"expired">>, Expired}]} || [Name, Expired] <- KeysList ].
 
-ejson_from_key(#chef_key{key_name = Name, public_key = PublicKey, expires_at = UnparsedExpirationDate}) ->
-    ExpirationDate = case UnparsedExpirationDate of
+ejson_from_key(#chef_key{key_name = Name, public_key = PublicKey, expires_at = NativeExpirationDate}) ->
+    ExpirationDate = case NativeExpirationDate of
         ?INFINITY_TIMESTAMP -> <<"infinity">>;
-        _ -> list_to_binary(ec_date:format("Y-m-dTH:i:sZ", UnparsedExpirationDate))
+        _ -> list_to_binary(ec_date:format("Y-m-dTH:i:sZ", NativeExpirationDate))
     end,
     {[{<<"name">>, Name},
       {<<"public_key">>, PublicKey},
@@ -216,4 +216,3 @@ flatten(#chef_key{} = Key) ->
 
 bulk_get_query() ->
     error(unsupported).
-

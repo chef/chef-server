@@ -30,6 +30,8 @@
 -define(GLOBAL_PLACEHOLDER_ORG_ID, <<"00000000000000000000000000000000">>).
 -define(INFINITY_TIMESTAMP, {{294277,1,9},{4,0,54.775807}}).
 
+-type infinity() :: {{294277,1,9},{4,0,float()}}.
+
 %% Custom Types
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -type db_type() :: mysql | pgsql.
@@ -224,7 +226,7 @@
           'key_name',               %% user named string describing key
           'public_key',             %% PKCS#1 public key or a certificate
           'key_version',            %% 0 for public_key, 1 for cert
-          'expires_at' :: binary(), %% expiration time (utc)
+          'expires_at' :: calendar:datetime() | infinity(), %% expiration time (utc)
           'last_updated_by' :: binary(), %% authz id of updater
           'created_at' :: binary(), %% when created
           'updated_at' :: binary(),  %% when last updated
@@ -255,5 +257,3 @@
                                  #chef_node{}.
 
 -type chef_updatable_object() :: tuple().
-
-
