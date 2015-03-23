@@ -48,11 +48,11 @@ describe 'Authentication' do
       it { should have_link 'Sign Up' }
       it { should_not have_link 'Sign Out', :href => signout_path }
       it { should have_button 'Sign In' }
-      it { should have_selector('.alert.alert-danger') }
+      it { should have_selector('.alert-box.alert') }
 
       describe 'and then visiting another page' do
-        before { click_on 'logo' }
-        it { should_not have_selector('.alert.alert-danger') }
+        before { find(:css, '.logo').click }
+        it { should_not have_selector('.alert-box.alert') }
       end
     end
   end
