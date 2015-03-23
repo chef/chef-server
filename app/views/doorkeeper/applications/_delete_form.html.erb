@@ -1,5 +1,3 @@
-<%- submit_btn_css ||= 'btn btn-link' %>
-<%= form_tag [:oauth, application] do %>
-  <input type="hidden" name="_method" value="delete">
-  <%= submit_tag 'Destroy', onclick: "return confirm('Are you sure?')", class: submit_btn_css %>
+<%= form_tag([:oauth, application], :method => :delete, 'data-abide' => '') do %>
+  <%= submit_tag 'Destroy', :data => {:confirm => 'Are you sure?'}, :class => 'button' %>
 <% end %>
