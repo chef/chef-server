@@ -113,7 +113,7 @@ validate_role_test_() ->
               ?assertThrow({invalid_key, <<"not_valid_key">>},
                            chef_role:validate_role(R,{update, ej:get({<<"name">>}, R)}))
       end}
-     
+
     ].
 
 set_default_values_test_() ->
@@ -230,7 +230,7 @@ new_record_test() ->
     OrgId = <<"12345678123456781234567812345678">>,
     AuthzId = <<"00000000000000000000000011111111">>,
     RoleData = {[{<<"name">>, <<"my-role">>}, {<<"alpha">>, <<"bravo">>}]},
-    Role = chef_role:new_record(OrgId, AuthzId, RoleData),
+    Role = chef_role:new_record(?API_MIN_VER, OrgId, AuthzId, RoleData),
     ?assertMatch(#chef_role{}, Role),
     %% TODO: validate more fields?
     ?assertEqual(<<"my-role">>, chef_role:name(Role)),

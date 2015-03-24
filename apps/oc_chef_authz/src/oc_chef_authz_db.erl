@@ -521,7 +521,7 @@ fetch_group_authz_id_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
     %% since ?FIRST uses record_info, it can't be placed within the fun.
     case stats_hero:ctime(ReqId, {chef_sql, fetch},
                           fun() ->
-                                  chef_object:default_fetch(#oc_chef_group{
+                                  chef_object_default_callbacks:fetch(#oc_chef_group{
                                                     org_id = OrgId,
                                                     name = Name},
                                                     fun chef_sql:select_rows/1)
@@ -558,7 +558,7 @@ fetch_global_admins(#oc_chef_authz_context{otto_connection=_Server,
 fetch_group_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
     case stats_hero:ctime(ReqId, {chef_sql, fetch},
                           fun() ->
-                                  chef_object:default_fetch(#oc_chef_group{
+                                  chef_object_default_callbacks:fetch(#oc_chef_group{
                                                                org_id = OrgId,
                                                                name = Name},
                                                             fun chef_sql:select_rows/1)

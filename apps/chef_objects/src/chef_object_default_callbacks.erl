@@ -35,7 +35,7 @@ update(Rec, CallbackFun) ->
     CallbackFun({Mod:update_query(), Mod:fields_for_update(Rec)}).
 
 fields_for_insert(Rec) ->
-    [_RecName|Tail] = tuple_to_list(Rec),
+    [_RecName, _ApiVersion|Tail] = tuple_to_list(Rec),
     %% We detect if any of the fields in the record have not been set
     %% and throw an error
     case lists:any(fun is_undefined/1, Tail) of

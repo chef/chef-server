@@ -32,7 +32,7 @@
          is_indexed/0,
          name/1,
          org_id/1,
-         new_record/3,
+         new_record/4,
          parse_binary_json/2,
          record_fields/0,
          set_created/2,
@@ -91,10 +91,11 @@ org_id(#chef_data_bag{org_id = OrgId}) ->
 type_name(#chef_data_bag{}) ->
     data_bag.
 
--spec new_record(object_id(), object_id(), binary() | string()) -> #chef_data_bag{}.
-new_record(OrgId, AuthzId, Name) ->
+-spec new_record(api_version(), object_id(), object_id(), binary() | string()) -> #chef_data_bag{}.
+new_record(ApiVersion, OrgId, AuthzId, Name) ->
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
-    #chef_data_bag{id = Id,
+    #chef_data_bag{server_api_version = ApiVersion,
+                   id = Id,
                    authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
                    org_id = OrgId,
                    name = Name}.

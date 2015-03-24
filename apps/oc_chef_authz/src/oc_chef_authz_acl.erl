@@ -98,7 +98,7 @@ fetch_id(group, #context{reqid = ReqId}, Name, OrgId) ->
     % extra requests
     case stats_hero:ctime(ReqId, {chef_sql, fetch},
                           fun() ->
-                                  chef_object:default_fetch(#oc_chef_group{org_id = OrgId,
+                                  chef_object_default_callbacks:fetch(#oc_chef_group{org_id = OrgId,
                                                                            name = Name},
                                                             fun chef_sql:select_rows/1)
                           end) of

@@ -33,7 +33,6 @@
                               | {QueryName :: atom(), BindParameters :: list(),
                                  ReturnTransform :: tuple()}) ->
                                       select_return()).
-
 -type update_return() :: pos_integer() | not_found | {conflict, _} | {error, _}.
 
 
@@ -56,10 +55,7 @@
 -callback record_fields() -> list(atom()).
 -callback list(object_rec(), select_callback()) -> select_return().
 -callback fetch(object_rec(), select_callback()) -> select_return().
--callback update(object_rec(), select_callback()) ->
-     update_return().
-
-
+-callback update(object_rec(), select_callback()) -> update_return().
 -callback new_record(ApiVersion :: api_version(),
                      OrgId :: object_id(),
                      AuthzId :: object_id() | unset,
@@ -87,7 +83,7 @@
          ejson_for_indexing/2,
          is_indexed/1,
          update_from_ejson/2,
-         new_record/4,
+         new_record/5,
          name/1,
          org_id/1,
          id/1,
@@ -118,6 +114,7 @@
          ]).
 
 -spec new_record(RecType :: atom(),
+                 ApiVersion :: api_version(),
                  OrgId :: object_id(),
                  AuthzId :: object_id() | unset,
                  ObjectEjson :: ejson_term() |
@@ -125,8 +122,18 @@
                                 {binary(), ejson_term()} |
                                 {ejson_term(), _}) ->
                         object_rec().
-new_record(RecType, OrgId, AuthzId, ObjectEjson) ->
-    RecType:new_record(OrgId, AuthzId, ObjectEjson).
+
+% TODO - testing code to make sure I didn't miss any calls.
+new_record(_RecType, undefined, _OrgId, _AuthzId, _ObjectEjson) ->
+    error(new_record_invoked_without_version);
+new_record(RecType, ApiVersion, OrgId, AuthzId, ObjectEjson) ->
+    % NOTE: First thought was to just silently inject the version as below, so that
+    % so that we don't have to update every new_record to be aware of it -
+    % but that would defeat the purpose, since new_record must be able to support
+    % versioned behaviors.
+    % [Type, _Version | Rest] = erlang:tuple_to_list(Record),
+    % erlang:list_to_tuple([Type, ApiVersion | Rest]).
+    RecType:new_record(ApiVersion, OrgId, AuthzId, ObjectEjson).
 
 -spec name(object_rec()) -> binary() | {binary(), binary()}.
 name(Rec) ->
@@ -170,8 +177,7 @@ set_created(Rec, ActorId) ->
 
 -spec record_fields(object_rec()) -> list(atom()).
 record_fields(Rec) ->
-    Mod = element(1, Rec),
-    Mod:record_fields().
+    call0(Rec, record_fields).
 
 create_query(Rec) ->
     call0(Rec, create_query).

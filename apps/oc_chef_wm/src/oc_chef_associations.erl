@@ -45,16 +45,18 @@
                    requestor_authz_id,
                    real_requestor_authz_id,
                    org_users,
+                   server_api_version,
                    msg = [],
                    usag} ).
 
 wm_associate_user(Req, #base_state{organization_guid = OrgId,
                                    chef_db_context = DbContext,
+                                   server_api_version = ApiVersion,
                                    resource_state = #association_state{user = #chef_user{id = UserId,
                                                                                          username = UserName},
                                                                        data = ReqData}} = State,
                   RequestorId) ->
-    ObjectRec = chef_object:new_record(oc_chef_org_user_association, OrgId, {authz_id, UserId}, ReqData),
+    ObjectRec = chef_object:new_record(oc_chef_org_user_association, ApiVersion, OrgId, {authz_id, UserId}, ReqData),
     case chef_db:create(ObjectRec, DbContext, RequestorId) of
         {conflict, _} ->
             wm_conflict_response(Req, State, user_already_in_org, UserName);
@@ -202,7 +204,7 @@ provision_associated_user(State, #chef_user{id = UserId} = User, RequestorAuthzI
                  end,
     Context = association_context(State, User, RequestorAuthzId),
     OrgId = Context#context.org_id,
-    USAG0 = oc_chef_group:create_record(OrgId, UserId, RequestorAuthzId),
+    USAG0 = oc_chef_group:create_record(Context#context.server_api_version, OrgId, UserId, RequestorAuthzId),
     % By forcing superuser here, this means we expect that the
     % calling resource has verified that the caller does have update org permissions
     % before invoking this.
@@ -284,6 +286,7 @@ association_context(#base_state{ organization_name = OrgName,
                                  organization_guid = OrgId,
                                  chef_authz_context = AuthzContext,
                                  chef_db_context = DbContext,
+                                 server_api_version = ApiVersion,
                                  requestor_id = RealRequestor},
                     #chef_user{ authz_id = UserAuthzId,
                                 username = UserName,
@@ -297,7 +300,9 @@ association_context(#base_state{ organization_name = OrgName,
               user_name = UserName,
               user_id = UserId,
               real_requestor_authz_id = RealRequestor,
-              requestor_authz_id = RequestorAuthzId}.
+              requestor_authz_id = RequestorAuthzId,
+              server_api_version = ApiVersion
+            }.
 
 invite_invalid_message() ->
     {[{<<"error">>, <<"This invitation is no longer valid. Please notify an administrator and request to be re-invited to the organization.">>}]}.

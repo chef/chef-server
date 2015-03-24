@@ -38,7 +38,7 @@
          record_fields/0,
          list/2,
          set_updated/2,
-         new_record/3,
+         new_record/4,
          name/1,
          id/1,
          org_id/1,
@@ -76,24 +76,24 @@ ejson_for_indexing(#chef_key{}, _) ->
 -spec update_from_ejson(#chef_key{}, ejson_term()) -> #chef_key{}.
 update_from_ejson(#chef_key{key_name = OldName, key_version = OldPubKeyVersion,
                             public_key = OldPubKey, expires_at = OldExpirationDate} = Key, EJ) ->
-  {NewVersion, NewPubKey} = case ej:get({<<"public_key">>}, EJ) of
-                              undefined ->
-                                {OldPubKeyVersion, OldPubKey};
-                              PK ->
-                                {safe_key_version(PK), PK}
-                            end,
-  NewExpiration = case ej:get({<<"expiration_date">>}, EJ) of
-                    undefined ->
-                      OldExpirationDate;
-                    Exp ->
-                      chef_object_base:parse_date(Exp)
-                  end,
-  Key#chef_key{key_name = ej:get({<<"name">>}, EJ, OldName),
-               key_version = NewVersion,
-               public_key = NewPubKey,
-               expires_at = NewExpiration,
-               % We need to preserve the old name for any update to be applied
-               old_name = OldName}.
+    {NewVersion, NewPubKey} = case ej:get({<<"public_key">>}, EJ) of
+                                undefined ->
+                                  {OldPubKeyVersion, OldPubKey};
+                                PK ->
+                                  {safe_key_version(PK), PK}
+                              end,
+    NewExpiration = case ej:get({<<"expiration_date">>}, EJ) of
+                      undefined ->
+                        OldExpirationDate;
+                      Exp ->
+                        chef_object_base:parse_date(Exp)
+                    end,
+    Key#chef_key{key_name = ej:get({<<"name">>}, EJ, OldName),
+                 key_version = NewVersion,
+                 public_key = NewPubKey,
+                 expires_at = NewExpiration,
+                 % We need to preserve the old name for any update to be applied
+                 old_name = OldName}.
 
 set_created(#chef_key{} = Key, ActorId) ->
     Now = chef_object_base:sql_date(now),
@@ -136,14 +136,15 @@ list(#chef_key{id = Id}, CallbackFun) when is_binary(Id) ->
 find_query() ->
     find_key_by_id_and_name.
 
-new_record(_OrgId, _AuthzId, {Id, KeyData}) ->
+new_record(ApiVersion, _OrgId, _AuthzId, {Id, KeyData}) ->
     PubKey = ej:get({<<"public_key">>}, KeyData),
     %% return a more useful error if key_version fails
     PubKeyVersion = safe_key_version(PubKey),
     Expires = chef_object_base:parse_date(ej:get({<<"expiration_date">>}, KeyData)),
-    #chef_key{ id = Id, key_name = ej:get({<<"name">>}, KeyData),
-               public_key = PubKey, key_version = PubKeyVersion,
-               expires_at = Expires}.
+    #chef_key{server_api_version = ApiVersion, id = Id,
+              key_name = ej:get({<<"name">>}, KeyData),
+              public_key = PubKey, key_version = PubKeyVersion,
+              expires_at = Expires}.
 
 safe_key_version(PublicKey) ->
     try chef_object_base:key_version(PublicKey) of
@@ -205,11 +206,12 @@ delete_query() ->
 delete(#chef_key{id = Id, key_name = Name}, CallbackFun) ->
     CallbackFun({delete_query(), [Id, Name]}).
 
-fields_for_insert(#chef_key{} = Key) ->
-    %% Drop off the first and last fielFirst is record name, and
-    %% last is one that isn't in the DB (for internal use)
-    [_|Tail] = tuple_to_list(Key),
-    lists:reverse(tl(lists:reverse(Tail))).
+fields_for_insert(#chef_key{id = Id, key_name = KeyName,
+                           public_key = PublicKey, key_version = KeyVersion,
+                           expires_at = ExpiresAt, last_updated_by = LastUpdatedBy,
+                           created_at = CreatedAt , updated_at = UpdatedAt}) ->
+    [Id, KeyName, PublicKey, KeyVersion, ExpiresAt,
+     LastUpdatedBy, CreatedAt, UpdatedAt].
 
 bulk_get_query() ->
     error(unsupported).

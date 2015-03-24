@@ -917,7 +917,11 @@ bulk_get_authz_ids(Type, Ids) ->
 %% and insert into the DB as appropriate.  Note this depends
 %% on the stability of the record order!
 create_object(#chef_cookbook_version{checksums = Checksums}=CookbookVersion) ->
-    Fields = chef_object:fields_for_insert(CookbookVersion),
+    % Note that we can't use chef_object :fields_for_insert - because of how
+    % common tests are built, modules are not loaded before they are referenced,
+    % and so fields_for_insert will use the default version instead of
+    % the one provided by the module when we're running CT, causing failures.
+    Fields = chef_cookbook_version:fields_for_insert(CookbookVersion),
     case create_object(insert_cookbook_version, Fields) of
         {ok, 1} ->
             case insert_cookbook_checksums(Checksums,

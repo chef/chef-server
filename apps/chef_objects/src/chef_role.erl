@@ -35,7 +35,7 @@
          is_indexed/0,
          name/1,
          environments/1,
-         new_record/3,
+         new_record/4,
          org_id/1,
          parse_binary_json/2,
          record_fields/0,
@@ -116,12 +116,13 @@ authz_id(#chef_role{authz_id = AuthzId}) ->
 org_id(#chef_role{org_id = OrgId}) ->
     OrgId.
 
--spec new_record(object_id(), object_id(), ejson_term()) -> #chef_role{}.
-new_record(OrgId, AuthzId, RoleData) ->
+-spec new_record(api_version(), object_id(), object_id(), ejson_term()) -> #chef_role{}.
+new_record(ApiVersion, OrgId, AuthzId, RoleData) ->
     Name = ej:get({<<"name">>}, RoleData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     Data = chef_db_compression:compress(chef_role, chef_json:encode(RoleData)),
-    #chef_role{id = Id,
+    #chef_role{server_api_version = ApiVersion,
+               id = Id,
                authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
                org_id = OrgId,
                name = Name,

@@ -35,7 +35,7 @@
          is_indexed/0,
          name/1,
          org_id/1,
-         new_record/3,
+         new_record/4,
          parse_binary_json/1,
          record_fields/0,
          set_created/2,
@@ -74,11 +74,12 @@
 
 -behaviour(chef_object).
 
-new_record(OrgId, AuthzId, EnvData) ->
+new_record(ApiVersion, OrgId, AuthzId, EnvData) ->
     Name = ej:get({<<"name">>}, EnvData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     Data = chef_db_compression:compress(chef_environment, chef_json:encode(EnvData)),
-    #chef_environment{id = Id,
+    #chef_environment{server_api_version = ApiVersion,
+                      id = Id,
                       authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
                       org_id = OrgId,
                       name = Name,

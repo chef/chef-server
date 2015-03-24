@@ -36,7 +36,7 @@
          is_indexed/0,
          name/1,
          org_id/1,
-         new_record/3,
+         new_record/4,
          parse_binary_json/2,
          parse_binary_json/3,
          record_fields/0,
@@ -144,14 +144,15 @@ list_query() ->
 bulk_get_query() ->
     bulk_get_clients.
 
--spec new_record(object_id(), object_id(), ejson_term()) -> #chef_client{}.
-new_record(OrgId, AuthzId, ClientData) ->
+-spec new_record(api_version(), object_id(), object_id(), ejson_term()) -> #chef_client{}.
+new_record(ApiVersion, OrgId, AuthzId, ClientData) ->
     Name = ej:get({<<"name">>}, ClientData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     Validator = ej:get({<<"validator">>}, ClientData) =:= true,
     Admin = ej:get({<<"admin">>}, ClientData) =:= true,
     {PublicKey, PubkeyVersion} = cert_or_key(ClientData),
-    #chef_client{id = Id,
+    #chef_client{server_api_version = ApiVersion,
+                 id = Id,
                  authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
                  org_id = OrgId,
                  name = Name,

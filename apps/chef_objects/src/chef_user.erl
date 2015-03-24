@@ -35,7 +35,7 @@
          is_indexed/0,
          name/1,
          username_from_ejson/1,
-         new_record/3,
+         new_record/4,
          org_id/1,
          parse_binary_json/1,
          parse_binary_json/3,
@@ -111,8 +111,8 @@ serialized_field_value(FieldName, #chef_user{serialized_object = SerializedObjec
     EJ = chef_json:decode(SerializedObject),
     ej:get({FieldName}, EJ).
 
--spec new_record(object_id(), object_id(), ejson_term()) -> #chef_user{}.
-new_record(OrgId, AuthzId, Data) ->
+-spec new_record(api_version(), object_id(), object_id(), ejson_term()) -> #chef_user{}.
+new_record(ApiVersion, OrgId, AuthzId, Data) ->
     {HashPass, Salt, HashType} = case ej:get({<<"password">>}, Data) of
         undefined ->
             {null, null, null};
@@ -127,7 +127,8 @@ new_record(OrgId, AuthzId, Data) ->
     EnableRecovery = ej:get({<<"recovery_authentication_enabled">>}, UserData) =:= true,
     {PublicKey, PubkeyVersion} = chef_object_base:cert_or_key(UserData),
     SerializedObject = { whitelisted_values(UserData, ?JSON_SERIALIZABLE) },
-    #chef_user{id = Id,
+    #chef_user{server_api_version = ApiVersion,
+               id = Id,
                authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
                username = Name,
                email = Email,

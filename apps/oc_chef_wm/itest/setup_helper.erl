@@ -24,6 +24,7 @@
 
 -include_lib("common_test/include/ct.hrl").
 -include_lib("eunit/include/eunit.hrl").
+-include("../../../include/chef_types.hrl").
 -include("../../../include/chef_osc_defaults.hrl").
 
 -export([
@@ -130,6 +131,7 @@ base_init_per_suite(Config0) ->
 
     FakeContext = chef_db:make_context(<<"fake-req-id">>),
     OrganizationRecord = chef_object:new_record(oc_chef_organization,
+                                                ?API_MIN_VER,
                                                 nil,
                                                 OrgAuthzId,
                                                 {[{<<"name">>, OrgName},
@@ -141,6 +143,7 @@ base_init_per_suite(Config0) ->
     %% create the test client
     OrgId = oc_chef_organization:id(OrganizationRecord),
     ClientRecord = chef_object:new_record(chef_client,
+                                          ?API_MIN_VER,
                                           OrgId,
                                           AuthzId,
                                           {[{<<"name">>, ClientName},
@@ -176,7 +179,7 @@ base_end_per_suite(Config) ->
     chef_test_suite_helper:stop_server(Config, needed_apps()).
 
 make_user(Config, Name, AuthzId) ->
-    User = chef_object:new_record(chef_user, ?OSC_ORG_ID, AuthzId,
+    User = chef_object:new_record(chef_user, ?API_MIN_VER, ?OSC_ORG_ID, AuthzId,
                                    {[{<<"username">>, Name},
                                      {<<"password">>, <<"zuperzecret">>},
                                      {<<"email">>, iolist_to_binary([Name, <<"@somewhere.com">>])},

@@ -28,7 +28,7 @@
 -export([
          parse_binary_json/1,
          delete/2,
-         create_record/3,
+         create_record/4,
          decompress_record/1
         ]).
 
@@ -46,7 +46,7 @@
          list/2,
          list_query/0,
          name/1,
-         new_record/3,
+         new_record/4,
          org_id/1,
          record_fields/0,
          set_created/2,
@@ -151,11 +151,12 @@ bulk_get_query() ->
     %% TODO: do we need this?
     ok.
 
-new_record(OrgId, PolicyAuthzID, PolicyData) ->
+new_record(ApiVersion, OrgId, PolicyAuthzID, PolicyData) ->
     Name = ej:get({<<"name">>}, PolicyData),
     RevisionId = ej:get({<<"revision_id">>}, PolicyData),
     Id = chef_object_base:make_org_prefix_id(OrgId, <<Name/binary, RevisionId/binary>>),
     #oc_chef_policy_revision{
+        server_api_version = ApiVersion,
         id = Id,
         org_id = OrgId,
         policy_authz_id = PolicyAuthzID,
@@ -163,8 +164,9 @@ new_record(OrgId, PolicyAuthzID, PolicyData) ->
         revision_id = RevisionId,
         serialized_object = ej:delete({<<"policy_group">>}, PolicyData)}.
 
-create_record(OrgId, Name, RequestingActorId) ->
+create_record(ApiVersion, OrgId, Name, RequestingActorId) ->
     Policy = #oc_chef_policy_revision{
+                           server_api_version = ApiVersion,
                            org_id = OrgId,
                            name = Name},
     set_created(Policy, RequestingActorId).

@@ -222,6 +222,7 @@ to_json(Req, #base_state{resource_state = #policy_state{policy_data_for_response
 from_json(Req, #base_state{organization_guid = OrgID,
                            chef_db_context = DbContext,
                            requestor_id = RequestorId,
+                           server_api_version = ApiVersion,
                            resource_state = #policy_state{policy_data = PolicyData,
                                                           policy_authz_id = PolicyAuthzID,
                                                           policy_group_authz_id = PolicyGroupAuthzID,
@@ -233,7 +234,8 @@ from_json(Req, #base_state{organization_guid = OrgID,
 
     case MaybeAssocID of
         false ->
-            CreateRecord =  oc_chef_policy_group_revision_association:new_record(OrgID,
+            CreateRecord =  oc_chef_policy_group_revision_association:new_record(ApiVersion,
+                                                                                 OrgID,
                                                                                  PolicyName,
                                                                                  PolicyAuthzID,
                                                                                  PolicyGroupName,
@@ -242,7 +244,8 @@ from_json(Req, #base_state{organization_guid = OrgID,
             R = oc_chef_policy_group_revision_association:insert_association(CreateRecord, DbContext, RequestorId),
             handle_create_result(R, PolicyName, PolicyData, Req, State);
         AssocId ->
-            UpdateRecord = oc_chef_policy_group_revision_association:update_record(AssocId,
+            UpdateRecord = oc_chef_policy_group_revision_association:update_record(ApiVersion,
+                                                                                   AssocId,
                                                                                    OrgID,
                                                                                    PolicyName,
                                                                                    PolicyAuthzID,

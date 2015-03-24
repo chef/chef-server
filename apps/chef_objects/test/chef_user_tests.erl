@@ -303,7 +303,7 @@ new_record_test() ->
                  {<<"name">>, <<"bob">>},
                  {<<"password">>, <<"top secret 123456">>}
                 ]},
-    User = chef_user:new_record(?OSC_ORG_ID ,<<"00000000000000000000000011111111">>, UserData),
+    User = chef_user:new_record(?API_MIN_VER, ?OSC_ORG_ID ,<<"00000000000000000000000011111111">>, UserData),
     ?assertMatch(#chef_user{}, User),
     ?assertEqual(<<"bob">>, chef_user:name(User)),
     ?assertEqual(null, User#chef_user.external_authentication_uid),
@@ -312,7 +312,7 @@ new_record_test() ->
 
 new_record_no_password_test() ->
     UserData = {[ {<<"name">>, <<"bob">>} ]},
-    User = chef_user:new_record(?OSC_ORG_ID ,<<"00000000000000000000000011111111">>, UserData),
+    User = chef_user:new_record(?API_MIN_VER, ?OSC_ORG_ID ,<<"00000000000000000000000011111111">>, UserData),
     ?assertEqual(null, User#chef_user.hashed_password),
     ?assertEqual(null, User#chef_user.salt),
     ?assertEqual(null, User#chef_user.hash_type).

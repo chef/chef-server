@@ -17,7 +17,7 @@
          assemble_group_ejson/2,
          delete/2,
          handle_error_for_update_ops/2,
-         create_record/3,
+         create_record/4,
          add_user_member/2,
          remove_user_member/2,
          add_group_member/2,
@@ -41,7 +41,7 @@
          list/2,
          list_query/0,
          name/1,
-         new_record/3,
+         new_record/4,
          org_id/1,
          record_fields/0,
          set_created/2,
@@ -111,16 +111,18 @@ bulk_get_query() ->
     %% TODO: do we need this?
     ok.
 
-new_record(OrgId, AuthzId, GroupData) ->
+new_record(ApiVersion, OrgId, AuthzId, GroupData) ->
     Name = ej:get({<<"id">>}, GroupData, ej:get({<<"groupname">>}, GroupData)),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
-    #oc_chef_group{id = Id,
-                       authz_id = AuthzId,
-                       org_id = OrgId,
-                       name = Name}.
+    #oc_chef_group{server_api_version = ApiVersion,
+                   id = Id,
+                   authz_id = AuthzId,
+                   org_id = OrgId,
+                   name = Name}.
 
-create_record(OrgId, Name, RequestingActorId) ->
-    Group = #oc_chef_group{id =chef_object_base:make_org_prefix_id(OrgId, Name),
+create_record(ApiVersion, OrgId, Name, RequestingActorId) ->
+    Group = #oc_chef_group{server_api_version = ApiVersion,
+                           id = chef_object_base:make_org_prefix_id(OrgId, Name),
                            org_id = OrgId,
                            name = Name},
     set_created(Group, RequestingActorId).
@@ -187,7 +189,7 @@ update(#oc_chef_group{
                       auth_side_actors = AuthSideActors,
                       auth_side_groups = AuthSideGroups
                      } = Record, CallbackFun) ->
-    case chef_object:default_update(Record, CallbackFun) of
+    case chef_object_default_callbacks:update(Record, CallbackFun) of
         %% If the group exists, N should be 1.
         N when is_integer(N) andalso N > 0 ->
             ClientAuthzIds = find_client_authz_ids(Clients, OrgId, CallbackFun),
@@ -271,7 +273,7 @@ parse_binary_json(Bin) ->
 
 
 fetch_base(#oc_chef_group{}=Record, TransformFun, CallbackFun) ->
-    case chef_object:default_fetch(Record, CallbackFun) of
+    case chef_object_default_callbacks:fetch(Record, CallbackFun) of
         #oc_chef_group{} = GroupRecord ->
             TransformFun(GroupRecord);
         not_found ->
@@ -309,7 +311,7 @@ fetch_new(#oc_chef_group{for_requestor_id = RequestorId} = Record, CallbackFun) 
     fetch_base(Record, FetchMembers, CallbackFun).
 
 fetch(#oc_chef_group{for_requestor_id = RequestorId} = Record, CallbackFun) ->
-    case chef_object:default_fetch(Record, CallbackFun) of
+    case chef_object_default_callbacks:fetch(Record, CallbackFun) of
         #oc_chef_group{authz_id = GroupAuthzId} = GroupRecord ->
             case fetch_authz_ids(GroupAuthzId, RequestorId) of
                 forbidden ->

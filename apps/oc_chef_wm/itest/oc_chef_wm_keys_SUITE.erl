@@ -586,14 +586,14 @@ http_named_key_request(Method, client, Requestor, Name, Body) ->
 
 % Some helpers to keep noise out of the tes.
 make_org(OrgName, OrgAuthzId) ->
-    Org = chef_object:new_record(oc_chef_organization, nil, OrgAuthzId,
+    Org = chef_object:new_record(oc_chef_organization, ?API_MIN_VER, nil, OrgAuthzId,
                                  {[{<<"name">>, OrgName}, {<<"full_name">>, OrgName}]}),
     chef_db:create(Org, context(), OrgAuthzId).
 
 make_client(Config, Name) ->
     OrgId = proplists:get_value(org_id, Config),
     PubKey = proplists:get_value(pubkey, Config),
-    Client = chef_object:new_record(chef_client, OrgId, ?CLIENT_AUTHZ_ID,
+    Client = chef_object:new_record(chef_client, ?API_MIN_VER, OrgId, ?CLIENT_AUTHZ_ID,
                                     {[{<<"name">>, Name},
                                       {<<"validator">>, true},
                                       {<<"admin">>, true},
@@ -607,7 +607,7 @@ make_user(Config, Name, AuthzId) ->
 make_user(Config, Name, AuthzId, OrgId) ->
     PubKey = proplists:get_value(pubkey, Config),
     Dom = <<"@somewheom">>,
-    User = chef_object:new_record(chef_user, OrgId, AuthzId,
+    User = chef_object:new_record(chef_user, ?API_MIN_VER, OrgId, AuthzId,
                                    {[{<<"username">>, Name},
                                      {<<"password">>, <<"zuperzecret">>},
                                      {<<"email">>, <<Name/binary,Dom/binary>>},

@@ -47,8 +47,8 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET', 'POST'], Req, State}.
 
-validate_request('GET', Req, #base_state{organization_guid = OrgId} = State) ->
-    {Req, State#base_state{resource_state = #oc_chef_organization{id = OrgId}}};
+validate_request('GET', Req, #base_state{organization_guid = OrgId, server_api_version = ApiVersion} = State) ->
+    {Req, State#base_state{resource_state = #oc_chef_organization{id = OrgId, server_api_version = ApiVersion}}};
 validate_request('POST', Req, #base_state{resource_state = OrganizationState}= State) ->
     Body = wrq:req_body(Req),
     {ok, EJson} = oc_chef_organization:parse_binary_json(Body),
@@ -100,6 +100,7 @@ from_json(Req, #base_state{resource_state = #organization_state{organization_dat
 %%    state records makes that hard.
 create_from_json(#wm_reqdata{} = Req,
                  #base_state{chef_db_context = DbContext,
+                             server_api_version = ApiVersion,
                              organization_guid = OrgId, % remove this
                              requestor_id = ActorId,
                              resource_mod = ResourceMod,
@@ -108,7 +109,7 @@ create_from_json(#wm_reqdata{} = Req,
                  RecType, {authz_id, AuthzId}, ObjectEjson) ->
     %% ObjectEjson should already be normalized. Record creation does minimal work and does
     %% not add or update any fields.
-    ObjectRec = chef_object:new_record(RecType, OrgId, AuthzId, ObjectEjson),
+    ObjectRec = chef_object:new_record(RecType, ApiVersion, OrgId, AuthzId, ObjectEjson),
     ResourceState1 = ResourceState#organization_state{organization_data = ObjectEjson,
                                                       organization_authz_id = AuthzId,
                                                       oc_chef_organization = ObjectRec},

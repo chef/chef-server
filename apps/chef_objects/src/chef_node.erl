@@ -37,7 +37,7 @@
          insert_autofill_fields/1,
          name/1,
          org_id/1,
-         new_record/3,
+         new_record/4,
          parse_check_binary_as_json_node/2,
          record_fields/0,
          set_created/2,
@@ -96,16 +96,18 @@
 
 -behaviour(chef_object).
 
--spec new_record(OrgId :: object_id(),
+-spec new_record(api_version(),
+                 OrgId :: object_id(),
                  AuthzId :: object_id() | unset,
                  ObjectEjson :: ejson_term()) ->
                         #chef_node{}.
-new_record(OrgId, AuthzId, NodeData) ->
+new_record(ApiVersion, OrgId, AuthzId, NodeData) ->
     Name = ej:get({<<"name">>}, NodeData),
     Environment = ej:get({<<"chef_environment">>}, NodeData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     Data = chef_db_compression:compress(chef_node, chef_json:encode(NodeData)),
-    #chef_node{id = Id,
+    #chef_node{server_api_version = ApiVersion,
+               id = Id,
                authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
                org_id = OrgId,
                name = Name,

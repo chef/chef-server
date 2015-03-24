@@ -912,12 +912,13 @@ create_from_json(#wm_reqdata{} = Req, #base_state{organization_guid = undefined}
 create_from_json(#wm_reqdata{} = Req,
                  #base_state{chef_db_context = DbContext,
                              organization_guid = OrgId,
+                             server_api_version = ApiVersion,
                              requestor_id = ActorId,
                              resource_mod = ResourceMod} = State,
                  RecType, {authz_id, AuthzId}, ObjectEjson) ->
     %% ObjectEjson should already be normalized. Record creation does minimal work and does
     %% not add or update any fields.
-    ObjectRec = chef_object:new_record(RecType, OrgId, maybe_authz_id(AuthzId), ObjectEjson),
+    ObjectRec = chef_object:new_record(RecType, ApiVersion, OrgId, maybe_authz_id(AuthzId), ObjectEjson),
     Name = chef_object:name(ObjectRec),
 
     %% Perform any additional platform-specific work on the object

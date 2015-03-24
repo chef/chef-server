@@ -29,7 +29,7 @@
          fields_for_fetch/1,
          record_fields/0,
          list/2,
-         new_record/3,
+         new_record/4,
          name/1,
          id/1,
          org_id/1,
@@ -147,7 +147,7 @@ assemble_organization_ejson(#oc_chef_organization{id = Guid,
             {?GUID_FIELD, Guid} ]},
     chef_object_base:set_default_values(Org, ?DEFAULT_FIELD_VALUES).
 
-new_record(_OrgId, AuthzId, OrganizationData) ->
+new_record(ApiVersion, _OrgId, AuthzId, OrganizationData) ->
     Id = chef_object_base:make_guid(),
 
     Name = ej:get({?NAME_FIELD}, OrganizationData),
@@ -156,6 +156,7 @@ new_record(_OrgId, AuthzId, OrganizationData) ->
     %% Also, does assigned at really make sense when org creation is done in one step?
     AssignedAt = ej:get({<<"assigned_at">>}, OrganizationData, chef_object_base:sql_date(now)),
     #oc_chef_organization{
+       server_api_version = ApiVersion,
        id = Id,
        authz_id = AuthzId,
        name = Name,

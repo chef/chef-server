@@ -5,6 +5,7 @@
 %% Copyright 2014 Chef, Inc. All Rights Reserved.
 
 -record(oc_chef_container, {
+          server_api_version,
           id,
           authz_id,
           org_id,
@@ -15,6 +16,7 @@
          }).
 
 -record(oc_chef_group, {
+          server_api_version,
           id,
           for_requestor_id,
           authz_id,
@@ -31,6 +33,7 @@
           }).
 
 -record(oc_chef_policy, {
+          server_api_version,
           id,
           name,
           org_id,
@@ -39,6 +42,7 @@
           }).
 
 -record(oc_chef_policy_group, {
+          server_api_version,
           id,
           name,
           org_id,
@@ -49,6 +53,7 @@
           }).
 
 -record(oc_chef_policy_revision, {
+          server_api_version,
           id,
           org_id,
           name,
@@ -59,6 +64,7 @@
          }).
 
 -record(oc_chef_policy_group_revision_association, {
+          server_api_version,
           % Database fields
           id,
           org_id,
@@ -89,6 +95,7 @@
          }).
 
 -record(oc_chef_cookbook_artifact_version, {
+          server_api_version,
           id,
           identifier,
           metadata,
@@ -102,6 +109,7 @@
          }).
 
 -record(oc_chef_organization, {
+          server_api_version,
           id,
           authz_id,
           name,
@@ -113,6 +121,7 @@
          }).
 
 -record(oc_chef_org_user_association, {
+          server_api_version,
           org_id,
           user_id,
           user_name, % Not part of the table but retrieved via join
@@ -122,6 +131,7 @@
          }).
 
 -record(oc_chef_org_user_invite, {
+          server_api_version,
           id,
           org_id,
           org_name,  % Not  part of table - retrieved via join

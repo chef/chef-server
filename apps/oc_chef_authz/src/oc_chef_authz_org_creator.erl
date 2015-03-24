@@ -147,11 +147,11 @@ process_policy([PolicyEntry|Policy], Org, User, Cache) ->
 %% Returns a tuple of updated cache, and expanded steps to process
 %%
 process_policy_step({create_containers, List},
-                    #oc_chef_organization{id=OrgId}, #chef_requestor{authz_id=RequestorId}, Cache) ->
-    {create_object(OrgId, RequestorId, container, List, Cache), []};
+                    #oc_chef_organization{server_api_version = ApiVersion, id=OrgId}, #chef_requestor{authz_id=RequestorId}, Cache) ->
+    {create_object(ApiVersion, OrgId, RequestorId, container, List, Cache), []};
 process_policy_step({create_groups, List},
-                    #oc_chef_organization{id=OrgId}, #chef_requestor{authz_id=RequestorId}, Cache) ->
-    {create_object(OrgId, RequestorId, group, List, Cache), []};
+                    #oc_chef_organization{server_api_version = ApiVersion, id=OrgId}, #chef_requestor{authz_id=RequestorId}, Cache) ->
+    {create_object(ApiVersion, OrgId, RequestorId, group, List, Cache), []};
 process_policy_step({set_acl_expanded, Object, Acl},
                     #oc_chef_organization{}, #chef_requestor{authz_id=_RequestorId}, Cache) ->
     {ResourceType, AuthzId} = find(Object, Cache),
@@ -162,6 +162,8 @@ process_policy_step({set_acl_expanded, Object, Acl},
     {Cache, []};
 process_policy_step({add_to_groups, ActorType, Members, Groups},
                     #oc_chef_organization{}, #chef_requestor{}, Cache) ->
+    %% Note that server_api_version is available to us here, if we should
+    %% need this behavior versioned in the future.
     MemberIds = objectlist_to_authz(Cache, ActorType, Members),
     GroupIds = objectlist_to_authz(Cache, group, Groups),
     %% TODO capture error return
@@ -170,12 +172,12 @@ process_policy_step({add_to_groups, ActorType, Members, Groups},
         {Type,MemberId} <- MemberIds],
     {Cache, []};
 process_policy_step({create_org_global_admins},
-                    #oc_chef_organization{name=OrgName},
+                    #oc_chef_organization{name=OrgName, server_api_version = ApiVersion},
                     #chef_requestor{authz_id=RequestorId}, Cache) ->
     GlobalGroupName = oc_chef_authz_db:make_global_admin_group_name(OrgName),
     %% TODO: Fix this to be the global groups org id.
     GlobalOrgId = ?GLOBAL_PLACEHOLDER_ORG_ID,
-    case create_helper(GlobalOrgId, RequestorId, group, GlobalGroupName) of
+    case create_helper(ApiVersion, GlobalOrgId, RequestorId, group, GlobalGroupName) of
         AuthzId when is_binary(AuthzId) ->
             {add_cache(Cache, {group, global_admins}, group, AuthzId), []};
         Error ->
@@ -187,13 +189,13 @@ process_policy_step({acls, Steps}, _Org, _User, Cache) ->
 %%
 %% Sequence of operations to create an object in authz and in chef sql.
 %%
-create_object(_, _, _, [], Cache) ->
+create_object(_, _, _, _, [], Cache) ->
     Cache;
-create_object(OrgId, RequestorId, Type, [Name|Remaining], Cache) ->
-    case create_helper(OrgId, RequestorId, Type, Name) of
+create_object(ApiVersion, OrgId, RequestorId, Type, [Name|Remaining], Cache) ->
+    case create_helper(ApiVersion, OrgId, RequestorId, Type, Name) of
         AuthzId when is_binary(AuthzId) ->
             NewCache = add_cache(Cache,{Type, Name}, AuthzId),
-            create_object(OrgId, RequestorId, Type, Remaining, NewCache);
+            create_object(ApiVersion, OrgId, RequestorId, Type, Remaining, NewCache);
         Error ->
             %% Do we clean up created authz stuff here, or save it for
             %% general org deletion routine later?
@@ -202,29 +204,29 @@ create_object(OrgId, RequestorId, Type, [Name|Remaining], Cache) ->
             throw(Error)
     end.
 
-create_helper(OrgId, RequestorId, Type, Name) when is_atom(Name) ->
+create_helper(ApiVersion, OrgId, RequestorId, Type, Name) when is_atom(Name) ->
     BinaryName = atom_to_binary(Name, utf8),
-    create_helper(OrgId, RequestorId, Type, BinaryName);
-create_helper(OrgId, RequestorId, Type, Name) ->
+    create_helper(ApiVersion, OrgId, RequestorId, Type, BinaryName);
+create_helper(ApiVersion, OrgId, RequestorId, Type, Name) ->
     case oc_chef_authz:create_resource(RequestorId, Type) of
         {ok, AuthzId} ->
-            create_chef_side(OrgId, RequestorId, Type, Name, AuthzId);
+            create_chef_side(ApiVersion, OrgId, RequestorId, Type, Name, AuthzId);
         {error, _} = Error ->
             Error
     end.
 
-create_chef_side(OrgId, RequestorId,  container, Name, AuthzId) ->
+create_chef_side(ApiVersion, OrgId, RequestorId,  container, Name, AuthzId) ->
     Data = ej:set({<<"containername">>}, {[]}, Name),
-    Object =chef_object:new_record(oc_chef_container, OrgId, AuthzId, Data),
+    Object =chef_object:new_record(oc_chef_container, ApiVersion, OrgId, AuthzId, Data),
     create_insert(Object, AuthzId, RequestorId);
-create_chef_side(OrgId, RequestorId, group, Name, AuthzId) ->
+create_chef_side(ApiVersion, OrgId, RequestorId, group, Name, AuthzId) ->
     Data = ej:set({<<"groupname">>}, {[]}, Name),
-    Object = chef_object:new_record(oc_chef_group, OrgId, AuthzId, Data),
+    Object = chef_object:new_record(oc_chef_group, ApiVersion, OrgId, AuthzId, Data),
     create_insert(Object, AuthzId, RequestorId).
 
 create_insert(Object, AuthzId, RequestorId) ->
     ObjectRec = chef_object:set_created(Object, RequestorId),
-    case chef_sql:create_object(chef_object:create_query(ObjectRec), chef_object:flatten(ObjectRec)) of
+    case chef_sql:create_object(chef_object:create_query(ObjectRec), chef_object:fields_for_insert(ObjectRec)) of
         {ok, 1} ->
             AuthzId;
         Error ->

@@ -43,7 +43,7 @@
          minimal_cookbook_ejson/2,
          name/1,
          org_id/1,
-         new_record/3,
+         new_record/4,
          parse_binary_json/2,
          parse_version/1,
          qualified_recipe_names/2,
@@ -132,8 +132,8 @@ set_updated(#chef_cookbook_version{} = Object, ActorId) ->
 type_name(#chef_cookbook_version{}) ->
     cookbook_version.
 
--spec new_record(object_id(), object_id(), ejson_term()) -> #chef_cookbook_version{}.
-new_record(OrgId, AuthzId, CBVData) ->
+-spec new_record(api_version(), object_id(), object_id(), ejson_term()) -> #chef_cookbook_version{}.
+new_record(ApiVersion, OrgId, AuthzId, CBVData) ->
     %% name for a cookbook_version is actually cb_name-cb_version which is good for ID
     %% creation
     Name = ej:get({<<"name">>}, CBVData),
@@ -161,7 +161,8 @@ new_record(OrgId, AuthzId, CBVData) ->
 
     Data = compress_maybe(ej:delete({<<"metadata">>}, CBVData),
                           chef_cookbook_version),
-    #chef_cookbook_version{id = Id,
+    #chef_cookbook_version{server_api_version = ApiVersion,
+                           id = Id,
                            authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
                            org_id = OrgId,
                            name = ej:get({<<"cookbook_name">>}, CBVData),
@@ -587,11 +588,12 @@ list_query() ->
 bulk_get_query() ->
     error(not_implemented).
 
-update_from_ejson(#chef_cookbook_version{org_id = OrgId,
+update_from_ejson(#chef_cookbook_version{server_api_version = ApiVersion,
+                                         org_id = OrgId,
                                          authz_id = AuthzId,
                                          frozen = FrozenOrig} = CookbookVersion,
                   CookbookVersionData) ->
-    UpdatedVersion = new_record(OrgId, AuthzId, CookbookVersionData),
+    UpdatedVersion = new_record(ApiVersion, OrgId, AuthzId, CookbookVersionData),
     %% frozen is immutable once it is set to true
     Frozen = FrozenOrig =:= true orelse UpdatedVersion#chef_cookbook_version.frozen,
     CookbookVersion#chef_cookbook_version{frozen            = Frozen,

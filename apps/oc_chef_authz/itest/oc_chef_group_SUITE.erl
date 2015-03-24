@@ -355,13 +355,14 @@ convert_to_path(BasePath, Elements) ->
 
 insert_user(Username) ->
     UserRecord = chef_user_record(Username, chef_test_suite_helper:make_az_id(Username), true),
-    [_| Values] = tuple_to_list(UserRecord),
-    FieldNames = record_info(fields, chef_user),
+    [_,_| Values] = tuple_to_list(UserRecord),
+    [_|FieldNames] = record_info(fields, chef_user),
     Input = lists:zip(FieldNames, Values),
     ?assertEqual({ok, 1}, sqerl:adhoc_insert(users, [Input])).
 
 insert_client(OrgId, Clientname) ->
     ClientRecord = chef_object:new_record(chef_client,
+                                          ?API_MIN_VER,
                                           OrgId,
                                           chef_test_suite_helper:make_az_id(Clientname),
                                           {[{<<"name">>, Clientname},
@@ -379,7 +380,7 @@ prepare_group_body(Actors, Groups) ->
     {[{<<"actors">>, Actors}, {<<"groups">>, Groups}]}.
 
 create_group(OrgId, GroupName) ->
-    ?assertEqual(ok, chef_db:create(oc_chef_group:new_record(OrgId, chef_test_suite_helper:make_az_id(GroupName), {[{<<"groupname">>,GroupName}]}), ?CTX, ?AUTHZ)).
+    ?assertEqual(ok, chef_db:create(oc_chef_group:new_record(?API_MIN_VER, OrgId, chef_test_suite_helper:make_az_id(GroupName), {[{<<"groupname">>,GroupName}]}), ?CTX, ?AUTHZ)).
 
 fetch_group(OrgId, GroupName) ->
     chef_db:fetch(#oc_chef_group{org_id = OrgId, name = GroupName, for_requestor_id = ?AUTHZ}, ?CTX).

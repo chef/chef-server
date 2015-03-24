@@ -40,8 +40,8 @@
          delete_query/0,
          record_fields/0,
          record_for_find/3,
-         new_record/6,
-         update_record/7,
+         new_record/7,
+         update_record/8,
          fields_for_insert/1,
          is_indexed/0,
          ejson_for_indexing/2]).
@@ -164,13 +164,13 @@ record_for_find(OrgID, PolicyName, GroupName) ->
         policy_group = #oc_chef_policy_group{org_id = OrgID, name = GroupName }
         }.
 
-new_record(OrgID, PolicyName, PolicyAuthzID, PolicyGroupName, PolicyGroupAuthzID, PolicyData) ->
+new_record(ApiVersion, OrgID, PolicyName, PolicyAuthzID, PolicyGroupName, PolicyGroupAuthzID, PolicyData) ->
     %% POLICY:   name, org_id, authz_id
-    Policy = oc_chef_policy:new_record(OrgID, PolicyAuthzID, PolicyName),
+    Policy = oc_chef_policy:new_record(ApiVersion, OrgID, PolicyAuthzID, PolicyName),
     %% GROUP:    name, org_id, authz_id
-    PolicyGroup = oc_chef_policy_group:new_record(OrgID, PolicyGroupAuthzID, PolicyGroupName),
+    PolicyGroup = oc_chef_policy_group:new_record(ApiVersion, OrgID, PolicyGroupAuthzID, PolicyGroupName),
     %% Revision: name, ord_id, policy_authz_id, revision_id, serialized_object
-    PolicyRevision = oc_chef_policy_revision:new_record(OrgID, PolicyAuthzID, PolicyData),
+    PolicyRevision = oc_chef_policy_revision:new_record(ApiVersion, OrgID, PolicyAuthzID, PolicyData),
     %% PGRA:     org_id, policy_group_authz_id, revision_id, revision_name, policy_group_name, associated records
     #oc_chef_policy_revision{revision_id = RevisionID} = PolicyRevision,
 
@@ -187,11 +187,12 @@ new_record(OrgID, PolicyName, PolicyAuthzID, PolicyGroupName, PolicyGroupAuthzID
         policy_revision = PolicyRevision
         }.
 
-update_record(ID, OrgID, PolicyName, PolicyAuthzID, PolicyGroupName, PolicyGroupAuthzID, PolicyData) ->
+update_record(ApiVersion, ID, OrgID, PolicyName, PolicyAuthzID, PolicyGroupName, PolicyGroupAuthzID, PolicyData) ->
     %% Policy and PolicyGroup must exist or else you'll run afoul of FK constraints.
-    PolicyRevision = oc_chef_policy_revision:new_record(OrgID, PolicyAuthzID, PolicyData),
+    PolicyRevision = oc_chef_policy_revision:new_record(ApiVersion, OrgID, PolicyAuthzID, PolicyData),
     #oc_chef_policy_revision{revision_id = RevisionID} = PolicyRevision,
     #oc_chef_policy_group_revision_association{
+        server_api_version = ApiVersion,
         id = ID,
         org_id = OrgID,
         policy_group_authz_id = PolicyGroupAuthzID,

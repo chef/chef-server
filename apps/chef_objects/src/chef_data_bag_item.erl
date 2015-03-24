@@ -35,7 +35,7 @@
          id/1,
          name/1,
          org_id/1,
-         new_record/3,
+         new_record/4,
          parse_binary_json/2,
          record_fields/0,
          set_created/2,
@@ -71,12 +71,13 @@
 
 -behaviour(chef_object).
 
--spec new_record(object_id(), object_id(), {binary(), ejson_term()}) -> #chef_data_bag_item{}.
-new_record(OrgId, _AuthzId, {BagName, ItemData}) ->
+-spec new_record(api_version(), object_id(), object_id(), {binary(), ejson_term()}) -> #chef_data_bag_item{}.
+new_record(ApiVersion, OrgId, _AuthzId, {BagName, ItemData}) ->
     ItemName = ej:get({<<"id">>}, ItemData),
     Id = chef_object_base:make_org_prefix_id(OrgId, <<BagName/binary, ItemName/binary>>),
     Data = chef_db_compression:compress(chef_data_bag_item, chef_json:encode(ItemData)),
-    #chef_data_bag_item{id = Id,
+    #chef_data_bag_item{server_api_version = ApiVersion,
+                        id = Id,
                         org_id = OrgId,
                         data_bag_name = BagName,
                         item_name = ItemName,

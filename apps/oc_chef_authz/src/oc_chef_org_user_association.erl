@@ -32,7 +32,7 @@
          fields_for_fetch/1,
          record_fields/0,
          list/2,
-         new_record/3,
+         new_record/4,
          name/1,
          id/1,
          org_id/1,
@@ -126,20 +126,21 @@ list(#oc_chef_org_user_association{user_id = UserId, org_id = undefined}, Callba
     CallbackFun({list_query(by_user), [UserId],  rows}).
 
 
-% Minor hack, will revisit - not an authz id:
-% Record creation via API. Temporary hack here to
-% capture user id instead of  authz id, so we can
-% use the existing framework.
-new_record(OrgId, {authz_id, UserId},  Data) ->
+% Record creation via API. Note that we're using the authz_id
+% field to capture the user id, so we can use the existing framework
+% without one-offing it.
+new_record(ApiVersion, OrgId, {authz_id, UserId},  Data) ->
     UserName = ej:get({<<"username">>}, Data),
-    #oc_chef_org_user_association{org_id = OrgId,
+    #oc_chef_org_user_association{server_api_version = ApiVersion,
+                                  org_id = OrgId,
                                   user_name = UserName,
                                   user_id = UserId};
-new_record(OrgId, _AuthzId, Data) ->
+new_record(ApiVersion, OrgId, _AuthzId, Data) ->
     % Used for record creation during migrations -
     % user_name ignored here since it's not persisted.
     UserId = ej:get({<<"user">>}, Data),
-    #oc_chef_org_user_association{org_id = OrgId,
+    #oc_chef_org_user_association{server_api_version = ApiVersion,
+                                  org_id = OrgId,
                                   user_id = UserId}.
 
 name(#oc_chef_org_user_association{user_name = Name}) ->

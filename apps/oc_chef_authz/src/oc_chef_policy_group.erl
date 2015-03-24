@@ -28,7 +28,7 @@
 -export([
          parse_binary_json/1,
          delete/2,
-         create_record/3
+         create_record/4
         ]).
 
 %% chef_object behaviour callbacks
@@ -47,7 +47,7 @@
          list/2,
          list_query/0,
          name/1,
-         new_record/3,
+         new_record/4,
          org_id/1,
          record_fields/0,
          set_created/2,
@@ -98,16 +98,18 @@ bulk_get_query() ->
     %% TODO: do we need this?
     ok.
 
-new_record(OrgId, AuthzId, Name) ->
+new_record(ApiVersion, OrgId, AuthzId, Name) ->
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     #oc_chef_policy_group{
+        server_api_version = ApiVersion,
         id = Id,
         authz_id = AuthzId,
         org_id = OrgId,
         name = Name}.
 
-create_record(OrgId, Name, RequestingActorId) ->
+create_record(ApiVersion, OrgId, Name, RequestingActorId) ->
     Policy = #oc_chef_policy_group{
+                           server_api_version = ApiVersion,
                            org_id = OrgId,
                            name = Name},
     set_created(Policy, RequestingActorId).
@@ -149,7 +151,7 @@ update(#oc_chef_policy_group{
                       authz_id = _PolicyGroupAuthzId,
                       last_updated_by = _AuthzId
                      } = Record, CallbackFun) ->
-	chef_object:default_update(Record, CallbackFun).
+    chef_object_default_callbacks:update(Record, CallbackFun).
 
 
 parse_binary_json(Bin) ->

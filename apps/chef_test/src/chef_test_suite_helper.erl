@@ -23,6 +23,7 @@
 -module(chef_test_suite_helper).
 
 -include_lib("eunit/include/eunit.hrl").
+-include("../../../include/chef_types.hrl").
 
 -export([
          context/0,
@@ -137,12 +138,12 @@ make_orgs() ->
     OrgConfig.
 
 make_org() ->
-    Org = chef_object:new_record(oc_chef_organization, nil, ?ORG_AUTHZ_ID,
+    Org = chef_object:new_record(oc_chef_organization, ?API_MIN_VER, nil, ?ORG_AUTHZ_ID,
                                  {[{<<"name">>, ?ORG_NAME}, {<<"full_name">>, ?ORG_NAME}]}),
     ok = chef_db:create(Org, context(), ?ORG_AUTHZ_ID).
 
 make_other_org() ->
-    Org = chef_object:new_record(oc_chef_organization, nil, ?OTHER_ORG_AUTHZ_ID,
+    Org = chef_object:new_record(oc_chef_organization, ?API_MIN_VER, nil, ?OTHER_ORG_AUTHZ_ID,
                                  {[{<<"name">>, ?OTHER_ORG_NAME}, {<<"full_name">>, ?OTHER_ORG_NAME}]}),
     ok = chef_db:create(Org, context(), ?OTHER_ORG_AUTHZ_ID).
 
@@ -182,8 +183,8 @@ other_org_id() ->
 
 create_record(Record) ->
     Query = chef_object:create_query(Record),
-    FlattenedRecord = chef_object:flatten(Record),
-    chef_sql:create_object(Query, FlattenedRecord).
+    FieldsForInsert = chef_object:fields_for_insert(Record),
+    chef_sql:create_object(Query, FieldsForInsert).
 
 fetch_record(Record) ->
     chef_sql:fetch_object(

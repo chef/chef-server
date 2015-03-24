@@ -121,6 +121,7 @@ db_round_trip(Config) ->
     %% and modulo a few things, it should be equal to what we inserted
     ChecksumsFromDB = RecFromDB#oc_chef_cookbook_artifact_version.checksums,
     ModifiedRecFromDB = RecFromDB#oc_chef_cookbook_artifact_version{id = undefined,
+                                                                    server_api_version = ?API_MIN_VER,
                                                                     %% they get reversed when saving
                                                                     checksums = lists:reverse(ChecksumsFromDB)},
     OriginalCreatedAt = CBAVRecord#oc_chef_cookbook_artifact_version.created_at,
@@ -315,7 +316,7 @@ filter_checksums_to_delete(Config) ->
 artifact_version_rec_from_json(Config, Json) ->
     OrgId = ?config(org_id, Config),
     AuthzId = chef_object_base:make_guid(),
-    oc_chef_cookbook_artifact_version:new_record(OrgId, AuthzId, Json).
+    oc_chef_cookbook_artifact_version:new_record(?API_MIN_VER, OrgId, AuthzId, Json).
 
 %% creates N versions for the same artifact,
 %% using the canonical example
