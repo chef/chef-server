@@ -169,10 +169,9 @@ parse_binary_json(Bin) ->
 
 validation_constraints() ->
     {[
-     {<<"name">>, {string_match, chef_regex:regex_for(cookbook_name)}},
-     {<<"json_class">>, <<"Chef::CookbookArtifactVersion">>},
-     {<<"chef_type">>, <<"cookbook_artifact_version">>}
      %% TODO: this should be more comprehensive
+     {<<"name">>, {string_match, chef_regex:regex_for(cookbook_name)}},
+     {<<"identifier">>, {string_match, chef_regex:regex_for(policy_identifier)}}
     ]}.
 
 %% @doc Re-constructs the JSON representation; can be seen as the reverse
