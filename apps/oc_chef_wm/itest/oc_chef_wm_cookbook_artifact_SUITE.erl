@@ -102,7 +102,6 @@ all() ->
 %% live somewhere else?
 db_round_trip(Config) ->
     Context = ?config(context, Config),
-    OrgId = ?config(org_id, Config),
 
     Name = "db_round_trip_name",
     Identifier = "db_round_trip_identifier",
@@ -220,7 +219,7 @@ http_delete(Config) ->
                  http_delete_cookbook_artifact_version(Name, Identifier)).
 
 %% Tests the GET BASE_URL/cookbook_artifacts/NAME endpoint
-http_get_cookbook_artifact(Config) ->
+http_get_cookbook_artifact(_Config) ->
     %% first let's create an artifact with a few versions
     Name = "http_get_cookbook_artifact_name",
     BaseIdentifier = "http_get_cookbook_artifact_identifier",
@@ -236,18 +235,18 @@ http_get_cookbook_artifact(Config) ->
     ?assertEqual(NumVersions, erlang:length(ArtifactLists)).
 
 %% 404 on GET BASE_URL/cookbook_artifacts/NAME
-http_get_missing_cookbook_artifact(Config) ->
+http_get_missing_cookbook_artifact(_Config) ->
     Name = "http_get_missing_cookbook_artifact_name",
     ?assertMatch({"404", _},
                  http_fetch_cookbook_artifact(Name)).
 
 %% Tests the GET BASE_URL/cookbook_artifacts endpoint
-http_get_cookbook_artifacts(Config) ->
+http_get_cookbook_artifacts(_Config) ->
     ?assertMatch({"200", _}, http_fetch_cookbook_artifacts()).
 
 %% Tests that GET BASE_URL/cookbook_artifacts endpoint
 %% works as expected when there are none
-http_delete_then_fetch_all_cookbook_artifacts(Config) ->
+http_delete_then_fetch_all_cookbook_artifacts(_Config) ->
     %% first, let's delete all the artifacts we've created so
     %% far (which is a good test, too!)
     {"200", {ArtifactList}} = http_fetch_cookbook_artifacts(),
