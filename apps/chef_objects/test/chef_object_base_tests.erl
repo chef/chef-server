@@ -219,12 +219,7 @@ set_key_pair_test_() ->
              || Type <- [key, cert] ],
     lists:flatten(Tests).
 
-parse_expiration_test_() ->
-    [{"check that parse_expiration handles infinity properly",
-      fun() ->
-	      ?assertEqual(?INFINITY_TIMESTAMP, chef_object_base:parse_expiration(<<"infinity">>))
-      end
-     }].
-
+parse_date_test() ->
+    ?assertEqual(?INFINITY_TIMESTAMP, chef_object_base:parse_date(<<"infinity">>)).
 
 

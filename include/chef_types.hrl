@@ -1,3 +1,4 @@
+%% -*- mode:erlang, erlang-indent-level: 4;indent-tabs-mode: nil -*-
 %% Copyright 2012-2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -219,15 +220,20 @@
 %% Not a true chef object either, keys are owned by their associated user
 %% or client object and are managed in that context.
 -record(chef_key, {
-	  'id'  :: object_id(),     %% guid of user or client, unique with key_name
-	  'key_name',               %% user named string describing key
-	  'public_key',             %% PKCS#1 public key or a certificate
-	  'key_version',            %% 0 for public_key, 1 for cert
-	  'expires_at' :: binary(), %% expiration time (utc)
-	  'last_updated_by' :: binary(), %% authz id of updater
-	  'created_at' :: binary(), %% when created
-	  'updated_at' :: binary()  %% when last updated
-	 }).
+          'id'  :: object_id(),     %% guid of user or client, unique with key_name
+          'key_name',               %% user named string describing key
+          'public_key',             %% PKCS#1 public key or a certificate
+          'key_version',            %% 0 for public_key, 1 for cert
+          'expires_at' :: binary(), %% expiration time (utc)
+          'last_updated_by' :: binary(), %% authz id of updater
+          'created_at' :: binary(), %% when created
+          'updated_at' :: binary(),  %% when last updated
+
+          %% Important note - in 'chef_key:flatten' we explcitly drop this last field
+          %% since it's not part of the DB table for insert. If you add more fields
+          %% that are part of the DB table, add them above this comment.
+          'old_name' :: binary()    %% In case of update, this will contain the original name
+        }).
 
 %% These types and records are just convenient shorthands for subsets of our
 %% records that are used in the SQL layers.

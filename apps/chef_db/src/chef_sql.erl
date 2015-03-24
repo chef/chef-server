@@ -47,6 +47,8 @@
          fetch/1,
          fetch_multi/3,
 
+         bulk_get_authz_ids/2,
+
          %% checksum ops
          mark_checksums_as_uploaded/2,
          non_uploaded_checksums/2,
@@ -83,6 +85,7 @@
 
          fetch_environment_filtered_recipes/2,
          fetch_latest_cookbook_versions/3,
+
 
          %% Sandbox Ops
          create_sandbox/1,
@@ -883,6 +886,23 @@ bulk_get_objects(Type, Ids) ->
         {error, Error} ->
             {error, Error}
     end.
+
+
+-spec bulk_get_authz_ids(chef_type(), [binary()]) ->
+                              {ok, [binary()] | not_found} |
+                              {error, term()}.
+%% @doc return a list of Authz IDs for the given IDs
+bulk_get_authz_ids(Type, Ids) ->
+    Query = list_to_existing_atom("bulk_get_" ++ atom_to_list(Type) ++ "_authz_ids"),
+    case sqerl:select(Query, [Ids], rows, []) of
+        {ok, none} ->
+            {ok, not_found};
+        {ok, L} when is_list(L) ->
+            {ok, L};
+        {error, Error} ->
+            {error, Error}
+    end.
+
 
 -spec create_object(Object :: chef_object() |
                               #chef_sandbox{} |

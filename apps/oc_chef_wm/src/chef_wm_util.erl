@@ -148,14 +148,14 @@ not_found_message(cookbook_version, {Name, Version}) when is_binary(Version) -> 
 not_found_message(client, Name) ->
     error_message_envelope(iolist_to_binary(["Cannot load client ", Name]));
 not_found_message(user, Name) ->
-    %error_message_envelope(iolist_to_binary(["user '", Name, "' not found"]));
-%TODO - verify this does not break other tests which require specific wording - otherwise
-    %we'll needd to update associated test in oc-chef-pedant:associations_spec
     {[{<<"error">>, iolist_to_binary(["Could not find user ", Name])}]};
 not_found_message(association, {Name, OrgName} ) ->
     {[{<<"error">>, iolist_to_binary(["Cannot find a user ", Name, " in organization ", OrgName])}]};
 not_found_message(invitation, Id) ->
-    {[{<<"error">>, iolist_to_binary(["Cannot find association request: ", Id])}]}.
+    {[{<<"error">>, iolist_to_binary(["Cannot find association request: ", Id])}]};
+not_found_message(key, {OwnerName, KeyName}) ->
+    {[{<<"error">>, iolist_to_binary(["There is no key named ", KeyName, " associated with ", OwnerName, "."])}]}.
+
 
 
 %% "Cannot load data bag item not_really_there for data bag sack"
@@ -211,7 +211,7 @@ set_uri_of_created_resource(Uri, Req0) when is_binary(Uri) ->
 %% the spec will be updated
 -spec object_name(cookbook | node | role | data_bag | data_bag_item |
                   environment | principal | sandbox | client | user |
-                  group | container | organization | invitation,
+                  group | container | organization | invitation | key,
                   Request :: #wm_reqdata{}) -> binary() | undefined.
 object_name(node, Req) ->
     extract_from_path(node_name, Req);

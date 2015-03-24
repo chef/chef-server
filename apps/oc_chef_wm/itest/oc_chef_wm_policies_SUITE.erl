@@ -405,11 +405,11 @@ http_create_with_modified_cookbook_lock(PolicyName, KeyName, KeyValue) ->
     ResponseCode.
 
 http_list_policies() ->
-    http_request(get, "", <<>>).
+    http_request(get, "/policies", <<>>).
 
 http_fetch_policy(Name) ->
     UrlEncodedName = ibrowse_lib:url_encode(Name),
-    http_request(get, "/group_name/" ++ UrlEncodedName, <<>>).
+    http_request(get, "/policy_groups/group_name/policies/" ++ UrlEncodedName, <<>>).
 
 http_create_modified_policy(Name) ->
     http_create_policy(Name, canonical_example_policy_json(Name)).
@@ -419,19 +419,19 @@ http_create_modified_policy(Name, RevisionID) ->
 
 http_create_policy(Name, Json) ->
     UrlEncodedName = ibrowse_lib:url_encode(Name),
-    http_request(put, "/group_name/" ++ UrlEncodedName, ejson:encode(Json)).
+    http_request(put, "/policy_groups/group_name/policies/" ++ UrlEncodedName, ejson:encode(Json)).
 
 http_delete_policy(Name) ->
     UrlEncodedName = ibrowse_lib:url_encode(Name),
-    http_request(delete, "/group_name/" ++ UrlEncodedName, <<>>).
+    http_request(delete, "/policy_groups/group_name/policies/" ++ UrlEncodedName, <<>>).
 
 http_update_policy(Name, Ejson) ->
     UrlEncodedName = ibrowse_lib:url_encode(Name),
-    http_request(put, "/group_name/" ++ UrlEncodedName, ejson:encode(Ejson)).
+    http_request(put, "/policy_groups/group_name/policies/" ++ UrlEncodedName, ejson:encode(Ejson)).
 
 http_request(Method, RouteSuffix, Body) ->
     OrgStr = erlang:binary_to_list(?ORG_NAME),
-    Url = "http://localhost:8000/organizations/" ++ OrgStr ++ "/policies" ++ RouteSuffix,
+    Url = "http://localhost:8000/organizations/" ++ OrgStr ++ RouteSuffix,
     ibrowse:send_req(Url,
                      [{"x-ops-userid", "test-client"},
                       {"accept", "application/json"},

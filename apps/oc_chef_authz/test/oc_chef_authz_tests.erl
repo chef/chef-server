@@ -254,7 +254,7 @@ bulk_actor_is_authorized_test_() ->
                                    {ok, "200", [], <<"{\"unauthorized\":[\"a\",\"b\"]}">>}
                            end),
                Resources = [{<<"a">>, a_data}, {<<"b">>, b_data}],
-               ?assertEqual({false,[b_data, a_data]},
+               ?assertEqual({false,{[b_data, a_data],[]}},
                             oc_chef_authz:bulk_actor_is_authorized(<<"test-req-id">>, <<"abcabc123">>, object,
                                                                    Resources, read))
        end},
@@ -268,7 +268,10 @@ bulk_actor_is_authorized_test_() ->
                                    {ok, "200", [], <<"{\"unauthorized\":[\"b\",\"l\",\"o\",\"t\"]}">>}
                            end),
                Resources = [ {I, binary_to_atom(<<I/binary, "_data">>, utf8)} || I <- Ids ],
-               ?assertEqual({false,[t_data, o_data, l_data, b_data]},
+               ?assertEqual({false,{[t_data, o_data, l_data, b_data],
+                                  [s_data, r_data, q_data, p_data, n_data, m_data,
+                                   k_data, j_data, i_data, h_data, g_data, f_data,
+                                   e_data, d_data, c_data, a_data]}},
                             oc_chef_authz:bulk_actor_is_authorized(<<"test-req-id">>,
                                                                    <<"abcabc123">>,
                                                                    object,

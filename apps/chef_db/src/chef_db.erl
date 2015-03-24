@@ -92,6 +92,7 @@
          fetch/2,
          fetch_multi/4,
          bulk_get/4,
+         bulk_get_authz_ids/3,
          data_bag_exists/3,
          environment_exists/3]).
 
@@ -698,6 +699,12 @@ bulk_get(#context{reqid = ReqId}, OrgName, client, Ids) ->
 % TODO: Can this come out now?
 bulk_get(Ctx, OrgName, Type, Ids) ->
     bulk_get_couchdb(Ctx, OrgName, Type, Ids).
+
+-spec bulk_get_authz_ids(#context{}, chef_type(), [binary()]) ->
+                        [{binary(), binary()}] | {error, _}.
+%% @doc Return a list of authz IDs corresponding to the specified list of IDs
+bulk_get_authz_ids(#context{reqid = ReqId}, Type, Ids) ->
+    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_authz_ids, (Type, Ids))).
 
 bulk_get_result({ok, not_found}) ->
     [];
