@@ -25,7 +25,6 @@
          init/1,
          request_type/0,
          allowed_methods/2,
-         post_is_create/2,
          from_json/2,
          resource_exists/2,
          to_json/2,
@@ -44,10 +43,7 @@ request_type() ->
     "cookbook_artifact_versions".
 
 allowed_methods(Req, State) ->
-    {['GET', 'POST', 'DELETE'], Req, State}.
-
-post_is_create(Req, State) ->
-    {true, Req, State}.
+    {['GET', 'PUT', 'DELETE'], Req, State}.
 
 create_path(Req, State) ->
     Identifier = wrq:path_info(identifier, Req),
@@ -56,7 +52,7 @@ create_path(Req, State) ->
 resource_exists(Req, State) ->
     {true, Req, State}.
 
-validate_request('POST', Req, #base_state{resource_state = CAVState} = State) ->
+validate_request('PUT', Req, #base_state{resource_state = CAVState} = State) ->
     CAVData = validate_json(Req),
     NewResourceState = CAVState#cookbook_artifact_version_state{cookbook_artifact_version_data = CAVData},
     valid_request(Req, State#base_state{resource_state = NewResourceState});
@@ -101,7 +97,7 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
 
 auth_info(Req, State, ResourceState, Method, DbContext, CAVRec) ->
     case {chef_db:fetch(CAVRec, DbContext), Method} of
-        {not_found, 'POST'} ->
+        {not_found, 'PUT'} ->
             {{create_in_container, cookbook_artifact}, Req, State};
         {not_found, GetOrDelete} when GetOrDelete =:= 'GET'; GetOrDelete =:= 'DELETE' ->
             Message = chef_wm_util:error_message_envelope(<<"not_found">>),

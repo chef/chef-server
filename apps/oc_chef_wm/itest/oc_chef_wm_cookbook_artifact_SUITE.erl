@@ -331,7 +331,7 @@ http_create_cookbook_artifact_versions(Name, BaseIdentifier, N) ->
     Identifiers.
 
 http_create_cookbook_artifact_version(Name, Identifier, Ejson) ->
-    http_request(post, route_suffix_for(Name, Identifier), Ejson).
+    http_request(put, route_suffix_for(Name, Identifier), Ejson).
 
 http_fetch_cookbook_artifact_version(Name, Identifier) ->
     http_request(get, route_suffix_for(Name, Identifier), null).
