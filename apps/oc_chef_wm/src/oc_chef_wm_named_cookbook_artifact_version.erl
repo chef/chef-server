@@ -31,7 +31,8 @@
          to_json/2,
          create_path/2,
          malformed_request_message/3,
-         conflict_message/1]).
+         conflict_message/1,
+         delete_resource/2]).
 
 init(Config) ->
     oc_chef_wm_base:init(?MODULE, Config).
@@ -43,7 +44,7 @@ request_type() ->
     "cookbook_artifact_versions".
 
 allowed_methods(Req, State) ->
-    {['GET', 'POST'], Req, State}.
+    {['GET', 'POST', 'DELETE'], Req, State}.
 
 post_is_create(Req, State) ->
     {true, Req, State}.
@@ -55,12 +56,12 @@ create_path(Req, State) ->
 resource_exists(Req, State) ->
     {true, Req, State}.
 
-validate_request('GET', Req, State) ->
-    valid_request(Req, State);
 validate_request('POST', Req, #base_state{resource_state = CAVState} = State) ->
     CAVData = validate_json(Req),
     NewResourceState = CAVState#cookbook_artifact_version_state{cookbook_artifact_version_data = CAVData},
-    valid_request(Req, State#base_state{resource_state = NewResourceState}).
+    valid_request(Req, State#base_state{resource_state = NewResourceState});
+validate_request(_GetOrDelete, Req, State) ->
+    valid_request(Req, State).
 
 validate_json(Req) ->
     Body = wrq:req_body(Req),
@@ -102,21 +103,15 @@ auth_info(Req, State, ResourceState, Method, DbContext, CAVRec) ->
     case {chef_db:fetch(CAVRec, DbContext), Method} of
         {not_found, 'POST'} ->
             {{create_in_container, cookbook_artifact}, Req, State};
-        {not_found, 'GET'} ->
-            forbidden(Req, State, 404, "not found", cookbook_artifact_not_found);
-        {forbidden, _} ->
-            forbidden(Req, State, 403, "forbidden", cookbook_artifact_forbidden);
+        {not_found, GetOrDelete} when GetOrDelete =:= 'GET'; GetOrDelete =:= 'DELETE' ->
+            Message = chef_wm_util:error_message_envelope(<<"not_found">>),
+            Req1 = chef_wm_util:set_json_body(Req, Message),
+            {{halt, 404}, Req1, State#base_state{log_msg = cookbook_artifact_version_not_found}};
         {#oc_chef_cookbook_artifact_version{authz_id = AuthzId} = CAV, _} ->
             NewResourceState = ResourceState#cookbook_artifact_version_state{oc_chef_cookbook_artifact_version = CAV},
             State1 = State#base_state{resource_state = NewResourceState},
             {{object, AuthzId}, Req, State1}
     end.
-
-forbidden(Req, State, RespCode, RespMessage, LogMsg) ->
-    Message = chef_wm_util:error_message_envelope(
-                erlang:iolist_to_binary(RespMessage)),
-    Req1 = chef_wm_util:set_json_body(Req, Message),
-    {{halt, RespCode}, Req1, State#base_state{log_msg = LogMsg}}.
 
 to_json(Req, #base_state{resource_state = #cookbook_artifact_version_state{
                              oc_chef_cookbook_artifact_version = CAVRec
@@ -142,6 +137,17 @@ from_json(Req, #base_state{resource_state = #cookbook_artifact_version_state{
         Else ->
             Else
     end.
+
+delete_resource(Req, #base_state{
+                        chef_db_context = DbContext,
+                        requestor_id = RequestorId,
+                        resource_state = #cookbook_artifact_version_state{
+                          oc_chef_cookbook_artifact_version = CAVRec
+                        }} = State) ->
+    ok = oc_chef_wm_base:delete_object(DbContext, CAVRec, RequestorId),
+    ExternalUrl = chef_wm_util:base_uri(Req),
+    Ejson = oc_chef_cookbook_artifact_version:to_json(CAVRec, ExternalUrl),
+    {true, chef_wm_util:set_json_body(Req, Ejson), State}.
 
 malformed_request_message(Any, _Req, _state) ->
     error({unexpected_malformed_request_message, Any}).

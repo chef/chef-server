@@ -45,6 +45,7 @@
          fetch_object/4,
          fetch_object_names/1,
          fetch/1,
+         fetch_multi/3,
 
          bulk_get_authz_ids/2,
 
@@ -741,9 +742,13 @@ statements() ->
     {ok, Statements} = file:consult(Path),
     Statements.
 
--spec(fetch(chef_object:object_rec()) -> chef_object:object_rec()).
+-spec fetch(chef_object:object_rec()) -> chef_object:object_rec() | not_found | {error, _Why}.
 fetch(Record) ->
     chef_object:fetch(Record, fun select_rows/1).
+
+-spec fetch_multi(atom(), atom(), list()) -> [chef_object:object_rec()] | not_found | {error, _Why}.
+fetch_multi(RecModule, QueryName, QueryParams) ->
+    chef_object:fetch_multi(RecModule, QueryName, QueryParams, fun select_rows/1).
 
 -spec select_rows(
         {QueryName, BindParameters } |
@@ -1219,6 +1224,9 @@ unlink_all_checksums_from_cbv(OrgId, CookbookVersionId) ->
 -spec delete_orphaned_checksums(OrgId::binary(),
 				Checksums::[binary()]) -> [binary()].
 delete_orphaned_checksums(OrgId, Checksums) ->
+    %% we don't want to delete checksums associated with
+    %% cookbook artifact versions
+    FilteredChecksums = oc_chef_cookbook_artifact:filter_checksums_to_delete(OrgId, Checksums),
     lists:foldl(fun(Checksum, Acc) ->
             case sqerl:statement(delete_checksum_by_id, [OrgId, Checksum]) of
                 {ok, N} when is_integer(N) -> %% pretend there is 1
@@ -1235,7 +1243,7 @@ delete_orphaned_checksums(OrgId, Checksums) ->
             end
       end,
       [],
-      Checksums).
+      FilteredChecksums).
 
 %% @doc try and delete the row from cookbooks table.  It is protected by a
 %% ON DELETE RESTRICT from cookbook_versions so we get a FK violation if there

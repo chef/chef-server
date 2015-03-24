@@ -232,17 +232,39 @@ statements(pgsql) ->
        "WHERE ca.org_id = $1 "
          "AND ca.name = $2 "
          "AND cav.identifier = $3 "
-    "GROUP BY cav.id, ca.org_id, ca.name, ca.authz_id;">>},
-      {list_cookbook_artifact_versions_by_org_id,
-       <<"SELECT cav.id, cav.identifier, cav.metadata, cav.serialized_object, cav.created_at, cav.created_by,"
-                "ca.org_id, ca.name, ca.authz_id, ARRAY_AGG(cavc.checksum) AS checksums "
+    "GROUP BY cav.id, ca.org_id, ca.name, ca.authz_id">>},
+      {delete_cookbook_artifact_version_by_id,
+       <<"SELECT * FROM delete_cookbook_artifact_version($1)">>},
+      {list_cookbook_artifacts_by_org_id,
+       <<"SELECT ca.id, ca.org_id, ca.name, ca.authz_id, "
+                "ARRAY_AGG(cav.identifier) AS version_identifiers "
          "FROM cookbook_artifact_versions AS cav "
          "JOIN cookbook_artifacts AS ca "
            "ON cav.cookbook_artifact_id = ca.id "
-         "JOIN cookbook_artifact_version_checksums AS cavc "
-           "ON cavc.cookbook_artifact_version_id = cav.id "
         "WHERE ca.org_id = $1 "
-        "GROUP BY cav.id, ca.org_id, ca.name, ca.authz_id;">>}
+     "GROUP BY ca.id">>},
+      {find_cookbook_artifact_by_org_id_name,
+       <<"SELECT ca.id, ca.org_id, ca.name, ca.authz_id, "
+                "ARRAY_AGG(cav.identifier) AS version_identifiers "
+         "FROM cookbook_artifact_versions AS cav "
+         "JOIN cookbook_artifacts AS ca "
+           "ON cav.cookbook_artifact_id = ca.id "
+        "WHERE ca.org_id = $1 "
+          "AND ca.name = $2 "
+     "GROUP BY ca.id">>},
+      {check_cookbook_artifact_exists_by_authz_id,
+      <<"SELECT authz_id "
+          "FROM cookbook_artifacts "
+         "WHERE authz_id = $1">>},
+      %% $2 should be an array of checksums to check
+      %% then this query returns all checksums from there
+      %% that are referenced by cookbook artifact versions
+      {checksums_referenced_by_cookbook_artifact_versions,
+       <<"SELECT checksum "
+           "FROM cookbook_artifact_version_checksums "
+          "WHERE org_id = $1 "
+            "AND checksum = ANY($2) "
+       "GROUP BY checksum">>}
     ].
 
 %

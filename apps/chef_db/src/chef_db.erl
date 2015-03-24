@@ -90,6 +90,7 @@
          list/2,
          update/3,
          fetch/2,
+         fetch_multi/4,
          bulk_get/4,
          bulk_get_authz_ids/3,
          data_bag_exists/3,
@@ -97,6 +98,7 @@
 
 -include("../../include/chef_db.hrl").
 -include("../../include/chef_types.hrl").
+-include("../../include/oc_chef_types.hrl").
 -include("../../include/chef_osc_defaults.hrl").
 -include_lib("stats_hero/include/stats_hero.hrl").
 
@@ -189,6 +191,21 @@ delete(#chef_cookbook_version{org_id = OrgId} = CookbookVersion,
             end;
         Result -> Result %% not_found or {error, _}
     end;
+delete(#oc_chef_cookbook_artifact_version{org_id = OrgId} = CAVRec,
+       #context{reqid = ReqId}) ->
+    chef_object:delete(CAVRec, fun({QueryName, Params}) ->
+        case sqerl:select(QueryName, Params, rows_as_scalars, [checksum_to_delete]) of
+            {ok, none} ->
+                %% no checksum deleted, but we did delete the artifact version, still
+                {ok, 1};
+            {ok, ChecksumsToDelete} when erlang:is_list(ChecksumsToDelete) ->
+                %% let's delete these files from storage
+                ?SH_TIME(ReqId, chef_s3, delete_checksums, (OrgId, ChecksumsToDelete)),
+                {ok, 1};
+            {error, _Why} = Error ->
+                Error
+        end
+    end);
 delete(ObjectRec, #context{reqid = ReqId}) ->
     stats_hero:ctime(ReqId, {chef_sql, delete_object},
                      fun() -> chef_sql:delete_object(ObjectRec) end).
@@ -202,6 +219,20 @@ fetch(ObjectRec, #context{reqid = ReqId}) ->
     stats_hero:ctime(ReqId, {chef_sql, fetch},
                           fun() ->
                                   chef_sql:fetch(ObjectRec)
+                          end).
+
+%% @doc Meant to be used for a query that fetches multiple objects
+-spec fetch_multi(RecModule :: atom(),
+                  DbContext :: #context{},
+                  QueryName :: atom(),
+                  QueryParams :: list()) ->
+                      [object_rec()] |
+                      not_found |
+                      {error, term()}.
+fetch_multi(RecModule, #context{reqid = ReqId}, QueryName, QueryParams) ->
+    stats_hero:ctime(ReqId, {chef_sql, fetch_multi, QueryName},
+                          fun() ->
+                                  chef_sql:fetch_multi(RecModule, QueryName, QueryParams)
                           end).
 
 -spec list(object_rec(), #context{}) -> [binary()] | {error, _}.

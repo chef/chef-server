@@ -105,6 +105,7 @@
 
          list/2,
          fetch/2,
+         fetch_multi/4,
          update/3,
          delete/2,
          default_fetch/2,
@@ -205,6 +206,11 @@ list(Rec, CallbackFun) ->
 fetch(Rec, CallbackFun) ->
     Mod = element(1, Rec),
     Mod:fetch(Rec, CallbackFun).
+
+fetch_multi(RecModule, QueryName, QueryParams, CallbackFun) ->
+    CallbackFun({QueryName,
+                 QueryParams,
+                 {rows_as_records, [RecModule, RecModule:record_fields()]}}).
 
 update(Rec, ActorId, CallbackFun) ->
     Mod = element(1, Rec),

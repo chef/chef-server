@@ -56,7 +56,7 @@
           revision_id,
           serialized_object,
           last_updated_by
-          }).
+         }).
 
 -record(oc_chef_policy_group_revision_association, {
           % Database fields
@@ -78,6 +78,14 @@
           policy,
           policy_revision,
           policy_group
+         }).
+
+-record(oc_chef_cookbook_artifact, {
+          id,
+          org_id,
+          name,
+          authz_id,
+          version_identifiers :: [ Identifier::binary() ]
          }).
 
 -record(oc_chef_cookbook_artifact_version, {

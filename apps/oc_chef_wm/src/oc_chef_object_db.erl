@@ -117,6 +117,12 @@ maybe_delete_authz_id_or_error(1, Object, _RequestorId)  when is_record(Object, 
                                                               is_record(Object, oc_chef_org_user_invite) ->
     %% These objects have no authz id
     ok;
+maybe_delete_authz_id_or_error({ok, 1}, #oc_chef_cookbook_artifact_version{authz_id = AuthzId}, RequestorId) ->
+    case oc_chef_cookbook_artifact:exists_by_authz_id(AuthzId) of
+        true -> ok;
+        false -> oc_chef_authz:delete_resource(RequestorId, object, AuthzId);
+        {error, _Why} = Error -> Error
+    end;
 maybe_delete_authz_id_or_error({ok, 1}, #chef_cookbook_version{}, _RequestorId) ->
     %% With status {ok, 1} we've deleted _only_ the cbv, not the cb so we leave the authz_id
     ok;

@@ -196,6 +196,10 @@
           oc_chef_cookbook_artifact_version :: #oc_chef_cookbook_artifact_version{}
          }).
 
+-record(cookbook_artifacts_state, {
+          oc_chef_cookbook_artifacts :: #oc_chef_cookbook_artifact{}
+         }).
+
 -record(data_state, {
           data_bag_name,
           data_bag_item_name,
