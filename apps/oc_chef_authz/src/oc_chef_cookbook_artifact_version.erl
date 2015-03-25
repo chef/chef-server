@@ -184,5 +184,6 @@ to_json(#oc_chef_cookbook_artifact_version{metadata = RawMetadata,
     BaseJson = ej:set({<<"metadata">>},
                       chef_db_compression:decompress_and_decode(SerializedObject),
                       chef_db_compression:decompress_and_decode(RawMetadata)),
+    JSONWithoutHacks = ej:delete({<<"json_class">>}, BaseJson),
     %% add the download URLs
-    chef_cookbook_version:annotate_with_s3_urls(BaseJson, OrgId, ExternalUrl).
+    chef_cookbook_version:annotate_with_s3_urls(JSONWithoutHacks, OrgId, ExternalUrl).

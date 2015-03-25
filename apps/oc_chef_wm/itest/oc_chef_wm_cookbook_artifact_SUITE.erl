@@ -378,7 +378,6 @@ body(Json) -> ejson:encode(Json).
       ],
       \"attributes\": [],
       \"files\": [],
-      \"json_class\": \"Chef::CookbookArtifactVersion\",
       \"providers\": [],
       \"metadata\": {
         \"dependencies\": {\"ruby\": [], \"rubygems\": []},
