@@ -230,7 +230,7 @@ fetch(ObjectRec, #context{reqid = ReqId}) ->
                       not_found |
                       {error, term()}.
 fetch_multi(RecModule, #context{reqid = ReqId}, QueryName, QueryParams) ->
-    stats_hero:ctime(ReqId, {chef_sql, fetch_multi, QueryName},
+    stats_hero:ctime(ReqId, {chef_sql, fetch_multi},
                           fun() ->
                                   chef_sql:fetch_multi(RecModule, QueryName, QueryParams)
                           end).
