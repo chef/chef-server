@@ -25,10 +25,10 @@ GIT
       omniauth (~> 1.2)
 
 GIT
-  remote: git@github.com:chef/chef-web-core
-  revision: 3512b0a0f8d099c318fdea850570e8728c86741f
+  remote: https://github.com/chef/chef-web-core.git
+  revision: 81bfcfc95a47d3a0128cf39908d36a082819a8fb
   specs:
-    chef-web-core (0.0.1)
+    chef-web-core (0.1.1)
       foundation-rails (= 5.5.1.0)
 
 GEM

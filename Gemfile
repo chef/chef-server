@@ -18,7 +18,7 @@ gem 'nokogiri', '~> 1.6.2'
 gem 'pg'
 gem 'mixlib-authentication', '~> 1.3.0'
 gem 'sentry-raven'
-gem 'chef-web-core', git: 'git@github.com:chef/chef-web-core'
+gem 'chef-web-core', git: 'https://github.com/chef/chef-web-core.git'
 gem 'responders', '~> 2.0'
 
 gem 'doorkeeper', '~> 1.4.0'
