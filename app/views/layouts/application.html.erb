@@ -14,7 +14,7 @@
       <ul class="title-area">
         <li class="name">
           <h1>
-            <%= link_to '', root_path, :class => 'logo', :data => {'tag-line' => 'oc-id'} %>
+            <%= link_to '', root_path, :class => 'logo default' %>
           </h1>
         </li>
         <li class="toggle-topbar menu-icon"><a href="#"><span></span></a></li>
@@ -44,7 +44,7 @@
   </div>
   <div class="row">
     <footer>
-      &copy; <%= Time.now.strftime('%Y') %> Chef Software, Inc.
+      &copy; <%= Time.now.year %> Chef Software, Inc.
     </footer>
   </div>
   <%= javascript_include_tag "application" %>
