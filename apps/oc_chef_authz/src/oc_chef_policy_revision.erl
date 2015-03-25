@@ -35,20 +35,20 @@
 %% chef_object behaviour callbacks
 -export([
          id/1,
-         bulk_get_query/0,
-         create_query/0,
-         delete_query/0,
+         bulk_get_query/1,
+         create_query/1,
+         delete_query/1,
          ejson_for_indexing/2,
          fields_for_fetch/1,
          fields_for_insert/1,
-         find_query/0,
-         is_indexed/0,
+         find_query/1,
+         is_indexed/1,
          list/2,
-         list_query/0,
+         list_query/1,
          name/1,
          new_record/4,
          org_id/1,
-         record_fields/0,
+         record_fields/1,
          set_created/2,
          set_updated/2,
          type_name/1,
@@ -59,7 +59,7 @@
          fields_for_update/1,
          update/2,
          update_from_ejson/2,
-         update_query/0
+         update_query/1
         ]).
 
 -mixin([{chef_object_default_callbacks, [fetch/2]}]).
@@ -120,7 +120,7 @@ update(#oc_chef_policy_revision{}, _CallbackFun) ->
 update_from_ejson(#oc_chef_policy_revision{}, _Data) ->
     error(not_implemented).
 
-update_query() ->
+update_query(_ObjectRec) ->
     error(not_implemented).
 
 id(#oc_chef_policy_revision{id = Id}) ->
@@ -135,19 +135,19 @@ org_id(#oc_chef_policy_revision{org_id = OrgId}) ->
 type_name(#oc_chef_policy_revision{}) ->
     policy.
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_policy_revision.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_policy_revision_by_id.
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_policy_revision_by_orgid_name_revision_id.
 
-list_query() ->
+list_query(_ObjectRec) ->
     list_policy_revisions_by_orgid_name.
 
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     %% TODO: do we need this?
     ok.
 
@@ -177,7 +177,7 @@ set_created(#oc_chef_policy_revision{} = Object, ActorId) ->
 set_updated(#oc_chef_policy_revision{} = Object, ActorId) ->
     Object#oc_chef_policy_revision{last_updated_by = ActorId}.
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     false.
 
 ejson_for_indexing(#oc_chef_policy_revision{}, _EjsonTerm) ->
@@ -186,11 +186,11 @@ ejson_for_indexing(#oc_chef_policy_revision{}, _EjsonTerm) ->
 fields_for_fetch(#oc_chef_policy_revision{org_id = OrgId, name = Name, revision_id = RevisionId}) ->
     [Name, OrgId, RevisionId].
 
-record_fields() ->
+record_fields(_ObjectRec) ->
     record_info(fields, oc_chef_policy_revision).
 
-list(#oc_chef_policy_revision{org_id = OrgId, name = Name}, CallbackFun) ->
-    CallbackFun({list_query(), [Name, OrgId], rows}).
+list(#oc_chef_policy_revision{org_id = OrgId, name = Name} = PR, CallbackFun) ->
+    CallbackFun({list_query(PR), [Name, OrgId], rows}).
 
 parse_binary_json(Bin) ->
     PolicyRevision = chef_json:decode_body(Bin),
@@ -223,4 +223,4 @@ delete(ObjectRec = #oc_chef_policy_revision{
                       org_id = OrgId,
                       last_updated_by = _AuthzId
                      }, CallbackFun) ->
-    CallbackFun({delete_query(), [name(ObjectRec), OrgId]}).
+    CallbackFun({delete_query(ObjectRec), [name(ObjectRec), OrgId]}).

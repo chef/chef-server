@@ -148,7 +148,8 @@ make_context() ->
                                      "-chef_reindex-",
                                      Time
                                     ]),
-    chef_db:make_context(ReqId).
+    % TODO - we will likely want to accept version asa  parameter to make_context
+    chef_db:make_context(?API_MIN_VER, ReqId).
 
 %% All object types are returned from chef_db:bulk_get/4 as
 %% binaries (compressed or not) EXCEPT for clients, which are

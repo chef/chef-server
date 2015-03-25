@@ -61,7 +61,7 @@
          bulk_get_environments/1,
 
          %% client ops
-         bulk_get_clients/1,
+         bulk_get_clients/2,
 
          %% node ops
          bulk_get_nodes/1,
@@ -114,15 +114,7 @@
 -include_lib("sqerl/include/sqerl.hrl").
 -include("../../include/chef_types.hrl").
 
--type delete_query() :: delete_cookbook_version_by_id |
-                        delete_user_by_id |
-                        delete_data_bag_by_id |
-                        delete_data_bag_item_by_id |
-                        delete_environment_by_id |
-                        delete_client_by_id |
-                        delete_node_by_id |
-                        delete_role_by_id |
-                        delete_sandbox_by_id.
+-type delete_query() :: atom().
 
 sql_now() -> calendar:now_to_universal_time(os:timestamp()).
 
@@ -247,7 +239,7 @@ bulk_get_environments(Ids) ->
 %% client ops
 %%
 
--spec bulk_get_clients([binary()]) -> {ok, [ [proplists:property()] ] | not_found} |
+-spec bulk_get_clients(api_version(), [binary()]) -> {ok, [ [proplists:property()] ] | not_found} |
                                       {error, term()}.
 %% The client table does not have a serialized_object field
 %% so we need to construct a binary JSON representation of the table
@@ -255,12 +247,12 @@ bulk_get_environments(Ids) ->
 %%
 %% Note this return a list of chef_client records, different from the other bulk_get_X
 %% calls
-bulk_get_clients(Ids) ->
+bulk_get_clients(ApiVersion, Ids) ->
     case sqerl:select(bulk_get_clients, [Ids], ?ALL(chef_client)) of
         {ok, none} ->
             {ok, not_found};
         {ok, L} when is_list(L) ->
-            {ok, L};
+            {ok, [chef_object:set_api_version(R, ApiVersion) || R <- L]};
         {error, Error} ->
             {error, Error}
     end.

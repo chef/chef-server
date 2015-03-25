@@ -14,20 +14,20 @@
 
 -export([
          authz_id/1,
-         is_indexed/0,
+         is_indexed/1,
          ejson_for_indexing/2,
          update_from_ejson/2,
          set_created/2,
          set_updated/2,
-         create_query/0,
-         update_query/0,
-         delete_query/0,
-         find_query/0,
-         list_query/0,
-         bulk_get_query/0,
+         create_query/1,
+         update_query/1,
+         delete_query/1,
+         find_query/1,
+         list_query/1,
+         bulk_get_query/1,
          fields_for_update/1,
          fields_for_fetch/1,
-         record_fields/0,
+         record_fields/1,
          list/2,
          new_record/4,
          name/1,
@@ -65,7 +65,7 @@ validation_constraints(OrgNameMatch) ->
 authz_id(#oc_chef_organization{authz_id = AuthzId}) ->
     AuthzId.
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     false.
 
 ejson_for_indexing(#oc_chef_organization{}, _EjsonTerm) ->
@@ -84,23 +84,23 @@ set_updated(#oc_chef_organization{} = Organization, ActorId) ->
     Now = chef_object_base:sql_date(now),
     Organization#oc_chef_organization{updated_at = Now, last_updated_by = ActorId}.
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_organization.
 
-update_query() ->
+update_query(_ObjectRec) ->
     update_organization_by_id.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_organization_by_id.
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_organization_by_id.
 
-list_query() ->
+list_query(_ObjectRec) ->
     list_organizations.
 
 %% Not implemented because we have no serialized json body
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     erlang:error(not_implemented).
 
 fields_for_update(#oc_chef_organization{last_updated_by = LastUpdatedBy,
@@ -113,11 +113,11 @@ fields_for_update(#oc_chef_organization{last_updated_by = LastUpdatedBy,
 fields_for_fetch(#oc_chef_organization{id = Id}) ->
     [Id].
 
-record_fields() ->
+record_fields(_ObjectRec) ->
     record_info(fields, oc_chef_organization).
 
-list(#oc_chef_organization{}, CallbackFun) ->
-    CallbackFun({list_query(), [], [name]}).
+list(#oc_chef_organization{} = Org, CallbackFun) ->
+    CallbackFun({list_query(Org), [], [name]}).
 
 parse_binary_json({Bin, OrgName}) ->
     parse_binary_json(Bin, OrgName);

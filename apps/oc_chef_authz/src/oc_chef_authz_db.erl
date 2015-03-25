@@ -24,6 +24,7 @@
 -module(oc_chef_authz_db).
 
 -include("../../include/oc_chef_types.hrl").
+-include("../../include/server_api_version.hrl").
 
 -export([container_record_to_authz_id/2,
          fetch_container/3,
@@ -31,7 +32,7 @@
          fetch_global_group_authz_id/3,
          fetch_group_authz_id/3,
          fetch_group_sql/3,
-         make_context/2,
+         make_context/3,
          statements/1
         ]).
 
@@ -306,12 +307,13 @@ statements(pgsql) ->
 -define(role_design, "roles").
 -define(user_design, "users").
 
--spec make_context(binary(), term()) -> #oc_chef_authz_context{}.
-make_context(ReqId, Darklaunch) when is_binary(ReqId) ->
+-spec make_context(api_version(), binary(), term()) -> #oc_chef_authz_context{}.
+make_context(ApiVersion, ReqId, Darklaunch) when is_binary(ReqId) ->
     Host = envy:get(oc_chef_authz, couchdb_host, string),
     Port = envy:get(oc_chef_authz, couchdb_port, pos_integer),
     S = couchbeam:server_connection(Host, Port, "", []),
-    #oc_chef_authz_context{reqid = ReqId,
+    #oc_chef_authz_context{server_api_version = ApiVersion,
+                           reqid = ReqId,
                            otto_connection = S,
                            darklaunch = Darklaunch}.
 
@@ -517,11 +519,12 @@ fetch_container_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
                                GroupName :: binary()) ->  object_id() |
                                                           {not_found, authz_group} |
                                                           {error, _}.
-fetch_group_authz_id_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
+fetch_group_authz_id_sql(#oc_chef_authz_context{server_api_version = ApiVersion, reqid = ReqId}, OrgId, Name) ->
     %% since ?FIRST uses record_info, it can't be placed within the fun.
     case stats_hero:ctime(ReqId, {chef_sql, fetch},
                           fun() ->
                                   chef_object_default_callbacks:fetch(#oc_chef_group{
+                                                    server_api_version = ApiVersion,
                                                     org_id = OrgId,
                                                     name = Name},
                                                     fun chef_sql:select_rows/1)
@@ -555,13 +558,14 @@ fetch_global_admins(#oc_chef_authz_context{otto_connection=_Server,
             fetch_group_sql(Ctx, ?GLOBAL_PLACEHOLDER_ORG_ID, GlobalGroupName)
     end.
 
-fetch_group_sql(#oc_chef_authz_context{reqid = ReqId}, OrgId, Name) ->
+fetch_group_sql(#oc_chef_authz_context{reqid = ReqId, server_api_version = ApiVersion}, OrgId, Name) ->
     case stats_hero:ctime(ReqId, {chef_sql, fetch},
                           fun() ->
                                   chef_object_default_callbacks:fetch(#oc_chef_group{
-                                                               org_id = OrgId,
-                                                               name = Name},
-                                                            fun chef_sql:select_rows/1)
+                                                                         server_api_version = ApiVersion,
+                                                                         org_id = OrgId,
+                                                                         name = Name},
+                                                                      fun chef_sql:select_rows/1)
                           end) of
         #oc_chef_group{} = Group ->
             Group;

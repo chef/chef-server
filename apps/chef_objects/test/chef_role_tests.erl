@@ -317,13 +317,14 @@ set_created_and_updated_test_() ->
       ?_assertMatch(UpdateActorId, UpdatedRole#chef_role.last_updated_by)}].
 
 query_name_test_() ->
+    Rec = #chef_role{},
     Tests = [{create_query, insert_role},
              {update_query, update_role_by_id},
              {delete_query, delete_role_by_id},
              {find_query, find_role_by_orgid_name},
              {list_query, list_roles_for_org},
              {bulk_get_query, bulk_get_roles}],
-    [ ?_assertEqual(E, chef_role:F()) || {F, E} <- Tests ].
+    [ ?_assertEqual(E, chef_role:F(Rec)) || {F, E} <- Tests ].
 
 ejson_for_indexing_test_() ->
     Role = #chef_role{name = <<"a_role">>},

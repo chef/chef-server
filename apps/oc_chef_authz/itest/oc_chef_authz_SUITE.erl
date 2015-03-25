@@ -25,6 +25,7 @@
 -include_lib("common_test/include/ct.hrl").
 -include("../../include/oc_chef_authz.hrl").
 -include("../../include/oc_chef_types.hrl").
+-include("../../include/server_api_version.hrl").
 
 -compile([export_all]).
 
@@ -47,7 +48,7 @@ end_per_suite(Config) ->
 fetch_container_sql(_Config) ->
     ContainerName = <<"nodes">>,
     ReqId = <<"test-1-req-id">>,
-    Ctx = oc_chef_authz:make_context(ReqId, darklaunch_stub),
+    Ctx = oc_chef_authz:make_context(?API_MIN_VER, ReqId, darklaunch_stub),
     case oc_chef_authz_db:fetch_container_sql(Ctx, ?ORG_ID, ContainerName) of
         #chef_container{name = <<"nodes">>} = C ->
             ct:pal("Found container: ~p", [C]),

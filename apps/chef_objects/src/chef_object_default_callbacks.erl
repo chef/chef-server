@@ -27,12 +27,12 @@
 
 fetch(Rec, CallbackFun) ->
     Mod = element(1, Rec),
-    CallbackFun({Mod:find_query(), Mod:fields_for_fetch(Rec),
-                 {first_as_record, [Mod, Mod:record_fields()]}}).
+    CallbackFun({Mod:find_query(Rec), Mod:fields_for_fetch(Rec),
+                 {first_as_record, [Mod, Mod:record_fields(Rec)]}}).
 
 update(Rec, CallbackFun) ->
     Mod = element(1, Rec),
-    CallbackFun({Mod:update_query(), Mod:fields_for_update(Rec)}).
+    CallbackFun({Mod:update_query(Rec), Mod:fields_for_update(Rec)}).
 
 fields_for_insert(Rec) ->
     [_RecName, _ApiVersion|Tail] = tuple_to_list(Rec),
@@ -46,7 +46,7 @@ fields_for_insert(Rec) ->
 
 delete(Rec, CallbackFun) ->
     Mod = element(1, Rec),
-    QueryName = Mod:delete_query(),
+    QueryName = Mod:delete_query(Rec),
     Id = Mod:id(Rec),
     CallbackFun({QueryName, [Id]}).
 

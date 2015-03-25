@@ -39,7 +39,7 @@
          fields_for_insert/1,
          fields_for_fetch/1,
          id/1,
-         is_indexed/0,
+         is_indexed/1,
          minimal_cookbook_ejson/2,
          name/1,
          org_id/1,
@@ -47,7 +47,7 @@
          parse_binary_json/2,
          parse_version/1,
          qualified_recipe_names/2,
-         record_fields/0,
+         record_fields/1,
          set_created/2,
          set_updated/2,
          type_name/1,
@@ -58,12 +58,12 @@
 
 %% database named queries
 -export([
-         bulk_get_query/0,
-         create_query/0,
-         delete_query/0,
-         find_query/0,
-         list_query/0,
-         update_query/0
+         bulk_get_query/1,
+         create_query/1,
+         delete_query/1,
+         find_query/1,
+         list_query/1,
+         update_query/1
         ]).
 
 -mixin([{chef_object_default_callbacks, [ fetch/2, update/2 ]}]).
@@ -570,22 +570,22 @@ maybe_qualify_name(CookbookName, RecipeName) ->
             <<CookbookName/binary, "::", StrippedName/binary>>
     end.
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_cookbook_version.
 
-update_query() ->
+update_query(_ObjectRec) ->
     update_cookbook_version.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_cookbook_version_by_id.
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_cookbook_version_by_orgid_name_version.
 
-list_query() ->
+list_query(_ObjectRec) ->
     list_cookbook_versions_by_orgid.
 
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     error(not_implemented).
 
 update_from_ejson(#chef_cookbook_version{server_api_version = ApiVersion,
@@ -604,7 +604,7 @@ update_from_ejson(#chef_cookbook_version{server_api_version = ApiVersion,
                                           checksums         = UpdatedVersion#chef_cookbook_version.checksums,
                                           serialized_object = UpdatedVersion#chef_cookbook_version.serialized_object}.
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     false.
 
 ejson_for_indexing(#chef_cookbook_version{}, _CBV) ->
@@ -660,8 +660,9 @@ fields_for_fetch(#chef_cookbook_version{org_id = OrgId,
                                         patch = Patch}) ->
     [OrgId, Name, Major, Minor, Patch].
 
-record_fields() ->
+record_fields(_ObjectRec) ->
     record_info(fields, chef_cookbook_version).
+
 -spec(list(#chef_cookbook_version{}, chef_object:select_callback()) -> chef_object:select_return()).
-list(#chef_cookbook_version{org_id = OrgId}, CallbackFun) ->
-    CallbackFun({list_query(), [OrgId], [name]}).
+list(#chef_cookbook_version{org_id = OrgId} = CBV, CallbackFun) ->
+    CallbackFun({list_query(CBV), [OrgId], [name]}).

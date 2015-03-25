@@ -29,12 +29,12 @@
          fields_for_fetch/1,
          fields_for_update/1,
          id/1,
-         is_indexed/0,
+         is_indexed/1,
          name/1,
          org_id/1,
          new_record/4,
          parse_binary_json/2,
-         record_fields/0,
+         record_fields/1,
          set_created/2,
          set_updated/2,
          type_name/1,
@@ -44,12 +44,12 @@
 
 %% database named queries
 -export([
-         bulk_get_query/0,
-         create_query/0,
-         delete_query/0,
-         find_query/0,
-         list_query/0,
-         update_query/0
+         bulk_get_query/1,
+         create_query/1,
+         delete_query/1,
+         find_query/1,
+         list_query/1,
+         update_query/1
         ]).
 
 -mixin([{chef_object_default_callbacks, [ fetch/2, update/2 ]}]).
@@ -104,7 +104,7 @@ new_record(ApiVersion, OrgId, AuthzId, Name) ->
 authz_id(#chef_data_bag{authz_id = AuthzId}) ->
     AuthzId.
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     false.
 
 ejson_for_indexing(#chef_data_bag{}, _Name) ->
@@ -124,22 +124,22 @@ set_updated(#chef_data_bag{} = Object, ActorId) ->
     Now = chef_object_base:sql_date(now),
     Object#chef_data_bag{updated_at = Now, last_updated_by = ActorId}.
 
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     error(not_implemented).
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_data_bag.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_data_bag_by_id.
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_data_bag_by_orgid_name.
 
-update_query() ->
+update_query(_ObjectRec) ->
     udpate_data_bag_by_id.
 
-list_query() ->
+list_query(_ObjectRec) ->
     list_data_bags_for_org.
 
 fields_for_update(_Rec) ->
@@ -149,7 +149,7 @@ fields_for_fetch(#chef_data_bag{org_id = OrgId,
                                 name = Name}) ->
     [OrgId, Name].
 
-record_fields() ->
+record_fields(_ObjectRec) ->
     record_info(fields, chef_data_bag).
 
 %% @doc Convert a binary JSON string representing a Chef data_bag into an EJson-encoded
@@ -172,6 +172,6 @@ validate_data_bag(DataBag) ->
             throw(Bad)
     end.
 -spec(list(#chef_data_bag{}, chef_object:select_callback()) -> chef_object:select_return()).
-list(#chef_data_bag{org_id = OrgId}, CallbackFun) ->
-    CallbackFun({list_query(), [OrgId], [name]}).
+list(#chef_data_bag{org_id = OrgId} = DB, CallbackFun) ->
+    CallbackFun({list_query(DB), [OrgId], [name]}).
 

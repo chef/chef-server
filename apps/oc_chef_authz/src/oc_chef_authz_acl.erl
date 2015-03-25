@@ -24,7 +24,8 @@
 -define(DEFAULT_HEADERS, []).
 
 % For getting out the ReqId for stats_hero: (not necessary once fetch_id is fixed for groups)
--record(context, {reqid :: binary(),
+-record(context, {server_api_version,
+                  reqid :: binary(),
                   otto_connection,
                   darklaunch = undefined}).
 
@@ -90,7 +91,7 @@ fetch_id(role, DbContext, Name, OrgId) ->
         #chef_role{authz_id = AuthzId} ->
             AuthzId
     end;
-fetch_id(group, #context{reqid = ReqId}, Name, OrgId) ->
+fetch_id(group, #context{server_api_version = ApiVersion, reqid = ReqId}, Name, OrgId) ->
     % Yes, this is ugly, but functionally it's identical to the internal logic
     % of a regular group fetch, minus expanding the group members and such.
     % And the regular group fetch was breaking for some reason I couldn't
@@ -98,9 +99,10 @@ fetch_id(group, #context{reqid = ReqId}, Name, OrgId) ->
     % extra requests
     case stats_hero:ctime(ReqId, {chef_sql, fetch},
                           fun() ->
-                                  chef_object_default_callbacks:fetch(#oc_chef_group{org_id = OrgId,
-                                                                           name = Name},
-                                                            fun chef_sql:select_rows/1)
+                                  chef_object_default_callbacks:fetch(#oc_chef_group{server_api_version = ApiVersion,
+                                                                                     org_id = OrgId,
+                                                                                     name = Name},
+                                                                      fun chef_sql:select_rows/1)
                           end) of
         not_found ->
             not_found;

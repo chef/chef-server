@@ -21,7 +21,8 @@
 %%
 
 -record(oc_chef_authz_context,
-        {reqid :: binary(),
+        {server_api_version,
+         reqid :: binary(),
          otto_connection :: couchbeam:server(),
          darklaunch :: term()}).
 

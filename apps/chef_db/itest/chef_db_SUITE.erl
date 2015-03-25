@@ -66,6 +66,7 @@ start_server(Config) ->
     application:set_env(chef_db, bulk_fetch_batch_size, 2),
     application:set_env(chef_db, couchdb_host, "localhost"),
     application:set_env(chef_db, couchdb_port, chef_test_suite_helper:random_bogus_port()),
+    ct:pal("**** I AM HERE 3"),
     [ {ok, _} = application:ensure_all_started(App) || App <- needed_apps() ],
     Config.
 

@@ -29,9 +29,6 @@
                  users = [],
                  groups = []}).
 
-%-ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
-%-endif.
 
 -define(CONTAINERS, [clients, containers, cookbooks, data, environments,
                      groups, nodes, roles, sandboxes, policies, policy_groups,

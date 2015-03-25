@@ -129,7 +129,7 @@ base_init_per_suite(Config0) ->
     Config1 = chef_test_db_helper:start_db(Config0, ?TEST_DB_NAME),
     Config2 = start_server(Config1),
 
-    FakeContext = chef_db:make_context(<<"fake-req-id">>),
+    FakeContext = chef_db:make_context(?API_MIN_VER, <<"fake-req-id">>),
     OrganizationRecord = chef_object:new_record(oc_chef_organization,
                                                 ?API_MIN_VER,
                                                 nil,

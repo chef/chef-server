@@ -35,13 +35,13 @@
          org_id/1,
          type_name/1,
          authz_id/1,
-         create_query/0,
-         update_query/0,
-         delete_query/0,
-         find_query/0,
-         list_query/0,
-         bulk_get_query/0,
-         is_indexed/0,
+         create_query/1,
+         update_query/1,
+         delete_query/1,
+         find_query/1,
+         list_query/1,
+         bulk_get_query/1,
+         is_indexed/1,
          ejson_for_indexing/2,
          update_from_ejson/2,
          new_record/4,
@@ -51,7 +51,7 @@
          fields_for_update/1,
          update/2,
          list/2,
-         record_fields/0,
+         record_fields/1,
          fields_for_insert/1]).
 
 -export([parse_binary_json/1,
@@ -72,26 +72,26 @@ type_name(#oc_chef_cookbook_artifact_version{}) ->
 authz_id(#oc_chef_cookbook_artifact_version{authz_id = AuthzId}) ->
     AuthzId.
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_cookbook_artifact_version.
 
-update_query() ->
+update_query(_ObjectRec) ->
     %% we never update a cookbook artifact version
     erlang:error(not_supported).
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_cookbook_artifact_version_by_id.
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_cookbook_artifact_version_by_org_name_identifier.
 
-list_query() ->
+list_query(_ObjectRec) ->
     erlang:error(not_supported).
 
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     erlang:error(not_supported).
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     %% TODO: we propably want this to be true?
     false.
 
@@ -143,7 +143,7 @@ fields_for_fetch(#oc_chef_cookbook_artifact_version{org_id = OrgId,
 list(#oc_chef_cookbook_artifact_version{}, _CallbackFun) ->
     erlang:error(not_supported).
 
-record_fields() ->
+record_fields(_ObjectRec) ->
     record_info(fields, oc_chef_cookbook_artifact_version).
 
 update(#oc_chef_cookbook_artifact_version{}, _CallbackFun) ->

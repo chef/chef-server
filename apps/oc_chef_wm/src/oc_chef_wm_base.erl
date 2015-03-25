@@ -65,30 +65,60 @@
 
 %% @doc Determines if service is available.
 %%
-%% Also initializes chef_db_context and reqid fields of base_state.
-%% And handle other base_state init that depends on `Req'.
-service_available(Req, State) ->
-    State0 = set_req_contexts(Req, State),
-    State1 = maybe_with_default_org(Req, State0),
-    spawn_stats_hero_worker(Req, State1),
-    {_GetHeader, State2} = chef_wm_util:get_header_fun(Req, State1),
-    case server_api_version(Req, State2,  wrq:get_req_header("X-Ops-Server-API-Version", Req)) of
-        #base_state{} = State3 ->
-            {true, Req, State3};
-        ErrorResponse ->
-            ErrorResponse
+%% Spawn a stats hero worker for this request,
+%% and initialize all components of base state that depend on Req:
+%%  reqid, db context and authz context, api version. db/oc_chef_db
+service_available(Req, #base_state{reqid_header_name = HeaderName} = State) ->
+    ReqId = read_req_id(HeaderName, Req),
+    State0 = State#base_state{reqid = ReqId},
+    % Ensure worker is started so that no matter what happens next, we
+    % can properly finish_request with any stats capture
+    spawn_stats_hero_worker(Req, State0),
+    case server_api_version(wrq:get_req_header("X-Ops-Server-API-Version", Req)) of
+        {error, RequestedVersion} ->
+            invalid_server_api_version_response(Req, State0, RequestedVersion);
+        Version ->
+            State1 = State0#base_state{server_api_version = Version},
+            State2 = set_req_contexts(Req, State1),
+            State3 = maybe_with_default_org(Req, State2),
+            {true, Req, State3}
     end.
 
-set_req_contexts(Req, #base_state{reqid_header_name = HeaderName} = State) ->
-    ReqId = read_req_id(HeaderName, Req),
+
+%% @doc Validate the requested X-Ops-Server-API-Version value and populate base_state,
+%% and reply with it as or reply with error if it's not valid.
+-spec server_api_version(undefined|string()) -> api_version().
+server_api_version(undefined) ->
+    ?API_MIN_VER;
+server_api_version(RequestedVersion) ->
+    try list_to_integer(RequestedVersion) of
+        Version when Version < ?API_MIN_VER orelse
+                     Version > ?API_MAX_VER  ->
+            {error, RequestedVersion};
+        Version ->
+            Version
+    catch
+        error:badarg ->
+            {error, RequestedVersion}
+    end.
+
+invalid_server_api_version_response(Req, State, RequestedVersion) ->
+    LogMsg = {invalid_server_api_version_requested, RequestedVersion},
+    Message = iolist_to_binary([ <<"Specified version ">>, RequestedVersion, <<" not supported">>]),
+    Req2 = chef_wm_util:set_json_body(Req, {[{<<"error">>, <<"invalid-x-ops-server-api-version">>},
+                                             {<<"message">>, Message},
+                                             {<<"min_version">>, ?API_MIN_VER},
+                                             {<<"max_version">>, ?API_MAX_VER}]}),
+    {{halt, 406}, Req2, State#base_state{darklaunch = no_header, log_msg = LogMsg}}.
+
+set_req_contexts(Req, #base_state{reqid = ReqId, server_api_version = ApiVersion} = State) ->
     {GetHeader, State1} = chef_wm_util:get_header_fun(Req, State),
     Darklaunch = xdarklaunch_req:parse_header(GetHeader),
-    AuthzContext = oc_chef_authz:make_context(ReqId, Darklaunch),
-    DbContext = chef_db:make_context(ReqId, Darklaunch),
+    DbContext = chef_db:make_context(ApiVersion, ReqId, Darklaunch),
+    AuthzContext = oc_chef_authz:make_context(ApiVersion, ReqId, Darklaunch),
     State1#base_state{chef_authz_context = AuthzContext,
-                     chef_db_context = DbContext,
-                     darklaunch = Darklaunch,
-                     reqid = ReqId}.
+                      chef_db_context = DbContext,
+                      darklaunch = Darklaunch}.
 
 
 content_types_accepted(Req, State) ->
@@ -389,8 +419,7 @@ authorized_by_org_membership_check(Req, #base_state{requestor=#chef_requestor{ty
     {true, Req, State};
 authorized_by_org_membership_check(Req, #base_state{organization_name = undefined} = State) ->
     {true, Req, State};
-authorized_by_org_membership_check(Req, State = #base_state{organization_name = OrgName,
-                                                            chef_db_context = DbContext}) ->
+authorized_by_org_membership_check(Req, #base_state{organization_name = OrgName, chef_db_context = DbContext} = State) ->
     {UserName, BypassesChecks} = get_user(Req, State#base_state{superuser_bypasses_checks = true}),
     case BypassesChecks of
         true -> {true, Req, State};
@@ -466,8 +495,7 @@ spawn_stats_hero_worker(Req, #base_state{resource_mod = Mod,
         {ok, _} ->
             ok;
         {error, Reason} ->
-            lager:error("FAILED stats_hero_worker_sup:new_worker: ~p~n",
-                                   [Reason]),
+            lager:error("FAILED stats_hero_worker_sup:new_worker: ~p~n", [Reason]),
             ok
     end.
 
@@ -543,9 +571,8 @@ set_authz_id(Id, #user_state{} = U, user) ->
                            State :: #base_state{}) ->
                                   ok | {error, {[any(),...]}}.
 check_cookbook_authz(Cookbooks, _Req, #base_state{reqid = ReqId,
-                                                        requestor_id = RequestorId}) ->
-    Resources = [{AuthzId, Name}
-                 || #chef_cookbook_version{name = Name, authz_id = AuthzId} <- Cookbooks],
+                                                  requestor_id = RequestorId}) ->
+    Resources = [{AuthzId, Name} || #chef_cookbook_version{name = Name, authz_id = AuthzId} <- Cookbooks],
     case ?SH_TIME(ReqId, oc_chef_authz, bulk_actor_is_authorized, (ReqId, RequestorId, object, Resources, read)) of
         true -> ok;
         {error, Why} ->
@@ -821,32 +848,6 @@ api_info_header_value(#base_state{}=State) ->
 %% information (more useful for debugging purposes).
 add_api_info_header(Req, State) ->
     wrq:set_resp_header("X-Ops-API-Info", api_info_header_value(State), Req).
-
-%% @doc Validate the requested X-Ops-Server-API-Version value and populate base_state,
-%% or fail with a 406 if it's not supported. Replies with base_state on success.
-server_api_version(_Req, State, undefined) ->
-    State#base_state{server_api_version = ?API_MIN_VER};
-server_api_version(Req, State, RequestedVersion) ->
-    try list_to_integer(RequestedVersion) of
-        Version when Version < ?API_MIN_VER ->
-            invalid_server_api_version_response(Req, State, RequestedVersion);
-        Version when Version > ?API_MAX_VER ->
-            invalid_server_api_version_response(Req, State, RequestedVersion);
-        Version ->
-            State#base_state{server_api_version = Version}
-    catch
-        error:badarg ->
-            invalid_server_api_version_response(Req, State, RequestedVersion)
-    end.
-
-invalid_server_api_version_response(Req, State, RequestedVersion) ->
-    LogMsg = {invalid_server_api_version_requested, RequestedVersion},
-    Req2 = chef_wm_util:set_json_body(Req, {[{<<"error">>, <<"invalid-x-ops-server-api-version">>},
-                                             {<<"message">>, iolist_to_binary([ <<"Specified version ">>, RequestedVersion, <<" not supported">>])},
-                                             {<<"min_version">>, ?API_MIN_VER},
-                                             {<<"max_version">>, ?API_MAX_VER}]}),
-    {{halt, 406}, Req2, State#base_state{log_msg = LogMsg}}.
-
 
 -spec verify_request_signature(#wm_reqdata{}, #base_state{}) ->
                                       {boolean(), #wm_reqdata{}, #base_state{}}.
@@ -1169,7 +1170,7 @@ authz_id(#chef_user{authz_id = AuthzId}) -> AuthzId.
 
 %% @doc Webmachine content producing callback (that can be wired into
 %% content_types_provided) that returns a JSON map of object names to object URLs. This
-%% leverages the `chef_object' behavior and relies upon a stub object record with `org_id'
+%% leverages the `chef_object' behavior and relies upon a stub object record
 %% being present in `State#base_state.resource_state'.
 %%
 %% Note that since this module provides {@link content_types_provided/2} with a hard-coded

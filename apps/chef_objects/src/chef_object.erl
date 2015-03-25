@@ -37,22 +37,23 @@
 
 
 -callback authz_id(object_rec()) -> object_id() | undefined.
--callback is_indexed() -> boolean().
+-callback is_indexed(object_rec()) -> boolean().
 -callback ejson_for_indexing(object_rec(), ejson_term()) -> ejson_term().
 -callback update_from_ejson(object_rec(), any()) -> object_rec().
 
 -callback set_created(object_rec(), object_id()) -> object_rec().
 -callback set_updated(object_rec(), object_id()) -> object_rec().
 
--callback create_query() -> atom().
--callback update_query() -> atom().
--callback delete_query() -> atom().
--callback find_query() -> atom().
--callback bulk_get_query() -> atom().
+-callback create_query(object_rec()) -> atom().
+-callback update_query(object_rec()) -> atom().
+-callback delete_query(object_rec()) -> atom().
+-callback find_query(object_rec()) -> atom().
+-callback bulk_get_query(object_rec()) -> atom().
+-callback list_query(object_rec()) -> atom().
 
 -callback fields_for_update(object_rec()) -> list().
 -callback fields_for_fetch(object_rec()) -> list().
--callback record_fields() -> list(atom()).
+-callback record_fields(object_rec()) -> list(atom()).
 -callback list(object_rec(), select_callback()) -> select_return().
 -callback fetch(object_rec(), select_callback()) -> select_return().
 -callback update(object_rec(), select_callback()) -> update_return().
@@ -62,19 +63,11 @@
                      ObjectEjson :: ejson_term() |
                                     binary() |
                                     {binary(), ejson_term()} |
-                                    {ejson_term(), _}) ->
-    object_rec().
-
--callback name(object_rec()) ->
-    binary() | {binary(), binary()}.
-
--callback id(object_rec()) ->
-    object_id().
-
+                                    {ejson_term(), _}) -> object_rec().
+-callback name(object_rec()) -> binary() | {binary(), binary()}.
+-callback id(object_rec()) -> object_id().
 -callback org_id(object_rec()) -> object_id() | undefined.
-
--callback type_name(object_rec()) ->
-    atom().
+-callback type_name(object_rec()) -> atom().
 
 -export([
          authz_id/1,
@@ -104,7 +97,9 @@
          fetch/2,
          fetch_multi/4,
          update/3,
-         delete/2
+         delete/2,
+
+         set_api_version/2
         ]).
 
 -export_type([
@@ -177,22 +172,22 @@ set_created(Rec, ActorId) ->
 
 -spec record_fields(object_rec()) -> list(atom()).
 record_fields(Rec) ->
-    call0(Rec, record_fields).
+    call(Rec, record_fields).
 
 create_query(Rec) ->
-    call0(Rec, create_query).
+    call(Rec, create_query).
 
 update_query(Rec) ->
-    call0(Rec, update_query).
+    call(Rec, update_query).
 
 delete_query(Rec) ->
-    call0(Rec, delete_query).
+    call(Rec, delete_query).
 
 find_query(Rec) ->
-    call0(Rec, find_query).
+    call(Rec, find_query).
 
 bulk_get_query(Rec) ->
-    call0(Rec, bulk_get_query).
+    call(Rec, bulk_get_query).
 
 fields_for_update(Rec) ->
     call(Rec, fields_for_update).
@@ -201,7 +196,7 @@ fields_for_fetch(Rec) ->
     call(Rec, fields_for_fetch).
 
 is_indexed(Rec) ->
-    call0(Rec, is_indexed).
+    call(Rec, is_indexed).
 
 -spec list(Rec:: object_rec(), CallbackFun :: select_callback()) ->
                   select_return().
@@ -229,10 +224,6 @@ call(Rec, Fun) ->
     Mod = element(1, Rec),
     Mod:Fun(Rec).
 
-call0(Rec, Fun) ->
-    Mod = element(1, Rec),
-    Mod:Fun().
-
 
 fields_for_insert(ObjectRec) ->
     call_if_exported(ObjectRec, fields_for_insert, [ObjectRec],
@@ -247,4 +238,12 @@ call_if_exported(ObjectRec, FunName, Args, DefaultFun) ->
             erlang:apply(DefaultFun, Args)
     end.
 
-
+set_api_version(Record, ApiVersion) when is_tuple(Record) ->
+    case erlang:tuple_to_list(Record) of
+        [Type, undefined | Rest] ->
+            erlang:list_to_tuple([Type, ApiVersion | Rest]);
+        _ ->
+            Record
+    end;
+set_api_version(NotRecord, _ApiVersion) ->
+    NotRecord.

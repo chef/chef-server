@@ -626,7 +626,7 @@ decoded_response_body({_, _, _, Body}) ->
     chef_json:decode(Body).
 
 context() ->
-    chef_db:make_context(<<"AB">>).
+    chef_db:make_context(?API_MIN_VER, <<"AB">>).
 
 client_id(Config, Name) ->
     OrgId = proplists:get_value(org_id, Config),
@@ -698,7 +698,6 @@ new_key_ejson(Config, Name, Expiration) ->
     new_key_ejson(Config, Name, Expiration, pubkey).
 new_key_ejson(Config, Name, Expiration, Key) ->
     PubKey = proplists:get_value(Key, Config),
-    ct:pal("PubKey ~p~n", [PubKey]),
     {[{<<"name">>, Name}, {<<"public_key">>, PubKey}, {<<"expiration_date">>, Expiration}]}.
 
 default_requestor(client) ->

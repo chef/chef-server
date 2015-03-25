@@ -27,7 +27,7 @@
 -behaviour(chef_object).
 
 -export([authz_id/1,
-         is_indexed/0,
+         is_indexed/1,
          ejson_for_indexing/2,
          update_from_ejson/2,
          set_created/2,
@@ -35,7 +35,7 @@
          fields_for_fetch/1,
          ejson_from_list/2,
          ejson_from_key/1,
-         record_fields/0,
+         record_fields/1,
          list/2,
          set_updated/2,
          new_record/4,
@@ -50,12 +50,12 @@
 
 %% database named queries
 -export([
-         create_query/0,
-         update_query/0,
-         delete_query/0,
-         find_query/0,
-         bulk_get_query/0,
-         list_query/0
+         create_query/1,
+         update_query/1,
+         delete_query/1,
+         find_query/1,
+         bulk_get_query/1,
+         list_query/1
         ]).
 
 -mixin([{chef_object_default_callbacks, [fetch/2, update/2]}]).
@@ -67,7 +67,7 @@
 authz_id(#chef_key{}) ->
     undefined.
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     false.
 
 ejson_for_indexing(#chef_key{}, _) ->
@@ -113,7 +113,7 @@ fields_for_update(#chef_key{id = Id, key_name = NewName, old_name = OldName,
 fields_for_fetch(#chef_key{id = Id, key_name = KeyName}) ->
   [Id, KeyName].
 
-record_fields() ->
+record_fields(_ObjectRec) ->
   record_info(fields, chef_key).
 
 ejson_from_list(KeysList, URIDecorator) ->
@@ -130,10 +130,10 @@ ejson_from_key(#chef_key{key_name = Name, public_key = PublicKey, expires_at = N
       {<<"public_key">>, PublicKey},
       {<<"expiration_date">>, ExpirationDate}]}.
 
-list(#chef_key{id = Id}, CallbackFun) when is_binary(Id) ->
-    CallbackFun({list_query(), [Id], rows}).
+list(#chef_key{id = Id} = Key, CallbackFun) when is_binary(Id) ->
+    CallbackFun({list_query(Key), [Id], rows}).
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_key_by_id_and_name.
 
 new_record(ApiVersion, _OrgId, _AuthzId, {Id, KeyData}) ->
@@ -165,10 +165,10 @@ org_id(#chef_key{}) ->
 type_name(#chef_key{}) ->
     key.
 
-list_query() ->
+list_query(_ObjectRec) ->
     list_keys_for_actor.
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_key_for_actor.
 
 parse_binary_json(Bin, update) ->
@@ -197,14 +197,14 @@ name_and_public_key_validation_spec(Req) ->
   {[ chef_object_base:public_key_spec(Req),
      {{Req, <<"name">>}, {string_match, chef_regex:regex_for(key_name)}} ]}.
 
-update_query() ->
+update_query(_ObjectRec) ->
   update_key_by_id_and_name.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
   delete_key_by_id_and_name.
 
-delete(#chef_key{id = Id, key_name = Name}, CallbackFun) ->
-    CallbackFun({delete_query(), [Id, Name]}).
+delete(#chef_key{id = Id, key_name = Name} = Rec, CallbackFun) ->
+    CallbackFun({delete_query(Rec), [Id, Name]}).
 
 fields_for_insert(#chef_key{id = Id, key_name = KeyName,
                            public_key = PublicKey, key_version = KeyVersion,
@@ -213,5 +213,5 @@ fields_for_insert(#chef_key{id = Id, key_name = KeyName,
     [Id, KeyName, PublicKey, KeyVersion, ExpiresAt,
      LastUpdatedBy, CreatedAt, UpdatedAt].
 
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     error(unsupported).

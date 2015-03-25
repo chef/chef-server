@@ -19,6 +19,7 @@
 -module(chef_db_tests).
 
 -include_lib("eunit/include/eunit.hrl").
+
 -include("../../include/chef_types.hrl").
 
 -define(REQ_ID, <<"req-id-123">>).
@@ -47,7 +48,8 @@ fetch_requestor_test_() ->
                %%meck:expect(chef_otto, fetch_org_id,
                %%            fun(_, <<"mock-org">>) -> <<"mock-org-id-123">> end),
 
-               User = #chef_user{id = <<"a1">>,
+               User = #chef_user{server_api_version = ?API_MIN_VER,
+                                 id = <<"a1">>,
                                  authz_id = <<"b2">>,
                                  username = <<"alice">>,
                                  public_key = <<"key data">>,
@@ -62,7 +64,7 @@ fetch_requestor_test_() ->
                            fun(#chef_client{org_id = <<"mock-org-id-123">>, name =  <<"alice">>}) -> not_found; % client_fetch
                               (#chef_user{username = <<"alice">>}) -> User                                % user fetch
                            end),
-               Context = chef_db:make_context(<<"req-id-123">>),
+               Context = chef_db:make_context(?API_MIN_VER, <<"req-id-123">>),
                Got = chef_db:fetch_requestor(Context, <<"mock-org-id-123">>, <<"alice">>),
                ?assertEqual(Got, User),
                Stats = stats_hero:snapshot(<<"req-id-123">>, all),
@@ -82,7 +84,8 @@ fetch_requestor_test_() ->
                %%            fun(_, <<"mock-org">>) ->
                %%                    <<"mock-org-id-123">>
                %%            end),
-               Client = #chef_client{id = <<"mock-client-id">>,
+               Client = #chef_client{server_api_version = ?API_MIN_VER,
+                                     id = <<"mock-client-id">>,
                                      authz_id = <<"mock-client-authz-id">>,
                                      org_id = <<"org-id-123">>,
                                      name = <<"alice">>,
@@ -92,7 +95,7 @@ fetch_requestor_test_() ->
                            fun(#chef_user{username = <<"alice">>}) -> not_found;
                               (#chef_client{org_id = <<"mock-org-id-123">>, name = <<"alice">>}) -> Client
                            end),
-               Context = chef_db:make_context(<<"req-id-123">>),
+               Context = chef_db:make_context(?API_MIN_VER, <<"req-id-123">>),
                Got = chef_db:fetch_requestor(Context, <<"mock-org-id-123">>, <<"alice">>),
                ?assertEqual(Got, Client)
        end
@@ -106,7 +109,8 @@ fetch_requestor_test_() ->
                %%             end),
                meck:expect(chef_db_darklaunch, is_enabled,
                            fun(<<"sql_users">>, _) -> true end),
-               Client = #chef_client{id = <<"mock-client-id">>,
+               Client = #chef_client{server_api_version = ?API_MIN_VER,
+                                     id = <<"mock-client-id">>,
                                      authz_id = <<"mock-client-authz-id">>,
                                      org_id = <<"org-id-123">>,
                                      name = <<"alice">>,
@@ -116,7 +120,7 @@ fetch_requestor_test_() ->
                            fun(#chef_user{username = <<"alice">>}) -> not_found;
                               (#chef_client{org_id = <<"mock-org-id-123">>, name = <<"alice">>}) -> Client
                            end),
-               Context = chef_db:make_context(<<"req-id-123">>),
+               Context = chef_db:make_context(?API_MIN_VER, <<"req-id-123">>),
                Got = chef_db:fetch_requestor(Context, <<"mock-org-id-123">>, <<"alice">>),
                ?assertEqual(Got, Client),
                Stats = stats_hero:snapshot(<<"req-id-123">>, all),
@@ -157,7 +161,7 @@ fetch_cookbook_versions_test_() ->
              SqlOutput = [[ ]],
              meck:expect(chef_sql, fetch_cookbook_versions,
                          fun(_) -> {ok, SqlOutput} end),
-             Ctx = chef_db:make_context(<<"req-id-123">>),
+             Ctx = chef_db:make_context(?API_MIN_VER, <<"req-id-123">>),
              ?assertEqual(SqlOutput, chef_db:fetch_cookbook_versions(Ctx, <<"mock-org">>))
          end},
       {"fetch_cookbook_versions collects stats_hero metrics",
@@ -165,7 +169,7 @@ fetch_cookbook_versions_test_() ->
              SqlOutput = [[ ]],
              meck:expect(chef_sql, fetch_cookbook_versions,
                          fun(_) -> {ok, SqlOutput} end),
-             Ctx = chef_db:make_context(<<"req-id-123">>),
+             Ctx = chef_db:make_context(?API_MIN_VER, <<"req-id-123">>),
              SqlOutput = chef_db:fetch_cookbook_versions(Ctx, <<"mock-org">>),
              Stats = stats_hero:snapshot(<<"req-id-123">>, all),
              ExpectKeys = [<<"req_time">>,
@@ -185,21 +189,21 @@ fetch_cookbook_versions_test_() ->
              SqlOutput = [[ <<"foo">>, {1, 2, 3} ]],
              meck:expect(chef_sql, fetch_cookbook_versions,
                          fun(_) -> {ok, SqlOutput} end),
-             Ctx = chef_db:make_context(<<"req-id-123">>),
+             Ctx = chef_db:make_context(?API_MIN_VER, <<"req-id-123">>),
              ?assertEqual(SqlOutput, chef_db:fetch_cookbook_versions(Ctx, <<"mock-org">>))
          end},
        {"fetch_cookbook_versions handles errors",
          fun() ->
              meck:expect(chef_sql, fetch_cookbook_versions,
                          fun(_) -> {error, internal_error} end),
-             Ctx = chef_db:make_context(<<"req-id-123">>),
+             Ctx = chef_db:make_context(?API_MIN_VER, <<"req-id-123">>),
              ?assertEqual({error, internal_error}, chef_db:fetch_cookbook_versions(Ctx, <<"mock-org">>))
          end},
        {"fetch_cookbook_versions handles errors",
          fun() ->
              meck:expect(chef_sql, fetch_cookbook_versions,
                          fun(_) -> {error, internal_error} end),
-             Ctx = chef_db:make_context(<<"req-id-123">>),
+             Ctx = chef_db:make_context(?API_MIN_VER, <<"req-id-123">>),
              ?assertEqual({error, internal_error}, chef_db:fetch_cookbook_versions(Ctx, <<"mock-org">>))
          end}
      ]

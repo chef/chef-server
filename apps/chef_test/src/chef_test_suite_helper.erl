@@ -169,7 +169,7 @@ other_org_name() ->
     ?OTHER_ORG_NAME.
 
 context() ->
-    chef_db:make_context(<<"AB">>).
+    chef_db:make_context(?API_MIN_VER, <<"AB">>).
 
 the_org_id() ->
     make_id(<<"aa1">>).
@@ -181,32 +181,46 @@ other_org_id() ->
 %% Common database queries
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-create_record(Record) ->
+create_record(Record0) ->
+    Record = chef_object:set_api_version(Record0, ?API_MIN_VER),
     Query = chef_object:create_query(Record),
     FieldsForInsert = chef_object:fields_for_insert(Record),
     chef_sql:create_object(Query, FieldsForInsert).
 
-fetch_record(Record) ->
-    chef_sql:fetch_object(
+fetch_record(Record0) ->
+    Record = chef_object:set_api_version(Record0, ?API_MIN_VER),
+    Result = chef_sql:fetch_object(
       chef_object:fields_for_fetch(Record),
       element(1, Record),
       chef_object:find_query(Record),
       chef_object:record_fields(Record)
-     ).
+     ),
+    case Result of
+        {ok, OutRecord} when is_tuple(OutRecord) ->
+            Final = chef_object:set_api_version(OutRecord, ?API_MIN_VER),
+            {ok, Final};
+        _ ->
+            Result
+    end.
 
-update_record(Record) ->
+
+
+update_record(Record0) ->
+    Record = chef_object:set_api_version(Record0, ?API_MIN_VER),
     chef_sql:do_update(chef_object:update_query(Record), chef_object:fields_for_update(Record)).
 
 %% Delete the database row associated with the Record. Note that the
 %% corresponding database query must delete by id (e.g.,
 %% "delete from table where id= $1"). Use a custom helper for other kinds of
 %% delete queries.
-delete_record(Record) ->
+delete_record(Record0) ->
+    Record = chef_object:set_api_version(Record0, ?API_MIN_VER),
     Query = chef_object:delete_query(Record),
     Id = chef_object:id(Record),
 
     chef_sql:delete_object(Query, Id).
 
-list_records(Record) ->
+list_records(Record0) ->
+    Record = chef_object:set_api_version(Record0, ?API_MIN_VER),
     chef_sql:fetch_object_names(Record).
 

@@ -1,5 +1,5 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
-%% ex: ts=4 sw=4 et
+% ex: ts=4 sw=4 et
 %% @author Mark Anderson <mark@opscode.com>
 %% @author Marc Paradise <marc@getchef.com>
 %% @doc authorization - Interface to the opscode authorization servize
@@ -40,7 +40,7 @@
          delete_resource/3,
          create_entity_if_authorized/4,
          get_container_aid_for_object/3,
-         make_context/2,
+         make_context/3,
          is_authorized_on_resource/6,
          ping/0,
          remove_actor_from_actor_acl/2,
@@ -54,9 +54,12 @@
 
 -ifdef(TEST).
 -compile([export_all]).
+-include_lib("eunit/include/eunit.hrl").
+
 -endif.
 
 -include("../../include/oc_chef_authz.hrl").
+-include("../../include/server_api_version.hrl").
 -include("oc_chef_authz_db.hrl").
 
 -export_type([oc_chef_authz_context/0]).
@@ -70,9 +73,6 @@
                          {delete, <<"delete">>},
                          {grant, <<"grant">>}]).
 
-%-ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
-%-endif.
 
 -type contained_object_name() :: 'client' |
                                  'container' |
@@ -92,9 +92,9 @@
 ping() ->
     oc_chef_authz_http:ping().
 
--spec make_context(binary(), term()) -> #oc_chef_authz_context{}.
-make_context(ReqId, Darklaunch)  ->
-    oc_chef_authz_db:make_context(ReqId, Darklaunch).
+-spec make_context(api_version(), binary(), term()) -> #oc_chef_authz_context{}.
+make_context(ApiVersion, ReqId, Darklaunch)  ->
+    oc_chef_authz_db:make_context(ApiVersion, ReqId, Darklaunch).
 
 -spec superuser_id() -> oc_authz_id().
 superuser_id() ->

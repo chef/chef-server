@@ -33,13 +33,13 @@
          fields_for_fetch/1,
          fields_for_update/1,
          id/1,
-         is_indexed/0,
+         is_indexed/1,
          name/1,
          org_id/1,
          new_record/4,
          parse_binary_json/2,
          parse_binary_json/3,
-         record_fields/0,
+         record_fields/1,
          set_created/2,
          set_updated/2,
          type_name/1,
@@ -49,12 +49,12 @@
 
 %% database named queries
 -export([
-         bulk_get_query/0,
-         create_query/0,
-         delete_query/0,
-         find_query/0,
-         list_query/0,
-         update_query/0
+         bulk_get_query/1,
+         create_query/1,
+         delete_query/1,
+         find_query/1,
+         list_query/1,
+         update_query/1
         ]).
 
 -mixin([{chef_object_default_callbacks, [ fetch/2, update/2 ]}]).
@@ -91,7 +91,7 @@ type_name(#chef_client{}) ->
 authz_id(#chef_client{authz_id = AuthzId})->
     AuthzId.
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     true.
 
 ejson_for_indexing(#chef_client{}, Client) ->
@@ -126,22 +126,22 @@ set_updated(#chef_client{} = Object, ActorId) ->
     Now = chef_object_base:sql_date(now),
     Object#chef_client{updated_at = Now, last_updated_by = ActorId}.
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_client.
 
-update_query() ->
+update_query(_ObjectRec) ->
     update_client_by_id.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_client_by_id.
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_client_by_orgid_name.
 
-list_query() ->
+list_query(_ObjectRec) ->
     list_clients_for_org.
 
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     bulk_get_clients.
 
 -spec new_record(api_version(), object_id(), object_id(), ejson_term()) -> #chef_client{}.
@@ -178,7 +178,7 @@ fields_for_fetch(#chef_client{org_id = OrgId,
                               name = Name}) ->
     [OrgId, Name].
 
-record_fields() ->
+record_fields(_ObjectRec) ->
     record_info(fields, chef_client).
 
 -spec add_authn_fields(ejson_term(), binary()) -> ejson_term().
@@ -322,7 +322,7 @@ value_or_undefined(Key, Data) ->
       Value
   end.
 -spec(list(#chef_client{}, chef_object:select_callback()) -> chef_object:select_return()).
-list(#chef_client{org_id = OrgId}, CallbackFun) ->
-    CallbackFun({list_query(), [OrgId], [name]}).
+list(#chef_client{org_id = OrgId} = Rec, CallbackFun) ->
+    CallbackFun({list_query(Rec), [OrgId], [name]}).
 
 

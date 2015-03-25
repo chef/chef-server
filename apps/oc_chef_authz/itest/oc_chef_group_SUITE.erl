@@ -29,7 +29,7 @@
 -include("../../include/chef_types.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
--define(CTX, {context, <<"req_id">>, otto, undefined}).
+-define(CTX, chef_db:make_context(?API_MIN_VER, <<"req_id">>)).
 -define(DEFAULT_HEADERS, []).
 -define(AUTHZ, chef_test_suite_helper:make_az_id(<<"actorid">>)).
 

@@ -34,16 +34,16 @@
          set_updated/2,
          fields_for_fetch/1,
          fields_for_update/1,
-         find_query/0,
-         create_query/0,
-         update_query/0,
-         delete_query/0,
-         record_fields/0,
+         find_query/1,
+         create_query/1,
+         update_query/1,
+         delete_query/1,
+         record_fields/1,
          record_for_find/3,
          new_record/7,
          update_record/8,
          fields_for_insert/1,
-         is_indexed/0,
+         is_indexed/1,
          ejson_for_indexing/2]).
 
 -mixin([{chef_object_default_callbacks, [fetch/2, update/2]}]).
@@ -140,19 +140,19 @@ fields_for_update(#oc_chef_policy_group_revision_association{
         last_updated_by = LastUpdatedBy}) ->
     [PolicyRevisionRevisionId, LastUpdatedBy, ID].
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_policy_by_group_asoc_and_name.
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_policy_group_policy_revision_association.
 
-update_query() ->
+update_query(_ObjectRec) ->
     update_policy_group_policy_revision_association.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_policy_group_policy_revision_association_by_id.
 
-record_fields() ->
+record_fields(_ObjectRec) ->
     record_info(fields, oc_chef_policy_group_revision_association).
 
 record_for_find(OrgID, PolicyName, GroupName) ->
@@ -218,7 +218,7 @@ fields_for_insert(#oc_chef_policy_group_revision_association{
         last_updated_by = LastUpdatedBy}) ->
     [Id, OrgId, RevisionId, PolicyName, GroupName, PolicyGroupAuthzID, LastUpdatedBy].
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     false.
 
 ejson_for_indexing(#oc_chef_policy_group_revision_association{}, _EjsonTerm) ->

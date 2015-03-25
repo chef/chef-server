@@ -35,26 +35,26 @@
 -export([
          id/1,
          authz_id/1,
-         bulk_get_query/0,
-         create_query/0,
-         delete_query/0,
+         bulk_get_query/1,
+         create_query/1,
+         delete_query/1,
          ejson_for_indexing/2,
          fields_for_fetch/1,
          fields_for_update/1,
          fields_for_insert/1,
-         find_query/0,
-         is_indexed/0,
+         find_query/1,
+         is_indexed/1,
          list/2,
-         list_query/0,
+         list_query/1,
          name/1,
          new_record/4,
          org_id/1,
-         record_fields/0,
+         record_fields/1,
          set_created/2,
          set_updated/2,
          type_name/1,
          update_from_ejson/2,
-         update_query/0,
+         update_query/1,
          update/2
         ]).
 
@@ -79,22 +79,22 @@ authz_id(#oc_chef_policy_group{authz_id = AuthzId}) ->
     AuthzId.
 
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_policy_group.
 
-update_query() ->
+update_query(_ObjectRec) ->
     update_policy_group_by_id.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_policy_group_by_id.
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_policy_group_by_orgid_name.
 
-list_query() ->
+list_query(_ObjectRec) ->
     list_policy_groups_for_org.
 
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     %% TODO: do we need this?
     ok.
 
@@ -120,7 +120,7 @@ set_created(#oc_chef_policy_group{} = Object, ActorId) ->
 set_updated(#oc_chef_policy_group{} = Object, ActorId) ->
     Object#oc_chef_policy_group{last_updated_by = ActorId}.
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     false.
 
 ejson_for_indexing(#oc_chef_policy_group{}, _EjsonTerm) ->
@@ -140,11 +140,11 @@ fields_for_update(#oc_chef_policy_group{
 fields_for_fetch(#oc_chef_policy_group{org_id = OrgId} = PolicyGroup) ->
     [name(PolicyGroup), OrgId].
 
-record_fields() ->
+record_fields(_ObjectRec) ->
     record_info(fields, oc_chef_policy_group).
 
-list(#oc_chef_policy_group{org_id = OrgId}, CallbackFun) ->
-    CallbackFun({list_query(), [OrgId], rows}).
+list(#oc_chef_policy_group{org_id = OrgId} = PG, CallbackFun) ->
+    CallbackFun({list_query(PG), [OrgId], rows}).
 
 update(#oc_chef_policy_group{
                       org_id = _OrgId,
@@ -176,6 +176,6 @@ delete(ObjectRec = #oc_chef_policy_group{
                       org_id = OrgId,
                       last_updated_by = _AuthzId,
                       authz_id = _PolicyAuthzId
-                     }, CallbackFun) ->
-    CallbackFun({delete_query(), [name(ObjectRec), OrgId]}).
+                     } = PolicyGroup, CallbackFun) ->
+    CallbackFun({delete_query(PolicyGroup), [name(ObjectRec), OrgId]}).
 

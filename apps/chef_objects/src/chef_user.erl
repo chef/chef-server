@@ -32,7 +32,7 @@
          fields_for_fetch/1,
          fields_for_update/1,
          id/1,
-         is_indexed/0,
+         is_indexed/1,
          name/1,
          username_from_ejson/1,
          new_record/4,
@@ -40,7 +40,7 @@
          parse_binary_json/1,
          parse_binary_json/3,
          password_data/1,
-         record_fields/0,
+         record_fields/1,
          set_created/2,
          set_password_data/2,
          set_updated/2,
@@ -53,12 +53,12 @@
 
 %% database named queries
 -export([
-         bulk_get_query/0,
-         create_query/0,
-         delete_query/0,
-         find_query/0,
-         list_query/0,
-         update_query/0
+         bulk_get_query/1,
+         create_query/1,
+         delete_query/1,
+         find_query/1,
+         list_query/1,
+         update_query/1
         ]).
 
 -mixin([{chef_object_default_callbacks, [ update/2 ]}]).
@@ -404,35 +404,35 @@ set_updated(#chef_user{} = Object, ActorId) ->
     Now = chef_object_base:sql_date(now),
     Object#chef_user{updated_at = Now, last_updated_by = ActorId}.
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_user.
 
-update_query() ->
+update_query(_ObjectRec) ->
     update_user_by_id.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_user_by_id.
 
-find_query() ->
+find_query(_ObjectRec) ->
     error(unsupported).
 
-list_query() ->
+list_query(_ObjectRec) ->
     list_users.
 
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     bulk_get_users.
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     false.
 
-fetch(#chef_user{username = undefined, external_authentication_uid = AuthUid}, CallbackFun) ->
-    fetch_user(find_user_by_external_authentication_uid, AuthUid, CallbackFun);
-fetch(#chef_user{username = UserName}, CallbackFun) ->
-    fetch_user(find_user_by_username, UserName, CallbackFun).
+fetch(#chef_user{username = undefined, external_authentication_uid = AuthUid} = Record, CallbackFun) ->
+    fetch_user(find_user_by_external_authentication_uid, Record, AuthUid, CallbackFun);
+fetch(#chef_user{username = UserName} = Record, CallbackFun) ->
+    fetch_user(find_user_by_username, Record, UserName, CallbackFun).
 
-fetch_user(Query, KeyValue, CallbackFun) ->
+fetch_user(Query, Record, KeyValue, CallbackFun) ->
     CallbackFun({Query, [KeyValue],
-                 {first_as_record, [chef_user, record_fields()]}}).
+                 {first_as_record, [chef_user, record_fields(Record)]}}).
 
 ejson_for_indexing(#chef_user{}, _) ->
     error(not_indexed).
@@ -456,12 +456,12 @@ fields_for_update(#chef_user{last_updated_by = LastUpdatedBy,
      [false, PublicKeyVersion, PublicKey, HashedPassword, Salt, HashType, SerializedObject,
      ExternalAuthenticationUid, RecoveryAuthEnabled =:= true, Email, UserName,  LastUpdatedBy, UpdatedAt, Id].
 
-record_fields() ->
+record_fields(_ObjectRec) ->
     record_info(fields, chef_user).
 
 list(#chef_user{external_authentication_uid = ExtAuthUid}, CallbackFun) when ExtAuthUid =/= undefined ->
     CallbackFun({list_users_by_ext_auth_uid, [ExtAuthUid], [username]});
-list(#chef_user{email = undefined}, CallbackFun) ->
-    CallbackFun({list_query(), [], [username]});
+list(#chef_user{email = undefined} = User, CallbackFun) ->
+    CallbackFun({list_query(User), [], [username]});
 list(#chef_user{email = EMail}, CallbackFun) ->
     CallbackFun({list_users_by_email, [EMail], [username]}).

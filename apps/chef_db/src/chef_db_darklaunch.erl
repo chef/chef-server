@@ -19,7 +19,6 @@
 
 -export([is_enabled/2]).
 
--include_lib("eunit/include/eunit.hrl").
 
 %% The darklaunch module used by chef_db can be set using this
 %% define. The default included here ignores `OrgName' and answers

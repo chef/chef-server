@@ -25,8 +25,8 @@
          parse_binary_json/2,
          set_created/2,
          fields_for_fetch/1,
-         find_query/0,
-         record_fields/0
+         find_query/1,
+         record_fields/1
         ]).
 
 -export([
@@ -124,10 +124,10 @@ fields_for_fetch(#chef_sandbox{org_id = OrgId,
                                id = Id}) ->
     [OrgId, Id].
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_sandbox_by_id.
 
-record_fields() ->
+record_fields(_ObjectRec) ->
     record_info(fields, chef_sandbox).
 
 -spec(fetch(#chef_sandbox{}, chef_object:select_callback()) -> chef_object:select_return()).

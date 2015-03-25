@@ -69,7 +69,10 @@
          ping/0
          ]).
 
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
+-endif.
+
 -include_lib("couchbeam/include/couchbeam.hrl").
 -include("../../include/chef_types.hrl").
 -include("chef_otto.hrl").

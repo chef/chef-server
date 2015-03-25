@@ -6,13 +6,14 @@
 -module(oc_chef_authz).
 
 -include("../../../../include/oc_chef_authz.hrl").
+-include("../../../../apps/oc_chef_authz/src/oc_chef_authz_db.hrl").
 
 -export([
          create_entity_if_authorized/4,
          delete_resource/3,
          get_container_aid_for_object/3,
          is_authorized_on_resource/6,
-         make_context/2
+         make_context/3
         ]).
 
 create_entity_if_authorized(_Context, _OrgId, _Creator, _ObjectType) ->
@@ -29,5 +30,8 @@ get_container_aid_for_object(_Context, _OrgId, _ObjectType) ->
 is_authorized_on_resource(_ReqestorId, _ResourceType, _ResourceId, _ActorType, _ActorId, _AccessMethod) ->
     true.
 
-make_context(_ReqId, _Darklaunch) ->
-    {mock, tuple}.
+make_context(ApiVersion, ReqId, Darklaunch) ->
+    #oc_chef_authz_context{server_api_version = ApiVersion,
+                           reqid = ReqId,
+                           darklaunch = Darklaunch,
+                           otto_connection = invalid}.

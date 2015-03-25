@@ -14,23 +14,23 @@
 -export([
          parse_binary_json/1,
          authz_id/1,
-         is_indexed/0,
+         is_indexed/1,
          ejson_for_indexing/2,
          update_from_ejson/2,
          set_created/2,
          set_updated/2,
          fields_for_insert/1,
          delete/2,
-         create_query/0,
-         update_query/0,
-         delete_query/0,
-         find_query/0,
-         list_query/0,
+         create_query/1,
+         update_query/1,
+         delete_query/1,
+         find_query/1,
+         list_query/1,
          ejson_from_list/1,
-         bulk_get_query/0,
+         bulk_get_query/1,
          fields_for_update/1,
          fields_for_fetch/1,
-         record_fields/0,
+         record_fields/1,
          list/2,
          new_record/4,
          name/1,
@@ -49,7 +49,7 @@ org_user_association_spec() ->
 authz_id(#oc_chef_org_user_association{}) ->
     erlang:error(not_implemented).
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     false.
 
 ejson_for_indexing(#oc_chef_org_user_association{}, _EjsonTerm) ->
@@ -68,24 +68,24 @@ set_updated(#oc_chef_org_user_association{} = Object, ActorId) ->
     Now = chef_object_base:sql_date(now),
     Object#oc_chef_org_user_association{updated_at = Now, last_updated_by = ActorId}.
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_org_user_association.
 
-update_query() ->
+update_query(_ObjectRec) ->
     erlang:error(not_implemented).
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_org_user_association_by_ids.
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_org_user_association_by_ids.
 
-list_query() ->
-    erlang:error(unused).
+list_query(_ObjectRec) ->
+    erlang:error(not_implemented).
 
-list_query(by_org) ->
+list_query(_ObjectRec, by_org) ->
     list_org_user_associations;
-list_query(by_user) ->
+list_query(_ObjectRec, by_user) ->
     list_user_org_associations.
 
 ejson_from_list(Associations) ->
@@ -98,7 +98,7 @@ fields_for_insert(#oc_chef_org_user_association{ org_id = OrgId, user_id = UserI
                                        updated_at = UpdatedAt} ) ->
     [OrgId, UserId, LastUpdatedBy, CreatedAt, UpdatedAt].
 
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     erlang:error(not_implemented).
 
 parse_binary_json(Bin) ->
@@ -117,13 +117,13 @@ fields_for_update(#oc_chef_org_user_association{}) ->
 fields_for_fetch(#oc_chef_org_user_association{org_id = OrgId, user_id = UserId}) ->
     [OrgId, UserId].
 
-record_fields() ->
+record_fields(_ObjectRec) ->
     record_info(fields, oc_chef_org_user_association).
 
-list(#oc_chef_org_user_association{org_id = OrgId, user_id = undefined}, CallbackFun) ->
-    CallbackFun({list_query(by_org), [OrgId], [user_name]});
-list(#oc_chef_org_user_association{user_id = UserId, org_id = undefined}, CallbackFun) ->
-    CallbackFun({list_query(by_user), [UserId],  rows}).
+list(#oc_chef_org_user_association{org_id = OrgId, user_id = undefined} = Assoc, CallbackFun) ->
+    CallbackFun({list_query(Assoc, by_org), [OrgId], [user_name]});
+list(#oc_chef_org_user_association{user_id = UserId, org_id = undefined} = Assoc, CallbackFun) ->
+    CallbackFun({list_query(Assoc, by_user), [UserId],  rows}).
 
 
 % Record creation via API. Note that we're using the authz_id
@@ -155,6 +155,6 @@ org_id(#oc_chef_org_user_association{org_id = OrgId}) ->
 type_name(#oc_chef_org_user_association{}) ->
     association.
 
-delete(#oc_chef_org_user_association{org_id = OrgId, user_id = UserId}, CallbackFun) ->
-    CallbackFun({delete_query(), [OrgId, UserId]}).
+delete(#oc_chef_org_user_association{org_id = OrgId, user_id = UserId} = ObjectRec, CallbackFun) ->
+    CallbackFun({delete_query(ObjectRec), [OrgId, UserId]}).
 

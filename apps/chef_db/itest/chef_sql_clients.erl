@@ -12,6 +12,7 @@
 make_client(Prefix) ->
     AzId = chef_test_suite_helper:make_az_id(Prefix),
     #chef_client{
+        server_api_version = ?API_MIN_VER,
 	    id = AzId,
 	    org_id = chef_test_suite_helper:the_org_id(),
 	    name = AzId,
@@ -53,7 +54,7 @@ bulk_fetch_client_data() ->
   Ids = [ C#chef_client.id || C <- Clients ],
   Expected = Clients,
 
-  {ok, Got} = chef_sql:bulk_get_clients(Ids),
+  {ok, Got} = chef_sql:bulk_get_clients(?API_MIN_VER, Ids),
   ?assertEqual(length(Got), 3),
   ?assertEqual(Expected, Got).
 
