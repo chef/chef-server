@@ -16,7 +16,7 @@ module ApplicationHelper
     button_to(
       text,
       url,
-      :class => 'button',
+      :class => 'button alert',
       :method => :delete,
       :data => {
         'abide' => '',

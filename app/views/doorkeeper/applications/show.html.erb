@@ -24,8 +24,7 @@
   </div>
 
   <div class="medium-4">
-    <h3>Actions</h3>
-    <p><%= link_to 'Edit', edit_oauth_application_path(@application), class: 'button' %></p>
-    <p><%= delete_button('Destroy', [:oauth, @application]) %></p>
+    <%= link_to 'Edit', edit_oauth_application_path(@application), class: 'button' %>
+    <%= delete_button('Destroy', [:oauth, @application]) %>
   </div>
 </div>
