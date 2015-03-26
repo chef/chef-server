@@ -2,6 +2,10 @@
 
 ## 12.0.7 (Undetermined)
 
+### oc\_erchef 1.6.4
+* Policyfile endpoint URLs updated to match Chef RFC 042
+* Cookbook Artifacts endpoint for policyfiles
+* Miscelaneous build improvements
 ### oc\_erchef 1.6.3
 * Search results respect ACLs.
 

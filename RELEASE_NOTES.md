@@ -5,9 +5,18 @@
 The following items are new since Chef Server 12.0.6 and/or are changes from previous versions.
 For specific breakdown of updated components, refer to CHANGELOG.md
 
+  * Implements the minimum set of Policyfile endpoints required for end
+    to end usage of Policyfiles. Requires Chef Client 12.2+ and ChefDK
+    0.5+. The upgrade process is still being tested so this only works
+    with a brand new installation, and you must set
+    `lb["xdl_defaults"]["policies"] = true` in the `chef-server.rb`
+    file. Chef Client and ChefDK also require feature flags in their
+    respective configurations to enable "native" Policyfile APIs.
+
   * Search results respect ACLs. (Disabled by default)
     To enable, ensure that `opscode_erchef['strict_search_result_acls']`
-    is set to `true` in `chef-server.rb`.
+    is set to `true` in `chef-server.rb`. This will default to enabled
+    in the next major version.
 
 ## 12.0.6 (2015-03-19)
 
