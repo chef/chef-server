@@ -1,6 +1,8 @@
 # Chef Server Release Notes
 
-## 12.0.7 (Undetermined)
+## 12.0.8 (undetermined)
+
+## 12.0.7 (2015-03-26)
 
 The following items are new since Chef Server 12.0.6 and/or are changes from previous versions.
 For specific breakdown of updated components, refer to CHANGELOG.md

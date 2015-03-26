@@ -1,6 +1,8 @@
 # Chef Server Changelog
 
-## 12.0.7 (Undetermined)
+## 12.0.8 (undetermined)
+
+## 12.0.7 (2015-03-26)
 
 ### oc\_erchef 1.6.4
 * Policyfile endpoint URLs updated to match Chef RFC 042
