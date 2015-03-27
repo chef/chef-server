@@ -1,15 +1,15 @@
-<div class="page-header">
+<div>
   <h1>Application: <%= @application.name %></h1>
 </div>
 
 <div class="row">
-  <div class="col-md-8">
+  <div class="medium-8">
     <h4>Application Id:</h4>
     <p><code id="application_id"><%= @application.uid %></code></p>
     <h4>Secret:</h4>
     <p><code id="secret"><%= @application.secret %></code></p>
     <h4>Callback URLs:</h4>
-    <table class="table">
+    <table>
       <% @application.redirect_uri.split.each do |uri| %>
         <tr>
           <td>
@@ -23,9 +23,8 @@
     </table>
   </div>
 
-  <div class="col-md-4">
-    <h3>Actions</h3>
-    <p><%= link_to 'Edit', edit_oauth_application_path(@application), class: 'btn btn-primary' %></p>
-    <p><%= render 'delete_form', application: @application, submit_btn_css: 'btn btn-danger' %></p>
+  <div class="medium-4">
+    <%= link_to 'Edit', edit_oauth_application_path(@application), class: 'button' %>
+    <%= delete_button('Destroy', [:oauth, @application]) %>
   </div>
 </div>

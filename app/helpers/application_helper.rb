@@ -1,15 +1,27 @@
 module ApplicationHelper
   delegate :sign_up_url, :to => "Settings"
 
-  def bootstrap_class_for(flash_type)
-
+  def chef_class_for(flash_type)
     classes = {
-      success:  'alert-success',
-      error:    'alert-danger',
-      alert:    'alert-warning',
-      notice:   'alert-info'
+      success:  'success',
+      error:    'alert',
+      alert:    'warning',
+      notice:   'info'
     }
 
     classes[flash_type.to_sym] || flash_type.to_s
+  end
+
+  def delete_button(text, url)
+    button_to(
+      text,
+      url,
+      :class => 'button alert',
+      :method => :delete,
+      :data => {
+        'abide' => '',
+        'confirm' => 'Are you sure?'
+      }
+    )
   end
 end

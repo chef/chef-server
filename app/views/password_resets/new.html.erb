@@ -1,6 +1,19 @@
-<h1>Forgot Your Password?</h1>
-<p>Enter your username and we'll send you an email containing a link you can use to reset your password.</p>
-<%= form_tag({ action: 'create' }, { class: 'form-inline' }) do -%>
-  <%= text_field_tag :username, nil, required: true, placeholder: 'Username' %>
-  <%= button_tag 'Submit', class: 'btn btn-primary' %>
-<% end -%>
+<div>
+  <h1>Forgot Your Password?</h1>
+</div>
+<div>
+  <p>Enter your username and we'll send you an email containing a link you can use to reset your password.</p>
+  <%= form_tag({ action: 'create' }, { 'data-abide' => '' }) do -%>
+    <div class="row">
+      <div class="medium-6 columns username-field">
+        <%= text_field_tag :username, nil, required: true, placeholder: 'Username' %>
+        <small class="error">Required</small>
+      </div>
+    </div>
+    <div class="row">
+      <div class="medium-6 columns">
+        <%= button_tag 'Submit', class: 'button' %>
+      </div>
+    </div>
+  <% end -%>
+</div>
