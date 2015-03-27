@@ -163,7 +163,7 @@ fields_for_fetch(#chef_data_bag_item{org_id = OrgId,
                                      item_name = ItemName}) ->
     [OrgId, BagName, ItemName].
 
-record_fields(_ObjectRec) ->
+record_fields(_ApiVersion) ->
     record_info(fields, chef_data_bag_item).
 
 -spec add_type_and_bag(BagName :: binary(), Item :: ejson_term()) -> ejson_term().

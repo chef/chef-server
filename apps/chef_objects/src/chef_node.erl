@@ -211,7 +211,7 @@ fields_for_fetch(#chef_node{org_id = OrgId,
                             name = Name}) ->
     [OrgId, Name].
 
-record_fields(_ObjectRec) ->
+record_fields(_ApiVersion) ->
     record_info(fields, chef_node).
 
 extract_recipes(RunList) ->

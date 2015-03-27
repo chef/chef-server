@@ -263,7 +263,7 @@ fields_for_fetch(#chef_role{org_id = OrgId,
                             name = Name}) ->
     [OrgId, Name].
 
-record_fields(_ObjectRec) ->
+record_fields(_ApiVersion) ->
     record_info(fields, chef_role).
 
 list(#chef_role{org_id = OrgId} = Rec, CallbackFun) ->

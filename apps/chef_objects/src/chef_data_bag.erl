@@ -149,7 +149,7 @@ fields_for_fetch(#chef_data_bag{org_id = OrgId,
                                 name = Name}) ->
     [OrgId, Name].
 
-record_fields(_ObjectRec) ->
+record_fields(_ApiVersion) ->
     record_info(fields, chef_data_bag).
 
 %% @doc Convert a binary JSON string representing a Chef data_bag into an EJson-encoded

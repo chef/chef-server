@@ -152,7 +152,7 @@ update_query(_ObjectRec) ->
 delete_query(_ObjectRec) ->
     delete_policy_group_policy_revision_association_by_id.
 
-record_fields(_ObjectRec) ->
+record_fields(_ApiVersion) ->
     record_info(fields, oc_chef_policy_group_revision_association).
 
 record_for_find(OrgID, PolicyName, GroupName) ->

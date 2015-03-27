@@ -117,7 +117,7 @@ fields_for_update(#oc_chef_org_user_association{}) ->
 fields_for_fetch(#oc_chef_org_user_association{org_id = OrgId, user_id = UserId}) ->
     [OrgId, UserId].
 
-record_fields(_ObjectRec) ->
+record_fields(_ApiVersion) ->
     record_info(fields, oc_chef_org_user_association).
 
 list(#oc_chef_org_user_association{org_id = OrgId, user_id = undefined} = Assoc, CallbackFun) ->

@@ -142,7 +142,7 @@ fields_for_insert(#oc_chef_org_user_invite{ id = Id,
                                   updated_at = UpdatedAt} ) ->
     [Id, OrgId, UserId, LastUpdatedBy, CreatedAt, UpdatedAt].
 
-record_fields(_ObjectRec) ->
+record_fields(_ApiVersion) ->
     record_info(fields, oc_chef_org_user_invite).
 
 list(#oc_chef_org_user_invite{org_id = OrgId, user_id = undefined} = Invite, CallbackFun) ->

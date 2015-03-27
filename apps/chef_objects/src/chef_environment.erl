@@ -198,7 +198,7 @@ fields_for_fetch(#chef_environment{org_id = OrgId,
                                    name = Name}) ->
     [OrgId, Name].
 
-record_fields(_ObjectRec) ->
+record_fields(_ApiVersion) ->
     record_info(fields, chef_environment).
 
 list(#chef_environment{org_id = OrgId} = Env, CallbackFun) ->

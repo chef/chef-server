@@ -456,7 +456,7 @@ fields_for_update(#chef_user{last_updated_by = LastUpdatedBy,
      [false, PublicKeyVersion, PublicKey, HashedPassword, Salt, HashType, SerializedObject,
      ExternalAuthenticationUid, RecoveryAuthEnabled =:= true, Email, UserName,  LastUpdatedBy, UpdatedAt, Id].
 
-record_fields(_ObjectRec) ->
+record_fields(_ApiVersion) ->
     record_info(fields, chef_user).
 
 list(#chef_user{external_authentication_uid = ExtAuthUid}, CallbackFun) when ExtAuthUid =/= undefined ->

@@ -45,7 +45,7 @@
          fetch_object/4,
          fetch_object_names/1,
          fetch/1,
-         fetch_multi/3,
+         fetch_multi/4,
 
          bulk_get_authz_ids/2,
 
@@ -55,19 +55,10 @@
 
          %% data_bag_item ops
          fetch_data_bag_item_ids/2,
-         bulk_get_data_bag_items/1,
 
-         %% environment ops
-         bulk_get_environments/1,
-
-         %% client ops
+         %% search ops
+         bulk_get_objects/2,
          bulk_get_clients/2,
-
-         %% node ops
-         bulk_get_nodes/1,
-
-         %% role ops
-         bulk_get_roles/1,
 
          %% cookbook version ops
          cookbook_exists/2,
@@ -185,23 +176,6 @@ fetch_actors_by_name(OrgId, Name) ->
     Result = sqerl:select(fetch_requestors_by_name, [OrgId, Name], Transform),
     match_result(Result).
 
-%%
-%% node ops
-%%
-
--spec bulk_get_nodes([binary()]) -> {ok, [binary()] | not_found} |
-                                    {error, term()}.
-bulk_get_nodes(Ids) ->
-    bulk_get_objects(node, Ids).
-
-%%
-%% role ops
-%%
-
--spec bulk_get_roles([binary()]) -> {ok, [binary()] | not_found} |
-                                    {error, term()}.
-bulk_get_roles(Ids) ->
-    bulk_get_objects(role, Ids).
 
 %%
 %% data_bag_item ops
@@ -221,23 +195,6 @@ fetch_data_bag_item_ids(OrgId, DataBagName) ->
             {error, Error}
     end.
 
--spec bulk_get_data_bag_items([binary()]) -> {ok, [binary()] | not_found} |
-                                             {error, term()}.
-bulk_get_data_bag_items(Ids) ->
-    bulk_get_objects(data_bag_item, Ids).
-
-%%
-%% environment ops
-%%
-
--spec bulk_get_environments([binary()]) -> {ok, [binary()] | not_found} |
-                                           {error, term()}.
-bulk_get_environments(Ids) ->
-    bulk_get_objects(environment, Ids).
-
-%%
-%% client ops
-%%
 
 -spec bulk_get_clients(api_version(), [binary()]) -> {ok, [ [proplists:property()] ] | not_found} |
                                       {error, term()}.
@@ -248,7 +205,8 @@ bulk_get_environments(Ids) ->
 %% Note this return a list of chef_client records, different from the other bulk_get_X
 %% calls
 bulk_get_clients(ApiVersion, Ids) ->
-    case sqerl:select(bulk_get_clients, [Ids], ?ALL(chef_client)) of
+    Query = chef_object:bulk_get_query(#chef_client{server_api_version = ApiVersion}),
+    case sqerl:select(Query, [Ids], ?ALL(chef_client)) of
         {ok, none} ->
             {ok, not_found};
         {ok, L} when is_list(L) ->
@@ -738,20 +696,18 @@ statements() ->
 fetch(Record) ->
     chef_object:fetch(Record, fun select_rows/1).
 
--spec fetch_multi(atom(), atom(), list()) -> [chef_object:object_rec()] | not_found | {error, _Why}.
-fetch_multi(RecModule, QueryName, QueryParams) ->
-    chef_object:fetch_multi(RecModule, QueryName, QueryParams, fun select_rows/1).
+-spec fetch_multi(api_version(), atom(), atom(), list()) -> [chef_object:object_rec()] | not_found | {error, _Why}.
+fetch_multi(ApiVersion, RecModule, QueryName, QueryParams) ->
+    case chef_object:fetch_multi(ApiVersion, RecModule, QueryName, QueryParams, fun select_rows/1) of
+        {ok, Rows} when is_list(Rows) ->
+            {ok, [chef_object:set_api_version(R, ApiVersion) || R <- Rows]};
+        Result ->
+            Result
+    end.
 
--spec select_rows(
-        {QueryName, BindParameters } |
-        {QueryName, BindParameters, ReturnTransform} |
-        {QueryName, BindParameters, ReturnFieldNames}
-     ) ->
-                         chef_object:select_return()  when
-      QueryName ::atom(),
-      BindParameters :: list(),
-      ReturnFieldNames :: [atom()],
-      ReturnTransform :: tuple().
+-spec select_rows( {atom(), list()} |
+                   {atom(), list(), tuple() | rows} |
+                   {atom(), list(), [atom()]}) -> chef_object:select_return().
 select_rows({Query, BindParameters}) ->
     match_result(sqerl:select(Query, BindParameters));
 select_rows({Query, BindParameters, Transform}) when is_tuple(Transform);

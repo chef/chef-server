@@ -127,7 +127,7 @@ fields_for_fetch(#chef_sandbox{org_id = OrgId,
 find_query(_ObjectRec) ->
     find_sandbox_by_id.
 
-record_fields(_ObjectRec) ->
+record_fields(_ApiVersion) ->
     record_info(fields, chef_sandbox).
 
 -spec(fetch(#chef_sandbox{}, chef_object:select_callback()) -> chef_object:select_return()).

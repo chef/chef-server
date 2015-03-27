@@ -95,7 +95,7 @@
 
          list/2,
          fetch/2,
-         fetch_multi/4,
+         fetch_multi/5,
          update/3,
          delete/2,
 
@@ -208,10 +208,10 @@ fetch(Rec, CallbackFun) ->
     Mod = element(1, Rec),
     Mod:fetch(Rec, CallbackFun).
 
-fetch_multi(RecModule, QueryName, QueryParams, CallbackFun) ->
+fetch_multi(ApiVersion, RecModule, QueryName, QueryParams, CallbackFun) ->
     CallbackFun({QueryName,
                  QueryParams,
-                 {rows_as_records, [RecModule, RecModule:record_fields()]}}).
+                 {rows_as_records, [RecModule, RecModule:record_fields(ApiVersion)]}}).
 
 update(Rec, ActorId, CallbackFun) ->
     Mod = element(1, Rec),

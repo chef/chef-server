@@ -178,7 +178,7 @@ fields_for_fetch(#chef_client{org_id = OrgId,
                               name = Name}) ->
     [OrgId, Name].
 
-record_fields(_ObjectRec) ->
+record_fields(_ApiVersion) ->
     record_info(fields, chef_client).
 
 -spec add_authn_fields(ejson_term(), binary()) -> ejson_term().

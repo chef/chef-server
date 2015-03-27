@@ -114,7 +114,7 @@ fields_for_fetch(#oc_chef_container{org_id = OrgId,
                                     name = Name}) ->
     [OrgId, Name].
 
-record_fields(_ObjectRec) ->
+record_fields(_ApiVersion) ->
     record_info(fields, oc_chef_container).
 
 list(#oc_chef_container{org_id = OrgId} = Container, CallbackFun) ->

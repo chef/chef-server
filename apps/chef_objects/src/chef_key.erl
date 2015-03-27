@@ -113,7 +113,7 @@ fields_for_update(#chef_key{id = Id, key_name = NewName, old_name = OldName,
 fields_for_fetch(#chef_key{id = Id, key_name = KeyName}) ->
   [Id, KeyName].
 
-record_fields(_ObjectRec) ->
+record_fields(_ApiVersion) ->
   record_info(fields, chef_key).
 
 ejson_from_list(KeysList, URIDecorator) ->

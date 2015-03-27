@@ -186,7 +186,7 @@ ejson_for_indexing(#oc_chef_policy_revision{}, _EjsonTerm) ->
 fields_for_fetch(#oc_chef_policy_revision{org_id = OrgId, name = Name, revision_id = RevisionId}) ->
     [Name, OrgId, RevisionId].
 
-record_fields(_ObjectRec) ->
+record_fields(_ApiVersion) ->
     record_info(fields, oc_chef_policy_revision).
 
 list(#oc_chef_policy_revision{org_id = OrgId, name = Name} = PR, CallbackFun) ->

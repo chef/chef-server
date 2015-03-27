@@ -250,16 +250,6 @@ process_post(Req, State) ->
 %% If `NamePaths' is non-empty, then the returned fun will create partial search results by
 %% extracting the values specified by the paths and mapping them to the specified names in
 %% the returned EJSON object.
-make_bulk_get_fun(DbContext, OrgName, client, [], _Req) ->
-    %% clients get special handling to add json_class which is not stored in the db (not
-    %% even in couch).
-    %%
-    %% BUGBUG in waiting: special casing for one class is UBER CODE SMELL
-    fun(Ids) ->
-            Clients = chef_db:bulk_get(DbContext, OrgName, client, Ids),
-            [ ej:set({<<"json_class">>}, Client, <<"Chef::ApiClient">>)
-              || Client <- Clients ]
-    end;
 make_bulk_get_fun(DbContext, OrgName, {data_bag, BagName}, [], _Req) ->
     %% We need to wrap the item in some additional JSON cruft to make it
     %% match the expected shape.

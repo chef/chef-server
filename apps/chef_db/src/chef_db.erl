@@ -217,7 +217,10 @@ delete(ObjectRec, #context{server_api_version = ApiVersion, reqid = ReqId}) ->
                    not_found |
                    {error, term()}.
 fetch(ObjectRec, #context{server_api_version = ApiVersion, reqid = ReqId}) ->
-    Result = ?SH_TIME(ReqId, chef_sql, fetch, (ObjectRec)),
+    % TODO - base branch!
+    ObjectRec2 = chef_object:set_api_version(ObjectRec, ApiVersion),
+    Result = ?SH_TIME(ReqId, chef_sql, fetch, (ObjectRec2)),
+    % TODO - base branch ^
     case Result of
         not_found ->
             Result;
@@ -235,11 +238,8 @@ fetch(ObjectRec, #context{server_api_version = ApiVersion, reqid = ReqId}) ->
                       [object_rec()] |
                       not_found |
                       {error, term()}.
-fetch_multi(RecModule, #context{reqid = ReqId}, QueryName, QueryParams) ->
-    stats_hero:ctime(ReqId, {chef_sql, fetch_multi},
-                          fun() ->
-                                  chef_sql:fetch_multi(RecModule, QueryName, QueryParams)
-                          end).
+fetch_multi(RecModule, #context{server_api_version = ApiVersion, reqid = ReqId}, QueryName, QueryParams) ->
+    ?SH_TIME(ReqId, chef_sql, fetch_multi, (ApiVersion, RecModule, QueryName, QueryParams)).
 
 -spec list(object_rec(), #context{}) -> [binary()] | {error, _}.
 list(StubRec, #context{server_api_version = ApiVersion, reqid = ReqId} = _Ctx) ->
@@ -679,13 +679,13 @@ connect() ->
 %% @doc Return a list of JSON/gzip'd JSON as binary corresponding to the specified list of
 %% IDs.
 bulk_get(#context{reqid = ReqId}, _OrgName, node, Ids) ->
-    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_nodes, (Ids)));
+    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_objects, (node, Ids)));
 bulk_get(#context{reqid = ReqId}, _OrgName, role, Ids) ->
-    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_roles, (Ids)));
+    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_objects, (role, Ids)));
 bulk_get(#context{reqid = ReqId}, _OrgName, data_bag_item, Ids) ->
-    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_data_bag_items, (Ids)));
+    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_objects, (data_bag_item, Ids)));
 bulk_get(#context{reqid = ReqId}, _OrgName, environment, Ids) ->
-    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_environments, (Ids)));
+    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_objects, (environment, Ids)));
 bulk_get(#context{reqid = ReqId, server_api_version = ApiVersion}, OrgName, client, Ids) ->
     ClientRecords = bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_clients, (ApiVersion, Ids))),
     [chef_client:assemble_client_ejson(C, OrgName) || #chef_client{}=C <- ClientRecords];

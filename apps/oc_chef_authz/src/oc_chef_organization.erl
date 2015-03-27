@@ -113,7 +113,7 @@ fields_for_update(#oc_chef_organization{last_updated_by = LastUpdatedBy,
 fields_for_fetch(#oc_chef_organization{id = Id}) ->
     [Id].
 
-record_fields(_ObjectRec) ->
+record_fields(_ApiVersion) ->
     record_info(fields, oc_chef_organization).
 
 list(#oc_chef_organization{} = Org, CallbackFun) ->

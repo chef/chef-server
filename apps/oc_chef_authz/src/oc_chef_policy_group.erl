@@ -140,7 +140,7 @@ fields_for_update(#oc_chef_policy_group{
 fields_for_fetch(#oc_chef_policy_group{org_id = OrgId} = PolicyGroup) ->
     [name(PolicyGroup), OrgId].
 
-record_fields(_ObjectRec) ->
+record_fields(_ApiVersion) ->
     record_info(fields, oc_chef_policy_group).
 
 list(#oc_chef_policy_group{org_id = OrgId} = PG, CallbackFun) ->

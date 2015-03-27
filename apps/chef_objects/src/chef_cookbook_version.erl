@@ -660,7 +660,7 @@ fields_for_fetch(#chef_cookbook_version{org_id = OrgId,
                                         patch = Patch}) ->
     [OrgId, Name, Major, Minor, Patch].
 
-record_fields(_ObjectRec) ->
+record_fields(_ApiVersion) ->
     record_info(fields, chef_cookbook_version).
 
 -spec(list(#chef_cookbook_version{}, chef_object:select_callback()) -> chef_object:select_return()).

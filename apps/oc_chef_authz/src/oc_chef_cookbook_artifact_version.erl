@@ -143,7 +143,7 @@ fields_for_fetch(#oc_chef_cookbook_artifact_version{org_id = OrgId,
 list(#oc_chef_cookbook_artifact_version{}, _CallbackFun) ->
     erlang:error(not_supported).
 
-record_fields(_ObjectRec) ->
+record_fields(_ApiVersion) ->
     record_info(fields, oc_chef_cookbook_artifact_version).
 
 update(#oc_chef_cookbook_artifact_version{}, _CallbackFun) ->

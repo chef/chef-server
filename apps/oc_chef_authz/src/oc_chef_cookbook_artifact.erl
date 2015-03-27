@@ -26,7 +26,7 @@
 
 -behaviour(chef_object).
 
--mixin([{chef_object,[{default_fetch/2, fetch}]}]).
+-mixin([{chef_object_default_callbacks,[{fetch/2, fetch}]}]).
 
 %% chef_object behaviour callbacks
 -export([id/1,
@@ -34,24 +34,24 @@
          org_id/1,
          type_name/1,
          authz_id/1,
-         create_query/0,
-         update_query/0,
-         delete_query/0,
-         find_query/0,
-         list_query/0,
-         bulk_get_query/0,
-         is_indexed/0,
+         create_query/1,
+         update_query/1,
+         delete_query/1,
+         find_query/1,
+         list_query/1,
+         bulk_get_query/1,
+         is_indexed/1,
          ejson_for_indexing/2,
          update_from_ejson/2,
-         new_record/3,
+         new_record/4,
          set_created/2,
          set_updated/2,
          fields_for_fetch/1,
          fields_for_update/1,
          update/2,
          list/2,
-         record_fields/0,
-         flatten/1]).
+         record_fields/1,
+         fields_for_insert/1]).
 
 -export([exists_by_authz_id/1,
          filter_checksums_to_delete/2]).
@@ -71,26 +71,26 @@ type_name(#oc_chef_cookbook_artifact{}) ->
 authz_id(#oc_chef_cookbook_artifact{authz_id = AuthzId}) ->
     AuthzId.
 
-create_query() ->
+create_query(_ObjectRec) ->
     %% created when creating a cookbook artifact version
     erlang:error(not_supported).
 
-update_query() ->
+update_query(_ObjectRec) ->
     erlang:error(not_supported).
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     erlang:error(not_supported).
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_cookbook_artifact_by_org_id_name.
 
-list_query() ->
+list_query(_ObjectRec) ->
     erlang:error(not_supported).
 
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     erlang:error(not_supported).
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     false.
 
 ejson_for_indexing(#oc_chef_cookbook_artifact{}, _EjsonTerm) ->
@@ -99,7 +99,7 @@ ejson_for_indexing(#oc_chef_cookbook_artifact{}, _EjsonTerm) ->
 update_from_ejson(#oc_chef_cookbook_artifact{}, _Ejson) ->
     erlang:error(not_supported).
 
-new_record(_OrgId, _AuthzId, _Ejson) ->
+new_record(_ApiVersion, _OrgId, _AuthzId, _Ejson) ->
     erlang:error(not_supported).
 
 set_created(#oc_chef_cookbook_artifact{}, _ActorId) ->
@@ -115,16 +115,16 @@ fields_for_fetch(#oc_chef_cookbook_artifact{org_id = OrgId,
                                             name = Name}) ->
     [OrgId, Name].
 
-list(#oc_chef_cookbook_artifact{org_id = OrgId}, CallbackFun) ->
-    CallbackFun({list_query(), [OrgId], rows}).
+list(#oc_chef_cookbook_artifact{org_id = OrgId} = CBA, CallbackFun) ->
+    CallbackFun({list_query(CBA), [OrgId], rows}).
 
-record_fields() ->
+record_fields(_ApiVersion) ->
     record_info(fields, oc_chef_cookbook_artifact).
 
 update(#oc_chef_cookbook_artifact{}, _CallbackFun) ->
 	erlang:error(not_supported).
 
-flatten(#oc_chef_cookbook_artifact{}) ->
+fields_for_insert(#oc_chef_cookbook_artifact{}) ->
     erlang:error(not_supported).
 
 %% @doc Checks if a cookbook artifact with the given `AuthzId' exists

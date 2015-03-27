@@ -174,7 +174,7 @@ fields_for_update(#oc_chef_policy{
 fields_for_fetch(#oc_chef_policy{org_id = OrgId} = Policy) ->
     [name(Policy), OrgId].
 
-record_fields(_ObjectRec) ->
+record_fields(_ApiVersion) ->
     record_info(fields, oc_chef_policy).
 
 list(#oc_chef_policy{org_id = OrgId} = P, CallbackFun) ->
@@ -185,7 +185,7 @@ update(#oc_chef_policy{
                       authz_id = _PolicyAuthzId,
                       last_updated_by = _AuthzId
                      } = Record, CallbackFun) ->
-    chef_object_default_callback:supdate(Record, CallbackFun).
+    chef_object_default_callback:update(Record, CallbackFun).
 
 
 parse_binary_json(Bin) ->
