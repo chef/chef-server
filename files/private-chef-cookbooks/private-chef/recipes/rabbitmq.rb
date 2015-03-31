@@ -87,7 +87,7 @@ if is_data_master?
     retries 20
   end
 
-  execute "#{rmq_ctl_chpost} wait #{rabbitmq_data_dir}/#{rabbitmq['nodename']}.pid" do
+  execute "#{rmq_ctl_chpost} wait #{rabbitmq_data_dir}/rabbit@localhost.pid" do
     environment rabbitmq_env
     retries 10
   end
