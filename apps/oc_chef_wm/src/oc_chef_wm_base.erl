@@ -944,9 +944,11 @@ create_from_json(#wm_reqdata{} = Req,
             {TypeName, Args} = call_if_exported(ResourceMod, route_args,
                                                 [ObjectRec, State], fun route_args/2),
             Uri = oc_chef_wm_routes:route(TypeName, Req, Args),
-            {true,
-             chef_wm_util:set_uri_of_created_resource(Uri, Req),
-             State#base_state{log_msg = LogMsg}};
+            BodyEJ0 = {[{<<"uri">>, Uri}]},
+            BodyEJ1 = call_if_exported(ResourceMod, finalize_create_body, [Req, State, BodyEJ0],
+                                       fun(_,_,EJ) -> EJ end),
+            Req1 = chef_wm_util:set_json_body(Req, BodyEJ1),
+            {true, chef_wm_util:set_location_of_created_resource(Uri, Req1), State#base_state{log_msg = LogMsg}};
         What ->
             %% ignore return value of solr delete, this is best effort.
             %% FIXME: created authz_id is leaked for this case, cleanup?
@@ -955,6 +957,7 @@ create_from_json(#wm_reqdata{} = Req,
             % 500 logging sanitizes responses to avoid exposing sensitive data -
             % TODO - parse sql error to get minimal meaningful message,
             % without exposing sensitive data
+            lager:error("Error in object creation: ~p", [What]),
             {{halt, 500}, Req, State#base_state{log_msg = What}}
     end.
 
@@ -986,13 +989,17 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
     case OrigObjectRec =:= ObjectRec of
         true ->
             State1 = State#base_state{log_msg = ignore_update_for_duplicate},
-            {true, chef_wm_util:set_json_body(Req, ObjectEjson), State1};
+            Body = call_if_exported(ResourceMod, finalize_update_body, [Req, State, ObjectEjson],
+                                   fun(_,_,EJ) -> EJ end),
+            {true, chef_wm_util:set_json_body(Req, Body), State1};
         false ->
             case chef_db:update(ObjectRec, DbContext, ActorId) of
                 ok ->
                     IsRename = chef_object:name(OrigObjectRec) =/= chef_object:name(ObjectRec),
                     Req1 = handle_rename(ObjectRec, Req, State, IsRename),
-                    {true, chef_wm_util:set_json_body(Req1, ObjectEjson), State};
+                    Body = call_if_exported(ResourceMod, finalize_update_body, [Req, State, ObjectEjson],
+                                           fun(_,_,EJ) -> EJ end),
+                    {true, chef_wm_util:set_json_body(Req1, Body), State};
                 not_found ->
                     %% We will get this if no rows were affected by the query. This could
                     %% happen if the object is deleted in the middle of handling this

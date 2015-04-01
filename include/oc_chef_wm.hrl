@@ -180,6 +180,7 @@
 -record(client_state, {
           client_data,
           client_authz_id,
+          keydata,
           chef_client :: #chef_client{} | not_found
          }).
 
@@ -278,6 +279,7 @@
 -record(user_state, {
           user_data,
           user_authz_id,
+          keydata,
           chef_user :: #chef_user{}
       }).
 

@@ -48,7 +48,8 @@
          conflict_message/1,
          malformed_request_message/3,
          request_type/0,
-         validate_request/3 ]).
+         validate_request/3,
+         finalize_update_body/3 ]).
 
 
 init(Config) ->
@@ -183,19 +184,25 @@ from_json(Req, #base_state{resource_state = #user_state{ chef_user = User, user_
         keygen_timeout ->
             {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
         UserDataWithKeys ->
-            %% Custom json body needed to maintain compatibility with opscode-account behavior.
-            %% oc_chef_wm_base:update_from_json will reply with the complete object, but
-            %% clients currently expect only a URI, and a private key if the key is new.
-            %%
-            %% However, we will retain the returned Request since Location header wil have been
-            %% correctly set if the username changed.
-            case oc_chef_wm_base:update_from_json(Req, State, User, UserDataWithKeys) of
-                {true, Req1, State1} ->
-                    {true, make_update_response(Req1, UserDataWithKeys), State1};
-                Other ->
-                    Other
-            end
+            oc_chef_wm_base:update_from_json(Req, State, User, UserDataWithKeys)
     end.
+
+finalize_update_body(Req, _State, BodyEJ) ->
+    %% Custom json body needed to maintain compatibility with opscode-account behavior.
+    %% oc_chef_wm_base:update_from_json will reply with the complete object, but
+    %% clients currently expect only a URI, and a private key if the key is new.
+    NewName = chef_user:username_from_ejson(BodyEJ),
+    Uri = oc_chef_wm_routes:route(user, Req, [{name, NewName}]),
+    EJ1 = {[{<<"uri">>, Uri}]},
+
+    % private_key will be set if we generated a new private_key, in which case
+    % we need to supply it to the caller.
+    case ej:get({<<"private_key">>}, BodyEJ) of
+        undefined ->
+            EJ1;
+        Key ->
+            ej:set({<<"private_key">>}, EJ1, Key)
+     end.
 
 to_json(Req, #base_state{resource_args = undefined,
                          resource_state = #user_state{chef_user = User},
@@ -246,24 +253,6 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
     {true, Req1, State}.
 
 
-%% Expected update response for users is currently just
-%% "uri" and (if regenerated) "privat_key" - this function will override
-%% whatever has been set in oc_chef_wm_base:update_from_ejson with these values.
-make_update_response(Request, OrigEJson) ->
-    NewName = chef_user:username_from_ejson(OrigEJson),
-    Uri = oc_chef_wm_routes:route(user, Request, [{name, NewName}]),
-
-    EJson1 = {[{<<"uri">>, Uri}]},
-
-    % private_key will be set if we generated a new private_key, in which case
-    % we need to supply it to the caller.
-    EJson2 = case ej:get({<<"private_key">>}, OrigEJson) of
-                 undefined ->
-                     EJson1;
-                 Key ->
-                     ej:set({<<"private_key">>}, EJson1, Key)
-             end,
-    chef_wm_util:set_json_body(Request, EJson2).
 
 conflict_message(Name) ->
     Msg = iolist_to_binary([<<"User '">>, Name, <<"' already exists">>]),

@@ -36,6 +36,7 @@
          object_name/2,
          set_json_body/2,
          set_uri_of_created_resource/2,
+         set_location_of_created_resource/2,
          with_error_body/2
         ]).
 
@@ -196,7 +197,12 @@ set_uri_of_created_resource(Uri, Req) when is_list(Uri) ->
 set_uri_of_created_resource(Uri, Req0) when is_binary(Uri) ->
     %% Uri needs to be a binary for encoding to JSON, but a string for the header value
     Req = set_json_body(Req0, {[{<<"uri">>, Uri}]}),
-    wrq:set_resp_header("Location", binary_to_list(Uri), Req).
+    set_location_of_created_resource(Uri, Req).
+
+set_location_of_created_resource(Uri, Req0) when is_list(Uri) ->
+    set_location_of_created_resource(list_to_binary(Uri), Req0);
+set_location_of_created_resource(Uri, Req0) when is_binary(Uri) ->
+    wrq:set_resp_header("Location", binary_to_list(Uri), Req0).
 
 %% @doc Extracts the name of a given object from the request path.  This is for use in
 %% resources that manipulate individual Chef objects, like nodes or roles.

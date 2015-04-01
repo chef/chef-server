@@ -35,7 +35,8 @@
          conflict_message/1,
          malformed_request_message/3,
          request_type/0,
-         validate_request/3]).
+         validate_request/3,
+         finalize_create_body/3 ]).
 
 
 init(Config) ->
@@ -91,18 +92,15 @@ handle_user_create(keygen_timeout, Req, State) ->
     {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
 handle_user_create({PublicKey, PrivateKey}, Req,
                    #base_state{resource_state = #user_state{user_data = UserData,
-                                                            user_authz_id = AuthzId}} = State) ->
-    Name = chef_user:username_from_ejson(UserData),
+                                                            user_authz_id = AuthzId} = US} = State) ->
     UserWithKey = chef_key_base:set_public_key(UserData, PublicKey),
+    US2 = US#user_state{keydata = PrivateKey},
+    oc_chef_wm_base:create_from_json(Req, State#base_state{resource_state = US2},
+                                     chef_user, {authz_id, AuthzId}, UserWithKey).
 
-    case oc_chef_wm_base:create_from_json(Req, State, chef_user, {authz_id, AuthzId}, UserWithKey) of
-        {true, Req1, State1} ->
-            Uri = oc_chef_wm_routes:route(user, Req1, [{name, Name}]),
-            Ejson = ej:set({<<"private_key">>}, {[{<<"uri">>, Uri}]}, PrivateKey),
-            {true, chef_wm_util:set_json_body(Req1, Ejson), State1};
-        Else ->
-            Else
-    end.
+% Callback from create_from_json, which allows us to customize our body response.
+finalize_create_body(_Req, #base_state{ resource_state = #client_state{ keydata = PrivateKey } }, BodyEJ ) ->
+    ej:set({<<"private_key">>}, BodyEJ, PrivateKey).
 
 to_json(Req, State) ->
     %% In the case of verbose, we cannot  use standard chef_wm_base behavior -

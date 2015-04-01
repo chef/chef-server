@@ -2,6 +2,23 @@
 %% ex: ts=4 sw=4 et
 %% @author Seth Falcon <seth@chef.io>
 %% @author Christopher Maier <cm@chef.io>
+%%
+%% Copyright 2012-2015 Chef Software, Inc. All Rights Reserved.
+%%
+%% This file is provided to you under the Apache License,
+%% Version 2.0 (the "License"); you may not use this file
+%% except in compliance with the License.  You may obtain
+%% a copy of the License at
+%%
+%%   http://www.apache.org/licenses/LICENSE-2.0
+%%
+%% Unless required by applicable law or agreed to in writing,
+%% software distributed under the License is distributed on an
+%% "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+%% KIND, either express or implied.  See the License for the
+%% specific language governing permissions and limitations
+%% under the License.
+%%
 %% @doc Resource for /data/:BAG_NAME
 %%
 %% This resource module serves two purposes. We initially factored it into two separate
@@ -20,22 +37,6 @@
 %%
 %%
 %% @end
-%% Copyright 2012-2014 Chef Software, Inc. All Rights Reserved.
-%%
-%% This file is provided to you under the Apache License,
-%% Version 2.0 (the "License"); you may not use this file
-%% except in compliance with the License.  You may obtain
-%% a copy of the License at
-%%
-%%   http://www.apache.org/licenses/LICENSE-2.0
-%%
-%% Unless required by applicable law or agreed to in writing,
-%% software distributed under the License is distributed on an
-%% "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-%% KIND, either express or implied.  See the License for the
-%% specific language governing permissions and limitations
-%% under the License.
-%%
 
 
 -module(chef_wm_named_data).
@@ -61,8 +62,8 @@
          malformed_request_message/3,
          request_type/0,
          validate_request/3,
-         conflict_message/1
-        ]).
+         conflict_message/1,
+         finalize_create_body/3 ]).
 
 -export([
          allowed_methods/2,
@@ -133,26 +134,23 @@ create_path(Req, #base_state{resource_state = #data_state{
     {binary_to_list(ItemName), Req, State}.
 
 -spec from_json(#wm_reqdata{}, #base_state{}) -> {boolean()|{halt,409|500}, #wm_reqdata{}, #base_state{}}.
-from_json(Req = #wm_reqdata{}, #base_state{
-                           resource_state = #data_state{data_bag_name = DataBagName,
-                                                        data_bag_item_ejson = ItemData}
-                          } = State) ->
-    case oc_chef_wm_base:create_from_json(Req, State, chef_data_bag_item, {authz_id,undefined}, {[{DataBagName, ItemData}]}) of
-        {true, _, NewState} ->
-            %% The Ruby API returns created items as-is, but with added chef_type and
-            %% data_bag fields. If those fields are present in the request, they are put
-            %% into the raw item data, but the values are overwritten for the return. When
-            %% this feature is enabled, erchef will mimic the Ruby API and force-add the
-            %% chef_type and data_bag keys to the item data. Current clients appear to rely
-            %% on this value, but it would be good to disable this and make the API more
-            %% sane. It is very confusing that you can specify bogus values, that look like
-            %% they are ignored, but actually end up in the item data.
-            ItemDataWithCruft = chef_data_bag_item:add_type_and_bag(DataBagName, ItemData),
-            Req1 = chef_wm_util:set_json_body(Req, ItemDataWithCruft),
-            {true, Req1, NewState};
-        AnyOtherCase ->
-            AnyOtherCase
-    end.
+from_json(Req, #base_state{resource_state = #data_state{data_bag_name = DataBagName,
+                                                        data_bag_item_ejson = ItemData} } = State) ->
+    oc_chef_wm_base:create_from_json(Req, State, chef_data_bag_item,
+                                     {authz_id,undefined}, {DataBagName, ItemData}).
+
+% Callback from create_from_json, which allows us to customize our body response.
+finalize_create_body(_Req, #base_state{ resource_state = #data_state{data_bag_name = DataBagName,
+                                                                     data_bag_item_ejson = ItemData} }, _BodyEJ ) ->
+    %% The Ruby API returns created items as-is, but with added chef_type and
+    %% data_bag fields. If those fields are present in the request, they are put
+    %% into the raw item data, but the values are overwritten for the return. When
+    %% this feature is enabled, erchef will mimic the Ruby API and force-add the
+    %% chef_type and data_bag keys to the item data. Current clients appear to rely
+    %% on this value, but it would be good to disable this and make the API more
+    %% sane. It is very confusing that you can specify bogus values, that look like
+    %% they are ignored, but actually end up in the item data.
+    chef_data_bag_item:add_type_and_bag(DataBagName, ItemData).
 
 to_json(Req, State) ->
     {items_for_data_bag(Req, State), Req, State}.

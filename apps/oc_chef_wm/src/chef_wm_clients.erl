@@ -58,7 +58,8 @@
 -export([allowed_methods/2,
          create_path/2,
          conflict_message/1,
-         from_json/2]).
+         from_json/2,
+         finalize_create_body/3]).
 
 init(Config) ->
     oc_chef_wm_base:init(?MODULE, Config).
@@ -115,27 +116,26 @@ from_json(Req, #base_state{resource_state =
               end,
     handle_client_create(KeyData, Req, State).
 
+
 handle_client_create(keygen_timeout, Req, State) ->
     {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
 handle_client_create({PublicKey, PrivateKey}, Req,
                      #base_state{resource_state =
                                      #client_state{client_data = ClientData,
-                                                   client_authz_id = AuthzId}} = State) ->
+                                                   client_authz_id = AuthzId} = CS} = State) ->
     ClientData1 = chef_key_base:set_public_key(ClientData, PublicKey),
-    case oc_chef_wm_base:create_from_json(Req, State, chef_client, {authz_id, AuthzId}, ClientData1) of
-        {true, Req1, State1} ->
-            %% create_from_json by default sets the response to a json body
-            %% containing only a uri key. Here we want to add the generated key
-            %% pair so we replace the response.
-            Name = ej:get({<<"name">>}, ClientData),
-            URI = oc_chef_wm_routes:route(client, Req1, [{name, Name}]),
-            EJSON = chef_key_base:set_key_pair({[{<<"uri">>, URI}]},
-                                                  {public_key, PublicKey},
-                                                  {private_key, PrivateKey}),
-            {true, chef_wm_util:set_json_body(Req1, EJSON), State1};
-        Else ->
-            Else
-    end.
+    CS2 = CS#client_state{ keydata = {PublicKey, PrivateKey}},
+    oc_chef_wm_base:create_from_json(Req,
+                                     State#base_state{resource_state = CS2},
+                                     chef_client, {authz_id, AuthzId}, ClientData1).
+
+% Callback from create_from_json, which allows us to customize our body response.
+finalize_create_body(_Req, #base_state{ resource_state = #client_state{ keydata = KeyData} }, BodyEJ) ->
+    {PublicKey, PrivateKey} = KeyData,
+    chef_key_base:set_key_pair(BodyEJ, {public_key, PublicKey}, {private_key, PrivateKey});
+finalize_create_body(_Req, _State, BodyEJ) ->
+    % Invoked indirectly from org creation, where wee won't have a #client_state
+    BodyEJ.
 
 malformed_request_message(Any, Req, State) ->
     chef_wm_malformed:malformed_request_message(Any, Req, State).

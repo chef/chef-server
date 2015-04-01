@@ -40,7 +40,8 @@
          delete_resource/2,
          from_json/2,
          resource_exists/2,
-         to_json/2]).
+         to_json/2,
+         finalize_update_body/3 ]).
 
 %% chef_wm behaviour callbacks
 -behaviour(chef_wm).
@@ -124,18 +125,16 @@ resource_exists(Req, #base_state{chef_db_context = DbContext,
     end.
 
 from_json(Req, #base_state{resource_state = #data_state{
-                             data_bag_name = BagName,
                              chef_data_bag_item = Item,
                              data_bag_item_ejson = ItemData}} = State) ->
-    %% We have to hack the shared update function so we can post-process and add the cruft
-    %% fields for back-compatibility.
-    case oc_chef_wm_base:update_from_json(Req, State, Item, ItemData) of
-        {true, Req1, State1} ->
-            CruftItemData = chef_data_bag_item:add_type_and_bag(BagName, ItemData),
-            {true, chef_wm_util:set_json_body(Req1, CruftItemData), State1};
-        {_, _, _} = Else ->
-            Else
-    end.
+    oc_chef_wm_base:update_from_json(Req, State, Item, ItemData).
+
+finalize_update_body(_Req, #base_state{ resource_state = #data_state{data_bag_name = BagName,
+                                                                     data_bag_item_ejson = ItemData}},
+                    _BodyEJ) ->
+    chef_data_bag_item:add_type_and_bag(BagName, ItemData).
+
+
 
 to_json(Req, #base_state{resource_state = DataBagState} = State) ->
     Item = DataBagState#data_state.chef_data_bag_item,
