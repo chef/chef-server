@@ -22,7 +22,7 @@
 
 require 'pedant/rspec/role_util'
 
-describe 'Pedant Self-Diagnostic', :pedantic do
+describe 'Pedant Self-Diagnostic', pedantic: true, self_test: true do
   context 'with shared() and let()' do
     context 'before(:all)' do
       before(:all) { shared_var } # Reference foo in noop
@@ -114,6 +114,42 @@ describe 'Pedant Self-Diagnostic', :pedantic do
         {:x => "foo", :y => [3,2,1]}.should_not strictly_match({:x => "foo", :y => [1,2,3,3,3]})
       end
 
+      context "works with hash values contained within an array" do
+        it "whether or not order matches" do
+          [ {:a => "a", :b => "b"} ].should strictly_match([ {:a => "a", :b => "b"} ])
+          [ {:a => "a", :b => "b"} ].should strictly_match([ {:b => "b", :a => "a"} ])
+        end
+
+
+        it "should not match if a key within the nested hash is missing from the target" do
+          expect([ {:b => "b", :a => "a"} ]).to_not strictly_match([ {:a => "a", :b => "b", :c => "c"} ])
+        end
+        it "should not match if the target contains more values then expected" do
+          expect([ {:b => "b", :a => "a", :c => "c"} ]).to_not strictly_match([ {:a => "a", :b => "b"} ])
+        end
+        it "should match if the spec contains a value that matches on regex and it is present in the target" do
+          expect([ { :a => "a", :b => "babcd"} ]).to strictly_match([ {:a => "a", :b => /.*ab.*/ } ])
+        end
+        it "should not match if the spec contains a value that matches on regex and it is not present in the target" do
+          expect([ {:b => "syz", :a => "a"} ]).to_not strictly_match([ {:a => "a", :b => /.*ab.*/ } ])
+        end
+        it "should match a nested array that matches" do
+          expect([ {:a => "a", :b => [:x,:y,:z]} ]).to strictly_match([ {:a => "a", :b => [:x, :y, :z] } ] )
+        end
+        it "should not match a nested array with too many values that otherwise matches" do
+          expect([ {:a => "a", :b => [:w, :x,:y,:z ]} ]).to_not strictly_match([ {:a => "a", :b => [:x, :y, :z] } ] )
+        end
+        it "should not match a nested array with too few values" do
+          expect([ {:a => "a", :b => [:x, :y ]} ]).to_not strictly_match([ {:a => "a", :b => [:x, :y, :z] } ] )
+        end
+        it "should not match a nested array that doesn't match" do
+          expect([ {:a => "a", :b => [:k, :l, :m ]} ] ).to_not strictly_match([ {:a => "a", :b => [:x, :y, :z] } ])
+        end
+      end
+      it "works with regexp specs in array elements" do
+        expect( { :x => ["a", "b", "bigfooot"]}).to strictly_match( {:x => ["a", "b", /.*foo.*/] })
+      end
+
       it "works with hash values" do
         # Positive case
         {
@@ -167,6 +203,37 @@ describe 'Pedant Self-Diagnostic', :pedantic do
 
         # Negative case
         {:a => 1, :b => 2}.should_not loosely_match({:a => 3})
+      end
+
+      context "works with hashes nested within an array" do
+        it "whether or not order matches" do
+          expect([ {:a => "a", :b => "b"} ]).to loosely_match([ {:a => "a", :b => "b"} ])
+          expect([ {:a => "a", :b => "b"} ]).to loosely_match([ {:b => "b", :a => "a"} ])
+        end
+        it "should not match if a key within the nested hash is missing from the target" do
+          expect([ {:b => "b", :a => "a"} ]).to_not loosely_match([ {:a => "a", :b => "b", :c => "c"} ])
+        end
+        it "should match if the target contains more values then expected" do
+          expect([ {:b => "b", :a => "a", :c => "c"} ]).to loosely_match([ {:a => "a", :b => "b"} ] )
+        end
+        it "should match if the spec contains a value that matches on regex and it is present in the target" do
+          expect([ {:b => "babcd", :a => "a"} ]).to loosely_match([ {:a => "a", :b => /.*ab.*/ } ] )
+        end
+        it "should not match if the spec contains a value that matches on regex and it is not present in the target" do
+          expect([ {:b => "syz", :a => "a"} ]).to_not loosely_match([ {:a => "a", :b => /.*ab.*/ } ])
+        end
+        it "should match a nested array that matches" do
+          expect([ {:a => "a", :b => [:x, :y, :z] } ]).to loosely_match([ {:a => "a", :b => [:x,:y,:z]} ] )
+        end
+        it "should match a nested array with too many values that otherwise matches because arrays are still exact matches" do
+          expect([ {:a => "a", :b => [:w, :x,:y, :z]}]).to loosely_match([ {:a => "a", :b => [:x, :y, :z] } ] )
+        end
+        it "should not match a nested array with too few values" do
+          expect([ {:a => "a", :b => [:x, :y ]} ]).to_not loosely_match([ {:a => "a", :b => [:x, :y, :z] }] )
+        end
+        it "should not match a nested array that doesn't match" do
+          expect([ {:a => "a", :b => [:x, :y, :z] } ]).to_not loosely_match([ {:a => "a", :b => [:k, :l, :m ]} ] )
+        end
       end
 
       it "works with regex keys" do

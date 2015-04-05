@@ -143,7 +143,7 @@ module Pedant
                 clients depsolver search knife validation authentication authorization
                 principals acl containers groups association omnibus organizations
                 usags internal_orgs rename_org controls keys cookbook_artifacts
-                license headers server-api-version)
+                license headers server-api-version policies cookbook-artifacts)
       export_options(opts, tags)
     end
 

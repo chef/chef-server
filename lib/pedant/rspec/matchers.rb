@@ -39,7 +39,7 @@ module RSpec
       end
 
       def matches?(actual)
-        return false unless actual.class == @expected.class
+        return false unless actual.class == @expected.class or (actual.class == String and @expected.class == Regexp)
         if actual.is_a? Hash
           hash_matches?(actual)
         elsif actual.is_a? Array
@@ -48,7 +48,12 @@ module RSpec
           @expected = @expected[:hashwrapper]
           result
         else
-          return false
+          # Using this, we can support matching regexp array elements
+          if @expected.class == Regexp
+            @expected =~ actual
+          else
+            @expected == actual
+          end
         end
       end # matches?
 
@@ -71,47 +76,18 @@ module RSpec
           when Array
             # we care about contents, not order; i.e., treat them
             # (kind of) like sets
-            begin
-              spec.sort == value.sort
-            rescue
-              # If the items cannot be sorted (e.g. Hashes), look for
-              # them one by one.  This requires you to specify the EXACT
-              # item!
-              #
-              # So far, this appears to be mainly of use for verifying
-              # search results.
-              #
-              # NOTE: If the items are Hashes, they must be exact matches!
-              #
-              # TODO: If we start testing against very large search
-              # results, this should be revisited, as this becomes very
-              # inefficient.
-
-              # might have recieved back nil as the result
-              # need to cut short the rest of the logic to provide a
-              # better message
-              return false if @actual.nil?
-
-              # A note here - when we're handling a key of :hashwrapper this means that
-              # this was a top-level array handed in for comparison. In that case,
-              # we will drive exactness of array match based on the strict?
-              # setting, since if the caller wanted an exact match of the array elements
-              # they would use body_exact (strict? == true)
-              if (key == :hashwrapper)
-                if strict?
-                  size_is_same = (spec.size == value.size)
-                else
-                  size_is_same = true # don't compare sizes, only the required elements
-                end
-              else
-                # In this case this is just one field among many contained in a hash - existing
-                # behavior expects this to match exactly even if we're not strictly matching
-                size_is_same = (spec.size == value.size)
+            return true if spec == value
+            return false if value.length < spec.length
+            return false if strict? and value.length != spec.length
+            # Note this is going to be slow for large arrays,
+            # though our actual usage shows we don't have any arrays on a
+            # scale that would matter.
+            return true if spec.all? { |s| value.include? s }
+            # Our comparisons are more complex than simple value
+              spec.each_with_index  do |newspec, x|
+                return false unless PedantHashComparator.new(newspec, @mode).matches? value[x]
               end
-
-              all_items_included = spec.all? { |item| value.include?(item) }
-              size_is_same && all_items_included
-            end
+              return true
           when Hash
             PedantHashComparator.new(spec, @mode).matches?(value)
           when Proc then
@@ -121,6 +97,14 @@ module RSpec
           end
         end
 
+      end
+
+      def friendly_actual
+        if @actual.class == Hash and @actual.has_key? :hashwrapper
+          @actual[:hashwrapper]
+        else
+          @actual
+        end
       end
 
       def description
@@ -135,7 +119,7 @@ module RSpec
         """
 Expected a #{strict? ? "full" : "partial"} match of the result
 
-  #{PP.pp(@actual, "")}
+  #{PP.pp(friendly_actual, "")}
 
 to the spec
 
@@ -149,7 +133,7 @@ to succeed, but it didn't!
         """
 Expected a #{strict? ? "full" : "partial"} match of the result
 
-  #{PP.pp(@actual, "")}
+  #{PP.pp(friendly_actual, "")}
 
 to the spec
 
