@@ -142,8 +142,8 @@ module Pedant
       tags = %w(environments cookbooks data_bags nodes roles sandboxes users
                 clients depsolver search knife validation authentication authorization
                 principals acl containers groups association omnibus organizations
-                usags internal_orgs rename_org controls keys cookbook_artifacts
-                license headers server-api-version policies cookbook-artifacts)
+                usags controls keys cookbook-artifacts license headers server-api-version
+                policies pedantic self-test )
       export_options(opts, tags)
     end
 
