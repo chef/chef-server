@@ -704,15 +704,22 @@ describe "/keys endpoint", :keys do
           end
           it "and infinity date is specfied it should still create a key with proper response and Location header" do
             expected_location = "#{key_url}/#{key_payload['name']}"
-            payload = key_payload
             key_payload["expiration_date"] = "infinity"
-            response = post("#{key_url}", superuser, payload: payload)
+            response = post("#{key_url}", superuser, payload: key_payload)
             response.should look_like(
               {
                 :status => 201,
                 :body_exact => { "uri" => expected_location },
                 :headers => [ "Location" => expected_location ]
               })
+          end
+          it "using special value 'generate' for public_key, it should generate a new private key and reply with it in the body" do
+            key_payload["public_key"] = "generate"
+            expected_location = "#{key_url}/#{key_payload['name']}"
+            response = post(key_url, superuser, payload: key_payload)
+            response.should look_like(status: 201,
+                                      body_exact: { "uri" => expected_location,
+                                                    "private_key" => /.*BEGIN (RSA )?PRIVATE.*/  })
           end
         end
 
@@ -730,7 +737,7 @@ describe "/keys endpoint", :keys do
         it_behaves_like "basic keys POST validation"
 
 
-        it "that doesn't exist" do
+        it "that doesn't exist it should reply with 404" do
             post("#{org_base_url}/clients/bob/keys", superuser, payload: key_payload).should look_like(status: 404)
         end
 
@@ -767,7 +774,7 @@ describe "/keys endpoint", :keys do
         let (:key_url) { "#{platform.server}/users/#{org_user_name}/keys" }
         it_behaves_like "basic keys POST validation"
 
-        it "that doesn't exist" do
+        it "that doesn't exist it should reply with 404" do
             post("#{platform.server}/users/bob/keys", superuser, payload: key_payload).should look_like(status: 404)
         end
         context "POST /users/:user/keys jas...", :authorization do
@@ -864,6 +871,12 @@ describe "/keys endpoint", :keys do
           @named_key_url = expected_location # Update so we can delete
           response.should look_like(status: 201, body_exact: key_payload,
                                     headers: ["Location" => expected_location])
+        end
+        it "using special value 'generate' for public_key, it should generate a new private key and reply with it in the body" do
+            response = put(@named_key_url, superuser, payload: { "public_key" => "generate" })
+            response.should look_like(status: 200,
+                                      body_exact: { "public_key" => /.*BEGIN (RSA )?PUBLIC KEY.*/,
+                                                    "private_key" => /.*BEGIN (RSA )?PRIVATE KEY.*/ } )
         end
         it "when PUT body is empty it should fail with a 400" do
           put(@named_key_url, superuser, payload: {}).should look_like(status: 400)
