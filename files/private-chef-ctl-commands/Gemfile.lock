@@ -1,19 +1,19 @@
 GIT
   remote: git://github.com/chef/omnibus-ctl.git
-  revision: bbe04f1451831dbc2d6aba3f24e522d0e511fc64
-  branch: tc/add-single-load
+  revision: 48b5bf8809a086848ab3933aa83e7750b4f5a0ef
+  branch: master
   specs:
-    omnibus-ctl (0.3.3)
+    omnibus-ctl (0.3.4)
 
 GEM
   remote: https://rubygems.org/
   specs:
     builder (3.2.2)
-    chef (12.1.2)
+    chef (12.2.1)
       chef-zero (~> 4.0)
       diff-lcs (~> 1.2, >= 1.2.4)
       erubis (~> 2.7)
-      ffi-yajl (~> 1.2)
+      ffi-yajl (>= 1.2, < 3.0)
       highline (~> 1.6, >= 1.6.9)
       mixlib-authentication (~> 1.3)
       mixlib-cli (~> 1.4)
@@ -31,8 +31,8 @@ GEM
       rspec_junit_formatter (~> 0.2.0)
       serverspec (~> 2.7)
       specinfra (~> 2.10)
-    chef-zero (4.0)
-      ffi-yajl (~> 1.1)
+    chef-zero (4.2.0)
+      ffi-yajl (>= 1.1, < 3.0)
       hashie (~> 2.0)
       mixlib-log (~> 1.3)
       rack
@@ -41,7 +41,7 @@ GEM
     diff-lcs (1.2.5)
     erubis (2.7.0)
     ffi (1.9.8)
-    ffi-yajl (1.4.0)
+    ffi-yajl (2.0.0)
       ffi (~> 1.5)
       libyajl2 (~> 1.2)
     hashie (2.1.2)
@@ -57,7 +57,6 @@ GEM
     mixlib-log (1.6.0)
     mixlib-shellout (2.0.1)
     multi_json (1.11.0)
-    net-dhcp (1.3.2)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
     net-ssh (2.9.2)
@@ -66,16 +65,15 @@ GEM
     net-ssh-multi (1.2.0)
       net-ssh (>= 2.6.5)
       net-ssh-gateway (>= 1.2.0)
-    ohai (8.1.1)
+    ohai (8.2.0)
       ffi (~> 1.9)
-      ffi-yajl (~> 1.1)
+      ffi-yajl (>= 1.1, < 3.0)
       ipaddress
       mime-types (~> 2.0)
       mixlib-cli
       mixlib-config (~> 2.0)
       mixlib-log
       mixlib-shellout (~> 2.0)
-      net-dhcp
       rake (~> 10.1)
       systemu (~> 2.6.4)
       wmi-lite (~> 1.0)
@@ -106,13 +104,13 @@ GEM
       builder (< 4)
       rspec (>= 2, < 4)
       rspec-core (!= 2.12.0)
-    serverspec (2.13.0)
+    serverspec (2.14.0)
       multi_json
       rspec (~> 3.0)
       rspec-its
       specinfra (~> 2.25)
     slop (3.6.0)
-    specinfra (2.25.1)
+    specinfra (2.28.1)
       net-scp
       net-ssh
     systemu (2.6.5)

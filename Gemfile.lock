@@ -1,12 +1,12 @@
 GIT
   remote: git://github.com/opscode/omnibus-software.git
-  revision: 023b7eed619b4ff72f43a1ea4edb430a35f848c2
+  revision: be79783ecc0e5d9caf816f13718d2f45ac049605
   specs:
     omnibus-software (4.0.0)
 
 GIT
   remote: git://github.com/opscode/omnibus.git
-  revision: daa70ea215d8bb2fd15b25ceba9441b3701750ea
+  revision: 1bb13b23df23b03c20e7f5cb9db680014dc1aec0
   specs:
     omnibus (4.0.0)
       chef-sugar (~> 3.0)
@@ -21,7 +21,7 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
-    chef-sugar (3.0.1)
+    chef-sugar (3.1.0)
     cleanroom (1.0.0)
     ffi (1.9.8)
     ffi-yajl (1.4.0)
@@ -47,7 +47,7 @@ GEM
       systemu (~> 2.6.4)
       wmi-lite (~> 1.0)
     rake (10.4.2)
-    ruby-progressbar (1.7.4)
+    ruby-progressbar (1.7.5)
     systemu (2.6.5)
     thor (0.19.1)
     uber-s3 (0.2.4)
