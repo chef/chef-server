@@ -2,6 +2,10 @@
 
 ## 12.0.8 (undetermined)
 
+### chef-server-ctl
+* Added rspec testing basics for chef-server-ctl commands
+* Updated and added testing for key rotation related chef-server-ctl commands
+
 ## 12.0.7 (2015-03-26)
 
 ### oc\_erchef 1.6.4

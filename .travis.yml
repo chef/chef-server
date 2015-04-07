@@ -1,3 +1,15 @@
-sudo:false
+branches:
+  only:
+    - master
+# used to parallelize different tests
+# see http://docs.travis-ci.com/user/speeding-up-the-build/
+env:
+  - TEST_SUITE=csc
+cache:
+  bundler: true
 language: ruby
-script: /bin/true
+rvm:
+  - 2.1.4
+before_script:
+  - bundle install
+script: "bundle exec rake test:$TEST_SUITE"

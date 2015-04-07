@@ -1,15 +1,15 @@
 GIT
   remote: git://github.com/opscode/omnibus-software.git
-  revision: 023b7eed619b4ff72f43a1ea4edb430a35f848c2
+  revision: be79783ecc0e5d9caf816f13718d2f45ac049605
   specs:
     omnibus-software (4.0.0)
 
 GIT
   remote: git://github.com/opscode/omnibus.git
-  revision: 0ca28e082b7b0678837f08584b8a2532db82c719
+  revision: 1bb13b23df23b03c20e7f5cb9db680014dc1aec0
   specs:
     omnibus (4.0.0)
-      chef-sugar (~> 2.2)
+      chef-sugar (~> 3.0)
       cleanroom (~> 1.0)
       mixlib-shellout (~> 1.4)
       mixlib-versioning
@@ -21,7 +21,7 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
-    chef-sugar (2.5.0)
+    chef-sugar (3.1.0)
     cleanroom (1.0.0)
     ffi (1.9.8)
     ffi-yajl (1.4.0)
@@ -46,8 +46,9 @@ GEM
       mixlib-shellout (~> 1.2)
       systemu (~> 2.6.4)
       wmi-lite (~> 1.0)
-    ruby-progressbar (1.7.1)
-    systemu (2.6.4)
+    rake (10.4.2)
+    ruby-progressbar (1.7.5)
+    systemu (2.6.5)
     thor (0.19.1)
     uber-s3 (0.2.4)
       mime-types (~> 1.17)
@@ -59,3 +60,4 @@ PLATFORMS
 DEPENDENCIES
   omnibus!
   omnibus-software!
+  rake
