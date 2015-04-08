@@ -1,5 +1,12 @@
 module("routes", package.seeall)
 
+-- To preserve the ability to run tests locally, please comment out any
+-- chef templating if statements so that the un-rendered portions run in tests. 
+-- For example:
+-- <% if @xdl_defaults['your_template_if_variable'] %>
+-- conditional lua code here
+-- <% end %>
+
 -- For lpeg syntax, reference www.inf.puc-rio.br/~roberto/lpeg/
 local lpeg = require "lpeg"
 local match = lpeg.match
@@ -66,11 +73,13 @@ local p_principals = P"principals"
 local p_internal_organizations_base = P"/internal-organizations"
 local p_controls = P"controls"
 local p_keys = P"keys"
-<% if @xdl_defaults['policies'] %>
+-- template portion below prefixed with lua comment to prevent
+-- errors when using un-rendered in tests.
+-- <% if @xdl_defaults['policies'] %>
 local p_policyfile = P"policies"
 local p_policy_groups = P"policy_groups"
 local p_cookbook_artifacts = P"cookbook_artifacts"
-<% end %>
+-- <% end %>
 
 
 -- Composite patterns

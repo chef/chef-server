@@ -1,6 +1,13 @@
 module("resolver", package.seeall)
 local upstream_resolver = { }
 
+-- To preserve the ability to run tests locally, please comment out any
+-- chef templating if statements so that the un-rendered portions run in tests.
+-- For example:
+-- <% if @xdl_defaults['your_template_if_variable'] %>
+-- conditional lua code here
+-- <% end %>
+
 -- These names map directly to named upstreams
 upstream_resolver.chef = "opscode_chef"
 upstream_resolver.erchef = "opscode_erchef"

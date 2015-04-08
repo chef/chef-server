@@ -1,5 +1,12 @@
 module("route_checks", package.seeall)
 
+-- To preserve the ability to run tests locally, please comment out any
+-- chef templating if statements so that the un-rendered portions run in tests.
+-- For example:
+-- <% if @xdl_defaults['your_template_if_variable'] %>
+-- conditional lua code	here
+-- <% end %>
+
 local response = {}
 response[403] = {}
 response[404] = {}
