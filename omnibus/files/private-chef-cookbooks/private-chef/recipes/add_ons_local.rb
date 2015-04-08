@@ -17,8 +17,19 @@ end
 
 addon_path = node['private_chef']['addons']['path']
 node['private_chef']['addons']['packages'].each do |pkg|
-  # find the newest package of each name
-  pkg_file = Dir["#{addon_path}/#{pkg}*.#{package_suffix}"].sort_by{ |f| File.mtime(f) }.last
+  if ::File.directory?(addon_path)
+    # find the newest package of each name if 'addon_path' is a directory
+    pkg_file = Dir["#{addon_path}/#{pkg}*.#{package_suffix}"].sort_by{ |f| File.mtime(f) }.last
+  else
+    if File.basename(addon_path) =~ /#{pkg}/
+      # use the full package path if it contains the package name
+      pkg_file = addon_path
+    else
+      # otherwise use the parent directory of the package
+      addon_parent_path = File.expand_path('..', addon_path)
+      pkg_file = Dir["#{addon_parent_path}/#{pkg}*.#{package_suffix}"].sort_by{ |f| File.mtime(f) }.last
+    end
+  end
   package pkg do
     case node['platform_family']
     when 'debian'
