@@ -1,6 +1,7 @@
 oc_erchef - Chef Server API
 ===========================
 
+[![Build Status Master](https://travis-ci.org/chef/oc_erchef.svg?branch=master)](https://travis-ci.org/chef/oc_erchef)
 
 This is the top-level project for the Erlang implementation of the
 Chef Server's REST API.
