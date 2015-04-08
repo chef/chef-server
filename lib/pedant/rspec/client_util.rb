@@ -322,15 +322,18 @@ module Pedant
               # Use the original public key
               #let(:updated_resource) { required_attributes.with('public_key', public_key) }
 
-              rejects_public_key_on_create_with "well-formed, bogus (private key)", public_key: Proc.new { bogus_key }
-              rejects_public_key_on_create_with "mal-formed", public_key: "-----BEGIN PUBLIC KEY-----You have been trolled :-)-----END PUBLIC KEY-----"
-              rejects_public_key_on_create_with "mal-formed RSA", public_key: "-----BEGIN RSA PUBLIC KEY-----You have been trolled :-)-----END RSA PUBLIC KEY-----"
-              rejects_public_key_on_create_with "mal-formed cert", public_key: "-----BEGIN CERTIFICATE-----You have been trolled :-)-----END CERTIFICATE-----"
-              rejects_public_key_on_create_with "blank", public_key: ""
+              # Public key validation is not enabled until min api version 1
+              if Pedant::Config.server_api_version > 0
+                rejects_public_key_on_create_with "well-formed, bogus (private key)", public_key: Proc.new { bogus_key }
+                rejects_public_key_on_create_with "mal-formed", public_key: "-----BEGIN PUBLIC KEY-----You have been trolled :-)-----END PUBLIC KEY-----"
+                rejects_public_key_on_create_with "mal-formed RSA", public_key: "-----BEGIN RSA PUBLIC KEY-----You have been trolled :-)-----END RSA PUBLIC KEY-----"
+                rejects_public_key_on_create_with "mal-formed cert", public_key: "-----BEGIN CERTIFICATE-----You have been trolled :-)-----END CERTIFICATE-----"
+                rejects_public_key_on_create_with "blank", public_key: ""
 
-              rejects_public_key_on_create_with "1 for the",  public_key: 1
-              rejects_public_key_on_create_with "[] for the", public_key: []
-              rejects_public_key_on_create_with "{} for the", public_key: {}
+                rejects_public_key_on_create_with "1 for the",  public_key: 1
+                rejects_public_key_on_create_with "[] for the", public_key: []
+                rejects_public_key_on_create_with "{} for the", public_key: {}
+              end
             end
 
           end # when setting private_key to true
@@ -404,25 +407,26 @@ module Pedant
             end
 
             context 'with a bad public_key', :validation do
-              # Use the original public key
-              let(:updated_resource) { required_attributes.with('public_key', test_client_public_key) }
+              # Public key validation is not enabled until min api version 1
+              if Pedant::Config.server_api_version > 0
+                let(:updated_resource) { required_attributes.with('public_key', test_client_public_key) }
+                rejects_public_key_on_update_with "well-formed, bogus", public_key: Proc.new { bogus_key } unless
+                rejects_public_key_on_update_with "mal-formed", public_key: "-----BEGIN PUBLIC KEY-----You have been trolled :-)-----END PUBLIC KEY-----"
+                rejects_public_key_on_update_with "mal-formed RSA", public_key: "-----BEGIN RSA PUBLIC KEY-----You have been trolled :-)-----END RSA PUBLIC KEY-----"
+                rejects_public_key_on_update_with "mal-formed cert", public_key: "-----BEGIN CERTIFICATE-----You have been trolled :-)-----END CERTIFICATE-----"
+                rejects_public_key_on_update_with "blank", public_key: ""
 
-              rejects_public_key_on_update_with "well-formed, bogus", public_key: Proc.new { bogus_key }
-              rejects_public_key_on_update_with "mal-formed", public_key: "-----BEGIN PUBLIC KEY-----You have been trolled :-)-----END PUBLIC KEY-----"
-              rejects_public_key_on_update_with "mal-formed RSA", public_key: "-----BEGIN RSA PUBLIC KEY-----You have been trolled :-)-----END RSA PUBLIC KEY-----"
-              rejects_public_key_on_update_with "mal-formed cert", public_key: "-----BEGIN CERTIFICATE-----You have been trolled :-)-----END CERTIFICATE-----"
-              rejects_public_key_on_update_with "blank", public_key: ""
-
-              # Invalid JSON types
-              rejects_public_key_on_update_with "1 for the",  public_key: 1
-              rejects_public_key_on_update_with "[] for the", public_key: []
-              rejects_public_key_on_update_with "{} for the", public_key: {}
+                # Invalid JSON types
+                rejects_public_key_on_update_with "1 for the",  public_key: 1
+                rejects_public_key_on_update_with "[] for the", public_key: []
+                rejects_public_key_on_update_with "{} for the", public_key: {}
+              end
             end
           end # when updating the public key
         end
 
         def rejects_public_key_on_create_with(adjective, _options = {})
-          context "with a #{adjective} public key" do
+          context "with a #{adjective} public key", :min_api_v1 do
             let(:requestor) { platform.admin_user }
             let(:public_key) { instance_eval_if_proc(_options[:public_key]) }
             let(:expected_response) { bad_request_response }
