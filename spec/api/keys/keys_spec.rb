@@ -105,18 +105,26 @@ describe "/keys endpoint", :keys do
     delete("#{platform.server}/users/#{user}/keys/#{key_name}",  requestor)
   end
 
+  def add_key_body(key, key_name, options)
+    request = { "name" => key_name, "expiration_date" => options[:expires] || "infinity" }
+    if key == :create_key
+      request["create_key"] = true
+    else
+      request["public_key"] = keys[key][:public]
+    end
+    request
+
+  end
   def add_client_key(org, client, key, key_name, options = {})
-    request =  { "name" => key_name, "public_key" => keys[key][:public],
-                 "expiration_date" => options[:expires] || "infinity" }
+    payload = add_key_body(key, key_name, options)
     requestor = options[:requestor].nil? ? superuser : options[:requestor]
-    post("#{platform.server}/organizations/#{org}/clients/#{client}/keys",  requestor, payload: request)
+    post("#{platform.server}/organizations/#{org}/clients/#{client}/keys",  requestor, payload: payload)
   end
 
   def add_user_key(user, key, key_name, options = {})
-    request =  { "name" => key_name, "public_key" => keys[key][:public],
-                 "expiration_date" => options[:expires] || "infinity"  }
+    payload = add_key_body(key, key_name, options)
     requestor = options[:requestor].nil? ? superuser : options[:requestor]
-    post("#{platform.server}/users/#{user}/keys",  requestor, payload: request)
+    post("#{platform.server}/users/#{user}/keys",  requestor, payload: payload)
   end
 
   def list_user_keys(user, requestor)
@@ -213,6 +221,20 @@ describe "/keys endpoint", :keys do
     end
   end
 
+  context "when a key has been generated for a user" do
+    before(:each) do
+        r = add_user_key(user['name'], :create_key, "genkey")
+        r.should look_like(status: 201)
+        @auth_privkey = parse(r)["private_key"]
+    end
+    after(:each) do
+      delete_user_key(user['name'], "genkey")
+    end
+    it "should be able to authenticate with the generated key" do
+        get("#{platform.server}/users/#{user['name']}", requestor(user['name'], @auth_privkey)).should look_like(status: 200)
+    end
+  end
+
   context "when a single key exists for a client" do
     context "when the key is uploaded via POST /clients" do
       it "should authenticate against the single key" do
@@ -231,6 +253,20 @@ describe "/keys endpoint", :keys do
       it "should break for original default key" do
         get("#{org_base_url}/clients/#{client['name']}", requestor(client['name'], client['private_key'])).should look_like(status: 401)
       end
+    end
+  end
+
+  context "when a key has been generated for a client" do
+    before(:each) do
+        r = add_client_key($org_name, client['name'], :create_key, "genkey")
+        r.should look_like(status: 201)
+        @auth_privkey = parse(r)["private_key"]
+    end
+    after(:each) do
+      delete_client_key($org_name, client['name'], "genkey")
+    end
+    it "should be able to authenticate with the generated key" do
+        get("#{org_base_url}/clients/#{client['name']}", requestor(client['name'], @auth_privkey)).should look_like(status: 200)
     end
   end
 
@@ -675,7 +711,8 @@ describe "/keys endpoint", :keys do
           "when date is missing" => {:delete =>  ["expiration_date"], :code => 400},
           "when public key is not a valid key" => {:replace => { "public_key" => "Nope."}, :code => 400},
           "when public key is missing" => {:delete=> ["public_key"], :code => 400},
-          "when a key of the same name already exists" => {:replace => {"name" => "default"}, :code => 409}
+          "when a key of the same name already exists" => {:replace => {"name" => "default"}, :code => 409},
+          "when both a public_key and create_key are present" => {:replace => { "create_key" => true }, :code => 400}
         }.each do |desc, setup|
           it "#{desc} it responds with #{setup[:code]}" do
             setup = {:replace=>{}, :delete => []}.merge(setup)
@@ -713,8 +750,16 @@ describe "/keys endpoint", :keys do
                 :headers => [ "Location" => expected_location ]
               })
           end
-          it "using special value 'generate' for public_key, it should generate a new private key and reply with it in the body" do
-            key_payload["public_key"] = "generate"
+          it "when 'create_key' is false alongside a public key it should not generate a private key" do
+            key_payload["create_key"] = false
+            expected_location = "#{key_url}/#{key_payload['name']}"
+            response = post(key_url, superuser, payload: key_payload)
+            response.should look_like(status: 201,
+                                      body_exact: { "uri" => expected_location })
+          end
+          it "when 'create_key' : true is specified in lieu of public key it should generate a new private key and reply with it in the body" do
+            key_payload["create_key"] = true
+            key_payload.delete("public_key")
             expected_location = "#{key_url}/#{key_payload['name']}"
             response = post(key_url, superuser, payload: key_payload)
             response.should look_like(status: 201,
@@ -872,8 +917,17 @@ describe "/keys endpoint", :keys do
           response.should look_like(status: 201, body_exact: key_payload,
                                     headers: ["Location" => expected_location])
         end
-        it "using special value 'generate' for public_key, it should generate a new private key and reply with it in the body" do
-            response = put(@named_key_url, superuser, payload: { "public_key" => "generate" })
+        it "when 'create_key' is false alongside a public key it should not generate a private key" do
+          key_payload['create_key'] = false
+          key_payload['public_key'] = keys[:key][:public]
+          key_payload.delete("name")
+          key_payload.delete("expiration_date")
+          response = put(@named_key_url, superuser, payload: key_payload)
+          response.should look_like(status: 200,
+                                    body_exact: { "public_key" => key_payload['public_key'] })
+        end
+        it "when 'create_key' : true is specified in lieu of public key it should generate a new private key and reply with it and the public_key in the body" do
+            response = put(@named_key_url, superuser, payload: { "create_key" => true })
             response.should look_like(status: 200,
                                       body_exact: { "public_key" => /.*BEGIN (RSA )?PUBLIC KEY.*/,
                                                     "private_key" => /.*BEGIN (RSA )?PRIVATE KEY.*/ } )
@@ -881,6 +935,7 @@ describe "/keys endpoint", :keys do
         it "when PUT body is empty it should fail with a 400" do
           put(@named_key_url, superuser, payload: {}).should look_like(status: 400)
         end
+
         # Note that ommitted fields are preserved, so we're not testing those as invalid updates.
         { "when name is empty" => {:replace => {"name" => ""}, :code => 400 },
           "when name is invalid" => {:replace => {"name" => "key the first"}, :code => 400 },
@@ -888,10 +943,12 @@ describe "/keys endpoint", :keys do
           "when date is invalid" => {:replace => {"expiration_date" => "2010-09-32T10:00:00"}, :code => 400},
           "when public key is empty" => {:replace => { "public_key" => ""}, :code => 400},
           "when public key is invalid" => {:replace => { "public_key" => "Nope."}, :code => 400},
-          "when a key of the same name already exists" => {:replace => {"name" => "default"}, :code => 409}
+          "when a key of the same name already exists" => {:replace => {"name" => "default"}, :code => 409},
+          "when both a public_key and create_key are present" => {:replace => { "create_key" => true }, :code => 400},
+          "when both a public_key and create_key are present but create_key is false" => {:replace => { "create_key" => false }, :code => 200}
         }.each do |desc, setup|
           it "#{desc} it responds with #{setup[:code]}" do
-            setup = {:replace=>{}, :delete => []}.merge(setup)
+            setup = {:replace=>{}}.merge(setup)
             payload = key_payload.merge(setup[:replace])
             put(@named_key_url, superuser, payload:payload).should look_like(status: setup[:code])
           end
@@ -1566,3 +1623,4 @@ describe "/keys endpoint", :keys do
     end
   end
 end
+
