@@ -128,7 +128,7 @@ list(#oc_chef_org_user_association{user_id = UserId, org_id = undefined} = Assoc
     CallbackFun({list_query(Assoc, by_user), [UserId],  rows}).
 
 new_record(ApiVersion, OrgId, unset,  Data) ->
-    UserId = eg:get({<<"user">>}, Data),
+    UserId = ej:get({<<"user">>}, Data),
     UserName = ej:get({<<"username">>}, Data),
     #oc_chef_org_user_association{server_api_version = ApiVersion,
                                   org_id = OrgId,
