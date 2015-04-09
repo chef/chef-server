@@ -34,17 +34,17 @@ module Pedant
       included do |base|
 
         base.extend(RSpecShared::Methods)
-
         include Pedant::JSON
         include Pedant::Request
         include Pedant::RSpec::CommonResponses
+
 
         # Request/Response
         subject { response } # By default, we are always testing responses
         let(:response) { authenticated_request(request_method, request_url_with_query_parameters, requestor, request_options.merge({server_api_version: request_version })) }
         let(:request_url_with_query_parameters){ request_url + (request_query_parameters ? "?#{request_query_parameters}" : "") }
         let(:parsed_response) { parse(response) }
-        let(:request_version) { Pedant::Config.server_api_version }
+        let(:request_version) { server_api_version }
         let(:request_method) { fail "Define one of the following: :GET, :POST, :PUT, :DELETE" }
         let(:requestor)      { fail "Define requestor (ex: admin_user, normal_user, etc.)" }
         let(:request_url)    { fail "Define url" }
@@ -400,8 +400,6 @@ module Pedant
           }.uniq
         end
 
-        require 'pathname'
-
         # Use this to wrap a group of examples into a focused context
         # We can't use focus because Rspec already has that directive
         def self.isolate(message = nil, &examples)
@@ -421,6 +419,7 @@ module Pedant
         def platform
           Pedant::Config.pedant_platform
         end
+
 
         ## TODO: Remove this method; we probably don't need to access it directly
         def server

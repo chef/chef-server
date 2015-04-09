@@ -121,7 +121,7 @@ describe "Principals API Endpoint", :principals do
     shared_context 'GET /principals/<name>' do
       context 'when requesting a client' do
         it 'returns a 200 ("OK") for admin' do
-          get(api_url("/principals/#{principal_client_name}"), admin_user, api_version: api_version) do |response|
+          get(api_url("/principals/#{principal_client_name}"), admin_user) do |response|
             response.should look_like({
                 :status => 200,
                 :body_exact => versioned_client_body
@@ -130,7 +130,7 @@ describe "Principals API Endpoint", :principals do
         end
 
         it 'returns a 200 ("OK") for normal user' do
-          get(api_url("/principals/#{principal_client_name}"), normal_user, api_version: api_version ) do |response|
+          get(api_url("/principals/#{principal_client_name}"), normal_user) do |response|
             response.should look_like({
                 :status => 200,
                 :body_exact => versioned_client_body
@@ -142,7 +142,7 @@ describe "Principals API Endpoint", :principals do
           # Currently, there is no auth on this endpoint at all; in the future,
           # these tests will have to change
 
-          get(api_url("/principals/#{principal_client_name}"), invalid_user, api_version: api_version ) do |response|
+          get(api_url("/principals/#{principal_client_name}"), invalid_user) do |response|
             response.should look_like({
                 :status => 200,
                 :body_exact => versioned_client_body
@@ -151,7 +151,7 @@ describe "Principals API Endpoint", :principals do
         end
 
         it 'returns a 200 ("OK") for outside user' do
-          get(api_url("/principals/#{principal_client_name}"), outside_user, api_version: api_version ) do |response|
+          get(api_url("/principals/#{principal_client_name}"), outside_user) do |response|
             response.should look_like({
                 :status => 200,
                 :body_exact => versioned_client_body
@@ -162,7 +162,7 @@ describe "Principals API Endpoint", :principals do
 
       context 'when requesting a user' do
         it 'returns a 200 ("OK") for admin' do
-          get(api_url("/principals/#{principal_user_name}"), admin_user, api_version: api_version ) do |response|
+          get(api_url("/principals/#{principal_user_name}"), admin_user) do |response|
             response.should look_like({
                 :status => 200,
                 :body_exact => versioned_user_body
@@ -171,7 +171,7 @@ describe "Principals API Endpoint", :principals do
         end
 
         it 'returns a 200 ("OK") for normal user' do
-          get(api_url("/principals/#{principal_user_name}"), normal_user, api_version: api_version ) do |response|
+          get(api_url("/principals/#{principal_user_name}"), normal_user) do |response|
             response.should look_like({
                 :status => 200,
                 :body_exact => versioned_user_body
@@ -180,7 +180,7 @@ describe "Principals API Endpoint", :principals do
         end
 
         it 'returns a 200 ("OK") for invalid user' do
-          get(api_url("/principals/#{principal_user_name}"), invalid_user, api_version: api_version ) do |response|
+          get(api_url("/principals/#{principal_user_name}"), invalid_user) do |response|
             response.should look_like({
                 :status => 200,
                 :body_exact => versioned_user_body
@@ -189,7 +189,7 @@ describe "Principals API Endpoint", :principals do
         end
 
         it 'returns a 200 ("OK") for outside user' do
-          get(api_url("/principals/#{principal_user_name}"), outside_user, api_version: api_version ) do |response|
+          get(api_url("/principals/#{principal_user_name}"), outside_user) do |response|
             response.should look_like({
                 :status => 200,
                 :body_exact => versioned_user_body
@@ -210,7 +210,7 @@ describe "Principals API Endpoint", :principals do
           } }
 
         it 'returns a 200 ("OK") for admin' do
-          get(api_url("/principals/#{principal_user_name}"), admin_user, api_version: api_version ) do |response|
+          get(api_url("/principals/#{principal_user_name}"), admin_user) do |response|
             response.should look_like({
                 :status => 200,
                 :body_exact => versioned_user_body
@@ -219,7 +219,7 @@ describe "Principals API Endpoint", :principals do
         end
 
         it 'returns a 200 ("OK") for normal user' do
-          get(api_url("/principals/#{principal_user_name}"), normal_user, api_version: api_version ) do |response|
+          get(api_url("/principals/#{principal_user_name}"), normal_user) do |response|
             response.should look_like({
                 :status => 200,
                 :body_exact => versioned_user_body
@@ -228,7 +228,7 @@ describe "Principals API Endpoint", :principals do
         end
 
         it 'returns a 200 ("OK") for invalid user' do
-          get(api_url("/principals/#{principal_user_name}"), invalid_user, api_version: api_version ) do |response|
+          get(api_url("/principals/#{principal_user_name}"), invalid_user) do |response|
             response.should look_like({
                 :status => 200,
                 :body_exact => versioned_user_body
@@ -237,7 +237,7 @@ describe "Principals API Endpoint", :principals do
         end
 
         it 'returns a 200 ("OK") for outside user' do
-          get(api_url("/principals/#{principal_user_name}"), outside_user, api_version: api_version ) do |response|
+          get(api_url("/principals/#{principal_user_name}"), outside_user) do |response|
             response.should look_like({
                 :status => 200,
                 :body_exact => versioned_user_body
@@ -327,15 +327,21 @@ describe "Principals API Endpoint", :principals do
       end
     end
 
-    context '[deprecated] v0' do
-        let(:api_version)  { 0 }
+    context '[deprecated] v0', :api_v0 do
         let(:versioned_client_body) { client_body }
         let(:versioned_user_body) { user_body }
         include_context 'GET /principals/<name>'
     end
 
-    context '[current] v>0' do
-        let(:api_version)  { 1 }
+    context '[current] v > 0', :api_vcurrent do
+        before(:all) do
+            puts "API version: #{platform.server_api_version}"
+            platform.server_api_version = 1 # TODO config generated for max supported
+            puts "API version: #{platform.server_api_version}"
+        end
+        after(:all) do
+            platform.reset_server_api_version
+        end
         let(:versioned_client_body) { {"principals" => [ client_body ]} }
         let(:versioned_user_body) { {"principals" => [ user_body ]} }
         include_context 'GET /principals/<name>'
