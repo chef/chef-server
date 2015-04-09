@@ -159,7 +159,7 @@ deprovision_fetch_org_global_admins(Error, Context) ->
     % the DB. If previous step to remove USAG from org users was successful, we can consider this a
     % successful deletion.
     % This will change when we start doing proper cleanup of auth entity as part of USAG deletion.
-    deprovision_remove_global_org_admin_ace({ok, ok}, Context = #context{msg = [{usag_record_delete_failed, Error}]}).
+    deprovision_remove_global_org_admin_ace({ok, ok}, Context#context{msg = [{usag_record_delete_failed, Error}]}).
 
 deprovision_remove_global_org_admin_ace(OrgGlobalAdminsAuthzId,
                                         #context{ user_authz_id = UserAuthzId,
