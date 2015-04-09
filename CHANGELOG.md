@@ -8,10 +8,20 @@
 
 ## 12.0.7 (2015-03-26)
 
+### oc\_erchef 1.7.0
+* introduces server api versioning pr chef-rfc/rfc-041.  As of 1.7.0
+  the only supported version is 0.
+* significant internal refactoring and cleanup
+
+### oc-chef-pedant 2.0.5
+* tests for server api versioning, and by default pass
+  x-ops-server-api-version to the server on all requests.
+
 ### oc\_erchef 1.6.4
 * Policyfile endpoint URLs updated to match Chef RFC 042
 * Cookbook Artifacts endpoint for policyfiles
 * Miscelaneous build improvements
+
 ### oc\_erchef 1.6.3
 * Search results respect ACLs.
 
