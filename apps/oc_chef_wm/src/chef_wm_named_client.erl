@@ -116,7 +116,7 @@ auth_info(Req, #base_state{resource_state =
 from_json(Req, #base_state{resource_state =
                                #client_state{chef_client = Client,
                                              client_data = ClientData}} = State) ->
-    case chef_wm_util:maybe_generate_key_pair(ClientData) of
+    case chef_key_base:maybe_generate_key_pair(ClientData) of
         keygen_timeout ->
             {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
         ClientData1 ->

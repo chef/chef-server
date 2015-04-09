@@ -107,7 +107,7 @@ create_path(Req, #base_state{resource_state = #client_state{client_data = Client
 %% and return the private key as part of the response
 from_json(Req, #base_state{resource_state =
                                #client_state{client_data = ClientData}} = State) ->
-    KeyData = case chef_object_base:cert_or_key(ClientData) of
+    KeyData = case chef_key_base:cert_or_key(ClientData) of
                   {undefined, _} ->
                       chef_keygen_cache:get_key_pair();
                   {PubKey, _PubKeyVersion} ->
@@ -121,7 +121,7 @@ handle_client_create({PublicKey, PrivateKey}, Req,
                      #base_state{resource_state =
                                      #client_state{client_data = ClientData,
                                                    client_authz_id = AuthzId}} = State) ->
-    ClientData1 = chef_object_base:set_public_key(ClientData, PublicKey),
+    ClientData1 = chef_key_base:set_public_key(ClientData, PublicKey),
     case oc_chef_wm_base:create_from_json(Req, State, chef_client, {authz_id, AuthzId}, ClientData1) of
         {true, Req1, State1} ->
             %% create_from_json by default sets the response to a json body
@@ -129,7 +129,7 @@ handle_client_create({PublicKey, PrivateKey}, Req,
             %% pair so we replace the response.
             Name = ej:get({<<"name">>}, ClientData),
             URI = oc_chef_wm_routes:route(client, Req1, [{name, Name}]),
-            EJSON = chef_object_base:set_key_pair({[{<<"uri">>, URI}]},
+            EJSON = chef_key_base:set_key_pair({[{<<"uri">>, URI}]},
                                                   {public_key, PublicKey},
                                                   {private_key, PrivateKey}),
             {true, chef_wm_util:set_json_body(Req1, EJSON), State1};

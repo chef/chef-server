@@ -179,7 +179,7 @@ from_json(Req, #base_state{resource_args = invitation_response,
             end
     end;
 from_json(Req, #base_state{resource_state = #user_state{ chef_user = User, user_data = UserData}} = State) ->
-    case chef_wm_util:maybe_generate_key_pair(UserData) of
+    case chef_key_base:maybe_generate_key_pair(UserData) of
         keygen_timeout ->
             {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
         UserDataWithKeys ->

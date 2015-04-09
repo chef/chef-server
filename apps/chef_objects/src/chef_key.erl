@@ -148,7 +148,7 @@ new_record(ApiVersion, _OrgId, _AuthzId, {Id, KeyData}) ->
               expires_at = Expires}.
 
 safe_key_version(PublicKey) ->
-    try chef_object_base:key_version(PublicKey) of
+    try chef_key_base:key_version(PublicKey) of
         Result -> Result
     catch
         _:_ -> throw(invalid_public_key)
@@ -195,7 +195,7 @@ validate_expiration_date(Required, EJ) ->
   end.
 
 name_and_public_key_validation_spec(Req) ->
-  {[ chef_object_base:public_key_spec(Req),
+  {[ chef_key_base:public_key_spec(Req),
      {{Req, <<"name">>}, {string_match, chef_regex:regex_for(key_name)}} ]}.
 
 update_query(_ObjectRec) ->

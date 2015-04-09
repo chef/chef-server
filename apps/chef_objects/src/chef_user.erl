@@ -126,7 +126,7 @@ new_record(ApiVersion, OrgId, AuthzId, Data) ->
     Email = value_or_null({<<"email">>}, UserData),
     ExtAuthUid = value_or_null({<<"external_authentication_uid">>}, UserData),
     EnableRecovery = ej:get({<<"recovery_authentication_enabled">>}, UserData) =:= true,
-    {PublicKey, PubkeyVersion} = chef_object_base:cert_or_key(UserData),
+    {PublicKey, PubkeyVersion} = chef_key_base:cert_or_key(UserData),
     SerializedObject = { whitelisted_values(UserData, ?JSON_SERIALIZABLE) },
     #chef_user{server_api_version = ApiVersion,
                id = Id,
@@ -242,7 +242,7 @@ assemble_user_ejson(#chef_user{username = Name,
     % public_key can mean either public key or cert.
     % if it's a cert, we need to extract the public key -
     % we don't want to hand the cert back on user GET.
-    RealPubKey = chef_object_base:extract_public_key(KeyOrCert),
+    RealPubKey = chef_key_base:extract_public_key(KeyOrCert),
     % Where external auth is enable, email may be null/undefined
     Email2 = case Email of
         undefined -> <<"">>;
@@ -267,12 +267,12 @@ parse_binary_json(Bin) ->
 
 -spec parse_binary_json(binary(), create | update, #chef_user{} | undefined) -> {ok, jiffy:json_value()}. % or throw
 parse_binary_json(Bin, Operation, User) ->
-    EJ = chef_object_base:delete_null_public_key(chef_json:decode(Bin)),
+    EJ = delete_null_public_key(chef_json:decode(Bin)),
     EJson = case ej:get({<<"private_key">>}, EJ) of
         true ->
             ej:delete({<<"public_key">>}, EJ);
         _ ->
-            validate_user(EJ, {[ chef_object_base:public_key_spec(opt) ]}),
+            validate_user(EJ, {[ chef_key_base:public_key_spec(opt) ]}),
             EJ
     end,
 
@@ -305,6 +305,16 @@ external_auth_uid(EJson, _) ->
 
 undefined_or_value(null) -> undefined;
 undefined_or_value(Value) -> Value.
+
+%% Hack to get null public_key accepted as undefined
+-spec delete_null_public_key(ej:json_object()) -> ej:json_object().
+delete_null_public_key(Ejson) ->
+    case ej:get({<<"public_key">>}, Ejson) of
+        null ->
+            ej:delete({<<"public_key">>}, Ejson);
+        _ ->
+            Ejson
+    end.
 
 %%-spec validate_user(ejson_term(), ejson_term()) -> {ok, ejson_term()}. % or throw
 validate_user(User, Spec) ->
@@ -360,7 +370,7 @@ update_from_ejson(#chef_user{} = User, UserEJson) ->
     RecoveryAuthenticationEnabled = value_or_existing({<<"recovery_authentication_enabled">>},
                                                       UserEJson,
                                                       User#chef_user.recovery_authentication_enabled) =:= true,
-    {Key, Version} = chef_object_base:cert_or_key(UserEJson),
+    {Key, Version} = chef_key_base:cert_or_key(UserEJson),
 
     User2 = case Key of
         undefined ->
@@ -469,3 +479,4 @@ list(#chef_user{email = EMail}, CallbackFun) ->
 
 set_api_version(ObjectRec, Version) ->
     ObjectRec#chef_user{server_api_version = Version}.
+

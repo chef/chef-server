@@ -103,7 +103,7 @@ update_from_ejson(#chef_client{} = Client, ClientData) ->
     IsAdmin = ej:get({<<"admin">>}, ClientData) =:= true,
     IsValidator = ej:get({<<"validator">>}, ClientData) =:= true,
     %% Take public_key first, then certificate
-    {Key, Version} = cert_or_key(ClientData),
+    {Key, Version} = chef_key_base:cert_or_key(ClientData),
     case Key of
         undefined ->
             Client#chef_client{name = Name,
@@ -151,7 +151,7 @@ new_record(ApiVersion, OrgId, AuthzId, ClientData) ->
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     Validator = ej:get({<<"validator">>}, ClientData) =:= true,
     Admin = ej:get({<<"admin">>}, ClientData) =:= true,
-    {PublicKey, PubkeyVersion} = cert_or_key(ClientData),
+    {PublicKey, PubkeyVersion} = chef_key_base:cert_or_key(ClientData),
     #chef_client{server_api_version = ApiVersion,
                  id = Id,
                  authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
@@ -192,7 +192,7 @@ add_authn_fields(ClientData, PublicKey) ->
                 end,
                 ClientData,
                 [
-                    {<<"pubkey_version">>, chef_object_base:key_version(PublicKey)},
+                    {<<"pubkey_version">>, chef_key_base:key_version(PublicKey)},
                     {<<"public_key">>, PublicKey}
                 ]).
 
@@ -210,9 +210,8 @@ assemble_client_ejson(#chef_client{name = Name, validator = Validator,
         undefined ->
             {Values};
         _ ->
-            {[{<<"public_key">>, chef_object_base:extract_public_key(PublicKey)} | Values]}
+            {[{<<"public_key">>, chef_key_base:extract_public_key(PublicKey)} | Values]}
     end.
-
 
 %% @doc Convert a binary JSON string representing a Chef Client into an
 %% EJson-encoded Erlang data structure, using passed defaults
@@ -240,9 +239,9 @@ set_values_from_current_client(Client, not_found) ->
 set_values_from_current_client(Client, #chef_client{validator = IsValidator,
                                                     public_key = Cert}) ->
     C = chef_object_base:set_default_values(Client, [{<<"validator">>, IsValidator}]),
-    case chef_object_base:cert_or_key(C) of
+    case chef_key_base:cert_or_key(C) of
         {undefined, _} ->
-            chef_object_base:set_public_key(C, Cert);
+            chef_key_base:set_public_key(C, Cert);
         {_NewPublicKey, _} ->
             C
     end.
@@ -299,29 +298,6 @@ value_or_default(undefined, Default) ->
 value_or_default(Value, _) ->
     Value.
 
-cert_or_key(Payload) ->
-    %% Some consumers of the API, such as webui, will generate a
-    %% JSON { public_key: null } to mean, "do not change it". By
-    %% default, null is treated as a defined, and will erase the
-    %% public_key in the database. We use value_or_undefined() to
-    %% convert all null into undefined.
-    Cert = value_or_undefined({<<"certificate">>}, Payload),
-    PublicKey = value_or_undefined({<<"public_key">>}, Payload),
-    %% Take certificate first, then public_key
-    case PublicKey of
-        undefined ->
-            {Cert, ?CERT_VERSION};
-        _ ->
-            {PublicKey, ?KEY_VERSION}
-    end.
-
-value_or_undefined(Key, Data) ->
-  case ej:get(Key, Data) of
-    null ->
-      undefined;
-    Value ->
-      Value
-  end.
 -spec(list(#chef_client{}, chef_object:select_callback()) -> chef_object:select_return()).
 list(#chef_client{org_id = OrgId} = Rec, CallbackFun) ->
     CallbackFun({list_query(Rec), [OrgId], [name]}).

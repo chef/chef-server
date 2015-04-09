@@ -196,9 +196,8 @@ maybe_create_client({PublicKey, PrivateKey}, Req,
                                                                      name = OrgName
                                                                     }} = ResourceState} = State) ->
     ClientName = <<OrgName/binary,"-validator">>,
-    ClientEJson = chef_object_base:set_public_key({[{<<"name">>, ClientName},
-                                                    {<<"validator">>, true}]},
-                                                  PublicKey),
+    ClientEJson = chef_key_base:set_public_key({[{<<"name">>, ClientName},
+                                                 {<<"validator">>, true}]}, PublicKey),
 
     %% Update the return state
     OrgEJson =  {[{<<"uri">>, oc_chef_wm_routes:route(organization, Req, [{name, OrgName}])},
