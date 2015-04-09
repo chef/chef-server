@@ -102,6 +102,7 @@ fields_for_insert(#oc_chef_org_user_association{ org_id = OrgId, user_id = UserI
 bulk_get_query(_ObjectRec) ->
     erlang:error(not_implemented).
 
+-spec parse_binary_json(binary()) -> {ok, jiffy:json_value()}. % or throw
 parse_binary_json(Bin) ->
     EJ = chef_json:decode(Bin),
     case ej:valid(org_user_association_spec(), EJ) of
@@ -155,7 +156,6 @@ type_name(#oc_chef_org_user_association{}) ->
 
 delete(#oc_chef_org_user_association{org_id = OrgId, user_id = UserId} = ObjectRec, CallbackFun) ->
     CallbackFun({delete_query(ObjectRec), [OrgId, UserId]}).
-
 
 set_api_version(ObjectRec, Version) ->
     ObjectRec#oc_chef_org_user_association{server_api_version = Version}.

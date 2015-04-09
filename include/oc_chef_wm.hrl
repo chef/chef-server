@@ -317,7 +317,7 @@
          }).
 
 -record(association_state, {
-          data,
+          data :: jiffy:json_value(),
           user,
           org_user_association,
           org_user_invite,

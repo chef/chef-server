@@ -112,6 +112,7 @@ list_query(_ObjectRec, by_user) ->
 bulk_get_query(_ObjectRec) ->
     erlang:error(not_implemented).
 
+-spec parse_binary_json(binary(), create | response) -> {ok, jiffy:json_value()}. %% or throw
 parse_binary_json(Bin, Type) ->
     EJ = chef_json:decode(Bin),
     case ej:valid(validation_spec(Type), EJ) of
