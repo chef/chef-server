@@ -50,7 +50,8 @@ cert_data() ->
 assemble_client_ejson_test_() ->
     [{"obtain expected EJSON",
       fun() ->
-              Client = #chef_client{name = <<"alice">>,
+              Client = #chef_client{server_api_version = ?API_MIN_VER,
+                                    name = <<"alice">>,
                                     admin = true,
                                     validator = false,
                                     public_key = public_key_data()},
@@ -68,7 +69,8 @@ assemble_client_ejson_test_() ->
       end},
      {"converts certificate to public key",
       fun() ->
-              Client = #chef_client{name = <<"alice">>,
+              Client = #chef_client{server_api_version = ?API_MIN_VER,
+                                    name = <<"alice">>,
                                     admin = true,
                                     validator = false,
                                     public_key = cert_data()},
@@ -92,13 +94,13 @@ parse_binary_json_test_() ->
     [{"Error thrown on mismatched names",
       fun() ->
           Body = <<"{\"name\":\"name\",\"clientname\":\"notname\"}">>,
-          ?assertThrow({client_name_mismatch}, chef_client:parse_binary_json(Body, <<"name">>))
+          ?assertThrow({client_name_mismatch}, chef_client:parse_binary_json(?API_MIN_VER, Body, <<"name">>))
       end
      },
      {"Can create with only name",
       fun() ->
           Body = <<"{\"name\":\"name\"}">>,
-          {ok, Client} = chef_client:parse_binary_json(Body, <<"name">>),
+          {ok, Client} = chef_client:parse_binary_json(?API_MIN_VER, Body, <<"name">>),
           Name = ej:get({<<"name">>}, Client),
           ClientName = ej:get({<<"clientname">>}, Client),
           ?assertEqual(Name, ClientName)
@@ -107,7 +109,7 @@ parse_binary_json_test_() ->
      {"Can create with only clientname",
       fun() ->
           Body = <<"{\"clientname\":\"name\"}">>,
-          {ok, Client} = chef_client:parse_binary_json(Body, <<"name">>),
+          {ok, Client} = chef_client:parse_binary_json(?API_MIN_VER, Body, <<"name">>),
           Name = ej:get({<<"name">>}, Client),
           ClientName = ej:get({<<"clientname">>}, Client),
           ?assertEqual(Name, ClientName)
@@ -117,7 +119,7 @@ parse_binary_json_test_() ->
       fun() ->
           Body = <<"{\"validator\":false}">>,
           ?assertThrow({both_missing, <<"name">>, <<"clientname">>},
-                       chef_client:parse_binary_json(Body, undefined))
+                       chef_client:parse_binary_json(?API_MIN_VER, Body, undefined))
       end
      },
      {"Error thrown with bad name",
@@ -125,7 +127,7 @@ parse_binary_json_test_() ->
           Body = <<"{\"name\":\"bad~name\"}">>,
           ?assertThrow({bad_client_name, <<"bad~name">>,
                         <<"Malformed client name.  Must be A-Z, a-z, 0-9, _, -, or .">>},
-                       chef_client:parse_binary_json(Body, <<"bad~name">>))
+                       chef_client:parse_binary_json(?API_MIN_VER, Body, <<"bad~name">>))
       end
      }
     ].

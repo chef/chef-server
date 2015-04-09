@@ -82,12 +82,12 @@ validate_request('GET', Req, #base_state{organization_guid = OrgId} = State) ->
     %% code for generating the map of name => URL returned for GET /clients.  OrgId is set via
     %% malformed_request.
     {Req, State#base_state{resource_state = #chef_client{org_id = OrgId}}};
-validate_request('POST', Req, State) ->
+validate_request('POST', Req, #base_state{server_api_version = ApiVersion} = State) ->
     case wrq:req_body(Req) of
         undefined ->
             throw({error, missing_body});
         Body ->
-            {ok, Client} = chef_client:parse_binary_json(Body, undefined),
+            {ok, Client} = chef_client:parse_binary_json(ApiVersion, Body, undefined),
             {Req, State#base_state{superuser_bypasses_checks = true,
                     resource_state = #client_state{client_data = Client}}}
     end.

@@ -27,7 +27,6 @@
 
 -export([
          authz_id/1,
-         add_authn_fields/2,
          assemble_client_ejson/2,
          ejson_for_indexing/2,
          fields_for_fetch/1,
@@ -37,15 +36,16 @@
          name/1,
          org_id/1,
          new_record/4,
-         parse_binary_json/2,
          parse_binary_json/3,
+         parse_binary_json/4,
          record_fields/1,
          set_created/2,
          set_updated/2,
          set_api_version/2,
          type_name/1,
          update_from_ejson/2,
-         list/2
+         list/2,
+         fields_for_insert/1
         ]).
 
 %% database named queries
@@ -59,17 +59,6 @@
         ]).
 
 -mixin([{chef_object_default_callbacks, [ fetch/2, update/2 ]}]).
-
-
--define(DEFAULT_FIELD_VALUES, [
-                               {<<"json_class">>, <<"Chef::ApiClient">>},
-                               {<<"chef_type">>, <<"client">>},
-                               {<<"validator">>, false},
-                               {<<"private_key">>, false}
-                              ]).
-
-
-
 
 -behaviour(chef_object).
 
@@ -127,26 +116,34 @@ set_updated(#chef_client{} = Object, ActorId) ->
     Now = chef_object_base:sql_date(now),
     Object#chef_client{updated_at = Now, last_updated_by = ActorId}.
 
+create_query(#chef_client{server_api_version = ?API_v0}) ->
+    insert_client_v0;
 create_query(_ObjectRec) ->
     insert_client.
 
+update_query(#chef_client{server_api_version = ?API_v0}) ->
+    update_client_by_id_v0;
 update_query(_ObjectRec) ->
     update_client_by_id.
 
 delete_query(_ObjectRec) ->
     delete_client_by_id.
 
+find_query(#chef_client{server_api_version = ?API_v0}) ->
+    find_client_by_orgid_name_v0;
 find_query(_ObjectRec) ->
     find_client_by_orgid_name.
 
 list_query(_ObjectRec) ->
     list_clients_for_org.
 
+bulk_get_query(#chef_client{server_api_version = ?API_v0}) ->
+    bulk_get_clients_v0;
 bulk_get_query(_ObjectRec) ->
     bulk_get_clients.
 
 -spec new_record(api_version(), object_id(), object_id(), ejson_term()) -> #chef_client{}.
-new_record(ApiVersion, OrgId, AuthzId, ClientData) ->
+new_record(?API_v0 = ApiVersion, OrgId, AuthzId, ClientData) ->
     Name = ej:get({<<"name">>}, ClientData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     Validator = ej:get({<<"validator">>}, ClientData) =:= true,
@@ -160,9 +157,20 @@ new_record(ApiVersion, OrgId, AuthzId, ClientData) ->
                  validator = Validator,
                  admin = Admin,
                  public_key = PublicKey,
-                 pubkey_version = PubkeyVersion}.
+                 pubkey_version = PubkeyVersion};
+new_record(ApiVersion, OrgId, AuthzId, ClientData) ->
+    Name = ej:get({<<"name">>}, ClientData),
+    Id = chef_object_base:make_org_prefix_id(OrgId, Name),
+    Validator = ej:get({<<"validator">>}, ClientData) =:= true,
+    #chef_client{server_api_version = ApiVersion,
+                 id = Id,
+                 authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
+                 org_id = OrgId,
+                 name = Name,
+                 validator = Validator}.
 
-fields_for_update(#chef_client{last_updated_by = LastUpdatedBy,
+fields_for_update(#chef_client{server_api_version = ?API_v0,
+                               last_updated_by = LastUpdatedBy,
                                updated_at = UpdatedAt,
                                name = Name,
                                public_key = PublicKey,
@@ -170,88 +178,115 @@ fields_for_update(#chef_client{last_updated_by = LastUpdatedBy,
                                admin = IsAdmin,
                                validator = IsValidator,
                                id = Id}) ->
-    [LastUpdatedBy, UpdatedAt, Name,
-     PublicKey, PubkeyVersion,
-     IsValidator =:= true,
-     IsAdmin =:= true, Id].
+    [LastUpdatedBy, UpdatedAt, Name, PublicKey, PubkeyVersion,
+     IsValidator =:= true, IsAdmin =:= true, Id];
+fields_for_update(#chef_client{last_updated_by = LastUpdatedBy,
+                               updated_at = UpdatedAt,
+                               name = Name,
+                               validator = IsValidator,
+                               id = Id}) ->
+    [LastUpdatedBy, UpdatedAt, Name, IsValidator =:= true, Id].
 
 fields_for_fetch(#chef_client{org_id = OrgId,
                               name = Name}) ->
     [OrgId, Name].
 
+fields_for_insert(#chef_client{server_api_version = ?API_v0} = Client) ->
+    chef_object_default_callbacks:fields_for_insert(Client);
+fields_for_insert(#chef_client{id = Id,
+                               authz_id = AuthzId,
+                               org_id = OrgId,
+                               name = Name,
+                               validator = IsValidator,
+                               last_updated_by = LastUpdatedBy,
+                               created_at = CreatedAt, updated_at = UpdatedAt}) ->
+    [Id, AuthzId, OrgId, Name, IsValidator =:= true, LastUpdatedBy, CreatedAt, UpdatedAt].
+
 record_fields(_ApiVersion) ->
     record_info(fields, chef_client).
 
--spec add_authn_fields(ejson_term(), binary()) -> ejson_term().
-%% @doc Add in the generated public key along with other authn related
-%% fields to the EJson encoded request body. Return the modified EJson
-%% structure
-add_authn_fields(ClientData, PublicKey) ->
-    lists:foldl(fun({Key, Value}, EJson) ->
-                    ej:set({Key}, EJson, Value)
-                end,
-                ClientData,
-                [
-                    {<<"pubkey_version">>, chef_key_base:key_version(PublicKey)},
-                    {<<"public_key">>, PublicKey}
-                ]).
-
 %% @doc creates the json body for clients
 -spec assemble_client_ejson(#chef_client{}, binary()) -> ejson_term().
-assemble_client_ejson(#chef_client{name = Name, validator = Validator,
-                                      public_key = PublicKey}, OrgName) ->
-    Values = [{<<"name">>, value_or_default(Name, <<"">>)},
-              {<<"clientname">>, value_or_default(Name, <<"">>)},
-              {<<"validator">>, Validator =:= true},
-              {<<"orgname">>, OrgName},
-              {<<"json_class">>, <<"Chef::ApiClient">>},
-              {<<"chef_type">>, <<"client">>}],
+assemble_client_ejson(#chef_client{server_api_version = ?API_v0, public_key = PublicKey} = Client, OrgName) ->
+    Values = base_client_ejson(Client, OrgName),
     case PublicKey of
         undefined ->
             {Values};
         _ ->
             {[{<<"public_key">>, chef_key_base:extract_public_key(PublicKey)} | Values]}
-    end.
+    end;
+assemble_client_ejson(Client, OrgName) ->
+    { base_client_ejson(Client, OrgName) }.
+
+base_client_ejson(#chef_client{name = Name, validator = Validator}, OrgName) ->
+    [{<<"name">>, value_or_default(Name, <<"">>)},
+     {<<"clientname">>, value_or_default(Name, <<"">>)},
+     {<<"validator">>, Validator =:= true},
+     {<<"orgname">>, OrgName},
+     {<<"json_class">>, <<"Chef::ApiClient">>},
+     {<<"chef_type">>, <<"client">>}].
 
 %% @doc Convert a binary JSON string representing a Chef Client into an
 %% EJson-encoded Erlang data structure, using passed defaults
 %% @end
-parse_binary_json(Bin, ReqName) ->
-    parse_binary_json(Bin, ReqName, not_found).
+parse_binary_json(ApiVersion, Bin, ReqName) ->
+    parse_binary_json(ApiVersion, Bin, ReqName, not_found).
 
--spec parse_binary_json(binary(), binary() | undefined,
-                        not_found | #chef_client{}) -> {'ok', {[{_, _}]}}. % or throw
-parse_binary_json(Bin, ReqName, CurrentClient) ->
+-spec parse_binary_json(api_version(), binary(), binary() | undefined,
+                        not_found | #chef_client{}) -> {'ok',ej:json_object()}. % or throw
+
+parse_binary_json(ApiVersion, Bin, ReqName, CurrentClient) ->
     Client = set_values_from_current_client(chef_json:decode_body(Bin), CurrentClient),
-    Client1 = chef_object_base:set_default_values(Client, ?DEFAULT_FIELD_VALUES),
+    Client1 = chef_object_base:set_default_values(Client, default_field_values(ApiVersion)),
     {Name, FinalClient} = destination_name(Client1, ReqName),
     valid_name(Name),
-    validate_client(FinalClient, Name).
+    validate_client(ApiVersion, FinalClient, Name).
 
-validate_client(Client, Name) ->
-    case ej:valid(client_spec(Name), Client) of
-        ok -> {ok, Client};
-        Bad -> throw(Bad)
+validate_client(ApiVersion, ClientData, Name) ->
+    chef_object_base:validate_ejson(ClientData, client_spec(ApiVersion, Name)),
+    maybe_validate_public_key(ApiVersion, ClientData).
+
+maybe_validate_public_key(?API_v0 , ClientData) ->
+    % Under APIv0, we do not validate public key, which does allow
+    % a certificate to be passed in. The certificate is still handled correctly
+    % later, for auth purposes and retrieving key data, so we'll
+    % keep the behavior until vNext
+    {ok, ClientData};
+maybe_validate_public_key(_, ClientData) ->
+    case ej:get({<<"public_key">>}, ClientData) of
+        Value when Value =:= undefined;
+                   Value == <<"generate">> ->
+            {ok, ClientData};
+        _ ->
+            chef_object_base:validate_ejson(ClientData, {[ chef_key_base:public_key_spec(opt) ]})
     end.
 
-set_values_from_current_client(Client, not_found) ->
-    Client;
-set_values_from_current_client(Client, #chef_client{validator = IsValidator,
-                                                    public_key = Cert}) ->
+set_values_from_current_client(Client, #chef_client{server_api_version = ?API_v0, validator = IsValidator, public_key = Cert}) ->
     C = chef_object_base:set_default_values(Client, [{<<"validator">>, IsValidator}]),
     case chef_key_base:cert_or_key(C) of
         {undefined, _} ->
             chef_key_base:set_public_key(C, Cert);
         {_NewPublicKey, _} ->
             C
-    end.
+    end;
+set_values_from_current_client(Client, #chef_client{validator = IsValidator}) ->
+    chef_object_base:set_default_values(Client, [{<<"validator">>, IsValidator}]);
+set_values_from_current_client(Client, not_found) ->
+    Client.
 
-client_spec(Name) ->
+client_spec(?API_v0, Name) ->
     {[
       {<<"name">>, Name},
       {<<"clientname">>, Name},
       {{opt, <<"validator">>}, boolean},
       {{opt, <<"private_key">>}, boolean}
+     ]};
+client_spec(_ApiVersion, Name) ->
+    {[
+      {<<"name">>, Name},
+      {<<"clientname">>, Name},
+      {{opt, <<"public_key">>}, string},
+      {{opt, <<"validator">>}, boolean}
      ]}.
 
 
@@ -269,8 +304,7 @@ destination_name(Client, ReqName) ->
             throw({both_missing, <<"name">>, <<"clientname">>});
         {undefined, undefined, ReqName} ->
             %% a PUT with only name found in URL, set both in body
-            {ReqName, ej:set({<<"name">>}, ej:set({<<"clientname">>},
-                                                  Client, ReqName), ReqName)};
+            {ReqName, ej:set({<<"name">>}, ej:set({<<"clientname">>}, Client, ReqName), ReqName)};
         {Name, Name, _} ->
             %% POST or PUT with with name == clientname
             {Name, Client};
@@ -302,7 +336,17 @@ value_or_default(Value, _) ->
 list(#chef_client{org_id = OrgId} = Rec, CallbackFun) ->
     CallbackFun({list_query(Rec), [OrgId], [name]}).
 
-
+default_field_values(?API_v0) ->
+     [ {<<"json_class">>, <<"Chef::ApiClient">>},
+       {<<"chef_type">>, <<"client">>},
+       {<<"validator">>, false},
+       {<<"private_key">>, false}
+     ];
+default_field_values(_) ->
+     [ {<<"json_class">>, <<"Chef::ApiClient">>},
+       {<<"chef_type">>, <<"client">>},
+       {<<"validator">>, false}
+     ].
 
 set_api_version(ObjectRec, Version) ->
     ObjectRec#chef_client{server_api_version = Version}.

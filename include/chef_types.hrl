@@ -94,10 +94,11 @@
           'org_id' :: object_id(),          % organization guid
           'name' :: binary(),               % name of client
           'validator' = false :: boolean(),         % boolean; true if this is a validator
+           % BEGIN DEPRECATED APIv1
           'admin' = false :: boolean(),             % true if this is an admin user
-          'public_key' :: binary(),         % public key cert
-          'pubkey_version' :: ?KEY_VERSION | ?CERT_VERSION,
-                                            % version/type of public key (certificate)
+          'public_key' :: binary(),         % public key
+          'pubkey_version' :: ?KEY_VERSION | ?CERT_VERSION, % 0 = key, 1 = cert %
+           % END DEPRECATED APIv1
           'last_updated_by' :: object_id(), % authz guid of last actor to update object
           'created_at' :: binary(), % time created at
           'updated_at' :: binary()  % time created at

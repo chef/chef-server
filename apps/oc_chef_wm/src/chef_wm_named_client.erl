@@ -77,7 +77,7 @@ validate_any_request(Req, #base_state{chef_db_context = DbContext,
     ClientState1 = ClientState#client_state{chef_client = Client},
     {Req, State#base_state{resource_state = ClientState1}}.
 
-validate_request('PUT', Req, State) ->
+validate_request('PUT', Req, #base_state{server_api_version = ApiVersion} = State) ->
     {Req1, State1} = validate_any_request(Req, State),
     #base_state{resource_state =
                     #client_state{chef_client = OldClient} = ClientState} = State1,
@@ -91,7 +91,7 @@ validate_request('PUT', Req, State) ->
             % the old client from the database in the first place.
             #chef_client{name = Name} = OldClient,
             Body = wrq:req_body(Req),
-            {ok, ClientData} = chef_client:parse_binary_json(Body, Name, OldClient),
+            {ok, ClientData} = chef_client:parse_binary_json(ApiVersion, Body, Name, OldClient),
             {Req1, State1#base_state{resource_state =
                                          ClientState#client_state{client_data =
                                                                       ClientData}}}
