@@ -31,6 +31,7 @@ function log_result(result)
 
   if (Fail > 0) then
     print(result[1] .. ": " .. Pass .. "/" .. Total .. " passed")
+    os.exit(1)
   end
 end
 

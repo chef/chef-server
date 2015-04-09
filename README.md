@@ -1,5 +1,9 @@
 Chef Server Omnibus Project
 ============================
+
+[![Build Status Master](https://travis-ci.org/chef/opscode-omnibus.svg?branch=master)](https://travis-ci.org/chef/opscode-omnibus)
+
+
 This project creates full-stack platform-specific packages for
 `chef-server`!
 
@@ -45,6 +49,7 @@ To run the unit tests:
 ```
 bundle install --binstubs
 ./bin/rake test:csc
+./bin/rake test:routing
 ```
 
 Usage
