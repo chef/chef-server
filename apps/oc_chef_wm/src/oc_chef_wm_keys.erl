@@ -42,7 +42,8 @@
          auth_info/3,
          route_args/2,
          to_json/2,
-         auth_info/2]).
+         auth_info/2,
+         finalize_create_body/3]).
 
 -export([allowed_methods/2,
          create_path/2,
@@ -131,7 +132,23 @@ to_json(Req, #base_state{ chef_db_context = DbContext,
         Error ->
             {{halt, 500}, Req, State#base_state{log_msg = Error }}
     end.
-from_json(Req, #base_state{resource_state = #key_state{key_data = EJ, parent_id = ActorId}} = State) ->
+from_json(Req, #base_state{resource_state = #key_state{key_data = EJ} = KeyState} = State) ->
+    case ej:get({<<"create_key">>}, EJ) of
+        true ->
+            case chef_keygen_cache:get_key_pair() of
+                {PublicKey, PrivateKey} ->
+                    EJ1 = ej:set({<<"public_key">>}, EJ, PublicKey),
+                    EJ2 = ej:delete({<<"create_key">>}, EJ1),
+                    KeyState2 = KeyState#key_state{generated_private_key = PrivateKey, key_data = EJ2},
+                    create_from_json(Req, State#base_state{resource_state = KeyState2});
+                keygen_timeout ->
+                    {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}}
+            end;
+        _ ->
+            create_from_json(Req, State)
+    end.
+
+create_from_json(Req, #base_state{resource_state = #key_state{key_data = EJ, parent_id = ActorId}} = State) ->
     oc_chef_wm_base:create_from_json(Req, State, chef_key, {authz_id, undefined}, {ActorId, EJ}).
 
 malformed_request_message(Any, _Req, _State) ->
@@ -146,3 +163,8 @@ route_args(#chef_key{key_name = Name},
            #base_state{ resource_state = #key_state{full_type = FullType, parent_name = ObjectName} } ) ->
     {FullType, [{name, Name}, {object_name, ObjectName}] }.
 
+% Callback from create_from_json, which allows us to customize our body response.
+finalize_create_body(_Req, #base_state{ resource_state = #key_state{generated_private_key = undefined}}, BodyEJ) ->
+    BodyEJ;
+finalize_create_body(_Req, #base_state{ resource_state = #key_state{generated_private_key = GenPrivKey}}, BodyEJ) ->
+    ej:set({<<"private_key">>}, BodyEJ, GenPrivKey).

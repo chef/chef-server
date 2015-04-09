@@ -103,6 +103,11 @@ malformed_request_message(invalid_num_versions, _Req, _State) ->
 malformed_request_message({invalid_key, Key}, _Req, _State) ->
     error_envelope([<<"Invalid key ">>, Key, <<" in request body">>]);
 
+
+malformed_request_message(create_or_pubkey_missing, _Req, _State) ->
+    error_envelope([<<"You must either provide a valid value for 'public_key', or specify 'create_key': true">>]);
+malformed_request_message(create_and_pubkey_specified, _Req, _State) ->
+    error_envelope([<<"You must specify either create_key or public_key, but not both">>]);
 malformed_request_message(invalid_json_object, _Req, _State) ->
     error_envelope([<<"Incorrect JSON type for request body">>]);
 

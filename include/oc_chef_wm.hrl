@@ -336,6 +336,7 @@
           parent_authz_id,
           parent_name,
           key_data,
+          generated_private_key,
           chef_key :: #chef_key{}
          }).
 

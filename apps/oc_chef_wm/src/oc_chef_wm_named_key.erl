@@ -44,7 +44,8 @@
 -export([init/1,
          init_resource_state/1,
          malformed_request_message/3,
-         request_type/0]).
+         request_type/0,
+         finalize_update_body/3]).
 
 -export([allowed_methods/2,
          delete_resource/2,
@@ -107,8 +108,32 @@ to_json(Req, #base_state{resource_state = #key_state{chef_key = Key}} = State) -
     EJ = chef_key:ejson_from_key(Key),
     {chef_json:encode(EJ), Req, State}.
 
-from_json(Req, #base_state{resource_state = #key_state{chef_key = Key, key_data = EJ}} = State) ->
+from_json(Req, #base_state{resource_state = #key_state{chef_key = Key, key_data = EJ} = KeyState} = State) ->
+    case ej:get({<<"create_key">>}, EJ) of
+        true  ->
+            case chef_keygen_cache:get_key_pair() of
+                {PublicKey, PrivateKey} ->
+                    KeyState2 = KeyState#key_state{generated_private_key = PrivateKey,
+                                                   chef_key = Key#chef_key{public_key = PublicKey}},
+                    update_from_json(Req, State#base_state{resource_state = KeyState2});
+                keygen_timeout ->
+                    {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}}
+            end;
+        _ ->
+            update_from_json(Req, State)
+    end.
+
+
+update_from_json(Req, #base_state{resource_state = #key_state{chef_key = Key, key_data = EJ}} = State) ->
     oc_chef_wm_base:update_from_json(Req, State, Key, EJ).
+
+finalize_update_body(_Req, #base_state{resource_state = #key_state{generated_private_key = undefined}}, BodyEJ) ->
+    % create_key could have been 'false' - make sure it's gone.
+    ej:delete({<<"create_key">>}, BodyEJ);
+finalize_update_body(_Req, #base_state{resource_state = #key_state{chef_key = #chef_key{public_key = PubKey}, generated_private_key = GenPrivKey}}, BodyEJ) ->
+    EJ1 = ej:delete({<<"create_key">>}, BodyEJ),
+    EJ2 = ej:set({<<"private_key">>}, EJ1, GenPrivKey),
+    ej:set({<<"public_key">>}, EJ2, PubKey).
 
 delete_resource(Req, #base_state{requestor_id = RequestorId, chef_db_context = Ctx,
                                  resource_state = #key_state{chef_key = Key}} = State) ->

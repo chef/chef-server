@@ -1,3 +1,4 @@
+%% M
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 80 -*-
 %% ex: ts=4 sw=4 et
 %% @author Tyler Cloke <tyler@chef.io>
@@ -59,7 +60,9 @@ init_per_suite(LastConfig) ->
     OrgId = chef_db:fetch_org_id(context(), ?ORG_NAME),
     {ok, PubKey} = file:read_file("../../spki_public.pem"),
     {ok, AltPubKey} = file:read_file("../../public.pem"),
-    [{org_id, OrgId}, {pubkey, PubKey}, {alt_pubkey, AltPubKey}] ++ Config2.
+    {ok, PrivateKeyRE} = re:compile(".*BEGIN (RSA )?PRIVATE KEY.*"),
+    {ok, PubKeyRE} = re:compile(".*BEGIN (RSA )?PUBLIC KEY.*"),
+    [{org_id, OrgId}, {pubkey, PubKey}, {alt_pubkey, AltPubKey},{pubkey_regex, PubKeyRE}, {privkey_regex, PrivateKeyRE}] ++ Config2.
 
 end_per_suite(Config) ->
     setup_helper:base_end_per_suite(Config).
@@ -82,7 +85,9 @@ all() ->
      get_key_for_nonexistent_user,
      get_key_for_nonexistent_client,
      post_user_new_valid_key,
+     post_user_create_key,
      post_client_new_valid_key,
+     post_client_create_key,
      post_new_key_invalid_date,
      post_new_key_invalid_utc_date,
      post_new_key_invalid_digits_date,
@@ -115,7 +120,9 @@ all() ->
      put_invalid_partial_client_key,
      put_invalid_partial_user_key,
      put_full_client_key,
-     put_full_user_key
+     put_generate_new_client_key,
+     put_full_user_key,
+     put_generate_new_user_key
      ].
 
 %% GET /organizations/org/clients/client/keys && GET /users/client/keys
@@ -253,6 +260,12 @@ put_full_client_key(Config) ->
 put_full_user_key(Config) ->
     validate_put_full_key(Config, user).
 
+put_generate_new_client_key(Config) ->
+    validate_put_partial_key_valid(Config, client, <<"create_key">>, true).
+
+put_generate_new_user_key(Config) ->
+    validate_put_partial_key_valid(Config, user, <<"create_key">>, true).
+
 put_valid_partial_user_key(Config) ->
     validate_put_partial_key_valid(Config, user, <<"expiration_date">>, ?KEY2EXPIRESTRING),
     validate_put_partial_key_valid(Config, user, <<"public_key">>, proplists:get_value(alt_pubkey, Config)).
@@ -318,10 +331,29 @@ post_client_new_valid_key(Config) ->
     Result = http_key_request(post, client, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "201", _, _}, Result).
 
+post_client_create_key(Config) ->
+    EJ = new_key_ejson(Config, <<"test1">>, <<"2099-10-25T22:49:08Z">>, create_key),
+    Body = chef_json:encode(EJ),
+    Result = http_key_request(post, client, ?ADMIN_USER_NAME, Body),
+    ?assertMatch({ok, "201", _, _}, Result),
+    ResultEJ =  decoded_response_body(Result),
+    ?assertEqual(false, has_well_formed_public_key(Config, ResultEJ)),
+    ?assertEqual(true, has_well_formed_private_key(Config, ResultEJ)).
+
+
 post_user_new_valid_key(Config) ->
     Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"2099-10-25T22:49:08Z">>)),
     Result = http_key_request(post, user, ?ADMIN_USER_NAME, Body),
     ?assertMatch({ok, "201", _, _}, Result).
+
+post_user_create_key(Config) ->
+    EJ = new_key_ejson(Config, <<"test1">>, <<"2099-10-25T22:49:08Z">>, create_key),
+    Body = chef_json:encode(EJ),
+    Result = http_key_request(post, user, ?ADMIN_USER_NAME, Body),
+    ?assertMatch({ok, "201", _, _}, Result),
+    ResultEJ =  decoded_response_body(Result),
+    ?assertEqual(false, has_well_formed_public_key(Config, ResultEJ)),
+    ?assertEqual(true, has_well_formed_private_key(Config, ResultEJ)).
 
 post_new_key_invalid_date(Config) ->
     Body = chef_json:encode(new_key_ejson(Config, <<"test1">>, <<"bad-date">>)),
@@ -415,10 +447,12 @@ init_per_testcase(TestCase, Config) when TestCase =:= post_new_key_invalid_date;
                                          TestCase =:= post_new_key_invalid_utc_date ->
     make_admin_non_admin_and_client(Config);
 init_per_testcase(TestCase, Config) when TestCase =:= post_client_new_valid_key;
+                                         TestCase =:= post_client_create_key;
                                          TestCase =:= post_conflicting_client_key;
                                          TestCase =:= post_multiple_valid_client_keys ->
     make_admin_and_client(Config);
 init_per_testcase(TestCase, Config) when TestCase =:= post_user_new_valid_key;
+                                         TestCase =:= post_user_create_key;
                                          TestCase =:= post_key_with_infinity_date;
                                          TestCase =:= post_key_with_invalid_key_name;
                                          TestCase =:= post_key_with_invalid_public_key;
@@ -500,7 +534,8 @@ init_per_testcase(Case, Config) when Case =:= delete_invalid_client_key;
                                      Case =:= put_rename_client_key;
                                      Case =:= put_valid_partial_client_key;
                                      Case =:= put_invalid_partial_client_key;
-                                     Case =:= put_full_client_key ->
+                                     Case =:= put_full_client_key;
+                                     Case =:= put_generate_new_client_key ->
     make_client(Config, ?CLIENT_NAME),
     ClientId = client_id(Config, ?CLIENT_NAME),
     add_key(Config, ClientId, ?KEY1NAME, ?KEY1EXPIRE),
@@ -520,7 +555,8 @@ init_per_testcase(Case, Config) when Case =:= delete_invalid_user_key;
                                      Case =:= put_rename_duplicate_user_key;
                                      Case =:= put_valid_partial_user_key;
                                      Case =:= put_invalid_partial_user_key;
-                                     Case =:= put_full_user_key ->
+                                     Case =:= put_full_user_key;
+                                     Case =:= put_generate_new_user_key ->
     make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
     UserId = user_id(?USER_NAME),
     add_key(Config, UserId, ?KEY1NAME, ?KEY1EXPIRE),
@@ -626,7 +662,7 @@ decoded_response_body({_, _, _, Body}) ->
     chef_json:decode(Body).
 
 context() ->
-    chef_db:make_context(?API_MIN_VER, <<"AB">>).
+    chef_db:make_context(?API_MIN_VER, <<"AB">>, no_header).
 
 client_id(Config, Name) ->
     OrgId = proplists:get_value(org_id, Config),
@@ -659,13 +695,21 @@ validate_rename(ClientOrUser, RenameCode, GetOldNameCode) ->
     % one way or another, KEY2 will exist
     ?assertMatch({ok, "200", _, _}, GetResult2).
 
+validate_put_partial_key_valid(Config, ClientOrUser, <<"create_key">>, true) ->
+    UpdateEJ = {[{<<"create_key">>, true}]},
+    PutResult = http_named_key_request(put, ClientOrUser, default_requestor(ClientOrUser), ?KEY1NAME, chef_json:encode(UpdateEJ)),
+    PutResultEJ = decoded_response_body(PutResult),
+    ?assertMatch({ok, "200", _, _}, PutResult),
+    ?assertMatch(true, has_well_formed_private_key(Config, PutResultEJ)),
+    % In this case we get back the field that has been changed (public key) in addition to the
+    % new private key.
+    ?assertEqual(true, has_well_formed_public_key(Config, PutResultEJ));
 validate_put_partial_key_valid(Config, ClientOrUser, Field, Value) ->
     UpdateEJ = {[{Field, Value}]},
     PutResult = http_named_key_request(put, ClientOrUser, default_requestor(ClientOrUser), ?KEY1NAME, chef_json:encode(UpdateEJ)),
     ?assertMatch({ok, "200", _, _}, PutResult),
     PutResultEJ = decoded_response_body(PutResult),
     ?assertMatch(UpdateEJ, PutResultEJ),
-
     ExpectedGetKeyEJ = ej:set({Field},  new_key_ejson(Config, ?KEY1NAME, ?KEY2EXPIRESTRING), Value),
     GetResult = http_named_key_request(get, ClientOrUser, default_requestor(ClientOrUser), ?KEY1NAME),
     ?assertMatch({ok, "200", _, _}, GetResult),
@@ -696,9 +740,17 @@ key_list_ejson(BaseURI, KeyInfo) ->
 
 new_key_ejson(Config, Name, Expiration) ->
     new_key_ejson(Config, Name, Expiration, pubkey).
-new_key_ejson(Config, Name, Expiration, Key) ->
-    PubKey = proplists:get_value(Key, Config),
+new_key_ejson(_Config, Name, Expiration, create_key) ->
+    {[{<<"name">>, Name}, {<<"create_key">>, true}, {<<"expiration_date">>, Expiration}]};
+new_key_ejson(Config, Name, Expiration, PubKey) ->
+    PubKey = proplists:get_value(PubKey, Config),
     {[{<<"name">>, Name}, {<<"public_key">>, PubKey}, {<<"expiration_date">>, Expiration}]}.
+
+has_well_formed_public_key(Config, EJ) ->
+    chef_test_suite_helper:value_matches_regex(ej:get({<<"public_key">>}, EJ), ?config(pubkey_regex, Config)).
+
+has_well_formed_private_key(Config, EJ) ->
+    chef_test_suite_helper:value_matches_regex(ej:get({<<"private_key">>}, EJ), ?config(privkey_regex, Config)).
 
 default_requestor(client) ->
     ?CLIENT_NAME;
