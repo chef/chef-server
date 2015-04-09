@@ -56,7 +56,8 @@ wm_associate_user(Req, #base_state{organization_guid = OrgId,
                                                                                          username = UserName},
                                                                        data = ReqData}} = State,
                   RequestorId) ->
-    ObjectRec = chef_object:new_record(oc_chef_org_user_association, ApiVersion, OrgId, {authz_id, UserId}, ReqData),
+    Data = ej:set({<<"user">>},ReqData,UserId),
+    ObjectRec = chef_object:new_record(oc_chef_org_user_association, ApiVersion, OrgId, unset, Data),
     case chef_db:create(ObjectRec, DbContext, RequestorId) of
         {conflict, _} ->
             wm_conflict_response(Req, State, user_already_in_org, UserName);
