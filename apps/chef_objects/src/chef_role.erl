@@ -41,6 +41,7 @@
          record_fields/1,
          set_created/2,
          set_updated/2,
+         set_api_version/2,
          type_name/1,
          update_from_ejson/2,
          list/2
@@ -269,3 +270,6 @@ record_fields(_ApiVersion) ->
 list(#chef_role{org_id = OrgId} = Rec, CallbackFun) ->
     CallbackFun({list_query(Rec), [OrgId], [name]}).
 
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#chef_role{server_api_version = Version}.

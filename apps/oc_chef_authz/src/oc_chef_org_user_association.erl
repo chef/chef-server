@@ -19,6 +19,7 @@
          update_from_ejson/2,
          set_created/2,
          set_updated/2,
+         set_api_version/2,
          fields_for_insert/1,
          delete/2,
          create_query/1,
@@ -158,3 +159,6 @@ type_name(#oc_chef_org_user_association{}) ->
 delete(#oc_chef_org_user_association{org_id = OrgId, user_id = UserId} = ObjectRec, CallbackFun) ->
     CallbackFun({delete_query(ObjectRec), [OrgId, UserId]}).
 
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#oc_chef_org_user_association{server_api_version = Version}.

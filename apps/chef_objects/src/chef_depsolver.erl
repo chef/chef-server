@@ -22,8 +22,9 @@
 %%
 
 -module(chef_depsolver).
-
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
+-endif.
 
 -export([
          parse_binary_json/1,
@@ -122,6 +123,3 @@ solve_dependencies(AllVersions, EnvConstraints, Cookbooks) ->
 depsolver_timeout() ->
     envy:get(chef_objects, depsolver_timeout, ?DEFAULT_DEPSOLVER_TIMEOUT, non_neg_integer).
 
-folsom_time(M, F, Fun) ->
-    Label = oc_folsom:mf_label(M, F),
-    oc_folsom:time(Label, Fun).

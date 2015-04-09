@@ -36,6 +36,7 @@
          record_fields/1,
          set_created/2,
          set_updated/2,
+         set_api_version/2,
          type_name/1,
          update_from_ejson/2,
          update_query/1
@@ -166,3 +167,6 @@ valid_name(Name) ->
         _ ->
             ok
     end.
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#oc_chef_container{server_api_version = Version}.

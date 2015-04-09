@@ -44,6 +44,7 @@
          set_created/2,
          set_password_data/2,
          set_updated/2,
+         set_api_version/2,
          type_name/1,
          update_from_ejson/2,
          validate_user_name/1,
@@ -465,3 +466,6 @@ list(#chef_user{email = undefined} = User, CallbackFun) ->
     CallbackFun({list_query(User), [], [username]});
 list(#chef_user{email = EMail}, CallbackFun) ->
     CallbackFun({list_users_by_email, [EMail], [username]}).
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#chef_user{server_api_version = Version}.

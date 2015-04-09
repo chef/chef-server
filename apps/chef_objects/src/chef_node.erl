@@ -41,6 +41,7 @@
          record_fields/1,
          set_created/2,
          set_updated/2,
+         set_api_version/2,
          type_name/1,
          update_from_ejson/2,
          validate_json_node/2,
@@ -290,3 +291,6 @@ list(#chef_node{environment = undefined, org_id = OrgId}, CallbackFun) ->
     CallbackFun({list_nodes_for_org, [OrgId], [name]});
 list(#chef_node{environment = EnvName, org_id = OrgId}, CallbackFun) ->
     CallbackFun({list_env_nodes_for_org, [OrgId, EnvName], [name]}).
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#chef_node{server_api_version = Version}.

@@ -19,6 +19,7 @@
          update_from_ejson/2,
          set_created/2,
          set_updated/2,
+         set_api_version/2,
          create_query/1,
          update_query/1,
          delete_query/1,
@@ -209,3 +210,6 @@ regex_for(org_name) ->
 regex_for(org_full_name) ->
     generate_regex_msg_tuple(?ANCHOR_REGEX(?FULL_NAME_REGEX),
                              <<"Malformed org full name.  Must only contain A-Z, a-z, 0-9, _, or -">>).
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#oc_chef_organization{server_api_version = Version}.

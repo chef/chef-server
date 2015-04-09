@@ -25,6 +25,7 @@
 -include_lib("mixer/include/mixer.hrl").
 -include("../../include/chef_types.hrl").
 
+-behaviour(chef_object).
 -export([
          add_type_and_bag/2,
          authz_id/1,
@@ -40,6 +41,7 @@
          record_fields/1,
          set_created/2,
          set_updated/2,
+         set_api_version/2,
          type_name/1,
          update_from_ejson/2,
          wrap_item/3,
@@ -69,7 +71,6 @@
           {<<"id">>, {string_match, chef_regex:regex_for(data_bag_item_id)}}
          ]}).
 
--behaviour(chef_object).
 
 -spec new_record(api_version(), object_id(), object_id(), {binary(), ejson_term()}) -> #chef_data_bag_item{}.
 new_record(ApiVersion, OrgId, _AuthzId, {BagName, ItemData}) ->
@@ -238,3 +239,6 @@ is_wrapped_item(Ejson) ->
 list(#chef_data_bag_item{org_id = OrgId, data_bag_name = DataBagName} = DBI, CallBackFun) ->
     CallBackFun({list_query(DBI), [OrgId, DataBagName], [item_name]}).
 
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#chef_data_bag_item{server_api_version = Version}.

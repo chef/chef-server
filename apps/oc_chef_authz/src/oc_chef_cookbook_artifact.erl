@@ -46,6 +46,7 @@
          new_record/4,
          set_created/2,
          set_updated/2,
+         set_api_version/2,
          fields_for_fetch/1,
          fields_for_update/1,
          update/2,
@@ -162,3 +163,6 @@ filter_checksums_to_delete(OrgId, Checksums) ->
         {error, _Why} = Error ->
             Error
     end.
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#oc_chef_cookbook_artifact{server_api_version = Version}.

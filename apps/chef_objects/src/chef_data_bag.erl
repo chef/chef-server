@@ -37,6 +37,7 @@
          record_fields/1,
          set_created/2,
          set_updated/2,
+         set_api_version/2,
          type_name/1,
          update_from_ejson/2,
          list/2
@@ -175,3 +176,6 @@ validate_data_bag(DataBag) ->
 list(#chef_data_bag{org_id = OrgId} = DB, CallbackFun) ->
     CallbackFun({list_query(DB), [OrgId], [name]}).
 
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#chef_data_bag{server_api_version = Version}.

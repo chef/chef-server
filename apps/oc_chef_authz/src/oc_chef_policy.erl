@@ -52,6 +52,7 @@
          record_fields/1,
          set_created/2,
          set_updated/2,
+         set_api_version/2,
          type_name/1,
          update_from_ejson/2,
          update_query/1,
@@ -212,3 +213,6 @@ delete(ObjectRec = #oc_chef_policy{
                       authz_id = _PolicyAuthzId
                      }, CallbackFun) ->
     CallbackFun({delete_query(ObjectRec), [name(ObjectRec), OrgId]}).
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#oc_chef_policy{server_api_version = Version}.

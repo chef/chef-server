@@ -26,12 +26,10 @@
          set_created/2,
          fields_for_fetch/1,
          find_query/1,
-         record_fields/1
-        ]).
-
--export([
+         record_fields/1,
+         set_api_version/2,
          fetch/2
-         ]).
+        ]).
 
 -ifdef(TEST).
 -compile(export_all).
@@ -178,4 +176,7 @@ proplist_to_checksum(Proplist) ->
          true -> true;
          false -> false
      end}.
+
+set_api_version(ObjectRec, ApiVersion) ->
+    ObjectRec#chef_sandbox{server_api_version = ApiVersion}.
 

@@ -41,6 +41,7 @@
          set_created/2,
          set_default_values/1,
          set_updated/2,
+         set_api_version/2,
          type_name/1,
          update_from_ejson/2,
          list/2
@@ -203,3 +204,6 @@ record_fields(_ApiVersion) ->
 
 list(#chef_environment{org_id = OrgId} = Env, CallbackFun) ->
     CallbackFun({list_query(Env), [OrgId], [name]}).
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#chef_environment{server_api_version = Version}.

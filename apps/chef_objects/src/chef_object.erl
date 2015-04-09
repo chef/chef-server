@@ -43,6 +43,7 @@
 
 -callback set_created(object_rec(), object_id()) -> object_rec().
 -callback set_updated(object_rec(), object_id()) -> object_rec().
+-callback set_api_version(object_rec(), api_version()) -> object_rec().
 
 -callback create_query(object_rec()) -> atom().
 -callback update_query(object_rec()) -> atom().
@@ -118,16 +119,7 @@
                                 {ejson_term(), _}) ->
                         object_rec().
 
-% TODO - testing code to make sure I didn't miss any calls.
-new_record(_RecType, undefined, _OrgId, _AuthzId, _ObjectEjson) ->
-    error(new_record_invoked_without_version);
 new_record(RecType, ApiVersion, OrgId, AuthzId, ObjectEjson) ->
-    % NOTE: First thought was to just silently inject the version as below, so that
-    % so that we don't have to update every new_record to be aware of it -
-    % but that would defeat the purpose, since new_record must be able to support
-    % versioned behaviors.
-    % [Type, _Version | Rest] = erlang:tuple_to_list(Record),
-    % erlang:list_to_tuple([Type, ApiVersion | Rest]).
     RecType:new_record(ApiVersion, OrgId, AuthzId, ObjectEjson).
 
 -spec name(object_rec()) -> binary() | {binary(), binary()}.
@@ -169,6 +161,13 @@ set_updated(Rec, ActorId) ->
 set_created(Rec, ActorId) ->
     Mod = element(1, Rec),
     Mod:set_created(Rec, ActorId).
+
+-spec set_api_version(object_rec(), api_version()) -> object_rec().
+set_api_version(Rec, ApiVersion) when is_tuple(Rec) ->
+    Mod = element(1, Rec),
+    Mod:set_api_version(Rec, ApiVersion);
+set_api_version(NotRec, _ApiVersion) ->
+    NotRec.
 
 -spec record_fields(object_rec()) -> list(atom()).
 record_fields(Rec) ->
@@ -238,12 +237,3 @@ call_if_exported(ObjectRec, FunName, Args, DefaultFun) ->
             erlang:apply(DefaultFun, Args)
     end.
 
-set_api_version(Record, ApiVersion) when is_tuple(Record) ->
-    case erlang:tuple_to_list(Record) of
-        [Type, undefined | Rest] ->
-            erlang:list_to_tuple([Type, ApiVersion | Rest]);
-        _ ->
-            Record
-    end;
-set_api_version(NotRecord, _ApiVersion) ->
-    NotRecord.

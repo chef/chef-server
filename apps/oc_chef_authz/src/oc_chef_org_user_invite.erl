@@ -21,6 +21,7 @@
          set_created/2,
          create_query/1,
          set_updated/2,
+         set_api_version/2,
          update_query/1,
          delete_query/1,
          find_query/1,
@@ -170,3 +171,6 @@ org_id(#oc_chef_org_user_invite{org_id = OrgId}) ->
 
 type_name(#oc_chef_org_user_invite{}) ->
     invite.
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#oc_chef_org_user_invite{server_api_version = Version}.

@@ -47,6 +47,7 @@
          new_record/4,
          set_created/2,
          set_updated/2,
+         set_api_version/2,
          fields_for_fetch/1,
          fields_for_update/1,
          update/2,
@@ -187,3 +188,6 @@ to_json(#oc_chef_cookbook_artifact_version{metadata = RawMetadata,
     JSONWithoutHacks = ej:delete({<<"json_class">>}, BaseJson),
     %% add the download URLs
     chef_cookbook_version:annotate_with_s3_urls(JSONWithoutHacks, OrgId, ExternalUrl).
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#oc_chef_cookbook_artifact_version{server_api_version = Version}.

@@ -38,6 +38,7 @@
          record_fields/1,
          list/2,
          set_updated/2,
+         set_api_version/2,
          new_record/4,
          name/1,
          id/1,
@@ -215,3 +216,6 @@ fields_for_insert(#chef_key{id = Id, key_name = KeyName,
 
 bulk_get_query(_ObjectRec) ->
     error(unsupported).
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#chef_key{server_api_version = Version}.

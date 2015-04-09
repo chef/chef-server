@@ -23,6 +23,7 @@
 -include_lib("mixer/include/mixer.hrl").
 -include("../../include/oc_chef_types.hrl").
 
+% TOD - is this supposed to be a chef_object? It looks kind of like one, but missing serveral things.
 -export([find_policy_revision_by_orgid_name_group_name/2,
          fetch_prereq_objects/2,
          insert_association/3,
@@ -32,6 +33,7 @@
          id/1,
          set_created/2,
          set_updated/2,
+         set_api_version/2,
          fields_for_fetch/1,
          fields_for_update/1,
          find_query/1,
@@ -44,9 +46,11 @@
          update_record/8,
          fields_for_insert/1,
          is_indexed/1,
-         ejson_for_indexing/2]).
+         ejson_for_indexing/2
+        ]).
 
 -mixin([{chef_object_default_callbacks, [fetch/2, update/2]}]).
+
 
 find_policy_revision_by_orgid_name_group_name(Record, DBContext) ->
     case chef_db:fetch(Record, DBContext) of
@@ -223,5 +227,8 @@ is_indexed(_ObjectRec) ->
 
 ejson_for_indexing(#oc_chef_policy_group_revision_association{}, _EjsonTerm) ->
    {[]}.
+
+set_api_version(ObjectRec, ApiVersion) ->
+    ObjectRec#oc_chef_policy_group_revision_association{server_api_version = ApiVersion}.
 
 

@@ -50,6 +50,7 @@
          record_fields/1,
          set_created/2,
          set_updated/2,
+         set_api_version/2,
          type_name/1,
          update_from_ejson/2,
          version_to_binary/1,
@@ -666,3 +667,6 @@ record_fields(_ApiVersion) ->
 -spec(list(#chef_cookbook_version{}, chef_object:select_callback()) -> chef_object:select_return()).
 list(#chef_cookbook_version{org_id = OrgId} = CBV, CallbackFun) ->
     CallbackFun({list_query(CBV), [OrgId], [name]}).
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#chef_cookbook_version{server_api_version = Version}.

@@ -51,6 +51,7 @@
          record_fields/1,
          set_created/2,
          set_updated/2,
+         set_api_version/2,
          type_name/1,
 
          %% Unused stubs:
@@ -224,3 +225,6 @@ delete(ObjectRec = #oc_chef_policy_revision{
                       last_updated_by = _AuthzId
                      }, CallbackFun) ->
     CallbackFun({delete_query(ObjectRec), [name(ObjectRec), OrgId]}).
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#oc_chef_policy_revision{server_api_version = Version}.
