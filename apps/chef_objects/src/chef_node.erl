@@ -21,6 +21,9 @@
 
 -module(chef_node).
 
+-include("../../include/chef_types.hrl").
+-include_lib("mixer/include/mixer.hrl").
+
 -export([
          authz_id/1,
          ejson_for_indexing/2,
@@ -29,44 +32,38 @@
          fields_for_fetch/1,
          fields_for_update/1,
          id/1,
-         is_indexed/0,
+         is_indexed/1,
          insert_autofill_fields/1,
          name/1,
          org_id/1,
-         new_record/3,
+         new_record/4,
          parse_check_binary_as_json_node/2,
-         record_fields/0,
+         record_fields/1,
          set_created/2,
          set_updated/2,
+         set_api_version/2,
          type_name/1,
          update_from_ejson/2,
-         validate_json_node/2
+         validate_json_node/2,
+         list/2
         ]).
 
 %% database named queries
 -export([
-         bulk_get_query/0,
-         create_query/0,
-         delete_query/0,
-         find_query/0,
-         list_query/0,
-         update_query/0
+         bulk_get_query/1,
+         create_query/1,
+         delete_query/1,
+         find_query/1,
+         list_query/1,
+         update_query/1
         ]).
 
--include_lib("mixer/include/mixer.hrl").
--mixin([{chef_object,[
-                      {default_fetch/2, fetch},
-                      {default_update/2, update}
-                     ]}]).
--export([
-         list/2
-         ]).
+-mixin([{chef_object_default_callbacks, [ fetch/2, update/2 ]}]).
+
 -ifdef(TEST).
 -compile(export_all).
 -endif.
 
--include("../../include/chef_types.hrl").
--include_lib("eunit/include/eunit.hrl").
 
 -define(VALIDATION_CONSTRAINTS,
         {[{<<"name">>, {string_match, chef_regex:regex_for(node_name)}},
@@ -99,16 +96,18 @@
 
 -behaviour(chef_object).
 
--spec new_record(OrgId :: object_id(),
+-spec new_record(api_version(),
+                 OrgId :: object_id(),
                  AuthzId :: object_id() | unset,
                  ObjectEjson :: ejson_term()) ->
                         #chef_node{}.
-new_record(OrgId, AuthzId, NodeData) ->
+new_record(ApiVersion, OrgId, AuthzId, NodeData) ->
     Name = ej:get({<<"name">>}, NodeData),
     Environment = ej:get({<<"chef_environment">>}, NodeData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     Data = chef_db_compression:compress(chef_node, chef_json:encode(NodeData)),
-    #chef_node{id = Id,
+    #chef_node{server_api_version = ApiVersion,
+               id = Id,
                authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
                org_id = OrgId,
                name = Name,
@@ -135,7 +134,7 @@ type_name(#chef_node{}) ->
 authz_id(#chef_node{authz_id = AuthzId}) ->
     AuthzId.
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     true.
 
 -spec ejson_for_indexing(#chef_node{}, ejson_term()) -> ejson_term().
@@ -184,22 +183,22 @@ set_updated(#chef_node{} = Object, ActorId) ->
     Now = chef_object_base:sql_date(now),
     Object#chef_node{updated_at = Now, last_updated_by = ActorId}.
 
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     bulk_get_nodes.
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_node.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_node_by_id.
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_node_by_orgid_name.
 
-list_query() ->
+list_query(_ObjectRec) ->
     list_nodes_for_org.
 
-update_query() ->
+update_query(_ObjectRec) ->
     update_node_by_id.
 
 fields_for_update(#chef_node{environment = Environment,
@@ -213,7 +212,7 @@ fields_for_fetch(#chef_node{org_id = OrgId,
                             name = Name}) ->
     [OrgId, Name].
 
-record_fields() ->
+record_fields(_ApiVersion) ->
     record_info(fields, chef_node).
 
 extract_recipes(RunList) ->
@@ -292,3 +291,6 @@ list(#chef_node{environment = undefined, org_id = OrgId}, CallbackFun) ->
     CallbackFun({list_nodes_for_org, [OrgId], [name]});
 list(#chef_node{environment = EnvName, org_id = OrgId}, CallbackFun) ->
     CallbackFun({list_env_nodes_for_org, [OrgId, EnvName], [name]}).
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#chef_node{server_api_version = Version}.

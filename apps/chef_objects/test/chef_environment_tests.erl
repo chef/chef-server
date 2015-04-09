@@ -28,7 +28,7 @@ new_record_test() ->
     OrgId = <<"12345678123456781234567812345678">>,
     AuthzId = <<"00000000000000000000000011111111">>,
     EnvData = {[{<<"name">>, <<"my-env">>}, {<<"alpha">>, <<"bravo">>}]},
-    Env = chef_environment:new_record(OrgId, AuthzId, EnvData),
+    Env = chef_environment:new_record(?API_MIN_VER, OrgId, AuthzId, EnvData),
     ?assertMatch(#chef_environment{}, Env),
     %% TODO: validate more fields?
     ?assertEqual(<<"my-env">>, chef_environment:name(Env)).

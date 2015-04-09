@@ -25,41 +25,41 @@
 
 -behaviour(chef_object).
 
--mixin([{chef_object,[{default_fetch/2, fetch}]}]).
-
 -export([
          parse_binary_json/1,
-         flatten/1,
          delete/2,
-         create_record/3
+         create_record/4
         ]).
 
 %% chef_object behaviour callbacks
 -export([
          id/1,
          authz_id/1,
-         bulk_get_query/0,
-         create_query/0,
-         delete_query/0,
+         bulk_get_query/1,
+         create_query/1,
+         delete_query/1,
          ejson_for_indexing/2,
          fields_for_fetch/1,
          fields_for_update/1,
-         find_query/0,
-         is_indexed/0,
+         fields_for_insert/1,
+         find_query/1,
+         is_indexed/1,
          list/2,
-         list_query/0,
+         list_query/1,
          name/1,
-         new_record/3,
+         new_record/4,
          org_id/1,
-         record_fields/0,
+         record_fields/1,
          set_created/2,
          set_updated/2,
+         set_api_version/2,
          type_name/1,
          update_from_ejson/2,
-         update_query/0,
+         update_query/1,
          update/2
         ]).
 
+-mixin([{chef_object_default_callbacks, [fetch/2]}]).
 
 -define(VALIDATION_CONSTRAINTS,
         {[{<<"revision_id">>, {string_match, chef_regex:regex_for(policy_file_revision_id)}},
@@ -114,35 +114,37 @@ authz_id(#oc_chef_policy{authz_id = AuthzId}) ->
     AuthzId.
 
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_policy.
 
-update_query() ->
+update_query(_ObjectRec) ->
     update_policy_by_id.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_policy_by_id.
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_policy_by_orgid_name.
 
-list_query() ->
+list_query(_ObjectRec) ->
     list_policies_for_org.
 
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     %% TODO: do we need this?
     ok.
 
-new_record(OrgId, AuthzId, Name) ->
+new_record(ApiVersion, OrgId, AuthzId, Name) ->
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     #oc_chef_policy{
+        server_api_version = ApiVersion,
         id = Id,
         authz_id = AuthzId,
         org_id = OrgId,
         name = Name}.
 
-create_record(OrgId, Name, RequestingActorId) ->
+create_record(ApiVersion, OrgId, Name, RequestingActorId) ->
     Policy = #oc_chef_policy{
+                           server_api_version = ApiVersion,
                            org_id = OrgId,
                            name = Name},
     set_created(Policy, RequestingActorId).
@@ -153,7 +155,7 @@ set_created(#oc_chef_policy{} = Object, ActorId) ->
 set_updated(#oc_chef_policy{} = Object, ActorId) ->
     Object#oc_chef_policy{last_updated_by = ActorId}.
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     false.
 
 ejson_for_indexing(#oc_chef_policy{}, _EjsonTerm) ->
@@ -173,18 +175,18 @@ fields_for_update(#oc_chef_policy{
 fields_for_fetch(#oc_chef_policy{org_id = OrgId} = Policy) ->
     [name(Policy), OrgId].
 
-record_fields() ->
+record_fields(_ApiVersion) ->
     record_info(fields, oc_chef_policy).
 
-list(#oc_chef_policy{org_id = OrgId}, CallbackFun) ->
-    CallbackFun({list_query(), [OrgId], rows}).
+list(#oc_chef_policy{org_id = OrgId} = P, CallbackFun) ->
+    CallbackFun({list_query(P), [OrgId], rows}).
 
 update(#oc_chef_policy{
                       org_id = _OrgId,
                       authz_id = _PolicyAuthzId,
                       last_updated_by = _AuthzId
                      } = Record, CallbackFun) ->
-	chef_object:default_update(Record, CallbackFun).
+    chef_object_default_callback:update(Record, CallbackFun).
 
 
 parse_binary_json(Bin) ->
@@ -196,7 +198,7 @@ parse_binary_json(Bin) ->
             throw(Bad)
     end.
 
-flatten(#oc_chef_policy{
+fields_for_insert(#oc_chef_policy{
           id = Id,
           authz_id = AuthzId,
           org_id = OrgId,
@@ -210,4 +212,7 @@ delete(ObjectRec = #oc_chef_policy{
                       last_updated_by = _AuthzId,
                       authz_id = _PolicyAuthzId
                      }, CallbackFun) ->
-    CallbackFun({delete_query(), [name(ObjectRec), OrgId]}).
+    CallbackFun({delete_query(ObjectRec), [name(ObjectRec), OrgId]}).
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#oc_chef_policy{server_api_version = Version}.

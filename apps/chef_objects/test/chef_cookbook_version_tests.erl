@@ -199,6 +199,7 @@ assemble_cookbook_ejson_test_() ->
               OrgId = <<"12341234123412341234123412341234">>,
               AuthzId = <<"auth">>,
               Record = chef_object:new_record(chef_cookbook_version,
+                                              ?API_MIN_VER,
                                               OrgId,
                                               AuthzId,
                                               CBEJson),
@@ -213,6 +214,7 @@ assemble_cookbook_ejson_test_() ->
               OrgId = <<"12341234123412341234123412341234">>,
               AuthzId = <<"auth">>,
               Record = chef_object:new_record(chef_cookbook_version,
+                                              ?API_MIN_VER,
                                               OrgId,
                                               AuthzId,
                                               CBEJson),
@@ -408,7 +410,7 @@ new_record_test() ->
     OrgId = <<"12345678123456781234567812345678">>,
     AuthzId = <<"00000000000000000000000011111111">>,
     CBVData = example_cookbook_version_json(),
-    CBV = chef_cookbook_version:new_record(OrgId, AuthzId, CBVData),
+    CBV = chef_cookbook_version:new_record(?API_MIN_VER, OrgId, AuthzId, CBVData),
     ?assertMatch(#chef_cookbook_version{}, CBV),
     %% TODO: validate more fields?
     ?assertEqual(<<"apache2">>, chef_cookbook_version:name(CBV)).

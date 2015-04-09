@@ -1,10 +1,10 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Christopher Brown <cb@chef.io>
+%% @author Christopher Brown
 %% @author Christopher Maier <cm@chef.io>
 %% @author Seth Falcon <seth@chef.io>
 %% @author Ho-Sheng Hsiao
-%% Copyright 2011-2014 Chef Software, Inc. All Rights Reserved.
+%% Copyright 2011-2015 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -29,7 +29,6 @@
          extract_from_path/2,
          get_header_fun/2,
          fetch_org_metadata/1,
-         malformed_request_message/3,
          base_mods/0,
          maybe_generate_key_pair/1,
          not_found_message/2,
@@ -75,8 +74,7 @@ vhost(Req) ->
 fqdn_with_port(Req) ->
     string:join(wrq:host_tokens(Req), ".") ++ port_string(wrq:port(Req)).
 
-get_header_fun(Req, State = #base_state{header_fun = HFun})
-  when HFun =:= undefined ->
+get_header_fun(Req, State = #base_state{header_fun = undefined}) ->
     GetHeader = fun(H) ->
                         Name = case is_binary(H) of
                                    true -> binary_to_list(H);
@@ -85,6 +83,8 @@ get_header_fun(Req, State = #base_state{header_fun = HFun})
                         case wrq:get_req_header(string:to_lower(Name), Req) of
                             B when is_binary(B) -> B;
                             "" -> undefined; %% We want to treat empty header values as missing
+                            % Possible DOS attack if this header includes a massive string and possibility
+                            % of exhausting the heap?
                             S when is_list(S) -> iolist_to_binary(S);
                             undefined -> undefined
                         end
@@ -255,44 +255,6 @@ extract_from_path(PathKey, Req) ->
         Value ->
             list_to_binary(Value)
     end.
-
-error_message(Msg) when is_list(Msg) ->
-    error_message(iolist_to_binary(Msg));
-error_message(Msg) when is_binary(Msg) ->
-    {[{<<"error">>, [Msg]}]}.
-
-malformed_request_message(#ej_invalid{type = json_type, key = Key}, _Req, _State) ->
-    case Key of
-        undefined -> error_message([<<"Incorrect JSON type for request body">>]);
-        _ ->error_message([<<"Incorrect JSON type for ">>, Key])
-    end;
-malformed_request_message(#ej_invalid{type = missing, key = Key}, _Req, _State) ->
-    error_message([<<"Required value for ">>, Key, <<" is missing">>]);
-malformed_request_message({invalid_key, Key}, _Req, _State) ->
-    error_message([<<"Invalid key ">>, Key, <<" in request body">>]);
-malformed_request_message(invalid_json_body, _Req, _State) ->
-    error_message([<<"Incorrect JSON type for request body">>]);
-malformed_request_message(#ej_invalid{type = exact, key = Key, msg = Expected},
-                          _Req, _State) ->
-    error_message([Key, <<" must equal ">>, Expected]);
-malformed_request_message(#ej_invalid{type = string_match, msg = Error},
-                          _Req, _State) ->
-    error_message([Error]);
-malformed_request_message(#ej_invalid{type = object_key, key = Object, found = Key},
-                          _Req, _State) ->
-    error_message([<<"Invalid key '">>, Key, <<"' for ">>, Object]);
-% TODO: next two tests can get merged (hopefully) when object_map is extended not
-% to swallow keys
-malformed_request_message(#ej_invalid{type = object_value, key = Object, found = Val},
-                          _Req, _State) when is_binary(Val) ->
-    error_message([<<"Invalid value '">>, Val, <<"' for ">>, Object]);
-malformed_request_message(#ej_invalid{type = object_value, key = Object, found = Val},
-                          _Req, _State) ->
-    error_message([<<"Invalid value '">>, io_lib:format("~p", [Val]),
-                   <<"' for ">>, Object]);
-malformed_request_message(Any, _Req, _State) ->
-    error({unexpected_malformed_request_message, Any}).
-
 
 %% @doc Utility function to process the `num_versions' parameter that is common to several
 %% cookbook-related resources

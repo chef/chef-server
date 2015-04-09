@@ -136,10 +136,11 @@ from_json(Req, #base_state{organization_name = OrgName,
 create_association(Req, #base_state{organization_guid = OrgId,
                            chef_db_context = DbContext,
                            requestor_id = RequestorId,
+                           server_api_version = ApiVersion,
                            resource_state = #association_state{user = #chef_user{id = UserId,
                                                                                  username = UserName},
                                                                data = ReqData}} = State) ->
-    ObjectRec = chef_object:new_record(oc_chef_org_user_invite, OrgId,
+    ObjectRec = chef_object:new_record(oc_chef_org_user_invite, ApiVersion, OrgId,
                                        {authz_id, UserId}, ReqData),
     case chef_db:create(ObjectRec, DbContext, RequestorId) of
         % TODO further research - is this response possible and testable?

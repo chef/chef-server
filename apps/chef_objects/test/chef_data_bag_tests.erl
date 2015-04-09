@@ -79,7 +79,7 @@ new_record_test() ->
     OrgId = <<"12345678123456781234567812345678">>,
     AuthzId = <<"00000000000000000000000011111111">>,
     DataBagData = <<"my-data_bag">>,
-    DataBag = chef_data_bag:new_record(OrgId, AuthzId, DataBagData),
+    DataBag = chef_data_bag:new_record(?API_MIN_VER, OrgId, AuthzId, DataBagData),
     ?assertMatch(#chef_data_bag{}, DataBag),
     ?assertEqual(DataBagData, chef_data_bag:name(DataBag)),
     ?assert(is_binary(chef_data_bag:id(DataBag))),

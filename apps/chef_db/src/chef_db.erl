@@ -28,14 +28,13 @@
 
 -export([
          %% Context record manipulation
-         make_context/1,
          make_context/2,
          make_context/3,
+         make_context/4,
          darklaunch_from_context/1,
 
          create_name_id_dict/3,
 
-         user_record_to_authz_id/2,
          fetch_org_id/2,
          fetch_org_metadata/2,
 
@@ -43,8 +42,6 @@
          %% orgs are migrated
          cdb_fetch_org_metadata/2,
          sql_fetch_org_metadata/2,
-
-         client_record_to_authz_id/2,
 
          fetch_requestor/3,
          fetch_requestors/3,
@@ -102,7 +99,8 @@
 -include("../../include/chef_osc_defaults.hrl").
 -include_lib("stats_hero/include/stats_hero.hrl").
 
--record(context, {reqid :: binary(),
+-record(context, {server_api_version,
+                  reqid :: binary(),
                   otto_connection,
                   darklaunch = undefined}).
 
@@ -155,33 +153,36 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
-make_context(ReqId) ->
-    #context{reqid = ReqId, darklaunch = undefined, otto_connection = chef_otto:connect()}.
+make_context(ApiVersion, ReqId) ->
+    #context{server_api_version = ApiVersion, reqid = ReqId, darklaunch = undefined, otto_connection = chef_otto:connect()}.
 
-make_context(ReqId, Darklaunch) ->
-    #context{reqid = ReqId, darklaunch = Darklaunch, otto_connection = chef_otto:connect()}.
+make_context(ApiVersion, ReqId, Darklaunch) ->
+    #context{server_api_version = ApiVersion, reqid = ReqId, darklaunch = Darklaunch, otto_connection = chef_otto:connect()}.
 
-make_context(ReqId, Darklaunch, OttoServer) ->
-    #context{reqid = ReqId, darklaunch = Darklaunch, otto_connection = OttoServer}.
+make_context(ApiVersion, ReqId, Darklaunch, OttoServer) ->
+    #context{server_api_version = ApiVersion, reqid = ReqId, darklaunch = Darklaunch, otto_connection = OttoServer}.
 
 -spec create(object_rec(), #context{}, object_id()) -> ok | {conflict, term()} | {error, term()}.
 create(#chef_cookbook_version{} = Record, DbContext, ActorId) ->
     create_object(DbContext, create_cookbook_version, Record, ActorId);
-create(ObjectRec0, #context{reqid = ReqId}, ActorId) ->
-    ObjectRec = chef_object:set_created(ObjectRec0, ActorId),
-    QueryName = chef_object:create_query(ObjectRec),
-    FlattenedRecord = chef_object:flatten(ObjectRec),
+create(ObjectRec0, #context{server_api_version = ApiVersion, reqid = ReqId}, ActorId) ->
+    %% Ensure api version is available to subsequent chef_object callbacks:
+    ObjectRec1 = chef_object:set_api_version(ObjectRec0, ApiVersion),
+    ObjectRec2 = chef_object:set_created(ObjectRec1, ActorId),
+    QueryName = chef_object:create_query(ObjectRec2),
+    Fields = chef_object:fields_for_insert(ObjectRec2),
     case stats_hero:ctime(ReqId, {chef_sql, create_object},
-                          fun() -> chef_sql:create_object(QueryName, FlattenedRecord) end) of
+                          fun() -> chef_sql:create_object(QueryName, Fields) end) of
         {ok, 1} -> ok;
         {conflict, Msg}-> {conflict, Msg};
         {error, Why} -> {error, Why}
     end.
 
 -spec delete(object_rec(), #context{}) -> {ok, 1 | 2} | 1 | 2 | not_found | {error, _}.
-delete(#chef_cookbook_version{org_id = OrgId} = CookbookVersion,
-       #context{reqid = ReqId} = Ctx) ->
-    case delete_object(Ctx, delete_cookbook_version, CookbookVersion) of
+delete(#chef_cookbook_version{server_api_version = ApiVersion, org_id = OrgId} = CookbookVersion, #context{reqid = ReqId} = Ctx) ->
+    %% Ensure api version is available to subsequent chef_object callbacks:
+    CookbookVersion2 = chef_object:set_api_version(CookbookVersion, ApiVersion),
+    case delete_object(Ctx, delete_cookbook_version, CookbookVersion2) of
         #chef_db_cb_version_delete{cookbook_delete=CookbookDeleted, deleted_checksums=DeletedChecksums} ->
             ?SH_TIME(ReqId, chef_s3, delete_checksums, (OrgId, DeletedChecksums)),
             %% TODO: return the actual chef_db_cb_version_delete record to the caller
@@ -191,8 +192,8 @@ delete(#chef_cookbook_version{org_id = OrgId} = CookbookVersion,
             end;
         Result -> Result %% not_found or {error, _}
     end;
-delete(#oc_chef_cookbook_artifact_version{org_id = OrgId} = CAVRec,
-       #context{reqid = ReqId}) ->
+delete(#oc_chef_cookbook_artifact_version{server_api_version = ApiVersion, org_id = OrgId} = CAVRec0, #context{reqid = ReqId}) ->
+    CAVRec = chef_object:set_api_version(CAVRec0, ApiVersion),
     chef_object:delete(CAVRec, fun({QueryName, Params}) ->
         case sqerl:select(QueryName, Params, rows_as_scalars, [checksum_to_delete]) of
             {ok, none} ->
@@ -206,20 +207,28 @@ delete(#oc_chef_cookbook_artifact_version{org_id = OrgId} = CAVRec,
                 Error
         end
     end);
-delete(ObjectRec, #context{reqid = ReqId}) ->
-    stats_hero:ctime(ReqId, {chef_sql, delete_object},
-                     fun() -> chef_sql:delete_object(ObjectRec) end).
+delete(ObjectRec, #context{server_api_version = ApiVersion, reqid = ReqId}) ->
+    ObjectRec2 = chef_object:set_api_version(ObjectRec, ApiVersion),
+    ?SH_TIME(ReqId, chef_sql, delete_object, (ObjectRec2)).
 
 -spec fetch(object_rec(),
             DbContext :: #context{}) ->
                    object_rec() |
                    not_found |
                    {error, term()}.
-fetch(ObjectRec, #context{reqid = ReqId}) ->
-    stats_hero:ctime(ReqId, {chef_sql, fetch},
-                          fun() ->
-                                  chef_sql:fetch(ObjectRec)
-                          end).
+fetch(ObjectRec, #context{server_api_version = ApiVersion, reqid = ReqId}) ->
+    % TODO - base branch!
+    ObjectRec2 = chef_object:set_api_version(ObjectRec, ApiVersion),
+    Result = ?SH_TIME(ReqId, chef_sql, fetch, (ObjectRec2)),
+    % TODO - base branch ^
+    case Result of
+        not_found ->
+            Result;
+        {error, _} ->
+            Result;
+        Record ->
+            chef_object:set_api_version(Record, ApiVersion)
+    end.
 
 %% @doc Meant to be used for a query that fetches multiple objects
 -spec fetch_multi(RecModule :: atom(),
@@ -229,18 +238,14 @@ fetch(ObjectRec, #context{reqid = ReqId}) ->
                       [object_rec()] |
                       not_found |
                       {error, term()}.
-fetch_multi(RecModule, #context{reqid = ReqId}, QueryName, QueryParams) ->
-    stats_hero:ctime(ReqId, {chef_sql, fetch_multi},
-                          fun() ->
-                                  chef_sql:fetch_multi(RecModule, QueryName, QueryParams)
-                          end).
+fetch_multi(RecModule, #context{server_api_version = ApiVersion, reqid = ReqId}, QueryName, QueryParams) ->
+    ?SH_TIME(ReqId, chef_sql, fetch_multi, (ApiVersion, RecModule, QueryName, QueryParams)).
 
 -spec list(object_rec(), #context{}) -> [binary()] | {error, _}.
-list(StubRec, #context{reqid = ReqId} = _Ctx) ->
-    stats_hero:ctime(ReqId, {chef_sql, fetch_object_names},
-                      fun() ->
-                              chef_sql:fetch_object_names(StubRec)
-                      end).
+list(StubRec, #context{server_api_version = ApiVersion, reqid = ReqId} = _Ctx) ->
+    %% Ensure api version is available to subsequent chef_object callbacks:
+    StubRec2 = chef_object:set_api_version(StubRec, ApiVersion),
+    ?SH_TIME(ReqId, chef_sql, fetch_object_names, (StubRec2)).
 
 -spec update(object_rec(), #context{}, object_id()) ->
              ok | not_found | {conflict, term()} | {error, term()}.
@@ -254,8 +259,7 @@ update(#chef_cookbook_version{org_id =OrgId} = Record, #context{reqid = ReqId} =
     end;
 update(ObjectRec, #context{reqid = ReqId}, ActorId) ->
     case stats_hero:ctime(ReqId, {chef_sql, do_update},
-                          fun() ->
-                                  chef_sql:update(ObjectRec, ActorId) end) of
+                          fun() -> chef_sql:update(ObjectRec, ActorId) end) of
         N when is_integer(N), N > 0 -> ok;
         not_found -> not_found;
         {conflict, Message} -> {conflict, Message};
@@ -264,13 +268,6 @@ update(ObjectRec, #context{reqid = ReqId}, ActorId) ->
 
 darklaunch_from_context(#context{darklaunch = Darklaunch}) ->
     Darklaunch.
-
--spec user_record_to_authz_id(#context{}, #chef_user{} | not_found) -> id().
-user_record_to_authz_id(#context{}, #chef_user{} = UserRecord) ->
-    UserRecord#chef_user.authz_id;
-user_record_to_authz_id(#context{}, not_found) ->
-    %% FIXME: is this what we want here?
-    erlang:error({error, not_found}).
 
 -spec fetch_org_id(#context{}, binary()) -> not_found | binary().
 fetch_org_id(Context, OrgName) ->
@@ -309,9 +306,6 @@ cdb_fetch_org_metadata(#context{reqid = ReqId,
 
 sql_fetch_org_metadata(#context{reqid = ReqId}, OrgName) ->
     ?SH_TIME(ReqId, chef_sql, fetch_org_metadata, (OrgName)).
-
-client_record_to_authz_id(_Context, ClientRecord) ->
-    ClientRecord#chef_client.authz_id.
 
 %% @doc Given a name and an org, find either a user or a client and return a
 %% #chef_user{} or #chef_client{} record.
@@ -685,15 +679,15 @@ connect() ->
 %% @doc Return a list of JSON/gzip'd JSON as binary corresponding to the specified list of
 %% IDs.
 bulk_get(#context{reqid = ReqId}, _OrgName, node, Ids) ->
-    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_nodes, (Ids)));
+    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_objects, (node, Ids)));
 bulk_get(#context{reqid = ReqId}, _OrgName, role, Ids) ->
-    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_roles, (Ids)));
+    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_objects, (role, Ids)));
 bulk_get(#context{reqid = ReqId}, _OrgName, data_bag_item, Ids) ->
-    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_data_bag_items, (Ids)));
+    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_objects, (data_bag_item, Ids)));
 bulk_get(#context{reqid = ReqId}, _OrgName, environment, Ids) ->
-    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_environments, (Ids)));
-bulk_get(#context{reqid = ReqId}, OrgName, client, Ids) ->
-    ClientRecords = bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_clients, (Ids))),
+    bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_objects, (environment, Ids)));
+bulk_get(#context{reqid = ReqId, server_api_version = ApiVersion}, OrgName, client, Ids) ->
+    ClientRecords = bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_clients, (ApiVersion, Ids))),
     [chef_client:assemble_client_ejson(C, OrgName) || #chef_client{}=C <- ClientRecords];
 
 % TODO: Can this come out now?
@@ -756,10 +750,11 @@ environment_exists(#context{}=Ctx, OrgId, EnvName) ->
 %% @doc Generic object creation with metrics.  `Fun' is the function in the `chef_sql'
 %% module to use for the creation and determines the return type (will return the
 %% appropriate chef object record type).
-create_object(#context{reqid = ReqId}, Fun, Object, ActorId) ->
+create_object(#context{server_api_version = ApiVersion, reqid = ReqId}, Fun, Object, ActorId) ->
     Object1 = chef_object:set_created(Object, ActorId),
+    Object2 = chef_object:set_api_version(Object1, ApiVersion),
     case stats_hero:ctime(ReqId, {chef_sql, Fun},
-                          fun() -> chef_sql:Fun(Object1) end) of
+                          fun() -> chef_sql:Fun(Object2) end) of
         {ok, 1} -> ok;
         {conflict, Msg}-> {conflict, Msg};
         {error, Why} -> {error, Why}
@@ -827,6 +822,8 @@ delete_object(#context{reqid = ReqId}, Fun, #chef_cookbook_version{} = CookbookV
         Result -> Result
     end;
 delete_object(#context{}=Ctx, Fun, Object) when is_tuple(Object) ->
+    % Note in delete by ID operations, object callbacks won't be use -
+    % so we have no need to ensure API version exists
     delete_object(Ctx, Fun, chef_object:id(Object));
 delete_object(#context{reqid = ReqId}, Fun, Id) ->
     case stats_hero:ctime(ReqId, {chef_sql, Fun},

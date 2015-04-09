@@ -105,8 +105,9 @@ perform(complete, Context, OrgInfo) ->
     perform(reindex, Context, OrgInfo).
 
 make_context(OrgName, IntLB) ->
-    ReqId = base64:encode(crypto:md5(term_to_binary(make_ref()))),
-    rpc:call(?ERCHEF, chef_db, make_context, [ReqId, find_dl_headers(OrgName, IntLB)]).
+    ReqId = base64:encode(crypto:hash(md5, (term_to_binary(make_ref())))),
+    % TODO how to handle api versioning here? we don't ahve access to current version level via hrl define
+    rpc:call(?ERCHEF, chef_db, make_context, [0, ReqId, find_dl_headers(OrgName, IntLB)]).
 
 %% @doc Verify that the given `OrgName' actually corresponds to a real
 %% organization.  Returns the organization's ID if so; 'not_found' otherwise.

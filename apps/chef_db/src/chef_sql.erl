@@ -45,7 +45,7 @@
          fetch_object/4,
          fetch_object_names/1,
          fetch/1,
-         fetch_multi/3,
+         fetch_multi/4,
 
          bulk_get_authz_ids/2,
 
@@ -55,19 +55,10 @@
 
          %% data_bag_item ops
          fetch_data_bag_item_ids/2,
-         bulk_get_data_bag_items/1,
 
-         %% environment ops
-         bulk_get_environments/1,
-
-         %% client ops
-         bulk_get_clients/1,
-
-         %% node ops
-         bulk_get_nodes/1,
-
-         %% role ops
-         bulk_get_roles/1,
+         %% search ops
+         bulk_get_objects/2,
+         bulk_get_clients/2,
 
          %% cookbook version ops
          cookbook_exists/2,
@@ -114,15 +105,7 @@
 -include_lib("sqerl/include/sqerl.hrl").
 -include("../../include/chef_types.hrl").
 
--type delete_query() :: delete_cookbook_version_by_id |
-                        delete_user_by_id |
-                        delete_data_bag_by_id |
-                        delete_data_bag_item_by_id |
-                        delete_environment_by_id |
-                        delete_client_by_id |
-                        delete_node_by_id |
-                        delete_role_by_id |
-                        delete_sandbox_by_id.
+-type delete_query() :: atom().
 
 sql_now() -> calendar:now_to_universal_time(os:timestamp()).
 
@@ -193,23 +176,6 @@ fetch_actors_by_name(OrgId, Name) ->
     Result = sqerl:select(fetch_requestors_by_name, [OrgId, Name], Transform),
     match_result(Result).
 
-%%
-%% node ops
-%%
-
--spec bulk_get_nodes([binary()]) -> {ok, [binary()] | not_found} |
-                                    {error, term()}.
-bulk_get_nodes(Ids) ->
-    bulk_get_objects(node, Ids).
-
-%%
-%% role ops
-%%
-
--spec bulk_get_roles([binary()]) -> {ok, [binary()] | not_found} |
-                                    {error, term()}.
-bulk_get_roles(Ids) ->
-    bulk_get_objects(role, Ids).
 
 %%
 %% data_bag_item ops
@@ -229,25 +195,8 @@ fetch_data_bag_item_ids(OrgId, DataBagName) ->
             {error, Error}
     end.
 
--spec bulk_get_data_bag_items([binary()]) -> {ok, [binary()] | not_found} |
-                                             {error, term()}.
-bulk_get_data_bag_items(Ids) ->
-    bulk_get_objects(data_bag_item, Ids).
 
-%%
-%% environment ops
-%%
-
--spec bulk_get_environments([binary()]) -> {ok, [binary()] | not_found} |
-                                           {error, term()}.
-bulk_get_environments(Ids) ->
-    bulk_get_objects(environment, Ids).
-
-%%
-%% client ops
-%%
-
--spec bulk_get_clients([binary()]) -> {ok, [ [proplists:property()] ] | not_found} |
+-spec bulk_get_clients(api_version(), [binary()]) -> {ok, [ [proplists:property()] ] | not_found} |
                                       {error, term()}.
 %% The client table does not have a serialized_object field
 %% so we need to construct a binary JSON representation of the table
@@ -255,12 +204,13 @@ bulk_get_environments(Ids) ->
 %%
 %% Note this return a list of chef_client records, different from the other bulk_get_X
 %% calls
-bulk_get_clients(Ids) ->
-    case sqerl:select(bulk_get_clients, [Ids], ?ALL(chef_client)) of
+bulk_get_clients(ApiVersion, Ids) ->
+    Query = chef_object:bulk_get_query(#chef_client{server_api_version = ApiVersion}),
+    case sqerl:select(Query, [Ids], ?ALL(chef_client)) of
         {ok, none} ->
             {ok, not_found};
         {ok, L} when is_list(L) ->
-            {ok, L};
+            {ok, [chef_object:set_api_version(R, ApiVersion) || R <- L]};
         {error, Error} ->
             {error, Error}
     end.
@@ -746,20 +696,18 @@ statements() ->
 fetch(Record) ->
     chef_object:fetch(Record, fun select_rows/1).
 
--spec fetch_multi(atom(), atom(), list()) -> [chef_object:object_rec()] | not_found | {error, _Why}.
-fetch_multi(RecModule, QueryName, QueryParams) ->
-    chef_object:fetch_multi(RecModule, QueryName, QueryParams, fun select_rows/1).
+-spec fetch_multi(api_version(), atom(), atom(), list()) -> [chef_object:object_rec()] | not_found | {error, _Why}.
+fetch_multi(ApiVersion, RecModule, QueryName, QueryParams) ->
+    case chef_object:fetch_multi(ApiVersion, RecModule, QueryName, QueryParams, fun select_rows/1) of
+        {ok, Rows} when is_list(Rows) ->
+            {ok, [chef_object:set_api_version(R, ApiVersion) || R <- Rows]};
+        Result ->
+            Result
+    end.
 
--spec select_rows(
-        {QueryName, BindParameters } |
-        {QueryName, BindParameters, ReturnTransform} |
-        {QueryName, BindParameters, ReturnFieldNames}
-     ) ->
-                         chef_object:select_return()  when
-      QueryName ::atom(),
-      BindParameters :: list(),
-      ReturnFieldNames :: [atom()],
-      ReturnTransform :: tuple().
+-spec select_rows( {atom(), list()} |
+                   {atom(), list(), tuple() | rows} |
+                   {atom(), list(), [atom()]}) -> chef_object:select_return().
 select_rows({Query, BindParameters}) ->
     match_result(sqerl:select(Query, BindParameters));
 select_rows({Query, BindParameters, Transform}) when is_tuple(Transform);
@@ -917,7 +865,11 @@ bulk_get_authz_ids(Type, Ids) ->
 %% and insert into the DB as appropriate.  Note this depends
 %% on the stability of the record order!
 create_object(#chef_cookbook_version{checksums = Checksums}=CookbookVersion) ->
-    Fields = cookbook_version_fields_for_insert(CookbookVersion),
+    % Note that we can't use chef_object :fields_for_insert - because of how
+    % common tests are built, modules are not loaded before they are referenced,
+    % and so fields_for_insert will use the default version instead of
+    % the one provided by the module when we're running CT, causing failures.
+    Fields = chef_cookbook_version:fields_for_insert(CookbookVersion),
     case create_object(insert_cookbook_version, Fields) of
         {ok, 1} ->
             case insert_cookbook_checksums(Checksums,
@@ -981,42 +933,8 @@ create_object(insert_cookbook_artifact_version = QueryName, Args) when is_list(A
 create_object(QueryName, Args) when is_atom(QueryName), is_list(Args) ->
     sqerl:statement(QueryName, Args, count);
 create_object(QueryName, Record) when is_atom(QueryName) ->
-    List = flatten_record(Record),
+    List = chef_object:fields_for_insert(Record),
     create_object(QueryName, List).
-
--spec cookbook_version_fields_for_insert(CookbookVersion::#chef_cookbook_version{}) -> list().
-cookbook_version_fields_for_insert(#chef_cookbook_version{
-                                      'id' = Id,
-                                      'major' = Major,
-                                      'minor' = Minor,
-                                      'patch' = Patch,
-                                      'frozen' = Frozen,
-                                      'meta_attributes' = MetaAttributes,
-                                      'meta_deps' = MetaDeps,
-                                      'meta_long_desc' = MetaLongDesc,
-                                      'metadata' = Metadata,
-                                      'serialized_object' = SerializedObject,
-                                      'last_updated_by' = LastUpdatedBy,
-                                      'created_at' = CreatedAt,
-                                      'updated_at' = UpdatedAt,
-                                      'org_id' = OrgId,
-                                      'name' = Name
-                                     }) ->
-    [Id,
-     Major,
-     Minor,
-     Patch,
-     Frozen,
-     MetaAttributes,
-     MetaDeps,
-     MetaLongDesc,
-     Metadata,
-     SerializedObject,
-     LastUpdatedBy,
-     CreatedAt,
-     UpdatedAt,
-     OrgId,
-     Name].
 
 %% @doc Inserts FK references to checksums into the database
 %%
@@ -1086,9 +1004,6 @@ delete_object(delete_cookbook_by_orgid_name = Query, OrgId, Name) ->
         Error ->
             Error
     end.
-
-flatten_record(Rec) ->
-    chef_object:flatten(Rec).
 
 update(ObjectRec, ActorId) ->
     chef_object:update(ObjectRec, ActorId, fun select_rows/1).

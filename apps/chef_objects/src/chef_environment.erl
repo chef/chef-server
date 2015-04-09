@@ -22,46 +22,42 @@
 
 -module(chef_environment).
 
+-include_lib("mixer/include/mixer.hrl").
+-include_lib("ej/include/ej.hrl").
+-include("../../include/chef_types.hrl").
+
 -export([
          authz_id/1,
          ejson_for_indexing/2,
          fields_for_fetch/1,
          fields_for_update/1,
          id/1,
-         is_indexed/0,
+         is_indexed/1,
          name/1,
          org_id/1,
-         new_record/3,
+         new_record/4,
          parse_binary_json/1,
-         record_fields/0,
+         record_fields/1,
          set_created/2,
          set_default_values/1,
          set_updated/2,
+         set_api_version/2,
          type_name/1,
-         update_from_ejson/2
+         update_from_ejson/2,
+         list/2
         ]).
 
 %% database named queries
 -export([
-         bulk_get_query/0,
-         create_query/0,
-         delete_query/0,
-         find_query/0,
-         list_query/0,         
-         update_query/0
+         bulk_get_query/1,
+         create_query/1,
+         delete_query/1,
+         find_query/1,
+         list_query/1,
+         update_query/1
         ]).
 
--include_lib("mixer/include/mixer.hrl").
--mixin([{chef_object,[
-                      {default_fetch/2, fetch},
-                      {default_update/2, update}
-                     ]}]).
--export([
-         list/2
-         ]).
--include_lib("ej/include/ej.hrl").
-
--include("../../include/chef_types.hrl").
+-mixin([{chef_object_default_callbacks, [ fetch/2, update/2 ]}]).
 
 -define(DEFAULT_FIELD_VALUES,
         [
@@ -79,11 +75,12 @@
 
 -behaviour(chef_object).
 
-new_record(OrgId, AuthzId, EnvData) ->
+new_record(ApiVersion, OrgId, AuthzId, EnvData) ->
     Name = ej:get({<<"name">>}, EnvData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     Data = chef_db_compression:compress(chef_environment, chef_json:encode(EnvData)),
-    #chef_environment{id = Id,
+    #chef_environment{server_api_version = ApiVersion,
+                      id = Id,
                       authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
                       org_id = OrgId,
                       name = Name,
@@ -153,7 +150,7 @@ update_from_ejson(#chef_environment{} = Env, EnvData) ->
     Data = chef_db_compression:compress(chef_environment, chef_json:encode(EnvData)),
     Env#chef_environment{name = Name, serialized_object = Data}.
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     true.
 
 ejson_for_indexing(#chef_environment{}, Environment) ->
@@ -173,22 +170,22 @@ set_updated(#chef_environment{} = Object, ActorId) ->
     Now = chef_object_base:sql_date(now),
     Object#chef_environment{updated_at = Now, last_updated_by = ActorId}.
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_environment.
 
-update_query() ->
+update_query(_ObjectRec) ->
     update_environment_by_id.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_environment_by_id.
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_environment_by_orgid_name.
 
-list_query() ->
+list_query(_ObjectRec) ->
     list_environments_for_org.
 
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     bulk_get_environments.
 
 fields_for_update(#chef_environment{last_updated_by = LastUpdatedBy,
@@ -202,8 +199,11 @@ fields_for_fetch(#chef_environment{org_id = OrgId,
                                    name = Name}) ->
     [OrgId, Name].
 
-record_fields() ->
+record_fields(_ApiVersion) ->
     record_info(fields, chef_environment).
 
-list(#chef_environment{org_id = OrgId}, CallbackFun) ->
-    CallbackFun({list_query(), [OrgId], [name]}).
+list(#chef_environment{org_id = OrgId} = Env, CallbackFun) ->
+    CallbackFun({list_query(Env), [OrgId], [name]}).
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#chef_environment{server_api_version = Version}.

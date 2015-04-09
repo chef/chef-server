@@ -25,7 +25,7 @@
 -include_lib("common_test/include/ct.hrl").
 -include("../../include/oc_chef_authz.hrl").
 -include("../../include/oc_chef_types.hrl").
-
+-include("../../include/server_api_version.hrl").
 -compile([export_all]).
 
 %% Note: this is also defined in the schema test data
@@ -87,7 +87,8 @@ make_policy(Prefix, OrgId) ->
     Id = chef_test_suite_helper:make_id(Prefix),
     AzId = chef_test_suite_helper:make_az_id(Prefix),
     Name = <<"policy", Prefix/binary>>,
-    #oc_chef_policy{id = Id, authz_id = AzId, org_id = OrgId, name = Name,
+    #oc_chef_policy{server_api_version = ?API_MIN_VER, id = Id, authz_id = AzId,
+                    org_id = OrgId, name = Name,
                     last_updated_by = chef_test_suite_helper:actor_id()}.
 
 primary_org_policy_fixtures(Config) ->
@@ -148,8 +149,9 @@ make_policy_group(Prefix, OrgId) ->
     Id = chef_test_suite_helper:make_id(Prefix),
     AzId = chef_test_suite_helper:make_az_id(Prefix),
     Name = <<"policy_group", Prefix/binary>>,
-    #oc_chef_policy_group{id = Id, authz_id = AzId, org_id = OrgId, name = Name,
-                    last_updated_by = chef_test_suite_helper:actor_id()}.
+    #oc_chef_policy_group{server_api_version = ?API_MIN_VER,
+                          id = Id, authz_id = AzId, org_id = OrgId, name = Name,
+                          last_updated_by = chef_test_suite_helper:actor_id()}.
 
 policy_revision_ops(Config) ->
     % setup (needed for FK constraints)
@@ -188,6 +190,7 @@ policy_group_revision_association_ops(Config) ->
 create_pgr_find_query_record(_Config) ->
     Result = oc_chef_policy_group_revision_association:record_for_find(?ORG_ID, <<"policy_name">>, <<"group_name">>),
     Expected = #oc_chef_policy_group_revision_association{
+            server_api_version = ?API_MIN_VER,
             org_id = ?ORG_ID,
             policy_revision_name = <<"policy_name">>,
             policy_group_name = <<"group_name">>,
@@ -213,8 +216,9 @@ pgr_assoc_has_all_deps(Config) ->
 updated_pgr_assoc_has_all_deps(Config) ->
     BaseAssoc = pgr_assoc_has_all_deps(Config),
     NewRevision = lists:last(policy_revisions_in_policy1(Config)),
-    #oc_chef_policy_revision{revision_id = RevisionId} = NewRevision,
+    #oc_chef_policy_revision{server_api_version = ?API_MIN_VER, revision_id = RevisionId} = NewRevision,
     BaseAssoc#oc_chef_policy_group_revision_association{
+        server_api_version = ?API_MIN_VER,
         policy_revision = NewRevision,
         policy_revision_revision_id = RevisionId}.
 
@@ -232,8 +236,9 @@ updated_pgr_assoc_new_policy_rev(Config) ->
     OrgId = proplists:get_value(org_id, Config),
     BaseAssoc = pgr_assoc_has_all_deps(Config),
     NewRevision = make_policy_revision(<<"91">>, <<"1">>, OrgId),
-    #oc_chef_policy_revision{revision_id = RevisionId} = NewRevision,
+    #oc_chef_policy_revision{server_api_version = ?API_MIN_VER, revision_id = RevisionId} = NewRevision,
     BaseAssoc#oc_chef_policy_group_revision_association{
+        server_api_version = ?API_MIN_VER,
         policy_revision = NewRevision,
         policy_revision_revision_id = RevisionId}.
 
@@ -273,11 +278,12 @@ make_policy_group_association(Config, Prefix, Policy,
                               #oc_chef_policy_revision{policy_authz_id = PolicyAuthzID} = Revision) ->
     Id = chef_test_suite_helper:make_id(Prefix),
     OrgId = proplists:get_value(org_id, Config),
-    #oc_chef_policy_revision{name = PolicyName, revision_id = RevisionId} = Revision,
+    #oc_chef_policy_revision{server_api_version = ?API_MIN_VER, name = PolicyName, revision_id = RevisionId} = Revision,
 
-    #oc_chef_policy_group{name = GroupName} = Group,
+    #oc_chef_policy_group{server_api_version = ?API_MIN_VER, name = GroupName} = Group,
 
     #oc_chef_policy_group_revision_association{
+                server_api_version = ?API_MIN_VER,
                 id = Id,
                 org_id = OrgId,
                 policy_revision_name = PolicyName,
@@ -314,7 +320,8 @@ fetch_prereq_objects_when_all_exist(Config) ->
     Assoc = pgr_assoc_has_all_deps(Config),
     Context = chef_test_suite_helper:context(),
     Result = oc_chef_policy_group_revision_association:fetch_prereq_objects(Assoc, Context),
-    #oc_chef_policy_group_revision_association{policy = ExpectedPolicy,
+    #oc_chef_policy_group_revision_association{server_api_version = ?API_MIN_VER,
+                                               policy = ExpectedPolicy,
                                                policy_group = ExpectedPolicyGroup} = Assoc,
     Expected = [{policy, ExpectedPolicy}, {policy_group, ExpectedPolicyGroup}],
     ?assertEqual(Expected, Result).
@@ -336,7 +343,8 @@ fetch_prereq_objects_when_missing_rev(Config) ->
     Assoc = pgr_assoc_missing_rev(Config),
     Context = chef_test_suite_helper:context(),
     Result = oc_chef_policy_group_revision_association:fetch_prereq_objects(Assoc, Context),
-    #oc_chef_policy_group_revision_association{policy = ExpectedPolicy,
+    #oc_chef_policy_group_revision_association{server_api_version = ?API_MIN_VER,
+                                               policy = ExpectedPolicy,
                                                policy_group = ExpectedPolicyGroup} = Assoc,
     Expected = [{policy, ExpectedPolicy}, {policy_group, ExpectedPolicyGroup}],
     ?assertEqual(Expected, Result).
@@ -377,7 +385,7 @@ fetch_prereq_objects_when_missing_policy_and_rev(Config) ->
     Assoc = pgr_assoc_missing_rev_and_policy(Config),
     Context = chef_test_suite_helper:context(),
     Result = oc_chef_policy_group_revision_association:fetch_prereq_objects(Assoc, Context),
-    #oc_chef_policy_group_revision_association{policy_group = ExpectedPolicyGroup} = Assoc,
+    #oc_chef_policy_group_revision_association{server_api_version = ?API_MIN_VER, policy_group = ExpectedPolicyGroup} = Assoc,
     Expected = [{policy, not_found}, {policy_group, ExpectedPolicyGroup}],
     ?assertEqual(Expected, Result).
 
@@ -428,7 +436,7 @@ update_policy_group_policy_revision_association(Config) ->
     ?assertEqual(ok, Result),
 
     Returned = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(Assoc, Context),
-    #oc_chef_policy_revision{serialized_object = ExpectedObject} = hd(policy_revisions_in_policy1(Config)),
+    #oc_chef_policy_revision{server_api_version = ?API_MIN_VER, serialized_object = ExpectedObject} = hd(policy_revisions_in_policy1(Config)),
     assert_pgr_associations_match(Assoc, ExpectedObject, Returned).
 
 update_policy_group_policy_revision_association_create_revision(Config) ->
@@ -440,7 +448,7 @@ update_policy_group_policy_revision_association_create_revision(Config) ->
     ?assertEqual(ok, Result),
 
     Returned = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(Assoc, Context),
-    #oc_chef_policy_revision{serialized_object = ExpectedObject} = hd(policy_revisions_in_policy1(Config)),
+    #oc_chef_policy_revision{server_api_version = ?API_MIN_VER, serialized_object = ExpectedObject} = hd(policy_revisions_in_policy1(Config)),
     assert_pgr_associations_match(Assoc, ExpectedObject, Returned),
     % clean up so we don't have to worry about violating unique constraints in
     % other insert tests:
@@ -543,7 +551,8 @@ make_policy_revision(Prefix, PolicyPrefix, OrgId) ->
     PolicyName = <<"policy", PolicyPrefix/binary>>,
     RevisionId = <<"policy_revision_id", Prefix/binary>>,
     SerializedObject = <<"policy_revision_serialized_object_", Prefix/binary>>,
-    #oc_chef_policy_revision{id = Id, org_id = OrgId, name = PolicyName,
+    #oc_chef_policy_revision{server_api_version = ?API_MIN_VER,
+                             id = Id, org_id = OrgId, name = PolicyName,
                              policy_authz_id = PolicyAzId,
                              revision_id = RevisionId,
                              last_updated_by = chef_test_suite_helper:actor_id(),

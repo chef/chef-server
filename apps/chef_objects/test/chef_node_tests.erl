@@ -224,7 +224,7 @@ new_record_test() ->
     OrgId = <<"12345678123456781234567812345678">>,
     AuthzId = <<"00000000000000000000000011111111">>,
     NodeData = {[{<<"name">>, <<"my-node">>}, {<<"alpha">>, <<"bravo">>}]},
-    Node = chef_node:new_record(OrgId, AuthzId, NodeData),
+    Node = chef_node:new_record(?API_MIN_VER, OrgId, AuthzId, NodeData),
     ?assertMatch(#chef_node{}, Node),
     %% TODO: validate more fields?
     ?assertEqual(<<"my-node">>, chef_node:name(Node)).

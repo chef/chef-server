@@ -20,6 +20,10 @@
 %
 -module(chef_user).
 
+-include_lib("mixer/include/mixer.hrl").
+-include_lib("ej/include/ej.hrl").
+-include("../../include/chef_types.hrl").
+
 -export([
          assemble_user_ejson/2,
          authz_id/1,
@@ -28,42 +32,37 @@
          fields_for_fetch/1,
          fields_for_update/1,
          id/1,
-         is_indexed/0,
+         is_indexed/1,
          name/1,
          username_from_ejson/1,
-         new_record/3,
+         new_record/4,
          org_id/1,
          parse_binary_json/1,
          parse_binary_json/3,
          password_data/1,
-         record_fields/0,
+         record_fields/1,
          set_created/2,
          set_password_data/2,
          set_updated/2,
+         set_api_version/2,
          type_name/1,
          update_from_ejson/2,
          validate_user_name/1,
-         serialized_field_value/2
+         serialized_field_value/2,
+         list/2
         ]).
 
 %% database named queries
 -export([
-         bulk_get_query/0,
-         create_query/0,
-         delete_query/0,
-         find_query/0,
-         list_query/0,
-         update_query/0
+         bulk_get_query/1,
+         create_query/1,
+         delete_query/1,
+         find_query/1,
+         list_query/1,
+         update_query/1
         ]).
 
--export([ list/2 ]).
-
--include_lib("mixer/include/mixer.hrl").
--mixin([{chef_object,[ {default_update/2, update} ]}]).
-
--include("../../include/chef_types.hrl").
-
--include_lib("ej/include/ej.hrl").
+-mixin([{chef_object_default_callbacks, [ update/2 ]}]).
 
 -behaviour(chef_object).
 
@@ -113,8 +112,8 @@ serialized_field_value(FieldName, #chef_user{serialized_object = SerializedObjec
     EJ = chef_json:decode(SerializedObject),
     ej:get({FieldName}, EJ).
 
--spec new_record(object_id(), object_id(), ejson_term()) -> #chef_user{}.
-new_record(OrgId, AuthzId, Data) ->
+-spec new_record(api_version(), object_id(), object_id(), ejson_term()) -> #chef_user{}.
+new_record(ApiVersion, OrgId, AuthzId, Data) ->
     {HashPass, Salt, HashType} = case ej:get({<<"password">>}, Data) of
         undefined ->
             {null, null, null};
@@ -129,7 +128,8 @@ new_record(OrgId, AuthzId, Data) ->
     EnableRecovery = ej:get({<<"recovery_authentication_enabled">>}, UserData) =:= true,
     {PublicKey, PubkeyVersion} = chef_object_base:cert_or_key(UserData),
     SerializedObject = { whitelisted_values(UserData, ?JSON_SERIALIZABLE) },
-    #chef_user{id = Id,
+    #chef_user{server_api_version = ApiVersion,
+               id = Id,
                authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
                username = Name,
                email = Email,
@@ -405,35 +405,35 @@ set_updated(#chef_user{} = Object, ActorId) ->
     Now = chef_object_base:sql_date(now),
     Object#chef_user{updated_at = Now, last_updated_by = ActorId}.
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_user.
 
-update_query() ->
+update_query(_ObjectRec) ->
     update_user_by_id.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_user_by_id.
 
-find_query() ->
+find_query(_ObjectRec) ->
     error(unsupported).
 
-list_query() ->
+list_query(_ObjectRec) ->
     list_users.
 
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     bulk_get_users.
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     false.
 
-fetch(#chef_user{username = undefined, external_authentication_uid = AuthUid}, CallbackFun) ->
-    fetch_user(find_user_by_external_authentication_uid, AuthUid, CallbackFun);
-fetch(#chef_user{username = UserName}, CallbackFun) ->
-    fetch_user(find_user_by_username, UserName, CallbackFun).
+fetch(#chef_user{username = undefined, external_authentication_uid = AuthUid} = Record, CallbackFun) ->
+    fetch_user(find_user_by_external_authentication_uid, Record, AuthUid, CallbackFun);
+fetch(#chef_user{username = UserName} = Record, CallbackFun) ->
+    fetch_user(find_user_by_username, Record, UserName, CallbackFun).
 
-fetch_user(Query, KeyValue, CallbackFun) ->
+fetch_user(Query, Record, KeyValue, CallbackFun) ->
     CallbackFun({Query, [KeyValue],
-                 {first_as_record, [chef_user, record_fields()]}}).
+                 {first_as_record, [chef_user, record_fields(Record)]}}).
 
 ejson_for_indexing(#chef_user{}, _) ->
     error(not_indexed).
@@ -457,12 +457,15 @@ fields_for_update(#chef_user{last_updated_by = LastUpdatedBy,
      [false, PublicKeyVersion, PublicKey, HashedPassword, Salt, HashType, SerializedObject,
      ExternalAuthenticationUid, RecoveryAuthEnabled =:= true, Email, UserName,  LastUpdatedBy, UpdatedAt, Id].
 
-record_fields() ->
+record_fields(_ApiVersion) ->
     record_info(fields, chef_user).
 
 list(#chef_user{external_authentication_uid = ExtAuthUid}, CallbackFun) when ExtAuthUid =/= undefined ->
     CallbackFun({list_users_by_ext_auth_uid, [ExtAuthUid], [username]});
-list(#chef_user{email = undefined}, CallbackFun) ->
-    CallbackFun({list_query(), [], [username]});
+list(#chef_user{email = undefined} = User, CallbackFun) ->
+    CallbackFun({list_query(User), [], [username]});
 list(#chef_user{email = EMail}, CallbackFun) ->
     CallbackFun({list_users_by_email, [EMail], [username]}).
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#chef_user{server_api_version = Version}.

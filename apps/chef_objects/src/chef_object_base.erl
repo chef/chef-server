@@ -40,10 +40,8 @@
          maybe_stub_authz_id/2,
          normalize_run_list/1,
          parse_constraint/1,
-         set_created/2,
          set_key_pair/3,
          set_public_key/2,
-         set_updated/2,
          strictly_valid/3,
          sql_date/1,
          throw_invalid_fun_match/1,
@@ -59,78 +57,6 @@
 -ifdef(TEST).
 -compile([export_all]).
 -endif.
-
--spec set_created(Object :: chef_object() |
-                            #chef_user{} |
-                            #chef_sandbox{} |
-                            #chef_cookbook_version{},
-                  ActorId :: object_id()) -> chef_object() |
-                                             #chef_sandbox{} |
-                                             #chef_cookbook_version{}.
-%% @doc Set the `created_at' and, if appropriate, the `updated_at' and `last_updated_by'
-%% fields of a `chef_object()' record type.
-set_created(#chef_data_bag{} = Object, ActorId) ->
-    Now = sql_date(now),
-    Object#chef_data_bag{created_at = Now, updated_at = Now, last_updated_by = ActorId};
-set_created(#chef_data_bag_item{} = Object, ActorId) ->
-    Now = sql_date(now),
-    Object#chef_data_bag_item{created_at = Now, updated_at = Now, last_updated_by = ActorId};
-set_created(#chef_environment{} = Object, ActorId) ->
-    Now = sql_date(now),
-    Object#chef_environment{created_at = Now, updated_at = Now, last_updated_by = ActorId};
-set_created(#chef_client{} = Object, ActorId) ->
-    Now = sql_date(now),
-    Object#chef_client{created_at = Now, updated_at = Now, last_updated_by = ActorId};
-set_created(#chef_node{} = Object, ActorId) ->
-    Now = sql_date(now),
-    Object#chef_node{created_at = Now, updated_at = Now, last_updated_by = ActorId};
-set_created(#chef_role{} = Object, ActorId) ->
-    Now = sql_date(now),
-    Object#chef_role{created_at = Now, updated_at = Now, last_updated_by = ActorId};
-set_created(#chef_user{} = Object, ActorId) ->
-    Now = sql_date(now),
-    Object#chef_user{created_at = Now, updated_at = Now, last_updated_by = ActorId};
-set_created(#chef_sandbox{}=Object, _ActorId) ->
-    Now = sql_date(now),
-    Object#chef_sandbox{created_at = Now};
-set_created(#chef_cookbook_version{} = Object, ActorId) ->
-    Now = sql_date(now),
-    Object#chef_cookbook_version{created_at = Now, updated_at = Now,
-                                 last_updated_by = ActorId}.
-
-% TODO why is this here when it seems every object also has a set_updated/set_created
-% callback?
-
--spec set_updated(chef_object() |
-                  #chef_user{} |
-                  #chef_cookbook_version{},
-                  object_id()) -> chef_object().
-%% @doc Set the `updated_at' and `last_updated_by' fields of a `chef_object()' record type
-%% (if appropriate, otherwise no-op that returns the same record provided as argument).
-set_updated(#chef_data_bag{} = Object, ActorId) ->
-    Now = sql_date(now),
-    Object#chef_data_bag{updated_at = Now, last_updated_by = ActorId};
-set_updated(#chef_data_bag_item{} = Object, ActorId) ->
-    Now = sql_date(now),
-    Object#chef_data_bag_item{updated_at = Now, last_updated_by = ActorId};
-set_updated(#chef_environment{} = Object, ActorId) ->
-    Now = sql_date(now),
-    Object#chef_environment{updated_at = Now, last_updated_by = ActorId};
-set_updated(#chef_client{} = Object, ActorId) ->
-    Now = sql_date(now),
-    Object#chef_client{updated_at = Now, last_updated_by = ActorId};
-set_updated(#chef_node{} = Object, ActorId) ->
-    Now = sql_date(now),
-    Object#chef_node{updated_at = Now, last_updated_by = ActorId};
-set_updated(#chef_role{} = Object, ActorId) ->
-    Now = sql_date(now),
-    Object#chef_role{updated_at = Now, last_updated_by = ActorId};
-set_updated(#chef_user{} = Object, ActorId) ->
-    Now = sql_date(now),
-    Object#chef_user{updated_at = Now, last_updated_by = ActorId};
-set_updated(#chef_cookbook_version{} = Object, ActorId) ->
-    Now = sql_date(now),
-    Object#chef_cookbook_version{updated_at = Now, last_updated_by = ActorId}.
 
 
 -spec sql_date(now | {non_neg_integer(), non_neg_integer(), non_neg_integer()}) -> binary().

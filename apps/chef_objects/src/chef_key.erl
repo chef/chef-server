@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil -*-
 %% ex: ts=4 sw=4 et
 %% @author Tyler Cloke <tyler@chef.io>
-%% @author Marc Paradise <marc@chef.io>
+% @author Marc Paradise <marc@chef.io>
 %% Copyright 2015 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -21,10 +21,13 @@
 
 -module(chef_key).
 
+-include_lib("mixer/include/mixer.hrl").
+-include("../../include/chef_types.hrl").
+
 -behaviour(chef_object).
 
 -export([authz_id/1,
-         is_indexed/0,
+         is_indexed/1,
          ejson_for_indexing/2,
          update_from_ejson/2,
          set_created/2,
@@ -32,45 +35,40 @@
          fields_for_fetch/1,
          ejson_from_list/2,
          ejson_from_key/1,
-         record_fields/0,
+         record_fields/1,
          list/2,
          set_updated/2,
-         new_record/3,
+         set_api_version/2,
+         new_record/4,
          name/1,
          id/1,
          org_id/1,
          type_name/1,
          delete/2,
          parse_binary_json/2,
-         flatten/1
+         fields_for_insert/1
         ]).
 
 %% database named queries
 -export([
-         create_query/0,
-         update_query/0,
-         delete_query/0,
-         find_query/0,
-         bulk_get_query/0,
-         list_query/0
+         create_query/1,
+         update_query/1,
+         delete_query/1,
+         find_query/1,
+         bulk_get_query/1,
+         list_query/1
         ]).
 
--include_lib("mixer/include/mixer.hrl").
--mixin([{chef_object,[
-                     {default_fetch/2, fetch},
-                     {default_update/2, update}
-                    ]}]).
+-mixin([{chef_object_default_callbacks, [fetch/2, update/2]}]).
 
 -ifdef(TEST).
 -compile(export_all).
 -endif.
 
--include("../../include/chef_types.hrl").
-
 authz_id(#chef_key{}) ->
     undefined.
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     false.
 
 ejson_for_indexing(#chef_key{}, _) ->
@@ -79,24 +77,24 @@ ejson_for_indexing(#chef_key{}, _) ->
 -spec update_from_ejson(#chef_key{}, ejson_term()) -> #chef_key{}.
 update_from_ejson(#chef_key{key_name = OldName, key_version = OldPubKeyVersion,
                             public_key = OldPubKey, expires_at = OldExpirationDate} = Key, EJ) ->
-  {NewVersion, NewPubKey} = case ej:get({<<"public_key">>}, EJ) of
-                              undefined ->
-                                {OldPubKeyVersion, OldPubKey};
-                              PK ->
-                                {safe_key_version(PK), PK}
-                            end,
-  NewExpiration = case ej:get({<<"expiration_date">>}, EJ) of
-                    undefined ->
-                      OldExpirationDate;
-                    Exp ->
-                      chef_object_base:parse_date(Exp)
-                  end,
-  Key#chef_key{key_name = ej:get({<<"name">>}, EJ, OldName),
-               key_version = NewVersion,
-               public_key = NewPubKey,
-               expires_at = NewExpiration,
-               % We need to preserve the old name for any update to be applied
-               old_name = OldName}.
+    {NewVersion, NewPubKey} = case ej:get({<<"public_key">>}, EJ) of
+                                undefined ->
+                                  {OldPubKeyVersion, OldPubKey};
+                                PK ->
+                                  {safe_key_version(PK), PK}
+                              end,
+    NewExpiration = case ej:get({<<"expiration_date">>}, EJ) of
+                      undefined ->
+                        OldExpirationDate;
+                      Exp ->
+                        chef_object_base:parse_date(Exp)
+                    end,
+    Key#chef_key{key_name = ej:get({<<"name">>}, EJ, OldName),
+                 key_version = NewVersion,
+                 public_key = NewPubKey,
+                 expires_at = NewExpiration,
+                 % We need to preserve the old name for any update to be applied
+                 old_name = OldName}.
 
 set_created(#chef_key{} = Key, ActorId) ->
     Now = chef_object_base:sql_date(now),
@@ -116,7 +114,7 @@ fields_for_update(#chef_key{id = Id, key_name = NewName, old_name = OldName,
 fields_for_fetch(#chef_key{id = Id, key_name = KeyName}) ->
   [Id, KeyName].
 
-record_fields() ->
+record_fields(_ApiVersion) ->
   record_info(fields, chef_key).
 
 ejson_from_list(KeysList, URIDecorator) ->
@@ -133,20 +131,21 @@ ejson_from_key(#chef_key{key_name = Name, public_key = PublicKey, expires_at = N
       {<<"public_key">>, PublicKey},
       {<<"expiration_date">>, ExpirationDate}]}.
 
-list(#chef_key{id = Id}, CallbackFun) when is_binary(Id) ->
-    CallbackFun({list_query(), [Id], rows}).
+list(#chef_key{id = Id} = Key, CallbackFun) when is_binary(Id) ->
+    CallbackFun({list_query(Key), [Id], rows}).
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_key_by_id_and_name.
 
-new_record(_OrgId, _AuthzId, {Id, KeyData}) ->
+new_record(ApiVersion, _OrgId, _AuthzId, {Id, KeyData}) ->
     PubKey = ej:get({<<"public_key">>}, KeyData),
     %% return a more useful error if key_version fails
     PubKeyVersion = safe_key_version(PubKey),
     Expires = chef_object_base:parse_date(ej:get({<<"expiration_date">>}, KeyData)),
-    #chef_key{ id = Id, key_name = ej:get({<<"name">>}, KeyData),
-               public_key = PubKey, key_version = PubKeyVersion,
-               expires_at = Expires}.
+    #chef_key{server_api_version = ApiVersion, id = Id,
+              key_name = ej:get({<<"name">>}, KeyData),
+              public_key = PubKey, key_version = PubKeyVersion,
+              expires_at = Expires}.
 
 safe_key_version(PublicKey) ->
     try chef_object_base:key_version(PublicKey) of
@@ -167,10 +166,10 @@ org_id(#chef_key{}) ->
 type_name(#chef_key{}) ->
     key.
 
-list_query() ->
+list_query(_ObjectRec) ->
     list_keys_for_actor.
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_key_for_actor.
 
 parse_binary_json(Bin, update) ->
@@ -199,20 +198,24 @@ name_and_public_key_validation_spec(Req) ->
   {[ chef_object_base:public_key_spec(Req),
      {{Req, <<"name">>}, {string_match, chef_regex:regex_for(key_name)}} ]}.
 
-update_query() ->
+update_query(_ObjectRec) ->
   update_key_by_id_and_name.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
   delete_key_by_id_and_name.
 
-delete(#chef_key{id = Id, key_name = Name}, CallbackFun) ->
-    CallbackFun({delete_query(), [Id, Name]}).
+delete(#chef_key{id = Id, key_name = Name} = Rec, CallbackFun) ->
+    CallbackFun({delete_query(Rec), [Id, Name]}).
 
-flatten(#chef_key{} = Key) ->
-    %% Drop off the first and last fielFirst is record name, and
-    %% last is one that isn't in the DB (for internal use)
-    [_|Tail] = tuple_to_list(Key),
-    lists:reverse(tl(lists:reverse(Tail))).
+fields_for_insert(#chef_key{id = Id, key_name = KeyName,
+                           public_key = PublicKey, key_version = KeyVersion,
+                           expires_at = ExpiresAt, last_updated_by = LastUpdatedBy,
+                           created_at = CreatedAt , updated_at = UpdatedAt}) ->
+    [Id, KeyName, PublicKey, KeyVersion, ExpiresAt,
+     LastUpdatedBy, CreatedAt, UpdatedAt].
 
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     error(unsupported).
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#chef_key{server_api_version = Version}.

@@ -49,7 +49,7 @@ load_public_key(alternate) ->
     PublicKey.
 
 update_from_ejson_test_() ->
-    OriginalKey = chef_key:new_record(unused, unused, {<<"A">>, example_key()}),
+    OriginalKey = chef_key:new_record(?API_MIN_VER, unused, unused, {<<"A">>, example_key()}),
     [{"check that update_from_ejson returns the updated chef_key when fields are updated",
       fun() ->
               NewKey = load_public_key(alternate),
@@ -76,14 +76,14 @@ ejson_from_key_test_() ->
      {"check that ejson_from_key replies in correct form with infinity expiration",
       fun() ->
           ExampleKey = example_key(<<"infinity">>, undefined),
-          ChefKey = chef_key:new_record(unused, unused, {<<"A">>, ExampleKey}),
+          ChefKey = chef_key:new_record(?API_MIN_VER, unused, unused, {<<"A">>, ExampleKey}),
           ?assertMatch(ExampleKey, chef_key:ejson_from_key(ChefKey))
       end
      },
      {"check that ejson_from_key replies in correct form with normal expiration",
       fun() ->
           ExampleKey = example_key(),
-          ChefKey = chef_key:new_record(unused, unused, {<<"A">>, ExampleKey }),
+          ChefKey = chef_key:new_record(?API_MIN_VER, unused, unused, {<<"A">>, ExampleKey }),
           ?assertMatch(ExampleKey, chef_key:ejson_from_key(ChefKey))
       end
      }
@@ -97,7 +97,7 @@ new_record_test_() ->
       fun() ->
 	      KeyData = example_key(),
 	      ID = <<"testid">>,
-          NewRecord = chef_key:new_record(unused, unused, {ID, KeyData}),
+          NewRecord = chef_key:new_record(?API_MIN_VER, unused, unused, {ID, KeyData}),
 	      ?assertEqual(?PARSED_DEFAULT_EXPIRATION, NewRecord#chef_key.expires_at)
       end
      },
@@ -105,24 +105,24 @@ new_record_test_() ->
       fun() ->
 	      KeyData = example_key(<<"infinity">>, undefined),
 	      ID = <<"testid">>,
-	      ?assertEqual(#chef_key{id = ID, key_name = ?KEY_NAME,
-				     public_key = ej:get({<<"public_key">>}, KeyData),
-				     key_version = 0, expires_at = ?INFINITY_TIMESTAMP},
-			   chef_key:new_record(unused, unused, {ID, KeyData}))
+	      ?assertEqual(#chef_key{server_api_version = ?API_MIN_VER, id = ID, key_name = ?KEY_NAME,
+                                 public_key = ej:get({<<"public_key">>}, KeyData),
+                                 key_version = 0, expires_at = ?INFINITY_TIMESTAMP},
+			   chef_key:new_record(?API_MIN_VER, unused, unused, {ID, KeyData}))
       end
      },
      {"check that KeyData with an invalid date throws bad_date",
       fun() ->
 	      KeyData = example_key(<<"not-a-date">>, undefined),
 	      ID = <<"testid">>,
-	      ?assertThrow({ec_date,{bad_date,_}}, chef_key:new_record(unused, unused, {ID, KeyData}))
+	      ?assertThrow({ec_date,{bad_date,_}}, chef_key:new_record(?API_MIN_VER, unused, unused, {ID, KeyData}))
       end
      },
      {"check that KeyData with an invalid public_key throws invalid_public_key",
       fun() ->
 	      KeyData = example_key(<<"infinity">>, <<"invalid_key">>),
 	      ID = <<"testid">>,
-	      ?assertThrow(invalid_public_key,chef_key:new_record(unused, unused, {ID, KeyData}))
+	      ?assertThrow(invalid_public_key,chef_key:new_record(?API_MIN_VER, unused, unused, {ID, KeyData}))
       end
      }
     ].
@@ -225,10 +225,10 @@ parse_binary_json_create_test_() ->
     ].
 
 chef_object_callbacks_test_() ->
-    ChefKey = chef_key:new_record(unused, unused, {<<"A">>, example_key()}),
+    ChefKey = chef_key:new_record(?API_MIN_VER, unused, unused, {<<"A">>, example_key()}),
     OkFun = fun(_) -> ok end,
     [
-        ?_assertEqual(true, is_list(chef_key:flatten(ChefKey))),
+        ?_assertEqual(true, is_list(chef_key:fields_for_insert(ChefKey))),
         ?_assertEqual(true, is_list(chef_key:fields_for_update(ChefKey))),
         ?_assertEqual(ChefKey#chef_key.key_name, chef_key:name(ChefKey)),
         ?_assertEqual(ChefKey#chef_key.id, chef_key:id(ChefKey)),
@@ -242,14 +242,14 @@ chef_object_callbacks_test_() ->
         ?_assertEqual(ok, chef_key:delete(ChefKey, OkFun)),
         ?_assertEqual(ok, chef_key:fetch(ChefKey, OkFun)),
         ?_assertEqual(ok, chef_key:update(ChefKey, OkFun)),
-        ?_assertEqual(true, is_list(chef_key:record_fields())),
-        ?_assertEqual(true, is_atom(chef_key:update_query())),
-        ?_assertEqual(true, is_atom(chef_key:delete_query())),
-        ?_assertEqual(true, is_atom(chef_key:list_query())),
-        ?_assertEqual(true, is_atom(chef_key:create_query())),
-        ?_assertEqual(true, is_atom(chef_key:find_query())),
-        ?_assertError(unsupported, chef_key:bulk_get_query()),
-        ?_assertEqual(false, chef_key:is_indexed()),
+        ?_assertEqual(true, is_list(chef_key:record_fields(ChefKey))),
+        ?_assertEqual(true, is_atom(chef_key:update_query(ChefKey))),
+        ?_assertEqual(true, is_atom(chef_key:delete_query(ChefKey))),
+        ?_assertEqual(true, is_atom(chef_key:list_query(ChefKey))),
+        ?_assertEqual(true, is_atom(chef_key:create_query(ChefKey))),
+        ?_assertEqual(true, is_atom(chef_key:find_query(ChefKey))),
+        ?_assertError(unsupported, chef_key:bulk_get_query(ChefKey)),
+        ?_assertEqual(false, chef_key:is_indexed(ChefKey)),
 
 
         ?_assertMatch([<<"A">>, ?KEY_NAME], chef_key:fields_for_fetch(ChefKey)),

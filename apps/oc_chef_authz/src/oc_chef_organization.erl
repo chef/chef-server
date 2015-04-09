@@ -14,22 +14,23 @@
 
 -export([
          authz_id/1,
-         is_indexed/0,
+         is_indexed/1,
          ejson_for_indexing/2,
          update_from_ejson/2,
          set_created/2,
          set_updated/2,
-         create_query/0,
-         update_query/0,
-         delete_query/0,
-         find_query/0,
-         list_query/0,
-         bulk_get_query/0,
+         set_api_version/2,
+         create_query/1,
+         update_query/1,
+         delete_query/1,
+         find_query/1,
+         list_query/1,
+         bulk_get_query/1,
          fields_for_update/1,
          fields_for_fetch/1,
-         record_fields/0,
+         record_fields/1,
          list/2,
-         new_record/3,
+         new_record/4,
          name/1,
          id/1,
          org_id/1,
@@ -38,10 +39,7 @@
          parse_binary_json/1
         ]).
 
--mixin([
-        {chef_object, [{default_fetch/2, fetch},
-                       {default_update/2, update}]}
-       ]).
+-mixin([{chef_object_default_callbacks, [ fetch/2, update/2 ]}]).
 
 %% We don't have a class for 'organizations' on the client yet, but eventually we may want
 %% to send a json_class Chef::ApiOrganization or the like.
@@ -68,7 +66,7 @@ validation_constraints(OrgNameMatch) ->
 authz_id(#oc_chef_organization{authz_id = AuthzId}) ->
     AuthzId.
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     false.
 
 ejson_for_indexing(#oc_chef_organization{}, _EjsonTerm) ->
@@ -87,23 +85,23 @@ set_updated(#oc_chef_organization{} = Organization, ActorId) ->
     Now = chef_object_base:sql_date(now),
     Organization#oc_chef_organization{updated_at = Now, last_updated_by = ActorId}.
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_organization.
 
-update_query() ->
+update_query(_ObjectRec) ->
     update_organization_by_id.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_organization_by_id.
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_organization_by_id.
 
-list_query() ->
+list_query(_ObjectRec) ->
     list_organizations.
 
 %% Not implemented because we have no serialized json body
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     erlang:error(not_implemented).
 
 fields_for_update(#oc_chef_organization{last_updated_by = LastUpdatedBy,
@@ -116,11 +114,11 @@ fields_for_update(#oc_chef_organization{last_updated_by = LastUpdatedBy,
 fields_for_fetch(#oc_chef_organization{id = Id}) ->
     [Id].
 
-record_fields() ->
+record_fields(_ApiVersion) ->
     record_info(fields, oc_chef_organization).
 
-list(#oc_chef_organization{}, CallbackFun) ->
-    CallbackFun({list_query(), [], [name]}).
+list(#oc_chef_organization{} = Org, CallbackFun) ->
+    CallbackFun({list_query(Org), [], [name]}).
 
 parse_binary_json({Bin, OrgName}) ->
     parse_binary_json(Bin, OrgName);
@@ -150,7 +148,7 @@ assemble_organization_ejson(#oc_chef_organization{id = Guid,
             {?GUID_FIELD, Guid} ]},
     chef_object_base:set_default_values(Org, ?DEFAULT_FIELD_VALUES).
 
-new_record(_OrgId, AuthzId, OrganizationData) ->
+new_record(ApiVersion, _OrgId, AuthzId, OrganizationData) ->
     Id = chef_object_base:make_guid(),
 
     Name = ej:get({?NAME_FIELD}, OrganizationData),
@@ -159,6 +157,7 @@ new_record(_OrgId, AuthzId, OrganizationData) ->
     %% Also, does assigned at really make sense when org creation is done in one step?
     AssignedAt = ej:get({<<"assigned_at">>}, OrganizationData, chef_object_base:sql_date(now)),
     #oc_chef_organization{
+       server_api_version = ApiVersion,
        id = Id,
        authz_id = AuthzId,
        name = Name,
@@ -211,3 +210,6 @@ regex_for(org_name) ->
 regex_for(org_full_name) ->
     generate_regex_msg_tuple(?ANCHOR_REGEX(?FULL_NAME_REGEX),
                              <<"Malformed org full name.  Must only contain A-Z, a-z, 0-9, _, or -">>).
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#oc_chef_organization{server_api_version = Version}.

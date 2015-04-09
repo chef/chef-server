@@ -20,6 +20,11 @@
 %%
 -module(chef_client).
 
+-include_lib("ej/include/ej.hrl").
+-include("../../include/chef_types.hrl").
+-include("../../include/chef_osc_defaults.hrl").
+-include_lib("mixer/include/mixer.hrl").
+
 -export([
          authz_id/1,
          add_authn_fields/2,
@@ -28,42 +33,33 @@
          fields_for_fetch/1,
          fields_for_update/1,
          id/1,
-         is_indexed/0,
+         is_indexed/1,
          name/1,
          org_id/1,
-         new_record/3,
+         new_record/4,
          parse_binary_json/2,
          parse_binary_json/3,
-         record_fields/0,
+         record_fields/1,
          set_created/2,
          set_updated/2,
+         set_api_version/2,
          type_name/1,
-         update_from_ejson/2
+         update_from_ejson/2,
+         list/2
         ]).
 
 %% database named queries
 -export([
-         bulk_get_query/0,
-         create_query/0,
-         delete_query/0,
-         find_query/0,
-         list_query/0,
-         update_query/0
+         bulk_get_query/1,
+         create_query/1,
+         delete_query/1,
+         find_query/1,
+         list_query/1,
+         update_query/1
         ]).
 
--include_lib("mixer/include/mixer.hrl").
--mixin([{chef_object,[
-                      {default_fetch/2, fetch},
-                      {default_update/2, update}
-                     ]}]).
+-mixin([{chef_object_default_callbacks, [ fetch/2, update/2 ]}]).
 
--export([
-         list/2
-         ]).
-
--include_lib("ej/include/ej.hrl").
--include("../../include/chef_types.hrl").
--include("../../include/chef_osc_defaults.hrl").
 
 -define(DEFAULT_FIELD_VALUES, [
                                {<<"json_class">>, <<"Chef::ApiClient">>},
@@ -96,7 +92,7 @@ type_name(#chef_client{}) ->
 authz_id(#chef_client{authz_id = AuthzId})->
     AuthzId.
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     true.
 
 ejson_for_indexing(#chef_client{}, Client) ->
@@ -131,32 +127,33 @@ set_updated(#chef_client{} = Object, ActorId) ->
     Now = chef_object_base:sql_date(now),
     Object#chef_client{updated_at = Now, last_updated_by = ActorId}.
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_client.
 
-update_query() ->
+update_query(_ObjectRec) ->
     update_client_by_id.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_client_by_id.
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_client_by_orgid_name.
 
-list_query() ->
+list_query(_ObjectRec) ->
     list_clients_for_org.
 
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     bulk_get_clients.
 
--spec new_record(object_id(), object_id(), ejson_term()) -> #chef_client{}.
-new_record(OrgId, AuthzId, ClientData) ->
+-spec new_record(api_version(), object_id(), object_id(), ejson_term()) -> #chef_client{}.
+new_record(ApiVersion, OrgId, AuthzId, ClientData) ->
     Name = ej:get({<<"name">>}, ClientData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     Validator = ej:get({<<"validator">>}, ClientData) =:= true,
     Admin = ej:get({<<"admin">>}, ClientData) =:= true,
     {PublicKey, PubkeyVersion} = cert_or_key(ClientData),
-    #chef_client{id = Id,
+    #chef_client{server_api_version = ApiVersion,
+                 id = Id,
                  authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
                  org_id = OrgId,
                  name = Name,
@@ -182,7 +179,7 @@ fields_for_fetch(#chef_client{org_id = OrgId,
                               name = Name}) ->
     [OrgId, Name].
 
-record_fields() ->
+record_fields(_ApiVersion) ->
     record_info(fields, chef_client).
 
 -spec add_authn_fields(ejson_term(), binary()) -> ejson_term().
@@ -326,7 +323,10 @@ value_or_undefined(Key, Data) ->
       Value
   end.
 -spec(list(#chef_client{}, chef_object:select_callback()) -> chef_object:select_return()).
-list(#chef_client{org_id = OrgId}, CallbackFun) ->
-    CallbackFun({list_query(), [OrgId], [name]}).
+list(#chef_client{org_id = OrgId} = Rec, CallbackFun) ->
+    CallbackFun({list_query(Rec), [OrgId], [name]}).
 
 
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#chef_client{server_api_version = Version}.

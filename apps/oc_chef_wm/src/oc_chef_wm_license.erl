@@ -16,37 +16,32 @@
                            ping/2,
                            forbidden/2,
                            is_authorized/2,
+                           validate_request/3,
+                           {default_malformed_request_message/3, malformed_request_message},
+                           {allow_all/2, auth_info},
                            service_available/2]}]).
-
--export([allowed_methods/2,
-         to_json/2]).
 
 %% chef_wm behaviour callbacks
 -behavior(chef_wm).
--export([auth_info/2,
-         init/1,
+-export([init/1,
          init_resource_state/1,
-         malformed_request_message/3,
-         request_type/0,
-         validate_request/3]).
+         request_type/0]).
+
+%% Our implemented webmachine callbacks
+-export([allowed_methods/2, to_json/2]).
 
 init(Config) ->
     oc_chef_wm_base:init(?MODULE, Config).
 
+% We're as simple as it gets, no state here.
 init_resource_state(_Config) ->
-    {ok, #base_state{}}.
+    {ok, undefined}.
 
 request_type() ->
     "license".
 
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
-
-validate_request('GET', Req, State) ->
-    {Req, State}.
-
-auth_info(Req, State) ->
-    {authorized, Req, State}.
 
 to_json(Req, State) ->
     {chef_json:encode(license_body(State)), Req, State}.
@@ -65,9 +60,3 @@ license_body(State) ->
 
 node_count(#base_state{chef_db_context = DbContext}) ->
     chef_db:count_nodes(DbContext).
-
-%% error message functions
-
-malformed_request_message(Any, Req, State) ->
-    chef_wm_util:malformed_request_message(Any, Req, State).
-

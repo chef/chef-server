@@ -25,13 +25,11 @@
          parse_binary_json/2,
          set_created/2,
          fields_for_fetch/1,
-         find_query/0,
-         record_fields/0
-        ]).
-
--export([
+         find_query/1,
+         record_fields/1,
+         set_api_version/2,
          fetch/2
-         ]).
+        ]).
 
 -ifdef(TEST).
 -compile(export_all).
@@ -124,10 +122,10 @@ fields_for_fetch(#chef_sandbox{org_id = OrgId,
                                id = Id}) ->
     [OrgId, Id].
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_sandbox_by_id.
 
-record_fields() ->
+record_fields(_ApiVersion) ->
     record_info(fields, chef_sandbox).
 
 -spec(fetch(#chef_sandbox{}, chef_object:select_callback()) -> chef_object:select_return()).
@@ -140,7 +138,7 @@ fetch(#chef_sandbox{org_id = OrgId, id = SandboxID}, CallbackFun) ->
     end.
 
 
- 
+
 %% @doc Transforms a collection of proplists representing a sandbox / checksum join query
 %% result and collapses them all into a single sandbox record.  There is a row for each
 %% checksum.  A checksum tuple is extracted from each row; sandbox information is extracted
@@ -178,4 +176,7 @@ proplist_to_checksum(Proplist) ->
          true -> true;
          false -> false
      end}.
+
+set_api_version(ObjectRec, ApiVersion) ->
+    ObjectRec#chef_sandbox{server_api_version = ApiVersion}.
 

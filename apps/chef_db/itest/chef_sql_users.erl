@@ -56,6 +56,7 @@ make_admin_user(Prefix) ->
 
 chef_user_record(AzId, Admin) ->
     #chef_user{
+       server_api_version = ?API_MIN_VER,
        id = AzId,
        authz_id = AzId,
        username = AzId,
@@ -89,7 +90,7 @@ fetch_user_data() ->
     Username = Expected#chef_user.username,
     %% Make sure client create succeeds
     ?assertEqual({ok, 1}, itest_util:create_record(Expected)),
-    Result = chef_db:fetch(#chef_user{username = Username}, chef_db:make_context(<<"ABCD">>)),
+    Result = chef_db:fetch(#chef_user{username = Username}, chef_db:make_context(?API_MIN_VER, <<"ABCD">>)),
     ?assertEqual(Expected, Result).
 
 fetch_user_list() ->
@@ -108,7 +109,7 @@ delete_user_data() ->
     Result = itest_util:delete_record(User),
     ?assertEqual({ok, 1}, Result),
     Username = User#chef_user.username,
-    Result1 = chef_db:fetch(#chef_user{username = Username}, chef_db:make_context(<<"ABCD">>)),
+    Result1 = chef_db:fetch(#chef_user{username = Username}, chef_db:make_context(?API_MIN_VER, <<"ABCD">>)),
     ?assertEqual(not_found, Result1).
 
 update_user_data() ->
@@ -117,7 +118,7 @@ update_user_data() ->
 
     %% Check that public key we inserted is correct
     Username = User#chef_user.username,
-    CreatedUser = chef_db:fetch(#chef_user{username = Username}, chef_db:make_context(<<"ABCD">>)),
+    CreatedUser = chef_db:fetch(#chef_user{username = Username}, chef_db:make_context(?API_MIN_VER, <<"ABCD">>)),
     ?assertEqual(?PUBLIC_KEY, CreatedUser#chef_user.public_key),
 
     %% Update public key
@@ -126,7 +127,7 @@ update_user_data() ->
     ?assertEqual({ok, 1}, Result),
 
     %% Did the public key really update?
-    PersistedUser = chef_db:fetch(#chef_user{username = Username}, chef_db:make_context(<<"ABCD">>)),
+    PersistedUser = chef_db:fetch(#chef_user{username = Username}, chef_db:make_context(?API_MIN_VER, <<"ABCD">>)),
     ?assertEqual(?OTHER_PUBLIC_KEY, PersistedUser#chef_user.public_key),
 
     %% Cleanup admin user so count_admin_users() tests will work

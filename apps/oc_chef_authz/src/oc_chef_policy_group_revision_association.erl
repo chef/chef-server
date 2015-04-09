@@ -20,12 +20,10 @@
 
 -module(oc_chef_policy_group_revision_association).
 
+-include_lib("mixer/include/mixer.hrl").
 -include("../../include/oc_chef_types.hrl").
 
--include_lib("mixer/include/mixer.hrl").
--mixin([{chef_object,[{default_fetch/2, fetch},
-                      {default_update/2, update}]}]).
-
+% TOD - is this supposed to be a chef_object? It looks kind of like one, but missing serveral things.
 -export([find_policy_revision_by_orgid_name_group_name/2,
          fetch_prereq_objects/2,
          insert_association/3,
@@ -35,19 +33,24 @@
          id/1,
          set_created/2,
          set_updated/2,
+         set_api_version/2,
          fields_for_fetch/1,
          fields_for_update/1,
-         find_query/0,
-         create_query/0,
-         update_query/0,
-         delete_query/0,
-         record_fields/0,
+         find_query/1,
+         create_query/1,
+         update_query/1,
+         delete_query/1,
+         record_fields/1,
          record_for_find/3,
-         new_record/6,
-         update_record/7,
-         flatten/1,
-         is_indexed/0,
-         ejson_for_indexing/2]).
+         new_record/7,
+         update_record/8,
+         fields_for_insert/1,
+         is_indexed/1,
+         ejson_for_indexing/2
+        ]).
+
+-mixin([{chef_object_default_callbacks, [fetch/2, update/2]}]).
+
 
 find_policy_revision_by_orgid_name_group_name(Record, DBContext) ->
     case chef_db:fetch(Record, DBContext) of
@@ -141,19 +144,19 @@ fields_for_update(#oc_chef_policy_group_revision_association{
         last_updated_by = LastUpdatedBy}) ->
     [PolicyRevisionRevisionId, LastUpdatedBy, ID].
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_policy_by_group_asoc_and_name.
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_policy_group_policy_revision_association.
 
-update_query() ->
+update_query(_ObjectRec) ->
     update_policy_group_policy_revision_association.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_policy_group_policy_revision_association_by_id.
 
-record_fields() ->
+record_fields(_ApiVersion) ->
     record_info(fields, oc_chef_policy_group_revision_association).
 
 record_for_find(OrgID, PolicyName, GroupName) ->
@@ -165,13 +168,13 @@ record_for_find(OrgID, PolicyName, GroupName) ->
         policy_group = #oc_chef_policy_group{org_id = OrgID, name = GroupName }
         }.
 
-new_record(OrgID, PolicyName, PolicyAuthzID, PolicyGroupName, PolicyGroupAuthzID, PolicyData) ->
+new_record(ApiVersion, OrgID, PolicyName, PolicyAuthzID, PolicyGroupName, PolicyGroupAuthzID, PolicyData) ->
     %% POLICY:   name, org_id, authz_id
-    Policy = oc_chef_policy:new_record(OrgID, PolicyAuthzID, PolicyName),
+    Policy = oc_chef_policy:new_record(ApiVersion, OrgID, PolicyAuthzID, PolicyName),
     %% GROUP:    name, org_id, authz_id
-    PolicyGroup = oc_chef_policy_group:new_record(OrgID, PolicyGroupAuthzID, PolicyGroupName),
+    PolicyGroup = oc_chef_policy_group:new_record(ApiVersion, OrgID, PolicyGroupAuthzID, PolicyGroupName),
     %% Revision: name, ord_id, policy_authz_id, revision_id, serialized_object
-    PolicyRevision = oc_chef_policy_revision:new_record(OrgID, PolicyAuthzID, PolicyData),
+    PolicyRevision = oc_chef_policy_revision:new_record(ApiVersion, OrgID, PolicyAuthzID, PolicyData),
     %% PGRA:     org_id, policy_group_authz_id, revision_id, revision_name, policy_group_name, associated records
     #oc_chef_policy_revision{revision_id = RevisionID} = PolicyRevision,
 
@@ -188,11 +191,12 @@ new_record(OrgID, PolicyName, PolicyAuthzID, PolicyGroupName, PolicyGroupAuthzID
         policy_revision = PolicyRevision
         }.
 
-update_record(ID, OrgID, PolicyName, PolicyAuthzID, PolicyGroupName, PolicyGroupAuthzID, PolicyData) ->
+update_record(ApiVersion, ID, OrgID, PolicyName, PolicyAuthzID, PolicyGroupName, PolicyGroupAuthzID, PolicyData) ->
     %% Policy and PolicyGroup must exist or else you'll run afoul of FK constraints.
-    PolicyRevision = oc_chef_policy_revision:new_record(OrgID, PolicyAuthzID, PolicyData),
+    PolicyRevision = oc_chef_policy_revision:new_record(ApiVersion, OrgID, PolicyAuthzID, PolicyData),
     #oc_chef_policy_revision{revision_id = RevisionID} = PolicyRevision,
     #oc_chef_policy_group_revision_association{
+        server_api_version = ApiVersion,
         id = ID,
         org_id = OrgID,
         policy_group_authz_id = PolicyGroupAuthzID,
@@ -208,7 +212,7 @@ decompress_record(#oc_chef_policy_group_revision_association{
     SerializedObject = jiffy:decode(chef_db_compression:decompress(CompressedSerializedObject)),
     Assoc#oc_chef_policy_group_revision_association{serialized_object = SerializedObject}.
 
-flatten(#oc_chef_policy_group_revision_association{
+fields_for_insert(#oc_chef_policy_group_revision_association{
         id = Id,
         org_id = OrgId,
         policy_revision_name = PolicyName,
@@ -218,10 +222,13 @@ flatten(#oc_chef_policy_group_revision_association{
         last_updated_by = LastUpdatedBy}) ->
     [Id, OrgId, RevisionId, PolicyName, GroupName, PolicyGroupAuthzID, LastUpdatedBy].
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     false.
 
 ejson_for_indexing(#oc_chef_policy_group_revision_association{}, _EjsonTerm) ->
    {[]}.
+
+set_api_version(ObjectRec, ApiVersion) ->
+    ObjectRec#oc_chef_policy_group_revision_association{server_api_version = ApiVersion}.
 
 

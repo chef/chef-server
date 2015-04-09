@@ -22,50 +22,48 @@
 
 -module(chef_data_bag_item).
 
+-include_lib("mixer/include/mixer.hrl").
+-include("../../include/chef_types.hrl").
+
+-behaviour(chef_object).
 -export([
          add_type_and_bag/2,
          authz_id/1,
          ejson_for_indexing/2,
-         is_indexed/0,
+         is_indexed/1,
          fields_for_fetch/1,
          fields_for_update/1,
          id/1,
          name/1,
          org_id/1,
-         new_record/3,
+         new_record/4,
          parse_binary_json/2,
-         record_fields/0,
+         record_fields/1,
          set_created/2,
          set_updated/2,
+         set_api_version/2,
          type_name/1,
          update_from_ejson/2,
-         wrap_item/3
+         wrap_item/3,
+         list/2
         ]).
 
 %% database named queries
 -export([
-         bulk_get_query/0,
-         create_query/0,
-         delete_query/0,
-         find_query/0,
-         list_query/0,
-         update_query/0
+         bulk_get_query/1,
+         create_query/1,
+         delete_query/1,
+         find_query/1,
+         list_query/1,
+         update_query/1
         ]).
 
--include_lib("mixer/include/mixer.hrl").
--mixin([{chef_object,[
-                      {default_fetch/2, fetch},
-                      {default_update/2, update}
-                     ]}]).
--export([
-         list/2
-         ]).
+-mixin([{chef_object_default_callbacks, [ fetch/2, update/2 ]}]).
 
 -ifdef(TEST).
 -compile(export_all).
 -endif.
 
--include("../../include/chef_types.hrl").
 
 %% Describes the valid structure of a data bag item for use with `ej:valid/2`.
 -define(VALIDATION_CONSTRAINTS,
@@ -73,14 +71,14 @@
           {<<"id">>, {string_match, chef_regex:regex_for(data_bag_item_id)}}
          ]}).
 
--behaviour(chef_object).
 
--spec new_record(object_id(), object_id(), {binary(), ejson_term()}) -> #chef_data_bag_item{}.
-new_record(OrgId, _AuthzId, {BagName, ItemData}) ->
+-spec new_record(api_version(), object_id(), object_id(), {binary(), ejson_term()}) -> #chef_data_bag_item{}.
+new_record(ApiVersion, OrgId, _AuthzId, {BagName, ItemData}) ->
     ItemName = ej:get({<<"id">>}, ItemData),
     Id = chef_object_base:make_org_prefix_id(OrgId, <<BagName/binary, ItemName/binary>>),
     Data = chef_db_compression:compress(chef_data_bag_item, chef_json:encode(ItemData)),
-    #chef_data_bag_item{id = Id,
+    #chef_data_bag_item{server_api_version = ApiVersion,
+                        id = Id,
                         org_id = OrgId,
                         data_bag_name = BagName,
                         item_name = ItemName,
@@ -116,7 +114,7 @@ set_updated(#chef_data_bag_item{} = Object, ActorId) ->
     Now = chef_object_base:sql_date(now),
     Object#chef_data_bag_item{updated_at = Now, last_updated_by = ActorId}.
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     true.
 
 -spec ejson_for_indexing(#chef_data_bag_item{}, {binary, ejson_term()} | ejson_term()) -> ejson_term().
@@ -137,22 +135,22 @@ update_from_ejson(#chef_data_bag_item{} = DataBagItem, DataBagItemData) ->
     Data = chef_db_compression:compress(chef_data_bag_item, DataBagItemJson),
     DataBagItem#chef_data_bag_item{item_name = Name, serialized_object = Data}.
 
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     bulk_get_data_bag_items.
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_data_bag_item.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_data_bag_item_by_id.
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_data_bag_item_by_orgid_name.
 
-list_query() ->
+list_query(_ObjectRec) ->
     list_data_bag_items_for_data_bag.
 
-update_query() ->
+update_query(_ObjectRec) ->
     update_data_bag_item_by_id.
 
 fields_for_update(#chef_data_bag_item{last_updated_by = LastUpdatedBy,
@@ -166,7 +164,7 @@ fields_for_fetch(#chef_data_bag_item{org_id = OrgId,
                                      item_name = ItemName}) ->
     [OrgId, BagName, ItemName].
 
-record_fields() ->
+record_fields(_ApiVersion) ->
     record_info(fields, chef_data_bag_item).
 
 -spec add_type_and_bag(BagName :: binary(), Item :: ejson_term()) -> ejson_term().
@@ -238,6 +236,9 @@ is_wrapped_item(Ejson) ->
      <<"Chef::DataBagItem">> =:= ej:get({<<"json_class">>}, Ejson)).
 
 -spec(list(#chef_data_bag_item{}, chef_object:select_callback()) -> chef_object:select_return()).
-list(#chef_data_bag_item{org_id = OrgId, data_bag_name = DataBagName}, CallBackFun) ->
-    CallBackFun({list_query(), [OrgId, DataBagName], [item_name]}).
-    
+list(#chef_data_bag_item{org_id = OrgId, data_bag_name = DataBagName} = DBI, CallBackFun) ->
+    CallBackFun({list_query(DBI), [OrgId, DataBagName], [item_name]}).
+
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#chef_data_bag_item{server_api_version = Version}.

@@ -25,6 +25,7 @@
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("ej/include/ej.hrl").
 -include("../../include/chef_osc_defaults.hrl").
+-include("../../include/chef_types.hrl").
 -compile([export_all]).
 
 -define(NEEDED_APPS, [ pooler ]).
@@ -631,4 +632,4 @@ make_env(Name, Deps) ->
              ]},
     Json = chef_json:encode(Ejson0),
     {ok, Ejson} = chef_environment:parse_binary_json(Json),
-    chef_environment:new_record(?OSC_ORG_ID, unset, Ejson).
+    chef_environment:new_record(?API_MIN_VER, ?OSC_ORG_ID, unset, Ejson).

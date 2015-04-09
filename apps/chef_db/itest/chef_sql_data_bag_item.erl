@@ -12,7 +12,8 @@
 make_data_bag_item(Prefix, BagName) ->
     Id = chef_test_suite_helper:make_id(Prefix),
     Name = <<"item_", Prefix/binary>>,
-    #chef_data_bag_item{id= Id, org_id= chef_test_suite_helper:the_org_id(), item_name= Name, data_bag_name= BagName,
+    #chef_data_bag_item{server_api_version = ?API_MIN_VER,
+                        id= Id, org_id= chef_test_suite_helper:the_org_id(), item_name= Name, data_bag_name= BagName,
                         last_updated_by= chef_test_suite_helper:actor_id(),
                         created_at= {datetime, {{2011,10,1},{16,47,46}}},
                         updated_at= {datetime, {{2011,10,1},{16,47,46}}},

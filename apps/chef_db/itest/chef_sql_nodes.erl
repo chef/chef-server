@@ -22,7 +22,7 @@ node_list() ->
     [ {make_node(<<"01">>), ActorId}, {make_node(<<"02">>), ActorId}].
 
 insert_node_data() ->
-    Ctx = chef_db:make_context(<<"itest-nodes">>, stub_xdl, stub_otto),
+    Ctx = chef_db:make_context(?API_MIN_VER, <<"itest-nodes">>),
     Nodes = node_list(),
     Expected = lists:duplicate(length(Nodes), ok),
     Results = [ chef_db:create(Node, Ctx, ActorId) || {Node, ActorId} <- Nodes ],

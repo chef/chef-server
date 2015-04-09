@@ -19,8 +19,11 @@
 %% under the License.
 %%
 
-
 -module(chef_cookbook_version).
+
+-include("../../include/chef_types.hrl").
+-include_lib("mixer/include/mixer.hrl").
+
 
 -export([
          assemble_cookbook_ejson/2,
@@ -33,49 +36,43 @@
          ejson_for_indexing/2,
          extract_checksums/1,
          fields_for_update/1,
+         fields_for_insert/1,
          fields_for_fetch/1,
          id/1,
-         is_indexed/0,
+         is_indexed/1,
          minimal_cookbook_ejson/2,
          name/1,
          org_id/1,
-         new_record/3,
+         new_record/4,
          parse_binary_json/2,
          parse_version/1,
          qualified_recipe_names/2,
-         record_fields/0,
+         record_fields/1,
          set_created/2,
          set_updated/2,
-
+         set_api_version/2,
          type_name/1,
          update_from_ejson/2,
-         version_to_binary/1
+         version_to_binary/1,
+         list/2
         ]).
 
 %% database named queries
 -export([
-         bulk_get_query/0,
-         create_query/0,
-         delete_query/0,
-         find_query/0,
-         list_query/0,
-         update_query/0
+         bulk_get_query/1,
+         create_query/1,
+         delete_query/1,
+         find_query/1,
+         list_query/1,
+         update_query/1
         ]).
 
--include_lib("mixer/include/mixer.hrl").
--mixin([{chef_object,[
-                      {default_fetch/2, fetch},
-                      {default_update/2, update}
-                     ]}]).
--export([
-         list/2
-         ]).
+-mixin([{chef_object_default_callbacks, [ fetch/2, update/2 ]}]).
 
 -ifdef(TEST).
 -compile(export_all).
 -endif.
 
--include("../../include/chef_types.hrl").
 
 %% This is the maximum size of an int value in postgres used to store major, minor, and
 %% patch versions.
@@ -136,8 +133,8 @@ set_updated(#chef_cookbook_version{} = Object, ActorId) ->
 type_name(#chef_cookbook_version{}) ->
     cookbook_version.
 
--spec new_record(object_id(), object_id(), ejson_term()) -> #chef_cookbook_version{}.
-new_record(OrgId, AuthzId, CBVData) ->
+-spec new_record(api_version(), object_id(), object_id(), ejson_term()) -> #chef_cookbook_version{}.
+new_record(ApiVersion, OrgId, AuthzId, CBVData) ->
     %% name for a cookbook_version is actually cb_name-cb_version which is good for ID
     %% creation
     Name = ej:get({<<"name">>}, CBVData),
@@ -165,7 +162,8 @@ new_record(OrgId, AuthzId, CBVData) ->
 
     Data = compress_maybe(ej:delete({<<"metadata">>}, CBVData),
                           chef_cookbook_version),
-    #chef_cookbook_version{id = Id,
+    #chef_cookbook_version{server_api_version = ApiVersion,
+                           id = Id,
                            authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
                            org_id = OrgId,
                            name = ej:get({<<"cookbook_name">>}, CBVData),
@@ -340,7 +338,7 @@ is_valid_version(Version) ->
 %% @doc Given a binary parse it to a valid cookbook version tuple {Major, Minor, Patch} or
 %% raise a `badarg' error. Each of `Major', `Minor', and `Patch' must be non-negative
 %% integer values less than `?MAX_VERSION' (max size of value in pg int column). It is
-%% acceptable to provide a value with one or two dots (1.0 is the same as 1.0.0). Less 
+%% acceptable to provide a value with one or two dots (1.0 is the same as 1.0.0). Less
 %% than one dot or more than two dots is an error.
 %%
 %% @end
@@ -573,29 +571,30 @@ maybe_qualify_name(CookbookName, RecipeName) ->
             <<CookbookName/binary, "::", StrippedName/binary>>
     end.
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_cookbook_version.
 
-update_query() ->
+update_query(_ObjectRec) ->
     update_cookbook_version.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_cookbook_version_by_id.
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_cookbook_version_by_orgid_name_version.
 
-list_query() ->
+list_query(_ObjectRec) ->
     list_cookbook_versions_by_orgid.
 
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     error(not_implemented).
 
-update_from_ejson(#chef_cookbook_version{org_id = OrgId,
+update_from_ejson(#chef_cookbook_version{server_api_version = ApiVersion,
+                                         org_id = OrgId,
                                          authz_id = AuthzId,
                                          frozen = FrozenOrig} = CookbookVersion,
                   CookbookVersionData) ->
-    UpdatedVersion = new_record(OrgId, AuthzId, CookbookVersionData),
+    UpdatedVersion = new_record(ApiVersion, OrgId, AuthzId, CookbookVersionData),
     %% frozen is immutable once it is set to true
     Frozen = FrozenOrig =:= true orelse UpdatedVersion#chef_cookbook_version.frozen,
     CookbookVersion#chef_cookbook_version{frozen            = Frozen,
@@ -606,11 +605,43 @@ update_from_ejson(#chef_cookbook_version{org_id = OrgId,
                                           checksums         = UpdatedVersion#chef_cookbook_version.checksums,
                                           serialized_object = UpdatedVersion#chef_cookbook_version.serialized_object}.
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     false.
 
 ejson_for_indexing(#chef_cookbook_version{}, _CBV) ->
     error(not_indexed).
+
+fields_for_insert(#chef_cookbook_version{
+                     'id' = Id,
+                     'major' = Major,
+                     'minor' = Minor,
+                     'patch' = Patch,
+                     'frozen' = Frozen,
+                     'meta_attributes' = MetaAttributes,
+                     'meta_deps' = MetaDeps,
+                     'meta_long_desc' = MetaLongDesc,
+                     'metadata' = Metadata,
+                     'serialized_object' = SerializedObject,
+                     'last_updated_by' = LastUpdatedBy,
+                     'created_at' = CreatedAt,
+                     'updated_at' = UpdatedAt,
+                     'org_id' = OrgId,
+                     'name' = Name}) ->
+    [Id,
+     Major,
+     Minor,
+     Patch,
+     Frozen,
+     MetaAttributes,
+     MetaDeps,
+     MetaLongDesc,
+     Metadata,
+     SerializedObject,
+     LastUpdatedBy,
+     CreatedAt,
+     UpdatedAt,
+     OrgId,
+     Name].
 
 fields_for_update(#chef_cookbook_version{ id                = Id,
                                           frozen            = Frozen,
@@ -630,8 +661,12 @@ fields_for_fetch(#chef_cookbook_version{org_id = OrgId,
                                         patch = Patch}) ->
     [OrgId, Name, Major, Minor, Patch].
 
-record_fields() ->
+record_fields(_ApiVersion) ->
     record_info(fields, chef_cookbook_version).
+
 -spec(list(#chef_cookbook_version{}, chef_object:select_callback()) -> chef_object:select_return()).
-list(#chef_cookbook_version{org_id = OrgId}, CallbackFun) ->
-    CallbackFun({list_query(), [OrgId], [name]}).
+list(#chef_cookbook_version{org_id = OrgId} = CBV, CallbackFun) ->
+    CallbackFun({list_query(CBV), [OrgId], [name]}).
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#chef_cookbook_version{server_api_version = Version}.

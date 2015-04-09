@@ -21,7 +21,6 @@
 
 
 -module(chef_client_tests).
-
 -include("../../include/chef_types.hrl").
 -include("../../include/chef_osc_defaults.hrl").
 -include_lib("ej/include/ej.hrl").
@@ -136,7 +135,7 @@ new_record_test() ->
     OrgId = <<"12345678123456781234567812345678">>,
     AuthzId = <<"00000000000000000000000011111111">>,
     ClientData = {[{<<"name">>, <<"my-client">>}, {<<"alpha">>, <<"bravo">>}]},
-    Client = chef_client:new_record(OrgId, AuthzId, ClientData),
+    Client = chef_client:new_record(?API_MIN_VER, OrgId, AuthzId, ClientData),
     ?assertMatch(#chef_client{}, Client),
     %% TODO: validate more fields?
     ?assertEqual(<<"my-client">>, chef_client:name(Client)).

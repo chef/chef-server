@@ -19,32 +19,30 @@
 %% chef_object behaviour callbacks
 -export([
          authz_id/1,
-         bulk_get_query/0,
-         create_query/0,
-         delete_query/0,
+         bulk_get_query/1,
+         create_query/1,
+         delete_query/1,
          ejson_for_indexing/2,
          fields_for_fetch/1,
          fields_for_update/1,
-         find_query/0,
+         find_query/1,
          id/1,
-         is_indexed/0,
+         is_indexed/1,
          list/2,
-         list_query/0,
+         list_query/1,
          name/1,
-         new_record/3,
+         new_record/4,
          org_id/1,
-         record_fields/0,
+         record_fields/1,
          set_created/2,
          set_updated/2,
+         set_api_version/2,
          type_name/1,
          update_from_ejson/2,
-         update_query/0
+         update_query/1
         ]).
 
--mixin([
-        {chef_object, [{default_fetch/2, fetch},
-                       {default_update/2, update}]}
-       ]).
+-mixin([{chef_object_default_callbacks, [ fetch/2, update/2 ]}]).
 
 name(#oc_chef_container{name = Name}) ->
     Name.
@@ -61,29 +59,30 @@ authz_id(#oc_chef_container{authz_id = AuthzId}) ->
 org_id(#oc_chef_container{org_id = OrgId}) ->
     OrgId.
 
-create_query() ->
+create_query(_ObjectRec) ->
     insert_container.
 
-update_query() ->
+update_query(_ObjectRec) ->
     update_container_by_id.
 
-delete_query() ->
+delete_query(_ObjectRec) ->
     delete_container_by_id.
 
-find_query() ->
+find_query(_ObjectRec) ->
     find_container_by_orgid_name.
 
-list_query() ->
+list_query(_ObjectRec) ->
     list_containers_for_org.
 
-bulk_get_query() ->
+bulk_get_query(_ObjectRec) ->
     %% TODO: do we need this?
     ok.
 
-new_record(OrgId, AuthzId, ContainerData) ->
+new_record(ApiVersion, OrgId, AuthzId, ContainerData) ->
     Name = ej:get({<<"containername">>}, ContainerData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
-    #oc_chef_container{id = Id,
+    #oc_chef_container{server_api_version = ApiVersion,
+                       id = Id,
                        authz_id = AuthzId,
                        org_id = OrgId,
                        name = Name}.
@@ -96,7 +95,7 @@ set_updated(#oc_chef_container{} = Object, ActorId) ->
     Now = chef_object_base:sql_date(now),
     Object#oc_chef_container{updated_at = Now, last_updated_by = ActorId}.
 
-is_indexed() ->
+is_indexed(_ObjectRec) ->
     false.
 
 ejson_for_indexing(#oc_chef_container{}, _EjsonTerm) ->
@@ -116,11 +115,11 @@ fields_for_fetch(#oc_chef_container{org_id = OrgId,
                                     name = Name}) ->
     [OrgId, Name].
 
-record_fields() ->
+record_fields(_ApiVersion) ->
     record_info(fields, oc_chef_container).
 
-list(#oc_chef_container{org_id = OrgId}, CallbackFun) ->
-    CallbackFun({list_query(), [OrgId], [name]}).
+list(#oc_chef_container{org_id = OrgId} = Container, CallbackFun) ->
+    CallbackFun({list_query(Container), [OrgId], [name]}).
 
 parse_binary_json(Bin) ->
     InputEjson = chef_json:decode_body(Bin),
@@ -168,3 +167,6 @@ valid_name(Name) ->
         _ ->
             ok
     end.
+
+set_api_version(ObjectRec, Version) ->
+    ObjectRec#oc_chef_container{server_api_version = Version}.
