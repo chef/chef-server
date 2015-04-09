@@ -707,7 +707,9 @@ fetch_multi(ApiVersion, RecModule, QueryName, QueryParams) ->
 
 -spec select_rows( {atom(), list()} |
                    {atom(), list(), tuple() | rows} |
-                   {atom(), list(), [atom()]}) -> chef_object:select_return().
+                   {atom(), list(), [atom()]}) ->
+                         chef_object:select_return()
+                       | [epgsql:bind_param()].
 select_rows({Query, BindParameters}) ->
     match_result(sqerl:select(Query, BindParameters));
 select_rows({Query, BindParameters, Transform}) when is_tuple(Transform);
@@ -804,7 +806,7 @@ query_and_txfm_for_record(fetch_latest, chef_cookbook_version) ->
 
 
 -spec fetch_object_names(tuple()) ->
-                           [binary()] | {error, term()}.
+                           [epgsql:bind_param()] | {error, term()}.
 %% @doc Return list of object names for a object record
 fetch_object_names(StubRec) ->
     case chef_object:list(StubRec, fun select_rows/1) of
