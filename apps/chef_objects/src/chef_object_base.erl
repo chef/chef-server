@@ -82,7 +82,7 @@ sql_date({_,_,_} = TS) ->
 -spec depsolver_constraints(#chef_environment{serialized_object::binary()}
                             | binary()   % JSON string
                             | {[{Name::binary(), ConstraintString::binary()}]}) %% EJson hash
-                           -> [ chef_depsolver:constraint() ].
+                           -> [ chef_depsolver:raw_constraint() ].
 depsolver_constraints(#chef_environment{serialized_object=SerializedObject}) ->
     EJson = chef_db_compression:decompress_and_decode(SerializedObject),
     %% The "cookbook_versions" key is required for Environments, and will always be present

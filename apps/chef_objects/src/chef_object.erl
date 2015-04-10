@@ -25,8 +25,13 @@
 -include_lib("ej/include/ej.hrl").
 
 -type object_rec() :: tuple().
--type select_return() :: not_found | list(object_rec()) | object_rec() |
-                         {error, _}.
+-type select_return() :: not_found
+                       | forbidden %% TODO not sure we want this here, but some
+                                   %% callbacks already assume it. Like it or not,
+                                   %% fetch/2 can return this
+                       | list(object_rec())
+                       | object_rec()
+                       |  {error, _}.
 -type select_callback() :: fun(({ QueryName ::atom(), BindParameters :: list(),
                                   ReturnFieldNames :: [atom()]}
                               | {QueryName :: atom(), BindParameters :: list()}
@@ -236,4 +241,3 @@ call_if_exported(ObjectRec, FunName, Args, DefaultFun) ->
         false  ->
             erlang:apply(DefaultFun, Args)
     end.
-

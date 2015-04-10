@@ -47,6 +47,7 @@
 -define(DEFAULT_DEPSOLVER_TIMEOUT, 2000).
 
 -export_type([constraint/0,
+              raw_constraint/0,
               dependency_set/0,
               pkg/0]).
 

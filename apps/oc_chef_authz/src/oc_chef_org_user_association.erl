@@ -102,6 +102,7 @@ fields_for_insert(#oc_chef_org_user_association{ org_id = OrgId, user_id = UserI
 bulk_get_query(_ObjectRec) ->
     erlang:error(not_implemented).
 
+-spec parse_binary_json(binary()) -> {ok, jiffy:json_value()}. % or throw
 parse_binary_json(Bin) ->
     EJ = chef_json:decode(Bin),
     case ej:valid(org_user_association_spec(), EJ) of
@@ -126,11 +127,8 @@ list(#oc_chef_org_user_association{org_id = OrgId, user_id = undefined} = Assoc,
 list(#oc_chef_org_user_association{user_id = UserId, org_id = undefined} = Assoc, CallbackFun) ->
     CallbackFun({list_query(Assoc, by_user), [UserId],  rows}).
 
-
-% Record creation via API. Note that we're using the authz_id
-% field to capture the user id, so we can use the existing framework
-% without one-offing it.
-new_record(ApiVersion, OrgId, {authz_id, UserId},  Data) ->
+new_record(ApiVersion, OrgId, unset,  Data) ->
+    UserId = ej:get({<<"user">>}, Data),
     UserName = ej:get({<<"username">>}, Data),
     #oc_chef_org_user_association{server_api_version = ApiVersion,
                                   org_id = OrgId,
@@ -158,7 +156,6 @@ type_name(#oc_chef_org_user_association{}) ->
 
 delete(#oc_chef_org_user_association{org_id = OrgId, user_id = UserId} = ObjectRec, CallbackFun) ->
     CallbackFun({delete_query(ObjectRec), [OrgId, UserId]}).
-
 
 set_api_version(ObjectRec, Version) ->
     ObjectRec#oc_chef_org_user_association{server_api_version = Version}.

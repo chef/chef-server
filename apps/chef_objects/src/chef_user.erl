@@ -265,7 +265,7 @@ assemble_user_ejson(#chef_user{username = Name,
 parse_binary_json(Bin) ->
     parse_binary_json(Bin, create, undefined).
 
--spec parse_binary_json(binary(), create | update, #chef_user{} | undefined) -> {ok, ej:json_object()}. % or throw
+-spec parse_binary_json(binary(), create | update, #chef_user{} | undefined) -> {ok, jiffy:json_value()}. % or throw
 parse_binary_json(Bin, Operation, User) ->
     EJ = chef_object_base:delete_null_public_key(chef_json:decode(Bin)),
     EJson = case ej:get({<<"private_key">>}, EJ) of

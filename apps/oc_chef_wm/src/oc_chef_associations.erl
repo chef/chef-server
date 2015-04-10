@@ -56,7 +56,8 @@ wm_associate_user(Req, #base_state{organization_guid = OrgId,
                                                                                          username = UserName},
                                                                        data = ReqData}} = State,
                   RequestorId) ->
-    ObjectRec = chef_object:new_record(oc_chef_org_user_association, ApiVersion, OrgId, {authz_id, UserId}, ReqData),
+    Data = ej:set({<<"user">>},ReqData,UserId),
+    ObjectRec = chef_object:new_record(oc_chef_org_user_association, ApiVersion, OrgId, unset, Data),
     case chef_db:create(ObjectRec, DbContext, RequestorId) of
         {conflict, _} ->
             wm_conflict_response(Req, State, user_already_in_org, UserName);
@@ -159,7 +160,7 @@ deprovision_fetch_org_global_admins(Error, Context) ->
     % the DB. If previous step to remove USAG from org users was successful, we can consider this a
     % successful deletion.
     % This will change when we start doing proper cleanup of auth entity as part of USAG deletion.
-    deprovision_remove_global_org_admin_ace({ok, ok}, Context = #context{msg = [{usag_record_delete_failed, Error}]}).
+    deprovision_remove_global_org_admin_ace({ok, ok}, Context#context{msg = [{usag_record_delete_failed, Error}]}).
 
 deprovision_remove_global_org_admin_ace(OrgGlobalAdminsAuthzId,
                                         #context{ user_authz_id = UserAuthzId,

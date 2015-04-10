@@ -29,6 +29,7 @@
 
 -include("../../include/chef_types.hrl").
 
+-spec decode(binary() | iolist()) -> jiffy:json_value().
 decode(Bin) ->
     try
         jiffy:decode(Bin)
