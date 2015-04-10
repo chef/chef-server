@@ -354,7 +354,7 @@ convert_to_path(BasePath, Elements) ->
 
 
 insert_user(Username) ->
-    UserRecord = chef_user_record(Username, chef_test_suite_helper:make_az_id(Username), true),
+    UserRecord = chef_user_record(Username, chef_test_suite_helper:make_az_id(Username) ),
     [_,_| Values] = tuple_to_list(UserRecord),
     [_|FieldNames] = record_info(fields, chef_user),
     Input = lists:zip(FieldNames, Values),
@@ -385,7 +385,7 @@ create_group(OrgId, GroupName) ->
 fetch_group(OrgId, GroupName) ->
     chef_db:fetch(#oc_chef_group{org_id = OrgId, name = GroupName, for_requestor_id = ?AUTHZ}, ?CTX).
 
-chef_user_record(Username, AzId, Admin) ->
+chef_user_record(Username, AzId) ->
   #chef_user{
     id = AzId,
     authz_id = AzId,
@@ -407,6 +407,5 @@ chef_user_record(Username, AzId, Admin) ->
     created_at = <<"2011-10-1 16:47:46">>,
     updated_at = <<"2011-10-1 16:47:46">>,
     external_authentication_uid = <<"an open id of some kind">>,
-    recovery_authentication_enabled = false,
-    admin = Admin
+    recovery_authentication_enabled = false
   }.

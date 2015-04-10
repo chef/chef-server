@@ -213,7 +213,6 @@
         'updated_at',                       %% time updated at
         'external_authentication_uid',      %% External UID, such as LDAP - nullable
         'recovery_authentication_enabled',  %%
-        'admin',                            %% if the user is an admin
         'serialized_object'                 %%
        }).
 

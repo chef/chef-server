@@ -23,7 +23,8 @@
 -export([fetch/2,
          update/2,
          delete/2,
-         fields_for_insert/1]).
+         fields_for_insert/1,
+         is_undefined/1]).
 
 fetch(Rec, CallbackFun) ->
     Mod = element(1, Rec),
@@ -50,6 +51,5 @@ delete(Rec, CallbackFun) ->
     Id = Mod:id(Rec),
     CallbackFun({QueryName, [Id]}).
 
-%% Internal
 is_undefined(undefined) -> true;
 is_undefined(_) -> false.

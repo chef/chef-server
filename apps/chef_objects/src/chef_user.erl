@@ -31,14 +31,15 @@
          fetch/2,
          fields_for_fetch/1,
          fields_for_update/1,
+         fields_for_insert/1,
          id/1,
          is_indexed/1,
          name/1,
          username_from_ejson/1,
          new_record/4,
          org_id/1,
-         parse_binary_json/1,
-         parse_binary_json/3,
+         parse_binary_json/2,
+         parse_binary_json/4,
          password_data/1,
          record_fields/1,
          set_created/2,
@@ -140,7 +141,6 @@ new_record(ApiVersion, OrgId, AuthzId, Data) ->
                hash_type = HashType,
                external_authentication_uid = ExtAuthUid,
                recovery_authentication_enabled = EnableRecovery,
-               admin = false,
                serialized_object = chef_json:encode(SerializedObject)
     }.
 
@@ -261,12 +261,12 @@ assemble_user_ejson(#chef_user{username = Name,
 
 %% @doc Convert a binary JSON string representing a Chef User into an
 %% EJson-encoded Erlang data structure.
--spec parse_binary_json(binary()) -> {ok, ej:json_object()}. % or throw
-parse_binary_json(Bin) ->
-    parse_binary_json(Bin, create, undefined).
+-spec parse_binary_json(api_version(), binary()) -> {ok, jiffy:json_value()}. % or throw
+parse_binary_json(ApiVersion, Bin) ->
+    parse_binary_json(ApiVersion, Bin, create, undefined).
 
--spec parse_binary_json(binary(), create | update, #chef_user{} | undefined) -> {ok, jiffy:json_value()}. % or throw
-parse_binary_json(Bin, Operation, User) ->
+-spec parse_binary_json(api_version(), binary(), create | update, #chef_user{} | undefined) -> {ok, jiffy:json_value()}. % or throw
+parse_binary_json(_ApiVersion, Bin, Operation, User) ->
     EJ = delete_null_public_key(chef_json:decode(Bin)),
     EJson = case ej:get({<<"private_key">>}, EJ) of
         true ->
@@ -276,6 +276,7 @@ parse_binary_json(Bin, Operation, User) ->
             EJ
     end,
 
+    validate_user_name(EJson),
     %% If user is invalid, an error is thrown
     validate_user(EJson, user_spec(common)),
     validate_user(EJson, user_spec(Operation)),
@@ -307,7 +308,7 @@ undefined_or_value(null) -> undefined;
 undefined_or_value(Value) -> Value.
 
 %% Hack to get null public_key accepted as undefined
--spec delete_null_public_key(ej:json_object()) -> ej:json_object().
+-spec delete_null_public_key(jiffy:json_value()) -> jiffy:json_value().
 delete_null_public_key(Ejson) ->
     case ej:get({<<"public_key">>}, Ejson) of
         null ->
@@ -318,7 +319,6 @@ delete_null_public_key(Ejson) ->
 
 %%-spec validate_user(ejson_term(), ejson_term()) -> {ok, ejson_term()}. % or throw
 validate_user(User, Spec) ->
-  validate_user_name(User),
   chef_object_base:validate_ejson(User, Spec).
 
 % Our user spec does not include 'username' because one of
@@ -415,9 +415,13 @@ set_updated(#chef_user{} = Object, ActorId) ->
     Now = chef_object_base:sql_date(now),
     Object#chef_user{updated_at = Now, last_updated_by = ActorId}.
 
+create_query(#chef_user{server_api_version = ?API_v0}) ->
+    insert_user_v0;
 create_query(_ObjectRec) ->
     insert_user.
 
+update_query(#chef_user{server_api_version = ?API_v0}) ->
+    update_user_by_id_v0;
 update_query(_ObjectRec) ->
     update_user_by_id.
 
@@ -431,13 +435,17 @@ list_query(_ObjectRec) ->
     list_users.
 
 bulk_get_query(_ObjectRec) ->
-    bulk_get_users.
+    error(unsupported).
 
 is_indexed(_ObjectRec) ->
     false.
 
+fetch(#chef_user{server_api_version = ?API_v0, username = undefined, external_authentication_uid = AuthUid} = Record, CallbackFun) ->
+    fetch_user(find_user_by_external_authentication_uid_v0, Record, AuthUid, CallbackFun);
 fetch(#chef_user{username = undefined, external_authentication_uid = AuthUid} = Record, CallbackFun) ->
     fetch_user(find_user_by_external_authentication_uid, Record, AuthUid, CallbackFun);
+fetch(#chef_user{server_api_version = ?API_v0, username = UserName} = Record, CallbackFun) ->
+    fetch_user(find_user_by_username_v0, Record, UserName, CallbackFun);
 fetch(#chef_user{username = UserName} = Record, CallbackFun) ->
     fetch_user(find_user_by_username, Record, UserName, CallbackFun).
 
@@ -451,7 +459,8 @@ ejson_for_indexing(#chef_user{}, _) ->
 fields_for_fetch(_) ->
     error(unsupported).
 
-fields_for_update(#chef_user{last_updated_by = LastUpdatedBy,
+fields_for_update(#chef_user{server_api_version = ?API_v0,
+                             last_updated_by = LastUpdatedBy,
                              updated_at      = UpdatedAt,
                              pubkey_version  = PublicKeyVersion,
                              public_key      = PublicKey,
@@ -464,10 +473,44 @@ fields_for_update(#chef_user{last_updated_by = LastUpdatedBy,
                              email           = Email,
                              username        = UserName,
                              id              = Id }) ->
-     [false, PublicKeyVersion, PublicKey, HashedPassword, Salt, HashType, SerializedObject,
-     ExternalAuthenticationUid, RecoveryAuthEnabled =:= true, Email, UserName,  LastUpdatedBy, UpdatedAt, Id].
+     [PublicKeyVersion, PublicKey, HashedPassword, Salt,
+      HashType, SerializedObject, ExternalAuthenticationUid, RecoveryAuthEnabled =:= true,
+      Email, UserName,  LastUpdatedBy, UpdatedAt, Id];
+fields_for_update(#chef_user{last_updated_by = LastUpdatedBy,
+                             updated_at      = UpdatedAt,
+                             hashed_password = HashedPassword,
+                             salt            = Salt,
+                             hash_type       = HashType,
+                             serialized_object = SerializedObject,
+                             external_authentication_uid = ExternalAuthenticationUid,
+                             recovery_authentication_enabled = RecoveryAuthEnabled,
+                             email           = Email,
+                             username        = UserName,
+                             id              = Id }) ->
+     [HashedPassword, Salt, HashType, SerializedObject,
+     ExternalAuthenticationUid, RecoveryAuthEnabled =:= true,
+     Email, UserName,  LastUpdatedBy, UpdatedAt, Id].
+
+fields_for_insert(#chef_user{server_api_version = ?API_v0} = User) ->
+    chef_object_default_callbacks:fields_for_insert(User);
+fields_for_insert(#chef_user{id = Id, authz_id = AuthzId, username = UserName,
+                             email = Email, hashed_password = HashedPassword,
+                             salt = Salt, hash_type = HashType, last_updated_by = LUB,
+                             created_at = CreatedAt, updated_at = UpdatedAt,
+                             external_authentication_uid = ExtAuthUID,
+                             recovery_authentication_enabled = RecAuthEnabled,
+                             serialized_object = SerializedObject} = User) ->
+    Fields = [Id, AuthzId, UserName, Email, HashedPassword, Salt, HashType,
+              LUB, CreatedAt, UpdatedAt, ExtAuthUID, RecAuthEnabled, SerializedObject],
+    case lists:any(fun chef_object_default_callbacks:is_undefined/1, Fields) of
+          true -> error({undefined_in_record, User});
+          false -> ok
+    end,
+    Fields.
+
 
 record_fields(_ApiVersion) ->
+    % Note that we're not versioning this - the extra fields won't cause problems.
     record_info(fields, chef_user).
 
 list(#chef_user{external_authentication_uid = ExtAuthUid}, CallbackFun) when ExtAuthUid =/= undefined ->
@@ -479,4 +522,3 @@ list(#chef_user{email = EMail}, CallbackFun) ->
 
 set_api_version(ObjectRec, Version) ->
     ObjectRec#chef_user{server_api_version = Version}.
-

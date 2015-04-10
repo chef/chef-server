@@ -64,7 +64,7 @@ parse_binary_json_test_() ->
       fun() ->
                 MinValid = make_min_valid_create_user_ejson(),
                 UserJson = chef_json:encode({MinValid}),
-                {ok, {GotData}} = chef_user:parse_binary_json(UserJson, create, undefined),
+                {ok, {GotData}} = chef_user:parse_binary_json(?API_MIN_VER, UserJson, create, undefined),
                 ?assertEqual(lists:sort(MinValid), lists:sort(GotData))
       end
      },
@@ -72,7 +72,7 @@ parse_binary_json_test_() ->
       fun() ->
                 MinValid = make_external_auth_create_user_ejson(),
                 UserJson = chef_json:encode({MinValid}),
-                {ok, {GotData}} = chef_user:parse_binary_json(UserJson, create, undefined),
+                {ok, {GotData}} = chef_user:parse_binary_json(?API_MIN_VER, UserJson, create, undefined),
                 ?assertEqual(lists:sort(MinValid), lists:sort(GotData))
       end
      },
@@ -82,7 +82,7 @@ parse_binary_json_test_() ->
                                              {<<"name">>, <<"bob">>},
                                              {<<"password">>, <<"top secret 123456">>}
                                             ]}),
-              ?assertThrow(#ej_invalid{}, chef_user:parse_binary_json(UserEjson, create, undefined))
+              ?assertThrow(#ej_invalid{}, chef_user:parse_binary_json(?API_MIN_VER, UserEjson, create, undefined))
       end
      },
      {"Valid email must be provided",
@@ -91,7 +91,7 @@ parse_binary_json_test_() ->
                     UserEJson2 = ej:set({<<"email">>}, {UserEJson}, <<"jo my @ bob.com">>),
                     UserJson = chef_json:encode(UserEJson2),
                     ?assertThrow(#ej_invalid{type = fun_match},
-                                 chef_user:parse_binary_json(UserJson, create, undefined))
+                                 chef_user:parse_binary_json(?API_MIN_VER, UserJson, create, undefined))
       end},
      {"required fields must be provided", generator,
       fun() ->
@@ -99,7 +99,7 @@ parse_binary_json_test_() ->
               UserEJson = {make_min_valid_create_user_ejson()},
 
               [ ?_assertThrow(#ej_invalid{type = missing, key = Key},
-                             chef_user:parse_binary_json(chef_json:encode(ej:delete({Key}, UserEJson)), create, undefined))
+                             chef_user:parse_binary_json(?API_MIN_VER, chef_json:encode(ej:delete({Key}, UserEJson)), create, undefined))
                              || Key  <- NukeFields]
       end},
      {"Properly formed emails are accepted", generator,
@@ -110,7 +110,7 @@ parse_binary_json_test_() ->
                            <<"me.you@here.com">>],
               UserEJson = {make_min_valid_create_user_ejson()},
                     [ ?_assertMatch({ok, _},
-                             chef_user:parse_binary_json(chef_json:encode(ej:set({<<"email">>}, UserEJson, E)), create, undefined))
+                             chef_user:parse_binary_json(?API_MIN_VER, chef_json:encode(ej:set({<<"email">>}, UserEJson, E)), create, undefined))
                              || E <- GoodEmail]
       end},
      {"Improperly formed emails are rejected", generator,
@@ -119,7 +119,7 @@ parse_binary_json_test_() ->
                           <<"spaces are not valid@either.com">>, <<"\"spaces are not valid\"@either.com">>],
               UserEJson = {make_min_valid_create_user_ejson()},
                     [ ?_assertThrow(#ej_invalid{key = <<"email">>},
-                              chef_user:parse_binary_json(chef_json:encode(ej:set({<<"email">>}, UserEJson, E)), create, undefined))
+                              chef_user:parse_binary_json(?API_MIN_VER, chef_json:encode(ej:set({<<"email">>}, UserEJson, E)), create, undefined))
                              || E <- BadEmail]
       end},
      {"Password must be valid", generator,
@@ -127,7 +127,7 @@ parse_binary_json_test_() ->
               BadPass = [<<"short">>, 123, [<<"longenoughbutinalist">>], {[]}, true, null],
               UserEJson = {make_min_valid_create_user_ejson()},
                     [ ?_assertThrow(#ej_invalid{key = <<"password">>},
-                             chef_user:parse_binary_json(chef_json:encode(ej:set({<<"password">>}, UserEJson, P)), create, undefined))
+                             chef_user:parse_binary_json(?API_MIN_VER, chef_json:encode(ej:set({<<"password">>}, UserEJson, P)), create, undefined))
                || P<- BadPass]
       end},
      {"Accepts name instead of username",
@@ -135,7 +135,7 @@ parse_binary_json_test_() ->
               UserEJson = {make_min_valid_create_user_ejson()},
               UserEJson1 = ej:delete({<<"username">>}, UserEJson),
               UserEJson2 = ej:set({<<"name">>}, UserEJson1, "validname"),
-              ?_assertMatch({ok, _}, chef_user:parse_binary_json(chef_json:encode(UserEJson2), create, undefined))
+              ?_assertMatch({ok, _}, chef_user:parse_binary_json(?API_MIN_VER, chef_json:encode(UserEJson2), create, undefined))
       end
      },
      {"Error thrown with bad name",
@@ -143,20 +143,20 @@ parse_binary_json_test_() ->
               UserEJson = {make_min_valid_create_user_ejson()},
               Body = ej:set({<<"username">>}, UserEJson, <<"bad~name">>),
               ?assertThrow(#ej_invalid{key = <<"username">>},
-                           chef_user:parse_binary_json(chef_json:encode(Body), update, #chef_user{}))
+                           chef_user:parse_binary_json(?API_MIN_VER, chef_json:encode(Body), update, #chef_user{}))
       end
      },
      {"a null public_key is removed for create",
       fun() ->
               UserEJson = make_min_valid_create_user_ejson() ++ [{<<"public_key">>, null}],
-              {ok, Got} = chef_user:parse_binary_json(chef_json:encode({UserEJson}), create, undefined),
+              {ok, Got} = chef_user:parse_binary_json(?API_MIN_VER, chef_json:encode({UserEJson}), create, undefined),
               ?assertEqual(undefined, ej:get({"public_key"}, Got))
       end},
 
      {"a null public_key is removed for update",
       fun() ->
               UserEJson = make_min_valid_create_user_ejson() ++ [{<<"public_key">>, null}],
-              {ok, Got} = chef_user:parse_binary_json(chef_json:encode({UserEJson}), update, #chef_user{}),
+              {ok, Got} = chef_user:parse_binary_json(?API_MIN_VER, chef_json:encode({UserEJson}), update, #chef_user{}),
               ?assertEqual(undefined, ej:get({"public_key"}, Got))
       end},
 
@@ -164,9 +164,9 @@ parse_binary_json_test_() ->
       fun() ->
               UserEJson = make_min_valid_create_user_ejson() ++ [{<<"public_key">>, public_key_data()}],
               Body = chef_json:encode({UserEJson}),
-              {ok, Got1} = chef_user:parse_binary_json(Body, create, undefined),
+              {ok, Got1} = chef_user:parse_binary_json(?API_MIN_VER, Body, create, undefined),
               ?assertEqual(public_key_data(), ej:get({"public_key"}, Got1)),
-              {ok, Got2} = chef_user:parse_binary_json(Body, update, #chef_user{}),
+              {ok, Got2} = chef_user:parse_binary_json(?API_MIN_VER, Body, update, #chef_user{}),
               ?assertEqual(public_key_data(), ej:get({"public_key"}, Got2))
       end},
 
@@ -178,7 +178,7 @@ parse_binary_json_test_() ->
                          113, [public_key_data()], {[]}],
               Body = { make_min_valid_create_user_ejson() },
              [ ?_assertThrow(#ej_invalid{key = <<"public_key">>},
-                             chef_user:parse_binary_json(chef_json:encode(ej:set({<<"public_key">>}, Body, Bad)), update, #chef_user{}))
+                             chef_user:parse_binary_json(?API_MIN_VER, chef_json:encode(ej:set({<<"public_key">>}, Body, Bad)), update, #chef_user{}))
                 || Bad <- BadKeys ]
       end},
      {"A valid public key is removed when private_key = true",
@@ -186,7 +186,7 @@ parse_binary_json_test_() ->
               UserEJson = make_min_valid_create_user_ejson() ++ [{<<"public_key">>, public_key_data()},
                                                                  {<<"private_key">>, true}],
               Body = chef_json:encode({UserEJson}),
-              {ok, Got1} = chef_user:parse_binary_json(Body, create, undefined),
+              {ok, Got1} = chef_user:parse_binary_json(?API_MIN_VER, Body, create, undefined),
               ?assertEqual(undefined, ej:get({"public_key"}, Got1))
       end
      },
@@ -196,7 +196,7 @@ parse_binary_json_test_() ->
                                                                 {<<"private_key">>, true}],
               Body = chef_json:encode({UserEJson}),
 
-              {ok, Got1} = chef_user:parse_binary_json(Body, create, undefined),
+              {ok, Got1} = chef_user:parse_binary_json(?API_MIN_VER, Body, create, undefined),
               ?assertEqual(undefined, ej:get({"public_key"}, Got1))
       end
     }

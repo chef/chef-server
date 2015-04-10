@@ -52,12 +52,12 @@ request_type() ->
 allowed_methods(Req, State) ->
   {['GET', 'POST'], Req, State}.
 
-validate_request('POST', Req, State) ->
+validate_request('POST', Req, #base_state{server_api_version = ApiVersion} = State) ->
   case wrq:req_body(Req) of
     undefined ->
       throw({error, missing_body});
    Body ->
-      {ok, UserData} = chef_user:parse_binary_json(Body),
+      {ok, UserData} = chef_user:parse_binary_json(ApiVersion, Body),
       {Req, State#base_state{resource_state =
           #user_state{user_data = UserData}}}
   end;
@@ -99,7 +99,7 @@ handle_user_create({PublicKey, PrivateKey}, Req,
                                      chef_user, {authz_id, AuthzId}, UserWithKey).
 
 % Callback from create_from_json, which allows us to customize our body response.
-finalize_create_body(_Req, #base_state{ resource_state = #client_state{ keydata = PrivateKey } }, BodyEJ ) ->
+finalize_create_body(_Req, #base_state{ resource_state = #user_state{ keydata = PrivateKey } }, BodyEJ ) ->
     ej:set({<<"private_key">>}, BodyEJ, PrivateKey).
 
 to_json(Req, State) ->

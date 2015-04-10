@@ -74,9 +74,9 @@ validate_request('PUT', Req, #base_state{resource_args = invitation_response} = 
                                           oc_chef_org_user_invite:parse_binary_json(Body, response)
                                   end,
                                   Req, State);
-validate_request('PUT', Req, State) ->
+validate_request('PUT', Req, #base_state{server_api_version = ApiVersion} = State) ->
     validate_put_request_response(fun(Body, User) ->
-                                          chef_user:parse_binary_json(Body, update, User)
+                                          chef_user:parse_binary_json(ApiVersion, Body, update, User)
                                   end,
                                   Req, State);
 validate_request(_Method, Req, #base_state{chef_db_context = DbContext,

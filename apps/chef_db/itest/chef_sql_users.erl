@@ -54,7 +54,7 @@ make_admin_user(Prefix) ->
     AzId = chef_test_suite_helper:make_az_id(Prefix),
     chef_user_record(AzId, true).
 
-chef_user_record(AzId, Admin) ->
+chef_user_record(AzId, _Admin) ->
     #chef_user{
        server_api_version = ?API_MIN_VER,
        id = AzId,
@@ -71,7 +71,6 @@ chef_user_record(AzId, Admin) ->
        updated_at = {datetime,{{2011,10,1},{16,47,46}}},
        external_authentication_uid = <<"an open id of some kind">>,
        recovery_authentication_enabled = false,
-       admin = Admin,
        serialized_object = <<"{}">>
       }.
 
