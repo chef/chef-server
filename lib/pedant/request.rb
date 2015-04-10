@@ -174,6 +174,9 @@ module Pedant
     def reset_server_api_version
       $server_api_version  = Pedant::Config.server_api_version
     end
+    def use_max_server_api_version
+      $server_api_version  = 1 # TODO Pedant::Config.max_server_api_version
+    end
 
   end
 end

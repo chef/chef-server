@@ -149,20 +149,8 @@ describe "/keys endpoint", :keys do
       [:original_client, :original_user, :key, :alt_key,
        :org_admin, :org_user, :org_client, :other_org_client,
        :other_org_user].map do |x|
-        priv = Tempfile.new("pedant-key-#{x}")
-        pub = Tempfile.new("pedant-key-#{x}.pub")
-        `openssl genrsa -out #{priv.path} 2048 1>/dev/null 2>&1`
-        `openssl rsa -in #{priv.path} -pubout -out #{pub.path} 2>/dev/null`
-        @keys[x] = {
-          :path => "#{pub.path}",
-          :private => File.read(priv.path),
-          :public => File.read(pub.path)
-           }
-        priv.close
-        priv.unlink
-        pub.close
-        pub.unlink
-        end
+         @keys[x] = platform.gen_rsa_key(x)
+       end
     rescue Exception => e
       puts "Error creating keys: #{e.message}"
       raise
@@ -822,7 +810,7 @@ describe "/keys endpoint", :keys do
         it "that doesn't exist it should reply with 404" do
             post("#{platform.server}/users/bob/keys", superuser, payload: key_payload).should look_like(status: 404)
         end
-        context "POST /users/:user/keys jas...", :authorization do
+        context "POST /users/:user/keys as...", :authorization do
           before (:all) do
             platform.associate_user_with_org($org_name, org_user).should look_like(status: 201)
           end

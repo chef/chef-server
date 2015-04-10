@@ -184,14 +184,20 @@ module Pedant
       clientname = name.to_s
       payload = { "name" => clientname }
 
-      r = post(api_url('/clients'), org.validator, :payload => payload)
-
-      if r.code == 409
-        payload["private_key"] = true
-        r = put(api_url("/clients/#{clientname}"), org.validator, :payload => payload)
+      if server_api_version == 0
+        r = post(api_url('/clients'), org.validator, :payload => payload)
+        if r.code == 409
+          payload["private_key"] = true
+          r = put(api_url("/clients/#{clientname}"), org.validator, :payload => payload)
+        end
+        private_key = parse(r)["private_key"]
+      else
+          r = post(api_url('/clients'), org.validator, :payload => payload.with("create_key", true))
+          if r.code == 409
+            r = put(api_url("/clients/#{clientname}/keys/default"), org.validator, :payload => { "create_key" => true} )
+          end
+          private_key = parse(r)["chef_key"]["private_key"]
       end
-
-      private_key = parse(r)["private_key"]
       Pedant::Client.new(clientname, private_key, platform: self)
     end
 
@@ -568,6 +574,22 @@ xfcg5zUCf3TQrwpcBB1Hf9hm6lUVpptvUZJAQtkWoaWXUPRY0CjcVdDc5ak4xqL2
 FcAuJwV95b3qLyPESJ8zUBLOg3DcT1X9mrvRuKgC/Ie6k4R+oxU/nXi4vsPXlvg4
 yap6MUYSjPOa7eCrhg2zFZiqO6VLEogPc1nsjb9Zl2UWLLYyCVz=
 -----END RSA PRIVATE KEY-----"
+    end
+
+    def gen_rsa_key(name)
+      priv = Tempfile.new("pedant-key-#{name}")
+      pub = Tempfile.new("pedant-key-#{name}.pub")
+      `openssl genrsa -out #{priv.path} 2048 1>/dev/null 2>&1`
+      `openssl rsa -in #{priv.path} -pubout -out #{pub.path} 2>/dev/null`
+      key = { :path => "#{pub.path}",
+              :private => File.read(priv.path),
+              :public => File.read(pub.path) }
+
+      priv.close
+      priv.unlink
+      pub.close
+      pub.unlink
+      key
     end
   end
 end

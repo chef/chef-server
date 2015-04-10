@@ -42,16 +42,20 @@ module Pedant
 
         let(:required_client_attributes) { { 'name' => client_name } }
         let(:default_client_attributes) do
-          required_client_attributes.
-            with('validator', client_is_validator)
+          attrs = required_client_attributes.with('validator', client_is_validator)
+          platform.server_api_version > 0 ? attrs.with('create_key', true) : attrs
         end
         let(:original_resource_attributes) { default_client_attributes.except('private_key') }
 
         let(:test_client) { client_name }
         let(:test_client_response) { create_client admin_requestor, default_resource_attributes }
         let(:test_client_parsed_response) { parse(test_client_response) }
-        let(:test_client_private_key) { test_client_parsed_response['private_key'] }
-        let(:test_client_public_key) { test_client_parsed_response['public_key'] }
+        let(:test_client_private_key) do
+          platform.server_api_version > 0 ? test_client_parsed_response['chef_key']['private_key'] : test_client_parsed_response['private_key']
+        end
+        let(:test_client_public_key) do
+          platform.server_api_version > 0 ? test_client_parsed_response['chef_key']['public_key'] : test_client_parsed_response['public_key']
+        end
         let(:test_client_requestor) { Pedant::Client.new(test_client, test_client_private_key, platform: platform, preexisting: false) }
 
         let(:client_url) { api_url("/clients/#{client_name}") }
@@ -70,22 +74,45 @@ module Pedant
 
       let(:client_not_found_response) { resource_not_found_response }
 
-      let(:expected_public_key) { /^(-----BEGIN (RSA )?PUBLIC KEY)/ }
-      let(:expected_private_key) { /^(-----BEGIN (RSA )?PRIVATE KEY)/ }
-      let(:fetch_validator_client_success_response) { ok_response.with(body_exact: new_client(client_name, validator: true).with('public_key', expected_public_key)) }
-      let(:fetch_nonadmin_client_success_response)  { ok_response.with(body_exact: new_client(client_name).with('public_key', expected_public_key)) }
+      let(:expected_public_key) { /^-----BEGIN (RSA )?PUBLIC KEY/ }
+      let(:expected_private_key) { /^-----BEGIN (RSA )?PRIVATE KEY/ }
+      let(:fetch_validator_client_success_response)  do
+        if platform.server_api_version > 0
+          ok_response.with(body_exact: new_client(client_name, validator: true).with('public_key', expected_public_key))
+        else
+          ok_response.with(body_exact: new_client(client_name, validator: true))
+        end
+      end
 
       let(:delete_client_success_response) { ok_response.with(body: { 'name' => client_name }) }
 
       let(:create_client_success_response) do
-        {
-          :status => 201,
-          :body_exact => {
-            "uri" => named_client_url,
-            "private_key" => /^-----BEGIN RSA PRIVATE KEY-----/,
-            "public_key" => /^-----BEGIN PUBLIC KEY-----/
+        if platform.server_api_version > 0
+          {
+            :status => 201,
+            :body_exact => {
+              "uri" => named_client_url,
+              chef_key => {
+                "name" => "default",
+                "expiration_date" => "infinity",
+                "uri" => "#{named_client_url}/keys/default",
+                "private_key" => expected_private_key,
+                "public_key" => expected_public_key
+              }
+            }
           }
+        else
+          {
+
+            :status => 201,
+            :body_exact => {
+              "uri" => named_client_url,
+              "private_key" => expected_private_key,
+              "public_key" => expected_public_key
+            }
         }
+
+        end
       end
 
       let(:create_client_bad_name_failure_response) do
@@ -124,7 +151,6 @@ module Pedant
       end
 
       def new_client(name, _options = {})
-        _options[:admin] ||= false
         _options[:validator] ||= false
         {
           "name" => name,
@@ -168,14 +194,7 @@ module Pedant
         end
 
         def client_type(_options)
-          case [_options[:admin] || false, _options[:validator] || false]
-          when [true,  false] then "an admin"
-          when [false, false] then "a non-admin"
-          when [false, true ] then "a validator"
-          when [true,  true ] then "an invalid admin and validator"
-          else
-            fail "Must declare :admin to either true or false"
-          end
+          _options[:validator] ? "a validator" : "a normal"
         end
 
         def should_generate_new_keys
@@ -249,8 +268,8 @@ module Pedant
             should_respond_with 400, 'and does not generate a new key pair' do
               parsed_response['private_key'].should be(nil)
 
-              # Now verify that you can retrieve it again
               persisted_resource_response.should look_like http_200_response.with(:body, updated_resource)
+              # Now verify that you can retrieve it again
 
               # Now verify we can use the original credentials
               get(resource_url, test_client_requestor).should look_like updated_response
@@ -318,22 +337,28 @@ module Pedant
               end
             end
 
-            context 'with a bad public_key', :validation do
+            context 'with a bad public_key [v1+]', :validation, :api_v1 do
+              before (:all) do
+                platform.use_max_server_api_version
+              end
+              after (:all) do
+                platform.reset_server_api_version
+              end
               # Use the original public key
               #let(:updated_resource) { required_attributes.with('public_key', public_key) }
 
               # Public key validation is not enabled until min api version 1
-              if Pedant::Config.server_api_version > 0
-                rejects_public_key_on_create_with "well-formed, bogus (private key)", public_key: Proc.new { bogus_key }
-                rejects_public_key_on_create_with "mal-formed", public_key: "-----BEGIN PUBLIC KEY-----You have been trolled :-)-----END PUBLIC KEY-----"
-                rejects_public_key_on_create_with "mal-formed RSA", public_key: "-----BEGIN RSA PUBLIC KEY-----You have been trolled :-)-----END RSA PUBLIC KEY-----"
-                rejects_public_key_on_create_with "mal-formed cert", public_key: "-----BEGIN CERTIFICATE-----You have been trolled :-)-----END CERTIFICATE-----"
-                rejects_public_key_on_create_with "blank", public_key: ""
+              rejects_public_key_on_create_with "well-formed, bogus (private key)", public_key: Proc.new { bogus_key }
+              rejects_public_key_on_create_with "mal-formed", public_key: "-----BEGIN PUBLIC KEY-----You have been trolled :-)-----END PUBLIC KEY-----"
+              rejects_public_key_on_create_with "mal-formed RSA", public_key: "-----BEGIN RSA PUBLIC KEY-----You have been trolled :-)-----END RSA PUBLIC KEY-----"
+              rejects_public_key_on_create_with "mal-formed cert", public_key: "-----BEGIN CERTIFICATE-----You have been trolled :-)-----END CERTIFICATE-----"
+              rejects_public_key_on_create_with "blank", public_key: ""
+              # certs are not accepted in a v1+ world
+              #TODO rejects_public_key_on_create_with "a valid certificate", public_key: platform.valid_certificate
 
-                rejects_public_key_on_create_with "1 for the",  public_key: 1
-                rejects_public_key_on_create_with "[] for the", public_key: []
-                rejects_public_key_on_create_with "{} for the", public_key: {}
-              end
+              rejects_public_key_on_create_with "1 for the",  public_key: 1
+              rejects_public_key_on_create_with "[] for the", public_key: []
+              rejects_public_key_on_create_with "{} for the", public_key: {}
             end
 
           end # when setting private_key to true
@@ -406,27 +431,33 @@ module Pedant
               end
             end
 
-            context 'with a bad public_key', :validation do
-              # Public key validation is not enabled until min api version 1
-              if Pedant::Config.server_api_version > 0
-                let(:updated_resource) { required_attributes.with('public_key', test_client_public_key) }
-                rejects_public_key_on_update_with "well-formed, bogus", public_key: Proc.new { bogus_key } unless
-                rejects_public_key_on_update_with "mal-formed", public_key: "-----BEGIN PUBLIC KEY-----You have been trolled :-)-----END PUBLIC KEY-----"
-                rejects_public_key_on_update_with "mal-formed RSA", public_key: "-----BEGIN RSA PUBLIC KEY-----You have been trolled :-)-----END RSA PUBLIC KEY-----"
-                rejects_public_key_on_update_with "mal-formed cert", public_key: "-----BEGIN CERTIFICATE-----You have been trolled :-)-----END CERTIFICATE-----"
-                rejects_public_key_on_update_with "blank", public_key: ""
-
-                # Invalid JSON types
-                rejects_public_key_on_update_with "1 for the",  public_key: 1
-                rejects_public_key_on_update_with "[] for the", public_key: []
-                rejects_public_key_on_update_with "{} for the", public_key: {}
+            context 'with a bad public_key [v1+]', :validation, :api_v1 do
+              before (:all) do
+                platform.use_max_server_api_version
               end
+              after (:all) do
+                platform.reset_server_api_version
+              end
+              # Public key validation is not enabled until min api version 1
+              let(:updated_resource) { required_attributes }
+              rejects_public_key_on_update_with "well-formed, bogus", public_key: Proc.new { bogus_key } unless
+              rejects_public_key_on_update_with "mal-formed", public_key: "-----BEGIN PUBLIC KEY-----You have been trolled :-)-----END PUBLIC KEY-----"
+              rejects_public_key_on_update_with "mal-formed RSA", public_key: "-----BEGIN RSA PUBLIC KEY-----You have been trolled :-)-----END RSA PUBLIC KEY-----"
+              rejects_public_key_on_update_with "mal-formed cert", public_key: "-----BEGIN CERTIFICATE-----You have been trolled :-)-----END CERTIFICATE-----"
+              rejects_public_key_on_update_with "blank", public_key: ""
+              # certs are not accepted in a v1+ world
+              # TODO  rejects_public_key_on_update_With "a valid certificate", public_key: platform.valid_certificate
+
+              # Invalid JSON types
+              rejects_public_key_on_update_with "1 for the",  public_key: 1
+              rejects_public_key_on_update_with "[] for the", public_key: []
+              rejects_public_key_on_update_with "{} for the", public_key: {}
             end
           end # when updating the public key
         end
 
         def rejects_public_key_on_create_with(adjective, _options = {})
-          context "with a #{adjective} public key", :min_api_v1 do
+          context "with a #{adjective} public key" do
             let(:requestor) { platform.admin_user }
             let(:public_key) { instance_eval_if_proc(_options[:public_key]) }
             let(:expected_response) { bad_request_response }
@@ -446,10 +477,12 @@ module Pedant
             let(:requestor) { platform.admin_user }
             let(:public_key) { instance_eval_if_proc(_options[:public_key]) }
             let(:expected_response) { bad_request_response }
-            should_respond_with 400, 'and does not update the client' do
-              # Verify nothing has changed
+            should_respond_with 400, 'and does not update the key' do
+              # Verify the client has not changed
               persisted_resource_response.should look_like updated_response
-
+              # Verify the key has not changed
+              get("#{resource_url}/keys/default", requestor).should look_like ({ status: 200,
+                                                                                   body: { "public_key" => test_client_public_key } })
               # Verify that we can use the original credentials
               get(resource_url, test_client_requestor).should look_like updated_response
             end

@@ -333,11 +333,9 @@ describe "Principals API Endpoint", :principals do
         include_context 'GET /principals/<name>'
     end
 
-    context '[current] v > 0', :api_vcurrent do
+    context '[current] v > 0', :api_v1 do
         before(:all) do
-            puts "API version: #{platform.server_api_version}"
-            platform.server_api_version = 1 # TODO config generated for max supported
-            puts "API version: #{platform.server_api_version}"
+            platform.use_max_server_api_version
         end
         after(:all) do
             platform.reset_server_api_version

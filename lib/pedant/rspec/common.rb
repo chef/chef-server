@@ -60,16 +60,16 @@ module Pedant
         let(:pedant_created_clients) { platform.clients.reject(&:bogus?).map(&:name).sort }
         let(:pedant_users)   { (['admin'] + platform.users.map(&:name)).sort }
 
-        # TODO: With request query parameters, in order to be completely
-        # general, we would first need to differentiate between query
-        # parameters intended for the search endpoint and otherwise in
-        # order to escape any embedded Solr query operators, and then
-        # URI encode the whole thing.
 
         def self.named_response_code(code)
           "#{code} #{Pedant::RSpec::HTTP::STATUS_CODES[code]}"
         end
 
+        # TODO: With request query parameters, in order to be completely
+        # general, we would first need to differentiate between query
+        # parameters intended for the search endpoint and otherwise in
+        # order to escape any embedded Solr query operators, and then
+        # URI encode the whole thing.
         def self.should_respond_with(code, additional_message = nil, metadata = {}, &additional_assertions)
           metadata[:validation] = true if code == 400
           metadata[:authentication] = true if code == 401
