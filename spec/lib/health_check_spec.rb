@@ -24,10 +24,10 @@ describe HealthCheck do
       expect(subject.status).to eql('not ok')
     end
 
-    it "should show something meaningful in the erchef status when there is a key problem" do
+    it "should show something meaningful in the erchef status when there is an authentication problem" do
       allow(subject).to receive(:chef).and_raise(ErchefUnauthorizedException)
       subject.check
-      expect(subject.erchef[:status]).to eql('key error')
+      expect(subject.erchef[:status]).to eql('authentication error')
     end
 
     it "should show something meaningful in the erchef status when there is a timeout" do

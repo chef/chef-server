@@ -5,12 +5,12 @@ class HealthCheck
   TIMEOUT = 'timeout'.freeze
   UNREACHABLE = 'unreachable'.freeze
   ERRORING = 'erroring'.freeze
-  KEYERROR = 'key error'.freeze
+  AUTHERROR = 'authentication error'.freeze
 
   attr_reader :status, :erchef, :postgres
 
   def initialize
-    @status = nil
+    @status = 'ok'
     @erchef = { status: REACHABLE }
     @postgres = { status: REACHABLE }
   end
@@ -67,10 +67,7 @@ class HealthCheck
   # What is the overall system status
   #
   def overall
-    if @postgres[:status] == REACHABLE &&
-       @erchef[:status] == REACHABLE
-      @status = 'ok'
-    else
+    if @postgres[:status] != REACHABLE || @erchef[:status] != REACHABLE
       @status = 'not ok'
     end
   end
@@ -82,7 +79,7 @@ class HealthCheck
       @erchef[:status] = TIMEOUT
     rescue Net::HTTPServerException => e
       if e.message =~ /401/
-        @erchef[:status] = KEYERROR
+        @erchef[:status] = AUTHERROR
       else
         @erchef[:status] = ERRORING
       end
