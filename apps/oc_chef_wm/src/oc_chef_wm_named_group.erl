@@ -98,6 +98,11 @@ validate_group(OrgId, GroupName, DbContext, Req,
                                                                             GroupName])),
             Req1 = chef_wm_util:set_json_body(Req, Message),
             {{halt, 404}, Req1, State#base_state{log_msg = group_not_found}};
+        forbidden ->
+            Message = chef_wm_util:error_message_envelope(iolist_to_binary(["No permission for group ",
+                                                                            GroupName])),
+            Req1 = chef_wm_util:set_json_body(Req, Message),
+            {{halt, 403}, Req1, State#base_state{log_msg = group_not_found}};
         #oc_chef_group{authz_id = AuthzId} = Group ->
             GroupState1 = GroupState#group_state{oc_chef_group = Group},
             State1 = State#base_state{resource_state = GroupState1},
