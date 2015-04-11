@@ -85,16 +85,16 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
       it "should output the name and expiry status of any other valid key" do
         expect { @helper.run_test_omnibus_command(command, arguments) }.to output(/name: key2\nexpired: true/).to_stdout
       end
-      context "when it is called with --show-public-keys" do
+      context "when it is called with --verbose" do
         it "should output a public key" do
-          expect { @helper.run_test_omnibus_command(command, arguments.concat(["--show-public-keys"])) }.to output(/public_key:\n-----BEGIN PUBLIC KEY-----/).to_stdout
+          expect { @helper.run_test_omnibus_command(command, arguments.concat(["--verbose"])) }.to output(/public_key:\n-----BEGIN PUBLIC KEY-----/).to_stdout
         end
       end
     end
 
     describe "list-user-keys" do
       before(:each) do
-        allow_any_instance_of(KeyCtlHelper).to receive(:get_rest).with("/users/testuser/keys").and_return(
+        allow(Chef::Key).to receive(:list_by_user).with("testuser").and_return(
           [
             {"uri"=>"https://127.0.0.1/users/pivotal/keys/default",
              "name"=>"default",
@@ -105,12 +105,16 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
           ]
         )
 
-        allow_any_instance_of(Chef::REST).to receive(:get_rest).with("https://127.0.0.1/users/pivotal/keys/default").and_return(
-          {"name"=>"default", "public_key"=>public_key, "expiration_date"=>"infinity"}
-        )
-        allow_any_instance_of(Chef::REST).to receive(:get_rest).with("https://127.0.0.1/users/pivotal/keys/key2").and_return(
-          {"name"=>"default", "public_key"=>public_key, "expiration_date"=>"2012-01-01T00:00:00Z"}
-        )
+        key1 = Chef::Key.new("testuser", "user")
+        key1.name "default"
+        key1.expiration_date "infinity"
+        key1.public_key public_key
+        key2 = Chef::Key.new("testuser", "user")
+        key2.name "default"
+        key2.expiration_date "2012-01-01T00:00:00Z"
+        key2.public_key public_key
+
+        allow(Chef::Key).to receive(:list_by_user).with("testuser", inflate=true).and_return([["default", key1],["key2", key2]])
       end
 
       it_should_behave_like "a key command with option parsing" do
@@ -123,8 +127,8 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
       end
 
       context "when valid arguments are passed to list-user-keys" do
-        it "should make an http request to /users/testuser/keys" do
-          expect_any_instance_of(KeyCtlHelper).to receive(:get_rest).with("/users/testuser/keys").at_least(:once)
+        it "should pass the username to Chef::Key.list_by_user" do
+          expect(Chef::Key).to receive(:list_by_user).with("testuser").at_least(:once)
           @helper.run_test_omnibus_command("list-user-keys", ["testuser"])
         end
       end
@@ -135,11 +139,17 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
           end
         end
       end
+      context "when --verbose is passed" do
+        it "should make a request to Chef::Key.list_by_user with inflate enabled" do
+          expect(Chef::Key).to receive(:list_by_user).with("testuser", inflate=true).at_least(:once)
+          @helper.run_test_omnibus_command("list-user-keys", ["testuser", "--verbose"])
+        end
+      end
     end
 
     describe "list-client-keys" do
       before(:each) do
-        allow_any_instance_of(KeyCtlHelper).to receive(:get_rest).with("/organizations/testorg/clients/testclient/keys").and_return(
+        allow(Chef::Key).to receive(:list_by_client).with("testclient").and_return(
           [
             {"uri"=>"https://127.0.0.1/organizations/testorg/clients/testclient/keys/default",
              "name"=>"default",
@@ -150,12 +160,16 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
           ]
         )
 
-        allow_any_instance_of(Chef::REST).to receive(:get_rest).with("https://127.0.0.1/organizations/testorg/clients/testclient/keys/default").and_return(
-          {"name"=>"default", "public_key"=>public_key, "expiration_date"=>"infinity"}
-        )
-        allow_any_instance_of(Chef::REST).to receive(:get_rest).with("https://127.0.0.1/organizations/testorg/clients/testclient/keys/key2").and_return(
-          {"name"=>"default", "public_key"=>public_key, "expiration_date"=>"2012-01-01T00:00:00Z"}
-        )
+        key1 = Chef::Key.new("testclient", "client")
+        key1.name "default"
+        key1.expiration_date "infinity"
+        key1.public_key public_key
+        key2 = Chef::Key.new("testclient", "client")
+        key2.name "default"
+        key2.expiration_date "2012-01-01T00:00:00Z"
+        key2.public_key public_key
+
+        allow(Chef::Key).to receive(:list_by_client).with("testclient", inflate=true).and_return([["default", key1],["key2", key2]])
       end
 
       it_should_behave_like "a key command with option parsing" do
@@ -166,9 +180,9 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
         let(:command)   { "list-client-keys" }
         let(:arguments) { ["testorg", "testclient"] }
       end
-      context "when valid arguments are passed to list-user-keys" do
-        it "should make an http request to /users/testuser/keys" do
-          expect_any_instance_of(KeyCtlHelper).to receive(:get_rest).with("/organizations/testorg/clients/testclient/keys").at_least(:once)
+      context "when valid arguments are passed to list-clinet-keys" do
+        it  "should pass the client to Chef::Key.list_by_client" do
+          expect(Chef::Key).to receive(:list_by_client).with("testclient").at_least(:once)
           @helper.run_test_omnibus_command("list-client-keys", ["testorg", "testclient"])
         end
       end
@@ -190,52 +204,46 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
   describe "adding key commands" do
 
     shared_examples_for "a key adding command" do
-      it "should POST a proper body to /users/testuser/keys" do
-        expect_any_instance_of(KeyCtlHelper).to receive(:post_rest).with(url,
-          {
-            'name' => "testkey",
-            'public_key' => File.read(public_key_path),
-            'expiration_date' => "infinity"
-          }
-        ).at_least(:once)
+      before do
+        new_key = Chef::Key.new(actor_name, type)
+        new_key.private_key "private_key_data"
+        allow_any_instance_of(Chef::Key).to receive(:create).and_return(new_key)
+      end
+      it "should generate a chef key" do
+        expect_any_instance_of(KeyCtlHelper).to receive(populate_key_command).with(actor_name, "testkey", File.read(public_key_path), "infinity").at_least(:once).and_return(Chef::Key.new("no_matter", "user"))
+        @helper.run_test_omnibus_command(command, arguments)
+      end
+      it "should call Chef::Key.create" do
+        expect_any_instance_of(Chef::Key).to receive(:create).at_least(:once)
         @helper.run_test_omnibus_command(command, arguments)
       end
       context "when --key-name isn't passed" do
-        context "when PUBLIC_KEY_PATH points to a valid public key" do
-          it "should use the fingerprint as the name of the key" do
-            expect_any_instance_of(KeyCtlHelper).to receive(:post_rest).with(url,
-              {
-                'name' => public_key_fingerprint,
-                'public_key' => File.read(public_key_path),
-                'expiration_date' => "infinity"
-              }
-            ).at_least(:once)
-            @helper.run_test_omnibus_command(command, arguments_no_keyname)
-          end
-        end
-        context "when PUBLIC_KEY_PATH points to a key with a valid header and an invalid body" do
-          it "should exit_failure and print fingerprint error message" do
-            expect { @helper.run_test_omnibus_command(command, base_arguments.concat([bad_public_key_path])) }.to raise_error(SystemExit, KeyCtlHelper.new.cannot_generate_fingerprint_msg)
-          end
-        end
-        context "when PUBLIC_KEY_PATH points to a key with an invalid header" do
+        context "when --public-key-path points to a key with an invalid header" do
           it "should exit_failure and print the proper message" do
-            expect { @helper.run_test_omnibus_command(command, base_arguments.concat([not_a_key_path])) }.to raise_error(SystemExit, KeyCtlHelper.new.not_a_public_key_msg)
+            expect { @helper.run_test_omnibus_command(command, base_arguments.concat(["-p", not_a_key_path])) }.to raise_error(SystemExit, KeyCtlHelper.new.not_a_public_key_msg)
           end
         end
-        context "when PUBLIC_KEY_PATH points to a file that doesn't exist" do
+        context "when --public-key-path points to a file that doesn't exist" do
           it "should exit_failure and print the proper message" do
-            expect { @helper.run_test_omnibus_command(command, base_arguments.concat(["/dev/null/not_there"])) }.to raise_error(SystemExit, KeyCtlHelper.new.public_key_path_msg)
+            expect { @helper.run_test_omnibus_command(command, base_arguments.concat(["-p", "/dev/null/not_there"])) }.to raise_error(SystemExit, KeyCtlHelper.new.public_key_path_msg)
           end
+        end
+        context "when --public-key-path is not passed" do
+          it "should exit_failure and print the proper message" do
+            expect { @helper.run_test_omnibus_command(command, base_arguments) }.to raise_error(SystemExit, KeyCtlHelper.new.pass_key_name_if_public_key_missing)
+          end
+        end
+      end
+      context "when --public-key-path isn't passed and --key-name is passed" do
+        it "should create a new public key and print the private key" do
+          expect_any_instance_of(Chef::Key).to receive(:create).at_least(:once)
+          expect_any_instance_of(Chef::KeyCtlHelper).to receive(:print_private_key).at_least(:once)
+          @helper.run_test_omnibus_command(command, base_arguments.concat(["-k", "testkey"]))
         end
       end
     end
 
     describe "add-user-key" do
-      before(:each) do
-        allow_any_instance_of(KeyCtlHelper).to receive(:post_rest)
-      end
-
       it_should_behave_like "a key command with option parsing" do
         let(:command)   { "add-user-key" }
       end
@@ -252,18 +260,21 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
       end
 
       it_should_behave_like "a key adding command" do
-        let(:url)               { "/users/testuser/keys" }
-        let(:command)           { "add-user-key" }
-        let(:base_arguments)    { ["testuser"] }
-        let(:arguments)         { ["testuser", public_key_path, "-k", "testkey"] }
-        let(:arguments_no_keyname)  { ["testuser", public_key_path] }
+        let(:url)                   { "/users/testuser/keys" }
+        let(:command)               { "add-user-key" }
+        let(:base_arguments)        { ["testuser"] }
+        let(:arguments)             { ["testuser", "-p", public_key_path, "-k", "testkey"] }
+        let(:arguments_no_keyname)  { ["testuser", "-p", public_key_path] }
+        let(:populate_key_command)  { :populate_user_key }
+        let(:actor_name)            { "testuser" }
+        let(:type)                  { "user" }
       end
     end
 
     context "when an invalid date is passed" do
       it "should fail with the proper error message" do
         expect {
-          @helper.run_test_omnibus_command("add-user-key",["username", public_key_path, "-e", "invalid-date"])
+          @helper.run_test_omnibus_command("add-user-key",["username", "-p", public_key_path, "-e", "invalid-date"])
         }.to raise_error(SystemExit, Regexp.new(KeyCtlHelper.new.invalid_date_msg))
       end
     end
@@ -274,18 +285,9 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
           mandatory_argument_should_exist "add-user-key", "USERNAME", [], 1
         end
       end
-      context "when PUBLIC_KEY_PATH is missing" do
-        it "should fail with the proper error message" do
-          mandatory_argument_should_exist "add-user-key", "PUBLIC_KEY_PATH", ["testuser"], 2
-        end
-      end
     end
 
     describe "add-client-key" do
-      before(:each) do
-        allow_any_instance_of(KeyCtlHelper).to receive(:post_rest)
-      end
-
       it_should_behave_like "a key command with option parsing" do
         let(:command)   { "add-client-key" }
       end
@@ -302,18 +304,21 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
       end
 
       it_should_behave_like "a key adding command" do
-        let(:url)                  { "/organizations/testorg/clients/testclient/keys" }
-        let(:command)              { "add-client-key" }
-        let(:base_arguments)       { ["testorg", "testclient"] }
-        let(:arguments)            { ["testorg", "testclient", public_key_path, "-k", "testkey"] }
-        let(:arguments_no_keyname) { ["testorg", "testclient", public_key_path] }
+        let(:url)                   { "/organizations/testorg/clients/testclient/keys" }
+        let(:command)               { "add-client-key" }
+        let(:base_arguments)        { ["testorg", "testclient"] }
+        let(:arguments)             { ["testorg", "testclient", "-p", public_key_path, "-k", "testkey"] }
+        let(:arguments_no_keyname)  { ["testorg", "testclient", "-p", public_key_path] }
+        let(:populate_key_command)  { :populate_client_key }
+        let(:actor_name)            { "testclient" }
+        let(:type)                  { "user" }
       end
     end
 
     context "when an invalid date is passed" do
       it "should fail with the proper error message" do
         expect {
-          @helper.run_test_omnibus_command("add-client-key",["testclient", "testorg", public_key_path,"-e", "invalid-date"])
+          @helper.run_test_omnibus_command("add-client-key",["testclient", "testorg", "-p", public_key_path,"-e", "invalid-date"])
         }.to raise_error(SystemExit, Regexp.new(KeyCtlHelper.new.invalid_date_msg))
       end
     end
@@ -329,26 +334,21 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
           mandatory_argument_should_exist "add-client-key", "CLIENTNAME", ["testorg"], 2
         end
       end
-      context "when PUBLIC_KEY_PATH is missing" do
-        it "should fail with the proper error message" do
-          mandatory_argument_should_exist "add-client-key", "PUBLIC_KEY_PATH", ["testorg", "testclient"], 3
-        end
-      end
     end
   end #adding key commands
 
   describe "deleting key commands" do
 
     shared_examples_for "a key deleting command" do
-      it "should POST a proper body to /users/testuser/keys" do
-        expect_any_instance_of(KeyCtlHelper).to receive(:delete_rest).with(url).at_least(:once)
+      it "should call key.destroy" do
+        expect_any_instance_of(Chef::Key).to receive(:destroy).at_least(:once)
         @helper.run_test_omnibus_command(command, arguments)
       end
     end
 
     describe "delete-user-key" do
       before(:each) do
-        allow_any_instance_of(KeyCtlHelper).to receive(:delete_rest)
+        allow_any_instance_of(Chef::Key).to receive(:destroy)
       end
 
       it_should_behave_like "a key deleting command" do
@@ -373,7 +373,7 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
 
     describe "delete-client-key" do
       before(:each) do
-        allow_any_instance_of(KeyCtlHelper).to receive(:delete_rest)
+        allow_any_instance_of(Chef::Key).to receive(:destroy)
       end
 
       it_should_behave_like "a key deleting command" do
