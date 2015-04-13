@@ -10,6 +10,8 @@ module V1
     def show
       @health = HealthCheck.new
       @health.check
+
+      respond_with @health
     end
   end
 end
