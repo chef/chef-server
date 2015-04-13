@@ -32,7 +32,7 @@ class HealthCheck
   #
   def erchef_health
     erchef_health_metric do
-      chef.get_rest 'license'
+      chef.get_rest '_status'
     end
   end
 
