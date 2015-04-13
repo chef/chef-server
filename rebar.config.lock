@@ -90,7 +90,7 @@
                 "132a9a3c0662a2377eaf7ebee694a496a0957160"}},
        {jiffy,".*",
               {git,"git://github.com/davisp/jiffy.git",
-                   "a16918da46a39a3d0791889f61f62b1265955d8d"}},
+                   "137d3d94b6ee10001d761d412cbbe7f665680c98"}},
        {gen_server2,".*",
                     {git,"git://github.com/mdaguete/gen_server2.git",
                          "992650004c81ee921183488cb8115de4777e7bd9"}},
@@ -140,4 +140,3 @@
              {git,"https://github.com/xenolinguist/hoax.git",
                   "093d2afc2e4ca2d7ab9779aeb3e09dd427a964f2"}}]}.
 {erl_opts,[debug_info,{parse_transform,lager_transform}]}.
-
