@@ -1,6 +1,8 @@
 class HealthCheck
   include ChefResource
 
+  OK = 'ok'.freeze
+  NOT_OK = 'not ok'.freeze
   REACHABLE = 'reachable'.freeze
   TIMEOUT = 'timeout'.freeze
   UNREACHABLE = 'unreachable'.freeze
@@ -10,7 +12,7 @@ class HealthCheck
   attr_reader :status, :erchef, :postgres
 
   def initialize
-    @status = 'ok'
+    @status = OK
     @erchef = { status: REACHABLE }
     @postgres = { status: REACHABLE }
   end
@@ -23,6 +25,13 @@ class HealthCheck
     erchef_authentication
     postgres_health
     overall
+  end
+
+  #
+  # Shortcut to see if all is well
+  #
+  def ok?
+    @status == OK
   end
 
   private
@@ -68,7 +77,7 @@ class HealthCheck
   #
   def overall
     if @postgres[:status] != REACHABLE || @erchef[:status] != REACHABLE
-      @status = 'not ok'
+      @status = NOT_OK
     end
   end
 

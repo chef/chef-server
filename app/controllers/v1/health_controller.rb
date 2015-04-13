@@ -11,7 +11,9 @@ module V1
       @health = HealthCheck.new
       @health.check
 
-      respond_with @health
+      status = @health.ok? ? :ok : :service_unavailable
+
+      respond_with @health, status: status
     end
   end
 end
