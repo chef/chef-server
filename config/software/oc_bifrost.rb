@@ -17,7 +17,7 @@
 name "oc_bifrost"
 default_version "1.4.6"
 
-source git: "git@github.com:opscode/oc_bifrost"
+source git: "https://github.com/opscode/oc_bifrost"
 
 dependency "erlang"
 dependency "rebar"
