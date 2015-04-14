@@ -290,9 +290,7 @@ assemble_response(Req, State, CookbookVersions) ->
             CBMapJson = chef_json:encode(JsonList),
             {true, wrq:append_to_response_body(CBMapJson, Req), State};
         {error, Msg} ->
-            forbid(Req, State, Msg, {forbidden, read});
-        {timeout, Msg} ->
-            server_error(Req, State, Msg, {timeout, cookbook_authz})
+            forbid(Req, State, Msg, {forbidden, read})
     end.
 
 %%------------------------------------------------------------------------------
