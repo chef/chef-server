@@ -2,6 +2,29 @@
 
 ## 12.0.8 (undetermined)
 
+The following items are new since Chef Server 12.0.7 and/or are changes from previous versions.
+For specific breakdown of updated components, refer to CHANGELOG.md
+
+### Security Updates
+* OpenResty 1.7.7.10 - a stack-based buffer overflow might occur in a worker
+  process while handling a specially crafted request, potentially
+  resulting in arbitrary code execution (CVE-2013-2028)
+* OpenResty 1.7.7.10 - a character following an unescaped space in a request line
+  was handled incorrectly (CVE-2013-4547)
+* OpenResty 1.7.7.10 - memory corruption might occur in a worker process on 32-bit
+  platforms while handling a specially crafted request by
+  ngx_http_spdy_module, potentially resulting in arbitrary code
+  execution (CVE-2014-0088)
+* OpenResty 1.7.7.10 - a heap memory buffer overflow might occur in a worker
+  process while handling a specially crafted request by
+  ngx_http_spdy_module, potentially resulting in arbitrary code
+  execution (CVE-2014-0133)
+* OpenResty 1.7.7.10 - pipelined commands were not discarded after STARTTLS
+  command in SMTP proxy (CVE-2014-3556)
+* OpenResty 1.7.7.10 - it was possible to reuse SSL sessions in unrelated contexts
+  if a shared SSL session cache or the same TLS session ticket key was
+  used for multiple "server" blocks (CVE-2014-3616)
+
 ## 12.0.7 (2015-03-26)
 
 The following items are new since Chef Server 12.0.6 and/or are changes from previous versions.

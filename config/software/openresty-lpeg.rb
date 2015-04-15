@@ -27,6 +27,6 @@ relative_path "lpeg-#{version}"
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
-  make "LUADIR=#{install_dir}/embedded/luajit/include/luajit-2.0", env: env
+  make "LUADIR=#{install_dir}/embedded/luajit/include/luajit-2.1", env: env
   command "install -p -m 0755 lpeg.so #{install_dir}/embedded/lualib", env: env
 end
