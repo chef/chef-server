@@ -641,7 +641,7 @@ extract_ace(JsonBlob) ->
     {Actors, Groups} = extract_actors_and_groups(JsonBlob),
     #authz_ace{actors=Actors, groups=Groups}.
 
--spec extract_acl({}) -> authz_acl().
+-spec extract_acl(jiffy:json_value()) -> authz_acl().
 extract_acl(JsonBlob) ->
     [ {PAtom, extract_ace(ej:get({PBin},JsonBlob))} || {PAtom, PBin} <- ?atom_bin_perms ].
 

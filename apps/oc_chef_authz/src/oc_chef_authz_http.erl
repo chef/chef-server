@@ -72,8 +72,8 @@ request(ReqId, Path, Method, Headers, Body, RequestorId) ->
     request(ReqId, no_pid, Path, Method, Headers, Body, RequestorId).
 
 -spec request(req_id(), pid() | 'no_pid', http_path(), http_method(), [{string(),
-              string()}], http_body(), requestor_id()) -> ok | {ok, _} | {error, _}.
-              request(ReqId, _Pid, Path, Method, Headers, Body, RequestorId) ->
+              string()}], http_body(), requestor_id()) -> ok | {ok, jiffy:json_value()} | {error, _}.
+request(ReqId, _Pid, Path, Method, Headers, Body, RequestorId) ->
     FullHeaders = full_headers(ReqId, RequestorId, Headers),
     AuthzConfig = envy:get(oc_chef_authz, authz_service, list),
     Timeout = proplists:get_value(timeout, AuthzConfig),
