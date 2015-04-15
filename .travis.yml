@@ -3,19 +3,22 @@ branches:
     - master
 cache:
   bundler: true
+sudo: false
 language: erlang
 otp_release:
   - R16B03-1
-install:
-  - ./rebar get-deps -C rebar.config.lock
-before_script:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y cpanminus perl libdbd-pg-perl build-essential
-  - sudo cpanm --quiet --notest App::Sqitch
 addons:
   postgresql: "9.3"
+  apt:
+    packages:
+      - cpanminus
+      - perl
+      - libdbd-pg-perl
+      - build-essential
+install:
+  - ./rebar get-deps -C rebar.config.lock
+  - PERL5LIB=~/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:~/perl5/lib/perl5:/etc/perl:/usr/local/lib/perl/5.14.2:/usr/local/share/perl/5.14.2:/usr/lib/perl5:/usr/share/perl5:/usr/lib/perl/5.14:/usr/share/perl/5.14:/usr/local/lib/site_perl cpanm --notest --quiet App::Sqitch
 script:
-  - sudo chmod 777 /var/run/postgresql/
   - make bundle
   - make
   - ./rebar skip_deps=true ct
