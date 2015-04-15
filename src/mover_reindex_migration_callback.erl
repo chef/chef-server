@@ -6,10 +6,14 @@
          migration_type/0,
          supervisor/0,
          error_halts_migration/0,
-         reconfigure_object/1
+         reconfigure_object/1,
+         needs_account_dets/0
          ]).
 
 -include_lib("moser/include/moser.hrl").
+
+needs_account_dets() ->
+    true.
 
 %Return any initial state not related to the object id
 migration_start_worker_args(Object, AcctInfo) ->
