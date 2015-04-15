@@ -23,6 +23,7 @@ OcId::Application.routes.draw do
 
       get 'me', to: 'users#me'
       get 'me/organizations', to: 'users#organizations'
+      get 'status', to: 'health#show'
     end
   end
 end
