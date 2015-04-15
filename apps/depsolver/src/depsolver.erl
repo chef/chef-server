@@ -190,6 +190,8 @@ filter_pvpair_by_constraint(PVPair, Constraints) ->
 
 -spec filter_package({pkg_name(), vsn()}, constraint()) ->
                             boolean().
+filter_package({PkgName, Vsn}, PkgName) ->
+    is_version_within_constraint(Vsn, PkgName);
 filter_package({PkgName, Vsn}, C = {PkgName, _}) ->
     is_version_within_constraint(Vsn, C);
 filter_package({PkgName, Vsn}, C = {PkgName, _, _}) ->
