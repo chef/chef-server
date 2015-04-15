@@ -839,7 +839,7 @@ bulk_get_objects(Type, Ids) ->
 
 
 -spec bulk_get_authz_ids(chef_type(), [binary()]) ->
-                              {ok, [binary()] | not_found} |
+                              {ok, [[binary()]] | not_found} |
                               {error, term()}.
 %% @doc return a list of Authz IDs for the given IDs
 bulk_get_authz_ids(Type, Ids) ->
