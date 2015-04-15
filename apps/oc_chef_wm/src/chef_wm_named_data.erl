@@ -132,11 +132,12 @@ create_path(Req, #base_state{resource_state = #data_state{
                                data_bag_item_name = ItemName}}=State) ->
     {binary_to_list(ItemName), Req, State}.
 
-from_json(Req, #base_state{
+-spec from_json(#wm_reqdata{}, #base_state{}) -> {boolean()|{halt,409|500}, #wm_reqdata{}, #base_state{}}.
+from_json(Req = #wm_reqdata{}, #base_state{
                            resource_state = #data_state{data_bag_name = DataBagName,
                                                         data_bag_item_ejson = ItemData}
                           } = State) ->
-    case oc_chef_wm_base:create_from_json(Req, State, chef_data_bag_item, {authz_id,undefined}, {DataBagName, ItemData}) of
+    case oc_chef_wm_base:create_from_json(Req, State, chef_data_bag_item, {authz_id,undefined}, {[{DataBagName, ItemData}]}) of
         {true, _, NewState} ->
             %% The Ruby API returns created items as-is, but with added chef_type and
             %% data_bag fields. If those fields are present in the request, they are put

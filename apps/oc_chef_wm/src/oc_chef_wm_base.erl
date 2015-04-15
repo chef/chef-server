@@ -896,7 +896,7 @@ verify_request_signature(Req,
 
 -spec create_from_json(Req :: #wm_reqdata{}, State :: #base_state{},
                        RecType :: chef_object_name()| chef_cookbook_version,
-                       ContainerId ::object_id() | {authz_id, AuthzId::object_id()},
+                       ContainerId :: object_id() | {authz_id, AuthzId::object_id() | undefined},
                        ObjectEjson :: ejson_term()) ->
                               {true | {halt, 409 | 500}, #wm_reqdata{}, #base_state{}}.
 %% @doc Implements the from_json callback for POST requests to create Chef
