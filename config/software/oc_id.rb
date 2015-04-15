@@ -17,7 +17,7 @@
 name "oc_id"
 default_version "0.4.4"
 
-source git: "git@github.com:opscode/oc-id"
+source git: "https://github.com/opscode/oc-id"
 
 dependency "postgresql92" # for libpq
 dependency "nodejs"

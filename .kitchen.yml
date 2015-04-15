@@ -11,7 +11,7 @@ driver:
 
 provisioner:
   name: chef_zero
-  require_chef_omnibus: 11.16.2
+  require_chef_omnibus: 12.1.0
 
 platforms:
   - name: ubuntu-12.04
@@ -22,6 +22,8 @@ platforms:
     run_list: apt::default
   - name: centos-5.10
   - name: centos-6.5
+  - name: centos-7.0
+    run_list:  yum-epel::default
 
 suites:
   - name: default
