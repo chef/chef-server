@@ -25,7 +25,10 @@ describe HealthCheck do
     end
 
     it "should show something meaningful in the erchef status when there is an authentication problem" do
-      allow(subject).to receive(:chef).and_raise(ErchefUnauthorizedException)
+      chefstub = double('chef')
+      allow(chefstub).to receive(:get_rest).with('_status').and_return({'status' => 'pong'})
+      allow(chefstub).to receive(:get_rest).with('/users/pivotal').and_raise(ErchefUnauthorizedException)
+      allow(subject).to receive(:chef).and_return(chefstub)
       subject.check
       expect(subject.erchef[:status]).to eql('authentication error')
     end
@@ -40,11 +43,20 @@ describe HealthCheck do
       subject.check
       expect(subject.erchef[:status]).to eql('erroring')
     end
+
+    it "should show that erchef is erroring if the status received is not 'pong'" do
+      chefstub = double('chef')
+      allow(chefstub).to receive(:get_rest).with('_status').and_return({'status' => 'pang'})
+      allow(chefstub).to receive(:get_rest).with('/users/pivotal').and_return(true)
+      allow(subject).to receive(:chef).and_return(chefstub)
+      subject.check
+      expect(subject.erchef[:status]).to eql('erroring')
+    end
   end
 
   context 'postgres is having problems' do
     before do
-      allow(subject).to receive(:chef).and_return(double('chef', :get_rest => true))
+      allow(subject).to receive(:chef).and_return(double('chef', :get_rest => {'status' => 'pong'}))
       allow(ActiveRecord::Base).to receive(:connection).and_raise(ActiveRecord::ConnectionTimeoutError)
     end
 
@@ -67,7 +79,7 @@ describe HealthCheck do
 
   context 'everything is running smoothly' do
     before do
-      allow(subject).to receive(:chef).and_return(double('chef', :get_rest => true))
+      allow(subject).to receive(:chef).and_return(double('chef', :get_rest => {'status' => 'pong'}))
       allow(ActiveRecord::Base).to receive_message_chain('connection.query') { ['2'] }
       subject.check
     end

@@ -22,6 +22,7 @@ class HealthCheck
   #
   def check
     erchef_health
+    erchef_key
     postgres_health
     overall
   end
@@ -40,7 +41,21 @@ class HealthCheck
   #
   def erchef_health
     erchef_health_metric do
-      chef.get_rest '_status'
+      output = chef.get_rest '_status'
+
+      if output['status'] != 'pong'
+        @erchef[:status] = ERRORING
+      end
+    end
+  end
+
+  #
+  # Try to fetch /users/pivotal, which will only succeed if we have the correct
+  # webui_priv.pem key in place.
+  #
+  def erchef_key
+    erchef_health_metric do
+      chef.get_rest '/users/pivotal'
     end
   end
 
