@@ -22,7 +22,6 @@ class HealthCheck
   #
   def check
     erchef_health
-    erchef_authentication
     postgres_health
     overall
   end
@@ -43,15 +42,6 @@ class HealthCheck
     erchef_health_metric do
       chef.get_rest '_status'
     end
-  end
-
-  #
-  # Try to authenticate with erchef to prove that oc-id is actually functioning
-  #
-  # TODO: in order for this to work, we need a test user, with
-  # username/password stored in the vault and accessible in Settings
-  #
-  def erchef_authentication
   end
 
   #
