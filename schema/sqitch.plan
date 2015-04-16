@@ -70,3 +70,4 @@ keys_update_tracking [multiple_keys] 2015-02-24T18:57:08Z Marc Paradise <marc@ch
 policy_groups [policies] 2015-02-27T22:52:25Z Daniel DeLeo <ddeleo@lorentz.local># Add policy_groups table
 policy_revisions [policy_groups] 2015-02-27T23:39:16Z Daniel DeLeo <ddeleo@lorentz.local># Create separte policy revisions table
 policy_revisions_policy_groups_association 2015-03-05T20:57:56Z Daniel DeLeo <ddeleo@lorentz.local># Add join between policy groups and revisions
+@policyfile-api-tables 2015-04-16T19:48:36Z Daniel DeLeo <ddeleo@lorentz.local> # Add policyfile endpoint tables
