@@ -289,7 +289,6 @@ default['private_chef']['lb']['xdl_defaults']['couchdb_acls'] = false
 default['private_chef']['lb']['xdl_defaults']['couchdb_association_requests'] = false
 default['private_chef']['lb']['xdl_defaults']['couchdb_organizations'] = false
 default['private_chef']['lb']['xdl_defaults']['couchdb_associations'] = false
-default['private_chef']['lb']['xdl_defaults']['policies'] = false
 
 ####
 # Nginx
