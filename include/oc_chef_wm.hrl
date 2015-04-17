@@ -193,6 +193,8 @@
 
          }).
 
+-type chef_wm_create_update_response() :: {true | {halt, 403 | 500 | 409}, wm_req(), #base_state{}}.
+
 -record(client_state, {
           client_data,
           client_authz_id,

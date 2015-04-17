@@ -26,16 +26,18 @@
          finalize_create_body/3]).
 
 
+-spec update_object_embedded_key_data_v0(wm_req(), #base_state{},
+                                         #chef_client{} | #chef_user{}, jiffy:json_value()) ->
+    chef_wm_create_update_response().
 update_object_embedded_key_data_v0(Req, State, ObjectRec, EJ) ->
-case chef_key_base:maybe_generate_key_pair(EJ) of
+    case chef_key_base:maybe_generate_key_pair(EJ) of
         keygen_timeout ->
             {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
         EJWithKeys->
             oc_chef_wm_base:update_from_json(Req, State, ObjectRec, EJWithKeys)
     end.
 
-% TODO owner_data should be moved to top-level object_ej [same with object_record] to avoid duplicating a subset of data
-% in multiple fields - and to generally simplify common object creation/validation/fetching behaviors.
+-spec create_object_with_embedded_key_data(wm_req(), #base_state{}) -> chef_wm_create_update_response().
 create_object_with_embedded_key_data(Req, #base_state{server_api_version = ?API_v0,
                                                       key_context = #key_context{object_ej = EJ}} = State) ->
     KeyData = case chef_key_base:cert_or_key(EJ) of
@@ -50,7 +52,11 @@ create_object_with_embedded_key_data(Req, #base_state{key_context = #key_context
                                           fun(Result) ->
                                                   create_object(Result, Req, State)
                                           end).
-
+-spec create_object(keygen_timeout |
+                    {binary(), binary()} |
+                    {binary(), undefined} |
+                    {undefined, undefined},
+                    wm_req(), #base_state{}) -> chef_wm_create_update_response().
 create_object(keygen_timeout, Req, State) ->
     {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
 create_object({PublicKey, PrivateKey},
@@ -63,12 +69,12 @@ create_object({PublicKey, PrivateKey},
     KeyContext1 = KeyContext#key_context{ object_ej = EJ1, key_ej = KeyEJ },
     oc_chef_wm_base:create_from_json(Req,
                                      State#base_state{ key_context = KeyContext1},
-                                     object_type(Type) , {authz_id, AuthzId}, EJ1);
+                                     chef_key_base:key_owner_type(Type) , {authz_id, AuthzId}, EJ1);
 create_object({undefined, undefined},
               Req, #base_state{key_context = #key_context{type = Type, object_authz_id = AuthzId,
                                                           object_ej = EJ}} = State ) ->
     % No public key was provided, and no key requested to be generated. Continue without additional action.
-    oc_chef_wm_base:create_from_json(Req, State, object_type(Type), {authz_id, AuthzId}, EJ);
+    oc_chef_wm_base:create_from_json(Req, State, chef_key_base:key_owner_type(Type), {authz_id, AuthzId}, EJ);
 create_object({PublicKey, PrivateKey},
               Req,
               #base_state{server_api_version = Version, organization_guid = OrgId,
@@ -92,20 +98,20 @@ create_object({PublicKey, PrivateKey},
             % By specifying the id in the EJ we'll ensure the object itself doesn't try to create it.
             OwnerEJ1 = ej:set({<<"id">>}, OwnerEJ, ObjectId),
             OwnerEJ2 = ej:delete({<<"create_key">>}, OwnerEJ1),
-            oc_chef_wm_base:create_from_json(Req, State#base_state{key_context = KeyContext2}, object_type(OwnerType), {authz_id, OwnerAuthzId}, OwnerEJ2);
-        What ->
-            % TODO DEBUGGING ONLY
-            lager:error("Failed to create key: ~p~n", [What]),
+            oc_chef_wm_base:create_from_json(Req, State#base_state{key_context = KeyContext2},
+                                            chef_key_base:key_owner_type(OwnerType), {authz_id, OwnerAuthzId}, OwnerEJ2);
+        _What ->
             {{halt, 500}, Req, State#base_state{ log_msg = failed_to_save_new_key }}
     end.
-
-finalize_create_body(_Req, #base_state{key_context = #key_context{key_ej = undefined}}, BodyEJ) ->
-    BodyEJ;
-finalize_create_body(_Req, #base_state{key_context = #key_context{key_ej = EJToEmbed}}, BodyEJ) ->
-    ej:set({<<"chef_key">>}, BodyEJ, EJToEmbed).
 
 safe_org_id(undefined) -> ?OSC_ORG_ID;
 safe_org_id(OrgId) -> OrgId.
 
 
-object_type(Type) -> list_to_existing_atom("chef_" ++ atom_to_list(Type)).
+-spec finalize_create_body(wm_req(), #base_state{}, jiffy:json_value()) -> jiffy:json_value().
+finalize_create_body(_Req, #base_state{key_context = #key_context{key_ej = undefined}}, BodyEJ) ->
+    BodyEJ;
+finalize_create_body(_Req, #base_state{key_context = #key_context{key_ej = EJToEmbed}}, BodyEJ) ->
+    ej:set({<<"chef_key">>}, BodyEJ, EJToEmbed).
+
+

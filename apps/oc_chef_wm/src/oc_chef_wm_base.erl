@@ -908,8 +908,7 @@ verify_request_signature(Req,
 -spec create_from_json(Req :: #wm_reqdata{}, State :: #base_state{},
                        RecType :: chef_object_name()| chef_cookbook_version,
                        ContainerId :: object_id() | {authz_id, AuthzId::object_id() | undefined},
-                       ObjectEjson :: ejson_term()) ->
-                              {true | {halt, 409 | 500}, #wm_reqdata{}, #base_state{}}.
+                       ObjectEjson :: ejson_term()) -> chef_wm_create_update_response().
 %% @doc Implements the from_json callback for POST requests to create Chef
 %% objects. `RecType' is the name of the object record being created
 %% (e.g. `chef_node'). `ContainerId' is the AuthzID of the container for the object being
@@ -966,16 +965,13 @@ create_from_json(#wm_reqdata{} = Req,
             % 500 logging sanitizes responses to avoid exposing sensitive data -
             % TODO - parse sql error to get minimal meaningful message,
             % without exposing sensitive data
-            lager:error("Error in object creation: ~p", [What]),
+            % lager:error("Error in object creation: ~p", [What]),
             {{halt, 500}, Req, State#base_state{log_msg = What}}
     end.
 
--spec update_from_json(#wm_reqdata{},
-                       #base_state{},
+-spec update_from_json(#wm_reqdata{}, #base_state{},
                        chef_updatable_object() | #chef_user{},
-                       ejson_term()) ->
-                              {true, #wm_reqdata{}, #base_state{}} |
-                              {{halt, 400 | 404 | 500}, #wm_reqdata{}, #base_state{}}.
+                       ejson_term()) ->  chef_wm_create_update_response().
 %% @doc Implements the from_json callback for PUT requests to update Chef
 %% objects. `OrigObjectRec' should be the existing and unmodified `chef_object()'
 %% record. `ObjectEjson' is the parsed EJSON from the request body.
@@ -1040,7 +1036,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                     State1 = State#base_state{log_msg = Why},
                     % TODO - parse sql error to get minimal meaningful message,
                     % without exposing sensitive data
-                    lager:error("Error in object creation: ~p", [Why]),
+                    % lager:error("Error in object creation: ~p", [Why]),
                     {{halt, 500}, Req, State1}
             end
     end.
