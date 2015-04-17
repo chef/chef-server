@@ -1,0 +1,10 @@
+#!/opt/opscode/embedded/bin/ruby
+
+require "dvm"
+
+begin
+  raise DVM::DVMArgumentError, "dvm must be run as root"  unless Process.uid == 0
+  DVM::Application.start(ARGV)
+rescue DVM::DVMArgumentError => e
+  say HighLine.color(e.message, :red)
+end

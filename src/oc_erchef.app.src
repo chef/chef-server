@@ -14,26 +14,21 @@
                   chef_objects,
                   depsolver,
                   oc_chef_authz,
-                  oc_chef_wm
+                  oc_chef_wm,
 
                   %% TODO: The following deps should be pulled in by the above
                   %% apps, but they aren't. Isn't that sad? We should fix it!
-                  ,
                   bear,
                   chef_authn,
-                  %% edoc,
                   ej,
                   envy,
                   eper,
                   erlware_commons,
                   et,
-                  %% eunit,
                   folsom_graphite,
                   gs,
-                  %% hipe,
                   jiffy,
                   mini_s3,
-                  %% mnesia,
                   oauth,
                   observer,
                   opscoderl_folsom,
@@ -43,7 +38,11 @@
                   tools,
                   uuid,
                   webtool,
-                  wx
+                  %% These are effectively dev-only, but need to be present as apps pulled into the
+                  %% development environment by relx.  mixer is not startable, and sync is only started when
+                  %% DEVVM=1 environment variable is present.
+                  sync,
+                  mixer
                  ]},
   {mod, { oc_erchef_app, []}},
   {env, []}

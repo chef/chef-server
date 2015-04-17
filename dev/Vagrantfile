@@ -1,0 +1,169 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby
+
+require "yaml"
+
+Vagrant.configure("2") do |config|
+  provisioning, installer, installer_path, attributes = prepare()
+  config.vm.box     = "oc_erchef-ubuntu-14.04"
+  config.vm.box_url= "https://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_ubuntu-14.04_chef-provisionerless.box"
+  config.vm.hostname = "api.chef-server.dev"
+  config.vm.network "private_network", ip: "33.33.33.100"
+
+  begin
+    custom_config = YAML.load_file("config.yml")
+    num_cpus = custom_config["vm"]["cpus"]
+    mem = custom_config["vm"]["memory"]
+  rescue
+  end
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ["modifyvm", :id,
+                  "--name", "chef-server",
+                  "--memory", mem || 4096,
+                  "--cpus", num_cpus || 4,
+                  "--natdnshostresolver1", "on",
+                  "--usb", "off",
+                  "--usbehci", "off",
+                  "--nictype1", "virtio",
+                  "--nictype2", "virtio"
+                  # ^ TODO if platform is mac don't?
+    ]
+    vb.customize [
+      "storagectl", :id,
+      "--name", "IDE Controller",
+      "--hostiocache", "on"
+    ]
+  end
+
+  if provisioning
+    # TODO - simple merge of config.yml vm packages as well
+    json = {
+      "packages" => attributes["vm"]["packages"],
+      "tz" => host_timezone
+    }
+    # Assumes residence in dev/oc_erchef, with interesting tidbits up one level from that
+    # Note that we can't exclude .git from top-level projects, and by extension from anything,
+    # otherwise rebar commands begin to fail. Note that we also exclude a lot of things we don't want to pull
+    # in from the host since we will generate them ourselves in the session.We also include a couple of projects
+    # that may exist in your host directory that we don't want to spend time on.
+    config.vm.synced_folder File.absolute_path(File.join(Dir.pwd, "../..")), "/host",
+      type: "rsync",
+      rsync__exclude: attributes["vm"]["sync-exclude"]
+
+   # We're also going to do a share of the slower vboxsf style, allowing us to auto-checkout dependencies
+    # and have them be properly synced to a place that we can use them.
+    config.vm.synced_folder base_path, "/mnt/host-do-not-use"
+    config.vm.synced_folder installer_path, "/installers"
+    config.vm.provision "shell", inline: install_hack(installer)
+    config.vm.provision "chef_solo" do |chef|
+      chef.install = false
+      chef.binary_path = "/opt/opscode/embedded/bin"
+      chef.node_name = config.vm.hostname
+      chef.cookbooks_path = "cookbooks"
+      chef.add_recipe("provisioning::chef-server")
+      chef.add_recipe("dev::system")
+      chef.add_recipe("dev::dvm")
+      chef.add_recipe("dev::user-env")
+      chef.json = json || {}
+    end
+  end
+end
+
+##############
+# Internals
+##############
+# These functions are used for provisioning, and ensuring that the VM has
+# what it needs to load up and install chef-server
+##############
+
+
+def prepare
+  action = ARGV.shift
+  if action =~ /^(provision|up|reload)$/
+    attributes = YAML.load_file("defaults.yml")
+    installer = ENV['INSTALLER'] || prompt_installer
+    raise "Please set INSTALLER to the path of a .deb package for Chef Server 12+." if installer.nil?
+    raise "#{installer} does not exist! Please fix this." unless File.file?(installer)
+    puts "*** Found #{installer}, will use this if an install is necessary"
+    installer_path = File.dirname(File.expand_path(installer))
+    provisioning = true
+  end
+  [provisioning, installer, installer_path, attributes]
+end
+
+def prompt_installer
+  # TODO allow config override of location, multiple locations, search pattern, max count?
+  files = Dir.glob("#{Dir.home}/Downloads/chef-server-core*.deb") + Dir.glob("#{base_path}/opscode-omnibus/pkg/chef-server-core*.deb")
+
+  if files.length ==  0
+    return nil
+  end
+  if files.length == 1
+    return files[0]
+  end
+
+  files = files.sort_by{ |f| File.mtime(f) }.last(10)
+  files.reverse!
+  cur = 1
+  files.each do |f|
+    puts " #{cur}) #{f}\n"
+    cur = cur + 1
+  end
+  selection = 0
+  loop do
+    print "Which Image? [1 - #{files.length}]: "
+    selection = gets.chomp.to_i
+    break if selection > 0 and selection <= files.length
+  end
+  files[selection - 1]
+
+end
+
+def host_timezone
+  require "time"
+  # Note that we have to reverse the offset sign if we're using Etc/GMT,
+  # reference: http://en.wikipedia.org/wiki/Tz_database#Area
+#  offset = (Time.zone_offset(Time.now.zone) / 3600) * -1
+#  zonesuffix = offset >= 0 ? "+#{offset.to_s}" : "#{offset.to_s}"
+#  "Etc/GMT#{zonesuffix}"
+  #  Sigh - sqitch doesn't like the above format and dies.
+  #  This is temporary and won't work on mac:
+  if /darwin/ =~ RUBY_PLATFORM
+
+    puts "Notice: using sudo to get timezone, no updates being made"
+    puts "Executing: sudo systemsetup -gettimezone"
+    # Time Zone: Blah/Blah
+    `sudo systemsetup -gettimezone`.chomp.split(":")[1].strip
+  else # TODO windows if we otherwise check out for windows.
+    `cat /etc/timezone`.chomp
+  end
+  #
+end
+
+# this is here in order to avoid having to download a chef provisioner -
+# we already have a chef-client install included with the server package, and since
+# we're going to run in solo mode, it will run for VM provisioning without
+# interfering with the server install.
+def install_hack(installer)
+  server_installer_name = File.basename(installer)
+  return ";" if server_installer_name.nil?
+<<SCRIPT
+if [ -d "/opt/opscode/embedded" ]
+then
+  echo "Bypassing server install, it appears done."
+else
+  echo "PATH=/opt/opscode/embedded/bin:$PATH" > /root/.bashrc
+  sudo dpkg -i /installers/#{server_installer_name}
+fi
+SCRIPT
+end
+def simple_deep_merge(from, into)
+  into.merge(from) do |key, oldval, newval|
+    oldval = oldval.to_hash if oldval.respond_to?(:to_hash)
+    newval = newval.to_hash if newval.respond_to?(:to_hash)
+    oldval.class.to_s == 'Hash' && newval.class.to_s == 'Hash' ? simple_deep_merge(oldval, newval) : newval
+  end
+end
+def base_path
+  File.absolute_path(File.join(Dir.pwd, "../.."))
+end
