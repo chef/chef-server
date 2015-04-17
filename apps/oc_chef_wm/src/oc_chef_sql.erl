@@ -24,38 +24,14 @@
 
 -module(oc_chef_sql).
 
--export([
-         statements/1
-     ]).
+-export([ statements/1 ]).
 
-%% @doc Private Chef Server queries. Merges base statements with OPC statements
-%% This is the function you for setting up sqerl in oc_erchef.config
-statements(DbType) ->
-    BaseStatements = statements(DbType, default),
-    OPCStatements = statements(DbType, opc),
+%% @doc Chef Server queries. Combines base statements
+%% from chef_sql with oc_chef_authz_db:statements.
+%%
+%% Referenced by sys.config in {sqerl, [{ prepared_staements...
+statements(_) ->
+    chef_sql:statements() ++ oc_chef_authz_db:statements(pgsql).
 
-    %% Queries from the OPC statements file will override any
-    %% identically-named queries used on the Open Source server
-    ChefStatements = dict:to_list(dict:merge(fun(_K, _V1, V2) -> V2 end,
-				     dict:from_list(BaseStatements),
-				     dict:from_list(OPCStatements))),
 
-    AuthzStatements = oc_chef_authz_db:statements(pgsql),
-    AuthzStatements ++ ChefStatements.
 
-%% @doc Return a proplist of the parameterized SQL queries needed for
-%% chef_sql.  `Class' is used to distinguish between OPC and OSC
-statements(pgsql, default) ->
-    chef_sql:statements();
-statements(DbType, Class) when Class =:= default;
-                               Class =:= opc ->
-    Suffix = case Class of
-                 default ->
-                     "_statements.config";
-                 opc ->
-                     "_statements_opc.config"
-             end,
-    File = atom_to_list(DbType) ++ Suffix,
-    Path = filename:join([filename:dirname(code:which(?MODULE)), "..", "priv", File]),
-    {ok, Statements} = file:consult(Path),
-    Statements.

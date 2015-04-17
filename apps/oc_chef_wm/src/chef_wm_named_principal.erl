@@ -60,11 +60,6 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
 
-principal_type(#chef_client{}) ->
-    <<"client">>;
-principal_type(#chef_user{}) ->
-    <<"user">>.
-
 %% We need to be able to accept unsigned requests while still extracting the org id
 %% If this kind of an unauthenticated request is used by more than one endpoint,
 %% consider moving this into a mixin
@@ -82,32 +77,37 @@ malformed_request(Req, #base_state{}=State) ->
             {true, NewReq, State#base_state{log_msg = Why}}
     end.
 
-resource_exists(Req, #base_state{chef_db_context = DbContext,
-                                 organization_guid = OrgId,
-                                 resource_state = ResourceState} = State) ->
+resource_exists(Req, #base_state{server_api_version = ?API_v0,
+                                 chef_db_context = DbContext,
+                                 organization_guid = OrgId} = State) ->
     Name = chef_wm_util:object_name(principal, Req),
     case chef_db:fetch_requestor(DbContext, OrgId, Name) of
         {not_found, client} ->
-            %% Note: this actually is returned if either a client OR a user cannot be found.
-            %% This is in need of further refactoring :(
-            %%
-            %% However, for the purposes of the principals endpoint, we're not so concerned
-            %% about that, since we need to create a custom return message anyway.
             Req1 = chef_wm_util:set_json_body(Req, not_found_ejson(<<"principal">>, Name)),
             {false, Req1, State#base_state{log_msg = client_not_found}};
-        #chef_client{name = Name, public_key = PublicKey, authz_id = AuthzId} = Client ->
-            State1 = ResourceState#principal_state{name = Name,
-                                                   public_key = PublicKey,
-                                                   type = principal_type(Client),
-                                                   authz_id = AuthzId},
-            {true, Req, State#base_state{resource_state = State1}};
-        #chef_user{username = Name, public_key = PublicKey, authz_id = AuthzId} = User ->
-            State1 = ResourceState#principal_state{name = Name,
-                                                   public_key = PublicKey,
-                                                   type = principal_type(User),
-                                                   authz_id = AuthzId},
-            {true, Req, State#base_state{resource_state = State1}}
+        Response->
+            PrincipalState = make_principal_state(Response),
+            {true, Req, State#base_state{resource_state = PrincipalState}}
+    end;
+resource_exists(Req, #base_state{chef_db_context = DbContext,
+                                 organization_guid = OrgId } = State) ->
+    Name = chef_wm_util:object_name(principal, Req),
+    case chef_db:fetch_requestors(DbContext, OrgId, Name) of
+        not_found ->
+            Req1 = chef_wm_util:set_json_body(Req, not_found_ejson(<<"principal">>, Name)),
+            {false, Req1, State#base_state{log_msg = principal_not_found}};
+        Requestors ->
+            PrincipalStates = [ make_principal_state(Requestor) || Requestor <- Requestors],
+            {true, Req, State#base_state{resource_state = PrincipalStates}}
     end.
+
+
+make_principal_state(#chef_client{name = Name, public_key = PublicKey, authz_id = AuthzId}) ->
+  #principal_state{name = Name, public_key = PublicKey, type = <<"client">>, authz_id = AuthzId};
+make_principal_state(#chef_user{username = Name, public_key = PublicKey, authz_id = AuthzId}) ->
+  #principal_state{name = Name, public_key = PublicKey, type = <<"user">>, authz_id = AuthzId};
+make_principal_state(#chef_requestor{name = Name, public_key = PublicKey, authz_id = AuthzId, type = Type}) ->
+  #principal_state{name = Name, public_key = PublicKey, type = Type, authz_id = AuthzId}.
 
 validate_request(_Method, Req, State) ->
     {Req, State}.
@@ -115,10 +115,15 @@ validate_request(_Method, Req, State) ->
 auth_info(Req, State) ->
     {authorized, Req, State}.
 
-to_json(Req, #base_state{resource_state = Principal, chef_db_context = DbContext,
-                         organization_name = OrgName} = State) ->
+to_json(Req, #base_state{server_api_version = ?API_v0, resource_state = Principal,
+                         chef_db_context = DbContext, organization_name = OrgName} = State) ->
     EJson = assemble_principal_ejson(Principal, OrgName, DbContext),
     Json = ejson:encode(EJson),
+    {Json, Req, State};
+to_json(Req, #base_state{resource_state = Principals,
+                         chef_db_context = DbContext, organization_name = OrgName} = State) ->
+    EJ = [ assemble_principal_ejson(Principal, OrgName, DbContext) || Principal <- Principals ],
+    Json = ejson:encode({[{ <<"principals">>, EJ}]} ),
     {Json, Req, State}.
 
 assemble_principal_ejson(#principal_state{name = Name,

@@ -10,8 +10,8 @@
 % and not product version.
 -define(API_v1, 1).
 
-%% Which level of API version is deprecated? Not currently used by
-%% erchef, this is for human consumption.
+%% Highest level of deprecated API version that will be removed in the nxt major product release.
+%% This is used in eunit tests for version range testing across objects.
 -define(API_DEPRECATED_VER, ?API_v0).
 
 

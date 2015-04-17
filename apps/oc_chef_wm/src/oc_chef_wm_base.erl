@@ -44,7 +44,7 @@
 -export([check_cookbook_authz/3,
          delete_object/3,
          object_creation_hook/2,
-         object_creation_error_hook/2,
+         object_creation_error_hook/3,
          stats_hero_label/1,
          stats_hero_upstreams/0,
          is_superuser/1,
@@ -676,11 +676,22 @@ client_cleanup(#chef_client{authz_id=ClientAuthzId,
             {error, Error}
     end.
 
-object_creation_error_hook(#chef_data_bag_item{}, _RequestorId) ->
+object_creation_error_hook(_, #chef_data_bag_item{}, _RequestorId) ->
     ok;
-object_creation_error_hook(#chef_cookbook_version{}, _RequestorId) ->
+object_creation_error_hook(_, #chef_cookbook_version{}, _RequestorId) ->
     ok;
-object_creation_error_hook(Object, RequestorId) ->
+object_creation_error_hook(DbContext, #chef_user{id = Id} = Object, RequestorId) ->
+    % v1+ we create the key before the user
+    chef_db:delete(#chef_key{id = Id}, DbContext),
+    object_creation_error_authz_cleanup(Object, RequestorId);
+object_creation_error_hook(DbContext, #chef_client{id = Id} = Object, RequestorId) ->
+    % v1+ we create the key before the client
+    chef_db:delete(#chef_key{id = Id}, DbContext),
+    object_creation_error_authz_cleanup(Object, RequestorId);
+object_creation_error_hook(_DbContext, Object, RequestorId) ->
+    object_creation_error_authz_cleanup(Object, RequestorId).
+
+object_creation_error_authz_cleanup(Object, RequestorId) ->
     case chef_object:authz_id(Object) of
         undefined ->
             ok;
@@ -897,8 +908,7 @@ verify_request_signature(Req,
 -spec create_from_json(Req :: #wm_reqdata{}, State :: #base_state{},
                        RecType :: chef_object_name()| chef_cookbook_version,
                        ContainerId :: object_id() | {authz_id, AuthzId::object_id() | undefined},
-                       ObjectEjson :: ejson_term()) ->
-                              {true | {halt, 409 | 500}, #wm_reqdata{}, #base_state{}}.
+                       ObjectEjson :: ejson_term()) -> chef_wm_create_update_response().
 %% @doc Implements the from_json callback for POST requests to create Chef
 %% objects. `RecType' is the name of the object record being created
 %% (e.g. `chef_node'). `ContainerId' is the AuthzID of the container for the object being
@@ -933,8 +943,7 @@ create_from_json(#wm_reqdata{} = Req,
         {conflict, _} ->
             %% ignore return value of solr delete, this is best effort.
             oc_chef_object_db:delete_from_solr(ObjectRec),
-            object_creation_error_hook(ObjectRec, ActorId),
-            %% FIXME: created authz_id is leaked for this case, cleanup?
+            object_creation_error_hook(DbContext, ObjectRec, ActorId),
             LogMsg = {RecType, name_conflict, Name},
             ConflictMsg = ResourceMod:conflict_message(Name),
             {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
@@ -944,26 +953,25 @@ create_from_json(#wm_reqdata{} = Req,
             {TypeName, Args} = call_if_exported(ResourceMod, route_args,
                                                 [ObjectRec, State], fun route_args/2),
             Uri = oc_chef_wm_routes:route(TypeName, Req, Args),
-            {true,
-             chef_wm_util:set_uri_of_created_resource(Uri, Req),
-             State#base_state{log_msg = LogMsg}};
+            BodyEJ0 = {[{<<"uri">>, Uri}]},
+            BodyEJ1 = call_if_exported(ResourceMod, finalize_create_body, [Req, State, ObjectRec, BodyEJ0],
+                                       fun(_,_,_,EJ) -> EJ end),
+            Req1 = chef_wm_util:set_json_body(Req, BodyEJ1),
+            {true, chef_wm_util:set_location_of_created_resource(Uri, Req1), State#base_state{log_msg = LogMsg}};
         What ->
             %% ignore return value of solr delete, this is best effort.
-            %% FIXME: created authz_id is leaked for this case, cleanup?
             oc_chef_object_db:delete_from_solr(ObjectRec),
-            object_creation_error_hook(ObjectRec, ActorId),
+            object_creation_error_hook(DbContext, ObjectRec, ActorId),
             % 500 logging sanitizes responses to avoid exposing sensitive data -
             % TODO - parse sql error to get minimal meaningful message,
             % without exposing sensitive data
+            % lager:error("Error in object creation: ~p", [What]),
             {{halt, 500}, Req, State#base_state{log_msg = What}}
     end.
 
--spec update_from_json(#wm_reqdata{},
-                       #base_state{},
+-spec update_from_json(#wm_reqdata{}, #base_state{},
                        chef_updatable_object() | #chef_user{},
-                       ejson_term()) ->
-                              {true, #wm_reqdata{}, #base_state{}} |
-                              {{halt, 400 | 404 | 500}, #wm_reqdata{}, #base_state{}}.
+                       ejson_term()) ->  chef_wm_create_update_response().
 %% @doc Implements the from_json callback for PUT requests to update Chef
 %% objects. `OrigObjectRec' should be the existing and unmodified `chef_object()'
 %% record. `ObjectEjson' is the parsed EJSON from the request body.
@@ -986,13 +994,17 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
     case OrigObjectRec =:= ObjectRec of
         true ->
             State1 = State#base_state{log_msg = ignore_update_for_duplicate},
-            {true, chef_wm_util:set_json_body(Req, ObjectEjson), State1};
+            Body = call_if_exported(ResourceMod, finalize_update_body, [Req, State, ObjectEjson],
+                                   fun(_,_,EJ) -> EJ end),
+            {true, chef_wm_util:set_json_body(Req, Body), State1};
         false ->
             case chef_db:update(ObjectRec, DbContext, ActorId) of
                 ok ->
                     IsRename = chef_object:name(OrigObjectRec) =/= chef_object:name(ObjectRec),
                     Req1 = handle_rename(ObjectRec, Req, State, IsRename),
-                    {true, chef_wm_util:set_json_body(Req1, ObjectEjson), State};
+                    Body = call_if_exported(ResourceMod, finalize_update_body, [Req, State, ObjectEjson],
+                                           fun(_,_,EJ) -> EJ end),
+                    {true, chef_wm_util:set_json_body(Req1, Body), State};
                 not_found ->
                     %% We will get this if no rows were affected by the query. This could
                     %% happen if the object is deleted in the middle of handling this
@@ -1024,6 +1036,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
                     State1 = State#base_state{log_msg = Why},
                     % TODO - parse sql error to get minimal meaningful message,
                     % without exposing sensitive data
+                    % lager:error("Error in object creation: ~p", [Why]),
                     {{halt, 500}, Req, State1}
             end
     end.

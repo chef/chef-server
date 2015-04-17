@@ -217,10 +217,8 @@ delete(ObjectRec, #context{server_api_version = ApiVersion, reqid = ReqId}) ->
                    not_found |
                    {error, term()}.
 fetch(ObjectRec, #context{server_api_version = ApiVersion, reqid = ReqId}) ->
-    % TODO - base branch!
     ObjectRec2 = chef_object:set_api_version(ObjectRec, ApiVersion),
     Result = ?SH_TIME(ReqId, chef_sql, fetch, (ObjectRec2)),
-    % TODO - base branch ^
     case Result of
         not_found ->
             Result;

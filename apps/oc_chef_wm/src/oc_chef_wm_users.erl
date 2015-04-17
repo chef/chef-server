@@ -2,7 +2,7 @@
 %% ex: ts=4 sw=4 et
 %% @author Mark Mzyk <mmzyk@chef.io>
 %% @author Marc Paradise <marc@chef.io>
-%% @copyright 2012-14 Chef Software, Inc.
+%% @copyright 2012-2015 Chef Software, Inc.
 
 %% @doc Resource module for Chef users endpoint
 
@@ -35,7 +35,8 @@
          conflict_message/1,
          malformed_request_message/3,
          request_type/0,
-         validate_request/3]).
+         validate_request/3,
+         finalize_create_body/4 ]).
 
 
 init(Config) ->
@@ -51,12 +52,12 @@ request_type() ->
 allowed_methods(Req, State) ->
   {['GET', 'POST'], Req, State}.
 
-validate_request('POST', Req, State) ->
+validate_request('POST', Req, #base_state{server_api_version = ApiVersion} = State) ->
   case wrq:req_body(Req) of
     undefined ->
       throw({error, missing_body});
    Body ->
-      {ok, UserData} = chef_user:parse_binary_json(Body),
+      {ok, UserData} = chef_user:parse_binary_json(ApiVersion, Body),
       {Req, State#base_state{resource_state =
           #user_state{user_data = UserData}}}
   end;
@@ -78,32 +79,25 @@ create_path(Req, #base_state{resource_state = #user_state{user_data = UserData}}
   Name = chef_user:username_from_ejson(UserData),
   {binary_to_list(Name), Req, State}.
 
-from_json(Req, #base_state{resource_state = #user_state{user_data = UserData}} = State) ->
-    KeyData = case chef_object_base:cert_or_key(UserData) of
-                  {undefined, _} ->
-                      chef_keygen_cache:get_key_pair();
-                  {PubKey, _PubKeyVersion} ->
-                      {PubKey, undefined}
-              end,
-    handle_user_create(KeyData, Req, State).
+from_json(Req, #base_state{resource_state = #user_state{user_data = UserData, user_authz_id = AuthzId}} = State) ->
+    KeyContext = #key_context{ object_name = chef_user:username_from_ejson(UserData),
+                               object_authz_id = AuthzId,
+                               object_ej = UserData,
+                               type = user},
+    oc_chef_wm_key_base:create_object_with_embedded_key_data(Req, State#base_state{key_context = KeyContext}).
 
-handle_user_create(keygen_timeout, Req, State) ->
-    {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
-handle_user_create({PublicKey, PrivateKey}, Req,
-                   #base_state{resource_state =
-                                   #user_state{user_data = UserData,
-                                               user_authz_id = AuthzId}} = State) ->
-    Name = chef_user:username_from_ejson(UserData),
-    UserWithKey = chef_object_base:set_public_key(UserData, PublicKey),
-
-    case oc_chef_wm_base:create_from_json(Req, State, chef_user, {authz_id, AuthzId}, UserWithKey) of
-        {true, Req1, State1} ->
-            Uri = oc_chef_wm_routes:route(user, Req1, [{name, Name}]),
-            Ejson = ej:set({<<"private_key">>}, {[{<<"uri">>, Uri}]}, PrivateKey),
-            {true, chef_wm_util:set_json_body(Req1, Ejson), State1};
-        Else ->
-            Else
-    end.
+% Callback from create_from_json, which allows us to customize our body response.
+%
+finalize_create_body(_Req, #base_state{server_api_version = ?API_v0,
+                                       key_context = #key_context{key_ej = KeyEJ}}, _User,  BodyEJ ) ->
+    case ej:get({<<"private_key">>}, KeyEJ) of
+        undefined ->
+            BodyEJ;
+        PrivateKey ->
+            ej:set({<<"private_key">>}, BodyEJ, PrivateKey)
+    end;
+finalize_create_body(Req, State, _Client, BodyEJ) ->
+    oc_chef_wm_key_base:finalize_create_body(Req, State, BodyEJ).
 
 to_json(Req, State) ->
     %% In the case of verbose, we cannot  use standard chef_wm_base behavior -

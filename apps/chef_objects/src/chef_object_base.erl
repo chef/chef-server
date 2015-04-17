@@ -29,26 +29,18 @@
 -include_lib("ej/include/ej.hrl").
 
 -export([
-         cert_or_key/1,
-         delete_null_public_key/1,
          depsolver_constraints/1,
-         extract_public_key/1,
-         key_version/1,
          make_guid/0,
          make_org_prefix_id/1,
          make_org_prefix_id/2,
          maybe_stub_authz_id/2,
          normalize_run_list/1,
          parse_constraint/1,
-         set_key_pair/3,
-         set_public_key/2,
          strictly_valid/3,
          sql_date/1,
          throw_invalid_fun_match/1,
-         valid_public_key/1,
          set_default_values/2,
          validate_ejson/2,
-         public_key_spec/1,
          validate_date_field/2,
          parse_date/1
         ]).
@@ -170,43 +162,6 @@ maybe_stub_authz_id(unset, ObjectId) ->
 maybe_stub_authz_id(AuthzId, _ObjectId) ->
     AuthzId.
 
-cert_or_key(Payload) ->
-    %% Some consumers of the API, such as webui, will generate a
-    %% JSON { public_key: null } to mean, "do not change it". By
-    %% default, null is treated as a defined, and will erase the
-    %% public_key in the database. We use value_or_undefined() to
-    %% convert all null into undefined.
-    Cert = value_or_undefined({<<"certificate">>}, Payload),
-    PublicKey = value_or_undefined({<<"public_key">>}, Payload),
-    %% Take certificate first, then public_key
-    case Cert of
-        undefined ->
-            {PublicKey, ?KEY_VERSION};
-        _ ->
-            {Cert, ?CERT_VERSION}
-    end.
-
-extract_public_key(null) -> null;
-extract_public_key(<<"null">>) -> null;
-extract_public_key(Data) ->
-    case key_version(Data) of
-        ?KEY_VERSION ->
-            Data;
-        ?CERT_VERSION ->
-            chef_authn:extract_pem_encoded_public_key(Data)
-    end.
-
-%% Hack to get null public_key accepted as undefined
--spec delete_null_public_key(json_object()) -> json_object().
-delete_null_public_key(Ejson) ->
-    case ej:get({<<"public_key">>}, Ejson) of
-        null ->
-            ej:delete({<<"public_key">>}, Ejson);
-        _ ->
-            Ejson
-    end.
-
-
 %% @doc Returns a normalized version of `RunList`.  All implicitly-declared recipes (e.g.,
 %% "foo::bar") are made explicit (e.g., "recipe[foo::bar]").  Already explicit recipes and
 %% roles (which are always explicit) are unchanged.
@@ -253,14 +208,6 @@ deduplicate_run_list(L) ->
     WithIdx = lists:zip(L, lists:seq(1, length(L))),
     [ Elt || {Elt, _} <- lists:ukeysort(2, lists:ukeysort(1, WithIdx)) ].
 
-value_or_undefined(Key, Data) ->
-  case ej:get(Key, Data) of
-    null ->
-      undefined;
-    Value ->
-      Value
-  end.
-
 %% These type specs are taken from ej. They are not in an exportable form
 %% They are reproduced here to make dialyzer work for strictly_valid()
 %% Perhaps, that means strictly_valid() should be moved into ej
@@ -305,77 +252,7 @@ allowed_keys(ValidKeys, [{Item, _}|Rest]) ->
             throw({invalid_key, Item})
     end.
 
-%% @doc Add public and private key data to `UserEjson'. This function infers
-%% the key type and puts the public key data in iether a `certificate' or
-%% `public_key' field.
-%% If a private key is defined, then the private key will be placed in the `private_key'
-%% field.
--spec set_key_pair(ej:json_object(), {public_key, binary()}, {private_key, binary()}) -> ej:json_object().
-set_key_pair(UserEjson, {public_key, PublicKey}, {private_key, PrivateKey}) ->
-    UserEjson1 = set_public_key(UserEjson, PublicKey),
-    case PrivateKey of
-        undefined ->
-            UserEjson1;
-        _ ->
-            ej:set({<<"private_key">>}, UserEjson1, PrivateKey)
-    end.
 
-%% @doc Sets either the `certificate' or `public_key' field of
-%% `UserEjson' depending on the value of `PublicKey'.
--spec set_public_key(ej:json_object(), null | binary()) -> ej:json_object().
-set_public_key(UserEjson, null) ->
-    ej:set({<<"public_key">>}, UserEjson, null);
-set_public_key(UserEjson, PublicKey) ->
-  case key_version(PublicKey) of
-        ?KEY_VERSION ->
-          UserEjson1 = ej:set({<<"public_key">>}, UserEjson, PublicKey),
-          ej:delete({<<"certificate">>}, UserEjson1);
-        ?CERT_VERSION ->
-          UserEjson1 = ej:set({<<"certificate">>}, UserEjson, PublicKey),
-          ej:delete({<<"public_key">>}, UserEjson1)
-    end.
-
-
-%% Determine the "pubkey_version" of a key or certificate in PEM
-%% format. Certificates are version 1. Public keys in either PKCS1 or
-%% SPKI format are version 0. The PKCS1 format is deprecated, but
-%% supported for read. We will only generate certs or SPKI packaged
-%% keys.
--spec key_version(<<_:64,_:_*8>>) -> 0 | 1.
-key_version(null) ->
-    null;
-key_version(<<"-----BEGIN CERTIFICATE", _Bin/binary>>) ->
-    %% cert
-    ?CERT_VERSION;
-key_version(<<"-----BEGIN PUBLIC KEY", _Bin/binary>>) ->
-    %% SPKI
-    ?KEY_VERSION;
-key_version(<<"-----BEGIN RSA PUBLIC KEY", _Bin/binary>>) ->
-    %% PKCS1
-    ?KEY_VERSION.
-
-%% OSC will only accept public keys. It will not accept certificates
--spec has_public_key_header(<<_:64,_:_*8>>) -> true | false.
-has_public_key_header(<<"-----BEGIN PUBLIC KEY", _/binary>>) ->
-    true;
-has_public_key_header(<<"-----BEGIN RSA PUBLIC KEY", _/binary>>) ->
-    true;
-has_public_key_header(_) ->
-    false.
-
--spec valid_public_key(<<_:64, _:_*8>>) -> ok | error.
-valid_public_key(PublicKey) ->
-    case has_public_key_header(PublicKey) of
-        true ->
-            case chef_authn:extract_public_key(PublicKey) of
-                {error, bad_key} ->
-                    error;
-                _ ->
-                    ok
-            end;
-        false ->
-            error
-    end.
 
 %% @doc throws an ej_invalid for fun_match. Useful for bespoke validation functions
 %% that needs to return an error message back to the API client.
@@ -408,11 +285,6 @@ validate_ejson(Ejson, Spec) ->
     BadSpec ->
       throw(BadSpec)
   end.
-
--spec public_key_spec( req | opt ) -> term().
-public_key_spec(OptOrRequired) ->
-    {{OptOrRequired,<<"public_key">>}, {fun_match, {fun valid_public_key/1, string,
-                                            <<"Public Key must be a valid key.">>}}}.
 
 % validate that the expiration_date field is a ISO8601 UTC timestring (ending in Z) and that
 % ec_date can parse it, and then turn it into a format sqerl's deps can handle.

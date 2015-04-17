@@ -49,7 +49,9 @@
          list_records/1,
          update_record/1,
          fetch_record/1,
-         delete_record/1
+         delete_record/1,
+
+         value_matches_regex/2
         ]).
 
 -define(ORG_AUTHZ_ID, <<"10000000000000000000000000000002">>).
@@ -223,4 +225,15 @@ delete_record(Record0) ->
 list_records(Record0) ->
     Record = chef_object:set_api_version(Record0, ?API_MIN_VER),
     chef_sql:fetch_object_names(Record).
+
+value_matches_regex(undefined , _RE) ->
+    false;
+value_matches_regex(Value, RE) when is_list(RE) ->
+    {ok, RealRE} = re:compile(RE),
+    value_matches_regex(Value, RealRE);
+value_matches_regex(Value, RE) ->
+    case re:run(Value, RE) of
+        {match, _} -> true;
+        _ -> false
+    end.
 

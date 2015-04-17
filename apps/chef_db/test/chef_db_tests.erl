@@ -57,8 +57,7 @@ fetch_requestor_test_() ->
                                  salt = <<"pepper">>,
                                  hash_type = <<"bcrypt">>,
                                  external_authentication_uid = <<"">>,
-                                 recovery_authentication_enabled = <<"0">>,
-                                 admin = <<"false">>
+                                 recovery_authentication_enabled = <<"0">>
                                },
                meck:expect(chef_sql, fetch,
                            fun(#chef_client{org_id = <<"mock-org-id-123">>, name =  <<"alice">>}) -> not_found; % client_fetch

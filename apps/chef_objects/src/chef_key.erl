@@ -40,17 +40,14 @@
          set_updated/2,
          set_api_version/2,
          new_record/4,
+         default_key_ejson/1,
          name/1,
          id/1,
          org_id/1,
          type_name/1,
          delete/2,
          parse_binary_json/2,
-         fields_for_insert/1
-        ]).
-
-%% database named queries
--export([
+         fields_for_insert/1,
          create_query/1,
          update_query/1,
          delete_query/1,
@@ -147,8 +144,13 @@ new_record(ApiVersion, _OrgId, _AuthzId, {Id, KeyData}) ->
               public_key = PubKey, key_version = PubKeyVersion,
               expires_at = Expires}.
 
+default_key_ejson(PublicKey ) ->
+    {[{<<"name">>, <<"default">>},
+      {<<"public_key">>, PublicKey},
+      {<<"expiration_date">>, <<"infinity">>}]}.
+
 safe_key_version(PublicKey) ->
-    try chef_object_base:key_version(PublicKey) of
+    try chef_key_base:key_version(PublicKey) of
         Result -> Result
     catch
         _:_ -> throw(invalid_public_key)
@@ -174,18 +176,22 @@ create_query(_ObjectRec) ->
 
 parse_binary_json(Bin, update) ->
   EJ = chef_json:decode(Bin),
-  % At least one field must be present:
-  OneOf = [<<"expiration_date">>, <<"public_key">>, <<"name">>],
+  % Expiration date, name, and either public_key or create_key must be present
+  % If both public_key andcreate_key are present it is an error.
+
+  OneOf = [<<"expiration_date">>, <<"name">>, <<"public_key">>, <<"create_key">>],
   case lists:filter(fun(X) -> X =/= undefined end, [ej:get({Field}, EJ) || Field <- OneOf]) of
       [] ->
           throw(missing_required_field);
       _ ->
-          chef_object_base:validate_ejson(EJ, name_and_public_key_validation_spec(opt)),
+          validate_name(opt, EJ),
+          chef_key_base:validate_public_key_fields(opt, EJ, key, update),
           validate_expiration_date(opt, EJ)
   end;
 parse_binary_json(Bin, create) ->
   EJ = chef_json:decode(Bin),
-  chef_object_base:validate_ejson(EJ, name_and_public_key_validation_spec(req)),
+  validate_name(req, EJ),
+  chef_key_base:validate_public_key_fields(req, EJ, key, create),
   validate_expiration_date(req, EJ).
 
 validate_expiration_date(Required, EJ) ->
@@ -194,15 +200,14 @@ validate_expiration_date(Required, EJ) ->
     _ -> chef_object_base:validate_date_field(EJ, <<"expiration_date">>)
   end.
 
-name_and_public_key_validation_spec(Req) ->
-  {[ chef_object_base:public_key_spec(Req),
-     {{Req, <<"name">>}, {string_match, chef_regex:regex_for(key_name)}} ]}.
+validate_name(Req, EJ) ->
+    chef_object_base:validate_ejson(EJ, {[ {{Req, <<"name">>}, {string_match, chef_regex:regex_for(key_name)}} ]}).
 
 update_query(_ObjectRec) ->
-  update_key_by_id_and_name.
+    update_key_by_id_and_name.
 
 delete_query(_ObjectRec) ->
-  delete_key_by_id_and_name.
+    delete_key_by_id_and_name.
 
 delete(#chef_key{id = Id, key_name = Name} = Rec, CallbackFun) ->
     CallbackFun({delete_query(Rec), [Id, Name]}).

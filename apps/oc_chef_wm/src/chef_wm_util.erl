@@ -30,15 +30,14 @@
          get_header_fun/2,
          fetch_org_metadata/1,
          base_mods/0,
-         maybe_generate_key_pair/1,
          not_found_message/2,
          num_versions/1,
          num_versions/2,
          object_name/2,
          set_json_body/2,
          set_uri_of_created_resource/2,
-         with_error_body/2,
-         lists_diff/2
+         set_location_of_created_resource/2,
+         with_error_body/2
         ]).
 
 -include("../../include/oc_chef_wm.hrl").
@@ -198,7 +197,12 @@ set_uri_of_created_resource(Uri, Req) when is_list(Uri) ->
 set_uri_of_created_resource(Uri, Req0) when is_binary(Uri) ->
     %% Uri needs to be a binary for encoding to JSON, but a string for the header value
     Req = set_json_body(Req0, {[{<<"uri">>, Uri}]}),
-    wrq:set_resp_header("Location", binary_to_list(Uri), Req).
+    set_location_of_created_resource(Uri, Req).
+
+set_location_of_created_resource(Uri, Req0) when is_list(Uri) ->
+    set_location_of_created_resource(list_to_binary(Uri), Req0);
+set_location_of_created_resource(Uri, Req0) when is_binary(Uri) ->
+    wrq:set_resp_header("Location", binary_to_list(Uri), Req0).
 
 %% @doc Extracts the name of a given object from the request path.  This is for use in
 %% resources that manipulate individual Chef objects, like nodes or roles.
@@ -314,33 +318,4 @@ port_string(Default) when Default =:= 80; Default =:= 443 ->
     "";
 port_string(Port) ->
     [$:|erlang:integer_to_list(Port)].
-
-%% @doc Conditionally generate and add key pair data.
-%%
-%% If the request data contains "private_key":true, then we will generate a new key pair. In
-%% this case, we'll add the new public and private keys into the EJSON since
-%% update_from_json will use it to set the response.
-maybe_generate_key_pair(Data) ->
-    case ej:get({<<"private_key">>}, Data) of
-        true ->
-            case chef_keygen_cache:get_key_pair() of
-                {PublicKey, PrivateKey} ->
-                    chef_object_base:set_key_pair(Data,
-                                                  {public_key, PublicKey},
-                                                  {private_key, PrivateKey});
-                keygen_timeout ->
-                    keygen_timeout
-            end;
-        _ ->
-            Data
-    end.
-
--spec lists_diff(list(), list()) -> {list(), list()}.
-lists_diff(FirstList, SecondList) ->
-    lists_diff_sorted(lists:sort(FirstList), lists:sort(SecondList)).
-lists_diff_sorted(FirstList, SecondList) ->
-    FirstSet = sets:from_list(FirstList),
-    SecondSet = sets:from_list(SecondList),
-    {lists:sort(sets:to_list(sets:subtract(FirstSet, SecondSet))),
-     lists:sort(sets:to_list(sets:subtract(SecondSet, FirstSet)))}.
 

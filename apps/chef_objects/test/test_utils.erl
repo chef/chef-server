@@ -19,17 +19,25 @@
 %%
 
 -module(test_utils).
-
 -export([
+
          mock/1,
          mock/2,
          unmock/1,
          bcrypt_setup/0,
          bcrypt_cleanup/1,
-         validate_modules/1
+         keygen_setup/0,
+         keygen_cleanup/1,
+         validate_modules/1,
+         versioned_desc/2,
+         make_deprecated_tests/1,
+         make_non_deprecated_tests/1,
+         make_all_versions_tests/1,
+         make_versioned_test_range/3
         ]).
 
 -include_lib("eunit/include/eunit.hrl").
+-include("../../include/server_api_version.hrl").
 
 %% helper functions for configuring mocking.
 
@@ -57,9 +65,21 @@ bcrypt_setup() ->
     [ ensure_start(App) || App <- [crypto, bcrypt] ],
     ok.
 
+
 bcrypt_cleanup(_) ->
     error_logger:tty(false),
     application:stop(bcrypt),
+    error_logger:tty(true).
+
+keygen_setup() ->
+    error_logger:tty(false),
+    [application:set_env(chef_authn, Field, Value) ||
+     {Field, Value} <- [ {keygen_cache_size, 4}, {keygen_start_size, 4},
+                         {keygen_timeout, 1000}, {keygen_size, 1024}] ],
+    chef_keygen_worker_sup:start_link(),
+    chef_keygen_cache:start_link().
+
+keygen_cleanup(_) ->
     error_logger:tty(true).
 
 ensure_start(App) ->
@@ -71,3 +91,22 @@ ensure_start(App) ->
         Error ->
             error(Error)
     end.
+
+versioned_desc(Version, Desc) ->
+    iolist_to_binary( ["[v", integer_to_list(Version), "] ", Desc] ).
+
+make_non_deprecated_tests(Generator) ->
+    make_versioned_test_range(?API_DEPRECATED_VER + 1, ?API_MAX_VER, Generator).
+
+make_deprecated_tests(Generator) ->
+    ?debugVal("I am here 1"),
+    T2 = make_versioned_test_range(?API_MIN_VER, ?API_DEPRECATED_VER, Generator),
+    ?debugVal("I am here 2"),
+    T2.
+
+make_all_versions_tests(Generator) ->
+    make_versioned_test_range(?API_MIN_VER, ?API_MAX_VER, Generator).
+
+make_versioned_test_range(Min, Max, Generator) ->
+    [Generator(Version) || Version <- lists:seq(Min, Max)].
+
