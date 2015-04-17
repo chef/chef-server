@@ -110,7 +110,6 @@ org_route(organization, Req, Args) ->
     TemplateArgs = [Name],
     render_template(Template, Req, TemplateArgs);
 org_route(client_key, Req, Args) ->
-    Org = org_name(Req),
     {object_name, ParentName} = lists:keyfind(object_name, 1, Args),
     {name, Name} = lists:keyfind(name, 1, Args),
     {BaseURI, Org} = extract_from_req(Req),

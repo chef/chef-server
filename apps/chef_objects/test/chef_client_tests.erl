@@ -26,6 +26,290 @@
 -include_lib("ej/include/ej.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
+-define(VD(D), test_utils:versioned_desc(Version,D)).
+-define(VDD(D), test_utils:versioned_desc(Version, iolist_to_binary(["[deprecated] ", D]))).
+
+
+assemble_client_ejson_test_() ->
+    test_utils:make_deprecated_tests(fun assemble_client_ejson_deprecated_tests/1) ++
+    test_utils:make_non_deprecated_tests(fun assemble_client_ejson_non_deprecated_tests/1).
+
+assemble_client_ejson_deprecated_tests(Version) ->
+    [{?VDD("obtain expected EJSON"),
+      fun() ->
+              Client = #chef_client{server_api_version = Version,
+                                    name = <<"alice">>,
+                                    admin = true,
+                                    validator = false,
+                                    public_key = public_key_data()},
+              {GotList} = chef_client:assemble_client_ejson(Client, <<"ponyville">>),
+              FilteredList = chomp_key_in_json_list(GotList),
+              ExpectedData = [{<<"json_class">>, <<"Chef::ApiClient">>},
+                              {<<"chef_type">>, <<"client">>},
+                              {<<"public_key">>, public_key_data()},
+                              {<<"validator">>, false},
+                              {<<"name">>, <<"alice">>},
+                              {<<"clientname">>, <<"alice">>},
+                              {<<"orgname">>, <<"ponyville">>}
+                             ],
+              ?assertEqual(lists:sort(ExpectedData), lists:sort(FilteredList))
+      end},
+     {?VDD("converts certificate to public key"),
+      fun() ->
+              Client = #chef_client{server_api_version = Version,
+                                    name = <<"alice">>,
+                                    admin = true,
+                                    validator = false,
+                                    public_key = cert_data()},
+              {GotList} = chef_client:assemble_client_ejson(Client, <<"ponyville">>),
+              FilteredList = chomp_key_in_json_list(GotList),
+              ExpectedData = [{<<"json_class">>, <<"Chef::ApiClient">>},
+                              {<<"chef_type">>, <<"client">>},
+                              {<<"public_key">>, public_key_data()},
+                              {<<"validator">>, false},
+                              {<<"name">>, <<"alice">>},
+                              {<<"clientname">>, <<"alice">>},
+                              {<<"orgname">>, <<"ponyville">>}
+                             ],
+              ?assertEqual(lists:sort(ExpectedData), lists:sort(FilteredList))
+      end}
+    ].
+
+
+assemble_client_ejson_non_deprecated_tests(Version) ->
+    [{?VD("obtain expected EJSON"),
+      fun() ->
+              Client = #chef_client{server_api_version = Version,
+                                    name = <<"alice">>,
+                                    validator = false },
+              {GotList} = chef_client:assemble_client_ejson(Client, <<"ponyville">>),
+              ExpectedData = [{<<"json_class">>, <<"Chef::ApiClient">>},
+                              {<<"chef_type">>, <<"client">>},
+                              {<<"validator">>, false},
+                              {<<"name">>, <<"alice">>},
+                              {<<"clientname">>, <<"alice">>},
+                              {<<"orgname">>, <<"ponyville">>}
+                             ],
+              ?assertEqual(lists:sort(ExpectedData), lists:sort(GotList))
+      end}
+    ].
+
+parse_binary_json_test_() ->
+    test_utils:make_all_versions_tests(fun parse_binary_json_tests/1) ++
+    test_utils:make_deprecated_tests(fun parse_binary_json_deprecated_tests/1) ++
+    test_utils:make_non_deprecated_tests(fun parse_binary_json_non_deprecated_tests/1).
+
+
+%% These are stable behaviors across all supported api versions.
+parse_binary_json_tests(Version) ->
+    [{?VD("Error thrown on mismatched names in create"),
+     fun() ->
+         Body = <<"{\"name\":\"name\",\"clientname\":\"notname\"}">>,
+         ?assertThrow({client_name_mismatch}, chef_client:parse_binary_json(Version, Body, undefined))
+     end},
+     {?VD("Error thrown on mismatched names in update"),
+      fun() ->
+          Body = <<"{\"name\":\"name\",\"clientname\":\"notname\"}">>,
+          ?assertThrow({client_name_mismatch}, chef_client:parse_binary_json(Version, Body, undefined))
+      end},
+     {?VD("Can create with only name"),
+      fun() ->
+          Body = <<"{\"name\":\"name\"}">>,
+          {ok, Client} = chef_client:parse_binary_json(Version, Body, undefined),
+          Name = ej:get({<<"name">>}, Client),
+          ClientName = ej:get({<<"clientname">>}, Client),
+          ?assertEqual(Name, ClientName)
+      end},
+     {?VD("Can create with only clientname"),
+      fun() ->
+          Body = <<"{\"clientname\":\"name\"}">>,
+          {ok, Client} = chef_client:parse_binary_json(Version, Body, undefined),
+          Name = ej:get({<<"name">>}, Client),
+          ClientName = ej:get({<<"clientname">>}, Client),
+          ?assertEqual(Name, ClientName)
+      end},
+     {?VD("Error thrown with no name or clientname"),
+      fun() ->
+          Body = <<"{\"validator\":false}">>,
+          ?assertThrow({both_missing, <<"name">>, <<"clientname">>},
+                       chef_client:parse_binary_json(Version, Body, undefined))
+      end},
+     {?VD("Error thrown with bad name"),
+      fun() ->
+          Body = <<"{\"name\":\"bad~name\"}">>,
+          ?assertThrow({bad_client_name, <<"bad~name">>,
+                        <<"Malformed client name.  Must be A-Z, a-z, 0-9, _, -, or .">>},
+                       chef_client:parse_binary_json(Version, Body, undefined))
+      end}
+    ].
+
+
+parse_binary_json_deprecated_tests(Version) ->
+    [
+     {?VDD("Accepted when private_key is included for create or update"),
+      fun() ->
+          Body = chef_json:encode({[{ <<"private_key">>, true }, { name, <<"a_name">> }]}),
+          ?assertMatch({ok, _},
+                       chef_client:parse_binary_json(Version, Body, undefined)),
+          ?assertMatch({ok, _},
+                       chef_client:parse_binary_json(Version, Body, #chef_client{}))
+      end},
+     {?VDD("Accepted when public_key is included for create or update"),
+      fun() ->
+          Body = chef_json:encode({[{ <<"public_key">>, public_key_data()}, { name, <<"a_name">> }]}),
+          ?assertMatch({ok, _},
+                       chef_client:parse_binary_json(Version, Body, #chef_client{})),
+          ?assertMatch({ok, _},
+                       chef_client:parse_binary_json(Version, Body, undefined))
+      end}
+    ].
+
+
+% Once the behavior they replace is retired, move these tests in parse_binary_json_test_
+parse_binary_json_non_deprecated_tests(Version) ->
+    [
+     {?VD("Error thrown when private_key is included for create or update"),
+      fun() ->
+          Body = chef_json:encode({[{ <<"private_key">>, true }, { name, <<"a_name">> }]}),
+          ?assertThrow(private_key_field_not_supported,
+                       chef_client:parse_binary_json(Version, Body, undefined)),
+          ?assertThrow(private_key_field_not_supported,
+                       chef_client:parse_binary_json(Version, Body, #chef_client{}))
+      end},
+     {?VD("Error thrown when public_key is included for update"),
+      fun() ->
+          Body = chef_json:encode({[{ <<"public_key">>, public_key_data()}, { name, <<"a_name">> }]}),
+          ?assertThrow(key_management_not_supported,
+                       chef_client:parse_binary_json(Version, Body, #chef_client{}))
+      end},
+     {?VD("Error thrown zero when create_key is included for update"),
+      fun() ->
+          Body = chef_json:encode({[{ <<"create_key">>, true}, {name, <<"a_name">> }]}),
+          ?assertThrow(key_management_not_supported,
+                       chef_client:parse_binary_json(Version, Body, #chef_client{}))
+      end}
+   ].
+
+
+new_record_test_() ->
+    test_utils:make_deprecated_tests(fun new_record_deprecated_tests/1) ++
+    test_utils:make_non_deprecated_tests(fun new_record_tests/1).
+
+
+new_record_tests(Version) ->
+    [
+     {?VD("new_record creates a correct new record without admin or public key data"),
+      fun() ->
+        PubkeyData = public_key_data(),
+        OrgId = <<"12345678123456781234567812345678">>,
+        AuthzId = <<"00000000000000000000000011111111">>,
+        ClientData = {[{<<"name">>, <<"my-client">>},
+                       {<<"alpha">>, <<"bravo">>}, % Ignored
+                       {<<"admin">>, true}, % Ignored
+                       {<<"validator">>, true},
+                       {<<"public_key">>, PubkeyData}]}, % Ignored
+        Client = chef_client:new_record(Version, OrgId, AuthzId, ClientData),
+        ?assertMatch(#chef_client{server_api_version = Version,
+                                 org_id = OrgId,
+                                 authz_id = AuthzId,
+                                 admin = false, % we default false in the record
+                                 validator = true,
+                                 name = <<"my-client">>,
+                                 public_key = undefined,
+                                 pubkey_version = undefined}, Client)
+
+
+     end}
+   ].
+
+new_record_deprecated_tests(Version) ->
+    [
+     {?VD("new_record creates a correct new record"),
+      fun() ->
+        PubkeyData = public_key_data(),
+        OrgId = <<"12345678123456781234567812345678">>,
+        AuthzId = <<"00000000000000000000000011111111">>,
+        ClientData = {[{<<"name">>, <<"my-client">>},
+                       {<<"alpha">>, <<"bravo">>}, % Ignored
+                       {<<"admin">>, true},
+                       {<<"validator">>, true},
+                       {<<"public_key">>, PubkeyData}]},
+        Client = chef_client:new_record(Version, OrgId, AuthzId, ClientData),
+        ?assertMatch(#chef_client{server_api_version = Version,
+                                  org_id = OrgId,
+                                  authz_id = AuthzId,
+                                  admin = true,
+                                  validator = true,
+                                  name = <<"my-client">>,
+                                  public_key = PubkeyData,
+                                  pubkey_version = ?KEY_VERSION}, Client)
+
+     end}
+    ].
+
+update_from_ejson_test_() ->
+    test_utils:make_deprecated_tests(fun update_from_ejson_deprecated_tests/1) ++
+    test_utils:make_non_deprecated_tests(fun update_from_ejson_tests/1) ++
+    test_utils:make_all_versions_tests(fun update_from_ejson_common_tests/1).
+
+update_from_ejson_tests(Version) ->
+    [
+     {?VD("update_from_ejson updates the fields but ignores admin and public_key"),
+      fun() ->
+              KeyData = public_key_data(),
+              EJ = {[{<<"name">>, <<"a_name">>}, {<<"validator">>, true},
+                     {<<"public_key">>, KeyData}, {<<"admin">>, true}]},
+              OriginalClient = #chef_client{server_api_version = Version},
+              NewClient = chef_client:update_from_ejson(OriginalClient, EJ),
+              ?assertMatch(#chef_client{server_api_version = Version,
+                                        name = <<"a_name">>,
+                                        validator = true,
+                                        admin = false, % we default false in the record
+                                        pubkey_version = undefined,
+                                        public_key = undefined}, NewClient)
+      end}
+    ].
+
+update_from_ejson_common_tests(Version) ->
+    [
+     {?VD("update_from_ejson updates the fields when key is not set"),
+      fun() ->
+              EJ = {[{<<"name">>, <<"a_name">>}, {<<"validator">>, true}]},
+              OriginalClient = #chef_client{server_api_version = Version},
+              NewClient = chef_client:update_from_ejson(OriginalClient, EJ),
+              ?assertMatch(#chef_client{server_api_version = Version,
+                                        name = <<"a_name">>,
+                                        validator = true}, NewClient)
+      end}
+     ].
+
+update_from_ejson_deprecated_tests(Version) ->
+    [
+     {?VDD("update_from_ejson updates the fields when key is not set"),
+      fun() ->
+              EJ = {[{<<"name">>, <<"a_name">>}, {<<"validator">>, true}]},
+              OriginalClient = #chef_client{server_api_version = Version},
+              NewClient = chef_client:update_from_ejson(OriginalClient, EJ),
+              ?assertMatch(#chef_client{server_api_version = Version,
+                                        name = <<"a_name">>,
+                                        validator = true}, NewClient)
+      end},
+     {?VDD("update_from_ejson updates the fields including public key when key is set"),
+      fun() ->
+              KeyData = public_key_data(),
+              EJ = {[{<<"name">>, <<"a_name">>}, {<<"validator">>, true},
+                     {<<"public_key">>, KeyData}]},
+              OriginalClient = #chef_client{server_api_version = Version},
+              NewClient = chef_client:update_from_ejson(OriginalClient, EJ),
+              ?assertMatch(#chef_client{server_api_version = Version,
+                                        name = <<"a_name">>,
+                                        validator = true,
+                                        pubkey_version = ?KEY_VERSION,
+                                        public_key = KeyData}, NewClient)
+      end}
+    ].
+
+
 %% remove trailing whitespace from a string
 chomp(In) ->
     re:replace(In, "\\s+$", "", [{return, binary}]).
@@ -46,98 +330,3 @@ public_key_data() ->
 cert_data() ->
     {ok, Bin} = file:read_file("../test/cert.pem"),
     chomp(Bin).
-
-assemble_client_ejson_test_() ->
-    [{"obtain expected EJSON",
-      fun() ->
-              Client = #chef_client{server_api_version = ?API_MIN_VER,
-                                    name = <<"alice">>,
-                                    admin = true,
-                                    validator = false,
-                                    public_key = public_key_data()},
-              {GotList} = chef_client:assemble_client_ejson(Client, <<"ponyville">>),
-              FilteredList = chomp_key_in_json_list(GotList),
-              ExpectedData = [{<<"json_class">>, <<"Chef::ApiClient">>},
-                              {<<"chef_type">>, <<"client">>},
-                              {<<"public_key">>, public_key_data()},
-                              {<<"validator">>, false},
-                              {<<"name">>, <<"alice">>},
-                              {<<"clientname">>, <<"alice">>},
-                              {<<"orgname">>, <<"ponyville">>}
-                             ],
-              ?assertEqual(lists:sort(ExpectedData), lists:sort(FilteredList))
-      end},
-     {"converts certificate to public key",
-      fun() ->
-              Client = #chef_client{server_api_version = ?API_MIN_VER,
-                                    name = <<"alice">>,
-                                    admin = true,
-                                    validator = false,
-                                    public_key = cert_data()},
-              {GotList} = chef_client:assemble_client_ejson(Client, <<"ponyville">>),
-              FilteredList = chomp_key_in_json_list(GotList),
-              ExpectedData = [{<<"json_class">>, <<"Chef::ApiClient">>},
-                              {<<"chef_type">>, <<"client">>},
-                              {<<"public_key">>, public_key_data()},
-                              {<<"validator">>, false},
-                              {<<"name">>, <<"alice">>},
-                              {<<"clientname">>, <<"alice">>},
-                              {<<"orgname">>, <<"ponyville">>}
-                             ],
-              ?assertEqual(lists:sort(ExpectedData), lists:sort(FilteredList))
-      end}
-    ].
-
-
-
-parse_binary_json_test_() ->
-    [{"Error thrown on mismatched names",
-      fun() ->
-          Body = <<"{\"name\":\"name\",\"clientname\":\"notname\"}">>,
-          ?assertThrow({client_name_mismatch}, chef_client:parse_binary_json(?API_MIN_VER, Body, <<"name">>))
-      end
-     },
-     {"Can create with only name",
-      fun() ->
-          Body = <<"{\"name\":\"name\"}">>,
-          {ok, Client} = chef_client:parse_binary_json(?API_MIN_VER, Body, <<"name">>),
-          Name = ej:get({<<"name">>}, Client),
-          ClientName = ej:get({<<"clientname">>}, Client),
-          ?assertEqual(Name, ClientName)
-      end
-     },
-     {"Can create with only clientname",
-      fun() ->
-          Body = <<"{\"clientname\":\"name\"}">>,
-          {ok, Client} = chef_client:parse_binary_json(?API_MIN_VER, Body, <<"name">>),
-          Name = ej:get({<<"name">>}, Client),
-          ClientName = ej:get({<<"clientname">>}, Client),
-          ?assertEqual(Name, ClientName)
-      end
-     },
-     {"Error thrown with no name or clientname",
-      fun() ->
-          Body = <<"{\"validator\":false}">>,
-          ?assertThrow({both_missing, <<"name">>, <<"clientname">>},
-                       chef_client:parse_binary_json(?API_MIN_VER, Body, undefined))
-      end
-     },
-     {"Error thrown with bad name",
-      fun() ->
-          Body = <<"{\"name\":\"bad~name\"}">>,
-          ?assertThrow({bad_client_name, <<"bad~name">>,
-                        <<"Malformed client name.  Must be A-Z, a-z, 0-9, _, -, or .">>},
-                       chef_client:parse_binary_json(?API_MIN_VER, Body, <<"bad~name">>))
-      end
-     }
-    ].
-
-
-new_record_test() ->
-    OrgId = <<"12345678123456781234567812345678">>,
-    AuthzId = <<"00000000000000000000000011111111">>,
-    ClientData = {[{<<"name">>, <<"my-client">>}, {<<"alpha">>, <<"bravo">>}]},
-    Client = chef_client:new_record(?API_MIN_VER, OrgId, AuthzId, ClientData),
-    ?assertMatch(#chef_client{}, Client),
-    %% TODO: validate more fields?
-    ?assertEqual(<<"my-client">>, chef_client:name(Client)).

@@ -179,13 +179,12 @@ from_json(Req, #base_state{resource_args = invitation_response,
                     {true, chef_wm_util:set_json_body(Req1, EJResponse), State1}
             end
     end;
+from_json(Req, #base_state{server_api_version = ?API_v0,
+                           resource_state = #user_state{ chef_user = User, user_data = UserData}} = State) ->
+    oc_chef_wm_key_base:update_object_embedded_key_data_v0(Req, State, User, UserData);
 from_json(Req, #base_state{resource_state = #user_state{ chef_user = User, user_data = UserData}} = State) ->
-    case chef_key_base:maybe_generate_key_pair(UserData) of
-        keygen_timeout ->
-            {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
-        UserDataWithKeys ->
-            oc_chef_wm_base:update_from_json(Req, State, User, UserDataWithKeys)
-    end.
+    % in v1+ keys may only be updated via the keys endpoint.
+    oc_chef_wm_base:update_from_json(Req, State, User, UserData).
 
 finalize_update_body(Req, _State, BodyEJ) ->
     %% Custom json body needed to maintain compatibility with opscode-account behavior.

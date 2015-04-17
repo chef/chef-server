@@ -78,6 +78,17 @@
 
 -type wm_req() :: #wm_reqdata{}.
 
+
+-record(key_context, {
+          type,
+          object_ej,
+          object_name,
+          object_authz_id,
+          key_ej,  % ejson to inject into body response
+
+          % deprecated support for api v0 in client/user creation:
+          private_key
+         }).
 %% Shared resource state shared by all chef_wm resource modules.
 -record(base_state, {
           %% Concrete resource impl
@@ -174,13 +185,18 @@
           %% list of resource arguments passed in on init of each resource by webmachine
           %% This will be set to 'Value' of a tuple in the resource argument list in
           %% dispatch.conf matching the form {resource_args, Value}
-          resource_args :: list()
+          resource_args :: list(),
+
+          % Multiple resources may create a key at time of object creation.  Expose it
+          % in base_state so that it's available for common handling.
+          key_context ::undefined | #key_context{}
+
          }).
 
 -record(client_state, {
           client_data,
           client_authz_id,
-          keydata,
+          generated_private_key,
           chef_client :: #chef_client{} | not_found
          }).
 
@@ -279,7 +295,7 @@
 -record(user_state, {
           user_data,
           user_authz_id,
-          keydata,
+          generated_private_key,
           chef_user :: #chef_user{}
       }).
 
@@ -341,6 +357,8 @@
           generated_private_key,
           chef_key :: #chef_key{}
          }).
+
+
 
 -define(gv(X,L), proplists:get_value(X, L)).
 -define(gv(X,L, D), proplists:get_value(X, L, D)).

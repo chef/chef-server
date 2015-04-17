@@ -108,21 +108,18 @@ to_json(Req, #base_state{resource_state = #key_state{chef_key = Key}} = State) -
     EJ = chef_key:ejson_from_key(Key),
     {chef_json:encode(EJ), Req, State}.
 
-from_json(Req, #base_state{resource_state = #key_state{chef_key = Key, key_data = EJ} = KeyState} = State) ->
-    case ej:get({<<"create_key">>}, EJ) of
-        true  ->
-            case chef_keygen_cache:get_key_pair() of
-                {PublicKey, PrivateKey} ->
-                    KeyState2 = KeyState#key_state{generated_private_key = PrivateKey,
-                                                   chef_key = Key#chef_key{public_key = PublicKey}},
-                    update_from_json(Req, State#base_state{resource_state = KeyState2});
-                keygen_timeout ->
-                    {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}}
-            end;
-        _ ->
-            update_from_json(Req, State)
-    end.
+from_json(Req, #base_state{resource_state = #key_state{key_data = EJ}} = State) ->
+    chef_key_base:maybe_generate_key_pair(EJ, fun(Result) -> handle_keypair(Req, State, Result) end).
 
+handle_keypair(Req, State, keygen_timeout) ->
+    {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
+handle_keypair(Req, State, {undefined, undefined}) ->
+   update_from_json(Req, State);
+handle_keypair(Req, #base_state{resource_state = #key_state{chef_key = Key} = KeyState} = State,
+               {PublicKey, PrivateKey}) ->
+    KeyState2 = KeyState#key_state{generated_private_key = PrivateKey,
+                                   chef_key = Key#chef_key{public_key = PublicKey} },
+    update_from_json(Req, State#base_state{resource_state = KeyState2}).
 
 update_from_json(Req, #base_state{resource_state = #key_state{chef_key = Key, key_data = EJ}} = State) ->
     oc_chef_wm_base:update_from_json(Req, State, Key, EJ).

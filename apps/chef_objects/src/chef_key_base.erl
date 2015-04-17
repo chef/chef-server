@@ -24,21 +24,35 @@
 -include("../../include/chef_types.hrl").
 
 -export([maybe_generate_key_pair/1,
+         maybe_generate_key_pair/2,
          set_key_pair/3,
          set_public_key/2,
          valid_public_key/1,
-         validate_public_key_fields/2,
+         validate_public_key_fields/4,
          public_key_spec/1,
          cert_or_key/1,
          extract_public_key/1,
-         key_version/1]).
+         key_version/1,
+         key_owner_type/1]).
 
+-spec maybe_generate_key_pair(ej:json_object(),
+                              fun(( keygen_timeout | not_requested | {binary(),binary()}) -> term())) -> term().
+maybe_generate_key_pair(EJ, ContinuationFun) ->
+    KeyPair = case ej:get({<<"create_key">>}, EJ) of
+        true -> chef_keygen_cache:get_key_pair();
+         _ -> {ej:get({<<"public_key">>}, EJ), undefined}
+    end,
+    ContinuationFun(KeyPair).
+
+-spec maybe_generate_key_pair(ej:json_object()) -> ej:json_object() | keygen_timeout.
 %% @doc Conditionally generate and add key pair data.
 %%
 %% If the request data contains "private_key":true, then we will generate a new key pair. In
 %% this case, we'll add the new public and private keys into the EJSON since
 %% update_from_json will use it to set the response.
--spec maybe_generate_key_pair(ej:json_object()) -> ej:json_object() | keygen_timeout.
+%%
+%% Note that this is now used by only ?API_v0 functions,
+%% and can be removed when API_v0 is removed.
 maybe_generate_key_pair(Data) ->
     case ej:get({<<"private_key">>}, Data) of
         true ->
@@ -67,7 +81,6 @@ set_key_pair(EJ, {public_key, PublicKey}, {private_key, PrivateKey}) ->
         _ ->
             ej:set({<<"private_key">>}, EJ1, PrivateKey)
     end.
-
 
 
 %% @doc Sets either the `certificate' or `public_key' field of
@@ -165,18 +178,20 @@ value_or_undefined(Key, Data) ->
       Value
   end.
 
+%% For clients
 % Will ensure that if required, only one of 'create_key' or 'public_key' is present,
 % and that the one present is valid.
--spec validate_public_key_fields(opt|req,  ej:json_object()) -> {ok, ej:json_object()}. % or throw
-validate_public_key_fields(Req, EJ) ->
+-spec validate_public_key_fields(opt|req,  ej:json_object(), key|user|client, create|update) -> {ok, ej:json_object()}. % or throw
+% but we want USER and CLIENT to reject all key-related fields on UPDATE.
+
+
+validate_public_key_fields(Req, EJ, key, _CreateOrUpdate) ->
+    fail_if_present(<<"private_key">>, EJ, private_key_field_not_supported),
     % Simple case first - if one or both are provided and are not valid, handle it.
     chef_object_base:validate_ejson(EJ, {[ {{opt, <<"create_key">>}, boolean},
                                            chef_key_base:public_key_spec(opt) ]}),
     % Now we know that if present, they're good (validate_ejson will throw)
     case {Req, ej:get({<<"public_key">>}, EJ), ej:get({<<"create_key">>}, EJ)} of
-        {opt, undefined, undefined} ->
-            % Both are optional and missing, so we don't care.
-            {ok, EJ};
         {req, undefined, undefined} ->
             % One is required, both missing.
             throw(create_or_pubkey_missing);
@@ -186,6 +201,33 @@ validate_public_key_fields(Req, EJ) ->
             % one or both are present and valid - but if it's both, it's a problem.
             throw(create_and_pubkey_specified);
         _ ->
-            % Only one is present and it looks good.
+            % Only one is present and it looks good OR key is optional
+            % and both are missing. In both cases, we're fine.
             {ok, EJ}
+    end;
+validate_public_key_fields(Req, EJ, _ObjectType, create) ->
+    % Any object that supports ancillary key creation at time of object creation
+    % validates the same as does a chef_key
+    % as a 'chef_key' on object creation
+    validate_public_key_fields(Req, EJ, key, create);
+validate_public_key_fields(_Req, EJ, _ObjectType, update) ->
+    % any object that supports ancillary key creation at time of object creation
+    % does NOT support updating it at a later time.
+    fail_if_present(<<"private_key">>, EJ, private_key_field_not_supported),
+    fail_if_present(<<"create_key">>, EJ, key_management_not_supported),
+    fail_if_present(<<"public_key">>, EJ, key_management_not_supported),
+    {ok, EJ}.
+
+
+fail_if_present(FieldName, EJ, Response) ->
+    case ej:get({FieldName}, EJ) of
+        undefined -> ok;
+        _ -> throw(Response)
     end.
+
+key_owner_type(Owner) when Owner =:= client;
+                           Owner =:= chef_client ->
+    client_key;
+key_owner_type(Owner) when Owner =:= user;
+                           Owner =:= chef_user ->
+    user_key.

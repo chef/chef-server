@@ -24,8 +24,7 @@
 -include_lib("ej/include/ej.hrl").
 -include("../../include/chef_types.hrl").
 
--export([
-         assemble_user_ejson/2,
+-export([assemble_user_ejson/2,
          authz_id/1,
          ejson_for_indexing/2,
          fetch/2,
@@ -114,7 +113,28 @@ serialized_field_value(FieldName, #chef_user{serialized_object = SerializedObjec
     ej:get({FieldName}, EJ).
 
 -spec new_record(api_version(), object_id(), object_id(), ejson_term()) -> #chef_user{}.
+new_record(?API_v0 = ApiVersion, OrgId, AuthzId, Data) ->
+    User = common_new_record(ApiVersion, AuthzId, Data),
+    #chef_user{username = UserName} = User,
+    Id = chef_object_base:make_org_prefix_id(OrgId, UserName),
+    {PublicKey, PubKeyVersion} = chef_key_base:cert_or_key(Data),
+    User#chef_user{id = Id, public_key = PublicKey,
+                   pubkey_version = PubKeyVersion,
+                   authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id) };
 new_record(ApiVersion, OrgId, AuthzId, Data) ->
+    User = common_new_record(ApiVersion, AuthzId, Data),
+    Id = case ej:get({<<"id">>}, Data) of
+            undefined ->
+                #chef_user{username = UserName} = User,
+                chef_object_base:make_org_prefix_id(OrgId, UserName);
+            UserId ->
+                UserId
+         end,
+    User#chef_user{id = Id,
+                   authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id) }.
+
+
+common_new_record(ApiVersion, AuthzId, Data) ->
     {HashPass, Salt, HashType} = case ej:get({<<"password">>}, Data) of
         undefined ->
             {null, null, null};
@@ -122,20 +142,15 @@ new_record(ApiVersion, OrgId, AuthzId, Data) ->
             chef_password:encrypt(Password)
     end,
     UserData = ej:delete({<<"password">>}, Data),
-    Name = username_from_ejson(UserData),
-    Id = chef_object_base:make_org_prefix_id(OrgId, Name),
+    Name = username_from_ejson(Data),
     Email = value_or_null({<<"email">>}, UserData),
     ExtAuthUid = value_or_null({<<"external_authentication_uid">>}, UserData),
     EnableRecovery = ej:get({<<"recovery_authentication_enabled">>}, UserData) =:= true,
-    {PublicKey, PubkeyVersion} = chef_key_base:cert_or_key(UserData),
     SerializedObject = { whitelisted_values(UserData, ?JSON_SERIALIZABLE) },
     #chef_user{server_api_version = ApiVersion,
-               id = Id,
-               authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
                username = Name,
+               authz_id = AuthzId,
                email = Email,
-               pubkey_version = PubkeyVersion,
-               public_key = PublicKey,
                hashed_password = HashPass,
                salt = Salt,
                hash_type = HashType,
@@ -233,31 +248,30 @@ valid_password(_Password) ->
 whitelisted_values(EJ, Permitted) ->
     [{X, ej:get({X}, EJ) } || X <- Permitted, ej:get({X}, EJ)  =/= undefined ].
 
-assemble_user_ejson(#chef_user{username = Name,
-                               public_key = KeyOrCert,
-                               email = Email,
-                               serialized_object = SerializedObject},
-                    _OrgId) ->
-    EJ = chef_json:decode(SerializedObject ),
+assemble_user_ejson(#chef_user{server_api_version = ?API_v0,
+                               public_key = KeyOrCert} = User, _OrgId) ->
     % public_key can mean either public key or cert.
     % if it's a cert, we need to extract the public key -
     % we don't want to hand the cert back on user GET.
-    RealPubKey = chef_key_base:extract_public_key(KeyOrCert),
+    { common_user_ejson(User) ++
+      [{<<"public_key">>, chef_key_base:extract_public_key(KeyOrCert)}] };
+assemble_user_ejson(User, _OrgId) ->
+    { common_user_ejson(User) }.
+
+common_user_ejson(#chef_user{username = Name,
+                             email = Email,
+                             serialized_object = SerializedObject}) ->
+    EJ = chef_json:decode(SerializedObject),
     % Where external auth is enable, email may be null/undefined
     Email2 = case Email of
         undefined -> <<"">>;
         null -> <<"">>;
         _ -> Email
     end,
-
-    User1 = [{<<"username">>, Name},
-             {<<"public_key">>, RealPubKey},
-             {<<"email">>, Email2}],
+    User1 = [{<<"username">>, Name}, {<<"email">>, Email2}],
     User2 = whitelisted_values(EJ, ?JSON_SERIALIZABLE ++
                                [ <<"recovery_authentication_enabled">>, <<"external_authentication_uid">>] ),
-
-    { User1 ++ User2 }.
-
+    User1 ++ User2.
 
 %% @doc Convert a binary JSON string representing a Chef User into an
 %% EJson-encoded Erlang data structure.
@@ -266,33 +280,44 @@ parse_binary_json(ApiVersion, Bin) ->
     parse_binary_json(ApiVersion, Bin, create, undefined).
 
 -spec parse_binary_json(api_version(), binary(), create | update, #chef_user{} | undefined) -> {ok, jiffy:json_value()}. % or throw
-parse_binary_json(_ApiVersion, Bin, Operation, User) ->
+parse_binary_json(?API_v0, Bin, Operation, User) ->
     EJ = delete_null_public_key(chef_json:decode(Bin)),
-    EJson = case ej:get({<<"private_key">>}, EJ) of
+    EJ1 = case ej:get({<<"private_key">>}, EJ) of
         true ->
             ej:delete({<<"public_key">>}, EJ);
         _ ->
-            validate_user(EJ, {[ chef_key_base:public_key_spec(opt) ]}),
+            chef_object_base:validate_ejson(EJ, {[ chef_key_base:public_key_spec(opt) ]}),
             EJ
     end,
+    common_user_validation(EJ1, User, Operation);
+parse_binary_json(_ApiVersion, Bin, Operation, User) ->
+    % We no longer accept key, this will fail if public_key, create_key, or private_key
+    % indicators are present.
+    EJ = chef_json:decode(Bin),
+    chef_key_base:validate_public_key_fields(opt, EJ, user, Operation),
+    common_user_validation(EJ, User, Operation),
+    {ok, EJ}.
 
-    validate_user_name(EJson),
+common_user_validation(EJ, User, Operation) ->
+    validate_user_name(EJ),
     %% If user is invalid, an error is thrown
-    validate_user(EJson, user_spec(common)),
-    validate_user(EJson, user_spec(Operation)),
+    chef_object_base:validate_ejson(EJ, user_spec(common)),
+    chef_object_base:validate_ejson(EJ, user_spec(Operation)),
 
     %% IF user is internally authenticated, some additional fields
     %% (common to both ops) are required. In the case where
     %% external auth id is not provided in the ejson/request,
     %% we'll use the existing data in the user record itself.
-    case external_auth_uid(EJson, User) of
+    case external_auth_uid(EJ, User) of
         undefined ->
-            validate_user(EJson, local_auth_user_spec(common)),
-            validate_user(EJson, local_auth_user_spec(Operation));
+            chef_object_base:validate_ejson(EJ, local_auth_user_spec(common)),
+            chef_object_base:validate_ejson(EJ, local_auth_user_spec(Operation));
          _ ->
             ok
     end,
-    {ok, EJson}.
+    % Ensure the user can't set this - we make use of it in some cases by setting it internally
+    EJ1 = ej:delete({<<"id">>}, EJ),
+    {ok, EJ1}.
 
 external_auth_uid(EJson, #chef_user{external_authentication_uid = ExtAuthUid}) ->
     case ej:get({<<"external_authentication_uid">>}, EJson) of
@@ -316,10 +341,6 @@ delete_null_public_key(Ejson) ->
         _ ->
             Ejson
     end.
-
-%%-spec validate_user(ejson_term(), ejson_term()) -> {ok, ejson_term()}. % or throw
-validate_user(User, Spec) ->
-  chef_object_base:validate_ejson(User, Spec).
 
 % Our user spec does not include 'username' because one of
 % 'name'|'username' may be present. Check for either/or here,
@@ -355,7 +376,23 @@ set_password_data(#chef_user{}=User, {HashedPassword, Salt, HashType}) ->
 %% @doc Return a new `chef_user()' record updated according to the specified EJSON
 %% terms. This provides behavior similar to chef_objects:update_from_ejson()
 -spec update_from_ejson(#chef_user{}, ejson_term()) -> #chef_user{}.
+update_from_ejson(#chef_user{server_api_version = ?API_v0} = User, UserEJson) ->
+    User1 = update_from_ejson_common(User, UserEJson),
+    {Key, Version} = chef_key_base:cert_or_key(UserEJson),
+    case Key of
+        undefined ->
+            User1;
+        _ ->
+            User1#chef_user{
+                pubkey_version= Version,
+                % Note: public_key is now potentially a certificate...
+                public_key = Key
+            }
+    end;
 update_from_ejson(#chef_user{} = User, UserEJson) ->
+    update_from_ejson_common(User, UserEJson).
+
+update_from_ejson_common(User, UserEJson) ->
     User1 = case ej:get({<<"password">>}, UserEJson) of
         NewPassword when is_binary(NewPassword) ->
             chef_user:set_password_data(User, chef_password:encrypt(NewPassword));
@@ -370,26 +407,15 @@ update_from_ejson(#chef_user{} = User, UserEJson) ->
     RecoveryAuthenticationEnabled = value_or_existing({<<"recovery_authentication_enabled">>},
                                                       UserEJson,
                                                       User#chef_user.recovery_authentication_enabled) =:= true,
-    {Key, Version} = chef_key_base:cert_or_key(UserEJson),
-
-    User2 = case Key of
-        undefined ->
-            User1;
-        _ ->
-            User1#chef_user{
-                pubkey_version= Version,
-                % Note: public_key is now potentially a certificate...
-                public_key = Key
-            }
-    end,
     SerializedObject0 = { whitelisted_values(UserEJson, ?JSON_SERIALIZABLE) },
-    SerializedObject1 = merge_user_data(chef_json:decode(User2#chef_user.serialized_object),
+    SerializedObject1 = merge_user_data(chef_json:decode(User1#chef_user.serialized_object),
                                         SerializedObject0),
-    User2#chef_user{username = Name,
-                    email = Email,
-                    external_authentication_uid = ExternalAuthenticationUid,
-                    recovery_authentication_enabled = RecoveryAuthenticationEnabled,
-                    serialized_object = chef_json:encode(SerializedObject1)}.
+    User1#chef_user{username = Name,
+                   email = Email,
+                   external_authentication_uid = ExternalAuthenticationUid,
+                   recovery_authentication_enabled = RecoveryAuthenticationEnabled,
+                   serialized_object = chef_json:encode(SerializedObject1)}.
+
 
 merge_user_data(User, {ModData}) ->
     % If value in ModData is null, delete from user, otherwise replace or insert the value.

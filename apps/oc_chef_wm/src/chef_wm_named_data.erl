@@ -63,7 +63,7 @@
          request_type/0,
          validate_request/3,
          conflict_message/1,
-         finalize_create_body/3 ]).
+         finalize_create_body/4 ]).
 
 -export([
          allowed_methods/2,
@@ -142,7 +142,7 @@ from_json(Req, #base_state{resource_state = #data_state{data_bag_name = DataBagN
 
 % Callback from create_from_json, which allows us to customize our body response.
 finalize_create_body(_Req, #base_state{ resource_state = #data_state{data_bag_name = DataBagName,
-                                                                     data_bag_item_ejson = ItemData} }, _BodyEJ ) ->
+                                                                     data_bag_item_ejson = ItemData} }, _DataBagItem, _BodyEJ ) ->
     %% The Ruby API returns created items as-is, but with added chef_type and
     %% data_bag fields. If those fields are present in the request, they are put
     %% into the raw item data, but the values are overwritten for the return. When

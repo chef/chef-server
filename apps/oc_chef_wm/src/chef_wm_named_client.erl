@@ -64,40 +64,24 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET', 'PUT', 'DELETE'], Req, State}.
 
-validate_any_request(Req, #base_state{chef_db_context = DbContext,
-                                      organization_guid = OrgId,
-                                      resource_state = ClientState} = State) ->
+validate_request(Method, Req, #base_state{chef_db_context = DbContext,
+                                          organization_guid = OrgId,
+                                          resource_state = ClientState} = State) ->
     Name = chef_wm_util:object_name(client, Req),
-    Client = case chef_db:fetch(#chef_client{org_id = OrgId, name = Name}, DbContext) of
-                 not_found ->
-                     not_found;
-                 #chef_client{} = Found ->
-                     Found
-             end,
-    ClientState1 = ClientState#client_state{chef_client = Client},
-    {Req, State#base_state{resource_state = ClientState1}}.
+    Client = chef_db:fetch(#chef_client{org_id = OrgId, name = Name}, DbContext),
+    NewState = State#base_state{resource_state = ClientState#client_state{chef_client = Client}},
+    validate_data(Method, Req, NewState).
 
-validate_request('PUT', Req, #base_state{server_api_version = ApiVersion} = State) ->
-    {Req1, State1} = validate_any_request(Req, State),
-    #base_state{resource_state =
-                    #client_state{chef_client = OldClient} = ClientState} = State1,
-    case OldClient of
-        not_found ->
-            {Req1, State1};
-        _ ->
-            % FIXME: parse_binary_json can probably be simplified to NOT need a
-            % name passed to it; the name extracted from the old client here is
-            % the same as the request name, since the request name is used to pull
-            % the old client from the database in the first place.
-            #chef_client{name = Name} = OldClient,
-            Body = wrq:req_body(Req),
-            {ok, ClientData} = chef_client:parse_binary_json(ApiVersion, Body, Name, OldClient),
-            {Req1, State1#base_state{resource_state =
-                                         ClientState#client_state{client_data =
-                                                                      ClientData}}}
-    end;
-validate_request(_Other, Req, State) ->
-    validate_any_request(Req, State).
+validate_data(_Any, Req, #base_state{resource_state = #client_state{chef_client = not_found}} = State) ->
+    {Req, State}; % let auth_info fail on not_found
+validate_data('PUT', Req, #base_state{server_api_version = ApiVersion,
+                                      resource_state = #client_state{chef_client = OldClient} = ClientState} = State) ->
+    Body = wrq:req_body(Req),
+    {ok, ClientData} = chef_client:parse_binary_json(ApiVersion, Body,  OldClient),
+    {Req, State#base_state{resource_state = ClientState#client_state{client_data = ClientData}}};
+validate_data(_NotPut, Req, State) ->
+    {Req, State}. % no data to validate for other request types.
+
 
 auth_info(Req, #base_state{resource_state =
                                #client_state{chef_client = not_found}} = State) ->
@@ -113,15 +97,17 @@ auth_info(Req, #base_state{resource_state =
     State1 = State#base_state{resource_state = ClientState1},
     {{actor, AuthzId}, Req, State1}.
 
+from_json(Req, #base_state{server_api_version = ?API_v0,
+                           resource_state =
+                               #client_state{chef_client = Client,
+                                             client_data = ClientData}} = State) ->
+    oc_chef_wm_key_base:update_object_embedded_key_data_v0(Req, State, Client, ClientData);
 from_json(Req, #base_state{resource_state =
                                #client_state{chef_client = Client,
                                              client_data = ClientData}} = State) ->
-    case chef_key_base:maybe_generate_key_pair(ClientData) of
-        keygen_timeout ->
-            {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
-        ClientData1 ->
-            oc_chef_wm_base:update_from_json(Req, State, Client, ClientData1)
-    end.
+    % We do not support key generation in named client from v1 onward -
+    % those operations are to be performed via keys endpoints.
+    oc_chef_wm_base:update_from_json(Req, State, Client, ClientData).
 
 to_json(Req, #base_state{resource_state =
                              #client_state{chef_client = Client},

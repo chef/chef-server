@@ -37,7 +37,6 @@
          org_id/1,
          new_record/4,
          parse_binary_json/3,
-         parse_binary_json/4,
          record_fields/1,
          set_created/2,
          set_updated/2,
@@ -87,7 +86,7 @@ is_indexed(_ObjectRec) ->
 ejson_for_indexing(#chef_client{}, Client) ->
     Client.
 
-update_from_ejson(#chef_client{} = Client, ClientData) ->
+update_from_ejson(#chef_client{server_api_version = ?API_v0} = Client, ClientData) ->
     Name = ej:get({<<"name">>}, ClientData),
     IsAdmin = ej:get({<<"admin">>}, ClientData) =:= true,
     IsValidator = ej:get({<<"validator">>}, ClientData) =:= true,
@@ -104,7 +103,13 @@ update_from_ejson(#chef_client{} = Client, ClientData) ->
                 validator = IsValidator,
                 public_key = Key,
                 pubkey_version = Version}
-    end.
+    end;
+update_from_ejson(#chef_client{} = Client, ClientData) ->
+    Name = ej:get({<<"name">>}, ClientData),
+    IsValidator = ej:get({<<"validator">>}, ClientData) =:= true,
+    Client#chef_client{name = Name,
+                       validator = IsValidator}.
+
 
 -spec set_created(#chef_client{}, object_id()) -> #chef_client{}.
 set_created(#chef_client{} = Object, ActorId) ->
@@ -160,7 +165,13 @@ new_record(?API_v0 = ApiVersion, OrgId, AuthzId, ClientData) ->
                  pubkey_version = PubkeyVersion};
 new_record(ApiVersion, OrgId, AuthzId, ClientData) ->
     Name = ej:get({<<"name">>}, ClientData),
-    Id = chef_object_base:make_org_prefix_id(OrgId, Name),
+    % this is only present if we put it there - we filter it out from incoming data.
+    Id = case ej:get({<<"id">>}, ClientData) of
+            undefined ->
+                chef_object_base:make_org_prefix_id(OrgId, Name);
+            ClientId ->
+                ClientId
+         end,
     Validator = ej:get({<<"validator">>}, ClientData) =:= true,
     #chef_client{server_api_version = ApiVersion,
                  id = Id,
@@ -229,37 +240,34 @@ base_client_ejson(#chef_client{name = Name, validator = Validator}, OrgName) ->
 %% @doc Convert a binary JSON string representing a Chef Client into an
 %% EJson-encoded Erlang data structure, using passed defaults
 %% @end
-parse_binary_json(ApiVersion, Bin, ReqName) ->
-    parse_binary_json(ApiVersion, Bin, ReqName, not_found).
 
--spec parse_binary_json(api_version(), binary(), binary() | undefined,
-                        not_found | #chef_client{}) -> {'ok',ej:json_object()}. % or throw
+-spec parse_binary_json(api_version(), binary(), undefined | #chef_client{}) -> {'ok',ej:json_object()}. % or throw
+parse_binary_json(ApiVersion, Bin, undefined) ->
+    validate_json(ApiVersion, Bin, undefined, undefined);
+parse_binary_json(ApiVersion, Bin, #chef_client{name = ReqName} = CurrentClient) ->
+    validate_json(ApiVersion, Bin, ReqName, CurrentClient).
 
-parse_binary_json(ApiVersion, Bin, ReqName, CurrentClient) ->
-    Client = set_values_from_current_client(chef_json:decode_body(Bin), CurrentClient),
-    Client1 = chef_object_base:set_default_values(Client, default_field_values(ApiVersion)),
-    {Name, FinalClient} = destination_name(Client1, ReqName),
+validate_json(ApiVersion, Bin, ReqName, CurrentClient) ->
+    ClientEJ0  = set_values_from_current_client(chef_json:decode_body(Bin), CurrentClient),
+    ClientEJ1 = chef_object_base:set_default_values(ClientEJ0, default_field_values(ApiVersion)),
+    % we use this if it gets populated, so let's not let a caller inject it.
+    ClientEJ2 = ej:delete({<<"id">>}, ClientEJ1),
+    {Name, ClientEJ3} = destination_name(ClientEJ2, ReqName),
     valid_name(Name),
-    validate_client(ApiVersion, FinalClient, Name).
+    % TODO - open bug here: clientname and name are both accepted but we ultimately only
+    % validate one of them.
+    chef_object_base:validate_ejson(ClientEJ3, client_spec(ApiVersion, Name)),
+    validate_key(ApiVersion, ClientEJ3, CurrentClient).
 
-validate_client(ApiVersion, ClientData, Name) ->
-    chef_object_base:validate_ejson(ClientData, client_spec(ApiVersion, Name)),
-    maybe_validate_public_key(ApiVersion, ClientData).
-
-maybe_validate_public_key(?API_v0 , ClientData) ->
+validate_key(?API_v0 , ClientData, _Client) ->
     % Under APIv0, we do not validate public key, which does allow
     % a certificate to be passed in. The certificate is still handled correctly
-    % later, for auth purposes and retrieving key data, so we'll
-    % keep the behavior until vNext
+    % later, for auth purposes and retrieving key data
     {ok, ClientData};
-maybe_validate_public_key(_, ClientData) ->
-    case ej:get({<<"public_key">>}, ClientData) of
-        Value when Value =:= undefined;
-                   Value == <<"generate">> ->
-            {ok, ClientData};
-        _ ->
-            chef_object_base:validate_ejson(ClientData, {[ chef_key_base:public_key_spec(opt) ]})
-    end.
+validate_key(_, ClientData, undefined)  ->
+    chef_key_base:validate_public_key_fields(opt, ClientData, client, create);
+validate_key(_, ClientData, _Client)  ->
+    chef_key_base:validate_public_key_fields(opt, ClientData, client, update).
 
 set_values_from_current_client(Client, #chef_client{server_api_version = ?API_v0, validator = IsValidator, public_key = Cert}) ->
     C = chef_object_base:set_default_values(Client, [{<<"validator">>, IsValidator}]),
@@ -271,7 +279,7 @@ set_values_from_current_client(Client, #chef_client{server_api_version = ?API_v0
     end;
 set_values_from_current_client(Client, #chef_client{validator = IsValidator}) ->
     chef_object_base:set_default_values(Client, [{<<"validator">>, IsValidator}]);
-set_values_from_current_client(Client, not_found) ->
+set_values_from_current_client(Client, undefined) ->
     Client.
 
 client_spec(?API_v0, Name) ->
@@ -304,6 +312,7 @@ destination_name(Client, ReqName) ->
             throw({both_missing, <<"name">>, <<"clientname">>});
         {undefined, undefined, ReqName} ->
             %% a PUT with only name found in URL, set both in body
+            %% TODO coverage checks show that our pedant tests don't cover this. Is it valid?
             {ReqName, ej:set({<<"name">>}, ej:set({<<"clientname">>}, Client, ReqName), ReqName)};
         {Name, Name, _} ->
             %% POST or PUT with with name == clientname
@@ -350,3 +359,4 @@ default_field_values(_) ->
 
 set_api_version(ObjectRec, Version) ->
     ObjectRec#chef_client{server_api_version = Version}.
+

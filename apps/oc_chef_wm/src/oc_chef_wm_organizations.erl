@@ -2,6 +2,21 @@
 %% ex: ts=4 sw=4 et
 %% @author Stephen Delano <stephen@chef.io>
 %% Copyright 2013-2014 Chef Software, Inc. All Rights Reserved.
+%%
+%% This file is provided to you under the Apache License,
+%% Version 2.0 (the "License"); you may not use this file
+%% except in compliance with the License.  You may obtain
+%% a copy of the License at
+%%
+%%   http://www.apache.org/licenses/LICENSE-2.0
+%%
+%% Unless required by applicable law or agreed to in writing,
+%% software distributed under the License is distributed on an
+%% "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+%% KIND, either express or implied.  See the License for the
+%% specific language governing permissions and limitations
+%% under the License.
+%%
 
 -module(oc_chef_wm_organizations).
 
@@ -122,8 +137,7 @@ create_from_json(#wm_reqdata{} = Req,
 
     case chef_db:create(ObjectRec, DbContext, ActorId) of
         {conflict, _} ->
-            oc_chef_wm_base:object_creation_error_hook(ObjectRec, ActorId),
-            %% FIXME: created authz_id is leaked for this case, cleanup?
+            oc_chef_wm_base:object_creation_error_hook(DbContext, ObjectRec, ActorId),
             LogMsg = {RecType, name_conflict, Name},
             ConflictMsg = ResourceMod:conflict_message(Name),
             {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
@@ -135,8 +149,7 @@ create_from_json(#wm_reqdata{} = Req,
              chef_wm_util:set_uri_of_created_resource(Uri, Req),
              State#base_state{log_msg = LogMsg, resource_state = ResourceState1}};
         What ->
-            %% FIXME: created authz_id is leaked for this case, cleanup?
-            oc_chef_wm_base:object_creation_error_hook(ObjectRec, ActorId),
+            oc_chef_wm_base:object_creation_error_hook(DbContext, ObjectRec, ActorId),
             {{halt, 500}, Req, State#base_state{log_msg = What, resource_state = ResourceState1}}
     end.
 
@@ -172,23 +185,13 @@ maybe_create_environment(ok, Req,
     EnvState = State#base_state{resource_mod = chef_wm_environments,
                                 organization_guid = OrgId,
                                 organization_name = OrgName},
-    AfterEnvCreate = fun({Status, Rec, _EnvState}) ->
-                             %% The state record we give to create_object_with_acl can be
-                             %% thrown away, since it only is updated on errors
-                             maybe_create_client_key({Status, Rec, State})
+    AfterEnvCreate = fun({Status, Rec, _DiscardState}) ->
+                             maybe_create_client(Status, Rec, State)
                      end,
-    create_object_with_acl(EnvEJson, environment, Req, EnvState, AfterEnvCreate).
+    create_object_with_acl(EnvEJson, environment, Req, EnvState,
+                           fun oc_chef_wm_base:create_from_json/5, AfterEnvCreate).
 
-maybe_create_client_key({true, Req, #base_state{} = State}) ->
-    %% create the authzid for the for the validator client
-    KeyPair = chef_keygen_cache:get_key_pair(),
-    maybe_create_client(KeyPair, Req, State);
-maybe_create_client_key({_Error, _Req, _State}=R) ->
-    cleanup_org(R).
-
-maybe_create_client(keygen_timeout, Req, State) ->
-    cleanup_org({{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}});
-maybe_create_client({PublicKey, PrivateKey}, Req,
+maybe_create_client(true, Req,
                     #base_state{
                        resource_state = #organization_state{
                                            oc_chef_organization = #oc_chef_organization{
@@ -196,31 +199,38 @@ maybe_create_client({PublicKey, PrivateKey}, Req,
                                                                      name = OrgName
                                                                     }} = ResourceState} = State) ->
     ClientName = <<OrgName/binary,"-validator">>,
-    ClientEJson = chef_key_base:set_public_key({[{<<"name">>, ClientName},
-                                                 {<<"validator">>, true}]}, PublicKey),
+    ClientEJson = {[{<<"name">>, ClientName},
+                    {<<"create_key">>, true},
+                    {<<"validator">>, true}]},
 
-    %% Update the return state
+    CreationFn = fun(CreateReq, CreateState, _Type, {authz_id, AuthzId}, EJ) ->
+                         KeyContext = #key_context{ object_name = ClientName,
+                                                    object_authz_id = AuthzId,
+                                                    object_ej = EJ,
+                                                    type = client },
+                         CreateState1 = CreateState#base_state{key_context = KeyContext},
+                         oc_chef_wm_key_base:create_object_with_embedded_key_data(CreateReq, CreateState1)
+                 end,
+
     OrgEJson =  {[{<<"uri">>, oc_chef_wm_routes:route(organization, Req, [{name, OrgName}])},
-                  {<<"clientname">>, ClientName},
-                  {<<"private_key">>, PrivateKey}]},
+                  {<<"clientname">>, ClientName}]},
 
-    State1 = State#base_state{resource_state= ResourceState#organization_state{organization_data = OrgEJson}},
+    State1 = State#base_state{resource_state = ResourceState#organization_state{organization_data = OrgEJson}},
 
-    %% We have to fake up a a base state record for the client create, but don't want
-    %% it when we are done
     ClientState = State#base_state{resource_mod = chef_wm_clients,
                                    organization_guid = OrgId,
                                    organization_name = OrgName},
     AfterClientCreate = fun(X) -> finish_org_create(X, OrgEJson, State1) end,
-    create_object_with_acl(ClientEJson, client, Req, ClientState, AfterClientCreate).
-
+    create_object_with_acl(ClientEJson, client, Req, ClientState, CreationFn, AfterClientCreate);
+maybe_create_client(Error, Req, State) ->
+    cleanup_org({Error, Req, State}).
 %%
 %% TODO: This maybe should be combined/refactored with oc_chef_wm_base:create_in_container
 %%
 -spec create_object_with_acl(ObjectJson :: {[tuple()]}, Type :: atom(),
                              Req :: wm_req(), State :: #base_state{},
-                             ContinuationFn :: fun((tuple()) -> tuple()) ) ->
-                                    tuple().
+                             CreationFun :: fun(),
+                             ContinuationFn :: fun((tuple()) -> tuple()) ) -> tuple().
 create_object_with_acl(ObjectJson, Type, Req,
                        #base_state{
                        resource_state = #organization_state{
@@ -229,15 +239,15 @@ create_object_with_acl(ObjectJson, Type, Req,
                                                                      name = OrgName
                                                                     } },
                        chef_authz_context = AuthzCtx} = State,
-                       ContinuationFn) ->
+                       CreationFn, ContinuationFn) ->
     {ChefType, ResourceMod} = create_type_helper(Type),
     ObjState = State#base_state{resource_mod = ResourceMod,
                                 organization_guid = OrgId,
                                 organization_name = OrgName},
     case oc_chef_authz:create_entity_if_authorized(AuthzCtx, OrgId, superuser, Type) of
         {ok, AuthzId} ->
-            Result = oc_chef_wm_base:create_from_json(Req, ObjState, ChefType, {authz_id, AuthzId}, ObjectJson),
-            ContinuationFn(Result);
+                Result =  CreationFn(Req, ObjState, ChefType, {authz_id, AuthzId}, ObjectJson),
+                ContinuationFn(Result);
         {error, forbidden} ->
             {Req1, State1} = oc_chef_wm_base:set_forbidden_msg(create, Req, State),
             {{halt, 503}, Req1, State1};
@@ -245,11 +255,12 @@ create_object_with_acl(ObjectJson, Type, Req,
             {Req1, State1} = set_error_msg(Error, Req, State),
             {{halt, 503}, Req1, State1}
     end.
-
-finish_org_create({true, Req, _ClientState}, OrgEJson, State) ->
+finish_org_create({true, Req, #base_state{key_context = #key_context{key_ej = KeyEJ}}}, OrgEJson, State) ->
+    PrivateKey = ej:get({<<"private_key">>}, KeyEJ),
+    OrgEJson2 = ej:set({<<"private_key">>}, OrgEJson, PrivateKey ),
     %% The state record we give to create_object_with_acl can be
     %% thrown away, since it only is updated on errors
-    {true, chef_wm_util:set_json_body(Req, OrgEJson), State};
+    {true, chef_wm_util:set_json_body(Req, OrgEJson2), State};
 finish_org_create(Result, _, _) ->
     cleanup_org(Result).
 

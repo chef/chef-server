@@ -99,15 +99,19 @@ malformed_request_message({bad_run_lists, {Field, _Value}}, _Req, _State) ->
 malformed_request_message(invalid_num_versions, _Req, _State) ->
     {[{<<"error">>, [<<"You have requested an invalid number of versions (x >= 0 || 'all')">>]}]};
 
-%% This is used by some custom validation in environments that may (or may not!) be pulled up into ej:valid validations
+%% This is used by some custom validation for validation patterns that can't be expressed well as ej:valid rules
 malformed_request_message({invalid_key, Key}, _Req, _State) ->
     error_envelope([<<"Invalid key ">>, Key, <<" in request body">>]);
-
-
 malformed_request_message(create_or_pubkey_missing, _Req, _State) ->
     error_envelope([<<"You must either provide a valid value for 'public_key', or specify 'create_key': true">>]);
 malformed_request_message(create_and_pubkey_specified, _Req, _State) ->
     error_envelope([<<"You must specify either create_key or public_key, but not both">>]);
+malformed_request_message(private_key_field_not_supported, _Req, _State) ->
+    error_envelope([<<"Please use create_key: true instead of private_key: true">>]);
+malformed_request_message(key_management_not_supported, _Req, _State) ->
+    error_envelope([<<"Since Server API v1, all keys must be updated via the keys endpoint. ">>]);
+
+
 malformed_request_message(invalid_json_object, _Req, _State) ->
     error_envelope([<<"Incorrect JSON type for request body">>]);
 

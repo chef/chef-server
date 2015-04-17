@@ -59,7 +59,7 @@
          create_path/2,
          conflict_message/1,
          from_json/2,
-         finalize_create_body/3]).
+         finalize_create_body/4]).
 
 init(Config) ->
     oc_chef_wm_base:init(?MODULE, Config).
@@ -104,38 +104,22 @@ create_path(Req, #base_state{resource_state = #client_state{client_data = Client
     Name = ej:get({<<"name">>}, ClientData),
     {binary_to_list(Name), Req, State}.
 
-%% @doc We generate a new public/private key pair, insert the public key into the DB
-%% and return the private key as part of the response
-from_json(Req, #base_state{resource_state =
-                               #client_state{client_data = ClientData}} = State) ->
-    KeyData = case chef_key_base:cert_or_key(ClientData) of
-                  {undefined, _} ->
-                      chef_keygen_cache:get_key_pair();
-                  {PubKey, _PubKeyVersion} ->
-                      {PubKey, undefined}
-              end,
-    handle_client_create(KeyData, Req, State).
+from_json(Req, #base_state{resource_state = #client_state{client_data = ClientData, client_authz_id = AuthzId}} = State) ->
+    KeyContext = #key_context{ object_name = ej:get({<<"name">>}, ClientData),
+                               object_authz_id = AuthzId,
+                               object_ej = ClientData,
+                               type = client },
+    oc_chef_wm_key_base:create_object_with_embedded_key_data(Req, State#base_state{key_context = KeyContext}).
 
-
-handle_client_create(keygen_timeout, Req, State) ->
-    {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
-handle_client_create({PublicKey, PrivateKey}, Req,
-                     #base_state{resource_state =
-                                     #client_state{client_data = ClientData,
-                                                   client_authz_id = AuthzId} = CS} = State) ->
-    ClientData1 = chef_key_base:set_public_key(ClientData, PublicKey),
-    CS2 = CS#client_state{ keydata = {PublicKey, PrivateKey}},
-    oc_chef_wm_base:create_from_json(Req,
-                                     State#base_state{resource_state = CS2},
-                                     chef_client, {authz_id, AuthzId}, ClientData1).
 
 % Callback from create_from_json, which allows us to customize our body response.
-finalize_create_body(_Req, #base_state{ resource_state = #client_state{ keydata = KeyData} }, BodyEJ) ->
-    {PublicKey, PrivateKey} = KeyData,
+finalize_create_body(_Req, #base_state{ server_api_version = ?API_v0,
+                                        key_context = #key_context{key_ej = KeyEJ}}, _Client, BodyEJ) ->
+    PublicKey = ej:get({<<"public_key">>}, KeyEJ),
+    PrivateKey = ej:get({<<"private_key">>}, KeyEJ),
     chef_key_base:set_key_pair(BodyEJ, {public_key, PublicKey}, {private_key, PrivateKey});
-finalize_create_body(_Req, _State, BodyEJ) ->
-    % Invoked indirectly from org creation, where wee won't have a #client_state
-    BodyEJ.
+finalize_create_body(Req, State, _Client, BodyEJ) ->
+    oc_chef_wm_key_base:finalize_create_body(Req, State, BodyEJ).
 
 malformed_request_message(Any, Req, State) ->
     chef_wm_malformed:malformed_request_message(Any, Req, State).

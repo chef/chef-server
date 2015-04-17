@@ -43,7 +43,7 @@
          route_args/2,
          to_json/2,
          auth_info/2,
-         finalize_create_body/3]).
+         finalize_create_body/4]).
 
 -export([allowed_methods/2,
          create_path/2,
@@ -88,7 +88,7 @@ make_resource_state_for_object(DbContext, user, Name, _OrgId) ->
 make_resource_state_for_object(_Type, not_found) ->
     #key_state{};
 make_resource_state_for_object(Type, Object) ->
-    FullType = list_to_existing_atom(atom_to_list(Type) ++ "_key"),
+    FullType = chef_key_base:key_owner_type(Type),
     #key_state{type = Type, full_type = FullType, parent_name = chef_object:name(Object),
                parent_authz_id = chef_object:authz_id(Object), parent_id = chef_object:id(Object)}.
 
@@ -132,21 +132,19 @@ to_json(Req, #base_state{ chef_db_context = DbContext,
         Error ->
             {{halt, 500}, Req, State#base_state{log_msg = Error }}
     end.
-from_json(Req, #base_state{resource_state = #key_state{key_data = EJ} = KeyState} = State) ->
-    case ej:get({<<"create_key">>}, EJ) of
-        true ->
-            case chef_keygen_cache:get_key_pair() of
-                {PublicKey, PrivateKey} ->
-                    EJ1 = ej:set({<<"public_key">>}, EJ, PublicKey),
-                    EJ2 = ej:delete({<<"create_key">>}, EJ1),
-                    KeyState2 = KeyState#key_state{generated_private_key = PrivateKey, key_data = EJ2},
-                    create_from_json(Req, State#base_state{resource_state = KeyState2});
-                keygen_timeout ->
-                    {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}}
-            end;
-        _ ->
-            create_from_json(Req, State)
-    end.
+
+from_json(Req, #base_state{resource_state = #key_state{key_data = EJ}} = State) ->
+    chef_key_base:maybe_generate_key_pair(EJ, fun(Result) -> handle_keypair(Req, State, Result) end).
+
+handle_keypair(Req, State, keygen_timeout) ->
+    {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
+handle_keypair(Req, State, {_, undefined}) ->
+   create_from_json(Req, State);
+handle_keypair(Req, #base_state{resource_state = KeyState} = State, {PublicKey, PrivateKey}) ->
+    EJ1 = ej:set({<<"public_key">>}, KeyState#key_state.key_data, PublicKey),
+    EJ2 = ej:delete({<<"create_key">>}, EJ1),
+    KeyState2 = KeyState#key_state{generated_private_key = PrivateKey, key_data = EJ2},
+    create_from_json(Req, State#base_state{resource_state = KeyState2}).
 
 create_from_json(Req, #base_state{resource_state = #key_state{key_data = EJ, parent_id = ActorId}} = State) ->
     oc_chef_wm_base:create_from_json(Req, State, chef_key, {authz_id, undefined}, {ActorId, EJ}).
@@ -164,7 +162,7 @@ route_args(#chef_key{key_name = Name},
     {FullType, [{name, Name}, {object_name, ObjectName}] }.
 
 % Callback from create_from_json, which allows us to customize our body response.
-finalize_create_body(_Req, #base_state{ resource_state = #key_state{generated_private_key = undefined}}, BodyEJ) ->
+finalize_create_body(_Req, #base_state{ resource_state = #key_state{generated_private_key = undefined}}, _Key, BodyEJ) ->
     BodyEJ;
-finalize_create_body(_Req, #base_state{ resource_state = #key_state{generated_private_key = GenPrivKey}}, BodyEJ) ->
+finalize_create_body(_Req, #base_state{ resource_state = #key_state{generated_private_key = GenPrivKey}}, _Key, BodyEJ) ->
     ej:set({<<"private_key">>}, BodyEJ, GenPrivKey).

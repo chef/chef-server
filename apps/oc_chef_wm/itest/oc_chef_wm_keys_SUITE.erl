@@ -742,8 +742,8 @@ new_key_ejson(Config, Name, Expiration) ->
     new_key_ejson(Config, Name, Expiration, pubkey).
 new_key_ejson(_Config, Name, Expiration, create_key) ->
     {[{<<"name">>, Name}, {<<"create_key">>, true}, {<<"expiration_date">>, Expiration}]};
-new_key_ejson(Config, Name, Expiration, PubKey) ->
-    PubKey = proplists:get_value(PubKey, Config),
+new_key_ejson(Config, Name, Expiration, KeyName) ->
+    PubKey = proplists:get_value(KeyName, Config),
     {[{<<"name">>, Name}, {<<"public_key">>, PubKey}, {<<"expiration_date">>, Expiration}]}.
 
 has_well_formed_public_key(Config, EJ) ->
