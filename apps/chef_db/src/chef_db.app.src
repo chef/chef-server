@@ -19,7 +19,7 @@
 {application, chef_db,
  [
   {description, "Database abstraction layer for Chef server"},
-  {vsn, git},
+  {vsn, "0"},
   {registered, []},
   {applications, [
                   kernel,
