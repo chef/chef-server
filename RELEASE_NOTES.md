@@ -1,5 +1,22 @@
 # Enterprise Chef Release Notes
 
+## 11.3.1 (2015-04-20)
+
+The folllowing items are new for Enterprise Chef 11.3.1 and/or are
+change from previous versions:
+
+### Security Updates
+
+The following items are the set of security fixes that have been applied since Enterprise Chef 11.3.0:
+
+* OpenResty 1.7.7.10 (nginx)
+  * CVE-2013-2028 - a stack-based buffer overflow might occur in a worker process while handling a specially crafted request, potentially resulting in arbitrary code execution
+  * CVE-2013-4547 - a character following an unescaped space in a request line was handled incorrectly
+  * CVE-2014-0088 -  memory corruption might occur in a worker process on 32-bit platforms while handling a specially crafted request by ngx_http_spdy_module, potentially resulting in arbitrary code execution
+  * CVE-2014-0133 - a heap memory buffer overflow might occur in a worker process while handling a specially crafted request by ngx_http_spdy_module, potentially resulting in arbitrary code execution
+  * CVE-2014-3556 - pipelined commands were not discarded after STARTTLS command in SMTP proxy
+  * CVE-2014-3616 - it was possible to reuse SSL sessions in unrelated contexts if a shared SSL session cache or the same TLS session ticket key was used for multiple "server" blocks
+
 ## 11.3.0 (2015-02-19)
 
 ### What's New
