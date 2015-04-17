@@ -16,7 +16,7 @@
 require 'pedant/rspec/client_util'
 require 'pedant/rspec/validations'
 
-describe "Client API endpoint", :clients do
+describe "Client API endpoint" do
   include Pedant::RSpec::ClientUtil
 
   # Just until we rename the requestors
@@ -79,7 +79,7 @@ describe "Client API endpoint", :clients do
     let(:resource_url) { client_url }
     let(:persisted_resource_response) { get(resource_url, superuser) }
     let(:default_resource_attributes) { default_client_attributes }
-    let(:required_attributes) { default_client_attributes.except('admin').except('private_key') }
+    let(:required_attributes) { default_client_attributes.except('private_key') }
 
     after :each do
       begin
@@ -122,13 +122,6 @@ describe "Client API endpoint", :clients do
 
       context 'with an empty payload' do
         let(:request_payload){{}}
-        it 'fails' do
-          should look_like create_client_no_name_failure_response
-        end
-      end
-
-      context 'with no name' do
-        let(:request_payload) {{"admin" => false}}
         it 'fails' do
           should look_like create_client_no_name_failure_response
         end
@@ -469,25 +462,6 @@ describe "Client API endpoint", :clients do
         should_generate_new_keys
         should_update_public_key
       end
-
-      # Fixed CS12 w/ keys rotation - same-name requestor and client will now work correctly
-      context "with a normal user of the same name as the client" do
-        after(:each)  { delete api_url("/users/#{client_name}"), admin_user }
-
-        let(:requestor) { user_requestor }
-        let(:user_requestor) { Pedant::User.new(client_name, user_private_key, platform: platform, preexisting: false) }
-        let(:user_response) { post api_url('/users'), superuser, payload: user_attributes }
-        let(:user_parsed_response) { parse(user_response).tap { |x| puts x } }
-        let(:user_private_key) { user_parsed_response['private_key'] }
-        let(:user_attributes) do
-          {
-            "username" => client_name,
-            "password" => SecureRandom.hex(32)
-          }
-        end
-        # TODO Under keys rotation changs, this should succeed now?
-      end
-
     end
 
     respects_maximum_payload_size

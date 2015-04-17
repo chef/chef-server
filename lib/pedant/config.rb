@@ -45,6 +45,15 @@ module Pedant
       # file
       non_nil_cli_options = cli_options.to_hash.delete_if{|key, value| value.nil? }
       merge!(non_nil_cli_options)
+
+      # TODO: suggestions?
+      #
+      # Messy, but because this gets exposed via 'request' which gets mixed into a bunch
+      # of rspec-isms, I haven't been able to find any other safe way to both expose it
+      # for easy configuration in tests while ensuring it is initialized when not specified
+      # This is made more complicated by the fact that we run a nested instance
+      # of pedant/rspec to handle org validation, and so it needs to be visible in both places.
+      $server_api_version = server_api_version
     end
 
     # Generate a list of directories in which Pedant will look for
@@ -131,9 +140,5 @@ module Pedant
     # Default orgname is nil by default
     default_orgname(nil)
 
-    # Default API version is zero. Note that this value
-    # is expected to be updated when minimum supported
-    # API version of the server changes.
-    server_api_version(0)
   end
 end

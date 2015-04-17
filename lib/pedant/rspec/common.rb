@@ -34,17 +34,17 @@ module Pedant
       included do |base|
 
         base.extend(RSpecShared::Methods)
-
         include Pedant::JSON
         include Pedant::Request
         include Pedant::RSpec::CommonResponses
 
+
         # Request/Response
         subject { response } # By default, we are always testing responses
-        let(:response) { authenticated_request(request_method, request_url_with_query_parameters, requestor, request_options) }
+        let(:response) { authenticated_request(request_method, request_url_with_query_parameters, requestor, request_options.merge({server_api_version: request_version })) }
         let(:request_url_with_query_parameters){ request_url + (request_query_parameters ? "?#{request_query_parameters}" : "") }
         let(:parsed_response) { parse(response) }
-
+        let(:request_version) { server_api_version }
         let(:request_method) { fail "Define one of the following: :GET, :POST, :PUT, :DELETE" }
         let(:requestor)      { fail "Define requestor (ex: admin_user, normal_user, etc.)" }
         let(:request_url)    { fail "Define url" }
@@ -60,16 +60,16 @@ module Pedant
         let(:pedant_created_clients) { platform.clients.reject(&:bogus?).map(&:name).sort }
         let(:pedant_users)   { (['admin'] + platform.users.map(&:name)).sort }
 
-        # TODO: With request query parameters, in order to be completely
-        # general, we would first need to differentiate between query
-        # parameters intended for the search endpoint and otherwise in
-        # order to escape any embedded Solr query operators, and then
-        # URI encode the whole thing.
 
         def self.named_response_code(code)
           "#{code} #{Pedant::RSpec::HTTP::STATUS_CODES[code]}"
         end
 
+        # TODO: With request query parameters, in order to be completely
+        # general, we would first need to differentiate between query
+        # parameters intended for the search endpoint and otherwise in
+        # order to escape any embedded Solr query operators, and then
+        # URI encode the whole thing.
         def self.should_respond_with(code, additional_message = nil, metadata = {}, &additional_assertions)
           metadata[:validation] = true if code == 400
           metadata[:authentication] = true if code == 401
@@ -400,8 +400,6 @@ module Pedant
           }.uniq
         end
 
-        require 'pathname'
-
         # Use this to wrap a group of examples into a focused context
         # We can't use focus because Rspec already has that directive
         def self.isolate(message = nil, &examples)
@@ -421,6 +419,7 @@ module Pedant
         def platform
           Pedant::Config.pedant_platform
         end
+
 
         ## TODO: Remove this method; we probably don't need to access it directly
         def server

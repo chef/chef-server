@@ -23,6 +23,15 @@ module Pedant
     require 'mixlib/shellout'
     include Pedant::JSON
 
+    # TODO: alternative suggestions?
+    # These accessors will at least hide the fact we're using a global...
+    def server_api_version= (v)
+      $server_api_version = v || Pedant::Config.server_api_version
+    end
+    def server_api_version
+      $server_api_version
+    end
+
     # Grab the the version of Chef / Knife that's on the box in order
     # to properly set the X-Chef-Version header
     KNIFE_VERSION = begin
@@ -72,6 +81,10 @@ module Pedant
     # authentication headers are applied last, and thus have priority
     # over any headers set in this hash.
     #
+    # :server_api_version => allows you to specify server api version to
+    # use for the request. Set to nil if you want to omit the default
+    # version header from the request.
+    #
     # :payload => the body of the request.  This is required for all PUT
     # and POST requests.  It should be given in its final form (i.e., as
     # a String, not a Ruby hash or anything else)
@@ -107,7 +120,7 @@ module Pedant
                             {"X-Ops-Server-API-Version" =>  version}
                           end
                         else
-                          {"X-Ops-Server-API-Version" => Pedant::Config.server_api_version}
+                          {"X-Ops-Server-API-Version" => server_api_version}
                         end
 
       auth_headers = opts[:auth_headers] || requestor.signing_headers(method, url, payload)
@@ -154,6 +167,15 @@ module Pedant
 
     def delete(url, requestor, opts={}, &validator)
       authenticated_request :DELETE, url, requestor, opts, &validator
+    end
+
+    # Use in conjunction with the server_api_version accessor to
+    # reset version to default
+    def reset_server_api_version
+      $server_api_version  = Pedant::Config.server_api_version
+    end
+    def use_max_server_api_version
+      $server_api_version  = 1 # TODO Pedant::Config.max_server_api_version
     end
 
   end
