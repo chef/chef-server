@@ -99,9 +99,7 @@ make_non_deprecated_tests(Generator) ->
     make_versioned_test_range(?API_DEPRECATED_VER + 1, ?API_MAX_VER, Generator).
 
 make_deprecated_tests(Generator) ->
-    ?debugVal("I am here 1"),
     T2 = make_versioned_test_range(?API_MIN_VER, ?API_DEPRECATED_VER, Generator),
-    ?debugVal("I am here 2"),
     T2.
 
 make_all_versions_tests(Generator) ->
@@ -109,4 +107,3 @@ make_all_versions_tests(Generator) ->
 
 make_versioned_test_range(Min, Max, Generator) ->
     [Generator(Version) || Version <- lists:seq(Min, Max)].
-
