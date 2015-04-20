@@ -1,5 +1,9 @@
 # Enterprise Chef Changelog
 
+## 11.3.1 (2015-04-20)
+
+* openresty (nginx) 1.7.7.10
+
 ## 11.3.0 (2015-02-19)
 
 * Ensure nginx restarts on frontends after lua-related changes

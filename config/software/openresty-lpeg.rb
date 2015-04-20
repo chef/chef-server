@@ -12,7 +12,7 @@ env = {
   "PATH" => "#{install_dir}/embedded/bin:#{ENV["PATH"]}",
 }
 
-lua_dir = "#{install_dir}/embedded/luajit/include/luajit-2.0"
+lua_dir = "#{install_dir}/embedded/luajit/include/luajit-2.1"
 
 build do
   command "make LUADIR=#{lua_dir}", :env => env
