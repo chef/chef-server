@@ -1,29 +1,36 @@
 # Chef Server Release Notes
 
-## 12.0.8 (undetermined)
+## 12.0.8 (2015-04-20)
 
-The following items are new since Chef Server 12.0.7 and/or are changes from previous versions.
-For specific breakdown of updated components, refer to CHANGELOG.md
+The following items are new since Chef Server 12.0.7 and/or are changes from previous versions.  For specific breakdown of updated components, refer to CHANGELOG.md
+
+* oc\_erchef
+  * Server API Versioning is now enabled and current API version is `0`.
+    See chef-rfc/rfc-041 for details on server API versioning support.
+* `chef-server-ctl`
+  * has been updated to use the Keys API for key management commands.
+  * `--enable-external-auth` option to command `chef-server-ctl password` has been fixed
 
 ### Security Updates
-* OpenResty 1.7.7.10 - a stack-based buffer overflow might occur in a worker
-  process while handling a specially crafted request, potentially
-  resulting in arbitrary code execution (CVE-2013-2028)
-* OpenResty 1.7.7.10 - a character following an unescaped space in a request line
-  was handled incorrectly (CVE-2013-4547)
-* OpenResty 1.7.7.10 - memory corruption might occur in a worker process on 32-bit
-  platforms while handling a specially crafted request by
-  ngx_http_spdy_module, potentially resulting in arbitrary code
-  execution (CVE-2014-0088)
-* OpenResty 1.7.7.10 - a heap memory buffer overflow might occur in a worker
-  process while handling a specially crafted request by
-  ngx_http_spdy_module, potentially resulting in arbitrary code
-  execution (CVE-2014-0133)
-* OpenResty 1.7.7.10 - pipelined commands were not discarded after STARTTLS
-  command in SMTP proxy (CVE-2014-3556)
-* OpenResty 1.7.7.10 - it was possible to reuse SSL sessions in unrelated contexts
-  if a shared SSL session cache or the same TLS session ticket key was
-  used for multiple "server" blocks (CVE-2014-3616)
+
+The following items are the security updates that have been applied since Chef Server 12.0.7
+
+* OpenResty 1.7.7.10 (nginx)
+  * CVE-2013-2028 - a stack-based buffer overflow might occur in a worker process while handling a specially crafted request, potentially resulting in a   rbitrary code execution
+  * CVE-2013-4547 - a character following an unescaped space in a request line was handled incorrectly
+  * CVE-2014-0088 -  memory corruption might occur in a worker process on 32-bit platforms while handling a specially crafted request by `ngx_http_spdy_module`, potentially resulting in arbitrary code execution
+  * CVE-2014-0133 - a heap memory buffer overflow might occur in a worker process while handling a specially crafted request by `ngx_http_spdy_module`, potentially resulting in arbitrary code execution
+  * CVE-2014-3556 - pipelined commands were not discarded after STARTTLS command in SMTP proxy
+  * CVE-2014-3616 - it was possible to reuse SSL sessions in unrelated contexts if a shared SSL session cache or the same TLS session ticket key was used for multiple "server" blocks
+
+### Issue Fixes
+  * [opscode-omnibus-744](https://github.com/chef/opscode-omnibus/issues/744)
+  * [chef-server-142](https://github.com/chef/chef-server/issues/142)
+
+### API Changes and Additions
+  * Server API Version support is enabled via X-Ops-Server-API-Version.
+    Current and default version is now version 0.
+
 
 ## 12.0.7 (2015-03-26)
 

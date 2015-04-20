@@ -1,21 +1,39 @@
 # Chef Server Changelog
 
-## 12.0.8 (undetermined)
+## 12.0.8 (2015-04-20)
 
 ### chef-server-ctl
 * Added rspec testing basics for chef-server-ctl commands
 * Updated and added testing for key rotation related chef-server-ctl commands
 
-## 12.0.7 (2015-03-26)
-
 ### oc\_erchef 1.7.0
-* introduces server api versioning pr chef-rfc/rfc-041.  As of 1.7.0
+* introduces server api versioning per chef-rfc/rfc-041.  As of 1.7.0
   the only supported version is 0.
 * significant internal refactoring and cleanup
 
 ### oc-chef-pedant 2.0.5
 * tests for server api versioning, and by default pass
   x-ops-server-api-version to the server on all requests.
+
+
+### opscode-omnibus
+* use node name for rabbit mq configuration instead of 'localhost'.
+* use keys API for key rotation in chef-server-ctl, instead of direct
+  database access.
+* lua routing tests working again
+* travis support enabled
+* centos-7/rhel-7 enabled for local builds
+
+### chef-mover
+* now floating on master
+
+
+### Contributors
+
+* bariyama - rabbitmq
+
+## 12.0.7 (2015-03-26)
+
 
 ### oc\_erchef 1.6.4
 * Policyfile endpoint URLs updated to match Chef RFC 042
@@ -28,6 +46,7 @@
 ## 12.0.6 (2015-03-19)
 
 ### opscode-omnibus
+
 * Use a cert instead of a public key for pivotal.
 * No longer generate /etc/opscode/pivotal.cert as it is no longer used.
 * Remove the public key we now use for bootstrapping (/etc/opscode/pivotal.pub) post bootstrap so that it only lives in the database.
