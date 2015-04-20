@@ -15,9 +15,7 @@
 * tests for server api versioning, and by default pass
   x-ops-server-api-version to the server on all requests.
 
-
 ### opscode-omnibus
-* use node name for rabbit mq configuration instead of 'localhost'.
 * use keys API for key rotation in chef-server-ctl, instead of direct
   database access.
 * lua routing tests working again
@@ -26,11 +24,6 @@
 
 ### chef-mover
 * now floating on master
-
-
-### Contributors
-
-* bariyama - rabbitmq
 
 ## 12.0.7 (2015-03-26)
 
