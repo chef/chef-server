@@ -1,5 +1,22 @@
 # Chef Server Release Notes
 
+## 12.1.0 (unknown)
+
+The following items are new since Chef Server 12.0.8 and/or are changes from previous versions.  For specific breakdown of updated components, refer to CHANGELOG.md
+
+* oc\_erchef
+  * Server API version is currently '1', and this release deprecates API
+    v0 behaviors for the Users, Clients and Prinicpals endpoints.
+  * New behaviors introduced under APIv1 for Clients, Users, and Principals.  See
+    API Changes and Additions
+
+### API Changes and Additions
+
+TODO
+TODO Reference to blog/doc posts
+TODO
+
+
 ## 12.0.8 (2015-04-20)
 
 The following items are new since Chef Server 12.0.7 and/or are changes from previous versions.  For specific breakdown of updated components, refer to CHANGELOG.md

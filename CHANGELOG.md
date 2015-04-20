@@ -1,5 +1,16 @@
 # Chef Server Changelog
 
+## 12.1.0 (unknown)
+
+### oc-chef-pedant
+*  2.1.0
+  * Versioned testing support for users, clients, and principals
+  * exposed 'server\_api\_version to tests.
+
+### oc\_erchef
+* 1.8.0
+  * API v1 introduced, affecting users, clients, and principals endpoints.
+
 ## 12.0.8 (2015-04-20)
 
 ### chef-server-ctl
