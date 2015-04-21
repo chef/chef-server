@@ -152,7 +152,7 @@ work_mem = <%= node['private_chef']['postgresql']['work_mem'] %>				# min 64kB
 
 # - Settings -
 
-#wal_level = minimal			# minimal, archive, or hot_standby
+wal_level = <%= node['private_chef']['postgresql']['wal_level'] %>			# minimal, archive, or hot_standby
 					# (change requires restart)
 #fsync = on				# turns forced synchronization on or off
 #synchronous_commit = on		# synchronization level; on, off, or local
@@ -180,10 +180,11 @@ checkpoint_warning = <%= node['private_chef']['postgresql']['checkpoint_warning'
 
 # - Archiving -
 
-#archive_mode = off		# allows archiving to be done
+
+archive_mode = <%= node['private_chef']['postgresql']['archive_mode'] %>		# allows archiving to be done
 				# (change requires restart)
-#archive_command = ''		# command to use to archive a logfile segment
-#archive_timeout = 0		# force a logfile segment switch after this
+archive_command = '<%= node['private_chef']['postgresql']['archive_command'] %>'   # command to use to archive a logfile segment
+archive_timeout = <%= node['private_chef']['postgresql']['archive_timeout'] %>		# force a logfile segment switch after this
 				# number of seconds; 0 disables
 
 
