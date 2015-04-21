@@ -17,6 +17,7 @@ vm:
     - "*.vmdk"
     - "*.plt"
     - "*.beam"
+    - .bundle/
     - rspec.failures
 
 projects:
