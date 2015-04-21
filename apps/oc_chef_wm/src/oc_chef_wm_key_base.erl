@@ -69,12 +69,12 @@ create_object({PublicKey, PrivateKey},
     KeyContext1 = KeyContext#key_context{ object_ej = EJ1, key_ej = KeyEJ },
     oc_chef_wm_base:create_from_json(Req,
                                      State#base_state{ key_context = KeyContext1},
-                                     chef_key_base:key_owner_type(Type) , {authz_id, AuthzId}, EJ1);
+                                     object_type(Type) , {authz_id, AuthzId}, EJ1);
 create_object({undefined, undefined},
               Req, #base_state{key_context = #key_context{type = Type, object_authz_id = AuthzId,
                                                           object_ej = EJ}} = State ) ->
     % No public key was provided, and no key requested to be generated. Continue without additional action.
-    oc_chef_wm_base:create_from_json(Req, State, chef_key_base:key_owner_type(Type), {authz_id, AuthzId}, EJ);
+    oc_chef_wm_base:create_from_json(Req, State, object_type(Type), {authz_id, AuthzId}, EJ);
 create_object({PublicKey, PrivateKey},
               Req,
               #base_state{server_api_version = Version, organization_guid = OrgId,
@@ -99,7 +99,7 @@ create_object({PublicKey, PrivateKey},
             OwnerEJ1 = ej:set({<<"id">>}, OwnerEJ, ObjectId),
             OwnerEJ2 = ej:delete({<<"create_key">>}, OwnerEJ1),
             oc_chef_wm_base:create_from_json(Req, State#base_state{key_context = KeyContext2},
-                                            chef_key_base:key_owner_type(OwnerType), {authz_id, OwnerAuthzId}, OwnerEJ2);
+                                            object_type(OwnerType), {authz_id, OwnerAuthzId}, OwnerEJ2);
         _What ->
             {{halt, 500}, Req, State#base_state{ log_msg = failed_to_save_new_key }}
     end.
@@ -114,4 +114,6 @@ finalize_create_body(_Req, #base_state{key_context = #key_context{key_ej = undef
 finalize_create_body(_Req, #base_state{key_context = #key_context{key_ej = EJToEmbed}}, BodyEJ) ->
     ej:set({<<"chef_key">>}, BodyEJ, EJToEmbed).
 
+object_type(Type) ->
+    list_to_existing_atom("chef_" ++ atom_to_list(Type)).
 
