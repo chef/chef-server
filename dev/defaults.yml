@@ -1,0 +1,155 @@
+vm:
+  packages: [ ntp, curl, wget, htop, uuid-dev, tmux, vim, iotop ]
+  installer-list-max-size: 10
+  # TODO whitelist as well?
+  sync-exclude:
+    - pkg/
+    - deps/
+    - _rel/
+    - opscode-dev-vm/
+    - chef-docs/ # Huge if you have it checked out!
+    - ebin/
+    - .eunit/
+    - .kitchen/
+    - "*_SUITE_data/"
+    - "*.deb"
+    - "*.rpm"
+    - "*.vmdk"
+    - "*.plt"
+    - "*.beam"
+    - .bundle/
+    - rspec.failures
+
+projects:
+  oc_erchef:
+    type: erlang
+    database: opscode_chef # Used for dvm psql oc_erchef
+    service:
+      rel-type: relx
+      name: opscode-erchef
+      cookie: erchef
+      node: erchef@127.0.0.1
+  oc_bifrost: # TODO : unverified
+    type: erlang
+    database: opscode_bifrost
+    service:
+      rel-type: relx
+      name:  oc_bifrost
+      cookie: oc_bifrost
+      node: oc_bifrost@127.0.0.1
+  bookshelf: # TODO unverified
+    type: erlang
+    service:
+      rel-type: relx
+      name:  bookhself
+      cookie: bookshelf
+      node: bookshelf@127.0.0.1
+  omnibus:
+    type: omnibus
+    git:
+      uri: git@github.com:chef/opscode-omnibus.git
+      branch: master
+    components:
+      # dest paths are relative to /opt/opscode/embedded for these components
+      # source apths are relative to opscode-omnibus/files
+      private-chef-cookbooks:
+        source_path: private-chef-cookbooks/private-chef
+        dest_path: cookbooks/private-chef
+        reconfigure_on_load: true
+      ha-drdb-cookbook:
+        source_path: private-chef-cookbooks/chef-ha-drdb
+        dest_path: cookbooks/chef-ha-drdb
+        reconfigure_on_load: true
+      ctl-commands:
+        source_path: private-chef-ctl-commands
+        dest_path: service/omnibus-ctl
+        reconfigure_on_load: false
+      upgrades:
+        source_path: private-chef-upgrades
+        dest_path: upgrades
+        reconfigure_on_load: false
+
+  oc-chef-pedant:
+    type: ruby
+    database: opscode_chef
+    run: "bin/oc-chef-pedant -c /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb"
+
+  #TODO
+  # fixie:
+  #   type: ruby
+  #
+
+
+quickstart:
+  oc_erchef:
+    description: "Load up cookbooks, oc-chef-pedant, and oc_erchef from /host. Start oc_erchef into a console."
+    load:
+      - omnibus private-chef-cookbooks
+      - oc-chef-pedant
+      - oc_erchef
+    start:
+      - oc_erchef
+  omnibus:
+    description: "Load most omnibus components (private-chef-cookbook, ctl-commands, upgrades) and run reconfigure"
+    load:
+      - private-chef-cookbooks
+      - ctl-commands
+      - upgrades
+  oc_bifrost:
+    description: "Load cookbooks, oc_bifrost, oc-bifrost-pedant, and oc_bifrost from /host. Start oc_bifrost into a console."
+    load:
+      - omnibus private-chef-cookbooks
+      - oc-bifrost-pedant
+      - oc_bifrost
+    start:
+      - oc_bifrost
+
+# NOTE
+# The orgs and users below are NOT created by default. To create them at any time,
+# invoke:
+#
+#   dvm populate users
+#   dvm populate orgs
+#
+# Or to save some typing:
+#   dvm populate all
+#
+# TODO this should live in the readme.
+# Under /vagrant/testdata (or oc_erchef/dvm/testdata on the host) the following will be populated,
+# depending on which 'populate' command you've run:
+#
+# keys/
+#   -> all user keys except pivotal (which is in /etc/opscode)
+# pivotal/  Pivotal can only be used from inside the vm
+#   .chef/chef-shell.rb for pivotal
+#   .chef/knife.rb for pivotal, but note that this will not be configured for an org, so is primarily
+#                  useful for knife raw
+#
+# orgs/
+#    each-orgname/
+#       orgname-validator.pem
+#       nodes/
+#         each-nodename/
+#           .chef/nodename-client.pem
+#           .chef/chef-client.rb
+#       users/
+#         each-username/
+#           .chef/knife.rb (will refer back to ../../keys/username-key.pem)
+
+orgs:
+  ponyville:
+    admins: [ applejack ]
+    users: [ applejack, thebeav ]
+    nodes: [ node1, node2, node3 ]
+  mariobrothers:
+    admins: [ mario, luigi ]
+    users: [ mario, luigi, bowser, toadstool ]
+    nodes: [ node1, node2, node3 ]
+  mixup:
+    admins: [ bowser, thebeav ]
+    users: [ applejack, mario, thebeav, toadstool, bowser]
+    nodes: [ node1, node2, node3 ]
+
+# These users will be created if they don't exist. No knife.rb will
+# be generated for them unless they are part of an org
+users: [unaffiliated]

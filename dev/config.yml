@@ -1,0 +1,5 @@
+# Place any complete or partial overrides to the configuration in defaults.yml here.
+# Map entries wlll be replaced, and you can remove from defaults by prefixing with --, for example:
+#
+# vm:
+#   packages: [ --vim, emacs24 ]

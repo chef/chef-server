@@ -123,6 +123,9 @@
        {uuid,".*",
              {git,"https://github.com/okeuday/uuid",
                   "f7c141c8359cd690faba0d2684b449a07db8e915"}},
+       {sync, ".*",
+             {git,"https://github.com/rustyio/sync.git",
+                  "ae7dbd4e6e2c08d77d96fc4c2bc2b6a3b266492b"}},
        {rebar_lock_deps_plugin,".*",
                                {git,"git://github.com/seth/rebar_lock_deps_plugin.git",
                                     "7a5835029c42b8138325405237ea7e8516a84800"}}]}.

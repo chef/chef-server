@@ -1,0 +1,5 @@
+# keeping this around for local testing
+gemspec :name => 'dvm.gemspec'
+
+gem "deep_merge", git:  "https://github.com/danielsdeleo/deep_merge.git"
+
