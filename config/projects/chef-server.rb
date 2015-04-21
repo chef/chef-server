@@ -32,7 +32,6 @@ override :berkshelf2, version: "2.0.18"
 override :rabbitmq, version: "3.3.4"
 override :erlang, version: "R16B03-1"
 override :ruby, version: "2.1.4"
-override :'server-jre', version: "7u25"
 
 # creates required build directories
 dependency "preparation"
