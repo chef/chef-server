@@ -102,7 +102,7 @@
                        "62f07401f56ac22d699c7c2d062af11b396c85b9"}},
        {chef_db,".*",
                 {git,"git@github.com:opscode/chef_db.git",
-                     "4382837a32f62079ad1172bafdf394c39fa69a26"}},
+                     "8381540bd3abf2753a4418526a10b910df087ba2"}},
        {oc_chef_authz,".*",
                       {git,"git@github.com:opscode/oc_chef_authz.git",
                            "92b723c058d8225fc5fec9b70d796dfc6bd8993b"}},
@@ -123,7 +123,7 @@
                         "0d7cd921b5dd382b70d7ce3b1672c4a670ada313"}},
        {chef_wm,".*",
                 {git,"git@github.com:opscode/chef_wm.git",
-                     "c637abb943314ca646f58408852b5ef4e569e0c9"}},
+                     "e37959efce846b0294e3fb86de913bee887300a1"}},
        {quickrand,".*",
                   {git,"https://github.com/okeuday/quickrand.git",
                        "0395a10b94472ccbe38b62bbfa9d0fc1ddac1dd7"}},
@@ -148,4 +148,3 @@
            {d,'CHEF_WM_DARKLAUNCH',xdarklaunch_req},
            {d,'SEARCH_CACHE',oc_chef_wm_search_cache},
            {parse_transform,lager_transform}]}.
-
