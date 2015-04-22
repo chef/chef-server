@@ -3,6 +3,10 @@ branches:
     - master
 cache:
   bundler: true
+  directories:
+    - $HOME/perl5
+    - $HOME/.cpanm
+    - $HOME/.cpan
 sudo: false
 language: erlang
 otp_release:
@@ -21,6 +25,7 @@ env:
 
 install:
   - ./rebar get-deps -C rebar.config.lock
+  - cpanm --local-lib=$HOME/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
   - cpanm --notest --quiet App::Sqitch
 script:
   - make
