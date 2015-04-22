@@ -17,6 +17,7 @@
 require "openssl"
 require "optparse"
 require "ostruct"
+require "chef/key"
 
 # due to how things are being exec'ed, the CWD will be all wrong,
 # so we want to use the full path when loaded from omnibus-ctl,
@@ -33,9 +34,9 @@ add_command_under_category "add-client-key", "key-rotation", "Create a new clien
   @options = OpenStruct.new
   @options.expiration_date = "infinity"
   @key = nil
-  @usage = "Usage: chef-server-ctl add-client-key ORGNAME CLIENTNAME PUBLIC_KEY_PATH [-e, --expiration-date DATE] [-k, --key-name NAME]"
+  @usage = "Usage: chef-server-ctl add-client-key ORGNAME CLIENTNAME [-p, --public-key-path, -e, --expiration-date DATE, -k, --key-name NAME]."
   @usage = @usage << @helper.add_key_usage
-  @arg_list = ["-e", "--expiration-date", "-k", "--key-name"]
+  @arg_list = ["-e", "--expiration-date", "-k", "--key-name", "-p", "--public-key-path"]
 
   opt_parser = OptionParser.new do |opts|
     opts.banner = @usage
@@ -49,6 +50,11 @@ add_command_under_category "add-client-key", "key-rotation", "Create a new clien
       @helper.catch_argument_passed_as_input(@arg_list, "--key-name", key_name)
       @options.key_name = key_name
     end
+
+    opts.on("-p", "--public-key-path PATH", "Path to a valid public key, if not passed, the server will generate a public key for you.") do |public_key_path|
+      @helper.catch_argument_passed_as_input(@arg_list, "--public-key-path", public_key_path)
+      @options.public_key_path = public_key_path
+    end
   end
 
   begin
@@ -61,17 +67,25 @@ add_command_under_category "add-client-key", "key-rotation", "Create a new clien
 
   @helper.get_required_arg!(@options, cmd_args, @usage, :orgname, "ORGNAME", 1)
   @helper.get_required_arg!(@options, cmd_args, @usage, :clientname, "CLIENTNAME", 2)
-  @helper.get_required_arg!(@options, cmd_args, @usage, :public_key_path, "PUBLIC_KEY_PATH", 3)
 
-  @key = @helper.read_and_check_key(@options.public_key_path)
-
-  # if --key-name was not passed, default to the key's fingerprint
-  if @options.key_name.nil?
-    @options.key_name = @helper.generate_fingerprint(@key)
+  if @options.public_key_path
+    @key = @helper.read_and_check_key(@options.public_key_path)
+  else
+    if @options.key_name
+      @key = nil
+    else
+      @helper.exit_failure(@helper.pass_key_name_if_public_key_missing)
+    end
   end
 
+  Chef::Config[:chef_server_url] = "#{Chef::Config[:chef_server_root]}/organizations/#{@options.orgname}"
+  chef_key = @helper.populate_client_key(@options.clientname, @options.key_name, @key, @options.expiration_date)
+
   begin
-    @helper.post_rest("/organizations/#{@options.orgname}/clients/#{@options.clientname}/keys", @helper.build_key_object(@options.key_name, @key, @options.expiration_date))
+    new_key = chef_key.create
+    if new_key.private_key
+      @helper.print_private_key(@options.key_name, new_key.private_key)
+    end
   rescue Net::HTTPServerException => e
     if e.response.code == "409"
       @helper.exit_failure("Error: A key named #{@options.key_name} already exists for #{@options.clientname} in org #{@options.orgname}.")
@@ -89,9 +103,9 @@ add_command_under_category "add-user-key", "key-rotation", "Create a new user ke
   @options = OpenStruct.new
   @options.expiration_date = "infinity"
   @key = nil
-  @usage = "Usage: chef-server-ctl add-user-key USERNAME PUBLIC_KEY_PATH [-e, --expiration-date DATE] [-k, --key-name NAME]"
+  @usage = "Usage: chef-server-ctl add-user-key USERNAME [-p, --public-key-path, -e, --expiration-date DATE, -k, --key-name NAME]"
   @usage = @usage << @helper.add_key_usage
-  @arg_list = ["-e", "--expiration-date", "-k", "--key-name"]
+  @arg_list = ["-e", "--expiration-date", "-k", "--key-name", "-p", "--public-key-path"]
   opt_parser = OptionParser.new do |opts|
     opts.banner = @usage
 
@@ -104,6 +118,11 @@ add_command_under_category "add-user-key", "key-rotation", "Create a new user ke
       @helper.catch_argument_passed_as_input(@arg_list, "--key-name", key_name)
       @options.key_name = key_name
     end
+
+    opts.on("-p", "--public-key-path PATH", "Path to a valid public key, if not passed, the server will generate a public key for you.") do |public_key_path|
+      @helper.catch_argument_passed_as_input(@arg_list, "--public-key-path", public_key_path)
+      @options.public_key_path = public_key_path
+    end
   end
 
   begin
@@ -115,20 +134,26 @@ add_command_under_category "add-user-key", "key-rotation", "Create a new user ke
   end
 
   @helper.get_required_arg!(@options, cmd_args, @usage, :username, "USERNAME", 1)
-  @helper.get_required_arg!(@options, cmd_args, @usage, :public_key_path, "PUBLIC_KEY_PATH", 2)
 
-  @key = @helper.read_and_check_key(@options.public_key_path)
-
-  # if --key-name was not passed, default to the key's fingerprint
-  if @options.key_name.nil?
-    @options.key_name = @helper.generate_fingerprint(@key)
+  if @options.public_key_path
+    @key = @helper.read_and_check_key(@options.public_key_path)
+  else
+    if @options.key_name
+      @key = nil
+    else
+      @helper.exit_failure(@helper.pass_key_name_if_public_key_missing)
+    end
   end
 
+  chef_key = @helper.populate_user_key(@options.username, @options.key_name, @key, @options.expiration_date)
   begin
-    @helper.post_rest("/users/#{@options.username}/keys", @helper.build_key_object(@options.key_name, @key, @options.expiration_date))
+    new_key = chef_key.create
+    if new_key.private_key
+      @helper.print_private_key(@options.key_name, new_key.private_key)
+    end
   rescue Net::HTTPServerException => e
     if e.response.code == "409"
-      @helper.exit_failure("Error: A key named #{@options.key_name} already exists for user #{@options.username}}.")
+      @helper.exit_failure("Error: A key named #{@options.key_name} already exists for user #{@options.username}.")
     elsif e.response.code == "404"
       @helper.exit_failure("Error: Could not find user #{@options.username}.")
     else
@@ -142,12 +167,12 @@ add_command_under_category "list-client-keys", "key-rotation", "List keys for a 
   @helper = KeyCtlHelper.new
   @options = OpenStruct.new
   @options.show_public_keys = false
-  @usage = "Usage: chef-server-ctl list-client-keys ORGNAME CLIENTNAME [-s, --show-public-keys]"
-  @arg_list = ["-s", "--show-public-keys"]
+  @usage = "Usage: chef-server-ctl list-client-keys ORGNAME CLIENTNAME [-v, --verbose]"
+  @arg_list = ["-v", "--verbose"]
 
   opt_parser = OptionParser.new do |opts|
-    opts.on("-s", "--show-public-keys", "Whether or not to output the full public key.") do
-      @options.show_public_keys = true
+    opts.on("-v", "--verbose", "Whether or not to output the full public key.") do
+      @options.verbose = true
     end
   end
 
@@ -162,9 +187,13 @@ add_command_under_category "list-client-keys", "key-rotation", "List keys for a 
   @helper.get_required_arg!(@options, cmd_args, @usage, :orgname, "ORGNAME", 1)
   @helper.get_required_arg!(@options, cmd_args, @usage, :clientname, "CLIENTNAME", 2)
 
+  Chef::Config[:chef_server_url] = "#{Chef::Config[:chef_server_root]}/organizations/#{@options.orgname}"
   begin
-    results = @helper.get_rest("/organizations/#{@options.orgname}/clients/#{@options.clientname}/keys")
-    @helper.output_key_results(results, @options.show_public_keys)
+    if @options.verbose
+      @helper.output_full_key_results(Chef::Key.list_by_client(@options.clientname, inflate=true))
+    else
+      @helper.output_simple_key_results(Chef::Key.list_by_client(@options.clientname))
+    end
   rescue Net::HTTPServerException => e
     if e.response.code == "404"
       @helper.exit_failure("Error: Could not find client #{@options.clientname} in org #{@options.orgname}.")
@@ -180,12 +209,12 @@ add_command_under_category "list-user-keys", "key-rotation", "List keys for a us
 
   @options = OpenStruct.new
   @options.show_public_keys = false
-  @usage = "Usage: chef-server-ctl list-user-keys USERNAME [-s, --show-public-keys]"
-  @arg_list = ["-s", "--show-public-keys"]
+  @usage = "Usage: chef-server-ctl list-user-keys USERNAME [-v, --verbose]"
+  @arg_list = ["-v", "--verbose"]
 
   opt_parser = OptionParser.new do |opts|
-    opts.on("-s", "--show-public-keys", "Whether or not to output the full public key.") do
-      @options.show_public_keys = true
+    opts.on("-v", "--verbose", "Outputs more verbose key info.") do
+      @options.verbose = true
     end
   end
 
@@ -200,8 +229,11 @@ add_command_under_category "list-user-keys", "key-rotation", "List keys for a us
   @helper.get_required_arg!(@options, cmd_args, @usage, :username, "USERNAME", 1)
 
   begin
-    results = @helper.get_rest("/users/#{@options.username}/keys")
-    @helper.output_key_results(results, @options.show_public_keys)
+  if @options.verbose
+    @helper.output_full_key_results(Chef::Key.list_by_user(@options.username, inflate=true))
+  else
+    @helper.output_simple_key_results(Chef::Key.list_by_user(@options.username))
+  end
   rescue Net::HTTPServerException => e
     if e.response.code == "404"
       @helper.exit_failure("Error: Could not find user #{@options.username}.")
@@ -220,8 +252,10 @@ add_command_under_category "delete-user-key", "key-rotation", "Delete a key", 2 
   @helper.get_required_arg!(@options, cmd_args, @usage, :username, "USERNAME", 1)
   @helper.get_required_arg!(@options, cmd_args, @usage, :key_name, "KEYNAME", 2)
 
+  key = Chef::Key.new(@options.username, "user")
+  key.name @options.key_name
   begin
-    @helper.delete_rest("/users/#{@options.username}/keys/#{@options.key_name}")
+    key.destroy
   rescue Net::HTTPServerException => e
     if e.response.code == "404"
       @helper.exit_failure("Error: Could not find key #{@options.key_name} for user #{@options.username}.")
@@ -241,8 +275,11 @@ add_command_under_category "delete-client-key", "key-rotation", "Delete a key", 
   @helper.get_required_arg!(@options, cmd_args, @usage, :clientname, "CLIENTNAME", 2)
   @helper.get_required_arg!(@options, cmd_args, @usage, :key_name, "KEYNAME", 3)
 
+  Chef::Config[:chef_server_url] = "#{Chef::Config[:chef_server_root]}/organizations/#{@options.orgname}"
+  key = Chef::Key.new(@options.clientname, "client")
+  key.name @options.key_name
   begin
-    @helper.delete_rest("/organizations/#{@options.orgname}/clients/#{@options.clientname}/keys/#{@options.key_name}")
+    key.destroy
   rescue Net::HTTPServerException => e
     if e.response.code == "404"
       @helper.exit_failure("Error: Could not find key #{@options.key_name} for user #{@options.username}.")

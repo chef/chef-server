@@ -2,6 +2,12 @@
 
 ## 12.1.0 (unknown)
 
+### chef-client master
+* Server's install of Chef now floats on master.
+
+### knife-opc master
+* Server's install of knife-opc now floats on master.
+
 ### oc-chef-pedant
 *  2.1.0
   * Versioned testing support for users, clients, and principals
@@ -14,6 +20,7 @@
 
 ### opscode-omnibus
 * Remove install message from postinst package script
+* Update chef-server-ctl key commands to use chef-client's Chef::Key object.
 
 ## 12.0.8 (2015-04-20)
 

@@ -2,6 +2,6 @@ source 'https://rubygems.org'
 
 # Used for rspec testing only
 gem "rspec"
-gem "chef"
+gem "chef", github: 'chef/chef', :branch => 'master'
 gem 'omnibus-ctl', github: 'chef/omnibus-ctl', :branch => 'master'
 

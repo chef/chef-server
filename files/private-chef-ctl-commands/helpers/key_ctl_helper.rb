@@ -1,9 +1,10 @@
 require "chef/config"
 require "chef/rest"
+require "chef/key"
 
 class KeyCtlHelper
   def initialize
-    @chef_rest = configure_chef_rest
+    Chef::Config.from_file(pivotal_config)
   end
 
   # Optparse doesn't properly handle the case where you specify an argument with mandatory input
@@ -31,25 +32,29 @@ class KeyCtlHelper
     raise SystemExit.new(1, msg)
   end
 
-  def get_rest(url)
-    @chef_rest.get_rest(url)
-  end
-
-  def delete_rest(url)
-    @chef_rest.delete_rest(url)
-  end
-
-  def post_rest(url, body)
-    @chef_rest.post_rest
-  end
-
   def pivotal_config
     "/etc/opscode/pivotal.rb"
   end
 
-  def configure_chef_rest
-    Chef::Config.from_file(pivotal_config)
-    Chef::REST.new(Chef::Config[:chef_server_root])
+  def populate_client_key(clientname, name, public_key, expiration_date)
+    key = Chef::Key.new(clientname, "client")
+    populate_key_helper(key, name, public_key, expiration_date)
+  end
+
+  def populate_user_key(username, name, public_key, expiration_date)
+    key = Chef::Key.new(username, "user")
+    populate_key_helper(key, name, public_key, expiration_date)
+  end
+
+  def populate_key_helper(key, name, public_key, expiration_date)
+    key.name name
+    key.expiration_date expiration_date
+    if public_key
+      key.public_key public_key
+    else
+      key.create_key true
+    end
+    key
   end
 
   def check_valid_iso_date(expiration_date)
@@ -71,21 +76,13 @@ class KeyCtlHelper
     key
   end
 
-  def generate_fingerprint(key)
-    begin
-      openssl_key_object = OpenSSL::PKey::RSA.new(key)
-      data_string = OpenSSL::ASN1::Sequence([
-                                              OpenSSL::ASN1::Integer.new(openssl_key_object.public_key.n),
-                                              OpenSSL::ASN1::Integer.new(openssl_key_object.public_key.e)
-                                            ])
-      OpenSSL::Digest::SHA1.hexdigest(data_string.to_der).scan(/../).join(':')
-    rescue
-      exit_failure(cannot_generate_fingerprint_msg)
-    end
-  end
-
   def add_key_usage
-    "\nUsage: Expiration date defaults to infinity. Pass an ISO 8601 fomatted string: YYYY-MM-DDTHH:MM:SSZ e.g. 2013-12-24T21:00:00Z in UTC timezone\nUsage: Default name used is the fingerprint of the key passed."
+<<EOS
+
+Usage: If --public-key-path isn't passed, the server will generate a public key for you.
+Usage: Expiration date defaults to infinity. Pass an ISO 8601 fomatted string: YYYY-MM-DDTHH:MM:SSZ e.g. 2013-12-24T21:00:00Z in UTC timezone.
+Usage: Default name used is the fingerprint of the key passed.
+EOS
   end
 
   def parse_missing_arg_error(err)
@@ -101,6 +98,7 @@ class KeyCtlHelper
   def exit_http_fail(err)
     exit_failure("Error: An unexpected error has occured (the server returned a #{err.response.code}).\nError: Please contact a system admin if the problem persists.")
   end
+
 
   def get_required_arg!(options, args, usage, field_symbol, field_name, field_number)
     field_value = nil
@@ -120,15 +118,20 @@ class KeyCtlHelper
     }
   end
 
-  def output_key_results(results, show_public_keys)
+  def output_simple_key_results(results)
     results.each do |result|
       puts "\nname: #{result['name']}"
       puts "expired: #{result['expired']}"
-      if show_public_keys
-        public_key = @chef_rest.get_rest(result["uri"])
-        puts "public_key:"
-        puts public_key["public_key"]
-      end
+    end
+  end
+
+  def output_full_key_results(results)
+    results.each do |result|
+      result = result[1]
+      puts "\nname: #{result.name}"
+      puts "expiration_date: #{result.expiration_date}"
+      puts "public_key:"
+      puts result.public_key
     end
   end
 
@@ -146,13 +149,6 @@ It defaults to infinity if you do not pass --expiration-date.
 EOS
   end
 
-  def cannot_generate_fingerprint_msg
-<<EOS
-Error: Could not parse fingerprint for public key you passed.
-Error: If optional --key-name arg is not specified, then fingerprint of key is used by default as the name.
-EOS
-  end
-
   def not_a_public_key_msg
 <<EOS
 Error: Invalid public key passed. Key must begin with:
@@ -162,7 +158,7 @@ EOS
   end
 
   def public_key_path_msg
-    "Error: PUBLIC_KEY_PATH must be a valid path."
+    "Error: --public-key-path PUBLIC_KEY_PATH must be a valid path."
   end
 
   def missing_valid_input_msg(arg)
@@ -175,6 +171,19 @@ EOS
 
   def argument_missing_msg(field_name, field_number)
     "\nError: You forgot to pass #{field_name}, which should have been argument number #{field_number}."
+  end
+
+  def pass_key_name_if_public_key_missing
+<<EOS
+Error: You did not pass --public-key-path or --key-name.
+Error: A key-name cannot be auto-generated if you do not pass --public-key-path.
+Error: Either pass a valid public key via --public-key path or supply a name via --key-name.
+EOS
+  end
+
+  def print_private_key(key_name, private_key_string)
+      puts "New private key for key named #{key_name} (please store, it is not saved in the database):"
+      puts private_key_string
   end
 
 end
