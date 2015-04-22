@@ -3,6 +3,7 @@ branches:
     - master
 cache:
   bundler: true
+  apt: true
   directories:
     - $HOME/perl5
     - $HOME/.cpanm
