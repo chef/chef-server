@@ -74,3 +74,4 @@ PLATFORMS
 DEPENDENCIES
   oc-chef-pedant!
   rest-client!
+
