@@ -67,6 +67,8 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET','POST'], Req, State}.
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request('GET', Req, #base_state{organization_guid = OrgId} = State) ->
     %% Put a stub chef_data record into the resource_state. This allows us to use shared
     %% code for generating the map of name => URL returned for GET /datas.  OrgId is set via

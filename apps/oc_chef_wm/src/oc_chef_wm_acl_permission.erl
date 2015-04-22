@@ -60,6 +60,8 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['PUT'], Req, State}.
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
                                          organization_guid = OrgId,
                                          organization_name = OrgName,

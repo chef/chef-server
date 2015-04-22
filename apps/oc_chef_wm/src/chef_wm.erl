@@ -24,6 +24,8 @@
 -type base_state() :: #base_state{}.
 -type resource_state() :: term().
 
+-export_type([http_verb/0, base_state/0, auth_info_return/0]).
+
 -callback init(list()) ->
     {ok, base_state()} | error().
 
@@ -39,7 +41,9 @@
 -callback request_type() ->
     string().
 
--callback auth_info(wm_req(), base_state()) ->
+-callback auth_info(wm_req(), base_state()) -> auth_info_return().
+
+-type auth_info_return() ::
     {{halt, non_neg_integer()}, wm_req(), base_state()} |
     {{halt, non_neg_integer(), binary()}, wm_req(), base_state()} |
     {{create_in_container, container_name()}, wm_req(), base_state()} |
@@ -54,4 +58,3 @@
     {{container_id, object_id()}, wm_req(), base_state()} |
     {{group, object_id()}, wm_req(), base_state()} |
     {{group_id, object_id()}, wm_req(), base_state()}.
-

@@ -69,6 +69,8 @@ allowed_methods(Req, State) ->
     Req1 = chef_wm_util:set_json_body(Req, {[{<<"error">>, [Msg]}]}),
     {Methods, Req1, State#base_state{resource_state = #environment_state{}}}.
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request('PUT', Req, State) ->
     Body = wrq:req_body(Req),
     {ok, Environment} = chef_environment:parse_binary_json(Body),

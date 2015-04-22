@@ -60,6 +60,8 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request('GET', Req, #base_state{resource_state = CBState0} = State) ->
     NumVersions = chef_wm_util:num_versions(Req),
     CBState = CBState0#cookbook_state{num_versions=NumVersions},

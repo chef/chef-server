@@ -75,7 +75,13 @@ validate_request('POST', Req, #base_state{chef_db_context = DbContext} = State) 
                                                                    data = EJ}}}
     end.
 
-auth_info(Req, #base_state{resource_state = #association_state{org_user_invite = not_found}} = State) ->
+-spec auth_info(wm_req(), chef_wm:base_state()) ->
+                       chef_wm:auth_info_return().
+auth_info(Req, #base_state{
+                  resource_state = #association_state{
+                                      org_user_invite = not_found
+                                     }
+                 } = State) ->
     Id = chef_wm_util:object_name(invitation, Req),
     Message = chef_wm_util:not_found_message(invitation, Id),
     Req1 = chef_wm_util:set_json_body(Req, Message),

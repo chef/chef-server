@@ -71,7 +71,10 @@
                           role |
                           client |
                           container |
-                          sandbox.
+                          sandbox |
+                          policies |
+                          user |
+                          organization.
 
 -type auth_tuple() :: {object, object_id(), permission()} |
                       {container, container_name(), permission()}.

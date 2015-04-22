@@ -69,6 +69,8 @@ validate_request('PUT', Req, #base_state{resource_state = NodeState} = State) ->
     {Req, State#base_state{resource_state = NodeState#node_state{node_data = Node}}}.
 
 %% Memoize the container id so we don't hammer the database
+-spec auth_info(wm_req(), chef_wm:base_state()) ->
+                       chef_wm:auth_info_return().
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            organization_guid = OrgId,
                            resource_state = NodeState} = State) ->

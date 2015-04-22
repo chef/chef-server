@@ -44,13 +44,19 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request('GET', Req, #base_state{organization_guid = OrgId} = State) ->
     {Req, State#base_state{superuser_bypasses_checks = true,
                            resource_state = #oc_chef_policy{org_id = OrgId}}}.
 
+-spec auth_info(wm_req(), chef_wm:base_state()) ->
+                       chef_wm:auth_info_return().
 auth_info(Req, State) ->
     auth_info(wrq:method(Req), Req, State).
 
+-spec auth_info(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                       chef_wm:auth_info_return().
 auth_info('GET', Req, State ) ->
     {{container, policies}, Req, State}.
 

@@ -62,6 +62,8 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET', 'POST'], Req, State}.
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request('GET', Req, #base_state{organization_guid = OrgId, server_api_version = ApiVersion} = State) ->
     {Req, State#base_state{resource_state = #oc_chef_organization{id = OrgId, server_api_version = ApiVersion}}};
 validate_request('POST', Req, #base_state{resource_state = OrganizationState}= State) ->
@@ -69,9 +71,13 @@ validate_request('POST', Req, #base_state{resource_state = OrganizationState}= S
     {ok, EJson} = oc_chef_organization:parse_binary_json(Body),
     {Req, State#base_state{resource_state = OrganizationState#organization_state{organization_data = EJson}}}.
 
+-spec auth_info(wm_req(), chef_wm:base_state()) ->
+                       chef_wm:auth_info_return().
 auth_info(Req, State) ->
     auth_info(wrq:method(Req), Req, State).
 
+-spec auth_info(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                       chef_wm:auth_info_return().
 auth_info('GET', Req, State) ->
     {{container, organization}, Req, State};
 auth_info('POST', Req, State) ->

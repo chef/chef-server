@@ -62,6 +62,8 @@ malformed_request_message(Any, _Req, _State) ->
 
 %% TODO: This is the same as in named_environment_resource and
 %% environment_cookbooks_resource... consider consolidating
+-spec auth_info(wm_req(), chef_wm:base_state()) ->
+                       chef_wm:auth_info_return().
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            organization_guid = OrgId,
                            resource_state = EnvState} = State) ->

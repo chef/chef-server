@@ -67,6 +67,8 @@ allowed_methods(Req, State) ->
     end,
     {Allowed, Req, State}.
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request('POST', Req, #base_state{chef_db_context = DbContext} = State) ->
     {ok, EJ} = oc_chef_org_user_association:parse_binary_json(wrq:req_body(Req)),
     UserName = ej:get({<<"username">>}, EJ),

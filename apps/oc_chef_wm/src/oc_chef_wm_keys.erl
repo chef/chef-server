@@ -63,6 +63,8 @@ allowed_methods(Req, State) ->
     {['GET', 'POST'], Req, State}.
 
 %% This export is mixed into oc_chef_wm_named_key -
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request('PUT', Req, #base_state{resource_args = ObjectType, chef_db_context = Ctx, organization_guid = OrgId} = State) ->
     EJ = chef_key:parse_binary_json(wrq:req_body(Req), update),
     ObjectName = chef_wm_util:object_name(ObjectType, Req),

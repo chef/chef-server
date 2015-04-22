@@ -50,6 +50,8 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET', 'POST'], Req, State}.
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request('GET', Req, #base_state{organization_guid = OrgId} = State) ->
     {Req, State#base_state{superuser_bypasses_checks = true,
                            resource_state = #oc_chef_group{org_id = OrgId}}};

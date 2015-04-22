@@ -52,6 +52,8 @@ request_type() ->
 allowed_methods(Req, State) ->
   {['GET', 'POST'], Req, State}.
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request('POST', Req, #base_state{server_api_version = ApiVersion} = State) ->
   case wrq:req_body(Req) of
     undefined ->
@@ -64,9 +66,13 @@ validate_request('POST', Req, #base_state{server_api_version = ApiVersion} = Sta
 validate_request('GET', Req, State) ->
     {Req, State}.
 
+-spec auth_info(wm_req(), chef_wm:base_state()) ->
+                       chef_wm:auth_info_return().
 auth_info(Req, State) ->
     auth_info(wrq:method(Req), Req, State).
 
+-spec auth_info(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                       chef_wm:auth_info_return().
 auth_info('GET', Req, State) ->
     {{container, user}, Req, State};
 auth_info('POST', Req, State) ->

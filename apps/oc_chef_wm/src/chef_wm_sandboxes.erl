@@ -59,6 +59,8 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['POST'], Req, State}.
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request('POST', Req, #base_state{resource_state = BoxState} = State) ->
     {ok, Sandbox} = chef_sandbox:parse_binary_json(wrq:req_body(Req), create),
     {Req, State#base_state{resource_state = BoxState#sandbox_state{sandbox_data = Sandbox}}}.

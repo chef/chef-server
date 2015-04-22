@@ -113,6 +113,8 @@ from_json(Req, #base_state{reqid = ReqId,
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request('PUT', Req, State) ->
     %% it's OK if this throws, will be handled by caller of validate_request/2.
     Body = chef_json:decode(wrq:req_body(Req)),

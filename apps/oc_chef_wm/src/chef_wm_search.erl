@@ -70,6 +70,8 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET','POST'], Req, State}.
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request('GET', Req, State) ->
     Query = make_query_from_params(Req),
     SearchState = #search_state{solr_query = Query},
