@@ -242,12 +242,12 @@ module Pedant
         {
           "name" => "#{name}-#{version}",
           "cookbook_name" => name,
-            "version" => version, # not actually used
-            "json_class" => "Chef::CookbookVersion",
-            "chef_type" => "cookbook_version",
-            "frozen?" => false,
-            "recipes" => opts[:recipes] || [],
-            "metadata" => {
+          "version" => version, # not actually used
+          "json_class" => "Chef::CookbookVersion",
+          "chef_type" => "cookbook_version",
+          "frozen?" => false,
+          "recipes" => opts[:recipes] || [],
+          "metadata" => {
             "version" => version,
             "name" => name, # not actually used
             "maintainer" => opts[:maintainer] || default_maintainer,
