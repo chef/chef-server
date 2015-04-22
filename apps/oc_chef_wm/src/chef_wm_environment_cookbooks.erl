@@ -57,6 +57,8 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request('GET', Req, #base_state{resource_state=EnvironmentState}=State) ->
     %% We need to figure out which cookbook, if any, we're restricting results to to figure
     %% out what value of 'num_versions' to use, so we might as well stick this into the

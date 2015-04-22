@@ -53,6 +53,8 @@ create_path(Req, State) ->
     Name = wrq:path_info(policy_name, Req),
     {Name, Req, State}.
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request(Method, Req,
                  State = #base_state{organization_guid = OrgId})
   when Method == 'GET'; Method == 'DELETE' ->
@@ -293,4 +295,3 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
 
 malformed_request_message(Any, _Req, _state) ->
     error({unexpected_malformed_request_message, Any}).
-

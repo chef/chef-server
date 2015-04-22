@@ -40,6 +40,8 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
 
+-spec auth_info(wm_req(), chef_wm:base_state()) ->
+                       chef_wm:auth_info_return().
 auth_info(Req, #base_state{organization_guid = OrgId,
                            chef_db_context = DbContext,
                            resource_args = single_artifact} = State) ->

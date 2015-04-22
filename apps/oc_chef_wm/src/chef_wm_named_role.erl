@@ -48,8 +48,6 @@
          resource_exists/2,
          to_json/2]).
 
-
-
 init(Config) ->
     oc_chef_wm_base:init(?MODULE, Config).
 
@@ -83,6 +81,8 @@ validate_request('PUT', Req, #base_state{resource_state = RoleState} = State) ->
     {Req, State#base_state{resource_state = RoleState#role_state{role_data = Role}}}.
 
 %% Memoize the container id so we don't hammer the database
+-spec auth_info(wm_req(), chef_wm:base_state()) ->
+                       chef_wm:auth_info_return().
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            resource_state = RoleState,
                            organization_guid = OrgId} = State) ->

@@ -47,6 +47,8 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET', 'POST'], Req, State}.
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request('GET', Req, #base_state{organization_guid = OrgId} = State) ->
     {Req, State#base_state{resource_state = #oc_chef_container{org_id = OrgId}}};
 validate_request('POST', Req, #base_state{resource_state = ContainerState}= State) ->

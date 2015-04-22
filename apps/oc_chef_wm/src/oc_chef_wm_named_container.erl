@@ -44,10 +44,14 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET', 'DELETE'], Req, State}.
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request(Method, Req, State) when Method == 'GET';
                                           Method == 'DELETE' ->
     {Req, State}.
 
+-spec auth_info(wm_req(), chef_wm:base_state()) ->
+                       chef_wm:auth_info_return().
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            resource_state = ContainerState,
                            organization_guid = OrgId} =State) ->

@@ -54,6 +54,8 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['POST'], Req, State}.
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request('POST', Req, #base_state{resource_state = ControlState} = State) ->
     Body = wrq:req_body(Req),
     Data = chef_json:decode(Body),
@@ -156,4 +158,3 @@ routing_key() ->
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
-

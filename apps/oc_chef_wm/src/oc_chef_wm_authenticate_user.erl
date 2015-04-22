@@ -42,6 +42,8 @@ request_type() ->
 allowed_methods(Req, State) ->
   {['POST'], Req, State}.
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request('POST', Req, #base_state{resource_state = UserState} = State) ->
   case wrq:req_body(Req) of
       Body  when Body == undefined orelse Body == <<>> ->

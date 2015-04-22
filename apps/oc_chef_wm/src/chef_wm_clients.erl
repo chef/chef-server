@@ -77,6 +77,8 @@ allowed_methods(Req, State) ->
 %% We set up the state such that the superuser avoids the ACL checks.
 %% FIXME: This is a temporary fix until pedant uses the validator which has
 %% permissions to create a new client
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request('GET', Req, #base_state{organization_guid = OrgId} = State) ->
     %% Put a stub chef_client record into the resource_state. This allows us to use shared
     %% code for generating the map of name => URL returned for GET /clients.  OrgId is set via

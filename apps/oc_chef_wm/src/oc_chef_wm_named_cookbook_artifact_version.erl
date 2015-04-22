@@ -52,6 +52,8 @@ create_path(Req, State) ->
 resource_exists(Req, State) ->
     {true, Req, State}.
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request('PUT', Req, #base_state{resource_state = CAVState} = State) ->
     CAVData = validate_json(Req),
     NewResourceState = CAVState#cookbook_artifact_version_state{cookbook_artifact_version_data = CAVData},

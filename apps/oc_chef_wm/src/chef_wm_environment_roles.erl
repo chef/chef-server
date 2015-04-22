@@ -61,6 +61,8 @@ allowed_methods(Req, State) ->
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
+-spec auth_info(wm_req(), chef_wm:base_state()) ->
+                       chef_wm:auth_info_return().
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            organization_guid = OrgId,
                            resource_state = RoleState} = State) ->

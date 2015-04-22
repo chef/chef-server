@@ -62,6 +62,8 @@ request_type() ->
 allowed_methods(Req, State) ->
     {['GET', 'PUT', 'DELETE'], Req, State}.
 
+-spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
+                              {wm_req(), chef_wm:base_state()}.
 validate_request(Method, Req, #base_state{resource_state = CBState0} = State) ->
     UrlName = chef_wm_util:extract_from_path(cookbook_name, Req),
     UrlVersion = chef_wm_util:extract_from_path(cookbook_version, Req),
