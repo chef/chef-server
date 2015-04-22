@@ -30,4 +30,3 @@ install:
 script:
   - make
   - PATH=~/perl5/bin:$PATH ./rebar skip_deps=true ct
-  - ./rebar skip_deps=true eunit
