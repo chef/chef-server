@@ -297,14 +297,19 @@ EOM
     def load(no_build = false)
       raise DVM::DVMArgumentError, "Project not available. Clone it onto your host machine." unless File.directory?(@project_dir)
       raise DVM::DVMArgumentError, "Project already loaded" if loaded?
-      do_build unless no_build
       Project.safe_run_command("chef-server-ctl stop #{service['name']}", "Stopping #{service['name']}", cwd: project_dir)
+      do_build unless no_build
 
       say("Setting up symlinks")
       FileUtils.rm_rf(["#{relpath}/log", "#{relpath}/sys.config"])
       FileUtils.ln_s("/var/opt/opscode/#{service["name"]}/sys.config", "#{relpath}/sys.config")
       FileUtils.ln_s("/var/log/opscode/#{service["name"]}", "#{relpath}/log")
-      FileUtils.rm("/opt/opscode/service/#{service['name']}")
+
+      # Make runsv forget about us so that chef-server-ctl reconfigure doesn't restart.
+      # Link may be missing if we're force-reloading
+      if (File.exists? "/opt/opscode/service/#{service['name']}")
+        FileUtils.rm("/opt/opscode/service/#{service['name']}")
+      end
       say(HighLine.color("Success! Your project is loaded.", :green))
       say("Start it now:")
       say(HighLine.color("    dvm start #{name} [--background]", :green))
@@ -317,6 +322,7 @@ EOM
       FileUtils.rm("#{relpath}/log")
       Project.safe_run_command("chef-server-ctl start #{name}", "Restarting packaged version of #{name} via chef-server-ctl", cwd: project_dir)
     end
+
     def do_build
       say("This should take just a couple of minutes")
       say("Cleaning deps...")
