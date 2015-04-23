@@ -160,8 +160,8 @@ module DVM
           Project.clone(name, url)
           # Ensure we're starting with the same code base that we had in the dependency to avoid
           # hot-loading headaches.
-          safe_run_command("git checkout #{ref}", "Checking out #{ref} to match what is currently running", :cwd => Project.host_dep_dir(name))
         end
+        Project. safe_run_command("git checkout #{ref}", "Checking out #{ref} to match what is currently running", :cwd => Project.host_dep_dir(name))
         build unless nobuild
         # Ugly here. Would rather not nuke the original, because we have no way to get it back in - so instead, we're going to
         # nuke the symlined dep
