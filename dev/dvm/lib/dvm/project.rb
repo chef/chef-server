@@ -187,7 +187,7 @@ module DVM
           # ANtoher assumption that either rebar.config.lock or rebar.config will exist
           # in erlang project dependencies
           rebar_lock_file = File.join(real_path, "rebar.config.lock")
-          rebar_config = File.file? rebar_lock_file ? "rebar.config.lock" : "rebar.config"
+          rebar_config = File.file?(rebar_lock_file) ? "rebar.config.lock" : "rebar.config"
           rebar = File.file?(File.join(real_path, "rebar"))  ? "./rebar" : "rebar"
           get_deps(rebar, rebar_config)
           rebar_compile(rebar, rebar_config)
