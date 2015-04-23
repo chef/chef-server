@@ -248,7 +248,7 @@ handle_depsolver_results(ok, {error, {unreachable_package, Unreachable}}, Req, S
 handle_depsolver_results(ok, {ok, Cookbooks}, Req, #base_state{chef_db_context = DbContext,
                                                                organization_name = OrgName} = State) ->
     %% TODO - helper function to deal with the call and match on a chef_cookbook version
-    CookbookRecords = [ chef_db:fetch_cookbook_version(DbContext, OrgName, Cookbook) || Cookbook <- Cookbooks],
+    CookbookRecords = chef_db:bulk_fetch_cookbook_versions(DbContext, OrgName, Cookbooks),
     assemble_response(Req, State, CookbookRecords).
 
 %% @doc Utility function to remove some of the verbosity

@@ -71,3 +71,6 @@ policy_groups [policies] 2015-02-27T22:52:25Z Daniel DeLeo <ddeleo@lorentz.local
 policy_revisions [policy_groups] 2015-02-27T23:39:16Z Daniel DeLeo <ddeleo@lorentz.local># Create separte policy revisions table
 policy_revisions_policy_groups_association 2015-03-05T20:57:56Z Daniel DeLeo <ddeleo@lorentz.local># Add join between policy groups and revisions
 @policyfile-api-tables 2015-04-16T19:48:36Z Daniel DeLeo <ddeleo@lorentz.local> # Add policyfile endpoint tables
+
+cbv_type 2015-04-23T08:33:00Z Steven Danna <steve@chef.io> # Add cbv type for new bulk_fetch_cookbook_versions query
+@cbv-type 2015-04-23T08:34:00Z Steven Danna <steve@chef.io> # Add cbv type for new bulk_fetch_cookbook_versions query
