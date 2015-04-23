@@ -87,7 +87,7 @@ service_available(Req, #base_state{reqid_header_name = HeaderName} = State) ->
 
 %% @doc Validate the requested X-Ops-Server-API-Version value and populate base_state,
 %% and reply with it as or reply with error if it's not valid.
--spec server_api_version(undefined|string()) -> api_version().
+-spec server_api_version(undefined|string()) -> api_version() | {error| string()}.
 server_api_version(undefined) ->
     ?API_MIN_VER;
 server_api_version(RequestedVersion) ->
@@ -217,11 +217,16 @@ multi_auth_check_to_wm_response({Error, {AuthzObjectType, AuthzId, Permission}, 
 %% general-purpose solution for this is provided right now.
 -spec multi_auth_check(AuthChecks :: [auth_tuple()],
                        Req :: wm_req(),
-                       State :: #base_state{}) -> true |
-                                                  {false,
-                                                   FailingTuple :: auth_tuple()} |
-                                                  {Error :: term(),
-                                                   FailingTuple :: auth_tuple()}.
+                       State :: chef_wm:base_state()) ->
+                              {true, wm_req(), chef_wm:base_state()} |
+                              {false,
+                               FailingTuple :: auth_tuple(),
+                               wm_req(),
+                               chef_wm:base_state()} |
+                              {Error :: term(),
+                               FailingTuple :: auth_tuple(),
+                               wm_req(),
+                               chef_wm:base_state()}.
 multi_auth_check([], Req, State) ->
     %% Nothing left to check, must be OK
     {true, Req, State};
@@ -250,8 +255,7 @@ auth_check({create_in_container, Container}, Req, State) ->
     %% create_in_container returns true to mean "is forbidden to do X"
     case create_in_container(Container, Req, State) of
         {true, UpdatedReq, UpdatedState} -> {false, UpdatedReq, UpdatedState};
-        {false, UpdatedReq, UpdatedState} -> {true, UpdatedReq, UpdatedState};
-        Error -> Error
+        {false, UpdatedReq, UpdatedState} -> {true, UpdatedReq, UpdatedState}
     end;
 auth_check({container, Container, Permission}, Req, State) ->
     ContainerId = fetch_container_id(Container, Req, State),
