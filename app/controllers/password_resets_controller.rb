@@ -15,7 +15,7 @@ class PasswordResetsController < ApplicationController
       if user.nil?
         user_not_found
       else
-        PasswordResetMailer.password_reset(user).deliver
+        PasswordResetMailer.password_reset(user).deliver_now
         flash.now[:notice] = 'Your password reset email has been sent'
         @status = :ok
       end
