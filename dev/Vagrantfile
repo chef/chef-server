@@ -50,10 +50,11 @@ Vagrant.configure("2") do |config|
       type: "rsync",
       rsync__exclude: attributes["vm"]["sync-exclude"]
 
-   # We're also going to do a share of the slower vboxsf style, allowing us to auto-checkout dependencies
+    # We're also going to do a share of the slower vboxsf style, allowing us to auto-checkout dependencies
     # and have them be properly synced to a place that we can use them.
     config.vm.synced_folder base_path, "/mnt/host-do-not-use"
     config.vm.synced_folder installer_path, "/installers"
+    config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
     config.vm.provision "shell", inline: install_hack(installer)
     config.vm.provision "chef_solo" do |chef|
       chef.install = false
@@ -127,7 +128,6 @@ def host_timezone
 #  zonesuffix = offset >= 0 ? "+#{offset.to_s}" : "#{offset.to_s}"
 #  "Etc/GMT#{zonesuffix}"
   #  Sigh - sqitch doesn't like the above format and dies.
-  #  This is temporary and won't work on mac:
   if /darwin/ =~ RUBY_PLATFORM
 
     puts "Notice: using sudo to get timezone, no updates being made"
@@ -148,6 +148,7 @@ def install_hack(installer)
   server_installer_name = File.basename(installer)
   return ";" if server_installer_name.nil?
 <<SCRIPT
+cp /home/vagrant/.gitconfig /root/.gitconfig
 if [ -d "/opt/opscode/embedded" ]
 then
   echo "Bypassing server install, it appears done."
@@ -157,13 +158,7 @@ else
 fi
 SCRIPT
 end
-def simple_deep_merge(from, into)
-  into.merge(from) do |key, oldval, newval|
-    oldval = oldval.to_hash if oldval.respond_to?(:to_hash)
-    newval = newval.to_hash if newval.respond_to?(:to_hash)
-    oldval.class.to_s == 'Hash' && newval.class.to_s == 'Hash' ? simple_deep_merge(oldval, newval) : newval
-  end
-end
+
 def base_path
   File.absolute_path(File.join(Dir.pwd, "../.."))
 end

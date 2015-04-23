@@ -11,16 +11,16 @@
       everything works with this.
 - [ ] for each project setting - or just at vm level? , add forward_ports. Note that user knife
       config, etc should work from in the vm or from the host.
+- [ ] refactor the crap out of projects.rb...
 - [ ] Should we default quickstart ercehf to launch in the background to
       avoid another ssh session for more work? One the one hand, simpler
       to start, on the other hand it's nice to see the immediate errors/info
       feedback when you get started...
-- [ ] It would be simple to do automatic git checkout of project dependencies on
-      requested load, but ultimately not helpful because we're using
-      vagrant rsync - the sync is one way, and the checked out projects won't
-      show up on the host.  One option to do this is to *additional* load in
-      the host location as a standard vbox share  and mount it to /host_rw or something.
-      Convoluted but it would work.
+- [x] clone and load project deps (erlang)
 - [ ] not really any support for ruby project deps, something that we
       will want if we expand this to support the things that layer atop chef
       server (manage, etc)
+  [ ] why doesn't NFS file share work, at least with linux host?
+  [ ] dvm run oc-chef-pedant appears to run as if '--all' were specified
+      by default, instead of '--smoke'
+
