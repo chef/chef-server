@@ -29,7 +29,6 @@
                            forbidden/2,
                            is_authorized/2,
                            {allow_all/2, auth_info},
-                           {default_malformed_request_message/3, malformed_request_message},
                            service_available/2]}]).
 
 
@@ -37,7 +36,9 @@
 -behaviour(chef_wm).
 -export([init/1,
          init_resource_state/1,
-         request_type/0 ]).
+         request_type/0,
+         malformed_request_message/3
+        ]).
 
 %% Our implemented webmachine callbacks
 -export([allowed_methods/2, to_json/2 ]).
@@ -61,3 +62,8 @@ to_json(Req, State) ->
 version_body() ->
     {[ {<<"min_api_version">>, ?API_MIN_VER},
        {<<"max_api_version">>, ?API_MAX_VER} ]}.
+
+-spec malformed_request_message(
+        term(), wm_req(), chef_wm:base_state()) -> no_return().
+malformed_request_message(Any, Req, State) ->
+    oc_chef_wm_base:default_malformed_request_message(Any, Req, State).

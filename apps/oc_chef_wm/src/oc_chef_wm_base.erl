@@ -1230,6 +1230,8 @@ route_args(ObjectRec,_State) ->
     TypeName = chef_object:type_name(ObjectRec),
     {TypeName, [{name, chef_object:name(ObjectRec)}]}.
 
+-spec default_malformed_request_message(
+        term(), wm_req(), chef_wm:base_state()) -> none().
 default_malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
