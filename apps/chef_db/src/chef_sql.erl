@@ -62,7 +62,7 @@
 
          %% cookbook version ops
          cookbook_exists/2,
-
+         bulk_fetch_cookbook_versions/2,
          fetch_cookbook_version/2,
          fetch_cookbook_versions/1,
          fetch_cookbook_versions/2,
@@ -494,6 +494,52 @@ fetch_environment_filtered_recipes(OrgId, Environment) ->
     end.
 
 %% cookbook version ops
+-spec bulk_fetch_cookbook_versions(OrgId::object_id(), [versioned_cookbook()]) ->
+                                          [#chef_cookbook_version{}].
+bulk_fetch_cookbook_versions(OrgId, CookbookVersions) ->
+    QueryParam = cookbook_versions_array_to_binary(CookbookVersions),
+    case sqerl:select(bulk_fetch_cookbook_versions, [OrgId, QueryParam], ?ALL(chef_cookbook_version)) of
+        {ok, none} ->
+            [];
+        {ok, Results} ->
+            Results;
+        {error, Error} ->
+            {error, Error}
+    end.
+
+-spec cookbook_versions_array_to_binary([versioned_cookbook()]) -> binary().
+cookbook_versions_array_to_binary(CookbookVersions) ->
+    cookbook_versions_array_to_binary(CookbookVersions, <<"{">>, <<"}">>, <<"">>).
+
+-spec cookbook_versions_array_to_binary([versioned_cookbook()], binary(), binary(), binary()) -> binary().
+cookbook_versions_array_to_binary([CkbVer|CookbookVersions], Acc, EndBin, Sep) ->
+    CkbBin = cookbook_version_to_binary(CkbVer),
+    cookbook_versions_array_to_binary(CookbookVersions,
+                                      <<Acc/binary, Sep/binary, CkbBin/binary>>,
+                                      EndBin, <<",">>);
+cookbook_versions_array_to_binary([], Acc, EndBin, _Sep) ->
+    <<Acc/binary, EndBin/binary>>.
+
+
+%% @doc Tranform a versioned_cookbook() into a binary that can be used
+%% in the bulk_fetch_cookbook_version sql query.  A
+%% versioned_cookbook() looks like:
+%%   {binary(), {integer(), integer(), integer()}}
+%%
+%% for example:
+%%  {<<"yum">>, {0, 2, 43}}
+%%
+%% our desired output for this example would be:
+%%   <<"\"(yum, 0, 2, 43)\"">>
+%%
+%%
+-spec cookbook_version_to_binary(versioned_cookbook()) -> binary().
+cookbook_version_to_binary({Name, {MajorInt, MinorInt, PatchInt}}) ->
+    iolist_to_binary([<<"\"(">>, Name, <<",">>,
+                      integer_to_binary(MajorInt), <<",">>,
+                      integer_to_binary(MinorInt), <<",">>,
+                      integer_to_binary(PatchInt), <<")\"">>]).
+
 -spec fetch_cookbook_version(OrgId::object_id(),
                              versioned_cookbook()) -> #chef_cookbook_version{} |
                                                       {cookbook_exists, object_id()} |
