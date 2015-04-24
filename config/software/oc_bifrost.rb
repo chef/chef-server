@@ -15,7 +15,7 @@
 #
 
 name "oc_bifrost"
-default_version "1.4.6"
+default_version "1.4.7"
 
 source git: "https://github.com/opscode/oc_bifrost"
 
