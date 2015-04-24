@@ -228,12 +228,13 @@ statements(pgsql) ->
         "FROM cookbook_artifact_versions AS cav "
         "JOIN cookbook_artifacts AS ca "
           "ON cav.cookbook_artifact_id = ca.id "
-        "JOIN cookbook_artifact_version_checksums AS cavc "
+        "LEFT JOIN cookbook_artifact_version_checksums AS cavc "
           "ON cavc.cookbook_artifact_version_id = cav.id "
        "WHERE ca.org_id = $1 "
          "AND ca.name = $2 "
          "AND cav.identifier = $3 "
     "GROUP BY cav.id, ca.org_id, ca.name, ca.authz_id">>},
+
       {delete_cookbook_artifact_version_by_id,
        <<"SELECT * FROM delete_cookbook_artifact_version($1)">>},
       {list_cookbook_artifacts_by_org_id,
