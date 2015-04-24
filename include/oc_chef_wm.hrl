@@ -390,6 +390,7 @@
                             #principal_state{} |
                             #object_identifier_state{} |
                             #search_state{} |
+                            #association_state{} |
 %% Sometimes resourse_state() is a chef_object stub. A possible refactor here would be to
 %% teach oc_chef_wm_base:list_objects_json how to determine which chef_object stub to build
 %% based on the state type, or to give base_state{} a field for chef_object_stub to use here
