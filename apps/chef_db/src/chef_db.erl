@@ -342,7 +342,10 @@ fetch_requestor(Context, OrgId, ClientName) ->
 %% @doc fetches requestor records for all actors matching by name. Note that
 %% if orgid is undefined, it will only retrieve records corresponding to users,
 %% and not clients.
--spec fetch_requestors(#context{}, binary()|undefined, binary()) -> [#chef_requestor{}] | not_found.
+-spec fetch_requestors(#context{}, binary()|undefined, binary()) ->
+                              [#chef_requestor{}]
+                                  | not_found
+                                  | {error, term()}.
 fetch_requestors(#context{reqid = ReqId}, OrgId, Name) ->
     ?SH_TIME(ReqId, chef_sql, fetch_actors_by_name, (OrgId, Name)).
 

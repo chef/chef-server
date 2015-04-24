@@ -24,13 +24,11 @@
 %%
 
 -module(oc_chef_authz).
-
 %
 % TODO:
 %
 % Helper function to ADD/DELETE actors and groups from record
 % (expecting we won't want to make everyone do this common task
-
 
 -export([
          add_client_to_clients_group/4,
@@ -73,21 +71,6 @@
                          {delete, <<"delete">>},
                          {grant, <<"grant">>}]).
 
-
--type contained_object_name() :: 'client' |
-                                 'container' |
-                                 'cookbook' |
-                                 'data' |
-                                 'environment'|
-                                 'group' |
-                                 'node' |
-                                 'role' |
-                                 'sandboxes' |
-                                 'search' |
-                                 'user' |
-                                 'policies' |
-                                 'cookbook_artifacts'.
-
 -spec ping() -> pong | pang.
 ping() ->
     oc_chef_authz_http:ping().
@@ -126,7 +109,7 @@ requestor_or_superuser(ObjectId) ->
 -spec create_entity_if_authorized(oc_chef_authz_context(),
                                   OrgId :: object_id(),
                                   Creator :: superuser | object_id(),
-                                  ObjectType :: contained_object_name()) ->
+                                  ObjectType :: chef_wm:container_name()) ->
                                          {ok, object_id()} |
                                          {error, forbidden}.
 create_entity_if_authorized(Context, OrgId, superuser, ObjectType) ->
@@ -149,7 +132,7 @@ create_entity_if_authorized(Context, OrgId, CreatorAId, ObjectType) ->
 %%% TODO: consider error cases in more detail
 -spec get_container_aid_for_object(oc_chef_authz_context(),
                                    object_id(),
-                                   contained_object_name()) ->
+                                   chef_wm:container_name()) ->
                                           object_id().
 get_container_aid_for_object(Context, OrgId, ObjectType) ->
     ContainerName = object_type_to_container_name(ObjectType),
@@ -165,9 +148,10 @@ get_container_aid_for_object(Context, OrgId, ObjectType) ->
 %% @end TODO: consider error cases in more detail
 -spec create_entity_with_container_acl(RequestorId::requestor_id(),
                                        ContainerAId::object_id(),
-                                       ObjectType :: 'client' | 'container' |
-                                                     'cookbook' | 'data' | 'environment' |
-                                                     'group' | 'node' | 'role' | 'search' | 'user'
+                                       ObjectType :: chef_wm:container_name()
+                                                     %'client' | 'container' |
+                                                     %'cookbook' | 'data' | 'environment' |
+                                                     %'group' | 'node' | 'role' | 'search' | 'user'
                                                      ) -> {ok, object_id()} | {error, forbidden}.
 create_entity_with_container_acl(RequestorId, ContainerAId, ObjectType) ->
 
@@ -575,7 +559,7 @@ pluralize_resource(container) -> <<"containers">>;
 pluralize_resource(group)     -> <<"groups">>;
 pluralize_resource(object)    -> <<"objects">>.
 
--spec object_type_to_container_name(contained_object_name()) -> <<_:32,_:_*8>>.
+-spec object_type_to_container_name(chef_wm:container_name()) -> <<_:32,_:_*8>>.
 object_type_to_container_name(client)            -> <<"clients">>;
 object_type_to_container_name(container)         -> <<"containers">>;
 object_type_to_container_name(cookbook)          -> <<"cookbooks">>;
@@ -589,7 +573,7 @@ object_type_to_container_name(sandbox)           -> <<"sandboxes">>;
 object_type_to_container_name(search)            -> <<"search">>;
 object_type_to_container_name(user)              -> <<"users">>;
 object_type_to_container_name(policies)          -> <<"policies">>;
-object_type_to_container_name(policy_group)          -> <<"policy_groups">>;
+object_type_to_container_name(policy_group)      -> <<"policy_groups">>;
 object_type_to_container_name(cookbook_artifact) -> <<"cookbook_artifacts">>.
 
 %% @doc The authz system needs to know the resource type as part of the API. This maps chef
@@ -597,7 +581,7 @@ object_type_to_container_name(cookbook_artifact) -> <<"cookbook_artifacts">>.
 %%
 %% When creating a new Authz entity in a given container, we need to ensure we're creating
 %% the correct kind.
--spec object_type_to_resource(contained_object_name()) -> atom().
+-spec object_type_to_resource(chef_wm:container_name()) -> atom().
 object_type_to_resource(client)    -> 'actor';
 object_type_to_resource(container) -> 'container';
 object_type_to_resource(group)     -> 'group';

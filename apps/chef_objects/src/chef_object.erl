@@ -143,7 +143,7 @@ org_id(Rec) ->
 type_name(Rec) ->
     call(Rec, type_name).
 
--spec authz_id(object_rec()) -> object_id().
+-spec authz_id(object_rec()) -> object_id() | undefined.
 authz_id(Rec) ->
     call(Rec, authz_id).
 
