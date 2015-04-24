@@ -51,8 +51,9 @@ module DVM
         # Some things to consider:
         # do we want to match the revision/branch from rebar?
         # do we want to auto-create a new branch from it if we did the clone ourselves or detect master or
-        # matching name?
-        # TODO make a Git class...
+        if opts[:skip_checkout]
+          raise DVMArgumentError "The project directory for #{name} can't be found, and you told me not to check it out."
+        end
         clone(name, url)
         # Ensure we're starting with the same code base that we had in the dependency to avoid
         # hot-loading headaches.
@@ -60,7 +61,7 @@ module DVM
       # TODO verify project is running, or allow option to do build anyway (just not  y default?)
       # Problem being if the project is not running, we will not auto-compiel
 
-      checkout(name, ref)
+      checkout(name, ref) unless opts[:skip_checkout]
       # INstead of linking it into the dep directory, replace the library path in the project installation
       # That way we don't have to overlay or preserve the project dep in it's original state - we'll
       # just restore the link on unload.

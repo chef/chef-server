@@ -9,15 +9,14 @@ module DVM
         # call subclass do_load if there is no such key. Will also let us quickly get new projects
         # going.
         @project['load'].each do |c|
-          Project.safe_run_command(c, c, cwd: @project_dir)
+          run_command(c, c, cwd: @project_dir)
         end
       else
-        Project.safe_run_command("rm -rf .bundle/config && bundle install --path /opt/opscode/embedded/service/gem --no-binstubs", "Installing in-place...", cwd: @project_dir)
+        run_command("rm -rf .bundle/config && bundle install --path /opt/opscode/embedded/service/gem --no-binstubs", "Installing in-place...", cwd: @project_dir)
       end
     end
     def unload
-      say "Unmounting #{name}"
-      Project.unmount(@project_dir)
+      unmount(@project_dir)
     end
     def loaded?
       false

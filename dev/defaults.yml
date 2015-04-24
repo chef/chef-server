@@ -32,7 +32,7 @@ projects:
     git:
       uri: git://github.com/chef/oc_erchef.git
       branch: master
-  oc_bifrost: # TODO : unverified
+  oc_bifrost:
     type: erlang
     database: opscode_bifrost
     build:
@@ -46,7 +46,7 @@ projects:
     git:
       uri: https://github.com/chef/oc_bifrost.git
       branch: master
-  bookshelf: # TODO unverified
+  bookshelf:
     type: erlang
     service:
       rel-type: relx

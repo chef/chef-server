@@ -51,12 +51,15 @@ module DVM
       end
     end
 
-    option :"no_build", type: :boolean,
+    option :no_build, type: :boolean,
                         aliases: ['-n'],
                         desc: "skip the build phase and just load/mount the source path"
     option :force, type: :boolean,
                    aliases: ['-f'],
                    desc: "force the load even if the component is already loaded"
+    option :skip_checkout, type: :boolean,
+                   aliases: ['-s'],
+                   desc: "do not attempt to clone the repo if it's missing, and do not change branches. "
     desc "load <project> [dep-or-sub]", "load a project or project's named dependency"
     def load(project_name, dep = nil)
       ensure_project(project_name)

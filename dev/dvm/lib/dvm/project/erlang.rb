@@ -124,9 +124,9 @@ EOM
 
       # Make runsv forget about us so that chef-server-ctl reconfigure doesn't restart.
       # Link may be missing if we're force-reloading
-      if (File.exists? "/opt/opscode/service/#{service['name']}")
-        FileUtils.rm("/opt/opscode/service/#{service['name']}")
-      end
+      #if (File.exists? "/opt/opscode/service/#{service['name']}")
+        #FileUtils.rm("/opt/opscode/service/#{service['name']}")
+      #end
       say(HighLine.color("Success! Your project is loaded.", :green))
       say("Start it now:")
       say(HighLine.color("    dvm start #{name} [--background]", :green))
@@ -134,7 +134,10 @@ EOM
 
     def unload
       name = service['name']
-      FileUtils.ln_s("/opt/opscode/service/#{name}", "/opt/opscode/sv/#{name}")
+      # NOt working - naturally ctl reconfigure  recreates this link.
+      # Could be that we want to coordinate between projects in here,
+      # reconfigure-notify: oc_erchef?
+      # FileUtils.ln_s("/opt/opscode/service/#{name}", "/opt/opscode/sv/#{name}")
       FileUtils.rm("#{relpath}/sys.config")
       FileUtils.rm("#{relpath}/log")
       run_command("chef-server-ctl start #{name}", "Restarting packaged version of #{name} via chef-server-ctl", cwd: project_dir)
