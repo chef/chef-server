@@ -22,7 +22,7 @@
 {application, chef_test,
  [
   {description, ""},
-  {vsn, "1"},
+  {vsn, "0"},
   {registered, []},
   {applications, [
                   kernel,

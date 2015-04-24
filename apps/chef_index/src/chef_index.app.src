@@ -18,7 +18,7 @@
 {application, chef_index,
  [
   {description, "Chef search index tools"},
-  {vsn, git},
+  {vsn, "0"},
   {registered, []},
   {applications, [
                   kernel,
