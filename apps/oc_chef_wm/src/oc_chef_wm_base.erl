@@ -250,6 +250,10 @@ multi_auth_check([CurrentTuple|Rest], Req, State) ->
 %% -spec auth_check(AuthCheck :: auth_tuple(),
 %%                  Req :: wm_req(),
 %%                  State :: #base_state{}) -> { true | false | Error :: term(), Req :: wm_req(), State :: #base_state{} }.
+-spec auth_check(auth_tuple(), wm_req(), chef_wm:base_state()) ->
+                        { true | false | term(),
+                          wm_req(),
+                          chef_wm:base_state()}.
 auth_check({create_in_container, Container}, Req, State) ->
     %% caller of auth_check expects true to mean "has permission to do X",
     %% create_in_container returns true to mean "is forbidden to do X"
@@ -275,6 +279,8 @@ auth_check({actor, ObjectId, Permission}, Req, State) ->
 %% permission. Otherwise, the created AuthzId is stored in the
 %% resource_state record using set_authz_id/3 (which knows how to deal
 %% with the different resource_state records).
+-spec create_in_container(container_name(), wm_req(), chef_wm:base_state()) ->
+                                 {true|false, wm_req(), chef_wm:base_state()}.
 create_in_container(client, Req, #base_state{chef_db_context = Ctx,
                                              organization_guid = OrgId,
                                              requestor = #chef_requestor{name = Name, type = <<"client">>}} = State) ->
@@ -334,6 +340,13 @@ create_in_container(Container, Req, #base_state{requestor_id = RequestorId} = St
     do_create_in_container(Container, Req, State, RequestorId).
 
 %% @doc Perform the actual creation of a new entity.
+-spec do_create_in_container(container_name(),
+                             wm_req(),
+                             chef_wm:base_state(),
+                             superuser |  object_id()) ->
+                                    {true|false,
+                                     wm_req(),
+                                     chef_wm:base_state()}.
 do_create_in_container(Container, Req,
                        #base_state{chef_authz_context = AuthzContext,
                                    organization_guid = OrgId,
@@ -525,6 +538,8 @@ get_user(Req, #base_state{superuser_bypasses_checks = SuperuserBypassesChecks}) 
     BypassesChecks = SuperuserBypassesChecks andalso is_superuser(UserName),
     {UserName, BypassesChecks}.
 
+-spec set_authz_id(object_id(), resource_state(), chef_wm:container_name())
+                  -> resource_state().
 set_authz_id(Id, #client_state{}=Cl, client) ->
     Cl#client_state{client_authz_id = Id};
 set_authz_id(Id, #cookbook_state{}=C, cookbook) ->

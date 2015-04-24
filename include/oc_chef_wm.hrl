@@ -64,20 +64,25 @@
 
 -type permission() :: create | delete | read | update.
 
--type container_name() :: cookbook |
-                          data |
-                          environment |
-                          node |
-                          role |
-                          client |
-                          container |
-                          sandbox |
-                          policies |
-                          user |
-                          organization.
+-type container_name() :: cookbook
+                        | data
+                        | environment
+                        | node
+                        | role
+                        | client
+                        | container
+                        | sandbox
+                        | policies
+                        | user
+                        | organization
+                        | group
+                        | cookbook_artifact
+                        | policy_group.
 
--type auth_tuple() :: {object, object_id(), permission()} |
-                      {container, container_name(), permission()}.
+-type auth_tuple() ::
+        {create_in_container, container_name()}
+      | {object, object_id(), permission()}
+      | {container, container_name(), permission()}.
 
 -type wm_req() :: #wm_reqdata{}.
 
@@ -176,7 +181,7 @@
           requestor :: #chef_requestor{} | #chef_client{},
 
           %% A record containing resource-specific state.
-          resource_state :: tuple(),
+          resource_state :: resource_state(),
 
           %% Turn this on if superuser is allowed to bypass security checks for
           %% this endpoint.
@@ -363,6 +368,20 @@
           chef_key :: #chef_key{}
          }).
 
+-type resource_state() ::   undefined |
+                            #client_state{} |
+                            #cookbook_state{} |
+                            #cookbook_artifact_version_state{} |
+                            #environment_state{} |
+                            #node_state{} |
+                            #role_state{} |
+                            #sandbox_state{} |
+                            #data_state{} |
+                            #container_state{} |
+                            #group_state{} |
+                            #policy_state{} |
+                            #organization_state{} |
+                            #user_state{}.
 
 
 -define(gv(X,L), proplists:get_value(X, L)).
