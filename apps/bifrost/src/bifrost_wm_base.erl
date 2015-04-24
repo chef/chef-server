@@ -168,6 +168,7 @@ spawn_stats_hero_worker(Req, #base_state{reqid=ReqId,
 
               {my_app, ?gv(root_metric_key, MetricsConfig)},
               {request_action, atom_to_list(wrq:method(Req))},
+              {protocol, envy:get(stats_hero, protocol, estatsd, atom)},
               {request_label, RequestLabel},
               {label_fun, ?gv(stats_hero_label_fun, MetricsConfig)},
               {upstream_prefixes, ?gv(stats_hero_upstreams, MetricsConfig)}
