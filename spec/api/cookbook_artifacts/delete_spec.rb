@@ -15,7 +15,7 @@
 
 require 'pedant/rspec/cookbook_util'
 
-describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artifacts_delete, :skip do
+describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artifacts_delete do
 
   let(:cookbook_url_base) { "cookbook_artifacts" }
 
@@ -23,11 +23,37 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
   context "DELETE /cookbooks/<name>/<version>" do
     let(:request_method) { :DELETE }
-    let(:request_url)    { named_cookbook_url }
+    let(:request_url){api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_identifier}")}
     let(:requestor)      { admin_user }
 
-    let(:fetched_cookbook) { original_cookbook }
-    let(:original_cookbook) { new_cookbook(cookbook_name, cookbook_version) }
+    let(:cookbook_identifier) { "1111111111111111111111111111111111111111" }
+    let(:default_version) { "1.2.3" }
+
+    def delete_cookbook_artifact(requestor, name, identifier)
+      res = delete(api_url("/#{cookbook_url_base}/#{name}/#{identifier}"),
+             requestor)
+      expect(['200', '404']).to include(res.code.to_s)
+    end
+
+    def make_cookbook_artifact(requestor, name, identifier, opts = {})
+      url = api_url("/#{cookbook_url_base}/#{name}/#{identifier}")
+      payload = new_cookbook_artifact(name, identifier, opts)
+      res = put(url, requestor, payload: payload)
+      expect(res.code).to eq(201)
+    end
+
+    def make_cookbook_artifact_with_recipes(cookbook_name, identifier, recipe_list)
+      recipe_specs = normalize_recipe_specs(recipe_list)
+      content_list = recipe_specs.map { |r| r[:content] }
+      files = content_list.map { |content| Pedant::Utility.new_temp_file(content) }
+      upload_files_to_sandbox(files)
+      checksums = files.map { |f| Pedant::Utility.checksum(f) }
+      recipes = recipe_specs.zip(checksums).map do |r, sum|
+        dummy_recipe(r[:name], sum)
+      end.sort { |a, b| a[:name] <=> b[:name] }
+      opts = { :recipes => recipes }
+      make_cookbook_artifact(requestor, cookbook_name, identifier, opts)
+    end
 
     context "for non-existent cookbooks" do
       let(:expected_response) { cookbook_version_not_found_exact_response }
@@ -35,39 +61,48 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
       let(:cookbook_name)    { "non_existent" }
       let(:cookbook_version) { "1.2.3" }
 
-      should_respond_with 404
+      it "returns 404" do
+        response = delete(request_url, requestor)
+        expect(response.code).to eq(404)
+        expect(parse(response)).to eq({"error"=>["not_found"]})
+      end
 
-      context 'with bad version', :validation do
-        let(:expected_response) { invalid_cookbook_version_exact_response }
-        let(:cookbook_version) { "1.2.3.4" }
-        should_respond_with 400
+      context 'with bad identifier' do
+
+        let(:cookbook_identifier) { "foo@bar" }
+
+        it "returns 404" do
+          response = delete(request_url, requestor)
+          expect(response.code).to eq(404)
+          expect(parse(response)).to eq({"error"=>["not_found"]})
+        end
+
       end # with bad version
     end # context for non-existent cookbooks
 
     context "for existing cookbooks" do
+
       let(:cookbook_name) { "cookbook-to-be-deleted" }
-      let(:cookbook_version) { "1.2.3" }
 
       context "when deleting non-existent version of an existing cookbook" do
-        let(:expected_response) { cookbook_version_not_found_exact_response }
-        let(:cookbook_version_not_found_error_message) { ["Cannot find a cookbook named #{cookbook_name} with version #{non_existing_version}"] }
-        let(:non_existing_version) { "99.99.99" }
-        let(:non_existing_version_url) { api_url("/#{cookbook_url_base}/#{cookbook_name}/#{non_existing_version}") }
-        let(:fetched_cookbook) { original_cookbook }
+        let(:non_existing_identifier) { "ffffffffffffffffffffffffffffffffffffffff" }
+        let(:non_existing_version_url) { api_url("/#{cookbook_url_base}/#{cookbook_name}/#{non_existing_identifier}") }
 
-        before(:each) { make_cookbook(admin_user, cookbook_name, cookbook_version) }
-        after(:each) { delete_cookbook(admin_user, cookbook_name, cookbook_version) }
+        before(:each) { make_cookbook_artifact(admin_user, cookbook_name, cookbook_identifier) }
+        after(:each) { delete_cookbook(admin_user, cookbook_name, cookbook_identifier) }
 
         it "should respond with 404 (\"Not Found\") and not delete existing versions" do
-          delete(non_existing_version_url, admin_user) do |response|
-            response.should look_like expected_response
+          delete(non_existing_version_url, requestor) do |response|
+            expect(response.code).to eq(404)
+            expect(parse(response)).to eq({"error"=>["not_found"]})
           end
 
-          should_not_be_deleted
+          expect(get(request_url, requestor).code).to eq(200)
         end
       end # it doesn't delete the wrong version of an existing cookbook
 
       context "when deleting existent version of an existing cookbook", :smoke do
+
         let(:recipe_name) { "test_recipe" }
         let(:recipe_content) { "hello-#{unique_suffix}" }
         let(:recipe_spec) do
@@ -77,24 +112,32 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
             }
         end
 
-        let(:cookbooks) do
-          {
-            cookbook_name => {
-              cookbook_version => [recipe_spec]
-            }
-          }
+        before(:each) do
+          make_cookbook_artifact_with_recipes(cookbook_name, cookbook_identifier, [recipe_spec])
         end
 
-        let(:fetched_cookbook) { original_cookbook }
-        let(:original_cookbook) { new_cookbook(cookbook_name, cookbook_version) }
-
-        before(:each) { setup_cookbooks(cookbooks) }
-        after(:each)  { remove_cookbooks(cookbooks) }
+        after(:each)  { delete_cookbook_artifact(requestor, cookbook_name, cookbook_identifier) }
 
         it "should cleanup unused checksum data in s3/bookshelf" do
-          verify_checksum_cleanup(:recipes) do
-            response.should look_like(:status => 200)
-          end
+          artifact_json = get(request_url, requestor)
+          expect(artifact_json.code).to eq(200)
+          artifact_before_delete = parse(artifact_json)
+          existing_recipes = artifact_before_delete["recipes"]
+
+          expect(existing_recipes.size).to eq(1)
+          remote_recipe_spec = existing_recipes.first
+          expect(remote_recipe_spec).to be_a_kind_of(Hash)
+
+          expect(remote_recipe_spec["name"]).to eq("test_recipe.rb")
+          expect(remote_recipe_spec["path"]).to eq("recipes/test_recipe.rb")
+          expect(remote_recipe_spec["checksum"]).to be_a_kind_of(String)
+          expect(remote_recipe_spec["specificity"]).to eq("default")
+          expect(remote_recipe_spec["url"]).to be_a_kind_of(String)
+
+          delete_response = delete(request_url, requestor)
+          expect(delete_response.code).to eq(200)
+
+          verify_checksum_url(remote_recipe_spec["url"], 404)
         end
 
       end # context when deleting existent version...
@@ -102,18 +145,23 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
     context "with permissions for" do
       let(:cookbook_name) {"delete-cookbook"}
-      let(:cookbook_version) { "0.0.1" }
+      let(:cookbook_identifier) { "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }
       let(:not_found_msg) { ["Cannot find a cookbook named delete-cookbook with version 0.0.1"] }
 
-      before(:each) { make_cookbook(admin_user, cookbook_name, cookbook_version) }
-      after(:each) { delete_cookbook(admin_user, cookbook_name, cookbook_version) }
+      let(:original_cookbook) { new_cookbook_artifact(cookbook_name, cookbook_identifier) }
+      let(:fetched_cookbook) { original_cookbook.dup.tap { |c| c.delete("json_class") } }
+
+      before(:each) { make_cookbook_artifact(admin_user, cookbook_name, cookbook_identifier) }
+      after(:each) { delete_cookbook_artifact(admin_user, cookbook_name, cookbook_identifier) }
 
       context 'as admin user' do
-        let(:expected_response) { delete_cookbook_success_response }
 
         it "should respond with 200 (\"OK\") and be deleted" do
-          should look_like expected_response
-          should_be_deleted
+          delete_response = delete(request_url, admin_user)
+          expect(delete_response.code).to eq(200)
+          expect(parse(delete_response)).to eq(fetched_cookbook)
+
+          expect(get(request_url, admin_user).code).to eq(404)
         end # it admin user returns 200
       end # as admin user
 
@@ -122,8 +170,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
         let(:requestor) { normal_user }
         it "should respond with 200 (\"OK\") and be deleted" do
-          should look_like expected_response
-          should_be_deleted
+          expect(delete(request_url, requestor).code).to eq(200)
         end # it admin user returns 200
       end # with normal user
 

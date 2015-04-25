@@ -238,6 +238,32 @@ module Pedant
             requestor, :payload => payload)
       end
 
+      def new_cookbook_artifact(name, identifier, opts = {})
+        {
+          "name" => "#{name}",
+          "identifier" => identifier,
+          "version" => opts[:version] || default_version, # version doesn't matter for cookbook_artifacts
+          "json_class" => "Chef::CookbookVersion",
+          "chef_type" => "cookbook_version",
+          "frozen?" => false,
+          "recipes" => opts[:recipes] || [],
+          "metadata" => {
+            "version" => opts[:version] || default_version,
+            "name" => name, # not actually used
+            "maintainer" => opts[:maintainer] || default_maintainer,
+            "maintainer_email" => opts[:maintainer_email] || default_maintainer_email,
+            "description" => opts[:description] || default_description,
+            "long_description" => opts[:long_description] || default_long_description,
+            "license" => opts[:license] || default_license,
+            "dependencies" => opts[:dependencies] || {},
+            "attributes" => opts[:attributes] || {},
+            # this recipies list is not the same as the top level list
+            # this is a list of recipes and their descriptions
+            "recipes" => opts[:meta_recipes] || {}
+          }
+        }
+      end
+
       def new_cookbook(name, version, opts = {})
         {
           "name" => "#{name}-#{version}",
