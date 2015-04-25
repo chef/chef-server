@@ -27,12 +27,6 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
   let(:default_version) { "1.0.0" }
 
-  def delete_cookbook_artifact(requestor, name, identifier)
-    res = delete(api_url("/#{cookbook_url_base}/#{name}/#{identifier}"),
-           requestor)
-    expect(['200', '404']).to include(res.code.to_s)
-  end
-
   context "PUT /cookbook_artifacts/<name>/<version> [create]" do
 
     include Pedant::RSpec::Validations::Create

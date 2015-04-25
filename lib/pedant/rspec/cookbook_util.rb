@@ -176,6 +176,59 @@ module Pedant
         end
       end
 
+      def new_cookbook_artifact(name, identifier, opts = {})
+        {
+          "name" => "#{name}",
+          "identifier" => identifier,
+          "version" => opts[:version] || default_version, # version doesn't matter for cookbook_artifacts
+          "json_class" => "Chef::CookbookVersion",
+          "chef_type" => "cookbook_version",
+          "frozen?" => false,
+          "recipes" => opts[:recipes] || [],
+          "metadata" => {
+            "version" => opts[:version] || default_version,
+            "name" => name, # not actually used
+            "maintainer" => opts[:maintainer] || default_maintainer,
+            "maintainer_email" => opts[:maintainer_email] || default_maintainer_email,
+            "description" => opts[:description] || default_description,
+            "long_description" => opts[:long_description] || default_long_description,
+            "license" => opts[:license] || default_license,
+            "dependencies" => opts[:dependencies] || {},
+            "attributes" => opts[:attributes] || {},
+            # this recipies list is not the same as the top level list
+            # this is a list of recipes and their descriptions
+            "recipes" => opts[:meta_recipes] || {}
+          }
+        }
+      end
+
+      def delete_cookbook_artifact(requestor, name, identifier)
+        res = delete(api_url("/#{cookbook_url_base}/#{name}/#{identifier}"),
+               requestor)
+        expect(['200', '404']).to include(res.code.to_s)
+      end
+
+      def make_cookbook_artifact(requestor, name, identifier, opts = {})
+        url = api_url("/#{cookbook_url_base}/#{name}/#{identifier}")
+        payload = new_cookbook_artifact(name, identifier, opts)
+        res = put(url, requestor, payload: payload)
+        expect(res.code).to eq(201)
+      end
+
+      def make_cookbook_artifact_with_recipes(cookbook_name, identifier, recipe_list)
+        recipe_specs = normalize_recipe_specs(recipe_list)
+        content_list = recipe_specs.map { |r| r[:content] }
+        files = content_list.map { |content| Pedant::Utility.new_temp_file(content) }
+        upload_files_to_sandbox(files)
+        checksums = files.map { |f| Pedant::Utility.checksum(f) }
+        recipes = recipe_specs.zip(checksums).map do |r, sum|
+          dummy_recipe(r[:name], sum)
+        end.sort { |a, b| a[:name] <=> b[:name] }
+        opts = { :recipes => recipes }
+        make_cookbook_artifact(requestor, cookbook_name, identifier, opts)
+      end
+
+
       # Verifies all deleted checksums are properly removed from Bookshelf (or S3).
       # The sets of 'existing' and 'updated' checksums can either be pre-computed
       # and passed in as function arugments or automatically computed if a
@@ -236,32 +289,6 @@ module Pedant
       def upload_cookbook(requestor, name, version, payload)
         put(api_url("/#{cookbook_url_base}/#{name}/#{version}"),
             requestor, :payload => payload)
-      end
-
-      def new_cookbook_artifact(name, identifier, opts = {})
-        {
-          "name" => "#{name}",
-          "identifier" => identifier,
-          "version" => opts[:version] || default_version, # version doesn't matter for cookbook_artifacts
-          "json_class" => "Chef::CookbookVersion",
-          "chef_type" => "cookbook_version",
-          "frozen?" => false,
-          "recipes" => opts[:recipes] || [],
-          "metadata" => {
-            "version" => opts[:version] || default_version,
-            "name" => name, # not actually used
-            "maintainer" => opts[:maintainer] || default_maintainer,
-            "maintainer_email" => opts[:maintainer_email] || default_maintainer_email,
-            "description" => opts[:description] || default_description,
-            "long_description" => opts[:long_description] || default_long_description,
-            "license" => opts[:license] || default_license,
-            "dependencies" => opts[:dependencies] || {},
-            "attributes" => opts[:attributes] || {},
-            # this recipies list is not the same as the top level list
-            # this is a list of recipes and their descriptions
-            "recipes" => opts[:meta_recipes] || {}
-          }
-        }
       end
 
       def new_cookbook(name, version, opts = {})

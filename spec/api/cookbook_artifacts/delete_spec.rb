@@ -29,32 +29,6 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
     let(:cookbook_identifier) { "1111111111111111111111111111111111111111" }
     let(:default_version) { "1.2.3" }
 
-    def delete_cookbook_artifact(requestor, name, identifier)
-      res = delete(api_url("/#{cookbook_url_base}/#{name}/#{identifier}"),
-             requestor)
-      expect(['200', '404']).to include(res.code.to_s)
-    end
-
-    def make_cookbook_artifact(requestor, name, identifier, opts = {})
-      url = api_url("/#{cookbook_url_base}/#{name}/#{identifier}")
-      payload = new_cookbook_artifact(name, identifier, opts)
-      res = put(url, requestor, payload: payload)
-      expect(res.code).to eq(201)
-    end
-
-    def make_cookbook_artifact_with_recipes(cookbook_name, identifier, recipe_list)
-      recipe_specs = normalize_recipe_specs(recipe_list)
-      content_list = recipe_specs.map { |r| r[:content] }
-      files = content_list.map { |content| Pedant::Utility.new_temp_file(content) }
-      upload_files_to_sandbox(files)
-      checksums = files.map { |f| Pedant::Utility.checksum(f) }
-      recipes = recipe_specs.zip(checksums).map do |r, sum|
-        dummy_recipe(r[:name], sum)
-      end.sort { |a, b| a[:name] <=> b[:name] }
-      opts = { :recipes => recipes }
-      make_cookbook_artifact(requestor, cookbook_name, identifier, opts)
-    end
-
     context "for non-existent cookbooks" do
       let(:expected_response) { cookbook_version_not_found_exact_response }
 
