@@ -370,6 +370,7 @@
 
 -type resource_state() ::   undefined |
                             #client_state{} |
+                            #chef_client{} | %% some weird pedant case
                             #cookbook_state{} |
                             #cookbook_artifact_version_state{} |
                             #environment_state{} |
