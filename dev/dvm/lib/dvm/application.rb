@@ -13,9 +13,7 @@ module DVM
     "ruby" => DVM::RubyProject
   }
   class DVMArgumentError < ArgumentError
-
   end
-
   class Application < Thor
     def initialize(args, local_options,config)
       super
@@ -47,23 +45,29 @@ module DVM
         say(HighLine.color("#{project} deps:", :bold))
         project = @projects[project]
         project.deps.each do |name, dep|
-          status, c = dep.loaded? ? ["loaded", :green] : ["available", :white]
+          status, c = dep.loaded? ? ["loaded", :yellow] : (dep.available? ? ["available", :green]  : ["not available", :red])
           say("  #{name}: #{HighLine.color(status, c)}")
         end
       end
     end
 
-    option :"no-build", type: :boolean,
+    option :no_build, type: :boolean,
                         aliases: ['-n'],
                         desc: "skip the build phase and just load/mount the source path"
+    option :force, type: :boolean,
+                   aliases: ['-f'],
+                   desc: "force the load even if the component is already loaded"
+    option :skip_checkout, type: :boolean,
+                   aliases: ['-s'],
+                   desc: "do not attempt to clone the repo if it's missing, and do not change branches. "
     desc "load <project> [dep-or-sub]", "load a project or project's named dependency"
     def load(project_name, dep = nil)
       ensure_project(project_name)
       project = @projects[project_name]
       if dep.nil?
-        project.load(options[:"no-build"])
+        project.load(options)
       else
-        project.load_dep(dep, options[:"no-build"])
+        project.load_dep(dep, options)
       end
     end
 

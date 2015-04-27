@@ -11,13 +11,14 @@ vm:
     - ebin/
     - .eunit/
     - .kitchen/
+    - .bundle/
+    - vendor/bundle/
     - "*_SUITE_data/"
     - "*.deb"
     - "*.rpm"
     - "*.vmdk"
     - "*.plt"
     - "*.beam"
-    - .bundle/
     - rspec.failures
 
 projects:
@@ -29,25 +30,40 @@ projects:
       name: opscode-erchef
       cookie: erchef
       node: erchef@127.0.0.1
-  oc_bifrost: # TODO : unverified
+    git:
+      uri: git://github.com/chef/oc_erchef.git
+      branch: master
+  oc_bifrost:
     type: erlang
     database: opscode_bifrost
+    build:
+      # higher concurrency appears to cause eunit failures...
+      max_concurrency: 1
     service:
       rel-type: relx
       name:  oc_bifrost
       cookie: oc_bifrost
       node: oc_bifrost@127.0.0.1
-  bookshelf: # TODO unverified
+    git:
+      uri: https://github.com/chef/oc_bifrost.git
+      branch: master
+  bookshelf:
     type: erlang
     service:
       rel-type: relx
       name:  bookhself
       cookie: bookshelf
       node: bookshelf@127.0.0.1
+    git:
+      uri: https://github.com/chef/bookshelf.git
+      branch: master
+    build:
+      # higher concurrency appears to cause eunit failures...
+      max_concurrency: 1
   omnibus:
     type: omnibus
     git:
-      uri: git@github.com:chef/opscode-omnibus.git
+      uri: https://github.com/chef/opscode-omnibus.git
       branch: master
     components:
       # dest paths are relative to /opt/opscode/embedded for these components

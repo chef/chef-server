@@ -42,7 +42,8 @@
                   %% development environment by relx.  mixer is not startable, and sync is only started when
                   %% DEVVM=1 environment variable is present.
                   sync,
-                  mixer
+                  mixer,
+                  eunit
                  ]},
   {mod, { oc_erchef_app, []}},
   {env, []}
