@@ -33,7 +33,7 @@ net {
   }
  
   handlers {
-    split-brain "/opt/opscode/embedded/lib/drbd/notify-split-brain.sh <%= node['private_chef']['notification_email'] %>";
+    split-brain "<%= node['private_chef']['drbd']['notify_split_brain_sh'] %> <%= node['private_chef']['notification_email'] %>";
   }
 }
 
