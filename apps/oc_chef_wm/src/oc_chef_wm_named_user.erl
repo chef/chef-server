@@ -130,7 +130,6 @@ invite_access_for(invitations, _) -> superuser_only;
 invite_access_for(invitation_count, _) -> superuser_only;
 invite_access_for(invitation_response, AuthzId) -> {actor, AuthzId, grant}.
 
-
 auth_type('PUT', AuthzId, #user_state{user_data = UserData}) ->
     ExtId = ej:get({<<"external_authentication_uid">>}, UserData),
     Recovery = ej:get({<<"recovery_authentication_enabled">>}, UserData),

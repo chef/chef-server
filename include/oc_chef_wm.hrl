@@ -193,7 +193,7 @@
           %% list of resource arguments passed in on init of each resource by webmachine
           %% This will be set to 'Value' of a tuple in the resource argument list in
           %% dispatch.conf matching the form {resource_args, Value}
-          resource_args :: list(),
+          resource_args :: atom(),
 
           % Multiple resources may create a key at time of object creation.  Expose it
           % in base_state so that it's available for common handling.
@@ -368,9 +368,12 @@
           chef_key :: #chef_key{}
          }).
 
+-record(object_identifier_state, {id :: object_id(),
+                                  authz_id :: object_id(),
+                                  org_id :: object_id()}).
+
 -type resource_state() ::   undefined |
                             #client_state{} |
-                            #chef_client{} | %% some weird pedant case
                             #cookbook_state{} |
                             #cookbook_artifact_version_state{} |
                             #environment_state{} |
@@ -379,11 +382,18 @@
                             #sandbox_state{} |
                             #data_state{} |
                             #container_state{} |
+                            #depsolver_state{} |
                             #group_state{} |
                             #policy_state{} |
                             #organization_state{} |
-                            #user_state{}.
-
-
+                            #user_state{} |
+                            #principal_state{} |
+                            #object_identifier_state{} |
+                            #search_state{} |
+%% Some pedant cases
+                            #chef_client{}   |
+                            #chef_data_bag{} |
+                            #chef_environment{} |
+                            #chef_role{}.
 -define(gv(X,L), proplists:get_value(X, L)).
 -define(gv(X,L, D), proplists:get_value(X, L, D)).
