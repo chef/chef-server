@@ -15,235 +15,118 @@
 
 require 'pedant/rspec/cookbook_util'
 
-# FIXME  We don't test GET /cookbooks/NAME/VERSION when we have
+# FIXME  We don't test GET /cookbook_artifacts/NAME/VERSION when we have
 # any files in the segments.  Thus we're not checking the creation
 # of the S3 URLs that should be returned for all the files in the
 # cookbook
 
-describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artifacts_read, :skip do
+describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artifacts_read do
 
   let(:cookbook_url_base) { "cookbook_artifacts" }
 
   include Pedant::RSpec::CookbookUtil
 
-  context "GET /cookbooks" do
-    let(:url) { cookbook_collection_url }
-    let(:request_url) { cookbook_collection_url }
-    let(:request_method) { :GET }
+  def cookbook_artifact_version_url(name, identifier)
+    api_url("/#{cookbook_url_base}/#{name}/#{identifier}")
+  end
+
+  context "GET /cookbook_artifacts" do
+    let(:request_url){api_url("/#{cookbook_url_base}/")}
     let(:requestor) { admin_user }
 
-    let(:cookbook_collection_url) { api_url("/#{cookbook_url_base}") }
-    let(:fetch_cookbook_collection_success_exact_response) do
-      {
-        :status => 200,
-        :body_exact => fetched_cookbooks
-      }
-    end
-
-    context "with an operational server", :smoke do
-      it { should look_like ok_response }
-    end
-
-    context "without existing cookbooks" do
-      let(:expected_response) { fetch_cookbook_collection_success_exact_response }
-
-      # Assert that there are no cookbooks
-      let(:fetched_cookbooks) { { } }
-
-      # NOTE:  This test must the first one dealing with cookbooks
-      # so that there are no cookbooks existing on the server
-
-      should_respond_with 200, "and an empty collection"
-
-      # Add test to check for empty case with different num_versions
-      context 'with a num_versions' do
-        let(:expected_response) { bad_request_response }
-        let(:request_url) { api_url("/#{cookbook_url_base}?num_versions=#{num_versions}") }
-        let(:error_message) { invalid_versions_msg }
-
-        def self.expects_response_of_400_with(message, _value)
-          context "with #{message}", :validation do
-            let(:num_versions) { _value }
-            should_respond_with 400
-          end
+    context "with no cookbook artifacts on the server", :smoke do
+      it "responds with 200" do
+        get(request_url, requestor) do |response|
+          expect(response.code).to eq(200)
+          expect(parse(response)).to eq({})
         end
+      end
+    end
 
-        expects_response_of_400_with "a negative num_versions", '-1'
-        expects_response_of_400_with "a missing num_versions", ''
-        expects_response_of_400_with "an invalid num_versions", 'foo'
+    context "with existing cookbook_artifacts and multiple versions" do
 
-      end # when requesting with num_versions
-    end # without existing cookbooks
+      let(:request_url) { api_url("/#{cookbook_url_base}") }
 
-    context "with existing cookbooks and multiple versions" do
-      let(:expected_response) { fetch_cookbook_collection_success_exact_response }
-      let(:request_url) { api_url("/#{cookbook_url_base}?num_versions=#{num_versions}") }
+      let(:fetched_cookbook_artifacts) { cookbook_collection }
 
-      let(:fetched_cookbooks) { cookbook_collection }
+      let(:default_version) { "1.0.0" }
 
       let(:cookbook_name) { "cookbook_name" }
       let(:cookbook_name2) { "cookbook_name2" }
-      let(:version1) { "0.0.1" }
-      let(:version2) { "0.0.2" }
-      let(:cookbooks) do
-        {
-          cookbook_name => {
-            version1 => [],
-            version2 => []
-          },
+      let(:identifier_1) { "1111111111111111111111111111111111111111" }
+      let(:identifier_2) { "2222222222222222222222222222222222222222" }
+      let(:identifier_3) { "3333333333333333333333333333333333333333" }
 
-          cookbook_name2 => {
-            version1 => []
-          }
-        }
-      end
+      let(:cba_1_url) { request_url + "/#{cookbook_name}/#{identifier_1}" }
+      let(:cba_2_url) { request_url + "/#{cookbook_name}/#{identifier_2}" }
+      let(:cba_3_url) { request_url + "/#{cookbook_name2}/#{identifier_3}" }
+
+      let(:cba_1) { new_cookbook_artifact(cookbook_name, identifier_1) }
+      let(:cba_2) { new_cookbook_artifact(cookbook_name, identifier_2) }
+      let(:cba_3) { new_cookbook_artifact(cookbook_name2, identifier_3) }
 
       before(:each) do
-        setup_cookbooks(cookbooks)
+        r1 = put(cba_1_url, admin_user, payload: cba_1)
+        expect(r1.code).to eq(201)
+
+        r2 = put(cba_2_url, admin_user, payload: cba_2)
+        expect(r2.code).to eq(201)
+
+        r3 = put(cba_3_url, admin_user, payload: cba_3)
+        expect(r3.code).to eq(201)
       end
 
       after(:each) do
-        remove_cookbooks(cookbooks)
+        r1 = delete(cba_1_url, admin_user)
+        expect(r1.code).to eq(200)
+
+        r2 = delete(cba_2_url, admin_user)
+        expect(r2.code).to eq(200)
+
+        r3 = delete(cba_3_url, admin_user)
+        expect(r3.code).to eq(200)
       end
 
-      context 'with num_versions set to 0' do
-        let(:num_versions) { 0 }
-        let(:cookbook_collection) do
-          {
-            cookbook_name  => { "url" => cookbook_url(cookbook_name), "versions" => [] },
-            cookbook_name2 => { "url" => cookbook_url(cookbook_name2), "versions" => [] }
-          }
-        end
-
-        it "should respond with cookbook collection with no version" do
-          should look_like expected_response
-        end
-      end # with num_versions set to 0
-      let(:cookbook_collection_with_one_version) do
+      let(:expected_cookbook_artifact_collection) do
         {
           cookbook_name => {
             "url" => cookbook_url(cookbook_name),
-            "versions" =>
-              [{ "version" => version2,
-                 "url" => cookbook_version_url(cookbook_name,version2) }]},
+            "versions" => [
+              { "identifier" => identifier_1,
+                "url" => cookbook_artifact_version_url(cookbook_name, identifier_1) },
+              { "identifier" => identifier_2,
+                "url" => cookbook_artifact_version_url(cookbook_name, identifier_2) }
+            ]},
           cookbook_name2 => {
             "url" => cookbook_url(cookbook_name2),
-            "versions" =>
-               [{ "version" => version1,
-                  "url" => cookbook_version_url(cookbook_name2, version1) }]}
+            "versions" => [
+              { "identifier" => identifier_3,
+                "url" => cookbook_artifact_version_url(cookbook_name2, identifier_3) }]}
         }
       end
 
-      context 'when num_versions is not set' do
-        let(:request_url) { cookbook_collection_url }
-        let(:cookbook_collection) { cookbook_collection_with_one_version }
-
-        it 'should return cookbook collection with one version per cookbook' do
-          should look_like expected_response
-        end
-      end # without num_versions
-
-      context 'when num_versions is set to 1' do
-        let(:num_versions) { 1 }
-        let(:cookbook_collection) { cookbook_collection_with_one_version }
-
-        it 'should return cookbook collection with one version per cookbook' do
-          should look_like expected_response
-        end
+      it 'should respond with a cookbook collection containing all versions of each cookbook' do
+        list_response = get(request_url, requestor)
+        expect(list_response.code).to eq(200)
+        expect(parse(list_response)).to eq(expected_cookbook_artifact_collection)
       end
 
-      context 'when num_versions is set to "all"' do
-        let(:num_versions) { 'all' }
-        let(:cookbook_collection) do
-          {
-            cookbook_name => {
-              "url" => cookbook_url(cookbook_name),
-              "versions" => [
-                { "version" => version2,
-                  "url" => cookbook_version_url(cookbook_name, version2) },
-                { "version" => version1,
-                  "url" => cookbook_version_url(cookbook_name, version1) } ]},
-            cookbook_name2 => {
-              "url" => cookbook_url(cookbook_name2),
-              "versions" => [
-                { "version" => version1,
-                  "url" => cookbook_version_url(cookbook_name2, version1) }]}
-          }
-        end
+    end
 
-        it 'should respond with a cookbook collection containing all versions of each cookbook' do
-          should look_like expected_response
-        end
+  end # context GET /cookbook_artifacts
 
-      end
-    end # context returns different results depending on num_versions
+  context "GET /cookbook_artifacts/<name>/<version>" do
 
-    context "with varying numbers of existing cookbooks" do
-      let(:expected_response) { fetch_cookbook_success_exact_response }
-      let(:request_url) { api_url("/#{cookbook_url_base}?num_versions=all") }
-
-      let(:fetched_cookbook) { cookbook_collection }
-      let(:cookbook_name) { "cookbook_name" }
-      let(:cookbook_version) { "1.2.3" }
-
-      context 'with a single, existing cookbook' do
-        let(:cookbook_collection) do
-          {
-            cookbook_name => {
-            "url" => cookbook_url(cookbook_name),
-            "versions" => [
-              { "version" => cookbook_version,
-                "url" => cookbook_version_url(cookbook_name, cookbook_version) }]}
-          }
-        end
-
-        it 'should respond with a single cookbook in the collection' do
-          make_cookbook(admin_user, cookbook_name, cookbook_version)
-          should look_like expected_response
-          delete_cookbook(admin_user, cookbook_name, cookbook_version)
-        end
-      end
-
-      context 'with multiple, existing cookbooks' do
-        let(:cookbook_collection) do
-          {
-            "cb1" => {
-              "url" => cookbook_url("cb1"),
-              "versions" => [
-                { "version" => "0.0.1",
-                  "url" => cookbook_version_url("cb1", "0.0.1") }]},
-            "cb2" => {
-              "url" => cookbook_url("cb2"),
-              "versions" => [
-                { "version" => "0.0.2",
-                  "url" => cookbook_version_url("cb2", "0.0.2") }]}
-          }
-        end
-
-        it "multiple cookbooks can be listed" do
-          # Upload cookbook
-          make_cookbook(admin_user, "cb1", "0.0.1")
-          make_cookbook(admin_user, "cb2", "0.0.2")
-
-          should look_like expected_response
-
-          # cleanup
-          delete_cookbook(admin_user, "cb1", "0.0.1")
-          delete_cookbook(admin_user, "cb2", "0.0.2")
-        end # it multiple cookbooks can be listed
-      end # with multiple, existing cookbooks
-
-    end # with varying numbers of existing cookbooks
-  end # context GET /cookbooks
-
-  context "GET /cookbooks/<name>/<version>" do
-    let(:request_method) { :GET }
-    let(:request_url)    { named_cookbook_url }
 
     let(:cookbook_name) { "the_cookbook_name" }
-    let(:cookbook_version) { "1.2.3" }
+    let(:default_version) { "1.2.3" }
+    let(:cookbook_identifier) { "1111111111111111111111111111111111111111" }
+
+    let(:request_url)    { cookbook_artifact_version_url(cookbook_name, cookbook_identifier) }
+
     let(:recipe_name) { "test_recipe" }
     let(:recipe_content) { "hello-#{unique_suffix}" }
+
     let(:recipe_spec) do
         {
           :name => recipe_name,
@@ -251,74 +134,81 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         }
     end
 
-    let(:cookbooks) do
-      {
-        cookbook_name => {
-          cookbook_version => [recipe_spec]
-        }
-      }
+    before(:each) do
+      make_cookbook_artifact_with_recipes(cookbook_name, cookbook_identifier, [recipe_spec])
     end
 
-    before(:each) { setup_cookbooks(cookbooks) }
-    after(:each)  { remove_cookbooks(cookbooks) }
+    after(:each)  { delete_cookbook_artifact(admin_user, cookbook_name, cookbook_identifier) }
 
-    let(:fetched_cookbook) do
-      # NOTE: the cookbook returned will actually have some recipe
-      # data. We don't yet have a nice way to do the required soft
-      # verification for the URL and checksum.
-      #
-      # To get around this, we'll just pass in a proc that asserts
-      # that the "recipes" key is an array of hashes with the correct
-      # keys.
-      retrieved_cookbook(cookbook_name,
-                         cookbook_version,
-                         :recipes => lambda{|recipes|
-                           recipes.is_a?(Array) &&
-                           recipes.all?{|recipe|
-                             recipe.is_a?(Hash) &&
-                             recipe.keys.sort == ["name", "path", "checksum", "specificity", "url"].sort
-                           }
-                         })
-    end
+    shared_examples_for "successful_cookbook_fetch" do
 
-    context 'as a normal user' do
-      let(:expected_response) { fetch_cookbook_success_exact_response }
-      let(:requestor) { normal_user }
+      let(:expected_cookbook_artifact_data) do
+        new_cookbook_artifact(cookbook_name, cookbook_identifier).tap do |cba|
+          cba.delete("json_class")
 
-      should_respond_with 200
+          # checksum and url are also present in the real data but they're not
+          # stable so we remove them before comparing
+          cba["recipes"] = [
+            {
+              "name" => "#{recipe_name}.rb",
+              "path" => "recipes/#{recipe_name}.rb",
+              "specificity" => "default"
+            }
+          ]
+        end
+      end
 
-      context "allows access to cookbook recipe files via" do
-        # These tests verify that the pre-signed URL that comes back
-        # within cookbook_version responses is usable. Validating both
-        # the URL generation, but also the use of bookshelf via the
-        # load balancer.
-        let(:cbv) { parse(response) }
-        let(:recipe_url) { cbv["recipes"].first["url"] }
+      it "returns a 200 response" do
+        get_response = get(request_url, requestor)
+        expect(get_response.code).to eq(200)
+        response_data = parse(get_response)
+        expect(response_data).to have_key("recipes")
+        expect(response_data["recipes"]).to be_a_kind_of(Array)
+        expect(response_data["recipes"].size).to eq(1)
+        expect(response_data["recipes"].first.keys).to match_array(%w[ name path checksum specificity url ])
 
-        it "net/http" do
-          uri = URI.parse(recipe_url)
-          http = Net::HTTP.new(uri.hostname, uri.port)
-          if uri.scheme == "https"
-            http.use_ssl = true
-            http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-          end
+        # URL and checksum are not predictable.
+        response_data["recipes"].first.delete("url")
+        response_data["recipes"].first.delete("checksum")
 
-          response = http.get(uri.request_uri, {})
-          response.body.should == recipe_content
+        expect(response_data).to eq(expected_cookbook_artifact_data)
+      end
+
+      # These tests verify that the pre-signed URL that comes back
+      # within cookbook_version responses is usable. Validating both
+      # the URL generation, but also the use of bookshelf via the
+      # load balancer.
+      it "returns valid file URLs" do
+        cookbook_artifact_data = parse(get(request_url, requestor))
+        recipe_url = cookbook_artifact_data["recipes"].first["url"]
+
+        uri = URI.parse(recipe_url)
+        http = Net::HTTP.new(uri.hostname, uri.port)
+        if uri.scheme == "https"
+          http.use_ssl = true
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
         end
 
-      end # access to recipe file content
+        response = http.get(uri.request_uri, {})
+        response.body.should == recipe_content
+      end
 
     end # as a normal user
 
+    context 'as a normal user' do
+      let(:requestor) { normal_user }
+
+      include_examples("successful_cookbook_fetch")
+    end
+
     context 'as an admin user' do
-      let(:expected_response) { fetch_cookbook_success_exact_response }
       let(:requestor) { admin_user }
 
-      should_respond_with 200
+      include_examples("successful_cookbook_fetch")
     end # as an admin user
 
     context 'as an user outside of the organization', :authorization do
+      let(:request_method) { :GET }
       let(:expected_response) { unauthorized_access_credential_response }
       let(:requestor) { outside_user }
 
@@ -326,11 +216,12 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
     end # as an outside user
 
     context 'with invalid user', :authentication do
+      let(:request_method) { :GET }
       let(:expected_response) { invalid_credential_exact_response }
       let(:requestor) { invalid_user }
 
       should_respond_with 401
     end
-  end # context GET /cookbooks/<name>/<version>
-end # describe Cookbooks API endpoint
+  end # context GET /cookbook_artifacts/<name>/<version>
+end # describe cookbook_artifacts API endpoint
 

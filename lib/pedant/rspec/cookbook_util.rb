@@ -225,7 +225,7 @@ module Pedant
           dummy_recipe(r[:name], sum)
         end.sort { |a, b| a[:name] <=> b[:name] }
         opts = { :recipes => recipes }
-        make_cookbook_artifact(requestor, cookbook_name, identifier, opts)
+        make_cookbook_artifact(admin_user, cookbook_name, identifier, opts)
       end
 
 
