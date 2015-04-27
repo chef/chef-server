@@ -55,7 +55,7 @@ projects:
       cookie: bookshelf
       node: bookshelf@127.0.0.1
     git:
-      uri: https://github.com/chef/oc_erchef.git
+      uri: https://github.com/chef/bookshelf.git
       branch: master
     build:
       # higher concurrency appears to cause eunit failures...
