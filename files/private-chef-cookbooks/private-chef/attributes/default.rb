@@ -598,8 +598,7 @@ default['private_chef']['upgrades']['dir'] = "/var/opt/opscode/upgrades"
 ##
 # Folsom Graphite
 ##
-# Off by default, graphite not included with chef. WARNING:If you turn on and
-# graphite is not available via tcp, erchef will fail to start.
+# Off by default, graphite not included with chef.
 default['private_chef']['folsom_graphite']['enabled'] = false
 # graphite server host name
 default['private_chef']['folsom_graphite']['host'] = "localhost"
@@ -609,3 +608,5 @@ default['private_chef']['folsom_graphite']['port'] = 8080
 default['private_chef']['folsom_graphite']['prefix'] = "stats_prefix"
 # how frequently to send stats to the graphite server in milliseconds
 default['private_chef']['folsom_graphite']['send_interval'] = 10000
+# if a connection fails, how frequently do we attempt to reconnect?
+default['private_chef']['folsom_graphite']['retry_interval'] = 2000

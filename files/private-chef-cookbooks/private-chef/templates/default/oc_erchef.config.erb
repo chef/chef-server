@@ -232,6 +232,7 @@
                      {graphite_port, <%= node['private_chef']['folsom_graphite']['port'] %>},
                      {graphite_prefix, "<%= node['private_chef']['folsom_graphite']['prefix'] %>"},
                      {send_interval, <%= node['private_chef']['folsom_graphite']['send_interval'] %>},
+                     {retry_interval, <%= node['private_chef']['folsom_graphite']['retry_interval'] %>},
                      {application, "erchef"}
                     ]
   }
