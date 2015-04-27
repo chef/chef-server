@@ -1,0 +1,27 @@
+<div class="row">
+  <div class="medium-4 columns">
+    <div>
+      <%= render "profile" %>
+    </div>
+  </div>
+  <div class="medium-4 columns">
+    <div>
+      <%= render "change_password" %>
+    </div>
+  </div>
+  <div class="medium-4 columns">
+    <div>
+      <div class="medium-12 columns">
+        <h3>Reset Your Private Key</h3>
+        <p>If you've lost your private key, or would like to replace it, click the button below to download one now.</p>
+        <p>
+          When you do this,
+          <strong>your old key will stop working.</strong>
+          This key replaces your current key.
+          We do not store a copy of this key, so please keep it somewhere safe.
+        </p>
+        <%= render "generate_key" %>
+      </div>
+    </div>
+  </div>
+</div>
