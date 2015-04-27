@@ -1,0 +1,262 @@
+#!/usr/bin/env ruby
+# ex: ft=ruby
+
+require "yaml"
+require "io/console"
+
+# TODO allow this to be configured and refresh per load
+# In local tests, it is about a 1.1 seconds per sync,
+# with up to about 15 seconds for a large sync (400mb single file)
+
+INTERVAL = 10
+# Everything we do has to fit in above STATUS_ROW
+# At some point I should make this dynamic...
+STATUS_ROW = 11
+CSI = "\e["
+
+
+init
+@screen = Screen.new
+@screen.clear
+@screen.say_at(1, 1, banner)
+
+interrupted = false
+while true do
+  # TODO add capture of keystrokes from term as well, avoid 'ctrl+c' requirement
+  # and just include the options menu on the top level
+  # TODO how to safely stop any interrupt from passing through to child process
+  # before we intercept?
+  begin
+    @screen.set_status("Syncing...")
+    r = do_sync
+    # Prevent scrolling and resizing from doing ugly things...
+    @screen.clear
+    @screen.say_at(1, 1, banner)
+    output = parse_results(r)
+    interrupted = false
+    refresh_stats(output)
+    sleep(INTERVAL)
+  rescue Interrupt => e
+    @screen.clear
+    if interrupted
+      quit
+    else
+      interrupted = true
+      @screen.say_at 1, 1, pause_message
+      result = @screen.next_char
+      case result
+      when ?q, "\u0003"
+        quit
+      when ?s
+        suspend
+      when ?h
+        halt
+      else
+        @screen.clear
+        @screen.say_at 1, 1, banner
+        interrupted = false
+      end
+    end
+  rescue Exception => e
+    @screen.clear
+    @screen.say_at 1,1, "Oops, something went wrong. Here's the info: "
+    @screen.move_to 3,1
+    raise
+  end
+end
+
+# Because I want my functions at the bottom of a script, damnit.
+BEGIN {
+  def init
+    @num_syncs = 0
+    @all_stats = { walltime: 0.0,  transferred: 0, created: 0, deleted: 0, bytes: 0, time: 0.0}
+    ssh_info = {}
+    `vagrant ssh-config`.split("\n").each do |line|
+      k, v = line.split(" ")
+      ssh_info[k.strip] = v.strip
+    end
+    @username = ssh_info["User"]
+    @host = ssh_info["HostName"]
+    @rsh = "ssh -p #{ssh_info["Port"]} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -q -i #{ssh_info["IdentityFile"]}"
+  end
+
+  def do_sync
+    start = Time.now
+    # reload the config for each sync so that we pick up changes
+    config = YAML.load_file("defaults.yml")
+    excludes = Array(config["vm"]["sync-exclude"]).map(&:to_s)
+
+    userconfig = YAML.load_file("config.yml")
+    userexclude = Array(userconfig["vm"]["sync-exclude"].map(&:to_s)) if userconfig.is_a? Hash and userconfig["vm"]
+    if userexclude
+      excludes += userexclude
+    end
+
+    excludes += ['.vagrant/']
+    excludes += Array(config["vm"]["sync-exclude"]).map(&:to_s)
+    excludes.uniq!
+    args = ["--stats", "--archive", "--delete", "-z", "--copy-links",
+            "--no-owner", "--no-group", "--rsync-path /usr/bin/rsync" ]
+    command = [ "rsync", args, "-e", "\"#{@rsh}\"", excludes.map { |e| ["--exclude", e] },
+                "../..", "#{@username}@#{@host}:/host" ].flatten.join(" ")
+    # TODO - subproc to ignore INT signal, or move to different process group
+    # to avoid Ctrl+C interrupting it.
+    r = `#{command}`
+    [ Time.now - start, r.split("\n") ]
+  end
+
+  def suspend
+    @screen.set_status "Suspending the VM, please wait..."
+    `vagrant suspend`
+    @screen.clear_status
+    @screen.say_at 6, 5, "VM suspended."
+    @screen.say_at 7, 5, "To resume the VM and syncing, just run: "
+    @screen.say_at 8, 8, "#{@screen.color(:magenta)}vagrant up && ./sync#{@screen.endcolor}."
+    exit 0
+  end
+
+  def quit
+    @screen.say_at 6, 5, "The VM will remain running, though sync is now terminated."
+    @screen.say_at 7, 5, "To resume syncing, just run:"
+    @screen.say_at 8, 8, "#{@screen.color(:magenta)}./sync#{@screen.endcolor}."
+    exit 0
+  end
+
+  def halt
+    @screen.set_status "Halting the VM, please wait..."
+    `vagrant halt`
+    @screen.clear_status
+    @screen.say_at 6, 5, "VM halted."
+    @screen.say_at 7, 5, "To start the VM and resume syncing, just run: "
+    @screen.say_at 8, 8, "#{@screen.color(:magenta)}vagrant up#{@screen.endcolor} && #{@screen.color(:magenta)}./sync#{@screen.endcolor}."
+    exit 0
+  end
+
+  def refresh_stats(output)
+    @screen.clear_status
+    @num_syncs += 1
+    color = @screen.color(:magenta)
+    ec = @screen.endcolor
+    @screen.say_at(6, 15,  "#{color}Last Sync:#{ec} #{Time.new.to_s}")
+    @screen.say_at(7, 7,  "#{color}Files Transferred:#{ec} #{output[:transferred]}                ")
+    if output[:bytes] > 1024
+      @screen.say_at(8, 19, "#{color}   KB:#{ec} #{(output[:bytes].to_f/1024.0).round(2)}               ")
+    else
+      @screen.say_at(8, 19, "#{color}Bytes:#{ec} #{output[:bytes]}                ")
+    end
+    @screen.say_at(7, 40,  "#{color}Transfer Time:#{ec} #{output[:time]}s")
+    @screen.say_at(8, 43, "#{color}Clock Time:#{ec} #{sprintf('%0.1f', output[:walltime])}")
+    color = @screen.color(:blue, true)
+    @screen.say_at(10, 8, "#{color}Total Clock Time:#{ec} #{sprintf('%0.1f', @all_stats[:walltime])}s")
+    @screen.say_at(10, 38, "#{color}Number of Syncs:#{ec} #{@num_syncs}")
+  end
+
+  def parse_results(results)
+    walltime, results = results
+    stats = {}
+    stats[:time] = 0.0
+    stats[:walltime] = walltime
+    results.each do |line|
+      case line
+      when /Number of created files: (.*)/ # rsync 3 on linux
+        stats[:created] = $1.gsub(",", "").to_i
+      when /Number of deleted files: (.*)/ # rsync 3 on linux
+        stats[:deleted] = $1.gsub(",", "").to_i
+      when /Number of .* transferred: (.*)/ # rsync 3 on linux (number of files) and rsync 2 on mac (number of regular files)
+        stats[:transferred] = $1.gsub(",", "").to_i
+      when /.* time: (.*) / # rsync 3 on linux and rsync 2 on mac. Two lines indicating time expected.
+        stats[:time] += $1.gsub(",", "").to_f
+      when /Total transferred file size: (.*) bytes/ # rsync 3 on linux and rsync 2 on mac
+        stats[:bytes] = $1.gsub(",", "").to_i
+      end
+    end
+    stats.each do |k, v|
+      @all_stats[k] = @all_stats[k] + v
+    end
+    stats
+  end
+
+  class Screen
+    attr_reader :rows, :cols
+    def initialize()
+      @rows, @cols = $stdin.winsize
+      @colors =  { black: 0, red: 1, green: 2, yellow: 3, blue: 4, magenta: 5, cyan: 6, white: 7 }
+    end
+
+    def clear_status
+      set_status("")
+    end
+
+
+    def set_status(message)
+      # Refresh in case of resize
+      @rows, @cols = $stdin.winsize
+      # Auto-fill to end of line with spaces. Trust that the message length
+      # isn't longer than the # cols...
+      # TODO Might be an escape code we can use to clear to end of line
+      message = "#{message}#{" " * (cols - message.length)}"
+      save_pos
+      say_at([rows, STATUS_ROW].min, 1, message)
+      restore_pos
+    end
+
+    def endcolor
+      "#{CSI}0m"
+    end
+    def color(color, bright = false)
+      "#{CSI}#{30+@colors[color]}#{bright ? ';1' : ''}m"
+    end
+    def bgcolor(color, bright = false)
+      "#{CSI}#{40+@colors[color]}#{bright ? ';1' : ''}m"
+    end
+    def say_at(row, col, message)
+      move_to(row, col)
+      $stdout.write(message)
+    end
+
+    def move_to(row, col); csi "#{row};#{col}H"; end
+    def clear; csi "2J";  end
+    def save_pos;  csi "s"; end
+    def restore_pos; csi "u"; end
+    def csi(out)
+      STDOUT.write "#{CSI}#{out}"
+    end
+
+    def next_char
+      $stdin.getch
+    end
+  end
+
+  def pause_message
+<<-EOM
+    Syncing paused. Options:
+        (q) terminate and leave the VM running
+        (h) terminate and halt the VM
+        (s) terminate and suspend
+        Any other key to continue syncing
+EOM
+  end
+  def banner
+<<-EOM
+This will remain running to keep files in sync between host and guest.
+Any modifications you make on the host are automatically loaded into the VM.
+
+Hit Ctrl+C to pause sync checks and be presented with options at any time.
+
+EOM
+  end
+} # BEGIN
+
+
+
+# 17117 files to consider
+#
+
+# TODO a couple of things to explore
+# - rsync daemon - faster? Doesit matter, since we're already well under a second
+#   for reasonable syncs?
+# - can we flip this around and just have rsync in the guest pull from the host
+#   at cron'd intervals? That avoids having to leave something running.
+#  (to get to host ip, ifconfig en0 | grep "inet " | cut -d" " -f2)
+
+

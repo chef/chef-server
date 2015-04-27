@@ -1,5 +1,12 @@
-# Place any complete or partial overrides to the configuration in defaults.yml here.
-# Map entries wlll be replaced, and you can remove from defaults by prefixing with --, for example:
+# Override support for default config entries in defaults.yml.
+# Still a WIP - most things work, but vm.packages won't be handled.
+# This will be .gitignored once everything is working 100%, but for now
+# I'm keeping it visible to git so that I can add docs and examples
 #
 # vm:
 #   packages: [ --vim, emacs24 ]
+#
+vm:
+  sync-exclude:
+    - vendor/bundle/
+

@@ -11,13 +11,14 @@ vm:
     - ebin/
     - .eunit/
     - .kitchen/
+    - .bundle/
+    - vendor/bundle/
     - "*_SUITE_data/"
     - "*.deb"
     - "*.rpm"
     - "*.vmdk"
     - "*.plt"
     - "*.beam"
-    - .bundle/
     - rspec.failures
 
 projects:
