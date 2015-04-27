@@ -53,7 +53,7 @@
                     "ee674c185e4b6719d9f342a8ba7b9150ec1260bd"}},
        {folsom_graphite,".*",
                         {git,"https://github.com/opscode/folsom_graphite",
-                             "0bf3d47e52178d8cf24ad9acdf5f37f4fb46a6b1"}},
+                             "d4ce9bf02c025ca559d18abc084c367bf4deaf3f"}},
        {ibrowse,".*",
                 {git,"https://github.com/opscode/ibrowse",
                      "8f3f6a3a30730b193cc340a8885a960586dc98de"}},
