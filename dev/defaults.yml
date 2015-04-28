@@ -19,6 +19,7 @@ vm:
     - "*.vmdk"
     - "*.plt"
     - "*.beam"
+    - relx
     - rspec.failures
 
 projects:
@@ -61,6 +62,7 @@ projects:
       # higher concurrency appears to cause eunit failures...
       max_concurrency: 1
   omnibus:
+    name: opscode-omnibus
     type: omnibus
     git:
       uri: https://github.com/chef/opscode-omnibus.git
@@ -70,19 +72,19 @@ projects:
       # source apths are relative to opscode-omnibus/files
       private-chef-cookbooks:
         source_path: private-chef-cookbooks/private-chef
-        dest_path: cookbooks/private-chef
+        dest_path: /opt/opscode/embedded/cookbooks/private-chef
         reconfigure_on_load: true
       ha-drdb-cookbook:
         source_path: private-chef-cookbooks/chef-ha-drdb
-        dest_path: cookbooks/chef-ha-drdb
+        dest_path: /opt/opscode/embedded/cookbooks/chef-ha-drdb
         reconfigure_on_load: true
       ctl-commands:
         source_path: private-chef-ctl-commands
-        dest_path: service/omnibus-ctl
+        dest_path: /opt/opscode/embedded/service/omnibus-ctl
         reconfigure_on_load: false
       upgrades:
         source_path: private-chef-upgrades
-        dest_path: upgrades
+        dest_path: /opt/opscode/embedded/upgrades
         reconfigure_on_load: false
 
   oc-chef-pedant:

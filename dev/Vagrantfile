@@ -48,6 +48,7 @@ Vagrant.configure("2") do |config|
     # that may exist in your host directory that we don't want to spend time on.
     config.vm.synced_folder File.absolute_path(File.join(Dir.pwd, "../..")), "/host",
       type: "rsync",
+      rsync__args: ["--verbose", "--archive", "--delete", "-z", "--no-owner", "--no-group" ],
       rsync__exclude: attributes["vm"]["sync-exclude"]
 
     # We're also going to do a share of the slower vboxsf style, allowing us to auto-checkout dependencies

@@ -10,7 +10,7 @@ module DVM
       if @deps.nil?
         @deps = {}
         @project['components'].each do |sub, c|
-          @deps[sub] = OmnibusDep.new(sub, c)
+          @deps[sub] = OmnibusDep.new(project_dir, sub, c)
         end
       end
     end
@@ -19,10 +19,10 @@ module DVM
     end
     def do_load
       # TODO we could actually add the standard clone-if-missing support
-      say "This project is not loadable on its own. Instead use 'dvm load #{project_name} $subproject"
+      say "This project is not loadable on its own. Instead use 'dvm load #{name} $subproject"
     end
     def do_unload
-      say "This project is not unloadable on its own. Instead use `dvm unload #{project_name} $subproject"
+      say "This project is not unloadable on its own. Instead use `dvm unload #{name} $subproject"
     end
   end
 end

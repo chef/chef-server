@@ -155,9 +155,20 @@ EOM
     end
 
     def enable_cover(modules = nil)
-      # TODO this will be awesome...
-      # [file:wildcard("/host/oc_erchef/apps/*/ebin")
-      # compile_beam_dir("/host/oc_erchef/apps/
+      say "Disabling sync to prevent conflicts in loaded beam files."
+      update("pause")
+        run_command("#{erl_command} -eval \"rpc:call('#{node}', sync, go, []).\" -s erlang halt", "Resuming sync on #{node}")
+        run_command("#{erl_command} -eval \"rpc:call('#{node}', sync, go, []).\" -s erlang halt", "Resuming sync on #{node}")
+      say "Cover-compiling app beams."
+      # Run these guys next - need to do it by hand via eval!
+      eval_cmd = <<-EOM
+F = fun() ->
+  Dirs = file:wildcard("/host/#{project_name}/apps/*/ebin\") ++ ["/host/#{project_name}/ebin"]
+  [cover:compile_beam_dir(Dir) || Dir <- Dirs]
+end,
+spawn(#{node}, F).
+EOM
+      run_command("#{erl_command} -eval \"#{eval_cmd}\" -s erlang halt", "Cover-compiling modules on the erlang node.")
     end
     def dump_cover(modules = nil)
       # TODO
