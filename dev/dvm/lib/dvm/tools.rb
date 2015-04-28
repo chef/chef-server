@@ -35,7 +35,6 @@ module DVM
       run_command("git clone '#{uri}' '#{name}'", "Cloning #{name} to host.", cwd: host_raw_dir)
     end
     def project_dir_exists_on_host?(name)
-      puts "Checking #{host_project_dir(name)}"
       File.directory? host_project_dir(name)
     end
 

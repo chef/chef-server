@@ -7,8 +7,10 @@ require "io/console"
 # TODO allow this to be configured and refresh per load
 # In local tests, it is about a 1.1 seconds per sync,
 # with up to about 15 seconds for a large sync (400mb single file)
+# CPU usage on the host is minimal, but for large syncs does increase
+# significantly on the guest.
+INTERVAL = 5
 
-INTERVAL = 10
 # Everything we do has to fit in above STATUS_ROW
 # At some point I should make this dynamic...
 STATUS_ROW = 11
@@ -16,10 +18,6 @@ CSI = "\e["
 
 
 init
-@screen = Screen.new
-@screen.clear
-@screen.say_at(1, 1, banner)
-
 interrupted = false
 while true do
   # TODO add capture of keystrokes from term as well, avoid 'ctrl+c' requirement
@@ -70,6 +68,7 @@ BEGIN {
   def init
     @num_syncs = 0
     @all_stats = { walltime: 0.0,  transferred: 0, created: 0, deleted: 0, bytes: 0, time: 0.0}
+    # Determine our ssh args up front, so we won't need to do this on every sync.
     ssh_info = {}
     `vagrant ssh-config`.split("\n").each do |line|
       k, v = line.split(" ")
@@ -78,6 +77,11 @@ BEGIN {
     @username = ssh_info["User"]
     @host = ssh_info["HostName"]
     @rsh = "ssh -p #{ssh_info["Port"]} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -q -i #{ssh_info["IdentityFile"]}"
+    @screen = Screen.new
+    @screen.clear
+    @screen.say_at(1, 1, banner)
+
+
   end
 
   def do_sync
@@ -95,7 +99,7 @@ BEGIN {
     excludes += ['.vagrant/']
     excludes += Array(config["vm"]["sync-exclude"]).map(&:to_s)
     excludes.uniq!
-    args = ["--stats", "--archive", "--delete", "-z", "--copy-links",
+    args = ["--stats", "--archive", "--delete", "-z",
             "--no-owner", "--no-group", "--rsync-path /usr/bin/rsync" ]
     command = [ "rsync", args, "-e", "\"#{@rsh}\"", excludes.map { |e| ["--exclude", e] },
                 "../..", "#{@username}@#{@host}:/host" ].flatten.join(" ")
