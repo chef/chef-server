@@ -104,19 +104,19 @@ describe 'authenticate_user', :users do
 
     it 'returns 405 for admin/different user' do
       put(request_url, platform.admin_user, :payload => body).should look_like({
-          :status => invalid_verb_response_code
+          :status => 405
         })
     end
 
     it 'returns 405 for non-admin/same user' do
       put(request_url, platform.non_admin_user, :payload => body).should look_like({
-          :status => invalid_verb_response_code
+          :status => 405
         })
     end
 
     it 'returns 405 for invalid user' do
       put(request_url, invalid_user, :payload => body).should look_like({
-          :status => invalid_verb_response_code
+          :status => 405
         })
     end
 

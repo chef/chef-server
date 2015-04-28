@@ -195,7 +195,6 @@ debug_org_creation false
 # necessary.  A common reason is to take into account different error
 # message formatting between the two implementations.
 #
-policies?                  true
 old_runlists_and_search true
 
 
