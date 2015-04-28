@@ -388,7 +388,7 @@ module Pedant
 
     def associate_user_with_org(orgname, user)
       r = post("#{@server}/organizations/#{orgname}/users", superuser, :payload => { "username" => user.name })
-      if r.code == 201 && r.code == 409 && parse(r)["error"] == "The association already exists."
+      if r.code == 201 or (r.code == 409 and parse(r)["error"] == "The association already exists.")
         r
       else
         raise "Bad response #{r.code} from POST /organizations/#{orgname}/users w/ { 'username' : '#{user.name}'}: #{r}"
