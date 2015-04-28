@@ -122,9 +122,9 @@ auth_info(_, Req, #base_state{resource_args = Args,
             invite_access_for(Args, AuthzId)
     end,
     {Auth, Req, State};
-auth_info(Method, Req, #base_state{resource_state = #user_state{chef_user = User}} = State) ->
+auth_info(Method, Req, #base_state{resource_state = #user_state{chef_user = User} = UserState} = State) ->
     #chef_user{authz_id = AuthzId} =   User,
-    {auth_type(Method, AuthzId, State), Req, State}.
+    {auth_type(Method, AuthzId, UserState), Req, State}.
 
 invite_access_for(invitations, _) -> superuser_only;
 invite_access_for(invitation_count, _) -> superuser_only;
