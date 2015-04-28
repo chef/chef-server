@@ -73,13 +73,9 @@ local p_principals = P"principals"
 local p_internal_organizations_base = P"/internal-organizations"
 local p_controls = P"controls"
 local p_keys = P"keys"
--- template portion below prefixed with lua comment to prevent
--- errors when using un-rendered in tests.
--- <% if @xdl_defaults['policies'] %>
 local p_policyfile = P"policies"
 local p_policy_groups = P"policy_groups"
 local p_cookbook_artifacts = P"cookbook_artifacts"
--- <% end %>
 
 
 -- Composite patterns
@@ -120,12 +116,8 @@ local c_maybe_identifier = (p_sep * c_identifier)^-1
 
 local p_erchef_endpoint = p_cookbooks + p_data + p_roles + p_sandboxes +
                           p_environments + p_clients + p_nodes + p_principals +
-                          p_groups + p_containers + p_controls
--- template portion below prefixed with lua comment to prevent
--- errors when using un-rendered in tests.
--- <% if @xdl_defaults['policies'] %>
-                          + p_policy_groups + p_policyfile + p_cookbook_artifacts
--- <% end %>
+                          p_groups + p_containers + p_controls +
+                          p_policy_groups + p_policyfile + p_cookbook_artifacts
 
 
 -- endpoints that map directly to erchef
