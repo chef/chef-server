@@ -357,7 +357,7 @@ http_request(Method, RouteSuffix, JsonOrNull) ->
                       {"accept", "application/json"},
                       {"content-type", "application/json"}],
                      Method, body(JsonOrNull)),
-    {RespCode, ejson:decode(RespBody)}.
+    {RespCode, chef_json:decode(RespBody)}.
 
 url_for(RouteSuffix) ->
     OrgNameStr = erlang:binary_to_list(?ORG_NAME),
@@ -365,7 +365,7 @@ url_for(RouteSuffix) ->
       ++ "/cookbook_artifacts" ++ RouteSuffix.
 
 body(null) -> <<>>;
-body(Json) -> ejson:encode(Json).
+body(Json) -> chef_json:encode(Json).
 
 -define(COOKBOOK_ARTIFACT_VERSION_CANONICAL_EXAMPLE, <<"
     {
@@ -443,7 +443,7 @@ body(Json) -> ejson:encode(Json).
     }">>).
 
 canonical_example() ->
-    ejson:decode(?COOKBOOK_ARTIFACT_VERSION_CANONICAL_EXAMPLE).
+    chef_json:decode(?COOKBOOK_ARTIFACT_VERSION_CANONICAL_EXAMPLE).
 canonical_example(Name, Identifier) ->
     Renamed = ej:set({<<"name">>}, canonical_example(),
                      erlang:list_to_binary(Name)),

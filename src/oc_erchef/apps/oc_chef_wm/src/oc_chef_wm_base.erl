@@ -870,6 +870,7 @@ create_500_response(Req) ->
     wrq:set_resp_body(Json, Req1).
 
 %% @doc Extract information from `State' needed to generate the X-Ops-API-Info header value.
+%% TODO this is to be retired with ?API_v0
 api_info(#base_state{api_version = ApiVersion,
                      otp_info = {ReleaseName, OtpVersion},
                      server_flavor = ServerFlavor}) ->

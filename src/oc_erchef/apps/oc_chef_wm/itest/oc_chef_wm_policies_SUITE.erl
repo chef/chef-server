@@ -304,7 +304,7 @@ list_when_created_policies(_) ->
     [ ?assertMatch({ok, "201", _, _}, http_create_modified_policy(Policy)) || Policy <- Policies ],
     {ok, ResponseCode, _, ResponseBody} = http_list_policies(),
     ?assertEqual("200", ResponseCode),
-    Ejson = ejson:decode(ResponseBody),
+    Ejson = chef_json:decode(ResponseBody),
     ?assertEqual( [<<"bar">>, <<"foo">>],
                   Ejson).
 
@@ -344,7 +344,7 @@ delete_policy(_) ->
 fetch_non_existant_policy(_) ->
     Result = {ok, _, _, ResponseBody} = http_fetch_policy("bar"),
     ?assertMatch({ok, "404", _, ResponseBody} , Result),
-    ?assertEqual([<<"Cannot load policy bar in policy group group_name">>], ej:get({"error"}, ejson:decode(ResponseBody))),
+    ?assertEqual([<<"Cannot load policy bar in policy group group_name">>], ej:get({"error"}, chef_json:decode(ResponseBody))),
     ok.
 
 fetch_existant_policy(_) ->
@@ -352,7 +352,7 @@ fetch_existant_policy(_) ->
     {ok, ResponseCode, _, ResponseBody} = http_fetch_policy("foo"),
     ?assertEqual("200", ResponseCode),
 	ExpectedJson = canonical_example_policy_json("foo"),
-	?assertEqual(ExpectedJson, ejson:decode(ResponseBody)).
+	?assertEqual(ExpectedJson, chef_json:decode(ResponseBody)).
 
 put_when_non_existant_policy_should_create(_) ->
 	Name = "foo",
@@ -419,7 +419,7 @@ http_create_modified_policy(Name, RevisionID) ->
 
 http_create_policy(Name, Json) ->
     UrlEncodedName = ibrowse_lib:url_encode(Name),
-    http_request(put, "/policy_groups/group_name/policies/" ++ UrlEncodedName, ejson:encode(Json)).
+    http_request(put, "/policy_groups/group_name/policies/" ++ UrlEncodedName, chef_json:encode(Json)).
 
 http_delete_policy(Name) ->
     UrlEncodedName = ibrowse_lib:url_encode(Name),
@@ -427,7 +427,7 @@ http_delete_policy(Name) ->
 
 http_update_policy(Name, Ejson) ->
     UrlEncodedName = ibrowse_lib:url_encode(Name),
-    http_request(put, "/policy_groups/group_name/policies/" ++ UrlEncodedName, ejson:encode(Ejson)).
+    http_request(put, "/policy_groups/group_name/policies/" ++ UrlEncodedName, chef_json:encode(Ejson)).
 
 http_request(Method, RouteSuffix, Body) ->
     OrgStr = erlang:binary_to_list(?ORG_NAME),
@@ -439,14 +439,14 @@ http_request(Method, RouteSuffix, Body) ->
                      ], Method, Body).
 
 canonical_example_policy_json(Name) ->
-    BaseJson = ejson:decode(?POLICY_FILE_CANONICAL_EXAMPLE),
+    BaseJson = chef_json:decode(?POLICY_FILE_CANONICAL_EXAMPLE),
     ej:set({<<"name">>}, BaseJson, iolist_to_binary(Name)).
 
 canonical_example_policy_json(Name, RevisionID) ->
-    BaseJson = ejson:decode(?POLICY_FILE_CANONICAL_EXAMPLE),
+    BaseJson = chef_json:decode(?POLICY_FILE_CANONICAL_EXAMPLE),
     WithNewName = ej:set({<<"name">>}, BaseJson, iolist_to_binary(Name)),
     ej:set({<<"revision_id">>}, WithNewName, iolist_to_binary(RevisionID)).
 
 minimal_example_policy_json(Name) ->
-    BaseJson = ejson:decode(?POLICY_FILE_MINIMAL_EXAMPLE),
+    BaseJson = chef_json:decode(?POLICY_FILE_MINIMAL_EXAMPLE),
     ej:set({<<"name">>}, BaseJson, list_to_binary(Name)).

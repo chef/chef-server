@@ -153,7 +153,7 @@ deprovision_delete_usag(Error, _Context) ->
 
 deprovision_fetch_org_global_admins(ok, #context{authz_context = AuthzContext,
                                                  org_name = OrgName} = Context) ->
-    Result = oc_chef_authz_db:fetch_global_group_authz_id(AuthzContext, OrgName, "global_admins"),
+    Result = oc_chef_authz_db:fetch_global_admins(AuthzContext, OrgName),
     deprovision_remove_global_org_admin_ace(Result, Context) ;
 deprovision_fetch_org_global_admins(Error, Context) ->
     % We don't care if we failed to delete the actual USAG record from
@@ -162,7 +162,7 @@ deprovision_fetch_org_global_admins(Error, Context) ->
     % This will change when we start doing proper cleanup of auth entity as part of USAG deletion.
     deprovision_remove_global_org_admin_ace({ok, ok}, Context#context{msg = [{usag_record_delete_failed, Error}]}).
 
-deprovision_remove_global_org_admin_ace(OrgGlobalAdminsAuthzId,
+deprovision_remove_global_org_admin_ace(#oc_chef_group{authz_id = OrgGlobalAdminsAuthzId},
                                         #context{ user_authz_id = UserAuthzId,
                                                   requestor_authz_id = RequestorAuthzId } = Context)  when is_binary(OrgGlobalAdminsAuthzId) ->
     %We're spoofing the requesting actor for this next operation to be the actual user
@@ -255,12 +255,12 @@ provision_add_usag_to_org_users(Error, _Context) ->
 
 provision_fetch_org_global_admins(ok, #context{org_name = OrgName,
                                         authz_context = AuthzContext } = Context) ->
-    Result = oc_chef_authz_db:fetch_global_group_authz_id(AuthzContext, OrgName, "global_admins"),
+    Result = oc_chef_authz_db:fetch_global_admins(AuthzContext, OrgName),
     provision_add_user_ace_to_global_admins(Result, Context);
 provision_fetch_org_global_admins(Error, _Context) ->
     {error, {add_usag_to_org_users_group_failed, Error}}.
 
-provision_add_user_ace_to_global_admins(OrgGlobalAdminsAuthzId,
+provision_add_user_ace_to_global_admins(#oc_chef_group{authz_id = OrgGlobalAdminsAuthzId},
                                         #context{user_authz_id = UserAuthzId,
                                                  real_requestor_authz_id = RequestorId } = Context) when is_binary(OrgGlobalAdminsAuthzId) ->
     % Spoofing to user as requestor, so that we have necessary access to update

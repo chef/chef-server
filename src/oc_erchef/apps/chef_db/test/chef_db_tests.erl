@@ -29,21 +29,19 @@ fetch_requestor_test_() ->
      fun() ->
              meck:new(chef_sql),
              meck:new(chef_db_darklaunch),
-             meck:new(chef_otto),
              set_app_env()
      end,
      fun(_) ->
-             meck:unload([chef_sql, chef_db_darklaunch, chef_otto])
+             meck:unload([chef_sql, chef_db_darklaunch])
      end,
      [
       {"a user is found SQL",
        fun() ->
                meck:expect(chef_db_darklaunch, is_enabled,
                            fun(<<"couchdb_clients">>, _) -> false;
-                              (<<"couchdb_organizations">>, _) -> true
+                              (<<"couchdb_organizations">>, _) -> false
                            end),
 
-               meck:expect(chef_otto, connect, fun() -> otto_connect end),
 
                User = #chef_user{server_api_version = ?API_MIN_VER,
                                  id = <<"a1">>,
@@ -75,7 +73,6 @@ fetch_requestor_test_() ->
       },
       {"a client is found SQL cert",
        fun() ->
-               meck:expect(chef_otto, connect, fun() -> otto_connect end),
                Client = #chef_client{server_api_version = ?API_MIN_VER,
                                      id = <<"mock-client-id">>,
                                      authz_id = <<"mock-client-authz-id">>,
@@ -94,7 +91,6 @@ fetch_requestor_test_() ->
       },
       {"a client is found SQL key",
        fun() ->
-               meck:expect(chef_otto, connect, fun() -> otto_connect end),
                meck:expect(chef_db_darklaunch, is_enabled,
                            fun(<<"sql_users">>, _) -> true end),
                Client = #chef_client{server_api_version = ?API_MIN_VER,
@@ -136,7 +132,6 @@ fetch_cookbook_versions_test_() ->
      end,
      fun(_) ->
              ?assert(meck:validate(chef_sql)),
-             ?assert(meck:validate(chef_otto)),
              meck:unload()
      end,
      [
@@ -191,8 +186,6 @@ fetch_cookbook_versions_test_() ->
 
 set_app_env() ->
     test_utils:start_stats_hero(),
-    application:set_env(chef_db, couchdb_host, "localhost"),
-    application:set_env(chef_db, couchdb_port, 5984),
     spawn_stats_hero_worker().
 
 spawn_stats_hero_worker() ->
@@ -207,4 +200,4 @@ stats_hero_config() ->
      {org_name, "myorg"},
      {request_id, ?REQ_ID},
      {label_fun, {test_utils, stats_hero_label}},
-     {upstream_prefixes, [<<"rdbms">>, <<"couchdb">>, <<"solr">>]}].
+     {upstream_prefixes, [<<"rdbms">>, <<"solr">>]}].

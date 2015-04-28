@@ -148,7 +148,8 @@ add_to_solr(ObjectRec, ObjectEjson) ->
     case chef_object:is_indexed(ObjectRec) of
         true ->
             IndexEjson = chef_object:ejson_for_indexing(ObjectRec, ObjectEjson),
-            DbName = chef_otto:dbname(chef_object:org_id(ObjectRec)),
+            OrgId = chef_object:org_id(ObjectRec),
+            DbName = <<"chef_", OrgId/binary>>,
             Id = chef_object:id(ObjectRec),
             TypeName = chef_object:type_name(ObjectRec),
             index_queue_add(TypeName, Id, DbName, IndexEjson);
@@ -163,7 +164,8 @@ delete_from_solr(ObjectRec) ->
     case chef_object:is_indexed(ObjectRec) of
         true ->
             Id = chef_object:id(ObjectRec),
-            DbName = chef_otto:dbname(chef_object:org_id(ObjectRec)),
+            OrgId = chef_object:org_id(ObjectRec),
+            DbName = <<"chef_", OrgId/binary>>,
             TypeName = chef_object:type_name(ObjectRec),
             index_queue_delete(TypeName, Id, DbName);
         false ->

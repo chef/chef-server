@@ -117,8 +117,8 @@ http_request(Method, RouteSuffix, Json) ->
                      [{"x-ops-userid", "test-client"},
                       {"accept", "application/json"},
                       {"content-type", "application/json"}],
-                     Method, ejson:encode(Json)),
-    {RespCode, ejson:decode(RespBody)}.
+                     Method, chef_json:encode(Json)),
+    {RespCode, chef_json:decode(RespBody)}.
 
 url_for(RouteSuffix) ->
     OrgNameStr = erlang:binary_to_list(?ORG_NAME),
