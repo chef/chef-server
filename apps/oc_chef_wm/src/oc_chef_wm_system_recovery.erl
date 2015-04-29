@@ -115,6 +115,5 @@ malformed_request_message(#ej_invalid{}, _Req, _State) ->
 auth_fail_message(401) ->
     chef_wm_util:error_message_envelope(<<"Failed to authenticate: Username and password incorrect">>);
 auth_fail_message(403) ->
-    chef_wm_util:error_message_envelope(<<"System recovery disabled for this user">>);
-auth_fail_message(502) ->
-    chef_wm_util:error_message_envelope(<<"Authentication server is unavailable.">>).
+    chef_wm_util:error_message_envelope(<<"System recovery disabled for this user">>).
+
