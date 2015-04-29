@@ -14,7 +14,7 @@ OcId::Application.routes.draw do
     resources :sessions, only: [:new, :create, :destroy]
     resource :password_reset, path: '/password-reset', except: [:destroy, :edit]
 
-    resource :profile
+    resource :profile, only: [:edit, :update]
 
     resource :zendesk, only: [:show] do
       get 'signout', to: 'zendesks#signout'
