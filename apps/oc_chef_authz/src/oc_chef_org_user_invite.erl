@@ -152,9 +152,9 @@ list(#oc_chef_org_user_invite{org_id = OrgId, user_id = undefined} = Invite, Cal
 list(#oc_chef_org_user_invite{user_id = UserId, org_id = undefined} = Invite, CallbackFun) ->
     CallbackFun({list_query(Invite, by_user), [UserId], rows}).
 
-new_record(ApiVersion, OrgId, undefined, Data) ->
-    new_record(ApiVersion, OrgId, {authz_id, ej:get({<<"user">>}, Data)}, Data);
-new_record(ApiVersion, OrgId, {authz_id, UserId}, _Data) ->
+new_record(ApiVersion, OrgId, unset, Data) ->
+    new_record(ApiVersion, OrgId, ej:get({<<"user">>}, Data), Data);
+new_record(ApiVersion, OrgId, UserId, _Data) ->
     Id = chef_object_base:make_org_prefix_id(OrgId),
     #oc_chef_org_user_invite{server_api_version = ApiVersion,
                              id = Id,
