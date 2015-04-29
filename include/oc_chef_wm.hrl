@@ -390,10 +390,14 @@
                             #principal_state{} |
                             #object_identifier_state{} |
                             #search_state{} |
-%% Some pedant cases
+%% Sometimes resourse_state() is a chef_object stub. A possible refactor here would be to
+%% teach oc_chef_wm_base:list_objects_json how to determine which chef_object stub to build
+%% based on the state type, or to give base_state{} a field for chef_object_stub to use here
+%% instead. This would make the intention of the resource_state field clearer
                             #chef_client{}   |
                             #chef_data_bag{} |
                             #chef_environment{} |
                             #chef_role{}.
+
 -define(gv(X,L), proplists:get_value(X, L)).
 -define(gv(X,L, D), proplists:get_value(X, L, D)).
