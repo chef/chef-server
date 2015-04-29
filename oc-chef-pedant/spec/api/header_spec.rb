@@ -30,4 +30,20 @@ describe "Headers", :headers do
         })
     end
   end # context "Request Headers"
+  context "Response Headers" do
+    context "API v0", :api_v0 do
+      it "Should include an X-Ops-API-Info header" do
+        get(request_url, requestor).should look_like( status: 200,
+                                                     headers:  ["X-Ops-API-Info"])
+
+      end
+    end
+    context "API v1 Behavior", :api_v1 do
+      it "Should include an X-Ops-API-Info header" do
+        get(request_url, requestor).should look_like( status: 200,
+                                                     no_headers:  ["X-Ops-API-Info"])
+      end
+
+    end
+  end
 end # describe "Headers"
