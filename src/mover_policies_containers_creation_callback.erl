@@ -134,10 +134,15 @@ insert_container_sql() ->
 %% * oc_chef_authz (maybe?)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-upgrade_org(#mover_org{superuser = CreatingUser} = Org) ->
+upgrade_org(#mover_org{superuser = CreatingUser, name = Name} = Org) ->
     Cache = init_cache(Org, CreatingUser),
-    CacheWithGroups = prepopulate_groups(Cache, Org),
-    process_policy(?ORG_POLICY_FOR_POLICIES_CONTAINERS, Org, CreatingUser, CacheWithGroups).
+    case prepopulate_groups(Cache, Org) of
+        {error, Group} ->
+            lager:error("Skipping migrations for org '~s' because required group '~p' is missing.", [Name, Group]),
+            ok;
+        CacheWithGroups ->
+            process_policy(?ORG_POLICY_FOR_POLICIES_CONTAINERS, Org, CreatingUser, CacheWithGroups)
+    end.
 
 prepopulate_groups(Cache, #mover_org{id = OrgID}) ->
     Cache1 = prepopulate_group(Cache, OrgID, admins),
@@ -145,14 +150,15 @@ prepopulate_groups(Cache, #mover_org{id = OrgID}) ->
     Cache3 = prepopulate_group(Cache2, OrgID, clients),
     Cache3.
 
+prepopulate_group({error, Group}, _, _) ->
+    {error, Group};
 prepopulate_group(Cache, OrgId, Group) ->
     {ok, Results} = sqerl:adhoc_select([name, authz_id, org_id],
                                        groups,
                                        {'and', [{name, equals, Group}, {org_id, equals, OrgId}]}),
     case Results of
         [] ->
-            lager:info("No matching group ~p for org id ~p", [Group, OrgId]),
-            Cache;
+            {error, Group};
         _ ->
             GroupFieldsList = hd(Results),
             {<<"authz_id">>, AuthzId} = proplists:lookup(<<"authz_id">>, GroupFieldsList),
