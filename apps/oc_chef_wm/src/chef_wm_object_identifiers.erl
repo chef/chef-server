@@ -55,10 +55,6 @@
          request_type/0,
          to_json/2]).
 
--record(object_identifier_state, {id :: object_id(),
-                                  authz_id :: object_id(),
-                                  org_id :: object_id()}).
-
 init(Config) ->
     oc_chef_wm_base:init(?MODULE, Config).
 
