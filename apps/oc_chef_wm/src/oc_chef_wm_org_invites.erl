@@ -93,7 +93,6 @@ auth_info(Req, #base_state{organization_name = OrgName,
     {{object, OrgAuthzId, update}, Req, State};
 auth_info(Req, #base_state{organization_name = OrgName,
                            resource_state = #association_state{org_user_invite = #oc_chef_org_user_invite{org_name = BadOrgName}}} = State) ->
-
     Message = org_name_mismatch_message(OrgName, BadOrgName),
     Req1 = chef_wm_util:set_json_body(Req, Message),
     {{halt, 400}, Req1, State#base_state{log_msg = {org_name_mismatch, OrgName, BadOrgName}}};
@@ -140,18 +139,18 @@ from_json(Req, #base_state{organization_name = OrgName,
     end.
 
 create_association(Req, #base_state{organization_guid = OrgId,
-                           chef_db_context = DbContext,
-                           requestor_id = RequestorId,
-                           server_api_version = ApiVersion,
-                           resource_state = #association_state{user = #chef_user{id = UserId,
-                                                                                 username = UserName},
-                                                               data = ReqData}} = State) ->
+                                    chef_db_context = DbContext,
+                                    requestor_id = RequestorId,
+                                    server_api_version = ApiVersion,
+                                    resource_state = #association_state{user = #chef_user{id = UserId,
+                                                                                          username = UserName},
+                                                                        data = ReqData}} = State) ->
     ObjectRec = chef_object:new_record(oc_chef_org_user_invite, ApiVersion, OrgId,
-                                       {authz_id, UserId}, ReqData),
+                                       UserId, ReqData),
     case chef_db:create(ObjectRec, DbContext, RequestorId) of
-        % TODO further research - is this response possible and testable?
-        % If the user is in the org, we can't issue the invite. Perhaps
-        % via race condition involving a POST to force-add and POST to creat invite?
+        %% TODO further research - is this response possible and testable?
+        %% If the user is in the org, we can't issue the invite. Perhaps
+        %% via race condition involving a POST to force-add and POST to creat invite?
         {conflict, _} ->
             oc_chef_associations:wm_conflict_response(Req, State, user_already_invited, UserName);
         ok ->

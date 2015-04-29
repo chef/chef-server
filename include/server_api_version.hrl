@@ -19,4 +19,3 @@
 -define(API_MAX_VER, ?API_v1).
 
 -type api_version() :: non_neg_integer() | -1.
-
