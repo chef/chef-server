@@ -1,22 +1,23 @@
 -module(mover_policies_containers_creation_callback).
 
 -export([
-	 migration_init/0,
-	 migration_complete/0,
-	 migration_type/0,
-	 supervisor/0,
-	 migration_start_worker_args/2,
-	 error_halts_migration/0,
-	 reconfigure_object/2,
-	 migration_action/2,
-	 next_object/0
-	]).
+     migration_init/0,
+     migration_complete/0,
+     migration_type/0,
+     supervisor/0,
+     migration_start_worker_args/2,
+     error_halts_migration/0,
+     reconfigure_object/2,
+     migration_action/2,
+     next_object/0,
+     needs_account_dets/0
+    ]).
 
 -include("mover.hrl").
 -include("mv_oc_chef_authz.hrl").
 
 -record(mover_org, {id, authz_id, name, superuser}).
--record(mover_requestor, {id, authz_id, username}).
+-record(mover_requestor, {authz_id}).
 
 %% This is an ACE in human readable form
 -record(mover_hr_ace, {clients = [],
@@ -63,13 +64,15 @@
          }
         ]).
 
+needs_account_dets() ->
+    false.
+
 migration_init() ->
     %% TODO: this fails if the pool is already created. Should be tolerant of
     %% errors and also should tear this down after the migration
     mv_oc_chef_authz_http:create_pool(),
-    %% TODO: superuser name is somewhat configurable, it's set in oc_erchef's sys.config
-    {ok, SuperuserResults} = sqerl:adhoc_select([username, id, authz_id], users, {username, equals, <<"pivotal">>}),
-    Superuser = db_results_to_requestor(hd(SuperuserResults)),
+    SuperUserAuthzId = envy:get(oc_chef_authz,authz_superuser_id, binary),
+    Superuser = #mover_requestor{authz_id = SuperUserAuthzId},
 
     FindOrgsWithNoPoliciesContainer = <<"SELECT orgs.name, orgs.id, orgs.authz_id FROM orgs "
                                         "LEFT JOIN containers ON orgs.id = org_id AND containers.name='policies' "
@@ -81,11 +84,6 @@ migration_init() ->
 migration_complete() ->
     mv_oc_chef_authz_http:delete_pool().
 
-db_results_to_requestor(FieldsValues) ->
-    {<<"username">>, Name} = proplists:lookup(<<"username">>, FieldsValues),
-    {<<"id">>,  Id}        = proplists:lookup(<<"id">>, FieldsValues),
-    {<<"authz_id">>,  AzId} = proplists:lookup(<<"authz_id">>, FieldsValues),
-    #mover_requestor{username = Name, id = Id, authz_id = AzId}.
 
 db_results_to_org(FieldsValues, Superuser) ->
     %% Each object will be a list like this:
@@ -129,6 +127,7 @@ insert_container_sql() ->
 %%
 %% Code in here is vendored and then modified to remove external dependencies.
 %% This makes the data migration resilent to future code changes that might
+%%
 %% break the migration.
 %%
 %% TODO: remove use of these:
@@ -150,9 +149,15 @@ prepopulate_group(Cache, OrgId, Group) ->
     {ok, Results} = sqerl:adhoc_select([name, authz_id, org_id],
                                        groups,
                                        {'and', [{name, equals, Group}, {org_id, equals, OrgId}]}),
-    GroupFieldsList = hd(Results),
-    {<<"authz_id">>, AuthzId} = proplists:lookup(<<"authz_id">>, GroupFieldsList),
-    add_cache(Cache,{group, Group}, AuthzId).
+    case Results of
+        [] ->
+            lager:info("No matching group ~p for org id ~p", [Group, OrgId]),
+            Cache;
+        _ ->
+            GroupFieldsList = hd(Results),
+            {<<"authz_id">>, AuthzId} = proplists:lookup(<<"authz_id">>, GroupFieldsList),
+            add_cache(Cache,{group, Group}, AuthzId)
+    end.
 
 %%
 %% Execute a policy to create an org
