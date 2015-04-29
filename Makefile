@@ -58,6 +58,7 @@ generate: munge_apps
 	@/bin/echo "using rebar as: $(REBAR)"
 	@$(REBAR) skip_deps=true generate
 	@rm -rf rel/apps rel/rebar.config
+	@echo '    _    _        ____      _    _     _____   ______    '
 	@echo '   \ \  / /      / __ \    ) )  ( (   / ___/  (   __ \   '
 	@echo '   () \/ ()     / /  \ \  ( (    ) ) ( (__     ) (__) )  '
 	@echo '   / _  _ \    ( ()  () )  \ \  / /   ) __)   (    __/   '
