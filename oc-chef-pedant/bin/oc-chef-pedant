@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup' # so we don't need to type 'bundle exec' to run it
+
+require 'rspec/core'
+require 'pedant'
+require 'pedant/organization'
+
+Pedant.config.suite = "api"
+Pedant.setup(ARGV)
+puts Pedant::UI.new.info_banner
+
+exit RSpec::Core::Runner.run(Pedant.config.rspec_args)

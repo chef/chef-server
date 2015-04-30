@@ -1,0 +1,12 @@
+log_level                :info
+log_location             STDOUT
+node_name                "<%= knife_user %>"
+client_key               "<%= key_dir %>/<%= knife_user %>.pem"
+validation_client_name   "<%= org_name %>-validator"
+validation_key           "<%= key_dir %>/<%= org_name %>-validator.pem"
+chef_server_url          "<%= server_url %>"
+cache_type               'BasicFile'
+cache_options( :path => "#{ENV['HOME']}/.chef/checksums" )
+chef_repo_path           "<%= test_repository_dir %>"
+cookbook_path            ["<%= File.join(test_repository_dir, "cookbooks") %>"]
+ssl_verify_mode          :verify_none

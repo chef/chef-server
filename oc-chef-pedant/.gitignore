@@ -1,0 +1,5 @@
+Gemfile.orig
+Gemfile.lock.orig
+
+.bundle/*
+rspec.failures
