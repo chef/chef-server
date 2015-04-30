@@ -1,0 +1,5 @@
+This directory contains test data used by the common test suite for bookshelf.
+
+The directories named `format_0_data?` represent bookshelf data
+directories in the original (0th) on disk format and are used for
+testing in-place upgrades.

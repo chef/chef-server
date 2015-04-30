@@ -1,0 +1,15 @@
+_build
+*.beam
+.eunit
+deps
+logs
+coverage.xml
+*.app
+rel/bookshelf
+bookshelf.plt
+.concrete
+_rel
+.rebar
+relx
+deps.plt
+erl_crash.dump

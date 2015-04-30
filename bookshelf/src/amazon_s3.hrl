@@ -1,0 +1,375 @@
+%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%%
+%% This file is provided to you under the Apache License,
+%% Version 2.0 (the "License"); you may not use this file
+%% except in compliance with the License.  You may obtain
+%% a copy of the License at
+%%
+%%   http://www.apache.org/licenses/LICENSE-2.0
+%%
+%% Unless required by applicable law or agreed to in writing,
+%% software distributed under the License is distributed on an
+%% "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+%% KIND, either express or implied.  See the License for the
+%% specific language governing permissions and limitations
+%% under the License.
+%%
+
+-record('TopicConfiguration',
+        {anyAttribs,
+         'Topic',
+         'Event'}).
+-record('NotificationConfiguration',
+        {anyAttribs,
+         'TopicConfiguration'}).
+-record('VersioningConfiguration',
+        {anyAttribs,
+         'Status',
+         'MfaDelete'}).
+-record('RequestPaymentConfiguration',
+        {anyAttribs,
+         'Payer'}).
+-record('CopyObjectResult',
+        {anyAttribs,
+         'LastModified',
+         'ETag'}).
+-record('CopyObjectResponse',
+        {anyAttribs,
+         'CopyObjectResult'}).
+-record('CopyObject',
+        {anyAttribs,
+         'SourceBucket',
+         'SourceKey',
+         'DestinationBucket',
+         'DestinationKey',
+         'MetadataDirective',
+         'Metadata',
+         'AccessControlList',
+         'CopySourceIfModifiedSince',
+         'CopySourceIfUnmodifiedSince',
+         'CopySourceIfMatch',
+         'CopySourceIfNoneMatch',
+         'StorageClass',
+         'AWSAccessKeyId',
+         'Timestamp',
+         'Signature',
+         'Credential'}).
+-record('PostResponse',
+        {anyAttribs,
+         'Location',
+         'Bucket',
+         'Key',
+         'ETag'}).
+-record('ListAllMyBucketsList',
+        {anyAttribs,
+         'Bucket'}).
+-record('ListAllMyBucketsResult',
+        {anyAttribs,
+         'Owner',
+         'Buckets'}).
+-record('ListAllMyBucketsEntry',
+        {anyAttribs,
+         'Name',
+         'CreationDate'}).
+-record('ListAllMyBucketsResponse',
+        {anyAttribs,
+         'ListAllMyBucketsResponse'}).
+-record('ListAllMyBuckets',
+        {anyAttribs,
+         'AWSAccessKeyId',
+         'Timestamp',
+         'Signature'}).
+-record('ListVersionsResult',
+        {anyAttribs,
+         'Metadata',
+         'Name',
+         'Prefix',
+         'KeyMarker',
+         'VersionIdMarker',
+         'NextKeyMarker',
+         'NextVersionIdMarker',
+         'MaxKeys',
+         'Delimiter',
+         'IsTruncated',
+         choice,
+         'CommonPrefixes'}).
+-record('ListBucketResult',
+        {anyAttribs,
+         'Metadata',
+         'Name',
+         'Prefix',
+         'Marker',
+         'NextMarker',
+         'MaxKeys',
+         'Delimiter',
+         'IsTruncated',
+         'Contents',
+         'CommonPrefixes'}).
+-record('PrefixEntry',
+        {anyAttribs,
+         'Prefix'}).
+-record('DeleteMarkerEntry',
+        {anyAttribs,
+         'Key',
+         'VersionId',
+         'IsLatest',
+         'LastModified',
+         'Owner'}).
+-record('VersionEntry',
+        {anyAttribs,
+         'Key',
+         'VersionId',
+         'IsLatest',
+         'LastModified',
+         'ETag',
+         'Size',
+         'Owner',
+         'StorageClass'}).
+-record('ListEntry',
+        {anyAttribs,
+         'Key',
+         'LastModified',
+         'ETag',
+         'Size',
+         'Owner',
+         'StorageClass'}).
+-record('ListVersionsResponse',
+        {anyAttribs,
+         'ListVersionsResponse'}).
+-record('ListBucketResponse',
+        {anyAttribs,
+         'ListBucketResponse'}).
+-record('ListBucket',
+        {anyAttribs,
+         'Bucket',
+         'Prefix',
+         'Marker',
+         'MaxKeys',
+         'Delimiter',
+         'AWSAccessKeyId',
+         'Timestamp',
+         'Signature',
+         'Credential'}).
+-record('DeleteObjectResponse',
+        {anyAttribs,
+         'DeleteObjectResponse'}).
+-record('DeleteObject',
+        {anyAttribs,
+         'Bucket',
+         'Key',
+         'AWSAccessKeyId',
+         'Timestamp',
+         'Signature',
+         'Credential'}).
+-record('PutObjectInlineResponse',
+        {anyAttribs,
+         'PutObjectInlineResponse'}).
+-record('PutObjectInline',
+        {anyAttribs,
+         'Bucket',
+         'Key',
+         'Metadata',
+         'Data',
+         'ContentLength',
+         'AccessControlList',
+         'StorageClass',
+         'AWSAccessKeyId',
+         'Timestamp',
+         'Signature',
+         'Credential'}).
+-record('PutObjectResult',
+        {anyAttribs,
+         'ETag',
+         'LastModified'}).
+-record('PutObjectResponse',
+        {anyAttribs,
+         'PutObjectResponse'}).
+-record('PutObject',
+        {anyAttribs,
+         'Bucket',
+         'Key',
+         'Metadata',
+         'ContentLength',
+         'AccessControlList',
+         'StorageClass',
+         'AWSAccessKeyId',
+         'Timestamp',
+         'Signature',
+         'Credential'}).
+-record('GetObjectExtendedResponse',
+        {anyAttribs,
+         'GetObjectResponse'}).
+-record('GetObjectExtended',
+        {anyAttribs,
+         'Bucket',
+         'Key',
+         'GetMetadata',
+         'GetData',
+         'InlineData',
+         'ByteRangeStart',
+         'ByteRangeEnd',
+         'IfModifiedSince',
+         'IfUnmodifiedSince',
+         'IfMatch',
+         'IfNoneMatch',
+         'ReturnCompleteObjectOnConditionFailure',
+         'AWSAccessKeyId',
+         'Timestamp',
+         'Signature',
+         'Credential'}).
+-record('GetObjectResult',
+        {anyAttribs,
+         'Status',
+         'Metadata',
+         'Data',
+         'LastModified',
+         'ETag'}).
+-record('GetObjectResponse',
+        {anyAttribs,
+         'GetObjectResponse'}).
+-record('GetObject',
+        {anyAttribs,
+         'Bucket',
+         'Key',
+         'GetMetadata',
+         'GetData',
+         'InlineData',
+         'AWSAccessKeyId',
+         'Timestamp',
+         'Signature',
+         'Credential'}).
+-record('SetBucketAccessControlPolicyResponse',
+        {anyAttribs}).
+-record('SetBucketAccessControlPolicy',
+        {anyAttribs,
+         'Bucket',
+         'AccessControlList',
+         'AWSAccessKeyId',
+         'Timestamp',
+         'Signature',
+         'Credential'}).
+-record('SetObjectAccessControlPolicyResponse',
+        {anyAttribs}).
+-record('SetObjectAccessControlPolicy',
+        {anyAttribs,
+         'Bucket',
+         'Key',
+         'AccessControlList',
+         'AWSAccessKeyId',
+         'Timestamp',
+         'Signature',
+         'Credential'}).
+-record('AccessControlPolicy',
+        {anyAttribs,
+         'Owner',
+         'AccessControlList'}).
+-record('LocationConstraint',
+        {anyAttribs,
+         '#text'}).
+-record('CreateBucketConfiguration',
+        {anyAttribs,
+         'LocationConstraint'}).
+-record('AccessControlList',
+        {anyAttribs,
+         'Grant'}).
+-record('Grant',
+        {anyAttribs,
+         'Grantee',
+         'Permission'}).
+-record('Group',
+        {anyAttribs,
+         'URI'}).
+-record('CanonicalUser',
+        {anyAttribs,
+         'ID',
+         'DisplayName'}).
+-record('AmazonCustomerByEmail',
+        {anyAttribs,
+         'EmailAddress'}).
+-record('User',
+        {anyAttribs}).
+-record('Grantee',
+        {anyAttribs}).
+-record('GetBucketAccessControlPolicyResponse',
+        {anyAttribs,
+         'GetBucketAccessControlPolicyResponse'}).
+-record('GetBucketAccessControlPolicy',
+        {anyAttribs,
+         'Bucket',
+         'AWSAccessKeyId',
+         'Timestamp',
+         'Signature',
+         'Credential'}).
+-record('GetObjectAccessControlPolicyResponse',
+        {anyAttribs,
+         'GetObjectAccessControlPolicyResponse'}).
+-record('GetObjectAccessControlPolicy',
+        {anyAttribs,
+         'Bucket',
+         'Key',
+         'AWSAccessKeyId',
+         'Timestamp',
+         'Signature',
+         'Credential'}).
+-record('SetBucketLoggingStatusResponse',
+        {anyAttribs}).
+-record('SetBucketLoggingStatus',
+        {anyAttribs,
+         'Bucket',
+         'AWSAccessKeyId',
+         'Timestamp',
+         'Signature',
+         'Credential',
+         'BucketLoggingStatus'}).
+-record('GetBucketLoggingStatusResponse',
+        {anyAttribs,
+         'GetBucketLoggingStatusResponse'}).
+-record('GetBucketLoggingStatus',
+        {anyAttribs,
+         'Bucket',
+         'AWSAccessKeyId',
+         'Timestamp',
+         'Signature',
+         'Credential'}).
+-record('LoggingSettings',
+        {anyAttribs,
+         'TargetBucket',
+         'TargetPrefix',
+         'TargetGrants'}).
+-record('BucketLoggingStatus',
+        {anyAttribs,
+         'LoggingEnabled'}).
+-record('DeleteBucketResponse',
+        {anyAttribs,
+         'DeleteBucketResponse'}).
+-record('DeleteBucket',
+        {anyAttribs,
+         'Bucket',
+         'AWSAccessKeyId',
+         'Timestamp',
+         'Signature',
+         'Credential'}).
+-record('CreateBucketResult',
+        {anyAttribs,
+         'BucketName'}).
+-record('Result',
+        {anyAttribs,
+         'Status'}).
+-record('Status',
+        {anyAttribs,
+         'Code',
+         'Description'}).
+-record('CreateBucketResponse',
+        {anyAttribs,
+         'CreateBucketReturn'}).
+-record('MetadataEntry',
+        {anyAttribs,
+         'Name',
+         'Value'}).
+-record('CreateBucket',
+        {anyAttribs,
+         'Bucket',
+         'AccessControlList',
+         'AWSAccessKeyId',
+         'Timestamp',
+         'Signature'}).
