@@ -101,7 +101,7 @@ EOM
 
     def do_load(options)
       # TODO this can also be wrapped and handled in the base...
-      if not project_dir_exists_on_host?(name)
+      if ! project_dir_exists_on_host?
         git = project['git']
         if git
           if git['uri']
@@ -204,4 +204,3 @@ EOM
 
   end
 end
-

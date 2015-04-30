@@ -102,7 +102,7 @@ BEGIN {
     args = ["--stats", "--archive", "--delete", "-z",
             "--no-owner", "--no-group", "--rsync-path /usr/bin/rsync" ]
     command = [ "rsync", args, "-e", "\"#{@rsh}\"", excludes.map { |e| ["--exclude", e] },
-                "../..", "#{@username}@#{@host}:/host" ].flatten.join(" ")
+                "../", "#{@username}@#{@host}:/host" ].flatten.join(" ")
     # TODO - subproc to ignore INT signal, or move to different process group
     # to avoid Ctrl+C interrupting it.
     r = `#{command}`
@@ -264,5 +264,3 @@ EOM
 # - can we flip this around and just have rsync in the guest pull from the host
 #   at cron'd intervals? That avoids having to leave something running.
 #  (to get to host ip, ifconfig en0 | grep "inet " | cut -d" " -f2)
-
-
