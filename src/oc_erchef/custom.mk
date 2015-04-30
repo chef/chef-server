@@ -54,4 +54,12 @@ bundle:
 	@echo bundling up depselector, This might take a while...
 	@cd apps/chef_objects/priv/depselector_rb; rm -rf .bundle; bundle install --deployment --path .bundle
 
+install:
+	@./rebar get-deps -C rebar.config.lock
+	@cpanm --notest --quiet App::Sqitch
+
+travis: all
+	PATH=~/perl5/bin:$(PATH) $(REBARC) skip_deps=true ct
+	$(REBARC) skip_deps=true eunit
+
 DEVVM_DIR = $(DEVVM_ROOT)/_rel/oc_erchef
