@@ -15,9 +15,7 @@
 #
 
 name "bookshelf"
-default_version "1.1.7"
-
-source git: "git://github.com/opscode/bookshelf.git"
+source path: "#{project.files_path}/../../src/bookshelf"
 
 dependency "erlang"
 dependency "rebar"

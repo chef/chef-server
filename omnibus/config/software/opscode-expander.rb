@@ -15,9 +15,7 @@
 #
 
 name "opscode-expander"
-default_version "pc-rel-1.0.0.1"
-
-source git: "https://github.com/opscode/opscode-expander"
+source path: "#{project.files_path}/../../src/opscode-expander"
 
 dependency "ruby"
 dependency "bundler"

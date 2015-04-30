@@ -15,10 +15,7 @@
 #
 
 name "oc-chef-pedant"
-
-default_version "2.2.0"
-
-source git: "https://github.com/opscode/oc-chef-pedant"
+source path: "#{project.files_path}/../../oc-chef-pedant"
 
 dependency "ruby"
 dependency "bundler"

@@ -17,9 +17,7 @@
 #
 
 name "chef-server-bootstrap"
-default_version "1.0.1"
-
-source git: "https://github.com/opscode/chef-server-bootstrap"
+source path: "#{project.files_path}/../../src/chef-server-bootstrap"
 
 dependency "ruby"
 dependency "libxml2"

@@ -15,10 +15,7 @@
 #
 
 name "oc_erchef"
-
-default_version "1.8.3"
-
-source git: "https://github.com/opscode/oc_erchef"
+source path: "#{project.files_path}/../../src/oc_erchef"
 
 dependency "erlang"
 dependency "rebar"

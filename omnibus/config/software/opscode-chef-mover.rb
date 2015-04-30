@@ -15,9 +15,7 @@
 #
 
 name "opscode-chef-mover"
-default_version "master"
-
-source git: "https://github.com/opscode/chef-mover"
+source path: "#{project.files_path}/../../src/chef-mover"
 
 dependency "erlang"
 dependency "rebar"
