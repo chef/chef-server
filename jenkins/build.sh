@@ -26,5 +26,5 @@ fi
 # Yep, hard-coding platform and version. We're building ubuntu only, 10.04 only,
 # but need to distribute to both.
 tar zcf $PACKAGE $PROJ_NAME/
-s3cmd put $PACKAGE s3://opscode-ci/artifacts/ubuntu-10.04/x86_64/$PROJ_NAME
-s3cmd put $PACKAGE s3://opscode-ci/artifacts/ubuntu-12.04/x86_64/$PROJ_NAME
+s3cmd put $PACKAGE s3://opscode-ci/artifacts/ubuntu-10.04/x86_64/$PROJ_NAME/$PACKAGE
+s3cmd put $PACKAGE s3://opscode-ci/artifacts/ubuntu-12.04/x86_64/$PROJ_NAME/$PACKAGE
