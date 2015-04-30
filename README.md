@@ -2,33 +2,46 @@
 
 This repository is the central repository for the Chef server.
 
-Currently this repository does not contain any code, as the Chef server
-code is spread out across several repositories.
+If you need to file an issue against another Chef project, you can
+find a list of projects and where to file issues in the
+[community contributions section](https://docs.chef.io/community_contributions.html#issues-and-bug-reports)
+of the [Chef docs](https://docs.chef.io).
 
-The purpose of this repository is to server as a central place to report
-Chef server issues and to outline how to contribute to the Chef Server.
+## Building a Chef Server package locally:
 
-If you need to file an issue against another Chef project, you can find a list of projects and where to file issues in the [community contributions section](https://docs.chef.io/community_contributions.html#issues-and-bug-reports) of the [Chef docs](https://docs.chef.io).
+You can build a Chef Server package locally with vagrant and test-kitchen.
+
+```
+cd omnibus/
+make dev dev-build
+```
+
+Once the build is complete, the package should be in omnibus/pkg.  By
+default the dev-build target will create an Ubuntu 10.04 build.
 
 ## Components of the Chef Server
 
-Following is a list of key components of Chef Server. This is not yet an exhaustive list. 
+This repository contains the core services that make up the Chef
+Server.
 
-### Commonly-Modified Components
+```
+|-- oc-chef-pedant: A comprehensive test suite for the Chef Server API
+|-- omnibus: Omnibus build configuration for the Chef Server
+|-- scripts: Utility scripts
+`-- src
+    |-- bookshelf: S3-compatible engine for storing cookbook data
+    |-- chef-mover: data migration orchestrator used in upgrades
+    |-- chef-server-bootstrap: ruby tool to instantiate key data structures in a new chef server
+    |-- oc-id: OAuth2 provider for extensions like Analytics or Supermarket
+    |-- oc_bifrost: Chef Server's authorization service
+    |-- oc_erchef: The core REST API server
+    `-- opscode-expander: a service that transforms Chef data before sending it to Solr for indexing
+```
 
-* [opscode-omnibus](http://github.com/opscode/opscode-omnibus): Configuration for the Chef Server installation, and the [Omnibus](http://github.com/opscode/omnibus) project definition for building it. 
-* [oc_erchef](http://github.com/opscode/oc_erchef), the REST API server. 
-* [oc-chef-pedant](http://github.com/opscode/oc-chef-pedant), Chef Server tests specific to formerly closed-source features such as multi-tenancy and RBAC. 
+## Dependencies contained in other repositories
 
-### Less-Commonly-Modified Components
-
-* [bookshelf](http://github.com/opscode/bookshelf), the S3-compatible engine for storing cookbook data
-* [chef-mover](http://github.com/opscode/chef-mover), the data migration orchestrator used in upgrades
-* [chef-pedant](http://github.com/opscode/oc-chef-pedant), the base test suite and testing tools for Chef Server
 * [knife-ec-backup](http://github.com/opscode/knife-ec-backup), used to ease migrations from Open Source Chef Server 11 (and below)
 * [knife-opc](http://github.com/opscode/knife-opc), used to provide administrative command-line control to the Chef Server from the console
-* [oc_bifrost](http://github.com/opscode/oc_bifrost), the authorization service
-* [oc-id](http://github.com/opscode/oc-id), the OAuth2 provider for extensions like Analytics or Supermarket
 
 ## Major Technologies used in Chef Server
 
