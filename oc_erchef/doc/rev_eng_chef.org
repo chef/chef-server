@@ -1,0 +1,114 @@
+* Notes chef_* schema reverse engineering
+** Mixlib::Authorization::Models::Client-fec21b157b76e08b86e92ef7cbc2be81
+*** Size: 1k docs in a large example (recorded future)
+*** Doc Schema:
+    _id: user side id for authz
+    couchrest-type: Mixlib::Authorization::Models::Client
+    certificate: RSA cert
+    clientname: Name
+    requester_id: GUID
+** Mixlib::Authorization::Models::Container-f6aead5acfa18f649f9f951ad5570324
+*** Size: 12 docs always
+*** Doc Schema:
+    _id: user side id for authz
+    couchrest-type: Mixlib::Authorization::Models::Container
+    containername: (clients, containers, etc.
+    containerpath: SAME
+    requester_id: GUID (often pivotal)
+** Mixlib::Authorization::Models::Cookbook-98638da9d7bfb86c50d448361c5ce691
+*** Size: 130 docs in a large example
+*** Doc Schema:
+    _id: user side id for authz
+    couchrest-type: Mixlib::Authorization::Models::Cookbook
+    display_name: OBJECT NAME
+    orgname: (ORGNAME)
+    requester_id: GUID
+*** NOTE: Only really used for authz
+** Mixlib::Authorization::Models::DataBag-ff80eed5150b3cf59c54630503d83bb5
+*** Size: 35 docs in a large example
+*** Doc schema:
+    _id: user side id for authz
+    couchrest-type: Mixlib::Authorization::Models::DataBag
+    name: OBJECT NAME
+    orgname: (ORGNAME)
+    requester_id: GUID
+*** NOTE: Only really used for authz
+** Mixlib::Authorization::Models::Environment-bd1a09cec7a4655bf54f4b98ec5ec156
+*** Size: 18 docs in one example
+*** Doc schema:
+    couchrest-type: Mixlib::Authorization::Models::Environment
+    name: OBJECT NAME
+    orgname: (ORGNAME)
+    requester_id: GUID
+*** NOTE: Only really used for authz
+** Mixlib::Authorization::Models::Group-59a505c964199e318b67910cc642a062
+*** Size: 18 docs in one example
+*** Doc schema:
+    couchrest-type: Mixlib::Authorization::Models::Group
+    actor_and_group_names: 
+      may have groups
+      may have users 
+      both are sometimes empty (clients group), sometimes have a single user (USAG), 
+    groupname: GROUP NAME
+    orgname: (ORGNAME)
+    requester_id: GUID
+*** TODO: determine if the actor_and_group_name field actually has anything useful   
+** Mixlib::Authorization::Models::Node-8554f173ac3e9bfa55a0836e19b0f232
+*** Vestigial, left over from migration
+** Mixlib::Authorization::Models::Role-793b383e56e849fca5901cd66b92bde7
+*** Size: 168 docs in one example
+*** Doc schema:
+    couchrest-type: Mixlib::Authorization::Models::Role
+    name: ROLE NAME
+    orgname: (ORGNAME)
+    requester_id: GUID
+*** NOTE: Only really used for authz
+** Mixlib::Authorization::Models::Sandbox-c389dd957052c45e5849e692662ca229
+*** Size: 3412 docs in one example (are these ever used?)
+*** Doc schema:
+    couchrest-type: Mixlib::Authorization::Models::Sandbox
+    orgname: (ORGNAME)
+    requester_id: GUID
+    sandbox_id: GUID
+*** NOTE: Only really used for authz
+** Opscode::Persistor::InstancePersistor (job worker??)
+*** NOTE: haven't actually found one in a db, so not sure about schema... May be transient and ignorable
+** checksums
+*** Size: 43K checksums in example
+*** Doc schema:
+    chef_type: checksum
+    json_class: Chef::Checksum
+    checksum: MD5sum
+    create_time: DATE
+    name: same as checksum
+** cookbooks
+*** Size: 2K in example (including versions)
+*** Doc schema:
+    chef_type: cookbook_version
+    json_class: Chef::CookbookVersion
+    cookbook_name: <NAME>
+    frozen?: bool
+    name: <NAME>-<VERSION>
+    templates: (part of blob?)
+    version: X.Y.Z
+*** Most of this ends up in the blob, but need to find what actually goes into the current DB schema.
+** data_bag_items
+*** Size: 275 in example
+*** Doc schema:
+    chef_type: data_bag_item
+    json_class: Chef::DataBagItem
+    data_bag: <DATA BAG NAME>
+    name: data_bag_item_<DATA BAG NAME>_<DATA BAG ITEM NAME>
+    raw_data: 
+** data_bags
+
+** environments
+
+** id_map
+
+** nodes
+*** Vestigial, left over from migration
+
+** roles
+
+** sandboxes

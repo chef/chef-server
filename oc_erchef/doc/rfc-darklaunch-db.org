@@ -1,0 +1,172 @@
+#+TITLE: RFC: Darklaunch with Dynamic Routing
+* Desired Features
+In order to migrate OHC off of couchdb, we want a reliable and
+responsive means of routing orgs to either =opscode-chef= or
+=oc_erchef=. The same mechanism should allow components within the
+system to make decisions about where data is located on a per-org
+basis.
+
+The feature flipping should allow "canary orgs" to test a new feature
+while the default for new orgs remains in the "old feature" mode. For
+active migrations, we will want to set the default for new orgs to be
+"new feature" and mark all existing orgs as "old feature".
+
+Since code at various levels of =oc_erchef= and =opscode-account=
+query darklaunch, the darklaunch mechanism should provide a consistent
+snapshot of an org's feature flags within the context of processing a
+single request. While processing a single request, a query for the
+org's features will always return the same answer.
+
+Feature flags are generally not permanent. Code is instrumented to
+allow flipping for the purpose of migration or experimental code
+roll out.
+
+We want to be able to support a few dozen features per org.
+
+It should be possible to update darklaunch values across the fleet of
+load balancers and FE services within 1000ms.
+
+We should be able to update features for a single org or a batch of
+orgs.
+
+As much as possible, there should be a single point of darklaunch
+truth. The storage backing darklaunch should not introduce a SPOF in
+the infrastructure.
+
+Darklaunch with dynamic routing will be introduced to the
+infrastructure while riding a pony.
+* Overview of Approach
+For each request, the external load balancers will parse the org name
+from requests and use it to look up darklaunch data for the org. The
+load balancers will also look up feature default and override
+values. The mechanism used by the load balancers to perform the look
+up is undecided (details below). It could be static config updated on
+demand or live connection to pgsql or redis.
+
+Load balancers package darklaunch feature data into an extra HTTP
+header 'x-ops-darklaunch' which is sent with the request to the
+upstream proxied server. 
+
+** Data Format
+The header format is <KEY>=<VALUE> itemes separated by the ';'
+character. The <KEY> is restricted to the PCRE alnum character class
+and the '_' character. <VALUE> is restricted to be '0' or '1' for
+false and true respectively. This may be extended in the future.
+
+** Example
+
+X-OPS-DARKLAUNCH: maint=0;couch_roles=0
+
+Upstream servers (=opscode-account=, =opscode-chef=, and =oc_erchef=)
+will read the extra HTTP headers and make the data available
+throughout the processing of the request.
+
+Missing keys can be be treated as hard errors by the
+clients. Unparseable key-value pairs can be silently dropped. Some
+failure modes of the load balancer can result in an empty header, and
+this should not be an error until we request a key and don't find it.
+
+* Central Storage of Darklaunch Data
+** Use redis
+For the type of data and queries that we'll need for darklaunch, Redis
+is a good fit. 
+We can use the hash data type with an entry for each org and two
+entries for default and override values.
+
+The default hash is named dl_default, the override is dl_override, and
+the per-org is named dl_org_ORGNAME. The hashes contain key value
+pairs where the keys represent features and the values are the
+settings (initially 0 and 1 for disabled and enabled.)
+
+Each request through the load balancer will fetch all three hashes,
+and combine them to form the final dark launch value passed on to the
+clients. The per-org values, if present would override any found in
+the default entry, and the override values would in turn override
+those from the other two. 
+
+A possible optimization would be to use lua scripting in redis to
+combine the default, per-org, and override values into a single hash
+that is returned to the load balancer.
+
+We have less experience running Redis with strict reliability for disk
+storage. Some of our use of Redis for caching may go away as the
+underlying services are rewritten and become more robust. In that
+case, it would be unfortunate to have to keep redis just for
+darklaunch.
+** Use pgsql
+Start with two tables, one for feature defaults and another for
+org-specific features. Tables could live in the main erchef database
+or a separate database on the same HA pgsql instance.
+
+Example schema:
+
+#+BEGIN_SRC sql
+CREATE TABLE darklaunch_default (
+    feature TEXT,
+    enabled BOOL);
+
+CREATE TABLE darklaunch_org (
+    org_name TEXT,
+    feature TEXT,
+    enabled BOOL);
+-- index on (org_name, feature)
+#+END_SRC
+
+Benefits of using pgsql:
+- Confidence in our ability to run the db HA and in pg's durability guarantees.
+- Darklaunch data would be covered by db backup (or easily included)
+- pg is already in the infrastructure and very unlikely to go
+  away. This is different from Redis, where we currently use it for
+  caching and might be able to remove it if perf without caching was
+  acceptable.
+* How load balancers obtain darklaunch data stored in db
+The load balancers can obtain the darklaunch data in two ways: pull
+from a data store in-line on each request; use static config which
+would be updated by a daemon either on-change or on a schedule.
+
+The in-line request approach minimizes complexity around the source
+of darklaunch truth especially when there are multiple lbs in
+play. The downsides include heebie-jeebies of having your external lb
+talk to your db, reliability and performance concerns of this setup
+both in the abstract of having all requests having to hit the db as
+well as specific concerns about quality of available modules for
+making the queries from the lb.
+
+One compromise for the in-line request approach would be to use a
+plugin for memcache or redis but have an Erlang service that speaks
+that protocol be on the other end. This would give us a lot of
+control, would allow darklaunch data to be in pgsql without having the
+lbs directly talking to pg. If a single Erlang service could handle
+the load, it could provide a mechanism for request throttling logic
+as well.
+
+The static config approach keeps lb behavior in the realm of the well
+understood. Having to have darklaunch state live in many places: db,
+updater daemon (maybe), and each lb is a major downside. You have to
+manage rewriting the lb config and making the config active.
+
+* How oc_erchef access darklaunch data
+A new helper component is added that reads the HTTP headers added by
+the lbs and makes the darklaunch data accessible to all components
+using req id. Should work in a similar fashion to stats_hero.
+* How opscode-account and opscode-chef access darklaunch data
+A new middle-ware component reads the HTTP headers and makes them
+available via global module to the request.
+* lb Alternatives
+*** Varnish
+Varnish can be used as an HTTP proxy without its caching
+capability. Docs suggest solid support for health checks. We might
+find hacking on extensions for Varnish to be more hospitable than
+nginx modules. The caching ability can be useful. The plugin modules
+might be either easier to use or more reliable. Consider exploring in
+a "spike" to see if Varnish feels like a net improvement for our lb
+needs.
+- [[https://github.com/nand2/libvmod-throttle][throttling]]
+- [[https://github.com/sodabrew/libvmod-memcached][memcached]] (would be easy to obtain db data from Erlang service
+  speaking memcached protocol).
+- [[https://www.varnish-cache.org/vmod/curl][curl]] (overhead of HTTP seems unfortunate, but lots of flexibility)
+*** nginx
+- Use the lua plugin for static config and interaction with dynamic
+  modules. Should allow us to express what we want more clearly.
+- Use [[http://wiki.nginx.org/HttpRedis2Module][HttpRedis2Module]]
+- Use [[https://github.com/FRiCKLE/ngx_postgres/][ngx_postgres]]

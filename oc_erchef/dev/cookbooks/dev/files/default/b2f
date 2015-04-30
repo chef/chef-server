@@ -1,0 +1,75 @@
+#! /usr/bin/env escript
+
+%% -*- mode: erlang -*-
+%% -*- tab-width: 4;erlang-indent-level: 4;indent-tabs-mode: nil -*-
+%% ex: ts=4 sw=4 ft=erlang et
+%%
+%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%%
+%% This file is provided to you under the Apache License,
+%% Version 2.0 (the "License"); you may not use this file
+%% except in compliance with the License.  You may obtain
+%% a copy of the License at
+%%
+%%   http://www.apache.org/licenses/LICENSE-2.0
+%%
+%% Unless required by applicable law or agreed to in writing,
+%% software distributed under the License is distributed on an
+%% "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+%% KIND, either express or implied.  See the License for the
+%% specific language governing permissions and limitations
+%% under the License.
+%%
+
+main([Cmd]) when Cmd == "help";
+                 Cmd == "--help";
+                 Cmd == "-h" ->
+    io:format("b2f: Beam To Function decompiler~n"),
+    io:format("Usage: b2f beam_file [function_names]~n"),
+    io:format("Notes: beam_file must be a valid path to a BEAM file with debug info.~n"),
+    io:format("       function_names are optional. If given, they must be a space-delimited list of~n"),
+    io:format("       function names to dump.~n");
+main([FileName|Funs]) ->
+    case file:read_file(FileName) of
+        {error, Reason} ->
+            exit(Reason);
+        {ok, Contents} ->
+            {ok, Chunk} = beam_lib:chunks(Contents, [abstract_code]),
+            {Mod, [{abstract_code, {raw_abstract_v1, Code}}]} = Chunk,
+            io:format("~n"),
+            dump_function(Mod, Code, Funs)
+    end.
+
+dump_function(Mod, Code, Funs) ->
+    MaskF = function_mask(Funs),
+    FinalFuns = [F || F <- Code,
+                      MaskF(F) == true],
+    pretty_print(Mod, FinalFuns).
+
+function_mask("") ->
+    fun({function, _, _, _, _}) ->
+            true;
+       (_) ->
+            false
+    end;
+function_mask(Names0) ->
+    Names = [list_to_atom(N) || N <- Names0],
+    fun({function, _, Name, _, _}) ->
+            lists:member(Name, Names);
+       (_) ->
+            false
+    end.
+
+pretty_print(_Mod, []) ->
+    ok;
+pretty_print(Mod, [{function, Line, Name, Arity, Body0}|T]) ->
+    Body = erl_prettypr:format(erl_syntax:form_list(Body0)),
+    io:format("[~p.erl:~p] ~p:~p/~p~n", [Mod, Line, Mod, Name, Arity]),
+    io:format("~p~s~n", [Name, Body]),
+    case T of
+        [] ->
+            ok;
+        _ ->
+            io:format("====================~n"),
+            pretty_print(Mod, T)
+    end.

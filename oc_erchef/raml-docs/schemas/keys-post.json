@@ -1,0 +1,18 @@
+{
+  "type" : "object",
+  "required" : true,
+  "properties" : {
+    "public_key" :
+      { "type" : "string",
+        "description" : "A valid public key",
+        "required" : true },
+    "name" :
+      { "type" : "string",
+        "description" : "A unique name for this key",
+        "required" : true },
+    "expiration_date" :
+      { "type" : "date",
+        "description" : "Date in ISO-8601 form, or the string 'infinity'",
+        "required" : true }
+  }
+}

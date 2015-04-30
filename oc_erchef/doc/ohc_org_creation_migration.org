@@ -1,0 +1,148 @@
+* Steps before outage window
+
+** Pre-reqs
+*** DONE opscode-lb is at 1.3.4+
+*** DONE opscode-xdarklaunch is at 0.1.1
+*** DONE CCR role[opscode-support] with latest opscode-platform-debug
+** DONE Make sure org creator uses internal load balancer
+** DONE Make sure dl_default 'disable_new_orgs' is set to false 
+: knife ssh role:mysql-master '/opt/redis/bin/redis-cli HGETALL dl_default'
+** DONE Stop org-creator
+: knife ssh role:opscode-account 'sudo /etc/init.d/opscode-org-creator stop
+** DONE deploy faster update interval to org creator:
+Update
+
+*** EDIT environments/rs-prod data bag
+ "org_creator_create_wait_ms": 10000,
+ "org_creator_create_splay_ms": 5000,
+
+*** UPLOAD data bag
+knife data bag from file environments data_bags/environments/rs-prod.rb
+
+*** RUN CCR
+knife ssh role:opscode-account 'sudo chef-client'
+
+
+* Outage window begins 
+
+** 1 Disable new org creation
+#+BEGIN_EXAMPLE
+knife ssh role:mysql-master '/opt/redis/bin/redis-cli HSET dl_default disable_new_orgs true'
+#+END_EXAMPLE
+
+
+** 2 Do the following steps in parallel: 10 min (longest task)
+
+*** 2.1 Delete all unassigned orgs TIME: 4 min (4 mins in preprod for 1500 orgs)
+#+BEGIN_EXAMPLE
+knife ssh role:opscode-support 'sudo /srv/opscode-platform-debug/current/orgmapper/scripts/delete-pre-created-orgs.rb /etc/chef/orgmapper.conf all'
+#+END_EXAMPLE
+
+NOTE: May need to be run from shell on box due to bundler issues
+
+*** 2.2 Load latest opscode-account database in mover: TIME: 10 min (production number)
+
+This needs to be done after we disable org creation to pick up the
+names for orgs that were just created, since XDL depends on the org
+name. It is not necessary to delete pre-created orgs first.
+
+Delete the existing database:
+
+: sudo rm /srv/moser-data/* 
+
+In the chef-mover console run:
+
+: (mover@127.0.0.1)1>  moser_acct_processor:process_account_file().
+
+end of parallel section 
+
+** 3 Run chef-mover command to create xdl entries for all unmigrated orgs TIME: 1 min
+
+And turn =couchdb_*= to all true for each org. Make sure that
+migration_state table has been updated
+
+#+BEGIN_EXAMPLE
+moser_state_tracker:add_missing_orgs().
+mover_util:populate_xdl_with_unmigrated_orgs().
+#+END_EXAMPLE
+
+** 4 Set OHC to SQL Orgs by default
+
+: knife ssh role:mysql-master '/opt/redis/bin/redis-cli HMSET dl_default couchdb_clients false couchdb_checksums false couchdb_cookbooks false couchdb_data false couchdb_roles false couchdb_sandboxes false couchdb_environments false'
+: knife ssh role:mysql-master '/opt/redis/bin/redis-cli HGETALL dl_default 
+
+** 5 Start org-creator
+
+: knife ssh role:opscode-account 'sudo /etc/init.d/opscode-org-creator start'
+
+** 6 Wait for the unassigned orgs to come back up to reserve levels (10 orgs), 4 min (estimated)
+
+On the couchdb box (same as mover) you can get the list of unassigned orgs by:
+
+: curl 'http://localhost:5984/opscode_account_internal/_design/Mixlib%3A%3AAuthorization%3A%3AModels%3A%3AOrganizationInternal-48acbb3cdff0332031068da2ff17175b/_view/by_state?key=%22unassigned%22' | head
+
+You can watch org creation by tailing the active erlang log file, which will be one of:
+: '/srv/opscode-org-creator/current/rel/org_app/log/erlang.log.*'
+
+: curl 'http://localhost:5984/opscode_account/_design/Mixlib%3A%3AAuthorization%3A%3AModels%3A%3AOrganization-eed4ffc4a127815b935ff840706c19de/_view/by_guid?key=%226ec639bb42964bb4a26270dd4b628ba3%22
+
+In prod it looks like org creation takes about a minute per org, with
+3 workers we should be good to go in about 3-5 minutes
+
+** 7 Enable new org creation 
+
+: knife ssh role:mysql-master '/opt/redis/bin/redis-cli HSET dl_default disable_new_orgs false
+: knife ssh role:mysql-master '/opt/redis/bin/redis-cli HGETALL dl_default 
+  
+* After outage window
+
+** Tune org creation back down to original level
+
+*** EDIT environments/rs-prod data bag
+ "org_creator_create_wait_ms": 30000,
+ "org_creator_create_splay_ms": 25000,
+
+*** UPLOAD data bag
+knife data bag from file environments data_bags/environments/rs-prod.rb
+
+*** RUN CCR
+knife ssh role:opscode-account 'sudo chef-client'
+
+
+* Check final state
+** REDIS:
+redis 127.0.0.1:6379> HGETALL dl_default
+ 1) "503_mode"
+ 2) "false"
+ 3) "couchdb_checksums"
+ 4) "false"
+ 5) "couchdb_cookbooks"
+ 6) "false"
+ 7) "couchdb_environments"
+ 8) "false"
+ 9) "couchdb_roles"
+10) "false"
+11) "couchdb_data"
+12) "false"
+13) "couchdb_clients"
+14) "false"
+15) "disable_new_orgs"
+16) "false"
+17) "couchdb_sandboxes"
+18) "false"
+*** Org creator
+ON
+Time set to ...
+
+** Write PBI for cleaning up orphan chargify accounts
+** Write PBI for cleaning up orphan couch databases (or not)
+** Add code to moser_state_tracker:add_missing_orgs to handle fact that orgs will be created in sql from start
+
+* Revert steps
+** Shutdown new org creation
+** Shutdown org-creator
+** Nuke precreated orgs
+** set couch_ default params to true
+knife ssh role:mysql-master '/opt/redis/bin/redis-cli HMSET dl_default couchdb_clients true couchdb_checksums true couchdb_cookbooks true couchdb_data true couchdb_roles true couchdb_sandboxes true couchdb_environments true'
+** start org creator
+** verify couch org creation works (optional)

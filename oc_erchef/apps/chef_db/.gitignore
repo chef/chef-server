@@ -1,0 +1,16 @@
+.eunit
+deps/
+ebin/
+TAGS
+.DS_Store
+doc/*.html
+*.beam
+/doc/edoc-info
+/doc/erlang.png
+/doc/stylesheet.css
+itest/.bundle
+/itest/Gemfile.lock
+itest/mysql-migration.log
+itest/pgsql-migration.log
+/chef_db.plt
+/itest/ct_logs

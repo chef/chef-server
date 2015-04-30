@@ -1,0 +1,17 @@
+rel/oc_erchef
+deps
+.DS_Store
+TAGS
+.rebar
+ebin
+.eunit
+user_default.beam
+chef_db_SUITE_data
+*.so
+tags
+*.dump
+_rel
+.concrete
+relx
+deps.plt
+apps/chef_index/src/chef_lucene.erl
