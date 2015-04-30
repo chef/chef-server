@@ -1,0 +1,124 @@
+#!/usr/bin/env escript
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil;fill-column: 92 -*-
+%% %% ex: ts=4 sw=4 et ft=erlang
+%%! -hidden
+%%
+%% Copyright(c) 2013 Opscode, Inc
+%% All Rights Reserved
+%%
+%% using compiled mode gives more informative error traces
+-mode(compile).
+
+%% @doc Migrate all users, and output the summary results to stdout
+%% in the form:
+%%
+%% `
+%% Total number of users: <number of users>
+%%     Unconverted users: <number of unconverted users>
+%% '
+%%
+%% Exit status is 0 on success, 1 if any conversion fails.
+%%
+%% <b>Important</b>: this must be run as root or connect will fail.
+%% If an error occurs, it will also be displayed on the console.
+%% If any org encounters errors in migrating or resetting state,
+%% the script will exit with exit code 1. Otherwise it will exit
+%% with exit code0, including if there are no orgs to migrate.
+
+% TODO: Define these via chef template
+-define(SELF, 'migrate-bcrypt-script@127.0.0.1').
+-define(MOVER, 'mover@127.0.0.1').
+
+-define(MOVER_COOKIE, 'mover').
+-define(MOVER_MOD, 'mover_manager').
+-define(SUCCESS_EXIT, 0).
+-define(FAILURE_EXIT, 1).
+
+
+main([]) ->
+    main(normal);
+main(["silent"]) ->
+    main(silent);
+main(Other) when is_list(Other) ->
+    io:fwrite("Unknown argument(s): ~p.~nUsage: migrate [silent]~n", [Other]),
+    halt(?FAILURE_EXIT);
+main(NoiseLevel) when is_atom(NoiseLevel) ->
+    {ExitCode, Message} = try
+        init_network(),
+        report(NoiseLevel, "~nKicking off migration. This might take a while.~nEstimated time: ~ps~n", [estimated_time()]),
+        migrate(),
+        sleep_until_migration_finished(),
+        parse_and_format(NoiseLevel, conversion_status())
+    catch
+        error:{error, HaltWith} ->
+            {?FAILURE_EXIT, HaltWith};
+        E:Why ->
+            error_logger:error_report({E, Why}),
+            {?FAILURE_EXIT, "An unknown error has occurred."}
+    end,
+    io:fwrite("~n~s~n~n", [Message]),
+    halt(ExitCode).
+
+init_network() ->
+    net_kernel:start([?SELF]),
+    erlang:set_cookie(?MOVER, ?MOVER_COOKIE),
+    verify_ping(net_adm:ping(?MOVER), "Could not connect to mover service"),
+    R = try
+            rpc:call(?MOVER, ?MOVER_MOD, ping, [])
+        catch
+            _M:_R  ->
+               pang
+        end,
+    verify_ping(R, "RPC to mover service failed").
+
+%% RPC calls %%
+migrate() ->
+    rpc:call(?MOVER, ?MOVER_MOD, migrate_user_password_storage, [all, bcrypt_workers_count_config()]).
+
+bcrypt_workers_count_config() ->
+    rpc:call(?MOVER, mover_user_hash_converter, bcrypt_workers_count_config, []).
+
+all_unconverted_users_count() ->
+    rpc:call(?MOVER, mover_user_hash_converter, all_unconverted_users_count, []).
+
+all_users_count() ->
+      rpc:call(?MOVER, mover_user_hash_converter, all_users_count, []).
+
+sleep_until_migration_finished() ->
+    rpc:call(?MOVER, mover_util, wait_for_status, []).
+
+%% Reporting and exit status %%
+
+estimated_time() ->
+    %% The 0.75 factor assumes standard bcrypt rounds and a machine similar in performance
+    %% to our HEC migration node, circa 2013.
+    ((all_unconverted_users_count() / bcrypt_workers_count_config()) * 0.75).
+
+conversion_status() ->
+    { all_unconverted_users_count(), all_users_count() }.
+
+parse_and_format(NoiseLevel, {UnconvertedUsers, UserTotal}) ->
+    report(NoiseLevel, "Total number of users: ~p", [UserTotal]),
+    report(NoiseLevel, "    Unconverted users: ~p", [UnconvertedUsers]),
+    {exit_code(UnconvertedUsers), exit_code_message(UnconvertedUsers)}.
+
+exit_code(0) ->
+    ?SUCCESS_EXIT;
+exit_code(S) when is_integer(S) ->
+    ?FAILURE_EXIT.
+
+exit_code_message(0) ->
+    "SHA1-Bcrypt user migrations completed successfully.";
+exit_code_message(S) when is_integer(S) ->
+    "Errors or warnings occurred.".
+
+report(silent, _, _) -> ok;
+report(_, Subject, Params) ->
+    io:fwrite(Subject, Params).
+
+verify_ping(pong, _HaltWith) -> ok;
+verify_ping(_Other, HaltWith) ->
+    % Doing a halt from here will not actual set exit code, presumably
+    % because trhere's additional program flow following this call.
+    % Throw an error instead.
+    error({error, HaltWith}).
