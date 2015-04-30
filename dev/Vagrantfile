@@ -46,7 +46,7 @@ Vagrant.configure("2") do |config|
     # otherwise rebar commands begin to fail. Note that we also exclude a lot of things we don't want to pull
     # in from the host since we will generate them ourselves in the session.We also include a couple of projects
     # that may exist in your host directory that we don't want to spend time on.
-    config.vm.synced_folder File.absolute_path(File.join(Dir.pwd, "../..")), "/host",
+    config.vm.synced_folder File.absolute_path(File.join(Dir.pwd, "../")), "/host",
       type: "rsync",
       rsync__args: ["--verbose", "--archive", "--delete", "-z", "--no-owner", "--no-group" ],
       rsync__exclude: attributes["vm"]["sync-exclude"]
@@ -95,7 +95,7 @@ end
 
 def prompt_installer
   # TODO allow config override of location, multiple locations, search pattern, max count?
-  files = Dir.glob("#{Dir.home}/Downloads/chef-server-core*.deb") + Dir.glob("#{base_path}/opscode-omnibus/pkg/chef-server-core*.deb")
+  files = Dir.glob("#{Dir.home}/Downloads/chef-server-core*.deb") + Dir.glob("#{base_path}/omnibus/pkg/chef-server-core*.deb")
 
   if files.length ==  0
     return nil
@@ -161,5 +161,5 @@ SCRIPT
 end
 
 def base_path
-  File.absolute_path(File.join(Dir.pwd, "../.."))
+  File.absolute_path(File.join(Dir.pwd, "../"))
 end

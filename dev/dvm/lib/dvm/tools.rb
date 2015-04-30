@@ -28,14 +28,17 @@ module DVM
     def host_raw_dir
       "/mnt/host-do-not-use"
     end
-    def host_project_dir(name)
-      File.join(host_raw_dir, name)
+
+    def host_project_dir
+      File.join(host_raw_dir, path)
     end
+
     def clone(name, uri)
       run_command("git clone '#{uri}' '#{name}'", "Cloning #{name} to host.", cwd: host_raw_dir)
     end
-    def project_dir_exists_on_host?(name)
-      File.directory? host_project_dir(name)
+
+    def project_dir_exists_on_host?
+      File.directory? host_project_dir
     end
 
     def checkout(name, ref)

@@ -2,14 +2,15 @@ require "mixlib/shellout"
 module DVM
   class Project
     include DVM::Tools
-    attr_reader :name, :project, :config, :service, :project_dir
+    attr_reader :name, :project, :config, :service, :project_dir, :path
     # TODO check required fields in config
     def initialize(project_name, config)
       @project = config['projects'][project_name]
       @name = project['name'].nil? ? project_name : project['name']
+      @path = project['path'] || "src/#{name}"
       @config = config
       @service = @project['service']
-      @project_dir = "/host/#{name}"
+      @project_dir = "/host/#{path}"
     end
     def start(args, detach)
       raise DVM::DVMArgumentError, "Start not supported for #{name}"

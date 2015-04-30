@@ -47,7 +47,7 @@ module DVM
     def load(opts)
       load_info
       # Again, muich of this can be offloaded to a base class that hooks into child class via callbacks.
-      if not project_dir_exists_on_host? name
+      if ! project_dir_exists_on_host?
         # Some things to consider:
         # do we want to match the revision/branch from rebar?
         # do we want to auto-create a new branch from it if we did the clone ourselves or detect master or
@@ -79,5 +79,3 @@ module DVM
     end
   end
 end
-
-

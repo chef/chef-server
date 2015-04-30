@@ -8,7 +8,6 @@ module DVM
       # TODO use .lock if available, else use .config
       @rebar_config_path = "#{project_dir}/rebar.config.lock"
       reldir = service['rel-type'] == 'relx' ? "_rel" : "rel"
-      relname =
       @relname = service['rel-name'] ? service['rel-name'] : name
       @relpath = "#{@project_dir}/#{reldir}/#{relname}"
       @service_dir = "/var/opt/opscode/embedded/service/#{service['name']}"
@@ -99,9 +98,23 @@ EOM
 
     end
 
+    def link
+      say("Setting up symlinks")
+      # Yay project inconsistencies
+      base_sv_path = "/var/opt/opscode/#{service["name"]}"
+      FileUtils.rm_rf(["#{relpath}/log", "#{relpath}/sys.config", "#{relpath}/etc/sys.config"])
+      if File.exists?("#{base_sv_path}/sys.config")
+        FileUtils.ln_s("#{base_sv_path}/sys.config", "#{relpath}/sys.config")
+      else
+        FileUtils.ln_s("#{base_sv_path}/etc/sys.config", "#{relpath}/etc/sys.config")
+      end
+
+      FileUtils.ln_s("/var/log/opscode/#{service["name"]}", "#{relpath}/log")
+    end
+
     def do_load(options)
       # TODO this can also be wrapped and handled in the base...
-      if not project_dir_exists_on_host?(name)
+      if ! project_dir_exists_on_host?
         git = project['git']
         if git
           if git['uri']
@@ -119,19 +132,7 @@ EOM
       run_command("chef-server-ctl stop #{service['name']}", "Stopping #{service['name']}", cwd: project_dir)
       do_build unless options[:no_build]
 
-      say("Setting up symlinks")
-      # Yay project inconsistencies
-      base_sv_path = "/var/opt/opscode/#{service["name"]}"
-      if File.exists?("#{base_sv_path}/sys.config")
-        FileUtils.rm("#{relpath}/sys.config")
-        FileUtils.ln_s("#{base_sv_path}/sys.config", "#{relpath}/sys.config")
-      else
-        FileUtils.rm("#{relpath}/etc/sys.config")
-        FileUtils.ln_s("#{base_sv_path}/etc/sys.config", "#{relpath}/etc/sys.config")
-      end
-      FileUtils.rm_rf(["#{relpath}/log", "#{relpath}/sys.config"])
-      FileUtils.ln_s("/var/log/opscode/#{service["name"]}", "#{relpath}/log")
-
+      link
       # Make runsv forget about us so that chef-server-ctl reconfigure doesn't restart.
       # Link may be missing if we're force-reloading
       #if (File.exists? "/opt/opscode/service/#{service['name']}")
@@ -204,4 +205,3 @@ EOM
 
   end
 end
-
