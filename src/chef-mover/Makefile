@@ -101,4 +101,11 @@ unlocked_deps:
 lock_deps:
 	@rebar lock-deps skip_deps=true
 
+install:
+	./rebar get-deps -C rebar.config.lock
+
+travis: all
+	./rebar skip_deps=true ct
+	./rebar skip_deps=true eunit
+
 .PHONY: distclean prepare_release lock_deps unlocked_deps update clean compile compile_skip allclean tags relclean devrel rel relclean generate munge_apps test

@@ -64,9 +64,9 @@ prune: prune_deb
 clear_pkg_cache: clear_pkg_cache_deb
 
 clear_pkg_cache_%:
-	cd .kitchen/kitchen-vagrant/default-$(DEV_PLATFORM) \
+	cd .kitchen/kitchen-vagrant/kitchen-omnibus-default-$(DEV_PLATFORM) \
 	&& vagrant ssh -c 'rm -v -f /var/cache/omnibus/pkg/*.$*'
-	cd .kitchen/kitchen-vagrant/default-$(DEV_PLATFORM) \
+	cd .kitchen/kitchen-vagrant/kitchen-omnibus-default-$(DEV_PLATFORM) \
 	&& vagrant ssh -c 'rm -v -f /var/cache/omnibus/pkg/*.$*.metadata.json'
 
 prune_%:
@@ -76,5 +76,11 @@ prune_%:
 
 # Bundle install and build chef-server
 dev-build: clear_pkg_cache prune
-	cd .kitchen/kitchen-vagrant/default-$(DEV_PLATFORM) && \
-	    vagrant ssh --command "cd opscode-omnibus && bundle install && time ./bin/omnibus build chef-server"
+	kitchen exec default-$(DEV_PLATFORM) -c "bash -l -c 'cd chef-server/omnibus && bundle install && time bundle exec omnibus build chef-server'"
+
+install:
+	bundle install
+
+travis:
+	bundle exec rake test:csc
+	bundle exec rake test:routing
