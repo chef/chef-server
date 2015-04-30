@@ -5,9 +5,9 @@ driver:
     cpus: 4
     memory: 4098
   synced_folders:
-    - ['.', '/home/vagrant/opscode-omnibus']
-    - ['../omnibus', '/home/vagrant/omnibus']
-    - ['../omnibus-software', '/home/vagrant/omnibus-software']
+    - ['..', '/home/vagrant/chef-server']
+    - ['../../omnibus', '/home/vagrant/omnibus']
+    - ['../../omnibus-software', '/home/vagrant/omnibus-software']
 
 provisioner:
   name: chef_zero
