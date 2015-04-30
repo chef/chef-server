@@ -24,5 +24,6 @@ fi
 
 cd rel
 tar zcf $PACKAGE $PROJ_NAME/
-s3cmd put $PACKAGE s3://opscode-ci/artifacts/ubuntu-10.04/x86_64/$PROJ_NAME
-s3cmd put $PACKAGE s3://opscode-ci/artifacts/ubuntu-12.04/x86_64/$PROJ_NAME
+s3cmd put $PACKAGE s3://opscode-ci/artifacts/ubuntu-10.04/x86_64/chef-mover/$PACKAGE
+s3cmd put $PACKAGE s3://opscode-ci/artifacts/ubuntu-12.04/x86_64/chef-mover/$PACKAGE
+

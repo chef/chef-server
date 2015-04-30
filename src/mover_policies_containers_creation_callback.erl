@@ -1,22 +1,23 @@
 -module(mover_policies_containers_creation_callback).
 
 -export([
-	 migration_init/0,
-	 migration_complete/0,
-	 migration_type/0,
-	 supervisor/0,
-	 migration_start_worker_args/2,
-	 error_halts_migration/0,
-	 reconfigure_object/2,
-	 migration_action/2,
-	 next_object/0
-	]).
+     migration_init/0,
+     migration_complete/0,
+     migration_type/0,
+     supervisor/0,
+     migration_start_worker_args/2,
+     error_halts_migration/0,
+     reconfigure_object/2,
+     migration_action/2,
+     next_object/0,
+     needs_account_dets/0
+    ]).
 
 -include("mover.hrl").
 -include("mv_oc_chef_authz.hrl").
 
 -record(mover_org, {id, authz_id, name, superuser}).
--record(mover_requestor, {id, authz_id, username}).
+-record(mover_requestor, {authz_id}).
 
 %% This is an ACE in human readable form
 -record(mover_hr_ace, {clients = [],
@@ -44,9 +45,9 @@
            {add_acl, [{container, cookbook_artifacts}], [create, read, update, delete, grant], [{user, creator}]},
 
            %% Admins
-           {add_acl, [{container, policies}],           [create, read, update, delete, grant], [{group, users}]},
-           {add_acl, [{container, policy_groups}],      [create, read, update, delete, grant], [{group, users}]},
-           {add_acl, [{container, cookbook_artifacts}], [create, read, update, delete, grant], [{group, users}]},
+           {add_acl, [{container, policies}],           [create, read, update, delete, grant], [{group, admins}]},
+           {add_acl, [{container, policy_groups}],      [create, read, update, delete, grant], [{group, admins}]},
+           {add_acl, [{container, cookbook_artifacts}], [create, read, update, delete, grant], [{group, admins}]},
 
 
            %% users
@@ -63,13 +64,15 @@
          }
         ]).
 
+needs_account_dets() ->
+    false.
+
 migration_init() ->
     %% TODO: this fails if the pool is already created. Should be tolerant of
     %% errors and also should tear this down after the migration
     mv_oc_chef_authz_http:create_pool(),
-    %% TODO: superuser name is somewhat configurable, it's set in oc_erchef's sys.config
-    {ok, SuperuserResults} = sqerl:adhoc_select([username, id, authz_id], users, {username, equals, <<"pivotal">>}),
-    Superuser = db_results_to_requestor(hd(SuperuserResults)),
+    SuperUserAuthzId = envy:get(oc_chef_authz,authz_superuser_id, binary),
+    Superuser = #mover_requestor{authz_id = SuperUserAuthzId},
 
     FindOrgsWithNoPoliciesContainer = <<"SELECT orgs.name, orgs.id, orgs.authz_id FROM orgs "
                                         "LEFT JOIN containers ON orgs.id = org_id AND containers.name='policies' "
@@ -81,11 +84,6 @@ migration_init() ->
 migration_complete() ->
     mv_oc_chef_authz_http:delete_pool().
 
-db_results_to_requestor(FieldsValues) ->
-    {<<"username">>, Name} = proplists:lookup(<<"username">>, FieldsValues),
-    {<<"id">>,  Id}        = proplists:lookup(<<"id">>, FieldsValues),
-    {<<"authz_id">>,  AzId} = proplists:lookup(<<"authz_id">>, FieldsValues),
-    #mover_requestor{username = Name, id = Id, authz_id = AzId}.
 
 db_results_to_org(FieldsValues, Superuser) ->
     %% Each object will be a list like this:
@@ -129,6 +127,7 @@ insert_container_sql() ->
 %%
 %% Code in here is vendored and then modified to remove external dependencies.
 %% This makes the data migration resilent to future code changes that might
+%%
 %% break the migration.
 %%
 %% TODO: remove use of these:
@@ -140,19 +139,26 @@ upgrade_org(#mover_org{superuser = CreatingUser} = Org) ->
     CacheWithGroups = prepopulate_groups(Cache, Org),
     process_policy(?ORG_POLICY_FOR_POLICIES_CONTAINERS, Org, CreatingUser, CacheWithGroups).
 
-prepopulate_groups(Cache, #mover_org{id = OrgID}) ->
-    Cache1 = prepopulate_group(Cache, OrgID, admins),
-    Cache2 = prepopulate_group(Cache1, OrgID, users),
-    Cache3 = prepopulate_group(Cache2, OrgID, clients),
-    Cache3.
+prepopulate_groups(Cache, Org) ->
+    % Failure is arguably okay if we can't set up admins acls
+    % but we can't continue if we can't set it up for clients and users.
+    Cache1 = prepopulate_group(Cache, Org, admins),
+    Cache2 = prepopulate_group(Cache1, Org, users),
+    prepopulate_group(Cache2, Org, clients).
 
-prepopulate_group(Cache, OrgId, Group) ->
+prepopulate_group(Cache, #mover_org{id = OrgId, name = OrgName}, Group) ->
     {ok, Results} = sqerl:adhoc_select([name, authz_id, org_id],
                                        groups,
                                        {'and', [{name, equals, Group}, {org_id, equals, OrgId}]}),
-    GroupFieldsList = hd(Results),
-    {<<"authz_id">>, AuthzId} = proplists:lookup(<<"authz_id">>, GroupFieldsList),
-    add_cache(Cache,{group, Group}, AuthzId).
+    case Results of
+        [] ->
+            lager:warning("Could not find group '~p' for org '~s'", [Group, OrgName]),
+            add_cache(Cache,{group, Group}, not_found);
+        _ ->
+            GroupFieldsList = hd(Results),
+            {<<"authz_id">>, AuthzId} = proplists:lookup(<<"authz_id">>, GroupFieldsList),
+            add_cache(Cache,{group, Group}, AuthzId)
+    end.
 
 %%
 %% Execute a policy to create an org
@@ -176,13 +182,17 @@ process_policy_step({create_containers, List},
     {create_object(OrgId, RequestorId, container, List, Cache), []};
 process_policy_step({set_acl_expanded, Object, Acl},
                     #mover_org{}, #mover_requestor{authz_id=_RequestorId}, Cache) ->
-    {ResourceType, AuthzId} = find(Object, Cache),
-    Acl1 = [{Action, ace_to_authz(Cache, ACE)} || {Action, ACE} <- Acl],
-    %% TODO: Error check authz results
-    %% FURTHER TODO: this probably won't work with our hacked ace records :'(
-    [ mv_oc_chef_authz:set_ace_for_entity(superuser, ResourceType, AuthzId, Method, ACE) ||
-        {Method, ACE} <- Acl1],
-    {Cache, []};
+    case  find(Object, Cache) of
+        {_, not_found} ->
+            {Cache, []};
+        {ResourceType, AuthzId} ->
+            Acl1 = [{Action, ace_to_authz(Cache, ACE)} || {Action, ACE} <- Acl],
+            %% TODO: Error check authz results
+            %% FURTHER TODO: this probably won't work with our hacked ace records :'(
+            [ mv_oc_chef_authz:set_ace_for_entity(superuser, ResourceType, AuthzId, Method, ACE) ||
+                {Method, ACE} <- Acl1 ],
+            {Cache, []}
+    end;
 process_policy_step({acls, Steps}, _Org, _User, Cache) ->
     {Cache, process_acls(Steps)}.
 
@@ -346,7 +356,6 @@ add_cache(C, {Type}, AuthzId) ->
 
 set(Key, Value, C) ->
     dict:store(Key,Value, C).
-
 find(Key, C) ->
     case dict:find(Key,C) of
         {ok, Value} -> Value;
