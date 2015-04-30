@@ -1,0 +1,27 @@
+require 'bundler'
+
+namespace :test do
+  task :csc do
+    Bundler.with_clean_env { 
+      if system "cd files/private-chef-ctl-commands/ && bundle install && bundle exec rspec"
+        exit 0
+      else
+        exit 1
+      end
+    }
+  end
+  task :routing do
+    if ENV["LUALIB"].nil?
+      puts "$LUALIB is not set. It should be set to a path that contains lpeg.so and cjson.so. See tests/routing/README.md for details."
+      exit 1
+    end
+    ENV["USE_OMNIBUS_FILES"] = '0'
+    Bundler.with_clean_env { 
+      if system "cd tests/routing/ && ./run_lua_tests.sh"
+        exit 0
+      else
+        exit 1
+      end
+    }
+  end
+end

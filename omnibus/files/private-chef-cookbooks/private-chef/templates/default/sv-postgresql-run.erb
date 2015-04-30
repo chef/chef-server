@@ -1,0 +1,4 @@
+#!/bin/sh
+exec 2>&1
+exec chpst -P -U <%= node['private_chef']['postgresql']['username'] %> -u <%= node['private_chef']['postgresql']['username'] %> /opt/opscode/embedded/bin/postgres -D <%= node['private_chef']['postgresql']['data_dir'] %>
+

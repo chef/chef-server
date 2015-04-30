@@ -1,0 +1,80 @@
+#!/opt/opscode/embedded/bin/escript
+
+%% using compiled mode gives more informative error traces
+-mode(compile).
+
+-define(MAGIC_NUMBER, <<16#b00c:16/integer>>).
+-define(OLD_COOKBOOK_PATH, "<%= node['private_chef']['opscode-chef']['checksum_path'] %>/").
+-define(BOOKSHELF_PATH, "<%= node['private_chef']['bookshelf']['dir'] %>/").
+-define(BOOKSHELF_DATA_PATH, "<%= node['private_chef']['bookshelf']['data_dir'] %>/").
+-define(NEW_BOOKSHELF_CONTAINER, ?BOOKSHELF_DATA_PATH ++ "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>/").
+
+main(_) ->
+    ok = create_destination(),
+    ok = move_cookbooks().
+
+create_destination() ->
+    create_directory_if_needed(?BOOKSHELF_PATH),
+    create_directory_if_needed(?BOOKSHELF_DATA_PATH),
+    create_directory_if_needed(?NEW_BOOKSHELF_CONTAINER).
+
+create_directory_if_needed(Path) ->
+    DummyPath = filename:join(Path, "for-ensure"),
+    case filelib:ensure_dir(DummyPath) of
+        ok ->
+            ok;
+        Error ->
+            erlang:error(Error)
+    end.
+
+move_cookbooks() ->
+    case file:list_dir(?OLD_COOKBOOK_PATH) of
+        {ok, Orgs} ->
+            ok = move_orgs(Orgs);
+        _ ->
+            % no files (e.g., a fresh install?), so nothing to migrate, just return
+            ok
+    end.
+
+move_orgs([]) ->
+    ok;
+move_orgs([Org|Rest]) ->
+    Path = ?OLD_COOKBOOK_PATH ++ Org,
+    {ok, Dirs} = file:list_dir(Path),
+    ok = move_dirs(Org, Dirs),
+    ok = move_orgs(Rest).
+
+move_dirs(_, []) ->
+    ok;
+move_dirs(Org, [Dir|Rest]) ->
+    Path = ?OLD_COOKBOOK_PATH ++ Org ++ "/" ++ Dir,
+    {ok, Files} = file:list_dir(Path),
+    ok = move_files(Org, Dir, Files),
+    ok = move_dirs(Org, Rest).
+
+move_files(_, _, []) ->
+    ok;
+move_files(Org, Dir, [File|Rest]) ->
+    OldPath = ?OLD_COOKBOOK_PATH ++ Org ++ "/" ++ Dir ++ "/" ++ File,
+    NewPath = ?NEW_BOOKSHELF_CONTAINER ++ new_file_name(Org, File),
+    update_header(OldPath, NewPath),
+    ok = move_files(Org, Dir, Rest).
+
+new_file_name(Org, File) ->
+    "organization-" ++ Org ++ "%2Fchecksum-" ++ File.
+
+update_header(OldPath, NewPath) ->
+    case file:open(NewPath, [exclusive, write, binary]) of
+        {ok, Fd} ->
+            {ok, Data} = file:read_file(OldPath),
+            Ctx0 = erlang:md5_init(),
+            Ctx1 = erlang:md5_update(Ctx0, Data),
+            Digest = erlang:md5_final(Ctx1),
+            file:write(Fd, ?MAGIC_NUMBER),
+            file:write(Fd, Digest),
+            file:write(Fd, Data),
+            file:close(Fd);
+        {error, eexist} ->
+            % Already done, just return ok
+            ok
+    end.

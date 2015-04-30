@@ -1,0 +1,37 @@
+daemonize no
+pidfile <%=@dir%>/lb-redis.pid
+
+port <%= @port %>
+<% if (@listen != "0.0.0.0") && (@listen != "::") %>
+bind <%= @bind %> <%= @listen == @bind ? "" : @listen %>
+<% end %>
+
+tcp-keepalive <%= @keepalive %>
+timeout <%= @timeout %>
+loglevel <%= @loglevel %>
+logfile ""
+
+databases <%= @databases %>
+
+<% @save_frequency.each do |dur, freq| %>
+save <%=dur%> <%=freq%>
+<% end %>
+
+rdbcompression yes
+dbfilename dump.rdb
+dir <%= File.join(@dir, "data") %>
+
+<% if not @maxmemory.nil? %>
+maxmemory <%= @maxmemory %>
+maxmemory-policy <%= @maxmemory_policy %>
+maxmemory-samples 3
+<% end %>
+
+appendonly <%= @appendonly %>
+appendfsync <%= @appendfsync %>
+
+no-appendfsync-on-rewrite no
+activerehashing <%=@activerehashing%>
+
+auto-aof-rewrite-percentage <%=@aof_rewrite_percent%>
+auto-aof-rewrite-min-size <%=@aof_rewrite_min_size%>

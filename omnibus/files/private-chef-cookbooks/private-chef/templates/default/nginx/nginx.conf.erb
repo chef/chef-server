@@ -1,0 +1,156 @@
+user <%= node['private_chef']['user']['username'] %> <%= node['private_chef']['user']['username']%>;
+worker_processes <%= @worker_processes %>;
+error_log /var/log/opscode/nginx/error.log<%= node['private_chef']['lb']['debug'] ? " debug" : "" %>;
+
+daemon off;
+
+events {
+  worker_connections <%= @worker_connections %>;
+}
+
+http {
+<% if node['private_chef']['nginx']['log_x_forwarded_for'] -%>
+  log_format opscode '$http_x_forwarded_for - $remote_user [$time_local]  '
+<% else -%>
+  log_format opscode '$remote_addr - $remote_user [$time_local]  '
+<% end -%>
+                    '"$request" $status "$request_time" $body_bytes_sent '
+                    '"$http_referer" "$http_user_agent" "$upstream_addr" "$upstream_status" "$upstream_response_time" "$http_x_chef_version" "$http_x_ops_sign" "$http_x_ops_userid" "$http_x_ops_timestamp" "$http_x_ops_content_hash" $request_length';
+
+  sendfile <%= @sendfile %>;
+  tcp_nopush <%= @tcp_nopush %>;
+  tcp_nodelay <%= @tcp_nodelay %>;
+
+  keepalive_timeout <%= @keepalive_timeout %>;
+
+  gzip <%= @gzip %>;
+  gzip_http_version <%= @gzip_http_version %>;
+  gzip_comp_level <%= @gzip_comp_level %>;
+  gzip_proxied <%= @gzip_proxied %>;
+  gzip_types <%= @gzip_types.join(' ') %>;
+
+  include /opt/opscode/embedded/conf/mime.types;
+
+  lua_package_path "<%=@script_path %>/?.lua;$prefix/?.lua;;";
+  lua_shared_dict maint_data 1m;
+  lua_shared_dict banned_ips 1m;
+
+  # Preload some shared modules globally
+  init_by_lua '
+    redis = require("resty/redis")
+    config = require("config")
+    routes = require("routes")
+    resolver = require("resolver")
+    route_checks = require("route_checks")
+
+    config.set_maint_refresh_interval(<%=@maint_refresh_interval%>)
+    config.set_ban_refresh_interval(<%=@ban_refresh_interval%>)
+    config.set_default_org(<%= @helper.default_orgname %>)
+  ';
+
+  <%- node['private_chef']['lb']['upstream'].each do |uname, servers| -%>
+  upstream <%= uname.sub(/-/, '_') %> {
+    <%- servers.each do |server| -%>
+    server <%= server %>:<%= node['private_chef'][uname]['port'] %>;
+    <%- end -%>
+  }
+  <%- end -%>
+
+  # Include upstream definitions for addons
+  include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_upstreams.conf;
+
+  <% # Delete the temp path entry below if/when the associated module is excluded
+     # from our openresty builds %>
+  fastcgi_temp_path "<%= @temp_dir %>/fastcgi";
+  client_body_temp_path "<%= @temp_dir %>/client_body";
+  uwsgi_temp_path "<%= @temp_dir %>/uwsgi";
+  scgi_temp_path "<%= @temp_dir %>/scgi";
+
+  # external lb config for Chef API
+  <%- if node['private_chef']['lb']['enable'] -%>
+    proxy_cache_path  <%= File.join(@dir, "cache", "webui") %> levels=1:2 keys_zone=webui-cache:50m max_size=<%= @cache_max_size %> inactive=600m;
+    proxy_cache_path  <%= File.join(@dir, "cache", "cookbooks") %> levels=1:2 keys_zone=cookbooks:50m max_size=<%= @cache_max_size %> inactive=600m;
+    proxy_temp_path <%= File.join(@dir, "cache-tmp") %>;
+
+    # We support three options: serve nothing on non_ssl_port (80),
+    # redirect to https, or actually serve the API.
+    <%- if @non_ssl_port -%>
+      <%- if @enable_non_ssl -%>
+        include <%= @chef_http_config %>;
+      <%- else -%>
+          server {
+            <%= @helper.listen_port('http') %>
+            access_log /var/log/opscode/nginx/rewrite-port-80.log;
+            return 301 https://$host$request_uri;
+          }
+      <%- end -%>
+    <%-  end %>
+
+    # Chef HTTPS API
+    include <%= @chef_https_config %>;
+  <%- end -%>
+
+  # internal lb config for Chef API Services
+  <%- if node['private_chef']['lb_internal']['enable'] -%>
+  server {
+    <%= @helper.listen_port(node['private_chef']['lb_internal']['chef_port']) %>
+    # The name doesn't matter; this is the only listener on this port
+    server_name <%= node['fqdn'] %>;
+
+    client_max_body_size <%= @client_max_body_size %>;
+    proxy_set_header        Host            $host;
+    proxy_set_header        X-Real-IP       $remote_addr;
+    proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header        X-Forwarded-Proto http;
+    proxy_set_header        X-Forwarded-Host $http_host;
+    proxy_pass_request_headers on;
+    proxy_connect_timeout   90;
+    proxy_send_timeout      90;
+    proxy_read_timeout      90;
+
+    access_log /var/log/opscode/nginx/internal-chef.access.log opscode;
+    error_log  /var/log/opscode/nginx/internal-chef.error.log<%= node['private_chef']['lb']['debug'] ? " debug" : "" %>;
+
+    # Include internal routes for addons
+    include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_internal.conf;
+
+    location "/" {
+      set $upstream "";
+      set $mode "internal_chef";
+      rewrite_by_lua_file '<%=@script_path%>/dispatch.lua';
+
+      proxy_redirect http://$upstream /;
+      proxy_pass http://$upstream;
+    }
+  }
+
+  # internal service access for oc_bifrost
+  server {
+    <%= @helper.listen_port(node['private_chef']['lb_internal']['oc_bifrost_port']) %>
+    server_name <%= node['fqdn'] %>;
+
+    client_max_body_size <%= @client_max_body_size %>;
+    proxy_set_header        Host            $host;
+    proxy_set_header        X-Real-IP       $remote_addr;
+    proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header        X-Forwarded-Proto http;
+    proxy_set_header        X-Forwarded-Host $http_host;
+    proxy_pass_request_headers on;
+
+    proxy_connect_timeout   90;
+    proxy_send_timeout      90;
+    proxy_read_timeout      90;
+
+    access_log /var/log/opscode/nginx/internal-authz.access.log opscode;
+    error_log  /var/log/opscode/nginx/internal-authz.error.log<%= node['private_chef']['lb']['debug'] ? " debug" : "" %>;
+
+    location / {
+      proxy_pass http://oc_bifrost;
+    }
+  }
+  <%- end -%>
+
+  include <%= node['private_chef']['nginx']['dir'] %>/etc/nginx.d/*.conf;
+}
+
+

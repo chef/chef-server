@@ -1,0 +1,88 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+ENV.delete('RUBYOPT')
+$:.unshift File.expand_path('../../lib', __FILE__)
+require 'partybus'
+require 'partybus/dsl_runner'
+require 'partybus/migrations'
+
+# load the config from a file
+require File.expand_path('../../config.rb', __FILE__)
+
+include Partybus::Logger
+
+# TODO: logging
+# print the current state
+# print a list of migrations from current version to desired version
+# for each migration
+# - start / complete / time
+
+def print_usage_and_exit(exitcode=1)
+  usage = <<EOU
+Usage: partybus ACTION
+
+Actions:
+  init        Set the initial migration level
+  upgrade     Run through the pending upgrades
+  help        Print this help message
+EOU
+  log(usage)
+  exit(exitcode)
+end
+
+partybus_action = ARGV[0]
+
+def load_current_migration_state
+  Partybus::MigrationState.new(Partybus.config.migration_state_file)
+end
+
+def load_migrations
+  migration_files = Dir.glob("#{Partybus.config.partybus_migration_directory}/**/*.rb")
+  migration_files.map {|path| Partybus::MigrationFile.new(path)}.sort
+end
+
+def set_initial_migration_state(migrations)
+  latest_migration = migrations.last
+  File.open(Partybus.config.migration_state_file, 'w') do |f|
+      f.puts({:major => latest_migration.major, :minor => latest_migration.minor}.to_json)
+  end
+end
+
+def do_upgrade(migration_state, migrations)
+  pending_migrations = migrations.select{ |m| m > migration_state }.sort
+  log("Latest Migration Available: #{migrations.last}")
+  log("Migrations to Run: #{pending_migrations}")
+
+  # run them through the DSL
+  pending_migrations.each do |migration|
+    log("Current Migration Version: #{migration_state}")
+    start_time = Time.now
+    log("Starting Migration #{migration}")
+    migration.run_migration
+    end_time = Time.now
+    elapsed_time = end_time - start_time
+    log("Finished Migration #{migration} in #{elapsed_time.round(2)} seconds")
+  end
+end
+
+# obtain the file lock on the migration state file
+File.open(Partybus.config.migration_state_file, File::RDWR | File::CREAT) do |f|
+  if f.flock(File::LOCK_EX | File::LOCK_NB)
+    case partybus_action
+    when "init"
+      migrations = load_migrations
+      set_initial_migration_state(migrations)
+    when "upgrade"
+      migration_state = load_current_migration_state
+      migrations = load_migrations
+      do_upgrade(migration_state, migrations)
+    when "help"
+      print_usage_and_exit(0)
+    else
+      print_usage_and_exit
+    end
+  else
+    log("ERROR: Unable to obtain file lock on #{Partybus.config.migration_state_file}")
+  end
+end

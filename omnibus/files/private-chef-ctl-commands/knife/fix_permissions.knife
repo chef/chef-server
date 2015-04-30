@@ -1,0 +1,69 @@
+#
+# Copyright:: Copyright (c) 2012-2014 Chef Software, Inc.
+# License:: Apache License, Version 2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+Chef::Log.info("Starting RBAC Permissions Update")
+
+####
+# Fix Permissions
+####
+# This knife script is to be run after executing a knife upload from Open Source
+# Chef Server 11. Since Chef 11 does not have an ACL system, this script repairs
+# the permissions of objects on the Chef Server as if they had been create during
+# the lifecycle of a normal Chef workflow.
+
+# Fixing Node Permissions
+#
+# During normal node bootstrapping on a Chef Server with RBAC, the following occurs:
+# - validator client is used to create a node-specific client
+# - node specific client creates a node object
+# - chef-client run continues and node object is saved
+#
+# On a Chef Server with RBAC, the client that creates the node is the one that
+# obtains permissions for all CRUDG operations. In a typical node boostrap scenario,
+# that would mean that the node-specific client has all permissions. During the
+# Chef 12 upgrade from Open Source Chef Server, the superuser is the client that
+# uploads all of the node data, and therefore is considered the creator of the
+# nodes. The following sections repairs the permissions of the nodes to grant
+# the node-specific client CRUDG permissions on it's respective node.
+#
+
+Chef::Log.info("Fixing Permissions for Clients on Node Objects")
+node_names = api.get("/nodes").keys
+client_names = api.get("/clients").keys
+node_names.each do |node|
+  begin
+    # skip the node if there is no corresponding client
+    if client_names.include?(node)
+      acl = api.get("/nodes/#{node}/_acl")
+      acl.each do |permission, ace|
+        # The "binary or" operator on a Ruby array is consiered "set union".
+        # This prevents us from the potential of adding duplicate entries into
+        # the actors of an ACE, which results in "400 Bad Request" responses from
+        # the API
+        ace['actors'] = ace['actors'] | [node]
+        api.put("/nodes/#{node}/_acl/#{permission}", { permission => ace })
+      end
+    else
+      Chef::Log.info("No corresponding client for node '#{node}'. Skipping.")
+    end
+  rescue Exception => e
+    Chef::Log.error("Fixing permissions for node '#{node}': #{e}")
+  end
+end
+
+
+Chef::Log.info("RBAC Permissions Update Complete")

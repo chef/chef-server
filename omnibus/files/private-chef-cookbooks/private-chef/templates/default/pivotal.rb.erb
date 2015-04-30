@@ -1,0 +1,5 @@
+node_name "pivotal"
+chef_server_url "<%= @prefix %>://<%= @vip %>"
+chef_server_root "<%= @prefix %>://<%= @vip %>"
+client_key "/etc/opscode/pivotal.pem"
+ssl_verify_mode :verify_none

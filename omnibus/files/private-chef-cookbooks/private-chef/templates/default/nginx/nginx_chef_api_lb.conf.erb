@@ -1,0 +1,117 @@
+  server {
+    <%= @helper.listen_port(@server_proto) %>
+    server_name <%= @server_name %>;
+
+    access_log <%= @helper.access_log(@server_proto) %> opscode;
+    <% if @server_proto == "https" %>
+      ssl on;
+      ssl_certificate <%= @ssl_certificate %>;
+      ssl_certificate_key <%= @ssl_certificate_key %>;
+
+      ssl_session_timeout 5m;
+
+      ssl_protocols <%= @ssl_protocols %>;
+      ssl_ciphers <%= @ssl_ciphers %>;
+      ssl_prefer_server_ciphers on;
+    <% end %>
+    root <%= File.join(@dir, "html") %>;
+    client_max_body_size <%= @client_max_body_size %>;
+
+    proxy_set_header Host <%= @helper.host_header_var(@server_proto) %>;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto <%= @x_forwarded_proto %>;
+    proxy_pass_request_headers on;
+    proxy_connect_timeout   <%= node['private_chef']['nginx']['proxy_connect_timeout'] %>;
+    proxy_send_timeout      300;
+    proxy_read_timeout      300;
+
+    error_page 404 =404 /404.html;
+    error_page 503 =503 /503.json;
+
+    # Whitelist the docs necessary to serve up error pages and friendly
+    # html to non-chef clients hitting this host.
+    location ~ "^/[0-9]{3,3}\.(json|html)|index.html$" {
+    }
+    location "/css/" {
+    }
+    location "/images/" {
+    }
+
+    location /version {
+      types { }
+      default_type text/plain;
+      alias /opt/opscode/version-manifest.txt;
+    }
+
+    # bookshelf
+    <% if node['private_chef']['opscode-erchef']['nginx_bookshelf_caching'] != :off -%>
+    location ~ "/<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>/{0,1}.*$" {
+      set $destination @cached;
+      if ($request_method !~ ^(GET)$) {
+         set $destination @uncached;
+      }
+      error_page 404 = $destination;
+      return 404;
+    }
+    location @cached {
+      proxy_cache cookbooks;
+      more_clear_headers 'Cache-Control';
+      add_header X-Proxy-Cache $upstream_cache_status;
+      proxy_pass http://bookshelf;
+    }
+    location @uncached {
+      proxy_pass http://bookshelf;
+    }
+    <% else -%>
+    location ~ "/<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>/{0,1}.*$" {
+      proxy_pass http://bookshelf;
+    }
+    <% end -%>
+
+    # erchef status endpoint
+    location ~ "^/_status/?$" {
+      types { }
+      default_type application/json;
+      proxy_pass http://opscode_erchef;
+    }
+
+    # This variable is set to an empty string here so it can be used in
+    # dispatch.lua later on. An add-on can set this variable to be used as an
+    # upstream if we determine the request was not intended to go to the API.
+    set $add_on_override_upstream "";
+
+    # Include external routes for addons
+    include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_external.conf;
+
+    location /_route/ {
+      default_type 'application/json';
+      content_by_lua_file '<%= @script_path %>/dispatch_route.lua';
+    }
+
+    location / {
+      satisfy any;
+
+      access_by_lua '
+        if ngx.var.http_x_ops_userid then
+          -- we will pass this access check since this is to be treated
+          -- as an REST API invocation.  As long as we pass, the request will
+          -- continue since we specified "satisfy any"
+          return
+        else
+          -- by exiting this way, we will force nginx to
+          -- also evaluate the subnets above because either this access
+          -- check must pass, OR the allow/deny must pass due to "satisfy any"
+          -- We are effectively saying here: "ok, this request is going to go
+          -- to manage, so apply those other access rules first."
+          ngx.exit(ngx.DECLINED)
+        end
+      ';
+
+      set $mode "api";
+      set $upstream "";
+      rewrite_by_lua_file '<%=@script_path%>/dispatch.lua';
+      proxy_pass http://$upstream;
+      proxy_redirect http://$upstream /;
+    }
+  }

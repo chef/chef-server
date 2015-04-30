@@ -1,0 +1,24 @@
+branches:
+  only:
+    - master
+# used to parallelize different tests
+# see http://docs.travis-ci.com/user/speeding-up-the-build/
+env:
+  - TEST_SUITE=csc
+  - TEST_SUITE=routing
+cache:
+  bundler: true
+language: ruby
+rvm:
+  - 2.1.4
+before_script:
+  - bundle install
+  - sudo apt-get update
+  - sudo apt-get install -y lua5.1
+  - sudo apt-get install -y luarocks
+  - sudo luarocks install lpeg
+  - sudo luarocks install lua-cjson
+script:
+  - export USE_OMNIBUS_FILES=0
+  - export LUALIB=/usr/local/lib/lua/5.1
+  - bundle exec rake test:$TEST_SUITE
