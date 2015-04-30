@@ -1,0 +1,14 @@
+BEGIN;
+
+\set schema '\'public\''
+
+SELECT no_plan();
+
+SELECT opscode.all_table_permissions(:schema, 'bifrost', ARRAY['SELECT', 'UPDATE', 'INSERT', 'DELETE']);
+SELECT opscode.all_table_permissions(:schema, 'bifrost_ro', ARRAY['SELECT']);
+
+SELECT opscode.all_view_permissions('debug', 'bifrost', ARRAY['SELECT']);
+SELECT opscode.all_view_permissions('debug', 'bifrost_ro', ARRAY['SELECT']);
+
+SELECT * FROM finish();
+ROLLBACK;

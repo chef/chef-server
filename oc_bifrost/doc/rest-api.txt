@@ -1,0 +1,106 @@
+/<type> endpoint
+  POST
+    internal actions:
+      generate new authz_id
+      create record
+        in auth_actor, auth_group, container, or auth_object
+      create ACLs for requestor
+        create records for CREATE, READ, UPDATE, DELETE, and GRANT
+        in actor_acl_actor, group_acl_actor, container_acl_actor, or object_acl_actor
+      [actors only] create ACLs for self
+        create records for CREATE, READ, UPDATE, DELETE, and GRANT
+        in actor_acl_actor, group_acl_actor, container_acl_actor, or object_acl_actor
+    response:
+      authz_id
+        "id" => 32-digit hex ID
+      uri
+        "uri" => "http://<host>/<type>/<id>"     
+
+/<type>/<id> endpoint
+  GET
+    response:
+      empty: 200 if <id> of <type> exists, 404 otherwise
+      [groups only]
+        "actors" => [<actors>]
+        "groups" => [<groups>]
+  DELETE
+    internal actions:
+      delete record
+        from auth_actor, auth_group, container, or auth_object
+        records should cascade delete
+    response:
+      empty
+
+/<type>/<id>/acl
+  GET
+    response:
+      create, read, update, delete, and grant (all):
+        "<action>" => {"actors" => [<actors>], "groups => [<groups>]}
+
+/<type>/<id>/acl/<action>
+  GET
+    response:
+      create, read, update, delete, or grant (one):
+        "<action>" => {"actors" => [<actors>], "groups => [<groups>]}
+  PUT
+    request:
+      create, read, update, delete, or grant (one):
+        "actors" => [<actors>], "groups => [<groups>]
+      conditions:
+        <actors> and <groups> should exist
+    internal actions:
+      delete old ACL for action
+        for action and target matching <id>
+        from [actor_acl_actor, actor_acl_group], [group_acl_actor, group_acl_group],
+          [container_acl_actor, container_acl_group], or [object_acl_actor,
+          object_acl_grup]
+      for each actor in <actors>
+        create record for <action>
+        in actor_acl_actor, group_acl_actor, container_acl_actor, or object_acl_actor
+      for each group in <groups>
+        create record for <action>
+        in actor_acl_group, group_acl_group, container_acl_group, or object_acl_group
+    response:
+      empty
+  DELETE
+    internal actions:
+      delete ACL for action
+        for action and target matching <id>
+        from [actor_acl_actor, actor_acl_group], [group_acl_actor, group_acl_group],
+          [container_acl_actor, container_acl_group], or [object_acl_actor,
+          object_acl_grup]
+    response:
+      empty
+ 
+/<type>/<id>/acl/<action>/<member_type>/<member_id>
+  GET
+    response:
+      empty: 200 if <member_id> of <member_type> has <action> permissiona against
+        <id> of <type>, 404 otherwise
+      note: <member_type> is always actors now
+
+/groups endpoint only:
+
+/groups/<id>/<member_type>/<member_id>
+  PUT
+    request:
+      empty
+    internal actions:
+      for member_type of actor
+        create record in group_actor_relations
+        where parent = <id> and child = <member_id>
+      for member_type of group
+        create record in group_group_relations
+        where parent = <id> and child = <member_id>
+    response:
+      empty
+  DELETE
+    internal actions:
+      for member_type of actor
+        delete record in group_actor_relations
+        where parent = <id> and child = <member_id>
+      for member_type of group
+        delete record in group_group_relations
+        where parent = <id> and child = <member_id>
+    response:
+      empty

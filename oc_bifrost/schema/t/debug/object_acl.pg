@@ -1,0 +1,41 @@
+BEGIN;
+
+SELECT no_plan();
+
+\i t/fixtures/test_data.sql
+
+-- NOTE: sorting by permission is by enum declaration order
+-- (i.e. "CRUDG"), and not alphabetical by label
+
+DECLARE actual CURSOR FOR
+SELECT "type", authorizee, permission, directly_granted
+FROM debug.object_acl
+ORDER BY type, authorizee, permission, directly_granted
+;
+
+-- Also, we have to do some explicit type casting because types can be gotten from cursors (really?).
+DECLARE expected CURSOR FOR
+VALUES
+
+    ('actor', 'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww'::CHAR(32), 'read'::auth_permission, FALSE),
+    ('actor', 'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww'::CHAR(32), 'delete'::auth_permission, FALSE),
+    ('actor', 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'::CHAR(32), 'delete'::auth_permission, FALSE),
+    ('actor', 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'::CHAR(32), 'delete'::auth_permission, TRUE),
+    ('actor', 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'::CHAR(32), 'read'::auth_permission, FALSE),
+    ('actor', 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'::CHAR(32), 'delete'::auth_permission, FALSE),
+    ('actor', 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'::CHAR(32), 'update'::auth_permission, TRUE),
+    ('group', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'::CHAR(32), 'delete'::auth_permission, TRUE),
+    ('group', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'::CHAR(32), 'read'::auth_permission, TRUE),
+    ('group', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'::CHAR(32), 'delete'::auth_permission, FALSE),
+    ('group', 'cccccccccccccccccccccccccccccccc'::CHAR(32), 'read'::auth_permission, FALSE),
+    ('group', 'cccccccccccccccccccccccccccccccc'::CHAR(32), 'delete'::auth_permission, FALSE)
+;
+
+SELECT results_eq(
+    'actual'::REFCURSOR,
+    'expected'::REFCURSOR,
+    'debug.object_acl view should return correct data'
+);
+
+SELECT * FROM finish();
+ROLLBACK;

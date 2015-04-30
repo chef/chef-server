@@ -1,0 +1,52 @@
+BEGIN;
+SELECT no_plan();
+
+INSERT INTO auth_group(authz_id)
+VALUES ('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'),
+       ('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'),
+       ('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'),
+       ('wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww');
+
+SELECT throws_ok(
+       $$
+         INSERT INTO group_group_relations(parent, child)
+         VALUES (group_id('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'), group_id('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'));
+       $$,
+       '23514',
+       'new row for relation "group_group_relations" violates check constraint "no_trivial_cycles"',
+       'Trivial cycle not allowed');
+
+SELECT throws_ok(
+       $$
+         INSERT INTO group_group_relations(parent,child)
+         VALUES (group_id('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'), group_id('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy')),
+                (group_id('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'), group_id('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')),
+                (group_id('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'), group_id('wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww')),
+                (group_id('wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww'), group_id('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'));
+       $$,
+       'OC001',
+       'This would create a group membership cycle, which is not allowed',
+       'Long-range cycles not allowed');
+
+SELECT lives_ok(
+       $$
+         INSERT INTO group_group_relations(parent,child)
+         VALUES (group_id('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'), group_id('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy')),
+                (group_id('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'), group_id('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')),
+                (group_id('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'), group_id('wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww'));
+       $$,
+       'Can insert non-cycle-forming group membership rules');
+
+
+-- This test depends on the success of the previous insert in the 'lives_ok' test.
+SELECT throws_ok(
+       $$
+         INSERT INTO group_group_relations(parent,child)
+         VALUES (group_id('wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww'), group_id('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'));
+       $$,
+       'OC001',
+       'This would create a group membership cycle, which is not allowed',
+       'New rules that would create a cycle are not allowed');
+
+SELECT * FROM finish();
+ROLLBACK;

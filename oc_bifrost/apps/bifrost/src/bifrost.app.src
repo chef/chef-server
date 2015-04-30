@@ -1,0 +1,21 @@
+%%-*- mode: erlang -*-
+{application, bifrost,
+ [{description, "Bifrost: Opscode Authorization API"},
+  {vsn, "0.0.1"},
+  {modules, []},
+  {registered, []},
+  {mod, {bifrost_app, []}},
+  {env, []},
+  {applications, [kernel,
+                  stdlib,
+                  lager,
+                  sasl,
+                  stats_hero,
+                  eper,
+                  ej,
+                  jiffy,
+                  mixer,
+                  envy,
+                  sqerl,
+                  opscoderl_wm
+                 ]}]}.

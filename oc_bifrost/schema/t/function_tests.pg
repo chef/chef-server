@@ -1,0 +1,313 @@
+BEGIN;
+
+SELECT no_plan();
+
+SELECT is_strict('authz_id_for_type',
+       ARRAY['character', 'auth_type']);
+SELECT volatility_is('authz_id_for_type',
+       ARRAY['character', 'auth_type'], 'stable');
+SELECT function_returns('public', 'authz_id_for_type',
+       ARRAY['character', 'auth_type'], 'bigint');
+
+INSERT INTO auth_actor(authz_id)
+       VALUES ('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+INSERT INTO auth_group(authz_id)
+       VALUES ('gggggggggggggggggggggggggggggggg');
+INSERT INTO auth_object(authz_id)
+       VALUES ('oooooooooooooooooooooooooooooooo');
+INSERT INTO auth_container(authz_id)
+       VALUES ('cccccccccccccccccccccccccccccccc');
+
+-- Tests for authz_id_for_type
+SELECT results_eq(
+       'SELECT authz_id_for_type AS id FROM authz_id_for_type(''aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'', ''actor'')',
+       'SELECT actor_id AS id FROM actor_id(''aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'')',
+       'authz_id_for_type returns correct ID for actors');
+
+SELECT results_eq(
+       'SELECT authz_id_for_type AS id FROM authz_id_for_type(''gggggggggggggggggggggggggggggggg'', ''group'')',
+       'SELECT group_id AS id FROM group_id(''gggggggggggggggggggggggggggggggg'')',
+       'authz_id_for_type returns correct ID for groups');
+
+SELECT results_eq(
+       'SELECT authz_id_for_type AS id FROM authz_id_for_type(''oooooooooooooooooooooooooooooooo'', ''object'')',
+       'SELECT object_id AS id FROM object_id(''oooooooooooooooooooooooooooooooo'')',
+       'authz_id_for_type returns correct ID for objects');
+
+SELECT results_eq(
+       'SELECT authz_id_for_type AS id FROM authz_id_for_type(''cccccccccccccccccccccccccccccccc'', ''container'')',
+       'SELECT container_id AS id FROM container_id(''cccccccccccccccccccccccccccccccc'')',
+       'authz_id_for_type returns correct ID for containers');
+
+SELECT function_returns('public', 'create_and_add_permissions',
+       ARRAY['auth_type', 'character', 'character'], 'boolean');
+
+-- Tests for create_and_add_permissons,
+--   first with requestor
+SELECT * FROM create_and_add_permissions('object', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn',
+                                         'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+SELECT is(TRUE,
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Created object''s requestor has create permission');
+SELECT is(TRUE,
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'read'),
+       'Created object''s requestor has read permission');
+SELECT is(TRUE,
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'update'),
+       'Created object''s requestor has update permission');
+SELECT is(TRUE,
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'delete'),
+       'Created object''s requestor has delete permission');
+SELECT is(TRUE,
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'grant'),
+       'Created object''s requestor has grant permission');
+
+--   actor with requestor
+SELECT * FROM create_and_add_permissions('actor', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                                         'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+SELECT is(TRUE,
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'actor', 'create'),
+       'Created actor''s requestor has create permission');
+SELECT is(TRUE,
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'actor', 'read'),
+       'Created actor''s requestor has read permission');
+SELECT is(TRUE,
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'actor', 'update'),
+       'Created actor''s requestor has update permission');
+SELECT is(TRUE,
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'actor', 'delete'),
+       'Created actor''s requestor has delete permission');
+SELECT is(TRUE,
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'actor', 'grant'),
+       'Created actor''s requestor has grant permission');
+SELECT is(TRUE,
+       actor_has_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                               'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'actor', 'create'),
+       'Created actor has create permission on itself');
+SELECT is(TRUE,
+       actor_has_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                               'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'actor', 'read'),
+       'Created actor has read permission on itselt');
+SELECT is(TRUE,
+       actor_has_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                               'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'actor', 'update'),
+       'Created actor has update permission on itself');
+SELECT is(TRUE,
+       actor_has_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                               'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'actor', 'delete'),
+       'Created actor has delete permission on itself');
+SELECT is(TRUE,
+       actor_has_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                               'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'actor', 'grant'),
+       'Created actor has grant permission on itself');
+
+--   without requestor
+SELECT * FROM create_and_add_permissions('object', 'mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm',
+                                         NULL);
+SELECT is(FALSE,
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm', 'object', 'any'),
+       'actor has no permission on new object');
+SELECT is(FALSE,
+       actor_has_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                               'mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm', 'object', 'any'),
+       'other actor has no permission on new object');
+
+--   actor with requestor
+SELECT * FROM create_and_add_permissions('actor', 'cccccccccccccccccccccccccccccccc',
+                                         NULL);
+SELECT is(FALSE,
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'cccccccccccccccccccccccccccccccc', 'actor', 'any'),
+       'actor has no permission on new actor');
+SELECT is(FALSE,
+       actor_has_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                               'cccccccccccccccccccccccccccccccc', 'actor', 'any'),
+       'other actor has no permission on new actor');
+SELECT is(TRUE,
+       actor_has_permission_on('cccccccccccccccccccccccccccccccc',
+                               'cccccccccccccccccccccccccccccccc', 'actor', 'create'),
+       'Created actor has create permission on itself');
+SELECT is(TRUE,
+       actor_has_permission_on('cccccccccccccccccccccccccccccccc',
+                               'cccccccccccccccccccccccccccccccc', 'actor', 'read'),
+       'Created actor has read permission on itselt');
+SELECT is(TRUE,
+       actor_has_permission_on('cccccccccccccccccccccccccccccccc',
+                               'cccccccccccccccccccccccccccccccc', 'actor', 'update'),
+       'Created actor has update permission on itself');
+SELECT is(TRUE,
+       actor_has_permission_on('cccccccccccccccccccccccccccccccc',
+                               'cccccccccccccccccccccccccccccccc', 'actor', 'delete'),
+       'Created actor has delete permission on itself');
+SELECT is(TRUE,
+       actor_has_permission_on('cccccccccccccccccccccccccccccccc',
+                               'cccccccccccccccccccccccccccccccc', 'actor', 'grant'),
+       'Created actor has grant permission on itself');
+
+-- Try sending bogus information
+
+-- Since unifying this with the requestor-less version, this now behaves exactly the
+-- same as simply supplying NULL as the requestor -- no error is ever triggered.
+-- I suppose we could catch this, but honestly, it shouldn't ever get to this point since
+-- erlang already returns a bad header error, so why should we care?
+
+-- SELECT throws_ok(
+--       $$SELECT create_and_add_permissions('object', 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
+--                                           'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq')$$,
+--       '22004',
+--       'null value cannot be assigned to variable "requestor_id" declared NOT NULL',
+--       'Attempting to create object with bogus requestor raises error');
+
+
+SELECT function_returns('public', 'clear_acl',
+       ARRAY['auth_type', 'character', 'auth_permission'], 'boolean');
+
+SELECT function_returns('public', 'update_acl',
+       ARRAY['auth_type', 'character', 'auth_permission', 'character[]', 'character[]'], 'boolean');
+
+INSERT INTO group_actor_relations(parent, child)
+  VALUES (group_id('gggggggggggggggggggggggggggggggg'),
+          actor_id('cccccccccccccccccccccccccccccccc'));
+
+-- Test out update ACL
+select *
+  FROM update_acl('object', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'create',
+                  ARRAY['bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb','aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'],
+                  ARRAY['gggggggggggggggggggggggggggggggg']);
+SELECT is(TRUE,
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Actor has permission on object in new ACL');
+SELECT is(TRUE,
+       actor_has_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Other actor has permission on object in new ACL');
+SELECT is(TRUE,
+       actor_has_permission_on('cccccccccccccccccccccccccccccccc',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Indirect actor has permission on object in new ACL');
+
+-- Test out clear ACL
+select *
+  FROM clear_acl('object', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'create');
+
+SELECT is(FALSE,
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Actor has permission on object in new ACL');
+SELECT is(FALSE,
+       actor_has_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Other actor has permission on object in new ACL');
+SELECT is(FALSE,
+       actor_has_permission_on('cccccccccccccccccccccccccccccccc',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Indirect actor has permission on object in new ACL');
+
+-- Try update again with just one actor this time
+select *
+  FROM update_acl('object', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'create',
+                  ARRAY['aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'],
+                  ARRAY['gggggggggggggggggggggggggggggggg']);
+SELECT is(TRUE,
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Actor has permission on object in second ACL');
+SELECT is(FALSE,
+       actor_has_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Other actor does not have permission on object in second ACL');
+SELECT is(TRUE,
+       actor_has_permission_on('cccccccccccccccccccccccccccccccc',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Indirect actor has permission on object in second ACL');
+
+-- Try it again with no (empty) groups
+select *
+  FROM update_acl('object', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'create',
+                  ARRAY['aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'], NULL);
+SELECT is(TRUE,
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Actor has permission on object in third ACL');
+SELECT is(FALSE,
+       actor_has_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Other actor does not have permission on object in third ACL');
+SELECT is(FALSE,
+       actor_has_permission_on('cccccccccccccccccccccccccccccccc',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Indirect actor does not have permission on object in third ACL');
+
+-- Try it again with no (NULL) actors
+select *
+  FROM update_acl('object', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'create',
+                  NULL, ARRAY['gggggggggggggggggggggggggggggggg']);
+SELECT is(FALSE,
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Actor does not have permission on object in fourth ACL');
+SELECT is(FALSE,
+       actor_has_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Other actor does not have permission on object in fourth ACL');
+SELECT is(TRUE,
+       actor_has_permission_on('cccccccccccccccccccccccccccccccc',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Indirect actor has permission on object in fourth ACL');
+
+-- Try it again with no (NULL) actors OR groups
+select *
+  FROM update_acl('object', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'create',
+                  NULL, NULL);
+SELECT is(FALSE,
+       actor_has_permission_on('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Actor does not have permission on object in fourth ACL');
+SELECT is(FALSE,
+       actor_has_permission_on('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Other actor does not have permission on object in fourth ACL');
+SELECT is(FALSE,
+       actor_has_permission_on('cccccccccccccccccccccccccccccccc',
+                               'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'object', 'create'),
+       'Indirect actor does not have permission on object in fourth ACL');
+
+-- Try sending bogus information
+SELECT throws_ok(
+       $$SELECT clear_acl('object', 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq', 'update')$$,
+       '22004',
+       'null value cannot be assigned to variable "target_id" declared NOT NULL',
+       'Updating non-existent ACL throws error');
+SELECT throws_ok(
+       $$SELECT update_acl('object', 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq', 'update',
+                           NULL, NULL)$$,
+       '22004',
+       'null value cannot be assigned to variable "target_id" declared NOT NULL',
+       'Updating non-existent ACL throws error');
+SELECT throws_ok(
+       $$SELECT update_acl('object', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'update',
+                           ARRAY['qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq'], NULL)$$,
+       '23502',
+       'null value in column "authorizee" violates not-null constraint',
+       'Updating ACL with non-existent actor throws error');
+SELECT throws_ok(
+       $$SELECT update_acl('object', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', 'update',
+                           NULL, ARRAY['qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq'])$$,
+       '23502',
+       'null value in column "authorizee" violates not-null constraint',
+       'Updating ACL with non-existent group throws error');
+
+SELECT finish();
+--ROLLBACK;
