@@ -1,0 +1,18 @@
+<div>
+  <h1>Reset Your Password</h1>
+</div>
+<%= form_tag(password_reset_path, { method: 'put', 'data-abide' => '' }) do -%>
+  <div class="row">
+    <div class="medium-6 columns password-field">
+      <%= password_field_tag :password, nil, required: true, placeholder: 'Password', autocomplete: 'off' %>
+    </div>
+  </div>
+  <div class="row">
+    <div class="medium-6 columns">
+      <%= button_tag 'Change Password', class: 'button' %>
+    </div>
+  </div>
+  <%= hidden_field_tag :expires, params[:expires] %>
+  <%= hidden_field_tag :signature, params[:signature] %>
+  <%= hidden_field_tag :username, params[:username] %>
+<% end -%>

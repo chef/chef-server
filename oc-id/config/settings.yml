@@ -1,0 +1,13 @@
+chef:
+  endpoint: https://33.33.33.10
+  superuser: pivotal
+  key_path: <%= Rails.root %>/config/webui_priv.pem
+doorkeeper:
+  administrators:
+    - rainbowdash
+email_from_address: 'Chef Notifications <notifications@chef.io>'
+protocol: https
+secret_key_base: CHANGE ME
+sign_up_url: https://manage.chef.io/signup?ref=community
+zendesk:
+  subdomain: getchef

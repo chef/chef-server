@@ -1,0 +1,32 @@
+*~
+*#
+.#*
+\#*#
+.*.sw[a-z]
+*.un~
+*.pem
+*.log
+*.sqlite3
+.vagrant
+.bundle
+.kitchen
+.kitchen.local.yml
+.chef
+node_modules/
+.DS_Store
+tmp/
+vendor/gems
+vendor/ruby
+
+# Ignore local settings files
+config/settings.local.yml
+config/settings/*.local.yml
+config/environments/*.local.yml# RailsConfig ignores
+
+*.dev_vm_backup
+
+vendor/bundle/
+
+public/id/
+
+.ruby-version

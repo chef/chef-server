@@ -1,0 +1,30 @@
+<div>
+  <h1>Application: <%= @application.name %></h1>
+</div>
+
+<div class="row">
+  <div class="medium-8">
+    <h4>Application Id:</h4>
+    <p><code id="application_id"><%= @application.uid %></code></p>
+    <h4>Secret:</h4>
+    <p><code id="secret"><%= @application.secret %></code></p>
+    <h4>Callback URLs:</h4>
+    <table>
+      <% @application.redirect_uri.split.each do |uri| %>
+        <tr>
+          <td>
+            <code><%= uri %></code>
+          </td>
+          <td>
+            <%= link_to 'Authorize', oauth_authorization_path(:client_id => @application.uid, :redirect_uri => uri, :response_type => 'code'), target: '_blank' %>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+
+  <div class="medium-4">
+    <%= link_to 'Edit', edit_oauth_application_path(@application), class: 'button' %>
+    <%= delete_button('Destroy', [:oauth, @application]) %>
+  </div>
+</div>

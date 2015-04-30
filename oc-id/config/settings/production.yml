@@ -1,0 +1,4 @@
+chef:
+  endpoint: https://api.opscode.us
+  superuser: pivotal
+  key_path: /etc/opscode/webui_priv.pem

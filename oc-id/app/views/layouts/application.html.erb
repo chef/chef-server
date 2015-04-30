@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chef Identity Service</title>
+  <%= stylesheet_link_tag "application", media: "all" %>
+  <%= javascript_include_tag '//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js' %>
+  <%= csrf_meta_tags %>
+</head>
+<body>
+  <div class="contain-to-grid">
+    <nav class="top-bar" data-topbar role="navigation">
+      <ul class="title-area">
+        <li class="name">
+          <h1>
+            <%= link_to '', root_path, :class => 'logo default' %>
+          </h1>
+        </li>
+        <li class="toggle-topbar menu-icon"><a href="#"><span></span></a></li>
+      </ul>
+      <div class="top-bar-section">
+        <ul class="left">
+          <% if signed_in? %>
+            <li><a>Signed in as: <%= current_user.username %></a></li>
+            <li><%= link_to "Sign Out", signout_path, method: "delete" %></li>
+          <% elsif controller.controller_name == 'sessions' %>
+            <li><%= link_to "Sign Up", sign_up_url, :target => "_blank" %></li>
+          <% else %>
+            <li><%= link_to "Sign In", signin_path %></li>
+          <% end %>
+        </ul>
+      </div>
+    </nav>
+  </div>
+  <div class="row">
+    <% flash.each do |key, value| %>
+      <div data-alert class="alert-box radius <%= chef_class_for(key) %>">
+        <%= value %>
+        <a href="#" class="close">&times;</a>
+      </div>
+    <% end %>
+    <%= yield %>
+  </div>
+  <div class="row">
+    <footer>
+      &copy; <%= Time.now.year %> Chef Software, Inc.
+    </footer>
+  </div>
+  <%= javascript_include_tag "application" %>
+  <script>
+    $(document).chef({
+      assets: {
+        images: '<%= Rails.application.config.assets.prefix %>'
+      }
+    });
+  </script>
+</body>
+</html>

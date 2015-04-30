@@ -1,0 +1,37 @@
+<%= form_for([:oauth, application], 'data-abide' => '') do |f| %>
+  <% if application.errors.any? %>
+    <div class="alert-box radius alert" data-alert><p>Whoops! Check your form for possible errors</p></div>
+  <% end %>
+
+  <div class="row">
+    <div class="medium-6 columns">
+      <%= f.label :name %>
+      <%= f.text_field :name %>
+      <%= doorkeeper_errors_for application, :name %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="medium-6 columns">
+      <%= f.label :redirect_uri %>
+      <%= f.text_area :redirect_uri %>
+      <%= doorkeeper_errors_for application, :redirect_uri %>
+      <div>
+        Use one line per URI
+      </div>
+      <% if Doorkeeper.configuration.native_redirect_uri %>
+        <div>
+          Use <code><%= Doorkeeper.configuration.native_redirect_uri %></code> for local tests
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="medium-6 columns">
+      <%= f.submit 'Submit', :class => "button" %>
+      <%= link_to "Cancel", oauth_applications_path, :class => "button secondary" %>
+    </div>
+  </div>
+<% end %>
+

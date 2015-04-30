@@ -1,0 +1,40 @@
+<div>
+  <h1>Authorization Required</h1>
+</div>
+
+<div>
+  <h4>
+    Authorize <strong><%= @pre_auth.client.name %></strong> to use your Chef account?
+  </h4>
+
+  <% if @pre_auth.scopes.any? %>
+    <div id="oauth-permissions">
+      <p>This application will be able to:</p>
+
+      <ul>
+        <% @pre_auth.scopes.each do |scope| %>
+          <li><%= t scope, :scope => [:doorkeeper, :scopes] %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form_tag(oauth_authorization_path, :method => :post, :class => 'button_to', 'data-abide' => '') do %>
+      <%= hidden_field_tag :client_id, @pre_auth.client.uid %>
+      <%= hidden_field_tag :redirect_uri, @pre_auth.redirect_uri %>
+      <%= hidden_field_tag :state, @pre_auth.state %>
+      <%= hidden_field_tag :response_type, @pre_auth.response_type %>
+      <%= hidden_field_tag :scope, @pre_auth.scope %>
+      <%= submit_tag "Yes", :class => "button" %>
+    <% end %>
+    <%= form_tag(oauth_authorization_path, :method => :delete, :class => 'button_to', 'data-abide' => '') do %>
+      <%= hidden_field_tag :client_id, @pre_auth.client.uid %>
+      <%= hidden_field_tag :redirect_uri, @pre_auth.redirect_uri %>
+      <%= hidden_field_tag :state, @pre_auth.state %>
+      <%= hidden_field_tag :response_type, @pre_auth.response_type %>
+      <%= hidden_field_tag :scope, @pre_auth.scope %>
+      <%= submit_tag "No, Thanks", :class => "button secondary" %>
+    <% end %>
+  </div>
+</div>

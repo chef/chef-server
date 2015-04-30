@@ -1,0 +1,26 @@
+<div>
+  <h1>Authorized Applications</h1>
+</div>
+
+<% if @applications.any? %>
+  <table>
+    <thead>
+      <tr>
+        <th>Application</th>
+        <th>Created At</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    <% @applications.each do |application| %>
+      <tr>
+        <td><%= application.name %></td>
+        <td><%= application.created_at.to_s(:db) %></td>
+        <td><%= delete_button('Revoke', oauth_authorized_application_path(application)) %></td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>You don't have any.</p>
+<% end %>
