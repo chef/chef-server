@@ -45,9 +45,9 @@
            {add_acl, [{container, cookbook_artifacts}], [create, read, update, delete, grant], [{user, creator}]},
 
            %% Admins
-           {add_acl, [{container, policies}],           [create, read, update, delete, grant], [{group, users}]},
-           {add_acl, [{container, policy_groups}],      [create, read, update, delete, grant], [{group, users}]},
-           {add_acl, [{container, cookbook_artifacts}], [create, read, update, delete, grant], [{group, users}]},
+           {add_acl, [{container, policies}],           [create, read, update, delete, grant], [{group, admins}]},
+           {add_acl, [{container, policy_groups}],      [create, read, update, delete, grant], [{group, admins}]},
+           {add_acl, [{container, cookbook_artifacts}], [create, read, update, delete, grant], [{group, admins}]},
 
 
            %% users
@@ -134,49 +134,30 @@ insert_container_sql() ->
 %% * oc_chef_authz (maybe?)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-upgrade_org(#mover_org{superuser = CreatingUser, name = Name} = Org) ->
+upgrade_org(#mover_org{superuser = CreatingUser} = Org) ->
     Cache = init_cache(Org, CreatingUser),
-    case prepopulate_groups(Cache, Org) of
-        {error, Group} ->
-            lager:error("Skipping migrations for org '~s' because required group '~p' is missing.", [Name, Group]),
-            ok;
-        CacheWithGroups ->
-            process_policy(?ORG_POLICY_FOR_POLICIES_CONTAINERS, Org, CreatingUser, CacheWithGroups)
-    end.
+    CacheWithGroups = prepopulate_groups(Cache, Org),
+    process_policy(?ORG_POLICY_FOR_POLICIES_CONTAINERS, Org, CreatingUser, CacheWithGroups).
 
-prepopulate_groups(Cache, #mover_org{id = OrgID, name = OrgName}) ->
+prepopulate_groups(Cache, Org) ->
     % Failure is arguably okay if we can't set up admins acls
-    %
-    Cache1 = case prepopulate_group(Cache, OrgID, admins) of
-                 {error, C} ->
-                     lager:warning("No admins org for ~p, attempting to continue with clients and users", [OrgName]),
-                     C;
-                 {ok, C} ->
-                     C
-             end,
-    case prepopulate_group(Cache1, OrgID, users) of
-        {error, _} ->
-            {error, users};
-        {ok, Cache2} ->
-            case prepopulate_group(Cache2, OrgID, clients) of
-                {error, _} ->
-                    {error, clients};
-                {ok, Cache3} ->
-                    Cache3
-            end
-    end.
+    % but we can't continue if we can't set it up for clients and users.
+    Cache1 = prepopulate_group(Cache, Org, admins),
+    Cache2 = prepopulate_group(Cache1, Org, users),
+    prepopulate_group(Cache2, Org, clients).
 
-prepopulate_group(Cache, OrgId, Group) ->
+prepopulate_group(Cache, #mover_org{id = OrgId, name = OrgName}, Group) ->
     {ok, Results} = sqerl:adhoc_select([name, authz_id, org_id],
                                        groups,
                                        {'and', [{name, equals, Group}, {org_id, equals, OrgId}]}),
     case Results of
         [] ->
-            {error, Cache};
+            lager:warning("Could not find group '~p' for org '~s'", [Group, OrgName]),
+            add_cache(Cache,{group, Group}, not_found);
         _ ->
             GroupFieldsList = hd(Results),
             {<<"authz_id">>, AuthzId} = proplists:lookup(<<"authz_id">>, GroupFieldsList),
-            {ok, add_cache(Cache,{group, Group}, AuthzId)}
+            add_cache(Cache,{group, Group}, AuthzId)
     end.
 
 %%
@@ -201,13 +182,17 @@ process_policy_step({create_containers, List},
     {create_object(OrgId, RequestorId, container, List, Cache), []};
 process_policy_step({set_acl_expanded, Object, Acl},
                     #mover_org{}, #mover_requestor{authz_id=_RequestorId}, Cache) ->
-    {ResourceType, AuthzId} = find(Object, Cache),
-    Acl1 = [{Action, ace_to_authz(Cache, ACE)} || {Action, ACE} <- Acl],
-    %% TODO: Error check authz results
-    %% FURTHER TODO: this probably won't work with our hacked ace records :'(
-    [ mv_oc_chef_authz:set_ace_for_entity(superuser, ResourceType, AuthzId, Method, ACE) ||
-        {Method, ACE} <- Acl1],
-    {Cache, []};
+    case  find(Object, Cache) of
+        {_, not_found} ->
+            {Cache, []};
+        {ResourceType, AuthzId} ->
+            Acl1 = [{Action, ace_to_authz(Cache, ACE)} || {Action, ACE} <- Acl],
+            %% TODO: Error check authz results
+            %% FURTHER TODO: this probably won't work with our hacked ace records :'(
+            [ mv_oc_chef_authz:set_ace_for_entity(superuser, ResourceType, AuthzId, Method, ACE) ||
+                {Method, ACE} <- Acl1 ],
+            {Cache, []}
+    end;
 process_policy_step({acls, Steps}, _Org, _User, Cache) ->
     {Cache, process_acls(Steps)}.
 
@@ -371,7 +356,6 @@ add_cache(C, {Type}, AuthzId) ->
 
 set(Key, Value, C) ->
     dict:store(Key,Value, C).
-
 find(Key, C) ->
     case dict:find(Key,C) of
         {ok, Value} -> Value;
