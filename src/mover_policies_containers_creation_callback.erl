@@ -144,25 +144,39 @@ upgrade_org(#mover_org{superuser = CreatingUser, name = Name} = Org) ->
             process_policy(?ORG_POLICY_FOR_POLICIES_CONTAINERS, Org, CreatingUser, CacheWithGroups)
     end.
 
-prepopulate_groups(Cache, #mover_org{id = OrgID}) ->
-    Cache1 = prepopulate_group(Cache, OrgID, admins),
-    Cache2 = prepopulate_group(Cache1, OrgID, users),
-    Cache3 = prepopulate_group(Cache2, OrgID, clients),
-    Cache3.
+prepopulate_groups(Cache, #mover_org{id = OrgID, name = OrgName}) ->
+    % Failure is arguably okay if we can't set up admins acls
+    %
+    Cache1 = case prepopulate_group(Cache, OrgID, admins) of
+                 {error, C} ->
+                     lager:warning("No admins org for ~p, attempting to continue with clients and users", [OrgName]),
+                     C;
+                 {ok, C} ->
+                     C
+             end,
+    case prepopulate_group(Cache1, OrgID, users) of
+        {error, _} ->
+            {error, users};
+        {ok, Cache2} ->
+            case prepopulate_group(Cache2, OrgID, clients) of
+                {error, _} ->
+                    {error, clients};
+                {ok, Cache3} ->
+                    Cache3
+            end
+    end.
 
-prepopulate_group({error, Group}, _, _) ->
-    {error, Group};
 prepopulate_group(Cache, OrgId, Group) ->
     {ok, Results} = sqerl:adhoc_select([name, authz_id, org_id],
                                        groups,
                                        {'and', [{name, equals, Group}, {org_id, equals, OrgId}]}),
     case Results of
         [] ->
-            {error, Group};
+            {error, Cache};
         _ ->
             GroupFieldsList = hd(Results),
             {<<"authz_id">>, AuthzId} = proplists:lookup(<<"authz_id">>, GroupFieldsList),
-            add_cache(Cache,{group, Group}, AuthzId)
+            {ok, add_cache(Cache,{group, Group}, AuthzId)}
     end.
 
 %%
