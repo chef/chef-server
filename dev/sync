@@ -143,10 +143,12 @@ BEGIN {
     ec = @screen.endcolor
     @screen.say_at(6, 15,  "#{color}Last Sync:#{ec} #{Time.new.to_s}")
     @screen.say_at(7, 7,  "#{color}Files Transferred:#{ec} #{output[:transferred]}                ")
-    if output[:bytes] > 1024
-      @screen.say_at(8, 19, "#{color}   KB:#{ec} #{(output[:bytes].to_f/1024.0).round(2)}               ")
-    else
-      @screen.say_at(8, 19, "#{color}Bytes:#{ec} #{output[:bytes]}                ")
+    if output[:bytes]
+      if output[:bytes] > 1024
+        @screen.say_at(8, 19, "#{color}   KB:#{ec} #{(output[:bytes].to_f/1024.0).round(2)}               ")
+      else
+        @screen.say_at(8, 19, "#{color}Bytes:#{ec} #{output[:bytes]}                ")
+      end
     end
     @screen.say_at(7, 40,  "#{color}Transfer Time:#{ec} #{output[:time]}s")
     @screen.say_at(8, 43, "#{color}Clock Time:#{ec} #{sprintf('%0.1f', output[:walltime])}")

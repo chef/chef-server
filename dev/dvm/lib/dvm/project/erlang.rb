@@ -2,13 +2,15 @@ require_relative "erlang_dep"
 
 module DVM
   class ErlangProject < Project
-    attr_reader :rebar_config_path, :project_dir, :relpath, :libpath
+    attr_reader :rebar_config_path, :project_dir, :relpath, :libpath, :relname
     def initialize(project_name, config)
       super
       # TODO use .lock if available, else use .config
       @rebar_config_path = "#{project_dir}/rebar.config.lock"
       reldir = service['rel-type'] == 'relx' ? "_rel" : "rel"
-      @relpath = "#{@project_dir}/#{reldir}/#{name}"
+      relname =
+      @relname = service['rel-name'] ? service['rel-name'] : name
+      @relpath = "#{@project_dir}/#{reldir}/#{relname}"
       @service_dir = "/var/opt/opscode/embedded/service/#{service['name']}"
       @libpath =  File.join(@relpath, "lib")
     end
@@ -33,9 +35,9 @@ module DVM
     def start(args, background)
       raise DVMArgumentError, "#{name} appears to be already running. Try 'dvm console oc_erchef', or 'dvm stop oc_erchef'" if is_running?
       if background
-        run_command("bin/#{name} start -env DEVVM=1", "Starting #{name}", cwd: relpath, env: { "DEVVM" => "1" } )
+        run_command("bin/#{relname} start -env DEVVM=1", "Starting #{name}", cwd: relpath, env: { "DEVVM" => "1" } )
       else
-        exec "cd #{relpath} && bin/#{name} console"
+        exec "cd #{relpath} && bin/#{relname} console"
       end
     end
 
@@ -118,8 +120,16 @@ EOM
       do_build unless options[:no_build]
 
       say("Setting up symlinks")
+      # Yay project inconsistencies
+      base_sv_path = "/var/opt/opscode/#{service["name"]}"
+      if File.exists?("#{base_sv_path}/sys.config")
+        FileUtils.rm("#{relpath}/sys.config")
+        FileUtils.ln_s("#{base_sv_path}/sys.config", "#{relpath}/sys.config")
+      else
+        FileUtils.rm("#{relpath}/etc/sys.config")
+        FileUtils.ln_s("#{base_sv_path}/etc/sys.config", "#{relpath}/etc/sys.config")
+      end
       FileUtils.rm_rf(["#{relpath}/log", "#{relpath}/sys.config"])
-      FileUtils.ln_s("/var/opt/opscode/#{service["name"]}/sys.config", "#{relpath}/sys.config")
       FileUtils.ln_s("/var/log/opscode/#{service["name"]}", "#{relpath}/log")
 
       # Make runsv forget about us so that chef-server-ctl reconfigure doesn't restart.
@@ -134,11 +144,11 @@ EOM
 
     def unload
       name = service['name']
-      # NOt working - naturally ctl reconfigure  recreates this link.
-      # Could be that we want to coordinate between projects in here,
-      # reconfigure-notify: oc_erchef?
-      # FileUtils.ln_s("/opt/opscode/service/#{name}", "/opt/opscode/sv/#{name}")
-      FileUtils.rm("#{relpath}/sys.config")
+      if File.exists?("#{relpath}/sys.config")
+        FileUtils.rm("#{relpath}/sys.config")
+      else
+        FileUtils.rm("#{relpath}/etc/sys.config")
+      end
       FileUtils.rm("#{relpath}/log")
       run_command("chef-server-ctl start #{name}", "Restarting packaged version of #{name} via chef-server-ctl", cwd: project_dir)
     end

@@ -6,6 +6,7 @@ vm:
     - pkg/
     - deps/
     - _rel/
+    - chef-mover/rel/mover/
     - opscode-dev-vm/
     - chef-docs/ # Huge if you have it checked out!
     - ebin/
@@ -48,6 +49,20 @@ projects:
     git:
       uri: https://github.com/chef/oc_bifrost.git
       branch: master
+  chef-mover:
+    type: erlang
+    service:
+      rel-name: mover
+      rel-type: rel
+      name:  opscode-chef-mover
+      cookie: mover
+      node: mover@127.0.0.1
+    git:
+      uri: https://github.com/chef/chef-mover.git
+      branch: master
+    build:
+      # higher concurrency appears to cause eunit failures...
+      max_concurrency: 1
   bookshelf:
     type: erlang
     service:
