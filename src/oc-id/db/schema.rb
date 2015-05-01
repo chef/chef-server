@@ -16,7 +16,7 @@ ActiveRecord::Schema.define(version: 20140313153625) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "oauth_access_grants", force: true do |t|
+  create_table "oauth_access_grants", force: :cascade do |t|
     t.string   "resource_owner_id", null: false
     t.integer  "application_id",    null: false
     t.string   "token",             null: false
@@ -29,7 +29,7 @@ ActiveRecord::Schema.define(version: 20140313153625) do
 
   add_index "oauth_access_grants", ["token"], name: "index_oauth_access_grants_on_token", unique: true, using: :btree
 
-  create_table "oauth_access_tokens", force: true do |t|
+  create_table "oauth_access_tokens", force: :cascade do |t|
     t.string   "resource_owner_id"
     t.integer  "application_id"
     t.string   "token",             null: false
@@ -44,7 +44,7 @@ ActiveRecord::Schema.define(version: 20140313153625) do
   add_index "oauth_access_tokens", ["resource_owner_id"], name: "index_oauth_access_tokens_on_resource_owner_id", using: :btree
   add_index "oauth_access_tokens", ["token"], name: "index_oauth_access_tokens_on_token", unique: true, using: :btree
 
-  create_table "oauth_applications", force: true do |t|
+  create_table "oauth_applications", force: :cascade do |t|
     t.string   "name",         null: false
     t.string   "uid",          null: false
     t.string   "secret",       null: false
