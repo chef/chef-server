@@ -40,7 +40,6 @@ template "/etc/opscode/chef-server.rb" do
   owner "root"
   group "root"
   action :create
-  notifies :run, "execute[reconfigure]", :immediately
 end
 
 template "/etc/hosts" do
@@ -49,10 +48,5 @@ template "/etc/hosts" do
   group "root"
   action :create
   variables({"fqdns" => ["api.chef-server.dev",  "manage.chef-server.dev" ]})
-end
-
-execute "reconfigure" do
-  command "chef-server-ctl reconfigure"
-  action :nothing
 end
 

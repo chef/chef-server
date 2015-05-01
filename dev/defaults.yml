@@ -32,6 +32,10 @@ projects:
       name: opscode-erchef
       cookie: erchef
       node: erchef@127.0.0.1
+  oc-id:
+    type: ruby
+    service:
+      name: oc_id
   oc_bifrost:
     type: erlang
     database: opscode_bifrost
@@ -75,10 +79,6 @@ projects:
         source_path: private-chef-cookbooks/private-chef
         dest_path: /opt/opscode/embedded/cookbooks/private-chef
         reconfigure_on_load: true
-      ha-drdb-cookbook:
-        source_path: private-chef-cookbooks/chef-ha-drdb
-        dest_path: /opt/opscode/embedded/cookbooks/chef-ha-drdb
-        reconfigure_on_load: true
       ctl-commands:
         source_path: private-chef-ctl-commands
         dest_path: /opt/opscode/embedded/service/omnibus-ctl
@@ -87,6 +87,10 @@ projects:
         source_path: private-chef-upgrades
         dest_path: /opt/opscode/embedded/upgrades
         reconfigure_on_load: false
+      ha-drdb-cookbook:
+        source_path: private-chef-cookbooks/chef-ha-drdb
+        dest_path: /opt/opscode/embedded/cookbooks/chef-ha-drdb
+        reconfigure_on_load: true
 
   oc-chef-pedant:
     type: ruby
@@ -102,23 +106,14 @@ projects:
 
 quickstart:
   oc_erchef:
-    description: "Load up cookbooks, oc-chef-pedant, and oc_erchef from /host. Start oc_erchef into a console."
+    description: "Load up erchef and start it in console mode."
     load:
-      - omnibus private-chef-cookbooks
-      - oc-chef-pedant
       - oc_erchef
     start:
       - oc_erchef
-  omnibus:
-    description: "Load most omnibus components (private-chef-cookbook, ctl-commands, upgrades) and run reconfigure"
-    load:
-      - private-chef-cookbooks
-      - ctl-commands
-      - upgrades
   oc_bifrost:
-    description: "Load cookbooks, oc_bifrost, oc-bifrost-pedant, and oc_bifrost from /host. Start oc_bifrost into a console."
+    description: "Load oc_bifrost and oc-bifrost-pedant from /host. Start oc_bifrost into a console."
     load:
-      - omnibus private-chef-cookbooks
       - oc-bifrost-pedant
       - oc_bifrost
     start:

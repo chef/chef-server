@@ -6,113 +6,102 @@ safe, pain-free manner.
 
 In short it will create a simple Vagrant VM, while still allowing you to do
 your development from the comfort of your own host. Changes to make are
-either instantly loaded (erlang projects with sync support) or instantly
-available on the guest vm.
+loaded immediately into the running service (for erlang projects with
+sync support) or otherwise made available on the guest VM.
 
 ## Quick Start
 
-Assuming you'd like to be able to modify oc_erchef, its omnibus
-cookbooks, and run/modify pedant tests:
+This assumes familiarity with the components of chef-server and that you
+want to
 
-```
-cd dev
-vagrant up  # this takes 3-5 minutes depending on your machine
-vagrant rsync-auto > /dev/null 2>&1 & 
-vagrant ssh
-sudo -i
-tmux # recommended, not required.
-dvm quickstart oc_erchef
-```
+Requirements:
 
-And if you want to verify that things are behaving ok, from inside the
-VM as root:
-```
-dvm run oc-chef-pedant
-```
+* VirtualBox 4.3+
+* Vagrant 1.7+
+* At least one recent Chef Server 12.0.9+ debian package download,
+  which you can grab from https://packagecloud.io/chef/current. Note
+  that you should download the chef-server-core package, and not run the
+  installer.
+* A text editor on your machine.
+* Any time you're doing something with 'dvm' on the VM, make sure
+  you've acquired root by using `sudo -i`. Otherwise dvm won't be in your
+  path.
 
-You can also provide the usual flags, eg `dvm run oc-chef-pedant
---focus-/skip-X`, `--all`, etc.
+Go!
 
-Now, start modifying things on your host. You'll notice the
-following:
+    cd dev
+    vagrant up
+    ./sync
 
-* Any change to erchef files will automatically compile and (if no
-  errors) load into the running erchef instance now on your screen.
-  You can see this activity happen in the running instance.
-* changes to opscode-omnibus/fils/private-chef-cookbooks are sync'd on the guest.
-  Change them on the host then run reconfigure to pick up the changes.
-* Similarly oc-chef-pedant is sync'd.  At any time you want to run  your
-  modifications you can `dvm run oc-chef-pedant`. Focus tags, etc are
-  respected normally.
+In a separate terminal session/pane/window:
 
-If you want to load in omnibus partybus upgrade migrations or commands
-for testing you can (from within the vm):
+    vagrant ssh
+    sudo -i
+    dvm quickstart oc_erchef
 
-* dvm load omnibus upgrades
-* dvm load omnibus ctl-commands
+### What can I do?
 
-Note that the standard basic VM management comments for vagrant
-(suspend/halt/destroy/etc) work normally.
+Start editing erchef files, pedant files, cookbooks, upgrade definitions,
+and/or chef-server-ctl commands.
 
-TODO: If you want to load in test users, orgs, and nodes for testing outside
+* Changes to erchef erlang files will be picked up and recompiled
+  automatically shortly after you save them on the host.
+* To pick up cookbook changes, run `chef-server-ctl reconfigure` in the VM.
+* upgrades and chef-server-ctl command changes/additions will be
+  available very quickly after you save them on the host (< 5 seconds)
+* To run pedant tests in the VM, use `dvm run oc-chef-pedant`.  You can also provide the
+  usual flags, eg `dvm run oc-chef-pedant --focus-/skip-X`, `--smoke`, `--all`, etc.
+
+`dvm` has support for many projects including bifrost and bookshelf.  Use `dvm list`
+to see them all.
+
+While all host changes are replicated to the dev vm only erlang projects support
+automatic hot compile and reload of changed modules on the host. To whatever
+extent supported by the language, we'll be adding the same for ruby service-based projects.
+
+### Dependency Loading
+
+If you find that you need to change an erlang project
+dependency, dvm simplifies that too. For example, let's say we want to
+modify `chef_authn` and pull it into the running erchef instance:
+
+    # From in the vm. assumes sudo -i
+    dvm load oc_erchef chef_authn
+
+This will  clone `chef_authn` onto your host[1], where you can begin
+editing it. It will link it into the project deps directory and hot-load
+it into the running VM[2].  This is available for nearly all dependencies
+declared in a project's rebar.config.
+
+[1] NOTE: Presently this will clone into chef-server directory. We will be
+ fixing this, it's a side effect of the recent project merge.
+[2] There is currently a limitation here in that the owning project must
+be running to pick up the changes. We will be fixing that shortly.
+
+For a list of dependencies available for loading and their current
+status, use `dvm list $PROJECTNAME`.  Any dependency that is not a
+system library and declared in a project's app.src is typically
+available.
+
+Ruby project dependency loading support coming soon.
+
+## Not so quick start
+
+TODO: details of components, terminology, etc. explore more dvm
+commands?
+
+## Test Data
+
+[pending] If you want to load in test users, orgs, and nodes for testing outside
 of pedant, you can:
 
-`dvm populate all`
+`dvm populate`
 
-Or if you don't want anything:
-* `dvm populate users
-* `dvm populate orgs` (Also creates users listed as associated with the orgs.)
-* `dvm populate nodes
+TODO: Provide a canned set of test data in ec-backup form for more thorough tests?
+##  dvm
 
-### Wait what just happened?
-
-The dvm `quickstart` command loads several projects for you. Take a
-look at defaults.yml under "quickstart" and you will see:
-
-```
-    load:
-      - omnibus private-chef-cookbooks
-      - oc-chef-pedant
-      - oc_erchef
-    start:
-      - oc_erchef --foreground
-```
-
-What this is the equivalent of doing is:
-
-```
-dvm load omnibus private-chef-cookbooks # load in cookbooks
-dvm load oc-chef-pedant # load in oc-chef-pedant  bundle installing as needed
-dvm load oc_erchef # build and load oc_erchef
-dvm start oc_erchef  --foreground
-```
-
-And it does just what it says. You can add your own quickstart
-configurations - or override the existing ones - in config.yml.
-Currently 'load' and 'start' are the supported sections since in
-practice that's what's been neeeded so far.
-
-
-## PreReqs
-
-Assuming that you're looking to do oc_erchef and/or opscode-omnibus
-development:
-
-* 8vcores and enough ram to do development with (16GB+, but 8 might
-  work...)
-* vagrant 1.7+ - earlier versions may work but are not tested
-* virtualbox 4.3 (as tested, other versions may/may not work)
-* A directory containing your checked out chef server projects. These
-  should be at the same level. Because this directory is rsync'd with the
-  VM (other options didn't give acceptable performance) try to avoid including
-  too many unrelated projects. For the erchef quickstart you will need:
-  * oc_erchef
-  * opscode-omnibus
-  * oc-chef-pedant
-
-###  dvm
-
-dvm is a command line tool used to manage the environment from within
+At the heart of all this is the 'dvm' tool.  This tool
+is used to manage the environment from within
 the vm.  It must always be run as root, and to be sure that the
 environment is correct, use `sudo -i` to become root to run it.
 
@@ -125,6 +114,7 @@ common activities:
 * open a console to a running erlang app
 * etop a running erlang app
 * access the DB for a project
+* coming soon: enable coverage for an erlang project
 
 And a few other things.  You can just use `dvm` by itself and a list of
 commands will be generated. You may also want to take a look in

@@ -32,3 +32,20 @@ mount "dvm" do
   fstype "none"
   options "bind"
 end
+
+# Finally, load in our base projects
+#
+execute "load oc-chef-pedant"  do
+  command "dvm load oc-chef-pedant"
+end
+execute "load omnibus upgrades" do
+  command "dvm load omnibus upgrades"
+end
+
+# Note that dvm knows that ocokbook changes require a reconfigure.
+# This will be our only reconfigure during provisioning, so that
+# we avoid doing it multiple times.
+execute "load omnibus private-chef-cookbooks"  do
+  command "dvm load omnibus private-chef-cookbooks"
+end
+

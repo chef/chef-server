@@ -1,26 +1,42 @@
-- [ ] MOTD with some useful instructions and available commands
+- [x] MOTD with some useful instructions and available commands
 - [ ] populate command to load test users and orgs
 - [ ] simple merge of vm settings in config.yml and default.yml files so that
       packages and vm config can be overridden.
 - [ ] Once that's done, update config.yml  with basic skeleton to show what can be done,
       then add to .gitignore
-- [ ] verify `bookshelf` and `oc_bifrost` work without further
-      modification
-- [ ] option to auto-modify /etc/hosts to add thte vm name
+- [ ] verify `bookshelf` works as-is
+- [ ] add 'sync' erlang dependency to bookshelf, oc_bifrost and chef-mover
+- [ ] option to auto-modify /etc/hosts to add the vm name
       Also ensure DNS for named host resolves to external IP and
       everything works with this.
-- [ ] for each project setting - or just at vm level? , add forward_ports. Note that user knife
-      config, etc should work from in the vm or from the host.
-- [ ] refactor the crap out of projects.rb...
+- [ ] for each project setting - or just at vm level? , add forward_ports. Note that user
+      knife config, etc should work from in the vm or from the host.
 - [ ] Should we default quickstart ercehf to launch in the background to
       avoid another ssh session for more work? One the one hand, simpler
       to start, on the other hand it's nice to see the immediate errors/info
       feedback when you get started...
-- [x] clone and load project deps (erlang)
 - [ ] not really any support for ruby project deps, something that we
       will want if we expand this to support the things that layer atop chef
       server (manage, etc)
-  [ ] why doesn't NFS file share work, at least with linux host?
-  [ ] dvm run oc-chef-pedant appears to run as if '--all' were specified
-      by default, instead of '--smoke'
-
+- [ ] why doesn't NFS file share work, at least with linux host?
+- [ ] dvm run oc-chef-pedant appears to run as if '--all' were specified
+      by default, instead of '--smoke' (this may be a change in behavior
+      of pedant itself due to other recent changes)
+- [ ] modify auto clone/load of erlang deps so that it won't clutter up
+      the chef-server dir on the host.
+- [ ] add oc_id supprt
+- [ ] add indexer support (is this worth it?)
+- [ ] ruby project dep loading support. Should just be able to reference
+      gemfile.lock
+- [ ] can ruby services (oc-id) support hot-loading of changes as erlang
+      projects can? If not, can we fake it?
+- [x] clone and load project deps (erlang)
+- [x] refactor the crap out of projects.rb...
+- [x] verify `oc_bifrost` works as-is
+- [ ] re-add support for compiling dependencies after linking them in,
+      instead of relying on the hot loading - hot loading doesn't work
+      if the service isn't started (and it won't work for projects that
+      don't have sync...)
+- [ ] mover to relx
+- [ ] bookshelf, bifrost: don't run unit on devrel, and add proper usage
+      of relx devmode for clean symlinks

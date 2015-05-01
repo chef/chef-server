@@ -50,7 +50,6 @@ Vagrant.configure("2") do |config|
       type: "rsync",
       rsync__args: ["--verbose", "--archive", "--delete", "-z", "--no-owner", "--no-group" ],
       rsync__exclude: attributes["vm"]["sync-exclude"]
-
     # We're also going to do a share of the slower vboxsf style, allowing us to auto-checkout dependencies
     # and have them be properly synced to a place that we can use them.
     config.vm.synced_folder base_path, "/mnt/host-do-not-use"
@@ -83,10 +82,9 @@ def prepare
   action = ARGV.shift
   if action =~ /^(provision|up|reload)$/
     attributes = YAML.load_file("defaults.yml")
-    installer = ENV['INSTALLER'] || prompt_installer
+    installer = prompt_installer
     raise "Please set INSTALLER to the path of a .deb package for Chef Server 12+." if installer.nil?
     raise "#{installer} does not exist! Please fix this." unless File.file?(installer)
-    puts "*** Found #{installer}, will use this if an install is necessary"
     installer_path = File.dirname(File.expand_path(installer))
     provisioning = true
   end
@@ -94,30 +92,44 @@ def prepare
 end
 
 def prompt_installer
+  puts "Looking in #{Dir.home}/Downloads and #{base_path}/omnibus/pkg for installable chef-server-core package."
   # TODO allow config override of location, multiple locations, search pattern, max count?
   files = Dir.glob("#{Dir.home}/Downloads/chef-server-core*.deb") + Dir.glob("#{base_path}/omnibus/pkg/chef-server-core*.deb")
 
-  if files.length ==  0
-    return nil
+  if ENV['INSTALLER']
+    if ENV['INSTALLER'] =~ /^.*chef-server-core.*deb$/ and File.file?(ENV['INSTALLER'])
+      user_installer = File.expand_path(ENV['INSTALLER'])
+    else
+      puts "INSTALLER #{ENV['INSTALLER']} is not a valid chef-server-core package. Ignoring."
+    end
   end
-  if files.length == 1
-    return files[0]
+
+  if files.length == 0 and not user_installer
+    return nil
   end
 
   files = files.sort_by{ |f| File.mtime(f) }.last(10)
   files.reverse!
+  files << "[INSTALLER]: #{user_installer}" if user_installer
   cur = 1
   files.each do |f|
     puts " #{cur}) #{f}\n"
     cur = cur + 1
   end
+
   selection = 0
+
   loop do
-    print "Which Image? [1 - #{files.length}]: "
+    print "Select an image, or set the INSTALLER variable and run again: [1 - #{files.length}]: "
     selection = gets.chomp.to_i
     break if selection > 0 and selection <= files.length
   end
-  files[selection - 1]
+
+  if selection == files.length  and user_installer
+    user_installer # we munged the text on this one
+  else
+    files[selection - 1]
+  end
 
 end
 
