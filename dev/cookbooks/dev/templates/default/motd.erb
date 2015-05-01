@@ -1,0 +1,21 @@
+DVM QuickStart
+---------------
+1. On the host, cd to chef-server/dev, and run the below command. Leave it running.
+      $> ./sync
+2. In your active shell (this one!) use "sudo -i" to gain root. dvm needs it.
+3. To load the chef-server repo's erchef project and run it:
+      #> dvm quickstart oc_erchef
+4. To run oc-chef-pedant, the server REST API spec suite:
+      #> dvm run oc-chef-pedant [--pedant-flags,...]
+5. To start a psql session with a project's database, use:
+      #> dvm psql $PROJECT
+
+The ominbus projects 'private-chef-cookbooks', 'upgrades', and 'ctl-commands' are by
+default loaded in from your chef-server repo clone.  You can instead have chef-server
+instead see the packaged/default versions by unloading them:
+      #> dvm unload omnibus $PROJECT_NAME
+To run the packaged oc-chef-pedant instead of the one from the repo, use:
+      #> cd /opt/opscode/embedded/service/oc-chef-pedant
+      #> bin/oc-chef-pedant -c /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb [--flags,...]
+Use dvm list for a list of loadable projects, and dvm list $PROJECT for a list of loadable deps.
+For a lot more information about dvm see chef-server/dev/README.md

@@ -1,9 +1,9 @@
 ## System setup
-node['packages'].each do |p|
-  package p
-end
+# Hey neat - our packages have chef from master now
+# which means we can:
+package nodes['packages']
 
-# Time and zone should match the host so that erlang's sync module plays nicely with vagrant rsync
+# Time and zone should match the host so that erlang's sync module plays nicely with rsync'd files.
 file "/etc/timezone" do
   content node["tz"]
   owner 'root'
@@ -23,7 +23,7 @@ template "/etc/profile.d/omnibus-embedded.sh" do
   source "omnibus-embedded.sh.erb"
   owner "root"
   user "root"
-  mode "0600"
+  mode 0600
 end
 
 template "/etc/sudoers" do
@@ -34,5 +34,17 @@ template "/etc/sudoers" do
   mode 0440
 end
 
+file "/etc/update-motd.d/10-help-text" do
+  action :delete
+end
+file "/etc/update-motd.d/91-release-upgrade" do
+  action :delete
+end
 
+template "/etc/motd" do
+  source "motd.erb"
+  owner "root"
+  user "root"
+  mode 0644
+end
 

@@ -1,4 +1,4 @@
- # Interesting to note that thor and highliine are already in our
+# Interesting to note that thor and highliine are already in our
 # omnibus bundle.
 require "thor"
 require "highline/import"
@@ -34,6 +34,12 @@ module DVM
       end
     end
 
+
+
+    desc "ls [project]", "list available projects, or available dependencies within project"
+    def ls(project = nil)
+      list(project)
+    end
 
     desc "list [project]", "list available projects, or available dependencies within project"
     def list(project = nil)
