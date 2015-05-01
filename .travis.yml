@@ -2,7 +2,10 @@ branches:
   only:
     - master
 cache:
-  bundler: true
+  - apt
+  - directories:
+    - vendor/bundle
+    - $HOME/.luarocks/rocks
 # Turn this back on once luarocks can be installed
 # via the add-ons
 # sudo: false
@@ -33,8 +36,8 @@ install:
   - luarocks install --local lpeg
   - luarocks install --local lua-cjson
   - eval $(luarocks path)
-  - rvm install --binary 2.1.4
-  - rvm use 2.1.4
   - cd $COMPONENT && make install
+rvm:
+  - 2.1.4
 script:
   - make travis
