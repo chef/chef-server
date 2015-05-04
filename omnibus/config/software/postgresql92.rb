@@ -31,6 +31,10 @@ relative_path "postgresql-9.2.9"
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
+  if version == "9.2.9" && ppc64le?
+    patch source: "v9.2.9.ppc64le-configure.patch", plevel: 1
+  end
+
   command "./configure" \
           " --prefix=#{install_dir}/embedded/postgresql/9.2" \
           " --with-libedit-preferred" \

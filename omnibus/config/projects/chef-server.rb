@@ -32,6 +32,10 @@ override :berkshelf2, version: "2.0.18"
 override :rabbitmq, version: "3.3.4"
 override :erlang, version: "R16B03-1"
 override :ruby, version: "2.1.4"
+override :libedit, version: "20141030-3.1"
+override :pcre, version: "8.36"
+override :python, version: "2.7.9"
+override :nodejs, version: "v0.10.38-release-ppc" if ppc64? || ppc64le?
 
 # creates required build directories
 dependency "preparation"
