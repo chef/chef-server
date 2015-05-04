@@ -60,6 +60,7 @@
                             'chef_role' |
                             'chef_node'|
                             'chef_user' |
+                            'chef_key' |
                             %% these belong to EC and should
                             %% eventually be included in a pluggable
                             %% fashion.

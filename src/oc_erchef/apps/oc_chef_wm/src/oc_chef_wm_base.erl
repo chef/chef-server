@@ -18,8 +18,6 @@
 %% KIND, either express or implied.  See the License for the
 %% specific language governing permissions and limitations
 %% under the License.
-%%
-
 
 -module(oc_chef_wm_base).
 
@@ -84,7 +82,6 @@ service_available(Req, #base_state{reqid_header_name = HeaderName} = State) ->
             {true, Req, State3}
     end.
 
-
 %% @doc Validate the requested X-Ops-Server-API-Version value and populate base_state,
 %% and reply with it as or reply with error if it's not valid.
 -spec server_api_version(undefined|string()) -> api_version() | {error| string()}.
@@ -119,7 +116,6 @@ set_req_contexts(Req, #base_state{reqid = ReqId, server_api_version = ApiVersion
     State1#base_state{chef_authz_context = AuthzContext,
                       chef_db_context = DbContext,
                       darklaunch = Darklaunch}.
-
 
 content_types_accepted(Req, State) ->
     {[{"application/json", from_json}], Req, State}.
@@ -204,7 +200,6 @@ multi_auth_check_to_wm_response({Error, {AuthzObjectType, AuthzId, Permission}, 
     lager:error("is_authorized_on_resource failed (~p, ~p, ~p): ~p~n",
                            [Permission, {AuthzObjectType, AuthzId}, RequestorId, Error]),
     {{halt, 500}, Req, State#base_state{log_msg={error, is_authorized_on_resource}}}.
-
 
 %% @doc Performs multiple authorization checks in sequence.  If all pass, returns true.  The
 %% first check that is false or returns an error, however, halts short-circuits any further
@@ -454,7 +449,6 @@ authorized_by_org_membership_check(Req, #base_state{organization_name = OrgName,
                      State#base_state{log_msg = {user_not_in_org_error, Error}}}
             end
     end.
-
 
 set_forbidden_msg(Perm, Req, State) when is_atom(Perm)->
     Msg = iolist_to_binary(["missing ", atom_to_binary(Perm, utf8), " permission"]),
@@ -925,21 +919,26 @@ verify_request_signature(Req,
             end
     end.
 
--spec create_from_json(Req :: #wm_reqdata{}, State :: #base_state{},
-                       RecType :: chef_object_name()| chef_cookbook_version,
+-spec create_from_json(Req :: #wm_reqdata{},
+                       State :: #base_state{},
+                       RecType :: chef_object_name()| chef_cookbook_version | oc_chef_cookbook_artifact_version,
                        ContainerId :: object_id() | {authz_id, AuthzId::object_id() | undefined},
-                       ObjectEjson :: ejson_term()) -> chef_wm_create_update_response().
+                       ObjectEjson :: ejson_term() |
+                                binary() |
+                                {binary(), ejson_term()} |
+                                {ejson_term(), _}
+                      ) -> chef_wm_create_update_response().
 %% @doc Implements the from_json callback for POST requests to create Chef
 %% objects. `RecType' is the name of the object record being created
 %% (e.g. `chef_node'). `ContainerId' is the AuthzID of the container for the object being
 %% created (e.g. node container authz ID for creating a node). The `ObjectEjson' is the
 %% validated and normalized EJSON that was parsed from the request body.
 create_from_json(#wm_reqdata{} = Req, #base_state{organization_guid = undefined} = State,
-                                                  RecType, AuthzData, ObjectEJson) ->
+                                                  RecType, AuthzData, ObjectEjson) ->
     % For objects that are not a member of an org, we just need to provide a valid ID
     % for guid generation.
     create_from_json(Req, State#base_state{organization_guid = ?OSC_ORG_ID},
-                     RecType, AuthzData, ObjectEJson);
+                     RecType, AuthzData, ObjectEjson);
 create_from_json(#wm_reqdata{} = Req,
                  #base_state{chef_db_context = DbContext,
                              organization_guid = OrgId,

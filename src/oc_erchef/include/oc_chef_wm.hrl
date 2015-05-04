@@ -228,7 +228,7 @@
 
 -record(cookbook_artifact_version_state, {
           authz_id,
-          cookbook_artifact_version_data,
+          cookbook_artifact_version_data :: ejson_term(),
           oc_chef_cookbook_artifact_version :: #oc_chef_cookbook_artifact_version{}
          }).
 
@@ -388,6 +388,7 @@
                             #organization_state{} |
                             #user_state{} |
                             #principal_state{} |
+                            [#principal_state{}] |
                             #object_identifier_state{} |
                             #search_state{} |
                             #association_state{} |
