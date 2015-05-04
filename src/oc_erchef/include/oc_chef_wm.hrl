@@ -388,6 +388,7 @@
                             #organization_state{} |
                             #user_state{} |
                             #principal_state{} |
+                            [#principal_state{}] |
                             #object_identifier_state{} |
                             #search_state{} |
                             #association_state{} |
