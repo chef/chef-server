@@ -85,6 +85,45 @@ available.
 
 Ruby project dependency loading support coming soon.
 
+### Code Coverage
+
+#### Get Ready!
+in your oc_erchef window,
+
+```erlang
+(erchef@127.0.0.1)1> sync:pause().
+[info] Pausing Sync. Call sync:go() to restart
+
+ok
+```
+
+Then, for a specific module
+```erlang
+(erchef@127.0.0.1)2> cover:compile_beam(oc_chef_authz_acl).
+{ok,oc_chef_authz_acl}
+```
+
+or, for all the modules:
+
+```erlang
+Dirs = file:wildcard("/host/oc_erchef/apps/*/ebin") .
+[cover:compile_beam_dir(Dir) || Dir <- Dirs].
+```
+
+#### Run Pedant
+or whatever
+
+#### Generate a report
+For a single module
+```erlang
+cover:analyze_to_file(oc_chef_authz_acl, "/root/first.txt").
+```
+
+Or all of them
+```erlang
+[cover:analyze_to_file(Mod, filename:join("/root", atom_to_list(Mod)) || Mod <- cover:modules()].
+```
+
 ## Not so quick start
 
 TODO: details of components, terminology, etc. explore more dvm
