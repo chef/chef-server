@@ -124,11 +124,6 @@ fetch_cookbook_id(DbContext, Name, OrgName) ->
     case chef_db:fetch_latest_cookbook_version(DbContext, OrgName, Name) of
         not_found ->
             not_found;
-        {cookbook_exists, AuthzId} ->
-            % unclear when this can happen; I assume for wrong version but
-            % won't happen with 'latest' version?  But still checking for it
-            % here.
-            AuthzId;
         #chef_cookbook_version{authz_id = AuthzId} ->
             AuthzId
     end.
