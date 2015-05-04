@@ -1,12 +1,13 @@
 GIT
-  remote: git://github.com/opscode/omnibus-software.git
-  revision: 4ca326c4ea5dadbd32c700ff3c31cb8b63a9977b
+  remote: git://github.com/ClogenyTechnologies/omnibus-software.git
+  revision: f71b403f23da9e4f98ed986b5300cf877bf37710
+  branch: kd/ppc-chef-server
   specs:
     omnibus-software (4.0.0)
 
 GIT
   remote: git://github.com/opscode/omnibus.git
-  revision: ab0417987c624eb10299c99f4321c234adb7f9ef
+  revision: c795b65bc796629c4e5b97ce21185b553caaf7e9
   specs:
     omnibus (4.0.0)
       chef-sugar (~> 3.0)
