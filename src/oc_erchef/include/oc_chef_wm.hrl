@@ -306,7 +306,7 @@
           user_data,
           user_authz_id,
           generated_private_key,
-          chef_user :: #chef_user{}
+          chef_user :: #chef_user{} | not_found
       }).
 
 -record(container_state, {
