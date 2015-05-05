@@ -25,6 +25,10 @@ module DVM
       project['database']
     end
 
+    def cover(action, modulename, options)
+      raise DVM::DVMArgumentError, "Only Erlang projects support coverage at this time."
+    end
+
     def deps
       parse_deps
       @deps

@@ -50,6 +50,10 @@ end
   end
 end
 
+directory "/vagrant/testdata/cover" do
+  action :create
+  recursive true
+end
 directory "/vagrant/testdata/keys" do
   action :create
   recursive true

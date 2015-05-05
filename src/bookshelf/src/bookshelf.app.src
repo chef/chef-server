@@ -37,5 +37,10 @@
                     lager,
                     opscoderl_wm,
                     iso8601,
-                    eper
+                    eper,
+                    runtime_tools,
+                    tools,
+                    sync,
+                    eunit,
+                    mixer
                   ]}]}.

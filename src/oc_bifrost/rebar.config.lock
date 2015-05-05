@@ -50,6 +50,9 @@
        {opscoderl_wm,".*",
                      {git,"git://github.com/chef/opscoderl_wm.git",
                           "64db62e070da58cf7bb0caebde7a3f11c2e3cbbb"}},
+       {sync,".*",
+             {git,"https://github.com/rustyio/sync.git",
+                  "ae7dbd4e6e2c08d77d96fc4c2bc2b6a3b266492b"}},
        {rebar_lock_deps_plugin,".*",
                                {git,"git://github.com/seth/rebar_lock_deps_plugin.git",
                                     "7a5835029c42b8138325405237ea7e8516a84800"}}]}.

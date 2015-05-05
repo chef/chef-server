@@ -44,6 +44,9 @@
        {rebar_lock_deps_plugin,".*",
                                {git,"git://github.com/seth/rebar_lock_deps_plugin.git",
                                     "7a5835029c42b8138325405237ea7e8516a84800"}},
+       {sync,".*",
+             {git,"https://github.com/rustyio/sync.git",
+                  "ae7dbd4e6e2c08d77d96fc4c2bc2b6a3b266492b"}},
        {edown,".*",
               {git,"git://github.com/seth/edown.git",
                    "30a9f7867d615af45783235faa52742d11a9348e"}}]}.

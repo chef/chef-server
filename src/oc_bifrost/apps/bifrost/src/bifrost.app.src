@@ -17,5 +17,9 @@
                   mixer,
                   envy,
                   sqerl,
-                  opscoderl_wm
+                  opscoderl_wm,
+                  runtime_tools,
+                  tools,
+                  sync,
+                  eunit
                  ]}]}.

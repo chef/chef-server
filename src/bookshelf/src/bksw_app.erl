@@ -26,6 +26,11 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
+    case os:getenv("DEVVM") of
+        "1" ->
+            application:start(sync);
+        _ -> ok
+    end,
     bksw_sup:start_link().
 
 stop(_State) ->
