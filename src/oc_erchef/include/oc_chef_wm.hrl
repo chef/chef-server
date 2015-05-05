@@ -233,7 +233,7 @@
          }).
 
 -record(cookbook_artifacts_state, {
-          oc_chef_cookbook_artifacts :: #oc_chef_cookbook_artifact{}
+          oc_chef_cookbook_artifacts :: [#oc_chef_cookbook_artifact{}]
          }).
 
 -record(data_state, {
