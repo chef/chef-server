@@ -108,7 +108,6 @@ Test chef server however you'd like. A good way would be running pedant as descr
 Once you're done running whatever tests you want to do, you'll need to generate coverage reports.
 
 For each module you want to generate a report for `cover:analyze_to_file(Module, "/root/filename").`
-```
 
 If you want a list comprehension for generaitng coverage reports for all modules, I've got you covered! (see what I did there?! _covered_!)
 
