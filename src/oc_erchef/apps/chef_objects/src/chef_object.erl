@@ -31,12 +31,14 @@
                                    %% fetch/2 can return this
                        | list(object_rec())
                        | object_rec()
-                       |  {error, _}.
+                       | [[tuple()]] %% This is what it looks like when your
+                                     %% ReturnTransform is 'rows'
+                       | {error, _}.
 -type select_callback() :: fun(({ QueryName ::atom(), BindParameters :: list(),
                                   ReturnFieldNames :: [atom()]}
                               | {QueryName :: atom(), BindParameters :: list()}
                               | {QueryName :: atom(), BindParameters :: list(),
-                                 ReturnTransform :: tuple()}) ->
+                                 ReturnTransform :: tuple() | rows}) ->
                                       select_return()).
 -type update_return() :: pos_integer() | not_found | {conflict, _} | {error, _}.
 
