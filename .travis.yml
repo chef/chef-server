@@ -36,8 +36,8 @@ install:
   - luarocks install --local lpeg
   - luarocks install --local lua-cjson
   - eval $(luarocks path)
+  - rvm install --binary 2.1.4
+  - rvm use 2.1.4
   - cd $COMPONENT && make install
-rvm:
-  - 2.1.4
 script:
   - make travis
