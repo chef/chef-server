@@ -116,8 +116,15 @@ fields_for_fetch(#oc_chef_cookbook_artifact{org_id = OrgId,
                                             name = Name}) ->
     [OrgId, Name].
 
-list(#oc_chef_cookbook_artifact{org_id = OrgId} = CBA, CallbackFun) ->
-    CallbackFun({list_query(CBA), [OrgId], rows}).
+-spec list(#oc_chef_cookbook_artifact{},
+           chef_object:select_callback()) -> chef_object:select_return().
+list(#oc_chef_cookbook_artifact{org_id = OrgId} = CBA, CallbackFun) when is_function(CallbackFun) ->
+    try CallbackFun({list_query(CBA), [OrgId], rows}) of
+        Results -> Results
+    catch
+        error:E ->
+            {error, E}
+    end.
 
 record_fields(_ApiVersion) ->
     record_info(fields, oc_chef_cookbook_artifact).
