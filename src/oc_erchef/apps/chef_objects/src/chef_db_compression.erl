@@ -38,20 +38,21 @@
                           | 'cookbook_metadata'
                           | 'cookbook_long_desc'
                           | 'chef_cookbook_artifact_version'
-                          | 'cookbook_artifact_metadata'.
+                          | 'cookbook_artifact_metadata'
+                          | 'oc_chef_policy_revision'.
 
 %% Define CHEF_UNCOMPRESSED_NODE_DATA at compile time if your schema requires uncompressed
 %% node data.
 -ifdef(CHEF_UNCOMPRESSED_NODE_DATA).
 %% skip compression of node data for quirk in node table schema.
--spec compress(chef_compressable(), binary()) -> binary().
+-spec compress(chef_compressable(), iodata()) -> binary().
 compress(chef_node, Data) ->
     Data;
 compress(_Type, Data) ->
     zlib:gzip(Data).
 -else.
 %% All types are compressed
--spec compress(chef_compressable(), binary()) -> binary().
+-spec compress(chef_compressable(), iodata()) -> binary().
 compress(_Type, Data) ->
     zlib:gzip(Data).
 -endif.
