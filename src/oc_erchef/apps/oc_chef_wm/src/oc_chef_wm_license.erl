@@ -17,7 +17,6 @@
                            forbidden/2,
                            is_authorized/2,
                            validate_request/3,
-                           {default_malformed_request_message/3, malformed_request_message},
                            {allow_all/2, auth_info},
                            service_available/2]}]).
 
@@ -25,7 +24,9 @@
 -behavior(chef_wm).
 -export([init/1,
          init_resource_state/1,
-         request_type/0]).
+         malformed_request_message/3,
+         request_type/0
+        ]).
 
 %% Our implemented webmachine callbacks
 -export([allowed_methods/2, to_json/2]).
@@ -60,3 +61,7 @@ license_body(State) ->
 
 node_count(#base_state{chef_db_context = DbContext}) ->
     chef_db:count_nodes(DbContext).
+
+-spec malformed_request_message(any(), wm_req(), oc_chef_wm_base:base_state()) -> no_return().
+malformed_request_message(Any, Req, State) ->
+    oc_chef_wm_base:default_malformed_request_message(Any, Req, State).
