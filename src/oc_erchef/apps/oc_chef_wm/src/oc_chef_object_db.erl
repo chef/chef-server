@@ -21,7 +21,9 @@
                     #oc_chef_group{} |
                     #chef_cookbook_version{} |
                     #oc_chef_org_user_association{} |
-                    #oc_chef_org_user_invite{}.
+                    #oc_chef_org_user_invite{} |
+                    #oc_chef_cookbook_artifact_version{} |
+                    #oc_chef_organization{}.
 
 % @doc safely deletes an object from database and solr if appropriate, but
 % returns not_found if the object doesn't exist; and returns an error tuple
@@ -182,4 +184,3 @@ index_queue_delete(TypeName, Id, DbName) ->
 bulk_delete_from_solr(Type, Ids, OrgId) ->
     [ index_queue_delete(Type, Id, OrgId) || Id <- Ids ],
     ok.
-

@@ -230,10 +230,14 @@ to_json(Req, #base_state{ resource_args = org_list,
     case chef_db:list(#oc_chef_org_user_association{user_id = User#chef_user.id}, DbContext) of
         Orgs when is_list(Orgs) ->
             EJson = [{[
-                       {<<"organization">>, {[
-                                              {<<"name">>, ShortName},
-                                              {<<"full_name">>, FullName},
-                                              {<<"guid">>, Guid}]}}]}
+                       {<<"organization">>,
+                        {[
+                          {<<"name">>, ShortName},
+                          {<<"full_name">>, FullName},
+                          {<<"guid">>, Guid}
+                         ]}
+                       }
+                      ]}
                      || [ShortName, FullName, Guid] <- Orgs ],
             {chef_json:encode(EJson), Req, State};
         Error ->

@@ -216,12 +216,18 @@ delete(ObjectRec, #context{server_api_version = ApiVersion, reqid = ReqId}) ->
             DbContext :: #context{}) ->
                    object_rec() |
                    not_found |
+                   forbidden |
                    {error, term()}.
 fetch(ObjectRec, #context{server_api_version = ApiVersion, reqid = ReqId}) ->
     ObjectRec2 = chef_object:set_api_version(ObjectRec, ApiVersion),
     Result = ?SH_TIME(ReqId, chef_sql, fetch, (ObjectRec2)),
     case Result of
         not_found ->
+            Result;
+        %% Technically, this 'forbidden' clause would be caught by Record at the bottom, but
+        %% having it here explicitly makes dialyzer happy, and since when dialyzer is happy,
+        %% we are happy, here it stays
+        forbidden ->
             Result;
         {error, _} ->
             Result;
@@ -240,7 +246,7 @@ fetch(ObjectRec, #context{server_api_version = ApiVersion, reqid = ReqId}) ->
 fetch_multi(RecModule, #context{server_api_version = ApiVersion, reqid = ReqId}, QueryName, QueryParams) ->
     ?SH_TIME(ReqId, chef_sql, fetch_multi, (ApiVersion, RecModule, QueryName, QueryParams)).
 
--spec list(object_rec(), #context{}) -> [binary()] | {error, _}.
+-spec list(object_rec(), #context{}) -> [epgsql:bind_param()] | {error, _}.
 list(StubRec, #context{server_api_version = ApiVersion, reqid = ReqId} = _Ctx) ->
     %% Ensure api version is available to subsequent chef_object callbacks:
     StubRec2 = chef_object:set_api_version(StubRec, ApiVersion),
@@ -400,7 +406,7 @@ cookbook_exists(#context{reqid=ReqId} = DbContext, OrgName, CookbookName) ->
 %% @doc Given a list of cookbook names and versions, return a list of #chef_cookbook_version
 %% objects.  This is used by the depsolver endpoint.
 -spec bulk_fetch_cookbook_versions(DbContext :: #context{}, OrgName :: binary(), [versioned_cookbook()]) -> [#chef_cookbook_version{}] | {error, any()}.
-bulk_fetch_cookbook_versions(#context{reqid = ReqID} = Ctx, OrgName, []) ->
+bulk_fetch_cookbook_versions(#context{}, _OrgName, []) ->
     %% Avoid database calls in the case of an empty run_list
     [];
 bulk_fetch_cookbook_versions(#context{reqid = ReqID} = Ctx, OrgName, VersionedCookbooks) ->

@@ -351,7 +351,9 @@ make_global_admin_group_name(OrgName) ->
 %% TODO: the only global groups are global admins groups and this should only be used for those
 fetch_global_group_authz_id(#oc_chef_authz_context{otto_connection=Server, darklaunch = Darklaunch} = Ctx,
                             OrgName, GroupName) ->
-    RealGroupName = lists:flatten(io_lib:format("~s_~s", [OrgName, GroupName])),
+    RealGroupName = list_to_binary(
+                      lists:flatten(
+                        io_lib:format("~s_~s", [OrgName, GroupName]))),
     %% global admins are strictly related to organizations, so we'll trigger
     %% whether the global admins group is in sql depending on where the org is
     case xdarklaunch_req:is_enabled(<<"couchdb_organizations">>, Darklaunch) of

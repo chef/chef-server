@@ -738,7 +738,7 @@ statements() ->
     {ok, Statements} = file:consult(Path),
     Statements.
 
--spec fetch(chef_object:object_rec()) -> chef_object:object_rec() | not_found | {error, _Why}.
+-spec fetch(chef_object:object_rec()) -> chef_object:object_rec() | not_found | forbidden | {error, _Why}.
 fetch(Record) ->
     chef_object:fetch(Record, fun select_rows/1).
 

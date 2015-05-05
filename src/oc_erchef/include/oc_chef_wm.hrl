@@ -233,7 +233,7 @@
          }).
 
 -record(cookbook_artifacts_state, {
-          oc_chef_cookbook_artifacts :: #oc_chef_cookbook_artifact{}
+          oc_chef_cookbook_artifacts :: [#oc_chef_cookbook_artifact{}]
          }).
 
 -record(data_state, {
@@ -306,7 +306,7 @@
           user_data,
           user_authz_id,
           generated_private_key,
-          chef_user :: #chef_user{}
+          chef_user :: #chef_user{} | not_found
       }).
 
 -record(container_state, {

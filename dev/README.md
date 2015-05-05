@@ -85,6 +85,36 @@ available.
 
 Ruby project dependency loading support coming soon.
 
+### Code Coverage
+
+If you want to run code coverage reports, here's what you need to do .
+
+#### Get Ready!
+in your oc_erchef window run `sync:pause().`. If you don't, your coverage enabled modules will be replaced by sync, and your coverage reports won't generate.
+
+If you only want coverage for a single module, compile a coverage friendly beam like this `cover:compile_beam(Module).`
+
+If you're looking to cover all of our modules, use this
+
+```erlang
+Dirs = file:wildcard("/host/oc_erchef/apps/*/ebin") .
+[cover:compile_beam_dir(Dir) || Dir <- Dirs].
+```
+
+#### You're now "covered"
+Test chef server however you'd like. A good way would be running pedant as described above, but if you want to test a specific scenario, now's your chance.
+
+#### Generate a report
+Once you're done running whatever tests you want to do, you'll need to generate coverage reports.
+
+For each module you want to generate a report for `cover:analyze_to_file(Module, "/root/filename").`
+
+If you want a list comprehension for generaitng coverage reports for all modules, I've got you covered! (see what I did there?! _covered_!)
+
+```erlang
+[cover:analyze_to_file(Mod, filename:join("/root", atom_to_list(Mod)) || Mod <- cover:modules()].
+```
+
 ## Not so quick start
 
 TODO: details of components, terminology, etc. explore more dvm

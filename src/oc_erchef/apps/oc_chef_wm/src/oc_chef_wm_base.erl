@@ -475,7 +475,9 @@ forbidden_message(unverified_org_membership, User, Org) ->
                     #oc_chef_container{} |
                     #oc_chef_group{} |
                     #oc_chef_org_user_association{} |
-                    #oc_chef_org_user_invite{},
+                    #oc_chef_org_user_invite{} |
+                    #oc_chef_cookbook_artifact_version{} |
+                    #oc_chef_org_user_association{},
                     object_id()) -> ok.
 delete_object(DbContext, Object, RequestorId) ->
     oc_chef_object_db:delete(DbContext, Object, RequestorId).

@@ -450,7 +450,7 @@ get_ace_for_entity(RequestorId, AuthzType, Id, AccessMethod) ->
 % Replace the actors and groups of an ace
 % PUT {objects|groups|actors|containers}/:id/acl/:action
 %
--spec set_ace_for_entity(requestor_id(),
+-spec set_ace_for_entity(requestor_id() | 'superuser',
                          AuthzType :: 'actor' | 'object',
                          object_id(),
                          access_method(),

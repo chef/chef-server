@@ -31,12 +31,14 @@
                                    %% fetch/2 can return this
                        | list(object_rec())
                        | object_rec()
-                       |  {error, _}.
+                       | [[tuple()]] %% This is what it looks like when your
+                                     %% ReturnTransform is 'rows'
+                       | {error, _}.
 -type select_callback() :: fun(({ QueryName ::atom(), BindParameters :: list(),
                                   ReturnFieldNames :: [atom()]}
                               | {QueryName :: atom(), BindParameters :: list()}
                               | {QueryName :: atom(), BindParameters :: list(),
-                                 ReturnTransform :: tuple()}) ->
+                                 ReturnTransform :: tuple() | rows}) ->
                                       select_return()).
 -type update_return() :: pos_integer() | not_found | {conflict, _} | {error, _}.
 
@@ -71,7 +73,7 @@
                                     {binary(), ejson_term()} |
                                     {ejson_term(), _}) -> object_rec().
 -callback name(object_rec()) -> binary() | {binary(), binary()}.
--callback id(object_rec()) -> object_id().
+-callback id(object_rec()) -> object_id() | [object_id()].
 -callback org_id(object_rec()) -> object_id() | undefined.
 -callback type_name(object_rec()) -> atom().
 
