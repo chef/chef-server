@@ -216,12 +216,18 @@ delete(ObjectRec, #context{server_api_version = ApiVersion, reqid = ReqId}) ->
             DbContext :: #context{}) ->
                    object_rec() |
                    not_found |
+                   forbidden |
                    {error, term()}.
 fetch(ObjectRec, #context{server_api_version = ApiVersion, reqid = ReqId}) ->
     ObjectRec2 = chef_object:set_api_version(ObjectRec, ApiVersion),
     Result = ?SH_TIME(ReqId, chef_sql, fetch, (ObjectRec2)),
     case Result of
         not_found ->
+            Result;
+        %% Technically, this 'forbidden' clause would be caught by Record at the bottom, but
+        %% having it here explicitly makes dialyzer happy, and since when dialyzer is happy,
+        %% we are happy, here it stays
+        forbidden ->
             Result;
         {error, _} ->
             Result;
