@@ -73,7 +73,7 @@
                                     {binary(), ejson_term()} |
                                     {ejson_term(), _}) -> object_rec().
 -callback name(object_rec()) -> binary() | {binary(), binary()}.
--callback id(object_rec()) -> object_id().
+-callback id(object_rec()) -> object_id() | [object_id()].
 -callback org_id(object_rec()) -> object_id() | undefined.
 -callback type_name(object_rec()) -> atom().
 
