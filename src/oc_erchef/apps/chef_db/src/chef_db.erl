@@ -246,7 +246,7 @@ fetch(ObjectRec, #context{server_api_version = ApiVersion, reqid = ReqId}) ->
 fetch_multi(RecModule, #context{server_api_version = ApiVersion, reqid = ReqId}, QueryName, QueryParams) ->
     ?SH_TIME(ReqId, chef_sql, fetch_multi, (ApiVersion, RecModule, QueryName, QueryParams)).
 
--spec list(object_rec(), #context{}) -> [binary()] | {error, _}.
+-spec list(object_rec(), #context{}) -> [epgsql:bind_param()] | {error, _}.
 list(StubRec, #context{server_api_version = ApiVersion, reqid = ReqId} = _Ctx) ->
     %% Ensure api version is available to subsequent chef_object callbacks:
     StubRec2 = chef_object:set_api_version(StubRec, ApiVersion),
