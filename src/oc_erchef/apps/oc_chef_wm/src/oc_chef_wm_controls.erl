@@ -107,7 +107,7 @@ from_json(Req, #base_state{resource_state = #control_state{control_data = Contro
     Req2 = wrq:set_resp_body(Out, Req),
     {true, Req2, State}.
 
--spec construct_payload(FullControlGroupPayload :: [{binary(), binary()},...],
+-spec construct_payload(FullControlGroupPayload :: {[{binary(), binary()}]},
                         Id   :: binary(),
                         Req :: wm_req(),
                         State :: #base_state{}) -> binary().
