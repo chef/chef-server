@@ -256,10 +256,7 @@ create_object_with_acl(ObjectJson, Type, Req,
                 ContinuationFn(Result);
         {error, forbidden} ->
             {Req1, State1} = oc_chef_wm_base:set_forbidden_msg(create, Req, State),
-            {{halt, 503}, Req1, State1};
-        {error, Error} ->
-            {Req1, State1} = set_error_msg(Error, Req, State),
-            {{halt, 503}, Req1, State1}
+            {{halt, 403}, Req1, State1}
     end.
 finish_org_create({true, Req, #base_state{key_context = #key_context{key_ej = KeyEJ}}}, OrgEJson, State) ->
     PrivateKey = ej:get({<<"private_key">>}, KeyEJ),
@@ -298,8 +295,3 @@ malformed_request_message(Any, _Req, _State) ->
 -spec conflict_message(binary()) -> ejson_term().
 conflict_message(_Name) ->
     {[{<<"error">>, <<"Organization already exists">>}]}.
-
-set_error_msg(Error, Req, State) ->
-    JsonMsg = chef_json:encode({[{<<"error">>, [Error]}]}),
-    Req1 = wrq:set_resp_body(JsonMsg, Req),
-    {Req1, State#base_state{log_msg = Error } }.
