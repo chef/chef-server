@@ -122,8 +122,7 @@ as_string(S) ->
 -spec make_key(OrgId :: object_id(),
                      Checksum :: binary()) -> Key :: string().
 make_key(OrgId, Checksum) ->
-    lists:flatten(["organization-", as_string(OrgId), "/",
-                   "checksum-", as_string(Checksum)]).
+    lists:append(["organization-", as_string(OrgId), "/checksum-", as_string(Checksum)]).
 
 %% @doc Base64-encode an MD5 hex string.
 -spec base64_checksum(Checksum::binary()) -> binary().
