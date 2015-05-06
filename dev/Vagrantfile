@@ -29,11 +29,6 @@ Vagrant.configure("2") do |config|
                   "--nictype2", "virtio"
                   # ^ TODO if platform is mac don't?
     ]
-    vb.customize [
-      "storagectl", :id,
-      "--name", "IDE Controller",
-      "--hostiocache", "on"
-    ]
   end
 
   if provisioning
