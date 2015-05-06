@@ -2,7 +2,10 @@ branches:
   only:
     - master
 cache:
-  bundler: true
+  - apt
+  - directories:
+    - vendor/bundle
+    - $HOME/.luarocks/rocks
 # Turn this back on once luarocks can be installed
 # via the add-ons
 # sudo: false
