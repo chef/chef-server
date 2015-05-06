@@ -5,8 +5,9 @@ require "yaml"
 
 Vagrant.configure("2") do |config|
   provisioning, installer, installer_path, attributes = prepare()
-  config.vm.box     = "oc_erchef-ubuntu-14.04"
-  config.vm.box_url= "https://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_ubuntu-14.04_chef-provisionerless.box"
+  # Use the official Ubuntu 14.04 box
+  # Vagrant will auto resolve the url to download from Atlas
+  config.vm.box = "ubuntu/trusty64"
   config.vm.hostname = "api.chef-server.dev"
   config.vm.network "private_network", ip: "33.33.33.100"
 
