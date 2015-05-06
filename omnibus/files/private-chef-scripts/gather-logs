@@ -141,9 +141,11 @@ fi
 if [[ -f "/etc/lsb-release" ]] && grep -q DISTRIB_ID /etc/lsb-release;
 then
     cp "/etc/lsb-release" "$tmpdir/platform_version.txt"
+    known_platform="ubuntu"
 elif [[ -f "/etc/redhat-release" ]];
 then
     cp "/etc/redhat-release" "$tmpdir/platform_version.txt"
+    known_platform="rhel"
 else
     echo "Platform and version are unknown." > "$tmpdir/platform_version.txt"
 fi
@@ -277,6 +279,25 @@ if [[ $type == 'CS' || $type == 'OSC' ]]; then
     else
 	echo "!!! Migration level file not found  !!!">> "$migration_level_file";
     fi
+fi
+
+#What packages do we have installed on our supported platforms?
+installed_packages_file="$tmpdir/installed-packages.txt"
+installed_packages_grep="grep -i -E (chef|opscode)"
+if [[ $known_platform == 'rhel' ]];
+then
+
+    rpm -qa | $installed_packages_grep >> "$installed_packages_file"
+
+elif [[ $known_platform == 'ubuntu' ]];
+then
+
+    dpkg -l | $installed_packages_grep >> "$installed_packages_file"
+
+else
+
+    echo "!!! Unknown platform !!!" >> "$installed_packages_file"
+
 fi
 
 ##
