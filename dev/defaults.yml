@@ -7,8 +7,8 @@ vm:
     - deps/
     - _rel/
     - chef-mover/rel/mover/
-    - opscode-dev-vm/
-    - chef-docs/ # Huge if you have it checked out!
+      # - opscode-dev-vm/
+      # - chef-docs/ # Huge if you have it checked out!
     - ebin/
     - .eunit/
     - .kitchen/
@@ -20,8 +20,13 @@ vm:
     - "*.vmdk"
     - "*.plt"
     - "*.beam"
-    - relx
+    - logs/
+    - /dev/
+    - .concrete/
+    - relx # we don't want to pull in a mac relx to our linux vm
     - rspec.failures
+  cover:
+    base_output_path: /vagrant/testdata/cover
 
 projects:
   oc_erchef:
@@ -39,9 +44,6 @@ projects:
   oc_bifrost:
     type: erlang
     database: opscode_bifrost
-    build:
-      # higher concurrency appears to cause eunit failures...
-      max_concurrency: 1
     service:
       rel-type: relx
       name:  oc_bifrost
@@ -55,19 +57,13 @@ projects:
       name:  opscode-chef-mover
       cookie: mover
       node: mover@127.0.0.1
-    build:
-      # higher concurrency appears to cause eunit failures...
-      max_concurrency: 1
   bookshelf:
     type: erlang
     service:
       rel-type: relx
-      name:  bookhself
+      name: bookshelf
       cookie: bookshelf
       node: bookshelf@127.0.0.1
-    build:
-      # higher concurrency appears to cause eunit failures...
-      max_concurrency: 1
   omnibus:
     path: "omnibus"
     name: opscode-omnibus

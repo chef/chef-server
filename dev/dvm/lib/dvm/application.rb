@@ -95,11 +95,28 @@ module DVM
       end
 
     end
+
+    # TODO this could be split into subcommands ...
+    option :with_deps, type: :boolean,
+                       aliases: ['-d'],
+                       default: false,
+                       desc: "when enabling coverage for all modules, also include deps"
+    option :raw_output,  type: :boolean,
+                         aliases: ['-r'],
+                         default: false,
+                         desc: "generate raw coverage reports. HTML is the default. Use with 'report'"
+    desc "cover <project> <start|stop|report|reset> [modulename] [-r -d]", "manage runtime code coverage"
+    def cover(project_name, action, modulename = "all")
+      ensure_project(project_name)
+      @projects[project_name].cover(action, modulename, options)
+    end
+
     desc "update <project> <pause|resume>",  "if the  project supports it, pause or resume sync updates in the running instance"
     def update(project_name, action)
       ensure_project(project_name)
       @projects[project_name].update(action)
     end
+
     desc "runit <project> [run-args]", "Run the project"
     def runit(project_name, *args)
       ensure_project(project_name)

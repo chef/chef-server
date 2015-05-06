@@ -1,30 +1,26 @@
-## Copied from opscode-dev-vm/devvm.mk
-## For use with relx erlang projects
+# Very simple make sequence that cleans, compiles and builds a release
+# and does a --dev-mode relx.  In dvm, ct/eunit/dialyzer are expected to be run
+# on the host.  dvm only wants to load the project.
 
-SHELL := /bin/bash
+devvm_distclean:
+	@rm -rf deps $(DEPS_PLT) #distclean
 
-## DEV VM Targets
-DEVVM_PROJ ?= $(notdir $(CURDIR))
-DEVVM_ROOT ?= /srv/piab/mounts/$(DEVVM_PROJ)
-DEVVM_DIR ?= $(DEVVM_ROOT)/_rel/$(PROJ)
+devvm_relclean: devvm_distclean
+	@rm -rf $(RELX_OUTPUT_DIR) # relclean
 
-bummer:
-	@/bin/echo Bummer! If you\'re stuck reading this error message, it\'s not the end of the world!
-	@/bin/echo You\'ll need to Ctrl-C twice to get out of this stuck rake command \(densoneold\)
-	@/bin/echo Then \'rake ssh\' into the box and cd $(DEVVM_ROOT)
-	@/bin/echo Then \'make devvm\' will get you running
+devvm_clean: devvm_relclean
+	@$(REBARC) -j 4  clean #clean
 
-devvm_stop:
-	private-chef-ctl stop $(PROJ)
+devvm_deps: devvm_clean
+	@$(REBARC) -j 4 get-deps # get-deps
 
-devvm_link:
-	rm -f $(DEVVM_DIR)/sys.config
-	ln -s  /var/opt/opscode/$(PROJ)/sys.config $(DEVVM_DIR)/sys.config
+devvm_compile: devvm_deps
+	@$(REBARC) -j 4 compile # compile
 
-devvm: devvm_stop devrel devvm_link
+devvm_relx:
+	curl -Lo relx $(RELX_URL) || wget $(RELX_URL)
+	chmod a+x relx
 
-compile_fast:
-	$(REBARC) compile skip_deps=true
+devvm: devvm_compile devvm_relx
+	@$(RELX) --dev-mode -c $(RELX_CONFIG) -o $(RELX_OUTPUT_DIR) $(RELX_OPTS) # devrel
 
-update: compile_fast
-	@cd _rel/$(PROJ);bin/$(PROJ) restart

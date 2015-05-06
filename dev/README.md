@@ -85,37 +85,34 @@ available.
 
 Ruby project dependency loading support coming soon.
 
-### Code Coverage
+### Coverage Analysis
 
-If you want to run code coverage reports, here's what you need to do .
+Erlang has built-in support for code coverage analaysis which will
+evaluate how often each line of code in erlang modules is hit.  To enable this
+for a full project, use:
 
-#### Get Ready!
-in your oc_erchef window run `sync:pause().`. If you don't, your coverage enabled modules will be replaced by sync, and your coverage reports won't generate.
+    dvm cover PROJECT enable
 
-If you only want coverage for a single module, compile a coverage friendly beam like this `cover:compile_beam(Module).`
+To enable it for a specific module, use:
 
-If you're looking to cover all of our modules, use this
+    dvm cover PROJECT enable MODULE_NAME
 
-```erlang
-Dirs = file:wildcard("/host/oc_erchef/apps/*/ebin") .
-[cover:compile_beam_dir(Dir) || Dir <- Dirs].
-```
+To reset coverage stats for one or all modules:
 
-#### You're now "covered"
-Test chef server however you'd like. A good way would be running pedant as described above, but if you want to test a specific scenario, now's your chance.
+    dvm cover PROJECT reset [MODULE_NAME]
 
-#### Generate a report
-Once you're done running whatever tests you want to do, you'll need to generate coverage reports.
+To write coverage results to file (chef-server/testdata/coverage) use:
 
-For each module you want to generate a report for `cover:analyze_to_file(Module, "/root/filename").`
+    dvm cover PROJECT report [MODULE_NAME]
 
-If you want a list comprehension for generaitng coverage reports for all modules, I've got you covered! (see what I did there?! _covered_!)
+And finally to disable coverage and re-enable automatic code sync:
 
-```erlang
-[cover:analyze_to_file(Mod, filename:join("/root", atom_to_list(Mod)) || Mod <- cover:modules()].
-```
+    dvm cover PROJECT disable
 
-## Not so quick start
+Note that enabling cover will disable automatic compile and load of changed
+modules, and disabling it will turn that back on.
+
+## Not So Quick Start
 
 TODO: details of components, terminology, etc. explore more dvm
 commands?
@@ -144,7 +141,6 @@ common activities:
 * open a console to a running erlang app
 * etop a running erlang app
 * access the DB for a project
-* coming soon: enable coverage for an erlang project
 
 And a few other things.  You can just use `dvm` by itself and a list of
 commands will be generated. You may also want to take a look in

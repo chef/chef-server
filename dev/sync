@@ -25,7 +25,9 @@ while true do
   # TODO how to safely stop any interrupt from passing through to child process
   # before we intercept?
   begin
-    @screen.set_status("Syncing...")
+    # Removing this - having it regularly flickering up and calling attention
+    # to itself has proven annoying...
+    #@screen.set_status("Syncing...")
     r = do_sync
     # Prevent scrolling and resizing from doing ugly things...
     @screen.clear
