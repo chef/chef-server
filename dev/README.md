@@ -12,7 +12,7 @@ sync support) or otherwise made available on the guest VM.
 ## Quick Start
 
 This assumes familiarity with the components of chef-server and that you
-want to
+want to run oc\_erchef off of your local machine.
 
 Requirements:
 
@@ -21,7 +21,10 @@ Requirements:
 * At least one recent Chef Server 12.0.9+ debian package download,
   which you can grab from https://packagecloud.io/chef/current. Note
   that you should download the chef-server-core package, and not run the
-  installer.
+  installer. dvm will then look for the package in either the Downloads dir
+  on your machine or the omnibus/pkg directory under the chef-server repo
+  where dvm is running. You can also set the INSTALLER environment variable
+  to tell dvm where to find the package if it is not in one of those locations.
 * A text editor on your machine.
 * Any time you're doing something with 'dvm' on the VM, make sure
   you've acquired root by using `sudo -i`. Otherwise dvm won't be in your
