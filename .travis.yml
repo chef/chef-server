@@ -41,6 +41,6 @@ install:
   - eval $(luarocks path)
   - rvm install --binary 2.1.4
   - rvm use 2.1.4
-  - cd $COMPONENT && make install
+  - cd $COMPONENT && travis_retry make install
 script:
   - make travis
