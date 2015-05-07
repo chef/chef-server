@@ -92,6 +92,7 @@ dependency "oc-chef-pedant"
 dependency "private-chef-upgrades"
 dependency "private-chef-cookbooks"
 dependency "chef-ha-plugin-config"
+dependency "strip-objects"
 
 package :rpm do
   signing_passphrase ENV['OMNIBUS_RPM_SIGNING_PASSPHRASE']
