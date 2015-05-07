@@ -29,18 +29,26 @@ class Chef
       private
 
       def create!
-        @attributes ||= Chef::JSONCompat.from_json(command("
-          app = Doorkeeper::Application.find_or_create_by(\
-            :name => \"#{new_resource.name}\");\
-          app.update_attributes(\
-            :redirect_uri => \"#{new_resource.redirect_uri}\");\
-          puts app.to_json
-          ")).delete_if { |key| %w[ id created_at updated_at].include? key }
-      end
+        @attributes ||= begin
+          rails_script = <<EOF
+app = Doorkeeper::Application.find_or_create_by(:name => "#{new_resource.name}");
+app.update_attributes(:redirect_uri => "#{new_resource.redirect_uri}");
+puts app.to_json
+EOF
+          # in order to account for rails logging, we take only the last line of output
+          # from the rails runner script. if the logging is parsed as json, we end up
+          # with a difficult-to-comprehend error message that looks like:
+          #
+          # ```
+          # Chef::Exceptions::JSON::ParseError: lexical error: invalid char in json text.
+          #                            I, [2015-05-07T18:26:37.236655
+          #          (right here) ------^
+          # ```
+          json = shell_out!("bin/rails runner -e production '#{rails_script}'",
+                            :cwd => '/opt/opscode/embedded/service/oc_id').stdout.lines.last.chomp
 
-      def command(text)
-        shell_out!("bin/rails runner -e production '#{text}'",
-                   :cwd => '/opt/opscode/embedded/service/oc_id').stdout.chomp
+          Chef::JSONCompat.from_json(json).delete_if { |key| %w[ id created_at updated_at].include? key }
+        end
       end
     end
   end
