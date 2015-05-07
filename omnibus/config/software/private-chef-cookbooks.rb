@@ -56,6 +56,7 @@ build do
     File.open("#{install_dir}/embedded/cookbooks/solo.rb", "w") do |f|
       f.write <<-EOH.gsub(/^ {8}/, '')
         cookbook_path   "#{install_dir}/embedded/cookbooks"
+        cache_path "/var/opt/opscode/local-mode-cache"
         file_cache_path "#{install_dir}/embedded/cookbooks/cache"
         verbose_logging true
         ssl_verify_mode :verify_peer
