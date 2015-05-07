@@ -87,19 +87,24 @@ The following should be installed on the development system and in your path.
 
 ```
 make
-make bundle # this installs dep_selector
 ```
 
 #### Running Tests
 
 ##### Running Integration Tests
 
-`rebar skip_deps=true ct`
+`make ct`
 
 You can see the output of test results by open the itest index files in your browser for the `oc_chef_authz`, `chef_db`, and `oc_chef_wm` apps:
 
 `<path_to_repo>/apps/<app_to_view>/itest/ct_logs/index.html`
 
+You can run individual ct tests by running:
+
+`make ct_<full_file_name_minus_suite>`
+
+For example, if you want to run the tests in `oc_chef_wm_server_api_version_SUITE.erl`, just run `make ct_oc_chef_wm_server_api_version`.
+
 ##### Running Unit Tests
 
-`rebar skip_deps=true eunit`
+`make test`

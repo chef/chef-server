@@ -84,9 +84,11 @@ service_available(Req, #base_state{reqid_header_name = HeaderName} = State) ->
 
 %% @doc Validate the requested X-Ops-Server-API-Version value and populate base_state,
 %% and reply with it as or reply with error if it's not valid.
+%%
+%% If X-Ops-Server-API-Version is not sent, the server assumes an API version of 0.
 -spec server_api_version(undefined|string()) -> api_version() | {error| string()}.
 server_api_version(undefined) ->
-    ?API_MIN_VER;
+    0;
 server_api_version(RequestedVersion) ->
     try list_to_integer(RequestedVersion) of
         Version when Version < ?API_MIN_VER orelse
@@ -106,7 +108,15 @@ invalid_server_api_version_response(Req, State, RequestedVersion) ->
                                              {<<"message">>, Message},
                                              {<<"min_version">>, ?API_MIN_VER},
                                              {<<"max_version">>, ?API_MAX_VER}]}),
-    {{halt, 406}, Req2, State#base_state{darklaunch = no_header, log_msg = LogMsg}}.
+    %% if the RequestedVersion was a valid integer, pass that along so we can parse it in the header response,
+    %% else, pass undefined so we know something invalid was passed.
+    ParsedRequestedVersion = try list_to_integer(RequestedVersion) of
+                                 IntegerRequestedVersion -> IntegerRequestedVersion
+                             catch
+                                 _:_ ->
+                                     bad_value_requested
+                             end,
+    {{halt, 406}, Req2, State#base_state{darklaunch = no_header, log_msg = LogMsg, server_api_version = ParsedRequestedVersion}}.
 
 set_req_contexts(Req, #base_state{reqid = ReqId, server_api_version = ApiVersion} = State) ->
     {GetHeader, State1} = chef_wm_util:get_header_fun(Req, State),
@@ -746,11 +756,15 @@ finish_request(Req, #base_state{reqid = ReqId,
         case Code of
             500 ->
                 % Sanitize response body
-                ErrReq = create_500_response(AnnotatedReq, State),
-                {true, ErrReq, State};
+                ErrReq0 = create_500_response(AnnotatedReq),
+                ErrReq1 = add_api_info_header(ErrReq0, State, undefined),
+                {true, ErrReq1, State};
+            406 ->
+                AnnotatedReq1 = add_api_info_header(AnnotatedReq, State, not_acceptable),
+                {true, AnnotatedReq1, State};
             _ ->
-                 AnnotatedReq1 = add_api_info_header(AnnotatedReq, State),
-                 {true, AnnotatedReq1, State}
+                AnnotatedReq1 = add_api_info_header(AnnotatedReq, State, undefined),
+                {true, AnnotatedReq1, State}
         end
     catch
         X:Y ->
@@ -845,15 +859,15 @@ malformed_request(Req, #base_state{resource_mod=Mod,
             {true, NewReq, State1#base_state{log_msg = Why}}
     end.
 
-
-create_500_response(Req, State) ->
+-spec create_500_response(#wm_reqdata{}) ->
+                                 #wm_reqdata{}.
+create_500_response(Req) ->
     %% sanitize response body
     Msg = <<"internal service error">>,
     Json = chef_json:encode({[{<<"error">>, [Msg]}]}),
     Req1 = wrq:set_resp_header("Content-Type",
                                "application/json", Req),
-    Req2 = add_api_info_header(Req1, State),
-    wrq:set_resp_body(Json, Req2).
+    wrq:set_resp_body(Json, Req1).
 
 %% @doc Extract information from `State' needed to generate the X-Ops-API-Info header value.
 api_info(#base_state{api_version = ApiVersion,
@@ -870,11 +884,53 @@ api_info_header_value(#base_state{}=State) ->
                     {Key, Value} <- api_info(State)],
                 ";").
 
-%% @doc Add the X-Ops-API-Info header to the outgoing response.  This contains server API
+%% @doc Add the X-Ops-Server-API-Version to the outgoing response. This will be of the format:
+%% {"min_version":"<non-negative integer>",
+%% "max_version":"<non-negative integer>",
+%% "request_version":"<integer>",
+%% "response_version":"<integer>"}
+%%
+%% min_version and max_version:
+%%   integers representing the range of API versions the server supports
+%% request_version:
+%%   an integer representing the desired API version from the client via X-Ops-Server-API-Version
+%%   or zero if none was sent. if X-Ops-Server-API-Version contained an invalid value (not an integer),
+%%   then -1 is returned.
+%% response_version:
+%%   an integer representing the API version used by the server to process the request.
+%%   it either matches what the client requested in X-Ops-Server-API-Version or is -1 if a 406 occurred.
+%%
+%% Deprecated: Add the X-Ops-API-Info header to the outgoing response.  This contains server API
 %% version information (useful for maintaining back-compatibility) as well as OTP version
 %% information (more useful for debugging purposes).
-add_api_info_header(Req, State) ->
-    wrq:set_resp_header("X-Ops-API-Info", api_info_header_value(State), Req).
+-spec add_api_info_header(#wm_reqdata{}, #base_state{}, atom()) ->
+                                 #wm_reqdata{}.
+add_api_info_header(Req, #base_state{server_api_version = APIVersion} = State, undefined) ->
+    Req0 = wrq:set_resp_header("X-Ops-API-Info", api_info_header_value(State), Req),
+    HeaderBody = build_api_info_header_body(APIVersion, APIVersion),
+    wrq:set_resp_header("X-Ops-Server-API-Version", HeaderBody, Req0);
+add_api_info_header(Req, #base_state{server_api_version = RequestedVersion} = State, not_acceptable) ->
+    %% indicates the request wasn't processed due to a 406
+    ActualAPIVersion = -1,
+    RequestedAPIVersion = case RequestedVersion of
+                              %% indicates that the client passed something unparsable (non-integer)
+                              bad_value_requested ->
+                                  -1;
+                              _ ->
+                                  RequestedVersion
+                          end,
+    Req0 = wrq:set_resp_header("X-Ops-API-Info", api_info_header_value(State), Req),
+    HeaderBody = build_api_info_header_body(RequestedAPIVersion, ActualAPIVersion),
+    wrq:set_resp_header("X-Ops-Server-API-Version", HeaderBody, Req0).
+-spec build_api_info_header_body(integer(), integer()) ->
+                                 list().
+build_api_info_header_body(RequestedAPIVersion, ActualAPIVersion) ->
+    binary_to_list(chef_json:encode({[
+                                      {min_version, integer_to_binary(?API_MIN_VER)},
+                                      {max_version, integer_to_binary(?API_MAX_VER)},
+                                      {request_version, integer_to_binary(RequestedAPIVersion)},
+                                      {response_version, integer_to_binary(ActualAPIVersion)}
+                                     ]})).
 
 -spec verify_request_signature(#wm_reqdata{}, #base_state{}) ->
                                       {boolean(), #wm_reqdata{}, #base_state{}}.
