@@ -55,7 +55,7 @@ install:
 	@cpanm --notest --quiet App::Sqitch
 
 travis: all
-	PATH=~/perl5/bin:$(PATH) $(REBARC) skip_deps=true ct
+	PATH=~/perl5/bin:$(PATH) $(REBARC) skip_deps=true ct || (cat /home/travis/build/chef/chef-server/src/oc_erchef/apps/*/itest/ct_logs/raw.log && false)
 	$(REBARC) skip_deps=true eunit
 
 DEVVM_DIR = $(DEVVM_ROOT)/_rel/oc_erchef
