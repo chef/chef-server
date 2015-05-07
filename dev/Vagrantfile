@@ -133,20 +133,33 @@ def host_timezone
   require "time"
   # Note that we have to reverse the offset sign if we're using Etc/GMT,
   # reference: http://en.wikipedia.org/wiki/Tz_database#Area
-#  offset = (Time.zone_offset(Time.now.zone) / 3600) * -1
-#  zonesuffix = offset >= 0 ? "+#{offset.to_s}" : "#{offset.to_s}"
-#  "Etc/GMT#{zonesuffix}"
+  #  offset = (Time.zone_offset(Time.now.zone) / 3600) * -1
+  #  zonesuffix = offset >= 0 ? "+#{offset.to_s}" : "#{offset.to_s}"
+  #  "Etc/GMT#{zonesuffix}"
   #  Sigh - sqitch doesn't like the above format and dies.
   if /darwin/ =~ RUBY_PLATFORM
+    host_timezone_osx
+  else # TODO windows if we otherwise check out for windows.
+    host_timezone_linux
+  end
+end
 
+def host_timezone_linux
+  File.read("/etc/timezone").chomp
+end
+
+def host_timezone_osx
+  if File.exists?(".cached_tz")
+    puts "Reading timezone from cache(.cached_tz)"
+    File.read(".cached_tz")
+  else
     puts "Notice: using sudo to get timezone, no updates being made"
     puts "Executing: sudo systemsetup -gettimezone"
     # Time Zone: Blah/Blah
-    `sudo systemsetup -gettimezone`.chomp.split(":")[1].strip
-  else # TODO windows if we otherwise check out for windows.
-    `cat /etc/timezone`.chomp
+    tz = `sudo systemsetup -gettimezone`.chomp.split(":")[1].strip
+    File.write(".cached_tz", tz)
+    tz
   end
-  #
 end
 
 # this is here in order to avoid having to download a chef provisioner -
