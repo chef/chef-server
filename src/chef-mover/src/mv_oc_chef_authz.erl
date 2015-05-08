@@ -267,8 +267,8 @@ set_acl(RequestorId, AuthzType, ObjectId, [{Method, ACE}|Rest]) when AuthzType =
         ok ->
             set_acl(RequestorId, AuthzType, ObjectId, Rest);
         {error, Reason} ->
-            error_logger:error_msg("Error setting ACE ~p for method ~p on ~p ~p for requestor ~p: ~p~n",
-                                   [ACE, Method, AuthzType, ObjectId, RequestorId, Reason]),
+            lager:error("Error setting ACE ~p for method ~p on ~p ~p for requestor ~p: ~p~n",
+                        [ACE, Method, AuthzType, ObjectId, RequestorId, Reason]),
             {error, Reason}
     end.
 
