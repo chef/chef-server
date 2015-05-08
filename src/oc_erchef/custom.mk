@@ -4,7 +4,7 @@ PROJ = oc_erchef
 DEVVM_PROJ = opscode-erchef
 
 ALL_HOOK = bundle
-
+CLEAN_HOOK = bundle_clean
 REL_HOOK = compile bundle
 
 CT_DIR = common_test
@@ -46,9 +46,12 @@ clean_ct:
 ## Pull in devvm.mk for relxy goodness
 include devvm.mk
 
+bundle_clean:
+	@cd apps/chef_objects/priv/depselector_rb; rm -rf .bundle
+
 bundle:
 	@echo bundling up depselector, This might take a while...
-	@cd apps/chef_objects/priv/depselector_rb; rm -rf .bundle; bundle install --deployment --path .bundle
+	@cd apps/chef_objects/priv/depselector_rb; bundle install --deployment --path .bundle
 
 install:
 	@./rebar get-deps -C rebar.config.lock
@@ -56,6 +59,5 @@ install:
 
 travis: all
 	PATH=~/perl5/bin:$(PATH) $(REBARC) skip_deps=true ct
-	$(REBARC) skip_deps=true eunit
 
 DEVVM_DIR = $(DEVVM_ROOT)/_rel/oc_erchef

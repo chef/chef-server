@@ -129,7 +129,7 @@ get-rebar: $(REBAR)
 	@touch $@
 
 # Clean ebin and .eunit of this project
-clean:
+clean: $(CLEAN_HOOK)
 	@$(REBARC) clean skip_deps=true
 
 # Clean this project and all deps
