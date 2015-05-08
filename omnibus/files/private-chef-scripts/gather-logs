@@ -9,26 +9,32 @@ POSTGRESQL_UNIX_USER=${POSTGRESQL_UNIX_USER:=opscode-pgsql}
 modified_within_last_x_minutes=180
 tail_lines=10000
 
-type='EC'
+type='CS'
 if [[ -n $1 ]];
 then
     type=$1
 fi
 
-if [[ $type == 'EC' ]];
+#Lets have a way to avoid things that take a while, like DNS
+if [[ -n $2  ]];
+then
+    testing=true
+fi
+
+if [[ $type == 'CS' ]];
 then
     path='opscode'
     ctl_cmd='private-chef-ctl'
-    config_name='chef-server.rb'
-    ha=$(egrep -qs 'topology\s+.*ha' /etc/opscode/chef-server.rb)$?
+    config_name='*chef*.rb'
+    ha=$(egrep -qs 'topology[[:space:]]+.*ha' /etc/opscode/*chef*.rb)$?
 
     if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
     then
-	echo "ERROR: Enterprise Chef server may not be installed."
-	exit 1
+        echo "ERROR: Enterprise or Chef Server may not be installed."
+        exit 1
     fi
 
-    echo "Gathering logs from Enterprise Chef server."
+    echo "Gathering logs from Enterprise or Chef Server."
 elif [[ $type == 'OSC' ]];
 then
     path='chef-server'
@@ -37,15 +43,29 @@ then
 
     if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
     then
-	echo "ERROR: Open Source Chef server may not be installed."
-	exit 1
+        echo "ERROR: Open Source Chef server may not be installed."
+        exit 1
     fi
 
     echo "Gathering logs from Open Source Chef server."
+elif [[ $type == 'Analytics' ]];
+then
+    path='opscode-analytics'
+    ctl_cmd='opscode-analytics-ctl'
+    config_name='opscode-analytics.rb'
+
+    if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
+    then
+        echo "ERROR: Analytics server may not be installed."
+        exit 1
+    fi
+
+    echo "Gathering logs from Analytics server."
 else
-    echo "Usage: gather-logs [ EC | OSC ]"
-    echo "EC - Enterprise Chef server (default)"
+    echo "Usage: gather-logs [ CS | OSC | Analytics ]"
+    echo "CS - Enterprise or Chef Server (default)"
     echo "OSC - Open Source Chef server"
+    echo "Analytics - Opscode Analytics server"
     exit 1
 fi
 
@@ -55,35 +75,38 @@ tmpdir="$(mktemp -d)/$hostname/$timestamp"
 #RHEL5 has ip and other tools here
 PATH=$PATH:/bin:/sbin
 
+PATH=/opt/$path/embedded/bin:$PATH
+
 mkdir -p "$tmpdir"
 
-for i in /opt/$path*/version-manifest.txt \
-    /opt/$path/pc-version.txt \
-    /etc/$path/$config_name \
-    /etc/$path/chef-server-running.json \
-    /var/log/syslog \
-    /var/log/messages; do
+for i in /opt/{chef,$path}*/version-manifest.txt \
+              /opt/$path/pc-version.txt \
+              /etc/$path/$config_name \
+              /etc/${path}*/*-running.json \
+              /var/opt/$path/rabbitmq/log/*.log \
+              /var/log/syslog \
+              /var/log/messages; do
     if [[ -e "$i" ]]; then
-	mkdir -p "$tmpdir/`dirname ${i:1}`"
-	tail -"$tail_lines" "$i" > "$tmpdir/${i:1}"
+        mkdir -p "$tmpdir/`dirname ${i:1}`"
+        tail -"$tail_lines" "$i" > "$tmpdir/${i:1}"
     fi
 done
 
-for i in `find /var/log/$path*/ -type f -mmin -"$modified_within_last_x_minutes"`; do
+for i in `find /var/log/${path}* -type f -mmin -"$modified_within_last_x_minutes"`; do
     if [[ -e "$i" ]]; then
-	mkdir -p "$tmpdir/`dirname ${i:1}`"
-	tail -"$tail_lines" "$i" > "$tmpdir/${i:1}"
+        mkdir -p "$tmpdir/`dirname ${i:1}`"
+        tail -"$tail_lines" "$i" > "$tmpdir/${i:1}"
     fi
 done
 
 $ctl_cmd status > "$tmpdir/$ctl_cmd"_status.txt
 
-if [[ ($type == 'EC') && ($ha == 0) ]]; then
+if [[ ($type == 'CS') && ($ha == 0) ]]; then
     for i in /var/log/$path/keepalived/cluster.log /proc/drbd; do
-	if [[ -e "$i" ]]; then
-	    mkdir -p "$tmpdir/`dirname ${i:1}`"
-	    tail -"$tail_lines" "$i" > "$tmpdir/${i:1}"
-	fi
+        if [[ -e "$i" ]]; then
+            mkdir -p "$tmpdir/`dirname ${i:1}`"
+            tail -"$tail_lines" "$i" > "$tmpdir/${i:1}"
+        fi
     done
 
     $ctl_cmd ha-status > "$tmpdir/$ctl_cmd"_ha-status.txt
@@ -98,18 +121,34 @@ fi
 # would be cool, but my sense is that this is OK for now.
 
 if [[ -S "/tmp/.s.PGSQL.5432" ]]; then
-    # su - $USER -c "psql -c 'SQL STATEMEENT'" > "$log"
-    su - $POSTGRESQL_UNIX_USER -c "/opt/$path/embedded/bin/psql opscode_chef -c 'SELECT CURRENT_TIMESTAMP;'" > "$tmpdir/pg_stat_activity.txt"
-    su - $POSTGRESQL_UNIX_USER -c "/opt/$path/embedded/bin/psql opscode_chef -c 'SELECT * FROM pg_stat_activity;'" >> "$tmpdir/pg_stat_activity.txt"
+    if [[ $type == 'CS' ]];
+    then
+        echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | su -l $POSTGRESQL_UNIX_USER -c 'psql opscode_chef' > "$tmpdir/pg_stat_activity.txt"
+
+        echo "SELECT * FROM sqitch.tags;" | su -l $POSTGRESQL_UNIX_USER -c 'psql opscode_chef' > "$tmpdir/opscode_chef_sqitch_tags.txt"
+        echo "SELECT * FROM sqitch.tags;" | su -l $POSTGRESQL_UNIX_USER -c 'psql bifrost' > "$tmpdir/bifrost_sqitch_tags.txt"
+
+        su -m $POSTGRESQL_UNIX_USER -c 'ulimit -a' > "$tmpdir/ulimit_a_opscode-pgsql.txt"
+    fi
+    if [[ $type == 'Analytics' ]];
+    then
+        echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | su -l chef-pgsql -c 'psql actions' > "$tmpdir/pg_stat_activity.txt"
+
+        echo "SELECT * FROM schema_migrations;" | su -l chef-pgsql -c 'psql actions' > "$tmpdir/actions_schema_migrations.txt"
+
+        su -m chef-pgsql -c 'ulimit -a'> "$tmpdir/ulimit_a_chef-pgsql.txt"
+    fi
 fi
 
 # Retrieve Platform and Platform Version
 if [[ -f "/etc/lsb-release" ]] && grep -q DISTRIB_ID /etc/lsb-release;
 then
     cp "/etc/lsb-release" "$tmpdir/platform_version.txt"
+    known_platform="ubuntu"
 elif [[ -f "/etc/redhat-release" ]];
 then
     cp "/etc/redhat-release" "$tmpdir/platform_version.txt"
+    known_platform="rhel"
 else
     echo "Platform and version are unknown." > "$tmpdir/platform_version.txt"
 fi
@@ -126,15 +165,40 @@ ps fauxww > "$tmpdir/ps_fauxww.txt"
 
 df -h >  "$tmpdir/df_h.txt"
 
+df -i >  "$tmpdir/df_i.txt"
+
+if [[ -e /opt/opscode-manage/bin/opscode-manage-ctl ]];
+then
+    /opt/opscode-manage/bin/opscode-manage-ctl status > "$tmpdir/opscode-manage-ctl_status.txt"
+    found_manage=true
+fi
+
+if [[ -e /opt/opscode-reporting/bin/opscode-reporting-ctl ]];
+then
+    /opt/opscode-reporting/bin/opscode-reporting-ctl status > "$tmpdir/opscode-reporting-ctl_status.txt"
+    found_reporting=true
+fi
+
+su -m opscode -c 'ulimit -a' > "$tmpdir/ulimit_a_opscode.txt"
+
 ip addr show > "$tmpdir/ip_addr_show.txt"
 
 # ss(8) is the command for socket statistics that replaces netstat
 #RHEL5 only has netstat
 if which ss > /dev/null 2>&1
 then
-  ss -ontap > "$tmpdir/ss_ontap.txt"
+    ss -ontap > "$tmpdir/ss_ontap.txt"
 else
-  netstat -alntp > "$tmpdir/netstat_alntp.txt"
+    netstat -alntp > "$tmpdir/netstat_alntp.txt"
+fi
+
+if grep ':5672 .* LISTEN .*beam.smp' "$tmpdir/netstat_alntp.txt" > /dev/null 2>&1 || \
+       grep -q 'LISTEN .*:5672 .*beam.smp' "$tmpdir/ss_ontap.txt" > /dev/null 2>&1;
+then
+    mkdir -p "$tmpdir/rabbitmq_vhosts"
+    for i in $(rabbitmqctl list_vhosts -q | grep -v '^/$'); do
+        rabbitmqctl list_queues -p $i > "$tmpdir/rabbitmq_vhosts/`basename $i`"
+    done
 fi
 
 sysctl -a > "$tmpdir/sysctl_a.txt" 2>&1
@@ -142,35 +206,158 @@ sysctl -a > "$tmpdir/sysctl_a.txt" 2>&1
 dmesg > "$tmpdir/dmesg.txt"
 
 function add_footer (){
-  echo "---" >> "$1"
-  echo ""    >> "$1"
+    echo "---" >> "$1"
+    echo ""    >> "$1"
 }
 
-name_resolution_file="$tmpdir/name-resolution.txt"
+if [[ -z $testing ]];
+then
 
-if which dig > /dev/null 2>&1; then
-    echo '## dig hostname -f' > "$name_resolution_file"
-    dig `hostname -f` >> "$name_resolution_file"
+    name_resolution_file="$tmpdir/name-resolution.txt"
+
+    if which dig > /dev/null 2>&1; then
+        echo '## dig hostname -f' > "$name_resolution_file"
+        dig `hostname -f` >> "$name_resolution_file"
+        add_footer "$name_resolution_file"
+    fi
+
+    echo '## /etc/resolv.conf' >> "$name_resolution_file"
+    cat /etc/resolv.conf >> "$name_resolution_file"
+    add_footer "$name_resolution_file"
+
+    echo '## ping hostname' >> "$name_resolution_file"
+    ping -c 2 `hostname` >> "$name_resolution_file"
+    add_footer "$name_resolution_file"
+
+    echo '## ping hostname -f' >> "$name_resolution_file"
+    ping -c 2 `hostname -f` >> "$name_resolution_file"
+    add_footer "$name_resolution_file"
+
+    echo '## /etc/hosts' >> "$name_resolution_file"
+    cat /etc/hosts >> "$name_resolution_file"
+    add_footer "$name_resolution_file"
+
 fi
-add_footer "$name_resolution_file"
 
-echo '## /etc/resolv.conf' >> "$name_resolution_file"
-cat /etc/resolv.conf >> "$name_resolution_file"
-add_footer "$name_resolution_file"
+if [[ $type == 'CS' ]];
+then
+    fqdn="api_fqdn"
+    backend_vip="backend_vip"
+    config_file_path="/etc/opscode/chef-server.rb"
+elif [[ $type == 'Analytics' ]];
+then
+    fqdn="analytics_fqdn"
+    backend_vip="backend_vip"
+    config_file_path="/etc/opscode-analytics/opscode-analytics.rb"
+fi
+tempname=`grep -E $fqdn $config_file_path | cut -d \" -f2`
+backend_fqdn=`grep -E $backend_vip $config_file_path | cut -d \" -f2`
 
-echo '## ping hostname' >> "$name_resolution_file"
-ping -c 2 `hostname` >> "$name_resolution_file"
-add_footer "$name_resolution_file"
+#Didnt find a hostname above, so fallback
+if [[ -z $tempname ]];
+then
+    tempname=$hostname
+fi
 
-echo '## ping hostname -f' >> "$name_resolution_file"
-ping -c 2 `hostname -f` >> "$name_resolution_file"
-add_footer "$name_resolution_file"
+if [[ -z $testing ]];
+then
 
-echo '## /etc/hosts' >> "$name_resolution_file"
-cat /etc/hosts >> "$name_resolution_file"
-add_footer "$name_resolution_file"
+    echo '## Resolved Name + Time' >> "$name_resolution_file"
+    echo $tempname >> "$name_resolution_file"
+    for interval in `seq 1 5`; do
+        { time /opt/$path/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$tempname\")" ; } >> "$name_resolution_file" 2>&1
+        sleep 2;
+    done
 
-tar -C "${tmpdir%/*/*}" -cjf "$hostname-$timestamp.tbz2" "$hostname/$timestamp/"
+    echo $backend_fqdn >> "$name_resolution_file"
+    for interval in `seq 1 5`; do
+        { time /opt/$path/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$backend_fqdn\")" ; } >> "$name_resolution_file" 2>&1
+        sleep 2;
+    done
+
+fi
+
+for fileperms in \
+    /var/opt/$path* \
+        /var/log/$path*; do
+    ls -altuhR "$fileperms" >> "$tmpdir/perms.txt"
+done
+
+if [[ $type == 'CS' || $type == 'OSC' ]]; then
+    migration_level_file="$tmpdir/migration-level.txt"
+    migration_level_file_location="/var/opt/$path/upgrades/migration-level"
+    if [[ -f $migration_level_file_location  ]]; then
+        cat $migration_level_file_location >> "$migration_level_file"
+    else
+        echo "!!! Migration level file not found  !!!">> "$migration_level_file";
+    fi
+fi
+
+#What packages do we have installed on our supported platforms?
+installed_packages_file="$tmpdir/installed-packages.txt"
+installed_packages_grep="grep -i -E (chef|opscode)"
+if [[ $known_platform == 'rhel' ]];
+then
+
+    rpm -qa | $installed_packages_grep >> "$installed_packages_file"
+
+elif [[ $known_platform == 'ubuntu' ]];
+then
+
+    dpkg -l | $installed_packages_grep >> "$installed_packages_file"
+
+else
+
+    echo "!!! Unknown platform !!!" >> "$installed_packages_file"
+
+fi
+
+##
+## Plain entries to construct reporting passwords for comparison
+## echo "select passwd from pg_shadow where usename='opscode_reporting';" | su - $POSTGRESQL_UNIX_USER -c 'psql -U opscode-pgsql postgres -t -A' | sed 's/md5//' >> "$service_passwords_file"
+## echo "select passwd from pg_shadow where usename='opscode_reporting_ro';" | su - $POSTGRESQL_UNIX_USER -c 'psql -U opscode-pgsql postgres -t -A' | sed 's/md5//' >> "$service_passwords_file"
+## grep sql_password /etc/opscode-reporting/opscode-reporting-running.json | sed -e 's/^.*"\(.*\)",$/\1opscode_reporting/' | tr -d '\n' | md5sum | cut -d ' ' -f1 >> "$service_passwords_file"
+## grep db_pass /var/opt/opscode-reporting/opscode-reporting/etc/sys.config | sed 's/^.*, "\(.*\)".*/\1opscode_reporting/' |tr -d '\n' | md5sum | cut -d ' ' -f1 >> "$service_passwords_file"
+## grep sql_ro_password /etc/opscode-reporting/opscode-reporting-running.json | sed -e 's/^.*"\(.*\)",$/\1opscode_reporting_ro/' | tr -d '\n' | md5sum | cut -d ' ' -f1 >> "$service_passwords_file"
+##
+##
+if [[ $type == 'CS' && $found_reporting ]];
+then
+    service_passwords_file="$tmpdir/service-passwords.txt"
+    db_check="echo select passwd from pg_shadow where usename=\'first\'\; | su - $POSTGRESQL_UNIX_USER -c 'psql -U opscode-pgsql postgres -t -A' | sed 's/md5//'"
+    opscode_reporting_password=`echo $db_check | sed s@first@opscode_reporting@`
+    opscode_reporting_password_ro=`echo $db_check | sed s@first@opscode_reporting_ro@`
+
+    file_check="grep passspot filename | sed 's/^.*\"\(.*\)\".*/\1sedfirst/' |tr -d '\n' | md5sum | cut -d ' ' -f1"
+    opscode_reporting_service=`echo $file_check | sed 's@passspot@db_pass@;s@filename@/var/opt/opscode-reporting/opscode-reporting/etc/sys.config@;s@sedfirst@opscode_reporting@'`
+
+    opscode_reporting_etc=`echo $file_check | sed 's@passspot@sql_password@;s@filename@/etc/opscode-reporting/opscode-reporting-running.json@;s@sedfirst@opscode_reporting@'`
+    opscode_reporting_etc_ro=`echo $file_check | sed 's@passspot@sql_ro_password@;s@filename@/etc/opscode-reporting/opscode-reporting-running.json@;s@sedfirst@opscode_reporting_ro@'`
+
+    echo '## opscode-reporting' >> "$service_passwords_file"
+    echo '-- opscode-reporting pass in DB' >> "$service_passwords_file"
+    echo `eval $opscode_reporting_password` >> "$service_passwords_file"
+    add_footer "$service_passwords_file"
+
+    echo '-- opscode-reporting_ro pass in DB' >> "$service_passwords_file"
+    echo `eval $opscode_reporting_password_ro` >> "$service_passwords_file"
+    add_footer "$service_passwords_file"
+
+    echo '-- opscode-reporting pass service config file /var/opt/opscode-reporting/opscode-reporting/etc/sys.config' >> "$service_passwords_file"
+    echo `eval $opscode_reporting_service` >> "$service_passwords_file"
+    add_footer "$service_passwords_file"
+
+    echo '-- opscode-reporting pass etc config file /etc/opscode-reporting/opscode-reporting-running.json' >> "$service_passwords_file"
+    echo `eval $opscode_reporting_etc` >> "$service_passwords_file"
+    add_footer "$service_passwords_file"
+
+    echo '-- opscode-reporting_ro pass etc config file' >> "$service_passwords_file"
+    echo `eval $opscode_reporting_etc_ro` >> "$service_passwords_file"
+    add_footer "$service_passwords_file"
+
+fi
+
+tar -C "${tmpdir%/*/*}" -cjpf "$hostname-$timestamp.tbz2" "$hostname/$timestamp/"
 
 rm -rf "${tmpdir%/*/*}"
 
