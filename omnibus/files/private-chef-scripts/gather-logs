@@ -30,11 +30,11 @@ then
 
     if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
     then
-	echo "ERROR: Enterprise or Chef server may not be installed."
-	exit 1
+        echo "ERROR: Enterprise or Chef Server may not be installed."
+        exit 1
     fi
 
-    echo "Gathering logs from Enterprise or Chef server."
+    echo "Gathering logs from Enterprise or Chef Server."
 elif [[ $type == 'OSC' ]];
 then
     path='chef-server'
@@ -43,8 +43,8 @@ then
 
     if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
     then
-	echo "ERROR: Open Source Chef server may not be installed."
-	exit 1
+        echo "ERROR: Open Source Chef server may not be installed."
+        exit 1
     fi
 
     echo "Gathering logs from Open Source Chef server."
@@ -56,14 +56,14 @@ then
 
     if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
     then
-       echo "ERROR: Analytics server may not be installed."
-       exit 1
+        echo "ERROR: Analytics server may not be installed."
+        exit 1
     fi
 
     echo "Gathering logs from Analytics server."
 else
     echo "Usage: gather-logs [ CS | OSC | Analytics ]"
-    echo "CS - Enterprise or Chef server (default)"
+    echo "CS - Enterprise or Chef Server (default)"
     echo "OSC - Open Source Chef server"
     echo "Analytics - Opscode Analytics server"
     exit 1
@@ -80,22 +80,22 @@ PATH=/opt/$path/embedded/bin:$PATH
 mkdir -p "$tmpdir"
 
 for i in /opt/{chef,$path}*/version-manifest.txt \
-    /opt/$path/pc-version.txt \
-    /etc/$path/$config_name \
-    /etc/${path}*/*-running.json \
-    /var/opt/$path/rabbitmq/log/*.log \
-    /var/log/syslog \
-    /var/log/messages; do
+              /opt/$path/pc-version.txt \
+              /etc/$path/$config_name \
+              /etc/${path}*/*-running.json \
+              /var/opt/$path/rabbitmq/log/*.log \
+              /var/log/syslog \
+              /var/log/messages; do
     if [[ -e "$i" ]]; then
-	mkdir -p "$tmpdir/`dirname ${i:1}`"
-	tail -"$tail_lines" "$i" > "$tmpdir/${i:1}"
+        mkdir -p "$tmpdir/`dirname ${i:1}`"
+        tail -"$tail_lines" "$i" > "$tmpdir/${i:1}"
     fi
 done
 
 for i in `find /var/log/${path}* -type f -mmin -"$modified_within_last_x_minutes"`; do
     if [[ -e "$i" ]]; then
-	mkdir -p "$tmpdir/`dirname ${i:1}`"
-	tail -"$tail_lines" "$i" > "$tmpdir/${i:1}"
+        mkdir -p "$tmpdir/`dirname ${i:1}`"
+        tail -"$tail_lines" "$i" > "$tmpdir/${i:1}"
     fi
 done
 
@@ -103,10 +103,10 @@ $ctl_cmd status > "$tmpdir/$ctl_cmd"_status.txt
 
 if [[ ($type == 'CS') && ($ha == 0) ]]; then
     for i in /var/log/$path/keepalived/cluster.log /proc/drbd; do
-	if [[ -e "$i" ]]; then
-	    mkdir -p "$tmpdir/`dirname ${i:1}`"
-	    tail -"$tail_lines" "$i" > "$tmpdir/${i:1}"
-	fi
+        if [[ -e "$i" ]]; then
+            mkdir -p "$tmpdir/`dirname ${i:1}`"
+            tail -"$tail_lines" "$i" > "$tmpdir/${i:1}"
+        fi
     done
 
     $ctl_cmd ha-status > "$tmpdir/$ctl_cmd"_ha-status.txt
@@ -123,21 +123,21 @@ fi
 if [[ -S "/tmp/.s.PGSQL.5432" ]]; then
     if [[ $type == 'CS' ]];
     then
-	echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | su -l $POSTGRESQL_UNIX_USER -c 'psql opscode_chef' > "$tmpdir/pg_stat_activity.txt"
+        echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | su -l $POSTGRESQL_UNIX_USER -c 'psql opscode_chef' > "$tmpdir/pg_stat_activity.txt"
 
-	echo "SELECT * FROM sqitch.tags;" | su -l $POSTGRESQL_UNIX_USER -c 'psql opscode_chef' > "$tmpdir/opscode_chef_sqitch_tags.txt"
-	echo "SELECT * FROM sqitch.tags;" | su -l $POSTGRESQL_UNIX_USER -c 'psql bifrost' > "$tmpdir/bifrost_sqitch_tags.txt"
+        echo "SELECT * FROM sqitch.tags;" | su -l $POSTGRESQL_UNIX_USER -c 'psql opscode_chef' > "$tmpdir/opscode_chef_sqitch_tags.txt"
+        echo "SELECT * FROM sqitch.tags;" | su -l $POSTGRESQL_UNIX_USER -c 'psql bifrost' > "$tmpdir/bifrost_sqitch_tags.txt"
 
-	su -m $POSTGRESQL_UNIX_USER -c 'ulimit -a' > "$tmpdir/ulimit_a_opscode-pgsql.txt"
+        su -m $POSTGRESQL_UNIX_USER -c 'ulimit -a' > "$tmpdir/ulimit_a_opscode-pgsql.txt"
     fi
-   if [[ $type == 'Analytics' ]];
-   then
-      echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | su -l chef-pgsql -c 'psql actions' > "$tmpdir/pg_stat_activity.txt"
+    if [[ $type == 'Analytics' ]];
+    then
+        echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | su -l chef-pgsql -c 'psql actions' > "$tmpdir/pg_stat_activity.txt"
 
-      echo "SELECT * FROM schema_migrations;" | su -l chef-pgsql -c 'psql actions' > "$tmpdir/actions_schema_migrations.txt"
+        echo "SELECT * FROM schema_migrations;" | su -l chef-pgsql -c 'psql actions' > "$tmpdir/actions_schema_migrations.txt"
 
-      su -m chef-pgsql -c 'ulimit -a'> "$tmpdir/ulimit_a_chef-pgsql.txt"
-   fi
+        su -m chef-pgsql -c 'ulimit -a'> "$tmpdir/ulimit_a_chef-pgsql.txt"
+    fi
 fi
 
 # Retrieve Platform and Platform Version
@@ -169,14 +169,14 @@ df -i >  "$tmpdir/df_i.txt"
 
 if [[ -e /opt/opscode-manage/bin/opscode-manage-ctl ]];
 then
-   /opt/opscode-manage/bin/opscode-manage-ctl status > "$tmpdir/opscode-manage-ctl_status.txt"
-  found_manage=true
+    /opt/opscode-manage/bin/opscode-manage-ctl status > "$tmpdir/opscode-manage-ctl_status.txt"
+    found_manage=true
 fi
 
 if [[ -e /opt/opscode-reporting/bin/opscode-reporting-ctl ]];
 then
-   /opt/opscode-reporting/bin/opscode-reporting-ctl status > "$tmpdir/opscode-reporting-ctl_status.txt"
-   found_reporting=true
+    /opt/opscode-reporting/bin/opscode-reporting-ctl status > "$tmpdir/opscode-reporting-ctl_status.txt"
+    found_reporting=true
 fi
 
 su -m opscode -c 'ulimit -a' > "$tmpdir/ulimit_a_opscode.txt"
@@ -197,7 +197,7 @@ if grep ':5672 .* LISTEN .*beam.smp' "$tmpdir/netstat_alntp.txt" > /dev/null 2>&
 then
     mkdir -p "$tmpdir/rabbitmq_vhosts"
     for i in $(rabbitmqctl list_vhosts -q | grep -v '^/$'); do
-	rabbitmqctl list_queues -p $i > "$tmpdir/rabbitmq_vhosts/`basename $i`"
+        rabbitmqctl list_queues -p $i > "$tmpdir/rabbitmq_vhosts/`basename $i`"
     done
 fi
 
@@ -206,8 +206,8 @@ sysctl -a > "$tmpdir/sysctl_a.txt" 2>&1
 dmesg > "$tmpdir/dmesg.txt"
 
 function add_footer (){
-  echo "---" >> "$1"
-  echo ""    >> "$1"
+    echo "---" >> "$1"
+    echo ""    >> "$1"
 }
 
 if [[ -z $testing ]];
@@ -216,9 +216,9 @@ then
     name_resolution_file="$tmpdir/name-resolution.txt"
 
     if which dig > /dev/null 2>&1; then
-	echo '## dig hostname -f' > "$name_resolution_file"
-	dig `hostname -f` >> "$name_resolution_file"
-	add_footer "$name_resolution_file"
+        echo '## dig hostname -f' > "$name_resolution_file"
+        dig `hostname -f` >> "$name_resolution_file"
+        add_footer "$name_resolution_file"
     fi
 
     echo '## /etc/resolv.conf' >> "$name_resolution_file"
@@ -265,21 +265,21 @@ then
     echo '## Resolved Name + Time' >> "$name_resolution_file"
     echo $tempname >> "$name_resolution_file"
     for interval in `seq 1 5`; do
-	{ time /opt/$path/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$tempname\")" ; } >> "$name_resolution_file" 2>&1
-	sleep 2;
+        { time /opt/$path/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$tempname\")" ; } >> "$name_resolution_file" 2>&1
+        sleep 2;
     done
 
     echo $backend_fqdn >> "$name_resolution_file"
     for interval in `seq 1 5`; do
-	{ time /opt/$path/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$backend_fqdn\")" ; } >> "$name_resolution_file" 2>&1
-	sleep 2;
+        { time /opt/$path/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$backend_fqdn\")" ; } >> "$name_resolution_file" 2>&1
+        sleep 2;
     done
 
 fi
 
 for fileperms in \
     /var/opt/$path* \
-    /var/log/$path*; do
+        /var/log/$path*; do
     ls -altuhR "$fileperms" >> "$tmpdir/perms.txt"
 done
 
@@ -287,9 +287,9 @@ if [[ $type == 'CS' || $type == 'OSC' ]]; then
     migration_level_file="$tmpdir/migration-level.txt"
     migration_level_file_location="/var/opt/$path/upgrades/migration-level"
     if [[ -f $migration_level_file_location  ]]; then
-	cat $migration_level_file_location >> "$migration_level_file"
+        cat $migration_level_file_location >> "$migration_level_file"
     else
-	echo "!!! Migration level file not found  !!!">> "$migration_level_file";
+        echo "!!! Migration level file not found  !!!">> "$migration_level_file";
     fi
 fi
 
