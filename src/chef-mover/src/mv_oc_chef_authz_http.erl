@@ -102,6 +102,7 @@ handle_ibrowse_response({ok, "404", _H, _B}) ->
 handle_ibrowse_response({ok, "500", _H, _B}) ->
     {error, server_error};
 handle_ibrowse_response({ok, Status, _H, _B}) ->
+    lager:error("Error ~p, message: ~p", [Status, _B]),
     {error, Status};
 handle_ibrowse_response({error, _} = Error) ->
     Error.
