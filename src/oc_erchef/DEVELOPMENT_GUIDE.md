@@ -19,7 +19,7 @@ and properly inserted into the database with a little massaging (also in base mo
 
 #### Validating Date Inputs
 
-We have added a validation and sqerl date satanizing function that you should use on your date object fields
+We have added a validation and sqerl date sanitizing function that you should use on your date object fields
 during validation:
 
 ```
