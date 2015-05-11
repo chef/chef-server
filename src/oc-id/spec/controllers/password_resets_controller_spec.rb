@@ -37,12 +37,12 @@ describe PasswordResetsController do
         post :create, username: 'jimmy'
       end
 
-      it 'shows a flash message explaining the problem' do
-        expect(flash[:alert]).to match(/not found/)
+      it 'shows a flash message that is informative but not revealing' do
+        expect(flash[:notice]).to match(/entered exists.*email shortly/)
       end
 
-      it 'returns a 404' do
-        expect(response.status).to eql(404)
+      it 'returns a 200 which is a lie but better for security' do
+        expect(response.status).to eql(200)
       end
 
       it 'renders the new template' do
@@ -64,12 +64,12 @@ describe PasswordResetsController do
           post :create, username: 'jimmy'
         end
 
-        it 'shows a flash message explaining the problem' do
-          expect(flash[:alert]).to match(/not found/)
+        it 'shows a flash message that is informative but not revealing' do
+          expect(flash[:notice]).to match(/entered exists.*email shortly/)
         end
 
-        it 'returns a 404' do
-          expect(response.status).to eql(404)
+        it 'returns a 200 which is a lie but better for security' do
+          expect(response.status).to eql(200)
         end
 
         it 'renders the new template' do
@@ -117,7 +117,7 @@ describe PasswordResetsController do
       end
 
       it 'shows a flash message explaining an email was sent' do
-        expect(flash[:notice]).to match(/password reset email has been sent/)
+        expect(flash[:notice]).to match(/entered exists.*email shortly/)
       end
 
       it 'succeeds' do
@@ -217,8 +217,8 @@ describe PasswordResetsController do
               put :update, password: 'haha', signature: signature, expires: expires, username: name
             end
 
-            it 'shows a flash message explaining the problem' do
-              expect(flash[:alert]).to match(/not found/)
+            it 'shows a flash message that is informative but not revealing' do
+              expect(flash[:notice]).to match(/entered exists.*email shortly/)
             end
 
             it 'redirects to new' do
