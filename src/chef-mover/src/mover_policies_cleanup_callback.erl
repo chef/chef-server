@@ -23,7 +23,7 @@ migration_init() ->
     mover_transient_migration_queue:initialize_queue(?MODULE, Results).
 
 migration_action(#container{id = Id, authz_id = AuthzId, su_aid = RequestorId}, _) ->
-    mv_oc_chef_authz:delete_resource(RequestorId, container, AuthzId),
+    mv_oc_chef_authz:delete_resource(superuser, container, AuthzId),
     % Failures will be logged from authz, but in any event we'll need to clean up the database record as well.
     case sqerl:execute(<<"delete from containers where id = $1">>, [Id]) of
         {ok, _} ->
