@@ -13,23 +13,37 @@
      needs_account_dets/0
     ]).
 
--record(container, { id, authz_id, su_aid} ).
+-record(container, { id, authz_id} ).
 
 migration_init() ->
     mv_oc_chef_authz_http:create_pool(),
-    {ok, SuperUserAuthzId} = sqerl:select(<<"select authz_id from users where username = 'pivotal'">>, [], first_as_scalar, [authz_id]),
-    Query = <<"select id, authz_id, $1::character(32) as su_aid from containers where name in ('policies', 'policy_groups', 'cookbook_artifacts')">>,
-    {ok, Results} = sqerl:select(Query, [SuperUserAuthzId], rows_as_records, [container, record_info(fields, container)]),
-    mover_transient_migration_queue:initialize_queue(?MODULE, Results).
+    Query = <<"select id, authz_id from containers where name in ('policies', 'policy_groups', 'cookbook_artifacts')">>,
+    Results = case sqerl:select(Query, [], rows_as_records, [container, record_info(fields, container)]) of
+                  {ok, none} -> [];
+                  {ok, Any} -> Any
+              end,
+    Final = case file:consult("/tmp/reprocess") of
+        {ok, Reprocess} ->
+            Reprocess2 = [ {container, Id, AuthzId} ||  { Id, AuthzId } <- Reprocess ],
+            Reprocess2 ++ Results;
+        _ ->
+            % No file, so no reprocessing
+            Results
+    end,
+    mover_transient_migration_queue:initialize_queue(?MODULE, Final).
 
-migration_action(#container{id = Id, authz_id = AuthzId, su_aid = RequestorId}, _) ->
-    mv_oc_chef_authz:delete_resource(RequestorId, container, AuthzId),
-    % Failures will be logged from authz, but in any event we'll need to clean up the database record as well.
-    case sqerl:execute(<<"delete from containers where id = $1">>, [Id]) of
-        {ok, _} ->
-            ok;
-        {error, Error} ->
-            lager:warning("Unexpected error deleting container ~p from database: ~p", [Id, Error])
+migration_action(#container{id = Id, authz_id = AuthzId}, _) ->
+    case mv_oc_chef_authz:delete_resource(superuser, container, AuthzId) of
+        {error, Reason} ->
+            lager:error("Did not process {~p,~p}. due to ~p", [Id, AuthzId, Reason]);
+        _ ->
+            % Failures will be logged from authz, but in any event we'll need to clean up the database record as well.
+            case sqerl:execute(<<"delete from containers where id = $1">>, [Id]) of
+                {ok, _} ->
+                    ok;
+                {error, Error} ->
+                    lager:warning("Unexpected error deleting container {~p, ~p}. from database: ~p", [Id, AuthzId, Error])
+            end
     end.
 
 migration_complete() ->
