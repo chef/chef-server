@@ -1,7 +1,8 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
 %% @author Douglas Triggs <doug@chef.io>
-%% Copyright 2014 Chef Software, Inc. All Rights Reserved.
+%% @author Mark Mzyk <mm@chef.io>
+%% Copyright 2014-2015 Chef Software, Inc.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -69,13 +70,26 @@ validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
     Body = wrq:req_body(Req),
     Ace = chef_json:decode_body(Body),
     Part = list_to_binary(wrq:path_info(acl_permission, Req)),
-    case chef_object_base:strictly_valid(acl_spec(Part), [Part], Ace) of
-        ok ->
-            oc_chef_wm_acl:validate_authz_id(Req, State,
-                                             AclState#acl_state{acl_data = Ace},
-                                             Type, OrgId, DbContext);
-        Other ->
-            throw(Other)
+    %% Make sure we have valid json before trying other checks
+    %% Throws if invalid json is found
+    check_json_validity(Part, Ace),
+    %% validate_authz_id will populate the ACL AuthzId, which is needed
+    %% for checking the ACL constraints; we need to run validate_authz_id
+    %% anyway, so go ahead and do so
+    {Req1, State1 = #base_state{resource_state = #acl_state{
+          authz_id = AuthzId}}} =
+                                  oc_chef_wm_acl:validate_authz_id(Req, State,
+                                                                   AclState#acl_state{acl_data = Ace},
+                                                                    Type, OrgId,  DbContext),
+
+    %% Check if we're violating any constraints around modifying ACLs
+    %% i.e. deleting default groups, etc.
+    case oc_chef_authz_acl_constraints:check_acl_constraints(AuthzId, Type, Part, Ace) of
+      ok ->
+        {Req1, State1};
+      [ Violation | _T ] ->
+        %% Received one or more failures. Report back the first one.
+        throw({acl_constraint_violation, Violation})
     end.
 
 auth_info(Req, State) ->
@@ -109,6 +123,14 @@ from_json(Req, #base_state{organization_guid = OrgId,
 
 %% Internal functions
 
+check_json_validity(Part, Ace) ->
+  case chef_object_base:strictly_valid(acl_spec(Part), [Part], Ace) of
+    ok ->
+      ok;
+    Other ->
+      throw(Other)
+  end.
+
 acl_spec(Part) ->
     {[
       {Part,
@@ -131,7 +153,6 @@ update_from_json(#acl_state{type = Type, authz_id = AuthzId, acl_data = Data},
         throw:bad_group ->
             bad_group
     end.
-
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).

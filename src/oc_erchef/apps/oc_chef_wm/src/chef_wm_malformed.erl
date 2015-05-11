@@ -63,6 +63,13 @@ malformed_request_message({bad_headers, Bad}, _Req, _State) ->
                             <<"bad header(s) ">>,
                             bin_str_join(Bad, <<", ">>)]),
     {[{<<"error">>, [Msg]}]};
+
+%% acl_constraint_violation messages
+malformed_request_message(attempted_admin_group_removal_grant_ace, _Req, _State) ->
+  {[{<<"error">>, [<<"Admin group cannot be removed from the Grant ACE">>]}]};
+
+%% End acl_constraint_violation messages
+
 malformed_request_message({error, invalid_json}, _Req, _State) ->
     %% in theory, there might be some sort of slightly useful error detail from
     %% chef_json/jiffy, but thus far nothing specific enough to beat out this. Also, would

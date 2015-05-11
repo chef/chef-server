@@ -854,6 +854,10 @@ malformed_request(Req, #base_state{resource_mod=Mod,
             lager:info("json too large (~p)", [Msg]),
             Req3 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, Msg}]}), Req),
             {{halt, 413}, Req3, State1#base_state{log_msg = too_big}};
+        throw:{acl_constraint_violation, Violation} ->
+            Msg = chef_wm_malformed:malformed_request_message(Violation, Req, State),
+            Req3 = wrq:set_resp_body(chef_json:encode(Msg), Req),
+            {{halt, 403}, Req3, State1#base_state{log_msg = Msg}};
         throw:Why ->
             Msg =  chef_wm_malformed:malformed_request_message(Why, Req, State),
             NewReq = wrq:set_resp_body(chef_json:encode(Msg), Req),
