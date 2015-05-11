@@ -222,8 +222,8 @@ describe "opscode-account user association", :association do
       it "an admin org user succeeds" do
         get(user_org_url, platform.admin_user).should look_like({:status => 200})
       end
-      it "another org member fails" do
-        get(user_org_url, platform.non_admin_user).should look_like({:status => 403})
+      it "another org member succeeds" do
+        get(user_org_url, platform.non_admin_user).should look_like({:status => 200})
       end
       it "some other user fails" do
         get(user_org_url, platform.bad_user).should look_like({:status => 403})
