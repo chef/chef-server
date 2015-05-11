@@ -47,6 +47,7 @@
          mark_checksums_as_uploaded/3,
 
          %% user ops
+         list_common_orgs/3,
          node_record_to_authz_id/2,
 
          %% role_record_to_authz_id/2,
@@ -561,6 +562,10 @@ count_nodes(#context{reqid = ReqId} = _Ctx) ->
         {error, Error} ->
             {error, Error}
     end.
+
+-spec list_common_orgs(object_id(), object_id(), #context{}) -> [list()].
+list_common_orgs(User1Id, User2Id, #context{reqid=ReqId}) ->
+    ?SH_TIME(ReqId, chef_sql, list_common_orgs_for_users, (User1Id, User2Id)).
 
 -spec is_user_in_org(#context{}, binary(), binary()) -> boolean() | {error, _}.
 is_user_in_org(#context{reqid = ReqId}, UserName, OrgName) ->

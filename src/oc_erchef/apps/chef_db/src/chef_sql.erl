@@ -91,6 +91,7 @@
          fetch_org_metadata/1,
 
          %% user-org ops
+         list_common_orgs_for_users/2,
          is_user_in_org/2,
 
          %% key ops
@@ -170,6 +171,21 @@ is_user_in_org(UserName, OrgName) ->
             false;
         {ok, N} when is_integer(N) ->
             true;
+        {error, Error} ->
+            {error, Error}
+    end.
+
+%%
+%% list_common_orgs: List the common organizations between two users
+%%
+%%
+-spec list_common_orgs_for_users(binary(), binary()) -> [list()].
+list_common_orgs_for_users(User1Id, User2Id) ->
+    case sqerl:select(list_common_orgs_for_users, [User1Id, User2Id], rows) of
+        {ok, none} ->
+            [];
+        {ok, L} when is_list(L) ->
+            L;
         {error, Error} ->
             {error, Error}
     end.
