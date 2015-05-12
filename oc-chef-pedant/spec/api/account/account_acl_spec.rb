@@ -9,8 +9,8 @@ describe "ACL API", :acl do
     let(:username) { platform.admin_user.name }
     let(:request_url) { "#{platform.server}/users/#{username}/_acl" }
 
-    let(:global_admins) { platform.test_org.name + "_global_admins"}
-    let(:read_groups) { [global_admins] }
+    let(:read_access_group) { platform.test_org.name + "_read_access_group"}
+    let(:read_groups) { [read_access_group] }
 
     context "GET /users/<user>/_acl"  do
 

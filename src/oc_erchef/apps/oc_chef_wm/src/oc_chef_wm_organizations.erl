@@ -274,7 +274,7 @@ create_type_helper(client) ->
 
 
 %%
-%% We at mininimum need to clean up the org and the global_admins group
+%% We at mininimum need to clean up the org and the read_access group
 %% We will orphan some org-local information (groups, containers, validator client, and default environment)
 %% But that's no worse than any org deletion right now, and is sufficient to allow retry of org creation.
 %%
@@ -285,7 +285,7 @@ cleanup_org({_Error, _Body,
                 requestor_id = RequestorId,
                 organization_name = OrgName,
                 resource_state = #organization_state{oc_chef_organization = Organization}}} = Result) ->
-    oc_chef_wm_named_organization:delete_global_admins(DbContext, AuthzContext, OrgName, RequestorId),
+    oc_chef_wm_named_organization:delete_read_access_group(DbContext, AuthzContext, OrgName, RequestorId),
     oc_chef_wm_base:delete_object(DbContext, Organization, RequestorId),
     Result.
 

@@ -68,9 +68,9 @@
 -define(DEFAULT_EC_EXPANDED_ORG,
         [{create_containers, ?CONTAINERS},
          {create_groups, ?GROUPS},
-         {create_org_global_admins},
+         {create_org_read_access_group},
          {add_to_groups, user, [creator], [admins, users]},
-         {add_to_groups, group, [admins, users], [global_admins]},
+         {add_to_groups, group, [admins, users], [read_access_group]},
 
          %% ACLs are expanded, then applied
          {acls,
@@ -168,15 +168,15 @@ process_policy_step({add_to_groups, ActorType, Members, Groups},
         {_, GroupId} <- GroupIds,
         {Type,MemberId} <- MemberIds],
     {Cache, []};
-process_policy_step({create_org_global_admins},
+process_policy_step({create_org_read_access_group},
                     #oc_chef_organization{name=OrgName, server_api_version = ApiVersion},
                     #chef_requestor{authz_id=RequestorId}, Cache) ->
-    GlobalGroupName = oc_chef_authz_db:make_global_admin_group_name(OrgName),
+    ReadAccessGroupName = oc_chef_authz_db:make_read_access_group_name(OrgName),
     %% TODO: Fix this to be the global groups org id.
     GlobalOrgId = ?GLOBAL_PLACEHOLDER_ORG_ID,
-    case create_helper(ApiVersion, GlobalOrgId, RequestorId, group, GlobalGroupName) of
+    case create_helper(ApiVersion, GlobalOrgId, RequestorId, group, ReadAccessGroupName) of
         AuthzId when is_binary(AuthzId) ->
-            {add_cache(Cache, {group, global_admins}, group, AuthzId), []};
+            {add_cache(Cache, {group, read_access_group}, group, AuthzId), []};
         Error ->
             {error, Error}
     end;

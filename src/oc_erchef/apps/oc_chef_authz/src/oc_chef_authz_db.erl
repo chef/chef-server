@@ -28,17 +28,18 @@
 
 -export([container_record_to_authz_id/2,
          fetch_container/3,
-         make_global_admin_group_name/1,
-         fetch_global_group_authz_id/3,
+         make_read_access_group_name/1,
+         fetch_read_access_group/2,
          fetch_group_authz_id/3,
+         fetch_global_group_authz_id/3,
          fetch_group/3,
          make_context/3,
          statements/1
         ]).
 
-%-ifdef(TEST).
+-ifdef(TEST).
 -compile([export_all]).
-%-endif.
+-endif.
 
 -include("../../include/oc_chef_authz.hrl").
 -include("oc_chef_authz_db.hrl").
@@ -92,14 +93,10 @@ fetch_container(#oc_chef_authz_context{reqid = ReqId}, OrgId, ContainerName) ->
             {error, Error}
     end.
 
-make_global_admin_group_name(OrgName) ->
-  lists:flatten(io_lib:format("~s_global_admins", [OrgName])).
-
 %% TODO: the only global groups are global admins groups and this should only be used for those
 fetch_global_group_authz_id(Ctx, OrgName, GroupName) ->
     RealGroupName = list_to_binary(lists:flatten(io_lib:format("~s_~s", [OrgName, GroupName]))),
     fetch_group_authz_id(Ctx, ?GLOBAL_PLACEHOLDER_ORG_ID, RealGroupName).
-
 
 %% @doc Retrieve the authz ID for a given group in an organaization.
 %%
@@ -144,9 +141,27 @@ container_record_to_authz_id(#oc_chef_authz_context{}, #chef_container{authz_id 
 %%  * in oc_chef_authz_groups
 %%  * in oc_chef_organization_policy
 %%
-fetch_global_admins(Ctx, OrgName) ->
-    GlobalGroupName = make_global_admin_group_name(OrgName),
-    fetch_group(Ctx, ?GLOBAL_PLACEHOLDER_ORG_ID, GlobalGroupName).
+fetch_read_access_group(#oc_chef_authz_context{} = Ctx, OrgName) ->
+    ReadAccessGroupName = make_read_access_group_name(OrgName),
+    case fetch_global_group(Ctx, ReadAccessGroupName) of
+        {not_found, authz_group} ->
+            %% For compatibility during provisioning, we return the global_admins group if
+            %% we don't find the read_access group This should allow the application to be
+            %% deployed before the migration is run.
+            GlobalAdminsGroupName = make_global_admins_group_name(OrgName),
+            fetch_global_group(Ctx, GlobalAdminsGroupName);
+        Other ->
+            Other
+    end.
+
+fetch_global_group(#oc_chef_authz_context{} = Ctx, GroupName) ->
+    fetch_group(Ctx, ?GLOBAL_PLACEHOLDER_ORG_ID, GroupName).
+
+make_read_access_group_name(OrgName) ->
+  lists:flatten(io_lib:format("~s_read_access_group", [OrgName])).
+
+make_global_admins_group_name(OrgName) ->
+  lists:flatten(io_lib:format("~s_global_admins", [OrgName])).
 
 fetch_group(#oc_chef_authz_context{reqid = ReqId, server_api_version = ApiVersion}, OrgId, Name) ->
     case stats_hero:ctime(ReqId, {chef_sql, fetch},

@@ -215,7 +215,6 @@ describe "opscode-account user association", :association do
             result.should look_like({ :status => 200 })
             json = JSON.parse(result)
             org = json.find {|o| o["organization"]["name"] == platform.test_org.name }["organization"]
-            expect(org.nil?).to be(false)
             expect(org["name"]).to eq(platform.test_org.name)
             expect(org["full_name"]).to eq(platform.test_org.name)
             expect(org["guid"].nil?).to be(false)
