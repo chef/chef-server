@@ -4,7 +4,7 @@ class PasswordResetsController < ApplicationController
 
   def create
     if params[:username].blank?
-      flash.now[:alert] = 'Please enter a username'
+      flash.now[:alert] = I18n.t("errors.password_resets.username_blank")
       render 'new', status: :unprocessable_entity
       return
     end
@@ -16,14 +16,14 @@ class PasswordResetsController < ApplicationController
         user_not_found
       else
         PasswordResetMailer.password_reset(user).deliver_now
-        flash.now[:notice] = password_reset_msg
+        flash.now[:notice] = I18n.t("errors.password_resets.completion")
         @status = :ok
       end
     rescue Net::HTTPServerException => e
       if e.response.code.to_i == 404
         user_not_found
       elsif e.response.code.to_i == 406
-        flash.now[:alert] = "'#{params[:username]}' is not a valid username"
+        flash.now[:alert] = I18n.t("errors.password_resets.invalid_username", :name => params[:username])
         @status = :forbidden
       else
         raise
@@ -35,17 +35,17 @@ class PasswordResetsController < ApplicationController
 
   def show
     unless valid_signature?
-      flash[:alert] = invalid_signature_message
+      flash[:alert] = I18n.t("errors.password_resets.invalid_signature")
       redirect_to action: 'new'
     end
   end
 
   def update
     if params[:password].blank?
-      flash.now[:alert] = 'Password must not be blank'
+      flash.now[:alert] = I18n.t("errors.password_resets.password_blank")
       render 'show', status: :forbidden
     elsif !valid_signature?
-      flash.now[:alert] = invalid_signature_message
+      flash.now[:alert] = I18n.t("errors.password_resets.invalid_signature")
       render 'show', status: :forbidden
     else
       begin
@@ -55,7 +55,7 @@ class PasswordResetsController < ApplicationController
         redirect_to signin_path
       rescue Net::HTTPServerException => e
         if e.response.code.to_i == 404
-          flash[:notice] = password_reset_msg
+          flash[:notice] = I18n.t("errors.password_resets.completion")
           redirect_to action: 'new'
         elsif e.response.code.to_i == 400
           flash.now[:alert] = error_from_json(e)['error']
@@ -70,19 +70,11 @@ class PasswordResetsController < ApplicationController
   private
 
   def user_not_found
-    flash.now[:notice] = password_reset_msg
-  end
-
-  def password_reset_msg
-    "If the username you entered exists, you should receive an email shortly"
+    flash.now[:notice] = I18n.t("errors.password_resets.completion")
   end
 
   def escaped_username
     URI.escape(params[:username])
-  end
-
-  def invalid_signature_message
-    'The given password reset link is expired or has an invalid signature'
   end
 
   def valid_signature?
