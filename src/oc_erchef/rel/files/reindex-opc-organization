@@ -120,7 +120,14 @@ get_org_id(Context, OrgName) ->
 init_network() ->
     net_kernel:start([?SELF, longnames]),
     erlang:set_cookie(node(), ?ERCHEF_COOKIE),
-    pong = net_adm:ping(?ERCHEF).
+    %% A hidden node is "invisible", and thus won't alter the behavior of the node / cluster
+    %% it is connecting to (by simple virtue of establishing the connection, that is).  Kind
+    %% of a handy quality for maintenance / support scripts to have, eh?
+    %%
+    %% See http://learnyousomeerlang.com/distribunomicon#hidden-nodes, won't you?
+    %%
+    %% Captain Picard has the Prime Directive; we have hidden nodes.
+    true = net_kernel:hidden_connect(?ERCHEF).
 
 find_dl_headers(OrgNameBin, IntLB) when is_binary(OrgNameBin) ->
     find_dl_headers(binary_to_list(OrgNameBin), IntLB);
