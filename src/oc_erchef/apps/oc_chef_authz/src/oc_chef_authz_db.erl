@@ -42,6 +42,7 @@
 
 -include("../../include/oc_chef_authz.hrl").
 -include("oc_chef_authz_db.hrl").
+-define(namespaced_types, true).
 -include_lib("sqerl/include/sqerl.hrl").
 
 %% TODO Fix:

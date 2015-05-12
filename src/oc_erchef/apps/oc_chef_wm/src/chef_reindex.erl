@@ -170,7 +170,7 @@ decompress_and_decode(Object) ->
                     BatchSize :: non_neg_integer(),
                     OrgInfo :: org_info(),
                     Index :: index(),
-                    NameIdDict :: dict()) -> ok.
+                    NameIdDict :: dict:dict()) -> ok.
 batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict) when is_list(Ids) ->
     DoBatch = fun(Batch, _Acc) ->
                       ok = index_a_batch(Ctx, Batch, OrgInfo, Index, NameIdDict),
@@ -184,7 +184,7 @@ batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict) when is_list(Ids)
                     BatchOfIds :: [object_id()],
                     OrgInfo :: org_info(),
                     Index :: index(),
-                    NameIdDict :: dict()) -> ok.
+                    NameIdDict :: dict:dict()) -> ok.
 index_a_batch(Ctx, BatchOfIds, {OrgId, OrgName}, Index, NameIdDict) ->
     SerializedObjects = chef_db:bulk_get(Ctx, OrgName, chef_object_type(Index), BatchOfIds),
     ok = send_to_index_queue(OrgId, Index, SerializedObjects, NameIdDict),
@@ -200,7 +200,7 @@ chef_object_type(Index)                       -> Index.
 -spec send_to_index_queue(OrgId :: object_id(),
                           Index :: index(),
                           SerializedObjects :: [binary()] | [ej:json_object()],
-                          NameIdDict :: dict()) -> ok.
+                          NameIdDict :: dict:dict()) -> ok.
 send_to_index_queue(_, _, [], _) ->
     ok;
 send_to_index_queue(OrgId, Index, [SO|Rest], NameIdDict) ->

@@ -102,6 +102,7 @@
 
         ]).
 
+-define(namespaced_types, true).
 -include_lib("sqerl/include/sqerl.hrl").
 -include("../../include/chef_types.hrl").
 
@@ -1421,7 +1422,7 @@ finalize_versions({Cookbook, Versions}) ->
 %%
 %% The key of the dict is a `{CookbookName, Version}' tuple, which
 %% corresponds to the data that Depsolver gives.
--spec create_cookbook_version_dict(OrgId :: object_id()) -> {ok, dict()} |
+-spec create_cookbook_version_dict(OrgId :: object_id()) -> {ok, dict:dict()} |
                                                             {error, term()}.
 create_cookbook_version_dict(OrgId) ->
     case sqerl:select(fetch_all_cookbook_version_ids_by_orgid, [OrgId]) of
@@ -1444,7 +1445,7 @@ create_cookbook_version_dict(OrgId) ->
 %% @doc Returns just the IDs of cookbook versions that are in
 %% environment-filtered set of cookbook versions.  Ordering is not
 %% important (and so not guaranteed).
--spec extract_ids_using_filtered_results(MappingDict :: dict(),
+-spec extract_ids_using_filtered_results(MappingDict :: dict:dict(),
                                          FilteredCookbookVersions :: [{CookbookName :: binary(),
                                                                        [BestVersion :: binary()]}]) ->
                                                 [Id :: integer()].
@@ -1547,7 +1548,7 @@ safe_split(N, L) ->
 %% data bag.
 -spec create_name_id_dict(OrgId :: object_id(),
                           Index :: node | role | client | environment | binary()) ->
-                                 {ok, dict()} | {error, term()}.
+                                 {ok, dict:dict()} | {error, term()}.
 create_name_id_dict(OrgId, Index) ->
     Query = dict_query_for_index(Index),
     Args = dict_query_args_for_index(OrgId, Index),
@@ -1607,7 +1608,7 @@ dict_key_value_for_index(Index) when Index =:= node;
                   Args :: list(),
                   {Key :: <<_:32,_:_*40>>, %% <<"name">> | <<"item_name">>
                    Value :: <<_:16>>}) %% <<"id">>
-                 -> {ok, dict()} | {error, term()}.
+                 -> {ok, dict:dict()} | {error, term()}.
 create_dict(Query, Args, {Key, Value}) ->
     case proplist_results(Query, Args) of
         Results when is_list(Results) ->
@@ -1641,7 +1642,7 @@ proplist_results(Query, Args) ->
 %% This spec brought to you by -Wunderspecs
 -spec proplists_to_dict(ResultSetProplist :: [[tuple()]],
                         Key :: <<_:32,_:_*40>>, %% <<"name">> | <<"item_name">>
-                        Value :: <<_:16>>) -> dict(). %% <<"id">>
+                        Value :: <<_:16>>) -> dict:dict(). %% <<"id">>
 proplists_to_dict(ResultSetProplist, Key, Value) ->
     lists:foldl(fun(Row, Dict) ->
                         K = proplists:get_value(Key, Row),

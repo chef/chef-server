@@ -718,7 +718,7 @@ update_object(#context{reqid = ReqId}, ActorId, Fun, Object) ->
 -spec create_name_id_dict(#context{},
                           Index :: node | role | client | environment | binary(),
                           OrgId :: object_id()) ->
-                                 dict() | {error, term()}.
+                                 dict:dict() | {error, term()}.
 create_name_id_dict(#context{reqid=ReqId}, Index, OrgId) ->
     case ?SH_TIME(ReqId, chef_sql, create_name_id_dict, (OrgId, Index)) of
         {ok, D} ->
