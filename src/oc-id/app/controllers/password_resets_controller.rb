@@ -16,7 +16,7 @@ class PasswordResetsController < ApplicationController
         user_not_found
       else
         PasswordResetMailer.password_reset(user).deliver_now
-        flash.now[:notice] = 'Your password reset email has been sent'
+        flash.now[:notice] = password_reset_msg
         @status = :ok
       end
     rescue Net::HTTPServerException => e
@@ -55,7 +55,7 @@ class PasswordResetsController < ApplicationController
         redirect_to signin_path
       rescue Net::HTTPServerException => e
         if e.response.code.to_i == 404
-          flash[:alert] = "User '#{params[:username]}' not found"
+          flash[:notice] = password_reset_msg
           redirect_to action: 'new'
         elsif e.response.code.to_i == 400
           flash.now[:alert] = error_from_json(e)['error']
@@ -70,8 +70,11 @@ class PasswordResetsController < ApplicationController
   private
 
   def user_not_found
-    flash.now[:alert] = "User '#{params[:username]}' not found"
-    @status = :not_found
+    flash.now[:notice] = password_reset_msg
+  end
+
+  def password_reset_msg
+    "If the username you entered exists, you should receive an email shortly"
   end
 
   def escaped_username
