@@ -22,6 +22,7 @@
 * Remove install message from postinst package script
 * Update chef-server-ctl key commands to use chef-client's Chef::Key object.
 * New gather-log script gathers a lot more debugging information.
+* Remove nested directories from log rotation template
 
 ## 12.0.8 (2015-04-20)
 
