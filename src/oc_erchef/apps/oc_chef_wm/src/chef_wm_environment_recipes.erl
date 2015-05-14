@@ -92,10 +92,10 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
 %% ]'''
 %%
 to_json(Req, #base_state{chef_db_context = DbContext,
-                         organization_name = OrgName,
+                         organization_guid = OrgId,
                          resource_state = #environment_state{
                            chef_environment = #chef_environment{
                              name = EnvName
                             }}} = State) ->
-    Results = chef_db:fetch_environment_filtered_recipes(DbContext, OrgName, EnvName),
+    Results = chef_db:fetch_environment_filtered_recipes(DbContext, OrgId, EnvName),
     {chef_json:encode(Results), Req, State}.

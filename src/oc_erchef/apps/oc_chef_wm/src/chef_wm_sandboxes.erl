@@ -82,11 +82,11 @@ create_path(Req, #base_state{organization_guid = OrgId,
 
 from_json(Req, #base_state{chef_db_context = DbContext,
                            requestor_id = ActorId,
-                           organization_name = OrgName,
+                           organization_guid = OrgId,
                            resource_state =
                                #sandbox_state{sandbox_data = SandboxData}} = State) ->
     Checksums = checksums_from_sandbox_ejson(SandboxData),
-    case chef_db:make_sandbox(DbContext, OrgName, ActorId, Checksums) of
+    case chef_db:make_sandbox(DbContext, OrgId, ActorId, Checksums) of
         #chef_sandbox{} = Sandbox ->
             Response = sandbox_to_response(Req, Sandbox),
             {true, chef_wm_util:set_json_body(Req, Response), State};

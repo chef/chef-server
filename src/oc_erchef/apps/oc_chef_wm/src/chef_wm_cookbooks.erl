@@ -85,9 +85,9 @@ to_json("_latest", Req, State) ->
 to_json("_recipes", Req, State) ->
     {cookbook_recipes_json(State), Req, State};
 to_json(CookbookName0, Req, #base_state{chef_db_context = DbContext,
-                                        organization_name = OrgName} = State) ->
+                                        organization_guid = OrgId} = State) ->
     CookbookName = list_to_binary(CookbookName0),
-    case chef_db:fetch_cookbook_versions(DbContext, OrgName, CookbookName) of
+    case chef_db:fetch_cookbook_versions(DbContext, OrgId, CookbookName) of
         [] ->
             Message = chef_wm_util:not_found_message(cookbook, CookbookName),
             {{halt, 404},
@@ -109,9 +109,9 @@ to_json(CookbookName0, Req, #base_state{chef_db_context = DbContext,
 -spec all_cookbooks_json(Request :: wm_req(),
                          State :: #base_state{}) -> JSON :: binary().
 all_cookbooks_json(Req, #base_state{chef_db_context = DbContext,
-                                    organization_name = OrgName,
+                                    organization_guid = OrgId,
                                     resource_state = CookbookState}) ->
-    CookbookVersions = chef_db:fetch_cookbook_versions(DbContext, OrgName),
+    CookbookVersions = chef_db:fetch_cookbook_versions(DbContext, OrgId),
     #cookbook_state{num_versions = NumVersions} = CookbookState,
     AggregateCookbooks = aggregate_versions(CookbookVersions),
     CBList = make_cookbook_list(Req, AggregateCookbooks, NumVersions),
@@ -122,8 +122,8 @@ all_cookbooks_json(Req, #base_state{chef_db_context = DbContext,
 -spec latest_cookbooks_json(Request :: wm_req(),
                             State :: #base_state{}) -> JSON :: binary().
 latest_cookbooks_json(Req, #base_state{chef_db_context = DbContext,
-                                       organization_name = OrgName}) ->
-    Latest = chef_db:fetch_latest_cookbook_versions(DbContext, OrgName),
+                                       organization_guid = OrgId}) ->
+    Latest = chef_db:fetch_latest_cookbook_versions(DbContext, OrgId),
     Processed = process_latest_cookbooks(Latest, Req),
     chef_json:encode({Processed}).
 
@@ -132,8 +132,8 @@ latest_cookbooks_json(Req, #base_state{chef_db_context = DbContext,
 %% by cookbook name and recipe name.
 -spec cookbook_recipes_json(State :: #base_state{}) -> JSON :: binary().
 cookbook_recipes_json(#base_state{chef_db_context = DbContext,
-                                  organization_name = OrgName}) ->
-    Recipes = chef_db:fetch_latest_cookbook_recipes(DbContext, OrgName),
+                                  organization_guid = OrgId}) ->
+    Recipes = chef_db:fetch_latest_cookbook_recipes(DbContext, OrgId),
     %% Recipes is just a list of cookbook-qualified recipe names, so we don't need to do any
     %% further processing; just encode to JSON and we're done.
     chef_json:encode(Recipes).

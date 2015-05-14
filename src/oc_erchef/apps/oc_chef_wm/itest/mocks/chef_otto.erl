@@ -6,12 +6,9 @@
 -module(chef_otto).
 
 -export([
-         connect/0,
-         fetch_org_id/2
+         connect/0
         ]).
 
 connect() ->
     mocked_server.
 
-fetch_org_id(_Server, _OrgName) ->
-    <<"00000000000000000000000000000000">>.

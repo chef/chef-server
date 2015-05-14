@@ -57,7 +57,7 @@ init_per_suite(LastConfig) ->
     Config = chef_test_db_helper:start_db(LastConfig, "oc_chef_wm_itests"),
     Config2 = setup_helper:start_server(Config),
     make_org(?ORG_NAME, ?ORG_AUTHZ_ID),
-    OrgId = chef_db:fetch_org_id(context(), ?ORG_NAME),
+    {OrgId, _} = chef_db:fetch_org_metadata(context(), ?ORG_NAME),
     {ok, PubKey} = file:read_file("../../spki_public.pem"),
     {ok, AltPubKey} = file:read_file("../../public.pem"),
     {ok, PrivateKeyRE} = re:compile(".*BEGIN (RSA )?PRIVATE KEY.*"),

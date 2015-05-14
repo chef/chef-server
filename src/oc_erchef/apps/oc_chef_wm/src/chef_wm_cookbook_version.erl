@@ -81,11 +81,11 @@ validate_request(Method, Req, #base_state{resource_state = CBState0} = State) ->
     {Req, State#base_state{resource_state = CBState}}.
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
-                          organization_name = OrgName,
+                           organization_guid = OrgId,
                            resource_state = #cookbook_state{cookbook_name = Name,
                                                             cookbook_version = Version} = CookbookState
                           } = State) ->
-    case fetch_cookbook_version(DbContext, OrgName, Name, Version) of
+    case fetch_cookbook_version(DbContext, OrgId, Name, Version) of
         not_found ->
             handle_not_found(Req, State);
         {cookbook_exists, AuthzId} ->
@@ -115,10 +115,10 @@ handle_is_conflict('PUT', Req, #base_state{resource_state = CookbookState} = Sta
 handle_is_conflict(_, Req, State) ->
     {false, Req, State}.
 
-fetch_cookbook_version(DbContext, OrgName, Name, latest) ->
-  chef_db:fetch_latest_cookbook_version(DbContext, OrgName, Name);
-fetch_cookbook_version(DbContext, OrgName, Name, Version) ->
-  chef_db:fetch_cookbook_version(DbContext, OrgName, {Name, Version}).
+fetch_cookbook_version(DbContext, OrgId, Name, latest) ->
+  chef_db:fetch_latest_cookbook_version(DbContext, OrgId, Name);
+fetch_cookbook_version(DbContext, OrgId, Name, Version) ->
+  chef_db:fetch_cookbook_version(DbContext, OrgId, {Name, Version}).
 
 to_json(Req, #base_state{resource_state=#cookbook_state{chef_cookbook_version=CBV}}=State) ->
     CompleteEJson = chef_cookbook_version:assemble_cookbook_ejson(CBV, chef_wm_util:base_uri(Req)),

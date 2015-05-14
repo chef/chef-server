@@ -61,7 +61,7 @@ delete(DbContext, #chef_data_bag{org_id = OrgId,
     %% Items and Data Bags.  We need to get the ids of all the data bag's items so that we
     %% can remove them from Solr as well; a cascade-on-delete foreign key takes care of the
     %% data bag item deletion from the database
-    DataBagItemIds = case chef_db:fetch_data_bag_item_ids(DbContext, {id, OrgId}, DataBagName) of
+    DataBagItemIds = case chef_db:fetch_data_bag_item_ids(DbContext, OrgId, DataBagName) of
                          Items when is_list(Items)->
                              Items;
                          _Other ->
