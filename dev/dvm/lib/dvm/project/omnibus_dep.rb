@@ -1,10 +1,13 @@
 module DVM
   class OmnibusDep < Dep
     attr_reader :source_path, :dest_path, :reconfigure_on_load
+    # Needed for now to make tools mixin behave:
+    attr_reader :path
     def initialize(base_dir, name, config)
       super(name)
       @source_path = File.join("#{base_dir}/files", config['source_path'])
       @dest_path = config['dest_path']
+      @path = @source_path
       @reconfigure_on_load = config['reconfigure_on_load']
       @available = true
     end
