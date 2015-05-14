@@ -63,7 +63,7 @@ module DVM
       raise DVM::DVMArgumentError, "Load the project before loading deps." unless loaded?
       dep = ensure_dep(name)
       raise DVM::DVMArgumentError, "#{name} is not loaded." unless dep.loaded?
-      deps.unload
+      deps[name].unload
     end
 
     def ensure_dep(name)
