@@ -65,7 +65,7 @@
          fetch_cookbook_version/3,
          fetch_cookbook_versions/2,
          fetch_cookbook_versions/3,
-         bulk_fetch_cookbook_versions/3,
+         bulk_fetch_minimal_cookbook_versions/3,
          fetch_latest_cookbook_version/3,
          fetch_latest_cookbook_versions/2,
          fetch_latest_cookbook_versions/3,
@@ -405,19 +405,19 @@ cookbook_exists(#context{reqid=ReqId} = DbContext, OrgName, CookbookName) ->
 
 %% @doc Given a list of cookbook names and versions, return a list of #chef_cookbook_version
 %% objects.  This is used by the depsolver endpoint.
--spec bulk_fetch_cookbook_versions(DbContext :: #context{}, OrgName :: binary(), [versioned_cookbook()]) -> [#chef_cookbook_version{}] | {error, any()}.
-bulk_fetch_cookbook_versions(#context{}, _OrgName, []) ->
+-spec bulk_fetch_minimal_cookbook_versions(DbContext :: #context{}, OrgName :: binary(), [versioned_cookbook()]) -> [#chef_cookbook_version{}] | {error, any()}.
+bulk_fetch_minimal_cookbook_versions(#context{}, _OrgName, []) ->
     %% Avoid database calls in the case of an empty run_list
     [];
-bulk_fetch_cookbook_versions(#context{reqid = ReqID} = Ctx, OrgName, VersionedCookbooks) ->
+bulk_fetch_minimal_cookbook_versions(#context{reqid = ReqID} = Ctx, OrgName, VersionedCookbooks) ->
     case fetch_org_id(Ctx, OrgName) of
         not_found ->
             not_found;
         OrgId ->
-            stats_hero:ctime(ReqID, {chef_sql, bulk_fetch_cookbook_versions},
+            stats_hero:ctime(ReqID, {chef_sql, bulk_fetch_minimal_cookbook_versions},
                              fun() ->
-                                     chef_sql:bulk_fetch_cookbook_versions(OrgId,
-                                                                           VersionedCookbooks)
+                                     chef_sql:bulk_fetch_minimal_cookbook_versions(OrgId,
+                                                                                   VersionedCookbooks)
                              end)
     end.
 
