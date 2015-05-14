@@ -62,7 +62,7 @@
 
          %% cookbook version ops
          cookbook_exists/2,
-         bulk_fetch_cookbook_versions/2,
+         bulk_fetch_minimal_cookbook_versions/2,
          fetch_cookbook_version/2,
          fetch_cookbook_versions/1,
          fetch_cookbook_versions/2,
@@ -494,11 +494,11 @@ fetch_environment_filtered_recipes(OrgId, Environment) ->
     end.
 
 %% cookbook version ops
--spec bulk_fetch_cookbook_versions(OrgId::object_id(), [versioned_cookbook()]) ->
+-spec bulk_fetch_minimal_cookbook_versions(OrgId::object_id(), [versioned_cookbook()]) ->
                                           [#chef_cookbook_version{}].
-bulk_fetch_cookbook_versions(OrgId, CookbookVersions) ->
+bulk_fetch_minimal_cookbook_versions(OrgId, CookbookVersions) ->
     QueryParam = cookbook_versions_array_to_binary(CookbookVersions),
-    case sqerl:select(bulk_fetch_cookbook_versions, [OrgId, QueryParam], ?ALL(chef_cookbook_version)) of
+    case sqerl:select(bulk_fetch_minimal_cookbook_versions, [OrgId, QueryParam], ?ALL(chef_cookbook_version)) of
         {ok, none} ->
             [];
         {ok, Results} ->
@@ -522,7 +522,7 @@ cookbook_versions_array_to_binary([], Acc, EndBin, _Sep) ->
 
 
 %% @doc Tranform a versioned_cookbook() into a binary that can be used
-%% in the bulk_fetch_cookbook_version sql query.  A
+%% in the bulk_fetch_minimal_cookbook_version sql query.  A
 %% versioned_cookbook() looks like:
 %%   {binary(), {integer(), integer(), integer()}}
 %%
