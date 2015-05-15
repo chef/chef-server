@@ -28,6 +28,18 @@ relative_path "oc-id"
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
+  # Tell nokogiri to use the system libraries instead of compiling its own
+  env["NOKOGIRI_USE_SYSTEM_LIBRARIES"] = "true"
+
+  bundle "config build.nokogiri" \
+         " --use-system-libraries" \
+         " --with-xml2-lib=#{install_dir}/embedded/lib" \
+         " --with-xml2-include=#{install_dir}/embedded/include/libxml2" \
+         " --with-xslt-lib=#{install_dir}/embedded/lib" \
+         " --with-xslt-include=#{install_dir}/embedded/include/libxslt" \
+         " --with-iconv-dir=#{install_dir}/embedded" \
+         " --with-zlib-dir=#{install_dir}/embedded", env: env
+
   bundle "install" \
          " --path=#{install_dir}/embedded/service/gem" \
          " --without development test doc", env: env

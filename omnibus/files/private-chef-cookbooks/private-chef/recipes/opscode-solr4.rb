@@ -6,6 +6,8 @@
 # All Rights Reserved
 #
 
+include_recipe 'chef-sugar::default'
+
 solr_dir              = node['private_chef']['opscode-solr4']['dir']            # /var/opt/opscode/opscode-solr4
 solr_data_dir         = node['private_chef']['opscode-solr4']['data_dir']       # /var/opt/opscpde/opscode-solr4/data
 solr_data_dir_symlink = File.join(solr_dir, "data")                             # /var/opt/opscode/opscode-solr4/data
@@ -116,6 +118,9 @@ java_opts << " -XX:NewSize=#{new_size}M" unless java_opts =~ /NewSize/
 java_opts << " -XX:+UseConcMarkSweepGC" unless java_opts =~ /UseConcMarkSweepGC/
 java_opts << " -XX:+UseParNewGC" unless java_opts =~ /UseParNewGC/
 
+# For ppc64 we use IBM Jre that uses -Xverbosegclog instead of -Xloggc
+verbose_gclog_java_opt = (ppc64? || ppc64le?) ? "-Xverbosegclog:" : "-Xloggc:"
+
 # Save the values back onto the node attributes
 node.default['private_chef']['opscode-solr4']['heap_size'] = solr_mem
 node.default['private_chef']['opscode-solr4']['new_size'] = new_size
@@ -123,7 +128,8 @@ node.default['private_chef']['opscode-solr4']['new_size'] = new_size
 node.default['private_chef']['opscode-solr4']['command'] =  "java -Xmx#{solr_mem}M -Xms#{solr_mem}M"
 node.default['private_chef']['opscode-solr4']['command'] << "#{java_opts}"
 # Enable GC Logging (very useful for debugging issues)
-node.default['private_chef']['opscode-solr4']['command'] << " -Xloggc:#{File.join(solr_log_dir, "gclog.log")} -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -XX:+PrintGCApplicationStoppedTime -XX:+PrintGCApplicationConcurrentTime -XX:+PrintTenuringDistribution"
+node.default['private_chef']['opscode-solr4']['command'] << " #{verbose_gclog_java_opt}:#{File.join(solr_log_dir, "gclog.log")} -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -XX:+PrintGCApplicationStoppedTime -XX:+PrintGCApplicationConcurrentTime -XX:+PrintTenuringDistribution"
+
 node.default['private_chef']['opscode-solr4']['command'] << " -Dsolr.data.dir=#{solr_data_dir}"
 node.default['private_chef']['opscode-solr4']['command'] << " -Dsolr.solr.home=#{solr_home_dir}"
 node.default['private_chef']['opscode-solr4']['command'] << " -server"

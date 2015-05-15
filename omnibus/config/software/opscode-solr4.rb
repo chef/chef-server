@@ -20,7 +20,13 @@ default_version "4.9.1"
 source url: "http://archive.apache.org/dist/lucene/solr/#{version}/solr-#{version}.tgz",
        md5: "0718bf3e3d0635d290db1a66ae16bce9"
 
-dependency "server-jre"
+
+if ppc64? || ppc64le?
+  dependency "ibm-jre"
+else
+  dependency "server-jre"
+end
+
 
 relative_path "solr-#{version}"
 
