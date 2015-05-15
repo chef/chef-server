@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/ClogenyTechnologies/omnibus-software.git
-  revision: 810d5a3c38b187bf8288ea6d322b1ca6ab7c9e01
+  revision: b066fd706095a09a43fd57d3fd265680d7fa7ff8
   branch: kd/ppc-chef-server
   specs:
     omnibus-software (4.0.0)
