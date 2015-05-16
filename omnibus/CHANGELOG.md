@@ -24,6 +24,15 @@
 * New gather-log script gathers a lot more debugging information.
 * Remove nested directories from log rotation template
 
+### postgresql 9.2.10
+* bugfixes: [link](http://www.postgresql.org/docs/9.2/static/release-9-2-10.html)
+* CVE-2015-0241: Fix buffer overruns in to_char()
+* CVE-2015-0242: Fix buffer overrun in replacement *printf() functions
+* CVE-2015-0243: Fix buffer overruns in contrib/pgcrypto
+* CVE-2015-0244: Fix possible loss of frontend/backend protocol synchronization after an error
+* CVE-2014-8161: Fix information leak via constraint-violation error messages
+* CVE-2014-0067: Lock down regression testing's temporary installations on Windows
+
 ## 12.0.8 (2015-04-20)
 
 ### chef-server-ctl
