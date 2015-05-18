@@ -117,11 +117,10 @@ fetch_id(environment, DbContext, Name, OrgId) ->
             AuthzId
     end.
 
-% TODO: bespoke code; cookbooks retrieval is by orgname instead of ID
-fetch_cookbook_id(DbContext, Name, OrgName) ->
+fetch_cookbook_id(DbContext, Name, OrgId) ->
     % cookbook endpoint pattern is utterly different from the others, generic
     % fetch does not handle cookbooks (and, well, versioning)
-    case chef_db:fetch_latest_cookbook_version(DbContext, OrgName, Name) of
+    case chef_db:fetch_latest_cookbook_version(DbContext, OrgId, Name) of
         not_found ->
             not_found;
         #chef_cookbook_version{authz_id = AuthzId} ->

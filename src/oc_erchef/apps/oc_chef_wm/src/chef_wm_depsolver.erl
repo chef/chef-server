@@ -100,11 +100,12 @@ post_is_create(Req, State) ->
 process_post(Req, #base_state{reqid = ReqId,
                               chef_db_context = DbContext,
                               organization_name = OrgName,
+                              organization_guid = OrgId,
                               resource_state = #depsolver_state{run_list_cookbooks = Cookbooks,
                                                                 environment_name = EnvName,
                                                                 chef_environment = Env}} = State) ->
     EnvConstraints = chef_object_base:depsolver_constraints(Env),
-    case chef_db:fetch_all_cookbook_version_dependencies(DbContext, OrgName) of
+    case chef_db:fetch_all_cookbook_version_dependencies(DbContext, OrgId) of
         {error, Error} ->
             lager:error("Dependency retrieval failure for org ~p with environment ~p: ~p~n",
                                    [OrgName, EnvName, Error]),
@@ -246,9 +247,9 @@ handle_depsolver_results(ok, {error, {unreachable_package, Unreachable}}, Req, S
                         not_reachable_message(Unreachable),
                         unreachable_dep);
 handle_depsolver_results(ok, {ok, Cookbooks}, Req, #base_state{chef_db_context = DbContext,
-                                                               organization_name = OrgName} = State) ->
+                                                               organization_guid = OrgId } = State) ->
     %% TODO - helper function to deal with the call and match on a chef_cookbook version
-    CookbookRecords = chef_db:bulk_fetch_minimal_cookbook_versions(DbContext, OrgName, Cookbooks),
+    CookbookRecords = chef_db:bulk_fetch_minimal_cookbook_versions(DbContext, OrgId, Cookbooks),
     assemble_response(Req, State, CookbookRecords).
 
 %% @doc Utility function to remove some of the verbosity

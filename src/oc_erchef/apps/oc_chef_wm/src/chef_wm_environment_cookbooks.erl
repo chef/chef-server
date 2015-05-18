@@ -93,7 +93,6 @@ malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
-                           organization_name = OrgName,
                            organization_guid = OrgId,
                            resource_state = #environment_state{cookbook=CookbookName}} = State) ->
 
@@ -111,7 +110,7 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
                 _ ->
                     %% We're actually looking for a specific cookbook; better see if it
                     %% exists first
-                    case chef_db:cookbook_exists(DbContext, OrgName, CookbookName) of
+                    case chef_db:cookbook_exists(DbContext, OrgId, CookbookName) of
                         true ->
                             %% Huzzah!  Do the real check now
                             do_forbidden(Req, State, Env);
@@ -152,7 +151,7 @@ do_forbidden(Req,
                                                  }}}.
 
 to_json(Req, #base_state{chef_db_context = DbContext,
-                         organization_name = OrgName,
+                         organization_guid = OrgId,
                          resource_state = #environment_state{
                            num_versions = NumVersions,
                            cookbook = Cookbook,
@@ -160,7 +159,7 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                              name = EnvName
                             }}} = State) ->
     Results = chef_db:fetch_environment_filtered_cookbook_versions(
-                DbContext, OrgName, EnvName, Cookbook, NumVersions),
+                DbContext, OrgId, EnvName, Cookbook, NumVersions),
     {chef_json:encode(process_filtered_results(Results, Req)),
      Req, State}.
 

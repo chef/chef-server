@@ -150,16 +150,16 @@ make_other_org() ->
     ok = chef_db:create(Org, context(), ?OTHER_ORG_AUTHZ_ID).
 
 org_config() ->
-    OrgId = chef_db:fetch_org_id(context(), ?ORG_NAME),
-    OtherOrgID = chef_db:fetch_org_id(context(), ?OTHER_ORG_NAME),
+    {OrgId, _} = chef_db:fetch_org_metadata(context(), ?ORG_NAME),
+    {OtherOrgID, _} = chef_db:fetch_org_metadata(context(), ?OTHER_ORG_NAME),
     [{org_id, OrgId}, {other_org_id, OtherOrgID}].
 
 confirm_org_setup(Config) ->
     ExpectedOrgId = proplists:get_value(org_id, Config),
     ExpectedOtherOrgId = proplists:get_value(other_org_id, Config),
 
-    ActualMainOrg = chef_db:fetch_org_id(context(), ?ORG_NAME),
-    ActualOtherOrg = chef_db:fetch_org_id(context(), ?OTHER_ORG_NAME),
+    {ActualMainOrg, _} = chef_db:fetch_org_metadata(context(), ?ORG_NAME),
+    {ActualOtherOrg, _} = chef_db:fetch_org_metadata(context(), ?OTHER_ORG_NAME),
     ?assertEqual(ExpectedOrgId, ActualMainOrg),
     ?assertEqual(ExpectedOtherOrgId, ActualOtherOrg).
 

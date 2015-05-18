@@ -35,7 +35,6 @@
 
          create_name_id_dict/3,
 
-         fetch_org_id/2,
          fetch_org_metadata/2,
 
          %% temporary hack for reindex script until
@@ -52,8 +51,6 @@
          %% user ops
          node_record_to_authz_id/2,
 
-         %% role ops
-         fetch_roles/2,
          %% role_record_to_authz_id/2,
 
          %% environment ops
@@ -274,12 +271,6 @@ update(ObjectRec, #context{reqid = ReqId}, ActorId) ->
 darklaunch_from_context(#context{darklaunch = Darklaunch}) ->
     Darklaunch.
 
--spec fetch_org_id(#context{}, binary()) -> not_found | binary().
-fetch_org_id(Context, OrgName) ->
-    case fetch_org_metadata(Context, OrgName) of
-        not_found -> not_found;
-        {OrgId, _OrgAuthzId} -> OrgId
-    end.
 
 %% Fetch the id and authz_id for a given organization name
 -spec fetch_org_metadata(#context{}, binary() | ?OSC_ORG_NAME) -> not_found | {binary(), binary()}.
@@ -363,123 +354,84 @@ fetch_requestors(#context{reqid = ReqId}, OrgId, Name) ->
 %% from the database).
 
 -spec make_sandbox(DbContext :: #context{},
-                   OrgName :: binary(),
+                   OrgId :: object_id(),
                    ActorId :: object_id(),
                    Checksums :: [binary()]) -> #chef_sandbox{} |
                                                not_found |
                                                {conflict, term()} |
                                                {error, term()}.
-make_sandbox(#context{}=Ctx, OrgName, ActorId, Checksums) ->
-    case fetch_org_id(Ctx, OrgName) of
-        not_found ->
-            not_found;
-        OrgId ->
-            Id = chef_object_base:make_org_prefix_id(OrgId),
-            %% TempSandbox doesn't know if the checksums have been uploaded yet or not
-            TempSandbox = #chef_sandbox{id=Id,
-                                        org_id=OrgId,
-                                        checksums = [{C, false} || C <- Checksums]},
-            %% TODO: ActorId isn't actually needed in the code, but it is if we want to use common code paths
-            case create_object(Ctx, create_sandbox, TempSandbox, ActorId) of
-                ok ->
-                    %% this sandbox will know if the checksums have been uploaded
-                    fetch(TempSandbox, Ctx);
-                {conflict, Msg} ->
-                    {conflict, Msg};
-                {error, Why} ->
-                    {error, Why}
-            end
+make_sandbox(#context{}=Ctx, OrgId, ActorId, Checksums) ->
+    Id = chef_object_base:make_org_prefix_id(OrgId),
+    %% TempSandbox doesn't know if the checksums have been uploaded yet or not
+    TempSandbox = #chef_sandbox{id=Id,
+                                org_id=OrgId,
+                                checksums = [{C, false} || C <- Checksums]},
+    %% TODO: ActorId isn't actually needed in the code, but it is if we want to use common code paths
+    case create_object(Ctx, create_sandbox, TempSandbox, ActorId) of
+        ok ->
+            %% this sandbox will know if the checksums have been uploaded
+            fetch(TempSandbox, Ctx);
+        {conflict, Msg} ->
+            {conflict, Msg};
+        {error, Why} ->
+            {error, Why}
     end.
 
 -spec cookbook_exists(DbContext :: #context{},
-                      OrgName :: binary(),
+                      OrgId::object_id(),
                       CookbookName :: binary()) ->
                              boolean() | {error, term()}.
-cookbook_exists(#context{reqid=ReqId} = DbContext, OrgName, CookbookName) ->
-    case fetch_org_id(DbContext, OrgName) of
-        not_found ->
-            not_found;
-        OrgId ->
-            ?SH_TIME(ReqId, chef_sql, cookbook_exists, (OrgId, CookbookName))
-    end.
+cookbook_exists(#context{reqid=ReqId}, OrgId, CookbookName) ->
+    ?SH_TIME(ReqId, chef_sql, cookbook_exists, (OrgId, CookbookName)).
 
 %% @doc Given a list of cookbook names and versions, return a list of #chef_cookbook_version
 %% objects.  This is used by the depsolver endpoint.
--spec bulk_fetch_minimal_cookbook_versions(DbContext :: #context{}, OrgName :: binary(), [versioned_cookbook()]) -> [#chef_cookbook_version{}] | {error, any()}.
-bulk_fetch_minimal_cookbook_versions(#context{}, _OrgName, []) ->
+-spec bulk_fetch_minimal_cookbook_versions(DbContext :: #context{}, OrgId:: object_id(), [versioned_cookbook()]) -> [#chef_cookbook_version{}] | {error, any()}.
+bulk_fetch_minimal_cookbook_versions(#context{}, _OrgId, []) ->
     %% Avoid database calls in the case of an empty run_list
     [];
-bulk_fetch_minimal_cookbook_versions(#context{reqid = ReqID} = Ctx, OrgName, VersionedCookbooks) ->
-    case fetch_org_id(Ctx, OrgName) of
-        not_found ->
-            not_found;
-        OrgId ->
-            stats_hero:ctime(ReqID, {chef_sql, bulk_fetch_minimal_cookbook_versions},
-                             fun() ->
-                                     chef_sql:bulk_fetch_minimal_cookbook_versions(OrgId,
-                                                                                   VersionedCookbooks)
-                             end)
-    end.
+bulk_fetch_minimal_cookbook_versions(#context{reqid = ReqID}, OrgId, VersionedCookbooks) ->
+    ?SH_TIME(ReqID, chef_sql, bulk_fetch_minimal_cookbook_versions , (OrgId, VersionedCookbooks)).
 
--spec fetch_cookbook_versions(#context{}, binary()) -> {not_found, org} |
-                                                       [versioned_cookbook()] |
-                                                       {error, any()}.
+-spec fetch_cookbook_versions(#context{},object_id()) -> [versioned_cookbook()] | {error, any()}.
 %% @doc Return a list of all cookbook names and versions in an org
-fetch_cookbook_versions(#context{} = Ctx, OrgName) ->
-    fetch_objects(Ctx, fetch_cookbook_versions, OrgName).
+fetch_cookbook_versions(#context{} = Ctx, OrgId) ->
+    fetch_objects(Ctx, fetch_cookbook_versions, OrgId).
 
--spec fetch_cookbook_versions(#context{}, binary(), binary()) -> {not_found, org} |
-                                                                 [versioned_cookbook()] |
-                                                                 {error, any()}.
+-spec fetch_cookbook_versions(#context{}, object_id(), binary()) -> [versioned_cookbook()] | {error, any()}.
 %% @doc Return a list of all cookbook names and versions in an org
-fetch_cookbook_versions(#context{} = Ctx, OrgName, CookbookName) ->
-    fetch_objects(Ctx, fetch_cookbook_versions, OrgName, CookbookName).
+fetch_cookbook_versions(#context{} = Ctx, OrgId, CookbookName) ->
+    fetch_objects(Ctx, fetch_cookbook_versions, OrgId, CookbookName).
 
 -spec fetch_cookbook_version(DbContext :: #context{},
-                             OrgName :: binary(),
+                             OrgId :: object_id(),
                              VersionedCookbook :: versioned_cookbook()) -> #chef_cookbook_version{} |
                                                                            {cookbook_exists, object_id()} |
                                                                            not_found |
                                                                            {error, term()}.
-fetch_cookbook_version(#context{reqid = ReqId} = Ctx, OrgName, VersionedCookbook) ->
-    case fetch_org_id(Ctx, OrgName) of
-        not_found ->
-            not_found;
-        OrgId ->
-            stats_hero:ctime(ReqId, {chef_sql, fetch_cookbook_version},
-                             fun() -> chef_sql:fetch_cookbook_version(OrgId,
-                                                                      VersionedCookbook)
-                             end)
-    end.
+fetch_cookbook_version(#context{reqid = ReqId}, OrgId, VersionedCookbook) ->
+    ?SH_TIME(ReqId, chef_sql, fetch_cookbook_version, (OrgId, VersionedCookbook)).
 
 -spec fetch_latest_cookbook_version(Ctx::#context{},
-                                    OrgName::binary(),
+                                    OrgId::object_id(),
                                     CookbookName::binary()) ->
                                     #chef_cookbook_version{} |
                                     not_found |
                                     {error, term()}.
 %% @doc Return the latest version of the requested cookbook
-fetch_latest_cookbook_version(#context{reqid=ReqId} = Ctx, OrgName, CookbookName) ->
-    case fetch_org_id(Ctx, OrgName) of
-      not_found ->
-        not_found;
-      OrgId ->
-         stats_hero:ctime(ReqId, {chef_sql, fetch_latest_cookbook_version},
-                          fun() -> chef_sql:fetch_latest_cookbook_version(OrgId, CookbookName)
-                          end)
-    end.
+fetch_latest_cookbook_version(#context{reqid=ReqId}, OrgId, CookbookName) ->
+    ?SH_TIME(ReqId, chef_sql, fetch_latest_cookbook_version, (OrgId, CookbookName)).
 
 %% @doc Retrieve a list of `{Name, Verison}' tuples for the latest version of each cookbook in
 %% an organization.  Version information is returned as a binary string (e.g., `<<"1.0.0">>')
 %% instead of the tuple form (e.g. `{1,0,0}') that is used elsewhere.
 -spec fetch_latest_cookbook_versions(DbContext :: #context{},
-                                     OrgName :: binary()) ->
+                                     OrgId :: object_id()) ->
                                             [{CookbookName :: binary(),
                                               VersionString :: binary()}] |
-                                            {not_found, org} |
                                             {error, Reason :: term()}.
-fetch_latest_cookbook_versions(#context{}=DbContext, OrgName) ->
-    fetch_latest_cookbook_versions(DbContext, OrgName, 1).
+fetch_latest_cookbook_versions(#context{}=DbContext, OrgId) ->
+    fetch_latest_cookbook_versions(DbContext, OrgId, 1).
 
 %% @doc Same as {@link fetch_latest_cookbook_versions/2}, but allows you to specify how many
 %% versions for which to fetch information.  For instance, setting `NumberOfVersions' to `3'
@@ -489,43 +441,31 @@ fetch_latest_cookbook_versions(#context{}=DbContext, OrgName) ->
 %% If fewer than `NumberOfVersions' versions exist for a given cookbook, all
 %% versions are represented in the output.
 -spec fetch_latest_cookbook_versions(DbContext :: #context{},
-                                     OrgName :: binary(),
+                                     OrgId :: object_id(),
                                      NumberOfVersions :: non_neg_integer()) ->
                                             [{CookbookName :: binary(),
                                               VersionString :: binary()}] |
-                                            {not_found, org} |
                                             {error, Reason :: term()}.
-fetch_latest_cookbook_versions(#context{reqid=ReqId}=DbContext, OrgName, NumberOfVersions) ->
-    case fetch_org_id(DbContext, OrgName) of
-        not_found ->
-            {not_found, org};
-        OrgId ->
-            case ?SH_TIME(ReqId, chef_sql, fetch_latest_cookbook_versions, (OrgId, all, NumberOfVersions)) of
-                {ok, VersionInfo} ->
-                    VersionInfo;
-                {error, Error} ->
-                    {error, Error}
-            end
+fetch_latest_cookbook_versions(#context{reqid=ReqId}, OrgId, NumberOfVersions) ->
+    case ?SH_TIME(ReqId, chef_sql, fetch_latest_cookbook_versions, (OrgId, all, NumberOfVersions)) of
+        {ok, VersionInfo} ->
+            VersionInfo;
+        {error, Error} ->
+            {error, Error}
     end.
 
 %% @doc Retrieves the list of all recipes from the latest version of all an organization's
-%% cookbooks and returns their cookbook-qualified names.
+%% cook}books and returns their cookbook-qualified names.
 -spec fetch_latest_cookbook_recipes(DbContext :: #context{},
-                                    OrgName :: binary()) ->
+                                    OrgId::object_id()) ->
                                            [CookbookQualifiedRecipeName :: binary()] |
-                                           {not_found, org} |
                                            {error, Reason :: term()}.
-fetch_latest_cookbook_recipes(#context{reqid=ReqId}=DbContext, OrgName) ->
-    case fetch_org_id(DbContext, OrgName) of
-        not_found ->
-            {not_found, org};
-        OrgId ->
-            case ?SH_TIME(ReqId, chef_sql, fetch_latest_cookbook_recipes, (OrgId)) of
-                {ok, Results} ->
-                    Results;
-                {error, Error} ->
-                    {error, Error}
-            end
+fetch_latest_cookbook_recipes(#context{reqid=ReqId}, OrgId) ->
+    case ?SH_TIME(ReqId, chef_sql, fetch_latest_cookbook_recipes, (OrgId)) of
+        {ok, Results} ->
+            Results;
+        {error, Error} ->
+            {error, Error}
     end.
 
 %% @doc Retrieve all cookbook dependency information for an organization as a list of
@@ -533,19 +473,14 @@ fetch_latest_cookbook_recipes(#context{reqid=ReqId}=DbContext, OrgName) ->
 %%
 %% See the corresponding function in the chef_sql module for more information.
 -spec fetch_all_cookbook_version_dependencies(DbContext :: #context{},
-                                              OrgName :: binary()) -> [depsolver:dependency_set()] |
+                                              OrgId::object_id()) -> [depsolver:dependency_set()] |
                                                                       {error, term()}.
-fetch_all_cookbook_version_dependencies(#context{reqid=ReqId}=DbContext, OrgName) ->
-    case fetch_org_id(DbContext, OrgName) of
-        not_found ->
-            not_found;
-        OrgId ->
-            case ?SH_TIME(ReqId, chef_sql, fetch_all_cookbook_version_dependencies, (OrgId)) of
-                {ok, Results} ->
-                    Results;
-                {error, Error} ->
-                    {error, Error}
-            end
+fetch_all_cookbook_version_dependencies(#context{reqid=ReqId}, OrgId) ->
+    case ?SH_TIME(ReqId, chef_sql, fetch_all_cookbook_version_dependencies, (OrgId)) of
+        {ok, Results} ->
+            Results;
+        {error, Error} ->
+            {error, Error}
     end.
 
 %% @doc Retrieve cookbook versions, subject to any constraints imposed by the specified
@@ -557,62 +492,42 @@ fetch_all_cookbook_version_dependencies(#context{reqid=ReqId}=DbContext, OrgName
 %% if it is a cookbook name (i.e., a binary), then information on just that cookbook will be
 %% returned.
 -spec fetch_environment_filtered_cookbook_versions(DbContext :: #context{},
-                                                   OrgName :: binary(),
+                                                   OrgId::object_id(),
                                                    EnvName :: binary(),
                                                    CookbookName :: binary() | all,
                                                    NumVersions :: all | non_neg_integer()) ->
                                                           [{CookbookName :: binary(), [Version :: binary()]}] |
                                                           {error, term()}.
-fetch_environment_filtered_cookbook_versions(#context{reqid=ReqId}=DbContext, OrgName, EnvName, CookbookName, NumVersions) ->
-    case fetch_org_id(DbContext, OrgName) of
-        not_found ->
-            not_found;
-        OrgId ->
-            case fetch(#chef_environment{org_id = OrgId, name = EnvName}, DbContext) of
-                #chef_environment{} = Environment ->
-                    case ?SH_TIME(ReqId, chef_sql, fetch_environment_filtered_cookbook_versions, (OrgId, Environment, CookbookName, NumVersions)) of
-                        {ok, Results} ->
-                            Results;
-                        {error, Error} ->
-                            {error, Error}
-                    end;
-                {error, Error} -> {error, Error}
-            end
+fetch_environment_filtered_cookbook_versions(#context{reqid=ReqId}=DbContext, OrgId, EnvName, CookbookName, NumVersions) ->
+    case fetch(#chef_environment{org_id = OrgId, name = EnvName}, DbContext) of
+        #chef_environment{} = Environment ->
+            case ?SH_TIME(ReqId, chef_sql, fetch_environment_filtered_cookbook_versions, (OrgId, Environment, CookbookName, NumVersions)) of
+                {ok, Results} ->
+                    Results;
+                {error, Error} ->
+                    {error, Error}
+            end;
+        {error, Error} -> {error, Error}
     end.
 
-fetch_environment_filtered_recipes(#context{reqid=ReqId}=DbContext, OrgName, EnvName) ->
-    case fetch_org_id(DbContext, OrgName) of
-        not_found ->
-            not_found;
-        OrgId ->
-            case fetch(#chef_environment{org_id = OrgId, name = EnvName}, DbContext) of
-                #chef_environment{} = Environment ->
-                    case ?SH_TIME(ReqId, chef_sql, fetch_environment_filtered_recipes, (OrgId, Environment)) of
-                        {ok, Results} ->
-                            Results;
-                        {error, Error} ->
-                            {error, Error}
-                    end;
-                {error, Error} -> {error, Error}
-            end
+fetch_environment_filtered_recipes(#context{reqid=ReqId}=DbContext, OrgId, EnvName) ->
+    case fetch(#chef_environment{org_id = OrgId, name = EnvName}, DbContext) of
+        #chef_environment{} = Environment ->
+            case ?SH_TIME(ReqId, chef_sql, fetch_environment_filtered_recipes, (OrgId, Environment)) of
+                {ok, Results} ->
+                    Results;
+                {error, Error} ->
+                    {error, Error}
+            end;
+        {error, Error} -> {error, Error}
     end.
 
 
--spec fetch_roles(#context{}, binary()) -> {not_found, org} |
-                                           [binary()] |
-                                           {error, any()}.
-%% @doc Return a list of all role names in an org
-fetch_roles(#context{} = Ctx, OrgName) ->
-    fetch_objects(Ctx, fetch_roles, OrgName).
 
-
--spec fetch_data_bag_item_ids(#context{}, binary() | {id, object_id()},
-                              binary()) -> [binary()] |
-                                           {not_found, org} |
-                                           {error, _}.
-%% @doc Returns list of data_bag_item names in `DataBagName' for `OrgName'.
-fetch_data_bag_item_ids(#context{} = Ctx, OrgName, DataBagName) ->
-    fetch_objects(Ctx, fetch_data_bag_item_ids, OrgName, DataBagName).
+-spec fetch_data_bag_item_ids(#context{}, object_id(), binary()) -> [binary()] | {error, _}.
+%% @doc Returns list of data_bag_item names in `DataBagName' for `OrgId'.
+fetch_data_bag_item_ids(#context{} = Ctx, OrgId, DataBagName) ->
+    fetch_objects(Ctx, fetch_data_bag_item_ids, OrgId, DataBagName).
 
 %% @doc Verifies that all checksums in the given sandbox are marked as uploaded, and if so,
 %% deletes the sandbox from the database.
@@ -704,13 +619,13 @@ connect() ->
                       [binary()|ej:json_object()] | {error, _}.
 %% @doc Return a list of JSON/gzip'd JSON as binary corresponding to the specified list of
 %% IDs.
-bulk_get(#context{reqid = ReqId}, _OrgName, node, Ids) ->
+bulk_get(#context{reqid = ReqId}, _, node, Ids) ->
     bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_objects, (node, Ids)));
-bulk_get(#context{reqid = ReqId}, _OrgName, role, Ids) ->
+bulk_get(#context{reqid = ReqId}, _, role, Ids) ->
     bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_objects, (role, Ids)));
-bulk_get(#context{reqid = ReqId}, _OrgName, data_bag_item, Ids) ->
+bulk_get(#context{reqid = ReqId}, _, data_bag_item, Ids) ->
     bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_objects, (data_bag_item, Ids)));
-bulk_get(#context{reqid = ReqId}, _OrgName, environment, Ids) ->
+bulk_get(#context{reqid = ReqId}, _, environment, Ids) ->
     bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_objects, (environment, Ids)));
 bulk_get(#context{reqid = ReqId, server_api_version = ApiVersion}, OrgName, client, Ids) ->
     ClientRecords = bulk_get_result(?SH_TIME(ReqId, chef_sql, bulk_get_clients, (ApiVersion, Ids))),
@@ -734,17 +649,16 @@ bulk_get_result({error, _Why}=Error) ->
     Error.
 
 bulk_get_couchdb(#context{reqid = ReqId, otto_connection = S}=Ctx, OrgName, _Type, Ids) ->
-    %% presently searching for non-nodes goes to couchdb
-    case fetch_org_id(Ctx, OrgName) of
+    case fetch_org_metadata(Ctx, OrgName) of
         not_found ->
             {error, {not_found, org}};
-        OrgId ->
+        {OrgId, _}  ->
             DbName = chef_otto:dbname(OrgId),
             ?SH_TIME(ReqId, chef_otto, bulk_get, (S, DbName, Ids))
     end.
 
--spec data_bag_exists(#context{}, binary(), binary()) -> boolean().
-%% @doc Return true if data bag `DataBag' exists in org `OrgName' and false otherwise.
+-spec data_bag_exists(#context{}, object_id(), binary()) -> boolean().
+%% @doc Return true if data bag `DataBag' exists in org and false otherwise.
 data_bag_exists(#context{}=Ctx, OrgId, DataBag) ->
     case fetch(#chef_data_bag{org_id = OrgId, name = DataBag}, Ctx) of
         #chef_data_bag{} -> true;
@@ -786,45 +700,31 @@ create_object(#context{server_api_version = ApiVersion, reqid = ReqId}, Fun, Obj
         {error, Why} -> {error, Why}
     end.
 
--spec fetch_objects(#context{}, atom(),
-                    binary() | {id, object_id()}) -> {not_found, org} |
-                                                     [binary() | versioned_cookbook() ] |
-                                                     {error, any()}.
+-spec fetch_objects(#context{}, atom(),  object_id()) -> [binary() | versioned_cookbook() ] | {error, any()}.
 %% @doc Generic listing of a Chef object type. `Fun' is a function in the `chef_sql'
 %% module. Returns a list of object names.
-fetch_objects(#context{reqid = ReqId}, Fun, {id, OrgId}) ->
+fetch_objects(#context{reqid = ReqId}, Fun, OrgId) ->
     case stats_hero:ctime(ReqId, {chef_sql, Fun},
                           fun() -> chef_sql:Fun(OrgId) end) of
         {ok, L} when is_list(L) ->
             L;
         {error, Error} ->
             {error, Error}
-    end;
-fetch_objects(#context{} = Ctx, Fun, OrgName) ->
-    case fetch_org_id(Ctx, OrgName) of
-        not_found -> {not_found, org};
-        OrgId -> fetch_objects(Ctx, Fun, {id, OrgId})
     end.
 
--spec fetch_objects(#context{}, atom(), binary() | {id, object_id()},
-                    binary()) -> {not_found, org} |
-                                 [binary() | versioned_cookbook()] |
+-spec fetch_objects(#context{}, atom(), object_id(),
+                    binary()) -> [binary() | versioned_cookbook()] |
                                  {error, any()}.
 %% @doc Generic listing of a Chef object type with filtering. `Fun' is the appropriate
 %% function in the `chef_sql' module. This version is used to fetch nodes within a specified
 %% `environment' as well as `data_bag_items' within a specified `data_bag'.
-fetch_objects(#context{reqid = ReqId}, Fun, {id, OrgId}, Arg) ->
+fetch_objects(#context{reqid = ReqId}, Fun, OrgId, Arg) ->
     case stats_hero:ctime(ReqId, {chef_sql, Fun},
                           fun() -> chef_sql:Fun(OrgId, Arg) end) of
         {ok, L} when is_list(L) ->
             L;
         {error, Error} ->
             {error, Error}
-    end;
-fetch_objects(#context{}=Ctx, Fun, OrgName, Arg) ->
-    case fetch_org_id(Ctx, OrgName) of
-        not_found -> {not_found, org};
-        OrgId -> fetch_objects(Ctx, Fun, {id, OrgId}, Arg)
     end.
 
 %% FIXME: seems like delete_object should take either object ID or orgid+object_name only.

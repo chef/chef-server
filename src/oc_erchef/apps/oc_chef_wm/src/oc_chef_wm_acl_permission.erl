@@ -64,7 +64,6 @@ allowed_methods(Req, State) ->
                               {wm_req(), chef_wm:base_state()}.
 validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
                                          organization_guid = OrgId,
-                                         organization_name = OrgName,
                                          resource_state = #acl_state{type = Type} =
                                              AclState} = State) ->
     Body = wrq:req_body(Req),
@@ -74,7 +73,7 @@ validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
         ok ->
             oc_chef_wm_acl:validate_authz_id(Req, State,
                                              AclState#acl_state{acl_data = Ace},
-                                             Type, OrgId, OrgName, DbContext);
+                                             Type, OrgId, DbContext);
         Other ->
             throw(Other)
     end.

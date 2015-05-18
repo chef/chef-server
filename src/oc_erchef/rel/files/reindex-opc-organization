@@ -52,7 +52,7 @@ main(Args) ->
 %%
 %% If the arguments are invalid for any reason, print a message and halt.
 validate_args([]) ->
-    io:format("You didn't specify a command!  Use either 'drop', 'reindex', or 'complete'"),
+    io:format("You didn't specify a command!  Use either 'drop', 'reindex', or 'complete'~n"),
     halt(1);
 validate_args([Command]) when Command =:= "reindex";
                               Command =:= "drop";
@@ -106,14 +106,15 @@ perform(complete, Context, OrgInfo) ->
 
 make_context(OrgName, IntLB) ->
     ReqId = base64:encode(crypto:hash(md5, (term_to_binary(make_ref())))),
-    % TODO how to handle api versioning here? we don't ahve access to current version level via hrl define
+    % TODO api versioning to be handled when we move this into an omnibus template
     rpc:call(?ERCHEF, chef_db, make_context, [0, ReqId, find_dl_headers(OrgName, IntLB)]).
 
 %% @doc Verify that the given `OrgName' actually corresponds to a real
 %% organization.  Returns the organization's ID if so; 'not_found' otherwise.
 -spec get_org_id(Context :: term(), OrgName :: binary()) -> OrgId::binary() | not_found.
 get_org_id(Context, OrgName) ->
-    rpc:call(?ERCHEF, chef_db, fetch_org_id, [Context, OrgName]).
+    {OrgId, _} = rpc:call(?ERCHEF, chef_db, fetch_org_metadata, [Context, OrgName]),
+    OrgId.
 
 %% @doc Connect to the node actually running Erchef.  Kind of hard to do RPC calls
 %% otherwise....

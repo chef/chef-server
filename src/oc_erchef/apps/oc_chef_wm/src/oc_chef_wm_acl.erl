@@ -54,7 +54,7 @@
 
 %% Other
 -export([% Also used by oc_chef_wm_acl_permission:
-         validate_authz_id/7]).
+         validate_authz_id/6]).
 
 init(Config) ->
     oc_chef_wm_base:init(?MODULE, Config).
@@ -73,10 +73,9 @@ allowed_methods(Req, State) ->
                               {wm_req(), chef_wm:base_state()}.
 validate_request('GET', Req, #base_state{chef_db_context = DbContext,
                                          organization_guid = OrgId,
-                                         organization_name = OrgName,
                                          resource_state = #acl_state{type = Type} =
                                              AclState} = State) ->
-    validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext).
+    validate_authz_id(Req, State, AclState, Type, OrgId, DbContext).
 
 auth_info(Req, State) ->
     check_acl_auth(Req, State).
@@ -93,14 +92,14 @@ to_json(Req, #base_state{resource_state = AclState} = State) ->
 %% Also used by oc_chef_wm_acl_permission
 validate_authz_id(Req,
                   #base_state{organization_authz_id = AuthzId} = State,
-                  AclState, organization, _OrgId, _OrgName, _DbContext) ->
+                  AclState, organization, _OrgId, _DbContext) ->
     AclState1 = AclState#acl_state{authz_id = AuthzId},
     {Req, State#base_state{resource_state = AclState1, superuser_bypasses_checks = true}};
-validate_authz_id(Req, State, AclState, Type, OrgId, OrgName, DbContext) ->
+validate_authz_id(Req, State, AclState, Type, OrgId, DbContext) ->
     Name = chef_wm_util:object_name(Type, Req),
     AuthzId = case Type of
                   cookbook ->
-                      oc_chef_authz_acl:fetch_cookbook_id(DbContext, Name, OrgName);
+                      oc_chef_authz_acl:fetch_cookbook_id(DbContext, Name, OrgId);
                   NotCookbook ->
                       oc_chef_authz_acl:fetch_id(NotCookbook, DbContext, Name, OrgId)
               end,
