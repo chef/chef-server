@@ -17,12 +17,6 @@ add_command_under_category "install", "general", "Install addon package by name,
     install_path = ARGV[ARGV.index(path_arg) + 1]
   end
 
-  attributes_path = "#{base_path}/embedded/cookbooks/install_params.json"
-  command = ["chef-client -z",
-    "--config #{base_path}/embedded/cookbooks/solo.rb",
-    "--json-attributes #{attributes_path}",
-    "--log_level fatal"]
-
   if package.nil?
     STDERR.puts "You must supply an addon name. Valid names include: #{KNOWN_ADDONS.join(', ')}."
     exit 1
@@ -31,6 +25,7 @@ add_command_under_category "install", "general", "Install addon package by name,
     exit 1
   end
 
+  attributes_path = "#{base_path}/embedded/cookbooks/install_params.json"
   json_src = { "run_list" => ["recipe[private-chef::add_ons_wrapper]"],
     "private_chef" => { "addons"=> {
         "install" => true,
@@ -41,6 +36,8 @@ add_command_under_category "install", "general", "Install addon package by name,
     file.write json_src.to_json
   end
 
-  status = run_command(command.join(" "))
+  chef_args = "-l fatal"
+
+  status = run_chef(attributes_path, chef_args)
   exit!(status.success? ? 0 : 1)
 end
