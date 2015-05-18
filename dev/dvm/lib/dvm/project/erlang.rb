@@ -106,7 +106,8 @@ EOM
       # typically sync, builder, eunit , mixer and common_test
       #
       # TODO this can also be wrapped and handled in the base...
-      if ! project_dir_exists_on_host?
+      # TODO this makes an assumption that this is NOT anything bundled in our chef-server env.
+      if ! project_dir_exists_on_host?(path)
         git = project['git']
         if git
           if git['uri']

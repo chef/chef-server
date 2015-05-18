@@ -1,4 +1,4 @@
-
+- [ ] bug: dvm gem mount gets undone after halt/up
 - [ ] populate command to load test users and orgs
 - [ ] use runsv 'down' file to cleanly disable loaded services even
       across chef-server-ctl reconfigure

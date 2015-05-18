@@ -2,6 +2,8 @@ module DVM
   class ErlangDep < Dep
     # TODO the path names suck
     attr_reader :ref, :url, :dep_path, :real_path, :parent, :libname, :libpath
+    # Needed for now to make tools mixin behave:
+    attr_reader :path
     def initialize(name, base_dir, data, parent_inst)
       super(name)
       @deps = nil
@@ -9,6 +11,7 @@ module DVM
       @ref  = data["ref"]
       @name = name
       @real_path = File.join("/host", name)
+      @path = @real_path
       @dep_path = File.join(base_dir, name)
       @parent = parent_inst
       @available = nil
@@ -47,7 +50,7 @@ module DVM
     def load(opts)
       load_info
       # Again, muich of this can be offloaded to a base class that hooks into child class via callbacks.
-      if ! project_dir_exists_on_host?
+      if !project_dir_exists_on_host?(name)
         # Some things to consider:
         # do we want to match the revision/branch from rebar?
         # do we want to auto-create a new branch from it if we did the clone ourselves or detect master or
