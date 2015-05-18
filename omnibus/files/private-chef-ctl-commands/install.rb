@@ -4,7 +4,6 @@
 KNOWN_ADDONS = %w(
   chef-ha
   chef-sync
-  opscode-analytics
   opscode-manage
   opscode-push-jobs-server
   opscode-reporting
