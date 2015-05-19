@@ -63,4 +63,10 @@ directory "/vagrant/testdata/orgs" do
   recursive true
 end
 
-
+ruby_block "dotfiles" do
+  block do
+    require "fileutils"
+    copyfiles = Dir.glob("/vagrant/dotfiles/.*").reject { |name| name =~ /.*\.$/ }
+    FileUtils.cp(copyfiles, "/home/vagrant")
+  end
+end

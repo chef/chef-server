@@ -1,0 +1,6 @@
+The contents of this directory will be linked into your home directory,
+allowing you to modify shell and application dotfiles to suit your needs.
+
+Take care that if you provide a custom .bashrc, that you set up your PATH as:
+
+export PATH=/opt/opscode/embedded/bin:$PATH
