@@ -40,7 +40,11 @@ all() ->
      valid_in_range_version_accepted,
      invalid_version_too_high_rejected,
      invalid_version_too_low_rejected,
-     invalid_version_bad_value_rejected].
+     invalid_version_bad_value_rejected,
+     valid_header_returned_when_valid_version_header_sent,
+     valid_header_returned_when_no_version_header_sent,
+     valid_header_returned_when_invalid_header_sent,
+     valid_header_returned_when_unsupported_header_sent].
 
 init_per_suite(Config) ->
     Config2 = setup_helper:base_init_per_suite([{org_name, ?ORG_NAME}, {org_authz_id, ?ORG_AUTHZ_ID},
@@ -99,8 +103,43 @@ valid_in_range_version_accepted(_Config) ->
     {Code, _} = api_get("license", ?API_MIN_VER + 1),
     ?assertEqual(Code, "200").
 
+valid_header_returned_when_valid_version_header_sent(_Config) ->
+    {ok, Code, Headers, _ResponseBody} = http_request(get, "license", ?API_MIN_VER),
+    MatchData = expected_header_response(?API_MIN_VER, ?API_MIN_VER),
+    ?assertEqual(Code, "200"),
+    ?assertEqual(chef_json:decode(proplists:get_value("X-Ops-Server-API-Version", Headers)), MatchData).
+
+valid_header_returned_when_no_version_header_sent(_Config) ->
+    {ok, Code, Headers, _ResponseBody} = http_request(get, "license", undefined),
+    MatchData = expected_header_response(0, ?API_MIN_VER),
+    ?assertEqual(Code, "200"),
+    ?assertEqual(chef_json:decode(proplists:get_value("X-Ops-Server-API-Version", Headers)), MatchData).
+
+valid_header_returned_when_invalid_header_sent(_Config) ->
+    {ok, Code, Headers, ResponseBody} = http_request(get, "license", pineapple),
+    MatchData = expected_header_response(-1, -1),
+    ?assertEqual(chef_json:decode(ResponseBody), expected_error_response("pineapple")),
+    ?assertEqual(Code, "406"),
+    ?assertEqual(chef_json:decode(proplists:get_value("X-Ops-Server-API-Version", Headers)), MatchData).
+
+valid_header_returned_when_unsupported_header_sent(_Config) ->
+    %% a version we will never support
+    {ok, Code, Headers, ResponseBody} = http_request(get, "license", -100),
+    MatchData = expected_header_response(-100, -1),
+    ?assertEqual(chef_json:decode(ResponseBody), expected_error_response(-100)),
+    ?assertEqual(Code, "406"),
+    ?assertEqual(chef_json:decode(proplists:get_value("X-Ops-Server-API-Version", Headers)), MatchData).
+
 end_per_testcase(_, Config) ->
     Config.
+
+expected_header_response(RequestVersion, ResponseVersion) ->
+    {[
+      {<<"min_version">>, integer_to_binary(?API_MIN_VER)},
+      {<<"max_version">>, integer_to_binary(?API_MAX_VER)},
+      {<<"request_version">>, integer_to_binary(RequestVersion)},
+      {<<"response_version">>, integer_to_binary(ResponseVersion)}
+     ]}.
 
 expected_error_response(BadVersion) when is_integer(BadVersion) ->
     expected_error_response(integer_to_list(BadVersion));

@@ -119,7 +119,7 @@
           %% We will not allow it to be
           %% undefined by default, because in error conditions where it does not get set we will
           %% still attempt to capture it to log in finish_request.
-          server_api_version  = -1 :: integer(),
+          server_api_version  = -1 :: integer() | 'bad_value_requested',
 
           %% OTP information for the Erchef server in {ReleaseName, OtpVersion} form.
           otp_info :: {string(), string()},
