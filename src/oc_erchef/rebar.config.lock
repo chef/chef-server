@@ -38,7 +38,7 @@
                     "7bb8ab83c6f60475e6ef8867d3d5afa0b1dd4013"}},
        {sqerl,".*",
               {git,"https://github.com/opscode/sqerl",
-                   "770a4bc7515fbbbc0ca276fe85e80f09ee951fdc"}},
+                   "17d8d95dbb644d20af3ab7dc19d04dab14e4bed5"}},
        {meck,".*",
              {git,"https://github.com/eproxus/meck",
                   "69664df5d0e01a0ae27efb62831d6eea45cc1cd4"}},
