@@ -1,12 +1,12 @@
 GIT
   remote: git://github.com/opscode/omnibus-software.git
-  revision: 4ca326c4ea5dadbd32c700ff3c31cb8b63a9977b
+  revision: 2d2399de502240f914cf297ccaf651eeff76bc06
   specs:
     omnibus-software (4.0.0)
 
 GIT
   remote: git://github.com/opscode/omnibus.git
-  revision: ab0417987c624eb10299c99f4321c234adb7f9ef
+  revision: 4b019f031c32a0d92c389d3949103e643884d864
   specs:
     omnibus (4.0.0)
       chef-sugar (~> 3.0)
@@ -31,7 +31,7 @@ GEM
     libyajl2 (1.2.0)
     mime-types (1.25.1)
     mixlib-cli (1.5.0)
-    mixlib-config (2.1.0)
+    mixlib-config (2.2.1)
     mixlib-log (1.6.0)
     mixlib-shellout (1.6.1)
     mixlib-versioning (1.0.0)
