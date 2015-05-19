@@ -1,0 +1,242 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_26768
+Validating Org Creation
+Run options: include {:focus=>true, :knife=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :knife=>true}
+
+Randomized with seed 52909
+
+.................................
+
+Finished in 1.29 seconds
+33 examples, 0 failures
+
+Randomized with seed 52909
+
+Starting Pedant Run: 2015-05-15 19:49:14 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :knife=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 62915
+
+
+knife
+  cookbook
+    download
+      as an admin
+[32m        should succeed[0m
+      as a normal user
+[32m        should succeed[0m
+
+knife
+  cookbook
+    upload
+      as an admin
+[32m        should succeed[0m
+      as a normal user
+[32m        should succeed[0m
+      as a normal client
+[32m        should fail[0m
+
+knife
+  data bag
+    create
+      without existing data bag of the same name
+        as an admin
+[32m          should succeed[0m
+      with an existing data bag of the same name
+        as an admin
+[32m          should fail[0m
+
+knife
+  data bag
+    delete
+      without existing data bag
+        as an admin
+[32m          should fail[0m
+      with existing data bag
+        as an admin
+[32m          should succeed[0m
+
+knife
+  data bag
+    from file
+      as an admin
+[32m        should succeed[0m
+
+knife
+  data bag
+    show [ITEM]
+      as an admin
+[32m        should succeed[0m
+
+knife
+  data bag
+    show [ITEM]
+      with existing data bag
+        as an admin
+[32m          should succeed[0m
+          without existing item name
+[32m            should fail[0m
+      without existing data bag
+        as an admin
+[32m          should fail[0m
+
+knife
+  node
+    bulk delete REGEX
+      as an admin
+[32m        should succeed[0m
+
+knife
+  node
+    create
+      without existing node of the same name
+        as an admin
+[32m          should succeed[0m
+      with an existing node of the same name
+        as an admin
+[33m          should fail (PENDING: CHEF-982: `knife node create` does not report name conflicts)[0m
+
+knife
+  node
+    delete
+      without existing node
+        as an admin
+[32m          should fail[0m
+      with existing node
+        as an admin
+[32m          should succeed[0m
+
+knife
+  node
+    from file NODE
+      with existing node
+        as an admin
+[32m          should succeed[0m
+
+knife
+  node
+    list
+      as an admin
+[32m        should succeed[0m
+
+knife
+  node
+    run_list
+      add NODE [ENTRIES,ENTRIES...]
+        with existing node
+          as an admin
+[32m            should succeed[0m
+        without existing node
+          as an admin
+[32m            should fail[0m
+      remove NODE [ENTRIES,ENTRIES...]
+        with existing node
+          as an admin
+[32m            should succeed[0m
+        without existing node
+          as an admin
+[32m            should fail[0m
+
+knife
+  node
+    show [NODE]
+      with existing node
+        as an admin
+[32m          should succeed[0m
+      without existing node
+        as an admin
+[32m          should fail[0m
+
+knife
+  role
+    bulk delete REGEX
+      as an admin
+[32m        should succeed[0m
+
+knife
+  role
+    create [ROLE]
+      without existing role of the same name
+        as an admin
+[32m          should succeed[0m
+      with an existing role of the same name
+        as an admin
+[33m          should fail (PENDING: CHEF-982: `knife role create` does not report name conflicts)[0m
+
+knife
+  role
+    delete [ROLE]
+      without existing role
+        as an admin
+[32m          should fail[0m
+      with existing role
+        as an admin
+[32m          should succeed[0m
+
+knife
+  role
+    from file ROLE
+      with existing role
+        as an admin
+[32m          should succeed[0m
+
+knife
+  role
+    list
+      as an admin
+[32m        should succeed[0m
+
+knife
+  role
+    show [ROLE]
+      with existing role
+        as an admin
+[32m          should succeed[0m
+      without existing role
+        as an admin
+[32m          should fail[0m
+Deleting organization pedant_testorg_api_26768 ...
+
+Pending:
+[33m  knife node create with an existing node of the same name as an admin should fail[0m
+[36m    # CHEF-982: `knife node create` does not report name conflicts[0m
+[36m    # ./spec/api/knife/nodes/create_spec.rb:41[0m
+[33m  knife role create [ROLE] with an existing role of the same name as an admin should fail[0m
+[36m    # CHEF-982: `knife role create` does not report name conflicts[0m
+[36m    # ./spec/api/knife/roles/create_spec.rb:41[0m
+
+Finished in 1 minute 40.24 seconds
+[33m36 examples, 0 failures, 2 pending[0m
+
+Randomized with seed 62915
+

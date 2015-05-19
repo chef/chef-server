@@ -1,0 +1,162 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_30836
+Validating Org Creation
+Run options: include {:focus=>true, :policies=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :policies=>true}
+
+Randomized with seed 61196
+
+.................................
+
+Finished in 1.27 seconds
+33 examples, 0 failures
+
+Randomized with seed 61196
+
+Starting Pedant Run: 2015-05-15 19:54:31 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :policies=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 64916
+
+
+Policies API endpoint
+  when no policies exist on the server
+    GET
+[32m      GET /policies/:group/:name returns 404[0m
+    DELETE
+[32m      DELETE /policies/:group/:name returns 404[0m
+    PUT
+      with a canonical payload
+[32m        PUT /policies/:group/:name returns 201[0m
+      with a minimal payload
+[32m        PUT /policies/:group/:name returns 201[0m
+      with a payload demonstrating validation edge conditions for 'name'
+        when the name contains every valid character
+[32m          PUT /policies/:group/:name returns 201[0m
+        when the name is close to the maximum size
+[32m          PUT /policies/:group/:name returns 201[0m
+        when a revision_id is the maximum size
+[32m          PUT /policies/:group/:name returns 201[0m
+        when a revision_id contains every valid character
+[32m          PUT /policies/:group/:name returns 201[0m
+        when a cookbook identifier is the maximum size
+[32m          PUT /policies/:group/:name returns 201[0m
+        when a cookbook identifier contains every valid character
+[32m          PUT /policies/:group/:name returns 201[0m
+      when the request body is invalid
+        because of missing revision id field
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because revision id field is an empty string
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because revision id field is larger than 255 characters
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because the revision_id contains invalid character
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because the revision_id contains invalid character +
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because the revision_id contains invalid character !
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because of missing name field
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because of an mismatched name field
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because the name is larger than 255 characters
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because the name contains invalid character ' '
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because the name contains invalid character '+'
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because the name contains invalid character '!'
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because of missing run_list field
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because run_list field is the wrong type
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because the run_list has invalid item '123'
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because the run_list has invalid item 'recipe['
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because the run_list has invalid item 'role[foo]'
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because the run_list has invalid item 'recipe[foo]'
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because cookbook_locks field is missing
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because cookbook_locks field is the wrong type
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because cookbook_locks contains an entry of the wrong type
+[32m          PUT /policies/:group/:name returns 400[0m
+        because cookbook_locks contains an entry that is missing the identifier field
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because cookbook_locks contains an entry with an identifier larger than 255 characters
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+        because cookbook_locks contains an entry with an invalid dotted_decimal_identifier field
+[32m          PUT /policies/:group/:name returns 400[0m
+[32m          PUT /policies/:group/:name body contains a well-formed error message[0m
+  when a policy exists on the server
+    GET
+[32m      retrieves the policy document[0m
+    PUT (update policy document)
+[32m      PUT /policies/:group/:name returns 200[0m
+[32m      GET /policies/:group/:name subsequently returns the updated document[0m
+    DELETE
+[32m      DELETE /policies/:group/:name returns the deleted document[0m
+[32m      DELETE /policies/:group/:name removes the policy from the data store[0m
+Deleting organization pedant_testorg_api_30836 ...
+
+Finished in 8.96 seconds
+[32m62 examples, 0 failures[0m
+
+Randomized with seed 64916
+

@@ -1,0 +1,266 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_20188
+Validating Org Creation
+Run options: include {:focus=>true, :data_bags=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :data_bags=>true}
+
+Randomized with seed 46553
+
+.................................
+
+Finished in 1.27 seconds
+33 examples, 0 failures
+
+Randomized with seed 46553
+
+Starting Pedant Run: 2015-05-15 19:36:19 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :data_bags=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 1737
+
+
+Data Bag API endpoint
+  with no data bags
+    a request to /data
+      GET
+[32m        returns an empty list of data bags[0m
+      POST
+        with a canonical payload
+          behaves like a successful data bag POST
+[32m            returns success[0m
+[32m            creates the data bag[0m
+        valid requests of various types to create a data bag
+          with a valid name
+            like 'pedant'
+              behaves like a successful data bag POST
+[32m                returns success[0m
+[32m                creates the data bag[0m
+            like 'pedant-bag'
+              behaves like a successful data bag POST
+[32m                returns success[0m
+[32m                creates the data bag[0m
+            like 'pedant_bag'
+              behaves like a successful data bag POST
+[32m                returns success[0m
+[32m                creates the data bag[0m
+            like 'pedant_bag-foo'
+              behaves like a successful data bag POST
+[32m                returns success[0m
+[32m                creates the data bag[0m
+            like '1234567890'
+              behaves like a successful data bag POST
+[32m                returns success[0m
+[32m                creates the data bag[0m
+            like 'pedant99'
+              behaves like a successful data bag POST
+[32m                returns success[0m
+[32m                creates the data bag[0m
+            like 'pedant:with:colons'
+              behaves like a successful data bag POST
+[32m                returns success[0m
+[32m                creates the data bag[0m
+            like 'pedant.with.dots'
+              behaves like a successful data bag POST
+[32m                returns success[0m
+[32m                creates the data bag[0m
+          missing certain keys
+            without a 'json_class' key
+              behaves like a successful data bag POST
+[32m                returns success[0m
+[32m                creates the data bag[0m
+            without a 'chef_type' key
+              behaves like a successful data bag POST
+[32m                returns success[0m
+[32m                creates the data bag[0m
+          with just a name
+            behaves like a successful data bag POST
+[32m              returns success[0m
+[32m              creates the data bag[0m
+          with an incorrect 'chef_type' key
+[32m            does not have the correct chef_type key[0m
+            behaves like a successful data bag POST
+[32m              returns success[0m
+[32m              creates the data bag[0m
+          with an incorrect 'json_class' key
+[32m            does not have the correct json_class key[0m
+            behaves like a successful data bag POST
+[32m              returns success[0m
+[32m              creates the data bag[0m
+        invalid requests of various types to create a data bag
+          with an invalid name
+            like 'pedant_badName!!$$$$_oh_very+bad'
+              behaves like an unsuccessful data bag POST
+[32m                returns failure[0m
+[32m                does not create a data bag[0m
+            like 'pedant-does-not-like-punctuation!!!!'
+              behaves like an unsuccessful data bag POST
+[32m                returns failure[0m
+[32m                does not create a data bag[0m
+          without a name
+            behaves like an unsuccessful data bag POST
+[32m              returns failure[0m
+[32m              does not create a data bag[0m
+        with a payload size
+          exactly equal to the maximum allowable size
+[32m            should not respond with 413 Request Entity Too Large[0m
+          exceeding the maximum allowable size
+[32m            should respond with 413 Request Entity Too Large[0m
+      PUT
+[32m        is not allowed[0m
+      DELETE
+[32m        is not allowed[0m
+    a request to /data/<bag>
+      GET
+[32m        fails because there is no bag[0m
+      POST
+[32m        fails because there is no bag[0m
+      PUT
+[32m        is not allowed[0m
+      DELETE
+[32m        fails because there is no bag[0m
+    a request to /data/<bag>/<item>
+      GET
+[32m        fails because there is no bag[0m
+      POST
+[32m        is not allowed[0m
+      PUT
+[32m        fails because there is no bag[0m
+      DELETE
+[32m        fails because there is no bag[0m
+  with data bags
+    that have no items
+      a request to /data
+        GET
+[32m          returns a non-empty list of data bags[0m
+        POST
+[32m          raises a conflict when creating an existing data bag[0m
+      a request to /data/<bag>
+        GET
+[32m          returns an empty bag[0m
+        POST
+          various good inputs to create a data bag item
+            with JUST an ID
+              behaves like a successful data bag item POST
+[32m                returns success[0m
+[32m                creates the resource[0m
+            with a good ID
+              like 'pedantitem'
+                behaves like a successful data bag item POST
+[32m                  returns success[0m
+[32m                  creates the resource[0m
+              like 'pedant_item'
+                behaves like a successful data bag item POST
+[32m                  returns success[0m
+[32m                  creates the resource[0m
+              like 'pedant-item'
+                behaves like a successful data bag item POST
+[32m                  returns success[0m
+[32m                  creates the resource[0m
+              like 'pedant-123-item'
+                behaves like a successful data bag item POST
+[32m                  returns success[0m
+[32m                  creates the resource[0m
+              like 'pedant:item'
+                behaves like a successful data bag item POST
+[32m                  returns success[0m
+[32m                  creates the resource[0m
+              like 'pedant.item'
+                behaves like a successful data bag item POST
+[32m                  returns success[0m
+[32m                  creates the resource[0m
+          various bad inputs to create a data bag item
+            without an ID
+[32m              really does not have an id[0m
+              behaves like an unsuccessful data bag item POST
+[32m                returns failure[0m
+            with a malformed ID
+              like 'pedant_badId!!'
+                behaves like an unsuccessful data bag item POST
+[32m                  returns failure[0m
+              like '^$@^*  pedant'
+                behaves like an unsuccessful data bag item POST
+[32m                  returns failure[0m
+          with a payload size
+            exactly equal to the maximum allowable size
+[32m              should not respond with 413 Request Entity Too Large[0m
+            exceeding the maximum allowable size
+[32m              should respond with 413 Request Entity Too Large[0m
+        DELETE
+[32m          deletes the data bag[0m
+      a request to /data/<bag>/<item>
+        GET
+[32m          fails because there is no item[0m
+        PUT
+[32m          fails because there is no item[0m
+        DELETE
+[32m          fails because there is no item[0m
+    that have items
+      a request to /data
+        GET
+[32m          returns the same non-empty list of data bags[0m
+      a request to /data/<bag>
+        GET
+[32m          shows a full data bag[0m
+        POST
+[32m          raises a conflict when creating an existing data bag item[0m
+        DELETE
+[32m          deletes a bag AND ALL THE ITEMS[0m
+      a request to /data/<bag>/<item>
+        GET
+[32m          shows the complete item[0m
+        PUT
+          with various correct inputs to update a data bag item
+            with normal input
+              behaves like a successful data bag item PUT
+[32m                returns success[0m
+[32m                updates the data bag item[0m
+            with no ID in the update body
+[32m              successfully updates (using ID from the URL)[0m
+          with various incorrect inputs to update a data bag item
+            to an item with a different id
+[32m              should have a different id[0m
+              behaves like an unsuccessful data bag item PUT
+[32m                should return failure[0m
+          with a payload size
+            exactly equal to the maximum allowable size
+[32m              should not respond with 413 Request Entity Too Large[0m
+            exceeding the maximum allowable size
+[32m              should respond with 413 Request Entity Too Large[0m
+        DELETE
+[32m          deletes the item[0m
+Deleting organization pedant_testorg_api_20188 ...
+
+Finished in 1 minute 2.47 seconds
+[32m89 examples, 0 failures[0m
+
+Randomized with seed 1737
+

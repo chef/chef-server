@@ -1,0 +1,229 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_31110
+Validating Org Creation
+Run options: include {:focus=>true, :roles=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :roles=>true}
+
+Randomized with seed 59199
+
+.................................
+
+Finished in 1.27 seconds
+33 examples, 0 failures
+
+Randomized with seed 59199
+
+Starting Pedant Run: 2015-05-15 19:54:56 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :roles=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 16883
+
+
+Environments API Endpoint
+  GET /environments/<name>/roles
+    within the default environment
+      with an existing role
+[32m        should respond with 200 OK[0m
+      without an existing role
+[32m        should respond with 404 Not Found[0m
+    within a non-default environment
+      with an existing role
+[32m        should respond with 200 OK and the role[0m
+      with non-existent environment
+[32m        should respond with 404 Not Found[0m
+      without authorization
+[32m        should respond with 401 Unauthorized[0m
+      with existing role in different existing environment
+[32m        should respond with 404 Not Found[0m
+
+Testing the Roles API endpoint
+  making a request to /roles
+    using GET
+      with no roles
+[32m        returns a 200 and an empty hash[0m
+      with roles
+[32m        returns a 200 and a hash of name -> url[0m
+    using POST
+      for a role that does not exist
+[32m        should respond with 201 and the correct path[0m
+[32m        should persist the role[0m
+      when validating
+        the 'name' field
+          when passing valid value "pedant_role"
+[32m            should respond with 201 Created and persist the resource[0m
+          when passing valid value "PEDANT_ROLE"
+[32m            should respond with 201 Created and persist the resource[0m
+          when passing valid value "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:"
+[32m            should respond with 201 Created and persist the resource[0m
+          when passing invalid value "this+ is bad!!!"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "I-do-not-like!!!"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+        the 'json_class' field
+          when passing valid value "Chef::Role"
+[32m            should respond with 201 Created and persist the resource[0m
+          when passing invalid value "Chef::NotReallyAClass"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+        the 'chef_type' field
+          when passing valid value "role"
+[32m            should respond with 201 Created and persist the resource[0m
+          when passing invalid value "node"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+        with invalid top-level keys
+          when passing invalid value of "something random" to "something_random" attribute
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value of "something random" to "漢字ひらがな한문" attribute
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value of "something random" to "5172e7d0cdb603f4c53fcf540138c070" attribute
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value of "something random" to "5eb9405e159be6b8df259a49503dddcb" attribute
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value of "something random" to "9af65b021dc64cc2ea42fce07787e059" attribute
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+      with various valid inputs
+        when missing 'default_attributes' value
+[32m          should create role and set '{}' as 'default_attributes' value[0m
+        when missing 'override_attributes' value
+[32m          should create role and set '{}' as 'override_attributes' value[0m
+        when missing 'run_list' value
+[32m          should create role and set '[]' as 'run_list' value[0m
+        when missing 'env_run_lists' value
+[32m          should create role and set '{}' as 'env_run_lists' value[0m
+        with a non-normalized run list
+[32m          should respond with 201 and the correct path[0m
+[32m          should persist the role with a normalized run list[0m
+        with a runlist that has recipes named 'recipe' and 'role'
+[32m          should respond with 201 and the correct path[0m
+[32m          should persist the role with all oddly-named recipes intact in the run list[0m
+        with a runlist that has duplicate recipes and roles
+[32m          should respond with 201 and the correct path[0m
+[32m          should persist the role with all run list duplicates removed[0m
+        with a runlist that has implicit and explict 'default' recipes
+[32m          should respond with 201 and the correct path[0m
+[32m          should persist the role with both versions remaining in the run list[0m
+        with non-normalized environment run lists
+[32m          should respond with 201 and the correct path[0m
+[32m          should persist the role with normalized environment run lists[0m
+        with environment run lists that have duplicates
+[32m          should respond with 201 and the correct path[0m
+[32m          should persist the role with duplicates removed[0m
+        with environment run lists that have implicit and explicit 'default' recipes
+[32m          should respond with 201 and the correct path[0m
+[32m          should persist the role with both versions remaining in the lists[0m
+        with environment run lists that have recipes named 'recipe' and 'role'
+[32m          should respond with 201 and the correct path[0m
+[32m          should persist the role with all oddly-named recipes intact in the run lists[0m
+      with various invalid inputs
+        with a non-hash value for 'default_attributes'
+[32m          fails to create the role[0m
+        with a non-hash value for 'override_attributes'
+[32m          fails to create the role[0m
+        with a non-valid run list value for 'run_list'
+[32m          fails to create the role[0m
+        with a non-valid run list value for 'run_list'
+[32m          fails to create the role[0m
+        with invalid env_run_lists hashes
+          with a non-hash value for 'env_run_lists'
+[32m            should respnd with an error[0m
+          without proper run lists in the 'env_run_lists hash'
+[32m            should respond with an error[0m
+        with a payload size
+          exactly equal to the maximum allowable size
+[32m            should not respond with 413 Request Entity Too Large[0m
+          exceeding the maximum allowable size
+[32m            should respond with 413 Request Entity Too Large[0m
+      for a role that already exists
+[32m        fails[0m
+  making a request to /roles/<role>
+    using GET
+      to a nonexistent role
+[32m        fails with a 404[0m
+      to a role that exists
+[32m        succeeds[0m
+    using PUT
+      to a nonexistent role
+[32m        should respond with a 404[0m
+      to a role that exists
+        with canonical payload
+[32m          should respond with 200 and the updated role body[0m
+[32m          should actually update the role[0m
+        with role name changed in the payload
+[32m          should respond with 400 Bad Request and an error message of 'Role name mismatch.'[0m
+[32m          does not change the role in any way[0m
+        without role name in payload
+[32m          should respond with 200 and the updated role body[0m
+[32m          should actually update the role[0m
+        with no name, but other invalid information in payload
+[32m          should respond with 400 Bad Request and an error message of 'Field 'json_class' invalid'[0m
+[32m          does not change the role in any way[0m
+        with a payload size
+          exactly equal to the maximum allowable size
+[32m            should not respond with 413 Request Entity Too Large[0m
+          exceeding the maximum allowable size
+[32m            should respond with 413 Request Entity Too Large[0m
+    using DELETE
+      to a nonexistent role
+[32m        fails with a 404[0m
+      to an existing role
+[32m        should respond with 201 and the deleted role body[0m
+[32m        should actually delete the role[0m
+  making a request to /roles/<role>/environments
+    GET
+      for a nonexistent role
+[32m        fails[0m
+      for a role with no environment run lists
+[32m        should return just the default environment[0m
+      for a role with one additional environment run list
+[32m        should return the default environment and the additional environment[0m
+      for a role with multiple additional environment run lists
+[32m        returns multiple environments, even if some do not exist[0m
+  making a request to /roles/<role>/environments/<environment>
+    using GET
+      with the default environment
+        to a nonexistent role
+[32m          responds with a 404 for the role[0m
+        with an already existing role
+[32m          responds with 200 and the role's run list[0m
+      with a non-default environment
+        for a role with a run list in that environment
+[32m          responds with 200 and the role's run list[0m
+        for a role with no run list in that environment
+[32m          responds with 200 and a null run list[0m
+      with a non-existent environment
+[32m        responds with a 404 for the environment[0m
+Deleting organization pedant_testorg_api_31110 ...
+
+Finished in 19.92 seconds
+[32m78 examples, 0 failures[0m
+
+Randomized with seed 16883
+

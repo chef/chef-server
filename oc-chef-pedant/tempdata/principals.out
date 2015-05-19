@@ -1,0 +1,113 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_30997
+Validating Org Creation
+Run options: include {:focus=>true, :principals=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :principals=>true}
+
+Randomized with seed 590
+
+.................................
+
+Finished in 1.27 seconds
+33 examples, 0 failures
+
+Randomized with seed 590
+
+Starting Pedant Run: 2015-05-15 19:54:46 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :principals=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 63280
+
+
+Principals API Endpoint
+  access control
+    with bogus org
+[32m      returns a 404 ("Not Found") for admin[0m
+[32m      returns a 404 ("Not Found") for normal user[0m
+    GET /principals
+[32m      returns a 404 ("Not Found") for admin[0m
+[32m      returns a 404 ("Not Found") for normal user[0m
+[32m      returns a 404 ("Not Found") for invalid user[0m
+[32m      returns a 404 ("Not Found") for outside user[0m
+    [deprecated] v0
+[32m      returns a 404 ("Not Found") for missing principal for admin[0m
+[32m      returns a 404 ("Not Found") for missing principal for normal user[0m
+      when requesting a client
+[32m        returns a 200 ("OK") for admin[0m
+[32m        returns a 200 ("OK") for normal user[0m
+[32m        returns a 200 ("OK") for invalid user[0m
+[32m        returns a 200 ("OK") for outside user[0m
+      when requesting a user
+[32m        returns a 200 ("OK") for admin[0m
+[32m        returns a 200 ("OK") for normal user[0m
+[32m        returns a 200 ("OK") for invalid user[0m
+[32m        returns a 200 ("OK") for outside user[0m
+      when requesting an outside user
+[32m        returns a 200 ("OK") for admin[0m
+[32m        returns a 200 ("OK") for normal user[0m
+[32m        returns a 200 ("OK") for invalid user[0m
+[32m        returns a 200 ("OK") for outside user[0m
+      when requesting a bad client
+[32m        returns a 404 ("Not Found") for admin[0m
+[32m        returns a 404 ("Not Found") for normal user[0m
+[32m        returns a 404 ("Not Found") for invalid user[0m
+[32m        returns a 404 ("Not Found") for outside user[0m
+    [current] v > 0
+[32m      returns a 404 ("Not Found") for missing principal for admin[0m
+[32m      returns a 404 ("Not Found") for missing principal for normal user[0m
+      when requesting a client
+[32m        returns a 200 ("OK") for admin[0m
+[32m        returns a 200 ("OK") for normal user[0m
+[32m        returns a 200 ("OK") for invalid user[0m
+[32m        returns a 200 ("OK") for outside user[0m
+      when requesting a user
+[32m        returns a 200 ("OK") for admin[0m
+[32m        returns a 200 ("OK") for normal user[0m
+[32m        returns a 200 ("OK") for invalid user[0m
+[32m        returns a 200 ("OK") for outside user[0m
+      when requesting an outside user
+[32m        returns a 200 ("OK") for admin[0m
+[32m        returns a 200 ("OK") for normal user[0m
+[32m        returns a 200 ("OK") for invalid user[0m
+[32m        returns a 200 ("OK") for outside user[0m
+      when requesting a bad client
+[32m        returns a 404 ("Not Found") for admin[0m
+[32m        returns a 404 ("Not Found") for normal user[0m
+[32m        returns a 404 ("Not Found") for invalid user[0m
+[32m        returns a 404 ("Not Found") for outside user[0m
+Deleting organization pedant_testorg_api_30997 ...
+
+Finished in 4.44 seconds
+[32m42 examples, 0 failures[0m
+
+Randomized with seed 63280
+

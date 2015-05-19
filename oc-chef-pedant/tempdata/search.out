@@ -1,0 +1,323 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_31496
+Validating Org Creation
+Run options: include {:focus=>true, :search=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :search=>true}
+
+Randomized with seed 56611
+
+.................................
+
+Finished in 1.27 seconds
+33 examples, 0 failures
+
+Randomized with seed 56611
+
+Starting Pedant Run: 2015-05-15 19:55:33 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :search=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 52032
+
+
+Search API endpoint
+  /search
+    GET
+      with no data bags
+[32m        should return a list of built-in indexes[0m
+      with data bags
+[32m        should return a list of built-in indexes, as well as indexes for each data bag[0m
+  /search/environment
+    GET
+[33m      should return filtered results when ACL on environments exist (PENDING: No reason given)[0m
+      a search that should return no results
+[32m        should have multiple environments on the system (for our search to ignore)[0m
+[32m        returns 200, with no search results[0m
+      when searching for a single environment by name
+[32m        should have more than just the target of our environment search on the system[0m
+[32m        should return status code 200 and a single environment[0m
+      when searching for multiple environments names using a * wildcard
+[32m        should have more than just the targets of our environment search on the system[0m
+[32m        should return all testing environments[0m
+    POST
+[33m      should return filtered results when ACLs exist (PENDING: No reason given)[0m
+      invalid partial search requests
+        with a request body of 'z[$blah'
+[32m          fails[0m
+        with a request body of '{"a_string"=>"blah"}'
+[32m          fails[0m
+        with a request body of '{"a_number"=>1}'
+[32m          fails[0m
+        with a request body of '{"a_true"=>true}'
+[32m          fails[0m
+        with a request body of '{"an_object"=>{"oop"=>true}}'
+[32m          fails[0m
+        with a request body of '{"an_array"=>[1, 2]}'
+[32m          fails[0m
+        with a request body of '{"an_array"=>["a", 2]}'
+[32m          fails[0m
+      targeted toward no environments with body of {"possibly_nested"=>["default_attributes", "top", "middle", "bottom"], "the_name"=>["name"], "not_found"=>["foo", "bar", "baz", "totally_not_a_real_field"], "empty"=>[]}
+[32m        should succeed, but return nothing[0m
+      targeted toward one environment with body of {"possibly_nested"=>["default_attributes", "top", "middle", "bottom"], "the_name"=>["name"], "not_found"=>["foo", "bar", "baz", "totally_not_a_real_field"], "empty"=>[]}
+[32m        should succeed, and return the single environment[0m
+      targeted toward many environments with body of {"possibly_nested"=>["default_attributes", "top", "middle", "bottom"], "the_name"=>["name"], "not_found"=>["foo", "bar", "baz", "totally_not_a_real_field"], "empty"=>[]}
+[32m        should succeed, and return multiple environments[0m
+      targeted toward no environments with body of {"possibly_nested"=>["description"], "the_name"=>["name"], "not_found"=>["foo", "bar", "baz", "totally_not_a_real_field"], "empty"=>[]}
+[32m        should succeed, but return nothing[0m
+      targeted toward one environment with body of {"possibly_nested"=>["description"], "the_name"=>["name"], "not_found"=>["foo", "bar", "baz", "totally_not_a_real_field"], "empty"=>[]}
+[32m        should succeed, and return the single environment[0m
+      targeted toward many environments with body of {"possibly_nested"=>["description"], "the_name"=>["name"], "not_found"=>["foo", "bar", "baz", "totally_not_a_real_field"], "empty"=>[]}
+[32m        should succeed, and return multiple environments[0m
+  /search/node
+    GET
+[33m      should return filtered results when ACL on nodes exist (PENDING: No reason given)[0m
+      a search that should return no results
+[32m        should have multiple nodes on the system (for our search to ignore)[0m
+[32m        returns 200, with no search results[0m
+      when searching for a single node by name
+[32m        should have more than just the target of our node search on the system[0m
+[32m        should return status code 200 and a single node[0m
+      when searching for multiple nodes names using a * wildcard
+[32m        should have more than just the targets of our node search on the system[0m
+[32m        should return all testing nodes[0m
+    POST
+[33m      should return filtered results when ACLs exist (PENDING: No reason given)[0m
+      invalid partial search requests
+        with a request body of 'z[$blah'
+[32m          fails[0m
+        with a request body of '{"a_string"=>"blah"}'
+[32m          fails[0m
+        with a request body of '{"a_number"=>1}'
+[32m          fails[0m
+        with a request body of '{"a_true"=>true}'
+[32m          fails[0m
+        with a request body of '{"an_object"=>{"oop"=>true}}'
+[32m          fails[0m
+        with a request body of '{"an_array"=>[1, 2]}'
+[32m          fails[0m
+        with a request body of '{"an_array"=>["a", 2]}'
+[32m          fails[0m
+      targeted toward no nodes with body of {"possibly_nested"=>["top", "middle", "bottom"], "the_name"=>["name"], "not_found"=>["foo", "bar", "baz", "totally_not_a_real_field"], "empty"=>[]}
+[32m        should succeed, but return nothing[0m
+      targeted toward one node with body of {"possibly_nested"=>["top", "middle", "bottom"], "the_name"=>["name"], "not_found"=>["foo", "bar", "baz", "totally_not_a_real_field"], "empty"=>[]}
+[32m        should succeed, and return the single node[0m
+      targeted toward many nodes with body of {"possibly_nested"=>["top", "middle", "bottom"], "the_name"=>["name"], "not_found"=>["foo", "bar", "baz", "totally_not_a_real_field"], "empty"=>[]}
+[32m        should succeed, and return multiple nodes[0m
+      searching a node with [:default] attributes, with a partial search path of ["testing"]
+[32m        should return {"one"=>"default"}, showing default attributes are merged directly to the node[0m
+      searching a node with [:normal] attributes, with a partial search path of ["testing"]
+[32m        should return {"one"=>"normal"}, showing normal attributes are merged directly to the node[0m
+      searching a node with [:override] attributes, with a partial search path of ["testing"]
+[32m        should return {"one"=>"override"}, showing override attributes are merged directly to the node[0m
+      searching a node with [:automatic] attributes, with a partial search path of ["testing"]
+[32m        should return {"one"=>"automatic"}, showing automatic attributes are merged directly to the node[0m
+      searching a node with [:default, :normal] attributes, with a partial search path of ["testing"]
+[32m        should return {"one"=>"default", "two"=>"normal", "three"=>"normal", "four"=>"normal"}, showing 'default' < 'normal' attributes[0m
+      searching a node with [:default, :override] attributes, with a partial search path of ["testing"]
+[32m        should return {"one"=>"default", "two"=>"default", "three"=>"override", "four"=>"override"}, showing 'default' < 'override' attributes[0m
+      searching a node with [:default, :automatic] attributes, with a partial search path of ["testing"]
+[32m        should return {"one"=>"default", "two"=>"default", "three"=>"default", "four"=>"automatic"}, showing 'default' < 'automatic' attributes[0m
+      searching a node with [:normal, :override] attributes, with a partial search path of ["testing"]
+[32m        should return {"two"=>"normal", "three"=>"override", "four"=>"override"}, showing 'normal' <  'override' attributes[0m
+      searching a node with [:normal, :automatic] attributes, with a partial search path of ["testing"]
+[32m        should return {"two"=>"normal", "three"=>"normal", "four"=>"automatic"}, showing 'normal' < 'automatic' attributes[0m
+      searching a node with [:override, :automatic] attributes, with a partial search path of ["testing"]
+[32m        should return {"three"=>"override", "four"=>"automatic"}, showing 'override' <  'automatic' attributes[0m
+      searching a node with [:default, :normal, :override] attributes, with a partial search path of ["testing"]
+[32m        should return {"one"=>"default", "two"=>"normal", "three"=>"override", "four"=>"override"}, showing 'default' < 'normal' < 'override' attributes[0m
+      searching a node with [:default, :normal, :automatic] attributes, with a partial search path of ["testing"]
+[32m        should return {"one"=>"default", "two"=>"normal", "three"=>"normal", "four"=>"automatic"}, showing 'default' < 'normal' < 'automatic' attributes[0m
+      searching a node with [:default, :override, :automatic] attributes, with a partial search path of ["testing"]
+[32m        should return {"one"=>"default", "two"=>"default", "three"=>"override", "four"=>"automatic"}, showing 'default' < 'override' < 'automatic' attributes[0m
+      searching a node with [:normal, :override, :automatic] attributes, with a partial search path of ["testing"]
+[32m        should return {"two"=>"normal", "three"=>"override", "four"=>"automatic"}, showing 'normal' < 'override' < 'automatic' attributes[0m
+      searching a node with [:default, :normal, :override, :automatic] attributes, with a partial search path of ["testing"]
+[32m        should return {"one"=>"default", "two"=>"normal", "three"=>"override", "four"=>"automatic"}, showing 'default' < 'normal' < 'override' < 'automatic' attributes[0m
+  /search/role
+    GET
+[33m      should return filtered results when ACL on roles exist (PENDING: No reason given)[0m
+      a search that should return no results
+[32m        should have multiple roles on the system (for our search to ignore)[0m
+[32m        returns 200, with no search results[0m
+      when searching for a single role by name
+[32m        should have more than just the target of our role search on the system[0m
+[32m        should return status code 200 and a single role[0m
+      when searching for multiple roles names using a * wildcard
+[32m        should have more than just the targets of our role search on the system[0m
+[32m        should return all testing roles[0m
+    POST
+[33m      should return filtered results when ACLs exist (PENDING: No reason given)[0m
+      invalid partial search requests
+        with a request body of 'z[$blah'
+[32m          fails[0m
+        with a request body of '{"a_string"=>"blah"}'
+[32m          fails[0m
+        with a request body of '{"a_number"=>1}'
+[32m          fails[0m
+        with a request body of '{"a_true"=>true}'
+[32m          fails[0m
+        with a request body of '{"an_object"=>{"oop"=>true}}'
+[32m          fails[0m
+        with a request body of '{"an_array"=>[1, 2]}'
+[32m          fails[0m
+        with a request body of '{"an_array"=>["a", 2]}'
+[32m          fails[0m
+      targeted toward no roles with body of {"possibly_nested"=>["override_attributes", "top", "middle", "bottom"], "the_name"=>["name"], "not_found"=>["foo", "bar", "baz", "totally_not_a_real_field"], "empty"=>[]}
+[32m        should succeed, but return nothing[0m
+      targeted toward one role with body of {"possibly_nested"=>["override_attributes", "top", "middle", "bottom"], "the_name"=>["name"], "not_found"=>["foo", "bar", "baz", "totally_not_a_real_field"], "empty"=>[]}
+[32m        should succeed, and return the single role[0m
+      targeted toward many roles with body of {"possibly_nested"=>["override_attributes", "top", "middle", "bottom"], "the_name"=>["name"], "not_found"=>["foo", "bar", "baz", "totally_not_a_real_field"], "empty"=>[]}
+[32m        should succeed, and return multiple roles[0m
+  /search/client
+    GET
+      with no criteria
+[32m        returns all the clients[0m
+      searching by name
+[32m        returns the correct client[0m
+      a search that should return no results
+[32m        should have multiple clients on the system (for our search to ignore)[0m
+[32m        returns 200, with no search results[0m
+    POST
+      targeted toward no clients with body of {"possibly_nested"=>["validator"], "the_name"=>["name"], "not_found"=>["foo", "bar", "baz", "totally_not_a_real_field"], "empty"=>[]}
+[32m        should succeed, but return nothing[0m
+      targeted toward one client with body of {"possibly_nested"=>["validator"], "the_name"=>["name"], "not_found"=>["foo", "bar", "baz", "totally_not_a_real_field"], "empty"=>[]}
+[32m        should succeed, and return the single client[0m
+      targeted toward many clients with body of {"possibly_nested"=>["validator"], "the_name"=>["name"], "not_found"=>["foo", "bar", "baz", "totally_not_a_real_field"], "empty"=>[]}
+[32m        should succeed, and return multiple clients[0m
+      invalid partial search requests
+        with a request body of 'z[$blah'
+[32m          fails[0m
+        with a request body of '{"a_string"=>"blah"}'
+[32m          fails[0m
+        with a request body of '{"a_number"=>1}'
+[32m          fails[0m
+        with a request body of '{"a_true"=>true}'
+[32m          fails[0m
+        with a request body of '{"an_object"=>{"oop"=>true}}'
+[32m          fails[0m
+        with a request body of '{"an_array"=>[1, 2]}'
+[32m          fails[0m
+        with a request body of '{"an_array"=>["a", 2]}'
+[32m          fails[0m
+  /search/<data_bag>
+    using GET
+      for a nonexistent data bag
+[32m        should fail[0m
+      an existing data bag
+[33m        should return no results to an unauthorized user (PENDING: No reason given)[0m
+        a query that should succeed
+[32m          should succeed[0m
+        with nested keys (CHEF-3975)
+          when searching a nested key
+[32m            should succeed[0m
+          when searching a nested key prefixed by raw_data_
+[32m            should return no results[0m
+    using POST
+      for a nonexistent data bag
+[33m        does something (PENDING: Not yet implemented)[0m
+      for an existing data bag
+        a partial search
+[32m          should succeed[0m
+        with nested keys (CHEF-3975)
+          when searching a nested key
+[32m            should succeed[0m
+          when searching a nested key prefixed by raw_data_
+[32m            should return no results[0m
+        invalid partial search requests
+          with a request body of 'z[$blah'
+[32m            fails[0m
+          with a request body of '{"a_string"=>"blah"}'
+[32m            fails[0m
+          with a request body of '{"a_number"=>1}'
+[32m            fails[0m
+          with a request body of '{"a_true"=>true}'
+[32m            fails[0m
+          with a request body of '{"an_object"=>{"oop"=>true}}'
+[32m            fails[0m
+          with a request body of '{"an_array"=>[1, 2]}'
+[32m            fails[0m
+          with a request body of '{"an_array"=>["a", 2]}'
+[32m            fails[0m
+    Search tokenizer
+      When the Chef server has data bag items with "foo" and "foo-bar"
+[32m        A search for foo-bar returns foo-bar and nothing else[0m
+[32m        A search for foo* AND NOT bar returns foo and foo-bar[0m
+  Index Deletion
+    Roles
+      it should behave like Deletes from Solr Index
+[32m        deletes an object from Solr when deleting from the system as a whole[0m
+    Nodes
+      it should behave like Deletes from Solr Index
+[32m        deletes an object from Solr when deleting from the system as a whole[0m
+    Data Bag Items
+      it should behave like Deletes from Solr Index
+[32m        deletes an object from Solr when deleting from the system as a whole[0m
+  partial search
+    roles
+      many results (roles)
+[32m        should have 10 results[0m
+      nodes
+[32m        returns partial results from default attributes of a node[0m
+[32m        returns partial results from normal attributes of a node[0m
+[32m        returns partial results from deep merged node attributes[0m
+Deleting organization pedant_testorg_api_31496 ...
+
+Pending:
+[33m  Search API endpoint /search/environment GET should return filtered results when ACL on environments exist[0m
+[36m    # No reason given[0m
+[36m    # ./lib/pedant/rspec/search_util.rb:108[0m
+[33m  Search API endpoint /search/environment POST should return filtered results when ACLs exist[0m
+[36m    # No reason given[0m
+[36m    # ./lib/pedant/rspec/search_util.rb:459[0m
+[33m  Search API endpoint /search/node GET should return filtered results when ACL on nodes exist[0m
+[36m    # No reason given[0m
+[36m    # ./lib/pedant/rspec/search_util.rb:108[0m
+[33m  Search API endpoint /search/node POST should return filtered results when ACLs exist[0m
+[36m    # No reason given[0m
+[36m    # ./lib/pedant/rspec/search_util.rb:459[0m
+[33m  Search API endpoint /search/role GET should return filtered results when ACL on roles exist[0m
+[36m    # No reason given[0m
+[36m    # ./lib/pedant/rspec/search_util.rb:108[0m
+[33m  Search API endpoint /search/role POST should return filtered results when ACLs exist[0m
+[36m    # No reason given[0m
+[36m    # ./lib/pedant/rspec/search_util.rb:459[0m
+[33m  Search API endpoint /search/<data_bag> using GET an existing data bag should return no results to an unauthorized user[0m
+[36m    # No reason given[0m
+[36m    # ./spec/api/search/search_spec.rb:415[0m
+[33m  Search API endpoint /search/<data_bag> using POST for a nonexistent data bag does something[0m
+[36m    # Not yet implemented[0m
+[36m    # ./spec/api/search/search_spec.rb:433[0m
+
+Finished in 2 minutes 27.6 seconds
+[33m113 examples, 0 failures, 8 pending[0m
+
+Randomized with seed 52032
+

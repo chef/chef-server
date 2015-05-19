@@ -1,0 +1,85 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_20553
+Validating Org Creation
+Run options: include {:focus=>true, :depsolver=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :depsolver=>true}
+
+Randomized with seed 18563
+
+.................................
+
+Finished in 1.28 seconds
+33 examples, 0 failures
+
+Randomized with seed 18563
+
+Starting Pedant Run: 2015-05-15 19:37:47 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :depsolver=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 64467
+
+
+Depsolver API endpoint
+  POST /environments/:env/cookbook_versions
+    empty and error cases
+[32m      returns 400 with an empty payload[0m
+[32m      returns 400 with an non-json payload[0m
+[32m      returns 404 with an invalid environment[0m
+[32m      returns 400 with non-Array as run_list value[0m
+[32m      returns 400 with malformed JSON[0m
+[32m      returns Error with an malformed item in run_list (int)[0m
+[32m      returns 200 with an empty run_list[0m
+[32m      returns 412 with a non-existent cookbook in _default environment[0m
+[32m      returns 412 with a non-existent cookbook[0m
+[32m      returns 412 with an existing cookbook filtered out by environment[0m
+[32m      returns 412 and both cookbooks with more than one non-existent cookbook[0m
+[32m      returns 412 when there is a runlist entry specifying version that doesn't exist[0m
+[32m      returns 412 and both errors non-existent and no versions cookbooks[0m
+    dependency error cases (one cookbook)
+[32m      returns 412 when there is a dep that doesn't exist[0m
+    dependency error cases (two cookbooks)
+[32m      returns 412 and both entries when there are runlist entries specifying versions that don't exist[0m
+[32m      returns 412 when there is a dep that doesn't have new enough version[0m
+[32m      returns 412 when there is an impossible dependency[0m
+    success cases
+[32m      returns 200 with a minimal good cookbook[0m
+      CHEF-3813: Return cookbook dependency metadata when a cookbook has dependencies
+[32m        returns dependencies[0m
+      with datestamps in cookbooks and environments
+[32m        returns the correct solution[0m
+Deleting organization pedant_testorg_api_20553 ...
+
+Finished in 8.09 seconds
+[32m20 examples, 0 failures[0m
+
+Randomized with seed 64467
+

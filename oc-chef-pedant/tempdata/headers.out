@@ -1,0 +1,61 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_24254
+Validating Org Creation
+Run options: include {:focus=>true, :headers=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :headers=>true}
+
+Randomized with seed 43455
+
+.................................
+
+Finished in 1.29 seconds
+33 examples, 0 failures
+
+Randomized with seed 43455
+
+Starting Pedant Run: 2015-05-15 19:44:42 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :headers=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 10614
+
+
+Headers
+  Request Headers
+[32m    Accepts High Version[0m
+[32m    Rejects Low Version[0m
+Deleting organization pedant_testorg_api_24254 ...
+
+Finished in 3.66 seconds
+[32m2 examples, 0 failures[0m
+
+Randomized with seed 10614
+

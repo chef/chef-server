@@ -1,0 +1,393 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_24364
+Validating Org Creation
+Run options: include {:focus=>true, :keys=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :keys=>true}
+
+Randomized with seed 29577
+
+.................................
+
+Finished in 1.29 seconds
+33 examples, 0 failures
+
+Randomized with seed 29577
+
+Starting Pedant Run: 2015-05-15 19:44:51 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :keys=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 63754
+
+
+/keys endpoint
+  when a new user is created via POST /users
+[32m    should insert a new default keys entry that is retrievable via the keys API[0m
+  when a new client is created via POST /organizations/:org/clients
+[32m    should insert a new default keys entry that is retrievable via the keys API[0m
+  when a single key exists for a user
+    when the key is uploaded via POST /users
+[32m      should authenticate against the single key[0m
+    when the default key has been changed via the keys API
+[32m      should authenticate against the updated key[0m
+[32m      should break for original default key[0m
+  when a key has been generated for a user
+[32m    should be able to authenticate with the generated key[0m
+  when a single key exists for a client
+    when the key is uploaded via POST /clients
+[32m      should authenticate against the single key[0m
+    when the default key has been changed via the keys API
+[32m      should authenticate against the updated key[0m
+[32m      should break for original default key[0m
+  when a key has been generated for a client
+[32m    should be able to authenticate with the generated key[0m
+  when a key is deleted for a user
+[32m    should not longer be returned by the keys API[0m
+[32m    should still contain other keys not yet deleted[0m
+  when a key is deleted for a client
+[32m    should no longer be returned by the keys API[0m
+[32m    should still contain other keys not yet deleted[0m
+  when multiple keys exist for a user
+    should properly authenticate against either keys
+[32m      should properly authenticate against the second key[0m
+[32m      should properly authenticate against the first key[0m
+  when multiple keys exist for a client
+    should properly authenticate against either keys
+[32m      should properly authenticate against the first key[0m
+[32m      should properly authenticate against the second key[0m
+  when a user key has an expiration date and isn't expired
+[32m    should authenticate against the key[0m
+  when a user's default key has an expiration date
+    and is updated via a PUT to /users/:user
+[32m      will no longer have an expiration date when queried via the keys API[0m
+  when a client's default key has an expiration date
+    and is updated via a PUT to /organizations/:org/clients/:client
+[32m      should no longer have an expiration date when queried via the keys API[0m
+  when a client key has an expiration date and isn't expired
+[32m    should authenticate against the key[0m
+  when a key is expired for a user
+[32m    should fail against the expired key[0m
+[32m    should succeed against other keys[0m
+  when a key is expired for a client
+[32m    should fail against the expired key[0m
+[32m    should succeed against other keys[0m
+  when the default key for a user exists
+[32m    the public_key field returned by GET /users/:user and from the keys table should be the same[0m
+  when the default key for a client exists
+[32m    should return public_key field returned by GET /organization/:org/clients/:client and from the keys table should be the same[0m
+  when a user's default key is updated via the keys API
+[32m    should return the proper, updated key via /users/:user[0m
+  when a user's default key is deleted via the keys API
+[32m    public field returned by /users/:user should be null[0m
+[32m    the keys API should not return a key named default[0m
+  when a clients's default key is deleted via the keys API
+[32m    public field returned by /organizations/:org/clients/:client should be null[0m
+[32m    the keys API should not return a key named default[0m
+  when a user is updated via PUT but the public_key is omitted
+[32m    should not modify the public key returned via GET /users/:user[0m
+[32m    should not clear the default key returned via the keys API[0m
+  when a client is updated via PUT but the public_key is omitted
+[32m    not modify the public key returned via GET /organizations/:org/clients/:client[0m
+[32m    should not clear the default key returned via the keys API[0m
+  when a user's default key has already been deleted via the keys API and then re-added via PUT to /users/:user
+[32m    the correct key should be shown in the user's record via GET /users/:user[0m
+[32m    should be present in the keys list[0m
+[32m    should be able to authenticate with the updated default key[0m
+  when a client's default key has already been deleted via the keys API and then re-added via PUT to /organizations/:org/clients/:client
+[32m    should be shown in the clients's record via GET of the named client[0m
+[32m    should be present in the keys list[0m
+[32m    should be able to authenticate with the updated default key[0m
+  when the default key is updated for a user via a PUT to /users/:user
+    when the default key exists
+[32m      should update the default key in the keys table[0m
+[32m      should no longer contain the old default key[0m
+[32m      should return the new key from the /users endpoint[0m
+  when the default key is updated for a client via a PUT to /organizations/:org/clients/:client
+    when the default key exists
+[32m      should update the default key in the keys table[0m
+[32m      should no longer contain the old default key[0m
+[32m      should return the new key from the /users endpoint[0m
+  when a user is PUT with public_key:null via /users/:user
+[32m    the key should remain unchanged via GET /users/:user[0m
+[32m    should leave the default key from the keys API list present for that user[0m
+  when a client is PUT with public_key:null to /organizations/:org/clients/:client
+[32m    the key should remain unchanged via GET /organizations/:org/clients/:client[0m
+[32m    should leave the default key from the keys API list unmodified for that client[0m
+  when a user and client with the same name exist
+[32m    should not allow client to query /users/:user/keys[0m
+[32m    should allow user to query /users/:user/keys[0m
+  managing keys
+Creating org pedant-keys-org-2-1431719159
+    posting keys
+      for a client
+[32m        that doesn't exist it should reply with 404[0m
+        behaves like basic keys POST validation
+[32m          when name is empty it responds with 400[0m
+[32m          when name is invalid it responds with 400[0m
+[32m          when name is missing it responds with 400[0m
+[32m          when date is invalid it responds with 400[0m
+[32m          when date is empty it responds with 400[0m
+[32m          when date is missing it responds with 400[0m
+[32m          when public key is not a valid key it responds with 400[0m
+[32m          when public key is missing it responds with 400[0m
+[32m          when a key of the same name already exists it responds with 409[0m
+[32m          when both a public_key and create_key are present it responds with 400[0m
+          when all fields are present and valid
+[32m            should create a key with proper response and Location header[0m
+[32m            and infinity date is specfied it should still create a key with proper response and Location header[0m
+[32m            when 'create_key' is false alongside a public key it should not generate a private key[0m
+[32m            when 'create_key' : true is specified in lieu of public key it should generate a new private key and reply with it in the body[0m
+        POST /organizations/:org/clients/:client/keys as...
+[32m          an invalid user fails with 401[0m
+[32m          the org client itself succeeds[0m
+[32m          the superuser succeeds[0m
+          another user in the org
+[32m            fails with 403[0m
+          as an org admin of a member org
+[32m            succeeds[0m
+      for a user
+[32m        that doesn't exist it should reply with 404[0m
+        behaves like basic keys POST validation
+[32m          when name is empty it responds with 400[0m
+[32m          when name is invalid it responds with 400[0m
+[32m          when name is missing it responds with 400[0m
+[32m          when date is invalid it responds with 400[0m
+[32m          when date is empty it responds with 400[0m
+[32m          when date is missing it responds with 400[0m
+[32m          when public key is not a valid key it responds with 400[0m
+[32m          when public key is missing it responds with 400[0m
+[32m          when a key of the same name already exists it responds with 409[0m
+[32m          when both a public_key and create_key are present it responds with 400[0m
+          when all fields are present and valid
+[32m            should create a key with proper response and Location header[0m
+[32m            and infinity date is specfied it should still create a key with proper response and Location header[0m
+[32m            when 'create_key' is false alongside a public key it should not generate a private key[0m
+[32m            when 'create_key' : true is specified in lieu of public key it should generate a new private key and reply with it in the body[0m
+        POST /users/:user/keys as...
+[32m          an invalid user fails with 401[0m
+[32m          an org client of a member org fails with 401[0m
+[32m          the user itself succeeds[0m
+[32m          the superuser succeeds[0m
+          an org admin of a member org
+[32m            fails with 403[0m
+    PUT
+      for a client
+        behaves like PUT like a PATCH
+[32m          when only name is present and is changed, responds with 201 and a Location header[0m
+[32m          when only name is present and has not been changed[0m
+[32m          should only update  public_key when that is the only provided field[0m
+[32m          should only update expiration date when that is the only provided field[0m
+        behaves like basic keys PUT validation
+[32m          when all fields are modified it should update the key and send us back the updated body and header[0m
+[32m          when 'create_key' is false alongside a public key it should not generate a private key[0m
+[32m          when 'create_key' : true is specified in lieu of public key it should generate a new private key and reply with it and the public_key in the body[0m
+[32m          when PUT body is empty it should fail with a 400[0m
+[32m          when name is empty it responds with 400[0m
+[32m          when name is invalid it responds with 400[0m
+[32m          when date is empty it responds with 400[0m
+[32m          when date is invalid it responds with 400[0m
+[32m          when public key is empty it responds with 400[0m
+[32m          when public key is invalid it responds with 400[0m
+[32m          when a key of the same name already exists it responds with 409[0m
+[32m          when both a public_key and create_key are present it responds with 400[0m
+[32m          when both a public_key and create_key are present but create_key is false it responds with 200[0m
+      for a user
+        behaves like PUT like a PATCH
+[32m          when only name is present and is changed, responds with 201 and a Location header[0m
+[32m          when only name is present and has not been changed[0m
+[32m          should only update  public_key when that is the only provided field[0m
+[32m          should only update expiration date when that is the only provided field[0m
+        behaves like basic keys PUT validation
+[32m          when all fields are modified it should update the key and send us back the updated body and header[0m
+[32m          when 'create_key' is false alongside a public key it should not generate a private key[0m
+[32m          when 'create_key' : true is specified in lieu of public key it should generate a new private key and reply with it and the public_key in the body[0m
+[32m          when PUT body is empty it should fail with a 400[0m
+[32m          when name is empty it responds with 400[0m
+[32m          when name is invalid it responds with 400[0m
+[32m          when date is empty it responds with 400[0m
+[32m          when date is invalid it responds with 400[0m
+[32m          when public key is empty it responds with 400[0m
+[32m          when public key is invalid it responds with 400[0m
+[32m          when a key of the same name already exists it responds with 409[0m
+[32m          when both a public_key and create_key are present it responds with 400[0m
+[32m          when both a public_key and create_key are present but create_key is false it responds with 200[0m
+    DELETE
+      /organizations/:org/clients/:client/keys/:key
+[32m        fails with 404[0m
+[32m        and the key does not exist it fails with 404[0m
+        as...
+[32m          the client itself, authenticating with a different key should succeed[0m
+[32m          the client itself, authenticating with the key it is trying to delete should fail with 403[0m
+[32m          a user not affiliated with the org should fail with a 403[0m
+[32m          the org admin should succeed[0m
+          a client in the same org
+[32m            should fail with a 403[0m
+          a client in a different org
+[32m            should fail with a 401[0m
+          a user in the same org
+[32m            should fail with a 403[0m
+      user keys
+        and the user does not exist
+[32m          DELETE /users/bob/keys/default[0m
+        and the key does not exist
+[32m          DELETE /users/:user/keys/badkey fails with 404[0m
+        DELETE /users/:user/keys/:name as...
+[32m          the user itself, authenticating with a different key should succeed[0m
+[32m          the user itself, authenticating with the key it is trying to delete should fail with 403[0m
+[32m          a user not affiliated with the org should fail with a 403[0m
+[32m          the org admin should fail with a 403[0m
+          a client in the same org
+[32m            should fail with a 401[0m
+          a client in a different org
+[32m            should fail with a 401[0m
+          a user in the same org
+[32m            should fail with a 403[0m
+    PUT
+      /organizations/:org/clients/:client/keys/:key
+[32m        to a key for an invalid actor fails with 404[0m
+[32m        to a key for a valid actor, but the key does not exist[0m
+        as...
+[32m          the client itself, authenticating with a different key should succeed[0m
+[32m          the client itself, authenticating with the key it is trying update should fail with 403[0m
+[32m          a user not affiliated with the org should fail with a 403[0m
+[32m          the org admin should succeed[0m
+          a client in the same org
+[32m            should fail with a 403[0m
+          a client in a different org
+[32m            should fail with a 401[0m
+          a user in the same org
+[32m            should fail with a 403[0m
+      /users/:user/keys/:key
+[32m        and the user does not exist it fails with a 404[0m
+[32m        and the key does not exist it fails with a 404[0m
+        as...
+[32m          the user itself, authenticating with a different key should succeed[0m
+[32m          the user itself, authenticating with the key it is trying to delete should fail with 403[0m
+[32m          a user not affiliated with the org should fail with a 403[0m
+[32m          the org admin should fail with a 403[0m
+          a client in the same org
+[32m            should fail with a 401[0m
+          a client in a different org
+[32m            should fail with a 401[0m
+          a user in the same org
+[32m            should fail with a 403[0m
+    listing key(s)
+      when multiple keys are present
+        for a client
+          when GET /organizations/org/clients/client/keys is called (list keys)
+[32m            all keys should be listed with correct expiry indicators[0m
+            when GET is called on the URIs that are returned
+[32m              should return status 200[0m
+          when GET /organizations/org/clients/client/keys/key is called (get single key)
+            when it is called for each valid key
+[32m              should properly return the default key with valid expiration[0m
+[32m              should properly return the first custom key with valid expiration[0m
+[32m              should properly return the second custom key with valid expiration[0m
+        for a user
+          when GET /users/user/keys is called (list keys)
+[32m            all keys should be listed with correct expiry indicators[0m
+            when GET is called on the URIs that are returned
+[32m              should return status 200[0m
+          when GET /users/user/keys/key is called (get single key)
+            when it is called for each valid key
+[32m              should properly return the default key with valid expiration[0m
+[32m              should properly return the first custom key with valid expiration[0m
+[32m              should properly return the second custom key with valid expiration[0m
+      of a user
+        when GET /users/user/keys is called (list keys)
+[32m          by an invalid user fails with a 401[0m
+[32m          by a client in the same org fails with a 401[0m
+[32m          who isn't valid by a user who is valid fails with a 404[0m
+        when GET /users/user/keys/default is called
+[32m          by an invalid user fails with a 401[0m
+[32m          by a client in the same org fails with a 401[0m
+[32m          who isn't valid by a user who is valid fails with a 404[0m
+      by an org admin
+        when GET /organizations/org/clients/client/keys is called
+[32m          for a client that is a member of the same org succeeds with a 200[0m
+[32m          for a client that is a member of a different org fails with a 403[0m
+        when GET /users/user/keys is called
+[32m          for a user that is a member of the same org succeeds with a 200[0m
+[32m          for a user that is not a member of the same org fails with a 403[0m
+        when GET /organizations/org/clients/client/keys/key is called
+[32m          for a client that is a member of the same org succeeds with a 200[0m
+[32m          for a client that is a member of a different org fails with a 403[0m
+        when GET /users/user/keys/key is called
+[32m          for a user that is a member of the same org succeeds with a 200[0m
+[32m          for a user that is not a member of the same org fails with a 403[0m
+      by an org client
+        when GET /organizations/org/clients/client/keys is called
+[32m          for a client that is a member of the same org fails with a 403[0m
+[32m          for a itself succeeds with a 200[0m
+[32m          for a client that is a member of a different org fails with a 401[0m
+        when GET /users/user/keys is called
+[32m          for a user that is a member of the same org fails with a 401[0m
+[32m          for a user that is not a member of the same org fails with a 401[0m
+        when GET /organizations/org/clients/client/keys/key is called
+[32m          for a client that is a member of the same org fails with a 403[0m
+[32m          for a itself succeeds with a 200[0m
+[32m          for a client that is a member of a different org fails with a 401[0m
+        when GET /users/user/keys/key is called
+[32m          for a user that is a member of the same org fails with a 401[0m
+[32m          for a user that is not a member of the same org fails with a 401[0m
+      by an org member who is not an admin
+        when GET /organizations/org/clients/client/keys is called
+[32m          for a client that is a member of the same org succeeds with a 200[0m
+[32m          for a client that is a member of a different org fails with a 403[0m
+        when GET /users/user/keys is called
+[32m          for a user that is a member of the same org fails with a 403[0m
+[32m          for a user that is not a member of the same org fails with a 403[0m
+        when GET /organizations/org/clients/client/key is called
+[32m          for a client that is a member of the same org succeeds with a 200[0m
+[32m          for a client that is a member of a different org fails with a 403[0m
+        when GET /users/user/keys/key is called
+[32m          for a user that is a member of the same org fails with a 403[0m
+[32m          for a user that is not a member of the same org fails with a 403[0m
+      by an unaffiliated user
+        when GET /organizations/org/clients/client/keys is called
+[32m          attempting to see an org client's keys fails with a 403[0m
+        when GET /users/user/keys is called
+[32m          attempting to see their own keys succeeds with a 200[0m
+[32m          attempting to see someone else's keys fails with a 403[0m
+        when GET /organizations/org/clients/client/keys/key is called
+[32m          attempting to see an org client's key fails with a 403[0m
+        when GET /users/user/keys/key is called
+[32m          attempting to see their own keys succeeds with a 200[0m
+[32m          attempting to see someone else's key fails with a 403[0m
+Deleting organization pedant-keys-org-2-1431719159 ...
+Deleting organization pedant-keys-org-1431719094 ...
+Deleting organization pedant_testorg_api_24364 ...
+
+Finished in 4 minutes 16.7 seconds
+[32m213 examples, 0 failures[0m
+
+Randomized with seed 63754
+

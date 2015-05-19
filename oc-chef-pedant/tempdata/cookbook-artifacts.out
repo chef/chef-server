@@ -1,0 +1,374 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_17196
+Validating Org Creation
+Run options: include {:focus=>true, :cookbook_artifacts=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :cookbook_artifacts=>true}
+
+Randomized with seed 32521
+
+.................................
+
+Finished in 1.28 seconds
+33 examples, 0 failures
+
+Randomized with seed 32521
+
+Starting Pedant Run: 2015-05-15 19:30:23 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :cookbook_artifacts=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 56170
+
+
+Cookbook Artifacts API endpoint
+  PUT /cookbook_artifacts/<name>/<version> [create]
+    with a basic cookbook
+[32m      creates a basic cookbook_artifact[0m
+    when validating
+      the cookbook version
+        with versions at exactly 4 bytes
+[32m          should respond with 201 Created[0m
+        with versions larger than 4 bytes
+[32m          should respond with 201 Created[0m
+        with versions with 'prerelease' fields
+[32m          should respond with 201 Created[0m
+    creating broken cookbook_artifacts to test validation and defaults
+      basic tests
+        with empty metadata
+[33m          create returns 400 (PENDING: FIXME - server needs to add validation)[0m
+      with segment 'resources' set to a String
+[33m        create returns 400 (PENDING: FIXME - server returns 500)[0m
+      with segment 'resources' set to an Array with one empty JSON object
+[33m        create returns 400 (PENDING: FIXME - server returns 500)[0m
+      with segment 'providers' set to a String
+[33m        create returns 400 (PENDING: FIXME - server returns 500)[0m
+      with segment 'providers' set to an Array with one empty JSON object
+[33m        create returns 400 (PENDING: FIXME - server returns 500)[0m
+      with segment 'recipes' set to a String
+[33m        create returns 400 (PENDING: FIXME - server returns 500)[0m
+      with segment 'recipes' set to an Array with one empty JSON object
+[33m        create returns 400 (PENDING: FIXME - server returns 500)[0m
+      with segment 'definitions' set to a String
+[33m        create returns 400 (PENDING: FIXME - server returns 500)[0m
+      with segment 'definitions' set to an Array with one empty JSON object
+[33m        create returns 400 (PENDING: FIXME - server returns 500)[0m
+      with segment 'libraries' set to a String
+[33m        create returns 400 (PENDING: FIXME - server returns 500)[0m
+      with segment 'libraries' set to an Array with one empty JSON object
+[33m        create returns 400 (PENDING: FIXME - server returns 500)[0m
+      with segment 'attributes' set to a String
+[33m        create returns 400 (PENDING: FIXME - server returns 500)[0m
+      with segment 'attributes' set to an Array with one empty JSON object
+[33m        create returns 400 (PENDING: FIXME - server returns 500)[0m
+      with segment 'files' set to a String
+[33m        create returns 400 (PENDING: FIXME - server returns 500)[0m
+      with segment 'files' set to an Array with one empty JSON object
+[33m        create returns 400 (PENDING: FIXME - server returns 500)[0m
+      with segment 'templates' set to a String
+[33m        create returns 400 (PENDING: FIXME - server returns 500)[0m
+      with segment 'templates' set to an Array with one empty JSON object
+[33m        create returns 400 (PENDING: FIXME - server returns 500)[0m
+      with segment 'root_files' set to a String
+[33m        create returns 400 (PENDING: FIXME - server returns 500)[0m
+      with segment 'root_files' set to an Array with one empty JSON object
+[33m        create returns 400 (PENDING: FIXME - server returns 500)[0m
+      checking metadata sections
+        with metadata section 'platforms' set to a string
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with a malformed constraint for metadata section platforms
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with metadata section 'dependencies' set to a string
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with a malformed constraint for metadata section dependencies
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with metadata section 'recommendations' set to a string
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with a malformed constraint for metadata section recommendations
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with metadata section 'suggestions' set to a string
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with a malformed constraint for metadata section suggestions
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with metadata section 'conflicting' set to a string
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with a malformed constraint for metadata section conflicting
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with metadata section 'replacing' set to a string
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with a malformed constraint for metadata section replacing
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with valid metadata dependency '> 1.0'
+[32m          create returns 200[0m
+        with valid metadata dependency '< 2.1.2'
+[32m          create returns 200[0m
+        with valid metadata dependency '3.3'
+[32m          create returns 200[0m
+        with valid metadata dependency '<= 4.6'
+[32m          create returns 200[0m
+        with valid metadata dependency '~> 5.6.2'
+[32m          create returns 200[0m
+        with valid metadata dependency '>= 6.0'
+[32m          create returns 200[0m
+        with invalid metadata dependency '> 1'
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with invalid metadata dependency '< 2'
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with invalid metadata dependency '3'
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with invalid metadata dependency '<= 4'
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with invalid metadata dependency '~> 5'
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with invalid metadata dependency '>= 6'
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with invalid metadata dependency '= 7'
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with invalid metadata dependency '>= 1.2.3.4'
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with invalid metadata dependency '<= 5.6.7.8.9.0'
+[33m          create returns 400 (PENDING: FIXME - missing server validation)[0m
+        with metadata.providing set to valid value cats::sleep
+[32m          create returns 200[0m
+        with metadata.providing set to valid value here(:kitty, :time_to_eat)
+[32m          create returns 200[0m
+        with metadata.providing set to valid value service[snuggle]
+[32m          create returns 200[0m
+        with metadata.providing set to valid value
+[32m          create returns 200[0m
+        with metadata.providing set to valid value 1
+[32m          create returns 200[0m
+        with metadata.providing set to valid value true
+[32m          create returns 200[0m
+        with metadata.providing set to valid value ["cats", "sleep", "here"]
+[32m          create returns 200[0m
+        with metadata.providing set to valid value {"cats::sleep"=>"0.0.1", "here(:kitty, :time_to_eat)"=>"0.0.1", "service[snuggle]"=>"0.0.1"}
+[32m          create returns 200[0m
+      with invalid cookbook artifact identifier in url
+[32m        should respond with an error[0m
+      when the cookbook name is invalid
+[32m        responds with a 400[0m
+      when the identifier in the URL doesn't match the payload
+[32m        responds with a 400[0m
+      when the cookbook name in the URL doesn't match the payload
+[32m        mismatched cookbook_name is a 400[0m
+      when uploading a cookbook artifact with a missing checksum
+[32m        specifying file not in sandbox is a 400[0m
+    creating good cookbook_artifacts to test defaults
+[32m      allows override of defaults[0m
+      with a payload size
+        exactly equal to the maximum allowable size
+[32m          should not respond with 413 Request Entity Too Large[0m
+        exceeding the maximum allowable size
+[32m          should respond with 413 Request Entity Too Large[0m
+  PUT multiple cookbook_artifacts
+[32m    allows us to create 2 revisions of the same cookbook[0m
+
+Cookbook Artifacts API endpoint
+  DELETE /cookbooks/<name>/<version>
+    for non-existent cookbooks
+[32m      returns 404[0m
+      with bad identifier
+[32m        returns 404[0m
+    for existing cookbooks
+      when deleting non-existent version of an existing cookbook
+[32m        should respond with 404 ("Not Found") and not delete existing versions[0m
+      when deleting existent version of an existing cookbook
+[32m        should cleanup unused checksum data in s3/bookshelf[0m
+    with permissions for
+      as admin user
+[32m        should respond with 200 ("OK") and be deleted[0m
+      as normal user
+[32m        should respond with 200 ("OK") and be deleted[0m
+      as a user outside of the organization
+[32m        should respond with 403 ("Forbidden") and does not delete cookbook[0m
+      with invalid user
+[32m        should respond with 401 ("Unauthorized") and does not delete cookbook[0m
+
+Cookbook Artifacts API endpoint
+  GET /cookbook_artifacts
+    with no cookbook artifacts on the server
+[32m      responds with 200[0m
+    with existing cookbook_artifacts and multiple versions
+[32m      should respond with a cookbook collection containing all versions of each cookbook[0m
+  GET /cookbook_artifacts/<name>/<version>
+    as a normal user
+[32m      returns a 200 response[0m
+[32m      returns valid file URLs[0m
+    as an admin user
+[32m      returns a 200 response[0m
+[32m      returns valid file URLs[0m
+    as an user outside of the organization
+[32m      should respond with 403 Forbidden[0m
+    with invalid user
+[32m      should respond with 401 Unauthorized[0m
+
+Cookbook Artifacts API endpoint
+  PUT /cookbooks/<name>/<version> [update]
+    with a payload size
+      exactly equal to the maximum allowable size
+[32m        should not respond with 413 Request Entity Too Large[0m
+      exceeding the maximum allowable size
+[32m        should respond with 413 Request Entity Too Large[0m
+    as admin user
+[32m      should respond with 409 Conflict[0m
+      as a user outside of the organization
+[32m        should respond with 403 ("Forbidden") and does not update cookbook[0m
+      with invalid user
+[32m        returns 401 and does not update cookbook[0m
+Deleting organization pedant_testorg_api_17196 ...
+
+Pending:
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults basic tests with empty metadata create returns 400[0m
+[36m    # FIXME - server needs to add validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults with segment 'resources' set to a String create returns 400[0m
+[36m    # FIXME - server returns 500[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults with segment 'resources' set to an Array with one empty JSON object create returns 400[0m
+[36m    # FIXME - server returns 500[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults with segment 'providers' set to a String create returns 400[0m
+[36m    # FIXME - server returns 500[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults with segment 'providers' set to an Array with one empty JSON object create returns 400[0m
+[36m    # FIXME - server returns 500[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults with segment 'recipes' set to a String create returns 400[0m
+[36m    # FIXME - server returns 500[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults with segment 'recipes' set to an Array with one empty JSON object create returns 400[0m
+[36m    # FIXME - server returns 500[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults with segment 'definitions' set to a String create returns 400[0m
+[36m    # FIXME - server returns 500[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults with segment 'definitions' set to an Array with one empty JSON object create returns 400[0m
+[36m    # FIXME - server returns 500[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults with segment 'libraries' set to a String create returns 400[0m
+[36m    # FIXME - server returns 500[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults with segment 'libraries' set to an Array with one empty JSON object create returns 400[0m
+[36m    # FIXME - server returns 500[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults with segment 'attributes' set to a String create returns 400[0m
+[36m    # FIXME - server returns 500[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults with segment 'attributes' set to an Array with one empty JSON object create returns 400[0m
+[36m    # FIXME - server returns 500[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults with segment 'files' set to a String create returns 400[0m
+[36m    # FIXME - server returns 500[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults with segment 'files' set to an Array with one empty JSON object create returns 400[0m
+[36m    # FIXME - server returns 500[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults with segment 'templates' set to a String create returns 400[0m
+[36m    # FIXME - server returns 500[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults with segment 'templates' set to an Array with one empty JSON object create returns 400[0m
+[36m    # FIXME - server returns 500[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults with segment 'root_files' set to a String create returns 400[0m
+[36m    # FIXME - server returns 500[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults with segment 'root_files' set to an Array with one empty JSON object create returns 400[0m
+[36m    # FIXME - server returns 500[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with metadata section 'platforms' set to a string create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with a malformed constraint for metadata section platforms create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with metadata section 'dependencies' set to a string create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with a malformed constraint for metadata section dependencies create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with metadata section 'recommendations' set to a string create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with a malformed constraint for metadata section recommendations create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with metadata section 'suggestions' set to a string create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with a malformed constraint for metadata section suggestions create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with metadata section 'conflicting' set to a string create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with a malformed constraint for metadata section conflicting create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with metadata section 'replacing' set to a string create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with a malformed constraint for metadata section replacing create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with invalid metadata dependency '> 1' create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with invalid metadata dependency '< 2' create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with invalid metadata dependency '3' create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with invalid metadata dependency '<= 4' create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with invalid metadata dependency '~> 5' create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with invalid metadata dependency '>= 6' create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with invalid metadata dependency '= 7' create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with invalid metadata dependency '>= 1.2.3.4' create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+[33m  Cookbook Artifacts API endpoint PUT /cookbook_artifacts/<name>/<version> [create] creating broken cookbook_artifacts to test validation and defaults checking metadata sections with invalid metadata dependency '<= 5.6.7.8.9.0' create returns 400[0m
+[36m    # FIXME - missing server validation[0m
+[36m    # ./spec/api/cookbook_artifacts/create_spec.rb:177[0m
+
+Finished in 15.35 seconds
+[33m88 examples, 0 failures, 40 pending[0m
+
+Randomized with seed 56170
+

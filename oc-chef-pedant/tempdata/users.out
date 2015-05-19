@@ -1,0 +1,340 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_16810
+Validating Org Creation
+Run options: include {:focus=>true, :users=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :users=>true}
+
+Randomized with seed 47376
+
+.................................
+
+Finished in 1.27 seconds
+33 examples, 0 failures
+
+Randomized with seed 47376
+
+Starting Pedant Run: 2015-05-15 20:25:18 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :users=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 43792
+
+
+authenticate_user
+  GET /authenticate_user
+[32m    returns 404 ("Not Found") for superuser[0m
+[32m    returns 404 ("Not Found") for admin/different user[0m
+[32m    returns 404 ("Not Found") for non-admin/same user[0m
+[32m    returns 404 ("Not Found") for invalid user[0m
+  PUT /authenticate_user
+[32m    returns 404 ("Not Found") for superuser[0m
+[32m    returns 404 ("Not Found") for admin/different user[0m
+[32m    returns 404 ("Not Found") for non-admin/same user[0m
+[32m    returns 404 ("Not Found") for invalid user[0m
+  POST /authenticate_user
+    with correct credentials
+[32m      superuser user returns 200 ("OK")[0m
+[32m      admin/different user returns 403 ("Forbidden")[0m
+[32m      non-admin/same user returns 403 ("Forbidden")[0m
+[32m      invalid user returns 401 ("Unauthorized")[0m
+    and user has external authentication enabled
+      but local bypass parameter is used
+[32m        allows authentication with correct password and no ldap[0m
+    with invalid username
+[32m      superuser returns 401 ("Unauthorized")[0m
+[32m      admin/different user returns 403 ("Forbidden")[0m
+[32m      non-admin/same user returns 403 ("Forbidden")[0m
+    with incorrect password
+[32m      superuser returns 401 ("Unauthorized")[0m
+[32m      admin/different user returns 403 ("Forbidden")[0m
+[32m      non-admin/same user returns 403 ("Forbidden")[0m
+    with missing username
+[32m      superuser returns 400 ("Bad Request")[0m
+[32m      admin/different user returns 400 ("Bad Request")[0m
+[32m      non-admin/same user returns 400 ("Bad Request")[0m
+    with missing password
+[32m      superuser returns 400 ("Bad Request")[0m
+[32m      admin/different user returns 400 ("Bad Request")[0m
+[32m      non-admin/same user returns 400 ("Bad Request")[0m
+    with empty username
+[32m      superuser returns 400 ("Bad Request")[0m
+[32m      admin/different user returns 400 ("Bad Request")[0m
+[32m      non-admin/same user returns 400 ("Bad Request")[0m
+    with empty password
+[32m      superuser returns 400 ("Bad Request")[0m
+[32m      admin/different user returns 400 ("Bad Request")[0m
+[32m      non-admin/same user returns 400 ("Bad Request")[0m
+    with username = user
+[32m      superuser returns 400 ("Bad Request")[0m
+[32m      admin/different user returns 400 ("Bad Request")[0m
+[32m      non-admin/same user returns 400 ("Bad Request")[0m
+    with password = pass
+[32m      superuser returns 400 ("Bad Request")[0m
+[32m      admin/different user returns 400 ("Bad Request")[0m
+[32m      non-admin/same user returns 400 ("Bad Request")[0m
+    with empty body
+[32m      superuser returns 400 ("Bad Request")[0m
+[32m      admin/different user returns 400 ("Bad Request")[0m
+[32m      non-admin/same user returns 400 ("Bad Request")[0m
+    with no body
+[32m      superuser returns 400 ("Bad Request")[0m
+[32m      admin/different user returns 400 ("Bad Request")[0m
+[32m      non-admin/same user returns 400 ("Bad Request")[0m
+[32m      invalid user returns 401 ("Unauthorized") (ruby) or 400 ("Bad Request") (erlang)[0m
+    with extra junk in body
+[32m      superuser returns 200 ("Ok")[0m
+[32m      admin/different user returns 403 ("Forbidden")[0m
+[32m      non-admin/same user returns 403 ("Forbidden")[0m
+[32m      invalid user returns 401 ("Unauthorized")[0m
+    when the webui superuser is specified as the target user
+[32m      should return Forbidden[0m
+  DELETE /authenticate_user
+[32m    returns 404 ("Not Found") for superuser[0m
+[32m    returns 404 ("Not Found") for admin/different user[0m
+[32m    returns 404 ("Not Found") for non-admin/same user[0m
+[32m    returns 404 ("Not Found") for invalid user[0m
+
+system_recovery
+  POST /system_recovery
+    when a user has recovery_authentication_enabled == true is requested
+      when the superuser is the requestor
+[32m        should return the user body[0m
+      when the password passed is incorrect
+[32m        should return 401 with an error message[0m
+      when a non-superuser is the requestor
+[32m        should return 403 with an error explaining non-superuser is not authorized[0m
+    when a user has recovery_authentication_enabled != true is requested by the superuser
+[32m      should return 403 with a relevant error message[0m
+    when a user that does not exist is requested by the superuser
+[32m      should return 404 with an error message[0m
+    when the request is missing the username field
+[32m      should return 400 with an error message[0m
+    when the request is missing the password field
+[32m      should return 400 with an error message[0m
+
+users
+  /users endpoint
+    GET /users
+      superuser
+[32m        can get all users[0m
+[32m        returns no users when filtering by non-existing email[0m
+[32m        returns a single user when filtering by that user's email address[0m
+[32m        returns a verbose list of users upon request[0m
+      admin user
+[32m        returns 403[0m
+      default normal user
+[32m        returns 403[0m
+      default client
+[32m        returns 401[0m
+      outside user
+[32m        returns 403[0m
+      invalid user
+[32m        returns 401[0m
+    PUT /users
+      admin user
+[32m        returns  404[ruby]/405[erlang][0m
+    POST /users
+      superuser
+[32m        can create new user[0m
+      admin user
+[32m        returns 403[0m
+      creating users
+        without password
+[32m          returns 400[0m
+        with external auth enabled
+[32m          returns 201 when password is not provided[0m
+[32m          returns 201 when password is provided[0m
+        without display_name
+[32m          returns 400[0m
+        without first and last name
+[32m          can create new user[0m
+        without email
+[32m          returns 400[0m
+        without email but with external auth enabled
+[32m          returns 201[0m
+        without username
+[32m          returns 400[0m
+        with invalid email
+[32m          returns 400[0m
+        with spaces in names
+[32m          can create new user[0m
+        with bogus field
+[32m          can create new user[0m
+        with space in display_name
+[32m          can create new user[0m
+        with UTF-8 in display_name
+[32m          can create new user[0m
+        with UTF-8 in first/last name
+[32m          can create new user[0m
+        with capitalized username
+[32m          returns 400[0m
+        with space in username
+[32m          returns 400[0m
+        when user already exists
+[32m          returns 409[0m
+    DELETE /users
+      admin user
+[32m        returns  404[ruby]/405[erlang][0m
+  /users/<name> endpoint
+    GET /users/<name>
+      superuser
+[32m        can get user[0m
+      admin user
+[32m        can get user[0m
+      default normal user
+[32m        can get self[0m
+      default client
+[32m        returns 401[0m
+      outside user
+[32m        returns 403[0m
+      invalid user
+[32m        returns 401[0m
+      when user doesn't exist
+[32m        returns 404[0m
+    PUT /users/<name>
+      superuser
+[32m        can modify user[0m
+[32m        can enable recovery[0m
+[32m        can set external id[0m
+        authenticating after updates
+          when password is unchanged
+[32m            can authenticate as the modified user when password has not been changed.[0m
+          when password is updated
+[32m            can authenticate as the modified user when password has been changed[0m
+[32m            fails to authenticate as the modified user using the old password[0m
+      admin user
+[32m        returns 403[0m
+[32m        cannot enable recovery[0m
+[32m        cannot set external id[0m
+      owning user
+[32m        can modify its own account[0m
+[32m        cannot enable recovery[0m
+[32m        cannot set external id[0m
+      default client
+[32m        returns 401[0m
+      when modifying non-existent user
+[32m        returns 404[0m
+      modifying users
+        without password
+[32m          can modify user[0m
+        with bogus field
+[32m          can modify user[0m
+        without display_name
+[32m          returns 400[0m
+        without first and last name
+[32m          can modify user[0m
+        without email
+[32m          returns 400[0m
+        without email but with external auth enabled
+[32m          returns 200[0m
+        without username
+[32m          returns 400[0m
+        with invalid email
+[32m          returns 400[0m
+        with spaces in names
+[32m          can modify user[0m
+        with space in display_name
+[32m          can modify user[0m
+        with UTF-8 in display_name
+[32m          can modify user[0m
+        with UTF-8 in first/last name
+[32m          can modify user[0m
+        with new password provided
+[32m          changes the password[0m
+        with public key provided
+[32m          accepts the public key and subsequently responds with it[0m
+        when a new private key is requested
+[32m          can be used to successfully authenticate request[0m
+        with private_key = true
+[32m          returns a new private key, changes the public key[0m
+        and a public_key is present
+[32m          returns a new private key, changes the public key[0m
+        and public key is present containing a certificate
+[32m          returns a new private key, ignores the certificate[0m
+        with a certificate in the public_key field
+[32m          returns 400[0m
+      renaming users
+        changing username
+          and the username is valid
+[32m            updates the user to the new name and provides a new uri[0m
+        changing username with UTF-8
+[32m          returns 400[0m
+        changing username with spaces
+[32m          returns 400[0m
+        changing username with capital letters
+[32m          returns 400[0m
+        new name already exists
+[32m          returns 409[0m
+    POST /users/<name>
+      admin user
+[32m        returns  404[ruby]/405[erlang][0m
+    DELETE /users/<name>
+      superuser
+[32m        can delete user[0m
+      admin user
+[32m        returns 403[0m
+      default client
+[32m        returns 401[0m
+      when deleting a non-existent user
+[32m        returns 404[0m
+
+Server API v1 Behaviors
+  [v1+]
+Creating org pedant_api-v1-org_1431721518-893939860-16810
+    users
+      POST /users
+        it should behave like actor creation validation
+[32m          should allow create_key: true and give a proper valid key in response[0m
+[32m          should allow allow public_key to be provided and respond with its location[0m
+[32m          should reply with an error if both create_key:true and public_key are specified[0m
+[32m          should accept the public key if both create_key:false and public_key are specified[0m
+[32m          should reply with an error if private_key:true is specified for key generation[0m
+[32m          when neither create_key nor public_key is specified, the operation should succeed and no default key is created[0m
+      PUT /users/:name
+        it should behave like actor update validation
+[32m          should allow an update that doesn't include public_key or create_key[0m
+[32m          should not allow create_key:true[0m
+[32m          should not allow public_key to be provided[0m
+[32m          should not allow private_key:true to be specified[0m
+      GET /users/:name
+        behaves like actor read validation
+[32m          should not include public_key[0m
+      GET /organization/:org/users/:name
+        behaves like actor read validation
+[32m          should not include public_key[0m
+Deleting organization pedant_api-v1-org_1431721518-893939860-16810 ...
+Deleting organization pedant_testorg_api_16810 ...
+
+Finished in 1 minute 18.19 seconds
+[32m152 examples, 0 failures[0m
+
+Randomized with seed 43792
+

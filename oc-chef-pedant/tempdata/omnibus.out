@@ -1,0 +1,77 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_29763
+Validating Org Creation
+Run options: include {:focus=>true, :omnibus=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :omnibus=>true}
+
+Randomized with seed 39628
+
+.................................
+
+Finished in 1.26 seconds
+33 examples, 0 failures
+
+Randomized with seed 39628
+
+Starting Pedant Run: 2015-05-15 19:52:52 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :omnibus=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 24516
+
+
+Server-side reindexing
+  reindexing OPC
+    it should behave like Reindexing
+[31m      works for all object types (FAILED - 1)[0m
+Deleting organization pedant_testorg_api_29763 ...
+
+Failures:
+
+  1) Server-side reindexing reindexing OPC it should behave like Reindexing works for all object types
+     [31mFailure/Error:[0m [31midentifiers.should_not include(name)[0m
+       [31mexpected ["pedant_node_test"] not to include "pedant_node_test"[0m
+     Shared Example Group: "Reindexing" called from ./spec/api/reindex_spec.rb:19
+[36m     # ./lib/pedant/rspec/search_util.rb:844:in `block in do_search'[0m
+[36m     # ./lib/pedant/rspec/search_util.rb:715:in `with_search_polling'[0m
+[36m     # ./lib/pedant/rspec/search_util.rb:830:in `do_search'[0m
+[36m     # ./lib/pedant/rspec/search_util.rb:826:in `should_not_find'[0m
+[36m     # ./lib/pedant/rspec/search_util.rb:862:in `block (2 levels) in <module:RSpec>'[0m
+
+Finished in 8.08 seconds
+[31m1 example, 1 failure[0m
+
+Failed examples:
+
+[31mrspec ./lib/pedant/rspec/search_util.rb:849[0m [36m# Server-side reindexing reindexing OPC it should behave like Reindexing works for all object types[0m
+
+Randomized with seed 24516
+

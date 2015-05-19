@@ -1,0 +1,2150 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_13014
+Validating Org Creation
+Run options: include {:focus=>true, :acl=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :acl=>true}
+
+Randomized with seed 34640
+
+.................................
+
+Finished in 1.31 seconds
+33 examples, 0 failures
+
+Randomized with seed 34640
+
+Starting Pedant Run: 2015-05-15 19:23:13 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :acl=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 52933
+
+
+ACL API
+[33m  /users/<name>/_acl endpoint (PENDING: No reason given)[0m
+  /ANY/_acl
+[32m    can get org acl by default[0m
+  /organizations/_acl endpoint
+    GET /organizations/_acl
+      admin user
+[32m        can get object ACL[0m
+      default normal user
+[32m        returns 403[0m
+      default client
+[32m        returns 403[0m
+      outside user
+[32m        returns 403[0m
+      invalid user
+[32m        returns 401[0m
+      with modified ACLs
+        when normal user granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal client granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal user granted GRANT permission
+[32m          can get ACL[0m
+        when normal client granted GRANT permission
+[32m          can get ACL[0m
+    PUT /organizations/_acl
+      admin user
+[32m        returns 405[0m
+    POST /organizations/_acl
+      admin user
+[32m        returns 405[0m
+    DELETE /organizations/_acl
+      admin user
+[32m        returns 405[0m
+  /organizations/_acl/create endpoint
+    PUT /organizations/_acl/create
+      admin user
+[32m        can modify ACL[0m
+      default normal user
+[32m        returns 403[0m
+      default normal client
+[32m        returns 403[0m
+      outside user
+[32m        returns 403[0m
+      invalid user
+[32m        returns 401[0m
+      malformed requests
+        invalid actor
+[32m          returns 400[0m
+        invalid group
+[32m          returns 400[0m
+        missing actors
+[32m          returns 400[0m
+        missing groups
+[32m          returns 400[0m
+        empty body
+[32m          returns 400[0m
+      with modified ACLs
+        when normal user granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal client granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal user granted GRANT permission
+[32m          can modify ACL[0m
+        when normal client granted GRANT permission
+[32m          can modify ACL[0m
+    GET /organizations/_acl/create
+      admin user
+[32m        returns 405[0m
+    POST /organizations/_acl/create
+      admin user
+[32m        returns 405[0m
+    DELETE /organizations/_acl/create
+      admin user
+[32m        returns 405[0m
+  /organizations/_acl/read endpoint
+    PUT /organizations/_acl/read
+      admin user
+[32m        can modify ACL[0m
+      default normal user
+[32m        returns 403[0m
+      default normal client
+[32m        returns 403[0m
+      outside user
+[32m        returns 403[0m
+      invalid user
+[32m        returns 401[0m
+      malformed requests
+        invalid actor
+[32m          returns 400[0m
+        invalid group
+[32m          returns 400[0m
+        missing actors
+[32m          returns 400[0m
+        missing groups
+[32m          returns 400[0m
+        empty body
+[32m          returns 400[0m
+      with modified ACLs
+        when normal user granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal client granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal user granted GRANT permission
+[32m          can modify ACL[0m
+        when normal client granted GRANT permission
+[32m          can modify ACL[0m
+    GET /organizations/_acl/read
+      admin user
+[32m        returns 405[0m
+    POST /organizations/_acl/read
+      admin user
+[32m        returns 405[0m
+    DELETE /organizations/_acl/read
+      admin user
+[32m        returns 405[0m
+  /organizations/_acl/update endpoint
+    PUT /organizations/_acl/update
+      admin user
+[32m        can modify ACL[0m
+      default normal user
+[32m        returns 403[0m
+      default normal client
+[32m        returns 403[0m
+      outside user
+[32m        returns 403[0m
+      invalid user
+[32m        returns 401[0m
+      malformed requests
+        invalid actor
+[32m          returns 400[0m
+        invalid group
+[32m          returns 400[0m
+        missing actors
+[32m          returns 400[0m
+        missing groups
+[32m          returns 400[0m
+        empty body
+[32m          returns 400[0m
+      with modified ACLs
+        when normal user granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal client granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal user granted GRANT permission
+[32m          can modify ACL[0m
+        when normal client granted GRANT permission
+[32m          can modify ACL[0m
+    GET /organizations/_acl/update
+      admin user
+[32m        returns 405[0m
+    POST /organizations/_acl/update
+      admin user
+[32m        returns 405[0m
+    DELETE /organizations/_acl/update
+      admin user
+[32m        returns 405[0m
+  /organizations/_acl/delete endpoint
+    PUT /organizations/_acl/delete
+      admin user
+[32m        can modify ACL[0m
+      default normal user
+[32m        returns 403[0m
+      default normal client
+[32m        returns 403[0m
+      outside user
+[32m        returns 403[0m
+      invalid user
+[32m        returns 401[0m
+      malformed requests
+        invalid actor
+[32m          returns 400[0m
+        invalid group
+[32m          returns 400[0m
+        missing actors
+[32m          returns 400[0m
+        missing groups
+[32m          returns 400[0m
+        empty body
+[32m          returns 400[0m
+      with modified ACLs
+        when normal user granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal client granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal user granted GRANT permission
+[32m          can modify ACL[0m
+        when normal client granted GRANT permission
+[32m          can modify ACL[0m
+    GET /organizations/_acl/delete
+      admin user
+[32m        returns 405[0m
+    POST /organizations/_acl/delete
+      admin user
+[32m        returns 405[0m
+    DELETE /organizations/_acl/delete
+      admin user
+[32m        returns 405[0m
+  /organizations/_acl/grant endpoint
+    PUT /organizations/_acl/grant
+      admin user
+[32m        can modify ACL[0m
+      default normal user
+[32m        returns 403[0m
+      default normal client
+[32m        returns 403[0m
+      outside user
+[32m        returns 403[0m
+      invalid user
+[32m        returns 401[0m
+      malformed requests
+        invalid actor
+[32m          returns 400[0m
+        invalid group
+[32m          returns 400[0m
+        missing actors
+[32m          returns 400[0m
+        missing groups
+[32m          returns 400[0m
+        empty body
+[32m          returns 400[0m
+      with modified ACLs
+        when normal user granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal client granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal user granted GRANT permission
+[32m          can modify ACL[0m
+        when normal client granted GRANT permission
+[32m          can modify ACL[0m
+    GET /organizations/_acl/grant
+      admin user
+[32m        returns 405[0m
+    POST /organizations/_acl/grant
+      admin user
+[32m        returns 405[0m
+    DELETE /organizations/_acl/grant
+      admin user
+[32m        returns 405[0m
+  /<type>/<name>/_acl endpoint
+    for clients type
+      GET /clients/<name>/_acl
+        admin user
+[32m          can get object ACL[0m
+        default normal user
+[32m          returns 403[0m
+        default client
+[32m          returns 403[0m
+        outside user
+[32m          returns 403[0m
+        invalid user
+[32m          returns 401[0m
+        when normal user granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal client granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal user granted GRANT permission
+[32m          can get object ACL[0m
+        when normal client granted GRANT permission
+[32m          can get object ACL[0m
+        OC-1702 - when containing a missing group
+[32m          should return the acl[0m
+      PUT /clients/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      POST /clients/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      DELETE /clients/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      /clients/<name>/_acl/create endpoint
+        GET /clients/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+        PUT /clients/<name>/_acl/create
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /clients/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+        DELETE /clients/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+      /clients/<name>/_acl/read endpoint
+        GET /clients/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+        PUT /clients/<name>/_acl/read
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /clients/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+        DELETE /clients/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+      /clients/<name>/_acl/update endpoint
+        GET /clients/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+        PUT /clients/<name>/_acl/update
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /clients/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+        DELETE /clients/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+      /clients/<name>/_acl/delete endpoint
+        GET /clients/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+        PUT /clients/<name>/_acl/delete
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /clients/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+        DELETE /clients/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+      /clients/<name>/_acl/grant endpoint
+        GET /clients/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+        PUT /clients/<name>/_acl/grant
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /clients/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+        DELETE /clients/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+    for groups type
+      GET /groups/<name>/_acl
+        admin user
+[32m          can get object ACL[0m
+        default normal user
+[32m          returns 403[0m
+        default client
+[32m          returns 403[0m
+        outside user
+[32m          returns 403[0m
+        invalid user
+[32m          returns 401[0m
+        when normal user granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal client granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal user granted GRANT permission
+[32m          can get object ACL[0m
+        when normal client granted GRANT permission
+[32m          can get object ACL[0m
+        OC-1702 - when containing a missing group
+[32m          should return the acl[0m
+      PUT /groups/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      POST /groups/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      DELETE /groups/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      /groups/<name>/_acl/create endpoint
+        GET /groups/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+        PUT /groups/<name>/_acl/create
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /groups/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+        DELETE /groups/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+      /groups/<name>/_acl/read endpoint
+        GET /groups/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+        PUT /groups/<name>/_acl/read
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /groups/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+        DELETE /groups/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+      /groups/<name>/_acl/update endpoint
+        GET /groups/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+        PUT /groups/<name>/_acl/update
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /groups/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+        DELETE /groups/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+      /groups/<name>/_acl/delete endpoint
+        GET /groups/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+        PUT /groups/<name>/_acl/delete
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /groups/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+        DELETE /groups/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+      /groups/<name>/_acl/grant endpoint
+        GET /groups/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+        PUT /groups/<name>/_acl/grant
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /groups/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+        DELETE /groups/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+    for containers type
+      GET /containers/<name>/_acl
+        admin user
+[32m          can get object ACL[0m
+        default normal user
+[32m          returns 403[0m
+        default client
+[32m          returns 403[0m
+        outside user
+[32m          returns 403[0m
+        invalid user
+[32m          returns 401[0m
+        when normal user granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal client granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal user granted GRANT permission
+[32m          can get object ACL[0m
+        when normal client granted GRANT permission
+[32m          can get object ACL[0m
+        OC-1702 - when containing a missing group
+[32m          should return the acl[0m
+      PUT /containers/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      POST /containers/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      DELETE /containers/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      /containers/<name>/_acl/create endpoint
+        GET /containers/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+        PUT /containers/<name>/_acl/create
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /containers/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+        DELETE /containers/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+      /containers/<name>/_acl/read endpoint
+        GET /containers/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+        PUT /containers/<name>/_acl/read
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /containers/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+        DELETE /containers/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+      /containers/<name>/_acl/update endpoint
+        GET /containers/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+        PUT /containers/<name>/_acl/update
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /containers/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+        DELETE /containers/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+      /containers/<name>/_acl/delete endpoint
+        GET /containers/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+        PUT /containers/<name>/_acl/delete
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /containers/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+        DELETE /containers/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+      /containers/<name>/_acl/grant endpoint
+        GET /containers/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+        PUT /containers/<name>/_acl/grant
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /containers/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+        DELETE /containers/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+    for data type
+      GET /data/<name>/_acl
+        admin user
+[32m          can get object ACL[0m
+        default normal user
+[32m          returns 403[0m
+        default client
+[32m          returns 403[0m
+        outside user
+[32m          returns 403[0m
+        invalid user
+[32m          returns 401[0m
+        when normal user granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal client granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal user granted GRANT permission
+[32m          can get object ACL[0m
+        when normal client granted GRANT permission
+[32m          can get object ACL[0m
+        OC-1702 - when containing a missing group
+[32m          should return the acl[0m
+      PUT /data/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      POST /data/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      DELETE /data/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      /data/<name>/_acl/create endpoint
+        GET /data/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+        PUT /data/<name>/_acl/create
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /data/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+        DELETE /data/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+      /data/<name>/_acl/read endpoint
+        GET /data/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+        PUT /data/<name>/_acl/read
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /data/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+        DELETE /data/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+      /data/<name>/_acl/update endpoint
+        GET /data/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+        PUT /data/<name>/_acl/update
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /data/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+        DELETE /data/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+      /data/<name>/_acl/delete endpoint
+        GET /data/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+        PUT /data/<name>/_acl/delete
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /data/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+        DELETE /data/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+      /data/<name>/_acl/grant endpoint
+        GET /data/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+        PUT /data/<name>/_acl/grant
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /data/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+        DELETE /data/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+    for nodes type
+      GET /nodes/<name>/_acl
+        admin user
+[32m          can get object ACL[0m
+        default normal user
+[32m          returns 403[0m
+        default client
+[32m          returns 403[0m
+        outside user
+[32m          returns 403[0m
+        invalid user
+[32m          returns 401[0m
+        when normal user granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal client granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal user granted GRANT permission
+[32m          can get object ACL[0m
+        when normal client granted GRANT permission
+[32m          can get object ACL[0m
+        OC-1702 - when containing a missing group
+[32m          should return the acl[0m
+      PUT /nodes/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      POST /nodes/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      DELETE /nodes/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      /nodes/<name>/_acl/create endpoint
+        GET /nodes/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+        PUT /nodes/<name>/_acl/create
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /nodes/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+        DELETE /nodes/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+      /nodes/<name>/_acl/read endpoint
+        GET /nodes/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+        PUT /nodes/<name>/_acl/read
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /nodes/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+        DELETE /nodes/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+      /nodes/<name>/_acl/update endpoint
+        GET /nodes/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+        PUT /nodes/<name>/_acl/update
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /nodes/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+        DELETE /nodes/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+      /nodes/<name>/_acl/delete endpoint
+        GET /nodes/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+        PUT /nodes/<name>/_acl/delete
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /nodes/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+        DELETE /nodes/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+      /nodes/<name>/_acl/grant endpoint
+        GET /nodes/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+        PUT /nodes/<name>/_acl/grant
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /nodes/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+        DELETE /nodes/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+    for roles type
+      GET /roles/<name>/_acl
+        admin user
+[32m          can get object ACL[0m
+        default normal user
+[32m          returns 403[0m
+        default client
+[32m          returns 403[0m
+        outside user
+[32m          returns 403[0m
+        invalid user
+[32m          returns 401[0m
+        when normal user granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal client granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal user granted GRANT permission
+[32m          can get object ACL[0m
+        when normal client granted GRANT permission
+[32m          can get object ACL[0m
+        OC-1702 - when containing a missing group
+[32m          should return the acl[0m
+      PUT /roles/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      POST /roles/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      DELETE /roles/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      /roles/<name>/_acl/create endpoint
+        GET /roles/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+        PUT /roles/<name>/_acl/create
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /roles/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+        DELETE /roles/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+      /roles/<name>/_acl/read endpoint
+        GET /roles/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+        PUT /roles/<name>/_acl/read
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /roles/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+        DELETE /roles/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+      /roles/<name>/_acl/update endpoint
+        GET /roles/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+        PUT /roles/<name>/_acl/update
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /roles/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+        DELETE /roles/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+      /roles/<name>/_acl/delete endpoint
+        GET /roles/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+        PUT /roles/<name>/_acl/delete
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /roles/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+        DELETE /roles/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+      /roles/<name>/_acl/grant endpoint
+        GET /roles/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+        PUT /roles/<name>/_acl/grant
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /roles/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+        DELETE /roles/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+    for environments type
+      GET /environments/<name>/_acl
+        admin user
+[32m          can get object ACL[0m
+        default normal user
+[32m          returns 403[0m
+        default client
+[32m          returns 403[0m
+        outside user
+[32m          returns 403[0m
+        invalid user
+[32m          returns 401[0m
+        when normal user granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal client granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal user granted GRANT permission
+[32m          can get object ACL[0m
+        when normal client granted GRANT permission
+[32m          can get object ACL[0m
+        OC-1702 - when containing a missing group
+[32m          should return the acl[0m
+      PUT /environments/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      POST /environments/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      DELETE /environments/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      /environments/<name>/_acl/create endpoint
+        GET /environments/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+        PUT /environments/<name>/_acl/create
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /environments/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+        DELETE /environments/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+      /environments/<name>/_acl/read endpoint
+        GET /environments/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+        PUT /environments/<name>/_acl/read
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /environments/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+        DELETE /environments/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+      /environments/<name>/_acl/update endpoint
+        GET /environments/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+        PUT /environments/<name>/_acl/update
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /environments/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+        DELETE /environments/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+      /environments/<name>/_acl/delete endpoint
+        GET /environments/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+        PUT /environments/<name>/_acl/delete
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /environments/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+        DELETE /environments/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+      /environments/<name>/_acl/grant endpoint
+        GET /environments/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+        PUT /environments/<name>/_acl/grant
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /environments/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+        DELETE /environments/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+    for cookbooks type
+      GET /cookbooks/<name>/_acl
+        admin user
+[32m          can get object ACL[0m
+        default normal user
+[32m          returns 403[0m
+        default client
+[32m          returns 403[0m
+        outside user
+[32m          returns 403[0m
+        invalid user
+[32m          returns 401[0m
+        when normal user granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal client granted all permissions except GRANT
+[32m          returns 403[0m
+        when normal user granted GRANT permission
+[32m          can get object ACL[0m
+        when normal client granted GRANT permission
+[32m          can get object ACL[0m
+        OC-1702 - when containing a missing group
+[32m          should return the acl[0m
+      PUT /cookbooks/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      POST /cookbooks/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      DELETE /cookbooks/<name>/_acl
+        admin user
+[32m          returns 405[0m
+      /cookbooks/<name>/_acl/create endpoint
+        GET /cookbooks/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+        PUT /cookbooks/<name>/_acl/create
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /cookbooks/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+        DELETE /cookbooks/<name>/_acl/create
+          admin user
+[32m            returns 405[0m
+      /cookbooks/<name>/_acl/read endpoint
+        GET /cookbooks/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+        PUT /cookbooks/<name>/_acl/read
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /cookbooks/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+        DELETE /cookbooks/<name>/_acl/read
+          admin user
+[32m            returns 405[0m
+      /cookbooks/<name>/_acl/update endpoint
+        GET /cookbooks/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+        PUT /cookbooks/<name>/_acl/update
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /cookbooks/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+        DELETE /cookbooks/<name>/_acl/update
+          admin user
+[32m            returns 405[0m
+      /cookbooks/<name>/_acl/delete endpoint
+        GET /cookbooks/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+        PUT /cookbooks/<name>/_acl/delete
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /cookbooks/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+        DELETE /cookbooks/<name>/_acl/delete
+          admin user
+[32m            returns 405[0m
+      /cookbooks/<name>/_acl/grant endpoint
+        GET /cookbooks/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+        PUT /cookbooks/<name>/_acl/grant
+          admin user
+[32m            can update ACL[0m
+          default normal user
+[32m            returns 403[0m
+          default client
+[32m            returns 403[0m
+          outside user
+[32m            returns 403[0m
+          invalid user
+[32m            returns 401[0m
+          malformed requests
+            invalid actor
+[32m              returns 400[0m
+            invalid group
+[32m              returns 400[0m
+            missing actors
+[32m              returns 400[0m
+            missing groups
+[32m              returns 400[0m
+            empty body
+[32m              returns 400[0m
+          normal user with all permissions except GRANT
+[32m            returns 403[0m
+          normal user with GRANT permission
+[32m            can update ACL[0m
+          normal client with all permissions except GRANT
+[32m            returns 403[0m
+          normal client with GRANT permission
+[32m            can update ACL[0m
+        POST /cookbooks/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+        DELETE /cookbooks/<name>/_acl/grant
+          admin user
+[32m            returns 405[0m
+Deleting organization pedant_testorg_api_13014 ...
+
+Pending:
+[33m  ACL API /users/<name>/_acl endpoint[0m
+[36m    # No reason given[0m
+[36m    # ./spec/api/account/account_acl_spec.rb:29[0m
+
+Finished in 4 minutes 48.2 seconds
+[33m883 examples, 0 failures, 1 pending[0m
+
+Randomized with seed 52933
+

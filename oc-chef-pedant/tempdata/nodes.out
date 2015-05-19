@@ -1,0 +1,721 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_28895
+Validating Org Creation
+Run options: include {:focus=>true, :nodes=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :nodes=>true}
+
+Randomized with seed 37901
+
+.................................
+
+Finished in 1.29 seconds
+33 examples, 0 failures
+
+Randomized with seed 37901
+
+Starting Pedant Run: 2015-05-15 19:51:19 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :nodes=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 52984
+
+
+chef server authorization checks
+  for nodes
+    without starting resource
+      POST /nodes
+        with an admin user
+          behaves like successful POST auth for nodes
+[32m            returns 201 and a correct path[0m
+[32m            creates the resource[0m
+        with a normal user
+          behaves like successful POST auth for nodes
+[32m            returns 201 and a correct path[0m
+[32m            creates the resource[0m
+        with a user with minimal permissions to create resource
+          behaves like successful POST auth for nodes
+[32m            returns 201 and a correct path[0m
+[32m            creates the resource[0m
+[32m            creates a child with restricted permissions[0m
+        with a user with all permissions EXCEPT create
+[32m          returns 403[0m
+        with a client
+[33m          returns 403 (PENDING: No reason given)[0m
+        with an outside user (admin of another org)
+[32m          returns 403[0m
+    with starting resource
+      PUT /nodes/<name>
+        with an admin user
+[32m          updates resource[0m
+        with a normal user
+[32m          updates resource[0m
+        with a user with minimal permissions to update a resource
+[32m          updates resource[0m
+        with a user with all permissions EXCEPT update
+[32m          returns 403[0m
+        with a client
+[33m          returns 403 (PENDING: No reason given)[0m
+        with an outside user (admin of another org)
+[32m          returns 403[0m
+      DELETE /nodes/<name>
+        with an admin user
+[32m          DELETE /nodes/<name> succeeds[0m
+        with a normal user
+[32m          DELETE /nodes/<name> succeeds[0m
+        with a user with minimal permissions to delete a resource
+[32m          DELETE /nodes/<name> succeeds[0m
+        with a user with all permissions EXCEPT delete
+[32m          returns 403[0m
+        with a client
+[33m          returns 403 (PENDING: No reason given)[0m
+        with an outside user (admin of another org)
+[32m          returns 403[0m
+      GET /nodes
+        with an admin user
+[32m          GET /nodes succeeds[0m
+        with a normal user
+[32m          GET /nodes succeeds[0m
+        with a user with minimal permissions to read resource
+[32m          GET /nodes succeeds[0m
+        with a user with all permissions EXCEPT read
+[32m          returns 403[0m
+        with a client
+[33m          GET /nodes succeeds (PENDING: No reason given)[0m
+        with an outside user (admin of another org)
+[32m          returns 403[0m
+      GET /nodes/<name>
+        with an admin user
+[32m          GET /nodes/<name> succeeds[0m
+        with a normal user
+[32m          GET /nodes/<name> succeeds[0m
+        with a user with minimal permissions to read resource
+[32m          GET /nodes/<name> succeeds[0m
+        with a user with all permissions EXCEPT read
+[32m          returns 403[0m
+        with a client
+[33m          GET /nodes/<name> succeeds (PENDING: No reason given)[0m
+        with an outside user (admin of another org)
+[32m          returns 403[0m
+
+Testing the Nodes API endpoint
+  GET /nodes
+    with no nodes on the server
+[32m      returns a 200 with an empty hash[0m
+    with 1 nodes on the server
+[32m      should return a hash with 1 nodes[0m
+    with 2 nodes on the server
+[32m      should return a hash with 2 nodes[0m
+    with 3 nodes on the server
+[32m      should return a hash with 3 nodes[0m
+    with 4 nodes on the server
+[32m      should return a hash with 4 nodes[0m
+    with 5 nodes on the server
+[32m      should return a hash with 5 nodes[0m
+    with 6 nodes on the server
+[32m      should return a hash with 6 nodes[0m
+    with 7 nodes on the server
+[32m      should return a hash with 7 nodes[0m
+  GET /nodes/<name>
+    for a nonexistent node
+[32m      returns a 404[0m
+    for an existing node
+[32m      returns a 200 and the node[0m
+  GET /environments/<environment_name>/nodes
+    with no nodes on the server
+[32m      returns a 200 with an empty hash[0m
+  POST /nodes
+    when validating
+      when validating 'name' field
+        without the "name" attribute
+[32m          should respond with 400 Bad Request[0m
+        when passing valid value "pedant_node"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "PEDANT_NODE"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing invalid value "node@127.0.0.1"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+      when validating 'chef_environment' field
+        with the "chef_environment" attribute
+[32m          should respond with 201 Created and persist the resource[0m
+        without the "chef_environment" attribute
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "PEDANT"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing invalid value "pedant:no_colon_in_environment_name"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value "pedant@127.0.0.1"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+      when validating 'json_class' field
+        with the "json_class" attribute
+[32m          should respond with 201 Created and persist the resource[0m
+        without the "json_class" attribute
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing invalid value "anything_else"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+      when validating 'chef_type' field
+        with the "chef_type" attribute
+[32m          should respond with 201 Created and persist the resource[0m
+        without the "chef_type" attribute
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing invalid value "anything_else"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+      when validating node attribute 'normal'
+        with a value of {:with=>{"valid_key"=>"valid value"}, :default=>{}}
+[32m          should respond with 201 Created and persist the resource[0m
+        without the attribute
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"valid value"}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>""}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>nil}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"これは日本語だ"}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"Hello 日本!"}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>1}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>[1, 2, 3]}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>["a", "b", "c"]}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>{"a"=>1, "b"=>2}}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>{1=>1, 2=>2}}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"正標"=>"valid value"}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{""=>1}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing invalid value "1"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value "[]"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value ""
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+      when validating node attribute 'default'
+        with a value of {:with=>{"valid_key"=>"valid value"}, :default=>{}}
+[32m          should respond with 201 Created and persist the resource[0m
+        without the attribute
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"valid value"}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>""}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>nil}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"これは日本語だ"}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"Hello 日本!"}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>1}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>[1, 2, 3]}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>["a", "b", "c"]}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>{"a"=>1, "b"=>2}}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>{1=>1, 2=>2}}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"正標"=>"valid value"}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{""=>1}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing invalid value "1"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value "[]"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value ""
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+      when validating node attribute 'override'
+        with a value of {:with=>{"valid_key"=>"valid value"}, :default=>{}}
+[32m          should respond with 201 Created and persist the resource[0m
+        without the attribute
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"valid value"}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>""}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>nil}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"これは日本語だ"}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"Hello 日本!"}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>1}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>[1, 2, 3]}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>["a", "b", "c"]}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>{"a"=>1, "b"=>2}}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>{1=>1, 2=>2}}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"正標"=>"valid value"}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{""=>1}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing invalid value "1"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value "[]"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value ""
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+      when validating node attribute 'automatic'
+        with a value of {:with=>{"valid_key"=>"valid value"}, :default=>{}}
+[32m          should respond with 201 Created and persist the resource[0m
+        without the attribute
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"valid value"}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>""}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>nil}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"これは日本語だ"}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"Hello 日本!"}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>1}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>[1, 2, 3]}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>["a", "b", "c"]}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>{"a"=>1, "b"=>2}}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>{1=>1, 2=>2}}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{"正標"=>"valid value"}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "{:with=>{""=>1}}"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing invalid value "1"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value "[]"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value ""
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+      when validating 'run_list'
+        with a value of ["chef"]
+[32m          should respond with 201 Created and persist the resource[0m
+        without the attribute
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing valid value "["base", "recipe[base]", "role[base]"]"
+[32m          should respond with 201 Created and persist the resource[0m
+        with unqualified recipe names
+          when passing valid value "["base", "nginx", "app"]"
+[32m            should respond with 201 Created and persist the resource[0m
+          when passing valid value "["1", "2", "3"]"
+[32m            should respond with 201 Created and persist the resource[0m
+          when passing valid value "["base@1.0"]"
+[32m            should respond with 201 Created and persist the resource[0m
+          when passing valid value "["base@1.0.1"]"
+[32m            should respond with 201 Created and persist the resource[0m
+          when passing valid value "["base@1.0.1", "nginx"]"
+[32m            should respond with 201 Created and persist the resource[0m
+          when passing invalid value "["gibberish@1"]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "["漢字", "ひらがな", "한문", "संस्कृतम्"]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+        with qualified recipe names
+          when passing valid value "["recipe[base]"]"
+[32m            should respond with 201 Created and persist the resource[0m
+          when passing valid value "["recipe[1]"]"
+[32m            should respond with 201 Created and persist the resource[0m
+          when passing valid value "["recipe[base@1.0]"]"
+[32m            should respond with 201 Created and persist the resource[0m
+          when passing valid value "["recipe[base@1.0.1]"]"
+[32m            should respond with 201 Created and persist the resource[0m
+          when passing valid value "["recipe[base]", "recipe[base@1.0.1]"]"
+[32m            should respond with 201 Created and persist the resource[0m
+          when passing invalid value "["recipe[gibberish@1]"]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "["recipe[漢字]"]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+        with qualified role names
+          when passing valid value "["role[base]"]"
+[32m            should respond with 201 Created and persist the resource[0m
+          when passing valid value "["role[1]"]"
+[32m            should respond with 201 Created and persist the resource[0m
+          when passing invalid value "["role[gibberish@1.0]"]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "["role[漢字]"]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+        with invalid run_list items
+          when passing invalid value "[""]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "["node[gibberish]"]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "["[gibberish]\#@$%"]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+        when not an array of strings
+          when passing invalid value "[1, 2, 3]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "[[]]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "["string", []]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "{}"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "string"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "1"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+      with invalid top-level keys
+        when passing invalid value of "something random" to "something_random" attribute
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value of "something random" to "漢字ひらがな한문" attribute
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value of "something random" to "07174e7674c3528afc5ddd93814d1caf" attribute
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value of "something random" to "340b4f43189c5059bd36aab48b35921c" attribute
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value of "something random" to "45d1524cde730b2d7049c102eec84c07" attribute
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+    without existing node name
+[32m      should respond with 201 Created[0m
+    with existing node name
+[32m      should respond with 409 Conflict[0m
+    with a payload size
+      exactly equal to the maximum allowable size
+[32m        should not respond with 413 Request Entity Too Large[0m
+      exceeding the maximum allowable size
+[32m        should respond with 413 Request Entity Too Large[0m
+  PUT /nodes/<name>
+    without an existing node
+[32m      should respond with 404 Not Found[0m
+    with existing node
+      when updating 'name' field
+        with a value of pedant_node_test
+[32m          should respond with 200 OK and persist the resource[0m
+        without the attribute
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing invalid value "pedant_node"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value "PEDANT_NODE"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value "node@127.0.0.1"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+      when validating 'chef_environment' field
+        with a value of pedant
+[32m          should respond with 200 OK and persist the resource[0m
+        without the attribute
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "PEDANT"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing invalid value "pedant:no_colon_in_environment_name"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value "pedant@127.0.0.1"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+      when validating 'json_class' field
+        with a value of Chef::Node
+[32m          should respond with 200 OK and persist the resource[0m
+        without the attribute
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing invalid value "anything_else"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+      when validating 'chef_type' field
+        with a value of node
+[32m          should respond with 200 OK and persist the resource[0m
+        without the attribute
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing invalid value "anything_else"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+      when validating node attribute 'normal'
+        with a value of {:with=>{"valid_key"=>"valid value"}, :default=>{}}
+[32m          should respond with 200 OK and persist the resource[0m
+        without the attribute
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"valid value"}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>""}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>nil}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"これは日本語だ"}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"Hello 日本!"}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>1}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>[1, 2, 3]}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>["a", "b", "c"]}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>{"a"=>1, "b"=>2}}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>{1=>1, 2=>2}}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"正標"=>"valid value"}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{""=>1}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing invalid value "1"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value "[]"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value ""
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+      when validating node attribute 'default'
+        with a value of {:with=>{"valid_key"=>"valid value"}, :default=>{}}
+[32m          should respond with 200 OK and persist the resource[0m
+        without the attribute
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"valid value"}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>""}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>nil}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"これは日本語だ"}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"Hello 日本!"}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>1}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>[1, 2, 3]}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>["a", "b", "c"]}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>{"a"=>1, "b"=>2}}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>{1=>1, 2=>2}}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"正標"=>"valid value"}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{""=>1}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing invalid value "1"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value "[]"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value ""
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+      when validating node attribute 'override'
+        with a value of {:with=>{"valid_key"=>"valid value"}, :default=>{}}
+[32m          should respond with 200 OK and persist the resource[0m
+        without the attribute
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"valid value"}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>""}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>nil}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"これは日本語だ"}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"Hello 日本!"}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>1}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>[1, 2, 3]}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>["a", "b", "c"]}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>{"a"=>1, "b"=>2}}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>{1=>1, 2=>2}}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"正標"=>"valid value"}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{""=>1}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing invalid value "1"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value "[]"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value ""
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+      when validating node attribute 'automatic'
+        with a value of {:with=>{"valid_key"=>"valid value"}, :default=>{}}
+[32m          should respond with 200 OK and persist the resource[0m
+        without the attribute
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"valid value"}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>""}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>nil}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"これは日本語だ"}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>"Hello 日本!"}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>1}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>[1, 2, 3]}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>["a", "b", "c"]}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>{"a"=>1, "b"=>2}}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"valid_key"=>{1=>1, 2=>2}}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{"正標"=>"valid value"}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "{:with=>{""=>1}}"
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing invalid value "1"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value "[]"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value ""
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+      when validating 'run_list'
+        with a value of ["chef"]
+[32m          should respond with 200 OK and persist the resource[0m
+        without the attribute
+[32m          should respond with 200 OK and persist the resource[0m
+        when passing valid value "["base", "recipe[base]", "role[base]"]"
+[32m          should respond with 200 OK and persist the resource[0m
+        with unqualified recipe names
+          when passing valid value "["base", "nginx", "app"]"
+[32m            should respond with 200 OK and persist the resource[0m
+          when passing valid value "["1", "2", "3"]"
+[32m            should respond with 200 OK and persist the resource[0m
+          when passing valid value "["base@1.0"]"
+[32m            should respond with 200 OK and persist the resource[0m
+          when passing valid value "["base@1.0.1"]"
+[32m            should respond with 200 OK and persist the resource[0m
+          when passing valid value "["base@1.0.1", "nginx"]"
+[32m            should respond with 200 OK and persist the resource[0m
+          when passing invalid value "["gibberish@1"]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "["漢字", "ひらがな", "한문", "संस्कृतम्"]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+        with qualified recipe names
+          when passing valid value "["recipe[base]"]"
+[32m            should respond with 200 OK and persist the resource[0m
+          when passing valid value "["recipe[1]"]"
+[32m            should respond with 200 OK and persist the resource[0m
+          when passing valid value "["recipe[base@1.0]"]"
+[32m            should respond with 200 OK and persist the resource[0m
+          when passing valid value "["recipe[base@1.0.1]"]"
+[32m            should respond with 200 OK and persist the resource[0m
+          when passing valid value "["recipe[base]", "recipe[base@1.0.1]"]"
+[32m            should respond with 200 OK and persist the resource[0m
+          when passing invalid value "["recipe[gibberish@1]"]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "["recipe[漢字]"]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+        with qualified role names
+          when passing valid value "["role[base]"]"
+[32m            should respond with 200 OK and persist the resource[0m
+          when passing valid value "["role[1]"]"
+[32m            should respond with 200 OK and persist the resource[0m
+          when passing invalid value "["role[gibberish@1.0]"]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "["role[漢字]"]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+        with invalid run_list items
+          when passing invalid value "[""]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "["node[gibberish]"]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "["[gibberish]\#@$%"]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+        when not an array of strings
+          when passing invalid value "[1, 2, 3]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "[[]]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "["string", []]"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "{}"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "string"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+          when passing invalid value "1"
+[32m            should respond with 400 Bad Request and not persist the resource[0m
+      with invalid top-level keys
+        when passing invalid value of "something random" to "something_random" attribute
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value of "something random" to "漢字ひらがな한문" attribute
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value of "something random" to "b314ab181a91702cda273affad7e2a34" attribute
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value of "something random" to "3ef47f1c362ad9e3165976fa6e193fb6" attribute
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value of "something random" to "d9988949f987c2b3ce56bec8c14495c4" attribute
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+      with a canonical payload
+[32m        updates the node[0m
+    with a payload size
+      exactly equal to the maximum allowable size
+[32m        should not respond with 413 Request Entity Too Large[0m
+      exceeding the maximum allowable size
+[32m        should respond with 413 Request Entity Too Large[0m
+  using DELETE
+    to a node that already exists
+[32m      succeeds[0m
+    to a node that does not exist
+[32m      fails[0m
+
+Private Chef Nodes API endpoint
+  updating a node
+    attempting to change node name on update
+[32m      returns a 400 ("Bad Request")[0m
+Deleting organization pedant_testorg_api_28895 ...
+
+Pending:
+[33m  chef server authorization checks for nodes without starting resource POST /nodes with a client returns 403[0m
+[36m    # No reason given[0m
+[36m    # ./spec/api/auth_spec.rb:112[0m
+[33m  chef server authorization checks for nodes with starting resource PUT /nodes/<name> with a client returns 403[0m
+[36m    # No reason given[0m
+[36m    # ./spec/api/auth_spec.rb:199[0m
+[33m  chef server authorization checks for nodes with starting resource DELETE /nodes/<name> with a client returns 403[0m
+[36m    # No reason given[0m
+[36m    # ./spec/api/auth_spec.rb:262[0m
+[33m  chef server authorization checks for nodes with starting resource GET /nodes with a client GET /nodes succeeds[0m
+[36m    # No reason given[0m
+[36m    # ./spec/api/auth_spec.rb:309[0m
+[33m  chef server authorization checks for nodes with starting resource GET /nodes/<name> with a client GET /nodes/<name> succeeds[0m
+[36m    # No reason given[0m
+[36m    # ./spec/api/auth_spec.rb:364[0m
+
+Finished in 1 minute 26.63 seconds
+[33m297 examples, 0 failures, 5 pending[0m
+
+Randomized with seed 52984
+

@@ -1,0 +1,194 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_15895
+Validating Org Creation
+Run options: include {:focus=>true, :api_v1=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :api_v1=>true}
+
+Randomized with seed 18452
+
+.................................
+
+Finished in 1.29 seconds
+33 examples, 0 failures
+
+Randomized with seed 18452
+
+Starting Pedant Run: 2015-05-15 19:28:17 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :api_v1=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 60052
+
+
+Client API endpoint
+  POST /clients
+    when validating
+      when setting public_key
+        with a bad public_key [v1+]
+          with a well-formed, bogus (private key) public key
+[32m            should respond with 400 Bad Request and does not create the client[0m
+          with a mal-formed public key
+[32m            should respond with 400 Bad Request and does not create the client[0m
+          with a mal-formed RSA public key
+[32m            should respond with 400 Bad Request and does not create the client[0m
+          with a mal-formed cert public key
+[32m            should respond with 400 Bad Request and does not create the client[0m
+          with a blank public key
+[32m            should respond with 400 Bad Request and does not create the client[0m
+          with a 1 for the public key
+[32m            should respond with 400 Bad Request and does not create the client[0m
+          with a [] for the public key
+[32m            should respond with 400 Bad Request and does not create the client[0m
+          with a {} for the public key
+[32m            should respond with 400 Bad Request and does not create the client[0m
+  PUT /clients/<name>
+    as an admin requestor
+      with another normal client
+        when updating public_key
+          with a bad public_key [v1+]
+            with a mal-formed public key
+[32m              should respond with 400 Bad Request and does not update the key[0m
+            with a mal-formed RSA public key
+[32m              should respond with 400 Bad Request and does not update the key[0m
+            with a mal-formed cert public key
+[32m              should respond with 400 Bad Request and does not update the key[0m
+            with a blank public key
+[32m              should respond with 400 Bad Request and does not update the key[0m
+            with a 1 for the public key
+[32m              should respond with 400 Bad Request and does not update the key[0m
+            with a [] for the public key
+[32m              should respond with 400 Bad Request and does not update the key[0m
+            with a {} for the public key
+[32m              should respond with 400 Bad Request and does not update the key[0m
+    as a normal client
+      with self
+        when updating public_key
+          with a bad public_key [v1+]
+            with a mal-formed public key
+[32m              should respond with 400 Bad Request and does not update the key[0m
+            with a mal-formed RSA public key
+[32m              should respond with 400 Bad Request and does not update the key[0m
+            with a mal-formed cert public key
+[32m              should respond with 400 Bad Request and does not update the key[0m
+            with a blank public key
+[32m              should respond with 400 Bad Request and does not update the key[0m
+            with a 1 for the public key
+[32m              should respond with 400 Bad Request and does not update the key[0m
+            with a [] for the public key
+[32m              should respond with 400 Bad Request and does not update the key[0m
+            with a {} for the public key
+[32m              should respond with 400 Bad Request and does not update the key[0m
+
+Principals API Endpoint
+  access control
+    [current] v > 0
+[32m      returns a 404 ("Not Found") for missing principal for admin[0m
+[32m      returns a 404 ("Not Found") for missing principal for normal user[0m
+      when requesting a client
+[32m        returns a 200 ("OK") for admin[0m
+[32m        returns a 200 ("OK") for normal user[0m
+[32m        returns a 200 ("OK") for invalid user[0m
+[32m        returns a 200 ("OK") for outside user[0m
+      when requesting a user
+[32m        returns a 200 ("OK") for admin[0m
+[32m        returns a 200 ("OK") for normal user[0m
+[32m        returns a 200 ("OK") for invalid user[0m
+[32m        returns a 200 ("OK") for outside user[0m
+      when requesting an outside user
+[32m        returns a 200 ("OK") for admin[0m
+[32m        returns a 200 ("OK") for normal user[0m
+[32m        returns a 200 ("OK") for invalid user[0m
+[32m        returns a 200 ("OK") for outside user[0m
+      when requesting a bad client
+[32m        returns a 404 ("Not Found") for admin[0m
+[32m        returns a 404 ("Not Found") for normal user[0m
+[32m        returns a 404 ("Not Found") for invalid user[0m
+[32m        returns a 404 ("Not Found") for outside user[0m
+
+Server API v1 Behaviors
+  [v1+]
+Creating org pedant_api-v1-org_1431718097-602711593-15895
+[33m    search results should not include client key data (PENDING: No reason given)[0m
+    org creation
+Deleting organization pedant_apiv1-org-create-test_1431718097-602711593-15895 ...
+[32m      should have created a validator client with a default key, and provided the client key back to us[0m
+    users
+      POST /users
+        it should behave like actor creation validation
+[32m          should allow create_key: true and give a proper valid key in response[0m
+[32m          should allow allow public_key to be provided and respond with its location[0m
+[32m          should reply with an error if both create_key:true and public_key are specified[0m
+[32m          should accept the public key if both create_key:false and public_key are specified[0m
+[32m          should reply with an error if private_key:true is specified for key generation[0m
+[32m          when neither create_key nor public_key is specified, the operation should succeed and no default key is created[0m
+      PUT /users/:name
+        it should behave like actor update validation
+[32m          should allow an update that doesn't include public_key or create_key[0m
+[32m          should not allow create_key:true[0m
+[32m          should not allow public_key to be provided[0m
+[32m          should not allow private_key:true to be specified[0m
+      GET /users/:name
+        behaves like actor read validation
+[32m          should not include public_key[0m
+      GET /organization/:org/users/:name
+        behaves like actor read validation
+[32m          should not include public_key[0m
+    clients
+      POST /organizations/:org/clients
+        it should behave like actor creation validation
+[32m          should allow create_key: true and give a proper valid key in response[0m
+[32m          should allow allow public_key to be provided and respond with its location[0m
+[32m          should reply with an error if both create_key:true and public_key are specified[0m
+[32m          should accept the public key if both create_key:false and public_key are specified[0m
+[32m          should reply with an error if private_key:true is specified for key generation[0m
+[32m          when neither create_key nor public_key is specified, the operation should succeed and no default key is created[0m
+      PUT /organization/:org/clients/:name
+        it should behave like actor update validation
+[32m          should allow an update that doesn't include public_key or create_key[0m
+[32m          should not allow create_key:true[0m
+[32m          should not allow public_key to be provided[0m
+[32m          should not allow private_key:true to be specified[0m
+      GET /organization/:org/clients/:name
+        behaves like actor read validation
+[32m          should not include public_key[0m
+Deleting organization pedant_api-v1-org_1431718097-602711593-15895 ...
+Deleting organization pedant_testorg_api_15895 ...
+
+Pending:
+[33m  Server API v1 Behaviors [v1+] search results should not include client key data[0m
+[36m    # No reason given[0m
+[36m    # ./spec/api/versioned_behaviors/server_api_v1_spec.rb:73[0m
+
+Finished in 21.63 seconds
+[33m65 examples, 0 failures, 1 pending[0m
+
+Randomized with seed 60052
+

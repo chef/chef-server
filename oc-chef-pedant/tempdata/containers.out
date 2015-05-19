@@ -1,0 +1,147 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_16927
+Validating Org Creation
+Run options: include {:focus=>true, :containers=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :containers=>true}
+
+Randomized with seed 54053
+
+.................................
+
+Finished in 1.3 seconds
+33 examples, 0 failures
+
+Randomized with seed 54053
+
+Starting Pedant Run: 2015-05-15 19:29:57 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :containers=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 6978
+
+
+opscode-account containers
+  /containers endpoint
+    GET /containers
+      admin user
+[32m        can get containers[0m
+      normal user
+[32m        can get containers[0m
+      client
+[32m        returns 403[0m
+      outside user
+[32m        returns 403[0m
+      invalid user
+[32m        returns 401[0m
+    POST /containers
+      permissions
+        admin user
+[32m          can create container[0m
+        normal user
+[32m          returns 403[0m
+        client
+[32m          returns 403[0m
+        outside user
+[32m          returns 403[0m
+        invalid user
+[32m          returns 401[0m
+      container creation
+        when container already exists
+[32m          returns 409[0m
+        with no container name
+[32m          returns 400[0m
+        name instead of container name
+[32m          returns 400[0m
+        with id instead of container name
+[32m          can create container[0m
+        with non-matching id and container name
+[32m          can create container (id wins)[0m
+        with bogus value in request
+[32m          can create container (ignores bogus value)[0m
+        with empty container name
+[32m          returns 400[0m
+        with space in container name
+[32m          returns 400[0m
+        with unicode in container name
+[33m          can create container (PENDING: returns 400)[0m
+        with users, clients, and containers
+[32m          ignores them[0m
+    DELETE /containers
+      admin user
+[32m        returns 404[0m
+    PUT /containers
+      admin user
+[32m        returns 404[0m
+  /containers/<name> endpoint
+    GET /containers/<name>
+      admin user
+[32m        can get container[0m
+      normal user
+[32m        returns 403[0m
+      client
+[32m        returns 403[0m
+      outside user
+[32m        returns 403[0m
+      invalid user
+[32m        returns 401[0m
+    DELETE /containers/<name>
+      admin user
+[32m        can delete container[0m
+      normal user
+[32m        returns 403[0m
+      client
+[32m        returns 403[0m
+      outside user
+[32m        returns 403[0m
+      invalid user
+[32m        returns 401[0m
+    PUT /containers/<name>
+[32m      is not allowed[0m
+    POST /containers/<name>
+      admin user
+[32m        returns 404[0m
+
+opscode-account endpoint
+  Client Container
+[32m    retrieves the Clients container[0m
+[32m    retrieves the Clients container's ACL[0m
+Deleting organization pedant_testorg_api_16927 ...
+
+Pending:
+[33m  opscode-account containers /containers endpoint POST /containers container creation with unicode in container name can create container[0m
+[36m    # returns 400[0m
+[36m    # ./spec/api/account/account_container_spec.rb:387[0m
+
+Finished in 7.41 seconds
+[33m36 examples, 0 failures, 1 pending[0m
+
+Randomized with seed 6978
+

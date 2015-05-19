@@ -1,0 +1,71 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_609
+Validating Org Creation
+Run options: include {:focus=>true, :server_api_version=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :server_api_version=>true}
+
+Randomized with seed 4524
+
+.................................
+
+Finished in 1.26 seconds
+33 examples, 0 failures
+
+Randomized with seed 4524
+
+Starting Pedant Run: 2015-05-15 19:58:17 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :server_api_version=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 30088
+
+
+Server API Versioning
+[32m  GET /server_api_version should respond with valid current server api version data[0m
+  version validation should occur before most other validation
+[32m    invalid method should fail for version, not method[0m
+[32m    invalid content should fail for version, not content[0m
+  any request should validate requested server api version
+[32m    and it should reply with the error message as specified in the RFC[0m
+[32m    and rejects when version is not a number[0m
+[32m    and rejects when version is higher than what's supported[0m
+[32m    and rejects when version is lower than what's supported[0m
+[32m    and accepts when version is exactly the minimum of what's supported[0m
+[32m    and accepts when version is exactly the maximum of what's supported[0m
+[32m    and accepts when it's in valid range of what's supported[0m
+[32m    and accept it when it's not specified[0m
+Deleting organization pedant_testorg_api_609 ...
+
+Finished in 3.97 seconds
+[32m11 examples, 0 failures[0m
+
+Randomized with seed 30088
+

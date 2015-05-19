@@ -1,0 +1,650 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_17403
+Validating Org Creation
+Run options: include {:focus=>true, :cookbooks=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :cookbooks=>true}
+
+Randomized with seed 57867
+
+.................................
+
+Finished in 1.3 seconds
+33 examples, 0 failures
+
+Randomized with seed 57867
+
+Starting Pedant Run: 2015-05-15 19:30:44 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :cookbooks=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 1447
+
+
+Cookbooks API endpoint
+  PUT /cookbooks/<name>/<version> [create]
+    with a basic cookbook
+[32m      creates a basic cookbook[0m
+    when validating
+      the 'json_class' field
+        when passing valid value "Chef::CookbookVersion"
+[32m          should respond with 201 Created and persist the resource[0m
+        when passing invalid value "Chef::Node"
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+      the cookbook version
+        with negative versions
+[32m          should respond with 400 Bad Request[0m
+        with versions at exactly 4 bytes
+[32m          should respond with 201 Created[0m
+        with versions larger than 4 bytes
+[32m          should respond with 201 Created[0m
+        with versions larger than 8 bytes
+[32m          should respond with 400 Bad Request[0m
+      with invalid top-level keys
+        when passing invalid value of "something random" to "something_random" attribute
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value of "something random" to "漢字ひらがな한문" attribute
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value of "something random" to "14ae72209e498343acd20dca4550acca" attribute
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value of "something random" to "4097674ebe0a09132b3194e0feb8757c" attribute
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+        when passing invalid value of "something random" to "3f64d88754d7b7e5f7a13afceaf4856f" attribute
+[32m          should respond with 400 Bad Request and not persist the resource[0m
+    creating broken cookbooks to test validation and defaults
+[32m      invalid cookbook name in URL is a 400[0m
+[32m      mismatched metadata.cookbook_version is a 400[0m
+[32m      mismatched cookbook_name is a 400[0m
+      basic tests
+[32m        json_class = delete returns 200[0m
+[32m        json_class = Chef::Role returns 400[0m
+[32m        metadata = {} returns 400[0m
+      checking segments
+[32m        resources = foo returns 400[0m
+[32m        resources = [{}] returns 400[0m
+[32m        providers = foo returns 400[0m
+[32m        providers = [{}] returns 400[0m
+[32m        recipes = foo returns 400[0m
+[32m        recipes = [{}] returns 400[0m
+[32m        definitions = foo returns 400[0m
+[32m        definitions = [{}] returns 400[0m
+[32m        libraries = foo returns 400[0m
+[32m        libraries = [{}] returns 400[0m
+[32m        attributes = foo returns 400[0m
+[32m        attributes = [{}] returns 400[0m
+[32m        files = foo returns 400[0m
+[32m        files = [{}] returns 400[0m
+[32m        templates = foo returns 400[0m
+[32m        templates = [{}] returns 400[0m
+[32m        root_files = foo returns 400[0m
+[32m        root_files = [{}] returns 400[0m
+      checking metadata sections
+[32m        platforms = foo returns 400[0m
+[32m        platforms = {"foo"=>"s395dss@#"} returns 400[0m
+[32m        dependencies = foo returns 400[0m
+[32m        dependencies = {"foo"=>"s395dss@#"} returns 400[0m
+[32m        recommendations = foo returns 400[0m
+[32m        recommendations = {"foo"=>"s395dss@#"} returns 400[0m
+[32m        suggestions = foo returns 400[0m
+[32m        suggestions = {"foo"=>"s395dss@#"} returns 400[0m
+[32m        conflicting = foo returns 400[0m
+[32m        conflicting = {"foo"=>"s395dss@#"} returns 400[0m
+[32m        replacing = foo returns 400[0m
+[32m        replacing = {"foo"=>"s395dss@#"} returns 400[0m
+        with metadata.dependencies
+[32m          dependencies = {"chef-client"=>"> 2.0.0", "apt"=>"> 1"} returns 400[0m
+[32m          dependencies = {"chef-client"=>"> 2.0.0", "apt"=>"< 2"} returns 400[0m
+[32m          dependencies = {"chef-client"=>"> 2.0.0", "apt"=>"3"} returns 400[0m
+[32m          dependencies = {"chef-client"=>"> 2.0.0", "apt"=>"<= 4"} returns 400[0m
+[32m          dependencies = {"chef-client"=>"> 2.0.0", "apt"=>"~> 5"} returns 400[0m
+[32m          dependencies = {"chef-client"=>"> 2.0.0", "apt"=>">= 6"} returns 400[0m
+[32m          dependencies = {"chef-client"=>"> 2.0.0", "apt"=>"= 7"} returns 400[0m
+[32m          dependencies = {"chef-client"=>"> 2.0.0", "apt"=>">= 1.2.3.4"} returns 400[0m
+[32m          dependencies = {"chef-client"=>"> 2.0.0", "apt"=>"<= 5.6.7.8.9.0"} returns 400[0m
+          when dependencies is set to {"chef-client"=>"> 2.0.0", "apt"=>"> 1.0"}
+[32m            dependencies = {"chef-client"=>"> 2.0.0", "apt"=>"> 1.0"} returns 201[0m
+          when dependencies is set to {"chef-client"=>"> 2.0.0", "apt"=>"< 2.1.2"}
+[32m            dependencies = {"chef-client"=>"> 2.0.0", "apt"=>"< 2.1.2"} returns 201[0m
+          when dependencies is set to {"chef-client"=>"> 2.0.0", "apt"=>"3.3"}
+[32m            dependencies = {"chef-client"=>"> 2.0.0", "apt"=>"3.3"} returns 201[0m
+          when dependencies is set to {"chef-client"=>"> 2.0.0", "apt"=>"<= 4.6"}
+[32m            dependencies = {"chef-client"=>"> 2.0.0", "apt"=>"<= 4.6"} returns 201[0m
+          when dependencies is set to {"chef-client"=>"> 2.0.0", "apt"=>"~> 5.6.2"}
+[32m            dependencies = {"chef-client"=>"> 2.0.0", "apt"=>"~> 5.6.2"} returns 201[0m
+          when dependencies is set to {"chef-client"=>"> 2.0.0", "apt"=>">= 6.0"}
+[32m            dependencies = {"chef-client"=>"> 2.0.0", "apt"=>">= 6.0"} returns 201[0m
+        with metadata.providing
+          when providing is set to cats::sleep
+[32m            providing = cats::sleep returns 201[0m
+          when providing is set to here(:kitty, :time_to_eat)
+[32m            providing = here(:kitty, :time_to_eat) returns 201[0m
+          when providing is set to service[snuggle]
+[32m            providing = service[snuggle] returns 201[0m
+          when providing is set to
+[32m            providing =  returns 201[0m
+          when providing is set to 1
+[32m            providing = 1 returns 201[0m
+          when providing is set to true
+[32m            providing = true returns 201[0m
+          when providing is set to ["cats", "sleep", "here"]
+[32m            providing = ["cats", "sleep", "here"] returns 201[0m
+          when providing is set to {"cats::sleep"=>"0.0.1", "here(:kitty, :time_to_eat)"=>"0.0.1", "service[snuggle]"=>"0.0.1"}
+[32m            providing = {"cats::sleep"=>"0.0.1", "here(:kitty, :time_to_eat)"=>"0.0.1", "service[snuggle]"=>"0.0.1"} returns 201[0m
+      with invalid version in url
+[32m        should respond with an error[0m
+      sandbox checks
+[32m        specifying file not in sandbox is a 400[0m
+    creating good cookbooks to test defaults
+[32m      allows creation of a minimal cookbook with no data[0m
+[32m      allows override of defaults[0m
+      with a payload size
+        exactly equal to the maximum allowable size
+[32m          should not respond with 413 Request Entity Too Large[0m
+        exceeding the maximum allowable size
+[32m          should respond with 413 Request Entity Too Large[0m
+  PUT multiple cookbooks
+[32m    allows us to create 2 versions of the same cookbook[0m
+
+Cookbooks API endpoint
+  DELETE /cookbooks/<name>/<version>
+    for non-existent cookbooks
+[32m      should respond with 404 Not Found[0m
+      with bad version
+[32m        should respond with 400 Bad Request[0m
+    for existing cookbooks
+      when deleting non-existent version of an existing cookbook
+[32m        should respond with 404 ("Not Found") and not delete existing versions[0m
+      when deleting existent version of an existing cookbook
+[32m        should cleanup unused checksum data in s3/bookshelf[0m
+    with permissions for
+      as admin user
+[32m        should respond with 200 ("OK") and be deleted[0m
+      as normal user
+[32m        should respond with 200 ("OK") and be deleted[0m
+      as a user outside of the organization
+[32m        should respond with 403 ("Forbidden") and does not delete cookbook[0m
+      with invalid user
+[32m        should respond with 401 ("Unauthorized") and does not delete cookbook[0m
+
+Cookbooks API endpoint, named filters
+  with no cookbooks
+    when requesting /cookbooks/_latest
+[32m      should respond with the 'latest' cookbooks[0m
+    when requesting /cookbooks/_recipes
+[32m      shows the recipes from the latest cookbooks[0m
+    when requesting /cookbooks/my_cookbook
+[32m      should respond with 404[0m
+  with one cookbook, one version
+    when requesting /cookbooks/_latest
+[32m      should respond with the 'latest' cookbooks[0m
+    when requesting /cookbooks/_recipes
+[32m      shows the recipes from the latest cookbooks[0m
+    when requesting /cookbooks/my_cookbook
+[32m      should respond with the 'named' cookbook[0m
+  with different cookbook, one version
+    when requesting /cookbooks/_latest
+[32m      should respond with the 'latest' cookbooks[0m
+    when requesting /cookbooks/_recipes
+[32m      shows the recipes from the latest cookbooks[0m
+    when requesting /cookbooks/my_cookbook
+[32m      should respond with 404[0m
+  with multiple cookbooks, one version each
+    when requesting /cookbooks/_latest
+[32m      should respond with the 'latest' cookbooks[0m
+    when requesting /cookbooks/_recipes
+[32m      shows the recipes from the latest cookbooks[0m
+    when requesting /cookbooks/my_cookbook
+[32m      should respond with the 'named' cookbook[0m
+  with multiple cookbooks, multiple versions each
+    when requesting /cookbooks/_latest
+[32m      should respond with the 'latest' cookbooks[0m
+    when requesting /cookbooks/_recipes
+[32m      shows the recipes from the latest cookbooks[0m
+    when requesting /cookbooks/my_cookbook
+[32m      should respond with the 'named' cookbook[0m
+
+Cookbooks API endpoint
+  GET /cookbooks
+    with an operational server
+[32m      should respond with 200 OK[0m
+    without existing cookbooks
+[32m      should respond with 200 OK and an empty collection[0m
+      with a num_versions
+        with a negative num_versions
+[32m          should respond with 400 Bad Request[0m
+        with a missing num_versions
+[32m          should respond with 400 Bad Request[0m
+        with an invalid num_versions
+[32m          should respond with 400 Bad Request[0m
+    with existing cookbooks and multiple versions
+      with num_versions set to 0
+[32m        should respond with cookbook collection with no version[0m
+      when num_versions is not set
+[32m        should return cookbook collection with one version per cookbook[0m
+      when num_versions is set to 1
+[32m        should return cookbook collection with one version per cookbook[0m
+      when num_versions is set to "all"
+[32m        should respond with a cookbook collection containing all versions of each cookbook[0m
+    with varying numbers of existing cookbooks
+      with a single, existing cookbook
+[32m        should respond with a single cookbook in the collection[0m
+      with multiple, existing cookbooks
+[32m        multiple cookbooks can be listed[0m
+  GET /cookbooks/<name>/<version>
+    as a normal user
+[32m      should respond with 200 OK[0m
+      allows access to cookbook recipe files via
+[32m        net/http[0m
+    as an admin user
+[32m      should respond with 200 OK[0m
+    as an user outside of the organization
+[32m      should respond with 403 Forbidden[0m
+    with invalid user
+[32m      should respond with 401 Unauthorized[0m
+
+Cookbooks API endpoint
+  PUT /cookbooks/<name>/<version> [update]
+    with a payload size
+      exactly equal to the maximum allowable size
+[32m        should not respond with 413 Request Entity Too Large[0m
+      exceeding the maximum allowable size
+[32m        should respond with 413 Request Entity Too Large[0m
+    as admin user
+[32m      should respond with 200 Ok[0m
+      as a user outside of the organization
+[32m        should respond with 403 ("Forbidden") and does not update cookbook[0m
+      with invalid user
+[32m        returns 401 and does not update cookbook[0m
+    for checksums
+[32m      adding all new checksums should succeed[0m
+[32m      should return url when adding checksums (if ruby endpoint)[0m
+[32m      adding invalid checksum should fail[0m
+[32m      deleting all checksums should succeed[0m
+[32m      deleting some checksums should succeed[0m
+[32m      changing all different checksums should succeed[0m
+[32m      changing some different checksums should succeed[0m
+[32m      changing to invalid checksums should fail[0m
+      CHEF-3716 coverage
+[32m        it does not delete checksums in use by another version[0m
+    for frozen?
+[32m      can set frozen? to true[0m
+[32m      can not edit cookbook when frozen? is set to true[0m
+[32m      can override frozen? with force set to true[0m
+[32m      can not override frozen? with force set to false[0m
+    when modifying data
+      for cookbook_name
+[32m        cookbook_name = 1 returns 400[0m
+[32m        cookbook_name = true returns 400[0m
+[32m        cookbook_name = [] returns 400[0m
+[32m        cookbook_name = {} returns 400[0m
+[32m        cookbook_name = new_cookbook_name returns 400[0m
+[32m        cookbook_name = with a space returns 400[0m
+[32m        cookbook_name = 外国語 returns 400[0m
+[32m        cookbook_name = delete returns 400[0m
+      for json_class
+[32m        json_class = delete returns 200[0m
+[32m        json_class = 1 returns 400[0m
+[32m        json_class = Chef::NonCookbook returns 400[0m
+[32m        json_class = all wrong returns 400[0m
+      for chef_type
+[32m        chef_type = delete returns 200[0m
+[32m        chef_type = not_cookbook returns 400[0m
+[32m        chef_type = false returns 400[0m
+[32m        chef_type = ["just any", "old junk"] returns 400[0m
+      for version
+[32m        version = delete returns 200[0m
+[32m        version = 1 returns 400[0m
+[32m        version = ["all", "ignored"] returns 400[0m
+[32m        version = {} returns 400[0m
+[32m        version = 0.0 returns 400[0m
+[32m        version = something invalid returns 400[0m
+      for collections
+        for attributes
+[32m          attributes = foo returns 400[0m
+[32m          attributes = ["foo"] returns 400[0m
+[32m          attributes = [] returns 200[0m
+[32m          attributes = [{}, {}] returns 400[0m
+[32m          attributes = [{"foo"=>"bar"}] returns 400[0m
+        for definitions
+[32m          definitions = foo returns 400[0m
+[32m          definitions = ["foo"] returns 400[0m
+[32m          definitions = [] returns 200[0m
+[32m          definitions = [{}, {}] returns 400[0m
+[32m          definitions = [{"foo"=>"bar"}] returns 400[0m
+        for files
+[32m          files = foo returns 400[0m
+[32m          files = ["foo"] returns 400[0m
+[32m          files = [] returns 200[0m
+[32m          files = [{}, {}] returns 400[0m
+[32m          files = [{"foo"=>"bar"}] returns 400[0m
+        for libraries
+[32m          libraries = foo returns 400[0m
+[32m          libraries = ["foo"] returns 400[0m
+[32m          libraries = [] returns 200[0m
+[32m          libraries = [{}, {}] returns 400[0m
+[32m          libraries = [{"foo"=>"bar"}] returns 400[0m
+        for providers
+[32m          providers = foo returns 400[0m
+[32m          providers = ["foo"] returns 400[0m
+[32m          providers = [] returns 200[0m
+[32m          providers = [{}, {}] returns 400[0m
+[32m          providers = [{"foo"=>"bar"}] returns 400[0m
+        for recipes
+[32m          recipes = foo returns 400[0m
+[32m          recipes = ["foo"] returns 400[0m
+[32m          recipes = [] returns 200[0m
+[32m          recipes = [{}, {}] returns 400[0m
+[32m          recipes = [{"foo"=>"bar"}] returns 400[0m
+        for resources
+[32m          resources = foo returns 400[0m
+[32m          resources = ["foo"] returns 400[0m
+[32m          resources = [] returns 200[0m
+[32m          resources = [{}, {}] returns 400[0m
+[32m          resources = [{"foo"=>"bar"}] returns 400[0m
+        for root_files
+[32m          root_files = foo returns 400[0m
+[32m          root_files = ["foo"] returns 400[0m
+[32m          root_files = [] returns 200[0m
+[32m          root_files = [{}, {}] returns 400[0m
+[32m          root_files = [{"foo"=>"bar"}] returns 400[0m
+        for templates
+[32m          templates = foo returns 400[0m
+[32m          templates = ["foo"] returns 400[0m
+[32m          templates = [] returns 200[0m
+[32m          templates = [{}, {}] returns 400[0m
+[32m          templates = [{"foo"=>"bar"}] returns 400[0m
+      for other stuff
+[32m        frozen? = true returns 200[0m
+    when modifying metadata
+[32m      metadata = {"new_name"=>"foo"} returns 400[0m
+      for name
+[32m        name = new_name returns 200[0m
+[32m        name = delete returns 200[0m
+[32m        name = 1 returns 400[0m
+[32m        name = true returns 400[0m
+[32m        name = {} returns 400[0m
+[32m        name = [] returns 400[0m
+[32m        name = invalid name returns 400[0m
+[32m        name = ダメよ returns 400[0m
+      for description
+[32m        description = new description returns 200[0m
+[32m        description = delete returns 200[0m
+[32m        description = 1 returns 400[0m
+      for long description
+[32m        long_description = longer description returns 200[0m
+[32m        long_description = delete returns 200[0m
+[32m        long_description = false returns 400[0m
+      for version
+[32m        version = 0.0 returns 400[0m
+[32m        version = not a version returns 400[0m
+[32m        version = delete returns 400[0m
+[32m        version = 1 returns 400[0m
+      for maintainer
+[32m        maintainer = Captain Stupendous returns 200[0m
+[32m        maintainer = delete returns 200[0m
+[32m        maintainer = true returns 400[0m
+[32m        maintainer_email = cap@awesome.com returns 200[0m
+[32m        maintainer_email = not really an email returns 200[0m
+[32m        maintainer_email = delete returns 200[0m
+[32m        maintainer_email = false returns 400[0m
+      for license
+[32m        license = to_kill returns 200[0m
+[32m        license = delete returns 200[0m
+[32m        license = 1 returns 400[0m
+      for collections
+        for platforms
+[32m          platforms = [] returns 400[0m
+[32m          platforms = {} returns 200[0m
+[32m          platforms = delete returns 200[0m
+[32m          platforms = foo returns 400[0m
+[32m          platforms = ["foo"] returns 400[0m
+[32m          platforms = {"foo"=>{}} returns 400[0m
+        with metadata.providing
+          when providing is set to cats::sleep
+[32m            providing = cats::sleep returns 200[0m
+          when providing is set to here(:kitty, :time_to_eat)
+[32m            providing = here(:kitty, :time_to_eat) returns 200[0m
+          when providing is set to service[snuggle]
+[32m            providing = service[snuggle] returns 200[0m
+          when providing is set to
+[32m            providing =  returns 200[0m
+          when providing is set to 1
+[32m            providing = 1 returns 200[0m
+          when providing is set to true
+[32m            providing = true returns 200[0m
+          when providing is set to ["cats", "sleep", "here"]
+[32m            providing = ["cats", "sleep", "here"] returns 200[0m
+          when providing is set to {"cats::sleep"=>"0.0.1", "here(:kitty, :time_to_eat)"=>"0.0.1", "service[snuggle]"=>"0.0.1"}
+[32m            providing = {"cats::sleep"=>"0.0.1", "here(:kitty, :time_to_eat)"=>"0.0.1", "service[snuggle]"=>"0.0.1"} returns 200[0m
+        for groupings
+[32m          groupings = [] returns 400[0m
+[32m          groupings = {} returns 200[0m
+[32m          groupings = delete returns 200[0m
+[32m          groupings = foo returns 400[0m
+[32m          groupings = ["foo"] returns 400[0m
+[32m          groupings = {"foo"=>{}} returns 200[0m
+        for dependencies
+[32m          dependencies = [] returns 400[0m
+[32m          dependencies = {} returns 200[0m
+[32m          dependencies = delete returns 200[0m
+[32m          dependencies = foo returns 400[0m
+[32m          dependencies = ["foo"] returns 400[0m
+[32m          dependencies = {"foo"=>{}} returns 400[0m
+        for recommendations
+[32m          recommendations = [] returns 400[0m
+[32m          recommendations = {} returns 200[0m
+[32m          recommendations = delete returns 200[0m
+[32m          recommendations = foo returns 400[0m
+[32m          recommendations = ["foo"] returns 400[0m
+[32m          recommendations = {"foo"=>{}} returns 400[0m
+        for suggestions
+[32m          suggestions = [] returns 400[0m
+[32m          suggestions = {} returns 200[0m
+[32m          suggestions = delete returns 200[0m
+[32m          suggestions = foo returns 400[0m
+[32m          suggestions = ["foo"] returns 400[0m
+[32m          suggestions = {"foo"=>{}} returns 400[0m
+        for conflicting
+[32m          conflicting = [] returns 400[0m
+[32m          conflicting = {} returns 200[0m
+[32m          conflicting = delete returns 200[0m
+[32m          conflicting = foo returns 400[0m
+[32m          conflicting = ["foo"] returns 400[0m
+[32m          conflicting = {"foo"=>{}} returns 400[0m
+        for replacing
+[32m          replacing = [] returns 400[0m
+[32m          replacing = {} returns 200[0m
+[32m          replacing = delete returns 200[0m
+[32m          replacing = foo returns 400[0m
+[32m          replacing = ["foo"] returns 400[0m
+[32m          replacing = {"foo"=>{}} returns 400[0m
+
+Cookbook Versions API endpoint, GET
+  with no cookbooks on the server
+[32m    should respond with 404 Not Found[0m
+  with cookbooks on the server
+    when fetching existing version of cookbook
+[32m      should respond with 200 OK and the cookbook version[0m
+    when fetching non-existant version of cookbook
+[32m      should respond with 404 Not Found[0m
+    as a non-admin user
+[32m      should respond with 200 OK and the cookbook version[0m
+    as a user outside the organization
+[32m      should respond with 403 Forbidden[0m
+    when requesting the 'latest' Cookbook version
+[32m      should respond with 200 OK and the latest cookbook version[0m
+    when requesting the 'latest' version of a non-existent cookbook
+[32m      should respond with 404 Not Found[0m
+
+Cookbooks API endpoint
+  DELETE /cookbooks/<name>/<version>
+    with delete cookbook authorization
+      as an authorized, normal user
+[32m        should respond with 200 ("OK")[0m
+      as an unauthorized, normal user
+[32m        should respond with 403 ("Forbidden")[0m
+
+/environments/ENVIRONMENT/cookbooks API endpoint
+  with no cookbooks
+    when fetching cookbooks from "_default" environment
+[32m      should respond with 200 OK and no cookbooks[0m
+    when environment does not exist
+[32m      should respond with 404 Not Found[0m
+    when fetching cookbooks
+[32m      should respond with 200 OK and no cookbooks[0m
+    when fetching cookbooks with num_version=all
+[32m      should respond with 200 OK and no cookbooks[0m
+    when fetching cookbooks with num_version=0
+[32m      should respond with 200 OK and no cookbooks[0m
+    when fetching cookbooks with num_version=1
+[32m      should respond with 200 OK and no cookbooks[0m
+    when fetching cookbooks with num_version=2
+[32m      should respond with 200 OK and no cookbooks[0m
+    when fetching cookbooks with num_version=30
+[32m      should respond with 200 OK and no cookbooks[0m
+    when num_versions is not "all" or a number
+[32m      should respond with 400 Bad Request[0m
+  with multiple versions of multiple cookbooks
+    with no environment constraints
+      from a non-default environment
+        when fetching cookbooks
+[32m          should respond with 200 OK and latest versions of ALL cookbooks[0m
+        when fetching cookbooks with num_version=all
+[32m          should respond with 200 OK and all latest versions of cookbooks[0m
+        when fetching cookbooks with num_version=1
+[32m          should respond with 200 OK and 1 latest versions of cookbooks[0m
+        when fetching cookbooks with num_version=2
+[32m          should respond with 200 OK and 2 latest versions of cookbooks[0m
+        when fetching cookbooks with num_version=3
+[32m          should respond with 200 OK and 3 latest versions of cookbooks[0m
+        when fetching cookbooks with num_version=30
+[32m          should respond with 200 OK and 30 latest versions of cookbooks[0m
+      from the _default environment
+        when fetching cookbooks in the _default environment
+[32m          should respond with 200 OK and latest versions of ALL cookbooks[0m
+        when fetching cookbooks with num_version=all
+[32m          should respond with 200 OK and all latest versions of cookbooks[0m
+        when fetching cookbooks with num_version=1
+[32m          should respond with 200 OK and 1 latest versions of cookbooks[0m
+        when fetching cookbooks with num_version=2
+[32m          should respond with 200 OK and 2 latest versions of cookbooks[0m
+        when fetching cookbooks with num_version=3
+[32m          should respond with 200 OK and 3 latest versions of cookbooks[0m
+        when fetching cookbooks with num_version=30
+[32m          should respond with 200 OK and 30 latest versions of cookbooks[0m
+    with environment constraints
+      with constraints {"pedant_cb_one"=>"= 1.0.0"}
+[32m        retrieves appropriate cookbooks[0m
+      with constraints {"pedant_cb_one"=>"> 1.0.0"}
+[32m        retrieves appropriate cookbooks[0m
+      with constraints {"pedant_cb_one"=>"> 1.0.0"}
+[32m        retrieves appropriate cookbooks with num_versions=2[0m
+      with constraints {"pedant_cb_one"=>"> 1.0.0"}
+[32m        retrieves appropriate cookbooks with num_versions=0[0m
+      with constraints {"pedant_cb_one"=>"> 1.0.0", "pedant_cb_two"=>"< 1.2.3"}
+[32m        retrieves appropriate cookbooks with num_versions=2[0m
+      with constraints {"pedant_cb_one"=>"> 1.0.0", "pedant_cb_two"=>"< 1.2.3"}
+[32m        retrieves appropriate cookbooks with num_versions=all[0m
+
+/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint
+  with no cookbooks
+[32m    fails if the environment does not exist[0m
+[32m    does not find a non-existent cookbook in the 'test_env' cookbook[0m
+[32m    does not find a non-existent cookbook in the '_default' cookbook[0m
+  with multiple versions of multiple cookbooks
+    with no environment constraints
+[32m      returns all acceptable cookbook version(s) of cb_one from the 'test_env' environment when num_versions is not specified[0m
+[32m      returns 1 acceptable cookbook version(s) of cb_one from the 'test_env' environment[0m
+[32m      returns 2 acceptable cookbook version(s) of cb_one from the 'test_env' environment[0m
+[32m      returns 3 acceptable cookbook version(s) of cb_one from the 'test_env' environment[0m
+[32m      returns 30 acceptable cookbook version(s) of cb_one from the 'test_env' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_one from the 'test_env' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_two from the 'test_env' environment when num_versions is not specified[0m
+[32m      returns 1 acceptable cookbook version(s) of cb_two from the 'test_env' environment[0m
+[32m      returns 2 acceptable cookbook version(s) of cb_two from the 'test_env' environment[0m
+[32m      returns 3 acceptable cookbook version(s) of cb_two from the 'test_env' environment[0m
+[32m      returns 30 acceptable cookbook version(s) of cb_two from the 'test_env' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_two from the 'test_env' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_three from the 'test_env' environment when num_versions is not specified[0m
+[32m      returns 1 acceptable cookbook version(s) of cb_three from the 'test_env' environment[0m
+[32m      returns 2 acceptable cookbook version(s) of cb_three from the 'test_env' environment[0m
+[32m      returns 3 acceptable cookbook version(s) of cb_three from the 'test_env' environment[0m
+[32m      returns 30 acceptable cookbook version(s) of cb_three from the 'test_env' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_three from the 'test_env' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_one from the '_default' environment when num_versions is not specified[0m
+[32m      returns 1 acceptable cookbook version(s) of cb_one from the '_default' environment[0m
+[32m      returns 2 acceptable cookbook version(s) of cb_one from the '_default' environment[0m
+[32m      returns 3 acceptable cookbook version(s) of cb_one from the '_default' environment[0m
+[32m      returns 30 acceptable cookbook version(s) of cb_one from the '_default' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_one from the '_default' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_two from the '_default' environment when num_versions is not specified[0m
+[32m      returns 1 acceptable cookbook version(s) of cb_two from the '_default' environment[0m
+[32m      returns 2 acceptable cookbook version(s) of cb_two from the '_default' environment[0m
+[32m      returns 3 acceptable cookbook version(s) of cb_two from the '_default' environment[0m
+[32m      returns 30 acceptable cookbook version(s) of cb_two from the '_default' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_two from the '_default' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_three from the '_default' environment when num_versions is not specified[0m
+[32m      returns 1 acceptable cookbook version(s) of cb_three from the '_default' environment[0m
+[32m      returns 2 acceptable cookbook version(s) of cb_three from the '_default' environment[0m
+[32m      returns 3 acceptable cookbook version(s) of cb_three from the '_default' environment[0m
+[32m      returns 30 acceptable cookbook version(s) of cb_three from the '_default' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_three from the '_default' environment[0m
+    with environment constraints
+      with constraints {"cb_one"=>"= 1.0.0"}
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=1[0m
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=2[0m
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=3[0m
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=all[0m
+[32m        retrieves all appropriate cookbook versions of 'cb_one' without 'num_versions'[0m
+      with constraints {"cb_one"=>"> 1.0.0"}
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=1[0m
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=2[0m
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=3[0m
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=all[0m
+[32m        retrieves all appropriate cookbook versions of 'cb_one' without 'num_versions'[0m
+      with constraints {"cb_one"=>"= 6.6.6"}
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=1[0m
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=2[0m
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=3[0m
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=all[0m
+[32m        retrieves all appropriate cookbook versions of 'cb_one' without 'num_versions'[0m
+      with constraints {"cb_three"=>"~> 0.5"}
+[32m        retrieves appropriate cookbook versions of 'cb_three' with num_versions=1[0m
+[32m        retrieves appropriate cookbook versions of 'cb_three' with num_versions=2[0m
+[32m        retrieves appropriate cookbook versions of 'cb_three' with num_versions=3[0m
+[32m        retrieves appropriate cookbook versions of 'cb_three' with num_versions=all[0m
+[32m        retrieves all appropriate cookbook versions of 'cb_three' without 'num_versions'[0m
+Deleting organization pedant_testorg_api_17403 ...
+
+Finished in 5 minutes 29 seconds
+[32m377 examples, 0 failures[0m
+
+Randomized with seed 1447
+

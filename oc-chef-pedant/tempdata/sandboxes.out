@@ -1,0 +1,89 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_31375
+Validating Org Creation
+Run options: include {:focus=>true, :sandboxes=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :sandboxes=>true}
+
+Randomized with seed 13374
+
+.................................
+
+Finished in 1.29 seconds
+33 examples, 0 failures
+
+Randomized with seed 13374
+
+Starting Pedant Run: 2015-05-15 19:55:22 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :sandboxes=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 53964
+
+
+Sandboxes API Endpoint
+  Sandboxes Endpoint, POST
+    when creating a new sandbox
+[32m      should respond with 201 Created[0m
+    when creating an invalid sandbox
+      with an empty request hash
+[32m        should fail[0m
+      with an empty checksums hash
+[32m        should fail[0m
+      with non-null hash values
+[32m        should fail[0m
+    with existing file
+[Sleeping to allow S3 to work ... ]
+[32m      should recognize files that are already on the server[0m
+    with a payload size
+      exactly equal to the maximum allowable size
+[32m        should not respond with 413 Request Entity Too Large[0m
+      exceeding the maximum allowable size
+[32m        should respond with 413 Request Entity Too Large[0m
+  Sandboxes Endpoint, PUT
+[32m    'is_committed' should be true for a committed sandbox[0m
+    when committing an incomplete sandbox
+[32m      should respond with 503 Service Unavailable[0m
+    when uploading expected files to the sandbox
+[32m      should respond with 200 OK or 204 No Content[0m
+    when committing a sandbox after uploading files
+[32m      should respond with 200 OK[0m
+    with a payload size
+      exactly equal to the maximum allowable size
+[32m        should not respond with 413 Request Entity Too Large[0m
+      exceeding the maximum allowable size
+[32m        should respond with 413 Request Entity Too Large[0m
+Deleting organization pedant_testorg_api_31375 ...
+
+Finished in 5.94 seconds
+[32m13 examples, 0 failures[0m
+
+Randomized with seed 53964
+

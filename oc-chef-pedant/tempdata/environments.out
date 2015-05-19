@@ -1,0 +1,1189 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_20724
+Validating Org Creation
+Run options: include {:focus=>true, :environments=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :environments=>true}
+
+Randomized with seed 23085
+
+.................................
+
+Finished in 1.21 seconds
+33 examples, 0 failures
+
+Randomized with seed 23085
+
+Starting Pedant Run: 2015-05-15 19:38:00 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :environments=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 16805
+
+
+chef server authorization checks
+  for environments
+    without starting resource
+      POST /environments
+        with an admin user
+          behaves like successful POST auth for environments
+[32m            returns 201 and a correct path[0m
+[32m            creates the resource[0m
+        with a normal user
+          behaves like successful POST auth for environments
+[32m            returns 201 and a correct path[0m
+[32m            creates the resource[0m
+        with a user with minimal permissions to create resource
+          behaves like successful POST auth for environments
+[32m            returns 201 and a correct path[0m
+[32m            creates the resource[0m
+[32m            creates a child with restricted permissions[0m
+        with a user with all permissions EXCEPT create
+[32m          returns 403[0m
+        with a client
+[33m          returns 403 (PENDING: No reason given)[0m
+        with an outside user (admin of another org)
+[32m          returns 403[0m
+    with starting resource
+      PUT /environments/<name>
+        with an admin user
+[32m          updates resource[0m
+        with a normal user
+[32m          updates resource[0m
+        with a user with minimal permissions to update a resource
+[32m          updates resource[0m
+        with a user with all permissions EXCEPT update
+[32m          returns 403[0m
+        with a client
+[33m          returns 403 (PENDING: No reason given)[0m
+        with an outside user (admin of another org)
+[32m          returns 403[0m
+      DELETE /environments/<name>
+        with an admin user
+[32m          DELETE /environments/<name> succeeds[0m
+        with a normal user
+[32m          DELETE /environments/<name> succeeds[0m
+        with a user with minimal permissions to delete a resource
+[32m          DELETE /environments/<name> succeeds[0m
+        with a user with all permissions EXCEPT delete
+[32m          returns 403[0m
+        with a client
+[33m          returns 403 (PENDING: No reason given)[0m
+        with an outside user (admin of another org)
+[32m          returns 403[0m
+      GET /environments
+        with an admin user
+[32m          GET /environments succeeds[0m
+        with a normal user
+[32m          GET /environments succeeds[0m
+        with a user with minimal permissions to read resource
+[32m          GET /environments succeeds[0m
+        with a user with all permissions EXCEPT read
+[32m          returns 403[0m
+        with a client
+[33m          GET /environments succeeds (PENDING: No reason given)[0m
+        with an outside user (admin of another org)
+[32m          returns 403[0m
+      GET /environments/<name>
+        with an admin user
+[32m          GET /environments/<name> succeeds[0m
+        with a normal user
+[32m          GET /environments/<name> succeeds[0m
+        with a user with minimal permissions to read resource
+[32m          GET /environments/<name> succeeds[0m
+        with a user with all permissions EXCEPT read
+[32m          returns 403[0m
+        with a client
+[33m          GET /environments/<name> succeeds (PENDING: No reason given)[0m
+        with an outside user (admin of another org)
+[32m          returns 403[0m
+
+/environments/ENVIRONMENT/cookbooks API endpoint
+  with no cookbooks
+    when fetching cookbooks from "_default" environment
+[32m      should respond with 200 OK and no cookbooks[0m
+    when environment does not exist
+[32m      should respond with 404 Not Found[0m
+    when fetching cookbooks
+[32m      should respond with 200 OK and no cookbooks[0m
+    when fetching cookbooks with num_version=all
+[32m      should respond with 200 OK and no cookbooks[0m
+    when fetching cookbooks with num_version=0
+[32m      should respond with 200 OK and no cookbooks[0m
+    when fetching cookbooks with num_version=1
+[32m      should respond with 200 OK and no cookbooks[0m
+    when fetching cookbooks with num_version=2
+[32m      should respond with 200 OK and no cookbooks[0m
+    when fetching cookbooks with num_version=30
+[32m      should respond with 200 OK and no cookbooks[0m
+    when num_versions is not "all" or a number
+[32m      should respond with 400 Bad Request[0m
+  with multiple versions of multiple cookbooks
+    with no environment constraints
+      from a non-default environment
+        when fetching cookbooks
+[32m          should respond with 200 OK and latest versions of ALL cookbooks[0m
+        when fetching cookbooks with num_version=all
+[32m          should respond with 200 OK and all latest versions of cookbooks[0m
+        when fetching cookbooks with num_version=1
+[32m          should respond with 200 OK and 1 latest versions of cookbooks[0m
+        when fetching cookbooks with num_version=2
+[32m          should respond with 200 OK and 2 latest versions of cookbooks[0m
+        when fetching cookbooks with num_version=3
+[32m          should respond with 200 OK and 3 latest versions of cookbooks[0m
+        when fetching cookbooks with num_version=30
+[32m          should respond with 200 OK and 30 latest versions of cookbooks[0m
+      from the _default environment
+        when fetching cookbooks in the _default environment
+[32m          should respond with 200 OK and latest versions of ALL cookbooks[0m
+        when fetching cookbooks with num_version=all
+[32m          should respond with 200 OK and all latest versions of cookbooks[0m
+        when fetching cookbooks with num_version=1
+[32m          should respond with 200 OK and 1 latest versions of cookbooks[0m
+        when fetching cookbooks with num_version=2
+[32m          should respond with 200 OK and 2 latest versions of cookbooks[0m
+        when fetching cookbooks with num_version=3
+[32m          should respond with 200 OK and 3 latest versions of cookbooks[0m
+        when fetching cookbooks with num_version=30
+[32m          should respond with 200 OK and 30 latest versions of cookbooks[0m
+    with environment constraints
+      with constraints {"pedant_cb_one"=>"= 1.0.0"}
+[32m        retrieves appropriate cookbooks[0m
+      with constraints {"pedant_cb_one"=>"> 1.0.0"}
+[32m        retrieves appropriate cookbooks[0m
+      with constraints {"pedant_cb_one"=>"> 1.0.0"}
+[32m        retrieves appropriate cookbooks with num_versions=2[0m
+      with constraints {"pedant_cb_one"=>"> 1.0.0"}
+[32m        retrieves appropriate cookbooks with num_versions=0[0m
+      with constraints {"pedant_cb_one"=>"> 1.0.0", "pedant_cb_two"=>"< 1.2.3"}
+[32m        retrieves appropriate cookbooks with num_versions=2[0m
+      with constraints {"pedant_cb_one"=>"> 1.0.0", "pedant_cb_two"=>"< 1.2.3"}
+[32m        retrieves appropriate cookbooks with num_versions=all[0m
+
+Environments API Endpoint
+  POST /environments
+    with a payload size
+      exactly equal to the maximum allowable size
+[32m        should not respond with 413 Request Entity Too Large[0m
+      exceeding the maximum allowable size
+[32m        should respond with 413 Request Entity Too Large[0m
+    with no additional environments
+      when creating a valid environment
+[32m        should respond with 201 Created and a correct path[0m
+[32m        should persist the environment[0m
+      when handling the payload
+        with authentication headers
+          with successful user
+            with everything correct
+[32m              is successful[0m
+            missing X-Ops-Sign
+[32m              returns 400[0m
+            unsupported X-Ops-Sign version
+[32m              returns 400[0m
+            empty X-Ops-Sign
+[32m              returns 400[0m
+            missing X-Ops-Userid
+[33m              returns 400 (PENDING: No reason given)[0m
+            empty X-Ops-Userid
+[33m              returns 400 (PENDING: No reason given)[0m
+            nonexistent username in X-Ops-Userid
+[32m              returns 401[0m
+            when X-Ops-Userid does not match signature
+[32m              returns 401[0m
+            absolutely immense X-Ops-Userid
+[33m              returns 401 (PENDING: No reason given)[0m
+            missing X-Ops-Timestamp
+[32m              returns 400[0m
+            empty X-Ops-Timestamp
+[32m              returns 400[0m
+            malformed X-Ops-Timestamp
+[32m              returns 401[0m
+            old X-Ops-Timestamp
+[32m              returns 401[0m
+            recent X-Ops-Timestamp
+[32m              succeeds[0m
+            when X-Ops-Timestamp does not match signature
+[32m              returns 401[0m
+            missing X-Ops-Content-Hash
+[32m              returns 400[0m
+            empty X-Ops-Content-Hash
+[32m              returns 400[0m
+            malformed X-Ops-Content-Hash
+[32m              returns 401[0m
+            when body does not match X-Ops-Content-Hash and signature
+[32m              returns 401[0m
+            when X-Ops-Content-Hash does not match body and signature
+[32m              returns 401[0m
+            missing signature in X-Ops-Authorization-
+[32m              returns 401[0m
+            malformed signature in X-Ops-Authorization-
+[32m              returns 401[0m
+            empty signature in X-Ops-Authorization-
+[32m              returns 401[0m
+            missing line 1 in signature in X-Ops-Authorization-
+[32m              returns 401[0m
+            missing a middle line in signature in X-Ops-Authorization-
+[32m              returns 401[0m
+            missing the last line in signature in X-Ops-Authorization-
+[32m              returns 401[0m
+            with a different method in the signature
+[32m              returns 401[0m
+            with a different path in the signature
+[32m              returns 401[0m
+            with an empty decoded signature
+[32m              returns 401[0m
+            with a malformed decoded signature
+[32m              returns 401[0m
+            when signature does not match body and X-Ops-Content-Hash
+[32m              returns 401[0m
+          when X-Ops-Request-Source is web
+            impersonating successful user
+[32m              succeeds[0m
+            impersonating failed user
+[32m              fails[0m
+          with other successful user
+[32m            succeeds[0m
+        when unable to accept application/json
+[32m          should respond with 406 Not Acceptable[0m
+        when sending something other than application/json
+[33m          webmachine not sucking (PENDING: No reason given)[0m
+        with unparsable JSON payload
+[32m          should respond with 400 Bad Request[0m
+        with empty request payload
+[32m          should respond with 400 Bad Request[0m
+      when creating another "_default" environment
+[32m        should respond with 409 Conflict[0m
+      when validating
+        with invalid body
+[32m          with blah = anyoldvalue it reports 400[0m
+          with an array
+[32m            should respond with 400 Bad Request[0m
+          with a string
+[32m            should respond with 400 Bad Request[0m
+          with a number
+[32m            should respond with 400 Bad Request[0m
+          with a floating number
+[32m            should respond with 400 Bad Request[0m
+          with a boolean
+[32m            should respond with 400 Bad Request[0m
+          with a null
+[32m            should respond with 400 Bad Request[0m
+        for name
+[32m          with name = delete it reports 400[0m
+[32m          with name =  it reports 400[0m
+[32m          with name = abc!123 it reports 400[0m
+[32m          with name = abc 123 it reports 400[0m
+[32m          with name = 大爆発 it reports 400[0m
+[32m          with name = 1999 it reports 400[0m
+[32m          with name =  it reports 400[0m
+[32m          with name = true it reports 400[0m
+[32m          with name = [] it reports 400[0m
+[32m          with name = {} it reports 400[0m
+          ejson:decode eats nulls
+[33m            with name = abc 123 it reports 400 (PENDING: No reason given)[0m
+        with weird environment name
+[32m          should respond with 201 Created and the environment url[0m
+        for description
+[32m          with description = delete it succeeds[0m
+[32m          with description =  it succeeds[0m
+[32m          with description = normal text it succeeds[0m
+[32m          with description = これは日本語だ it succeeds[0m
+[32m          with description = Hello 日本! it succeeds[0m
+[32m          with description = 1999 it reports 400[0m
+        for json_class
+[32m          with json_class = Chef::Environment it succeeds[0m
+[32m          with json_class = delete it succeeds[0m
+[32m          with json_class =  it reports 400[0m
+[32m          with json_class = 1999 it reports 400[0m
+[32m          with json_class = notaclass it reports 400[0m
+        for chef_type
+[32m          with chef_type = environment it succeeds[0m
+[32m          with chef_type = delete it succeeds[0m
+[32m          with chef_type =  it reports 400[0m
+[32m          with chef_type = 1999 it reports 400[0m
+[32m          with chef_type = notaclass it reports 400[0m
+        for default_attributes
+[32m          with default_attributes = delete it succeeds[0m
+[32m          with default_attributes = {} it succeeds[0m
+[32m          with default_attributes = {"key1"=>"value1", "key2"=>"value2"} it succeeds[0m
+[32m          with default_attributes = 1999 it reports 400[0m
+[32m          with default_attributes = hello it reports 400[0m
+          for keys
+[32m            with default_attributes = {"key"=>"value"} it succeeds[0m
+[32m            with default_attributes = {"鍵"=>"value"} it succeeds[0m
+[32m            with default_attributes = {""=>"value"} it succeeds[0m
+[32m            with default_attributes = {null:"value"} it reports 400[0m
+[32m            with default_attributes = {99:"value"} it reports 400[0m
+[32m            with default_attributes = {"key":"value","key":"value"} it reports 400[0m
+          for values
+[32m            with default_attributes = {"key"=>""} it succeeds[0m
+[32m            with default_attributes = {"key"=>nil} it succeeds[0m
+[32m            with default_attributes = {"key"=>99} it succeeds[0m
+[32m            with default_attributes = {"key"=>"値"} it succeeds[0m
+        for override_attributes
+[32m          with override_attributes = delete it succeeds[0m
+[32m          with override_attributes = {} it succeeds[0m
+[32m          with override_attributes = {"key1"=>"value1", "key2"=>"value2"} it succeeds[0m
+[32m          with override_attributes = 1999 it reports 400[0m
+[32m          with override_attributes = hello it reports 400[0m
+          for keys
+[32m            with override_attributes = {"key"=>"value"} it succeeds[0m
+[32m            with override_attributes = {"鍵"=>"value"} it succeeds[0m
+[32m            with override_attributes = {""=>"value"} it succeeds[0m
+[32m            with override_attributes = {null:"value"} it reports 400[0m
+[32m            with override_attributes = {99:"value"} it reports 400[0m
+[32m            with override_attributes = {"key":"value","key":"value"} it reports 400[0m
+          for values
+[32m            with override_attributes = {"key"=>""} it succeeds[0m
+[32m            with override_attributes = {"key"=>nil} it succeeds[0m
+[32m            with override_attributes = {"key"=>99} it succeeds[0m
+[32m            with override_attributes = {"key"=>"値"} it succeeds[0m
+        for cookbooks
+[32m          with cookbook_versions = delete it succeeds[0m
+[32m          with cookbook_versions = {} it succeeds[0m
+[32m          with cookbook_versions = 1999 it reports 400[0m
+[32m          with cookbook_versions = hello it reports 400[0m
+          for cookbook names
+[32m            with cookbook_versions = {"cookbook"=>">= 1.0.0"} it succeeds[0m
+[32m            with cookbook_versions = {"the cookbook"=>">= 1.0.0"} it reports 400[0m
+[32m            with cookbook_versions = {"料理書"=>">= 1.0.0"} it reports 400[0m
+[32m            with cookbook_versions = {""=>">= 1.0.0"} it reports 400[0m
+[32m            with cookbook_versions = {null:">= 1.0.0"} it reports 400[0m
+[32m            with cookbook_versions = {1999:">= 1.0.0"} it reports 400[0m
+          for versions
+[32m            with cookbook_versions = {"cookbook"=>">= 1.0.0"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1.0"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>"<= 1.0.0"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>"> 1.0.0"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>"< 1.0.0"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>"= 1.0.0"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>"~> 1.0.0"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>"1.0.0"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>nil} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>[">= 1.0.0"]} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>[]} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1.0.0.0"} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1,0,0"} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1.a.b"} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1.0rc1"} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>">=1.0.0"} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>" >= 1.0.0"} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>">=  1.0.0"} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>[">= 1.0", ">= 2.0"]} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>1} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>1.1} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>""} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1.2.20130730201745"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1.-2.3"} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1.2.2147483647"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1.2.2147483669"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1.2.9223372036854775849"} it reports 400[0m
+      when creating an environment without json_class
+[32m        should respond with 201 Created and a correct path[0m
+[32m        should persist the environment[0m
+    with non-default environments
+      with the same name as another non-default environment
+[32m        should respond with 409 Conflict[0m
+
+Environments API Endpoint
+  POST /environments
+    with no additional environments
+[33m      when handling the payload (PENDING: No reason given)[0m
+      permissions
+        with an admin user
+[32m          should respond with 201 Created and a correct path[0m
+[32m          should persist the environment[0m
+        with a normal user
+[32m          should respond with 201 Created and a correct path[0m
+[32m          should persist the environment[0m
+        with a user with minimal permissions to create /environments
+[32m          should respond with 201 Created and a correct path[0m
+[32m          should persist the environment[0m
+[32m          should create a child with restricted permissions[0m
+        with a user with all permissions EXCEPT create
+[32m          returns 403[0m
+        with a client
+[32m          should respond with 403 Forbidden[0m
+        with an outside user (admin of another org)
+[32m          should respond with 403 Forbidden[0m
+
+Environments API Endpoint
+  with no additional environments
+    DELETE /environments
+[32m      should respond with 405 Method Not Allowed[0m
+    DELETE /environments/<name>
+      with "_default" environment
+[32m        should respond with 405 Method Not Allowed[0m
+      with non-existent environment
+[32m        should respond with 404 Not Found[0m
+  with non-default environments in the organization
+    DELETE /environments/<name>
+      when authenticating
+        with successful user
+          with everything correct
+[32m            is successful[0m
+          missing X-Ops-Sign
+[32m            returns 400[0m
+          unsupported X-Ops-Sign version
+[32m            returns 400[0m
+          empty X-Ops-Sign
+[32m            returns 400[0m
+          missing X-Ops-Userid
+[33m            returns 400 (PENDING: No reason given)[0m
+          empty X-Ops-Userid
+[33m            returns 400 (PENDING: No reason given)[0m
+          nonexistent username in X-Ops-Userid
+[32m            returns 401[0m
+          when X-Ops-Userid does not match signature
+[32m            returns 401[0m
+          absolutely immense X-Ops-Userid
+[33m            returns 401 (PENDING: No reason given)[0m
+          missing X-Ops-Timestamp
+[32m            returns 400[0m
+          empty X-Ops-Timestamp
+[32m            returns 400[0m
+          malformed X-Ops-Timestamp
+[32m            returns 401[0m
+          old X-Ops-Timestamp
+[32m            returns 401[0m
+          recent X-Ops-Timestamp
+[32m            succeeds[0m
+          when X-Ops-Timestamp does not match signature
+[32m            returns 401[0m
+          missing X-Ops-Content-Hash
+[32m            returns 400[0m
+          empty X-Ops-Content-Hash
+[32m            returns 400[0m
+          malformed X-Ops-Content-Hash
+[32m            returns 401[0m
+          when body does not match X-Ops-Content-Hash and signature
+[32m            returns 401[0m
+          when X-Ops-Content-Hash does not match body and signature
+[32m            returns 401[0m
+          missing signature in X-Ops-Authorization-
+[32m            returns 401[0m
+          malformed signature in X-Ops-Authorization-
+[32m            returns 401[0m
+          empty signature in X-Ops-Authorization-
+[32m            returns 401[0m
+          missing line 1 in signature in X-Ops-Authorization-
+[32m            returns 401[0m
+          missing a middle line in signature in X-Ops-Authorization-
+[32m            returns 401[0m
+          missing the last line in signature in X-Ops-Authorization-
+[32m            returns 401[0m
+          with a different method in the signature
+[32m            returns 401[0m
+          with a different path in the signature
+[32m            returns 401[0m
+          with an empty decoded signature
+[32m            returns 401[0m
+          with a malformed decoded signature
+[32m            returns 401[0m
+          when signature does not match body and X-Ops-Content-Hash
+[32m            returns 401[0m
+        when X-Ops-Request-Source is web
+          impersonating successful user
+[32m            succeeds[0m
+          impersonating failed user
+[32m            fails[0m
+        with other successful user
+[32m          succeeds[0m
+      with an existing environment
+[32m        should respond with 200 OK[0m
+      without an existing environment
+[32m        should respond with 404 Not Found[0m
+      when attempting to delete "_default" environment
+[32m        should respond with 405 Method Not Allowed[0m
+
+Environments API Endpoint
+  with non-default environments in the organization
+    DELETE /environments/<name>
+      permissions
+        as an admin user
+[32m          should respond with 200 OK and the deleted environment[0m
+[32m          should delete the environment[0m
+        as a normal user
+[32m          should respond with 200 OK and the deleted environment[0m
+[32m          should delete the environment[0m
+        with a user with minimal permissions to delete /environments/<name>
+[32m          should respond with 200 OK and the deleted environment[0m
+[32m          should delete the environment[0m
+        with a user with all permissions EXCEPT delete
+[32m          should respond with 403 Forbidden[0m
+        with a client
+[32m          should respond with 403 Forbidden[0m
+        with an outside user (admin of another org)
+[32m          should respond with 403 Forbidden[0m
+      when the organization does not exist
+[32m        should respond with 404 Not Found[0m
+
+Environments API Endpoint
+  GET /environments
+    with an operational server
+[32m      should respond with 200 OK[0m
+    with no additional environments
+[32m      should respond with 200 OK[0m
+[33m      should respond to cookbook versions (PENDING: Not yet implemented)[0m
+      with a non-existant environment
+[32m        should respond with 404 Not Found[0m
+    with non-default environments
+[32m      should respond with 200 OK and an index of all the available environments[0m
+  GET /environments/_default
+    with an operational server
+[32m      should respond with 200 OK[0m
+    with a newly installed server
+[32m      should respond with 200 OK and the default environment[0m
+  GET /environments/<name>
+    with an existing environment
+[32m      should respond with 200 OK and the environment[0m
+    when handling authentication headers
+      with successful user
+        with everything correct
+[32m          is successful[0m
+        missing X-Ops-Sign
+[32m          returns 400[0m
+        unsupported X-Ops-Sign version
+[32m          returns 400[0m
+        empty X-Ops-Sign
+[32m          returns 400[0m
+        missing X-Ops-Userid
+[33m          returns 400 (PENDING: No reason given)[0m
+        empty X-Ops-Userid
+[33m          returns 400 (PENDING: No reason given)[0m
+        nonexistent username in X-Ops-Userid
+[32m          returns 401[0m
+        when X-Ops-Userid does not match signature
+[32m          returns 401[0m
+        absolutely immense X-Ops-Userid
+[33m          returns 401 (PENDING: No reason given)[0m
+        missing X-Ops-Timestamp
+[32m          returns 400[0m
+        empty X-Ops-Timestamp
+[32m          returns 400[0m
+        malformed X-Ops-Timestamp
+[32m          returns 401[0m
+        old X-Ops-Timestamp
+[32m          returns 401[0m
+        recent X-Ops-Timestamp
+[32m          succeeds[0m
+        when X-Ops-Timestamp does not match signature
+[32m          returns 401[0m
+        missing X-Ops-Content-Hash
+[32m          returns 400[0m
+        empty X-Ops-Content-Hash
+[32m          returns 400[0m
+        malformed X-Ops-Content-Hash
+[32m          returns 401[0m
+        when body does not match X-Ops-Content-Hash and signature
+[32m          returns 401[0m
+        when X-Ops-Content-Hash does not match body and signature
+[32m          returns 401[0m
+        missing signature in X-Ops-Authorization-
+[32m          returns 401[0m
+        malformed signature in X-Ops-Authorization-
+[32m          returns 401[0m
+        empty signature in X-Ops-Authorization-
+[32m          returns 401[0m
+        missing line 1 in signature in X-Ops-Authorization-
+[32m          returns 401[0m
+        missing a middle line in signature in X-Ops-Authorization-
+[32m          returns 401[0m
+        missing the last line in signature in X-Ops-Authorization-
+[32m          returns 401[0m
+        with a different method in the signature
+[32m          returns 401[0m
+        with a different path in the signature
+[32m          returns 401[0m
+        with an empty decoded signature
+[32m          returns 401[0m
+        with a malformed decoded signature
+[32m          returns 401[0m
+        when signature does not match body and X-Ops-Content-Hash
+[32m          returns 401[0m
+      when X-Ops-Request-Source is web
+        impersonating successful user
+[32m          succeeds[0m
+        impersonating failed user
+[32m          fails[0m
+      with other successful user
+[32m        succeeds[0m
+    when the environment does not exist
+[32m      should respond with 404 Not Found[0m
+  search
+[32m    can be searched for by name[0m
+[32m    can be searched for by description[0m
+[32m    can be searched for by JSON class[0m
+[32m    can be searched for by cookbook versions[0m
+[32m    can be searched for by chef type[0m
+[32m    can be searched for by default attribute[0m
+[32m    can be searched for by override attribute[0m
+
+Environments API Endpoint
+  GET
+    with no additional environments
+[33m      should respond to cookbook versions (PENDING: Not yet implemented)[0m
+      GET /environments
+[32m        should respond with 200 OK[0m
+      GET /environments/_default
+[32m        should respond with 200 OK and the default environment[0m
+      with a non-existant environment
+[32m        should respond with 404 Not Found[0m
+    with non-default environments
+      GET /environments
+        permissions
+          with an admin user
+[32m            GET /environments succeeds[0m
+          with a normal user
+[32m            GET /environments succeeds[0m
+          with a user with minimal permissions to read /environments
+[32m            GET /environments succeeds[0m
+          with a user with all permissions EXCEPT read
+[32m            returns 403[0m
+          with a client
+[32m            GET /environments succeeds[0m
+          with an outside user (admin of another org)
+[32m            returns 403[0m
+      GET /environments/<name>
+        permissions
+          with an admin user
+[32m            should respond with 200 OK[0m
+          with a normal user
+[32m            should respond with 200 OK[0m
+          with a user with minimal permissions to read /environments
+[32m            should respond with 200 OK[0m
+          with a user with all permissions EXCEPT read
+[32m            returns 403[0m
+          with a client
+[32m            should respond with 200 OK[0m
+          with an outside user (admin of another org)
+[32m            should respond with 403 Forbidden[0m
+        when the organization does not exist
+[32m          should respond with 404 Not Found[0m
+        when the environment does not exist
+[32m          should respond with 404 Not Found[0m
+
+/environments/ENVIRONMENT/recipes API endpoint
+  with no cookbooks
+    when environment does not exist
+[32m      should respond with 404 Not Found[0m
+    when fetching recipes
+[32m      should respond with 200 OK and no recipes[0m
+    when fetching recipes from _default environment
+[32m      should respond with 200 OK and no recipes[0m
+  with multiple versions of multiple cookbooks
+    with no environment constraints
+      when fetching recipes from a non-default environment
+[32m        should respond with 200 OK and recipes from the latest version of all cookbooks within the environment[0m
+      when fetching recipes from _default environment
+[32m        should respond with 200 OK and recipes from the latest version of all cookbooks within the environment[0m
+    with environment constraints
+      with constraints {"pedant_cb_one"=>"= 1.0.0"}
+[32m        retrieves appropriate recipes[0m
+      with constraints {"pedant_cb_one"=>"< 2.5.0"}
+[32m        retrieves appropriate recipes[0m
+      with constraints {"pedant_cb_one"=>"< 2.5.0", "pedant_cb_two"=>"= 1.0.0"}
+[32m        retrieves appropriate recipes[0m
+      with constraints {"pedant_cb_one"=>"= 6.6.6", "pedant_cb_two"=>"= 6.6.6", "pedant_cb_three"=>"= 6.6.6"}
+[32m        retrieves appropriate recipes[0m
+
+Environments API Endpoint
+  GET /environments/<name>/roles
+    within the default environment
+      with an existing role
+[32m        should respond with 200 OK[0m
+      without an existing role
+[32m        should respond with 404 Not Found[0m
+    within a non-default environment
+      with an existing role
+[32m        should respond with 200 OK and the role[0m
+      with non-existent environment
+[32m        should respond with 404 Not Found[0m
+      without authorization
+[32m        should respond with 401 Unauthorized[0m
+      with existing role in different existing environment
+[32m        should respond with 404 Not Found[0m
+
+/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint
+  with no cookbooks
+[32m    fails if the environment does not exist[0m
+[32m    does not find a non-existent cookbook in the 'test_env' cookbook[0m
+[32m    does not find a non-existent cookbook in the '_default' cookbook[0m
+  with multiple versions of multiple cookbooks
+    with no environment constraints
+[32m      returns all acceptable cookbook version(s) of cb_one from the 'test_env' environment when num_versions is not specified[0m
+[32m      returns 1 acceptable cookbook version(s) of cb_one from the 'test_env' environment[0m
+[32m      returns 2 acceptable cookbook version(s) of cb_one from the 'test_env' environment[0m
+[32m      returns 3 acceptable cookbook version(s) of cb_one from the 'test_env' environment[0m
+[32m      returns 30 acceptable cookbook version(s) of cb_one from the 'test_env' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_one from the 'test_env' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_two from the 'test_env' environment when num_versions is not specified[0m
+[32m      returns 1 acceptable cookbook version(s) of cb_two from the 'test_env' environment[0m
+[32m      returns 2 acceptable cookbook version(s) of cb_two from the 'test_env' environment[0m
+[32m      returns 3 acceptable cookbook version(s) of cb_two from the 'test_env' environment[0m
+[32m      returns 30 acceptable cookbook version(s) of cb_two from the 'test_env' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_two from the 'test_env' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_three from the 'test_env' environment when num_versions is not specified[0m
+[32m      returns 1 acceptable cookbook version(s) of cb_three from the 'test_env' environment[0m
+[32m      returns 2 acceptable cookbook version(s) of cb_three from the 'test_env' environment[0m
+[32m      returns 3 acceptable cookbook version(s) of cb_three from the 'test_env' environment[0m
+[32m      returns 30 acceptable cookbook version(s) of cb_three from the 'test_env' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_three from the 'test_env' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_one from the '_default' environment when num_versions is not specified[0m
+[32m      returns 1 acceptable cookbook version(s) of cb_one from the '_default' environment[0m
+[32m      returns 2 acceptable cookbook version(s) of cb_one from the '_default' environment[0m
+[32m      returns 3 acceptable cookbook version(s) of cb_one from the '_default' environment[0m
+[32m      returns 30 acceptable cookbook version(s) of cb_one from the '_default' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_one from the '_default' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_two from the '_default' environment when num_versions is not specified[0m
+[32m      returns 1 acceptable cookbook version(s) of cb_two from the '_default' environment[0m
+[32m      returns 2 acceptable cookbook version(s) of cb_two from the '_default' environment[0m
+[32m      returns 3 acceptable cookbook version(s) of cb_two from the '_default' environment[0m
+[32m      returns 30 acceptable cookbook version(s) of cb_two from the '_default' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_two from the '_default' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_three from the '_default' environment when num_versions is not specified[0m
+[32m      returns 1 acceptable cookbook version(s) of cb_three from the '_default' environment[0m
+[32m      returns 2 acceptable cookbook version(s) of cb_three from the '_default' environment[0m
+[32m      returns 3 acceptable cookbook version(s) of cb_three from the '_default' environment[0m
+[32m      returns 30 acceptable cookbook version(s) of cb_three from the '_default' environment[0m
+[32m      returns all acceptable cookbook version(s) of cb_three from the '_default' environment[0m
+    with environment constraints
+      with constraints {"cb_one"=>"= 1.0.0"}
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=1[0m
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=2[0m
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=3[0m
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=all[0m
+[32m        retrieves all appropriate cookbook versions of 'cb_one' without 'num_versions'[0m
+      with constraints {"cb_one"=>"> 1.0.0"}
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=1[0m
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=2[0m
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=3[0m
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=all[0m
+[32m        retrieves all appropriate cookbook versions of 'cb_one' without 'num_versions'[0m
+      with constraints {"cb_one"=>"= 6.6.6"}
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=1[0m
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=2[0m
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=3[0m
+[32m        retrieves appropriate cookbook versions of 'cb_one' with num_versions=all[0m
+[32m        retrieves all appropriate cookbook versions of 'cb_one' without 'num_versions'[0m
+      with constraints {"cb_three"=>"~> 0.5"}
+[32m        retrieves appropriate cookbook versions of 'cb_three' with num_versions=1[0m
+[32m        retrieves appropriate cookbook versions of 'cb_three' with num_versions=2[0m
+[32m        retrieves appropriate cookbook versions of 'cb_three' with num_versions=3[0m
+[32m        retrieves appropriate cookbook versions of 'cb_three' with num_versions=all[0m
+[32m        retrieves all appropriate cookbook versions of 'cb_three' without 'num_versions'[0m
+
+Environments API Endpoint
+  with no additional environments
+    PUT /environments
+[32m      should respond with 405 Method Not Allowed[0m
+    PUT /environments/<name>
+      with a non-existent environment
+[32m        should respond with 404 Not Found[0m
+      when updating the "_default" environment
+[32m        should respond with 404 Not Found[0m
+  with non-default environments in the organization
+    PUT /environments/<name>
+      with a payload size
+        exactly equal to the maximum allowable size
+[32m          should not respond with 413 Request Entity Too Large[0m
+        exceeding the maximum allowable size
+[32m          should respond with 413 Request Entity Too Large[0m
+      with a valid update
+[32m        should respond with 200 OK[0m
+      when handling request headers and payload
+        with authentication headers
+          with successful user
+            with everything correct
+[32m              is successful[0m
+            missing X-Ops-Sign
+[32m              returns 400[0m
+            unsupported X-Ops-Sign version
+[32m              returns 400[0m
+            empty X-Ops-Sign
+[32m              returns 400[0m
+            missing X-Ops-Userid
+[33m              returns 400 (PENDING: No reason given)[0m
+            empty X-Ops-Userid
+[33m              returns 400 (PENDING: No reason given)[0m
+            nonexistent username in X-Ops-Userid
+[32m              returns 401[0m
+            when X-Ops-Userid does not match signature
+[32m              returns 401[0m
+            absolutely immense X-Ops-Userid
+[33m              returns 401 (PENDING: No reason given)[0m
+            missing X-Ops-Timestamp
+[32m              returns 400[0m
+            empty X-Ops-Timestamp
+[32m              returns 400[0m
+            malformed X-Ops-Timestamp
+[32m              returns 401[0m
+            old X-Ops-Timestamp
+[32m              returns 401[0m
+            recent X-Ops-Timestamp
+[32m              succeeds[0m
+            when X-Ops-Timestamp does not match signature
+[32m              returns 401[0m
+            missing X-Ops-Content-Hash
+[32m              returns 400[0m
+            empty X-Ops-Content-Hash
+[32m              returns 400[0m
+            malformed X-Ops-Content-Hash
+[32m              returns 401[0m
+            when body does not match X-Ops-Content-Hash and signature
+[32m              returns 401[0m
+            when X-Ops-Content-Hash does not match body and signature
+[32m              returns 401[0m
+            missing signature in X-Ops-Authorization-
+[32m              returns 401[0m
+            malformed signature in X-Ops-Authorization-
+[32m              returns 401[0m
+            empty signature in X-Ops-Authorization-
+[32m              returns 401[0m
+            missing line 1 in signature in X-Ops-Authorization-
+[32m              returns 401[0m
+            missing a middle line in signature in X-Ops-Authorization-
+[32m              returns 401[0m
+            missing the last line in signature in X-Ops-Authorization-
+[32m              returns 401[0m
+            with a different method in the signature
+[32m              returns 401[0m
+            with a different path in the signature
+[32m              returns 401[0m
+            with an empty decoded signature
+[32m              returns 401[0m
+            with a malformed decoded signature
+[32m              returns 401[0m
+            when signature does not match body and X-Ops-Content-Hash
+[32m              returns 401[0m
+          when X-Ops-Request-Source is web
+            impersonating successful user
+[32m              succeeds[0m
+            impersonating failed user
+[32m              fails[0m
+          with other successful user
+[32m            succeeds[0m
+        when unable to accept application/json
+[32m          should respond with 406 Not Acceptable[0m
+        when sending something other than application/json
+[33m          webmachine not sucking (PENDING: No reason given)[0m
+        with unparsable JSON payload
+[32m          should respond with 400 Bad Request[0m
+        with empty request payload
+[32m          should respond with 400 Bad Request[0m
+      when validating
+        with invalid body
+[32m          with blah = anyoldvalue it reports 400[0m
+          with an array
+[32m            should respond with 400 Bad Request[0m
+          with a string
+[32m            should respond with 400 Bad Request[0m
+          with a number
+[32m            should respond with 400 Bad Request[0m
+          with a floating number
+[32m            should respond with 400 Bad Request[0m
+          with a boolean
+[32m            should respond with 400 Bad Request[0m
+          with a null
+[32m            should respond with 400 Bad Request[0m
+        for name
+[32m          with name = delete it reports 400[0m
+[32m          with name =  it reports 400[0m
+[32m          with name = abc!123 it reports 400[0m
+[32m          with name = abc 123 it reports 400[0m
+[32m          with name = 大爆発 it reports 400[0m
+[32m          with name =  it reports 400[0m
+[32m          with name = 1999 it reports 400[0m
+[32m          with name = true it reports 400[0m
+[32m          with name = [] it reports 400[0m
+[32m          with name = {} it reports 400[0m
+          ejson:decode eats nulls
+[32m            with name = abc 123 it reports 400[0m
+        for description
+[32m          with description = delete it succeeds[0m
+[32m          with description =  it succeeds[0m
+[32m          with description = normal text it succeeds[0m
+[32m          with description = これは日本語だ it succeeds[0m
+[32m          with description = Hello 日本! it succeeds[0m
+[32m          with description = 1999 it reports 400[0m
+        for json_class
+[32m          with json_class = Chef::Environment it succeeds[0m
+[32m          with json_class = delete it succeeds[0m
+[32m          with json_class =  it reports 400[0m
+[32m          with json_class = 1999 it reports 400[0m
+[32m          with json_class = notaclass it reports 400[0m
+        for chef_type
+[32m          with chef_type = environment it succeeds[0m
+[32m          with chef_type = delete it succeeds[0m
+[32m          with chef_type =  it reports 400[0m
+[32m          with chef_type = 1999 it reports 400[0m
+[32m          with chef_type = notaclass it reports 400[0m
+        for default_attributes
+[32m          with default_attributes = delete it succeeds[0m
+[32m          with default_attributes = {} it succeeds[0m
+[32m          with default_attributes = {"key1"=>"value1", "key2"=>"value2"} it succeeds[0m
+[32m          with default_attributes = 1999 it reports 400[0m
+[32m          with default_attributes = hello it reports 400[0m
+          for keys
+[32m            with default_attributes = {"key"=>"value"} it succeeds[0m
+[32m            with default_attributes = {"鍵"=>"value"} it succeeds[0m
+[32m            with default_attributes = {""=>"value"} it succeeds[0m
+[32m            with default_attributes = {null:"value"} it reports 400[0m
+[32m            with default_attributes = {99:"value"} it reports 400[0m
+[32m            with default_attributes = {"key":"value","key":"value"} it reports 400[0m
+          for values
+[32m            with default_attributes = {"key"=>""} it succeeds[0m
+[32m            with default_attributes = {"key"=>nil} it succeeds[0m
+[32m            with default_attributes = {"key"=>99} it succeeds[0m
+[32m            with default_attributes = {"key"=>"値"} it succeeds[0m
+        for override_attributes
+[32m          with override_attributes = delete it succeeds[0m
+[32m          with override_attributes = {} it succeeds[0m
+[32m          with override_attributes = {"key1"=>"value1", "key2"=>"value2"} it succeeds[0m
+[32m          with override_attributes = 1999 it reports 400[0m
+[32m          with override_attributes = hello it reports 400[0m
+          for keys
+[32m            with override_attributes = {"key"=>"value"} it succeeds[0m
+[32m            with override_attributes = {"鍵"=>"value"} it succeeds[0m
+[32m            with override_attributes = {""=>"value"} it succeeds[0m
+[32m            with override_attributes = {null:"value"} it reports 400[0m
+[32m            with override_attributes = {99:"value"} it reports 400[0m
+[32m            with override_attributes = {"key":"value","key":"value"} it reports 400[0m
+          for values
+[32m            with override_attributes = {"key"=>""} it succeeds[0m
+[32m            with override_attributes = {"key"=>nil} it succeeds[0m
+[32m            with override_attributes = {"key"=>99} it succeeds[0m
+[32m            with override_attributes = {"key"=>"値"} it succeeds[0m
+        for cookbooks
+[32m          with cookbook_versions = delete it succeeds[0m
+[32m          with cookbook_versions = {} it succeeds[0m
+[32m          with cookbook_versions = 1999 it reports 400[0m
+[32m          with cookbook_versions = hello it reports 400[0m
+          for cookbook names
+[32m            with cookbook_versions = {"cookbook"=>">= 1.0.0"} it succeeds[0m
+[32m            with cookbook_versions = {"the cookbook"=>">= 1.0.0"} it reports 400[0m
+[32m            with cookbook_versions = {"料理書"=>">= 1.0.0"} it reports 400[0m
+[32m            with cookbook_versions = {""=>">= 1.0.0"} it reports 400[0m
+[32m            with cookbook_versions = {null:">= 1.0.0"} it reports 400[0m
+[32m            with cookbook_versions = {1999:">= 1.0.0"} it reports 400[0m
+          for versions
+[32m            with cookbook_versions = {"cookbook"=>">= 1.0.0"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1.0"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>"<= 1.0.0"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>"> 1.0.0"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>"< 1.0.0"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>"= 1.0.0"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>"~> 1.0.0"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>"1.0.0"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>nil} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>[">= 1.0.0"]} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>[]} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1.0.0.0"} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1,0,0"} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1.a.b"} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1.0rc1"} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>">=1.0.0"} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>" >= 1.0.0"} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>">=  1.0.0"} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>[">= 1.0", ">= 2.0"]} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>1} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>1.1} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>""} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1.2.20130730201745"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1.-2.3"} it reports 400[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1.2.2147483647"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1.2.2147483669"} it succeeds[0m
+[32m            with cookbook_versions = {"cookbook"=>">= 1.2.9223372036854775849"} it reports 400[0m
+      when updating a single value
+        when updating description = "whooooah"
+[32m          should respond with 200 OK and update the environment[0m
+        when updating cookbook_versions = {"fork"=>"= 2.2"}
+[32m          should respond with 200 OK and update the environment[0m
+        when updating json_class = "Chef::Environment"
+[32m          should respond with 200 OK and update the environment[0m
+        when updating chef_type = "environment"
+[32m          should respond with 200 OK and update the environment[0m
+        when updating default_attributes = {"arr"=>"yarr"}
+[32m          should respond with 200 OK and update the environment[0m
+        when updating override_attributes = {"frick"=>"frack"}
+[32m          should respond with 200 OK and update the environment[0m
+      when updating name
+[32m        should respond with 201 Created and the updated environment[0m
+[32m        should respond with 201 Created and renames the environment[0m
+      when environment already exists
+[32m        should respond with 409 Conflict and does not rename environment[0m
+      when renaming environment to "_default"
+[32m        should respond with 409 Conflict[0m
+
+Environments API Endpoint
+  with no additional environments
+    PUT /environments/<name>
+      with a non-existent organization
+[32m        should respond with 404 Not Found[0m
+  with non-default environments in the organization
+    PUT /environments/<name>
+      permissions
+        with an admin user
+[32m          updates description = blah[0m
+        with a normal user
+[32m          updates description = blah[0m
+        with a user with minimal permissions to update an environment
+[32m          updates description = blah[0m
+        with a user with all permissions EXCEPT update
+[32m          returns 403[0m
+        with a client
+[32m          returns 403[0m
+        with an outside user (admin of another org)
+[32m          returns 403[0m
+
+Environments API Endpoint
+  access control
+    GET /environments
+[32m      returns a 401 ("Unauthorized") for invalid user[0m
+[32m      returns a 403 ("Forbidden") for outside user[0m
+    GET /environments/<name>
+[32m      returns a 200 ("OK") for admin[0m
+[32m      returns a 200 ("OK") for normal user[0m
+[32m      returns a 401 ("Unauthorized") for invalid user[0m
+[32m      returns a 403 ("Forbidden") for outside user[0m
+[32m      returns a 404 ("Not Found") for missing environment for admin[0m
+[32m      returns a 404 ("Not Found") for missing environment for normal user[0m
+    POST /environments
+[32m      returns a 401 ("Unauthorized") for invalid user[0m
+[32m      returns a 201 ("Created") for normal user[0m
+[32m      returns a 403 ("Forbidden") for outside user[0m
+[32m      returns a 201 ("Created") for admin user[0m
+[32m      returns a 409 ("Conflict") when trying to recreate existing environment[0m
+    PUT /environments/<name>
+[32m      returns a 200 ("OK") for admin[0m
+[32m      returns a 401 ("Unauthorized") for invalid user[0m
+[32m      returns a 200 ("OK") for normal user[0m
+[32m      returns a 403 ("Forbidden") for outside user[0m
+[32m      returns a 404 ("Not Found") when PUTting missing environment[0m
+    DELETE /environments/<name>
+[32m      returns a 200 ("OK") as admin[0m
+[32m      returns a 200 ("OK") as user[0m
+[32m      returns a 401 ("Unauthorized") for invalid user[0m
+[32m      returns a 403 ("Forbidden") for outside user[0m
+[32m      returns a 404 ("Not Found") when DELETEing missing environment[0m
+
+Testing the Roles API endpoint
+  making a request to /roles/<role>/environments/<environment>
+    using GET
+      with the default environment
+        to a nonexistent role
+[32m          responds with a 404 for the role[0m
+        with an already existing role
+[32m          responds with 200 and the role's run list[0m
+      with a non-default environment
+        for a role with a run list in that environment
+[32m          responds with 200 and the role's run list[0m
+        for a role with no run list in that environment
+[32m          responds with 200 and a null run list[0m
+      with a non-existent environment
+[32m        responds with a 404 for the environment[0m
+Deleting organization pedant_testorg_api_20724 ...
+
+Pending:
+[33m  chef server authorization checks for environments without starting resource POST /environments with a client returns 403[0m
+[36m    # No reason given[0m
+[36m    # ./spec/api/auth_spec.rb:112[0m
+[33m  chef server authorization checks for environments with starting resource PUT /environments/<name> with a client returns 403[0m
+[36m    # No reason given[0m
+[36m    # ./spec/api/auth_spec.rb:199[0m
+[33m  chef server authorization checks for environments with starting resource DELETE /environments/<name> with a client returns 403[0m
+[36m    # No reason given[0m
+[36m    # ./spec/api/auth_spec.rb:262[0m
+[33m  chef server authorization checks for environments with starting resource GET /environments with a client GET /environments succeeds[0m
+[36m    # No reason given[0m
+[36m    # ./spec/api/auth_spec.rb:309[0m
+[33m  chef server authorization checks for environments with starting resource GET /environments/<name> with a client GET /environments/<name> succeeds[0m
+[36m    # No reason given[0m
+[36m    # ./spec/api/auth_spec.rb:364[0m
+[33m  Environments API Endpoint POST /environments with no additional environments when handling the payload with authentication headers with successful user missing X-Ops-Userid returns 400[0m
+[36m    # No reason given[0m
+[36m    # ./lib/pedant/rspec/auth_headers_util.rb:135[0m
+[33m  Environments API Endpoint POST /environments with no additional environments when handling the payload with authentication headers with successful user empty X-Ops-Userid returns 400[0m
+[36m    # No reason given[0m
+[36m    # ./lib/pedant/rspec/auth_headers_util.rb:135[0m
+[33m  Environments API Endpoint POST /environments with no additional environments when handling the payload with authentication headers with successful user absolutely immense X-Ops-Userid returns 401[0m
+[36m    # No reason given[0m
+[36m    # ./lib/pedant/rspec/auth_headers_util.rb:135[0m
+[33m  Environments API Endpoint POST /environments with no additional environments when handling the payload when sending something other than application/json webmachine not sucking[0m
+[36m    # No reason given[0m
+[36m    # ./spec/api/environments/create_oss_spec.rb:104[0m
+[33m  Environments API Endpoint POST /environments with no additional environments when validating for name ejson:decode eats nulls with name = abc 123 it reports 400[0m
+[36m    # No reason given[0m
+[36m    # ./lib/pedant/rspec/environment_util.rb:214[0m
+[33m  Environments API Endpoint POST /environments with no additional environments when handling the payload[0m
+[36m    # No reason given[0m
+[36m    # ./spec/api/environments/create_spec.rb:133[0m
+[33m  Environments API Endpoint with non-default environments in the organization DELETE /environments/<name> when authenticating with successful user missing X-Ops-Userid returns 400[0m
+[36m    # No reason given[0m
+[36m    # ./lib/pedant/rspec/auth_headers_util.rb:135[0m
+[33m  Environments API Endpoint with non-default environments in the organization DELETE /environments/<name> when authenticating with successful user empty X-Ops-Userid returns 400[0m
+[36m    # No reason given[0m
+[36m    # ./lib/pedant/rspec/auth_headers_util.rb:135[0m
+[33m  Environments API Endpoint with non-default environments in the organization DELETE /environments/<name> when authenticating with successful user absolutely immense X-Ops-Userid returns 401[0m
+[36m    # No reason given[0m
+[36m    # ./lib/pedant/rspec/auth_headers_util.rb:135[0m
+[33m  Environments API Endpoint GET /environments with no additional environments should respond to cookbook versions[0m
+[36m    # Not yet implemented[0m
+[36m    # ./spec/api/environments/read_oss_spec.rb:49[0m
+[33m  Environments API Endpoint GET /environments/<name> when handling authentication headers with successful user missing X-Ops-Userid returns 400[0m
+[36m    # No reason given[0m
+[36m    # ./lib/pedant/rspec/auth_headers_util.rb:135[0m
+[33m  Environments API Endpoint GET /environments/<name> when handling authentication headers with successful user empty X-Ops-Userid returns 400[0m
+[36m    # No reason given[0m
+[36m    # ./lib/pedant/rspec/auth_headers_util.rb:135[0m
+[33m  Environments API Endpoint GET /environments/<name> when handling authentication headers with successful user absolutely immense X-Ops-Userid returns 401[0m
+[36m    # No reason given[0m
+[36m    # ./lib/pedant/rspec/auth_headers_util.rb:135[0m
+[33m  Environments API Endpoint GET with no additional environments should respond to cookbook versions[0m
+[36m    # Not yet implemented[0m
+[36m    # ./spec/api/environments/read_spec.rb:65[0m
+[33m  Environments API Endpoint with non-default environments in the organization PUT /environments/<name> when handling request headers and payload with authentication headers with successful user missing X-Ops-Userid returns 400[0m
+[36m    # No reason given[0m
+[36m    # ./lib/pedant/rspec/auth_headers_util.rb:135[0m
+[33m  Environments API Endpoint with non-default environments in the organization PUT /environments/<name> when handling request headers and payload with authentication headers with successful user empty X-Ops-Userid returns 400[0m
+[36m    # No reason given[0m
+[36m    # ./lib/pedant/rspec/auth_headers_util.rb:135[0m
+[33m  Environments API Endpoint with non-default environments in the organization PUT /environments/<name> when handling request headers and payload with authentication headers with successful user absolutely immense X-Ops-Userid returns 401[0m
+[36m    # No reason given[0m
+[36m    # ./lib/pedant/rspec/auth_headers_util.rb:135[0m
+[33m  Environments API Endpoint with non-default environments in the organization PUT /environments/<name> when handling request headers and payload when sending something other than application/json webmachine not sucking[0m
+[36m    # No reason given[0m
+[36m    # ./spec/api/environments/update_oss_spec.rb:119[0m
+
+Finished in 6 minutes 12 seconds
+[33m602 examples, 0 failures, 23 pending[0m
+
+Randomized with seed 16805
+

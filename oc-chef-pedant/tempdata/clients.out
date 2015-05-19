@@ -1,0 +1,110 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_16789
+Validating Org Creation
+Run options: include {:focus=>true, :clients=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :clients=>true}
+
+Randomized with seed 58168
+
+.................................
+
+Finished in 1.3 seconds
+33 examples, 0 failures
+
+Randomized with seed 58168
+
+Starting Pedant Run: 2015-05-15 19:29:42 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :clients=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 9684
+
+
+opscode-account endpoint
+  Client ACLs
+    the initial validator client
+[32m      has the appropriate ACLs[0m
+    a new validator client
+[32m      has the appropriate ACLs[0m
+  Admin User Group
+[32m    has the appropriate members[0m
+  Client Group
+    group retrieval
+[32m      retrieves the group[0m
+    group ACL retrieval
+[32m      retrieves the ACL[0m
+  Client Container
+[32m    retrieves the Clients container[0m
+[32m    retrieves the Clients container's ACL[0m
+  Client Creation
+    by a non-validator client
+[32m      cannot create a client[0m
+    by a validator
+[32m      creates a new non-validator client[0m
+[32m      cannot create a new validator client[0m
+[32m      has the validator removed from the new client's ACL[0m
+[32m      puts the new client into the 'clients' group[0m
+[33m      a new validator should have read / create permissions on clients container (PENDING: No reason given)[0m
+
+Server API v1 Behaviors
+  [v1+]
+Creating org pedant_api-v1-org_1431718182-988984228-16789
+    clients
+      POST /organizations/:org/clients
+        it should behave like actor creation validation
+[32m          should allow create_key: true and give a proper valid key in response[0m
+[32m          should allow allow public_key to be provided and respond with its location[0m
+[32m          should reply with an error if both create_key:true and public_key are specified[0m
+[32m          should accept the public key if both create_key:false and public_key are specified[0m
+[32m          should reply with an error if private_key:true is specified for key generation[0m
+[32m          when neither create_key nor public_key is specified, the operation should succeed and no default key is created[0m
+      PUT /organization/:org/clients/:name
+        it should behave like actor update validation
+[32m          should allow an update that doesn't include public_key or create_key[0m
+[32m          should not allow create_key:true[0m
+[32m          should not allow public_key to be provided[0m
+[32m          should not allow private_key:true to be specified[0m
+      GET /organization/:org/clients/:name
+        behaves like actor read validation
+[32m          should not include public_key[0m
+Deleting organization pedant_api-v1-org_1431718182-988984228-16789 ...
+Deleting organization pedant_testorg_api_16789 ...
+
+Pending:
+[33m  opscode-account endpoint Client Creation by a validator a new validator should have read / create permissions on clients container[0m
+[36m    # No reason given[0m
+[36m    # ./spec/api/clients/account_client_spec.rb:264[0m
+
+Finished in 8.31 seconds
+[33m24 examples, 0 failures, 1 pending[0m
+
+Randomized with seed 9684
+

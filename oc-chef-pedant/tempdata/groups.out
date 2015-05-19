@@ -1,0 +1,221 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_24042
+Validating Org Creation
+Run options: include {:focus=>true, :groups=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :groups=>true}
+
+Randomized with seed 61307
+
+.................................
+
+Finished in 1.28 seconds
+33 examples, 0 failures
+
+Randomized with seed 61307
+
+Starting Pedant Run: 2015-05-15 19:44:18 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :groups=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 7174
+
+
+opscode-account groups
+  /groups endpoint
+    GET /groups
+      admin user
+[32m        can get groups[0m
+      normal user
+[32m        can get groups[0m
+      client
+[32m        returns 403[0m
+      outside user
+[32m        returns 403[0m
+      invalid user
+[32m        returns 401[0m
+    POST /groups
+      permissions
+        admin user
+[32m          can create group[0m
+        normal user
+[32m          returns 403[0m
+        client
+[32m          returns 403[0m
+        outside user
+[32m          returns 403[0m
+        invalid user
+[32m          returns 401[0m
+      group creation
+        when group already exists
+[32m          returns 409[0m
+        with no group name
+[32m          returns 400[0m
+        name instead of group name
+[32m          returns 400[0m
+        with id instead of group name
+[32m          can create group[0m
+        with non-matching id and group name
+[32m          can create group (id wins)[0m
+        with bogus value in request
+[32m          can create group (ignores bogus value)[0m
+        with empty group name
+[32m          returns 400[0m
+        with space in group name
+[32m          returns 400[0m
+        with unicode in group name
+[33m          can create group (PENDING: returns 400)[0m
+        with users, clients, and groups
+[32m          ignores them[0m
+    DELETE /groups
+      admin user
+[32m        returns 405[0m
+    PUT /groups
+      admin user
+[32m        returns 405[0m
+  /groups/<name> endpoint
+    GET /groups/<name>
+      admin user
+[32m        can get group[0m
+      normal user
+[32m        can get group[0m
+      normal user without read ACE returns 403
+[32m        can't read group[0m
+      normal user without any ACE returns 403
+[32m        can't read group[0m
+      client
+[32m        returns 403[0m
+      outside user
+[32m        returns 403[0m
+      invalid user
+[32m        returns 401[0m
+      OC-11702 - when a containing a missing group
+[32m        can get group[0m
+    DELETE /groups/<name>
+      admin user
+[32m        can delete group[0m
+      normal user
+[32m        returns 403[0m
+      client
+[32m        returns 403[0m
+      outside user
+[32m        returns 403[0m
+      invalid user
+[32m        returns 401[0m
+    PUT /groups/<name>
+      permissions
+        admin user
+[32m          can update group[0m
+        admin user cannot remove self from group
+[33m          can update group (PENDING: pending discussion)[0m
+        normal user with update ACE
+[32m          can update group[0m
+        normal user with update ACE cannot remove self
+[33m          can update group (PENDING: pending discussion)[0m
+        normal user without update ACE
+[32m          returns 403[0m
+        client
+[32m          returns 403[0m
+        outside user
+[32m          returns 403[0m
+        invalid user
+[32m          returns 401[0m
+      updating groups
+        with different group name
+[32m          will rename group[0m
+[32m          will not overwrite existing group[0m
+        with only user change
+[32m          will update group[0m
+        with only client change
+[32m          will update group[0m
+        with only group change
+[32m          will update group[0m
+        without groupname
+[32m          will update group[0m
+        with bogus id instead of groupname
+[32m          will update group[0m
+        with random bogus value
+[32m          will update group[0m
+        with empty groupname
+[32m          returns 400[0m
+        with bogus client
+[33m          returns 400 (PENDING: returns 500 instead)[0m
+        with bogus user
+[33m          returns 400 (PENDING: returns 500 instead)[0m
+        with bogus group
+[33m          returns 400 (PENDING: returns 500 instead)[0m
+        with empty actors
+[32m          will not update group (nothing changed)[0m
+        with no actors
+[32m          will not update group (nothing changed)[0m
+        with bogus actors
+[33m          returns 400 (PENDING: returns 200(!) instead (but it doesn't actually change anything))[0m
+    POST /groups/<name>
+      admin user
+[32m        returns 405[0m
+
+opscode-account endpoint
+  Admin User Group
+[32m    has the appropriate members[0m
+  Client Group
+    group retrieval
+[32m      retrieves the group[0m
+    group ACL retrieval
+[32m      retrieves the ACL[0m
+Deleting organization pedant_testorg_api_24042 ...
+
+Pending:
+[33m  opscode-account groups /groups endpoint POST /groups group creation with unicode in group name can create group[0m
+[36m    # returns 400[0m
+[36m    # ./spec/api/account/account_group_spec.rb:345[0m
+[33m  opscode-account groups /groups/<name> endpoint PUT /groups/<name> permissions admin user cannot remove self from group can update group[0m
+[36m    # pending discussion[0m
+[36m    # ./spec/api/account/account_group_spec.rb:648[0m
+[33m  opscode-account groups /groups/<name> endpoint PUT /groups/<name> permissions normal user with update ACE cannot remove self can update group[0m
+[36m    # pending discussion[0m
+[36m    # ./spec/api/account/account_group_spec.rb:704[0m
+[33m  opscode-account groups /groups/<name> endpoint PUT /groups/<name> updating groups with bogus client returns 400[0m
+[36m    # returns 500 instead[0m
+[36m    # ./spec/api/account/account_group_spec.rb:1040[0m
+[33m  opscode-account groups /groups/<name> endpoint PUT /groups/<name> updating groups with bogus user returns 400[0m
+[36m    # returns 500 instead[0m
+[36m    # ./spec/api/account/account_group_spec.rb:1062[0m
+[33m  opscode-account groups /groups/<name> endpoint PUT /groups/<name> updating groups with bogus group returns 400[0m
+[36m    # returns 500 instead[0m
+[36m    # ./spec/api/account/account_group_spec.rb:1084[0m
+[33m  opscode-account groups /groups/<name> endpoint PUT /groups/<name> updating groups with bogus actors returns 400[0m
+[36m    # returns 200(!) instead (but it doesn't actually change anything)[0m
+[36m    # ./spec/api/account/account_group_spec.rb:1139[0m
+
+Finished in 17.4 seconds
+[33m62 examples, 0 failures, 7 pending[0m
+
+Randomized with seed 7174
+

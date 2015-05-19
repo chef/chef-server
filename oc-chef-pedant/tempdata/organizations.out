@@ -1,0 +1,119 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_29951
+Validating Org Creation
+Run options: include {:focus=>true, :organizations=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :organizations=>true}
+
+Randomized with seed 9381
+
+.................................
+
+Finished in 1.31 seconds
+33 examples, 0 failures
+
+Randomized with seed 9381
+
+Starting Pedant Run: 2015-05-15 19:53:06 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :organizations=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 45840
+
+
+/organizations
+  GET /organizations
+    when the user requests a list of organizations
+[32m      should return a valid list of organizations[0m
+  GET /organizations/:id
+    when the user requests a valid organization
+[32m      should return a valid organization object[0m
+[32m      should return a organization object that contains a valid guid[0m
+[33m      erlang will not return the assigned_at field (PENDING: No reason given)[0m
+  POST /organizations
+    when the user posts a new organization with a valid body and name
+Deleting organization test-1431719592-29951 ...
+[32m      should respond with a valid newly created organization[0m
+      but an organization of the same name already exists
+Deleting organization test-1431719594-29951 ...
+[32m        it rejects the new org as conflicting[0m
+    when the user attempts to create a new org with invalid data
+Deleting organization test-1431719595-29951 ...
+Unexpected response when deleting org: 404: {"error":["organization 'test-1431719595-29951' does not exist."]}
+[32m      it should fail when 'name' is missing[0m
+Deleting organization test-1431719595-29951 ...
+Unexpected response when deleting org: 404: {"error":["organization 'test-1431719595-29951' does not exist."]}
+[32m      it should fail when 'full_name' is missing[0m
+Deleting organization test-1431719595-29951 ...
+Unexpected response when deleting org: 404: {"error":["organization 'test-1431719595-29951' does not exist."]}
+[32m      it should fail when 'name' is invalid[0m
+  PUT /organizations/:id
+    when the user updates the organization object
+Deleting organization test-1431719596-29951 ...
+[32m      should fail to update the organization object if the name is changed[0m
+    when the user updates the organization object update should fail when
+Deleting organization test-1431719597-29951 ...
+Deleting organization test-1431719597-29951 ...
+Unexpected response when deleting org: 404: {"error":["organization 'test-1431719597-29951' does not exist."]}
+[32m      'name' is missing[0m
+Deleting organization test-1431719598-29951 ...
+Deleting organization test-1431719598-29951 ...
+Unexpected response when deleting org: 404: {"error":["organization 'test-1431719598-29951' does not exist."]}
+[32m      'full_name' is missing[0m
+Deleting organization test-1431719600-29951 ...
+Deleting organization test-1431719600-29951 ...
+Unexpected response when deleting org: 404: {"error":["organization 'test-1431719600-29951' does not exist."]}
+[32m      'name' is invalid[0m
+    when the user updates fields in the organization with valid data
+Deleting organization test-1431719601-29951 ...
+[32m      should update the organization object[0m
+    when the user tries to PUT to the organization with a private_key
+Deleting organization test-1431719602-29951 ...
+[32m      throws an error related to no longer supporting PUT for key updating[0m
+
+Server API v1 Behaviors
+  [v1+]
+Creating org pedant_api-v1-org_1431719586-81145939-29951
+    org creation
+Deleting organization pedant_apiv1-org-create-test_1431719586-81145939-29951 ...
+[32m      should have created a validator client with a default key, and provided the client key back to us[0m
+Deleting organization pedant_api-v1-org_1431719586-81145939-29951 ...
+Deleting organization pedant_testorg_api_29951 ...
+
+Pending:
+[33m  /organizations GET /organizations/:id when the user requests a valid organization erlang will not return the assigned_at field[0m
+[36m    # No reason given[0m
+[36m    # ./spec/api/organization_spec.rb:71[0m
+
+Finished in 17.25 seconds
+[33m16 examples, 0 failures, 1 pending[0m
+
+Randomized with seed 45840
+

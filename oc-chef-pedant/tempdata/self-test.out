@@ -1,0 +1,116 @@
+Configuring logging...
+Creating platform...
+Configured URL: https://api.chef-server.dev
+Creating org pedant_testorg_api_495
+Validating Org Creation
+Run options: include {:focus=>true, :self_test=>true}
+
+All examples were filtered out; ignoring {:focus=>true, :self_test=>true}
+
+Randomized with seed 35100
+
+.................................
+
+Finished in 1.25 seconds
+33 examples, 0 failures
+
+Randomized with seed 35100
+
+Starting Pedant Run: 2015-05-15 19:58:07 UTC
+ _______  _______  _______  _______  _______  ______   _______
+|       ||       ||       ||       ||       ||      | |       |
+|   _   ||    _  ||  _____||       ||   _   ||  _    ||    ___|
+|  | |  ||   |_| || |_____ |       ||  | |  || | |   ||   |___
+|  |_|  ||    ___||_____  ||      _||  |_|  || |_|   ||    ___|
+|       ||   |     _____| ||     |_ |       ||       ||   |___
+|_______||___|    |_______||_______||_______||______| |_______|
+
+     _______  _______  ______   _______  __    _  _______
+    |       ||       ||      | |   _   ||  |  | ||       |
+    |    _  ||    ___||  _    ||  |_|  ||   |_| ||_     _|
+    |   |_| ||   |___ | | |   ||       ||       |  |   |
+    |    ___||    ___|| |_|   ||       ||  _    |  |   |
+    |   |    |   |___ |       ||   _   || | |   |  |   |
+    |___|    |_______||______| |__| |__||_|  |__|  |___|
+
+                    "Accuracy Over Tact"
+
+                  === Testing Environment ===
+                 Config File: /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+       HTTP Traffic Log File: /var/log/opscode/oc-chef-pedant/http-traffic.log
+
+Running tests from the following directories:
+/host/oc-chef-pedant/spec/api
+Run options:
+  include {:focus=>true, :self_test=>true}
+  exclude {:intermittent_failure=>true, :cleanup=>true}
+
+Randomized with seed 23756
+
+
+Pedant Self-Diagnostic
+  with shared() and let()
+    before(:all)
+[32m      should use parent shared_var[0m
+[32m      should use parent let_var[0m
+      within a child context
+[32m        should use the child shared_var[0m
+[32m        should use the child let_var[0m
+  Integration Users
+    with admin_user
+[32m      should use parent let_var[0m
+      within a child context
+[32m        should use the child let_var[0m
+    with normal_user
+[32m      should use parent let_var[0m
+      within a child context
+[32m        should use the child let_var[0m
+    with outside_user
+[32m      should use parent let_var[0m
+      within a child context
+[32m        should use the child let_var[0m
+    with superuser
+[32m      should use parent let_var[0m
+      within a child context
+[32m        should use the child let_var[0m
+  Matchers
+    strictly_match
+[32m      works with plain hashes[0m
+[32m      works with regex keys[0m
+[32m      works with arrays of scalars, treating them as sets[0m
+[32m      works with regexp specs in array elements[0m
+[32m      works with hash values[0m
+[32m      should work with nested hashes of specs[0m
+      works with hash values contained within an array
+[32m        whether or not order matches[0m
+[32m        should not match if a key within the nested hash is missing from the target[0m
+[32m        should not match if the target contains more values then expected[0m
+[32m        should match if the spec contains a value that matches on regex and it is present in the target[0m
+[32m        should not match if the spec contains a value that matches on regex and it is not present in the target[0m
+[32m        should match a nested array that matches[0m
+[32m        should not match a nested array with too many values that otherwise matches[0m
+[32m        should not match a nested array with too few values[0m
+[32m        should not match a nested array that doesn't match[0m
+    loosely_match
+[32m      works with plain hashes[0m
+[32m      works with regex keys[0m
+[32m      works with arrays of scalars, treating them as sets[0m
+[32m      works with hash values[0m
+[32m      should work with nested hashes of specs[0m
+      works with hashes nested within an array
+[32m        whether or not order matches[0m
+[32m        should not match if a key within the nested hash is missing from the target[0m
+[32m        should match if the target contains more values then expected[0m
+[32m        should match if the spec contains a value that matches on regex and it is present in the target[0m
+[32m        should not match if the spec contains a value that matches on regex and it is not present in the target[0m
+[32m        should match a nested array that matches[0m
+[32m        should match a nested array with too many values that otherwise matches because arrays are still exact matches[0m
+[32m        should not match a nested array with too few values[0m
+[32m        should not match a nested array that doesn't match[0m
+Deleting organization pedant_testorg_api_495 ...
+
+Finished in 4.44 seconds
+[32m41 examples, 0 failures[0m
+
+Randomized with seed 23756
+
