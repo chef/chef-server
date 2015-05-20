@@ -94,7 +94,6 @@ needed_apps() ->
      epgsql,
      sqerl,
      ibrowse,
-     ejson,
      inets,
      mochiweb,
      webmachine,
