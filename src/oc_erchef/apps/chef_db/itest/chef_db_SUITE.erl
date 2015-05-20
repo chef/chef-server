@@ -64,8 +64,6 @@ start_server(Config) ->
     %% to exercise the joining together of multiple database calls.  See the TODO
     %% in the "Environment-filtered Recipes Tests" section for more.
     application:set_env(chef_db, bulk_fetch_batch_size, 2),
-    application:set_env(chef_db, couchdb_host, "localhost"),
-    application:set_env(chef_db, couchdb_port, chef_test_suite_helper:random_bogus_port()),
     [ {ok, _} = application:ensure_all_started(App) || App <- needed_apps() ],
     Config.
 

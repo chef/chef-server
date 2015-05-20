@@ -24,8 +24,6 @@
          is_enabled/2]).
 
 -ifndef(CHEF_WM_DARKLAUNCH).
-is_enabled(<<"couchdb_", _Rest/binary>>, _) ->
-    false;
 is_enabled(<<"rabbit_aux_", _Rest/binary>>, _) ->
     false;
 is_enabled(<<"query_aux_", _Rest/binary>>, _) ->

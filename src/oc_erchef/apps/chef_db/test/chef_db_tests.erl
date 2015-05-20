@@ -37,11 +37,6 @@ fetch_requestor_test_() ->
      [
       {"a user is found SQL",
        fun() ->
-               meck:expect(chef_db_darklaunch, is_enabled,
-                           fun(<<"couchdb_clients">>, _) -> false;
-                              (<<"couchdb_organizations">>, _) -> true
-                           end),
-
 
                User = #chef_user{server_api_version = ?API_MIN_VER,
                                  id = <<"a1">>,
@@ -124,8 +119,6 @@ fetch_cookbook_versions_test_() ->
      fun() ->
              meck:new(chef_sql),
              meck:new(chef_db_darklaunch),
-             meck:expect(chef_db_darklaunch, is_enabled,
-                         fun(<<"couchdb_organizations">>, _) -> false end),
              set_app_env()
      end,
      fun(_) ->
@@ -184,8 +177,6 @@ fetch_cookbook_versions_test_() ->
 
 set_app_env() ->
     test_utils:start_stats_hero(),
-    application:set_env(chef_db, couchdb_host, "localhost"),
-    application:set_env(chef_db, couchdb_port, 5984),
     spawn_stats_hero_worker().
 
 spawn_stats_hero_worker() ->
@@ -200,4 +191,4 @@ stats_hero_config() ->
      {org_name, "myorg"},
      {request_id, ?REQ_ID},
      {label_fun, {test_utils, stats_hero_label}},
-     {upstream_prefixes, [<<"rdbms">>, <<"couchdb">>, <<"solr">>]}].
+     {upstream_prefixes, [<<"rdbms">>, <<"solr">>]}].

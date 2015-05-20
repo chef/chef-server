@@ -21,11 +21,9 @@
 
 
 %% The darklaunch module used by chef_db can be set using this
-%% define. The default included here ignores `OrgName' and answers
-%% false to all couchdb_* features and true otherwise.
+%% define. In the current version of chef there are no
+%% darklaunch-flagged features, so we default everything to true.
 -ifndef(CHEF_DB_DARKLAUNCH).
-is_enabled(<<"couchdb_", _Rest/binary>>, _) ->
-    false;
 is_enabled(_, _) ->
     true.
 -else.

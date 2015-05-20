@@ -42,12 +42,6 @@ start_server(Config) ->
     chef_test_suite_helper:set_app_env(stats_hero),
     chef_test_suite_helper:set_app_env(pooler),
 
-    application:set_env(oc_chef_authz, couchdb_host, "localhost"),
-    application:set_env(oc_chef_authz, couchdb_port, 6984),
-
-    application:set_env(chef_db, couchdb_host, "localhost"),
-    application:set_env(chef_db, couchdb_port, 6984),
-
     application:set_env(lager, error_logger_redirect, false),
 
     % TODO: we should automate setting these, if it matters at all
