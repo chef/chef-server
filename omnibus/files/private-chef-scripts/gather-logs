@@ -80,7 +80,8 @@ mkdir -p "$tmpdir"
 for i in /opt/{chef,$path}*/version-manifest.txt \
               /opt/$path/pc-version.txt \
               /etc/$path/$config_name \
-              /etc/${path}*/*-running.json \
+              /etc/{chef,$path}*/*-running.json \
+              /etc/{chef,$path}*/*.rb \
               /var/opt/$path/rabbitmq/log/*.log \
               /var/log/syslog \
               /var/log/messages; do
