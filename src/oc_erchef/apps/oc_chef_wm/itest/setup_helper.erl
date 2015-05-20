@@ -110,7 +110,6 @@ needed_apps() ->
      syntax_tools,
      goldrush,
      lager,
-     couchbeam,
      chef_index,
      oc_chef_authz,
      oc_chef_wm].

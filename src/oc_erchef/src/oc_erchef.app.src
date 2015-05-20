@@ -25,7 +25,6 @@
                   gs,
                   jiffy,
                   mini_s3,
-                  oauth,
                   observer,
                   opscoderl_folsom,
                   opscoderl_httpc,
