@@ -29,11 +29,10 @@ fetch_requestor_test_() ->
      fun() ->
              meck:new(chef_sql),
              meck:new(chef_db_darklaunch),
-             meck:new(chef_otto),
              set_app_env()
      end,
      fun(_) ->
-             meck:unload([chef_sql, chef_db_darklaunch, chef_otto])
+             meck:unload([chef_sql, chef_db_darklaunch])
      end,
      [
       {"a user is found SQL",
@@ -43,7 +42,6 @@ fetch_requestor_test_() ->
                               (<<"couchdb_organizations">>, _) -> true
                            end),
 
-               meck:expect(chef_otto, connect, fun() -> otto_connect end),
 
                User = #chef_user{server_api_version = ?API_MIN_VER,
                                  id = <<"a1">>,
@@ -75,7 +73,6 @@ fetch_requestor_test_() ->
       },
       {"a client is found SQL cert",
        fun() ->
-               meck:expect(chef_otto, connect, fun() -> otto_connect end),
                Client = #chef_client{server_api_version = ?API_MIN_VER,
                                      id = <<"mock-client-id">>,
                                      authz_id = <<"mock-client-authz-id">>,
@@ -94,7 +91,6 @@ fetch_requestor_test_() ->
       },
       {"a client is found SQL key",
        fun() ->
-               meck:expect(chef_otto, connect, fun() -> otto_connect end),
                meck:expect(chef_db_darklaunch, is_enabled,
                            fun(<<"sql_users">>, _) -> true end),
                Client = #chef_client{server_api_version = ?API_MIN_VER,
@@ -127,16 +123,13 @@ fetch_cookbook_versions_test_() ->
     {foreach,
      fun() ->
              meck:new(chef_sql),
-             meck:new(chef_otto),
              meck:new(chef_db_darklaunch),
-             meck:expect(chef_otto, connect, fun() -> otto_connect end),
              meck:expect(chef_db_darklaunch, is_enabled,
                          fun(<<"couchdb_organizations">>, _) -> false end),
              set_app_env()
      end,
      fun(_) ->
              ?assert(meck:validate(chef_sql)),
-             ?assert(meck:validate(chef_otto)),
              meck:unload()
      end,
      [

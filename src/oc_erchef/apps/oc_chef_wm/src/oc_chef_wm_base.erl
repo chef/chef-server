@@ -631,7 +631,7 @@ is_user_in_org(Type, DbContext, Name, OrgName) ->
 
 %% These are modules that we instrument with stats_hero and aggregate into common prefix via
 %% stats_hero_label.
--type metric_module() :: oc_chef_authz | chef_s3 | chef_sql | chef_solr | chef_otto.
+-type metric_module() :: oc_chef_authz | chef_s3 | chef_sql | chef_solr.
 
 %% @doc Given a `{Mod, Fun}' tuple, generate a stats hero metric with a prefix appropriate
 %% for stats_hero aggregation. An error is thrown if `Mod' is unknown. This is where we

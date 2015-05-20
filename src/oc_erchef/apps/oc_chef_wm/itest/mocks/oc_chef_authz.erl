@@ -33,5 +33,4 @@ is_authorized_on_resource(_ReqestorId, _ResourceType, _ResourceId, _ActorType, _
 make_context(ApiVersion, ReqId, Darklaunch) ->
     #oc_chef_authz_context{server_api_version = ApiVersion,
                            reqid = ReqId,
-                           darklaunch = Darklaunch,
-                           otto_connection = invalid}.
+                           darklaunch = Darklaunch }.
