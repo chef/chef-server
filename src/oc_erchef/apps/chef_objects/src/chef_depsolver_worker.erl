@@ -70,7 +70,7 @@ start_link() ->
                          Timeout :: integer()) ->
                                 {ok, [ chef_depsolver:versioned_cookbook()]} | {error, term()}.
 solve_dependencies(AllVersions, EnvConstraints, Cookbooks, Timeout) ->
-    case pooler:take_member(chef_depsolver) of
+    case pooler:take_member(chef_depsolver, pooler_timeout()) of
         error_no_members ->
             {error, no_depsolver_workers};
         Pid ->
@@ -86,6 +86,9 @@ solve_dependencies(AllVersions, EnvConstraints, Cookbooks, Timeout) ->
                     Result
             end
     end.
+
+pooler_timeout() ->
+    envy:get(chef_objects, depsolver_pooler_timeout, 0, non_neg_integer).
 
 %%%===================================================================
 %%% gen_server callbacks

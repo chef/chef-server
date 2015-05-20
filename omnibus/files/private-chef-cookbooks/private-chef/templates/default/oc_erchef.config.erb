@@ -127,6 +127,7 @@
                                  {timeout, <%= node['private_chef']['opscode-erchef']['authz_timeout'] %>},
                                  {init_count, <%= node['private_chef']['oc_chef_authz']['http_init_count'] %>},
                                  {max_count, <%= node['private_chef']['oc_chef_authz']['http_max_count'] %>},
+                                 {queue_max, <%= node['private_chef']['oc_chef_authz']['http_queue_max'] %>},
                                  {cull_interval, <%= node['private_chef']['oc_chef_authz']['http_cull_interval'] %>},
                                  {max_age, <%= node['private_chef']['oc_chef_authz']['http_max_age'] %>},
                                  {max_connection_duration, <%= node['private_chef']['oc_chef_authz']['http_max_connection_duration'] %>},
@@ -166,7 +167,8 @@
                   {s3_url_expiry_window_size, <%= @helper.s3_url_caching(node['private_chef']['opscode-erchef']['s3_url_expiry_window_size']) %>},
                   {s3_parallel_ops_timeout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_timeout'] %>},
                   {s3_parallel_ops_fanout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_fanout'] %>},
-                  {depsolver_timeout, <%= @depsolver_timeout %>}
+                  {depsolver_timeout, <%= @depsolver_timeout %>},
+                  {depsolver_pooler_timeout, <%= @depsolver_pooler_timeout %>}
                  ]},
   {stats_hero, [
                %% Set sender pool size to DB max_connections to avoid contention
@@ -221,6 +223,7 @@
                     [{name, chef_depsolver},
                      {max_count, <%= @depsolver_worker_count %>},
                      {init_count, <%= @depsolver_worker_count %>},
+                     {queue_max, <%= @depsolver_pool_queue_max %>},
                      {start_mfa, {chef_depsolver_worker, start_link, []}}]]},
            {metrics_module, folsom_metrics}
           ]}
