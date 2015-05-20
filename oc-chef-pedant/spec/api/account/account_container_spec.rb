@@ -3,15 +3,18 @@ require 'pedant/rspec/common'
 
 describe "opscode-account containers", :containers do
 
-  def self.ruby?
-    Pedant::Config.ruby_container_endpoint?
-  end
-
-  def self.in_sql?
-    !ruby? || Pedant::Config.ruby_container_endpoint_in_sql?
-  end
-
-  let(:in_sql?) { self.class.in_sql? }
+    let(:only_allowed_get_delete) do
+      {
+        :status => 405,
+        :headers => { "allow" => ["GET, DELETE"] }
+      }
+    end
+    let(:only_allowed_get_post) do
+      {
+        :status => 405,
+        :headers => { "allow" => ["GET, POST"] }
+      }
+    end
 
   context "/containers endpoint" do
     let(:request_url) { api_url("containers") }
@@ -233,8 +236,6 @@ describe "opscode-account containers", :containers do
             # This sort of makes sense (default container perms are empty), but
             # still seems wrong -- no matter what the permissions are, this should
             # still be a 409
-            skip "returns 403 instead" if ruby?
-
             post(request_url, platform.admin_user,
               :payload => request_body).should look_like({
                 :status => 409
@@ -413,11 +414,7 @@ describe "opscode-account containers", :containers do
 
           let(:container_body) {{
               "containername" => new_container,
-              # containerpath: a discussion took place between Mark A. and I that
-              # revolved around leaving the containerpath implemented the same way
-              # HEC sets it when creating a new org, which is the same as the
-              # containername
-              "containerpath" => in_sql? ? new_container : "/"
+              "containerpath" => new_container
             }}
 
           it "ignores them", :validation do
@@ -441,46 +438,19 @@ describe "opscode-account containers", :containers do
 
     context "DELETE /containers" do
 
-      let(:not_allowed_response) do
-        if ruby?
-          {:status => 404}
-        else
-          {
-            :status => 405,
-            :headers => {
-              "allow" => ["GET, POST"]
-            }
-          }
-        end
-      end
-
       context "admin user" do
         # A 405 here would be fine (better, even)
         it "returns 404" do
-          delete(request_url, platform.admin_user).should look_like(not_allowed_response)
+          delete(request_url, platform.admin_user).should look_like(only_allowed_get_post)
         end
       end
     end
 
     context "PUT /containers" do
-      let(:not_allowed_response) do
-        if ruby?
-          {:status => 404}
-        else
-          {
-            :status => 405,
-            :headers => {
-              "allow" => ["GET, POST"]
-            }
-          }
-        end
-      end
-
-
       context "admin user" do
         # A 405 here would be fine (better, even)
         it "returns 404" do
-          put(request_url, platform.admin_user).should look_like(not_allowed_response)
+          put(request_url, platform.admin_user).should look_like(only_allowed_get_post)
         end
       end
     end
@@ -500,12 +470,9 @@ describe "opscode-account containers", :containers do
       delete(request_url, platform.admin_user)
     end
 
-    #
-    # When containers are in sql we eliminate the containerpath field and return the containername instead
-    #
     let(:default_container_body) {{
         "containername" => test_container,
-        "containerpath" => in_sql? ?  test_container : "/"
+        "containerpath" => test_container
       }}
 
     context "GET /containers/<name>" do
@@ -615,44 +582,16 @@ describe "opscode-account containers", :containers do
         "containerpath" => test_container
       }}
 
-      let(:not_allowed_response) do
-        if ruby?
-          {:status => 404}
-        else
-          {
-            :status => 405,
-            :headers => {
-              "allow" => ["GET, DELETE"]
-            }
-          }
-        end
-      end
-
       it "is not allowed" do
-        put(request_url, platform.admin_user, :payload => new_container_payload)
-          .should look_like(not_allowed_response)
+        put(request_url, platform.admin_user, :payload => new_container_payload).should look_like(only_allowed_get_delete)
       end
     end
 
     context "POST /containers/<name>" do
-
-      let(:not_allowed_response) do
-        if ruby?
-          {:status => 404}
-        else
-          {
-            :status => 405,
-            :headers => {
-              "allow" => ["GET, DELETE"]
-            }
-          }
-        end
-      end
-
       context "admin user" do
         # A 405 here would be fine (better, even)
         it "returns 404" do
-          post(request_url, platform.admin_user).should look_like(not_allowed_response)
+          post(request_url, platform.admin_user).should look_like(only_allowed_get_delete)
         end
       end
     end # context POST /containers/<name>

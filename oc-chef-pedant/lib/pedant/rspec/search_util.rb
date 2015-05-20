@@ -688,18 +688,9 @@ module Pedant
         # time to clear the queue.  In a test scenario, this
         # should be enough of a wait.
         sleep direct_solr_query_sleep_time
-        if Pedant::Config.chef_12?
-          url = "#{Pedant::Config.search_server}/solr/update?commit=true"
-          body = ''
-          headers = {}
-        else
-          url = "#{Pedant::Config.search_server}/solr/update"
-          body = '<commit waitSearcher="true" waitFlush="true" softCommit="false"/>'
-          headers = {
-            "Content-Type" => "application/xml",
-            "Accept" => "application/xml"
-          }
-        end
+        url = "#{Pedant::Config.search_server}/solr/update?commit=true"
+        body = ''
+        headers = {}
         RestClient.send :post, url, body, headers
       end
 
