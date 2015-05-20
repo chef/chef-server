@@ -90,7 +90,7 @@ fetch_id(role, DbContext, Name, OrgId) ->
 fetch_id(group, {context, ApiVersion, ReqId, DarkLaunch}, Name, OrgId) ->
     Ctx = oc_chef_authz_db:make_context(ApiVersion, ReqId, DarkLaunch),
     case oc_chef_authz_db:fetch_group(Ctx, OrgId, Name) of
-        not_found ->
+        {not_found, authz_group}  ->
             not_found;
         #oc_chef_group{authz_id = AuthzId} ->
             AuthzId

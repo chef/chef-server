@@ -123,9 +123,7 @@ fetch_cookbook_versions_test_() ->
     {foreach,
      fun() ->
              meck:new(chef_sql),
-             meck:new(chef_otto),
              meck:new(chef_db_darklaunch),
-             meck:expect(chef_otto, connect, fun() -> otto_connect end),
              meck:expect(chef_db_darklaunch, is_enabled,
                          fun(<<"couchdb_organizations">>, _) -> false end),
              set_app_env()
