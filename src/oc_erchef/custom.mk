@@ -55,9 +55,8 @@ bundle:
 
 install:
 	@./rebar get-deps -C rebar.config.lock
-	@cpanm --notest --quiet App::Sqitch
 
 travis: all
-	PATH=~/perl5/bin:$(PATH) $(REBARC) skip_deps=true ct
+	 PATH=~/perl5/bin:$(PATH) $(REBARC) skip_deps=true ct
 
 DEVVM_DIR = $(DEVVM_ROOT)/_rel/oc_erchef
