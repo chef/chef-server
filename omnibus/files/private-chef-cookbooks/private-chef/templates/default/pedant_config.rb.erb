@@ -181,7 +181,7 @@ search_acls?               <%= node['private_chef']['opscode-erchef']['strict_se
 old_runlists_and_search true
 
 # Default server api version for all requests that don't specify it.
-server_api_version      0
+server_api_version         <%= node['private_chef']['server-api-version'] %>
 
 <%- if @log_http_requests %>
 

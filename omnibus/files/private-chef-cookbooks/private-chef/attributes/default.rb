@@ -80,6 +80,15 @@ default['private_chef']['couchdb']['port'] = 5984
 default['private_chef']['opscode-solr']['data_dir'] = "/var/opt/opscode/opscode-solr/data"
 
 ####
+# Server API Version - is not used in server configuration, but rather in the configuration
+# of components that need to know how to talk to the erchef server.
+#
+# This is set to the current minimally supported version.
+####
+default['private_chef']['server-api-version'] = 0
+
+
+####
 # RabbitMQ
 ####
 default['private_chef']['rabbitmq']['enable'] = true
