@@ -31,7 +31,7 @@
 
 update_part(Part, AceRecord, Type, AuthzId, OrgId) ->
     Ids = names_to_ids(ej:get({Part}, AceRecord), OrgId),
-    Data = ejson:encode(Ids),
+    Data = chef_json:encode(Ids),
     Path = acl_path(Type, AuthzId, Part),
     SuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
     Result = oc_chef_authz_http:request(Path, put, ?DEFAULT_HEADERS, Data, SuperuserId),

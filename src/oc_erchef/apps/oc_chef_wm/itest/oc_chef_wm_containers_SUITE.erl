@@ -79,7 +79,7 @@ list_when_created_containers(_) ->
     [ http_create_container(Container) || Container <- Containers ],
     {ok, ResponseCode, _, ResponseBody} = http_list_containers(),
     ?assertEqual("200", ResponseCode),
-    Ejson = ejson:decode(ResponseBody),
+    Ejson = chef_json:decode(ResponseBody),
     {ContainerList} = Ejson,
     [ ?assertEqual(true, proplists:is_defined(list_to_binary(Container), ContainerList))
       || Container <- Containers ].
@@ -103,14 +103,14 @@ delete_container(_) ->
 fetch_non_existant_container(_) ->
     Result = {ok, _, _, ResponseBody} = http_fetch_container("bar"),
     ?assertMatch({ok, "404", _, ResponseBody} , Result),
-    ?assertEqual([<<"Cannot load container bar">>], ej:get({"error"}, ejson:decode(ResponseBody))),
+    ?assertEqual([<<"Cannot load container bar">>], ej:get({"error"}, chef_json:decode(ResponseBody))),
     ok.
 
 fetch_existant_container(_) ->
     http_create_container("foo"),
     {ok, ResponseCode, _, ResponseBody} = http_fetch_container("foo"),
     ?assertMatch("200", ResponseCode),
-    Ejson = ejson:decode(ResponseBody),
+    Ejson = chef_json:decode(ResponseBody),
     ?assertEqual(<<"foo">>, ej:get({"containername"}, Ejson)),
     ?assertEqual(<<"foo">>, ej:get({"containerpath"}, Ejson)).
 
@@ -139,7 +139,7 @@ http_create_container(Name) ->
                      [{"x-ops-userid", "test-client"},
                       {"accept", "application/json"},
                       {"content-type", "application/json"}
-                     ],post, ejson:encode({[{<<"containername">>, list_to_binary(Name)}]})
+                     ],post, chef_json:encode({[{<<"containername">>, list_to_binary(Name)}]})
                     ).
 
 http_delete_container(Name) ->
@@ -153,4 +153,4 @@ http_update_container(Name, Ejson) ->
                      [{"x-ops-userid", "test-client"},
                       {"accept", "application/json"},
                       {"content-type", "application/json"}
-                     ], put, ejson:encode(Ejson)).
+                     ], put, chef_json:encode(Ejson)).

@@ -23,7 +23,6 @@
   {applications, [
                   kernel,
                   stdlib,
-                  ejson,
                   gen_bunny,
                   ibrowse
                  ]},
