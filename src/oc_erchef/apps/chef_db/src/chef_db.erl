@@ -287,18 +287,7 @@ fetch_org_metadata(#context{darklaunch = Darklaunch} = Context, OrgName) ->
 %% For couchdb-based orgs, fetch information from the orgname -> metadata cache
 cdb_fetch_org_metadata(#context{reqid = ReqId,
                                 otto_connection = Server}, OrgName) ->
-    case chef_cache:get(org_metadata, OrgName) of
-        Error when Error =:= not_found orelse Error =:= no_cache ->
-            case ?SH_TIME(ReqId, chef_otto, fetch_org_metadata, (Server, OrgName)) of
-                not_found ->
-                    not_found;
-                {OrgGuid, OrgAuthzId} ->
-                    chef_cache:put(org_metadata, OrgName, {OrgGuid, OrgAuthzId}),
-                    {OrgGuid, OrgAuthzId}
-            end;
-        {ok, {OrgGuid, OrgAuthzId}} ->
-            {OrgGuid, OrgAuthzId}
-    end.
+    ?SH_TIME(ReqId, chef_otto, fetch_org_metadata, (Server, OrgName)).
 
 sql_fetch_org_metadata(#context{reqid = ReqId}, OrgName) ->
     ?SH_TIME(ReqId, chef_sql, fetch_org_metadata, (OrgName)).
