@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
 
-gem 'dep_selector', :git => 'git://github.com/opscode/dep-selector', :branch => 'master'
-gem 'erlectricity', :git => 'git://github.com/sdelano/erlectricity', :branch => 'master'
+gem 'dep_selector', :git => 'git://github.com/chef/dep-selector', :branch => 'master'
+gem 'erlectricity', :git => 'git://github.com/marcparadise/erlectricity', :branch => 'mp/gcc-4.9.2-compat-fix'
 gem 'uuidtools'

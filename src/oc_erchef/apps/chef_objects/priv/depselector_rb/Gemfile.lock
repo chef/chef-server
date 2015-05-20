@@ -1,5 +1,5 @@
 GIT
-  remote: git://github.com/opscode/dep-selector
+  remote: git://github.com/chef/dep-selector
   revision: 7a75df69ae482768b439a28ab5e237459c6fa263
   branch: master
   specs:
@@ -8,9 +8,9 @@ GIT
       ffi (~> 1.9)
 
 GIT
-  remote: git://github.com/sdelano/erlectricity
-  revision: b8b627fbc4b82cbfe2807ab62733ba0a65d0c209
-  branch: master
+  remote: git://github.com/marcparadise/erlectricity
+  revision: c059bdad14921942dc5e89fad1d7c9d8ef7c2fd5
+  branch: mp/gcc-4.9.2-compat-fix
   specs:
     erlectricity (1.1.1)
 
@@ -18,8 +18,8 @@ GEM
   remote: https://rubygems.org/
   specs:
     dep-selector-libgecode (1.0.2)
-    ffi (1.9.6)
-    uuidtools (2.1.4)
+    ffi (1.9.8)
+    uuidtools (2.1.5)
 
 PLATFORMS
   ruby
