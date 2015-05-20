@@ -152,30 +152,7 @@ requestors({
 # on and get the full output
 debug_org_creation <%= node['private_chef']['oc-chef-pedant']['debug_org_creation'] %>
 
-# To facilitate testing as we transition from Ruby to Erlang endpoint
-# implementations, you can specify in your configuration which
-# implementation for each endpoint is currently active on the system
-# under test.  Tests should be written to fork on this value if
-# necessary.  A common reason is to take into account different error
-# message formatting between the two implementations.
-#
-ruby_environment_endpoint? false
-ruby_sandbox_endpoint?     false
-ruby_data_endpoint?        false
-ruby_role_endpoint?        false
-ruby_cookbook_endpoint?    false
-ruby_client_endpoint?      false
-ruby_users_endpoint?       false
-ruby_container_endpoint?   false
-ruby_container_endpoint_in_sql? true
-ruby_group_endpoint?       false
-ruby_acl_endpoint?         false
-ruby_system_recovery_endpoint? false
-ruby_org_acl_endpoint?     false
-ruby_org_assoc?            false
-ruby_organizations_endpoint? false
-chef_12?                   true
-policies?                  true
+# The behavior of these features depends on erchef configuration
 search_acls?               <%= node['private_chef']['opscode-erchef']['strict_search_result_acls'] %>
 
 old_runlists_and_search true
