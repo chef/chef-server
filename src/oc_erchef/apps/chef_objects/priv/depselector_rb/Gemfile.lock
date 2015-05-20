@@ -8,9 +8,8 @@ GIT
       ffi (~> 1.9)
 
 GIT
-  remote: git://github.com/marcparadise/erlectricity
+  remote: git://github.com/sdelano/erlectricity
   revision: 279b22e0d6373bf67ddb8f9f3efb5e9ba1eaa6c2
-  branch: master
   specs:
     erlectricity (1.1.1)
 
