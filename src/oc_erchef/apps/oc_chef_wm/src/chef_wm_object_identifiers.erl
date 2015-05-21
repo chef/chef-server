@@ -70,14 +70,17 @@ allowed_methods(Req, State) ->
 resource_exists(Req, State) ->
     ObjType = chef_wm_util:extract_from_path(object_type, Req),
     ObjName = chef_wm_util:extract_from_path(object_name, Req),
-    case object_identifiers(ObjType, ObjName, State) of
+    {OrgId, OrgAuthzId} = chef_wm_util:fetch_org_metadata(State),
+    State1 = State#base_state{organization_guid = OrgId,
+                              organization_authz_id = OrgAuthzId},
+    case object_identifiers(ObjType, ObjName, State1) of
         #object_identifier_state{} = IdState ->
-            State1 = State#base_state{resource_state = IdState},
-            {true, Req, State1};
+            State2 = State1#base_state{resource_state = IdState},
+            {true, Req, State2};
         Error ->
             Message = error_message(Error, ObjType, ObjName),
             Req1 = chef_wm_util:set_json_body(Req, Message),
-            {false, Req1, State#base_state{log_msg = {Error, ObjType, ObjName}}}
+            {false, Req1, State1#base_state{log_msg = {Error, ObjType, ObjName}}}
     end.
 
 to_json(Req, #base_state{resource_state = #object_identifier_state{
