@@ -63,6 +63,12 @@ default_orgname <%= @default_orgname ? "\"#{@default_orgname}\"" : "nil" %>
 # poll for a period to ensure they are querying committed results.
 search_server "<%= @solr_url %>"
 
+# Some tests expect access erchef server directly, instead of routing through
+# LB.
+#
+internal_server "http://<%= @erchef_internal_vip %>:<%= @erchef_internal_port %>"
+
+
 # Related to the 'search_server' parameter, this specifies the maximum
 # amout of time (in seconds) that search endpoint requests should be
 # retried before giving up.  If not explicitly set, it will default to

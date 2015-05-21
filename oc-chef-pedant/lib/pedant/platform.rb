@@ -27,7 +27,7 @@ module Pedant
     MAX_ATTEMPTS = 5
 
     attr_reader :test_org, :test_org_owner, :validate_org, :internal_account_url,
-                :ldap, :ldap_testing,
+                :internal_server, :ldap, :ldap_testing,
                 :server, :superuser, :superuser_key_file
 
     # Create a Platform object for a given server (specified by
@@ -41,6 +41,7 @@ module Pedant
       @superuser = Pedant::Requestor.new(superuser_name, superuser_key_file, platform: self)
       @test_org = org_from_config
       @internal_account_url = Pedant::Config[:internal_account_url]
+      @internal_server = Pedant::Config.internal_server || (fail "Missing internal_server in Pedant config.")
       @ldap = Pedant::Config[:ldap]
       @ldap_testing = Pedant::Config[:ldap_testing]
       self.pedant_run_timestamp # Cache the global timestamp at initialization
@@ -65,6 +66,15 @@ module Pedant
       path_prefix = (map_to_default_orgname?(path_fragment) ? '' : "/organizations/#{org.name}")
       slash = path_fragment.start_with?('/') ? '' : '/'
       "#{server}#{path_prefix}#{slash}#{path_fragment}"
+    end
+
+    # Construct a complete API URL for internal APIs that are not typically exposed
+    # via the public-facing load balancers.   Other than the server itself,
+    # behaves the same as api_url
+    def internal_api_url(path_fragment = '/', org=test_org)
+      path_prefix = "/organizations/#{org.name}"
+      slash = path_fragment.start_with?('/') ? '' : '/'
+      "#{internal_server}#{path_prefix}#{slash}#{path_fragment}"
     end
 
     ################################################################################

@@ -46,6 +46,8 @@ template pedant_config do
     :solr_url => "http://#{helper.vip_for_uri('opscode-solr4')}:#{node['private_chef']['opscode-solr4']['port']}",
     :opscode_account_internal_url => node['private_chef']['lb_internal']['vip'],
     :opscode_account_internal_port => node['private_chef']['lb_internal']['account_port'],
+    :erchef_internal_vip => node['private_chef']['opscode-erchef']['vip'],
+    :erchef_internal_port => node['private_chef']['opscode-erchef']['port'],
     :default_orgname => node['private_chef']['default_orgname'],
     :hostname => node['hostname'],
     :ssl_version =>  ssl_version
