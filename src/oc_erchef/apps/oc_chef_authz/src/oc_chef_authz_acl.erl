@@ -23,12 +23,6 @@
 
 -define(DEFAULT_HEADERS, []).
 
-% For getting out the ReqId for stats_hero: (not necessary once fetch_id is fixed for groups)
--record(context, {server_api_version,
-                  reqid :: binary(),
-                  otto_connection,
-                  darklaunch = undefined}).
-
 update_part(Part, AceRecord, Type, AuthzId, OrgId) ->
     Ids = names_to_ids(ej:get({Part}, AceRecord), OrgId),
     Data = chef_json:encode(Ids),
@@ -91,20 +85,12 @@ fetch_id(role, DbContext, Name, OrgId) ->
         #chef_role{authz_id = AuthzId} ->
             AuthzId
     end;
-fetch_id(group, #context{server_api_version = ApiVersion, reqid = ReqId}, Name, OrgId) ->
-    % Yes, this is ugly, but functionally it's identical to the internal logic
-    % of a regular group fetch, minus expanding the group members and such.
-    % And the regular group fetch was breaking for some reason I couldn't
-    % figure out, and at least this avoids that and doesn't spent time on
-    % extra requests
-    case stats_hero:ctime(ReqId, {chef_sql, fetch},
-                          fun() ->
-                                  chef_object_default_callbacks:fetch(#oc_chef_group{server_api_version = ApiVersion,
-                                                                                     org_id = OrgId,
-                                                                                     name = Name},
-                                                                      fun chef_sql:select_rows/1)
-                          end) of
-        not_found ->
+% TODO moving fetch_group into chef_db:fetch_unexpanded_group  will simplify this and
+% remove the need to know about chef_db:#context internals.
+fetch_id(group, {context, ApiVersion, ReqId, DarkLaunch}, Name, OrgId) ->
+    Ctx = oc_chef_authz_db:make_context(ApiVersion, ReqId, DarkLaunch),
+    case oc_chef_authz_db:fetch_group(Ctx, OrgId, Name) of
+        {not_found, authz_group}  ->
             not_found;
         #oc_chef_group{authz_id = AuthzId} ->
             AuthzId

@@ -69,6 +69,7 @@ default['private_chef']['service_dir_perms'] = "0750"
 
 ####
 # CouchDB (legacy required for upgrades to work)
+# TODO - still required?
 ####
 default['private_chef']['couchdb']['data_dir'] = "/var/opt/opscode/couchdb/db"
 default['private_chef']['couchdb']['vip'] = "127.0.0.1"
@@ -187,7 +188,6 @@ default['private_chef']['opscode-erchef']['db_pooler_timeout'] = '0'
 default['private_chef']['opscode-erchef']['sql_db_timeout'] = 5000
 default['private_chef']['opscode-erchef']['udp_socket_pool_size'] = '20'
 default['private_chef']['opscode-erchef']['db_pool_queue_max'] = '20'
-default['private_chef']['opscode-erchef']['couchdb_max_conn'] = '100'
 default['private_chef']['opscode-erchef']['ibrowse_max_sessions'] = 256
 default['private_chef']['opscode-erchef']['ibrowse_max_pipeline_size'] = 1
 # Default: generate signed URLs based upon Host: header. Override with a url, "http:// ..."
@@ -292,12 +292,6 @@ default['private_chef']['lb']['chef_min_version'] = 10
 # Load balancer route configuration
 ###
 default['private_chef']['lb']['xdl_defaults']['503_mode'] = false
-default['private_chef']['lb']['xdl_defaults']['couchdb_containers'] = false
-default['private_chef']['lb']['xdl_defaults']['couchdb_groups'] = false
-default['private_chef']['lb']['xdl_defaults']['couchdb_acls'] = false
-default['private_chef']['lb']['xdl_defaults']['couchdb_association_requests'] = false
-default['private_chef']['lb']['xdl_defaults']['couchdb_organizations'] = false
-default['private_chef']['lb']['xdl_defaults']['couchdb_associations'] = false
 
 ####
 # Nginx

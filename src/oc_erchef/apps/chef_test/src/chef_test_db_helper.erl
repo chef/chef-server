@@ -83,10 +83,6 @@ start_db(Config, DbName) ->
               [{<<"created_at">>, {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}},
                {<<"updated_at">>, {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}}]}]),
 
-    %% TODO: tell chef_otto that couchdb is dead
-    chef_test_suite_helper:set_env(chef_db,
-                                   [{couchdb_host, "localhost"},
-                                    {couchdb_port, 6984}]),
 
     [{pg_port, Port}, {pg_data, PgData}, {pg_log, PgLog}, {pg_name, DbName} | Config].
 

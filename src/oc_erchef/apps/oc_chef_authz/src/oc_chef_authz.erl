@@ -57,6 +57,7 @@
 -endif.
 
 -include("../../include/oc_chef_authz.hrl").
+-include("../../include/oc_chef_types.hrl").
 -include("../../include/server_api_version.hrl").
 -include("oc_chef_authz_db.hrl").
 
@@ -483,7 +484,7 @@ set_ace_for_entity(RequestorId, AuthzType, Id, AccessMethod,
 add_client_to_clients_group(Context, OrgId, ClientAuthzId, RequestorId) ->
     %% We need the superuser ID here because when a validator creates a client, the won't
     %% have the permissions required to add that new client to the clients group.
-    ClientGroupAuthzId = oc_chef_authz_db:fetch_group_authz_id(Context, OrgId, <<"clients">>),
+    #oc_chef_group{authz_id = ClientGroupAuthzId} = oc_chef_authz_db:fetch_group(Context, OrgId, <<"clients">>),
     add_to_group(ClientGroupAuthzId, actor, ClientAuthzId, RequestorId).
 
 %% @doc Add actor or group to group.

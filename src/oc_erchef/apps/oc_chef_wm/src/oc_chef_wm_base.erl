@@ -631,7 +631,7 @@ is_user_in_org(Type, DbContext, Name, OrgName) ->
 
 %% These are modules that we instrument with stats_hero and aggregate into common prefix via
 %% stats_hero_label.
--type metric_module() :: oc_chef_authz | chef_s3 | chef_sql | chef_solr | chef_otto.
+-type metric_module() :: oc_chef_authz | chef_s3 | chef_sql | chef_solr.
 
 %% @doc Given a `{Mod, Fun}' tuple, generate a stats hero metric with a prefix appropriate
 %% for stats_hero aggregation. An error is thrown if `Mod' is unknown. This is where we
@@ -870,6 +870,7 @@ create_500_response(Req) ->
     wrq:set_resp_body(Json, Req1).
 
 %% @doc Extract information from `State' needed to generate the X-Ops-API-Info header value.
+%% TODO this is to be retired with ?API_v0
 api_info(#base_state{api_version = ApiVersion,
                      otp_info = {ReleaseName, OtpVersion},
                      server_flavor = ServerFlavor}) ->
