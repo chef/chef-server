@@ -1,3 +1,8 @@
+#
+# Commented sections of this configuration should be uncommented once
+# luarocks is added to the apt package whitelist:
+#   https://github.com/travis-ci/travis-ci/issues/3716
+#
 branches:
   only:
     - master
@@ -5,13 +10,11 @@ cache:
   apt: true
   directories:
     - src/oc-id/vendor/bundle
-    - $HOME/.luarocks/rocks
+#    - $HOME/.luarocks/rocks
     - $HOME/.cpanm
     - $HOME/.cpan
     - $HOME/perl5
-# Turn this back on once luarocks can be installed
-# via the add-ons
-# sudo: false
+sudo: false
 language: erlang
 otp_release:
   - R16B03-1
@@ -21,24 +24,24 @@ addons:
     packages:
       - cpanminus
       - perl
-      - lua5.1
+#      - lua5.1
       - libdbd-pg-perl
       - build-essential
 env:
   global:
     - PERL5LIB=~/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:~/perl5/lib/perl5:/etc/perl:/usr/local/lib/perl/5.14.2:/usr/local/share/perl/5.14.2:/usr/lib/perl5:/usr/share/perl5:/usr/lib/perl/5.14:/usr/share/perl/5.14:/usr/local/lib/site_perl
     - USE_OMNIBUS_FILES=0
-    - LUALIB=~/.luarocks/lib/lua/5.2
+#    - LUALIB=~/.luarocks/lib/lua/5.2
   matrix:
   - COMPONENT=omnibus
   - COMPONENT=src/oc_erchef
   - COMPONENT=src/oc-id
   - COMPONENT=src/chef-mover
 install:
-  - sudo apt-get install luarocks
-  - luarocks install --local lpeg
-  - luarocks install --local lua-cjson
-  - eval $(luarocks path)
+#  - sudo apt-get install luarocks
+#  - luarocks install --local lpeg
+#  - luarocks install --local lua-cjson
+#  - eval $(luarocks path)
   - rvm install --binary 2.1.4
   - rvm use 2.1.4
   - cd $COMPONENT && travis_retry make install
