@@ -89,8 +89,6 @@ validate_modules(Modules) ->
 %% copied from chef_wm_base to use for testing
 stats_hero_label({chef_sql, Fun}) ->
     stats_hero_label0(rdbms, {chef_sql, Fun});
-stats_hero_label({chef_otto, Fun}) ->
-    stats_hero_label0(couchdb, {chef_otto, Fun});
 stats_hero_label({chef_solr, Fun}) ->
     stats_hero_label0(solr, {chef_solr, Fun});
 stats_hero_label({BadPrefix, Fun}) ->

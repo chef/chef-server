@@ -20,7 +20,7 @@
 -include_lib("eunit/include/eunit.hrl").
 -include("../../include/oc_chef_wm.hrl").
 
--define(CHECK_MODS, [chef_otto, chef_sql, chef_solr]).
+-define(CHECK_MODS, [chef_sql, chef_solr]).
 
 %% totally made up data, used for mocks
 -define(KEYGEN_STATUS, [{keys, 10}, {max, 10},

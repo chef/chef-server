@@ -26,7 +26,6 @@
 % For getting out the ReqId for stats_hero: (not necessary once fetch_id is fixed for groups)
 -record(context, {server_api_version,
                   reqid :: binary(),
-                  otto_connection,
                   darklaunch = undefined}).
 
 update_part(Part, AceRecord, Type, AuthzId, OrgId) ->

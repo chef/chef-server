@@ -23,7 +23,6 @@
 -record(oc_chef_authz_context,
         {server_api_version,
          reqid :: binary(),
-         otto_connection :: couchbeam:server(),
          darklaunch :: term()}).
 
 -type oc_chef_authz_context() :: #oc_chef_authz_context{}.

@@ -34,7 +34,7 @@
 %% probably confusing... this seems unused, delete it?
 -define(ORG_ID, <<"33330000000000000000000000000000">>).
 
-all() -> [fetch_container_sql].
+all() -> [fetch_container].
 
 init_per_suite(LastConfig) ->
     Config = chef_test_db_helper:start_db(LastConfig, "oc_chef_authz_itests"),
@@ -45,11 +45,11 @@ init_per_suite(LastConfig) ->
 end_per_suite(Config) ->
     chef_test_suite_helper:stop_server(Config, suite_helper:needed_apps()).
 
-fetch_container_sql(_Config) ->
+fetch_container(_Config) ->
     ContainerName = <<"nodes">>,
     ReqId = <<"test-1-req-id">>,
     Ctx = oc_chef_authz:make_context(?API_MIN_VER, ReqId, darklaunch_stub),
-    case oc_chef_authz_db:fetch_container_sql(Ctx, ?ORG_ID, ContainerName) of
+    case oc_chef_authz_db:fetch_container(Ctx, ?ORG_ID, ContainerName) of
         #chef_container{name = <<"nodes">>} = C ->
             ct:pal("Found container: ~p", [C]),
             ok;
