@@ -141,8 +141,6 @@
                ]},
   {chef_db, [
              {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
-             {cache_defaults, [{max_size, <%= @max_cache_size %> },
-                                  {ttl, <%= @cache_ttl %> }]},
              %% COUCHDB REMOVE THESE
              {couchdb_host, "127.0.0.1"},
              {couchdb_port, 5987 }
