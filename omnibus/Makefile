@@ -83,4 +83,6 @@ install:
 
 travis:
 	bundle exec rake test:csc
-	bundle exec rake test:routing
+# Uncomment once luarocks is added to the
+# apt-package whitelist in travis
+#	bundle exec rake test:routing
