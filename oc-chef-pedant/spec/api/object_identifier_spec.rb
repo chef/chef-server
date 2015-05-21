@@ -26,17 +26,17 @@ describe "Private Chef Nodes API endpoint",  :'object-identifiers' do
   let(:requestor){admin_requestor}
   let(:request_method){:GET}
   context "retrieving object identifiers" do
-    let(:object_guid)    { /^[0-9A-Fa-f]{32}$/ } 
+    let(:object_guid)    { /^[0-9A-Fa-f]{32}$/ }
     let(:request_url)    { internal_api_url("/nodes/#{node_name}/_identifiers") }
 
     context 'for nodes' do
       context 'that exist' do
         include_context 'with temporary testing node'
-        it "returns a 200 and valid node identifiers" do
-          # TODO if we expand the _identifiers behavior beyond nodes, this will 
-          # get factored up into its own shared context usable across different 
+        xit "returns a 200 and valid node identifiers" do
+          # TODO if we expand the _identifiers behavior beyond nodes, this will
+          # get factored up into its own shared context usable across different
           # object types.
-          should look_like({ 
+          should look_like({
             :status => 200,
             :body_exact => {
               "id" => object_guid,
@@ -61,7 +61,7 @@ describe "Private Chef Nodes API endpoint",  :'object-identifiers' do
       let(:request_url) { internal_api_url("/search/bad_object/_identifiers") }
       it "returns a 404" do
         should look_like(
-          { :status => 404, 
+          { :status => 404,
             :body_exact => { "error" => ["Unsupported object type: 'search'."] } } )
       end
     end
