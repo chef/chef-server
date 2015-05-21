@@ -55,9 +55,11 @@ bundle:
 
 install:
 	@./rebar get-deps -C rebar.config.lock
+	@cpanm --local-lib=~/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
 	@cpanm --notest --quiet App::Sqitch
 
 travis: all
+	psql postgres
 	PATH=~/perl5/bin:$(PATH) $(REBARC) skip_deps=true ct
 
 DEVVM_DIR = $(DEVVM_ROOT)/_rel/oc_erchef
