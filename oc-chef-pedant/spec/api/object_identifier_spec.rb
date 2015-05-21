@@ -32,7 +32,7 @@ describe "Private Chef Nodes API endpoint",  :'object-identifiers' do
     context 'for nodes' do
       context 'that exist' do
         include_context 'with temporary testing node'
-        xit "returns a 200 and valid node identifiers" do
+        it "returns a 200 and valid node identifiers" do
           # TODO if we expand the _identifiers behavior beyond nodes, this will
           # get factored up into its own shared context usable across different
           # object types.
