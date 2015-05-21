@@ -46,6 +46,12 @@ template erchef_config do
   notifies :restart, 'runit_service[opscode-erchef]' unless backend_secondary?
 end
 
+template "/opt/opscode/bin/reindex-opc-organization" do
+  source "reindex-opc-organization.erb"
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
+  mode "755"
+end
 # Erchef still ultimately uses disk_log [1] for request logging, and if
 # you change the log file sizing in the configuration **without also
 # issuing a call to disk_log:change_size/2, Erchef won't start.

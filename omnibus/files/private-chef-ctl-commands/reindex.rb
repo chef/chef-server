@@ -8,6 +8,6 @@ add_command_under_category "reindex", "general", "Reindex all server data for a 
   # Always perform a complete reindexing; if you want more granular options,
   # use the reindex-opc-server escript directly
   Dir.chdir(File.join(base_path, "embedded", "service", "opscode-erchef", "bin")) do
-    exec("./reindex-opc-organization complete #{organization}")
+    exec("/opt/opscode/bin/reindex-opc-organization complete #{organization}")
   end
 end
