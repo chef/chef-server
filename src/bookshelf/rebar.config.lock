@@ -1,6 +1,6 @@
 %% THIS FILE IS GENERATED. DO NOT EDIT IT MANUALLY %%
 
-{require_otp_vsn,"17.*"}.
+{require_otp_vsn,"R16|17.*"}.
 {erl_dep_retries,10}.
 {deps,[{goldrush,".*",
                  {git,"git://github.com/DeadZen/goldrush.git",

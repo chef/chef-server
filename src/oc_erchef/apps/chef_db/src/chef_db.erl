@@ -26,6 +26,10 @@
 
 -module(chef_db).
 
+-ifdef(namespaced_types).
+-type dict() :: dict:dict().
+-endif.
+
 -export([
          %% Context record manipulation
          make_context/2,
@@ -718,7 +722,7 @@ update_object(#context{reqid = ReqId}, ActorId, Fun, Object) ->
 -spec create_name_id_dict(#context{},
                           Index :: node | role | client | environment | binary(),
                           OrgId :: object_id()) ->
-                                 dict:dict() | {error, term()}.
+                                 dict() | {error, term()}.
 create_name_id_dict(#context{reqid=ReqId}, Index, OrgId) ->
     case ?SH_TIME(ReqId, chef_sql, create_name_id_dict, (OrgId, Index)) of
         {ok, D} ->
