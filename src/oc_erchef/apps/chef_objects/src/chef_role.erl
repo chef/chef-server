@@ -178,7 +178,7 @@ parse_binary_json(Bin, Action) ->
 set_default_values(Role) ->
     chef_object_base:set_default_values(Role, ?DEFAULT_FIELD_VALUES).
 
--spec validate(ej:ejson_object()) -> {ok, ej:ejson_object()}.
+-spec validate(jiffy:json_value()) -> {ok, jiffy:json_value()}.
 validate(Role) ->
     case chef_object_base:strictly_valid(?VALIDATION_CONSTRAINTS, ?VALID_KEYS, Role) of
         ok ->

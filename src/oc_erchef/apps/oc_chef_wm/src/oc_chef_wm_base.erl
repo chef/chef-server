@@ -677,7 +677,7 @@ object_creation_hook(Object, _State) ->
 %% See oc_chef_authz:add_client_to_clients_group/4 for more
 %% information on the `RequestorId` argument
 -spec client_cleanup(#chef_client{},
-                     AuthContext :: chef_authz:chef_authz_context(),
+                     AuthContext :: oc_chef_authz:oc_chef_authz_context(),
                      OrgId :: object_id(),
                      RequestorId :: superuser) -> #chef_client{} |
                                                                 {error, term()}.
@@ -1289,7 +1289,7 @@ route_args(ObjectRec,_State) ->
     {TypeName, [{name, chef_object:name(ObjectRec)}]}.
 
 -spec default_malformed_request_message(
-        term(), wm_req(), chef_wm:base_state()) -> none().
+        term(), wm_req(), #base_state{}) -> none().
 default_malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
