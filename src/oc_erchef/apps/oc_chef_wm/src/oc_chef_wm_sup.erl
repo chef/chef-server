@@ -45,7 +45,6 @@ upgrade() ->
 %% @doc ervisor callback.
 init([]) ->
     ok = load_ibrowse_config(),
-    ok = enable_org_cache(),
 
     Action = envy:get(oc_chef_wm, enable_actions, false, boolean),
 
@@ -96,17 +95,6 @@ load_ibrowse_config() ->
     ConfigFile = filename:absname(filename:join(["etc", "ibrowse", "ibrowse.config"])),
     lager:info("Loading ibrowse configuration from ~s~n", [ConfigFile]),
     ok = ibrowse:rescan_config(ConfigFile),
-    ok.
-
-enable_org_cache() ->
-    %% FIXME: should this config live at the oc_chef_wm level?
-    case envy:get(chef_db, cache_defaults, undefined, any) of
-        undefined ->
-            lager:info("Org guid cache disabled");
-        _Defaults ->
-            chef_cache:init(org_metadata),
-            lager:info("Org guid cache enabled")
-    end,
     ok.
 
 dispatch_table() ->

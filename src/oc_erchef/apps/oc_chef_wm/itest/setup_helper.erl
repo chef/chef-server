@@ -110,7 +110,6 @@ needed_apps() ->
      syntax_tools,
      goldrush,
      lager,
-     couchbeam,
      chef_index,
      oc_chef_authz,
      oc_chef_wm].
@@ -187,4 +186,3 @@ make_user(Config, Name, AuthzId) ->
     Response = chef_db:create(User, ?config(context, Config), AuthzId),
     ?assertEqual(Response, ok),
     User.
-
