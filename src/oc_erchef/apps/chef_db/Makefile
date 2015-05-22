@@ -2,12 +2,10 @@ DEPS=$(CURDIR)/deps
 DIALYZER_DEPS = deps/chef_objects/ebin \
                 deps/depsolver/ebin \
                 deps/ej/ebin \
-                deps/ejson/ebin \
                 deps/epgsql/ebin \
                 deps/ibrowse/ebin \
                 deps/mini_s3/ebin \
                 deps/mochiweb/ebin \
-                deps/oauth/ebin \
                 deps/pooler/ebin \
                 deps/sqerl/ebin \
                 deps/stats_hero/ebin

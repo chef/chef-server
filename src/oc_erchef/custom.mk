@@ -12,7 +12,6 @@ CT_DIR = common_test
 DIALYZER_OPTS =
 
 DIALYZER_SRC = -r apps/chef_db/ebin -r apps/chef_index/ebin -r apps/chef_objects/ebin -r apps/depsolver/ebin -r apps/oc_chef_authz/ebin -r apps/oc_chef_wm/ebin
-DIALYZER_SKIP_DEPS = couchbeam
 
 ct: clean_ct compile
 	time $(REBARC) ct skip_deps=true

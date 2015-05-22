@@ -24,7 +24,6 @@
   {applications, [
                   kernel,
                   stdlib,
-                  couchbeam,
                   stats_hero,
                   sqerl
                  ]},
