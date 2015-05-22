@@ -62,6 +62,6 @@ license_body(State) ->
 node_count(#base_state{chef_db_context = DbContext}) ->
     chef_db:count_nodes(DbContext).
 
--spec malformed_request_message(any(), wm_req(), oc_chef_wm_base:base_state()) -> no_return().
+-spec malformed_request_message(any(), wm_req(), #base_state{}) -> no_return().
 malformed_request_message(Any, Req, State) ->
     oc_chef_wm_base:default_malformed_request_message(Any, Req, State).

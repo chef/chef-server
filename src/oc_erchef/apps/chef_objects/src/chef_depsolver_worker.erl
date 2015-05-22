@@ -42,7 +42,10 @@
 
 -record(state, {port, os_pid}).
 
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl"). %% TODO: remove
+-endif.
+-include("../../include/chef_types.hrl").
 
 %%%===================================================================
 %%% API
@@ -68,7 +71,7 @@ start_link() ->
                          Cookbooks :: [Name::binary() |
                                              {Name::binary(), Version::binary()}],
                          Timeout :: integer()) ->
-                                {ok, [ chef_depsolver:versioned_cookbook()]} | {error, term()}.
+                                {ok, [ versioned_cookbook()]} | {error, term()}.
 solve_dependencies(AllVersions, EnvConstraints, Cookbooks, Timeout) ->
     case pooler:take_member(chef_depsolver, pooler_timeout()) of
         error_no_members ->
