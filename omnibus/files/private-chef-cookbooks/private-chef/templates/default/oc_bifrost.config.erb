@@ -96,6 +96,7 @@
           {db_pass, "<%= node['private_chef']['oc_bifrost']['sql_password'] %>" },
           {db_name, "bifrost" },
           {idle_check, 10000},
+          {pooler_timeout, <%= @db_pooler_timeout %>},
           {db_timeout, <%= node['private_chef']['oc_bifrost']['sql_db_timeout'] %>},
           {prepared_statements, {bifrost_db, statements, []} },
           {column_transforms, []}
@@ -110,6 +111,7 @@
            {pools, [[{name, sqerl},
                      {max_count, <%= @db_pool_size %> },
                      {init_count, <%= @db_pool_size %> },
+                     {queue_max, <%= @db_pool_queue_max %>},
                      {start_mfa, {sqerl_client, start_link, []}}]]}
            %%,{metrics_module, folsom_metrics}
           ]},

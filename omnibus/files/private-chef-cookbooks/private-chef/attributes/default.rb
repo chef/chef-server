@@ -180,11 +180,40 @@ default['private_chef']['opscode-erchef']['port'] = 8000
 default['private_chef']['opscode-erchef']['auth_skew'] = '900'
 default['private_chef']['opscode-erchef']['authz_pooler_timeout'] = '0'
 default['private_chef']['opscode-erchef']['bulk_fetch_batch_size'] = '5'
+default['private_chef']['opscode-erchef']['udp_socket_pool_size'] = '20'
+# Pool configuration for postgresql connections
+#
+# db_pool_size - the number of pgsql connections in the pool
+#
+# db_pool_queue_max - the maximum number of pgsql requests to queue up
+# if all connections are busy
+#
+# db_pooler_timeout - the maximum amount of time a request should wait
+# in the queue before timing out.  Request queueing is only effective
+# if db_pooler_timeout > 0
 default['private_chef']['opscode-erchef']['db_pool_size'] = '20'
 default['private_chef']['opscode-erchef']['db_pooler_timeout'] = '0'
 default['private_chef']['opscode-erchef']['sql_db_timeout'] = 5000
-default['private_chef']['opscode-erchef']['udp_socket_pool_size'] = '20'
 default['private_chef']['opscode-erchef']['db_pool_queue_max'] = '20'
+# Pool configuration for depsolver workers
+#
+# depsolver_worker_count - the number of depselector workers.  This is
+# a CPU bound task, thus setting this over the number of CPUs is not
+# advised.
+#
+# depsolver_pool_queue_max - the number of depsolve requets to queue
+# if all workers are busy.
+#
+# depsolver_pooler_timeout - the time in ms to wait before a queued
+# request times out.  Requesting queueing is only effective if
+# db_pooler_timeout > 0
+#
+# depsolver_tiemout - the amount of time to wait in ms before a
+# request to a depsolver worker is abandoned.
+default['private_chef']['opscode-erchef']['depsolver_pooler_timeout'] = '0'
+default['private_chef']['opscode-erchef']['depsolver_pool_queue_max'] = '50'
+default['private_chef']['opscode-erchef']['depsolver_worker_count'] = 5
+default['private_chef']['opscode-erchef']['depsolver_timeout'] = 5000
 default['private_chef']['opscode-erchef']['couchdb_max_conn'] = '100'
 default['private_chef']['opscode-erchef']['ibrowse_max_sessions'] = 256
 default['private_chef']['opscode-erchef']['ibrowse_max_pipeline_size'] = 1
@@ -199,8 +228,6 @@ default['private_chef']['opscode-erchef']['s3_parallel_ops_fanout'] = 20
 default['private_chef']['opscode-erchef']['authz_timeout'] = 2000
 default['private_chef']['opscode-erchef']['authz_fanout'] = 20
 default['private_chef']['opscode-erchef']['root_metric_key'] = "chefAPI"
-default['private_chef']['opscode-erchef']['depsolver_worker_count'] = 5
-default['private_chef']['opscode-erchef']['depsolver_timeout'] = 5000
 default['private_chef']['opscode-erchef']['max_request_size'] = 1000000
 default['private_chef']['opscode-erchef']['cleanup_batch_size'] = 0
 default['private_chef']['opscode-erchef']['keygen_cache_size'] = 10
@@ -425,6 +452,9 @@ default['private_chef']['oc_bifrost']['listen'] = '127.0.0.1'
 default['private_chef']['oc_bifrost']['port'] = 9463
 default['private_chef']['oc_bifrost']['superuser_id'] = '5ca1ab1ef005ba111abe11eddecafbad'
 default['private_chef']['oc_bifrost']['db_pool_size'] = '20'
+# The db_pool is only effective for a db_pooler_timeout > 0
+default['private_chef']['oc_bifrost']['db_pooler_timeout'] = '0'
+default['private_chef']['oc_bifrost']['db_pool_queue_max'] = '50'
 default['private_chef']['oc_bifrost']['sql_user'] = "bifrost"
 default['private_chef']['oc_bifrost']['sql_password'] = "challengeaccepted"
 default['private_chef']['oc_bifrost']['sql_ro_user'] = "bifrost_ro"
@@ -439,6 +469,9 @@ default['private_chef']['oc_bifrost']['extended_perf_log'] = true
 ####
 default['private_chef']['oc_chef_authz']['http_init_count'] = 25
 default['private_chef']['oc_chef_authz']['http_max_count'] = 100
+# The queue max is only effective if authz_pooler_timeout (in the
+# opscode-erchef configurables above) is > 0
+default['private_chef']['oc_chef_authz']['http_queue_max'] = 50
 default['private_chef']['oc_chef_authz']['http_cull_interval'] = "{1, min}"
 default['private_chef']['oc_chef_authz']['http_max_age'] = "{70, sec}"
 default['private_chef']['oc_chef_authz']['http_max_connection_duration'] = "{70, sec}"
