@@ -9,6 +9,23 @@ REL_HOOK = compile bundle
 
 CT_DIR = common_test
 
+ERLANG_DIALYZER_APPS = asn1 \
+                       compiler \
+                       crypto \
+                       edoc \
+                       eldap \
+                       erts \
+                       inets \
+                       kernel \
+                       mnesia \
+                       public_key \
+                       sasl \
+                       ssl \
+                       stdlib \
+                       syntax_tools \
+                       tools \
+                       xmerl
+
 DIALYZER_OPTS =
 
 DIALYZER_SRC = -r apps/chef_db/ebin -r apps/chef_index/ebin -r apps/chef_objects/ebin -r apps/depsolver/ebin -r apps/oc_chef_authz/ebin -r apps/oc_chef_wm/ebin
