@@ -128,4 +128,5 @@
            {d,'CHEF_DB_DARKLAUNCH',xdarklaunch_req},
            {d,'CHEF_WM_DARKLAUNCH',xdarklaunch_req},
            {parse_transform,lager_transform},
-           debug_info]}.
+           warnings_as_errors,debug_info]}.
+
