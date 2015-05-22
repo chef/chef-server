@@ -55,11 +55,11 @@
          set_api_version/2,
          type_name/1,
          update_from_ejson/2,
-         update_query/1,
-         update/2
+         update_query/1
         ]).
 
--mixin([{chef_object_default_callbacks, [fetch/2]}]).
+-mixin([{chef_object_default_callbacks, [fetch/2,
+                                         update/2]}]).
 
 -define(VALIDATION_CONSTRAINTS,
         {[{<<"revision_id">>, {string_match, chef_regex:regex_for(policy_file_revision_id)}},
@@ -181,12 +181,6 @@ record_fields(_ApiVersion) ->
 list(#oc_chef_policy{org_id = OrgId} = P, CallbackFun) ->
     CallbackFun({list_query(P), [OrgId], rows}).
 
-update(#oc_chef_policy{
-                      org_id = _OrgId,
-                      authz_id = _PolicyAuthzId,
-                      last_updated_by = _AuthzId
-                     } = Record, CallbackFun) ->
-    chef_object_default_callback:update(Record, CallbackFun).
 
 
 parse_binary_json(Bin) ->
