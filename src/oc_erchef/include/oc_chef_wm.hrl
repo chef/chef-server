@@ -172,7 +172,7 @@
           chef_db_context :: chef_db:db_context(),
 
           %% Opaque db connection context record as returned by chef_authz:make_context.
-          chef_authz_context :: chef_authz:chef_authz_context(),
+          chef_authz_context :: oc_chef_authz:oc_chef_authz_context(),
 
           %% AuthzId for the actor making the request.
           requestor_id :: object_id(),

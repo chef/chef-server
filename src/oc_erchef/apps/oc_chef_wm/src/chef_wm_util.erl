@@ -178,7 +178,7 @@ set_json_body(Req, EjsonData) ->
 %% in an error message envelope, which is then encoded to JSON and set as the body of the
 %% request.  This updated request is returned.
 -spec with_error_body(Req :: wm_req(),
-                      ErrorData :: ej:json_object() | ej:json_string()) ->
+                      ErrorData :: jiffy:json_value()) ->
                              ReqWithErrorJSON :: wm_req().
 with_error_body(Req, ErrorData) ->
     ErrorPayload = error_message_envelope(ErrorData),
