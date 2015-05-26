@@ -93,8 +93,24 @@ unless File.exists?(ssl_keyfile) && File.exists?(ssl_crtfile) && File.exists?(ss
   end
 end
 
+
+ssl_dhparam = File.join(nginx_ca_dir, "dhparams.pem")
+# We do the File.exist check at compile-time to prevent expensive
+# dhapram generation.
+if ! File.exists?(ssl_dhparam)
+  file ssl_dhparam do
+    content `/opt/opscode/embedded/bin/openssl dhparam 2048 2>/dev/null`
+    mode "0644"
+    owner "root"
+    group "root"
+    action :create_if_missing
+  end
+end
+
+
 node.default['private_chef']['nginx']['ssl_certificate'] ||= ssl_crtfile
 node.default['private_chef']['nginx']['ssl_certificate_key'] ||= ssl_keyfile
+node.default['private_chef']['nginx']['ssl_dhparam'] ||= ssl_dhparam
 
 remote_directory nginx_html_dir do
   source "html"
