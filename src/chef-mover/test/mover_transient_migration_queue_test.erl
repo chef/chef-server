@@ -28,4 +28,3 @@ initialize_queue_overwrites_queue() ->
     ?assertEqual(3, mover_transient_migration_queue:length(?MODULE)),
     mover_transient_migration_queue:initialize_queue(?MODULE, [4,5]),
     ?assertEqual(2, mover_transient_migration_queue:length(?MODULE)).
-    

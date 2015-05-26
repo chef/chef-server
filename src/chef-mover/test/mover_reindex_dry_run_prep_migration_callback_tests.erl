@@ -6,7 +6,6 @@
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("hoax/include/hoax.hrl").
 
-
 ?HOAX_FIXTURE(fun() ->
                   mover_transient_migration_queue:start_link()
               end,
@@ -19,7 +18,7 @@
 
 migration_init_should_fail_if_in_dry_run() ->
     application:set_env(mover, dry_run, true),
-    ?assertError({badmatch, true}, mover_reindex_dry_run_prep_migration_callback:migration_init()).    
+    ?assertError({badmatch, true}, mover_reindex_dry_run_prep_migration_callback:migration_init()).
 
 migration_init_should_initialize_queue_with_orgs() ->
     application:set_env(mover, dry_run, false),
@@ -33,7 +32,7 @@ migration_init_should_initialize_queue_with_orgs() ->
     mover_reindex_dry_run_prep_migration_callback:migration_init(),
 
     ?assertEqual(2, mover_transient_migration_queue:length(mover_reindex_dry_run_prep_migration_callback)).
-    
+
 migration_start_worker_args_include_both_org_and_account_info_in_list() ->
     ?assertEqual([org,account_info], mover_reindex_dry_run_prep_migration_callback:migration_start_worker_args(org, account_info)).
 
