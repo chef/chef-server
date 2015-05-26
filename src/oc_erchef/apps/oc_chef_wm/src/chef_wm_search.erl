@@ -306,26 +306,12 @@ index_type_to_db_type(Type) ->
 %% node data is a special case because node attributes are deep-merged prior to indexing for
 %% search and we want to work with the same merged attributes for extracting partial search
 %% data.
-%%
-%% data_bag is another special case while data bags are still in couchdb where they are
-%% stored with wraper cruft. We provide a fun-head to deal with this.
 parse_item(node, Item) ->
     Node = parse_item0(Item),
     %% This is fairly hacky. :(
     NodeRecStub = #chef_node{name = ej:get({<<"name">>}, Node),
                              environment = ej:get({<<"chef_environment">>}, Node)},
     chef_object:ejson_for_indexing(NodeRecStub, Node);
-parse_item({data_bag, _}, Item) ->
-    RawItem = parse_item0(Item),
-    %% TODO: when data bags are no longer in couchdb, clean this
-    case ej:get({<<"id">>}, RawItem) of
-        undefined ->
-            %% we have a crufted data_bag_item, de-cruft!
-            ej:get({<<"raw_data">>}, RawItem);
-        Id when is_binary(Id) ->
-            %% no cruft, just return it
-            RawItem
-    end;
 parse_item(_, Item) ->
     parse_item0(Item).
 
@@ -410,39 +396,14 @@ encode_results(Results, Prefix, Acc) ->
 %% Encode a list of items as a JSON array partial. That is, encode as a JSON array and then
 %% strip the '[' and ']' off the result. This allows us to incrementally encode a long array
 %% of objects in batches avoiding having all objects in memory in order to encode them.
-%%
-%% This function knows how to deal with gzip binary from SQL and with EJSON data coming
-%% straight from couch. If the data has come from couch, this is where couch cruft keys _id
-%% and _rev are removed.
 encode_result_rows([Item|_Rest]=Items) when is_binary(Item) ->
     ItemList = << <<(chef_db_compression:decompress(Bin))/binary, ",">> || Bin <- Items >>,
     %% remove trailing "," from binary
     binary:part(ItemList, {0, size(ItemList) - 1});
 encode_result_rows(Items) ->
-    %% ensure no couchdb cruft leaks out
-    CleanItems = [ {remove_couchdb_keys(Doc)} || {Doc} <- Items ],
-    Bin = chef_json:encode(CleanItems),
+    Bin = chef_json:encode(Items),
     %% remove leading '[' and trailing ']' so that we can add to this result.
     binary:part(Bin, {1, size(Bin) - 2}).
-
-%% Remove couchdb internal keys "_rev" and "_id" from a tuple list where the keys are
-%% assumed to be binaries. The first two instances of _rev or _id will be removed, so if you
-%% somehow have duplicates, this will not remove all occurances.
-remove_couchdb_keys([]) ->
-    [];
-remove_couchdb_keys(L) ->
-    remove_couchdb_keys(L, 0).
-
-remove_couchdb_keys([{Key, _}|T], N) when Key =:= <<"_rev">>;
-                                          Key =:= <<"_id">> ->
-    remove_couchdb_keys(T, N+1);
-remove_couchdb_keys(L, N) when N > 1 ->
-    L;
-remove_couchdb_keys([H|T], N) ->
-    [H|remove_couchdb_keys(T, N)];
-remove_couchdb_keys([], _) ->
-    [].
-
 
 safe_split(N, L) ->
     try
