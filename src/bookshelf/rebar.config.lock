@@ -1,6 +1,6 @@
 %% THIS FILE IS GENERATED. DO NOT EDIT IT MANUALLY %%
 
-{require_otp_vsn,"R1[56]B.*"}.
+{require_otp_vsn,"R16|17.*"}.
 {erl_dep_retries,10}.
 {deps,[{goldrush,".*",
                  {git,"git://github.com/DeadZen/goldrush.git",
@@ -23,9 +23,12 @@
        {iso8601,".*",
                 {git,"git://github.com/opscode/erlang_iso8601.git",
                      "25675e1df8b2bade1fb539cd9a913d61b90468dd"}},
+       {rebar_vsn_plugin,".*",
+                         {git,"https://github.com/erlware/rebar_vsn_plugin.git",
+                              "fd40c960c7912193631d948fe962e1162a8d1334"}},
        {erlware_commons,".*",
                         {git,"git://github.com/erlware/erlware_commons.git",
-                             "e7d175d0dbbcfc9b1b93f69cebfbc73c4b937905"}},
+                             "03f76c6ef2e854a11a62c3a1992f047ab0a0a69e"}},
        {mixer,".*",
               {git,"git://github.com/opscode/mixer.git",
                    "58ded93d5c47675899d8e5e1589270f340ea66c5"}},
@@ -34,19 +37,19 @@
                      "8f3f6a3a30730b193cc340a8885a960586dc98de"}},
        {envy,".*",
              {git,"git://github.com/manderson26/envy.git",
-                  "d62cb227b9000ee866c8bcc724ddf68d87621dea"}},
+                  "e6ba39664a1016ed309ea44269247943de2eb16b"}},
        {mini_s3,".*",
                 {git,"git://github.com/opscode/mini_s3.git",
                      "1cf296868077caefa6791f4996145a369c49091b"}},
+       {sync,".*",
+             {git,"https://github.com/rustyio/sync.git",
+                  "ae7dbd4e6e2c08d77d96fc4c2bc2b6a3b266492b"}},
        {eper,".*",
              {git,"git://github.com/massemanet/eper.git",
                   "80e7cd6446d26d2423f2acd37253826bb3152964"}},
        {rebar_lock_deps_plugin,".*",
                                {git,"git://github.com/seth/rebar_lock_deps_plugin.git",
                                     "7a5835029c42b8138325405237ea7e8516a84800"}},
-       {sync,".*",
-             {git,"https://github.com/rustyio/sync.git",
-                  "ae7dbd4e6e2c08d77d96fc4c2bc2b6a3b266492b"}},
        {edown,".*",
               {git,"git://github.com/seth/edown.git",
                    "30a9f7867d615af45783235faa52742d11a9348e"}}]}.

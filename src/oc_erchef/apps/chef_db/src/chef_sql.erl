@@ -24,7 +24,6 @@
 %% @author Ho-Sheng
 %% @author Marc Paradise <marc@chef.io>
 
-
 -module(chef_sql).
 
 -include("../../include/chef_db.hrl").
@@ -33,6 +32,9 @@
 -compile(export_all).
 -endif.
 
+-ifdef(namespaced_types).
+-type dict() :: dict:dict().
+-endif.
 
 -export([
          create_name_id_dict/2,

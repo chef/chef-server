@@ -35,7 +35,7 @@
                       policy_file_name |
                       policy_identifier.
 
--type re_regex() :: {re_pattern, integer(), integer(), binary()}.
+-type re_regex() :: re:mp(). %%{re_pattern, integer(), integer(), binary()}.
 %% FIXME: This type is not yet correct
 %% I'd like to use binary() but dialyzer wants this more specific type
 -type re_msg() :: <<_:64,_:_*8>>.

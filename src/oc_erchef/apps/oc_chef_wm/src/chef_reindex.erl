@@ -19,6 +19,10 @@
 -module(chef_reindex).
 -compile([warnings_as_errors]).
 
+-ifdef(namespaced_types).
+-type dict() :: dict:dict().
+-endif.
+
 -include("../../include/chef_types.hrl").
 -include_lib("ej/include/ej.hrl").
 

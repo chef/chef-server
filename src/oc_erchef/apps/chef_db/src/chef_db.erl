@@ -26,6 +26,10 @@
 
 -module(chef_db).
 
+-ifdef(namespaced_types).
+-type dict() :: dict:dict().
+-endif.
+
 -export([
          %% Context record manipulation
          make_context/2,
