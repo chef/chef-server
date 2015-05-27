@@ -19,6 +19,7 @@
 
 -module(oc_chef_wm_base_tests).
 
+-include("../../include/oc_chef_wm.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 stats_hero_label_test_() ->
@@ -39,3 +40,59 @@ stats_hero_label_test_() ->
                 ?_assertError({bad_prefix, {bad, juju}},
                               oc_chef_wm_base:stats_hero_label({bad, juju})) ],
     GoodTests ++ BadTests.
+
+verify_request_signature_test_() ->
+    {foreach,
+     fun() ->
+             meck:expect(wrq, get_req_header, fun(_Header, _Req) ->
+                                                      "username"
+                                              end)
+     end,
+     fun(_) ->
+             meck:unload()
+     end,
+     [
+      {"returns {halt, 503} on no_connections",
+       fun() ->
+               Req = make_req_data(),
+               State = make_base_state(),
+               meck:expect(chef_db, fetch_requestors, fun(_Context, _OrgId, _Name) ->
+                                                              {error, no_connections}
+                                                      end),
+               {Return, _Req1, State1} = oc_chef_wm_base:verify_request_signature(Req, State),
+               ?assertEqual({halt, 503}, Return),
+               ?assertEqual({error_finding_user_or_client, no_connections}, State1#base_state.log_msg)
+       end},
+      {"returns {halt, 500} on unknown errors",
+       fun() ->
+               Req = make_req_data(),
+               State = make_base_state(),
+               meck:expect(chef_db, fetch_requestors, fun(_Context, _OrgId, _Name) ->
+                                                              {error, uh_oh}
+                                                      end),
+               {Return, _Req1, State1} = oc_chef_wm_base:verify_request_signature(Req, State),
+               ?assertEqual({halt, 500}, Return),
+               ?assertEqual({error_finding_user_or_client, uh_oh}, State1#base_state.log_msg)
+       end},
+      {"returns false (401) when user / client not found",
+       fun() ->
+               Req = make_req_data(),
+               State = make_base_state(),
+               meck:expect(chef_db, fetch_requestors, fun(_Context, _OrgId, _Name) ->
+                                                              not_found
+                                                      end),
+               {Return, _Req1, State1} = oc_chef_wm_base:verify_request_signature(Req, State),
+               ?assertEqual(false, Return),
+               ?assertEqual({not_found, user_or_client}, State1#base_state.log_msg)
+       end}
+     ]}.
+
+make_req_data() ->
+    #wm_reqdata{}.
+
+make_base_state() ->
+    #base_state{
+       organization_name = <<"ponyville">>,
+       organization_guid = <<"12341234123412341234123412341234">>,
+       auth_skew = 900
+      }.
