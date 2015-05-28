@@ -31,6 +31,13 @@ ldap_authentication_enabled = OmnibusHelper.new(node).ldap_authentication_enable
 enable_ssl = ldap_authentication_enabled ? node['private_chef']['ldap']['enable_ssl'] : nil
 ldap_encryption_type = ldap_authentication_enabled ? node['private_chef']['ldap']['encryption_type'] : nil
 
+actions_vip = ((!node['analytics']['rabbitmq']['actions_vip'].nil?) rescue false) ? node['analytics']['rabbitmq']['actions_vip'] : node['private_chef']['rabbitmq']['vip']
+actions_port = ((!node['analytics']['rabbitmq']['actions_port'].nil?) rescue false) ? node['analytics']['rabbitmq']['actions_port'] : node['private_chef']['rabbitmq']['node_port']
+actions_user = ((!node['analytics']['rabbitmq']['actions_user'].nil?) rescue false) ? node['analytics']['rabbitmq']['actions_user'] : node['private_chef']['rabbitmq']['user']      
+actions_password = ((!node['analytics']['rabbitmq']['actions_password'].nil?) rescue false) ? node['analytics']['rabbitmq']['actions_password'] : node['private_chef']['rabbitmq']['password']        
+actions_vhost = ((!node['analytics']['rabbitmq']['actions_vhost'].nil?) rescue false) ? node['analytics']['rabbitmq']['actions_vhost'] : node['private_chef']['rabbitmq']['actions_vhost']
+actions_exchange = ((!node['analytics']['rabbitmq']['actions_exchange'].nil?) rescue false) ? node['analytics']['rabbitmq']['actions_exchange'] : node['private_chef']['rabbitmq']['actions_exchange']
+
 erchef_config = File.join(opscode_erchef_dir, "sys.config")
 
 template erchef_config do
@@ -38,7 +45,13 @@ template erchef_config do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode "644"
-  variables(node['private_chef']['opscode-erchef'].to_hash.merge(:ldap_enabled => ldap_authentication_enabled,
+  variables(node['private_chef']['opscode-erchef'].to_hash.merge(:actions_vip => actions_vip,
+                                                                 :actions_port => actions_port,
+                                                                 :actions_user => actions_user,
+                                                                 :actions_password => actions_password,
+                                                                 :actions_vhost => actions_vhost,
+                                                                 :actions_exchange => actions_exchange,
+                                                                 :ldap_enabled => ldap_authentication_enabled,
                                                                  :enable_ssl =>  enable_ssl,
                                                                  :ldap_encryption_type => ldap_encryption_type,
                                                                  :helper => OmnibusHelper.new(node)))
