@@ -1,5 +1,10 @@
 # Chef Server Changelog
 
+## Unreleased
+
+### chef-server
+* Ensure that postgres shared buffers are calculated correctly
+
 ## 12.1.0 (2015-05-27)
 
 ### chef-server
