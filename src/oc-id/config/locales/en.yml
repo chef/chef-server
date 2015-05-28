@@ -22,8 +22,8 @@
 en:
   errors:
     password_resets:
-      username_blank: "Please enter a username"
-      invalid_username: "%{name} is not a valid username"
-      password_blank: "Password must not be blank"
-      invalid_signature: "The given password reset link is expired or has an invalid signature"
-      completion: "If the username you entered exists, you should receive an email shortly"
+      username_blank: "Please enter a username."
+      invalid_username: "%{name} is not a valid username."
+      password_blank: "Password must not be blank."
+      invalid_signature: "The given password reset link is expired or has an invalid signature."
+      completion: "If the username you entered exists, you should receive an email shortly."

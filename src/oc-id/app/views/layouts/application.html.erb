@@ -14,18 +14,18 @@
       <ul class="title-area">
         <li class="name">
           <h1>
-            <%= link_to '', root_path, :class => 'logo default' %>
+            <%= chef_logo(:a, :href => root_path, :class => 'logo').html_safe %>
           </h1>
         </li>
         <li class="toggle-topbar menu-icon"><a href="#"><span></span></a></li>
       </ul>
-      <div class="top-bar-section">
+      <div class="top-bar-section main">
         <ul class="left">
           <% if signed_in? %>
             <li><a>Signed in as: <%= current_user.username %></a></li>
             <li><%= link_to "Sign Out", signout_path, method: "delete" %></li>
           <% elsif controller.controller_name == 'sessions' %>
-            <li><%= link_to "Sign Up", sign_up_url, :target => "_blank" %></li>
+            <li><%= link_to "Sign Up", chef_sign_up_url, :target => "_blank" %></li>
           <% else %>
             <li><%= link_to "Sign In", signin_path %></li>
           <% end %>
@@ -42,11 +42,9 @@
     <% end %>
     <%= yield %>
   </div>
-  <div class="row">
-    <footer>
-      &copy; <%= Time.now.year %> Chef Software, Inc.
-    </footer>
-  </div>
+  <footer>
+    &copy; <%= Time.now.year %> Chef Software, Inc.
+  </footer>
   <%= javascript_include_tag "application" %>
   <script>
     $(document).chef({
