@@ -1,31 +1,214 @@
 # Chef Server Release Notes
 
-## 12.1.0 (unknown)
+## 12.1.0 (2015-05-27)
 
-The following items are new since Chef Server 12.0.8 and/or are changes from previous versions.  For specific breakdown of updated components, refer to CHANGELOG.md
+The following items are new since Chef Server 12.0.8 and/or are changes from previous versions.  For specific breakdown of updated components, refer to CHANGELOG.md.
 
-* oc\_erchef
-  * Server API version is currently '1', and this release deprecates API
-    v0 behaviors for the Users, Clients and Prinicpals endpoints.
+Additional items will be highlighted here for further RC updates, then
+consolidated into the overall 12.1.0 release notes as part of the final
+12.1.0 release.
+
+### Chef Server
+  * Expose queue configuration for erchef and bifrost connection pools
+  * A new gather-log script gathers a lot more debugging information for
+    use in support requests.
+  * Optionally send application statistics using the statsd
+    protocol. To send statsd-formatted statistics,
+    set `estatsd['protocol'] = "statsd"` in chef-server.rb.
+  * expose postgres WAL configurables in chef-server.rb
+  * chef-server-ctl key commands now use the keys API
+  * remove darklaunch flags that controlled routing of requests to couch
+    vs postgres, and oc_erchef vs opscode-account.
+  * Fix local-mode-cache warnings on `chef-server-ctl reconfigure`
+
+#### Chef Server Development Improvements
+
+* Many of Chef Server's components have been consolidated, allowing
+  Chef to increase the rate at which we can deliver improvements. The
+  new consolidated repository can be found at
+  https://github.com/chef/chef-server.
+* A new self-contained development environment greatly simplifies and
+  speeds up the process of developing Chef Server components.  This
+  also eases the path for those outside of the Chef organization
+  who wish to contribute to Chef Server. You can find this here:
+  https://github.com/chef/chef-server/tree/master/dev.  Feedback and
+  suggestions are welcome.
+* Many less-visible improvements all contribute to making Chef Server
+  easier to enhance and maintain, including improved test coverage,
+  better static code analysis, coverage analysis, removal of redundant
+  paths, unified build/make process, and extensive refactoring of code.
+
+### REST API Service (oc\_erchef)
+  * Server API version is now `1`, and this release deprecates API v0.
+    See Deprecations below for more information.
+  * All support for couch has been removed, along with darklaunch flags
+    that would allow switching between CouchDB and Postgres.
   * New behaviors introduced under APIv1 for Clients, Users, and Principals.  See
     API Changes and Additions
+  * Multiple performance enhancements. Data showing the
+    effects of these changes in our own hosted environment will be published to
+    the Chef blog as part of the final 12.1 release announcement:
+    * Improve performance of depsolver endpoint by using a bulk query for
+      cookbook versions.
+    * Reduce bulk query to retrieve minimum required data, which
+      provided a significant performance improvement.
+    * Changes to reduce the number of redundant database calls made from many
+      endpoints
+    * Eliminate unecessary postgresql transactions caused by recent versions of sqerl.
+    * Wire-level performance enhancements for postgres communications that
+      significantly reduce the number of network packets required for
+      most transactions.
+  * Preparations for upgrade to Erlang 17.5, which is scheduled for 12.1.0-rc.2.
 
-### API Changes and Additions
 
-TODO
-TODO Reference to blog/doc posts
-TODO
+### Authorization Service (oc\_bifrost)
+
+  * Wire-level performance enhancements for postgres
+  * Eliminate unecessary postgresql transactions caused by recent versions of sqerl.
+
+### Identity Service (oc\_id)
+
+  * New profile mangement feature
+  * Ensure that unless newrelic support is expressly configured, the
+    service will not call home to newrelic.
+
+### Deprecations
+
+  * Server API version is currently `1`.  Version `0` is deprecated.
+    This includes several v0 behaviors for the Users, Clients and
+    Prinicpals endpoints.  See API Changes and Additions for more details.
+  * The response header `X-Ops-API-Info` is also deprecated. Version `0`
+    requests will continue to receive it alongside the new
+    `X-Ops-Server-API-Version` header, while Version `1`+ will receive only
+    the latter.
+
+### Changes in Behavior
+
+  * As a side effect of keys-related changes Clients under
+    API v1, searches for clients created using v1 of the API will no longer
+    include client public keys in the response.  When API v0 is
+    desupported, this will become the default behavior.
+
+### Bug Fixes / Closed Issues
+
+Pending for final release: most of these have github issues that need to be linked.
+
+  * API requests made by a user that shares a name with a client in the
+    same org wil no longer fail with a 401.
+  * Fix bug where chef-server-ctl install command would
+    always attempt to reinstall previously installed packages.
+  * Fix a fatal `oc_erchef` crash that occurred when `folsom_graphite` is configured,
+    but no server is avaiable or the server goes away.
+  * Prevent graphite failures from causing `oc_erchef` to crash when
+    `folsom_graphite` is enabled.
+  * Pull in newest folsom and bear to address `folsome_graphite` crashes.
+  * Fix local-mode-cache warnings on `chef-server-ctl reconfigure`
+    (Issue #106)
+  * Restart procps server to ensure sysctl tuning is applied.
+  * Correct path to DRBD split brain notification script.
+  * Remove install message from postinst package script
+  * Fix bug where `chef-server-ctl reconfigure` would
+    fail if rabbitmq['nodename'] had been changed.
+  * Fixes chef-server issue #119 which prevented some LDAP users from
+    successfully logging in.
+  * Correct path to DRBD split brain notification script.
+
+### Security Updates
 
 The following items are the security updates that have been applied since Chef Server 12.0.8:
 
 * PostgreSQL 9.2.10
-  * CVE-2015-0241 - Fix buffer overruns in to_char()
-  * CVE-2015-0242 - Fix buffer overrun in replacement *printf() functions
-  * CVE-2015-0243 - Fix buffer overruns in contrib/pgcrypto
-  * CVE-2015-0244 - Fix possible loss of frontend/backend protocol synchronization after an error
+  * CVE-2015-0241 - Fix buffer overruns in `to_char()`
+  * CVE-2015-0242 - Fix buffer overrun in replacement `*printf()` functions
+  * CVE-2015-0243 - Fix buffer overruns in `contrib/pgcrypto`
+  * CVE-2015-0244 - Fix possible loss of frontend/backend protocol synchronization
+    after an error
   * CVE-2014-8161 - Fix information leak via constraint-violation error messages
   * CVE-2014-0067 - Lock down regression testing's temporary installations on Windows
 
+### API Changes and Additions
+
+Complete API change documentation and coverage of new features will be
+be provided with the 12.1.0 final final release.
+
+Server API Version support is enabled via the `X-Ops-Server-API-Version`
+request header. Current valid values are `0` and `1`.
+
+Server API Version `0` is deprecated with the release of 12.1.0.
+
+*Changes implemented under API v0+*
+
+These additions and behaviors are in effect for API v0 and any later versions:
+
+  * Policyfile, Policy Groups, and Cookbook Artifact endpoints are now
+    considered final and are available for use.
+  * When creating or updating a key via the Keys API, it is now possible
+    to include `create_key: true` in the request body to use a server-generated
+    private key. In this case, the fields `public_key` and `private_key` will be
+    returned along with the existing response body.
+  * If request header `X-Ops-Server-API-Version` is not provided by the
+    client, be considered `0` instead of the lowest-supported version.
+  * Response header `X-Ops-Server-API-Version` has been implemented for
+    all requests, and will indicate the version level at which each
+    request was services.
+  * In client creation and update, the last remnants of the `admin` flag
+    have been removed. It was previously partially supported in that we
+    would capture and update the value, but the value was unused in the system.
+    If submitted in POST/PUT of a client or user, it is ignored.
+
+*Changes implemented under API v1+*
+
+These changes are in effect only if the requestor specifies API version
+of `1` or higher. Clients that do not request this version or explicitly
+request version `0` will continue to see unmodified behavior under API
+v0, until that version is desupported.
+
+  * Response header X-Ops-API-Info is not included in responses.
+  * Clients and Users
+    * GET of named client/user will no longer include a `public_key`
+      field.  Instead use `GET /clients/:name/keys` to list keys, and
+      `GET /clients/:name/keys/:key_name` to view the `public_key`
+      value.
+    * A default key can be created when POSTing create a new client or user
+      by including either a `public_key` value or `create_key: true` in
+      the request body.
+    * If neither `public_key` nor `create_key` is provided in the request
+      body, the client or user will be created without a key.  A key can
+      be added later via the keys endpoint for the client/user.
+    * Certificates are no longer accepted as a valid `public_key` value
+      when POSTing to create a client. Only public keys are accepted.
+    * Keys can no longer be updated via a PUT request to client or user -
+      instead perform the PUT request to the keys endpoint.
+    * Including any of `public_key`, `private_key`, or `create_key` in PUT
+      requests to client/users will cause a 400 response with detailed message.
+    * If a key is created for a new client or user via `public_key` or `create_key`,
+      a `chef_key` object will be included in the response. The `chef_key` will
+      also include the key's URL which can be used for updates and removal.
+      If the key has been generated by the server, then `private_key` will
+      be included in the embedded `chef_key`.
+  * The Principals endpoint will return a list of principal data for all
+    matching principals within a container object in the form
+    `{ "principals" : [{...},... ] }`.  The fields within each `principal`
+    record in the list are unmodified from v0.
+
+#### Compatibility Notes
+
+  * Client Support for APIv1 is underway and is expected to be released
+    shortly.
+  * Current server Add-Ons will work with 12.1.0.  However, reporting,
+    push server, and analytics may not work correctly if multiple keys are
+    configured for clients or users. Updates to these products to enable
+    support for Chef Server API v1 and multi-key are forthcoming.
+  * If you are upgrading from 12.0.7 or earlier and have any existing
+    organizations that does not have the default `users`, `admins`, and/or
+    `clients` groups, then policyfiles, policy groups, and cookbook artifacts
+    may  not work correctly for these organizations.  If your existing
+    organizations do have these groups, then the new endpoints will work
+    as expected.
+
+### Release History
+
+* RC1 - 2015-05-27 (internal)
 
 ## 12.0.8 (2015-04-20)
 
@@ -53,11 +236,6 @@ The following items are the security updates that have been applied since Chef S
 ### Issue Fixes
   * [opscode-omnibus-744](https://github.com/chef/opscode-omnibus/issues/744)
   * [chef-server-142](https://github.com/chef/chef-server/issues/142)
-
-### API Changes and Additions
-  * Server API Version support is enabled via X-Ops-Server-API-Version.
-    Current and default version is now version 0.
-
 
 ## 12.0.7 (2015-03-26)
 

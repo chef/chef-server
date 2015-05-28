@@ -23,7 +23,7 @@ replace         "private-chef"
 conflict        "private-chef"
 install_dir     "/opt/opscode"
 # last released version is 12.0.8
-build_version   "12.0.9"
+build_version   "12.1.0-rc.1"
 build_iteration 1
 
 override :cacerts, version: '2014.08.20'
