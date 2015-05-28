@@ -1,38 +1,106 @@
 # Chef Server Changelog
 
-## 12.1.0 (unknown)
+## 12.1.0 (2015-05-27)
 
-### chef-client master
+### chef-server
+* new self-contained development environment for chef server
+* Remove nested directories from log rotation template
+* Fix local-mode-cache warnings on `chef-server-ctl reconfigure`:
+  Move the `cache_path` into /var/opt/opscode to avoid warnings
+* Float Chef and knife-opc on master
+* update chef-sever-ctl key commands to use Chef::Key.
+* Correct path to DRBD split brain notification script.
+* remove SquareSerif font, comm-503 page, and associated resources
 * Server's install of Chef now floats on master.
-
-### knife-opc master
 * Server's install of knife-opc now floats on master.
-
-### oc-chef-pedant
-*  2.1.0
-  * Versioned testing support for users, clients, and principals
-  * exposed 'server\_api\_version to tests.
-
-### oc\_erchef
-* 1.8.0
-  * API v1 introduced, affecting users, clients, and principals
-  endpoints.
-
-### opscode-omnibus
 * Remove install message from postinst package script
 * Update chef-server-ctl key commands to use chef-client's Chef::Key object.
 * New gather-log script gathers a lot more debugging information.
-* Remove nested directories from log rotation template
+* removed unused error json and html pages. Correct doctype in default
+  landing page.
+
+### Components
+
+### oc_erchef
+* API v1 now available
+* API v0 deprecated
+* Update policyfile URLs to match draft RFC
+* significant performance improvements
+  * create `bulk_fetch_query` to replace multiple repeated db calls,
+    return less data, and reference fewer tables.
+  * sqerl updates to reduce unncessary requests, and batch all steps of
+    a binding and executing a query into a single call to postgres.
+* X-Ops-Server-API-Info response header now implemented for all API
+  versions
+* [refactor] reduce copy-paste of core functionality by allowing
+  callbacks for response body customization on create/update.
+* dialyze everything - clean dialyzer build
+* enable `warnings_as_errors` build flag
+* consistency in sql statement loading across `chef_db` and
+  `oc_chef_authz_db`.
+* add support for server-side generation of keys via the keys API by
+  accepting `create_key`: true in the request body.
+* [refactor] consolidated key manipulation and validation to one place
+  in the code.
+* Cookbook Artifacts API interops w/ chef-client and ChefDK
+* Pull in newest folsom and bear to address folsome_graphite crashes.
+* Thanks to @danieldreier for removing satan from the development guide
+
+### oc-id
+* interationalization and other improvements to password change
+* don't call home to newrelic unless specifically configured with a
+  newrelic API key
+* fix asset precompile:
+  * Use HTTPS rather than git URLs for gems from GitHub
+  * Update to latest web core
+  * Add assets precompile to Travis CI step
+  * Changes to remove deprecation warnings
+* new profile controller and views
+
+### oc-chef-pedant
+  * Versioned testing support for users, clients, principals,and
+    response headers.
+  * Bring artifacts & policyfile test into line with final implementation
+  * exposed 'server\_api\_version to tests.
+
+
+#### Merged Repositories
+
+12.1.0 is the first release using the new merged repository which
+contains the following components:
+
+- opscode-omnibus
+- oc\_erchef
+- oc\_bifrost
+- oc-id
+- bookshelf
+- opscode-expander
+- chef-mover
+- chef-server-bootstrap
+
+#### Updated Components
+
+* zlib (1.2.6 -> 1.2.8)
+* libffi (3.0.13 -> 3.2.1)
+* omnibus-ctl (89423eda -> c514d1d4)
+* postgresql92 (9.2.9 -> 9.2.10)
+* server-jre (7u25 -> 8u31)
+* knife-opc (7bf26f4b -> daec05e7)
+* python (2.7.5 -> 2.7.9)
+* opscode-solr4 (4.5.1 -> 4.9.1)
+* chef (12.0.3 -> 4664b73)
+
+### opscode-omnibus
 
 ### postgresql 9.2.10
 * bugfixes: [link](http://www.postgresql.org/docs/9.2/static/release-9-2-10.html)
-* CVE-2015-0241: Fix buffer overruns in to_char()
-* CVE-2015-0242: Fix buffer overrun in replacement *printf() functions
-* CVE-2015-0243: Fix buffer overruns in contrib/pgcrypto
+* CVE-2015-0241: Fix buffer overruns in `to_char`()
+* CVE-2015-0242: Fix buffer overrun in replacement `*printf()` functions
+* CVE-2015-0243: Fix buffer overruns in `contrib/pgcrypto`
 * CVE-2015-0244: Fix possible loss of frontend/backend protocol synchronization after an error
 * CVE-2014-8161: Fix information leak via constraint-violation error messages
 * CVE-2014-0067: Lock down regression testing's temporary installations on Windows
-
+-----------------------------
 ## 12.0.8 (2015-04-20)
 
 ### chef-server-ctl
