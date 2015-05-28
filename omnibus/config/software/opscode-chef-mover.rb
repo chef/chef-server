@@ -26,7 +26,7 @@ build do
   make "distclean", env: env
   make "rel", env: env
 
-  sync "#{project_dir}/rel/mover/", "#{install_dir}/embedded/service/opscode-chef-mover/"
+  sync "#{project_dir}/_rel/mover/", "#{install_dir}/embedded/service/opscode-chef-mover/"
   delete "#{install_dir}/embedded/service/opscode-chef-mover/log"
 
   mkdir "#{install_dir}/embedded/service/opscode-chef-mover/scripts"

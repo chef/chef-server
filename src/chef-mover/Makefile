@@ -1,111 +1,42 @@
-DEPS=$(CURDIR)/deps
+# This Makefile written by concrete
+#
+# {concrete_makefile_version, 3}
+#
+# ANY CHANGES TO THIS FILE WILL BE OVERWRITTEN on `concrete update`
+# IF YOU WANT TO CHANGE ANY OF THESE LINES BELOW, COPY THEM INTO
+# custom.mk FIRST
 
-# The release branch should have a file named USE_REBAR_LOCKED
-use_locked_config = $(wildcard USE_REBAR_LOCKED)
-ifeq ($(use_locked_config),USE_REBAR_LOCKED)
-  rebar_config = rebar.config.lock
-else
-  rebar_config = rebar.config
-endif
-REBAR = REBAR_PARENT=$(CURDIR)/rebar.config rebar -C $(rebar_config)
+# Use this to override concrete's default dialyzer options of
+# -Wunderspecs
+# DIALYZER_OPTS = ...
 
-all: compile
+# List dependencies that you do NOT want to be included in the
+# dialyzer PLT for the project here.  Typically, you would list a
+# dependency here if it isn't spec'd well and doesn't play nice with
+# dialyzer or otherwise mucks things up.
+#
+# DIALYZER_SKIP_DEPS = bad_dep_1 \
+#                      bad_dep_2
 
-compile: $(DEPS)
-	@$(REBAR) compile
+# If you want to add dependencies to the default "all" target provided
+# by concrete, add them here (along with make rules to build them if needed)
+# ALL_HOOK = ...
 
-compile_skip:
-	@$(REBAR) compile skip_deps=true
+## .DEFAULT_GOAL can be overridden in custom.mk if "all" is not the desired
+## default
+.DEFAULT_GOAL := all
 
-test:
-	@$(REBAR) eunit skip_deps=true
-
-# For a release-only project, this won't make much sense, but could be
-# useful for release projects that have their own code
-clean:
-	@$(REBAR) clean skip_deps=true
-
-allclean:
-	@$(REBAR) clean
-
-update: compile
-	@cd rel/mover;bin/mover restart
-
-distclean: relclean
-	@rm -rf deps
-	@$(REBAR) clean
-	@rm -rf rel/apps rel/rebar.config
-
-tags: TAGS
-
-TAGS:
-	find deps -name "*.[he]rl" -print | etags -
-
-# Only do munge_apps if we have files in src/
-all_src_files = $(wildcard src/*)
-ifeq ($(strip $(all_src_files)),)
-munge_apps:
-	@true
-else
-munge_apps:
-	@mkdir -p rel/apps/mover
-	@ln -sf `pwd`/ebin rel/apps/mover
-	@ln -sf `pwd`/priv rel/apps/mover
+# custom.mk is totally optional
+custom_rules_file = $(wildcard custom.mk)
+ifeq ($(custom_rules_file),custom.mk)
+    include custom.mk
 endif
 
-generate: munge_apps
-	@/bin/echo 'building OTP release package for mover'
-	@/bin/echo "using rebar as: $(REBAR)"
-	@$(REBAR) skip_deps=true generate
-	@rm -rf rel/apps rel/rebar.config
-	@echo '    _    _        ____      _    _     _____   ______    '
-	@echo '   \ \  / /      / __ \    ) )  ( (   / ___/  (   __ \   '
-	@echo '   () \/ ()     / /  \ \  ( (    ) ) ( (__     ) (__) )  '
-	@echo '   / _  _ \    ( ()  () )  \ \  / /   ) __)   (    __/   '
-	@echo '  / / \/ \ \   ( ()  () )   \ \/ /   ( (       ) \ \  _  '
-	@echo ' /_/      \_\   \ \__/ /     \  /     \ \___  ( ( \ \_)) '
-	@echo '(/          \)   \____/       \/       \____\  )_) \__/  '
-	@echo ''
-	@echo '    ready to move'
-
-rel: rel/mover
-
-devrel: rel
-	@/bin/echo -n Symlinking deps and apps into release
-	@$(foreach dep,$(wildcard deps/*), /bin/echo -n .;rm -rf rel/mover/lib/$(shell basename $(dep))-* \
-	   && ln -sf $(abspath $(dep)) rel/mover/lib;)
-	@rm -rf rel/mover/lib/mover-*;mkdir -p rel/mover/lib/mover
-	@ln -sf `pwd`/ebin rel/mover/lib/mover
-	@ln -sf `pwd`/priv rel/mover/lib/mover
-	@/bin/echo done.
-	@/bin/echo  Run \'make update\' to pick up changes in a running VM.
-
-rel/mover: compile generate
-
-relclean:
-	@rm -rf rel/mover
-
-$(DEPS):
-	@echo "Fetching deps as: $(REBAR)"
-	@$(REBAR) get-deps
-
-prepare_release: distclean unlocked_deps rel lock_deps
-	@echo 'release prepared, bumping version'
-	@touch USE_REBAR_LOCKED
-	@$(REBAR) bump-rel-version
-
-unlocked_deps:
-	@echo 'Fetching deps as: rebar -C rebar.config'
-	@rebar -C rebar.config get-deps
-
-lock_deps:
-	@rebar lock-deps skip_deps=true
-
-install:
-	./rebar get-deps -C rebar.config.lock
-
-travis: all
-	./rebar skip_deps=true ct
-	./rebar skip_deps=true eunit
-
-.PHONY: distclean prepare_release lock_deps unlocked_deps update clean compile compile_skip allclean tags relclean devrel rel relclean generate munge_apps test
+concrete_rules_file = $(wildcard concrete.mk)
+ifeq ($(concrete_rules_file),concrete.mk)
+    include concrete.mk
+else
+    all:
+	@echo "ERROR: missing concrete.mk"
+	@echo "  run: concrete update"
+endif

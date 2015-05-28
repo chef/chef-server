@@ -20,3 +20,9 @@ OLD
 .#*
 *~
 .rebar
+.concrete
+_rel
+relx
+deps.plt
+erln8.config
+Makefile.0
