@@ -68,7 +68,6 @@ consolidated into the overall 12.1.0 release notes as part of the final
 
 ### Identity Service (oc\_id)
 
-  * New profile mangement feature
   * Ensure that unless newrelic support is expressly configured, the
     service will not call home to newrelic.
 
