@@ -28,15 +28,7 @@ link "/opt/opscode/embedded/service/opscode-chef-mover/log" do
   to opscode_chef_mover_log_dir
 end
 
-template "/opt/opscode/embedded/service/opscode-chef-mover/bin/mover" do
-  source "opscode-chef-mover.erb"
-  owner OmnibusHelper.new(node).ownership['owner']
-  group OmnibusHelper.new(node).ownership['group']
-  mode "0755"
-  variables(node['private_chef']['opscode-chef-mover'].to_hash)
-end
-
-mover_config = File.join(opscode_chef_mover_etc_dir, "sys.config")
+mover_config = File.join(opscode_chef_mover_dir, "sys.config")
 
 template mover_config do
   source "opscode-chef-mover.config.erb"
@@ -46,7 +38,7 @@ template mover_config do
   variables(node['private_chef']['opscode-chef-mover'].to_hash.merge({:helper => OmnibusHelper.new(node)}))
 end
 
-link "/opt/opscode/embedded/service/opscode-chef-mover/etc/sys.config" do
+link "/opt/opscode/embedded/service/opscode-chef-mover/sys.config" do
   to mover_config
 end
 
