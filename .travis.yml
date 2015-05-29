@@ -21,7 +21,7 @@ before_cache:
   - rm -f $HOME/.cpanm/build.log
 language: erlang
 otp_release:
-  - 17.4
+  - R16B03-1
 addons:
   postgresql: "9.3"
   apt:
