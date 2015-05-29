@@ -16,14 +16,18 @@ end
 # to get a sqitch schema in place from EC11? We already use sqitch in
 # 11.2 and 11.3, which I think are the only ones we support upgrading from.
 private_chef_pg_sqitch "/opt/opscode/embedded/service/opscode-erchef/schema/baseline" do
+  hostname  postgres['vip']
+  port      postgres['port']
   username  postgres['sql_user']
   password  postgres['sql_password']
   database  "opscode_chef"
 end
 
 private_chef_pg_sqitch "/opt/opscode/embedded/service/opscode-erchef/schema" do
-  username postgres['sql_user']
-  password postgres['sql_password']
+  hostname  postgres['vip']
+  port      postgres['port']
+  username  postgres['sql_user']
+  password  postgres['sql_password']
   database "opscode_chef"
 end
 

@@ -1,8 +1,8 @@
 class EcPostgres
   def self.with_connection(node, database = 'template1')
     require 'pg'
-    # TODO -
-    #
+    # TODO - this will need to accept params for where to connect once we suppotr splitting out multiple
+    # databases.
     postgres = node['private_chef']['postgresql']
     if postgres['remote']
       # TODO this is a dual user of postgres['username'] - though it makes sense here?
