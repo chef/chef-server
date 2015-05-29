@@ -37,7 +37,6 @@ override :ruby, version: "2.1.4"
 dependency "preparation"
 
 # global
-dependency "chef" # for embedded chef-client -z runs
 dependency "private-chef-scripts" # assorted scripts used by installed instance
 dependency "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
 dependency "ctl-man" # install man page
@@ -92,6 +91,7 @@ dependency "oc-chef-pedant"
 dependency "private-chef-upgrades"
 dependency "private-chef-cookbooks"
 dependency "chef-ha-plugin-config"
+dependency "chef" # for embedded chef-client -z runs (built from master - build last)
 
 package :rpm do
   signing_passphrase ENV['OMNIBUS_RPM_SIGNING_PASSPHRASE']
