@@ -1,12 +1,27 @@
 class EcPostgres
   def self.with_connection(node, database = 'template1')
     require 'pg'
-    as_user(node['private_chef']['postgresql']['username']) do
-      connection = ::PGconn.open('dbname' => database)
-      begin
-        yield connection
-      ensure
-        connection.close
+    # TODO -
+    #
+    postgres = node['private_chef']['postgresql']
+    if postgres['remote']
+      # TODO this is a dual user of postgres['username'] - though it makes sense here?
+        connection = ::PGconn.open('user' => postgres['username'],
+                                   'host' => postgres['vip'], 'password' => postgres['password'],
+                                   'port' => postgres['port'], 'dbname' => database)
+        begin
+          yield connection
+        ensure
+          connection.close
+        end
+    else
+      as_user(node['private_chef']['postgresql']['username']) do
+        connection = ::PGconn.open('dbname' => database)
+        begin
+          yield connection
+        ensure
+          connection.close
+        end
       end
     end
   end

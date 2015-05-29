@@ -390,6 +390,7 @@ default['private_chef']['postgresql']['version'] = "9.2"
 # we'll be using these directories to determine what versions we have installed and
 # whether we need to run pg_upgrade.
 default['private_chef']['postgresql']['enable'] = true
+default['private_chef']['postgresql']['remote'] = false
 default['private_chef']['postgresql']['ha'] = false
 default['private_chef']['postgresql']['dir'] = "/var/opt/opscode/postgresql/#{node['private_chef']['postgresql']['version']}"
 default['private_chef']['postgresql']['data_dir'] = "/var/opt/opscode/postgresql/#{node['private_chef']['postgresql']['version']}/data"
@@ -397,7 +398,10 @@ default['private_chef']['postgresql']['log_directory'] = "/var/log/opscode/postg
 default['private_chef']['postgresql']['log_min_duration_statement'] = -1
 default['private_chef']['postgresql']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['postgresql']['log_rotation']['num_to_keep'] = 10
+# If 'remote' = true, these shoudl be set to the username and password
+# of a superuser on the remote instance who has access over tcp vi pg_hba.conf
 default['private_chef']['postgresql']['username'] = "opscode-pgsql"
+default['private_chef']['postgresql']['password'] = nil
 default['private_chef']['postgresql']['shell'] = "/bin/sh"
 default['private_chef']['postgresql']['home'] = "/var/opt/opscode/postgresql"
 default['private_chef']['postgresql']['user_path'] = "/opt/opscode/embedded/bin:/opt/opscode/bin:$PATH"
@@ -461,6 +465,12 @@ default['private_chef']['oc_bifrost']['db_pool_size'] = '20'
 # The db_pool is only effective for a db_pooler_timeout > 0
 default['private_chef']['oc_bifrost']['db_pooler_timeout'] = '0'
 default['private_chef']['oc_bifrost']['db_pool_queue_max'] = '50'
+## TODO, allow:
+#
+#default['private_chef']['oc_bifrost']['db']['hostname']
+#default['private_chef']['oc_bifrost']['db']['port']
+#default['private_chef']['oc_bifrost']['db']['username']
+#default['private_chef']['oc_bifrost']['db']['password']
 default['private_chef']['oc_bifrost']['sql_user'] = "bifrost"
 default['private_chef']['oc_bifrost']['sql_password'] = "challengeaccepted"
 default['private_chef']['oc_bifrost']['sql_ro_user'] = "bifrost_ro"

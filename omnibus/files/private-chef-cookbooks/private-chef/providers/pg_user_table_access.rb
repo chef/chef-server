@@ -66,6 +66,7 @@ def functions_access
 end
 
 def run_sql(connection, sql, *params)
+  # TODO - don't really want to see every query in my output...
   converge_by sql do
     connection.exec(sql, *params)
   end

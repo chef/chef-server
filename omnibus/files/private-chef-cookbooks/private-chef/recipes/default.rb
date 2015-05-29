@@ -245,6 +245,16 @@ include_recipe "private-chef::plugins"
       end
 
       case service
+      when  "postgresql"
+        # Data master check is to only attempt this from one place.
+        if is_data_master? and node['private_chef']['postgresql']['remote']
+          # We still need users created!
+          #private_chef_pg_database "opscode-pgsql"
+          include_recipe "private-chef::erchef_database"
+          include_recipe "private-chef::bifrost_database"
+          include_recipe "private-chef::oc_id_database"
+        end
+
       when "opscode-expander"
         runit_service "opscode-expander-reindexer" do
           action :disable
@@ -258,6 +268,7 @@ include_recipe "private-chef::plugins"
   end
 end
 
+# If an external database is provided, we still need to ensure our users are set up.
 
 
 include_recipe "private-chef::actions" if darklaunch_values["actions"]
