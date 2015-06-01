@@ -227,6 +227,11 @@
                      {start_mfa, {chef_depsolver_worker, start_link, []}}]]},
            {metrics_module, folsom_metrics}
           ]}
+<% if !node['private_chef']['opscode-erchef']['ssl_session_caching']['enabled'] -%>
+,  {ssl, [
+      {session_cb, noop_session_cache}
+  ]}
+<% end -%>
 <% if node['private_chef']['folsom_graphite']['enabled'] -%>
 , {folsom_graphite, [
                      {graphite_host, "<%= @helper.normalize_host(node['private_chef']['folsom_graphite']['host']) %>"},
