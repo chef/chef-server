@@ -98,7 +98,7 @@
                               "fd40c960c7912193631d948fe962e1162a8d1334"}},
        {erlware_commons,".*",
                         {git,"https://github.com/erlware/erlware_commons.git",
-                             "ef0d252b11c863f9c228af2fe93a4e42fba2f7f3"}},
+                             "2e23e43079686ddb68bfca772d37f78dfe4dd95e"}},
        {darklaunch,".*",
                    {git,"https://github.com/opscode/opscode-darklaunch-erlang",
                         "05881cb04e9393ab42b6fac3b22803130ef2701c"}},
@@ -128,6 +128,6 @@
            {d,'CHEF_DB_DARKLAUNCH',xdarklaunch_req},
            {d,'CHEF_WM_DARKLAUNCH',xdarklaunch_req},
            {parse_transform,lager_transform},
-           warnings_as_errors,
-           debug_info,
+           warnings_as_errors,debug_info,
            {platform_define,"^[0-9]+",namespaced_types}]}.
+
