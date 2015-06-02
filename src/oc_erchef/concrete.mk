@@ -104,7 +104,7 @@ ifeq ($(TRAVIS),true)
 ## reported by erlang:system_info(otp_release)
 ## s3cmd put --acl-public --guess-mime-type <FILENAME> s3://concrete-plts
 
-BASE_PLT := travis-erlang-$(ERLANG_VERSION).plt
+BASE_PLT := travis-erlang-$(TRAVIS_OTP_RELEASE).plt
 BASE_PLT_URL := http://s3.amazonaws.com/concrete-plts/$(BASE_PLT)
 else
 BASE_PLT := ~/.concrete_dialyzer_plt_$(BASE_PLT_ID)_$(ERLANG_VERSION).plt
