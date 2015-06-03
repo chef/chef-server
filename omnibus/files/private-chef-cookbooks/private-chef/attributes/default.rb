@@ -131,6 +131,7 @@ default['private_chef']['opscode-solr4']['enable'] = true
 default['private_chef']['opscode-solr4']['ha'] = false
 default['private_chef']['opscode-solr4']['dir'] = "/var/opt/opscode/opscode-solr4"
 default['private_chef']['opscode-solr4']['data_dir'] = "/var/opt/opscode/opscode-solr4/data"
+default['private_chef']['opscode-solr4']['temp_directory'] = "/var/opt/opscode/opscode-solr4/"
 default['private_chef']['opscode-solr4']['log_directory'] = "/var/log/opscode/opscode-solr4"
 default['private_chef']['opscode-solr4']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['opscode-solr4']['log_rotation']['num_to_keep'] = 10
