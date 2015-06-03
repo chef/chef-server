@@ -42,7 +42,7 @@ class PasswordResetsController < ApplicationController
 
   def update
     if params[:password].blank?
-      flash.now[:alert] = I18n.t("errors.password_resets.password_blank")
+      flash.now[:alert] = I18n.t("errors.passwords.blank", :label => 'Password')
       render 'show', status: :forbidden
     elsif !valid_signature?
       flash.now[:alert] = I18n.t("errors.password_resets.invalid_signature")
@@ -86,11 +86,5 @@ class PasswordResetsController < ApplicationController
       params[:expires],
       Settings.secret_key_base
     ).valid_for?(params[:signature])
-  end
-
-  def error_from_json(error)
-    JSON.parse(error.response.body)
-  rescue JSON::ParserError
-    { 'error' => error.message }
   end
 end

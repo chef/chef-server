@@ -34,7 +34,7 @@ Doorkeeper.configure do
     # Put your admin authentication logic here.
     # Example implementation:
     # Admin.find_by_id(session[:admin_id]) || redirect_to(new_admin_session_url)
-    Settings.doorkeeper.administrators.include?(session[:username]) || (render template: 'errors/404', status: :not_found)
+    User.admin?(session[:username]) || (render template: 'errors/404', status: :not_found)
   end
 
   # Authorization Code expiration time (default 10 minutes).
