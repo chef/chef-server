@@ -42,18 +42,18 @@ env:
     - CHEFDK_GECODE_PATH=/opt/chefdk/embedded/lib/ruby/gems/2.1.0/gems/dep-selector-libgecode-1.0.2/lib/dep-selector-libgecode/vendored-gecode
     - LUALIB=~/.luarocks/lib/lua/5.2
   matrix:
-  #- COMPONENT=omnibus
+  - COMPONENT=omnibus
   - COMPONENT=src/oc_erchef
   - COMPONENT=src/oc-id
   - COMPONENT=src/chef-mover
 install:
   - mkdir -p $HOME/.realcache
-  # Some errors expected but not fatal -- thus ||true
+    # Some warning-type errors expected . THis will give a non-zero return
+    # code and stop the build, thus ||true
   - rsync -azr --no-R --stats /home/travis/.realcache/ / || true
-    # TODO - luarocks local install of lpeg is failing, need to look at why.
-  #- luarocks install --local lpeg
-  #- luarocks install --local lua-cjson
-  #- eval $(luarocks path)
+  - luarocks install --local lpeg
+  - luarocks install --local lua-cjson
+  - eval $(luarocks path)
   - rvm install --binary 2.1.4
   - rvm use 2.1.4
   - cpanm --notest --quiet --local-lib=$HOME/perl5 local::lib
