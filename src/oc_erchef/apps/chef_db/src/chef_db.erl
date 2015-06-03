@@ -86,7 +86,8 @@
          bulk_get/4,
          bulk_get_authz_ids/3,
          data_bag_exists/3,
-         environment_exists/3]).
+         environment_exists/3,
+         find_all_policy_revisions_by_group_and_name/2]).
 
 -include("../../include/chef_db.hrl").
 -include("../../include/chef_types.hrl").
@@ -608,6 +609,14 @@ environment_exists(#context{}=Ctx, OrgId, EnvName) ->
     case fetch(#chef_environment{org_id = OrgId, name = EnvName}, Ctx) of
         #chef_environment{} -> true;
         _ -> false
+    end.
+
+find_all_policy_revisions_by_group_and_name(#context{reqid=ReqId}, OrgId) ->
+    case ?SH_TIME(ReqId, chef_sql, find_all_policy_revisions_by_group_and_name, (OrgId)) of
+        {ok, PolicyGroupPolicyRevisionIDs} ->
+            PolicyGroupPolicyRevisionIDs;
+        {error, Error} ->
+            {error, Error}
     end.
 
 %% -------------------------------------

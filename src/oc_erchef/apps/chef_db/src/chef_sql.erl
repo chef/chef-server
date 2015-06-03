@@ -96,6 +96,9 @@
          %% key ops
          fetch_actors_by_name/2,
 
+         %% policy_groups
+         find_all_policy_revisions_by_group_and_name/1,
+
          sql_now/0,
          ping/0,
          statements/0,
@@ -1515,6 +1518,26 @@ fetch_cookbook_version_serialized_objects_batch(Ids) when is_list(Ids)->
         {error, Reason} ->
             {error, Reason}
     end.
+
+find_all_policy_revisions_by_group_and_name(OrgId) ->
+    case sqerl:select(find_all_policy_revisions_by_group_and_name, [OrgId]) of
+        {ok, none} ->
+            {ok, []};
+        {ok, Rows } ->
+            Processed = policy_rev_by_group_rows_to_tuple(Rows, []),
+            {ok, Processed};
+        {error, Reason} ->
+            {error, Reason}
+    end.
+
+policy_rev_by_group_rows_to_tuple([Row|Rest], Processed) ->
+    PolicyGroupName = proplists:get_value(<<"policy_group_name">>, Row),
+    PolicyName = proplists:get_value(<<"policy_revision_name">>, Row),
+    RevisionID = proplists:get_value(<<"policy_revision_revision_id">>, Row),
+    ProcessedRow = {PolicyGroupName, PolicyName, RevisionID},
+    policy_rev_by_group_rows_to_tuple(Rest, [ProcessedRow|Processed]);
+policy_rev_by_group_rows_to_tuple([], Processed) ->
+    Processed.
 
 %% @doc Extracts qualified recipe names for a collection of cookbook
 %% versions, presented as `{CookbookName, SerializedObject}' pairs.

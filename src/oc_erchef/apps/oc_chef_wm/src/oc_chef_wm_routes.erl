@@ -257,7 +257,9 @@ template_for_type(user) ->
 template_for_type(user_key) ->
     "/users/~s/keys/~s";
 template_for_type(client_key) ->
-    "/organizations/~s/clients/~s/keys/~s".
+    "/organizations/~s/clients/~s/keys/~s";
+template_for_type(policy_group) ->
+    "/organizations/~s/policy_groups/~s".
 
 
 
