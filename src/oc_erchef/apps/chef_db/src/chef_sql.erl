@@ -99,6 +99,9 @@
          %% policy_groups
          find_all_policy_revisions_by_group_and_name/1,
 
+         %% policies
+         list_all_policy_revisions_by_orgid/1,
+
          sql_now/0,
          ping/0,
          statements/0,
@@ -1518,6 +1521,22 @@ fetch_cookbook_version_serialized_objects_batch(Ids) when is_list(Ids)->
         {error, Reason} ->
             {error, Reason}
     end.
+
+list_all_policy_revisions_by_orgid(OrgId) ->
+    case sqerl:select(list_all_policy_revisions_by_orgid, [OrgId]) of
+        {ok, none} -> {ok, []};
+        {ok, AllRevisionRows} ->
+            Processed = [tuplize_policy_rev(Row) || Row <- AllRevisionRows],
+            {ok, Processed};
+        {error, Reason} ->
+            {error, Reason}
+    end.
+
+tuplize_policy_rev(Row) ->
+    PolicyName = proplists:get_value(<<"name">>, Row),
+    RevisionID = proplists:get_value(<<"revision_id">>, Row),
+    {PolicyName, RevisionID}.
+
 
 find_all_policy_revisions_by_group_and_name(OrgId) ->
     case sqerl:select(find_all_policy_revisions_by_group_and_name, [OrgId]) of
