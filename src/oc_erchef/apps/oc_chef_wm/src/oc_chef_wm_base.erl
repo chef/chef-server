@@ -426,7 +426,8 @@ is_authorized(Req, State) ->
         {false, ReqOther, StateOther} ->
             %% FIXME: the supported version is determined by the chef_authn application
             %% also, see: https://wiki.corp.chef.io/display/CORP/RFC+Authentication+Version+Negotiation
-            {"X-Ops-Sign version=\"1.0\" version=\"1.1\"", ReqOther, StateOther}
+            {"X-Ops-Sign version=\"1.0\" version=\"1.1\"", ReqOther, StateOther};
+        {{halt, _Code}, _Req, _State} = Halt -> Halt
     end.
 
 %% Clients are inherently a member of the org, but users are not.  For purposes of acl checks,
@@ -933,7 +934,7 @@ build_api_info_header_body(RequestedAPIVersion, ActualAPIVersion) ->
                                      ]})).
 
 -spec verify_request_signature(#wm_reqdata{}, #base_state{}) ->
-                                      {boolean(), #wm_reqdata{}, #base_state{}}.
+                                      {boolean() | {halt, integer()}, #wm_reqdata{}, #base_state{}}.
 %% @doc Perform request signature verification (authenticate)
 %%
 %% Fetches user or client certificate and uses it verify the signature
@@ -951,9 +952,13 @@ verify_request_signature(Req,
             NotFoundMsg = verify_request_message(user_or_client_not_found, Name, OrgName),
             {false, wrq:set_resp_body(chef_json:encode(NotFoundMsg), Req),
              State#base_state{log_msg = {not_found, user_or_client}}};
+        {error, no_connections=Error} ->
+            Msg = verify_request_message(error_finding_user_or_client, Name, OrgName),
+            {{halt, 503}, wrq:set_resp_body(chef_json:encode(Msg), Req),
+             State#base_state{log_msg = {error_finding_user_or_client, Error}}};
         {error, Error} ->
             Msg = verify_request_message(error_finding_user_or_client, Name, OrgName),
-            {false, wrq:set_resp_body(chef_json:encode(Msg), Req),
+            {{halt, 500}, wrq:set_resp_body(chef_json:encode(Msg), Req),
              State#base_state{log_msg = {error_finding_user_or_client, Error}}};
         Requestors ->
             %% If the request originated from the webui, we do authn using the webui public
