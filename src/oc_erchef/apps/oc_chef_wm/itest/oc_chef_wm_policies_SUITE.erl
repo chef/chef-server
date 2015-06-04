@@ -305,8 +305,12 @@ list_when_created_policies(_) ->
     {ok, ResponseCode, _, ResponseBody} = http_list_policies(),
     ?assertEqual("200", ResponseCode),
     Ejson = chef_json:decode(ResponseBody),
-    ?assertEqual( [<<"bar">>, <<"foo">>],
-                  Ejson).
+    ExpectedBarRevisions = {[{<<"909c26701e291510eacdc6c06d626b9fa5350d25">>, {[]}}]},
+    ActualBarRevisions = ej:get({"bar", "revisions"}, Ejson),
+    ?assertEqual(ExpectedBarRevisions, ActualBarRevisions),
+    ExpectedFooRevisions = {[{<<"909c26701e291510eacdc6c06d626b9fa5350d25">>, {[]}}]},
+    ActualFooRevisions = ej:get({"foo", "revisions"}, Ejson),
+    ?assertEqual(ExpectedFooRevisions, ActualFooRevisions).
 
 create_policy(_) ->
 	{ok, ResultCode, _, _} = http_create_modified_policy("foo"),

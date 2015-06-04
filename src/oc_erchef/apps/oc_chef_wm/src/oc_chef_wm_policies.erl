@@ -66,8 +66,31 @@ resource_exists(Req, State) ->
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
-to_json(Req, #base_state{chef_db_context = DbContext,
-                         resource_state = StubRec
+to_json(Req, #base_state{chef_db_context = _DbContext,
+                         organization_guid = OrgId
                         } = State) ->
-    Names = chef_db:list(StubRec, DbContext),
-    {chef_json:encode(lists:sort([ hd(NameAsList) ||NameAsList <- Names])), Req, State}.
+    AllRevisionRows = list_all_policy_revisions_by_orgid(OrgId),
+
+    AllRevisions = [ tuplize_policy_rev(Row) || Row <- AllRevisionRows],
+    PolicyEJSON = build_policy_list_ejson(AllRevisions, {[]}),
+    io:format("ALL REVS:~p~n", [PolicyEJSON]),
+    {chef_json:encode(PolicyEJSON), Req, State}.
+
+%% TODO: this needs to move to chef_sql and be wrapped w/ stats hero in chef_db
+list_all_policy_revisions_by_orgid(OrgId) ->
+    case sqerl:select(list_all_policy_revisions_by_orgid, [OrgId]) of
+        {ok, none} -> [];
+        {ok, AllRevisionRows} -> AllRevisionRows
+    end.
+
+tuplize_policy_rev(Row) ->
+    PolicyName = proplists:get_value(<<"name">>, Row),
+    RevisionID = proplists:get_value(<<"revision_id">>, Row),
+    {PolicyName, RevisionID}.
+
+build_policy_list_ejson([{PolicyName, RevisionID}|Rest], EJSON) ->
+    %% TODO: need to set policy_name URL
+    NewEJSON = ej:set_p({PolicyName, "revisions", RevisionID}, EJSON, {[]}),
+    build_policy_list_ejson(Rest, NewEJSON);
+build_policy_list_ejson([], EJSON) ->
+    EJSON.
