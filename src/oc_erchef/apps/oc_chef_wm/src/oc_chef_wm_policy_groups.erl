@@ -86,7 +86,7 @@ to_json(Req, #base_state{chef_db_context = DbContext,organization_guid = OrgId, 
     BaseEJSON = make_base_ejson(Names, Req),
     case chef_db:find_all_policy_revisions_by_group_and_name(DbContext, OrgId) of
         {error, Why} ->
-            Report = {check_cookbook_authz, {Why, ReqId}},
+            Report = {find_all_policy_revisions_by_group_and_name, {Why, ReqId}},
             lager:error("~p", [Report]),
             error(Report);
         PolicyGroupRevisionIDs ->
