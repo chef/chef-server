@@ -21,6 +21,32 @@ describe "Policies API endpoint", :policies do
     to_json(parsed)
   end
 
+  def name_of(policy_data)
+    parse(policy_data)["name"]
+  end
+
+  def rev_id_of(policy_data)
+    parse(policy_data)["revision_id"]
+  end
+
+  def modified_policy(name: nil, rev_id: nil)
+    base_policy = minimum_valid_policy_payload
+
+    if name
+      base_policy = mutate_json(base_policy) do |p|
+        p["name"] = name
+      end
+    end
+
+    if rev_id
+      base_policy = mutate_json(base_policy) do |p|
+        p["revision_id"] = rev_id
+      end
+    end
+
+    base_policy
+  end
+
   # Just until we rename the requestors
   let(:admin_requestor){ admin_user }
 
@@ -28,9 +54,9 @@ describe "Policies API endpoint", :policies do
 
   let(:policies_url) { api_url("/policies") }
 
-  let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/some_policy_name") }
+  let(:policy_groups_url) { api_url("/policy_groups") }
 
-  let(:request_url) { static_named_policy_url }
+  let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/some_policy_name") }
 
   let(:minimum_valid_policy_payload) do
     <<-PAYLOAD
@@ -98,245 +124,490 @@ describe "Policies API endpoint", :policies do
   end
 
   let(:request_payload) { raise "define payload" }
-  context "when no policies exist on the server" do
 
-    context "GET" do
+  describe "Listing policies and policy groups" do
 
-      let(:request_payload) { nil }
+    let(:request_url) { policies_url }
 
-      let(:request_method) { :GET }
+    let(:list_policies) { get(policies_url, requestor) }
 
-      it "GET /policies/:group/:name returns 404" do
-        expect(response.code).to eq(404)
+    let(:list_policy_groups) { get(policy_groups_url, requestor) }
+
+    context "when no policies or policy_groups exist on the server" do
+
+      it "GET /policies returns an empty list", :policy_name do
+        expect(list_policies.code).to eq(200)
+        response_obj = parse(list_policies.body)
+        expect(response_obj).to be_a_kind_of(Hash)
+        expect(response_obj).to eq({})
+      end
+
+      it "GET /policy_groups returns an empty list", :policy_groups do
+        expect(list_policy_groups.code).to eq(200)
+        response_obj = parse(list_policy_groups.body)
+        expect(response_obj).to be_a_kind_of(Hash)
+        expect(response_obj).to eq({})
       end
 
     end
 
-    context "DELETE" do
+    context "when a policy assigned to a group exists" do
 
-      let(:request_payload) { nil }
-
-      let(:request_method) { :DELETE }
-
-      it "DELETE /policies/:group/:name returns 404" do
-        expect(response.code).to eq(404)
+      before do
+        put(static_named_policy_url, requestor, payload: minimum_valid_policy_payload)
       end
-
-    end
-
-    context "PUT" do
-
-      let(:request_method) { :PUT }
 
       after(:each) do
         delete(static_named_policy_url, requestor)
       end
 
-      context "with a canonical payload" do
-
-        let(:request_payload) { canonical_policy_payload }
-
-        it "PUT /policies/:group/:name returns 201" do
-          expect(response.code).to eq(201)
-        end
-
-
+      let(:expected_policies_list) do
+        {
+          "some_policy_name" => {
+            "revisions" => {
+              "909c26701e291510eacdc6c06d626b9fa5350d25" => {}
+            }
+          }
+        }
       end
 
-      context "with a minimal payload" do
-
-        let(:request_payload) { minimum_valid_policy_payload }
-
-        it "PUT /policies/:group/:name returns 201" do
-          expect(response.code).to eq(201)
-        end
-
-      end
-
-      context "with a payload demonstrating validation edge conditions for 'name'" do
-
-        context "when the name contains every valid character" do
-          let(:name_with_all_valid_chars) { 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:.' }
-
-          # Have to override the URL or else we will hit validation that name in
-          # document matches the one in URL
-          let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/#{name_with_all_valid_chars}") }
-
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) { |p| p["name"] = name_with_all_valid_chars }
-          end
-
-          it "PUT /policies/:group/:name returns 201" do
-            expect(response.code).to eq(201)
-          end
-        end
-
-        context "when the name is close to the maximum size" do
-
-          # On Chef Zero, some backends will append `.json` to a file name,
-          # which can exceed the common limit of 255 characters.
-          let(:max_size_name) { 'a' * 250 }
-
-          # Have to override the URL or else we will hit validation that name in
-          # document matches the one in URL
-          let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/#{max_size_name}") }
-
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) { |p| p["name"] = max_size_name }
-          end
-
-          it "PUT /policies/:group/:name returns 201" do
-            expect(response.code).to eq(201)
-          end
-        end
-
-        context "when a revision_id is the maximum size" do
-
-          let(:max_size_revision_id) { 'a' * 255 }
-
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) do |policy|
-              policy["revision_id"] = max_size_revision_id
-            end
-          end
-
-          it "PUT /policies/:group/:name returns 201" do
-            expect(response.code).to eq(201)
-          end
-        end
-
-        context "when a revision_id contains every valid character" do
-
-          let(:revision_id_with_all_valid_chars) { 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:.' }
-
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) do |policy|
-              policy["revision_id"] = revision_id_with_all_valid_chars
-            end
-          end
-
-
-          it "PUT /policies/:group/:name returns 201" do
-            expect(response.code).to eq(201)
-          end
-        end
-
-        context "when a cookbook identifier is the maximum size" do
-
-          let(:max_size_identifier) { 'a' * 255 }
-
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) do |policy|
-              policy["cookbook_locks"]["edge_case"] = {
-                "identifier" => max_size_identifier,
-                "version" => "1.2.3"
+      let(:expected_policy_group_list) do
+        {
+          "some_policy_group" => {
+            "uri" => api_url("policy_groups/some_policy_group"),
+            "policies" => {
+              "some_policy_name" => {
+                "revision_id" => "909c26701e291510eacdc6c06d626b9fa5350d25"
               }
-            end
-          end
-
-          it "PUT /policies/:group/:name returns 201" do
-            expect(response.code).to eq(201)
-          end
-        end
-
-        context "when a cookbook identifier contains every valid character" do
-
-          let(:identifier_with_all_valid_chars) { 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:.' }
-
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) do |policy|
-              policy["cookbook_locks"]["edge_case"] = {
-                "identifier" => identifier_with_all_valid_chars,
-                "version" => "1.2.3"
-              }
-            end
-          end
-
-          it "PUT /policies/:group/:name returns 201" do
-            expect(response.code).to eq(201)
-          end
-        end
+            }
+          }
+        }
       end
 
-      context "when the request body is invalid" do
+      it "GET /policies returns a data structure with the groups assigned policy revision", :policy_name do
+        expect(list_policies.code).to eq(200)
+        response_obj = parse(list_policies.body)
+        expect(response_obj).to be_a_kind_of(Hash)
+        expect(response_obj).to eq(expected_policies_list)
+      end
 
-        shared_examples_for "an invalid policy document" do
+      it "GET /policy_groups returns a data structure with the groups assigned policy revision", :policy_groups do
+        expect(list_policy_groups.code).to eq(200)
+        response_obj = parse(list_policy_groups.body)
+        expect(response_obj).to be_a_kind_of(Hash)
+        expect(response_obj).to eq(expected_policy_group_list)
+      end
+    end
 
-          let(:error_message) do
-            response_obj = parse(response.body)
-            expect(response_obj).to be_a_kind_of(Hash)
-            expect(response_obj).to have_key("error")
-            expect(response_obj["error"]).to be_a_kind_of(Array)
-            expect(response_obj["error"].size).to eq(1)
-            response_obj["error"].first
+    context "policy exists but has been removed from all policy groups" do
+
+      let(:expected_policy_list) do
+        {
+          "some_policy_name" => {
+            "revisions" => {
+              "909c26701e291510eacdc6c06d626b9fa5350d25" => {}
+            }
+          }
+        }
+      end
+
+      let(:expected_policy_group_list) do
+        {
+          "some_policy_group" => {
+            "uri" => api_url("policy_groups/some_policy_group")
+          }
+        }
+      end
+
+      before do
+        put(static_named_policy_url, requestor, payload: minimum_valid_policy_payload)
+        delete(static_named_policy_url, requestor)
+      end
+
+      it "GET /policies shows the policy", :policy_name do
+        expect(list_policies.code).to eq(200)
+        response_obj = parse(list_policies.body)
+        expect(response_obj).to be_a_kind_of(Hash)
+        expect(response_obj).to eq(expected_policy_list)
+      end
+
+      it "GET /policy_groups returns a data structure with the groups assigned policy revision", :policy_groups do
+        expect(list_policy_groups.code).to eq(200)
+        response_obj = parse(list_policy_groups.body)
+        expect(response_obj).to be_a_kind_of(Hash)
+        expect(response_obj).to eq(expected_policy_group_list)
+      end
+    end
+
+    context "with multiple policies and groups" do
+
+      def assoc(policy_data, policy_group)
+        policy_name = name_of(policy_data)
+        url = api_url("policy_groups/#{policy_group}/policies/#{policy_name}")
+        {
+          url: url,
+          policy_name: policy_name,
+          policy_group: policy_group,
+          policy_data: policy_data,
+          rev_id: rev_id_of(policy_data)
+        }
+      end
+
+      def push(assoc)
+        put(assoc[:url], requestor, payload: assoc[:policy_data])
+      end
+
+      def rm(assoc)
+        delete(assoc[:url], requestor)
+      end
+
+      let(:app_policy_1) { modified_policy(name: "appserver", rev_id: "1" * 40) }
+      let(:app_policy_2) { modified_policy(name: "appserver", rev_id: "2" * 40) }
+      let(:app_policy_3) { modified_policy(name: "appserver", rev_id: "3" * 40) }
+
+      # match numbering to rev_id instead of starting over
+      let(:db_policy_6) { modified_policy(name: "db", rev_id: "6" * 40) }
+      let(:db_policy_7) { modified_policy(name: "db", rev_id: "7" * 40) }
+      let(:db_policy_8) { modified_policy(name: "db", rev_id: "8" * 40) }
+
+      # match numbering to rev_id instead of starting over
+      let(:cache_policy_a) { modified_policy(name: "cache", rev_id: "a" * 40) }
+      let(:cache_policy_b) { modified_policy(name: "cache", rev_id: "b" * 40) }
+
+      let(:assoc_app_dev) { assoc(app_policy_1, "dev") }
+      let(:assoc_db_dev) { assoc(db_policy_6, "dev") }
+      let(:assoc_cache_dev) { assoc(cache_policy_a, "dev") }
+
+      let(:assoc_app_test) { assoc(app_policy_2, "test") }
+      let(:assoc_db_test) { assoc(db_policy_7, "test") }
+      let(:assoc_cache_test) { assoc(cache_policy_b, "test") }
+
+      let(:assoc_app_prod) { assoc(app_policy_3, "prod") }
+      let(:assoc_db_prod) { assoc(db_policy_8, "prod") }
+
+      let(:expected_policies_list) do
+        {
+          "some_policy_name" => {
+            "revisions" => {
+              "909c26701e291510eacdc6c06d626b9fa5350d25" => {}
+            }
+          },
+          "appserver" => {
+            "revisions" => {
+              "1111111111111111111111111111111111111111" => {},
+              "2222222222222222222222222222222222222222" => {},
+              "3333333333333333333333333333333333333333" => {}
+            }
+          },
+          "db" => {
+            "revisions" => {
+              "6666666666666666666666666666666666666666" => {},
+              "7777777777777777777777777777777777777777" => {},
+              "8888888888888888888888888888888888888888" => {}
+            }
+          },
+          "cache" => {
+            "revisions" => {
+              "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" => {},
+              "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" => {}
+            }
+          }
+        }
+      end
+
+      let(:expected_dev_group_data) do
+        {
+          "uri" => api_url("policy_groups/dev"),
+          "policies" => {
+            "db" => { "revision_id" => "6666666666666666666666666666666666666666" },
+            "appserver" => { "revision_id" => "1111111111111111111111111111111111111111" },
+            "cache" => { "revision_id" => "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }
+          }
+        }
+      end
+
+      let(:expected_test_group_data) do
+        {
+          "uri" => api_url("policy_groups/test"),
+          "policies" => {
+            "db" => { "revision_id" => "7777777777777777777777777777777777777777" },
+            "appserver" => { "revision_id" => "2222222222222222222222222222222222222222" },
+            "cache" => { "revision_id" => "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" }
+          }
+        }
+      end
+
+      let(:expected_prod_group_data) do
+        {
+          "uri" => api_url("policy_groups/prod"),
+          "policies" => {
+            "db" => { "revision_id" => "8888888888888888888888888888888888888888" },
+            "appserver" => { "revision_id" => "3333333333333333333333333333333333333333" }
+          }
+        }
+      end
+
+      before do
+        push(assoc_app_dev)
+        push(assoc_db_dev)
+        push(assoc_cache_dev)
+
+        push(assoc_app_test)
+        push(assoc_db_test)
+        push(assoc_cache_test)
+
+        push(assoc_app_prod)
+        push(assoc_db_prod)
+      end
+
+      after do
+        rm(assoc_app_dev)
+        rm(assoc_db_dev)
+        rm(assoc_cache_dev)
+
+        rm(assoc_app_test)
+        rm(assoc_db_test)
+        rm(assoc_cache_test)
+
+        rm(assoc_app_prod)
+        rm(assoc_db_prod)
+      end
+
+      it "GET /policies returns a data structure with all the policies", :policy_name do
+        expect(list_policies.code).to eq(200)
+        response_obj = parse(list_policies.body)
+        expect(response_obj).to be_a_kind_of(Hash)
+        expect(response_obj).to eq(expected_policies_list)
+      end
+
+      it "GET /policy_groups returns a data structure with all policy group->policy rev associations", :policy_groups do
+        expect(list_policy_groups.code).to eq(200)
+        response_obj = parse(list_policy_groups.body)
+        expect(response_obj).to be_a_kind_of(Hash)
+        expect(response_obj["dev"]).to eq(expected_dev_group_data)
+        expect(response_obj["test"]).to eq(expected_test_group_data)
+        expect(response_obj["prod"]).to eq(expected_prod_group_data)
+      end
+
+    end
+  end
+
+  describe "Policy Group Revision Association Endpoint /policy_groups/:policy_group/policies/:policy_name", :policy_group_assoc do
+
+    let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/some_policy_name") }
+
+    let(:request_url) { static_named_policy_url }
+
+    context "when no policies exist on the server" do
+
+      context "GET" do
+
+        let(:request_payload) { nil }
+
+        let(:request_method) { :GET }
+
+        it "GET /policies/:group/:name returns 404" do
+          expect(response.code).to eq(404)
+        end
+
+      end
+
+      context "DELETE" do
+
+        let(:request_payload) { nil }
+
+        let(:request_method) { :DELETE }
+
+        it "DELETE /policies/:group/:name returns 404" do
+          expect(response.code).to eq(404)
+        end
+
+      end
+
+      context "PUT" do
+
+        let(:request_method) { :PUT }
+
+        after(:each) do
+          delete(static_named_policy_url, requestor)
+        end
+
+        context "with a canonical payload" do
+
+          let(:request_payload) { canonical_policy_payload }
+
+          it "PUT /policies/:group/:name returns 201" do
+            expect(response.code).to eq(201)
           end
 
-          it "PUT /policies/:group/:name returns 400" do
-            expect(response.code).to eq(400)
-          end
 
-          it "PUT /policies/:group/:name body contains a well-formed error message" do
-            expect(error_message).to eq(expected_error_message)
+        end
+
+        context "with a minimal payload" do
+
+          let(:request_payload) { minimum_valid_policy_payload }
+
+          it "PUT /policies/:group/:name returns 201" do
+            expect(response.code).to eq(201)
           end
 
         end
 
-        ## MANDATORY FIELDS AND FORMATS
-        # * `revision_id`: String; Must be < 255 chars, matches /^[\-[:alnum:]_\.\:]+$/
-        # * `name`: String; Must match name in URI; Must be < 255 chars, matches /^[\-[:alnum:]_\.\:]+$/
-        # * `run_list`: Array
-        # * `run_list[i]`: Fully Qualified Recipe Run List Item
-        # * `cookbook_locks`: JSON Object
-        # * `cookbook_locks(key)`: CookbookName
-        # * `cookbook_locks[item]`: JSON Object, mandatory keys: "identifier", "dotted_decimal_identifier"
-        # * `cookbook_locks[item]["identifier"]`: varchar(255) ?
-        # * `cookbook_locks[item]["dotted_decimal_identifier"]` ChefCompatibleVersionNumber
+        context "with a payload demonstrating validation edge conditions for 'name'" do
 
-        context "because of missing revision id field" do
+          context "when the name contains every valid character" do
+            let(:name_with_all_valid_chars) { 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:.' }
 
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) { |p| p.delete("revision_id") }
-          end
-
-          let(:expected_error_message) { "Field 'revision_id' missing" }
-
-          include_examples "an invalid policy document"
-
-        end
-
-        context "because revision id field is an empty string" do
-
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) { |p| p["revision_id"] = "" }
-          end
-
-          let(:expected_error_message) { "Field 'revision_id' invalid" }
-
-          include_examples "an invalid policy document"
-
-        end
-
-        context "because revision id field is larger than 255 characters" do
-
-          let(:long_revision_id_is_long) { "f" * 256 }
-
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) { |p| p["revision_id"] = long_revision_id_is_long }
-          end
-
-          let(:expected_error_message) { "Field 'revision_id' invalid" }
-
-          include_examples "an invalid policy document"
-
-        end
-
-        [ ' ', '+', '!' ].each do |invalid_char|
-          context "because the revision_id contains invalid character #{invalid_char}" do
-
-            let(:invalid_revision_id) { "invalid" + invalid_char + "invalid" }
+            # Have to override the URL or else we will hit validation that name in
+            # document matches the one in URL
+            let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/#{name_with_all_valid_chars}") }
 
             let(:request_payload) do
-              mutate_json(minimum_valid_policy_payload) { |p| p["revision_id"] = invalid_revision_id }
+              mutate_json(minimum_valid_policy_payload) { |p| p["name"] = name_with_all_valid_chars }
+            end
+
+            it "PUT /policies/:group/:name returns 201" do
+              expect(response.code).to eq(201)
+            end
+          end
+
+          context "when the name is close to the maximum size" do
+
+            # On Chef Zero, some backends will append `.json` to a file name,
+            # which can exceed the common limit of 255 characters.
+            let(:max_size_name) { 'a' * 250 }
+
+            # Have to override the URL or else we will hit validation that name in
+            # document matches the one in URL
+            let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/#{max_size_name}") }
+
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) { |p| p["name"] = max_size_name }
+            end
+
+            it "PUT /policies/:group/:name returns 201" do
+              expect(response.code).to eq(201)
+            end
+          end
+
+          context "when a revision_id is the maximum size" do
+
+            let(:max_size_revision_id) { 'a' * 255 }
+
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) do |policy|
+                policy["revision_id"] = max_size_revision_id
+              end
+            end
+
+            it "PUT /policies/:group/:name returns 201" do
+              expect(response.code).to eq(201)
+            end
+          end
+
+          context "when a revision_id contains every valid character" do
+
+            let(:revision_id_with_all_valid_chars) { 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:.' }
+
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) do |policy|
+                policy["revision_id"] = revision_id_with_all_valid_chars
+              end
+            end
+
+
+            it "PUT /policies/:group/:name returns 201" do
+              expect(response.code).to eq(201)
+            end
+          end
+
+          context "when a cookbook identifier is the maximum size" do
+
+            let(:max_size_identifier) { 'a' * 255 }
+
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) do |policy|
+                policy["cookbook_locks"]["edge_case"] = {
+                  "identifier" => max_size_identifier,
+                  "version" => "1.2.3"
+                }
+              end
+            end
+
+            it "PUT /policies/:group/:name returns 201" do
+              expect(response.code).to eq(201)
+            end
+          end
+
+          context "when a cookbook identifier contains every valid character" do
+
+            let(:identifier_with_all_valid_chars) { 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:.' }
+
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) do |policy|
+                policy["cookbook_locks"]["edge_case"] = {
+                  "identifier" => identifier_with_all_valid_chars,
+                  "version" => "1.2.3"
+                }
+              end
+            end
+
+            it "PUT /policies/:group/:name returns 201" do
+              expect(response.code).to eq(201)
+            end
+          end
+        end
+
+        context "when the request body is invalid" do
+
+          shared_examples_for "an invalid policy document" do
+
+            let(:error_message) do
+              response_obj = parse(response.body)
+              expect(response_obj).to be_a_kind_of(Hash)
+              expect(response_obj).to have_key("error")
+              expect(response_obj["error"]).to be_a_kind_of(Array)
+              expect(response_obj["error"].size).to eq(1)
+              response_obj["error"].first
+            end
+
+            it "PUT /policies/:group/:name returns 400" do
+              expect(response.code).to eq(400)
+            end
+
+            it "PUT /policies/:group/:name body contains a well-formed error message" do
+              expect(error_message).to eq(expected_error_message)
+            end
+
+          end
+
+          ## MANDATORY FIELDS AND FORMATS
+          # * `revision_id`: String; Must be < 255 chars, matches /^[\-[:alnum:]_\.\:]+$/
+          # * `name`: String; Must match name in URI; Must be < 255 chars, matches /^[\-[:alnum:]_\.\:]+$/
+          # * `run_list`: Array
+          # * `run_list[i]`: Fully Qualified Recipe Run List Item
+          # * `cookbook_locks`: JSON Object
+          # * `cookbook_locks(key)`: CookbookName
+          # * `cookbook_locks[item]`: JSON Object, mandatory keys: "identifier", "dotted_decimal_identifier"
+          # * `cookbook_locks[item]["identifier"]`: varchar(255) ?
+          # * `cookbook_locks[item]["dotted_decimal_identifier"]` ChefCompatibleVersionNumber
+
+          context "because of missing revision id field" do
+
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) { |p| p.delete("revision_id") }
+            end
+
+            let(:expected_error_message) { "Field 'revision_id' missing" }
+
+            include_examples "an invalid policy document"
+
+          end
+
+          context "because revision id field is an empty string" do
+
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) { |p| p["revision_id"] = "" }
             end
 
             let(:expected_error_message) { "Field 'revision_id' invalid" }
@@ -344,64 +615,72 @@ describe "Policies API endpoint", :policies do
             include_examples "an invalid policy document"
 
           end
-        end
 
+          context "because revision id field is larger than 255 characters" do
 
-        context "because of missing name field" do
+            let(:long_revision_id_is_long) { "f" * 256 }
 
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) { |p| p.delete("name") }
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) { |p| p["revision_id"] = long_revision_id_is_long }
+            end
+
+            let(:expected_error_message) { "Field 'revision_id' invalid" }
+
+            include_examples "an invalid policy document"
+
           end
 
-          let(:expected_error_message) { "Field 'name' missing" }
+          [ ' ', '+', '!' ].each do |invalid_char|
+            context "because the revision_id contains invalid character #{invalid_char}" do
 
-          include_examples "an invalid policy document"
+              let(:invalid_revision_id) { "invalid" + invalid_char + "invalid" }
 
-        end
+              let(:request_payload) do
+                mutate_json(minimum_valid_policy_payload) { |p| p["revision_id"] = invalid_revision_id }
+              end
 
-        context "because of an mismatched name field" do
+              let(:expected_error_message) { "Field 'revision_id' invalid" }
 
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) { |p| p["name"] = "monkeypants" }
+              include_examples "an invalid policy document"
+
+            end
           end
 
-          let(:expected_error_message) { "Field 'name' invalid : some_policy_name does not match monkeypants" }
 
-          include_examples "an invalid policy document"
+          context "because of missing name field" do
 
-        end
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) { |p| p.delete("name") }
+            end
 
-        context "because the name is larger than 255 characters" do
+            let(:expected_error_message) { "Field 'name' missing" }
 
-          let(:long_name_is_long) { "z" * 256 }
+            include_examples "an invalid policy document"
 
-          # Have to override the URL or else we might only hit validation that
-          # name in document matches the one in URL
-          let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/#{long_name_is_long}") }
-
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) { |p| p["name"] = long_name_is_long }
           end
 
-          let(:expected_error_message) { "Field 'name' invalid" }
+          context "because of an mismatched name field" do
 
-          include_examples "an invalid policy document"
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) { |p| p["name"] = "monkeypants" }
+            end
 
-        end
+            let(:expected_error_message) { "Field 'name' invalid : some_policy_name does not match monkeypants" }
 
-        [ ' ', '+', '!' ].each do |invalid_char|
-          context "because the name contains invalid character '#{invalid_char}'" do
+            include_examples "an invalid policy document"
 
-            let(:invalid_policy_name) { "invalid" + invalid_char + "invalid" }
+          end
 
-            let(:encoded_invalid_name) { URI.encode(invalid_policy_name) }
+          context "because the name is larger than 255 characters" do
+
+            let(:long_name_is_long) { "z" * 256 }
 
             # Have to override the URL or else we might only hit validation that
             # name in document matches the one in URL
-            let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/#{encoded_invalid_name}") }
+            let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/#{long_name_is_long}") }
 
             let(:request_payload) do
-              mutate_json(minimum_valid_policy_payload) { |p| p["name"] = invalid_policy_name }
+              mutate_json(minimum_valid_policy_payload) { |p| p["name"] = long_name_is_long }
             end
 
             let(:expected_error_message) { "Field 'name' invalid" }
@@ -409,40 +688,45 @@ describe "Policies API endpoint", :policies do
             include_examples "an invalid policy document"
 
           end
-        end
 
-        context "because of missing run_list field" do
+          [ ' ', '+', '!' ].each do |invalid_char|
+            context "because the name contains invalid character '#{invalid_char}'" do
 
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) { |p| p.delete("run_list") }
+              let(:invalid_policy_name) { "invalid" + invalid_char + "invalid" }
+
+              let(:encoded_invalid_name) { URI.encode(invalid_policy_name) }
+
+              # Have to override the URL or else we might only hit validation that
+              # name in document matches the one in URL
+              let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/#{encoded_invalid_name}") }
+
+              let(:request_payload) do
+                mutate_json(minimum_valid_policy_payload) { |p| p["name"] = invalid_policy_name }
+              end
+
+              let(:expected_error_message) { "Field 'name' invalid" }
+
+              include_examples "an invalid policy document"
+
+            end
           end
 
-          let(:expected_error_message) { "Field 'run_list' missing" }
-
-          include_examples "an invalid policy document"
-
-        end
-
-        context "because run_list field is the wrong type" do
-
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) { |p| p["run_list"] = {} }
-          end
-
-          let(:expected_error_message) { "Field 'run_list' is not a valid run list" }
-
-          include_examples "an invalid policy document"
-
-        end
-
-        # Run list items in policies are required to be fully normalized recipe names, e.g,
-        # "recipe[mysql::default]"
-        [123, "recipe[", "role[foo]", "recipe[foo]"].each do |invalid_run_list_item|
-
-          context "because the run_list has invalid item '#{invalid_run_list_item}'" do
+          context "because of missing run_list field" do
 
             let(:request_payload) do
-              mutate_json(minimum_valid_policy_payload) { |p| p["run_list"] = [ invalid_run_list_item ] }
+              mutate_json(minimum_valid_policy_payload) { |p| p.delete("run_list") }
+            end
+
+            let(:expected_error_message) { "Field 'run_list' missing" }
+
+            include_examples "an invalid policy document"
+
+          end
+
+          context "because run_list field is the wrong type" do
+
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) { |p| p["run_list"] = {} }
             end
 
             let(:expected_error_message) { "Field 'run_list' is not a valid run list" }
@@ -451,183 +735,199 @@ describe "Policies API endpoint", :policies do
 
           end
 
-        end
+          # Run list items in policies are required to be fully normalized recipe names, e.g,
+          # "recipe[mysql::default]"
+          [123, "recipe[", "role[foo]", "recipe[foo]"].each do |invalid_run_list_item|
 
-        context "because cookbook_locks field is missing" do
+            context "because the run_list has invalid item '#{invalid_run_list_item}'" do
 
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) { |p| p.delete("cookbook_locks") }
-          end
+              let(:request_payload) do
+                mutate_json(minimum_valid_policy_payload) { |p| p["run_list"] = [ invalid_run_list_item ] }
+              end
 
-          let(:expected_error_message) { "Field 'cookbook_locks' missing" }
+              let(:expected_error_message) { "Field 'run_list' is not a valid run list" }
 
-          include_examples "an invalid policy document"
+              include_examples "an invalid policy document"
 
-        end
-
-        context "because cookbook_locks field is the wrong type" do
-
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) { |p| p["cookbook_locks"] = [] }
-          end
-
-          let(:expected_error_message) { "Field 'cookbook_locks' invalid" }
-
-          include_examples "an invalid policy document"
-
-        end
-
-        context "because cookbook_locks contains an entry of the wrong type" do
-
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) { |p| p["cookbook_locks"]["invalid_member"] = [] }
-          end
-
-          let(:expected_error_message) { "Field 'cookbook_locks' invalid" }
-
-          # TODO: customizing the 400 message for this is currently difficult
-          # in erchef, so we skip validating the message.
-
-          it "PUT /policies/:group/:name returns 400" do
-            expect(response.code).to eq(400)
-          end
-
-        end
-
-        context "because cookbook_locks contains an entry that is missing the identifier field" do
-
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) do |policy|
-              policy["cookbook_locks"]["invalid_member"] = { "dotted_decimal_identifier" => "1.2.3" }
             end
+
           end
 
-          let(:expected_error_message) { "Field 'identifier' missing" }
+          context "because cookbook_locks field is missing" do
 
-          include_examples "an invalid policy document"
-
-        end
-
-        context "because cookbook_locks contains an entry with an identifier larger than 255 characters" do
-
-          let(:long_identifier) { "a" * 256 }
-
-          let(:invalid_lock) do
-            {
-              "identifier" => long_identifier,
-              "version" => "1.2.3"
-            }
-          end
-
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) do |policy|
-              policy["cookbook_locks"]["invalid_member"] = invalid_lock
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) { |p| p.delete("cookbook_locks") }
             end
+
+            let(:expected_error_message) { "Field 'cookbook_locks' missing" }
+
+            include_examples "an invalid policy document"
+
           end
 
-          let(:expected_error_message) { "Field 'identifier' invalid" }
+          context "because cookbook_locks field is the wrong type" do
 
-          include_examples "an invalid policy document"
-
-        end
-
-
-        context "because cookbook_locks contains an entry with an invalid dotted_decimal_identifier field" do
-
-          let(:request_payload) do
-            mutate_json(minimum_valid_policy_payload) do |policy|
-              policy["cookbook_locks"]["invalid_member"] = { "identifier" => "123def", "version" => "1.2.3", "dotted_decimal_identifier" => "foo" }
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) { |p| p["cookbook_locks"] = [] }
             end
+
+            let(:expected_error_message) { "Field 'cookbook_locks' invalid" }
+
+            include_examples "an invalid policy document"
+
           end
 
-          let(:expected_error_message) { "Field 'dotted_decimal_identifier' is not a valid version" }
+          context "because cookbook_locks contains an entry of the wrong type" do
 
-          include_examples "an invalid policy document"
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) { |p| p["cookbook_locks"]["invalid_member"] = [] }
+            end
+
+            let(:expected_error_message) { "Field 'cookbook_locks' invalid" }
+
+            # TODO: customizing the 400 message for this is currently difficult
+            # in erchef, so we skip validating the message.
+
+            it "PUT /policies/:group/:name returns 400" do
+              expect(response.code).to eq(400)
+            end
+
+          end
+
+          context "because cookbook_locks contains an entry that is missing the identifier field" do
+
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) do |policy|
+                policy["cookbook_locks"]["invalid_member"] = { "dotted_decimal_identifier" => "1.2.3" }
+              end
+            end
+
+            let(:expected_error_message) { "Field 'identifier' missing" }
+
+            include_examples "an invalid policy document"
+
+          end
+
+          context "because cookbook_locks contains an entry with an identifier larger than 255 characters" do
+
+            let(:long_identifier) { "a" * 256 }
+
+            let(:invalid_lock) do
+              {
+                "identifier" => long_identifier,
+                "version" => "1.2.3"
+              }
+            end
+
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) do |policy|
+                policy["cookbook_locks"]["invalid_member"] = invalid_lock
+              end
+            end
+
+            let(:expected_error_message) { "Field 'identifier' invalid" }
+
+            include_examples "an invalid policy document"
+
+          end
+
+
+          context "because cookbook_locks contains an entry with an invalid dotted_decimal_identifier field" do
+
+            let(:request_payload) do
+              mutate_json(minimum_valid_policy_payload) do |policy|
+                policy["cookbook_locks"]["invalid_member"] = { "identifier" => "123def", "version" => "1.2.3", "dotted_decimal_identifier" => "foo" }
+              end
+            end
+
+            let(:expected_error_message) { "Field 'dotted_decimal_identifier' is not a valid version" }
+
+            include_examples "an invalid policy document"
+
+          end
 
         end
+
+      end
+
+    end
+
+    context "when a policy exists on the server" do
+
+      before(:each) do
+        put(static_named_policy_url, requestor, payload: canonical_policy_payload)
+      end
+
+      context "GET" do
+
+        let(:request_method) { :GET }
+
+        let(:request_payload) { nil }
+
+        it "retrieves the policy document" do
+          expect(JSON.parse(response.body)).to eq(JSON.parse(canonical_policy_payload))
+        end
+
+      end
+
+      context "PUT (update policy document)" do
+
+        let(:updated_canonical_policy_payload) do
+          mutate_json(canonical_policy_payload) do |policy|
+            policy["revision_id"] = "d4991d020462724edcf05f572e1d856cc5927803"
+            policy["cookbook_locks"]["policyfile_demo"]["identifier"] = "2a42abea88dc847bf6d3194af8bf899908642421"
+            policy["cookbook_locks"]["policyfile_demo"]["dotted_decimal_identifier"] = "11895255163526276.34892808658286783.151290363782177"
+          end
+        end
+
+        let(:request_payload) { updated_canonical_policy_payload }
+
+        let(:request_method) { :PUT }
+
+        before(:each) do
+          # Force the update PUT to occur
+          response
+        end
+
+        it "PUT /policies/:group/:name returns 200" do
+          expect(response.code).to eq(200)
+          expect(response.body).to eq(updated_canonical_policy_payload)
+        end
+
+        it "GET /policies/:group/:name subsequently returns the updated document" do
+          retrieved_doc = get(static_named_policy_url, requestor)
+          expect(retrieved_doc.code).to eq(200)
+          expect(retrieved_doc.body).to eq(updated_canonical_policy_payload)
+        end
+      end
+
+      context "DELETE" do
+
+        let(:request_payload) { nil }
+
+        let(:request_method) { :DELETE }
+
+        before(:each) do
+          # Force the DELETE to occur
+          response
+        end
+
+
+        it "DELETE /policies/:group/:name returns the deleted document" do
+          expect(response.code).to eq(200)
+          expect(JSON.parse(response.body)).to eq(JSON.parse(canonical_policy_payload))
+        end
+
+        it "DELETE /policies/:group/:name removes the policy from the data store" do
+          subsequent_get = get(static_named_policy_url, requestor)
+          expect(subsequent_get.code).to eq(404)
+        end
+
 
       end
 
     end
 
   end
-
-  context "when a policy exists on the server" do
-
-    before(:each) do
-      put(static_named_policy_url, requestor, payload: canonical_policy_payload)
-    end
-
-    context "GET" do
-
-      let(:request_method) { :GET }
-
-      let(:request_payload) { nil }
-
-      it "retrieves the policy document" do
-        expect(JSON.parse(response.body)).to eq(JSON.parse(canonical_policy_payload))
-      end
-
-    end
-
-    context "PUT (update policy document)" do
-
-      let(:updated_canonical_policy_payload) do
-        mutate_json(canonical_policy_payload) do |policy|
-          policy["revision_id"] = "d4991d020462724edcf05f572e1d856cc5927803"
-          policy["cookbook_locks"]["policyfile_demo"]["identifier"] = "2a42abea88dc847bf6d3194af8bf899908642421"
-          policy["cookbook_locks"]["policyfile_demo"]["dotted_decimal_identifier"] = "11895255163526276.34892808658286783.151290363782177"
-        end
-      end
-
-      let(:request_payload) { updated_canonical_policy_payload }
-
-      let(:request_method) { :PUT }
-
-      before(:each) do
-        # Force the update PUT to occur
-        response
-      end
-
-      it "PUT /policies/:group/:name returns 200" do
-        expect(response.code).to eq(200)
-        expect(response.body).to eq(updated_canonical_policy_payload)
-      end
-
-      it "GET /policies/:group/:name subsequently returns the updated document" do
-        retrieved_doc = get(static_named_policy_url, requestor)
-        expect(retrieved_doc.code).to eq(200)
-        expect(retrieved_doc.body).to eq(updated_canonical_policy_payload)
-      end
-    end
-
-    context "DELETE" do
-
-      let(:request_payload) { nil }
-
-      let(:request_method) { :DELETE }
-
-      before(:each) do
-        # Force the DELETE to occur
-        response
-      end
-
-
-      it "DELETE /policies/:group/:name returns the deleted document" do
-        expect(response.code).to eq(200)
-        expect(JSON.parse(response.body)).to eq(JSON.parse(canonical_policy_payload))
-      end
-
-      it "DELETE /policies/:group/:name removes the policy from the data store" do
-        subsequent_get = get(static_named_policy_url, requestor)
-        expect(subsequent_get.code).to eq(404)
-      end
-
-
-    end
-
-  end
-
 end
-
 
