@@ -9,16 +9,19 @@
 solr_dir              = node['private_chef']['opscode-solr4']['dir']            # /var/opt/opscode/opscode-solr4
 solr_data_dir         = node['private_chef']['opscode-solr4']['data_dir']       # /var/opt/opscpde/opscode-solr4/data
 solr_data_dir_symlink = File.join(solr_dir, "data")                             # /var/opt/opscode/opscode-solr4/data
-solr_home_dir         = File.join(solr_dir, "home")                             # /var/opt/opscpde/opscode-solr4/home
+solr_home_dir         = File.join(solr_dir, "home")                             # /var/opt/opscode/opscode-solr4/home
+solr_temp_dir         = node['private_chef']['opscode-solr4']['temp_directory'] # /var/opt/opscode/opscode-solr4
 solr_log_dir          = node['private_chef']['opscode-solr4']['log_directory']  # /var/log/opscode/opscode-solr4
 solr_collection_dir   = File.join(solr_home_dir, "collection1")                 # /var/opt/opscode/opscode-solr4/home/collection1
 solr_conf_dir         = File.join(solr_collection_dir, "conf")                  # /var/opt/opscode/opscode-solr4/home/collection1/conf
 solr_jetty_dir        = "/opt/opscode/embedded/service/opscode-solr4/jetty"
 
+
 # set up the basic solr directory structure
 [ solr_dir,
   solr_data_dir,
   solr_home_dir,
+  solr_temp_dir,
   solr_log_dir,
   solr_collection_dir,
   solr_conf_dir
@@ -90,6 +93,15 @@ template File.join(solr_jetty_dir, "etc", "jetty.xml") do
   notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
 end
 
+template File.join(solr_jetty_dir, "contexts", "solr-jetty-context.xml") do
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
+  mode "0644"
+  source "solr4/solr-jetty-context.xml.erb"
+  notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
+end
+
+
 execute "chown -R #{OmnibusHelper.new(node).ownership['owner']} #{solr_jetty_dir}"
 
 node.default['private_chef']['opscode-solr4']['command'] =  "java -Xmx#{node['private_chef']['opscode-solr4']['heap_size']} -Xms#{node['private_chef']['opscode-solr4']['heap_size']}"
@@ -126,6 +138,7 @@ node.default['private_chef']['opscode-solr4']['command'] << "#{java_opts}"
 node.default['private_chef']['opscode-solr4']['command'] << " -Xloggc:#{File.join(solr_log_dir, "gclog.log")} -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -XX:+PrintGCApplicationStoppedTime -XX:+PrintGCApplicationConcurrentTime -XX:+PrintTenuringDistribution"
 node.default['private_chef']['opscode-solr4']['command'] << " -Dsolr.data.dir=#{solr_data_dir}"
 node.default['private_chef']['opscode-solr4']['command'] << " -Dsolr.solr.home=#{solr_home_dir}"
+node.default['private_chef']['opscode-solr4']['command'] << " -Djava.io.tmpdir=#{solr_temp_dir}"
 node.default['private_chef']['opscode-solr4']['command'] << " -server"
 node.default['private_chef']['opscode-solr4']['command'] << " -jar '#{solr_jetty_dir}/start.jar'"
 

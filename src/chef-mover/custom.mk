@@ -1,5 +1,5 @@
 SKIP_DIALYZER=true
-
+include devvm.mk
 install:
 	@./rebar get-deps -C rebar.config.lock
 
