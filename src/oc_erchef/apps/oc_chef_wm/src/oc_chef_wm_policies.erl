@@ -77,9 +77,7 @@ to_json(Req, #base_state{chef_db_context = DbContext,
             error(Report);
         AllRevisions ->
             BaseEJSON = build_base_policy_list_ejson(Req, AllRevisions),
-            io:format("BASE EJSON:~p~n", [BaseEJSON]),
             PolicyEJSON = build_policy_list_ejson(AllRevisions, BaseEJSON),
-            io:format("ALL REVS:~p~n", [PolicyEJSON]),
             {chef_json:encode(PolicyEJSON), Req, State}
     end.
 
