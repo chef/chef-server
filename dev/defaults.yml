@@ -53,7 +53,7 @@ projects:
     type: erlang
     service:
       rel-name: mover
-      rel-type: rel
+      rel-type: relx
       name:  opscode-chef-mover
       cookie: mover
       node: mover@127.0.0.1
