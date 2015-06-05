@@ -76,13 +76,25 @@ to_json(Req, #base_state{chef_db_context = DbContext,
             lager:error("~p", [Report]),
             error(Report);
         AllRevisions ->
-            PolicyEJSON = build_policy_list_ejson(AllRevisions, {[]}),
+            BaseEJSON = build_base_policy_list_ejson(Req, AllRevisions),
+            io:format("BASE EJSON:~p~n", [BaseEJSON]),
+            PolicyEJSON = build_policy_list_ejson(AllRevisions, BaseEJSON),
             io:format("ALL REVS:~p~n", [PolicyEJSON]),
             {chef_json:encode(PolicyEJSON), Req, State}
     end.
 
+build_base_policy_list_ejson(Req, PolicyRevisions) ->
+    RouteFun = oc_chef_wm_routes:bulk_route_fun(policy, Req),
+    UriMap= [{Name, RouteFun(Name)} || {Name, _Rev} <- PolicyRevisions],
+    build_nested_base_ejson(UriMap, {[]}).
+
+build_nested_base_ejson([{PolicyName, URI}|Rest], EJSON) ->
+    NewEJSON = ej:set_p({PolicyName, "uri"}, EJSON, URI),
+    build_nested_base_ejson(Rest, NewEJSON);
+build_nested_base_ejson([], EJSON) ->
+    EJSON.
+
 build_policy_list_ejson([{PolicyName, RevisionID}|Rest], EJSON) ->
-    %% TODO: need to set policy_name URL
     NewEJSON = ej:set_p({PolicyName, "revisions", RevisionID}, EJSON, {[]}),
     build_policy_list_ejson(Rest, NewEJSON);
 build_policy_list_ejson([], EJSON) ->

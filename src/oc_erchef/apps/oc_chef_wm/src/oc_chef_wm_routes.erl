@@ -203,12 +203,6 @@ org_bulk_route_fun(cookbook_artifact_version, Req) ->
     fun(CookbookName, Identifier) ->
             render_template(Template, BaseURI, [Org, CookbookName, Identifier])
     end;
-org_bulk_route_fun(policy, Req) ->
-    {BaseURI, Org} = extract_from_req(Req),
-    Template = template_for_type(policy),
-    fun([Name, Group]) ->
-            render_template(Template, BaseURI, [Org, Name, Group])
-    end;
 org_bulk_route_fun(Type, Req) ->
     {BaseURI, Org} = extract_from_req(Req),
     Template = template_for_type(Type),
@@ -242,8 +236,6 @@ template_for_type(data_bag_item) ->
 template_for_type({data_bag, _}) ->
     %% another way of asking for data_bag_item
     "/organizations/~s/data/~s/~s";
-template_for_type(policy) ->
-    "/organizations/~s/policies/~s/~s";
 template_for_type(container) ->
     "/organizations/~s/containers/~s";
 template_for_type(group) ->
@@ -258,6 +250,8 @@ template_for_type(user_key) ->
     "/users/~s/keys/~s";
 template_for_type(client_key) ->
     "/organizations/~s/clients/~s/keys/~s";
+template_for_type(policy) ->
+    "/organizations/~s/policies/~s";
 template_for_type(policy_group) ->
     "/organizations/~s/policy_groups/~s".
 
