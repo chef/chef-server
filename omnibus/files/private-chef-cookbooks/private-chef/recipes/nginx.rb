@@ -98,6 +98,7 @@ ssl_dhparam = File.join(nginx_ca_dir, "dhparams.pem")
 # We do the File.exist check at compile-time to prevent expensive
 # dhapram generation.
 if ! File.exists?(ssl_dhparam)
+  Chef::Log.info("Creating 2048 bit dhparam because it does not exist.  This may take some time.")
   file ssl_dhparam do
     content `/opt/opscode/embedded/bin/openssl dhparam 2048 2>/dev/null`
     mode "0644"
