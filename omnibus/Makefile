@@ -79,10 +79,10 @@ dev-build: clear_pkg_cache prune
 	kitchen exec default-$(DEV_PLATFORM) -c "bash -l -c 'cd chef-server/omnibus && bundle install && time bundle exec omnibus build chef-server'"
 
 install:
+	luarocks install --local lpeg
+	luarocks install --local lua-cjson
 	bundle install
 
 travis:
 	bundle exec rake test:csc
-# Uncomment once luarocks is added to the
-# apt-package whitelist in travis
-#	bundle exec rake test:routing
+	bundle exec rake test:routing

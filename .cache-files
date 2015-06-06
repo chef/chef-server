@@ -1,8 +1,0 @@
-.luarocks/
-.cpanm/
-.cpan/
-.rvm/
-perl5/
-build/chef/chef-server/src/oc-id/vendor/bundle
-build/chef/chef-server/src/oc_erchef/deps.plt
-build/chef/chef-server/src/oc_erchef/travis-erlang-17.4.plt

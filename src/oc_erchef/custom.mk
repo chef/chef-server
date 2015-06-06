@@ -7,6 +7,7 @@ ALL_HOOK = bundle
 CLEAN_HOOK = bundle_clean
 REL_HOOK = compile bundle
 
+GECODE_URL=https://chef-travis-ci-cache.s3.amazonaws.com/ubuntu-12.04/vendored-gecode.tar.gz
 CT_DIR = common_test
 
 ERLANG_DIALYZER_APPS = asn1 \
@@ -70,9 +71,15 @@ bundle:
 	@cd apps/chef_objects/priv/depselector_rb; bundle install --deployment --path .bundle
 
 install:
+	curl -Lo vendored-gecode.tar.gz $(GECODE_URL) || wget $(GECODE_URL)
+	tar xf vendored-gecode.tar.gz
+	cpanm --notest --quiet --local-lib=$(HOME)/perl5 local::lib
+	cpanm --notest --quiet App::Sqitch
 	@./rebar get-deps -C rebar.config.lock
+	rm -f $(HOME)/.cpanm/work/*/build.log
+	rm -f $(HOME)/.cpanm/build.log
 
 travis: all
-	 PATH=~/perl5/bin:$(PATH) $(REBARC) skip_deps=true ct
+	PATH=~/perl5/bin:$(PATH) $(REBARC) skip_deps=true ct
 
 DEVVM_DIR = $(DEVVM_ROOT)/_rel/oc_erchef
