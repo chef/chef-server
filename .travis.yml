@@ -3,9 +3,12 @@ sudo: false
 branches:
   only:
   - master
+  - mp/custom-cache
 cache:
   apt: true
   directories:
+    # TODO - I think we need this to get the before cache hook
+    # but test and remove if not
   - ".fakecache"
 env:
   matrix:
@@ -44,4 +47,3 @@ install:
 
 script:
 - $TRAVIS_BUILD_DIR/scripts/build.sh $COMPONENT"
-
