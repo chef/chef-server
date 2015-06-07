@@ -4,11 +4,10 @@
   </div>
   <div>
     <p>Enter your hosted Chef username and we'll send you a link to reset it.</p>
-    <%= form_tag({ action: 'create' }, { 'data-abide' => '' }) do -%>
+    <%= form_tag({ action: 'create' }) do -%>
       <div class="row">
         <div class="medium-6 columns username-field">
           <%= text_field_tag :username, nil, required: true, autocomplete: 'off', placeholder: 'Username', class: 'radius' %>
-          <small class="error">Required</small>
         </div>
       </div>
       <div class="row">
