@@ -70,6 +70,8 @@ consolidated into the overall 12.1.0 release notes as part of the final
 
   * Ensure that unless newrelic support is expressly configured, the
     service will not call home to newrelic.
+  * The UI has been updated as part of our ongoing effort to improve the look
+    and feel of all Chef applications.
 
 ### Deprecations
 

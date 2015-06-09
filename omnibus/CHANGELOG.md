@@ -56,6 +56,7 @@
   * Add assets precompile to Travis CI step
   * Changes to remove deprecation warnings
 * new profile controller and views
+* updated UI using chef-web-core
 
 ### oc-chef-pedant
   * Versioned testing support for users, clients, principals,and
