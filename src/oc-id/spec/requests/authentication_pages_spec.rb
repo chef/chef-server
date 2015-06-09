@@ -25,7 +25,7 @@ describe 'Authentication' do
       it { should have_link 'Sign Out', :href => signout_path }
       it { should_not have_link 'Sign In' }
       it { should_not have_link 'Sign Up' }
-      it { should have_content 'Authorized Applications' }
+      it { should have_content 'Applications' }
 
       describe 'and then sign out' do
         before { click_link 'Sign Out' }

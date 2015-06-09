@@ -1,5 +1,9 @@
+require 'chef/web/core/asset_helpers'
+require 'chef/web/core/url_helpers'
+
 module ApplicationHelper
-  delegate :sign_up_url, :to => "Settings"
+  include Chef::Web::Core::AssetHelpers
+  include Chef::Web::Core::URLHelpers
 
   def chef_class_for(flash_type)
     classes = {
