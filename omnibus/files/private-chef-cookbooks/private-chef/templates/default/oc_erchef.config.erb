@@ -95,12 +95,12 @@
               %% be part of a loaded application
               {node_license, <%= node['private_chef']['license']['nodes'] %>},
               {upgrade_url, <<"<%= node['private_chef']['license']['upgrade_url'] %>">>},
-              {actions_host, "<%= node['private_chef']['rabbitmq']['vip'] %>"},
-              {actions_port, <%= node['private_chef']['rabbitmq']['node_port'] %> },
-              {actions_user, <<"<%= node['private_chef']['rabbitmq']['user'] %>">>},
-              {actions_password, <<"<%= node['private_chef']['rabbitmq']['password'] %>">>},
-              {actions_vhost, <<"<%= node['private_chef']['rabbitmq']['actions_vhost'] %>">>},
-              {actions_exchange, <<"<%= node['private_chef']['rabbitmq']['actions_exchange'] %>">>},
+              {actions_host, "<%= @actions_vip %>"},
+              {actions_port, <%= @actions_port %> },
+              {actions_user, <<"<%= @actions_user %>">>},
+              {actions_password, <<"<%= @actions_password %>">>},
+              {actions_vhost, <<"<%= @actions_vhost %>">>},
+              {actions_exchange, <<"<%= @actions_exchange %>">>},
               {actions_fqdn, <<"<%= node['private_chef']['lb']['api_fqdn'] %>">>},
 
               {max_request_size, <%= node['private_chef']['opscode-erchef']['max_request_size'] %>},

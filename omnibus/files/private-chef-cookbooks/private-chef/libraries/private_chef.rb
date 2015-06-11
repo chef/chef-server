@@ -25,6 +25,7 @@ module PrivateChef
 
   addons Mash.new
   rabbitmq Mash.new
+  external_rabbitmq Mash.new
   rabbitmq['log_rotation'] ||= Mash.new
   opscode_solr4 Mash.new
   opscode_solr4['log_rotation'] ||= Mash.new
@@ -92,6 +93,16 @@ module PrivateChef
   opscode_certificate Mash.new
 
   class << self
+
+    def gen_rabbit
+      external = (node['private_chef']['external_rabbitmq']['actions_rabbitmq'] rescue nil)
+      if external == true
+        rabbit = node['private_chef']['external_rabbitmq']
+      else
+        rabbit = node['private_chef']['rabbitmq']
+      end
+      rabbit
+    end
 
     def from_file(filename)
       # We're overriding this here so that we can get more meaningful errors from
