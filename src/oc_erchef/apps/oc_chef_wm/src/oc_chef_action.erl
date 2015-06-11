@@ -170,7 +170,13 @@ maybe_add_data(Msg, []) ->
 maybe_add_data(Msg, undefined) ->
     ej:set({<<"data">>}, Msg, {[]});
 maybe_add_data(Msg, FullActionPayload) ->
-    ej:set({<<"data">>}, Msg, FullActionPayload).
+    ej:set({<<"data">>}, Msg, maybe_scrub_password(FullActionPayload)).
+
+maybe_scrub_password(Msg) ->
+    case ej:get({"password"}, Msg) of
+        undefined -> Msg;
+        _ -> ej:set({<<"password">>}, Msg, ?REDACTED_PASSWORD)
+    end.
 
 %%Example of a permission object
 %entity_name: grant,
@@ -344,4 +350,3 @@ req_header(Name, Req) ->
         Header ->
             iolist_to_binary(Header)
     end.
-
