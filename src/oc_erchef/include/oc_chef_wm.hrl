@@ -403,3 +403,5 @@
 
 -define(gv(X,L), proplists:get_value(X, L)).
 -define(gv(X,L, D), proplists:get_value(X, L, D)).
+
+-define(REDACTED_PASSWORD, <<"*******">>).

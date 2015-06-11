@@ -113,6 +113,7 @@ Pending for final release: most of these have github issues that need to be link
   * Fixes chef-server issue #119 which prevented some LDAP users from
     successfully logging in.
   * Correct path to DRBD split brain notification script.
+  * Redact password from actions data, if present.
 
 ### Security Updates
 
@@ -126,6 +127,7 @@ The following items are the security updates that have been applied since Chef S
     after an error
   * CVE-2014-8161 - Fix information leak via constraint-violation error messages
   * CVE-2014-0067 - Lock down regression testing's temporary installations on Windows
+* Redact password from actions data, if present.
 
 ### API Changes and Additions
 

@@ -295,6 +295,25 @@ maybe_add_remote_request_id_test_() ->
      }
     ].
 
+maybe_add_data_test() ->
+  [{"redacts password when <<\"password\">> key is present",
+    fun() -> FullActionPayload = {[{<<"username">>, <<"alice">>},
+                                   {<<"password">>, <<"changeme">>}]},
+             Expected = {[{<<"data">>, {[{<<"username">>, <<"alice">>},
+                                          <<"password">>, ?REDACTED_PASSWORD]} }]},
+             Ret = oc_chef_action:maybe_add_data({[]}, FullActionPayload),
+             ?assertEqual(Expected, Ret)
+    end
+   },
+   {"no redacted password added when no <<\"password\">> key is present",
+    fun() -> FullActionPayload = {[{<<"name">>, <<"db">>}]},
+             Expected = {[{<<"data">>, {[{<<"name">>, <<"db">>}]} }]},
+             Ret = oc_chef_action:maybe_add_data({[]}, FullActionPayload),
+             ?assertEqual(Expected, Ret)
+    end
+   }
+  ].
+
 end_to_end_test_() ->
     HostFQDN = <<"hostname.example.com">>,
     MockedModules = [chef_wm_util, wrq, bunnyc],

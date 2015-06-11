@@ -45,6 +45,7 @@
 * Cookbook Artifacts API interops w/ chef-client and ChefDK
 * Pull in newest folsom and bear to address folsome_graphite crashes.
 * Thanks to @danieldreier for removing satan from the development guide
+* Redact password from actions data, if present.
 
 ### oc-id
 * interationalization and other improvements to password change
