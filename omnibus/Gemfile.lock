@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/opscode/omnibus-software.git
-  revision: 0fb66f82eef7b52d866a9fbc153fc4b1d686e8c9
+  revision: 8b0ebc7691d854f9b287107c4b3afca9caf4b9b4
   specs:
     omnibus-software (4.0.0)
 
@@ -34,7 +34,7 @@ GEM
     mixlib-config (2.2.1)
     mixlib-log (1.6.0)
     mixlib-shellout (1.6.1)
-    mixlib-versioning (1.0.0)
+    mixlib-versioning (1.1.0)
     ohai (7.4.1)
       ffi (~> 1.9)
       ffi-yajl (~> 1.1)
