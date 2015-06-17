@@ -28,7 +28,7 @@ if is_data_master?
     content lazy {::File.open('/etc/opscode/webui_priv.pem').read}
   end
 
-  rabbitmq = PrivateChef.gen_rabbit
+  rabbitmq = OmnibusHelper.new(node).rabbitmq_configuration
 
   file "/etc/opscode-analytics/actions-source.json" do
     owner 'root'

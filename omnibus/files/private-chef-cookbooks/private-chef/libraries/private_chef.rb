@@ -94,16 +94,6 @@ module PrivateChef
 
   class << self
 
-    def gen_rabbit
-      external = (node['private_chef']['external_rabbitmq']['actions_rabbitmq'] rescue nil)
-      if external == true
-        rabbit = node['private_chef']['external_rabbitmq']
-      else
-        rabbit = node['private_chef']['rabbitmq']
-      end
-      rabbit
-    end
-
     def from_file(filename)
       # We're overriding this here so that we can get more meaningful errors from
       # the reconfigure chef run; we don't particularly care what line in the chef
@@ -242,6 +232,7 @@ module PrivateChef
         "redis_lb",
         "addons",
         "rabbitmq",
+        "external_rabbitmq",
         "opscode_solr4",
         "opscode_expander",
         "opscode_erchef",

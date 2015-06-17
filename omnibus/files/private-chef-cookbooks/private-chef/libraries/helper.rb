@@ -14,6 +14,15 @@ class OmnibusHelper
     {"owner" => owner, "group" => group}
   end
 
+  def rabbitmq_configuration
+    external = node['private_chef']['external-rabbitmq']['enable']
+    if external
+      node['private_chef']['external-rabbitmq']
+    else
+      node['private_chef']['rabbitmq']
+    end
+  end
+
   # Normalizes hosts. If the host part is an ipv6 literal, then it
   # needs to be quoted with []
   def self.normalize_host(host_part)

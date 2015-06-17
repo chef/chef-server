@@ -33,7 +33,7 @@ ldap_encryption_type = ldap_authentication_enabled ? node['private_chef']['ldap'
 
 erchef_config = File.join(opscode_erchef_dir, "sys.config")
 
-rabbitmq = PrivateChef.gen_rabbit
+rabbitmq = OmnibusHelper.new(node).rabbitmq_configuration
 
 actions_vip = rabbitmq['vip']
 actions_port = rabbitmq['node_port']
