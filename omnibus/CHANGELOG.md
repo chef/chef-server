@@ -99,6 +99,12 @@ contains the following components:
 
 ### opscode-omnibus
 
+### redis 2.8.21
+
+* Multiple bug fixes since 2.8.21:
+https://raw.githubusercontent.com/antirez/redis/2.8/00-RELEASENOTES
+* CVE-2015-4335: Redis Lua Sandbox Escape
+
 ### postgresql 9.2.10
 * bugfixes: [link](http://www.postgresql.org/docs/9.2/static/release-9-2-10.html)
 * CVE-2015-0241: Fix buffer overruns in `to_char`()
