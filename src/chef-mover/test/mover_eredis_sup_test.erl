@@ -12,5 +12,4 @@
 %% the start_link path from being followed.
 start_link_should_start_client() ->
     process_flag(trap_exit, true),
-    ?assertMatch({error, {connection_error, {connection_error,_}}}, mover_eredis_sup:eredis_start_link("host", 1234)).
-
+    ?assertMatch({error, {connection_error, {connection_error,_}}}, mover_eredis_sup:eredis_start_link("host", 1234, "")).

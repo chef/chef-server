@@ -10,7 +10,7 @@
 
 %% Supervisor callbacks
 -export([init/1,
-         eredis_start_link/2
+         eredis_start_link/3
         ]).
 
 -define(SERVER, ?MODULE).
@@ -21,9 +21,10 @@ start_link() ->
 init([]) ->
     Host = envy:get(mover, eredis_host, string),
     Port = envy:get(mover, eredis_port, integer),
-    StartUp = {?MODULE, eredis_start_link, [Host, Port]},
+    Password = envy:get(mover, eredis_password, "", string),
+    StartUp = {?MODULE, eredis_start_link, [Host, Port, Password]},
     Child = [{eredis, StartUp, permanent, brutal_kill, worker, [eredis]}],
     {ok, {{one_for_one, 60, 10}, Child}}.
 
-eredis_start_link(Host, Port) ->
-    gen_server:start_link({local, mover_eredis_client}, eredis_client, [Host, Port, 0, "", 100, 2000], []).
+eredis_start_link(Host, Port, Password) ->
+    gen_server:start_link({local, mover_eredis_client}, eredis_client, [Host, Port, 0, Password, 100, 2000], []).
