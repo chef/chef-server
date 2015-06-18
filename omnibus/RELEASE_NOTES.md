@@ -1,6 +1,6 @@
 # Chef Server Release Notes
 
-## 12.1.0 (2015-05-27)
+## 12.1.0 (2015-06-18)
 
 The following items are new since Chef Server 12.0.8 and/or are changes from previous versions.  For specific breakdown of updated components, refer to CHANGELOG.md.
 
@@ -128,6 +128,8 @@ The following items are the security updates that have been applied since Chef S
   * CVE-2014-8161 - Fix information leak via constraint-violation error messages
   * CVE-2014-0067 - Lock down regression testing's temporary installations on Windows
 * Redact password from actions data, if present.
+* Redis 2.8.21
+  * CVE-2015-4335: Redis Lua Sandbox Escape
 
 ### API Changes and Additions
 

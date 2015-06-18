@@ -1,11 +1,8 @@
 # Chef Server Changelog
 
-## Unreleased
-
 ### chef-server
-* Ensure that postgres shared buffers are calculated correctly
 
-## 12.1.0 (2015-05-27)
+## 12.1.0 (2015-06-18)
 
 ### chef-server
 * new self-contained development environment for chef server
@@ -23,6 +20,7 @@
 * New gather-log script gathers a lot more debugging information.
 * removed unused error json and html pages. Correct doctype in default
   landing page.
+* Ensure that postgres shared buffers are calculated correctly
 
 ### Components
 
