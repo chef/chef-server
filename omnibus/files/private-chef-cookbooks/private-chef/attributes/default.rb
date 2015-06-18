@@ -203,10 +203,11 @@ default['private_chef']['opscode-erchef']['udp_socket_pool_size'] = '20'
 # db_pooler_timeout - the maximum amount of time a request should wait
 # in the queue before timing out.  Request queueing is only effective
 # if db_pooler_timeout > 0
-default['private_chef']['opscode-erchef']['db_pool_size'] = '20'
-default['private_chef']['opscode-erchef']['db_pooler_timeout'] = '0'
+default['private_chef']['opscode-erchef']['db_pool_size'] = 20
+default['private_chef']['opscode-erchef']['db_pool_queue_max'] = 20
+default['private_chef']['opscode-erchef']['db_pooler_timeout'] = 2000
 default['private_chef']['opscode-erchef']['sql_db_timeout'] = 5000
-default['private_chef']['opscode-erchef']['db_pool_queue_max'] = '20'
+
 # Pool configuration for depsolver workers
 #
 # depsolver_worker_count - the number of depselector workers.  This is
@@ -473,8 +474,8 @@ default['private_chef']['oc_bifrost']['port'] = 9463
 default['private_chef']['oc_bifrost']['superuser_id'] = '5ca1ab1ef005ba111abe11eddecafbad'
 default['private_chef']['oc_bifrost']['db_pool_size'] = '20'
 # The db_pool is only effective for a db_pooler_timeout > 0
-default['private_chef']['oc_bifrost']['db_pooler_timeout'] = '0'
-default['private_chef']['oc_bifrost']['db_pool_queue_max'] = '50'
+default['private_chef']['oc_bifrost']['db_pooler_timeout'] = 2000
+default['private_chef']['oc_bifrost']['db_pool_queue_max'] = 20
 default['private_chef']['oc_bifrost']['sql_user'] = "bifrost"
 default['private_chef']['oc_bifrost']['sql_password'] = "challengeaccepted"
 default['private_chef']['oc_bifrost']['sql_ro_user'] = "bifrost_ro"
