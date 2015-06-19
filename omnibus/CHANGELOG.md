@@ -2,7 +2,7 @@
 
 ### chef-server
 
-## 12.1.0 (2015-06-18)
+## 12.1.0 (2015-06-19)
 
 ### chef-server
 * new self-contained development environment for chef server
@@ -21,6 +21,9 @@
 * removed unused error json and html pages. Correct doctype in default
   landing page.
 * Ensure that postgres shared buffers are calculated correctly
+* Adding support for being able to use external rabbitmq box for data to
+  be sent into analytics. This would mean that miltiple chef-servers
+  could send info into one analytics via external rabbitmq.
 
 ### Components
 
