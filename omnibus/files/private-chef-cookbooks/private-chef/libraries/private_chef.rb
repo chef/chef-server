@@ -25,6 +25,7 @@ module PrivateChef
 
   addons Mash.new
   rabbitmq Mash.new
+  external_rabbitmq Mash.new
   rabbitmq['log_rotation'] ||= Mash.new
   opscode_solr4 Mash.new
   opscode_solr4['log_rotation'] ||= Mash.new
@@ -231,6 +232,7 @@ module PrivateChef
         "redis_lb",
         "addons",
         "rabbitmq",
+        "external_rabbitmq",
         "opscode_solr4",
         "opscode_expander",
         "opscode_erchef",

@@ -117,6 +117,17 @@ default['private_chef']['rabbitmq']['consumer_id'] = 'hotsauce'
 default['private_chef']['rabbitmq']['env_path'] = "/opt/opscode/bin:/opt/opscode/embedded/bin:/usr/bin:/bin"
 
 ####
+# External RabbitMQ
+####
+default['private_chef']['external-rabbitmq']['enable'] = false
+default['private_chef']['external-rabbitmq']['actions_user'] = 'actions'
+default['private_chef']['external-rabbitmq']['actions_password'] = 'changeme'
+default['private_chef']['external-rabbitmq']['actions_vhost'] = '/analytics'
+default['private_chef']['external-rabbitmq']['actions_exchange'] = 'actions'
+default['private_chef']['external-rabbitmq']['node_port'] = '5672'
+default['private_chef']['external-rabbitmq']['vip'] = '127.0.0.1'
+
+####
 # Jetty dummy for logs
 ####
 # Should always be enable = false, we control Jetty+Solr through opscode-solr4
