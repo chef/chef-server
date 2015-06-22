@@ -57,6 +57,13 @@ directory "/etc/opscode/logrotate.d" do
   action :nothing
 end.run_action(:create)
 
+#consume analytics queue config information if this file exists
+actions_source = "/etc/opscode/actions-source.json"
+if File.exists?(actions_source)
+  analytics = JSON.parse(IO.read(actions_source))
+  node.consume_attributes({"analytics" => analytics['analytics']})
+end
+
 if File.exists?("/etc/opscode/chef-server.json")
   Chef::Log.warn("Please move to /etc/opscode/chef-server.rb for configuration - /etc/opscode/chef-server.json is deprecated.")
 else
