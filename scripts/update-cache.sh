@@ -47,13 +47,13 @@ done
 
 cd $CACHE_DIR
 tar czf $NEW_CACHE_FILE .
-# TODO I think updated timestamp but no content changes are causing different
-#      sums every time.  There's probably a better way to handle this.
+# Note: tried to do checksums first, but changes in timestamps with no
+#       content updates result in a different checksum...
 echo "Comparing $OLD_CACHE_FILE to $NEW_CACHE_FILE"
-original=`md5sum $OLD_CACHE_FILE`
-new=`md5sum $NEW_CACHE_FILE`
+original=`wc -c $OLD_CACHE_FILE | cut -d' ' -f1`
+new=`wc -c $NEW_CACHE_FILE | cut -d' ' -f1`
 
-if [ "$orginal" == "$new" ]; then
+if [ "$original" -eq "$new" ]; then
   echo "No changes in cache detected, not uploading."
 else
   echo "Uploading changed cache"
