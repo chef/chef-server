@@ -25,8 +25,8 @@ To run this app you'll need:
 ## Configuration
 
 For instructions on configuring the Chef identity that is included with Chef
-server, see the
-[chef-server.rb Settings documentation](https://docs.getchef.com/config_rb_server.html#oc-id).
+server, see the 
+[chef-server.rb Settings documentation](https://docs.chef.io/config_rb_server_optional_settings.html#oc-id).
 
 [RailsConfig](https://github.com/railsconfig/rails_config) is used for
 application configuration. The defaults are in config/settings.yml. You can
