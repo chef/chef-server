@@ -42,7 +42,7 @@ cd $HOME
 for entry in $cachelist; do
   # Here we will force everything to be relative to $HOME
   # and sync it up with our original cache files
-  rsync -azrR --delete  ${entry#$HOME/} $HOME/.realcache/cacheroot
+  rsync --stats -i -azrR --delete  ${entry#$HOME/} $HOME/.realcache/cacheroot
 done
 
 cd $CACHE_DIR
