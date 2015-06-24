@@ -53,6 +53,9 @@ echo "Comparing $OLD_CACHE_FILE to $NEW_CACHE_FILE"
 original=`wc -c $OLD_CACHE_FILE | cut -d' ' -f1`
 new=`wc -c $NEW_CACHE_FILE | cut -d' ' -f1`
 
+echo "$OLD_CACHE_FILE: $original"
+echo "$NEW_CACHE_FILE: $new"
+
 if [ "$original" -eq "$new" ]; then
   echo "No changes in cache detected, not uploading."
 else
