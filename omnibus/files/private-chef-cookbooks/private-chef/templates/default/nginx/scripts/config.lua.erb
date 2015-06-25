@@ -46,7 +46,6 @@ end
 local function connect_redis()
    local red = redis:new()
    red:set_timeout(<%=@redis_connection_timeout%>)
-   red:set_timeout(1000)
    local ok, err = red:connect("<%= @omnihelper.vip_for_uri('redis_lb') %>", <%=@redis_port%>)
 
    if not ok then
