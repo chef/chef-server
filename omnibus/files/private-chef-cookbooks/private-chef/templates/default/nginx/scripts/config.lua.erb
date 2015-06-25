@@ -36,15 +36,32 @@ local function array_to_hash(t)
   return h
 end
 
+local function auth_not_required(err)
+  -- conservatively try to determine if auth is not required.
+  -- if auth isn't required, we can safely ignore an error from
+  -- the AUTH command
+  return err == "ERR Client sent AUTH, but no password is set"
+end
+
 local function connect_redis()
-  local red = redis:new()
-  local results
-  red:set_timeout(<%=@redis_connection_timeout%>)
-  local ok, err = red:connect("<%= @omnihelper.vip_for_uri('redis_lb') %>", <%=@redis_port%>)
-  if not ok then
-    ngx.log(ngx.ERR, "failed to connect redis: ", err)
-  end
-  return ok, red
+   local red = redis:new()
+   red:set_timeout(<%=@redis_connection_timeout%>)
+   local ok, err = red:connect("<%= @omnihelper.vip_for_uri('redis_lb') %>", <%=@redis_port%>)
+
+   if not ok then
+      ngx.log(ngx.ERR, "failed to connect redis: ", err)
+   end
+
+   local ok, err = red:auth("<%= @redis_password %>")
+   if not ok then
+      if auth_not_required(err) then
+         ok = true
+      else
+         ngx.log(ngx.ERR, "failed to authenticate to redis: ", err)
+      end
+   end
+
+   return ok, red
 end
 
 local function close_redis(red)
