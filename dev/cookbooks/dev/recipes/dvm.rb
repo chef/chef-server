@@ -33,19 +33,9 @@ mount "dvm" do
   options "bind"
 end
 
-# Finally, load in our base projects
-#
-execute "load oc-chef-pedant"  do
-  command "dvm load oc-chef-pedant"
+# Let's make sure this remounts on reboot:
+bash "dvm mount to fstab" do
+   user "root"
+   code lazy { "echo /vagrant/dvm #{DVMHelper.dvm_path} none bind >> /etc/fstab" }
+   not_if "grep -q dvm /etc/fstab"
 end
-execute "load omnibus upgrades" do
-  command "dvm load omnibus upgrades"
-end
-
-# Note that dvm knows that ocokbook changes require a reconfigure.
-# This will be our only reconfigure during provisioning, so that
-# we avoid doing it multiple times.
-execute "load omnibus private-chef-cookbooks"  do
-  command "dvm load omnibus private-chef-cookbooks"
-end
-
