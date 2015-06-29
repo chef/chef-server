@@ -1,0 +1,5 @@
+{
+  "name" : "client1",
+  "validator" : "true",
+  "create_key" : true
+}

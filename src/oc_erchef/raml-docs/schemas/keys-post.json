@@ -4,7 +4,7 @@
   "properties" : {
     "public_key" :
       { "type" : "string",
-        "description" : "A valid public key",
+        "description" : "A valid PKCS#1 public key string.",
         "required" : true },
     "name" :
       { "type" : "string",
@@ -12,7 +12,7 @@
         "required" : true },
     "expiration_date" :
       { "type" : "date",
-        "description" : "Date in ISO-8601 form, or the string 'infinity'",
+        "description" : "An ISO 8601 fomatted string: YYYY-MM-DDTHH:MM:SSZ e.g. 2013-12-24T21:00:00Z in UTC timezone or the string 'infinity'.",
         "required" : true }
   }
 }
