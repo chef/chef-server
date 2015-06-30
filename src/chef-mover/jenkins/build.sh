@@ -15,14 +15,14 @@ then
     VERSION=$(git describe --tags --exact-match --match='[0-9]*.[0-9]*.[0-9]*')
     PACKAGE=${PROJ_NAME}-${VERSION}.tar.gz
 else
-    REL_VERSION=`cat rel/reltool.config|grep '{rel,.*"mover"'|cut -d ',' -f 3|sed 's/"//g'`
+    REL_VERSION=`cat src/mover.app.src|grep '{vsn'|cut -d '"' -f 2`
     GIT_SHA=`git rev-parse --short HEAD`
     VERSION=${REL_VERSION}-${GIT_SHA}
     PACKAGE=${PROJ_NAME}-${VERSION}.tar.gz
 fi
 
 
-cd rel
+cd _rel
 tar zcf $PACKAGE $PROJ_NAME/
 s3cmd put $PACKAGE s3://opscode-ci/artifacts/ubuntu-10.04/x86_64/chef-mover/$PACKAGE
 s3cmd put $PACKAGE s3://opscode-ci/artifacts/ubuntu-12.04/x86_64/chef-mover/$PACKAGE
