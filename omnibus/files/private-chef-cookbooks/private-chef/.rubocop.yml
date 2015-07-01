@@ -1,0 +1,32 @@
+AllCops:
+  Include:
+    - Berksfile
+    - Gemfile
+    - Rakefile
+    - Thorfile
+    - Guardfile
+  Exclude:
+    - metadata.rb
+    - test/**/metadata.rb
+    - vendor/**/*
+
+Metrics/CyclomaticComplexity:
+  Max: 8
+Style/Documentation:
+  Enabled: false
+ClassLength:
+  Enabled: false
+Encoding:
+  Enabled: false
+HashSyntax:
+  Enabled: false
+LineLength:
+  Enabled: false
+MethodLength:
+  Enabled: false
+SignalException:
+  Enabled: false
+TrailingComma:
+  Enabled: false
+WordArray:
+  Enabled: false
