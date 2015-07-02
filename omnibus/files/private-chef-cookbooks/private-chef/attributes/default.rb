@@ -193,6 +193,10 @@ default['private_chef']['opscode-erchef']['auth_skew'] = '900'
 default['private_chef']['opscode-erchef']['authz_pooler_timeout'] = '0'
 default['private_chef']['opscode-erchef']['bulk_fetch_batch_size'] = '5'
 default['private_chef']['opscode-erchef']['udp_socket_pool_size'] = '20'
+default['private_chef']['opscode-erchef']['sql_user'] = "opscode_chef"
+default['private_chef']['opscode-erchef']['sql_password'] = "snakepliskin"
+default['private_chef']['opscode-erchef']['sql_ro_user'] = "opscode_chef_ro"
+default['private_chef']['opscode-erchef']['sql_ro_password'] = "shmunzeltazzen"
 # Pool configuration for postgresql connections
 #
 # db_pool_size - the number of pgsql connections in the pool
@@ -416,10 +420,6 @@ default['private_chef']['postgresql']['username'] = "opscode-pgsql"
 default['private_chef']['postgresql']['shell'] = "/bin/sh"
 default['private_chef']['postgresql']['home'] = "/var/opt/opscode/postgresql"
 default['private_chef']['postgresql']['user_path'] = "/opt/opscode/embedded/bin:/opt/opscode/bin:$PATH"
-default['private_chef']['postgresql']['sql_user'] = "opscode_chef"
-default['private_chef']['postgresql']['sql_password'] = "snakepliskin"
-default['private_chef']['postgresql']['sql_ro_user'] = "opscode_chef_ro"
-default['private_chef']['postgresql']['sql_ro_password'] = "shmunzeltazzen"
 default['private_chef']['postgresql']['vip'] = "127.0.0.1"
 default['private_chef']['postgresql']['port'] = 5432
 default['private_chef']['postgresql']['listen_address'] = 'localhost'
