@@ -115,10 +115,6 @@ module PrivateChef
       PrivateChef["servers"]
     end
 
-    def servers
-      PrivateChef["servers"]
-    end
-
     def backend_vip(name=nil, opts={})
       if name
         PrivateChef['backend_vips'] ||= Mash.new

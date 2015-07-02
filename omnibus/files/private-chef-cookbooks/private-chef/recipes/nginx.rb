@@ -49,11 +49,11 @@ end
   end
 end
 
-# Generate self-signed SSL certificate
 ssl_keyfile = File.join(nginx_ca_dir, "#{node['private_chef']['nginx']['server_name']}.key")
 ssl_crtfile = File.join(nginx_ca_dir, "#{node['private_chef']['nginx']['server_name']}.crt")
 ssl_dhparam = File.join(nginx_ca_dir, 'dhparams.pem')
 
+# Generate self-signed SSL certificate
 openssl_x509 ssl_crtfile do
   common_name node['private_chef']['nginx']['server_name']
   org node['private_chef']['nginx']['ssl_company_name']
@@ -66,8 +66,7 @@ openssl_x509 ssl_crtfile do
   mode '0644'
 end
 
-# We do the File.exist check at compile-time to prevent expensive
-# dhapram generation.
+# Generate dhparam.pem for better secrecy
 openssl_dhparam ssl_dhparam do
   key_length node['private_chef']['nginx']['dhparam_key_length']
   generator node['private_chef']['nginx']['dhparam_generator_id']
