@@ -1,0 +1,23 @@
+# See defaults.yml for a list of supported configuration values. Any simple value
+# will override the defaults.yml setting.  Hashes will be recursively merged.
+# A value containing arrays/lists will be merged and made unique.
+#
+# If the value you have differs in type (eg, is a simple value when
+# defaults.yml has a hash or array or vice-versa) your value will overwrite
+# the original - use this with caution.
+#
+# Currently hashes nested within arrays are not supported - the higher-level
+# behavior of naively merging the arrays will occur.
+
+vm:
+  cpus: 4 # Default is 4
+  memory: 4096 # Default is 4096
+  # apt packages you would like to see installed on initial setup? Add them here:
+  packages: []
+  # If there are other directory or file name patterns that you want to exclude from
+  # sync, add them here:
+  sync-exclude: []
+
+  # Leaving this set will auto-load omnibus cookbooks from your chef-server clone
+  # *before* the first reconfigure:
+  omnibus-autoload: [private-chef-cookbooks]

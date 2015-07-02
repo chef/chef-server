@@ -1,14 +1,16 @@
+# Anything in this file can be overridden in config.yml.
+#
 vm:
+  cpus: 4
+  memory: 4096
   packages: [ ntp, curl, wget, htop, uuid-dev, tmux, vim, iotop ]
-  installer-list-max-size: 10
+  omnibus-autoload: [] # see config.yml for details and to add components
   # TODO whitelist as well?
   sync-exclude:
     - pkg/
     - deps/
     - _rel/
     - chef-mover/rel/mover/
-      # - opscode-dev-vm/
-      # - chef-docs/ # Huge if you have it checked out!
     - ebin/
     - .eunit/
     - .kitchen/
@@ -26,7 +28,7 @@ vm:
     - relx # we don't want to pull in a mac relx to our linux vm
     - rspec.failures
   cover:
-    base_output_path: /vagrant/testdata/cover
+    base_output_path: /vagrant/testdata/cover # maps to dev/testdata/cover
 
 projects:
   oc_erchef:
@@ -83,9 +85,9 @@ projects:
         source_path: private-chef-upgrades
         dest_path: /opt/opscode/embedded/upgrades
         reconfigure_on_load: false
-      ha-drdb-cookbook:
-        source_path: private-chef-cookbooks/chef-ha-drdb
-        dest_path: /opt/opscode/embedded/cookbooks/chef-ha-drdb
+      ha-drbd-cookbook:
+        source_path: private-chef-cookbooks/chef-ha-drbd
+        dest_path: /opt/opscode/embedded/cookbooks/chef-ha-drbd
         reconfigure_on_load: true
 
   oc-chef-pedant:
