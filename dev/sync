@@ -92,10 +92,13 @@ BEGIN {
     config = YAML.load_file("defaults.yml")
     excludes = Array(config["vm"]["sync-exclude"]).map(&:to_s)
 
-    userconfig = YAML.load_file("config.yml")
-    userexclude = Array(userconfig["vm"]["sync-exclude"].map(&:to_s)) if userconfig.is_a? Hash and userconfig["vm"]
-    if userexclude
-      excludes += userexclude
+    begin
+      userconfig = YAML.load_file("config.yml")
+      userexclude = Array(userconfig["vm"]["sync-exclude"].map(&:to_s)) if userconfig.is_a? Hash and userconfig["vm"]
+      if userexclude
+        excludes += userexclude
+      end
+    rescue # config.yml may not exist
     end
 
     excludes += ['.vagrant/']
