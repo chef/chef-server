@@ -369,6 +369,8 @@ EOF
     end
 
     running_config = JSON.parse(File.read("/etc/chef-server/chef-server-running.json"))
+    # Note that the location of sql_user/sql_password has changed to 'opscode-erchef'
+    # but for this upgrade we would still expect it to be in 'postgresql'
     sql_host = running_config['chef_server']['postgresql']['vip']
     sql_port = running_config['chef_server']['postgresql']['port']
     sql_user = running_config['chef_server']['postgresql']['sql_user']
