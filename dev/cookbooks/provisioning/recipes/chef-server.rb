@@ -13,6 +13,30 @@ end
 package "build-essential"
 package "git"
 
+
+template "/etc/hosts" do
+  source "hosts.erb"
+  owner "root"
+  group "root"
+  action :create
+  variables({"fqdns" => ["api.chef-server.dev",  "manage.chef-server.dev" ]})
+end
+
+directory "/etc/opscode" do
+  owner "root"
+  group "root"
+  recursive true
+  action :create
+end
+
+# Note that we do not run reconfigure at this time
+# We will allow the dvm recipe to handle when that should occur.
+template "/etc/opscode/chef-server.rb" do
+  source "chef-server.rb.erb"
+  owner "root"
+  group "root"
+  action :create
+end
 # Install required external packages.
 # TODO eventually support auto-download of these packages from packagecloud
  #node['chef-server']['installers'].each do |package_name|
@@ -28,32 +52,3 @@ package "git"
 
 #end
 
-directory "/etc/opscode" do
-  owner "root"
-  group "root"
-  recursive true
-  action :create
-end
-
-template "/etc/opscode/chef-server.rb" do
-  source "chef-server.rb.erb"
-  owner "root"
-  group "root"
-  action :create
-  notifies :run, 'bash[reconfigure-chef-server]'
-end
-
-template "/etc/hosts" do
-  source "hosts.erb"
-  owner "root"
-  group "root"
-  action :create
-  variables({"fqdns" => ["api.chef-server.dev",  "manage.chef-server.dev" ]})
-end
-
-
-bash "reconfigure-chef-server" do
-  user 'root'
-  code "chef-server-ctl reconfigure"
-  action :nothing
-end
