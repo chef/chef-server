@@ -44,6 +44,7 @@ add_command_under_category "add-client-key", "key-rotation", "Create a new clien
     opts.on("-e", "--expiration-date DATE", "Expiration date for your key (if desired).") do |expiration_date|
       @helper.catch_argument_passed_as_input(@arg_list, "--expiration-date", expiration_date)
       @helper.check_valid_iso_date(expiration_date)
+      @options.expiration_date = expiration_date
     end
 
     opts.on("-k", "--key-name NAME", "Name for your key (defaults to fingerprint of your key).") do |key_name|
@@ -112,6 +113,7 @@ add_command_under_category "add-user-key", "key-rotation", "Create a new user ke
     opts.on("-e", "--expiration-date DATE", "Expiration date for your key (if desired).") do |expiration_date|
       @helper.catch_argument_passed_as_input(@arg_list, "--expiration-date", expiration_date)
       @helper.check_valid_iso_date(expiration_date)
+      @options.expiration_date = expiration_date
     end
 
     opts.on("-k", "--key-name NAME", "Name for your key (defaults to fingerprint of your key).") do |key_name|
