@@ -18,9 +18,7 @@ action :deploy do
              deploy #{target} --verify
     EOM
     environment "PERL5LIB" => "",
-                "PGPASSWORD" => new_resource.password,
-                "SQITCH_PASSWORD" => new_resource.password
-    user new_resource.psql_user
+                "PGPASSWORD" => new_resource.password
     # Sqitch Return Codes
     # 0 - when changes are applied
     # 1 - when everything is ok but no changes were made
