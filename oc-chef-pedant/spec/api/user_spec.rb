@@ -612,6 +612,13 @@ describe "users", :users do
               :body_exact => user_body
             })
         end
+
+        it "can get the admin user since they share an organization", :authorization do
+          req_url = "#{platform.server}/users/#{platform.admin_user.name}"
+          get(req_url, platform.non_admin_user).should look_like({
+              :status => 200
+           })
+        end
       end
 
       context "default client" do

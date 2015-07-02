@@ -226,24 +226,35 @@ to_json(Req, #base_state{ resource_args = Args,
             {{halt, 500}, Req, State#base_state{log_msg = Error }}
     end;
 to_json(Req, #base_state{ resource_args = org_list,
-                          resource_state = #user_state{chef_user = User }, chef_db_context = DbContext } = State) ->
-    case chef_db:list(#oc_chef_org_user_association{user_id = User#chef_user.id}, DbContext) of
+                          requestor = #chef_requestor{id = RequestorID},
+                          resource_state = #user_state{chef_user = #chef_user{id = TargetUserID} },
+                          chef_db_context = DbContext } = State) ->
+    Result = case superuser_or_self(TargetUserID, RequestorID, Req) of
+               true ->
+                     chef_db:list(#oc_chef_org_user_association{user_id = TargetUserID}, DbContext);
+               false ->
+                     chef_db:list_common_orgs(TargetUserID, RequestorID, DbContext)
+             end,
+    case Result of
         Orgs when is_list(Orgs) ->
-            EJson = [{[
-                       {<<"organization">>,
-                        {[
-                          {<<"name">>, ShortName},
-                          {<<"full_name">>, FullName},
-                          {<<"guid">>, Guid}
-                         ]}
-                       }
-                      ]}
-                     || [ShortName, FullName, Guid] <- Orgs ],
-            {chef_json:encode(EJson), Req, State};
+            {chef_json:encode(orgs_to_ej(Orgs)), Req, State};
         Error ->
-            {{halt, 500}, Req, State#base_state{log_msg = Error }}
+            {{halt, 500}, Req, State#base_state{log_msg = Error}}
     end.
 
+superuser_or_self(UserId, UserId, _Req) ->
+    true;
+superuser_or_self(_UserId, _RequestorID, Req) ->
+    % The is_superuser function only knows how to deal with usernames.  Thus, we pull the
+    % username from request rather than using the RequestorID:
+    UserName = list_to_binary(wrq:get_req_header("x-ops-userid", Req)),
+    oc_chef_wm_base:is_superuser(UserName).
+
+orgs_to_ej(Orgs) ->
+    [{[{<<"organization">>,
+        {[{<<"name">>, ShortName},
+          {<<"full_name">>, FullName},
+          {<<"guid">>, Guid}]}}]} || [ShortName, FullName, Guid] <- Orgs ].
 
 delete_resource(Req, #base_state{chef_db_context = DbContext,
                                  requestor_id = RequestorId,

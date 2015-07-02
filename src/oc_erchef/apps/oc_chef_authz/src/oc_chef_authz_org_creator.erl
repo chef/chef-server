@@ -70,7 +70,7 @@
          {create_groups, ?GROUPS},
          {create_org_global_admins},
          {add_to_groups, user, [creator], [admins, users]},
-         {add_to_groups, group, [admins], [global_admins]},
+         {add_to_groups, group, [admins, users], [global_admins]},
 
          %% ACLs are expanded, then applied
          {acls,

@@ -172,16 +172,26 @@ describe "opscode-account user association", :association do
       end
     end
   end
+
   context "/users/USER/organizations endpoint" do
     let(:test_username) { "test-user-#{Time.now.to_i}-#{Process.pid}" }
+    let(:test_orgname2) { "test-org-#{Time.now.to_i}-#{Process.pid}" }
     let(:test_user) { platform.create_user(test_username) }
+    let(:test_org2) { platform.create_org(test_orgname2)}
+    let(:test_user2) { platform.create_user(test_username + "-2") }
     let(:user_org_url) { "#{users_url}/#{test_username}/organizations" }
     before do
+      platform.create_org(test_orgname2)
       platform.associate_user_with_org(platform.test_org.name, test_user)
+      platform.associate_user_with_org(platform.test_org.name, test_user2)
+      platform.associate_user_with_org(test_orgname2, test_user2)
     end
     after do
-      delete(api_url("users/#{test_username}"), platform.superuser)
-      delete("#{platform.server}/users/#{test_username}", platform.superuser)
+      [test_username, "#{test_username}-2"].each do |u|
+        delete(api_url("users/#{u}"), platform.superuser)
+        delete("#{platform.server}/users/#{u}", platform.superuser)
+      end
+      delete("#{platform.server}/organizations/#{test_orgname2}", platform.superuser)
     end
 
     context "invoking" do
@@ -193,21 +203,41 @@ describe "opscode-account user association", :association do
       end
 
       context "GET" do
-        it "returns a proper list of orgs for the user" do
-          result = get(user_org_url, test_user)
-          result.should look_like({ :status => 200 })
-          # we need to split out our field checks here, because
-          # we don't know the value of guid, so we can't include it in
-          # a body check.  however pedant will fail on an unaccounted-for field
-          # in the body response
-          json = JSON.parse(result)
-          json.length.should == 1
-          org = json[0]["organization"]
-          expect(org.nil?).to be(false)
-          expect(org["name"]).to eq(platform.test_org.name)
-          expect(org["full_name"]).to eq(platform.test_org.name)
-          expect(org["guid"].nil?).to be(false)
-          expect(org["guid"].empty?).to be(false)
+        context "when the requesting user is the targetuser" do
+          it "returns all organizations the user is a member of" do
+            result = get(user_org_url, test_user)
+            result.should look_like({:status => 200})
+            expect(JSON.parse(result).length == 2)
+          end
+
+          it "returns a proper list of orgs for the user" do
+            result = get(user_org_url, test_user)
+            result.should look_like({ :status => 200 })
+            json = JSON.parse(result)
+            org = json.find {|o| o["organization"]["name"] == platform.test_org.name }["organization"]
+            expect(org.nil?).to be(false)
+            expect(org["name"]).to eq(platform.test_org.name)
+            expect(org["full_name"]).to eq(platform.test_org.name)
+            expect(org["guid"].nil?).to be(false)
+            expect(org["guid"].empty?).to be(false)
+          end
+        end
+
+        context "when the requesting user is the superuser" do
+          it "returns all organizations the user is a member of" do
+            result = get(user_org_url, platform.superuser)
+            result.should look_like({:status => 200})
+            expect(JSON.parse(result).length == 2)
+          end
+        end
+
+        context "when the requesting user shares 1 organization with the target user" do
+          it "only returns the shared organization" do
+            result = get(user_org_url, platform.superuser)
+            result.should look_like({:status => 200})
+            expect(JSON.parse(result).length).to eq(1)
+            expect(JSON.parse(result)[0]["organization"]["name"]).to eq(platform.test_org.name)
+          end
         end
       end
     end
@@ -222,8 +252,8 @@ describe "opscode-account user association", :association do
       it "an admin org user succeeds" do
         get(user_org_url, platform.admin_user).should look_like({:status => 200})
       end
-      it "another org member fails" do
-        get(user_org_url, platform.non_admin_user).should look_like({:status => 403})
+      it "another org member succeeds" do
+        get(user_org_url, platform.non_admin_user).should look_like({:status => 200})
       end
       it "some other user fails" do
         get(user_org_url, platform.bad_user).should look_like({:status => 403})
