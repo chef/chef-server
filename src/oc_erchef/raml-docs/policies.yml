@@ -1,28 +1,24 @@
 #%RAML 0.8
 ---
-title: Policies API
-baseUri: http://chef.example/organizations/:orgname/policies
-version: v0
-mediaType: application/json
-documentation:
-  - title: Policyfile Object API (pre-release)
-    content: |
-      Nodes have a many to one relationship with policies, based on their group
-      and policy. A group is generally named after the functional role a host
-      preforms, such as "appserver", "chatserver", "load balancer", etc. A group
-      defines a set of hosts in a deployment unit, which may map to an
-      organization's environments (e.g., dev, qa, staging, production), or may
-      represent more granular phases (e.g., a change may go to a "canary" group,
-      and then be rolled through various clusters within the production
-      environment, so you'd have "prod-canary", "prod-cluster-1", etc.).
+description: |
+  Policyfile Object API (pre-release).
 
-      Groups are ephemeral in the sense that they only exist when there is a
-      policy applied to them.
+  Nodes have a many to one relationship with policies, based on their group
+  and policy. A group is generally named after the functional role a host
+  preforms, such as "appserver", "chatserver", "load balancer", etc. A group
+  defines a set of hosts in a deployment unit, which may map to an
+  organization's environments (e.g., dev, qa, staging, production), or may
+  represent more granular phases (e.g., a change may go to a "canary" group,
+  and then be rolled through various clusters within the production
+  environment, so you'd have "prod-canary", "prod-cluster-1", etc.).
 
-      The API as described here functions similarly to the Policyfile
-      compatibility mode which uses data bag items to store policies. It may be
-      modified in the future, particularly to provide better support for
-      describing collections of objects.
+  Groups are ephemeral in the sense that they only exist when there is a
+  policy applied to them.
+
+  The API as described here functions similarly to the Policyfile
+  compatibility mode which uses data bag items to store policies. It may be
+  modified in the future, particularly to provide better support for
+  describing collections of objects.
 
 /{group}/{policy}:
   description: |
@@ -34,8 +30,8 @@ documentation:
       displayName: group - Policy Group Name
       type: string
   get:
-    description: |
-      Retrieve the Policy document
+    is: [ versioned ]
+    description: Retrieve the Policy document.
     responses:
       200:
         body:
@@ -84,8 +80,8 @@ documentation:
               }
 
   put:
-    description: |
-      Create or update a policy document
+    is: [ versioned ]
+    description: Create or update a policy document.
     body:
       application/json:
         example: |
@@ -132,14 +128,15 @@ documentation:
           }
 
     responses:
-      201:
-        description: |
-          Policy successfully created. Returns the policy document that was created.
-        body:
-          application/json:
       200:
         description: |
           Policy successfully updated. Returns the policy document that was created.
         body:
           application/json:
+      201:
+        description: |
+          Policy successfully created. Returns the policy document that was created.
+        body:
+          application/json:
+
 

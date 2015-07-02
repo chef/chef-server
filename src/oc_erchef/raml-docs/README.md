@@ -14,5 +14,6 @@ plans to make these docs official or comprehensive.
 
 1) swallow your pride and get node.js
 2) `npm install -g raml2html`
-3) `raml2html SOURCE_FILE.yml > OUTFILE.html`
+3) `raml2html base.yml > OUTFILE.html`
+4) `open OUTFILE.html`
 

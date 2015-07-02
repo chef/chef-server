@@ -1,0 +1,6 @@
+{
+  "user" : "user1",
+  "display_name" : "Real Name",
+  "email" : "user1@chef.example",
+  "password" : "new_password"
+}
