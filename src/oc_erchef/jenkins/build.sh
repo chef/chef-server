@@ -16,7 +16,7 @@ then
     PACKAGE=${PROJ_NAME}-${VERSION}.tar.gz
     cd _rel
 else
-    REL_VERSION=`cat rel/reltool.config|grep '{rel,.*"oc_erchef"'|cut -d ',' -f 3|sed 's/"//g'`
+    REL_VERSION=`cat relx.config|grep '{release,' |cut -d ',' -f 3|sed 's/"//g'|sed 's/}//g'`
     GIT_SHA=`git rev-parse --short HEAD`
     VERSION=${REL_VERSION}-${GIT_SHA}
     PACKAGE=${PROJ_NAME}-${VERSION}.tar.gz

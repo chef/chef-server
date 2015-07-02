@@ -18,7 +18,7 @@ then
     VERSION=$(git describe --tags --exact-match --match='[0-9]*.[0-9]*.[0-9]*')
     PACKAGE=${PROJ_NAME}-${VERSION}.tar.gz
 else
-    REL_VERSION=`cat apps/bifrost/src/bifrost.app.src|grep '{vsn'|cut -d '"' -f 2`
+    REL_VERSION=`cat relx.config|grep '{release,' |cut -d ',' -f 3|sed 's/"//g'|sed 's/}//g'`
     GIT_SHA=`git rev-parse --short HEAD`
     VERSION=${REL_VERSION}-${GIT_SHA}
     PACKAGE=${PROJ_NAME}-${VERSION}.tar.gz
