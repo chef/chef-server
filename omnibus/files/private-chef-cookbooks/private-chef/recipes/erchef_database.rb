@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 private_chef_pg_user node['private_chef']['postgresql']['sql_user'] do
   password node['private_chef']['postgresql']['sql_password']
   superuser false
@@ -16,6 +17,9 @@ end
 =======
 postgres = node['private_chef']['postgresql']
 >>>>>>> Adding pg_sqitch provider and updates to bifrost and erchef recipes to use it
+=======
+postgres = node['private_chef']['postgresql']
+>>>>>>> Adding pg_sqitch provider and updates to bifrost and erchef recipes to use it
 
 private_chef_pg_user postgres['sql_user'] do
   password postgres['sql_password']
@@ -30,6 +34,7 @@ private_chef_pg_database "opscode_chef" do
   owner postgres['sql_user']
   notifies :run, "private_chef_pg_sqitch[/opt/opscode/embedded/service/opscode-erchef/schema/baseline]", :immediately
 end
+
 
 # For existing installations, make sure the database owner is set to sql_user
 ruby_block "set opscode_chef ownership" do
@@ -51,8 +56,7 @@ private_chef_pg_sqitch "/opt/opscode/embedded/service/opscode-erchef/schema/base
   password  postgres['sql_password']
   database  "opscode_chef"
   action :nothing
-  notifies :run, "private_chef_pg_sqitch[/opt/opscode/embedded/service/opscode-erchef/schema]", :immediately
->>>>>>> Adding pg_sqitch provider and updates to bifrost and erchef recipes to use it
+  notifies :run, "private_chef_pg_sqitch[/opt/opscode/embedded/service/opscode-erchef/schema]", :immediatelyß
 end
 
 private_chef_pg_sqitch "/opt/opscode/embedded/service/opscode-erchef/schema" do
