@@ -1,5 +1,15 @@
+private_chef_pg_user node['private_chef']['postgresql']['sql_user'] do
+  password node['private_chef']['postgresql']['sql_password']
+  superuser false
+end
+
+private_chef_pg_user node['private_chef']['postgresql']['sql_ro_user'] do
+  password node['private_chef']['postgresql']['sql_ro_password']
+  superuser false
+end
+
 private_chef_pg_database "opscode_chef" do
-#  owner node['private_chef']['postgresql']['username'] # Do we really want this?
+  owner node['private_chef']['postgresql']['sql_user']
   notifies :run, "execute[chef-server-schema]", :immediately
 end
 
@@ -36,11 +46,13 @@ execute "enterprise-chef-server-schema" do
 end
 
 
-# Create Database Users
-
-private_chef_pg_user node['private_chef']['postgresql']['sql_user'] do
-  password node['private_chef']['postgresql']['sql_password']
-  superuser false
+# For existing installations, make sure the database owner is set to sql_user
+ruby_block "set opscode_chef ownership" do
+  block do
+    EcPostgres.with_connection(node, 'opscode_chef') do |connection|
+      connection.exec("ALTER DATABASE opscode_chef OWNER TO #{node['private_chef']['postgresql']['sql_user']};")
+    end
+  end
 end
 
 private_chef_pg_user_table_access node['private_chef']['postgresql']['sql_user'] do
@@ -49,10 +61,6 @@ private_chef_pg_user_table_access node['private_chef']['postgresql']['sql_user']
   access_profile :write
 end
 
-private_chef_pg_user node['private_chef']['postgresql']['sql_ro_user'] do
-  password node['private_chef']['postgresql']['sql_ro_password']
-  superuser false
-end
 
 private_chef_pg_user_table_access node['private_chef']['postgresql']['sql_ro_user'] do
   database 'opscode_chef'
