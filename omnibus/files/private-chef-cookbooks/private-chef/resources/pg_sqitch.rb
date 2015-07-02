@@ -8,4 +8,3 @@ attribute :password,       kind_of: String, required: false, default: ""
 attribute :target_version, kind_of: String
 attribute :hostname,       kind_of: String, required: true
 attribute :port,           kind_of: Integer, required: true
-attribute :psql_user,	   kind_of: String, required: false, default: "opscode-pgsql"
