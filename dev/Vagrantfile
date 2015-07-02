@@ -11,18 +11,11 @@ Vagrant.configure("2") do |config|
   config.vm.hostname = "api.chef-server.dev"
   config.vm.network "private_network", ip: "192.168.33.100"
 
-  begin
-    custom_config = YAML.load_file("config.yml")
-    num_cpus = custom_config["vm"]["cpus"]
-    mem = custom_config["vm"]["memory"]
-  rescue
-  end
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id,
                   "--name", "chef-server",
-                  "--memory", mem || 4096,
-                  "--cpus", num_cpus || 4,
-                  "--natdnshostresolver1", "on",
+                  "--memory", attributes["vm"]["memory"],
+                  "--cpus", attributes["vm"]["cpus"],
                   "--usb", "off",
                   "--usbehci", "off",
                   "--nictype1", "virtio",
@@ -32,16 +25,14 @@ Vagrant.configure("2") do |config|
   end
 
   if provisioning
-    # TODO - simple merge of config.yml vm packages as well
     json = {
       "packages" => attributes["vm"]["packages"],
-      "tz" => host_timezone
+      "tz" => host_timezone,
+      "omnibus-autoload" => attributes["vm"]["omnibus-autoload"]
     }
     # Assumes residence in dev/oc_erchef, with interesting tidbits up one level from that
     # Note that we can't exclude .git from top-level projects, and by extension from anything,
-    # otherwise rebar commands begin to fail. Note that we also exclude a lot of things we don't want to pull
-    # in from the host since we will generate them ourselves in the session.We also include a couple of projects
-    # that may exist in your host directory that we don't want to spend time on.
+    # otherwise rebar commands begin to fail.
     config.vm.synced_folder File.absolute_path(File.join(Dir.pwd, "../")), "/host",
       type: "rsync",
       rsync__args: ["--verbose", "--archive", "--delete", "-z", "--no-owner", "--no-group" ],
@@ -58,8 +49,8 @@ Vagrant.configure("2") do |config|
       chef.node_name = config.vm.hostname
       chef.cookbooks_path = "cookbooks"
       chef.add_recipe("provisioning::chef-server")
-      chef.add_recipe("dev::system")
       chef.add_recipe("dev::dvm")
+      chef.add_recipe("dev::system")
       chef.add_recipe("dev::user-env")
       chef.json = json || {}
     end
@@ -76,8 +67,13 @@ end
 
 def prepare
   action = ARGV.shift
+  attributes = YAML.load_file("defaults.yml")
+  begin
+    custom_attributes = YAML.load_file("config.yml")
+    attributes = simple_deep_merge(attributes, custom_attributes)
+  rescue
+  end
   if action =~ /^(provision|up|reload)$/
-    attributes = YAML.load_file("defaults.yml")
     installer = prompt_installer
     raise "Please set INSTALLER to the path of a .deb package for Chef Server 12+." if installer.nil?
     raise "#{installer} does not exist! Please fix this." unless File.file?(installer)
@@ -183,4 +179,18 @@ end
 
 def base_path
   File.absolute_path(File.join(Dir.pwd, "../"))
+end
+
+def simple_deep_merge(source_hash, new_hash)
+  source_hash.merge(new_hash) do |key, old, new|
+    if new.respond_to?(:blank) && new.blank?
+      old
+    elsif (old.kind_of?(Hash) and new.kind_of?(Hash))
+        simple_deep_merge(old, new)
+    elsif (old.kind_of?(Array) and new.kind_of?(Array))
+        old.concat(new).uniq
+    else
+       new
+    end
+  end
 end
