@@ -18,11 +18,12 @@ Vagrant.configure("2") do |config|
   rescue
   end
   config.vm.provider :virtualbox do |vb|
+    #vb.gui = true
     vb.customize ["modifyvm", :id,
                   "--name", "chef-server",
                   "--memory", mem || 4096,
                   "--cpus", num_cpus || 4,
-                  "--natdnshostresolver1", "on",
+                  #"--natdnshostresolver1", "on",
                   "--usb", "off",
                   "--usbehci", "off",
                   "--nictype1", "virtio",
