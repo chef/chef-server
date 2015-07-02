@@ -167,6 +167,17 @@ module PrivateChef
           end
         end
       end
+      # Transitional from erchef's sql_user/password etc lived under 'postgresql' and not under opscode-erchef
+      if PrivateChef['postgresql'].has_key? 'sql_password'
+        PrivateChef['opscode_erchef']['sql_password'] ||= PrivateChef['postgresql']['sql_password']
+        PrivateChef['postgresql'].delete 'sql_password'
+        PrivateChef['postgresql'].delete 'sql_user'
+      end
+      if PrivateChef['postgresql'].has_key? 'sql_ro_password'
+        PrivateChef['opscode_erchef']['sql_ro_password'] ||= PrivateChef['postgresql']['sql_ro_password']
+        PrivateChef['postgresql'].delete 'sql_ro_password'
+        PrivateChef['postgresql'].delete 'sql_ro_user'
+      end
 
       me = PrivateChef["servers"][node_name]
       ha_guard = PrivateChef['topology'] == 'ha' && !me['bootstrap']
@@ -175,11 +186,11 @@ module PrivateChef
       PrivateChef['rabbitmq']['password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['rabbitmq']['jobs_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['rabbitmq']['actions_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['postgresql']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['postgresql']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['drbd']['shared_secret'] ||= generate_hex_if_bootstrap(30, ha_guard)
       PrivateChef['keepalived']['vrrp_instance_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['oc_bifrost']['superuser_id'] ||= generate_hex_if_bootstrap(16, ha_guard)
+      PrivateChef['opscode_erchef']['sql_password'] ||= generate_hex_if_bootstrap(30, ha_guard)
+      PrivateChef['opscode_erchef']['sql_ro_password'] ||= generate_hex_if_bootstrap(30, ha_guard)
       PrivateChef['oc_bifrost']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['oc_bifrost']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['oc_id']['secret_key_base'] ||= generate_hex_if_bootstrap(50, ha_guard)
@@ -199,9 +210,9 @@ module PrivateChef
                 'jobs_password' => PrivateChef['rabbitmq']['jobs_password'],
                 'actions_password' => PrivateChef['rabbitmq']['actions_password'],
               },
-              'postgresql' => {
-                'sql_password' => PrivateChef['postgresql']['sql_password'],
-                'sql_ro_password' => PrivateChef['postgresql']['sql_ro_password']
+              'opscode-erchef' => {
+                'sql_password' => PrivateChef['opscode_erchef']['sql_password'],
+                'sql_ro_password' => PrivateChef['opscode_erchef']['sql_ro_password']
               },
               'oc_id' => {
                 'sql_password' => PrivateChef['oc_id']['sql_password'],

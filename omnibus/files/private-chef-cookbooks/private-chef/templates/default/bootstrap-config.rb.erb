@@ -2,8 +2,8 @@ output_directory: '/tmp/opscode-platform-test'
 
 db_driver: "postgres"
 db_host: '<%= node['private_chef']['postgresql']['vip'] %>'
-db_user: '<%= node['private_chef']['postgresql']['sql_user'] %>'
-db_password: '<%= node['private_chef']['postgresql']['sql_password'] %>'
+db_user: '<%= node['private_chef']['opscode-erchef']['sql_user'] %>'
+db_password: '<%= node['private_chef']['opscode-erchef']['sql_password'] %>'
 
 bifrost_host: '<%= node['private_chef']['oc_bifrost']['vip'] %>'
 bifrost_port: '<%= node['private_chef']['oc_bifrost']['port'] %>'

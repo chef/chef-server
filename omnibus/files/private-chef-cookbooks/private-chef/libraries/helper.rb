@@ -46,8 +46,8 @@ class OmnibusHelper
 
   def db_connection_uri
     db_protocol = "postgres"
-    db_user     = node['private_chef']['postgresql']['sql_user']
-    db_password = node['private_chef']['postgresql']['sql_password']
+    db_user     = node['private_chef']['opscode-erchef']['sql_user']
+    db_password = node['private_chef']['opscode-erchef']['sql_password']
     db_vip      = vip_for_uri('postgresql')
     db_name     = "opscode_chef"
 
