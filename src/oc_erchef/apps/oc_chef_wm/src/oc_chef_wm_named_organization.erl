@@ -33,7 +33,7 @@
          validate_request/3]).
 
 
--export([delete_global_admins/4]).
+-export([delete_read_access_group/4]).
 
 init(Config) ->
     oc_chef_wm_base:init(?MODULE, Config).
@@ -106,7 +106,7 @@ from_json(Req, #base_state{resource_state = #organization_state{
 %% 1) Disassociate all users
 %%    We don't directly disassociate users. Instead, we rely on two consistiency properties
 %%    * Deleting the org deletes the associations and invites via foreign key constraints.
-%%    * Deleting the global admins group removes it from the users read ACE.
+%%    * Deleting the read_access group removes it from the users read ACE.
 %%
 %%    This has the advantage of removing users last, since we delete the org record as the
 %%    last step. If we disasociated users sooner a failure during the delete could leave us
@@ -115,7 +115,7 @@ from_json(Req, #base_state{resource_state = #organization_state{
 %%    We will need to be cleverer if we move to a world where more cleanup is required for
 %%    associations.
 %%
-%% 2) Delete <ORGNAME>_global_admins
+%% 2) Delete <ORGNAME>_read_access_group
 %%    Bifrost will remove that any ACLs and groups where it appears.
 %%
 %% 3) TODO: Clean up all org objects in sql and authz.
@@ -130,36 +130,36 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
                                  resource_state = #organization_state{
                                                      oc_chef_organization = Organization}
                                 } = State) ->
-    delete_global_admins(Req, State),
+    delete_read_access_group(Req, State),
     ok = oc_chef_wm_base:delete_object(DbContext, Organization, RequestorId),
     Ejson = oc_chef_organization:assemble_organization_ejson(Organization),
     {true, chef_wm_util:set_json_body(Req, Ejson), State}.
 
-%% Delete global admins
-%% We delete both the global admins record in SQL, and the authz object.
-%% We do not directly remove the global_admins group from each users ACE; instead
+%% Delete ORGNAME_read_access_group
+%% We delete both the read access group record in SQL, and the authz object.
+%% We do not directly remove the read_access_group from each users ACE; instead
 %% we rely on bifrost to maintain consistiency when the group is deleted.
 %%
-%% TODO: Make sure tests explicitly test for global admins removal on org deletion
-delete_global_admins(_Req, #base_state{chef_db_context = DbContext,
+%% TODO: Make sure tests explicitly test for read access group removal on org deletion
+delete_read_access_group(_Req, #base_state{chef_db_context = DbContext,
                                        organization_name = OrgName,
                                        chef_authz_context = AuthzContext,
                                        requestor_id = RequestorId} = _State) ->
-    delete_global_admins(DbContext, AuthzContext, OrgName, RequestorId).
+    delete_read_access_group(DbContext, AuthzContext, OrgName, RequestorId).
 
-delete_global_admins(DbContext, AuthzContext, OrgName, RequestorId) ->
+delete_read_access_group(DbContext, AuthzContext, OrgName, RequestorId) ->
     %% TODO
     %% Refactor the fetch of global admins, along with that in oc_chef_wm_association
     %% we use this low-level api because we don't want to expand the users/groups from authz.
-    case oc_chef_authz_db:fetch_global_admins(AuthzContext, OrgName) of
-        #oc_chef_group{} = GlobalAdmins ->
+    case oc_chef_authz_db:fetch_read_access_group(AuthzContext, OrgName) of
+        #oc_chef_group{} = ReadAccessGroup ->
             %% This could be done as superuser, because we've already checked our org's
-            %% permissions, and those should take precedence over those on global_admins.
-            oc_chef_object_db:safe_delete(DbContext, GlobalAdmins, RequestorId);
+            %% permissions, and those should take precedence over those on read_access.
+            oc_chef_object_db:safe_delete(DbContext, ReadAccessGroup, RequestorId);
         {not_found, authz_group} ->
             %% Ignoring this error lets us retry the whole deletion process if it fails part
             %% of the way through
-            lager:error("Could not find global admins when deleting org ~s", [OrgName]),
+            lager:error("Could not find read access group when deleting org ~s", [OrgName]),
             ok
     end.
 

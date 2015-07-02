@@ -18,7 +18,7 @@ Tasks Remaining
 -------
 
 This is derived from reading the opscode-account code. A complete specification should incorporate
-more sources. 
+more sources.
 
 TODO: Read tests in detail, verify that these are correct, and identify missing tests. In the end
 tests should define this spec exactly
@@ -36,7 +36,7 @@ groups, but there are some special system groups that all organizations must hav
 Some special services (reporting and pushy) use other special groups as a form of access
 control. (TODO document more)
 
-There also is a global group 'ORGNAME_global_admins'. This may be deprecated in future versions, and
+There also is a global group 'ORGNAME_read_access_group'. This may be deprecated in future versions, and
 is for internal use only.
 
 (TODO: Explain exactly what this group does)
@@ -73,7 +73,7 @@ The groups resource has two methods, GET and POST
 
 #### GET
 
-The GET method returns the list of groups for an org. It does not list the ORGNAME_global_admins
+The GET method returns the list of groups for an org. It does not list the ORGNAME_read_access_group
 group. This method takes no parameters
 
 ##### Request
@@ -133,7 +133,7 @@ With a request body of the form
 }
 ```
 
-All other fields are ignored. Specifically, we ignore actor and group fields. 
+All other fields are ignored. Specifically, we ignore actor and group fields.
 
 'groupname' can also be used to set the name, but 'id' wins if both are set. The 'name' field is ignored.
 
@@ -146,7 +146,7 @@ TODO BUG new ruby-sql groups api actually appears to accept and set actors
 
 ##### Response
 
-The response body will be 
+The response body will be
 
 ```{ "uri" : "API_URL/organizations/ORGNAME/groups/NAME" }```
 
@@ -159,17 +159,17 @@ Unlike containers the 'Location' header is not set. This is probably a bug.
 | 201 | Ok |
 | 400 | Bad Request if validation fails |
 | 401 | Unauthorized (TODO check that this is tested) |
-| 403 | Forbidden. The requestor does not have permission. The requestor must have CREATE 
+| 403 | Forbidden. The requestor does not have permission. The requestor must have CREATE
 permissions in the 'groups' container and be a member of the organization. |
 | 409 | Conflict: "Container already exists." |
 
 ### Resource /groups/NAME
 
-This operates on individual groups. 
+This operates on individual groups.
 
 #### GET
 
-The GET method retrieves a group. It takes no parameters. 
+The GET method retrieves a group. It takes no parameters.
 
 #####  Request
 
@@ -224,11 +224,11 @@ of being flattened as it is returned by GET.
 }
 `
 
-The request body may have the following fields: 
+The request body may have the following fields:
 
 * 'groupname': If the groupname differers from the NAME provided, this
 is a rename operation.
-* 'orgname': may be omitted.  
+* 'orgname': may be omitted.
 * 'actors'; which has subfields
 ** 'clients'
 ** 'users'
@@ -295,7 +295,3 @@ s.match("/groups", :method=>"get").to(:controller=>'groups', :action=>'index')
 s.match("/groups/:id", :method=>"get").to(:controller=>'groups', :action=>'show')
 s.match("/groups/:id", :method=>"put").to(:controller=>'groups', :action=>'update')
 s.match("/groups/:id", :method=>"delete").to(:controller=>'groups', :action=>'destroy')
-
-
-
-

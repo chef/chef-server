@@ -147,33 +147,33 @@ deprovision_delete_usag(ok, #context{usag = USAG,
                                      requestor_authz_id = RequestorID } = Context) ->
     % This will delete both the USAG and its authz entry.
     Result = oc_chef_object_db:safe_delete(DbContext, USAG, RequestorID),
-    deprovision_fetch_org_global_admins(Result, Context);
+    deprovision_fetch_org_read_access_group(Result, Context);
 deprovision_delete_usag(Error, _Context) ->
     {error, {error_removing_from_org_user_group, Error}}.
 
-deprovision_fetch_org_global_admins(ok, #context{authz_context = AuthzContext,
-                                                 org_name = OrgName} = Context) ->
-    Result = oc_chef_authz_db:fetch_global_group_authz_id(AuthzContext, OrgName, "global_admins"),
-    deprovision_remove_global_org_admin_ace(Result, Context) ;
-deprovision_fetch_org_global_admins(Error, Context) ->
+deprovision_fetch_org_read_access_group(ok, #context{authz_context = AuthzContext,
+                                                     org_name = OrgName} = Context) ->
+    Result = oc_chef_authz_db:fetch_read_access_group(AuthzContext, OrgName),
+    deprovision_remove_read_access_group_ace(Result, Context);
+deprovision_fetch_org_read_access_group(Error, Context) ->
     % We don't care if we failed to delete the actual USAG record from
     % the DB. If previous step to remove USAG from org users was successful, we can consider this a
     % successful deletion.
     % This will change when we start doing proper cleanup of auth entity as part of USAG deletion.
-    deprovision_remove_global_org_admin_ace({ok, ok}, Context#context{msg = [{usag_record_delete_failed, Error}]}).
+    deprovision_remove_read_access_group_ace({ok, ok}, Context#context{msg = [{usag_record_delete_failed, Error}]}).
 
-deprovision_remove_global_org_admin_ace(OrgGlobalAdminsAuthzId,
-                                        #context{ user_authz_id = UserAuthzId,
-                                                  requestor_authz_id = RequestorAuthzId } = Context)  when is_binary(OrgGlobalAdminsAuthzId) ->
+deprovision_remove_read_access_group_ace(#oc_chef_group{authz_id = ReadAccessGroupAuthzId},
+                                         #context{ user_authz_id = UserAuthzId,
+                                                   requestor_authz_id = RequestorAuthzId } = Context)  ->
     %We're spoofing the requesting actor for this next operation to be the actual user
     % who is being removed.  This is because the actor will need to have update access
     % to that user's record - and the originator of this request may not.
     Result = oc_chef_authz:remove_ace_for_entity(RequestorAuthzId,
-                                                 group, OrgGlobalAdminsAuthzId,
+                                                 group, ReadAccessGroupAuthzId,
                                                  actor, UserAuthzId,
                                                  read),
     deprovision_removed_user_done(Result, Context);
-deprovision_remove_global_org_admin_ace(Error, #context{msg = Msg}) ->
+deprovision_remove_read_access_group_ace(Error, #context{msg = Msg}) ->
     % Here, we have deleted user from the org, etc - but we can't remove permissions.
     % This shouldn't fail the delete request which has already succeeded.
     {warning, [{org_admin_group_fetch_failed, Error}] ++ Msg}.
@@ -249,32 +249,32 @@ provision_add_usag_to_org_users(#oc_chef_group{} = OrgUsersGroup,
                                          db_context = DbContext} = Context) ->
     OrgUsersGroup0 = oc_chef_group:add_group_member(OrgUsersGroup, USAG#oc_chef_group.name),
     Result = chef_db:update(OrgUsersGroup0, DbContext, RequestorAuthzId),
-    provision_fetch_org_global_admins(Result, Context);
+    provision_fetch_org_read_access_group(Result, Context);
 provision_add_usag_to_org_users(Error, _Context) ->
     {error, {fetch_org_users_group_by_name_failed, Error}}.
 
-provision_fetch_org_global_admins(ok, #context{org_name = OrgName,
-                                        authz_context = AuthzContext } = Context) ->
-    Result = oc_chef_authz_db:fetch_global_group_authz_id(AuthzContext, OrgName, "global_admins"),
-    provision_add_user_ace_to_global_admins(Result, Context);
-provision_fetch_org_global_admins(Error, _Context) ->
+provision_fetch_org_read_access_group(ok, #context{org_name = OrgName,
+                                                   authz_context = AuthzContext } = Context) ->
+    Result = oc_chef_authz_db:fetch_read_access_group(AuthzContext, OrgName),
+    provision_add_user_ace_to_read_access_group(Result, Context);
+provision_fetch_org_read_access_group(Error, _Context) ->
     {error, {add_usag_to_org_users_group_failed, Error}}.
 
-provision_add_user_ace_to_global_admins(OrgGlobalAdminsAuthzId,
+provision_add_user_ace_to_read_access_group(#oc_chef_group{authz_id = ReadAccessGroupAuthzId},
                                         #context{user_authz_id = UserAuthzId,
-                                                 real_requestor_authz_id = RequestorId } = Context) when is_binary(OrgGlobalAdminsAuthzId) ->
+                                                 real_requestor_authz_id = RequestorId } = Context) when is_binary(ReadAccessGroupAuthzId) ->
     % Spoofing to user as requestor, so that we have necessary access to update
     Result = oc_chef_authz:add_ace_for_entity(RequestorId,
-                                              group, OrgGlobalAdminsAuthzId,
+                                              group, ReadAccessGroupAuthzId,
                                               actor, UserAuthzId,
                                               read),
     provision_associated_user_done(Result, Context);
-provision_add_user_ace_to_global_admins(Error, _) ->
+provision_add_user_ace_to_read_access_group(Error, _) ->
     % No need to continue - if we can't get the admin group, we can't add
     % permissions. However, the USAG is part fo the group, so even
     % though an admin cannot view this user in the context of the org,
     % they wll have permissions within the org.
-    {warning, [{fetch_org_admins_failed, Error}]}.
+    {warning, [{fetch_read_access_group_failed, Error}]}.
 
 provision_associated_user_done(ok, _Context) ->
     ok;
