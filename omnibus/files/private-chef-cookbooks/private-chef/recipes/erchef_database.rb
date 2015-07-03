@@ -11,7 +11,7 @@ end
 
 private_chef_pg_database "opscode_chef" do
   owner postgres['sql_user']
-  notifies :run, "private_chef_pg_sqitch[/opt/opscode/embedded/service/opscode-erchef/schema/baseline]", :immediately
+  notifies :deploy, "private_chef_pg_sqitch[/opt/opscode/embedded/service/opscode-erchef/schema/baseline]", :immediately
 end
 
 # TODO these originally were only run on notify - is this still required
@@ -26,7 +26,7 @@ private_chef_pg_sqitch "/opt/opscode/embedded/service/opscode-erchef/schema/base
   password  postgres['sql_password']
   database  "opscode_chef"
   action :nothing
-  notifies :run, "private_chef_pg_sqitch[/opt/opscode/embedded/service/opscode-erchef/schema]", :immediately
+  notifies :deploy, "private_chef_pg_sqitch[/opt/opscode/embedded/service/opscode-erchef/schema]", :immediately
 end
 
 private_chef_pg_sqitch "/opt/opscode/embedded/service/opscode-erchef/schema" do
