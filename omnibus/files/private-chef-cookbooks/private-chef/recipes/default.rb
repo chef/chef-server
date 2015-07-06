@@ -155,7 +155,7 @@ end
 # If we are doing initial key generation,
 # generate a new key.
 unless File.exists?('/etc/opscode/pivotal.pem')
-  key = OpenSSL::PKey::RSA.generate(2048)
+  pivotal_key = OpenSSL::PKey::RSA.generate(2048)
 end
 
 # This will be cleaned up during bootstrap.
@@ -167,7 +167,7 @@ unless File.exists?('/etc/opscode/pivotal.pem')
     owner OmnibusHelper.new(node).ownership['owner']
     group "root"
     mode "0644"
-    content key.public_key.to_s
+    content pivotal_key.public_key.to_s
   end
 end
 
@@ -177,7 +177,7 @@ file "/etc/opscode/pivotal.pem" do
   owner OmnibusHelper.new(node).ownership['owner']
   group "root"
   mode "0600"
-  content key.to_pem.to_s unless File.exists?('/etc/opscode/pivotal.pem')
+  content pivotal_key.to_pem.to_s unless File.exists?('/etc/opscode/pivotal.pem')
 end
 
 directory "/etc/chef" do
@@ -230,35 +230,40 @@ include_recipe "private-chef::plugins"
   "nginx",
   "keepalived"
 ].each do |service|
-  if node["private_chef"][service]["enable"]
-    include_recipe "private-chef::#{service}"
+  if node["private_chef"][service]["external"]
+    begin
+      # Perform any necessary configuration of the external service:
+      include_recipe "private-chef::#{service}-external"
+    rescue Chef::Exceptions::RecipeNotFound
+      raise "#{service} has the 'external' attribute set true, but does not currently support being run externally."
+    end
+    # Disable the actual local service since what is enabled
+    # is an externally managed version. Given that bootstrap and
+    # opscode-expander are not externalizable, don't need special
+    # handling for them as we do in the normal disable case below.
+    runit_service service do
+      action :disable
+    end
   else
-    # All non-enabled services get disabled;
-    # opscode-expander gets additional special treatment
-    #
-    # bootstrap isn't really a service, though, so there's
-    # nothing to disable, really.
-    unless service == 'bootstrap'
-
+    if node["private_chef"][service]["enable"]
+      include_recipe "private-chef::#{service}"
+    else
+      # bootstrap isn't a service, nothing to disable.
+      next if service == 'bootstrap'
+      # All non-enabled services get disabled;
       runit_service service do
         action :disable
       end
-
-      case service
-      when "opscode-expander"
-        runit_service "opscode-expander-reindexer" do
+      # opscode-expander is paired with expander-reindexer,
+      # so disable that too.
+      if service == 'opscode-expander'
+        runit_service 'opscode-expander-reindexer' do
           action :disable
         end
-      else
-        # nothing to see, move along
       end
-
-    end # unless
-
+    end
   end
 end
-
-
 
 include_recipe "private-chef::actions" if darklaunch_values["actions"]
 
