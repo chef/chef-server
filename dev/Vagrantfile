@@ -29,8 +29,8 @@ Vagrant.configure("2") do |config|
       "packages" => attributes["vm"]["packages"],
       "tz" => host_timezone,
       "omnibus-autoload" => attributes["vm"]["omnibus-autoload"]
-    }
-    # Assumes residence in dev/oc_erchef, with interesting tidbits up one level from that
+    }.merge attributes["vm"]["node-attributes"]
+
     # Note that we can't exclude .git from top-level projects, and by extension from anything,
     # otherwise rebar commands begin to fail.
     config.vm.synced_folder File.absolute_path(File.join(Dir.pwd, "../")), "/host",
