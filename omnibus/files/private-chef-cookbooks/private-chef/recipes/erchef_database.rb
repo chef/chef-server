@@ -1,31 +1,10 @@
 
-private_chef_pg_user node['private_chef']['postgresql']['sql_user'] do
-  password node['private_chef']['postgresql']['sql_password']
-  superuser false
-end
-
-private_chef_pg_user node['private_chef']['postgresql']['sql_ro_user'] do
-  password node['private_chef']['postgresql']['sql_ro_password']
-  superuser false
-end
-
-private_chef_pg_database "opscode_chef" do
-  owner node['private_chef']['postgresql']['sql_user']
-  notifies :run, "execute[chef-server-schema]", :immediately
-end
-
 postgres = node['private_chef']['postgresql']
 
-private_chef_pg_user postgres['sql_ro_user'] do
-  password postgres['sql_ro_password']
+private_chef_pg_user postgres['sql_user'] do
+  password postgres['sql_password']
   superuser false
 end
-
-private_chef_pg_database "opscode_chef" do
-  owner postgres['sql_user']
-  notifies :run, "private_chef_pg_sqitch[/opt/opscode/embedded/service/opscode-erchef/schema/baseline]", :immediately
-
-postgres = node['private_chef']['postgresql']
 
 private_chef_pg_user postgres['sql_ro_user'] do
   password postgres['sql_ro_password']

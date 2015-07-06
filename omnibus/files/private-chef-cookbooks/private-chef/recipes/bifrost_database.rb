@@ -7,6 +7,11 @@ postgres_attrs = node['private_chef']['postgresql']
 
 # create users
 
+private_chef_pg_user bifrost_attrs['sql_user'] do
+  password bifrost_attrs['sql_ro_password']
+  superuser false
+end
+
 private_chef_pg_user bifrost_attrs['sql_ro_user'] do
   password bifrost_attrs['sql_ro_password']
   superuser false
@@ -14,12 +19,6 @@ end
 
 private_chef_pg_database 'bifrost' do
   owner bifrost_attrs['sql_user']
-end
-
-private_chef_pg_user_table_access bifrost_attrs['sql_user'] do
-  database 'bifrost'
-  schema 'public'
-  access_profile :write
 end
 
 private_chef_pg_user_table_access bifrost_attrs['sql_ro_user'] do
