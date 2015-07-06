@@ -6,10 +6,6 @@ bifrost_attrs = node['private_chef']['oc_bifrost']
 postgres_attrs = node['private_chef']['postgresql']
 
 # create users
-private_chef_pg_user bifrost_attrs['sql_user'] do
-  password bifrost_attrs['sql_password']
-  superuser false
-end
 
 private_chef_pg_user bifrost_attrs['sql_ro_user'] do
   password bifrost_attrs['sql_ro_password']

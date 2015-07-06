@@ -404,7 +404,7 @@ default['private_chef']['postgresql']['version'] = "9.2"
 # we'll be using these directories to determine what versions we have installed and
 # whether we need to run pg_upgrade.
 default['private_chef']['postgresql']['enable'] = true
-default['private_chef']['postgresql']['remote'] = false
+default['private_chef']['postgresql']['external'] = false
 default['private_chef']['postgresql']['ha'] = false
 default['private_chef']['postgresql']['dir'] = "/var/opt/opscode/postgresql/#{node['private_chef']['postgresql']['version']}"
 default['private_chef']['postgresql']['data_dir'] = "/var/opt/opscode/postgresql/#{node['private_chef']['postgresql']['version']}/data"
