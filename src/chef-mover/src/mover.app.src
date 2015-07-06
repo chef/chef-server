@@ -13,6 +13,8 @@
                   lager,
                   bcrypt,
                   chef_reindex,
+                  bear,
+                  folsom,
                   stats_hero]},
   {mod, {mover_app, []}}
  ]}.
