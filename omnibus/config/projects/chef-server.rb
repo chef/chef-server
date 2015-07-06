@@ -22,8 +22,8 @@ package_name    "chef-server-core"
 replace         "private-chef"
 conflict        "private-chef"
 install_dir     "/opt/opscode"
-# last released version is 12.0.8
-build_version   "12.1.0"
+# last released version is 12.1.0
+build_version   "12.1.1"
 build_iteration 1
 
 override :cacerts, version: '2014.08.20'
