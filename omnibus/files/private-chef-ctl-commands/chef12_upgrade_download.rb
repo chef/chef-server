@@ -10,7 +10,7 @@ require 'ostruct'
 
 add_command_under_category "chef12-upgrade-download", "open-source-upgrade", "Download data from a open source Chef 11 server.", 2 do
 
-   def parse(args)
+  def parse(args)
     @options = OpenStruct.new
 
     # Define defaults
@@ -30,7 +30,7 @@ add_command_under_category "chef12-upgrade-download", "open-source-upgrade", "Do
 
       # This option matches the knife -s option
       opts.on("-s", "--chef11-server-url [url]", String, "The url of the open source Chef 11 server.  Defaults to #{@options.chef11_server_url}") do |url|
-         @options.chef11_server_url = url
+        @options.chef11_server_url = url
       end
 
       # This option matches the knife -u option
@@ -64,6 +64,22 @@ add_command_under_category "chef12-upgrade-download", "open-source-upgrade", "Do
         end
       end
 
+      opts.on("--sql-host HOST", String, "Hostname for Chef 11 SQL Database. Autoconfigured via /etc/chef-server/chef-server-running.json by default") do |sql_host|
+        @options.sql_host = sql_host
+      end
+
+      opts.on("--sql-port PORT", Integer, "Port for the Chef 11 SQL database. Autoconfigured via /etc/chef-server/chef-server-running.json by default") do |sql_port|
+        @options.sql_port = sql_port
+      end
+
+      opts.on("--sql-user USERNAME", String, "Username for the Chef 11 SQL Database. Autoconfigured via /etc/chef-server/chef-server-running.json by default") do |sql_user|
+        @options.sql_user = sql_user
+      end
+
+      opts.on("--sql-pass PASSWORD", String, "Password for the Chef 11 SQL Database. Autoconfigured via /etc/chef-server/chef-server-running.json by default") do |sql_pass|
+        @options.sql_pass = sql_pass
+      end
+
       opts.on("-h", "--help", "Show this message") do
         puts opts
         exit
@@ -72,7 +88,7 @@ add_command_under_category "chef12-upgrade-download", "open-source-upgrade", "Do
 
     opt_parser.parse!(args)
     log "Proceeding with options #{@options.inspect}"
-   end
+  end
 
   ### Start script ###
 
