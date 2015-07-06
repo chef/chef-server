@@ -12,3 +12,4 @@ description:
       type: string
   /clients: !include clients.yml
   /policies: !include policies.yml
+  /policy_groups: !include policy_groups.yml
