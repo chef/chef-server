@@ -1,4 +1,6 @@
 api_fqdn "api.chef-server.dev"
 
 topology "standalone"
-
+<% node['provisioning']['chef-server-config'].each_pair do |k, v| %>
+<%= k%>=<%= v%>
+<% end %>
