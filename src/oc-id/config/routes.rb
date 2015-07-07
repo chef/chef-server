@@ -24,6 +24,7 @@ OcId::Application.routes.draw do
       resources :users, only: :show
 
       get 'me', to: 'users#me'
+      get 'all_users', to: 'users#all_users'
       get 'me/organizations', to: 'users#organizations'
       get 'status', to: 'health#show'
     end
