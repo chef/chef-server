@@ -124,8 +124,8 @@ module DVM
       @projects[project_name].run args
     end
 
-    desc "start <project> [run-args]", "Start the service associated with the project, out of the mounted directory. Currently supported for erlang projects only.  Will remain in foreground --background is specified."
-    option :"foreground", type: :boolean,
+    desc "start <project> [run-args]", "Start the service associated with the project, out of the mounted directory. Currently supported for erlang projects only.  Will remain in foreground unless --background is specified."
+    option :"background", type: :boolean,
                         aliases: ['-b'],
                         desc: "Launch the server in the background instead of the default behavior of bringing it to the foreground for interactive use"
     def start(project_name, *args)
