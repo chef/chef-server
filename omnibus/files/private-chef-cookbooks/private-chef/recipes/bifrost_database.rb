@@ -21,6 +21,21 @@ private_chef_pg_database 'bifrost' do
   owner bifrost_attrs['sql_user']
 end
 
+# For existing installations, make sure the database owner is set to sql_user
+ruby_block "set bifrost ownership" do
+  block do
+    EcPostgres.with_connection(node, 'bifrost') do |connection|
+      connection.exec("ALTER DATABASE bifrost OWNER TO #{node['private_chef']['oc_bifrost']['sql_user']};")
+    end
+  end
+end
+
+private_chef_pg_user_table_access bifrost_attrs['sql_user'] do
+  database 'bifrost'
+  schema 'public'
+  access_profile :write
+end
+
 private_chef_pg_user_table_access bifrost_attrs['sql_ro_user'] do
   database 'bifrost'
   schema 'public'

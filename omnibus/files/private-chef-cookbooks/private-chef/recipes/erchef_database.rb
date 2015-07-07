@@ -17,12 +17,13 @@ private_chef_pg_database "opscode_chef" do
 end
 
 # For existing installations, make sure the database owner is set to sql_user
-ruby_block "set opscode_chef ownership" do
-  block do
-    EcPostgres.with_connection(node, 'opscode_chef') do |connection|
-      connection.exec("ALTER DATABASE opscode_chef OWNER TO #{node['private_chef']['postgresql']['sql_user']};")
-    end
-  end
+#ruby_block "set opscode_chef ownership" do
+#  block do
+#    EcPostgres.with_connection(node, 'opscode_chef') do |connection|
+#      connection.exec("ALTER DATABASE opscode_chef OWNER TO #{node['private_chef']['postgresql']['sql_user']};")
+#    end
+#  end
+#end
   
 # TODO these originally were only run on notify - is this still required
 # to get a sqitch schema in place from EC11? We already use sqitch in
