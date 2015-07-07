@@ -83,4 +83,17 @@ describe User do
       end
     end
   end
+
+  context 'when retrieving all users on a Chef Server' do
+    let(:chef) { double('chef') }
+
+    before do
+      allow_any_instance_of(ChefResource).to receive(:chef).and_return(chef)
+    end
+
+    it 'requests all users with verbose=true' do
+      expect(chef).to receive(:get).with('users?verbose=true')
+      User.all
+    end
+  end
 end
