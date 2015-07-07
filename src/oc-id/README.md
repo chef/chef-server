@@ -5,6 +5,7 @@ oc-id
 
 Chef identity: An [OAuth 2](http://oauth.net/2/) provider for Chef.
 
+For an introduction to oc-id and how it works, please see this blog post [oc-id on Chef Server: An Introduction](https://www.chef.io/blog/2015/06/09/oc-id-on-chef-server-an-introduction/)
 
 ## System Requirements
 
