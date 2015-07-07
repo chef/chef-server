@@ -44,8 +44,11 @@ migration_action(#org{name = OrgName} = Org, _) ->
     case add_group_to_group(UserGroup, GAGroup) of
         ok ->
             ok;
+        {error, no_user_group} ->
+            lager:info("Organization ~p has no user group and cannot be migrated.", [OrgName]),
+            ok;
         {error, Error} ->
-            lager:warn("Organization ~p failed during group addition.", [OrgName]),
+            lager:error("Organization ~p failed during group addition.", [OrgName]),
             Error
     end.
 
@@ -74,9 +77,15 @@ ga_groupname(#org{name = OrgName}) ->
     iolist_to_binary([OrgName, <<"_global_admins">>]).
 
 user_group(#org{id = OrgId}) ->
-    {ok, [Group]} = sqerl:select(users_group_query(), [OrgId], rows_as_records, [group, record_info(fields, group)]),
-    Group.
+    case sqerl:select(users_group_query(), [OrgId], rows_as_records, [group, record_info(fields, group)]) of
+        {ok, [Group]} ->
+            Group;
+        {ok, none} ->
+            {error, no_user_group}
+    end.
 
+add_group_to_group({error, no_user_group} = Error, _GAGroup) ->
+    Error;
 add_group_to_group(#group{authz_id = IdToAdd}, #group{authz_id = TargetId}) ->
     mv_oc_chef_authz:add_to_group(TargetId, group, IdToAdd, superuser).
 

@@ -63,7 +63,7 @@ new_groupname(#group{name = GroupName}) ->
 rename_group(#group{id = GroupId} = Group, NewGroupName) ->
     case sqerl:execute(<<"UPDATE groups SET name = $1 WHERE id = $2">>, [NewGroupName, GroupId]) of
         {ok, 0} ->
-            lager:warn("Group ~p not found, may have been deleted since the start of the migration", [Group#group.name]),
+            lager:warning("Group ~p not found, may have been deleted since the start of the migration", [Group#group.name]),
             ok;
         {ok, 1} ->
             ok;
