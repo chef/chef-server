@@ -44,8 +44,24 @@ migration_action(#org{name = OrgName} = Org, _) ->
     case add_group_to_group(UserGroup, GAGroup) of
         ok ->
             ok;
+        %% Non-fatal errors.
+        %% We ignore the following error cases
+        %%
+        %% - no users group
+        %% - no global_admins groups
+        %% - missing bifrost data
+        %%
+        %% Orgs in this state cannot be migrated and would need futher repair. We ignore
+        %% these errors to ensure that the partybus migration does not fail since this is a
+        %% policy-change migration not required for correct operation of chef-client runs.
+        {error, no_global_admins_group} ->
+            lager:info("Organization ~p has no global_admins group and cannot be migrated", [OrgName]),
+            ok;
         {error, no_user_group} ->
             lager:info("Organization ~p has no user group and cannot be migrated.", [OrgName]),
+            ok;
+        {error, not_found} ->
+            lager:info("Organization ~p is missing bifrost data for either the users or global_admins group and cannot be migrated.", [OrgName]),
             ok;
         {error, Error} ->
             lager:error("Organization ~p failed during group addition.", [OrgName]),
@@ -70,8 +86,12 @@ all_orgs() ->
     Orgs.
 
 global_admin_group(Org) ->
-    {ok, [Group]} = sqerl:select(global_admin_query(), [ga_groupname(Org)], rows_as_records, [group, record_info(fields, group)]),
-    Group.
+    case sqerl:select(global_admin_query(), [ga_groupname(Org)], rows_as_records, [group, record_info(fields, group)]) of
+        {ok, [Group]} ->
+            Group;
+        {ok, none} ->
+            {error, no_global_admins_group}
+    end.
 
 ga_groupname(#org{name = OrgName}) ->
     iolist_to_binary([OrgName, <<"_global_admins">>]).
@@ -85,6 +105,8 @@ user_group(#org{id = OrgId}) ->
     end.
 
 add_group_to_group({error, no_user_group} = Error, _GAGroup) ->
+    Error;
+add_group_to_group(_UserGroup, {error, no_global_admins_group} = Error) ->
     Error;
 add_group_to_group(#group{authz_id = IdToAdd}, #group{authz_id = TargetId}) ->
     mv_oc_chef_authz:add_to_group(TargetId, group, IdToAdd, superuser).
