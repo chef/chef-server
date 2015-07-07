@@ -31,7 +31,8 @@ oc_chef_authz_acl_constraints_test_() ->
     { "Check admins group removal returns admins group was not removed", check_admins_group_removal_not_removed() },
     { "Check admins group removal returns admins group was removed", check_admins_group_removal_removed() },
     { "Check that the acl constraints reports no failures when there should be none", check_acl_constraints_no_failures() },
-    { "Check that the acl constraints reports failures when they are present", check_acl_constraints_failures() }
+    { "Check that the acl constraints reports failures when they are present", check_acl_constraints_failures() },
+    { "Check that removal of grant ace passes if not grant ace", check_acl_constraints_not_grant_ace() }
   ].
 
 
@@ -101,4 +102,23 @@ check_acl_constraints_failures() ->
                ],
   Test2 = ?_assertEqual([failure_one, failure_two], oc_chef_authz_acl_constraints:check_acl_constraints(AuthzId, Type, AclPerm, Ace, AclChecks2)),
   [ Test1, Test2 ].
+
+check_acl_constraints_not_grant_ace() ->
+  %% Not a true unit test, as this is more of an integration
+  %% test within this module, but this tests catches an observed
+  %% failure that bubbled up in pedant.
+
+  %% The opposite tests that checks if this works with the grant ace
+  %% can't be run as an eunit test because it relies on calling out
+  %% to another module
+
+  %% All dummy values, but based on real values.
+  AuthzId = <<"10000000000000000000000000000000">>,
+  Type = organization,
+  AclPerm = <<"create">>,
+  Ace = {[{<<"create">>,{[{<<"actors">>,[<<"pivotal">>]},{<<"groups">>,[]}]}}]},
+  [
+    ?_assertEqual(ok, oc_chef_authz_acl_constraints:check_acl_constraints(AuthzId, Type, AclPerm, Ace, oc_chef_authz_acl_constraints:acl_checks()))
+  ].
+
 

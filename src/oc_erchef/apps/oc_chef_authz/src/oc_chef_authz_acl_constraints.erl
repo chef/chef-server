@@ -60,7 +60,9 @@ check_admins_group_removal_from_grant_ace(AuthzId, Type, AclPerm, NewAce) ->
           {true, attempted_admin_group_removal_grant_ace}
       end;
     _Other ->
-      ok
+      %% Needs to return false here, which means all is okay, so this can
+      %% work when called within lists:filtermap
+      false
   end.
 
 check_admins_group_removal(CurrentGroups, NewGroups) ->
