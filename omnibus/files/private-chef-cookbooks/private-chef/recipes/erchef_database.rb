@@ -1,50 +1,20 @@
-private_chef_pg_user node['private_chef']['postgresql']['sql_user'] do
-  password node['private_chef']['postgresql']['sql_password']
+
+postgres = node['private_chef']['postgresql']
+
+private_chef_pg_user postgres['sql_user'] do
+  password postgres['sql_password']
   superuser false
 end
 
-private_chef_pg_user node['private_chef']['postgresql']['sql_ro_user'] do
-  password node['private_chef']['postgresql']['sql_ro_password']
+private_chef_pg_user postgres['sql_ro_user'] do
+  password postgres['sql_ro_password']
   superuser false
 end
 
 private_chef_pg_database "opscode_chef" do
-  owner node['private_chef']['postgresql']['sql_user']
-  notifies :run, "execute[chef-server-schema]", :immediately
+  owner postgres['sql_user']
+  notifies :deploy, "private_chef_pg_sqitch[/opt/opscode/embedded/service/opscode-erchef/schema/baseline]", :immediately
 end
-
-# Though Sqitch runs are idempotent, we need to have them run only
-# when the database is first created (thus the chained notifications).
-# This is only for EC11; subsequent versions can run them
-# idempotently, like normal.  This is just to allow fresh EC11
-# installs to use Sqitch; upgraded installations have a Partybus
-# upgrade to run.  The end result should be that whether or not you
-# are installing or upgrading EC11, at the end of the day, you'll have
-# Sqitch metadata info in your database.
-execute "chef-server-schema" do
-  command "sqitch --db-name opscode_chef deploy --verify"
-  # OSC schema is a dependency of the EC schema, and managed by it
-  cwd "/opt/opscode/embedded/service/opscode-erchef/schema/baseline"
-  user node['private_chef']['postgresql']['username']
-  # Clear PERL5LIB to ensure sqitch only uses omnibus's perl
-  # installation
-  environment "PERL5LIB" => ""
-  returns [0,1]
-  action :nothing
-  notifies :run, "execute[enterprise-chef-server-schema]", :immediately
-end
-
-execute "enterprise-chef-server-schema" do
-  command "sqitch --db-name opscode_chef deploy --verify"
-  cwd "/opt/opscode/embedded/service/opscode-erchef/schema"
-  user node['private_chef']['postgresql']['username']
-  # Clear PERL5LIB to ensure sqitch only uses omnibus's perl
-  # installation
-  environment "PERL5LIB" => ""
-  returns [0,1]
-  action :nothing
-end
-
 
 # For existing installations, make sure the database owner is set to sql_user
 ruby_block "set opscode_chef ownership" do
@@ -55,20 +25,44 @@ ruby_block "set opscode_chef ownership" do
   end
 end
 
-private_chef_pg_user_table_access node['private_chef']['postgresql']['sql_user'] do
+# Note that the sqitch migrations below only trigger when we create the database.
+# At this tiem, we're using partybus to apply upgrade-related sqitch migrations,
+# so that we can also apply any necessary data migrations (not yet managed through sqitch)
+# at that time.
+private_chef_pg_sqitch "/opt/opscode/embedded/service/opscode-erchef/schema/baseline" do
+  hostname  postgres['vip']
+  port      postgres['port']
+  # TODO: will become db_superuser , db_superuser_password
+  username  postgres['username']
+  database  "opscode_chef"
+  action :nothing
+  notifies :deploy, "private_chef_pg_sqitch[/opt/opscode/embedded/service/opscode-erchef/schema]", :immediately
+end
+
+private_chef_pg_sqitch "/opt/opscode/embedded/service/opscode-erchef/schema" do
+  hostname  postgres['vip']
+  port      postgres['port']
+  # TODO: will become db_superuser , db_superuser_password
+  username  postgres['username']
+  database "opscode_chef"
+  action :nothing
+end
+
+
+private_chef_pg_user_table_access postgres['sql_user'] do
   database 'opscode_chef'
   schema 'public'
   access_profile :write
 end
 
-
-private_chef_pg_user_table_access node['private_chef']['postgresql']['sql_ro_user'] do
+private_chef_pg_user_table_access postgres['sql_ro_user'] do
   database 'opscode_chef'
   schema 'public'
   access_profile :read
 end
 
 # Cleanup old enterprise-chef-server-schema
+# TODO don't we have a cleanup mechanism this can live in?
 directory "/opt/opscode/embedded/service/enterprise-chef-server-schema" do
   recursive true
   action :delete
