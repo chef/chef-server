@@ -36,7 +36,7 @@ end
 private_chef_pg_sqitch "/opt/opscode/embedded/service/oc_bifrost/db" do
   hostname postgres_attrs['vip']
   port     postgres_attrs['port']
-  # TODO: will become db_superuser , db_superuser_password
-  username postgres_attrs['username']
+  username  postgres_attrs['db_superuser']
+  password  postgres_attrs['db_superuser_password']
   database "bifrost"
 end

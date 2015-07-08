@@ -23,14 +23,14 @@ vm:
   omnibus-autoload: [private-chef-cookbooks]
 
   postgresql:
-    # enable a separate postgres vm but do not use it unless
-    # use-external is set.
-    #  start: true
+  # enable a separate postgres vm but do not use it unless
+  # use-external is set.
+  #  start: true
 
-    # When this is set true, and start is true,
-    # the chef-server node will be configured to use
-    # this vm as an external postgresql server from the start.
-    #  use-external: true
+  # When this is set true, and start is true,
+  # the chef-server node will be configured to use
+  # this vm as an external postgresql server from the start.
+  #  use-external: true
 
   # These will map directly to entries in the generated chef-server.rb
   node-attributes:

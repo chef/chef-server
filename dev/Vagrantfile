@@ -35,9 +35,7 @@ def define_chef_server(config, attributes)
                   "--memory", attributes["vm"]["memory"],
                   "--cpus", attributes["vm"]["cpus"],
                   "--usb", "off",
-                  "--usbehci", "off",
-                  "--nictype1", "virtio",
-                  "--nictype2", "virtio"
+                  "--usbehci", "off"
     ]
   end
 
@@ -54,7 +52,10 @@ def define_chef_server(config, attributes)
              "postgresql['vip']" => "\"#{DB_VM_ADDRESS}\"",
              "postgresql['port']" => 5432,
              "postgresql['db_superuser']" => "\"#{DB_SUPERUSER}\"",
-             "postgresql['db_superuser_password']" => "\"#{DB_SUPERPASS}\"", }
+             "postgresql['db_superuser_password']" => "\"#{DB_SUPERPASS}\"",
+             "opscode_erchef['db_pool_size']" => 10,
+             "oc_id['db_pool_size']" => 10,
+             "oc_bifrost['db_pool_size']" => 10 }
       # TODO merge with other options nicely.
       json["provisioning"] = {}
       json["provisioning"]["chef-server-config"] = pg
@@ -81,21 +82,21 @@ def define_chef_server(config, attributes)
       chef.json = json || {}
     end
   end
-
 end
 
 def define_db_server(config, attributes)
   config.vm.hostname = "database.chef-server.dev"
   config.vm.network "private_network", ip: DB_VM_ADDRESS
+
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id,
                   "--name", "database",
-                  "--memory", 1024,
-                  "--cpus", 2,
+                  # For basic pedant tests, we're not putting
+                  # a lot of load on this:
+                  "--memory", 512,
+                  "--cpus", 1,
                   "--usb", "off",
-                  "--usbehci", "off",
-                  "--nictype1", "virtio",
-                  "--nictype2", "virtio"
+                  "--usbehci", "off"
     ]
   end
 
