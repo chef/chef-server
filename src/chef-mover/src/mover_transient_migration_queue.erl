@@ -30,7 +30,9 @@ init([]) ->
 
 %% populate the queue with items contained in  Items
 initialize_queue(Key, Items) when is_list(Items) ->
-    gen_server:call(?MODULE, {init_queue, Key, Items}).
+    gen_server:call(?MODULE, {init_queue, Key, Items});
+initialize_queue(Key, none) ->
+    gen_server:call(?MODULE, {init_queue, Key, []}).
 
 %% How many items in the queue?
 length(Key) ->
