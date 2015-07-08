@@ -166,7 +166,7 @@ dialyzer: $(BASE_PLT) $(DEPS_PLT)
 	@$(DIALYZER) $(DIALYZER_OPTS) --plts $(BASE_PLT) $(DEPS_PLT) $(DIALYZER_SRC)
 
 $(DEPS_PLT):
-	@$(DIALYZER) --build_plt $(DIALYZER_DEPS) --output_plt $(DEPS_PLT)
+	@$(DIALYZER) --build_plt $(DIALYZER_DEPS) --plts $(BASE_PLT) --output_plt $(DEPS_PLT)
 endif
 
 $(BASE_PLT):
