@@ -68,6 +68,8 @@ class User
   end
 
   class << self
+    include ChefResource
+
     def find(username)
       begin
         new(username: username).get unless username.nil?
@@ -101,6 +103,10 @@ class User
       else
         nil
       end
+    end
+
+    def all
+      chef.get("users?verbose=true")
     end
   end
 end

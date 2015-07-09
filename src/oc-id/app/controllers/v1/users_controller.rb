@@ -1,6 +1,6 @@
 module V1
   class UsersController < ApplicationController
-    doorkeeper_for :all, except: :show
+    doorkeeper_for :all, except: [ :show, :all_users ]
 
     respond_to :json
 
@@ -24,6 +24,15 @@ module V1
       @user = User.find(doorkeeper_token.resource_owner_id)
 
       respond_with @user.organizations
+    end
+
+    def all_users
+      app = Doorkeeper::Application.find_by_uid(params[:app_id])
+      head :unauthorized and return unless app
+
+      @users = User.all
+
+      respond_with @users
     end
   end
 end
