@@ -13,3 +13,7 @@ attribute :password,
 attribute :superuser,
 :kind_of => [TrueClass, FalseClass],
 :default => false
+
+attribute :local_connection,
+:kind_of => [TrueClass, FalseClass],
+:default => false

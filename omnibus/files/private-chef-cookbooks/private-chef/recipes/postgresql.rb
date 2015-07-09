@@ -123,6 +123,16 @@ if is_data_master?
   execute "/opt/opscode/bin/private-chef-ctl start postgresql" do
     retries 20
   end
+
+  # Update the postgresql superuser  with a password for tcp-based access.
+  private_chef_pg_user node['private_chef']['postgresql']['db_superuser'] do
+    password node['private_chef']['postgresql']['db_superuser_password']
+    # This initial password set must be done over local socket:
+    local_connection true
+    # Don't make superuser into a non-superuser...
+    superuser true
+  end
+
   # Set up a database for the opscode-pgsql user to log into automatically
   private_chef_pg_database "opscode-pgsql"
   include_recipe "private-chef::erchef_database"
