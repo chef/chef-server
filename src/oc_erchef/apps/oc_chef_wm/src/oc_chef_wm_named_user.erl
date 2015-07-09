@@ -245,10 +245,9 @@ to_json(Req, #base_state{ resource_args = org_list,
 superuser_or_self(UserId, UserId, _Req) ->
     true;
 superuser_or_self(_UserId, _RequestorID, Req) ->
-    % The is_superuser function only knows how to deal with usernames.  Thus, we pull the
-    % username from request rather than using the RequestorID:
-    UserName = list_to_binary(wrq:get_req_header("x-ops-userid", Req)),
-    oc_chef_wm_base:is_superuser(UserName).
+    %% The is_superuser function only knows how to deal with usernames and how to
+    %% pull them from request objects, so we use that instead of the RequestorID
+    oc_chef_wm_base:is_superuser(Req).
 
 orgs_to_ej(Orgs) ->
     [{[{<<"organization">>,
