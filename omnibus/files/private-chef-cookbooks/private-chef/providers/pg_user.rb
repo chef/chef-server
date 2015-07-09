@@ -8,39 +8,51 @@ def whyrun_supported?
 end
 
 action :create do
-  EcPostgres.with_connection(node) do |connection|
+  if new_resource.local_connection
+    EcPostgres.with_local_connection(node) do |connection|
+      do_create(connection)
+    end
+  else
+    EcPostgres.with_connection(node) do |connection|
+      do_create(connection)
+    end
+  end
+end
 
-    user_info = connection.exec('select usesuper, passwd from pg_shadow where usename = $1', [ new_resource.username ])
-    if user_info.ntuples > 0
-      user_info = user_info[0]
-      changes = [ "Update Postgres user #{new_resource.username}" ]
-      sql = ''
-      if user_info['usesuper'] != (new_resource.superuser ? 't' : 'f')
-        changes << "  Set superuser to #{!!new_resource.superuser}"
-        sql << (new_resource.superuser ? ' SUPERUSER' : ' NOSUPERUSER')
-      end
-      if new_resource.password && user_info['passwd'] != ::PGconn.encrypt_password(new_resource.password, new_resource.username)
-        changes << '  Update password'
-        sql << " ENCRYPTED PASSWORD '#{connection.escape(new_resource.password)}'"
-      end
-      if changes.size > 1
-        converge_by changes do
-          connection.exec("ALTER USER #{new_resource.username}#{sql}")
-        end
-      end
-    else
-      changes = [ "Create Postgres user #{new_resource.username}" ]
-      sql = ''
-      if new_resource.superuser
-        changes << "  Set superuser to #{!!new_resource.superuser}"
-        sql << (new_resource.superuser ? ' SUPERUSER' : ' NOSUPERUSER')
-      end
-      if new_resource.password
-        changes << '  Update password'
-        sql << " ENCRYPTED PASSWORD '#{connection.escape(new_resource.password)}'"
-      end
+def do_create(connection)
+  user_info = connection.exec('select usesuper, passwd from pg_shadow where usename = $1', [ new_resource.username ])
+  if user_info.ntuples > 0
+    user_info = user_info[0]
+    changes = [ "Update Postgres user #{new_resource.username}" ]
+    sql = ''
+    if user_info['usesuper'] != (new_resource.superuser ? 't' : 'f')
+      changes << "  Set superuser to #{!!new_resource.superuser}"
+      sql << (new_resource.superuser ? 'SUPERUSER' : 'NOSUPERUSER')
+    end
+    if new_resource.password && user_info['passwd'] != ::PGconn.encrypt_password(new_resource.password, new_resource.username)
+      changes << '  Update password'
+      sql << " ENCRYPTED PASSWORD '#{connection.escape(new_resource.password)}'"
+    end
+    if changes.size > 1
       converge_by changes do
-        connection.exec("CREATE USER #{new_resource.username}#{sql}")
+        connection.exec("ALTER USER \"#{new_resource.username}\" #{sql}")
+      end
+    end
+  else
+    changes = [ "Create Postgres user #{new_resource.username}" ]
+    sql = ''
+    if new_resource.superuser
+      changes << "  Set superuser to #{!!new_resource.superuser}"
+      sql << (new_resource.superuser ? 'SUPERUSER' : 'NOSUPERUSER')
+    end
+    if new_resource.password
+      changes << '  Update password'
+      sql << " ENCRYPTED PASSWORD '#{connection.escape(new_resource.password)}'"
+    end
+    converge_by changes do
+      connection.exec("CREATE USER \"#{new_resource.username}\" #{sql}")
+      if node['private_chef']['postgresql']['external']
+        connection.exec("GRANT #{new_resource.username} TO \"#{node['private_chef']['postgresql']['db_superuser']}\"")
       end
     end
   end
