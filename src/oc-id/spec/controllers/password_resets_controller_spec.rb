@@ -264,7 +264,7 @@ describe PasswordResetsController do
         }
         before do
           allow(User).to receive(:find).with('jimmy').and_return(user)
-          allow(user).to receive_message_chain(:chef, :put_rest).and_return(true)
+          allow(user).to receive_message_chain(:chef, :put_rest).and_return({'private_key' => 'my awesome private key'})
           put :update, password: 'haha', signature: signature, expires: expires, username: name
         end
 

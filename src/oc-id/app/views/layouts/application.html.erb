@@ -22,11 +22,11 @@
       <div class="top-bar-section main">
         <ul class="left">
           <% if signed_in? %>
-            <li>
-              <%= link_to root_path do %>
-                Signed in as: <%= current_user.username %>
-              <% end %>
-            </li>
+            <li><%= link_to "Signed in as: #{current_user.username}", profile_path %></li>
+            <% if User.admin?(current_user.username) %>
+              <li><%= link_to 'Applications', oauth_applications_path %></li>
+            <% end %>
+            <li><%= link_to 'Authorized Applications', oauth_authorized_applications_path %></li>
             <li><%= link_to "Sign Out", signout_path, method: "delete" %></li>
           <% elsif controller.controller_name == 'sessions' %>
             <li><%= link_to "Sign Up", chef_sign_up_url, :target => "_blank" %></li>

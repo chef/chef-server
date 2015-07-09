@@ -2,6 +2,7 @@ require 'mixlib/authentication/signatureverification'
 
 class User
   extend ActiveModel::Naming
+  include ActiveModel::Conversion
 
   include ActiveModel::AttributeMethods
   include ChefResource
@@ -10,16 +11,20 @@ class User
     :username,
     :first_name,
     :last_name,
+    :middle_name,
     :email,
     :public_key,
+    :private_key,
     :display_name,
     :password
   ]
 
   attr_accessor *ATTRIBUTES
+  attr_reader :errors
 
   def initialize(attrs={})
     set_attributes(attrs)
+    @errors = ActiveModel::Errors.new(self)
   end
 
   def id
@@ -30,9 +35,37 @@ class User
     username
   end
 
+  def regen_private_key
+    update_attributes('private_key' => true)
+  end
+
   def set_attributes(attrs={})
     attrs.symbolize_keys!
     ATTRIBUTES.each { |a| instance_variable_set("@#{a}", attrs[a]) unless attrs[a].nil? }
+  end
+
+  def update_password(params)
+    [:current_password, :new_password, :password_confirmation].each do |f|
+      if params[f].blank?
+        errors.add(f, I18n.t("errors.passwords.blank", :label => f.to_s.titleize))
+      end
+    end
+
+    unless User.authenticate(username, params[:current_password])
+      errors.add(:current_password, I18n.t("errors.passwords.current_password_is_wrong"))
+    end
+
+    if params[:new_password] != params[:password_confirmation]
+      errors.add(:base, I18n.t("errors.passwords.dont_match"))
+    end
+
+    if errors.empty?
+      begin
+        update_attributes('password' => params[:new_password])
+      rescue Net::HTTPServerException => e
+        raise
+      end
+    end
   end
 
   def public
@@ -63,11 +96,34 @@ class User
     end
 
     new_attrs = current_attrs.merge(attrs)
-    chef.put_rest(url, new_attrs)
-    set_attributes(new_attrs)
+
+    begin
+      result = chef.put_rest(url, new_attrs)
+      set_attributes(new_attrs.merge('private_key' => result['private_key']))
+    rescue => e
+      false
+    end
   end
 
+  # ActiveModel::Errors requires a minimal implementation of these 3 methods
+  def read_attribute_for_validation(attr)
+    send(attr)
+  end
+
+  def User.human_attribute_name(attr, options={})
+    attr.to_s.titleize
+  end
+
+  def User.lookup_ancestors
+    [self]
+  end
+  # ActiveModel::Errors finished
+
   class << self
+    def admin?(username)
+      Settings.doorkeeper.administrators.include?(username)
+    end
+
     def find(username)
       begin
         new(username: username).get unless username.nil?

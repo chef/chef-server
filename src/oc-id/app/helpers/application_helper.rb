@@ -5,6 +5,14 @@ module ApplicationHelper
   include Chef::Web::Core::AssetHelpers
   include Chef::Web::Core::URLHelpers
 
+  def error_message_for(model, attr)
+    msgs = model.errors[attr]
+
+    if msgs.present?
+      content_tag(:small, msgs.join("\n"), :class => 'error')
+    end
+  end
+
   def chef_class_for(flash_type)
     classes = {
       success:  'success',

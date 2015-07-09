@@ -7,6 +7,6 @@
   We do not store a copy of this key, so please keep it somewhere safe.
 </p>
 
-<div>
-  <button type="submit" class="button">Get a New Key</button>
-</div>
+<%= form_tag(regen_key_profile_path, :method => :post) do %>
+  <%= submit_tag "Get a New Key", :class => "button" %>
+<% end %>
