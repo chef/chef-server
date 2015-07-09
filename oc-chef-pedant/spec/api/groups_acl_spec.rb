@@ -4,7 +4,7 @@ require 'pedant/acl'
 describe "Groups ACL", :acl do
   include Pedant::ACL
 
-  describe "returns Forbidden when trying to remove the admin group from any grant ACE" do
+  describe "returns expected response when trying to remove the admin group from any grant ACE" do
     # For now testing with groups, but potentially also want to test with other objects
     %w(admins clients users).each do |test_group|
       context "for #{test_group}" do
@@ -47,11 +47,18 @@ describe "Groups ACL", :acl do
               :payload => payload).should look_like({:status => 200})
         end
 
-        it "returns Fordidden trying to remove grant ace from #{test_group} group" do
+        it "returns Fordidden trying to remove grant ace from #{test_group} group using non-superuser" do
           response = put(write_acl_url, platform.admin_user,
                          :payload => request_body)
           response.should look_like({:status => 403})
         end
+
+        it "returns OK trying to remove grant ace from #{test_group} group user superuser" do
+          response = put(write_acl_url, superuser,
+                         :payload => request_body)
+          response.should look_like({:status => 200})
+        end
+
 
       end
     end

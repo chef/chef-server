@@ -70,9 +70,11 @@ validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
     Body = wrq:req_body(Req),
     Ace = chef_json:decode_body(Body),
     Part = list_to_binary(wrq:path_info(acl_permission, Req)),
+
     %% Make sure we have valid json before trying other checks
     %% Throws if invalid json is found
     check_json_validity(Part, Ace),
+
     %% validate_authz_id will populate the ACL AuthzId, which is needed
     %% for checking the ACL constraints; we need to run validate_authz_id
     %% anyway, so go ahead and do so
@@ -84,12 +86,20 @@ validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
 
     %% Check if we're violating any constraints around modifying ACLs
     %% i.e. deleting default groups, etc.
-    case oc_chef_authz_acl_constraints:check_acl_constraints(AuthzId, Type, Part, Ace) of
-      ok ->
+
+    case oc_chef_wm_base:is_superuser(Req) of
+      true ->
+        %% It's the superuser; they are allowed to bypass the checks, assuming
+        %% they know what they are doing. With great power and all.
         {Req1, State1};
-      [ Violation | _T ] ->
-        %% Received one or more failures. Report back the first one.
-        throw({acl_constraint_violation, Violation})
+      false ->
+        case oc_chef_authz_acl_constraints:check_acl_constraints(AuthzId, Type, Part, Ace) of
+          ok ->
+            {Req1, State1};
+          [ Violation | _T ] ->
+            %% Received one or more failures. Report back the first one.
+            throw({acl_constraint_violation, Violation})
+        end
     end.
 
 auth_info(Req, State) ->
