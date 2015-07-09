@@ -2,6 +2,19 @@
 
 ### chef-server
 
+## 12.1.1 (2015-07-09)
+
+* Fix problems with upgrades from Open Source Chef Server 11 related
+  to client and user uploads.
+
+* Fix problems with upgrades from Enterprise Chef Server 11 related to
+  a failed chef-mover migration.
+
+* Upgrade to openssl 1.0.1p
+
+* Upgrade to libxml 2.9.2
+
+
 ## 12.1.0 (2015-06-18)
 
 ### chef-server
