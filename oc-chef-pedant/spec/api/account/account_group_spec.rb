@@ -477,7 +477,9 @@ describe "opscode-account groups", :groups do
             put(api_url("groups/#{test_group}/_acl/#{permission}"), platform.admin_user,
               :payload => {permission => {
                   "actors" => [platform.admin_user.name],
-                  "groups" => []
+                  # Leave admins in the groups, as per ACL policy
+                  # it can't be removed from the grant ACL except by the superuser
+                  "groups" => ["admins"]
                 }}).should look_like({
                 :status => 200
               })
