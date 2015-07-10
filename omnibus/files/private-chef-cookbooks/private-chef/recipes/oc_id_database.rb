@@ -23,7 +23,19 @@ private_chef_pg_user id_attrs['sql_user'] do
   password id_attrs['sql_password']
 end
 
+private_chef_pg_user id_attrs['sql_ro_user'] do
+  password id_attrs['sql_ro_password']
+end
+
+
 private_chef_pg_database "oc_id" do
   owner id_attrs['sql_user']
+end
+
+private_chef_pg_user_table_access id_attrs['sql_ro_user'] do
+  database 'oc_id'
+  schema 'public'
+  access_profile :read
+  only_if { is_data_master? }
 end
 
