@@ -56,6 +56,12 @@ do
   unset $ruby_env_var
 done
 
+ID=`id -u`
+if [ $ID -ne 0 ]; then
+   echo "This command must be run as root."
+   exit 1
+fi
+
 #{install_dir}/embedded/bin/omnibus-ctl opscode #{install_dir}/embedded/service/omnibus-ctl $@
        EOH
     end
