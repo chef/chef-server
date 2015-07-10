@@ -536,6 +536,7 @@ http_method_to_authz_perm('PUT') ->
     update.
 
 %% Tells whether this user is the superuser.
+-spec is_superuser(Req :: #wm_reqdata{} | binary()) -> boolean().
 is_superuser(Req = #wm_reqdata{}) ->
     UserName = get_username_from_request(Req),
     is_superuser(UserName);
@@ -544,11 +545,13 @@ is_superuser(UserName) ->
     lists:member(UserName, Superusers).
 
 %% Get the username from the request (and tell whether it is a superuser)
+-spec get_user(Req :: #wm_reqdata{}, #base_state{}) -> {binary(), boolean()}.
 get_user(Req, #base_state{superuser_bypasses_checks = SuperuserBypassesChecks}) ->
     UserName = get_username_from_request(Req),
     BypassesChecks = SuperuserBypassesChecks andalso is_superuser(UserName),
     {UserName, BypassesChecks}.
 
+-spec get_username_from_request(Req :: #wm_reqdata{}) -> binary().
 get_username_from_request(Req) ->
     list_to_binary(wrq:get_req_header("x-ops-userid", Req)).
 

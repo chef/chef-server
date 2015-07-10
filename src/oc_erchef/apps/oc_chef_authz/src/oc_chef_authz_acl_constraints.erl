@@ -20,15 +20,20 @@
 
 -module(oc_chef_authz_acl_constraints).
 
+-include_lib("ej/include/ej.hrl").
+
 -ifdef(TEST).
 -compile([export_all]).
 -endif.
 
 -export([check_acl_constraints/4]).
 
+-spec check_acl_constraints(binary(), atom(), binary(),tuple()) -> ok | [atom(),...].
 check_acl_constraints(AuthzId, Type, AclPerm, Ace) ->
   check_acl_constraints(AuthzId, Type, AclPerm, Ace, acl_checks()).
 
+
+-spec check_acl_constraints(binary(),atom(),binary(),tuple(), [fun()]) -> ok | [atom(),...].
 check_acl_constraints(AuthzId, Type, AclPerm, Ace, AclChecks) ->
   case lists:filtermap(fun(Check) -> Check(AuthzId, Type, AclPerm, Ace) end, AclChecks) of
     [] ->
@@ -37,11 +42,14 @@ check_acl_constraints(AuthzId, Type, AclPerm, Ace, AclChecks) ->
       Failures
   end.
 
+-spec acl_checks() -> [fun()].
 acl_checks() ->
   [
     fun check_admins_group_removal_from_grant_ace/4
   ].
 
+-spec check_admins_group_removal_from_grant_ace(binary(),atom(),binary(),tuple())
+      -> false | {true, attempted_admin_group_removal_grant_ace}.
 check_admins_group_removal_from_grant_ace(AuthzId, Type, AclPerm, NewAce) ->
   %% It is necessary to pull the current ace and compare to the new ace.
   %% This is because there are some groups that don't have the admin
@@ -65,6 +73,7 @@ check_admins_group_removal_from_grant_ace(AuthzId, Type, AclPerm, NewAce) ->
       false
   end.
 
+-spec check_admins_group_removal([binary()], [binary()]) -> 'not_removed' | 'removed'.
 check_admins_group_removal(CurrentGroups, NewGroups) ->
   %% Check if the CurrentGroups contains the admin group. If it doesn't, there
   %% is nothing to do. If it does, then check if the admin group is present in
@@ -81,6 +90,7 @@ check_admins_group_removal(CurrentGroups, NewGroups) ->
       end
   end.
 
+-spec contains_admins_group([binary()]) -> boolean().
 contains_admins_group(Groups) ->
   case lists:filter(fun(X) -> X =:= <<"admins">> end, Groups) of
     [] ->
@@ -89,6 +99,8 @@ contains_admins_group(Groups) ->
         true
     end.
 
+%% json_object is a type defined in ej;
+-spec extract_acl_groups(binary(), json_object()) -> [binary()].
 extract_acl_groups(AclPerm, Ace) ->
       ActorsAndGroups = ej:get({AclPerm}, Ace),
       ej:get({<<"groups">>}, ActorsAndGroups).
