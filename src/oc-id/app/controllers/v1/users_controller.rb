@@ -1,6 +1,6 @@
 module V1
   class UsersController < ApplicationController
-    doorkeeper_for :all, except: [ :show, :all_users ]
+    doorkeeper_for :all, except: [ :show ]
 
     respond_to :json
 

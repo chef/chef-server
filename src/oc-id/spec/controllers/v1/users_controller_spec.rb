@@ -60,7 +60,12 @@ describe V1::UsersController do
       }
     end
 
+    let(:token) { double acceptable?: true }
+
     before do
+      # Stubs doorkeeper authentication
+      allow(controller).to receive(:doorkeeper_token).and_return(token)
+
       allow(User).to receive(:all).and_return(sample_users)
     end
 
