@@ -151,5 +151,9 @@ class OmnibusHelper
     node['private_chef'].attribute?('ldap') &&
       !(node['private_chef']['ldap'].nil? || node['private_chef']['ldap'].empty?)
   end
+
+  def self.is_backend?(node)
+    node['private_chef']['role'] == 'backend' or node['private_chef']['role'] == 'standalone'
+  end
 end
 
