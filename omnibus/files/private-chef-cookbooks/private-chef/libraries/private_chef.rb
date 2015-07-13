@@ -194,6 +194,7 @@ module PrivateChef
       PrivateChef['oc_bifrost']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['oc_id']['secret_key_base'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['oc_id']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['oc_id']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['bookshelf']['access_key_id'] ||= generate_hex_if_bootstrap(20, ha_guard)
       PrivateChef['bookshelf']['secret_access_key'] ||= generate_hex_if_bootstrap(40, ha_guard)
 
@@ -218,6 +219,7 @@ module PrivateChef
               },
               'oc_id' => {
                 'sql_password' => PrivateChef['oc_id']['sql_password'],
+                'sql_ro_password' => PrivateChef['oc_id']['sql_ro_password'],
                 'secret_key_base' => PrivateChef['oc_id']['secret_key_base']
               },
               'drbd' => {
