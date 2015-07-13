@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 name 'chef_backup-gem'
-default_version '0.0.1.dev.3'
+default_version '0.0.1.dev.4'
 
 dependency 'ruby'
 dependency 'rubygems'
