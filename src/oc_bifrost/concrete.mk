@@ -204,7 +204,7 @@ RELX_OPTS ?=
 RELX_OUTPUT_DIR ?= _rel
 ifeq ($(RELX),)
 RELX = $(CURDIR)/relx
-RELX_VERSION = 1.0.4
+RELX_VERSION ?= 3.3.2
 else
 RELX_VERSION = $(shell relx --version)
 endif

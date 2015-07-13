@@ -23,7 +23,7 @@ dependency "sqitch"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
-
+  env['REL_VERSION'] = "#{project.build_version}"
   make "distclean", env: env
   make "rel", env: env
 

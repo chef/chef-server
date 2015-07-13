@@ -2,7 +2,7 @@
 %% ex: ts=4 sw=4 et
 {application, mover,
  [{description, ""},
-  {vsn, "12.2.0"},
+  {vsn, {cmd,"cat VERSION"}},
   {applications, [kernel,
                   stdlib,
                   sasl,

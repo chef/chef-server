@@ -4,7 +4,7 @@
 {application, oc_erchef,
  [
   {description, ""},
-  {vsn, "12.2.0"},
+  {vsn, {cmd,"cat VERSION"}},
   {registered, []},
   {applications, [
                   kernel,

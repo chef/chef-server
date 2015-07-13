@@ -1,11 +1,13 @@
 SHELL := /bin/bash
 
+RELX_VERSION = 3.3.2
+
 PROJ = oc_erchef
 DEVVM_PROJ = opscode-erchef
 
 ALL_HOOK = bundle
 CLEAN_HOOK = bundle_clean
-REL_HOOK = compile bundle
+REL_HOOK = VERSION compile bundle
 
 CT_DIR = common_test
 
@@ -76,3 +78,13 @@ travis: all
 	 PATH=~/perl5/bin:$(PATH) $(REBARC) skip_deps=true ct
 
 DEVVM_DIR = $(DEVVM_ROOT)/_rel/oc_erchef
+
+version_clean:
+	@rm -f VERSION
+
+VERSION: version_clean
+ifeq ($(REL_VERSION),)
+	@echo -n "$$(git log --oneline --decorate | grep -F "tag: " --color=never | head -n 1 | sed  "s/.*tag: \([^,)]*\).*/\1/")-$$(git rev-parse --short HEAD)" > VERSION
+else
+	@echo -n $(REL_VERSION) > VERSION
+endif

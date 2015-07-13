@@ -1,7 +1,11 @@
 SHELL := /bin/bash
 
+RELX_VERSION = 3.3.2
+
 ##PROJ = bifrost
 CT_DIR = common_test
+
+REL_HOOK = VERSION compile
 
 DIALYZER_OPTS =
 
@@ -32,3 +36,13 @@ clean_ct:
 
 ## Pull in devvm.mk for relxy goodness
 include devvm.mk
+
+version_clean:
+	@rm -f VERSION
+
+VERSION: version_clean
+ifeq ($(REL_VERSION),)
+	@echo -n "$$(git log --oneline --decorate | grep -F "tag: " --color=never | head -n 1 | sed  "s/.*tag: \([^,)]*\).*/\1/")-$$(git rev-parse --short HEAD)" > VERSION
+else
+	@echo -n $(REL_VERSION) > VERSION
+endif

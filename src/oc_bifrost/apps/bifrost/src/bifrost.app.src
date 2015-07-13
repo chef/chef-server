@@ -1,7 +1,7 @@
 %%-*- mode: erlang -*-
 {application, bifrost,
  [{description, "Bifrost: Opscode Authorization API"},
-  {vsn, "12.2.0"},
+  {vsn, {cmd,"cat ../../VERSION"}},
   {modules, []},
   {registered, []},
   {mod, {bifrost_app, []}},

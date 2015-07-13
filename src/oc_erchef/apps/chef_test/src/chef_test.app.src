@@ -22,7 +22,7 @@
 {application, chef_test,
  [
   {description, ""},
-  {vsn, "0"},
+  {vsn, {cmd,"cat ../../VERSION"}},
   {registered, []},
   {applications, [
                   kernel,

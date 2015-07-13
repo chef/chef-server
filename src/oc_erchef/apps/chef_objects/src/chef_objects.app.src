@@ -18,7 +18,7 @@
 {application, chef_objects,
  [
   {description, "Chef object types and support modules"},
-  {vsn, "0"},
+  {vsn, {cmd,"cat ../../VERSION"}},
   {registered, []},
   {applications, [
                   kernel,

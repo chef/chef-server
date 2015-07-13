@@ -31,7 +31,9 @@ dependency "bundler"
 build do
   env = with_standard_compiler_flags(with_embedded_path)
   env['USE_SYSTEM_GECODE'] = "1"
+  env['REL_VERSION'] = "#{project.build_version}"
 
+  make "bundle_clean", env: env
   make "distclean", env: env
   make "compile", env: env
   make "bundle", env: env
