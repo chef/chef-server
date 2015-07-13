@@ -167,12 +167,12 @@ module PrivateChef
       # Transition from erchef's sql_user/password etc living under 'postgresql' in older versions,
       # to 'opscode_erchef' in newer versions.
       if PrivateChef['postgresql'].has_key? 'sql_password'
-        PrivateChef['opscode-erchef']['sql_password'] ||= PrivateChef['postgresql']['sql_password']
+        PrivateChef['opscode_erchef']['sql_password'] ||= PrivateChef['postgresql']['sql_password']
         PrivateChef['postgresql'].delete 'sql_password'
         PrivateChef['postgresql'].delete 'sql_user'
       end
       if PrivateChef['postgresql'].has_key? 'sql_ro_password'
-        PrivateChef['opscode-erchef']['sql_ro_password'] ||= PrivateChef['postgresql']['sql_ro_password']
+        PrivateChef['opscode_erchef']['sql_ro_password'] ||= PrivateChef['postgresql']['sql_ro_password']
         PrivateChef['postgresql'].delete 'sql_ro_password'
         PrivateChef['postgresql'].delete 'sql_ro_user'
       end
@@ -187,8 +187,8 @@ module PrivateChef
       PrivateChef['rabbitmq']['actions_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['drbd']['shared_secret'] ||= generate_hex_if_bootstrap(30, ha_guard)
       PrivateChef['keepalived']['vrrp_instance_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['opscode-erchef']['sql_password'] ||= generate_hex_if_bootstrap(30, ha_guard)
-      PrivateChef['opscode-erchef']['sql_ro_password'] ||= generate_hex_if_bootstrap(30, ha_guard)
+      PrivateChef['opscode_erchef']['sql_password'] ||= generate_hex_if_bootstrap(30, ha_guard)
+      PrivateChef['opscode_erchef']['sql_ro_password'] ||= generate_hex_if_bootstrap(30, ha_guard)
       PrivateChef['oc_bifrost']['superuser_id'] ||= generate_hex_if_bootstrap(16, ha_guard)
       PrivateChef['oc_bifrost']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['oc_bifrost']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
@@ -198,47 +198,45 @@ module PrivateChef
       PrivateChef['bookshelf']['secret_access_key'] ||= generate_hex_if_bootstrap(40, ha_guard)
 
       if File.directory?("/etc/opscode")
-        # This was originally directly written via f.puts(Chef::JSONCompat.to_json_pretty)
-        # Let's instead assemble this hash externally so that if it fails for any reason
-        # we don't wipe out the secrets file.
-        out_json = Chef::JSONCompat.to_json_pretty({
-          'redis_lb' => {
-            'password' => PrivateChef['redis_lb']['password']
-          },
-          'rabbitmq' => {
-            'password' => PrivateChef['rabbitmq']['password'],
-            'jobs_password' => PrivateChef['rabbitmq']['jobs_password'],
-            'actions_password' => PrivateChef['rabbitmq']['actions_password'],
-          },
-          'postgresql' => {
-            'db_superuser_password' => PrivateChef['postgresql']['db_superuser_password']
-          },
-          'opscode-erchef' => {
-            'sql_password' => PrivateChef['opscode-erchef']['sql_password'],
-            'sql_ro_password' => PrivateChef['opscode-erchef']['sql_ro_password']
-          },
-          'oc_id' => {
-            'sql_password' => PrivateChef['oc_id']['sql_password'],
-            'secret_key_base' => PrivateChef['oc_id']['secret_key_base']
-          },
-          'drbd' => {
-            'shared_secret' => PrivateChef['drbd']['shared_secret']
-          },
-          'keepalived' => {
-            'vrrp_instance_password' => PrivateChef['keepalived']['vrrp_instance_password']
-          },
-          'oc_bifrost' => {
-            'superuser_id' => PrivateChef['oc_bifrost']['superuser_id'],
-            'sql_password' => PrivateChef['oc_bifrost']['sql_password'],
-            'sql_ro_password' => PrivateChef['oc_bifrost']['sql_ro_password']
-          },
-          'bookshelf' => {
-            'access_key_id' => PrivateChef['bookshelf']['access_key_id'],
-            'secret_access_key' => PrivateChef['bookshelf']['secret_access_key']
-          }})
-
         File.open("/etc/opscode/private-chef-secrets.json", "w") do |f|
-          f.puts(out_json)
+          f.puts(
+            Chef::JSONCompat.to_json_pretty({
+              'redis_lb' => {
+                'password' => PrivateChef['redis_lb']['password']
+              },
+              'rabbitmq' => {
+                'password' => PrivateChef['rabbitmq']['password'],
+                'jobs_password' => PrivateChef['rabbitmq']['jobs_password'],
+                'actions_password' => PrivateChef['rabbitmq']['actions_password'],
+              },
+              'postgresql' => {
+                'db_superuser_password' => PrivateChef['postgresql']['db_superuser_password']
+              },
+              'opscode-erchef' => {
+                'sql_password' => PrivateChef['opscode_erchef']['sql_password'],
+                'sql_ro_password' => PrivateChef['opscode_erchef']['sql_ro_password']
+              },
+              'oc_id' => {
+                'sql_password' => PrivateChef['oc_id']['sql_password'],
+                'secret_key_base' => PrivateChef['oc_id']['secret_key_base']
+              },
+              'drbd' => {
+                'shared_secret' => PrivateChef['drbd']['shared_secret']
+              },
+              'keepalived' => {
+                'vrrp_instance_password' => PrivateChef['keepalived']['vrrp_instance_password']
+              },
+              'oc_bifrost' => {
+                'superuser_id' => PrivateChef['oc_bifrost']['superuser_id'],
+                'sql_password' => PrivateChef['oc_bifrost']['sql_password'],
+                'sql_ro_password' => PrivateChef['oc_bifrost']['sql_ro_password']
+              },
+              'bookshelf' => {
+                'access_key_id' => PrivateChef['bookshelf']['access_key_id'],
+                'secret_access_key' => PrivateChef['bookshelf']['secret_access_key']
+              }
+            })
+          )
           system("chmod 0600 /etc/opscode/private-chef-secrets.json")
         end
       end
