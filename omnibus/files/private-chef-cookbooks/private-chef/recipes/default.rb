@@ -84,6 +84,14 @@ else
   if chef_server_rb_exists
     PrivateChef.from_file(chef_server_path)
   end
+  # Bail out if something is wrong in our configuration.
+  # NOTE: Over time, we can move the validation done in private_chef.rb
+  #       here as well.
+  #
+  # If preflight checks fail, they will abort immediately with a detailed error
+  # message, and without a stacktrace to clutter the screen.
+  PreflightChecks.new(node).run!
+
   node.consume_attributes(PrivateChef.generate_config(node['fqdn']))
 end
 

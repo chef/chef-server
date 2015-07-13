@@ -1,11 +1,13 @@
 class EcPostgres
   # Provides a superuser connection to the specified database
-  def self.with_connection(node, database = 'template1')
+  def self.with_connection(node, database = 'template1', opts = {})
     require 'pg'
-    postgres = node['private_chef']['postgresql']
+    postgres = node['private_chef']['postgresql'].merge(opts)
     connection = ::PGconn.open('user' => postgres['db_superuser'],
-                               'host' => postgres['vip'], 'password' => postgres['db_superuser_password'],
-                               'port' => postgres['port'], 'dbname' => database)
+                               'host' => postgres['vip'],
+                               'password' => postgres['db_superuser_password'],
+                               'port' => postgres['port'],
+                               'dbname' => database)
     begin
       yield connection
     ensure
