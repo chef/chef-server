@@ -11,8 +11,7 @@ known_dbs = {
   "reporting" => {"dbname" => "opscode_reporting", "config_key" => "postgresql", "hashseed" => "reporting"}
 }
 
-#TODO: Make a better description
-add_command_under_category "psql", "Database", "Connect to your psql instances.", 2 do
+add_command_under_category "psql", "Database", "Launches an interactve psql session with the service database you name.", 2 do
 
   service_name = ARGV[3]
   write_arg = '--write'
