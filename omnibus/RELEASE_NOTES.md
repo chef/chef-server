@@ -1,11 +1,11 @@
 # Chef Server Release Notes
 
-## 12.1.1 (2015-07-09)
+## 12.1.1 (2015-07-13)
 
 This is a bug fix release which fixes bugs related to upgrades from
 Open Source and Enterprise Chef 11.
 
-This release also ships 1.0.1p; however, Chef Server was not
+This release also ships openssl 1.0.1p; however, Chef Server was not
 vulnerable to CVE-2015-1793 since no version of Chef Server shipped
 the affected versions.
 
