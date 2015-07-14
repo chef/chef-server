@@ -213,7 +213,7 @@ module PrivateChef
               'postgresql' => {
                 'db_superuser_password' => PrivateChef['postgresql']['db_superuser_password']
               },
-              'opscode-erchef' => {
+              'opscode_erchef' => {
                 'sql_password' => PrivateChef['opscode_erchef']['sql_password'],
                 'sql_ro_password' => PrivateChef['opscode_erchef']['sql_ro_password']
               },
