@@ -22,8 +22,8 @@ package_name    "chef-server-core"
 replace         "private-chef"
 conflict        "private-chef"
 install_dir     "/opt/opscode"
-# last released version is 12.1.1
-build_version   "12.1.1"
+# last released version is 12.1.2
+build_version   "12.1.2"
 build_iteration 1
 
 override :cacerts, version: '2014.08.20'
@@ -91,7 +91,7 @@ dependency "oc-chef-pedant"
 dependency "private-chef-upgrades"
 dependency "private-chef-cookbooks"
 dependency "chef-ha-plugin-config"
-dependency "chef" # for embedded chef-client -z runs (built from master - build last)
+dependency "chef", version: "9a3e6e04f3bb39c2b2f5749719f0c21dd3f3f2ec" # for embedded chef-client -z runs (built from master - build last)
 
 package :rpm do
   signing_passphrase ENV['OMNIBUS_RPM_SIGNING_PASSPHRASE']

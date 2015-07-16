@@ -1,5 +1,9 @@
 # Chef Server Release Notes
 
+## 12.1.2 (2015-07-16)
+
+Fix issue where chef-server-ctl install could not fetch remote packages via apt.
+
 ## 12.1.1 (2015-07-13)
 
 This is a bug fix release which fixes bugs related to upgrades from

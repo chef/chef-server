@@ -1,6 +1,9 @@
 # Chef Server Changelog
 
+## 12.1.2 (2015-07-16)
+
 ### chef-server
+* Fix issue where chef-server-ctl install could not fetch remote packages via apt.
 
 ## 12.1.1 (2015-07-13)
 
