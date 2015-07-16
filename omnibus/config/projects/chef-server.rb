@@ -32,6 +32,7 @@ override :berkshelf2, version: "2.0.18"
 override :rabbitmq, version: "3.3.4"
 override :erlang, version: "17.5"
 override :ruby, version: "2.1.4"
+override "chef", version: "9a3e6e04f3bb39c2b2f5749719f0c21dd3f3f2ec"
 
 # creates required build directories
 dependency "preparation"
@@ -91,7 +92,7 @@ dependency "oc-chef-pedant"
 dependency "private-chef-upgrades"
 dependency "private-chef-cookbooks"
 dependency "chef-ha-plugin-config"
-dependency "chef", version: "9a3e6e04f3bb39c2b2f5749719f0c21dd3f3f2ec" # for embedded chef-client -z runs (built from master - build last)
+dependency "chef" # for embedded chef-client -z runs (built from master - build last)
 
 package :rpm do
   signing_passphrase ENV['OMNIBUS_RPM_SIGNING_PASSPHRASE']
