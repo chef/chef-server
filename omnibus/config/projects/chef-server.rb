@@ -32,7 +32,7 @@ override :berkshelf2, version: "2.0.18"
 override :rabbitmq, version: "3.3.4"
 override :erlang, version: "17.5"
 override :ruby, version: "2.1.4"
-override "chef", version: "9a3e6e04f3bb39c2b2f5749719f0c21dd3f3f2ec"
+override :chef, version: "9a3e6e04f3bb39c2b2f5749719f0c21dd3f3f2ec"
 
 # creates required build directories
 dependency "preparation"
