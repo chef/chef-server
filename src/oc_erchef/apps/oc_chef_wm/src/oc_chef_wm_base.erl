@@ -536,15 +536,24 @@ http_method_to_authz_perm('PUT') ->
     update.
 
 %% Tells whether this user is the superuser.
+-spec is_superuser(Req :: #wm_reqdata{} | binary()) -> boolean().
+is_superuser(Req = #wm_reqdata{}) ->
+    UserName = get_username_from_request(Req),
+    is_superuser(UserName);
 is_superuser(UserName) ->
     Superusers = envy:get(oc_chef_wm, superusers, [], list),
     lists:member(UserName, Superusers).
 
 %% Get the username from the request (and tell whether it is a superuser)
+-spec get_user(Req :: #wm_reqdata{}, #base_state{}) -> {binary(), boolean()}.
 get_user(Req, #base_state{superuser_bypasses_checks = SuperuserBypassesChecks}) ->
-    UserName = list_to_binary(wrq:get_req_header("x-ops-userid", Req)),
+    UserName = get_username_from_request(Req),
     BypassesChecks = SuperuserBypassesChecks andalso is_superuser(UserName),
     {UserName, BypassesChecks}.
+
+-spec get_username_from_request(Req :: #wm_reqdata{}) -> binary().
+get_username_from_request(Req) ->
+    list_to_binary(wrq:get_req_header("x-ops-userid", Req)).
 
 -spec set_authz_id(object_id(), resource_state(), chef_wm:container_name())
                   -> resource_state().
@@ -854,6 +863,10 @@ malformed_request(Req, #base_state{resource_mod=Mod,
             lager:info("json too large (~p)", [Msg]),
             Req3 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, Msg}]}), Req),
             {{halt, 413}, Req3, State1#base_state{log_msg = too_big}};
+        throw:{acl_constraint_violation, Violation} ->
+            Msg = chef_wm_malformed:malformed_request_message(Violation, Req, State),
+            Req3 = wrq:set_resp_body(chef_json:encode(Msg), Req),
+            {{halt, 403}, Req3, State1#base_state{log_msg = Msg}};
         throw:Why ->
             Msg =  chef_wm_malformed:malformed_request_message(Why, Req, State),
             NewReq = wrq:set_resp_body(chef_json:encode(Msg), Req),

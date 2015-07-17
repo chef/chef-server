@@ -1277,7 +1277,9 @@ describe "ACL API", :acl do
                     :payload => {"grant" => {
                         "actors" => [platform.non_admin_user.name,
                           platform.admin_user.name, "pivotal"],
-                        "groups" => []
+                        # Per ACL policy, non-superusers can't remove the admins
+                        # group from the grant ACL.
+                        "groups" => ["admins"]
                       }}).should look_like({
                       :status => 200
                     })
@@ -1315,7 +1317,9 @@ describe "ACL API", :acl do
                     :payload => {"grant" => {
                         "actors" => [platform.non_admin_client.name,
                           platform.admin_user.name, "pivotal"],
-                        "groups" => []
+                        # Per ACL policy, non-superusers can't remove the admins
+                        # group from the grant ACL.
+                        "groups" => ["admins"]
                       }}).should look_like({
                       :status => 200
                     })
