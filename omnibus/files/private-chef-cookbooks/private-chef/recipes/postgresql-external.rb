@@ -16,7 +16,7 @@
 #
 
 # External installations require only that we set up our application databases.
-if is_data_master? and node['private_chef']['postgresql']['remote']
+if is_data_master? and node['private_chef']['postgresql']['external']
   include_recipe "private-chef::erchef_database"
   include_recipe "private-chef::bifrost_database"
   include_recipe "private-chef::oc_id_database"

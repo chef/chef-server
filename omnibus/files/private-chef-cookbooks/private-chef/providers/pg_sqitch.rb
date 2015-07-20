@@ -10,12 +10,12 @@ action :deploy do
 
   # Note: the split behavior below will go away once we modify managed local psql
   # to use permit password + tcp for postgres user on localhost.
-  if new_resource.password.empty?
-    auth_info = ""
-    run_user = new_resource.username
-  else
+  if node['private_chef']['postgresql']['external']
     run_user = Process.uid
     auth_info = "--db-host #{new_resource.hostname} --db-port #{new_resource.port} --db-user #{new_resource.username}"
+  else
+    auth_info = ""
+    run_user = new_resource.username
   end
 
   converge_by "Deploying schema from #{new_resource.name}" do
