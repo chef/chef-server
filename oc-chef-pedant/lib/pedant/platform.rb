@@ -371,7 +371,11 @@ module Pedant
     def create_user(username, options = {})
       r = create_min_user(username, options)
       raise "Could not create user #{username}: #{r}" unless r.code == 201
-      private_key = parse(r)["private_key"]
+      if server_api_version == 0
+        private_key = parse(r)["private_key"]
+      else
+        private_key = parse(r)["chef_key"]["private_key"]
+      end
 
       # The "admin" and "associate" options here are more of a metadata
       # than actually creating an admin or associating. This allows
