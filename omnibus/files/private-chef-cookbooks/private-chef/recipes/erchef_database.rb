@@ -33,8 +33,8 @@ end
 private_chef_pg_sqitch "/opt/opscode/embedded/service/opscode-erchef/schema/baseline" do
   hostname  postgres['vip']
   port      postgres['port']
-  # TODO: will become db_superuser , db_superuser_password
-  username  postgres['username']
+  username  postgres['db_superuser']
+  password  postgres['db_superuser_password']
   database  "opscode_chef"
   action :nothing
   notifies :deploy, "private_chef_pg_sqitch[/opt/opscode/embedded/service/opscode-erchef/schema]", :immediately
@@ -43,8 +43,8 @@ end
 private_chef_pg_sqitch "/opt/opscode/embedded/service/opscode-erchef/schema" do
   hostname  postgres['vip']
   port      postgres['port']
-  # TODO: will become db_superuser , db_superuser_password
-  username  postgres['username']
+  username  postgres['db_superuser']
+  password  postgres['db_superuser_password']
   database "opscode_chef"
   action :nothing
 end
