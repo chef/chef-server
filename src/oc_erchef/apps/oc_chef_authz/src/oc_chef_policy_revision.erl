@@ -210,7 +210,7 @@ fields_for_insert(#oc_chef_policy_revision{
                 policy_authz_id = PolicyAuthzID,
                 last_updated_by = LastUpdatedBy,
                 serialized_object = SerializedObject}) ->
-	Compressed = chef_db_compression:compress(oc_chef_policy_revision, jiffy:encode(SerializedObject)),
+	Compressed = jiffy:encode(SerializedObject),
     [Id, OrgId, RevisionId, Name, PolicyAuthzID, Compressed, LastUpdatedBy].
 
 
