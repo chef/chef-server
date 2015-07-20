@@ -37,6 +37,7 @@ REBARC = $(REBAR) -C $(REBAR_CONFIG)
 
 # For use on Travis CI, skip dialyzer for R14 and R15. Newer versions
 # have a faster dialyzer that is less likely to cause a build timeout.
+SKIP_DIALYZER ?= false
 DIALYZER = dialyzer
 R14 = $(findstring R14,$(TRAVIS_OTP_RELEASE))
 R15 = $(findstring R15,$(TRAVIS_OTP_RELEASE))
@@ -46,7 +47,7 @@ endif
 ifneq ($(R15),)
 DIALYZER = echo "SKIPPING dialyzer"
 endif
-ifneq ($(SKIP_DIALYZER),)
+ifneq ($(SKIP_DIALYZER),false)
 DIALYZER = echo "SKIPPING dialyzer"
 endif
 
@@ -103,7 +104,7 @@ ifeq ($(TRAVIS),true)
 ## reported by erlang:system_info(otp_release)
 ## s3cmd put --acl-public --guess-mime-type <FILENAME> s3://concrete-plts
 
-BASE_PLT := travis-erlang-$(ERLANG_VERSION).plt
+BASE_PLT := travis-erlang-$(TRAVIS_OTP_RELEASE).plt
 BASE_PLT_URL := http://s3.amazonaws.com/concrete-plts/$(BASE_PLT)
 else
 BASE_PLT := ~/.concrete_dialyzer_plt_$(BASE_PLT_ID)_$(ERLANG_VERSION).plt
@@ -115,7 +116,7 @@ endif
 all: .concrete/DEV_MODE $(DEPS)
 	@$(MAKE) all_but_dialyzer dialyzer
 
-all_but_dialyzer: .concrete/DEV_MODE compile eunit $(ALL_HOOK)
+all_but_dialyzer: .concrete/DEV_MODE compile $(ALL_HOOK) eunit
 
 $(REBAR):
 	curl -Lo rebar $(REBAR_URL) || wget $(REBAR_URL)
@@ -128,7 +129,7 @@ get-rebar: $(REBAR)
 	@touch $@
 
 # Clean ebin and .eunit of this project
-clean:
+clean: $(CLEAN_HOOK)
 	@$(REBARC) clean skip_deps=true
 
 # Clean this project and all deps
@@ -204,7 +205,7 @@ RELX_OPTS ?=
 RELX_OUTPUT_DIR ?= _rel
 ifeq ($(RELX),)
 RELX = $(CURDIR)/relx
-RELX_VERSION ?= 3.3.2
+RELX_VERSION ?= 1.0.4
 else
 RELX_VERSION = $(shell relx --version)
 endif
@@ -227,26 +228,8 @@ $(RELX):
 rel: relclean $(REL_HOOK) $(RELX)
 	@$(RELX) -c $(RELX_CONFIG) -o $(RELX_OUTPUT_DIR) $(RELX_OPTS)
 
-devrel: rel
-devrel: lib_dir=$(wildcard $(RELX_RELEASE_DIR)/lib/$(PROJ)-* )
-devrel:
-	@/bin/echo Symlinking deps into release
-	@$(foreach dep,$(wildcard deps/*), /bin/echo -n .;rm -rf $(RELX_RELEASE_DIR)/lib/$(shell basename $(dep))-* \
-	   && ln -sf $(abspath $(dep)) $(RELX_RELEASE_DIR)/lib;)
-	@/bin/echo done symlinking deps
-	@/bin/echo Symlinking apps into release
-	@$(foreach app,$(wildcard apps/*), /bin/echo -n .;rm -rf $(RELX_RELEASE_DIR)/lib/$(shell basename $(app))-* \
-	   && ln -sf $(abspath $(app)) $(RELX_RELEASE_DIR)/lib;)
-	@/bin/echo done symlinking apps
-ifeq ($(lib_dir),)
-	@/bin/echo No top level code to symlink
-else
-	@/bin/echo Symlinking top level into release
-	@rm -rf $(lib_dir); mkdir -p $(lib_dir)
-	@ln -sf `pwd`/ebin $(lib_dir)
-	@ln -sf `pwd`/priv $(lib_dir)
-	@ln -sf `pwd`/src $(lib_dir)
-endif
+devrel: relclean $(REL_HOOK) $(RELX)
+	@$(RELX) --dev-mode -c $(RELX_CONFIG) -o $(RELX_OUTPUT_DIR) $(RELX_OPTS)
 
 relclean:
 	rm -rf $(RELX_OUTPUT_DIR)
