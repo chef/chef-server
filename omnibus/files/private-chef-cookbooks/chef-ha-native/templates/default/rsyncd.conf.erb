@@ -1,0 +1,11 @@
+pid file = <%= @dir -%>/rsync.pid
+port = <%= @port -%>
+address = <%= @listen -%>
+
+[bookshelf]
+use chroot = no
+uid = <%= node['private_chef']['user']['username'] %>
+read only = no
+write only = yes
+path = <%= node['private_chef']['bookshelf']['data_dir'] %>
+auth user = <%= node['private_chef']['user']['username'] %>

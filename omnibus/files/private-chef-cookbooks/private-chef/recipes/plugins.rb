@@ -14,6 +14,6 @@ plugins.each do |plugin|
   next if !plugin.parent_plugin.nil?
   chef_run plugin.run_list do
     cookbook_path plugin.cookbook_path
-    included_attrs ["private_chef"]
+    included_attrs ["private_chef", "runit"]
   end
 end
