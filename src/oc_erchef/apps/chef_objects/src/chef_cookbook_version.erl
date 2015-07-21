@@ -144,23 +144,22 @@ new_record(ApiVersion, OrgId, AuthzId, CBVData) ->
 
     Metadata0 = ej:get({<<"metadata">>}, CBVData),
 
-    MAttributes = compress_maybe(ej:get({<<"attributes">>}, Metadata0, {[]}),
+    MAttributes = encode_maybe(ej:get({<<"attributes">>}, Metadata0, {[]}),
                                  cookbook_meta_attributes),
 
-    %% Do not compress the deps!
     Deps = chef_json:encode(ej:get({<<"dependencies">>}, Metadata0, {[]})),
 
-    LongDesc = compress_maybe(ej:get({<<"long_description">>}, Metadata0, <<"">>),
+    LongDesc = encode_maybe(ej:get({<<"long_description">>}, Metadata0, <<"">>),
                               cookbook_long_desc),
 
-    Metadata = compress_maybe(lists:foldl(fun(Key, MD) ->
+    Metadata = encode_maybe(lists:foldl(fun(Key, MD) ->
                                                   ej:delete({Key}, MD)
                                           end, Metadata0, [<<"attributes">>,
                                                            <<"dependencies">>,
                                                            <<"long_description">>]),
                               cookbook_metadata),
 
-    Data = compress_maybe(ej:delete({<<"metadata">>}, CBVData),
+    Data = encode_maybe(ej:delete({<<"metadata">>}, CBVData),
                           chef_cookbook_version),
     #chef_cookbook_version{server_api_version = ApiVersion,
                            id = Id,
@@ -178,10 +177,8 @@ new_record(ApiVersion, OrgId, AuthzId, CBVData) ->
                            checksums = extract_checksums(CBVData),
                            serialized_object = Data}.
 
-compress_maybe(Data, cookbook_long_desc) ->
-    chef_db_compression:compress(cookbook_long_desc, Data);
-compress_maybe(Data, Type) ->
-    chef_db_compression:compress(Type, chef_json:encode(Data)).
+encode_maybe(Data, cookbook_long_desc) -> Data;
+encode_maybe(Data, _Type) -> chef_json:encode(Data).
 
 %% @doc Convert a binary JSON string representing a Chef Cookbook Version into an
 %% EJson-encoded Erlang data structure.
