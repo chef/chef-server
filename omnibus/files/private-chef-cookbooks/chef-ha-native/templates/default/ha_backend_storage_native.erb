@@ -1,0 +1,119 @@
+#!/bin/bash
+# vim: sw=2 sts=2 et ts=8:
+LOGNAME=/var/log/opscode/keepalived/cluster.log
+
+function log_me
+{
+  echo $1
+  echo "$(date -R): ${1}" >> $LOGNAME
+}
+
+function error_exit
+{
+  log_me "$1"
+  echo "${PROGNAME}: ${1:-"Unknown Error"}" 1>&2
+  exit 1
+}
+
+# 10 * SVWAIT
+try=300
+
+ACTION="$1"
+
+transition_postgresql_master() {
+    log_me "I have no idea how to do that.  Good luck, Chief."
+}
+
+transition_bookshelf_master() {
+    log_me "I have no idea how to do that.  Good luck, Chief."
+}
+
+transition_rabbit_master() {
+    log_me "I have no idea how to do that.  Good luck, Chief."
+}
+
+transition_solr_master() {
+    log_me "Rebuilding solr index..."
+    # Postgresql, Rabbit, Expander, and Solr must all but up for
+    # reindexing
+    #
+    # Postgresql should already be transitioned to master
+    #
+    chef-server-ctl start rabbitmq
+    chef-server-ctl start opscode-expander
+    chef-server-ctl start opscode-erchef
+    chef-server-ctl start opscode-solr4
+    # TODO: We need a status command to tell us when we are ready to
+    # reindex, otherwise we need to sleep
+    chef-server-ctl reindex --all --wait
+}
+
+transition_redis_master() {
+    log_me "I have no idea how to do that.  Good luck, Chief."
+}
+
+transition_postgresql_backup() {
+    log_me "I have no idea how to do that.  Good luck, Chief."
+}
+
+transition_bookshelf_backup() {
+    log_me "I have no idea how to do that.  Good luck, Chief."
+}
+
+transition_rabbit_backup() {
+    log_me "I have no idea how to do that.  Good luck, Chief."
+}
+
+transition_solr_backup() {
+    log_me "I have no idea how to do that.  Good luck, Chief."
+}
+
+transition_redis_backup() {
+    log_me "I have no idea how to do that.  Good luck, Chief."
+}
+
+postgresql_status() {
+    log_me "I have no idea how to do that.  Good luck, Chief."
+}
+
+bookshelf_status() {
+    log_me "I have no idea how to do that.  Good luck, Chief."
+}
+
+rabbit_status() {
+    log_me "I have no idea how to do that.  Good luck, Chief."
+}
+
+solr_status() {
+    log_me "I have no idea how to do that.  Good luck, Chief."
+}
+
+redis_status() {
+    log_me "I have no idea how to do that.  Good luck, Chief."
+}
+
+case $ACTION in
+    attach)
+        transition_postgresql_master
+        transition_bookshelf_master
+        transition_rabbitmq_master
+        transition_solr_master
+        transition_redis_master
+        log_me "Backend storage services transitioned to master"
+        ;;
+    detach)
+        transition_postgresql_backup
+        transition_bookshelf_backup
+        transition_rabbitmq_backup
+        transition_solr_backup
+        transition_redis_backup
+        log_me "Backend storage services transitioned to backup"
+        ;;
+    status)
+        postgresql_status
+        bookshelf_status
+        rabbitmq_status
+        solr_status
+        redis_status
+        ;;
+esac
