@@ -23,6 +23,12 @@ known_dbs = {
   "reporting" => {"dbname" => "opscode_reporting", "config_key" => "postgresql", "hashseed" => "reporting"}
 }
 
+# Alias better-known service names for ease of use:
+known_dbs['oc_erchef'] = known_dbs['opscode_chef']
+known_dbs['oc-id'] = known_dbs['oc_id']
+known_dbs['opscode-erchef'] = known_dbs['opscode_chef']
+
+
 add_command_under_category "psql", "Database", "Launches an interactive psql session with the service database you name.", 2 do
 
   service_name = ARGV[3]
