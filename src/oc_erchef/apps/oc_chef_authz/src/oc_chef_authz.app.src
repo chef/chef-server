@@ -18,7 +18,7 @@
 {application, oc_chef_authz,
  [
   {description, "Opscode authz client"},
-  {vsn, {cmd,"cat ../../VERSION"}},
+  {vsn, {cmd,"cat ../../VERSION | awk '{print $0}'"}},
   {registered, []},
   {applications, [kernel,
                   stdlib,

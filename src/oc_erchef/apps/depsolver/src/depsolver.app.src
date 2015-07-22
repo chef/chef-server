@@ -22,6 +22,6 @@
 
 {application, depsolver,
  [{description, "Package Constraint Solver"},
-  {vsn, {cmd,"cat ../../VERSION"}},
+  {vsn, {cmd,"cat ../../VERSION | awk '{print $0}'"}},
   {modules, []},
   {applications, [kernel, stdlib]}]}.

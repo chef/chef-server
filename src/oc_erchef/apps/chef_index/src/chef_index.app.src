@@ -18,7 +18,7 @@
 {application, chef_index,
  [
   {description, "Chef search index tools"},
-  {vsn, {cmd,"cat ../../VERSION"}},
+  {vsn, {cmd,"cat ../../VERSION | awk '{print $0}'"}},
   {registered, []},
   {applications, [
                   kernel,
