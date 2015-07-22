@@ -1,7 +1,11 @@
 SHELL := /bin/bash
 
+RELX_VERSION = 3.3.2
+
 ##PROJ = bifrost
 CT_DIR = common_test
+
+REL_HOOK = VERSION compile
 
 DIALYZER_OPTS =
 
@@ -32,3 +36,15 @@ clean_ct:
 
 ## Pull in devvm.mk for relxy goodness
 include devvm.mk
+install: VERSION $(CURDIR)/deps
+
+travis: all
+
+version_clean:
+	@rm -f VERSION
+
+## echo -n only works in bash shell
+SHELL=bash
+REL_VERSION ?= $$(git log --oneline --decorate | grep -v -F "jenkins" | grep -F "tag: " --color=never | head -n 1 | sed  "s/.*tag: \([^,)]*\).*/\1/")-$$(git rev-parse --short HEAD)
+VERSION: version_clean
+	@echo -n $(REL_VERSION) > VERSION

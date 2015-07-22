@@ -1,11 +1,13 @@
 SHELL := /bin/bash
 
+RELX_VERSION = 3.3.2
+
 PROJ = oc_erchef
 DEVVM_PROJ = opscode-erchef
 
 ALL_HOOK = bundle
 CLEAN_HOOK = bundle_clean
-REL_HOOK = compile bundle
+REL_HOOK = VERSION compile bundle
 
 CT_DIR = common_test
 
@@ -69,10 +71,17 @@ bundle:
 	@echo bundling up depselector, This might take a while...
 	@cd apps/chef_objects/priv/depselector_rb; bundle install --deployment --path .bundle
 
-install:
-	@./rebar get-deps -C rebar.config.lock
+install: VERSION $(CURDIR)/deps
 
-travis: all
-	 PATH=~/perl5/bin:$(PATH) $(REBARC) skip_deps=true ct
+travis:  all
 
 DEVVM_DIR = $(DEVVM_ROOT)/_rel/oc_erchef
+
+version_clean:
+	@rm -f VERSION
+
+## echo -n only works in bash shell
+SHELL=bash
+REL_VERSION ?= $$(git log --oneline --decorate | grep -v -F "jenkins" | grep -F "tag: " --color=never | head -n 1 | sed  "s/.*tag: \([^,)]*\).*/\1/")-$$(git rev-parse --short HEAD)
+VERSION: version_clean
+	@echo -n $(REL_VERSION) > VERSION

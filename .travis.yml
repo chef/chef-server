@@ -39,13 +39,15 @@ env:
     - PERL5LIB=~/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:~/perl5/lib/perl5:/etc/perl:/usr/local/lib/perl/5.14.2:/usr/local/share/perl/5.14.2:/usr/lib/perl5:/usr/share/perl5:/usr/lib/perl/5.14:/usr/share/perl/5.14:/usr/local/lib/site_perl
     - USE_OMNIBUS_FILES=0
     - CHEFDK_GECODE_PATH=/opt/chefdk/embedded/lib/ruby/gems/2.1.0/gems/dep-selector-libgecode-1.0.2/lib/dep-selector-libgecode/vendored-gecode
-
+    - PATH=~/perl5/bin:$PATH
 #    - LUALIB=~/.luarocks/lib/lua/5.2
   matrix:
     # - COMPONENT=omnibus
   - COMPONENT=src/oc_erchef
   - COMPONENT=src/oc-id
   - COMPONENT=src/chef-mover
+#  - COMPONENT=src/oc_bifrost
+#  - COMPONENT=src/bookshelf
 install:
 #  - sudo apt-get install luarocks
 #  - luarocks install --local lpeg
@@ -59,3 +61,6 @@ install:
 
 script:
   - USE_SYSTEM_GECODE=1 LIBRARY_PATH=$CHEFDK_GECODE_PATH/lib LD_LIBRARY_PATH=$CHEFDK_GECODE_PATH/lib CPLUS_INCLUDE_PATH=$CHEFDK_GECODE_PATH/include make travis
+
+after_failure:
+  - cat logs/raw.log

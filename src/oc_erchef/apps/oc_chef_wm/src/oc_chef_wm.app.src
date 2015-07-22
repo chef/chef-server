@@ -4,7 +4,7 @@
 {application, oc_chef_wm,
  [
   {description, "Base bits needed to write Web Machine API endpoints"},
-  {vsn, "0"},
+  {vsn, {cmd,"cat ../../VERSION | awk '{print $0}'"}},
   {registered, []},
   {applications, [
                   kernel,

@@ -1,7 +1,9 @@
 SHELL := /bin/bash
 
 PROJ = bookshelf
-CT_DIR = common_test
+CT_DIR = test
+
+RELX_VERSION = 3.3.2
 
 DIALYZER_OPTS =
 ## Uncomment to dialyze test/*.beam. They don't pass right now
@@ -10,6 +12,8 @@ DIALYZER_OPTS =
 DIALYZER_SKIP_DEPS = erlware_commons
 
 ALL_HOOK = ct
+
+REL_HOOK = VERSION all_but_dialyzer
 
 ct: clean_ct compile
 	time $(REBARC) ct skip_deps=true
@@ -36,3 +40,17 @@ clean_ct:
 
 ## Pull in devvm.mk for relxy goodness
 include devvm.mk
+
+install: VERSION $(CURDIR)/deps
+
+travis: all
+
+version_clean:
+	@rm -f VERSION
+
+## echo -n only works in bash shell
+SHELL=bash
+REL_VERSION ?= $$(git log --oneline --decorate | grep -v -F "jenkins" | grep -F "tag: " --color=never | head -n 1 | sed  "s/.*tag: \([^,)]*\).*/\1/")-$$(git rev-parse --short HEAD)
+VERSION: version_clean
+	@echo -n $(REL_VERSION) > VERSION
+
