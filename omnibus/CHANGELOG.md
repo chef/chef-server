@@ -1,6 +1,27 @@
 # Chef Server Changelog
 
+## 12.1.2 (2015-07-16)
+
 ### chef-server
+* Fix issue where chef-server-ctl install could not fetch remote packages via apt.
+
+## 12.1.1 (2015-07-13)
+
+### chef-server
+* Fix problems with upgrades from Open Source Chef Server 11 related
+  to client and user uploads.
+
+* Fix problems with upgrades from Enterprise Chef Server 11 related to
+  a failed chef-mover migration.
+
+* Upgrade to openssl 1.0.1p
+
+* Upgrade to libxml 2.9.2
+
+### Components
+
+### knife-ec-backup
+* Version 2.0.4 pulled in to fix Open Source Chef Server 11 upgrade bugs related to API versioning.
 
 ## 12.1.0 (2015-06-19)
 

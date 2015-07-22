@@ -22,7 +22,7 @@ package_name    "chef-server-core"
 replace         "private-chef"
 conflict        "private-chef"
 install_dir     "/opt/opscode"
-# last released version is 12.1.0
+# last released version is 12.1.2
 build_version   "12.2.0"
 build_iteration 1
 
