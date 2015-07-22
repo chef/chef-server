@@ -256,7 +256,7 @@ BEGIN {
         (q) terminate and leave the VM running
         (h) terminate and halt the VM
         (s) terminate and suspend
-        (d) destroy the V
+        (d) destroy the VM(s)
         Any other key to continue syncing
 EOM
   end
