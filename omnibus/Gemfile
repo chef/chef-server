@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 # Install omnibus software
 gem 'omnibus', github: 'chef/omnibus'
-gem 'omnibus-software', github: 'chef/omnibus-software'
+gem 'omnibus-software', github: 'chef/omnibus-software', branch: 'tc/temp-pin-ohai'
 gem 'rake'
 gem 'chefspec'
 gem 'berkshelf'
