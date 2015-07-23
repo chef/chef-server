@@ -13,7 +13,7 @@ DIALYZER_SKIP_DEPS = erlware_commons
 
 ALL_HOOK = ct
 
-REL_HOOK = VERSION all_but_dialyzer
+REL_HOOK ?= VERSION 
 
 ct: clean_ct compile
 	time $(REBARC) ct skip_deps=true
@@ -53,4 +53,3 @@ SHELL=bash
 REL_VERSION ?= $$(git log --oneline --decorate | grep -v -F "jenkins" | grep -F "tag: " --color=never | head -n 1 | sed  "s/.*tag: \([^,)]*\).*/\1/")-$$(git rev-parse --short HEAD)
 VERSION: version_clean
 	@echo -n $(REL_VERSION) > VERSION
-
