@@ -4,6 +4,23 @@
 %% @copyright 2015 Chef, Inc.
 -module(mover_uncompress_serialized_objects_callback).
 
+% This is a migration that uncompresses (specifically, ungzips) all serialized_object
+% columns in the table nodes. It is meant to follow a change to chef-server which stops
+% compression of new inbound database items. A useful consequence of not manually
+% uncompressing all the json blobs is the exposure of the underlying data postgres json
+% operators and indexing.
+
+% The hope is that postgres's own TOAST mechanism for compression and external storage of
+% large column values will do as well as manual gzipping. A preliminary experiment consisting
+% of doing
+% > ALTER TABLE nodes ALTER serialized_object SET STORAGE EXTENDED;
+% (since the storage mode of serialized_object was EXTERNAL before, which inhibits
+% compression, see http://www.postgresql.org/docs/9.4/static/storage-toast.html) exhibits
+% about a 2x increase in pg_total_relation_size('nodes') on a chef-server populated by many
+% copies of the file lib/fauxhai/platforms/windows/2003R2.json from the repository
+% https://github.com/customink/fauxhai but it may be hoped that the use of jsonb or
+% other postgres tuning might bring this down to parity with gzip.
+
 -export([
 	 migration_init/0,
 	 migration_type/0,
