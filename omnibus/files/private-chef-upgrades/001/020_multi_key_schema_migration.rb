@@ -5,6 +5,7 @@ define_upgrade do
   # have been moved to its new location.
   if Partybus.config.bootstrap_server
     must_be_data_master
+    run_sqitch("@2.5.3", "@1.0.4")
 
     running_config = JSON.parse(File.read("/etc/opscode/chef-server-running.json"))
     pc = running_config['private_chef']
