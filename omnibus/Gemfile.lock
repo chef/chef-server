@@ -205,3 +205,6 @@ DEPENDENCIES
   omnibus!
   omnibus-software!
   rake
+
+BUNDLED WITH
+   1.10.4

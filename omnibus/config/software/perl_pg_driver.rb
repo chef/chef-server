@@ -19,7 +19,7 @@ default_version "3.3.0"
 
 dependency "perl"
 dependency "cpanminus"
-dependency "postgresql92"
+dependency "postgresql93"
 
 source url: "http://search.cpan.org/CPAN/authors/id/T/TU/TURNSTEP/DBD-Pg-#{version}.tar.gz",
        md5: "547de1382a47d66872912fe64282ff55"

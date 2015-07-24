@@ -19,7 +19,7 @@ name "partybus"
 source path: "#{Omnibus::Config.project_root}/#{name}"
 
 dependency "bundler"
-dependency "postgresql92"
+dependency "postgresql93"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)

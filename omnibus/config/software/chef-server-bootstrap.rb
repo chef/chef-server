@@ -22,7 +22,7 @@ source path: "#{project.files_path}/../../src/chef-server-bootstrap"
 dependency "ruby"
 dependency "libxml2"
 dependency "bundler"
-dependency "postgresql92"
+dependency "postgresql93"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)

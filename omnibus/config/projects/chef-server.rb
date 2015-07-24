@@ -46,7 +46,7 @@ dependency "openresty-lpeg"  # lua-based routing
 dependency "runit"
 
 # the backend
-dependency "postgresql92"
+dependency "postgresql93"
 dependency "rabbitmq"
 dependency "redis" # dynamic routing controls
 dependency "opscode-solr4"
