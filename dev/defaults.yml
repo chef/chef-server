@@ -43,6 +43,7 @@ vm:
     - .concrete/
     - relx # we don't want to pull in a mac relx to our linux vm
     - rspec.failures
+    - VERSION
   cover:
     base_output_path: /vagrant/testdata/cover # maps to dev/testdata/cover
   node-attributes:

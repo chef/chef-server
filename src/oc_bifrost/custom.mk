@@ -7,6 +7,8 @@ CT_DIR = common_test
 
 REL_HOOK = VERSION compile
 
+CLEAN_HOOK = version_clean
+
 DIALYZER_OPTS =
 
 DIALYZER_SRC = -r apps/bifrost/ebin

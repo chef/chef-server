@@ -1,5 +1,6 @@
 RELX_VERSION = 3.3.2
 REL_HOOK = VERSION compile
+CLEAN_HOOK = version_clean
 
 SKIP_DIALYZER=true
 include devvm.mk
