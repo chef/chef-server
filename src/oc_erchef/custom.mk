@@ -6,7 +6,7 @@ PROJ = oc_erchef
 DEVVM_PROJ = opscode-erchef
 
 ALL_HOOK = bundle
-CLEAN_HOOK = bundle_clean
+CLEAN_HOOK = version_clean bundle_clean
 REL_HOOK = VERSION compile bundle
 
 CT_DIR = common_test

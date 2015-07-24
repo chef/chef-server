@@ -12,8 +12,8 @@ DIALYZER_OPTS =
 DIALYZER_SKIP_DEPS = erlware_commons
 
 ALL_HOOK = ct
-
-REL_HOOK ?= VERSION 
+CLEAN_HOOK = version_clean
+REL_HOOK ?= VERSION
 
 ct: clean_ct compile
 	time $(REBARC) ct skip_deps=true
