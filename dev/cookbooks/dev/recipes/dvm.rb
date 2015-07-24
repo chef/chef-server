@@ -39,3 +39,18 @@ bash "dvm mount to fstab" do
    code lazy { "echo /vagrant/dvm #{DVMHelper.dvm_path} none bind >> /etc/fstab" }
    not_if "grep -q dvm /etc/fstab"
 end
+
+# Load the components that have been requested
+node["omnibus-autoload"].each do |component|
+  execute "dvm load omnibus #{component}"  do
+    # Use -no-build to avoid triggering multiple possible automatic reconfigures
+    # within DVM - we'll do it ourselves in the next step instead.
+    command "dvm load omnibus #{component} --no-build"
+  end
+end
+
+# Now that everything is loaded, run our reconfigure.
+bash "reconfigure-chef-server" do
+  user 'root'
+  code "chef-server-ctl reconfigure"
+end

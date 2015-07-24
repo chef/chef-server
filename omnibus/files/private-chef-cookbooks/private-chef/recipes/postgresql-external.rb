@@ -1,6 +1,5 @@
-#
-# Author:: James Casey <james@getchef.com>
-# Copyright:: Copyright (c) 2014 Opscode, Inc.
+# Author:: Marc Paradise <marc@chef.io>
+# Copyright:: Copyright (c) 2015 Chef Software, Inc
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,26 +15,9 @@
 # limitations under the License.
 #
 
-id_attrs = node['private_chef']['oc_id']
-
-# create users
-private_chef_pg_user id_attrs['sql_user'] do
-  password id_attrs['sql_password']
+# External installations require only that we set up our application databases.
+if is_data_master? and node['private_chef']['postgresql']['external']
+  include_recipe "private-chef::erchef_database"
+  include_recipe "private-chef::bifrost_database"
+  include_recipe "private-chef::oc_id_database"
 end
-
-private_chef_pg_user id_attrs['sql_ro_user'] do
-  password id_attrs['sql_ro_password']
-end
-
-
-private_chef_pg_database "oc_id" do
-  owner id_attrs['sql_user']
-end
-
-private_chef_pg_user_table_access id_attrs['sql_ro_user'] do
-  database 'oc_id'
-  schema 'public'
-  access_profile :read
-  only_if { is_data_master? }
-end
-

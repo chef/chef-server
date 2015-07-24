@@ -51,6 +51,8 @@ while true do
         suspend
       when ?h
         halt
+      when ?d
+        nuke
       else
         @screen.clear
         @screen.say_at 1, 1, banner
@@ -72,7 +74,7 @@ BEGIN {
     @all_stats = { walltime: 0.0,  transferred: 0, created: 0, deleted: 0, bytes: 0, time: 0.0}
     # Determine our ssh args up front, so we won't need to do this on every sync.
     ssh_info = {}
-    `vagrant ssh-config`.split("\n").each do |line|
+    `vagrant ssh-config chef-server`.split("\n").each do |line|
       k, v = line.split(" ")
       ssh_info[k.strip] = v.strip
     end
@@ -92,10 +94,13 @@ BEGIN {
     config = YAML.load_file("defaults.yml")
     excludes = Array(config["vm"]["sync-exclude"]).map(&:to_s)
 
-    userconfig = YAML.load_file("config.yml")
-    userexclude = Array(userconfig["vm"]["sync-exclude"].map(&:to_s)) if userconfig.is_a? Hash and userconfig["vm"]
-    if userexclude
-      excludes += userexclude
+    begin
+      userconfig = YAML.load_file("config.yml")
+      userexclude = Array(userconfig["vm"]["sync-exclude"].map(&:to_s)) if userconfig.is_a? Hash and userconfig["vm"]
+      if userexclude
+        excludes += userexclude
+      end
+    rescue # config.yml may not exist
     end
 
     excludes += ['.vagrant/']
@@ -125,6 +130,16 @@ BEGIN {
     @screen.say_at 6, 5, "The VM will remain running, though sync is now terminated."
     @screen.say_at 7, 5, "To resume syncing, just run:"
     @screen.say_at 8, 8, "#{@screen.color(:magenta)}./sync#{@screen.endcolor}."
+    exit 0
+  end
+
+  def nuke
+    @screen.set_status "Destroying the VM(s), please wait..."
+    `vagrant destroy -f`
+    @screen.clear_status
+    @screen.say_at 6, 5, "VM destroyed."
+    @screen.say_at 7, 5, "To start the VM fresh and resume syncing, just run: "
+    @screen.say_at 8, 8, "#{@screen.color(:magenta)}vagrant up#{@screen.endcolor} && #{@screen.color(:magenta)}./sync#{@screen.endcolor}."
     exit 0
   end
 
@@ -241,6 +256,7 @@ BEGIN {
         (q) terminate and leave the VM running
         (h) terminate and halt the VM
         (s) terminate and suspend
+        (d) destroy the VM(s)
         Any other key to continue syncing
 EOM
   end

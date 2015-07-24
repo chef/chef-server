@@ -1,0 +1,51 @@
+# See defaults.yml for a list of supported configuration values. Any simple value
+# will override the defaults.yml setting.  Hashes will be recursively merged.
+# A value containing arrays/lists will be merged and made unique.
+#
+# If the value you have differs in type (eg, is a simple value when
+# defaults.yml has a hash or array or vice-versa) your value will overwrite
+# the original - use this with caution.
+#
+# Currently hashes nested within arrays are not supported - the higher-level
+# behavior of naively merging the arrays will occur.
+
+vm:
+  cpus: 4 # Default is 4
+  memory: 4096 # Default is 4096
+  # apt packages you would like to see installed on initial setup? Add them here:
+  packages: []
+  # If there are other directory or file name patterns that you want to exclude from
+  # sync, add them here:
+  sync-exclude: []
+
+  # Leaving this set will auto-load omnibus cookbooks from your chef-server clone
+  # *before* the first reconfigure:
+  omnibus-autoload: [private-chef-cookbooks]
+
+  postgresql:
+  # enable a separate postgres vm but do not use it unless
+  # use-external is set.
+  #  start: true
+
+  # When this is set true, and start is true,
+  # the chef-server node will be configured to use
+  # this vm as an external postgresql server from the start.
+  #  use-external: true
+
+  # These will map directly to entries in the generated chef-server.rb
+  node-attributes:
+    provisioning:
+      # uncomment to enable default configuration of remote postgres node.
+      # using your host as the server. Note that if you have postgresql: use-vm-for-external
+      # set, that will override any customization ehre.
+      # This assumes that that you've configured a local superuser with user/pass below
+      # and that you've configured a local superuser with user/pass below
+      # and tcp-based access.
+      #chef-server-config:
+      #  postgresql['external']: true
+      #  postgresql['vip']:  "\"192.168.33.1\""
+      #  postgresql['port']: 5432
+      #  postgresql['db_superuser']: "\"bob\""
+      #  postgresql['db_superuser_password']: "\"i like bob\""
+      #
+      #
