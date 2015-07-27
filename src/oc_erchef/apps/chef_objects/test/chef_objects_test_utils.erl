@@ -17,7 +17,7 @@
 %% specific language governing permissions and limitations
 %% under the License.
 %%
--module(test_utils).
+-module(chef_objects_test_utils).
 -export([
          mock/1,
          mock/2,
@@ -62,7 +62,6 @@ bcrypt_setup() ->
     application:set_env(bcrypt, default_log_rounds, 4),
     [ ensure_start(App) || App <- [crypto, bcrypt] ],
     ok.
-
 
 bcrypt_cleanup(_) ->
     error_logger:tty(false),

@@ -29,8 +29,8 @@
 
 encrypt_test_() ->
     {setup,
-     fun test_utils:bcrypt_setup/0,
-     fun test_utils:bcrypt_cleanup/1,
+     fun chef_objects_test_utils:bcrypt_setup/0,
+     fun chef_objects_test_utils:bcrypt_cleanup/1,
      [{"encrypts a password",
        fun() ->
                {Hashed, Salt, Type} = chef_password:encrypt("fizzbuzz"),
@@ -47,8 +47,8 @@ encrypt_test_() ->
 
 bcrypt_round_trip_test_() ->
     {setup,
-     fun test_utils:bcrypt_setup/0,
-     fun test_utils:bcrypt_cleanup/1,
+     fun chef_objects_test_utils:bcrypt_setup/0,
+     fun chef_objects_test_utils:bcrypt_cleanup/1,
      [
       {"basic roundtrip", generator,
        fun() ->
@@ -76,8 +76,8 @@ bcrypt_round_trip_test_() ->
 
 cross_type_test_() ->
     {setup,
-     fun test_utils:bcrypt_setup/0,
-     fun test_utils:bcrypt_cleanup/1,
+     fun chef_objects_test_utils:bcrypt_setup/0,
+     fun chef_objects_test_utils:bcrypt_cleanup/1,
      [
       {"treats a OSC_DEFAULT_HASH_TYPE as a DEFAULT_HASH_TYPE",
        fun() ->
@@ -90,10 +90,10 @@ cross_type_test_() ->
 unmigrated_round_trip_test_() ->
     {setup,
      fun() ->
-             test_utils:bcrypt_setup(),
+             chef_objects_test_utils:bcrypt_setup(),
              osc_sha1_examples() ++ ec_sha1_examples()
      end,
-     fun test_utils:bcrypt_cleanup/1,
+     fun chef_objects_test_utils:bcrypt_cleanup/1,
      fun(Examples) ->
              [
 
@@ -105,10 +105,10 @@ unmigrated_round_trip_test_() ->
 migrated_round_trip_test_() ->
     {setup,
      fun() ->
-            test_utils:bcrypt_setup(),
+            chef_objects_test_utils:bcrypt_setup(),
             osc_migrated_examples() ++ ec_migrated_examples()
      end,
-     fun test_utils:bcrypt_cleanup/1,
+     fun chef_objects_test_utils:bcrypt_cleanup/1,
      fun(MigratedExamples) ->
              [
               [ ?_assertEqual(true, chef_password:verify(Pass, Prev))
@@ -125,8 +125,8 @@ migrated_round_trip_test_() ->
 
 upgrade_test_() ->
     {setup,
-     fun test_utils:bcrypt_setup/0,
-     fun test_utils:bcrypt_cleanup/1,
+     fun chef_objects_test_utils:bcrypt_setup/0,
+     fun chef_objects_test_utils:bcrypt_cleanup/1,
      [
        {"upgrades password data when current form is sha1", generator,
        fun() ->

@@ -92,8 +92,8 @@ set_public_key_test_() ->
 
 maybe_generate_key_pair_test_() ->
     {setup,
-     fun test_utils:keygen_setup/0,
-     fun test_utils:keygen_cleanup/1,
+     fun chef_objects_test_utils:keygen_setup/0,
+     fun chef_objects_test_utils:keygen_cleanup/1,
      [
       {"when called with create_key true, a key pair is generated and passed into the continuation fun",
       fun() ->
@@ -117,8 +117,8 @@ maybe_generate_key_pair_test_() ->
 maybe_generate_key_pair_deprecated_test_() ->
     KeyData = public_key_data(),
     {setup,
-     fun test_utils:keygen_setup/0,
-     fun test_utils:keygen_cleanup/1,
+     fun chef_objects_test_utils:keygen_setup/0,
+     fun chef_objects_test_utils:keygen_cleanup/1,
      [{"when private_key is specified, the response contains a public and private key",
        fun() ->
          EJ = {[{<<"private_key">>, true}]},

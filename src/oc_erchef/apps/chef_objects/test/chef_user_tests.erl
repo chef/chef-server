@@ -26,14 +26,14 @@
 -include_lib("eunit/include/eunit.hrl").
 
 
--define(VD(D), test_utils:versioned_desc(Version,D)).
--define(VDD(D), test_utils:versioned_desc(Version, iolist_to_binary(["[deprecated] ", D]))).
+-define(VD(D), chef_objects_test_utils:versioned_desc(Version,D)).
+-define(VDD(D), chef_objects_test_utils:versioned_desc(Version, iolist_to_binary(["[deprecated] ", D]))).
 
 assemble_user_ejson_test_() ->
     {setup,
-     fun test_utils:bcrypt_setup/0,
-     fun test_utils:bcrypt_cleanup/1,
-     test_utils:make_all_versions_tests(fun assemble_user_ejson_tests/1) }.
+     fun chef_objects_test_utils:bcrypt_setup/0,
+     fun chef_objects_test_utils:bcrypt_cleanup/1,
+     chef_objects_test_utils:make_all_versions_tests(fun assemble_user_ejson_tests/1) }.
 
 assemble_user_ejson_tests(Version) ->
     [{?VD("obtain expected EJSON"),
@@ -67,14 +67,14 @@ assemble_user_ejson_tests(Version) ->
 
 assemble_user_ejson_non_deprecated_test_() ->
     {setup,
-     fun test_utils:bcrypt_setup/0,
-     fun test_utils:bcrypt_cleanup/1,
-     test_utils:make_non_deprecated_tests(fun assemble_user_ejson_non_deprecated_tests/1) }.
+     fun chef_objects_test_utils:bcrypt_setup/0,
+     fun chef_objects_test_utils:bcrypt_cleanup/1,
+     chef_objects_test_utils:make_non_deprecated_tests(fun assemble_user_ejson_non_deprecated_tests/1) }.
 
 assemble_user_ejson_non_deprecated_tests(Version)->
     {setup,
-     fun test_utils:bcrypt_setup/0,
-     fun test_utils:bcrypt_cleanup/1,
+     fun chef_objects_test_utils:bcrypt_setup/0,
+     fun chef_objects_test_utils:bcrypt_cleanup/1,
      [{?VD("obtain expected EJSON"),
        fun() ->
                User = make_valid_user_record(Version),
@@ -85,11 +85,11 @@ assemble_user_ejson_non_deprecated_tests(Version)->
      ]}.
 
 assemble_user_ejson_deprecated_test_() ->
-    test_utils:make_deprecated_tests(fun assemble_user_ejson_deprecated_tests/1).
+    chef_objects_test_utils:make_deprecated_tests(fun assemble_user_ejson_deprecated_tests/1).
 assemble_user_ejson_deprecated_tests(Version) ->
     {setup,
-     fun test_utils:bcrypt_setup/0,
-     fun test_utils:bcrypt_cleanup/1,
+     fun chef_objects_test_utils:bcrypt_setup/0,
+     fun chef_objects_test_utils:bcrypt_cleanup/1,
     [{?VDD("obtain expected EJSON"),
       fun() ->
               User = make_valid_user_record(Version),
@@ -120,7 +120,7 @@ assemble_user_ejson_deprecated_tests(Version) ->
     ]}.
 
 parse_binary_json_deprecated_test_() ->
-    test_utils:make_deprecated_tests(fun parse_binary_json_deprecated_tests/1).
+    chef_objects_test_utils:make_deprecated_tests(fun parse_binary_json_deprecated_tests/1).
 
 parse_binary_json_deprecated_tests(Version) ->
     [{?VDD("a null public_key is removed for create"),
@@ -168,7 +168,7 @@ parse_binary_json_deprecated_tests(Version) ->
     ].
 
 parse_binary_json_test_() ->
-    test_utils:make_all_versions_tests(fun parse_binary_json_tests/1).
+    chef_objects_test_utils:make_all_versions_tests(fun parse_binary_json_tests/1).
 
 parse_binary_json_tests(Version) ->
     [{?VD("Can create user when all required fields are present"),
@@ -272,7 +272,7 @@ parse_binary_json_tests(Version) ->
     ].
 
 parse_binary_json_non_deprecated_test_() ->
-    test_utils:make_non_deprecated_tests(fun parse_binary_json_non_deprecated_tests /1).
+    chef_objects_test_utils:make_non_deprecated_tests(fun parse_binary_json_non_deprecated_tests /1).
 
 parse_binary_json_non_deprecated_tests(Version) ->
     [{?VD("Public key is rejected as a field for update, even when valid"),
@@ -337,17 +337,17 @@ parse_binary_json_non_deprecated_tests(Version) ->
     ].
 
 update_record_test_() ->
-    test_utils:make_all_versions_tests(fun update_record_tests/1).
+    chef_objects_test_utils:make_all_versions_tests(fun update_record_tests/1).
 
 update_record_tests(Version) ->
     {setup,
      fun() ->
-        test_utils:bcrypt_setup(),
+        chef_objects_test_utils:bcrypt_setup(),
         SerializedAsEJson = {base_user_record_as_ejson(Version) ++
                              persisted_serializable_fields() },
         make_valid_user_record(chef_json:encode(SerializedAsEJson), Version)
      end,
-     fun test_utils:bcrypt_cleanup/1,
+     fun chef_objects_test_utils:bcrypt_cleanup/1,
      fun(User) ->
         UpdateAsEJson = {[ {<<"username">>, <<"martha">>},
                         {<<"email">>, <<"new_email@somewhere.com">>},
@@ -435,7 +435,7 @@ update_record_tests(Version) ->
     }.
 
 new_record_test() ->
-    test_utils:bcrypt_setup(),
+    chef_objects_test_utils:bcrypt_setup(),
     UserData = {[
                  {<<"name">>, <<"bob">>},
                  {<<"password">>, <<"top secret 123456">>}
@@ -445,7 +445,7 @@ new_record_test() ->
     ?assertEqual(<<"bob">>, chef_user:name(User)),
     ?assertEqual(null, User#chef_user.external_authentication_uid),
     ?assertEqual(false, User#chef_user.recovery_authentication_enabled),
-    test_utils:bcrypt_cleanup(ignore).
+    chef_objects_test_utils:bcrypt_cleanup(ignore).
 
 new_record_no_password_test() ->
     UserData = {[ {<<"name">>, <<"bob">>} ]},

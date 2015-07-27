@@ -58,8 +58,8 @@ msg_with_payload(Task) ->
 oc_chef_action_test_() ->
     MockedModules = [bunnyc],
     {foreach,
-     fun() -> test_util:setup(MockedModules) end,
-     fun(_) -> test_util:cleanup(MockedModules) end,
+     fun() -> oc_chef_wm_test_utils:setup(MockedModules) end,
+     fun(_) -> oc_chef_wm_test_utils:cleanup(MockedModules) end,
      [
       {"add a msg to the queue",
        fun() ->
@@ -102,8 +102,8 @@ log_action_routing_test_() ->
     MockedModules = [wrq],
     State = make_state(),
     {foreach,
-     fun() -> test_util:setup(MockedModules) end,
-     fun(_) -> test_util:cleanup(MockedModules) end,
+     fun() -> oc_chef_wm_test_utils:setup(MockedModules) end,
+     fun(_) -> oc_chef_wm_test_utils:cleanup(MockedModules) end,
      [
             {"logging action for GET /clients doesn't log",
              fun() ->
@@ -140,8 +140,8 @@ task_for_cookbooks_test_() ->
     MockedModules = [wrq],
     State = #base_state{resource_state=#cookbook_state{}},
     {foreach,
-     fun() -> test_util:setup(MockedModules) end,
-     fun(_) -> test_util:cleanup(MockedModules) end,
+     fun() -> oc_chef_wm_test_utils:setup(MockedModules) end,
+     fun(_) -> oc_chef_wm_test_utils:cleanup(MockedModules) end,
      [
             {"PUT with 201 is create",
              fun() -> meck:expect(wrq, method, fun(req) -> 'PUT' end),
@@ -175,8 +175,8 @@ key_for_method_test() ->
 extract_entity_info_test_() ->
     MockedModules = [chef_wm_util],
     {foreach,
-     fun() -> test_util:setup(MockedModules) end,
-     fun(_) -> test_util:cleanup(MockedModules) end,
+     fun() -> oc_chef_wm_test_utils:setup(MockedModules) end,
+     fun(_) -> oc_chef_wm_test_utils:cleanup(MockedModules) end,
      [{"client entity info",
        fun() -> State = #client_state{client_data = {[{<<"name">>,<<"node-foo">>}]} },
                 meck:expect(chef_wm_util,object_name, fun(client, req) -> undefined end),
@@ -323,7 +323,7 @@ end_to_end_test_() ->
                         resource_state=#node_state{node_data = {[{<<"name">>,<<"db">>}]} }},
     ok = application:set_env(oc_chef_wm, actions_fqdn, HostFQDN),
     {foreach,
-     fun() -> test_util:setup(MockedModules),
+     fun() -> oc_chef_wm_test_utils:setup(MockedModules),
               meck:expect(chef_wm_util,object_name, fun(node, req) -> undefined end),
               meck:expect(wrq, response_code, fun(req) -> 201 end),
               meck:expect(chef_wm_util,object_name, fun(node, req) -> undefined end),
@@ -338,7 +338,7 @@ end_to_end_test_() ->
                               end
                           end)
      end,
-     fun(_) -> test_util:cleanup(MockedModules) end,
+     fun(_) -> oc_chef_wm_test_utils:cleanup(MockedModules) end,
      [{"end to end client test, action create with no payload",
        fun() -> ExpectedMsg = msg(<<"create">>),
                 meck:expect(wrq, method, fun(req) -> 'POST' end),

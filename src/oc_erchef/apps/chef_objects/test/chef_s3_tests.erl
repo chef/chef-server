@@ -55,7 +55,7 @@ make_key_test() ->
 }).
 setup_s3(InternalS3Url, ExternalS3Url) ->
     MockedModules = [mini_s3],
-    test_utils:mock(MockedModules, [passthrough]),
+    chef_objects_test_utils:mock(MockedModules, [passthrough]),
     application:set_env(chef_objects, s3_platform_bucket_name, "testbucket"),
     application:set_env(chef_objects, s3_access_key_id, "super_id"),
     application:set_env(chef_objects, s3_secret_key_id, "super_secret"),
@@ -94,7 +94,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                {InternalS3Url, ExternalS3Url, ExpectedExpiry}
        end,
        fun(_) ->
-               test_utils:unmock(MockedModules)
+               chef_objects_test_utils:unmock(MockedModules)
        end,
        [
         fun({_InternalS3Url, _ExternalS3Url, ExpectedExpiry}) ->
@@ -104,7 +104,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                           Expect_s3_url(Method, HostHeaderUrl, ExpectedExpiry),
                           chef_s3:generate_presigned_url(OrgId, Lifetime, Method,
                                                          Checksum, HostHeaderUrl),
-                          test_utils:validate_modules(MockedModules)
+                          chef_objects_test_utils:validate_modules(MockedModules)
                   end}
                  || Method <- [put, get]] ++
                     [{" (batch checksums)",
@@ -115,7 +115,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                               Expect_s3_url(put, HostHeaderUrl, ExpectedExpiry),
                               chef_s3:generate_presigned_urls(OrgId, Lifetime, put,
                                                               Checksums, HostHeaderUrl),
-                              test_utils:validate_modules(MockedModules)
+                              chef_objects_test_utils:validate_modules(MockedModules)
                       end}]
         end]}},
 
@@ -131,7 +131,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                {InternalS3Url, ExternalS3Url, ExpectedExpiry}
        end,
        fun(_) ->
-               test_utils:unmock(MockedModules)
+               chef_objects_test_utils:unmock(MockedModules)
        end,
        [
         fun({InternalS3Url, _ExternalS3Url, ExpectedExpiry}) ->
@@ -141,7 +141,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                           Expect_s3_url(Method, InternalS3Url, ExpectedExpiry),
                           chef_s3:generate_presigned_url(OrgId, Lifetime, Method,
                                                          Checksum, HostHeaderUrl),
-                          test_utils:validate_modules(MockedModules)
+                          chef_objects_test_utils:validate_modules(MockedModules)
                   end}
                  || Method <- [put, get]] ++
                     [{" (batch checksums)",
@@ -152,7 +152,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                               Expect_s3_url(put, InternalS3Url, ExpectedExpiry),
                               chef_s3:generate_presigned_urls(OrgId, Lifetime, put,
                                                               Checksums, HostHeaderUrl),
-                              test_utils:validate_modules(MockedModules)
+                              chef_objects_test_utils:validate_modules(MockedModules)
                       end}]
         end]}},
 
@@ -168,7 +168,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                {InternalS3Url, ExternalS3Url, ExpectedExpiry}
        end,
        fun(_) ->
-               test_utils:unmock(MockedModules)
+               chef_objects_test_utils:unmock(MockedModules)
        end,
        [
         fun({_InternalS3Url, ExternalS3Url, ExpectedExpiry}) ->
@@ -178,7 +178,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                           Expect_s3_url(Method, ExternalS3Url, ExpectedExpiry),
                           chef_s3:generate_presigned_url(OrgId, Lifetime, Method,
                                                          Checksum, HostHeaderUrl),
-                          test_utils:validate_modules(MockedModules)
+                          chef_objects_test_utils:validate_modules(MockedModules)
                   end}
                  || Method <- [put, get]] ++
                     [{" (batch checksums)",
@@ -189,7 +189,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                               Expect_s3_url(put, ExternalS3Url, ExpectedExpiry),
                               chef_s3:generate_presigned_urls(OrgId, Lifetime, put,
                                                               Checksums, HostHeaderUrl),
-                              test_utils:validate_modules(MockedModules)
+                              chef_objects_test_utils:validate_modules(MockedModules)
                       end}]
         end]}}
     ].
@@ -200,7 +200,7 @@ checksum_test_() ->
      fun() ->
              %% Temporarily disable logging chef_s3:delete_checksums/2
              error_logger:tty(false),
-             test_utils:mock(MockedModules, [passthrough]),
+             chef_objects_test_utils:mock(MockedModules, [passthrough]),
              meck:expect(chef_s3, get_internal_config, fun() -> mock_config end),
              application:set_env(chef_objects, s3_platform_bucket_name, "testbucket"),
 
@@ -276,7 +276,7 @@ checksum_test_() ->
      fun(_OrgId) ->
              %% Re-enable logging
              error_logger:tty(true),
-             test_utils:unmock(MockedModules)
+             chef_objects_test_utils:unmock(MockedModules)
      end,
      [
       fun(OrgId) ->
@@ -295,7 +295,7 @@ checksum_test_() ->
                                       {timeout, []},
                                       {error, []}},
                                      chef_s3:check_checksums(OrgId, Checksums)),
-                        test_utils:validate_modules(MockedModules)
+                        chef_objects_test_utils:validate_modules(MockedModules)
                 end},
 
                {"Fetch: Finds all the checksums (greater than parallel limit)",
@@ -319,7 +319,7 @@ checksum_test_() ->
                                       {timeout, []},
                                       {error, []}},
                                      chef_s3:check_checksums(OrgId, Checksums)),
-                        test_utils:validate_modules(MockedModules)
+                        chef_objects_test_utils:validate_modules(MockedModules)
                 end},
 
               {"Fetch: Missing one of the checksums",
@@ -334,7 +334,7 @@ checksum_test_() ->
                                       {timeout, []},
                                       {error, []}},
                                      chef_s3:check_checksums(OrgId, Checksums)),
-                        test_utils:validate_modules(MockedModules)
+                        chef_objects_test_utils:validate_modules(MockedModules)
                 end},
                {"Fetch: Error for one of the checksums",
                 fun() ->
@@ -348,7 +348,7 @@ checksum_test_() ->
                                       {timeout, []},
                                       {error, [<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd">>]}},
                                      chef_s3:check_checksums(OrgId, Checksums)),
-                        test_utils:validate_modules(MockedModules)
+                        chef_objects_test_utils:validate_modules(MockedModules)
                 end},
                {"Fetch: Timeout!",
                 %% 20 seconds is waaaaaaay liberal here
@@ -362,7 +362,7 @@ checksum_test_() ->
                                                     {timeout, [<<"cccccccccccccccccccccccccccccccf">>]},
                                                     {error, []}},
                                                    chef_s3:check_checksums(OrgId, Checksums)),
-                                      test_utils:validate_modules(MockedModules)
+                                      chef_objects_test_utils:validate_modules(MockedModules)
                               end}
                },
                {"Fetch: One of each",
@@ -376,7 +376,7 @@ checksum_test_() ->
                                       {timeout, []},
                                       {error, [<<"cccccccccccccccccccccccccccccccd">>]}},
                                      chef_s3:check_checksums(OrgId, Checksums)),
-                        test_utils:validate_modules(MockedModules)
+                        chef_objects_test_utils:validate_modules(MockedModules)
                 end},
                {"Fetch: All files are already in the system!",
                 fun() ->
@@ -404,7 +404,7 @@ checksum_test_() ->
                                       {timeout, []},
                                       {error, []}},
                                      chef_s3:delete_checksums(OrgId, Checksums)),
-                        test_utils:validate_modules(MockedModules)
+                        chef_objects_test_utils:validate_modules(MockedModules)
                  end},
                 {"Delete: Multiple chunk groups",
                  fun() ->
@@ -429,7 +429,7 @@ checksum_test_() ->
                                       {timeout, []},
                                       {error, []}},
                                      chef_s3:delete_checksums(OrgId, Checksums)),
-                        test_utils:validate_modules(MockedModules)
+                        chef_objects_test_utils:validate_modules(MockedModules)
                  end},
                 {"Delete: Missing one of the checksums",
                  fun() ->
@@ -443,7 +443,7 @@ checksum_test_() ->
                                       {timeout, []},
                                       {error, []}},
                                      chef_s3:delete_checksums(OrgId, Checksums)),
-                        test_utils:validate_modules(MockedModules)
+                        chef_objects_test_utils:validate_modules(MockedModules)
                  end},
                 {"Delete: Error for one of the checksums",
                  fun() ->
@@ -457,7 +457,7 @@ checksum_test_() ->
                                       {timeout, []},
                                       {error, [<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd">>]}},
                                      chef_s3:delete_checksums(OrgId, Checksums)),
-                        test_utils:validate_modules(MockedModules)
+                        chef_objects_test_utils:validate_modules(MockedModules)
                  end},
                 {"Delete: Timeout!",
                  %% 20 seconds is waaaaaaay liberal here
@@ -471,7 +471,7 @@ checksum_test_() ->
                                                     {timeout, [<<"cccccccccccccccccccccccccccccccf">>]},
                                                     {error, []}},
                                                    chef_s3:delete_checksums(OrgId, Checksums)),
-                                      test_utils:validate_modules(MockedModules)
+                                      chef_objects_test_utils:validate_modules(MockedModules)
                               end}
                 },
                 {"Delete: One of each",
@@ -485,7 +485,7 @@ checksum_test_() ->
                                       {timeout, []},
                                       {error, [<<"cccccccccccccccccccccccccccccccd">>]}},
                                      chef_s3:delete_checksums(OrgId, Checksums)),
-                        test_utils:validate_modules(MockedModules)
+                        chef_objects_test_utils:validate_modules(MockedModules)
                  end}
               ]
       end]}.

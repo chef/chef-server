@@ -19,7 +19,7 @@
 %% under the License.
 %%
 
--module(test_utils).
+-module(chef_db_test_utils).
 
 -export([test_setup/0,
          test_cleanup/1,

@@ -43,7 +43,7 @@ simple_test_() ->
     {foreach,
      fun() ->
              setup_env(),
-             test_utils:mock(MockedModules)
+             chef_objects_test_utils:mock(MockedModules)
      end,
      fun(_) ->
               meck:unload()
