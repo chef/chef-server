@@ -20,7 +20,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
--include("../../include/chef_types.hrl").
+-include("chef_types.hrl").
 
 -define(REQ_ID, <<"req-id-123">>).
 

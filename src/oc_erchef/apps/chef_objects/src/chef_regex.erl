@@ -34,7 +34,7 @@
 -compile(export_all).
 -endif.
 
--include("../../include/chef_regex.hrl").
+-include("chef_regex.hrl").
 
 %% Regular Expression Macros
 %% (Just to help DRY things up and make the usage patterns a little more clear)

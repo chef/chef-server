@@ -32,7 +32,7 @@
 %%
 -module(chef_wm_nodes).
 
--include("../../include/oc_chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
 %% Webmachine resource callbacks
 -mixin([{oc_chef_wm_base, [content_types_accepted/2,

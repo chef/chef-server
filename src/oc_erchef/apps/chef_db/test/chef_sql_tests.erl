@@ -18,5 +18,5 @@
 -module(chef_sql_tests).
 
 -include_lib("eunit/include/eunit.hrl").
--include("../../include/chef_types.hrl").
+-include("chef_types.hrl").
 

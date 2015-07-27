@@ -26,7 +26,7 @@
 
 -module(chef_sql).
 
--include("../../include/chef_db.hrl").
+-include("chef_db.hrl").
 
 -ifdef(TEST).
 -compile(export_all).
@@ -112,7 +112,7 @@
         ]).
 
 -include_lib("sqerl/include/sqerl.hrl").
--include("../../include/chef_types.hrl").
+-include("chef_types.hrl").
 
 -type delete_query() :: atom().
 

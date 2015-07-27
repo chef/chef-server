@@ -21,7 +21,7 @@
 
 -module(chef_key_base).
 
--include("../../include/chef_types.hrl").
+-include("chef_types.hrl").
 
 -export([maybe_generate_key_pair/1,
          maybe_generate_key_pair/2,

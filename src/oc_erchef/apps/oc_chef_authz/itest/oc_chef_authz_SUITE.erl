@@ -23,9 +23,9 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("common_test/include/ct.hrl").
--include("../../include/oc_chef_authz.hrl").
--include("../../include/oc_chef_types.hrl").
--include("../../include/server_api_version.hrl").
+-include("oc_chef_authz.hrl").
+-include("oc_chef_types.hrl").
+-include("server_api_version.hrl").
 
 -compile([export_all]).
 

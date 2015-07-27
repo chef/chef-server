@@ -29,7 +29,7 @@
 %%          test_setup/0,
 %%          test_cleanup/1]).
 
--include("../../include/oc_chef_authz.hrl").
+-include("oc_chef_authz.hrl").
 
 %-define(setup, oc_chef_authz_tests).
 -define(setup, test_utils).

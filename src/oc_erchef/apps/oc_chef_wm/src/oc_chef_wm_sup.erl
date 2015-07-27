@@ -15,7 +15,7 @@
 %% supervisor callbacks
 -export([init/1]).
 
--include("../../include/oc_chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
 %% @spec start_link() -> ServerRet
 %% @doc API for starting the supervisor.

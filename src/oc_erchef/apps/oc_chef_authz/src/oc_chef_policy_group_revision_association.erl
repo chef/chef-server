@@ -21,7 +21,7 @@
 -module(oc_chef_policy_group_revision_association).
 
 -include_lib("mixer/include/mixer.hrl").
--include("../../include/oc_chef_types.hrl").
+-include("oc_chef_types.hrl").
 
 % TOD - is this supposed to be a chef_object? It looks kind of like one, but missing serveral things.
 -export([find_policy_revision_by_orgid_name_group_name/2,

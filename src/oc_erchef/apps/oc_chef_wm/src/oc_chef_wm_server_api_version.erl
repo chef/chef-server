@@ -19,7 +19,7 @@
 
 -module(oc_chef_wm_server_api_version).
 
--include("../../include/oc_chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
 -mixin([{oc_chef_wm_base, [content_types_provided/2,
                            finish_request/2,

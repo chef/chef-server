@@ -22,7 +22,7 @@
 
 -module(oc_chef_action).
 
--include("../../include/oc_chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
 -export([log_action/2]).
 

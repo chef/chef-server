@@ -30,7 +30,7 @@
          max_size/1
         ]).
 
--include("../../include/oc_chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 %% This is the max size allowed for incoming request bodies.
 -define(MAX_SIZE, 1000000).
 

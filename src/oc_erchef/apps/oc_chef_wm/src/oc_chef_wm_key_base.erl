@@ -19,7 +19,7 @@
 %%
 
 -module(oc_chef_wm_key_base).
--include("../../include/oc_chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
 -export([create_object_with_embedded_key_data/2,
          update_object_embedded_key_data_v0/4,

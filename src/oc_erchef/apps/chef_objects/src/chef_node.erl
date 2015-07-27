@@ -21,7 +21,7 @@
 
 -module(chef_node).
 
--include("../../include/chef_types.hrl").
+-include("chef_types.hrl").
 -include_lib("mixer/include/mixer.hrl").
 
 -export([

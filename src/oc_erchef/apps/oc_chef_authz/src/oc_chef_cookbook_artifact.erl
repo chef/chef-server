@@ -20,8 +20,8 @@
 
 -module(oc_chef_cookbook_artifact).
 
--include("../../include/chef_types.hrl").
--include("../../include/oc_chef_types.hrl").
+-include("chef_types.hrl").
+-include("oc_chef_types.hrl").
 -include_lib("mixer/include/mixer.hrl").
 
 -behaviour(chef_object).

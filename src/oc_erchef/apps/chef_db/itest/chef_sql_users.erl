@@ -24,8 +24,8 @@
 -compile([export_all]).
 
 -include_lib("eunit/include/eunit.hrl").
--include("../../include/chef_db.hrl").
--include("../../include/chef_types.hrl").
+-include("chef_db.hrl").
+-include("chef_types.hrl").
 
 -define(PUBLIC_KEY, <<"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwxOFcrbsV7bEbqzOvW5u"
 		      "W5lyB23qsenlUdIGyRttqzGEaki01s7X+PpYy4BLfmVVmA6A6FCbL38CzzTUFX1a"

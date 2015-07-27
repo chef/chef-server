@@ -21,7 +21,7 @@
 -module(chef_key_tests).
 
 -include_lib("eunit/include/eunit.hrl").
--include("../../include/chef_types.hrl").
+-include("chef_types.hrl").
 
 -define(KEY_NAME, <<"test_key">>).
 -define(DEFAULT_EXPIRATION, <<"2099-10-24T22:49:08Z">>).

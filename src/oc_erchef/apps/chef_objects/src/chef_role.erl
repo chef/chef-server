@@ -24,7 +24,7 @@
 
 
 -include_lib("mixer/include/mixer.hrl").
--include("../../include/chef_types.hrl").
+-include("chef_types.hrl").
 
 -export([
          authz_id/1,

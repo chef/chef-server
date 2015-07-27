@@ -23,8 +23,8 @@
 
 -module(oc_chef_authz_db).
 
--include("../../include/oc_chef_types.hrl").
--include("../../include/server_api_version.hrl").
+-include("oc_chef_types.hrl").
+-include("server_api_version.hrl").
 
 -export([container_record_to_authz_id/2,
          fetch_container/3,
@@ -41,12 +41,12 @@
 -compile([export_all]).
 -endif.
 
--include("../../include/oc_chef_authz.hrl").
+-include("oc_chef_authz.hrl").
 -include("oc_chef_authz_db.hrl").
 -include_lib("sqerl/include/sqerl.hrl").
 
 %% TODO Fix:
-%% -include("../../include/chef_types.hrl").
+%% -include("chef_types.hrl").
 %% can't include this because it also defines object_id
 %% So copied this over for the short term.
 -define(GLOBAL_PLACEHOLDER_ORG_ID, <<"00000000000000000000000000000000">>).

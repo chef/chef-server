@@ -19,7 +19,7 @@
 
 -module(oc_chef_wm_base_tests).
 
--include("../../include/oc_chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 stats_hero_label_test_() ->

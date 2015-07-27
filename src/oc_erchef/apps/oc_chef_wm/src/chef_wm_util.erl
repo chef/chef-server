@@ -40,7 +40,7 @@
          with_error_body/2
         ]).
 
--include("../../include/oc_chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
 %% TODO: These types are just placeholders until we get all the types cleaned up
 -type ejson() :: {[tuple()]}.

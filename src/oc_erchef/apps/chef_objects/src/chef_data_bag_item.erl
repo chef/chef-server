@@ -23,7 +23,7 @@
 -module(chef_data_bag_item).
 
 -include_lib("mixer/include/mixer.hrl").
--include("../../include/chef_types.hrl").
+-include("chef_types.hrl").
 
 -behaviour(chef_object).
 -export([

@@ -22,7 +22,7 @@
 
 -include_lib("mixer/include/mixer.hrl").
 -include_lib("ej/include/ej.hrl").
--include("../../include/chef_types.hrl").
+-include("chef_types.hrl").
 
 -export([assemble_user_ejson/2,
          authz_id/1,

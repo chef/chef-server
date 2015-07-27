@@ -23,7 +23,7 @@
 -type dict() :: dict:dict().
 -endif.
 
--include("../../include/chef_types.hrl").
+-include("chef_types.hrl").
 -include_lib("ej/include/ej.hrl").
 
 %% A binary() index is taken to be a data bag name.

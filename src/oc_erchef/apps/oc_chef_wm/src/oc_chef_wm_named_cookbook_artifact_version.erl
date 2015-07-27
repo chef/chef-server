@@ -5,7 +5,7 @@
 
 -module(oc_chef_wm_named_cookbook_artifact_version).
 
--include("../../include/oc_chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
 -behaviour(chef_wm).
 

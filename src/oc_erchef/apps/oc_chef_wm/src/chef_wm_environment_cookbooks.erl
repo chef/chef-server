@@ -23,7 +23,7 @@
 -module(chef_wm_environment_cookbooks).
 
 %% chef_wm behaviour callbacks
--include("../../include/oc_chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 -behaviour(chef_wm).
 -export([auth_info/2,
          init/1,
