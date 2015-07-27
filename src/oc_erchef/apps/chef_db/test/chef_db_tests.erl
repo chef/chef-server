@@ -183,7 +183,7 @@ fetch_cookbook_versions_test_() ->
     }.
 
 set_app_env() ->
-    test_utils:start_stats_hero(),
+    chef_db_test_utils:start_stats_hero(),
     application:set_env(chef_db, couchdb_host, "localhost"),
     application:set_env(chef_db, couchdb_port, 5984),
     spawn_stats_hero_worker().
@@ -199,5 +199,5 @@ stats_hero_config() ->
      {request_action, "ACTION"},
      {org_name, "myorg"},
      {request_id, ?REQ_ID},
-     {label_fun, {test_utils, stats_hero_label}},
+     {label_fun, {chef_db_test_utils, stats_hero_label}},
      {upstream_prefixes, [<<"rdbms">>, <<"couchdb">>, <<"solr">>]}].

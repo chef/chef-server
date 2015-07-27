@@ -20,7 +20,7 @@
 %% under the License.
 %%
 
--module(test_utils).
+-module(oc_chef_authz_test_utils).
 
 -export([
          test_setup/0

@@ -1,4 +1,4 @@
--module(test_util).
+-module(oc_chef_wm_test_utils).
 
 -include_lib("eunit/include/eunit.hrl").
 

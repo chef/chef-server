@@ -26,13 +26,13 @@
 -include_lib("ej/include/ej.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
--define(VD(D), test_utils:versioned_desc(Version,D)).
--define(VDD(D), test_utils:versioned_desc(Version, iolist_to_binary(["[deprecated] ", D]))).
+-define(VD(D), chef_objects_test_utils:versioned_desc(Version,D)).
+-define(VDD(D), chef_objects_test_utils:versioned_desc(Version, iolist_to_binary(["[deprecated] ", D]))).
 
 
 assemble_client_ejson_test_() ->
-    test_utils:make_deprecated_tests(fun assemble_client_ejson_deprecated_tests/1) ++
-    test_utils:make_non_deprecated_tests(fun assemble_client_ejson_non_deprecated_tests/1).
+    chef_objects_test_utils:make_deprecated_tests(fun assemble_client_ejson_deprecated_tests/1) ++
+    chef_objects_test_utils:make_non_deprecated_tests(fun assemble_client_ejson_non_deprecated_tests/1).
 
 assemble_client_ejson_deprecated_tests(Version) ->
     [{?VDD("obtain expected EJSON"),
@@ -95,9 +95,9 @@ assemble_client_ejson_non_deprecated_tests(Version) ->
     ].
 
 parse_binary_json_test_() ->
-    test_utils:make_all_versions_tests(fun parse_binary_json_tests/1) ++
-    test_utils:make_deprecated_tests(fun parse_binary_json_deprecated_tests/1) ++
-    test_utils:make_non_deprecated_tests(fun parse_binary_json_non_deprecated_tests/1).
+    chef_objects_test_utils:make_all_versions_tests(fun parse_binary_json_tests/1) ++
+    chef_objects_test_utils:make_deprecated_tests(fun parse_binary_json_deprecated_tests/1) ++
+    chef_objects_test_utils:make_non_deprecated_tests(fun parse_binary_json_non_deprecated_tests/1).
 
 
 %% These are stable behaviors across all supported api versions.
@@ -192,8 +192,8 @@ parse_binary_json_non_deprecated_tests(Version) ->
 
 
 new_record_test_() ->
-    test_utils:make_deprecated_tests(fun new_record_deprecated_tests/1) ++
-    test_utils:make_non_deprecated_tests(fun new_record_tests/1).
+    chef_objects_test_utils:make_deprecated_tests(fun new_record_deprecated_tests/1) ++
+    chef_objects_test_utils:make_non_deprecated_tests(fun new_record_tests/1).
 
 
 new_record_tests(Version) ->
@@ -248,9 +248,9 @@ new_record_deprecated_tests(Version) ->
     ].
 
 update_from_ejson_test_() ->
-    test_utils:make_deprecated_tests(fun update_from_ejson_deprecated_tests/1) ++
-    test_utils:make_non_deprecated_tests(fun update_from_ejson_tests/1) ++
-    test_utils:make_all_versions_tests(fun update_from_ejson_common_tests/1).
+    chef_objects_test_utils:make_deprecated_tests(fun update_from_ejson_deprecated_tests/1) ++
+    chef_objects_test_utils:make_non_deprecated_tests(fun update_from_ejson_tests/1) ++
+    chef_objects_test_utils:make_all_versions_tests(fun update_from_ejson_common_tests/1).
 
 update_from_ejson_tests(Version) ->
     [
