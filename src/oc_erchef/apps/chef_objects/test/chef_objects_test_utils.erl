@@ -31,7 +31,8 @@
          make_deprecated_tests/1,
          make_non_deprecated_tests/1,
          make_all_versions_tests/1,
-         make_versioned_test_range/3
+         make_versioned_test_range/3,
+         read_file/1
         ]).
 
 -include_lib("eunit/include/eunit.hrl").
@@ -104,3 +105,16 @@ make_all_versions_tests(Generator) ->
 
 make_versioned_test_range(Min, Max, Generator) ->
     [Generator(Version) || Version <- lists:seq(Min, Max)].
+
+read_file(File) ->
+    case read_file(app, File) of
+        {error, enoent} ->
+            read_file(test, File);
+        {ok, Bin} ->
+            {ok, Bin}
+    end.
+
+read_file(app, File) -> %% Rebar3
+    file:read_file(filename:join([".", "apps", "chef_objects", "test", File]));
+read_file(test, File) -> %% Rebar2
+    file:read_file(filename:join(["..", "test", File])).

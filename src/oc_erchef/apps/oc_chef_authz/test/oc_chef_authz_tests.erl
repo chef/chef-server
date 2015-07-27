@@ -44,9 +44,7 @@
 -define(chef_host_name, "localhost").
 -define(chef_host_port, 5984).
 
--define(AUTOMECK_FILE(TestName), filename:join(["..", "test", "automeck_config",
-                                                atom_to_list(?MODULE) ++ "_" ++ atom_to_list(TestName) ++
-                                                    ".config"])).
+-define(AUTOMECK_FILE(TestName), oc_chef_authz_test_utils:automeck_file(?MODULE, TestName)).
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -331,7 +329,8 @@ get_container_aid_for_object_test_() ->
      fun() ->
              error_logger:tty(false),
              automeck:mocks(?AUTOMECK_FILE(container_aid)),
-              oc_chef_authz_test_utils:test_setup() end,
+             oc_chef_authz_test_utils:test_setup()
+     end,
      fun(_) -> meck:unload() end,
      [fun({Context, _Superuser}) ->
               {"Can we get a real container",

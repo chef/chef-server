@@ -26,11 +26,11 @@
 -include("chef_types.hrl").
 
 public_key_data() ->
-    {ok, Bin} = file:read_file("../test/spki_public.pem"),
+    {ok, Bin} = chef_objects_test_utils:read_file("spki_public.pem"),
     Bin.
 
 cert_data() ->
-    {ok, Bin} = file:read_file("../test/cert.pem"),
+    {ok, Bin} = chef_objects_test_utils:read_file("cert.pem"),
     Bin.
 
 set_key_pair_test_() ->
@@ -145,6 +145,3 @@ maybe_generate_key_pair_deprecated_test_() ->
        end}
      ]}.
     %validate_public_key_fields_test_() ->
-
-
-

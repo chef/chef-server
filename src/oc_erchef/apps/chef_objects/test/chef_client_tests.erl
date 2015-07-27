@@ -324,9 +324,9 @@ chomp_key_in_json_list(List) ->
 %% the public key data here is derived from the certificate in
 %% cert_data/1
 public_key_data() ->
-    {ok, Bin} = file:read_file("../test/spki_public.pem"),
+    {ok, Bin} = chef_objects_test_utils:read_file("spki_public.pem"),
     chomp(Bin).
 
 cert_data() ->
-    {ok, Bin} = file:read_file("../test/cert.pem"),
+    {ok, Bin} = chef_objects_test_utils:read_file("cert.pem"),
     chomp(Bin).

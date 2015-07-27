@@ -23,7 +23,8 @@
 -module(oc_chef_authz_test_utils).
 
 -export([
-         test_setup/0
+         test_setup/0,
+         automeck_file/2
         ]).
 
 -include_lib("eunit/include/eunit.hrl").
@@ -41,3 +42,20 @@ test_setup() ->
     Superuser = <<"cb4dcaabd91a87675a14ec4f4a00050d">>,
     {Server, Superuser}.
 
+automeck_file(Module, TestName) ->
+    FileName = filename(Module, TestName),
+    AppFile = automeck_file_(app, FileName),
+    case filelib:is_file(AppFile) of
+        true ->
+            AppFile;
+        false ->
+            automeck_file_(test, FileName)
+    end.
+
+automeck_file_(app, FileName) -> %% Rebar3
+    filename:join([".", "apps", "oc_chef_authz", "test", "automeck_config", FileName]);
+automeck_file_(test, FileName) -> %% Rebar2
+    filename:join(["..", "test", "automeck_config", FileName]).
+
+filename(Module, TestName) ->
+    atom_to_list(Module) ++ "_" ++ atom_to_list(TestName) ++ ".config".
