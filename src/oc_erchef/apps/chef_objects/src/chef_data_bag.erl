@@ -21,7 +21,7 @@
 
 -module(chef_data_bag).
 
--include("../../include/chef_types.hrl").
+-include("chef_types.hrl").
 -include_lib("mixer/include/mixer.hrl").
 -export([
          authz_id/1,

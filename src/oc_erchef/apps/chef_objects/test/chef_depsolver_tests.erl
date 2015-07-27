@@ -24,8 +24,8 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("ej/include/ej.hrl").
--include("../../include/chef_osc_defaults.hrl").
--include("../../include/chef_types.hrl").
+-include("chef_osc_defaults.hrl").
+-include("chef_types.hrl").
 -compile([export_all]).
 
 -define(NEEDED_APPS, [ pooler ]).

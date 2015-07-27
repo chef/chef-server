@@ -23,7 +23,7 @@
 -module(chef_key_base_tests).
 
 -include_lib("eunit/include/eunit.hrl").
--include("../../include/chef_types.hrl").
+-include("chef_types.hrl").
 
 public_key_data() ->
     {ok, Bin} = file:read_file("../test/spki_public.pem"),

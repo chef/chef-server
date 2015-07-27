@@ -45,7 +45,7 @@
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl"). %% TODO: remove
 -endif.
--include("../../include/chef_types.hrl").
+-include("chef_types.hrl").
 
 %%%===================================================================
 %%% API

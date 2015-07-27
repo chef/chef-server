@@ -32,7 +32,7 @@
 -compile(export_all).
 -endif.
 
--include("../../include/chef_regex.hrl").
+-include("chef_regex.hrl").
 
 %% @doc `ej:valid/2` spec for attribute hashes.  This can be used for,
 %% e.g., a node's default, override, normal, and automatic attributes,

@@ -91,10 +91,10 @@
          list_all_policy_revisions_by_orgid/2,
          find_all_policy_revisions_by_group_and_name/2]).
 
--include("../../include/chef_db.hrl").
--include("../../include/chef_types.hrl").
--include("../../include/oc_chef_types.hrl").
--include("../../include/chef_osc_defaults.hrl").
+-include("chef_db.hrl").
+-include("chef_types.hrl").
+-include("oc_chef_types.hrl").
+-include("chef_osc_defaults.hrl").
 -include_lib("stats_hero/include/stats_hero.hrl").
 
 -record(context, {server_api_version,

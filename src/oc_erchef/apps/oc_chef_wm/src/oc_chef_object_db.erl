@@ -13,8 +13,8 @@
          bulk_delete_from_solr/3,
          delete_from_solr/1]).
 
--include("../../include/chef_types.hrl").
--include("../../include/oc_chef_types.hrl").
+-include("chef_types.hrl").
+-include("oc_chef_types.hrl").
 
 -type delete_type() ::chef_object() |
                     #oc_chef_container{} |

@@ -17,10 +17,8 @@
 %% specific language governing permissions and limitations
 %% under the License.
 %%
-
 -module(test_utils).
 -export([
-
          mock/1,
          mock/2,
          unmock/1,
@@ -37,7 +35,7 @@
         ]).
 
 -include_lib("eunit/include/eunit.hrl").
--include("../../include/server_api_version.hrl").
+-include("server_api_version.hrl").
 
 %% helper functions for configuring mocking.
 

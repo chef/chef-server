@@ -21,7 +21,7 @@
 
 -module(chef_object).
 
--include("../../include/chef_types.hrl").
+-include("chef_types.hrl").
 -include_lib("ej/include/ej.hrl").
 
 -type object_rec() :: tuple().

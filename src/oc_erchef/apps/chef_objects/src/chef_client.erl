@@ -21,8 +21,8 @@
 -module(chef_client).
 
 -include_lib("ej/include/ej.hrl").
--include("../../include/chef_types.hrl").
--include("../../include/chef_osc_defaults.hrl").
+-include("chef_types.hrl").
+-include("chef_osc_defaults.hrl").
 -include_lib("mixer/include/mixer.hrl").
 
 -export([
@@ -359,4 +359,3 @@ default_field_values(_) ->
 
 set_api_version(ObjectRec, Version) ->
     ObjectRec#chef_client{server_api_version = Version}.
-

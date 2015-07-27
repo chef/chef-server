@@ -35,7 +35,7 @@
 -compile(export_all).
 -endif.
 
--include("../../include/chef_types.hrl").
+-include("chef_types.hrl").
 
 -define(VALIDATION_CONSTRAINTS,
         {[

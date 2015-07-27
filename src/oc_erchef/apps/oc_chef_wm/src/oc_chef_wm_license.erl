@@ -7,7 +7,7 @@
 
 -module(oc_chef_wm_license).
 
--include("../../include/oc_chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 
 %% Webmachine resource callbacks
 -mixin([{oc_chef_wm_base, [content_types_provided/2,

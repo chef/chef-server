@@ -28,7 +28,7 @@
 -compile([export_all]).
 -endif.
 
--include("../../include/chef_index.hrl").
+-include("chef_index.hrl").
 
 -type uuid_binary() :: <<_:288>> | <<_:256>>. %% with|without hypens are both allowed
 -type chef_db_name() :: binary().

@@ -6,9 +6,9 @@
 
 -module(oc_chef_org_user_invite).
 
--include("../../include/oc_chef_types.hrl").
+-include("oc_chef_types.hrl").
 -include_lib("mixer/include/mixer.hrl").
--include("../../include/chef_types.hrl").
+-include("chef_types.hrl").
 
 -behaviour(chef_object).
 

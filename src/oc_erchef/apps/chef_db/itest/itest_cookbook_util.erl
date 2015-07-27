@@ -24,8 +24,8 @@
 -compile([export_all]).
 
 -include_lib("eunit/include/eunit.hrl").
--include("../../include/chef_db.hrl").
--include("../../include/chef_types.hrl").
+-include("chef_db.hrl").
+-include("chef_types.hrl").
 
 %%------------------------------------------------------------------------------
 %% Cookbook-related Helper Functions

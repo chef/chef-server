@@ -21,7 +21,7 @@
 
 -module(chef_cookbook_version).
 
--include("../../include/chef_types.hrl").
+-include("chef_types.hrl").
 -include_lib("mixer/include/mixer.hrl").
 
 

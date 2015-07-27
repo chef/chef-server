@@ -20,7 +20,7 @@
 
 -module(oc_chef_policy_revision).
 
--include("../../include/oc_chef_types.hrl").
+-include("oc_chef_types.hrl").
 -include_lib("mixer/include/mixer.hrl").
 
 -behaviour(chef_object).

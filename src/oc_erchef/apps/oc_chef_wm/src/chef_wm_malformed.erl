@@ -20,8 +20,8 @@
 
 -module(chef_wm_malformed).
 
--include("../../include/chef_regex.hrl").
--include("../../include/oc_chef_wm.hrl").
+-include("chef_regex.hrl").
+-include("oc_chef_wm.hrl").
 
 -export([
          malformed_request_message/3

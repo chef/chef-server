@@ -55,8 +55,8 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
--include("../../include/server_api_version.hrl").
--include("../../include/oc_chef_authz.hrl").
+-include("server_api_version.hrl").
+-include("oc_chef_authz.hrl").
 -include("oc_chef_authz_db.hrl").
 
 -export_type([oc_chef_authz_context/0]).

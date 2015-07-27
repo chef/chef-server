@@ -27,7 +27,7 @@
          encode/1
         ]).
 
--include("../../include/chef_types.hrl").
+-include("chef_types.hrl").
 
 -spec decode(binary() | iolist()) -> jiffy:json_value().
 decode(Bin) ->

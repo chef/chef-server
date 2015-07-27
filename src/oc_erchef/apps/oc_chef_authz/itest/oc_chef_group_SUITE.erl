@@ -25,8 +25,8 @@
 -compile(export_all).
 
 -include_lib("common_test/include/ct.hrl").
--include("../../include/oc_chef_types.hrl").
--include("../../include/chef_types.hrl").
+-include("oc_chef_types.hrl").
+-include("chef_types.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -define(CTX, chef_db:make_context(?API_MIN_VER, <<"req_id">>)).

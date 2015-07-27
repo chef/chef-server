@@ -23,7 +23,7 @@
 -module(chef_object_base_tests).
 
 -include_lib("eunit/include/eunit.hrl").
--include("../../include/chef_types.hrl").
+-include("chef_types.hrl").
 
 depsolver_constraints_test_() ->
     {foreachx,
