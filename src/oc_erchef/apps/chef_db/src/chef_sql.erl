@@ -758,7 +758,7 @@ dcv_result_or_error(CookbookDelete, DeletedChecksums) ->
 %% @doc Return a proplist of the parameterized SQL queries needed for
 %% chef_sql.
 statements() ->
-    Path = filename:join([filename:dirname(code:which(?MODULE)), "..", "priv", "pgsql_statements.config"]),
+    Path = filename:join([code:priv_dir(chef_db), "pgsql_statements.config"]),
     {ok, Statements} = file:consult(Path),
     Statements.
 

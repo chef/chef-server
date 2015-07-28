@@ -24,7 +24,8 @@
 
 -export([
          test_setup/0,
-         automeck_file/2
+         automeck_file/2,
+         read_file/1
         ]).
 
 -include_lib("eunit/include/eunit.hrl").
@@ -59,3 +60,16 @@ automeck_file_(test, FileName) -> %% Rebar2
 
 filename(Module, TestName) ->
     atom_to_list(Module) ++ "_" ++ atom_to_list(TestName) ++ ".config".
+
+read_file(File) ->
+    case read_file(app, File) of
+        {error, enoent} ->
+            read_file(test, File);
+        {ok, Bin} ->
+            {ok, Bin}
+    end.
+
+read_file(app, File) -> %% Rebar3
+    file:read_file(filename:join([".", "apps", "oc_chef_authz", "test", File]));
+read_file(test, File) -> %% Rebar2
+    file:read_file(filename:join(["..", "test", File])).

@@ -23,7 +23,7 @@
 -module(oc_chef_wm_keys_SUITE).
 
 -include_lib("common_test/include/ct.hrl").
--include("../../../include/oc_chef_wm.hrl").
+-include("oc_chef_wm.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -compile([export_all, {parse_transform, lager_transform}]).
@@ -54,12 +54,12 @@
 -define(KEY_2_ENTRY, { ?KEY2NAME, true } ).
 
 init_per_suite(LastConfig) ->
-    Config = chef_test_db_helper:start_db(LastConfig, "oc_chef_wm_itests"),
+    Config = chef_test_db_helper:start_db([{app, oc_chef_wm}|LastConfig], "oc_chef_wm_itests"),
     Config2 = setup_helper:start_server(Config),
     make_org(?ORG_NAME, ?ORG_AUTHZ_ID),
     {OrgId, _} = chef_db:fetch_org_metadata(context(), ?ORG_NAME),
-    {ok, PubKey} = file:read_file("../../spki_public.pem"),
-    {ok, AltPubKey} = file:read_file("../../public.pem"),
+    {ok, PubKey} = file:read_file(filename:join([?config(data_dir, Config2), "..","spki_public.pem"])),
+    {ok, AltPubKey} = file:read_file(filename:join([?config(data_dir, Config2), "..","public.pem"])),
     {ok, PrivateKeyRE} = re:compile(".*BEGIN (RSA )?PRIVATE KEY.*"),
     {ok, PubKeyRE} = re:compile(".*BEGIN (RSA )?PUBLIC KEY.*"),
     [{org_id, OrgId}, {pubkey, PubKey}, {alt_pubkey, AltPubKey},{pubkey_regex, PubKeyRE}, {privkey_regex, PrivateKeyRE}] ++ Config2.

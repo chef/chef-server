@@ -15,7 +15,7 @@
 #
 
 name "oc_erchef"
-source path: "#{project.files_path}/../../src/oc_erchef"
+source path: "#{project.files_path}/../../src/oc_erchef", options: {:exclude => ["_build"]}
 
 dependency "erlang"
 dependency "rebar"
@@ -33,12 +33,11 @@ build do
   env['USE_SYSTEM_GECODE'] = "1"
   env['REL_VERSION'] = "#{project.build_version}"
 
-  make "bundle_clean", env: env
   make "distclean", env: env
-  make "compile", env: env
-  make "bundle", env: env
-  make "rel", env: env
+  make "rebar3", env: env
+  command "./rebar3 update", env: env
+  command "./rebar3 do clean, compile, release", env: env
 
-  sync "#{project_dir}/_rel/oc_erchef/", "#{install_dir}/embedded/service/opscode-erchef/", exclude: ['**/.git', '**/.gitignore']
+  sync "#{project_dir}/_build/default/rel/oc_erchef/", "#{install_dir}/embedded/service/opscode-erchef/", exclude: ['**/.git', '**/.gitignore']
   delete "#{install_dir}/embedded/service/opscode-erchef/log"
 end

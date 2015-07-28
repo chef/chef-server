@@ -6,8 +6,8 @@
 -module(oc_chef_wm_policies_SUITE).
 
 -include_lib("common_test/include/ct.hrl").
--include("../../../include/chef_types.hrl").
--include("../../../include/oc_chef_types.hrl").
+-include("chef_types.hrl").
+-include("oc_chef_types.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 %%-compile([export_all, {parse_transform, lager_transform}]).

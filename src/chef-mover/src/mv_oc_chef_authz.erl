@@ -679,7 +679,7 @@ merge_acl(Acl1, Acl2) ->
 %% unit tests for internal functions
 -ifdef(TEST).
 extract_acl_test() ->
-    {ok, AclJson} = file:read_file("../test/example_container_acl.json"),
+    {ok, AclJson} = file:read_file("./test/example_container_acl.json"),
     RawAcl = jiffy:decode(AclJson),
     Acl = extract_acl(RawAcl),
     [ ?assertEqual(true, lists:keymember(Perm, 1, Acl)) || Perm <- ?access_methods ],
@@ -691,11 +691,11 @@ extract_acl_test() ->
                              <<"5360afaf2d6bace8609f0e3df1c1555d">>])).
 
 merge_acl_test_() ->
-    {ok, ContainerAclJson} = file:read_file("../test/example_container_acl.json"),
+    {ok, ContainerAclJson} = file:read_file("./test/example_container_acl.json"),
     RawContainerAcl = jiffy:decode(ContainerAclJson),
     ContainerAcl = extract_acl(RawContainerAcl),
 
-    {ok, NodeAclJson} = file:read_file("../test/example_node_acl.json"),
+    {ok, NodeAclJson} = file:read_file("./test/example_node_acl.json"),
     RawNodeAcl = jiffy:decode(NodeAclJson),
     NodeAcl = extract_acl(RawNodeAcl),
 

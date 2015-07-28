@@ -14,3 +14,4 @@ relx
 deps.plt
 erl_crash.dump
 VERSION
+_build

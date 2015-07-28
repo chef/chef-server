@@ -27,3 +27,5 @@ deps.plt
 erln8.config
 Makefile.0
 VERSION
+_build
+*.coverdata

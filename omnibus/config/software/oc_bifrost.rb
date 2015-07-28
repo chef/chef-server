@@ -15,7 +15,7 @@
 #
 
 name "oc_bifrost"
-source path: "#{project.files_path}/../../src/oc_bifrost"
+source path: "#{project.files_path}/../../src/oc_bifrost", options: {:exclude => ["_build"]}
 
 dependency "erlang"
 dependency "rebar"
@@ -25,9 +25,10 @@ build do
   env = with_standard_compiler_flags(with_embedded_path)
   env['REL_VERSION'] = "#{project.build_version}"
   make "distclean", env: env
-  make "rel", env: env
+  make "rebar3", env: env
+  command "./rebar3 do clean, compile, release", env: env
 
-  sync "#{project_dir}/_rel/oc_bifrost/", "#{install_dir}/embedded/service/oc_bifrost/"
+  sync "#{project_dir}/_build/default/rel/oc_bifrost/", "#{install_dir}/embedded/service/oc_bifrost/"
   sync "#{project_dir}/schema", "#{install_dir}/embedded/service/oc_bifrost/db/"
   delete "#{install_dir}/embedded/service/oc_bifrost/log"
 end

@@ -36,9 +36,15 @@
 %% They default to oc_chef_sql:statements(pgsql) like everything.
 start_db(Config, DbName) ->
     DataDir = ?config(data_dir, Config),
-    CommonDir = filename:join([DataDir, "../common"]),
+    RootDir = filename:join([DataDir, "..", "..", "..", "..", "..", ".."]),
+    App = ?config(app, Config),
+    AppDir = filename:join([RootDir, "apps", App]),
+
+    %%CommonDir = filename:join([DataDir, "../common"]),
+    CommonDir = filename:join([AppDir, "itest", "common"]),
+
     Schema = filename:join([CommonDir, "schema.sql"]),
-    ECSchema = filename:join([DataDir, "../../../../schema"]),
+    ECSchema = filename:join([RootDir, "schema"]),
     OSCSchema = filename:join([ECSchema, "baseline"]),
     PgData = filename:join(DataDir, "pg_data"),
     PgLog = filename:join(DataDir, "pg.log"),

@@ -99,8 +99,7 @@ load_ibrowse_config() ->
 
 dispatch_table() ->
     {ok, Dispatch} = file:consult(filename:join(
-            [filename:dirname(code:which(?MODULE)),
-                "..", "priv", "dispatch.conf"])),
+            [code:priv_dir(oc_chef_wm), "dispatch.conf"])),
     add_custom_settings(maybe_add_default_org_routes(Dispatch)).
 
 maybe_add_default_org_routes(Dispatch) ->

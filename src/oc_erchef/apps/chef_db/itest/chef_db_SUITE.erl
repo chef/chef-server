@@ -52,7 +52,7 @@ statements() ->
 
 init_per_suite(LastConfig) ->
     %% Define statements for sqerl
-    NewConfig = [{statements, {chef_db_SUITE, statements, []}} | LastConfig],
+    NewConfig = [{app, chef_db}, {statements, {chef_db_SUITE, statements, []}} | LastConfig],
     Config = chef_test_db_helper:start_db(NewConfig, "oc_chef_authz_itests"),
     start_server(Config).
 

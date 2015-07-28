@@ -118,7 +118,7 @@
 
 -spec new_record(RecType :: atom(),
                  ApiVersion :: api_version(),
-                 OrgId :: object_id(),
+                 OrgId :: object_id()  | nil,
                  AuthzId :: object_id() | unset,
                  ObjectEjson :: ejson_term() |
                                 binary() |

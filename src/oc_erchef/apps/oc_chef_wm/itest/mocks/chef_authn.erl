@@ -15,7 +15,7 @@
         ]).
 
 -include_lib("public_key/include/public_key.hrl").
--include("../../../../include/chef_types.hrl").
+-include("chef_types.hrl").
 
 -define(AUTHZ_ID, <<"00000000000000000000000000000001">>).
 

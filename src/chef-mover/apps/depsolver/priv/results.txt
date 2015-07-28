@@ -1,0 +1,36 @@
+Test Data: 07be9e47-6f42-4a5d-b8b5-1d2eae1ad83b - 24 packages, 28 constraints
+native: 0.292 ms
+ruby: 6.079 ms
+erlang: 22.059 ms
+
+Test Data: 183998c1-2ada-4214-b308-e480345c42f2 (Error) - 84 packages, ??
+
+(correctly errors in both erlang and ruby with missing package "9")
+
+ruby: 21.812 ms
+erlang: 65.685 ms
+
+Test Data: 311a15e7-3378-4c5b-beb7-86a1b9cf0ea9 - 43 packages, 66 constraints
+
+native: 0.537 ms
+ruby: 27.187 ms
+erlang: 39.009 ms
+
+Test Data: 382cfe5b-0ac2-48b8-83d1-717cb4620990 - 14 packages, 14 constraints
+
+native: 0.187 ms
+ruby: 3.149 ms
+erlang: 12.414 ms
+
+Test Data: d3564ef6-6437-41e7-90b6-dbdb849551a6_mod - 55 packages, 79 constraints
+
+native: 0.464 ms
+ruby: 23.923 ms
+erlang: 80.541 ms
+
+Test Data: ea2d264b-003e-4611-94ed-14efc7732083 - 17 packages, 16 constraints
+
+native: 0.21 ms
+ruby: 3.471 ms
+erlang: 4.736 ms
+
