@@ -42,10 +42,10 @@ example_key(Name, Expiration, PublicKey) ->
 
 
 load_public_key(primary) ->
-    {ok, PublicKey} = file:read_file("../test/spki_public.pem"),
+    {ok, PublicKey} = chef_objects_test_utils:read_file("spki_public.pem"),
     PublicKey;
 load_public_key(alternate) ->
-    {ok, PublicKey} = file:read_file("../test/public.pem"),
+    {ok, PublicKey} = chef_objects_test_utils:read_file("public.pem"),
     PublicKey.
 
 update_from_ejson_test_() ->
