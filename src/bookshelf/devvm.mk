@@ -21,5 +21,5 @@ devvm_relx:
 	curl -Lo relx $(RELX_URL) || wget $(RELX_URL)
 	chmod a+x relx
 
-devvm: devvm_compile bundle devvm_relx
+devvm: devvm_compile devvm_relx
 	@$(RELX) --dev-mode -c $(RELX_CONFIG) -o $(RELX_OUTPUT_DIR) $(RELX_OPTS) # devrel

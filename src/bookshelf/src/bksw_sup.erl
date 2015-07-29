@@ -54,4 +54,15 @@ init(_Args) ->
     WebmachineSup = {bks_webmachine_sup, {bksw_webmachine_sup, start_link, []},
                      Restart, infinity, supervisor, [bksw_webmachine_sup]},
 
-    {ok, {SupFlags, [WebmachineSup]}}.
+    {ok, {SupFlags, maybe_with_sync([WebmachineSup])}}.
+
+maybe_with_sync(List) ->
+    case bksw_conf:rsync_uri() of
+        undefined ->
+            lager:info("No rsync_uri defined in configuration, not starting bksw_sync."),
+            List;
+        Other ->
+            Syncer = {bksw_sync, {bksw_sync, start_link, [bksw_conf:disk_store(), Other]},
+                      permanent, infinity, worker, [bksw_sync]},
+            [Syncer|List]
+    end.

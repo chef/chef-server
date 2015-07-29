@@ -25,6 +25,7 @@
          get_context/1,
          access_key_id/1,
          disk_store/0,
+         rsync_uri/0,
          reset_dispatch/0,
          secret_access_key/1,
          stream_download/0,
@@ -127,6 +128,14 @@ port() ->
             {port, 4321};
         {ok, Port} ->
             {port, Port}
+    end.
+
+rsync_uri() ->
+    case application:get_env(bookshelf, rsync_uri) of
+        undefined ->
+            undefined;
+        {ok, URI} ->
+            URI
     end.
 
 keys() ->
