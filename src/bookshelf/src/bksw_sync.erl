@@ -87,7 +87,12 @@
           wait_interval,
           % The maximum number of paths we will collect before sending
           % a sync message.
-          max_pending_paths}).
+          max_pending_paths,
+          % Whether or not we've completed at least 1 full sync. This
+          % helps us not pile up sync retries requests if we are still
+          % waiting on the first full sync to complete.
+          full_sync_completed
+         }).
 
 %%
 %% Public API
@@ -125,6 +130,7 @@ init([BaseDir, RemoteURI, Config]) ->
 
     lager:info("starting bksw_rsync for ~p ~p", [BaseDir, RemoteURI]),
     {ok, #sync_state{unsynced_paths = [],
+                     full_sync_completed=false,
                      retry_interval = retry_interval(Config),
                      wait_interval = wait_interval(Config),
                      max_pending_paths = max_pending_paths(Config),
@@ -141,7 +147,10 @@ handle_cast(full_sync, State = #sync_state{retry_interval = RetryTime}) ->
     case RsyncCmd of
         {ok, _Rest} ->
             lager:info("full rsync run successful."),
-            {noreply, State};
+            %% signal a partial sync to clear pending_paths that might
+            %% have built up while retrying failed full sync.
+            sync(),
+            {noreply, State#sync_state{full_sync_completed=true}};
         {error, Result} ->
             lager:error("full rsync run failed, retrying in ~p ms", [RetryTime]),
             log_rsync_error(Result),
@@ -149,7 +158,11 @@ handle_cast(full_sync, State = #sync_state{retry_interval = RetryTime}) ->
             {noreply, State}
     end;
 handle_cast(sync, State = #sync_state{unsynced_paths = []}) ->
-    lager:info("sync message recieved but no data to sync"),
+    lager:info("sync message recieved but no new data to sync"),
+    {noreply, State};
+handle_cast(sync, State = #sync_state{full_sync_completed=false}) ->
+    lager:warning("partial sync requested before full sync has been completed"),
+    lager:warning("assuming full sync is still retrying and ignoring sync request"),
     {noreply, State};
 handle_cast(sync, State = #sync_state{unsynced_paths = UP,
                                       retry_interval = RetryTime}) ->

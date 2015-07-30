@@ -44,7 +44,7 @@ bksw_sync_test_() ->
       {"bksw_sync:status() returns a sync_state record",
        fun() ->
                %% format is always: expected, actual
-               ?assertEqual({sync_state, [], base_dir(), remote(), 2000, 2000, 250}, bksw_sync:status())
+               ?assertEqual({sync_state, [], base_dir(), remote(), 2000, 2000, 250, true}, bksw_sync:status())
        end
       },
       {"bksw_sync:new(Path) adds Path to the unsynced list as a relative path",
