@@ -186,10 +186,11 @@ terminate(_Reason, _State) ->
 %%
 %% Internal Functions
 %%
-
-log_rsync_error(Result) ->
+log_rsync_error(Result) when is_list(Result) ->
     log_if_exists("rsync stdout", stdout, Result),
-    log_if_exists("rsync stderr", stderr, Result).
+    log_if_exists("rsync stderr", stderr, Result);
+log_rsync_error(Result) ->
+    lager:error("Unkown response type from exec:run: ~p", [Result]).
 
 log_if_exists(Prefix, Key, Data) ->
     case proplists:get_value(Key, Data) of
