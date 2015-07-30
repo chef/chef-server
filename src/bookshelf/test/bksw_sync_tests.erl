@@ -16,6 +16,15 @@ partial_run_args() ->
     ["rsync -r --delete --delete-missing-args -vv --files-from .bookshelf-eunit-test-tmpfile-will-delete /tmp/fake-test-dir/ rsync://example.com:111/bookshelf",
      [stdout,stderr,sync]].
 
+pending_list(Status) ->
+    [sync_state|[List|_Rest]] = tuple_to_list(Status),
+    List.
+
+config() ->
+    [{retry_interval, 2000},
+     {max_pending_paths, 250},
+     {wait_interval, 2000}].
+
 bksw_sync_test_() ->
     {foreach,
      fun() ->
@@ -25,7 +34,7 @@ bksw_sync_test_() ->
              meck:expect(exec, run, [{full_run_args(), {ok, something}},
                                      {partial_run_args(), {ok, something}}
                                     ]),
-             bksw_sync:start_link(base_dir(), remote())
+             bksw_sync:start_link(base_dir(), remote(), config())
      end,
      fun(_) ->
              meck:unload([exec, bksw_io_names]),
@@ -35,21 +44,21 @@ bksw_sync_test_() ->
       {"bksw_sync:status() returns a sync_state record",
        fun() ->
                %% format is always: expected, actual
-               ?assertEqual({sync_state, [], base_dir(), remote()}, bksw_sync:status())
+               ?assertEqual({sync_state, [], base_dir(), remote(), 2000, 2000, 250}, bksw_sync:status())
        end
       },
       {"bksw_sync:new(Path) adds Path to the unsynced list as a relative path",
        fun() ->
                bksw_sync:new(<<"/tmp/fake-test-dir/foo/bar/added">>),
-               {sync_state, [NewPath], _Dir, _Rem} = bksw_sync:status(),
-               ?assertEqual(<<"foo/bar/added">>, NewPath)
+               NewPath = pending_list(bksw_sync:status()),
+               ?assertEqual([<<"foo/bar/added">>], NewPath)
        end
       },
       {"bksw_sync:delete(Path) adds Path to the unsynced list as a relative path",
        fun() ->
                bksw_sync:delete(<<"/tmp/fake-test-dir/foo/bar/deleted">>),
-               {sync_state, [NewPath], _Dir, _Rem} = bksw_sync:status(),
-               ?assertEqual(<<"foo/bar/deleted">>, NewPath)
+               NewPath = pending_list(bksw_sync:status()),
+               ?assertEqual([<<"foo/bar/deleted">>], NewPath)
        end
       },
       {"bksw_sync eventually runs a rsync with any partial updates after an addition",

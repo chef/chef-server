@@ -62,7 +62,9 @@ maybe_with_sync(List) ->
             lager:info("No rsync_uri defined in configuration, not starting bksw_sync."),
             List;
         Other ->
-            Syncer = {bksw_sync, {bksw_sync, start_link, [bksw_conf:disk_store(), Other]},
+            Config = bksw_conf:sync_config(),
+            DiskStore = bksw_conf:disk_store(),
+            Syncer = {bksw_sync, {bksw_sync, start_link, [DiskStore, Other, Config]},
                       permanent, infinity, worker, [bksw_sync]},
             [Syncer|List]
     end.

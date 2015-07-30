@@ -26,6 +26,7 @@
          access_key_id/1,
          disk_store/0,
          rsync_uri/0,
+         sync_config/0,
          reset_dispatch/0,
          secret_access_key/1,
          stream_download/0,
@@ -136,6 +137,14 @@ rsync_uri() ->
             undefined;
         {ok, URI} ->
             URI
+    end.
+
+sync_config() ->
+    case application:get_env(bookshelf, sync_config) of
+        undefined ->
+            [];
+        {ok, Config} ->
+            Config
     end.
 
 keys() ->

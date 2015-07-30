@@ -33,9 +33,9 @@
 %% deleted file. bksw_sync will add this path to a list of unsynced
 %% paths.
 %%
-%% If no new paths have been added for MAX_UNFLUSHED_TIME
+%% If no new paths have been added for wait_interval
 %% milliseconds, we will call rsync on any unsynced paths.
-%% Alternatively, if the unsynced list grows to MAX_UNFLUSHED_SIZE, we
+%% Alternatively, if the unsynced list grows to max_pending_paths, we
 %% will call rsync on the unsynced paths.
 %%
 %% The calls to rsync are done syncronously such that only one rsync
@@ -46,12 +46,12 @@
 %% If a full_sync or partial_sync succeeds, we clear the
 %% unsynced_paths list and wait for more updates.
 %%
-%% If a sync fails, we do not clear the list, and try again in 2
-%% seconds.
+%% If a sync fails, we do not clear the list, and try again in retry_interval
+%% milliseconds.
 %%
 -behavior(gen_server).
 
--export([start_link/2,
+-export([start_link/3,
          new/1,
          delete/1,
          sync/0,
@@ -66,8 +66,6 @@
          code_change/3
         ]).
 
--define(MAX_UNFLUSHED_SIZE, 250).
--define(MAX_UNFLUSHED_TIME, 2000).
 -define(RSYNC_EXE, "rsync").
 -define(RSYNC_ARGS, "-r --delete --delete-missing-args -vv").
 
@@ -80,13 +78,22 @@
           base_directory,
           % A valid rsync remote URI.  We expect the user to supply
           % this explicitly as part of the configuration.
-          rsync_remote}).
+          rsync_remote,
+          % The number of milliseconds we will wait before retrying
+          % a failure
+          retry_interval,
+          % The number of milliseconds we will wait for more updates
+          % before syncing pending updates.
+          wait_interval,
+          % The maximum number of paths we will collect before sending
+          % a sync message.
+          max_pending_paths}).
 
 %%
 %% Public API
 %%
-start_link(BaseDir, RemoteURI) ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [BaseDir, RemoteURI], []).
+start_link(BaseDir, RemoteURI, Config) ->
+    gen_server:start_link({local, ?MODULE}, ?MODULE, [BaseDir, RemoteURI, Config], []).
 
 new(Path) ->
     gen_server:cast(?MODULE, {created, Path}).
@@ -110,13 +117,17 @@ status() ->
 %%
 %% gen_server callbacks
 %%
-init([BaseDir, RemoteURI]) ->
+init([BaseDir, RemoteURI, Config]) ->
     %% Send ourselves a full_sync to ensure that we always do a
     %% full_sync on startup. Note: this doesn't block init() since it
     %% is a gen_server:cast underneath.
     full_sync(),
+
     lager:info("starting bksw_rsync for ~p ~p", [BaseDir, RemoteURI]),
     {ok, #sync_state{unsynced_paths = [],
+                     retry_interval = retry_interval(Config),
+                     wait_interval = wait_interval(Config),
+                     max_pending_paths = max_pending_paths(Config),
                      base_directory = to_binary(BaseDir),
                      rsync_remote = RemoteURI}}.
 
@@ -124,7 +135,7 @@ handle_cast({created, Path}, State) ->
     add_to_unsynced(Path, State);
 handle_cast({deleted, Path}, State) ->
     add_to_unsynced(Path, State);
-handle_cast(full_sync, State) ->
+handle_cast(full_sync, State = #sync_state{retry_interval = RetryTime}) ->
     lager:info("starting full rsync run"),
     RsyncCmd = exec:run(mk_rsync_cmd(full, State), [stdout, stderr, sync]),
     case RsyncCmd of
@@ -132,15 +143,16 @@ handle_cast(full_sync, State) ->
             lager:info("full rsync run successful."),
             {noreply, State};
         {error, Result} ->
-            lager:error("full rsync run failed, retrying in ~p ms", [?MAX_UNFLUSHED_TIME]),
+            lager:error("full rsync run failed, retrying in ~p ms", [RetryTime]),
             log_rsync_error(Result),
-            timer:apply_after(?MAX_UNFLUSHED_TIME, ?MODULE, full_sync, []),
+            timer:apply_after(RetryTime, ?MODULE, full_sync, []),
             {noreply, State}
     end;
 handle_cast(sync, State = #sync_state{unsynced_paths = []}) ->
     lager:info("sync message recieved but no data to sync"),
     {noreply, State};
-handle_cast(sync, State = #sync_state{unsynced_paths = UP}) ->
+handle_cast(sync, State = #sync_state{unsynced_paths = UP,
+                                      retry_interval = RetryTime}) ->
     lager:info("starting partial sync on ~p paths", [length(UP)]),
     {ok, File, Filename} = tempfile(),
     [file:write(File, iolist_to_binary([P, $\n])) || P <- UP ],
@@ -153,21 +165,22 @@ handle_cast(sync, State = #sync_state{unsynced_paths = UP}) ->
             lager:info("partial rsync run successful."),
             {noreply, State#sync_state{unsynced_paths = []}};
         {error, Result} ->
-            lager:error("partial rsync run failed, retrying in ~p ms", [?MAX_UNFLUSHED_TIME]),
+            lager:error("partial rsync run failed, retrying in ~p ms", [RetryTime]),
             log_rsync_error(Result),
-            timer:apply_after(?MAX_UNFLUSHED_TIME, ?MODULE, sync, []),
+            timer:apply_after(RetryTime, ?MODULE, sync, []),
             {noreply, State}
     end;
 handle_cast(stop, State) ->
     {stop, normal, State}.
 
-handle_call(status, _From, State) ->
+handle_call(status, _From, State = #sync_state{wait_interval = WaitTime}) ->
     % Use a timeout here to prevent status calls from stranding
     % unsynced paths for longer than expected.
-    {reply, State, State, ?MAX_UNFLUSHED_TIME}.
+    {reply, State, State, WaitTime}.
 
-handle_info(timeout, State = #sync_state{unsynced_paths = UP}) ->
-    lager:debug("No updates for ~p ms", [?MAX_UNFLUSHED_TIME]),
+handle_info(timeout, State = #sync_state{unsynced_paths = UP,
+                                         wait_interval = WaitTime}) ->
+    lager:debug("No updates for ~p ms", [WaitTime]),
     case UP of
         [] ->
             lager:debug("Up to date. Nothing to do."),
@@ -209,16 +222,18 @@ log_if_exists(Prefix, Key, Data) ->
 %% paths if we never hit the max.
 %%
 add_to_unsynced(Element, State = #sync_state{unsynced_paths = UpdateSet,
-                                             base_directory = BaseDir}) ->
+                                             base_directory = BaseDir,
+                                             max_pending_paths = Limit,
+                                             wait_interval = WaitTime}) ->
     NewSet = [relative(Element, BaseDir) | UpdateSet],
     State1 = State#sync_state{unsynced_paths = NewSet},
     case length(NewSet) of
-        N when N > ?MAX_UNFLUSHED_SIZE ->
+        N when N > Limit ->
             lager:info("Maximum unsynced paths reached. Sending sync message."),
             sync(),
-            {noreply, State1, ?MAX_UNFLUSHED_TIME};
+            {noreply, State1, WaitTime};
         _ ->
-            {noreply, State1, ?MAX_UNFLUSHED_TIME}
+            {noreply, State1, WaitTime}
     end.
 
 to_binary(Path) when is_list(Path) ->
@@ -249,3 +264,16 @@ tempfile() ->
     Filename = bksw_io_names:write_path("bookshelf-tmp", "inc-sync"),
     {ok, FD} = file:open(Filename, [write, exclusive]),
     {ok, FD, Filename}.
+
+
+%%
+%% Config Helpers
+%%
+retry_interval(Config) ->
+    proplists:get_value(retry_interval, Config, 2000).
+
+wait_interval(Config) ->
+    proplists:get_value(wait_interval, Config, 2000).
+
+max_pending_paths(Config) ->
+    proplists:get_value(max_pending_paths, Config, 250).
