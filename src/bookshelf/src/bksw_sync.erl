@@ -167,10 +167,10 @@ handle_call(status, _From, State) ->
     {reply, State, State, ?MAX_UNFLUSHED_TIME}.
 
 handle_info(timeout, State = #sync_state{unsynced_paths = UP}) ->
-    lager:info("No updates for ~p ms", [?MAX_UNFLUSHED_TIME]),
+    lager:debug("No updates for ~p ms", [?MAX_UNFLUSHED_TIME]),
     case UP of
         [] ->
-            lager:info("Up to date. Nothing to do."),
+            lager:debug("Up to date. Nothing to do."),
             {noreply, State};
         _Paths ->
             sync(),
@@ -213,7 +213,7 @@ add_to_unsynced(Element, State = #sync_state{unsynced_paths = UpdateSet,
     State1 = State#sync_state{unsynced_paths = NewSet},
     case length(NewSet) of
         N when N > ?MAX_UNFLUSHED_SIZE ->
-            lager:info("Maximum unsynced paths reached."),
+            lager:info("Maximum unsynced paths reached. Sending sync message."),
             sync(),
             {noreply, State1, ?MAX_UNFLUSHED_TIME};
         _ ->
