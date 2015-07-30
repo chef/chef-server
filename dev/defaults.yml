@@ -109,6 +109,10 @@ projects:
         source_path: private-chef-cookbooks/chef-ha-drbd
         dest_path: /opt/opscode/embedded/cookbooks/chef-ha-drbd
         reconfigure_on_load: true
+      ha-native-cookbooks:
+        source_path: private-chef-cookbooks/chef-ha-native
+        dest_path: /opt/opscode/embedded/cookbooks/chef-ha-native
+        reconfigure_on_load: true
 
   oc-chef-pedant:
     type: ruby
