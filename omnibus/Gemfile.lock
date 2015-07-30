@@ -1,7 +1,6 @@
 GIT
   remote: git://github.com/chef/omnibus-software.git
-  revision: a7c4d3770a9e0bdc6ac2f078b0ba239364abd63b
-  branch: tc/temp-pin-ohai
+  revision: 560a17f90dd884943d7f26bc24f8caf8cc0b9b87
   specs:
     omnibus-software (4.0.0)
 
@@ -209,6 +208,3 @@ DEPENDENCIES
   omnibus!
   omnibus-software!
   rake
-
-BUNDLED WITH
-   1.10.6
