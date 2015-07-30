@@ -125,7 +125,7 @@ delete_resource(Rq0, Ctx) ->
     Res = bksw_io:entry_delete(Bucket, Path),
     case Res of
         true ->
-            sync_deletion(bksw_io_names:entry_path(Bucket, Path)),
+            bksw_sync:delete(bksw_io_names:entry_path(Bucket, Path)),
             {true, Rq0, Ctx};
         Other ->
             {Other, Rq0, Ctx}
@@ -158,7 +158,7 @@ upload(Rq0, Ctx) ->
     case bksw_io:open_for_write(Bucket, Path) of
         {ok, Ref} ->
             Resp = write_streamed_body(wrq:stream_req_body(Rq0, ?BLOCK_SIZE), Ref, Rq0, Ctx),
-            sync_creation(bksw_io_names:entry_path(Bucket, Path)),
+            bksw_sync:new(bksw_io_names:entry_path(Bucket, Path)),
             Resp;
         Error ->
             error_logger:error_msg("Erroring opening ~p/~p for writing: ~p~n", [Bucket, Path, Error]),
@@ -169,14 +169,6 @@ upload(Rq0, Ctx) ->
 %%===================================================================
 %% Internal Functions
 %%===================================================================
-
--spec sync_creation(binary() | string()) -> ok.
-sync_creation(Path) ->
-    bksw_sync:new(Path).
-
--spec sync_deletion(binary() | string()) -> ok.
-sync_deletion(Path) ->
-    bksw_sync:delete(Path).
 
 send_streamed_body(Ref) ->
      case bksw_io:read(Ref, ?BLOCK_SIZE) of
