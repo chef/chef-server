@@ -40,6 +40,7 @@
          sync/0,
          full_sync/0,
          status/0,
+         stop/0,
          init/1,
          handle_info/2,
          handle_call/3,
@@ -64,7 +65,6 @@
           % this explicitly as part of the configuration.
           rsync_remote}).
 
-
 %%
 %% Public API
 %%
@@ -83,8 +83,12 @@ sync() ->
 full_sync() ->
     gen_server:cast(?MODULE, full_sync).
 
+stop() ->
+    gen_server:cast(?MODULE, stop).
+
 status() ->
     gen_server:call(?MODULE, status).
+
 
 %%
 %% gen_server callbacks
@@ -136,7 +140,9 @@ handle_cast(sync, State = #sync_state{unsynced_paths = UP}) ->
             log_rsync_error(Result),
             timer:apply_after(?MAX_UNFLUSHED_TIME, ?MODULE, sync, []),
             {noreply, State}
-    end.
+    end;
+handle_cast(stop, State) ->
+    {stop, normal, State}.
 
 handle_call(status, _From, State) ->
     % Use a timeout here to prevent status calls from stranding

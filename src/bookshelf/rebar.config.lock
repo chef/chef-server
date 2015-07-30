@@ -44,6 +44,9 @@
        {mini_s3,".*",
                 {git,"git://github.com/opscode/mini_s3.git",
                      "1cf296868077caefa6791f4996145a369c49091b"}},
+       {meck,".*",
+             {git,"https://github.com/eproxus/meck.git",
+                  "17b0ea5b7d9c93af3a52b5152c6bee14302b3885"}},
        {sync,".*",
              {git,"https://github.com/rustyio/sync.git",
                   "475d728a8f89cdb4cc7067fbbb0a4fd3f3f24bd2"}},
@@ -58,6 +61,7 @@
                    "30a9f7867d615af45783235faa52742d11a9348e"}}]}.
 {erl_opts,[debug_info,{parse_transform,lager_transform},warnings_as_errors]}.
 {xref_checks,[exports_not_used,undefined_function_calls]}.
+{ct_dir,"itest"}.
 {use_lock_deps,true}.
 {use_edown,true}.
 {plugins,[rebar_lock_deps_plugin]}.

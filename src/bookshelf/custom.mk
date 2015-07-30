@@ -1,10 +1,9 @@
 SHELL := /bin/bash
 
 PROJ = bookshelf
-CT_DIR = test
 
 RELX_VERSION = 3.3.2
-
+CT_DIR=itest
 DIALYZER_OPTS =
 ## Uncomment to dialyze test/*.beam. They don't pass right now
 ## DIALYZER_OPTS = test
