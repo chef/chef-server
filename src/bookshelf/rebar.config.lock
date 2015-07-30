@@ -23,6 +23,9 @@
        {iso8601,".*",
                 {git,"git://github.com/opscode/erlang_iso8601.git",
                      "25675e1df8b2bade1fb539cd9a913d61b90468dd"}},
+       {exec,".*",
+             {git,"https://github.com/saleyn/erlexec.git",
+                  "b3548d6973a1529bfada3cab9bbf602d43fb5e46"}},
        {rebar_vsn_plugin,".*",
                          {git,"https://github.com/erlware/rebar_vsn_plugin.git",
                               "fd40c960c7912193631d948fe962e1162a8d1334"}},
@@ -41,12 +44,15 @@
        {mini_s3,".*",
                 {git,"git://github.com/opscode/mini_s3.git",
                      "1cf296868077caefa6791f4996145a369c49091b"}},
+       {meck,".*",
+             {git,"https://github.com/eproxus/meck.git",
+                  "17b0ea5b7d9c93af3a52b5152c6bee14302b3885"}},
        {sync,".*",
              {git,"https://github.com/rustyio/sync.git",
-                  "ae7dbd4e6e2c08d77d96fc4c2bc2b6a3b266492b"}},
+                  "475d728a8f89cdb4cc7067fbbb0a4fd3f3f24bd2"}},
        {eper,".*",
              {git,"git://github.com/massemanet/eper.git",
-                  "80e7cd6446d26d2423f2acd37253826bb3152964"}},
+                  "8e9eee4e1e55bea1483edb2c49df1842be6be683"}},
        {rebar_lock_deps_plugin,".*",
                                {git,"git://github.com/seth/rebar_lock_deps_plugin.git",
                                     "7a5835029c42b8138325405237ea7e8516a84800"}},
@@ -55,6 +61,7 @@
                    "30a9f7867d615af45783235faa52742d11a9348e"}}]}.
 {erl_opts,[debug_info,{parse_transform,lager_transform},warnings_as_errors]}.
 {xref_checks,[exports_not_used,undefined_function_calls]}.
+{ct_dir,"itest"}.
 {use_lock_deps,true}.
 {use_edown,true}.
 {plugins,[rebar_lock_deps_plugin]}.
