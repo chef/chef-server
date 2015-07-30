@@ -26,6 +26,11 @@ plugin "chef-ha-drbd" do
   enabled_by_default false
   cookbook_path "/opt/opscode/embedded/cookbooks"
 end
+
+plugin "chef-ha-native" do
+  enabled_by_default false
+  cookbook_path "/opt/opscode/embedded/cookbooks"
+end
 EOF
     end
   end
