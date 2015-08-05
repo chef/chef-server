@@ -9,8 +9,8 @@ Description
 Setup
 -----
 
-*[Erlang](http://www.erlang.org) R15
-*[Rebar](https://github.com/basho/rebar) (recent)
+*[Erlang](http://www.erlang.org) 17.5
+*[Rebar](https://github.com/rebar/rebar3) (3+)
 *[Virtualenv](http://pypi.python.org/pypi/virtualenv) (for integration testing)
 
 ### Host Name Setup
@@ -38,22 +38,22 @@ Build
 Test
 ----
 
-Just as a not, the password for the testing cert is `opscode`.
+Just as a note, the password for the testing cert is `opscode`.
 
 ##### Unit Tests
 
-    $> make unit
+    $> rebar3 eunit
 
 ##### Integration Tests
 
 The integration tests do *not* start the server to be tested. You must
 manually run $>./start.sh to start that instance before runing `make test`
 
-    $> make integration
+    $> rebar3 ct
 
 ##### All Tests
 
-    $> make test
+    $> rebar3 do eunit, ct
 
 
 Configuration
@@ -64,4 +64,4 @@ Configuration
 Start
 -----
 
-    $> ./start.sh
+    $>  ./_build/default/rel/bookshelf/bin/bookshelf console

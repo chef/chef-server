@@ -24,8 +24,8 @@
 
 -include_lib("common_test/include/ct.hrl").
 -include_lib("eunit/include/eunit.hrl").
--include("../../../include/chef_types.hrl").
--include("../../../include/chef_osc_defaults.hrl").
+-include("chef_types.hrl").
+-include("chef_osc_defaults.hrl").
 
 -export([
          start_server/1,
@@ -124,7 +124,7 @@ base_init_per_suite(Config0) ->
     AuthzId = get_config(authz_id, Config0),
     ClientName = get_config(client_name, Config0),
 
-    Config1 = chef_test_db_helper:start_db(Config0, ?TEST_DB_NAME),
+    Config1 = chef_test_db_helper:start_db([{app, oc_chef_wm}|Config0], ?TEST_DB_NAME),
     Config2 = start_server(Config1),
 
     FakeContext = chef_db:make_context(?API_MIN_VER, <<"fake-req-id">>),
@@ -152,8 +152,8 @@ base_init_per_suite(Config0) ->
     ok = chef_db:create(ClientRecord,
                         FakeContext,
                         AuthzId),
-
-    {ok, PubKey} = file:read_file("../../spki_public.pem"),
+    ct:pal("pwd: ~p", [os:cmd("pwd")]),
+    {ok, PubKey} = file:read_file(filename:join([?config(data_dir, Config2), "..","spki_public.pem"])),
     [{context, FakeContext},
      {org, OrganizationRecord},
      {org_id, OrgId},

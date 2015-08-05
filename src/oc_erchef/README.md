@@ -40,8 +40,24 @@ limitations under the License.
 Release tagging and branching
 -----------------------------
 
-All dependencies are locked via `rebar.config.lock`. We update the
-lock file on master and tag releases off of master.
+All dependencies are locked via [rebar3](http://rebar3.org)'s `rebar.lock`.
+We update the lock file on master and tag releases off of master.
+
+Here's how the `rebar.lock` file gets updated:
+
+#### Add a dependency
+
+Add a new dependency to `rebar.config`. It'll get locked the first time
+you compile with it.
+
+#### Unlock a dependency
+
+If you want to include a new updated version of `sqerl`, you need to
+`rebar unlock sqerl`, then when you compile, the version of `sqerl`
+specified in `rebar.config` will be added to `rebar.lock`.
+
+*NOTE*: if `rebar.config` is pointing at a tag, this probably won't
+change your `rebar.lock`
 
 You can update the lock file (pull in latest versions of dependencies)
 as follows:
@@ -69,14 +85,16 @@ branch).
 Development
 -----------
 
-We have started to put together a development guide with some best practices and suggestions [here](https://github.com/chef/oc_erchef/blob/master/DEVELOPMENT_GUIDE.md).
+We have started to put together a development guide with some best
+practices and suggestions
+[here](https://github.com/chef/oc_erchef/blob/master/DEVELOPMENT_GUIDE.md).
 
 #### Dependencies
 
 The following should be installed on the development system and in your path.
 
-+ erlang   R16B03-1
-+ rebar    2.2.0
++ erlang   17.5
++ rebar    3
 + gecode   3.7
 + ruby     1.9.3
 + bundler  1.7.6
@@ -95,16 +113,21 @@ make
 
 `make ct`
 
-You can see the output of test results by open the itest index files in your browser for the `oc_chef_authz`, `chef_db`, and `oc_chef_wm` apps:
+You can see the output of test results by open the itest index files
+in your browser for the `oc_chef_authz`, `chef_db`, and `oc_chef_wm`
+apps, but they're all in one place now!
 
-`<path_to_repo>/apps/<app_to_view>/itest/ct_logs/index.html`
+`open _build/test/logs/index.html`
 
-You can run individual ct tests by running:
+You can run individual ct tests by using rebar3's syntax; however, you
+need to specify which application you're test lives in.
 
-`make ct_<full_file_name_minus_suite>`
+`rebar3 ct --dir apps/<app_name>/itest --suite <suite_name>`
 
-For example, if you want to run the tests in `oc_chef_wm_server_api_version_SUITE.erl`, just run `make ct_oc_chef_wm_server_api_version`.
+For example, if you want to run the tests in
+`oc_chef_wm_server_api_version_SUITE.erl`, just run `rebar3 ct --dir
+apps/oc_chef_wm/itest --suite ct_oc_chef_wm_server_api_version`.
 
 ##### Running Unit Tests
 
-`make test`
+`rebar3 eunit`

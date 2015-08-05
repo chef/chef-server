@@ -26,6 +26,7 @@ vm:
     - pkg/
     - deps/
     - _rel/
+    - _build/
     - chef-mover/rel/mover/
     - ebin/
     - .eunit/

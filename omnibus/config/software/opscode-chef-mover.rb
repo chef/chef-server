@@ -15,17 +15,20 @@
 #
 
 name "opscode-chef-mover"
-source path: "#{project.files_path}/../../src/chef-mover"
+source path: "#{project.files_path}/../../src/chef-mover", options: {:exclude => ["_build"]}
 dependency "erlang"
 dependency "rebar"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
+  env['USE_SYSTEM_GECODE'] = "1"
   env['REL_VERSION'] = "#{project.build_version}"
   make "distclean", env: env
-  make "rel", env: env
+  make "rebar3", env: env
+  command "./rebar3 update", env: env
+  command "./rebar3 do clean, compile, release", env: env
 
-  sync "#{project_dir}/_rel/mover/", "#{install_dir}/embedded/service/opscode-chef-mover/"
+  sync "#{project_dir}/_build/default/rel/mover/", "#{install_dir}/embedded/service/opscode-chef-mover/"
   delete "#{install_dir}/embedded/service/opscode-chef-mover/log"
 
   mkdir "#{install_dir}/embedded/service/opscode-chef-mover/scripts"

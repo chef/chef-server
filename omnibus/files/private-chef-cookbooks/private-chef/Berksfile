@@ -6,3 +6,5 @@ cookbook 'enterprise', :git => 'https://github.com/opscode-cookbooks/enterprise-
 cookbook 'chef-ha-drbd', :path => '../chef-ha-drbd'
 cookbook 'apt', '~> 2.0'
 cookbook 'yum', '~> 3.0'
+
+cookbook 'runit', '= 1.6.0'

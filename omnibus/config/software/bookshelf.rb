@@ -15,7 +15,7 @@
 #
 
 name "bookshelf"
-source path: "#{project.files_path}/../../src/bookshelf"
+source path: "#{project.files_path}/../../src/bookshelf", options: {:exclude => ["_build"]}
 
 dependency "erlang"
 dependency "rebar"
@@ -24,11 +24,10 @@ build do
   env = with_standard_compiler_flags(with_embedded_path)
   env['REL_VERSION'] = "#{project.build_version}"
 
-  # Override REL_HOOK to avoid running tests during the build
-  env['REL_HOOK'] = "VERSION .concrete/DEV_MODE compile"
   make "distclean", env: env
-  make "rel", env: env
+  make "rebar3", env: env
+  command "./rebar3 do clean, compile, release", env: env
 
-  sync "#{project_dir}/_rel/bookshelf/", "#{install_dir}/embedded/service/bookshelf/"
+  sync "#{project_dir}/_build/default/rel/bookshelf/", "#{install_dir}/embedded/service/bookshelf/"
   delete "#{install_dir}/embedded/service/bookshelf/log"
 end

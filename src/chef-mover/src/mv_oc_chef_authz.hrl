@@ -2,7 +2,7 @@
 %% VENDORED Records and Types
 %%
 %% Replaces dependency in oc_chef_authz:
-%%      -include("../../include/oc_chef_authz.hrl").
+%%      -include("oc_chef_authz.hrl").
 %%      -include("oc_chef_authz_db.hrl").
 %%
 %% Copied from oc_erchef 1.6.4 d0fa517e23483ca9555721a0ebae681e30f9d104

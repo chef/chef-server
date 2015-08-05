@@ -5,9 +5,8 @@ module DVM
     attr_reader :rebar_config_path, :project_dir, :relpath, :libpath, :relname, :node
     def initialize(project_name, config)
       super
-      # TODO use .lock if available, else use .config
-      @rebar_config_path = "#{project_dir}/rebar.config.lock"
-      reldir = service['rel-type'] == 'relx' ? "_rel" : "rel"
+      @rebar_config_path = "#{project_dir}/rebar.config"
+      reldir = "_build/dev/rel"
       @relname = service['rel-name'] ? service['rel-name'] : name
       @relpath = "#{@project_dir}/#{reldir}/#{relname}"
       @service_dir = "/var/opt/opscode/embedded/service/#{service['name']}"
@@ -162,7 +161,7 @@ EOM
       # TODO currently we only load projects that are maintained by Chef and live in chef-server/src.
       # If this changes, we'll need to support specification of alternative build commands.
       # TODO2: add build.env since only erchef needs use_system_gecode...
-      run_command("make -j 4 devvm", "Building...", cwd: project_dir, env: { "USE_SYSTEM_GECODE" => "1"})
+      run_command("make -j 4 dvm", "Building...", cwd: project_dir, env: { "USE_SYSTEM_GECODE" => "1"})
     end
 
     def cover(action, modulename, options)

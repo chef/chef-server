@@ -1,0 +1,46 @@
+LOG:  database system was shut down at 2015-03-17 13:11:27 MST
+LOG:  database system is ready to accept connections
+LOG:  autovacuum launcher started
+ERROR:  relation "changes" does not exist at character 50
+STATEMENT:  
+	            SELECT change_id
+	              FROM changes
+	             WHERE project = $1
+	             ORDER BY committed_at DESC
+	             LIMIT 1
+	            OFFSET COALESCE($2, 0)
+	        
+ERROR:  null value in column "id" violates not-null constraint
+DETAIL:  Failing row contains (null, 0, 0, 0, f, \x, , \x, \x, \x, 2011-10-01 16:47:46, 2011-10-01 16:47:46, a11ffff0000000000000000000000000, 4).
+STATEMENT:  INSERT INTO cookbook_versions (id, major, minor, patch, frozen, meta_attributes, meta_deps, meta_long_desc, metadata, serialized_object, last_updated_by, created_at, updated_at, cookbook_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, (SELECT id FROM cookbooks WHERE org_id = $14 AND name = $15))
+ERROR:  insert or update on table "cookbook_version_checksums" violates foreign key constraint "cookbook_version_checksums_org_id_fkey"
+DETAIL:  Key (org_id, checksum)=(aa100000000000000000000000000000, cksum1                          ) is not present in table "checksums".
+STATEMENT:  INSERT INTO cookbook_version_checksums (checksum, org_id, cookbook_version_id) VALUES ($1, $2, (SELECT cookbook_versions.id FROM cookbooks, cookbook_versions                  WHERE cookbooks.id = cookbook_versions.cookbook_id AND                        cookbooks.name = $3 AND                        cookbooks.org_id = $4 AND                        major = $5 AND minor = $6 AND patch = $7))
+ERROR:  insert or update on table "cookbook_version_checksums" violates foreign key constraint "cookbook_version_checksums_org_id_fkey"
+DETAIL:  Key (org_id, checksum)=(aa100000000000000000000000000000, 5missing100000000000000000000000) is not present in table "checksums".
+STATEMENT:  INSERT INTO cookbook_version_checksums (checksum, org_id, cookbook_version_id) VALUES ($1, $2, (SELECT cookbook_versions.id FROM cookbooks, cookbook_versions                  WHERE cookbooks.id = cookbook_versions.cookbook_id AND                        cookbooks.name = $3 AND                        cookbooks.org_id = $4 AND                        major = $5 AND minor = $6 AND patch = $7))
+ERROR:  duplicate key value violates unique constraint "checksums_pkey"
+DETAIL:  Key (org_id, checksum)=(aa100000000000000000000000000000, shared-1000000000000000000000000) already exists.
+STATEMENT:  INSERT INTO checksums(org_id, checksum)
+	     VALUES ($1, $2)
+ERROR:  duplicate key value violates unique constraint "checksums_pkey"
+DETAIL:  Key (org_id, checksum)=(aa100000000000000000000000000000, v7-20000000000000000000000000000) already exists.
+STATEMENT:  INSERT INTO checksums(org_id, checksum)
+	     VALUES ($1, $2)
+ERROR:  update or delete on table "checksums" violates foreign key constraint "cookbook_version_checksums_org_id_fkey" on table "cookbook_version_checksums"
+DETAIL:  Key (org_id, checksum)=(aa100000000000000000000000000000, shared-1000000000000000000000000) is still referenced from table "cookbook_version_checksums".
+STATEMENT:  DELETE FROM checksums where org_id = $1 AND checksum = $2
+ERROR:  update or delete on table "checksums" violates foreign key constraint "cookbook_version_checksums_org_id_fkey" on table "cookbook_version_checksums"
+DETAIL:  Key (org_id, checksum)=(aa100000000000000000000000000000, checksum100000000000000000000000) is still referenced from table "cookbook_version_checksums".
+STATEMENT:  DELETE FROM checksums where org_id = $1 AND checksum = $2
+ERROR:  update or delete on table "checksums" violates foreign key constraint "cookbook_version_checksums_org_id_fkey" on table "cookbook_version_checksums"
+DETAIL:  Key (org_id, checksum)=(aa100000000000000000000000000000, checksum200000000000000000000000) is still referenced from table "cookbook_version_checksums".
+STATEMENT:  DELETE FROM checksums where org_id = $1 AND checksum = $2
+ERROR:  update or delete on table "cookbooks" violates foreign key constraint "cookbook_versions_cookbook_id_fkey" on table "cookbook_versions"
+DETAIL:  Key (id)=(14) is still referenced from table "cookbook_versions".
+STATEMENT:  DELETE FROM cookbooks WHERE (org_id = $1 AND name = $2)
+LOG:  received fast shutdown request
+LOG:  aborting any active transactions
+LOG:  autovacuum launcher shutting down
+LOG:  shutting down
+LOG:  database system is shut down

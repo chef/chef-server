@@ -56,7 +56,7 @@
 -define(auth_join_db, "opscode_account").
 
 statements(_) ->
-    Path = filename:join([filename:dirname(code:which(?MODULE)), "..", "priv", "pgsql_statements.config"]),
+    Path = filename:join([code:priv_dir(oc_chef_authz), "pgsql_statements.config"]),
     {ok, Statements} = file:consult(Path),
     Statements.
 %

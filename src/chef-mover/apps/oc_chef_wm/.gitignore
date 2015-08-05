@@ -1,0 +1,16 @@
+.eunit
+deps/
+ebin/
+ebin_dialyzer/
+TAGS
+.DS_Store
+doc/*.html
+*.beam
+/doc/edoc-info
+/doc/erlang.png
+/doc/stylesheet.css
+.test
+/oc_chef_wm.plt
+ct_logs
+*_data
+.rebar

@@ -1,0 +1,68 @@
+#!/usr/bin/env escript
+-module(extract_content).
+
+-mode(compile).
+
+-compile([export_all]).
+
+-include_lib("xmerl/include/xmerl.hrl").
+
+main(Dir) ->
+    Files = filelib:wildcard(Dir ++ "/**.xml.*") ++ filelib:wildcard(Dir ++ "/**/**.xml.*"),
+    run(Files),
+    ok.
+
+process_file(File) ->
+    {Root, _RemainingText = ""} = xmerl_scan:file(File),
+    YY = xmerl_xpath:string("//add/doc/field[@name='content']/text()", Root),
+    Content = lists:flatten([ V || #xmlText{value = V} <- YY ]),
+    Lines = join_lines(lists:sort(re:split(Content, " "))),
+    file:write_file(File ++ ".lines", Lines),
+    ok.
+
+join_lines(Lines) ->
+    join_lines(Lines, []).
+
+join_lines([Line], Acc) ->
+    lists:reverse([Line | Acc]);
+join_lines([Line | Rest], Acc) ->
+    join_lines(Rest, ["\n", Line | Acc]).
+
+run([]) ->
+    ok;
+run(Files) ->
+    N = erlang:system_info(schedulers) + 2,
+    {Batch, Rest} = safe_split(N, Files),
+    Pids = spawn_workers(Batch),
+    ok = gather_workers(Pids),
+    run(Rest).
+
+spawn_workers(Files) ->
+    Parent = self(),
+    [ spawn(worker_fun(Parent, File)) || File <- Files ].
+                               
+worker_fun(Parent, File) ->
+    fun() ->
+            ok = process_file(File),
+            Parent ! {self(), ok}
+    end.
+
+gather_workers(Pids) ->
+    [ await_worker(Pid) || Pid <- Pids ],
+    ok.
+
+await_worker(Pid) ->
+    receive
+        {Pid, ok} ->
+            ok
+    after 20000 ->
+            erlang:error({worker_timeout, Pid})
+    end.
+               
+safe_split(N, L) ->
+    try
+        lists:split(N, L)
+    catch
+        error:badarg ->
+            {L, []}
+    end.
