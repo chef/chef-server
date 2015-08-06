@@ -50,7 +50,6 @@ vm:
   node-attributes:
     placeholder: true
 
-
 projects:
   oc_erchef:
     type: erlang
@@ -110,6 +109,9 @@ projects:
         source_path: private-chef-cookbooks/chef-ha-drbd
         dest_path: /opt/opscode/embedded/cookbooks/chef-ha-drbd
         reconfigure_on_load: true
+      partybus:
+        source_path: ../partybus
+        dest_path: /opt/opscode/embedded/service/partybus
 
   oc-chef-pedant:
     type: ruby
@@ -138,52 +140,3 @@ quickstart:
     start:
       - oc_bifrost
 
-# NOTE
-# The orgs and users below are NOT created by default. To create them at any time,
-# invoke:
-#
-#   dvm populate users
-#   dvm populate orgs
-#
-# Or to save some typing:
-#   dvm populate all
-#
-# TODO this should live in the readme.
-# Under /vagrant/testdata (or oc_erchef/dvm/testdata on the host) the following will be populated,
-# depending on which 'populate' command you've run:
-#
-# keys/
-#   -> all user keys except pivotal (which is in /etc/opscode)
-# pivotal/  Pivotal can only be used from inside the vm
-#   .chef/chef-shell.rb for pivotal
-#   .chef/knife.rb for pivotal, but note that this will not be configured for an org, so is primarily
-#                  useful for knife raw
-#
-# orgs/
-#    each-orgname/
-#       orgname-validator.pem
-#       nodes/
-#         each-nodename/
-#           .chef/nodename-client.pem
-#           .chef/chef-client.rb
-#       users/
-#         each-username/
-#           .chef/knife.rb (will refer back to ../../keys/username-key.pem)
-
-orgs:
-  ponyville:
-    admins: [ applejack ]
-    users: [ applejack, thebeav ]
-    nodes: [ node1, node2, node3 ]
-  mariobrothers:
-    admins: [ mario, luigi ]
-    users: [ mario, luigi, bowser, toadstool ]
-    nodes: [ node1, node2, node3 ]
-  mixup:
-    admins: [ bowser, thebeav ]
-    users: [ applejack, mario, thebeav, toadstool, bowser]
-    nodes: [ node1, node2, node3 ]
-
-# These users will be created if they don't exist. No knife.rb will
-# be generated for them unless they are part of an org
-users: [unaffiliated]
