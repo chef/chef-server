@@ -1,6 +1,6 @@
 module DVM
   class OmnibusDep < Dep
-    attr_reader :source_path, :dest_path, :reconfigure_on_load
+    attr_reader :source_path, :dest_path, :reconfigure_on_load, :bundler
     # Needed for now to make tools mixin behave:
     attr_reader :path
     def initialize(base_dir, name, config)
@@ -10,6 +10,7 @@ module DVM
       @path = @source_path
       @reconfigure_on_load = config['reconfigure_on_load']
       @available = true
+      @bundler = config['bundler']
     end
     def unload
       unmount(source_path)
