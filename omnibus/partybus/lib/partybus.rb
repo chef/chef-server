@@ -21,6 +21,17 @@ module Partybus
     attr_accessor :bootstrap_server
     attr_accessor :couchdb_data_dir
 
+    attr_accessor :running_server
+    attr_accessor :postgres
+
+    def initialize
+      if File.exists?("/etc/opscode/chef-server-running.json")
+        @running_server = JSON.parse(IO.read("/etc/opscode/chef-server-running.json"))
+      end
+      @postgres = @running_server['private_chef']['postgres']
+
+    end
+
   end
 
   module Logger
