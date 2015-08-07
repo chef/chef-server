@@ -112,6 +112,8 @@ projects:
       partybus:
         source_path: ../partybus
         dest_path: /opt/opscode/embedded/service/partybus
+        reconfigure_on_load: false
+        bundler: true
 
   oc-chef-pedant:
     type: ruby
