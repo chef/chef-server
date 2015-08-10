@@ -44,7 +44,7 @@ The Chef Code Review process happens on Github pull requests. See
 [this article](https://help.github.com/articles/using-pull-requests)
 if you're not familiar with Github Pull Requests.
 
-Once you a pull request, the **Chef Engineering Team** or **Chef Core
+Once you a pull request, the **Chef Engineering Team** or **Chef Server
 Committers** will review your code and respond to you with any
 feedback they might have.
 
