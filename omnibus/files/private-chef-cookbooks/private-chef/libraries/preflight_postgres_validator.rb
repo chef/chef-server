@@ -151,9 +151,10 @@ private
     # change is captured here: https://github.com/chef/chef-server/issues/441
     manifest = JSON.parse(File.read("/opt/opscode/version-manifest.json"))
     required_major, required_minor = manifest['software']['postgresql92']['locked_version'].split(".")
-    # that- note that our current key in chefwe want to pull in our requirement from our build-time configuration
-    # and not hard-code it here.
-    unless major == required_major and minor == required_minor
+
+    # Note that we're looking for the same major, and using our minor as the minimum version
+    # This provides compatibility with external databases that use 9.3+ before we officially upgrade to it.
+    unless major == required_major and minor >= required_minor
       fail_with err_CSPG014_bad_postgres_version(v)
     end
   end
@@ -162,7 +163,7 @@ private
     # This test is only valid on our initial run - bootstrap itself is not a sufficent check,
     # because we may have partially bootstrapped.
     return if previous_run
-    r = connection.exec("SELECT count(*) AS result FROM pg_database WHERE datname='name'")
+    r = connection.exec("SELECT count(*) AS result FROM pg_database WHERE datname='#{name}'")
     Chef::Log.fatal(r[0])
     fail_with err_CSPG016_database_exists(name) unless r[0]['result'] == '0'
   end
