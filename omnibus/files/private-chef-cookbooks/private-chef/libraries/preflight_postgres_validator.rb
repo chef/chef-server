@@ -70,7 +70,7 @@ class PostgresqlPreflightValidator < PreflightValidator
     # the default value of 'false' will be in place, and having a
     # differing value is valid.
     if OmnibusHelper.has_been_bootstrapped? && backend?  && previous_run
-      if cs_pg_attr.has_key? 'external' && (cs_pg_attr['external'] != previous_run['postgresql']['external'])
+      if (cs_pg_attr.has_key? 'external') && (cs_pg_attr['external'] != previous_run['postgresql']['external'])
         fail_with err_CSPG001_cannot_change_external_flag
       end
     else
