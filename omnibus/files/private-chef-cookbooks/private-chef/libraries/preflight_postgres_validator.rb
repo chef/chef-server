@@ -207,7 +207,7 @@ CSPG002: You have not set a database superuser name under
          chef-server.rb.  This is required for external database support - please set
          it now and then re-run 'chef-server-ctl reconfigure'.
 
-         See https://docs.chef.io/TODO-external-pg-chef-server-configuration
+         See https://docs.chef.io/server_components.html#postgresql-settings
          for more information.
 EOM
   end
@@ -219,7 +219,7 @@ CSPG003: You have not set a database superuser password under
          required for external database support - please set it now and then
          re-run 'chef-server-ctl reconfigure'.
 
-         See documentation at https://docs.chef.io/TODO-external-pg-chef-server-configuration
+         See https://docs.chef.io/server_components.html#postgresql-settings
          for more information.
 EOM
   end
@@ -230,7 +230,7 @@ CSPG004: Because postgresql['external'] is set to true, you must also set
          postgresql['vip'] to the host or IP of an external postgres database
          in chef-server.rb.
 
-         See documentation at https://docs.chef.io/TODO-external-pg-chef-server-configuration
+         See https://docs.chef.io/server_components.html#postgresql-settings
          for more information.
 EOM
   end
