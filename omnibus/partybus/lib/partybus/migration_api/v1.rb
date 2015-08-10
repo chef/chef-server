@@ -98,15 +98,15 @@ EOF
       end
 
       def run_sqitch(ec_target, osc_target="@1.0.4")
-        args =  " --db-user #{Partybus.config.postgres['db_useruser']}"
+        args =  " --db-user #{Partybus.config.postgres['db_superuser']}"
         args << " --db-name opscode_chef"
         args << " --db-host #{Partybus.config.postgres['vip']}"
         args << " --db-port #{Partybus.config.postgres['port']}"
         args << " --engine pg"
 
         cmd = "cd /opt/opscode/embedded/service/opscode-erchef/schema"
-        cmd << " && cd baseline && sqitch deploy #{args} --to-target #{osc_target} --verify"
-        cmd << " && cd .. && sqitch deploy #{args} --to-target #{ec_target} --verify;"
+        cmd << " && cd baseline && sqitch #{args} deploy --to-target #{osc_target} --verify"
+        cmd << " && cd .. && sqitch #{args} deploy --to-target #{ec_target} --verify;"
         run_command(cmd,
                     :cwd => "/opt/opscode/embedded/service/opscode-erchef/schema",
                     :env => {"PGPASSWORD" => Partybus.config.postgres['db_superuser_password']})

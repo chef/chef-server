@@ -27,9 +27,8 @@ module Partybus
     def initialize
       if File.exists?("/etc/opscode/chef-server-running.json")
         @running_server = JSON.parse(IO.read("/etc/opscode/chef-server-running.json"))
+        @postgres = @running_server['private_chef']['postgresql']
       end
-      @postgres = @running_server['private_chef']['postgres']
-
     end
 
   end
