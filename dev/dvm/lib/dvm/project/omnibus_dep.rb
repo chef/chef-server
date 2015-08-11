@@ -20,7 +20,7 @@ module DVM
     end
     def load(opts)
       if bundler
-        run_command("rm -rf .bundle/config && bundle install --path /opt/opscode/embedded/service/gem --no-binstubs", "Installing in-place...", cwd: @dest_path)
+        run_command("rm -rf .bundle/config ;  bundle install --path /opt/opscode/embedded/service/gem --no-binstubs", "Installing in-place...", cwd: @dest_path)
       end
       bind_mount(source_path, dest_path)
       if reconfigure_on_load and not opts[:no_build]
