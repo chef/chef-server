@@ -28,6 +28,15 @@ module Partybus
       if File.exists?("/etc/opscode/chef-server-running.json")
         @running_server = JSON.parse(IO.read("/etc/opscode/chef-server-running.json"))
         @postgres = @running_server['private_chef']['postgresql']
+      else
+        log <<EOF
+***
+ERROR: Cannot find /etc/opscode/chef-server-running.json
+***
+Try running `chef-server-ctl reconfigure` before upgrading
+
+EOF
+        exit(1)
       end
     end
 
