@@ -214,7 +214,7 @@ private
 CSPG001: The value of postgresql['external'] must be set prior to the initial
          run of chef-server-ctl reconfigure and cannot be changed.
 
-         See https://docs.chef.io/TODO-external-pg-upgrade-existing-installation
+         See https://docs.chef.io/error_messages.html#cspg001-changed-setting
          for more information on how you can transition an existing chef-server
          to a new instance configured for an external database and vice-versa.
 EOM
@@ -263,7 +263,7 @@ CSPG010: I cannot make a connection to the host #{cs_pg_attr['vip']}.  Please
          you have configured postgresql['port'] if it's not the standard
          port 5432, then run 'chef-server-ctl reconfigure' again.
 
-         See https://docs.chef.io/TODO-external-pg-config#networking
+         See https://docs.chef.io/error_messages.html#cspg010-cannot-connect
          for more information about postgresql networking requirements.
 EOM
   end
@@ -276,7 +276,7 @@ CSPG011: I could not authenticate to #{cs_pg_attr['vip']} as
          chef-server.rb under "postgresql['db_superuser_password'] is correct
          for this user.
 
-         See https://docs.chef.io/TODO-external-pg-chef-server-configuration
+         See https://docs.chef.io/error_messages.html#cspg011-cannot-authenticate
          for more information.
 EOM
   end
@@ -290,7 +290,7 @@ CSPG012: There is a missing or incorrect pg_hba.conf entry for the
          allow the application accounts to connect from all Chef Server
          nodes.
 
-         See https://docs.chef.io/TODO-external-pg-config#pg_hba
+         See https://docs.chef.io/error_messages.html#cspg012-incorrect-rules
          for more information.
 EOM
   end
@@ -300,7 +300,7 @@ CSPG013: The superuser account '#{cs_pg_attr['db_superuser']}' does not have
          superuser access to the to the database specified.  At minimum, this
          user must be granted CREATE DATABASE and CREATE ROLE privileges.
 
-         See https://docs.chef.io/TODO-external-pg-config#access_levels
+         See https://docs.chef.io/error_messages.html#cspg013-incorrect-permissions
          for more information.
 EOM
   end
@@ -310,7 +310,7 @@ EOM
 CSPG014: Chef Server currently requires PostgreSQL version 9.2 or greater.
          The database you have provided is running version #{ver}.
 
-         See https://docs.chef.io/TODO-external-pg-config#requirements
+         See https://docs.chef.io/error_messages.html#cspg014-incorrect-version
          for more information.
 EOM
   end
@@ -321,7 +321,7 @@ CSPG015: The database server you provided does not have the default database
          template1 available.  Please create the template1 database before
          proceeding.
 
-         See https://docs.chef.io/TODO-external-pg-config#requirements
+         See https://docs.chef.io/error_messages.html#cspg015-missing-database
          for more information.
 EOM
   end
@@ -332,7 +332,7 @@ EOM
 CSPG016: The Chef Server database named '#{dbname}' already exists on the
          PostgreSQL server. Please remove it before proceeding.
 
-         See https://docs.chef.io/TODO-external-pg-config#requirements
+         See https://docs.chef.io/error_messages.html#cspg016-database-exists
          for more information.
 EOM
   end
@@ -341,11 +341,11 @@ EOM
 <<EOM
 CSPG017: The Chef Server database role/user named '#{username}' already exists
          on the PostgreSQL server. If possible, please remove this user
-         via 'DROP ROLE "#{username}"\' before proceeding, or reference the
+         via 'DROP ROLE "#{username}"' before proceeding, or reference the
          troubleshooting link below for information about configuring
          Chef Server to use an alternative user name.
 
-         See https://docs.chef.io/TODO-external-pg-config#requirements
+         See https://docs.chef.io/error_messages.html#cspg017-user-exists
          for more information.
 EOM
 

@@ -40,7 +40,7 @@ class PreflightValidator
   end
 
   # Helper function that let get the correct top-level value for a service
-  # node entry, givent that we haven't yet merged PrivateChef
+  # node entry, given that we haven't yet merged PrivateChef
   # into the node.
   def service_key_value(service_name, key)
     # Ugh: config key munging pain redux
@@ -65,9 +65,10 @@ class PreflightChecks
   # Stop the run immediately if a validation failure occurs, bypassing normal error handlers
   # so we can output the error message without a stack trace to muddy things.
   #
-  # Validators are expected to be run after chef-server.rb entries are ingested, but before any
-  # defaults are configured via libraries/private_chef.rb. This allows us to check the values that
-  # are explicitly configured independetly of the defaults set in the recipe.
+  # Validators are expected to be run after chef-server.rb entries are loaded but before
+  # they're ingested into the node, and before any defaults are configured via libraries/private_chef.rb
+  # This allows us to check the values that are explicitly configured independently of
+  # the defaults set in the recipe.
   def run!
     begin
       PostgresqlPreflightValidator.new(node).run!
