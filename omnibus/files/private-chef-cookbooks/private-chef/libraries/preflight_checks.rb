@@ -38,6 +38,20 @@ class PreflightValidator
                   node['enterprise']['name'] =>  PrivateChef }
     EnterpriseChef::Helpers.backend? faux_node
   end
+
+  # Helper function that let get the correct top-level value for a service
+  # node entry, givent that we haven't yet merged PrivateChef
+  # into the node.
+  def service_key_value(service_name, key)
+    # Ugh: config key munging pain redux
+    alt_service_name = (service_name == 'opscode-erchef' ? 'opscode_erchef' : service_name)
+    if PrivateChef.has_key?(alt_service_name)
+      if PrivateChef[alt_service_name].has_key?(key)
+        return PrivateChef[alt_service_name][key]
+      end
+    end
+    return node['private_chef'][service_name][key]
+  end
 end
 
 class PreflightChecks

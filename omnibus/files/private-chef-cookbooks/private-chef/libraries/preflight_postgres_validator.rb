@@ -110,6 +110,8 @@ class PostgresqlPreflightValidator < PreflightValidator
         backend_verify_database_access(connection)
         backend_verify_postgres_version(connection)
         %w{bifrost opscode_chef oc_id}.each {|db| backend_verify_named_db_not_present(connection, db) }
+        backend_verify_cs_roles_not_present(connection)
+
       end
     rescue ::PG::InsufficientPrivilege => e
       fail_with err_CSPG013_not_superuser
@@ -159,12 +161,30 @@ private
     end
   end
 
+  # Throws CSPG017 if any of the reserved usernames we
+  # need to create are already in the datbase.
+  def backend_verify_cs_roles_not_present(connection)
+    # This test is only valid on our initial run
+    return if previous_run
+    %w{opscode-erchef oc_id oc_bifrost}.each do |service|
+      %w{sql_user sql_ro_user}.each do |key|
+        username = service_key_value(service, key)
+        fail_with err_CSPG017_role_exists(username) if named_role_exists?(connection, username)
+      end
+    end
+  end
+
+  def named_role_exists?(connection, username)
+    # If a record exists, the role exists:
+    connection.exec("select usesuper from pg_catalog.pg_user where usename = '#{username}'").ntuples > 0
+  end
+
+
   def backend_verify_named_db_not_present(connection, name)
     # This test is only valid on our initial run - bootstrap itself is not a sufficent check,
     # because we may have partially bootstrapped.
     return if previous_run
     r = connection.exec("SELECT count(*) AS result FROM pg_database WHERE datname='#{name}'")
-    Chef::Log.fatal(r[0])
     fail_with err_CSPG016_database_exists(name) unless r[0]['result'] == '0'
   end
 
@@ -309,7 +329,7 @@ EOM
 
   def err_CSPG016_database_exists(dbname)
 <<EOM
-CSPG016: The Chef Server database named `#{dbname}` already exists on the
+CSPG016: The Chef Server database named '#{dbname}' already exists on the
          PostgreSQL server. Please remove it before proceeding.
 
          See https://docs.chef.io/TODO-external-pg-config#requirements
@@ -317,5 +337,18 @@ CSPG016: The Chef Server database named `#{dbname}` already exists on the
 EOM
   end
 
+  def err_CSPG017_role_exists(username)
+<<EOM
+CSPG017: The Chef Server database role/user named '#{username}' already exists
+         on the PostgreSQL server. If possible, please remove this user
+         via 'DROP ROLE "#{username}"\' before proceeding, or reference the
+         troubleshooting link below for information about configuring
+         Chef Server to use an alternative user name.
+
+         See https://docs.chef.io/TODO-external-pg-config#requirements
+         for more information.
+EOM
+
+  end
 end
 
