@@ -78,7 +78,7 @@
 new_record(ApiVersion, OrgId, AuthzId, EnvData) ->
     Name = ej:get({<<"name">>}, EnvData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
-    Data = chef_db_compression:compress(chef_environment, chef_json:encode(EnvData)),
+    Data = chef_json:encode(EnvData),
     #chef_environment{server_api_version = ApiVersion,
                       id = Id,
                       authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
@@ -147,7 +147,7 @@ validate_keys([{Item, _}|Rest]) ->
 
 update_from_ejson(#chef_environment{} = Env, EnvData) ->
     Name = ej:get({<<"name">>}, EnvData),
-    Data = chef_db_compression:compress(chef_environment, chef_json:encode(EnvData)),
+    Data = chef_json:encode(EnvData),
     Env#chef_environment{name = Name, serialized_object = Data}.
 
 is_indexed(_ObjectRec) ->

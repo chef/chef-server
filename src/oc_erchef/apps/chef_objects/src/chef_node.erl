@@ -105,7 +105,7 @@ new_record(ApiVersion, OrgId, AuthzId, NodeData) ->
     Name = ej:get({<<"name">>}, NodeData),
     Environment = ej:get({<<"chef_environment">>}, NodeData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
-    Data = chef_db_compression:compress(chef_node, chef_json:encode(NodeData)),
+    Data = chef_json:encode(NodeData),
     #chef_node{server_api_version = ApiVersion,
                id = Id,
                authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
@@ -170,7 +170,7 @@ update_from_ejson(#chef_node{} = Node, NodeJson) ->
     Name = ej:get({<<"name">>}, NodeJson),
     %% We expect that the insert_autofill_fields call will insert default when necessary
     Environment = ej:get({<<"chef_environment">>}, NodeJson),
-    Data = chef_db_compression:compress(chef_node, chef_json:encode(NodeJson)),
+    Data = chef_json:encode(NodeJson),
     Node#chef_node{name = Name, environment = Environment, serialized_object = Data}.
 
 -spec set_created(#chef_node{}, object_id()) -> #chef_node{}.

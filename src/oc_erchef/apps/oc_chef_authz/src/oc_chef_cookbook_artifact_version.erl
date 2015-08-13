@@ -103,10 +103,8 @@ ejson_for_indexing(#oc_chef_cookbook_artifact_version{}, _EjsonTerm) ->
 update_from_ejson(#oc_chef_cookbook_artifact_version{} = Old, CAVData) ->
     Name = ej:get({<<"name">>}, CAVData),
     Identifier = ej:get({<<"identifier">>}, CAVData),
-    Metadata = compress(cookbook_artifact_metadata,
-                        ej:get({<<"metadata">>}, CAVData)),
-    SerializedObject = compress(chef_cookbook_artifact_version,
-                        ej:delete({<<"metadata">>}, CAVData)),
+    Metadata = chef_json:encode(ej:get({<<"metadata">>}, CAVData)),
+    SerializedObject = chef_json:encode(ej:delete({<<"metadata">>}, CAVData)),
     Checksums = chef_cookbook_version:extract_checksums(CAVData),
 
     Old#oc_chef_cookbook_artifact_version{identifier = Identifier,
@@ -114,9 +112,6 @@ update_from_ejson(#oc_chef_cookbook_artifact_version{} = Old, CAVData) ->
                                           serialized_object = SerializedObject,
                                           name = Name,
                                           checksums = Checksums}.
-
-compress(Type, Data) ->
-    chef_db_compression:compress(Type, chef_json:encode(Data)).
 
 -spec new_record(api_version(), object_id(), object_id(), ejson_term()) -> #oc_chef_cookbook_artifact_version{}.
 new_record(ApiVersion, OrgId, AuthzId, CAVData) ->

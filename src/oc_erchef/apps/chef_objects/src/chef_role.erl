@@ -121,7 +121,7 @@ org_id(#chef_role{org_id = OrgId}) ->
 new_record(ApiVersion, OrgId, AuthzId, RoleData) ->
     Name = ej:get({<<"name">>}, RoleData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
-    Data = chef_db_compression:compress(chef_role, chef_json:encode(RoleData)),
+    Data = chef_json:encode(RoleData),
     #chef_role{server_api_version = ApiVersion,
                id = Id,
                authz_id = chef_object_base:maybe_stub_authz_id(AuthzId, Id),
@@ -141,7 +141,7 @@ ejson_for_indexing(#chef_role{}, Role) ->
 -spec update_from_ejson(#chef_role{}, ejson_term()) -> #chef_role{}.
 update_from_ejson(#chef_role{} = Role, RoleData) ->
     Name = ej:get({<<"name">>}, RoleData),
-    Data = chef_db_compression:compress(chef_role, chef_json:encode(RoleData)),
+    Data = chef_json:encode(RoleData),
     Role#chef_role{name = Name, serialized_object = Data}.
 
 %% @doc Given the EJSON representation of a role, return a sorted list of the environment names

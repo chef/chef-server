@@ -76,7 +76,7 @@
 new_record(ApiVersion, OrgId, _AuthzId, {BagName, ItemData}) ->
     ItemName = ej:get({<<"id">>}, ItemData),
     Id = chef_object_base:make_org_prefix_id(OrgId, <<BagName/binary, ItemName/binary>>),
-    Data = chef_db_compression:compress(chef_data_bag_item, chef_json:encode(ItemData)),
+    Data = chef_json:encode(ItemData),
     #chef_data_bag_item{server_api_version = ApiVersion,
                         id = Id,
                         org_id = OrgId,
@@ -132,7 +132,7 @@ ejson_for_indexing(#chef_data_bag_item{data_bag_name = BagName,
 update_from_ejson(#chef_data_bag_item{} = DataBagItem, DataBagItemData) ->
     Name = ej:get({<<"id">>}, DataBagItemData),
     DataBagItemJson = chef_json:encode(DataBagItemData),
-    Data = chef_db_compression:compress(chef_data_bag_item, DataBagItemJson),
+    Data = DataBagItemJson,
     DataBagItem#chef_data_bag_item{item_name = Name, serialized_object = Data}.
 
 bulk_get_query(_ObjectRec) ->
