@@ -29,11 +29,15 @@ known_dbs['oc-id'] = known_dbs['oc_id']
 known_dbs['opscode-erchef'] = known_dbs['opscode_chef']
 
 
-add_command_under_category "psql", "Database", "Launches an interactive psql session with the service database you name.", 2 do
+add_command_under_category "psql", "Database", "Launches an interactive psql session with the service database you name. Add '--write' for write access and '--options <OPTIONS>' to specify psql options.", 2 do
 
   service_name = ARGV[3]
   write_arg = '--write'
   ro = ARGV.include?(write_arg) ? '' : 'ro_'
+  options_arg = '--options'
+  if (ARGV.include?(options_arg))
+    psql_options = " #{ARGV[ARGV.index(options_arg) + 1]}"
+  end
 
   if service_name.nil?
     STDERR.puts "[ERROR] You must supply a service name. Valid names include: #{known_dbs.keys}"
@@ -73,7 +77,7 @@ add_command_under_category "psql", "Database", "Launches an interactive psql ses
     STDOUT.puts "DBName: #{db_name}"
   end
 
-  cmd = "PGPASSWORD=#{db_password} PAGER=less LESS='-iMSx4 -FX' /opt/opscode/embedded/bin/psql --host #{db_host} --username #{db_username} --port #{db_port} --dbname #{db_name}"
+  cmd = "PGPASSWORD=#{db_password} PAGER=less LESS='-iMSx4 -FX' /opt/opscode/embedded/bin/psql --host #{db_host} --username #{db_username} --port #{db_port} --dbname #{db_name}#{psql_options}"
 
   exec cmd
 
