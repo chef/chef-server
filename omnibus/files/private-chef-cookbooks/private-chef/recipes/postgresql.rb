@@ -124,6 +124,32 @@ if is_data_master?
     retries 20
   end
 
+  ruby_block "wait for postgresql to start" do
+    block do
+      connectable = false
+      2.times do |i|
+        `echo 'SELECT * FROM pg_database;' | su - opscode-pgsql -c '/opt/opscode/embedded/bin/psql -U opscode-pgsql postgres -t -A'`
+	if $?.exitstatus != 0
+          Chef::Log.fatal("Could not connect to database, retrying in 10 seconds.")
+          sleep 10
+        else
+          connectable = true
+          break
+        end
+      end
+
+      unless connectable
+        Chef::Log.fatal <<-ERR
+
+Could not connect to the postgresql database.
+Please check /var/log/opscode/posgresql/current for more information.
+
+ERR
+        exit!(1)
+      end
+    end
+  end
+
   # Update the postgresql superuser  with a password for tcp-based access.
   private_chef_pg_user node['private_chef']['postgresql']['db_superuser'] do
     password node['private_chef']['postgresql']['db_superuser_password']

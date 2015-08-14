@@ -70,7 +70,7 @@ class PostgresqlPreflightValidator < PreflightValidator
     # the default value of 'false' will be in place, and having a
     # differing value is valid.
     if OmnibusHelper.has_been_bootstrapped? && backend?  && previous_run
-      if cs_pg_attr.has_key? 'external' && (cs_pg_attr['external'] != previous_run['postgresql']['external'])
+      if (cs_pg_attr.has_key? 'external') && (cs_pg_attr['external'] != previous_run['postgresql']['external'])
         fail_with err_CSPG001_cannot_change_external_flag
       end
     else
@@ -110,6 +110,8 @@ class PostgresqlPreflightValidator < PreflightValidator
         backend_verify_database_access(connection)
         backend_verify_postgres_version(connection)
         %w{bifrost opscode_chef oc_id}.each {|db| backend_verify_named_db_not_present(connection, db) }
+        backend_verify_cs_roles_not_present(connection)
+
       end
     rescue ::PG::InsufficientPrivilege => e
       fail_with err_CSPG013_not_superuser
@@ -151,19 +153,38 @@ private
     # change is captured here: https://github.com/chef/chef-server/issues/441
     manifest = JSON.parse(File.read("/opt/opscode/version-manifest.json"))
     required_major, required_minor = manifest['software']['postgresql92']['locked_version'].split(".")
-    # that- note that our current key in chefwe want to pull in our requirement from our build-time configuration
-    # and not hard-code it here.
-    unless major == required_major and minor == required_minor
+
+    # Note that we're looking for the same major, and using our minor as the minimum version
+    # This provides compatibility with external databases that use 9.3+ before we officially upgrade to it.
+    unless major == required_major and minor >= required_minor
       fail_with err_CSPG014_bad_postgres_version(v)
     end
   end
+
+  # Throws CSPG017 if any of the reserved usernames we
+  # need to create are already in the datbase.
+  def backend_verify_cs_roles_not_present(connection)
+    # This test is only valid on our initial run
+    return if previous_run
+    %w{opscode-erchef oc_id oc_bifrost}.each do |service|
+      %w{sql_user sql_ro_user}.each do |key|
+        username = service_key_value(service, key)
+        fail_with err_CSPG017_role_exists(username) if named_role_exists?(connection, username)
+      end
+    end
+  end
+
+  def named_role_exists?(connection, username)
+    # If a record exists, the role exists:
+    connection.exec("select usesuper from pg_catalog.pg_user where usename = '#{username}'").ntuples > 0
+  end
+
 
   def backend_verify_named_db_not_present(connection, name)
     # This test is only valid on our initial run - bootstrap itself is not a sufficent check,
     # because we may have partially bootstrapped.
     return if previous_run
-    r = connection.exec("SELECT count(*) AS result FROM pg_database WHERE datname='name'")
-    Chef::Log.fatal(r[0])
+    r = connection.exec("SELECT count(*) AS result FROM pg_database WHERE datname='#{name}'")
     fail_with err_CSPG016_database_exists(name) unless r[0]['result'] == '0'
   end
 
@@ -193,7 +214,7 @@ private
 CSPG001: The value of postgresql['external'] must be set prior to the initial
          run of chef-server-ctl reconfigure and cannot be changed.
 
-         See https://docs.chef.io/TODO-external-pg-upgrade-existing-installation
+         See https://docs.chef.io/error_messages.html#cspg001-changed-setting
          for more information on how you can transition an existing chef-server
          to a new instance configured for an external database and vice-versa.
 EOM
@@ -207,7 +228,7 @@ CSPG002: You have not set a database superuser name under
          chef-server.rb.  This is required for external database support - please set
          it now and then re-run 'chef-server-ctl reconfigure'.
 
-         See https://docs.chef.io/TODO-external-pg-chef-server-configuration
+         See https://docs.chef.io/server_components.html#postgresql-settings
          for more information.
 EOM
   end
@@ -219,7 +240,7 @@ CSPG003: You have not set a database superuser password under
          required for external database support - please set it now and then
          re-run 'chef-server-ctl reconfigure'.
 
-         See documentation at https://docs.chef.io/TODO-external-pg-chef-server-configuration
+         See https://docs.chef.io/server_components.html#postgresql-settings
          for more information.
 EOM
   end
@@ -230,7 +251,7 @@ CSPG004: Because postgresql['external'] is set to true, you must also set
          postgresql['vip'] to the host or IP of an external postgres database
          in chef-server.rb.
 
-         See documentation at https://docs.chef.io/TODO-external-pg-chef-server-configuration
+         See https://docs.chef.io/server_components.html#postgresql-settings
          for more information.
 EOM
   end
@@ -242,7 +263,7 @@ CSPG010: I cannot make a connection to the host #{cs_pg_attr['vip']}.  Please
          you have configured postgresql['port'] if it's not the standard
          port 5432, then run 'chef-server-ctl reconfigure' again.
 
-         See https://docs.chef.io/TODO-external-pg-config#networking
+         See https://docs.chef.io/error_messages.html#cspg010-cannot-connect
          for more information about postgresql networking requirements.
 EOM
   end
@@ -255,7 +276,7 @@ CSPG011: I could not authenticate to #{cs_pg_attr['vip']} as
          chef-server.rb under "postgresql['db_superuser_password'] is correct
          for this user.
 
-         See https://docs.chef.io/TODO-external-pg-chef-server-configuration
+         See https://docs.chef.io/error_messages.html#cspg011-cannot-authenticate
          for more information.
 EOM
   end
@@ -269,7 +290,7 @@ CSPG012: There is a missing or incorrect pg_hba.conf entry for the
          allow the application accounts to connect from all Chef Server
          nodes.
 
-         See https://docs.chef.io/TODO-external-pg-config#pg_hba
+         See https://docs.chef.io/error_messages.html#cspg012-incorrect-rules
          for more information.
 EOM
   end
@@ -279,7 +300,7 @@ CSPG013: The superuser account '#{cs_pg_attr['db_superuser']}' does not have
          superuser access to the to the database specified.  At minimum, this
          user must be granted CREATE DATABASE and CREATE ROLE privileges.
 
-         See https://docs.chef.io/TODO-external-pg-config#access_levels
+         See https://docs.chef.io/error_messages.html#cspg013-incorrect-permissions
          for more information.
 EOM
   end
@@ -289,7 +310,7 @@ EOM
 CSPG014: Chef Server currently requires PostgreSQL version 9.2 or greater.
          The database you have provided is running version #{ver}.
 
-         See https://docs.chef.io/TODO-external-pg-config#requirements
+         See https://docs.chef.io/error_messages.html#cspg014-incorrect-version
          for more information.
 EOM
   end
@@ -300,7 +321,7 @@ CSPG015: The database server you provided does not have the default database
          template1 available.  Please create the template1 database before
          proceeding.
 
-         See https://docs.chef.io/TODO-external-pg-config#requirements
+         See https://docs.chef.io/error_messages.html#cspg015-missing-database
          for more information.
 EOM
   end
@@ -308,13 +329,26 @@ EOM
 
   def err_CSPG016_database_exists(dbname)
 <<EOM
-CSPG016: The Chef Server database named `#{dbname}` already exists on the
+CSPG016: The Chef Server database named '#{dbname}' already exists on the
          PostgreSQL server. Please remove it before proceeding.
 
-         See https://docs.chef.io/TODO-external-pg-config#requirements
+         See https://docs.chef.io/error_messages.html#cspg016-database-exists
          for more information.
 EOM
   end
 
+  def err_CSPG017_role_exists(username)
+<<EOM
+CSPG017: The Chef Server database role/user named '#{username}' already exists
+         on the PostgreSQL server. If possible, please remove this user
+         via 'DROP ROLE "#{username}"' before proceeding, or reference the
+         troubleshooting link below for information about configuring
+         Chef Server to use an alternative user name.
+
+         See https://docs.chef.io/error_messages.html#cspg017-user-exists
+         for more information.
+EOM
+
+  end
 end
 
