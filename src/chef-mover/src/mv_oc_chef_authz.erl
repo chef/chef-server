@@ -28,7 +28,7 @@
 %% d0fa517e23483ca9555721a0ebae681e30f9d104 (tag 1.6.4).
 %%
 %% Functions and record types will be slightly modified to meet the needs of
-%% mover_policies_containers_creation_callback.
+%% mover_policies_containers_creation_callback and mover_server_admins_global_group_callback.
 %%
 %% Any code with an external dependency on oc_chef_authz_db has been commented
 %% out. If you need that code, feel free to uncomment it, but be sure to vendor
