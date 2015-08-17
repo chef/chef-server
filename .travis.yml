@@ -1,8 +1,3 @@
-#
-# Commented sections of this configuration should be uncommented once
-# luarocks is added to the apt package whitelist:
-#   https://github.com/travis-ci/travis-ci/issues/3716
-#
 sudo: false
 branches:
   only:
@@ -11,7 +6,7 @@ cache:
   apt: true
   directories:
     - src/oc-id/vendor/bundle
-#    - $HOME/.luarocks/rocks
+    - $HOME/.luarocks/rocks
     - $HOME/.cpanm
     - $HOME/.cpan
     - $HOME/perl5
@@ -30,7 +25,8 @@ addons:
     packages:
       - cpanminus
       - perl
-#      - lua5.1
+      - lua5.1
+      - luarocks
       - libdbd-pg-perl
       - build-essential
       - chefdk
@@ -40,19 +36,18 @@ env:
     - USE_OMNIBUS_FILES=0
     - CHEFDK_GECODE_PATH=/opt/chefdk/embedded/lib/ruby/gems/2.1.0/gems/dep-selector-libgecode-1.0.2/lib/dep-selector-libgecode/vendored-gecode
     - PATH=~/perl5/bin:$PATH
-#    - LUALIB=~/.luarocks/lib/lua/5.2
+    - LUALIB=~/.luarocks/lib/lua/5.2
   matrix:
-    # - COMPONENT=omnibus
+  - COMPONENT=omnibus
   - COMPONENT=src/oc_erchef
   - COMPONENT=src/oc-id
   - COMPONENT=src/chef-mover
-#  - COMPONENT=src/oc_bifrost
-#  - COMPONENT=src/bookshelf
+  - COMPONENT=src/oc_bifrost
+  - COMPONENT=src/bookshelf
 install:
-#  - sudo apt-get install luarocks
-#  - luarocks install --local lpeg
-#  - luarocks install --local lua-cjson
-#  - eval $(luarocks path)
+  - luarocks install --local lpeg
+  - luarocks install --local lua-cjson
+  - eval $(luarocks path)
   - rvm install --binary 2.1.4
   - rvm use 2.1.4
   - cpanm --notest --quiet --local-lib=$HOME/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)

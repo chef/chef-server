@@ -25,6 +25,9 @@ all: $(REBAR3)
 rel: all
 	@$(REBAR3) release
 
+update: $(REBAR3)
+	@$(REBAR3) update
+
 $(REBAR3):
 	curl -Lo rebar3 $(REBAR3_URL) || wget $(REBAR3_URL)
 	chmod a+x rebar3
@@ -45,7 +48,7 @@ VERSION: version_clean
 ## For Travis
 install: $(REBAR3)
 
-travis: all
+travis: update all
 	@echo "Travis'd!"
 
 
