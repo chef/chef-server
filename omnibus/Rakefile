@@ -10,6 +10,15 @@ namespace :test do
       end
     }
   end
+  task :private_chef_cookbooks do
+    Bundler.with_clean_env {
+      if system "bundle install --without omnibus && bundle exec rspec files/private-chef-cookbooks/private-chef/spec/"
+        exit 0
+      else
+        exit 1
+      end
+    }
+  end
   task :routing do
     if ENV["LUALIB"].nil?
       puts "$LUALIB is not set. It should be set to a path that contains lpeg.so and cjson.so. See tests/routing/README.md for details."
