@@ -1,0 +1,199 @@
+require_relative '../../libraries/private_chef.rb'
+require 'chef/log'
+
+def expect_existing_secrets
+  allow(File).to receive(:exists?).with("/etc/opscode/private-chef-secrets.json").and_return(true)
+  allow(File).to receive(:read).with("/etc/opscode/private-chef-secrets.json").and_return(secrets)
+end
+
+def config_for(hostname)
+  PrivateChef.from_file(config_file)
+  PrivateChef.generate_config(hostname)
+end
+
+describe PrivateChef do
+  before(:each) {
+    PrivateChef.reset
+    # May Cthulhu have mercy on our souls. PrivateChef.reset seems to do
+    # too much without reloading the class, PrivateChef loses all of
+    # the default Mashes
+    load ::File.expand_path("#{::File.dirname(__FILE__)}/../../libraries/private_chef.rb")
+    PrivateChef[:node] = node
+  }
+
+  # Example content of /etc/opscode/private-chef-secrets.json
+  # used when testing non-bootstrap config parsing.
+  let(:secrets) {<<EOF
+  {
+  "redis_lb": {
+    "password": "a24799bbeecee698792c6c9a26b453700bd52b709868a61f184cd9a0fdb32619cdeb494ddc98ce814aa14eda01fcc06cb335"
+  },
+  "rabbitmq": {
+    "password": "a866861140c2c7bc2dc67c9f7696be2b2108321e18acb08922c28a075a8dbb8e773d82142e9cc52c96fdf6928c901c3ab360",
+    "jobs_password": "0b46135781879d28515981b7cc85e69895bafecdea8a7aa68851624e1cdde2d439166614708cac2519729e458d9e46d13140",
+    "actions_password": "80ee6755aa6b4051aa99837ae213668f67f8941b6bb06142e0d9c99d9a4cd4210a07d30e430b49b41903b76554e01be11401"
+  },
+  "postgresql": {
+    "db_superuser_password": "43e6fc68d8888764a7bea802a12be66b542f384b24469c6fc11a5d9c7c833b22962d8dd636ed2c5826a0aaeb056d49180391"
+  },
+  "opscode_erchef": {
+    "sql_password": "d1f5ed48a14db08225d81fc8b8c50958318526ba86a3276effa0f24abf5b",
+    "sql_ro_password": "96804edcfcf237db9925c734316faa3deb4cc3bc4e4e3a0f5e0be5bf3779"
+  },
+  "oc_id": {
+    "sql_password": "8506ed8b4d4840dbd00da13157f48d4a362aac2101c3a1f4463e39e33ec46c7144681d1232cea80b7e7c382cc3f34b580f78",
+    "sql_ro_password": "ca000f92407cca27995f925a5004aae08310819f3cd27dcb8cbd08e500b35f61acb2d98b709d39308b704d4481b2ee19b493",
+    "secret_key_base": "df2c22dea04fd9b075c877a044499734ad6e6e9045ebf86f63bd27edbd7394bb3663f5a6af319a48ec4b70295164bd4811b2"
+  },
+  "drbd": {
+    "shared_secret": "f872f5deb67b1a7faa9b47b829fb278c7ef83dc861e039ebe07255ec8618"
+  },
+  "keepalived": {
+    "vrrp_instance_password": "06064a047e7070ac5d8f8181366afadba3dbb03455bfa8d96f7f2901e687ac27b6ad74a850b14cb313f931b2936aee367721"
+  },
+  "oc_bifrost": {
+    "superuser_id": "b293108b4a58a346758c091a8ca7462a",
+    "sql_password": "dfaac052d330cb64aa82dd493bd342e93583cb61823fb3ed7792f21f928f9ef0b85d88c995b02ce216d193e9138217f8a5ed",
+    "sql_ro_password": "f3003275a303dccc3e8b93bcde838e2254a82e1c6feb0db034e5e64c263e55643e14f8f75003c7080f7a145328d8a26c8242"
+  },
+  "bookshelf": {
+    "access_key_id": "331fe88b6a86c4801218fd3e831a68b710544069",
+    "secret_access_key": "393dd9330f834102f3650a6ac6938530ccbfbe1c86cb7d732f9893768e4e06eb172cc326da17f435"
+  }}
+EOF
+  }
+
+  let(:config_file) {
+    filename = "/fake/config.rb"
+    allow(IO).to receive(:read).with(filename).and_return(config)
+    filename
+  }
+
+  let(:node) {
+    {
+      "private_chef" => {
+        "postgresql" => {
+          "version" => "9.2"
+        }
+      }
+    }
+  }
+
+  context "in a standalone topology" do
+    let(:config) { <<-EOF
+topology "standalone"
+EOF
+    }
+
+    it "generates secrets" do
+      rendered_config = config_for("api.chef.io")
+      expect(rendered_config["private_chef"]["rabbitmq"]).to have_key("password")
+    end
+
+    it "does not regenerate a secret if it already exists" do
+      expect_existing_secrets
+      rendered_config = config_for("api.chef.io")
+      expect(rendered_config["private_chef"]["rabbitmq"]["password"]).to eq("a866861140c2c7bc2dc67c9f7696be2b2108321e18acb08922c28a075a8dbb8e773d82142e9cc52c96fdf6928c901c3ab360")
+    end
+  end
+
+  context "in an HA topology" do
+    let(:config) { <<-EOF
+topology "ha"
+
+backend_vip "backend.chef.io",
+  :ipaddress => "10.0.0.1"
+
+server "frontend.chef.io",
+  :role => 'frontend'
+
+server "backend-active.chef.io",
+  :role => 'backend',
+  :bootstrap => true
+
+server "backend-passive.chef.io",
+  :role => 'backend'
+EOF
+    }
+
+    it "generates secrets on the backend bootstrap node" do
+      rendered_config = config_for("backend-active.chef.io")
+      expect(rendered_config["private_chef"]["rabbitmq"]).to have_key("password")
+    end
+
+    it "enables opscode-chef-mover on the bootstrap node" do
+      rendered_config = config_for("backend-active.chef.io")
+      expect(rendered_config["private_chef"]["opscode-chef-mover"]["enable"]).to eq(true)
+    end
+
+    it "enables bootstrap recipe on the bootstrap node" do
+      rendered_config = config_for("backend-active.chef.io")
+      expect(rendered_config["private_chef"]["bootstrap"]["enable"]).to eq(true)
+    end
+
+    it "disables opscode-chef-mover on the frontend nodes" do
+      expect_existing_secrets
+      rendered_config = config_for("frontend.chef.io")
+      expect(rendered_config["private_chef"]["opscode-chef-mover"]["enable"]).to eq(false)
+    end
+
+    it "disables bootstrap recipe on the frontend node" do
+      expect_existing_secrets
+      rendered_config = config_for("frontend.chef.io")
+      expect(rendered_config["private_chef"]["bootstrap"]["enable"]).to eq(false)
+    end
+
+    it "disables bootstrap recipe on the non-bootstrap backend node" do
+      expect_existing_secrets
+      rendered_config = config_for("backend-passive.chef.io")
+      expect(rendered_config["private_chef"]["bootstrap"]["enable"]).to eq(false)
+    end
+
+    it "refuses to generate secrets on non-bootstrap node" do
+      expect(Chef::Log).to receive(:fatal)
+      expect {config_for("backend-passive.chef.io")}.to raise_error SystemExit
+    end
+
+    it "sets the relavent data directory paths to the shared store" do
+      rendered_config = config_for("backend-active.chef.io")
+      expect(rendered_config["private_chef"]["bookshelf"]["data_dir"]).to eq("/var/opt/opscode/drbd/data/bookshelf")
+      expect(rendered_config["private_chef"]["rabbitmq"]["data_dir"]).to eq("/var/opt/opscode/drbd/data/rabbitmq")
+      expect(rendered_config["private_chef"]["opscode-solr4"]["data_dir"]).to eq("/var/opt/opscode/drbd/data/opscode-solr4")
+      expect(rendered_config["private_chef"]["redis_lb"]["data_dir"]).to eq("/var/opt/opscode/drbd/data/redis_lb")
+
+      # Legacy Paths
+      expect(rendered_config["private_chef"]["couchdb"]["data_dir"]).to eq("/var/opt/opscode/drbd/data/couchdb")
+      expect(rendered_config["private_chef"]["opscode-solr"]["data_dir"]).to eq("/var/opt/opscode/drbd/data/opscode-solr")
+      expect(rendered_config["private_chef"]["opscode-chef"]["checksum_path"]).to eq("/var/opt/opscode/drbd/data/opscode-chef/checksum")
+    end
+
+    it "sets backend services to listen on INADDR_ANY if the machine is a backend" do
+      rendered_config = config_for("backend-active.chef.io")
+      expect(rendered_config["private_chef"]["rabbitmq"]["node_ip_address"]).to eq("0.0.0.0")
+      expect(rendered_config["private_chef"]["bookshelf"]["listen"]).to eq("0.0.0.0")
+      expect(rendered_config["private_chef"]["redis_lb"]["listen"]).to eq("0.0.0.0")
+      expect(rendered_config["private_chef"]["opscode-solr4"]["ip_address"]).to eq("0.0.0.0")
+      expect(rendered_config["private_chef"]["postgresql"]["listen_address"]).to eq("*")
+    end
+
+    it "sets the VIPs for backend services to the backend_vip when configuring frontend services" do
+      expect_existing_secrets
+      rendered_config = config_for("frontend.chef.io")
+      expect(rendered_config["private_chef"]["postgresql"]["vip"]).to eq("10.0.0.1")
+      expect(rendered_config["private_chef"]["bookshelf"]["vip"]).to eq("10.0.0.1")
+      expect(rendered_config["private_chef"]["redis_lb"]["vip"]).to eq("10.0.0.1")
+      expect(rendered_config["private_chef"]["rabbitmq"]["vip"]).to eq("10.0.0.1")
+      expect(rendered_config["private_chef"]["opscode-solr4"]["vip"]).to eq("10.0.0.1")
+    end
+
+    it "disables backend services on the frontend" do
+      expect_existing_secrets
+      rendered_config = config_for("frontend.chef.io")
+      expect(rendered_config["private_chef"]["postgresql"]["enable"]).to eq(false)
+      expect(rendered_config["private_chef"]["bookshelf"]["enable"]).to eq(false)
+      expect(rendered_config["private_chef"]["redis_lb"]["enable"]).to eq(false)
+      expect(rendered_config["private_chef"]["rabbitmq"]["enable"]).to eq(false)
+      expect(rendered_config["private_chef"]["opscode-solr4"]["enable"]).to eq(false)
+    end
+  end
+end
