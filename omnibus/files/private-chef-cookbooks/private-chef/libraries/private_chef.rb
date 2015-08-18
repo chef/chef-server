@@ -95,6 +95,8 @@ module PrivateChef
   opscode_org_creator Mash.new
   opscode_certificate Mash.new
 
+  registered_extensions Mash.new
+
   class << self
 
     def from_file(filename)
@@ -115,6 +117,27 @@ module PrivateChef
         if PrivateChef[old_service_key].has_key? configkey
           PrivateChef[new_service_key][configkey] ||= PrivateChef[old_service_key][configkey]
           PrivateChef[old_service_key].delete configkey
+        end
+      end
+    end
+
+    VALID_EXTENSION_CONFIGS= %i(server_config_required config_values gen_backend gen_frontend gen_secrets gen_api_fqdn) unless defined?(VALID_EXTENSION_CONFIGS)
+    def register_extension(name, extension)
+      bad_keys = extension.keys - VALID_EXTENSION_CONFIGS
+
+      bad_keys.each do |key|
+        Chef::Log.warn("Extension #{name} contains unknown configuration option: #{key}")
+        extension.delete(key) # delete mutates extension
+      end
+
+      PrivateChef["registered_extensions"][name] = extension
+      if extension.key?(:config_values)
+        extension[:config_values].each do |k, v|
+          # TODO(ssd): Should we even allow this? Perhaps we should just exit?
+          if PrivateChef.has_key?(k)
+            Chef::Log.warn("Extension #{name} attempted to register configuration default for #{k}, but it already exists!")
+          end
+          PrivateChef.send(k, v)
         end
       end
     end
@@ -161,7 +184,242 @@ module PrivateChef
       SecureRandom.hex(chars)
     end
 
-    def generate_secrets(node_name)
+    def generate_hash
+      results = { "private_chef" => {} }
+      default_keys = [
+        "opscode_chef",
+        "redis_lb",
+        "addons",
+        "rabbitmq",
+        "external_rabbitmq",
+        "opscode_solr4",
+        "opscode_expander",
+        "opscode_erchef",
+        "oc_chef_authz",
+        "folsom_graphite",
+        "lb",
+        "lb_internal",
+        "postgresql",
+        "oc_bifrost",
+        "oc_id",
+        "opscode_chef_mover",
+        "bookshelf",
+        "bootstrap",
+        "drbd",
+        "keepalived",
+        "estatsd",
+        "nginx",
+        "ldap",
+        "user",
+        "ha",
+        "disabled_plugins",
+        "enabled_plugins",
+        "license",
+        "backup",
+
+        # keys for cleanup and back-compat
+        "couchdb",
+        "opscode_solr"]
+      keys_from_extensions = PrivateChef["registered_extensions"].map {|name, ext| ext[:config_values].keys.map {|k| k.to_s} if ext[:config_values]}.flatten.compact
+      (default_keys | keys_from_extensions).each do |key|
+        # @todo: Just pick a naming convention and adhere to it
+        # consistently
+        rkey = if key =~ /^oc_/ || key == "redis_lb"
+                 key # leave oc_* keys as is
+               else
+                 key.gsub('_', '-')
+               end
+        results['private_chef'][rkey] = PrivateChef[key]
+      end
+      results['private_chef']['default_orgname'] = PrivateChef['default_orgname']
+      results['private_chef']['oc-chef-pedant'] = PrivateChef['oc_chef_pedant']
+      results['private_chef']['notification_email'] = PrivateChef['notification_email']
+      results['private_chef']['from_email'] = PrivateChef['from_email']
+      results['private_chef']['role'] = PrivateChef['role']
+      results['private_chef']['topology'] = PrivateChef['topology']
+      results['private_chef']['servers'] = PrivateChef['servers']
+      results['private_chef']['backend_vips'] = PrivateChef['backend_vips']
+      results['private_chef']['logs'] = {}
+      results['private_chef']['logs']['log_retention'] = PrivateChef['log_retention']
+      results['private_chef']['logs']['log_rotation'] = PrivateChef['log_rotation']
+      results['private_chef']['dark_launch'] = PrivateChef['dark_launch']
+      results['private_chef']['opscode-erchef']['max_request_size'] = PrivateChef["opscode_erchef"]["max_request_size"]
+      results['private_chef']['folsom_graphite'] = PrivateChef['folsom_graphite']
+      results
+    end
+
+
+    def gen_hapaths
+      PrivateChef["ha"]["provider"] ||= "drbd" # Use drbd by default for HA
+      PrivateChef["enabled_plugins"] << "chef-ha-#{PrivateChef["ha"]["provider"]}"
+      PrivateChef["ha"]["path"] ||= "/var/opt/opscode/drbd/data"
+      hapath = PrivateChef["ha"]["path"]
+      PrivateChef['bookshelf']['data_dir'] = "#{hapath}/bookshelf"
+      PrivateChef["rabbitmq"]["data_dir"] ||= "#{hapath}/rabbitmq"
+      PrivateChef["opscode_solr4"]["data_dir"] ||= "#{hapath}/opscode-solr4"
+      PrivateChef["redis_lb"]["data_dir"] ||= "#{hapath}/redis_lb"
+
+      # cleanup back-compat
+      # in order to delete the data directories for opscode-solr and couchdb
+      # after installing Chef Server 12, we need to have access to the configuration
+      # data as if it were configured for Enterprise Chef 11.
+      PrivateChef['couchdb']['data_dir'] = "#{hapath}/couchdb"
+      PrivateChef['opscode_solr']['data_dir'] = "#{hapath}/opscode-solr"
+
+      # The postgresql data directory is scoped to the current version;
+      # changes in the directory trigger upgrades from an old PostgreSQL
+      # version to a newer one
+      PrivateChef["postgresql"]["data_dir"] ||= "#{hapath}/postgresql_#{node['private_chef']['postgresql']['version']}"
+
+      # Need old path for cookbook migration
+      PrivateChef['opscode_chef']['checksum_path'] ||= "#{hapath}/opscode-chef/checksum"
+    end
+
+    def gen_keepalived(node_name)
+      PrivateChef['servers'].each do |k, v|
+        next unless v['role'] == "backend"
+        next if k == node_name
+        PrivateChef['servers'][node_name]['peer_ipaddress'] = v['ipaddress']
+      end
+      PrivateChef["keepalived"]["enable"] ||= true
+      PrivateChef["keepalived"]["ipv6_on"] ||= PrivateChef["use_ipv6"]
+      PrivateChef["keepalived"]["vrrp_instance_interface"] = backend_vip["device"]
+      PrivateChef["keepalived"]["vrrp_instance_ipaddress"] = backend_vip["ipaddress_with_netmask"]
+      PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"]
+      PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_bind"] = PrivateChef['servers'][node_name]['ipaddress']
+      PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_peer"] = PrivateChef['servers'][node_name]['peer_ipaddress']
+      PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"]
+      PrivateChef["bookshelf"]["ha"] ||= true
+      PrivateChef["oc_id"]["ha"] ||= true
+      PrivateChef["rabbitmq"]["ha"] ||= true
+      PrivateChef["opscode_solr4"]["ha"] ||= true
+      PrivateChef["opscode_expander"]["ha"] ||= true
+      PrivateChef["opscode_erchef"]["ha"] ||= true
+      PrivateChef["lb"]["ha"] ||= true
+      PrivateChef["postgresql"]["ha"] ||= true
+      PrivateChef["redis_lb"]["ha"] ||= true
+      PrivateChef["oc_bifrost"]["ha"] ||= true
+      PrivateChef["nginx"]["ha"] ||= true
+    end
+
+    #
+    # Genereric gen_ callbacks
+    #
+    # - gen_frontend: Run on all frontend nodes
+    #
+    # - gen_backend: Runs on all backend nodes, take a parameter
+    # indicating whether the current node is the bootstrap node.
+    #
+    # - gen_api_fqdn: Runs on all nodes
+    #
+    # - gen_secrets: Runs on all nodes but should abort if a needed
+    # secret doesn't exist on a non-bootstrap node. Takes the node
+    # name.
+    #
+    # If a plugin doesn't define a callback for one of these functions
+    # the generic version is used.
+    #
+    def gen_frontend
+      callback = callback_for(:gen_frontend)
+      if ! callback.nil?
+        instance_exec(&callback)
+      else
+        gen_frontend_default
+      end
+    end
+
+    def gen_backend(bootstrap=false)
+      callback = callback_for(:gen_backend)
+      if ! callback.nil?
+        instance_exec(bootstrap, &callback)
+      else
+        gen_backend_default(bootstrap)
+      end
+    end
+
+    def gen_secrets(node_name)
+      callback = callback_for(:gen_secrets)
+      if ! callback.nil?
+        instance_exec(node_name, &callback)
+      else
+        gen_secrets_default(node_name)
+      end
+    end
+
+    def gen_api_fqdn
+      callback = callback_for(:gen_api_fqdn)
+      if ! callback.nil?
+        instance_exec(&callback)
+      else
+        gen_api_fqdn_default
+      end
+    end
+
+    def callback_for(name)
+      extension = PrivateChef["registered_extensions"][PrivateChef["topology"]]
+      if extension
+        extension[name]
+      else
+        nil
+      end
+    end
+
+    #
+    # Default implementation of gen_ callbacks
+    #
+    # Currently these are focused on providing the tier & HA toplogies
+    # but will do less and less as that functionality moves into the
+    # plugin
+    #
+    def gen_backend_default(bootstrap)
+      PrivateChef[:role] = "backend" #mixlib-config wants a symbol :(
+      PrivateChef["bookshelf"]["listen"] ||= PrivateChef["default_listen_address"]
+      PrivateChef["rabbitmq"]["node_ip_address"] ||= PrivateChef["default_listen_address"]
+      PrivateChef["redis_lb"]["listen"] ||= PrivateChef["default_listen_address"]
+      PrivateChef["opscode_solr4"]["ip_address"] ||= PrivateChef["default_listen_address"]
+      PrivateChef["postgresql"]["listen_address"] ||= '*' #PrivateChef["default_listen_address"]
+
+      authaddr = []
+      authaddr << "0.0.0.0/0" # if PrivateChef["use_ipv4"]
+      authaddr << "::/0" if PrivateChef["use_ipv6"]
+      PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= authaddr
+
+      PrivateChef["opscode_chef_mover"]["enable"] = !!bootstrap
+      PrivateChef["bootstrap"]["enable"] = !!bootstrap
+    end
+
+    def gen_frontend_default
+      PrivateChef[:role] = "frontend"
+      PrivateChef["bookshelf"]["enable"] ||= false
+      PrivateChef["bookshelf"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+      PrivateChef["rabbitmq"]["enable"] ||= false
+      PrivateChef["rabbitmq"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+      PrivateChef["redis_lb"]["enable"] ||= false
+      PrivateChef["redis_lb"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+      PrivateChef["opscode_solr4"]["enable"] ||= false
+      PrivateChef["opscode_solr4"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+      PrivateChef["opscode_expander"]["enable"] ||= false
+      PrivateChef["postgresql"]["enable"] ||= false
+      PrivateChef["postgresql"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
+      PrivateChef["lb"]["cache_cookbook_files"] ||= true
+      PrivateChef["lb"]["upstream"] ||= Mash.new
+      if PrivateChef["use_ipv6"] && PrivateChef["backend_vips"]["ipaddress"].include?(':')
+        PrivateChef["lb"]["upstream"]["bookshelf"] ||= [ "[#{PrivateChef["backend_vips"]["ipaddress"]}]" ]
+      else
+        PrivateChef["lb"]["upstream"]["bookshelf"] ||= [ PrivateChef["backend_vips"]["ipaddress"] ]
+      end
+      PrivateChef["opscode_chef_mover"]["enable"] = false
+      PrivateChef["bootstrap"]["enable"] = false
+    end
+
+    def gen_api_fqdn_default
+      PrivateChef["lb"]["api_fqdn"] ||= PrivateChef['api_fqdn']
+      PrivateChef["lb"]["web_ui_fqdn"] ||= PrivateChef['api_fqdn']
+      PrivateChef["nginx"]["server_name"] ||= PrivateChef['api_fqdn']
+      PrivateChef["nginx"]["url"] ||= "https://#{PrivateChef['api_fqdn']}"
+    end
+
+    def gen_secrets_default(node_name)
       existing_secrets ||= Hash.new
       if File.exists?("/etc/opscode/private-chef-secrets.json")
         existing_secrets = Chef::JSONCompat.from_json(File.read("/etc/opscode/private-chef-secrets.json"))
@@ -258,175 +516,13 @@ module PrivateChef
       end
     end
 
-    def generate_hash
-      results = { "private_chef" => {} }
-      [
-        "opscode_chef",
-        "redis_lb",
-        "addons",
-        "rabbitmq",
-        "external_rabbitmq",
-        "opscode_solr4",
-        "opscode_expander",
-        "opscode_erchef",
-        "oc_chef_authz",
-        "folsom_graphite",
-        "lb",
-        "lb_internal",
-        "postgresql",
-        "oc_bifrost",
-        "oc_id",
-        "opscode_chef_mover",
-        "bookshelf",
-        "bootstrap",
-        "drbd",
-        "keepalived",
-        "estatsd",
-        "nginx",
-        "ldap",
-        "user",
-        "ha",
-        "disabled_plugins",
-        "enabled_plugins",
-        "license",
-        "backup",
-
-        # keys for cleanup and back-compat
-        "couchdb",
-        "opscode_solr"
-      ].each do |key|
-        # @todo: Just pick a naming convention and adhere to it
-        # consistently
-        rkey = if key =~ /^oc_/ || key == "redis_lb"
-                 key # leave oc_* keys as is
-               else
-                 key.gsub('_', '-')
-               end
-        results['private_chef'][rkey] = PrivateChef[key]
-      end
-      results['private_chef']['default_orgname'] = PrivateChef['default_orgname']
-      results['private_chef']['oc-chef-pedant'] = PrivateChef['oc_chef_pedant']
-      results['private_chef']['notification_email'] = PrivateChef['notification_email']
-      results['private_chef']['from_email'] = PrivateChef['from_email']
-      results['private_chef']['role'] = PrivateChef['role']
-      results['private_chef']['topology'] = PrivateChef['topology']
-      results['private_chef']['servers'] = PrivateChef['servers']
-      results['private_chef']['backend_vips'] = PrivateChef['backend_vips']
-      results['private_chef']['logs'] = {}
-      results['private_chef']['logs']['log_retention'] = PrivateChef['log_retention']
-      results['private_chef']['logs']['log_rotation'] = PrivateChef['log_rotation']
-      results['private_chef']['dark_launch'] = PrivateChef['dark_launch']
-      results['private_chef']['opscode-erchef']['max_request_size'] = PrivateChef["opscode_erchef"]["max_request_size"]
-      results['private_chef']['folsom_graphite'] = PrivateChef['folsom_graphite']
-      results
-    end
-
-    def gen_api_fqdn
-      PrivateChef["lb"]["api_fqdn"] ||= PrivateChef['api_fqdn']
-      PrivateChef["lb"]["web_ui_fqdn"] ||= PrivateChef['api_fqdn']
-      PrivateChef["nginx"]["server_name"] ||= PrivateChef['api_fqdn']
-      PrivateChef["nginx"]["url"] ||= "https://#{PrivateChef['api_fqdn']}"
-    end
-
-    def gen_hapaths
-      PrivateChef["ha"]["provider"] ||= "drbd" # Use drbd by default for HA
-      PrivateChef["enabled_plugins"] << "chef-ha-#{PrivateChef["ha"]["provider"]}"
-      PrivateChef["ha"]["path"] ||= "/var/opt/opscode/drbd/data"
-      hapath = PrivateChef["ha"]["path"]
-      PrivateChef['bookshelf']['data_dir'] = "#{hapath}/bookshelf"
-      PrivateChef["rabbitmq"]["data_dir"] ||= "#{hapath}/rabbitmq"
-      PrivateChef["opscode_solr4"]["data_dir"] ||= "#{hapath}/opscode-solr4"
-      PrivateChef["redis_lb"]["data_dir"] ||= "#{hapath}/redis_lb"
-
-      # cleanup back-compat
-      # in order to delete the data directories for opscode-solr and couchdb
-      # after installing Chef Server 12, we need to have access to the configuration
-      # data as if it were configured for Enterprise Chef 11.
-      PrivateChef['couchdb']['data_dir'] = "#{hapath}/couchdb"
-      PrivateChef['opscode_solr']['data_dir'] = "#{hapath}/opscode-solr"
-
-      # The postgresql data directory is scoped to the current version;
-      # changes in the directory trigger upgrades from an old PostgreSQL
-      # version to a newer one
-      PrivateChef["postgresql"]["data_dir"] ||= "#{hapath}/postgresql_#{node['private_chef']['postgresql']['version']}"
-
-      # Need old path for cookbook migration
-      PrivateChef['opscode_chef']['checksum_path'] ||= "#{hapath}/opscode-chef/checksum"
-    end
-
-    def gen_keepalived(node_name)
-      PrivateChef['servers'].each do |k, v|
-        next unless v['role'] == "backend"
-        next if k == node_name
-        PrivateChef['servers'][node_name]['peer_ipaddress'] = v['ipaddress']
-      end
-      PrivateChef["keepalived"]["enable"] ||= true
-      PrivateChef["keepalived"]["ipv6_on"] ||= PrivateChef["use_ipv6"]
-      PrivateChef["keepalived"]["vrrp_instance_interface"] = backend_vip["device"]
-      PrivateChef["keepalived"]["vrrp_instance_ipaddress"] = backend_vip["ipaddress_with_netmask"]
-      PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"]
-      PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_bind"] = PrivateChef['servers'][node_name]['ipaddress']
-      PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_peer"] = PrivateChef['servers'][node_name]['peer_ipaddress']
-      PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"]
-      PrivateChef["bookshelf"]["ha"] ||= true
-      PrivateChef["oc_id"]["ha"] ||= true
-      PrivateChef["rabbitmq"]["ha"] ||= true
-      PrivateChef["opscode_solr4"]["ha"] ||= true
-      PrivateChef["opscode_expander"]["ha"] ||= true
-      PrivateChef["opscode_erchef"]["ha"] ||= true
-      PrivateChef["lb"]["ha"] ||= true
-      PrivateChef["postgresql"]["ha"] ||= true
-      PrivateChef["redis_lb"]["ha"] ||= true
-      PrivateChef["oc_bifrost"]["ha"] ||= true
-      PrivateChef["nginx"]["ha"] ||= true
-    end
-
-    def gen_backend(bootstrap=false)
-      PrivateChef[:role] = "backend" #mixlib-config wants a symbol :(
-      PrivateChef["bookshelf"]["listen"] ||= PrivateChef["default_listen_address"]
-      PrivateChef["rabbitmq"]["node_ip_address"] ||= PrivateChef["default_listen_address"]
-      PrivateChef["redis_lb"]["listen"] ||= PrivateChef["default_listen_address"]
-      PrivateChef["opscode_solr4"]["ip_address"] ||= PrivateChef["default_listen_address"]
-      PrivateChef["postgresql"]["listen_address"] ||= '*' #PrivateChef["default_listen_address"]
-
-      authaddr = []
-      authaddr << "0.0.0.0/0" # if PrivateChef["use_ipv4"]
-      authaddr << "::/0" if PrivateChef["use_ipv6"]
-      PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= authaddr
-
-      PrivateChef["opscode_chef_mover"]["enable"] = !!bootstrap
-      PrivateChef["bootstrap"]["enable"] = !!bootstrap
-    end
-
-    def gen_frontend
-      PrivateChef[:role] = "frontend"
-      PrivateChef["bookshelf"]["enable"] ||= false
-      PrivateChef["bookshelf"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-      PrivateChef["rabbitmq"]["enable"] ||= false
-      PrivateChef["rabbitmq"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-      PrivateChef["redis_lb"]["enable"] ||= false
-      PrivateChef["redis_lb"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-      PrivateChef["opscode_solr4"]["enable"] ||= false
-      PrivateChef["opscode_solr4"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-      PrivateChef["opscode_expander"]["enable"] ||= false
-      PrivateChef["postgresql"]["enable"] ||= false
-      PrivateChef["postgresql"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-      PrivateChef["lb"]["cache_cookbook_files"] ||= true
-      PrivateChef["lb"]["upstream"] ||= Mash.new
-      if PrivateChef["use_ipv6"] && PrivateChef["backend_vips"]["ipaddress"].include?(':')
-        PrivateChef["lb"]["upstream"]["bookshelf"] ||= [ "[#{PrivateChef["backend_vips"]["ipaddress"]}]" ]
-      else
-        PrivateChef["lb"]["upstream"]["bookshelf"] ||= [ PrivateChef["backend_vips"]["ipaddress"] ]
-      end
-      PrivateChef["opscode_chef_mover"]["enable"] = false
-      PrivateChef["bootstrap"]["enable"] = false
-    end
-
     def gen_redundant(node_name, topology)
       me = PrivateChef["servers"][node_name]
       case me["role"]
       when "backend"
         gen_backend(me['bootstrap'])
+        # TODO(ssd): Move these into gen_backend callback for HA
+        # plugin once that is split out
         gen_hapaths if topology == 'ha'
         gen_keepalived(node_name) if topology == 'ha'
         gen_api_fqdn
@@ -503,8 +599,13 @@ module PrivateChef
 
     end
 
+
+    # True if the given topology requires per-server config via `server` blocks
     def server_config_required?
-      PrivateChef["topology"] == "ha" || PrivateChef["topology"] == "tier"
+      PrivateChef["topology"] == "ha" ||
+        PrivateChef["topology"] == "tier" ||
+        (PrivateChef["registered_extensions"][PrivateChef["topology"]] &&
+         PrivateChef["registered_extensions"][PrivateChef["topology"]][:server_config_required])
     end
 
     def assert_server_config(node_name)
@@ -520,9 +621,26 @@ EOF
       end
     end
 
+    def generate_config_for_topology(topology, node_name)
+      case topology
+      when "standalone","manual"
+        PrivateChef[:api_fqdn] ||= node_name
+        gen_api_fqdn
+      when "ha", "tier"
+        gen_redundant(node_name, topology)
+      else
+        if PrivateChef["registered_extensions"].key?(topology)
+          gen_redundant(node_name, topology)
+        else
+          Chef::Log.fatal("I do not understand topology #{PrivateChef.topology} - try standalone, manual, ha, or tier.")
+          exit 55
+        end
+      end
+    end
+
     def generate_config(node_name)
       assert_server_config(node_name) if server_config_required?
-      generate_secrets(node_name)
+      gen_secrets(node_name)
 
       # Under ipv4 default to 0.0.0.0 in order to ensure that
       # any service that needs to listen externally on back-end
@@ -545,16 +663,7 @@ EOF
 
       PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
 
-      case PrivateChef['topology']
-      when "standalone","manual"
-        PrivateChef[:api_fqdn] ||= node_name
-        gen_api_fqdn
-      when "ha", "tier"
-        gen_redundant(node_name, PrivateChef['topology'])
-      else
-        Chef::Log.fatal("I do not understand topology #{PrivateChef.topology} - try standalone, manual, ha, or tier.")
-        exit 55
-      end
+      generate_config_for_topology(PrivateChef["topology"], node_name)
 
       unless PrivateChef["ldap"].nil? || PrivateChef["ldap"].empty?
         gen_ldap
