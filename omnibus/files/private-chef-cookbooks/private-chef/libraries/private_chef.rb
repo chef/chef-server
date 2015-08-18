@@ -423,7 +423,6 @@ module PrivateChef
     end
 
     def gen_redundant(node_name, topology)
-      raise "Please add a server section for #{node_name} to /etc/opscode/private-chef.rb!" unless PrivateChef['servers'].has_key?(node_name)
       me = PrivateChef["servers"][node_name]
       case me["role"]
       when "backend"
@@ -504,7 +503,25 @@ module PrivateChef
 
     end
 
+    def server_config_required?
+      PrivateChef["topology"] == "ha" || PrivateChef["topology"] == "tier"
+    end
+
+    def assert_server_config(node_name)
+      unless PrivateChef["servers"].key?(node_name)
+        Chef::Log.fatal <<-EOF
+No server configuration found for "#{node_name}".  Server configuration
+exists for the following hostnames:
+
+  #{PrivateChef["servers"].keys.sort.join("\n  ")}
+
+EOF
+        exit(1)
+      end
+    end
+
     def generate_config(node_name)
+      assert_server_config(node_name) if server_config_required?
       generate_secrets(node_name)
 
       # Under ipv4 default to 0.0.0.0 in order to ensure that
