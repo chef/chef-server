@@ -220,7 +220,7 @@ module PrivateChef
         # keys for cleanup and back-compat
         "couchdb",
         "opscode_solr"]
-      keys_from_extensions = PrivateChef["registered_extensions"].map {|name, ext| ext[:config_values].keys.map {|k| k.to_s} if ext[:config_values]}.flatten.compact
+
       (default_keys | keys_from_extensions).each do |key|
         # @todo: Just pick a naming convention and adhere to it
         # consistently
@@ -248,6 +248,18 @@ module PrivateChef
       results
     end
 
+    #
+    # Returns an array of the configuration keys added by registered
+    # extensions. These keys should be rendered to the final
+    # configuration
+    #
+    def keys_from_extensions
+      PrivateChef["registered_extensions"].map do |name, ext|
+        if ext[:config_values]
+          ext[:config_values].keys.map {|k| k.to_s}
+        end
+      end.flatten.compact
+    end
 
     def gen_hapaths
       PrivateChef["ha"]["provider"] ||= "drbd" # Use drbd by default for HA
