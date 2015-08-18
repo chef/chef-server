@@ -623,8 +623,8 @@ module PrivateChef
     def assert_server_config(node_name)
       unless PrivateChef["servers"].key?(node_name)
         Chef::Log.fatal <<-EOF
-No server configuration found for "#{node_name}".  Server configuration
-exists for the following hostnames:
+No server configuration found for "#{node_name}" in /etc/opscode/chef-server.rb.
+Server configuration exists for the following hostnames:
 
   #{PrivateChef["servers"].keys.sort.join("\n  ")}
 
