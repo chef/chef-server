@@ -24,17 +24,15 @@ fi
 if [[ $type == 'CS' ]];
 then
     path='opscode'
-    ctl_cmd='private-chef-ctl'
+    ctl_cmd='chef-server-ctl'
     config_name='*chef*.rb'
     ha=$(egrep -qs 'topology[[:space:]]+.*ha' /etc/opscode/*chef*.rb)$?
 
     if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
     then
-        echo "ERROR: Enterprise or Chef Server may not be installed."
+        echo "ERROR: Chef Server may not be installed."
         exit 1
     fi
-
-    echo "Gathering logs from Enterprise or Chef Server."
 elif [[ $type == 'OSC' ]];
 then
     path='chef-server'
@@ -43,11 +41,11 @@ then
 
     if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
     then
-        echo "ERROR: Open Source Chef server may not be installed."
+        echo "ERROR: Open Source Chef Server 11 may not be installed."
         exit 1
     fi
 
-    echo "Gathering logs from Open Source Chef server."
+    echo "Gathering logs from Open Source Chef server 11."
 elif [[ $type == 'Analytics' ]];
 then
     path='opscode-analytics'
@@ -64,7 +62,7 @@ then
 else
     echo "Usage: gather-logs [ CS | OSC | Analytics ]"
     echo "CS - Enterprise or Chef Server (default)"
-    echo "OSC - Open Source Chef server"
+    echo "OSC - Open Source Chef Server 11"
     echo "Analytics - Opscode Analytics server"
     exit 1
 fi
@@ -116,27 +114,29 @@ fi
 # There are two cases in which this could fail:
 # 1) We've configure postgresql to listen on a different local socket. Most users don't do this, but it is possible.
 # 2) Postgresql isn't running.
-# Since the general goal of this script is to collect whatever we can for support but not present confusing errors to 
-# the user, we went for a test that covered (2) easily. If we can do something smart that would account for (1) that 
+# Since the general goal of this script is to collect whatever we can for support but not present confusing errors to
+# the user, we went for a test that covered (2) easily. If we can do something smart that would account for (1) that
 # would be cool, but my sense is that this is OK for now.
 
 if [[ -S "/tmp/.s.PGSQL.5432" ]]; then
-    if [[ $type == 'CS' ]];
-    then
-        echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | su -l $POSTGRESQL_UNIX_USER -c 'psql opscode_chef' > "$tmpdir/pg_stat_activity.txt"
-
-        echo "SELECT * FROM sqitch.tags;" | su -l $POSTGRESQL_UNIX_USER -c 'psql opscode_chef' > "$tmpdir/opscode_chef_sqitch_tags.txt"
-        echo "SELECT * FROM sqitch.tags;" | su -l $POSTGRESQL_UNIX_USER -c 'psql bifrost' > "$tmpdir/bifrost_sqitch_tags.txt"
-
-        su -m $POSTGRESQL_UNIX_USER -c 'ulimit -a' > "$tmpdir/ulimit_a_opscode-pgsql.txt"
-    fi
     if [[ $type == 'Analytics' ]];
     then
         echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | su -l chef-pgsql -c 'psql actions' > "$tmpdir/pg_stat_activity.txt"
-
         echo "SELECT * FROM schema_migrations;" | su -l chef-pgsql -c 'psql actions' > "$tmpdir/actions_schema_migrations.txt"
-
         su -m chef-pgsql -c 'ulimit -a'> "$tmpdir/ulimit_a_chef-pgsql.txt"
+    fi
+fi
+
+
+if [[ $type == 'CS' ]];
+then
+    # postgres server may be external - we'll go ahead and try to gather what we can in any case, and just capture errors to the output
+    # without showing them to the user
+    echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | chef-server-ctl psql oc_erchef  --options -tA > "$tmpdir/pg_stat_activity.txt" 2>&1
+    echo "SELECT * FROM sqitch.tags;" |  chef-server-ctl psql oc_erchef --options -tA  > "$tmpdir/opscode_chef_sqitch_tags.txt" 2>&1
+    echo "SELECT * FROM sqitch.tags;" |  chef-server-ctl psql bifrost --options -tA > "$tmpdir/bifrost_sqitch_tags.txt" 2>&1
+    if [[ -S "/tmp/.s.PGSQL.5432" ]]; then
+        su -m $POSTGRESQL_UNIX_USER -c 'ulimit -a' > "$tmpdir/ulimit_a_opscode-pgsql.txt"
     fi
 fi
 
