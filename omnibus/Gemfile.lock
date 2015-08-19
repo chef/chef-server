@@ -51,7 +51,7 @@ GEM
     buff-shell_out (0.2.0)
       buff-ruby_engine (~> 0.1.0)
     builder (3.2.2)
-    celluloid (0.16.1)
+    celluloid (0.16.0)
       timers (~> 4.0.0)
     celluloid-io (0.16.2)
       celluloid (>= 0.16.0)
@@ -239,3 +239,6 @@ DEPENDENCIES
   omnibus-software!
   rake
   rspec
+
+BUNDLED WITH
+   1.10.0
