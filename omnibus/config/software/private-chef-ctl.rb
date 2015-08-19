@@ -28,7 +28,7 @@ build do
       file.print <<-EOH
 #!/bin/bash
 #
-# Copyright 2012-2014 Chef Software, Inc.
+# Copyright 2012-2015 Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,14 +47,11 @@ export SVWAIT=30
 
 # Ensure the calling environment (disapproval look Bundler) does not infect our
 # Ruby environment if private-chef-ctl is called from a Ruby script.
-for ruby_env_var in RUBYOPT \\
-                    BUNDLE_BIN_PATH \\
-                    BUNDLE_GEMFILE \\
-                    GEM_PATH \\
-                    GEM_HOME
-do
-  unset $ruby_env_var
-done
+unset RUBYOPT
+unset BUNDLE_BIN_PATH
+unset BUNDLE_GEMFILE
+unset GEM_PATH
+unset GEM_HOME
 
 ID=`id -u`
 if [ $ID -ne 0 ]; then
@@ -62,7 +59,7 @@ if [ $ID -ne 0 ]; then
    exit 1
 fi
 
-#{install_dir}/embedded/bin/omnibus-ctl opscode #{install_dir}/embedded/service/omnibus-ctl "$@"
+#{install_dir}/embedded/service/omnibus-ctl/chef-server-ctl opscode #{install_dir}/embedded/service/omnibus-ctl "$@"
        EOH
     end
   end
