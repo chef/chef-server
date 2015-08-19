@@ -4,7 +4,7 @@
 %% @author Jean Rouge <jean@chef.io>
 %% Copyright 2013-2015 Chef Software, Inc. All Rights Reserved.
 
--module(oc_chef_wm_named_policy).
+-module(oc_chef_wm_policy_group_policy_rev).
 
 -include("oc_chef_wm.hrl").
 

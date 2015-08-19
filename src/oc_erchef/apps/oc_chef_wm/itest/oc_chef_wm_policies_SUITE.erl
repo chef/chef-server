@@ -146,14 +146,14 @@ functional_tests(Config) ->
     ok.
 
 test_init(_Config) ->
-    {OkOrError, _State} = oc_chef_wm_named_policy:init([]),
+    {OkOrError, _State} = oc_chef_wm_policy_group_policy_rev:init([]),
     ?assertEqual(ok, OkOrError).
 
 test_validate_json(_Config) ->
-    Result = oc_chef_wm_named_policy:validate_json(?POLICY_FILE_MINIMAL_EXAMPLE, "some_policy_name"),
+    Result = oc_chef_wm_policy_group_policy_rev:validate_json(?POLICY_FILE_MINIMAL_EXAMPLE, "some_policy_name"),
     Expected = jiffy:decode(?POLICY_FILE_MINIMAL_EXAMPLE),
     ?assertEqual(Expected, Result),
-    Result2 = oc_chef_wm_named_policy:validate_json(?POLICY_FILE_CANONICAL_EXAMPLE, "some_policy_name"),
+    Result2 = oc_chef_wm_policy_group_policy_rev:validate_json(?POLICY_FILE_CANONICAL_EXAMPLE, "some_policy_name"),
     Expected2 = jiffy:decode(?POLICY_FILE_CANONICAL_EXAMPLE),
     ?assertEqual(Expected2, Result2),
     ok.
@@ -173,7 +173,7 @@ test_policy_permissions_get_404(Config) ->
     DbContext = proplists:get_value(context, Config),
     QueryRecord = make_query_record_404(Config),
     % 404s
-    Result = oc_chef_wm_named_policy:policy_permissions_objects('GET', not_found, QueryRecord, DbContext),
+    Result = oc_chef_wm_policy_group_policy_rev:policy_permissions_objects('GET', not_found, QueryRecord, DbContext),
     Expected = {halt, 404, {[{<<"error">>, [<<"Cannot load policy nope in policy group nope">>]}]}},
     ?assertEqual(Expected, Result),
     ok.
@@ -182,7 +182,7 @@ test_policy_permissions_delete_404(Config) ->
     DbContext = proplists:get_value(context, Config),
     QueryRecord = make_query_record_404(Config),
     % 404s
-    Result = oc_chef_wm_named_policy:policy_permissions_objects('DELETE', not_found, QueryRecord, DbContext),
+    Result = oc_chef_wm_policy_group_policy_rev:policy_permissions_objects('DELETE', not_found, QueryRecord, DbContext),
     Expected = {halt, 404, {[{<<"error">>, [<<"Cannot load policy nope in policy group nope">>]}]}},
     ?assertEqual(Expected, Result),
     ok.
@@ -191,7 +191,7 @@ test_policy_permissions_put_404_prereqs_dont_exist(Config) ->
     DbContext = proplists:get_value(context, Config),
     QueryRecord = make_query_record_404(Config),
     % 404s
-    Result = oc_chef_wm_named_policy:policy_permissions_objects('PUT', not_found, QueryRecord, DbContext),
+    Result = oc_chef_wm_policy_group_policy_rev:policy_permissions_objects('PUT', not_found, QueryRecord, DbContext),
     Expected = [{create_in_container, policy_group}, {create_in_container, policies}],
     ?assertEqual(Expected, Result),
     ok.
@@ -269,7 +269,7 @@ test_policy_permissions_put_404_prereqs_exist(Config) ->
             policy = Policy,
             policy_group = PolicyGroup
             },
-    Result = oc_chef_wm_named_policy:policy_permissions_objects('PUT', not_found, QueryAssoc, DbContext),
+    Result = oc_chef_wm_policy_group_policy_rev:policy_permissions_objects('PUT', not_found, QueryAssoc, DbContext),
     % These get reversed by list head-tail stuff compared to the asssociation exists case
     Expected = [{policy_group, ?AUTHZ_ID5}, {policy, ?AUTHZ_ID4}],
     ?assertEqual(Expected, Result),
@@ -279,7 +279,7 @@ test_policy_permissions_get_when_exists(Config) ->
     DbContext = proplists:get_value(context, Config),
     CreatedAssocWithObjects = make_query_record_exists(Config),
     ReturnedAssoc = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(CreatedAssocWithObjects, DbContext),
-    Result = oc_chef_wm_named_policy:policy_permissions_objects('GET', ReturnedAssoc, CreatedAssocWithObjects, DbContext),
+    Result = oc_chef_wm_policy_group_policy_rev:policy_permissions_objects('GET', ReturnedAssoc, CreatedAssocWithObjects, DbContext),
     Expected = [{policy, ?AUTHZ_ID4}, {policy_group, ?AUTHZ_ID5}],
     ?assertEqual(Expected, Result),
     delete_all_policy_data().
@@ -288,7 +288,7 @@ test_policy_permissions_put_when_exists(Config) ->
     DbContext = proplists:get_value(context, Config),
     CreatedAssocWithObjects = make_query_record_exists(Config),
     ReturnedAssoc = oc_chef_policy_group_revision_association:find_policy_revision_by_orgid_name_group_name(CreatedAssocWithObjects, DbContext),
-    Result = oc_chef_wm_named_policy:policy_permissions_objects('PUT', ReturnedAssoc, CreatedAssocWithObjects, DbContext),
+    Result = oc_chef_wm_policy_group_policy_rev:policy_permissions_objects('PUT', ReturnedAssoc, CreatedAssocWithObjects, DbContext),
     Expected = [{policy, ?AUTHZ_ID4}, {policy_group, ?AUTHZ_ID5}],
     ?assertEqual(Expected, Result),
     delete_all_policy_data().
