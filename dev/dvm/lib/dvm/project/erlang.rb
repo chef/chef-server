@@ -89,7 +89,7 @@ EOM
       say("Setting up symlinks")
       # Yay project inconsistencies
       base_sv_path = "/var/opt/opscode/#{service["name"]}"
-      FileUtils.rm_rf(["#{relpath}/log", "#{relpath}/sys.config", "#{relpath}/etc/sys.config"])
+      purge_links
       if File.exists?("#{base_sv_path}/sys.config")
         FileUtils.ln_s("#{base_sv_path}/sys.config", "#{relpath}/sys.config")
       else
@@ -97,6 +97,10 @@ EOM
       end
 
       FileUtils.ln_s("/var/log/opscode/#{service["name"]}", "#{relpath}/log")
+    end
+
+    def purge_links
+      FileUtils.rm_rf(["#{relpath}/log", "#{relpath}/sys.config", "#{relpath}/etc/sys.config"])
     end
 
     def do_load(options)
@@ -148,16 +152,16 @@ EOM
 
     end
     def unload
-      if File.exists?("#{relpath}/sys.config")
-        FileUtils.rm("#{relpath}/sys.config")
-      else
-        FileUtils.rm("#{relpath}/etc/sys.config")
-      end
-      FileUtils.rm("#{relpath}/log")
+      purge_links
       enable_service
     end
 
     def do_build
+      # Now that we use relx, the build will write sys.config. In the case of a
+      # `dvm load $proj --force`, this can open the symlink to sys.config and
+      # write invalid config to the omnibus managed copy, leaving you with a
+      # broken configuration. So we need to nuke those links first.
+      purge_links
       # TODO currently we only load projects that are maintained by Chef and live in chef-server/src.
       # If this changes, we'll need to support specification of alternative build commands.
       # TODO2: add build.env since only erchef needs use_system_gecode...
