@@ -241,10 +241,7 @@ wget --quiet https://www.postgresql.org/media/keys/ACCC4CF8.asc
 apt-key add ACCC4CF8.asc
 apt-get update
 apt-get install postgresql-9.2 -y
-echo "host    all             bofh            #{CS_VM_ADDRESS}/32         md5" >> /etc/postgresql/9.2/main/pg_hba.conf
-echo "host    oc_id           oc_id           #{CS_VM_ADDRESS}/32         md5" >> /etc/postgresql/9.2/main/pg_hba.conf
-echo "host    bifrost         bifrost         #{CS_VM_ADDRESS}/32         md5" >> /etc/postgresql/9.2/main/pg_hba.conf
-echo "host    opscode_chef    opscode_chef    #{CS_VM_ADDRESS}/32         md5" >> /etc/postgresql/9.2/main/pg_hba.conf
+echo "host    all             all             #{CS_VM_ADDRESS}/32         md5" >> /etc/postgresql/9.2/main/pg_hba.conf
 echo "listen_addresses='*'" >> /etc/postgresql/9.2/main/postgresql.conf
 service postgresql restart
 export PATH=/usr/lib/postgresql/9.2/bin:$PATH

@@ -9,24 +9,53 @@ module DVM
       cmd
     end
     def bind_mount(from, to)
-      run_command "mount -o bind #{from} #{to}"
-    end
-    def unmount(from)
-      run_command "umount #{from}"
+      if path_mounted?(from)
+        puts "#{from} already mounted, taking no action"
+        return
+      end
+      if find_mount(File.read('/etc/fstab'), from)
+        puts "Not adding #{from} to /etc/fstab, it already exists"
+      else
+        # Add an fstab entry so we don't lose this on reboot.
+        File.open('/etc/fstab', 'a') { |fstab| fstab.puts "#{from} #{to} none bind" }
+      end
+      run_command("mount #{from}")
     end
 
-    def path_mounted?(path)
-      mounts = run_command "mount"
-      mounts.stdout.split("\n").each do |mount|
-        if mount.include? path
-          return true
+    def unmount(from)
+      unless path_mounted?(from)
+        puts "#{from} not mounted, taking no action"
+        return
+      end
+
+      run_command "umount #{from}"
+      lines = File.read('/etc/fstab').split("\n")
+      File.open('/etc/fstab', 'w') do |fstab|
+        # Write everything except the item we're removing.
+        lines.each do |line|
+          fstab.puts line unless line.include? from
         end
+      end
+    end
+
+    def find_mount(mount_list, path)
+      mount_list.split("\n").each do |line|
+        return true if line.include?(path)
       end
       return false
     end
 
+    def path_mounted?(path)
+      mounts = run_command "mount"
+      find_mount(mounts.stdout, path)
+    end
+
+    def system_gem_path(name)
+       gem_path = `gem which #{name} 2>&1`
+       Pathname.new(gem_path).parent.parent.to_s
+    end
     def host_raw_dir
-      "/mnt/host-do-not-use"
+        "/mnt/host-do-not-use"
     end
 
     def host_project_dir(path)
@@ -42,9 +71,16 @@ module DVM
     end
 
     def checkout(name, ref)
-      result = run_command("git checkout #{ref}", "Checking out #{ref} to match what is currently running", cwd: host_project_dir(name), no_raise: true)
+      cwd = host_project_dir(name)
+      result = run_command("git checkout #{ref}", "Checking out #{ref} to match what is currently running", cwd: cwd, no_raise: true)
       if result.error?
-        raise DVM::DVMArgumentError, "Could not check out #{ref} in #{host_project_dir(name)}.  Have you pulled the latest and/or stashed local changes?\nError was: #{result.stderr}"
+        raise DVM::DVMArgumentError, <<-EOM
+Could not check out #{ref} in #{host_project_dir(name)}.
+Have you pulled the latest and/or stashed local changes?
+Alternatively, specify '--no-checkout'.
+
+Error was: #{result.stderr}"
+EOM
       end
     end
   end
