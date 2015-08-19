@@ -99,6 +99,7 @@
 
          %% policy_groups
          find_all_policy_revisions_by_group_and_name/1,
+         find_all_policy_revisions_associated_to_group/2,
 
          %% policies
          list_all_policy_revisions_by_orgid/1,
@@ -1556,6 +1557,17 @@ tuplize_policy_rev(Row) ->
 
 find_all_policy_revisions_by_group_and_name(OrgId) ->
     case sqerl:select(find_all_policy_revisions_by_group_and_name, [OrgId]) of
+        {ok, none} ->
+            {ok, []};
+        {ok, Rows } ->
+            Processed = policy_rev_by_group_rows_to_tuple(Rows, []),
+            {ok, Processed};
+        {error, Reason} ->
+            {error, Reason}
+    end.
+
+find_all_policy_revisions_associated_to_group(OrgId, GroupName) ->
+    case sqerl:select(find_all_policy_revisions_associated_to_group, [OrgId, GroupName]) of
         {ok, none} ->
             {ok, []};
         {ok, Rows } ->

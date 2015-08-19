@@ -93,6 +93,7 @@ org_route(principal, Req, Args) -> route_organization_rest_object("principals", 
 org_route(client, Req, Args) -> route_organization_rest_object("clients", Req, Args);
 org_route(container, Req, Args) -> route_organization_rest_object("containers", Req, Args);
 org_route(policy, Req, Args) -> route_organization_rest_object("policies", Req, Args);
+org_route(policy_group, Req, Args) -> route_organization_rest_object("policy_groups", Req, Args);
 org_route(group, Req, Args) -> route_organization_rest_object("groups", Req, Args);
 org_route(association, Req, Args) -> route_organization_rest_object("users", Req, Args);
 org_route(invite, Req, Args) -> route_organization_rest_object("association_requests", Req, Args);

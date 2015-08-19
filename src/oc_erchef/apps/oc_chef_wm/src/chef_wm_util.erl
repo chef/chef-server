@@ -153,7 +153,9 @@ not_found_message(association, {Name, OrgName} ) ->
 not_found_message(invitation, Id) ->
     {[{<<"error">>, iolist_to_binary(["Cannot find association request: ", Id])}]};
 not_found_message(key, {OwnerName, KeyName}) ->
-    {[{<<"error">>, iolist_to_binary(["There is no key named ", KeyName, " associated with ", OwnerName, "."])}]}.
+    {[{<<"error">>, iolist_to_binary(["There is no key named ", KeyName, " associated with ", OwnerName, "."])}]};
+not_found_message(policy_group, Name) ->
+    error_message_envelope(iolist_to_binary(["policy_group '", Name, "' not found"])).
 
 
 

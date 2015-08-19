@@ -338,6 +338,11 @@
           oc_chef_policy_group_revision_association :: #oc_chef_policy_group_revision_association{}
          }).
 
+-record(policy_group_state, {
+          policy_group,
+          policy_group_authz_id
+         }).
+
 -record(acl_state, {
           type,
           authz_id,

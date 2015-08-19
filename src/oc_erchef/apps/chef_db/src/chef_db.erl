@@ -89,7 +89,8 @@
          data_bag_exists/3,
          environment_exists/3,
          list_all_policy_revisions_by_orgid/2,
-         find_all_policy_revisions_by_group_and_name/2]).
+         find_all_policy_revisions_by_group_and_name/2,
+         find_all_policy_revisions_associated_to_group/3]).
 
 -include("chef_db.hrl").
 -include("chef_types.hrl").
@@ -632,6 +633,16 @@ find_all_policy_revisions_by_group_and_name(#context{reqid=ReqId}, OrgId) ->
         {error, Error} ->
             {error, Error}
     end.
+
+find_all_policy_revisions_associated_to_group(#context{reqid=ReqId}, OrgId, GroupName) ->
+    case ?SH_TIME(ReqId, chef_sql, find_all_policy_revisions_associated_to_group, (OrgId, GroupName)) of
+        {ok, PolicyGroupPolicyRevisionIDs} ->
+            PolicyGroupPolicyRevisionIDs;
+        {error, Error} ->
+            {error, Error}
+    end.
+
+
 
 %% -------------------------------------
 %% private functions

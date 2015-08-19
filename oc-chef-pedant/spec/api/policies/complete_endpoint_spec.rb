@@ -396,7 +396,166 @@ describe "Policies API endpoint", :policies do
       end
 
     end
-  end
+  end # describe "Listing policies and policy groups"
+
+  describe "Named Policy Groups endpoint /policy_groups/:policy_group_name" do
+
+    let(:named_policy_group_url) { api_url("/policy_groups/example-policy-group") }
+
+    context "when the named group doesn't exist" do
+
+      it "GET /policy_groups/:policy_group_name returns a 404" do
+        expect(get(named_policy_group_url, requestor).code).to eq(404)
+      end
+
+      it "DELETE /policy_groups/:policy_group_name returns a 404" do
+        expect(delete(named_policy_group_url, requestor).code).to eq(404)
+      end
+
+    end
+
+    context "when the named group exists" do
+
+      let(:associated_policy_url) { "#{named_policy_group_url}/policies/some_policy_name" }
+
+      before do
+        put(associated_policy_url, requestor, payload: minimum_valid_policy_payload)
+      end
+
+      after do
+        delete(named_policy_group_url, requestor)
+      end
+
+      context "when no policies are assigned to the group" do
+
+        let(:expected_body) do
+          {
+            "uri" => api_url("policy_groups/example-policy-group"),
+            "policies" => {}
+          }
+        end
+
+        before do
+          # remove policy group association to clear out the policy group
+          delete(associated_policy_url, requestor)
+        end
+
+        it "GET /policy_groups/:policy_group_name returns 200 with an empty JSON Object" do
+          response = get(named_policy_group_url, requestor)
+          expect(response.code).to eq(200)
+          expect(parse(response.body)).to eq(expected_body)
+        end
+
+        it "DELETE /policy_groups/:policy_group_name returns 200 with an empty JSON Object" do
+          response = delete(named_policy_group_url, requestor)
+          expect(response.code).to eq(200)
+          expect(parse(response.body)).to eq(expected_body)
+        end
+
+      end
+
+      context "when policies are assigned to the group" do
+
+        let(:expected_body) do
+          {
+            "uri" => api_url("policy_groups/example-policy-group"),
+            "policies" => {
+              "some_policy_name" => { "revision_id" => "909c26701e291510eacdc6c06d626b9fa5350d25" }
+            }
+          }
+        end
+
+        it "GET /policy_groups/:policy_group_name returns 200 with a JSON Object showing associated policies" do
+          response = get(named_policy_group_url, requestor)
+          expect(response.code).to eq(200)
+          expect(parse(response.body)).to eq(expected_body)
+        end
+
+        it "DELETE /policy_groups/:policy_group_name returns 200 with a JSON Object showing associated policies" do
+          response = delete(named_policy_group_url, requestor)
+          expect(response.code).to eq(200)
+          expect(parse(response.body)).to eq(expected_body)
+        end
+
+        it "DELETE /policy_groups/:policy_group_name deletes policy associations" do
+          response = delete(named_policy_group_url, requestor)
+          expect(response.code).to eq(200)
+
+          expect(get(associated_policy_url, requestor).code).to eq(404)
+        end
+
+      end
+
+    end
+
+  end # describe "Named Policy Groups endpoint /policy_groups/:policy_group_name"
+
+  describe "Named policy endpoint /policies/:policy_name" do
+
+    context "when :policy_name doesn't exist" do
+
+      it "GET /policies/:policy_name returns a 404"
+
+      it "DELETE /policies/:policy_name returns 404"
+
+      it "POST /policies/:policy_name/revisions creates the policy name and policy revision"
+
+    end
+
+    context "when policy_name exists" do
+
+      it "GET /policies/:policy_name returns a list of revisions"
+
+      it "DELETE /policies/:policy_name deletes the thing and returns the list of revisions"
+
+      describe "creating a new revision" do
+
+        context "when the revision doesn't yet exist" do
+
+          it "POST /policies/:policy_name/revisions creates the policy revision"
+
+        end
+
+        context "when the revision exists" do
+
+          it "POST /policies/:policy_name/revisions returns 409"
+
+        end
+
+      end
+
+    end
+
+  end # describe "Named policy endpoint /policies/:policy_name"
+
+  describe "Named policy revision endpoint /policies/:policy_name/revisions/:revision_id" do
+
+    context "when the policy_name doesn't exist" do
+
+      it "GET /policies/:policy_name/revisions/:revision_id returns 404"
+
+      it "DELETE /policies/:policy_name/revisions/:revision_id returns 404"
+
+    end
+
+    context "when the policy_name exists but :revision_id doesn't" do
+
+      it "GET /policies/:policy_name/revisions/:revision_id returns 404"
+
+      it "DELETE /policies/:policy_name/revisions/:revision_id returns 404"
+
+    end
+
+    context "when the policy_name exists and :revision_id exists" do
+
+      it "GET /policies/:policy_name/revisions/:revision_id returns 200, with the policy as the body"
+
+      it "DELETE /policies/:policy_name/revisions/:revision_id returns 200, with the policy as the body"
+
+    end
+
+  end # describe "Named policy revision endpoint /policies/:policy_name/revisions/:revision_id"
+
 
   describe "Policy Group Revision Association Endpoint /policy_groups/:policy_group/policies/:policy_name", :policy_group_assoc do
 
