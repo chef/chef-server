@@ -179,19 +179,6 @@ module PrivateChef
         PrivateChef['postgresql'].delete 'sql_ro_password'
         PrivateChef['postgresql'].delete 'sql_ro_user'
       end
-      # Transition Solr memory and JVM settings from OSC11 to Chef 12.
-      if PrivateChef['opscode_solr'].has_key? 'heap_size'
-        PrivateChef['opscode_solr4']['heap_size'] ||= PrivateChef['opscode_solr']['heap_size']
-        PrivateChef['opscode_solr'].delete 'heap_size'
-      end
-      if PrivateChef['opscode_solr'].has_key? 'new_size'
-        PrivateChef['opscode_solr4']['new_size'] ||= PrivateChef['opscode_solr']['new_size']
-        PrivateChef['opscode_solr'].delete 'new_size'
-      end
-      if PrivateChef['opscode_solr'].has_key? 'java_opts'
-        PrivateChef['opscode_solr4']['java_opts'] ||= PrivateChef['opscode_solr']['java_opts']
-        PrivateChef['opscode_solr'].delete 'java_opts'
-      end
 
 
       me = PrivateChef["servers"][node_name]
@@ -526,6 +513,20 @@ module PrivateChef
         PrivateChef["use_ipv4"] = false
         PrivateChef["use_ipv6"] = true
         PrivateChef["default_listen_address"] = "::"
+      end
+
+      # Transition Solr memory and JVM settings from OSC11 to Chef 12.
+      if PrivateChef['opscode_solr'].has_key? 'heap_size'
+        PrivateChef['opscode_solr4']['heap_size'] ||= PrivateChef['opscode_solr']['heap_size']
+        PrivateChef['opscode_solr'].delete 'heap_size'
+      end
+      if PrivateChef['opscode_solr'].has_key? 'new_size'
+        PrivateChef['opscode_solr4']['new_size'] ||= PrivateChef['opscode_solr']['new_size']
+        PrivateChef['opscode_solr'].delete 'new_size'
+      end
+      if PrivateChef['opscode_solr'].has_key? 'java_opts'
+        PrivateChef['opscode_solr4']['java_opts'] ||= PrivateChef['opscode_solr']['java_opts']
+        PrivateChef['opscode_solr'].delete 'java_opts'
       end
 
       PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
