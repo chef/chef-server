@@ -110,6 +110,15 @@ module PrivateChef
       end
     end
 
+    def import_legacy_service_config(old_service_key, new_service_key, keys)
+      keys.each do |configkey|
+        if PrivateChef[old_service_key].has_key? configkey
+          PrivateChef[new_service_key][configkey] ||= PrivateChef[old_service_key][configkey]
+          PrivateChef[old_service_key].delete configkey
+        end
+      end
+    end
+
     def server(name=nil, opts={})
       if name
         PrivateChef["servers"] ||= Mash.new
@@ -179,7 +188,6 @@ module PrivateChef
         PrivateChef['postgresql'].delete 'sql_ro_password'
         PrivateChef['postgresql'].delete 'sql_ro_user'
       end
-
 
       me = PrivateChef["servers"][node_name]
       ha_guard = PrivateChef['topology'] == 'ha' && !me['bootstrap']
@@ -516,18 +524,19 @@ module PrivateChef
       end
 
       # Transition Solr memory and JVM settings from OSC11 to Chef 12.
-      if PrivateChef['opscode_solr'].has_key? 'heap_size'
-        PrivateChef['opscode_solr4']['heap_size'] ||= PrivateChef['opscode_solr']['heap_size']
-        PrivateChef['opscode_solr'].delete 'heap_size'
-      end
-      if PrivateChef['opscode_solr'].has_key? 'new_size'
-        PrivateChef['opscode_solr4']['new_size'] ||= PrivateChef['opscode_solr']['new_size']
-        PrivateChef['opscode_solr'].delete 'new_size'
-      end
-      if PrivateChef['opscode_solr'].has_key? 'java_opts'
-        PrivateChef['opscode_solr4']['java_opts'] ||= PrivateChef['opscode_solr']['java_opts']
-        PrivateChef['opscode_solr'].delete 'java_opts'
-      end
+      import_legacy_service_config('opscode_solr', 'opscode_solr4', ['heap_size', 'new_size', 'java_opts'])
+      # if PrivateChef['opscode_solr'].has_key? 'heap_size'
+      #   PrivateChef['opscode_solr4']['heap_size'] ||= PrivateChef['opscode_solr']['heap_size']
+      #   PrivateChef['opscode_solr'].delete 'heap_size'
+      # end
+      # if PrivateChef['opscode_solr'].has_key? 'new_size'
+      #   PrivateChef['opscode_solr4']['new_size'] ||= PrivateChef['opscode_solr']['new_size']
+      #   PrivateChef['opscode_solr'].delete 'new_size'
+      # end
+      # if PrivateChef['opscode_solr'].has_key? 'java_opts'
+      #   PrivateChef['opscode_solr4']['java_opts'] ||= PrivateChef['opscode_solr']['java_opts']
+      #   PrivateChef['opscode_solr'].delete 'java_opts'
+      # end
 
       PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
 
