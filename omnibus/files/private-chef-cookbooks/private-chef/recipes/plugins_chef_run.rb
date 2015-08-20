@@ -1,4 +1,4 @@
-plugins = EnterprisePluginCollection.from_glob("/var/opt/opscode/plugins/*.rb")
+plugins = node.default['available-plugins']
 plugins.each do |p|
   next if !p.parent_plugin.nil?
   p.enabled true if node['private_chef']['enabled-plugins'].include?(p.name)

@@ -7,8 +7,16 @@ class EnterprisePluginCollection
 
   def plugin(name, &block)
     p = EnterprisePlugin.new(name)
-    p.instance_eval &block
+    p.instance_eval(&block)
     @plugins << p
+  end
+
+  def plugin_names
+    @plugins.map {|p| p.name }
+  end
+
+  def by_name(name)
+    @plugins.find {|p| p.name == name }
   end
 
   def load_from_file(filename)
@@ -16,7 +24,19 @@ class EnterprisePluginCollection
     nc.instance_eval(::File.read(filename))
     nc.plugins.each do |p|
       p.cookbook_path "#{::File.dirname(filename)}/embedded/cookbooks" unless p.cookbook_path
+      p.definition_location filename
     end
+
+    # Don't add already loaded plugins to the path.
+    nc.plugins.reject! do |p|
+      if plugin_names.include?(p.name)
+        Chef::Log.warn("Plugin #{p.name} already loaded, not loading #{p.name} from #{filename}")
+        Chef::Log.warn("Plugin #{p.name} was already defined by #{by_name(p.name).definition_location}")
+        true
+      end
+      false
+    end
+
     @plugins += nc.plugins
   end
 

@@ -33,6 +33,14 @@ class EnterprisePlugin
     set_or_return(:enabled, value)
   end
 
+  def definition_location(value=nil)
+    set_or_return(:definition_location, value)
+  end
+
+  def config_extension_path(value=nil)
+    set_or_return(:config_extension_path, value)
+  end
+
   def enabled_run_list
     "recipe[#{name}::enable]"
   end
