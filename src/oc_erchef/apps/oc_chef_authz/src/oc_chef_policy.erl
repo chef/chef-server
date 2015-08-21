@@ -201,12 +201,8 @@ fields_for_insert(#oc_chef_policy{
     [Id, AuthzId, OrgId, Name, LastUpdatedBy].
 
 
-delete(ObjectRec = #oc_chef_policy{
-                      org_id = OrgId,
-                      last_updated_by = _AuthzId,
-                      authz_id = _PolicyAuthzId
-                     }, CallbackFun) ->
-    CallbackFun({delete_query(ObjectRec), [name(ObjectRec), OrgId]}).
+delete(ObjectRec = #oc_chef_policy{id = ID}, CallbackFun) ->
+    CallbackFun({delete_query(ObjectRec), [ID]}).
 
 set_api_version(ObjectRec, Version) ->
     ObjectRec#oc_chef_policy{server_api_version = Version}.

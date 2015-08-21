@@ -338,6 +338,15 @@
           oc_chef_policy_group_revision_association :: #oc_chef_policy_group_revision_association{}
          }).
 
+-record(named_policy_revisions_state, {
+          policy_name,
+          create_policy = false,
+          policy_record,
+          policy_revision_data,
+          policy_authz_id,
+          policy_data_for_response
+         }).
+
 -record(policy_group_state, {
           policy_group,
           policy_group_authz_id

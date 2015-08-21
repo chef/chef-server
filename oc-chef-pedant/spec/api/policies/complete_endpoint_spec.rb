@@ -492,33 +492,107 @@ describe "Policies API endpoint", :policies do
 
   describe "Named policy endpoint /policies/:policy_name" do
 
+    let(:named_policy_url) { api_url("/policies/example-policy") }
+
+    let(:named_policy_revisions_url) { api_url("/policies/example-policy/revisions") }
+
+    let(:payload) do
+      <<-PAYLOAD
+      {
+        "revision_id": "909c26701e291510eacdc6c06d626b9fa5350d25",
+        "name": "example-policy",
+        "run_list": [
+          "recipe[policyfile_demo::default]"
+        ],
+        "cookbook_locks": {
+          "policyfile_demo": {
+            "identifier": "f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+            "version": "1.2.3"
+          }
+        }
+      }
+      PAYLOAD
+    end
+
     context "when :policy_name doesn't exist" do
 
-      it "GET /policies/:policy_name returns a 404"
+      it "GET /policies/:policy_name returns a 404" do
+        expect(get(named_policy_url, requestor).code).to eq(404)
+      end
 
-      it "DELETE /policies/:policy_name returns 404"
+      it "DELETE /policies/:policy_name returns 404" do
+        expect(delete(named_policy_url, requestor).code).to eq(404)
+      end
 
-      it "POST /policies/:policy_name/revisions creates the policy name and policy revision"
+      it "POST /policies/:policy_name/revisions creates the policy name and policy revision" do
+        response = post(named_policy_revisions_url, requestor, payload: payload)
+        expect(response.code).to eq(201)
+        expect(parse(response.body)).to eq(parse(payload))
+      end
+
+      context "when the policy name in request doens't match URL" do
+
+        it "POST /policies/:policy_name/revisions returns 400" do
+          response = post(named_policy_revisions_url, requestor, payload: minimum_valid_policy_payload)
+          expect(response.code).to eq(400)
+        end
+      end
 
     end
 
     context "when policy_name exists" do
 
-      it "GET /policies/:policy_name returns a list of revisions"
+      before do
+        post(named_policy_revisions_url, requestor, payload: payload)
+      end
 
-      it "DELETE /policies/:policy_name deletes the thing and returns the list of revisions"
+      let(:expected_policy_list) do
+        {
+          "revisions" => {
+            "909c26701e291510eacdc6c06d626b9fa5350d25" => {},
+          }
+        }
+      end
+
+      it "GET /policies/:policy_name returns a list of revisions" do
+        response = get(named_policy_url, requestor)
+        expect(response.code).to eq(200)
+        expect(parse(response.body)).to eq(expected_policy_list)
+      end
+
+      it "DELETE /policies/:policy_name deletes all revisions and returns the list of revisions" do
+        response = delete(named_policy_url, requestor)
+        expect(response.code).to eq(200)
+        expect(parse(response.body)).to eq(expected_policy_list)
+
+        expect(get(named_policy_url, requestor).code).to eq(404)
+      end
 
       describe "creating a new revision" do
 
+        let(:other_revision) do
+          data = parse(payload).tap do |p|
+            p["revision_id"] = "1111111111111111111111111111111111111111"
+          end
+          to_json(data)
+        end
+
         context "when the revision doesn't yet exist" do
 
-          it "POST /policies/:policy_name/revisions creates the policy revision"
+          it "POST /policies/:policy_name/revisions creates the policy revision" do
+            response = post(named_policy_revisions_url, requestor, payload: other_revision)
+            expect(response.code).to eq(201)
+            expect(parse(response.body)).to eq(parse(other_revision))
+          end
 
         end
 
         context "when the revision exists" do
 
-          it "POST /policies/:policy_name/revisions returns 409"
+          it "POST /policies/:policy_name/revisions returns 409" do
+            response = post(named_policy_revisions_url, requestor, payload: payload)
+            expect(response.code).to eq(409)
+          end
 
         end
 

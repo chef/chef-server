@@ -579,6 +579,8 @@ set_authz_id(Id, #group_state{} = G, group) ->
     G#group_state{group_authz_id = Id};
 set_authz_id(Id, #policy_state{} = P, policy_group) ->
     P#policy_state{policy_group_authz_id = Id, created_policy_group = true};
+set_authz_id(Id, #named_policy_revisions_state{} = P, policies) ->
+    P#named_policy_revisions_state{policy_authz_id = Id};
 set_authz_id(Id, #policy_state{} = P, policies) ->
     P#policy_state{policy_authz_id = Id, created_policy = true};
 set_authz_id(Id, #organization_state{} = O, organization) ->
