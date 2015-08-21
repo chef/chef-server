@@ -110,6 +110,15 @@ module PrivateChef
       end
     end
 
+    def import_legacy_service_config(old_service_key, new_service_key, keys)
+      keys.each do |configkey|
+        if PrivateChef[old_service_key].has_key? configkey
+          PrivateChef[new_service_key][configkey] ||= PrivateChef[old_service_key][configkey]
+          PrivateChef[old_service_key].delete configkey
+        end
+      end
+    end
+
     def server(name=nil, opts={})
       if name
         PrivateChef["servers"] ||= Mash.new
@@ -513,6 +522,9 @@ module PrivateChef
         PrivateChef["use_ipv6"] = true
         PrivateChef["default_listen_address"] = "::"
       end
+
+      # Transition Solr memory and JVM settings from OSC11 to Chef 12.
+      import_legacy_service_config('opscode_solr', 'opscode_solr4', ['heap_size', 'new_size', 'java_opts'])
 
       PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
 
