@@ -1242,11 +1242,12 @@ select_user_or_webui_key(Req, Requestors) ->
                     lager:error({no_such_key, Msg, erlang:get_stacktrace()}),
                     throw({no_such_key, WebKeyTag})
             end,
-            % Our query defaults to sorting clients first,
-            % but by definition web requests are user based.  This ensures that our
-            % requestor record is populated with user data (most importantly, requesting authz id)
-            % instead of client, in the event of a client/user name conflict.
-            [Requestor | _] = lists:reverse(Requestors),
+            % The query in chef_sql:fetch_actors_by_name (whence we get Requestors) sorts
+            % users before clients. By definition web requests are user based. Arbitrarily
+            % picking the first requestor from the list ensures that our requestor record is
+            % populated with user data (most importantly, requesting authz id) instead of
+            % client, in the event of a client/user name conflict.
+            [Requestor | _] = Requestors,
             [{Requestor, Key}];
         _ ->
             [{Requestor, Key} || #chef_requestor{public_key = Key} = Requestor <- Requestors]
