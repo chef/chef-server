@@ -516,6 +516,13 @@ describe "Policies API endpoint", :policies do
 
     context "when :policy_name doesn't exist" do
 
+      after do
+        allowed_codes = [200, 404]
+        actual = delete(named_policy_url, requestor).code
+        # backwards, but there's no equal_one_of() in rspec
+        expect(allowed_codes).to include(actual)
+      end
+
       it "GET /policies/:policy_name returns a 404" do
         expect(get(named_policy_url, requestor).code).to eq(404)
       end
@@ -543,7 +550,14 @@ describe "Policies API endpoint", :policies do
     context "when policy_name exists" do
 
       before do
-        post(named_policy_revisions_url, requestor, payload: payload)
+        expect(post(named_policy_revisions_url, requestor, payload: payload).code).to eq(201)
+      end
+
+      after do
+        allowed_codes = [200, 404]
+        actual = delete(named_policy_url, requestor).code
+        # backwards, but there's no equal_one_of() in rspec
+        expect(allowed_codes).to include(actual)
       end
 
       let(:expected_policy_list) do
@@ -604,27 +618,107 @@ describe "Policies API endpoint", :policies do
 
   describe "Named policy revision endpoint /policies/:policy_name/revisions/:revision_id" do
 
+    let(:named_policy_url) { api_url("/policies/example-policy") }
+
+    let(:named_revision_url) { api_url("/policies/example-policy/revisions/909c26701e291510eacdc6c06d626b9fa5350d25") }
+
+    let(:named_policy_revisions_url) { api_url("/policies/example-policy/revisions") }
+
+    let(:payload) do
+      <<-PAYLOAD
+      {
+        "revision_id": "909c26701e291510eacdc6c06d626b9fa5350d25",
+        "name": "example-policy",
+        "run_list": [
+          "recipe[policyfile_demo::default]"
+        ],
+        "cookbook_locks": {
+          "policyfile_demo": {
+            "identifier": "f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+            "version": "1.2.3"
+          }
+        }
+      }
+      PAYLOAD
+    end
+
     context "when the policy_name doesn't exist" do
 
-      it "GET /policies/:policy_name/revisions/:revision_id returns 404"
+      it "GET /policies/:policy_name/revisions/:revision_id returns 404" do
+        expect(get(named_revision_url, requestor).code).to eq(404)
+      end
 
-      it "DELETE /policies/:policy_name/revisions/:revision_id returns 404"
+      it "DELETE /policies/:policy_name/revisions/:revision_id returns 404" do
+        expect(delete(named_revision_url, requestor).code).to eq(404)
+      end
 
     end
 
     context "when the policy_name exists but :revision_id doesn't" do
 
-      it "GET /policies/:policy_name/revisions/:revision_id returns 404"
+      let(:other_revision) do
+        data = parse(payload).tap do |p|
+          p["revision_id"] = "1111111111111111111111111111111111111111"
+        end
+        to_json(data)
+      end
 
-      it "DELETE /policies/:policy_name/revisions/:revision_id returns 404"
+      let(:other_revision_url) { api_url("/policies/example-policy/revisions/1111111111111111111111111111111111111111") }
+
+      before do
+        expect(post(named_policy_revisions_url, requestor, payload: other_revision).code).to eq(201)
+      end
+
+      after do
+        allowed_codes = [200, 404]
+        actual = delete(named_policy_url, requestor).code
+        # backwards, but there's no equal_one_of() in rspec
+        expect(allowed_codes).to include(actual)
+      end
+
+      it "GET /policies/:policy_name/revisions/:revision_id returns 404" do
+        expect(get(named_revision_url, requestor).code).to eq(404)
+      end
+
+      it "DELETE /policies/:policy_name/revisions/:revision_id returns 404" do
+        expect(delete(named_revision_url, requestor).code).to eq(404)
+      end
 
     end
 
     context "when the policy_name exists and :revision_id exists" do
 
-      it "GET /policies/:policy_name/revisions/:revision_id returns 200, with the policy as the body"
+      before do
+        expect(post(named_policy_revisions_url, requestor, payload: payload).code).to eq(201)
+      end
 
-      it "DELETE /policies/:policy_name/revisions/:revision_id returns 200, with the policy as the body"
+      after do
+        allowed_codes = [200, 404]
+        actual = delete(named_policy_url, requestor).code
+        # backwards, but there's no equal_one_of() in rspec
+        expect(allowed_codes).to include(actual)
+      end
+
+      it "GET /policies/:policy_name/revisions/:revision_id returns 200, with the policy as the body" do
+        response = get(named_revision_url, requestor)
+        expect(response.code).to eq(200)
+        expect(parse(response.body)).to eq(parse(payload))
+      end
+
+      it "DELETE /policies/:policy_name/revisions/:revision_id returns 200, with the policy as the body" do
+        response = delete(named_revision_url, requestor)
+        expect(response.code).to eq(200)
+        expect(parse(response.body)).to eq(parse(payload))
+        expect(get(named_revision_url, requestor).code).to eq(404)
+      end
+
+      it "DELETE /policies/:policy_name/revisions/:revision_id doesn't delete authz information for :policy_name" do
+        response = delete(named_revision_url, requestor)
+        expect(response.code).to eq(200)
+        expect(get(named_revision_url, requestor).code).to eq(404)
+        post(named_policy_revisions_url, requestor, payload: payload)
+        expect(get(named_revision_url, requestor).code).to eq(200)
+      end
 
     end
 

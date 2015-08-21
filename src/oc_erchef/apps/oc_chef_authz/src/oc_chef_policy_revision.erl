@@ -109,8 +109,8 @@ valid_cookbook_lock(CookbookLockJson) ->
 %%%%%%%%%%%%%%%%%%%%
 
 
-authz_id(#oc_chef_policy_revision{}) ->
-    error(not_implemented).
+authz_id(#oc_chef_policy_revision{policy_authz_id = AuthzID}) ->
+    AuthzID.
 
 fields_for_update(#oc_chef_policy_revision{}) ->
     error(not_implemented).
@@ -220,11 +220,8 @@ decompress_record(#oc_chef_policy_revision{
     SerializedObject = jiffy:decode(chef_db_compression:decompress(CompressedSerializedObject)),
     Revision#oc_chef_policy_revision{serialized_object = SerializedObject}.
 
-delete(ObjectRec = #oc_chef_policy_revision{
-                      org_id = OrgId,
-                      last_updated_by = _AuthzId
-                     }, CallbackFun) ->
-    CallbackFun({delete_query(ObjectRec), [name(ObjectRec), OrgId]}).
+delete(ObjectRec = #oc_chef_policy_revision{id = ID}, CallbackFun) ->
+    CallbackFun({delete_query(ObjectRec), [ID]}).
 
 set_api_version(ObjectRec, Version) ->
     ObjectRec#oc_chef_policy_revision{server_api_version = Version}.

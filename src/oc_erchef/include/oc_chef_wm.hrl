@@ -347,6 +347,14 @@
           policy_data_for_response
          }).
 
+-record(named_policy_named_rev_state, {
+          policy_name,
+          revision_id,
+          policy_record,
+          policy_revision_record,
+          policy_authz_id
+         }).
+
 -record(policy_group_state, {
           policy_group,
           policy_group_authz_id
