@@ -567,7 +567,7 @@ Server configuration exists for the following hostnames:
   #{PrivateChef["servers"].keys.sort.join("\n  ")}
 
 EOF
-        exit(1)
+        exit!(1)
       end
     end
 

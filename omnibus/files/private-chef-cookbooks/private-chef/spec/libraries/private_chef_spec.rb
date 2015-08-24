@@ -20,6 +20,7 @@ describe PrivateChef do
     Object.send(:remove_const, :PrivateChef)
     load ::File.expand_path("#{::File.dirname(__FILE__)}/../../libraries/private_chef.rb")
     PrivateChef[:node] = node
+    allow(PrivateChef).to receive(:exit!).and_raise(SystemExit)
   }
 
   # Example content of /etc/opscode/private-chef-secrets.json
