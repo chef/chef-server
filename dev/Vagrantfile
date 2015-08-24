@@ -227,7 +227,7 @@ then
   echo "Bypassing server install, it appears done."
 else
   echo "PATH=/opt/opscode/embedded/bin:$PATH" > /root/.bashrc
-  sudo dpkg -i /installers/#{server_installer_name}
+  sudo dpkg -i "/installers/#{server_installer_name}"
 fi
 SCRIPT
 end
