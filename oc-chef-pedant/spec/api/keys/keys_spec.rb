@@ -711,7 +711,7 @@ describe "/keys endpoint", :keys do
         platform.remove_user_from_org($org_name, org_user)
       end
 
-      it "should allow the user to query /users/:user when user is impersonated via web request'", :focus do
+      it "should allow the user to query /users/:user when user is impersonated via web request'" do
         # Note that the key used doesn't matter below - by using impersonate we'll be substituting the webui
         # public key.
         get("#{org_base_url}/users/#{org_user_name}",
