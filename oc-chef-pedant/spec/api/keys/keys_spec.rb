@@ -686,6 +686,40 @@ describe "/keys endpoint", :keys do
       platform.delete_org(other_org_name)
     end
 
+    context "when a client exists with the same name as the user" do
+      let(:colliding_client) do
+        {
+          "name" => org_user_name,
+          "public_key" => keys[:org_client][:public],
+          "private_key" => keys[:org_client][:private]
+        }
+      end
+
+      let(:colliding_client_payload) do
+        { "name" => colliding_client['name'], "public_key" => colliding_client['public_key'],
+          "admin" => "false"
+        }
+      end
+
+      before(:each) do
+        post("#{org_base_url}/clients", superuser, payload: colliding_client_payload)
+        platform.associate_user_with_org($org_name, org_user)
+      end
+
+      after(:each) do
+        delete("#{org_base_url}/clients/#{colliding_client['name']}", superuser)
+        platform.remove_user_from_org($org_name, org_user)
+      end
+
+      it "should allow the user to query /users/:user when user is impersonated via web request'", :focus do
+        # Note that the key used doesn't matter below - by using impersonate we'll be substituting the webui
+        # public key.
+        get("#{org_base_url}/users/#{org_user_name}",
+            impersonate(requestor(org_user_name, colliding_client['private_key'])),
+            headers: {'X-Ops-Request-Source' => 'web'}).should look_like(status: 200)
+      end
+    end
+
     context "posting keys" do
 
       # These behaviors are identical for POSTing to create a client or user key
@@ -1611,4 +1645,3 @@ describe "/keys endpoint", :keys do
     end
   end
 end
-
