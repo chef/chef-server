@@ -137,7 +137,7 @@ module PrivateChef
           if PrivateChef.has_key?(k)
             Chef::Log.warn("Extension #{name} attempted to register configuration default for #{k}, but it already exists!")
           end
-          PrivateChef.send(k, v)
+          PrivateChef[k] = v
         end
       end
     end
