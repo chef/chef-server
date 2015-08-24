@@ -95,6 +95,8 @@ module PrivateChef
   opscode_org_creator Mash.new
   opscode_certificate Mash.new
 
+  registered_extensions Mash.new
+
   class << self
 
     def from_file(filename)
@@ -115,6 +117,27 @@ module PrivateChef
         if PrivateChef[old_service_key].has_key? configkey
           PrivateChef[new_service_key][configkey] ||= PrivateChef[old_service_key][configkey]
           PrivateChef[old_service_key].delete configkey
+        end
+      end
+    end
+
+    VALID_EXTENSION_CONFIGS= %i(server_config_required config_values gen_backend gen_frontend gen_secrets gen_api_fqdn) unless defined?(VALID_EXTENSION_CONFIGS)
+    def register_extension(name, extension)
+      bad_keys = extension.keys - VALID_EXTENSION_CONFIGS
+
+      bad_keys.each do |key|
+        Chef::Log.warn("Extension #{name} contains unknown configuration option: #{key}")
+        extension.delete(key) # delete mutates extension
+      end
+
+      PrivateChef["registered_extensions"][name] = extension
+      if extension.key?(:config_values)
+        extension[:config_values].each do |k, v|
+          # TODO(ssd): Should we even allow this? Perhaps we should just exit?
+          if PrivateChef.has_key?(k)
+            Chef::Log.warn("Extension #{name} attempted to register configuration default for #{k}, but it already exists!")
+          end
+          PrivateChef[k] = v
         end
       end
     end
@@ -161,106 +184,9 @@ module PrivateChef
       SecureRandom.hex(chars)
     end
 
-    def generate_secrets(node_name)
-      existing_secrets ||= Hash.new
-      if File.exists?("/etc/opscode/private-chef-secrets.json")
-        existing_secrets = Chef::JSONCompat.from_json(File.read("/etc/opscode/private-chef-secrets.json"))
-      end
-      existing_secrets.each do |k, v|
-        v.each do |pk, p|
-          if not PrivateChef[k]
-            Chef::Log.info("Ignoring unused secret for #{k}.")
-          else
-            PrivateChef[k][pk] = p
-          end
-        end
-      end
-
-      # Transition from erchef's sql_user/password etc living under 'postgresql' in older versions,
-      # to 'opscode_erchef' in newer versions.
-      if PrivateChef['postgresql'].has_key? 'sql_password'
-        PrivateChef['opscode_erchef']['sql_password'] ||= PrivateChef['postgresql']['sql_password']
-        PrivateChef['postgresql'].delete 'sql_password'
-        PrivateChef['postgresql'].delete 'sql_user'
-      end
-      if PrivateChef['postgresql'].has_key? 'sql_ro_password'
-        PrivateChef['opscode_erchef']['sql_ro_password'] ||= PrivateChef['postgresql']['sql_ro_password']
-        PrivateChef['postgresql'].delete 'sql_ro_password'
-        PrivateChef['postgresql'].delete 'sql_ro_user'
-      end
-
-      me = PrivateChef["servers"][node_name]
-      ha_guard = PrivateChef['topology'] == 'ha' && !me['bootstrap']
-
-      PrivateChef['postgresql']['db_superuser_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['redis_lb']['password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['rabbitmq']['password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['rabbitmq']['jobs_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['rabbitmq']['actions_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['drbd']['shared_secret'] ||= generate_hex_if_bootstrap(30, ha_guard)
-      PrivateChef['keepalived']['vrrp_instance_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['opscode_erchef']['sql_password'] ||= generate_hex_if_bootstrap(30, ha_guard)
-      PrivateChef['opscode_erchef']['sql_ro_password'] ||= generate_hex_if_bootstrap(30, ha_guard)
-      PrivateChef['oc_bifrost']['superuser_id'] ||= generate_hex_if_bootstrap(16, ha_guard)
-      PrivateChef['oc_bifrost']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['oc_bifrost']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['oc_id']['secret_key_base'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['oc_id']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['oc_id']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['bookshelf']['access_key_id'] ||= generate_hex_if_bootstrap(20, ha_guard)
-      PrivateChef['bookshelf']['secret_access_key'] ||= generate_hex_if_bootstrap(40, ha_guard)
-
-      if File.directory?("/etc/opscode")
-        # This was originally directly written via f.puts(Chef::JSONCompat.to_json_pretty)
-        # Let's instead assemble this hash externally so that if it fails for any reason
-        # we don't wipe out the secrets file.
-        out_json = Chef::JSONCompat.to_json_pretty({
-          'redis_lb' => {
-            'password' => PrivateChef['redis_lb']['password']
-          },
-          'rabbitmq' => {
-            'password' => PrivateChef['rabbitmq']['password'],
-            'jobs_password' => PrivateChef['rabbitmq']['jobs_password'],
-            'actions_password' => PrivateChef['rabbitmq']['actions_password'],
-          },
-          'postgresql' => {
-            'db_superuser_password' => PrivateChef['postgresql']['db_superuser_password']
-          },
-          'opscode_erchef' => {
-            'sql_password' => PrivateChef['opscode_erchef']['sql_password'],
-            'sql_ro_password' => PrivateChef['opscode_erchef']['sql_ro_password']
-          },
-          'oc_id' => {
-            'sql_password' => PrivateChef['oc_id']['sql_password'],
-            'sql_ro_password' => PrivateChef['oc_id']['sql_ro_password'],
-            'secret_key_base' => PrivateChef['oc_id']['secret_key_base']
-          },
-          'drbd' => {
-            'shared_secret' => PrivateChef['drbd']['shared_secret']
-          },
-          'keepalived' => {
-            'vrrp_instance_password' => PrivateChef['keepalived']['vrrp_instance_password']
-          },
-          'oc_bifrost' => {
-            'superuser_id' => PrivateChef['oc_bifrost']['superuser_id'],
-            'sql_password' => PrivateChef['oc_bifrost']['sql_password'],
-            'sql_ro_password' => PrivateChef['oc_bifrost']['sql_ro_password']
-          },
-          'bookshelf' => {
-            'access_key_id' => PrivateChef['bookshelf']['access_key_id'],
-            'secret_access_key' => PrivateChef['bookshelf']['secret_access_key']
-          }})
-
-        File.open("/etc/opscode/private-chef-secrets.json", "w") do |f|
-          f.puts(out_json)
-          system("chmod 0600 /etc/opscode/private-chef-secrets.json")
-        end
-      end
-    end
-
     def generate_hash
       results = { "private_chef" => {} }
-      [
+      default_keys = [
         "opscode_chef",
         "redis_lb",
         "addons",
@@ -293,8 +219,9 @@ module PrivateChef
 
         # keys for cleanup and back-compat
         "couchdb",
-        "opscode_solr"
-      ].each do |key|
+        "opscode_solr"]
+
+      (default_keys | keys_from_extensions).each do |key|
         # @todo: Just pick a naming convention and adhere to it
         # consistently
         rkey = if key =~ /^oc_/ || key == "redis_lb"
@@ -321,11 +248,17 @@ module PrivateChef
       results
     end
 
-    def gen_api_fqdn
-      PrivateChef["lb"]["api_fqdn"] ||= PrivateChef['api_fqdn']
-      PrivateChef["lb"]["web_ui_fqdn"] ||= PrivateChef['api_fqdn']
-      PrivateChef["nginx"]["server_name"] ||= PrivateChef['api_fqdn']
-      PrivateChef["nginx"]["url"] ||= "https://#{PrivateChef['api_fqdn']}"
+    #
+    # Returns an array of the configuration keys added by registered
+    # extensions. These keys should be rendered to the final
+    # configuration
+    #
+    def keys_from_extensions
+      PrivateChef["registered_extensions"].map do |name, ext|
+        if ext[:config_values]
+          ext[:config_values].keys.map {|k| k.to_s}
+        end
+      end.flatten.compact
     end
 
     def gen_hapaths
@@ -381,7 +314,76 @@ module PrivateChef
       PrivateChef["nginx"]["ha"] ||= true
     end
 
+    #
+    # Genereric gen_ callbacks
+    #
+    # - gen_frontend: Run on all frontend nodes
+    #
+    # - gen_backend: Runs on all backend nodes, take a parameter
+    # indicating whether the current node is the bootstrap node.
+    #
+    # - gen_api_fqdn: Runs on all nodes
+    #
+    # - gen_secrets: Runs on all nodes but should abort if a needed
+    # secret doesn't exist on a non-bootstrap node. Takes the node
+    # name.
+    #
+    # If a plugin doesn't define a callback for one of these functions
+    # the generic version is used.
+    #
+    def gen_frontend
+      callback = callback_for(:gen_frontend)
+      if ! callback.nil?
+        instance_exec(&callback)
+      else
+        gen_frontend_default
+      end
+    end
+
     def gen_backend(bootstrap=false)
+      callback = callback_for(:gen_backend)
+      if ! callback.nil?
+        instance_exec(bootstrap, &callback)
+      else
+        gen_backend_default(bootstrap)
+      end
+    end
+
+    def gen_secrets(node_name)
+      callback = callback_for(:gen_secrets)
+      if ! callback.nil?
+        instance_exec(node_name, &callback)
+      else
+        gen_secrets_default(node_name)
+      end
+    end
+
+    def gen_api_fqdn
+      callback = callback_for(:gen_api_fqdn)
+      if ! callback.nil?
+        instance_exec(&callback)
+      else
+        gen_api_fqdn_default
+      end
+    end
+
+    def callback_for(name)
+      extension = PrivateChef["registered_extensions"][PrivateChef["topology"]]
+      if extension
+        extension[name]
+      else
+        nil
+      end
+    end
+
+    #
+    # Default implementation of gen_ callbacks
+    #
+    # Currently these are focused on providing the tier & HA toplogies
+    # but will do less and less as that functionality moves into the
+    # plugin
+    #
+    def gen_backend_default(bootstrap)
       PrivateChef[:role] = "backend" #mixlib-config wants a symbol :(
       PrivateChef["bookshelf"]["listen"] ||= PrivateChef["default_listen_address"]
       PrivateChef["rabbitmq"]["node_ip_address"] ||= PrivateChef["default_listen_address"]
@@ -398,7 +400,7 @@ module PrivateChef
       PrivateChef["bootstrap"]["enable"] = !!bootstrap
     end
 
-    def gen_frontend
+    def gen_frontend_default
       PrivateChef[:role] = "frontend"
       PrivateChef["bookshelf"]["enable"] ||= false
       PrivateChef["bookshelf"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
@@ -422,12 +424,57 @@ module PrivateChef
       PrivateChef["bootstrap"]["enable"] = false
     end
 
+    def gen_api_fqdn_default
+      PrivateChef["lb"]["api_fqdn"] ||= PrivateChef['api_fqdn']
+      PrivateChef["lb"]["web_ui_fqdn"] ||= PrivateChef['api_fqdn']
+      PrivateChef["nginx"]["server_name"] ||= PrivateChef['api_fqdn']
+      PrivateChef["nginx"]["url"] ||= "https://#{PrivateChef['api_fqdn']}"
+    end
+
+    def gen_secrets_default(node_name)
+      consume_existing_secrets
+      # Transition from erchef's sql_user/password etc living under 'postgresql' in older versions,
+      # to 'opscode_erchef' in newer versions.
+      if PrivateChef['postgresql'].has_key? 'sql_password'
+        PrivateChef['opscode_erchef']['sql_password'] ||= PrivateChef['postgresql']['sql_password']
+        PrivateChef['postgresql'].delete 'sql_password'
+        PrivateChef['postgresql'].delete 'sql_user'
+      end
+      if PrivateChef['postgresql'].has_key? 'sql_ro_password'
+        PrivateChef['opscode_erchef']['sql_ro_password'] ||= PrivateChef['postgresql']['sql_ro_password']
+        PrivateChef['postgresql'].delete 'sql_ro_password'
+        PrivateChef['postgresql'].delete 'sql_ro_user'
+      end
+
+      me = PrivateChef["servers"][node_name]
+      ha_guard = PrivateChef['topology'] == 'ha' && !me['bootstrap']
+
+      PrivateChef['postgresql']['db_superuser_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['redis_lb']['password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['rabbitmq']['password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['rabbitmq']['jobs_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['rabbitmq']['actions_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['drbd']['shared_secret'] ||= generate_hex_if_bootstrap(30, ha_guard)
+      PrivateChef['keepalived']['vrrp_instance_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['opscode_erchef']['sql_password'] ||= generate_hex_if_bootstrap(30, ha_guard)
+      PrivateChef['opscode_erchef']['sql_ro_password'] ||= generate_hex_if_bootstrap(30, ha_guard)
+      PrivateChef['oc_bifrost']['superuser_id'] ||= generate_hex_if_bootstrap(16, ha_guard)
+      PrivateChef['oc_bifrost']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['oc_bifrost']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['oc_id']['secret_key_base'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['oc_id']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['oc_id']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['bookshelf']['access_key_id'] ||= generate_hex_if_bootstrap(20, ha_guard)
+      PrivateChef['bookshelf']['secret_access_key'] ||= generate_hex_if_bootstrap(40, ha_guard)
+    end
+
     def gen_redundant(node_name, topology)
-      raise "Please add a server section for #{node_name} to /etc/opscode/private-chef.rb!" unless PrivateChef['servers'].has_key?(node_name)
       me = PrivateChef["servers"][node_name]
       case me["role"]
       when "backend"
         gen_backend(me['bootstrap'])
+        # TODO(ssd): Move these into gen_backend callback for HA
+        # plugin once that is split out
         gen_hapaths if topology == 'ha'
         gen_keepalived(node_name) if topology == 'ha'
         gen_api_fqdn
@@ -501,11 +548,50 @@ module PrivateChef
       PrivateChef["ldap"]["encryption_type"] = ssl_enabled ? "simple_tls" :
                                                tls_enabled ? "start_tls" :
                                                "none"
+    end
 
+    # True if the given topology requires per-server config via `server` blocks
+    def server_config_required?
+      PrivateChef["topology"] == "ha" ||
+        PrivateChef["topology"] == "tier" ||
+        (PrivateChef["registered_extensions"][PrivateChef["topology"]] &&
+         PrivateChef["registered_extensions"][PrivateChef["topology"]][:server_config_required])
+    end
+
+    def assert_server_config(node_name)
+      unless PrivateChef["servers"].key?(node_name)
+        Chef::Log.fatal <<-EOF
+No server configuration found for "#{node_name}" in /etc/opscode/chef-server.rb.
+Server configuration exists for the following hostnames:
+
+  #{PrivateChef["servers"].keys.sort.join("\n  ")}
+
+EOF
+        exit!(1)
+      end
+    end
+
+    def generate_config_for_topology(topology, node_name)
+      case topology
+      when "standalone","manual"
+        PrivateChef[:api_fqdn] ||= node_name
+        gen_api_fqdn
+      when "ha", "tier"
+        gen_redundant(node_name, topology)
+      else
+        if PrivateChef["registered_extensions"].key?(topology)
+          gen_redundant(node_name, topology)
+        else
+          Chef::Log.fatal("I do not understand topology #{PrivateChef.topology} - try standalone, manual, ha, or tier.")
+          exit 55
+        end
+      end
     end
 
     def generate_config(node_name)
-      generate_secrets(node_name)
+      assert_server_config(node_name) if server_config_required?
+      gen_secrets(node_name)
+      write_secrets_file
 
       # Under ipv4 default to 0.0.0.0 in order to ensure that
       # any service that needs to listen externally on back-end
@@ -528,22 +614,82 @@ module PrivateChef
 
       PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
 
-      case PrivateChef['topology']
-      when "standalone","manual"
-        PrivateChef[:api_fqdn] ||= node_name
-        gen_api_fqdn
-      when "ha", "tier"
-        gen_redundant(node_name, PrivateChef['topology'])
-      else
-        Chef::Log.fatal("I do not understand topology #{PrivateChef.topology} - try standalone, manual, ha, or tier.")
-        exit 55
-      end
+      generate_config_for_topology(PrivateChef["topology"], node_name)
 
       unless PrivateChef["ldap"].nil? || PrivateChef["ldap"].empty?
         gen_ldap
       end
 
       generate_hash
+    end
+
+    def existing_secrets
+      @existing_secrets ||= if File.exists?("/etc/opscode/private-chef-secrets.json")
+                              Chef::JSONCompat.from_json(File.read("/etc/opscode/private-chef-secrets.json"))
+                            else
+                              {}
+                            end
+    end
+
+    def consume_existing_secrets
+      existing_secrets.each do |k, v|
+        v.each do |pk, p|
+          if not PrivateChef[k]
+            Chef::Log.info("Ignoring unused secret for #{k}.")
+          else
+            PrivateChef[k][pk] = p
+          end
+        end
+      end
+    end
+
+    def write_secrets_file
+      if File.directory?("/etc/opscode")
+        # This was originally directly written via f.puts(Chef::JSONCompat.to_json_pretty)
+        # Let's instead assemble this hash externally so that if it fails for any reason
+        # we don't wipe out the secrets file.
+        out_json = Chef::JSONCompat.to_json_pretty({
+          'redis_lb' => {
+            'password' => PrivateChef['redis_lb']['password']
+          },
+          'rabbitmq' => {
+            'password' => PrivateChef['rabbitmq']['password'],
+            'jobs_password' => PrivateChef['rabbitmq']['jobs_password'],
+            'actions_password' => PrivateChef['rabbitmq']['actions_password'],
+          },
+          'postgresql' => {
+            'db_superuser_password' => PrivateChef['postgresql']['db_superuser_password']
+          },
+          'opscode_erchef' => {
+            'sql_password' => PrivateChef['opscode_erchef']['sql_password'],
+            'sql_ro_password' => PrivateChef['opscode_erchef']['sql_ro_password']
+          },
+          'oc_id' => {
+            'sql_password' => PrivateChef['oc_id']['sql_password'],
+            'sql_ro_password' => PrivateChef['oc_id']['sql_ro_password'],
+            'secret_key_base' => PrivateChef['oc_id']['secret_key_base']
+          },
+          'drbd' => {
+            'shared_secret' => PrivateChef['drbd']['shared_secret']
+          },
+          'keepalived' => {
+            'vrrp_instance_password' => PrivateChef['keepalived']['vrrp_instance_password']
+          },
+          'oc_bifrost' => {
+            'superuser_id' => PrivateChef['oc_bifrost']['superuser_id'],
+            'sql_password' => PrivateChef['oc_bifrost']['sql_password'],
+            'sql_ro_password' => PrivateChef['oc_bifrost']['sql_ro_password']
+          },
+          'bookshelf' => {
+            'access_key_id' => PrivateChef['bookshelf']['access_key_id'],
+            'secret_access_key' => PrivateChef['bookshelf']['secret_access_key']
+          }})
+
+        File.open("/etc/opscode/private-chef-secrets.json", "w") do |f|
+          f.puts(out_json)
+          system("chmod 0600 /etc/opscode/private-chef-secrets.json")
+        end
+      end
     end
   end
 end

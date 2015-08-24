@@ -17,8 +17,10 @@ describe PrivateChef do
     # May Cthulhu have mercy on our souls. PrivateChef.reset seems to do
     # too much without reloading the class, PrivateChef loses all of
     # the default Mashes
+    Object.send(:remove_const, :PrivateChef)
     load ::File.expand_path("#{::File.dirname(__FILE__)}/../../libraries/private_chef.rb")
     PrivateChef[:node] = node
+    allow(PrivateChef).to receive(:exit!).and_raise(SystemExit)
   }
 
   # Example content of /etc/opscode/private-chef-secrets.json
@@ -195,5 +197,179 @@ EOF
       expect(rendered_config["private_chef"]["rabbitmq"]["enable"]).to eq(false)
       expect(rendered_config["private_chef"]["opscode-solr4"]["enable"]).to eq(false)
     end
+  end
+
+  describe "#generate_config" do
+    context "when the topology is HA" do
+      let(:config) { <<-EOF
+topology "ha"
+
+server "frontend.chef.io",
+  :role => "frontend"
+
+server "backend.chef.io",
+  :role => "backend",
+  :bootstrap => true
+EOF
+      }
+
+      it "exits with a clear error message if it can't find a server block for the current block for the current machine" do
+        expect(Chef::Log).to receive(:fatal).with <<-EOF
+No server configuration found for "backend-passive.chef.io" in /etc/opscode/chef-server.rb.
+Server configuration exists for the following hostnames:
+
+  backend.chef.io
+  frontend.chef.io
+
+EOF
+        expect { config_for("backend-passive.chef.io") }.to raise_error SystemExit
+      end
+    end
+
+    context "when a configuration extension is in use" do
+      let(:config) {<<-EOF
+topology "custom_topo"
+
+server "a_backend",
+  :role => "backend",
+  :bootstrap => true
+
+server "a_frontend",
+  :role => "frontend"
+EOF
+      }
+
+      let!(:my_gen_backend) {
+        Proc.new {
+          throw :my_gen_backend_called
+        }
+      }
+
+      let!(:my_gen_frontend) {
+        Proc.new {
+          throw :my_gen_frontend_called
+        }
+      }
+
+      let!(:my_gen_secrets) {
+        Proc.new {
+          throw :my_gen_secrets_called
+        }
+      }
+
+      let!(:my_gen_api_fqdn) {
+        Proc.new {
+          throw :my_gen_api_fqdn_called
+        }
+      }
+
+      let(:my_gen_api_fqdn_no_throw) { Proc.new {} }
+
+      it "calls the gen_backup callback of the custom topology for a backend node" do
+        PrivateChef.register_extension("custom_topo", gen_backend: my_gen_backend )
+        expect{ config_for("a_backend") }.to throw_symbol :my_gen_backend_called
+      end
+
+      it "calls the gen_frontend callback of the custom topology for a frontend node" do
+        PrivateChef.register_extension("custom_topo", gen_frontend: my_gen_frontend )
+        expect{ config_for("a_frontend") }.to throw_symbol :my_gen_frontend_called
+      end
+
+      it "calls the gen_secrets callback of the custom topology on backend and frontend nodes" do
+        PrivateChef.register_extension("custom_topo", gen_secrets: my_gen_secrets )
+        expect{ config_for("a_frontend") }.to throw_symbol :my_gen_secrets_called
+        expect{ config_for("a_backend") }.to throw_symbol :my_gen_secrets_called
+      end
+
+      it "calls the gen_api_fqdn callback of the custom topology on backend and frontend nodes" do
+        PrivateChef.register_extension("custom_topo", gen_api_fqdn: my_gen_api_fqdn)
+        expect{ config_for("a_frontend") }.to throw_symbol :my_gen_api_fqdn_called
+        expect{ config_for("a_backend") }.to throw_symbol :my_gen_api_fqdn_called
+      end
+
+      it "uses the default implementation for a callback that isn't provided" do
+        PrivateChef.register_extension("custom_topo", gen_api_fqdn: my_gen_api_fqdn_no_throw)
+        rendered_config = config_for("a_backend")
+        # test a known side-effect of teh current gen_backend function
+        expect(rendered_config["private_chef"]["redis_lb"]["listen"]).to eq("0.0.0.0")
+      end
+    end
+  end
+
+  describe "#register_extension" do
+    let(:name) { "mytopo" }
+    let(:config) {<<-EOF
+EOF
+    }
+
+    it "allows users to register new config values with a default" do
+      PrivateChef.register_extension(name, config_values: {
+                                       new_value: "a default" })
+      expect(PrivateChef[:new_value]).to eq("a default")
+    end
+
+    it "renders registered configuration values into final config" do
+      PrivateChef.register_extension(name, config_values: {
+                                       new_value: "a default" })
+      expect(config_for("some host")["private_chef"]["new-value"]).to eq("a default")
+    end
+
+    it "allows users to register callbacks for gen_backend" do
+      my_gen_backend = lambda {
+        "lamb"
+      }
+
+      PrivateChef.register_extension(name, gen_backend: my_gen_backend)
+      expect(PrivateChef.registered_extensions[name][:gen_backend]).to eq(my_gen_backend)
+    end
+
+    it "allows users to register callbacks for gen_frontend" do
+      my_gen_frontend = lambda {
+        "lamb"
+      }
+
+      PrivateChef.register_extension(name, gen_frontend: my_gen_frontend)
+      expect(PrivateChef.registered_extensions[name][:gen_frontend]).to eq(my_gen_frontend)
+    end
+
+    it "allows users to register callbacks for gen_secrets" do
+      my_gen_secrets = lambda {
+        "lamb"
+      }
+
+      PrivateChef.register_extension(name, gen_secrets: my_gen_secrets)
+      expect(PrivateChef.registered_extensions[name][:gen_secrets]).to eq(my_gen_secrets)
+    end
+
+
+    it "allows users to register callbacks for gen_api_fqdn" do
+      my_gen_api_fqdn = lambda {
+        "lamb"
+      }
+
+      PrivateChef.register_extension(name, gen_api_fqdn: my_gen_api_fqdn)
+      expect(PrivateChef.registered_extensions[name][:gen_api_fqdn]).to eq(my_gen_api_fqdn)
+    end
+
+    it "warns if you try to register a configuration value that already exists" do
+      expect(Chef::Log).to receive(:warn).with("Extension different attempted to register configuration default for new_value, but it already exists!")
+      PrivateChef.register_extension(name, config_values: {
+                                       new_value: "a default" })
+      PrivateChef.register_extension("different", config_values: {
+                                       new_value: "a different default" })
+    end
+
+    it "warns if the extension contains un unkown configuration option" do
+      expect(Chef::Log).to receive(:warn).with("Extension #{name} contains unknown configuration option: not_here")
+      PrivateChef.register_extension(name, not_here: "a default")
+    end
+
+    it "does not save any unkown keys" do
+      allow(Chef::Log).to receive(:warn)
+      PrivateChef.register_extension(name, config_values: {
+                                       not_here: "a default" })
+      expect(PrivateChef["registered_extensions"][name][:not_here]).to eq(nil)
+    end
+
   end
 end
