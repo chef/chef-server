@@ -33,8 +33,8 @@ directory "/etc/opscode/logrotate.d" do
   action :nothing
 end.run_action(:create)
 
-include_recipe "private-chef::plugins_discovery"
-include_recipe "private-chef::plugins_config_extensions"
+include_recipe "private-chef::plugin_discovery"
+include_recipe "private-chef::plugin_config_extensions"
 include_recipe "private-chef::config"
 
 # Warn about deprecated opscode_webui settings
@@ -163,7 +163,7 @@ end
 include_recipe "enterprise::runit"
 include_recipe "private-chef::sysctl-updates"
 # Run plugins first, mostly for ha
-include_recipe "private-chef::plugins_chef_run"
+include_recipe "private-chef::plugin_chef_run"
 # Configure Services
 [
   "rabbitmq",
