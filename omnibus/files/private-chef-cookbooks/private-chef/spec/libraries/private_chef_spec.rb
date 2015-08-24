@@ -17,6 +17,7 @@ describe PrivateChef do
     # May Cthulhu have mercy on our souls. PrivateChef.reset seems to do
     # too much without reloading the class, PrivateChef loses all of
     # the default Mashes
+    Object.send(:remove_const, :PrivateChef)
     load ::File.expand_path("#{::File.dirname(__FILE__)}/../../libraries/private_chef.rb")
     PrivateChef[:node] = node
   }

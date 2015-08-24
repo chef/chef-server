@@ -432,20 +432,7 @@ module PrivateChef
     end
 
     def gen_secrets_default(node_name)
-      existing_secrets ||= Hash.new
-      if File.exists?("/etc/opscode/private-chef-secrets.json")
-        existing_secrets = Chef::JSONCompat.from_json(File.read("/etc/opscode/private-chef-secrets.json"))
-      end
-      existing_secrets.each do |k, v|
-        v.each do |pk, p|
-          if not PrivateChef[k]
-            Chef::Log.info("Ignoring unused secret for #{k}.")
-          else
-            PrivateChef[k][pk] = p
-          end
-        end
-      end
-
+      consume_existing_secrets
       # Transition from erchef's sql_user/password etc living under 'postgresql' in older versions,
       # to 'opscode_erchef' in newer versions.
       if PrivateChef['postgresql'].has_key? 'sql_password'
@@ -479,53 +466,6 @@ module PrivateChef
       PrivateChef['oc_id']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['bookshelf']['access_key_id'] ||= generate_hex_if_bootstrap(20, ha_guard)
       PrivateChef['bookshelf']['secret_access_key'] ||= generate_hex_if_bootstrap(40, ha_guard)
-
-      if File.directory?("/etc/opscode")
-        # This was originally directly written via f.puts(Chef::JSONCompat.to_json_pretty)
-        # Let's instead assemble this hash externally so that if it fails for any reason
-        # we don't wipe out the secrets file.
-        out_json = Chef::JSONCompat.to_json_pretty({
-          'redis_lb' => {
-            'password' => PrivateChef['redis_lb']['password']
-          },
-          'rabbitmq' => {
-            'password' => PrivateChef['rabbitmq']['password'],
-            'jobs_password' => PrivateChef['rabbitmq']['jobs_password'],
-            'actions_password' => PrivateChef['rabbitmq']['actions_password'],
-          },
-          'postgresql' => {
-            'db_superuser_password' => PrivateChef['postgresql']['db_superuser_password']
-          },
-          'opscode_erchef' => {
-            'sql_password' => PrivateChef['opscode_erchef']['sql_password'],
-            'sql_ro_password' => PrivateChef['opscode_erchef']['sql_ro_password']
-          },
-          'oc_id' => {
-            'sql_password' => PrivateChef['oc_id']['sql_password'],
-            'sql_ro_password' => PrivateChef['oc_id']['sql_ro_password'],
-            'secret_key_base' => PrivateChef['oc_id']['secret_key_base']
-          },
-          'drbd' => {
-            'shared_secret' => PrivateChef['drbd']['shared_secret']
-          },
-          'keepalived' => {
-            'vrrp_instance_password' => PrivateChef['keepalived']['vrrp_instance_password']
-          },
-          'oc_bifrost' => {
-            'superuser_id' => PrivateChef['oc_bifrost']['superuser_id'],
-            'sql_password' => PrivateChef['oc_bifrost']['sql_password'],
-            'sql_ro_password' => PrivateChef['oc_bifrost']['sql_ro_password']
-          },
-          'bookshelf' => {
-            'access_key_id' => PrivateChef['bookshelf']['access_key_id'],
-            'secret_access_key' => PrivateChef['bookshelf']['secret_access_key']
-          }})
-
-        File.open("/etc/opscode/private-chef-secrets.json", "w") do |f|
-          f.puts(out_json)
-          system("chmod 0600 /etc/opscode/private-chef-secrets.json")
-        end
-      end
     end
 
     def gen_redundant(node_name, topology)
@@ -608,9 +548,7 @@ module PrivateChef
       PrivateChef["ldap"]["encryption_type"] = ssl_enabled ? "simple_tls" :
                                                tls_enabled ? "start_tls" :
                                                "none"
-
     end
-
 
     # True if the given topology requires per-server config via `server` blocks
     def server_config_required?
@@ -653,6 +591,7 @@ EOF
     def generate_config(node_name)
       assert_server_config(node_name) if server_config_required?
       gen_secrets(node_name)
+      write_secrets_file
 
       # Under ipv4 default to 0.0.0.0 in order to ensure that
       # any service that needs to listen externally on back-end
@@ -682,6 +621,75 @@ EOF
       end
 
       generate_hash
+    end
+
+    def existing_secrets
+      @existing_secrets ||= if File.exists?("/etc/opscode/private-chef-secrets.json")
+                              Chef::JSONCompat.from_json(File.read("/etc/opscode/private-chef-secrets.json"))
+                            else
+                              {}
+                            end
+    end
+
+    def consume_existing_secrets
+      existing_secrets.each do |k, v|
+        v.each do |pk, p|
+          if not PrivateChef[k]
+            Chef::Log.info("Ignoring unused secret for #{k}.")
+          else
+            PrivateChef[k][pk] = p
+          end
+        end
+      end
+    end
+
+    def write_secrets_file
+      if File.directory?("/etc/opscode")
+        # This was originally directly written via f.puts(Chef::JSONCompat.to_json_pretty)
+        # Let's instead assemble this hash externally so that if it fails for any reason
+        # we don't wipe out the secrets file.
+        out_json = Chef::JSONCompat.to_json_pretty({
+          'redis_lb' => {
+            'password' => PrivateChef['redis_lb']['password']
+          },
+          'rabbitmq' => {
+            'password' => PrivateChef['rabbitmq']['password'],
+            'jobs_password' => PrivateChef['rabbitmq']['jobs_password'],
+            'actions_password' => PrivateChef['rabbitmq']['actions_password'],
+          },
+          'postgresql' => {
+            'db_superuser_password' => PrivateChef['postgresql']['db_superuser_password']
+          },
+          'opscode_erchef' => {
+            'sql_password' => PrivateChef['opscode_erchef']['sql_password'],
+            'sql_ro_password' => PrivateChef['opscode_erchef']['sql_ro_password']
+          },
+          'oc_id' => {
+            'sql_password' => PrivateChef['oc_id']['sql_password'],
+            'sql_ro_password' => PrivateChef['oc_id']['sql_ro_password'],
+            'secret_key_base' => PrivateChef['oc_id']['secret_key_base']
+          },
+          'drbd' => {
+            'shared_secret' => PrivateChef['drbd']['shared_secret']
+          },
+          'keepalived' => {
+            'vrrp_instance_password' => PrivateChef['keepalived']['vrrp_instance_password']
+          },
+          'oc_bifrost' => {
+            'superuser_id' => PrivateChef['oc_bifrost']['superuser_id'],
+            'sql_password' => PrivateChef['oc_bifrost']['sql_password'],
+            'sql_ro_password' => PrivateChef['oc_bifrost']['sql_ro_password']
+          },
+          'bookshelf' => {
+            'access_key_id' => PrivateChef['bookshelf']['access_key_id'],
+            'secret_access_key' => PrivateChef['bookshelf']['secret_access_key']
+          }})
+
+        File.open("/etc/opscode/private-chef-secrets.json", "w") do |f|
+          f.puts(out_json)
+          system("chmod 0600 /etc/opscode/private-chef-secrets.json")
+        end
+      end
     end
   end
 end
