@@ -1,5 +1,14 @@
 # Chef Server Changelog
 
+## Unreleased
+
+### chef-server
+* New policyfile API endpoints to enable cleanup of policy objects:
+  * `/policies/:policy_name` (GET, DELETE)
+  * `/policies/:policy_name/revisions` (POST)
+  * `/policies/:policy_name/revisions/:revision_id` (GET, DELETE)
+  * `/policy_groups/:policy_group_name` (GET, DELETE)
+
 ## 12.1.2 (2015-07-16)
 
 ### chef-server
