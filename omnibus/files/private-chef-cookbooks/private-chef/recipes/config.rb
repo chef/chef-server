@@ -37,9 +37,10 @@ if File.exists?("/etc/opscode/chef-server-running.json")
   node.consume_attributes({"previous_run" => old_config['private_chef']})
 end
 
-
-if File.exists?("/etc/opscode/chef-server.json")
-  Chef::Log.warn("Please move to /etc/opscode/chef-server.rb for configuration - /etc/opscode/chef-server.json is deprecated.")
+if File.exists?("/etc/opscode/chef-server.json") &&
+    !(File.exist?("/etc/opscode/private-chef.rb") || File.exist?("/etc/opscode/chef-server.rb"))
+  Chef::Log.fatal("Configuration via /etc/opscode/chef-server.json is not supported. Please use /etc/opscode/chef-server.rb")
+  exit!(1)
 else
   PrivateChef[:node] = node
   private_chef_path = "/etc/opscode/private-chef.rb"
@@ -47,9 +48,11 @@ else
   private_chef_rb_exists = File.exists?(private_chef_path)
   private_chef_rb_not_symlink = !File.symlink?(private_chef_path)
   chef_server_rb_exists = File.exists?(chef_server_path)
+
   if chef_server_rb_exists
     chef_server_rb_not_empty = !File.zero?(chef_server_path)
   end
+
   # Things are a bit tricky here, because there are multiple scenarios.  But the
   # upshot is, if we have a private-chef.rb and don't have (or have an empty)
   # chef-server.rb, then copy it over and link back.  Otherwise warn.
@@ -62,6 +65,12 @@ else
     FileUtils.ln_s(chef_server_path, private_chef_path)
     chef_server_rb_exists = true
   end
+
+  if File.exists?("/etc/opscode/chef-server.json")
+    Chef::Log.warn("Ignoring unsupported configuration file /etc/opscode/chef-server.json.")
+    Chef::Log.warn("Using /etc/opscode/chef-server.rb instead.")
+  end
+
   if chef_server_rb_exists
     PrivateChef.from_file(chef_server_path)
   end
