@@ -1,16 +1,21 @@
 require "mixlib/shellout"
 module DVM
   class Project
+    attr_reader :name, :project, :config, :service, :project_dir, :path, :external
     include DVM::Tools
-    attr_reader :name, :project, :config, :service, :project_dir, :path
     # TODO check required fields in config
     def initialize(project_name, config)
       @project = config['projects'][project_name]
-      @name = project['name'].nil? ? project_name : project['name']
-      @path = project['path'] || "src/#{name}"
+      @external = @project['external'] || false
+      @name = project.has_key?('name') ? project['name'] : project_name
+      if external
+        @path = project['path'] || "external-deps/#{name}"
+      else
+        @path = project['path'] || "src/#{name}"
+      end
+      @project_dir = "/host/#{path}"
       @config = config
       @service = @project['service']
-      @project_dir = "/host/#{path}"
     end
     def start(args, detach)
       raise DVM::DVMArgumentError, "Start not supported for #{name}"
@@ -50,8 +55,6 @@ module DVM
     def loaded?
       false
     end
-
-
 
     def load_dep(name, ignored_for_now)
       raise DVM::DVMArgumentError, "Load the project before loading deps." unless loaded?

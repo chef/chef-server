@@ -46,6 +46,7 @@ vm:
     - rspec.failures
     - VERSION
     - partybus/config.rb
+
   cover:
     base_output_path: /vagrant/testdata/cover # maps to dev/testdata/cover
   node-attributes:
@@ -115,18 +116,15 @@ projects:
         dest_path: /opt/opscode/embedded/service/partybus
         reconfigure_on_load: false
         bundler: true
-
+  omnibus-ctl:
+    type: ruby #todo instead could callt his 'gem'?
+    system: true
+    external: true
   oc-chef-pedant:
     type: ruby
-    path: "oc-chef-pedant"
+    path: oc-chef-pedant
     database: opscode_chef
-    run: "bin/oc-chef-pedant -c /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb"
-
-  #TODO
-  # fixie:
-  #   type: ruby
-  #
-
+    run: bin/oc-chef-pedant -c /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
 
 quickstart:
   oc_erchef:
@@ -138,7 +136,6 @@ quickstart:
   oc_bifrost:
     description: "Load oc_bifrost and oc-bifrost-pedant from /host. Start oc_bifrost into a console."
     load:
-      - oc-bifrost-pedant
       - oc_bifrost
     start:
       - oc_bifrost

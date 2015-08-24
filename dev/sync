@@ -107,7 +107,7 @@ BEGIN {
     excludes += Array(config["vm"]["sync-exclude"]).map(&:to_s)
     excludes.uniq!
     args = ["--stats", "--archive", "--delete", "-z",
-            "--no-owner", "--no-group", "--rsync-path /usr/bin/rsync" ]
+            "--no-owner", "--no-group", "--rsync-path /usr/bin/rsync", "-k" ]
     command = [ "rsync", args, "-e", "\"#{@rsh}\"", excludes.map { |e| ["--exclude", e] },
                 "../", "#{@username}@#{@host}:/host" ].flatten.join(" ")
     # TODO - subproc to ignore INT signal, or move to different process group
