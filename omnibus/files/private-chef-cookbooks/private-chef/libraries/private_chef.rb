@@ -572,6 +572,8 @@ EOF
     end
 
     def generate_config_for_topology(topology, node_name)
+      # TODO(ssd): This can be cleaned up once the "default"
+      # topologies are also implemented using registered extensions
       case topology
       when "standalone","manual"
         PrivateChef[:api_fqdn] ||= node_name
@@ -579,8 +581,11 @@ EOF
       when "ha", "tier"
         gen_redundant(node_name, topology)
       else
-        if PrivateChef["registered_extensions"].key?(topology)
+        if PrivateChef["registered_extensions"].key?(topology) && server_config_required?
           gen_redundant(node_name, topology)
+        elsif PrivateChef["registered_extensions"].key?(topology) && !server_config_required?
+          PrivateChef[:api_fqdn] ||= node_name
+          gen_api_fqdn
         else
           Chef::Log.fatal("I do not understand topology #{PrivateChef.topology} - try standalone, manual, ha, or tier.")
           exit 55

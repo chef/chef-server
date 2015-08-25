@@ -266,12 +266,12 @@ EOF
       let(:my_gen_api_fqdn_no_throw) { Proc.new {} }
 
       it "calls the gen_backup callback of the custom topology for a backend node" do
-        PrivateChef.register_extension("custom_topo", gen_backend: my_gen_backend )
+        PrivateChef.register_extension("custom_topo", gen_backend: my_gen_backend, server_config_required: true)
         expect{ config_for("a_backend") }.to throw_symbol :my_gen_backend_called
       end
 
       it "calls the gen_frontend callback of the custom topology for a frontend node" do
-        PrivateChef.register_extension("custom_topo", gen_frontend: my_gen_frontend )
+        PrivateChef.register_extension("custom_topo", gen_frontend: my_gen_frontend, server_config_required: true)
         expect{ config_for("a_frontend") }.to throw_symbol :my_gen_frontend_called
       end
 
@@ -288,7 +288,7 @@ EOF
       end
 
       it "uses the default implementation for a callback that isn't provided" do
-        PrivateChef.register_extension("custom_topo", gen_api_fqdn: my_gen_api_fqdn_no_throw)
+        PrivateChef.register_extension("custom_topo", gen_api_fqdn: my_gen_api_fqdn_no_throw, server_config_required: true)
         rendered_config = config_for("a_backend")
         # test a known side-effect of teh current gen_backend function
         expect(rendered_config["private_chef"]["redis_lb"]["listen"]).to eq("0.0.0.0")
