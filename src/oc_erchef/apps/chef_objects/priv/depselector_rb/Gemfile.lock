@@ -9,7 +9,7 @@ GIT
 
 GIT
   remote: git://github.com/sdelano/erlectricity
-  revision: 279b22e0d6373bf67ddb8f9f3efb5e9ba1eaa6c2
+  revision: 4ad8379b4e3ff2c6d4e852daaf04bc9103676d19
   branch: master
   specs:
     erlectricity (1.1.1)
@@ -18,7 +18,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     dep-selector-libgecode (1.0.2)
-    ffi (1.9.8)
+    ffi (1.9.10)
     uuidtools (2.1.5)
 
 PLATFORMS
