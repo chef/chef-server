@@ -1,5 +1,11 @@
 # Chef Server Release Notes
 
+## 12.1.3 (Unreleased)
+
+Take extra steps to ensure that unless newrelic support is expressly
+configured, the service will not call home to newrelic. This fixes a
+problem that affects 12.1.0, 12.1.1, 12.1.2.
+
 ## 12.1.2 (2015-07-16)
 
 Fix issue where chef-server-ctl install could not fetch remote packages via apt.
