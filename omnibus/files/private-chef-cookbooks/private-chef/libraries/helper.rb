@@ -151,5 +151,16 @@ class OmnibusHelper
     node['private_chef'].attribute?('ldap') &&
       !(node['private_chef']['ldap'].nil? || node['private_chef']['ldap'].empty?)
   end
+
+  def repository_configured?(name)
+    case node['platform_family']
+    when 'rhel'
+      File.exists? "/etc/yum.repos.d/#{name}.repo"
+    when 'debian'
+      File.exists? "/etc/apt/sources.list.d/#{name}.list"
+    else
+     false
+    end
+  end
 end
 
