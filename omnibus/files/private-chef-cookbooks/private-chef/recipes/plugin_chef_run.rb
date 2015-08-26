@@ -12,6 +12,12 @@ end
 
 plugins.each do |plugin|
   next if !plugin.parent_plugin.nil?
+
+  if plugin.cookbook_path.nil?
+    Chef::Log.warn("The plugin #{plugin.name} does not include a cookbook path.")
+    next
+  end
+
   chef_run plugin.run_list do
     cookbook_path plugin.cookbook_path
     included_attrs ["private_chef"]
