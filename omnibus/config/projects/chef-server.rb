@@ -32,7 +32,7 @@ override :berkshelf2, version: "2.0.18"
 override :rabbitmq, version: "3.3.4"
 override :erlang, version: "17.5"
 override :ruby, version: "2.1.4"
-override :'omnibus-ctl', version: "/mp/LOB-10-bug-fix" # "0.4.1"
+override :'omnibus-ctl', version: "0.4.1"
 # creates required build directories
 dependency "preparation"
 

@@ -63,8 +63,16 @@ add_command_under_category "psql", "Database", "Launches an interactive psql ses
   db_hash_key=known_dbs[service_name]["config_key"]
   db_name=known_dbs[service_name]["dbname"]
 
-  db_username=db_config[seed][db_hash_key]["sql_#{ro}user"]
-  db_password=db_config[seed][db_hash_key]["sql_#{ro}password"]
+  # undocumented, but available. Intended for use primarily for
+  # gather-logs to be able to do its thing correctly.
+  if (ARGV.include? "--as-admin")
+    cfg = running_service_config('postgresql')
+    db_username=cfg['db_superuser']
+    db_password=cfg['db_superuser_password']
+  else
+    db_username=db_config[seed][db_hash_key]["sql_#{ro}user"]
+    db_password=db_config[seed][db_hash_key]["sql_#{ro}password"]
+  end
 
   db_host = db_config[seed]['postgresql']['vip']
   db_port = db_config[seed]['postgresql']['port']
