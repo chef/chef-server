@@ -17,15 +17,16 @@ module Omnibus
       # NOTE a better way to handle this particular action may be through a chef_run of a 'cleanse' recipe,
       # since here we're explicitly reversing the actions we did in-recipe to set the DBs up....
       superuser = postgres['db_superuser']
-      [%w{oc_bifrost, bifrost},
-       %w{opscode-erchef, opscode_chef},
-       %w{oc_id, oc_id}].each do |service|
+      [%w{oc_bifrost bifrost},
+       %w{opscode-erchef opscode_chef},
+       %w{oc_id oc_id}].each do |service|
         key, dbname = service
+        service_config = running_service_config(key)
         exec_list << "DROP DATABASE #{dbname}"
-        exec_list << "REVOKE \"#{running_package_config[key]['sql_user']}\" FROM \"#{superuser}\""
-        exec_list << "REVOKE \"#{running_package_config[key]['sql_ro_user']}\" FROM \"#{superuser}\""
-        exec_list << "DROP ROLE \"#{running_package_config[key]['sql_user']}\""
-        exec_list << "DROP ROLE \"#{running_package_config[key]['sql_ro_user']}\""
+        exec_list << "REVOKE \"#{service_config['sql_user']}\" FROM \"#{superuser}\""
+        exec_list << "REVOKE \"#{service_config['sql_ro_user']}\" FROM \"#{superuser}\""
+        exec_list << "DROP ROLE \"#{service_config['sql_user']}\""
+        exec_list << "DROP ROLE \"#{service_config['sql_ro_user']}\""
       end
       if perform_delete
         delete_external_postgresql_data(exec_list, postgres)
