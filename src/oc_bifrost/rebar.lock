@@ -56,7 +56,7 @@
   0},
  {<<"jiffy">>,
   {git,"git://github.com/davisp/jiffy.git",
-       {ref,"3b6a1327d418f7594ecb23aa8d7874c3986f433e"}},
+       {ref,"f661ee9fd80e5b6b03e9dfbb17d1c72fb6cfdba9"}},
   0},
  {<<"eper">>,
   {git,"git://github.com/massemanet/eper.git",
