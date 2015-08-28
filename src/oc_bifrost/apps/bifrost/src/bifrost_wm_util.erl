@@ -68,7 +68,7 @@ set_json_body(Req, EjsonData) ->
 %% something.  LIKE WE DO.
 -spec encode(ej:json_object()) -> binary().
 encode(EjsonData) ->
-    jiffy:encode(EjsonData).
+    iolist_to_binary(jiffy:encode(EjsonData)).
 
 -spec decode(binary()) -> ej:json_object().
 decode(JsonData) ->
