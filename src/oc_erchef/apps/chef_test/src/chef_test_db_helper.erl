@@ -97,22 +97,22 @@ start_db(Config, DbName) ->
 the_real_root_dir("") ->
     {error, not_found};
 the_real_root_dir(Dir) ->
-    ct:pal("the_real_root_dir(~s)",[Dir]),
-    case file:list_dir(Dir) of
-        {ok, AllFiles} ->
-            file:list_dir(Dir),
-            case {lists:member("_build", AllFiles), lists:member("apps", AllFiles)} of
-                {true, true} ->
-                    Dir;
-                _ ->
-                    Tokens = filename:split(Dir),
-                    NewDir = filename:join(lists:droplast(Tokens)),
-                    the_real_root_dir(NewDir)
-            end;
+    AllFiles = maybe_find_files(Dir),
+    case {lists:member("_build", AllFiles), lists:member("apps", AllFiles)} of
+        {true, true} ->
+            Dir;
         _ ->
             Tokens = filename:split(Dir),
             NewDir = filename:join(lists:droplast(Tokens)),
             the_real_root_dir(NewDir)
+    end.
+
+maybe_find_files(Dir) ->
+    case file:list_dir(Dir) of
+        {ok, AllFiles} ->
+            AllFiles;
+        _ ->
+            []
     end.
 
 stop_db(Config) ->
