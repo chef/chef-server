@@ -42,6 +42,11 @@ REL_VERSION ?= $$(git log --oneline --decorate | grep -v -F "jenkins" | grep -F 
 VERSION: version_clean
 	@echo -n $(REL_VERSION) > VERSION
 
+## for Omnbibus
+omnibus: $(REBAR3) distclean
+	$(REBAR3) update
+	$(REBAR3) do compile, release
+
 ## For dvm
 DVM_HOOK = bundle
 dvm_file = $(wildcard /vagrant/dvm.mk)

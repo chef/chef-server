@@ -51,6 +51,10 @@ install: $(REBAR3)
 travis: update all
 	@echo "Travis'd!"
 
+## for Omnbibus
+omnibus: $(REBAR3) distclean
+	$(REBAR3) update
+	$(REBAR3) do compile, release
 
 ## For dvm
 PROJ = bookshelf

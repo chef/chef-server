@@ -33,10 +33,7 @@ build do
   env['USE_SYSTEM_GECODE'] = "1"
   env['REL_VERSION'] = "#{project.build_version}"
 
-  make "distclean", env: env
-  make "rebar3", env: env
-  command "./rebar3 update", env: env
-  command "./rebar3 do clean, compile, release", env: env
+  make "omnibus", env: env
 
   sync "#{project_dir}/_build/default/rel/oc_erchef/", "#{install_dir}/embedded/service/opscode-erchef/", exclude: ['**/.git', '**/.gitignore']
   delete "#{install_dir}/embedded/service/opscode-erchef/log"
