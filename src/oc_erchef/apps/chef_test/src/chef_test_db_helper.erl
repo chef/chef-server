@@ -97,6 +97,7 @@ start_db(Config, DbName) ->
 the_real_root_dir("") ->
     {error, not_found};
 the_real_root_dir(Dir) ->
+    ct:pal("the_real_root_dir(~s)",[Dir]),
     {ok, AllFiles} = file:list_dir(Dir),
 
     case {lists:member("_build", AllFiles), lists:member("apps", AllFiles)} of
