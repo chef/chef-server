@@ -36,7 +36,10 @@
 %% They default to oc_chef_sql:statements(pgsql) like everything.
 start_db(Config, DbName) ->
     DataDir = ?config(data_dir, Config),
-    RootDir = filename:join([DataDir, "..", "..", "..", "..", "..", ".."]),
+
+    %% Will the real root dir please stand up!
+    RootDir = the_real_root_dir(DataDir),
+
     App = ?config(app, Config),
     AppDir = filename:join([RootDir, "apps", App]),
 
@@ -90,6 +93,20 @@ start_db(Config, DbName) ->
                {<<"updated_at">>, {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}}]}]),
 
     [{pg_port, Port}, {pg_data, PgData}, {pg_log, PgLog}, {pg_name, DbName} | Config].
+
+the_real_root_dir("") ->
+    {error, not_found};
+the_real_root_dir(Dir) ->
+    {ok, AllFiles} = file:list_dir(Dir),
+
+    case {lists:member("_build", AllFiles), lists:member("apps", AllFiles)} of
+        {true, true} ->
+            Dir;
+        _ ->
+            Tokens = filename:split(Dir),
+            NewDir = filename:join(lists:droplast(Tokens)),
+            the_real_root_dir(NewDir)
+    end.
 
 stop_db(Config) ->
     PgData = ?config(pg_data, Config),
