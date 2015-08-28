@@ -49,6 +49,11 @@ bundle:
 	@echo bundling up depselector, This might take a while...
 	@cd apps/chef_objects/priv/depselector_rb; bundle install --deployment --path .bundle
 
+## for Omnbibus
+omnibus: $(REBAR3) distclean
+	$(REBAR3) update
+	$(REBAR3) do compile, release
+
 ## For dvm
 DVM_HOOK = bundle
 dvm_file = $(wildcard /vagrant/dvm.mk)

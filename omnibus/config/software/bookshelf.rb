@@ -24,9 +24,7 @@ build do
   env = with_standard_compiler_flags(with_embedded_path)
   env['REL_VERSION'] = "#{project.build_version}"
 
-  make "distclean", env: env
-  make "rebar3", env: env
-  command "./rebar3 do clean, compile, release", env: env
+  make "omnibus", env: env
 
   sync "#{project_dir}/_build/default/rel/bookshelf/", "#{install_dir}/embedded/service/bookshelf/"
   delete "#{install_dir}/embedded/service/bookshelf/log"
