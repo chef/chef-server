@@ -22,6 +22,13 @@ DECLARE
         -- hold the value of an authz id as we iterate through actors and groups
         id char(32);
 BEGIN
+
+        -- Obtain a lock for actions applied to this entity's acls.
+        -- Note that the lock is implictly released at the end of the transaction
+        -- that automatically encloses this function call. This lock applies
+        -- across sessions.
+        EXECUTE 'SELECT pg_advisory_xact_lock($1)' USING target_id;
+
         -- Clear out the old
         EXECUTE 'DELETE FROM ' || actor_table || '
             WHERE target = $1 AND permission = $2' USING target_id, perm;
