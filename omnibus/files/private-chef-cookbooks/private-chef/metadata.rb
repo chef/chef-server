@@ -14,4 +14,4 @@ end
 depends          'enterprise' # grabbed via Berkshelf + Git
 depends          'apt'
 depends          'yum', '~> 3.0'
-depends          'openssl', '>= 4.2'
+depends          'openssl', '>= 4.4'
