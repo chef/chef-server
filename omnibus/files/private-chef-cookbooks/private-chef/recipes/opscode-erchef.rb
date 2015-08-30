@@ -32,6 +32,7 @@ enable_ssl = ldap_authentication_enabled ? node['private_chef']['ldap']['enable_
 ldap_encryption_type = ldap_authentication_enabled ? node['private_chef']['ldap']['encryption_type'] : nil
 
 erchef_config = File.join(opscode_erchef_dir, "sys.config")
+erchef_vm = File.join(opscode_erchef_dir, "vm.args")
 
 rabbitmq = OmnibusHelper.new(node).rabbitmq_configuration
 
@@ -42,6 +43,13 @@ actions_password = rabbitmq['actions_password']
 actions_vhost = rabbitmq['actions_vhost']
 actions_exchange = rabbitmq['actions_exchange']
 
+template erchef_vm do
+  source "erchef-vm.args.erb"
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
+  mode "644"
+  variables(:name => "erchef@#{node['api_fqdn']}")
+end
 template erchef_config do
   source "oc_erchef.config.erb"
   owner OmnibusHelper.new(node).ownership['owner']
@@ -80,6 +88,10 @@ end
 
 link "/opt/opscode/embedded/service/opscode-erchef/sys.config" do
   to erchef_config
+end
+
+link "/opt/opscode/embedded/service/opscode-erchef/vm.args" do
+  to erchef_vm
 end
 
 component_runit_service "opscode-erchef"

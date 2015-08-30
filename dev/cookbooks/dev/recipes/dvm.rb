@@ -53,4 +53,5 @@ end
 bash "reconfigure-chef-server" do
   user 'root'
   code "chef-server-ctl reconfigure"
+  not_if { node['dvm']['no-reconfigure'] }
 end

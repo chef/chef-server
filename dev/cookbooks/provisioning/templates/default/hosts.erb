@@ -1,6 +1,7 @@
 127.0.0.1 localhost
-<% @fqdns.each do |fqdn| %>
-192.168.33.100  <%=fqdn.split(".")[0]%>
+
+<% @fqdns.each_pair do |k, v| %>
+<%= v%> <%= k%>
 <% end %>
 
 ::1 localhost ip6-localhost ip6-loopback

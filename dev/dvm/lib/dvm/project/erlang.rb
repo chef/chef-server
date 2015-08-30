@@ -92,15 +92,16 @@ EOM
       purge_links
       if File.exists?("#{base_sv_path}/sys.config")
         FileUtils.ln_s("#{base_sv_path}/sys.config", "#{relpath}/sys.config")
-      else
-        FileUtils.ln_s("#{base_sv_path}/etc/sys.config", "#{relpath}/etc/sys.config")
+      end
+      if File.exists?("#{base_sv_path}/vm.args")
+        FileUtils.ln_s("#{base_sv_path}/vm.args", "#{relpath}/vm.args")
       end
 
       FileUtils.ln_s("/var/log/opscode/#{service["name"]}", "#{relpath}/log")
     end
 
     def purge_links
-      FileUtils.rm_rf(["#{relpath}/log", "#{relpath}/sys.config", "#{relpath}/etc/sys.config"])
+      FileUtils.rm_rf(["#{relpath}/log", "#{relpath}/vm.args", "#{relpath}/sys.config", "#{relpath}/etc/sys.config"])
     end
 
     def do_load(options)

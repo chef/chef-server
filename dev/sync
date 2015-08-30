@@ -28,11 +28,10 @@ while true do
     # Removing this - having it regularly flickering up and calling attention
     # to itself has proven annoying...
     #@screen.set_status("Syncing...")
-    r = do_sync
+    output = do_sync
     # Prevent scrolling and resizing from doing ugly things...
     @screen.clear
     @screen.say_at(1, 1, banner)
-    output = parse_results(r)
     interrupted = false
     refresh_stats(output)
     sleep(INTERVAL)
@@ -78,9 +77,15 @@ BEGIN {
       k, v = line.split(" ")
       ssh_info[k.strip] = v.strip
     end
+    ssh_info2 = {}
+    `vagrant ssh-config chef-server-node`.split("\n").each do |line|
+      k, v = line.split(" ")
+      ssh_info2[k.strip] = v.strip
+    end
     @username = ssh_info["User"]
     @host = ssh_info["HostName"]
     @rsh = "ssh -p #{ssh_info["Port"]} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -q -i #{ssh_info["IdentityFile"]}"
+    @rsh2 = "ssh -p #{ssh_info2["Port"]} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -q -i #{ssh_info2["IdentityFile"]}"
     @screen = Screen.new
     @screen.clear
     @screen.say_at(1, 1, banner)
@@ -106,14 +111,19 @@ BEGIN {
     excludes += ['.vagrant/']
     excludes += Array(config["vm"]["sync-exclude"]).map(&:to_s)
     excludes.uniq!
-    args = ["--stats", "--archive", "--delete", "-z",
-            "--no-owner", "--no-group", "--rsync-path /usr/bin/rsync", "-k" ]
-    command = [ "rsync", args, "-e", "\"#{@rsh}\"", excludes.map { |e| ["--exclude", e] },
-                "../", "#{@username}@#{@host}:/host" ].flatten.join(" ")
-    # TODO - subproc to ignore INT signal, or move to different process group
-    # to avoid Ctrl+C interrupting it.
-    r = `#{command}`
-    [ Time.now - start, r.split("\n") ]
+    out = ""
+    r = ""
+    [@rsh, @rsh2].each do |rsh|
+      args = ["--stats", "--archive", "--delete", "-z",
+              "--no-owner", "--no-group", "--rsync-path /usr/bin/rsync", "-k" ]
+      command = [ "rsync", args, "-e", "\"#{rsh}\"", excludes.map { |e| ["--exclude", e] },
+                  "../", "#{@username}@#{@host}:/host" ].flatten.join(" ")
+      # TODO - subproc to ignore INT signal, or move to different process group
+      # to avoid Ctrl+C interrupting it.
+      r = `#{command}`
+      out = parse_results( [ Time.now - start, r.split("\n") ])
+    end
+    out
   end
 
   def suspend
