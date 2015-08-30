@@ -50,6 +50,7 @@ template erchef_vm do
   mode "644"
   variables(:name => "erchef@#{node['api_fqdn']}")
 end
+
 template erchef_config do
   source "oc_erchef.config.erb"
   owner OmnibusHelper.new(node).ownership['owner']

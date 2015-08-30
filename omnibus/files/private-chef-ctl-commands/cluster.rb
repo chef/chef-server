@@ -40,9 +40,8 @@ EOM
       my_name = name
     end
   end
-  # Ugly hack because Ctl doens't give us a clean set of args, and other
-  # global option (--verbose, -q ) are permitted  - so remove anything we
-  # don't want to see.
+  # We really need to fix Ctl base to give us a clean set of args - we shouldn't have to
+  # worry about ARGV[4...] or dealing with the possible presence of global args.
   cmd_args = ARGV[3..-1].reject { |arg| arg.start_with?("-") && !(arg == "--fqdn" || arg == "-f" ) }
   begin
     opt_parser.parse!(cmd_args)
@@ -61,17 +60,17 @@ EOM
   `mkdir -p /etc/opscode`
   `rm -rf /etc/opscode/*`
   run_command "/opt/opscode/embedded/service/omnibus-ctl/node_connector.es #{my_name} #{remotenode}"
-  if $?.status == 0
+  if $?.exitstatus == 0
     # Okay! This means we've gotten all of our config, have a proper chef-server.rb -
     # so we'll reconfigure and be done.
     log "Registration complete!"
     log "Reconfiguring chef-server, this may take up to three minutes."
     # Make reconfigure quiet.
     @quiet = true
-    reconfigure(true)
+    reconfigure(false)
     log "This node can now be added to the load balancer rotation."
     log "Happy Cheffing!"
-
+    0
   else
     raise SystemExit.new($?.status, "fail")
   end

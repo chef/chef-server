@@ -15,7 +15,7 @@
 main([MyHost, RemoteHost]) ->
     HomeTeam = binary_to_atom(iolist_to_binary(["guest@", MyHost] ), utf8),
     AwayTeam = binary_to_atom(iolist_to_binary(["erchef@", RemoteHost] ), utf8),
-    net_kernel:start([HomeTeam, longnames]),
+    {ok, _} = net_kernel:start([HomeTeam, longnames]),
     erlang:set_cookie(node(), 'erchef'),
     register(guest_node, self()),
     % We'll want some nice pretty error handling here -

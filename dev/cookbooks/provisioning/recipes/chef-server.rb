@@ -7,6 +7,8 @@ template "/etc/opscode/chef-server.rb" do
   owner "root"
   group "root"
   action :create
+  variables( fqdn: 'api.chef-server.dev',
+             ip: '192.168.33.100' )
 end
 
 

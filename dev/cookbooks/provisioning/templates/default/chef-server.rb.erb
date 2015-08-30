@@ -1,6 +1,16 @@
-api_fqdn "api.chef-server.dev"
+api_fqdn "#{@fqdn}"
 
-topology "standalone"
-<% node['provisioning']['chef-server-config'].each_pair do |k, v| %>
-<%= k%>=<%= v%>
-<% end %>
+# topology "standalone"
+# <% node['provisioning']['chef-server-config'].each_pair do |k, v| %>
+# <%= k%>=<%= v%>
+# <% end %>
+#
+topology "tier"
+server "#{@fqdn}",
+  :ipaddress => "#{@ip}",
+  :role => "backend",
+  :bootstrap => true
+
+backend_vip "#{@fqdn}",
+  :ipaddress => "#{@ip}",
+  :device => "eth1"
