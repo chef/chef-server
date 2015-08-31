@@ -8,7 +8,7 @@
 case node['platform_family']
 when 'debian'
   package_suffix = 'deb'
-when 'rhel'
+when 'rhel', 'suse'
   package_suffix = 'rpm'
 else
   # TODO: probably don't actually want to fail out?
@@ -28,7 +28,7 @@ node['private_chef']['addons']['packages'].each do |pkg|
     case node['platform_family']
     when 'debian'
       provider Chef::Provider::Package::Dpkg
-    when 'rhel'
+    when 'rhel', 'suse'
       provider Chef::Provider::Package::Rpm
     end
     source pkg_file
