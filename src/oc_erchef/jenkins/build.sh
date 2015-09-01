@@ -5,7 +5,7 @@
 # PROJ_NAME and the make command.
 
 PROJ_NAME=oc_erchef
-export PATH=/opt/ruby1.9/bin:/opt/erlang/bin:$PATH:/usr/local/bin
+export PATH=/opt/omnibus-toolchain/embedded/bin:/opt/erlang/bin:$PATH:/usr/local/bin
 export USE_SYSTEM_GECODE=1
 
 make distclean
