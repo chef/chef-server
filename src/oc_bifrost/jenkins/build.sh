@@ -6,7 +6,7 @@
 
 PROJ_NAME=oc_bifrost
 
-export PATH=/opt/erlang/bin:$PATH:/usr/local/bin
+export PATH=/opt/omnibus-toolchain/embedded/bin:/opt/otp/17.5/bin:$PATH:/usr/local/bin
 jenkins/builder_info.rb
 source machine_info
 
