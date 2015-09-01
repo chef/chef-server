@@ -22,11 +22,11 @@ module Omnibus
        %w{oc_id oc_id}].each do |service|
         key, dbname = service
         service_config = running_service_config(key)
-        exec_list << "DROP DATABASE #{dbname}"
-        exec_list << "REVOKE \"#{service_config['sql_user']}\" FROM \"#{superuser}\""
-        exec_list << "REVOKE \"#{service_config['sql_ro_user']}\" FROM \"#{superuser}\""
-        exec_list << "DROP ROLE \"#{service_config['sql_user']}\""
-        exec_list << "DROP ROLE \"#{service_config['sql_ro_user']}\""
+        exec_list << "DROP DATABASE #{dbname};"
+        exec_list << "REVOKE \"#{service_config['sql_user']}\" FROM \"#{superuser}\";"
+        exec_list << "REVOKE \"#{service_config['sql_ro_user']}\" FROM \"#{superuser}\";"
+        exec_list << "DROP ROLE \"#{service_config['sql_user']}\";"
+        exec_list << "DROP ROLE \"#{service_config['sql_ro_user']}\";"
       end
       if perform_delete
         delete_external_postgresql_data(exec_list, postgres)
@@ -81,7 +81,7 @@ module Omnibus
           "run: postgresql: connected OK to #{postgres['vip']}:#{postgres['port']}"
           # to hopefully avoid breaking anyone who parses this.
         else
-          postgres_verbose_status(postgres, connetion)
+          postgres_verbose_status(postgres, connection)
         end
       rescue StandardError => e
         if detail_level == :sparse
