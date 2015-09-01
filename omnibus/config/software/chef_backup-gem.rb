@@ -19,7 +19,10 @@ default_version '0.0.1.dev.4'
 
 dependency 'ruby'
 dependency 'rubygems'
-dependency 'rsync'
+# rsync dependency must be met by pre-installation on the server,
+# Because of rsync's GPLv3 licensing, we can't include it in the shipped
+# chef-server without further evaluation.
+#dependency 'rsync'
 
 build do
   gem "install chef_backup -n #{install_dir}/embedded/bin --no-rdoc --no-ri -v #{version}"

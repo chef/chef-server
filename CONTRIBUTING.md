@@ -26,6 +26,42 @@ code until it is ready to merge.
 5. Merge it! (If you don't have commit access, a maintainer will merge
    it for you after code review is complete).
 
+### Commit Messages
+
+In order to ensure that our tooling can identify and document changes
+that go into a given release, we are now requiring each pull request
+include at least one commit that contains a message in the format below:
+
+`ChangeLog-Entry: [$component] [$issue-id] brief description of what was
+added or changed.`
+
+Examples:
+
+* `ChangeLog-Entry: [omnibus] [chef-server/999] reconfigure will no longer delete rm -rf /`
+
+* `ChangeLog-Entry: [oc-id] ensure that we don't dial home to newrelic
+unless explicitly configured to do so.`
+
+* `ChangeLog-Entry: [oc_erchef] add a new _versions endpoint.`
+* `ChangeLog-Entry: [omnibus] add routing for new _versions endpoint`
+
+Some notes:
+
+* The message should stand on its own, without further context needed to
+  understand the the change at a high level.
+* If there is no issue associated, that can be omitted.
+* Note that this can be part of a larger commit message, it just needs
+  to be in there somewhere.
+* Putting it in the PR message will not work, as this isn't captured as
+  part of a commit.
+* A changelog entry can include newlines, the tooling will pick up
+  everything up to the first blank line or end of message.
+* Multiple changelog entries for a single PR are encouraged if they're
+  for different components.
+
+Pull requests that don't contain a commit with a message in this form
+will not be accepted.
+
 ## Reporting an Issue
 
 When reporting an issue, please try to include as much detail as

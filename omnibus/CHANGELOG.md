@@ -1,13 +1,71 @@
 # Chef Server Changelog
 
-## Unreleased
+## 12.2.0 (2015-09-01)
 
-### chef-server
+### oc\_erchef
 * New policyfile API endpoints to enable cleanup of policy objects:
   * `/policies/:policy_name` (GET, DELETE)
   * `/policies/:policy_name/revisions` (POST)
   * `/policies/:policy_name/revisions/:revision_id` (GET, DELETE)
   * `/policy_groups/:policy_group_name` (GET, DELETE)
+* admin group acl policy changes, preventing removal of admin group ACE
+  from a group's grant ACL.
+* renamed `$ORG_global_admins` to `$ORG_read_access_group`
+* prefer user auth when there is a username/client collision and the
+  request is originating from Manage.
+
+
+### omnibus
+* Change oc-id vip back to 127.0.0.1 to avoid possible
+  error with nginx; add -b option for Rails and make vip fully
+  configurable so it can work properly in IPv4 and IPv6 environments
+* Ensure automatic updates from the chef packagecloud repository
+  are disabled on rhel by default, and in all cases specify stable
+  repository.
+* Ensure that `opscode_chef` database is owned by the `sql_user` specified for
+  `opsode-erchef` instead of the global postgresql user.
+* external postgresql now supported
+* change nearly all database access (except initial DB creation for
+  locally managed database) to use tcp/ip instead of local socket for
+  consistency in local/remote installations.
+* add-on configuration hook framework
+* chef-server-ctl support for pre/post command hooks via omnibus-ctl
+* chef-server-ctl support for external postgresql
+* new chef-server-ctl commands: psql, backup, restore
+* chef-server-ctl will give a nice message instead of a stack trace when
+  not run as root.
+
+### dvm
+* new option to auto-load components that live in omnibus prior to first
+  chef-server-ctl reconfigure
+* support and auto config for an additional postgres VM.
+
+### bifrost
+* fix for deadlocks that occur when multiple updates to the same actor are applied
+  concurrently.
+
+### oc-id
+* additional fix for not enabling newrelic unless requested
+
+### chef-mover
+* New migration for the rename of `$ORG_global_admins` to
+  `$ORG_read_access_groups` and proper setup of org user read
+  permissions.
+
+### bookshelf
+* Experimental support for synchronizing two bookshelf instances.
+
+### Components
+
+New Components
+* `chef_backup-gem` (0.0.1.dev.4)
+
+Updated Components
+* `omnibus-ctl` (c514d1d4 -> 0.4.1)
+* `knife-opc` (17d4fc26 -> 528be923)
+* `knife-ec-backup` (2.0.4 -> 2.0.6)
+* `ohai` (2accf7e2 -> ffd9a0a0)
+* `chef` (9a3e6e04 -> 8926514f)
 
 ## 12.1.2 (2015-07-16)
 
@@ -19,10 +77,7 @@
 ### chef-server
 * Fix problems with upgrades from Open Source Chef Server 11 related
   to client and user uploads.
-
-* Fix problems with upgrades from Enterprise Chef Server 11 related to
-  a failed chef-mover migration.
-
+* Fix problems with upgrades from Enterprise Chef Server 11 related to a failed chef-mover migration.
 * Upgrade to openssl 1.0.1p
 
 * Upgrade to libxml 2.9.2
