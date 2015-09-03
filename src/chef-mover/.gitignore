@@ -1,4 +1,4 @@
-ebin/*
+ebin
 deps/*
 .eunit/*
 doc/*
@@ -20,6 +20,7 @@ OLD
 .#*
 *~
 .rebar
+.rebar3
 .concrete
 _rel
 relx
