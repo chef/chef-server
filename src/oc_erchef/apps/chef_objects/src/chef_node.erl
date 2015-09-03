@@ -148,6 +148,8 @@ ejson_for_indexing(#chef_node{name = Name, environment = Environment}, Node) ->
     DefaultNormalOverride = chef_deep_merge:merge(DefaultNormal, Override),
     {Merged} = chef_deep_merge:merge(DefaultNormalOverride, Automatic),
     RunList = ej:get({<<"run_list">>}, Node, []),
+    ExtractedRecipes = extract_recipes(RunList),
+    ExtractedRoles = extract_roles(RunList),
     %% We transform to a dict to ensure we override the top-level keys
     %% with the appropriate values and don't introduce any duplicate
     %% keys
@@ -157,9 +159,16 @@ ejson_for_indexing(#chef_node{name = Name, environment = Environment}, Node) ->
                                    %% FIXME: nodes may have environment in the db, but not in JSON
                                    %% or not set at all (pre-environments nodes).
                                    {<<"chef_environment">>, Environment},
-                                   {<<"recipe">>, extract_recipes(RunList)},
-                                   {<<"role">>, extract_roles(RunList)},
-                                   {<<"run_list">>, RunList}]),
+                                   {<<"recipe">>, ExtractedRecipes},
+                                   {<<"role">>, ExtractedRoles},
+                                   {<<"run_list">>, RunList},
+                                   {<<"cheftoplevel-name">>, Name},
+                                   {<<"cheftoplevel-chef_environment">>, Environment},
+                                   {<<"cheftoplevel-recipe">>, ExtractedRecipes},
+                                   {<<"cheftoplevel-role">>, ExtractedRoles},
+                                   {<<"cheftoplevel-run_list">>, RunList},
+                                   {<<"cheftoplevel-recipes">>, ej:get({"recipes"}, Automatic)},
+                                   {<<"cheftoplevel-roles">>, ej:get({"roles"}, Automatic)}]),
     NodeDict1 = dict:merge(fun(_Key, TopVal, _AttrVal) ->
                                    TopVal
                            end, TopLevelDict, NodeDict),

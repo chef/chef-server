@@ -364,7 +364,12 @@ basic_node_index() ->
       {<<"chef_environment">>, <<"prod">>},
       {<<"recipe">>, [<<"web">>]},
       {<<"role">>, [<<"prod">>]},
-      {<<"run_list">>, [<<"recipe[web]">>, <<"role[prod]">>]}
+      {<<"run_list">>, [<<"recipe[web]">>, <<"role[prod]">>]},
+      {<<"cheftoplevel-name">>, <<"a_node">>},
+      {<<"cheftoplevel-chef_environment">>, <<"prod">>},
+      {<<"cheftoplevel-recipe">>, [<<"web">>]},
+      {<<"cheftoplevel-role">>, [<<"prod">>]},
+      {<<"cheftoplevel-run_list">>, [<<"recipe[web]">>, <<"role[prod]">>]}
      ]}.
 
 %% @doc Merge two proplists together, returning a proplist.  Treats them as dictionaries to
