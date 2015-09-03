@@ -32,6 +32,7 @@ override :berkshelf2, version: "2.0.18"
 override :rabbitmq, version: "3.3.4"
 override :erlang, version: "17.5"
 override :ruby, version: "2.1.4"
+override :rubygems, version: "2.4.5"
 override :'omnibus-ctl', version: "0.4.2"
 # creates required build directories
 dependency "preparation"
