@@ -151,7 +151,7 @@ add_to_solr(ObjectRec, ObjectEjson) ->
             DbName = dbname(chef_object:org_id(ObjectRec)),
             Id = chef_object:id(ObjectRec),
             TypeName = chef_object:type_name(ObjectRec),
-            index_queue_add(TypeName, Id, DbName, IndexEjson);
+            chef_index:add(TypeName, Id, DbName, IndexEjson);
         false ->
             ok
     end.
@@ -165,16 +165,10 @@ delete_from_solr(ObjectRec) ->
             Id = chef_object:id(ObjectRec),
             DbName = dbname(chef_object:org_id(ObjectRec)),
             TypeName = chef_object:type_name(ObjectRec),
-            index_queue_delete(TypeName, Id, DbName);
+            chef_index:delete(TypeName, Id, DbName);
         false ->
             ok
     end.
-
-index_queue_add(TypeName, Id, DbName, IndexEjson) ->
-    ok = chef_index_queue:set(envy:get(chef_index, rabbitmq_vhost, binary), TypeName, Id, DbName, IndexEjson).
-
-index_queue_delete(TypeName, Id, DbName) ->
-    ok = chef_index_queue:delete(envy:get(chef_index, rabbitmq_vhost, binary), TypeName, Id, DbName).
 
 %% @doc Given an object type and a list of ids, delete the corresponding search index data
 %% from solr. The delete is achieved by putting a delete message on the indexing queue
@@ -182,9 +176,8 @@ index_queue_delete(TypeName, Id, DbName) ->
 %% immediately.
 -spec bulk_delete_from_solr(atom(), [binary()], binary()) -> ok.
 bulk_delete_from_solr(Type, Ids, OrgId) ->
-    [ index_queue_delete(Type, Id, OrgId) || Id <- Ids ],
+    [ chef_index:delete(Type, Id, OrgId) || Id <- Ids ],
     ok.
-
 
 -spec dbname(binary()) -> <<_:40,_:_*8>>.
 dbname(OrgId) ->

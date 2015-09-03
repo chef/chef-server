@@ -46,7 +46,9 @@ start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 init([]) ->
-    error_logger:info_msg("starting chef_index_sup~n", []),
+    error_logger:info_msg("Starting chef_index_sup.~n", []),
+    error_logger:info_msg("Creating HTTP pool for Solr.~n"),
+    chef_index_http:create_pool(),
     Children = amqp_child_spec(),
     {ok, {{one_for_one, 60, 10}, Children}}.
 
@@ -57,7 +59,6 @@ amqp_child_spec() ->
     %% Lookup AMQP connection info
     case envy:get(chef_index, disable_rabbitmq, false, boolean) of
         true ->
-            error_logger:info_msg("RabbitMQ config disabled. Indexing for search is disabled.~n"),
             [];
         false ->
             %% This uses the key 'ip_mode' in chef_index to decide how to parse the address
@@ -86,4 +87,3 @@ bunnyc_spec(VHost, Host, Port, User, Password, ExchangeName) ->
 server_for_vhost(VHost) ->
     Bin = erlang:iolist_to_binary([<<"chef_index_queue">>, VHost]),
     erlang:binary_to_atom(Bin, utf8).
-    
