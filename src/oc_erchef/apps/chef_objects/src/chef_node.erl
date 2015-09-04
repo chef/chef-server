@@ -29,6 +29,7 @@
          ejson_for_indexing/2,
          extract_recipes/1,
          extract_roles/1,
+         fields_for_insert/1,
          fields_for_fetch/1,
          fields_for_update/1,
          id/1,
@@ -108,6 +109,8 @@
 new_record(ApiVersion, OrgId, AuthzId, NodeData) ->
     Name = ej:get({<<"name">>}, NodeData),
     Environment = ej:get({<<"chef_environment">>}, NodeData),
+    PolicyName = ej:get({<<"policy_name">>}, NodeData),
+    PolicyGroup = ej:get({<<"policy_group">>}, NodeData),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name),
     Data = chef_db_compression:compress(chef_node, chef_json:encode(NodeData)),
     #chef_node{server_api_version = ApiVersion,
@@ -116,6 +119,8 @@ new_record(ApiVersion, OrgId, AuthzId, NodeData) ->
                org_id = OrgId,
                name = Name,
                environment = Environment,
+               policy_name = PolicyName,
+               policy_group = PolicyGroup,
                serialized_object = Data}.
 
 -spec name(#chef_node{}) -> binary().
@@ -142,7 +147,10 @@ is_indexed(_ObjectRec) ->
     true.
 
 -spec ejson_for_indexing(#chef_node{}, ejson_term()) -> ejson_term().
-ejson_for_indexing(#chef_node{name = Name, environment = Environment}, Node) ->
+ejson_for_indexing(#chef_node{name = Name,
+                              environment = Environment,
+                              policy_name = _PName,
+                              policy_group = _PGroup}, Node) ->
     Defaults = ej:get({<<"default">>}, Node, ?EMPTY_EJSON_HASH),
     Normal = ej:get({<<"normal">>}, Node, ?EMPTY_EJSON_HASH),
     Override = ej:get({<<"override">>}, Node, ?EMPTY_EJSON_HASH),
@@ -161,6 +169,9 @@ ejson_for_indexing(#chef_node{name = Name, environment = Environment}, Node) ->
                                    %% FIXME: nodes may have environment in the db, but not in JSON
                                    %% or not set at all (pre-environments nodes).
                                    {<<"chef_environment">>, Environment},
+                                   %% TODO: add policyfile stuff once there's pedant tests.
+                                   %% {<<"policy_name">>, PName},
+                                   %% {<<"policy_group">>, PGroup},
                                    {<<"recipe">>, extract_recipes(RunList)},
                                    {<<"role">>, extract_roles(RunList)},
                                    {<<"run_list">>, RunList}]),
@@ -174,8 +185,10 @@ update_from_ejson(#chef_node{} = Node, NodeJson) ->
     Name = ej:get({<<"name">>}, NodeJson),
     %% We expect that the insert_autofill_fields call will insert default when necessary
     Environment = ej:get({<<"chef_environment">>}, NodeJson),
+    PolicyName = ej:get({<<"policy_name">>}, NodeJson),
+    PolicyGroup = ej:get({<<"policy_group">>}, NodeJson),
     Data = chef_db_compression:compress(chef_node, chef_json:encode(NodeJson)),
-    Node#chef_node{name = Name, environment = Environment, serialized_object = Data}.
+    Node#chef_node{name = Name, environment = Environment, policy_name = PolicyName, policy_group = PolicyGroup, serialized_object = Data}.
 
 -spec set_created(#chef_node{}, object_id()) -> #chef_node{}.
 set_created(#chef_node{} = Object, ActorId) ->
@@ -205,12 +218,23 @@ list_query(_ObjectRec) ->
 update_query(_ObjectRec) ->
     update_node_by_id.
 
+%% This is different than the default behavior in
+%% chef_object_default_callbacks:fields_for_insert, where having a value of
+%% 'undefined' causes an error. In this case we _do_ want to insert NULL for
+%% the policy_name and policy_group fields if they're not present, so we allow
+%% 'undefined' to pass through.
+fields_for_insert(Rec) ->
+    [_RecName, _ApiVersion|Tail] = tuple_to_list(Rec),
+    Tail.
+
 fields_for_update(#chef_node{environment = Environment,
+                             policy_name = PolicyName,
+                             policy_group = PolicyGroup,
                              last_updated_by = LastUpdatedBy,
                              updated_at = UpdatedAt,
                              serialized_object = Object,
                              id = Id}) ->
-    [Environment, LastUpdatedBy, UpdatedAt, Object, Id].
+    [Environment, PolicyName, PolicyGroup, LastUpdatedBy, UpdatedAt, Object, Id].
 
 fields_for_fetch(#chef_node{org_id = OrgId,
                             name = Name}) ->

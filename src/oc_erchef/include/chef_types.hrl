@@ -173,6 +173,8 @@
           'org_id',           % organization guid
           'name',             % node name
           'environment',      % environment
+          'policy_name',      % name of policyfile used by this node
+          'policy_group',     % name of policy group this node is in
           'last_updated_by',  % authz guid of last actor to update object
           'created_at',       % time created at
           'updated_at',       % time created at
