@@ -362,6 +362,8 @@ basic_node_index() ->
     {[{<<"name">>, <<"a_node">>},
       {<<"chef_type">>, <<"node">>},
       {<<"chef_environment">>, <<"prod">>},
+      {<<"policy_group">>, undefined},
+      {<<"policy_name">>, undefined},
       {<<"recipe">>, [<<"web">>]},
       {<<"role">>, [<<"prod">>]},
       {<<"run_list">>, [<<"recipe[web]">>, <<"role[prod]">>]}

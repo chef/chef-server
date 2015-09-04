@@ -112,6 +112,53 @@ describe 'Search API endpoint', :search do
       # TODO: Cannot currently search for expanded run-list information via the "recipes"
       # or "roles" keys because that information is only populated on a chef-client run.
 
+      context "with a node that has policyfile attributes" do
+
+        let(:maximum_search_time){ Pedant::Config.maximum_search_time}
+
+        let(:node_name) { unique_name('testing_node' ) }
+
+        let(:nodes_container) { api_url("/nodes") }
+
+        let(:resource_url) { api_url "/nodes/#{node_name}" }
+
+        let(:node) do
+          new_node(node_name).tap do |n|
+            n["policy_name"] = "example-policy-name"
+            n["policy_group"] = "example-policy-group"
+          end
+        end
+
+        before do
+          post(nodes_container, requestor, payload: node)
+        end
+
+        after :each do
+          delete_node(admin_requestor, node_name)
+        end
+
+        it "finds nodes by policy_name" do
+          search_url = request_url + "?q=policy_name:example-policy-name"
+          response = with_search_polling  { get(search_url, requestor) }
+
+          result = parse(response)
+
+          expect(result["total"]).to eq(1)
+          expect(result["rows"].first).to eq(node)
+        end
+
+        it "finds nodes by policy_group" do
+          search_url = request_url + "?q=policy_group:example-policy-group"
+          response = with_search_polling  { get(search_url, requestor) }
+
+          result = parse(response)
+
+          expect(result["total"]).to eq(1)
+          expect(result["rows"].first).to eq(node)
+        end
+
+      end
+
     end # GET
 
     # Partial Search

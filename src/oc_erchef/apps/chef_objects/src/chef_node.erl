@@ -149,8 +149,8 @@ is_indexed(_ObjectRec) ->
 -spec ejson_for_indexing(#chef_node{}, ejson_term()) -> ejson_term().
 ejson_for_indexing(#chef_node{name = Name,
                               environment = Environment,
-                              policy_name = _PName,
-                              policy_group = _PGroup}, Node) ->
+                              policy_name = PName,
+                              policy_group = PGroup}, Node) ->
     Defaults = ej:get({<<"default">>}, Node, ?EMPTY_EJSON_HASH),
     Normal = ej:get({<<"normal">>}, Node, ?EMPTY_EJSON_HASH),
     Override = ej:get({<<"override">>}, Node, ?EMPTY_EJSON_HASH),
@@ -169,9 +169,8 @@ ejson_for_indexing(#chef_node{name = Name,
                                    %% FIXME: nodes may have environment in the db, but not in JSON
                                    %% or not set at all (pre-environments nodes).
                                    {<<"chef_environment">>, Environment},
-                                   %% TODO: add policyfile stuff once there's pedant tests.
-                                   %% {<<"policy_name">>, PName},
-                                   %% {<<"policy_group">>, PGroup},
+                                   {<<"policy_name">>, PName},
+                                   {<<"policy_group">>, PGroup},
                                    {<<"recipe">>, extract_recipes(RunList)},
                                    {<<"role">>, extract_roles(RunList)},
                                    {<<"run_list">>, RunList}]),
