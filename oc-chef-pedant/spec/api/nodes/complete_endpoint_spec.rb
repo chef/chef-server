@@ -153,6 +153,197 @@ describe "Testing the Nodes API endpoint", :nodes do
         rejects_invalid_value 'anything_else'
       end
 
+      context "when validating 'policy_name' field" do
+
+        let(:default_resource_attributes) { new_node(node_name) }
+
+        let(:request_payload) do
+          new_node(node_name).tap do |node_data|
+            node_data["policy_name"] = policy_name
+          end
+        end
+
+        shared_examples_for "valid_policy_name" do
+
+          it "accepts the policy_name field" do
+            response = post(request_url, requestor, payload: request_payload)
+            expect(response.code).to eq(201)
+
+            get_response = get(resource_url, requestor)
+
+            expect(get_response.code).to eq(200)
+            returned_resource = parse(get_response.body)
+            expect(returned_resource["policy_name"]).to eq(policy_name)
+          end
+
+        end
+
+        context "when policy_name is valid" do
+
+          context "with a simple valid policy name" do
+
+            let(:policy_name) { "example-policy" }
+
+            include_examples "valid_policy_name"
+
+          end
+
+          context "with a maximum length policy name" do
+
+            let(:policy_name) { "d" * 255 }
+
+            include_examples "valid_policy_name"
+
+          end
+
+          context "with a policy name containing every valid character" do
+
+            let(:policy_name) { 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:.' }
+
+            include_examples "valid_policy_name"
+
+          end
+
+        end
+
+        context "when policy name is invalid" do
+
+          shared_examples_for "invalid_policy_name" do
+
+            let(:expected_response) { "{\"error\":[\"Field 'policy_name' invalid\"]}" }
+
+            it "rejects the policy_name field" do
+              response = post(request_url, requestor, payload: request_payload)
+              expect(response.code).to eq(400)
+              expect(response.body).to eq(expected_response)
+            end
+
+          end
+
+          context "when it's not a string" do
+
+            let(:policy_name) { 42 }
+
+            include_examples "invalid_policy_name"
+
+          end
+
+          context "when it's too long" do
+
+            let(:policy_name) { "F" * 256 }
+
+            include_examples "invalid_policy_name"
+
+          end
+
+          [ ' ', '+', '!' ].each do |invalid_char|
+            context "because the policy_name contains invalid character #{invalid_char}" do
+
+              let(:policy_name) { "invalid-char" + invalid_char }
+
+              include_examples "invalid_policy_name"
+
+            end
+          end
+        end
+
+      end
+
+      context "when validating 'policy_group' field" do
+
+        let(:default_resource_attributes) { new_node(node_name) }
+
+        let(:request_payload) do
+          new_node(node_name).tap do |node_data|
+            node_data["policy_group"] = policy_group
+          end
+        end
+
+        shared_examples_for "valid_policy_group" do
+
+          it "accepts the policy_group field" do
+            response = post(request_url, requestor, payload: request_payload)
+            expect(response.code).to eq(201)
+
+            get_response = get(resource_url, requestor)
+
+            expect(get_response.code).to eq(200)
+            returned_resource = parse(get_response.body)
+            expect(returned_resource["policy_group"]).to eq(policy_group)
+          end
+
+        end
+
+        context "when policy_group is valid" do
+
+          context "with a simple valid policy name" do
+
+            let(:policy_group) { "example-policy" }
+
+            include_examples "valid_policy_group"
+
+          end
+
+          context "with a maximum length policy name" do
+
+            let(:policy_group) { "d" * 255 }
+
+            include_examples "valid_policy_group"
+
+          end
+
+          context "with a policy name containing every valid character" do
+
+            let(:policy_group) { 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:.' }
+
+            include_examples "valid_policy_group"
+
+          end
+
+        end
+
+        context "when policy name is invalid" do
+
+          shared_examples_for "invalid_policy_group" do
+
+            let(:expected_response) { "{\"error\":[\"Field 'policy_group' invalid\"]}" }
+
+            it "rejects the policy_group field" do
+              response = post(request_url, requestor, payload: request_payload)
+              expect(response.code).to eq(400)
+              expect(response.body).to eq(expected_response)
+            end
+
+          end
+
+          context "when it's not a string" do
+
+            let(:policy_group) { 42 }
+
+            include_examples "invalid_policy_group"
+
+          end
+
+          context "when it's too long" do
+
+            let(:policy_group) { "F" * 256 }
+
+            include_examples "invalid_policy_group"
+
+          end
+
+          [ ' ', '+', '!' ].each do |invalid_char|
+            context "because the policy_group contains invalid character #{invalid_char}" do
+
+              let(:policy_group) { "invalid-char" + invalid_char }
+
+              include_examples "invalid_policy_group"
+
+            end
+          end
+        end
+      end
+
       validates_node_attribute 'normal'
       validates_node_attribute 'default'
       validates_node_attribute 'override'
@@ -265,6 +456,197 @@ describe "Testing the Nodes API endpoint", :nodes do
       validates_run_list
 
       rejects_invalid_keys
+
+      context "when validating 'policy_name' field" do
+
+        let(:default_resource_attributes) { new_node(node_name) }
+
+        let(:request_payload) do
+          new_node(node_name).tap do |node_data|
+            node_data["policy_name"] = policy_name
+          end
+        end
+
+        shared_examples_for "valid_policy_name" do
+
+          it "accepts the policy_name field" do
+            response = put(request_url, requestor, payload: request_payload)
+            expect(response.code).to eq(200)
+
+            get_response = get(resource_url, requestor)
+
+            expect(get_response.code).to eq(200)
+            returned_resource = parse(get_response.body)
+            expect(returned_resource["policy_name"]).to eq(policy_name)
+          end
+
+        end
+
+        context "when policy_name is valid" do
+
+          context "with a simple valid policy name" do
+
+            let(:policy_name) { "example-policy" }
+
+            include_examples "valid_policy_name"
+
+          end
+
+          context "with a maximum length policy name" do
+
+            let(:policy_name) { "d" * 255 }
+
+            include_examples "valid_policy_name"
+
+          end
+
+          context "with a policy name containing every valid character" do
+
+            let(:policy_name) { 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:.' }
+
+            include_examples "valid_policy_name"
+
+          end
+
+        end
+
+        context "when policy name is invalid" do
+
+          shared_examples_for "invalid_policy_name" do
+
+            let(:expected_response) { "{\"error\":[\"Field 'policy_name' invalid\"]}" }
+
+            it "rejects the policy_name field" do
+              response = put(request_url, requestor, payload: request_payload)
+              expect(response.code).to eq(400)
+              expect(response.body).to eq(expected_response)
+            end
+
+          end
+
+          context "when it's not a string" do
+
+            let(:policy_name) { 42 }
+
+            include_examples "invalid_policy_name"
+
+          end
+
+          context "when it's too long" do
+
+            let(:policy_name) { "F" * 256 }
+
+            include_examples "invalid_policy_name"
+
+          end
+
+          [ ' ', '+', '!' ].each do |invalid_char|
+            context "because the policy_name contains invalid character #{invalid_char}" do
+
+              let(:policy_name) { "invalid-char" + invalid_char }
+
+              include_examples "invalid_policy_name"
+
+            end
+          end
+        end
+
+      end
+
+      context "when validating 'policy_group' field" do
+
+        let(:default_resource_attributes) { new_node(node_name) }
+
+        let(:request_payload) do
+          new_node(node_name).tap do |node_data|
+            node_data["policy_group"] = policy_group
+          end
+        end
+
+        shared_examples_for "valid_policy_group" do
+
+          it "accepts the policy_group field" do
+            response = put(request_url, requestor, payload: request_payload)
+            expect(response.code).to eq(200)
+
+            get_response = get(resource_url, requestor)
+
+            expect(get_response.code).to eq(200)
+            returned_resource = parse(get_response.body)
+            expect(returned_resource["policy_group"]).to eq(policy_group)
+          end
+
+        end
+
+        context "when policy_group is valid" do
+
+          context "with a simple valid policy name" do
+
+            let(:policy_group) { "example-policy" }
+
+            include_examples "valid_policy_group"
+
+          end
+
+          context "with a maximum length policy name" do
+
+            let(:policy_group) { "d" * 255 }
+
+            include_examples "valid_policy_group"
+
+          end
+
+          context "with a policy name containing every valid character" do
+
+            let(:policy_group) { 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:.' }
+
+            include_examples "valid_policy_group"
+
+          end
+
+        end
+
+        context "when policy name is invalid" do
+
+          shared_examples_for "invalid_policy_group" do
+
+            let(:expected_response) { "{\"error\":[\"Field 'policy_group' invalid\"]}" }
+
+            it "rejects the policy_group field" do
+              response = put(request_url, requestor, payload: request_payload)
+              expect(response.code).to eq(400)
+              expect(response.body).to eq(expected_response)
+            end
+
+          end
+
+          context "when it's not a string" do
+
+            let(:policy_group) { 42 }
+
+            include_examples "invalid_policy_group"
+
+          end
+
+          context "when it's too long" do
+
+            let(:policy_group) { "F" * 256 }
+
+            include_examples "invalid_policy_group"
+
+          end
+
+          [ ' ', '+', '!' ].each do |invalid_char|
+            context "because the policy_group contains invalid character #{invalid_char}" do
+
+              let(:policy_group) { "invalid-char" + invalid_char }
+
+              include_examples "invalid_policy_group"
+
+            end
+          end
+        end
+      end
 
       context 'with a canonical payload' do
         let(:existing_default_attributes){node['default']}

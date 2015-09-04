@@ -76,12 +76,16 @@
           {<<"override">>, chef_json_validator:attribute_spec()},
           {<<"automatic">>, chef_json_validator:attribute_spec()},
 
-          {<<"run_list">>, chef_json_validator:run_list_spec()}
+          {<<"run_list">>, chef_json_validator:run_list_spec()},
+
+          {{opt, <<"policy_name">> }, {string_match, chef_regex:regex_for(policy_file_name)}},
+          {{opt, <<"policy_group">> }, {string_match, chef_regex:regex_for(policy_file_name)}}
          ]}).
 
 -define(VALID_KEYS,
         [<<"name">>, <<"chef_environment">>, <<"json_class">>, <<"chef_type">>,
-         <<"normal">>, <<"default">>, <<"override">>, <<"automatic">>, <<"run_list">>]).
+         <<"normal">>, <<"default">>, <<"override">>, <<"automatic">>, <<"run_list">>,
+         <<"policy_name">>, <<"policy_group">> ]).
 
 -define(create_if_missing_fields,
         [{<<"chef_environment">>, <<"_default">>},
