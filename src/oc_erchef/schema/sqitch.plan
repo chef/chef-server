@@ -74,3 +74,5 @@ policy_revisions_policy_groups_association 2015-03-05T20:57:56Z Daniel DeLeo <dd
 
 cbv_type 2015-04-23T08:33:00Z Steven Danna <steve@chef.io> # Add cbv type for new bulk_fetch_cookbook_versions query
 @cbv-type 2015-04-23T08:34:00Z Steven Danna <steve@chef.io> # Add cbv type for new bulk_fetch_cookbook_versions query
+
+node_policy_name_policy_group 2015-09-04T01:15:03Z Daniel DeLeo <ddeleo@lorentz.local># Add policy_name and policy_group fields to node
