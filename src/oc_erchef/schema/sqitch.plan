@@ -76,3 +76,4 @@ cbv_type 2015-04-23T08:33:00Z Steven Danna <steve@chef.io> # Add cbv type for ne
 @cbv-type 2015-04-23T08:34:00Z Steven Danna <steve@chef.io> # Add cbv type for new bulk_fetch_cookbook_versions query
 
 node_policy_name_policy_group 2015-09-04T01:15:03Z Daniel DeLeo <ddeleo@lorentz.local># Add policy_name and policy_group fields to node
+@node-policyfile-fields 2015-09-05T01:47:34Z Daniel DeLeo <ddeleo@lorentz.local># Add policyfile fields to node
