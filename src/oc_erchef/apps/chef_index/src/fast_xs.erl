@@ -13,6 +13,7 @@ init() ->
             Path
     end,
     ok = erlang:load_nif(filename:join(PrivDir, "fast_xs"), 0).
- 
+
+-spec escape(binary()) -> binary().
 escape(_X) ->
-    exit(nif_library_not_loaded).
+    erlang:nif_error(nif_library_not_loaded).

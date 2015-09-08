@@ -1,4 +1,3 @@
-
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
 %% Copyright 2014 Chef Software, Inc. All Rights Reserved.
@@ -436,6 +435,7 @@ join_keys([K | Rest], Sep, Acc) ->
 %% searching for to escape.  Note that technically we don't need to
 %% escape `>' nor `"', symmetry and matching of a pre-existing Ruby
 %% implementation suggest otherwise.
+-spec xml_text_escape(binary()|[binary()]) -> binary()|[binary()].
 xml_text_escape(BinStr) ->
     iolist_to_binary(xml_text_escape1(BinStr)).
 
