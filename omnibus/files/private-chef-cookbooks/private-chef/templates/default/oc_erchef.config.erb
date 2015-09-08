@@ -155,7 +155,15 @@
                 {rabbitmq_password, <<"<%= node['private_chef']['rabbitmq']['password'] %>">>},
                 {rabbitmq_vhost, <<"<%= node['private_chef']['rabbitmq']['vhost'] %>">>},
                 {rabbitmq_exchange, <<"">>},
-                {solr_url, "http://<%= @helper.vip_for_uri('opscode-solr4') %>:<%= node['private_chef']['opscode-solr4']['port'] %>/solr"}
+                {solr_service, [{root_url, "http://<%= @helper.vip_for_uri('opscode-solr4') %>:<%= node['private_chef']['opscode-solr4']['port'] %>/solr"},
+                                {timeout, <%= @solr_timeout %>},
+                                {init_count, <%= @solr_http_init_count %>},
+                                {max_count, <%= @solr_http_max_count %>},
+                                {cull_interval, <%= @solr_http_cull_interval %>},
+                                {max_age, <%= @solr_http_max_age %>},
+                                {max_connection_duration, <%= @solr_http_max_connection_duration %>},
+                                {ibrowse_options, <%= @solr_ibrowse_options %>}]}
+
                ]},
   {chef_objects, [
                   {s3_access_key_id, "<%= node['private_chef']['bookshelf']['access_key_id'] %>"},

@@ -234,6 +234,15 @@ default['private_chef']['opscode-erchef']['depsolver_timeout'] = 5000
 default['private_chef']['opscode-erchef']['couchdb_max_conn'] = '100'
 default['private_chef']['opscode-erchef']['ibrowse_max_sessions'] = 256
 default['private_chef']['opscode-erchef']['ibrowse_max_pipeline_size'] = 1
+# solr_service configuration for erchef. These are used to configure an opscoderl_httpc pool
+# of HTTP connecton workers.
+default['private_chef']['opscode-erchef']['solr_timeout'] = 30000
+default['private_chef']['opscode-erchef']['solr_http_init_count'] = 25
+default['private_chef']['opscode-erchef']['solr_http_max_count'] = 100
+default['private_chef']['opscode-erchef']['solr_http_cull_interval'] = "{1, min}"
+default['private_chef']['opscode-erchef']['solr_http_max_age'] = "{70, sec}"
+default['private_chef']['opscode-erchef']['solr_http_max_connection_duration'] = "{70,sec}"
+default['private_chef']['opscode-erchef']['solr_ibrowse_options'] = "[{connect_timeout, 10000}]"
 # Default: generate signed URLs based upon Host: header. Override with a url, "http:// ..."
 default['private_chef']['opscode-erchef']['base_resource_url'] = :host_header
 default['private_chef']['opscode-erchef']['s3_bucket'] = 'bookshelf'
