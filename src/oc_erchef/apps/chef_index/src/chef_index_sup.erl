@@ -49,17 +49,21 @@ init([]) ->
     error_logger:info_msg("Starting chef_index_sup.~n", []),
     error_logger:info_msg("Creating HTTP pool for Solr.~n"),
     chef_index_http:create_pool(),
-    Children = amqp_child_spec(),
+    Children = child_spec(),
     {ok, {{one_for_one, 60, 10}, Children}}.
 
-%% Return a spec for a bunnyc gen_server for each vhost in {chef_index, rabbitmq_vhosts}. If
-%% no such list of vhosts is found, check for key rabbitmq_vhost. Each vhost induces a
-%% locally registered bunnyc server with name `chef_index_queue$VHOST'.
-amqp_child_spec() ->
+%% Return a spec for a bunnyc gen_server or the chef_index_batch gen_server based on the
+%% disable_rabbitmq configuration.
+%%
+%% When rabbitmq is enable, one bunnyc server is started for each vhost in {chef_index,
+%% rabbitmq_vhosts}. If no such list of vhosts is found, check for key rabbitmq_vhost. Each
+%% vhost induces a locally registered bunnyc server with name `chef_index_queue$VHOST'.
+child_spec() ->
     %% Lookup AMQP connection info
     case envy:get(chef_index, disable_rabbitmq, false, boolean) of
         true ->
-            [];
+            [{chef_index_batch, {chef_index_batch, start_link, []},
+              permanent, 5000, worker, [chef_index_batch]}];
         false ->
             %% This uses the key 'ip_mode' in chef_index to decide how to parse the address
             Host = envy_parse:host_to_ip(chef_index, rabbitmq_host),

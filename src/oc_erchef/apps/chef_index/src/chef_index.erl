@@ -32,7 +32,7 @@ add(TypeName, Id, DbName, IndexEjson) ->
                                 T
                         end,
             Doc = chef_index_expand:doc_for_index(TypeName2, Id, DbName, IndexEjson),
-            chef_index_expand:send_item(Doc)
+            chef_index_batch:add_item(Doc)
     end.
 
 delete(TypeName, Id, DbName) ->

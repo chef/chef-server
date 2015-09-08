@@ -59,6 +59,7 @@
          make_command/5,
          post_multi/2,
          post_single/2,
+         post_to_solr/1,
          send_items/1,
          send_item/1,
          send_delete/1,
@@ -146,7 +147,7 @@ chef_object_type(Index) when is_atom(Index)   -> Index.
 %%
 
 %% @doc Create a fully expanded XML representation of the object for
-%% addition.  This document will need to be wrapped in
+%% addition. This document will need to be wrapped in
 %% <update><add>DOC_HERE</add></update> before it is sent to solr.
 doc_for_index(Index, Id, OrgId, Ejson) ->
     Command = make_command(add, Index, Id, OrgId, Ejson),
