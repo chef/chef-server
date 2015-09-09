@@ -37,6 +37,7 @@
 -define(SERVER, ?MODULE).
 
 -ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
 -compile([export_all]).
 -endif.
 
@@ -206,7 +207,7 @@ post_to_solr(Doc) ->
     DocBin = iolist_to_binary(Doc),
     {ok, Code, _Head, Body} = chef_index_http:request("update", post, DocBin),
     case Code of
-        "2" ++ _Rest ->
+        [$2|_Rest] ->
             ok;
         _ ->
             {error, {Code, Body}}

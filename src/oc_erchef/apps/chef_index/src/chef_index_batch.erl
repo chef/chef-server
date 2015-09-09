@@ -18,10 +18,18 @@
 -module(chef_index_batch).
 -behaviour(gen_server).
 
--export([start_link/0,
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-endif.
+
+-export([
+         add_item/1,
+         flush/0,
+         start_link/0,
          status/0,
          stats/0,
-         add_item/1]).
+         stop/0
+        ]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -48,11 +56,17 @@ add_item(Doc) ->
     Size = byte_size(iolist_to_binary(Doc)),
     gen_server:call(?MODULE, {add_item, Doc, Size}).
 
+flush() ->
+    gen_server:cast(?MODULE, flush).
+
 status() ->
     gen_server:call(?MODULE, status).
 
 stats() ->
     gen_server:call(?MODULE, stats).
+
+stop() ->
+    gen_server:call(?MODULE, stop).
 
 wrap_solr(Docs) ->
     [<<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>">>,
@@ -79,17 +93,32 @@ wrap(Docs, #chef_idx_batch_state{search_provider = cloudsearch}) ->
 wrapper_size(State) ->
     byte_size(iolist_to_binary(wrap([], State))).
 
+-spec state_to_map(#chef_idx_batch_state{}) -> map().
+state_to_map(State) ->
+    #{wrapper_size => State#chef_idx_batch_state.wrapper_size,
+      current_size => State#chef_idx_batch_state.current_size,
+      max_size => State#chef_idx_batch_state.max_size,
+      item_queue => State#chef_idx_batch_state.item_queue,
+      max_wait => State#chef_idx_batch_state.max_wait,
+      search_provider => State#chef_idx_batch_state.search_provider,
+      total_docs_queued => State#chef_idx_batch_state.total_docs_queued,
+      total_docs_success => State#chef_idx_batch_state.total_docs_success,
+      avg_queue_latency => State#chef_idx_batch_state.avg_queue_latency,
+      avg_success_latency => State#chef_idx_batch_state.avg_success_latency
+     }.
+
 init([]) ->
     MaxSize = envy:get(chef_index, search_batch_max_size, 5000000, integer),
     case MaxSize =< 0 of
         true ->
-            {stop, list_to_binary([<<"chef_index batch_max_size is set to ">>, integer_to_binary(MaxSize), <<". Please set to non-negative value, or set search_queue_mode to something besides batch.">>])};
+            {stop, list_to_binary([<<"chef_index batch_max_size is set to ">>, integer_to_binary(MaxSize),
+                                   <<". Please set to non-negative value, or set search_queue_mode to something besides batch.">>])};
         false ->
             SearchProvider = envy:get(chef_index, search_provider, solr, chef_index_utils:one_of([solr, cloudsearch])),
             MaxWait = envy:get(chef_index, search_batch_max_wait, 10, non_neg_integer),
             WrapperSize = wrapper_size(#chef_idx_batch_state{search_provider=SearchProvider}),
             CurrentSize = 0,
-            send_wakup(MaxWait),
+            spawn_flusher(MaxWait),
             {ok, #chef_idx_batch_state{wrapper_size = WrapperSize,
                                        current_size = CurrentSize,
                                        max_size = MaxSize,
@@ -97,8 +126,14 @@ init([]) ->
                                        search_provider = SearchProvider}}
     end.
 
-send_wakup(Time) ->
-    erlang:send_after(Time, self(), flush).
+spawn_flusher(Time) ->
+    spawn_link(
+      fun Flusher() ->
+                      timer:sleep(Time),
+                      gen_server:cast(?MODULE, flush),
+                      Flusher()
+              end
+     ).
 
 -spec flush(#chef_idx_batch_state{}) -> #chef_idx_batch_state{}.
 flush(State = #chef_idx_batch_state{item_queue = []}) ->
@@ -141,7 +176,7 @@ handle_call({add_item, Doc, Size}, From, State = #chef_idx_batch_state{item_queu
                                          current_size = CurrentSize + Size
                                         }};
 handle_call(status, _From, State) ->
-    {reply, State, State};
+    {reply, state_to_map(State), State};
 handle_call(stats, _From, State = #chef_idx_batch_state{avg_queue_latency = OQL,
                                                         avg_success_latency = OSL,
                                                         total_docs_queued = TQ,
@@ -149,11 +184,14 @@ handle_call(stats, _From, State = #chef_idx_batch_state{avg_queue_latency = OQL,
                                                        }) ->
     Stats = [
              {avg_queue_latency, OQL},
-             {avg_sucess_latency, OSL},
+             {avg_success_latency, OSL},
              {total_docs_queued, TQ},
-             {total_docs_sucess, TS}
+             {total_docs_success, TS}
             ],
     {reply, Stats, State};
+handle_call(stop, From, State) ->
+    lager:info("Stop requested from ~p", [From]),
+    {stop, normal, ok, State};
 handle_call(_Request, _From, State) ->
     Reply = ok,
     {reply, Reply, State}.
@@ -177,13 +215,12 @@ handle_cast({stats_update, TotalDocs, {AvgQueueLatency,AvgSuccessLatency}, Resp}
         _ ->
             {noreply, State1}
     end;
+handle_cast(flush, State) ->
+    State1 = flush(State),
+    {noreply, State1};
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
-handle_info(flush, State = #chef_idx_batch_state{max_wait=MaxWait}) ->
-    State1 = flush(State),
-    send_wakup(MaxWait),
-    {noreply, State1};
 handle_info(_Info, State) ->
     {noreply, State}.
 
