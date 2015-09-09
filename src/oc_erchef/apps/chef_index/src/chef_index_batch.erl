@@ -111,7 +111,7 @@ flush(State = #chef_idx_batch_state{item_queue = Queue,
     Self = self(),
     spawn_link(
       fun() ->
-              lager:info("Batch posting to solr ~p documents (~p bytes)", [length(DocsToAdd), CurrentSize+WrapperSize]),
+              lager:debug("Batch posting to solr ~p documents (~p bytes)", [length(DocsToAdd), CurrentSize+WrapperSize]),
               Now = os:timestamp(),
               Res = chef_index_expand:post_to_solr(Doc),
               Now1 = os:timestamp(),
