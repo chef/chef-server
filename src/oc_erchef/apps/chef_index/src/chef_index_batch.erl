@@ -35,7 +35,6 @@
           search_provider = solr :: solr|cloudsearch
          }).
 
-
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 

@@ -17,12 +17,14 @@
 
 -module(chef_index).
 
--export([delete/3,
-         add/4,
-         add_async/4]).
+-export([delete/4,
+         add/5,
+         add_async/4,
+         add_async/5
+        ]).
 
-add(TypeName, Id, DbName, IndexEjson) ->
-    QueueMode = envy:get(chef_index, search_queue_mode, rabbitmq, chef_index_utils:one_of([rabbitmq, batch, inline])),
+add(TypeName, Id, DbName, IndexEjson, ReqId) ->
+    QueueMode = queue_mode(),
     case QueueMode of
         rabbitmq ->
             ok = chef_index_queue:set(envy:get(chef_index, rabbitmq_vhost, binary), TypeName, Id, DbName, IndexEjson);
@@ -34,23 +36,42 @@ add(TypeName, Id, DbName, IndexEjson) ->
                                 T
                         end,
             Doc = chef_index_expand:doc_for_index(TypeName2, Id, DbName, IndexEjson),
-	    case QueueMode of
-		batch ->
-		    chef_index_batch:add_item(Doc);
-		inline ->
-		    chef_index_expand:send_item(Doc)
-	    end
+            send_to_solr(QueueMode, Doc, ReqId)
     end.
 
+add_async(TypeName, Id, DbName, IndexEjson, _ReqId) ->
+    %% No solr_time logging for add_async as this doesn't happen as
+    %% part of a request, But we provided a add_async/5 to make it
+    %% easier to call in oc_chef_object_db.
+    add_async(TypeName, Id, DbName, IndexEjson).
+
 add_async(TypeName, Id, DbName, IndexEjson) ->
-    spawn(chef_index, add, [TypeName, Id, DbName, IndexEjson]),
+    spawn(chef_index, add, [TypeName, Id, DbName, IndexEjson, none]),
     ok.
 
-delete(TypeName, Id, DbName) ->
-    case envy:get(chef_index, search_queue_mode, rabbitmq, chef_index_utils:one_of([rabbitmq, batch, inline])) of
+delete(TypeName, Id, DbName, ReqId) ->
+    case queue_mode() of
         rabbitmq ->
             ok = chef_index_queue:delete(envy:get(chef_index, rabbitmq_vhost, binary), TypeName, Id, DbName);
         _ -> %% batch mode not implemented for delete, always use inline if not rabbitmq
-            Doc = chef_index_expand:doc_for_delete(TypeName, Id, DbName),
-            chef_index_expand:send_delete(Doc)
+            stats_hero:ctime(ReqId, {chef_solr, delete},
+                             fun() ->
+                                     Doc = chef_index_expand:doc_for_delete(TypeName, Id, DbName),
+                                     chef_index_expand:send_delete(Doc)
+                             end)
     end.
+
+queue_mode() ->
+    envy:get(chef_index, search_queue_mode, rabbitmq, chef_index_utils:one_of([rabbitmq, batch, inline])).
+
+
+send_to_solr(QueueMode, Doc, none) ->
+    send_to_solr(QueueMode, Doc);
+send_to_solr(QueueMode, Doc, ReqId) ->
+    stats_hero:ctime(ReqId, {chef_solr, update}, fun() ->
+                                                         send_to_solr(QueueMode, Doc)
+                                                 end).
+send_to_solr(batch, Doc) ->
+    chef_index_batch:add_item(Doc);
+send_to_solr(inline, Doc) ->
+    chef_index_expand:send_item(Doc).
