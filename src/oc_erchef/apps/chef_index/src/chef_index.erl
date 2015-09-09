@@ -21,10 +21,11 @@
          add/4]).
 
 add(TypeName, Id, DbName, IndexEjson) ->
-    case envy:get(chef_index, disable_rabbitmq, false, boolean) of
-        false ->
+    QueueMode = envy:get(chef_index, search_queue_mode, rabbitmq, [rabbitmq, batch, inline]),
+    case QueueMode of
+        rabbitmq ->
             ok = chef_index_queue:set(envy:get(chef_index, rabbitmq_vhost, binary), TypeName, Id, DbName, IndexEjson);
-        true ->
+        _ -> %% else batch or inline, create doc
             TypeName2 = case TypeName of
                             data_bag_item ->
                                 ej:get({<<"data_bag">>}, IndexEjson);
@@ -32,14 +33,19 @@ add(TypeName, Id, DbName, IndexEjson) ->
                                 T
                         end,
             Doc = chef_index_expand:doc_for_index(TypeName2, Id, DbName, IndexEjson),
-            chef_index_batch:add_item(Doc)
+	    case QueueMode of
+		batch ->
+		    chef_index_batch:add_item(Doc);
+		inline ->
+		    chef_index_expand:send_item(Doc)
+	    end
     end.
 
 delete(TypeName, Id, DbName) ->
-    case envy:get(chef_index, disable_rabbitmq, false, boolean) of
-        false ->
+    case envy:get(chef_index, search_queue_mode, rabbitmq, [rabbitmq, batch, inline]) of
+        rabbitmq ->
             ok = chef_index_queue:delete(envy:get(chef_index, rabbitmq_vhost, binary), TypeName, Id, DbName);
-        true ->
+        _ -> %% batch mode not implemented for delete, always use inline if not rabbitmq
             Doc = chef_index_expand:doc_for_delete(TypeName, Id, DbName),
             chef_index_expand:send_delete(Doc)
     end.

@@ -53,18 +53,15 @@ init([]) ->
     {ok, {{one_for_one, 60, 10}, Children}}.
 
 %% Return a spec for a bunnyc gen_server or the chef_index_batch gen_server based on the
-%% disable_rabbitmq configuration.
+%% search_queue_mode configuration.
 %%
 %% When rabbitmq is enable, one bunnyc server is started for each vhost in {chef_index,
 %% rabbitmq_vhosts}. If no such list of vhosts is found, check for key rabbitmq_vhost. Each
 %% vhost induces a locally registered bunnyc server with name `chef_index_queue$VHOST'.
 child_spec() ->
     %% Lookup AMQP connection info
-    case envy:get(chef_index, disable_rabbitmq, false, boolean) of
-        true ->
-            [{chef_index_batch, {chef_index_batch, start_link, []},
-              permanent, 5000, worker, [chef_index_batch]}];
-        false ->
+    case envy:get(chef_index, search_queue_mode, rabbitmq, [rabbitmq, batch, inline]) of
+        rabbitmq ->
             %% This uses the key 'ip_mode' in chef_index to decide how to parse the address
             Host = envy_parse:host_to_ip(chef_index, rabbitmq_host),
             Port = envy:get(chef_index,rabbitmq_port, non_neg_integer),
@@ -76,7 +73,10 @@ child_spec() ->
             error_logger:info_msg("Connecting to Rabbit at ~p:~p ~p~n",
                                   [Host, Port, {VHost, ExchangeName}]),
 
-            [bunnyc_spec(VHost, Host, Port, User, Password, ExchangeName)]
+            [bunnyc_spec(VHost, Host, Port, User, Password, ExchangeName)];
+        _  -> %% TODO should we not start up batch if in inline mode?
+            [{chef_index_batch, {chef_index_batch, start_link, []},
+              permanent, 5000, worker, [chef_index_batch]}]
     end.
 
 bunnyc_spec(VHost, Host, Port, User, Password, ExchangeName) ->

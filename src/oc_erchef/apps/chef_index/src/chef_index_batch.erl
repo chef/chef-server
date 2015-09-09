@@ -73,17 +73,22 @@ wrapper_size(State) ->
     byte_size(iolist_to_binary(wrap([], State))).
 
 init([]) ->
-    SearchProvider = solr, % TODO(ssd): envy:get
-    MaxSize = 5000000, % TODO(ssd): envy:get
-    MaxWait = 10, % TODO(ssd): envy:get
-    WrapperSize = wrapper_size(#chef_idx_batch_state{search_provider=SearchProvider}),
-    CurrentSize = 0,
-    send_wakup(MaxWait),
-    {ok, #chef_idx_batch_state{wrapper_size = WrapperSize,
-                               current_size = CurrentSize,
-                               max_size = MaxSize,
-                               max_wait = MaxWait,
-                               search_provider = SearchProvider}}.
+    MaxSize = envy:get(chef_index, search_batch_max_size, 5000000, integer),
+    case MaxSize =< 0 of
+	true ->
+	    {stop, list_to_binary([<<"chef_index batch_max_size is set to ">>, integer_to_binary(MaxSize), <<". Please set to non-negative value, or set search_queue_mode to something besides batch.">>])};
+	false ->
+	    SearchProvider = envy:get(chef_index, search_provider, solr, [solr, cloudsearch]),
+	    MaxWait = envy:get(chef_index, search_batch_max_wait, 10, non_neg_integer),
+	    WrapperSize = wrapper_size(#chef_idx_batch_state{search_provider=SearchProvider}),
+	    CurrentSize = 0,
+	    send_wakup(MaxWait),
+	    {ok, #chef_idx_batch_state{wrapper_size = WrapperSize,
+				       current_size = CurrentSize,
+				       max_size = MaxSize,
+				       max_wait = MaxWait,
+				       search_provider = SearchProvider}}
+    end.
 
 send_wakup(Time) ->
     erlang:send_after(Time, self(), flush).

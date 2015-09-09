@@ -234,6 +234,11 @@ default['private_chef']['opscode-erchef']['depsolver_timeout'] = 5000
 default['private_chef']['opscode-erchef']['couchdb_max_conn'] = '100'
 default['private_chef']['opscode-erchef']['ibrowse_max_sessions'] = 256
 default['private_chef']['opscode-erchef']['ibrowse_max_pipeline_size'] = 1
+# general search settings used to set up chef_index
+default['private_chef']['opscode-erchef']['search_provider'] = "solr" # solr, TODO cloudsearch
+default['private_chef']['opscode-erchef']['search_queue_mode'] = "rabbitmq" # rabbitmq, batch, or inline
+default['private_chef']['opscode-erchef']['search_batch_max_size'] = "5000000"
+default['private_chef']['opscode-erchef']['search_batch_max_wait'] = "10"
 # solr_service configuration for erchef. These are used to configure an opscoderl_httpc pool
 # of HTTP connecton workers.
 default['private_chef']['opscode-erchef']['solr_timeout'] = 30000
