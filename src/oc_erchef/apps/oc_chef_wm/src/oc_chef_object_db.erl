@@ -10,6 +10,7 @@
 -export([safe_delete/3,
          delete/3,
          add_to_solr/2,
+         add_to_solr_async/2,
          bulk_delete_from_solr/3,
          delete_from_solr/1]).
 
@@ -145,13 +146,20 @@ maybe_delete_authz_id_or_error(1, Object, RequestorId) ->
 
 -spec add_to_solr(tuple(), ejson_term() | {ejson_term(), _}) -> ok.
 add_to_solr(ObjectRec, ObjectEjson) ->
+    add_to_solr1(ObjectRec, ObjectEjson, fun chef_index:add/4).
+
+-spec add_to_solr_async(tuple(), ejson_term() | {ejson_term(), _}) -> ok.
+add_to_solr_async(ObjectRec, ObjectEjson) ->
+    add_to_solr1(ObjectRec, ObjectEjson, fun chef_index:add_async/4).
+
+add_to_solr1(ObjectRec, ObjectEjson, SendTo) ->
     case chef_object:is_indexed(ObjectRec) of
         true ->
             IndexEjson = chef_object:ejson_for_indexing(ObjectRec, ObjectEjson),
             DbName = dbname(chef_object:org_id(ObjectRec)),
             Id = chef_object:id(ObjectRec),
             TypeName = chef_object:type_name(ObjectRec),
-            chef_index:add(TypeName, Id, DbName, IndexEjson);
+            SendTo(TypeName, Id, DbName, IndexEjson);
         false ->
             ok
     end.

@@ -18,7 +18,8 @@
 -module(chef_index).
 
 -export([delete/3,
-         add/4]).
+         add/4,
+         add_async/4]).
 
 add(TypeName, Id, DbName, IndexEjson) ->
     QueueMode = envy:get(chef_index, search_queue_mode, rabbitmq, chef_index_utils:one_of([rabbitmq, batch, inline])),
@@ -40,6 +41,10 @@ add(TypeName, Id, DbName, IndexEjson) ->
 		    chef_index_expand:send_item(Doc)
 	    end
     end.
+
+add_async(TypeName, Id, DbName, IndexEjson) ->
+    spawn(chef_index, add, [TypeName, Id, DbName, IndexEjson]),
+    ok.
 
 delete(TypeName, Id, DbName) ->
     case envy:get(chef_index, search_queue_mode, rabbitmq, chef_index_utils:one_of([rabbitmq, batch, inline])) of
