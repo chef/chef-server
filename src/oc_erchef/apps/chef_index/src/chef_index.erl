@@ -21,7 +21,7 @@
          add/4]).
 
 add(TypeName, Id, DbName, IndexEjson) ->
-    QueueMode = envy:get(chef_index, search_queue_mode, rabbitmq, [rabbitmq, batch, inline]),
+    QueueMode = envy:get(chef_index, search_queue_mode, rabbitmq, chef_index_utils:one_of([rabbitmq, batch, inline])),
     case QueueMode of
         rabbitmq ->
             ok = chef_index_queue:set(envy:get(chef_index, rabbitmq_vhost, binary), TypeName, Id, DbName, IndexEjson);
@@ -42,7 +42,7 @@ add(TypeName, Id, DbName, IndexEjson) ->
     end.
 
 delete(TypeName, Id, DbName) ->
-    case envy:get(chef_index, search_queue_mode, rabbitmq, [rabbitmq, batch, inline]) of
+    case envy:get(chef_index, search_queue_mode, rabbitmq, chef_index_utils:one_of([rabbitmq, batch, inline])) of
         rabbitmq ->
             ok = chef_index_queue:delete(envy:get(chef_index, rabbitmq_vhost, binary), TypeName, Id, DbName);
         _ -> %% batch mode not implemented for delete, always use inline if not rabbitmq

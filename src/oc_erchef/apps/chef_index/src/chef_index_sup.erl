@@ -60,7 +60,7 @@ init([]) ->
 %% vhost induces a locally registered bunnyc server with name `chef_index_queue$VHOST'.
 child_spec() ->
     %% Lookup AMQP connection info
-    case envy:get(chef_index, search_queue_mode, rabbitmq, [rabbitmq, batch, inline]) of
+    case envy:get(chef_index, search_queue_mode, rabbitmq, chef_index_utils:one_of([rabbitmq, batch, inline])) of
         rabbitmq ->
             %% This uses the key 'ip_mode' in chef_index to decide how to parse the address
             Host = envy_parse:host_to_ip(chef_index, rabbitmq_host),

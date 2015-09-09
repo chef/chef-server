@@ -78,7 +78,7 @@ init([]) ->
 	true ->
 	    {stop, list_to_binary([<<"chef_index batch_max_size is set to ">>, integer_to_binary(MaxSize), <<". Please set to non-negative value, or set search_queue_mode to something besides batch.">>])};
 	false ->
-	    SearchProvider = envy:get(chef_index, search_provider, solr, [solr, cloudsearch]),
+	    SearchProvider = envy:get(chef_index, search_provider, solr, chef_index_utils:one_of([solr, cloudsearch])),
 	    MaxWait = envy:get(chef_index, search_batch_max_wait, 10, non_neg_integer),
 	    WrapperSize = wrapper_size(#chef_idx_batch_state{search_provider=SearchProvider}),
 	    CurrentSize = 0,
