@@ -20,58 +20,19 @@
 %%
 %% This module implements Chef object flatten/expand using the same
 %% algorithm as `chef-expander' and handles POSTing updates (both adds
-%% and deletes) to Solr. You will interact with four functions:
-%%
-%% <ol>
-%% <li>{@link init_items/1}</li>
-%% <li>{@link add_item/4}</li>
-%% <li>{@link delete_item/4}</li>
-%% <li>{@link send_items/1}</li>
-%% </ol>
-%%
-%% Start by initializing an item context object using {@link
-%% init_items/1} to which you pass the URL for the Solr instance you
-%% want to work with.
-%%
-%% Next, use {@link add_item/4} to add/update items in the
-%% index. These items will go through the flatten/expand process. If
-%% you want to stage an item delete, use {@link delete_item/4}. Both
-%% of these functions take an item context object and return a
-%% possibly updated context. It is important to keep track of the
-%% possibly modified context to use for your next call. This API
-%% allows this module to handle the flatten/expand and post in
-%% different ways. For example, the flatten/expand can be done inline,
-%% accumulating the result in the context, or the context can contain
-%% a pid and the work can be done async and in parallel.
-%%
-%% Finally, call {@link send_items/1} passing the accumulated context
-%% object. Calling this function triggers the actual POST to solr.
+%% and deletes) to Solr.
 %%
 %% @end
 -module(chef_index_expand).
 
--export([
-         start_link/0,
-         add_item/5,
-         delete_item/4,
-         init_items/2,
-         make_command/5,
+-export([make_command/5,
          post_multi/2,
          post_single/2,
          post_to_solr/1,
-         send_items/1,
          send_item/1,
          send_delete/1,
          doc_for_index/4,
-         doc_for_delete/3,
-         stop/1,
-         gather/1
-        ]).
--behaviour(gen_server).
-
-%% gen_server callbacks
--export([init/1, handle_call/3, handle_cast/2, handle_info/2,
-         terminate/2, code_change/3]).
+         doc_for_delete/3]).
 
 -define(SERVER, ?MODULE).
 
@@ -110,30 +71,6 @@
 -define(META_FIELDS, [{?K_ID, <<"X_CHEF_id_CHEF_X">>},
                       {?K_DATABASE, <<"X_CHEF_database_CHEF_X">>}]).
 
--record(idx_exp_ctx, {
-          count = 0,
-          current = 0,
-          received = 0,
-          to_add = [],
-          to_del = [],
-          send_requested = undefined,
-          send_fun = fun post_to_solr/1
-         }).
-
--opaque index_expand_ctx() :: #idx_exp_ctx{}.
--export_type([index_expand_ctx/0]).
-
-%% @doc Create a new index expand context.
--spec init_items(pid(), non_neg_integer()) -> ok.
-init_items(Pid, NumberItems) ->
-    gen_server:cast(Pid, {init_items,NumberItems}).
-
-add_item(Pid, Id, Ejson, Index, OrgId) ->
-    gen_server:cast(Pid, {add_item, Id, Ejson, Index, OrgId}).
-
-delete_item(Pid, Id, Index, OrgId) ->
-    gen_server:cast(Pid, {delete_item, Id, Index, OrgId}).
-
 chef_object_type(Index) when is_binary(Index) -> {data_bag_item, Index};
 chef_object_type(Index) when is_atom(Index)   -> Index.
 
@@ -169,34 +106,6 @@ send_item(Doc) ->
 
 send_delete(Doc) ->
     post_to_solr(update_payload([], [Doc])).
-
-%% @doc Send items accumulated in the index expand context to
-%% Solr. The URL used to talk to Solr is embedded in the context
-%% object and determined when `{@link init_items/1}' was called.
--spec send_items(pid() | index_expand_ctx()) -> ok | {error, {_, _}}.
-send_items(Pid) when is_pid(Pid)->
-    % Adding a timeout of 30s as preprod is very, very slow
-    gen_server:call(Pid, send_items, 30000).
-send_items_impl(#idx_exp_ctx{to_add = Added, to_del = Deleted,
-                        count = Count,
-                        received = Count,
-                       send_requested = Requestor,
-                       send_fun = SendFun}) when Requestor /= undefined ->
-    Result = case {Added, Deleted} of
-        {[], []} ->
-            ok;
-        {UnsortedToAdd, UnsortedToDel} ->
-            ToAdd = sort(UnsortedToAdd),
-            ToDel = sort(UnsortedToDel),
-            error_logger:info_msg("chef_index_expand:send_items adds:~p dels:~p~n",
-                                  [length(ToAdd), length(ToDel)]),
-            Doc = update_payload(ToAdd, ToDel),
-            SendFun(Doc)
-             end,
-    gen_server:reply(Requestor, Result),
-    #idx_exp_ctx{};
-send_items_impl(State) ->
-    State.
 
 %% --- start copy from chef_index (chef_index_queue) ---
 
@@ -453,66 +362,3 @@ to_bin(S) when is_list(S) ->
     iolist_to_binary(S);
 to_bin(A) when is_atom(A) ->
     atom_to_binary(A, utf8).
-
-stop(Pid) ->
-    gen_server:call(Pid, stop).
-
-%% Allows testing of batches without sending to solr.  Useful for getting timing
-%% info for batches.
-gather(Pid) ->
-    gen_server:call(Pid, gather).
-
-start_link() ->
-    gen_server:start_link(?MODULE, [], []).
-init([]) ->
-    {ok, #idx_exp_ctx{}}.
-
-handle_call(gather, From, State) ->
-    NewState = State#idx_exp_ctx{send_requested = From,
-                                send_fun = fun(_) -> no_op end},
-    {noreply, NewState};
-handle_call(send_items, From, State) ->
-    NewState = State#idx_exp_ctx{send_requested = From},
-    Result = send_items_impl(NewState),
-    {noreply, Result};
-handle_call(stop, _From, State) ->
-    {stop, normal, ok, State};
-handle_call(_Request, _From, State) ->
-    Reply = ok,
-    {reply, Reply, State}.
-
-handle_cast({add_created, OrderNum, Doc}, #idx_exp_ctx{to_add = Added, received = Received} = State) ->
-    {noreply, send_items_impl(State#idx_exp_ctx{to_add = [{OrderNum, Doc} | Added], received = (Received + 1)})};
-handle_cast({add_item, Id, Ejson, Index, OrgId}, #idx_exp_ctx{current = Current} = State) ->
-    ParentPid = self(),
-    spawn_link(fun() ->
-                       Doc = doc_for_index(Index, Id, OrgId, Ejson),
-                       gen_server:cast(ParentPid, {add_created, Current, Doc})
-               end),
-    {noreply, State#idx_exp_ctx{current = Current + 1}};
-handle_cast({delete_created, OrderNum, Doc}, #idx_exp_ctx{to_del = Deleted, received = Received} = State) ->
-    {noreply, send_items_impl(State#idx_exp_ctx{to_del = [{OrderNum, Doc} | Deleted], received = Received + 1})};
-handle_cast({delete_item, Id, Index, OrgId}, #idx_exp_ctx{current = Current} = State) ->
-    ParentPid = self(),
-    spawn_link(fun() ->
-                       Doc = doc_for_delete(Index, Id, OrgId),
-                       gen_server:cast(ParentPid, {delete_created, Current, Doc})
-               end),
-    {noreply, State#idx_exp_ctx{current = Current + 1}};
-handle_cast({init_items, Count}, State) ->
-    {noreply, State#idx_exp_ctx{count = Count}};
-handle_cast(_Msg, State) ->
-    {noreply, State}.
-
-handle_info(_Info, State) ->
-    {noreply, State}.
-
-terminate(_Reason, _State) ->
-    ok.
-code_change(_OldVsn, State, _Extra) ->
-    {ok, State}.
-
-sort(List) ->
-    SortedList = lists:keysort(1, List),
-    {_OrderNums, Items} = lists:unzip(SortedList),
-    lists:reverse(Items).
