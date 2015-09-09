@@ -19,7 +19,8 @@
 %%
 
 -module(chef_index_utils).
--export([one_of/1]).
+-export([one_of/1,
+         diff_times/2]).
 
 %% @doc Helper function for envy validations.
 %% This feauture has been requested upstream:
@@ -32,3 +33,7 @@ one_of(Allowed) when is_list(Allowed) ->
     fun(Item) ->
             lists:member(Item, Allowed)
     end.
+
+
+diff_times({EM, ES, EI}, {SM, SS, SI}) ->
+    ((EM - SM) * 1000000 + (ES - SS)) * 1000 + ((EI - SI) div 1000).

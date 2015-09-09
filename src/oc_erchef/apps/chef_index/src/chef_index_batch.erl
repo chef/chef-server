@@ -20,6 +20,7 @@
 
 -export([start_link/0,
          status/0,
+         stats/0,
          add_item/1]).
 
 %% gen_server callbacks
@@ -32,7 +33,11 @@
           max_size :: non_neg_integer(),
           item_queue = [], %% [{Pid, Timestamp, Doc}]
           max_wait :: non_neg_integer(),
-          search_provider = solr :: solr|cloudsearch
+          search_provider = solr :: solr|cloudsearch,
+          total_docs_queued = 0 :: integer(),
+          total_docs_success = 0 :: integer(),
+          avg_queue_latency = 0.0 :: float(),
+          avg_success_latency = 0.0 :: float()
          }).
 
 start_link() ->
@@ -45,6 +50,9 @@ add_item(Doc) ->
 
 status() ->
     gen_server:call(?MODULE, status).
+
+stats() ->
+    gen_server:call(?MODULE, stats).
 
 wrap_solr(Docs) ->
     [<<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>">>,
@@ -74,19 +82,19 @@ wrapper_size(State) ->
 init([]) ->
     MaxSize = envy:get(chef_index, search_batch_max_size, 5000000, integer),
     case MaxSize =< 0 of
-	true ->
-	    {stop, list_to_binary([<<"chef_index batch_max_size is set to ">>, integer_to_binary(MaxSize), <<". Please set to non-negative value, or set search_queue_mode to something besides batch.">>])};
-	false ->
-	    SearchProvider = envy:get(chef_index, search_provider, solr, chef_index_utils:one_of([solr, cloudsearch])),
-	    MaxWait = envy:get(chef_index, search_batch_max_wait, 10, non_neg_integer),
-	    WrapperSize = wrapper_size(#chef_idx_batch_state{search_provider=SearchProvider}),
-	    CurrentSize = 0,
-	    send_wakup(MaxWait),
-	    {ok, #chef_idx_batch_state{wrapper_size = WrapperSize,
-				       current_size = CurrentSize,
-				       max_size = MaxSize,
-				       max_wait = MaxWait,
-				       search_provider = SearchProvider}}
+        true ->
+            {stop, list_to_binary([<<"chef_index batch_max_size is set to ">>, integer_to_binary(MaxSize), <<". Please set to non-negative value, or set search_queue_mode to something besides batch.">>])};
+        false ->
+            SearchProvider = envy:get(chef_index, search_provider, solr, chef_index_utils:one_of([solr, cloudsearch])),
+            MaxWait = envy:get(chef_index, search_batch_max_wait, 10, non_neg_integer),
+            WrapperSize = wrapper_size(#chef_idx_batch_state{search_provider=SearchProvider}),
+            CurrentSize = 0,
+            send_wakup(MaxWait),
+            {ok, #chef_idx_batch_state{wrapper_size = WrapperSize,
+                                       current_size = CurrentSize,
+                                       max_size = MaxSize,
+                                       max_wait = MaxWait,
+                                       search_provider = SearchProvider}}
     end.
 
 send_wakup(Time) ->
@@ -98,13 +106,27 @@ flush(State = #chef_idx_batch_state{item_queue = []}) ->
 flush(State = #chef_idx_batch_state{item_queue = Queue,
                                     current_size = CurrentSize,
                                     wrapper_size = WrapperSize}) ->
-    {PidsToReply, _TimeStamps, DocsToAdd} = lists:unzip3(Queue),
+    {PidsToReply, Timestamps, DocsToAdd} = lists:unzip3(Queue),
     Doc = wrap(DocsToAdd, State),
-    spawn_link(fun() ->
-                       lager:info("Batch posting to solr ~p documents (~p bytes)", [length(DocsToAdd), CurrentSize+WrapperSize]),
-                       Res = chef_index_expand:post_to_solr(Doc),
-                       [gen_server:reply(From, Res) || From <- PidsToReply]
-               end),
+    Self = self(),
+    spawn_link(
+      fun() ->
+              lager:info("Batch posting to solr ~p documents (~p bytes)", [length(DocsToAdd), CurrentSize+WrapperSize]),
+              Now = os:timestamp(),
+              Res = chef_index_expand:post_to_solr(Doc),
+              Now1 = os:timestamp(),
+              TotalDocs = length(Timestamps),
+              {BeforeDiff, AfterDiff} =
+                  lists:foldl(
+                    fun(T, {BeforePost, AfterPost}) ->
+                            {BeforePost + chef_index_utils:diff_times(Now, T),
+                             AfterPost + chef_index_utils:diff_times(Now1, T)}
+                    end,
+                    {0, 0},
+                    Timestamps),
+              gen_server:cast(Self, {stats_update, TotalDocs, {BeforeDiff/TotalDocs, AfterDiff/TotalDocs}, Res}),
+              [gen_server:reply(From, Res) || From <- PidsToReply]
+      end),
     State#chef_idx_batch_state{item_queue = [], current_size=0}.
 
 handle_call({add_item, Doc, Size}, From,
@@ -120,10 +142,41 @@ handle_call({add_item, Doc, Size}, From, State = #chef_idx_batch_state{item_queu
                                         }};
 handle_call(status, _From, State) ->
     {reply, State, State};
+handle_call(stats, _From, State = #chef_idx_batch_state{avg_queue_latency = OQL,
+                                                        avg_success_latency = OSL,
+                                                        total_docs_queued = TQ,
+                                                        total_docs_success = TS
+                                                       }) ->
+    Stats = [
+             {avg_queue_latency, OQL},
+             {avg_sucess_latency, OSL},
+             {total_docs_queued, TQ},
+             {total_docs_sucess, TS}
+            ],
+    {reply, Stats, State};
 handle_call(_Request, _From, State) ->
     Reply = ok,
     {reply, Reply, State}.
 
+handle_cast({stats_update, TotalDocs, {AvgQueueLatency,AvgSuccessLatency}, Resp},
+            State = #chef_idx_batch_state{avg_queue_latency = OQL,
+                                          avg_success_latency = OSL,
+                                          total_docs_queued = TQ,
+                                          total_docs_success = TS
+                                         }) ->
+    State1 = State#chef_idx_batch_state{total_docs_queued = TQ + TotalDocs,
+                                        avg_queue_latency = ((AvgQueueLatency*TotalDocs)+(OQL*TQ))/(TQ+TotalDocs)
+                                       },
+    case Resp of
+        ok ->
+            {noreply, State1#chef_idx_batch_state{
+                        total_docs_success = TS+TotalDocs,
+                        avg_success_latency = ((AvgSuccessLatency*TotalDocs)+(OSL*TS))/(TS+TotalDocs)
+                       }
+            };
+        _ ->
+            {noreply, State1}
+    end;
 handle_cast(_Msg, State) ->
     {noreply, State}.
 

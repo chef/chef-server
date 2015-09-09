@@ -207,10 +207,8 @@ post_to_solr(Doc) ->
     {ok, Code, _Head, Body} = chef_index_http:request("update", post, DocBin),
     case Code of
         "2" ++ _Rest ->
-            %% FIXME: add logging and timing
             ok;
         _ ->
-            %% FIXME: add logging, timing
             {error, {Code, Body}}
     end.
 
