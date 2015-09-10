@@ -23,6 +23,12 @@
          add_async/5
         ]).
 
+%% The difference between add and add_async is that add_async
+%% will not block on the data being posted to our search store
+%% and will instantly return `ok` (regardless of queue mode);
+%% whereas, add will block the request until the queue has been
+%% flushed to our search store in batch queue mode or directly
+%% posted in inline queue mode.
 add(TypeName, Id, DbName, IndexEjson, ReqId) ->
     QueueMode = queue_mode(),
     case QueueMode of
