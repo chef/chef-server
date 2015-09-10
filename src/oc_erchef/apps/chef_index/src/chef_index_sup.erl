@@ -46,20 +46,22 @@ start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 init([]) ->
-    error_logger:info_msg("starting chef_index_sup~n", []),
-    Children = amqp_child_spec(),
+    error_logger:info_msg("Starting chef_index_sup.~n", []),
+    error_logger:info_msg("Creating HTTP pool for Solr.~n"),
+    chef_index_http:create_pool(),
+    Children = child_spec(),
     {ok, {{one_for_one, 60, 10}, Children}}.
 
-%% Return a spec for a bunnyc gen_server for each vhost in {chef_index, rabbitmq_vhosts}. If
-%% no such list of vhosts is found, check for key rabbitmq_vhost. Each vhost induces a
-%% locally registered bunnyc server with name `chef_index_queue$VHOST'.
-amqp_child_spec() ->
+%% Return a spec for a bunnyc gen_server or the chef_index_batch gen_server based on the
+%% search_queue_mode configuration.
+%%
+%% When rabbitmq is enable, one bunnyc server is started for each vhost in {chef_index,
+%% rabbitmq_vhosts}. If no such list of vhosts is found, check for key rabbitmq_vhost. Each
+%% vhost induces a locally registered bunnyc server with name `chef_index_queue$VHOST'.
+child_spec() ->
     %% Lookup AMQP connection info
-    case envy:get(chef_index, disable_rabbitmq, false, boolean) of
-        true ->
-            error_logger:info_msg("RabbitMQ config disabled. Indexing for search is disabled.~n"),
-            [];
-        false ->
+    case envy:get(chef_index, search_queue_mode, rabbitmq, envy:one_of([rabbitmq, batch, inline])) of
+        rabbitmq ->
             %% This uses the key 'ip_mode' in chef_index to decide how to parse the address
             Host = envy_parse:host_to_ip(chef_index, rabbitmq_host),
             Port = envy:get(chef_index,rabbitmq_port, non_neg_integer),
@@ -71,7 +73,10 @@ amqp_child_spec() ->
             error_logger:info_msg("Connecting to Rabbit at ~p:~p ~p~n",
                                   [Host, Port, {VHost, ExchangeName}]),
 
-            [bunnyc_spec(VHost, Host, Port, User, Password, ExchangeName)]
+            [bunnyc_spec(VHost, Host, Port, User, Password, ExchangeName)];
+        _  -> %% TODO should we not start up batch if in inline mode?
+            [{chef_index_batch, {chef_index_batch, start_link, []},
+              permanent, 5000, worker, [chef_index_batch]}]
     end.
 
 bunnyc_spec(VHost, Host, Port, User, Password, ExchangeName) ->
@@ -86,4 +91,3 @@ bunnyc_spec(VHost, Host, Port, User, Password, ExchangeName) ->
 server_for_vhost(VHost) ->
     Bin = erlang:iolist_to_binary([<<"chef_index_queue">>, VHost]),
     erlang:binary_to_atom(Bin, utf8).
-    

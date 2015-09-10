@@ -8,6 +8,9 @@ ebin
 user_default.beam
 chef_db_SUITE_data
 *.so
+*.o
+*.d
+*.beam
 tags
 *.dump
 _rel

@@ -220,7 +220,7 @@ send_to_index_queue(OrgId, Index, [SO|Rest], NameIdDict) ->
     StubRec = stub_record(Index, OrgId, ObjectId, ItemName, PreliminaryEJson),
     %% Since we get here via valid `Index', we don't have to check that the objects are
     %% indexable.
-    ok = oc_chef_object_db:add_to_solr(StubRec, PreliminaryEJson),
+    ok = oc_chef_object_db:add_to_solr_async(StubRec, PreliminaryEJson),
     send_to_index_queue(OrgId, Index, Rest, NameIdDict).
 
 %% @doc Determine the proper key to use to retrieve the unique name of

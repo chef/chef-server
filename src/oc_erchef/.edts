@@ -1,0 +1,4 @@
+:name "oc_erchef"
+:node-sname "oc_erchef_edts"
+:lib-dirs '("_build/default/lib")
+:app-include-dirs '("include")

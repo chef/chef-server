@@ -115,11 +115,10 @@ make_query_from_params_test_() ->
 search_test_() ->
     {foreach,
      fun() ->
-             meck:new(ibrowse),
-             application:set_env(chef_index, solr_url, "mock_solr_url")
+             meck:new(chef_index_http)
      end,
      fun(_) ->
-             meck:unload([ibrowse])
+             meck:unload([chef_index_http])
      end,
     [
      {"error if org filter not set",
@@ -143,8 +142,8 @@ search_test_() ->
                           {<<"numFound">>, 10},
                           {<<"docs">>, Docs}]}}]},
               SolrJson = jiffy:encode(Solr),
-              meck:expect(ibrowse, send_req,
-                          fun(_Url, [], get) -> {ok, "200", [], SolrJson} end),
+              meck:expect(chef_index_http, request,
+                          fun(_Url, get, []) -> {ok, "200", [], SolrJson} end),
               Query0 = #chef_solr_query{
                 query_string = "*:*",
                 filter_query = "+X_CHEF_type_CHEF_X:node",
@@ -153,7 +152,7 @@ search_test_() ->
                 rows = 1000},
               Query1 = chef_solr:add_org_guid_to_query(Query0, <<"0123abc">>),
               ?assertEqual({ok, 2, 10, ["d1", "d2"]}, chef_solr:search(Query1)),
-              ?assert(meck:validate(ibrowse))
+              ?assert(meck:validate(chef_index_http))
      end}
     ]}.
 

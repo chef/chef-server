@@ -39,6 +39,9 @@ vm:
     - "*.vmdk"
     - "*.plt"
     - "*.beam"
+    - "*.o"
+    - "*.so"
+    - "*.d"
     - logs/
     - /dev/
     - .concrete/
@@ -139,4 +142,3 @@ quickstart:
       - oc_bifrost
     start:
       - oc_bifrost
-

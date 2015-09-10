@@ -1018,7 +1018,8 @@ create_from_json(#wm_reqdata{} = Req, #base_state{organization_guid = undefined}
     create_from_json(Req, State#base_state{organization_guid = ?OSC_ORG_ID},
                      RecType, AuthzData, ObjectEjson);
 create_from_json(#wm_reqdata{} = Req,
-                 #base_state{chef_db_context = DbContext,
+                 #base_state{reqid = ReqId,
+                             chef_db_context = DbContext,
                              organization_guid = OrgId,
                              server_api_version = ApiVersion,
                              requestor_id = ActorId,
@@ -1035,11 +1036,11 @@ create_from_json(#wm_reqdata{} = Req,
     %% a 500 and client can retry. If we succeed and the db call fails or conflicts, we can
     %% safely send a delete to solr since this is a new object with a unique ID unknown to
     %% the world.
-    ok = oc_chef_object_db:add_to_solr(ObjectRec, ObjectEjson),
+    ok = oc_chef_object_db:add_to_solr(ObjectRec, ObjectEjson, ReqId),
     case chef_db:create(ObjectRec, DbContext, ActorId) of
         {conflict, _} ->
             %% ignore return value of solr delete, this is best effort.
-            oc_chef_object_db:delete_from_solr(ObjectRec),
+            oc_chef_object_db:delete_from_solr(ObjectRec, ReqId),
             object_creation_error_hook(DbContext, ObjectRec, ActorId),
             LogMsg = {RecType, name_conflict, Name},
             ConflictMsg = ResourceMod:conflict_message(Name),
@@ -1057,7 +1058,7 @@ create_from_json(#wm_reqdata{} = Req,
             {true, chef_wm_util:set_location_of_created_resource(Uri, Req1), State#base_state{log_msg = LogMsg}};
         What ->
             %% ignore return value of solr delete, this is best effort.
-            oc_chef_object_db:delete_from_solr(ObjectRec),
+            oc_chef_object_db:delete_from_solr(ObjectRec, ReqId),
             object_creation_error_hook(DbContext, ObjectRec, ActorId),
             % 500 logging sanitizes responses to avoid exposing sensitive data -
             % TODO - parse sql error to get minimal meaningful message,
@@ -1072,7 +1073,8 @@ create_from_json(#wm_reqdata{} = Req,
 %% @doc Implements the from_json callback for PUT requests to update Chef
 %% objects. `OrigObjectRec' should be the existing and unmodified `chef_object()'
 %% record. `ObjectEjson' is the parsed EJSON from the request body.
-update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
+update_from_json(#wm_reqdata{} = Req, #base_state{reqid=ReqId,
+                                                  chef_db_context = DbContext,
                                                   requestor_id = ActorId,
                                                   resource_mod = ResourceMod} = State,
                  OrigObjectRec, ObjectEjson) ->
@@ -1081,7 +1083,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{chef_db_context = DbContext,
     %% Send object to solr for indexing *first*. If the update fails, we will have sent
     %% incorrect data, but that should get corrected when the client retries. This is a
     %% compromise.
-    ok = oc_chef_object_db:add_to_solr(ObjectRec, ObjectEjson),
+    ok = oc_chef_object_db:add_to_solr(ObjectRec, ObjectEjson, ReqId),
 
     %% Ignore updates that don't change anything. If the user PUTs identical data, we skip
     %% going to the database and skip updating updated_at. This allows us to avoid RDBMS

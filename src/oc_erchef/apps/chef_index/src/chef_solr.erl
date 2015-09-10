@@ -30,7 +30,6 @@
          make_query_from_params/4,
          ping/0,
          search/1,
-         search/2,
          solr_commit/0
         ]).
 
@@ -65,19 +64,10 @@ add_org_guid_to_query(Query = #chef_solr_query{filter_query = FilterQuery},
                     {ok, non_neg_integer(), non_neg_integer(), [binary()]} |
                     {error, {solr_400, string()}} |
                     {error, {solr_500, string()}}.
-search(Query) ->
-    SolrUrl = envy:get(chef_index, solr_url, string),
-    search(Query, SolrUrl).
-
-
--spec search(#chef_solr_query{}, string()) ->
-                    {ok, non_neg_integer(), non_neg_integer(), [binary()]} |
-                    {error, {solr_400, string()}} |
-                    {error, {solr_500, string()}}.
-search(#chef_solr_query{} = Query, SolrUrl) ->
+search(#chef_solr_query{} = Query) ->
     %% FIXME: error handling
-    Url = SolrUrl ++ make_solr_query_url(Query),
-    {ok, Code, _Head, Body} = ibrowse:send_req(Url, [], get),
+    Url = make_solr_query_url(Query),
+    {ok, Code, _Head, Body} = chef_index_http:request(Url, get, []),
     case Code of
         "200" ->
             SolrData = jiffy:decode(Body),
@@ -101,10 +91,8 @@ search(#chef_solr_query{} = Query, SolrUrl) ->
 -spec ping() -> pong | pang.
 ping() ->
     try
-        SolrUrl = envy:get(chef_index, solr_url, string),
         %% FIXME: solr will barf on doubled '/'s so SolrUrl must not end with a trailing slash
-        Url = SolrUrl ++ "/admin/ping?wt=json",
-        case ibrowse:send_req(Url, [], get) of
+        case chef_index_http:request("/admin/ping?wt=json", get, []) of
             %% FIXME: verify that solr returns non-200 if something is wrong and not "status":"ERROR".
             {ok, "200", _Head, _Body} -> pong;
             _Error -> pang
@@ -270,11 +258,8 @@ validate_non_neg(_Key, Int, _OrigValue) ->
 -spec solr_update(Body :: [byte(),...]) -> ok | {error, term()}.
 solr_update(Body) ->
     try
-        SolrUrl = envy:get(chef_index, solr_url, string),
         %% FIXME: solr will barf on doubled '/'s so SolrUrl must not end with a trailing slash
-        Url = SolrUrl ++ "/update",
-        Headers = [{"Content-Type", "text/xml"}],
-        case ibrowse:send_req(Url, Headers, post, Body) of
+        case chef_index_http:request("/update", post, Body) of
             %% FIXME: verify that solr returns non-200 if something is wrong and not "status":"ERROR".
             {ok, "200", _Head, _Body} -> ok;
             Error -> {error, Error}
