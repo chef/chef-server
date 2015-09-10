@@ -67,7 +67,7 @@
               %% how many nodes are deserialized at a time in
               %% preparing a response.
               {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
-	          {superusers, [<<"pivotal">>]},
+              {superusers, [<<"pivotal">>]},
               %% metrics config
               {root_metric_key, "<%= @root_metric_key %>"},
 
@@ -155,10 +155,10 @@
                 {rabbitmq_password, <<"<%= node['private_chef']['rabbitmq']['password'] %>">>},
                 {rabbitmq_vhost, <<"<%= node['private_chef']['rabbitmq']['vhost'] %>">>},
                 {rabbitmq_exchange, <<"">>},
-		{search_provider, <%= node['private_chef']['opscode-erchef']['search_provider'] %>},
-		{search_queue_mode, <%= node['private_chef']['opscode-erchef']['search_queue_mode'] %>},
-		{search_batch_max_size, <%= node['private_chef']['opscode-erchef']['search_batch_max_size'] %>},
-		{search_batch_max_wait, <%= node['private_chef']['opscode-erchef']['search_batch_max_wait'] %>},
+                {search_provider, <%= node['private_chef']['opscode-erchef']['search_provider'] %>},
+                {search_queue_mode, <%= node['private_chef']['opscode-erchef']['search_queue_mode'] %>},
+                {search_batch_max_size, <%= node['private_chef']['opscode-erchef']['search_batch_max_size'] %>},
+                {search_batch_max_wait, <%= node['private_chef']['opscode-erchef']['search_batch_max_wait'] %>},
                 {solr_service, [{root_url, "http://<%= @helper.vip_for_uri('opscode-solr4') %>:<%= node['private_chef']['opscode-solr4']['port'] %>/solr"},
                                 {timeout, <%= @solr_timeout %>},
                                 {init_count, <%= @solr_http_init_count %>},
