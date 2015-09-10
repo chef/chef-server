@@ -114,7 +114,7 @@ init([]) ->
             {stop, list_to_binary([<<"chef_index batch_max_size is set to ">>, integer_to_binary(MaxSize),
                                    <<". Please set to non-negative value, or set search_queue_mode to something besides batch.">>])};
         false ->
-            SearchProvider = envy:get(chef_index, search_provider, solr, chef_index_utils:one_of([solr, cloudsearch])),
+            SearchProvider = envy:get(chef_index, search_provider, solr, envy:one_of([solr, cloudsearch])),
             MaxWait = envy:get(chef_index, search_batch_max_wait, 10, non_neg_integer),
             WrapperSize = wrapper_size(#chef_idx_batch_state{search_provider=SearchProvider}),
             CurrentSize = 0,
@@ -154,8 +154,8 @@ flush(State = #chef_idx_batch_state{item_queue = Queue,
               {BeforeDiff, AfterDiff} =
                   lists:foldl(
                     fun(T, {BeforePost, AfterPost}) ->
-                            {BeforePost + chef_index_utils:diff_times(Now, T),
-                             AfterPost + chef_index_utils:diff_times(Now1, T)}
+                            {BeforePost + diff_times(Now, T),
+                             AfterPost + diff_times(Now1, T)}
                     end,
                     {0, 0},
                     Timestamps),
@@ -228,3 +228,6 @@ terminate(_Reason, _State) ->
     ok.
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
+
+diff_times({EM, ES, EI}, {SM, SS, SI}) ->
+    ((EM - SM) * 1000000 + (ES - SS)) * 1000 + ((EI - SI) div 1000).

@@ -28,7 +28,7 @@
   0},
  {<<"envy">>,
   {git,"https://github.com/manderson26/envy",
-       {ref,"e6ba39664a1016ed309ea44269247943de2eb16b"}},
+       {ref,"954c87adcfea892db462f56059eb8bc2857ab50b"}},
   0},
  {<<"eper">>,
   {git,"https://github.com/massemanet/eper",
