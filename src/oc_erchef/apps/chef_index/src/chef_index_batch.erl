@@ -39,7 +39,7 @@
           wrapper_size :: non_neg_integer(),
           current_size :: non_neg_integer(),
           max_size :: non_neg_integer(),
-          item_queue = [], %% [{Pid, Timestamp, Doc}]
+          item_queue = [] :: [{{pid(), term()}, erlang:timestamp(), iolist()}],
           max_wait :: non_neg_integer(),
           search_provider = solr :: solr|cloudsearch,
           total_docs_queued = 0 :: integer(),
