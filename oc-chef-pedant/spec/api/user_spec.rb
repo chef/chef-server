@@ -645,6 +645,17 @@ describe "users", :users do
         end
       end
 
+      context "when using email instead of username" do
+        let(:request_url) { "#{platform.server}/users/#{user_body['email']}" }
+
+        it "can get user" do
+          get(request_url, platform.superuser).should look_like({
+              :status => 200,
+              :body_exact => user_body
+            })
+        end
+      end
+
       context "when user doesn't exist" do
         let(:username) { "bogus" }
         it "returns 404" do

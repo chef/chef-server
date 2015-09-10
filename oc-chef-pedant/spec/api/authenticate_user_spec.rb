@@ -153,6 +153,37 @@ describe 'authenticate_user', :users do
       end
     end
 
+    context 'with correct (email) credentials', :smoke do
+      let(:body) { { 'username' => username + '@opscode.com', 'password' => password } }
+
+      it 'superuser user returns 200 ("OK")' do
+        post(request_url, superuser, :payload => body).should look_like({
+            :status => 200,
+            :body_exact => response_body
+          })
+      end
+
+      it 'admin/different user returns 403 ("Forbidden")', :authorization do
+        # This doubles as a test of a non-superuser checking a different user
+        post(request_url, platform.admin_user, :payload => body).should look_like({
+            :status => 403
+          })
+      end
+
+      it 'non-admin/same user returns 403 ("Forbidden")', :authorization do
+        # This doubles as a test of a the same non-superuser checking themselves
+        post(request_url, platform.non_admin_user, :payload => body).should look_like({
+            :status => 403
+          })
+      end
+
+      it 'invalid user returns 401 ("Unauthorized")', :authorization do
+        post(request_url, invalid_user, :payload => body).should look_like({
+            :status => 401
+          })
+      end
+    end
+
     context 'and user has external authentication enabled' do
       context 'but local bypass parameter is used' do
         let(:password) { "badger badger" }
