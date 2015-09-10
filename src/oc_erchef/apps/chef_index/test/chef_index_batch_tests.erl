@@ -27,8 +27,6 @@ chef_index_batch_test_() ->
              Pid
      end,
      fun(_Pid) ->
-             %% https://github.com/eproxus/meck/pull/150
-             timer:sleep(100),
              meck:unload(chef_index_expand),
              chef_index_batch:stop()
      end,
@@ -92,7 +90,6 @@ add_item(Item) ->
                   erlang:send(Us, Res)
           end),
     wait_for_started().
-
 
 %%
 %% Async means never having to say you're sorry.

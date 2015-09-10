@@ -78,8 +78,17 @@ start_server(Config) ->
                            {annotations, [req_id, org_name, msg, darklaunch, perf_stats]}
                           ]
                          }]),
-    application:set_env(chef_index, disable_rabbitmq, true),
-
+    application:set_env(chef_index, search_queue_mode, inline),
+    application:set_env(chef_index, solr_service,
+                        [{root_url, "http://localhost:9999"},
+                         {max_count, 10},
+                         {init_count, 10},
+                         {cull_interval, {1, min}},
+                         {max_age, {70, sec}},
+                         {max_connection_duration, {70, sec}},
+                         {ibrowse_options, [{connect_timeout, 10000}]},
+                         {timeout, 300}
+                        ]),
     [ {ok, _} = application:ensure_all_started(A) || A <- needed_apps() ],
     Config.
 
