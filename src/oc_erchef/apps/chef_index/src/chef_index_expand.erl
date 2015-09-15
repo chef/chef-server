@@ -289,6 +289,8 @@ expand(Keys, true, Acc) ->
     add_kv_pair(Keys, <<"true">>, Acc);
 expand(Keys, false, Acc) ->
     add_kv_pair(Keys, <<"false">>, Acc);
+expand(_Keys, undefined, _Acc) ->
+    throw({undefined_value_in_expander, "You cannot pass a key with an undefined value to chef_index_expander:expand/3."});
 expand(Keys, null, Acc) ->
     add_kv_pair(Keys, <<"">>, Acc).
 
