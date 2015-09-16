@@ -59,8 +59,7 @@ def define_chef_server(config, attributes)
              "oc_id['db_pool_size']" => 10,
              "oc_bifrost['db_pool_size']" => 10 }
       # TODO merge with other options nicely.
-      json["provisioning"] = {}
-      json["provisioning"]["chef-server-config"] = pg
+      json = simple_deep_merge(json, { "provisioning" => { "chef-server-config" => pg } })
     end
     config.vm.synced_folder File.absolute_path(File.join(Dir.pwd, "../")), "/host",
       type: "rsync",
@@ -68,7 +67,6 @@ def define_chef_server(config, attributes)
       rsync__exclude: attributes["vm"]["sync-exclude"]
     # We're also going to do a share of the slower vboxsf style, allowing us to auto-checkout dependencies
     # and have them be properly synced to a place that we can use them.
-    config.vm.synced_folder base_path, "/mnt/host-do-not-use"
     config.vm.synced_folder installer_path, "/installers"
     config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
     config.vm.provision "shell", inline: install_hack(installer)
@@ -89,7 +87,6 @@ end
 def define_db_server(config, attributes)
   config.vm.hostname = "database.chef-server.dev"
   config.vm.network "private_network", ip: DB_VM_ADDRESS
-
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id,
                   "--name", "database",

@@ -1,4 +1,5 @@
-<% # We do not use env_keep - sudo then lets you share the /vagrant .bashrc and home settings  %>
+Defaults    env_keep+=SSH_AUTH_SOCK
+
 opscode ALL=(ALL:ALL) ALL
 root ALL=(ALL:ALL) ALL
 vagrant ALL=(ALL) NOPASSWD:ALL

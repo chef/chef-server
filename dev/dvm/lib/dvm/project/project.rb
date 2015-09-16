@@ -1,12 +1,13 @@
 require "mixlib/shellout"
 module DVM
   class Project
-    attr_reader :name, :project, :config, :service, :project_dir, :path, :external
+    attr_reader :name, :project, :config, :service, :project_dir, :path, :external, :omnibus_project
     include DVM::Tools
     # TODO check required fields in config
     def initialize(project_name, config)
       @project = config['projects'][project_name]
       @external = @project['external'] || false
+      @omnibus_project = @project['omnibus-project'] || "opscode"
       @name = project.has_key?('name') ? project['name'] : project_name
       if external
         @path = project['path'] || "external-deps/#{name}"

@@ -55,7 +55,7 @@ module DVM
        Pathname.new(gem_path).parent.parent.to_s
     end
     def host_raw_dir
-        "/mnt/host-do-not-use"
+        "/host"
     end
 
     def host_project_dir(path)
@@ -63,11 +63,13 @@ module DVM
     end
 
     def clone(name, uri)
-      run_command("git clone '#{uri}' '#{name}'", "Cloning #{name} to host.", cwd: host_raw_dir)
+      run_command("git clone '#{uri}' '#{name}'", "Cloning #{name} to host. For future reference, you may also symlink it into chef-server/external-deps from another location on the host.",
+                  cwd: host_external_deps_dir)
     end
 
     def project_dir_exists_on_host?(name)
-      File.directory? host_project_dir(name)
+      puts "Checking #{host_project_dir(name)} "
+      File.directory?(host_project_dir(name))
     end
 
     def checkout(name, ref)
@@ -75,7 +77,7 @@ module DVM
       result = run_command("git checkout #{ref}", "Checking out #{ref} to match what is currently running", cwd: cwd, no_raise: true)
       if result.error?
         raise DVM::DVMArgumentError, <<-EOM
-Could not check out #{ref} in #{host_project_dir(name)}.
+Could not check out #{ref} in #{cwd}.
 Have you pulled the latest and/or stashed local changes?
 Alternatively, specify '--no-checkout'.
 

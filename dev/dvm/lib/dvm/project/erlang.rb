@@ -6,23 +6,36 @@ module DVM
     def initialize(project_name, config)
       super
       @rebar_config_path = "#{project_dir}/rebar.config"
-      reldir = "_build/dev/rel"
-      @relname = service['rel-name'] ? service['rel-name'] : name
+      reldir = case service['rel-type']
+               when 'relx'
+                 "_rel"
+               when 'reltool'
+                 "rel"
+               when 'rebar3'
+                 "_build/dev/rel"
+               end
+
+      @relname = service['rel-name'].nil? ? name : service['rel-name']
       @relpath = "#{@project_dir}/#{reldir}/#{relname}"
-      @service_dir = "/var/opt/opscode/embedded/service/#{service['name']}"
+      @service_dir = "/var/opt/#{omnibus_project}/embedded/service/#{service['name']}"
       @libpath =  File.join(@relpath, "lib")
       @node = service['node']
+    end
+    def init_reltool
+
+    end
+    def init_rebar3
+
     end
 
     def parse_deps
       return @deps if @deps
       @deps = {}
       path = File.expand_path("../../../../parse.es", __FILE__)
-      # For some reason vim tag browser doesn't like it when
-      # eval(`...`) is used.
       result = run_command("#{path} #{@rebar_config_path}")
+      target_lib_dir = service['rel-type'] == 'rebar3' ? "_build/dev/lib" : "deps"
       eval(result.stdout).each do |name, data|
-        @deps[name] = ErlangDep.new(name, File.join(project_dir, "deps") , data, self)
+        @deps[name] = ErlangDep.new(name, File.join(project_dir, target_lib_dir) , data, self)
       end
     end
 
@@ -32,7 +45,7 @@ module DVM
     end
 
     def start(args, background)
-      raise DVMArgumentError, "#{name} appears to be already running. Try 'dvm console oc_erchef', or 'dvm stop oc_erchef'" if is_running?
+      raise DVMArgumentError, "#{name} appears to be already running. Try 'dvm console #{relname}', or 'dvm stop #{relname}'" if is_running?
       # Ensure that our packaged installation isn't running, thereby preventing spewage of startup errors.
       disable_service
       if background
@@ -42,7 +55,7 @@ module DVM
       end
     end
 
-    def stop()
+    def stop
       raise DVMArgumentError, <<-EOM unless is_running?
 "#{name} does not seem to be running from a loaded instance.
 If you want to stop the global instance, use chef-server-ctl stop #{service['name']}'"
@@ -88,7 +101,7 @@ EOM
     def link
       say("Setting up symlinks")
       # Yay project inconsistencies
-      base_sv_path = "/var/opt/opscode/#{service["name"]}"
+      base_sv_path = "/var/opt/#{omnibus_project}/#{service["name"]}"
       purge_links
       if File.exists?("#{base_sv_path}/sys.config")
         FileUtils.ln_s("#{base_sv_path}/sys.config", "#{relpath}/sys.config")
@@ -104,13 +117,9 @@ EOM
     end
 
     def do_load(options)
-      # TODO: Can we just link in our dev-time dependencies post-build,
-      # so that we don't have to declare them as apps in app.src? These are
-      # typically sync, builder, eunit , mixer and common_test
-      #
       # TODO this can also be wrapped and handled in the base...
-      # TODO this makes an assumption that this is NOT anything bundled in our chef-server env.
-      if ! project_dir_exists_on_host?(path)
+      puts "Checking #{path}"
+      if !project_dir_exists_on_host?(path)
         git = project['git']
         if git
           if git['uri']
@@ -120,7 +129,8 @@ EOM
             end
           end
         else
-          raise DVMArgumentError, "Project not available. Clone it onto your host machine, or update the git settings in config.yml."
+          # UGH _ note we're still stuck on not having /do-not-use - because if we clone to external-deps it will not get nuked!
+          raise DVMArgumentError, "Project not available. Clone or link it into chef-server/external-deps directory onto your host machine, or update the project git settings."
         end
       end
 
@@ -165,7 +175,8 @@ EOM
       # TODO currently we only load projects that are maintained by Chef and live in chef-server/src.
       # If this changes, we'll need to support specification of alternative build commands.
       # TODO2: add build.env since only erchef needs use_system_gecode...
-      run_command("make -j 4 dvm", "Building...", cwd: project_dir, env: { "USE_SYSTEM_GECODE" => "1"})
+      make_target = project['make-target'] ? project['make-target'] : 'dvm'
+      run_command("make -j 4 #{make_target}", "Building...", cwd: project_dir, env: { "USE_SYSTEM_GECODE" => "1"})
     end
 
     def cover(action, modulename, options)

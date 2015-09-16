@@ -16,7 +16,7 @@ vm:
   # All settings below apply only to the chef-server vm
   cpus: 4
   memory: 4096
-  packages: [ ntp, curl, wget, htop, uuid-dev, tmux, vim, iotop ]
+  #packages: [ ntp, curl, wget, htop, uuid-dev, tmux, vim, iotop ]
   omnibus-autoload: [] # see config.yml for details and to add components
 
   # TODO whitelist as well?
@@ -25,6 +25,7 @@ vm:
   sync-exclude:
     - pkg/
     - deps/
+    - rel/
     - _rel/
     - _build/
     - chef-mover/rel/mover/
@@ -60,7 +61,7 @@ projects:
     type: erlang
     database: opscode_chef # Used for dvm psql oc_erchef
     service:
-      rel-type: relx
+      rel-type: rebar3
       name: opscode-erchef
       cookie: erchef
       node: erchef@127.0.0.1
@@ -70,27 +71,54 @@ projects:
       name: oc_id
   oc_bifrost:
     type: erlang
-    database: opscode_bifrost
+    database: bifrost
     service:
-      rel-type: relx
+      rel-type: rebar3
       name:  oc_bifrost
       cookie: oc_bifrost
       node: oc_bifrost@127.0.0.1
+  oc_reporting:
+    type:  erlang
+    external: true
+    make-target: compile generate rel
+    database: opscode_reporting
+    omnibus-project: opscode-reporting
+    service:
+     rel-type: reltool
+     name: opscode-reporting
+     rel-name: oc_reporting
+     cookie: oc_reporting
+     node: oc_reporting@127.0.0.1
   chef-mover:
     type: erlang
     service:
+      rel-type: rebar3
       rel-name: mover
-      rel-type: relx
       name:  opscode-chef-mover
       cookie: mover
       node: mover@127.0.0.1
   bookshelf:
     type: erlang
     service:
-      rel-type: relx
+      rel-type: rebar3
       name: bookshelf
       cookie: bookshelf
       node: bookshelf@127.0.0.1
+  omnibus-reporting:
+    name: omnibus-reporting
+    type: omnibus
+    external: true
+    components:
+      reporting-cookbooks:
+        source_path: cookbooks/opscode-reporting
+        dest_path: /opt/opscode-reporting/embedded/cookbooks/opscode-reporting
+        ctl-name: opscode-reporting-ctl
+        reconfigure_on_load: true
+      ctl-commands:
+        source_path: opscode-reporting-ctl-commands
+        dest_path: /opt/opscode/embedded/service/omnibus-ctl
+        reconfigure_on_load: false
+
   omnibus:
     path: "omnibus"
     name: opscode-omnibus

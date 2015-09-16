@@ -43,7 +43,7 @@ module DVM
       @available = true
       @libpath = matches[0]
       @libname = File.basename(matches[0])
-      @link_target = File.readlink(libpath)
+      @link_target = File.symlink?(libpath) ? File.readlink(libpath) : libpath
     end
 
 
@@ -57,12 +57,12 @@ module DVM
         if opts[:skip_checkout]
           raise DVMArgumentError "The project directory for #{name} can't be found, and you told me not to check it out."
         end
-        clone(name, url)
         # Ensure we're starting with the same code base that we had in the dependency to avoid
         # hot-loading headaches.
+        clone(name, url)
       end
-      # TODO verify project is running, or allow option to do build anyway (just not  y default?)
-      # Problem being if the project is not running, we will not auto-compiel
+      # TODO if project is not running, do a normal build of the project - or shoudl we anyway so that
+      #      our beam files persist?
 
       checkout(name, ref) unless opts[:skip_checkout]
       # INstead of linking it into the dep directory, replace the library path in the project installation
