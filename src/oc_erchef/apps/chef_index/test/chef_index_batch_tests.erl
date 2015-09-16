@@ -28,7 +28,7 @@ chef_index_batch_test_() ->
      end,
      fun(_Pid) ->
              meck:unload(chef_index_expand),
-             chef_index_batch:stop()
+             stop_server()
      end,
      [{"current_size+wrapper_size is the actual size posted to solr",
        fun() ->
@@ -59,18 +59,18 @@ chef_index_batch_test_() ->
        end},
       {"chef_index_batch flushes an added item automatically",
        fun() ->
+               meck:expect(chef_index_expand, post_to_solr, fun(_Payload) -> ok end),
                application:set_env(chef_index, search_batch_max_wait, 10),
                restart_server(),
-               meck:expect(chef_index_expand, post_to_solr, fun(_Payload) -> ok end),
                add_item(<<"abcdefg">>),
                ?assertEqual(ok, wait_for_res())
        end
       },
       {"chef_index_batch flushes when current_size+wrapper_size >= max_size",
        fun() ->
+               meck:expect(chef_index_expand, post_to_solr, fun(_Payload) -> ok end),
                application:set_env(chef_index, search_batch_max_size, 70),
                restart_server(),
-               meck:expect(chef_index_expand, post_to_solr, fun(_Payload) -> ok end),
                add_item(<<"abcd">>), % The wrapper size is 66
                ?assertEqual(ok, wait_for_res())
        end
@@ -78,16 +78,26 @@ chef_index_batch_test_() ->
      ]
     }.
 
-restart_server() ->
+stop_server() ->
+    Pid = whereis(chef_index_batch),
+    MRef = erlang:monitor(process, Pid),
     chef_index_batch:stop(),
+    receive
+        {'DOWN', MRef, _, _, _} ->
+            ok
+    end.
+
+restart_server() ->
+    stop_server(),
     chef_index_batch:start_link().
 
 add_item(Item) ->
     Us = self(),
-    spawn(fun() ->
-                  erlang:send(Us, started),
-                  Res = chef_index_batch:add_item(Item),
-                  erlang:send(Us, Res)
+    spawn_link(
+      fun() ->
+              erlang:send(Us, started),
+              Res = chef_index_batch:add_item(Item),
+              erlang:send(Us, Res)
           end),
     wait_for_started().
 
