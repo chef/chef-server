@@ -164,16 +164,29 @@ ejson_for_indexing(#chef_node{name = Name,
     %% with the appropriate values and don't introduce any duplicate
     %% keys
     NodeDict = dict:from_list(Merged),
-    TopLevelDict = dict:from_list([{<<"name">>, Name},
-                                   {<<"chef_type">>, <<"node">>},
-                                   %% FIXME: nodes may have environment in the db, but not in JSON
-                                   %% or not set at all (pre-environments nodes).
-                                   {<<"chef_environment">>, Environment},
-                                   {<<"policy_name">>, PName},
-                                   {<<"policy_group">>, PGroup},
-                                   {<<"recipe">>, extract_recipes(RunList)},
-                                   {<<"role">>, extract_roles(RunList)},
-                                   {<<"run_list">>, RunList}]),
+    TopLevelList = [{<<"name">>, Name},
+                    {<<"chef_type">>, <<"node">>},
+                    %% FIXME: nodes may have environment in the db, but not in JSON
+                    %% or not set at all (pre-environments nodes).
+                    {<<"chef_environment">>, Environment},
+                    {<<"recipe">>, extract_recipes(RunList)},
+                    {<<"role">>, extract_roles(RunList)},
+                    {<<"run_list">>, RunList}],
+    %% Only add policy_name and policy_group key and value if
+    %% value is defined for each.
+    TopLevelListWithPName = case PName of
+                                undefined ->
+                                    TopLevelList;
+                                _ ->
+                                    TopLevelList ++ [{<<"policy_name">>, PName}]
+                            end,
+    TopLevelListFinal = case PGroup of
+                            undefined ->
+                                TopLevelListWithPName;
+                            _ ->
+                                TopLevelListWithPName ++ [{<<"policy_group">>, PGroup}]
+                        end,
+    TopLevelDict = dict:from_list(TopLevelListFinal),
     NodeDict1 = dict:merge(fun(_Key, TopVal, _AttrVal) ->
                                    TopVal
                            end, TopLevelDict, NodeDict),

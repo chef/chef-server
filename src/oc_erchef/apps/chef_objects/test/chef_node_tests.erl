@@ -236,7 +236,15 @@ ejson_for_indexing_test_() ->
               assert_ejson_equal(basic_node_index(),
                                  chef_object:ejson_for_indexing(basic_node_record(), Node))
       end},
-
+     {"with_policy_info_test",
+      fun() ->
+              Node = merge(basic_node(), {[{<<"default">>, {
+						[{<<"policy_group">>, <<"some_group">>},
+						 {<<"policy_name">>, <<"some_policy">>}]
+					       }}]}),
+              assert_ejson_equal(basic_node_index_with_policy_info(),
+                                 chef_object:ejson_for_indexing(basic_node_record(), Node))
+      end},
      {"default_only_test",
       fun() ->
               Defaults = {[{<<"a">>, 1}]},
@@ -358,16 +366,26 @@ basic_node() ->
 basic_node_record() ->
     #chef_node{name = <<"a_node">>, environment = <<"prod">>}.
 
-basic_node_index() ->
-    {[{<<"name">>, <<"a_node">>},
+basic_node_list() ->
+    [
+     {<<"name">>, <<"a_node">>},
       {<<"chef_type">>, <<"node">>},
       {<<"chef_environment">>, <<"prod">>},
-      {<<"policy_group">>, undefined},
-      {<<"policy_name">>, undefined},
       {<<"recipe">>, [<<"web">>]},
       {<<"role">>, [<<"prod">>]},
       {<<"run_list">>, [<<"recipe[web]">>, <<"role[prod]">>]}
-     ]}.
+     ].
+
+basic_node_index() ->
+    {basic_node_list()}.
+
+basic_node_index_with_policy_info() ->
+    {
+      [{<<"policy_group">>, <<"some_group">>},
+       {<<"policy_name">>, <<"some_policy">>}] ++ basic_node_list()
+    }.
+
+
 
 %% @doc Merge two proplists together, returning a proplist.  Treats them as dictionaries to
 %% prevent repeated keys.  Values in L2 take precedence of values in L1.
