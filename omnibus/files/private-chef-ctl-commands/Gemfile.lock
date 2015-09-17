@@ -27,6 +27,17 @@ GIT
       specinfra (~> 2.10)
 
 GIT
+  remote: git://github.com/chef/chef_backup.git
+  revision: a17e010cbb86ec71a2f9d86efd96b88b0b334222
+  branch: master
+  specs:
+    chef_backup (0.0.1.dev.4)
+      chef
+      di-ruby-lvm
+      highline
+      mixlib-shellout
+
+GIT
   remote: git://github.com/chef/omnibus-ctl.git
   revision: 3f61f2e1af8b261743aad8dd767c1d4b0173a4d6
   branch: master
@@ -44,6 +55,10 @@ GEM
       rack
       uuidtools (~> 2.1)
     coderay (1.1.0)
+    di-ruby-lvm (0.1.3)
+      di-ruby-lvm-attrib (~> 0.0.3)
+      open4 (>= 0.9.6)
+    di-ruby-lvm-attrib (0.0.21)
     diff-lcs (1.2.5)
     erubis (2.7.0)
     ffi (1.9.8)
@@ -82,6 +97,7 @@ GEM
       rake (~> 10.1)
       systemu (~> 2.6.4)
       wmi-lite (~> 1.0)
+    open4 (1.3.4)
     plist (3.1.0)
     pry (0.10.1)
       coderay (~> 1.1.0)
@@ -127,5 +143,9 @@ PLATFORMS
 
 DEPENDENCIES
   chef!
+  chef_backup!
   omnibus-ctl!
   rspec
+
+BUNDLED WITH
+   1.10.5

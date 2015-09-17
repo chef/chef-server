@@ -1,6 +1,8 @@
 require 'omnibus-ctl'
 
 class OmnibusCtlHelper
+  attr_accessor :ctl
+
   def initialize(files)
     @ctl = Omnibus::Ctl.new("test-ctl")
     files.each do |file|
