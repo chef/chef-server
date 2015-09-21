@@ -118,7 +118,7 @@ check_health_worker(Mod, Parent, Timeout) ->
 %% format and converts 'pang' to 'fail' for easier reading.
 -spec gather_health_workers([{{pid(), reference()}, atom()}],
                             [{binary(), binary()}]) -> [{binary(), binary()}].
-gather_health_workers([{{Pid, _}, Mod} | Rest] = List, Acc) ->
+gather_health_workers([{{Pid, Ref}, Mod} | Rest] = List, Acc) ->
     %% Each worker is allotted `ping_timeout()' time to complete its check and report back
     %% to this process. We should always get a reply within this window since either the
     %% worker will send a result, trigger a timeout and send that, or crash in which case
@@ -136,6 +136,7 @@ gather_health_workers([{{Pid, _}, Mod} | Rest] = List, Acc) ->
                             pang -> <<"fail">>;
                             timeout -> <<"fail">>
                         end,
+            demonitor(Ref, [flush]),
             gather_health_workers(Rest, [ {?A2B(Mod), ResultBin} | Acc ]);
         {'DOWN', _MonRef, process, Pid, normal} ->
             %% ignore. should always get the message from the worker before the down
@@ -159,4 +160,3 @@ ping_timeout() ->
 
 ping_modules() ->
     envy:get(oc_chef_wm, health_ping_modules,list).
-
