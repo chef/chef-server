@@ -10,20 +10,38 @@
 <body>
   <div class="header-block">
     <div id="header">
-      <strong class="logo"><a href="http://www.getchef.com">Chef</a></strong>
+      <strong class="logo"><a href="http://chef.io">Chef</a></strong>
     </div>
   </div>
   <div id="wrapper">
     <div id="main">
       <div class="mybox">
         <div id="content">
-          <h1>Chef Server API</h1>
+          <h1>Are You Looking For the Chef Server?</h1>
+
+          <p>Hello! It looks like you were trying to browse to your Chef Server but you haven't installed the Management Console.</p>
+
           <p>
-            This is the main endpoint for all of the Chef APIs. In general,
-            none of these have any HTML representations, and the vast majority
-            of them require that you are sending properly authenticated
-            requests. So while it's neat that you came to visit, you probably
-            won't find what you are looking for here.
+            If you prefer, you can access the server programmatically with the Chef Server API. To learn how to
+            do this, head over to our <a href="https://docs.chef.io/api_chef_server.html">API Documentation</a> pages.
+          </p>
+
+          <p>
+            If you do want to use your browser to manage your server, then
+            install the Management Console. It's free for up to 25 nodes.
+          </p>
+
+          <p>
+            One way to install the Management Console is to log in as root and type this command:
+            <pre> # chef-server-ctl install opscode-manage </pre>
+            Alternatively, you can download the Management Console as an installable package from the <a href="https://downloads.chef.io/chef-manage"> Management Console</a> downloads page.
+          </p>
+
+          <p>
+            You may also be interested in our other add-ons. These are available as packages from our
+            <a href="https://downloads.chef.io/chef-server/">Chef Server</a> downloads page or you can
+            type <code>chef-server-ctl install</code>. Without arguments, the command lists the packages
+            available for installation.
           </p>
         </div>
       </div>
@@ -34,7 +52,7 @@
       <div class="mybox">
       </div>
       <div class="footer-bottom">
-        <span>&copy; 2010&thinsp;&ndash;&thinsp;2014 Chef Software, Inc. All Rights Reserved</span>
+        <span>&copy; 2010&thinsp;&ndash;&thinsp;2015 Chef Software, Inc. All Rights Reserved</span>
       </div>
     </div>
   </div>
