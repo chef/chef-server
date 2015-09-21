@@ -94,6 +94,10 @@ add_command_under_category "ha-status", "high-availability", "Show the status of
   ha_services = Dir.chdir(running_config['runit']['sv_dir']){Dir.glob('**/keepalive_me').map{|f| File.dirname(f)}}.sort
 
   get_all_services.sort.each do |service_name|
+    # opscode-chef-mover service is only used during an upgrade, and does not need to be running all of the time
+    # do not consider any hidden services when checking ha status
+    next if hidden_services.include?(service_name)
+    
     if service_enabled?(service_name)
       status = run_command("/opt/opscode/init/#{service_name} status >/dev/null 2>&1")
       if ha_services.include?(service_name)
