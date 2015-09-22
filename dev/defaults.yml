@@ -16,7 +16,7 @@ vm:
   # All settings below apply only to the chef-server vm
   cpus: 4
   memory: 4096
-  #packages: [ ntp, curl, wget, htop, uuid-dev, tmux, vim, iotop ]
+  packages: [ ntp, curl, wget, htop, uuid-dev, tmux, vim, iotop ]
   omnibus-autoload: [] # see config.yml for details and to add components
 
   # TODO whitelist as well?
@@ -50,6 +50,7 @@ vm:
     - rspec.failures
     - VERSION
     - partybus/config.rb
+    - oc-reporting-pedant/Gemfile.lock # friggin ugh
 
   cover:
     base_output_path: /vagrant/testdata/cover # maps to dev/testdata/cover
@@ -104,21 +105,6 @@ projects:
       name: bookshelf
       cookie: bookshelf
       node: bookshelf@127.0.0.1
-  omnibus-reporting:
-    name: omnibus-reporting
-    type: omnibus
-    external: true
-    components:
-      reporting-cookbooks:
-        source_path: cookbooks/opscode-reporting
-        dest_path: /opt/opscode-reporting/embedded/cookbooks/opscode-reporting
-        ctl-name: opscode-reporting-ctl
-        reconfigure_on_load: true
-      ctl-commands:
-        source_path: opscode-reporting-ctl-commands
-        dest_path: /opt/opscode/embedded/service/omnibus-ctl
-        reconfigure_on_load: false
-
   omnibus:
     path: "omnibus"
     name: opscode-omnibus
@@ -147,23 +133,66 @@ projects:
         dest_path: /opt/opscode/embedded/service/partybus
         reconfigure_on_load: false
         bundler: true
-  omnibus-ctl:
-    type: ruby #todo instead could callt his 'gem'?
-    system: true
-    external: true
   oc-chef-pedant:
     type: ruby
     path: oc-chef-pedant
     database: opscode_chef
     run: bin/oc-chef-pedant -c /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
 
+  #
+  # External Components
+  # We'll eventually allow external projects to supply their own
+  # 'dvm.yml' that we can include for project definitions, but for now...
+
+  #
+  # omnibus-ctl
+  #
+  omnibus-ctl:
+    type: ruby
+    system: true
+    external: true
+
+  #
+  # Reporting
+  #
+  omnibus-reporting:
+    name: omnibus-reporting
+    type: omnibus
+    external: true
+    components:
+      reporting-cookbooks:
+        source_path: cookbooks/opscode-reporting
+        dest_path: /opt/opscode-reporting/embedded/cookbooks/opscode-reporting
+        ctl-name: opscode-reporting-ctl
+        reconfigure_on_load: true
+      ctl-commands:
+        source_path: opscode-reporting-ctl-commands
+        dest_path: /opt/opscode-reporting/embedded/service/omnibus-ctl
+        reconfigure_on_load: false
+  oc-reporting-pedant:
+    type: ruby
+    external: true
+    gem-path: /opt/opscode-reporting/embedded/service/gems
+    run: ./oc-reporting-pedant -c /etc/opscode-reporting/pedant_config.rb
+
 quickstart:
+  chef-server:
+    description: "Load up all the things used for most chef server dev: pedant, cookbooks, commands, erchef.  Starts oc_erchef without a console."
+    load:
+      - omnibus private-chef-cookbooks
+      - omnibus ctl-commands
+      - oc-chef-pedant
+      - oc_erchef
+    start:
+      - oc_erchef
+
   oc_erchef:
     description: "Load up erchef and start it in console mode."
     load:
       - oc_erchef
     start:
       - oc_erchef
+
   oc_bifrost:
     description: "Load oc_bifrost and oc-bifrost-pedant from /host. Start oc_bifrost into a console."
     load:
