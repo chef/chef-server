@@ -468,13 +468,13 @@ is_indexed(_ObjectRec) ->
 
 fetch(#chef_user{server_api_version = ApiVersion,
                  username = undefined, external_authentication_uid = AuthUid} = Record, CallbackFun) ->
-    fetch_user(external_auth_id_query(ApiVersion, case_sensitivity()), Record, AuthUid, CallbackFun);
+    fetch_user(external_auth_id_query(ApiVersion, ldap_case_sensitivity()), Record, AuthUid, CallbackFun);
 fetch(#chef_user{server_api_version = ?API_v0, username = UserName} = Record, CallbackFun) ->
     fetch_user(find_user_by_username_v0, Record, UserName, CallbackFun);
 fetch(#chef_user{username = UserName} = Record, CallbackFun) ->
     fetch_user(find_user_by_username, Record, UserName, CallbackFun).
 
-case_sensitivity() ->
+ldap_case_sensitivity() ->
     LdapConfig = envy:get(oc_chef_wm, ldap, [], list),
     proplists:get_value(case_sensitive_login_attribute, LdapConfig, false).
 
