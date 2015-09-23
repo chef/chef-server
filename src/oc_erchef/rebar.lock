@@ -104,7 +104,7 @@
   0},
  {<<"opscoderl_httpc">>,
   {git,"https://github.com/opscode/opscoderl_httpc",
-       {ref,"2f0e99cadbe80b5c728109ff669a5efb164ab79e"}},
+       {ref,"0ef57e8bf89b9c88be2fa94d747b75089849dfd1"}},
   0},
  {<<"opscoderl_wm">>,
   {git,"https://github.com/opscode/opscoderl_wm",
