@@ -666,6 +666,9 @@ default['private_chef']['ldap'] = nil
 # default['private_chef']['ldap']['base_dn'] = "OU=Employees,OU=Domain users,DC=example,DC=com"
 # default['private_chef']['ldap']['timeout'] = 60000
 # default['private_chef']['ldap']['port'] = 389
+## Nearly every attribute in the standard LDAP schema that users likely set login_attr
+## to is case sensitive.
+# default['private_chef']['ldap']['case_sensitive_login_attribute'] = false
 #
 # default['private_chef']['ldap']['enable_ssl'] = false
 # default['private_chef']['ldap']['enable_tls'] = false
