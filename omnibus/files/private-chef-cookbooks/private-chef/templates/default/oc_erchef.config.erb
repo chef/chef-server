@@ -71,8 +71,8 @@
               %% metrics config
               {root_metric_key, "<%= @root_metric_key %>"},
 
-              {authz_timeout, <%= node['private_chef']['opscode-erchef']['authz_timeout'] %>},
-              {authz_fanout, <%= node['private_chef']['opscode-erchef']['authz_fanout'] %>},
+              {authz_timeout, <%= @oc_erchef['authz_timeout'] %>},
+              {authz_fanout, <%= @oc_erchef['authz_fanout'] %>},
 
               {enable_actions, <%= node['private_chef']['dark_launch']['actions'] %>},
               <% if @ldap_enabled -%>
@@ -104,28 +104,28 @@
               {actions_exchange, <<"<%= @actions_exchange %>">>},
               {actions_fqdn, <<"<%= node['private_chef']['lb']['api_fqdn'] %>">>},
 
-              {max_request_size, <%= node['private_chef']['opscode-erchef']['max_request_size'] %>},
+              {max_request_size, <%= @oc_erchef['max_request_size'] %>},
               {server_version, "<%= node['private_chef']['version'] %>"},
               {health_ping_timeout, 400},
               {health_ping_modules, [oc_chef_authz, chef_sql, chef_solr]},
-              {base_resource_url, <%= @helper.erl_atom_or_string(node['private_chef']['opscode-erchef']['base_resource_url']) %>},
+              {base_resource_url, <%= @helper.erl_atom_or_string(@oc_erchef['base_resource_url']) %>},
               {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
               {strict_search_result_acls, <%= @strict_search_result_acls %>}
             ]},
   {chef_authn, [
                 {keyring, [{default, "/etc/opscode/webui_pub.pem"}]},
-                <% unless node['private_chef']['opscode-erchef']['keygen_cache_workers'] == :auto -%>
-                {keygen_cache_workers, <%= node['private_chef']['opscode-erchef']['keygen_cache_workers'] %>},
+                <% unless @oc_erchef['keygen_cache_workers'] == :auto -%>
+                {keygen_cache_workers, <%= @oc_erchef['keygen_cache_workers'] %>},
                 <% end -%>
-                {keygen_cache_size, <%= node['private_chef']['opscode-erchef']['keygen_cache_size'] %>},
-                {keygen_start_size, <%= node['private_chef']['opscode-erchef']['keygen_start_size'] %>},
-                {keygen_timeout, <%= node['private_chef']['opscode-erchef']['keygen_timeout'] %>},
-                {keygen_size, <%= node['private_chef']['opscode-erchef']['keygen_key_size'] %>}
+                {keygen_cache_size, <%= @oc_erchef['keygen_cache_size'] %>},
+                {keygen_start_size, <%= @oc_erchef['keygen_start_size'] %>},
+                {keygen_timeout, <%= @oc_erchef['keygen_timeout'] %>},
+                {keygen_size, <%= @oc_erchef['keygen_key_size'] %>}
                ]},
   {oc_chef_authz, [
-                {authz_root_url, "http://<%= @helper.vip_for_uri('oc_bifrost') %>:<%= node['private_chef']['oc_bifrost']['port'] %>" },
-                {authz_service, [{root_url, "http://<%= @helper.vip_for_uri('oc_bifrost') %>:<%= node['private_chef']['oc_bifrost']['port'] %>" },
-                                 {timeout, <%= node['private_chef']['opscode-erchef']['authz_timeout'] %>},
+                {authz_root_url, "http://<%= @helper.vip_for_uri('oc_bifrost') %>:<%= @oc_bifrost['port'] %>" },
+                {authz_service, [{root_url, "http://<%= @helper.vip_for_uri('oc_bifrost') %>:<%= @oc_bifrost['port'] %>" },
+                                 {timeout, <%= @oc_erchef['authz_timeout'] %>},
                                  {init_count, <%= node['private_chef']['oc_chef_authz']['http_init_count'] %>},
                                  {max_count, <%= node['private_chef']['oc_chef_authz']['http_max_count'] %>},
                                  {queue_max, <%= node['private_chef']['oc_chef_authz']['http_queue_max'] %>},
@@ -138,8 +138,8 @@
                 {couchdb_host, "127.0.0.1"},
                 {couchdb_port, 5987 },
                 %% END COUCHDB REMOVE THESE
-                {authz_superuser_id, <<"<%= node['private_chef']['oc_bifrost']['superuser_id'] %>">>},
-                {cleanup_batch_size, <%= node['private_chef']['opscode-erchef']['cleanup_batch_size'] %>}
+                {authz_superuser_id, <<"<%= @oc_bifrost['superuser_id'] %>">>},
+                {cleanup_batch_size, <%= @oc_erchef['cleanup_batch_size'] %>}
                ]},
   {chef_db, [
              {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
@@ -156,10 +156,10 @@
                 {rabbitmq_password, <<"<%= node['private_chef']['rabbitmq']['password'] %>">>},
                 {rabbitmq_vhost, <<"<%= node['private_chef']['rabbitmq']['vhost'] %>">>},
                 {rabbitmq_exchange, <<"">>},
-                {search_provider, <%= node['private_chef']['opscode-erchef']['search_provider'] %>},
-                {search_queue_mode, <%= node['private_chef']['opscode-erchef']['search_queue_mode'] %>},
-                {search_batch_max_size, <%= node['private_chef']['opscode-erchef']['search_batch_max_size'] %>},
-                {search_batch_max_wait, <%= node['private_chef']['opscode-erchef']['search_batch_max_wait'] %>},
+                {search_provider, <%= @oc_erchef['search_provider'] %>},
+                {search_queue_mode, <%= @oc_erchef['search_queue_mode'] %>},
+                {search_batch_max_size, <%= @oc_erchef['search_batch_max_size'] %>},
+                {search_batch_max_wait, <%= @oc_erchef['search_batch_max_wait'] %>},
                 {solr_service, [{root_url, "http://<%= @helper.vip_for_uri('opscode-solr4') %>:<%= node['private_chef']['opscode-solr4']['port'] %>/solr"},
                                 {timeout, <%= @solr_timeout %>},
                                 {init_count, <%= @solr_http_init_count %>},
@@ -175,11 +175,11 @@
                   {s3_secret_key_id, "<%= node['private_chef']['bookshelf']['secret_access_key'] %>"},
                   {s3_url, "<%= node['private_chef']['nginx']['x_forwarded_proto'] %>://<%= @helper.vip_for_uri('bookshelf') %>"},
                   {s3_external_url, <%= @helper.erl_atom_or_string(node['private_chef']['bookshelf']['external_url']) %>},
-                  {s3_platform_bucket_name, "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>"},
-                  {s3_url_ttl, <%= node['private_chef']['opscode-erchef']['s3_url_ttl'] %>},
-                  {s3_url_expiry_window_size, <%= @helper.s3_url_caching(node['private_chef']['opscode-erchef']['s3_url_expiry_window_size']) %>},
-                  {s3_parallel_ops_timeout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_timeout'] %>},
-                  {s3_parallel_ops_fanout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_fanout'] %>},
+                  {s3_platform_bucket_name, "<%= @oc_erchef['s3_bucket'] %>"},
+                  {s3_url_ttl, <%= @oc_erchef['s3_url_ttl'] %>},
+                  {s3_url_expiry_window_size, <%= @helper.s3_url_caching(@oc_erchef['s3_url_expiry_window_size']) %>},
+                  {s3_parallel_ops_timeout, <%= @oc_erchef['s3_parallel_ops_timeout'] %>},
+                  {s3_parallel_ops_fanout, <%= @oc_erchef['s3_parallel_ops_fanout'] %>},
                   {depsolver_timeout, <%= @depsolver_timeout %>},
                   {depsolver_pooler_timeout, <%= @depsolver_pooler_timeout %>}
                  ]},
@@ -194,25 +194,40 @@
                      {pooler_timeout, <%= @authz_pooler_timeout %>}
                     ]},
   {sqerl, [
-           {db_driver_mod, sqerl_pgsql_client},
            {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
-           %% Database connection parameters
-           {db_host, "<%= node['private_chef']['postgresql']['vip'] %>"},
-           {db_port, <%= node['private_chef']['postgresql']['port'] %>},
-           {db_user, "<%= node['private_chef']['opscode-erchef']['sql_user'] %>"},
-           {db_pass, "<%= node['private_chef']['opscode-erchef']['sql_password'] %>"},
-           {db_name, "opscode_chef" },
-           {idle_check, 10000},
            {pooler_timeout, <%= @db_pooler_timeout %>},
-           {db_timeout, <%= node['private_chef']['opscode-erchef']['sql_db_timeout'] %>},
-           {prepared_statements, {oc_chef_sql, statements, [pgsql]}},
-           {column_transforms,
-                              [{<<"created_at">>,
-                                {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}},
-                               {<<"updated_at">>,
-                                {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}}]
-           }
-          ]},
+           {db_driver_mod, sqerl_pgsql_client},
+           {databases, [
+                        {bifrost, [
+                                   {db_host, "<%= node['private_chef']['postgresql']['vip'] %>" },
+                                   {db_port, <%= node['private_chef']['postgresql']['port'] %> },
+                                   {db_user, "<%= @oc_bifrost['sql_user'] %>" },
+                                   {db_pass, "<%= @oc_bifrost['sql_password'] %>" },
+                                   {db_name, "bifrost" },
+                                   {idle_check, 10000},
+                                   {db_timeout, <%= @oc_bifrost['sql_db_timeout'] %>},
+                                   {prepared_statements, {bifrost_db, statements, []} },
+                                   {column_transforms, []}
+                                  ]},
+                        % This pool is used by default when no sqerl pool exists for a calling application.
+                        {sqerl, [
+                                 %% Database connection parameters
+                                 {db_host, "<%= node['private_chef']['postgresql']['vip'] %>"},
+                                 {db_port, <%= node['private_chef']['postgresql']['port'] %> },
+                                 {db_user, "<%= @oc_erchef['sql_user'] %>"},
+                                 {db_pass, "<%= @oc_erchef['sql_password'] %>"},
+                                 {db_name, "opscode_chef" },
+                                 {idle_check, 10000},
+                                 {db_timeout, <%= @oc_erchef['sql_db_timeout'] %>},
+                                 {prepared_statements, {oc_chef_sql, statements, [pgsql]}},
+                                 {column_transforms,
+                                                    [{<<"created_at">>,
+                                                      {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}},
+                                                     {<<"updated_at">>,
+                                                      {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}}
+                                                    ]}
+                                ]}
+                        ]},
   {webmachine, [
           {log_handlers, [
                {oc_wm_request_logger, [
@@ -233,14 +248,27 @@
                      {init_count, <%= @db_pool_size %>},
                      {start_mfa, {sqerl_client, start_link, []}},
                      {queue_max, <%= @db_pool_queue_max %>}],
+                    [{name, sqerl_bifrost},
+                     {max_count, <%= @oc_bifrost['db_pool_size'] %>},
+                     {init_count, <%= @oc_bifrost['db_pool_size'] %>},
+                     {start_mfa, {sqerl_client, start_link, [{pool, bifrost}]}},
+                     {queue_max, <%= @oc_bifrost['db_pool_queue_max'] %>}],
                     [{name, chef_depsolver},
-                     {max_count, <%= @depsolver_worker_count %>},
-                     {init_count, <%= @depsolver_worker_count %>},
-                     {queue_max, <%= @depsolver_pool_queue_max %>},
+                     {max_count, <%= @oc_erchef['depsolver_worker_count'] %>},
+                     {init_count, <%= @oc_erchef['depsolver_worker_count'] %>},
+                     {queue_max, <%= @oc_erchef['depsolver_pool_queue_max'] %>},
                      {start_mfa, {chef_depsolver_worker, start_link, []}}]]},
            {metrics_module, folsom_metrics}
-          ]}
-<% if !node['private_chef']['opscode-erchef']['ssl_session_caching']['enabled'] -%>
+          ]},
+ {bifrost, [
+             {ip, "<%= @listen %>" },
+             {port, <%= @port %> },
+             {superuser_id, "<%= @bifrost_superuser_id %>"},
+             {root_metric_key, "bifrost"},
+             {enable_extended_perf_log, <%= @oc_bifrost['extended_perf_log'] %>}
+            ]}
+
+<% if !@oc_erchef['ssl_session_caching']['enabled'] -%>
 ,  {ssl, [
       {session_cb, noop_session_cache}
   ]}

@@ -4,9 +4,11 @@
 #
 # All Rights Reserved
 
-opscode_erchef_dir = node['private_chef']['opscode-erchef']['dir']
+oc_erchef = node['private_chef']['oc_erchef']
+oc_bifrost = node['private_chef']['oc_bifrost']
+opscode_erchef_dir = oc_erchef['dir']
 opscode_erchef_etc_dir = File.join(opscode_erchef_dir, "etc")
-opscode_erchef_log_dir = node['private_chef']['opscode-erchef']['log_directory']
+opscode_erchef_log_dir = oc_erchef['log_directory']
 opscode_erchef_sasl_log_dir = File.join(opscode_erchef_log_dir, "sasl")
 [
   opscode_erchef_dir,
@@ -47,16 +49,19 @@ template erchef_config do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode "644"
-  variables(node['private_chef']['opscode-erchef'].to_hash.merge(:ldap_enabled => ldap_authentication_enabled,
-                                                                 :enable_ssl =>  enable_ssl,
-                                                                 :actions_vip => actions_vip,
-                                                                 :actions_port => actions_port,
-                                                                 :actions_user => actions_user,
-                                                                 :actions_password => actions_password,
-                                                                 :actions_vhost => actions_vhost,
-                                                                 :actions_exchange => actions_exchange,
-                                                                 :ldap_encryption_type => ldap_encryption_type,
-                                                                 :helper => OmnibusHelper.new(node)))
+  variables({
+    oc_erchef: oc_erchef,
+    oc_bifrost: oc_bifrost,
+    ldap_enabled: ldap_authentication_enabled,
+    enable_ssl:enable_ssl,
+    actions_vip: actions_vip,
+    actions_port: actions_port,
+    actions_user: actions_user,
+    actions_password: actions_password,
+    actions_vhost: actions_vhost,
+    actions_exchange: actions_exchange,
+    ldap_encryption_type: ldap_encryption_type,
+    helper => OmnibusHelper.new(node)))
   notifies :run, 'execute[remove_erchef_siz_files]', :immediately
   notifies :restart, 'runit_service[opscode-erchef]' unless backend_secondary?
 end
@@ -74,7 +79,7 @@ end
 # [1]: http://erlang.org/doc/man/disk_log.html
 execute "remove_erchef_siz_files" do
   command "rm -f *.siz"
-  cwd node['private_chef']['opscode-erchef']['log_directory']
+  cwd oc_erchef['log_directory']
   action :nothing
 end
 
