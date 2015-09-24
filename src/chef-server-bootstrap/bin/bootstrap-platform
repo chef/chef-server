@@ -38,7 +38,7 @@ class BootstrapPlatform
   def bootstrap
     config = YAML.load_file(@config_file)
 
-    db = Sequel.connect("#{config['db_driver']}://#{config['db_user']}:#{config['db_password']}@#{config['db_host']}/opscode_chef")
+    db = Sequel.connect("#{config['db_driver']}://#{config['db_user']}:#{config['db_password']}@#{config['db_host']}:#{config['db_port']}/opscode_chef")
 
     #################################
     # create superuser authz object #

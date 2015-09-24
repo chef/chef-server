@@ -2,6 +2,7 @@ output_directory: '/tmp/opscode-platform-test'
 
 db_driver: "postgres"
 db_host: '<%= node['private_chef']['postgresql']['vip'] %>'
+db_port: '<%= node['private_chef']['postgresql']['port'] %>'
 db_user: '<%= node['private_chef']['opscode-erchef']['sql_user'] %>'
 db_password: '<%= node['private_chef']['opscode-erchef']['sql_password'] %>'
 
