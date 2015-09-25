@@ -466,14 +466,26 @@ bulk_get_query(_ObjectRec) ->
 is_indexed(_ObjectRec) ->
     false.
 
-fetch(#chef_user{server_api_version = ?API_v0, username = undefined, external_authentication_uid = AuthUid} = Record, CallbackFun) ->
-    fetch_user(find_user_by_external_authentication_uid_v0, Record, AuthUid, CallbackFun);
-fetch(#chef_user{username = undefined, external_authentication_uid = AuthUid} = Record, CallbackFun) ->
-    fetch_user(find_user_by_external_authentication_uid, Record, AuthUid, CallbackFun);
+fetch(#chef_user{server_api_version = ApiVersion,
+                 username = undefined, external_authentication_uid = AuthUid} = Record, CallbackFun) ->
+    fetch_user(external_auth_id_query(ApiVersion, ldap_case_sensitivity()), Record, AuthUid, CallbackFun);
 fetch(#chef_user{server_api_version = ?API_v0, username = UserName} = Record, CallbackFun) ->
     fetch_user(find_user_by_username_v0, Record, UserName, CallbackFun);
 fetch(#chef_user{username = UserName} = Record, CallbackFun) ->
     fetch_user(find_user_by_username, Record, UserName, CallbackFun).
+
+ldap_case_sensitivity() ->
+    LdapConfig = envy:get(oc_chef_wm, ldap, [], list),
+    proplists:get_value(case_sensitive_login_attribute, LdapConfig, false).
+
+external_auth_id_query(?API_v0, true) ->
+    find_user_by_sensitive_external_authentication_uid_v0;
+external_auth_id_query(?API_v0, _NotSensitive) ->
+    find_user_by_external_authentication_uid_v0;
+external_auth_id_query(_Not0, true) ->
+    find_user_by_sensitive_external_authentication_uid;
+external_auth_id_query(_Not0, _NotSensitive) ->
+    find_user_by_external_authentication_uid.
 
 fetch_user(Query, Record, KeyValue, CallbackFun) ->
     CallbackFun({Query, [KeyValue],

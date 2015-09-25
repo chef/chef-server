@@ -84,6 +84,7 @@
                       {base_dn, "<%= node['private_chef']['ldap']['base_dn'] || "" %>" },
                       {group_dn, "<%= node['private_chef']['ldap']['group_dn'] || "" %>" },
                       {login_attribute, "<%= node['private_chef']['ldap']['login_attribute'] || "samaccountname" %>" },
+                      {case_sensitive_login_attribute, <%= node['private_chef']['ldap']['case_sensitive_login_attribute'] || false %>},
                       {encryption, <%= @ldap_encryption_type %>}
               ]},
               <% else -%>
