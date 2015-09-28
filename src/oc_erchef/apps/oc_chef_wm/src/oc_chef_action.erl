@@ -163,7 +163,23 @@ routing_key(EntityType, Method) ->
 -spec publish(RoutingKey :: binary(),
               Msg :: binary()) -> ok.
 publish(RoutingKey, Msg)->
-    oc_chef_action_queue:publish(RoutingKey, Msg).
+    QueueMonitorEnabled = envy:get(oc_chef_wm, rabbitmq_queue_length_monitor_enabled, boolean),
+    publish(RoutingKey, Msg, QueueMonitorEnabled).
+
+
+-spec publish(RoutingKey :: binary(),
+              Msg :: binary(),
+              QueueMonitoringEnabled :: boolean()) -> ok.
+publish(RoutingKey, Msg, false) ->
+      oc_chef_action_queue:publish(RoutingKey, Msg);
+publish(RoutingKey, Msg, true) ->
+    case (envy:get(oc_chef_wm, rabbitmq_drop_on_full_capacity, boolean)
+        andalso chef_wm_actions_queue_monitoring:is_queue_at_capacity()) of
+        true ->
+            chef_wm_actions_queue_monitoring:message_dropped();
+        false ->
+            oc_chef_action_queue:publish(RoutingKey, Msg)
+    end.
 
 maybe_add_data(Msg, []) ->
     Msg;

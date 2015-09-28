@@ -34,11 +34,14 @@
 setup_env() ->
     application:set_env(oc_chef_wm, health_ping_timeout, ?PING_TIMEOUT),
     application:set_env(oc_chef_wm, health_ping_modules, ?CHECK_MODS),
+    application:set_env(oc_chef_wm, rabbitmq_queue_length_monitor_enabled,
+                        false),
     ok.
 
 cleanup_env() ->
     application:unset_env(oc_chef_wm, health_ping_timeout),
     application:unset_env(oc_chef_wm, health_ping_modules),
+    application:unset_env(oc_chef_wm, rabbitmq_queue_length_monitor_enabled),
     ok.
 
 check_health_all_ok_test_() ->

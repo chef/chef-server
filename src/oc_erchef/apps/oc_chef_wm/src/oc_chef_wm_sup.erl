@@ -84,7 +84,18 @@ init([]) ->
 
 maybe_start_action(true, Workers) ->
     lager:info("Starting oc_chef_action", []),
-    [amqp_child_spec() | Workers];
+    case envy:get(oc_chef_wm, rabbitmq_queue_length_monitor_enabled, false, boolean) of
+        true ->
+            chef_wm_actions_queue_monitoring:create_pool(),
+            ActionQueueMonitoringSpec = {chef_wm_actions_queue_monitoring,
+                    {chef_wm_actions_queue_monitoring, start_link, []},
+                        permanent, 5000, worker, [chef_wm_actions_queue_monitoring]},
+            lager:info("Starting actions queue monitoring"),
+            [ActionQueueMonitoringSpec | [ amqp_child_spec() | Workers]];
+        false ->
+            [ amqp_child_spec() | Workers]
+    end;
+
 maybe_start_action(false, Workers) ->
     lager:info("Not starting Actionlog supervisor since actionlog is disabled."),
     Workers.

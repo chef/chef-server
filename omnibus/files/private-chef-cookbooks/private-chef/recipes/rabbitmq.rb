@@ -21,6 +21,7 @@ rabbitmq = node["private_chef"]["rabbitmq"]
 
 rabbitmq_dir = rabbitmq['dir']
 rabbitmq_etc_dir = File.join(rabbitmq_dir, "etc")
+rabbitmq_ca_dir = rabbitmq_etc_dir
 rabbitmq_data_dir = rabbitmq['data_dir']
 rabbitmq_data_dir_symlink = File.join(rabbitmq_dir, "db")
 rabbitmq_log_dir = rabbitmq['log_directory']
@@ -74,13 +75,37 @@ template config_file do
   variables(rabbitmq.to_hash)
 end
 
+#ssl_keyfile = File.join(rabbitmq_ca_dir, "rabbitmq.key")
+ssl_crtfile = File.join(rabbitmq_ca_dir, "rabbitmq.crt")
+
+openssl_x509 ssl_crtfile do
+  common_name node['private_chef']['rabbitmq']['server_name']
+  org node['private_chef']['rabbitmq']['ssl_company_name']
+  org_unit node['private_chef']['rabbitmq']['ssl_organizational_unit_name']
+  country node['private_chef']['rabbitmq']['ssl_country_name']
+  key_length node['private_chef']['rabbitmq']['ssl_key_length']
+  expire node['private_chef']['rabbitmq']['ssl_duration']
+  owner 'root'
+  group 'root'
+  mode '0644'
+end
+
+template "#{rabbitmq_etc_dir}/rabbitmq.config" do
+  owner "root"
+  group "root"
+  mode "0755"
+  variables( :rabbitmq_ca_dir => rabbitmq_ca_dir )
+end
+
 component_runit_service "rabbitmq"
 
 if is_data_master?
   rmq_ctl = "/opt/opscode/embedded/bin/rabbitmqctl"
+  rmq_plugins = "/opt/opscode/embedded/bin/rabbitmq-plugins"
   opc_ctl = "/opt/opscode/bin/private-chef-ctl"
   opc_username = OmnibusHelper.new(node).ownership['owner']
   rmq_ctl_chpost = "/opt/opscode/embedded/bin/chpst -u #{opc_username} -U #{opc_username} #{rmq_ctl}"
+  rmq_plugins_chpost = "/opt/opscode/embedded/bin/chpst -u #{opc_username} -U #{opc_username} #{rmq_plugins}"
 
   execute "#{opc_ctl} start rabbitmq" do
     environment rabbitmq_env
@@ -119,6 +144,14 @@ if is_data_master?
     environment (rabbitmq_env)
     user opc_username
     not_if "#{rmq_ctl_chpost} list_users |grep #{rabbitmq['actions_user']}", :environment => rabbitmq_env, :user => "root"
+    retries 10
+  end
+
+
+  execute "#{rmq_ctl} add_user #{rabbitmq['management_user']} #{rabbitmq['management_password']}" do
+    environment (rabbitmq_env)
+    user opc_username
+    not_if "#{rmq_ctl_chpost} list_users |grep #{rabbitmq['management_user']}", :environment => rabbitmq_env, :user => "root"
     retries 10
   end
 
@@ -161,4 +194,48 @@ if is_data_master?
     not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['actions_user']}|grep #{rabbitmq['actions_vhost']}", :environment => rabbitmq_env, :user => "root"
     retries 10
   end
+
+
+  execute "#{rmq_ctl} set_permissions -p #{rabbitmq['actions_vhost']} #{rabbitmq['management_user']} \".*\" \".*\" \".*\"" do
+    environment (rabbitmq_env)
+    user opc_username
+    not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['management_user']}|grep #{rabbitmq['actions_vhost']}", :environment => rabbitmq_env, :user => "root"
+    retries 10
+  end
+
+  execute "#{rmq_ctl} set_permissions -p / #{rabbitmq['management_user']} \".*\" \".*\" \".*\"" do
+    environment (rabbitmq_env)
+    user opc_username
+    not_if "#{rmq_ctl_chpost} list_user_permissions #{rabbitmq['management_user']}|grep \"/\\s\"", :environment => rabbitmq_env, :user => "root"
+    retries 10
+  end
+
+  execute "#{rmq_plugins} enable rabbitmq_management" do
+    environment (rabbitmq_env)
+    user opc_username
+    not_if "#{rmq_plugins} list | grep rabbitmq_management | grep -v rabbit_management_agent | grep E"
+    retries 10
+  end
+
+  execute "#{rmq_ctl} set_user_tags #{rabbitmq['management_user']} administrator" do
+    environment (rabbitmq_env)
+    user opc_username
+    not_if "#{rmq_ctl_chpost} list_users | grep rabbitmgmt | grep administrator", :environment => rabbitmq_env, :user => "root"
+    retries 10
+  end
+
+  execute "#{rmq_ctl} set_policy -p /analytics max_length '(erchef|alaska|notifier.notifications|notifier_config)' '{\"max-length\":#{rabbitmq['max_length']}}' --apply-to queues" do
+    environment (rabbitmq_env)
+    user opc_username
+    only_if do rabbitmq['max_length_enabled'] end
+    retries 10
+  end
+
+  execute "#{rmq_ctl} clear_policy -p /analytics max_length" do
+    environment (rabbitmq_env)
+    user opc_username
+    not_if do rabbitmq['max_length_enabled'] end
+    retries 10
+  end
+
 end

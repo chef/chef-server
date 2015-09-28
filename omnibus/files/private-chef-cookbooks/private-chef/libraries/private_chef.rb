@@ -454,6 +454,7 @@ module PrivateChef
       PrivateChef['rabbitmq']['password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['rabbitmq']['jobs_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['rabbitmq']['actions_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['rabbitmq']['management_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['drbd']['shared_secret'] ||= generate_hex_if_bootstrap(30, ha_guard)
       PrivateChef['keepalived']['vrrp_instance_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['opscode_erchef']['sql_password'] ||= generate_hex_if_bootstrap(30, ha_guard)
@@ -661,6 +662,7 @@ EOF
             'password' => PrivateChef['rabbitmq']['password'],
             'jobs_password' => PrivateChef['rabbitmq']['jobs_password'],
             'actions_password' => PrivateChef['rabbitmq']['actions_password'],
+            'management_password' => PrivateChef['rabbitmq']['management_password']
           },
           'postgresql' => {
             'db_superuser_password' => PrivateChef['postgresql']['db_superuser_password']

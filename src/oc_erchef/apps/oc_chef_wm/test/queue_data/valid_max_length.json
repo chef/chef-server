@@ -1,0 +1,10 @@
+{
+  "vhost": "/analytics",
+  "name": "max_length",
+  "pattern": "(erchef|alaska|notifier.notifications|notifier_config)",
+  "apply-to": "queues",
+  "definition": {
+    "max-length": 99
+  },
+  "priority": 0
+}

@@ -61,10 +61,20 @@ check_health() ->
     Status = overall_status(Pings),
     log_failure(Status, Pings),
     KeyGen = chef_keygen_cache:status_for_json(),
-    {Status, chef_json:encode({[{<<"status">>, ?A2B(Status)},
-                                {<<"upstreams">>, {Pings}},
-                                {<<"keygen">>, {KeyGen} }
-                               ]})}.
+
+    StatList0 = [{<<"status">>, ?A2B(Status)},
+                {<<"upstreams">>, {Pings}},
+                {<<"keygen">>, {KeyGen} }
+                ],
+
+    StatList =
+      case envy:get(oc_chef_wm, rabbitmq_queue_length_monitor_enabled, boolean) of
+        false -> % chef_wm_actions_queue_monitoring isn't running, skip it
+                 StatList0;
+        true -> AnalyticsQ = chef_wm_actions_queue_monitoring:status(),
+                StatList0 ++ [{<<"analytics_queue">>, {AnalyticsQ}}]
+    end,
+    {Status, chef_json:encode({StatList})}.
 
 overall_status(Pings) ->
     case [ Pang || {_, <<"fail">>}=Pang <- Pings ] of

@@ -116,6 +116,45 @@ default['private_chef']['rabbitmq']['vip'] = '127.0.0.1'
 default['private_chef']['rabbitmq']['consumer_id'] = 'hotsauce'
 default['private_chef']['rabbitmq']['env_path'] = "/opt/opscode/bin:/opt/opscode/embedded/bin:/usr/bin:/bin"
 
+default['private_chef']['rabbitmq']['max_length'] = 100000
+default['private_chef']['rabbitmq']['max_length_enabled'] = true
+default['private_chef']['rabbitmq']['management_user'] = "rabbitmgmt"
+default['private_chef']['rabbitmq']['management_password'] = "chefrocks"
+default['private_chef']['rabbitmq']['management_port'] = 15672
+default['private_chef']['rabbitmq']['management_enabled'] = true
+
+default['private_chef']['rabbitmq']['queue_length_monitor_enabled'] = true
+default['private_chef']['rabbitmq']['queue_length_monitor_millis'] = 30000
+
+# if the queue monitor is busy and this timeout has been exceeded,
+# assume that rabbit is in a bad state and don't send messages to it
+# 5000 is the default of gen_server:call()
+default['private_chef']['rabbitmq']['rabbitmq_queue_length_timeout_millis'] = 5000
+
+# don't send messages to rabbitmq if it has reached it's configured max_length
+default['private_chef']['rabbitmq']['drop_on_full_capacity'] = true
+
+# rabbit_mgmt_service configuration for erchef. These are used to configure an opscoderl_httpc pool
+# of HTTP connecton workers.
+default['private_chef']['rabbitmq']['rabbit_mgmt_timeout'] = 30000
+default['private_chef']['rabbitmq']['rabbit_mgmt_http_init_count'] = 25
+default['private_chef']['rabbitmq']['rabbit_mgmt_http_max_count'] = 100
+default['private_chef']['rabbitmq']['rabbit_mgmt_http_cull_interval'] = "{1, min}"
+default['private_chef']['rabbitmq']['rabbit_mgmt_http_max_age'] = "{70, sec}"
+default['private_chef']['rabbitmq']['rabbit_mgmt_http_max_connection_duration'] = "{70,sec}"
+
+# comma sep list of tuples, without surrounding []'s
+# rendered as a list in oc_erchef.config.erb, including basic_auth info
+default['private_chef']['rabbitmq']['rabbit_mgmt_ibrowse_options'] =  "{connect_timeout, 10000}"
+
+# rabbitmq management console SSL settings
+default['private_chef']['rabbitmq']['server_name'] = node['fqdn']
+default['private_chef']['rabbitmq']['ssl_country_name'] = "US"
+default['private_chef']['rabbitmq']['ssl_company_name'] = "YouCorp"
+default['private_chef']['rabbitmq']['ssl_organizational_unit_name'] = "Operations"
+default['private_chef']['rabbitmq']['ssl_key_length'] = 2048
+default['private_chef']['rabbitmq']['ssl_duration'] = 3650
+
 ####
 # External RabbitMQ
 ####
