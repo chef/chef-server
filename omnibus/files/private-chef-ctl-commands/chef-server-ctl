@@ -182,6 +182,31 @@ CLEANSE002: Note that Chef Server data was not removed from your
 EOM
     end
 
+    # External Solr/ElasticSearch Commands
+    def external_status_opscode_solr4(_detail_level)
+      solr = external_services['opscode-solr4']['external_url']
+      begin
+        Chef::HTTP.new(solr).get(solr_status_url)
+        puts "run: opscode-solr4: connected OK to #{solr}"
+      rescue StandardError => e
+        puts "down: opscode-solr4: failed to connect to #{solr}: #{e.message.split("\n")[0]}"
+      end
+    end
+
+    def external_cleanse_opscode_solr4(perform_delete)
+      log <<-EOM
+Cleansing data in a remote Sol4 instance is not currently supported.
+EOM
+    end
+
+    def solr_status_url
+      case running_service_config('opscode-erchef')['search_provider']
+      when "elasticsearch"
+        "/chef"
+      else
+        "/admin/ping?wt=json"
+      end
+    end
   end
 end
 

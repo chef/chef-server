@@ -1,4 +1,5 @@
 require 'mixlib/shellout'
+require 'uri'
 
 class OmnibusHelper
   attr_reader :node
@@ -42,6 +43,24 @@ class OmnibusHelper
 
   def vip_for_uri(service)
     normalize_host(node['private_chef'][service]['vip'])
+  end
+
+  # Returns scheme://host:port without any path
+  def solr_root
+    url = URI.parse(solr_url)
+    host = url.scheme + "://" + url.host
+    if url.port
+      host += ":" + url.port.to_s
+    end
+    host
+  end
+
+  def solr_url
+    if node['private_chef']['opscode-solr4']['external']
+      node['private_chef']['opscode-solr4']['external_url']
+    else
+      "http://#{vip_for_uri('opscode-solr4')}:#{node['private_chef']['opscode-solr4']['port']}/solr"
+    end
   end
 
   def db_connection_uri
@@ -163,4 +182,3 @@ class OmnibusHelper
     end
   end
 end
-
