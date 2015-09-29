@@ -17,11 +17,77 @@
 
 -module(chef_index).
 
--export([delete/4,
+-export([search/1,
+         update/1,
+         update/2,
+         query_from_params/4,
+         add_org_guid_to_query/2,
+         delete_search_db/1,
+         delete_search_db_by_type/2,
+         transform_data/1,
+         transform_data/2,
+         delete/4,
          add/5,
          add_async/4,
-         add_async/5
+         add_async/5,
+         search_provider/0
         ]).
+
+-include("chef_solr.hrl").
+
+search_provider() ->
+    envy:get(chef_index, search_provider, solr, envy:one_of([solr, elasticsearch])).
+
+-spec search(#chef_solr_query{}) ->
+                    {ok, non_neg_integer(), non_neg_integer(), [binary()]} |
+                    {error, {solr_400, string()}} |
+                    {error, {solr_500, string()}}.
+search(Query = #chef_solr_query{search_provider=elasticsearch}) ->
+    chef_elasticsearch:search(Query);
+search(Query = #chef_solr_query{search_provider=solr}) ->
+    chef_solr:search(Query).
+
+-spec update(iolist() | binary()) -> ok | {error, term()}.
+update(Body) ->
+    update(search_provider(), Body).
+
+update(elasticsearch, Body) ->
+    chef_elasticsearch:update(Body);
+update(solr, Body) ->
+    chef_solr:update(Body).
+
+-spec delete_search_db(OrgId :: binary()) -> ok.
+delete_search_db(OrgId) ->
+    case search_provider() of
+        elasticsearch -> chef_elasticsearch:delete_search_db(OrgId);
+        solr -> chef_solr:delete_search_db(OrgId)
+    end.
+
+-spec delete_search_db_by_type(OrgId :: binary(), Type :: atom()) -> ok.
+delete_search_db_by_type(OrgId, Type) ->
+    case search_provider() of
+        elasticsearch -> chef_elasticsearch:delete_search_db_by_type(OrgId, Type);
+        solr -> chef_solr:delete_search_db_by_type(OrgId, Type)
+    end.
+
+-spec query_from_params(binary()|string(),
+                        string() | binary() | undefined,
+                        string(),
+                        string()) -> #chef_solr_query{}.
+query_from_params(ObjType, QueryString, Start, Rows) ->
+    chef_index_query:from_params(search_provider(), ObjType, QueryString, Start, Rows).
+
+-spec add_org_guid_to_query(#chef_solr_query{}, binary()) -> #chef_solr_query{}.
+add_org_guid_to_query(Query, OrgGuid) ->
+    chef_index_query:add_org_guid_to_query(Query, OrgGuid).
+
+transform_data(Data) ->
+    transform_data(search_provider(), Data).
+
+transform_data(elasticsearch, Data) ->
+    chef_elasticsearch:transform_data(Data);
+transform_data(solr, Data) ->
+    chef_solr:transform_data(Data).
 
 %% The difference between add and add_async is that add_async
 %% will not block on the data being posted to our search store
@@ -69,7 +135,6 @@ delete(TypeName, Id, DbName, ReqId) ->
 
 queue_mode() ->
     envy:get(chef_index, search_queue_mode, rabbitmq, envy:one_of([rabbitmq, batch, inline])).
-
 
 send_to_solr(QueueMode, Doc, none) ->
     send_to_solr(QueueMode, Doc);

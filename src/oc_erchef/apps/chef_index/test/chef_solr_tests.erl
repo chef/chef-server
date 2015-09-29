@@ -20,98 +20,6 @@
 -include_lib("eunit/include/eunit.hrl").
 -include("chef_solr.hrl").
 
-%expect_params(Params) ->
-    %meck:expect(wrq, get_qs_value, fun(Key, req_mock) ->
-                                           %proplists:get_value(Key, Params)
-                                   %end).
-
-make_query_from_params_test_() ->
-    {foreach,
-     fun() ->
-         ok
-     end,
-     fun(_) ->
-         ok
-     end,
-    [
-     {"properly formed",
-      fun() ->
-          Query = chef_solr:make_query_from_params("node", "myquery", "2", "5"),
-          Expect = #chef_solr_query{
-            query_string = "myquery",
-            filter_query = "+X_CHEF_type_CHEF_X:node",
-            sort = "X_CHEF_id_CHEF_X asc",
-            start = 2,
-            rows = 5,
-            index = node},
-          ?assertEqual(Expect, Query)
-      end},
-
-    {"default values",
-      %% TODO: currently, a missing 'q' param is mapped to "*:*". We'd
-      %% like to change that to be a 400 in the future.
-      fun() ->
-          Query = chef_solr:make_query_from_params("role", undefined, undefined, undefined),
-          Expect = #chef_solr_query{
-            query_string = "*:*",
-            filter_query = "+X_CHEF_type_CHEF_X:role",
-            sort = "X_CHEF_id_CHEF_X asc",
-            start = 0,
-            rows = 1000,
-            index = role},
-          ?assertEqual(Expect, Query)
-      end},
-
-    {"Present, but empty 'q' is a 400",
-      fun() ->
-          ?assertThrow({bad_query, ""},
-            chef_solr:make_query_from_params("role", "", undefined, undefined))
-      end},
-
-    {"bad query",
-      fun() ->
-          ?assertThrow({bad_query, <<"a[b">>},
-            chef_solr:make_query_from_params("node", "a[b", undefined, undefined))
-      end},
-
-    {"bad start not integer",
-      fun() ->
-          ?assertThrow({bad_param, {"start", "abc"}},
-            chef_solr:make_query_from_params("node", undefined, "abc", undefined))
-      end},
-
-    {"bad start negative",
-      fun() ->
-          ?assertThrow({bad_param, {"start", "-5"}},
-            chef_solr:make_query_from_params("node", undefined, "-5", undefined))
-      end},
-
-    {"bad rows not integer",
-      fun() ->
-          ?assertThrow({bad_param, {"rows", "abc"}},
-            chef_solr:make_query_from_params("node", undefined, undefined, "abc"))
-      end},
-
-    {"bad rows negative",
-      fun() ->
-          ?assertThrow({bad_param, {"rows", "-5"}},
-            chef_solr:make_query_from_params("node", undefined, undefined, "-5"))
-      end},
-
-     {"index type",
-      fun() ->
-              Tests = [{"node", node}, {"role", role}, {"client", client},
-                       {"environment", environment},
-                       {"adbag", {data_bag, <<"adbag">>}}],
-              lists:foreach(
-                fun({Sent, Want}) ->
-                        Query = chef_solr:make_query_from_params(Sent, "query", "2", "5"),
-                        ?assertEqual(Want, Query#chef_solr_query.index)
-                end, Tests)
-      end}
-
-    ]}.
-
 search_test_() ->
     {foreach,
      fun() ->
@@ -130,7 +38,7 @@ search_test_() ->
                 sort = "X_CHEF_id_CHEF_X asc",
                 start = 0,
                 rows = 1000},
-              ?assertError(function_clause, chef_solr:search(Query))
+              ?assertError({badmatch, _X}, chef_solr:search(Query))
       end},
 
      {"parse non-empty solr result",
@@ -150,21 +58,8 @@ search_test_() ->
                 sort = "X_CHEF_id_CHEF_X asc",
                 start = 0,
                 rows = 1000},
-              Query1 = chef_solr:add_org_guid_to_query(Query0, <<"0123abc">>),
+              Query1 = chef_index:add_org_guid_to_query(Query0, <<"0123abc">>),
               ?assertEqual({ok, 2, 10, ["d1", "d2"]}, chef_solr:search(Query1)),
               ?assert(meck:validate(chef_index_http))
      end}
     ]}.
-
-add_org_guid_to_query_test() ->
-    Query0 = #chef_solr_query{
-      query_string = "*:*",
-      filter_query = "+X_CHEF_type_CHEF_X:role",
-      sort = "X_CHEF_id_CHEF_X asc",
-      start = 0,
-      rows = 1000,
-      index = role},
-    Query1 = chef_solr:add_org_guid_to_query(Query0, <<"0123abc">>),
-    ?assertEqual("+X_CHEF_database_CHEF_X:chef_0123abc "
-                 "+X_CHEF_type_CHEF_X:role",
-                 Query1#chef_solr_query.filter_query).

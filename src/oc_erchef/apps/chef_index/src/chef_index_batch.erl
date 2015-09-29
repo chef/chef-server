@@ -41,7 +41,7 @@
           max_size :: non_neg_integer(),
           item_queue = [] :: [{{pid(), term()}, erlang:timestamp(), iolist()}],
           max_wait :: non_neg_integer(),
-          search_provider = solr :: solr|cloudsearch,
+          search_provider = solr :: solr|elasticsearch,
           total_docs_queued = 0 :: integer(),
           total_docs_success = 0 :: integer(),
           avg_queue_latency = 0.0 :: float(),
@@ -76,18 +76,11 @@ wrap_solr(Docs) ->
      <<"</add>">>,
      <<"</update>">>].
 
-wrap_cloudsearch(Docs) ->
-    [<<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>">>,
-     <<"<batch>">>,
-     Docs,
-     <<"</batch>">>].
-
 -spec wrap(iolist(), #chef_idx_batch_state{}) -> iolist().
 wrap(Docs, #chef_idx_batch_state{search_provider = solr}) ->
     wrap_solr(Docs);
-wrap(Docs, #chef_idx_batch_state{search_provider = cloudsearch}) ->
-    lager:warning("Not implemented yet."),
-    wrap_cloudsearch(Docs).
+wrap(Docs, #chef_idx_batch_state{search_provider = elasticsearch}) ->
+    Docs.
 
 -spec wrapper_size(#chef_idx_batch_state{}) -> non_neg_integer().
 wrapper_size(State) ->
@@ -114,7 +107,7 @@ init([]) ->
             {stop, list_to_binary([<<"chef_index batch_max_size is set to ">>, integer_to_binary(MaxSize),
                                    <<". Please set to non-negative value, or set search_queue_mode to something besides batch.">>])};
         false ->
-            SearchProvider = envy:get(chef_index, search_provider, solr, envy:one_of([solr, cloudsearch])),
+            SearchProvider = envy:get(chef_index, search_provider, solr, envy:one_of([solr, elasticsearch])),
             MaxWait = envy:get(chef_index, search_batch_max_wait, 10, non_neg_integer),
             WrapperSize = wrapper_size(#chef_idx_batch_state{search_provider=SearchProvider}),
             CurrentSize = 0,
@@ -140,6 +133,7 @@ flush(State = #chef_idx_batch_state{item_queue = []}) ->
     State;
 flush(State = #chef_idx_batch_state{item_queue = Queue,
                                     current_size = CurrentSize,
+                                    search_provider = Provider,
                                     wrapper_size = WrapperSize}) ->
     {PidsToReply, Timestamps, DocsToAdd} = lists:unzip3(Queue),
     Doc = wrap(DocsToAdd, State),
@@ -148,7 +142,7 @@ flush(State = #chef_idx_batch_state{item_queue = Queue,
       fun() ->
               lager:debug("Batch posting to solr ~p documents (~p bytes)", [length(DocsToAdd), CurrentSize+WrapperSize]),
               Now = os:timestamp(),
-              Res = chef_index_expand:post_to_solr(Doc),
+              Res = chef_index:update(Provider, Doc),
               Now1 = os:timestamp(),
               TotalDocs = length(Timestamps),
               {BeforeDiff, AfterDiff} =

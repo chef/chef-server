@@ -11,15 +11,15 @@
 search_test_() ->
     {foreach,
      fun() ->
-             meck:new([chef_solr, stats_hero])
+             meck:new([chef_index, stats_hero])
      end,
      fun(_) ->
-             meck:unload([chef_solr, stats_hero])
+             meck:unload([chef_index, stats_hero])
      end,
      [
       {"Catch exception and return",
        fun() ->
-               meck:expect(chef_solr, search,
+               meck:expect(chef_index, search,
                            fun(solr_query) ->
                                    erlang:error(any_error)
                            end
@@ -29,7 +29,7 @@ search_test_() ->
        end},
        {"Catch throw and return",
        fun() ->
-               meck:expect(chef_solr, search,
+               meck:expect(chef_index, search,
                            fun(solr_query) ->
                                    erlang:throw({other, any_error})
                            end
@@ -39,7 +39,7 @@ search_test_() ->
        end},
        {"Catch exit and return",
        fun() ->
-               meck:expect(chef_solr, search,
+               meck:expect(chef_index, search,
                            fun(solr_query) ->
                                    erlang:exit(any_error)
                            end
@@ -50,7 +50,7 @@ search_test_() ->
 
       {"Return result when no error",
        fun() ->
-               meck:expect(chef_solr, search,
+               meck:expect(chef_index, search,
                            fun(solr_query) ->
                                    result
                            end

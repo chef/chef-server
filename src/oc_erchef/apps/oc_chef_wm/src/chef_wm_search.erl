@@ -91,7 +91,7 @@ resource_exists(Req, #base_state{organization_guid = OrgGuid,
                                  resource_state = SearchState} = State) ->
     QueryWithoutGuid = SearchState#search_state.solr_query,
     try
-        Query = chef_solr:add_org_guid_to_query(QueryWithoutGuid, OrgGuid),
+        Query = chef_index:add_org_guid_to_query(QueryWithoutGuid, OrgGuid),
         SearchState1 = SearchState#search_state{solr_query = Query},
         {true, Req, State#base_state{organization_guid = OrgGuid,
                                      resource_state = SearchState1}}
@@ -110,6 +110,16 @@ resource_exists_message(org_not_found, Org) ->
                             <<"' does not exist.">>]),
     {[{<<"error">>, [Msg]}]}.
 
+handle_undefined_start(undefined, Req) ->
+    decode(wrq:get_qs_value("start", Req));
+handle_undefined_start(Start, _Req) ->
+    Start.
+
+decode(undefined) ->
+    0;
+decode(Val) ->
+    list_to_integer(http_uri:decode(Val)).
+
 to_json(Req, #base_state{chef_db_context = DbContext,
                          resource_state = SearchState,
                          organization_name = OrgName,
@@ -119,7 +129,8 @@ to_json(Req, #base_state{chef_db_context = DbContext,
     BatchSize = batch_size(),
     Query = SearchState#search_state.solr_query,
     case solr_query(Query, ReqId) of
-        {ok, Start, SolrNumFound, Ids} ->
+        {ok, Start0, SolrNumFound, Ids} ->
+            Start1 = handle_undefined_start(Start0, Req),
             IndexType = Query#chef_solr_query.index,
             Paths = SearchState#search_state.partial_paths,
             BulkGetFun = make_bulk_get_fun(DbContext, OrgName, IndexType, Paths, Req),
@@ -130,7 +141,7 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                              false -> Ids
                          end,
             {DbNumFound, Ans} = make_search_results(BulkGetFun, FilteredIds, BatchSize,
-                                                    Start, SolrNumFound),
+                                                    Start1, SolrNumFound),
             State1 = State#base_state{log_msg = search_log_msg(SolrNumFound,
                                                                solr_ids_length(Ids), DbNumFound)},
             case IndexType of
@@ -213,7 +224,7 @@ solr_query(Query, ReqId) ->
 
 solr_search(Query) ->
     try
-        chef_solr:search(Query)
+        chef_index:search(Query)
     catch
         Error:Reason ->
             {Error, Reason}
@@ -336,7 +347,7 @@ parse_item0({L}=Item) when is_list(L) ->
     Item.
 
 %% This helper function extracts the necessary params from the request and passes it to
-%% chef_solr:make_query_from_params to return the query.
+%% chef_index:make_query_from_params to return the query.
 make_query_from_params(Req) ->
     % TODO - sort this out
     % ObjType = chef_wm_util:extract_from_path(object_type, Req),
@@ -344,7 +355,7 @@ make_query_from_params(Req) ->
     QueryString = wrq:get_qs_value("q", Req),
     Start = wrq:get_qs_value("start", Req),
     Rows = wrq:get_qs_value("rows", Req),
-    chef_solr:make_query_from_params(ObjType, QueryString, Start, Rows).
+    chef_index:query_from_params(ObjType, QueryString, Start, Rows).
 
 extract_path(_Item, []) ->
     null;
@@ -442,7 +453,6 @@ remove_couchdb_keys([H|T], N) ->
     [H|remove_couchdb_keys(T, N)];
 remove_couchdb_keys([], _) ->
     [].
-
 
 safe_split(N, L) ->
     try

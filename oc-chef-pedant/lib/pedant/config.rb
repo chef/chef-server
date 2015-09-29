@@ -116,6 +116,10 @@ module Pedant
     # commits of Solr)
     maximum_search_time 65
 
+    # Default URL for to commit/refresh before a search
+    search_commit_url "/solr/update?commit=true"
+    search_url_fmt "/solr/select?fq=+X_CHEF_type_CHEF_X:%{type}&q=%{query}&wt=json"
+
     # Amout of time to sleep (in seconds) after performing a direct
     # Solr query (rather than via the Chef API).  This is used, e.g.,
     # following an explicit Solr commit.  If you are getting

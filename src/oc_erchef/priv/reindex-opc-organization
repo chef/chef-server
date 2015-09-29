@@ -95,7 +95,7 @@ validate_args([Command, _OrgName]) ->
               {OrgId::binary(), OrgName::binary()}) -> term().
 perform(drop, _Context, {OrgId, OrgName}) ->
     io:format("Removing all index entries for organization '~s'...~n", [OrgName]),
-    ok = rpc:call(?ERCHEF, chef_solr, delete_search_db, [OrgId]);
+    ok = rpc:call(?ERCHEF, chef_index, delete_search_db, [OrgId]);
 perform(reindex, Context, {_OrgId, OrgName}=OrgInfo) ->
     io:format("Sending all data for organization '~s' to be indexed again.  It may take some time before everything is available via search.~n", [OrgName]),
     ok = rpc:call(?ERCHEF, chef_reindex, reindex, [Context, OrgInfo]);

@@ -192,7 +192,7 @@
                 {search_queue_mode, <%= node['private_chef']['opscode-erchef']['search_queue_mode'] %>},
                 {search_batch_max_size, <%= node['private_chef']['opscode-erchef']['search_batch_max_size'] %>},
                 {search_batch_max_wait, <%= node['private_chef']['opscode-erchef']['search_batch_max_wait'] %>},
-                {solr_service, [{root_url, "http://<%= @helper.vip_for_uri('opscode-solr4') %>:<%= node['private_chef']['opscode-solr4']['port'] %>/solr"},
+                {solr_service, [{root_url, "<%= @helper.solr_url() %>"},
                                 {timeout, <%= @solr_timeout %>},
                                 {init_count, <%= @solr_http_init_count %>},
                                 {max_count, <%= @solr_http_max_count %>},
