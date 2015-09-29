@@ -6,7 +6,7 @@
          delete_pool/0
         ]).
 
--define(HEADERS, [{"Content-Type", "text/xml"}]).
+-define(HEADERS, [{"Content-Type", "application/xml"}]).
 
 request(Path, Method, Body) ->
     SolrConfig = envy:get(chef_index, solr_service, list),

@@ -130,7 +130,7 @@ search_test_() ->
                 sort = "X_CHEF_id_CHEF_X asc",
                 start = 0,
                 rows = 1000},
-              ?assertError(function_clause, chef_solr:search(Query))
+              ?assertError({badmatch, _X}, chef_solr:search(Query))
       end},
 
      {"parse non-empty solr result",
