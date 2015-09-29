@@ -86,7 +86,6 @@ wrap_cloudsearch(Docs) ->
 wrap(Docs, #chef_idx_batch_state{search_provider = solr}) ->
     wrap_solr(Docs);
 wrap(Docs, #chef_idx_batch_state{search_provider = cloudsearch}) ->
-    lager:warning("Not implemented yet."),
     wrap_cloudsearch(Docs).
 
 -spec wrapper_size(#chef_idx_batch_state{}) -> non_neg_integer().

@@ -18,6 +18,7 @@
 -record(chef_solr_query, {
           query_string :: string(),
           filter_query :: string(),
+          search_provider = solr :: 'solr' | 'cloudsearch',
           start :: integer(),
           rows :: integer(),
           sort :: string(),

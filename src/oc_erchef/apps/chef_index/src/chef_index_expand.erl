@@ -42,11 +42,9 @@
 -endif.
 
 -define(SEP, <<"_">>).
--define(KV_SEP, <<"__=__">>).
-
 -define(FIELD(Name, Value), [<<"<field name=\"">>, Name, <<"\">">>, Value, <<"</field>">>]).
-
 -define(XML_HEADER, <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>">>).
+
 -define(ADD_S, <<"<add>">>).
 -define(ADD_E, <<"</add>">>).
 -define(UPDATE_S, <<"<update>">>).
@@ -69,11 +67,55 @@
 
 %% A mapping of the metadata command JSON keys to metadata field names
 %% for XML.
--define(META_FIELDS, [{?K_ID, <<"X_CHEF_id_CHEF_X">>},
-                      {?K_DATABASE, <<"X_CHEF_database_CHEF_X">>}]).
-
 chef_object_type(Index) when is_binary(Index) -> {data_bag_item, Index};
 chef_object_type(Index) when is_atom(Index)   -> Index.
+
+%% Solr
+%%
+%% <?xml version="1.0" encoding="UTF-8"?>
+%% <update>
+%%   <add>
+%%     <doc>
+%%       <field name="X_CHEF_id_CHEF_X">a1</field>
+%%       <field name="X_CHEF_database_CHEF_X">chef_db1</field>
+%%       <field name="X_CHEF_type_CHEF_X">role</field>
+%%       <field name="content">X_CHEF_database_CHEF_X__=__chef_db1 X_CHEF_id_CHEF_X__=__a1 X_CHEF_type_CHEF_X__=__role key1__=__value1 key2__=__value2</field>
+%%     </doc>
+%%     <doc>
+%%       <field name="X_CHEF_id_CHEF_X">a2</field>
+%%       <field name="X_CHEF_database_CHEF_X">chef_db1</field>
+%%       <field name="X_CHEF_type_CHEF_X">role</field>
+%%       <field name="content">X_CHEF_database_CHEF_X__=__chef_db1 X_CHEF_id_CHEF_X__=__a2 X_CHEF_type_CHEF_X__=__role key1__=__value1 key2__=__value2</field>
+%%     </doc>
+%%   </add>
+%%   <delete>
+%%     <id>a3</id>
+%%   </delete>
+%%   <delete>
+%%     <id>a4</id>
+%%   </delete>
+%% </update>
+%%
+%% Cloudsearch
+%%
+%% <?xml version="1.0" encoding="UTF-8"?>
+%% <batch>
+%%   <add id="a1">
+%%     <field name="x_chef_id_chef_x">a1</field>
+%%     <field name="x_chef_database_chef_x">chef_db1</field>
+%%     <field name="x_chef_type_chef_x">role</field>
+%%     <field name="content">x_chef_database_chef_x__=__chef_db1 x_chef_id_chef_x__=__a1 x_chef_type_chef_x__=__role key1__=__value1 key2__=__value2</field>
+%%   </add>
+%%   <add id="a1">
+%%     <field name="x_chef_id_chef_x">a1</field>
+%%     <field name="x_chef_database_chef_x">chef_db1</field>
+%%     <field name="x_chef_type_chef_x">role</field>
+%%     <field name="content">x_chef_database_chef_x__=__chef_db1 x_chef_id_chef_x__=__a1 x_chef_type_chef_x__=__role key1__=__value1 key2__=__value2</field>
+%%   </add>
+%%   <delete id="a3" />
+%%   <delete id="a4" />
+%% </batch>
+%%
 
 %%
 %% Synchronous API
@@ -90,16 +132,36 @@ doc_for_index(Index, Id, OrgId, Ejson) ->
     Command = make_command(add, Index, Id, OrgId, Ejson),
     make_doc_for_add(Command, chef_object_type(Index)).
 
-doc_for_delete(Index, Id, OrgId) ->
-    Command = make_command(delete, Index, Id, OrgId, {[]}),
-    make_doc_for_del(Command).
+doc_for_delete(_Index, Id, _OrgId) ->
+    make_doc_for_del(chef_solr:search_provider(), Id).
 
 update_payload(ToAdd, ToDel) ->
+    update_payload(ToAdd, ToDel, chef_solr:search_provider()).
+
+update_payload(ToAdd, ToDel, SearchProvider) ->
     [?XML_HEADER,
-     ?UPDATE_S,
+     start_tag(SearchProvider),
      ToDel,
-     value_or_empty(ToAdd, [?ADD_S, ToAdd, ?ADD_E]),
-     ?UPDATE_E].
+     add_block(ToAdd, SearchProvider),
+     end_tag(SearchProvider)
+    ].
+
+start_tag(solr) ->
+    ?UPDATE_S;
+start_tag(cloudsearch) ->
+    <<"<batch>">>.
+
+end_tag(solr) ->
+    ?UPDATE_E;
+end_tag(cloudsearch) ->
+    <<"</batch>">>.
+
+add_block([], _) ->
+    [];
+add_block(ToAdd, solr) ->
+    [?ADD_S, ToAdd, ?ADD_E];
+add_block(ToAdd, cloudsearch) ->
+    ToAdd.
 
 %% @doc Send a single document to solr directly.
 send_item(Doc) ->
@@ -168,11 +230,6 @@ post_multi(Commands, Index) ->
             post_to_solr(Doc)
     end.
 
-value_or_empty([], _V) ->
-    [];
-value_or_empty([_|_], V) ->
-    V.
-
 %% @doc Given a command EJSON term as returned by {@link
 %% make_command/4}, flatten/expand and POST to Solr.
 -spec post_single(term(), atom() | binary()) -> ok | {error, {_, _}}.
@@ -205,7 +262,7 @@ post_to_solr(Doc) ->
     %% Note: we should try to enhance ibrowse to allow sending an
     %% iolist to avoid having to do iolist_to_binary here.
     DocBin = iolist_to_binary(Doc),
-    {ok, Code, _Head, Body} = chef_index_http:request("update", post, DocBin),
+    {ok, Code, _Head, Body} = chef_index_http:request(chef_solr:update_url(), post, DocBin),
     case Code of
         [$2|_Rest] ->
             ok;
@@ -215,25 +272,53 @@ post_to_solr(Doc) ->
 
 make_doc_for_del(Command) ->
     Payload = ej:get({?K_PAYLOAD}, Command),
+    Id = ej:get({?K_ID}, Payload),
+    make_doc_for_del(chef_solr:search_provider(), Id).
+
+make_doc_for_del(solr, Id) ->
     [<<"<delete><id>">>,
-     ej:get({?K_ID}, Payload),
-     <<"</id></delete>">>].
+     Id,
+     <<"</id></delete>">>];
+make_doc_for_del(cloudsearch, Id) ->
+    [<<"<delete id=\"">>,
+     Id,
+     <<"\" />">>].
 
 make_doc_for_add(Command, ObjType) ->
+    make_doc_for_add(Command, ObjType, chef_solr:search_provider()).
+
+make_doc_for_add(Command, ObjType, SearchProvider) ->
     Payload = ej:get({?K_PAYLOAD}, Command),
-    TypeField = ?FIELD(<<"X_CHEF_type_CHEF_X">>, get_object_type(ObjType)),
-    MetaFieldsPL =  [ {Key, ej:get({Key0}, Payload)} || {Key0, Key} <- ?META_FIELDS ] ++ [{<<"X_CHEF_type_CHEF_X">>, get_object_type(ObjType)}],
-    MetaFields = [?FIELD(Name, ej:get({Key}, Payload)) || {Key, Name} <- ?META_FIELDS ] ++ [TypeField],
-    [?DOC_S,
+    TypeField = ?FIELD(chef_solr:type_field(), get_object_type(ObjType)),
+    MetaFieldsPL =  [ {Key, ej:get({Key0}, Payload)} || {Key0, Key} <- meta_fields() ] ++ [{chef_solr:type_field(), get_object_type(ObjType)}],
+    MetaFields = [?FIELD(Name, ej:get({Key}, Payload)) || {Key, Name} <- meta_fields() ] ++ [TypeField],
+    Id = ej:get({<<"id">>}, Payload),
+    [doc_start(SearchProvider, Id),
      MetaFields,
      maybe_data_bag_field(ObjType),
      make_content(Payload, MetaFieldsPL),
-     ?DOC_E].
+     doc_end(SearchProvider)].
+
+meta_fields() ->
+    [{?K_ID, chef_solr:id_field()},
+     {?K_DATABASE, chef_solr:database_field()}].
 
 get_object_type({ObjectType, _}) ->
     get_object_type(ObjectType);
 get_object_type(ObjectType) ->
     list_to_binary(atom_to_list(ObjectType)).
+
+doc_start(solr, _Id) ->
+    ?DOC_S;
+doc_start(cloudsearch, Id) ->
+    [<<"<add id=\"">>,
+     Id,
+     <<"\">">>].
+
+doc_end(solr) ->
+    ?DOC_E;
+doc_end(cloudsearch) ->
+    <<"</add>">>.
 
 %% @doc If we have a `data_bag_item' object, return a Solr field
 %% `data_bag', otherwise empty list.
@@ -317,7 +402,10 @@ add_kv_pair([K|_]=Keys, Value, Acc) ->
 %% text escaping `K' and `V' and building an iolist with the
 %% appropriate separator.
 encode_pair(K, V) ->
-    [xml_text_escape(K), ?KV_SEP, xml_text_escape(V), <<" ">>].
+    [xml_text_escape(chef_solr:transform_data(K)),
+     chef_solr:kv_sep(),
+     xml_text_escape(chef_solr:transform_data(V)),
+     <<" ">>].
 
 %% @doc Return an iolist such that `Sep' is added between each element
 %% of `Keys'. Does not flatten.  Used to construct the flattened key

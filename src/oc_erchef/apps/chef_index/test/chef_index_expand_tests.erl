@@ -201,7 +201,7 @@ post_single_test_() ->
                           "key1__=__value1 key2__=__value2 </field>"
                           "</doc></add></update>">>,
                meck:expect(chef_index_http, request,
-                           fun("update", post, Doc) ->
+                           fun("/update", post, Doc) ->
                                    ?assertEqual(Expect, Doc),
                                    {ok, "200", [], []}
                            end),
@@ -216,7 +216,7 @@ post_single_test_() ->
                Expect = <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                           "<update><delete><id>abc123</id></delete></update>">>,
                meck:expect(chef_index_http, request,
-                           fun("update", post, Doc) ->
+                           fun("/update", post, Doc) ->
                                    ?assertEqual(Expect, Doc),
                                    {ok, "200", [], []}
                            end),
@@ -255,7 +255,7 @@ post_single_test_() ->
                           "</add>"
                           "</update>">>,
                meck:expect(chef_index_http, request,
-                           fun("update", post, Doc) ->
+                           fun("/update", post, Doc) ->
                                    ?assertEqual(Expect, Doc),
                                    {ok, "200", [], []}
                            end),
@@ -274,7 +274,7 @@ post_single_test_() ->
                Cmd = chef_index_expand:make_command(add, role, <<"abc123">>,
                                                     "dbdb1212", MinItem),
                meck:expect(chef_index_http, request,
-                           fun("update", post, _Doc) ->
+                           fun("/update", post, _Doc) ->
                                    {ok, "500", [], <<"oh no">>}
                            end),
                ?assertEqual({error, {"500", <<"oh no">>}}, chef_index_expand:post_single(Cmd, role))
@@ -300,7 +300,7 @@ post_multi_test_() ->
        fun() ->
                Expect = multi_update_xml_expect(),
                meck:expect(chef_index_http, request,
-                           fun("update", post, Doc) ->
+                           fun("/update", post, Doc) ->
                                    ?assertEqual(Expect, Doc),
                                    {ok, "200", [], []}
                            end),
@@ -317,7 +317,7 @@ post_multi_test_() ->
      ]}.
 
 
-api_test_() ->
+solr_api_test_() ->
     MinItem = {[{<<"key1">>, <<"value1">>},
                 {<<"key2">>, <<"value2">>}]},
     {foreach,
@@ -332,7 +332,7 @@ api_test_() ->
                 fun() ->
                         Expect = send_item_xml_expect(),
                         meck:expect(chef_index_http, request,
-                                    fun("update", post, Doc) ->
+                                    fun("/update", post, Doc) ->
                                             ?assertEqual(Expect, Doc),
                                             {ok, "200", [], []}
                                     end),
@@ -343,7 +343,7 @@ api_test_() ->
                 fun() ->
                         Expect = send_delete_xml_expect(),
                         meck:expect(chef_index_http, request,
-                                    fun("update", post, Doc) ->
+                                    fun("/update", post, Doc) ->
                                             ?assertEqual(Expect, Doc),
                                             {ok, "200", [], []}
                                     end),
@@ -354,6 +354,47 @@ api_test_() ->
               ]
      end]
     }.
+
+cloudsearch_api_test_() ->
+    MinItem = {[{<<"key1">>, <<"value1">>},
+                {<<"key2">>, <<"value2">>}]},
+    {foreach,
+     fun() ->
+             application:set_env(chef_index, search_provider, cloudsearch),
+             meck:new(chef_index_http, [])
+     end,
+     fun(_) ->
+             application:set_env(chef_index, search_provider, solr),
+             meck:unload()
+     end,
+     [fun(_) ->
+              [{"send_item",
+                fun() ->
+                        Expect = cs_send_item_xml_expect(),
+                        meck:expect(chef_index_http, request,
+                                    fun("/documents/batch", post, Doc) ->
+                                            ?assertEqual(Expect, Doc),
+                                            {ok, "200", [], []}
+                                    end),
+                        AddDoc = chef_index_expand:doc_for_index(role, <<"a1">>, <<"db1">>, MinItem),
+                        ?assertEqual(ok, chef_index_expand:send_item(AddDoc))
+                end},
+               {"send_delete",
+                fun() ->
+                        Expect = cs_send_delete_xml_expect(),
+                        meck:expect(chef_index_http, request,
+                                    fun("/documents/batch", post, Doc) ->
+                                            ?assertEqual(Expect, Doc),
+                                            {ok, "200", [], []}
+                                    end),
+                        DelDoc = chef_index_expand:doc_for_delete(role, <<"a5">>, <<"db3">>),
+                        ?assertEqual(ok, chef_index_expand:send_delete(DelDoc))
+                end
+               }
+              ]
+     end]
+    }.
+
 
 send_delete_xml_expect() ->
     <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
@@ -379,6 +420,27 @@ send_item_xml_expect() ->
       "</doc>"
       "</add>"
       "</update>">>.
+
+cs_send_delete_xml_expect() ->
+    <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+      "<batch>"
+      "<delete id=\"a5\" />"
+      "</batch>">>.
+
+cs_send_item_xml_expect() ->
+    <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+      "<batch>"
+      "<add id=\"a1\">"
+      "<field name=\"x_chef_id_chef_x\">a1</field>"
+      "<field name=\"x_chef_database_chef_x\">chef_db1</field>"
+      "<field name=\"x_chef_type_chef_x\">role</field>"
+      "<field name=\"content\">"
+      "key1__EQ__value1 key2__EQ__value2 "
+      "x_chef_database_chef_x__EQ__chef_db1 "
+      "x_chef_id_chef_x__EQ__a1 "
+      "x_chef_type_chef_x__EQ__role </field>"
+      "</add>"
+      "</batch>">>.
 
 multi_update_xml_expect() ->
     %% See http://wiki.apache.org/solr/UpdateXmlMessages
