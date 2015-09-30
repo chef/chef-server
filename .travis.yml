@@ -42,7 +42,6 @@ env:
   - COMPONENT=src/oc_erchef
   - COMPONENT=src/oc-id
   - COMPONENT=src/chef-mover
-  - COMPONENT=src/oc_bifrost
   - COMPONENT=src/bookshelf
 install:
   - luarocks install --local lpeg
