@@ -17,7 +17,7 @@ module DVM
     def loaded?
       File.directory? @project_dir
     end
-    def do_load
+    def do_load(ignore)
       # TODO we could actually add the standard clone-if-missing support
       say "This project is not loadable on its own. Instead use 'dvm load #{name} $subproject"
     end

@@ -1,12 +1,14 @@
 require "mixlib/shellout"
 module DVM
   class Project
-    attr_reader :name, :project, :config, :service, :project_dir, :path, :external
+    attr_reader :name, :project, :config, :service, :project_dir, :path, :external, :omnibus_project
     include DVM::Tools
     # TODO check required fields in config
     def initialize(project_name, config)
       @project = config['projects'][project_name]
       @external = @project['external'] || false
+      # We're not doing auto-checkout for now - so tell them they need to find a mising thing
+      @omnibus_project = @project['omnibus-project'] || "opscode"
       @name = project.has_key?('name') ? project['name'] : project_name
       if external
         @path = project['path'] || "external-deps/#{name}"
@@ -14,6 +16,9 @@ module DVM
         @path = project['path'] || "src/#{name}"
       end
       @project_dir = "/host/#{path}"
+      if (external and !File.exists?(@project_dir))
+        raise DVM::DVMArgumentError, "Please check out or symlink #{name} into chef-server/external-deps on your host before attempting to load it."
+      end
       @config = config
       @service = @project['service']
     end
