@@ -1,0 +1,20 @@
+%%-*- mode: erlang -*-
+{application, bifrost,
+ [{description, "Bifrost: Opscode Authorization API"},
+  {vsn, {cmd,"cat ../../VERSION | awk '{print $0}'"}},
+  {modules, []},
+  {registered, []},
+  {mod, {bifrost_app, []}},
+  {env, []},
+  {applications, [kernel,
+                  stdlib,
+                  lager,
+                  sasl,
+                  stats_hero,
+                  jiffy,
+                  envy,
+                  sqerl,
+                  opscoderl_wm,
+                  runtime_tools,
+                  tools
+                 ]}]}.
