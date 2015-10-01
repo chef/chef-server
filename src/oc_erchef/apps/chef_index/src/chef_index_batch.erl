@@ -143,7 +143,7 @@ flush(State = #chef_idx_batch_state{item_queue = Queue,
     {PidsToReply, Timestamps, DocsToAdd} = lists:unzip3(Queue),
     Doc = wrap(DocsToAdd, State),
     Self = self(),
-    spawn_link(
+    spawn(
       fun() ->
               lager:debug("Batch posting to solr ~p documents (~p bytes)", [length(DocsToAdd), CurrentSize+WrapperSize]),
               Now = os:timestamp(),
