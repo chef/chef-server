@@ -139,22 +139,22 @@ describe 'Search API endpoint', :search do
 
         it "finds nodes by policy_name" do
           search_url = request_url + "?q=policy_name:example-policy-name"
-          response = with_search_polling  { get(search_url, requestor) }
-
-          result = parse(response)
-
-          expect(result["total"]).to eq(1)
-          expect(result["rows"].first).to eq(node)
+          with_search_polling do
+            response = get(search_url, requestor)
+            result = parse(response)
+            expect(result["total"]).to eq(1)
+            expect(result["rows"].first).to eq(node)
+          end
         end
 
         it "finds nodes by policy_group" do
           search_url = request_url + "?q=policy_group:example-policy-group"
-          response = with_search_polling  { get(search_url, requestor) }
-
-          result = parse(response)
-
-          expect(result["total"]).to eq(1)
-          expect(result["rows"].first).to eq(node)
+          with_search_polling do
+            response = get(search_url, requestor)
+            result = parse(response)
+            expect(result["total"]).to eq(1)
+            expect(result["rows"].first).to eq(node)
+          end
         end
 
       end
