@@ -82,7 +82,8 @@ for i in /opt/{chef,$path}*/version-manifest.txt \
               /opt/$path/pc-version.txt \
               /etc/$path/$config_name \
               /etc/{chef,$path}*/*-running.json \
-              /etc/{chef,$path}*/*.rb \
+              /var/opt/$path*/etc/*-running.json \
+              /etc/{chef,$path,opscode-manage}*/*.rb \
               /var/opt/$path/rabbitmq/log/*.log \
               /var/log/syslog \
               /var/log/messages; do
