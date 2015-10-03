@@ -25,22 +25,20 @@
 %% @end
 -module(chef_index_expand).
 
--export([make_command/5,
-         post_multi/2,
-         post_single/2,
-         post_to_solr/1,
-         send_item/1,
+-export([send_item/1,
          send_delete/1,
          doc_for_index/4,
          doc_for_delete/3]).
-
--define(SERVER, ?MODULE).
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -compile([export_all]).
 -endif.
 
+-record(chef_idx_expand_doc, {type,
+                              id,
+                              database,
+                              item}).
 -define(SEP, <<"_">>).
 -define(FIELD(Name, Value), [<<"<field name=\"">>, Name, <<"\">">>, Value, <<"</field>">>]).
 -define(XML_HEADER, <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>">>).
@@ -51,71 +49,6 @@
 -define(UPDATE_E, <<"</update>">>).
 -define(DOC_S, <<"<doc>">>).
 -define(DOC_E, <<"</doc>">>).
-
-%% Keys expected in command JSON.
--define(K_ACTION, <<"action">>).
--define(K_PAYLOAD, <<"payload">>).
-
-%% Keys expected in payload JSON
--define(K_ITEM, <<"item">>).
--define(K_ID, <<"id">>).
--define(K_TYPE, <<"type">>).
--define(K_DATABASE, <<"database">>).
--define(K_ENQUEUED_AT, <<"enqueued_at">>).
--define(K_DATA_BAG_ITEM, <<"data_bag_item">>).
--define(K_DATA_BAG, <<"data_bag">>).
-
-%% A mapping of the metadata command JSON keys to metadata field names
-%% for XML.
-chef_object_type(Index) when is_binary(Index) -> {data_bag_item, Index};
-chef_object_type(Index) when is_atom(Index)   -> Index.
-
-%% Solr
-%%
-%% <?xml version="1.0" encoding="UTF-8"?>
-%% <update>
-%%   <add>
-%%     <doc>
-%%       <field name="X_CHEF_id_CHEF_X">a1</field>
-%%       <field name="X_CHEF_database_CHEF_X">chef_db1</field>
-%%       <field name="X_CHEF_type_CHEF_X">role</field>
-%%       <field name="content">X_CHEF_database_CHEF_X__=__chef_db1 X_CHEF_id_CHEF_X__=__a1 X_CHEF_type_CHEF_X__=__role key1__=__value1 key2__=__value2</field>
-%%     </doc>
-%%     <doc>
-%%       <field name="X_CHEF_id_CHEF_X">a2</field>
-%%       <field name="X_CHEF_database_CHEF_X">chef_db1</field>
-%%       <field name="X_CHEF_type_CHEF_X">role</field>
-%%       <field name="content">X_CHEF_database_CHEF_X__=__chef_db1 X_CHEF_id_CHEF_X__=__a2 X_CHEF_type_CHEF_X__=__role key1__=__value1 key2__=__value2</field>
-%%     </doc>
-%%   </add>
-%%   <delete>
-%%     <id>a3</id>
-%%   </delete>
-%%   <delete>
-%%     <id>a4</id>
-%%   </delete>
-%% </update>
-%%
-%% Cloudsearch
-%%
-%% <?xml version="1.0" encoding="UTF-8"?>
-%% <batch>
-%%   <add id="a1">
-%%     <field name="x_chef_id_chef_x">a1</field>
-%%     <field name="x_chef_database_chef_x">chef_db1</field>
-%%     <field name="x_chef_type_chef_x">role</field>
-%%     <field name="content">x_chef_database_chef_x__=__chef_db1 x_chef_id_chef_x__=__a1 x_chef_type_chef_x__=__role key1__=__value1 key2__=__value2</field>
-%%   </add>
-%%   <add id="a1">
-%%     <field name="x_chef_id_chef_x">a1</field>
-%%     <field name="x_chef_database_chef_x">chef_db1</field>
-%%     <field name="x_chef_type_chef_x">role</field>
-%%     <field name="content">x_chef_database_chef_x__=__chef_db1 x_chef_id_chef_x__=__a1 x_chef_type_chef_x__=__role key1__=__value1 key2__=__value2</field>
-%%   </add>
-%%   <delete id="a3" />
-%%   <delete id="a4" />
-%% </batch>
-%%
 
 %%
 %% Synchronous API
@@ -129,8 +62,7 @@ chef_object_type(Index) when is_atom(Index)   -> Index.
 %% addition. This document will need to be wrapped in
 %% <update><add>DOC_HERE</add></update> before it is sent to solr.
 doc_for_index(Index, Id, OrgId, Ejson) ->
-    Command = make_command(add, Index, Id, OrgId, Ejson),
-    make_doc_for_add(Command, chef_object_type(Index)).
+    make_doc_for_add(make_record(Index, Id, OrgId, Ejson)).
 
 doc_for_delete(_Index, Id, _OrgId) ->
     make_doc_for_del(chef_solr:search_provider(), Id).
@@ -165,49 +97,25 @@ add_block(ToAdd, cloudsearch) ->
 
 %% @doc Send a single document to solr directly.
 send_item(Doc) ->
-    post_to_solr(update_payload([Doc], [])).
+    chef_solr:update(update_payload([Doc], [])).
 
 send_delete(Doc) ->
-    post_to_solr(update_payload([], [Doc])).
+    chef_solr:update(update_payload([], [Doc])).
 
-%% --- start copy from chef_index (chef_index_queue) ---
-
-%% @doc Create a "command" EJSON term given Chef object attributes
-%% `Type', `ID', `DatabaseName', and `Item'. The returned EJSON has
-%% the same form as we use to place on the RabbitMQ queue for indexing
-%% and that chef-expander expects to find for processing. The
-%% `DatabaseName' can be either an OrgId or "chef_1deadbeef". The
-%% `Item' should be the EJSON representation for the object
-%% appropriate for indexing. In particular, this means a deep merged
-%% structure for node objects.
+%% @doc Create a chef_idx_expand_doc given Chef object attributes
+%% `Type', `ID', `DatabaseName', and `Item'.
 %%
-%% The code here is largely copied from the `chef_index' repo and the
-%% `chef_index_queue' module, but isn't tied to rabbitmq client
-%% libraries or actual queue publishing.
--spec make_command(Action :: add | delete,
-                   Type :: binary() | atom(),
+-spec make_record(Type :: binary() | atom(),
                    ID :: binary(),
                    DatabaseName :: binary() | string(),
-                   Item :: term()) -> term().   % both term() are EJSON
-make_command(Action, Type, ID, DatabaseName, Item) ->
-  package_for_set(to_bin(Action), to_bin(Type), ID, normalize_db_name(DatabaseName), Item).
-
-package_for_set(Action, Type, ID, DatabaseName, Item) ->
-  InnerEnvelope = inner_envelope(Type, ID, DatabaseName, Item),
-  {[{<<"action">>, Action},
-    {<<"payload">>, InnerEnvelope}]}.
-
-inner_envelope(Type, ID, DatabaseName, Item) ->
-  {[{<<"type">>, Type},
-    {<<"id">>, ID},
-    {<<"database">>, DatabaseName},
-    {<<"item">>, Item}, %% DEEP MERGED NODE
-    {<<"enqueued_at">>, unix_time()}
-  ]}.
-
-unix_time() ->
-  {MS, S, _US} = os:timestamp(),
-  (1000000 * MS) + S.
+                   Item :: term()) -> #chef_idx_expand_doc{}.   % both term() are EJSON
+make_record(Type, ID, DatabaseName, Item) ->
+    #chef_idx_expand_doc{
+       type = Type,
+       id = ID,
+       database = normalize_db_name(DatabaseName),
+       item = Item
+      }.
 
 normalize_db_name(S) when is_list(S) ->
     normalize_db_name(iolist_to_binary(S));
@@ -215,65 +123,6 @@ normalize_db_name(<<"chef_", _/binary>>=Name) ->
     Name;
 normalize_db_name(OrgId) ->
     <<"chef_", OrgId/binary>>.
-%% --- end copy from chef_index ---
-
-%% @doc Given a list of command EJSON terms, as returned by {@link
-%% make_command/4}, perform the appropriate flatten/expand operation
-%% and POST the result to Solr as a single update.
--spec post_multi(list(), atom() | binary()) -> ok | {error, {_, _}}.
-post_multi(Commands, Index) ->
-    case handle_commands(Commands, chef_object_type(Index)) of
-        {[], []} ->
-            ok;
-        {ToAdd, ToDel} ->
-            Doc = update_payload(ToAdd, ToDel),
-            post_to_solr(Doc)
-    end.
-
-%% @doc Given a command EJSON term as returned by {@link
-%% make_command/4}, flatten/expand and POST to Solr.
--spec post_single(term(), atom() | binary()) -> ok | {error, {_, _}}.
-post_single(Command, Index) ->
-    post_multi([Command], Index).
-
-%% @doc Return tuple of `{ToAdd, ToDel}' where `ToAdd' and `ToDel' are
-%% iolists of XML data appropriate for including in an
-%% `<update>...</update>' doc and POSTing to Solr.
--spec handle_commands(list(), atom() | {data_bag_item, binary}) -> {list(), list()}.
-handle_commands(Commands, Index) ->
-    lists:foldl(fun(C, {Adds, Deletes}) ->
-                        case ej:get({?K_ACTION}, C) of
-                            <<"add">> ->
-                                {[make_doc_for_add(C, Index) | Adds], Deletes};
-                            <<"delete">> ->
-                                {Adds, [make_doc_for_del(C) | Deletes]};
-                            _ ->
-                                {Adds, Deletes}
-                        end
-                end, {[], []}, Commands).
-
-%% @doc Post iolist `Doc' to Solr's `/update' endpoint at
-%% `SolrUrl'.
-%%
-%% The atom `ok' is returned if Solr responds with a 2xx
-%% status code. Otherwise, an error tuple is returned.
--spec post_to_solr(iolist()) -> ok | {error, {_, _}}.
-post_to_solr(Doc) ->
-    %% Note: we should try to enhance ibrowse to allow sending an
-    %% iolist to avoid having to do iolist_to_binary here.
-    DocBin = iolist_to_binary(Doc),
-    {ok, Code, _Head, Body} = chef_index_http:request(chef_solr:update_url(), post, DocBin),
-    case Code of
-        [$2|_Rest] ->
-            ok;
-        _ ->
-            {error, {Code, Body}}
-    end.
-
-make_doc_for_del(Command) ->
-    Payload = ej:get({?K_PAYLOAD}, Command),
-    Id = ej:get({?K_ID}, Payload),
-    make_doc_for_del(chef_solr:search_provider(), Id).
 
 make_doc_for_del(solr, Id) ->
     [<<"<delete><id>">>,
@@ -284,24 +133,23 @@ make_doc_for_del(cloudsearch, Id) ->
      Id,
      <<"\" />">>].
 
-make_doc_for_add(Command, ObjType) ->
-    make_doc_for_add(Command, ObjType, chef_solr:search_provider()).
+make_doc_for_add(Command) ->
+    make_doc_for_add(Command, chef_solr:search_provider()).
 
-make_doc_for_add(Command, ObjType, SearchProvider) ->
-    Payload = ej:get({?K_PAYLOAD}, Command),
-    TypeField = ?FIELD(chef_solr:type_field(), get_object_type(ObjType)),
-    MetaFieldsPL =  [ {Key, ej:get({Key0}, Payload)} || {Key0, Key} <- meta_fields() ] ++ [{chef_solr:type_field(), get_object_type(ObjType)}],
-    MetaFields = [?FIELD(Name, ej:get({Key}, Payload)) || {Key, Name} <- meta_fields() ] ++ [TypeField],
-    Id = ej:get({<<"id">>}, Payload),
+make_doc_for_add(Command = #chef_idx_expand_doc{id = Id, type=Type},
+                 SearchProvider) ->
+    MetaFieldsPL = meta_fields(Command),
+    MetaFields = [ ?FIELD(Name, Value) || {Name, Value} <- MetaFieldsPL ],
     [doc_start(SearchProvider, Id),
      MetaFields,
-     maybe_data_bag_field(ObjType),
-     make_content(Payload, MetaFieldsPL),
+     maybe_data_bag_field(Type),
+     make_content(Command, MetaFieldsPL),
      doc_end(SearchProvider)].
 
-meta_fields() ->
-    [{?K_ID, chef_solr:id_field()},
-     {?K_DATABASE, chef_solr:database_field()}].
+meta_fields(#chef_idx_expand_doc{id = Id, database = Database, type=Type}) ->
+    [{chef_solr:id_field(), Id},
+     {chef_solr:database_field(), Database},
+     {chef_solr:type_field(), get_object_type(Type)}].
 
 get_object_type({ObjectType, _}) ->
     get_object_type(ObjectType);
@@ -330,10 +178,9 @@ maybe_data_bag_field(_) ->
 
 %% @doc Extract the Chef object content, flatten/expand, and return an
 %% iolist of the `content' field.
-make_content(Payload, MetaFieldsPL) ->
+make_content(#chef_idx_expand_doc{item={Item0}}, MetaFieldsPL) ->
     %% The Ruby code in chef-expander adds the database name, id, and
     %% type as fields. So we do the same.
-    {Item0} = ej:get({?K_ITEM}, Payload),
     Item = {MetaFieldsPL ++ Item0},
     ?FIELD(<<"content">>, flatten(Item)).
 
@@ -442,12 +289,3 @@ xml_text_escape1(BinStr) when is_binary(BinStr) ->
 
 xml_text_escape1(BinList) when is_list(BinList) ->
     [ xml_text_escape1(B) || B <- BinList ].
-
-to_bin({_, B}) ->
-    to_bin(B);
-to_bin(B) when is_binary(B) ->
-    B;
-to_bin(S) when is_list(S) ->
-    iolist_to_binary(S);
-to_bin(A) when is_atom(A) ->
-    atom_to_binary(A, utf8).
