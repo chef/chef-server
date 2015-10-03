@@ -22,12 +22,12 @@ chef_index_batch_test_() ->
     {foreach,
      fun() ->
              application:set_env(chef_index, search_batch_max_wait, 10000000),
-             meck:new(chef_index_expand),
+             meck:new(chef_solr),
              {ok, Pid} = chef_index_batch:start_link(),
              Pid
      end,
      fun(_Pid) ->
-             meck:unload(chef_index_expand),
+             meck:unload(chef_solr),
              stop_server()
      end,
      [{"current_size+wrapper_size is the actual size posted to solr",
@@ -36,7 +36,7 @@ chef_index_batch_test_() ->
                State = chef_index_batch:status(),
                CurrentSize = maps:get(current_size, State),
                WrapperSize = maps:get(wrapper_size, State),
-               meck:expect(chef_index_expand, post_to_solr,
+               meck:expect(chef_solr, update,
                            fun(Payload) ->
                                    ExpectedSize = byte_size(iolist_to_binary(Payload)),
                                    ?assertEqual(CurrentSize+WrapperSize, ExpectedSize),
@@ -47,7 +47,7 @@ chef_index_batch_test_() ->
        end},
       {"chef_index_batch:stats returns a proplist of statistics",
        fun() ->
-               meck:expect(chef_index_expand, post_to_solr, fun(_Payload) -> ok end),
+               meck:expect(chef_solr, update, fun(_Payload) -> ok end),
                add_item(<<"abcdefg">>),
                chef_index_batch:flush(),
                wait_for_res(),
@@ -59,7 +59,7 @@ chef_index_batch_test_() ->
        end},
       {"chef_index_batch flushes an added item automatically",
        fun() ->
-               meck:expect(chef_index_expand, post_to_solr, fun(_Payload) -> ok end),
+               meck:expect(chef_solr, update, fun(_Payload) -> ok end),
                application:set_env(chef_index, search_batch_max_wait, 10),
                restart_server(),
                add_item(<<"abcdefg">>),
@@ -68,7 +68,7 @@ chef_index_batch_test_() ->
       },
       {"chef_index_batch flushes when current_size+wrapper_size >= max_size",
        fun() ->
-               meck:expect(chef_index_expand, post_to_solr, fun(_Payload) -> ok end),
+               meck:expect(chef_solr, update, fun(_Payload) -> ok end),
                application:set_env(chef_index, search_batch_max_size, 70),
                restart_server(),
                add_item(<<"abcd">>), % The wrapper size is 66

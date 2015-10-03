@@ -192,6 +192,8 @@ delete_search_db_by_type(OrgId, Type) ->
 %% Body is really a string(), but Dialyzer can only determine it is a list of bytes due to
 %% the implementation of search_db_from_orgid/1
 -spec update(Body :: [byte(),...]) -> ok | {error, term()}.
+update(Body) when is_list(Body) ->
+    update(iolist_to_binary(Body));
 update(Body) ->
     try
         %% FIXME: solr will barf on doubled '/'s so SolrUrl must not end with a trailing slash
