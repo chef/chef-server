@@ -24,7 +24,7 @@ fi
 if [[ $type == 'CS' ]];
 then
     path='opscode'
-    ctl_cmd='chef-server-ctl'
+    ctl_cmd='private-chef-ctl'
     config_name='*chef*.rb'
     ha=$(egrep -qs 'topology[[:space:]]+.*ha' /etc/$path/$config_name)$?
 
@@ -36,7 +36,7 @@ then
 elif [[ $type == 'OSC' ]];
 then
     path='chef-server'
-    ctl_cmd='/opt/chef-server/bin/chef-server-ctl'
+    ctl_cmd='chef-server-ctl'
     config_name='chef-server.rb'
 
     if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
