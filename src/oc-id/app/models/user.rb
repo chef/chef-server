@@ -126,6 +126,14 @@ class User
 
     def find(username)
       begin
+        if (username.include?('@'))
+          users = self.new.chef.get(
+            "users?#{{ email: username }.to_query}"
+          )
+          if (users.length > 0)
+            username = users.first[0]
+          end
+        end
         new(username: username).get unless username.nil?
       rescue Net::HTTPServerException
 
