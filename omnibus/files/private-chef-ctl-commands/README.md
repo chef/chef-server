@@ -4,7 +4,7 @@ This folder contains the additional commands that are added to chef-server-ctl f
 
 #### Testing
 
-To run the unit tests for these commands, simply `cd` back to the base `opscode-omnibus` directory, then:
+To run the unit tests for these commands, simply `cd` back to the base `chef-server` directory, then:
 
 ```
 bundle install --binstubs
