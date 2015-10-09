@@ -50,7 +50,7 @@
           %% number of messages per second allowed to come from
           %% error_logger.  This is the same as used by
           %% opscode-chef-mover, FWIW.
-          {error_logger_hwm, 1000}
+          {error_logger_hwm, <%= @log_rotation['max_messages_per_second'] %>}
         ]},
  {oc_chef_wm, [
               {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
