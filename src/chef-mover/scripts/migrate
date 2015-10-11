@@ -41,6 +41,7 @@
 %% the script will exit with exit code 1. Otherwise it will exit
 %% with exit code0, including if there are no orgs to migrate.
 
+M/
 
 
 -define(SELF, 'migrate-script@127.0.0.1').

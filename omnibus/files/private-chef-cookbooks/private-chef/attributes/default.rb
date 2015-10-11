@@ -198,6 +198,7 @@ default['private_chef']['opscode-erchef']['sql_user'] = "opscode_chef"
 default['private_chef']['opscode-erchef']['sql_password'] = "snakepliskin"
 default['private_chef']['opscode-erchef']['sql_ro_user'] = "opscode_chef_ro"
 default['private_chef']['opscode-erchef']['sql_ro_password'] = "shmunzeltazzen"
+
 # Pool configuration for postgresql connections
 #
 # db_pool_size - the number of pgsql connections in the pool

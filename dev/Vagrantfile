@@ -7,7 +7,7 @@ CS_VM_ADDRESS="192.168.33.100"
 DB_VM_ADDRESS="192.168.33.150"
 DB_SUPERUSER="bofh"
 DB_SUPERPASS="i1uvd3v0ps"
-
+CS_VM_2_ADDRESS="192.168.33.101"
 
 Vagrant.configure("2") do |config|
   attributes = load_settings
@@ -24,18 +24,35 @@ Vagrant.configure("2") do |config|
   config.vm.define("chef-server", primary: true) do |c|
     define_chef_server(c, attributes)
   end
+  config.vm.define("chef-server-node") do |c|
+    define_chef_server(c, attributes, true)
+  end
 end
 
 
-def define_chef_server(config, attributes)
+def define_chef_server(config, attributes, secondary = false)
+  # Ugh come back to this - don'tprompt twice!
   provisioning, installer, installer_path = prepare()
-  config.vm.hostname = "api.chef-server.dev"
-  config.vm.network "private_network", ip: CS_VM_ADDRESS
+
+  if secondary
+    ip = CS_VM_2_ADDRESS
+    host = "node.chef-server.dev"
+    mem = 2048
+    cpus = 2
+  else
+    ip = CS_VM_ADDRESS
+    host = "api.chef-server.dev"
+    mem = attributes["vm"]["memory"]
+    cpus = attributes["vm"]["cpus"]
+  end
+
+  config.vm.hostname = host
+  config.vm.network "private_network", ip: ip
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id,
-                  "--name", "chef-server",
-                  "--memory", attributes["vm"]["memory"],
-                  "--cpus", attributes["vm"]["cpus"],
+                  "--name", host,
+                  "--memory", mem,
+                  "--cpus", cpus,
                   "--usb", "off",
                   "--usbehci", "off"
     ]
@@ -45,9 +62,11 @@ def define_chef_server(config, attributes)
     json = {
       "packages" => attributes["vm"]["packages"],
       "tz" => host_timezone,
-      "omnibus-autoload" => attributes["vm"]["omnibus-autoload"]
+      "omnibus-autoload" => attributes["vm"]["omnibus-autoload"],
+      "dvm" => {}
     }.merge attributes["vm"]["node-attributes"]
 
+    json['dvm']['no-reconfigure'] = true if secondary
     if attributes["vm"]["postgresql"]["start"] and attributes["vm"]["postgresql"]["use-external"]
       # TODO make this stuff common - we have these values in 2-3 places now...
       pg = { "postgresql['external']" => true,
@@ -75,7 +94,8 @@ def define_chef_server(config, attributes)
       chef.binary_path = "/opt/opscode/embedded/bin"
       chef.node_name = config.vm.hostname
       chef.cookbooks_path = "cookbooks"
-      chef.add_recipe("provisioning::chef-server")
+      chef.add_recipe("provisioning::default")
+      chef.add_recipe("provisioning::chef-server") unless secondary
       chef.add_recipe("dev::dvm")
       chef.add_recipe("dev::system")
       chef.add_recipe("dev::user-env")
