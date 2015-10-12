@@ -23,7 +23,7 @@ template "/etc/profile.d/omnibus-embedded.sh" do
   source "omnibus-embedded.sh.erb"
   owner "root"
   user "root"
-  mode 0600
+  mode 0644
 end
 
 template "/etc/sudoers" do
