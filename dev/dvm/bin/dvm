@@ -1,6 +1,6 @@
 #!/opt/opscode/embedded/bin/ruby
 
-BASE_PATH="/vagrant/dvm/lib/dvm"
+BASE_PATH="dvm"
 require "#{BASE_PATH}"
 
 begin
