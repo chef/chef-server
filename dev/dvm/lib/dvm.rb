@@ -1,4 +1,4 @@
-require "#{BASE_PATH}/tools"
-require "#{BASE_PATH}/project"
-require "#{BASE_PATH}/application"
-require "#{BASE_PATH}/populate"
+require_relative "dvm/tools"
+require_relative "dvm/project"
+require_relative "dvm/application"
+require_relative "dvm/populate"

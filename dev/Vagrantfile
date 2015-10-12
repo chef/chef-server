@@ -11,16 +11,22 @@ DB_SUPERPASS="i1uvd3v0ps"
 
 Vagrant.configure("2") do |config|
   attributes = load_settings
+
   # Use the official Ubuntu 14.04 box
   # Vagrant will auto resolve the url to download from Atlas
   config.vm.box = "ubuntu/trusty64"
   config.ssh.forward_agent = true
 
-  if attributes['vm']['postgresql']['start']
-    config.vm.define("database") do |c|
-      define_db_server(c, attributes)
+  if attributes['vm'].has_key? 'postgresql'
+    if attributes['vm']['postgresql']['start']
+      config.vm.define("database") do |c|
+        define_db_server(c, attributes)
+      end
     end
+  else
+    attributes['vm']['postgresql'] = nil
   end
+
   config.vm.define("chef-server", primary: true) do |c|
     define_chef_server(c, attributes)
   end
@@ -75,12 +81,14 @@ def define_chef_server(config, attributes)
       chef.node_name = config.vm.hostname
       chef.cookbooks_path = "cookbooks"
       chef.add_recipe("provisioning::chef-server")
-      chef.add_recipe("dev::dvm")
       chef.add_recipe("dev::system")
       chef.add_recipe("dev::user-env")
-      chef.add_recipe("dev::dvm-autoload")
+      chef.add_recipe("dev::dvm")
       chef.json = json || {}
     end
+    # Makes more sense here than in a one-off line in the dvm recipe, which
+    # has no direct connection...
+    config.vm.provision "shell", inline: "chef-server-ctl reconfigure"
   end
 end
 

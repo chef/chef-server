@@ -10,8 +10,7 @@ end
 file "/var/chef/cache/apt-update-done" do
   action :create
 end
-package "build-essential"
-package "git"
+package %w{build-essential git}
 
 
 template "/etc/hosts" do
