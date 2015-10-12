@@ -153,6 +153,8 @@ meta_fields(#chef_idx_expand_doc{id = Id, database = Database, type=Type}) ->
 
 get_object_type({ObjectType, _}) ->
     get_object_type(ObjectType);
+get_object_type(ObjectType) when is_binary(ObjectType) ->
+    <<"data_bag_item">>;
 get_object_type(ObjectType) ->
     list_to_binary(atom_to_list(ObjectType)).
 
@@ -170,8 +172,7 @@ doc_end(cloudsearch) ->
 
 %% @doc If we have a `data_bag_item' object, return a Solr field
 %% `data_bag', otherwise empty list.
-
-maybe_data_bag_field({_, DataBagName}) ->
+maybe_data_bag_field(DataBagName) when is_binary(DataBagName) ->
     ?FIELD(<<"data_bag">>, xml_text_escape(DataBagName));
 maybe_data_bag_field(_) ->
     [].
@@ -249,9 +250,9 @@ add_kv_pair([K|_]=Keys, Value, Acc) ->
 %% text escaping `K' and `V' and building an iolist with the
 %% appropriate separator.
 encode_pair(K, V) ->
-    [xml_text_escape(chef_solr:transform_data(K)),
+    [xml_text_escape(chef_solr:transform_data(iolist_to_binary(K))),
      chef_solr:kv_sep(),
-     xml_text_escape(chef_solr:transform_data(V)),
+     xml_text_escape(chef_solr:transform_data(iolist_to_binary(V))),
      <<" ">>].
 
 %% @doc Return an iolist such that `Sep' is added between each element

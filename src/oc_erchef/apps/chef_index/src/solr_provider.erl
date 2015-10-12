@@ -13,8 +13,11 @@
          make_standard_fq/1,
          make_data_bag_fq/1,
          search_url_fmt/0,
-         transform_query/1,
-         %% Document Building Helpers
+         transform_query_all/1,
+         transform_query_safe/1,
+         transform_query_term/1,
+         transform_query_phrase/1,
+          %% Document Building Helpers
          transform_data/1,
          %% Response Handling Functions
          handle_successful_search/1,
@@ -69,7 +72,16 @@ make_data_bag_fq(ObjType) ->
 add_org_guid_to_fq(OrgGuid, FilterQuery) ->
     "+" ++ search_db_from_orgid(OrgGuid) ++ " " ++ FilterQuery.
 
-transform_query(Query) ->
+transform_query_all(Query) ->
+    Query.
+
+transform_query_safe(Query) ->
+    Query.
+
+transform_query_term(Query) ->
+    Query.
+
+transform_query_phrase(Query) ->
     Query.
 
 transform_data(Data) ->
