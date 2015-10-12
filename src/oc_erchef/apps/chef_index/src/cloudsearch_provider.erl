@@ -13,7 +13,10 @@
          make_standard_fq/1,
          make_data_bag_fq/1,
          search_url_fmt/0,
-         transform_query/1,
+         transform_query_all/1,
+         transform_query_safe/1,
+         transform_query_term/1,
+         transform_query_phrase/1,
          %% Document Building Helpers
          transform_data/1,
          %% Response Handling Functions
@@ -75,10 +78,19 @@ add_org_guid_to_fq(OrgGuid, FilterQuery) ->
       FilterQuery).
 
 transform_data(Data) ->
-    replace_specials(Data).
+    cs_escape:escape(Data).
 
-transform_query(Query) ->
-    substitute_sep(Query).
+transform_query_all(Data) ->
+    cs_escape:escape(Data).
+
+transform_query_safe(Data) ->
+    cs_escape:escape_safe(Data).
+
+transform_query_term(Data) ->
+    cs_escape:escape_term_safe(Data).
+
+transform_query_phrase(Data) ->
+    cs_escape:escape_phrase_safe(Data).
 
 assert_org_id_filter(FieldQuery) ->
     Start = "(and (term field=" ++ binary_to_list(database_field()) ++ " 'chef_",
@@ -110,17 +122,3 @@ sq_and(First, Second) ->
 
 sq_quote(Value) ->
     "'" ++ Value ++ "'".
-
-replace_specials(Item) ->
-    replace_equal(Item).
-
-replace_equal(Item) ->
-    New = re:replace(Item, "=", "__EQ__", [{return, binary}, global]),
-    replace_dash(New).
-
-replace_dash(Item) ->
-    re:replace(Item, "-", "__DASH__", [{return, binary}, global]).
-
-substitute_sep(Query) ->
-    New = re:replace(Query, "__=__", "__EQ__", [{return, binary}, global]),
-    replace_specials(New).

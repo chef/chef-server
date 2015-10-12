@@ -34,6 +34,10 @@
          %% Query Building
          add_org_guid_to_query/2,
          make_query_from_params/4,
+         transform_query_all/1,
+         transform_query_safe/1,
+         transform_query_term/1,
+         transform_query_phrase/1,
          %% Document Buidling
          transform_data/1,
          %% Operations
@@ -286,12 +290,24 @@ check_query(RawQuery) ->
             transform_query(http_uri:decode(Query))
     end.
 
+transform_query_all(Data) ->
+    ?PROVIDER_FUNC(transform_query_all, [Data]).
+
+transform_query_safe(Data) ->
+    ?PROVIDER_FUNC(transform_query_safe, [Data]).
+
+transform_query_term(Data) ->
+    ?PROVIDER_FUNC(transform_query_term, [Data]).
+
+transform_query_phrase(Data) ->
+    ?PROVIDER_FUNC(transform_query_phrase, [Data]).
+
 transform_query(RawQuery) when is_list(RawQuery) ->
     transform_query(list_to_binary(RawQuery));
 transform_query(RawQuery) ->
     case chef_lucene:parse(RawQuery) of
         Query when is_binary(Query) ->
-            binary_to_list(?PROVIDER_FUNC(transform_query, [Query]));
+            binary_to_list(Query);
         _ ->
             throw({bad_query, RawQuery})
     end.

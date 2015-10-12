@@ -258,7 +258,7 @@ doc_construction_tests_() ->
 
 solr_api_test_() ->
     MinItem = {[{<<"key1">>, <<"value1">>},
-                {<<"key2">>, <<"value2">>}]},
+                {<<"key2">>, <<"value-2">>}]},
     {foreach,
      fun() ->
              meck:new(chef_index_http, [])
@@ -296,7 +296,7 @@ solr_api_test_() ->
 
 cloudsearch_api_test_() ->
     MinItem = {[{<<"key1">>, <<"value1">>},
-                {<<"key2">>, <<"value2">>}]},
+                {<<"key2">>, <<"value-2">>}]},
     {foreach,
      fun() ->
              application:set_env(chef_index, search_provider, cloudsearch),
@@ -354,7 +354,7 @@ send_item_xml_expect() ->
       "X_CHEF_database_CHEF_X__=__chef_db1 "
       "X_CHEF_id_CHEF_X__=__a1 "
       "X_CHEF_type_CHEF_X__=__role "
-      "key1__=__value1 key2__=__value2 </field>"
+      "key1__=__value1 key2__=__value-2 </field>"
       "</doc>"
       "</add>"
       "</update>">>.
@@ -373,7 +373,7 @@ cs_send_item_xml_expect() ->
       "<field name=\"x_chef_database_chef_x\">chef_db1</field>"
       "<field name=\"x_chef_type_chef_x\">role</field>"
       "<field name=\"content\">"
-      "key1__EQ__value1 key2__EQ__value2 "
+      "key1__EQ__value1 key2__EQ__value__DS__2 "
       "x_chef_database_chef_x__EQ__chef_db1 "
       "x_chef_id_chef_x__EQ__a1 "
       "x_chef_type_chef_x__EQ__role </field>"
