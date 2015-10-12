@@ -1,6 +1,7 @@
 #!/opt/opscode/embedded/bin/ruby
 
-require "dvm"
+BASE_PATH="/vagrant/dvm/lib/dvm"
+require "#{BASE_PATH}"
 
 begin
   raise DVM::DVMArgumentError, "become root first via sudo -i"  unless Process.uid == 0
