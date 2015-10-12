@@ -2,7 +2,7 @@
 # omnibus bundle.
 require "thor"
 require "highline/import"
-require "deep_merge"
+require "chef/mixin/deep_merge"
 require "yaml"
 
 module DVM
