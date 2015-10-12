@@ -48,3 +48,8 @@ template "/etc/motd" do
   mode 0644
 end
 
+# It seems that we're getting an ssh configured to look for
+execute "generate ed25519 ssh host key" do
+  command "dpkg-reconfigure openssh-server"
+  not_if { File.exist?("/etc/ssh/ssh_host_ed25519_key") }
+end
