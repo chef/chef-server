@@ -44,6 +44,14 @@ class OmnibusHelper
     normalize_host(node['private_chef'][service]['vip'])
   end
 
+  def solr_url()
+    if node['private_chef']['opscode-solr4']['external_url']
+      node['private_chef']['opscode-solr4']['external_url']
+    else
+      "http://#{vip_for_uri('opscode-solr4')}:#{node['private_chef']['opscode-solr4']['port']}/solr"
+    end
+  end
+
   def db_connection_uri
     db_protocol = "postgres"
     db_user     = node['private_chef']['opscode-erchef']['sql_user']
@@ -163,4 +171,3 @@ class OmnibusHelper
     end
   end
 end
-
