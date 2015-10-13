@@ -1,6 +1,8 @@
 Defaults    env_keep+=SSH_AUTH_SOCK
-
+Defaults    env_keep+=RUBYLIB
+Defaults    env_keep+=DEVVM
+Defaults    env_keep+=USE_SYSTEM_GECODE
+Defaults    secure_path+=/opt/opscode/embedded/bin:/opt/opscode/bin:/opt/opscode/embedded/jre/bin:/vagrant/dvm:/usr/local/sbin/:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 opscode ALL=(ALL:ALL) ALL
 root ALL=(ALL:ALL) ALL
 vagrant ALL=(ALL) NOPASSWD:ALL
-

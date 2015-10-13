@@ -20,16 +20,10 @@ module DVM
       end
 
       @project_dir = "/host/#{path}"
-      warn_if_not_linked
       @config = config
       @service = @project['service']
     end
 
-    def warn_if_not_linked
-      if (external and !File.exists?(project_dir))
-        say(HighLine.color("Please check out or symlink #{name} into chef-server/external-deps on your host before attempting to load it.", :yellow))
-      end
-    end
 
     def start(args, detach)
       raise DVM::DVMArgumentError, "Start not supported for #{name}"
@@ -54,6 +48,9 @@ module DVM
     end
 
     def load(build)
+      if (external and !File.exists?(project_dir))
+        say(HighLine.color("Please check out or symlink #{name} into chef-server/external-deps on your host before attempting to load it.", :yellow))
+      end
       do_load(build)
     end
 

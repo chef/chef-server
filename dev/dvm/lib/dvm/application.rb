@@ -2,9 +2,8 @@
 # omnibus bundle.
 require "thor"
 require "highline/import"
-require "deep_merge"
+require "chef/mixin/deep_merge"
 require "yaml"
-
 module DVM
   PROJECT_CLASSES = {
     # TODO module Project, class method 'base_name', enumerate and generate...
@@ -12,8 +11,6 @@ module DVM
     "erlang" => DVM::ErlangProject,
     "ruby" => DVM::RubyProject
   }
-  class DVMArgumentError < ArgumentError
-  end
   class Application < Thor
     def initialize(args, local_options,config)
       super
@@ -26,7 +23,7 @@ module DVM
       @config = YAML.load_file("/vagrant/defaults.yml")
       if File.file? "/vagrant/config.yml"
         overrides = YAML.load_file("/vagrant/config.yml")
-        @config.deep_merge! overrides
+        @config = Chef::Mixin::DeepMerge.deep_merge!(@config, overrides)
       end
       @config["projects"].each do |name, project|
         type = project["type"]
