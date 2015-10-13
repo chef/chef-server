@@ -128,7 +128,9 @@ if is_data_master?
     block do
       connectable = false
       2.times do |i|
-        `echo 'SELECT * FROM pg_database;' | su - opscode-pgsql -c '/opt/opscode/embedded/bin/psql -U opscode-pgsql postgres -t -A'`
+        # Note that we have to include the port even for a local pipe, because the port number
+        # is included in the pipe default.
+        `echo 'SELECT * FROM pg_database;' | su - opscode-pgsql -c '/opt/opscode/embedded/bin/psql -p #{node['private_chef']['postgresql']['port']}  -U  opscode-pgsql postgres -t -A'`
 	if $?.exitstatus != 0
           Chef::Log.fatal("Could not connect to database, retrying in 10 seconds.")
           sleep 10
