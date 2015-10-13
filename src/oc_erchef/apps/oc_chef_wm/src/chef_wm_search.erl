@@ -129,8 +129,7 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                                  filter_permitted_results(ReqId, RequestorId, OrgId, DbContext, IndexType, Ids);
                              false -> Ids
                          end,
-            {DbNumFound, Ans} = make_search_results(BulkGetFun, FilteredIds, BatchSize,
-                                                    Start, SolrNumFound),
+            {DbNumFound, Ans} = make_search_results(BulkGetFun, FilteredIds, BatchSize, Start),
             State1 = State#base_state{log_msg = search_log_msg(SolrNumFound,
                                                                solr_ids_length(Ids), DbNumFound)},
             case IndexType of
@@ -351,10 +350,10 @@ extract_path(_Item, []) ->
 extract_path(Item, Path) ->
     ej:get(list_to_tuple(Path), Item, null).
 
-make_search_results(BulkGetFun, Ids, BatchSize, Start, NumFound) ->
-    Ans0 = search_result_start(Start, NumFound),
-    {N, Ans1} = fetch_result_rows(Ids, BatchSize, BulkGetFun, {0, Ans0}),
-    {N, search_result_finish(Ans1)}.
+make_search_results(BulkGetFun, Ids, BatchSize, Start) ->
+    {N, Ans0} = fetch_result_rows(Ids, BatchSize, BulkGetFun, {0, []}),
+    Ans1 = search_result_finish(Ans0),
+    {N, search_result_prepend(Start, N, Ans1)}.
 
 %% @doc Fetch a list of `Ids' in batches of size `BatchSize'.
 %%
@@ -454,11 +453,12 @@ safe_split(N, L) ->
 
 %% Return the start of a JSON response for search results. We take this approach to limit
 %% RAM use and avoid having the entire result parsed into EJSON terms at one time.
-search_result_start(Start, Total) ->
+search_result_prepend(Start, Total, Cur) ->
     % {"total":Total,"start":Start,"rows":[i1, i2]}
-    ["\"rows\":[", ",",
-     integer_to_list(Start), "\"start\":", ",",
-     integer_to_list(Total), "\"total\":", "{"].
+    lists:append(["{", "\"total\":", integer_to_list(Total), ",",
+                  "\"start\":", integer_to_list(Start), ",",
+                  "\"rows\":["
+                 ], Cur).
 
 search_result_finish(Result) ->
     %% Note that all we need here is an iolist not a flat binary.
