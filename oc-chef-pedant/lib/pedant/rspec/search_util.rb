@@ -629,8 +629,7 @@ module Pedant
       let(:search_success_response) do
         {
           :status => 200,
-          :body_exact => {
-            "total" => search_result_items.size,
+          :body => {
             "start" => 0, # TODO: Test paging
             "rows" => search_result_items
           }
@@ -725,8 +724,7 @@ module Pedant
           get(api_url("/search/#{options[:type]}?q=#{options[:query]}"),user) do |response|
             response.should look_like({
                                         :status => 200,
-                                        :body_exact => {
-                                          "total" => results.count,
+                                        :body => {
                                           "start" => 0,
                                           "rows" => results
                                         }
@@ -741,7 +739,6 @@ module Pedant
           response = get(search_url, admin_user)
           response.should look_like({:status => 200, :body => { 'start' => 0 }})
           response = parse(response)
-          response['total'].should == response['rows'].size
           response['rows']
         end
       end

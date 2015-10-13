@@ -142,7 +142,6 @@ describe 'Search API endpoint', :search do
           with_search_polling do
             response = get(search_url, requestor)
             result = parse(response)
-            expect(result["total"]).to eq(1)
             expect(result["rows"].first).to eq(node)
           end
         end
@@ -152,7 +151,6 @@ describe 'Search API endpoint', :search do
           with_search_polling do
             response = get(search_url, requestor)
             result = parse(response)
-            expect(result["total"]).to eq(1)
             expect(result["rows"].first).to eq(node)
           end
         end
@@ -660,8 +658,7 @@ describe 'Search API endpoint', :search do
               }
               # TODO this seems wrong, sine we're discarding the actual expected result...
               want_results = 10.times.map { |i| want_result }
-              response.should look_like({:status => 200,
-                                          :body => {'total' => 10}})
+              response.should look_like({:status => 200 })
               got = parse(response)['rows']
               got_digits = got.map { |o| o['data']['goal'] }.sort
               got_digits.should == (0..9).to_a
@@ -713,11 +710,11 @@ describe 'Search API endpoint', :search do
             post(api_url("/search/node?q=name:#{node_name}"), admin_user,
                  :payload => payload) do |response|
               response.should look_like({:status => 200,
-                                          :body => {'total' => 1,
-                                            "rows" => [{ 'url' => api_url("/nodes/#{node_name}"),
-                                                         'data' => {
-                                                           'we_found_default' => true
-                                                         }}]}})
+                                          :body => {
+                                           "rows" => [{ 'url' => api_url("/nodes/#{node_name}"),
+                                                        'data' => {
+                                                          'we_found_default' => true
+                                                        }}]}})
             end
           end
         end
@@ -730,11 +727,11 @@ describe 'Search API endpoint', :search do
             post(api_url("/search/node?q=name:#{node_name}"), admin_user,
                  :payload => payload) do |response|
               response.should look_like({:status => 200,
-                                          :body => {'total' => 1,
-                                            "rows" => [{ 'url' => api_url("/nodes/#{node_name}"),
-                                                         'data' => {
-                                                           'we_found_normal' => true
-                                                         }}]}})
+                                         :body => {
+                                           "rows" => [{ 'url' => api_url("/nodes/#{node_name}"),
+                                                        'data' => {
+                                                          'we_found_normal' => true
+                                                        }}]}})
             end
           end
         end
@@ -747,17 +744,14 @@ describe 'Search API endpoint', :search do
             post(api_url("/search/node?q=name:#{node_name}"), admin_user,
                  :payload => payload) do |response|
               response.should look_like({:status => 200,
-                                          :body => {'total' => 1,
-                                            "rows" => [{ 'url' => api_url("/nodes/#{node_name}"),
-                                                         'data' => {
-                                                           'goal' => 'found_it_normal'
-                                                         }}]}})
+                                         :body => {
+                                           "rows" => [{ 'url' => api_url("/nodes/#{node_name}"),
+                                                        'data' => {
+                                                          'goal' => 'found_it_normal'
+                                                        }}]}})
             end
           end
         end
-
-
-
       end # context
     end
   end
