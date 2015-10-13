@@ -198,7 +198,7 @@
            {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
            %% Database connection parameters
            {db_host, "<%= node['private_chef']['postgresql']['vip'] %>"},
-           {db_port, 5432},
+           {db_port, <%= node['private_chef']['postgresql']['port'] %>},
            {db_user, "<%= node['private_chef']['opscode-erchef']['sql_user'] %>"},
            {db_pass, "<%= node['private_chef']['opscode-erchef']['sql_password'] %>"},
            {db_name, "opscode_chef" },
