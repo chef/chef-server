@@ -15,10 +15,10 @@
 #
 
 name "postgresql92"
-default_version "9.2.10"
+default_version "9.2.14"
 
-source url: "http://ftp.postgresql.org/pub/source/v9.2.10/postgresql-9.2.10.tar.bz2",
-       md5: "7b81646e2eaf67598d719353bf6ee936"
+source url: "http://ftp.postgresql.org/pub/source/v9.2.14/postgresql-9.2.14.tar.bz2",
+       md5: "ce2e50565983a14995f5dbcd3c35b627"
 
 dependency "zlib"
 dependency "openssl"
@@ -26,7 +26,7 @@ dependency "libedit"
 dependency "ncurses"
 dependency "libossp-uuid"
 
-relative_path "postgresql-9.2.10"
+relative_path "postgresql-9.2.14"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
