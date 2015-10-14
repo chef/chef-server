@@ -1,5 +1,10 @@
 # Chef Server Changelog
 
+# 12.2.1 (pending)
+
+## Updated components
+  * postgresql (9.2.10 -> 9.2.14)
+
 ## 12.2.0 (2015-09-01)
 
 ### oc\_erchef
