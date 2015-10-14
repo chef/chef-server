@@ -97,19 +97,57 @@ assert_org_id_filter(FieldQuery) ->
     Len = length(Start),
     Start = string:substr(FieldQuery, 1, Len).
 
-delete_search_db(_OrgId) ->
-    lager:warning("delete_search_db not implemented"),
-    ok.
+delete_search_db(OrgId) ->
+    lager:warning("CloudSearch does not support manual commiting. Search requests may return deleted data for some time."),
+    Query = "x_chef_database_chef_x:chef_" ++ binary_to_list(OrgId),
+    delete_all_docs_for_query(Query).
 
-delete_search_db_by_type(_OrgId, _Type) ->
-    lager:warning("delete_search_db_by_type not implemented"),
-    ok.
+delete_search_db_by_type(OrgId, Type) ->
+    lager:warning("CloudSearch does not support manual commiting. Search requests may return deleted data for some time."),
+    Query = "x_chef_type_chef_x:" ++ safe_bin_to_list(Type) ++ " AND x_chef_database_chef_x:chef_" ++ safe_bin_to_list(OrgId),
+    delete_all_docs_for_query(Query).
 
 commit() ->
     lager:info("Commit not supported when using cloudsearch as a search provider"),
     ok.
 
 %% Internal Functions
+safe_bin_to_list(List) when is_list(List)->
+    List;
+safe_bin_to_list(Binary) when is_binary(Binary) ->
+    binary_to_list(Binary).
+
+delete_all_docs_for_query(Query) ->
+    delete_all_docs_for_query(Query, <<"initial">>, undefined).
+
+delete_all_docs_for_query(_Query, _NextCursor, _NextCursor) ->
+    ok;
+delete_all_docs_for_query(Query, NextCursor, _LastCursor) ->
+    UrlFmt = "/search?q=~s&q.parser=lucene&size=10000&&cursor=~s&sort=~s",
+    Sort = binary_to_list(id_field()) ++ "+asc",
+    Url = io_lib:format(UrlFmt, [Query, NextCursor, Sort]),
+    {ok, Code, _Head, Body} = chef_index_http:request(Url, get, []),
+    case Code of
+        "200" ->
+            ResponseBody = jiffy:decode(Body),
+            Response = ej:get({<<"hits">>}, ResponseBody),
+            NewNextCursor = ej:get({<<"cursor">>}, Response),
+            DocList  = ej:get({<<"hit">>}, Response),
+            Ids = [ ej:get({id_field()}, Doc) || Doc <- unwrap_doclist(DocList) ],
+            DeleteDocs = [ chef_index_expand:doc_for_delete(unused, Id, unused) || Id <- Ids],
+            case DeleteDocs of
+                [] ->
+                    %% special case an empty page, it is likely the last page
+                    delete_all_docs_for_query(Query, NewNextCursor, NextCursor);
+                _ ->
+                    chef_index_expand:send_delete(DeleteDocs),
+                    delete_all_docs_for_query(Query, NewNextCursor, NextCursor)
+            end;
+        "400" ->
+            {error, {solr_400, Url}};
+        "500" ->
+            {error, {solr_500, Url}}
+    end.
 
 %% Structured Query Helpers
 %%
