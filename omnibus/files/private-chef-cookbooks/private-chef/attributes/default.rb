@@ -143,6 +143,7 @@ default['private_chef']['opscode-solr4']['enable'] = true
 # Set this to point at a solr/cloudsearch installation
 # not controlled by chef-server
 #
+default['private_chef']['opscode-solr4']['external'] = false
 default['private_chef']['opscode-solr4']['external_url'] = nil
 default['private_chef']['opscode-solr4']['ha'] = false
 default['private_chef']['opscode-solr4']['dir'] = "/var/opt/opscode/opscode-solr4"
