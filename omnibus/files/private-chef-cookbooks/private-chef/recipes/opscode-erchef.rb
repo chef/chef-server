@@ -4,7 +4,7 @@
 #
 # All Rights Reserved
 
-oc_erchef = node['private_chef']['oc_erchef']
+oc_erchef = node['private_chef']['opscode-erchef']
 oc_bifrost = node['private_chef']['oc_bifrost']
 opscode_erchef_dir = oc_erchef['dir']
 opscode_erchef_etc_dir = File.join(opscode_erchef_dir, "etc")
@@ -44,11 +44,13 @@ actions_password = rabbitmq['actions_password']
 actions_vhost = rabbitmq['actions_vhost']
 actions_exchange = rabbitmq['actions_exchange']
 
+helper = OmnibusHelper.new(node)
 template erchef_config do
   source "oc_erchef.config.erb"
-  owner OmnibusHelper.new(node).ownership['owner']
-  group OmnibusHelper.new(node).ownership['group']
+  owner helper.ownership['owner']
+  group helper.ownership['group']
   mode "644"
+  sensitive true
   variables({
     oc_erchef: oc_erchef,
     oc_bifrost: oc_bifrost,
@@ -61,7 +63,7 @@ template erchef_config do
     actions_vhost: actions_vhost,
     actions_exchange: actions_exchange,
     ldap_encryption_type: ldap_encryption_type,
-    helper => OmnibusHelper.new(node)))
+    helper: helper})
   notifies :run, 'execute[remove_erchef_siz_files]', :immediately
   notifies :restart, 'runit_service[opscode-erchef]' unless backend_secondary?
 end

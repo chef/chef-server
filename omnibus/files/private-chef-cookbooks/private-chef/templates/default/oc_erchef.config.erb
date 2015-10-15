@@ -4,35 +4,35 @@
 [
  %% SASL config
  {sasl, [
-         {sasl_error_logger, {file, "<%= File.join(@log_directory, 'sasl-error.log') %>"}},
+         {sasl_error_logger, {file, "<%= File.join(@oc_erchef['log_directory'], 'sasl-error.log') %>"}},
          {errlog_type, error},
-         {error_logger_mf_dir, "<%= File.join(@log_directory, 'sasl') %>"},      % Log directory
-         {error_logger_mf_maxbytes, <%= @log_rotation['file_maxbytes'] %>},
-         {error_logger_mf_maxfiles, <%= @log_rotation['num_to_keep'] %>}
+         {error_logger_mf_dir, "<%= File.join(@oc_erchef['log_directory'], 'sasl') %>"},      % Log directory
+         {error_logger_mf_maxbytes, <%= @oc_erchef['log_rotation']['file_maxbytes'] %>},
+         {error_logger_mf_maxfiles, <%= @oc_erchef['log_rotation']['num_to_keep'] %>}
         ]},
  {lager, [
           {handlers, [
               {lager_console_backend, [info, {lager_default_formatter, [ "[", severity, "] ", message, "\n"]}]},
               {lager_file_backend, [
-                                    {file, "<%= File.join(@log_directory, 'erchef.log') %>"},
+                                    {file, "<%= File.join(@oc_erchef['log_directory'], 'erchef.log') %>"},
                                     {level, info},
-                                    {size, <%= @log_rotation['file_maxbytes'] %>},
+                                    {size, <%= @oc_erchef['log_rotation']['file_maxbytes'] %>},
                                     {date, "$D0"},
-                                    {count, <%= @log_rotation['num_to_keep'] %>},
+                                    {count, <%= @oc_erchef['log_rotation']['num_to_keep'] %>},
                                     {formatter_config, [date, " ", time, " [", severity, "] ", message, "\n"]}
                                    ]}
               ]},
 
           %% Whether to write a crash log, and where.
           %% Commented/omitted/undefined means no crash logger.
-          {crash_log, "<%= File.join(@log_directory, 'crash.log') %>"},
+          {crash_log, "<%= File.join(@oc_erchef['log_directory'], 'crash.log') %>"},
 
           %% Maximum size in bytes of events in the crash log - defaults to 65536
           {crash_log_msg_size, 65536},
 
           %% Maximum size of the crash log in bytes, before its rotated, set
           %% to 0 to disable rotation - default is 0
-          {crash_log_size, <%= @log_rotation['file_maxbytes'] %>},
+          {crash_log_size, <%= @oc_erchef['log_rotation']['file_maxbytes'] %>},
 
           %% What time to rotate the crash log - default is no time
           %% rotation. See the lager README for a description of this format:
@@ -41,7 +41,7 @@
 
           %% Number of rotated crash logs to keep, 0 means keep only the
           %% current one - default is 0
-          {crash_log_count, <%= @log_rotation['num_to_keep'] %>},
+          {crash_log_count, <%= @oc_erchef['log_rotation']['num_to_keep'] %>},
 
           %% Whether to redirect error_logger messages into lager - defaults to true
           {error_logger_redirect, true},
@@ -50,7 +50,7 @@
           %% number of messages per second allowed to come from
           %% error_logger.  This is the same as used by
           %% opscode-chef-mover, FWIW.
-          {error_logger_hwm, <%= @log_rotation['max_messages_per_second'] %>}
+          {error_logger_hwm, <%= @oc_erchef['log_rotation']['max_messages_per_second'] %>}
         ]},
  {oc_chef_wm, [
               {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
@@ -59,17 +59,17 @@
 
               {default_orgname, <%= node['private_chef']['default_orgname'] ? "<<\"#{node['private_chef']['default_orgname']}\">>" : "undefined" %> },
 
-              {ip, "<%= @listen %>"},
-              {port, <%= @port %>},
+              {ip, "<%= @oc_erchef['listen'] %>"},
+              {port, <%= @oc_erchef['port'] %>},
               {reqid_header_name, "X-Request-Id"},
-              {auth_skew, <%= @auth_skew %>},
+              {auth_skew, <%= @oc_erchef['auth_skew'] %>},
               %% currently only used by the search endpoint to bound
               %% how many nodes are deserialized at a time in
               %% preparing a response.
-              {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
+              {bulk_fetch_batch_size, <%= @oc_erchef['bulk_fetch_batch_size'] %>},
               {superusers, [<<"pivotal">>]},
               %% metrics config
-              {root_metric_key, "<%= @root_metric_key %>"},
+              {root_metric_key, "<%= @oc_erchef['root_metric_key'] %>"},
 
               {authz_timeout, <%= @oc_erchef['authz_timeout'] %>},
               {authz_fanout, <%= @oc_erchef['authz_fanout'] %>},
@@ -95,7 +95,8 @@
               %% their own logical section, but erlang requires these to
               %% be part of a loaded application
               {node_license, <%= node['private_chef']['license']['nodes'] %>},
-              {upgrade_url, <<"<%= node['private_chef']['license']['upgrade_url'] %>">>},
+               {upgrade_url, <<"<%= node['private_chef']['license']['upgrade_url'] %>">>},
+              % TODO let's just { actions, [ { port, _ }...] }
               {actions_host, "<%= @actions_vip %>"},
               {actions_port, <%= @actions_port %> },
               {actions_user, <<"<%= @actions_user %>">>},
@@ -109,8 +110,8 @@
               {health_ping_timeout, 400},
               {health_ping_modules, [oc_chef_authz, chef_sql, chef_solr]},
               {base_resource_url, <%= @helper.erl_atom_or_string(@oc_erchef['base_resource_url']) %>},
-              {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
-              {strict_search_result_acls, <%= @strict_search_result_acls %>}
+              {bulk_fetch_batch_size, <%= @oc_erchef['bulk_fetch_batch_size'] %>},
+              {strict_search_result_acls, <%= @oc_erchef['strict_search_result_acls'] %>}
             ]},
   {chef_authn, [
                 {keyring, [{default, "/etc/opscode/webui_pub.pem"}]},
@@ -142,7 +143,7 @@
                 {cleanup_batch_size, <%= @oc_erchef['cleanup_batch_size'] %>}
                ]},
   {chef_db, [
-             {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
+             {bulk_fetch_batch_size, <%= @oc_erchef['bulk_fetch_batch_size'] %>},
              %% COUCHDB REMOVE THESE
              {couchdb_host, "127.0.0.1"},
              {couchdb_port, 5987 }
@@ -161,13 +162,13 @@
                 {search_batch_max_size, <%= @oc_erchef['search_batch_max_size'] %>},
                 {search_batch_max_wait, <%= @oc_erchef['search_batch_max_wait'] %>},
                 {solr_service, [{root_url, "http://<%= @helper.vip_for_uri('opscode-solr4') %>:<%= node['private_chef']['opscode-solr4']['port'] %>/solr"},
-                                {timeout, <%= @solr_timeout %>},
-                                {init_count, <%= @solr_http_init_count %>},
-                                {max_count, <%= @solr_http_max_count %>},
-                                {cull_interval, <%= @solr_http_cull_interval %>},
-                                {max_age, <%= @solr_http_max_age %>},
-                                {max_connection_duration, <%= @solr_http_max_connection_duration %>},
-                                {ibrowse_options, <%= @solr_ibrowse_options %>}]}
+                                {timeout, <%= @oc_erchef['solr_timeout']%>},
+                                {init_count, <%= @oc_erchef['solr_http_init_count'] %>},
+                                {max_count, <%= @oc_erchef['solr_http_max_count'] %>},
+                                {cull_interval, <%= @oc_erchef['solr_http_cull_interval'] %>},
+                                {max_age, <%= @oc_erchef['solr_http_max_age'] %>},
+                                {max_connection_duration, <%= @oc_erchef['solr_http_max_connection_duration'] %>},
+                                {ibrowse_options, <%= @oc_erchef['solr_ibrowse_options'] %>}]}
 
                ]},
   {chef_objects, [
@@ -180,8 +181,8 @@
                   {s3_url_expiry_window_size, <%= @helper.s3_url_caching(@oc_erchef['s3_url_expiry_window_size']) %>},
                   {s3_parallel_ops_timeout, <%= @oc_erchef['s3_parallel_ops_timeout'] %>},
                   {s3_parallel_ops_fanout, <%= @oc_erchef['s3_parallel_ops_fanout'] %>},
-                  {depsolver_timeout, <%= @depsolver_timeout %>},
-                  {depsolver_pooler_timeout, <%= @depsolver_pooler_timeout %>}
+                  {depsolver_timeout, <%= @oc_erchef['depsolver_timeout'] %>},
+                  {depsolver_pooler_timeout, <%= @oc_erchef['depsolver_pooler_timeout'] %>}
                  ]},
   {stats_hero, [
                %% Set sender pool size to DB max_connections to avoid contention
@@ -191,11 +192,11 @@
                {estatsd_port, <%= node['private_chef']['estatsd']['port'] %>}
               ]},
   {opscoderl_httpc, [
-                     {pooler_timeout, <%= @authz_pooler_timeout %>}
+                     {pooler_timeout, <%= @oc_erchef['authz_pooler_timeout'] %>}
                     ]},
   {sqerl, [
            {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
-           {pooler_timeout, <%= @db_pooler_timeout %>},
+           {pooler_timeout, <%= @oc_erchef['db_pooler_timeout'] %>},
            {db_driver_mod, sqerl_pgsql_client},
            {databases, [
                         {bifrost, [
@@ -227,27 +228,28 @@
                                                       {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}}
                                                     ]}
                                 ]}
-                        ]},
+                        ]}
+  ]},
   {webmachine, [
           {log_handlers, [
                {oc_wm_request_logger, [
-                       {file, "<%= File.join(@log_directory, 'requests.log') %>"},
-                       {file_size, <%= (@log_rotation['file_maxbytes'].to_f/1024/1024).round %>},  %% Size in MB
-                       {files, <%= @log_rotation['num_to_keep'] %>},
+                       {file, "<%= File.join(@oc_erchef['log_directory'], 'requests.log') %>"},
+                       {file_size, <%= (@oc_erchef['log_rotation']['file_maxbytes'].to_f/1024/1024).round %>},  %% Size in MB
+                       {files, <%= @oc_erchef['log_rotation']['num_to_keep'] %>},
                        {annotations, [req_id, org_name, msg, darklaunch, perf_stats, user, req_api_version]}
                        ]
                       }]}]
       },
   {ibrowse, [
-             {default_max_sessions, <%= @ibrowse_max_sessions %>},
-             {default_max_pipeline_size, <%= @ibrowse_max_pipeline_size %>}
+             {default_max_sessions, <%= @oc_erchef['ibrowse_max_sessions'] %>},
+             {default_max_pipeline_size, <%= @oc_erchef['ibrowse_max_pipeline_size'] %>}
             ]},
   {pooler, [
            {pools, [[{name, sqerl},
-                     {max_count, <%= @oc_erchef['db_pool_size' %>},
-                     {init_count, <%= @oc_erchef['db_pool_size' %>},
+                     {max_count, <%= @oc_erchef['db_pool_size'] %>},
+                     {init_count, <%= @oc_erchef['db_pool_init_size'] %>},
                      {start_mfa, {sqerl_client, start_link, []}},
-                     {queue_max, <%= @db_pool_queue_max %>}],
+                     {queue_max, <%= @oc_erchef['db_pool_queue_max'] %>}],
                     [{name, bifrost},
                      {max_count, <%= @oc_bifrost['db_pool_size'] %>},
                      {init_count, <%= @oc_bifrost['db_pool_size'] %>},
@@ -261,9 +263,9 @@
            {metrics_module, folsom_metrics}
           ]},
  {bifrost, [
-             {ip, "<%= @listen %>" },
-             {port, <%= @port %> },
-             {superuser_id, "<%= @bifrost_superuser_id %>"},
+             {ip, "<%= @oc_bifrost['listen'] %>" },
+             {port, <%= @oc_bifrost['port'] %> },
+             {superuser_id, "<%= @oc_bifrost['superuser_id'] %>"},
              {root_metric_key, "bifrost"},
              {enable_extended_perf_log, <%= @oc_bifrost['extended_perf_log'] %>}
             ]}
