@@ -129,7 +129,6 @@ end
 
 execute "oc_id_schema" do
   command "bundle exec rake db:migrate"
-  path ["/opt/opscode/embedded/bin"]
   cwd "/opt/opscode/embedded/service/oc_id"
 
   # There are other recipes that depend on having a VERSION environment
