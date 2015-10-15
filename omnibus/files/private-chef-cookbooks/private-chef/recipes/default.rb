@@ -237,6 +237,7 @@ file "/etc/opscode/chef-server-running.json" do
   owner OmnibusHelper.new(node).ownership['owner']
   group "root"
   mode "0600"
+  sensitive true
 
   file_content = {
     "private_chef" => node['private_chef'].to_hash,
