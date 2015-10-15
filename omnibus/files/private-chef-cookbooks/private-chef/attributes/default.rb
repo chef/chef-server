@@ -201,7 +201,7 @@ default['private_chef']['opscode-erchef']['sql_ro_password'] = "shmunzeltazzen"
 # Pool configuration for postgresql connections
 #
 # db_pool_size - the number of pgsql connections in the pool
-#
+# db_pool_init_size - the initial number to start with.
 # db_pool_queue_max - the maximum number of pgsql requests to queue up
 # if all connections are busy
 #
@@ -209,6 +209,7 @@ default['private_chef']['opscode-erchef']['sql_ro_password'] = "shmunzeltazzen"
 # in the queue before timing out.  Request queueing is only effective
 # if db_pooler_timeout > 0
 default['private_chef']['opscode-erchef']['db_pool_size'] = 20
+default['private_chef']['opscode-erchef']['db_pool_init_size'] = 20
 default['private_chef']['opscode-erchef']['db_pool_queue_max'] = 20
 default['private_chef']['opscode-erchef']['db_pooler_timeout'] = 2000
 default['private_chef']['opscode-erchef']['sql_db_timeout'] = 5000
@@ -493,6 +494,7 @@ default['private_chef']['oc_bifrost']['listen'] = '127.0.0.1'
 default['private_chef']['oc_bifrost']['port'] = 9463
 default['private_chef']['oc_bifrost']['superuser_id'] = '5ca1ab1ef005ba111abe11eddecafbad'
 default['private_chef']['oc_bifrost']['db_pool_size'] = '20'
+default['private_chef']['oc_bifrost']['db_pool_init_size'] = '20'
 # The db_pool is only effective for a db_pooler_timeout > 0
 default['private_chef']['oc_bifrost']['db_pooler_timeout'] = 2000
 default['private_chef']['oc_bifrost']['db_pool_queue_max'] = 20
