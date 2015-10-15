@@ -3,6 +3,7 @@
 
 
 require "yaml"
+load "dvmtools.rb"
 CS_VM_ADDRESS="192.168.33.100"
 DB_VM_ADDRESS="192.168.33.150"
 DB_SUPERUSER="bofh"
@@ -69,7 +70,7 @@ def define_chef_server(config, attributes)
     config.vm.synced_folder File.absolute_path(File.join(Dir.pwd, "../")), "/host",
       type: "rsync",
       rsync__args: ["--verbose", "--archive", "--delete", "-z", "--no-owner", "--no-group" ],
-      rsync__exclude: attributes["vm"]["sync-exclude"]
+      rsync__exclude: attributes["vm"]['sync']['exclude-files']
     # We're also going to do a share of the slower vboxsf style, allowing us to auto-checkout dependencies
     # and have them be properly synced to a place that we can use them.
     config.vm.synced_folder installer_path, "/installers"
@@ -120,16 +121,6 @@ end
 # what it needs to load up and install chef-server
 ##############
 
-
-def load_settings
-  attributes = YAML.load_file("defaults.yml")
-  begin
-    custom_attributes = YAML.load_file("config.yml")
-    attributes = simple_deep_merge(attributes, custom_attributes)
-  rescue
-  end
-  attributes
-end
 
 def prepare
   action = ARGV[0]
@@ -287,16 +278,3 @@ def base_path
   File.absolute_path(File.join(Dir.pwd, "../"))
 end
 
-def simple_deep_merge(source_hash, new_hash)
-  source_hash.merge(new_hash) do |key, old, new|
-    if new.respond_to?(:blank) && new.blank?
-      old
-    elsif (old.kind_of?(Hash) and new.kind_of?(Hash))
-        simple_deep_merge(old, new)
-    elsif (old.kind_of?(Array) and new.kind_of?(Array))
-        old.concat(new).uniq
-    else
-       new
-    end
-  end
-end
