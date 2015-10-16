@@ -202,7 +202,7 @@ end
 def get_selection(files)
   selection = 0
   files.each_index do |x|
-    puts " #{x}) #{files[x]}\n"
+    puts " #{x+1}) #{files[x]}\n"
   end
   loop do
     print "Select an image, or set the INSTALLER variable and run again: [1 - #{files.length}]: "
