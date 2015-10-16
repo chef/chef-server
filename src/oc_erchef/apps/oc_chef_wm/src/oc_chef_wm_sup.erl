@@ -17,6 +17,8 @@
 
 -include("oc_chef_wm.hrl").
 
+-define(QUEUE_MONITOR_SETTING(Key, Default), chef_wm_rabbitmq_management:get_rabbit_queue_monitor_setting(Key, Default)).
+
 %% @spec start_link() -> ServerRet
 %% @doc API for starting the supervisor.
 start_link() ->
@@ -82,15 +84,22 @@ init([]) ->
                                                               KeyCache,
                                                               Web])}}.
 
+
 maybe_start_action(true, Workers) ->
     lager:info("Starting oc_chef_action", []),
-    case envy:get(oc_chef_wm, rabbitmq_queue_length_monitor_enabled, false, boolean) of
+    Vhost = ?QUEUE_MONITOR_SETTING(queue_length_monitor_vhost, "/analytics"),
+    Queue = ?QUEUE_MONITOR_SETTING(queue_length_monitor_queue, "alaska"),
+    QMEnabled = ?QUEUE_MONITOR_SETTING(queue_length_monitor_enabled, false),
+
+    case QMEnabled of
         true ->
-            chef_wm_actions_queue_monitoring:create_pool(),
+            chef_wm_rabbitmq_management:create_pool(),
+            {MaxLength, CurrentLength} = check_queue_at_capacity(Vhost, Queue),
             ActionQueueMonitoringSpec = {chef_wm_actions_queue_monitoring,
-                    {chef_wm_actions_queue_monitoring, start_link, []},
+                    {chef_wm_actions_queue_monitoring, start_link,
+                     [Vhost, Queue, MaxLength, CurrentLength]},
                         permanent, 5000, worker, [chef_wm_actions_queue_monitoring]},
-            lager:info("Starting actions queue monitoring"),
+            lager:info("Starting actions queue monitoring for vhost ~p and queue ~p", [Vhost, Queue]),
             [ActionQueueMonitoringSpec | [ amqp_child_spec() | Workers]];
         false ->
             [ amqp_child_spec() | Workers]
@@ -99,6 +108,29 @@ maybe_start_action(true, Workers) ->
 maybe_start_action(false, Workers) ->
     lager:info("Not starting Actionlog supervisor since actionlog is disabled."),
     Workers.
+
+
+check_queue_at_capacity(Vhost, Queue) ->
+    PreventStartupOnCap = ?QUEUE_MONITOR_SETTING(prevent_erchef_startup_on_full_capacity, false),
+    {MaxLength, CurrentLength, QueueAtCapacity} =
+        chef_wm_rabbitmq_management:sync_check_queue_at_capacity(Vhost, Queue),
+    case QueueAtCapacity of
+        true ->
+            case PreventStartupOnCap of
+                true ->
+                    lager:critical("Vhost ~p, queue ~p at capacity, cannot start", [Vhost, Queue]),
+                    erlang:error(analytics_queue_at_capacity);
+                false ->
+                    lager:warning("Vhost ~p, queue ~p at capacity", [Vhost, Queue]),
+                    {MaxLength, CurrentLength}
+            end;
+        false ->
+            lager:info("Vhost ~p, queue ~p not at capacity or RabbitMQ Management Plugin unavailable",
+                        [Vhost, Queue]),
+            {MaxLength, CurrentLength}
+    end.
+
+
 
 load_ibrowse_config() ->
     %% FIXME: location of the ibrowse.config should be itself configurable. Also need to

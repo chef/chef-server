@@ -1,13 +1,18 @@
 [
- {ssl, [{versions, ['tlsv1.2', 'tlsv1.1']}]},
+ {ssl, [{versions, [<%= @ssl_versions %>]}]},
+ {rabbit, [{tcp_listeners, [<%= node['private_chef']['rabbitmq']['node_port'] %>]},
+               {ssl_options,
+                 [{certfile, "<%= @ssl_crtfile %>"},
+                  {keyfile,  "<%= @ssl_keyfile %>"},
+                    {versions, [<%= @ssl_versions %>]}]}
+  ]},
  {rabbitmq_management,
-  [{listener, [{port,     <%= node['private_chef']['rabbitmq']['management_port'] %> },
-               {ssl,      true},
-               {ssl_opts, [{certfile,   "<%= @rabbitmq_ca_dir %>/rabbitmq.crt"},
-                           {keyfile,    "<%= @rabbitmq_ca_dir %>/rabbitmq.key"},
-                           {versions, ['tlsv1.2', 'tlsv1.1']}]}
+     [{listener, [
+               {ip, "<%= node['private_chef']['rabbitmq']['vip'] %>"},
+               {port,     <%= node['private_chef']['rabbitmq']['management_port'] %> },
+               {ssl,      true}
+               % The Rabbit Management Plugin will use the global Rabbit SSL Config
               ]}
   ]}
 ].
-
 

@@ -1,7 +1,7 @@
 % -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %%% @author Dave Parfitt <dparfitt@chef.io>
-%% Copyright 2011-2015 Chef Software, Inc. All Rights Reserved.
+%% Copyright 2015 Chef Software, Inc.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -35,11 +35,50 @@
 -record(state, {total_dropped = 0,
                 dropped_since_last_check = 0}).
 
+
+-define(VHOST, "/analytics").
+-define(QUEUE_NAME, "alaska").
+
+
+
+default_rabbit_config() ->
+    [
+        {management,
+        [{user, <<"rabbitmgmt">>},
+            {port, 15672},
+            {password, <<"chef123">>},
+            % rabbitmq management http connection pool
+            {rabbitmq_management_service,
+            [{root_url, "http://127.0.0.1:15672/api"},
+            {timeout, 30000},
+            {init_count, 25},
+            {max_count, 100},
+            {cull_interval, {60, sec}},
+            {max_age, {70, sec}},
+            {max_connection_duration, {70, sec}},
+            {ibrowse_options,
+            [{connect_timeout, 10000},
+                {basic_auth,
+                {"rabbitmgmt",
+                "chef123"}}]}
+            ]}]},
+        {monitoring,
+        [{queue_length_monitor_enabled, true},
+            {queue_length_monitor_vhost, "/analytics"},
+            {queue_length_monitor_queue, alaska },
+            {queue_length_monitor_millis, 30000 },
+            {queue_length_monitor_timeout_millis, 5000 },
+            {drop_on_full_capacity, true }
+        ]}
+    ].
+
+
+
 queue_monitor_prop() ->
     ?FORALL(Commands, commands(?MODULE),
 	    begin
-            application:set_env(oc_chef_wm, rabbitmq_queue_length_monitor_millis, 60000),
-            chef_wm_actions_queue_monitoring:start_link(),
+            application:set_env(oc_chef_wm, rabbitmq, default_rabbit_config()),
+            chef_wm_actions_queue_monitoring:start_link(?VHOST, ?QUEUE_NAME, 0, 0),
             chef_wm_actions_queue_monitoring:stop_timer(),
             {H,S,Res} = run_commands(?MODULE, Commands),
             clean_up(),
@@ -56,8 +95,8 @@ send_msg(Msg) ->
     Pid = whereis(chef_wm_actions_queue_monitoring),
     Pid ! Msg.
 
-reset_dropped_since_last_check() ->
-    send_msg(reset_dropped_since_last_check).
+reset_dropped_since_last_check(MaxLength) ->
+    send_msg({MaxLength, reset_dropped_since_last_check}).
 
 initial_state() -> #state{}.
 
@@ -70,7 +109,7 @@ command(_Props) ->
              oneof([
                     {call, ?MODULE, send_msg,[{MaxLength, N, at_cap(N, MaxLength)}]},
                     {call, chef_wm_actions_queue_monitoring, message_dropped,[]},
-                    {call, ?MODULE, reset_dropped_since_last_check, []}
+                    {call, ?MODULE, reset_dropped_since_last_check, [MaxLength]}
                    ])).
 
 % any command can run at any time
@@ -90,14 +129,16 @@ postcondition(State, {call, chef_wm_actions_queue_monitoring, message_dropped, [
     State#state.total_dropped == (Total - 1)
       andalso
     State#state.dropped_since_last_check == (N - 1);
-postcondition(_State, {call, ?MODULE, reset_dropped_since_last_check, []}, _Result) ->
+postcondition(_State, {call, ?MODULE, reset_dropped_since_last_check, [MaxLength]}, _Result) ->
     Status = chef_wm_actions_queue_monitoring:status(),
-    0 == proplists:get_value(dropped_since_last_check, Status);
+    0 == proplists:get_value(dropped_since_last_check, Status)
+      andalso
+    MaxLength == proplists:get_value(max_length, Status);
 postcondition(_, Call, Result) ->
     io:format(user, "Unmatched postcondition: ~p ~n    ~p~n", [Call, Result]),
     false.
 
-next_state(State, _Var, {call, ?MODULE, reset_dropped_since_last_check, []}) ->
+next_state(State, _Var, {call, ?MODULE, reset_dropped_since_last_check, [_MaxLength]}) ->
     State#state{dropped_since_last_check = 0};
 next_state(State, _Var, {call, ?MODULE, send_msg, _}) ->
     State#state{dropped_since_last_check = 0};
