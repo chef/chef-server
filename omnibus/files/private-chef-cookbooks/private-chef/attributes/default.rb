@@ -430,6 +430,12 @@ default['private_chef']['nginx']['x_forwarded_proto'] = 'https'
 default['private_chef']['nginx']['server_name'] = node['fqdn']
 default['private_chef']['nginx']['url'] = "https://#{node['fqdn']}"
 default['private_chef']['nginx']['proxy_connect_timeout'] = 1
+# Support for the stub_status module
+default['private_chef']['nginx']['enable_stub_status'] = true
+default['private_chef']['nginx']['stub_status']['listen_host'] = "127.0.0.1"
+default['private_chef']['nginx']['stub_status']['listen_port'] = "9999"
+default['private_chef']['nginx']['stub_status']['location'] = "/nginx_status"
+default['private_chef']['nginx']['stub_status']['allow_list'] = ["127.0.0.1"]
 # Based off of the Mozilla recommended cipher suite
 # https://wiki.mozilla.org/Security/Server_Side_TLS#Recommended_Ciphersuite
 #
