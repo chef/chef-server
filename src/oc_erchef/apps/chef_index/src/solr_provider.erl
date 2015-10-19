@@ -96,12 +96,12 @@ delete_search_db(OrgId) ->
     DeleteQuery = "<?xml version='1.0' encoding='UTF-8'?><delete><query>" ++
         search_db_from_orgid(OrgId) ++
         "</query></delete>",
-    ok = chef_solr:update(DeleteQuery),
+    ok = chef_solr:update(?MODULE, DeleteQuery),
     ok = commit(),
     ok.
 
 commit() ->
-    chef_solr:update("<?xml version='1.0' encoding='UTF-8'?><commit/>").
+    chef_solr:update(?MODULE, "<?xml version='1.0' encoding='UTF-8'?><commit/>").
 
 -spec delete_search_db_by_type(OrgId :: binary(), Type :: atom()) -> ok.
 delete_search_db_by_type(OrgId, Type)
@@ -112,7 +112,7 @@ delete_search_db_by_type(OrgId, Type)
         search_db_from_orgid(OrgId) ++ " AND " ++
         search_type_constraint(Type) ++
         "</query></delete>",
-    chef_solr:update(DeleteQuery).
+    chef_solr:update(?MODULE, DeleteQuery).
 
 -spec search_db_from_orgid(OrgId :: binary()) -> DBName :: [byte(),...].
 search_db_from_orgid(OrgId) ->
