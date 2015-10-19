@@ -19,6 +19,7 @@
           query_string :: string(),
           filter_query :: string(),
           search_provider = solr :: 'solr' | 'cloudsearch',
+          search_module = solr_provider :: 'solr_provider' | 'cloudsearch_provider',
           start :: integer(),
           rows :: integer(),
           sort :: string(),
