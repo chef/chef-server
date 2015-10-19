@@ -8,7 +8,7 @@ query <- star_star / (expression / space)* %{
 star_star <- "*:*" ~;
 
 expression <- operation / group / field_phrase / field / field_range / term / string %{
-           [chef_solr:transform_query_safe(iolist_to_binary(Node))]
+           [chef_solr:transform_query_safe(get(search_module), iolist_to_binary(Node))]
 %};
 
 term <- keyword valid_letter+ / !keyword valid_letter+ %{
@@ -16,12 +16,12 @@ term <- keyword valid_letter+ / !keyword valid_letter+ %{
 %};
 
 field <- name:field_name ":" arg:(fuzzy_op / term / group / string) %{
-    [<<"content:">>, convert_term(?gv(name, Node)), chef_solr:kv_sep(), ?gv(arg, Node)]
+    [<<"content:">>, convert_term(?gv(name, Node)), chef_solr:kv_sep(get(search_module)), ?gv(arg, Node)]
 %};
 
 field_phrase <- name:field_name ':' '"' str:(term (space term)*) '"' %{
     P = convert_phrase(?gv(str, Node)),
-    [<<"content:\"">>, ?gv(name, Node), chef_solr:kv_sep(), P, <<"\"">>]
+    [<<"content:\"">>, ?gv(name, Node), chef_solr:kv_sep(get(search_module)), P, <<"\"">>]
 %};
 
 field_range <- field_name ":" (("[" range_entry " TO " range_entry "]") /
@@ -108,37 +108,37 @@ special_char <- '[' / ']' / '\\' / '"' / [!(){}^~*?:] ~;
 
 -spec convert_term(iolist()) -> binary().
 convert_term(Term) ->
-  chef_solr:transform_query_term(iolist_to_binary(Term)).
+  chef_solr:transform_query_term(get(search_module), iolist_to_binary(Term)).
 
 -spec convert_phrase(iolist()) -> binary().
 convert_phrase(Phrase) ->
-  chef_solr:transform_query_phrase(iolist_to_binary(Phrase)).
+  chef_solr:transform_query_phrase(get(search_module), iolist_to_binary(Phrase)).
 
 -spec convert_char(iolist()) -> binary().
 convert_char(Char) ->
-  chef_solr:transform_query_all(iolist_to_binary(Char)).
+  chef_solr:transform_query_all(get(search_module), iolist_to_binary(Char)).
 
 
 -spec convert_range_expression(binary(), binary(), binary(), binary(), binary()) -> iolist().
 convert_range_expression(FieldName, _, <<"*">>, <<"*">>, _) ->
-    [<<"content:">>, FieldName, chef_solr:kv_sep(), <<"*">>];
+    [<<"content:">>, FieldName, chef_solr:kv_sep(get(search_module)), <<"*">>];
 
 convert_range_expression(FieldName, Open, Start, <<"*">>, Close) ->
     [<<"content:">>,
-     Open, FieldName, chef_solr:kv_sep(), Start,
+     Open, FieldName, chef_solr:kv_sep(get(search_module)), Start,
      <<" TO ">>,
-     FieldName, chef_solr:kv_sep(), <<"\\ufff0">>, Close];
+     FieldName, chef_solr:kv_sep(get(search_module)), <<"\\ufff0">>, Close];
 
 convert_range_expression(FieldName, Open, <<"*">>, End, Close) ->
     [<<"content:">>,
-     Open, FieldName, chef_solr:kv_sep(),
+     Open, FieldName, chef_solr:kv_sep(get(search_module)),
      <<" TO ">>,
-     FieldName, chef_solr:kv_sep(), End, Close];
+     FieldName, chef_solr:kv_sep(get(search_module)), End, Close];
 
 convert_range_expression(FieldName, Open, Start, End, Close) ->
     [<<"content:">>,
-     Open, FieldName, chef_solr:kv_sep(), Start,
+     Open, FieldName, chef_solr:kv_sep(get(search_module)), Start,
      <<" TO ">>,
-     FieldName, chef_solr:kv_sep(), End, Close].
+     FieldName, chef_solr:kv_sep(get(search_module)), End, Close].
 
 %}

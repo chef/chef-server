@@ -143,13 +143,14 @@ make_doc_for_add(Command = #chef_idx_expand_doc{id = Id, type=Type},
     [doc_start(SearchProvider, Id),
      MetaFields,
      maybe_data_bag_field(Type),
-     make_content(Command, MetaFieldsPL),
+     make_content(chef_solr:search_module(), Command, MetaFieldsPL),
      doc_end(SearchProvider)].
 
 meta_fields(#chef_idx_expand_doc{id = Id, database = Database, type=Type}) ->
-    [{chef_solr:id_field(), Id},
-     {chef_solr:database_field(), Database},
-     {chef_solr:type_field(), get_object_type(Type)}].
+    Module = chef_solr:search_module(),
+    [{chef_solr:id_field(Module), Id},
+     {chef_solr:database_field(Module), Database},
+     {chef_solr:type_field(Module), get_object_type(Type)}].
 
 get_object_type({ObjectType, _}) ->
     get_object_type(ObjectType);
@@ -179,11 +180,11 @@ maybe_data_bag_field(_) ->
 
 %% @doc Extract the Chef object content, flatten/expand, and return an
 %% iolist of the `content' field.
-make_content(#chef_idx_expand_doc{item={Item0}}, MetaFieldsPL) ->
+make_content(Mod, #chef_idx_expand_doc{item={Item0}}, MetaFieldsPL) ->
     %% The Ruby code in chef-expander adds the database name, id, and
     %% type as fields. So we do the same.
     Item = {MetaFieldsPL ++ Item0},
-    ?FIELD(<<"content">>, flatten(Item)).
+    ?FIELD(<<"content">>, flatten(Mod, Item)).
 
 %% @doc Main interface to flatten/expand for Chef object EJSON. Given
 %% an EJSON term representing a Chef object, returns an iolist of the
@@ -197,61 +198,61 @@ make_content(#chef_idx_expand_doc{item={Item0}}, MetaFieldsPL) ->
 %%
 %% Keys and values receive basic XML escaping for the characters `<',
 %% `&', and `>'.
--spec flatten(term()) -> iolist().
-flatten(Obj) ->
-    unique_expand([], Obj, []).
+-spec flatten(atom(), term()) -> iolist().
+flatten(Mod, Obj) ->
+    unique_expand(Mod, [], Obj, []).
 
-unique_expand(Keys, Obj, Acc) ->
-    lists:usort(expand(Keys, Obj, Acc)).
+unique_expand(Mod, Keys, Obj, Acc) ->
+    lists:usort(expand(Mod, Keys, Obj, Acc)).
 
-expand(Keys, {PL} = Obj, Acc) when is_list(PL) ->
-    expand_obj(Keys, Obj, Acc);
-expand(Keys, Array, Acc) when is_list(Array) ->
-    expand_list(Keys, Array, Acc);
-expand(Keys, String, Acc) when is_binary(String) ->
-    add_kv_pair(Keys, String, Acc);
-expand(Keys, Int, Acc) when is_integer(Int) ->
+expand(Mod, Keys, {PL} = Obj, Acc) when is_list(PL) ->
+    expand_obj(Mod, Keys, Obj, Acc);
+expand(Mod, Keys, Array, Acc) when is_list(Array) ->
+    expand_list(Mod, Keys, Array, Acc);
+expand(Mod, Keys, String, Acc) when is_binary(String) ->
+    add_kv_pair(Mod, Keys, String, Acc);
+expand(Mod, Keys, Int, Acc) when is_integer(Int) ->
     I = list_to_binary(integer_to_list(Int)),
-    add_kv_pair(Keys, I, Acc);
-expand(Keys, Flt, Acc) when is_float(Flt) ->
+    add_kv_pair(Mod, Keys, I, Acc);
+expand(Mod, Keys, Flt, Acc) when is_float(Flt) ->
     %% trying to match closest to Ruby implementation, we can't use
     %% ~f.
     F = iolist_to_binary(io_lib:format("~p", [Flt])),
-    add_kv_pair(Keys, F, Acc);
-expand(Keys, true, Acc) ->
-    add_kv_pair(Keys, <<"true">>, Acc);
-expand(Keys, false, Acc) ->
-    add_kv_pair(Keys, <<"false">>, Acc);
-expand(_Keys, undefined, _Acc) ->
+    add_kv_pair(Mod, Keys, F, Acc);
+expand(Mod, Keys, true, Acc) ->
+    add_kv_pair(Mod, Keys, <<"true">>, Acc);
+expand(Mod, Keys, false, Acc) ->
+    add_kv_pair(Mod, Keys, <<"false">>, Acc);
+expand(_Mod, _Keys, undefined, _Acc) ->
     throw({undefined_value_in_expander, "You cannot pass a key with an undefined value to chef_index_expander:expand/3."});
-expand(Keys, null, Acc) ->
-    add_kv_pair(Keys, <<"">>, Acc).
+expand(Mod, Keys, null, Acc) ->
+    add_kv_pair(Mod, Keys, <<"">>, Acc).
 
-expand_list(Keys, List, Acc) ->
+expand_list(Mod, Keys, List, Acc) ->
     lists:foldl(fun(Item, MyAcc) ->
-                        expand(Keys, Item, MyAcc)
+                        expand(Mod, Keys, Item, MyAcc)
                 end, Acc, List).
 
-expand_obj(Keys, {PL}, Acc) ->
+expand_obj(Mod, Keys, {PL}, Acc) ->
     lists:foldl(fun({K, V}, MyAcc) ->
-                        MyAcc1 = expand(Keys, K, MyAcc),
-                        expand([K|Keys], V, MyAcc1)
+                        MyAcc1 = expand(Mod, Keys, K, MyAcc),
+                        expand(Mod, [K|Keys], V, MyAcc1)
                 end, Acc, PL).
 
-add_kv_pair([], _Value, Acc) ->
+add_kv_pair(_Mod, [], _Value, Acc) ->
     Acc;
-add_kv_pair([K], Value, Acc) ->
-    [encode_pair(K, Value) | Acc];
-add_kv_pair([K|_]=Keys, Value, Acc) ->
-    [encode_pair(join_keys(Keys, ?SEP), Value),
-     encode_pair(K, Value) | Acc].
+add_kv_pair(Mod, [K], Value, Acc) ->
+    [encode_pair(Mod, K, Value) | Acc];
+add_kv_pair(Mod, [K|_]=Keys, Value, Acc) ->
+    [encode_pair(Mod, join_keys(Keys, ?SEP), Value),
+     encode_pair(Mod, K, Value) | Acc].
 
 %% @doc Encode a single key/value pair for indexing. This means XML
 %% text escaping `K' and `V' and building an iolist with the
 %% appropriate separator.
-encode_pair(K, V) ->
+encode_pair(Mod, K, V) ->
     [xml_text_escape(chef_solr:transform_data(iolist_to_binary(K))),
-     chef_solr:kv_sep(),
+     chef_solr:kv_sep(Mod),
      xml_text_escape(chef_solr:transform_data(iolist_to_binary(V))),
      <<" ">>].
 
