@@ -31,11 +31,13 @@ en:
       current_password_is_wrong: "Current Password was not entered correctly."
       dont_match: "The password you entered does not match the confirmation password."
     password_resets:
-      username_blank: "Please enter a username."
-      invalid_username: "%{name} is not a valid username."
+      username_blank: "Please enter a username or email address."
+      invalid_username: "%{name} is not a valid username or email address."
       password_blank: "Password must not be blank."
       invalid_signature: "The given password reset link is expired or has an invalid signature."
-      completion: "If the username you entered exists, you should receive an email shortly."
+      completion: "If the username or email address you entered exists, you should receive an email shortly."
+    logins:
+      invalid_credentials: "Sorry, that username, email address, or password was incorrect. Please try again."
   password_resets:
     new:
       form_caption: Enter your Chef username and we'll send you a link to reset it.
