@@ -27,6 +27,7 @@
          %% Static Data Accessors
          search_provider/0,
          search_module/0,
+         search_module/1,
          id_field/1,
          database_field/1,
          kv_sep/1,

@@ -38,7 +38,7 @@ flatten_non_recursive_type_test() ->
               {<<"q1">>, <<"with \"quotes\"">>},
               {<<"q2 \"2\"">>, <<"with quotes in key">>}
              ]},
-    Expanded = chef_index_expand:flatten(Input),
+    Expanded = chef_index_expand:flatten(solr_provider, Input),
     %% Expected final result when flattened should be space separated
     %% as below. Formatting of floats is tricky. We should investigate
     %% what the Ruby code does.
@@ -56,7 +56,7 @@ flatten_lists_test() ->
     Input = {[{<<"k1">>, [null, true, false,
                           <<"a">>, 0, 1.123,
                           [<<"b">>, 2], <<"c">>]}]},
-    Expanded = chef_index_expand:flatten(Input),
+    Expanded = chef_index_expand:flatten(solr_provider, Input),
     Expect = <<"k1__=__ "
                "k1__=__0 k1__=__1.123 "
                "k1__=__2 k1__=__a k1__=__b k1__=__c "
@@ -66,7 +66,7 @@ flatten_lists_test() ->
 example_test() ->
     {ok, Bin} = chef_index_test_utils:read_file("sample_node.json"),
     Node = jiffy:decode(Bin),
-    Expanded = chef_index_expand:flatten(Node),
+    Expanded = chef_index_expand:flatten(solr_provider, Node),
     file:write_file(chef_index_test_utils:filename("sample.out"), Expanded),
     ok.
 
@@ -86,7 +86,7 @@ example_nested_test() ->
                                                          ]}]}
                                         ]}}
                           ]}}]},
-    Expanded = chef_index_expand:flatten(Input),
+    Expanded = chef_index_expand:flatten(solr_provider, Input),
     file:write_file("../test/example_nested.out", Expanded),
     ok.
 
@@ -98,7 +98,7 @@ example_flat_test() ->
               {<<"a_float">>, 1.23},
               {<<"a_string">>, <<"hello, \"you\"">>}
              ]},
-    Expanded = chef_index_expand:flatten(Input),
+    Expanded = chef_index_expand:flatten(solr_provider, Input),
     file:write_file("../test/example_flat.out", Expanded),
     ok.
 
@@ -152,21 +152,22 @@ flatten_nested_test() ->
                 "kkk2__=__i&lt;&amp;&gt; "
                 "lkk&lt;&gt;k1__=__1 "
                 "lkkk2__=__2 ">>,
-    ?assertEqual(Expect, iolist_to_binary(chef_index_expand:flatten(Input))).
+    ?assertEqual(Expect, iolist_to_binary(chef_index_expand:flatten(solr_provider, Input))).
 
 flatten_and_xml_escape_test() ->
     Input = {[
               {<<"A & W">>, <<"The \"question\" is < > !&">>}
              ]},
     Expect = <<"A &amp; W__=__The &quot;question&quot; is &lt; &gt; !&amp; ">>,
-    ?assertEqual(Expect, iolist_to_binary(chef_index_expand:flatten(Input))).
+    ?assertEqual(Expect, iolist_to_binary(chef_index_expand:flatten(solr_provider, Input))).
 
 doc_construction_tests_() ->
     MinItem = {[{<<"key1">>, <<"value1">>},
                 {<<"key2">>, <<"value2">>}]},
     {setup,
      fun() ->
-             meck:new(chef_index_http, [])
+             meck:new(chef_index_http, []),
+             application:set_env(chef_index, search_provider, solr)
      end,
      fun(_) ->
              meck:unload()
@@ -191,7 +192,7 @@ doc_construction_tests_() ->
                                    ?assertEqual(Expect, Doc),
                                    {ok, "200", [], []}
                            end),
-               ?assertEqual(ok, chef_solr:update(D))
+               ?assertEqual(ok, chef_solr:update(chef_solr:update_module(), D))
        end},
 
       {"happy path delete",
@@ -204,7 +205,7 @@ doc_construction_tests_() ->
                                    ?assertEqual(Expect, Doc),
                                    {ok, "200", [], []}
                            end),
-               ?assertEqual(ok, chef_solr:update(D))
+               ?assertEqual(ok, chef_solr:update(chef_solr:update_module(), D))
        end},
 
       {"special handling for data bag items",
@@ -261,7 +262,9 @@ solr_api_test_() ->
                 {<<"key2">>, <<"value-2">>}]},
     {foreach,
      fun() ->
+             application:set_env(chef_index, search_provider, solr),
              meck:new(chef_index_http, [])
+
      end,
      fun(_) ->
              meck:unload()
@@ -269,6 +272,7 @@ solr_api_test_() ->
      [fun(_) ->
               [{"send_item",
                 fun() ->
+                        chef_index_test_utils:set_provider(solr),
                         Expect = send_item_xml_expect(),
                         meck:expect(chef_index_http, request,
                                     fun("/update", post, Doc) ->
@@ -280,6 +284,7 @@ solr_api_test_() ->
                 end},
                {"send_delete",
                 fun() ->
+                        chef_index_test_utils:set_provider(solr),
                         Expect = send_delete_xml_expect(),
                         meck:expect(chef_index_http, request,
                                     fun("/update", post, Doc) ->
@@ -299,16 +304,15 @@ cloudsearch_api_test_() ->
                 {<<"key2">>, <<"value-2">>}]},
     {foreach,
      fun() ->
-             application:set_env(chef_index, search_provider, cloudsearch),
-             meck:new(chef_index_http, [])
+             application:set_env(chef_index, search_provider, cloudsearch)
      end,
      fun(_) ->
-             application:set_env(chef_index, search_provider, solr),
              meck:unload()
      end,
      [fun(_) ->
               [{"send_item",
                 fun() ->
+                        chef_index_test_utils:set_provider(cloudsearch),
                         Expect = cs_send_item_xml_expect(),
                         meck:expect(chef_index_http, request,
                                     fun("/documents/batch", post, Doc) ->
@@ -320,6 +324,7 @@ cloudsearch_api_test_() ->
                 end},
                {"send_delete",
                 fun() ->
+                        chef_index_test_utils:set_provider(cloudsearch),
                         Expect = cs_send_delete_xml_expect(),
                         meck:expect(chef_index_http, request,
                                     fun("/documents/batch", post, Doc) ->

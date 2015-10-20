@@ -97,10 +97,10 @@ add_block(ToAdd, cloudsearch) ->
 
 %% @doc Send a single document to solr directly.
 send_item(Doc) ->
-    chef_solr:update(update_payload([Doc], [])).
+    chef_solr:update(chef_solr:search_module(), update_payload([Doc], [])).
 
 send_delete(Doc) ->
-    chef_solr:update(update_payload([], [Doc])).
+    chef_solr:update(chef_solr:search_module(), update_payload([], [Doc])).
 
 %% @doc Create a chef_idx_expand_doc given Chef object attributes
 %% `Type', `ID', `DatabaseName', and `Item'.

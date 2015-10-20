@@ -18,28 +18,31 @@
 -module(chef_lucene_tests).
 -include_lib("eunit/include/eunit.hrl").
 
-chef_lucene_test_() ->
-    {foreach,
-     fun() ->
-             application:set_env(chef_index, search_provider, solr)
-     end,
-     fun(_) ->
-             application:set_env(chef_index, search_provider, solr)
-     end,
+% Note: chef_index_test_utils:set_provider sets the application env and a process dictionary
+% entry to specify the provider module. This must be done within each test, because
+% setup/teardown functions do not seem to execute within the same process as the test.
+
+chef_lucene_solr_test_() ->
      [
       {"it transforms an arbitrary field search into a search on the content field",
        fun() ->
+               chef_index_test_utils:set_provider(solr),
+               io:fwrite("*** search_module: ~p~n", [get(search_module)]),
                ?assertEqual(chef_lucene:parse(<<"foo:bar">>), <<"content:foo__=__bar">>)
-       end},
+       end}
+     ].
+
+chef_lucene_cloudsearch_test_() ->
+     [
       {"it uses the correct key-value seperator for the given search provider",
        fun() ->
-               application:set_env(chef_index, search_provider, cloudsearch),
+               chef_index_test_utils:set_provider(cloudsearch),
                ?assertEqual(chef_lucene:parse(<<"foo:bar">>), <<"content:foo__EQ__bar">>)
        end
       },
       {"cloudsearch: it does not replace solr wildcard operators in a term",
        fun() ->
-               application:set_env(chef_index, search_provider, cloudsearch),
+               chef_index_test_utils:set_provider(cloudsearch),
                ?assertEqual(chef_lucene:parse(<<"bar*">>), <<"bar*">>),
                ?assertEqual(chef_lucene:parse(<<"bar?">>), <<"bar?">>),
                ?assertEqual(chef_lucene:parse(<<"foo:bar*">>), <<"content:foo__EQ__bar*">>),
@@ -48,7 +51,7 @@ chef_lucene_test_() ->
       },
       {"cloudsearch: it replaces other wordbreaking characters in a term",
        fun() ->
-               application:set_env(chef_index, search_provider, cloudsearch),
+               chef_index_test_utils:set_provider(cloudsearch),
                ?assertEqual(chef_lucene:parse(<<"bar-bar">>), <<"bar__DS__bar">>),
                ?assertEqual(chef_lucene:parse(<<"foo:bar-baz">>), <<"content:foo__EQ__bar__DS__baz">>),
                ?assertEqual(chef_lucene:parse(<<"foo:bar@baz">>), <<"content:foo__EQ__bar__AT__baz">>),
@@ -57,7 +60,7 @@ chef_lucene_test_() ->
       },
       {"cloudsearch: it does replace escaped solr wildcard operators in a term",
        fun() ->
-               application:set_env(chef_index, search_provider, cloudsearch),
+               chef_index_test_utils:set_provider(cloudsearch),
                ?assertEqual(chef_lucene:parse(<<"bar\\*">>), <<"bar\\__ST__">>),
                ?assertEqual(chef_lucene:parse(<<"bar\\?">>), <<"bar\\__QS__">>),
                ?assertEqual(chef_lucene:parse(<<"foo:bar\\*">>), <<"content:foo__EQ__bar\\__ST__">>),
@@ -66,17 +69,17 @@ chef_lucene_test_() ->
       },
       {"cloudsearch: it does NOT replace leading operators",
        fun() ->
-               application:set_env(chef_index, search_provider, cloudsearch),
+               chef_index_test_utils:set_provider(cloudsearch),
                ?assertEqual(chef_lucene:parse(<<"-bar">>), <<"-bar">>),
                ?assertEqual(chef_lucene:parse(<<"-foo:bar">>), <<"-content:foo__EQ__bar">>)
        end
       },
       {"cloudsearch: it does NOT replace trailing operators",
        fun() ->
-               application:set_env(chef_index, search_provider, cloudsearch),
+               chef_index_test_utils:set_provider(cloudsearch),
                ?assertEqual(chef_lucene:parse(<<"bar~">>), <<"bar~">>),
                ?assertEqual(chef_lucene:parse(<<"foo:bar~">>), <<"content:foo__EQ__bar~">>)
        end
       }
-     ]
-    }.
+     ].
+

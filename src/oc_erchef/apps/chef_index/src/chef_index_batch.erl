@@ -139,6 +139,7 @@ flush(State = #chef_idx_batch_state{item_queue = []}) ->
     State;
 flush(State = #chef_idx_batch_state{item_queue = Queue,
                                     current_size = CurrentSize,
+                                    search_provider = Provider,
                                     wrapper_size = WrapperSize}) ->
     {PidsToReply, Timestamps, DocsToAdd} = lists:unzip3(Queue),
     Doc = wrap(DocsToAdd, State),
@@ -147,7 +148,7 @@ flush(State = #chef_idx_batch_state{item_queue = Queue,
       fun() ->
               lager:debug("Batch posting to solr ~p documents (~p bytes)", [length(DocsToAdd), CurrentSize+WrapperSize]),
               Now = os:timestamp(),
-              Res = chef_solr:update(Doc),
+              Res = chef_solr:update(chef_solr:search_module(Provider), Doc),
               Now1 = os:timestamp(),
               TotalDocs = length(Timestamps),
               {BeforeDiff, AfterDiff} =

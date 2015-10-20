@@ -24,3 +24,10 @@ dumb_random_port() ->
     {ok, Port} = inet:port(Socket),
     gen_udp:close(Socket),
     Port.
+
+set_provider(solr) ->
+    application:set_env(chef_index, search_provider, solr),
+    put(search_module, solr_provider);
+set_provider(cloudsearch) ->
+    application:set_env(chef_index, search_provider, cloudsearch),
+    put(search_module, cloudsearch_provider).

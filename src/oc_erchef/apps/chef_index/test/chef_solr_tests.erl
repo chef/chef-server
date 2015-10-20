@@ -36,10 +36,13 @@ make_query_from_params_test_() ->
     [
      {"properly formed",
       fun() ->
+          chef_index_test_utils:set_provider(solr),
           Query = chef_solr:make_query_from_params("node", "myquery", "2", "5"),
           Expect = #chef_solr_query{
             query_string = "myquery",
             filter_query = "+X_CHEF_type_CHEF_X:node",
+            search_provider = solr,
+            search_module = solr_provider,
             sort = "X_CHEF_id_CHEF_X asc",
             start = 2,
             rows = 5,
@@ -51,9 +54,12 @@ make_query_from_params_test_() ->
       %% TODO: currently, a missing 'q' param is mapped to "*:*". We'd
       %% like to change that to be a 400 in the future.
       fun() ->
+          chef_index_test_utils:set_provider(solr),
           Query = chef_solr:make_query_from_params("role", undefined, undefined, undefined),
           Expect = #chef_solr_query{
             query_string = "*:*",
+            search_provider = solr,
+            search_module = solr_provider,
             filter_query = "+X_CHEF_type_CHEF_X:role",
             sort = "X_CHEF_id_CHEF_X asc",
             start = 0,
