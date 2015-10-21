@@ -38,7 +38,9 @@
 -record(chef_idx_expand_doc, {type,
                               id,
                               database,
-                              item}).
+                              item,
+                              search_provider,
+                              search_module }).
 -define(SEP, <<"_">>).
 -define(FIELD(Name, Value), [<<"<field name=\"">>, Name, <<"\">">>, Value, <<"</field>">>]).
 -define(XML_HEADER, <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>">>).
@@ -110,7 +112,11 @@ send_delete(Doc) ->
                    DatabaseName :: binary() | string(),
                    Item :: term()) -> #chef_idx_expand_doc{}.   % both term() are EJSON
 make_record(Type, ID, DatabaseName, Item) ->
+    Provider = chef_solr:search_provider(),
+    Module = chef_solr:search_module(Provider),
     #chef_idx_expand_doc{
+       search_module = Module,
+       search_provider = Provider,
        type = Type,
        id = ID,
        database = normalize_db_name(DatabaseName),
@@ -133,21 +139,17 @@ make_doc_for_del(cloudsearch, Id) ->
      Id,
      <<"\" />">>].
 
-make_doc_for_add(Command) ->
-    make_doc_for_add(Command, chef_solr:search_provider()).
 
-make_doc_for_add(Command = #chef_idx_expand_doc{id = Id, type=Type},
-                 SearchProvider) ->
+make_doc_for_add(Command = #chef_idx_expand_doc{id = Id, type=Type, search_module=Module, search_provider=Provider }) ->
     MetaFieldsPL = meta_fields(Command),
     MetaFields = [ ?FIELD(Name, Value) || {Name, Value} <- MetaFieldsPL ],
-    [doc_start(SearchProvider, Id),
+    [doc_start(Provider, Id),
      MetaFields,
      maybe_data_bag_field(Type),
-     make_content(chef_solr:search_module(), Command, MetaFieldsPL),
-     doc_end(SearchProvider)].
+     make_content(Module, Command, MetaFieldsPL),
+     doc_end(Provider)].
 
-meta_fields(#chef_idx_expand_doc{id = Id, database = Database, type=Type}) ->
-    Module = chef_solr:search_module(),
+meta_fields(#chef_idx_expand_doc{id = Id, database = Database, type=Type, search_module = Module}) ->
     [{chef_solr:id_field(Module), Id},
      {chef_solr:database_field(Module), Database},
      {chef_solr:type_field(Module), get_object_type(Type)}].
