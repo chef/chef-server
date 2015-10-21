@@ -23,25 +23,28 @@ class SolrPreflightValidator < PreflightValidator
   end
 
   def run!
-    warn_unchanged_external_flag
+    warn_changed_external_flag
     verify_external_url
     verify_erchef_config
   end
 
-  def warn_unchanged_external_flag
+  def warn_changed_external_flag
     if OmnibusHelper.has_been_bootstrapped? && backend?  && previous_run
-      if cs_solr_attr.has_key?('external') && (cs_solr_attr['external'] != previous_run['opscode-solr4']['external'])
+      if external_flag_changed?
         Chef::Log.warn <<-EOM
 
-The value of opscode_solr4['external'] has been changed.  Search
+The value of opscode_solr4['external'] has been changed. Search
 results against the new external search index may be incorrect. Please
 run `chef-server-ctl reindex --all` to ensure correct results
 
 EOM
       end
-    else
-      return true
     end
+  end
+
+  def external_flag_changed?
+    cs_solr_attr.has_key?('external') &&
+      (cs_solr_attr['external'] != previous_run['opscode-solr4']['external'])
   end
 
   def verify_external_url
@@ -77,6 +80,7 @@ EOM
     when 'solr'
     else
       fail_with <<-EOM
+
 The specified search provider (#{provider}) is not currently supported.
 Please choose from one of the following search providers:
 
