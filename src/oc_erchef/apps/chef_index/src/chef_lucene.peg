@@ -8,15 +8,15 @@ query <- star_star / (expression / space)* %{
 star_star <- "*:*" ~;
 
 expression <- operation / group / field_phrase / field / field_range / term / string %{
-           [chef_solr:transform_query_safe(get(search_module), iolist_to_binary(Node))]
+           convert_final(Node)
 %};
 
 term <- keyword valid_letter+ / !keyword valid_letter+ %{
-     [convert_term(Node)]
+     [{term, Node}]
 %};
 
 field <- name:field_name ":" arg:(fuzzy_op / term / group / string) %{
-    [<<"content:">>, convert_term(?gv(name, Node)), chef_solr:kv_sep(get(search_module)), ?gv(arg, Node)]
+    [<<"content:">>, {term, ?gv(name, Node)}, chef_solr:kv_sep(get(search_module)), ?gv(arg, Node)]
 %};
 
 field_phrase <- name:field_name ':' '"' str:(term (space term)*) '"' %{
@@ -59,7 +59,7 @@ fuzzy_op <- (term / string) '~' fuzzy_param? ~;
 fuzzy_param <- [0-9]+ ('.' [0-9])? ~;
 
 string <- '"' phr:(term (space term)*) '"' %{
-       [<<"\"">>, convert_phrase(?gv(phr, Node)), <<"\"">>]
+       [ <<"\"">>, convert_phrase(?gv(phr, Node)), <<"\"">>]
 %};
 
 keyword <- "AND" / "OR" / "NOT" ~;
@@ -69,7 +69,7 @@ valid_letter <- start_letter+ ([a-zA-Z0-9*?@_+./-] / escaped_special)* ~;
 start_letter <- [a-zA-Z0-9_.*/] / escaped_special ~;
 
 escaped_special <- '\\' chr:special_char %{
-    [<<"\\">>, convert_char(?gv(chr, Node))]
+    [{escaped_special, ?gv(chr, Node)}]
 %};
 
 space <- [ \t]+ ~;
@@ -106,18 +106,48 @@ special_char <- '[' / ']' / '\\' / '"' / [!(){}^~*?:] ~;
 -define(not_op, 'NOT').
 -define(not_bang_op, '!').
 
+-spec convert_final(list()) -> iolist().
+convert_final(Ast) ->
+      L = lists:flatten(Ast),
+      convert_final1(L, []).
+
+convert_final1([], Acc) ->
+  chef_solr:transform_query_safe(get(search_module), iolist_to_binary(lists:reverse(Acc)));
+convert_final1([Bin|Rest], Acc) when is_binary(Bin) ->
+   convert_final1(Rest, [Bin|Acc]);
+convert_final1([{term, Content}|Rest], Acc) ->
+   convert_final1(Rest, [convert_term(Content) | Acc]).
+
 -spec convert_term(iolist()) -> binary().
 convert_term(Term) ->
-  chef_solr:transform_query_term(get(search_module), iolist_to_binary(Term)).
+  L = lists:flatten(Term),
+  convert_term1(L, [], []).
+
+convert_term1([], Accum1, Accum2) ->
+  Prev = chef_solr:transform_query_term(get(search_module), iolist_to_binary(lists:reverse(Accum1))),
+  [Accum2, Prev];
+convert_term1([Term|Rest], Accum1, Accum2) when is_binary(Term) ->
+  convert_term1(Rest, [Term|Accum1], Accum2);
+convert_term1([{escaped_special, Char}|Rest], Accum1, Accum2) ->
+  Prev = convert_char(lists:reverse(Accum1)),
+  NewAccum2 = [Accum2, Prev, <<"\\">>, convert_char(Char)],
+  convert_term1(Rest, [], NewAccum2).
 
 -spec convert_phrase(iolist()) -> binary().
 convert_phrase(Phrase) ->
-  chef_solr:transform_query_phrase(get(search_module), iolist_to_binary(Phrase)).
+  convert_phrase1(lists:flatten(Phrase), []).
+
+convert_phrase1([], Accum) ->
+  chef_solr:transform_query_phrase(get(search_module), iolist_to_binary(lists:reverse(Accum)));
+convert_phrase1([{term, Term}|Rest], Accum) ->
+  convert_phrase1(Rest, [convert_term1(lists:flatten(Term), [], [])|Accum]);
+convert_phrase1([Other|Rest], Accum) ->
+  convert_phrase1(Rest, [Other|Accum]).
+
 
 -spec convert_char(iolist()) -> binary().
 convert_char(Char) ->
   chef_solr:transform_query_all(get(search_module), iolist_to_binary(Char)).
-
 
 -spec convert_range_expression(binary(), binary(), binary(), binary(), binary()) -> iolist().
 convert_range_expression(FieldName, _, <<"*">>, <<"*">>, _) ->

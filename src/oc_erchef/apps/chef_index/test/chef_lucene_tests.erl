@@ -58,6 +58,12 @@ chef_lucene_cloudsearch_test_() ->
                ?assertEqual(chef_lucene:parse(<<"foo:bar+baz">>), <<"content:foo__EQ__bar__PL__baz">>)
        end
       },
+      {"cloudsearch: it replaces underscores correctly",
+       fun() ->
+               chef_index_test_utils:set_provider(cloudsearch),
+               ?assertEqual(chef_lucene:parse(<<"foo:bar_bar">>), <<"content:foo__EQ__bar__US__bar">>)
+       end
+      },
       {"cloudsearch: it does replace escaped solr wildcard operators in a term",
        fun() ->
                chef_index_test_utils:set_provider(cloudsearch),
@@ -65,6 +71,12 @@ chef_lucene_cloudsearch_test_() ->
                ?assertEqual(chef_lucene:parse(<<"bar\\?">>), <<"bar\\__QS__">>),
                ?assertEqual(chef_lucene:parse(<<"foo:bar\\*">>), <<"content:foo__EQ__bar\\__ST__">>),
                ?assertEqual(chef_lucene:parse(<<"foo:bar\\?">>), <<"content:foo__EQ__bar\\__QS__">>)
+       end
+      },
+      {"cloudsearch: it does replace solr wildcards in a phrase",
+       fun() ->
+               chef_index_test_utils:set_provider(cloudsearch),
+               ?assertEqual(chef_lucene:parse(<<"foo:\"bar*\"">>), <<"content:\"foo__EQ__bar__ST__\"">>)
        end
       },
       {"cloudsearch: it does NOT replace leading operators",
@@ -82,4 +94,3 @@ chef_lucene_cloudsearch_test_() ->
        end
       }
      ].
-
