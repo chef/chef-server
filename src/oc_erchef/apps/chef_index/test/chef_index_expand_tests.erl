@@ -161,7 +161,7 @@ flatten_and_xml_escape_test() ->
     Expect = <<"A &amp; W__=__The &quot;question&quot; is &lt; &gt; !&amp; ">>,
     ?assertEqual(Expect, iolist_to_binary(chef_index_expand:flatten(solr_provider, Input))).
 
-doc_construction_tests_() ->
+doc_construction_test_() ->
     MinItem = {[{<<"key1">>, <<"value1">>},
                 {<<"key2">>, <<"value2">>}]},
     {setup,
@@ -192,7 +192,7 @@ doc_construction_tests_() ->
                                    ?assertEqual(Expect, Doc),
                                    {ok, "200", [], []}
                            end),
-               ?assertEqual(ok, chef_solr:update(chef_solr:update_module(), D))
+               ?assertEqual(ok,chef_index_expand:send_item(D))
        end},
 
       {"happy path delete",
@@ -205,12 +205,12 @@ doc_construction_tests_() ->
                                    ?assertEqual(Expect, Doc),
                                    {ok, "200", [], []}
                            end),
-               ?assertEqual(ok, chef_solr:update(chef_solr:update_module(), D))
+               ?assertEqual(ok, chef_index_expand:send_delete(D))
        end},
 
       {"special handling for data bag items",
        fun() ->
-               D = chef_index_expand:doc_for_index(data_bag_item, <<"abc123">>, "dbdb1212", ?DB_ITEM),
+               D = chef_index_expand:doc_for_index(<<"sport-balls">>, <<"abc123">>, "dbdb1212", ?DB_ITEM),
                Expect = <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                           "<update>"
                           "<add>"
@@ -243,7 +243,7 @@ doc_construction_tests_() ->
                                    ?assertEqual(Expect, Doc),
                                    {ok, "200", [], []}
                            end),
-               ?assertEqual(ok, chef_solr:update(D))
+               ?assertEqual(ok, chef_index_expand:send_item(D))
        end},
 
       {"error from chef_index_http",
@@ -253,7 +253,7 @@ doc_construction_tests_() ->
                            fun("/update", post, _Doc) ->
                                    {ok, "500", [], <<"oh no">>}
                            end),
-               ?assertEqual({error, {ok, "500", [], <<"oh no">>}}, chef_solr:update(Doc))
+               ?assertEqual({error, {ok, "500", [], <<"oh no">>}}, chef_solr:update(solr_provider, Doc))
        end}
      ]}.
 
@@ -385,36 +385,3 @@ cs_send_item_xml_expect() ->
       "</add>"
       "</batch>">>.
 
-multi_update_xml_expect() ->
-    %% See http://wiki.apache.org/solr/UpdateXmlMessages
-    %% for expected format of mixed add/delete POSTs
-    <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-      "<update>"
-      "<delete>"
-      "<id>a5</id>"
-      "</delete>"
-      "<add>"
-
-      "<doc>"
-      "<field name=\"X_CHEF_id_CHEF_X\">a2</field>"
-      "<field name=\"X_CHEF_database_CHEF_X\">chef_db2</field>"
-      "<field name=\"X_CHEF_type_CHEF_X\">role</field>"
-      "<field name=\"content\">"
-      "X_CHEF_database_CHEF_X__=__chef_db2 "
-      "X_CHEF_id_CHEF_X__=__a2 "
-      "X_CHEF_type_CHEF_X__=__role "
-      "key1__=__value1 key2__=__value2 </field>"
-      "</doc>"
-
-      "<doc>"
-      "<field name=\"X_CHEF_id_CHEF_X\">a1</field>"
-      "<field name=\"X_CHEF_database_CHEF_X\">chef_db1</field>"
-      "<field name=\"X_CHEF_type_CHEF_X\">role</field>"
-      "<field name=\"content\">"
-      "X_CHEF_database_CHEF_X__=__chef_db1 "
-      "X_CHEF_id_CHEF_X__=__a1 "
-      "X_CHEF_type_CHEF_X__=__role "
-      "key1__=__value1 key2__=__value2 </field>"
-      "</doc>"
-      "</add>"
-      "</update>">>.
