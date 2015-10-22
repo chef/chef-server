@@ -29,14 +29,13 @@ class SolrPreflightValidator < PreflightValidator
   end
 
   def warn_changed_external_flag
-    if OmnibusHelper.has_been_bootstrapped? && backend?  && previous_run
+    if OmnibusHelper.has_been_bootstrapped? && backend? && previous_run
       if external_flag_changed?
         Chef::Log.warn <<-EOM
 
-The value of opscode_solr4['external'] has been changed. Search
-results against the new external search index may be incorrect. Please
-run `chef-server-ctl reindex --all` to ensure correct results
-
+CSSOLR001: The value of opscode_solr4['external'] has been changed. Search
+           results against the new external search index may be incorrect. Please
+           run `chef-server-ctl reindex --all` to ensure correct results
 EOM
       end
     end
@@ -51,10 +50,9 @@ EOM
     if cs_solr_attr['external'] & (! cs_solr_attr['external_url'])
       fail_with <<EOM
 
-No external url specified for Solr depsite opscode_solr4['external']
-being set to true. To use an external solr instance, please set
-opscode_solr4['external_url'] to the external solr endpoint.
-
+CSSOLR002: No external url specified for Solr depsite opscode_solr4['external']
+           being set to true. To use an external solr instance, please set
+           opscode_solr4['external_url'] to the external solr endpoint.
 EOM
     end
   end
@@ -67,25 +65,24 @@ EOM
       if ! ['batch', 'inline'].include?(@cs_erchef_attr['search_queue_mode'])
         fail_with <<-EOM
 
-The cloudsearch search provider is only supported by the batch or
-inline queue modes. To use the cloudsearch search provider, please
-also set:
+CSSOLR003: The cloudsearch search provider is only supported by the batch or
+           inline queue modes. To use the cloudsearch search provider, please
+           also set:
 
-opscode_erchef['search_queue_mode'] = 'batch'
+           opscode_erchef['search_queue_mode'] = 'batch'
 
-in /etc/opscode/chef-server.rb
-
+           in /etc/opscode/chef-server.rb
 EOM
       end
     when 'solr'
     else
       fail_with <<-EOM
 
-The specified search provider (#{provider}) is not currently supported.
-Please choose from one of the following search providers:
+CSSOLR004: The specified search provider (#{provider}) is not currently supported.
+           Please choose from one of the following search providers:
 
-solr
-cloudsearch
+           solr
+           cloudsearch
 EOM
     end
   end
