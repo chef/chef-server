@@ -18,18 +18,18 @@ init() ->
     end,
     ok = erlang:load_nif(filename:join(PrivDir, "cs_escape"), 0).
 
--spec escape(binary()) -> binary().
+-spec escape(string()) -> string().
 escape(_X) ->
     erlang:nif_error(nif_library_not_loaded).
 
--spec escape_safe(binary()) -> binary().
+-spec escape_safe(string()) -> string().
 escape_safe(_X) ->
     erlang:nif_error(nif_library_not_loaded).
 
--spec escape_term_safe(binary()) -> binary().
+-spec escape_term_safe(string()) -> string().
 escape_term_safe(_X) ->
     erlang:nif_error(nif_library_not_loaded).
 
--spec escape_phrase_safe(binary()) -> binary().
+-spec escape_phrase_safe(string()) -> string().
 escape_phrase_safe(_X) ->
     erlang:nif_error(nif_library_not_loaded).
