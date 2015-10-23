@@ -38,7 +38,7 @@ flatten_non_recursive_type_test() ->
               {<<"q1">>, <<"with \"quotes\"">>},
               {<<"q2 \"2\"">>, <<"with quotes in key">>}
              ]},
-    Expanded = chef_index_expand:flatten(Input),
+    Expanded = chef_index_expand:flatten(solr_provider, Input),
     %% Expected final result when flattened should be space separated
     %% as below. Formatting of floats is tricky. We should investigate
     %% what the Ruby code does.
@@ -56,7 +56,7 @@ flatten_lists_test() ->
     Input = {[{<<"k1">>, [null, true, false,
                           <<"a">>, 0, 1.123,
                           [<<"b">>, 2], <<"c">>]}]},
-    Expanded = chef_index_expand:flatten(Input),
+    Expanded = chef_index_expand:flatten(solr_provider, Input),
     Expect = <<"k1__=__ "
                "k1__=__0 k1__=__1.123 "
                "k1__=__2 k1__=__a k1__=__b k1__=__c "
@@ -66,7 +66,7 @@ flatten_lists_test() ->
 example_test() ->
     {ok, Bin} = chef_index_test_utils:read_file("sample_node.json"),
     Node = jiffy:decode(Bin),
-    Expanded = chef_index_expand:flatten(Node),
+    Expanded = chef_index_expand:flatten(solr_provider, Node),
     file:write_file(chef_index_test_utils:filename("sample.out"), Expanded),
     ok.
 
@@ -86,7 +86,7 @@ example_nested_test() ->
                                                          ]}]}
                                         ]}}
                           ]}}]},
-    Expanded = chef_index_expand:flatten(Input),
+    Expanded = chef_index_expand:flatten(solr_provider, Input),
     file:write_file("../test/example_nested.out", Expanded),
     ok.
 
@@ -98,7 +98,7 @@ example_flat_test() ->
               {<<"a_float">>, 1.23},
               {<<"a_string">>, <<"hello, \"you\"">>}
              ]},
-    Expanded = chef_index_expand:flatten(Input),
+    Expanded = chef_index_expand:flatten(solr_provider, Input),
     file:write_file("../test/example_flat.out", Expanded),
     ok.
 
@@ -152,42 +152,29 @@ flatten_nested_test() ->
                 "kkk2__=__i&lt;&amp;&gt; "
                 "lkk&lt;&gt;k1__=__1 "
                 "lkkk2__=__2 ">>,
-    ?assertEqual(Expect, iolist_to_binary(chef_index_expand:flatten(Input))).
+    ?assertEqual(Expect, iolist_to_binary(chef_index_expand:flatten(solr_provider, Input))).
 
 flatten_and_xml_escape_test() ->
     Input = {[
               {<<"A & W">>, <<"The \"question\" is < > !&">>}
              ]},
     Expect = <<"A &amp; W__=__The &quot;question&quot; is &lt; &gt; !&amp; ">>,
-    ?assertEqual(Expect, iolist_to_binary(chef_index_expand:flatten(Input))).
+    ?assertEqual(Expect, iolist_to_binary(chef_index_expand:flatten(solr_provider, Input))).
 
-make_command_role_test_() ->
-    Cmd = chef_index_expand:make_command(add, role, <<"abc123">>, <<"dbdb1212">>, ?ROLE),
-
-    Payload = ej:get({<<"payload">>}, Cmd),
-    [?_assertEqual(<<"add">>, ej:get({<<"action">>}, Cmd)),
-     ?_assert(is_integer(ej:get({<<"enqueued_at">>}, Payload))),
-     ?_assertEqual(<<"role">>, ej:get({<<"type">>}, Payload)),
-     ?_assertEqual(<<"abc123">>, ej:get({<<"id">>}, Payload)),
-     ?_assertEqual(<<"chef_dbdb1212">>, ej:get({<<"database">>}, Payload)),
-     ?_assertEqual(?ROLE, ej:get({<<"item">>}, Payload))
-    ].
-
-post_single_test_() ->
+doc_construction_test_() ->
     MinItem = {[{<<"key1">>, <<"value1">>},
                 {<<"key2">>, <<"value2">>}]},
     {setup,
      fun() ->
-             meck:new(chef_index_http, [])
+             meck:new(chef_index_http, []),
+             application:set_env(chef_index, search_provider, solr)
      end,
      fun(_) ->
              meck:unload()
      end,
-     [{"happy path add post_single",
+     [{"happy path add",
        fun() ->
-               Cmd = chef_index_expand:make_command(add, role, <<"abc123">>,
-                                                    "dbdb1212", MinItem),
-
+               D = chef_index_expand:doc_for_index(role, <<"abc123">>, "dbdb1212", MinItem),
                Expect = <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                           "<update>"
                           "<add><doc>"
@@ -201,32 +188,29 @@ post_single_test_() ->
                           "key1__=__value1 key2__=__value2 </field>"
                           "</doc></add></update>">>,
                meck:expect(chef_index_http, request,
-                           fun("update", post, Doc) ->
+                           fun("/update", post, Doc) ->
                                    ?assertEqual(Expect, Doc),
                                    {ok, "200", [], []}
                            end),
-               ?assertEqual(ok, chef_index_expand:post_single(Cmd, role))
+               ?assertEqual(ok,chef_index_expand:send_item(D))
        end},
 
-      {"happy path delete post_single",
+      {"happy path delete",
        fun() ->
-               Cmd = chef_index_expand:make_command(delete, role, <<"abc123">>,
-                                                    "dbdb1212", {[]}),
-
+               D = chef_index_expand:doc_for_delete(role, <<"abc123">>, "dbdb1212"),
                Expect = <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                           "<update><delete><id>abc123</id></delete></update>">>,
                meck:expect(chef_index_http, request,
-                           fun("update", post, Doc) ->
+                           fun("/update", post, Doc) ->
                                    ?assertEqual(Expect, Doc),
                                    {ok, "200", [], []}
                            end),
-               ?assertEqual(ok, chef_index_expand:post_single(Cmd, role))
+               ?assertEqual(ok, chef_index_expand:send_delete(D))
        end},
 
       {"special handling for data bag items",
        fun() ->
-               Cmd = chef_index_expand:make_command(add, data_bag_item, <<"abc123">>,
-                                                    "dbdb1212", ?DB_ITEM),
+               D = chef_index_expand:doc_for_index(<<"sport-balls">>, <<"abc123">>, "dbdb1212", ?DB_ITEM),
                Expect = <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                           "<update>"
                           "<add>"
@@ -255,74 +239,32 @@ post_single_test_() ->
                           "</add>"
                           "</update>">>,
                meck:expect(chef_index_http, request,
-                           fun("update", post, Doc) ->
+                           fun("/update", post, Doc) ->
                                    ?assertEqual(Expect, Doc),
                                    {ok, "200", [], []}
                            end),
-               ?assertEqual(ok, chef_index_expand:post_single(Cmd, <<"sport-balls">>))
-       end},
-
-      {"bogus action is skipped",
-       fun() ->
-               Cmd = chef_index_expand:make_command(bogus, role, <<"abc123">>,
-                                                    "chef_dbdb1212", MinItem),
-               ?assertEqual(ok, chef_index_expand:post_single(Cmd, role))
+               ?assertEqual(ok, chef_index_expand:send_item(D))
        end},
 
       {"error from chef_index_http",
        fun() ->
-               Cmd = chef_index_expand:make_command(add, role, <<"abc123">>,
-                                                    "dbdb1212", MinItem),
+               Doc = chef_index_expand:doc_for_index(role, <<"abc123">>, "dbdb1212", MinItem),
                meck:expect(chef_index_http, request,
-                           fun("update", post, _Doc) ->
+                           fun("/update", post, _Doc) ->
                                    {ok, "500", [], <<"oh no">>}
                            end),
-               ?assertEqual({error, {"500", <<"oh no">>}}, chef_index_expand:post_single(Cmd, role))
+               ?assertEqual({error, {ok, "500", [], <<"oh no">>}}, chef_solr:update(solr_provider, Doc))
        end}
      ]}.
 
-post_multi_test_() ->
+solr_api_test_() ->
     MinItem = {[{<<"key1">>, <<"value1">>},
-                {<<"key2">>, <<"value2">>}]},
-    Cmds = [chef_index_expand:make_command(add, role, <<"a1">>, "db1", MinItem),
-            chef_index_expand:make_command(add, role, <<"a2">>, "db2", MinItem),
-            chef_index_expand:make_command(bogus, role, <<"a3">>, "db2", MinItem),
-            chef_index_expand:make_command(bogus, role, <<"a4">>, "db2", MinItem),
-            chef_index_expand:make_command(delete, role, <<"a5">>, "db3", {[]})],
-    {setup,
-     fun() ->
-             meck:new(chef_index_http, [])
-     end,
-     fun(_) ->
-             meck:unload()
-     end,
-     [{"happy path mix post_multi",
-       fun() ->
-               Expect = multi_update_xml_expect(),
-               meck:expect(chef_index_http, request,
-                           fun("update", post, Doc) ->
-                                   ?assertEqual(Expect, Doc),
-                                   {ok, "200", [], []}
-                           end),
-               ?assertEqual(ok, chef_index_expand:post_multi(Cmds, role))
-       end},
-
-      {"all empty post_multi",
-       fun() ->
-               AllBogus = [chef_index_expand:make_command(bogus, role, <<"a3">>, "db2", MinItem),
-                           chef_index_expand:make_command(bogus, role, <<"a4">>, "db2", MinItem)],
-               ?assertEqual(ok, chef_index_expand:post_multi(AllBogus, role))
-       end}
-
-     ]}.
-
-
-api_test_() ->
-    MinItem = {[{<<"key1">>, <<"value1">>},
-                {<<"key2">>, <<"value2">>}]},
+                {<<"key2">>, <<"value-2">>}]},
     {foreach,
      fun() ->
+             application:set_env(chef_index, search_provider, solr),
              meck:new(chef_index_http, [])
+
      end,
      fun(_) ->
              meck:unload()
@@ -330,9 +272,10 @@ api_test_() ->
      [fun(_) ->
               [{"send_item",
                 fun() ->
+                        chef_index_test_utils:set_provider(solr),
                         Expect = send_item_xml_expect(),
                         meck:expect(chef_index_http, request,
-                                    fun("update", post, Doc) ->
+                                    fun("/update", post, Doc) ->
                                             ?assertEqual(Expect, Doc),
                                             {ok, "200", [], []}
                                     end),
@@ -341,9 +284,50 @@ api_test_() ->
                 end},
                {"send_delete",
                 fun() ->
+                        chef_index_test_utils:set_provider(solr),
                         Expect = send_delete_xml_expect(),
                         meck:expect(chef_index_http, request,
-                                    fun("update", post, Doc) ->
+                                    fun("/update", post, Doc) ->
+                                            ?assertEqual(Expect, Doc),
+                                            {ok, "200", [], []}
+                                    end),
+                        DelDoc = chef_index_expand:doc_for_delete(role, <<"a5">>, <<"db3">>),
+                        ?assertEqual(ok, chef_index_expand:send_delete(DelDoc))
+                end
+               }
+              ]
+     end]
+    }.
+
+cloudsearch_api_test_() ->
+    MinItem = {[{<<"key1">>, <<"value1">>},
+                {<<"key2">>, <<"value-2">>}]},
+    {foreach,
+     fun() ->
+             application:set_env(chef_index, search_provider, cloudsearch)
+     end,
+     fun(_) ->
+             meck:unload()
+     end,
+     [fun(_) ->
+              [{"send_item",
+                fun() ->
+                        chef_index_test_utils:set_provider(cloudsearch),
+                        Expect = cs_send_item_xml_expect(),
+                        meck:expect(chef_index_http, request,
+                                    fun("/documents/batch", post, Doc) ->
+                                            ?assertEqual(Expect, Doc),
+                                            {ok, "200", [], []}
+                                    end),
+                        AddDoc = chef_index_expand:doc_for_index(role, <<"a1">>, <<"db1">>, MinItem),
+                        ?assertEqual(ok, chef_index_expand:send_item(AddDoc))
+                end},
+               {"send_delete",
+                fun() ->
+                        chef_index_test_utils:set_provider(cloudsearch),
+                        Expect = cs_send_delete_xml_expect(),
+                        meck:expect(chef_index_http, request,
+                                    fun("/documents/batch", post, Doc) ->
                                             ?assertEqual(Expect, Doc),
                                             {ok, "200", [], []}
                                     end),
@@ -375,41 +359,29 @@ send_item_xml_expect() ->
       "X_CHEF_database_CHEF_X__=__chef_db1 "
       "X_CHEF_id_CHEF_X__=__a1 "
       "X_CHEF_type_CHEF_X__=__role "
-      "key1__=__value1 key2__=__value2 </field>"
+      "key1__=__value1 key2__=__value-2 </field>"
       "</doc>"
       "</add>"
       "</update>">>.
 
-multi_update_xml_expect() ->
-    %% See http://wiki.apache.org/solr/UpdateXmlMessages
-    %% for expected format of mixed add/delete POSTs
+cs_send_delete_xml_expect() ->
     <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-      "<update>"
-      "<delete>"
-      "<id>a5</id>"
-      "</delete>"
-      "<add>"
+      "<batch>"
+      "<delete id=\"a5\" />"
+      "</batch>">>.
 
-      "<doc>"
-      "<field name=\"X_CHEF_id_CHEF_X\">a2</field>"
-      "<field name=\"X_CHEF_database_CHEF_X\">chef_db2</field>"
-      "<field name=\"X_CHEF_type_CHEF_X\">role</field>"
+cs_send_item_xml_expect() ->
+    <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+      "<batch>"
+      "<add id=\"a1\">"
+      "<field name=\"x_chef_id_chef_x\">a1</field>"
+      "<field name=\"x_chef_database_chef_x\">chef_db1</field>"
+      "<field name=\"x_chef_type_chef_x\">role</field>"
       "<field name=\"content\">"
-      "X_CHEF_database_CHEF_X__=__chef_db2 "
-      "X_CHEF_id_CHEF_X__=__a2 "
-      "X_CHEF_type_CHEF_X__=__role "
-      "key1__=__value1 key2__=__value2 </field>"
-      "</doc>"
-
-      "<doc>"
-      "<field name=\"X_CHEF_id_CHEF_X\">a1</field>"
-      "<field name=\"X_CHEF_database_CHEF_X\">chef_db1</field>"
-      "<field name=\"X_CHEF_type_CHEF_X\">role</field>"
-      "<field name=\"content\">"
-      "X_CHEF_database_CHEF_X__=__chef_db1 "
-      "X_CHEF_id_CHEF_X__=__a1 "
-      "X_CHEF_type_CHEF_X__=__role "
-      "key1__=__value1 key2__=__value2 </field>"
-      "</doc>"
+      "key1__EQ__value1 key2__EQ__value__DS__2 "
+      "x_chef_database_chef_x__EQ__chef_db1 "
+      "x_chef_id_chef_x__EQ__a1 "
+      "x_chef_type_chef_x__EQ__role </field>"
       "</add>"
-      "</update>">>.
+      "</batch>">>.
+
