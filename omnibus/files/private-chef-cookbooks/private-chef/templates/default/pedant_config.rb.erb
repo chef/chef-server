@@ -61,7 +61,7 @@ default_orgname <%= @default_orgname ? "\"#{@default_orgname}\"" : "nil" %>
 # testing location, you should not specify a value for this parameter.
 # The tests will still run, albeit slower, as they will now need to
 # poll for a period to ensure they are querying committed results.
-<% if node['private_chef']['search_provider'] == "solr" %>
+<% if node['private_chef']['opscode-erchef']['search_provider'] == "solr" %>
 search_server "<%= @solr_url %>"
 <% else %>
 # search_server "<%= @solr_url %>"
