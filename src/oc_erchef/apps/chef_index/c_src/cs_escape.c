@@ -117,9 +117,12 @@ ERL_NIF_TERM escape_nif_gen(ErlNifEnv * env, int argc, const ERL_NIF_TERM argv[]
   int character, len;
   int pos = 0;
 
-  if (argc != 1)
+  if (argc != 1) {
+      enif_make_badarg(env);
       return enif_make_string(env, "Error: no argument provided.", ERL_NIF_LATIN1);
+  }
   if (!enif_get_list_length(env, argv[0], &len)) {
+      enif_make_badarg(env);
       return enif_make_string(env, "Error: argument is not a list.", ERL_NIF_LATIN1);
   }
 
@@ -128,9 +131,10 @@ ERL_NIF_TERM escape_nif_gen(ErlNifEnv * env, int argc, const ERL_NIF_TERM argv[]
   while (enif_get_list_cell(env, head, &head, &tail)) {
     if (!enif_get_int(env, head, &character)) {
       enif_free(replacement_list);
+      enif_make_badarg(env);
       return enif_make_string(env, "Error: invalid character in list.", ERL_NIF_LATIN1);
     }
-    replacement_list[pos] = enif_make_int(env, funcPtr(character));
+    replacement_list[pos] = enif_make_int(env, cs_escape_if(character, funcPtr));
   }
   retval = enif_make_list_from_array(env, replacement_list, len);
   enif_free(replacement_list);
