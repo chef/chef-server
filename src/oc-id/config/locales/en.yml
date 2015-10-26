@@ -20,6 +20,10 @@
 # available at http://guides.rubyonrails.org/i18n.html.
 
 en:
+  doorkeeper:
+    authorized_applications:
+      index:
+        no_applications_message: You have not granted any applications access to your Chef account.
   errors:
     passwords:
       blank: "%{label} must not be blank."
@@ -32,6 +36,9 @@ en:
       password_blank: "Password must not be blank."
       invalid_signature: "The given password reset link is expired or has an invalid signature."
       completion: "If the username you entered exists, you should receive an email shortly."
+  password_resets:
+    new:
+      form_caption: Enter your Chef username and we'll send you a link to reset it.
   profile:
     update_successful: "Profile updated successfully."
     password_changed: "Password changed."
