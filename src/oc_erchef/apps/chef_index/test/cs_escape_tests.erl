@@ -22,7 +22,7 @@ cs_escape_test_() ->
     [
      {"doesn't alter data with no special characters", ?_assertEqual(cs_escape:escape(<<"FooBar">>), <<"FooBar">>)},
      {"replaces a bunch of special characters", ?_assertEqual(cs_escape:escape(<<"Foo-()*Bar">>), <<"Foo__DS____OP____CP____ST__Bar">>)},
-     {"doesn't replace underscore", ?_assertEqual(cs_escape:escape(<<"Foo_Bar">>), <<"Foo_Bar">>)},
+     {"replaces underscores that appears in original data", ?_assertEqual(cs_escape:escape(<<"A-Foo_Bar">>), <<"A__DS__Foo__US__Bar">>)},
      {"doesn't replace period", ?_assertEqual(cs_escape:escape(<<"Foo.Bar">>), <<"Foo.Bar">>)},
      {"doesn't replace integers", ?_assertEqual(cs_escape:escape(<<"Foo9Bar">>), <<"Foo9Bar">>)},
      {"doesn't replace single quotes", ?_assertEqual(cs_escape:escape(<<"Foo'Bar">>), <<"Foo'Bar">>)},

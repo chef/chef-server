@@ -379,9 +379,8 @@ cs_send_item_xml_expect() ->
       "<field name=\"x_chef_type_chef_x\">role</field>"
       "<field name=\"content\">"
       "key1__EQ__value1 key2__EQ__value__DS__2 "
-      "x_chef_database_chef_x__EQ__chef_db1 "
-      "x_chef_id_chef_x__EQ__a1 "
-      "x_chef_type_chef_x__EQ__role </field>"
+      "x__US__chef__US__database__US__chef__US__x__EQ__chef__US__db1 "
+      "x__US__chef__US__id__US__chef__US__x__EQ__a1 "
+      "x__US__chef__US__type__US__chef__US__x__EQ__role </field>"
       "</add>"
       "</batch>">>.
-

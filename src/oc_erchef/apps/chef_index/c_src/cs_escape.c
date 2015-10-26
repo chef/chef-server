@@ -27,7 +27,7 @@
 // shortening the array.
 #define replacement_for(n) replacements[n - 33]
 
-static const char *replacements[] = {
+static const unsigned char *replacements[] = {
   "__EX__", // !
   "__DQ__", // "
   "__HS__", // #
@@ -58,7 +58,7 @@ static const char *replacements[] = {
   "__BS__", // Back Slash
   "__CB__", // ]
   "__CA__", // ^
-  "_", // _
+  "__US__", // _
   "__BT__", // `
   "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
   "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v",
@@ -74,27 +74,26 @@ static const char *replacements[] = {
 // 0x5b - 0x60 is [ through `
 // 0x7b - 0x7e is { through ~
 static inline bool has_replacement(unsigned char n) {
-  return ((n >= 0x21 && n <= 0x2f) || \
-          (n >= 0x3a && n <= 0x40) || \
-          (n >= 0x5b && n <= 0x60) || \
+  return ((n >= 0x21 && n <= 0x2f) ||
+          (n >= 0x3a && n <= 0x40) ||
+          (n >= 0x5b && n <= 0x60) ||
           (n >= 0x7b && n <= 0x7e));
 }
 
 static inline bool is_cs_safe(unsigned char n) {
-  return (n == 0x23 || n == 0x24 || n == 0x25 || \
-          n == 0x2c || n == 0x2f || n == 0x3b || \
+  return (n == 0x23 || n == 0x24 || n == 0x25 ||
+          n == 0x2c || n == 0x2f || n == 0x3b ||
           n == 0x3c || n == 0x3d || n == 0x3e ||
           n == 0x40 || n == 0x60);
 }
 
 static inline bool is_cs_term_safe(unsigned char n) {
-  return (n == 0x2b || n == 0x2d || is_cs_safe(n));
+  return (n == 0x2b || n == 0x2d || n == 0x5f || is_cs_safe(n));
 }
 
 static inline bool is_cs_phrase_safe(unsigned char n) {
-  return (n == 0x2b || n == 0x2d || \
-          n == 0x2a || n == 0x3f || \
-          is_cs_safe(n));
+  return (n == 0x2b || n == 0x2d ||
+          n == 0x2a || n == 0x3f || is_cs_safe(n));
 }
 
 static size_t do_replace(unsigned char *buf, int n) {
