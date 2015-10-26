@@ -27,21 +27,6 @@ describe 'Search API endpoint', :search do
         end
       end
       add_node(admin_requestor, n).should look_like({:status => 201 })
-      n = new_node("search_workbreak_node").tap do |node|
-        SPECIAL_CHARS.each_char do |c|
-          node["default"]["key1"] = "a quick brown fox"
-          node["default"]["key2"] = 3.14
-          node["default"]["key3"] = "one-two-one-two-three-four"
-          node["default"]["a.key"] = "a.value"
-        end
-      end
-      add_node(admin_requestor, n).should look_like({:status => 201 })
-
-
-      # Just force this once- all subsequent searches here
-      # will be against the same object so we don't need to
-      # recommit for every test.
-      force_solr_commit
     end
 
     after :all do
@@ -76,7 +61,9 @@ describe 'Search API endpoint', :search do
           if usage == :does_not_use_char or (usage == :uses_char and PERMITTED_QUERY_CHARS.include?(char))
             it "with #{description}, should #{find_expected ? "find" : "not find"} the node" do
               expected = find_expected ? wb_node_found_result : wb_node_not_found_result
-              expect(search_result("node", query)).to look_like expected
+              with_search_polling do
+                expect(search_result("node", query)).to look_like expected
+              end
             end
 
           end
