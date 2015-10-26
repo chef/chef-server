@@ -78,19 +78,19 @@ add_org_guid_to_fq(OrgGuid, FilterQuery) ->
       FilterQuery).
 
 transform_data(Data) when is_binary(Data) ->
-    unicode:characters_to_binary(cs_escape:escape(binary_to_list(Data)), utf8).
+    list_to_binary(cs_escape:escape(binary_to_list(Data))).
 
 transform_query_all(Data) when is_binary(Data) ->
-    unicode:characters_to_binary(cs_escape:escape(binary_to_list(Data)), utf8).
+    cs_escape:escape(binary_to_list(Data)).
 
 transform_query_safe(Data) when is_binary(Data) ->
-    unicode:characters_to_binary(cs_escape:escape_safe(binary_to_list(Data)), utf8).
+    cs_escape:escape_safe(binary_to_list(Data)).
 
 transform_query_term(Data) when is_binary(Data) ->
-    unicode:characters_to_binary(cs_escape:escape_term_safe(binary_to_list(Data)), utf8).
+    cs_escape:escape_term_safe(binary_to_list(Data)).
 
 transform_query_phrase(Data) ->
-    unicode:characters_to_binary(cs_escape:escape_phrase_safe(binary_to_list(Data)), utf8).
+    cs_escape:escape_phrase_safe(binary_to_list(Data)).
 
 assert_org_id_filter(FieldQuery) ->
     Start = "(and (term field=" ++ binary_to_list(database_field()) ++ " 'chef_",

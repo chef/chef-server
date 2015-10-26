@@ -8,7 +8,7 @@ query <- star_star / (expression / space)* %{
 star_star <- "*:*" ~;
 
 expression <- operation / group / field_phrase / field / field_range / term / string %{
-           [chef_solr:transform_query_safe(get(search_module), iolist_to_binary(Node))]
+           [unicode:characters_to_binary(chef_solr:transform_query_safe(get(search_module), iolist_to_binary(Node)))]
 %};
 
 term <- keyword valid_letter+ / !keyword valid_letter+ %{

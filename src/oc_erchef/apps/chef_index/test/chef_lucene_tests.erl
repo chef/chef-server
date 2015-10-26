@@ -52,19 +52,19 @@ chef_lucene_cloudsearch_test_() ->
       {"cloudsearch: it replaces other wordbreaking characters in a term",
        fun() ->
                chef_index_test_utils:set_provider(cloudsearch),
-               ?assertEqual(chef_lucene:parse(<<"bar-bar">>), <<"bar__DS__bar">>),
-               ?assertEqual(chef_lucene:parse(<<"foo:bar-baz">>), <<"content:foo__EQ__bar__DS__baz">>),
-               ?assertEqual(chef_lucene:parse(<<"foo:bar@baz">>), <<"content:foo__EQ__bar__AT__baz">>),
-               ?assertEqual(chef_lucene:parse(<<"foo:bar+baz">>), <<"content:foo__EQ__bar__PL__baz">>)
+               ?assertEqual(chef_lucene:parse(<<"bar-bar">>), <<"barËbar"/utf8>>),
+               ?assertEqual(chef_lucene:parse(<<"foo:bar-baz">>), <<"content:foo__EQ__barËbaz"/utf8>>),
+               ?assertEqual(chef_lucene:parse(<<"foo:bar@baz">>), <<"content:foo__EQ__barÓbaz"/utf8>>),
+               ?assertEqual(chef_lucene:parse(<<"foo:bar+baz">>), <<"content:foo__EQ__barÉbaz"/utf8>>)
        end
       },
       {"cloudsearch: it does replace escaped solr wildcard operators in a term",
        fun() ->
                chef_index_test_utils:set_provider(cloudsearch),
-               ?assertEqual(chef_lucene:parse(<<"bar\\*">>), <<"bar\\__ST__">>),
-               ?assertEqual(chef_lucene:parse(<<"bar\\?">>), <<"bar\\__QS__">>),
-               ?assertEqual(chef_lucene:parse(<<"foo:bar\\*">>), <<"content:foo__EQ__bar\\__ST__">>),
-               ?assertEqual(chef_lucene:parse(<<"foo:bar\\?">>), <<"content:foo__EQ__bar\\__QS__">>)
+               ?assertEqual(chef_lucene:parse(<<"bar\\*">>), <<"bar\\È"/utf8>>),
+               ?assertEqual(chef_lucene:parse(<<"bar\\?">>), <<"bar\\Ò"/utf8>>),
+               ?assertEqual(chef_lucene:parse(<<"foo:bar\\*">>), <<"content:foo__EQ__bar\\È"/utf8>>),
+               ?assertEqual(chef_lucene:parse(<<"foo:bar\\?">>), <<"content:foo__EQ__bar\\Ò"/utf8>>)
        end
       },
       {"cloudsearch: it does NOT replace leading operators",
@@ -80,6 +80,11 @@ chef_lucene_cloudsearch_test_() ->
                ?assertEqual(chef_lucene:parse(<<"bar~">>), <<"bar~">>),
                ?assertEqual(chef_lucene:parse(<<"foo:bar~">>), <<"content:foo__EQ__bar~">>)
        end
+      },
+      {"cloudsearch: the value returned can be url_escaped",
+       fun() ->
+               chef_index_test_utils:set_provider(cloudsearch),
+               ?assertEqual(ibrowse_lib:url_encode(binary_to_list(chef_lucene:parse(<<"bar-bar">>))), "bar%c3%8bbar")
+       end
       }
      ].
-
