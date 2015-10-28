@@ -19,7 +19,7 @@ describe PasswordResetsController do
       before { post :create }
 
       it 'shows a flash message prompting for a username' do
-        expect(flash[:alert]).to eql('Please enter a username.')
+        expect(flash[:alert]).to eql('Please enter a username or email address.')
       end
 
       it 'returns a 422' do
