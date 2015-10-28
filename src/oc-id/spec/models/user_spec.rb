@@ -41,7 +41,6 @@ describe User do
 
   it 'should update users on the server' do
     new_attrs = user_attrs.merge('email' => 'jimmeh@example.com')
-    allow(jimmy).to receive(:chef).and_return(chef)
     expect(chef).to receive(:put_rest).with('users/jimmeh', new_attrs.stringify_keys).and_return({'private key' => 'my awesome private key'})
     jimmy.update_attributes('email' => 'jimmeh@example.com')
     expect(jimmy.email).to eql('jimmeh@example.com')
@@ -50,6 +49,15 @@ describe User do
   it 'can identify an admin' do
     allow(Settings).to receive_message_chain('doorkeeper.administrators') { ['jimmeh'] }
     expect(User.admin?(jimmy.username)).to eql(true)
+  end
+
+  it 'can handle find when supplied email' do
+    allow(User).to receive(:new).and_return(jimmy)
+    expect(chef).to receive(:get).with("users?#{ {email: jimmy.email }.to_query}")
+                     .and_return([[jimmy.username]])
+    expect(chef).to receive(:get_rest).with('users/jimmeh')
+                     .and_return({'private key' => 'my awesome private key'})
+    expect(User.find(jimmy.email)).to eql(jimmy)
   end
 
   describe 'updating a password' do

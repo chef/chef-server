@@ -11,7 +11,7 @@ class SessionsController < ApplicationController
   end
 
   def retry
-    flash.now[:error] = "Sorry, that username or password was incorrect. Please try again."
+    flash.now[:error] = I18n.t("errors.logins.invalid_credentials")
     render :new
   end
 

@@ -9,15 +9,6 @@ GIT
       sass-rails (>= 3.2.5)
 
 GIT
-  remote: https://github.com/chef/omniauth-chef
-  revision: 994af13a91eca707e7b8b4934167c6b4331cacac
-  branch: master
-  specs:
-    omniauth-chef (0.1.2)
-      chef (~> 11)
-      omniauth (~> 1.2)
-
-GIT
   remote: https://github.com/nixme/jazz_hands
   revision: 5e4b48f145883ecb14b55bf04eacc28ac9662676
   branch: bring-your-own-debugger
@@ -172,7 +163,7 @@ GEM
       mime-types (~> 1.15)
       posix-spawn (~> 0.3.6)
     hashie (2.1.2)
-    highline (1.7.1)
+    highline (1.7.8)
     hike (1.2.3)
     hirb (0.7.3)
     i18n (0.7.0)
@@ -206,7 +197,7 @@ GEM
     mixlib-authentication (1.3.0)
       mixlib-log
     mixlib-cli (1.5.0)
-    mixlib-config (2.1.0)
+    mixlib-config (2.2.1)
     mixlib-log (1.6.0)
     mixlib-shellout (1.6.1)
     moneta (0.6.0)
@@ -215,7 +206,7 @@ GEM
     net-ssh (2.9.2)
     net-ssh-gateway (1.2.0)
       net-ssh (>= 2.6.5)
-    net-ssh-multi (1.2.0)
+    net-ssh-multi (1.2.1)
       net-ssh (>= 2.6.5)
       net-ssh-gateway (>= 1.2.0)
     newrelic_rpm (3.12.0.288)
@@ -232,6 +223,9 @@ GEM
     omniauth (1.2.2)
       hashie (>= 1.2, < 4)
       rack (~> 1.0)
+    omniauth-chef (0.2.0)
+      chef (~> 11)
+      omniauth (~> 1.2)
     pg (0.18.1)
     posix-spawn (0.3.11)
     pry (0.9.12.6)
@@ -301,9 +295,8 @@ GEM
       json (~> 1.4)
     responders (2.1.0)
       railties (>= 4.2.0, < 5)
-    rest-client (1.6.8)
+    rest-client (1.6.9)
       mime-types (~> 1.16)
-      rdoc (>= 2.4.2)
     rspec-core (3.2.2)
       rspec-support (~> 3.2.0)
     rspec-expectations (3.2.0)
@@ -411,7 +404,7 @@ DEPENDENCIES
   newrelic_rpm
   nokogiri (~> 1.6.2)
   omniauth (~> 1.2.1)
-  omniauth-chef!
+  omniauth-chef
   pg
   pry-byebug
   quiet_assets
