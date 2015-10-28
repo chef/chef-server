@@ -30,4 +30,7 @@ set_provider(solr) ->
     put(search_module, solr_provider);
 set_provider(cloudsearch) ->
     application:set_env(chef_index, search_provider, cloudsearch),
-    put(search_module, cloudsearch_provider).
+    put(search_module, cloudsearch_provider);
+set_provider(elasticsearch) ->
+    application:set_env(chef_index, search_provider, elasticsearch),
+    put(search_module, elasticsearch_provider).

@@ -70,7 +70,6 @@ delete(TypeName, Id, DbName, ReqId) ->
 queue_mode() ->
     envy:get(chef_index, search_queue_mode, rabbitmq, envy:one_of([rabbitmq, batch, inline])).
 
-
 send_to_solr(QueueMode, Doc, none) ->
     send_to_solr(QueueMode, Doc);
 send_to_solr(QueueMode, Doc, ReqId) ->

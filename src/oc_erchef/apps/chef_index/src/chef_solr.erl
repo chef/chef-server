@@ -55,7 +55,6 @@
 
 -include("chef_solr.hrl").
 
-
 provider_call(FuncName) ->
     (search_module()):FuncName().
 
@@ -65,18 +64,18 @@ provider_call(FuncName, Arg1) ->
 provider_call(FuncName, Arg1, Arg2) ->
     (search_module()):FuncName(Arg1, Arg2).
 
-
 search_provider() ->
-    envy:get(chef_index, search_provider, solr, envy:one_of([solr, cloudsearch])).
+    envy:get(chef_index, search_provider, solr, envy:one_of([solr, cloudsearch, elasticsearch])).
 
 search_module() ->
     search_module(search_provider()).
 
 search_module(solr) ->
     solr_provider;
+search_module(elasticsearch) ->
+    elasticsearch_provider;
 search_module(cloudsearch) ->
     cloudsearch_provider.
-
 
 -spec id_field(atom()) -> binary().
 id_field(SearchModule) ->
@@ -86,11 +85,9 @@ id_field(SearchModule) ->
 database_field(SearchModule) ->
     SearchModule:database_field().
 
-
 -spec type_field(atom()) -> binary().
 type_field(SearchModule) ->
     SearchModule:type_field().
-
 
 -spec ping_url(atom()) -> string().
 ping_url(SearchModule) ->
@@ -139,7 +136,6 @@ add_org_guid_to_query(Query = #chef_solr_query{filter_query = FilterQuery, searc
                       OrgGuid) ->
     Query#chef_solr_query{filter_query = Mod:add_org_guid_to_fq(OrgGuid, FilterQuery)}.
 
-
 %% Document Building Helpers
 %% These helpers are called by chef_index_expand to build
 %% XML documents appropriate for the given provider.
@@ -156,7 +152,9 @@ transform_data(Data) ->
 search(#chef_solr_query{} = Query) ->
     %% FIXME: error handling
     Url = make_solr_query_url(Query),
-    {ok, Code, _Head, Body} = chef_index_http:request(Url, get, []),
+    ReqBody = make_solr_query_body(Query),
+    lager:warning("Sending query with ~p ~p", [Url, ReqBody]),
+    {ok, Code, _Head, Body} = chef_index_http:request(Url, get, ReqBody),
     case Code of
         "200" ->
             handle_successful_search(Body);
@@ -183,7 +181,8 @@ ping() ->
         case chef_index_http:request(ping_url(search_module()), get, []) of
             %% FIXME: verify that solr returns non-200 if something is wrong and not "status":"ERROR".
             {ok, "200", _Head, _Body} -> pong;
-            _Error -> pang
+            Error ->
+                pang
         end
     catch
         How:Why ->
@@ -246,19 +245,25 @@ commit() ->
 db_from_orgid(OrgId) ->
     "chef_" ++ binary_to_list(OrgId).
 
-
 %% Internal Functions
 
 %% Construct a solr query URL
 %% Calls assert_org_id_filter and search_url_fmt from provider
 %% The search_url_fmt should accept all standard search args.
 -spec make_solr_query_url(#chef_solr_query{}) -> string().
+make_solr_query_url(#chef_solr_query{search_module = elasticsearch_provider}) ->
+    elasticsearch_provider:search_url_fmt();
 make_solr_query_url(Query = #chef_solr_query{search_module = SearchModule, filter_query = FilterQuery}) ->
     %% ensure we filter on an org ID
     SearchModule:assert_org_id_filter(FilterQuery),
     Url = SearchModule:search_url_fmt(),
     Args = search_url_args(Query),
     lists:flatten(io_lib:format(Url, Args)).
+
+make_solr_query_body(Query = #chef_solr_query{search_module=elasticsearch_provider}) ->
+    elasticsearch_provider:make_search_query_body(Query);
+make_solr_query_body(_) ->
+    [].
 
 search_url_args(#chef_solr_query{
                    query_string = Query,

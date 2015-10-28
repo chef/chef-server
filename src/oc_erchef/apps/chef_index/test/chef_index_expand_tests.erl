@@ -299,6 +299,47 @@ solr_api_test_() ->
      end]
     }.
 
+es_api_test_() ->
+    MinItem = {[{<<"key1">>, <<"value1">>},
+                {<<"key2">>, <<"value-2">>}]},
+    {foreach,
+     fun() ->
+             application:set_env(chef_index, search_provider, elasticsearch)
+     end,
+     fun(_) ->
+             meck:unload()
+     end,
+     [fun(_) ->
+              [{"send_item",
+                fun() ->
+                        chef_index_test_utils:set_provider(elasticsearch),
+                        Expect = es_send_item_xml_expect(),
+                        meck:expect(chef_index_http, request,
+                                    fun("/_bulk", post, Doc) ->
+                                            ?assertEqual(Expect, Doc),
+                                            {ok, "200", [], []}
+                                    end),
+                        AddDoc = chef_index_expand:doc_for_index(role, <<"a1">>, <<"db1">>, MinItem),
+                        ?assertEqual(ok, chef_index_expand:send_item(AddDoc))
+                end},
+               {"send_delete",
+                fun() ->
+                        chef_index_test_utils:set_provider(elasticsearch),
+                        Expect = es_send_delete_xml_expect(),
+                        meck:expect(chef_index_http, request,
+                                    fun("/_bulk", post, Doc) ->
+                                            ?assertEqual(Expect, Doc),
+                                            {ok, "200", [], []}
+                                    end),
+                        DelDoc = chef_index_expand:doc_for_delete(role, <<"a5">>, <<"db3">>),
+                        ?assertEqual(ok, chef_index_expand:send_delete(DelDoc))
+                end
+               }
+              ]
+     end]
+    }.
+
+
 cloudsearch_api_test_() ->
     MinItem = {[{<<"key1">>, <<"value1">>},
                 {<<"key2">>, <<"value-2">>}]},
@@ -384,3 +425,11 @@ cs_send_item_xml_expect() ->
       "x_chef_type_chef_x__EQ__role </field>"
       "</add>"
       "</batch>">>.
+
+es_send_delete_xml_expect() ->
+    <<"{\"delete\":{\"_index\":\"chef\",\"_type\":\"object\",\"_id\":\"a5\" }}">>.
+
+es_send_item_xml_expect() ->
+    <<"{\"index\":{\"_index\":\"chef\",\"_type\":\"object\",\"_id\":\"a1\"}}\n"
+      "{\"X_CHEF_id_CHEF_X\":\"a1\",\"X_CHEF_database_CHEF_X\":\"chef_db1\",\"X_CHEF_type_CHEF_X\":\"role\",\"content\":"
+      "\"X_CHEF_database_CHEF_X__=__chef_db1 X_CHEF_id_CHEF_X__=__a1 X_CHEF_type_CHEF_X__=__role key1__=__value1 key2__=__value-2 \"}\n">>.

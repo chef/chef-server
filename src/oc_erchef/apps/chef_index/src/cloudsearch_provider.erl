@@ -78,7 +78,7 @@ add_org_guid_to_fq(OrgGuid, FilterQuery) ->
       FilterQuery).
 
 transform_data(Data) when is_binary(Data) ->
-    list_to_binary(cs_escape:escape(binary_to_list(Data))).
+    solr_provider:transform_data(list_to_binary(cs_escape:escape(binary_to_list(Data)))).
 
 transform_query_all(Data) when is_binary(Data) ->
     cs_escape:escape(binary_to_list(Data)).
