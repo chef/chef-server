@@ -60,7 +60,7 @@ EOM
     provider = @cs_erchef_attr['search_provider']
     return true if provider.nil? #default provider
     case provider
-    when 'cloudsearch'
+    when 'cloudsearch', 'elasticsearch'
       if ! ['batch', 'inline'].include?(@cs_erchef_attr['search_queue_mode'])
         fail_with <<-EOM
 
@@ -82,6 +82,7 @@ Please choose from one of the following search providers:
 
 solr
 cloudsearch
+elasticsearch
 EOM
     end
   end

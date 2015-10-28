@@ -203,6 +203,8 @@ EOM
       case running_service_config('opscode-erchef')['search_provider']
       when "cloudsearch"
         "/search"
+      when "elasticsearch"
+        "/chef"
       else
         "/admin/ping?wt=json"
       end

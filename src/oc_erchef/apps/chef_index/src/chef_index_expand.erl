@@ -73,20 +73,29 @@ update_payload(ToAdd, ToDel) ->
     update_payload(ToAdd, ToDel, chef_solr:search_provider()).
 
 update_payload(ToAdd, ToDel, SearchProvider) ->
-    [?XML_HEADER,
+    [header(SearchProvider),
      start_tag(SearchProvider),
      ToDel,
      add_block(ToAdd, SearchProvider),
      end_tag(SearchProvider)
     ].
 
+header(elasticsearch) ->
+    [];
+header(_) ->
+    ?XML_HEADER.
+
 start_tag(solr) ->
     ?UPDATE_S;
+start_tag(elasticsearch) ->
+    [];
 start_tag(cloudsearch) ->
     <<"<batch>">>.
 
 end_tag(solr) ->
     ?UPDATE_E;
+end_tag(elasticsearch) ->
+    [];
 end_tag(cloudsearch) ->
     <<"</batch>">>.
 
@@ -94,7 +103,7 @@ add_block([], _) ->
     [];
 add_block(ToAdd, solr) ->
     [?ADD_S, ToAdd, ?ADD_E];
-add_block(ToAdd, cloudsearch) ->
+add_block(ToAdd, _Provider) ->
     ToAdd.
 
 %% @doc Send a single document to solr directly.
@@ -134,19 +143,32 @@ make_doc_for_del(solr, Id) ->
     [<<"<delete><id>">>,
      Id,
      <<"</id></delete>">>];
+make_doc_for_del(elasticsearch, Id) ->
+    [<<"{\"delete\":{\"_index\":\"chef\",\"_type\":\"object\",\"_id\":\"">>,
+     Id, <<"\" }}\n">>];
 make_doc_for_del(cloudsearch, Id) ->
     [<<"<delete id=\"">>,
      Id,
      <<"\" />">>].
 
-
+make_doc_for_add(Command = #chef_idx_expand_doc{id = Id, type=Type, search_module=Module, search_provider=elasticsearch}) ->
+    MetaFieldsPL = meta_fields(Command),
+    [jiffy:encode({[{<<"index">>, {[
+                                   {<<"_index">>, <<"chef">>},
+                                   {<<"_type">>, <<"object">>},
+                                   {<<"_id">>, Id}
+                                  ]}}
+                   ]}),
+     <<"\n">>,
+     jiffy:encode({MetaFieldsPL ++ maybe_data_bag_field(Type) ++ [{<<"content">>, iolist_to_binary(make_content(Module, Command, MetaFieldsPL))}]}),
+     <<"\n">>];
 make_doc_for_add(Command = #chef_idx_expand_doc{id = Id, type=Type, search_module=Module, search_provider=Provider }) ->
     MetaFieldsPL = meta_fields(Command),
     MetaFields = [ ?FIELD(Name, Value) || {Name, Value} <- MetaFieldsPL ],
     [doc_start(Provider, Id),
      MetaFields,
-     maybe_data_bag_field(Type),
-     make_content(Module, Command, MetaFieldsPL),
+     maybe_field(maybe_data_bag_field(Type)),
+     ?FIELD(<<"content">>, make_content(Module, Command, MetaFieldsPL)),
      doc_end(Provider)].
 
 meta_fields(#chef_idx_expand_doc{id = Id, database = Database, type=Type, search_module = Module}) ->
@@ -170,15 +192,23 @@ doc_start(cloudsearch, Id) ->
 
 doc_end(solr) ->
     ?DOC_E;
+doc_end(elasticsearch) ->
+    <<"">>;
 doc_end(cloudsearch) ->
     <<"</add>">>.
 
 %% @doc If we have a `data_bag_item' object, return a Solr field
 %% `data_bag', otherwise empty list.
 maybe_data_bag_field(DataBagName) when is_binary(DataBagName) ->
-    ?FIELD(<<"data_bag">>, xml_text_escape(DataBagName));
+    [{<<"data_bag">>, chef_solr:transform_data(DataBagName)}];
 maybe_data_bag_field(_) ->
     [].
+
+maybe_field([{Name, Value}]) ->
+    ?FIELD(Name, Value);
+maybe_field(_) ->
+    [].
+
 
 %% @doc Extract the Chef object content, flatten/expand, and return an
 %% iolist of the `content' field.
@@ -186,7 +216,7 @@ make_content(Mod, #chef_idx_expand_doc{item={Item0}}, MetaFieldsPL) ->
     %% The Ruby code in chef-expander adds the database name, id, and
     %% type as fields. So we do the same.
     Item = {MetaFieldsPL ++ Item0},
-    ?FIELD(<<"content">>, flatten(Mod, Item)).
+    flatten(Mod, Item).
 
 %% @doc Main interface to flatten/expand for Chef object EJSON. Given
 %% an EJSON term representing a Chef object, returns an iolist of the
@@ -253,9 +283,9 @@ add_kv_pair(Mod, [K|_]=Keys, Value, Acc) ->
 %% text escaping `K' and `V' and building an iolist with the
 %% appropriate separator.
 encode_pair(Mod, K, V) ->
-    [xml_text_escape(chef_solr:transform_data(iolist_to_binary(K))),
+    [chef_solr:transform_data(iolist_to_binary(K)),
      chef_solr:kv_sep(Mod),
-     xml_text_escape(chef_solr:transform_data(iolist_to_binary(V))),
+     chef_solr:transform_data(iolist_to_binary(V)),
      <<" ">>].
 
 %% @doc Return an iolist such that `Sep' is added between each element
@@ -272,24 +302,3 @@ join_keys([K], _Sep, Acc) ->
     [K | Acc];
 join_keys([K | Rest], Sep, Acc) ->
     join_keys(Rest, Sep, [Sep, K | Acc]).
-
-%% @doc Given a binary or list of binaries, replace occurances of `<',
-%% `&', `"', and `>' with the corresponding entity code such that the
-%% resulting binary or list of binaries is suitable for inclusion as
-%% text in an XML element.
-%%
-%% We cheat and simply process the binaries byte at a time. This
-%% should be OK for UTF-8 binaries, but relies on multi-byte
-%% characters not starting with the same value as those we are
-%% searching for to escape.  Note that technically we don't need to
-%% escape `>' nor `"', symmetry and matching of a pre-existing Ruby
-%% implementation suggest otherwise.
--spec xml_text_escape(binary()|[binary()]) -> binary()|[binary()].
-xml_text_escape(BinStr) ->
-    iolist_to_binary(xml_text_escape1(BinStr)).
-
-xml_text_escape1(BinStr) when is_binary(BinStr) ->
-    efast_xs:escape(BinStr);
-
-xml_text_escape1(BinList) when is_list(BinList) ->
-    [ xml_text_escape1(B) || B <- BinList ].

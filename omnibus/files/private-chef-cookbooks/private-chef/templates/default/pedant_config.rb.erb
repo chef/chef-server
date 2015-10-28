@@ -61,10 +61,15 @@ default_orgname <%= @default_orgname ? "\"#{@default_orgname}\"" : "nil" %>
 # testing location, you should not specify a value for this parameter.
 # The tests will still run, albeit slower, as they will now need to
 # poll for a period to ensure they are querying committed results.
-<% if node['private_chef']['opscode-erchef']['search_provider'] == "solr" %>
-search_server "<%= @solr_url %>"
-<% else %>
+<% if node['private_chef']['opscode-erchef']['search_provider'] == "cloudsearch" %>
 # search_server "<%= @solr_url %>"
+<% else %>
+search_server "<%= @solr_url %>"
+<% end %>
+
+<% if node['private_chef']['opscode-erchef']['search_provider'] == "elasticsearch" %>
+search_commit_url "/_refresh"
+search_url_fmt "/chef/_search?fq=X_CHEF_type_CHEF_X:%{type}&q=%{query}"
 <% end %>
 
 # Some tests expect access erchef server directly, instead of routing through

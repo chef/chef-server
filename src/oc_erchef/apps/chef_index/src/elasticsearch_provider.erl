@@ -1,6 +1,5 @@
--module(solr_provider).
--export([
-         %% Static Data Accessors
+-module(elasticsearch_provider).
+-export([%% Static Data Accessors
          database_field/0,
          id_field/0,
          kv_sep/0,
@@ -12,6 +11,7 @@
          assert_org_id_filter/1,
          make_standard_fq/1,
          make_data_bag_fq/1,
+         make_search_query_body/1,
          search_url_fmt/0,
          transform_query_all/1,
          transform_query_safe/1,
@@ -27,6 +27,8 @@
          delete_search_db_by_type/2
         ]).
 
+-include("chef_solr.hrl").
+
 id_field() ->
     <<"X_CHEF_id_CHEF_X">>.
 
@@ -37,31 +39,23 @@ type_field() ->
     <<"X_CHEF_type_CHEF_X">>.
 
 ping_url() ->
-    "/admin/ping?wt=json".
+    "/chef".
 
 update_url() ->
-    "/update".
+    "/_bulk".
 
 search_url_fmt() ->
-    "/select?"
-        "fq=~s"
-        "&indent=off"
-        "&q=~s"
-        "&start=~B"
-        "&rows=~B"
-        "&wt=json"
-        "&sort=~s".
+    "/chef/_search".
 
 kv_sep() ->
     <<"__=__">>.
 
 handle_successful_search(ResponseBody) ->
-    Response = ej:get({<<"response">>}, ResponseBody),
-    Start    = ej:get({<<"start">>}, Response),
-    NumFound = ej:get({<<"numFound">>}, Response),
-    DocList  = ej:get({<<"docs">>}, Response),
-    Ids = [ ej:get({id_field()}, Doc) || Doc <- DocList ],
-    {ok, Start, NumFound, Ids}.
+    Response = ej:get({<<"hits">>}, ResponseBody),
+    NumFound = ej:get({<<"total">>}, Response),
+    DocList  = ej:get({<<"hits">>}, Response),
+    Ids = [ ej:get({<<"_id">>}, Doc) || Doc <- DocList ],
+    {ok, undefined, NumFound, Ids}.
 
 make_standard_fq(ObjType) ->
     "+" ++ binary_to_list(type_field()) ++ ":" ++ ObjType.
@@ -85,55 +79,68 @@ transform_query_phrase(Query) ->
     Query.
 
 transform_data(Data) ->
-    xml_text_escape(Data).
-
-%% @doc Given a binary or list of binaries, replace occurances of `<',
-%% `&', `"', and `>' with the corresponding entity code such that the
-%% resulting binary or list of binaries is suitable for inclusion as
-%% text in an XML element.
-%%
-%% We cheat and simply process the binaries byte at a time. This
-%% should be OK for UTF-8 binaries, but relies on multi-byte
-%% characters not starting with the same value as those we are
-%% searching for to escape.  Note that technically we don't need to
-%% escape `>' nor `"', symmetry and matching of a pre-existing Ruby
-%% implementation suggest otherwise.
--spec xml_text_escape(binary()|[binary()]) -> binary()|[binary()].
-xml_text_escape(BinStr) ->
-    iolist_to_binary(xml_text_escape1(BinStr)).
-
-xml_text_escape1(BinStr) when is_binary(BinStr) ->
-    efast_xs:escape(BinStr);
-
-xml_text_escape1(BinList) when is_list(BinList) ->
-    [ xml_text_escape1(B) || B <- BinList ].
+    Data.
 
 assert_org_id_filter(FieldQuery) ->
     Start = "+" ++ binary_to_list(database_field()) ++ ":chef_",
     Len = length(Start),
     Start = string:substr(FieldQuery, 1, Len).
 
-delete_search_db(OrgId) ->
-    DeleteQuery = "<?xml version='1.0' encoding='UTF-8'?><delete><query>" ++
-        search_db_from_orgid(OrgId) ++
-        "</query></delete>",
-    ok = chef_solr:update(?MODULE, DeleteQuery),
-    ok = commit(),
-    ok.
-
 commit() ->
-    chef_solr:update(?MODULE, "<?xml version='1.0' encoding='UTF-8'?><commit/>").
+    post("/_refresh", []).
+
+-spec post(list(), iolist() | binary()) -> ok | {error, term()}.
+post(Url, Body) when is_list(Body) ->
+    post(Url, iolist_to_binary(Body));
+post(Url, Body) ->
+    request_with_caught_errors(Url, post, Body).
+
+request_with_caught_errors(Url, Method, Body) ->
+    try
+        case chef_index_http:request(Url, Method, Body) of
+            {ok, "200", _Head, _Body} -> ok;
+            Error -> {error, Error}
+        end
+    catch
+        How:Why ->
+            error_logger:error_report({elasticsearch_provider, Method, How, Why}),
+            {error, Why}
+    end.
+
+make_search_query_body(#chef_solr_query{
+                          query_string = Query,
+                          filter_query = FilterQuery,
+                          start = Start,
+                          rows = Rows}) ->
+    jiffy:encode({[{<<"from">>, Start},
+                   {<<"size">>, Rows},
+                   {<<"sort">>, [{[{<<"X_CHEF_id_CHEF_X">>, {[{<<"order">>, <<"asc">>}]}}]}]},
+                   {<<"query">>, {[
+                                   {<<"filtered">>,{[
+                                                     query_string_query_ejson(Query),
+                                                     {<<"filter">>, {[query_string_query_ejson(FilterQuery)]}}
+                                                    ]}}]}}]}).
+
+query_string_query_ejson(QueryString) ->
+    { <<"query">>, {
+          [{<<"query_string">>,{
+                [{<<"query">>, list_to_binary(QueryString)}]}}]
+         }
+    }.
 
 -spec delete_search_db_by_type(OrgId :: binary(), Type :: atom()) -> ok.
 delete_search_db_by_type(OrgId, Type)
   when Type == client orelse Type == data_bag_item orelse
        Type == environment orelse Type == node orelse
        Type == role ->
-    DeleteQuery = "<?xml version='1.0' encoding='UTF-8'?><delete><query>" ++
-        search_db_from_orgid(OrgId) ++ " AND " ++
-        search_type_constraint(Type) ++
-        "</query></delete>",
-    chef_solr:update(?MODULE, DeleteQuery).
+    DeleteQuery = jiffy:encode(query_string_query_ejson(search_db_from_orgid(OrgId) ++ "AND" ++ search_type_constraint(Type))),
+    ok = chef_solr:update(?MODULE, DeleteQuery).
+
+delete_search_db(OrgId) ->
+    DeleteQuery = jiffy:encode(query_string_query_ejson(search_db_from_orgid(OrgId))),
+    ok = chef_solr:update(?MODULE, DeleteQuery),
+    ok = commit(),
+    ok.
 
 -spec search_db_from_orgid(OrgId :: binary()) -> DBName :: [byte(),...].
 search_db_from_orgid(OrgId) ->
