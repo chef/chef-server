@@ -10,7 +10,7 @@ describe 'Search API endpoint', :search do
   shared(:admin_requestor){admin_user}
   shared(:requestor){admin_requestor}
 
-  context "word break handling", :focus do
+  context "word break handling" do
     let(:request_method){:GET}
     let(:request_url){api_url("/search/node")}
     SPECIAL_CHARS = '!"$%&()*+,-:;<=>?@[\]%_`{|}~\'\\'
@@ -23,10 +23,11 @@ describe 'Search API endpoint', :search do
       n = new_node("search_supernode").tap do |node|
         SPECIAL_CHARS.each_char do |c|
           node["default"]["attrtest#{SPECIAL_CHARS.index(c)}"] = "hello#{c}world"
-          node["default"]["key#{SPECIAL_CHARS.index(c)}abc"] = "dlrow olleh"
+          node["default"]["key#{c}abc"] = "dlrowolleh#{SPECIAL_CHARS.index(c)}"
         end
       end
       add_node(admin_requestor, n).should look_like({:status => 201 })
+      force_solr_commit
     end
 
     after :all do
@@ -61,18 +62,15 @@ describe 'Search API endpoint', :search do
           if usage == :does_not_use_char or (usage == :uses_char and PERMITTED_QUERY_CHARS.include?(char))
             it "with #{description}, should #{find_expected ? "find" : "not find"} the node" do
               expected = find_expected ? wb_node_found_result : wb_node_not_found_result
-              with_search_polling do
-                expect(search_result("node", query)).to look_like expected
-              end
+              expect(search_result("node", query)).to look_like expected
             end
-
           end
         end
       end
 
       describe "when searching for attribute an attribute key containing the special character '#{char}'" do
         c = PERMITTED_QUERY_CHARS.include?(char) ? "\\#{char}" : char
-        attrval = "dlrow olleh"
+        attrval = "dlrowolleh#{SPECIAL_CHARS.index(char)}"
         [ [ "an exact match on name and value", "key#{c}abc:#{attrval}", :uses_char, true],
           [ "a wildcard match on key name with exact value", "*:#{attrval}", :uses_char, true ],
           [ "a wildcard in attribute key around the special char", "*#{c}*:#{attrval}", :uses_char, true],
