@@ -61,19 +61,40 @@ check_health() ->
     Status = overall_status(Pings),
     log_failure(Status, Pings),
     KeyGen = chef_keygen_cache:status_for_json(),
-    {Status, chef_json:encode({[{<<"status">>, ?A2B(Status)},
-                                {<<"upstreams">>, {Pings}},
-                                {<<"keygen">>, {KeyGen} }
-                               ]})}.
+
+    StatList0 = [{<<"status">>, ?A2B(Status)},
+                {<<"upstreams">>, {Pings}},
+                {<<"keygen">>, {KeyGen} }
+                ],
+
+    StatList =
+    case chef_wm_rabbitmq_management:get_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false) of
+        false -> % chef_wm_actions_queue_monitoring isn't running, skip it
+                 StatList0;
+        true -> AnalyticsQ = chef_wm_actions_queue_monitoring:status(),
+                StatList0 ++ [{<<"analytics_queue">>, {AnalyticsQ}}]
+    end,
+    {Status, chef_json:encode({StatList})}.
 
 overall_status(Pings) ->
     case [ Pang || {_, <<"fail">>}=Pang <- Pings ] of
         [] ->
-            %% no fails, we're good
-            pong;
+            case is_analytics_queue_at_capacity() of
+                true -> fail;
+                _ -> pong %% no fails, we're good
+            end;
         _Failure ->
             fail
     end.
+
+-spec is_analytics_queue_at_capacity() -> boolean().
+is_analytics_queue_at_capacity() ->
+    case chef_wm_rabbitmq_management:get_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false) of
+        % don't try to connect to the queue monitor if it isn't running
+        true -> chef_wm_actions_queue_monitoring:is_queue_at_capacity();
+        false -> false
+    end.
+
 
 -spec log_failure(fail | pong, [{binary(), <<_:32>>}]) -> ok.
 log_failure(fail, Pings) ->

@@ -116,6 +116,54 @@ default['private_chef']['rabbitmq']['vip'] = '127.0.0.1'
 default['private_chef']['rabbitmq']['consumer_id'] = 'hotsauce'
 default['private_chef']['rabbitmq']['env_path'] = "/opt/opscode/bin:/opt/opscode/embedded/bin:/usr/bin:/bin"
 
+default['private_chef']['rabbitmq']['ssl_versions'] = ['tlsv1.2', 'tlsv1.1']
+
+####
+# RabbitMQ Management Plugin
+####
+default['private_chef']['rabbitmq']['management_user'] = "rabbitmgmt"
+default['private_chef']['rabbitmq']['management_password'] = "chefrocks"
+default['private_chef']['rabbitmq']['management_port'] = 15672
+default['private_chef']['rabbitmq']['management_enabled'] = true
+
+# RabbitMQ max-length policy
+default['private_chef']['rabbitmq']['analytics_max_length'] = 10000
+default['private_chef']['rabbitmq']['queue_length_monitor_vhost'] = "/analytics"
+default['private_chef']['rabbitmq']['queue_length_monitor_queue'] = "alaska"
+default['private_chef']['rabbitmq']['queue_length_monitor_enabled'] = true
+
+####
+# RabbitMQ Queue Monitor
+####
+# how often to run the queue monitor
+default['private_chef']['rabbitmq']['queue_length_monitor_millis'] = 30000
+# if the queue monitor is busy and this timeout has been exceeded,
+# assume that rabbit is in a bad state and don't send messages to it
+# 5000 is the default of gen_server:call()
+default['private_chef']['rabbitmq']['queue_length_monitor_timeout_millis'] = 5000
+
+# don't send messages to rabbitmq if it has reached it's configured max_length
+default['private_chef']['rabbitmq']['drop_on_full_capacity'] = true
+
+# prevent erchef from starting if queue is at capacity
+default['private_chef']['rabbitmq']['prevent_erchef_startup_on_full_capacity'] = false
+
+# rabbit_mgmt_service configuration for erchef. These are used to configure an opscoderl_httpc pool
+# of HTTP connecton workers.
+default['private_chef']['rabbitmq']['rabbit_mgmt_timeout'] = 30000
+default['private_chef']['rabbitmq']['rabbit_mgmt_http_init_count'] = 25
+default['private_chef']['rabbitmq']['rabbit_mgmt_http_max_count'] = 100
+# cull interval specified in seconds
+default['private_chef']['rabbitmq']['rabbit_mgmt_http_cull_interval'] = 60
+# max age specified in seconds
+default['private_chef']['rabbitmq']['rabbit_mgmt_http_max_age'] = 70
+#max connection duration specified in seconds
+default['private_chef']['rabbitmq']['rabbit_mgmt_http_max_connection_duration'] = 70
+
+# comma sep list of tuples, without surrounding []'s
+# rendered as a list in oc_erchef.config.erb, including basic_auth info
+default['private_chef']['rabbitmq']['rabbit_mgmt_ibrowse_options'] =  "{connect_timeout, 10000}"
+
 ####
 # External RabbitMQ
 ####

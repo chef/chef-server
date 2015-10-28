@@ -163,7 +163,25 @@ routing_key(EntityType, Method) ->
 -spec publish(RoutingKey :: binary(),
               Msg :: binary()) -> ok.
 publish(RoutingKey, Msg)->
-    oc_chef_action_queue:publish(RoutingKey, Msg).
+    QueueMonitorEnabled =
+      chef_wm_rabbitmq_management:get_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false),
+    publish(RoutingKey, Msg, QueueMonitorEnabled).
+
+
+-spec publish(RoutingKey :: binary(),
+              Msg :: binary(),
+              QueueMonitoringEnabled :: boolean()) -> ok.
+publish(RoutingKey, Msg, false) ->
+      oc_chef_action_queue:publish(RoutingKey, Msg);
+publish(RoutingKey, Msg, true) ->
+    DropOnCapacity =
+      chef_wm_rabbitmq_management:get_rabbit_queue_monitor_setting(drop_on_full_capacity, true),
+    case DropOnCapacity andalso chef_wm_actions_queue_monitoring:is_queue_at_capacity() of
+        true ->
+            chef_wm_actions_queue_monitoring:message_dropped();
+        false ->
+            oc_chef_action_queue:publish(RoutingKey, Msg)
+    end.
 
 maybe_add_data(Msg, []) ->
     Msg;
