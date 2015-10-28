@@ -11,6 +11,6 @@ require "dvm"
 
 begin
   DVM::Application.start(ARGV)
-rescue DVM::DVMArgumentError => e
+rescue Exception => e
   say HighLine.color(e.message, :red)
 end
