@@ -24,9 +24,9 @@ fi
 if [[ $type == 'CS' ]];
 then
     path='opscode'
-    ctl_cmd='chef-server-ctl'
+    ctl_cmd='private-chef-ctl'
     config_name='*chef*.rb'
-    ha=$(egrep -qs 'topology[[:space:]]+.*ha' /etc/opscode/*chef*.rb)$?
+    ha=$(egrep -qs 'topology[[:space:]]+.*ha' /etc/$path/$config_name)$?
 
     if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
     then
@@ -36,7 +36,7 @@ then
 elif [[ $type == 'OSC' ]];
 then
     path='chef-server'
-    ctl_cmd='/opt/chef-server/bin/chef-server-ctl'
+    ctl_cmd='chef-server-ctl'
     config_name='chef-server.rb'
 
     if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
@@ -66,6 +66,7 @@ else
     echo "Analytics - Opscode Analytics server"
     exit 1
 fi
+config_file_path="/etc/$path/$config_name"
 
 hostname=$(hostname)
 timestamp=$(date +%F_%H.%M.%S-%Z)
@@ -80,7 +81,9 @@ mkdir -p "$tmpdir"
 for i in /opt/{chef,$path}*/version-manifest.txt \
               /opt/$path/pc-version.txt \
               /etc/$path/$config_name \
-              /etc/${path}*/*-running.json \
+              /etc/{chef,$path}*/*-running.json \
+              /var/opt/$path*/etc/*-running.json \
+              /etc/{chef,$path,opscode-manage}*/*.rb \
               /var/opt/$path/rabbitmq/log/*.log \
               /var/log/syslog \
               /var/log/messages; do
@@ -242,14 +245,11 @@ fi
 if [[ $type == 'CS' ]];
 then
     fqdn="api_fqdn"
-    backend_vip="backend_vip"
-    config_file_path="/etc/opscode/chef-server.rb"
 elif [[ $type == 'Analytics' ]];
 then
     fqdn="analytics_fqdn"
-    backend_vip="backend_vip"
-    config_file_path="/etc/opscode-analytics/opscode-analytics.rb"
 fi
+backend_vip="backend_vip"
 tempname=`grep -E $fqdn $config_file_path | cut -d \" -f2`
 backend_fqdn=`grep -E $backend_vip $config_file_path | cut -d \" -f2`
 
