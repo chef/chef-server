@@ -591,7 +591,7 @@ describe 'Search API endpoint', :search do
 
         # Because data bag items are hierarchical, we need to fudge
         # things a bit to make the common tests work for them
-        let(:index_name) { "data_bag_item%20+data_bag:#{bag_name}" }
+        let(:index_name) { "data_bag_item +data_bag:#{bag_name}" }
         let(:container) { "data/#{bag_name}" } # data bags are odd
         let(:deletion_identifier) { test_item_id }
 
