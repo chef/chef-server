@@ -629,8 +629,7 @@ module Pedant
       let(:search_success_response) do
         {
           :status => 200,
-          :body_exact => {
-            "total" => search_result_items.size,
+          :body => {
             "start" => 0, # TODO: Test paging
             "rows" => search_result_items
           }
@@ -642,8 +641,6 @@ module Pedant
       # Amount of time to try searches until giving up... this gives Solr
       # an opportunity to commit.
       let(:maximum_search_time){ Pedant::Config.maximum_search_time}
-      let(:direct_solr_query_sleep_time){ Pedant::Config.direct_solr_query_sleep_time }
-
       # Databag items that come back from a search are wrapped in a bit of
       # extra cruft.
       #
@@ -673,7 +670,7 @@ module Pedant
         headers = {
           "Accept" => "application/json"
         }
-        sleep direct_solr_query_sleep_time
+        sleep Pedant::Config.direct_solr_query_sleep_time
         r = RestClient.send :get, url, headers
         parse(r)
       end
@@ -682,12 +679,11 @@ module Pedant
       # subsequently want to search for.  Much preferable to waiting
       # around for a minute.
       def force_solr_commit
-
         # assuming we're running this after adding
         # some things to Solr, we want to give it a little
         # time to clear the queue.  In a test scenario, this
         # should be enough of a wait.
-        sleep direct_solr_query_sleep_time
+        sleep Pedant::Config.direct_solr_query_sleep_time
         url = "#{Pedant::Config.search_server}/solr/update?commit=true"
         body = ''
         headers = {}
@@ -725,8 +721,7 @@ module Pedant
           get(api_url("/search/#{options[:type]}?q=#{options[:query]}"),user) do |response|
             response.should look_like({
                                         :status => 200,
-                                        :body_exact => {
-                                          "total" => results.count,
+                                        :body => {
                                           "start" => 0,
                                           "rows" => results
                                         }
@@ -735,15 +730,16 @@ module Pedant
         end
       end
 
-      def search(index, query)
+      def search_result(index, query)
         search_url = api_url(URI::encode("/search/#{index}?q=#{query}"))
         with_search_polling do
-          response = get(search_url, admin_user)
-          response.should look_like({:status => 200, :body => { 'start' => 0 }})
-          response = parse(response)
-          response['total'].should == response['rows'].size
-          response['rows']
+          get(search_url, admin_user)
         end
+      end
+      def search(index, query)
+        response.should look_like({:status => 200, :body => { 'start' => 0 }})
+        response = parse(search_result(index, query))['rows']
+        response['rows']
       end
     end
 

@@ -86,7 +86,6 @@ wrap_cloudsearch(Docs) ->
 wrap(Docs, #chef_idx_batch_state{search_provider = solr}) ->
     wrap_solr(Docs);
 wrap(Docs, #chef_idx_batch_state{search_provider = cloudsearch}) ->
-    lager:warning("Not implemented yet."),
     wrap_cloudsearch(Docs).
 
 -spec wrapper_size(#chef_idx_batch_state{}) -> non_neg_integer().
@@ -140,15 +139,16 @@ flush(State = #chef_idx_batch_state{item_queue = []}) ->
     State;
 flush(State = #chef_idx_batch_state{item_queue = Queue,
                                     current_size = CurrentSize,
+                                    search_provider = Provider,
                                     wrapper_size = WrapperSize}) ->
     {PidsToReply, Timestamps, DocsToAdd} = lists:unzip3(Queue),
     Doc = wrap(DocsToAdd, State),
     Self = self(),
-    spawn_link(
+    spawn(
       fun() ->
               lager:debug("Batch posting to solr ~p documents (~p bytes)", [length(DocsToAdd), CurrentSize+WrapperSize]),
               Now = os:timestamp(),
-              Res = chef_index_expand:post_to_solr(Doc),
+              Res = chef_solr:update(chef_solr:search_module(Provider), Doc),
               Now1 = os:timestamp(),
               TotalDocs = length(Timestamps),
               {BeforeDiff, AfterDiff} =
