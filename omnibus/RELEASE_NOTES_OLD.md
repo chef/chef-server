@@ -476,7 +476,7 @@ The following items are new since Enterprise Chef 11.2.1 and/or are changes from
     organizations, allowing management of organizations without the management console
     or original webui. You can find information about these commands via `chef-server-ctl help`.
     and looking under "Organization and User Management Commands".  You can find usage
-    examples at this location: https://docs.getchef.com/install_server.html
+    examples at this location: https://docs.chef.io/install_server.html
   * new `gather-logs` command to create a tarball of important logs and system information.
 * Org Policy Changes
   * it is now required that a user be removed from an organization's "admins" group
@@ -495,8 +495,8 @@ The following items are new since Enterprise Chef 11.2.1 and/or are changes from
        the upgrade process to be broken down into discrete steps if more control is desired than the upgrade
        command alone provides.
     * Run any of these commands with -h to see the full help menu and all the possible options that can be set.
-      In addition, refer to the docs at http://docs.getchef.com/upgrade_server.html#from-chef-server-osc and
-      https://docs.getchef.com/upgrade_server_open_source_notes.html#manual-upgrades for more information.
+      In addition, refer to the docs at https://docs.chef.io/upgrade_server.html#from-chef-server-osc and
+      https://docs.chef.io/upgrade_server_open_source_notes.html#manual-upgrades for more information.
 
 ### Bug Fixes:
 
@@ -557,10 +557,10 @@ using this currently):
 More information - including examples of modifying permissions for both
 newly created data bags and existing data bags data - can be found here:
 
-https://www.getchef.com/blog/2014/11/10/security-update-hosted-chef/
+https://www.chef.io/blog/2014/11/10/security-update-hosted-chef/
 
 [1] knife-acl is a plugin to support managing ACLs using knife, instead
-of the opscode-manage interface. It can be found here: https://github.com/opscode/knife-acl
+of the opscode-manage interface. It can be found here: https://github.com/chef/knife-acl
 
 *Admins Cannot be Removed From Organizations*
 

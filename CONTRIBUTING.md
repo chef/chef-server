@@ -11,7 +11,7 @@ for issue tracking and contributions:
 All patches should be submitted as GitHub pull requests:
 
 1. Sign or be added to an existing
-[Contributor License Agreement (CLA)](https://supermarket.getchef.com/become-a-contributor).
+[Contributor License Agreement (CLA)](https://supermarket.chef.io/become-a-contributor).
 
 2. Create a GitHub Pull Request.
 

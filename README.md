@@ -43,8 +43,8 @@ Server.
 
 ## Dependencies contained in other repositories
 
-* [knife-ec-backup](http://github.com/opscode/knife-ec-backup), used to ease migrations from Open Source Chef Server 11 (and below)
-* [knife-opc](http://github.com/opscode/knife-opc), used to provide administrative command-line control to the Chef Server from the console
+* [knife-ec-backup](https://www.github.com/chef/knife-ec-backup), used to ease migrations from Open Source Chef Server 11 (and below)
+* [knife-opc](https://www.github.com/chef/knife-opc), used to provide administrative command-line control to the Chef Server from the console
 
 ## Major Technologies used in Chef Server
 

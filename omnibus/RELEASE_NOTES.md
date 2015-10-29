@@ -19,7 +19,7 @@ CHANGELOG.md.
     * See "Organization Policy Changes" below for more details.
   * It is now possible to configure a new installation of Chef Server to
     use a self-hosted PostgreSQL instance, including Amazon RDS
-    PostgreSQL. See [this page](http://docs.chef.io/release/server_12-2/release_notes.html#external-postgresql) for details.
+    PostgreSQL. See [this page](https://docs.chef.io/release/server_12-2/release_notes.html#external-postgresql) for details.
     * Note that direct upgrades to an external postgresql instance are
       not supported at this time.  Instead,  back up the existing Chef
       Server using knife ec backup, bring up a new Chef Server with
