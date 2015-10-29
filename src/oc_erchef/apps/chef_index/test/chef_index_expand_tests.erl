@@ -187,10 +187,10 @@ doc_construction_test_() ->
                           "X_CHEF_type_CHEF_X__=__role "
                           "key1__=__value1 key2__=__value2 </field>"
                           "</doc></add></update>">>,
-               meck:expect(chef_index_http, request,
-                           fun("/update", post, Doc) ->
+               meck:expect(chef_index_http, post,
+                           fun("/update", Doc) ->
                                    ?assertEqual(Expect, Doc),
-                                   {ok, "200", [], []}
+                                   ok
                            end),
                ?assertEqual(ok,chef_index_expand:send_item(D))
        end},
@@ -200,10 +200,10 @@ doc_construction_test_() ->
                D = chef_index_expand:doc_for_delete(role, <<"abc123">>, "dbdb1212"),
                Expect = <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                           "<update><delete><id>abc123</id></delete></update>">>,
-               meck:expect(chef_index_http, request,
-                           fun("/update", post, Doc) ->
+               meck:expect(chef_index_http, post,
+                           fun("/update", Doc) ->
                                    ?assertEqual(Expect, Doc),
-                                   {ok, "200", [], []}
+                                   ok
                            end),
                ?assertEqual(ok, chef_index_expand:send_delete(D))
        end},
@@ -238,10 +238,10 @@ doc_construction_test_() ->
                           "</doc>"
                           "</add>"
                           "</update>">>,
-               meck:expect(chef_index_http, request,
-                           fun("/update", post, Doc) ->
+               meck:expect(chef_index_http, post,
+                           fun("/update", Doc) ->
                                    ?assertEqual(Expect, Doc),
-                                   {ok, "200", [], []}
+                                   ok
                            end),
                ?assertEqual(ok, chef_index_expand:send_item(D))
        end},
@@ -249,9 +249,9 @@ doc_construction_test_() ->
       {"error from chef_index_http",
        fun() ->
                Doc = chef_index_expand:doc_for_index(role, <<"abc123">>, "dbdb1212", MinItem),
-               meck:expect(chef_index_http, request,
-                           fun("/update", post, _Doc) ->
-                                   {ok, "500", [], <<"oh no">>}
+               meck:expect(chef_index_http, post,
+                           fun("/update", _Doc) ->
+                                   {error, {ok, "500", [], <<"oh no">>}}
                            end),
                ?assertEqual({error, {ok, "500", [], <<"oh no">>}}, chef_solr:update(solr_provider, Doc))
        end}
@@ -274,10 +274,10 @@ solr_api_test_() ->
                 fun() ->
                         chef_index_test_utils:set_provider(solr),
                         Expect = send_item_xml_expect(),
-                        meck:expect(chef_index_http, request,
-                                    fun("/update", post, Doc) ->
+                        meck:expect(chef_index_http, post,
+                                    fun("/update", Doc) ->
                                             ?assertEqual(Expect, Doc),
-                                            {ok, "200", [], []}
+                                            ok
                                     end),
                         AddDoc = chef_index_expand:doc_for_index(role, <<"a1">>, <<"db1">>, MinItem),
                         ?assertEqual(ok, chef_index_expand:send_item(AddDoc))
@@ -286,10 +286,10 @@ solr_api_test_() ->
                 fun() ->
                         chef_index_test_utils:set_provider(solr),
                         Expect = send_delete_xml_expect(),
-                        meck:expect(chef_index_http, request,
-                                    fun("/update", post, Doc) ->
+                        meck:expect(chef_index_http, post,
+                                    fun("/update", Doc) ->
                                             ?assertEqual(Expect, Doc),
-                                            {ok, "200", [], []}
+                                            ok
                                     end),
                         DelDoc = chef_index_expand:doc_for_delete(role, <<"a5">>, <<"db3">>),
                         ?assertEqual(ok, chef_index_expand:send_delete(DelDoc))
@@ -314,10 +314,10 @@ es_api_test_() ->
                 fun() ->
                         chef_index_test_utils:set_provider(elasticsearch),
                         Expect = es_send_item_json_expect(),
-                        meck:expect(chef_index_http, request,
-                                    fun("/_bulk", post, Doc) ->
+                        meck:expect(chef_index_http, post,
+                                    fun("/_bulk", Doc) ->
                                             ?assertEqual(Expect, Doc),
-                                            {ok, "200", [], []}
+                                            ok
                                     end),
                         AddDoc = chef_index_expand:doc_for_index(role, <<"a1">>, <<"db1">>, MinItem),
                         ?assertEqual(ok, chef_index_expand:send_item(AddDoc))
@@ -326,10 +326,10 @@ es_api_test_() ->
                 fun() ->
                         chef_index_test_utils:set_provider(elasticsearch),
                         Expect = es_send_delete_json_expect(),
-                        meck:expect(chef_index_http, request,
-                                    fun("/_bulk", post, Doc) ->
+                        meck:expect(chef_index_http, post,
+                                    fun("/_bulk", Doc) ->
                                             ?assertEqual(Expect, Doc),
-                                            {ok, "200", [], []}
+                                            ok
                                     end),
                         DelDoc = chef_index_expand:doc_for_delete(role, <<"a5">>, <<"db3">>),
                         ?assertEqual(ok, chef_index_expand:send_delete(DelDoc))

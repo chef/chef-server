@@ -67,32 +67,8 @@ assert_org_id_filter(FieldQuery) ->
     Start = string:substr(FieldQuery, 1, Len).
 
 commit() ->
-    post("/_refresh", []).
+    chef_index_http:post("/_refresh", []).
 
--spec post(list(), iolist() | binary()) -> ok | {error, term()}.
-post(Url, Body) when is_list(Body) ->
-    post(Url, iolist_to_binary(Body));
-post(Url, Body) ->
-    request_with_caught_errors(Url, post, Body).
-
--spec delete(list(), iolist() | binary()) -> ok | {error, term()}.
-delete(Url, Body) when is_list(Body) ->
-    post(Url, iolist_to_binary(Body));
-delete(Url, Body) ->
-    request_with_caught_errors(Url, delete, Body).
-
-
-request_with_caught_errors(Url, Method, Body) ->
-    try
-        case chef_index_http:request(Url, Method, Body) of
-            {ok, "200", _Head, _Body} -> ok;
-            Error -> {error, Error}
-        end
-    catch
-        How:Why ->
-            error_logger:error_report({elasticsearch_provider, Method, How, Why}),
-            {error, Why}
-    end.
 
 make_search_query_body(#chef_solr_query{
                           query_string = Query,
@@ -122,11 +98,11 @@ delete_search_db_by_type(OrgId, Type)
        Type == environment orelse Type == node orelse
        Type == role ->
     DeleteQuery = jiffy:encode({[query_string_query_ejson(search_db_from_orgid(OrgId) ++ "AND" ++ search_type_constraint(Type))]}),
-    ok = delete("/chef/_query", DeleteQuery).
+    ok = chef_index_http:delete("/chef/_query", DeleteQuery).
 
 delete_search_db(OrgId) ->
     DeleteQuery = jiffy:encode({[query_string_query_ejson(search_db_from_orgid(OrgId))]}),
-    ok = delete("/chef/_query", DeleteQuery),
+    ok = chef_index_http:delete("/chef/_query", DeleteQuery),
     ok = commit(),
     ok.
 

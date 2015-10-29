@@ -203,18 +203,7 @@ delete_search_db_by_type(OrgId, Type) ->
 update(Mod, Body) when is_list(Body) ->
     update(Mod, iolist_to_binary(Body));
 update(Mod, Body) ->
-    try
-        %% FIXME: solr will barf on doubled '/'s so SolrUrl must not end with a trailing slash
-        case chef_index_http:request(update_url(Mod), post, Body) of
-            %% FIXME: verify that solr returns non-200 if something is wrong and not "status":"ERROR".
-            {ok, "200", _Head, _Body} -> ok;
-            Error -> {error, Error}
-        end
-    catch
-        How:Why ->
-            error_logger:error_report({chef_solr, update, How, Why}),
-            {error, Why}
-    end.
+    chef_index_http:post(update_url(Mod), Body).
 
 %% @doc Sends a "commit" message directly to Solr
 %% This is exposed for the users of delete_search_db_by_type
