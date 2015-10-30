@@ -167,7 +167,8 @@ default_config() ->
             {queue_length_monitor_queue, alaska },
             {queue_length_monitor_millis, 30000 },
             {queue_length_monitor_timeout_millis, 5000 },
-            {drop_on_full_capacity, true }
+            {drop_on_full_capacity, true },
+            {queue_at_capacity_affects_overall_status, false}
         ]}
     ].
 
