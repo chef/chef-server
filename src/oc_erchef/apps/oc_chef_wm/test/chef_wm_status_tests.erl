@@ -162,7 +162,8 @@ default_config() ->
             {queue_length_monitor_queue, alaska },
             {queue_length_monitor_millis, 30000 },
             {queue_length_monitor_timeout_millis, 5000 },
-            {drop_on_full_capacity, true }
+            {drop_on_full_capacity, true },
+            {queue_at_capacity_affects_overall_status, false}
         ]}
     ].
 
@@ -197,6 +198,79 @@ check_health_with_rabbit_monitoring_test_() ->
           ?assertEqual(?ANALYTICS_STATUS, ej:get({<<"analytics_queue">>}, Ejson))
 
     end]}.
+
+check_queue_mon_affects_overall_status_test_() ->
+    {setup,
+     fun() ->
+             setup_env(),
+             application:set_env(oc_chef_wm, rabbitmq, default_config()),
+             {ok, _QMPid} = chef_wm_actions_queue_monitoring:start_link("/analytics", "alaska", 0, 0),
+             chef_wm_actions_queue_monitoring:override_queue_at_capacity(true),
+             [ begin
+                   meck:new(Mod),
+                   meck:expect(Mod, ping, fun() -> pong end)
+               end || Mod <- ?CHECK_MODS ],
+             meck:new(chef_keygen_cache),
+             meck:expect(chef_keygen_cache, status_for_json, fun() -> ?KEYGEN_STATUS end)
+     end,
+     fun(_) ->
+             [ meck:unload(Mod) || Mod <- ?CHECK_MODS ],
+             meck:unload(chef_keygen_cache),
+             cleanup_env()
+     end,
+     [
+      fun() ->
+              % overall_status will be fail as the queue is at capacity as
+              % queue_at_capacity_affects_overall_status is true
+              chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_at_capacity_affects_overall_status, true),
+              {Status, Json} = chef_wm_status:check_health(),
+              ?assertEqual(fail, Status),
+              Ejson = chef_json:decode(Json),
+              ?assertEqual(<<"fail">>, ej:get({<<"status">>}, Ejson)),
+              ?assertEqual(true, ej:get({<<"analytics_queue">>, <<"queue_at_capacity">>}, Ejson)),
+              [ ?assertEqual(<<"pong">>, ej:get({"upstreams", a2b(Mod)}, Ejson))
+                || Mod <- ?CHECK_MODS ]
+      end,
+      fun() ->
+              % overall_status will be pong as the queue is at capacity, but
+              % queue_at_capacity_affects_overall_status is false
+              chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_at_capacity_affects_overall_status, false),
+              {Status, Json} = chef_wm_status:check_health(),
+              ?assertEqual(pong, Status),
+              Ejson = chef_json:decode(Json),
+              ?assertEqual(<<"pong">>, ej:get({<<"status">>}, Ejson)),
+              ?assertEqual(true, ej:get({<<"analytics_queue">>, <<"queue_at_capacity">>}, Ejson)),
+              [ ?assertEqual(<<"pong">>, ej:get({"upstreams", a2b(Mod)}, Ejson))
+                || Mod <- ?CHECK_MODS ]
+      end,
+      fun() ->
+              % overall_status will be pong as the queue is at capacity, but the queue monitor is
+              % disabled
+              chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_at_capacity_affects_overall_status, false),
+              chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false),
+              {Status, Json} = chef_wm_status:check_health(),
+              ?assertEqual(pong, Status),
+              Ejson = chef_json:decode(Json),
+              ?assertEqual(<<"pong">>, ej:get({<<"status">>}, Ejson)),
+              ?assertEqual(undefined, ej:get({<<"analytics_queue">>, <<"queue_at_capacity">>}, Ejson)),
+              [ ?assertEqual(<<"pong">>, ej:get({"upstreams", a2b(Mod)}, Ejson))
+                || Mod <- ?CHECK_MODS ]
+      end,
+      fun() ->
+              % overall_status not affected as the queue monitor is disabled
+              chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_at_capacity_affects_overall_status, true),
+              chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false),
+              {Status, Json} = chef_wm_status:check_health(),
+              ?assertEqual(pong, Status),
+              Ejson = chef_json:decode(Json),
+              ?assertEqual(<<"pong">>, ej:get({<<"status">>}, Ejson)),
+              ?assertEqual(undefined, ej:get({<<"analytics_queue">>, <<"queue_at_capacity">>}, Ejson)),
+              [ ?assertEqual(<<"pong">>, ej:get({"upstreams", a2b(Mod)}, Ejson))
+                || Mod <- ?CHECK_MODS ]
+      end
+
+
+     ]}.
 
 
 a2b(A) ->

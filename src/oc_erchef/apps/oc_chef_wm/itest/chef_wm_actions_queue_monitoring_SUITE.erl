@@ -262,7 +262,8 @@ default_rabbit_config(Config) ->
             {queue_length_monitor_millis, 30000 },
             {queue_length_monitor_timeout_millis, 5000 },
             {drop_on_full_capacity, true },
-            {prevent_erchef_startup_on_full_capacity, false}
+            {prevent_erchef_startup_on_full_capacity, false},
+            {queue_at_capacity_affects_overall_status, false}
         ]}
     ].
 

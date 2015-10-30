@@ -131,6 +131,8 @@ default['private_chef']['rabbitmq']['analytics_max_length'] = 10000
 default['private_chef']['rabbitmq']['queue_length_monitor_vhost'] = "/analytics"
 default['private_chef']['rabbitmq']['queue_length_monitor_queue'] = "alaska"
 default['private_chef']['rabbitmq']['queue_length_monitor_enabled'] = true
+# does a full queue set overall_status to fail at \_status
+default['private_chef']['rabbitmq']['queue_at_capacity_affects_overall_status'] = false
 
 ####
 # RabbitMQ Queue Monitor

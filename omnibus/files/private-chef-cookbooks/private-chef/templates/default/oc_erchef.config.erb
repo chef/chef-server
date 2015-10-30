@@ -138,7 +138,8 @@
                                 {queue_length_monitor_millis, <%= @node['private_chef']['rabbitmq']['queue_length_monitor_millis'] %>},
                                 {queue_length_monitor_timeout_millis, <%= @node['private_chef']['rabbitmq']['queue_length_monitor_timeout_millis'] %>},
                                 {drop_on_full_capacity, <%=  @node['private_chef']['rabbitmq']['drop_on_full_capacity']  %>},
-                                {prevent_erchef_startup_on_full_capacity, <%= @node['private_chef']['rabbitmq']['prevent_erchef_startup_on_full_capacity'] %>}
+                                {prevent_erchef_startup_on_full_capacity, <%= @node['private_chef']['rabbitmq']['prevent_erchef_startup_on_full_capacity'] %>},
+                                {queue_at_capacity_affects_overall_status, <%= @node['private_chef']['rabbitmq']['queue_at_capacity_affects_overall_status'] %>}
                                ]}
                           ]}
             ]},
