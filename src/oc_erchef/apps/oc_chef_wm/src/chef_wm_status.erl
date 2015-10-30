@@ -103,7 +103,7 @@ queue_at_capacity_affects_overall_status() ->
     chef_wm_rabbitmq_management:get_rabbit_queue_monitor_setting(queue_at_capacity_affects_overall_status, false).
 
 
--spec log_failure(fail | pong, [{binary(), <<_:32>>}], tuple()) -> ok.
+-spec log_failure(fail | pong, [{binary(), <<_:32>>}], list()) -> ok.
 log_failure(fail, Pings, []) ->
     % queue monitor isn't active
     FailureData = {{status, fail}, {upstreams, {Pings}}},
