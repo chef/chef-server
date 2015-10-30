@@ -629,8 +629,7 @@ module Pedant
       let(:search_success_response) do
         {
           :status => 200,
-          :body_exact => {
-            "total" => search_result_items.size,
+          :body => {
             "start" => 0, # TODO: Test paging
             "rows" => search_result_items
           }
@@ -638,12 +637,11 @@ module Pedant
       end
 
       require 'uri'
+      require 'cgi'
 
       # Amount of time to try searches until giving up... this gives Solr
       # an opportunity to commit.
       let(:maximum_search_time){ Pedant::Config.maximum_search_time}
-      let(:direct_solr_query_sleep_time){ Pedant::Config.direct_solr_query_sleep_time }
-
       # Databag items that come back from a search are wrapped in a bit of
       # extra cruft.
       #
@@ -669,26 +667,33 @@ module Pedant
         # Chef Object type (in addition to filtering based on org).  We
         # don't have an easy way to access the org's guid in the tests, so
         # I'm not using that. In any event, the following query works.
-        url = URI.escape("#{Pedant::Config.search_server}/solr/select?fq=+X_CHEF_type_CHEF_X:#{type}&q=#{query}&wt=json")
+        url = "#{Pedant::Config.search_server}#{Pedant::Config.search_url_fmt}" % {:type => CGI.escape(type), :query => CGI.escape(query)}
         headers = {
           "Accept" => "application/json"
         }
-        sleep direct_solr_query_sleep_time
+        sleep Pedant::Config.direct_solr_query_sleep_time
         r = RestClient.send :get, url, headers
         parse(r)
+      end
+
+      def get_response_count(r)
+        if r["response"].nil?
+          r["hits"]["total"]
+        else
+          r["response"]["numFound"]
+        end
       end
 
       # Force a commit on Solr.  Call this after adding things that you
       # subsequently want to search for.  Much preferable to waiting
       # around for a minute.
       def force_solr_commit
-
         # assuming we're running this after adding
         # some things to Solr, we want to give it a little
         # time to clear the queue.  In a test scenario, this
         # should be enough of a wait.
-        sleep direct_solr_query_sleep_time
-        url = "#{Pedant::Config.search_server}/solr/update?commit=true"
+        sleep Pedant::Config.direct_solr_query_sleep_time
+        url = "#{Pedant::Config.search_server}#{Pedant::Config.search_commit_url}"
         body = ''
         headers = {}
         RestClient.send :post, url, body, headers
@@ -725,8 +730,7 @@ module Pedant
           get(api_url("/search/#{options[:type]}?q=#{options[:query]}"),user) do |response|
             response.should look_like({
                                         :status => 200,
-                                        :body_exact => {
-                                          "total" => results.count,
+                                        :body => {
                                           "start" => 0,
                                           "rows" => results
                                         }
@@ -735,18 +739,19 @@ module Pedant
         end
       end
 
-      def search(index, query)
+      def search_result(index, query)
         search_url = api_url(URI::encode("/search/#{index}?q=#{query}"))
+        get(search_url, admin_user)
+      end
+
+      def search(index, query)
         with_search_polling do
-          response = get(search_url, admin_user)
+          response = search_result(index, query)
           response.should look_like({:status => 200, :body => { 'start' => 0 }})
-          response = parse(response)
-          response['total'].should == response['rows'].size
-          response['rows']
+          parse(response)['rows']
         end
       end
     end
-
 
     shared_examples "Deletes from Solr Index" do
       if Pedant::Config.search_server
@@ -771,7 +776,7 @@ module Pedant
         it "deletes an object from Solr when deleting from the system as a whole" do
           # Assert that there is no item of the given type with the given name in the search index
           r = direct_solr_query(index_name, "content:name__=__#{item_name}")
-          num_before_add = r["response"]["numFound"]
+          num_before_add = get_response_count(r)
           num_before_add.should eq 0
 
           # Now add the item and force a Solr commit
@@ -780,8 +785,9 @@ module Pedant
 
           # Verify that it is now searchable
           r2 = direct_solr_query(index_name, "content:name__=__#{item_name}")
-          num_after_add = r2["response"]["numFound"]
+          num_after_add = get_response_count(r2)
           num_after_add.should eq 1
+          force_solr_commit
 
           # Now delete the object and force a Solr commit
           delete_chef_object(container, requestor, deletion_identifier)
@@ -789,7 +795,7 @@ module Pedant
 
           # Searching for the object should retrieve no results from Solr
           r3 = direct_solr_query(index_name, "content:name__=__#{item_name}")
-          num_after_delete = r3["response"]["numFound"]
+          num_after_delete = get_response_count(r3)
           num_after_delete.should eq 0
         end
       end

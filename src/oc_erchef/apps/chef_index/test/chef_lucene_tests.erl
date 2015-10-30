@@ -1,4 +1,4 @@
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright 2015 Chef Server, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -15,9 +15,23 @@
 %% under the License.
 %%
 
--module(lucene_txfm_tests).
-
+-module(chef_lucene_tests).
 -include_lib("eunit/include/eunit.hrl").
+
+% Note: chef_index_test_utils:set_provider sets the application env and a process dictionary
+% entry to specify the provider module. This must be done within each test, because
+% setup/teardown functions do not seem to execute within the same process as the test.
+
+chef_lucene_solr_test_() ->
+     [
+      {"it transforms an arbitrary field search into a search on the content field",
+       fun() ->
+               chef_index_test_utils:set_provider(solr),
+               io:fwrite("*** search_module: ~p~n", [get(search_module)]),
+               ?assertEqual(chef_lucene:parse(<<"foo:bar">>), <<"content:foo__=__bar">>)
+       end}
+     ].
+
 -define(i2b(X), iolist_to_binary(X)).
 -define(gv(X, PL), proplists:get_value(X, PL)).
 
@@ -43,14 +57,19 @@ make_pairs([A, B |Rest], Acc) ->
 make_pairs([], Acc) ->
     Acc.
 
-trimre(Bin) -> 
+trimre(Bin) ->
     re:replace(Bin, "^\\s+|\\s+$", % FIX for emacs "
                "",
                [{return, binary}, global]).
 
 query_example_test_() ->
-    % run the example transform tests as we run in Ruby Chef
-    Queries = read_example_queries("../test/search_queries.txt"),
+    %% run the example transform tests as we run in Ruby Chef
+    %% TravisCI doesn't allow relative paths
+    Len = length(code:priv_dir(chef_index)),
+    Dir = string:sub_string(code:priv_dir(chef_index), 1, Len - 4),
+    Path = Dir ++ "/test/search_queries.txt",
+    ?debugFmt("Reading example queries from ~p", [Path]),
+    Queries = read_example_queries(Path),
     [ ?_assertEqual(E, chef_lucene:parse(I)) || {I, E} <- Queries ].
 
 lucene_query_test_() ->
@@ -102,7 +121,7 @@ field_range_test_() ->
                % everything and ignoring inclusive/exclusive
                {"afield:[* TO *]", <<"content:afield__=__*">>},
                {"afield:{* TO *}", <<"content:afield__=__*">>}
-               
+
                ],
     [ ?_assertEqual(E, chef_lucene:parse(I)) || {I, E} <- Queries ].
 

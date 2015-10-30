@@ -63,6 +63,11 @@ default_orgname <%= @default_orgname ? "\"#{@default_orgname}\"" : "nil" %>
 # poll for a period to ensure they are querying committed results.
 search_server "<%= @solr_url %>"
 
+<% if node['private_chef']['opscode-erchef']['search_provider'] == "elasticsearch" %>
+search_commit_url "/_refresh"
+search_url_fmt "/chef/_search?fq=X_CHEF_type_CHEF_X:%{type}&q=%{query}"
+<% end %>
+
 # Some tests expect access erchef server directly, instead of routing through
 # LB.
 #

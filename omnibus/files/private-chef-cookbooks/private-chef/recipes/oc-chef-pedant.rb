@@ -43,7 +43,7 @@ template pedant_config do
   mode  "0755"
   variables({
     :api_url  => node['private_chef']['nginx']['url'],
-    :solr_url => "http://#{helper.vip_for_uri('opscode-solr4')}:#{node['private_chef']['opscode-solr4']['port']}",
+    :solr_url => OmnibusHelper.new(node).solr_root,
     :opscode_account_internal_url => node['private_chef']['lb_internal']['vip'],
     :opscode_account_internal_port => node['private_chef']['lb_internal']['account_port'],
     :erchef_internal_vip => node['private_chef']['opscode-erchef']['vip'],

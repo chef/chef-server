@@ -142,7 +142,6 @@ describe 'Search API endpoint', :search do
           with_search_polling do
             response = get(search_url, requestor)
             result = parse(response)
-            expect(result["total"]).to eq(1)
             expect(result["rows"].first).to eq(node)
           end
         end
@@ -152,7 +151,6 @@ describe 'Search API endpoint', :search do
           with_search_polling do
             response = get(search_url, requestor)
             result = parse(response)
-            expect(result["total"]).to eq(1)
             expect(result["rows"].first).to eq(node)
           end
         end
@@ -541,14 +539,14 @@ describe 'Search API endpoint', :search do
 
         it 'A search for foo-bar returns foo-bar and nothing else' do
             with_search_polling do
-                search('x', 'id:foo-bar').map { |row| row['name'] }.should =~ [ 'data_bag_item_x_foo-bar' ]
+              search('x', 'id:foo-bar').map { |row| row['name'] }.should =~ [ 'data_bag_item_x_foo-bar' ]
             end
         end
 
         it 'A search for foo* AND NOT bar returns foo and foo-bar' do
-            with_search_polling do
-                search('x', 'id:foo* AND NOT bar').map { |row| row['name'] }.should =~ [ 'data_bag_item_x_foo', 'data_bag_item_x_foo-bar' ]
-            end
+          with_search_polling do
+            search('x', 'id:foo* AND NOT bar').map { |row| row['name'] }.should =~ [ 'data_bag_item_x_foo', 'data_bag_item_x_foo-bar' ]
+          end
         end
       end
     end
@@ -593,7 +591,7 @@ describe 'Search API endpoint', :search do
 
         # Because data bag items are hierarchical, we need to fudge
         # things a bit to make the common tests work for them
-        let(:index_name) { "data_bag_item%20+data_bag:#{bag_name}" }
+        let(:index_name) { "data_bag_item +data_bag:#{bag_name}" }
         let(:container) { "data/#{bag_name}" } # data bags are odd
         let(:deletion_identifier) { test_item_id }
 
@@ -660,8 +658,7 @@ describe 'Search API endpoint', :search do
               }
               # TODO this seems wrong, sine we're discarding the actual expected result...
               want_results = 10.times.map { |i| want_result }
-              response.should look_like({:status => 200,
-                                          :body => {'total' => 10}})
+              response.should look_like({:status => 200 })
               got = parse(response)['rows']
               got_digits = got.map { |o| o['data']['goal'] }.sort
               got_digits.should == (0..9).to_a
@@ -713,11 +710,11 @@ describe 'Search API endpoint', :search do
             post(api_url("/search/node?q=name:#{node_name}"), admin_user,
                  :payload => payload) do |response|
               response.should look_like({:status => 200,
-                                          :body => {'total' => 1,
-                                            "rows" => [{ 'url' => api_url("/nodes/#{node_name}"),
-                                                         'data' => {
-                                                           'we_found_default' => true
-                                                         }}]}})
+                                          :body => {
+                                           "rows" => [{ 'url' => api_url("/nodes/#{node_name}"),
+                                                        'data' => {
+                                                          'we_found_default' => true
+                                                        }}]}})
             end
           end
         end
@@ -730,11 +727,11 @@ describe 'Search API endpoint', :search do
             post(api_url("/search/node?q=name:#{node_name}"), admin_user,
                  :payload => payload) do |response|
               response.should look_like({:status => 200,
-                                          :body => {'total' => 1,
-                                            "rows" => [{ 'url' => api_url("/nodes/#{node_name}"),
-                                                         'data' => {
-                                                           'we_found_normal' => true
-                                                         }}]}})
+                                         :body => {
+                                           "rows" => [{ 'url' => api_url("/nodes/#{node_name}"),
+                                                        'data' => {
+                                                          'we_found_normal' => true
+                                                        }}]}})
             end
           end
         end
@@ -747,17 +744,14 @@ describe 'Search API endpoint', :search do
             post(api_url("/search/node?q=name:#{node_name}"), admin_user,
                  :payload => payload) do |response|
               response.should look_like({:status => 200,
-                                          :body => {'total' => 1,
-                                            "rows" => [{ 'url' => api_url("/nodes/#{node_name}"),
-                                                         'data' => {
-                                                           'goal' => 'found_it_normal'
-                                                         }}]}})
+                                         :body => {
+                                           "rows" => [{ 'url' => api_url("/nodes/#{node_name}"),
+                                                        'data' => {
+                                                          'goal' => 'found_it_normal'
+                                                        }}]}})
             end
           end
         end
-
-
-
       end # context
     end
   end
