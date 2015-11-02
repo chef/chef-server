@@ -539,7 +539,7 @@ describe "Policies API endpoint", :policies do
 
       context "when the policy name in request doens't match URL" do
 
-        it "POST /policies/:policy_name/revisions returns 400" do
+        it "POST /policies/:policy_name/revisions returns 400", :validation do
           response = post(named_policy_revisions_url, requestor, payload: minimum_valid_policy_payload)
           expect(response.code).to eq(400)
         end
@@ -904,11 +904,11 @@ describe "Policies API endpoint", :policies do
               response_obj["error"].first
             end
 
-            it "PUT /policies/:group/:name returns 400" do
+            it "PUT /policies/:group/:name returns 400", :validation do
               expect(response.code).to eq(400)
             end
 
-            it "PUT /policies/:group/:name body contains a well-formed error message" do
+            it "PUT /policies/:group/:name body contains a well-formed error message", :validation do
               expect(error_message).to eq(expected_error_message)
             end
 
@@ -1121,7 +1121,7 @@ describe "Policies API endpoint", :policies do
             # TODO: customizing the 400 message for this is currently difficult
             # in erchef, so we skip validating the message.
 
-            it "PUT /policies/:group/:name returns 400" do
+            it "PUT /policies/:group/:name returns 400", :validation do
               expect(response.code).to eq(400)
             end
 
