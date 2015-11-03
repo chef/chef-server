@@ -15,10 +15,10 @@
 #
 
 name "opscode-solr4"
-default_version "4.9.1"
+default_version "4.10.4"
 
 source url: "http://archive.apache.org/dist/lucene/solr/#{version}/solr-#{version}.tgz",
-       md5: "0718bf3e3d0635d290db1a66ae16bce9"
+       md5: "8ae107a760b3fc1ec7358a303886ca06"
 
 dependency "server-jre"
 
