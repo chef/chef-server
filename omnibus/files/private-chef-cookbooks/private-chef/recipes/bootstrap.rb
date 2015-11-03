@@ -45,6 +45,7 @@ end
 execute "bootstrap-platform" do
   command "/opt/opscode/embedded/bin/bundle exec ./bin/bootstrap-platform ./bootstrapper-config/config.rb ./bootstrapper-config/pivotal.yml"
   cwd opscode_test_dir
+  retries 3
   not_if { OmnibusHelper.has_been_bootstrapped? }
   notifies :restart, 'service[opscode-erchef]'
 end
