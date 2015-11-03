@@ -48,6 +48,21 @@ http {
     config.set_default_org(<%= @helper.default_orgname %>)
   ';
 
+  <%- if node['private_chef']['nginx']['enable_stub_status'] -%>
+  # Listen for local requests to the stub_status module.
+  server {
+    listen <%= node['private_chef']['nginx']['stub_status']['listen_host'] %>:<%= node['private_chef']['nginx']['stub_status']['listen_port'] %>;
+    location <%= node['private_chef']['nginx']['stub_status']['location'] %> {
+      stub_status on;
+      access_log   off;
+      <%- node['private_chef']['nginx']['stub_status']['allow_list'].each do |allowed| -%>
+      allow <%= allowed %>;
+      <%- end -%>
+      deny all;
+    }
+  }
+  <%- end -%>
+
   <%- node['private_chef']['lb']['upstream'].each do |uname, servers| -%>
   upstream <%= uname.sub(/-/, '_') %> {
     <%- servers.each do |server| -%>
