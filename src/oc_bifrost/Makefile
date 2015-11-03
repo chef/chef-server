@@ -53,7 +53,6 @@ omnibus: $(REBAR3) distclean
 	$(REBAR3) do compile, release
 
 ## For dvm
-DVM_HOOK = bundle
 dvm_file = $(wildcard /vagrant/dvm.mk)
 ifeq ($(dvm_file),/vagrant/dvm.mk)
 	include /vagrant/dvm.mk
