@@ -129,7 +129,6 @@ end
 
 execute "oc_id_schema" do
   command "bundle exec rake db:migrate"
-  path ["/opt/opscode/embedded/bin"]
   cwd "/opt/opscode/embedded/service/oc_id"
 
   # There are other recipes that depend on having a VERSION environment
@@ -142,7 +141,8 @@ execute "oc_id_schema" do
   #
   # Also set the RAILS_ENV as is needed.
   environment("RAILS_ENV" => "production",
-              "VERSION" => `ls -1 /opt/opscode/embedded/service/oc_id/db/migrate | tail -n 1 | sed -e "s/_.*//g"`.chomp)
+              "VERSION" => `ls -1 /opt/opscode/embedded/service/oc_id/db/migrate | tail -n 1 | sed -e "s/_.*//g"`.chomp,
+              "PATH" => "/opt/opscode/embedded/bin")
 
   only_if { is_data_master? }
 end
