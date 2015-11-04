@@ -60,6 +60,10 @@ describe User do
     expect(User.find(jimmy.email)).to eql(jimmy)
   end
 
+  it 'doesnt blow up when user is nil' do
+    expect(User.find(nil)).to be_nil
+  end
+
   describe 'updating a password' do
     fields = [:current_password, :new_password, :password_confirmation]
     fields.each do |f|

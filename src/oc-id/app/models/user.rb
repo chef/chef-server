@@ -126,7 +126,7 @@ class User
 
     def find(username)
       begin
-        if (username.include?('@'))
+        if (username != nil && username.include?('@'))
           users = self.new.chef.get(
             "users?#{{ email: username }.to_query}"
           )
