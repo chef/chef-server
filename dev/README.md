@@ -149,3 +149,25 @@ And a few other things.  You can just use `dvm` by itself and a list of
 commands will be generated. You may also want to take a look in
 defaults.yml, in which project definitions and other things are set up.
 
+# Using external databases
+
+To use an external database for Chef Server (and Reporting), create a `config.yml` file with the following contents:
+
+```
+vm:
+  postgresql:
+    start: true
+    use-external: true
+```
+
+To use separate external databases for Chef Server and Chef Reporting, create a `config.yml` file with the following contents:
+
+```
+vm:
+  postgresql:
+    start: true
+    use-external: true
+  reporting_postgresql:
+    start: true
+    use-external: true
+```
