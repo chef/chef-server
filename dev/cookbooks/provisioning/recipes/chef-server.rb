@@ -36,6 +36,22 @@ template "/etc/opscode/chef-server.rb" do
   group "root"
   action :create
 end
+
+directory "/etc/opscode-reporting" do
+  owner "root"
+  group "root"
+  recursive true
+  action :create
+end
+
+template "/etc/opscode-reporting/opscode-reporting.rb" do
+  source "opscode-reporting.rb.erb"
+  owner "root"
+  group "root"
+  action :create
+  only_if { node['provisioning'].has_key? 'opscode-reporting-config' }
+end
+
 # Install required external packages.
 # TODO eventually support auto-download of these packages from packagecloud
  #node['chef-server']['installers'].each do |package_name|
