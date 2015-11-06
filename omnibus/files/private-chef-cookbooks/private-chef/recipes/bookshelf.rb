@@ -6,7 +6,6 @@
 
 cookbook_migration = "/opt/opscode/embedded/bin/cookbook_migration.sh"
 
-checksum_path = node['private_chef']['opscode-chef']['checksum_path']
 data_path = node['private_chef']['bookshelf']['data_dir']
 
 template cookbook_migration do
@@ -21,12 +20,10 @@ end
 # Note that data_path will not be a subdir of bookshelf_dir in HA configurations
 #
 bookshelf_dir = node['private_chef']['bookshelf']['dir']
-bookshelf_etc_dir = File.join(bookshelf_dir, "etc")
 bookshelf_log_dir = node['private_chef']['bookshelf']['log_directory']
 bookshelf_sasl_log_dir = File.join(bookshelf_log_dir, "sasl")
 [
   bookshelf_dir,
-  bookshelf_etc_dir,
   bookshelf_log_dir,
   bookshelf_sasl_log_dir,
   data_path

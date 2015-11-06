@@ -5,12 +5,10 @@
 # All Rights Reserved
 
 opscode_erchef_dir = node['private_chef']['opscode-erchef']['dir']
-opscode_erchef_etc_dir = File.join(opscode_erchef_dir, "etc")
 opscode_erchef_log_dir = node['private_chef']['opscode-erchef']['log_directory']
 opscode_erchef_sasl_log_dir = File.join(opscode_erchef_log_dir, "sasl")
 [
   opscode_erchef_dir,
-  opscode_erchef_etc_dir,
   opscode_erchef_log_dir,
   opscode_erchef_sasl_log_dir
 ].each do |dir_name|
