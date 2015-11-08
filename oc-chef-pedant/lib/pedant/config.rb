@@ -74,6 +74,10 @@ module Pedant
         args.concat(self[:tags].map { |tag| ['-t', tag.to_s] } )
       end
 
+      if self[:seed]
+        args.concat([ '--seed', self[:seed] ])
+      end
+
       args.concat(rspec_formatting_args)
 
       # Load up the failures file if we're re-running
