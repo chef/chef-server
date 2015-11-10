@@ -1,9 +1,188 @@
 # Chef Server Changelog
 
-# 12.2.1 (pending)
+# 12.3.0 (2015-11-12)
 
-## Updated components
-  * postgresql (9.2.10 -> 9.2.14)
+### Components
+
+#### Updated
+* ncurses (5.9-2015 -> 5.9)
+* rubygems (1.8.24 -> 2.4.5)
+* bundler (1.5.3 -> 1.10.6)
+* openresty (1.7.10.1 -> 1.9.3.1)
+* postgresql92 (9.2.10 -> 9.2.14)
+* liblzma (5.0.5 -> 5.2.2)
+* ohai (ffd9a0a0 -> c9787b96)
+* appbundler (0.4.0 -> 0.6.0)
+* redis (2.8.21 -> 3.0.4)
+* opscode-solr4 (4.9.1 -> 4.10.4)
+* chef (ad8fd4d6 -> b0dbe243)
+
+#### New
+* pkg-config-lite (0.28-1)
+
+#### Removed
+* pkg-config (0.28)
+* gdbm (1.9.1)
+
+## Detailed Change Log
+
+* `omnibus` [616](https://github.com/chef/chef-server/pull/616) - omnibus-software-bump
+  * Remove dependency on gdbm
+* `oc-chef-pedant` [615](https://github.com/chef/chef-server/pull/615) - mark-more-validations
+  * Mark `policy/policy` group validation specs with `:validation`.
+* `oc-chef-pedant` [614](https://github.com/chef/chef-server/pull/614) - pedant\_add\_seed\_option
+  * Rspec by default runs tests in a random order, which normally is
+    good. However sometimes bugs manifest themselves as state leftover from
+    prior tests, and it's hard to sort those out when the order changes
+    every time.
+    Add a --seed flag to pedant to set the rspec seed value.
+* `chef-mover` [613](https://github.com/chef/chef-server/pull/613) - no-eunit-on-vendored-code
+  * do not run intermittently failing tests on dependencies
+    that we can't change for backward-compatibility reasons.
+* `omnibus` [611](https://github.com/chef/chef-server/pull/611) - no-etc-for-erl
+  * Don't create a few unused directories on new
+    installs
+* `omnibus` [612](https://github.com/chef/chef-server/pull/612) - migration-26-rename
+  * Follow filename convention for migration `26`
+* `dvm` [610](https://github.com/chef/chef-server/pull/610) - custom-dotfile-location
+  * add support for dotfiles external to the repository
+* `dvm` [609](https://github.com/chef/chef-server/pull/609) - dp\_add\_reporting\_template
+  * missing template from [https://github.com/chef/chef-server/pull/608](https://github.com/chef/chef-server/pull/608)
+* `internal-doc`, `dvm` [608](https://github.com/chef/chef-server/pull/608) - dp\_external\_pgsql\_dvm
+  * allow dvm to create an external reporting db vm
+* `oc-id` [606](https://github.com/chef/chef-server/pull/606) - dp\_nil\_username\_ocid
+  * nil username breaks Analytics login
+* `omnibus` [597](https://github.com/chef/chef-server/pull/597) - fixes584
+  * [chef-server/584](https://github.com/chef/chef-server/issues/584) Adding 3 retries will ensure `bootstrap-platform` script does not fail because bifrost component slow to start up.
+* `omnibus` [fix-warn](https://github.com/chef/chef-server/commit/1128fda0db9a38cb664b5e400feecbe2f459d611)
+  * Fixes Chef 13 warning related to using 'environment' attribute to configure 'PATH'.
+* `omnibus` [RyanFrantz-master](https://github.com/chef/chef-server/commit/a50470c41d0ee9d716f860a8d6f79cc14fde5ddd)
+  * the nginx `nginx_status` endpoint is now availalbe.
+  * Sensibe defaults are defined in `attributes/default`.rb.
+* `omnibus` [571](https://github.com/chef/chef-server/pull/571) - CVE-2014-3628
+  * Need the md5sum too...
+  * Bump to Solr 4.10.4 for CVE-2014-3628
+* `dvm`, `bifrost` [588](https://github.com/chef/chef-server/pull/588) - dvm-fixes
+  * dvm fixes to fix unhelpful error messages and enable successful loading of bifrost.
+* `oc-chef-pedant` [600](https://github.com/chef/chef-server/pull/600) - tag-pedant-validations
+  * Mark every spec expecting a `400` as `:validation`.
+* `bookshelf`, `bifrost`, `erchef` [592](https://github.com/chef/chef-server/pull/592) - rebar-lock-updates-and-webmachine-rehome
+  * pull in the latest
+    webmachine and mochiweb dependencies to resolve an issue which could
+    lead to requests being rejected under sudden load.
+* `omnibus`, `erchef` [591](https://github.com/chef/chef-server/pull/591) - dp\_queue\_mon\_affects\_overall\_status
+  * queue monitor doesn't affect `overall_status` by default
+* `oc-chef-pedant`, `omnibus`, `erchef` [589](https://github.com/chef/chef-server/pull/589) - fcs
+  * Chef Server now supports Elasticsearch as a search
+    indexing backend in addition to solr.
+  * Once an ElasticSearch node is configured, you can
+* `omnibus`, `erchef` [570](https://github.com/chef/chef-server/pull/570) - dp\_rabbit\_monitoring
+  * enable RabbitMQ Management Plugin
+* `oc-id` [560](https://github.com/chef/chef-server/pull/560) - add-ocid-email
+  * fixing specs
+  * update `omniauth-chef` to 0.2.0
+  * I18n changes
+  * Changes to allow username for password changes
+* `omnibus` [555](https://github.com/chef/chef-server/pull/555) - gather-log-updates
+  * `gather-logs` updates
+* `oc-id` [563](https://github.com/chef/chef-server/pull/563) - oc-id-hosted-copy
+  * Just call it "Chef account" and "Chef username" and put it into the `i18n`
+    config.
+* `omnibus` [579](https://github.com/chef/chef-server/pull/579) - chef-server-ctl-proxy
+  * This configuration file is used by `chef-server-ctl` to talk to the API
+    locally. Proxy configs in the users environment often cause problems
+    because the LB VIP is almost always `127.0.0.1`, which causes the proxy to
+    try to connect to itself rather than back to the `chef-server`.
+* `chef-mover` [569](https://github.com/chef/chef-server/pull/569) - be-quiet-mover
+  * This test is noisy and fails at random on Travis.  It is part of
+    `chef-mover`'s vendored copy of depsolver.
+* `dvm` [573](https://github.com/chef/chef-server/pull/573) - fix-package-listing
+  * Other parts of the installer selection code assume that the user
+    gave us a number starting from 1.
+* `dvm` [574](https://github.com/chef/chef-server/pull/574) - dvm-sync-cleanup
+  * updated the sync tool with more configuration
+    options and more succinct output.
+* `omnibus` [master](https://github.com/chef/chef-server/commit/d9ed3b0c926079e56731a8dec58c0e4f493f83a8)
+  * This upgrades PostgreSQL to the current release and addreses several
+    CVEs.
+    [http://www.postgresql.org/docs/9.2/static/release-9-2-11.html](http://www.postgresql.org/docs/9.2/static/release-9-2-11.html)
+    [http://www.postgresql.org/docs/9.2/static/release-9-2-14.html](http://www.postgresql.org/docs/9.2/static/release-9-2-14.html)
+* `omnibus`, `bootstrap` [545](https://github.com/chef/chef-server/pull/545) - fix-non-default-postgres-port
+  * Issue `459:` Use configured port everywhere we talk to postgres
+* `dvm` [566](https://github.com/chef/chef-server/pull/566) - dvm-powerdown-ssh-fail
+  * It's now possible to specify AUTOPACKAGE=x where
+    x is the number of the selection you'd type in. This saves the arduous
+    task of having to wait for the package menu and type a number on
+    `vagrant up`
+  * do not check if project path is available until
+    we try to load that project.
+* `omnibus` [565](https://github.com/chef/chef-server/pull/565) - master
+  * Change the name to be more meaningful
+  * Adding configurability for erchef and bifrost logging messages per second
+* `dvm` [556](https://github.com/chef/chef-server/pull/556) - warn-for-external-projects
+  * Warns rather than fail if external project isn't linked
+* `oc-chef-pedant` [552](https://github.com/chef/chef-server/pull/552) - search-poll-correctly
+  * `with_search_polling` works by retrying when an exception is raised. An
+    empty response from search will not raise an exception, rather the
+    assertions on the results should also be inside the `with_search_polling`
+    block.
+* `omnibus` [550](https://github.com/chef/chef-server/pull/550) - fix-bundler
+  * Override bundler from `omnibus-software` default of 1.5.3 to 1.10.6.
+* `dvm` [reporting-updates](https://github.com/chef/chef-server/commit/a4ee35619bdf1afcf4f73146ed968064ee2d9d75)
+  * add support for `oc-reporting-pedant`
+  * fix dep loading that broke with rebar changes, add reporting projects, and more!
+* `omnibus`, `erchef` [540](https://github.com/chef/chef-server/pull/540) - ldap-case-sensitive
+  * Fix bug where logins via LDAP failed because of case
+    sensitivity.
+* `omnibus`, `oc-id` [543](https://github.com/chef/chef-server/pull/543) - oc-id-favicon
+  * remove `oc-id` favicon
+  * Uses the favicon from [https://www.chef.io/favicon.ico.](https://www.chef.io/favicon.ico.)
+    `oc-id` had a blank file in that place, while the static files did not
+    have one. Adding the files and the configuration to let nginx serve it.
+* `omnibus` [537](https://github.com/chef/chef-server/pull/537) - backup\_exit
+  * [chef-server/534](https://github.com/chef/chef-server/issues/534) Fix `chef-server-ctl` backup always returning 1
+* `erchef` [541](https://github.com/chef/chef-server/pull/541) - fix-conn-leak
+  * Fix HTTP `500s` generated by request timeouts to bifrost
+    on `high-traffic` Chef Servers.
+* `omnibus` [524](https://github.com/chef/chef-server/pull/524) - cleanup-static-nginx-files
+  * Make the default index.html message more informative.
+  * delete unused javsacript files from nginx deploy
+* `omnibus` [536](https://github.com/chef/chef-server/pull/536) - master
+  * Don't consider `opscode-chef-mover` or any other hidden service status when checking `ha-status`. This is based on assumption the `opscode-chef-mover` service is only used during an upgrade, and does not need to be running all of the time.
+* `erchef` [528](https://github.com/chef/chef-server/pull/528) - spurious-status-400s
+  * Fix bug where persistent clients would receive HTTP `400`
+    after successful calls to the /_status endpoint.
+* `erchef` [529](https://github.com/chef/chef-server/pull/529) - remove-chef-otto
+  * Remove unused `chef_otto.hrl`
+* `erchef` [533](https://github.com/chef/chef-server/pull/533) - stablize-batch-tests
+  * A number of timeouts we were seeing seems to be a race condition in
+    shutting down the `gen_server`. To avoid this, we monitor the `gen_server`
+    pid and wait to get notified of its exit.
+* `erchef` [532](https://github.com/chef/chef-server/pull/532) - efast\_xs
+  * Only try to index `policy_name` and `policy_group` if their values are not undefined.
+  * Added throw to `chef_index_expander:expand/3` when key passed with undefined value.
+  * Added `efast_xs` to relx section of rebar.config.
+* `dvm` [516](https://github.com/chef/chef-server/pull/516) - forward-ssh-agent
+  * Occasionally we want to clone private repositories inside the `dev-vm`.
+    The forwarded `ssh-agent` makes this easier since the user can add their
+    github ssh key to their agent and it will be available inside the VM.
+* `dvm`, `omnibus`, `erchef` [520](https://github.com/chef/chef-server/pull/520) - direct\_solr\_writes
+  * add support for immediate data commits to `chef_solr`, bypassing the rabbit queue and expander process.
+    Enable this by setting `opscode_erchef['search_queue_mode']` to `batch`.
+* `oc-id` [522](https://github.com/chef/chef-server/pull/522) - CVE-2015-1840
+  * Upgrade `jquery-rails` to patch CVE-2015-1840
+* `bookshelf`, `chef-mover`, `bifrost`, `erchef` [518](https://github.com/chef/chef-server/pull/518) - rebar-update-pc-fix
+  * An update to the port compiler on hex caused an incompatibility with the
+    version of rebar we had vendored. Here we lock the pc plugin to avoid
+    the problem.
+    We should try to move to a newer rebar3 and update the port compiler
+    once rebar3 does a release.
+* `chef-mover`, `bifrost`, `erchef` [507](https://github.com/chef/chef-server/pull/507) - ok-rebar-you-win
+  * rebar3 wants to alphabetize the rebar.lock file, who are we to argue?
+* `chef-mover` [508](https://github.com/chef/chef-server/pull/508) - ignore-ance-is-bliss
+  * Remove `oc_erchef` build artifacts from git
+* `omnibus` [509](https://github.com/chef/chef-server/pull/509) - sles-support-csc-install
+  * Adding suse to package support for local addon installs.
 
 ## 12.2.0 (2015-09-01)
 
