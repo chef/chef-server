@@ -148,7 +148,8 @@ module Pedant
                 clients depsolver search knife validation authentication authorization
                 principals acl containers groups association omnibus organizations
                 usags controls keys cookbook-artifacts license headers server-api-version
-                policies pedantic self-test api-v0 api-v1 object-identifiers)
+                policies pedantic self-test api-v0 api-v1 object-identifiers
+                multiuser)
       export_options(opts, tags)
     end
 

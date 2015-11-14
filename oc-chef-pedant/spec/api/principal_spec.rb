@@ -198,7 +198,7 @@ describe "Principals API Endpoint", :principals do
         end
       end
 
-      context 'when requesting an outside user' do
+      context 'when requesting an outside user', :multiuser do
         let(:principal_user_name) { outside_user.name }
         let(:user_body) {
           {
