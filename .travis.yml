@@ -2,6 +2,7 @@ sudo: false
 branches:
   only:
     - master
+
 cache:
   apt: true
   directories:
@@ -59,3 +60,19 @@ script:
 
 after_failure:
   - cat logs/raw.log
+
+matrix:
+  include:
+    - language: ruby
+      rvm: 2.2
+      gemfile: oc-chef-pedant/Gemfile
+      before_script: cd oc-chef-pedant
+      script: bundle exec rake chef_zero_spec
+      # Remove things only used by erlang
+      install:
+      after_failure:
+      env:
+      otp_release:
+      addons:
+      before_cache:
+      cache:
