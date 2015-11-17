@@ -38,7 +38,7 @@ release:
 - [ ] Test an upgrade from the latest release of Open Source Chef Server
 11 to the most current build from master. To do this you must:
 
-  - Install Open Souce Chef Server 11
+  - Install Open Source Chef Server 11
   - Populate data using knife
   - Install the latest build
   - Follow the upgrade instruction for that build

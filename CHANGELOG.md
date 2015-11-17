@@ -57,7 +57,7 @@
 * `omnibus` [fix-warn](https://github.com/chef/chef-server/commit/1128fda0db9a38cb664b5e400feecbe2f459d611)
   * Fixes Chef 13 warning related to using 'environment' attribute to configure 'PATH'.
 * `omnibus` [RyanFrantz-master](https://github.com/chef/chef-server/commit/a50470c41d0ee9d716f860a8d6f79cc14fde5ddd)
-  * the nginx `nginx_status` endpoint is now availalbe.
+  * the nginx `nginx_status` endpoint is now available.
   * Sensibe defaults are defined in `attributes/default`.rb.
 * `omnibus` [571](https://github.com/chef/chef-server/pull/571) - CVE-2014-3628
   * Need the md5sum too...

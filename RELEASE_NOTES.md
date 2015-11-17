@@ -1,6 +1,6 @@
 # Chef Server Release Notes
 
-This document contains an overview of signficant customer-facing changes
+This document contains an overview of significant customer-facing changes
 in the release. For a detailed list of changed components, refer to
 [CHANGELOG.md](CHANGELOG.md).
 
