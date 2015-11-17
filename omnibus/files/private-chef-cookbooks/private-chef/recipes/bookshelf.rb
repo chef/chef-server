@@ -48,12 +48,19 @@ end
 
 bookshelf_config = File.join(bookshelf_dir, "sys.config")
 
+bookshelf_params = node['private_chef']['bookshelf'].to_hash.dup # is dup implicit in #to_hash?
+bookshelf_params['postgresql'] = node['private_chef']['postgresql'].dup
+['sql_user', 'sql_password', 'sql_db_timeout'].each do |v|
+  bookshelf_params['postgresql'][v] = node['private_chef']['opscode-erchef'][v]
+end
+
+
 template bookshelf_config do
   source "bookshelf.config.erb"
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode "644"
-  variables(node['private_chef']['bookshelf'].to_hash)
+  variables(bookshelf_params)
   notifies :restart, 'runit_service[bookshelf]' if is_data_master?
 end
 
