@@ -1,3 +1,5 @@
 .DS_Store
 erln8.config
 config.yml
+.bundle
+vendor
