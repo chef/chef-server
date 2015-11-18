@@ -45,6 +45,30 @@
                    entry :: binary(),
                    ctx :: undefined | binary()}).
 
+-record(db_file, {
+          bucket_name :: binary(),
+          bucket_id   :: integer(),
+          name        :: binary(),
+          file_id     :: integer(),
+          created_at  :: any(), % refine type
+          data_id     :: integer(),
+          complete    :: boolean(),
+          data_size   :: integer(),
+          chunk_count :: integer(),
+          hash_md5    :: binary(),
+          hash_sha512 :: binary()
+         }).
+
+-define(DB_FILE_TX_FM, [db_file, [bucket_name, bucket_id, name, file_id, created_at, data_id, complete, data_size, chunk_count, hash_md5, hash_sha512]]).
+
+-record(db_bucket, {
+          bucket_name :: binary(),
+          created_at  :: any(),
+          bucket_id   :: integer()
+         }).
+
+-define(DB_BUCKET_TX_FM, [db_bucket, [name, created_at, id]]).
+
 -record(context, {
                   auth_check_disabled = false :: boolean(),
                   %% AWS credentials
@@ -61,6 +85,12 @@
                   %% balancer
                   reqid_header_name :: string(),
 
-                  entry_ref :: #entryref{},
-                  entry_md :: #object{}
+                  entry_ref :: #entryref{}, % null in sql mode
+
+                  entry_md :: #object{} | #db_file{},
+                  next_chunk_to_stream :: integer(),
+
+                  hash_md5_context :: any(), % refine
+                  hash_sha256_context :: any(),
+                  hash_sha512_context :: any() % refine
               }).
