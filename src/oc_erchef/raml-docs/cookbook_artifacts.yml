@@ -1,0 +1,68 @@
+#%RAML 0.8
+---
+description: |
+  API to manage cookbooks for use with Policyfiles. This API is broadly similar
+  to the cookbooks/ API, except that the cookbook data structure includes an
+  additional "identifier" field which is used instead of the version numbers in
+  URIs and for the purpose of determining uniqueness.
+get:
+  is: [ versioned ]
+  description:
+    List all cookbook artifacts for an organization.
+  responses:
+    200:
+      body:
+        application/json:
+          example: !include examples/cookbook-artifacts-list.json
+
+/{cookbook_name}:
+  get:
+    is: [ versioned ]
+    description:
+      List all cookbook artifacts with the given cookbook_name
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include examples/cookbook-artifacts-single-cookbook-name-list.json
+
+/{cookbook_name}/{identifier}:
+  description: Endpoint for managing individual revisions of a cookbook artifact.
+  get:
+    is: [ versioned ]
+    description:
+      Return the cookbook object for a specific revision of the named cookbook.
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include examples/cookbook-artifact.json
+
+  put:
+    is: [ versioned ]
+    description:
+      Create a new cookbook artifact with the given name and identifier.
+    body:
+      application/json:
+        example: !include examples/cookbook-artifact-create-body.json
+    responses:
+      201:
+        body:
+          application/json:
+            example: !include examples/cookbook-artifact.json
+      409:
+        description:
+          Cookbook artifact objects cannot be modified. A 409 "Conflict" error
+          is always returned if there is an existing cookbook artifact with the
+          given name and identifier.
+  delete:
+    is: [ versioned ]
+    description:
+      Delete the cookbook object for a specific revision of the named cookbook.
+      If any files belonging to the cookbook are not used by other cookbooks,
+      they are deleted from the file store.
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include examples/cookbook-artifact.json

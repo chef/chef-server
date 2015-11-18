@@ -13,3 +13,4 @@ description:
   /clients: !include clients.yml
   /policies: !include policies.yml
   /policy_groups: !include policy_groups.yml
+  /cookbook_artifacts: !include cookbook_artifacts.yml

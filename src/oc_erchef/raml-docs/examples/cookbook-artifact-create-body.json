@@ -1,0 +1,30 @@
+{
+  "name": "aar",
+  "identifier": "c89808699edb7abe0569d6dd761d94912f998733",
+  "version": "0.1.0",
+  "json_class": "Chef::CookbookVersion",
+  "chef_type": "cookbook_version",
+  "frozen?": false,
+  "recipes": [
+
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "name": "aar",
+    "maintainer": "your name",
+    "maintainer_email": "youremail@example.com",
+    "description": "A fabulous new cookbook",
+    "long_description": "",
+    "license": "Apache v2.0",
+    "dependencies": {
+
+    },
+    "attributes": {
+
+    },
+    "recipes": {
+
+    }
+  }
+}
+

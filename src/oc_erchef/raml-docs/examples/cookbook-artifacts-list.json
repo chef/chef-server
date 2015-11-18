@@ -1,0 +1,51 @@
+{
+  "ark": {
+    "url": "https://chef.example/organizations/org1/cookbook_artifacts/ark",
+    "versions": [
+      {
+        "url": "https://chef.example/organizations/org1/cookbook_artifacts/ark/6d24c101804d81cc4d59f22c75eba8643412308b",
+        "identifier": "6d24c101804d81cc4d59f22c75eba8643412308b"
+      }
+    ]
+  },
+  "yum-mysql-community": {
+    "url": "https://chef.example/organizations/org1/cookbook_artifacts/yum-mysql-community",
+    "versions": [
+      {
+        "url": "https://chef.example/organizations/org1/cookbook_artifacts/yum-mysql-community/1e0b7c12d3a3c772e510e200d58435229388b3d9",
+        "identifier": "1e0b7c12d3a3c772e510e200d58435229388b3d9"
+      }
+    ]
+  },
+  "rbac": {
+    "url": "https://chef.example/organizations/org1/cookbook_artifacts/rbac",
+    "versions": [
+      {
+        "url": "https://chef.example/organizations/org1/cookbook_artifacts/rbac/9e7da4381830b92d9066a531df8aa5ea96a1bf75",
+        "identifier": "9e7da4381830b92d9066a531df8aa5ea96a1bf75"
+      }
+    ]
+  },
+  "7-zip": {
+    "url": "https://chef.example/organizations/org1/cookbook_artifacts/7-zip",
+    "versions": [
+      {
+        "url": "https://chef.example/organizations/org1/cookbook_artifacts/7-zip/dec0b1942996ee75b06097ba3f5e65d60e53a135",
+        "identifier": "dec0b1942996ee75b06097ba3f5e65d60e53a135"
+      }
+    ]
+  },
+  "yum": {
+    "url": "https://chef.example/organizations/org1/cookbook_artifacts/yum",
+    "versions": [
+      {
+        "url": "https://chef.example/organizations/org1/cookbook_artifacts/yum/6840f0ad8b45ba80eb202e1c11a27ce40e2e3221",
+        "identifier": "6840f0ad8b45ba80eb202e1c11a27ce40e2e3221"
+      },
+      {
+        "url": "https://chef.example/organizations/org1/cookbook_artifacts/yum/e640703e1d237cbace9ba8c078a1c6bbad379a3e",
+        "identifier": "e640703e1d237cbace9ba8c078a1c6bbad379a3e"
+      }
+    ]
+  }
+}
