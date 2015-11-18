@@ -156,7 +156,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
       shared_examples_for "valid_cookbook_artifact" do
 
-        it "create returns 200" do
+        it "create returns 201" do
           #create it
           put(request_url, requestor, :payload => payload) do |response|
             expect(response.code).to eq(201)
