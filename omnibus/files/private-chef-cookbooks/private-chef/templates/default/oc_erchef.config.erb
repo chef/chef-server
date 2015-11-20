@@ -1,6 +1,6 @@
 %% -*- mode: erlang -*-
 %% -*- tab-width: 4;erlang-indent-level: 4;indent-tabs-mode: nil -*-
-%% ex: ts=4 sw=4 ft=erlang et
+%% ex: ts=4 sw=4 ft=eruby.erlang et
 [
  %% SASL config
  {sasl, [
@@ -144,7 +144,7 @@
                           ]}
             ]},
 
- 
+
   {chef_authn, [
                 {keyring, [{default, "/etc/opscode/webui_pub.pem"}]},
                 <% unless node['private_chef']['opscode-erchef']['keygen_cache_workers'] == :auto -%>
@@ -206,7 +206,7 @@
   {chef_objects, [
                   {s3_access_key_id, "<%= node['private_chef']['bookshelf']['access_key_id'] %>"},
                   {s3_secret_key_id, "<%= node['private_chef']['bookshelf']['secret_access_key'] %>"},
-                  {s3_url, "<%= node['private_chef']['nginx']['x_forwarded_proto'] %>://<%= @helper.vip_for_uri('bookshelf') %>"},
+                  {s3_url, "<%= "#{@s3_proto}://#{@helper.vip_for_uri('bookshelf')}:#{NginxErb.new(node).port_for_proto(@s3_proto)}"%>"},
                   {s3_external_url, <%= @helper.erl_atom_or_string(node['private_chef']['bookshelf']['external_url']) %>},
                   {s3_platform_bucket_name, "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>"},
                   {s3_url_ttl, <%= node['private_chef']['opscode-erchef']['s3_url_ttl'] %>},

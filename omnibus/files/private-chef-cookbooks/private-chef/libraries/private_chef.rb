@@ -428,7 +428,12 @@ module PrivateChef
       PrivateChef["lb"]["api_fqdn"] ||= PrivateChef['api_fqdn']
       PrivateChef["lb"]["web_ui_fqdn"] ||= PrivateChef['api_fqdn']
       PrivateChef["nginx"]["server_name"] ||= PrivateChef['api_fqdn']
-      PrivateChef["nginx"]["url"] ||= "https://#{PrivateChef['api_fqdn']}"
+
+      if PrivateChef["nginx"]["ssl_port"] == 443
+          PrivateChef["nginx"]["url"] ||= "https://#{PrivateChef['api_fqdn']}"
+      else
+          PrivateChef["nginx"]["url"] ||= "https://#{PrivateChef['api_fqdn']}:#{PrivateChef["nginx"]["ssl_port"]}"
+      end
     end
 
     def gen_secrets_default(node_name)

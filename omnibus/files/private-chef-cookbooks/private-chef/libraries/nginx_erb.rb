@@ -30,17 +30,20 @@ class NginxErb
     end
   end
 
-  def listen_port(proto, options = {})
-    listen_port = ""
-    listen_port << case proto
-                   when "http"
-                     node['private_chef']['nginx']['non_ssl_port'].to_s || "80"
-                   when "https"
-                     node['private_chef']['nginx']['ssl_port'].to_s
-                   else
-                     proto.to_s
-                   end
+  def port_for_proto(proto)
+    case proto
+    when "http"
+      node['private_chef']['nginx']['non_ssl_port'].to_s || "80"
+    when "https"
+      node['private_chef']['nginx']['ssl_port'].to_s
+    else
+      proto.to_s
+    end
+  end
 
+
+  def listen_port(proto, options = {})
+    listen_port = port_for_proto(proto)
     if node['private_chef']['nginx']['enable_ipv6']
       # In some cases, we're serving as a front-end for a service that's already
       # listening on the same port in ipv4 - this prevents a conflict in that situation.
