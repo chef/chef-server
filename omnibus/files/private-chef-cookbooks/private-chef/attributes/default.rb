@@ -101,7 +101,6 @@ default['private_chef']['rabbitmq']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['rabbitmq']['vhost'] = '/chef'
 default['private_chef']['rabbitmq']['user'] = 'chef'
 default['private_chef']['rabbitmq']['password'] = 'chefrocks'
-default['private_chef']['rabbitmq']['reindexer_vhost'] = '/reindexer'
 default['private_chef']['rabbitmq']['jobs_vhost'] = '/jobs'
 default['private_chef']['rabbitmq']['jobs_user'] = 'jobs'
 default['private_chef']['rabbitmq']['jobs_password'] = 'workcomplete'
@@ -229,7 +228,6 @@ default['private_chef']['opscode-expander']['dir'] = "/var/opt/opscode/opscode-e
 default['private_chef']['opscode-expander']['log_directory'] = "/var/log/opscode/opscode-expander"
 default['private_chef']['opscode-expander']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['opscode-expander']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['opscode-expander']['reindexer_log_directory'] = "/var/log/opscode/opscode-expander-reindexer"
 default['private_chef']['opscode-expander']['consumer_id'] = "default"
 default['private_chef']['opscode-expander']['nodes'] = 2
 

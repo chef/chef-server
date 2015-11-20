@@ -1,3 +1,0 @@
-#!/bin/sh
-exec chpst -U <%= node['private_chef']['user']['username'] %> -u <%= node['private_chef']['user']['username'] %> \
-  svlogd -tt <%= @options[:log_directory] %>

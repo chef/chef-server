@@ -213,13 +213,6 @@ end
       runit_service service do
         action :disable
       end
-      # opscode-expander is paired with expander-reindexer,
-      # so disable that too.
-      if service == 'opscode-expander'
-        runit_service 'opscode-expander-reindexer' do
-          action :disable
-        end
-      end
     end
   end
 end
