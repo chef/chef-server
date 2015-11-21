@@ -49,7 +49,7 @@ buckets(Buckets) ->
     #'ListAllMyBucketsList'{'Bucket' =
                                 [bucket(V1) || V1 <- Buckets]}.
 
-bucket(#bucket{name = Name, date = Date}) ->
+bucket(#db_bucket{bucket_name = Name, created_at = Date}) ->
     #'ListAllMyBucketsEntry'{'Name' = Name,
                              'CreationDate' = bksw_format:to_date(Date)}.
 
