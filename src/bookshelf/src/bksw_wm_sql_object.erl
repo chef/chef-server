@@ -98,6 +98,8 @@ resource_exists(Rq0, Ctx) ->
             case fetch_entry_md(Rq0, Ctx) of
                 {error, none} ->
                     {false, Rq0, Ctx};
+                {error, not_found} ->
+                    {false, Rq0, Ctx};
                 {#db_file{}, CtxNew} ->
                     {true, Rq0, CtxNew}
             end
@@ -143,6 +145,8 @@ fetch_entry_md(Req, #context{} = Ctx) ->
     case bksw_sql:find_file(Bucket,Path) of
         {ok, #db_file{} = Object} ->
             {Object, Ctx#context{entry_md = Object}};
+        {ok, not_found} ->
+            {not_found, {Bucket,Path}};
         {ok, none} ->
             {error, Ctx}
             %% error case here TODO
@@ -159,9 +163,19 @@ download(Rq0, #context{stream_download = false} = Ctx0) ->
     Ctx = Ctx0#context{next_chunk_to_stream = 0},
     {fully_read(Ctx, []), Rq0, Ctx}.
 
-upload(Rq0, Ctx) ->
-    {#db_file{}, #context{} = Ctx} = fetch_entry_md(Rq0, Ctx),
-    Resp = write_streamed_body(wrq:stream_req_body(Rq0, ?BLOCK_SIZE), Rq0, Ctx),
+upload(Rq, Ctx0) ->
+    %% Maybe this belongs in resource exists?
+    {_, Ctx2} =
+        case fetch_entry_md(Rq, Ctx0) of
+            {#db_file{data_id = DataId} = Db, #context{} = Ctx1} ->
+                bksw_sql:purge_chunks(DataId),
+                {Db, Ctx1};
+            {not_found, {Bucket, Name}} ->
+                {ok, _BucketId} = bksw_sql:create_file(Bucket, Name),
+                %% TODO we should rework create file to allow us to skip the fetch
+                {#db_file{}, #context{}} = fetch_entry_md(Rq, Ctx0)
+        end,
+    Resp = write_streamed_body(wrq:stream_req_body(Rq, ?BLOCK_SIZE), Rq, Ctx2),
     Resp.
 
 
@@ -195,13 +209,22 @@ fully_read({error, Error}, Accum) ->
 fully_read({Data, Next}, Accum) ->
     fully_read(Next(), [Data | Accum]).
 
-write_streamed_body({_, done}, Rq0,
+write_streamed_body({Data, done}, Rq0,
                     #context{entry_md = #db_file{data_id = DataId},
                              next_chunk_to_stream = ChunkId} = Ctx ) ->
     HashMd5 = <<"">>,
     HashSha512 = <<"">>,
 
-    bksw_sql:mark_file_done(DataId, ChunkId, HashMd5, HashSha512),
+    FinalChunkId = 
+        case Data of
+            <<"">> ->
+                ChunkId;
+            Data ->
+                bksw_sql:add_file_chunk(DataId, ChunkId, Data),
+                ChunkId+1
+        end,
+
+    bksw_sql:mark_file_done(DataId, FinalChunkId, HashMd5, HashSha512),
 
     case get_header('Content-MD5', Rq0) of
         undefined ->
@@ -214,7 +237,7 @@ write_streamed_body({_, done}, Rq0,
                     Rq1 = bksw_req:with_etag(RawRequestMd5, Rq0),
                     {true, wrq:set_response_code(202, Rq1), Ctx};
                 _ ->
-                    %% TODO Replace with commented out code
+                    %% TODO Replace with commented out code once I get a working s3 test tool
                     Rq1 = bksw_req:with_etag(RawRequestMd5, Rq0),
                     {true, wrq:set_response_code(202, Rq1), Ctx}
                     %% TODO {true, wrq:set_response_code(406, Rq0), Ctx}
