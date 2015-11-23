@@ -2,3 +2,4 @@
 %project=bookshelf
 %uri=https://github.com/chef/chef-server/blob/master/src/bookshelf
 
+base_schema 2015-11-23T18:56:06Z Mark Anderson <mark@chef.io> # Basic schema for bookshelf file storage
