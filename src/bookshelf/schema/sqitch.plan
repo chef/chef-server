@@ -1,0 +1,4 @@
+%syntax-version=1.0.0
+%project=bookshelf
+%uri=https://github.com/chef/chef-server/blob/master/src/bookshelf
+
