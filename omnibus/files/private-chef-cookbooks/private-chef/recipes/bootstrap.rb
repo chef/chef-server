@@ -7,6 +7,7 @@
 
 require 'securerandom'
 
+# TODO - why is this in bootstrap?
 # Enterprise Addon Install
 # On a new install, download and install all of the Chef
 # addons from package repositories. Only perform this
@@ -17,24 +18,12 @@ if (!OmnibusHelper.has_been_bootstrapped? &&
   include_recipe "private-chef::add_ons_wrapper"
 end
 
-opscode_test_dir = "/opt/opscode/embedded/service/chef-server-bootstrap"
+bootstrap_script = File.join(opscode_test_config_dir, "pivotal.yml")
 opscode_test_config_dir = "/opt/opscode/embedded/service/chef-server-bootstrap/bootstrapper-config"
 
-template File.join(opscode_test_config_dir, "config.rb") do
-  source "bootstrap-config.rb.erb"
-  owner "root"
-  group "root"
-  mode "0600"
-end
-
-bootstrap_script = File.join(opscode_test_config_dir, "pivotal.yml")
-
-template bootstrap_script do
-  source "bootstrap-script.rb.erb"
-  owner "root"
-  group "root"
-  mode "0600"
-  not_if { OmnibusHelper.has_been_bootstrapped? }
+# Delete legacy bootstrap
+file File.join(opscode_test_config_dir, "config.rb") do
+  action :delete
 end
 
 execute "/opt/opscode/bin/private-chef-ctl start" do
@@ -42,31 +31,15 @@ execute "/opt/opscode/bin/private-chef-ctl start" do
   retries 20
 end
 
-execute "bootstrap-platform" do
-  command "/opt/opscode/embedded/bin/bundle exec ./bin/bootstrap-platform ./bootstrapper-config/config.rb ./bootstrapper-config/pivotal.yml"
-  cwd opscode_test_dir
-  retries 3
-  not_if { OmnibusHelper.has_been_bootstrapped? }
-  notifies :restart, 'service[opscode-erchef]'
-end
-
-# Once we've bootstrapped the Enterprise Chef server
-# we can delete the bootstrap script that contains
-# the superuser password. Although this password cannot
-# be used to authenticate with the API, it should
-# nevertheless be deleted. We have elected not to
-# trigger the delete from the execute resource immediately
-# above so that we can ensure that bootstrap scripts from
-# previous installs are also cleaned up.
-template bootstrap_script do
+file bootstrap_script do
   action :delete
 end
 
-# Once we've bootstrapped, we can also delete pivotal.pub
-file "/etc/opscode/pivotal.pub" do
-  action :delete
-end
+#file "/etc/opscode/pivotal.pub" do
+  #action :delete
+#end
 
+# Keeping this for now, too much relies on has_been_boostrapped?
 file OmnibusHelper.bootstrap_sentinel_file do
   owner "root"
   group "root"

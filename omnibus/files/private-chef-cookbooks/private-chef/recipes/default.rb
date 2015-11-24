@@ -102,32 +102,25 @@ file "/etc/opscode/worker-private.pem" do
   content worker_key.to_pem.to_s unless File.exists?('/etc/opscode/worker-public.pem')
 end
 
-# If we are doing initial key generation,
-# generate a new key.
+# If we don't have a pivotal.pem, make it now.
+# In cases where we have had our config copied in from
+# another node, this file will already exist.
 unless File.exists?('/etc/opscode/pivotal.pem')
   pivotal_key = OpenSSL::PKey::RSA.generate(2048)
-end
 
-# This will be cleaned up during bootstrap.
-# Only generate if pivotal.pem doesn't exist,
-# because that means we are doing initial key generation
-# per the step directly above.
-unless File.exists?('/etc/opscode/pivotal.pem')
+  file "/etc/opscode/pivotal.pem" do
+    owner OmnibusHelper.new(node).ownership['owner']
+    group "root"
+    mode "0600"
+    content pivotal_key.to_pem.to_s
+  end
+
   file "/etc/opscode/pivotal.pub" do
     owner OmnibusHelper.new(node).ownership['owner']
     group "root"
     mode "0644"
     content pivotal_key.public_key.to_s
   end
-end
-
-# If we are doing initial key generation (aka pivotal.pem hasn't yet
-# been created), create pivotal.pem.
-file "/etc/opscode/pivotal.pem" do
-  owner OmnibusHelper.new(node).ownership['owner']
-  group "root"
-  mode "0600"
-  content pivotal_key.to_pem.to_s unless File.exists?('/etc/opscode/pivotal.pem')
 end
 
 directory "/etc/chef" do
@@ -182,11 +175,12 @@ end
   "opscode-solr4",
   "opscode-expander",
   "bookshelf",
-  "opscode-erchef",
-  "bootstrap",
   "opscode-chef-mover",
   "redis_lb",
   "nginx",
+  # This goes near the end- its auto-bootstrap relies on
+  # the rest of the services being up and running.
+  "opscode-erchef",
   "keepalived"
 ].each do |service|
   if node["private_chef"][service]["external"]
@@ -198,8 +192,8 @@ end
     end
     # Disable the actual local service since what is enabled
     # is an externally managed version. Given that bootstrap and
-    # opscode-expander are not externalizable, don't need special
-    # handling for them as we do in the normal disable case below.
+    # opscode-expander is not externalizable, don't need special
+    # handling for them it as we do in the normal disable case below.
     runit_service service do
       action :disable
     end
