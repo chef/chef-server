@@ -132,7 +132,8 @@
                                     "<%= node['private_chef']['rabbitmq']['management_password'] %>"}}]}
                                 ]}]},
                             {monitoring,
-                               [{queue_length_monitor_enabled, <%= @node['private_chef']['rabbitmq']['queue_length_monitor_enabled'] %>},
+                               [{queue_length_monitor_enabled, <%= @node['private_chef']['rabbitmq']['queue_length_monitor_enabled'] &&
+                                                                   @node['private_chef']['dark_launch']['actions'] %>},
                                 {queue_length_monitor_vhost, "<%= @node['private_chef']['rabbitmq']['queue_length_monitor_vhost'] %>"},
                                 {queue_length_monitor_queue, "<%= @node['private_chef']['rabbitmq']['queue_length_monitor_queue'] %>"},
                                 {queue_length_monitor_millis, <%= @node['private_chef']['rabbitmq']['queue_length_monitor_millis'] %>},
