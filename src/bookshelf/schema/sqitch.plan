@@ -4,3 +4,4 @@
 
 base_schema 2015-11-23T18:56:06Z Mark Anderson <mark@chef.io> # Basic schema for bookshelf file storage
 utility_functions 2015-11-24T02:14:16Z Mark Anderson <mark@chef.io> # Stored procedures for create/delete
+garbage_collection 2015-11-24T02:33:39Z Mark Anderson <mark@chef.io> # Stored procedures for gc
