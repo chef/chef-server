@@ -44,7 +44,7 @@
       "url": {
         "description": "The URL to the cookbook.",
         "$ref": "definitions.json#Uri"
-      },
+      }
     },
     "example": {
       "version": "1.5.1",
@@ -123,8 +123,8 @@
         "description": "Must be Chef::CookbookVersion.",
         "type": "string",
         "regex": "Chef::CookbookVersion"
-      },
-    },
+      }
+    }
   },
 
   "CookbookVersionFileArray": {
@@ -151,9 +151,9 @@
           "default": "default"
         },
         "url": {
-          "description": "The URL where the file can be downloaded.",,
+          "description": "The URL where the file can be downloaded.",
           "$ref": "definitions.json#Uri"
-        },
+        }
       }
     },
     "example": [
@@ -254,7 +254,7 @@
         "additionalProperties": {
           "description": "A description of the recipe.",
           "type": "string"
-        },
+        }
       },
       "attributes": {
         "description": "Documentation for attributes.",
@@ -268,8 +268,8 @@
         "type": "object",
         "additionalProperties": {
           "type": "AttributeGroupDocumentation"
-        },
-      },
+        }
+      }
     },
     "example": {
       "name": "blah",
@@ -322,7 +322,7 @@
       "[A-Za-z0-9-_.:]{1..255}": {
         "description": "Constraint on the versions of the cookbook.",
         "$ref": "definitions.json#VersionConstraint"
-      },
+      }
     },
     "example": {
       "redhat": ">= 0.0.0",
@@ -330,7 +330,7 @@
       "scientific": ">= 0.0.0",
       "amazon": ">= 0.0.0",
       "fedora": ">= 0.0.0"
-    },
+    }
   },
 
   "AttributeDocumentation": {

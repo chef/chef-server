@@ -16,14 +16,9 @@
     }
   },
 
-  "Uri": {
-    "description": "A URI.",
-    "type": "string"
-  },
-
   "Base64": {
     "type": "string",
-    "regex": "[A-Za-z0-9+/]+={0-3}",
+    "regex": "[A-Za-z0-9+/]+={0-3}"
   },
 
   "Guid": {

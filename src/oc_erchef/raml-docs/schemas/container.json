@@ -1,5 +1,5 @@
 {
-  "Container":
+  "Container": {
     "description": "Represents the top level endpoints under an organization (clients, nodes, etc.)",
     "properties": {
       "containername": {
