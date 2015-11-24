@@ -167,9 +167,10 @@ upload(Rq, Ctx0) ->
     %% Maybe this belongs in resource exists?
     {_, Ctx2} =
         case fetch_entry_md(Rq, Ctx0) of
-            {#db_file{data_id = DataId} = Db, #context{} = Ctx1} ->
-                bksw_sql:purge_chunks(DataId),
-                {Db, Ctx1};
+            {#db_file{file_id = FileId} = Db, #context{} = Ctx1} ->
+                %% Get replace the chunk data; rely on triggers to clean up
+                {ok, DataId1} = bksw_sql:replace_chunk_data(FileId),
+                {Db#db_file{data_id=DataId1}, Ctx1};
             {not_found, {Bucket, Name}} ->
                 {ok, _BucketId} = bksw_sql:create_file(Bucket, Name),
                 %% TODO we should rework create file to allow us to skip the fetch
@@ -215,7 +216,7 @@ write_streamed_body({Data, done}, Rq0,
     HashMd5 = <<"">>,
     HashSha512 = <<"">>,
 
-    FinalChunkId = 
+    FinalChunkId =
         case Data of
             <<"">> ->
                 ChunkId;
