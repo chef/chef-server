@@ -56,10 +56,11 @@
           data_size   :: integer(),
           chunk_count :: integer(),
           hash_md5    :: binary(),
+          hash_sha256 :: binary(),
           hash_sha512 :: binary()
          }).
 
--define(DB_FILE_TX_FM, [db_file, [bucket_name, bucket_id, name, file_id, created_at, data_id, complete, data_size, chunk_count, hash_md5, hash_sha512]]).
+-define(DB_FILE_TX_FM, [db_file, [bucket_name, bucket_id, name, file_id, created_at, data_id, complete, data_size, chunk_count, hash_md5, hash_sha256, hash_sha512]]).
 
 -record(db_bucket, {
           bucket_name :: binary(),
@@ -68,6 +69,13 @@
          }).
 
 -define(DB_BUCKET_TX_FM, [db_bucket, [bucket_name, created_at, bucket_id]]).
+
+-record(file_upload_state, {
+          size :: integer(),
+          hash_context_md5 :: any(), % refine
+          hash_context_sha256 :: any(),
+          hash_context_sha512 :: any() % refine
+         }).
 
 -record(context, {
                   auth_check_disabled = false :: boolean(),
@@ -90,7 +98,6 @@
                   entry_md :: #object{} | #db_file{},
                   next_chunk_to_stream :: integer(),
 
-                  hash_md5_context :: any(), % refine
-                  hash_sha256_context :: any(),
-                  hash_sha512_context :: any() % refine
+                  upload_state :: #file_upload_state{}
+
               }).

@@ -33,9 +33,12 @@
           find_file/2,
           delete_file/2,
           add_file_chunk/3,
-          mark_file_done/4,
+          mark_file_done/6,
           get_chunk_data/2,
-          replace_chunk_data/1
+          replace_chunk_data/1,
+          init_upload_state/0,
+          update_upload_state/2,
+          finalize_upload_state/2
         ]).
 
 -include_lib("sqerl/include/sqerl.hrl").
@@ -143,8 +146,8 @@ add_file_chunk(DataId, Sequence, Chunk) ->
     end.
 
 
-mark_file_done(DataId, Chunks, SumMD5, SumSha512) ->
-    case sqerl:statement(update_file_data_done, [DataId, Chunks, SumMD5, SumSha512], count) of
+mark_file_done(DataId, Size, Chunks, SumMD5, SumSha256, SumSha512) ->
+    case sqerl:statement(update_file_data_done, [DataId, Size, Chunks, SumMD5, SumSha256, SumSha512], count) of
         {ok, 1} ->
             ok;
         Error ->
@@ -168,3 +171,42 @@ replace_chunk_data(FileId) ->
         Error ->
             Error
     end.
+
+init_upload_state() ->
+    #file_upload_state{
+       size = 0,
+       hash_context_md5 = crypto:hash_init(md5),
+       hash_context_sha256 = crypto:hash_init(sha256),
+       hash_context_sha512 = crypto:hash_init(sha512)
+      }.
+
+update_upload_state(#file_upload_state{} = UploadState, Data) when size(Data) == 0 ->
+    UploadState;
+update_upload_state(#file_upload_state{
+                       size = Size,
+                       hash_context_md5 = ContextMd5,
+                       hash_context_sha256 = ContextSha256,
+                       hash_context_sha512 = ContextSha512
+                      } = UploadState, Data) ->
+    Size1 = Size + size(Data),
+
+    UploadState#file_upload_state{size = Size1,
+                                  hash_context_md5 = crypto:hash_update(ContextMd5, Data),
+                                  hash_context_sha256 = crypto:hash_update(ContextSha256, Data),
+                                  hash_context_sha512 = crypto:hash_update(ContextSha512, Data)
+                                 }.
+
+finalize_upload_state(#file_upload_state{
+                         size = Size,
+                         hash_context_md5    = ContextMd5,
+                         hash_context_sha256 = ContextSha256,
+                         hash_context_sha512 = ContextSha512
+                        },
+                      #db_file{} = File) ->
+
+    HashMd5    = crypto:hash_final(ContextMd5),
+    HashSha256 = crypto:hash_final(ContextSha256),
+    HashSha512 = crypto:hash_final(ContextSha512),
+
+    File#db_file{data_size = Size,
+                 hash_md5 = HashMd5, hash_sha256 = HashSha256, hash_sha512 = HashSha512}.

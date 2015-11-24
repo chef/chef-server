@@ -165,18 +165,22 @@ download(Rq0, #context{stream_download = false} = Ctx0) ->
 
 upload(Rq, Ctx0) ->
     %% Maybe this belongs in resource exists?
-    {_, Ctx2} =
+    {_, Ctx3} =
         case fetch_entry_md(Rq, Ctx0) of
             {#db_file{file_id = FileId} = Db, #context{} = Ctx1} ->
                 %% Get replace the chunk data; rely on triggers to clean up
                 {ok, DataId1} = bksw_sql:replace_chunk_data(FileId),
-                {Db#db_file{data_id=DataId1}, Ctx1};
+                Db1 = Db#db_file{data_id=DataId1},
+                {Db1 , Ctx1#context{entry_md=Db1}};
             {not_found, {Bucket, Name}} ->
                 {ok, _BucketId} = bksw_sql:create_file(Bucket, Name),
                 %% TODO we should rework create file to allow us to skip the fetch
                 {#db_file{}, #context{}} = fetch_entry_md(Rq, Ctx0)
         end,
-    Resp = write_streamed_body(wrq:stream_req_body(Rq, ?BLOCK_SIZE), Rq, Ctx2),
+
+    Ctx4 = Ctx3#context{upload_state = bksw_sql:init_upload_state()},
+
+    Resp = write_streamed_body(wrq:stream_req_body(Rq, ?BLOCK_SIZE), Rq, Ctx4),
     Resp.
 
 
@@ -211,10 +215,16 @@ fully_read({Data, Next}, Accum) ->
     fully_read(Next(), [Data | Accum]).
 
 write_streamed_body({Data, done}, Rq0,
-                    #context{entry_md = #db_file{data_id = DataId},
-                             next_chunk_to_stream = ChunkId} = Ctx ) ->
-    HashMd5 = <<"">>,
-    HashSha512 = <<"">>,
+                    #context{entry_md = #db_file{data_id = DataId} = File0,
+                             next_chunk_to_stream = ChunkId,
+                             upload_state = UploadState0} = Ctx0 ) ->
+    UploadState1 = bksw_sql:update_upload_state(UploadState0, Data),
+    #db_file{data_size = Size,
+             hash_md5 = HashMd5,
+             hash_sha256 = HashSha256,
+             hash_sha512 = HashSha512} = File1 =
+        bksw_sql:finalize_upload_state(UploadState1, File0),
+    Ctx1 = Ctx0#context{entry_md = File1},
 
     FinalChunkId =
         case Data of
@@ -225,32 +235,36 @@ write_streamed_body({Data, done}, Rq0,
                 ChunkId+1
         end,
 
-    bksw_sql:mark_file_done(DataId, FinalChunkId, HashMd5, HashSha512),
+    bksw_sql:mark_file_done(DataId, Size, FinalChunkId, HashMd5, HashSha256, HashSha512),
+
+
 
     case get_header('Content-MD5', Rq0) of
         undefined ->
             Rq1 = bksw_req:with_etag(base64:encode(HashMd5), Rq0),
-            {true, wrq:set_response_code(202, Rq1), Ctx};
+            {true, wrq:set_response_code(202, Rq1), Ctx1};
         RawRequestMd5 ->
             RequestMd5 = base64:decode(RawRequestMd5),
             case RequestMd5 of
                 HashMd5 ->
                     Rq1 = bksw_req:with_etag(RawRequestMd5, Rq0),
-                    {true, wrq:set_response_code(202, Rq1), Ctx};
+                    {true, wrq:set_response_code(202, Rq1), Ctx1};
                 _ ->
                     %% TODO Replace with commented out code once I get a working s3 test tool
                     Rq1 = bksw_req:with_etag(RawRequestMd5, Rq0),
-                    {true, wrq:set_response_code(202, Rq1), Ctx}
+                    {true, wrq:set_response_code(202, Rq1), Ctx1}
                     %% TODO {true, wrq:set_response_code(406, Rq0), Ctx}
             end
     end;
 write_streamed_body({Data, Next}, Rq0,
                     #context{entry_md = #db_file{data_id = DataId},
-                             next_chunk_to_stream = ChunkId} = Ctx0 ) ->
+                             next_chunk_to_stream = ChunkId,
+                             upload_state = UploadState0} = Ctx0 ) ->
     bksw_sql:add_file_chunk(DataId, ChunkId, Data),
-    %% TODO Add hash accumulation here.
+    UploadState1 = bksw_sql:update_upload_state(UploadState0, Data),
 
-    Ctx = Ctx0#context{next_chunk_to_stream = ChunkId + 1},
+    Ctx = Ctx0#context{next_chunk_to_stream = ChunkId + 1,
+                       upload_state = UploadState1},
     write_streamed_body(Next(), Rq0, Ctx).
 
 get_header(Header, Rq) ->
