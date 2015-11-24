@@ -35,7 +35,7 @@
           add_file_chunk/3,
           mark_file_done/4,
           get_chunk_data/2,
-          purge_chunks/1
+          replace_chunk_data/1
         ]).
 
 -include_lib("sqerl/include/sqerl.hrl").
@@ -161,12 +161,10 @@ get_chunk_data(Id, ChunkSequence) ->
             {error, Error}
     end.
 
-
-purge_chunks(DataId) ->
-    case sqerl:statement(purge_chunk_data, [DataId], count) of 
-        {ok, _} ->
-            ok;
+replace_chunk_data(FileId) ->
+    case sqerl:statement(replace_chunk_data, [FileId], first_as_scalar, [replace_chunk_data]) of
+        {ok, DataId} ->
+            {ok, DataId};
         Error ->
             Error
     end.
-
