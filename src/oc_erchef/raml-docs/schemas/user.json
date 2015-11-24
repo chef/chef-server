@@ -32,7 +32,7 @@
           "description" : "The last name of the new user",
           "required" : false },
       "public_key" :
-        { "$ref" : "definitions.json#/PublicKey",
+        { "$ref" : "common.json#/PublicKey",
           "description" : "A valid PKCS#1 public key. Cannot be passed with create_key. If not passed, the new user will be created without a default public key (unless create_key is passed). If passed, the server will return chef_key containing the public_key in its response body.",
           "required" : false }
         }

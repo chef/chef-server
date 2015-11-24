@@ -25,11 +25,11 @@
         "properties": {
           "uri": {
             "description": "URI to the created key",
-            "$ref": "definitions.json#Uri"
+            "$ref": "common.json#Uri"
           },
           "private_key": {
             "description": "The created private key",
-            "$ref": "definitions.json#PrivateKey"
+            "$ref": "common.json#PrivateKey"
           }
         }
       }
@@ -42,11 +42,11 @@
       "properties": {
         "name": {
           "description": "The unique name of this key under the given user or client.",
-          "$ref": "definitions.json#ChefName"
+          "$ref": "common.json#ChefName"
         },
         "uri": {
           "description": "The URI to this key.",
-          "$ref": "definitions.json#Uri"
+          "$ref": "common.json#Uri"
         },
         "expired": {
           "description": "Whether this key is expired or not.",

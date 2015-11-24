@@ -7,7 +7,7 @@
         "properties": {
           "url": {
             "description": "The URL to the cookbook.",
-            "$ref": "definitions.json#Uri"
+            "$ref": "common.json#Uri"
           },
           "versions": {
             "type": "object",
@@ -39,11 +39,11 @@
     "properties": {
       "version": {
         "description": "The version of the cookbook.",
-        "$ref": "definitions.json#Version"
+        "$ref": "common.json#Version"
       },
       "url": {
         "description": "The URL to the cookbook.",
-        "$ref": "definitions.json#Uri"
+        "$ref": "common.json#Uri"
       }
     },
     "example": {
@@ -57,7 +57,7 @@
     "properties": {
       "name": {
         "description": "The fully-qualified name+version of the cookbook.",
-        "$ref": "definitions.json#ChefNameVersion",
+        "$ref": "common.json#ChefNameVersion",
         "example": "blah-1.5.1"
       },
       "cookbook": {
@@ -67,7 +67,7 @@
       },
       "version": {
         "description": "The version of the cookbook.",
-        "$ref": "definitions.json#Version",
+        "$ref": "common.json#Version",
         "example": "1.5.1"
       },
       "frozen?": {
@@ -143,7 +143,7 @@
         },
         "checksum": {
           "description": "The SHA256 checksum of the file.",
-          "$ref": "definitions.json#SHA256Checksum"
+          "$ref": "common.json#SHA256Checksum"
         },
         "specificity": {
           "description": "The specificity of the file (the second part of the path). Only relevant to files and templates.",
@@ -152,7 +152,7 @@
         },
         "url": {
           "description": "The URL where the file can be downloaded.",
-          "$ref": "definitions.json#Uri"
+          "$ref": "common.json#Uri"
         }
       }
     },
@@ -172,7 +172,7 @@
     "properties": {
       "name": {
         "description": "The cookbook name.",
-        "$ref": "definitions.json#ChefName"
+        "$ref": "common.json#ChefName"
       },
       "version": {
         "description": "The cookbook version.",
@@ -200,11 +200,11 @@
       },
       "source_url": {
         "description": "The URL to the source code for this cookbook.",
-        "$ref": "definitions.json#Uri"
+        "$ref": "common.json#Uri"
       },
       "issues_url": {
         "description": "The URL to the bug tracker for this cookbook.",
-        "$ref": "definitions.json#Uri"
+        "$ref": "common.json#Uri"
       },
       "privacy": {
         "description": "Whether this cookbook is private or not.",
@@ -321,7 +321,7 @@
     "patternProperties": {
       "[A-Za-z0-9-_.:]{1..255}": {
         "description": "Constraint on the versions of the cookbook.",
-        "$ref": "definitions.json#VersionConstraint"
+        "$ref": "common.json#VersionConstraint"
       }
     },
     "example": {

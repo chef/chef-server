@@ -3,12 +3,12 @@
     "properties": {
       "name": {
         "description": "The name of the client (unique within an organization).",
-        "$ref": "definitions.json#ChefName",
+        "$ref": "common.json#ChefName",
         "required": "true"
       },
       "clientname": {
         "description": "Same as name.",
-        "$ref": "definitions.json#ChefName"
+        "$ref": "common.json#ChefName"
       },
       "validator": {
         "description": "Whether or not the new client will be a validator.",
@@ -21,7 +21,7 @@
       },
       "orgname": {
         "description": "The name of the organization the client is in.",
-        "$ref": "definitions.json#ChefName"
+        "$ref": "common.json#ChefName"
       },
       "json_class": {
         "description": "Must have the value Chef::ApiClient.",

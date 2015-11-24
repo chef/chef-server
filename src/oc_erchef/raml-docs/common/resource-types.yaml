@@ -26,7 +26,7 @@
       responses:
         200:
           body:
-            schema: ../schemas/definitions.json#Acl
+            schema: ../schemas/common.json#Acl
 
 - acl_permission:
     type: item_endpoint
@@ -36,4 +36,4 @@
       responses:
         200:
           body:
-            schema: ../schemas/definitions.json#Acl
+            schema: ../schemas/common.json#Acl

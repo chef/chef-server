@@ -15,12 +15,12 @@
     "properties": {
       "actors": {
         "description": "The clients and users authorized for this permission on this Chef object.",
-        "$ref": "definitions.json#ChefName"
+        "$ref": "common.json#ChefName"
       },
       "groups": {
         "description": "The groups authorized for this permission on this Chef object.",
         "type": "array",
-        "items": { "$ref": "definitions.json#ChefName" }
+        "items": { "$ref": "common.json#ChefName" }
       }
     }
   }

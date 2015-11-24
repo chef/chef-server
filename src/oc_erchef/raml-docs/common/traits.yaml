@@ -2,7 +2,7 @@
 ---
 - error_response:
     body:
-      schema: ../schemas/definitions.json#Errors
+      schema: ../schemas/common.json#Errors
 
 - chef_endpoint:
     headers:

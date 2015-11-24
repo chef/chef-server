@@ -4,7 +4,7 @@
     "properties": {
       "name": {
         "description": "The short name of the organization used in URLs and references.",
-        "$ref": "definitions.json#ChefName"
+        "$ref": "common.json#ChefName"
       },
       "full_name": {
         "description": "The full name of the organization.",
@@ -12,7 +12,7 @@
       },
       "guid": {
         "description": "A GUID unique to the organization.",
-        "$ref": "definitions.json#Guid"
+        "$ref": "common.json#Guid"
       }
     },
     "example": {
@@ -27,15 +27,15 @@
         "properties": {
           "url": {
             "description": "The URL to the created organization.",
-            "$ref": "definitions.json#Uri"
+            "$ref": "common.json#Uri"
           },
           "clientname": {
             "description": "The name of the validator client.",
-            "$ref": "definitions.json#ChefName"
+            "$ref": "common.json#ChefName"
           },
           "private_key": {
             "description": "The private key generated for the validator client.",
-            "$ref": "definitions.json#PrivateKey"
+            "$ref": "common.json#PrivateKey"
           }
         }
       },
@@ -48,7 +48,7 @@
         "properties": {
           "url": {
             "description": "The URL to the created organization.",
-            "$ref": "definitions.json#Uri"
+            "$ref": "common.json#Uri"
           }
         }
       },

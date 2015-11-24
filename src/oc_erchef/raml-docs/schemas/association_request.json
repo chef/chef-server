@@ -8,7 +8,7 @@
       },
       "username": {
         "description": "Name of user invited to the organization.",
-        "$ref": "definitions.json#ChefName"
+        "$ref": "common.json#ChefName"
       }
     }
   }
