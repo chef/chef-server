@@ -1,0 +1,15 @@
+description: Environments, representing a logical grouping of nodes with common properties.
+
+/{name}:
+  description: An environment, representing a logical grouping of nodes with common properties.
+
+  /cookbook_versions:
+  /cookbooks:
+    /{name}:
+  /nodes:
+  /roles:
+    /{name}:
+  /recipes:
+
+  /_acl: acl_endpoint
+  /_identifiers: identifiers_endpoint

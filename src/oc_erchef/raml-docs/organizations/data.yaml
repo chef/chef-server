@@ -1,0 +1,10 @@
+description: Data bags, containing arbitrary JSON data.
+
+/{name}:
+  description: A data bag, which can contain many items.
+
+  /{item_name}:
+    description: A data bag item, which contains arbitrary JSON data.
+
+  /_acl: acl_endpoint
+  /_identifiers: identifiers_endpoint

@@ -1,0 +1,19 @@
+{
+  "Container":
+    "description": "Represents the top level endpoints under an organization (clients, nodes, etc.)",
+    "properties": {
+      "containername": {
+        "description": "The container's name.",
+        "type": "string"
+      },
+      "containerpath": {
+        "description": "Same as container name.",
+        "type": "string"
+      }
+    },
+    "example": {
+      "containername": "clients",
+      "containerpath": "clients"
+    }
+  }
+}

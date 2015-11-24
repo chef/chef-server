@@ -1,0 +1,61 @@
+{
+  "ChefName": {
+    "description": "The name of a Chef object.",
+    "regex": "[A-Za-z0-9-_.:]{1..255}"
+  },
+
+  "Uri": {
+    "description": "A URI.",
+    "type": "string"
+  },
+
+  "NamedChildList": {
+    "description": "The children of an endpoint, and the URLs to reach them.",
+    "patternProperties": {
+      "[A-Za-z0-9-_.:]{1..255}": { "$ref": "#/Uri" }
+    }
+  },
+
+  "Uri": {
+    "description": "A URI.",
+    "type": "string"
+  },
+
+  "Base64": {
+    "type": "string",
+    "regex": "[A-Za-z0-9+/]+={0-3}",
+  },
+
+  "Guid": {
+    "description": "A GUID.",
+    "type": "string",
+    "regex": "[0-9]{32}"
+  },
+
+  "PublicKey": {
+    "description": "A valid PKCS#1 public key.",
+    "type": "string"
+  },
+
+  "Version": {
+    "description": "A version.",
+    "type": "string",
+    "regex": "\\d+\\.\\d+\\.\\d+"
+  },
+
+  "VersionConstraint": {
+    "description": "A version constraint. A series of comma separated constraints, each of which may include VERSION, \"> VERSION\", \"< VERSION\", \">= VERSION\", \"<= VERSION\", \"= VERSION\" and \"~> VERSION\".",
+    "type": "string"
+  },
+
+  "Errors": {
+    "description": "An array of error strings used in error responses.",
+    "properties": {
+      "errors": {
+        "type": "array",
+        "items": { "type": "string" },
+        "minItems": "1"
+      }
+    }
+  }
+}

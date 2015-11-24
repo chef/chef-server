@@ -1,0 +1,75 @@
+{
+  "Client": {
+    "properties": {
+      "name": {
+        "description": "The name of the client (unique within an organization).",
+        "$ref": "definitions.json#ChefName",
+        "required": "true"
+      },
+      "clientname": {
+        "description": "Same as name.",
+        "$ref": "definitions.json#ChefName"
+      },
+      "validator": {
+        "description": "Whether or not the new client will be a validator.",
+        "type": "boolean",
+        "default": "false"
+      },
+      "public_key": {
+        "description": "The public key corresponding to the client's private key, for authentication.",
+        "type": "PublicKey"
+      },
+      "orgname": {
+        "description": "The name of the organization the client is in.",
+        "$ref": "definitions.json#ChefName"
+      },
+      "json_class": {
+        "description": "Must have the value Chef::ApiClient.",
+        "type": "string",
+        "regex": "Chef::ApiClient"
+      },
+      "chef_type": {
+        "description": "Must have the value \"client\"",
+        "type": "string",
+        "regex": "client"
+      }
+    },
+    "example": {
+      "name": "foo",
+      "clientname": "foo",
+      "validator": "false,",
+      "orgname": "essentials",
+      "json_class": "Chef::ApiClient",
+      "chef_type": "client"
+    }
+  },
+  "CreateClient": {
+    "allOf": [
+      { "$ref": "#/Client" },
+      {
+        "type": "object",
+        "properties": {
+          "create_key": {
+            "type": "boolean",
+            "description": "Tell the server whether to generate a default key for the new client or not (cannot be passed with public_key). If true, the server will return chef_key containing a private_key and public_key in its response body."
+          }
+        }
+      }
+    ]
+  },
+  "CreatedKey": {
+    "allOf": [
+      { "$ref": "#/Client" },
+      {
+        "type": "object",
+        "properties": {
+          "chef_key" : {
+            "description": "The key that was created (if create_key was passed).",
+            "$ref": "key.json#/CreatedKey",
+            "required" : false
+          }
+        }
+      }
+    ]
+  }
+}

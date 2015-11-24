@@ -1,0 +1,12 @@
+"AssociationRequest": {
+  "description": "An invitation to join an organization, which has not yet been accepted.",
+  "properties": {
+    "id": {
+      "description": "id unique to this association request.",
+      "type": "string"
+    },
+    "username": {
+      "description": "Name of user invited to the organization.",
+      "$ref": "definitions.json#ChefName"
+    }
+}

@@ -1,0 +1,7 @@
+description: List of containers (objects describing endpoints under the organization).
+
+/{name}:
+  description: Object describing an endpoint under the organization (i.e. clients, cookbooks, data, etc.).
+
+  /_acl: acl_endpoint
+  /_identifiers: identifiers_endpoint

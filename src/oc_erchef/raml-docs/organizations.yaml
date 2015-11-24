@@ -1,0 +1,60 @@
+#%RAML 0.8
+---
+description: Chef Organizations, describing one set of nodes, cookbooks, policies and other objects.
+type: list_endpoint
+
+get:
+  description: List all organizations on the server. Superuser only.
+  responses:
+    200: { body: { schema: NamedChildList } }
+
+post:
+  description: Create an organization. Superuser only.
+  body: { schema: Organization }
+  responses:
+    201: { body: { schema: CreatedOrganization } }
+
+/{organization}:
+  description: An organization, describing a common set of nodes, cookbooks, policies and other objects.
+  type: item_endpoint
+  uriParameters:
+    organization:
+      description: Shortname of the organization you wish to perform an action on
+      type: string
+
+  get:
+    description: Get this organization.
+    responses:
+      200: { body: { schema: Organization } }
+
+  put:
+    description: Update this organization.
+    body: { schema: Organization }
+    responses:
+      200: { body: { schema: UpdatedOrganization } }
+
+  delete:
+    description: Delete this organization.
+    responses:
+      200: { body: { schema: Organization } }
+
+  # /association_requests: !organizations/association_requests.yaml
+  # /clients: !organizations/clients.yaml
+  # /cookbooks: !organizations/cookbooks.yaml
+  # /cookbook_artifacts: !organizations/cookbook_artifacts.yaml
+  # /containers: !organizations/containers.yaml
+  # /controls: !organizations/controls.yaml
+  # /data: !organizations/data.yaml
+  # /environments: !organizations/environments.yaml
+  # /nodes: !organizations/nodes.yaml
+  # /policies: !organizations/policies.yaml
+  # /policy_groups: !organizations/policy_groups.yaml
+  # /roles: !organizations/roles.yaml
+  # /sandboxes: !organizations/sandboxes.yaml
+  # /principals: !organizations/principals.yaml
+  # /search: !organizations/search.yaml
+  # /users: !organizations/users.yaml
+  #
+  # /organization/_acl:
+  #   description: Access control for the organization.
+  #   is: acl_endpoint

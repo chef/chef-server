@@ -1,0 +1,34 @@
+- Acl: |
+    { "$ref": "acl.json#Acl" }
+  AssociationRequest: |
+    { "$ref": "association_request.json#AssociationRequest" }
+  Client: |
+    { "$ref": "client.json#Client" }
+  CreateClient: |
+    { "$ref": "client.json#CreateClient" }
+  CreatedClient: |
+    { "$ref": "client.json#CreatedClient" }
+  # Container: |
+  #   { "$ref": "container.json#Container" }
+  # Cookbook: |
+  #   { "$ref": "cookbook.json#Cookbook" }
+  Organization: |
+    { "$ref": "organization.json#Organization" }
+  CreatedOrganization: |
+    { "$ref": "organization.json#CreatedOrganization" }
+  UpdatedOrganization: |
+    { "$ref": "organization.json#UpdatedOrganization" }
+  User: |
+    { "$ref": "user.json#User" }
+  CreateUser: |
+    { "$ref": "user.json#CreateUser" }
+  CreatedUser: |
+    { "$ref": "user.json#CreatedUser" }
+  Key: |
+    { "$ref": "key.json#Key" }
+  KeyList: |
+    { "$ref": "key.json#KeyList" }
+  NamedChildList: |
+    { "$ref": "definitions.json#NamedChildList" }
+  Errors: |
+    { "$ref": "definitions.json#Errors" }

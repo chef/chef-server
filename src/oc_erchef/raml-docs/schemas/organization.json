@@ -1,0 +1,58 @@
+{
+  "Organization": {
+    "description": "A Chef organization.",
+    "properties": {
+      "name": {
+        "description": "The short name of the organization used in URLs and references.",
+        "$ref": "definitions.json#ChefName"
+      },
+      "full_name": {
+        "description": "The full name of the organization.",
+        "type": "string"
+      },
+      "guid": {
+        "description": "A GUID unique to the organization.",
+        "$ref": "definitions.json#Guid"
+      }
+    },
+    "example": {
+      "name": "foo",
+      "full_name": "foo",
+      "guid": "919d0e3f527743f6b0a792290982a3c9"
+    }
+  },
+  "CreatedOrganization": {
+    "allOf": [
+      {
+        "properties": {
+          "url": {
+            "description": "The URL to the created organization.",
+            "$ref": "definitions.json#Uri"
+          },
+          "clientname": {
+            "description": "The name of the validator client.",
+            "$ref": "definitions.json#ChefName"
+          },
+          "private_key": {
+            "description": "The private key generated for the validator client.",
+            "$ref": "definitions.json#PrivateKey"
+          }
+        }
+      },
+      { "$ref": "#/Organization" }
+    ]
+  },
+  "UpdatedOrganization": {
+    "allOf": [
+      {
+        "properties": {
+          "url": {
+            "description": "The URL to the created organization.",
+            "$ref": "definitions.json#Uri"
+          }
+        }
+      },
+      { "$ref": "#/Organization" }
+    ]
+  }
+}

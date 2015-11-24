@@ -1,0 +1,10 @@
+description: Cookbooks used to manage nodes.
+
+/{name}:
+  description: A cookbook.
+
+  /{version}:
+    description: A version of a cookbook.
+
+  /_acl: acl_endpoint
+  /_identifiers: identifiers_endpoint

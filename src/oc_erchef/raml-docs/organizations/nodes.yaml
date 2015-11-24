@@ -1,0 +1,7 @@
+description: Systems which are managed by cookbooks.
+
+/{name}:
+  description: A system which is managed by cookbooks.
+
+  /_acl: acl_endpoint
+  /_identifiers: identifiers_endpoint
