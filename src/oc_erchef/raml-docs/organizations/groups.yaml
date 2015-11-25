@@ -1,0 +1,16 @@
+description: Groups of users for authorization.
+type: list_endpoint
+
+/{group}:
+  description: A group of users for authorization.
+  type: item_endpoint
+  uriParameters:
+    group:
+      description: Name of the node.
+      type: string
+
+  /_acl:
+    type: acl_endpoint
+
+    /{permission}:
+      type: acl_permission_endpoint
