@@ -25,22 +25,21 @@ acl_endpoint:
     description: Read all permissions on this object.
     responses:
       200:
-        body:
-          schema: ../schemas/common.json#Acl
+        body: { schema: Acl }
 
 acl_permission_endpoint:
+  description: A single permission on the object. Must be create, read, update, delete, grant (CRUDG).
   type: item_endpoint
   uriParameters:
-    organization:
-      description: Shortname of the organization you wish to perform an action on
+    permission:
+      description: The permission you are operating on (create, read, update, delete or grant).
       type: string
-  description: A single permission on the object. Must be create, read, update, delete, grant (CRUDG).
   put:
     description: Modify the given permission.
+    body: { schema: Acl }
     responses:
       200:
-        body:
-          schema: ../schemas/common.json#Acl
+        body: { schema: ObjectUri }
 
 identifiers_endpoint:
   type: list_endpoint

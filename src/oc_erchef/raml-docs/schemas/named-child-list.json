@@ -3,6 +3,6 @@
 
   "description": "The children of an endpoint, and the URLs to reach them.",
   "patternProperties": {
-    "[A-Za-z0-9-_.:]{1..255}": { "$ref": "#/Uri" }
+    "[A-Za-z0-9-_.:]{1..255}": { "$ref": "common.json#Uri" }
   }
 }

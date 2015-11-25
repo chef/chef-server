@@ -3,10 +3,10 @@
 
   "description": "The full permissions for a Chef object.",
   "properties": {
-    "create": { "$ref": "#/AclPermission" },
-    "read": { "$ref": "#/AclPermission" },
-    "update": { "$ref": "#/AclPermission" },
-    "delete": { "$ref": "#/AclPermission" },
-    "grant": { "$ref": "#/AclPermission" }
+    "create": { "$ref": "common.json#AclPermission" },
+    "read": { "$ref": "common.json#AclPermission" },
+    "update": { "$ref": "common.json#AclPermission" },
+    "delete": { "$ref": "common.json#AclPermission" },
+    "grant": { "$ref": "common.json#AclPermission" }
   }
 }

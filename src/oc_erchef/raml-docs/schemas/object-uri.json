@@ -1,0 +1,8 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "description": "An object's URI.",
+  "property": {
+    "uri": { "$ref": "common.json#Uri" }
+  }
+}
