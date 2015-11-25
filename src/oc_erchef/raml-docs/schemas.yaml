@@ -10,6 +10,10 @@ Container:                 !include schemas/container.json
 CookbookRecipeList:        !include schemas/cookbook-recipe-list.json
 CookbookVersionList:       !include schemas/cookbook-version-list.json
 CookbookVersion:           !include schemas/cookbook-version.json
+DataBag:                   !include schemas/data-bag.json
+DataBagItem:               !include schemas/data-bag-item.json
+DataBagItemDeleteResponse: !include schemas/data-bag-item-delete-response.json
+DataBagItemPostResponse:   !include schemas/data-bag-item-post-response.json
 Errors:                    !include schemas/errors.json
 Key:                       !include schemas/key.json
 KeyCreated:                !include schemas/key-created.json

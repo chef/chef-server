@@ -5,7 +5,7 @@
     "name": {
       "description": "The name of the client (unique within an organization).",
       "$ref": "common.json#ChefName",
-      "required": "true"
+      "required": true
     },
     "clientname": {
       "description": "Same as name.",
@@ -13,8 +13,7 @@
     },
     "validator": {
       "description": "Whether or not the new client will be a validator.",
-      "type": "boolean",
-      "default": "false"
+      "type": "boolean"
     },
     "public_key": {
       "description": "The public key corresponding to the client's private key, for authentication.",
