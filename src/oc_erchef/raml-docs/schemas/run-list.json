@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "properties": {
+    "run_list": {
+      "type": "array",
+      "items": {
+        "description": "A recipe with an optional @version qualifier",
+        "type": "string"
+      }
+    }
+  },
+  "example": {
+    "run_list": [
+      "zed@0.0.1",
+      "role[bar]",
+      "mysql::server",
+      "recipe[gem]",
+      "nginx::base@0.99.2",
+      "cron",
+      "foo"
+    ]
+  }
+}
