@@ -1,7 +1,16 @@
 description: List of containers (objects describing endpoints under the organization).
+type: list_endpoint
 
-/{name}:
+/{container}:
   description: Object describing an endpoint under the organization (i.e. clients, cookbooks, data, etc.).
+  type: item_endpoint
+  uriParameters:
+    container:
+      description: Name of the container (top-level organization endpoint).
+      type: string
 
-  /_acl: acl_endpoint
-  /_identifiers: identifiers_endpoint
+  /_acl:
+    type: acl_endpoint
+
+    /{permission}:
+      type: acl_permission_endpoint

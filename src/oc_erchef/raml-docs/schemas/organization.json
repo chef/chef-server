@@ -1,58 +1,24 @@
 {
-  "Organization": {
-    "description": "A Chef organization.",
-    "properties": {
-      "name": {
-        "description": "The short name of the organization used in URLs and references.",
-        "$ref": "common.json#ChefName"
-      },
-      "full_name": {
-        "description": "The full name of the organization.",
-        "type": "string"
-      },
-      "guid": {
-        "description": "A GUID unique to the organization.",
-        "$ref": "common.json#Guid"
-      }
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "description": "A Chef organization.",
+  "properties": {
+    "name": {
+      "description": "The short name of the organization used in URLs and references.",
+      "$ref": "common.json#ChefName"
     },
-    "example": {
-      "name": "foo",
-      "full_name": "foo",
-      "guid": "919d0e3f527743f6b0a792290982a3c9"
+    "full_name": {
+      "description": "The full name of the organization.",
+      "type": "string"
+    },
+    "guid": {
+      "description": "A GUID unique to the organization.",
+      "$ref": "common.json#Guid"
     }
   },
-  "CreatedOrganization": {
-    "allOf": [
-      {
-        "properties": {
-          "url": {
-            "description": "The URL to the created organization.",
-            "$ref": "common.json#Uri"
-          },
-          "clientname": {
-            "description": "The name of the validator client.",
-            "$ref": "common.json#ChefName"
-          },
-          "private_key": {
-            "description": "The private key generated for the validator client.",
-            "$ref": "common.json#PrivateKey"
-          }
-        }
-      },
-      { "$ref": "#/Organization" }
-    ]
-  },
-  "UpdatedOrganization": {
-    "allOf": [
-      {
-        "properties": {
-          "url": {
-            "description": "The URL to the created organization.",
-            "$ref": "common.json#Uri"
-          }
-        }
-      },
-      { "$ref": "#/Organization" }
-    ]
+  "example": {
+    "name": "foo",
+    "full_name": "foo",
+    "guid": "919d0e3f527743f6b0a792290982a3c9"
   }
 }

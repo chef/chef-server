@@ -1,1 +1,8 @@
-/{index}:
+type: list_endpoint
+
+/{search_index}:
+  type: list_endpoint
+  uriParameters:
+    search_index:
+      description: Name of the search index.
+      type: string

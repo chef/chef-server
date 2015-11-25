@@ -1,1 +1,8 @@
-/{name}:
+type: list_endpoint
+
+/{principal}:
+  type: item_endpoint
+  uriParameters:
+    principal:
+      description: Name of the referenced user or client.
+      type: string

@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "allOf": [
+    { "$ref": "organization.json" },
+    {
+      "properties": {
+        "url": {
+          "description": "The URL to the created organization.",
+          "$ref": "common.json#Uri"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "properties": {
+    "user": {
+      "description": "Name of user invited to the organization.",
+      "$ref": "common.json#ChefName"
+    }
+  },
+
+  "example": {
+    "user": "jkeiser"
+  }
+}

@@ -22,7 +22,7 @@ get:
 post:
   body:
     schema: Key
-    example: !include ../..examples/keys-post.json
+    example: !include ../../examples/keys-post.json
   description: Add a new key for the named client.
   responses:
     201:
@@ -36,7 +36,6 @@ post:
   description: View and add keys for the named client in an organization.
   uriParameters:
     key:
-      displayName: key
       description: Name of the key owned by the client.
       type: string
 
@@ -47,12 +46,13 @@ post:
       200:
         body:
           schema: Key
-          example: !include ../..examples/named-key-example.json
+          example: !include ../../examples/named-key-example.json
+
   put:
     description: Update one or more attributes of a key for a client in an organization.
     body:
       schema: Key
-      example: !include ../..examples/keys-post.json
+      example: !include ../../examples/keys-post.json
     responses:
       200:
         description: |
@@ -60,16 +60,16 @@ post:
           Returns the updated key object.
         body:
           schema: Key
-          example: !include ../..examples/named-key-example.json
+          example: !include ../../examples/named-key-example.json
       201:
         description: |
           Received when the resource has been updated with a new name, and a new URI generated.
           If a response code 201 is received, the original URI used to access the named key
           is no longer valid.
-        headers: !include ../..common/location-header.yml
         body:
           schema: Key
-          example: !include ../..examples/named-key-example.json
+          example: !include ../../examples/named-key-example.json
+
   delete:
     description: Deletes the named key.
     responses:
@@ -77,4 +77,4 @@ post:
         description: Returns the deleted key in the body on successful delete.
         body:
           schema: Key
-          example: !include ../..examples/named-key-example.json
+          example: !include ../../examples/named-key-example.json

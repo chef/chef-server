@@ -1,7 +1,19 @@
 description: Systems which are managed by cookbooks.
+type: list_endpoint
 
-/{name}:
+/{node}:
   description: A system which is managed by cookbooks.
+  type: item_endpoint
+  uriParameters:
+    node:
+      description: Name of the node.
+      type: string
 
-  /_acl: acl_endpoint
-  /_identifiers: identifiers_endpoint
+  /_acl:
+    type: acl_endpoint
+
+    /{permission}:
+      type: acl_permission_endpoint
+
+  /_identifiers:
+    type: identifiers_endpoint

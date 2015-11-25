@@ -1,0 +1,29 @@
+#%RAML 0.8
+---
+title: Chef Server
+version: 1
+mediaType: application/json
+documentation:
+  - title: Chef Server API
+    content:
+      API for the Chef Server.
+
+schemas:
+  - !include schemas.yaml
+resourceTypes:
+  - !include resource-types.yaml
+traits:
+  - !include traits.yaml
+
+/organizations: !include organizations.yaml
+/users: !include users.yaml
+# /_status:
+#   description: Server status.
+# /authenticate_user:
+#   description: Authenticate a user.
+# /system_recovery:
+#   description: Authenticate a user when system recovery is enabled.
+# /license:
+#   description: Server license.
+# /server_api_version:
+#   description: Server API version.

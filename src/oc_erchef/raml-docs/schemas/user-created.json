@@ -1,0 +1,15 @@
+{
+  "allOf": [
+    { "$ref": "#/User" },
+    {
+      "type": "object",
+      "properties": {
+        "chef_key": {
+          "description": "The key that was created (if create_key was passed).",
+          "$ref": "key.json#/KeyCreated",
+          "required": false
+        }
+      }
+    }
+  ]
+}

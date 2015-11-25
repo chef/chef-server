@@ -1,10 +1,24 @@
 description: Data bags, containing arbitrary JSON data.
+type: list_endpoint
 
-/{name}:
+/{data_bag}:
+  type: list_endpoint
   description: A data bag, which can contain many items.
+  uriParameters:
+    data_bag:
+      description: Name of the data bag.
+      type: string
 
-  /{item_name}:
+  /{data_bag_item}:
+    type: item_endpoint
     description: A data bag item, which contains arbitrary JSON data.
+    uriParameters:
+      data_bag_item:
+        description: Name of the data bag item.
+        type: string
 
-  /_acl: acl_endpoint
-  /_identifiers: identifiers_endpoint
+  /_acl:
+    type: acl_endpoint
+
+  /_identifiers:
+    type: list_endpoint

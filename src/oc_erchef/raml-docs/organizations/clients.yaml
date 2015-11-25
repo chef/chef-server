@@ -16,15 +16,14 @@ get:
           }
 
 post:
-  body:
-    schema: CreateClient
-    example: !include examples/clients-post.json
   description: Create a new client in an organization.
+  body:
+    schema: ClientCreate
+    example: !include ../examples/clients-post.json
   responses:
     201:
-      headers: !include common/location-header.yml
       body:
-        schema: CreatedClient
+        schema: ClientCreated
         example: |
           {
             "uri"=>"https://chef.example/orgaizations/org1/clients/client1",
@@ -62,12 +61,12 @@ post:
       Unlike the users endpoint, you only need to include the fields you wish update in the body.
       You can no longer update the public key via this method. Use the keys API.
     body:
-      schema: CreateClient
-      example: !include examples/clients-put.json
+      schema: ClientCreate
+      example: !include ../examples/clients-put.json
     responses:
       200:
         body:
-          schema: CreatedClient
+          schema: ClientCreated
           example: |
             {"uri" : "https://chef.example/orgaizations/org1/clients/client1"}
 
@@ -83,7 +82,10 @@ post:
               "validator" : "false"
             }
 
-  /keys: !include client-keys.yml
+  /keys: !include clients/keys.yaml
 
-  # /_acl: acl_endpoint
-  # /_identifiers: identifiers_endpoint
+  /_acl:
+    type: acl_endpoint
+
+    /{permission}:
+      type: acl_permission_endpoint

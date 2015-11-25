@@ -1,0 +1,14 @@
+description: Groupings of run lists and attributes which can be applied to any node.
+
+/{role}:
+  description: A grouping of run list and attributes which can be applied to any node.
+  uriParameters:
+    role:
+      description: Name of the role.
+      type: string
+
+  /_acl:
+    type: acl_endpoint
+
+    /{permission}:
+      type: acl_permission_endpoint

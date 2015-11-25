@@ -12,7 +12,7 @@ post:
   description: Create an organization. Superuser only.
   body: { schema: Organization }
   responses:
-    201: { body: { schema: CreatedOrganization } }
+    201: { body: { schema: OrganizationCreated } }
 
 /{organization}:
   description: An organization, describing a common set of nodes, cookbooks, policies and other objects.
@@ -31,30 +31,33 @@ post:
     description: Update this organization.
     body: { schema: Organization }
     responses:
-      200: { body: { schema: UpdatedOrganization } }
+      200: { body: { schema: OrganizationUpdated } }
 
   delete:
     description: Delete this organization.
     responses:
       200: { body: { schema: Organization } }
 
-  # /association_requests: !organizations/association_requests.yaml
-  # /clients: !organizations/clients.yaml
-  # /cookbooks: !organizations/cookbooks.yaml
-  # /cookbook_artifacts: !organizations/cookbook_artifacts.yaml
-  # /containers: !organizations/containers.yaml
-  # /controls: !organizations/controls.yaml
-  # /data: !organizations/data.yaml
-  # /environments: !organizations/environments.yaml
-  # /nodes: !organizations/nodes.yaml
-  # /policies: !organizations/policies.yaml
-  # /policy_groups: !organizations/policy_groups.yaml
-  # /roles: !organizations/roles.yaml
-  # /sandboxes: !organizations/sandboxes.yaml
-  # /principals: !organizations/principals.yaml
-  # /search: !organizations/search.yaml
-  # /users: !organizations/users.yaml
-  #
-  # /organization/_acl:
-  #   description: Access control for the organization.
-  #   is: acl_endpoint
+  /association_requests: !include organizations/association_requests.yaml
+  /clients: !include organizations/clients.yaml
+  /cookbooks: !include organizations/cookbooks.yaml
+  /cookbook_artifacts: !include organizations/cookbook_artifacts.yaml
+  /containers: !include organizations/containers.yaml
+  /controls: !include organizations/controls.yaml
+  /data: !include organizations/data.yaml
+  /environments: !include organizations/environments.yaml
+  /nodes: !include organizations/nodes.yaml
+  /policies: !include organizations/policies.yaml
+  /policy_groups: !include organizations/policy_groups.yaml
+  /roles: !include organizations/roles.yaml
+  /principals: !include organizations/principals.yaml
+  /sandboxes: !include organizations/sandboxes.yaml
+  /search: !include organizations/search.yaml
+  /users: !include organizations/users.yaml
+
+  /organization/_acl:
+    description: Access control for the organization.
+    type: acl_endpoint
+
+    /{permission}:
+      type: acl_permission_endpoint

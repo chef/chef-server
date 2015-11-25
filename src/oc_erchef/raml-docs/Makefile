@@ -3,7 +3,7 @@ all: index.html
 NPM = $(shell which npm)
 RAML2HTML = $(shell which raml2html)
 
-index.html:
+index.html: index.raml *.yaml */*.json */*.yaml
 ifeq ($(NPM),)
 	@echo "You don't have node.js installed."
 	@echo "It's up to you to decide the best way of doing that for your system"

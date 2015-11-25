@@ -89,8 +89,21 @@ post:
 
   /keys: !include users/keys.yaml
 
-  # /association_requests:
-  #   /count:
-  #   /{name}:
-  # /_acl:
-  #   /{name}:
+  /association_requests:
+    type: list_endpoint
+
+    /count:
+      type: item_endpoint
+
+    /{association_request}:
+      type: item_endpoint
+      uriParameters:
+        association_request:
+          description: ID of the association request.
+          type: string
+
+  /_acl:
+    type: acl_endpoint
+
+    /{permission}:
+      type: acl_permission_endpoint

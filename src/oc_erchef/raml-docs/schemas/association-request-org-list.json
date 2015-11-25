@@ -1,6 +1,9 @@
 {
-  "AssociationRequest": {
-    "description": "An invitation to join an organization, which has not yet been accepted.",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "description": "The list of outstanding invites to an organization.",
+  "type": "array",
+  "items": {
     "properties": {
       "id": {
         "description": "id unique to this association request.",

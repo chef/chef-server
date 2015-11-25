@@ -1,10 +1,24 @@
 description: Cookbooks used to manage nodes.
+type: list_endpoint
 
-/{name}:
+/{cookbook}:
   description: A cookbook.
+  type: list_endpoint
+  uriParameters:
+    cookbook:
+      description: Name of the cookbook.
+      type: string
 
-  /{version}:
+  /{cookbook_version}:
     description: A version of a cookbook.
+    type: item_endpoint
+    uriParameters:
+      cookbook_version:
+        description: Version of the cookbook.
+        type: string
 
-  /_acl: acl_endpoint
-  /_identifiers: identifiers_endpoint
+  /_acl:
+    type: acl_endpoint
+
+    /{permission}:
+      type: acl_permission_endpoint

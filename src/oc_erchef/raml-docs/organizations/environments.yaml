@@ -1,15 +1,45 @@
 description: Environments, representing a logical grouping of nodes with common properties.
+type: list_endpoint
 
-/{name}:
+/{environment}:
   description: An environment, representing a logical grouping of nodes with common properties.
+  type: item_endpoint
+  uriParameters:
+    environment:
+      description: Name of the environment.
+      type: string
 
   /cookbook_versions:
-  /cookbooks:
-    /{name}:
-  /nodes:
-  /roles:
-    /{name}:
-  /recipes:
+    type: list_endpoint
 
-  /_acl: acl_endpoint
-  /_identifiers: identifiers_endpoint
+  /cookbooks:
+    type: list_endpoint
+
+    /{cookbook}:
+      type: item_endpoint
+      uriParameters:
+        cookbook:
+          description: Name of the cookbook.
+          type: string
+
+  /nodes:
+    type: list_endpoint
+
+  /roles:
+    type: list_endpoint
+
+    /{role}:
+      type: item_endpoint
+      uriParameters:
+        role:
+          description: Name of the role.
+          type: string
+
+  /recipes:
+    type: list_endpoint
+
+  /_acl:
+    type: acl_endpoint
+
+    /{permission}:
+      type: acl_permission_endpoint

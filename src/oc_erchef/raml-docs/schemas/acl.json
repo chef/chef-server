@@ -1,27 +1,12 @@
 {
-  "Acl": {
-    "description": "The full permissions for a Chef object.",
-    "properties": {
-      "create": { "$ref": "#/AclPermission" },
-      "read": { "$ref": "#/AclPermission" },
-      "update": { "$ref": "#/AclPermission" },
-      "delete": { "$ref": "#/AclPermission" },
-      "grant": { "$ref": "#/AclPermission" }
-    }
-  },
+  "$schema": "http://json-schema.org/draft-04/schema#",
 
-  "AclPermission": {
-    "description": "An access control list for a single permission (create, read, update, grant or delete) for an object.",
-    "properties": {
-      "actors": {
-        "description": "The clients and users authorized for this permission on this Chef object.",
-        "$ref": "common.json#ChefName"
-      },
-      "groups": {
-        "description": "The groups authorized for this permission on this Chef object.",
-        "type": "array",
-        "items": { "$ref": "common.json#ChefName" }
-      }
-    }
+  "description": "The full permissions for a Chef object.",
+  "properties": {
+    "create": { "$ref": "#/AclPermission" },
+    "read": { "$ref": "#/AclPermission" },
+    "update": { "$ref": "#/AclPermission" },
+    "delete": { "$ref": "#/AclPermission" },
+    "grant": { "$ref": "#/AclPermission" }
   }
 }
