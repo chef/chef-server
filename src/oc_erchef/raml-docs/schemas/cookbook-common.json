@@ -43,7 +43,7 @@
           "default": "default"
         },
         "url": {
-          "description": "The URL where the file can be downloaded.",
+          "description": "The URL where the file can be downloaded. If not specified on PUT, the server will assume the file is at the location specified by the sandboxes endpoint.",
           "$ref": "common.json#Uri"
         }
       }

@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "description": "A list of recipes.",
+  "type": "array",
+  "items": {
+    "description": "A recipe (fully-qualified or not).",
+    "type": "string"
+  },
+  "example": [
+    "apache2",
+    "apache2::default",
+    "apache2::server",
+    "mysql",
+    "mysql::default",
+    "mysql::client"
+  ]
+}
