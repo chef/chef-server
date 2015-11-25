@@ -32,7 +32,6 @@
                     mochiweb,
                     webmachine,
                     erlsom,
-                    exec,
                     mini_s3,
                     inets,
                     lager,
