@@ -46,6 +46,7 @@ get:
 
     put:
       description: Create a new cookbook artifact with the given name and identifier.
+      is: [chef_endpoint,parent_not_found,conflict,validated]
       body:
         example: !include ../examples/cookbook-artifact-create-body.json
       responses:
