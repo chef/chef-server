@@ -1,10 +1,24 @@
 description: Groupings of run lists and attributes which can be applied to any node.
+type: list_endpoint
 
 /{role}:
   description: A grouping of run list and attributes which can be applied to any node.
+  type: item_endpoint
   uriParameters:
     role:
       description: Name of the role.
       type: string
+
+  /environments:
+    description: The list of environments for which this role has an env_run_list.
+    type: list_endpoint
+
+    /{environment}:
+      description: The run list for the role, in the given environment.
+      type: item_endpoint
+      uriParameters:
+        environment:
+          description: Name of the environment.
+          type: string
 
   /_acl: !include ../acl_endpoint.yaml

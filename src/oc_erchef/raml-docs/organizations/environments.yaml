@@ -29,6 +29,7 @@ type: list_endpoint
     type: list_endpoint
 
     /{role}:
+      description: The run list for the role, in the given environment.
       type: item_endpoint
       uriParameters:
         role:
