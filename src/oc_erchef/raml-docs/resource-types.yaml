@@ -8,6 +8,16 @@ item_endpoint:
   delete?:
     is: [chef_endpoint,not_found]
 
+renameable_item_endpoint:
+  get?:
+    is: [chef_endpoint,not_found]
+  put?:
+    is: [chef_endpoint,not_found,validated,rename_conflict,renamed]
+  post?:
+    is: [chef_endpoint,validated]
+  delete?:
+    is: [chef_endpoint,not_found]
+
 list_endpoint:
   get?:
     is: [chef_endpoint,not_found]

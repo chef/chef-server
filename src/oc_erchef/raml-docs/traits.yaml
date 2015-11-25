@@ -86,6 +86,20 @@ conflict:
       body:
         schema: Errors
 
+rename_conflict:
+  responses:
+    409:
+      description: When the resources is being renamed and a resource with the new name already exists.
+      body:
+        schema: Errors
+
+renamed:
+  responses:
+    201:
+      headers:
+        Location:
+          description: Location of newly-created resource (URI).
+
 created:
   responses:
     201:

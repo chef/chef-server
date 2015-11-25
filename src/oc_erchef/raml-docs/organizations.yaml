@@ -56,9 +56,4 @@ post:
   /search:               !include organizations/search.yaml
   /users:                !include organizations/users.yaml
 
-  /organization/_acl:
-    description: Access control for the organization.
-    type: acl_endpoint
-
-    /{permission}:
-      type: acl_permission_endpoint
+  /organization/_acl: !include acl_endpoint.yaml

@@ -7,8 +7,4 @@ description: Groupings of run lists and attributes which can be applied to any n
       description: Name of the role.
       type: string
 
-  /_acl:
-    type: acl_endpoint
-
-    /{permission}:
-      type: acl_permission_endpoint
+  /_acl: !include ../acl_endpoint.yaml

@@ -33,7 +33,7 @@ post:
 
 /{key}:
   description: View and add keys for the named user.
-  type: item_endpoint
+  type: renameable_item_endpoint
   uriParameters:
     key:
       displayName: key

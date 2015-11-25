@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
 
   "allOf": [
-    { "$ref": "client.json" },
+    { "$ref": "object-uri.json" },
     {
       "type": "object",
       "properties": {

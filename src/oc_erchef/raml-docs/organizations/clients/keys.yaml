@@ -32,7 +32,7 @@ post:
           { "uri" : "https://chef.example/organizations/example/clients/client1/keys/key1" }
 
 /{key}:
-  type: item_endpoint
+  type: renameable_item_endpoint
   description: View and add keys for the named client in an organization.
   uriParameters:
     key:

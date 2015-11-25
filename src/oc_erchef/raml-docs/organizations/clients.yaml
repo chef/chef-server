@@ -31,11 +31,12 @@ post:
               "name" : "default",
               "public_key" : "-----BEGIN PUBLIC KEY-----",
               "private_key" : "-----BEGIN RSA PRIVATE KEY-----"
+            }
           }
 
 /{client}:
   description: Manage individual clients that exist in an organization.
-  type: item_endpoint
+  type: renameable_item_endpoint
   uriParameters:
     client:
       description: Name of the client you wish to perform an action on.
@@ -58,17 +59,25 @@ post:
   put:
     description: |
       Update an existing client.
-      Unlike the users endpoint, you only need to include the fields you wish update in the body.
+
+      This endpoint is patchy: you only need to include the fields you wish update in the body.
+      Any missing fields will be filled in with their current value.
+
+      You can rename the client by putting a different name in the body than in the URL.
+
       You can no longer update the public key via this method. Use the keys API.
     body:
-      schema: ClientCreate
+      schema: Client
       example: !include ../examples/clients-put.json
     responses:
       200:
+        description: When the client is updated.
         body:
-          schema: ClientCreated
-          example: |
-            {"uri" : "https://chef.example/orgaizations/org1/clients/client1"}
+          schema: Client
+      201:
+        description: When the client is renamed.
+        body:
+          schema: Client
 
   delete:
     description: Delete an existing client in an organization.
@@ -83,9 +92,4 @@ post:
             }
 
   /keys: !include clients/keys.yaml
-
-  /_acl:
-    type: acl_endpoint
-
-    /{permission}:
-      type: acl_permission_endpoint
+  /_acl: !include ../acl_endpoint.yaml
