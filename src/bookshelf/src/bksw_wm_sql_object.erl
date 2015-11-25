@@ -98,7 +98,7 @@ resource_exists(Rq0, Ctx) ->
             case fetch_entry_md(Rq0, Ctx) of
                 {error, none} ->
                     {false, Rq0, Ctx};
-                {error, not_found} ->
+                {not_found, {_Bucket, _Path} } ->
                     {false, Rq0, Ctx};
                 {#db_file{}, CtxNew} ->
                     {true, Rq0, CtxNew}
@@ -123,13 +123,13 @@ generate_etag(Rq0, Ctx) ->
 
 delete_resource(Rq0, Ctx) ->
     case fetch_entry_md(Rq0, Ctx) of
-        {#db_file{bucket_name = BucketName, name = Name}, CtxNew} ->
+        {#db_file{file_id = FileId}, CtxNew} ->
             %% Note delete file should be changed to use bucket id and be simpler.
-            case bksw_sql:delete_file(BucketName, Name) of
-                    {ok, 1} ->
+            case bksw_sql:delete_file(FileId) of
+                ok ->
                     {true, Rq0, CtxNew};
-                {ok, none} ->
-                        {halt, Rq0, CtxNew}
+                _ ->
+                    {halt, Rq0, CtxNew}
             end;
         _ ->
             {halt, Rq0, Ctx}
@@ -179,7 +179,7 @@ upload(Rq, Ctx0) ->
         end,
 
     Ctx4 = Ctx3#context{upload_state = bksw_sql:init_upload_state()},
-
+    io:format("Context 1 ~p~n", [Ctx4]),
     Resp = write_streamed_body(wrq:stream_req_body(Rq, ?BLOCK_SIZE), Rq, Ctx4),
     Resp.
 
@@ -218,6 +218,7 @@ write_streamed_body({Data, done}, Rq0,
                     #context{entry_md = #db_file{data_id = DataId} = File0,
                              next_chunk_to_stream = ChunkId,
                              upload_state = UploadState0} = Ctx0 ) ->
+    io:format("Context 2 ~p~n", [Ctx0]),
     UploadState1 = bksw_sql:update_upload_state(UploadState0, Data),
     #db_file{data_size = Size,
              hash_md5 = HashMd5,
@@ -236,8 +237,6 @@ write_streamed_body({Data, done}, Rq0,
         end,
 
     bksw_sql:mark_file_done(DataId, Size, FinalChunkId, HashMd5, HashSha256, HashSha512),
-
-
 
     case get_header('Content-MD5', Rq0) of
         undefined ->
@@ -260,6 +259,7 @@ write_streamed_body({Data, Next}, Rq0,
                     #context{entry_md = #db_file{data_id = DataId},
                              next_chunk_to_stream = ChunkId,
                              upload_state = UploadState0} = Ctx0 ) ->
+    io:format("Context 3 ~p~n", [Ctx0]),
     bksw_sql:add_file_chunk(DataId, ChunkId, Data),
     UploadState1 = bksw_sql:update_upload_state(UploadState0, Data),
 

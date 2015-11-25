@@ -31,7 +31,8 @@
           list_bucket/1,
           create_file/2,
           find_file/2,
-          delete_file/2,
+          delete_file/2, %% deprecate
+          delete_file/1,
           add_file_chunk/3,
           mark_file_done/6,
           get_chunk_data/2,
@@ -123,13 +124,17 @@ delete_file(Bucket, Name) ->
     case find_file(Bucket, Name) of
         {ok, none} ->
             {error, file_not_found};
-        {ok, #db_file{bucket_id = BucketId}} ->
-            case sqerl:statement(delete_file, [BucketId, Name], count) of
-                {ok, 1} ->
-                    ok;
-                Error ->
-                    Error
-            end;
+        {ok, #db_file{file_id = FileId}} ->
+            delete_file(FileId);
+        Error ->
+            Error
+    end.
+
+
+delete_file(FileId) ->
+    case sqerl:statement(delete_file, [FileId], count) of
+        {ok, 1} ->
+            ok;
         Error ->
             Error
     end.
