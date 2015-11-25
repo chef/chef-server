@@ -5,11 +5,13 @@
   "properties": {
     "containername": {
       "description": "The container's name.",
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "containerpath": {
-      "description": "Same as container name.",
-      "type": "string"
+      "description": "Same as container name. This field is ignored on POST.",
+      "type": "string",
+      "required": false
     }
   },
   "example": {
