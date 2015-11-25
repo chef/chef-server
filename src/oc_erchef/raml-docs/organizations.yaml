@@ -38,22 +38,4 @@ post:
     responses:
       200: { body: { schema: Organization } }
 
-  /association_requests: !include organizations/association_requests.yaml
-  /clients:              !include organizations/clients.yaml
-  /cookbooks:            !include organizations/cookbooks.yaml
-  /cookbook_artifacts:   !include organizations/cookbook_artifacts.yaml
-  /containers:           !include organizations/containers.yaml
-  /controls:             !include organizations/controls.yaml
-  /data:                 !include organizations/data.yaml
-  /environments:         !include organizations/environments.yaml
-  /groups:               !include organizations/groups.yaml
-  /nodes:                !include organizations/nodes.yaml
-  /policies:             !include organizations/policies.yaml
-  /policy_groups:        !include organizations/policy_groups.yaml
-  /roles:                !include organizations/roles.yaml
-  /principals:           !include organizations/principals.yaml
-  /sandboxes:            !include organizations/sandboxes.yaml
-  /search:               !include organizations/search.yaml
-  /users:                !include organizations/users.yaml
-
   /organization/_acl: !include acl_endpoint.yaml

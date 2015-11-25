@@ -1,0 +1,10 @@
+/_status:
+  description: Server status.
+/authenticate_user:
+  description: Authenticate a user.
+/system_recovery:
+  description: Authenticate a user when system recovery is enabled.
+/license:
+  description: Server license.
+/server_api_version:
+  description: Server API version.

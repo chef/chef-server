@@ -1,6 +1,8 @@
+description: Users and clients which are members of this organization.
 type: list_endpoint
 
 /{principal}:
+  description: The user or client referenced by the given name for this organization.
   type: item_endpoint
   uriParameters:
     principal:
