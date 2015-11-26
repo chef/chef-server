@@ -16,6 +16,8 @@ DataBagItemDeleteResponse: !include schemas/data-bag-item-delete-response.json
 DataBagItemPostResponse:   !include schemas/data-bag-item-post-response.json
 Environment:               !include schemas/environment.json
 Errors:                    !include schemas/errors.json
+Group:                     !include schemas/group.json
+GroupCreate:               !include schemas/group-create.json
 Key:                       !include schemas/key.json
 KeyCreated:                !include schemas/key-created.json
 KeyList:                   !include schemas/key-list.json
