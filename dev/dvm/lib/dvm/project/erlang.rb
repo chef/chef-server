@@ -14,7 +14,6 @@ module DVM
                when 'rebar3'
                  "_build/dev/rel"
                end
-
       @relname = service['rel-name'].nil? ? name : service['rel-name']
       @relpath = "#{@project_dir}/#{reldir}/#{relname}"
       @service_dir = "/var/opt/#{omnibus_project}/embedded/service/#{service['name']}"
@@ -179,40 +178,25 @@ EOM
       run_command("make -j 4 #{make_target}", "Building...", cwd: project_dir, env: { "USE_SYSTEM_GECODE" => "1"})
     end
 
-    def cover(action, modulename, options)
-      runargs, message = case action
-                         when 'enable'
-                           cover_enable_args(modulename, options)
-                         when 'report'
-                           cover_report_args(modulename, options)
-                         when 'reset'
-                           [ [modulename], "Resetting coverage stats for #{modulename}"]
-                         when 'disable'
-                           [ [], "Disabling coverage for all modules and re-enabling automatic code loading" ]
-                         else
-                           raise DVMArgumentError, "Valid cover commands are enable, disable, reset, and report."
-                         end
-       erl_rpc("user_default", "cov_#{action}", runargs, message)
+    def cover_enable(modulename, options)
+      erl_rpc("user_default", "cov_enable",
+              ["\\\"#{@project_dir}\\\"", modulename, options[:with_deps]],
+              "Enabling coverage for #{modulename}. NOTE: Automatic code loading will be disabled until you invoke: 'dvm cover stop #{name}" )
     end
-
-    def cover_enable_args(modulename, options)
-      msg = "Important: automatic code loading will be disabled until 'dvm cover #{name} stop' is invoked\n"
-      msg << "Enabling coverage for #{modulename}"
-      msg = "Enabling coverage for #{modulename}"
-      runargs = ["\\\"#{@project_dir}\\\""]
-      runargs << modulename
-      runargs << options[:with_deps]
-      [runargs, msg]
+    def cover_report(modulename, options)
+      out_path = File.join(config['vm']['cover']['base_output_path'], name)
+      FileUtils.mkdir_p(out_path)
+      erl_rpc("user_default", "cov_report",
+              ["\\\"#{out_path}\\\"", modulename, options[:raw]],
+              "Generating coverage report(s) for #{modulename} to #{out_path}.  This may take a few.")
     end
-
-    def cover_report_args(modulename, options)
-       msg = "Generating coverage report for #{modulename}"
-       out_path = File.join(config['vm']['cover']['base_output_path'], name)
-       FileUtils.mkdir_p(out_path)
-       runargs = ["\\\"#{out_path}\\\""]
-       runargs << modulename
-       runargs << options[:raw_output]
-       [runargs, msg]
+    def cover_disable()
+      erl_rpc("user_default", "cov_disable", [],
+              "Disabling coverage for all modules and re-enabling automatic code loading")
+    end
+    def cover_reset(modulename)
+       erl_rpc("user_default", "cov_reset", [modulename],
+               "Resetting coverage stats for #{modulename}")
     end
 
     def update(args)

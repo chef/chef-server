@@ -8,8 +8,19 @@ unless Process.uid == 0
 end
 
 require "dvm"
+require "chef/mixin/deep_merge"
+require "yaml"
 
 begin
+  $config = YAML.load_file("/vagrant/defaults.yml")
+  if File.file? "/vagrant/config.yml"
+    overrides = YAML.load_file("/vagrant/config.yml")
+    $config = Chef::Mixin::DeepMerge.deep_merge!($config, overrides)
+    # Allow external projects to define their own DVM settings.
+    Dir.glob("/host/external-deps/*/dvm.yml").each do |file|
+      $config = Chef::Mixin::DeepMerge.deep_merge!($config, YAML.load_file(file))
+    end
+  end
   DVM::Application.start(ARGV)
 rescue DVM::DVMArgumentError => e
   say HighLine.color(e.message, :red)

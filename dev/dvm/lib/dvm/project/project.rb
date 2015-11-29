@@ -3,7 +3,9 @@ require "highline/import"
 
 module DVM
   class Project
-    attr_reader :name, :project, :config, :service, :project_dir, :path, :external, :omnibus_project
+    attr_reader :name, :project, :config, :service,
+                :project_dir, :path, :external, :omnibus_project,
+                :type
     include DVM::Tools
 
     # TODO check required fields in config
@@ -18,7 +20,7 @@ module DVM
       else
         @path = project['path'] || "src/#{name}"
       end
-
+      @type = project['type']
       @project_dir = "/host/#{path}"
       @config = config
       @service = @project['service']
@@ -36,10 +38,6 @@ module DVM
     def database
       raise DVM::DVMArgumentError, "No database configured for #{name}" unless project['database']
       project['database']
-    end
-
-    def cover(action, modulename, options)
-      raise DVM::DVMArgumentError, "Only Erlang projects support coverage at this time."
     end
 
     def deps
