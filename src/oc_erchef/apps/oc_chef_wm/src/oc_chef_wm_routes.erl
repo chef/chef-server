@@ -121,7 +121,12 @@ org_route(user_key, Req, Args) ->
     {name, Name} = lists:keyfind(name, 1, Args),
     BaseURI = chef_wm_util:base_uri(Req),
     Template = template_for_type(user_key),
-    render_template(Template, BaseURI, [ParentName, Name]).
+    render_template(Template, BaseURI, [ParentName, Name]);
+org_route(universe, Req, _) ->
+    Org = org_name(Req),
+    Template = "/organizations/~s/universe",
+    TemplateArgs = [Org],
+    render_template(Template, Req, TemplateArgs).
 
 route_organization_rest_object(ParentName, Req, Args) ->
     Org = org_name(Req),
