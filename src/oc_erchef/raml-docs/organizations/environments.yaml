@@ -1,0 +1,122 @@
+description: Environments, representing a logical grouping of nodes with common attributes and cookbooks.
+type: list_endpoint
+
+get:
+  description: List all environments.
+  responses:
+    200:
+      body: { schema: NamedChildList }
+
+post:
+  description: Create an environment.
+  body: { schema: Environment }
+  responses:
+    201:
+      body: { schema: ObjectUri }
+
+/{environment}:
+  description: An environment, representing a logical grouping of nodes with common properties.
+  type: item_endpoint
+  uriParameters:
+    environment:
+      description: Name of the environment.
+      type: string
+
+  get:
+    description: Get an environment.
+    responses:
+      200:
+        body: { schema: Environment }
+
+  put:
+    description: Update an environment.
+    body: { schema: Environment }
+    responses:
+      200:
+        body: { schema: Environment }
+
+  delete:
+    description: Delete an environment.
+    responses:
+      200:
+        body: { schema: Environment }
+
+  /cookbooks:
+    description: Cookbooks valid in this environment (that match the environment's env_run_list).
+    type: list_endpoint
+
+    get:
+      description: List all cookbooks valid in this environment (that match the environment's cookbook_versions).
+      queryParameters:
+        num_versions:
+          description: Number of versions to return (or all). The latest n versions will be returned.
+          default: 1
+      responses:
+        200:
+          body: { schema: CookbookVersionList }
+
+    /{cookbook}:
+      description: Valid versions of a cookbook in this environment (that match the environment's cookbook_versions).
+      type: item_endpoint
+      uriParameters:
+        cookbook:
+          description: Name of the cookbook.
+          type: string
+
+      get:
+        description: List all versions of this cookbook that are valid in this environment (that match the environment's env_run_list).
+        queryParameters:
+          num_versions:
+            description: Number of versions to return (or all). The latest n versions will be returned.
+            default: all
+        responses:
+          200:
+            body: { schema: CookbookVersionList }
+
+  /cookbook_versions:
+    description: |
+      Resolve the set of cookbooks that must be run for a node in this environment.
+      Takes in a runlist in POST, and returns the actual set of cookbooks, in
+      order.
+    type: list_endpoint
+
+    post:
+      body: { schema: RunList }
+      responses:
+        200:
+          body: { schema: ResolvedCookbooks }
+
+  /nodes:
+    description: Nodes in this environment.
+    type: list_endpoint
+
+    get:
+      description: List all nodes in this environment.
+      responses:
+        200:
+          body: { schema: NamedChildList }
+
+  /recipes:
+    description: All fully-qualified recipes available in the latest version of all cookbooks in this environment (filtered by environment cookbook_versions).
+    type: list_endpoint
+    get:
+      description: List all fully-qualified recipes available in the latest version of all cookbooks (filtered by environment cookbook_versions).
+      responses:
+        200:
+          body: { schema: CookbookRecipeList }
+
+  /roles/{role}:
+    description: The run list for the role, in this environment.
+    type: item_endpoint
+    uriParameters:
+      role:
+        description: Name of the role.
+        type: string
+
+    get:
+      description: Get the run list for this role in this environment.
+      responses:
+        200:
+          body: { schema: RunList }
+
+  /_acl: !include ../acl_endpoint.yaml

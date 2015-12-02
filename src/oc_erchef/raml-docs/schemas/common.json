@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "ChefName": {
+    "description": "The name of a Chef object.",
+    "regex": "[A-Za-z0-9-_.:]{1..255}"
+  },
+
+  "Uri": {
+    "description": "A URI.",
+    "type": "string"
+  },
+
+  "Base64": {
+    "type": "string",
+    "regex": "[A-Za-z0-9+/]+={0-3}"
+  },
+
+  "Guid": {
+    "description": "A GUID.",
+    "type": "string",
+    "regex": "[0-9]{32}"
+  },
+
+  "PublicKey": {
+    "description": "A valid PKCS#1 public key.",
+    "type": "string"
+  },
+
+  "Version": {
+    "description": "A version.",
+    "type": "string",
+    "regex": "\\d+\\.\\d+\\.\\d+"
+  },
+
+  "VersionConstraint": {
+    "description": "A version constraint. A series of comma separated constraints, each of which may include VERSION, \"> VERSION\", \"< VERSION\", \">= VERSION\", \"<= VERSION\", \"= VERSION\" and \"~> VERSION\".",
+    "type": "string"
+  },
+
+  "AclPermission": {
+    "description": "An access control list for a single permission (create, read, update, grant or delete) for an object.",
+    "properties": {
+      "actors": {
+        "description": "The clients and users authorized for this permission on this Chef object.",
+        "$ref": "common.json#ChefName"
+      },
+      "groups": {
+        "description": "The groups authorized for this permission on this Chef object.",
+        "type": "array",
+        "items": { "$ref": "common.json#ChefName" }
+      }
+    }
+  }
+}

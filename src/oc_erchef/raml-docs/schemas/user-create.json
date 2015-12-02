@@ -1,0 +1,15 @@
+{
+  "allOf": [
+    { "$ref": "user.json" },
+    {
+      "type": "object",
+      "properties": {
+        "create_key": {
+          "type": "boolean",
+          "description": "Tell the server whether to generate a default key for the new user or not (cannot be passed with public_key). If true, the server will return chef_key containing a private_key and public_key in its response body.",
+          "required": false
+        }
+      }
+    }
+  ]
+}

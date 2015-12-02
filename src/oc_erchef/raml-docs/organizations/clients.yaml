@@ -1,0 +1,95 @@
+#%RAML 0.8
+---
+description: Agents authorized to manage nodes.
+type: list_endpoint
+
+get:
+  description: List all clients for an organization.
+  responses:
+    200:
+      body:
+        schema: Client
+        example: |
+          {
+            "org1-validator" : "https://chef.example/orgaizations/org1/clients/org1-validator",
+            "client1" : "https://chef.example/orgaizations/org1/clients/client1"
+          }
+
+post:
+  description: Create a new client in an organization.
+  body:
+    schema: ClientCreate
+    example: !include ../examples/clients-post.json
+  responses:
+    201:
+      body:
+        schema: ClientCreated
+        example: |
+          {
+            "uri"=>"https://chef.example/orgaizations/org1/clients/client1",
+            "chef_key" : {
+              "name" : "default",
+              "public_key" : "-----BEGIN PUBLIC KEY-----",
+              "private_key" : "-----BEGIN RSA PRIVATE KEY-----"
+            }
+          }
+
+/{client}:
+  description: Manage individual clients that exist in an organization.
+  type: renameable_item_endpoint
+  uriParameters:
+    client:
+      description: Name of the client you wish to perform an action on.
+      type: string
+
+  get:
+    description: |
+      Retrieve an individual Chef client that exists in an organization.
+      No longer contains public key field. Use the keys API to retrieve a key.
+    responses:
+      200:
+        body:
+          schema: Client
+          example: |
+            {
+              "name" : "user1",
+              "validator" : "false"
+            }
+
+  put:
+    description: |
+      Update an existing client.
+
+      This endpoint is patchy: you only need to include the fields you wish update in the body.
+      Any missing fields will be filled in with their current value.
+
+      You can rename the client by putting a different name in the body than in the URL.
+
+      You can no longer update the public key via this method. Use the keys API.
+    body:
+      schema: Client
+      example: !include ../examples/clients-put.json
+    responses:
+      200:
+        description: When the client is updated.
+        body:
+          schema: Client
+      201:
+        description: When the client is renamed.
+        body:
+          schema: Client
+
+  delete:
+    description: Delete an existing client in an organization.
+    responses:
+      200:
+        body:
+          schema: Client
+          example: |
+            {
+              "name" : "client1",
+              "validator" : "false"
+            }
+
+  /keys: !include clients/keys.yaml
+  /_acl: !include ../acl_endpoint.yaml

@@ -537,7 +537,7 @@ describe "Policies API endpoint", :policies do
         expect(parse(response.body)).to eq(parse(payload))
       end
 
-      context "when the policy name in request doens't match URL" do
+      context "when the policy name in request doesn't match URL" do
 
         it "POST /policies/:policy_name/revisions returns 400", :validation do
           response = post(named_policy_revisions_url, requestor, payload: minimum_valid_policy_payload)
@@ -1263,4 +1263,3 @@ describe "Policies API endpoint", :policies do
 
   end
 end
-

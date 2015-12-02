@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "description": "Represents a data bag item containing arbitrary JSON data.",
+  "properties": {
+    "id": {
+      "description": "The name of this data bag item.",
+      "$ref": "common.json#ChefName",
+      "required": true
+    }
+  },
+  "additionalProperties": true
+}

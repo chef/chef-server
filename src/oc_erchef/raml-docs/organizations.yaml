@@ -1,0 +1,41 @@
+#%RAML 0.8
+---
+description: Chef Organizations, describing one set of nodes, cookbooks, policies and other objects.
+type: list_endpoint
+
+get:
+  description: List all organizations on the server. Superuser only.
+  responses:
+    200: { body: { schema: NamedChildList } }
+
+post:
+  description: Create an organization. Superuser only.
+  body: { schema: Organization }
+  responses:
+    201: { body: { schema: OrganizationCreated } }
+
+/{organization}:
+  description: An organization, describing a common set of nodes, cookbooks, policies and other objects.
+  type: item_endpoint
+  uriParameters:
+    organization:
+      description: Shortname of the organization you wish to perform an action on
+      type: string
+
+  get:
+    description: Get this organization.
+    responses:
+      200: { body: { schema: Organization } }
+
+  put:
+    description: Update this organization.
+    body: { schema: Organization }
+    responses:
+      200: { body: { schema: OrganizationUpdated } }
+
+  delete:
+    description: Delete this organization.
+    responses:
+      200: { body: { schema: Organization } }
+
+  /organization/_acl: !include acl_endpoint.yaml

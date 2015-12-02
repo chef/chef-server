@@ -1,0 +1,34 @@
+description: A list of users who have been invited to the organization but have not accepted.
+type: list_endpoint
+
+get:
+  description: List the users who have been invited to the organization.
+  responses:
+    200:
+      body: { schema: AssociationRequestOrgList }
+
+post:
+  description: Invite a user to the organization.
+  # TODO check if this overrides the list_endpoint's is, or adds to it!
+  is: [chef_endpoint,conflict,not_found]
+  body: { schema: AssociationRequestCreate }
+  responses:
+    201:
+      body: { schema: AssociationRequestCreated }
+    404:
+      description: When the organization or user do not exist.
+    409:
+      description: When the user has already been invited to the organization or is already a member.
+
+/{association_request}:
+  type: item_endpoint
+  uriParameters:
+    association_request:
+      description: ID of the association_request
+      type: string
+
+  delete:
+    description: Uninvite a user from the organization.
+    responses:
+      200:
+        body: { schema: AssociationRequest }

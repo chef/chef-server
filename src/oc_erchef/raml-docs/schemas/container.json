@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "description": "Represents the top level endpoints under an organization (clients, nodes, etc.)",
+  "properties": {
+    "containername": {
+      "description": "The container's name.",
+      "type": "string",
+      "required": true
+    },
+    "containerpath": {
+      "description": "Same as container name. This field is ignored on POST.",
+      "type": "string",
+      "required": false
+    }
+  },
+  "example": {
+    "containername": "clients",
+    "containerpath": "clients"
+  }
+}

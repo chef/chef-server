@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "allOf": [
+    { "$ref": "object-uri.json" },
+    {
+      "type": "object",
+      "properties": {
+        "chef_key" : {
+          "description": "The key that was created (if create_key was passed).",
+          "$ref": "key-created.json",
+          "required" : false
+        }
+      }
+    }
+  ]
+}

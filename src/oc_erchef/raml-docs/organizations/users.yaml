@@ -1,0 +1,9 @@
+description: A list of users who are members of the organization.
+type: list_endpoint
+
+/{user}:
+  type: item_endpoint
+  uriParameters:
+    user:
+      description: Name of the user.
+      type: string
