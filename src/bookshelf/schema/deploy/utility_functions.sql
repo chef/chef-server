@@ -19,6 +19,7 @@ END;
 $$
 LANGUAGE plpgsql VOLATILE;
 
+-- DEPRECATED?
 CREATE OR REPLACE FUNCTION create_file_by_bucket_name(
        bn bucket_names.bucket_name%TYPE,
        new_name  file_names.name%TYPE )
@@ -36,7 +37,23 @@ END;
 $$
 LANGUAGE plpgsql VOLATILE;
 
+-- Replace a file; used as the final phase of upload
+CREATE OR REPLACE FUNCTION rename_file_with_overwrite(
+       target_bucket_id file_names.bucket_id%TYPE,
+       target_file_id file_names.file_id%TYPE,
+       new_name file_names.name%TYPE)
+RETURNS boolean
+AS $$
+BEGIN
+   --  Don't delete yourself if you are no-op ing
+   DELETE FROM file_names WHERE bucket_id = target_bucket_id AND name = new_name AND file_id != target_file_id;
+   UPDATE file_names SET name = new_name WHERE file_id = target_file_id;
+   RETURN true;
+END;
+$$
+LANGUAGE plpgsql VOLATILE;
 
+-- DEPRECATED?
 CREATE OR REPLACE FUNCTION replace_chunk_data(
        target_file_id file_names.file_id%TYPE )
 RETURNS file_data.data_id%TYPE -- what happens if exists already? TODO
