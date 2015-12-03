@@ -29,10 +29,16 @@
           find_bucket/1,
           list_buckets/0,
           list_bucket/1,
-          create_file/2,
+          find_file/1,
           find_file/2,
+          create_file/2,
+          create_file_with_data/3,
+          update_file_with_data/2,
           delete_file/2, %% deprecate
           delete_file/1,
+          rename_file_with_overwrite/3,
+          insert_file_data/0,
+          delete_file_data/1,
           add_file_chunk/3,
           mark_file_done/6,
           get_chunk_data/2,
@@ -108,8 +114,36 @@ create_file(Bucket, Name) ->
             {error, Reason}
     end.
 
+
+create_file_with_data(BucketId, FileName, DataId) ->
+    case sqerl:statement(insert_file_with_data_id, [BucketId, FileName, DataId], count) of
+        {ok, 1} ->
+            ok;
+        Error ->
+            Error
+    end.
+
+update_file_with_data(FileId, DataId) ->
+    case sqerl:statement(update_file_with_data_id, [FileId, DataId], count) of
+        {ok, 1} ->
+            ok;
+        Error ->
+            Error
+    end.
+
 find_file(Bucket, Name) ->
     case sqerl:select(find_file, [Bucket, Name], {first_as_record, ?DB_FILE_TX_FM }) of
+        %% Awkward sanity check that we got back the expected record type here.
+        {ok, Object} when db_file =:= element(1, Object) ->
+            {ok, Object};
+        {ok, none} ->
+            {ok, not_found};
+        {error, Error} ->
+            {error, Error}
+    end.
+
+find_file(FileId) ->
+    case sqerl:select(find_file_by_id, [FileId], {first_as_record, ?DB_FILE_TX_FM }) of
         %% Awkward sanity check that we got back the expected record type here.
         {ok, Object} when db_file =:= element(1, Object) ->
             {ok, Object};
@@ -139,6 +173,38 @@ delete_file(FileId) ->
             Error
     end.
 
+rename_file_with_overwrite(BucketId, FileId, NewName) ->
+    case sqerl:statement(rename_file_with_overwrite, [BucketId, FileId, NewName], sucess) of
+        {ok, true} ->
+            ok;
+        Error ->
+            Error
+    end.
+
+mark_file_done(DataId, Size, Chunks, SumMD5, SumSha256, SumSha512) ->
+    case sqerl:statement(update_file_data_done, [DataId, Size, Chunks, SumMD5, SumSha256, SumSha512], count) of
+        {ok, 1} ->
+            ok;
+        Error ->
+            Error
+    end.
+
+insert_file_data() ->
+    case sqerl:statement(insert_file_data, [], first_as_scalar, [data_id]) of
+        {ok, 1, DataId} ->
+            {ok, DataId};
+        {error, _} = Error ->
+            Error
+    end.
+
+delete_file_data(DataId) ->
+    case sqerl:statement(delete_file_data, [DataId], count) of
+        {ok, 1} ->
+            ok;
+        Error ->
+            Error
+    end.
+
 -spec add_file_chunk(integer(), integer(), binary()) -> ok.
 add_file_chunk(DataId, Sequence, Chunk) ->
     case sqerl:statement(add_file_chunk, [DataId, Sequence, Chunk], count) of
@@ -146,15 +212,6 @@ add_file_chunk(DataId, Sequence, Chunk) ->
             ok;
         {conflict, _} ->
             error("Never should happen");
-        Error ->
-            Error
-    end.
-
-
-mark_file_done(DataId, Size, Chunks, SumMD5, SumSha256, SumSha512) ->
-    case sqerl:statement(update_file_data_done, [DataId, Size, Chunks, SumMD5, SumSha256, SumSha512], count) of
-        {ok, 1} ->
-            ok;
         Error ->
             Error
     end.

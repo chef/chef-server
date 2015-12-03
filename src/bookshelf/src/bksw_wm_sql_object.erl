@@ -89,7 +89,14 @@ resource_exists(Rq0, Ctx) ->
     case wrq:method(Rq0) of
         %% Buckets always exist for writes since we create them on the fly
         'PUT' ->
-            {true, Rq0, Ctx};
+            case fetch_entry_md(Rq0, Ctx) of
+                {error, none} ->
+                    {false, Rq0, Ctx};
+                {not_found, #context{} = Ctx1 } ->
+                    {true, Rq0, Ctx1};
+                {#db_file{}, Ctx1} ->
+                    {true, Rq0, Ctx1}
+            end;
         _ ->
             %% determine if the entry exists by opening it. This way, we can cache the fd
             %% and avoid extra system calls. It also helps to keep the request processing
@@ -98,10 +105,10 @@ resource_exists(Rq0, Ctx) ->
             case fetch_entry_md(Rq0, Ctx) of
                 {error, none} ->
                     {false, Rq0, Ctx};
-                {not_found, {_Bucket, _Path} } ->
-                    {false, Rq0, Ctx};
-                {#db_file{}, CtxNew} ->
-                    {true, Rq0, CtxNew}
+                {not_found, #context{} = Ctx1 } ->
+                    {false, Rq0, Ctx1};
+                {#db_file{}, Ctx1} ->
+                    {true, Rq0, Ctx1}
             end
     end.
 
@@ -109,7 +116,7 @@ last_modified(Rq0, Ctx) ->
     case fetch_entry_md(Rq0, Ctx) of
         {#db_file{created_at = {datetime, Date}}, CtxNew} ->
             {Date, Rq0, CtxNew};
-        _ ->
+        _ -> %% TODO Detect not found and return proper error
             {halt, Rq0, Ctx}
     end.
 
@@ -117,7 +124,7 @@ generate_etag(Rq0, Ctx) ->
     case fetch_entry_md(Rq0, Ctx) of
         {#db_file{hash_md5 = Digest}, CtxNew} ->
             {bksw_format:to_base64(Digest), Rq0, CtxNew};
-        _ ->
+        _ -> %% TODO Detect not found and return proper error
             {halt, Rq0, Ctx}
     end.
 
@@ -131,7 +138,7 @@ delete_resource(Rq0, Ctx) ->
                 _ ->
                     {halt, Rq0, CtxNew}
             end;
-        _ ->
+        _ -> %% TODO Detect not found and return proper error
             {halt, Rq0, Ctx}
     end.
 
@@ -146,8 +153,10 @@ fetch_entry_md(Req, #context{} = Ctx) ->
         {ok, #db_file{} = Object} ->
             {Object, Ctx#context{entry_md = Object}};
         {ok, not_found} ->
-            {not_found, {Bucket,Path}};
-        {ok, none} ->
+            {not_found, Ctx#context{entry_md = #db_file{bucket_name = Bucket, name = Path}}};
+        {ok, DbFile} ->
+            io:format("Match trouble, ~p ~p ~p~n",[Bucket,Path,(DbFile)]);
+        {error, _Error} ->
             {error, Ctx}
             %% error case here TODO
     end.
@@ -163,26 +172,20 @@ download(Rq0, #context{stream_download = false} = Ctx0) ->
     Ctx = Ctx0#context{next_chunk_to_stream = 0},
     {fully_read(Ctx, []), Rq0, Ctx}.
 
-upload(Rq, Ctx0) ->
-    %% Maybe this belongs in resource exists?
-    {_, Ctx3} =
-        case fetch_entry_md(Rq, Ctx0) of
-            {#db_file{file_id = FileId} = Db, #context{} = Ctx1} ->
-                %% Get replace the chunk data; rely on triggers to clean up
-                {ok, DataId1} = bksw_sql:replace_chunk_data(FileId),
-                Db1 = Db#db_file{data_id=DataId1},
-                {Db1 , Ctx1#context{entry_md=Db1}};
-            {not_found, {Bucket, Name}} ->
-                {ok, _BucketId} = bksw_sql:create_file(Bucket, Name),
-                %% TODO we should rework create file to allow us to skip the fetch
-                {#db_file{}, #context{}} = fetch_entry_md(Rq, Ctx0)
-        end,
+maybe_upload(Rq, #context{entry_md = #db_file{} = Obj0}= Ctx0, {ok, DataId}) ->
+    Obj1 = Obj0#db_file{data_id = DataId},
+    Ctx1 = Ctx0#context{entry_md = Obj1, upload_state = bksw_sql:init_upload_state()},
+    Resp = write_streamed_body(wrq:stream_req_body(Rq, ?BLOCK_SIZE), Rq, Ctx1),
+    Resp;
+maybe_upload(Rq, Ctx, {error, _Error}) -> %% Clean up and return useful error
+    {halt, Rq, Ctx};
+maybe_upload(Rq, Ctx, Error) -> %% Clean up and return useful error
+    io:format("maybe_upload ~p ~p ~p~n", [Rq, Ctx, Error]),
+    {halt, Rq, Ctx}.
 
-    Ctx4 = Ctx3#context{upload_state = bksw_sql:init_upload_state()},
-    io:format("Context 1 ~p~n", [Ctx4]),
-    Resp = write_streamed_body(wrq:stream_req_body(Rq, ?BLOCK_SIZE), Rq, Ctx4),
-    Resp.
-
+upload(Rq, Ctx) ->
+    %% Uploads create a new data segment, regardless of file existence
+    maybe_upload(Rq, Ctx, bksw_sql:insert_file_data()).
 
 %%===================================================================
 %% Internal Functions
@@ -191,12 +194,15 @@ upload(Rq, Ctx0) ->
 send_streamed_body(#context{entry_md = #db_file{chunk_count = ChunkCount},
                             next_chunk_to_stream = ChunkCount}) ->
     {<<>>, done};
-send_streamed_body(#context{entry_md = #db_file{data_id = DataId},
+send_streamed_body(#context{entry_md = #db_file{data_id = DataId} = DbFile,
                             next_chunk_to_stream = ChunkId} = Ctx) ->
     case bksw_sql:get_chunk_data(DataId, ChunkId) of
         {ok, not_found} ->
-            error_logger:error_msg("Error occurred during content download: ~p~n", [missing_chunk]),
+            error_logger:error_msg("Error occurred during content download: missing chunk ~p ~p ~n", [ChunkId, DbFile]),
             {error, missing_chunk};
+        {ok, []} ->
+            io:format("Empty chunk sent Chunk ~p ~p~n", [ChunkId, DbFile]),
+            {[], fun() -> send_streamed_body(Ctx#context{next_chunk_to_stream = ChunkId + 1}) end};
         {ok, Data} ->
             {Data, fun() -> send_streamed_body(Ctx#context{next_chunk_to_stream = ChunkId + 1}) end};
         {error, _} = Error ->
@@ -214,11 +220,34 @@ fully_read({error, Error}, Accum) ->
 fully_read({Data, Next}, Accum) ->
     fully_read(Next(), [Data | Accum]).
 
+%% New files will have no file_id
+finalize_maybe_create_file(_Rq, _Ctx,
+                           #db_file{file_id = undefined,
+                                    bucket_name = BucketName,
+                                    name = Name,
+                                    data_id = DataId}) ->
+    {ok, BucketId} = bksw_sql:find_bucket(BucketName),
+    case bksw_sql:create_file_with_data(BucketId, Name, DataId) of
+        _ ->
+            ok
+            %% TODO ERROR HANDLING
+    end;
+%% If we have a file_id, we're replacing an old file
+finalize_maybe_create_file(_Rq, _Ctx,
+                           #db_file{file_id = FileId,
+                                    data_id = DataId}) ->
+    case bksw_sql:update_file_with_data(FileId, DataId) of
+        _ ->
+            ok
+                %% TODO ERROR HANDLING
+    end.
+
+
 write_streamed_body({Data, done}, Rq0,
                     #context{entry_md = #db_file{data_id = DataId} = File0,
                              next_chunk_to_stream = ChunkId,
                              upload_state = UploadState0} = Ctx0 ) ->
-    io:format("Context 2 ~p~n", [Ctx0]),
+%%    io:format("Context 2 ~p~n", [Ctx0]),
     UploadState1 = bksw_sql:update_upload_state(UploadState0, Data),
     #db_file{data_size = Size,
              hash_md5 = HashMd5,
@@ -235,8 +264,9 @@ write_streamed_body({Data, done}, Rq0,
                 bksw_sql:add_file_chunk(DataId, ChunkId, Data),
                 ChunkId+1
         end,
-
     bksw_sql:mark_file_done(DataId, Size, FinalChunkId, HashMd5, HashSha256, HashSha512),
+
+    ok = finalize_maybe_create_file(Rq0, Ctx0, File1),
 
     case get_header('Content-MD5', Rq0) of
         undefined ->
@@ -259,7 +289,7 @@ write_streamed_body({Data, Next}, Rq0,
                     #context{entry_md = #db_file{data_id = DataId},
                              next_chunk_to_stream = ChunkId,
                              upload_state = UploadState0} = Ctx0 ) ->
-    io:format("Context 3 ~p~n", [Ctx0]),
+%%    io:format("Context 3 ~p~n", [Ctx0]),
     bksw_sql:add_file_chunk(DataId, ChunkId, Data),
     UploadState1 = bksw_sql:update_upload_state(UploadState0, Data),
 
