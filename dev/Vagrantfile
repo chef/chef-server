@@ -11,54 +11,50 @@ DB_SUPERUSER="bofh"
 DB_SUPERPASS="i1uvd3v0ps"
 
 
-Vagrant.configure("2") do |config|
+Vagrant.configure("2") do |vc|
   attributes = load_settings
-
-  # Use the official Ubuntu 14.04 box
-  # Vagrant will auto resolve the url to download from Atlas
-  config.vm.box = "ubuntu/trusty64"
-  config.ssh.forward_agent = true
-
-  if attributes['vm'].has_key? 'postgresql'
-    if attributes['vm']['postgresql']['start']
-      config.vm.define("database") do |c|
-        define_db_server(c, attributes)
-      end
-    end
-  else
-    attributes['vm']['postgresql'] = nil
+  vc.vm.box = "ubuntu/trusty64"
+  vc.ssh.forward_agent = true
+  vc.vm.define("chef-server", primary: true) do |c|
+    chef_server(c, attributes)
   end
+  maybe_db_server(vc, attributes, DB_VM_ADDRESS, "database", "postgresql")
+  maybe_db_server(vc, attributes, REPORTING_DB_VM_ADDRESS, "reportingdb", "reporting-postgresql")
 
-  if attributes['vm'].has_key? 'reporting_postgresql'
-    if attributes['vm']['reporting_postgresql']['start']
-      config.vm.define("reportingdb") do |c|
-        define_db_server_reporting(c, attributes)
-      end
-    end
-  else
-    attributes['vm']['reporting_postgresql'] = nil
-  end
-
-
-  config.vm.define("chef-server", primary: true) do |c|
-    define_chef_server(c, attributes)
-  end
 end
 
+def maybe_db_server(config, attributes, name, ip, key)
+  if attributes['vm'].has_key? key
+    if attributes['vm'][key]['start']
+      config.vm.define(name) do |c|
+        c.vm.hostname = "#{name}.chef-server.dev"
+        c.vm.network "private_network", ip: ip
+        c.vm.provider :virtualbox do |vb|
+          v.name = name
+          v.memory = 1024
+          v.cpus = 1
+        end
+        c.vm.provision "shell", inline: configure_postgres
+      end
+    end
+  else
+    attributes['vm'][key] = nil
+  end
+end
+def backend_server(config, attributes)
+  backend = attributes['vm']['backend']
+  return unless backend['enable'] == true
+  provisioning, installer, installer_path = prepare(backend['package-search-path'], backend['package-name-wildcard'])
 
-def define_chef_server(config, attributes)
+end
+def chef_server(config, attributes)
   provisioning, installer, installer_path = prepare()
   config.vm.hostname = "api.chef-server.dev"
   config.vm.network "private_network", ip: CS_VM_ADDRESS
-
   config.vm.provider :virtualbox do |vb|
-    vb.customize ["modifyvm", :id,
-                  "--name", "chef-server",
-                  "--memory", attributes["vm"]["memory"],
-                  "--cpus", attributes["vm"]["cpus"],
-                  "--usb", "off",
-                  "--usbehci", "off"
-    ]
+    vb.name = "chef-server"
+    vb.memory = attributes["vm"]["memory"]
+    vb.cpus = attributes["vm"]["cpus"],
   end
   if provisioning
     json = {
@@ -67,7 +63,8 @@ def define_chef_server(config, attributes)
       "omnibus-autoload" => attributes["vm"]["omnibus-autoload"]
     }.merge attributes["vm"]["node-attributes"]
 
-    if attributes["vm"]["postgresql"]["start"] and attributes["vm"]["postgresql"]["use-external"]
+    if attributes["vm"]["postgresql"]["start"]
+      if attributes["vm"]["postgresql"]["use-external"]
       # TODO make this stuff common - we have these values in 2-3 places now...
       pg = { "postgresql['external']" => true,
              "postgresql['vip']" => "\"#{DB_VM_ADDRESS}\"",
@@ -78,16 +75,16 @@ def define_chef_server(config, attributes)
              "oc_id['db_pool_size']" => 10,
              "oc_bifrost['db_pool_size']" => 10 }
       json = simple_deep_merge(json, { "provisioning" => { "chef-server-config" => pg } })
-    end
 
-    if attributes["vm"]["reporting_postgresql"]["start"] and attributes["vm"]["reporting_postgresql"]["use-external"]
-      pg = { "postgresql['external']" => true,
-             "postgresql['vip']" => "\"#{REPORTING_DB_VM_ADDRESS}\"",
-             "postgresql['port']" => 5432,
-             "postgresql['db_superuser']" => "\"#{DB_SUPERUSER}\"",
-             "postgresql['db_superuser_password']" => "\"#{DB_SUPERPASS}\""
-           }
-      json = simple_deep_merge(json, { "provisioning" => { "opscode-reporting-config" => pg } })
+      if attributes["vm"]["reporting_postgresql"]["use-external"]
+        pg = { "postgresql['external']" => true,
+               "postgresql['vip']" => "\"#{REPORTING_DB_VM_ADDRESS}\"",
+               "postgresql['port']" => 5432,
+               "postgresql['db_superuser']" => "\"#{DB_SUPERUSER}\"",
+               "postgresql['db_superuser_password']" => "\"#{DB_SUPERPASS}\""
+             }
+        json = simple_deep_merge(json, { "provisioning" => { "opscode-reporting-config" => pg } })
+      end
     end
 
     dotfiles_path = attributes["vm"]["dotfile_path"] || "dotfiles"
@@ -99,7 +96,6 @@ def define_chef_server(config, attributes)
     # and have them be properly synced to a place that we can use them.
     config.vm.synced_folder installer_path, "/installers"
     config.vm.synced_folder File.expand_path(dotfiles_path), "/dotfiles"
-
     config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
     config.vm.provision "shell", inline: install_hack(installer)
     config.vm.provision "chef_solo" do |chef|
@@ -119,48 +115,6 @@ def define_chef_server(config, attributes)
   end
 end
 
-def define_db_server(config, attributes)
-  config.vm.hostname = "database.chef-server.dev"
-  config.vm.network "private_network", ip: DB_VM_ADDRESS
-  config.vm.provider :virtualbox do |vb|
-    vb.customize ["modifyvm", :id,
-                  "--name", "database",
-                  # For basic pedant tests, we're not putting
-                  # a lot of load on this:
-                  "--memory", 512,
-                  "--cpus", 1,
-                  "--usb", "off",
-                  "--usbehci", "off"
-    ]
-  end
-
-  # Using shell here to ave the trouble of downloading
-  # chef-client for the node.  May reconsider...
-  config.vm.provision "shell", inline: configure_postgres
-end
-
-
-def define_db_server_reporting(config, attributes)
-  config.vm.hostname = "reportingdb.chef-server.dev"
-  config.vm.network "private_network", ip: REPORTING_DB_VM_ADDRESS
-  config.vm.provider :virtualbox do |vb|
-    vb.customize ["modifyvm", :id,
-                  "--name", "reportingdb",
-                  # For basic pedant tests, we're not putting
-                  # a lot of load on this:
-                  "--memory", 512,
-                  "--cpus", 1,
-                  "--usb", "off",
-                  "--usbehci", "off"
-    ]
-  end
-
-  # Using shell here to ave the trouble of downloading
-  # chef-client for the node.  May reconsider...
-  config.vm.provision "shell", inline: configure_postgres
-end
-
-
 ##############
 # Internals
 ##############
@@ -169,11 +123,11 @@ end
 ##############
 
 
-def prepare
+def prepare(search_path = nil, wildcard)
   action = ARGV[0]
   if action =~ /^(provision|up|reload)$/
-    installer = prompt_installer
-    raise "Please set INSTALLER to the path of a .deb package for Chef Server 12+." if installer.nil?
+    installer = prompt_installer(search_path, wildcard)
+    raise "Please set INSTALLER to the path of a .deb package." if installer.nil?
     raise "#{installer} does not exist! Please fix this." unless File.file?(installer)
     installer_path = File.dirname(File.expand_path(installer))
     provisioning = true
@@ -181,10 +135,12 @@ def prepare
   [provisioning, installer, installer_path]
 end
 
-def prompt_installer
-  puts "Looking in #{Dir.home}/Downloads and #{base_path}/omnibus/pkg for installable chef-server-core package."
-  # TODO allow config override of location, multiple locations, search pattern, max count?
+def prompt_installer(search_path, wildcard)
+  puts "Looking in #{search_path} for installable #{wildcard} packages"
   files = Dir.glob("#{Dir.home}/Downloads/chef-server-core*.deb") + Dir.glob("#{base_path}/omnibus/pkg/chef-server-core*.deb")
+  files = search_paths.each do |path|
+
+    Dir.glob(File.join("#{Dir.home}/Downloads/chef-server-core*.deb") + Dir.glob("#{base_path}/omnibus/pkg/chef-server-core*.deb")
 
   if ENV['INSTALLER']
     if ENV['INSTALLER'] =~ /^.*chef-server-core.*deb$/ and File.file?(ENV['INSTALLER'])
