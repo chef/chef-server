@@ -15,7 +15,7 @@
 #
 
 name "knife-opc"
-default_version "master"
+default_version "tc/force_remove_from_admins"
 
 source git: "git://github.com/opscode/knife-opc.git"
 
