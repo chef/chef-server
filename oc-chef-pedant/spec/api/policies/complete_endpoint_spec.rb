@@ -1198,7 +1198,7 @@ describe "Policies API endpoint", :policies do
         let(:request_payload) { nil }
 
         it "retrieves the policy document" do
-          expect(JSON.parse(response.body)).to eq(JSON.parse(canonical_policy_payload))
+          expect(parse(response.body)).to eq(parse(canonical_policy_payload))
         end
 
       end
@@ -1224,13 +1224,13 @@ describe "Policies API endpoint", :policies do
 
         it "PUT /policies/:group/:name returns 200" do
           expect(response.code).to eq(200)
-          expect(response.body).to eq(updated_canonical_policy_payload)
+          expect(parse(response.body)).to eq(parse(updated_canonical_policy_payload))
         end
 
         it "GET /policies/:group/:name subsequently returns the updated document" do
           retrieved_doc = get(static_named_policy_url, requestor)
           expect(retrieved_doc.code).to eq(200)
-          expect(retrieved_doc.body).to eq(updated_canonical_policy_payload)
+          expect(parse(retrieved_doc.body)).to eq(parse(updated_canonical_policy_payload))
         end
       end
 
@@ -1248,7 +1248,7 @@ describe "Policies API endpoint", :policies do
 
         it "DELETE /policies/:group/:name returns the deleted document" do
           expect(response.code).to eq(200)
-          expect(JSON.parse(response.body)).to eq(JSON.parse(canonical_policy_payload))
+          expect(parse(response.body)).to eq(parse(canonical_policy_payload))
         end
 
         it "DELETE /policies/:group/:name removes the policy from the data store" do
