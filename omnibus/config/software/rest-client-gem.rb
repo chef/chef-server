@@ -17,13 +17,21 @@
 name "rest-client"
 default_version "1.8.0"
 
+source git: "git://github.com/rest-client/rest-client"
+
 dependency "ruby"
 dependency "rubygems"
+dependency "appbundler"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
-  gem "install rest-client" \
-      " --version '#{version}'" \
-      " --bindir '#{install_dir}/embedded/bin'" \
+
+  bundle "install --without development", env: env
+
+  gem "build rest-client.gemspec", env: env
+
+  gem "install rest-client.gem " \
       " --no-ri --no-rdoc", env: env
+
+  appbundle "rest-client"
 end
