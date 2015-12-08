@@ -1,4 +1,4 @@
-# Anything in this file can be overridden in config.yml.
+# Anything in th#is file can be overridden in config.yml.
 #
 vm:
   # Override this in config.yml if you want to bring up the
@@ -219,3 +219,7 @@ quickstart:
       - oc_bifrost
     start:
       - oc_bifrost
+
+# override this in config.yml to enable a Chef Analytics vm
+analytics: false
+

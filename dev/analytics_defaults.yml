@@ -1,0 +1,88 @@
+# Anything in this file can be overridden in analytics_config.yml.
+#
+vm:
+  # All settings below apply only to the chef-analytics vm
+  cpus: 4
+  memory: 4096
+  packages: [ ntp, curl, wget, htop, uuid-dev, tmux, vim, iotop ]
+  omnibus-autoload: [] # see config.yml for details and to add components
+  # Override this in config.yml to set a custom path for your dotfiles
+  # that's external to this repository.
+  dotfile_path: dotfiles
+  # TODO whitelist as well?
+  # Note that we can't exclude .git from top-level projects, and by extension from anything,
+  # otherwise rebar commands begin to fail.
+  sync:
+  # In local tests, it is about a 1.1 seconds per sync,
+  # with up to about 15 seconds for a large sync (400mb single file)
+  # CPU usage on the host is minimal, but for large syncs does increase
+  # significantly on the guest.
+     interval: 5
+     show-syncing-message: true
+     exclude-files:
+       - pkg/
+       - deps/
+       - rel/
+       - _rel/
+       - _build/
+       - chef-mover/rel/mover/
+       - ebin/
+       - .eunit/
+       - .kitchen/
+       - .bundle/
+       - vendor/bundle/
+       - "*_SUITE_data/"
+       - "*.deb"
+       - "*.rpm"
+       - "*.vmdk"
+       - "*.plt"
+       - "*.beam"
+       - "*.o"
+       - "*.so"
+       - "*.d"
+       - logs/
+       - /dev/
+       - .concrete/
+       - relx # we don't want to pull in a mac relx to our linux vm
+       - rspec.failures
+       - VERSION
+       - partybus/config.rb
+       - oc-reporting-pedant/Gemfile.lock # friggin ugh
+
+  cover:
+    base_output_path: /vagrant/testdata/cover # maps to dev/testdata/cover
+  node-attributes:
+    placeholder: true
+
+projects:
+    #  omnibus:
+    #path: "omnibus"
+    #name: omnibus-analytics
+    #type: omnibus
+    #external: true
+    #components:
+    #  # dest paths are relative to /opt/opscode/embedded for these components
+    #  # source apths are relative to opscode-omnibus/files
+    #  private-chef-cookbooks:
+    #    source_path: private-chef-cookbooks/private-chef
+    #    dest_path: /opt/opscode/embedded/cookbooks/private-chef
+    #    reconfigure_on_load: true
+    #  ctl-commands:
+    #    source_path: private-chef-ctl-commands
+    #    dest_path: /opt/opscode/embedded/service/omnibus-ctl
+    #    reconfigure_on_load: false
+
+  #
+  # External Components
+  # We'll eventually allow external projects to supply their own
+  # 'dvm.yml' that we can include for project definitions, but for now...
+
+  #
+  # omnibus-ctl
+  #
+  omnibus-ctl:
+    type: ruby
+    system: true
+    external: true
+
+quickstart:

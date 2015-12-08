@@ -4,3 +4,13 @@ topology "standalone"
 <% node['provisioning']['chef-server-config'].each_pair do |k, v| %>
 <%= k%>=<%= v%>
 <% end %>
+
+<% if node['provisioning']['chef-server-config']['analytics'] %>
+oc_id['applications'] = {
+  'analytics' => {
+    'redirect_uri' => 'https://analytics.dev/'
+  }
+}
+rabbitmq['vip'] = '192.168.33.100'
+rabbitmq['node_ip_address'] = '0.0.0.0'
+<% end %>
