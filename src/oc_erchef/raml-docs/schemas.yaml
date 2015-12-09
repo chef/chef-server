@@ -22,6 +22,7 @@ Key:                       !include schemas/key.json
 KeyCreated:                !include schemas/key-created.json
 KeyList:                   !include schemas/key-list.json
 NamedChildList:            !include schemas/named-child-list.json
+Node:                      !include schemas/node.json
 ObjectUri:                 !include schemas/object-uri.json
 Organization:              !include schemas/organization.json
 OrganizationCreated:       !include schemas/organization-created.json
