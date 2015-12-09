@@ -143,10 +143,12 @@ ejson_for_indexing(#oc_chef_group{}, _EjsonTerm) ->
    {[]}.
 
 update_from_ejson(#oc_chef_group{name = OrigName, clients = OrigClients, users = OrigUsers, groups = OrigGroups} = Group, GroupData) ->
+    lager:error("update from ejson ~p", [GroupData]),
     Name = ej:get({<<"groupname">>}, GroupData, OrigName),
     Clients = ej:get({<<"actors">>, <<"clients">>}, GroupData, OrigClients),
     Groups = ej:get({<<"actors">>, <<"groups">>}, GroupData, OrigGroups),
     Users = ej:get({<<"actors">>, <<"users">>}, GroupData, OrigUsers),
+    lager:error("update from ejson users ~p", [Users]),
     Group#oc_chef_group{name = Name, clients = Clients, groups = Groups, users = Users}.
 
 fields_for_update(#oc_chef_group{last_updated_by = LastUpdatedBy,
@@ -190,11 +192,14 @@ update(#oc_chef_group{
                       auth_side_actors = AuthSideActors,
                       auth_side_groups = AuthSideGroups
                      } = Record, CallbackFun) ->
+    lager:error("record ~p", [Record]),
+    lager:error("callback fun ~p", [CallbackFun]),
     case chef_object_default_callbacks:update(Record, CallbackFun) of
         %% If the group exists, N should be 1.
         N when is_integer(N) andalso N > 0 ->
             ClientAuthzIds = find_client_authz_ids(Clients, OrgId, CallbackFun),
             UserAuthzIds = find_user_authz_ids(Users, CallbackFun),
+            lager:error("users ~p", [Users]),
             GroupAuthzIds = find_group_authz_ids(Groups, OrgId, CallbackFun),
             UserSideActorsAuthzIds = UserAuthzIds ++ ClientAuthzIds,
             %% Subtract from the Authz returned ids, the list of known good ids.

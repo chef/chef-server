@@ -1085,6 +1085,9 @@ update_from_json(#wm_reqdata{} = Req, #base_state{reqid=ReqId,
     %% compromise.
     ok = oc_chef_object_db:add_to_solr(ObjectRec, ObjectEjson, ReqId),
 
+    lager:error("org rec ~p", [OrigObjectRec]),
+    lager:error("update rec ~p", [ObjectRec]),
+
     %% Ignore updates that don't change anything. If the user PUTs identical data, we skip
     %% going to the database and skip updating updated_at. This allows us to avoid RDBMS
     %% specific behavior around updates with unchanged data and race conditions around

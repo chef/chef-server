@@ -62,12 +62,17 @@ allowed_methods(Req, State) ->
 
 -spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
                               {wm_req(), chef_wm:base_state()}.
+validate_request(Method, Req, #base_state{organization_guid = undefined} = State) ->
+    lager:error("in undefined state"),
+    State1 = State#base_state{organization_guid = ?GLOBAL_PLACEHOLDER_ORG_ID},
+    validate_request(Method, Req, State1);
 validate_request(Method, Req, State = #base_state{organization_guid = OrgId}) when Method == 'GET';
-                                          Method == 'DELETE' ->
+                                                                                   Method == 'DELETE' ->
     {Req, State#base_state{superuser_bypasses_checks = true, resource_state = #group_state{oc_chef_group = #oc_chef_group{org_id = OrgId}}}};
 validate_request('PUT', Req, #base_state{organization_guid = OrgId, resource_state = GroupState} = State) ->
     Body = wrq:req_body(Req),
     {ok, Group} = oc_chef_group:parse_binary_json(Body),
+    lager:error("put group ~p ~p", [Group, OrgId]),
     {Req, State#base_state{
             superuser_bypasses_checks = true,
             resource_state = GroupState#group_state{
@@ -80,12 +85,16 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
     GroupName = chef_wm_util:extract_from_path(group_name, Req),
     case wrq:method(Req) of
         'PUT' ->
+            lager:error("in put"),
             case oc_chef_wm_groups:validate_group_name(ej:get({<<"id">>}, GroupData, ej:get({<<"groupname">>}, GroupData))) of
                 valid ->
+                    lager:error("valid ~p", [GroupState]),
                     validate_group(OrgId, GroupName, DbContext, Req, State, GroupState);
                 missing ->
+                    lager:error("missing"),
                     validate_group(OrgId, GroupName, DbContext, Req, State, GroupState);
                 invalid  ->
+                    lager:error("invalid"),
                     oc_chef_wm_groups:group_name_invalid(Req, State)
             end;
         _ ->
@@ -93,6 +102,7 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
     end.
 validate_group(OrgId, GroupName, DbContext, Req,
                #base_state{requestor_id = RequestorId} = State, GroupState) ->
+    lager:error("fetch ~p", [chef_db:fetch(#oc_chef_group{org_id = OrgId, name = GroupName, for_requestor_id = RequestorId}, DbContext)]),
     case chef_db:fetch(#oc_chef_group{org_id = OrgId, name = GroupName,
                                       for_requestor_id = RequestorId}, DbContext) of
         not_found ->
@@ -129,6 +139,7 @@ from_json(Req, #base_state{resource_state = #group_state{
                                                group_data = GroupData
                                               }
                           } = State) ->
+    lager:error("from json"),
     oc_chef_wm_base:update_from_json(Req, State, Group , GroupData).
 
 conflict_message(_Name) ->

@@ -52,7 +52,13 @@ allowed_methods(Req, State) ->
 
 -spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
                               {wm_req(), chef_wm:base_state()}.
+% global groups case
+validate_request(Method, Req, #base_state{organization_guid = undefined} = State) ->
+    lager:error("in undefined state"),
+    State1 = State#base_state{organization_guid = ?GLOBAL_PLACEHOLDER_ORG_ID},
+    validate_request(Method, Req, State1);
 validate_request('GET', Req, #base_state{organization_guid = OrgId} = State) ->
+    lager:error("in get state ~p", [OrgId]),
     {Req, State#base_state{superuser_bypasses_checks = true,
                            resource_state = #oc_chef_group{org_id = OrgId}}};
 validate_request('POST', Req, #base_state{organization_guid = OrgId,
