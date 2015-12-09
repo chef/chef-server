@@ -40,6 +40,7 @@ post:
     responses:
       200:
         body: { schema: Node }
+
   /_acl: !include ../acl_endpoint.yaml
 
   /_identifiers:
