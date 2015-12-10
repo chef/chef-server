@@ -28,6 +28,14 @@ class PreflightValidator
     end
   end
 
+  def first_run?
+    previous_run.nil?
+  end
+
+  def secrets_exists?
+    PrivateChef.existing_secrets.length > 0
+  end
+
   def backend?
     #
     # When these preflight checks are run, the chef-server.rb has been ingested into
