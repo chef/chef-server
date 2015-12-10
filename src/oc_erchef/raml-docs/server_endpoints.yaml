@@ -6,9 +6,21 @@
 
 /authenticate_user:
   description: Authenticate a user.
+  get:
+    responses:
+      200: { schema: AuthenticatedUser }
+
 /system_recovery:
   description: Authenticate a user when system recovery is enabled.
+  get:
+    responses:
+      200: { schema: SystemRecovery }
+
 /license:
   description: Server license.
+  get:
+    responses:
+      200: { schema: ServerLicense }
+
 /server_api_version:
   description: Server API version.
