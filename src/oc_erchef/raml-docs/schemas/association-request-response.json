@@ -5,7 +5,7 @@
     "response": {
       "description": "Whether to accept or reject the invitation.",
       "type": "string",
-      "regex": "accept|reject"
+      "pattern": "accept|reject"
     }
   },
   "example": {

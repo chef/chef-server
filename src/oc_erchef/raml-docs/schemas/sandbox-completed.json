@@ -15,7 +15,9 @@
       "type": "array",
       "items": {
         "description": "The checksums that were uploaded.",
-        "regex": "[0-9a-f]{32}"
+        "minLength": 32,
+        "maxLength": 32,
+        "pattern": "[0-9a-f]"
       }
     },
     "create_time": {

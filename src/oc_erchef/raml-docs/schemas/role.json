@@ -35,12 +35,12 @@
     "json_class": {
       "description": "Must have the value Chef::Role.",
       "type": "string",
-      "regex": "Chef::Role"
+      "pattern": "Chef::Role"
     },
     "chef_type": {
       "description": "Must have the value \"role\"",
       "type": "string",
-      "regex": "role"
+      "pattern": "role"
     }
   }
 }

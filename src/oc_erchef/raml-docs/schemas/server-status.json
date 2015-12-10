@@ -3,12 +3,12 @@
   "properties": {
     "status": {
       "type": "string",
-      "regex": "pong|fail"
+      "pattern": "pong|fail"
     },
     "upstreams": {
       "additionalProperties": {
         "type": "string",
-        "regex": "pong|fail"
+        "pattern": "pong|fail"
       }
     },
     "keygen": {

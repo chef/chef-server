@@ -26,12 +26,12 @@
     "json_class": {
       "description": "Must have the value Chef::ApiClient.",
       "type": "string",
-      "regex": "Chef::ApiClient"
+      "pattern": "Chef::ApiClient"
     },
     "chef_type": {
       "description": "Must have the value \"client\"",
       "type": "string",
-      "regex": "client"
+      "pattern": "client"
     }
   },
   "example": {

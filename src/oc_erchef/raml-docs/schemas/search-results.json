@@ -39,12 +39,12 @@
               "json_class": {
                 "description": "Must have the value Chef::ApiClient.",
                 "type": "string",
-                "regex": "Chef::ApiClient"
+                "pattern": "Chef::ApiClient"
               },
               "chef_type": {
                 "description": "Must have the value \"client\"",
                 "type": "string",
-                "regex": "client"
+                "pattern": "client"
               }
             }
           },
@@ -75,12 +75,12 @@
               "json_class": {
                 "description": "Must have the value Chef::DataBagItem.",
                 "type": "string",
-                "regex": "Chef::DataBagItem"
+                "pattern": "Chef::DataBagItem"
               },
               "chef_type": {
                 "description": "Must have the value \"data_bag_item\"",
                 "type": "string",
-                "regex": "data_bag_item"
+                "pattern": "data_bag_item"
               },
               "raw_data": {
                 "type": "object",

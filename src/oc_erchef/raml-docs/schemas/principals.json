@@ -17,7 +17,7 @@
           "type": {
             "description": "The type of the principal (user or client)",
             "type": "string",
-            "regex": "user|client"
+            "pattern": "user|client"
           },
           "authz_id": {
             "description": "The authorization system's ID for the principal",
