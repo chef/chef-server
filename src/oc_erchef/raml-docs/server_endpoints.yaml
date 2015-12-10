@@ -6,13 +6,13 @@
 
 /authenticate_user:
   description: Authenticate a user.
-  get:
+  post:
     responses:
       200: { schema: AuthenticatedUser }
 
 /system_recovery:
   description: Authenticate a user when system recovery is enabled.
-  get:
+  post:
     responses:
       200: { schema: SystemRecovery }
 
@@ -23,4 +23,7 @@
       200: { schema: ServerLicense }
 
 /server_api_version:
-  description: Server API version.
+  description: The Chef API versions supported by this server.
+  get:
+    responses:
+      200: { schema: ServerApiVersion }

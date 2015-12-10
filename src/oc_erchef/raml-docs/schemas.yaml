@@ -41,6 +41,9 @@ RunList:                   !include schemas/run-list.json
 SearchCustomResultsPost:   !include schemas/search-custom-results-post.json
 SearchCustomResults:       !include schemas/search-custom-results.json
 SearchResults:             !include schemas/search-results.json
+ServerApiVersion:          !include schemas/server-api-version.json
+ServerLicense:             !include schemas/server-license.json
+ServerStatus:              !include schemas/server-status.json
 User:                      !include schemas/user.json
 UserCreate:                !include schemas/user-create.json
 UserCreated:               !include schemas/user-created.json
