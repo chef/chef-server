@@ -22,7 +22,7 @@
 %% settings
 -define(BOOKSHELF_CONFIG, bookshelf).
 -define(TIMEOUT_MS, 4096).
--define(BLOCK_SIZE, 16384).
+-define(BLOCK_SIZE,64*1024). %% 256k seems to cause a substantial slowdown and timeouts.
 
 %% logging utilities
 -compile([{parse_transform, lager_transform}]).
@@ -56,10 +56,11 @@
           data_size   :: integer(),
           chunk_count :: integer(),
           hash_md5    :: binary(),
+          hash_sha256 :: binary(),
           hash_sha512 :: binary()
          }).
 
--define(DB_FILE_TX_FM, [db_file, [bucket_name, bucket_id, name, file_id, created_at, data_id, complete, data_size, chunk_count, hash_md5, hash_sha512]]).
+-define(DB_FILE_TX_FM, [db_file, [bucket_name, bucket_id, name, file_id, created_at, data_id, complete, data_size, chunk_count, hash_md5, hash_sha256, hash_sha512]]).
 
 -record(db_bucket, {
           bucket_name :: binary(),
@@ -68,6 +69,15 @@
          }).
 
 -define(DB_BUCKET_TX_FM, [db_bucket, [bucket_name, created_at, bucket_id]]).
+
+-record(file_transfer_state, {
+          size = 0 :: integer(), % transferred size
+          next_chunk = 0:: integer(),
+          %% These hashes are computed on both upload and download to help insure file integrity
+          hash_context_md5 :: any(), % 
+          hash_context_sha256 :: any(),
+          hash_context_sha512 :: any() % refine
+         }).
 
 -record(context, {
                   auth_check_disabled = false :: boolean(),
@@ -88,9 +98,7 @@
                   entry_ref :: #entryref{}, % null in sql mode
 
                   entry_md :: #object{} | #db_file{},
-                  next_chunk_to_stream :: integer(),
 
-                  hash_md5_context :: any(), % refine
-                  hash_sha256_context :: any(),
-                  hash_sha512_context :: any() % refine
+                  transfer_state :: #file_transfer_state{}
+
               }).
