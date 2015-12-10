@@ -19,6 +19,7 @@ EnvironmentList:           !include schemas/environment-list.json
 Errors:                    !include schemas/errors.json
 Group:                     !include schemas/group.json
 GroupCreate:               !include schemas/group-create.json
+GroupUpdate:               !include schemas/group-update.json
 Key:                       !include schemas/key.json
 KeyCreated:                !include schemas/key-created.json
 KeyList:                   !include schemas/key-list.json

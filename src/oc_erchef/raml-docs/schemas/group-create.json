@@ -2,36 +2,10 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
 
   "properties": {
-    "name": {
+    "groupname": {
       "description": "The name of the group (unique within an organization).",
       "$ref": "common.json#ChefName",
       "required": true
-    },
-    "actors": {
-      "type": "object",
-      "properties": {
-        "users": {
-          "description": "Users who are members of this group.",
-          "type": "array",
-          "items": {
-            "$ref": "common.json#ChefName"
-          }
-        },
-        "clients": {
-          "description": "Clients who are members of this group.",
-          "type": "array",
-          "items": {
-            "$ref": "common.json#ChefName"
-          }
-        },
-        "groups": {
-          "description": "Sub-groups of this group.",
-          "type": "array",
-          "items": {
-            "$ref": "common.json#ChefName"
-          }
-        }
-      }
     }
   }
 }
