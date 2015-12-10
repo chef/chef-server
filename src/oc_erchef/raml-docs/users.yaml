@@ -88,18 +88,6 @@ post:
             }
 
   /keys: !include users/keys.yaml
-
-  /association_requests:
-    type: list_endpoint
-
-    /count:
-      type: item_endpoint
-
-    /{association_request}:
-      type: item_endpoint
-      uriParameters:
-        association_request:
-          description: ID of the association request.
-          type: string
+  /association_requests: !include users/association_requests.yaml
 
   /_acl: !include acl_endpoint.yaml

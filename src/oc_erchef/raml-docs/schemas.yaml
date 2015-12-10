@@ -1,8 +1,12 @@
 Acl:                       !include schemas/acl.json
 AssociationRequest:        !include schemas/association-request.json
+AssociationRequestCount:   !include schemas/association-request-count.json
 AssociationRequestCreate:  !include schemas/association-request-create.json
 AssociationRequestCreated: !include schemas/association-request-created.json
 AssociationRequestOrgList: !include schemas/association-request-org-list.json
+AssociationRequestResponse: !include schemas/association-request-response.json
+AssociationRequestResponseSuccess: !include schemas/association-request-response-success.json
+AssociationRequestUserList: !include schemas/association-request-user-list.json
 Client:                    !include schemas/client.json
 ClientCreate:              !include schemas/client-create.json
 ClientCreated:             !include schemas/client-created.json

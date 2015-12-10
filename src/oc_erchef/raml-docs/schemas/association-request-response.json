@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "properties": {
+    "response": {
+      "description": "Whether to accept or reject the invitation.",
+      "type": "string",
+      "regex": "accept|reject"
+    }
+  },
+  "example": {
+    "response": "accept"
+  }
+}
