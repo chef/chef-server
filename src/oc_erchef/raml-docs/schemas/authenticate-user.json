@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "properties": {
+    "username": {
+      "description": "The user to authenticate",
+      "$ref": "common.json#ChefName"
+    },
+    "password": {
+      "description": "Hashed password for the user",
+      "type": "string"
+    }
+  },
+
+  "example": {
+    "username": {
+      "description": "The user to authenticate",
+      "$ref": "common.json#ChefName"
+    },
+    "password": {
+      "description": "Hashed password for the user",
+      "type": "string"
+    }
+  }
+}
