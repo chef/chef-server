@@ -28,12 +28,12 @@
     "json_class": {
       "description": "Must have the value Chef::Environment.",
       "type": "string",
-      "regex": "Chef::Environment"
+      "enum": [ "Chef::Environment" ]
     },
     "chef_type": {
       "description": "Must have the value \"environment\"",
       "type": "string",
-      "regex": "environment"
+      "enum": [ "environment" ]
     }
   }
 }

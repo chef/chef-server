@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "properties": {
+    "principals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The name of the user or client",
+            "$ref": "common.json#ChefName"
+          },
+          "public_key": {
+            "description": "The PKCS#1 public key of the user or client",
+            "$ref": "common.json#/PublicKey"
+          },
+          "type": {
+            "description": "The type of the principal (user or client)",
+            "type": "string",
+            "enum": [ "user", "client" ]
+          },
+          "authz_id": {
+            "description": "The authorization system's ID for the principal",
+            "type": "string"
+          },
+          "org_member": {
+            "description": "Whether or not the user or client is a member of the org (clients always are).",
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  },
+  "example": {
+    "principals": [
+      {
+        "name": "yargh",
+        "public_key": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtJO2gMlppmm+kbeR+nCK\njXA6TUi6PN5w0gkdnW3EPt2rpGYDEBgtPHlHouwUAXVKguI196matevtDKNVGKV7\nd3aPx8dIbm5DadPLLu4dn/xQEDWit4x+kaCF8TneB8hfHdd/o86q7yFMium2e/ou\naopjxwv7bsVsfmWP2h+8gGq7HRt4z0SpH9n7DNdnm3MAxAU+7UZb/LwpZ/ovYj5I\nIgAHAEW7/JOel0eetADW+NkX2SBK/SK7GncKoqb8BUUzlYUlbvYJ3d6tQgXJt153\nVXWHvGfp7VlU1e4hIUyPFnJt9Ku76IEX30eR73lzwa1a6SUdfRE9mNPqLjHxKhSQ\n9QIDAQAB\n-----END PUBLIC KEY-----\n\n",
+        "type": "client",
+        "authz_id": "86735e974570e99253c753bf1fc16a72",
+        "org_member": true
+      }
+    ]
+  }
+}

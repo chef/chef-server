@@ -10,7 +10,9 @@
       },
       "url": {
         "description": "The URL to the cookbook.",
-        "$ref": "common.json#Uri"
+        "type": "string",
+
+        "format": "uri"
       }
     },
     "example": {
@@ -44,7 +46,9 @@
         },
         "url": {
           "description": "The URL where the file can be downloaded. If not specified on PUT, the server will assume the file is at the location specified by the sandboxes endpoint.",
-          "$ref": "common.json#Uri"
+          "type": "string",
+
+          "format": "uri"
         }
       }
     },
@@ -84,7 +88,8 @@
       },
       "maintainer_email": {
         "description": "The cookbook maintainer's email.",
-        "type": "Email"
+        "type": "string",
+        "format": "email"
       },
       "license": {
         "description": "The license of the cookbook.",
@@ -92,11 +97,15 @@
       },
       "source_url": {
         "description": "The URL to the source code for this cookbook.",
-        "$ref": "common.json#Uri"
+        "type": "string",
+
+        "format": "uri"
       },
       "issues_url": {
         "description": "The URL to the bug tracker for this cookbook.",
-        "$ref": "common.json#Uri"
+        "type": "string",
+
+        "format": "uri"
       },
       "privacy": {
         "description": "Whether this cookbook is private or not.",
@@ -242,12 +251,12 @@
       "type": {
         "description": "The type of the attribute (string, array or hash).",
         "type": "string",
-        "regex": "string|array|hash"
+        "enum": [ "string", "array", "hash" ]
       },
       "required": {
         "description": "The level of user input (required, recommended or optional).",
         "type": "string",
-        "regex": "required|recommended|optional"
+        "enum": [ "required", "recommended", "optional" ]
       },
       "recipes": {
         "description": "The recipes that use this attribute.",

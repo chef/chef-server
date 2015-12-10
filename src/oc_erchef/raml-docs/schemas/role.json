@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "properties": {
+    "name": {
+      "description": "The name of the role (unique within an organization).",
+      "$ref": "common.json#ChefName",
+      "required": true
+    },
+    "description": {
+      "description": "A description of this role.",
+      "type": "string"
+    },
+    "run_list": {
+      "description": "A run list for all nodes with this role (unless overridden by env_run_lists).",
+      "$ref": "common.json#RunList"
+    },
+    "env_run_lists": {
+      "description": "Run lists for nodes with this role in specific environments",
+      "type": "object",
+      "patternProperties": {
+        "[A-Za-z0-9-_.:]{1..255}": { "$ref": "common.json#RunList" }
+      }
+    },
+    "default_attributes": {
+      "description": "Default-level role attributes for all nodes with this role.",
+      "type": "object",
+      "additionalProperties": true
+    },
+    "override_attributes": {
+      "description": "Override-level role attributes for all nodes with this role.",
+      "type": "object",
+      "additionalProperties": true
+    },
+    "json_class": {
+      "description": "Must have the value Chef::Role.",
+      "type": "string",
+      "enum": [ "Chef::Role" ]
+    },
+    "chef_type": {
+      "description": "Must have the value \"role\"",
+      "type": "string",
+      "enum": [ "role" ]
+    }
+  }
+}

@@ -3,43 +3,55 @@
   "required": true,
   "properties": {
     "username": {
-      "type": "string",
       "description": "A unique namespace matching the format [a-z0-9\\-_]+",
+      "type": "string",
       "required": true
     },
     "display_name": {
-      "type": "string",
       "description": "Human-readable name to be rendered into UIs and other human-readable locations",
+      "type": "string",
       "required": true
     },
     "email": {
-      "type": "string",
       "description": "Valid email address for the new user",
+      "type": "string",
+      "format": "email",
       "required": true
     },
     "password": {
+      "description": "Hashed password for the new user that is over 6 characters",
       "type": "string",
-      "description": "Password for the new user that is over 6 characters",
       "required": true
     },
     "first_name": {
-      "type": "string",
       "description": "The first name of the new user",
+      "type": "string",
       "required": false
     },
     "middle_name": {
-      "type": "string",
       "description": "The middle name of the new user",
+      "type": "string",
       "required": false
     },
     "last_name": {
-      "type": "string",
       "description": "The last name of the new user",
+      "type": "string",
+      "required": false
+    },
+    "external_authentication_uid": {
+      "description": "The external authentication UID of the user (their AD or LDAP ID, generally)",
+      "type": "boolean",
+      "required": false
+    },
+    "recovery_authentication_enabled": {
+      "description": "Whether this user may log in with their password when AD is down",
+      "type": "boolean",
+      "default": false,
       "required": false
     },
     "public_key": {
-      "$ref": "common.json#/PublicKey",
       "description": "A valid PKCS#1 public key. Cannot be passed with create_key. If not passed, the new user will be created without a default public key (unless create_key is passed). If passed, the server will return chef_key containing the public_key in its response body.",
+      "$ref": "common.json#/PublicKey",
       "required": false
     }
   }

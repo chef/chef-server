@@ -7,12 +7,12 @@
     "json_class": {
       "description": "Has the value Chef::DataBagItem.",
       "type": "string",
-      "regex": "Chef::DataBagItem"
+      "enum": [ "Chef::DataBagItem" ]
     },
     "chef_type": {
       "description": "Has the value \"data_bag_item\"",
       "type": "string",
-      "regex": "data_bag_item"
+      "enum": [ "data_bag_item" ]
     },
     "raw_data": { "$ref": "data-bag-item.json" }
   }

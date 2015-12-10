@@ -8,7 +8,9 @@
     },
     "uri": {
       "description": "The URI of the sandbox.",
-      "$ref": "common.json#Uri"
+      "type": "string",
+
+      "format": "uri"
     },
     "checksums": {
       "description": "A hash where each key is one of the checksums that you are willing to upload",
@@ -18,7 +20,9 @@
           "properties": {
             "url": {
               "description": "The URL the file should be uploaded to. Only specified if needs_upload is true.",
-              "$ref": "common.json#Uri"
+              "type": "string",
+
+              "format": "uri"
             },
             "needs_upload": {
               "description": "true if the checksum is not already on the server; false if it is.",

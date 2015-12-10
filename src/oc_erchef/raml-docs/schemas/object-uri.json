@@ -3,6 +3,7 @@
 
   "description": "An object's URI.",
   "property": {
-    "uri": { "$ref": "common.json#Uri" }
+    "uri": { "type": "string",
+ "format": "uri" }
   }
 }

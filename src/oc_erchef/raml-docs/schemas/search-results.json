@@ -1,0 +1,118 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "properties": {
+    "total": {
+      "description": "Total number of results returned by the search",
+      "type": "integer"
+    },
+    "start": {
+      "description": "The starting index of this set of results within the total set of results",
+      "type": "integer"
+    },
+    "rows": {
+      "description": "The results.",
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "description": "A client result.",
+            "type": "object",
+            "properties": {
+              "name": {
+                "description": "The name of the client (unique within an organization).",
+                "$ref": "common.json#ChefName",
+                "required": true
+              },
+              "clientname": {
+                "description": "Same as name.",
+                "$ref": "common.json#ChefName"
+              },
+              "validator": {
+                "description": "Whether or not the client is a validator.",
+                "type": "boolean"
+              },
+              "orgname": {
+                "description": "The name of the organization the client is in.",
+                "$ref": "common.json#ChefName"
+              },
+              "json_class": {
+                "description": "Must have the value Chef::ApiClient.",
+                "type": "string",
+                "enum": [ "Chef::ApiClient" ]
+              },
+              "chef_type": {
+                "description": "Must have the value \"client\"",
+                "type": "string",
+                "enum": [ "client" ]
+              }
+            }
+          },
+          {
+            "description": "An environment result.",
+            "$ref": "environment.json"
+          },
+          {
+            "description": "A node result.",
+            "$ref": "node.json"
+          },
+          {
+            "description": "A role result.",
+            "$ref": "role.json"
+          },
+          {
+            "description": "A data bag item result.",
+            "type": "object",
+            "properties": {
+              "name": {
+                "description": "The name of this data bag item.",
+                "$ref": "common.json#ChefName"
+              },
+              "data_bag": {
+                "description": "The name of the data bag this data bag item is contained in (same as the search index).",
+                "$ref": "common.json#ChefName"
+              },
+              "json_class": {
+                "description": "Must have the value Chef::DataBagItem.",
+                "type": "string",
+                "enum": [ "Chef::DataBagItem" ]
+              },
+              "chef_type": {
+                "description": "Must have the value \"data_bag_item\"",
+                "type": "string",
+                "enum": [ "data_bag_item" ]
+              },
+              "raw_data": {
+                "type": "object",
+                "additionalProperties": true
+              }
+
+            }
+          }
+        ]
+      }
+    }
+  },
+  "example": {
+    "total": 2,
+    "start": 0,
+    "rows": [
+      {
+        "name": "wahooo",
+        "clientname": "wahooo",
+        "validator": true,
+        "orgname": "essentials",
+        "json_class": "Chef::ApiClient",
+        "chef_type": "client"
+      },
+      {
+        "name": "wootles",
+        "clientname": "wootles",
+        "validator": false,
+        "orgname": "essentials",
+        "json_class": "Chef::ApiClient",
+        "chef_type": "client"
+      }
+    ]
+  }
+}

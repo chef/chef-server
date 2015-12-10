@@ -3,23 +3,22 @@
 
   "ChefName": {
     "description": "The name of a Chef object.",
-    "regex": "[A-Za-z0-9-_.:]{1..255}"
-  },
-
-  "Uri": {
-    "description": "A URI.",
-    "type": "string"
+    "minLength": 1,
+    "maxLength": 255,
+    "pattern": "^[A-Za-z0-9-_.:]*$"
   },
 
   "Base64": {
     "type": "string",
-    "regex": "[A-Za-z0-9+/]+={0-3}"
+    "pattern": "^[A-Za-z0-9+/]+={0-3}$"
   },
 
   "Guid": {
     "description": "A GUID.",
     "type": "string",
-    "regex": "[0-9]{32}"
+    "minLength": 32,
+    "maxLength": 32,
+    "pattern": "^[0-9A-Fa-f-]*$"
   },
 
   "PublicKey": {
@@ -30,7 +29,7 @@
   "Version": {
     "description": "A version.",
     "type": "string",
-    "regex": "\\d+\\.\\d+\\.\\d+"
+    "pattern": "^\\d+\\.\\d+\\.\\d+$"
   },
 
   "VersionConstraint": {
@@ -58,7 +57,7 @@
     "type": "array",
     "items": {
       "type": "string",
-      "regex": "\\w+(::\\w+)?(@\\d+\\.\\d+\\.\\d+)?"
+      "pattern": "^\\w+(::\\w+)?(@\\d+\\.\\d+\\.\\d+)?$"
     }
   }
 }

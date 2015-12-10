@@ -65,12 +65,12 @@
     "chef_type": {
       "description": "Must be cookbook_version.",
       "type": "string",
-      "regex": "cookbook_version"
+      "enum": [ "cookbook_version" ]
     },
     "json_class": {
       "description": "Must be Chef::CookbookVersion.",
       "type": "string",
-      "regex": "Chef::CookbookVersion"
+      "enum": [ "Chef::CookbookVersion" ]
     }
   }
 }

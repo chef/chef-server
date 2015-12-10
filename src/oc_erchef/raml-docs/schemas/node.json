@@ -39,12 +39,12 @@
     "json_class": {
       "description": "Must have the value Chef::Node.",
       "type": "string",
-      "regex": "Chef::Node"
+      "enum": [ "Chef::Node" ]
     },
     "chef_type": {
       "description": "Must have the value \"node\"",
       "type": "string",
-      "regex": "node"
+      "enum": [ "node" ]
     }
   }
 }

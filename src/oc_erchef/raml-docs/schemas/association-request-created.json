@@ -4,7 +4,8 @@
   "properties": {
     "uri": {
       "description": "URI to the created invite",
-      "$ref": "common.json#Uri",
+      "type": "string",
+      "format": "uri",
       "example": "https://api.opscode.com/organizations/essentials/association_requests/92290982a3c91bd471466daae3c95f75"
     },
     "organization_user": {
@@ -30,7 +31,8 @@
       "properties": {
         "email": {
           "description": "Email of invited user.",
-          "$ref": "common.json#Email"
+          "type": "string",
+          "format": "email"
         },
         "first_name": {
           "description": "First name of invited user.",

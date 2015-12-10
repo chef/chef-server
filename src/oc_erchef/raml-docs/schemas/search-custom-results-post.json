@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "description": "A hash of keys that should be returned, to paths to the data from each item that should be returned.",
+  "additionalProperties": {
+    "description": "A path to the data that should be returned for this key, for each item. Each entry in the array represents a key that should be traversed in the results.",
+    "type": "array",
+    "items": {
+      "description": "The next key to traverse (['a', 'b', 'c'] means look up { \"a\": { \"b\": { \"c\": ... } } }) and assign that value to the key.",
+      "type": "string"
+    }
+  },
+  "example": {
+    "node_name": [ "name" ],
+    "apache_port": [ "apache", "http_port" ]
+  }
+}

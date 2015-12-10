@@ -34,6 +34,8 @@ post:
     responses:
       200:
         body: { schema: GroupUpdate }
+      201:
+        body: { schema: GroupUpdate }
 
   delete:
     description: Delete this group.

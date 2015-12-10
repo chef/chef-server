@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "properties": {
+    "response": {
+      "description": "Whether to accept or reject the invitation.",
+      "enum": [ "accept", "reject" ]
+    }
+  },
+  "example": {
+    "response": "accept"
+  }
+}
