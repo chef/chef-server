@@ -2,13 +2,7 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
 
   "properties": {
-    "run_list": {
-      "type": "array",
-      "items": {
-        "description": "A recipe with an optional @version qualifier",
-        "type": "string"
-      }
-    }
+    "run_list": { "$ref": "common.json#RunList" }
   },
   "example": {
     "run_list": [

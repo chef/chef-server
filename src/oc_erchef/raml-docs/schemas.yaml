@@ -15,6 +15,7 @@ DataBagItem:               !include schemas/data-bag-item.json
 DataBagItemDeleteResponse: !include schemas/data-bag-item-delete-response.json
 DataBagItemPostResponse:   !include schemas/data-bag-item-post-response.json
 Environment:               !include schemas/environment.json
+EnvironmentList:           !include schemas/environment-list.json
 Errors:                    !include schemas/errors.json
 Group:                     !include schemas/group.json
 GroupCreate:               !include schemas/group-create.json
@@ -22,6 +23,7 @@ Key:                       !include schemas/key.json
 KeyCreated:                !include schemas/key-created.json
 KeyList:                   !include schemas/key-list.json
 NamedChildList:            !include schemas/named-child-list.json
+Node:                      !include schemas/node.json
 ObjectUri:                 !include schemas/object-uri.json
 Organization:              !include schemas/organization.json
 OrganizationCreated:       !include schemas/organization-created.json

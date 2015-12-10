@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "properties": {
+    "checksums": {
+      "description": "A hash where each key is one of the checksums that you are willing to upload",
+      "patternProperties": {
+        "[0-9a-f]{32}": { "type": "null" }
+      }
+    }
+  }
+}

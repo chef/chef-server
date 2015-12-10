@@ -51,5 +51,14 @@
         "items": { "$ref": "common.json#ChefName" }
       }
     }
+  },
+
+  "RunList": {
+    "description": "An ordered list of recipes to run.",
+    "type": "array",
+    "items": {
+      "type": "string",
+      "regex": "\\w+(::\\w+)?(@\\d+\\.\\d+\\.\\d+)?"
+    }
   }
 }
