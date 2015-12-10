@@ -48,7 +48,7 @@ get:
     }
     ```
 
-    Will be returned if you search for d:hi, *or* a_b_c:hi.
+    Will be returned if you search for c:hi, *or* a_b_c:hi.
 
   type: list_endpoint
   uriParameters:
