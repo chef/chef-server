@@ -39,12 +39,12 @@
               "json_class": {
                 "description": "Must have the value Chef::ApiClient.",
                 "type": "string",
-                "pattern": "Chef::ApiClient"
+                "enum": [ "Chef::ApiClient" ]
               },
               "chef_type": {
                 "description": "Must have the value \"client\"",
                 "type": "string",
-                "pattern": "client"
+                "enum": [ "client" ]
               }
             }
           },
@@ -75,12 +75,12 @@
               "json_class": {
                 "description": "Must have the value Chef::DataBagItem.",
                 "type": "string",
-                "pattern": "Chef::DataBagItem"
+                "enum": [ "Chef::DataBagItem" ]
               },
               "chef_type": {
                 "description": "Must have the value \"data_bag_item\"",
                 "type": "string",
-                "pattern": "data_bag_item"
+                "enum": [ "data_bag_item" ]
               },
               "raw_data": {
                 "type": "object",

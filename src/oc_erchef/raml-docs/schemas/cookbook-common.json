@@ -251,12 +251,12 @@
       "type": {
         "description": "The type of the attribute (string, array or hash).",
         "type": "string",
-        "pattern": "string|array|hash"
+        "enum": [ "string", "array", "hash" ]
       },
       "required": {
         "description": "The level of user input (required, recommended or optional).",
         "type": "string",
-        "pattern": "required|recommended|optional"
+        "enum": [ "required", "recommended", "optional" ]
       },
       "recipes": {
         "description": "The recipes that use this attribute.",

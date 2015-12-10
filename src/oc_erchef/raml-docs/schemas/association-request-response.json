@@ -4,8 +4,7 @@
   "properties": {
     "response": {
       "description": "Whether to accept or reject the invitation.",
-      "type": "string",
-      "pattern": "accept|reject"
+      "enum": [ "accept", "reject" ]
     }
   },
   "example": {

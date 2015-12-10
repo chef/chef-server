@@ -26,12 +26,12 @@
     "json_class": {
       "description": "Must have the value Chef::ApiClient.",
       "type": "string",
-      "pattern": "Chef::ApiClient"
+      "enum": [ "Chef::ApiClient" ]
     },
     "chef_type": {
       "description": "Must have the value \"client\"",
       "type": "string",
-      "pattern": "client"
+      "enum": [ "client" ]
     }
   },
   "example": {

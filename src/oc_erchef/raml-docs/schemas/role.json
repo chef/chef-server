@@ -35,12 +35,12 @@
     "json_class": {
       "description": "Must have the value Chef::Role.",
       "type": "string",
-      "pattern": "Chef::Role"
+      "enum": [ "Chef::Role" ]
     },
     "chef_type": {
       "description": "Must have the value \"role\"",
       "type": "string",
-      "pattern": "role"
+      "enum": [ "role" ]
     }
   }
 }

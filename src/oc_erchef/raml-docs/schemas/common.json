@@ -10,7 +10,7 @@
 
   "Base64": {
     "type": "string",
-    "pattern": "[A-Za-z0-9+/]+={0-3}"
+    "pattern": "^[A-Za-z0-9+/]+={0-3}$"
   },
 
   "Guid": {
@@ -29,7 +29,7 @@
   "Version": {
     "description": "A version.",
     "type": "string",
-    "pattern": "\\d+\\.\\d+\\.\\d+"
+    "pattern": "^\\d+\\.\\d+\\.\\d+$"
   },
 
   "VersionConstraint": {
@@ -57,7 +57,7 @@
     "type": "array",
     "items": {
       "type": "string",
-      "pattern": "\\w+(::\\w+)?(@\\d+\\.\\d+\\.\\d+)?"
+      "pattern": "^\\w+(::\\w+)?(@\\d+\\.\\d+\\.\\d+)?$"
     }
   }
 }

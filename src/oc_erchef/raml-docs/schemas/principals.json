@@ -17,7 +17,7 @@
           "type": {
             "description": "The type of the principal (user or client)",
             "type": "string",
-            "pattern": "user|client"
+            "enum": [ "user", "client" ]
           },
           "authz_id": {
             "description": "The authorization system's ID for the principal",

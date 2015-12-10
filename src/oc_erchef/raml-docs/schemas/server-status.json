@@ -3,12 +3,12 @@
   "properties": {
     "status": {
       "type": "string",
-      "pattern": "pong|fail"
+      "enum": [ "pong", "fail" ]
     },
     "upstreams": {
       "additionalProperties": {
         "type": "string",
-        "pattern": "pong|fail"
+        "enum": [ "pong", "fail" ]
       }
     },
     "keygen": {

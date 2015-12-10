@@ -4,8 +4,7 @@
   "properties": {
     "status": {
       "description": "Whether the authenticated account is linked to a Chef user (if using LDAP or AD, a user's username and password may be correct, but they may not have a linked Chef account)",
-      "type": "string",
-      "pattern": "linked|unlinked"
+      "enum": [ "linked", "unlinked" ]
     },
     "user": {
       "description": "The Chef user (or in the case of unlinked user, the default information about the Chef user from LDAP or AD)",
