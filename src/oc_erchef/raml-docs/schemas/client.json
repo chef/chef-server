@@ -12,7 +12,7 @@
       "$ref": "common.json#ChefName"
     },
     "validator": {
-      "description": "Whether or not the new client will be a validator.",
+      "description": "Whether or not the client is a validator.",
       "type": "boolean"
     },
     "public_key": {

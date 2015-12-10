@@ -29,8 +29,13 @@ ObjectUri:                 !include schemas/object-uri.json
 Organization:              !include schemas/organization.json
 OrganizationCreated:       !include schemas/organization-created.json
 OrganizationUpdated:       !include schemas/organization-updated.json
+Principals:                !include schemas/principals.json
 ResolvedCookbooks:         !include schemas/resolved-cookbooks.json
+Role:                      !include schemas/role.json
 RunList:                   !include schemas/run-list.json
+SearchCustomResultsPost:   !include schemas/search-custom-results-post.json
+SearchCustomResults:       !include schemas/search-custom-results.json
+SearchResults:             !include schemas/search-results.json
 User:                      !include schemas/user.json
 UserCreate:                !include schemas/user-create.json
 UserCreated:               !include schemas/user-created.json
