@@ -2,7 +2,8 @@
   description: Server status.
   get:
     responses:
-      200: { schema: ServerStatus }
+      200:
+        body: { schema: ServerStatus }
 
 /authenticate_user:
   post:
@@ -35,11 +36,13 @@
   get:
     description: Get the server license.
     responses:
-      200: { schema: ServerLicense }
+      200:
+        body: { schema: ServerLicense }
 
 /server_api_version:
   description: The Chef API versions supported by this server.
   get:
     description: Get the Chef API versions supported by this server.
     responses:
-      200: { schema: ServerApiVersion }
+      200:
+        body: { schema: ServerApiVersion }

@@ -7,7 +7,9 @@
       "properties": {
         "url": {
           "description": "The URL to the created organization.",
-          "$ref": "common.json#Uri"
+          "type": "string",
+
+          "format": "uri"
         }
       }
     }

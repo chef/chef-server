@@ -15,7 +15,9 @@
     },
     "upgrade_url": {
       "description": "The URL for more information on how to upgrade",
-      "$ref": "common.json#Uri"
+      "type": "string",
+
+      "format": "uri"
     }
   },
   "example": {

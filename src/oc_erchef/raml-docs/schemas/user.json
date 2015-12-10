@@ -15,6 +15,7 @@
     "email": {
       "description": "Valid email address for the new user",
       "type": "string",
+      "format": "email",
       "required": true
     },
     "password": {

@@ -18,7 +18,9 @@
         "properties": {
           "url": {
             "description": "The URL to the object on the server (e.g. https://api.chef.io/organizations/foo/nodes/bar)",
-            "$ref": "common.json#Uri"
+            "type": "string",
+
+            "format": "uri"
           },
           "data": {
             "description": "The desired data. Each key corresponds to a key from the POST.",

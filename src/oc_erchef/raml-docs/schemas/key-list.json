@@ -11,7 +11,9 @@
       },
       "uri": {
         "description": "The URI to this key.",
-        "$ref": "common.json#Uri"
+        "type": "string",
+
+        "format": "uri"
       },
       "expired": {
         "description": "Whether this key is expired or not.",

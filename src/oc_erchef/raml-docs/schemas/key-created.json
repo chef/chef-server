@@ -8,7 +8,9 @@
       "properties": {
         "uri": {
           "description": "URI to the created key",
-          "$ref": "common.json#Uri"
+          "type": "string",
+
+          "format": "uri"
         },
         "private_key": {
           "description": "The created private key",

@@ -8,7 +8,9 @@
       "properties": {
         "url": {
           "description": "The URL to the cookbook.",
-          "$ref": "common.json#Uri"
+          "type": "string",
+
+          "format": "uri"
         },
         "versions": {
           "type": "object",
