@@ -1,5 +1,9 @@
 /_status:
   description: Server status.
+  get:
+    responses:
+      200: { schema: ServerStatus }
+
 /authenticate_user:
   description: Authenticate a user.
 /system_recovery:
