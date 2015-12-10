@@ -1,7 +1,6 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby
 
-
 require "yaml"
 load "dvmtools.rb"
 CS_VM_ADDRESS="192.168.33.100"
@@ -10,44 +9,59 @@ REPORTING_DB_VM_ADDRESS="192.168.33.155"
 DB_SUPERUSER="bofh"
 DB_SUPERPASS="i1uvd3v0ps"
 
+attributes = load_settings
+
+if attributes['analytics']
+    load "analytics.rb"
+end
 
 Vagrant.configure("2") do |config|
-  attributes = load_settings
+    # Use the official Ubuntu 14.04 box
+    # Vagrant will auto resolve the url to download from Atlas
+    config.vm.box = "ubuntu/trusty64"
+    config.ssh.forward_agent = true
 
-  # Use the official Ubuntu 14.04 box
-  # Vagrant will auto resolve the url to download from Atlas
-  config.vm.box = "ubuntu/trusty64"
-  config.ssh.forward_agent = true
-
-  if attributes['vm'].has_key? 'postgresql'
-    if attributes['vm']['postgresql']['start']
-      config.vm.define("database") do |c|
-        define_db_server(c, attributes)
-      end
+    if attributes['vm'].has_key? 'postgresql'
+        if attributes['vm']['postgresql']['start']
+            config.vm.define("database") do |c|
+                define_db_server(c, attributes)
+            end
+        end
+    else
+        attributes['vm']['postgresql'] = nil
     end
-  else
-    attributes['vm']['postgresql'] = nil
-  end
 
-  if attributes['vm'].has_key? 'reporting_postgresql'
-    if attributes['vm']['reporting_postgresql']['start']
-      config.vm.define("reportingdb") do |c|
-        define_db_server_reporting(c, attributes)
-      end
+    if attributes['vm'].has_key? 'reporting_postgresql'
+        if attributes['vm']['reporting_postgresql']['start']
+            config.vm.define("reportingdb") do |c|
+                define_db_server_reporting(c, attributes)
+            end
+        end
+    else
+        attributes['vm']['reporting_postgresql'] = nil
     end
-  else
-    attributes['vm']['reporting_postgresql'] = nil
-  end
 
+    if attributes['analytics']
+      add_analytics_provisioning_atts(attributes)
+    end
 
-  config.vm.define("chef-server", primary: true) do |c|
-    define_chef_server(c, attributes)
-  end
+    config.vm.define("chef-server", primary: true) do |c|
+        define_chef_server(c, attributes)
+    end
+
+    if attributes['analytics']
+        config.vm.define("chef-analytics") do |c|
+            define_analytics_server(c)
+        end
+    end
 end
 
 
 def define_chef_server(config, attributes)
-  provisioning, installer, installer_path = prepare()
+
+  action = ARGV[0]
+  provisioning, installer, installer_path =
+        PackagePrompt.new("chef-server-core", "Chef Server", "INSTALLER", "AUTOPACKAGE").prepare(action)
   config.vm.hostname = "api.chef-server.dev"
   config.vm.network "private_network", ip: CS_VM_ADDRESS
 
@@ -116,6 +130,9 @@ def define_chef_server(config, attributes)
     # Makes more sense here than in a one-off line in the dvm recipe, which
     # has no direct connection...
     config.vm.provision "shell", inline: "chef-server-ctl reconfigure"
+    # if the box is configured for Analytics, pass the actions-source file out so
+    # analytics can use it during it's reconfigure phase
+    config.vm.provision "shell", inline: "cp /etc/opscode-analytics/actions-source.json /installers/actions-source.json || true"
   end
 end
 
@@ -168,87 +185,6 @@ end
 # what it needs to load up and install chef-server
 ##############
 
-
-def prepare
-  action = ARGV[0]
-  if action =~ /^(provision|up|reload)$/
-    installer = prompt_installer
-    raise "Please set INSTALLER to the path of a .deb package for Chef Server 12+." if installer.nil?
-    raise "#{installer} does not exist! Please fix this." unless File.file?(installer)
-    installer_path = File.dirname(File.expand_path(installer))
-    provisioning = true
-  end
-  [provisioning, installer, installer_path]
-end
-
-def prompt_installer
-  puts "Looking in #{Dir.home}/Downloads and #{base_path}/omnibus/pkg for installable chef-server-core package."
-  # TODO allow config override of location, multiple locations, search pattern, max count?
-  files = Dir.glob("#{Dir.home}/Downloads/chef-server-core*.deb") + Dir.glob("#{base_path}/omnibus/pkg/chef-server-core*.deb")
-
-  if ENV['INSTALLER']
-    if ENV['INSTALLER'] =~ /^.*chef-server-core.*deb$/ and File.file?(ENV['INSTALLER'])
-      user_installer = File.expand_path(ENV['INSTALLER'])
-    else
-      puts "INSTALLER #{ENV['INSTALLER']} is not a valid chef-server-core package. Ignoring."
-    end
-  end
-
-  if files.length == 0 and not user_installer
-    return nil
-  end
-
-  files = files.sort_by{ |f| File.mtime(f) }.last(10)
-  files.reverse!
-  files << "[INSTALLER]: #{user_installer}" if user_installer
-
-  selection = 0
-
-  # For the fantastically lazy, allow an environment variable to specify
-  # which package selection to use. Special value of '-1' or 'installer' will
-  # use the INSTALLER env var automatically (instead of just putting it in
-  # the list to choose from).
-  if ENV.has_key? 'AUTOPACKAGE'
-
-    selection = ENV['AUTOPACKAGE']
-    if (selection == 'installer' or selection == '-1') and user_installer
-      # Auto pick the INSTALLER pacckage
-      selection = files.length
-    else
-      selection = selection.to_i
-    end
-
-    if selection <= 0 or selection > files.length
-      puts "Invalid AUTOPACKAGE selection of #{selection}."
-      selection = get_selection(files)
-    else
-      puts "Using AUTOPACKAGE selection of #{files[selection - 1]}"
-    end
-
-  else
-    selection = get_selection(files)
-  end
-
-  if selection == files.length  and user_installer
-    user_installer # we munged the text on this one
-  else
-    files[selection - 1]
-  end
-
-end
-
-def get_selection(files)
-  selection = 0
-  files.each_index do |x|
-    puts " #{x+1}) #{files[x]}\n"
-  end
-  loop do
-    print "Select an image, or set the INSTALLER variable and run again: [1 - #{files.length}]: "
-    selection = $stdin.gets.chomp.to_i
-    break if selection > 0 and selection <= files.length
-  end
-  selection
-end
 
 def host_timezone
   require "time"
@@ -321,7 +257,4 @@ sudo -u postgres psql -c "CREATE USER bofh SUPERUSER ENCRYPTED PASSWORD 'i1uvd3v
 BASH
 end
 
-def base_path
-  File.absolute_path(File.join(Dir.pwd, "../"))
-end
 

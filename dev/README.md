@@ -171,3 +171,18 @@ vm:
     start: true
     use-external: true
 ```
+
+# Chef Analytics
+
+add the following to `config.yml`:
+
+```
+analytics: true
+```
+
+Once Vagrant is done building VM's, you can access each via:
+
+```
+vagrant ssh chef-analytics
+vagrant ssh chef-server
+```
