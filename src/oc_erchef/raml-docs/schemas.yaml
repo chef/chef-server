@@ -7,6 +7,8 @@ AssociationRequestOrgList: !include schemas/association-request-org-list.json
 AssociationRequestResponse: !include schemas/association-request-response.json
 AssociationRequestResponseSuccess: !include schemas/association-request-response-success.json
 AssociationRequestUserList: !include schemas/association-request-user-list.json
+AuthenticateUser:          !include schemas/authenticate-user.json
+AuthenticatedUser:         !include schemas/authenticated-user.json
 Client:                    !include schemas/client.json
 ClientCreate:              !include schemas/client-create.json
 ClientCreated:             !include schemas/client-created.json
@@ -44,6 +46,7 @@ SearchResults:             !include schemas/search-results.json
 ServerApiVersion:          !include schemas/server-api-version.json
 ServerLicense:             !include schemas/server-license.json
 ServerStatus:              !include schemas/server-status.json
+SystemRecoveryAuthenticatedUser: !include schemas/system-recovery-authenticated-user.json
 User:                      !include schemas/user.json
 UserCreate:                !include schemas/user-create.json
 UserCreated:               !include schemas/user-created.json

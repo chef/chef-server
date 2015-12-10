@@ -42,7 +42,7 @@
       "type": "boolean",
       "required": false
     },
-    "system_recovery_enabled": {
+    "recovery_authentication_enabled": {
       "description": "Whether this user may log in with their password when AD is down",
       "type": "boolean",
       "default": false,

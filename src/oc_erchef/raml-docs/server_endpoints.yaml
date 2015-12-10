@@ -21,9 +21,14 @@
 /system_recovery:
   post:
     description: Authenticate a user when system recovery is enabled.
+    body: { schema: AuthenticateUser }
     responses:
       200:
-        body: { schema: SystemRecovery }
+        body: { schema: SystemRecoveryAuthenticatedUser }
+      401:
+        description: When the user's password does not match.
+      403:
+        description: When the user does not exist or is not authorized to use system recovery (their recovery_authentication_enabled bit is not set to true).
 
 /license:
   description: Server license.
