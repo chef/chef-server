@@ -43,9 +43,9 @@
           mark_file_done/6,
           get_chunk_data/2,
           replace_chunk_data/1,
-          init_upload_state/0,
-          update_upload_state/2,
-          finalize_upload_state/2
+          init_transfer_state/0,
+          update_transfer_state/3,
+          finalize_transfer_state/2
         ]).
 
 -include_lib("sqerl/include/sqerl.hrl").
@@ -234,31 +234,34 @@ replace_chunk_data(FileId) ->
             Error
     end.
 
-init_upload_state() ->
-    #file_upload_state{
+init_transfer_state() ->
+    #file_transfer_state{
        size = 0,
+       next_chunk = 0,
        hash_context_md5 = crypto:hash_init(md5),
        hash_context_sha256 = crypto:hash_init(sha256),
        hash_context_sha512 = crypto:hash_init(sha512)
       }.
 
-update_upload_state(#file_upload_state{} = UploadState, Data) when size(Data) == 0 ->
-    UploadState;
-update_upload_state(#file_upload_state{
+update_transfer_state(#file_transfer_state{next_chunk = NextChunk} = UploadState, Data, ChunkIncr) when size(Data) == 0 ->
+    UploadState#file_transfer_state{next_chunk = NextChunk + ChunkIncr};
+update_transfer_state(#file_transfer_state{
                        size = Size,
+                       next_chunk = NextChunk,
                        hash_context_md5 = ContextMd5,
                        hash_context_sha256 = ContextSha256,
                        hash_context_sha512 = ContextSha512
-                      } = UploadState, Data) ->
+                      } = UploadState, Data, ChunkIncr) ->
     Size1 = Size + size(Data),
 
-    UploadState#file_upload_state{size = Size1,
-                                  hash_context_md5 = crypto:hash_update(ContextMd5, Data),
-                                  hash_context_sha256 = crypto:hash_update(ContextSha256, Data),
-                                  hash_context_sha512 = crypto:hash_update(ContextSha512, Data)
+    UploadState#file_transfer_state{size = Size1,
+                                    next_chunk = NextChunk + ChunkIncr,
+                                    hash_context_md5 = crypto:hash_update(ContextMd5, Data),
+                                    hash_context_sha256 = crypto:hash_update(ContextSha256, Data),
+                                    hash_context_sha512 = crypto:hash_update(ContextSha512, Data)
                                  }.
 
-finalize_upload_state(#file_upload_state{
+finalize_transfer_state(#file_transfer_state{
                          size = Size,
                          hash_context_md5    = ContextMd5,
                          hash_context_sha256 = ContextSha256,

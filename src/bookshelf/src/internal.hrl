@@ -70,9 +70,11 @@
 
 -define(DB_BUCKET_TX_FM, [db_bucket, [bucket_name, created_at, bucket_id]]).
 
--record(file_upload_state, {
-          size :: integer(),
-          hash_context_md5 :: any(), % refine
+-record(file_transfer_state, {
+          size = 0 :: integer(), % transferred size
+          next_chunk = 0:: integer(),
+          %% These hashes are computed on both upload and download to help insure file integrity
+          hash_context_md5 :: any(), % 
           hash_context_sha256 :: any(),
           hash_context_sha512 :: any() % refine
          }).
@@ -96,8 +98,7 @@
                   entry_ref :: #entryref{}, % null in sql mode
 
                   entry_md :: #object{} | #db_file{},
-                  next_chunk_to_stream :: integer(),
 
-                  upload_state :: #file_upload_state{}
+                  transfer_state :: #file_transfer_state{}
 
               }).

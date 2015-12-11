@@ -166,15 +166,15 @@ fetch_entry_md(Req, #context{} = Ctx) ->
 %%
 
 download(Rq0, #context{stream_download = true} = Ctx0) ->
-    Ctx = Ctx0#context{next_chunk_to_stream = 0},
+    Ctx = Ctx0#context{transfer_state = bksw_sql:init_transfer_state()},
     {{stream, send_streamed_body(Ctx)}, Rq0, Ctx};
 download(Rq0, #context{stream_download = false} = Ctx0) ->
-    Ctx = Ctx0#context{next_chunk_to_stream = 0},
+    Ctx = Ctx0#context{transfer_state = bksw_sql:init_transfer_state()},
     {fully_read(Ctx, []), Rq0, Ctx}.
 
 maybe_upload(Rq, #context{entry_md = #db_file{} = Obj0}= Ctx0, {ok, DataId}) ->
     Obj1 = Obj0#db_file{data_id = DataId},
-    Ctx1 = Ctx0#context{entry_md = Obj1, upload_state = bksw_sql:init_upload_state()},
+    Ctx1 = Ctx0#context{entry_md = Obj1, transfer_state = bksw_sql:init_transfer_state()},
     Resp = write_streamed_body(wrq:stream_req_body(Rq, ?BLOCK_SIZE), Rq, Ctx1),
     Resp;
 maybe_upload(Rq, Ctx, {error, _Error}) -> %% Clean up and return useful error
@@ -192,19 +192,21 @@ upload(Rq, Ctx) ->
 %%===================================================================
 
 send_streamed_body(#context{entry_md = #db_file{chunk_count = ChunkCount},
-                            next_chunk_to_stream = ChunkCount}) ->
+                            transfer_state = #file_transfer_state{next_chunk = ChunkCount} = _TransferState0}) ->
+                          %% TODO CHECK hash checksums/length before exiting successfully
     {<<>>, done};
 send_streamed_body(#context{entry_md = #db_file{data_id = DataId} = DbFile,
-                            next_chunk_to_stream = ChunkId} = Ctx) ->
+                            transfer_state = #file_transfer_state{next_chunk = ChunkId} = TransferState0} = Ctx) ->
     case bksw_sql:get_chunk_data(DataId, ChunkId) of
         {ok, not_found} ->
             error_logger:error_msg("Error occurred during content download: missing chunk ~p ~p ~n", [ChunkId, DbFile]),
             {error, missing_chunk};
         {ok, []} ->
             io:format("Empty chunk sent Chunk ~p ~p~n", [ChunkId, DbFile]),
-            {[], fun() -> send_streamed_body(Ctx#context{next_chunk_to_stream = ChunkId + 1}) end};
+            {[], fun() -> send_streamed_body(Ctx) end};
         {ok, Data} ->
-            {Data, fun() -> send_streamed_body(Ctx#context{next_chunk_to_stream = ChunkId + 1}) end};
+            TransferState1 = bksw_sql:update_transfer_state(TransferState0, Data, 1),
+            {Data, fun() -> send_streamed_body(Ctx#context{transfer_state = TransferState1}) end};
         {error, _} = Error ->
             error_logger:error_msg("Error occurred during content download: ~p~n", [Error]),
             Error
@@ -245,15 +247,14 @@ finalize_maybe_create_file(_Rq, _Ctx,
 
 write_streamed_body({Data, done}, Rq0,
                     #context{entry_md = #db_file{data_id = DataId} = File0,
-                             next_chunk_to_stream = ChunkId,
-                             upload_state = UploadState0} = Ctx0 ) ->
+                             transfer_state = #file_transfer_state{next_chunk = ChunkId} = TransferState0} = Ctx0 ) ->
 %%    io:format("Context 2 ~p~n", [Ctx0]),
-    UploadState1 = bksw_sql:update_upload_state(UploadState0, Data),
+    TransferState1 = bksw_sql:update_upload_state(TransferState0, Data, 1),
     #db_file{data_size = Size,
              hash_md5 = HashMd5,
              hash_sha256 = HashSha256,
              hash_sha512 = HashSha512} = File1 =
-        bksw_sql:finalize_upload_state(UploadState1, File0),
+        bksw_sql:finalize_upload_state(TransferState1, File0),
     Ctx1 = Ctx0#context{entry_md = File1},
 
     FinalChunkId =
@@ -287,14 +288,12 @@ write_streamed_body({Data, done}, Rq0,
     end;
 write_streamed_body({Data, Next}, Rq0,
                     #context{entry_md = #db_file{data_id = DataId},
-                             next_chunk_to_stream = ChunkId,
-                             upload_state = UploadState0} = Ctx0 ) ->
+                             transfer_state = #file_transfer_state{next_chunk = ChunkId} = TransferState0} = Ctx0 ) ->
 %%    io:format("Context 3 ~p~n", [Ctx0]),
     bksw_sql:add_file_chunk(DataId, ChunkId, Data),
-    UploadState1 = bksw_sql:update_upload_state(UploadState0, Data),
+    TransferState1 = bksw_sql:update_upload_state(TransferState0, Data, 1),
 
-    Ctx = Ctx0#context{next_chunk_to_stream = ChunkId + 1,
-                       upload_state = UploadState1},
+    Ctx = Ctx0#context{transfer_state = TransferState1},
     write_streamed_body(Next(), Rq0, Ctx).
 
 get_header(Header, Rq) ->
