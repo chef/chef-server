@@ -748,7 +748,7 @@ describe "ACL API", :acl do
     # TODO: Sanity check: users don't seem to have any ACLs, or at least, nothing is
     # accessible from external API as far as I can tell:
     # - [jkeiser] Users have ACLs, but they are at /users/NAME/_acl
-    %w(clients groups containers data nodes roles environments cookbooks).each do |type|
+    %w(clients groups containers data nodes roles environments cookbooks policies policy_groups).each do |type|
       context "for #{type} type" do
 
         let(:new_object) { "new-object" }
@@ -855,10 +855,38 @@ describe "ACL API", :acl do
             }}
           let(:groups) { ["users", "admins"] }
           let(:read_groups) { ["users", "clients", "admins"] }
+        when "policies"
+          let(:creation_url) { api_url("#{type}/#{new_object}/revisions") }
+          let(:creation_body) {{
+            "revision_id" => "909c26701e291510eacdc6c06d626b9fa5350d25",
+            "name" => new_object,
+            "run_list" => [ "recipe[policyfile_demo::default]" ],
+            "cookbook_locks" => {
+              "policyfile_demo" => {
+                "identifier" => "f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+                "version" => "1.2.3"
+              }
+            }
+          }}
+        when "policy_groups"
+          let(:creation_url) {
+            api_url("#{type}/#{new_object}/policies/acl_test_policy")
+          }
+          let(:creation_body) {{
+            "revision_id" => "909c26701e291510eacdc6c06d626b9fa5350d25",
+            "name" => "acl_test_policy",
+            "run_list" => [ "recipe[policyfile_demo::default]" ],
+            "cookbook_locks" => {
+              "policyfile_demo" => {
+                "identifier" => "f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+                "version" => "1.2.3"
+              }
+            }
+          }}
         end
 
         before :each do
-          if (type == "cookbooks")
+          if (type == "cookbooks" || type == "policy_groups")
             # Inconsistent API needs a PUT here.  We love consistency!
             put(creation_url, setup_user,
               :payload => creation_body).should look_like({
@@ -873,6 +901,14 @@ describe "ACL API", :acl do
         end
 
         after :each do
+          if (type == "policy_groups")
+            # Policy groups are only created indirectly when we create policies;
+            # deleting the group doesn't delete the policy so we do it explicitly
+            delete(api_url("policies/acl_test_policy"),
+              platform.admin_user).should look_like({
+                :status => 200
+              })
+          end
           delete(deletion_url, platform.admin_user).should look_like({
               :status => 200
             })
