@@ -90,6 +90,20 @@ fetch_id(role, DbContext, Name, OrgId) ->
         #chef_role{authz_id = AuthzId} ->
             AuthzId
     end;
+fetch_id(policy, DbContext, Name, OrgId) ->
+    case chef_db:fetch(#oc_chef_policy{org_id = OrgId, name = Name}, DbContext) of
+        not_found ->
+            not_found;
+        #oc_chef_policy{authz_id = AuthzId} ->
+            AuthzId
+    end;
+fetch_id(policy_group, DbContext, Name, OrgId) ->
+    case chef_db:fetch(#oc_chef_policy_group{org_id = OrgId, name = Name}, DbContext) of
+        not_found ->
+            not_found;
+        #oc_chef_policy_group{authz_id = AuthzId} ->
+            AuthzId
+    end;
 fetch_id(group, #context{server_api_version = ApiVersion, reqid = ReqId}, Name, OrgId) ->
     % Yes, this is ugly, but functionally it's identical to the internal logic
     % of a regular group fetch, minus expanding the group members and such.
@@ -244,6 +258,10 @@ acl_path(client, AuthzId) ->
 acl_path(user, AuthzId) ->
     acl_path(actor, AuthzId);
 acl_path(organization, AuthzId) ->
+    acl_path(object, AuthzId);
+acl_path(policy, AuthzId) ->
+    acl_path(object, AuthzId);
+acl_path(policy_group, AuthzId) ->
     acl_path(object, AuthzId);
 acl_path(Type, AuthzId) ->
     "/" ++ type_to_resource(Type) ++ "/" ++ binary_to_list(AuthzId) ++ "/acl".
