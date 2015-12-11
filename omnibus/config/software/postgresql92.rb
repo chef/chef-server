@@ -28,11 +28,15 @@ dependency "openssl"
 dependency "libedit"
 dependency "ncurses"
 dependency "libossp-uuid"
+dependency "config-guess"
 
 relative_path "postgresql-9.2.15"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
+
+  copy "#{Omnibus::Config.source_dir}/config-guess/config.guess", "config/config.guess"
+  copy "#{Omnibus::Config.source_dir}/config-guess/config.sub", "config/config.sub"
 
   command "./configure" \
           " --prefix=#{install_dir}/embedded/postgresql/9.2" \
