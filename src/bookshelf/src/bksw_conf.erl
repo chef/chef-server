@@ -48,7 +48,8 @@ get_context(Config) ->
              access_key_id = proplists:get_value(access_key_id, Config),
              secret_access_key = proplists:get_value(secret_access_key, Config),
              stream_download = proplists:get_value(stream_download, Config),
-             reqid_header_name = proplists:get_value(reqid_header_name, Config)}.
+             reqid_header_name = proplists:get_value(reqid_header_name, Config),
+             next_chunk_to_stream = 0}.
 
 -spec summarize_config() -> proplists:proplist().
 summarize_config() ->
