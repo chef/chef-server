@@ -79,10 +79,10 @@ disk_store() ->
     "/tmp/".
 -else.
 disk_store() ->
-    case application:get_env(bookshelf, disk_store) of
+    case envy:get(bookshelf, disk_store, undefined, any) of
         undefined ->
             error({missing_config, {bookshelf, disk_store}});
-        {ok, Path} when is_list(Path) ->
+        Path when is_list(Path) ->
             case ends_with($/, Path) of
                 true ->
                     Path;
@@ -99,12 +99,7 @@ ends_with(Char, String) ->
 %%%===================================================================
 
 ip() ->
-    case application:get_env(bookshelf, ip) of
-        undefined ->
-            [{ip, "127.0.0.1"}];
-        {ok, Ip} ->
-            [{ip, Ip}]
-    end.
+    {ip, envy:get(bookshelf, ip, "127.0.0.1", string)}.
 
 reset_dispatch() ->
     [{dispatch, Dispatch}] = dispatch(),
@@ -122,38 +117,22 @@ dispatch() ->
                  {[], bksw_wm_index, Config}]}].
 
 port() ->
-    case application:get_env(bookshelf, port) of
-        undefined ->
-            {port, 4321};
-        {ok, Port} ->
-            {port, Port}
-    end.
+    {port, envy:get(bookshelf, port, 4321, positive_integer)}.
 
 keys() ->
-    case application:get_env(bookshelf, keys) of
+    case envy:get(bookshelf, keys, undefined, any) of
         undefined ->
             error({missing_config, {bookshelf, keys}});
-        {ok, {AWSAccessKey, SecretKey}} ->
+        {AWSAccessKey, SecretKey} ->
             {keys, {bksw_util:to_binary(AWSAccessKey),
                     bksw_util:to_binary(SecretKey)}}
     end.
 
 log_dir() ->
-    case application:get_env(bookshelf, log_dir) of
-        undefined ->
-            Dir = code:priv_dir(bookshelf),
-            {log_dir, Dir};
-        {ok, Dir} ->
-            {log_dir, Dir}
-    end.
+    {log_dir, envy:get(bookshelf, log_dir, code:priv_dir(bookshelf), any)}.
 
 reqid_header_name() ->
-    application:get_env(bookshelf, reqid_header_name).
+    envy:get(bookshelf, reqid_header_name, undefined, string).
 
 stream_download() ->
-    case application:get_env(bookshelf, stream_download) of
-        {ok, true} ->
-            true;
-        _ ->
-            false
-    end.
+    envy:get(bookshelf, stream_download, false, boolean).
