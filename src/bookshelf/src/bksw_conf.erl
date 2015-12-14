@@ -79,7 +79,7 @@ disk_store() ->
     "/tmp/".
 -else.
 disk_store() ->
-    case application:get_env(bookshelf, disk_store) of
+    case envy:get(bookshelf, disk_store, list, undefined) of
         undefined ->
             error({missing_config, {bookshelf, disk_store}});
         {ok, Path} when is_list(Path) ->
@@ -99,12 +99,7 @@ ends_with(Char, String) ->
 %%%===================================================================
 
 ip() ->
-    case application:get_env(bookshelf, ip) of
-        undefined ->
-            [{ip, "127.0.0.1"}];
-        {ok, Ip} ->
-            [{ip, Ip}]
-    end.
+    envy:get(bookshelf, ip, "127.0.0.1").
 
 reset_dispatch() ->
     [{dispatch, Dispatch}] = dispatch(),
@@ -122,15 +117,10 @@ dispatch() ->
                  {[], bksw_wm_index, Config}]}].
 
 port() ->
-    case application:get_env(bookshelf, port) of
-        undefined ->
-            {port, 4321};
-        {ok, Port} ->
-            {port, Port}
-    end.
+    envy:get(bookshelf, port, positive_integer, 4321).
 
 keys() ->
-    case application:get_env(bookshelf, keys) of
+    case envy:get(bookshelf, keys, any, undefined) of
         undefined ->
             error({missing_config, {bookshelf, keys}});
         {ok, {AWSAccessKey, SecretKey}} ->
@@ -139,21 +129,10 @@ keys() ->
     end.
 
 log_dir() ->
-    case application:get_env(bookshelf, log_dir) of
-        undefined ->
-            Dir = code:priv_dir(bookshelf),
-            {log_dir, Dir};
-        {ok, Dir} ->
-            {log_dir, Dir}
-    end.
+    envy:get(bookshelf, log_dir, any, code:priv_dir(bookshelf)).
 
 reqid_header_name() ->
-    application:get_env(bookshelf, reqid_header_name).
+    envy:get(bookshelf, reqid_header_name, any).
 
 stream_download() ->
-    case application:get_env(bookshelf, stream_download) of
-        {ok, true} ->
-            true;
-        _ ->
-            false
-    end.
+    envy:get(bookshelf, stream_download, boolean, false).
