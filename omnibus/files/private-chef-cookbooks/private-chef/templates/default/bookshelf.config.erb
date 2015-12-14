@@ -106,7 +106,7 @@
           ]},
  {pooler, [
            {pools, [[{name, sqerl},
-                     {max_count, 1 },
+                     {max_count, <%= @db_pool_size %> },
                      {init_count, <%= @db_pool_size %> },
                      {queue_max, <%= @db_pool_queue_max %>},
                      {start_mfa, {sqerl_client, start_link, []}}]]}
