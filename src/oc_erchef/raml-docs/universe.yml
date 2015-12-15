@@ -1,0 +1,36 @@
+#%RAML 0.8
+---
+description: |
+  Universe API
+
+  The universe is the known collection of cookbooks that have been uploaded
+  to the organization.
+  The universe is JSON data organized by cookbook, then by cookbook version,
+  and then by a dependency graph that lists each dependency a cookbook version
+  may have on other cookbooks or cookbook versions.
+
+  Use the /universe endpoint to retrieve the known collection of cookbooks,
+  and then use it with Berkshelf.
+get:
+  description: Retrieve the universe data
+  responses:
+    200:
+      body:
+        application/json:
+          example: |
+            {
+              "foo": {
+                "1.2.3": {
+                  "dependencies": { "bar": ">= 1.1.1" },
+                  "location_path": "https://chef.example/organizations/org1/cookbooks/foo/1.2.3",
+                  "location_type": "chef_server"
+                }
+              },
+              "bar": {
+                "1.2.3": {
+                  "dependencies": {},
+                  "location_path": "https://chef.example/organizations/org1/cookbooks/bar/1.2.3",
+                  "location_type": "chef_server"
+                }
+              }
+            }
