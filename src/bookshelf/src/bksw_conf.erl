@@ -53,6 +53,7 @@ get_context(Config) ->
 summarize_config() ->
     {keys, {KeyId, _Secret}} = keys(),
     lists:flatten([ip(), port(), log_dir(),
+                   {storage_type, storage_type()},
                    {disk_store, disk_store()},
                    {stream_download, stream_download()},
                    {reqid_header_name, reqid_header_name()},
@@ -61,8 +62,8 @@ summarize_config() ->
 -spec get_configuration() -> list().
 get_configuration() ->
     lists:flatten([ip(),
-                   dispatch(),
                    port(),
+                   dispatch(),
                    log_dir()]).
 
 -spec access_key_id(context()) -> binary().
@@ -112,9 +113,19 @@ dispatch() ->
               {access_key_id, AccessKeyId},
               {secret_access_key, SecretAccessKey}],
     %% per wm docs, init args for resources should be a list
+    dispatch_by_storage(storage_type(), Config).
+
+dispatch_by_storage(filesystem, Config) ->
     [{dispatch, [{[bucket, obj_part, '*'], bksw_wm_object, Config},
                  {[bucket], bksw_wm_bucket, Config},
-                 {[], bksw_wm_index, Config}]}].
+                 {[], bksw_wm_index, Config}]}];
+dispatch_by_storage(sql, Config) ->
+    [{dispatch, [{[bucket, obj_part, '*'], bksw_wm_sql_object, Config},
+                 {[bucket], bksw_wm_sql_bucket, Config},
+                 {[], bksw_wm_sql_index, Config}]}].
+
+storage_type() ->
+    envy:get(bookshelf, storage_type, filesystem, atom).
 
 port() ->
     {port, envy:get(bookshelf, port, 4321, positive_integer)}.
