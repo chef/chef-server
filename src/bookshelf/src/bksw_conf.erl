@@ -44,7 +44,8 @@
 
 -spec get_context(proplists:proplist()) -> context().
 get_context(Config) ->
-    #context{access_key_id = proplists:get_value(access_key_id, Config),
+    #context{auth_check_disabled = proplists:get_value(auth_check_disabled, Config),
+             access_key_id = proplists:get_value(access_key_id, Config),
              secret_access_key = proplists:get_value(secret_access_key, Config),
              stream_download = proplists:get_value(stream_download, Config),
              reqid_header_name = proplists:get_value(reqid_header_name, Config)}.
@@ -55,6 +56,7 @@ summarize_config() ->
     lists:flatten([ip(), port(), log_dir(),
                    {disk_store, disk_store()},
                    {stream_download, stream_download()},
+                   {auth_check_disabled, auth_check_disabled()},
                    {reqid_header_name, reqid_header_name()},
                    {access_key_id, KeyId}]).
 
@@ -97,6 +99,8 @@ ends_with(Char, String) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+auth_check_disabled() ->
+    envy:get(bookshelf, auth_check_disabled, false, boolean).
 
 ip() ->
     {ip, envy:get(bookshelf, ip, "127.0.0.1", string)}.
@@ -109,6 +113,7 @@ reset_dispatch() ->
 dispatch() ->
     {keys, {AccessKeyId, SecretAccessKey}} = keys(),
     Config = [{stream_download, stream_download()},
+              {auth_check_disabled, auth_check_disabled()},
               {access_key_id, AccessKeyId},
               {secret_access_key, SecretAccessKey}],
     %% per wm docs, init args for resources should be a list

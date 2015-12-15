@@ -46,6 +46,7 @@
                    ctx :: undefined | binary()}).
 
 -record(context, {
+                  auth_check_disabled = false :: boolean(),
                   %% AWS credentials
                   access_key_id :: binary(),
                   secret_access_key :: binary(),
