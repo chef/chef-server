@@ -48,7 +48,10 @@ get_context(Config) ->
              access_key_id = proplists:get_value(access_key_id, Config),
              secret_access_key = proplists:get_value(secret_access_key, Config),
              stream_download = proplists:get_value(stream_download, Config),
-             reqid_header_name = proplists:get_value(reqid_header_name, Config)}.
+             reqid_header_name = proplists:get_value(reqid_header_name, Config),
+             sql_retry_delay = proplists:get_value(sql_retry_delay, Config),
+             sql_retry_count = proplists:get_value(sql_retry_count, Config)
+            }.
 
 -spec summarize_config() -> proplists:proplist().
 summarize_config() ->
@@ -59,7 +62,9 @@ summarize_config() ->
                    {stream_download, stream_download()},
                    {auth_check_disabled, auth_check_disabled()},
                    {reqid_header_name, reqid_header_name()},
-                   {access_key_id, KeyId}]).
+                   {access_key_id, KeyId},
+                   sql_retry()
+                  ]).
 
 -spec get_configuration() -> list().
 get_configuration() ->
@@ -116,7 +121,7 @@ dispatch() ->
     Config = [{stream_download, stream_download()},
               {auth_check_disabled, auth_check_disabled()},
               {access_key_id, AccessKeyId},
-              {secret_access_key, SecretAccessKey}],
+              {secret_access_key, SecretAccessKey}|sql_retry()],
     %% per wm docs, init args for resources should be a list
     dispatch_by_storage(storage_type(), Config).
 
@@ -152,3 +157,7 @@ reqid_header_name() ->
 
 stream_download() ->
     envy:get(bookshelf, stream_download, false, boolean).
+
+sql_retry() ->
+    [{sql_retry_delay, envy:get(bookshelf, sql_retry_delay, ?PGSQL_RETRY_INTERVAL, integer)},
+     {sql_retry_count, envy:get(bookshelf, sql_retry_count, 0, integer)}].

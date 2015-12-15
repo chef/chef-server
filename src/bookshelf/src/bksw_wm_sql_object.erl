@@ -1,7 +1,8 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
+%% @author Mark Anderson <mark@chef.io>
 %% @author Tim Dysinger <dysinger@opscode.com>
-%% Copyright 2012-2013 Opscode, Inc. All Rights Reserved.
+%% Copyright 2012-2015 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -147,6 +148,12 @@ delete_resource(Rq0, Ctx) ->
             {halt, Rq0, Ctx}
     end.
 
+maybe_retry(#context{sql_retry_count = 0}, _RetryFun, FailFun) ->
+    FailFun();
+maybe_retry(#context{sql_retry_delay = Delay, sql_retry_count = Count} = Ctx, RetryFun, _FailFun) ->
+    timer:sleep(Delay),
+    RetryFun(Ctx#context{sql_retry_count = Count - 1}).
+
 %% Return `{Obj, CtxNew}' where `Obj' is the entry meta data `#db_file{}' record or the atom
 %% `error'. The `CtxNew' may have been updated and should be kept. Accessing entry md
 %% through this function ensures we only ever read the md from the file system once.
@@ -160,6 +167,12 @@ fetch_entry_md(Req, #context{} = Ctx) ->
             {Object, Ctx#context{entry_md = Object}};
         {ok, not_found} ->
             {not_found, Ctx#context{entry_md = #db_file{bucket_name = Bucket, name = Path}}};
+        {error, no_connections} ->
+            maybe_retry(Ctx, fun(Ctx1) -> fetch_entry_md(Req, Ctx1) end,
+                        fun() ->
+                                error_logger:error_msg("fetch_entry_md no_connections", []),
+                                {error, no_connections}
+                        end);
         {error, _Error} ->
             error_logger:error_msg("Error occurred during fetch_entry_md: B:~p P:~p '~p'~n", [Bucket,Path,_Error]),
             {error, Ctx}
@@ -219,8 +232,15 @@ send_streamed_body(#context{entry_md = #db_file{data_id = DataId} = DbFile,
         {ok, Data} ->
             TransferState1 = bksw_sql:update_transfer_state(TransferState0, Data, 1),
             {Data, fun() -> send_streamed_body(Ctx#context{transfer_state = TransferState1}) end};
+        {error, no_connections} ->
+            maybe_retry(Ctx, fun(Ctx1) -> send_streamed_body(Ctx1) end,
+                        fun() ->
+                                error_logger:error_msg("send_streamed_body no_connections", []),
+                                {error, no_connections}
+                        end);
         {error, _} = Error ->
-            error_logger:error_msg("Error occurred during content download: ~p~n", [Error]),
+            %% This crashes webmachine; we need a smoother way of handling this.
+            error_logger:error_msg("Error occurred during content download: d~p c~p ~p~n", [DataId, ChunkId, Error]),
             Error
     end.
 

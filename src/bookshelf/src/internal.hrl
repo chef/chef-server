@@ -22,7 +22,8 @@
 %% settings
 -define(BOOKSHELF_CONFIG, bookshelf).
 -define(TIMEOUT_MS, 4096).
--define(BLOCK_SIZE,64*1024). %% 256k seems to cause a substantial slowdown and timeouts.
+-define(BLOCK_SIZE, 64*1024). %% 256k seems to cause a substantial slowdown and timeouts.
+-define(PGSQL_RETRY_INTERVAL, 5).
 
 %% logging utilities
 -compile([{parse_transform, lager_transform}]).
@@ -86,6 +87,10 @@
                   secret_access_key :: binary(),
 
                   stream_download :: any(),
+
+                  % Do we retry sql when we get no_connections. ms to wait
+                  sql_retry_delay :: pos_integer(),
+                  sql_retry_count = 0 :: non_neg_integer(),
 
                   %% unique request ID from nginx header (or generated if not
                   %% found) set by opscoderl_wm:read_req_id.
