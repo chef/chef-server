@@ -70,6 +70,7 @@
 -define(DB_BUCKET_TX_FM, [db_bucket, [bucket_name, created_at, bucket_id]]).
 
 -record(context, {
+                  auth_check_disabled = false :: boolean(),
                   %% AWS credentials
                   access_key_id :: binary(),
                   secret_access_key :: binary(),
