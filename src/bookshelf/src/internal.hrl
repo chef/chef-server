@@ -22,7 +22,8 @@
 %% settings
 -define(BOOKSHELF_CONFIG, bookshelf).
 -define(TIMEOUT_MS, 4096).
--define(BLOCK_SIZE,64*1024). %% 256k seems to cause a substantial slowdown and timeouts.
+-define(BLOCK_SIZE, 64*1024). %% 256k seems to cause a substantial slowdown and timeouts.
+-define(PGSQL_RETRY_INTERVAL, 5).
 
 %% logging utilities
 -compile([{parse_transform, lager_transform}]).
