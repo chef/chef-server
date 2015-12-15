@@ -1,7 +1,8 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
+%% @author Mark Anderson <mark@chef.io>
 %% @author Tim Dysinger <dysinger@opscode.com>
-%% Copyright 2012-2013 Opscode, Inc. All Rights Reserved.
+%% Copyright 2012-2015 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -156,7 +157,11 @@ fetch_entry_md(Req, #context{} = Ctx) ->
             {not_found, Ctx#context{entry_md = #db_file{bucket_name = Bucket, name = Path}}};
         {ok, DbFile} ->
             io:format("Match trouble, ~p ~p ~p~n",[Bucket,Path,(DbFile)]);
+        {error, no_connections} ->
+            timer:sleep(?PGSQL_RETRY_INTERVAL),
+            fetch_entry_md(Req, Ctx);
         {error, _Error} ->
+            error_logger:error_msg("Error occurred during fetch_entry_md: B:~p P:~p '~p'~n", [Bucket,Path,_Error]),
             {error, Ctx}
             %% error case here TODO
     end.
@@ -207,8 +212,15 @@ send_streamed_body(#context{entry_md = #db_file{data_id = DataId} = DbFile,
         {ok, Data} ->
             TransferState1 = bksw_sql:update_transfer_state(TransferState0, Data, 1),
             {Data, fun() -> send_streamed_body(Ctx#context{transfer_state = TransferState1}) end};
+        {error, no_connections} ->
+            %% Sleep a bit then retry.
+            %% not pretty, there should be a nicer way of redoing this. At minimum we probably should push this down
+            %% into bksw_sql or sqerl somehow.
+            timer:sleep(?PGSQL_RETRY_INTERVAL),
+            {[], fun() -> send_streamed_body(Ctx) end};
         {error, _} = Error ->
-            error_logger:error_msg("Error occurred during content download: ~p~n", [Error]),
+            %% This crashes webmachine; we need a smoother way of handling this.
+            error_logger:error_msg("Error occurred during content download: d~p c~p ~p~n", [DataId, ChunkId, Error]),
             Error
     end.
 
