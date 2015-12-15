@@ -112,9 +112,19 @@ dispatch() ->
               {access_key_id, AccessKeyId},
               {secret_access_key, SecretAccessKey}],
     %% per wm docs, init args for resources should be a list
+    dispatch_by_storage(get_storage_type(), Config).
+
+dispatch_by_storage(filesystem, Config) ->
     [{dispatch, [{[bucket, obj_part, '*'], bksw_wm_object, Config},
                  {[bucket], bksw_wm_bucket, Config},
-                 {[], bksw_wm_index, Config}]}].
+                 {[], bksw_wm_index, Config}]}];
+dispatch_by_storage(sql, Config) ->
+    [{dispatch, [{[bucket, obj_part, '*'], bksw_wm_sql_object, Config},
+                 {[bucket], bksw_wm_sql_bucket, Config},
+                 {[], bksw_wm_sql_index, Config}]}].
+
+get_storage_type() ->
+    envy:get(bookshelf, storage_type, atom, filesystem).
 
 port() ->
     envy:get(bookshelf, port, positive_integer, 4321).
