@@ -88,6 +88,13 @@ available.
 
 Ruby project dependency loading support coming soon.
 
+### Installer Options
+
+If you have a package at a non-default location (defaults are `../omnibus/pkg` and this directory),
+you can specify it with the $INSTALLER variable. Also, you can automate the selection of which build
+to use with $AUTOPACKAGE. So, to automatically select a custom package, set $INSTALLER to it's path
+and $AUTOPACKAGE to 1.
+
 ### Coverage Analysis
 
 Erlang has built-in support for code coverage analaysis which will
