@@ -596,7 +596,7 @@ default['private_chef']['bookshelf']['port'] = 4321
 default['private_chef']['bookshelf']['stream_download'] = true
 default['private_chef']['bookshelf']['access_key_id'] = "generated-by-default"
 default['private_chef']['bookshelf']['secret_access_key'] = "generated-by-default"
-default['private_chef']['bookshelf']['auth_check_disabled'] = false
+default['private_chef']['bookshelf']['auth_check_disabled'] = true
 # Default: set to Host: header. Override to hardcode a url, "http://..."
 default['private_chef']['bookshelf']['external_url'] = :host_header
 default['private_chef']['bookshelf']['storage_type'] = :filesystem
