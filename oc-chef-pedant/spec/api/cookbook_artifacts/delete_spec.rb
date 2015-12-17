@@ -21,7 +21,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
   include Pedant::RSpec::CookbookUtil
 
-  context "DELETE /cookbooks/<name>/<version>" do
+  context "DELETE /cookbook_artifacts/<name>/<version>" do
     let(:request_method) { :DELETE }
     let(:request_url){api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_identifier}")}
     let(:requestor)      { admin_user }
@@ -169,5 +169,5 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
       end # with invalid user
 
     end # context with permissions for
-  end # context DELETE /cookbooks/<name>/<version>
+  end # context DELETE /cookbook_artifacts/<name>/<version>
 end

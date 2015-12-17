@@ -739,7 +739,7 @@ describe "Policies API endpoint", :policies do
 
         let(:request_method) { :GET }
 
-        it "GET /policies/:group/:name returns 404" do
+        it "GET /policy_groups/:group_name/policies/:policy_name returns 404" do
           expect(response.code).to eq(404)
         end
 
@@ -751,7 +751,7 @@ describe "Policies API endpoint", :policies do
 
         let(:request_method) { :DELETE }
 
-        it "DELETE /policies/:group/:name returns 404" do
+        it "DELETE /policy_groups/:group_name/policies/:policy_name returns 404" do
           expect(response.code).to eq(404)
         end
 
@@ -769,7 +769,7 @@ describe "Policies API endpoint", :policies do
 
           let(:request_payload) { canonical_policy_payload }
 
-          it "PUT /policies/:group/:name returns 201" do
+          it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
             expect(response.code).to eq(201)
           end
 
@@ -780,7 +780,7 @@ describe "Policies API endpoint", :policies do
 
           let(:request_payload) { minimum_valid_policy_payload }
 
-          it "PUT /policies/:group/:name returns 201" do
+          it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
             expect(response.code).to eq(201)
           end
 
@@ -799,7 +799,7 @@ describe "Policies API endpoint", :policies do
               mutate_json(minimum_valid_policy_payload) { |p| p["name"] = name_with_all_valid_chars }
             end
 
-            it "PUT /policies/:group/:name returns 201" do
+            it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
               expect(response.code).to eq(201)
             end
           end
@@ -818,7 +818,7 @@ describe "Policies API endpoint", :policies do
               mutate_json(minimum_valid_policy_payload) { |p| p["name"] = max_size_name }
             end
 
-            it "PUT /policies/:group/:name returns 201" do
+            it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
               expect(response.code).to eq(201)
             end
           end
@@ -833,7 +833,7 @@ describe "Policies API endpoint", :policies do
               end
             end
 
-            it "PUT /policies/:group/:name returns 201" do
+            it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
               expect(response.code).to eq(201)
             end
           end
@@ -849,7 +849,7 @@ describe "Policies API endpoint", :policies do
             end
 
 
-            it "PUT /policies/:group/:name returns 201" do
+            it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
               expect(response.code).to eq(201)
             end
           end
@@ -867,7 +867,7 @@ describe "Policies API endpoint", :policies do
               end
             end
 
-            it "PUT /policies/:group/:name returns 201" do
+            it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
               expect(response.code).to eq(201)
             end
           end
@@ -885,7 +885,7 @@ describe "Policies API endpoint", :policies do
               end
             end
 
-            it "PUT /policies/:group/:name returns 201" do
+            it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
               expect(response.code).to eq(201)
             end
           end
@@ -904,11 +904,11 @@ describe "Policies API endpoint", :policies do
               response_obj["error"].first
             end
 
-            it "PUT /policies/:group/:name returns 400", :validation do
+            it "PUT /policy_groups/:group_name/policies/:policy_name returns 400", :validation do
               expect(response.code).to eq(400)
             end
 
-            it "PUT /policies/:group/:name body contains a well-formed error message", :validation do
+            it "PUT /policy_groups/:group_name/policies/:policy_name body contains a well-formed error message", :validation do
               expect(error_message).to eq(expected_error_message)
             end
 
