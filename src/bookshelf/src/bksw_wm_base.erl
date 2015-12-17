@@ -35,8 +35,8 @@
 %%
 
 init(Config) ->
-    {ok, bksw_conf:get_context(Config)}.
-%    {{trace,"/tmp"}, bksw_conf:get_context(Config)}.
+%    {ok, bksw_conf:get_context(Config)}.
+    {{trace,"/tmp"}, bksw_conf:get_context(Config)}.
 
 is_authorized(Rq, Ctx) ->
     bksw_sec:is_authorized(Rq, Ctx).
