@@ -3,15 +3,39 @@ class EcPostgres
   def self.with_connection(node, database = 'template1', opts = {})
     require 'pg'
     postgres = node['private_chef']['postgresql'].merge(opts)
-    connection = ::PGconn.open('user' => postgres['db_superuser'],
-                               'host' => postgres['vip'],
-                               'password' => postgres['db_superuser_password'],
-                               'port' => postgres['port'],
-                               'dbname' => database)
+    connection = nil
+    retries = 5
+    begin
+      connection = ::PGconn.open('user' => postgres['db_superuser'],
+                                 'host' => postgres['vip'],
+                                 'password' => postgres['db_superuser_password'],
+                                 'port' => postgres['port'],
+                                 'dbname' => database)
+    rescue e
+      if retries > 0
+        retries -= 1
+        Chef::Log.warn "Error connecting to postgresql: #{e.message}, retrying after 1s sleep. #{retries} retries remaining."
+        sleep 1
+        retry
+      else
+        Chef::Log.warn "Error from postgresql: #{e.message}, retries have been exhausted."
+        raise
+      end
+    end
+
     begin
       yield connection
     ensure
       connection.close
+    end
+  end
+
+  def self.with_service_connection(node, database, service_name)
+    service = node['private_chef'][service_name]
+    with_connection(node, database,
+                    db_superuser: service['sql_user'],
+                    db_superuser_password: service['sql_password']) do |connection|
+      yield connection
     end
   end
 
