@@ -24,6 +24,22 @@ module Pedant
       extend ::RSpecShared::Methods
       extend Pedant::Concern
 
+      def authenticated_request(method, url, *args, &block)
+        response = nil
+        if block_given?
+          super(method, url, *args) { |r| response = r; block.call(r) }
+        else
+          response = super(method, url, *args)
+        end
+        # Anyone who does a PUT to cookbooks gets automagically added to created_server_objects
+        if method == :PUT && url =~ /(\/(cookbooks|cookbook_artifacts)\/[^\/]*\/[^\/]*)$/
+          if response.code.to_s == "201"
+            created_server_objects << $1
+          end
+        end
+        response
+      end
+
       # The list of things we've created throughout this test
       let(:created_server_objects) { [] }
       after do
@@ -36,7 +52,7 @@ module Pedant
       end
 
       # Sandbox utils live here as well
-            # When the request methods get pulled out into external modules,
+      # When the request methods get pulled out into external modules,
       # these can go into Pedant::Sandbox
 
       # pedant_files should be things in PEDANT_ROOT/files
@@ -97,28 +113,10 @@ module Pedant
         checksum
       end
 
-      # When you include this context, 'cookbook_name' and
-      # 'cookbook_version' are set for the new testing cookbook
-      shared_context 'with temporary testing cookbook' do
-        let(:temporary_cookbook_name){unique_name('testing_cookbook')}
-        let(:temporary_cookbook_version){'1.2.3'}
-
-        # TODO: expose individual cookbook options as let blocks?
-        before :each do
-          make_cookbook("/#{cookbook_url_base}/#{temporary_cookbook_name}/#{temporary_cookbook_version}")
-        end
-
-        let(:cookbook_name){temporary_cookbook_name}
-        let(:cookbook_version){temporary_cookbook_version}
-      end # shared context
-
       # Do not put these lets in included() as this will break (override ordering)
       # Concern is included here to make it easy to extend the example group using
       # module ClassMethods
 
-
-      let(:named_cookbook_url) { api_url(named_cookbook_path) }
-      let(:named_cookbook_path) { "/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}" }
 
       let(:cookbook_version_not_found_exact_response) do
         {
@@ -207,21 +205,13 @@ module Pedant
         }
       end
 
-      def delete_cookbook_artifact(requestor, name, identifier)
-        res = delete(api_url("/#{cookbook_url_base}/#{name}/#{identifier}"),
-               requestor)
-        expect(['200', '404']).to include(res.code.to_s)
-      end
-
-      def make_cookbook_artifact(requestor, name, identifier, opts = {})
-        path = "/#{cookbook_url_base}/#{name}/#{identifier}"
-        created_server_objects << path
+      def make_cookbook_artifact(path, opts = {})
         payload = new_cookbook_artifact(name, identifier, opts)
         res = upload_cookbook(path, payload)
         expect(res.code).to eq(201)
       end
 
-      def make_cookbook_artifact_with_recipes(cookbook_name, identifier, recipe_list)
+      def make_cookbook_artifact_with_recipes(path, recipe_list)
         recipe_specs = normalize_recipe_specs(recipe_list)
         content_list = recipe_specs.map { |r| r[:content] }
         files = content_list.map { |content| Pedant::Utility.new_temp_file(content) }
@@ -231,7 +221,7 @@ module Pedant
           dummy_recipe(r[:name], sum)
         end.sort { |a, b| a[:name] <=> b[:name] }
         opts = { :recipes => recipes }
-        make_cookbook_artifact(admin_user, cookbook_name, identifier, opts)
+        make_cookbook_artifact(path, opts)
       end
 
       def get_cookbook_checksums(path)
@@ -268,12 +258,12 @@ module Pedant
       # The sets of 'existing' and 'updated' checksums can either be pre-computed
       # and passed in as function arugments or automatically computed if a
       # block is provided.
-      def verify_checksum_cleanup(segment_type, existing_checksums=nil, updated_checksums=nil, &block)
-        existing_checksums ||= checksums_for_segment_type(segment_type)
+      def verify_checksum_cleanup(path, &block)
+        existing_checksums ||= get_cookbook_checksums(path)
 
         yield if block_given?
 
-        updated_checksums ||= checksums_for_segment_type(segment_type)
+        updated_checksums ||= get_cookbook_checksums(path)
 
         deletions = existing_checksums.keys - updated_checksums.keys
 
@@ -303,14 +293,6 @@ module Pedant
         end
       end
 
-      def cookbook_url(cookbook_name)
-        api_url("/#{cookbook_url_base}/#{cookbook_name}")
-      end
-
-      def cookbook_version_url(cookbook_name, cookbook_version)
-        api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
-      end
-
       def make_cookbook(path, opts={})
         name, version = path.split("/")[2..3]
         payload = new_cookbook(name, version, opts)
@@ -318,7 +300,6 @@ module Pedant
       end
 
       def upload_cookbook(path, payload)
-        created_server_objects << path
         put(path, nil, :payload => payload)
       end
 
@@ -500,27 +481,6 @@ module Pedant
         results
       end
 
-      # given a cookbook segment type (ie files, recipes, etc) query the
-      # cookbook version and return a hash with a checksum => url mapping for
-      # the segment type.  Data returned will look something like:
-      #
-      #   {"ebebcd269de93146a2c0b63c7f7ea6c8"=>
-      #     "https://...",
-      #    "245456d07df19c0e8f264d132e86c3c7"=>
-      #     "https://...",
-      #   }
-      #
-      def checksums_for_segment_type(segment_type, cb_version=cookbook_version)
-        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cb_version}"),
-          admin_user) do |response|
-          segment_contents = parse(response)[segment_type.to_s] || []
-          segment_contents.inject({}) do |return_hash, segment_member|
-            return_hash[segment_member['checksum']] = segment_member['url']
-            return_hash
-          end
-        end
-      end
-
       module ClassMethods
 
         # This is used for testing creates with changes to the default
@@ -562,7 +522,7 @@ module Pedant
               payload[key] = value
             end
 
-            path = "/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"
+            path = "/cookbooks/#{cookbook_name}/#{cookbook_version}"
             response = upload_cookbook(path, payload)
             if ignores_value
               payload[key] = actual_value
@@ -610,17 +570,12 @@ module Pedant
               payload[key] = value
             end
 
+            path = "/cookbooks/#{cookbook_name}/#{cookbook_version}"
             response = upload_cookbook(path, payload)
             if server_error
-              response.should =~ /^HTTP\/1.1 500 Internal Server Error/
+              expect(response).to match(/^HTTP\/1.1 500 Internal Server Error/)
             else
-              response.
-                should look_like({
-                :status => error,
-                :body_exact => {
-                                     "error" => [message]
-              }
-              })
+              expect(response).to look_like(status: error, body_exact: { "error" => [ message ] })
             end
 
             # Verified change (or creation) did not happen
@@ -678,7 +633,7 @@ module Pedant
             end
             put_payload["metadata"] = put_metadata
 
-            path = "/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"
+            path = "/cookbooks/#{cookbook_name}/#{cookbook_version}"
             response = upload_cookbook(path, put_payload)
             # The PUT response returns the payload exactly as it was sent
             expect(response).to look_like(status: _expected_status, body_exact: put_payload)
@@ -733,7 +688,6 @@ module Pedant
               metadata[key] = value
             end
             payload["metadata"] = metadata
-            path = "/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"
             response = upload_cookbook(path, payload)
             if server_error
               expect(response).to match(/^HTTP\/1.1 500 Internal Server Error/)
@@ -741,26 +695,16 @@ module Pedant
               expect(response).to look_like(status: error, body_exact: { "error" => [message] })
             end
 
-                # Verified change (or creation) did not happen
-                if (create)
-                  get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
-                      admin_user) do |response|
-                        response.
-                          should look_like({
-                          :status => 404
-                        })
-                      end
-                else
-                  get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
-                      admin_user) do |response|
-                        payload = new_cookbook(cookbook_name, cookbook_version)
-                        response.
-                          should look_like({
-                          :status => 200,
-                          :body_exact => payload
-                        })
-                      end
-                end
+            # Verified change (or creation) did not happen
+            path = "/cookbooks/#{cookbook_name}/#{cookbook_version}"
+            if create
+              response = get(path)
+              expect(response).to look_like(status: 404)
+            else
+              payload = new_cookbook(cookbook_name, cookbook_version)
+              response = get(path)
+              expect(response).to look_like(status: 200, body_exact: payload)
+            end
           end
         end
       end # module Class Methods

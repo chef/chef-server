@@ -11,13 +11,12 @@ require 'pp'
 require 'pedant/rspec/cookbook_util'
 
 describe "Cookbooks API endpoint", :cookbooks do
-  let(:cookbook_url_base) { "cookbooks" }
   include Pedant::RSpec::CookbookUtil
 
 
   context "DELETE /cookbooks/<name>/<version>" do
     let(:request_method) { :DELETE }
-    let(:request_url)    { named_cookbook_url }
+    let(:request_url)    { api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}") }
     let(:requestor)      { admin_user }
 
     let(:original_cookbook) { new_cookbook(cookbook_name, cookbook_version) }

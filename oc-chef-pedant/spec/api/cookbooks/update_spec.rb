@@ -28,15 +28,13 @@ require 'pedant/rspec/cookbook_util'
 
 describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
 
-  let(:cookbook_url_base) { "cookbooks" }
-
   include Pedant::RSpec::CookbookUtil
 
   context "PUT /cookbooks/<name>/<version> [update]" do
 
     let(:request_method){:PUT}
     shared(:requestor){admin_user}
-    let(:request_url) { named_cookbook_url }
+    let(:request_url)    { api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}") }
     let(:cookbook_name) { "cookbook-to-be-modified" }
     let(:cookbook_version) { self.class.cookbook_version }
     let(:fetched_cookbook) { retrieved_cookbook(cookbook_name, cookbook_version) }
@@ -58,10 +56,6 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
       make_cookbook("/cookbooks/#{cookbook_name}/#{cookbook_version}")
     }
 
-    after(:each) {
-      delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
-    }
-
     respects_maximum_payload_size
 
     context "as admin user" do
@@ -71,7 +65,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
         metadata["description"] = "hi there"
         payload["metadata"] = metadata
 
-        put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user, :payload => payload) do |response|
           response.
             should look_like({
@@ -81,7 +75,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
         end
 
         # verify change happened
-        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user) do |response|
           response.
             should look_like({
@@ -107,12 +101,12 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
         let(:expected_response) { invalid_credential_exact_response }
 
         it "returns 401 and does not update cookbook" do
-          put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), invalid_user, :payload => updated_cookbook) do |response|
+          put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"), invalid_user, :payload => updated_cookbook) do |response|
             response.should look_like expected_response
           end
 
           # Verified change did not happen
-          get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user) do |response|
+          get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"), admin_user) do |response|
             response.
               should look_like({
               :status => 200,
@@ -153,9 +147,9 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
                               "checksum" => checksums[3],
                               "specificity" => "default"}]
 
-        verify_checksum_cleanup(:files) do
+        verify_checksum_cleanup("/cookbooks/#{cookbook_name}/#{cookbook_version}") do
 
-          put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+          put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
               admin_user, :payload => payload) do |response|
             response.
               should look_like({
@@ -166,7 +160,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
 
           # verify change happened
           # TODO make this match on body when URLs are parsable
-          get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+          get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
               admin_user) do |response|
             response.
               should look_like({
@@ -187,7 +181,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
                               "checksum" => checksums[1],
                               "specificity" => "default"}]
 
-        put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user, :payload => payload) do |response|
           response.
             should look_like({
@@ -199,7 +193,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
         # Look into it ...
         # verify change happened
         # TODO make this match on body when URLs are parsable
-        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user) do |response|
           response.
             should look_like({
@@ -218,7 +212,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
                               "checksum" => "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                               "specificity" => "default"}]
 
-        put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user, :payload => payload) do |response|
 
           error = ["Manifest has checksum aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa but it hasn't yet been uploaded"]
@@ -234,7 +228,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
         # Verify change did not happen
         payload.delete("files")
 
-        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user) do |response|
           response.
             should look_like({
@@ -245,7 +239,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
       end # it adding invalid checksum should fail
 
       it "deleting all checksums should succeed" do
-        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
+        delete("/cookbooks/#{cookbook_name}/#{cookbook_version}")
         payload = new_cookbook(cookbook_name, cookbook_version)
         payload["files"] = [{"name" => "name1", "path" => "files/default/name1",
                               "checksum" => checksums[0],
@@ -263,7 +257,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
 
         # Verified initial cookbook
         # TODO make this match on body when URLs are parsable
-        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user) do |response|
           response.
             should look_like({
@@ -272,10 +266,10 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
                              })
         end
 
-        verify_checksum_cleanup(:files) do
+        verify_checksum_cleanup("/cookbooks/#{cookbook_name}/#{cookbook_version}") do
 
           payload.delete("files")
-          put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+          put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
               admin_user, :payload => payload) do |response|
             response.
               should look_like({
@@ -286,7 +280,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
 
           # verify change happened
           # TODO make this match on body when URLs are parsable
-          get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+          get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
               admin_user) do |response|
             response.
               should look_like({
@@ -299,7 +293,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
       end # it deleting all checksums should succeed
 
       it "deleting some checksums should succeed" do
-        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
+        delete("/cookbooks/#{cookbook_name}/#{cookbook_version}")
         payload = new_cookbook(cookbook_name, cookbook_version)
         payload["files"] = [{"name" => "name1", "path" => "path/name1",
                               "checksum" => checksums[0],
@@ -318,7 +312,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
 
         # Verified initial cookbook
         # TODO make this match on body when URLs are parsable
-        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user) do |response|
           response.
             should look_like({
@@ -327,7 +321,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
                              })
         end
 
-        verify_checksum_cleanup(:files) do
+        verify_checksum_cleanup("/cookbooks/#{cookbook_name}/#{cookbook_version}") do
 
           payload["files"] = [{"name" => "name1", "path" => "path/name1",
                                 "checksum" => checksums[0],
@@ -335,7 +329,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
                               {"name" => "name2", "path" => "path/name2",
                                 "checksum" => checksums[1],
                                 "specificity" => "default"}]
-          put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+          put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
               admin_user, :payload => payload) do |response|
             response.
               should look_like({
@@ -346,7 +340,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
 
           # verify change happened
           # TODO make this match on body when URLs are parsable
-          get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+          get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
               admin_user) do |response|
             response.
               should look_like({
@@ -358,7 +352,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
       end # it deleting some checksums should succeed
 
       it "changing all different checksums should succeed" do
-        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
+        delete("/cookbooks/#{cookbook_name}/#{cookbook_version}")
         payload = new_cookbook(cookbook_name, cookbook_version)
         payload["files"] = [{"name" => "name1", "path" => "path/name1",
                               "checksum" => checksums[0],
@@ -370,7 +364,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
 
         # Verified initial cookbook
         # TODO make this match on body when URLs are parsable
-        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user) do |response|
           response.
             should look_like({
@@ -379,7 +373,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
                              })
         end
 
-        verify_checksum_cleanup(:files) do
+        verify_checksum_cleanup("/cookbooks/#{cookbook_name}/#{cookbook_version}") do
 
           payload["files"] = [{"name" => "name3", "path" => "path/name3",
                                 "checksum" => checksums[2],
@@ -387,7 +381,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
                               {"name" => "name4", "path" => "path/name4",
                                 "checksum" => checksums[3],
                                 "specificity" => "default"}]
-          put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+          put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
               admin_user, :payload => payload) do |response|
             response.
               should look_like({
@@ -398,7 +392,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
 
           # verify change happened
           # TODO make this match on body when URLs are parsable
-          get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+          get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
               admin_user) do |response|
             response.
               should look_like({
@@ -410,7 +404,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
       end # it changing all different checksums should succeed
 
       it "changing some different checksums should succeed" do
-        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
+        delete("/cookbooks/#{cookbook_name}/#{cookbook_version}")
         payload = new_cookbook(cookbook_name, cookbook_version)
         payload["files"] = [{"name" => "name1", "path" => "path/name1",
                               "checksum" => checksums[0],
@@ -425,7 +419,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
 
         # Verified initial cookbook
         # TODO make this match on body when URLs are parsable
-        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user) do |response|
           response.
             should look_like({
@@ -434,7 +428,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
                              })
         end
 
-        verify_checksum_cleanup(:files) do
+        verify_checksum_cleanup("/cookbooks/#{cookbook_name}/#{cookbook_version}") do
 
           payload["files"] = [{"name" => "name2", "path" => "path/name2",
                                 "checksum" => checksums[1],
@@ -445,7 +439,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
                               {"name" => "name4", "path" => "path/name4",
                                 "checksum" => checksums[3],
                                 "specificity" => "default"}]
-          put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+          put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
               admin_user, :payload => payload) do |response|
             response.
               should look_like({
@@ -456,7 +450,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
 
           # verify change happened
           # TODO make this match on body when URLs are parsable
-          get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+          get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
               admin_user) do |response|
             response.
               should look_like({
@@ -468,7 +462,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
       end # it changing some different checksums should succeed
 
       it "changing to invalid checksums should fail", :validation do
-        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
+        delete("/cookbooks/#{cookbook_name}/#{cookbook_version}")
 
         payload = new_cookbook(cookbook_name, cookbook_version)
         payload["files"] = [{"name" => "name1", "path" => "path/name1",
@@ -484,7 +478,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
 
         # Verified initial cookbook
         # TODO make this match on body when URLs are parsable
-        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user) do |response|
           response.
             should look_like({
@@ -502,7 +496,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
                             {"name" => "name4", "path" => "path/name4",
                               "checksum" => "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                               "specificity" => "default"}]
-        put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user, :payload => payload) do |response|
 
           error = ["Manifest has checksum aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa but it hasn't yet been uploaded"]
@@ -527,7 +521,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
                               "specificity" => "default"}]
 
         # TODO make this match on body when URLs are parsable
-        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user) do |response|
           response.
             should look_like({
@@ -548,10 +542,6 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
       # in the 404 errors when trying to download.
       context "CHEF-3716 coverage" do
         let(:cookbook_version2) { "11.2.4" }
-
-        after(:each) {
-          delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version2}")
-        }
 
         it "it does not delete checksums in use by another version" do
 
@@ -578,8 +568,8 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
           put("/cookbooks/#{cookbook_name}/#{cookbook_version2}", nil, payload: payload2)
 
           # compute an intersection and difference
-          cbv_1_checksums = checksums_for_segment_type(:files, cookbook_version)
-          cbv_2_checksums = checksums_for_segment_type(:files, cookbook_version2)
+          cbv_1_checksums = get_cookbook_checksums("/cookbooks/#{cookbook_name}/#{cookbook_version}")
+          cbv_2_checksums = get_cookbook_checksums("/cookbooks/#{cookbook_name}/#{cookbook_version2}")
           intersection_checksums = cbv_1_checksums.keys & cbv_2_checksums.keys
           cbv_2_difference_checksums = cbv_2_checksums.keys - cbv_1_checksums.keys
 
@@ -611,7 +601,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
         payload = new_cookbook(cookbook_name, cookbook_version)
         payload["frozen?"] = true
 
-        put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user, :payload => payload) do |response|
           response.
             should look_like({
@@ -624,7 +614,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
       it "can set frozen? to true" do
         payload = new_cookbook(cookbook_name, cookbook_version)
         payload["frozen?"] = true
-        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user) do |response|
           response.
             should look_like({
@@ -641,7 +631,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
         metadata["description"] = "this is different"
         payload["metadata"] = metadata
 
-        put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user, :payload => payload) do |response|
           response.
             should look_like({
@@ -655,7 +645,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
         # Verify that change did not occur
         payload = new_cookbook(cookbook_name, cookbook_version)
         payload["frozen?"] = true
-        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user) do |response|
           response.
             should look_like({
@@ -672,7 +662,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
         metadata["description"] = "this is different"
         payload["metadata"] = metadata
 
-        put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}?force=true"),
+        put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}?force=true"),
             admin_user, :payload => payload) do |response|
           # You can modify things, but you can't unfreeze the cookbook
           payload["frozen?"] = true
@@ -684,7 +674,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
         end
 
         # Verify that change did occur
-        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user) do |response|
           response.
             should look_like({
@@ -701,7 +691,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
         metadata["description"] = "this is different"
         payload["metadata"] = metadata
 
-        put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}?force=false"),
+        put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}?force=false"),
             admin_user, :payload => payload) do |response|
           # You can modify things, but you can't unfreeze the cookbook
           payload["frozen?"] = true
@@ -715,7 +705,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
         end
 
         # Verify that change did occur
-        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user) do |response|
           payload = new_cookbook(cookbook_name, cookbook_version)
           payload["frozen?"] = true
@@ -863,8 +853,6 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
         context "with metadata.providing" do
           # In erchef, we are not validating the "providing" metadata
           # See: http://tickets.opscode.com/browse/CHEF-3976
-
-          after(:each) { delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}") }
 
           # http://docs.opscode.com/config_rb_metadata.html#provides
           should_change_with_metadata 'providing', 'cats::sleep'

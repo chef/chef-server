@@ -21,7 +21,6 @@ describe 'knife', :knife do
     context 'download' do
       include Pedant::RSpec::KnifeUtil
       include Pedant::RSpec::CookbookUtil
-      let(:cookbook_url_base) { "cookbooks" }
       let(:command) { "knife cookbook download #{cookbook_name} -c #{knife_config}" }
       let(:cwd) { downloaded_cookbook_dir }
       let(:downloaded_cookbook_dir) { knife_fixture "cookbooks" }

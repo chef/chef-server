@@ -17,17 +17,15 @@ require 'pedant/rspec/cookbook_util'
 
 describe "Cookbook Versions API endpoint, GET", :cookbooks, :cookbooks_version do
 
-  let(:cookbook_url_base) { "cookbooks" }
-
   include Pedant::RSpec::CookbookUtil
 
   let(:request_method) { :GET }
-  let(:request_url)    { named_cookbook_url }
+  let(:request_url)    { api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}") }
   let(:requestor)      { admin_user }
 
   let(:non_existent_cookbook){ "fakecookbook" }
   let(:fake_version){ "1.0.0" }
-  let(:latest_cookbook_version_url) { api_url("/#{cookbook_url_base}/#{cookbook_name}/_latest") }
+  let(:latest_cookbook_version_url) { api_url("/cookbooks/#{cookbook_name}/_latest") }
 
   let(:fetch_cookbook_version_success_response) do
     {
@@ -62,11 +60,6 @@ describe "Cookbook Versions API endpoint, GET", :cookbooks, :cookbooks_version d
       make_cookbook("/cookbooks/#{existing_cookbook_name}/#{existing_cookbook_version}")
       # Erchef doesn't handle multipe versions yet
       make_cookbook("/cookbooks/#{existing_cookbook_name}/#{latest}")
-    end
-
-    after :each do
-      delete("/#{cookbook_url_base}/#{existing_cookbook_name}/#{existing_cookbook_version}")
-      delete("/#{cookbook_url_base}/#{existing_cookbook_name}/#{latest}")
     end
 
     context 'when fetching existing version of cookbook' do
@@ -113,4 +106,3 @@ describe "Cookbook Versions API endpoint, GET", :cookbooks, :cookbooks_version d
     end # when requesting the 'latest' version of a non-existent cookbook
   end # with existing cookbook
 end
-

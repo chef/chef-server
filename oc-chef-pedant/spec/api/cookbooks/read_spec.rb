@@ -22,8 +22,6 @@ require 'pedant/rspec/cookbook_util'
 
 describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
 
-  let(:cookbook_url_base) { "cookbooks" }
-
   include Pedant::RSpec::CookbookUtil
 
   context "GET /cookbooks" do
@@ -32,7 +30,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
     let(:request_method) { :GET }
     let(:requestor) { admin_user }
 
-    let(:cookbook_collection_url) { api_url("/#{cookbook_url_base}") }
+    let(:cookbook_collection_url) { api_url("/cookbooks") }
     let(:fetch_cookbook_collection_success_exact_response) do
       {
         :status => 200,
@@ -58,7 +56,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
       # Add test to check for empty case with different num_versions
       context 'with a num_versions' do
         let(:expected_response) { bad_request_response }
-        let(:request_url) { api_url("/#{cookbook_url_base}?num_versions=#{num_versions}") }
+        let(:request_url) { api_url("/cookbooks?num_versions=#{num_versions}") }
         let(:error_message) { invalid_versions_msg }
 
         def self.expects_response_of_400_with(message, _value)
@@ -77,7 +75,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
 
     context "with existing cookbooks and multiple versions" do
       let(:expected_response) { fetch_cookbook_collection_success_exact_response }
-      let(:request_url) { api_url("/#{cookbook_url_base}?num_versions=#{num_versions}") }
+      let(:request_url) { api_url("/cookbooks?num_versions=#{num_versions}") }
 
       let(:fetched_cookbooks) { cookbook_collection }
 
@@ -105,8 +103,8 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
         let(:num_versions) { 0 }
         let(:cookbook_collection) do
           {
-            cookbook_name  => { "url" => cookbook_url(cookbook_name), "versions" => [] },
-            cookbook_name2 => { "url" => cookbook_url(cookbook_name2), "versions" => [] }
+            cookbook_name  => { "url" => api_url("/cookbooks/#{cookbook_name}"), "versions" => [] },
+            cookbook_name2 => { "url" => api_url("/cookbooks/#{cookbook_name2}"), "versions" => [] }
           }
         end
 
@@ -117,15 +115,15 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
       let(:cookbook_collection_with_one_version) do
         {
           cookbook_name => {
-            "url" => cookbook_url(cookbook_name),
+            "url" => api_url("/cookbooks/#{cookbook_name}"),
             "versions" =>
               [{ "version" => version2,
-                 "url" => cookbook_version_url(cookbook_name,version2) }]},
+                 "url" => api_url("/cookbooks/#{cookbook_name}/#{version2}") }]},
           cookbook_name2 => {
-            "url" => cookbook_url(cookbook_name2),
+            "url" => api_url("/cookbooks/#{cookbook_name2}"),
             "versions" =>
                [{ "version" => version1,
-                  "url" => cookbook_version_url(cookbook_name2, version1) }]}
+                  "url" => api_url("/cookbooks/#{cookbook_name2}/#{version1}") }]}
         }
       end
 
@@ -152,17 +150,17 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
         let(:cookbook_collection) do
           {
             cookbook_name => {
-              "url" => cookbook_url(cookbook_name),
+              "url" => api_url("/cookbooks/#{cookbook_name}"),
               "versions" => [
                 { "version" => version2,
-                  "url" => cookbook_version_url(cookbook_name, version2) },
+                  "url" => api_url("/cookbooks/#{cookbook_name}/#{version2}") },
                 { "version" => version1,
-                  "url" => cookbook_version_url(cookbook_name, version1) } ]},
+                  "url" => api_url("/cookbooks/#{cookbook_name}/#{version1}") } ]},
             cookbook_name2 => {
-              "url" => cookbook_url(cookbook_name2),
+              "url" => api_url("/cookbooks/#{cookbook_name2}"),
               "versions" => [
                 { "version" => version1,
-                  "url" => cookbook_version_url(cookbook_name2, version1) }]}
+                  "url" => api_url("/cookbooks/#{cookbook_name2}/#{version1}") }]}
           }
         end
 
@@ -175,7 +173,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
 
     context "with varying numbers of existing cookbooks" do
       let(:expected_response) { fetch_cookbook_success_exact_response }
-      let(:request_url) { api_url("/#{cookbook_url_base}?num_versions=all") }
+      let(:request_url) { api_url("/cookbooks?num_versions=all") }
 
       let(:fetched_cookbook) { cookbook_collection }
       let(:cookbook_name) { "cookbook_name" }
@@ -185,10 +183,10 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
         let(:cookbook_collection) do
           {
             cookbook_name => {
-            "url" => cookbook_url(cookbook_name),
+            "url" => api_url("/cookbooks/#{cookbook_name}"),
             "versions" => [
               { "version" => cookbook_version,
-                "url" => cookbook_version_url(cookbook_name, cookbook_version) }]}
+                "url" => api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}") }]}
           }
         end
 
@@ -203,15 +201,15 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
         let(:cookbook_collection) do
           {
             "cb1" => {
-              "url" => cookbook_url("cb1"),
+              "url" => api_url("/cookbooks/cb1"),
               "versions" => [
                 { "version" => "0.0.1",
-                  "url" => cookbook_version_url("cb1", "0.0.1") }]},
+                  "url" => api_url("/cookbooks/cb1/0.0.1") }]},
             "cb2" => {
-              "url" => cookbook_url("cb2"),
+              "url" => api_url("/cookbooks/cb2"),
               "versions" => [
                 { "version" => "0.0.2",
-                  "url" => cookbook_version_url("cb2", "0.0.2") }]}
+                  "url" => api_url("/cookbooks/cb2/0.0.2") }]}
           }
         end
 
@@ -233,7 +231,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
 
   context "GET /cookbooks/<name>/<version>" do
     let(:request_method) { :GET }
-    let(:request_url)    { named_cookbook_url }
+    let(:request_url)    { api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}") }
 
     let(:cookbook_name) { "the_cookbook_name" }
     let(:cookbook_version) { "1.2.3" }

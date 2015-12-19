@@ -20,14 +20,6 @@ describe "Depsolver API endpoint", :depsolver do
   include Pedant::RSpec::CookbookUtil
   include Pedant::RSpec::EnvironmentUtil
 
-  # Cookbook tests are parameterized to support common testing of both
-  # /cookbooks and /cookbook_artifacts, so we need to specify that we want to
-  # talk to /cookbooks. Have to define this as a method rather than a `let`
-  # because we access it in `before(:all)` hooks
-  def cookbook_url_base
-    "cookbooks"
-  end
-
   shared(:env){ "test_depsolver_env"}
   shared(:no_cookbooks_env) { "test_depsolver_no_cookbooks_env" }
   shared(:cookbook_name){"foo"}
@@ -68,7 +60,7 @@ describe "Depsolver API endpoint", :depsolver do
       }
 
       after(:all) {
-        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
+        delete("/cookbooks/#{cookbook_name}/#{cookbook_version}")
       }
 
       it "returns 400 with an empty payload", :validation do
@@ -283,7 +275,7 @@ describe "Depsolver API endpoint", :depsolver do
       # We create the cookbook in the test with a specific dependency.
       # Clean it up here
       after(:each) {
-        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
+        delete("/cookbooks/#{cookbook_name}/#{cookbook_version}")
       }
 
       # TODO: need more detailed depsolver output to construct error message
@@ -319,8 +311,8 @@ describe "Depsolver API endpoint", :depsolver do
       # We create the cookbooks in the test with a specific dependency.
       # Clean them up here
       after(:each) {
-        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
-        delete("/#{cookbook_url_base}/#{cookbook_name2}/#{cookbook_version2}")
+        delete("/cookbooks/#{cookbook_name}/#{cookbook_version}")
+        delete("/cookbooks/#{cookbook_name2}/#{cookbook_version2}")
       }
 
       it "returns 412 and both entries when there are runlist entries specifying versions that don't exist" do
@@ -403,7 +395,7 @@ describe "Depsolver API endpoint", :depsolver do
       }
 
       after(:all) {
-        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
+        delete("/cookbooks/#{cookbook_name}/#{cookbook_version}")
       }
 
       it "returns 200 with a minimal good cookbook", :smoke do
@@ -436,10 +428,10 @@ describe "Depsolver API endpoint", :depsolver do
         end
 
         after :all do
-          delete("/#{cookbook_url_base}/foo/1.0.0")
-          delete("/#{cookbook_url_base}/bar/2.0.0")
-          delete("/#{cookbook_url_base}/baz/3.0.0")
-          delete("/#{cookbook_url_base}/quux/4.0.0")
+          delete("/cookbooks/foo/1.0.0")
+          delete("/cookbooks/bar/2.0.0")
+          delete("/cookbooks/baz/3.0.0")
+          delete("/cookbooks/quux/4.0.0")
         end
 
         it "returns dependencies" do
@@ -469,7 +461,7 @@ describe "Depsolver API endpoint", :depsolver do
         end
 
         after :each do
-          delete("/#{cookbook_url_base}/datestamp/1.2.20130730201745")
+          delete("/cookbooks/datestamp/1.2.20130730201745")
           delete_environment(admin_user, "datestamp_env")
         end
 

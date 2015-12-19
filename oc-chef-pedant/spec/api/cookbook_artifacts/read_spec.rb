@@ -22,16 +22,14 @@ require 'pedant/rspec/cookbook_util'
 
 describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artifacts_read do
 
-  let(:cookbook_url_base) { "cookbook_artifacts" }
-
   include Pedant::RSpec::CookbookUtil
 
   def cookbook_artifact_version_url(name, identifier)
-    api_url("/#{cookbook_url_base}/#{name}/#{identifier}")
+    api_url("/cookbook_artifacts/#{name}/#{identifier}")
   end
 
   context "GET /cookbook_artifacts" do
-    let(:request_url){api_url("/#{cookbook_url_base}/")}
+    let(:request_url){api_url("/cookbook_artifacts/")}
     let(:requestor) { admin_user }
 
     context "with no cookbook artifacts on the server", :smoke do
@@ -45,7 +43,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
     context "with existing cookbook_artifacts and multiple versions" do
 
-      let(:request_url) { api_url("/#{cookbook_url_base}") }
+      let(:request_url) { api_url("/cookbook_artifacts") }
 
       let(:fetched_cookbook_artifacts) { cookbook_collection }
 
@@ -66,31 +64,15 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
       let(:cba_3) { new_cookbook_artifact(cookbook_name2, identifier_3) }
 
       before(:each) do
-        r1 = put(cba_1_url, admin_user, payload: cba_1)
-        expect(r1.code).to eq(201)
-
-        r2 = put(cba_2_url, admin_user, payload: cba_2)
-        expect(r2.code).to eq(201)
-
-        r3 = put(cba_3_url, admin_user, payload: cba_3)
-        expect(r3.code).to eq(201)
-      end
-
-      after(:each) do
-        r1 = delete(cba_1_url, admin_user)
-        expect(r1.code).to eq(200)
-
-        r2 = delete(cba_2_url, admin_user)
-        expect(r2.code).to eq(200)
-
-        r3 = delete(cba_3_url, admin_user)
-        expect(r3.code).to eq(200)
+        upload_cookbook(cba_1_url, cba_1)
+        upload_cookbook(cba_2_url, cba_2)
+        upload_cookbook(cba_3_url, cba_3)
       end
 
       let(:expected_cookbook_artifact_collection) do
         {
           cookbook_name => {
-            "url" => cookbook_url(cookbook_name),
+            "url" => api_url("/cookbook_artifacts/#{cookbook_name}"),
             "versions" => [
               { "identifier" => identifier_1,
                 "url" => cookbook_artifact_version_url(cookbook_name, identifier_1) },
@@ -98,7 +80,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
                 "url" => cookbook_artifact_version_url(cookbook_name, identifier_2) }
             ]},
           cookbook_name2 => {
-            "url" => cookbook_url(cookbook_name2),
+            "url" => api_url("/cookbook_artifacts/#{cookbook_name2}"),
             "versions" => [
               { "identifier" => identifier_3,
                 "url" => cookbook_artifact_version_url(cookbook_name2, identifier_3) }]}
@@ -135,10 +117,8 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
     end
 
     before(:each) do
-      make_cookbook_artifact_with_recipes(cookbook_name, cookbook_identifier, [recipe_spec])
+      make_cookbook_artifact_with_recipes("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}", [recipe_spec])
     end
-
-    after(:each)  { delete_cookbook_artifact(admin_user, cookbook_name, cookbook_identifier) }
 
     shared_examples_for "successful_cookbook_fetch" do
 
@@ -224,4 +204,3 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
     end
   end # context GET /cookbook_artifacts/<name>/<version>
 end # describe cookbook_artifacts API endpoint
-

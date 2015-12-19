@@ -15,7 +15,6 @@
 
 require 'pedant/rspec/cookbook_util'
 describe 'Universe API Endpoint', :universe do
-  let(:cookbook_url_base) { "cookbooks" }
   include Pedant::RSpec::CookbookUtil
 
   let(:admin_requestor){ admin_user }
@@ -64,11 +63,6 @@ describe 'Universe API Endpoint', :universe do
     before do
       make_cookbook("/cookbooks/#{cb_one_name}/#{cb_one_version}", cb_one_opts)
       make_cookbook("/cookbooks/#{cb_two_name}/#{cb_two_version}")
-    end
-
-    after do
-      delete("/#{cookbook_url_base}/#{cb_one_name}/#{cb_one_version}")
-      delete("/#{cookbook_url_base}/#{cb_two_name}/#{cb_two_version}")
     end
 
     it "is successful" do

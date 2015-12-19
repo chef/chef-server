@@ -93,7 +93,7 @@ module Pedant
 
       # If you just want to run one (or a few) tests in development,
       # add :focus metadata
-      c.filter_run :cookbooks => true
+      c.filter_run :focus => true
 
       if Pedant.config.only_internal
         c.filter_run :cleanup

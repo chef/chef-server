@@ -28,8 +28,6 @@ require 'pedant/rspec/cookbook_util'
 
 describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artifacts_update do
 
-  let(:cookbook_url_base) { "cookbook_artifacts" }
-
   include Pedant::RSpec::CookbookUtil
 
   context "PUT /cookbooks/<name>/<version> [update]" do
@@ -37,7 +35,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
     # for respects_maximum_payload_size
     let(:request_method) { :PUT }
     let(:requestor){admin_user}
-    let(:request_url){api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_identifier}")}
+    let(:request_url){api_url("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}")}
     let(:cookbook_name) { "cookbook-to-be-modified" }
     let(:cookbook_identifier) { "1111111111111111111111111111111111111111" }
     let(:default_version) { "1.2.3" }
@@ -49,11 +47,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
     end
 
     before(:each) {
-      make_cookbook_artifact(admin_user, cookbook_name, cookbook_identifier)
-    }
-
-    after(:each) {
-      delete_cookbook_artifact(admin_user, cookbook_name, cookbook_identifier)
+      make_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}")
     }
 
     respects_maximum_payload_size
@@ -122,4 +116,3 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
     end # context with permissions for
   end # context PUT /cookbooks/<name>/<version> [update]
 end
-

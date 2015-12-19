@@ -19,8 +19,6 @@ require 'pedant/rspec/validations'
 
 describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
 
-  let(:cookbook_url_base) { "cookbooks" }
-
   include Pedant::RSpec::CookbookUtil
 
   context "PUT /cookbooks/<name>/<version> [create]" do
@@ -32,8 +30,6 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
     let(:default_resource_attributes){ new_cookbook(cookbook_name, cookbook_version)}
 
     context 'with a basic cookbook', :smoke do
-      after(:each) { delete("/cookbooks/#{cookbook_name}/#{cookbook_version}") }
-
       let(:request_payload) { default_resource_attributes }
       let(:cookbook_name) { "pedant_basic" }
       let(:cookbook_version) { "1.0.0" }
@@ -51,8 +47,6 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
 
       let(:resource_url){api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}")}
       let(:persisted_resource_response){ get(resource_url, requestor) }
-
-      after(:each){ delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")}
 
       context "the 'json_class' field" do
         let(:validate_attribute){"json_class"}
@@ -98,10 +92,6 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
       malformed_constraint = "s395dss@#"
 
       context "basic tests" do
-        after(:each) do
-          delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
-        end
-
         should_create('json_class', :delete, true, 'Chef::CookbookVersion')
         should_fail_to_create('json_class', 'Chef::Role', 400, "Field 'json_class' invalid")
         should_fail_to_create('metadata', {}, 400, "Field 'metadata.version' missing")
@@ -137,10 +127,6 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
         end
 
         context "with metadata.dependencies" do
-          after(:each) do
-            delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
-          end
-
           ["> 1.0", "< 2.1.2", "3.3", "<= 4.6", "~> 5.6.2", ">= 6.0"].each do |dep|
             should_create_with_metadata 'dependencies', {"chef-client" => "> 2.0.0", "apt" => dep}
           end
@@ -154,8 +140,6 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
         end
 
         context "with metadata.providing" do
-          after(:each) { delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}") }
-
           # http://docs.opscode.com/config_rb_metadata.html#provides
           should_create_with_metadata 'providing', 'cats::sleep'
           should_create_with_metadata 'providing', 'here(:kitty, :time_to_eat)'
@@ -174,7 +158,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
 
       context 'with invalid version in url' do
         let(:expected_response) { invalid_cookbook_version_response }
-        let(:url) { named_cookbook_url }
+        let(:url) { api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}") }
         let(:payload) { {} }
         let(:cookbook_version) { 'abc' }
 
@@ -228,9 +212,6 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
       end # it mismatched cookbook_name is a 400
 
       context "sandbox checks" do
-        after(:each) do
-          delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
-        end
         it "specifying file not in sandbox is a 400" do
           payload = new_cookbook(cookbook_name, cookbook_version)
           payload["recipes"] = [
@@ -275,10 +256,6 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
         }
       }
 
-      after :each do
-        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
-      end
-
       respects_maximum_payload_size
 
       it "allows creation of a minimal cookbook with no data" do
@@ -318,12 +295,6 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
     let(:cookbook_name) { "multiple_versions" }
     let(:cookbook_version1) { "1.2.3" }
     let(:cookbook_version2) { "1.3.0" }
-
-    after :each do
-      [cookbook_version1, cookbook_version2].each do |v|
-        delete(api_url("/cookbooks/#{cookbook_name}/#{v}"), admin_user)
-      end
-    end
 
     it "allows us to create 2 versions of the same cookbook" do
       payload = new_cookbook(cookbook_name, cookbook_version1, {})

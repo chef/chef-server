@@ -17,13 +17,11 @@ require 'pedant/rspec/cookbook_util'
 
 describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artifacts_delete do
 
-  let(:cookbook_url_base) { "cookbook_artifacts" }
-
   include Pedant::RSpec::CookbookUtil
 
   context "DELETE /cookbooks/<name>/<version>" do
     let(:request_method) { :DELETE }
-    let(:request_url){api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_identifier}")}
+    let(:request_url){api_url("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}")}
     let(:requestor)      { admin_user }
 
     let(:cookbook_identifier) { "1111111111111111111111111111111111111111" }
@@ -60,10 +58,9 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
       context "when deleting non-existent version of an existing cookbook" do
         let(:non_existing_identifier) { "ffffffffffffffffffffffffffffffffffffffff" }
-        let(:non_existing_version_url) { api_url("/#{cookbook_url_base}/#{cookbook_name}/#{non_existing_identifier}") }
+        let(:non_existing_version_url) { api_url("/cookbook_artifacts/#{cookbook_name}/#{non_existing_identifier}") }
 
-        before(:each) { make_cookbook_artifact(admin_user, cookbook_name, cookbook_identifier) }
-        after(:each) { delete("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}") }
+        before(:each) { make_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}") }
 
         it "should respond with 404 (\"Not Found\") and not delete existing versions" do
           delete(non_existing_version_url, requestor) do |response|
@@ -84,10 +81,8 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
             :name => recipe_name,
             :content => recipe_content
           }
-          make_cookbook_artifact_with_recipes(cookbook_name, cookbook_identifier, [recipe_spec])
+          make_cookbook_artifact_with_recipes("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}", [recipe_spec])
         end
-
-        after(:each)  { delete_cookbook_artifact(requestor, cookbook_name, cookbook_identifier) }
 
         it "should cleanup unused checksum data in s3/bookshelf" do
           artifact_json = get(request_url, requestor)
@@ -122,8 +117,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
       let(:original_cookbook) { new_cookbook_artifact(cookbook_name, cookbook_identifier) }
       let(:fetched_cookbook) { original_cookbook.dup.tap { |c| c.delete("json_class") } }
 
-      before(:each) { make_cookbook_artifact(admin_user, cookbook_name, cookbook_identifier) }
-      after(:each) { delete_cookbook_artifact(admin_user, cookbook_name, cookbook_identifier) }
+      before(:each) { make_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}") }
 
       context 'as admin user' do
 

@@ -20,11 +20,6 @@ describe "/environments/ENVIRONMENT/recipes API endpoint", :environments do
   include Pedant::RSpec::CookbookUtil
   include Pedant::RSpec::EnvironmentUtil
 
-  # Cookbook tests are parameterized to support common testing of both
-  # /cookbooks and /cookbook_artifacts, so we need to specify that we want to
-  # talk to /cookbooks
-  let(:cookbook_url_base) { "cookbooks" }
-
   let(:request_method)   { :GET }
   let(:request_url)      { api_url "/environments/#{environment_name}/recipes" }
   let(:requestor)        { admin_user }
