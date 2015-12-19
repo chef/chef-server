@@ -64,8 +64,9 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
       it "creates a basic cookbook_artifact" do
         # create it:
-        create_response = put(request_url, requestor, payload: cookbook_artifact_to_create)
-        expect(create_response.code.to_s).to eq("201")
+        expect(
+          put(request_url, payload: cookbook_artifact_to_create)
+        ).to look_like(status: 201)
 
         # list:
         list_response = get("/cookbook_artifacts/#{cookbook_name}", requestor)
@@ -76,10 +77,9 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         expect(list_data["pedant_basic"]["versions"].first["identifier"]).to eq(cookbook_identifier)
 
         # fetch it:
-        get_response = get(request_url, requestor)
-
-        expect(get_response.code.to_s).to eq("200")
-        expect(parse(get_response)).to eq(expected_get_response_data)
+        expect(
+          get(request_url, requestor)
+        ).to look_like(status: 200, body_exact: expected_get_response_data)
       end
     end
 
@@ -148,37 +148,28 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
         it "create returns 201" do
           #create it
-          put(request_url, requestor, :payload => payload) do |response|
-            expect(response.code).to eq(201)
-          end
+          expect(
+            put(request_url, payload: payload)
+          ).to look_like(status: 201)
 
           # verify it looks correct
-          get(request_url, requestor) do |response|
-            response.
-              should look_like({
-              :status => 200,
-              :body => payload
-            })
-          end
+          expect(
+            get(request_url)
+          ).to look_like(status: 200, body: payload)
         end
       end
 
       shared_examples_for "invalid_cookbook_artifact" do
         it "create returns 400" do
           # create should respond with error
-          put(request_url, requestor, :payload => payload) do |response|
-            expect(response).to look_like({
-              :status => 400,
-              :body_exact => {"error" => [error_message]}
-            })
-          end
+          expect(
+            put(request_url, payload: payload)
+          ).to look_like(status: 400, body_exact: { "error" => [error_message] })
 
           # double check it did't get created
-          get(request_url, requestor) do |response|
-            expect(response).to look_like({
-              :status => 404
-            })
-          end
+          expect(
+            get(request_url)
+          ).to look_like(status: 404)
         end
       end
 
@@ -306,10 +297,9 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         let(:payload){ new_cookbook_artifact(cookbook_name, cookbook_identifier)}
 
         it "should respond with an error" do
-          put(request_url, requestor, :payload => payload) do |response|
-            expect(response.code).to eq(400)
-            expect(parse(response)).to eq({"error" => ["Field 'identifier' invalid"]})
-          end
+          expect(
+            put(request_url, payload: payload)
+          ).to look_like(status: 400, { "error" => ["Field 'identifier' invalid"] })
         end # it invalid version in URL is a 400
       end # with invalid version in url
 
@@ -319,14 +309,9 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         let(:payload){ new_cookbook_artifact(cookbook_name, default_cookbook_id)}
 
         it "responds with a 400" do
-          put(request_url, requestor, :payload => payload) do |response|
-            expect(response).to look_like({
-                                        :status => 400,
-                                        :body => {
-                                          "error" => ["Field 'name' invalid"]
-                                        }
-                                      })
-          end
+          expect(
+            put(request_url, payload: payload)
+          ).to look_like(status: 400, body: { "error" => ["Field 'name' invalid"] })
         end
       end
 
@@ -338,15 +323,11 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         let(:request_url) { api_url("/cookbook_artifacts/#{cookbook_name}/#{default_cookbook_id}") }
 
         it "responds with a 400" do
-          put(request_url, requestor, :payload => payload) do |response|
-            error = "Field 'identifier' invalid : 1111111111111111111111111111111111111111 does not match ffffffffffffffffffffffffffffffffffffffff"
-            response.should look_like({
-                                        :status => 400,
-                                        :body => {
-                                          "error" => [error]
-                                        }
-                                      })
-          end
+          error = "Field 'identifier' invalid : 1111111111111111111111111111111111111111 does not match ffffffffffffffffffffffffffffffffffffffff"
+
+          expect(
+            put(request_url, payload: payload)
+          ).to look_like(status: 400, body: { "error" => [error] })
         end # it mismatched metadata.cookbook_version is a 400
       end
 
@@ -355,15 +336,10 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         let(:request_url) { api_url("/cookbook_artifacts/#{cookbook_name}/#{cookbook_version}") }
 
         it "mismatched cookbook_name is a 400" do
-          put(request_url, requestor, :payload => payload) do |response|
-            error = "Field 'name' invalid : cookbook_name does not match foobar"
-            expect(response).to look_like({
-              :status => 400,
-              :body => {
-                "error" => [error]
-              }
-            })
-          end
+          error = "Field 'name' invalid : cookbook_name does not match foobar"
+          expect(
+            put(request_url, payload: payload)
+          ).to look_like(status: 400, body: { "error" => [error] }) do |response|
         end
       end
 
@@ -382,15 +358,10 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         end
 
         it "specifying file not in sandbox is a 400" do
-          put(request_url, requestor, :payload => payload) do |response|
-            error = "Manifest has a checksum that hasn't been uploaded."
-            expect(response).to look_like({
-              :status => 400,
-              :body => {
-                "error" => [error]
-              }
-            })
-          end
+          error = "Manifest has a checksum that hasn't been uploaded."
+          expect(
+            put(request_url, payload: payload)
+          ).to look_like(status: 400, body => { "error" => [error] })
         end # it specifying file not in sandbox is a 400
       end # context sandbox checks
     end # context creating broken cookbook_artifacts to test validation and defaults
@@ -431,15 +402,13 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
       end
 
       it "allows override of defaults" do
-        put(request_url, requestor, :payload => payload) do |response|
-          expect(response.code).to eq(201)
-        end
-        get(request_url, requestor) do |response|
-          expect(response).to look_like({
-            :status => 200,
-            :body => expected_get_response_data
-          })
-        end
+        expect(
+          put(request_url, payload: payload)
+        ).to look_like(status: 201)
+
+        expect(
+          get(request_url, requestor)
+        ).to look_like(status: 200, body: expected_get_response_data)
       end # it allows override of defaults
     end # context creating good gookbooks to test defaults
   end # context PUT /cookbook_artifacts/<name>/<version> [create]
@@ -466,33 +435,21 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
     end
 
     it "allows us to create 2 revisions of the same cookbook" do
-      put("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_1}",
-        admin_user,
-        :payload => cookbook_1_payload) do |response|
-          expect(response.code).to eq(201)
-      end
+      expect(
+        put("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_1}", payload: cookbook_1_payload)
+      ).to look_like(status: 201)
 
-      put("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_2}",
-        admin_user,
-        :payload => cookbook_2_payload) do |response|
-          expect(response.code).to eq(201)
-      end
+      expect(
+        put("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_2}", payload: cookbook_2_payload)
+      ).to look_like(status: 201)
 
-      get("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_1}",
-        admin_user) do |response|
-        response.should look_like({
-                                   :status => 200,
-                                   :body => cookbook_1_get_response
-                                  })
-      end
+      expect(
+        get("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_1}")
+      ).to look_like(status: 200, body: cookbook_1_get_response)
 
-      get("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_2}",
-        admin_user) do |response|
-        response.should look_like({
-                                   :status => 200,
-                                   :body => cookbook_2_get_response
-                                  })
-      end
+      expect(
+        get("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_2}")
+      ).to look_like(status: 200, body: cookbook_2_get_response)
     end # it allows us to create 2 versions of the same cookbook
   end # context PUT multiple cookbook_artifacts
 end # describe cookbook_artifacts API endpoint

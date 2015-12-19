@@ -63,12 +63,13 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         before(:each) { make_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}") }
 
         it "should respond with 404 (\"Not Found\") and not delete existing versions" do
-          delete(non_existing_version_url, requestor) do |response|
-            expect(response.code).to eq(404)
-            expect(parse(response)).to eq({"error"=>["not_found"]})
-          end
+          expect(
+            delete(non_existing_version_url)
+          ).to look_like(status: 404, body_exact: { "error" => ["not_found"]})
 
-          expect(get(request_url, requestor).code).to eq(200)
+          expect(
+            get(request_url)
+          ).to look_like(status: 200)
         end
       end # it doesn't delete the wrong version of an existing cookbook
 
@@ -85,8 +86,9 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         end
 
         it "should cleanup unused checksum data in s3/bookshelf" do
-          artifact_json = get(request_url, requestor)
-          expect(artifact_json.code).to eq(200)
+          expect(
+            artifact_json = get(request_url)
+          ).to look_like(status: 200)
           artifact_before_delete = parse(artifact_json)
           existing_recipes = artifact_before_delete["recipes"]
 
@@ -100,8 +102,9 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
           expect(remote_recipe_spec["specificity"]).to eq("default")
           expect(remote_recipe_spec["url"]).to be_a_kind_of(String)
 
-          delete_response = delete(request_url, requestor)
-          expect(delete_response.code).to eq(200)
+          expect(
+            delete(request_url)
+          ).to look_like(status: 200)
 
           verify_checksum_url(remote_recipe_spec["url"], 404)
         end
@@ -122,11 +125,13 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
       context 'as admin user' do
 
         it "should respond with 200 (\"OK\") and be deleted" do
-          delete_response = delete(request_url, admin_user)
-          expect(delete_response.code).to eq(200)
-          expect(parse(delete_response)).to eq(fetched_cookbook)
+          expect(
+            delete(request_url)
+          ).to look_like(status: 200, body_exact: fetched_cookbook)
 
-          expect(get(request_url, admin_user).code).to eq(404)
+          expect(
+            get(request_url)
+          ).to look_like(status: 404)
         end # it admin user returns 200
       end # as admin user
 
@@ -135,7 +140,9 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
         let(:requestor) { normal_user }
         it "should respond with 200 (\"OK\") and be deleted" do
-          expect(delete(request_url, requestor).code).to eq(200)
+          expect(
+            delete(request_url)
+          ).to look_like(status: 200)
         end # it admin user returns 200
       end # with normal user
 
