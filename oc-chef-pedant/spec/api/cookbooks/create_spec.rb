@@ -26,13 +26,13 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
   context "PUT /cookbooks/<name>/<version> [create]" do
     include Pedant::RSpec::Validations::Create
     let(:request_method){:PUT}
-    let(:request_url){api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")}
+    let(:request_url){api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}")}
     shared(:requestor){admin_user}
 
     let(:default_resource_attributes){ new_cookbook(cookbook_name, cookbook_version)}
 
     context 'with a basic cookbook', :smoke do
-      after(:each) { delete_cookbook(admin_user, cookbook_name, cookbook_version) }
+      after(:each) { delete("/cookbooks/#{cookbook_name}/#{cookbook_version}") }
 
       let(:request_payload) { default_resource_attributes }
       let(:cookbook_name) { "pedant_basic" }
@@ -49,10 +49,10 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
       let(:cookbook_name) { "cookbook_name" }
       let(:cookbook_version) { "1.2.3" }
 
-      let(:resource_url){api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")}
+      let(:resource_url){api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}")}
       let(:persisted_resource_response){ get(resource_url, requestor) }
 
-      after(:each){ delete_cookbook(requestor, cookbook_name, cookbook_version)}
+      after(:each){ delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")}
 
       context "the 'json_class' field" do
         let(:validate_attribute){"json_class"}
@@ -99,7 +99,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
 
       context "basic tests" do
         after(:each) do
-          delete_cookbook(admin_user, cookbook_name, cookbook_version)
+          delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
         end
 
         should_create('json_class', :delete, true, 'Chef::CookbookVersion')
@@ -138,7 +138,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
 
         context "with metadata.dependencies" do
           after(:each) do
-            delete_cookbook(admin_user, cookbook_name, cookbook_version)
+            delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
           end
 
           ["> 1.0", "< 2.1.2", "3.3", "<= 4.6", "~> 5.6.2", ">= 6.0"].each do |dep|
@@ -154,7 +154,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
         end
 
         context "with metadata.providing" do
-          after(:each) { delete_cookbook admin_user, cookbook_name, cookbook_version }
+          after(:each) { delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}") }
 
           # http://docs.opscode.com/config_rb_metadata.html#provides
           should_create_with_metadata 'providing', 'cats::sleep'
@@ -187,7 +187,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
 
       it "invalid cookbook name in URL is a 400" do
         payload = {}
-        put(api_url("/#{cookbook_url_base}/first@second/1.2.3"), admin_user,
+        put(api_url("/cookbooks/first@second/1.2.3"), admin_user,
             :payload => payload) do |response|
           error = "Invalid cookbook name 'first@second' using regex: 'Malformed cookbook name. Must only contain A-Z, a-z, 0-9, _, . or -'."
           response.should look_like({
@@ -201,7 +201,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
 
       it "mismatched metadata.cookbook_version is a 400" do
         payload = new_cookbook(cookbook_name, "0.0.1")
-        put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user,
+        put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"), admin_user,
             :payload => payload) do |response|
           error = "Field 'name' invalid"
           response.should look_like({
@@ -215,7 +215,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
 
       it "mismatched cookbook_name is a 400" do
         payload = new_cookbook("foobar", cookbook_version)
-        put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user,
+        put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"), admin_user,
             :payload => payload) do |response|
           error = "Field 'name' invalid"
           response.should look_like({
@@ -229,7 +229,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
 
       context "sandbox checks" do
         after(:each) do
-          delete_cookbook(admin_user, cookbook_name, cookbook_version)
+          delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
         end
         it "specifying file not in sandbox is a 400" do
           payload = new_cookbook(cookbook_name, cookbook_version)
@@ -241,7 +241,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
                                   "specificity" => "default"
                                 }
                                ]
-          put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+          put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
               admin_user, :payload => payload) do |response|
             error = "Manifest has a checksum that hasn't been uploaded."
             response.should look_like({
@@ -276,7 +276,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
       }
 
       after :each do
-        delete_cookbook(admin_user, cookbook_name, cookbook_version)
+        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
       end
 
       respects_maximum_payload_size
@@ -288,7 +288,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
         # elsewhere in the test suite.
         payload = retrieved_cookbook(cookbook_name, cookbook_version)
 
-        put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user,
             :payload => payload) do |response|
           response.
@@ -301,7 +301,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
 
       it "allows override of defaults" do
         payload = new_cookbook(cookbook_name, cookbook_version, opts)
-        put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+        put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
             admin_user, :payload => payload) do |response|
           response.
             should look_like({
@@ -321,13 +321,13 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
 
     after :each do
       [cookbook_version1, cookbook_version2].each do |v|
-        delete(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{v}"), admin_user)
+        delete(api_url("/cookbooks/#{cookbook_name}/#{v}"), admin_user)
       end
     end
 
     it "allows us to create 2 versions of the same cookbook" do
       payload = new_cookbook(cookbook_name, cookbook_version1, {})
-      put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version1}"),
+      put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version1}"),
         admin_user,
         :payload => payload) do |response|
         response.should look_like({
@@ -337,7 +337,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
       end
 
       payload2 = new_cookbook(cookbook_name, cookbook_version2, {})
-      put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version2}"),
+      put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version2}"),
         admin_user,
         :payload => payload2) do |response|
         response.should look_like({
@@ -346,7 +346,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
           })
       end
 
-      get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version1}"),
+      get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version1}"),
         admin_user) do |response|
         response.should look_like({
                                    :status => 200,
@@ -354,7 +354,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
                                   })
       end
 
-      get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version2}"),
+      get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version2}"),
         admin_user) do |response|
         response.should look_like({
                                    :status => 200,

@@ -87,14 +87,9 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
       let(:version2) { "0.0.2" }
       let(:cookbooks) do
         {
-          cookbook_name => {
-            version1 => [],
-            version2 => []
-          },
-
-          cookbook_name2 => {
-            version1 => []
-          }
+          "/cookbooks/#{cookbook_name}/#{version1}" => [],
+          "/cookbooks/#{cookbook_name}/#{version2}" => [],
+          "/cookbooks/#{cookbook_name2}/#{version1}" => [],
         }
       end
 
@@ -198,9 +193,9 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
         end
 
         it 'should respond with a single cookbook in the collection' do
-          make_cookbook(admin_user, cookbook_name, cookbook_version)
+          make_cookbook("/cookbooks/#{cookbook_name}/#{cookbook_version}")
           should look_like expected_response
-          delete_cookbook(admin_user, cookbook_name, cookbook_version)
+          delete("/cookbooks/#{cookbook_name}/#{cookbook_version}")
         end
       end
 
@@ -222,14 +217,14 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
 
         it "multiple cookbooks can be listed" do
           # Upload cookbook
-          make_cookbook(admin_user, "cb1", "0.0.1")
-          make_cookbook(admin_user, "cb2", "0.0.2")
+          make_cookbook("/cookbooks/cb1/0.0.1")
+          make_cookbook("/cookbooks/cb2/0.0.2")
 
           should look_like expected_response
 
           # cleanup
-          delete_cookbook(admin_user, "cb1", "0.0.1")
-          delete_cookbook(admin_user, "cb2", "0.0.2")
+          delete("/cookbooks/cb1/0.0.1")
+          delete("/cookbooks/cb2/0.0.2")
         end # it multiple cookbooks can be listed
       end # with multiple, existing cookbooks
 
@@ -253,14 +248,11 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
 
     let(:cookbooks) do
       {
-        cookbook_name => {
-          cookbook_version => [recipe_spec]
-        }
+        "/cookbooks/#{cookbook_name}/#{cookbook_version}" => [ recipe_spec ],
       }
     end
 
     before(:each) { setup_cookbooks(cookbooks) }
-    after(:each)  { remove_cookbooks(cookbooks) }
 
     let(:fetched_cookbook) do
       # NOTE: the cookbook returned will actually have some recipe
@@ -333,4 +325,3 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
     end
   end # context GET /cookbooks/<name>/<version>
 end # describe Cookbooks API endpoint
-

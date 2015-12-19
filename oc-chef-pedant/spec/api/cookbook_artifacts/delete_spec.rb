@@ -63,7 +63,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         let(:non_existing_version_url) { api_url("/#{cookbook_url_base}/#{cookbook_name}/#{non_existing_identifier}") }
 
         before(:each) { make_cookbook_artifact(admin_user, cookbook_name, cookbook_identifier) }
-        after(:each) { delete_cookbook(admin_user, cookbook_name, cookbook_identifier) }
+        after(:each) { delete("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}") }
 
         it "should respond with 404 (\"Not Found\") and not delete existing versions" do
           delete(non_existing_version_url, requestor) do |response|
@@ -79,14 +79,11 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
         let(:recipe_name) { "test_recipe" }
         let(:recipe_content) { "hello-#{unique_suffix}" }
-        let(:recipe_spec) do
-            {
-              :name => recipe_name,
-              :content => recipe_content
-            }
-        end
-
         before(:each) do
+          recipe_spec = {
+            :name => recipe_name,
+            :content => recipe_content
+          }
           make_cookbook_artifact_with_recipes(cookbook_name, cookbook_identifier, [recipe_spec])
         end
 

@@ -27,8 +27,8 @@ describe "Cookbooks API endpoint", :cookbooks do
       let(:cookbook_name) {"delete-cookbook"}
       let(:cookbook_version) { "0.0.1" }
 
-      before(:each) { make_cookbook(admin_user, cookbook_name, cookbook_version) }
-      after(:each)  { delete_cookbook(admin_user, cookbook_name, cookbook_version) }
+      before(:each) { make_cookbook("/cookbooks/#{cookbook_name}/#{cookbook_version}") }
+      after(:each)  { delete("/cookbooks/#{cookbook_name}/#{cookbook_version}") }
 
       context 'as an authorized, normal user' do
         let(:expected_response) { delete_cookbook_success_response }

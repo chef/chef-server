@@ -100,7 +100,9 @@ module Pedant
     # receive a single argument, the HTTP response (as a
     # RestClient::Response object).  Testing methods should use this to
     # carry out any validation tests of the response.
-    def authenticated_request(method, url, requestor, opts={}, &validator)
+    def authenticated_request(method, url, requestor=nil, opts={}, &validator)
+      # Default to admin_user
+      requestor ||= admin_user
       user_headers = opts[:headers] || {}
       version = opts[:server_api_version]
       payload_raw = opts[:payload] || ""
@@ -126,6 +128,12 @@ module Pedant
       auth_headers = opts[:auth_headers] || requestor.signing_headers(method, url, payload)
 
       uri = URI.parse(url)
+      # If you don't pass api_url, we do it for you.
+      if !uri.scheme
+        url = api_url(url)
+        uri = URI.parse(url)
+      end
+
       if (uri.scheme == 'http' && uri.port == 80) || (uri.scheme == 'https' && uri.port == 443)
         host = uri.host
       else
@@ -153,19 +161,19 @@ module Pedant
 
     # Accessory methods for making requests a bit easier
 
-    def get(url, requestor, opts={}, &validator)
+    def get(url, requestor=nil, opts={}, &validator)
       authenticated_request :GET, url, requestor, opts, &validator
     end
 
-    def put(url, requestor, opts={}, &validator)
+    def put(url, requestor=nil, opts={}, &validator)
       authenticated_request :PUT, url, requestor, opts, &validator
     end
 
-    def post(url, requestor, opts={}, &validator)
+    def post(url, requestor=nil, opts={}, &validator)
       authenticated_request :POST, url, requestor, opts, &validator
     end
 
-    def delete(url, requestor, opts={}, &validator)
+    def delete(url, requestor=nil, opts={}, &validator)
       authenticated_request :DELETE, url, requestor, opts, &validator
     end
 

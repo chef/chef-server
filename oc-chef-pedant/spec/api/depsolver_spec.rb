@@ -64,11 +64,11 @@ describe "Depsolver API endpoint", :depsolver do
 
     context "empty and error cases" do
       before(:all) {
-        make_cookbook(admin_user, cookbook_name, cookbook_version)
+        make_cookbook("/cookbooks/#{cookbook_name}/#{cookbook_version}")
       }
 
       after(:all) {
-        delete_cookbook(admin_user, cookbook_name, cookbook_version)
+        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
       }
 
       it "returns 400 with an empty payload", :validation do
@@ -283,7 +283,7 @@ describe "Depsolver API endpoint", :depsolver do
       # We create the cookbook in the test with a specific dependency.
       # Clean it up here
       after(:each) {
-        delete_cookbook(admin_user, cookbook_name, cookbook_version)
+        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
       }
 
       # TODO: need more detailed depsolver output to construct error message
@@ -291,7 +291,7 @@ describe "Depsolver API endpoint", :depsolver do
         not_exist_name = "this_does_not_exist"
         not_exist_version = "0.0.0"
         opts = { :dependencies => {not_exist_name => ">= #{not_exist_version}"}}
-        make_cookbook(admin_user, cookbook_name, cookbook_version,opts)
+        make_cookbook("/cookbooks/#{cookbook_name}/#{cookbook_version}",opts)
         error_hash = {
           "message" => "Unable to satisfy constraints on package this_does_not_exist, " +
                        "which does not exist, due to solution constraint (foo >= 0.0.0). " +
@@ -319,13 +319,13 @@ describe "Depsolver API endpoint", :depsolver do
       # We create the cookbooks in the test with a specific dependency.
       # Clean them up here
       after(:each) {
-        delete_cookbook(admin_user, cookbook_name, cookbook_version)
-        delete_cookbook(admin_user, cookbook_name2, cookbook_version2)
+        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
+        delete("/#{cookbook_url_base}/#{cookbook_name2}/#{cookbook_version2}")
       }
 
       it "returns 412 and both entries when there are runlist entries specifying versions that don't exist" do
-        make_cookbook(admin_user, cookbook_name, cookbook_version)
-        make_cookbook(admin_user, cookbook_name2, cookbook_version2)
+        make_cookbook("/cookbooks/#{cookbook_name}/#{cookbook_version}")
+        make_cookbook("/cookbooks/#{cookbook_name2}/#{cookbook_version2}")
         missing_version_payload = "{\"run_list\":[\"#{cookbook_name2}@2.0.0\", \"#{cookbook_name}@3.0.0\"]}"
         error_hash = {
           "message" => "Run list contains invalid items: no versions match the constraints on cookbook (foo = 3.0.0).",
@@ -346,8 +346,8 @@ describe "Depsolver API endpoint", :depsolver do
       # TODO: need more detailed depsolver output to construct error message
       it "returns 412 when there is a dep that doesn't have new enough version" do
         opts = { :dependencies => {cookbook_name2 => "> #{cookbook_version2}"} }
-        make_cookbook(admin_user, cookbook_name, cookbook_version, opts)
-        make_cookbook(admin_user, cookbook_name2, cookbook_version2)
+        make_cookbook("/cookbooks/#{cookbook_name}/#{cookbook_version}", opts)
+        make_cookbook("/cookbooks/#{cookbook_name2}/#{cookbook_version2}")
         error_hash = {
           "message" =>
             "Unable to satisfy constraints on package bar due to solution constraint " +
@@ -372,8 +372,8 @@ describe "Depsolver API endpoint", :depsolver do
       it "returns 412 when there is an impossible dependency" do
         opts1 = { :dependencies => {cookbook_name2=>"> 2.0.0"}}
         opts2 = { :dependencies => {cookbook_name=>"> 3.0.0"}}
-        make_cookbook(admin_user, cookbook_name, cookbook_version, opts1)
-        make_cookbook(admin_user, cookbook_name2, cookbook_version2, opts2)
+        make_cookbook("/cookbooks/#{cookbook_name}/#{cookbook_version}", opts1)
+        make_cookbook("/cookbooks/#{cookbook_name2}/#{cookbook_version2}", opts2)
         error_hash = {
           "message" => "Unable to satisfy constraints on package bar due to " +
                        "solution constraint (foo >= 0.0.0). Solution constraints " +
@@ -399,11 +399,11 @@ describe "Depsolver API endpoint", :depsolver do
       let(:payload) {"{\"run_list\":[\"#{cookbook_name}\"]}"}
 
       before(:all) {
-        make_cookbook(admin_user, cookbook_name, cookbook_version)
+        make_cookbook("/cookbooks/#{cookbook_name}/#{cookbook_version}")
       }
 
       after(:all) {
-        delete_cookbook(admin_user, cookbook_name, cookbook_version)
+        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
       }
 
       it "returns 200 with a minimal good cookbook", :smoke do
@@ -429,17 +429,17 @@ describe "Depsolver API endpoint", :depsolver do
       context "CHEF-3813: Return cookbook dependency metadata when a cookbook has dependencies" do
 
         before :all do
-          make_cookbook(admin_user, "foo", "1.0.0")
-          make_cookbook(admin_user, "bar", "2.0.0", {:dependencies => {"foo" => "> 0.0.0"}})
-          make_cookbook(admin_user, "baz", "3.0.0")
-          make_cookbook(admin_user, "quux", "4.0.0", {:dependencies => {"bar" => "= 2.0.0", "baz" => "= 3.0.0"}})
+          make_cookbook("/cookbooks/foo/1.0.0")
+          make_cookbook("/cookbooks/bar/2.0.0", {:dependencies => {"foo" => "> 0.0.0"}})
+          make_cookbook("/cookbooks/baz/3.0.0")
+          make_cookbook("/cookbooks/quux/4.0.0", {:dependencies => {"bar" => "= 2.0.0", "baz" => "= 3.0.0"}})
         end
 
         after :all do
-          delete_cookbook(admin_user, "foo", "1.0.0")
-          delete_cookbook(admin_user, "bar", "2.0.0")
-          delete_cookbook(admin_user, "baz", "3.0.0")
-          delete_cookbook(admin_user, "quux", "4.0.0")
+          delete("/#{cookbook_url_base}/foo/1.0.0")
+          delete("/#{cookbook_url_base}/bar/2.0.0")
+          delete("/#{cookbook_url_base}/baz/3.0.0")
+          delete("/#{cookbook_url_base}/quux/4.0.0")
         end
 
         it "returns dependencies" do
@@ -460,7 +460,7 @@ describe "Depsolver API endpoint", :depsolver do
 
       context "with datestamps in cookbooks and environments" do
         before :each do
-          make_cookbook(admin_user, "datestamp", "1.2.20130730201745")
+          make_cookbook("/cookbooks/datestamp/1.2.20130730201745")
           datestamp_env = new_environment("datestamp_env")
           datestamp_env['cookbook_versions'] = {
             'datestamp' => ">= 1.2.20130730200000"
@@ -469,7 +469,7 @@ describe "Depsolver API endpoint", :depsolver do
         end
 
         after :each do
-          delete_cookbook(admin_user, "datestamp", "1.2.20130730201745")
+          delete("/#{cookbook_url_base}/datestamp/1.2.20130730201745")
           delete_environment(admin_user, "datestamp_env")
         end
 

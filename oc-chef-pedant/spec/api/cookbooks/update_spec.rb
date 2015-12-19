@@ -55,11 +55,11 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
     end
 
     before(:each) {
-      make_cookbook(admin_user, cookbook_name, cookbook_version)
+      make_cookbook("/cookbooks/#{cookbook_name}/#{cookbook_version}")
     }
 
     after(:each) {
-      delete_cookbook(admin_user, cookbook_name, cookbook_version)
+      delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
     }
 
     respects_maximum_payload_size
@@ -245,7 +245,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
       end # it adding invalid checksum should fail
 
       it "deleting all checksums should succeed" do
-        delete_cookbook(admin_user, cookbook_name, cookbook_version)
+        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
         payload = new_cookbook(cookbook_name, cookbook_version)
         payload["files"] = [{"name" => "name1", "path" => "files/default/name1",
                               "checksum" => checksums[0],
@@ -259,7 +259,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
                             {"name" => "name4", "path" => "files/default/name4",
                               "checksum" => checksums[3],
                               "specificity" => "default"}]
-        upload_cookbook(admin_user, cookbook_name, cookbook_version, payload)
+        put("/cookbooks/#{cookbook_name}/#{cookbook_version}", nil, payload: payload)
 
         # Verified initial cookbook
         # TODO make this match on body when URLs are parsable
@@ -299,7 +299,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
       end # it deleting all checksums should succeed
 
       it "deleting some checksums should succeed" do
-        delete_cookbook(admin_user, cookbook_name, cookbook_version)
+        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
         payload = new_cookbook(cookbook_name, cookbook_version)
         payload["files"] = [{"name" => "name1", "path" => "path/name1",
                               "checksum" => checksums[0],
@@ -314,7 +314,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
                               "checksum" => checksums[3],
                               "specificity" => "default"}]
 
-        upload_cookbook(admin_user, cookbook_name, cookbook_version, payload)
+        put("/cookbooks/#{cookbook_name}/#{cookbook_version}", nil, payload: payload)
 
         # Verified initial cookbook
         # TODO make this match on body when URLs are parsable
@@ -358,7 +358,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
       end # it deleting some checksums should succeed
 
       it "changing all different checksums should succeed" do
-        delete_cookbook(admin_user, cookbook_name, cookbook_version)
+        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
         payload = new_cookbook(cookbook_name, cookbook_version)
         payload["files"] = [{"name" => "name1", "path" => "path/name1",
                               "checksum" => checksums[0],
@@ -366,7 +366,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
                             {"name" => "name2", "path" => "path/name2",
                               "checksum" => checksums[1],
                               "specificity" => "default"}]
-        upload_cookbook(admin_user, cookbook_name, cookbook_version, payload)
+        put("/cookbooks/#{cookbook_name}/#{cookbook_version}", nil, payload: payload)
 
         # Verified initial cookbook
         # TODO make this match on body when URLs are parsable
@@ -410,7 +410,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
       end # it changing all different checksums should succeed
 
       it "changing some different checksums should succeed" do
-        delete_cookbook(admin_user, cookbook_name, cookbook_version)
+        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
         payload = new_cookbook(cookbook_name, cookbook_version)
         payload["files"] = [{"name" => "name1", "path" => "path/name1",
                               "checksum" => checksums[0],
@@ -421,7 +421,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
                             {"name" => "name3", "path" => "path/name3",
                               "checksum" => checksums[2],
                               "specificity" => "default"}]
-        upload_cookbook(admin_user, cookbook_name, cookbook_version, payload)
+        put("/cookbooks/#{cookbook_name}/#{cookbook_version}", nil, payload: payload)
 
         # Verified initial cookbook
         # TODO make this match on body when URLs are parsable
@@ -468,7 +468,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
       end # it changing some different checksums should succeed
 
       it "changing to invalid checksums should fail", :validation do
-        delete_cookbook(admin_user, cookbook_name, cookbook_version)
+        delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
 
         payload = new_cookbook(cookbook_name, cookbook_version)
         payload["files"] = [{"name" => "name1", "path" => "path/name1",
@@ -480,7 +480,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
                             {"name" => "name3", "path" => "path/name3",
                               "checksum" => checksums[2],
                               "specificity" => "default"}]
-        upload_cookbook(admin_user, cookbook_name, cookbook_version, payload)
+        put("/cookbooks/#{cookbook_name}/#{cookbook_version}", nil, payload: payload)
 
         # Verified initial cookbook
         # TODO make this match on body when URLs are parsable
@@ -550,7 +550,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
         let(:cookbook_version2) { "11.2.4" }
 
         after(:each) {
-          delete_cookbook(admin_user, cookbook_name, cookbook_version2)
+          delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version2}")
         }
 
         it "it does not delete checksums in use by another version" do
@@ -574,8 +574,8 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
                               {"name" => "name2", "path" => "path/name2",
                                 "checksum" => checksums[2],
                                 "specificity" => "default"}]
-          upload_cookbook(admin_user, cookbook_name, cookbook_version, payload1)
-          upload_cookbook(admin_user, cookbook_name, cookbook_version2, payload2)
+          put("/cookbooks/#{cookbook_name}/#{cookbook_version}", nil, payload: payload1)
+          put("/cookbooks/#{cookbook_name}/#{cookbook_version2}", nil, payload: payload2)
 
           # compute an intersection and difference
           cbv_1_checksums = checksums_for_segment_type(:files, cookbook_version)
@@ -588,7 +588,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
           payload2["files"] = [{"name" => "name5", "path" => "path/name5",
                                 "checksum" => checksums[3],
                                 "specificity" => "default"}]
-          upload_cookbook(admin_user, cookbook_name, cookbook_version2, payload2)
+          put("/cookbooks/#{cookbook_name}/#{cookbook_version2}", nil, payload: payload2)
 
           # Checksums unique to first iteration of cookbook version 2 should
           # have been deleted
@@ -864,7 +864,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
           # In erchef, we are not validating the "providing" metadata
           # See: http://tickets.opscode.com/browse/CHEF-3976
 
-          after(:each) { delete_cookbook admin_user, cookbook_name, cookbook_version }
+          after(:each) { delete("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}") }
 
           # http://docs.opscode.com/config_rb_metadata.html#provides
           should_change_with_metadata 'providing', 'cats::sleep'

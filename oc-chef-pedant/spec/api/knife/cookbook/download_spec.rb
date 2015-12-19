@@ -26,8 +26,8 @@ describe 'knife', :knife do
       let(:cwd) { downloaded_cookbook_dir }
       let(:downloaded_cookbook_dir) { knife_fixture "cookbooks" }
 
-      before(:each) { upload_cookbook(admin_user, cookbook_name, version, cookbook_payload) }
-      after(:each)  { delete_cookbook admin_user, cookbook_name, version }
+      before(:each) { put("/cookbooks/#{cookbook_name}/#{version}", nil, payload: cookbook_payload) }
+      after(:each)  { delete("/cookbooks/#{cookbook_name}/#{version}") }
 
       let(:cookbook_name) { Pedant::Utility.with_unique_suffix("pedant-cookbook") }
       let(:version) { "0.0.1" }

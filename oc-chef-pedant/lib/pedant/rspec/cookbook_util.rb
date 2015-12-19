@@ -24,6 +24,17 @@ module Pedant
       extend ::RSpecShared::Methods
       extend Pedant::Concern
 
+      # The list of things we've created throughout this test
+      let(:created_server_objects) { [] }
+      after do
+        # Delete the objects in the reverse order they were created
+        created_server_objects.uniq.reverse_each do |path|
+          response = delete(path)
+          # It's OK if they already exist, but not OK if the delete *fails*
+          expect(response.code.to_s).to eq('200').or eq('404')
+        end
+      end
+
       # Sandbox utils live here as well
             # When the request methods get pulled out into external modules,
       # these can go into Pedant::Sandbox
@@ -62,9 +73,7 @@ module Pedant
       end
 
       def commit_sandbox(sandbox)
-        ensure_2xx(put(sandbox["uri"],
-                       admin_user,
-                       :payload => {"is_completed" => true}))
+        ensure_2xx(put(sandbox["uri"], nil, payload: { "is_completed" => true }))
       end
 
       def upload_files_to_sandbox(files)
@@ -96,11 +105,7 @@ module Pedant
 
         # TODO: expose individual cookbook options as let blocks?
         before :each do
-          make_cookbook(admin_requestor, temporary_cookbook_name, temporary_cookbook_version)
-        end
-
-        after :each do
-          delete_cookbook(admin_requestor, temporary_cookbook_name, temporary_cookbook_version)
+          make_cookbook("/#{cookbook_url_base}/#{temporary_cookbook_name}/#{temporary_cookbook_version}")
         end
 
         let(:cookbook_name){temporary_cookbook_name}
@@ -209,9 +214,10 @@ module Pedant
       end
 
       def make_cookbook_artifact(requestor, name, identifier, opts = {})
-        url = api_url("/#{cookbook_url_base}/#{name}/#{identifier}")
+        path = "/#{cookbook_url_base}/#{name}/#{identifier}"
+        created_server_objects << path
         payload = new_cookbook_artifact(name, identifier, opts)
-        res = put(url, requestor, payload: payload)
+        res = upload_cookbook(path, payload)
         expect(res.code).to eq(201)
       end
 
@@ -226,6 +232,35 @@ module Pedant
         end.sort { |a, b| a[:name] <=> b[:name] }
         opts = { :recipes => recipes }
         make_cookbook_artifact(admin_user, cookbook_name, identifier, opts)
+      end
+
+      def get_cookbook_checksums(path)
+        # Cookbook looks like:
+        # {
+        #   "name": "cookbook",
+        #   ...
+        #   "recipes": [
+        #     { "name": "default.rb", "path": "recipes/default.rb", "checksum": "13984723984723", "url": "https://s3.com/path/to/file" },
+        #     ...
+        #   ],
+        #   "libraries": [
+        #     { "name": "default.rb", "path": "recipes/default.rb", "checksum": "13984723984723", "url": "https://s3.com/path/to/file" },
+        #     ...
+        #   ],
+        #   ...
+        # }
+        # We are going to go through and grab everything with a checksum.
+        result = {}
+        parse(get(path)).each_pair do |segment, files|
+          if files.is_a?(Array)
+            files.each do |file|
+              if file['checksum']
+                result[file['checksum']] = file['url']
+              end
+            end
+          end
+        end
+        result
       end
 
 
@@ -276,19 +311,15 @@ module Pedant
         api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
       end
 
-      def delete_cookbook(requestor, name, version)
-        delete(api_url("/#{cookbook_url_base}/#{name}/#{version}"),
-               requestor)
-      end
-
-      def make_cookbook(requestor, name, version, opts={})
+      def make_cookbook(path, opts={})
+        name, version = path.split("/")[2..3]
         payload = new_cookbook(name, version, opts)
-        upload_cookbook(requestor, name, version, payload)
+        upload_cookbook(path, payload)
       end
 
-      def upload_cookbook(requestor, name, version, payload)
-        put(api_url("/#{cookbook_url_base}/#{name}/#{version}"),
-            requestor, :payload => payload)
+      def upload_cookbook(path, payload)
+        created_server_objects << path
+        put(path, nil, :payload => payload)
       end
 
       def new_cookbook(name, version, opts = {})
@@ -422,7 +453,7 @@ module Pedant
       # are sorted alphabetically; this is due to Ruby sorting the recipe
       # names *when the cookbook is created*, rather than sorting when the
       # data is returned.  The Erlang behavior is the opposite.
-      def save_dummy_cookbook_with_recipes(cookbook_name, cookbook_version, recipe_list)
+      def save_dummy_cookbook_with_recipes(path, recipe_list)
         recipe_specs = normalize_recipe_specs(recipe_list)
         content_list = recipe_specs.map { |r| r[:content] }
         files = content_list.map { |content| Pedant::Utility.new_temp_file(content) }
@@ -432,48 +463,41 @@ module Pedant
           dummy_recipe(r[:name], sum)
         end.sort { |a, b| a[:name] <=> b[:name] }
         opts = { :recipes => recipes }
-        make_cookbook(admin_user, cookbook_name, cookbook_version, opts)
+        make_cookbook(path, opts)
       end
 
       # Generate and insert cookbooks based on the following format
       #
-      # { "my_cookbook" => { "1.0.0" => [ "recipe1", "recipe2"],
-      #                      "2.0.0" => [ "recipe3", "recipe4" ]},
-      #   "your_cookbook" => { "0.0.1" => [ "recipe1", "recipe2"],
-      #                        "1.5.0" => [ "recipe3", "recipe4" ]} }
+      # { "/cookbooks/my_cookbook/1.0.0" => [ "recipe1", "recipe2"],
+      #   "/cookbooks/my_cookbook/2.0.0" => [ "recipe3", "recipe4" ],
+      #   "/cookbooks/your_cookbook/0.0.1" => [ "recipe1", "recipe2"],
+      #   "/cookbooks/your_cookbook/1.5.0" => [ "recipe3", "recipe4" ] }
       #
       def setup_cookbooks(cookbook_spec)
-        cookbook_spec.each do |cookbook_name, version_specs|
-          version_specs.each do |version, recipe_names|
-            save_dummy_cookbook_with_recipes(cookbook_name, version, recipe_names)
-          end
+        cookbook_spec.each do |path, recipe_names|
+          save_dummy_cookbook_with_recipes(path, recipe_names)
         end
       end
 
       # Delete the specified cookbook versions.  Given the same argument hash, this will remove
       # everything created by +setup_cookbooks+
       def remove_cookbooks(cookbook_spec)
-        cookbook_spec.each do |cookbook_name, version_specs|
-          version_specs.each do |version, recipe_names|
-            delete_cookbook(admin_user, cookbook_name, version)
-          end
-        end
+        cookbook_spec.each_key { |path| delete(path) }
       end
 
+      # Sort versions in descending order and only pick the top n versions for
+      # each cookbook.
+      # { "/cookbooks/apache2/1.0.1" => [ ... ], ... }
       def get_latest_cookbooks(cookbook_spec, num_versions=1)
-        cookbook_spec.inject({}) do |acc, kv|
-          cookbook_name, version_specs = kv
-
+        results = {}
+        cookbook_spec.group_by { |path,recipes| path.split('/')[0..-2].join('/') }.each_pair do |cookbook, versions|
           # Right now this just sorts lexicographically, which works fine
           # when major, minor, and patch numbers are all single-digit
-          sorted = version_specs.sort_by{|k,v| k}
-          acc[cookbook_name] = if num_versions == 'all'
-                                 sorted.reverse
-                               else
-                                 sorted.reverse.take(num_versions)
-                               end
-          acc
+          versions = versions.sort_by { |path,recipes| path }.reverse
+          versions = versions.take(num_versions) unless num_versions == 'all'
+          versions.each { |k,v| results[k] = v }
         end
+        results
       end
 
       # given a cookbook segment type (ie files, recipes, etc) query the
@@ -537,27 +561,17 @@ module Pedant
             else
               payload[key] = value
             end
-            put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
-                 admin_user, :payload => payload) do |response|
-                  if (ignores_value)
-                    payload[key] = actual_value
-                  end
-                  response.
-                    should look_like({
-                    :status => create ? 201 : 200,
-                    :body_exact => payload
-                  })
-                end
 
-                # Verified change (or creation) happened
-                get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
-                    admin_user) do |response|
-                      response.
-                        should look_like({
-                        :status => 200,
-                        :body => payload
-                      })
-                    end
+            path = "/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"
+            response = upload_cookbook(path, payload)
+            if ignores_value
+              payload[key] = actual_value
+            end
+            expect(response).to look_like(status: create ? 201 : 200, body_exact: payload)
+
+            # Verified change (or creation) happened
+            response = get(path)
+            expect(response).to look_like(status: 200, body: payload)
           end
         end
 
@@ -595,41 +609,29 @@ module Pedant
             else
               payload[key] = value
             end
-            put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
-                admin_user, :payload => payload) do |response|
-                  if (server_error)
-                    response.should =~ /^HTTP\/1.1 500 Internal Server Error/
-                  else
-                    response.
-                      should look_like({
-                      :status => error,
-                      :body_exact => {
-                                           "error" => [message]
-                    }
-                    })
-                  end
-                end
 
-                # Verified change (or creation) did not happen
-                if (create)
-                  get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
-                      admin_user) do |response|
-                        response.
-                          should look_like({
-                          :status => 404
-                        })
-                      end
-                else
-                  get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
-                      admin_user) do |response|
-                        payload = new_cookbook(cookbook_name, cookbook_version)
-                        response.
-                          should look_like({
-                          :status => 200,
-                          :body_exact => payload
-                        })
-                      end
-                end
+            response = upload_cookbook(path, payload)
+            if server_error
+              response.should =~ /^HTTP\/1.1 500 Internal Server Error/
+            else
+              response.
+                should look_like({
+                :status => error,
+                :body_exact => {
+                                     "error" => [message]
+              }
+              })
+            end
+
+            # Verified change (or creation) did not happen
+            if create
+              response = get(path)
+              expect(response).to look_like(status: 404)
+            else
+              response = get(path)
+              payload = new_cookbook(cookbook_name, cookbook_version)
+              expect(response).to look_like(status: 200, body_exact: payload)
+            end
           end
         end
 
@@ -669,30 +671,28 @@ module Pedant
 
             put_payload = cookbook.dup
             put_metadata = put_payload["metadata"]
-            if (value == :delete)
+            if value == :delete
               put_metadata.delete(key)
             else
               put_metadata[key] = value
             end
             put_payload["metadata"] = put_metadata
 
-            put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user, :payload => put_payload) do |response|
-              # The PUT response returns the payload exactly as it was sent
-              response.should look_like({:status => _expected_status, :body_exact => put_payload})
-            end
+            path = "/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"
+            response = upload_cookbook(path, put_payload)
+            # The PUT response returns the payload exactly as it was sent
+            expect(response).to look_like(status: _expected_status, body_exact: put_payload)
 
             # Verified change (or creation) happened
-            get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user) do |response|
-              get_response = cookbook.dup
-              if (new_value)
-                get_metadata = get_response["metadata"]
-                get_metadata[key] = new_value
-                get_response["metadata"] = get_metadata
-              end
-
-              response.should look_like({:status => 200, :body => get_response})
+            get_response = cookbook.dup
+            if new_value
+              get_metadata = get_response["metadata"]
+              get_metadata[key] = new_value
+              get_response["metadata"] = get_metadata
             end
 
+            response = get(path)
+            expect(response).to look_like(status: 200, body: get_response)
           end
         end
 
@@ -733,20 +733,13 @@ module Pedant
               metadata[key] = value
             end
             payload["metadata"] = metadata
-            put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
-                admin_user, :payload => payload) do |response|
-                  if (server_error)
-                    response.should =~ /^HTTP\/1.1 500 Internal Server Error/
-                  else
-                    response.
-                      should look_like({
-                      :status => error,
-                      :body_exact => {
-                      "error" => [message]
-                    }
-                    })
-                  end
-                end
+            path = "/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"
+            response = upload_cookbook(path, payload)
+            if server_error
+              expect(response).to match(/^HTTP\/1.1 500 Internal Server Error/)
+            else
+              expect(response).to look_like(status: error, body_exact: { "error" => [message] })
+            end
 
                 # Verified change (or creation) did not happen
                 if (create)

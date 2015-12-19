@@ -62,13 +62,13 @@ describe 'Universe API Endpoint', :universe do
       }
     end
     before do
-      make_cookbook(admin_user, cb_one_name, cb_one_version, cb_one_opts)
-      make_cookbook(admin_user, cb_two_name, cb_two_version)
+      make_cookbook("/cookbooks/#{cb_one_name}/#{cb_one_version}", cb_one_opts)
+      make_cookbook("/cookbooks/#{cb_two_name}/#{cb_two_version}")
     end
 
     after do
-      delete_cookbook(admin_user, cb_one_name, cb_one_version)
-      delete_cookbook(admin_user, cb_two_name, cb_two_version)
+      delete("/#{cookbook_url_base}/#{cb_one_name}/#{cb_one_version}")
+      delete("/#{cookbook_url_base}/#{cb_two_name}/#{cb_two_version}")
     end
 
     it "is successful" do

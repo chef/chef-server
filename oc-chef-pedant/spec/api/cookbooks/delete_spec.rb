@@ -17,136 +17,84 @@ require 'pedant/rspec/cookbook_util'
 
 describe "Cookbooks API endpoint", :cookbooks, :cookbooks_delete do
 
-  let(:cookbook_url_base) { "cookbooks" }
-
   include Pedant::RSpec::CookbookUtil
 
   context "DELETE /cookbooks/<name>/<version>" do
-    let(:request_method) { :DELETE }
-    let(:request_url)    { named_cookbook_url }
-    let(:requestor)      { admin_user }
 
-    let(:fetched_cookbook) { original_cookbook }
-    let(:original_cookbook) { new_cookbook(cookbook_name, cookbook_version) }
+    it "deleting a non-existent cookbook 404s" do
+      expect( delete("/cookbooks/non-existent-cookbook/99.99.99") ).to look_like(
+        status: 404,
+        body_exact: { "error" => ["Cannot find a cookbook named non-existent-cookbook with version 99.99.99"] }
+      )
+    end
 
-    context "for non-existent cookbooks" do
-      let(:expected_response) { cookbook_version_not_found_exact_response }
+    it "deleting a cookbook with a poorly formatted version", :validation do
+      expect( delete("/cookbooks/non-existent-cookbook/1.2.3.4") ).to look_like(status: 400)
+    end
 
-      let(:cookbook_name)    { "non_existent" }
-      let(:cookbook_version) { "1.2.3" }
+    context "when cookbook-to-be-deleted version 1.2.3 has a file in it" do
+      before do
+        setup_cookbooks(
+          "/cookbooks/cookbook-to-be-deleted/1.2.3" => [ { name: "test_recipe", content: "hello-#{unique_suffix}" } ]
+        )
+      end
 
-      should_respond_with 404
+      it "deleting cookbook-to-deleted version 1.2.3 returns 200 and deletes the cookbook", :smoke do
+        # Grab the checksums
+        checksums = get_cookbook_checksums("/cookbooks/cookbook-to-be-deleted/1.2.3")
+        expect(checksums.size).to eq(1)
 
-      context 'with bad version', :validation do
-        let(:expected_response) { invalid_cookbook_version_exact_response }
-        let(:cookbook_version) { "1.2.3.4" }
-        should_respond_with 400
-      end # with bad version
-    end # context for non-existent cookbooks
+        # Delete the cookbook
+        expect( delete("/cookbooks/cookbook-to-be-deleted/1.2.3") ).to look_like(status: 200)
 
-    context "for existing cookbooks" do
-      let(:cookbook_name) { "cookbook-to-be-deleted" }
-      let(:cookbook_version) { "1.2.3" }
+        # Ensure all the checksums' associated files were deleted
+        checksums.each_pair do |checksum, uri|
+          expect(get(uri)).to look_like(status: 404)
+        end
+      end
 
-      context "when deleting non-existent version of an existing cookbook" do
-        let(:expected_response) { cookbook_version_not_found_exact_response }
-        let(:cookbook_version_not_found_error_message) { ["Cannot find a cookbook named #{cookbook_name} with version #{non_existing_version}"] }
-        let(:non_existing_version) { "99.99.99" }
-        let(:non_existing_version_url) { api_url("/#{cookbook_url_base}/#{cookbook_name}/#{non_existing_version}") }
-        let(:fetched_cookbook) { original_cookbook }
+      it "for admin user, delete responds with 200, and the cookbook is removed", :authorization do
+        expect( delete("/cookbooks/cookbook-to-be-deleted/1.2.3"), admin_user ).to look_like(status: 200)
+        expect( get("/cookbooks/cookbook-to-be-deleted/1.2.3") ).to look_like(status: 404)
+      end
 
-        before(:each) { make_cookbook(admin_user, cookbook_name, cookbook_version) }
-        after(:each) { delete_cookbook(admin_user, cookbook_name, cookbook_version) }
+      it "for normal user, delete responds with 200, and the cookbook is removed", :authorization do
+        expect( delete("/cookbooks/cookbook-to-be-deleted/1.2.3", normal_user) ).to look_like(status: 200)
+        expect( get("/cookbooks/cookbook-to-be-deleted/1.2.3") ).to look_like(status: 404)
+      end
 
-        it "should respond with 404 (\"Not Found\") and not delete existing versions" do
-          delete(non_existing_version_url, admin_user) do |response|
-            response.should look_like expected_response
+      it "for a user outside of the org, delete responds with 403, and the cookbook is NOT removed", :authorization do
+        expect( delete("/cookbooks/cookbook-to-be-deleted/1.2.3", outside_user) ).to look_like(status: 200)
+        expect( get("/cookbooks/cookbook-to-be-deleted/1.2.3") ).to look_like(status: 200)
+      end
+
+      it "for an invalid user, delete responds with 401, and the cookbook is NOT removed", :authentication do
+        expect( delete("/cookbooks/cookbook-to-be-deleted/1.2.3", invalid_user) ).to look_like(status: 401)
+        expect( get("/cookbooks/cookbook-to-be-deleted/1.2.3") ).to look_like(status: 200)
+      end
+
+      context "and some-other-cookbook version 2.3.4 has a file with the same content" do
+        before do
+          setup_cookbooks(
+            "/cookbooks/some-other-cookbook/2.3.4" => [ { name: "blarghle", content: "hello-#{unique_suffix}" } ],
+          )
+        end
+
+        it "deleting cookbook-to-be-deleted version 1.2.3 does not clean up the checksum" do
+          # Grab the checksums
+          checksums = get_cookbook_checksums("/cookbooks/cookbook-to-be-deleted/1.2.3")
+          expect(checksums.size).to eq(1)
+          expect(get_cookbook_checksums("/cookbooks/some-other-cookbook/2.3.4")).to eq(checksums)
+
+          # Delete the cookbook
+          expect( delete("/cookbooks/cookbook-to-be-deleted/1.2.3") ).to look_like(status: 200)
+
+          # Ensure none of the checksums' associated files were deleted
+          checksums.each_pair do |checksum, uri|
+            expect(get(uri)).to look_like(status: 200)
           end
-
-          should_not_be_deleted
         end
-      end # it doesn't delete the wrong version of an existing cookbook
-
-      context "when deleting existent version of an existing cookbook", :smoke do
-        let(:recipe_name) { "test_recipe" }
-        let(:recipe_content) { "hello-#{unique_suffix}" }
-        let(:recipe_spec) do
-            {
-              :name => recipe_name,
-              :content => recipe_content
-            }
-        end
-
-        let(:cookbooks) do
-          {
-            cookbook_name => {
-              cookbook_version => [recipe_spec]
-            }
-          }
-        end
-
-        let(:fetched_cookbook) { original_cookbook }
-        let(:original_cookbook) { new_cookbook(cookbook_name, cookbook_version) }
-
-        before(:each) { setup_cookbooks(cookbooks) }
-        after(:each)  { remove_cookbooks(cookbooks) }
-
-        it "should cleanup unused checksum data in s3/bookshelf" do
-          verify_checksum_cleanup(:recipes) do
-            response.should look_like(:status => 200)
-          end
-        end
-
-      end # context when deleting existent version...
-    end # context for existing cookbooks
-
-    context "with permissions for" do
-      let(:cookbook_name) {"delete-cookbook"}
-      let(:cookbook_version) { "0.0.1" }
-      let(:not_found_msg) { ["Cannot find a cookbook named delete-cookbook with version 0.0.1"] }
-
-      before(:each) { make_cookbook(admin_user, cookbook_name, cookbook_version) }
-      after(:each) { delete_cookbook(admin_user, cookbook_name, cookbook_version) }
-
-      context 'as admin user' do
-        let(:expected_response) { delete_cookbook_success_response }
-
-        it "should respond with 200 (\"OK\") and be deleted" do
-          should look_like expected_response
-          should_be_deleted
-        end # it admin user returns 200
-      end # as admin user
-
-      context 'as normal user', :authorization do
-        let(:expected_response) { delete_cookbook_success_response }
-
-        let(:requestor) { normal_user }
-        it "should respond with 200 (\"OK\") and be deleted" do
-          should look_like expected_response
-          should_be_deleted
-        end # it admin user returns 200
-      end # with normal user
-
-      context 'as a user outside of the organization', :authorization do
-        let(:expected_response) { unauthorized_access_credential_response }
-        let(:requestor) { outside_user }
-
-        it "should respond with 403 (\"Forbidden\") and does not delete cookbook" do
-          response.should look_like expected_response
-          should_not_be_deleted
-        end
-      end # it outside user returns 403
-
-      context 'with invalid user', :authorization do
-        let(:expected_response) { invalid_credential_exact_response }
-        let(:requestor) { invalid_user }
-
-        it "should respond with 401 (\"Unauthorized\") and does not delete cookbook" do
-          response.should look_like expected_response
-          should_not_be_deleted
-        end # responds with 401
-      end # with invalid user
-
-    end # context with permissions for
+      end
+    end
   end # context DELETE /cookbooks/<name>/<version>
 end

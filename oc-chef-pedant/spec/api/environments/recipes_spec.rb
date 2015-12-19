@@ -74,24 +74,15 @@ describe "/environments/ENVIRONMENT/recipes API endpoint", :environments do
   context 'with multiple versions of multiple cookbooks' do
     let(:cookbooks) do
       {
-        "pedant_cb_one" =>
-        {
-          "1.0.0" => ['webserver'],
-          "2.0.0" => ['database', 'webserver'],
-          "3.0.0" => ['awesome_sauce', 'database', 'webserver']
-        },
-          "pedant_cb_two" =>
-        {
-          "1.0.0" => ['chicken'],
-          "1.2.0" => ['beef', 'chicken'],
-          "1.2.5" => ['beef', 'chicken', 'stewed_monkey_brains']
-        },
-          "pedant_cb_three" =>
-        {
-          "0.0.1" => ['server'],
-          "0.5.0" => ['client', 'server'],
-          "1.0.0" => ['client', 'replication', 'server']
-        }
+        "/cookbooks/pedant_cb_one/1.0.0" => ['webserver'],
+        "/cookbooks/pedant_cb_one/2.0.0" => ['database', 'webserver'],
+        "/cookbooks/pedant_cb_one/3.0.0" => ['awesome_sauce', 'database', 'webserver'],
+        "/cookbooks/pedant_cb_two/1.0.0" => ['chicken'],
+        "/cookbooks/pedant_cb_two/1.2.0" => ['beef', 'chicken'],
+        "/cookbooks/pedant_cb_two/1.2.5" => ['beef', 'chicken', 'stewed_monkey_brains'],
+        "/cookbooks/pedant_cb_three/0.0.1" => ['server'],
+        "/cookbooks/pedant_cb_three/0.5.0" => ['client', 'server'],
+        "/cookbooks/pedant_cb_three/1.0.0" => ['client', 'replication', 'server'],
       }
     end
 

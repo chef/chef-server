@@ -41,21 +41,15 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
   # Ditto for cookbooks
   def self.cookbooks
     {
-      "cb_one" => {
-      "1.0.0" => ['webserver'],
-      "2.0.0" => ['database', 'webserver'],
-      "3.0.0" => ['awesome_sauce', 'database', 'webserver']
-    },
-      "cb_two" => {
-      "1.0.0" => ['chicken'],
-      "1.2.0" => ['beef', 'chicken'],
-      "1.2.5" => ['beef', 'chicken', 'stewed_monkey_brains']
-    },
-      "cb_three" => {
-      "0.5.1" => ['server'],
-      "0.6.0" => ['client', 'server'],
-      "1.0.0" => ['client', 'replication', 'server']
-    }
+      "/cookbooks/cb_one/1.0.0" => ['webserver'],
+      "/cookbooks/cb_one/2.0.0" => ['database', 'webserver'],
+      "/cookbooks/cb_one/3.0.0" => ['awesome_sauce', 'database', 'webserver'],
+      "/cookbooks/cb_two/1.0.0" => ['chicken'],
+      "/cookbooks/cb_two/1.2.0" => ['beef', 'chicken'],
+      "/cookbooks/cb_two/1.2.5" => ['beef', 'chicken', 'stewed_monkey_brains'],
+      "/cookbooks/cb_three/0.5.1" => ['server'],
+      "/cookbooks/cb_three/0.6.0" => ['client', 'server'],
+      "/cookbooks/cb_three/1.0.0" => ['client', 'replication', 'server'],
     }
   end
 
@@ -119,31 +113,30 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
     end
 
     # Generate the expected JSON body from a set of cookbook specs for
-    # a call to the /environments/ENVIRONMENT/cookbooks/COOKBOOK endpoint
-    def expected_for_cookbooks(cookbooks, cookbook_name, num_versions)
+    # a call to the /environments/ENVIRONMENT/cookbooks endpoint
+    def expected_for_cookbooks(cookbooks, num_versions)
       latest = get_latest_cookbooks(cookbooks, num_versions)
-      latest.inject({}) do |body, cookbook_spec|
-        name, version_specs  = cookbook_spec
-
-        if (name == cookbook_name)
-          body[name] = {
-            "url" => api_url("/cookbooks/#{name}"),
-            "versions" => version_specs.map do |version_string, recipe_names|
-              {
-                "url" => api_url("/cookbooks/#{name}/#{version_string}"),
-                "version" => version_string
-              }
-            end
+      # { "apache2" => { "url" => <url>, "versions" => }}
+      results = {}
+      latest.group_by { |path, recipes| path.split('/')[0..-2].join('/') }.each do |cookbook_path, versions|
+        cookbook_name = cookbook_path.split('/')[2]
+        results[cookbook_name] = {
+          "url" => api_url(cookbook_path),
+          "versions" => versions.map do |path, recipes|
+            {
+              "url" => api_url(path),
+              "version" => path.split('/')[-1]
             }
-        end
-
-        body
+          end
+        }
       end
+      results
     end
 
     context 'with no environment constraints' do
       [env, default].each do |environment|
-        cookbooks.keys.each do |cookbook|
+        cookbooks.keys.each do |path|
+          cookbook = path.split('/')[2]
           [nil, 1, 2, 3, 30, 'all'].each do |num_versions|
 
             description = if num_versions
@@ -161,7 +154,7 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
               get(url, admin_user) do |response|
                 response.should look_like({
                                             :status => 200,
-                                            :body_exact => expected_for_cookbooks(cookbooks, cookbook, num_versions ? num_versions : "all") # should default to "all"
+                                            :body_exact => expected_for_cookbooks(cookbooks.select { |path,r| path.split('/')[2] == cookbook }, num_versions ? num_versions : "all") # should default to "all"
                                           })
               end
             end # it

@@ -29,18 +29,16 @@ describe "Cookbooks API endpoint, named filters", :cookbooks, :cookbooks_named_f
   # most recent version of each cookbook in a cookbook spec
   def expected_for_latest(cookbooks)
     latest = get_latest_cookbooks(cookbooks)
-    latest.inject({}) do |body, cookbook_spec|
-      name, version_specs  = cookbook_spec
-      latest_version = version_specs.first
-      version_string, _recipe_names = latest_version
-      body[name] = api_url("/#{cookbook_url_base}/#{name}/#{version_string}")
-      body
+    # { 'apache2' => <url>, ... }
+    result = {}
+    latest.each_key do |path|
+      result[path.split('/')[2]] = api_url(path)
     end
+    result
   end
 
   def expected_for_named_cookbook(cookbooks, named_cookbook)
     cookbook = cookbooks.select{ |k,v| k == named_cookbook}
-
 
     cookbook.inject({}) do |body, cookbook_spec|
       name, version_specs  = cookbook_spec
@@ -60,19 +58,13 @@ describe "Cookbooks API endpoint, named filters", :cookbooks, :cookbooks_named_f
   # recent cookbooks in a cookbook spec
   def expected_for_recipes(cookbooks)
     latest = get_latest_cookbooks(cookbooks)
-    nested = latest.map do |cookbook_spec|
-      cookbook_name, version_specs = cookbook_spec
-      latest_version = version_specs.first
-      _version_string, recipe_names =latest_version
-
-      # don't sort the recipes for the Ruby endpoint; CouchDB keeps them in insertion order
-      recipe_names.sort!
-
-      recipe_names.map do |recipe_name|
-        "#{cookbook_name}::#{recipe_name}"
-      end
+    # [ "apache2::a", "apache2::b", "foo::default", "foo::bar", ... ]
+    result = []
+    latest.each_pair do |path, recipes|
+      cookbook = path.split('/')[2]
+      recipes.each { |recipe| result << "#{cookbook}::#{recipe}" }
     end
-    nested.flatten
+    result.sort
   end
 
   let(:cookbooks) { raise "Must define a cookbook spec!" }
@@ -151,7 +143,7 @@ describe "Cookbooks API endpoint, named filters", :cookbooks, :cookbooks_named_f
   # smoke tests.
   context "with one cookbook, one version" do
     let(:cookbooks) do
-      {"my_cookbook" => {"1.0.0" => ["recipe1", "recipe2"]}}
+      {"/cookbooks/my_cookbook/1.0.0" => ["recipe1", "recipe2"]}
     end
 
     should_respond_with_latest_cookbooks
@@ -161,7 +153,7 @@ describe "Cookbooks API endpoint, named filters", :cookbooks, :cookbooks_named_f
 
   context "with different cookbook, one version" do
     let(:cookbooks) do
-      {"your_cookbook" => {"1.0.0" => ["recipe1", "recipe2"]}}
+      {"/cookbooks/your_cookbook/1.0.0" => ["recipe1", "recipe2"]}
     end
 
     should_respond_with_latest_cookbooks
@@ -172,8 +164,8 @@ describe "Cookbooks API endpoint, named filters", :cookbooks, :cookbooks_named_f
   context "with multiple cookbooks, one version each" do
     let(:cookbooks) do
       {
-        "my_cookbook" => {"1.0.0" => ["recipe1", "recipe2"]},
-        "your_cookbook" => {"1.3.0" => ["foo", "bar"]},
+        "/cookbooks/my_cookbook/1.0.0" => ["recipe1", "recipe2"],
+        "/cookbooks/your_cookbook/1.3.0" => ["foo", "bar"],
       }
     end
 
@@ -185,14 +177,10 @@ describe "Cookbooks API endpoint, named filters", :cookbooks, :cookbooks_named_f
   context "with multiple cookbooks, multiple versions each" do
     let(:cookbooks) do
       {
-        "my_cookbook" => {
-        "1.0.0" => ["monitoring", "security"],
-        "1.5.0" => ["security", "users"]
-      },
-        "your_cookbook" => {
-        "1.3.0" => ["webserver", "database"],
-        "2.0.0" => ["webserver", "database", "load_balancer"]
-      },
+        "/cookbooks/my_cookbook/1.0.0" => ["monitoring", "security"],
+        "/cookbooks/my_cookbook/1.5.0" => ["security", "users"],
+        "/cookbooks/your_cookbook/1.3.0" => ["webserver", "database"],
+        "/cookbooks/your_cookbook/2.0.0" => ["webserver", "database", "load_balancer"],
       }
     end
 

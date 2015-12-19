@@ -90,24 +90,15 @@ describe "/environments/ENVIRONMENT/cookbooks API endpoint", :environments, :coo
 
     let(:cookbooks) do
       {
-        "pedant_cb_one" =>
-        {
-          "1.0.0" => [],
-          "2.0.0" => [],
-          "3.0.0" => []
-        },
-          "pedant_cb_two" =>
-        {
-          "1.0.0" => [],
-          "1.2.0" => [],
-          "1.2.5" => []
-        },
-          "pedant_cb_three" =>
-        {
-          "0.0.1" => [],
-          "0.5.0" => [],
-          "1.0.0" => []
-        },
+        "/cookbooks/pedant_cb_one/1.0.0" => [],
+        "/cookbooks/pedant_cb_one/2.0.0" => [],
+        "/cookbooks/pedant_cb_one/3.0.0" => [],
+        "/cookbooks/pedant_cb_two/1.0.0" => [],
+        "/cookbooks/pedant_cb_two/1.2.0" => [],
+        "/cookbooks/pedant_cb_two/1.2.5" => [],
+        "/cookbooks/pedant_cb_three/0.0.1" => [],
+        "/cookbooks/pedant_cb_three/0.5.0" => [],
+        "/cookbooks/pedant_cb_three/1.0.0" => [],
       }
     end
 
@@ -116,19 +107,21 @@ describe "/environments/ENVIRONMENT/cookbooks API endpoint", :environments, :coo
     # a call to the /environments/ENVIRONMENT/cookbooks endpoint
     def expected_for_cookbooks(cookbooks, num_versions)
       latest = get_latest_cookbooks(cookbooks, num_versions)
-      latest.inject({}) do |body, cookbook_spec|
-        name, version_specs  = cookbook_spec
-        body[name] = {
-          "url" => api_url("/cookbooks/#{name}"),
-          "versions" => version_specs.map do |version_string, recipe_names|
+      # { "apache2" => { "url" => <url>, "versions" => }}
+      results = {}
+      latest.group_by { |path, recipes| path.split('/')[0..-2].join('/') }.each do |cookbook_path, versions|
+        cookbook_name = cookbook_path.split('/')[-1]
+        results[cookbook_name] = {
+          "url" => api_url(cookbook_path),
+          "versions" => versions.map do |path, recipes|
             {
-              "url" => api_url("/cookbooks/#{name}/#{version_string}"),
-              "version" => version_string
+              "url" => api_url(path),
+              "version" => path.split('/')[-1]
             }
           end
         }
-        body
       end
+      results
     end
 
     context 'with no environment constraints' do

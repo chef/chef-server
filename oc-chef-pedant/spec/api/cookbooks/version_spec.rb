@@ -59,14 +59,14 @@ describe "Cookbook Versions API endpoint, GET", :cookbooks, :cookbooks_version d
     let(:latest){ "1.0.1" }
 
     before :each do
-      make_cookbook(admin_user, existing_cookbook_name, existing_cookbook_version)
+      make_cookbook("/cookbooks/#{existing_cookbook_name}/#{existing_cookbook_version}")
       # Erchef doesn't handle multipe versions yet
-      make_cookbook(admin_user, existing_cookbook_name, latest)
+      make_cookbook("/cookbooks/#{existing_cookbook_name}/#{latest}")
     end
 
     after :each do
-      delete_cookbook(admin_user, existing_cookbook_name, existing_cookbook_version)
-      delete_cookbook(admin_user, existing_cookbook_name, latest)
+      delete("/#{cookbook_url_base}/#{existing_cookbook_name}/#{existing_cookbook_version}")
+      delete("/#{cookbook_url_base}/#{existing_cookbook_name}/#{latest}")
     end
 
     context 'when fetching existing version of cookbook' do
