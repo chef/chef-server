@@ -41,7 +41,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
     let(:default_version) { "1.2.3" }
 
     let(:updated_cookbook_artifact) do
-      new_cookbook_artifact(cookbook_name, cookbook_identifier).tap do |payload|
+      new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}").tap do |payload|
         payload["metadata"]["description"] = "hi there"
       end
     end
@@ -56,7 +56,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
     context "as admin user" do
 
       let(:fetched_cookbook_artifact) do
-        new_cookbook_artifact(cookbook_name, cookbook_identifier).tap do |c|
+        new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}").tap do |c|
           c.delete("json_class")
         end
       end

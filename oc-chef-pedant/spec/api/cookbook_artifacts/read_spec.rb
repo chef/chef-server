@@ -59,9 +59,9 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
       let(:cba_2_url) { request_url + "/#{cookbook_name}/#{identifier_2}" }
       let(:cba_3_url) { request_url + "/#{cookbook_name2}/#{identifier_3}" }
 
-      let(:cba_1) { new_cookbook_artifact(cookbook_name, identifier_1) }
-      let(:cba_2) { new_cookbook_artifact(cookbook_name, identifier_2) }
-      let(:cba_3) { new_cookbook_artifact(cookbook_name2, identifier_3) }
+      let(:cba_1) { new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{identifier_1}") }
+      let(:cba_2) { new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{identifier_2}") }
+      let(:cba_3) { new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name2}/#{identifier_3}") }
 
       before(:each) do
         upload_cookbook(cba_1_url, cba_1)
@@ -123,7 +123,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
     shared_examples_for "successful_cookbook_fetch" do
 
       let(:expected_cookbook_artifact_data) do
-        new_cookbook_artifact(cookbook_name, cookbook_identifier).tap do |cba|
+        new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}").tap do |cba|
           cba.delete("json_class")
 
           # checksum and url are also present in the real data but they're not

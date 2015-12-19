@@ -218,6 +218,9 @@ end
 # describes the various tests that should be run.  Currently a
 # response spec can have the following keys (all are optional):
 #
+# You may pass an integer as the first parameter, which implies
+# status: <your integer>. e.g. expect(get('x')).to respond_with(200, body_exact: {})
+#
 # :status => Value is the integer HTTP status code the response should
 #     have
 #
@@ -238,12 +241,28 @@ end
 #     the specified headers, and makes no assumptions about
 #     unspecified headers.
 # :no_headers => an array of header names that should NOT be present
+#
+# :error_message => an error. Implies :body_exact => { "error" => [error] }
 
-RSpec::Matchers.define :look_like do |expected_response_spec|
+RSpec::Matchers.define :respond_with do |*expected_response_specs|
   include ::Pedant::JSON
 
   match do |response|
     begin
+      # Figure out the response spec from the args.
+      expected_response_spec = {}
+      expected_response_specs.each do |s|
+        case s
+        when Integer
+          expected_response_spec.merge!(status: s)
+        else
+          if s[:error_message]
+            s[:body_exact] = { "error" => [ s.delete(:error_message) ] }
+          end
+          expected_response_spec.merge!(s)
+        end
+      end
+
       things_to_check = expected_response_spec.keys
       json_tests = [:body, :body_exact]
 
@@ -320,6 +339,7 @@ RSpec::Matchers.define :look_like do |expected_response_spec|
     @error_message
   end
 end
+RSpec::Matchers.alias_matcher :look_like, :respond_with
 
 
 # Knife Matchers

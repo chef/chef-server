@@ -33,7 +33,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
     let(:request_url){api_url("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}")}
     shared(:requestor){admin_user}
 
-    let(:cookbook_artifact_to_create){ new_cookbook_artifact(cookbook_name, cookbook_identifier)}
+    let(:cookbook_artifact_to_create){ new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}")}
 
     context 'with a basic cookbook', :smoke do
       let(:cookbook_name) { "pedant_basic" }
@@ -95,7 +95,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
       context "the cookbook version" do
 
         let(:cookbook_artifact_to_create) do
-          new_cookbook_artifact(cookbook_name, cookbook_identifier, version: cookbook_version)
+          new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}", version: cookbook_version)
         end
 
         let(:request_payload) { cookbook_artifact_to_create }
@@ -129,7 +129,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
       let(:cookbook_identifier) { default_cookbook_id }
       let(:base_payload) do
-        new_cookbook_artifact(cookbook_name, cookbook_identifier, version: cookbook_version).tap do |ca|
+        new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}", version: cookbook_version).tap do |ca|
           ca.delete("json_class")
         end
       end
@@ -294,7 +294,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
       context 'with invalid cookbook artifact identifier in url' do
 
         let(:cookbook_identifier) { "foo@bar" }
-        let(:payload){ new_cookbook_artifact(cookbook_name, cookbook_identifier)}
+        let(:payload){ new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}")}
 
         it "should respond with an error" do
           expect(
@@ -306,7 +306,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
       context "when the cookbook name is invalid" do
 
         let(:cookbook_name) { "first@second" }
-        let(:payload){ new_cookbook_artifact(cookbook_name, default_cookbook_id)}
+        let(:payload){ new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{default_cookbook_id}")}
 
         it "responds with a 400" do
           expect(
@@ -317,7 +317,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
       context "when the identifier in the URL doesn't match the payload" do
         let(:payload) do
-          new_cookbook_artifact(cookbook_name, "ffffffffffffffffffffffffffffffffffffffff")
+          new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/ffffffffffffffffffffffffffffffffffffffff")
         end
 
         let(:request_url) { api_url("/cookbook_artifacts/#{cookbook_name}/#{default_cookbook_id}") }
@@ -332,7 +332,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
       end
 
       context "when the cookbook name in the URL doesn't match the payload" do
-        let(:payload) { new_cookbook_artifact("foobar", cookbook_version) }
+        let(:payload) { new_cookbook_artifact("/cookbook_artifacts/foobar/#{cookbook_version}") }
         let(:request_url) { api_url("/cookbook_artifacts/#{cookbook_name}/#{cookbook_version}") }
 
         it "mismatched cookbook_name is a 400" do
@@ -345,7 +345,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
       context "when uploading a cookbook artifact with a missing checksum" do
         let(:payload) do
-          new_cookbook_artifact(cookbook_name, default_cookbook_id).tap do |p|
+          new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{default_cookbook_id}").tap do |p|
             p["recipes"] = [
               {
                 "name" => "default.rb",
@@ -392,7 +392,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
       respects_maximum_payload_size
 
       let(:payload) do
-        new_cookbook_artifact(cookbook_name, cookbook_identifier, opts)
+        new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}", opts)
       end
 
       let(:expected_get_response_data) do
@@ -419,7 +419,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
     let(:cookbook_id_2) { "2222222222222222222222222222222222222222" }
 
     let(:cookbook_1_payload) do
-      new_cookbook_artifact(cookbook_name, cookbook_id_1, {})
+      new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_1}", {})
     end
 
     let(:cookbook_1_get_response) do
@@ -427,7 +427,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
     end
 
     let(:cookbook_2_payload) do
-      new_cookbook_artifact(cookbook_name, cookbook_id_2, {})
+      new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_2}", {})
     end
 
     let(:cookbook_2_get_response) do

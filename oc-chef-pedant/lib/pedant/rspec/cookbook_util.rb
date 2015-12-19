@@ -179,7 +179,8 @@ module Pedant
         end
       end
 
-      def new_cookbook_artifact(name, identifier, opts = {})
+      def new_cookbook_artifact(path, opts = {})
+        name, identifier = path.split('/')[2..3]
         {
           "name" => "#{name}",
           "identifier" => identifier,
@@ -206,7 +207,7 @@ module Pedant
       end
 
       def make_cookbook_artifact(path, opts = {})
-        payload = new_cookbook_artifact(name, identifier, opts)
+        payload = new_cookbook_artifact("/cookbook_artifacts/#{name}/#{identifier}", opts)
         res = upload_cookbook(path, payload)
         expect(res.code).to eq(201)
       end
