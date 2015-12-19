@@ -68,7 +68,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         expect(create_response.code.to_s).to eq("201")
 
         # list:
-        list_response = get(api_url("/cookbook_artifacts/#{cookbook_name}"), requestor)
+        list_response = get("/cookbook_artifacts/#{cookbook_name}", requestor)
 
         list_data = parse(list_response)
         expect(list_data).to have_key("pedant_basic")
@@ -466,19 +466,19 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
     end
 
     it "allows us to create 2 revisions of the same cookbook" do
-      put(api_url("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_1}"),
+      put("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_1}",
         admin_user,
         :payload => cookbook_1_payload) do |response|
           expect(response.code).to eq(201)
       end
 
-      put(api_url("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_2}"),
+      put("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_2}",
         admin_user,
         :payload => cookbook_2_payload) do |response|
           expect(response.code).to eq(201)
       end
 
-      get(api_url("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_1}"),
+      get("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_1}",
         admin_user) do |response|
         response.should look_like({
                                    :status => 200,
@@ -486,7 +486,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
                                   })
       end
 
-      get(api_url("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_2}"),
+      get("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_2}",
         admin_user) do |response|
         response.should look_like({
                                    :status => 200,

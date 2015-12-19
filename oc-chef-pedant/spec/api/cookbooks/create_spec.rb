@@ -171,44 +171,25 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
 
       it "invalid cookbook name in URL is a 400" do
         payload = {}
-        put(api_url("/cookbooks/first@second/1.2.3"), admin_user,
-            :payload => payload) do |response|
-          error = "Invalid cookbook name 'first@second' using regex: 'Malformed cookbook name. Must only contain A-Z, a-z, 0-9, _, . or -'."
-          response.should look_like({
-                                      :status => 400,
-                                      :body => {
-                                        "error" => [error]
-                                      }
-                                    })
-        end
+        error = "Invalid cookbook name 'first@second' using regex: 'Malformed cookbook name. Must only contain A-Z, a-z, 0-9, _, . or -'."
+        expect(
+          put("/cookbooks/first@second/1.2.3", payload: payload)
+        ).to look_like(status: 400, body: { "error" => [error] })
       end # it invalid cookbook name in URL is a 400
 
       it "mismatched metadata.cookbook_version is a 400" do
         payload = new_cookbook(cookbook_name, "0.0.1")
-        put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"), admin_user,
-            :payload => payload) do |response|
-          error = "Field 'name' invalid"
-          response.should look_like({
-                                      :status => 400,
-                                      :body => {
-                                        "error" => [error]
-                                      }
-                                    })
-        end
+        expect(
+          put("/cookbooks/#{cookbook_name}/#{cookbook_version}", payload: payload)
+        ).to look_like(status: 400, body: { "error" => [error] })
       end # it mismatched metadata.cookbook_version is a 400
 
       it "mismatched cookbook_name is a 400" do
         payload = new_cookbook("foobar", cookbook_version)
-        put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"), admin_user,
-            :payload => payload) do |response|
-          error = "Field 'name' invalid"
-          response.should look_like({
-                                      :status => 400,
-                                      :body => {
-                                        "error" => [error]
-                                      }
-                                    })
-        end
+        error = "Field 'name' invalid"
+        expect(
+          put("/cookbooks/#{cookbook_name}/#{cookbook_version}", payload: payload)
+        ).to look_like(status: 400, body: { "error" => [error] })
       end # it mismatched cookbook_name is a 400
 
       context "sandbox checks" do
@@ -222,16 +203,10 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
                                   "specificity" => "default"
                                 }
                                ]
-          put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
-              admin_user, :payload => payload) do |response|
-            error = "Manifest has a checksum that hasn't been uploaded."
-            response.should look_like({
-                                        :status => 400,
-                                        :body => {
-                                          "error" => [error]
-                                        }
-                                      })
-          end
+          error = "Manifest has a checksum that hasn't been uploaded."
+          expect(
+            put("/cookbooks/#{cookbook_name}/#{cookbook_version}", payload: payload)
+          ).to look_like(status: 400, body: { "error" => [error] })
         end # it specifying file not in sandbox is a 400
       end # context sandbox checks
     end # context creating broken cookbooks to test validation and defaults
@@ -264,29 +239,19 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
         # define the input in terms of the response, since we use that
         # elsewhere in the test suite.
         payload = retrieved_cookbook(cookbook_name, cookbook_version)
-
-        put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
-            admin_user,
-            :payload => payload) do |response|
-          response.
-            should look_like({
-                               :status => 201,
-                               :body => payload
-                             })
-        end
+        expect(
+          put("/cookbooks/#{cookbook_name}/#{cookbook_version}", payload: payload)
+        ).to look_like(status: 201, body: payload)
       end # it allows creation of a minimal cookbook with no data
 
       it "allows override of defaults" do
         payload = new_cookbook(cookbook_name, cookbook_version, opts)
-        put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version}"),
-            admin_user, :payload => payload) do |response|
-          response.
-            should look_like({
-                               :status => 201,
-                               :body => retrieved_cookbook(cookbook_name, cookbook_version,
-                                                      opts)
-                             })
-        end
+        expect(
+          put("/cookbooks/#{cookbook_name}/#{cookbook_version}"), payload: payload)
+        ).to look_like(
+          status: 200,
+          body: retrieved_cookbook(cookbook_name, cookbook_version, opts)
+        )
       end # it allows override of defaults
     end # context creating good gookbooks to test defaults
   end # context PUT /cookbooks/<name>/<version> [create]
@@ -298,40 +263,22 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
 
     it "allows us to create 2 versions of the same cookbook" do
       payload = new_cookbook(cookbook_name, cookbook_version1, {})
-      put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version1}"),
-        admin_user,
-        :payload => payload) do |response|
-        response.should look_like({
-            :status => 201,
-            :body => payload
-          })
-      end
+      expect(
+        put("/cookbooks/#{cookbook_name}/#{cookbook_version1}"), payload: payload)
+      ).to look_like(status: 201, body: payload)
 
       payload2 = new_cookbook(cookbook_name, cookbook_version2, {})
-      put(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version2}"),
-        admin_user,
-        :payload => payload2) do |response|
-        response.should look_like({
-            :status => 201,
-            :body => payload2
-          })
-      end
+      expect(
+        put("/cookbooks/#{cookbook_name}/#{cookbook_version2}", payload: payload2)
+      ).to look_like(status: 201, body: payload2)
 
-      get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version1}"),
-        admin_user) do |response|
-        response.should look_like({
-                                   :status => 200,
-                                   :body => retrieved_cookbook(cookbook_name, cookbook_version1)
-                                  })
-      end
+      expect(
+        get("/cookbooks/#{cookbook_name}/#{cookbook_version1}")
+      ).to look_like(status: 200, body: retrieved_cookbook(cookbook_name, cookbook_version1))
 
-      get(api_url("/cookbooks/#{cookbook_name}/#{cookbook_version2}"),
-        admin_user) do |response|
-        response.should look_like({
-                                   :status => 200,
-                                   :body => retrieved_cookbook(cookbook_name, cookbook_version2)
-                                  })
-      end
+      expect(
+        get("/cookbooks/#{cookbook_name}/#{cookbook_version2}")
+      ).to look_like(status: 200, body: retrieved_cookbook(cookbook_name, cookbook_version2))
     end # it allows us to create 2 versions of the same cookbook
   end # context PUT multiple cookbooks
 end # describe Cookbooks API endpoint

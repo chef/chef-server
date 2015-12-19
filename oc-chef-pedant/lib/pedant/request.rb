@@ -100,7 +100,7 @@ module Pedant
     # receive a single argument, the HTTP response (as a
     # RestClient::Response object).  Testing methods should use this to
     # carry out any validation tests of the response.
-    def authenticated_request(method, url, requestor=nil, opts={}, &validator)
+    def authenticated_request(method, url, requestor=nil, **opts, &validator)
       # Default to admin_user
       requestor ||= admin_user
       user_headers = opts[:headers] || {}
@@ -161,19 +161,19 @@ module Pedant
 
     # Accessory methods for making requests a bit easier
 
-    def get(url, requestor=nil, opts={}, &validator)
+    def get(url, requestor=nil, **opts, &validator)
       authenticated_request :GET, url, requestor, opts, &validator
     end
 
-    def put(url, requestor=nil, opts={}, &validator)
+    def put(url, requestor=nil, **opts, &validator)
       authenticated_request :PUT, url, requestor, opts, &validator
     end
 
-    def post(url, requestor=nil, opts={}, &validator)
+    def post(url, requestor=nil, **opts, &validator)
       authenticated_request :POST, url, requestor, opts, &validator
     end
 
-    def delete(url, requestor=nil, opts={}, &validator)
+    def delete(url, requestor=nil, **opts, &validator)
       authenticated_request :DELETE, url, requestor, opts, &validator
     end
 

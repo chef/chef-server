@@ -89,7 +89,7 @@ module Pedant
       end
 
       def commit_sandbox(sandbox)
-        ensure_2xx(put(sandbox["uri"], nil, payload: { "is_completed" => true }))
+        ensure_2xx(put(sandbox["uri"], payload: { "is_completed" => true }))
       end
 
       def upload_files_to_sandbox(files)
