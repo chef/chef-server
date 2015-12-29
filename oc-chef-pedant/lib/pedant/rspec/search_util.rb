@@ -853,7 +853,7 @@ module Pedant
         should_find(temporary_data_bag_name, "test_item")
 
         # Now, drop all information from the search index
-        `#{executable} drop #{reindex_args.join(" ")}`
+        `#{executable} drop #{reindex_args.join(" ")} #{Pedant::Config.reindex_endpoint}`
 
         # Verify that searches come up empty
         should_not_find("node", node_name)
@@ -863,7 +863,7 @@ module Pedant
         should_not_find(temporary_data_bag_name, "test_item")
 
         # Now, send everything to be re-indexed
-        `#{executable} reindex #{reindex_args.join(" ")}`
+        `#{executable} reindex #{reindex_args.join(" ")} #{Pedant::Config.reindex_endpoint}`
 
         # Verify that the reindexing worked by finding all the items
         # again.  Remember, there are implicit Solr commit calls being
