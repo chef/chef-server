@@ -1,7 +1,9 @@
 ## System setup
 # Hey neat - our packages have chef from master now
 # which means we can:
-package node['packages']
+package node['packages'] do
+  not_if { node['offline'] }
+end
 
 # Time and zone should match the host so that erlang's sync module plays nicely with rsync'd files.
 file "/etc/timezone" do

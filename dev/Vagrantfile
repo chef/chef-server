@@ -63,6 +63,7 @@ def define_chef_server(config, attributes)
   if provisioning
     json = {
       "packages" => attributes["vm"]["packages"],
+      "offline" => attributes['vm']['offline'],
       "tz" => host_timezone,
       "omnibus-autoload" => attributes["vm"]["omnibus-autoload"]
     }.merge attributes["vm"]["node-attributes"]
