@@ -103,14 +103,20 @@ def define_chef_server(config, attributes)
       chef.binary_path = "/opt/opscode/embedded/bin"
       chef.node_name = config.vm.hostname
       chef.cookbooks_path = "cookbooks"
-      chef.add_recipe("provisioning::chef-server")
+      # TODO will this order work? No reason to tie having a sane
+      # working env to a successful reconfigure, as we currnetly do...
       chef.add_recipe("dev::system")
       chef.add_recipe("dev::user-env")
       chef.add_recipe("dev::dvm")
+      # TODO:
+      chef.add_recipe("provisioning::sync")
+      chef.add_recipe("provisioning::chef-server")
       chef.json = json || {}
     end
+    # Initial sync and start th sync service - this will need to become a recipe...
+    #
     # Makes more sense here than in a one-off line in the dvm recipe, which
-    # has no direct connection...
+    # has no direct connection. In addition this lets us see the output  in provisioning itself?
     config.vm.provision "shell", inline: "chef-server-ctl reconfigure"
   end
 end
