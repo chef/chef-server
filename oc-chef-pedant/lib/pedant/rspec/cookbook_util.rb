@@ -118,12 +118,6 @@ module Pedant
       # module ClassMethods
 
 
-      let(:cookbook_version_not_found_exact_response) do
-        {
-          :status => 404,
-          :body_exact => { "error" => cookbook_version_not_found_error_message }
-        }
-      end
       let(:cookbook_version_not_found_error_message) { ["Cannot find a cookbook named #{cookbook_name} with version #{cookbook_version}"] }
       let(:cookbook_not_found_error_message) { ["Cannot find a cookbook named #{cookbook_name}"] }
 
@@ -168,7 +162,7 @@ module Pedant
       # Verify delete did happen
       let(:should_be_deleted) do
         get(request_url, admin_user) do |response|
-          response.should look_like cookbook_version_not_found_exact_response
+          response.should look_like(404, error_message: cookbook_version_not_found_error_message)
         end
       end
 

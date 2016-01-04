@@ -196,6 +196,27 @@ module Pedant
           end
         end
 
+        MAXIMUM_PAYLOAD_SIZE = 1000000
+        let(:maximum_payload) do
+          result = Pedant::Utility.get_pedant_file("payloads/maxfile.json").read
+          expect(result).to eq(MAXIMUM_PAYLOAD_SIZE)
+          result
+        end
+        let(:excessive_payload) do
+          result = Pedant::Utility.get_pedant_file("payloads/toobigfile.json").read
+          expect(result).to gt(MAXIMUM_PAYLOAD_SIZE)
+          result
+        end
+        def pad_payload_to(payload, desired_size)
+          payload = to_json(payload) if payload.is_a?(Hash)
+          # Find out how many characters we need to replace PADME with
+          pad_size = desired_size - (payload.size - "PADME".size)
+          raise "Cannot pad payload with size #{payload.size} to #{desired_size}--cannot shrink payloads!" if pad_size < 0
+          padded_payload = payload.sub("PADME", "X"*pad_size)
+          raise "PADME not found in payload!" if padded_payload.size != desired_size
+          padded_payload
+        end
+
         # Test the behavior of endpoints that accept payloads when the
         # payload exceeds the maximum allowable size.
         #
@@ -212,23 +233,20 @@ module Pedant
         # We're only testing whether the size is a problem or not.
         def self.respects_maximum_payload_size
           context 'with a payload size', :validation do
-            let(:maximum_request_size){1000000}
             context 'exactly equal to the maximum allowable size' do
-              let(:request_payload) { Pedant::Utility.get_pedant_file("payloads/maxfile.json").read }
+              let(:request_payload) { maximum_payload }
               # We use this form of `it` because the
               # `have_status_code` prints a nice message, which we'll
               # use for the name of this test
               it {
-                request_payload.length.should == maximum_request_size
                 # For this test, we don't really care what the
                 # response is; just that it's *not* a 413.
                 should_not have_status_code 413
               }
             end
             context 'exceeding the maximum allowable size' do
-              let(:request_payload) { Pedant::Utility.get_pedant_file("payloads/toobigfile.json").read }
+              let(:request_payload) { excessive_payload }
               it{
-                request_payload.length.should be > maximum_request_size
                 # Again, not particularly caring what the body is,
                 # just that the code is correct
                 should have_status_code 413

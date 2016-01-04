@@ -19,30 +19,23 @@ require 'pedant/rspec/validations'
 
 describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artifacts_create do
 
-  let(:default_cookbook_id) { "1111111111111111111111111111111111111111" }
+  TEST_NAME = "cookbook_artifacts_create"
+  TEST_IDENTIFIER = "1111111111111111111111111111111111111111"
+  TEST_COOKBOOK = "/cookbook_artifacts/#{TEST_NAME}/#{TEST_IDENTIFIER}"
 
   include Pedant::RSpec::CookbookUtil
 
-  let(:default_version) { "1.0.0" }
-
-  context "PUT /cookbook_artifacts/<name>/<version> [create]" do
+  context "PUT #{TEST_COOKBOOK} [create]" do
 
     include Pedant::RSpec::Validations::Create
 
-    let(:request_method){:PUT}
-    let(:request_url){api_url("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}")}
-    shared(:requestor){admin_user}
-
-    let(:cookbook_artifact_to_create){ new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}")}
+    let(:cookbook_artifact_to_create){ new_cookbook_artifact(TEST_COOKBOOK) }
 
     context 'with a basic cookbook', :smoke do
-      let(:cookbook_name) { "pedant_basic" }
-      let(:cookbook_identifier) { "1111111111111111111111111111111111111111" }
-
       let(:expected_get_response_data) do
         {
-          "name"=>"pedant_basic",
-          "identifier"=>"1111111111111111111111111111111111111111",
+          "name"=>TEST_NAME,
+          "identifier"=>TEST_IDENTIFIER,
           "version"=>"1.0.0",
           "chef_type"=>"cookbook_version",
           "frozen?"=>false,
@@ -65,71 +58,86 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
       it "creates a basic cookbook_artifact" do
         # create it:
         expect(
-          put(request_url, payload: cookbook_artifact_to_create)
-        ).to look_like(status: 201)
+          put(TEST_COOKBOOK, payload: cookbook_artifact_to_create)
+        ).to respond_with(201)
 
         # list:
-        list_response = get("/cookbook_artifacts/#{cookbook_name}", requestor)
+        list_response = get("/cookbook_artifacts/#{TEST_NAME}", requestor)
 
         list_data = parse(list_response)
         expect(list_data).to have_key("pedant_basic")
         expect(list_data["pedant_basic"]["versions"].size).to eq(1)
-        expect(list_data["pedant_basic"]["versions"].first["identifier"]).to eq(cookbook_identifier)
+        expect(list_data["pedant_basic"]["versions"].first["identifier"]).to eq(TEST_IDENTIFIER)
 
         # fetch it:
         expect(
-          get(request_url, requestor)
-        ).to look_like(status: 200, body_exact: expected_get_response_data)
+          get(TEST_COOKBOOK, requestor)
+        ).to respond_with(200, body_exact: expected_get_response_data)
+      end
+    end
+
+    def expect_cookbook_artifact_to_be_created(without: [], **fields)
+      payload = new_cookbook_artifact(cookbook_path, fields)
+      without.each do |value|
+      expect(put(cookbook_path, payload: payload)).to respond_with(201)
+      expect(get(cookbook_path)).to respond_with(200, body: Hash[fields.map { |k,v| [k.to_s,v] }])
+    end
+    def self.cookbook_artifact_create_succeeds(description=nil, without: [], **fields)
+      description ||= begin
+        description = []
+        description << "with #{fields.map { |k,v| "#{k}=#{v.inspect}"}.join(", ")}" unless fields.empty?
+        description << "without #{without.join(", ")}" unless without.empty?
+        description.join(" and ")
+      end
+      description = " #{description}" if !description.empty?
+
+      it "Creating a cookbook artifact#{description} succeeds" do
+        payload = new_cookbook_artifact(TEST_COOKBOOK, fields)
+        without.each { |field| payload.delete(field.to_s) }
+        expect(put(TEST_COOKBOOK, payload: payload)).to respond_with(201)
+        expected_body = Hash[fields.map { |k,v| [k.to_s,v] }.reject { |k,v| k == "json_class" }]
+        expect(get(TEST_COOKBOOK)).to respond_with(200, body: expected_body)
+      end
+    end
+    def self.cookbook_artifact_create_fails(code, error_message, *tags, without: [], **fields)
+      description ||= begin
+        description = []
+        description << "with #{fields.map { |k,v| "#{k}=#{v.inspect}"}.join(", ")}" unless fields.empty?
+        description << "without #{without.join(", ")}" unless without.empty?
+        description.join(" and ")
+      end
+      description = " #{description}" if description
+      tags << :validation if code == 400
+      tags << :authentication if code == 401
+      tags << :authorization if code == 403
+      tags << :validation if code == 413
+
+      it "Creating a cookbook artifact#{description} fails with #{code}: #{error_message}" do
+        payload = new_cookbook_artifact(TEST_COOKBOOK, fields)
+        without.each { |field| payload.delete(field.to_s) }
+        expect(put(TEST_COOKBOOK, payload: payload)).to respond_with(code, error_message: error_message)
+        expect(get(TEST_COOKBOOK)).to respond_with(404)
       end
     end
 
     # Start using the new validation macros
-    context "when validating" do
-
-      let(:cookbook_name) { "cookbook_name" }
-      let(:cookbook_identifier) { "1111111111111111111111111111111111111111" }
-
-      let(:resource_url){api_url("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}")}
-      let(:persisted_resource_response){ get(resource_url, requestor) }
-
-      context "the cookbook version" do
-
-        let(:cookbook_artifact_to_create) do
-          new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}", version: cookbook_version)
-        end
-
-        let(:request_payload) { cookbook_artifact_to_create }
-        let(:default_resource_attributes) { cookbook_artifact_to_create }
-
-        context "with versions at exactly 4 bytes" do
-          int4_exact = "2147483647"
-          let(:cookbook_version) { "1.2.#{int4_exact}" }
-          it { should look_like http_201_response }
-        end
-
-        context "with versions larger than 4 bytes" do
-          int4_overflow = "2147483669" # max = 2147483647 (add 42)
-          let(:cookbook_version) { "1.2.#{int4_overflow}" }
-          it { should look_like http_201_response }
-        end
-
-        context "with versions with 'prerelease' fields" do
-
-          let(:cookbook_version) { "1.2.3.beta.5" }
-
-          it { should look_like http_201_response }
-        end
+    context "when validating fields" do
+      cookbook_artifact_create_succeeds "with all valid values"
+      context "version" do
+        cookbook_artifact_create_succeeds "with a version exactly 4 bytes", version: "1.2.2147483647"
+        cookbook_artifact_create_succeeds "with a version greater than 4 bytes", version: "1.2.2147483669"
+        cookbook_artifact_create_succeeds "with a prerelease version", version: "1.2.3.beta.5"
       end
-
+      context "Field json_class" do
+        # cookbook_artifact_create_succeeds without: :json_class
+        # cookbook_artifact_create_fails 400, json_class: "blah"
+      end
     end
 
     context "creating broken cookbook_artifacts to test validation and defaults", :validation do
-      let(:cookbook_name) { "cookbook_name" }
-      let(:cookbook_version) { "1.2.3" }
 
-      let(:cookbook_identifier) { default_cookbook_id }
       let(:base_payload) do
-        new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}", version: cookbook_version).tap do |ca|
+        new_cookbook_artifact(TEST_COOKBOOK, version: cookbook_version).tap do |ca|
           ca.delete("json_class")
         end
       end
@@ -149,13 +157,13 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         it "create returns 201" do
           #create it
           expect(
-            put(request_url, payload: payload)
-          ).to look_like(status: 201)
+            put(TEST_COOKBOOK, payload: payload)
+          ).to respond_with(201)
 
           # verify it looks correct
           expect(
-            get(request_url)
-          ).to look_like(status: 200, body: payload)
+            get(TEST_COOKBOOK)
+          ).to respond_with(200, body: payload)
         end
       end
 
@@ -163,13 +171,13 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         it "create returns 400" do
           # create should respond with error
           expect(
-            put(request_url, payload: payload)
-          ).to look_like(status: 400, body_exact: { "error" => [error_message] })
+            put(TEST_COOKBOOK, payload: payload)
+          ).to respond_with(400, error_message: error_message)
 
           # double check it did't get created
           expect(
-            get(request_url)
-          ).to look_like(status: 404)
+            get(TEST_COOKBOOK)
+          ).to respond_with(404)
         end
       end
 
@@ -293,59 +301,51 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
       context 'with invalid cookbook artifact identifier in url' do
 
-        let(:cookbook_identifier) { "foo@bar" }
-        let(:payload){ new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}")}
+        let(:payload){ new_cookbook_artifact("/cookbook_artifacts/#{TEST_NAME}/invalid@identifier")}
 
         it "should respond with an error" do
           expect(
-            put(request_url, payload: payload)
-          ).to look_like(status: 400, { "error" => ["Field 'identifier' invalid"] })
+            put(TEST_COOKBOOK, payload: payload)
+          ).to respond_with(400, { "error" => ["Field 'identifier' invalid"] })
         end # it invalid version in URL is a 400
       end # with invalid version in url
 
       context "when the cookbook name is invalid" do
 
-        let(:cookbook_name) { "first@second" }
-        let(:payload){ new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{default_cookbook_id}")}
+        let(:payload){ new_cookbook_artifact("/cookbook_artifacts/invalid@identifier/#{TEST_IDENTIFIER}")}
 
         it "responds with a 400" do
           expect(
-            put(request_url, payload: payload)
-          ).to look_like(status: 400, body: { "error" => ["Field 'name' invalid"] })
+            put(TEST_COOKBOOK, payload: payload)
+          ).to respond_with(400, body: { "error" => ["Field 'name' invalid"] })
         end
       end
 
       context "when the identifier in the URL doesn't match the payload" do
         let(:payload) do
-          new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/ffffffffffffffffffffffffffffffffffffffff")
+          new_cookbook_artifact("/cookbook_artifacts/#{TEST_NAME}/ffffffffffffffffffffffffffffffffffffffff")
         end
 
-        let(:request_url) { api_url("/cookbook_artifacts/#{cookbook_name}/#{default_cookbook_id}") }
-
         it "responds with a 400" do
-          error = "Field 'identifier' invalid : 1111111111111111111111111111111111111111 does not match ffffffffffffffffffffffffffffffffffffffff"
-
           expect(
-            put(request_url, payload: payload)
-          ).to look_like(status: 400, body: { "error" => [error] })
+            put(TEST_COOKBOOK, payload: payload)
+          ).to respond_with(400, error_message: "Field 'identifier' invalid : #{TEST_IDENTIFIER} does not match ffffffffffffffffffffffffffffffffffffffff")
         end # it mismatched metadata.cookbook_version is a 400
       end
 
       context "when the cookbook name in the URL doesn't match the payload" do
         let(:payload) { new_cookbook_artifact("/cookbook_artifacts/foobar/#{cookbook_version}") }
-        let(:request_url) { api_url("/cookbook_artifacts/#{cookbook_name}/#{cookbook_version}") }
 
-        it "mismatched cookbook_name is a 400" do
-          error = "Field 'name' invalid : cookbook_name does not match foobar"
+        it "mismatched cookbook name is a 400" do
           expect(
-            put(request_url, payload: payload)
-          ).to look_like(status: 400, body: { "error" => [error] }) do |response|
+            put(TEST_COOKBOOK, payload: payload)
+          ).to respond_with(400, error_message: "Field 'name' invalid : #{TEST_NAME} does not match foobar")
         end
       end
 
       context "when uploading a cookbook artifact with a missing checksum" do
         let(:payload) do
-          new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{default_cookbook_id}").tap do |p|
+          new_cookbook_artifact("/cookbook_artifacts/#{TEST_NAME}/#{default_cookbook_id}").tap do |p|
             p["recipes"] = [
               {
                 "name" => "default.rb",
@@ -358,68 +358,61 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         end
 
         it "specifying file not in sandbox is a 400" do
-          error = "Manifest has a checksum that hasn't been uploaded."
           expect(
-            put(request_url, payload: payload)
-          ).to look_like(status: 400, body => { "error" => [error] })
+            put(TEST_COOKBOOK, payload: payload)
+          ).to respond_with(400, error_message: "Manifest has a checksum that hasn't been uploaded.")
         end # it specifying file not in sandbox is a 400
       end # context sandbox checks
     end # context creating broken cookbook_artifacts to test validation and defaults
 
-    context "creating good cookbook_artifacts to test defaults" do
-      let(:cookbook_name) { "cookbook_name" }
-      let(:cookbook_version) { "1.2.3" }
+    it "Disallows excessive requests (greater than #{MAXIMUM_PAYLOAD_SIZE} bytes)" do
+      payload = new_cookbook_artifact(TEST_COOKBOOK, long_description: "PADME"))
+      payload = pad_payload_to(payload, MAXIMUM_PAYLOAD_SIZE+1)
+      expect(
+        put(TEST_COOKBOOK, payload: payload)
+      ).to respond_with(413)
+      expect(
+        get(TEST_COOKBOOK)
+      ).to respond_with(404)
+    end
 
-      let(:cookbook_identifier) { default_cookbook_id }
+    it "Allows maximally-sized requests (equal to #{MAXIMUM_PAYLOAD_SIZE} bytes)" do
+      valid_payload = new_cookbook_artifact(TEST_COOKBOOK, long_description: "PADME"))
+      payload = pad_payload_to(payload, MAXIMUM_PAYLOAD_SIZE+1)
+      expect(
+        put(TEST_COOKBOOK, payload: payload)
+      ).to respond_with(201, body_exact: payload)
+      expect(
+        get(TEST_COOKBOOK)
+      ).to respond_with(200, body: payload.reject { |k,v| k == "json_class"})
+    end
 
-      let(:description) { "my cookbook" }
-      let(:long_description) { "this is a great cookbook" }
-      let(:maintainer) { "This is my name" }
-      let(:maintainer_email) { "cookbook_author@example.com" }
-      let(:license) { "MPL" }
+    it "Allows PUT to override defaults" do
+      payload = new_cookbook_artifact(TEST_COOKBOOK,
+        version: "1.2.3",
+        description: "my cookbook",
+        long_description: "this is a great cookbook",
+        maintainer: "This is my name",
+        maintainer_email: "cookbook_author@example.com",
+        license: "MPL"
+      )
 
-      let (:opts) {
-        {
-          :version => cookbook_version,
-          :description => description,
-          :long_description => long_description,
-          :maintainer => maintainer,
-          :maintainer_email => maintainer_email,
-          :license => license
-        }
-      }
+      expect(
+        put(TEST_COOKBOOK, payload: payload)
+      ).to respond_with(201)
 
-      respects_maximum_payload_size
-
-      let(:payload) do
-        new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_identifier}", opts)
-      end
-
-      let(:expected_get_response_data) do
-        payload.dup.tap do |artifact|
-          artifact.delete("json_class")
-        end
-      end
-
-      it "allows override of defaults" do
-        expect(
-          put(request_url, payload: payload)
-        ).to look_like(status: 201)
-
-        expect(
-          get(request_url, requestor)
-        ).to look_like(status: 200, body: expected_get_response_data)
-      end # it allows override of defaults
-    end # context creating good gookbooks to test defaults
+      expect(
+        get(TEST_COOKBOOK)
+      ).to respond_with(200, body: payload.reject { |k,v| k == "json_class"})
+    end # it allows override of defaults
   end # context PUT /cookbook_artifacts/<name>/<version> [create]
 
   context "PUT multiple cookbook_artifacts" do
-    let(:cookbook_name) { "multiple_versions" }
-    let(:cookbook_id_1) { "1111111111111111111111111111111111111111" }
+    let(:cookbook_id_1) { TEST_IDENTIFIER }
     let(:cookbook_id_2) { "2222222222222222222222222222222222222222" }
 
     let(:cookbook_1_payload) do
-      new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_1}", {})
+      new_cookbook_artifact("/cookbook_artifacts/#{TEST_NAME}/#{cookbook_id_1}", {})
     end
 
     let(:cookbook_1_get_response) do
@@ -427,7 +420,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
     end
 
     let(:cookbook_2_payload) do
-      new_cookbook_artifact("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_2}", {})
+      new_cookbook_artifact("/cookbook_artifacts/#{TEST_NAME}/#{cookbook_id_2}", {})
     end
 
     let(:cookbook_2_get_response) do
@@ -436,20 +429,20 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
     it "allows us to create 2 revisions of the same cookbook" do
       expect(
-        put("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_1}", payload: cookbook_1_payload)
-      ).to look_like(status: 201)
+        put("/cookbook_artifacts/#{TEST_NAME}/#{cookbook_id_1}", payload: cookbook_1_payload)
+      ).to respond_with(201)
 
       expect(
-        put("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_2}", payload: cookbook_2_payload)
-      ).to look_like(status: 201)
+        put("/cookbook_artifacts/#{TEST_NAME}/#{cookbook_id_2}", payload: cookbook_2_payload)
+      ).to respond_with(201)
 
       expect(
-        get("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_1}")
-      ).to look_like(status: 200, body: cookbook_1_get_response)
+        get("/cookbook_artifacts/#{TEST_NAME}/#{cookbook_id_1}")
+      ).to respond_with(200, body: cookbook_1_get_response)
 
       expect(
-        get("/cookbook_artifacts/#{cookbook_name}/#{cookbook_id_2}")
-      ).to look_like(status: 200, body: cookbook_2_get_response)
+        get("/cookbook_artifacts/#{TEST_NAME}/#{cookbook_id_2}")
+      ).to respond_with(200, body: cookbook_2_get_response)
     end # it allows us to create 2 versions of the same cookbook
   end # context PUT multiple cookbook_artifacts
 end # describe cookbook_artifacts API endpoint

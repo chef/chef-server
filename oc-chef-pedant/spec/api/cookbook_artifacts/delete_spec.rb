@@ -19,27 +19,24 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
   include Pedant::RSpec::CookbookUtil
 
-  context "DELETE /cookbooks/<name>/<version>" do
-    TEST_NAME = "cookbook_artifact_delete"
-    TEST_COOKBOOK = "/cookbook_artifacts/#{TEST_NAME}/1111111111111111111111111111111111111111"
+  TEST_NAME = "cookbook_artifact_delete"
+  TEST_IDENTIFIER = "1111111111111111111111111111111111111111"
+  TEST_COOKBOOK = "/cookbook_artifacts/#{TEST_NAME}/#{TEST_IDENTIFIER}"
+
+  context "DELETE #{TEST_COOKBOOK}" do
 
     context "When there are no cookbook artifacts" do
       it "Deleting a cookbook artifact returns 404" do
         expect(
-          delete("/cookbook_artifacts/#{TEST_NAME}_nonexistent/1111111111111111111111111111111111111111")
+          delete("/cookbook_artifacts/#{TEST_NAME}_nonexistent/#{TEST_IDENTIFIER}")
         ).to respond_with(404, error_message: "not_found")
-        # TODO find out why we didn't do this
-        #).to look_like(cookbook_version_not_found_exact_response)
       end
 
-      context "Deleting a cookbook with invalid identifier foo@bar returns 404" do
-        it "returns 404" do
-          expect(
-            delete("/cookbook_artifacts/#{TEST_NAME}/foo@bar")
-          ).to respond_with(404, error_message: "not_found")
-        end
-
-      end # with bad version
+      it "Deleting a cookbook artifact with an invalid identifier 404s" do
+        expect(
+          delete("/cookbook_artifacts/#{TEST_NAME}/foo@bar")
+        ).to respond_with(404, error_message: "not_found")
+      end
     end # context for non-existent cookbooks
 
     context "when a cookbook artifact #{TEST_COOKBOOK} exists" do
@@ -47,7 +44,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
       let(:original_cookbook) { new_cookbook_artifact(TEST_COOKBOOK) }
       let(:fetched_cookbook) { original_cookbook.dup.tap { |c| c.delete("json_class") } }
 
-      it "deleting a different version of #{TEST_COOKBOOK} should respond with 404 (\"Not Found\") and not delete existing versions" do
+      it "Deleting a different version of #{TEST_COOKBOOK} 404s and does not delete anything" do
         expect(
           delete("/cookbook_artifacts/#{TEST_NAME}/ffffffffffffffffffffffffffffffffffffffff")
         ).to respond_with(404, error_message: "not_found")
@@ -57,18 +54,13 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         ).to respond_with(200)
       end
 
-      it "deleting the cookbook should delete it and its parent (since it's the last one)" do
+      it "Deleting the cookbook should delete it and its parent (since it's the last one)" do
         expect(
           delete(TEST_COOKBOOK)
         ).to respond_with(200)
 
-        expect(
-          get(TEST_COOKBOOK)
-        ).to respond_with(404)
-
-        expect(
-          get("/cookbook_artifacts/#{TEST_NAME}")
-        ).to respond_with(404)
+        expect(get(TEST_COOKBOOK)).to respond_with(404)
+        expect(get("/cookbook_artifacts/#{TEST_NAME}")).to respond_with(404)
       end
     end
 
@@ -125,7 +117,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
           expect(
             get(TEST_COOKBOOK)
-          ).to look_like(cookbook_version_not_found_exact_response)
+          ).to look_like(404, error_message: ["not_found"])
         end
       end # it outside user returns 403
 
@@ -137,7 +129,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
           expect(
             get(TEST_COOKBOOK)
-          ).to look_like(cookbook_version_not_found_exact_response)
+          ).to look_like(404, error_message: ["not_found"])
         end # responds with 401
       end # with invalid user
 

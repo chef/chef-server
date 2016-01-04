@@ -29,14 +29,14 @@ describe "Cookbook Versions API endpoint, GET", :cookbooks, :cookbooks_version d
 
   let(:fetch_cookbook_version_success_response) do
     {
-      :status => 200,
-      :body => retrieved_cookbook(cookbook_name, cookbook_version)
+      status: 200,
+      body: retrieved_cookbook(cookbook_name, cookbook_version)
     }
   end
   let(:cookbook_version_not_found_exact_response) do
     {
-      :status => 404,
-      :body_exact => { "error" => ["Cannot find a cookbook named #{cookbook_name} with version #{cookbook_version}"] }
+      status: 404,
+      error_message: "Cannot find a cookbook named #{cookbook_name} with version #{cookbook_version}"
     }
   end
 
