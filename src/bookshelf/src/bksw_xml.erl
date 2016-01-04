@@ -36,6 +36,8 @@ list_buckets(Buckets) ->
     #'ListAllMyBucketsResult'{'Owner' = owner(),
                               'Buckets' = buckets(Buckets)}.
 
+list_objects(Bucket, none) ->
+    list_objects(Bucket, []);
 list_objects(Bucket, Objects) ->
     #'ListBucketResult'{'Name' = Bucket, 'Prefix' = "",
                         'Marker' = "", 'MaxKeys' = 10000, 'IsTruncated' = false,
