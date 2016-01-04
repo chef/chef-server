@@ -15,7 +15,7 @@ interval_remaining = 1
 while true do
   # reload the config for each sync so that we pick up changes
   # TODO - merge in custom settings...
-  config = load_settings['vm']['sync']
+  config = load_settings("/vagrant")['vm']['sync']
   # TODO how to safely stop any interrupt from passing through to child process
   # before we intercept?
   begin
@@ -69,15 +69,15 @@ BEGIN {
     @screen.set_status 'Loading SSH config...'
     @all_stats = { walltime: 0.0,  transferred: 0, created: 0, deleted: 0, bytes: 0, time: 0.0}
     # Determine our ssh args up front, so we won't need to do this on every sync.
-    ssh_info = {}
-    `vagrant ssh-config chef-server`.split("\n").each do |line|
-      k, v = line.split(" ")
-      ssh_info[k.strip] = v.strip
-    end
+    #ssh_info = {}
+    #`vagrant ssh-config chef-server`.split("\n").each do |line|
+      #k, v = line.split(" ")
+      #ssh_info[k.strip] = v.strip
+    #end
     @screen.clear_status
-    @username = ssh_info["User"]
-    @host = ssh_info["HostName"]
-    @rsh = "ssh -p #{ssh_info["Port"]} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -q -i #{ssh_info["IdentityFile"]}"
+    #@username = ssh_info["User"]
+    #@host = ssh_info["HostName"]
+    #@rsh = "ssh -p #{ssh_info["Port"]} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -q -i #{ssh_info["IdentityFile"]}"
   end
 
   def refresh_sync(config, message)
@@ -93,10 +93,13 @@ BEGIN {
     excludes = Array(config['exclude-files']).map(&:to_s)
     excludes += ['.vagrant/']
     excludes.uniq!
-    args = ["--stats", "--archive", "--delete", "-z",
-            "--no-owner", "--no-group", "--rsync-path /usr/bin/rsync", "-k" ]
-    command = [ "rsync", args, "-e", "\"#{@rsh}\"", excludes.map { |e| ["--exclude", e] },
-                "../", "#{@username}@#{@host}:/host" ].flatten.join(" ")
+    # TODO - can we make do anything to make this faster?
+    args = ["--stats", "--archive", "--delete",
+            "--no-owner", "--no-group", "-k" ]
+    #command = [ "rsync", args, "-e", "\"#{@rsh}\"", excludes.map { |e| ["--exclude", e] },
+    #            "../", "#{@username}@#{@host}:/host" ].flatten.join(" ")
+    command = [ "rsync", args, excludes.map { |e| ["--exclude", e] },
+                "/host-base/", "/host" ].flatten.join(" ")
     # TODO - subproc to ignore INT signal, or move to different process group
     # to avoid Ctrl+C interrupting it.
     r = `#{command}`

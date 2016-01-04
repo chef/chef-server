@@ -1,8 +1,8 @@
 
-def load_settings
-  attributes = YAML.load_file("defaults.yml")
+def load_settings(base = "./")
+  attributes = YAML.load_file(File.join(base, "defaults.yml"))
   begin
-    custom_attributes = YAML.load_file("config.yml")
+    custom_attributes = YAML.load_file(File.join(base, "config.yml"))
     attributes = simple_deep_merge(attributes, custom_attributes)
   rescue
   end

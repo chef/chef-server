@@ -91,12 +91,7 @@ def define_chef_server(config, attributes)
     end
 
     dotfiles_path = attributes["vm"]["dotfile_path"] || "dotfiles"
-    config.vm.synced_folder File.absolute_path(File.join(Dir.pwd, "../")), "/host",
-      type: "rsync",
-      rsync__args: ["--verbose", "--archive", "--delete", "-z", "--no-owner", "--no-group" ],
-      rsync__exclude: attributes["vm"]['sync']['exclude-files']
-    # We're also going to do a share of the slower vboxsf style, allowing us to auto-checkout dependencies
-    # and have them be properly synced to a place that we can use them.
+    config.vm.synced_folder File.absolute_path(File.join(Dir.pwd, "../")), "/host-base"
     config.vm.synced_folder installer_path, "/installers"
     config.vm.synced_folder File.expand_path(dotfiles_path), "/dotfiles"
 
