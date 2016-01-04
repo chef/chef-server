@@ -30,6 +30,9 @@
          stream_download/0,
          summarize_config/0]).
 
+%% Exported for common test
+-export([port/0, ip/0, keys/0]).
+
 -include("internal.hrl").
 
 %%%===================================================================
@@ -79,7 +82,9 @@ secret_access_key(#context{secret_access_key=SecretAccessKey}) ->
 -spec disk_store() -> string().
 -ifdef(TEST).
 disk_store() ->
-    "/tmp/".
+    D = "/tmp/bksw_test",
+    filelib:ensure_dir(D),
+    D.
 -else.
 disk_store() ->
     case envy:get(bookshelf, disk_store, undefined, any) of
