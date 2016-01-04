@@ -67,7 +67,7 @@ bucket_delete(Bucket) ->
 
 -spec entry_list(binary()) -> [#object{}] | [].
 entry_list(Bucket) ->
-    ?LOG_DEBUG("reading entries for bucket '~p' #~p", [Bucket]),
+    ?LOG_DEBUG("reading entries for bucket '~p'", [Bucket]),
     bksw_sql:list_bucket(Bucket).
 
 -spec entry_delete(binary(), binary()) -> boolean().
