@@ -37,12 +37,9 @@ vm:
   # Note that we can't exclude .git from top-level projects, and by extension from anything,
   # otherwise rebar commands begin to fail.
   sync:
-  # In local tests, it is about a 1.1 seconds per sync,
+  # In local tests, it is about a 3 seconds per sync,
   # with up to about 15 seconds for a large sync (400mb single file)
-  # CPU usage on the host is minimal, but for large syncs does increase
-  # significantly on the guest.
      interval: 5
-     show-syncing-message: true
      exclude-files:
        - pkg/
        - deps/

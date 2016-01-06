@@ -1,21 +1,23 @@
-
-ruby_block
-execute "setting up host FS syncing" do
-  block: begin
-           # Or should we just cron
-           # it -
-           #  - capture run results (NOTE! WE're not constrained to limimted mac osx output anymore!)
-           #  -   imclude meaningful exit code parsing
-           #  - COMMANDS:
-           #    dvm host-sync status
-           #    dvm host-sync resume
-           #    dvm host-sync pause
-           #    dvm host-sync now
-           #    dvm host-sync last
-           #
-           #
-   #  exec "/opt/opscode/embedded/bin/ruby /vagrant/sync"
-  end
-
+file "/vagrant/dvm-file-sync-stats.json" do
+  action :delete
+end
+cookbook_file "/etc/init/dvm-fs-sync.conf" do
+  source "dvm-fs-sync.conf"
+  mode "0644"
+  owner "root"
+  group "root"
 end
 
+cookbook_file "/etc/init.d/dvm-fs-sync" do
+  source "dvm-fs-sync"
+
+  mode "0755"
+  owner "root"
+  group "root"
+end
+
+service "dvm-fs-sync" do
+  supports start: true, stop: true, status: true
+  start_command "/etc/init.d/dvm-fs-sync start"
+  action [ :enable, :start ]
+end

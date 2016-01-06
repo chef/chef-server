@@ -3,6 +3,7 @@
 require "thor"
 require "highline/import"
 require "chef/mixin/deep_merge"
+require "json"
 require "yaml"
 module DVM
   PROJECT_CLASSES = {
@@ -33,6 +34,58 @@ module DVM
 
 
 
+    # TODO - subcommand
+    desc "host-sync $action", "manage host file syncing.  Supported actions are 'pause', 'resume', and 'status'"
+    def host_sync(action)
+      # This file is expected to always exist - it's only removed if the service is stopped
+      # and it's manually deleted, so we'll consider that an error and allow it to raise.
+      status = JSON.parse(File.read("/vagrant/dvm-file-sync-stats.json"))
+      case action
+      when 'status'
+        ago = (Time.now - DateTime.parse(status['last_xfer_time']).to_time).round(1)
+        puts
+        puts <<-EOM.gsub(/^\s+/, "")
+        #{HighLine.color('Totals:', :green)}
+          * Sync Runs Completed: #{status['total_syncs']}
+          * Total Files Synced: #{status['total_xfer_count']}
+          * Average Sync Time: #{(status['total_xfer_elapsed'] / status['total_syncs']).round(2)}
+        #{HighLine.color('Current State:', :green)} #{status['current_state']}
+        #{HighLine.color('Last Sync: ', :green)}
+          * completed #{ago} seconds ago
+          * #{status['last_xfer_count']} files transferred.
+        EOM
+        puts
+
+      when 'resume'
+        if status['current_state'] == 'paused'
+          File.delete '/vagrant/dvm-file-sync-pause'
+          puts "Host file sync will resume shortly."
+        elsif status['current_state'] == 'terminated'
+          puts "Host file sync is not running. Use 'dvm host-sync start' instead."
+        else
+          puts "File sync has already been resumed (or was never paused)."
+        end
+
+      when 'pause'
+        case status['current_state']
+          when 'paused'
+            puts "Sync is already paused"
+          when 'terminated'
+            puts "Sync is not currently running.  Start it using 'dvm host-sync start' when you're ready."
+          when 'syncing'
+            puts "A file sync is in process.  Pause will take effect when this is complete."
+            File.write '/vagrant/dvm-file-sync-pause', ''
+          when 'waiting'
+            puts "File sync has been paused."
+            File.write '/vagrant/dvm-file-sync-pause', ''
+        end
+      when nil
+        usage
+      else
+        puts "Unrecognized action '#{action}'."
+        usage
+      end
+    end
     desc "ls [project]", "list available projects, or available dependencies within project"
     def ls(project = nil)
       list(project)

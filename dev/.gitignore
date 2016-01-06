@@ -2,3 +2,5 @@
 testdata/
 .cached_tz
 dotfiles/.*
+dvm-file-sync-stats.json
+dvm-file-sync-halt

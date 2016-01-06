@@ -8,6 +8,7 @@ def load_settings(base = "./")
   end
   attributes
 end
+
 def simple_deep_merge(source_hash, new_hash)
   source_hash.merge(new_hash) do |key, old, new|
     if new.respond_to?(:blank) && new.blank?
