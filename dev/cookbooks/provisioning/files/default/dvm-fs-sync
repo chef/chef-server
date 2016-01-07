@@ -103,7 +103,7 @@ while keep_going do
   excludes += ['.vagrant/']
   excludes.uniq!
   args = ["--stats", "--archive", "--delete", "--no-owner", "--no-group", "-k" ]
-  command = [ "rsync", args, excludes.map { |e| ["--exclude", e] }, "/host-base/", "/host" ].flatten.join(" ")
+  command = [ "rsync", args, excludes.map { |e| ["--exclude", e] }, "--exclude-from /vagrant/scripts/dvm-fs-sync-exclude.list", "/host-base/", "/host" ].flatten.join(" ")
   stats[:last_command] = command
   File.write(STATS_FILE, stats.to_json)
 

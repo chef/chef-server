@@ -33,45 +33,12 @@ vm:
   # Override this in config.yml to set a custom path for your dotfiles
   # that's external to this repository.
   dotfile_path: dotfiles
-  # TODO whitelist as well?
-  # Note that we can't exclude .git from top-level projects, and by extension from anything,
-  # otherwise rebar commands begin to fail.
   sync:
-  # In local tests, it is about a 3 seconds per sync,
-  # with up to about 15 seconds for a large sync (400mb single file)
+     # How frequently should files from host be synced to guest?
      interval: 5
-     exclude-files:
-       - pkg/
-       - deps/
-       - rel/
-       - _rel/
-       - _build/
-       - chef-mover/rel/mover/
-       - ebin/
-       - .eunit/
-       - .kitchen/
-       - .bundle/
-       - vendor/bundle/
-       - "*_SUITE_data/"
-       - "*.deb"
-       - "*.rpm"
-       - "*.vmdk"
-       - "*.plt"
-       - "*.beam"
-       - "*.o"
-       - "*.so"
-       - "*.d"
-       - logs/
-       - /dev/
-       - .concrete/
-       - relx # we don't want to pull in a mac relx to our linux vm
-       - rspec.failures
-       - VERSION
-       - partybus/config.rb
-       - oc-reporting-pedant/Gemfile.lock # friggin ugh
-
-  cover:
-    base_output_path: /vagrant/testdata/cover # maps to dev/testdata/cover
+     # The primary list of exclude files are in scripts/dvm-fs-sync-exclude.list
+     # but you can modify your config.yml with this key to add more.
+     exclude-files: []
   node-attributes:
     placeholder: true
   # If you ever find yourself without internet access, this flag can be
