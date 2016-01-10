@@ -84,7 +84,7 @@ queue_monitor_prop() ->
             {H,S,Res} = run_commands(?MODULE, Commands),
             clean_up(),
             ?WHENFAIL(
-              io:format("History: ~w\nState: ~w\nRes: ~w\n", [H, S, Res]),
+              io:format("History: ~w~nState: ~w~nRes: ~w~n", [H, S, Res]),
               aggregate(command_names(Commands), Res =:= ok))
 	    end).
 
