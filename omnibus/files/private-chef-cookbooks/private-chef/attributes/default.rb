@@ -598,14 +598,10 @@ default['private_chef']['bookshelf']['db_pool_size'] = 20
 default['private_chef']['bookshelf']['db_pool_queue_max'] = 20
 default['private_chef']['bookshelf']['db_pooler_timeout'] = 2000
 default['private_chef']['bookshelf']['sql_db_timeout'] = 5000
-
-default['private_chef']['bookshelf']['storage_type'] = :filesystem
-default['private_chef']['bookshelf']['db_pool_size'] = 20
-default['private_chef']['bookshelf']['db_pool_queue_max'] = 20
-default['private_chef']['bookshelf']['db_pooler_timeout'] = 2000
-default['private_chef']['bookshelf']['sql_db_timeout'] = 5000
-
-
+default['private_chef']['bookshelf']['sql_ro_user'] = 'bookshelf_ro'
+default['private_chef']['bookshelf']['sql_ro_password'] = 'should_never_be_used'
+default['private_chef']['bookshelf']['sql_user'] = 'bookshelf'
+default['private_chef']['bookshelf']['sql_password'] = 'should_never_be_used'
 
 ###
 # Chef Identity
