@@ -33,9 +33,9 @@ class ChefServerDataBootstrap
     # This is done in two steps - we'll first create the bifrost objects and
     # dependencies.  If this fails, it can be re-run idempotently without
     # risk of causing the run to fail.
-    @superuser_authz_id = create_object_in_authz("actors", bifrost['superuser_id'])
-    users_authz_id = create_object_in_authz("containers", superuser_authz_id)
-    orgs_authz_id = create_object_in_authz("containers", superuser_authz_id)
+    @superuser_authz_id = create_actor_in_authz(bifrost['superuser_id'])
+    users_authz_id = create_container_in_authz(superuser_authz_id)
+    orgs_authz_id = create_container_in_authz(superuser_authz_id)
     create_server_admins_global_group_in_bifrost(users_authz_id)
 
     # put pivotal in server-admins global group
@@ -58,7 +58,7 @@ class ChefServerDataBootstrap
 
   # Create and set up permissions for the server admins group.
   def create_server_admins_global_group_in_bifrost(users_authz_id)
-    @server_admins_authz_id= create_object_in_authz("groups", bifrost['superuser_id'])
+    @server_admins_authz_id = create_group_in_authz(bifrost['superuser_id'])
     %w{create read update delete}.each do |permission|
       # grant server admins group permission on the users container,
       # as the erchef superuser.
@@ -138,8 +138,20 @@ class ChefServerDataBootstrap
 
   ## Bifrost access helpers.
 
-  def create_object_in_authz(object_name, requester_id)
-    result = bifrost_request(:post, "#{object_name}", "{}", requester_id)
+  def create_group_in_authz(reqeustor_id)
+    create_object_in_authz("groups", requestor_id)
+  end
+
+  def create_actor_in_authz(requestor_id)
+    create_object_in_authz("actors", requestor_id)
+  end
+
+  def create_container_in_authz(requestor_id)
+    create_object_in_authz("containers", requestor_id)
+  end
+
+  def create_object_in_authz(object_name, requestor_id)
+    result = bifrost_request(:post, "#{object_name}", "{}", requestor_id)
     JSON.parse(result)["id"]
   end
 
@@ -149,11 +161,11 @@ class ChefServerDataBootstrap
     bifrost_request(:put, "/groups/#{group_id}/actors/#{actor_id}", "{}", superuser_authz_id)
   end
 
-  def grant_authz_object_permission(permission_type, granted_to_object_type, granted_on_object_type, granted_on_id, granted_to_id, requester_id)
+  def grant_authz_object_permission(permission_type, granted_to_object_type, granted_on_object_type, granted_on_id, granted_to_id, requestor_id)
     url = "#{granted_on_object_type}/#{granted_on_id}/acl/#{permission_type}"
-    body = JSON.parse(bifrost_request(:get, url, nil, requester_id))
+    body = JSON.parse(bifrost_request(:get, url, nil, requestor_id))
     body[granted_to_object_type] << granted_to_id
-    bifrost_request(:put, url, body.to_json, requester_id)
+    bifrost_request(:put, url, body.to_json, requestor_id)
   end
 
   # Assemble the appropriate header per bifrost's expectations
