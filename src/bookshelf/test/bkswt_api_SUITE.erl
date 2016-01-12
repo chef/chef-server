@@ -124,15 +124,16 @@ all(doc) ->
 all() ->
     [
 %     bucket_basic,
-%     bucket_many,
-%     bucket_encoding,
-%     head_object,
-     put_object
+     bucket_many, % Intermittednt
+     bucket_encoding,
+     head_object,
+     put_object,
+     object_roundtrip,
 
-%     sec_fail,
-%     signed_url,
-%     signed_url_fail,
-%     at_the_same_time,
+     sec_fail, % Failing
+     signed_url,
+     signed_url_fail,
+     at_the_same_time
 %     upgrade_from_v0
 ].
 
@@ -168,7 +169,7 @@ bucket_many(Config) ->
     ct:print("Prebucket: ~p~n", [ BucketsBefore ] ),
 
     % create
-    Buckets = [random_binary() || _ <- lists:seq(1, 25)],
+    Buckets = [random_binary() || _ <- lists:seq(1, 50)],
     Res = ec_plists:map(fun(B) ->
                                 mini_s3:create_bucket(B, public_read_write, none, S3Conf)
                         end,
@@ -213,7 +214,8 @@ head_object(suite) ->
 head_object(Config) when is_list(Config) ->
     S3Conf = proplists:get_value(s3_conf, Config),
     Bucket = "head-put-tests",
-    ?assertEqual(ok, mini_s3:create_bucket(Bucket, public_read_write, none, S3Conf)),
+
+    ensure_bucket(Bucket, S3Conf),
     BucketContents = mini_s3:list_objects(Bucket, [], S3Conf),
     ?assertEqual(Bucket, proplists:get_value(name, BucketContents)),
     ?assertEqual([], proplists:get_value(contents, BucketContents)),
@@ -235,7 +237,11 @@ head_object(Config) when is_list(Config) ->
             error:Why ->
                 Why
         end,
-    ct:pal("HEAD 404: ~p", [V]).
+    ct:pal("HEAD 404: ~p", [V]),
+
+    % Cleanup
+    ?assertEqual(ok, mini_s3:delete_bucket(Bucket, S3Conf)).
+
 
 put_object(doc) ->
     ["should be able to put and list objects"];
@@ -245,18 +251,17 @@ put_object(Config) when is_list(Config) ->
     S3Conf = proplists:get_value(s3_conf, Config),
     ct:print("S3Conf hahaha ~p~n", [S3Conf]),
 
-    RandomSuffix  = random_string(10, ?STR_CHARS),
-    ct:print("Suffix ~p~n",[RandomSuffix]),
-    Bucket = string:concat("bukkit-", RandomSuffix),
+    Bucket = random_bucket(),
+    ct:print("Bucket ~p~n",[Bucket]),
 
     ensure_bucket(Bucket, S3Conf),
 
     BucketContents = mini_s3:list_objects(Bucket, [], S3Conf),
     ?assertEqual(Bucket, proplists:get_value(name, BucketContents)),
     ?assertEqual([], proplists:get_value(contents, BucketContents)),
+
     Count = 50,
-    Objs = [filename:join(random_binary(), random_binary()) ||
-               _ <- lists:seq(1,Count)],
+    Objs = [random_path() || _ <- lists:seq(1,Count)],
     ec_plists:map(fun(F) ->
                           mini_s3:put_object(Bucket, F, F, [], [], S3Conf)
                   end, Objs),
@@ -279,7 +284,17 @@ object_roundtrip(doc) ->
 object_roundtrip(suite) ->
     [];
 object_roundtrip(Config) when is_list(Config) ->
-    ok.
+    S3Conf = proplists:get_value(s3_conf, Config),
+    Bucket = random_bucket(),
+    ensure_bucket(Bucket,S3Conf),
+    Name = random_path(),
+    Data = erlang:iolist_to_binary(test_data_text(128*1024)),
+    mini_s3:put_object(Bucket, Name, Data, [], [], S3Conf),
+    Result = mini_s3:get_object(Bucket, Name, [], S3Conf),
+    ct:print("Fetched ~p~n", [Name]),
+    DataRoundtrip = proplists:get_value(content, Result),
+    ?assertEqual(Data, DataRoundtrip).
+
 
 sec_fail(doc) ->
     ["Check authentication failure on the part of the caller"];
@@ -303,7 +318,7 @@ signed_url(suite) ->
 signed_url(Config) when is_list(Config) ->
     S3Conf = proplists:get_value(s3_conf, Config),
     Bucket = random_binary(),
-    mini_s3:create_bucket(Bucket, public_read_write, none, S3Conf),
+    ensure_bucket(Bucket, S3Conf),
     Content = "<x>Super Foo</x>",
     Headers = [{"content-type", "text/xml"},
                {"content-md5",
@@ -331,7 +346,8 @@ signed_url_fail(suite) ->
 signed_url_fail(Config) when is_list(Config) ->
     S3Conf = proplists:get_value(s3_conf, Config),
     Bucket = random_binary(),
-    mini_s3:create_bucket(Bucket, public_read_write, none, S3Conf),
+    ensure_bucket(Bucket, S3Conf),
+
     Content = "<x>Super Foo</x>",
     Headers = [{"content-type", "text/xml"},
                {"content-md5",
@@ -351,7 +367,8 @@ at_the_same_time(suite) -> [];
 at_the_same_time(Config) when is_list(Config) ->
     S3Conf = proplists:get_value(s3_conf, Config),
     Bucket = "bukkit",
-    ?assertEqual(ok, mini_s3:create_bucket(Bucket, public_read_write, none, S3Conf)),
+
+    ensure_bucket(Bucket, S3Conf),
     BucketContents = mini_s3:list_objects(Bucket, [], S3Conf),
     ?assertEqual(Bucket, proplists:get_value(name, BucketContents)),
     ?assertEqual([], proplists:get_value(contents, BucketContents)),
@@ -423,6 +440,17 @@ random_string(Length, AllowedChars) ->
                                    AllowedChars) | Acc]
                 end, [], lists:seq(1, Length)).
 
+random_bucket() ->
+    RandomSuffix  = random_string(10, ?STR_CHARS),
+    string:concat("bukkit-", RandomSuffix).
+random_path() ->
+    filename:join(random_binary(), random_binary()).
+
+test_data(Size) ->
+    crypto:random_bytes(Size).
+
+test_data_text(Size) ->
+    random_string(Size, " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\n" ).
 
 bucket_list(S3Conf) ->
     [{buckets, Details}] = mini_s3:list_buckets(S3Conf),

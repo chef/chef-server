@@ -62,17 +62,12 @@ DEBUG=0 ./rebar3 ct
 * TODO Make port forwarding possible via DVM
  ssh vagrant@127.0.0.1 -p 2222 -o Compression=yes -o DSAAuthentication=yes -o LogLevel=FATAL -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i /home/mark/oc/chef-server/dev/.vagrant/machines/chef-server/virtualbox/private_key -o ForwardAgent=yes -L4321:localhost:4321
 
+* Failing tests:
+Intermittent:
 
+%%% bkswt_api_SUITE ==> bucket_many: FAILED
+%%% bkswt_api_SUITE ==> 
+Failure/Error: ?assertEqual([[97,102,101,105,122,112,98,105,107,109,111,97,107,108,102,111,101,115,102,100,112,109,114,120,112,105,110,121,115,108],[98,117,107,107,105,116],[98,117,107,107,105,116,45,112,109,114,120,112,105,110,121,115,108]], bucket_list ( S3Conf ))
+  expected: ["afeizpbikmoaklfoesfdpmrxpinysl","bukkit","bukkit-pmrxpinysl"]
+       got: ["bukkit","bukkit-pmrxpinysl"]      line: 191
 
-object_roundtrip(doc) ->
-    ["Can put a object and get it back"];
-object_roundtrip(suite) ->
-    [];
-object_roundtrip(Config) when is_list(Config) ->
-    ok.
-
-
-
-ensure_bucket(Bucket, Config) ->
-    ?assertEqual(ok, mini_s3:delete_bucket(Bucket, Config)),
-    ?assertEqual(ok, mini_s3:create_bucket(Bucket, public_read_write, none, Config)).
