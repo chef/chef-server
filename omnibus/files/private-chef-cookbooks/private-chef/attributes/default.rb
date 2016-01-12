@@ -596,7 +596,7 @@ default['private_chef']['bookshelf']['port'] = 4321
 default['private_chef']['bookshelf']['stream_download'] = true
 default['private_chef']['bookshelf']['access_key_id'] = "generated-by-default"
 default['private_chef']['bookshelf']['secret_access_key'] = "generated-by-default"
-default['private_chef']['bookshelf']['auth_check_disabled'] = true
+default['private_chef']['bookshelf']['auth_check_disabled'] = false
 # Default: set to Host: header. Override to hardcode a url, "http://..."
 default['private_chef']['bookshelf']['external_url'] = :host_header
 default['private_chef']['bookshelf']['storage_type'] = :filesystem
@@ -604,8 +604,10 @@ default['private_chef']['bookshelf']['db_pool_size'] = 20
 default['private_chef']['bookshelf']['db_pool_queue_max'] = 20
 default['private_chef']['bookshelf']['db_pooler_timeout'] = 2000
 default['private_chef']['bookshelf']['sql_db_timeout'] = 5000
-
-
+default['private_chef']['bookshelf']['sql_ro_user'] = 'bookshelf_ro'
+default['private_chef']['bookshelf']['sql_ro_password'] = 'should_never_be_used'
+default['private_chef']['bookshelf']['sql_user'] = 'bookshelf'
+default['private_chef']['bookshelf']['sql_password'] = 'should_never_be_used'
 
 ###
 # Chef Identity
