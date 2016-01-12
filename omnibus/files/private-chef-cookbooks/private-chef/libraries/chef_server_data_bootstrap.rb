@@ -1,4 +1,5 @@
 # Author:: Tyler Cloke <tyler@chef.io>
+# Author:: Marc Paradise <marc@chef.io>
 # Copyright:: Copyright (c) 2014-5 Chef, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -176,8 +177,10 @@ class ChefServerDataBootstrap
     rescue RestClient::Exception => e
       if retries > 0
         retries -= 1
-        Chef::Log.warn "Error from bifrost: #{e.response}, retrying after 1 second.  #{retries} retries remaining."
-        sleep 1
+        retry_time = 5 - retries
+        retry_time *= retry_time
+        Chef::Log.warn "Error from bifrost: #{e.response}, retrying after #{retry_time}s.  #{retries} retries remaining."
+        sleep retry_time
         retry
       else
         Chef::Log.error "Error from bifrost #{e.response}, retries have been exhausted"

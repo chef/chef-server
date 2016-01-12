@@ -14,8 +14,10 @@ class EcPostgres
     rescue e
       if retries > 0
         retries -= 1
-        Chef::Log.warn "Error connecting to postgresql: #{e.message}, retrying after 1s sleep. #{retries} retries remaining."
-        sleep 1
+        sleep_time = 5 - retries
+        sleep_time *= sleep_time
+        Chef::Log.warn "Error connecting to postgresql: #{e.message}, retrying after #{sleep_time}s sleep. #{retries} retries remaining."
+        sleep sleep_time
         retry
       else
         Chef::Log.warn "Error from postgresql: #{e.message}, retries have been exhausted."
