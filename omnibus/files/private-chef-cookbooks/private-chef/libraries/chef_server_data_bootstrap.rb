@@ -102,7 +102,7 @@ class ChefServerDataBootstrap
     simple_insert(conn, 'users',
                     id: user_id,
                     username: 'pivotal',
-                    email: 'support+chef-server@chef.io',
+                    email: 'root@localhost.localdomain',
                     authz_id: @superuser_authz_id,
                     created_at: bootstrap_time,
                     updated_at: bootstrap_time,
