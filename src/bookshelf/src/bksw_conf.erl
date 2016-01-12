@@ -77,7 +77,7 @@ secret_access_key(#context{secret_access_key=SecretAccessKey}) ->
     SecretAccessKey.
 
 -spec disk_store() -> string().
--ifdef(TEST).
+-ifdef(EUNIT_TEST).
 disk_store() ->
     "/tmp/".
 -else.
