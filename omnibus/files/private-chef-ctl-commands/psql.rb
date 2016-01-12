@@ -19,6 +19,7 @@ known_dbs = {
   "opscode_chef" => {"dbname" => "opscode_chef", "config_key" => "opscode-erchef", "hashseed" => "private_chef"},
   "bifrost" => {"dbname" => "bifrost", "config_key" => "oc_bifrost", "hashseed" => "private_chef"},
   "oc_id" => {"dbname" => "oc_id", "config_key" => "oc_id", "hashseed" => "private_chef"},
+  "bookshelf" => {"dbname" => "bookshelf", "config_key" => "bookshelf", "hashseed" => "private_chef"},
   "push-jobs" => {"dbname" => "opscode_pushy", "config_key" => "postgresql", "hashseed" => "pushy"},
   "reporting" => {"dbname" => "opscode_reporting", "config_key" => "postgresql", "hashseed" => "reporting"}
 }

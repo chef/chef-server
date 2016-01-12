@@ -170,21 +170,22 @@ bucket_many(Config) ->
 
     % create
     Buckets = [random_binary() || _ <- lists:seq(1, 50)],
+    NewBuckets = lists:subtract(Buckets, Buckets),
     Res = ec_plists:map(fun(B) ->
                                 mini_s3:create_bucket(B, public_read_write, none, S3Conf)
                         end,
-                        Buckets),
+                        NewBuckets),
     ?assert(lists:all(fun(Val) -> ok == Val end, Res)),
 
     BucketsAfter = bucket_list(S3Conf),
-    BucketsExpected = lists:usort(BucketsBefore ++ Buckets),
+    BucketsExpected = lists:usort(BucketsBefore ++ NewBuckets),
     ?assertEqual(BucketsExpected, BucketsAfter),
 
     % delete
     DRes = ec_plists:map(fun(B) ->
                                 mini_s3:delete_bucket(B, S3Conf)
                          end,
-                         Buckets),
+                         NewBuckets),
     ?assert(lists:all(fun(Val) -> ok == Val end, DRes)),
 
     % sanity check
@@ -301,10 +302,15 @@ sec_fail(doc) ->
 sec_fail(suite) ->
     [];
 sec_fail(Config) when is_list(Config) ->
-    S3Conf = proplists:get_value(s3_conf, Config),
-    Bucket = random_binary(),
+    BogusS3Conf = {config,
+                   "http://127.0.0.1:4321",
+                   <<"nopenope">>,
+                   <<"evenmorenope">>,
+                   path},
+    Bucket = "thisshouldfail",
+    ct:print("trying: mini_s3:create_bucket(~p, public_read_write, none, ~p)~n", [Bucket, BogusS3Conf]),
     ?assertError({aws_error, {http_error, 403, _}},
-                 mini_s3:create_bucket(Bucket, public_read_write, none, S3Conf)),
+                 mini_s3:create_bucket(Bucket, public_read_write, none, BogusS3Conf)),
     %% also verify that unsigned URL requests don't crash
     {ok, Status, _H, Body} = ibrowse:send_req("http://127.0.0.1:4321/foobar", [],
                                               get),
@@ -443,6 +449,7 @@ random_string(Length, AllowedChars) ->
 random_bucket() ->
     RandomSuffix  = random_string(10, ?STR_CHARS),
     string:concat("bukkit-", RandomSuffix).
+
 random_path() ->
     filename:join(random_binary(), random_binary()).
 

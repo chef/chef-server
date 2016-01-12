@@ -166,4 +166,5 @@ ERR
   include_recipe "private-chef::erchef_database"
   include_recipe "private-chef::bifrost_database"
   include_recipe "private-chef::oc_id_database"
+  include_recipe "private-chef::bookshelf_database"
 end
