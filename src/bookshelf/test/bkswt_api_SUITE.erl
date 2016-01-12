@@ -302,10 +302,15 @@ sec_fail(doc) ->
 sec_fail(suite) ->
     [];
 sec_fail(Config) when is_list(Config) ->
-    S3Conf = proplists:get_value(s3_conf, Config),
-    Bucket = random_binary(),
+    BogusS3Conf = {config,
+                   "http://127.0.0.1:4321",
+                   <<"nopenope">>,
+                   <<"evenmorenope">>,
+                   path},
+    Bucket = "thisshouldfail",
+    ct:print("trying: mini_s3:create_bucket(~p, public_read_write, none, ~p)~n", [Bucket, BogusS3Conf]),
     ?assertError({aws_error, {http_error, 403, _}},
-                 mini_s3:create_bucket(Bucket, public_read_write, none, S3Conf)),
+                 mini_s3:create_bucket(Bucket, public_read_write, none, BogusS3Conf)),
     %% also verify that unsigned URL requests don't crash
     {ok, Status, _H, Body} = ibrowse:send_req("http://127.0.0.1:4321/foobar", [],
                                               get),
