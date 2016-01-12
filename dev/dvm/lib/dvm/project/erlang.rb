@@ -21,9 +21,11 @@ module DVM
       @libpath =  File.join(@relpath, "lib")
       @node = service['node']
     end
+
     def init_reltool
 
     end
+
     def init_rebar3
 
     end
@@ -207,7 +209,7 @@ EOM
 
     def cover_report_args(modulename, options)
        msg = "Generating coverage report for #{modulename}"
-       out_path = File.join(config['vm']['cover']['base_output_path'], name)
+       out_path = File.join("/vagrant/testdata", name)
        FileUtils.mkdir_p(out_path)
        runargs = ["\\\"#{out_path}\\\""]
        runargs << modulename

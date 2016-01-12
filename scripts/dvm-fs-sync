@@ -1,0 +1,105 @@
+#!/opt/opscode/embedded/bin/ruby
+# ex: ft=ruby
+
+require "yaml"
+require "json"
+load "/vagrant/dvmtools.rb"
+
+PID_FILE = "/var/run/dvm-file-sync.pid"
+STATS_FILE = "/vagrant/dvm-file-sync-stats.json"
+keep_going = true
+
+def sync_proc_running?
+  if File.exists? PID_FILE
+    pid = File.read PID_FILE
+    running = !!Process.kill(0, pid) rescue false
+    File.delete PID_FILE unless running
+    running
+  else
+    false
+  end
+end
+
+# Launch in the background if 'start' is given.
+if ARGV[0] == 'start'
+  # Can't start if we're running
+  #
+  pid = Process.fork
+  if pid.nil? then
+    # In child - we'll drop through the rest of the case
+    # and run the actual sync loop below
+    File.write(PID_FILE, Process.pid)
+    Process.daemon
+    Signal.trap("TERM") do
+      keep_going = false
+    end
+  else
+    # In parent - detach to prevent a zombie and terminate ourselves.
+    Process.detach(pid)
+    Kernel.exit! 0
+  end
+else
+  if
+end
+
+# Actual Syncing
+
+
+if File.exists? STATS_FILE
+  stats = JSON.parse(File.read(STATS_FILE))
+else
+  stats = {
+    "total_syncs" => 0,
+    "total_xfer_count" => 0,
+    "total_xfer_elapsed" => 0,
+    "last_xfer_time" => 0,
+    "last_xfer_elapsed" =>  0,
+    "last_xfer_count" => 0,
+    "last_command" => "",
+    "current_state" => "waiting" }
+end
+
+while keep_going do
+
+  # Reload each time to pick up changes
+  config = load_settings("/vagrant")['vm']['sync']
+
+  if File.exists? "/vagrant/dvm-file-sync-pause"
+    stats["current_state"] = :paused
+    File.write(STATS_FILE, stats.to_json)
+    sleep config['interval']
+    next
+  end
+
+  stats["total_syncs"] += 1
+  stats["current_state"] = :syncing
+  start_time = Time.now
+  excludes = Array(config['exclude-files']).map(&:to_s)
+  excludes += ['.vagrant/']
+  excludes.uniq!
+  args = ["--stats", "--archive", "--delete", "--no-owner", "--no-group", "-k" ]
+  command = [ "rsync", args, excludes.map { |e| ["--exclude", e] }, "--exclude-from /vagrant/scripts/dvm-fs-sync-exclude.list", "/host-base/", "/host" ].flatten.join(" ")
+  stats[:last_command] = command
+  File.write(STATS_FILE, stats.to_json)
+
+  results = `#{command}`.split('\n')
+  results.each do |line|
+    if line =~ /File list size: (.*)/
+      stats["last_xfer_count"] = $1.to_i
+      stats["total_xfer_count"] += $1.to_i
+    end
+  end
+  now = Time.now
+  stats["last_xfer_time" ] = now
+  elapsed = now - start_time
+  stats["last_xfer_elapsed"] = elapsed
+  stats["total_xfer_elapsed"] += elapsed
+  stats["current_state"] = :waiting
+  File.write(STATS_FILE, stats.to_json)
+  sleep config['interval']
+end
+
+stats["current_state"] = :terminated
+File.delete PID_FILE
+File.write(STATS_FILE, stats.to_json)
+

@@ -1,35 +1,27 @@
 # Anything in this file can be overridden in config.yml.
 #
 vm:
-  # Override this in config.yml if you want to bring up the
-  # postgres box, and if you want to automatically configure chef-server
-  # to use it as an externally managed postgres instance.
+  # See docs/multi-db-config.md for details on these.
   postgresql:
-    # enable a separate postgres vm but do not use it unless
-    # use-vm-for-external is set.
-    start: false
-    # When this is set true, and start is true,
-    # the chef-server node will be configured to use
-    # this vm as an external postgresql server from the start.
-    use-external: true
-  # Override this in config.yml if you want to bring up a separate reporting
-  # postgres box, and if you want to automatically configure chef-server
-  # to use it as an externally managed reporting postgres instance.
-  reporting_postgresql:
-    # enable a separate postgres vm but do not use it unless
-    # use-vm-for-external is set.
-    start: false
-    # When this is set true, and start is true,
-    # chef reporting will be configured to use
-    # this vm as an external postgresql server from the start.
-    use-external: true
+    chef-server:
+      start: false
+      use-external: false
+    reporting:
+      start: false
+      use-external: false
 
   # All settings below apply only to the chef-server vm
   cpus: 4
   memory: 4096
-  # packages: [ ntp, curl, wget, htop, uuid-dev, tmux, vim, iotop ]
+  # Which packages do we install by default? Override this in
+  # config.yml if there are things you want to have included.
   packages: []
-  omnibus-autoload: [] # see config.yml for details and to add components
+  # Specify which omnibus projects should be loaded before the
+  # first reconfigure. None by default, but override this
+  # in config.yml if you need to ensure cookbooks
+  # or chef-server-ctl commands are loaded from the start.
+  omnibus-autoload: []
+
   # Override this in config.yml to set a custom path for your dotfiles
   # that's external to this repository.
   dotfile_path: dotfiles
@@ -41,9 +33,11 @@ vm:
      exclude-files: []
   node-attributes:
     placeholder: true
-  # If you ever find yourself without internet access, this flag can be
-  # set true and attempts to install additional packages will not be made, preventing
-  # provisioining failures to do inability to apt-get update/install.
+  # If you ever find yourself without Internet access, this flag can be
+  # set true and attempts to install additional packages will not be made,
+  # preventing provisioining failures due to inability to apt-get update/install.
+  # Note that you'll still be limited, as most project loading requires
+  # Internet access to pull in deps.
   offline: false
 
 projects:
