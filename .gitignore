@@ -4,3 +4,4 @@ config.yml
 .bundle
 vendor
 src/bookshelf/itest/bkswt_api_SUITE_data/format_0_data
+src/bookshelf/test/bkswt_api_SUITE_data
