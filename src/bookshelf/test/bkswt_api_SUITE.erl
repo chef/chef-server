@@ -170,21 +170,22 @@ bucket_many(Config) ->
 
     % create
     Buckets = [random_binary() || _ <- lists:seq(1, 50)],
+    NewBuckets = lists:subtract(Buckets, Buckets),
     Res = ec_plists:map(fun(B) ->
                                 mini_s3:create_bucket(B, public_read_write, none, S3Conf)
                         end,
-                        Buckets),
+                        NewBuckets),
     ?assert(lists:all(fun(Val) -> ok == Val end, Res)),
 
     BucketsAfter = bucket_list(S3Conf),
-    BucketsExpected = lists:usort(BucketsBefore ++ Buckets),
+    BucketsExpected = lists:usort(BucketsBefore ++ NewBuckets),
     ?assertEqual(BucketsExpected, BucketsAfter),
 
     % delete
     DRes = ec_plists:map(fun(B) ->
                                 mini_s3:delete_bucket(B, S3Conf)
                          end,
-                         Buckets),
+                         NewBuckets),
     ?assert(lists:all(fun(Val) -> ok == Val end, DRes)),
 
     % sanity check
@@ -443,6 +444,7 @@ random_string(Length, AllowedChars) ->
 random_bucket() ->
     RandomSuffix  = random_string(10, ?STR_CHARS),
     string:concat("bukkit-", RandomSuffix).
+
 random_path() ->
     filename:join(random_binary(), random_binary()).
 
