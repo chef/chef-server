@@ -107,7 +107,7 @@ list_bucket(BucketName) ->
             {error, Reason}
     end.
 
--spec create_file(binary(), binary()) -> integer().
+-spec create_file(binary(), binary()) -> {ok, integer()} | {error, any()}.
 create_file(Bucket, Name) ->
     case sqerl:select(insert_file, [Bucket, Name], first_as_scalar, [data_id]) of
         {ok, File} ->
@@ -158,7 +158,7 @@ find_file(FileId) ->
 %% TODO IMPROVE
 delete_file(Bucket, Name) ->
     case find_file(Bucket, Name) of
-        {ok, none} ->
+        {ok, not_found} ->
             {error, file_not_found};
         {ok, #db_file{file_id = FileId}} ->
             delete_file(FileId);
@@ -176,7 +176,7 @@ delete_file(FileId) ->
     end.
 
 rename_file_with_overwrite(BucketId, FileId, NewName) ->
-    case sqerl:statement(rename_file_with_overwrite, [BucketId, FileId, NewName], sucess) of
+    case sqerl:select(rename_file_with_overwrite, [BucketId, FileId, NewName], first_as_scalar, [success]) of
         {ok, true} ->
             ok;
         Error ->

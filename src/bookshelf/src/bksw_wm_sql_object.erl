@@ -91,7 +91,7 @@ resource_exists(Rq0, Ctx) ->
         %% Buckets always exist for writes since we create them on the fly
         'PUT' ->
             case fetch_entry_md(Rq0, Ctx) of
-                {error, none} ->
+                {error, _Error} ->
                     {false, Rq0, Ctx};
                 {not_found, #context{} = Ctx1 } ->
                     {true, Rq0, Ctx1};
@@ -104,7 +104,7 @@ resource_exists(Rq0, Ctx) ->
             %% more consistent since we will open the fd once at start and hold on to it.
             %% Note that there is still a possible discrepency when we read the meta data.
             case fetch_entry_md(Rq0, Ctx) of
-                {error, none} ->
+                {error, _Error} ->
                     {false, Rq0, Ctx};
                 {not_found, #context{} = Ctx1 } ->
                     {false, Rq0, Ctx1};
@@ -155,15 +155,12 @@ fetch_entry_md(Req, #context{} = Ctx) ->
             {Object, Ctx#context{entry_md = Object}};
         {ok, not_found} ->
             {not_found, Ctx#context{entry_md = #db_file{bucket_name = Bucket, name = Path}}};
-        {ok, DbFile} ->
-            io:format("Match trouble, ~p ~p ~p~n",[Bucket,Path,(DbFile)]);
         {error, no_connections} ->
             timer:sleep(?PGSQL_RETRY_INTERVAL),
             fetch_entry_md(Req, Ctx);
-        {error, _Error} ->
-            error_logger:error_msg("Error occurred during fetch_entry_md: B:~p P:~p '~p'~n", [Bucket,Path,_Error]),
+        {error, Error} ->
+            error_logger:error_msg("Error occurred during fetch_entry_md: B:~p P:~p '~p'~n", [Bucket,Path,Error]),
             {error, Ctx}
-            %% error case here TODO
     end.
 
 %%

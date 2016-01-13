@@ -72,9 +72,13 @@ entry_list(Bucket) ->
 
 -spec entry_delete(binary(), binary()) -> boolean().
 entry_delete(Bucket, Entry) ->
-    bksw_sql:delete_file(Bucket, Entry).
+    case bksw_sql:delete_file(Bucket, Entry) of
+        ok ->
+            true;
+        _ ->
+            false
+    end.
 
 %% Stub function; unsure if we really need it.
-
 entry_exists(undefined, undefined) ->
     ok.
