@@ -71,3 +71,7 @@ Failure/Error: ?assertEqual([[97,102,101,105,122,112,98,105,107,109,111,97,107,1
   expected: ["afeizpbikmoaklfoesfdpmrxpinysl","bukkit","bukkit-pmrxpinysl"]
        got: ["bukkit","bukkit-pmrxpinysl"]      line: 191
 
+* Delete bucket works, and cleans up
+* Delete file works and cleans up
+* Figure out WTF:
+[error] Error occurred during content download: missing chunk 1 {db_file,<<"bukkit">>,658,<<"afeizpbikmoaklfoesfdpmrxpinysl/hbqrpkbukshpuxwrkpozbbaavgivvx">>,1733,{datetime,{{2016,1,12},{9,29,2}}},2155,true,200000,4,<<172,51,20,71,40,105,202,247,225,211,35,251,88,164,227,171>>,<<242,146,236,162,44,86,245,139,48,151,19,35,166,9,4,191,162,96,48,50,166,188,100,148,112,13,178,174,61,74,3,53>>,<<64,181,183,117,39,67,139,22,212,182,219,67,147,187,90,101,145,145,92,145,207,191,0,66,96,158,242,107,216,166,199,115,200,172,94,102,64,103,10,36,251,244,125,12,101,143,204,156,203,112,194,238,87,157,232,164,22,229,186,112,103,131,118,35>>} 

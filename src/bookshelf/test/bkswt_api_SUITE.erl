@@ -124,17 +124,20 @@ all(doc) ->
 all() ->
     [
 %     bucket_basic,
-     bucket_many, % Intermittednt
-     bucket_encoding,
-     head_object,
-     put_object,
-     object_roundtrip,
+     %% bucket_many, % Intermittednt
+     %% bucket_encoding,
+     %% bucket_delete,
+     %% head_object,
+     %% put_object,
+     %% object_roundtrip,
+     %% object_delete,
 
-     sec_fail, % Failing
-     signed_url,
-     signed_url_fail,
-     at_the_same_time
+     %% sec_fail, % Failing
+     %% signed_url,
+     %% signed_url_fail,
+     at_the_same_time,
 %     upgrade_from_v0
+     noop
 ].
 
 
@@ -142,7 +145,12 @@ all() ->
 %% TEST CASES
 %%====================================================================
 
-
+noop(doc) ->
+    ["No Op"];
+noop(suite) ->
+    [];
+noop(_) ->
+    ok.
 
 bucket_basic(doc) ->
     ["should create, view, and delete a bucket"];
@@ -296,6 +304,52 @@ object_roundtrip(Config) when is_list(Config) ->
     DataRoundtrip = proplists:get_value(content, Result),
     ?assertEqual(Data, DataRoundtrip).
 
+object_delete(doc) ->
+    ["Can create and delete an object"];
+object_delete(suite) ->
+    [];
+object_delete(Config) when is_list(Config) ->
+    S3Conf = proplists:get_value(s3_conf, Config),
+
+    Bucket = random_bucket(),
+    ensure_bucket(Bucket,S3Conf),
+    Name = random_path(),
+    Data = "TestData\nMore test data",
+    mini_s3:put_object(Bucket, Name, Data, [], [], S3Conf),
+    ?assert(file_exists(Bucket, Name, S3Conf)),
+
+    mini_s3:delete_object(Bucket, Name, S3Conf),
+
+    ?assert(not file_exists(Bucket, Name, S3Conf)).
+
+
+bucket_delete(doc) ->
+    ["Can create and delete an bucket"];
+bucket_delete(suite) ->
+    [];
+bucket_delete(Config) when is_list(Config) ->
+    S3Conf = proplists:get_value(s3_conf, Config),
+
+    Bucket = random_bucket(),
+    ensure_bucket(Bucket,S3Conf),
+
+    %% Add a file
+    Name = random_path(),
+    Data = "TestData\nMore test data",
+    mini_s3:put_object(Bucket, Name, Data, [], [], S3Conf),
+    ?assert(file_exists(Bucket, Name, S3Conf)),
+
+    ?assertEqual(ok, mini_s3:delete_bucket(Bucket, S3Conf)),
+
+    %% Verify it's gone
+    ?assert(not bucket_exists(Bucket, S3Conf)),
+
+    %% Recreate bucket and check that no files reappear
+    ensure_bucket(Bucket,S3Conf),
+    ?assert(not file_exists(Bucket, Name, S3Conf)),
+
+    ?assertEqual(ok, mini_s3:delete_bucket(Bucket, S3Conf)).
+
 
 sec_fail(doc) ->
     ["Check authentication failure on the part of the caller"];
@@ -398,7 +452,9 @@ at_the_same_time(Config) when is_list(Config) ->
     error_logger:info_msg("done with plists map of ops"),
     Result = mini_s3:list_objects(Bucket, [], S3Conf),
     ObjList = proplists:get_value(contents, Result),
-    ?assertEqual(1, length(ObjList)).
+    ?assertEqual(1, length(ObjList)),
+    %% Cleanup
+    ?assertEqual(ok, mini_s3:delete_bucket(Bucket, S3Conf)).
 
 upgrade_from_v0(doc) ->
     ["Upgrades from version 0 disk format to current version"];
@@ -472,3 +528,8 @@ ensure_bucket(Bucket, Config) ->
         _ -> ok
     end,
     ?assertEqual(ok, mini_s3:create_bucket(Bucket, public_read_write, none, Config)).
+
+file_exists(Bucket, Name, S3Conf) ->
+    List = mini_s3:list_objects(Bucket, [], S3Conf),
+    Files = [ proplists:get_value(key, I) || I <- proplists:get_value(contents, List)],
+    lists:member(Name, Files).
