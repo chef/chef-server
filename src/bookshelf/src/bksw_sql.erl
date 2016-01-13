@@ -91,6 +91,8 @@ find_bucket(BucketName) ->
 
 list_buckets() ->
     case sqerl:select(list_buckets, [], rows_as_records, ?DB_BUCKET_TX_FM) of
+        {ok, none} ->
+            [];
         {ok, Buckets} ->
             Buckets;
         {error, Reason} ->
