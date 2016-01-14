@@ -80,6 +80,10 @@ secret_access_key(#context{secret_access_key=SecretAccessKey}) ->
     SecretAccessKey.
 
 -spec disk_store() -> string().
+-ifdef(EUNIT_TEST).
+disk_store() ->
+    "/tmp/".
+-else.
 disk_store() ->
     case envy:get(bookshelf, disk_store, undefined, any) of
         undefined ->
@@ -95,7 +99,7 @@ disk_store() ->
 
 ends_with(Char, String) ->
     lists:last(String) =:= Char.
-
+-endif.
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
