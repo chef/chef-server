@@ -51,5 +51,27 @@ $delete_file_last_reference$ LANGUAGE plpgsql;
 
 COMMIT;
 
+-- Find and cleanup orphan filedata structures
+-- Base query to list these is:
+-- WITH dead_files AS (SELECT file_data.data_id, file_data.complete, file_data.chunk_count
+--   FROM file_data LEFT JOIN file_names ON file_data.data_id =
+--   file_names.data_id WHERE bucket_id IS NULL )
+--   SELECT data_id FROM dead_files;
+CREATE OR REPLACE FUNCTION gc_data_ids()
+RETURNS integer
+AS $$
+DECLARE
+  deleted integer;
+BEGIN
+   WITH dead_files AS (SELECT file_data.data_id, file_data.complete, file_data.chunk_count
+     FROM file_data LEFT JOIN file_names
+     ON file_data.data_id = file_names.data_id
+     WHERE bucket_id IS NULL ),
+     removed AS (DELETE FROM file_data USING dead_files WHERE file_data.data_id = dead_files.data_id RETURNING 1)
+   SELECT count(*) FROM removed INTO deleted;
+   RETURN deleted;
+END;
+$$
+LANGUAGE plpgsql VOLATILE;
 
        
