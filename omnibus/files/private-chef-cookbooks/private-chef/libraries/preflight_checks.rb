@@ -73,6 +73,7 @@ class PreflightChecks
     begin
       PostgresqlPreflightValidator.new(node).run!
       SolrPreflightValidator.new(node).run!
+      BookshelfPreflightValidator.new(node).run!
     rescue PreflightValidationFailed => e
       # use of exit! prevents exit handlers from running, ensuring the last thing
       # the customer sees is the descriptive error we've provided.
