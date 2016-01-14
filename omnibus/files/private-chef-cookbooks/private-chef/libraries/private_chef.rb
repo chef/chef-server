@@ -688,6 +688,8 @@ EOF
             'sql_ro_password' => PrivateChef['oc_bifrost']['sql_ro_password']
           },
           'bookshelf' => {
+            'sql_password' => PrivateChef['bookshelf']['sql_password'],
+            'sql_ro_password' => PrivateChef['bookshelf']['sql_ro_password'],
             'access_key_id' => PrivateChef['bookshelf']['access_key_id'],
             'secret_access_key' => PrivateChef['bookshelf']['secret_access_key']
           }})
