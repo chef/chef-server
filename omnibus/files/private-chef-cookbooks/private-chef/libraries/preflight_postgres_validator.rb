@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require "pg"
 
 class PostgresqlPreflightValidator < PreflightValidator
   attr_reader :cs_pg_attr, :node_pg_attr
@@ -109,9 +108,17 @@ class PostgresqlPreflightValidator < PreflightValidator
       connect_as(:superuser) do |connection|
         backend_verify_database_access(connection)
         backend_verify_postgres_version(connection)
-        %w{bifrost opscode_chef oc_id}.each {|db| backend_verify_named_db_not_present(connection, db) }
+        # The database should only exist if we haven't bootstrapped the previous
+        # run, or secrets haven't been copied from previous node.
+        if first_run?
+          if secrets_exists?
+            return
+          end
+        else
+          return
+        end
+        %w{bifrost opscode_chef oc_id}.each {|db| backend_verify_named_db_not_present(connection, db)}
         backend_verify_cs_roles_not_present(connection)
-
       end
     rescue ::PG::InsufficientPrivilege => e
       fail_with err_CSPG013_not_superuser
@@ -131,7 +138,6 @@ class PostgresqlPreflightValidator < PreflightValidator
     end
   end
 
-private
   def backend_verify_database_access(connection)
     # Make sure we have the access we need.
     # Note on not escaping username: we already connected with the same attribute,
@@ -164,8 +170,6 @@ private
   # Throws CSPG017 if any of the reserved usernames we
   # need to create are already in the datbase.
   def backend_verify_cs_roles_not_present(connection)
-    # This test is only valid on our initial run
-    return if previous_run
     %w{opscode-erchef oc_id oc_bifrost}.each do |service|
       %w{sql_user sql_ro_user}.each do |key|
         username = service_key_value(service, key)
@@ -181,14 +185,15 @@ private
 
 
   def backend_verify_named_db_not_present(connection, name)
-    # This test is only valid on our initial run - bootstrap itself is not a sufficent check,
-    # because we may have partially bootstrapped.
-    return if previous_run
-    r = connection.exec("SELECT count(*) AS result FROM pg_database WHERE datname='#{name}'")
-    fail_with err_CSPG016_database_exists(name) unless r[0]['result'] == '0'
+    fail_with err_CSPG016_database_exists(name) if named_db_exists?(connection, name)
+  end
+
+  def named_db_exists?(connection, name)
+    connection.exec("SELECT count(*) AS result FROM pg_database WHERE datname='#{name}'")[0]['result'] == '1'
   end
 
   def connect_as(type)
+    require "pg"
     port = cs_pg_attr.has_key?('port') ? cs_pg_attr['port'] : node_pg_attr['port']
     host = cs_pg_attr['vip']
     if type == :invalid_user
@@ -208,6 +213,7 @@ private
        end
     end
   end
+private
 
   def err_CSPG001_cannot_change_external_flag
 <<EOM
@@ -351,4 +357,3 @@ EOM
 
   end
 end
-
