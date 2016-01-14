@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+require_relative 'preflight_checks'
+
 class BookshelfPreflightValidator < PreflightValidator
   attr_reader :user_attrs, :node_attrs
 
@@ -36,17 +38,20 @@ class BookshelfPreflightValidator < PreflightValidator
       true
     else
       previous_value = previous_run['bookshelf']['storage_type']
-      current_value = user_value || :filesystem
+      current_value = user_attrs['storage_type'] || :filesystem
 
-      if previous_value.nil? && current_value == :filesystem # case (2)
+      if previous_value.nil? && current_value.to_s == 'filesystem' # case (2)
         true
-      elsif previous_value == current_value # case (5)
+      elsif previous_value.to_s == current_value.to_s # case (5)
         true
       else # everything else is invalid
         fail_with <<EOM
-Bookshelf's storage_type was previously ':#{previous_value}'; however the current
-configuration woudl result it a value of ':#{current_value}'. At this time it is
-not possible to change the bookshelf storage_type post-installation. Please set
+
+Bookshelf's storage_type was previously '#{previous_value}'; however
+the current configuration would result in a value of '#{current_value}'.
+At this time it is not possible to change the bookshelf storage_type post-installation.
+
+Please set
 
 bookshelf['storage_type'] = :#{previous_value}
 
