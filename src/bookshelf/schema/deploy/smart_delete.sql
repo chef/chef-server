@@ -18,18 +18,36 @@ DECLARE
 BEGIN
    SELECT (now() at time zone 'utc') + delay INTO expire_time;
    UPDATE file_data SET delete_after = expire_time WHERE data_id = id;
+   raise WARNING 'expiring (% %)', id, expire_time;
    RETURN expire_time;
 END;
 $$
 LANGUAGE plpgsql VOLATILE;
 
 CREATE OR REPLACE FUNCTION purge_expired()
-RETURNS integer;
+RETURNS integer
+AS $$
+DECLARE
+   deleted integer;
 BEGIN
-   RETURN DELETE FROM file_data WHERE delete_after < now();
+   WITH a AS (DELETE FROM file_data WHERE delete_after < now() RETURNING 1)
+   SELECT count(*) FROM a INTO deleted;
+   RETURN deleted;
 END;
 $$
 LANGUAGE plpgsql VOLATILE;
+
+-- this replaces the existing garbage collection
+CREATE OR REPLACE FUNCTION delete_file_last_reference() RETURNS TRIGGER as $delete_file_last_reference$
+   BEGIN
+       raise WARNING 'reference (%, %)', OLD.name, OLD.data_id;
+       IF NOT EXISTS (SELECT 1 FROM file_names WHERE data_id = OLD.data_id) THEN
+         raise WARNING 'deleting (%)', OLD.data_id;
+         PERFORM mark_deleted(OLD.data_id, '30m');
+       END IF;
+       RETURN NULL; -- result is ignored since this is an AFTER trigger
+   END;
+$delete_file_last_reference$ LANGUAGE plpgsql;
 
 COMMIT;
 

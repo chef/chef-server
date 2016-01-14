@@ -6,8 +6,10 @@ BEGIN;
 -- Reference counting happens here:
 CREATE OR REPLACE FUNCTION delete_file_last_reference() RETURNS TRIGGER as $delete_file_last_reference$
    BEGIN
+       raise WARNING 'reference (%)', OLD.data_id;
        IF NOT EXISTS (SELECT 1 FROM file_names WHERE data_id = OLD.data_id) THEN
-           DELETE FROM file_data where data_id = OLD.data_id;
+          raise WARNING 'reference (%)', OLD.data_id;
+          DELETE FROM file_data where data_id = OLD.data_id;
        END IF;
        RETURN NULL; -- result is ignored since this is an AFTER trigger
    END;
