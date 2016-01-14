@@ -31,6 +31,9 @@
          stream_download/0,
          summarize_config/0]).
 
+%% Exported for common test
+-export([port/0, ip/0, keys/0]).
+
 -include("internal.hrl").
 
 %%%===================================================================
