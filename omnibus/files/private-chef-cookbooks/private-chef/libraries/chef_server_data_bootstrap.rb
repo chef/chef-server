@@ -121,8 +121,8 @@ class ChefServerDataBootstrap
                     authz_id: authz_id,
                     org_id: GLOBAL_ORG_ID,
                     last_updated_by: superuser_authz_id,
-                    created_at: bootstrap_time.to_s,
-                    updated_at: bootstrap_time.to_s)
+                    created_at: bootstrap_time,
+                    updated_at: bootstrap_time)
   end
 
   # db helper to construct and execute a simple insert statement

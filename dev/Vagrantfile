@@ -98,6 +98,8 @@ def define_chef_server(config, attributes)
     # We're also going to do a share of the slower vboxsf style, allowing us to auto-checkout dependencies
     # and have them be properly synced to a place that we can use them.
     config.vm.synced_folder installer_path, "/installers"
+    chef_backend_config_path = File.absolute_path(File.join(Dir.pwd, "../../chef-backend/dev"))
+    config.vm.synced_folder chef_backend_config_path, "/be-gen-config" if File.directory? chef_backend_config_path
     config.vm.synced_folder File.expand_path(dotfiles_path), "/dotfiles"
 
     config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
