@@ -25,6 +25,7 @@
          get_context/1,
          access_key_id/1,
          disk_store/0,
+         storage_type/0,
          reset_dispatch/0,
          secret_access_key/1,
          stream_download/0,

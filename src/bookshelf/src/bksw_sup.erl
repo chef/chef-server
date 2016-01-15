@@ -47,11 +47,32 @@ init(_Args) ->
 
     SupFlags = {RestartStrategy, MaxRestarts, MaxSecondsBetweenRestarts},
 
-    Restart = permanent,
-
+    ensure_default_bucket(bksw_conf:storage_type()),
     WebmachineSup = {bksw_webmachine_sup, {bksw_webmachine_sup, start_link, []},
-                     Restart, infinity, supervisor, [bksw_webmachine_sup]},
+                     permanent, infinity, supervisor, [bksw_webmachine_sup]},
+    {ok, {SupFlags, maybe_with_cleanup_task([WebmachineSup])}}.
+
+
+maybe_with_cleanup_task(ChildSpecs) ->
     CleanupTask = {bksw_cleanup_task, {bksw_cleanup_task, start_link, []},
                    permanent, brutal_kill, worker, [bksw_cleanup_task]},
+    case bksw_conf:storage_type() of
+        sql ->
+            [CleanupTask| ChildSpecs];
+        _ ->
+            ChildSpecs
+    end.
 
-    {ok, {SupFlags, [ WebmachineSup, CleanupTask ]}}.
+%% When in sql storage_mode, create the default 'bookshelf' bucket on startup if it doesn't exist
+ensure_default_bucket(filesystem) ->
+    ok;
+ensure_default_bucket(sql) ->
+    DefaultBucket = <<"bookshelf">>,
+    case bksw_sql:bucket_exists(DefaultBucket) of
+        true ->
+            lager:info("Default bucket ~p already exists.", [DefaultBucket]),
+            ok;
+        false ->
+            lager:info("Create default bucket ~p.", [DefaultBucket]),
+            bksw_sql:create_bucket(DefaultBucket)
+    end.

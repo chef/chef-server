@@ -31,10 +31,17 @@ start(_StartType, _StartArgs) ->
             application:start(sync);
         _ -> ok
     end,
+
+    {ok, _OtherApps} = maybe_start_sqerl(bksw_conf:storage_type()),
     bksw_sup:start_link().
 
 stop(_State) ->
     ok.
+
+maybe_start_sqerl(filesystem) ->
+    {ok, []};
+maybe_start_sqerl(sql) ->
+    application:ensure_all_started(sqerl, permanent).
 
 %% @doc Print an informative message about how to use a remote shell
 %% attached to a live bookshelf node. The idea is to call this from a
