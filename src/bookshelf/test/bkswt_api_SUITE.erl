@@ -63,6 +63,8 @@ load_inline_config() ->
                              {keys, {"e1efc99729beb175",
                                      "fc683cd9ed1990ca"}},
                              {disk_store, "/tmp/bukkits"},
+                             {sql_retry_count, 0},
+                             {sql_retry_delay, 5000},
                              {reqid_header_name, "X-Request-Id"}],
     StaticSqerlConfig = [{db_host, "localhost"},
                          {db_port, 5432},
@@ -70,6 +72,7 @@ load_inline_config() ->
                          {db_pass, os_getenv("CT_SQL_PASSWORD", "pass-ignored")},
                          {db_name, "bookshelf"},
                          {idle_check, 10000},
+                         {pooler_timeout, 4000},
                          {prepared_statements, {bksw_sql, statements, [pgsql]}},
                          {column_transforms,
                           [{<<"created_at">>, {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}},
@@ -78,7 +81,7 @@ load_inline_config() ->
     application:set_env(pooler, pools, [[{name, sqerl},
                                          {max_count, 20},
                                          {init_count, 20},
-                                         {queue_max, 20},
+                                         {queue_max, 200}, %% Use a very high queue-max to avoid test failures for high-concurrency tests
                                          {start_mfa, {sqerl_client, start_link, []}}]]),
     [application:set_env(sqerl, Key, Value) || {Key, Value} <- StaticSqerlConfig],
     [application:set_env(bookshelf, Key, Value) || {Key, Value} <- StaticBookshelfConfig].
