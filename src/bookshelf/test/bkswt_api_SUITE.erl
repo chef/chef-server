@@ -28,17 +28,60 @@
 -include_lib("eunit/include/eunit.hrl").
 -include("../src/internal.hrl").
 
--define(STANDALONE_BOOKSHELF, true).
+-define(STANDALONE_BOOKSHELF, false).
 
 -define(STR_CHARS, "abcdefghijklmnopqrstuvwxyz").
 
 %% Loads the environment from a config file
 load_default_config() ->
+    case ?STANDALONE_BOOKSHELF of
+        true ->
+            load_config_from_file();
+        false ->
+            load_inline_config()
+    end.
+
+load_config_from_file() ->
     ConfigPath = case os:getenv("BOOKSHELF_CT_CONFIG_PATH") of
                      false -> "/var/opt/opscode/bookshelf/sys.config";
                      X -> X
                  end,
     load_config(ConfigPath).
+
+%% os:getenv/2 is a recent thing
+os_getenv(Key, Default) ->
+    case os:getenv(Key) of
+        false ->
+            Default;
+        Value ->
+            Value
+    end.
+
+load_inline_config() ->
+    StaticBookshelfConfig = [{ip, "127.0.0.1"},
+                             {port, 4321},
+                             {keys, {"e1efc99729beb175",
+                                     "fc683cd9ed1990ca"}},
+                             {disk_store, "/tmp/bukkits"},
+                             {reqid_header_name, "X-Request-Id"}],
+    StaticSqerlConfig = [{db_host, "localhost"},
+                         {db_port, 5432},
+                         {db_user, os_getenv("CT_SQL_USER", os:getenv("USER")) },
+                         {db_pass, os_getenv("CT_SQL_PASSWORD", "pass-ignored")},
+                         {db_name, "bookshelf"},
+                         {idle_check, 10000},
+                         {prepared_statements, {bksw_sql, statements, [pgsql]}},
+                         {column_transforms,
+                          [{<<"created_at">>, {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}},
+                           {<<"updated_at">>, {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}}]}],
+
+    application:set_env(pooler, pools, [[{name, sqerl},
+                                         {max_count, 20},
+                                         {init_count, 20},
+                                         {queue_max, 20},
+                                         {start_mfa, {sqerl_client, start_link, []}}]]),
+    [application:set_env(sqerl, Key, Value) || {Key, Value} <- StaticSqerlConfig],
+    [application:set_env(bookshelf, Key, Value) || {Key, Value} <- StaticBookshelfConfig].
 
 load_config(File) ->
     {ok, [Terms]} = file:consult(File),
@@ -56,50 +99,118 @@ start_bookshelf() ->
     %% we start lager since we depend on it for the release. However,
     %% we want to keep error_logger on its own so that we continue to
     %% see messages in common test output.
-    lager_common_test_backend:bounce(debug),
+    lager_common_test_backend:bounce(error),
 
     case application:ensure_all_started(bookshelf) of
         {ok, Apps} ->
-            ct:pal("Apps Started: ~p", [Apps]),
             {ok, Apps};
         {error, Es} ->
             erlang:error({application_start_failed, Es})
     end.
 
 stop_bookshelf(Config) ->
-    [application:stop(A)|| A <- ?config(apps, Config)].
+    [application:stop(A)|| A <- lists:flatten([?config(apps, Config), pooler, sqerl])].
+
+start_db(Config) ->
+    DataDir = ?config(data_dir, Config),
+    RootDir = the_real_root_dir(DataDir),
+    Schema = filename:join([RootDir, "schema"]),
+    PgData = filename:join([DataDir, "pg_data"]),
+    PgLog = filename:join([DataDir, "pg.log"]),
+    run_cmd(["rm -rf", PgData]),
+    run_cmd(["mkdir -p", DataDir]),
+    run_cmd(["initdb -D", PgData]),
+    run_cmd(["pg_ctl", "-l", PgLog, "-D", PgData, "start"]),
+    run_cmd(["sleep 1 && createdb -h localhost bookshelf"]),
+    run_cmd(["cd", Schema, "&& sqitch --engine pg --db-name bookshelf deploy"]),
+    ok.
+
+stop_db(Config) ->
+    DataDir = ?config(data_dir, Config),
+    PgData = filename:join([DataDir, "pg_data"]),
+    run_cmd(["pg_ctl", "-D", PgData, "stop"]),
+    ok.
+
+run_cmd(Args) ->
+    os:cmd(string:join(Args, " ")).
 
 %%====================================================================
 %% TEST SERVER CALLBACK FUNCTIONS
 %%====================================================================
 init_per_suite(Config) ->
+    case ?STANDALONE_BOOKSHELF of
+        true ->
+            ok;
+        false ->
+            start_db(Config)
+    end,
     Config.
 
-end_per_suite(_Config) ->
+end_per_suite(Config) ->
+    stop_db(Config),
     ok.
 
-init_per_testcase(_, Config0) ->
+set_storage_type_for_test_case(Casename) ->
+    case lists:last(string:tokens(atom_to_list(Casename), "_")) of
+        "sql" ->
+            application:set_env(bookshelf, storage_type, sql);
+        _ ->
+            application:set_env(bookshelf, storage_type, filesystem)
+    end.
+
+init_per_testcase(upgrade_from_v0, Config) ->
+    %% This fixes another rebar brokenness. We cant specify any options to
+    %% common test in rebar
+    Seed = now(),
+    random:seed(Seed),
+    error_logger:info_msg("Using random seed: ~p~n", [Seed]),
+    Format0Data = filename:join([?config(data_dir, Config),
+                                 "format_0_data"]),
+    DiskStore = filename:join(proplists:get_value(priv_dir, Config),
+                              random_string(10, "abcdefghijklmnopqrstuvwxyz")),
+    LogDir = filename:join(proplists:get_value(priv_dir, Config),
+                           "logs"),
+    filelib:ensure_dir(filename:join(DiskStore, "tmp")),
+    error_logger:info_msg("Using disk_store: ~p~n", [DiskStore]),
+    CMD = ["cd ", Format0Data, "; tar cf - * | (cd ", DiskStore, "; tar xf -; mkdir bucket-4)"],
+    ct:pal("copying format 0 data into disk store with command:~n~s~n", [CMD]),
+    os:cmd(CMD),
+    AccessKeyID = random_string(10, "abcdefghijklmnopqrstuvwxyz"),
+    SecretAccessKey = random_string(30, "abcdefghijklmnopqrstuvwxyz"),
+
+    application:set_env(bookshelf, reqid_header_name, "X-Request-Id"),
+    application:set_env(bookshelf, disk_store, DiskStore),
+    application:set_env(bookshelf, keys, {AccessKeyID, SecretAccessKey}),
+    application:set_env(bookshelf, log_dir, LogDir),
+    application:set_env(bookshelf, stream_download, true),
+    {ok, Apps} = start_bookshelf(),
+    bksw_conf:reset_dispatch(),
+    %% increase max sessions per server for ibrowse
+    application:set_env(ibrowse, default_max_sessions, 256),
+    %% disable request pipelining for ibrowse.
+    application:set_env(ibrowse, default_max_pipeline_size, 1),
+    Port = 4321,
+    S3State = mini_s3:new(AccessKeyID, SecretAccessKey,
+                          lists:flatten(io_lib:format("http://127.0.0.1:~p",
+                                                      [Port])),
+                          path),
+    [{s3_conf, S3State}, {disk_store, DiskStore}, {apps, lists:reverse(Apps)} | Config];
+init_per_testcase(Casename, Config0) ->
     load_default_config(),
-    application:set_env(bookshelf, storage_type, sql),
-
-    ct:print("Initing:~n~p~n", [application:get_all_env(bookshelf)]),
-
-    Apps =
-        case ?STANDALONE_BOOKSHELF of
-            true ->
-                application:start(sasl),
-                application:ensure_all_started(mini_s3),
-                [xmerl,mochiweb,webmachine,erlsom,ibrowse,mini_s3,envy,epgsql,pooler,sqerl,
-                 opscoderl_wm,iso8601,runtime_tools,tools,bookshelf];
-            false ->
-                {ok, Apps0} = start_bookshelf(),
-                %% force webmachine to pickup new dispatch_list. I don't understand why it
-                %% isn't enough to do application:stop/start for webmachine, but it isn't.
-                bksw_conf:reset_dispatch(),
-                Apps0
-        end,
-
-    ct:print("Apps: ~n~p", [Apps]),
+    set_storage_type_for_test_case(Casename),
+    Apps = case ?STANDALONE_BOOKSHELF of
+               true ->
+                   application:start(sasl),
+                   application:ensure_all_started(mini_s3),
+                   [xmerl,mochiweb,webmachine,erlsom,ibrowse,mini_s3,envy,epgsql,pooler,sqerl,
+                    opscoderl_wm,iso8601,runtime_tools,tools,bookshelf];
+               false ->
+                   {ok, Apps0} = start_bookshelf(),
+                   %% force webmachine to pickup new dispatch_list. I don't understand why it
+                   %% isn't enough to do application:stop/start for webmachine, but it isn't.
+                   bksw_conf:reset_dispatch(),
+                   Apps0
+           end,
 
     %% increase max sessions per server for ibrowse
     application:set_env(ibrowse, default_max_sessions, 256),
@@ -122,35 +233,75 @@ all(doc) ->
     ["This test is runs the fs implementation of the bkss_store signature"].
 
 all() ->
-    [
-%     bucket_basic,
-     %% bucket_many, % Intermittednt
-     %% bucket_encoding,
-     %% bucket_delete,
-     %% head_object,
-     %% put_object,
-     %% object_roundtrip,
-     %% object_delete,
+    lists:flatten([
+                   filesystem_tests(),
+                   sql_tests()]).
 
-     %% sec_fail, % Failing
-     %% signed_url,
-     %% signed_url_fail,
-     at_the_same_time,
-%     upgrade_from_v0
-     noop
-].
+sql_tests() ->
+    [ bucket_basic_sql,
+      bucket_many_sql,
+      bucket_encoding_sql,
+      bucket_delete_sql,
+      head_object_sql,
+      put_object_sql,
+      object_roundtrip_sql,
+      object_delete_sql,
+      sec_fail_sql,
+      signed_url_sql,
+      signed_url_fail_sql,
+      at_the_same_time_sql,
+      noop ].
 
+
+filesystem_tests() ->
+    [ bucket_basic,
+      bucket_many,
+      bucket_encoding,
+      bucket_delete,
+      head_object,
+      put_object,
+      object_roundtrip,
+      object_delete,
+      sec_fail,
+      signed_url,
+      signed_url_fail,
+      at_the_same_time,
+      upgrade_from_v0].
 
 %%====================================================================
 %% TEST CASES
 %%====================================================================
-
 noop(doc) ->
     ["No Op"];
 noop(suite) ->
     [];
 noop(_) ->
     ok.
+
+bucket_basic_sql(Arg) ->
+    bucket_basic(Arg).
+bucket_many_sql(Arg) ->
+    bucket_many(Arg).
+bucket_encoding_sql(Arg) ->
+    bucket_encoding(Arg).
+bucket_delete_sql(Arg) ->
+    bucket_delete(Arg).
+head_object_sql(Arg) ->
+    head_object(Arg).
+put_object_sql(Arg) ->
+    put_object(Arg).
+object_roundtrip_sql(Arg) ->
+    object_roundtrip(Arg).
+object_delete_sql(Arg) ->
+    object_delete(Arg).
+sec_fail_sql(Arg) ->
+    sec_fail(Arg).
+signed_url_sql(Arg) ->
+    signed_url(Arg).
+signed_url_fail_sql(Arg) ->
+    signed_url_fail(Arg).
+at_the_same_time_sql(Arg) ->
+    at_the_same_time(Arg).
 
 bucket_basic(doc) ->
     ["should create, view, and delete a bucket"];
@@ -174,9 +325,6 @@ bucket_many(Config) ->
     S3Conf = proplists:get_value(s3_conf, Config),
 
     BucketsBefore = bucket_list(S3Conf),
-    ct:print("Prebucket: ~p~n", [ BucketsBefore ] ),
-
-    % create
     Buckets = [random_binary() || _ <- lists:seq(1, 50)],
     NewBuckets = lists:subtract(Buckets, Buckets),
     Res = ec_plists:map(fun(B) ->
@@ -237,18 +385,14 @@ head_object(Config) when is_list(Config) ->
     Got = ec_plists:ftmap(fun(Obj) ->
                                   mini_s3:get_object_metadata(Bucket, Obj, [], S3Conf)
                           end, Objs, 10000),
-    error_logger:info_msg("Got: ~p~n", [Got]),
     [ ?assertMatch({value, _}, Item) || Item <- Got ],
     %% verify 404 behavior
-    V = try
-            mini_s3:get_object_metadata(Bucket, "no-such-object", [], S3Conf)
-        catch
-            error:Why ->
-                Why
-        end,
-    ct:pal("HEAD 404: ~p", [V]),
-
-    % Cleanup
+    try
+        mini_s3:get_object_metadata(Bucket, "no-such-object", [], S3Conf)
+    catch
+        error:Why ->
+            Why
+    end,
     ?assertEqual(ok, mini_s3:delete_bucket(Bucket, S3Conf)).
 
 
@@ -258,10 +402,8 @@ put_object(suite) ->
     [];
 put_object(Config) when is_list(Config) ->
     S3Conf = proplists:get_value(s3_conf, Config),
-    ct:print("S3Conf hahaha ~p~n", [S3Conf]),
 
     Bucket = random_bucket(),
-    ct:print("Bucket ~p~n",[Bucket]),
 
     ensure_bucket(Bucket, S3Conf),
 
@@ -300,7 +442,6 @@ object_roundtrip(Config) when is_list(Config) ->
     Data = erlang:iolist_to_binary(test_data_text(128*1024)),
     mini_s3:put_object(Bucket, Name, Data, [], [], S3Conf),
     Result = mini_s3:get_object(Bucket, Name, [], S3Conf),
-    ct:print("Fetched ~p~n", [Name]),
     DataRoundtrip = proplists:get_value(content, Result),
     ?assertEqual(Data, DataRoundtrip).
 
@@ -362,7 +503,6 @@ sec_fail(Config) when is_list(Config) ->
                    <<"evenmorenope">>,
                    path},
     Bucket = "thisshouldfail",
-    ct:print("trying: mini_s3:create_bucket(~p, public_read_write, none, ~p)~n", [Bucket, BogusS3Conf]),
     ?assertError({aws_error, {http_error, 403, _}},
                  mini_s3:create_bucket(Bucket, public_read_write, none, BogusS3Conf)),
     %% also verify that unsigned URL requests don't crash
@@ -482,11 +622,7 @@ upgrade_from_v0(Config) ->
     AssertCount("bucket-4", 0),
     AssertCount("bucket%20space", 2),
 
-    [ begin
-          Res = mini_s3:get_object(Bucket, Key, [], S3Conf),
-          ct:pal("Found: ~p~n", [Res])
-      end || {Bucket, Key} <- ShouldExist ],
-
+    [ mini_s3:get_object(Bucket, Key, [], S3Conf) || {Bucket, Key} <- ShouldExist ],
     ok.
 
 
@@ -533,3 +669,31 @@ file_exists(Bucket, Name, S3Conf) ->
     List = mini_s3:list_objects(Bucket, [], S3Conf),
     Files = [ proplists:get_value(key, I) || I <- proplists:get_value(contents, List)],
     lists:member(Name, Files).
+
+
+
+%%%%
+%% Helpers
+%%%%
+
+% stolen from chef_test_db_helper
+the_real_root_dir("") ->
+    {error, not_found};
+the_real_root_dir(Dir) ->
+    AllFiles = maybe_find_files(Dir),
+    case {lists:member("_build", AllFiles), lists:member("config", AllFiles)} of
+        {true, true} ->
+            Dir;
+        _ ->
+            Tokens = filename:split(Dir),
+            NewDir = filename:join(lists:droplast(Tokens)),
+            the_real_root_dir(NewDir)
+    end.
+
+maybe_find_files(Dir) ->
+    case file:list_dir(Dir) of
+        {ok, AllFiles} ->
+            AllFiles;
+        _ ->
+            []
+    end.
