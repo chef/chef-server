@@ -16,13 +16,13 @@
                            post_is_create/2,
                            {list_objects_json/2, to_json},
                            forbidden/2,
-                           is_authorized/2,
-                           service_available/2]}]).
+                           is_authorized/2]}]).
 
 -export([allowed_methods/2,
          create_path/2,
          from_json/2,
-         resource_exists/2]).
+         resource_exists/2,
+         service_available/2]).
 
 %% chef_wm behavior callbacks
 -behaviour(chef_wm).
@@ -47,6 +47,22 @@ init(Config) ->
 
 init_resource_state(_Config) ->
     {ok, #control_state{}}.
+
+service_available(Req, State) ->
+    case oc_chef_wm_base:service_available(Req, State) of
+        {true, Req1, State1} ->
+            ActionsEnabled = envy:get(oc_chef_wm, enable_actions, false, boolean),
+            case ActionsEnabled of
+                true -> {true, Req1, State1};
+                false ->
+                    Msg = <<"Resource gone, analytics unavailable in the current server configuration">>,
+                    Req2 = wrq:set_resp_header("Content-type", "application/json", Req1),
+                    Req3 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, Msg}]}), Req2),
+                    {{halt, 410}, Req3, State1#base_state{log_msg = rabbitmq_disabled}}
+            end;
+        Other ->
+          Other
+    end.
 
 request_type() ->
     "controls".
