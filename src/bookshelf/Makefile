@@ -48,7 +48,7 @@ VERSION: version_clean
 ## For Travis
 install: $(REBAR3)
 
-travis: update all
+travis: update all ct
 	@echo "Travis'd!"
 
 ## for Omnbibus

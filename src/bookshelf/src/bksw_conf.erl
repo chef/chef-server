@@ -30,6 +30,9 @@
          stream_download/0,
          summarize_config/0]).
 
+%% Exported for common test
+-export([port/0, ip/0, keys/0]).
+
 -include("internal.hrl").
 
 %%%===================================================================
@@ -44,7 +47,8 @@
 
 -spec get_context(proplists:proplist()) -> context().
 get_context(Config) ->
-    #context{access_key_id = proplists:get_value(access_key_id, Config),
+    #context{auth_check_disabled = proplists:get_value(auth_check_disabled, Config),
+             access_key_id = proplists:get_value(access_key_id, Config),
              secret_access_key = proplists:get_value(secret_access_key, Config),
              stream_download = proplists:get_value(stream_download, Config),
              reqid_header_name = proplists:get_value(reqid_header_name, Config)}.
@@ -53,16 +57,18 @@ get_context(Config) ->
 summarize_config() ->
     {keys, {KeyId, _Secret}} = keys(),
     lists:flatten([ip(), port(), log_dir(),
+                   {storage_type, storage_type()},
                    {disk_store, disk_store()},
                    {stream_download, stream_download()},
+                   {auth_check_disabled, auth_check_disabled()},
                    {reqid_header_name, reqid_header_name()},
                    {access_key_id, KeyId}]).
 
 -spec get_configuration() -> list().
 get_configuration() ->
     lists:flatten([ip(),
-                   dispatch(),
                    port(),
+                   dispatch(),
                    log_dir()]).
 
 -spec access_key_id(context()) -> binary().
@@ -74,15 +80,15 @@ secret_access_key(#context{secret_access_key=SecretAccessKey}) ->
     SecretAccessKey.
 
 -spec disk_store() -> string().
--ifdef(TEST).
+-ifdef(EUNIT_TEST).
 disk_store() ->
     "/tmp/".
 -else.
 disk_store() ->
-    case application:get_env(bookshelf, disk_store) of
+    case envy:get(bookshelf, disk_store, undefined, any) of
         undefined ->
             error({missing_config, {bookshelf, disk_store}});
-        {ok, Path} when is_list(Path) ->
+        Path when is_list(Path) ->
             case ends_with($/, Path) of
                 true ->
                     Path;
@@ -97,14 +103,11 @@ ends_with(Char, String) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+auth_check_disabled() ->
+    envy:get(bookshelf, auth_check_disabled, false, boolean).
 
 ip() ->
-    case application:get_env(bookshelf, ip) of
-        undefined ->
-            [{ip, "127.0.0.1"}];
-        {ok, Ip} ->
-            [{ip, Ip}]
-    end.
+    {ip, envy:get(bookshelf, ip, "127.0.0.1", string)}.
 
 reset_dispatch() ->
     [{dispatch, Dispatch}] = dispatch(),
@@ -114,46 +117,41 @@ reset_dispatch() ->
 dispatch() ->
     {keys, {AccessKeyId, SecretAccessKey}} = keys(),
     Config = [{stream_download, stream_download()},
+              {auth_check_disabled, auth_check_disabled()},
               {access_key_id, AccessKeyId},
               {secret_access_key, SecretAccessKey}],
     %% per wm docs, init args for resources should be a list
+    dispatch_by_storage(storage_type(), Config).
+
+dispatch_by_storage(filesystem, Config) ->
     [{dispatch, [{[bucket, obj_part, '*'], bksw_wm_object, Config},
                  {[bucket], bksw_wm_bucket, Config},
-                 {[], bksw_wm_index, Config}]}].
+                 {[], bksw_wm_index, Config}]}];
+dispatch_by_storage(sql, Config) ->
+    [{dispatch, [{[bucket, obj_part, '*'], bksw_wm_sql_object, Config},
+                 {[bucket], bksw_wm_sql_bucket, Config},
+                 {[], bksw_wm_sql_index, Config}]}].
+
+storage_type() ->
+    envy:get(bookshelf, storage_type, filesystem, atom).
 
 port() ->
-    case application:get_env(bookshelf, port) of
-        undefined ->
-            {port, 4321};
-        {ok, Port} ->
-            {port, Port}
-    end.
+    {port, envy:get(bookshelf, port, 4321, positive_integer)}.
 
 keys() ->
-    case application:get_env(bookshelf, keys) of
+    case envy:get(bookshelf, keys, undefined, any) of
         undefined ->
             error({missing_config, {bookshelf, keys}});
-        {ok, {AWSAccessKey, SecretKey}} ->
+        {AWSAccessKey, SecretKey} ->
             {keys, {bksw_util:to_binary(AWSAccessKey),
                     bksw_util:to_binary(SecretKey)}}
     end.
 
 log_dir() ->
-    case application:get_env(bookshelf, log_dir) of
-        undefined ->
-            Dir = code:priv_dir(bookshelf),
-            {log_dir, Dir};
-        {ok, Dir} ->
-            {log_dir, Dir}
-    end.
+    {log_dir, envy:get(bookshelf, log_dir, code:priv_dir(bookshelf), any)}.
 
 reqid_header_name() ->
-    application:get_env(bookshelf, reqid_header_name).
+    envy:get(bookshelf, reqid_header_name, undefined, string).
 
 stream_download() ->
-    case application:get_env(bookshelf, stream_download) of
-        {ok, true} ->
-            true;
-        _ ->
-            false
-    end.
+    envy:get(bookshelf, stream_download, false, boolean).
