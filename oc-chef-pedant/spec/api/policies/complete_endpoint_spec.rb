@@ -804,7 +804,7 @@ describe "Policies API endpoint", :policies do
             end
           end
 
-          context "when the name is close to the maximum size" do
+          context "when the name is close to the maximum size", :chef_zero_quirks do
 
             # On Chef Zero, some backends will append `.json` to a file name,
             # which can exceed the common limit of 255 characters.
@@ -823,7 +823,7 @@ describe "Policies API endpoint", :policies do
             end
           end
 
-          context "when a revision_id is the maximum size" do
+          context "when a revision_id is the maximum size", :chef_zero_quirks do
 
             let(:max_size_revision_id) { 'a' * 255 }
 
