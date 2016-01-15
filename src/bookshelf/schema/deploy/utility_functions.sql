@@ -12,7 +12,7 @@ AS $$
 DECLARE
    new_id file_data.data_id%TYPE;
 BEGIN
-   INSERT INTO file_data (complete) VALUES ('false') returning data_id INTO new_id;
+   INSERT INTO file_data (complete) VALUES ('false') RETURNING data_id INTO new_id;
    INSERT INTO file_names (bucket_id, "name", data_id) VALUES (bucket_id, new_name, new_id);
    RETURN new_id;
 END;
@@ -30,7 +30,7 @@ DECLARE
    new_data_id file_data.data_id%TYPE;
 BEGIN
    SELECT b.bucket_id INTO bucket_id FROM bucket_names AS b WHERE b.bucket_name = bn;
-   INSERT INTO file_data (complete) VALUES ('false') returning data_id INTO new_data_id;
+   INSERT INTO file_data (complete) VALUES ('false') RETURNING data_id INTO new_data_id;
    INSERT INTO file_names (bucket_id, "name", data_id) VALUES (bucket_id, new_name, new_data_id);
    RETURN new_data_id;
 END;

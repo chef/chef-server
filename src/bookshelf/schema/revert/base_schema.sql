@@ -21,5 +21,8 @@ DROP TABLE IF EXISTS file_names CASCADE;
 DROP TABLE IF EXISTS file_data CASCADE;
 DROP TABLE IF EXISTS file_chunks CASCADE;
 
+DROP FUNCTION IF EXISTS link_file_data(my_file_id file_names.file_id%TYPE, my_data_id file_data.data_id%TYPE);
+DROP FUNCTION IF EXISTS  create_file_link_data(bn bucket_names.bucket_name%TYPE, my_name file_names.name%TYPE, my_data_id file_data.data_id%TYPE);
+
 
 COMMIT;

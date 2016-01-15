@@ -34,10 +34,11 @@ CREATE UNIQUE INDEX file_names_file_id_index ON file_names(file_id);
 -- Encoding choices for hashes.
 
 CREATE TABLE IF NOT EXISTS file_data(
-    data_id     bigserial PRIMARY KEY,
-    complete	boolean,
-    data_size   bigint, 
-    chunk_count int,
+    data_id           bigserial PRIMARY KEY,
+    upload_started_at timestamp without time zone default (now() at time zone 'utc'),
+    complete          boolean,
+    data_size         bigint, 
+    chunk_count       int,
 
     -- Normal practice would be to constrain hash_* fields to be NOT
     -- NULL UNIQUE, but if we are streaming the file we won't know
@@ -87,5 +88,44 @@ CREATE OR REPLACE VIEW expanded_files AS SELECT bucket_name, fd.* FROM bucket_na
                file_names f INNER JOIN file_data d ON f.data_id = d.data_id) fd
 	ON b.bucket_id = fd.bucket_id;	
 
+--
+-- This atomically links a file data item with 
+-- 
+CREATE OR REPLACE FUNCTION link_file_data (
+       my_file_id file_names.file_id%TYPE,
+       my_data_id file_data.data_id%TYPE
+       )
+       RETURNS VOID -- fix this to be null
+AS $$
+BEGIN
+  UPDATE file_data SET complete = true WHERE data_id = my_data_id;
+  UPDATE file_names SET data_id = my_data_id WHERE file_id = my_file_id;
+END
+$$
+LANGUAGE plpgsql VOLATILE;
+
+
+--
+-- This could be refactored to use link_file_data above, but it seems
+-- simpler to do it this way.
+--
+CREATE OR REPLACE FUNCTION create_file_link_data(
+       bn bucket_names.bucket_name%TYPE,
+       my_name  file_names.name%TYPE,
+       my_data_id file_data.data_id%TYPE)
+RETURNS file_names.file_id%TYPE -- what happens if exists already? UPSERT?
+AS $$
+DECLARE
+   my_bucket_id file_names.bucket_id%TYPE;
+   new_file_id file_names.file_id%TYPE;
+BEGIN
+   SELECT b.bucket_id INTO my_bucket_id FROM bucket_names AS b WHERE b.bucket_name = bn;
+   UPDATE file_data SET complete = true WHERE data_id = my_data_id;
+   INSERT INTO file_names (bucket_id, "name", data_id) VALUES (my_bucket_id, my_name, my_data_id)
+   	       RETURNING file_id INTO new_file_id;
+   RETURN new_file_id;	       
+END;
+$$
+LANGUAGE plpgsql VOLATILE;       
 
 COMMIT;
