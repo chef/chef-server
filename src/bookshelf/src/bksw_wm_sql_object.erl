@@ -91,7 +91,7 @@ resource_exists(Rq0, Ctx) ->
         %% Buckets always exist for writes since we create them on the fly
         'PUT' ->
             case fetch_entry_md(Rq0, Ctx) of
-                {error, _Error} ->
+                {error, none} ->
                     {false, Rq0, Ctx};
                 {not_found, #context{} = Ctx1 } ->
                     {true, Rq0, Ctx1};
@@ -104,7 +104,7 @@ resource_exists(Rq0, Ctx) ->
             %% more consistent since we will open the fd once at start and hold on to it.
             %% Note that there is still a possible discrepency when we read the meta data.
             case fetch_entry_md(Rq0, Ctx) of
-                {error, _Error} ->
+                {error, none} ->
                     {false, Rq0, Ctx};
                 {not_found, #context{} = Ctx1 } ->
                     {false, Rq0, Ctx1};
@@ -155,12 +155,15 @@ fetch_entry_md(Req, #context{} = Ctx) ->
             {Object, Ctx#context{entry_md = Object}};
         {ok, not_found} ->
             {not_found, Ctx#context{entry_md = #db_file{bucket_name = Bucket, name = Path}}};
+        {ok, DbFile} ->
+            io:format("Match trouble, ~p ~p ~p~n",[Bucket,Path,(DbFile)]);
         {error, no_connections} ->
             timer:sleep(?PGSQL_RETRY_INTERVAL),
             fetch_entry_md(Req, Ctx);
-        {error, Error} ->
-            error_logger:error_msg("Error occurred during fetch_entry_md: B:~p P:~p '~p'~n", [Bucket,Path,Error]),
+        {error, _Error} ->
+            error_logger:error_msg("Error occurred during fetch_entry_md: B:~p P:~p '~p'~n", [Bucket,Path,_Error]),
             {error, Ctx}
+            %% error case here TODO
     end.
 
 %%
@@ -239,20 +242,21 @@ finalize_maybe_create_file(_Rq, _Ctx,
                                     bucket_name = BucketName,
                                     name = Name,
                                     data_id = DataId}) ->
-    {ok, BucketId} = bksw_sql:find_bucket(BucketName),
-    case bksw_sql:create_file_with_data(BucketId, Name, DataId) of
-        _ ->
-            ok
+    case bksw_sql:create_file_link_data(BucketName, Name, DataId) of
+        {ok, _} ->
+            ok;
+        {error, _Reason} ->
             %% TODO ERROR HANDLING
+            ok
     end;
 %% If we have a file_id, we're replacing an old file
 finalize_maybe_create_file(_Rq, _Ctx,
                            #db_file{file_id = FileId,
                                     data_id = DataId}) ->
-    case bksw_sql:update_file_with_data(FileId, DataId) of
+    case bksw_sql:link_file_data(FileId, DataId) of
         _ ->
             ok
-                %% TODO ERROR HANDLING
+            %% TODO ERROR HANDLING
     end.
 
 %%
@@ -281,7 +285,7 @@ write_streamed_body({Data, done}, Rq0,
              hash_sha512 = HashSha512} = File1 =
         bksw_sql:finalize_transfer_state(TransferState1, File0),
     Ctx1 = Ctx0#context{entry_md = File1},
-    bksw_sql:mark_file_done(DataId, Size, ChunkCount, HashMd5, HashSha256, HashSha512),
+    bksw_sql:update_metadata(DataId, Size, ChunkCount, HashMd5, HashSha256, HashSha512),
 
     ok = finalize_maybe_create_file(Rq0, Ctx0, File1),
 

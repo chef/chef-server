@@ -32,15 +32,15 @@
           find_file/1,
           find_file/2,
           create_file/2,
-          create_file_with_data/3,
-          update_file_with_data/2,
+          create_file_link_data/3,
+          link_file_data/2,
           delete_file/2, %% deprecate
           delete_file/1,
           rename_file_with_overwrite/3,
           insert_file_data/0,
           delete_file_data/1,
           add_file_chunk/3,
-          mark_file_done/6,
+          update_metadata/6,
           get_chunk_data/2,
           replace_chunk_data/1,
           init_transfer_state/0,
@@ -91,8 +91,6 @@ find_bucket(BucketName) ->
 
 list_buckets() ->
     case sqerl:select(list_buckets, [], rows_as_records, ?DB_BUCKET_TX_FM) of
-        {ok, none} ->
-            [];
         {ok, Buckets} ->
             Buckets;
         {error, Reason} ->
@@ -107,7 +105,7 @@ list_bucket(BucketName) ->
             {error, Reason}
     end.
 
--spec create_file(binary(), binary()) -> {ok, integer()} | {error, any()}.
+-spec create_file(binary(), binary()) -> integer().
 create_file(Bucket, Name) ->
     case sqerl:select(insert_file, [Bucket, Name], first_as_scalar, [data_id]) of
         {ok, File} ->
@@ -116,21 +114,22 @@ create_file(Bucket, Name) ->
             {error, Reason}
     end.
 
-
-create_file_with_data(BucketId, FileName, DataId) ->
-    case sqerl:statement(insert_file_with_data_id, [BucketId, FileName, DataId], count) of
-        {ok, 1} ->
-            ok;
-        Error ->
-            Error
+create_file_link_data(BucketName, Name, DataId) ->
+    case sqerl:select(create_file_link_data, [BucketName, Name, DataId], first_as_scalar, [success]) of
+        {ok, FileId} ->
+            {ok, FileId};
+        {conflict, Reason} ->
+            {error, Reason};
+        {error, Reason} ->
+            {error, Reason}
     end.
 
-update_file_with_data(FileId, DataId) ->
-    case sqerl:statement(update_file_with_data_id, [FileId, DataId], count) of
-        {ok, 1} ->
+link_file_data(FileId, DataId) ->
+    case sqerl:select(link_file_data, [FileId, DataId], first_as_scalar, [success]) of
+        {ok, _} ->
             ok;
-        Error ->
-            Error
+        {error, Reason} ->
+            {error, Reason}
     end.
 
 find_file(Bucket, Name) ->
@@ -158,7 +157,7 @@ find_file(FileId) ->
 %% TODO IMPROVE
 delete_file(Bucket, Name) ->
     case find_file(Bucket, Name) of
-        {ok, not_found} ->
+        {ok, none} ->
             {error, file_not_found};
         {ok, #db_file{file_id = FileId}} ->
             delete_file(FileId);
@@ -176,15 +175,15 @@ delete_file(FileId) ->
     end.
 
 rename_file_with_overwrite(BucketId, FileId, NewName) ->
-    case sqerl:select(rename_file_with_overwrite, [BucketId, FileId, NewName], first_as_scalar, [success]) of
+    case sqerl:statement(rename_file_with_overwrite, [BucketId, FileId, NewName], sucess) of
         {ok, true} ->
             ok;
         Error ->
             Error
     end.
 
-mark_file_done(DataId, Size, Chunks, SumMD5, SumSha256, SumSha512) ->
-    case sqerl:statement(update_file_data_done, [DataId, Size, Chunks, SumMD5, SumSha256, SumSha512], count) of
+update_metadata(DataId, Size, Chunks, SumMD5, SumSha256, SumSha512) ->
+    case sqerl:statement(update_metadata, [DataId, Size, Chunks, SumMD5, SumSha256, SumSha512], count) of
         {ok, 1} ->
             ok;
         Error ->
