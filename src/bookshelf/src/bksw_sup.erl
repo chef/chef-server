@@ -55,6 +55,6 @@ init(_Args) ->
     WebmachineSup = {bksw_webmachine_sup, {bksw_webmachine_sup, start_link, []},
                      Restart, infinity, supervisor, [bksw_webmachine_sup]},
     CleanupTask = {bksw_cleanup_task, {bksw_cleanup_task, start_link, []},
-                   permanent, brutal_kill, worker, bksw_cleanup_task}
+                   permanent, brutal_kill, worker, [bksw_cleanup_task]},
 
-    {ok, {SupFlags, [WebmachineSup, CleanupTask]}}.
+    {ok, {SupFlags, [ WebmachineSup, CleanupTask ]}}.
