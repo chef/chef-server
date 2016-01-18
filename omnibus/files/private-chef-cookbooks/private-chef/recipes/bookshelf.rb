@@ -4,6 +4,8 @@
 #
 # All Rights Reserved
 
+include_recipe "private-chef::runit_setup"
+
 cookbook_migration = "/opt/opscode/embedded/bin/cookbook_migration.sh"
 
 data_path = node['private_chef']['bookshelf']['data_dir']

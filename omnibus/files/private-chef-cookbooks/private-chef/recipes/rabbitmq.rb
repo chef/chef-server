@@ -17,6 +17,8 @@
 # limitations under the License.
 #
 
+include_recipe "private-chef::runit_setup"
+
 rabbitmq = node["private_chef"]["rabbitmq"]
 
 rabbitmq_dir = rabbitmq['dir']

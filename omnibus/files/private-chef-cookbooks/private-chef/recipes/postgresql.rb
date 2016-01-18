@@ -17,6 +17,7 @@
 #
 
 include_recipe "private-chef::old_postgres_cleanup"
+include_recipe "private-chef::runit_setup"
 
 postgresql_dir = node['private_chef']['postgresql']['dir']
 postgresql_data_dir = node['private_chef']['postgresql']['data_dir']

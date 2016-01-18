@@ -1,0 +1,23 @@
+# This file includes functions for use in the runit (sv-*) scripts
+
+# Backend services in an HA setup need to wait until the backing storage is mounted
+# @returns 0 if all required backing stores are mounted and 1 otherwise
+function ensure_backing_storage {
+  # If this isn't an HA situation there is no backing storage to wait for
+  if [[ '<%= node['private_chef']['topology'] %>' != 'ha' ]]; then
+    return 0
+  fi
+
+  echo "Ensuring backing datastore is mounted"
+  for attempt in {1..15}; do
+    <%= node['private_chef']['keepalived']['dir'] %>/bin/ha_backend_storage mounted
+    if [[ $? == 0 ]]; then
+      return 0
+    fi
+    echo "Backing datastore not yet mounted...."
+    sleep $((2 * attempt))
+  done
+
+  echo "Timed out waiting for storage (aws, drdb, etc) to mount.  Check your backing storage setup and try again"
+  return 1
+}
