@@ -1,5 +1,19 @@
+#
+# Copyright:: Copyright (c) 2015 Chef Software, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-require "pg"
+
 
 class BootstrapPreflightValidator < PreflightValidator
   def initialize(node)
@@ -22,14 +36,24 @@ class BootstrapPreflightValidator < PreflightValidator
 
     # If we're bypassing bootstrap it's because we think another node has already done it.
     # Verify that assumption.
-    if bypass_bootstrap?
-      verify_application_credentials
-      verify_pivotal_user_exists
-      verify_pivotal_key_present
-    else
-    end
-
-
+       # TODO:
+      # If the pivotal key file exists locally:
+      #  - fetch pivotal public key(s) from opscode_chef keys view + users
+      #  - extract public key from local pivotal.pem
+      #   * If we fail with an auth error at this time, it means that either the
+      #     username/password for erchef are not set up (in which case db/schema bootstrap has
+      #     not been run and we are working from an outdated secrets file), or we
+      #     don't have the correct credentials due to an old secrets file.
+      #     This should raise its own error.
+      #
+      #  - validate that the public key matches any of the returned
+      #    pivotal user keys
+      #  - if it doesn't:
+      #    fail_with err_BOOT008_pivotal_public_key_mismatch
+      #  - if it does but the matched key is expired:
+      #    fail_with err_BOOT008_pivotal_key_expired
+      #  If the pivotal key file does not exist locally, but the secrets file does exist,
+      #  it was not copied over from the machine that performed the bootstrap.
   end
 
   # In order to support a stateless standalone that connects to all-external
@@ -57,20 +81,9 @@ class BootstrapPreflightValidator < PreflightValidator
     # for the username 'pivotal' can't be found in opsode_chef.users
   end
 
-  def validate_pivotal_key
-    # TODO:
-    # If the pivotal key exists:
-    #  - fetch pivotal public key(s) from opscode_chef keys view + users
-    #  - extract public key from local pivotal.pem
-    #  - validate that the public key matches any of the returned
-    #    pivotal user keys
-    #  - if it doesn't:
-    #    fail_with err_BOOT008_pivotal_public_key_mismatch
-    #  - if it does but the matched key is expired:
-    #    fail_with err_BOOT008_pivotal_key_expired
-    #  - extractFetch user pivotal
-  end
 
+  #TODO:
+  #These error messages and condition will need further refinement, details, and validation.
   def err_BOOT001_missing_pivotal_key
 <<EOM
 BOOT001: Your configuration indicates that you are starting this node
@@ -151,7 +164,7 @@ BOOT007: The pivotal key file /etc/opscode/pivotal.pem exists, but its public ke
 EOM
   end
 
-  def err_BOOT008_pivotal_key_expired
+  def err_BOOT009_pivotal_key_expired
 <<EOM
 BOOT007: The pivotal superuser account key is expired.
 
