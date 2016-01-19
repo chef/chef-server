@@ -115,3 +115,5 @@ get:
           200:
             body:
               example: !include ../examples/policy.json
+
+    /acl: !include ../acl_endpoint.yaml
