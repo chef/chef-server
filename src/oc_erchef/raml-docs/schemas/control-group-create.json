@@ -1,0 +1,5 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$ref": "https://github.com/chef/chef-analytics/blob/master/src/analytics_docs/schema/control_groups-0.1.1.json",
+  "example": { "$ref": "https://github.com/chef/chef-analytics/blob/master/src/analytics_docs/schema/examples/control_groups-0.1.1.json" }
+}
