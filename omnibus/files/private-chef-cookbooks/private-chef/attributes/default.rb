@@ -594,7 +594,10 @@ default['private_chef']['bookshelf']['secret_access_key'] = "generated-by-defaul
 # Default: set to Host: header. Override to hardcode a url, "http://..."
 default['private_chef']['bookshelf']['external_url'] = :host_header
 default['private_chef']['bookshelf']['storage_type'] = :filesystem
+# This retries connections that are rejected because pooler queue is maxed out. 
+default['private_chef']['bookshelf']['sql_retry_count'] = 0
 # Intervals are in milliseconds
+default['private_chef']['bookshelf']['sql_retry_delay'] = 10
 default['private_chef']['bookshelf']['abandoned_upload_cleanup_interval'] = 19 * (60 * 1000)
 default['private_chef']['bookshelf']['deleted_data_cleanup_interval'] = 7 * (60 * 1000)
 default['private_chef']['bookshelf']['db_pool_size'] = 20
