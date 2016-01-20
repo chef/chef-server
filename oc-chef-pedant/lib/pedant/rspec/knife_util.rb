@@ -73,17 +73,30 @@ module Pedant
         # Convenience method for creating a Mixlib::ShellOut representation
         # of a knife command in our test repository
         def shell_out(command_line)
-          # All the environment variable munging is so Bundler doesn't
-          # poison things, since we don't include a Chef gem
-          Mixlib::ShellOut.new(command_line, {
+          Mixlib::ShellOut.new(command_line,
                                  'cwd' => cwd,
-                                 'env' => {
-                                   'BUNDLE_GEMFILE' => nil,
-                                   'BUNDLE_BIN_PATH' => nil,
-                                   'GEM_PATH' => nil,
-                                   'GEM_HOME' => nil,
-                                   'RUBYOPT' => nil
-                                 }})
+                                 'env' => command_environment)
+        end
+
+        # When running pedant in a standalone configuration, Bundler will
+        # prevent `knife` from running properly because pedant doesn't have a
+        # dependency on Chef. However, unsetting all the ruby/bundler
+        # environment variables will prevent these tests from working correctly
+        # when run from a bundle that includes chef and is running under RVM.
+        # Set the `PEDANT_ALLOW_RVM` environment variable (to anything) to opt
+        # out of the bundle/rvm busting mode.
+        def command_environment
+          if ENV["PEDANT_ALLOW_RVM"]
+            {}
+          else
+            {
+              'BUNDLE_GEMFILE' => nil,
+              'BUNDLE_BIN_PATH' => nil,
+              'GEM_PATH' => nil,
+              'GEM_HOME' => nil,
+              'RUBYOPT' => nil
+            }
+          end
         end
 
         # Convenience method for actually running a knife command in our
