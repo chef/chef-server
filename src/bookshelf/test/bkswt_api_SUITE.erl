@@ -220,9 +220,9 @@ init_per_testcase(Casename, Config0) ->
     %% disable request pipelining for ibrowse.
     application:set_env(ibrowse, default_max_pipeline_size, 1),
 
-    {port, Port} = bksw_conf:port(),
-    {ip, Ip} = bksw_conf:ip(),
-    {keys, {AccessKeyID, SecretAccessKey}} = bksw_conf:keys(),
+    Port = bksw_conf:port(),
+    Ip = bksw_conf:ip(),
+    {AccessKeyID, SecretAccessKey} = bksw_conf:keys(),
     S3State = mini_s3:new(AccessKeyID, SecretAccessKey,
                           lists:flatten(io_lib:format("http://~s:~p", [Ip, Port])),
                           path),

@@ -45,7 +45,7 @@ init(_Args) ->
     error_logger:info_msg("bookshelf using config: ~p~n",
                           [bksw_conf:summarize_config()]),
     %% This will reconfigure the system each time we startup.
-    WebConfig = bksw_conf:get_configuration(),
+    WebConfig = bksw_conf:get_wm_configuration(),
     WebMachine = {webmachine_mochiweb,
                   {webmachine_mochiweb, start, [WebConfig]},
                   permanent, 5000, worker, dynamic},
