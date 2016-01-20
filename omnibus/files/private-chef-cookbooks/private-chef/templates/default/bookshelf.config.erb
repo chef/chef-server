@@ -80,6 +80,10 @@
                       "<%= @secret_access_key %>"}},
               {storage_type, <%= @storage_type %>},
               {disk_store, "<%= @data_dir %>"},
+<% if @storage_type.to_s == "sql" -%>
+              {abandoned_upload_cleanup_interval, <%= @abandoned_upload_cleanup_interval -%>},
+              {deleted_data_cleanup_interval, <%= @deleted_data_cleanup_interval -%>},
+<% end -%>
               {stream_download, <%= @stream_download %>},
               {log_dir, "<%= @log_directory %>"}
              ]},
