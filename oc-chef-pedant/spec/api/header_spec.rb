@@ -24,7 +24,7 @@ describe "Headers", :headers do
         })
     end
 
-    it "Rejects Low Version" do
+    it "Rejects Low Version", :validation do
       get(request_url, requestor, :headers => low_version_headers).should look_like({
           :status => 400
         })
