@@ -23,7 +23,6 @@ class BootstrapPreflightValidator < PreflightValidator
   def run!
     # Sanity checks: for any configuration we should expect that
     # neither pivotal.pem nor private-chef-secrets.json exists, or that both exist.
-  puts "Checking bootstrap!"
     validate_sane_state
 
     # The remaining validation tests apply only if we haven't completed
@@ -44,7 +43,6 @@ class BootstrapPreflightValidator < PreflightValidator
         fail_with err_BOOT011_pivotal_user_does_not_exist
       end
     else
-      puts "Not on bypass."
       if pivotal_user_exists?
         # If we're running bootstrap, we need to make sure that nobody else
         # has created the pivotal user.
