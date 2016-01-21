@@ -25,9 +25,8 @@
          access_denied_error/1,
          model/0, write/1, write_erl/0, write_hrl/0]).
 
--include("bksw_obj.hrl").
 -include("amazon_s3.hrl").
-
+-include("internal.hrl").
 
 %%===================================================================
 %% Public API
@@ -50,10 +49,19 @@ buckets(Buckets) ->
     #'ListAllMyBucketsList'{'Bucket' =
                                 [bucket(V1) || V1 <- Buckets]}.
 
-bucket(#bucket{name = Name, date = Date}) ->
+bucket(#db_bucket{bucket_name = Name, created_at = Date}) ->
     #'ListAllMyBucketsEntry'{'Name' = Name,
                              'CreationDate' = bksw_format:to_date(Date)}.
 
+object(#db_file{name = Name, created_at = Date, data_size = Size,
+                hash_md5 = Digest}) ->
+     #'ListEntry'{'Key' = Name,
+                 'LastModified' = bksw_format:to_date(Date),
+                 'ETag' = bksw_format:to_etag(Digest),
+                 'Size' = io_lib:format("~w", [Size]),
+                 'Owner' = owner(),
+                 'StorageClass' = "STANDARD"};
+%% TODO REMOVE
 object(#object{name = Name, date = Date, size = Size,
                digest = Digest}) ->
     #'ListEntry'{'Key' = Name,

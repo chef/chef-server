@@ -44,7 +44,8 @@
 
 -spec get_context(proplists:proplist()) -> context().
 get_context(Config) ->
-    #context{access_key_id = proplists:get_value(access_key_id, Config),
+    #context{auth_check_disabled = proplists:get_value(auth_check_disabled, Config),
+             access_key_id = proplists:get_value(access_key_id, Config),
              secret_access_key = proplists:get_value(secret_access_key, Config),
              stream_download = proplists:get_value(stream_download, Config),
              reqid_header_name = proplists:get_value(reqid_header_name, Config)}.
@@ -55,6 +56,7 @@ summarize_config() ->
     lists:flatten([ip(), port(), log_dir(),
                    {disk_store, disk_store()},
                    {stream_download, stream_download()},
+                   {auth_check_disabled, auth_check_disabled()},
                    {reqid_header_name, reqid_header_name()},
                    {access_key_id, KeyId}]).
 
@@ -79,7 +81,7 @@ disk_store() ->
     "/tmp/".
 -else.
 disk_store() ->
-    case application:get_env(bookshelf, disk_store) of
+    case envy:get(bookshelf, disk_store, list, undefined) of
         undefined ->
             error({missing_config, {bookshelf, disk_store}});
         {ok, Path} when is_list(Path) ->
@@ -97,14 +99,11 @@ ends_with(Char, String) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+auth_check_disabled() ->
+    envy:get(bookshelf, auth_check_disabled, false, boolean).
 
 ip() ->
-    case application:get_env(bookshelf, ip) of
-        undefined ->
-            [{ip, "127.0.0.1"}];
-        {ok, Ip} ->
-            [{ip, Ip}]
-    end.
+    envy:get(bookshelf, ip, "127.0.0.1").
 
 reset_dispatch() ->
     [{dispatch, Dispatch}] = dispatch(),
@@ -117,20 +116,25 @@ dispatch() ->
               {access_key_id, AccessKeyId},
               {secret_access_key, SecretAccessKey}],
     %% per wm docs, init args for resources should be a list
+    dispatch_by_storage(get_storage_type(), Config).
+
+dispatch_by_storage(filesystem, Config) ->
     [{dispatch, [{[bucket, obj_part, '*'], bksw_wm_object, Config},
                  {[bucket], bksw_wm_bucket, Config},
-                 {[], bksw_wm_index, Config}]}].
+                 {[], bksw_wm_index, Config}]}];
+dispatch_by_storage(sql, Config) ->
+    [{dispatch, [{[bucket, obj_part, '*'], bksw_wm_sql_object, Config},
+                 {[bucket], bksw_wm_sql_bucket, Config},
+                 {[], bksw_wm_sql_index, Config}]}].
+
+get_storage_type() ->
+    envy:get(bookshelf, storage_type, atom, filesystem).
 
 port() ->
-    case application:get_env(bookshelf, port) of
-        undefined ->
-            {port, 4321};
-        {ok, Port} ->
-            {port, Port}
-    end.
+    envy:get(bookshelf, port, positive_integer, 4321).
 
 keys() ->
-    case application:get_env(bookshelf, keys) of
+    case envy:get(bookshelf, keys, any, undefined) of
         undefined ->
             error({missing_config, {bookshelf, keys}});
         {ok, {AWSAccessKey, SecretKey}} ->
@@ -139,21 +143,10 @@ keys() ->
     end.
 
 log_dir() ->
-    case application:get_env(bookshelf, log_dir) of
-        undefined ->
-            Dir = code:priv_dir(bookshelf),
-            {log_dir, Dir};
-        {ok, Dir} ->
-            {log_dir, Dir}
-    end.
+    envy:get(bookshelf, log_dir, any, code:priv_dir(bookshelf)).
 
 reqid_header_name() ->
-    application:get_env(bookshelf, reqid_header_name).
+    envy:get(bookshelf, reqid_header_name, any).
 
 stream_download() ->
-    case application:get_env(bookshelf, stream_download) of
-        {ok, true} ->
-            true;
-        _ ->
-            false
-    end.
+    envy:get(bookshelf, stream_download, boolean, false).
