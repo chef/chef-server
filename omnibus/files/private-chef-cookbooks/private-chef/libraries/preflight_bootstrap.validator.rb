@@ -13,30 +13,47 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+# require_relative "preflight_checks"
 
 class BootstrapPreflightValidator < PreflightValidator
   def initialize(node)
     super
-    # TODO - load pivotal user record from DB using oc_erchef credentials to
-    #        log into opscode_chef if they exist.
-    #        (set nil if it doesn't exist or if we don't have credentials)
-    #
   end
 
   def run!
     # Sanity checks: for any configuration we should expect that
     # neither pivotal.pem nor private-chef-secrets.json exists, or that both exist.
-
+  puts "Checking bootstrap!"
     validate_sane_state
 
     # The remaining validation tests apply only if we haven't completed
     # a successful reconfigure
     return unless first_run?
 
-    # If we're bypassing bootstrap it's because we think another node has already done it.
-    # Verify that assumption.
-       # TODO:
+    # At this time, these data-related complications are most helpful
+    # if we're configured to use an external DB.  It will be possible
+    # to support a managed DB, but will require further consideration -
+    # because these checks run before any config recipes,
+    # the database server itself won't necessarily be available.
+    return unless PrivateChef['postgresql']['external']
+
+
+    if bypass_bootstrap?
+      unless pivotal_user_exists?
+        # Since we're not running bootstrap, the pivotal user must have
+        # been put there by someone else.
+        fail_with err_BOOT011_pivotal_user_does_not_exist
+      end
+    else
+      if pivotal_user_exists?
+        # If we're running bootstrap, we need to make sure that nobody else
+        # has created the pivotal user.
+        fail_with err_BOOT010_pivotal_user_exists
+      end
+    end
+
+
+      # TODO:
       # If the pivotal key file exists locally:
       #  - fetch pivotal public key(s) from opscode_chef keys view + users
       #  - extract public key from local pivotal.pem
@@ -60,25 +77,39 @@ class BootstrapPreflightValidator < PreflightValidator
   # backend components, allow data bootstrapping to be bypassed when
   # no chef-server-running.json is present but a secrets file is present.
   def bypass_bootstrap?
-    first_run? && secrets_exist?
+    first_run? && secrets_exists?
   end
 
   private
   def validate_sane_state
     if File.exists? "/etc/opscode/pivotal.pem"
-      if existing_secrets.empty?
+      unless secrets_exists?
         fail_with err_BOOT006_pivotal_with_no_secrets
       end
     else
-      if !existing_secrets.empty?
+      if secrets_exists?
         fail_with err_BOOT007_secrets_with_no_pivotal
       end
     end
   end
 
-  def verify_pivotal_user_exists
-    # fails with err_BOOT005_missing_pivotal_user if a record
-    # for the username 'pivotal' can't be found in opsode_chef.users
+  def pivotal_user_exists?
+    connect_as(:superuser) do |conn|
+
+      begin
+        # The opscode_chef database may not exist - so we'll explicitly
+        # connect to it after obtaining a known-cgood connection to the
+        # default DB 'template1'
+        conn.execute("connect to opscode_chef");
+        r = connection.execute("select count(*) result from  users where username = 'pivotal'")
+        r[0]['result'] == '1'
+      rescue
+        # Since we already have the connection, any error is going to
+        # indicate that the table/schema is not yet created - and if that's
+        # not created, then the user is not created.
+        false
+      end
+    end
   end
 
 
@@ -171,6 +202,29 @@ BOOT007: The pivotal superuser account key is expired.
          Critical maintenance operations cannot be performed.
 
          Pending: remediation walkthrough.
+EOM
+  end
+
+  def err_BOOT010_pivotal_user_exists
+<<EOM
+BOOT010: Unable to configure this node because the superuser 'pivotal'
+         already exists in the database.
+
+         Please ensure that you have copied the files 'pivotal.pem' and
+         'private-chef-secrets.json' from the node to be reconfigured
+         over '/etc/opscode/' on this node before attempting to run
+         reconfigure again.
+EOM
+  end
+
+  def err_BOOT011_pivotal_user_does_not_exist
+<<EOM
+BOOT011: Unable to configure this node because the superuser 'pivotal'
+         does not exist in the database.
+
+         If this is the first node you're attempting to reconfigure,
+         please remove the files 'pivotal.pem' and 'private-chef-secrets.json'
+         from '/etc/opscode' before attempting to run reconfigure again.
 EOM
   end
 end

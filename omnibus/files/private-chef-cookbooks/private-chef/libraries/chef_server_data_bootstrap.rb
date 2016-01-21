@@ -138,7 +138,7 @@ class ChefServerDataBootstrap
 
   ## Bifrost access helpers.
 
-  def create_group_in_authz(reqeustor_id)
+  def create_group_in_authz(requestor_id)
     create_object_in_authz("groups", requestor_id)
   end
 

@@ -4,23 +4,24 @@ class EcPostgres
     require 'pg'
     postgres = node['private_chef']['postgresql'].merge(opts)
     connection = nil
-    retries = 5
+    retries = opts['retries'] || 5
     begin
       connection = ::PGconn.open('user' => postgres['db_superuser'],
                                  'host' => postgres['vip'],
                                  'password' => postgres['db_superuser_password'],
                                  'port' => postgres['port'],
                                  'dbname' => database)
-    rescue e
+    rescue => e
+      raise if opts['caller_wants_exception']
       if retries > 0
         retries -= 1
         sleep_time = 5 - retries
         sleep_time *= sleep_time
-        Chef::Log.warn "Error connecting to postgresql: #{e.message}, retrying after #{sleep_time}s sleep. #{retries} retries remaining."
+        Chef::Log.debug "Error connecting to postgresql: #{e.message}, retrying after #{sleep_time}s sleep. #{retries} retries remaining."
         sleep sleep_time
         retry
       else
-        Chef::Log.warn "Error from postgresql: #{e.message}, retries have been exhausted."
+        Chef::Log.info "Error from postgresql: #{e.message}, retries have been exhausted."
         raise
       end
     end

@@ -15,18 +15,10 @@
 
 
 class PostgresqlPreflightValidator < PreflightValidator
-  attr_reader :cs_pg_attr, :node_pg_attr
 
   def initialize(node)
     super
 
-    # Note that PrivateChef['postgresql'] will currently contain
-    # ONLY the settings specified in chef-server.rb plus some
-    # attributes set on initialization of the class.
-    @cs_pg_attr = PrivateChef['postgresql']
-
-    # Represents the recipe defaults
-    @node_pg_attr = node['private_chef']['postgresql']
   end
 
 
@@ -178,41 +170,10 @@ class PostgresqlPreflightValidator < PreflightValidator
     end
   end
 
-  def named_role_exists?(connection, username)
-    # If a record exists, the role exists:
-    connection.exec("select usesuper from pg_catalog.pg_user where usename = '#{username}'").ntuples > 0
-  end
-
-
   def backend_verify_named_db_not_present(connection, name)
     fail_with err_CSPG016_database_exists(name) if named_db_exists?(connection, name)
   end
 
-  def named_db_exists?(connection, name)
-    connection.exec("SELECT count(*) AS result FROM pg_database WHERE datname='#{name}'")[0]['result'] == '1'
-  end
-
-  def connect_as(type)
-    require "pg"
-    port = cs_pg_attr.has_key?('port') ? cs_pg_attr['port'] : node_pg_attr['port']
-    host = cs_pg_attr['vip']
-    if type == :invalid_user
-      user = 'chef_server_conn_test'
-      password = 'invalid'
-    else
-      user = cs_pg_attr['db_superuser']
-      password = cs_pg_attr['db_superuser_password']
-    end
-    # We just want this to throw an exception or not - caller knows what to do with it.
-    EcPostgres.with_connection(node, 'template1', { 'db_superuser' => user,
-                                                    'db_superuser_password' => password,
-                                                    'vip' => host,
-                                                    'port' => port}) do |conn|
-       if block_given?
-         yield(conn)
-       end
-    end
-  end
 private
 
   def err_CSPG001_cannot_change_external_flag
