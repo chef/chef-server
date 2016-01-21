@@ -68,7 +68,7 @@ class PreflightValidator
     connection.exec("select usesuper from pg_catalog.pg_user where usename = '#{username}'").ntuples > 0
   end
 
-  def connect_as(type)
+  def connect_as(type, db_name = 'template1')
     require "pg" # Make the PG constants available to the caller
     port = cs_pg_attr.has_key?('port') ? cs_pg_attr['port'] : node_pg_attr['port']
     host = cs_pg_attr['vip']
@@ -80,15 +80,15 @@ class PreflightValidator
       password = cs_pg_attr['db_superuser_password']
     end
     # We just want this to throw an exception or not - caller knows what to do with it.
-    EcPostgres.with_connection(node, 'template1', { 'db_superuser' => user,
-                                                    'db_superuser_password' => password,
-                                                    'vip' => host,
-                                                    'port' => port,
-                                                    # By default, pass exceptions up without retrying
-                                                    # We have a few scenarios in which we
-                                                    # expect errors, and don't want to delay the bootstrap
-                                                    # for unnecessary retries.
-                                                    'retries' => 0 }) do |conn|
+    EcPostgres.with_connection(node, db_name, { 'db_superuser' => user,
+                                                'db_superuser_password' => password,
+                                                'vip' => host,
+                                                'port' => port,
+                                                # By default, pass exceptions up without retrying
+                                                # We have a few scenarios in which we
+                                                # expect errors, and don't want to delay the bootstrap
+                                                # for unnecessary retries.
+                                                'retries' => 0 }) do |conn|
        if block_given?
          yield(conn)
        end

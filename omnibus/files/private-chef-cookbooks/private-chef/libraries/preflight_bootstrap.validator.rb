@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# require_relative "preflight_checks"
+require_relative "preflight_checks"
 
 class BootstrapPreflightValidator < PreflightValidator
   def initialize(node)
@@ -37,7 +37,6 @@ class BootstrapPreflightValidator < PreflightValidator
     # the database server itself won't necessarily be available.
     return unless PrivateChef['postgresql']['external']
 
-
     if bypass_bootstrap?
       unless pivotal_user_exists?
         # Since we're not running bootstrap, the pivotal user must have
@@ -45,6 +44,7 @@ class BootstrapPreflightValidator < PreflightValidator
         fail_with err_BOOT011_pivotal_user_does_not_exist
       end
     else
+      puts "Not on bypass."
       if pivotal_user_exists?
         # If we're running bootstrap, we need to make sure that nobody else
         # has created the pivotal user.
@@ -53,24 +53,24 @@ class BootstrapPreflightValidator < PreflightValidator
     end
 
 
-      # TODO:
-      # If the pivotal key file exists locally:
-      #  - fetch pivotal public key(s) from opscode_chef keys view + users
-      #  - extract public key from local pivotal.pem
-      #   * If we fail with an auth error at this time, it means that either the
-      #     username/password for erchef are not set up (in which case db/schema bootstrap has
-      #     not been run and we are working from an outdated secrets file), or we
-      #     don't have the correct credentials due to an old secrets file.
-      #     This should raise its own error.
-      #
-      #  - validate that the public key matches any of the returned
-      #    pivotal user keys
-      #  - if it doesn't:
-      #    fail_with err_BOOT008_pivotal_public_key_mismatch
-      #  - if it does but the matched key is expired:
-      #    fail_with err_BOOT008_pivotal_key_expired
-      #  If the pivotal key file does not exist locally, but the secrets file does exist,
-      #  it was not copied over from the machine that performed the bootstrap.
+    # TODO:
+    # If the pivotal key file exists locally:
+    #  - fetch pivotal public key(s) from opscode_chef keys view + users
+    #  - extract public key from local pivotal.pem
+    #   * If we fail with an auth error at this time, it means that either the
+    #     username/password for erchef are not set up (in which case db/schema bootstrap has
+    #     not been run and we are working from an outdated secrets file), or we
+    #     don't have the correct credentials due to an old secrets file.
+    #     This should raise its own error.
+    #
+    #  - validate that the public key matches any of the returned
+    #    pivotal user keys
+    #  - if it doesn't:
+    #    fail_with err_BOOT008_pivotal_public_key_mismatch
+    #  - if it does but the matched key is expired:
+    #    fail_with err_BOOT008_pivotal_key_expired
+    #  If the pivotal key file does not exist locally, but the secrets file does exist,
+    #  it was not copied over from the machine that performed the bootstrap.
   end
 
   # In order to support a stateless standalone that connects to all-external
@@ -94,21 +94,29 @@ class BootstrapPreflightValidator < PreflightValidator
   end
 
   def pivotal_user_exists?
-    connect_as(:superuser) do |conn|
-
-      begin
-        # The opscode_chef database may not exist - so we'll explicitly
-        # connect to it after obtaining a known-cgood connection to the
-        # default DB 'template1'
-        conn.execute("connect to opscode_chef");
-        r = connection.execute("select count(*) result from  users where username = 'pivotal'")
-        r[0]['result'] == '1'
-      rescue
-        # Since we already have the connection, any error is going to
-        # indicate that the table/schema is not yet created - and if that's
-        # not created, then the user is not created.
-        false
+    # DB might not exist yet, so let's capture that with an outer-level
+    # rescue
+    begin
+      connect_as(:superuser, 'opscode_chef') do |conn|
+        begin
+          # The opscode_chef database may not exist - so we'll explicitly
+          # connect to it after obtaining a known-cgood connection to the
+          # default DB 'template1'
+          r = conn.exec("select count(*) result from  users where username = 'pivotal'")
+          r[0]['result'] == '1'
+        rescue => e
+          puts e.message
+          # Since we already have the connection, any error is going to
+          # indicate that the table/schema is not yet created - and if that's
+          # not created, then the user is not created.
+          false
+        end
       end
+    rescue => e
+      puts e.message
+      # DB not present, or other more critical failure that will be captured
+      # down the line via  postgres preflight.
+      false
     end
   end
 
@@ -212,7 +220,7 @@ BOOT010: Unable to configure this node because the superuser 'pivotal'
 
          Please ensure that you have copied the files 'pivotal.pem' and
          'private-chef-secrets.json' from the node to be reconfigured
-         over '/etc/opscode/' on this node before attempting to run
+         into '/etc/opscode/' on this node before attempting to run
          reconfigure again.
 EOM
   end

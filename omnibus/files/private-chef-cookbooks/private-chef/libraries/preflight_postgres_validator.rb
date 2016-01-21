@@ -21,9 +21,7 @@ class PostgresqlPreflightValidator < PreflightValidator
 
   end
 
-
   def run!
-    #
     verify_unchanged_external_flag
 
     # Our additional validations only apply when a database server exists,
@@ -31,6 +29,7 @@ class PostgresqlPreflightValidator < PreflightValidator
     # if external DB is configured.
     return unless cs_pg_attr['external']
     external_postgres_config_validation
+
     # In the future, we should be able to run these
     # on non-backend nodes:
     connectivity_validation
