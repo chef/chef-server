@@ -194,7 +194,7 @@ EOM
 
   def err_BOOT008_pivotal_public_key_mismatch
 <<EOM
-BOOT007: The pivotal key file /etc/opscode/pivotal.pem exists, but its public key
+BOOT008: The pivotal key file /etc/opscode/pivotal.pem exists, but its public key
          does not match the key for the pivotal user in chef-server.
 
          Critical maintenance operations cannot be performed.
@@ -205,7 +205,7 @@ EOM
 
   def err_BOOT009_pivotal_key_expired
 <<EOM
-BOOT007: The pivotal superuser account key is expired.
+BOOT009: The pivotal superuser account key is expired.
 
          Critical maintenance operations cannot be performed.
 
