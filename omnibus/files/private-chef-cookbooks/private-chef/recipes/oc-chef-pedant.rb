@@ -42,6 +42,7 @@ template pedant_config do
   group "root"
   mode  "0755"
   variables({
+    :actions_enabled => node['private_chef']['dark_launch']['actions'],
     :api_url  => node['private_chef']['nginx']['url'],
     :solr_url => OmnibusHelper.new(node).solr_root,
     :opscode_account_internal_url => node['private_chef']['lb_internal']['vip'],
