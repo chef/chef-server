@@ -18,6 +18,8 @@ ln -sf /opt/opscode/chef-server-plugin.rb /var/opt/opscode/plugins/chef-ha-drbd.
 
 mkdir -p /etc/opscode
 touch /etc/opscode/chef-server.rb
+# chef-server.rb might contain secrets, restrict permissions of other.
+chmod o-rwx /etc/opscode/chef-server.rb
 
 # Ensure all files/directories in $INSTALLER_DIR are owned by root. This
 # has been fixed on new installs but upgrades from old installs need to
