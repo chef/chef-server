@@ -30,7 +30,12 @@ travis: all ct rel
 	@echo "Travis'd!"
 
 ct: $(REBAR3)
-	$(REBAR3) do ct --dir apps/chef_db/itest, ct --dir apps/oc_chef_authz/itest, ct --dir apps/oc_chef_wm/itest
+	## TODO(ssd): This should use rebar do but there appears to be a
+	## problem with cth_readbale and the latest rebar when using
+	## do.
+	$(REBAR3) ct --dir apps/chef_db/itest
+	$(REBAR3) ct --dir apps/oc_chef_authz/itest
+	$(REBAR3) ct --dir apps/oc_chef_wm/itest
 
 version_clean:
 	@rm -f VERSION
