@@ -16,16 +16,21 @@
 require 'json'
 
 describe "/keys endpoint", :keys do
-
   # Noise reducer.
   def requestor(who, key)
     Pedant::Requestor.new(who, key, preexisting: false)
   end
 
+  # Generate a random 7-digit number
+  def rand_id
+    rand(10**7...10**8).to_s
+  end
+
   shared(:keys) {@keys}
+
   let(:user) do
     {
-      "name" => "pedant-keys-user-#{Time.now.to_i}",
+      "name" => "pedant-keys-user-#{rand_id}",
       "public_key" => keys[:original_user][:public],
       "private_key" => keys[:original_user][:private]
     }
@@ -51,14 +56,14 @@ describe "/keys endpoint", :keys do
 
   let(:client) do
     {
-      "name" => "pedant-keys-client-#{Time.now.to_i}",
+      "name" => "pedant-keys-client-#{rand_id}",
       "public_key" => keys[:original_client][:public],
       "private_key" => keys[:original_client][:private]
     }
   end
 
   let(:key_name) do
-    "key-#{Time.now.to_i}"
+    "key-#{rand_id}"
   end
 
   let(:client_payload) do
@@ -176,19 +181,19 @@ describe "/keys endpoint", :keys do
     delete("#{org_base_url}/clients/#{client['name']}", superuser)
   end
 
-  context "when a new user is created via POST /users" do
+  context "when a new user is created via POST /users", :user_keys do
     it "should insert a new default keys entry that is retrievable via the keys API" do
       list_user_keys(user['name'], superuser).should look_like( { :status=> 200, :body => new_user_list_keys_response} )
     end
   end
 
-  context "when a new client is created via POST /organizations/:org/clients" do
+  context "when a new client is created via POST /organizations/:org/clients", :client_keys do
     it "should insert a new default keys entry that is retrievable via the keys API" do
       list_client_keys($org_name, client['name'], superuser).should look_like( { :status=> 200, :body => new_client_list_keys_response} )
     end
   end
 
-  context "when a single key exists for a user" do
+  context "when a single key exists for a user", :user_keys do
     context "when the key is uploaded via POST /users" do
       it "should authenticate against the single key" do
         get("#{platform.server}/users/#{user['name']}", requestor(user['name'], user['private_key'])).should look_like(status: 200)
@@ -209,7 +214,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a key has been generated for a user" do
+  context "when a key has been generated for a user", :user_keys do
     before(:each) do
         r = add_user_key(user['name'], :create_key, "genkey")
         r.should look_like(status: 201)
@@ -223,7 +228,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a single key exists for a client" do
+  context "when a single key exists for a client", :client_keys do
     context "when the key is uploaded via POST /clients" do
       it "should authenticate against the single key" do
         get("#{org_base_url}/clients/#{client['name']}", requestor(client['name'], client['private_key'])).should look_like(status: 200)
@@ -244,7 +249,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a key has been generated for a client" do
+  context "when a key has been generated for a client", :client_keys do
     before(:each) do
         r = add_client_key($org_name, client['name'], :create_key, "genkey")
         r.should look_like(status: 201)
@@ -258,7 +263,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a key is deleted for a user" do
+  context "when a key is deleted for a user", :user_keys do
     before(:each) do
         add_user_key(user['name'], :alt_key, key_name).should look_like(status: 201)
     end
@@ -272,7 +277,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a key is deleted for a client" do
+  context "when a key is deleted for a client", :client_keys do
     before(:each) do
       add_client_key($org_name, client['name'], :alt_key, key_name).should look_like({:status=>201})
     end
@@ -286,11 +291,16 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when multiple keys exist for a user" do
+  context "when multiple keys exist for a user", :user_keys do
     before(:each) do
       add_user_key(user['name'], :alt_key, "alt-#{key_name}").should look_like(status: 201)
       add_user_key(user['name'], :key, key_name).should look_like(status: 201)
     end
+
+    after(:each) do
+      delete_user_key(user['name'], :key)
+    end
+
     context "should properly authenticate against either keys" do
       it "should properly authenticate against the second key" do
         get("#{platform.server}/users/#{user['name']}", requestor(user['name'], keys[:key][:private])).should look_like(status: 200)
@@ -301,7 +311,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when multiple keys exist for a client" do
+  context "when multiple keys exist for a client", :client_keys do
     before(:each) do
         add_client_key($org_name, client['name'], :alt_key, "alt-#{key_name}").should look_like({:status=>201})
         add_client_key($org_name, client['name'], :key, key_name).should look_like({:status=>201})
@@ -316,7 +326,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a user key has an expiration date and isn't expired" do
+  context "when a user key has an expiration date and isn't expired", :user_keys do
     before(:each) do
       add_user_key(user['name'], :key, key_name, :expires => "2017-12-24T21:00:00Z").should look_like(status: 201)
     end
@@ -325,7 +335,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a user's default key has an expiration date" do
+  context "when a user's default key has an expiration date", :user_keys do
     before(:each) do
       delete_user_key(user['name'], "default")
       add_user_key(user['name'], :key, "default", :expires => "2017-12-24T21:00:00Z").should look_like(status: 201)
@@ -342,7 +352,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a client's default key has an expiration date" do
+  context "when a client's default key has an expiration date", :client_keys do
     before(:each) do
       delete_client_key($org_name, client['name'], "default")
       add_client_key($org_name, client['name'], :key, "default", :expires => "2017-12-24T21:00:00Z").should look_like({:status=>201})
@@ -359,7 +369,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a client key has an expiration date and isn't expired" do
+  context "when a client key has an expiration date and isn't expired", :client_keys do
     before(:each) do
       add_client_key($org_name, client['name'], :key, key_name, :expires => "2017-12-24T21:00:00Z").should look_like({:status=>201})
     end
@@ -368,7 +378,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a key is expired for a user", :authentication do
+  context "when a key is expired for a user", :authentication, :user_keys do
     before(:each) do
       add_user_key(user['name'], :key, key_name, :expires => "2012-12-24T21:00:00Z").should look_like(status: 201)
     end
@@ -380,7 +390,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a key is expired for a client", :authentication do
+  context "when a key is expired for a client", :authentication, :client_keys do
     before(:each) do
       add_client_key($org_name, client['name'], :key, key_name, :expires => "2012-12-24T21:00:00Z" ).should look_like({:status=>201})
     end
@@ -392,21 +402,21 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when the default key for a user exists" do
+  context "when the default key for a user exists", :user_keys do
     it "the public_key field returned by GET /users/:user and from the keys table should be the same" do
       user_api_public_key = JSON.parse(get("#{platform.server}/users/#{user['name']}", superuser))['public_key']
       get_user_key(user['name'], superuser, "default").should look_like({:status => 200, :body => { "public_key" => user_api_public_key }})
     end
   end
 
-  context "when the default key for a client exists" do
+  context "when the default key for a client exists", :client_keys do
     it "should return public_key field returned by GET /organization/:org/clients/:client and from the keys table should be the same" do
       client_api_public_key = JSON.parse(get("#{org_base_url}/clients/#{client['name']}", superuser))['public_key']
       get_client_key($org_name, client['name'], superuser, "default").should look_like({:status => 200, :body => { "public_key" => client_api_public_key }})
     end
   end
 
-  context "when a user's default key is updated via the keys API" do
+  context "when a user's default key is updated via the keys API", :user_keys do
     before(:each) do
       delete_user_key(user['name'], "default")
       add_user_key(user['name'], :key, "default").should look_like(status: 201)
@@ -417,7 +427,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a user's default key is deleted via the keys API" do
+  context "when a user's default key is deleted via the keys API", :user_keys do
     before(:each) do
       delete_user_key(user['name'], "default")
     end
@@ -430,7 +440,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a clients's default key is deleted via the keys API" do
+  context "when a clients's default key is deleted via the keys API", :client_keys do
     before(:each) do
       delete_client_key($org_name, client['name'], "default")
     end
@@ -443,7 +453,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a user is updated via PUT but the public_key is omitted" do
+  context "when a user is updated via PUT but the public_key is omitted", :user_keys do
     before(:each) do
       original_data = JSON.parse(get("#{platform.server}/users/#{user['name']}", superuser))
       original_data.delete("public_key")
@@ -457,7 +467,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a client is updated via PUT but the public_key is omitted" do
+  context "when a client is updated via PUT but the public_key is omitted", :client_keys do
     before(:each) do
       original_data = JSON.parse(get("#{org_base_url}/clients/#{client['name']}", superuser))
       original_data.delete("public_key")
@@ -471,7 +481,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a user's default key has already been deleted via the keys API and then re-added via PUT to /users/:user" do
+  context "when a user's default key has already been deleted via the keys API and then re-added via PUT to /users/:user", :user_keys do
     before(:each) do
       delete_user_key(user['name'], "default")
       original_data = JSON.parse(get("#{platform.server}/users/#{user['name']}", superuser))
@@ -489,7 +499,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a client's default key has already been deleted via the keys API and then re-added via PUT to /organizations/:org/clients/:client" do
+  context "when a client's default key has already been deleted via the keys API and then re-added via PUT to /organizations/:org/clients/:client", :client_keys do
     before(:each) do
       delete_client_key($org_name, client['name'], "default")
       original_data = JSON.parse(get("#{org_base_url}/clients/#{client['name']}", superuser))
@@ -507,7 +517,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when the default key is updated for a user via a PUT to /users/:user" do
+  context "when the default key is updated for a user via a PUT to /users/:user", :user_keys do
     before(:each) do
       original_data = JSON.parse(get("#{platform.server}/users/#{user['name']}", superuser))
       original_data['public_key'] = keys[:key][:public]
@@ -528,7 +538,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when the default key is updated for a client via a PUT to /organizations/:org/clients/:client" do
+  context "when the default key is updated for a client via a PUT to /organizations/:org/clients/:client", :client_keys do
     before(:each) do
       original_data = JSON.parse(get("#{org_base_url}/clients/#{client['name']}", superuser))
       original_data['public_key'] = keys[:key][:public]
@@ -550,7 +560,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a user is PUT with public_key:null via /users/:user" do
+  context "when a user is PUT with public_key:null via /users/:user", :user_keys do
     before(:each) do
       original_data = JSON.parse(get("#{platform.server}/users/#{user['name']}", superuser))
       original_data['public_key'] = nil
@@ -565,7 +575,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a client is PUT with public_key:null to /organizations/:org/clients/:client" do
+  context "when a client is PUT with public_key:null to /organizations/:org/clients/:client", :client_keys do
     before(:each) do
       original_data = JSON.parse(get("#{org_base_url}/clients/#{client['name']}", superuser))
       original_data['public_key'] = nil
@@ -580,7 +590,7 @@ describe "/keys endpoint", :keys do
     end
   end
 
-  context "when a user and client with the same name exist", :authentication do
+  context "when a user and client with the same name exist", :authentication, :user_keys do
     before(:each) do
       # give user same name as client
       delete("#{platform.server}/users/#{user['name']}", superuser)
@@ -613,7 +623,7 @@ describe "/keys endpoint", :keys do
   end
 
   context "managing keys" do
-    shared(:name_suffix) { "#{Time.now.to_i}" }
+    shared(:name_suffix) { "#{rand_id}" }
     shared(:org_admin_name) {"pedant-keys-admin-#{name_suffix}" }
     shared(:org_admin_user) {requestor(org_admin_name, keys[:org_admin][:private]) }
     shared(:org_user_name) {"pedant-keys-user-#{name_suffix}" }
@@ -621,7 +631,7 @@ describe "/keys endpoint", :keys do
     shared(:org_client_name) {"pedant-keys-client-#{name_suffix}" }
     shared(:org_client) {requestor(org_client_name, keys[:org_client][:private]) }
 
-    shared(:other_org_name) { "pedant-keys-org-2-#{Time.now.to_i}" }
+    shared(:other_org_name) { "pedant-keys-org-2-#{rand_id}" }
     shared(:other_org_user_name) { "#{other_org_name}-user" }
     shared(:other_org_user) {requestor(other_org_user_name, keys[:other_org_user][:private]) }
     shared(:other_org_client_name) { "#{other_org_name}-client" }
@@ -721,32 +731,38 @@ describe "/keys endpoint", :keys do
     end
 
     context "posting keys" do
-
       # These behaviors are identical for POSTing to create a client or user key
       shared_context "basic keys POST validation" do
         # Generate validation tests
-        { "when name is empty" => {:replace => {"name" => ""}, :code => 400 },
-          "when name is invalid" => {:replace => {"name" => "key the first"}, :code => 400 },
-          "when name is missing" => {:delete => ["name"], :code => 400},
-          "when date is invalid" => {:replace => {"expiration_date" => "2010-09-32T10:00:00Z"}, :code => 400},
-          "when date is empty" => {:replace => {"expiration_date" => ""}, :code => 400},
-          "when date is missing" => {:delete =>  ["expiration_date"], :code => 400},
-          "when public key is not a valid key" => {:replace => { "public_key" => "Nope."}, :code => 400},
-          "when public key is missing" => {:delete=> ["public_key"], :code => 400},
-          "when a key of the same name already exists" => {:replace => {"name" => "default"}, :code => 409},
-          "when both a public_key and create_key are present" => {:replace => { "create_key" => true }, :code => 400}
+        { "when name is empty"   => { replace: { "name" => "" } },
+          "when name is invalid" => { replace: { "name" => "key the first" } },
+          "when name is missing" => { delete:  [ "name" ] },
+          "when date is invalid" => { replace: { "expiration_date" => "2010-09-32T10:00:00Z" } },
+          "when date is empty"   => { replace: { "expiration_date" => "" } },
+          "when date is missing" => { delete:  [ "expiration_date" ] },
+          "when public key is not a valid key" => { replace: { "public_key" => "Nope." } },
+          "when public key is missing" => { delete: [ "public_key" ] },
+          "when both a public_key and create_key are present" => { replace: { "create_key" => true } }
         }.each do |desc, setup|
-          it "#{desc} it responds with #{setup[:code]}" do
+          it "#{desc} it responds with 400", :validation do
             setup = {:replace=>{}, :delete => []}.merge(setup)
             payload = key_payload.dup
             payload.merge!(setup[:replace])
             setup[:delete].each { |field| payload.delete(field) }
-            post(key_url, superuser, payload: payload).should look_like({:status => setup[:code]})
-            if setup[:code] == 201
-              delete("#{key_url}/#{payload['name']}", superuser).should look_like({:code => 200})
-            end
+
+            post(key_url, superuser, payload: payload).should look_like(status: 400)
           end
         end
+
+        context "when a key of the same name already exists" do
+          let(:payload) { key_payload.merge("name" => "default") }
+
+          it "responds with 409" do
+            post(key_url, superuser, payload: payload)
+              .should look_like(code: 409)
+          end
+        end
+
         context "when all fields are present and valid" do
           after do
             delete("#{key_url}/#{key_payload['name']}", superuser).should look_like(status: 200)
@@ -792,7 +808,7 @@ describe "/keys endpoint", :keys do
 
       end
 
-      context "for a client" do
+      context "for a client", :client_keys do
         before(:each) do
           post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
         end
@@ -802,7 +818,6 @@ describe "/keys endpoint", :keys do
 
         let (:key_url) { "#{org_base_url}/clients/#{org_client_name}/keys" }
         it_behaves_like "basic keys POST validation"
-
 
         it "that doesn't exist it should reply with 404" do
             post("#{org_base_url}/clients/bob/keys", superuser, payload: key_payload).should look_like(status: 404)
@@ -815,7 +830,7 @@ describe "/keys endpoint", :keys do
           it "the org client itself succeeds" do
             post("#{org_base_url}/clients/#{org_client_name}/keys", org_client, payload: key_payload).should look_like(status: 201)
           end
-          context "another user in the org" do
+          context "another user in the org", :authorization do
             before do
               platform.associate_user_with_org($org_name, org_user).should look_like(status: 201)
             end
@@ -837,7 +852,7 @@ describe "/keys endpoint", :keys do
         end
       end
 
-      context "for a user" do
+      context "for a user", :user_keys do
         let (:key_url) { "#{platform.server}/users/#{org_user_name}/keys" }
         it_behaves_like "basic keys POST validation"
 
@@ -870,7 +885,7 @@ describe "/keys endpoint", :keys do
           it "the superuser succeeds" do
             post("#{platform.server}/users/#{org_user_name}/keys", superuser, payload: key_payload).should look_like(status: 201)
           end
-          context "an org admin of a member org" do
+          context "an org admin of a member org", :authorization do
             it "fails with 403" do
               post("#{platform.server}/users/#{org_user_name}/keys", org_admin_user, payload: key_payload).should look_like(status: 403)
             end
@@ -977,7 +992,7 @@ describe "/keys endpoint", :keys do
         end
       end
 
-      context "for a client" do
+      context "for a client", :client_keys do
         before(:all) do
           post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
         end
@@ -988,7 +1003,7 @@ describe "/keys endpoint", :keys do
         it_behaves_like "PUT like a PATCH"
         it_behaves_like "basic keys PUT validation"
       end
-      context "for a user" do
+      context "for a user", :user_keys do
         let (:key_url) { "#{platform.server}/users/#{org_user_name}/keys" }
         it_behaves_like "PUT like a PATCH"
         it_behaves_like "basic keys PUT validation"
@@ -996,7 +1011,7 @@ describe "/keys endpoint", :keys do
     end
 
     context "DELETE", :authorization do
-      context "/organizations/:org/clients/:client/keys/:key" do
+      context "/organizations/:org/clients/:client/keys/:key", :client_keys do
         before(:all) do
           post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
         end
@@ -1074,7 +1089,7 @@ describe "/keys endpoint", :keys do
           end
         end
       end
-      context "user keys" do
+      context "user keys", :user_keys do
         before(:all) do
           post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
         end
@@ -1152,7 +1167,7 @@ describe "/keys endpoint", :keys do
     end
 
     context "PUT", :authorization do
-      context "/organizations/:org/clients/:client/keys/:key" do
+      context "/organizations/:org/clients/:client/keys/:key", :client_keys do
         before(:all) do
           post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
           add_client_key($org_name, org_client_name, :alt_key, "alt_key").should look_like({:status=>201})
@@ -1229,7 +1244,7 @@ describe "/keys endpoint", :keys do
         end
       end
 
-      context "/users/:user/keys/:key" do
+      context "/users/:user/keys/:key", :user_keys do
         before(:all) do
           post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
           add_user_key(org_user_name, :alt_key, "alt_key", :expires =>  unexpired_date).should look_like({:status=>201})
@@ -1258,7 +1273,7 @@ describe "/keys endpoint", :keys do
                                 :body_exact => { "error" => "The key 'alt_key' was used to authenticate this request and cannot be modified or deleted."}})
           end
 
-          context "a client in the same org" do
+          context "a client in the same org", :authentication do
             it "should fail with a 401" do
               put(@key_url, org_client, payload: key_payload).should look_like(status: 401)
             end
@@ -1301,7 +1316,7 @@ describe "/keys endpoint", :keys do
 
     context "listing key(s)" do
       context "when multiple keys are present" do
-        context "for a client" do
+        context "for a client", :client_keys do
           before(:each) do
             post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
             add_client_key($org_name, org_client_name, :key, "key1", :expires =>  unexpired_date).should look_like({:status=>201})
@@ -1353,7 +1368,7 @@ describe "/keys endpoint", :keys do
           end
         end
 
-        context "for a user" do
+        context "for a user", :user_keys do
           before(:each) do
             platform.associate_user_with_org($org_name, org_user).should look_like(status: 201)
             add_user_key(org_user_name, :key, "key1", :expires => unexpired_date).should look_like(status: 201)
@@ -1389,10 +1404,14 @@ describe "/keys endpoint", :keys do
           context "when GET /users/user/keys/key is called (get single key)" do
             context "when it is called for each valid key" do
               it "should properly return the default key with valid expiration" do
-                get_user_key(org_user_name, superuser, "default").should look_like({
-                  :status => 200,
-                  :body => { "name" => "default", "public_key" => keys[:org_user][:public], "expiration_date" => "infinity" }
-                  })
+                get_user_key(org_user_name, superuser, "default")
+                  .should look_like(
+                    status:  200,
+                    body: { "name" => "default",
+                            "public_key" => keys[:org_user][:public],
+                            "expiration_date" => "infinity"
+                    }
+                  )
               end
               it "should properly return the first custom key with valid expiration" do
                 get_user_key(org_user_name, superuser, "key1").should look_like({
@@ -1411,7 +1430,7 @@ describe "/keys endpoint", :keys do
         end
       end
 
-      context "of a user" do
+      context "of a user", :user_keys do
         before(:each) do
           platform.associate_user_with_org($org_name, org_user).should look_like(status: 201)
           post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
