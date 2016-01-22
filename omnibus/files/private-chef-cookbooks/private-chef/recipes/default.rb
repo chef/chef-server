@@ -86,22 +86,6 @@ file "/etc/opscode/webui_priv.pem" do
   content webui_key.to_pem.to_s unless File.exists?('/etc/opscode/webui_pub.pem')
 end
 
-worker_key = OpenSSL::PKey::RSA.generate(2048) unless File.exists?('/etc/opscode/worker-public.pem')
-
-file "/etc/opscode/worker-public.pem" do
-  owner "root"
-  group "root"
-  mode "0644"
-  content worker_key.public_key.to_s unless File.exists?('/etc/opscode/worker-public.pem')
-end
-
-file "/etc/opscode/worker-private.pem" do
-  owner OmnibusHelper.new(node).ownership['owner']
-  group "root"
-  mode "0600"
-  content worker_key.to_pem.to_s unless File.exists?('/etc/opscode/worker-public.pem')
-end
-
 # If we are doing initial key generation,
 # generate a new key.
 unless File.exists?('/etc/opscode/pivotal.pem')
