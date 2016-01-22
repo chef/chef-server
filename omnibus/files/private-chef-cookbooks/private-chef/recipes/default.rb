@@ -86,34 +86,6 @@ file "/etc/opscode/webui_priv.pem" do
   content webui_key.to_pem.to_s unless File.exists?('/etc/opscode/webui_pub.pem')
 end
 
-# If we are doing initial key generation,
-# generate a new key.
-unless File.exists?('/etc/opscode/pivotal.pem')
-  pivotal_key = OpenSSL::PKey::RSA.generate(2048)
-end
-
-# This will be cleaned up during bootstrap.
-# Only generate if pivotal.pem doesn't exist,
-# because that means we are doing initial key generation
-# per the step directly above.
-unless File.exists?('/etc/opscode/pivotal.pem')
-  file "/etc/opscode/pivotal.pub" do
-    owner OmnibusHelper.new(node).ownership['owner']
-    group "root"
-    mode "0644"
-    content pivotal_key.public_key.to_s
-  end
-end
-
-# If we are doing initial key generation (aka pivotal.pem hasn't yet
-# been created), create pivotal.pem.
-file "/etc/opscode/pivotal.pem" do
-  owner OmnibusHelper.new(node).ownership['owner']
-  group "root"
-  mode "0600"
-  content pivotal_key.to_pem.to_s unless File.exists?('/etc/opscode/pivotal.pem')
-end
-
 directory "/etc/chef" do
   owner "root"
   group OmnibusHelper.new(node).ownership['group']
