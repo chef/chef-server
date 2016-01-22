@@ -112,7 +112,7 @@ if is_data_master?
     retries 10
   end
 
-  [ rabbitmq['vhost'], rabbitmq['reindexer_vhost'], rabbitmq['jobs_vhost'], rabbitmq['actions_vhost'] ].each do |vhost|
+  [ rabbitmq['vhost'], rabbitmq['actions_vhost'] ].each do |vhost|
     execute "#{rmq_ctl} add_vhost #{vhost}" do
       environment (rabbitmq_env)
       user opc_username
@@ -125,13 +125,6 @@ if is_data_master?
     environment (rabbitmq_env)
     not_if "#{rmq_ctl_chpst} list_users |grep #{rabbitmq['user']}", :environment => rabbitmq_env, :user => "root"
     user opc_username
-    retries 10
-  end
-
-  execute "#{rmq_ctl} add_user #{rabbitmq['jobs_user']} #{rabbitmq['jobs_password']}" do
-    environment (rabbitmq_env)
-    user opc_username
-    not_if "#{rmq_ctl_chpst} list_users |grep #{rabbitmq['jobs_user']}", :environment => rabbitmq_env, :user => "root"
     retries 10
   end
 
@@ -151,7 +144,6 @@ if is_data_master?
   end
 
   #
-
   # grant the mapper user the ability to do anything with the /chef vhost
   # the three regex's map to config, write, read permissions respectively
   #
@@ -159,20 +151,6 @@ if is_data_master?
     environment (rabbitmq_env)
     user opc_username
     not_if "#{rmq_ctl_chpst} list_user_permissions #{rabbitmq['user']}|grep #{rabbitmq['vhost']}", :environment => rabbitmq_env, :user => "root"
-    retries 10
-  end
-
-  execute "#{rmq_ctl} set_permissions -p #{rabbitmq['reindexer_vhost']} #{rabbitmq['user']} \".*\" \".*\" \".*\"" do
-    environment (rabbitmq_env)
-    user opc_username
-    not_if "#{rmq_ctl_chpst} list_user_permissions #{rabbitmq['user']}|grep #{rabbitmq['reindexer_vhost']}", :environment => rabbitmq_env, :user => "root"
-    retries 10
-  end
-
-  execute "#{rmq_ctl} set_permissions -p #{rabbitmq['jobs_vhost']} #{rabbitmq['jobs_user']} \".*\" \".*\" \".*\"" do
-    environment (rabbitmq_env)
-    user opc_username
-    not_if "#{rmq_ctl_chpst} list_user_permissions #{rabbitmq['jobs_user']}|grep #{rabbitmq['jobs_vhost']}", :environment => rabbitmq_env, :user => "root"
     retries 10
   end
 
