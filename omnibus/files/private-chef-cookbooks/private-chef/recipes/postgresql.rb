@@ -16,7 +16,6 @@
 # limitations under the License.
 #
 
-include_recipe "private-chef::old_postgres_cleanup"
 
 postgresql_dir = node['private_chef']['postgresql']['dir']
 postgresql_data_dir = node['private_chef']['postgresql']['data_dir']

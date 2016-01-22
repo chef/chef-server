@@ -129,6 +129,7 @@ if OmnibusHelper.new(node).repository_configured? "chef-stable"
   include_recipe "private-chef::add_ons_repository"
 end
 
+
 # Configure Services
 [
   "rabbitmq",
@@ -173,6 +174,7 @@ end
   end
 end
 
+include_recipe "private-chef::cleanup"
 include_recipe "private-chef::actions" if darklaunch_values["actions"]
 
 include_recipe "private-chef::private-chef-sh"
