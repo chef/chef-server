@@ -47,11 +47,11 @@ log 'opscode_webui deprecation notice' do
   only_if { opscode_webui_deprecation_notice.applicable? }
 end
 
-# @todo: This seems like it might belong in the PrivateChef helper;
-#   many other attributes like are set automatically there as well.
-if OmnibusHelper.has_been_bootstrapped?
+if OmnibusHelper.has_been_bootstrapped? or
+    BootstrapPreflightValidator.new(node).bypass_bootstrap?
   node.set['private_chef']['bootstrap']['enable'] = false
 end
+
 
 # Create the Chef User
 include_recipe "private-chef::users"
