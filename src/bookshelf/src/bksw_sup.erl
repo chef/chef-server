@@ -1,7 +1,8 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
+%% @author Mark Anderson <mark@chef.io>
 %% @author Tim Dysinger <dysinger@opscode.com>
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright 2012-16 Chef, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -48,7 +49,9 @@ init(_Args) ->
 
     Restart = permanent,
 
-    WebmachineSup = {bks_webmachine_sup, {bksw_webmachine_sup, start_link, []},
+    WebmachineSup = {bksw_webmachine_sup, {bksw_webmachine_sup, start_link, []},
                      Restart, infinity, supervisor, [bksw_webmachine_sup]},
+    CleanupTask = {bksw_cleanup_task, {bksw_cleanup_task, start_link, []},
+                   permanent, brutal_kill, worker, [bksw_cleanup_task]},
 
-    {ok, {SupFlags, [WebmachineSup]}}.
+    {ok, {SupFlags, [ WebmachineSup, CleanupTask ]}}.

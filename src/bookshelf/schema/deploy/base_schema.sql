@@ -34,10 +34,12 @@ CREATE UNIQUE INDEX files_id_index ON files(id);
 -- Encoding choices for hashes.
 
 CREATE TABLE IF NOT EXISTS file_data(
-    data_id     bigserial PRIMARY KEY,
-    complete	boolean,
-    data_size   bigint, 
-    chunk_count int,
+    data_id           bigserial PRIMARY KEY,
+    upload_started_at timestamp without time zone default (now() at time zone 'utc'),
+    tombstoned_at     timestamp without time zone default NULL,
+    complete          boolean,
+    data_size         bigint,
+    chunk_count       int,
 
     -- Normal practice would be to constrain hash_* fields to be NOT
     -- NULL UNIQUE, but if we are streaming the file we won't know
@@ -51,7 +53,7 @@ CREATE TABLE IF NOT EXISTS file_data(
 
     -- Might want to store sha256 as well/instead, because the S3 v4 api has a field for that.
     hash_sha256 bytea, -- 256 bits as binary (32B)
-    
+
     -- This exists to allow deduplication. sha512 is faster than
     -- sha256, and 32 extra bytes per file seems pretty low impact.
     -- 256 bits would be ample for simple collision by accident, but
@@ -62,6 +64,8 @@ CREATE TABLE IF NOT EXISTS file_data(
 
 CREATE INDEX file_data_hash_md5_index ON file_data(hash_md5);
 CREATE INDEX file_data_hash_sha512_index ON file_data(hash_sha512);
+CREATE INDEX file_data_tombstoned_at_index on file_data(tombstoned_at);
+CREATE INDEX file_data_upload_started_at_index on file_data(upload_started_at);
 
 -- We would like to do reference counting for the file_data entries so that when the last referring
 -- files entry goes away so does it. However this merely makes sure that every files references a valid
@@ -70,13 +74,13 @@ ALTER TABLE files ADD CONSTRAINT files_data_id_fk FOREIGN KEY (data_id) REFERENC
 
 -- Initial design uses chunks of bytea, to allow for chunked streaming of data instead of one giant put.
 -- A (possibly) better design would use blobs
--- 
+--
 -- Storage of data as chunks avoids 1GB limit on bytea structures, allows more efficient streaming
 --
 CREATE TABLE IF NOT EXISTS file_chunks(
     data_id     bigint,
     chunk       integer,
-    CONSTRAINT file_chunks_data_id_chunk_key UNIQUE(data_id, chunk), 
+    CONSTRAINT file_chunks_data_id_chunk_key UNIQUE(data_id, chunk),
     data        bytea
 );
 

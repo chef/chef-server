@@ -33,12 +33,12 @@
           list_bucket/1,
           bucket_exists/1,
           find_file/2,
-          create_file_with_data/3,
-          update_file_with_data/2,
+          create_file_link_data/3,
+          link_file_data/2,
           delete_file/1,
           insert_file_data/0,
           add_file_chunk/3,
-          mark_file_done/6,
+          update_metadata/6,
           get_chunk_data/2,
           init_transfer_state/0,
           update_transfer_state/3,
@@ -135,20 +135,22 @@ list_bucket(BucketName) ->
             {error, Reason}
     end.
 
-create_file_with_data(BucketId, FileName, DataId) ->
-    case sqerl:statement(insert_file_with_data_id, [BucketId, FileName, DataId], count) of
-        {ok, 1} ->
-            ok;
-        Error ->
-            Error
+create_file_link_data(BucketName, Name, DataId) ->
+    case sqerl:select(create_file_link_data, [BucketName, Name, DataId], first_as_scalar, [success]) of
+        {ok, FileId} ->
+            {ok, FileId};
+        {conflict, Reason} ->
+            {error, Reason};
+        {error, Reason} ->
+            {error, Reason}
     end.
 
-update_file_with_data(FileId, DataId) ->
-    case sqerl:statement(update_file_with_data_id, [FileId, DataId], count) of
-        {ok, 1} ->
+link_file_data(FileId, DataId) ->
+    case sqerl:select(link_file_data, [FileId, DataId], first_as_scalar, [success]) of
+        {ok, _} ->
             ok;
-        Error ->
-            Error
+        {error, Reason} ->
+            {error, Reason}
     end.
 
 find_file(Bucket, Name) ->
@@ -169,8 +171,8 @@ delete_file(FileId) ->
             Error
     end.
 
-mark_file_done(DataId, Size, Chunks, SumMD5, SumSha256, SumSha512) ->
-    case sqerl:statement(update_file_data_done, [DataId, Size, Chunks, SumMD5, SumSha256, SumSha512], count) of
+update_metadata(DataId, Size, Chunks, SumMD5, SumSha256, SumSha512) ->
+    case sqerl:statement(update_metadata, [DataId, Size, Chunks, SumMD5, SumSha256, SumSha512], count) of
         {ok, 1} ->
             ok;
         Error ->

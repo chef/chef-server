@@ -262,20 +262,23 @@ finalize_maybe_create_file(_Rq, _Ctx,
                                     bucket_name = BucketName,
                                     name = Name,
                                     data_id = DataId}) ->
-    {ok, BucketId} = bksw_sql:find_bucket(BucketName),
-    case bksw_sql:create_file_with_data(BucketId, Name, DataId) of
-        _ ->
-            ok
-            %% TODO ERROR HANDLING
+    case bksw_sql:create_file_link_data(BucketName, Name, DataId) of
+        {ok, _} ->
+            ok;
+        {error, Reason} ->
+            error_logger:error_msg("create_file_link_data ~p~n", [Reason]),
+            fail
     end;
 %% If we have a file_id, we're replacing an old file
 finalize_maybe_create_file(_Rq, _Ctx,
                            #db_file{file_id = FileId,
                                     data_id = DataId}) ->
-    case bksw_sql:update_file_with_data(FileId, DataId) of
-        _ ->
-            ok
-                %% TODO ERROR HANDLING
+    case bksw_sql:link_file_data(FileId, DataId) of
+        ok ->
+            ok;
+        {error, Reason} ->
+            error_logger:error_msg("link_file_data ~p~n", [Reason]),
+            fail
     end.
 
 %%
@@ -301,7 +304,7 @@ write_streamed_body({Data, done}, Rq0,
              hash_sha512 = HashSha512} = File1 =
         bksw_sql:finalize_transfer_state(TransferState1, File0),
     Ctx1 = Ctx0#context{entry_md = File1},
-    bksw_sql:mark_file_done(DataId, Size, ChunkCount, HashMd5, HashSha256, HashSha512),
+    bksw_sql:update_metadata(DataId, Size, ChunkCount, HashMd5, HashSha256, HashSha512),
 
     case get_header('Content-MD5', Rq0) of
         undefined ->
