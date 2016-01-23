@@ -41,7 +41,8 @@
 
 -record(state, {checksums,
                 num_checksums,
-                s3_config}).
+                s3_config,
+                s3_host}).
 
 %%%===================================================================
 %%% API
@@ -79,7 +80,11 @@ init([]) ->
     %%
     %% basho_bench sets cwd to ./tests/current so we need to
     %% traverse up an extra directory to get to deps
-    code:add_paths(filelib:wildcard("../../../deps/*/ebin")),
+    {ok, Cwd} = file:get_cwd(),
+    io:format("Test starting in ~p~n", [Cwd]),
+
+    PossiblePaths = filelib:wildcard("../_build/default/*/ebin"), 
+    code:add_paths(PossiblePaths),
 
     DataProfile = basho_bench_config:get(bookshelf_data_profile),
     ChecksumSizes = parse_distro_file(DataProfile),
@@ -89,6 +94,8 @@ init([]) ->
     S3SecretAccessKey = basho_bench_config:get(s3_secret_access_key),
     S3Host = basho_bench_config:get(s3_host),
 
+    io:format("S3_HOST: ~p~n", [S3Host]),
+
     S3Config = mini_s3:new(S3AccessKeyId, S3SecretAccessKey, S3Host, path),
 
     %% todo:
@@ -96,20 +103,24 @@ init([]) ->
     ok = application:start(ibrowse),
     ibrowse_http_client:start({"localhost", 4321}),
 
-    %% create all of the checksums in our bucket
-    [begin
-         Data = crypto:rand_bytes(Size),
-         mini_s3:put_object("bookshelf",           % bucket name
-                            integer_to_list(Size), % key
-                            Data,                  % object data
-                            [],                    % options
-                            [],                    % headers
-                            S3Config)              % config
-     end || Size <- ChecksumSizes],
+    {Time, _ } = timer:tc(fun() ->
+                                  %% create all of the checksums in our bucket
+                                  [begin
+                                       Data = crypto:rand_bytes(Size),
+                                       mini_s3:put_object("bookshelf",           % bucket name
+                                                          integer_to_list(Size), % key
+                                                          Data,                  % object data
+                                                          [],                    % options
+                                                          [],                    % headers
+                                                          S3Config)              % config
+                                   end || Size <- ChecksumSizes]
+                          end),
+    io:format("Setup took ~p~n", [Time]),
 
     {ok, #state{checksums = ChecksumSizes,
                 num_checksums = NumChecksums,
-                s3_config = S3Config}}.
+                s3_config = S3Config,
+                s3_host = S3Host}}.
 
 %%--------------------------------------------------------------------
 %% @private
