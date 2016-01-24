@@ -22,7 +22,7 @@
 
 -behaviour(supervisor).
 
--export([start_link/0, reconfigure_server/0]).
+-export([start_link/0]).
 
 -export([init/1]).
 
@@ -32,9 +32,6 @@
 
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
-
-reconfigure_server() ->
-    supervisor:restart_child(?MODULE, bksw_webmachine_sup).
 
 %%===================================================================
 %% Supervisor callbacks
