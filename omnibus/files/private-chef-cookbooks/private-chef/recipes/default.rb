@@ -47,11 +47,11 @@ log 'opscode_webui deprecation notice' do
   only_if { opscode_webui_deprecation_notice.applicable? }
 end
 
-# @todo: This seems like it might belong in the PrivateChef helper;
-#   many other attributes like are set automatically there as well.
-if OmnibusHelper.has_been_bootstrapped?
+if OmnibusHelper.has_been_bootstrapped? or
+    BootstrapPreflightValidator.new(node).bypass_bootstrap?
   node.set['private_chef']['bootstrap']['enable'] = false
 end
+
 
 # Create the Chef User
 include_recipe "private-chef::users"
@@ -84,34 +84,6 @@ file "/etc/opscode/webui_priv.pem" do
   group "root"
   mode "0600"
   content webui_key.to_pem.to_s unless File.exists?('/etc/opscode/webui_pub.pem')
-end
-
-# If we are doing initial key generation,
-# generate a new key.
-unless File.exists?('/etc/opscode/pivotal.pem')
-  pivotal_key = OpenSSL::PKey::RSA.generate(2048)
-end
-
-# This will be cleaned up during bootstrap.
-# Only generate if pivotal.pem doesn't exist,
-# because that means we are doing initial key generation
-# per the step directly above.
-unless File.exists?('/etc/opscode/pivotal.pem')
-  file "/etc/opscode/pivotal.pub" do
-    owner OmnibusHelper.new(node).ownership['owner']
-    group "root"
-    mode "0644"
-    content pivotal_key.public_key.to_s
-  end
-end
-
-# If we are doing initial key generation (aka pivotal.pem hasn't yet
-# been created), create pivotal.pem.
-file "/etc/opscode/pivotal.pem" do
-  owner OmnibusHelper.new(node).ownership['owner']
-  group "root"
-  mode "0600"
-  content pivotal_key.to_pem.to_s unless File.exists?('/etc/opscode/pivotal.pem')
 end
 
 directory "/etc/chef" do
@@ -157,6 +129,7 @@ if OmnibusHelper.new(node).repository_configured? "chef-stable"
   include_recipe "private-chef::add_ons_repository"
 end
 
+
 # Configure Services
 [
   "rabbitmq",
@@ -201,6 +174,7 @@ end
   end
 end
 
+include_recipe "private-chef::cleanup"
 include_recipe "private-chef::actions" if darklaunch_values["actions"]
 
 include_recipe "private-chef::private-chef-sh"
