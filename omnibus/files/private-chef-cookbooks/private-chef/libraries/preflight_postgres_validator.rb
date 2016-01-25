@@ -36,6 +36,21 @@ class PostgresqlPreflightValidator < PreflightValidator
     backend_validation
   end
 
+  def bookshelf_in_sql?
+    @cs_pg_attr['bookshelf'] && @cs_pg_attr['bookshelf']['storage_type'].to_s == "sql"
+  end
+
+  def databases_to_check
+    d = %w{bifrost opscode_chef oc_id}
+    d << 'bookshelf' if bookshelf_in_sql?
+    d
+  end
+
+  def roles_to_check
+    d = %w{opscode-erchef oc_id oc_bifrost}
+    d << 'bookshelf' if bookshelf_in_sql?
+    d
+  end
 
   def external_postgres_config_validation
     # For now we're only performing these checks for external pgsql mode:
@@ -108,7 +123,7 @@ class PostgresqlPreflightValidator < PreflightValidator
         else
           return
         end
-        %w{bifrost opscode_chef oc_id}.each {|db| backend_verify_named_db_not_present(connection, db)}
+        databases_to_check.each {|db| backend_verify_named_db_not_present(connection, db)}
         backend_verify_cs_roles_not_present(connection)
       end
     rescue ::PG::InsufficientPrivilege => e
@@ -161,7 +176,7 @@ class PostgresqlPreflightValidator < PreflightValidator
   # Throws CSPG017 if any of the reserved usernames we
   # need to create are already in the datbase.
   def backend_verify_cs_roles_not_present(connection)
-    %w{opscode-erchef oc_id oc_bifrost}.each do |service|
+    roles_to_check.each do |service|
       %w{sql_user sql_ro_user}.each do |key|
         username = service_key_value(service, key)
         fail_with err_CSPG017_role_exists(username) if named_role_exists?(connection, username)
@@ -185,7 +200,6 @@ CSPG001: The value of postgresql['external'] must be set prior to the initial
          to a new instance configured for an external database and vice-versa.
 EOM
   end
-
 
   def err_CSPG002_missing_superuser_id
 <<EOM
@@ -291,7 +305,6 @@ CSPG015: The database server you provided does not have the default database
          for more information.
 EOM
   end
-
 
   def err_CSPG016_database_exists(dbname)
 <<EOM
