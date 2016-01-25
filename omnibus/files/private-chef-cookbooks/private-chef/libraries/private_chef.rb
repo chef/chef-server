@@ -466,6 +466,8 @@ module PrivateChef
       PrivateChef['oc_id']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['bookshelf']['access_key_id'] ||= generate_hex_if_bootstrap(20, ha_guard)
       PrivateChef['bookshelf']['secret_access_key'] ||= generate_hex_if_bootstrap(40, ha_guard)
+      PrivateChef['bookshelf']['sql_password'] ||= generate_hex_if_bootstrap(40, ha_guard)
+      PrivateChef['bookshelf']['sql_ro_password'] ||= generate_hex_if_bootstrap(40, ha_guard)
     end
 
     def gen_redundant(node_name, topology)
@@ -686,6 +688,8 @@ EOF
             'sql_ro_password' => PrivateChef['oc_bifrost']['sql_ro_password']
           },
           'bookshelf' => {
+            'sql_password' => PrivateChef['bookshelf']['sql_password'],
+            'sql_ro_password' => PrivateChef['bookshelf']['sql_ro_password'],
             'access_key_id' => PrivateChef['bookshelf']['access_key_id'],
             'secret_access_key' => PrivateChef['bookshelf']['secret_access_key']
           }})

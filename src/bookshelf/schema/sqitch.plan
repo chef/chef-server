@@ -1,0 +1,6 @@
+%syntax-version=1.0.0-b2
+%project=bookshelf
+%uri=https://github.com/chef/chef-server/blob/master/src/bookshelf
+
+base_schema 2015-11-23T18:56:06Z Mark Anderson <mark@chef.io> # Basic schema for bookshelf file storage
+smart_delete 2016-01-13T18:39:12Z Mark Anderson <mark@chef.io> # Stored procedures for create/delete

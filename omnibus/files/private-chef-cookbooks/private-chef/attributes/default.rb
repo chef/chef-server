@@ -593,6 +593,21 @@ default['private_chef']['bookshelf']['access_key_id'] = "generated-by-default"
 default['private_chef']['bookshelf']['secret_access_key'] = "generated-by-default"
 # Default: set to Host: header. Override to hardcode a url, "http://..."
 default['private_chef']['bookshelf']['external_url'] = :host_header
+default['private_chef']['bookshelf']['storage_type'] = :filesystem
+# This retries connections that are rejected because pooler queue is maxed out. 
+default['private_chef']['bookshelf']['sql_retry_count'] = 0
+# Intervals are in milliseconds
+default['private_chef']['bookshelf']['sql_retry_delay'] = 10
+default['private_chef']['bookshelf']['abandoned_upload_cleanup_interval'] = 19 * (60 * 1000)
+default['private_chef']['bookshelf']['deleted_data_cleanup_interval'] = 7 * (60 * 1000)
+default['private_chef']['bookshelf']['db_pool_size'] = 20
+default['private_chef']['bookshelf']['db_pool_queue_max'] = 200
+default['private_chef']['bookshelf']['db_pooler_timeout'] = 2000
+default['private_chef']['bookshelf']['sql_db_timeout'] = 5000
+default['private_chef']['bookshelf']['sql_ro_user'] = 'bookshelf_ro'
+default['private_chef']['bookshelf']['sql_ro_password'] = 'should_never_be_used'
+default['private_chef']['bookshelf']['sql_user'] = 'bookshelf'
+default['private_chef']['bookshelf']['sql_password'] = 'should_never_be_used'
 
 ###
 # Chef Identity
