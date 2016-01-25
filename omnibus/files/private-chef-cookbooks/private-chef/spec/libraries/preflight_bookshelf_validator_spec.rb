@@ -18,11 +18,11 @@ require_relative '../../libraries/private_chef.rb'
 require_relative '../../libraries/helper.rb'
 
 describe BookshelfPreflightValidator do
-  let(:subject) { BookshelfPreflightValidator.new({'private_chef' => {}}) }
-
   context "storage_type_unchanged validation" do
     context "when no previous run exists" do
       let(:subject) {
+        allow(PrivateChef).to receive(:[]).with('postgresql').and_return({})
+        allow(PrivateChef).to receive(:[]).with('bookshelf').and_return({})
         s = BookshelfPreflightValidator.new({'private_chef' => {}})
         allow(s).to receive(:previous_run).and_return(nil)
         s
@@ -35,6 +35,7 @@ describe BookshelfPreflightValidator do
 
     context "when storage_type was previously unset" do
       let(:subject) {
+        allow(PrivateChef).to receive(:[]).with('postgresql').and_return({})
         s = BookshelfPreflightValidator.new({'private_chef' => {}})
         allow(s).to receive(:previous_run).and_return({'bookshelf' => {}})
         allow(s).to receive(:fail_with).and_return(:i_failed)
@@ -69,6 +70,7 @@ describe BookshelfPreflightValidator do
 
     context "when storage_type was previously set" do
       let(:subject) {
+        allow(PrivateChef).to receive(:[]).with('postgresql').and_return({})
         s = BookshelfPreflightValidator.new({'private_chef' => {}})
         allow(s).to receive(:previous_run).and_return({'bookshelf' => {'storage_type' => 'sql'}})
         allow(s).to receive(:fail_with).and_return(:i_failed)
