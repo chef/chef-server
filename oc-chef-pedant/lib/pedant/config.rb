@@ -148,5 +148,7 @@ module Pedant
     # Default orgname is nil by default
     default_orgname(nil)
 
+    # The lb endpoint to use for reindex-opc-organization
+    reindex_endpoint("https://127.0.0.1")
   end
 end

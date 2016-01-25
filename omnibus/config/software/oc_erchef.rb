@@ -30,11 +30,15 @@ dependency "bundler"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
+  fips_enabled = project.overrides[:fips] && project.overrides[:fips][:enabled]
+  profile_name = fips_enabled ? "fips" : "default"
+
   env['USE_SYSTEM_GECODE'] = "1"
   env['REL_VERSION'] = "#{project.build_version}"
+  env['REBAR_PROFILE'] = profile_name
 
   make "omnibus", env: env
 
-  sync "#{project_dir}/_build/default/rel/oc_erchef/", "#{install_dir}/embedded/service/opscode-erchef/", exclude: ['**/.git', '**/.gitignore']
+  sync "#{project_dir}/_build/#{profile_name}/rel/oc_erchef/", "#{install_dir}/embedded/service/opscode-erchef/", exclude: ['**/.git', '**/.gitignore']
   delete "#{install_dir}/embedded/service/opscode-erchef/log"
 end

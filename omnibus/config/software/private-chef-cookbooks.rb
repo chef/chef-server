@@ -31,11 +31,15 @@ build do
           " --path=#{install_dir}/embedded/cookbooks", env: env, cwd: "#{project_dir}/private-chef"
 
   block do
+    fips_enabled = (project.overrides[:fips] && project.overrides[:fips][:enabled]) || false
     File.open("#{install_dir}/embedded/cookbooks/dna.json", "w") do |f|
+      run_list = Array.new.tap do |r|
+        r << 'recipe[private-chef::fips]' if fips_enabled
+        r << 'recipe[private-chef::default]'
+      end
+
       f.write JSON.fast_generate(
-        run_list: [
-          'recipe[private-chef::default]',
-        ]
+        run_list: run_list
       )
     end
     File.open("#{install_dir}/embedded/cookbooks/show-config.json", "w") do |f|
