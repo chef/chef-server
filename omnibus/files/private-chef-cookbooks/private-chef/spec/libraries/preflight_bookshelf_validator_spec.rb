@@ -47,11 +47,6 @@ describe BookshelfPreflightValidator do
         expect(subject.verify_storage_type_unchanged).to eq(true)
       end
 
-      it "succeeds if set to :filesystem" do
-        expect(PrivateChef).to receive(:[]).with('bookshelf').and_return({'storage_type' => :filesystem})
-        expect(subject.verify_storage_type_unchanged).to eq(true)
-      end
-
       it "succeeds if not set" do
         expect(PrivateChef).to receive(:[]).with('bookshelf').and_return({})
         expect(subject.verify_storage_type_unchanged).to eq(true)
@@ -79,11 +74,6 @@ describe BookshelfPreflightValidator do
 
       it "succceds if set to the same value as before" do
         expect(PrivateChef).to receive(:[]).with('bookshelf').and_return({'storage_type' => 'sql'})
-        expect(subject.verify_storage_type_unchanged).to eq(true)
-      end
-
-      it "succceds if set to the same value as before but as a symbol" do
-        expect(PrivateChef).to receive(:[]).with('bookshelf').and_return({'storage_type' => :sql})
         expect(subject.verify_storage_type_unchanged).to eq(true)
       end
 

@@ -165,5 +165,5 @@ ERR
   include_recipe "private-chef::erchef_database"
   include_recipe "private-chef::bifrost_database"
   include_recipe "private-chef::oc_id_database"
-  include_recipe "private-chef::bookshelf_database" if node["private_chef"]["bookshelf"]["storage_type"].to_s == "sql"
+  include_recipe "private-chef::bookshelf_database" if node["private_chef"]["bookshelf"]["storage_type"] == "sql"
 end

@@ -132,6 +132,12 @@ module PrivateChef
       end
     end
 
+    # Mutate PrivateChef to account for common cases of user-provided
+    # types not being what we want
+    def transform_to_consistent_types
+      PrivateChef['bookshelf']['storage_type'] = PrivateChef['bookshelf']['storage_type'].to_s
+    end
+
     VALID_EXTENSION_CONFIGS = %i{server_config_required config_values gen_backend gen_frontend gen_secrets gen_api_fqdn} unless defined?(VALID_EXTENSION_CONFIGS)
     def register_extension(name, extension)
       bad_keys = extension.keys - VALID_EXTENSION_CONFIGS
@@ -796,6 +802,7 @@ EOF
 
       # Transition Solr memory and JVM settings from OSC11 to Chef 12.
       import_legacy_service_config("opscode_solr", "opscode_solr4", ["heap_size", "new_size", "java_opts"])
+      transform_to_consistent_types
 
       PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
 
