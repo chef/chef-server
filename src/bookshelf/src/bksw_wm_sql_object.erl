@@ -312,7 +312,7 @@ write_streamed_body({Data, done}, Rq0,
             %% Failures here turn into 500s and stack traces; we might want to do better if this
             %% happens much.
             ok = finalize_maybe_create_file(Rq1, Ctx0, File1),
-            {{halt, 202}, Rq1, Ctx1};
+            {{halt, 204}, Rq1, Ctx1};
         RawRequestMd5 ->
             RequestMd5 = base64:decode(RawRequestMd5),
             case RequestMd5 of
@@ -321,7 +321,7 @@ write_streamed_body({Data, done}, Rq0,
                     %% Failures here turn into 500s and stack traces; we might want to do better if this
                     %% happens much.
                     ok = finalize_maybe_create_file(Rq1, Ctx0, File1),
-                    {{halt, 202}, Rq1, Ctx1};
+                    {{halt, 204}, Rq1, Ctx1};
                 _ ->
                     lager:error("Mismatch between Content-MD5 and actual content. Content-MD5: ~p; Actual: ~p", [RequestMd5, HashMd5]),
                     %% Exiting here causes uploads to be abandoned, but the upload_cleanup task will
