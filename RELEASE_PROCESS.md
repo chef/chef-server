@@ -26,7 +26,8 @@ In order to release, you will need the following accounts/permissions:
 - VPN account for Chef Software, Inc.
 - Login for wilson.ci.opscode.us (This is linked to your github
 account.)
-- Access to artifactory credentials
+- Access to artifactory.chef.co
+- Access to delivery.chef.co
 
 ## THE PROCESS
 ### Testing the Release
@@ -35,22 +36,14 @@ Every commit to chef-server master is tested against a full pedant
 run. However, upgrade testing must still be done in advance of the
 release:
 
-- [ ] Test an upgrade from the latest release of Open Source Chef Server
-11 to the most current build from master. To do this you must:
-
-  - Install Open Source Chef Server 11
-  - Populate data using knife
-  - Install the latest build
-  - Follow the upgrade instruction for that build
-  - Ensure that the data you populated has migrated correctly
-
-- [ ] Test an upgrade from the latest release of Enterprise Chef
-  Server 12 to the most current build from master, following the same
-  basic process that you used for the Chef Server 11 test.
-
-- [ ] Test an upgrade from the latest release of Enterprise Chef
-  Server 11 to the most current build from master, following the same
-  basic process that you used for the Chef Server 11 test.
+- [ ] Run the Chef Delivery-based automated upgrade testing
+  * Checkout the `chef-server-acceptance` project from delivery.chef.co
+  * Update the `chef_server_test_url-override` attributes in
+    `.delivery/build/attributes/default.rb` to the URL corresponding to
+    the latest package you'd like to test at artifactory.chef.co
+  * Commit the change and run `delivery review`
+  * When the lint and unit tests pass, approve the change and watch the
+    matrix of tests run
 
 - [ ] If this release is being made to address a specific
   high-urgency, high-severity customer issue or security issue, please
