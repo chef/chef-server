@@ -185,6 +185,14 @@ module Pedant
           "chef_type" => "cookbook_version",
           "frozen?" => false,
           "recipes" => opts[:recipes] || [],
+          "definitions" => [],
+          "libraries" => [],
+          "attributes" => [],
+          "files" => [],
+          "templates" => [],
+          "resources" => [],
+          "providers" => [],
+          "root_files" => [],
           "metadata" => {
             "version" => opts[:version] || default_version,
             "name" => name, # not actually used
