@@ -7,6 +7,18 @@ Bifrost PostgreSQL Schema
 
 * [Set up and Use Sqitch](doc/sqitch_background.md)
 
+## Ensuring Modifications are Applied in Upgrades
+
+Upgrades are not automatically applied when chef-server upgrades are
+installed/reconfigured.  In order to have a schema change applied,
+you must add a partybus migration with content similar to the following:
+
+    define_upgrade do
+      run_sqitch(target: "target-tag-name", database: "bifrost")
+    end
+
+
+
 # Testing
 
 We use [pgTAP][] to test both the schema and the stored procedures in
