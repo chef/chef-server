@@ -1,5 +1,69 @@
 # Chef Server Changelog
 
+## 12.4.0 (2016-01-27)
+
+### Components
+
+#### Updated
+* openssl (1.0.1p -> 1.0.1q)
+* knife-opc (528be923 -> 0b8fa0fa)
+* ohai (f1e35bf1 -> 81f1c968)
+* chef (2fe875ce -> 3f3fbc8f)
+
+#### New
+* rest-client (1.8.0)
+
+#### Removed
+* chef-server-bootstrap
+
+## Detailed Change Log
+
+* `oc-pedant`
+    * Replace /policies/:group/:name in spec descriptions with /policy_groups/:group_name/policies/:policy_name.
+    * Fix spec descriptions that were copied from /cookbooks to cookbook_artifacts.
+    * Allow opt-out of RVM/bundler busting in knife pedant tests
+    * Add validation tag to header validation test
+
+* `oc-erchef`
+    * Added ACL endpoints for policies and policy groups; also pedant tests
+    * Implement RFC 14 - Add universe endpoint
+    * V1 of Server Admins. Implements flexable user management global group.
+
+* `chef-server-ctl`
+    * Make sure chef-server-ctl install can do chef-manage
+
+* `knife`
+    * Add test for knife-opc org creation
+    * Use validation for knife opc instead of knife
+
+* `updated RAML documentation`
+
+* `chef-server`
+    * Restrict 'other' permissions for chef-server.rb as it may contain secrets.
+    * Remove other permissions on existing copies of chef-server.rb to protect potentially sensitive config options
+
+* `omnibus`
+    * EcPostgres can be used with other databases
+    * Move bootstrap to recipe/library.
+    * Remove chef-server-bootstrap project
+    * Create a consolidated cleanup recipe
+    * Bootstrap preflight checks to prevent multiple bootstraps
+    * Modify postgres preflight checks to have correct assumptions
+    * Fix statem test output formatting
+
+* `rabbitmq`
+    * Correct handling of no rabbitmq in controls endpoint
+    * Set rabbitmq_management listener IP to rabbitmq node_ip_address
+    * Don't monitor rabbit queue length w/ actions disabled
+    * Remove unused jobs queue from rabbitmq setup
+
+* `bookshelf`
+    * Support optionally storing cookbook data in postgresql rather than on the filesystem directly. This is an experimental feature and is off by default. This is only supported for new installs at this time; there is no support for migrating cookbook data from the filesystem to sql (or back).
+    * Remove `bksw_sync` module
+
+* `opscode-expander-reindexer`
+    * Remove opscode-expander-reindexer service
+
 # 12.3.0 (2015-11-12)
 
 ### Components
