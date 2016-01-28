@@ -43,11 +43,11 @@ describe "opscode-account endpoint", :clients do
       end
 
       it "has the appropriate ACLs" do
-        actors = ["pivotal", requestor.name]
+        actors = ["pivotal", requestor.name].uniq
 
         get(api_url("/clients/#{client}/_acl"), platform.admin_user).should look_like({
             :status => 200,
-            :body_exact =>{
+            :body =>{
               "create" => {
                 "actors" => actors,
                 "groups" => ["admins"]},

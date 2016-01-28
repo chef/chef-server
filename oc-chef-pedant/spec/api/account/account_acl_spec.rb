@@ -14,7 +14,7 @@ describe "ACL API", :acl do
 
     context "GET /users/<user>/_acl"  do
 
-      let(:actors) { ["pivotal", username] }
+      let(:actors) { ["pivotal", username].uniq }
       let(:groups) { [] }
 
       let(:acl_body) {{
@@ -29,7 +29,7 @@ describe "ACL API", :acl do
         it "can get user acl" do
           get(request_url, platform.superuser).should look_like({
              :status => 200,
-             :body_exact => acl_body
+             :body => acl_body
           })
         end
       end
@@ -37,7 +37,7 @@ describe "ACL API", :acl do
         it "can get user acl" do
           get(request_url, platform.admin_user).should look_like({
              :status => 200,
-             :body_exact => acl_body
+             :body => acl_body
           })
         end
       end
@@ -55,7 +55,7 @@ describe "ACL API", :acl do
         let(:request_url)  { "#{platform.server}/users/#{username}/_acl/#{permission}" }
 
         context "PUT /users/<user>/_acl/#{permission}" do
-          let(:actors) { ["pivotal", username] }
+          let(:actors) { ["pivotal", username].uniq }
           let(:groups) { [] }
           let(:default_body) {{
               "create" => {"actors" => actors, "groups" => groups},
@@ -83,7 +83,7 @@ describe "ACL API", :acl do
             # rest of the test suite if the permissions aren't right
             get(acl_url, platform.admin_user).should look_like({
                                                                  :status => 200,
-                                                                 :body_exact => default_body
+                                                                 :body => default_body
                                                                })
           end
 
@@ -97,7 +97,7 @@ describe "ACL API", :acl do
               modified_body[permission] = request_body[permission]
               get(acl_url, platform.admin_user).should look_like({
                                                                    :status => 200,
-                                                                   :body_exact => modified_body
+                                                                   :body => modified_body
                                                                  })
             end
           end
@@ -110,7 +110,7 @@ describe "ACL API", :acl do
                                                              })
               get(acl_url, platform.admin_user).should look_like({
                                                                    :status => 200,
-                                                                   :body_exact => default_body
+                                                                   :body => default_body
                                                                  })
             end
           end
@@ -123,7 +123,7 @@ describe "ACL API", :acl do
                                                              })
               get(acl_url, platform.admin_user).should look_like({
                                                                    :status => 200,
-                                                                   :body_exact => default_body
+                                                                   :body => default_body
                                                                  })
             end
           end
@@ -136,7 +136,7 @@ describe "ACL API", :acl do
                                                              })
               get(acl_url, platform.admin_user).should look_like({
                                                                    :status => 200,
-                                                                   :body_exact => default_body
+                                                                   :body => default_body
                                                                  })
             end
           end
@@ -149,7 +149,7 @@ describe "ACL API", :acl do
                                                              })
               get(acl_url, platform.admin_user).should look_like({
                                                                    :status => 200,
-                                                                   :body_exact => default_body
+                                                                   :body => default_body
                                                                  })
             end
           end
@@ -172,7 +172,7 @@ describe "ACL API", :acl do
                                                                })
                 get(acl_url, platform.admin_user).should look_like({
                                                                      :status => 200,
-                                                                     :body_exact => default_body
+                                                                     :body => default_body
                                                                    })
               end
             end
@@ -193,7 +193,7 @@ describe "ACL API", :acl do
                                                                })
                 get(acl_url, platform.admin_user).should look_like({
                                                                      :status => 200,
-                                                                     :body_exact => default_body
+                                                                     :body => default_body
                                                                    })
               end
             end
@@ -212,7 +212,7 @@ describe "ACL API", :acl do
                                                                })
                 get(acl_url, platform.admin_user).should look_like({
                                                                      :status => 200,
-                                                                     :body_exact => default_body
+                                                                     :body => default_body
                                                                    })
               end
             end
@@ -232,7 +232,7 @@ describe "ACL API", :acl do
                                                                })
                 get(acl_url, platform.admin_user).should look_like({
                                                                      :status => 200,
-                                                                     :body_exact => default_body
+                                                                     :body => default_body
                                                                    })
               end
             end
@@ -247,7 +247,7 @@ describe "ACL API", :acl do
                                                                })
                 get(acl_url, platform.admin_user).should look_like({
                                                                      :status => 200,
-                                                                     :body_exact => default_body
+                                                                     :body => default_body
                                                                    })
               end
             end
@@ -284,7 +284,7 @@ describe "ACL API", :acl do
         it "can get object ACL" do
           get(request_url, platform.admin_user).should look_like({
               :status => 200,
-              :body_exact => acl_body
+              :body => acl_body
             })
         end
       end
@@ -336,7 +336,7 @@ describe "ACL API", :acl do
           # support multi-org tests.
           get(request_url, platform.admin_user).should look_like({
               :status => 200,
-              :body_exact => acl_body
+              :body => acl_body
             })
         end
 
@@ -441,7 +441,7 @@ describe "ACL API", :acl do
         let(:request_body) {{
             permission => {
               "actors" => ["pivotal", platform.admin_user.name,
-                platform.non_admin_user.name],
+                platform.non_admin_user.name].uniq,
               "groups" => groups
             }
           }}
@@ -456,7 +456,7 @@ describe "ACL API", :acl do
           # rest of the test suite if the permissions aren't right
           get(acl_url, platform.admin_user).should look_like({
               :status => 200,
-              :body_exact => default_body
+              :body => default_body
             })
         end
 
@@ -470,7 +470,7 @@ describe "ACL API", :acl do
             modified_body[permission] = request_body[permission]
             get(acl_url, platform.admin_user).should look_like({
                 :status => 200,
-                :body_exact => modified_body
+                :body => modified_body
               })
           end
         end
@@ -483,7 +483,7 @@ describe "ACL API", :acl do
               })
             get(acl_url, platform.admin_user).should look_like({
                 :status => 200,
-                :body_exact => default_body
+                :body => default_body
               })
           end
         end
@@ -496,7 +496,7 @@ describe "ACL API", :acl do
               })
             get(acl_url, platform.admin_user).should look_like({
                 :status => 200,
-                :body_exact => default_body
+                :body => default_body
               })
           end
         end
@@ -509,7 +509,7 @@ describe "ACL API", :acl do
               })
             get(acl_url, platform.admin_user).should look_like({
                 :status => 200,
-                :body_exact => default_body
+                :body => default_body
               })
           end
         end
@@ -522,7 +522,7 @@ describe "ACL API", :acl do
               })
             get(acl_url, platform.admin_user).should look_like({
                 :status => 200,
-                :body_exact => default_body
+                :body => default_body
               })
           end
         end
@@ -544,7 +544,7 @@ describe "ACL API", :acl do
                 })
               get(acl_url, platform.admin_user).should look_like({
                   :status => 200,
-                  :body_exact => default_body
+                  :body => default_body
                 })
             end
           end
@@ -565,7 +565,7 @@ describe "ACL API", :acl do
                 })
               get(acl_url, platform.admin_user).should look_like({
                   :status => 200,
-                  :body_exact => default_body
+                  :body => default_body
                 })
             end
           end
@@ -584,7 +584,7 @@ describe "ACL API", :acl do
                 })
               get(acl_url, platform.admin_user).should look_like({
                   :status => 200,
-                  :body_exact => default_body
+                  :body => default_body
                 })
             end
           end
@@ -604,7 +604,7 @@ describe "ACL API", :acl do
                 })
               get(acl_url, platform.admin_user).should look_like({
                   :status => 200,
-                  :body_exact => default_body
+                  :body => default_body
                 })
             end
           end
@@ -619,7 +619,7 @@ describe "ACL API", :acl do
                 })
               get(acl_url, platform.admin_user).should look_like({
                   :status => 200,
-                  :body_exact => default_body
+                  :body => default_body
                 })
             end
           end
@@ -638,7 +638,7 @@ describe "ACL API", :acl do
             # rest of the test suite if the permissions aren't right
             get(acl_url, platform.admin_user).should look_like({
                 :status => 200,
-                :body_exact => default_body
+                :body => default_body
               })
           end
 
@@ -748,7 +748,7 @@ describe "ACL API", :acl do
         # default ACLs are different on almost every different types -- so these are
         # the defaults of defaults, which are overridden below for the different
         # types:
-        let(:actors) { ["pivotal", platform.admin_user.name] }
+        let(:actors) { ["pivotal", platform.admin_user.name].uniq }
         let(:groups) { ["admins"] }
         let(:read_groups) { groups }
         let(:update_groups) { groups }
@@ -771,7 +771,7 @@ describe "ACL API", :acl do
             # As long as 'new_object' isn't a validator (and you're on
             # the Erchef client endpoint), new_object will be in the
             # actors list
-            ["pivotal", new_object, setup_user.name]
+            ["pivotal", new_object, setup_user.name].uniq
           }
           let(:read_groups) { ["users", "admins"] }
           let(:delete_groups) { ["users", "admins"] }
@@ -900,7 +900,7 @@ describe "ACL API", :acl do
             it "can get object ACL" do
               get(request_url, platform.admin_user).should look_like({
                   :status => 200,
-                  :body_exact => acl_body
+                  :body => acl_body
                 })
             end
           end
@@ -1030,7 +1030,7 @@ describe "ACL API", :acl do
             it "should return the acl", :validation do
               get(request_url, platform.admin_user).should look_like({
                 :status => 200,
-                :body_exact => acl_body
+                :body => acl_body
               })
             end
           end
@@ -1093,7 +1093,7 @@ describe "ACL API", :acl do
 
               let(:groups_and_actors) {{
                   "actors" => [platform.non_admin_user.name,
-                    platform.admin_user.name, "pivotal"],
+                    platform.admin_user.name, "pivotal"].uniq,
                   "groups" => ["admins", "users", "clients"]
                 }}
               let(:update_body) {{
@@ -1111,7 +1111,7 @@ describe "ACL API", :acl do
 
                   get(request_url, platform.admin_user).should look_like({
                       :status => 200,
-                      :body_exact => check_body
+                      :body => check_body
                     })
                 end
               end
@@ -1124,7 +1124,7 @@ describe "ACL API", :acl do
                     })
                   get(request_url, platform.admin_user).should look_like({
                       :status => 200,
-                      :body_exact => acl_body
+                      :body => acl_body
                     })
                 end
               end
@@ -1137,7 +1137,7 @@ describe "ACL API", :acl do
                     })
                   get(request_url, platform.admin_user).should look_like({
                       :status => 200,
-                      :body_exact => acl_body
+                      :body => acl_body
                     })
                 end
               end
@@ -1150,7 +1150,7 @@ describe "ACL API", :acl do
                     })
                   get(request_url, platform.admin_user).should look_like({
                       :status => 200,
-                      :body_exact => acl_body
+                      :body => acl_body
                     })
                 end
               end
@@ -1163,7 +1163,7 @@ describe "ACL API", :acl do
                     })
                   get(request_url, platform.admin_user).should look_like({
                       :status => 200,
-                      :body_exact => acl_body
+                      :body => acl_body
                     })
                 end
               end
@@ -1185,7 +1185,7 @@ describe "ACL API", :acl do
                       })
                     get(request_url, platform.admin_user).should look_like({
                         :status => 200,
-                        :body_exact => acl_body
+                        :body => acl_body
                       })
                   end
                 end
@@ -1206,7 +1206,7 @@ describe "ACL API", :acl do
                       })
                     get(request_url, platform.admin_user).should look_like({
                         :status => 200,
-                        :body_exact => acl_body
+                        :body => acl_body
                       })
                   end
                 end
@@ -1225,7 +1225,7 @@ describe "ACL API", :acl do
                       })
                     get(request_url, platform.admin_user).should look_like({
                         :status => 200,
-                        :body_exact => acl_body
+                        :body => acl_body
                       })
                   end
                 end
@@ -1245,7 +1245,7 @@ describe "ACL API", :acl do
                       })
                     get(request_url, platform.admin_user).should look_like({
                         :status => 200,
-                        :body_exact => acl_body
+                        :body => acl_body
                       })
                   end
                 end
@@ -1260,7 +1260,7 @@ describe "ACL API", :acl do
                       })
                     get(request_url, platform.admin_user).should look_like({
                         :status => 200,
-                        :body_exact => acl_body
+                        :body => acl_body
                       })
                   end
                 end
