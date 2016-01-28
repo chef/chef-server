@@ -62,10 +62,10 @@ The git SHA of the build you are testing can be found in
 - [ ] Check that omnibus/config/projects/chef-server.rb has the
   correct version given the type of changes in this release.
 
-- [ ] Double check omnibus/CHANGELOG.md to ensure it includes all
+- [ ] Double check CHANGELOG.md to ensure it includes all
   included changes. Update as appropriate.
 
-- [ ] Check omnibus/RELEASE_NOTES.md to ensure that it describes the
+- [ ] Check RELEASE_NOTES.md to ensure that it describes the
   most important user-facing changes in the release. This file should
   form the basis of the blog post in the following step. Update as
   appropriate.
@@ -131,18 +131,6 @@ Chef Server is now released.
 
 ## Post Release
 
-- [ ] Bump the Chef Server version number for development to the next
-  logical version number.  Currently, this involves bumping the
-  version number in the following files:
-
-```
-omnibus/config/projects/chef-server.rb
-src/chef-mover/relx.config
-src/chef-mover/src/mover.app.src
-src/oc_bifrost/apps/bifrost/src/bifrost.app.src
-src/oc_bifrost/rel/reltool.config
-src/oc_bifrost/relx.config
-src/oc_erchef/rel/reltool.config
-src/oc_erchef/relx.config
-src/oc_erchef/src/oc_erchef.app.src
-```
+- [ ] Bump the Chef Server version number in
+  `omnibus/config/projects/chef-server.rb` for development to the next
+  logical version number.
