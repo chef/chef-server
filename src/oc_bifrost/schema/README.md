@@ -14,9 +14,10 @@ installed/reconfigured.  In order to have a schema change applied,
 you must add a partybus migration with content similar to the following:
 
     define_upgrade do
-      run_sqitch(target: "target-tag-name", database: "bifrost")
+      if Partybus.config.bootstrap_server
+        must_be_data_master
+        run_sqitch("target-tag-name", 'oc_bifrost')
     end
-
 
 
 # Testing
