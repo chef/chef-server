@@ -2,11 +2,12 @@ GEM
   remote: http://rubygems.org/
   specs:
     pg (0.16.0)
-    sequel (3.34.1)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   pg (~> 0.16.0)
-  sequel (~> 3.34.1)
+
+BUNDLED WITH
+   1.10.6
