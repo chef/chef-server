@@ -9,7 +9,7 @@ define_upgrade do
     # Note that we only have to apply it in this upgrade, because this is the first sqitch migration
     # that will be run.  If this doesn't need to be run, that tells us they're upgrading from an installation
     # that already has applied it.
-    run_sqitch('@1.0.4', 'oc_erchef', path: 'oc_erchef/schema/baseline')
+    run_sqitch('@1.0.4', 'oc_erchef', path: 'opscode-erchef/schema/baseline')
 
     # The actual schema change for this release -
     # track more state values in migration_state.
