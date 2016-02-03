@@ -1,5 +1,21 @@
 # Chef Server Changelog
 
+## [12.4.1](https://github.com/chef/chef-server/tree/12.4.1) (2016-02-03)
+[Full Changelog](https://github.com/chef/chef-server/compare/12.4.0...12.4.1)
+
+### Components
+
+#### Updated
+* ohai (81f1c968 -> d9262d06)
+* chef (ec5a8925 -> 09227432)
+
+## Detailed Change Log
+
+**Fixed bugs:**
+
+- chef-server-ctl upgrade broken in 12.4.0 [\#724](https://github.com/chef/chef-server/issues/724)
+- Create cookbook artifacts with all fields filled in [\#714](https://github.com/chef/chef-server/pull/714) ([danielsdeleo](https://github.com/danielsdeleo))
+
 ## 12.4.0 (2016-01-27)
 
 ### Components
