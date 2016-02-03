@@ -28,6 +28,9 @@ In order to release, you will need the following accounts/permissions:
 account.)
 - Access to artifactory.chef.co
 - Access to delivery.chef.co
+- The CHANGELOG_GITHUB_TOKEN environment variable set to a github token gathered here: https://github.com/settings/tokens/new?description=GitHub%20Changelog%20Generator%20token
+- Install Github Changelog Generator: `gem install github_changelog_generator`
+
 
 ## THE PROCESS
 ### Testing the Release
@@ -62,8 +65,15 @@ The git SHA of the build you are testing can be found in
 - [ ] Check that omnibus/config/projects/chef-server.rb has the
   correct version given the type of changes in this release.
 
-- [ ] Double check CHANGELOG.md to ensure it includes all
-  included changes. Update as appropriate.
+- [ ] Download the previous release of Chef Server (.deb).
+
+- [ ] Run `./dev/scripts/update-changelog.sh /path/to/deb/from/previous/step`
+
+- [ ] Grab the section on the latest version from `NEW_CHANGELOG.md` and paste
+  it at the top of `CHANGELOG.md`.
+
+- [ ] Copy the components section from `MODIFIED_COMPONENTS_CHANGELOG.md` and
+  paste into `CHANGELOG.md`
 
 - [ ] Check RELEASE_NOTES.md to ensure that it describes the
   most important user-facing changes in the release. This file should
