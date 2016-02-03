@@ -39,15 +39,13 @@ start_link() ->
 %%===================================================================
 
 init(_Args) ->
-    bksw_io:ensure_disk_store(),
-    bksw_io:upgrade_disk_format(),
+    prepare_storage_type(bksw_conf:storage_type()),
+
     RestartStrategy = one_for_one,
     MaxRestarts = 1000,
     MaxSecondsBetweenRestarts = 3600,
-
     SupFlags = {RestartStrategy, MaxRestarts, MaxSecondsBetweenRestarts},
 
-    ensure_default_bucket(bksw_conf:storage_type()),
     WebmachineSup = {bksw_webmachine_sup, {bksw_webmachine_sup, start_link, []},
                      permanent, infinity, supervisor, [bksw_webmachine_sup]},
     {ok, {SupFlags, maybe_with_cleanup_task([WebmachineSup])}}.
@@ -63,10 +61,13 @@ maybe_with_cleanup_task(ChildSpecs) ->
             ChildSpecs
     end.
 
-%% When in sql storage_mode, create the default 'bookshelf' bucket on startup if it doesn't exist
-ensure_default_bucket(filesystem) ->
-    ok;
-ensure_default_bucket(sql) ->
+prepare_storage_type(filesystem) ->
+    bksw_io:ensure_disk_store(),
+    bksw_io:upgrade_disk_format();
+prepare_storage_type(sql) ->
+    ensure_default_bucket().
+
+ensure_default_bucket() ->
     DefaultBucket = <<"bookshelf">>,
     case bksw_sql:bucket_exists(DefaultBucket) of
         true ->
