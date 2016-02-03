@@ -13,8 +13,8 @@ module Omnibus
       d = [%w{oc_bifrost bifrost},
            %w{opscode-erchef opscode_chef},
            %w{oc_id oc_id}]
-      if running_service_config('bookshelf')['storage_mode'] == 'sql'
-        d << [%w{bookshelf bookshelf}]
+      if running_service_config('bookshelf')['storage_type'] == 'sql'
+        d << %w{bookshelf bookshelf}
       end
       d
     end
