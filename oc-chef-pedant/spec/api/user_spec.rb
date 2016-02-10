@@ -16,6 +16,35 @@ describe "users", :users do
   let(:default_pedant_user_names) { platform.users.select(&:associate).map(&:name).sort }
   let(:default_users_body)        { default_pedant_user_names.map { |user| {"user" => {"username" => user} } } }
 
+  context "/organizations/:org_name/users/:name endpoint" do
+    context "get" do
+      let(:request_url) { api_url("/users/#{platform.non_admin_user.name}") }
+
+      context "default client" do
+        it "returns 200", :authorization, :wip do
+          get(request_url, platform.non_admin_client).should look_like({
+              :status => 200
+            })
+        end
+      end
+
+      context "client from a different org" do
+        let(:org_name) { "secondorg" }
+        let(:second_org) { platform.create_org(org_name) }
+
+        after(:each) do
+          platform.delete_org(org_name)
+        end
+
+        it "returns 403", :authorization, :wip do
+          get(request_url, second_org.validator).should look_like({
+            :status => 403
+          })
+        end
+      end
+    end
+  end
+
   context "/users endpoint" do
     let(:request_url) { "#{platform.server}/users" }
 
@@ -618,14 +647,6 @@ describe "users", :users do
           get(req_url, platform.non_admin_user).should look_like({
               :status => 200
            })
-        end
-      end
-
-      context "default client" do
-        it "returns 401", :authentication do
-          get(request_url, platform.non_admin_client).should look_like({
-              :status => 401
-            })
         end
       end
 

@@ -70,7 +70,7 @@
          {create_groups, ?GROUPS},
          {create_org_read_access_group},
          {add_to_groups, user, [creator], [admins, users]},
-         {add_to_groups, group, [admins, users], [read_access_group]},
+         {add_to_groups, group, [admins, users, clients], [read_access_group]},
 
          %% ACLs are expanded, then applied
          {acls,
