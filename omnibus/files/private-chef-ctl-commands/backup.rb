@@ -9,6 +9,7 @@ add_command_under_category 'backup', 'general', 'Backup the Chef Server', 2 do
 
   options = OpenStruct.new
   options.agree_to_go_offline = false
+  options.config_only = false
 
   OptionParser.new do |opts|
     opts.banner = 'Usage: chef-server-ctl backup [options]'
@@ -19,6 +20,10 @@ add_command_under_category 'backup', 'general', 'Backup the Chef Server', 2 do
 
     opts.on('--pg-options [string]', 'Additional options to pass to postgress during backups') do |pg_options|
       options.pg_options = pg_options
+    end
+
+    opts.on('-c', '--config-only', 'Backup only the config on the frontends. No data will be backedup.') do
+      options.config_only = true
     end
 
     opts.on('-h', '--help', 'Show this message') do
