@@ -8,8 +8,6 @@ events {
   worker_connections <%= @worker_connections %>;
 }
 
-server_names_hash_bucket_size <%= @server_names_hash_bucket_size %>;
-
 http {
 <% if node['private_chef']['nginx']['log_x_forwarded_for'] -%>
   log_format opscode '$http_x_forwarded_for - $remote_user [$time_local]  '
@@ -18,6 +16,8 @@ http {
 <% end -%>
                     '"$request" $status "$request_time" $body_bytes_sent '
                     '"$http_referer" "$http_user_agent" "$upstream_addr" "$upstream_status" "$upstream_response_time" "$http_x_chef_version" "$http_x_ops_sign" "$http_x_ops_userid" "$http_x_ops_timestamp" "$http_x_ops_content_hash" $request_length';
+
+  server_names_hash_bucket_size <%= @server_names_hash_bucket_size %>;
 
   sendfile <%= @sendfile %>;
   tcp_nopush <%= @tcp_nopush %>;
