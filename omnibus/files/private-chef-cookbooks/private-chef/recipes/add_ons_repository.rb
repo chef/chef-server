@@ -26,7 +26,12 @@ when 'debian'
 
 when 'rhel'
 
-  major_version = node['platform_version'].split('.').first
+  major_version = if node['platform'] == 'amazon' then
+                    '7' # Hard-code to EL7 for Amazon Linux.  the platform_version on AL
+                        # looks like '2015.09' which doesn't then make a valid yum repo path
+                    else
+                      node['platform_version'].split('.').first
+                    end
 
   gpg_key_path = File.join(node['private_chef']['install_path'], "/embedded/keys/packages-chef-io-public.key")
 
