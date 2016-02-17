@@ -473,6 +473,7 @@ default['private_chef']['nginx']['gzip_types'] = [ "text/plain", "text/css", "ap
 default['private_chef']['nginx']['keepalive_timeout'] = 65
 default['private_chef']['nginx']['client_max_body_size'] = '250m'
 default['private_chef']['nginx']['cache_max_size'] = '5000m'
+default['private_chef']['nginx']['server_names_hash_bucket_size'] = 128
 default['private_chef']['nginx']['enable_ipv6'] = false
 
 ###
@@ -600,7 +601,7 @@ default['private_chef']['bookshelf']['secret_access_key'] = "generated-by-defaul
 # Default: set to Host: header. Override to hardcode a url, "http://..."
 default['private_chef']['bookshelf']['external_url'] = :host_header
 default['private_chef']['bookshelf']['storage_type'] = :filesystem
-# This retries connections that are rejected because pooler queue is maxed out. 
+# This retries connections that are rejected because pooler queue is maxed out.
 default['private_chef']['bookshelf']['sql_retry_count'] = 0
 # Intervals are in milliseconds
 default['private_chef']['bookshelf']['sql_retry_delay'] = 10

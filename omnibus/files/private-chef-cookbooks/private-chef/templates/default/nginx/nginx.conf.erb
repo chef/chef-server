@@ -8,6 +8,8 @@ events {
   worker_connections <%= @worker_connections %>;
 }
 
+server_names_hash_bucket_size <%= @server_names_hash_bucket_size %>;
+
 http {
 <% if node['private_chef']['nginx']['log_x_forwarded_for'] -%>
   log_format opscode '$http_x_forwarded_for - $remote_user [$time_local]  '
