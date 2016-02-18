@@ -113,7 +113,7 @@ describe "Server API v1 Behaviors", :api_v1 do
                                                                "expiration_date" => "infinity" }  } })
       end
 
-      it "should reply with an error if both create_key:true and public_key are specified" do
+      it "should reply with an error if both create_key:true and public_key are specified", :validation do
         result = post(resource_url, superuser,
                       payload: create_payload.with('public_key', valid_pubkey).with("create_key", true))
         result.should have_status_code 400
@@ -126,7 +126,7 @@ describe "Server API v1 Behaviors", :api_v1 do
 
       end
 
-      it "should reply with an error if private_key:true is specified for key generation" do
+      it "should reply with an error if private_key:true is specified for key generation", :validation do
         # TODO error message check?
         result = post(resource_url, superuser,
                       payload: create_payload.with('private_key', true))
@@ -154,14 +154,14 @@ describe "Server API v1 Behaviors", :api_v1 do
         put(named_resource_url, superuser, payload: create_payload).should have_status_code 200
       end
 
-      it "should not allow create_key:true" do
+      it "should not allow create_key:true", :validation do
         put(named_resource_url, superuser, payload: create_payload.with('create_key', true)).should have_status_code 400
       end
 
-      it "should not allow public_key to be provided" do
+      it "should not allow public_key to be provided", :validation do
         put(named_resource_url, superuser, payload: create_payload.with('public_key', valid_pubkey)).should have_status_code 400
       end
-      it "should not allow private_key:true to be specified" do
+      it "should not allow private_key:true to be specified", :validation do
         put(named_resource_url, superuser, payload: create_payload.with('private_key', true)).should have_status_code 400
       end
     end
