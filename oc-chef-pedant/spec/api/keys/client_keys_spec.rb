@@ -38,14 +38,28 @@ describe "Client keys endpoint", :keys, :client_keys do
     }
   end
 
+  let(:user_payload) do
+    {
+      "username" => user['name'],
+      "first_name" => user['name'],
+      "middle_name" => user['name'],
+      "last_name" => user['name'],
+      "display_name" => user['name'],
+      "email" => "#{user['name']}@#{user['name']}.com",
+      "password" => "user-password",
+      "public_key" => user['public_key']
+    }
+  end
+
   # In the spirit of eventual parallelization,
   # we'll be using our own org.
-  $org_name =
+  shared(:org_name) do
     if Pedant.config[:org][:create_me]
       "pedant-keys-org-#{Time.now.to_i}"
     else
       Pedant.config[:org][:name]
     end
+  end
 
 
   let(:client) do
@@ -103,29 +117,37 @@ describe "Client keys endpoint", :keys, :client_keys do
 
     if Pedant.config[:org][:create_me]
       # orgs static in the tests, only create once
-      post("#{platform.server}/organizations", superuser, payload: { "name" => $org_name, "full_name" => $org_name } ).should look_like(status: 201)
+      post("#{platform.server}/organizations", superuser, payload: { "name" => org_name, "full_name" => org_name } ).should look_like(status: 201)
     end
   end
 
   after(:all) do
     if Pedant.config[:org][:create_me] && Pedant.config[:delete_org]
-      platform.delete_org($org_name)
+      platform.delete_org(org_name)
     end
   end
 
   # create client before each test
   before(:each) do
+    unless Pedant::Config[:tags].include?("~multiuser")
+      post("#{platform.server}/users", superuser, payload: user_payload)
+    end
+
     post("#{org_base_url}/clients", superuser, payload: client_payload)
   end
 
   # delete client after each test
   after(:each) do
+    unless Pedant::Config[:tags].include?("~multiuser")
+      delete("#{platform.server}/users/#{user['name']}", superuser)
+    end
+
     delete("#{org_base_url}/clients/#{client['name']}", superuser)
   end
 
   context "when a new client is created via POST /organizations/:org/clients" do
     it "should insert a new default keys entry that is retrievable via the keys API" do
-      list_client_keys($org_name, client['name'], superuser).should look_like(status: 200, body: new_client_list_keys_response)
+      list_client_keys(org_name, client['name'], superuser).should look_like(status: 200, body: new_client_list_keys_response)
     end
   end
 
@@ -138,8 +160,8 @@ describe "Client keys endpoint", :keys, :client_keys do
 
     context "when the default key has been changed via the keys API", :authentication do
       before(:each) do
-        delete_client_key($org_name, client['name'], "default")
-        add_client_key($org_name, client['name'], :key, "default").should look_like(status: 201)
+        delete_client_key(org_name, client['name'], "default")
+        add_client_key(org_name, client['name'], :key, "default").should look_like(status: 201)
       end
 
       it "should authenticate against the updated key" do
@@ -154,13 +176,13 @@ describe "Client keys endpoint", :keys, :client_keys do
 
   context "when a key has been generated for a client" do
     before(:each) do
-        r = add_client_key($org_name, client['name'], :create_key, "genkey")
+        r = add_client_key(org_name, client['name'], :create_key, "genkey")
         r.should look_like(status: 201)
         @auth_privkey = parse(r)["private_key"]
     end
 
     after(:each) do
-      delete_client_key($org_name, client['name'], "genkey")
+      delete_client_key(org_name, client['name'], "genkey")
     end
 
     it "should be able to authenticate with the generated key" do
@@ -170,24 +192,24 @@ describe "Client keys endpoint", :keys, :client_keys do
 
   context "when a key is deleted for a client" do
     before(:each) do
-      add_client_key($org_name, client['name'], :alt_key, key_name).should look_like(status: 201)
+      add_client_key(org_name, client['name'], :alt_key, key_name).should look_like(status: 201)
     end
 
     it "should no longer be returned by the keys API" do
-      delete_client_key($org_name, client['name'], key_name)
-      list_client_keys($org_name, client['name'], superuser).should_not include(key_name)
+      delete_client_key(org_name, client['name'], key_name)
+      list_client_keys(org_name, client['name'], superuser).should_not include(key_name)
     end
 
     it "should still contain other keys not yet deleted" do
-      delete_client_key($org_name, client['name'], key_name)
-      list_client_keys($org_name, client['name'], superuser).should include("default")
+      delete_client_key(org_name, client['name'], key_name)
+      list_client_keys(org_name, client['name'], superuser).should include("default")
     end
   end
 
   context "when multiple keys exist for a client" do
     before(:each) do
-      add_client_key($org_name, client['name'], :alt_key, "alt-#{key_name}").should look_like(status: 201)
-      add_client_key($org_name, client['name'], :key, key_name).should look_like(status: 201)
+      add_client_key(org_name, client['name'], :alt_key, "alt-#{key_name}").should look_like(status: 201)
+      add_client_key(org_name, client['name'], :key, key_name).should look_like(status: 201)
     end
 
     context "should properly authenticate against either keys" do
@@ -203,8 +225,8 @@ describe "Client keys endpoint", :keys, :client_keys do
 
   context "when a client's default key has an expiration date" do
     before(:each) do
-      delete_client_key($org_name, client['name'], "default")
-      add_client_key($org_name, client['name'], :key, "default", expires: "2017-12-24T21:00:00Z").should look_like(status: 201)
+      delete_client_key(org_name, client['name'], "default")
+      add_client_key(org_name, client['name'], :key, "default", expires: "2017-12-24T21:00:00Z").should look_like(status: 201)
     end
 
     context "and is updated via a PUT to /organizations/:org/clients/:client" do
@@ -215,7 +237,7 @@ describe "Client keys endpoint", :keys, :client_keys do
       end
 
       it "should no longer have an expiration date when queried via the keys API" do
-        get_client_key($org_name, client['name'], superuser, "default")
+        get_client_key(org_name, client['name'], superuser, "default")
           .should look_like(status: 200, body: { "expiration_date" => "infinity" })
       end
     end
@@ -223,7 +245,7 @@ describe "Client keys endpoint", :keys, :client_keys do
 
   context "when a client key has an expiration date and isn't expired" do
     before(:each) do
-      add_client_key($org_name, client['name'], :key, key_name, expires: "2017-12-24T21:00:00Z").should look_like(status: 201)
+      add_client_key(org_name, client['name'], :key, key_name, expires: "2017-12-24T21:00:00Z").should look_like(status: 201)
     end
 
     it "should authenticate against the key" do
@@ -233,7 +255,7 @@ describe "Client keys endpoint", :keys, :client_keys do
 
   context "when a key is expired for a client", :authentication do
     before(:each) do
-      add_client_key($org_name, client['name'], :key, key_name, expires: "2012-12-24T21:00:00Z" ).should look_like(status: 201)
+      add_client_key(org_name, client['name'], :key, key_name, expires: "2012-12-24T21:00:00Z" ).should look_like(status: 201)
     end
 
     it "should fail against the expired key" do
@@ -248,14 +270,14 @@ describe "Client keys endpoint", :keys, :client_keys do
   context "when the default key for a client exists" do
     it "should return public_key field returned by GET /organization/:org/clients/:client and from the keys table should be the same" do
       client_api_public_key = JSON.parse(get("#{org_base_url}/clients/#{client['name']}", superuser))['public_key']
-      get_client_key($org_name, client['name'], superuser, "default")
+      get_client_key(org_name, client['name'], superuser, "default")
         .should look_like(status: 200, body: { "public_key" => client_api_public_key })
     end
   end
 
   context "when a clients's default key is deleted via the keys API" do
     before(:each) do
-      delete_client_key($org_name, client['name'], "default")
+      delete_client_key(org_name, client['name'], "default")
     end
 
     it "public field returned by /organizations/:org/clients/:client should be null" do
@@ -263,7 +285,7 @@ describe "Client keys endpoint", :keys, :client_keys do
     end
 
     it "the keys API should not return a key named default" do
-      list_client_keys($org_name, client['name'], superuser).should_not include("default")
+      list_client_keys(org_name, client['name'], superuser).should_not include("default")
     end
   end
 
@@ -279,13 +301,13 @@ describe "Client keys endpoint", :keys, :client_keys do
     end
 
     it "should not clear the default key returned via the keys API" do
-      get_client_key($org_name, client['name'], superuser, "default").should look_like(status: 200)
+      get_client_key(org_name, client['name'], superuser, "default").should look_like(status: 200)
     end
   end
 
   context "when a client's default key has already been deleted via the keys API and then re-added via PUT to /organizations/:org/clients/:client" do
     before(:each) do
-      delete_client_key($org_name, client['name'], "default")
+      delete_client_key(org_name, client['name'], "default")
       original_data = JSON.parse(get("#{org_base_url}/clients/#{client['name']}", superuser))
       original_data['public_key'] = keys[:key][:public]
       put("#{org_base_url}/clients/#{client['name']}", superuser, payload: original_data)
@@ -296,7 +318,7 @@ describe "Client keys endpoint", :keys, :client_keys do
     end
 
     it "should be present in the keys list" do
-      list_client_keys($org_name, client['name'], superuser).should include("default")
+      list_client_keys(org_name, client['name'], superuser).should include("default")
     end
 
     it "should be able to authenticate with the updated default key" do
@@ -313,12 +335,12 @@ describe "Client keys endpoint", :keys, :client_keys do
 
     context "when the default key exists" do
       it "should update the default key in the keys table" do
-        get_client_key($org_name, client['name'], superuser, "default")
+        get_client_key(org_name, client['name'], superuser, "default")
           .should look_like(status: 200, body: { "public_key" => keys[:key][:public] })
       end
 
       it "should no longer contain the old default key" do
-        response = get_client_key($org_name, client['name'], superuser, "default")
+        response = get_client_key(org_name, client['name'], superuser, "default")
         response.should look_like(status: 200 )
 
         JSON.parse(response)["public_key"].should_not include client['public_key']
@@ -342,7 +364,7 @@ describe "Client keys endpoint", :keys, :client_keys do
     end
 
     it "should leave the default key from the keys API list unmodified for that client" do
-      list_client_keys($org_name, client['name'], superuser).should include("default")
+      list_client_keys(org_name, client['name'], superuser).should include("default")
     end
   end
 
@@ -389,6 +411,30 @@ describe "Client keys endpoint", :keys, :client_keys do
         "name" => other_org_client_name }
     end
 
+    before :all do
+      unless Pedant::Config[:tags].include?("~multiuser")
+        # This user is used in more tests than not, so create it for the full context.
+        # Leave it up to the tests to determine if they need it associated
+        platform.create_min_user(org_user_name, overrides: org_user_payload).should look_like(status: 201 )
+        platform.create_min_user(org_admin_name, overrides: org_admin_payload).should look_like(status: 201 )
+        platform.associate_user_with_org(org_name, org_admin_user)
+        platform.add_user_to_group(org_name, org_admin_user, "admins")
+        platform.create_org(other_org_name)
+        platform.create_min_user(other_org_user_name, overrides: other_org_user_payload).should look_like(status: 201)
+        platform.associate_user_with_org(other_org_name, other_org_user)
+      end
+    end
+
+    after :all do
+      unless Pedant::Config[:tags].include?("~multiuser")
+        platform.remove_user_from_group(org_name, org_admin_user, "admins", superuser)
+        platform.delete_user(org_admin_user)
+        platform.delete_user(org_user)
+        platform.delete_user(other_org_user)
+        platform.delete_org(other_org_name)
+      end
+    end
+
     context "posting keys" do
       let (:key_url) { "#{org_base_url}/clients/#{org_client_name}/keys" }
 
@@ -420,14 +466,6 @@ describe "Client keys endpoint", :keys, :client_keys do
         end
 
         context "another user in the org", :authorization do
-          before do
-            platform.associate_user_with_org($org_name, org_user).should look_like(status: 201)
-          end
-
-          after do
-            platform.remove_user_from_org($org_name, org_user)
-          end
-
           it "fails with 403" do
             post("#{org_base_url}/clients/#{org_client_name}/keys", org_user, payload: key_payload).should look_like(status: 403)
           end
@@ -467,11 +505,11 @@ describe "Client keys endpoint", :keys, :client_keys do
         end
 
         before (:each) do
-          add_client_key($org_name, org_client_name, :alt_key, "alt_key").should look_like(status: 201)
+          add_client_key(org_name, org_client_name, :alt_key, "alt_key").should look_like(status: 201)
         end
 
         after (:each) do
-          delete_client_key($org_name, org_client_name, "alt_key")
+          delete_client_key(org_name, org_client_name, "alt_key")
         end
 
         it "fails with 404" do
@@ -484,11 +522,11 @@ describe "Client keys endpoint", :keys, :client_keys do
 
         context "as..." do # DELETE $endpoint as
           it "the client itself, authenticating with a different key should succeed" do
-            delete_client_key($org_name, org_client_name, "alt_key", requestor: org_client).should look_like(status: 200)
+            delete_client_key(org_name, org_client_name, "alt_key", requestor: org_client).should look_like(status: 200)
           end
 
           it "the client itself, authenticating with the key it is trying to delete should fail with 403" do
-            r = delete_client_key($org_name, org_client_name, "alt_key", requestor: requestor(org_client_name, keys[:alt_key][:private]))
+            r = delete_client_key(org_name, org_client_name, "alt_key", requestor: requestor(org_client_name, keys[:alt_key][:private]))
             r.should look_like(status: 403, body_exact: { "error" => "The key 'alt_key' was used to authenticate this request and cannot be modified or deleted." })
           end
 
@@ -502,7 +540,7 @@ describe "Client keys endpoint", :keys, :client_keys do
             end
 
             it "should fail with a 403" do
-              delete_client_key($org_name, org_client_name, "alt_key", requestor: other_org_client).should look_like(status: 403)
+              delete_client_key(org_name, org_client_name, "alt_key", requestor: other_org_client).should look_like(status: 403)
             end
           end
 
@@ -516,31 +554,31 @@ describe "Client keys endpoint", :keys, :client_keys do
             end
 
             it "should fail with a 401" do
-              delete_client_key($org_name, org_client_name, "alt_key", requestor: other_org_client).should look_like(status: 401)
+              delete_client_key(org_name, org_client_name, "alt_key", requestor: other_org_client).should look_like(status: 401)
             end
           end
 
           context "a user in the same org" do
             before do
-              platform.associate_user_with_org($org_name, org_user).should look_like(status: 201)
+              platform.associate_user_with_org(org_name, org_user).should look_like(status: 201)
             end
 
             after do
-              platform.remove_user_from_org($org_name, org_user)
+              platform.remove_user_from_org(org_name, org_user)
             end
 
             it "should fail with a 403" do
-              delete_client_key($org_name, org_client_name, "alt_key", requestor: org_user).should look_like(status: 403)
+              delete_client_key(org_name, org_client_name, "alt_key", requestor: org_user).should look_like(status: 403)
             end
 
           end
 
           it "a user not affiliated with the org should fail with a 403" do
-            delete_client_key($org_name, org_client_name, "alt_key", requestor: other_org_user).should look_like(status: 403)
+            delete_client_key(org_name, org_client_name, "alt_key", requestor: other_org_user).should look_like(status: 403)
           end
 
           it "the org admin should succeed" do
-            delete_client_key($org_name, org_client_name, "alt_key", requestor: org_admin_user).should look_like(status: 200)
+            delete_client_key(org_name, org_client_name, "alt_key", requestor: org_admin_user).should look_like(status: 200)
           end
         end
       end
@@ -550,13 +588,13 @@ describe "Client keys endpoint", :keys, :client_keys do
       context "/organizations/:org/clients/:client/keys/:key" do
         before(:all) do
           post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
-          add_client_key($org_name, org_client_name, :alt_key, "alt_key").should look_like(status: 201)
+          add_client_key(org_name, org_client_name, :alt_key, "alt_key").should look_like(status: 201)
           @key_url = "#{org_base_url}/clients/#{org_client_name}/keys/alt_key"
         end
 
         after(:all) do
           delete("#{org_base_url}/clients/#{org_client_name}", superuser).should look_like(status: 200)
-          delete_client_key($org_name, org_client_name, "alt_key")
+          delete_client_key(org_name, org_client_name, "alt_key")
         end
 
         it "to a key for an invalid actor fails with 404" do
@@ -610,11 +648,11 @@ describe "Client keys endpoint", :keys, :client_keys do
 
           context "a user in the same org" do
             before do
-              platform.associate_user_with_org($org_name, org_user).should look_like(status: 201)
+              platform.associate_user_with_org(org_name, org_user).should look_like(status: 201)
             end
 
             after do
-              platform.remove_user_from_org($org_name, org_user)
+              platform.remove_user_from_org(org_name, org_user)
             end
 
             it "should fail with a 403" do
@@ -639,8 +677,8 @@ describe "Client keys endpoint", :keys, :client_keys do
         context "for a client" do
           before(:each) do
             post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
-            add_client_key($org_name, org_client_name, :key, "key1", expires: unexpired_date).should look_like(status: 201)
-            add_client_key($org_name, org_client_name, :alt_key, "key2", expires: expired_date).should look_like(status: 201)
+            add_client_key(org_name, org_client_name, :key, "key1", expires: unexpired_date).should look_like(status: 201)
+            add_client_key(org_name, org_client_name, :alt_key, "key2", expires: expired_date).should look_like(status: 201)
           end
 
           after(:each) do
@@ -649,7 +687,7 @@ describe "Client keys endpoint", :keys, :client_keys do
 
           context "when GET /organizations/org/clients/client/keys is called (list keys)" do
             it "all keys should be listed with correct expiry indicators" do
-              list_client_keys($org_name, org_client_name, superuser).should look_like(
+              list_client_keys(org_name, org_client_name, superuser).should look_like(
                 status: 200,
                 body_exact: [
                   { "name" => "default", "uri" => "#{org_base_url}/clients/#{org_client_name}/keys/default", "expired" => false },
@@ -661,7 +699,7 @@ describe "Client keys endpoint", :keys, :client_keys do
 
             context "when GET is called on the URIs that are returned" do
               it "should return status 200" do
-                client_keys = list_client_keys($org_name, org_client_name, superuser)
+                client_keys = list_client_keys(org_name, org_client_name, superuser)
 
                 JSON.parse(client_keys).each do |key|
                   get(key["uri"], superuser).should look_like(status: 200)
@@ -673,7 +711,7 @@ describe "Client keys endpoint", :keys, :client_keys do
           context "when GET /organizations/org/clients/client/keys/key is called (get single key)" do
             context "when it is called for each valid key" do
               it "should properly return the default key with valid expiration" do
-                get_client_key($org_name, org_client_name, superuser, "default").should look_like(
+                get_client_key(org_name, org_client_name, superuser, "default").should look_like(
                   status: 200,
                   body: {
                     "name" => "default",
@@ -684,7 +722,7 @@ describe "Client keys endpoint", :keys, :client_keys do
               end
 
               it "should properly return the first custom key with valid expiration" do
-                get_client_key($org_name, org_client_name, superuser, "key1").should look_like(
+                get_client_key(org_name, org_client_name, superuser, "key1").should look_like(
                   status: 200,
                   body: {
                     "name" => "key1",
@@ -695,7 +733,7 @@ describe "Client keys endpoint", :keys, :client_keys do
               end
 
               it "should properly return the second custom key with valid expiration" do
-                get_client_key($org_name, org_client_name, superuser, "key2").should look_like(
+                get_client_key(org_name, org_client_name, superuser, "key2").should look_like(
                   status: 200,
                   body: {
                     "name" => "key2",
@@ -711,18 +749,18 @@ describe "Client keys endpoint", :keys, :client_keys do
 
       context "by an org admin", :authorization do
         before(:each) do
-          platform.associate_user_with_org($org_name, org_user)
+          platform.associate_user_with_org(org_name, org_user)
           post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
         end
 
         after(:each) do
           delete("#{org_base_url}/clients/#{org_client_name}", superuser).should look_like(status: 200)
-          platform.remove_user_from_org($org_name, org_user).should look_like(status: 200)
+          platform.remove_user_from_org(org_name, org_user).should look_like(status: 200)
         end
 
         context "when GET /organizations/org/clients/client/keys is called" do
           it "for a client that is a member of the same org succeeds with a 200" do
-            list_client_keys($org_name, org_client_name, org_admin_user).should look_like(status: 200)
+            list_client_keys(org_name, org_client_name, org_admin_user).should look_like(status: 200)
           end
 
           it "for a client that is a member of a different org fails with a 403" do
@@ -742,7 +780,7 @@ describe "Client keys endpoint", :keys, :client_keys do
 
         context "when GET /organizations/org/clients/client/keys/key is called" do
           it "for a client that is a member of the same org succeeds with a 200" do
-            get_client_key($org_name, org_client_name, org_admin_user, "default").should look_like(status: 200)
+            get_client_key(org_name, org_client_name, org_admin_user, "default").should look_like(status: 200)
           end
 
           it "for a client that is a member of a different org fails with a 403" do
@@ -764,22 +802,22 @@ describe "Client keys endpoint", :keys, :client_keys do
 
       context "by an org client", :authorization do
         before (:each) do
-          platform.associate_user_with_org($org_name, org_user)
+          platform.associate_user_with_org(org_name, org_user)
           post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
         end
 
         after (:each) do
           delete("#{org_base_url}/clients/#{org_client_name}", superuser).should look_like(status: 200)
-          platform.remove_user_from_org($org_name, org_user).should look_like(status: 200)
+          platform.remove_user_from_org(org_name, org_user).should look_like(status: 200)
         end
 
         context "when GET /organizations/org/clients/client/keys is called" do
           it "for a client that is a member of the same org fails with a 403" do
-            list_client_keys($org_name, client['name'], org_client).should look_like(status: 403)
+            list_client_keys(org_name, client['name'], org_client).should look_like(status: 403)
           end
 
           it "for a itself succeeds with a 200" do
-            list_client_keys($org_name, org_client_name, org_client).should look_like(status: 200)
+            list_client_keys(org_name, org_client_name, org_client).should look_like(status: 200)
           end
 
           it "for a client that is a member of a different org fails with a 401" do
@@ -799,11 +837,11 @@ describe "Client keys endpoint", :keys, :client_keys do
 
         context "when GET /organizations/org/clients/client/keys/key is called" do
           it "for a client that is a member of the same org fails with a 403" do
-            get_client_key($org_name, client['name'], org_client, "default").should look_like(status: 403)
+            get_client_key(org_name, client['name'], org_client, "default").should look_like(status: 403)
           end
 
           it "for a itself succeeds with a 200" do
-            get_client_key($org_name, org_client_name, org_client, "default").should look_like(status: 200)
+            get_client_key(org_name, org_client_name, org_client, "default").should look_like(status: 200)
           end
 
           it "for a client that is a member of a different org fails with a 401" do
@@ -824,24 +862,24 @@ describe "Client keys endpoint", :keys, :client_keys do
 
       context "by an org member who is not an admin", :authorization do
         before (:each) do
-          platform.associate_user_with_org($org_name, org_user)
+          platform.associate_user_with_org(org_name, org_user)
           platform.associate_user_with_org(other_org_name, other_org_user)
           post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
         end
 
         after (:each) do
           delete("#{org_base_url}/clients/#{org_client_name}", superuser).should look_like(status: 200)
-          platform.remove_user_from_org($org_name, org_user).should look_like(status: 200)
+          platform.remove_user_from_org(org_name, org_user).should look_like(status: 200)
           platform.remove_user_from_org(other_org_name, other_org_user)
         end
 
         context "when GET /organizations/org/clients/client/keys is called" do
           it "for a client that is a member of the same org succeeds with a 200" do
-            list_client_keys($org_name, org_client_name, org_user).should look_like(status: 200)
+            list_client_keys(org_name, org_client_name, org_user).should look_like(status: 200)
           end
 
           it "for a client that is a member of a different org fails with a 403" do
-            list_client_keys($org_name, org_client_name, other_org_user).should look_like(status: 403)
+            list_client_keys(org_name, org_client_name, other_org_user).should look_like(status: 403)
           end
         end
 
@@ -857,11 +895,11 @@ describe "Client keys endpoint", :keys, :client_keys do
 
         context "when GET /organizations/org/clients/client/key is called" do
           it "for a client that is a member of the same org succeeds with a 200" do
-            get_client_key($org_name, org_client_name, org_user, "default").should look_like(status: 200)
+            get_client_key(org_name, org_client_name, org_user, "default").should look_like(status: 200)
           end
 
           it "for a client that is a member of a different org fails with a 403" do
-            get_client_key($org_name, org_client_name, other_org_user, "default").should look_like(status: 403)
+            get_client_key(org_name, org_client_name, other_org_user, "default").should look_like(status: 403)
           end
         end
 

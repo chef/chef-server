@@ -22,7 +22,7 @@ module Pedant
       extend Pedant::Concern
 
       def org_base_url
-        "#{platform.server}/organizations/#{$org_name}"
+        "#{platform.server}/organizations/#{org_name}"
       end
 
       def add_user_key(user, key, key_name, options = {})
