@@ -188,9 +188,11 @@ describe "Client API endpoint", :clients do
     respects_maximum_payload_size
 
   end
-  context 'GET /clients/<name>' do
+
+  # TODO: Remove wip tag.
+  context 'GET /clients/<name>', :wip do
     let(:request_method) { :GET }
-    let(:request_url)    { named_client_url }
+    let(:request_url)    { api_url "/clients/#{platform.non_admin_client.name}" }
 
     context 'without an existing client' do
       let(:request_url) { api_url "/clients/#{pedant_nonexistent_client_name}" }
@@ -198,53 +200,85 @@ describe "Client API endpoint", :clients do
     end
 
     context 'with an existing client' do
-      include_context 'with temporary testing client'
-
-      def self.should_fetch_client
-        it { should look_like ok_response.with(body: { 'name' => client_name }) }
-      end
-
-      def self.forbids_fetching
-       let(:fobidden_action_error_message) { ["missing read permission"] }
-        it('forbids fetching', :authorization) { should look_like forbidden_response }
-      end
-
-      context 'as an org admin' do
-        let (:requestor) { admin_requestor }
-        with_another_validator_client { should_fetch_client }
-        with_another_normal_client    { should_fetch_client }
-      end
-      context 'as client' do
-        let (:requestor) { normal_client }
-        with_another_validator_client { forbids_fetching }
-        with_another_normal_client    { forbids_fetching}
-      end
-
-      # Validator clients can only fetch themselves
-      context 'as a validator client' do
-        let(:requestor) { validator_client}
-
-        with_another_validator_client { forbids_fetching }
-        with_another_normal_client    { forbids_fetching }
-
-        with_self do
-          let(:client_is_validator) { true }
-          forbids_fetching
+      context 'client is requesting itself' do
+        it 'returns 200', :authorization do
+          get(request_url, platform.non_admin_client).should look_like({
+                                                                         :status => 200
+                                                                       })
         end
       end
 
-      # Normal clients can only fetch themselves
-      context 'as a normal client' do
-        let(:requestor) { normal_client }
-        with_another_validator_client { forbids_fetching }
-        with_another_normal_client    { forbids_fetching }
-        with_self                     { should_fetch_client }
+      context 'client within the same org as the client being requested' do
+        let(:client_name) { "pedant-secondclient-sameorg-#{Time.new.to_i}" }
+        let(:second_client) { platform.create_client(client_name) }
+
+        after do
+          platform.delete_client(second_client)
+        end
+
+        it 'returns 200', :authorization do
+          get(request_url, second_client).should look_like({
+                                                             :status => 200
+                                                           })
+        end
       end
 
-      context 'as a user' do
-        let(:requestor) { normal_user }
-        with_another_validator_client { should_fetch_client }
-        with_another_normal_client    { should_fetch_client }
+      context 'client from a different org than the user being requested' do
+        let(:org_name) { "pedant-secondorg-#{Time.new.to_i}" }
+        let(:client_name) { "pedant-secondclient-#{Time.new.to_i}" }
+        let(:second_org) { platform.create_org(org_name) }
+        let(:second_client) { platform.create_client(client_name, second_org) }
+
+        after do
+          platform.delete_client(second_client, second_org)
+          platform.delete_org(org_name)
+        end
+
+        # This will return a 401 since clients only exist in the scope of
+        # an org, and that scope is assumed from the request url to be the
+        # org in the url (since it is not specified in the headers). So
+        # the API will attempt to auth you as "some client from the org
+        # for which the request was made" and fail to find a client under that org.
+        it 'returns 401', :authorization do
+          get(request_url, second_client).should look_like({
+                                                             :status => 401
+                                                           })
+        end
+      end
+
+      context 'with an existing user' do
+        context 'user within the same org as the client being requested' do
+          it 'returns 200', :authorization do
+            get(request_url, platform.non_admin_user).should look_like({
+                                                                         :status => 200
+                                                                       })
+          end
+        end
+
+        context 'user from a different org as the client being requested' do
+          let(:org_name) { "pedant-secondorg-#{Time.new.to_i}" }
+          let(:user_name) { "pedant-seconduser-#{Time.new.to_i}" }
+          let(:second_org) { platform.create_org(org_name) }
+          let(:other_org_user) { platform.create_user(user_name) }
+
+          before do
+            # Call it into existence, otherwise rspec will not have
+            # created it at this point (and thus create_org will not have been called.
+            second_org
+            platform.associate_user_with_org(org_name, other_org_user)
+          end
+
+          after do
+            platform.delete_org(org_name)
+            platform.delete_user(other_org_user)
+          end
+
+          it 'returns 403', :authorization do
+            get(request_url, other_org_user).should look_like({
+                                                                :status => 403
+                                                              })
+          end
+        end
       end
     end
   end

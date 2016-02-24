@@ -195,18 +195,18 @@ module Pedant
       payload = { "name" => clientname }
 
       if server_api_version == 0
-        r = post(api_url('/clients'), org.validator, :payload => payload)
+        r = post(api_url('/clients', org), org.validator, :payload => payload)
         if r.code == 409
           payload["private_key"] = true
           r = put(api_url("/clients/#{clientname}"), org.validator, :payload => payload)
         end
         private_key = parse(r)["private_key"]
       else
-          r = post(api_url('/clients'), org.validator, :payload => payload.with("create_key", true))
-          if r.code == 409
-            r = put(api_url("/clients/#{clientname}/keys/default"), org.validator, :payload => { "create_key" => true} )
-          end
-          private_key = parse(r)["chef_key"]["private_key"]
+        r = post(api_url('/clients', org), org.validator, :payload => payload.with("create_key", true))
+        if r.code == 409
+          r = put(api_url("/clients/#{clientname}/keys/default"), org.validator, :payload => { "create_key" => true } )
+        end
+        private_key = parse(r)["chef_key"]["private_key"]
       end
       Pedant::Client.new(clientname, private_key, platform: self)
     end

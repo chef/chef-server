@@ -16,30 +16,41 @@ describe "users", :users do
   let(:default_pedant_user_names) { platform.users.select(&:associate).map(&:name).sort }
   let(:default_users_body)        { default_pedant_user_names.map { |user| {"user" => {"username" => user} } } }
 
-  context "/organizations/:org_name/users/:name endpoint" do
-    context "get" do
+  # Don't need additional client tests for /users/:user because
+  # clients can't auth against non-org endpoints.
+  # TODO: Remove wip tag.
+  context '/organizations/:org_name/users/:name endpoint', :wip do
+    context 'get' do
       let(:request_url) { api_url("/users/#{platform.non_admin_user.name}") }
 
-      context "default client" do
-        it "returns 200", :authorization, :wip do
+      context 'client within the same org as the user being requested' do
+        it 'returns 200', :authorization do
           get(request_url, platform.non_admin_client).should look_like({
               :status => 200
-            })
+             })
         end
       end
 
-      context "client from a different org" do
-        let(:org_name) { "secondorg" }
+      context 'client from a different org than the user being requested' do
+        let(:org_name) { "pedant-secondorg-#{Time.new.to_i}" }
+        let(:client_name) { "pedant-secondclient-#{Time.new.to_i}" }
         let(:second_org) { platform.create_org(org_name) }
+        let(:second_client) { platform.create_client(client_name, second_org) }
 
-        after(:each) do
+        after do
+          platform.delete_client(second_client, second_org)
           platform.delete_org(org_name)
         end
 
-        it "returns 403", :authorization, :wip do
-          get(request_url, second_org.validator).should look_like({
-            :status => 403
-          })
+        # This will return a 401 since clients only exist in the scope of
+        # an org, and that scope is assumed from the request url to be the
+        # org in the url (since it is not specified in the headers). So
+        # the API will attempt to auth you as "some client from the org
+        # for which the request was made" and fail to find a client under that org.
+        it 'returns 401', :authorization do
+          get(request_url, second_client).should look_like({
+                                                             :status => 401
+                                                           })
         end
       end
     end
