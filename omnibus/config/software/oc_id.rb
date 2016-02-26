@@ -18,6 +18,9 @@ name "oc_id"
 
 source path: "#{project.files_path}/../../src/oc-id"
 
+license "Apache 2.0"
+license_file "LICENSE"
+
 dependency "postgresql92" # for libpq
 dependency "nodejs"
 dependency "ruby"

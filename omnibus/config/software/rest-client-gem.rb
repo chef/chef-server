@@ -17,6 +17,9 @@
 name "rest-client"
 default_version "1.8.0"
 
+license "MIT"
+license_file "https://github.com/rest-client/rest-client/blob/master/LICENSE"
+
 dependency "ruby"
 dependency "rubygems"
 

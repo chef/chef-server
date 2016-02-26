@@ -17,6 +17,9 @@
 name "opscode-solr4"
 default_version "4.10.4"
 
+license "Apache 2.0"
+license_file "LICENSE.txt"
+
 source url: "http://archive.apache.org/dist/lucene/solr/#{version}/solr-#{version}.tgz",
        md5: "8ae107a760b3fc1ec7358a303886ca06"
 

@@ -3,7 +3,7 @@ driver:
   forward_agent: yes
   customize:
     cpus: 4
-    memory: 4098
+    memory: 4096
   synced_folders:
     - ['..', '/home/vagrant/chef-server']
     - ['../../omnibus', '/home/vagrant/omnibus']
