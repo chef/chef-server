@@ -379,16 +379,18 @@
           organization_authz_id,
           oc_chef_organization :: #oc_chef_organization{}
          }).
+
 -record(key_state, {
           type,
           full_type,
           parent_id,
           parent_authz_id,
-          parent_name,
+          parent_name :: binary(),
           key_data,
           generated_private_key,
           chef_key :: #chef_key{}
          }).
+-type key_state() :: #key_state{}.
 
 -record(object_identifier_state, {id :: object_id(),
                                   authz_id :: object_id(),

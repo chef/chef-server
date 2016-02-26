@@ -123,6 +123,63 @@ And finally to disable coverage and re-enable automatic code sync:
 Note that enabling cover will disable automatic compile and load of changed
 modules, and disabling it will turn that back on.
 
+## Troubleshooting
+
+If you see something like the following, or ever have trouble with Vagrant while running `./sync`:
+
+```
+Files Transferred: 0
+         Next Sync: 0 seconds...Bad port '-o'force_available_locales will default to true in the future. If you really want to skip validation of your locale you can set I18n.enforce_available_locales =rsync: connection unexpectedly closed (0 bytes received so far) [sender]
+rsync error: error in rsync protocol data stream (code 12) at /SourceCache/rsync/rsync-45/rsync/io.c(453) [sender=2.6.9]
+
+It appears that you've ran a newer version of Vagrant on this
+computer. Unfortunately, newer versions of Vagrant change internal
+directory layouts that cause older versions to break. This version
+of Vagrant cannot properly run.
+
+If you'd like to start from a clean state, please remove the
+Vagrant state directory: /Users/tyler/.vagrant.d
+
+Warning that this will remove all your boxes and potentially corrupt
+existing Vagrant environments that were running based on the future
+version.
+```
+
+It might be because ruby is picking up the ChefDK version of Vagrant instead of the one you normally use. For example:
+
+```
+which vagrant
+/usr/local/bin/vagrant
+++> irb
+`irb(main):001:0> `which vagrant`
+=> "/opt/chefdk/embedded/bin/vagrant\n"
+```
+
+You can tell `./sync` what Vagrant to use by setting `$VAGRANT_PATH` like so:
+
+```
+export VAGRANT_PATH=/usr/local/bin/vagrant
+```
+
+## Chef Mover
+
+`chef-mover` does not currently support hot code loading. You can use it, but you have
+to interact with it a bit differently. To start it, run:
+
+```
+dvm load chef-mover
+dvm start chef-mover
+```
+
+This will start it up, but if you make any changes, you will need to reload the application, like:
+
+```
+dvm load chef-mover --force
+dvm start chef-mover
+```
+
+Then the new code will be loaded.
+
 ## Not So Quick Start
 
 TODO: details of components, terminology, etc. explore more dvm

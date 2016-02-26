@@ -1,0 +1,14 @@
+description: |
+  Retrieves all of the user's key identifers and their associated
+  URIs and expiry states.
+responses:
+  200:
+    body:
+      schema: KeyList
+      example: |
+        [ { "name" : "default",
+            "uri" : "https://chef.example/users/user1/keys/default",
+            "expired" : false },
+          { "name" : "key1",
+            "uri" : "https://chef.example/users/user1/keys/key1",
+            "expired" : false} ]

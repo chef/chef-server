@@ -34,3 +34,9 @@ make_context(ApiVersion, ReqId, Darklaunch) ->
     #oc_chef_authz_context{server_api_version = ApiVersion,
                            reqid = ReqId,
                            darklaunch = Darklaunch }.
+
+is_actor_transitive_member_of_group(_SuperuserId, _ActorId, _GroupId) ->
+    true.
+
+superuser_id() ->
+    <<"00000000000000000000000000000000">>.

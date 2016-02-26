@@ -41,8 +41,16 @@ module Pedant
         get("#{platform.server}/users/#{user}/keys", requestor)
       end
 
+      def list_org_scoped_user_keys(org, user, requestor)
+        get("#{platform.server}/organizations/#{org}/users/#{user}/keys", requestor)
+      end
+
       def get_user_key(user, requestor, key)
         get("#{platform.server}/users/#{user}/keys/#{key}", requestor)
+      end
+
+      def get_org_scoped_user_key(org, user, requestor, key)
+        get("#{platform.server}/organizations/#{org}/users/#{user}/keys/#{key}", requestor)
       end
 
       def list_client_keys(org, client, requestor)

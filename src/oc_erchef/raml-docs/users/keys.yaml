@@ -3,21 +3,7 @@
 description: View and add keys for the named user.
 type: list_endpoint
 
-get:
-  description: |
-    Retrieves all of the user's key identifers and their associated
-    URIs and expiry states.
-  responses:
-    200:
-      body:
-        schema: KeyList
-        example: |
-          [ { "name" : "default",
-              "uri" : "https://chef.example/users/user1/keys/default",
-              "expired" : false },
-            { "name" : "key1",
-              "uri" : "https://chef.example/users/user1/keys/key1",
-              "expired" : false} ]
+get: !include ../shared/keys-get.yaml
 
 post:
   description: Add a new key for the named user.
@@ -40,14 +26,7 @@ post:
       description: Name of the key owned by the user.
       type: string
 
-  get:
-    description: |
-      Retrieves the specified public key and its associated data.
-    responses:
-      200:
-        body:
-          schema: Key
-          example: !include ../examples/named-key-example.json
+  get: !include ../shared/keys-list.yaml
 
   put:
     description: Update one or more attributes of a key for a user.

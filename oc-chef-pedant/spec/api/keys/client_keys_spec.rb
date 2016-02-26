@@ -468,7 +468,7 @@ describe "Client keys endpoint", :keys, :client_keys do
         end
 
         context "another user in the org", :authorization do
-          it "fails with 403" do
+          it "fails with 403", :authorization do
             post("#{org_base_url}/clients/#{org_client_name}/keys", org_user, payload: key_payload).should look_like(status: 403)
           end
         end
@@ -527,7 +527,7 @@ describe "Client keys endpoint", :keys, :client_keys do
             delete_client_key(org_name, org_client_name, "alt_key", requestor: org_client).should look_like(status: 200)
           end
 
-          it "the client itself, authenticating with the key it is trying to delete should fail with 403" do
+          it "the client itself, authenticating with the key it is trying to delete should fail with 403", :authorization do
             r = delete_client_key(org_name, org_client_name, "alt_key", requestor: requestor(org_client_name, keys[:alt_key][:private]))
             r.should look_like(status: 403, body_exact: { "error" => "The key 'alt_key' was used to authenticate this request and cannot be modified or deleted." })
           end
@@ -541,7 +541,7 @@ describe "Client keys endpoint", :keys, :client_keys do
               delete("#{org_base_url}/clients/#{other_org_client_name}", superuser).should look_like(status: 200)
             end
 
-            it "should fail with a 403" do
+            it "should fail with a 403", :authorization do
               delete_client_key(org_name, org_client_name, "alt_key", requestor: other_org_client).should look_like(status: 403)
             end
           end
@@ -569,13 +569,13 @@ describe "Client keys endpoint", :keys, :client_keys do
               platform.remove_user_from_org(org_name, org_user)
             end
 
-            it "should fail with a 403" do
+            it "should fail with a 403", :authorization do
               delete_client_key(org_name, org_client_name, "alt_key", requestor: org_user).should look_like(status: 403)
             end
 
           end
 
-          it "a user not affiliated with the org should fail with a 403" do
+          it "a user not affiliated with the org should fail with a 403", :authorization do
             delete_client_key(org_name, org_client_name, "alt_key", requestor: other_org_user).should look_like(status: 403)
           end
 
@@ -612,7 +612,7 @@ describe "Client keys endpoint", :keys, :client_keys do
             put(@key_url, org_client, payload: key_payload).should look_like(status: 200)
           end
 
-          it "the client itself, authenticating with the key it is trying update should fail with 403" do
+          it "the client itself, authenticating with the key it is trying update should fail with 403", :authorization do
             res = put(@key_url, requestor(org_client_name, keys[:alt_key][:private]), payload: key_payload)
             res.should look_like(
               status: 403,
@@ -629,7 +629,7 @@ describe "Client keys endpoint", :keys, :client_keys do
               delete("#{org_base_url}/clients/#{other_org_client_name}", superuser).should look_like(status: 200)
             end
 
-            it "should fail with a 403" do
+            it "should fail with a 403", :authorization do
               put(@key_url, other_org_client, payload: key_payload).should look_like(status: 403)
             end
           end
@@ -657,13 +657,13 @@ describe "Client keys endpoint", :keys, :client_keys do
               platform.remove_user_from_org(org_name, org_user)
             end
 
-            it "should fail with a 403" do
+            it "should fail with a 403", :authorization do
               put(@key_url, org_user, payload: key_payload).should look_like(status: 403)
             end
 
           end
 
-          it "a user not affiliated with the org should fail with a 403" do
+          it "a user not affiliated with the org should fail with a 403", :authorization do
             put(@key_url, other_org_user, payload: key_payload).should look_like(status: 403)
           end
 
@@ -690,8 +690,8 @@ describe "Client keys endpoint", :keys, :client_keys do
           context "when GET /organizations/org/clients/client/keys is called (list keys)" do
             it "all keys should be listed with correct expiry indicators" do
               list_client_keys(org_name, org_client_name, current_requestor).should look_like({
-                :status => 200,
-                :body_exact => [
+                status: 200,
+                body_exact: [
                   { "name" => "default", "uri" => "#{org_base_url}/clients/#{org_client_name}/keys/default", "expired" => false },
                   { "name" => "key1", "uri" => "#{org_base_url}/clients/#{org_client_name}/keys/key1", "expired" => false },
                   { "name" => "key2", "uri" => "#{org_base_url}/clients/#{org_client_name}/keys/key2", "expired" => true}
