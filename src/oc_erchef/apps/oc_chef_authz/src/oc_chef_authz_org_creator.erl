@@ -69,8 +69,10 @@
         [{create_containers, ?CONTAINERS},
          {create_groups, ?GROUPS},
          {create_org_read_access_group},
+         {create_actor_keys_access_group},
          {add_to_groups, user, [creator], [admins, users]},
          {add_to_groups, group, [admins, users], [read_access_group]},
+         {add_to_groups, group, [users, clients], [actor_keys_access_group]},
 
          %% ACLs are expanded, then applied
          {acls,
@@ -177,6 +179,19 @@ process_policy_step({create_org_read_access_group},
     case create_helper(ApiVersion, GlobalOrgId, RequestorId, group, ReadAccessGroupName) of
         AuthzId when is_binary(AuthzId) ->
             {add_cache(Cache, {group, read_access_group}, group, AuthzId), []};
+        Error ->
+            {error, Error}
+    end;
+process_policy_step({create_actor_keys_access_group},
+                    #oc_chef_organization{name=OrgName, server_api_version = ApiVersion},
+                    #chef_requestor{authz_id=RequestorId}, Cache) ->
+    ActorKeysAccessGroupName = oc_chef_authz_db:make_org_prefixed_group_name(OrgName, "actor_keys_access_group"),
+    %% TODO: Do we want users to be able to muck with this? If so, it should be
+    %% scoped to our org and not global.
+    GlobalOrgId = ?GLOBAL_PLACEHOLDER_ORG_ID,
+    case create_helper(ApiVersion, GlobalOrgId, RequestorId, group, ActorKeysAccessGroupName) of
+        AuthzId when is_binary(AuthzId) ->
+            {add_cache(Cache, {group, actor_keys_access_group}, group, AuthzId), []};
         Error ->
             {error, Error}
     end;
