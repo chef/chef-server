@@ -40,7 +40,7 @@ describe "Groups Endpoint" do
                            with_body({"id" => /^[0-9a-f]{32}$/, "uri" => /[0-9a-fhttp:\\]*/})
           # TODO URI: URI code broken
           #"uri" => /^#{Pedant.config[:host]}:#{Pedant.config[:port]}\/groups\/[0-9a-f]{32}$/})
-        
+
           @group_id = parse(response)["id"]
 
           # Verify that uri and id are the same
@@ -891,4 +891,100 @@ describe "Groups Endpoint" do
       end # for groups
     end # DELETE
   end # /groups/<group_id>/<member_type>/<member_id>
+
+  context '/groups/<group_id>/transitive_member/<member_type>/<member_id>' do
+    # Crazy group and actor names because
+    # 1) These helpers suck and don't allow lets to be defined because they are
+    #    run before "rspec compile time".
+    # 2) We just want to simulate routing to that place. Any 32 char
+    #    alphanumeric string will do.
+    should_not_allow :PUT,
+      "/groups/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/transitive_member/actors/ffffffffffffffffffffffffffffffff"
+    should_not_allow :POST,
+      "/groups/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/transitive_member/actors/ffffffffffffffffffffffffffffffff"
+    should_not_allow :DELETE,
+       "/groups/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/transitive_member/actors/ffffffffffffffffffffffffffffffff"
+
+
+    # TODO currently only supports actor since db query depends on db function
+    # groups_for_actor and a similar db function for groups does not exist, but
+    # will leave code in for groups in case we ever want to implement.
+    ['actors'].each do |member_type|
+      context 'GET' do
+        context 'when the member does not exist' do
+          it 'returns a 404' do
+            get("/groups/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/transitive_member/#{member_type}/ffffffffffffffffffffffffffffffff",
+                :superuser).should have_status_code(404)
+          end
+        end
+
+        context 'when the parent group exists but the but the actor does not' do
+          with_group :parent_group
+          it 'returns a 404' do
+            get("/groups/#{parent_group}/transitive_member/#{member_type}/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                :superuser).should have_status_code(404)
+          end
+        end
+
+        context 'when the member exists' do
+          if member_type == 'actors'
+            with_actor :test_member
+          elsif member_type == 'groups'
+            with_group :test_member
+          end
+
+          context 'when the parent group does not exist' do
+            it 'returns a 404' do
+              get("/groups/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/transitive_member/#{member_type}/#{member_type}",
+                  :superuser).should have_status_code(404)
+            end
+          end
+
+          context 'when the member is not a member of any group' do
+            with_group :parent_group
+
+            it 'returns false' do
+              get("/groups/#{parent_group}/transitive_member/#{member_type}/#{test_member}",
+                  :superuser).should have_status_code(200).
+                                      with_body({"is_member" => false})
+            end
+          end
+
+          context 'when the member is a direct member of a group' do
+            with_group :parent_group, :members => [:test_member]
+
+            it 'returns true' do
+              puts "/groups/#{parent_group}/transitive_member/#{member_type}/#{test_member}"
+              get("/groups/#{parent_group}/transitive_member/#{member_type}/#{test_member}",
+                  :superuser).should have_status_code(200).
+                                      with_body({"is_member" => true})
+            end
+          end
+
+          context 'when the member is a member of a group that is a member of the test group' do
+            with_group :parent_group, :members => [:test_member]
+            with_group :super_parent_group, :members => [:parent_group]
+
+            it 'returns true' do
+              get("/groups/#{super_parent_group}/transitive_member/#{member_type}/#{test_member}",
+                  :superuser).should have_status_code(200).
+                                      with_body({"is_member" => true})
+            end
+          end
+
+          context 'when the member is a member of a group that is a member of the test group' do
+            with_group :parent_group, :members => [:test_member]
+            with_group :some_other_group
+            with_group :super_parent_group, :members => [:some_other_group]
+
+            it 'returns false' do
+              get("/groups/#{super_parent_group}/transitive_member/#{member_type}/#{test_member}",
+                  :superuser).should have_status_code(200).
+                                      with_body({"is_member" => false})
+            end
+          end
+        end # when the member exists
+      end # GET
+    end # ['actor', 'group'].each do |member_type|
+  end # /groups/<group_id>/transitive_member/<member_type>/<member_id>
 end
