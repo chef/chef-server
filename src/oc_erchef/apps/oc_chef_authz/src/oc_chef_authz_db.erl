@@ -32,6 +32,7 @@
          fetch_read_access_group/2,
          fetch_group_authz_id/3,
          fetch_global_group_authz_id/3,
+         fetch_global_group/2,
          fetch_group/3,
          make_context/3,
          statements/1,
@@ -131,8 +132,6 @@ fetch_group_authz_id(#oc_chef_authz_context{server_api_version = ApiVersion, req
 -spec container_record_to_authz_id(any(), any()) -> object_id().
 container_record_to_authz_id(#oc_chef_authz_context{}, #chef_container{authz_id = Id}) ->
     Id.
-
-
 
 %% TODO: refactor, clean this up
 %% We need a clean api for fetching a group w/o expansion of members

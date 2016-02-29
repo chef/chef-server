@@ -28,7 +28,6 @@
                            malformed_request/2,
                            ping/2,
                            post_is_create/2,
-                           forbidden/2,
                            is_authorized/2,
                            service_available/2]}]).
 
@@ -43,7 +42,8 @@
          route_args/2,
          to_json/2,
          auth_info/2,
-         finalize_create_body/4]).
+         finalize_create_body/4,
+         forbidden/2]).
 
 -export([allowed_methods/2,
          create_path/2,
@@ -61,6 +61,42 @@ request_type() ->
 
 allowed_methods(Req, State) ->
     {['GET', 'POST'], Req, State}.
+
+forbidden(Req, State) ->
+    forbidden(wrq:method(Req), Req, State).
+forbidden('GET', Req, #base_state{chef_db_context = _DbContext, 
+                                  organization_guid = OrgId,
+                                  organization_name = OrgName,
+                                  chef_authz_context = AuthzContext,
+                                  resource_state = ResourceState} = State) ->
+    lager:error("guid: ~p", [AuthzContext]),
+    %% This code serves 6 endpoints:
+    %% + /orgs/:org/clients/:client/keys(/:key)
+    %% + /orgs/:org/users/:user/keys(/:key)
+    %% + /users/:user/keys(/:key)
+    %% For the latter, we simply want to look at acls like normal.
+    %% For the org scoped ones, we want to check if the requestor is a member
+    %% of <org>_actor_keys_access_group on GET requests to give all users and clients
+    %% access on all users and clients if they share an org.
+    case OrgId of
+        undefined -> oc_chef_wm_base:forbidden(Req, State);
+        _ ->
+            %% This is the atom true or false, return the oppsite to trigger
+            %% a 403 if this actor is not a member of <org>_actor_keys_access_group.
+            ActorId = ResourceState#key_state.parent_authz_id,
+            GroupName = binary_to_list(OrgName) ++ "_actor_keys_access_group",
+            Group = oc_chef_authz_db:fetch_global_group(AuthzContext, GroupName),
+            GroupId = Group#oc_chef_group.authz_id,
+            case oc_chef_authz:is_actor_transitive_member_of_group(oc_chef_authz:superuser_id(), ActorId, GroupId) of
+                {error, not_found} ->
+                    {{halt, 404}, Req, State};
+                IsMember ->
+                    lager:error("ismember: ~p", [IsMember]),
+                    {not IsMember, Req, State}
+            end
+    end;
+forbidden(_Method, Req, State) ->
+    oc_chef_wm_base:forbidden(Req, State).
 
 %% This export is mixed into oc_chef_wm_named_key -
 -spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
