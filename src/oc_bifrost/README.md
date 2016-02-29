@@ -133,7 +133,7 @@ again:
     /usr/bin/vagrant destroy db
 
 Eventually, we'll be adding Test Kitchen support for running
-[oc-bifrost-pedant][] and our pgTAP database schema tests.
+[oc-bifrost-pedant][https://github.com/chef/oc-bifrost-pedant] and our pgTAP database schema tests.
 
 Cookbook Hacking
 ================

@@ -17,7 +17,9 @@
          has_permission/4,
          remove_from_group/3,
          statements/0,
-         update_acl/5]).
+         update_acl/5,
+         get_all_parent_groups_for_actor/1,
+         get_id/2]).
 
 ping() ->
     case select(ping, [], first_as_scalar, [ping]) of
@@ -87,6 +89,19 @@ exists(Type, AuthId) ->
     StatementName = exists_query(Type),
     {ok, Answer} = select(StatementName, [AuthId], first_as_scalar, [exists]),
     Answer.
+
+get_id_query(actor)     -> get_actor_id;
+get_id_query(container) -> get_container_id;
+get_id_query(group)     -> get_group_id;
+get_id_query(object)    -> get_object_id.
+
+%-spec exists(auth_type(), auth_id()) -> boolean().
+get_id(Type, AuthId) ->
+    case select(get_id_query(Type), [AuthId], first_as_scalar, [id]) of
+        {ok, none} -> not_found;
+        {ok, Answer} -> Answer
+    end.
+
 
 acl_member_query(actor, actor) -> actors_in_actor_acl;
 acl_member_query(group, actor) -> groups_in_actor_acl;
@@ -180,6 +195,20 @@ group_membership(TargetType, GroupId) ->
     MembershipStatement = membership_query(TargetType),
     case select(MembershipStatement, [GroupId], rows_as_scalars,
                 [authz_id]) of
+        {ok, L} when is_list(L) ->
+            L;
+        {ok, none} ->
+            [];
+        {error, Error} ->
+            {error, Error}
+    end.
+
+%% Returns all groups this actor is a member of,
+%% including parents of those groups, recursively.
+-spec get_all_parent_groups_for_actor(auth_id()) -> list() | {error, term()}.
+get_all_parent_groups_for_actor(AuthzId) ->
+    lager:error("get_all_parent_groups_for_actor ~p", [AuthzId]),
+    case select(get_all_recursive_groups_for_actor, [AuthzId], rows_as_scalars, [authz_id]) of
         {ok, L} when is_list(L) ->
             L;
         {ok, none} ->
