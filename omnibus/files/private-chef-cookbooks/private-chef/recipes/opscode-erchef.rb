@@ -7,10 +7,12 @@
 opscode_erchef_dir = node['private_chef']['opscode-erchef']['dir']
 opscode_erchef_log_dir = node['private_chef']['opscode-erchef']['log_directory']
 opscode_erchef_sasl_log_dir = File.join(opscode_erchef_log_dir, "sasl")
+insights_log_dir = node['private_chef']['insights']['log_dir']
 [
   opscode_erchef_dir,
   opscode_erchef_log_dir,
-  opscode_erchef_sasl_log_dir
+  opscode_erchef_sasl_log_dir,
+  insights_log_dir
 ].each do |dir_name|
   directory dir_name do
     owner OmnibusHelper.new(node).ownership['owner']
