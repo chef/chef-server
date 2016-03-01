@@ -75,6 +75,8 @@
               {authz_fanout, <%= node['private_chef']['opscode-erchef']['authz_fanout'] %>},
 
               {enable_actions, <%= node['private_chef']['dark_launch']['actions'] %>},
+              {enable_insights, <%= node['private_chef']['insights']['enable']%>},
+              {insights_log, "<%= node['private_chef']['insights']['log_dir'] %>"},
               <% if @ldap_enabled -%>
               {ldap, [{host, "<%= @helper.normalize_host(node['private_chef']['ldap']['host']) || "localhost" %>"},
                       {port, <%= node['private_chef']['ldap']['port'] || (@ssl_enabled ? 636 : 389) %> },
@@ -145,7 +147,7 @@
                           ]}
             ]},
 
- 
+
   {chef_authn, [
                 {keyring, [{default, "/etc/opscode/webui_pub.pem"}]},
                 <% unless node['private_chef']['opscode-erchef']['keygen_cache_workers'] == :auto -%>
