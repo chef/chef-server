@@ -91,6 +91,8 @@ maybe_start_action(true, Workers) ->
     Queue = ?QUEUE_MONITOR_SETTING(queue_length_monitor_queue, "alaska"),
     QMEnabled = ?QUEUE_MONITOR_SETTING(queue_length_monitor_enabled, false),
 
+    MaybeInsights = insights_child_spec(envy:get(oc_chef_wm, enable_insights, false, boolean), Workers),
+
     case QMEnabled of
         true ->
             chef_wm_rabbitmq_management:create_pool(),
@@ -100,9 +102,9 @@ maybe_start_action(true, Workers) ->
                      [Vhost, Queue, MaxLength, CurrentLength]},
                         permanent, 5000, worker, [chef_wm_actions_queue_monitoring]},
             lager:info("Starting actions queue monitoring for vhost ~p and queue ~p", [Vhost, Queue]),
-            [ActionQueueMonitoringSpec | [ amqp_child_spec() | Workers]];
+            [ActionQueueMonitoringSpec | [amqp_child_spec() | MaybeInsights]];
         false ->
-            [ amqp_child_spec() | Workers]
+            [amqp_child_spec() | MaybeInsights]
     end;
 
 maybe_start_action(false, Workers) ->
@@ -248,6 +250,14 @@ default_resource_init() ->
         _ ->
             Defaults
     end.
+
+-spec insights_child_spec(boolean(), list()) -> list().
+insights_child_spec(true, Workers) ->
+    [{oc_chef_action_insights,
+        {oc_chef_action_insights, start_link,[]},
+             permanent, 5000, worker, [oc_chef_action_insights]} | Workers];
+insights_child_spec(false, Workers) ->
+    Workers.
 
 amqp_child_spec() ->
     Host = envy_parse:host_to_ip(oc_chef_wm, actions_host),

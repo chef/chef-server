@@ -93,6 +93,11 @@ default['private_chef']['opscode-solr']['data_dir'] = "/var/opt/opscode/opscode-
 ####
 default['private_chef']['server-api-version'] = 0
 
+####
+# Inisghts
+####
+default['private_chef']['insights']['enable'] = false
+default['private_chef']['insights']['log_file'] = '/var/log/opscode/insights/insights.log'
 
 ####
 # RabbitMQ

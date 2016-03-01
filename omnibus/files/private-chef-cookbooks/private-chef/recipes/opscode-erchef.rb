@@ -7,6 +7,9 @@
 opscode_erchef_dir = node['private_chef']['opscode-erchef']['dir']
 opscode_erchef_log_dir = node['private_chef']['opscode-erchef']['log_directory']
 opscode_erchef_sasl_log_dir = File.join(opscode_erchef_log_dir, "sasl")
+
+include_recipe 'private-chef::insights' if node['private_chef']['insights']['enable']
+
 [
   opscode_erchef_dir,
   opscode_erchef_log_dir,

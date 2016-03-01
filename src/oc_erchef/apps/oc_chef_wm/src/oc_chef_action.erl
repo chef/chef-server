@@ -93,15 +93,12 @@ log_action(Req, #base_state{resource_state = ResourceState} = State) ->
 -spec  log_action0(Req :: wm_req(),
                    State :: #base_state{}) -> ok.
 log_action0(Req, #base_state{resource_state = ResourceState} = State) ->
-    ShouldSendBody = envy:get(oc_chef_wm, enable_actions_body, true, boolean),
+    ShouldSendInsights = envy:get(oc_chef_wm, enable_insights, false, boolean),
     {FullActionPayload, EntityType, EntitySpecificPayload} = extract_entity_info(Req, ResourceState),
-    Payload = case ShouldSendBody of
-        true -> FullActionPayload;
-        false -> []
-    end,
     Task = task(Req, State),
     MsgType = routing_key(EntityType, Task),
-    Msg = construct_payload(Payload, Task, Req, State, EntitySpecificPayload),
+    Msg = construct_payload(FullActionPayload, Task, Req, State, EntitySpecificPayload),
+    oc_chef_action_insights:ingest(ShouldSendInsights, Msg),
     publish(MsgType, Msg).
 
 %%

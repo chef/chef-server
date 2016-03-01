@@ -65,6 +65,8 @@ start_server(Config) ->
     application:set_env(oc_chef_wm, authz_fanout, 20),
     application:set_env(oc_chef_wm, node_license, 25),
     application:set_env(oc_chef_wm, upgrade_url, <<"https://nowhere">>),
+    application:set_env(oc_chef_wm, enable_insights, false),
+    application:set_env(oc_chef_wm, insights_log, "/tmp/insights.log"),
 
     application:set_env(chef_wm, local_key_gen, {true, 1024}),
 
