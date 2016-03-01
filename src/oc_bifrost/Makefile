@@ -25,7 +25,11 @@ all: $(REBAR3)
 rel: all
 	@$(REBAR3) release
 
-pedant: provision_test_db rel start_test_rel test_pedant stop_test_rel destroy_test_db
+pedant: pedant_setup test_pedant pedant_cleanup
+
+pedant_setup: provision_test_db rel start_test_rel
+
+pedant_cleanup: stop_test_rel destroy_test_db
 
 start_test_rel:
 	_build/default/rel/oc_bifrost/bin/oc_bifrost start
