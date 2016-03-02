@@ -23,8 +23,8 @@ for you by one of the reviewers.
 4. Respond [Code Review](#cr) to code review comments to improve the
 code until it is ready to merge.
 
-5. Merge it! (If you don't have commit access, a maintainer will merge
-   it for you after code review is complete).
+5. Rebase your branch on master to pick up any changes that have landed since your patch was opened and merge it!
+   (If you don't have commit access, a maintainer will merge it for you after code review is complete).
 
 ### Commit Messages
 
