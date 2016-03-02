@@ -52,12 +52,12 @@ port_string(Port) ->
 
 base_uri(Req) ->
     Scheme = scheme(Req),
-    Host = string:join(lists:reverse(wrq:host_tokens(Req)), "."),
+    Host = string:join(wrq:host_tokens(Req), "."),
     PortString = port_string(wrq:port(Req)),
     Scheme ++ "://" ++ Host ++ PortString.
 
 full_uri(Req) ->
-    base_uri(Req) ++ wrq:disp_path(Req).
+    base_uri(Req) ++ "/" ++ wrq:disp_path(Req).
 
 -spec set_json_body(wm_req(), ej:json_object()) -> wm_req().
 set_json_body(Req, EjsonData) ->
