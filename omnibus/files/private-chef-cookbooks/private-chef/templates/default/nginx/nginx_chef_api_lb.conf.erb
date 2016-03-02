@@ -93,21 +93,13 @@
     location / {
       satisfy any;
 
-      access_by_lua '
-        if ngx.var.http_x_ops_userid then
-          -- we will pass this access check since this is to be treated
-          -- as an REST API invocation.  As long as we pass, the request will
-          -- continue since we specified "satisfy any"
-          return
-        else
-          -- by exiting this way, we will force nginx to
-          -- also evaluate the subnets above because either this access
-          -- check must pass, OR the allow/deny must pass due to "satisfy any"
-          -- We are effectively saying here: "ok, this request is going to go
-          -- to manage, so apply those other access rules first."
-          ngx.exit(ngx.DECLINED)
-        end
-      ';
+      <% if @access_by_lua_file %>
+      # access_by_lua_file acts as an access phase handler and executes Lua code
+      # contained in the given file for every request.  This is disabled by
+      # default, separate from the lua dispatch routing, and intended to do
+      # initial access authentication.
+      access_by_lua_file '<%= @access_by_lua_file %>';
+      <% end %>
 
       set $mode "api";
       set $upstream "";
