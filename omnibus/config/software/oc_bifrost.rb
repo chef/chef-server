@@ -18,7 +18,6 @@ name "oc_bifrost"
 source path: "#{project.files_path}/../../src/oc_bifrost", options: {:exclude => ["_build"]}
 
 dependency "erlang"
-dependency "rebar"
 dependency "sqitch"
 
 build do

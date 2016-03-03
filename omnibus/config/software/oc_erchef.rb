@@ -18,7 +18,6 @@ name "oc_erchef"
 source path: "#{project.files_path}/../../src/oc_erchef", options: {:exclude => ["_build"]}
 
 dependency "erlang"
-dependency "rebar"
 dependency "gecode"
 dependency "sqitch"
 dependency "perl_pg_driver"

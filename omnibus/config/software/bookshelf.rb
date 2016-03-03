@@ -18,7 +18,6 @@ name "bookshelf"
 source path: "#{project.files_path}/../../src/bookshelf", options: {:exclude => ["_build"]}
 
 dependency "erlang"
-dependency "rebar"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
