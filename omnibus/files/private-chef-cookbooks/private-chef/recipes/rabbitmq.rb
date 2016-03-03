@@ -183,13 +183,24 @@ if is_data_master?
     retries 10
   end
 
-  execute "#{rmq_plugins} enable rabbitmq_management" do
-    environment (rabbitmq_env)
-    user opc_username
-    not_if "#{rmq_plugins} list | grep rabbitmq_management | grep -v rabbit_management_agent | grep E"
-    # management plugin needs a rabbit restart
-    notifies :restart, 'runit_service[rabbitmq]', :delayed
-    retries 10
+  rabbitmq_management_is_up = "#{rmq_plugins} list | grep rabbitmq_management  | grep -v rabbitmq_management_agent | grep -v rabbitmq_management_visualiser | grep E"
+  if rabbitmq['management_enabled']
+    execute "#{rmq_plugins} enable rabbitmq_management" do
+      environment (rabbitmq_env)
+      user opc_username
+      not_if rabbitmq_management_is_up
+      # management plugin needs a rabbit restart
+      notifies :restart, 'runit_service[rabbitmq]', :delayed
+      retries 10
+    end
+  else
+    execute "#{rmq_plugins} disable rabbitmq_management" do
+      environment (rabbitmq_env)
+      user opc_username
+      notifies :restart, 'runit_service[rabbitmq]', :delayed
+      if rabbitmq_management_status_is_up
+      retries 10
+    end
   end
 
   execute "#{rmq_ctl} set_user_tags #{rabbitmq['management_user']} administrator" do
