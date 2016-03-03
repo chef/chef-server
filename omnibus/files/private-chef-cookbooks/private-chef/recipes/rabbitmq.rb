@@ -198,7 +198,7 @@ if is_data_master?
       environment (rabbitmq_env)
       user opc_username
       notifies :restart, 'runit_service[rabbitmq]', :delayed
-      if rabbitmq_management_status_is_up
+      only_if rabbitmq_management_is_up
       retries 10
     end
   end
