@@ -11,7 +11,7 @@ PATH
       rspec_junit_formatter (~> 0.1.1)
 
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
     activesupport (3.2.11)
       i18n (~> 0.6)
@@ -45,3 +45,6 @@ PLATFORMS
 
 DEPENDENCIES
   oc-bifrost-pedant!
+
+BUNDLED WITH
+   1.10.6
