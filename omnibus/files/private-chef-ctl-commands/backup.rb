@@ -11,12 +11,17 @@ add_command_under_category 'backup', 'general', 'Backup the Chef Server', 2 do
 
   options = OpenStruct.new
   options.agree_to_go_offline = false
+  options.config_only = false
 
   OptionParser.new do |opts|
     opts.banner = 'Usage: chef-server-ctl backup [options]'
 
     opts.on('-y', '--yes', 'Agree to go offline during tar based backups') do
       options.agree_to_go_offline = true
+    end
+
+    opts.on('-c', '--config-only', 'Backup only the config on the frontends. No data will be backedup.') do
+      options.config_only = true
     end
 
     opts.on('-h', '--help', 'Show this message') do
