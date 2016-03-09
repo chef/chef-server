@@ -340,26 +340,7 @@ end_to_end_test_() ->
                           end)
      end,
      fun(_) -> oc_chef_wm_test_utils:cleanup(MockedModules) end,
-     [{"end to end client test, action create with no payload",
-       fun() -> ExpectedMsg = msg(<<"create">>),
-                meck:expect(wrq, method, fun(req) -> 'POST' end),
-                AssertPublishDataCorrect =
-                   fun(_ServerName, RoutingKey, _Message) ->
-                       ?assertEqual(<<"erchef.node.create">>, RoutingKey),
-                       ok
-                   end,
-               meck:expect(bunny_util, new_message, fun(Data) ->
-                  ?assertEqual(ExpectedMsg, chef_json:decode(Data)),
-                  msg
-               end),
-               meck:expect(bunny_util, set_delivery_mode, fun(msg, 2) -> undefined end),
-               meck:expect(bunnyc, publish, AssertPublishDataCorrect),
-               application:set_env(oc_chef_wm, enable_actions_body, false),
-               Ret = oc_chef_action:log_action(req, State),
-               ?assertEqual(ok, Ret)
-       end
-     },
-     {"end to end client test, action create with payload",
+     [{"end to end client test, action create with payload",
        fun() -> ExpectedMsg = msg_with_payload(<<"create">>),
                 meck:expect(wrq, method, fun(req) -> 'POST' end),
                 AssertPublishDataCorrect =
@@ -373,30 +354,12 @@ end_to_end_test_() ->
                 end),
                 meck:expect(bunny_util, set_delivery_mode, fun(msg, 2) -> undefined end ),
                 meck:expect(bunnyc, publish, AssertPublishDataCorrect),
-                application:set_env(oc_chef_wm, enable_actions_body, true),
+                application:set_env(oc_chef_wm, enable_insights, true),
+                application:set_env(oc_chef_wm, insights_log, "/tmp"),
                 Ret = oc_chef_action:log_action(req, State),
                 ?assertEqual(ok, Ret)
         end
       },
-      {"end to end client test, action delete with no payload",
-       fun() -> ExpectedMsg = msg(<<"delete">>),
-                meck:expect(wrq, method, fun(req) -> 'DELETE' end),
-                AssertPublishDataCorrect =
-                   fun(_ServerName, RoutingKey, _Message) ->
-                       ?assertEqual(<<"erchef.node.delete">>, RoutingKey),
-                       ok
-                   end,
-                meck:expect(bunny_util, new_message, fun(Data) ->
-                  ?assertEqual(ExpectedMsg, chef_json:decode(Data)),
-                  msg
-                end),
-               meck:expect(bunny_util, set_delivery_mode, fun(msg, 2) -> undefined end ),
-               meck:expect(bunnyc, publish, AssertPublishDataCorrect),
-               application:set_env(oc_chef_wm, enable_actions_body, false),
-               Ret = oc_chef_action:log_action(req, State),
-               ?assertEqual(ok, Ret)
-        end
-       },
       {"end to end client test, action delete with data",
        fun() -> ExpectedMsg = msg_with_payload(<<"delete">>),
                 meck:expect(wrq, method, fun(req) -> 'DELETE' end),
@@ -411,7 +374,8 @@ end_to_end_test_() ->
                 end),
                 meck:expect(bunny_util, set_delivery_mode, fun(msg, 2) -> undefined end ),
                 meck:expect(bunnyc, publish, AssertPublishDataCorrect),
-                application:set_env(oc_chef_wm, enable_actions_body, true),
+                application:set_env(oc_chef_wm, enable_insights, true),
+                application:set_env(oc_chef_wm, insights_log, "/tmp"),
                 Ret = oc_chef_action:log_action(req, State),
                 ?assertEqual(ok, Ret)
         end

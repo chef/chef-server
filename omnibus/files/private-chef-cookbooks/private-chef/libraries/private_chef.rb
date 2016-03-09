@@ -61,6 +61,7 @@ module PrivateChef
   dark_launch Mash.new
   opscode_chef_mover Mash.new
   oc_chef_pedant Mash.new
+  insights Mash.new
 
   license Mash.new
 
@@ -216,7 +217,7 @@ module PrivateChef
         "enabled_plugins",
         "license",
         "backup",
-
+        "insights",
         # keys for cleanup and back-compat
         "couchdb",
         "opscode_solr"]
