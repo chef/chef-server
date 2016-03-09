@@ -22,8 +22,12 @@ add_command_under_category 'backup', 'general', 'Backup the Chef Server', 2 do
       options.pg_options = pg_options
     end
 
-    opts.on('-c', '--config-only', 'Backup only the config on the frontends. No data will be backedup.') do
+    opts.on('-c', '--config-only', 'Only backup configuration, no data') do
       options.config_only = true
+    end
+
+    opts.on('-t', '--timeout [string]', 'Set the Maximum amount of time to wait for shell commands') do |shell_out_timeout|
+      options.shell_out_timeout = shell_out_timeout
     end
 
     opts.on('-h', '--help', 'Show this message') do
@@ -64,6 +68,10 @@ add_command_under_category 'restore', 'general', 'Restore the Chef Server from b
 
     opts.on('--pg-options [string]', 'Additional options to pass to postgress during backups') do |pg_options|
       options.pg_options = pg_options
+    end
+
+    opts.on('-t', '--timeout [string]', 'Maximum amount of time to wait for shell commands') do |shell_out_timeout|
+      options.shell_out_timeout = shell_out_timeout
     end
 
     opts.on('-h', '--help', 'Show this message') do
