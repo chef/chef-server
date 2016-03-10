@@ -105,7 +105,7 @@
               {actions_fqdn, <<"<%= node['private_chef']['lb']['api_fqdn'] %>">>},
               {max_request_size, <%= node['private_chef']['opscode-erchef']['max_request_size'] %>},
               {server_version, "<%= node['private_chef']['version'] %>"},
-              {health_ping_timeout, 400},
+              {health_ping_timeout, <%= node['private_chef']['opscode-erchef']['health_ping_timeout'] %>},
               {health_ping_modules, [oc_chef_authz, chef_sql, chef_<%= node['private_chef']['opscode-erchef']['search_provider'] %>]},
               {base_resource_url, <%= @helper.erl_atom_or_string(node['private_chef']['opscode-erchef']['base_resource_url']) %>},
               {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
@@ -145,7 +145,7 @@
                           ]}
             ]},
 
- 
+
   {chef_authn, [
                 {keyring, [{default, "/etc/opscode/webui_pub.pem"}]},
                 <% unless node['private_chef']['opscode-erchef']['keygen_cache_workers'] == :auto -%>
