@@ -1,5 +1,7 @@
 # Chef Server
 
+TESTING
+
 This repository is the central repository for the Chef server.
 
 If you want to file an issue about Chef Server or contribute a change,
