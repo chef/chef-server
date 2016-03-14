@@ -44,7 +44,13 @@ Looks like everything URI related needs an overhaul.
 Testing and Development
 =======================
 
-Everything works through the Makefile.
+Everything works through the Makefile. You need to install a few prerequisite
+packages before the Makefile commands with work.  See
+[schema/README.md](schema/README.md) for more information.
+
+You will need to install postgres, pgTAP, sqitch and Erlang. To find out the
+correct version of Erlang to install, please see the omnibus project definition
+as this is the version that is guaranteed to work with the tests.
 
 Run `make ct` for the itests.
 
@@ -53,3 +59,6 @@ postgres server running. It will assume you want to use the postgres users
 `postgres`, but if you are running locally on OS X, it might be set up properly.
 If you wish to use a different user (like your own username), just set `$POSTGRES_USER`
 before running `make pedant`.
+
+If you wish to reset your system/database state back to the beginning before
+trying `make` again, run `make stop_test_rel` and `make destroy_test_db`.
