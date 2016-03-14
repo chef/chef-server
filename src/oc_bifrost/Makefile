@@ -20,7 +20,7 @@ endif
 POSTGRES_USER ?= 'postgres'
 
 all: $(REBAR3)
-	@$(REBAR3) do clean, compile, eunit, ct, dialyzer
+	@$(REBAR3) do clean, compile, eunit, dialyzer
 
 rel: all
 	@$(REBAR3) release
@@ -61,9 +61,6 @@ install: $(REBAR3)
 
 travis: update all pedant
 	@echo "Travis'd!"
-
-ct: $(REBAR3)
-	$(REBAR3) do ct --dir apps/chef_db/itest, ct --dir apps/oc_chef_authz/itest, ct --dir apps/oc_chef_wm/itest
 
 version_clean:
 	@rm -f VERSION
