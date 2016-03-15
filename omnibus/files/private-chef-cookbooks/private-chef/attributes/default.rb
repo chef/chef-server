@@ -327,6 +327,11 @@ default['private_chef']['opscode-erchef']['keygen_key_size'] = 2048
 default['private_chef']['opscode-erchef']['strict_search_result_acls'] = false
 default['private_chef']['opscode-erchef']['ssl_session_caching']['enabled'] = false
 
+# The amount of milliseconds before we timeout and assume an endpoint is down for
+# the /_status endpoint.
+
+default['private_chef']['opscode-erchef']['health_ping_timeout'] = 400
+
 ###
 # Legacy path (required for cookbok migration)
 ###
