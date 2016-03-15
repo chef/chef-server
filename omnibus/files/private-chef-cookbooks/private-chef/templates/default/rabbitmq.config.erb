@@ -1,4 +1,5 @@
 [
+ {kernel, [{inet_dist_use_interface, {127,0,0,1}}]},
  {ssl, [{versions, [<%= @ssl_versions %>]}]},
  {rabbit, [{tcp_listeners, [<%= node['private_chef']['rabbitmq']['node_port'] %>]},
                {ssl_options,
