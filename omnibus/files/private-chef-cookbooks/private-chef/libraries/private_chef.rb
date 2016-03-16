@@ -631,7 +631,7 @@ EOF
     end
 
     def existing_secrets
-      @existing_secrets ||= if File.exists?("/etc/opscode/private-chef-secrets.json")
+      existing_secrets ||= if File.exists?("/etc/opscode/private-chef-secrets.json")
                               Chef::JSONCompat.from_json(File.read("/etc/opscode/private-chef-secrets.json"))
                             else
                               {}
@@ -642,7 +642,10 @@ EOF
       existing_secrets.each do |k, v|
         v.each do |pk, p|
           if not PrivateChef[k]
-            Chef::Log.info("Ignoring unused secret for #{k}.")
+            @extra_secrets ||= Hash.new
+            @extra_secrets[k] ||= Hash.new
+            Chef::Log.warn("The secret for #{k} doesn't appear to be valid, you should remove it.")
+            @extra_secrets[k][pk] = p
           else
             PrivateChef[k][pk] = p
           end
@@ -655,7 +658,7 @@ EOF
         # This was originally directly written via f.puts(Chef::JSONCompat.to_json_pretty)
         # Let's instead assemble this hash externally so that if it fails for any reason
         # we don't wipe out the secrets file.
-        out_json = Chef::JSONCompat.to_json_pretty({
+        out_hash = {
           'redis_lb' => {
             'password' => PrivateChef['redis_lb']['password']
           },
@@ -692,7 +695,8 @@ EOF
             'sql_ro_password' => PrivateChef['bookshelf']['sql_ro_password'],
             'access_key_id' => PrivateChef['bookshelf']['access_key_id'],
             'secret_access_key' => PrivateChef['bookshelf']['secret_access_key']
-          }})
+          }}.merge(@extra_secrets)
+        out_json = Chef::JSONCompat.to_json_pretty(out_hash)
 
         File.open("/etc/opscode/private-chef-secrets.json", "w") do |f|
           f.puts(out_json)
