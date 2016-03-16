@@ -17,7 +17,7 @@
 name "perl_pg_driver"
 default_version "3.3.0"
 
-license "Artistic"
+license "Artistic-2.0"
 license_file "LICENSES/artistic.txt"
 
 dependency "perl"

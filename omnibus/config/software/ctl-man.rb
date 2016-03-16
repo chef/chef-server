@@ -18,7 +18,7 @@
 name "ctl-man"
 default_version "7b25fa4de4d6663dafe2cbe853ada29eee67a6a6"
 
-license "Apache 2.0"
+license :project_license
 
 dependency "private-chef-ctl"
 
