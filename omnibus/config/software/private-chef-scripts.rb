@@ -18,6 +18,8 @@ name "private-chef-scripts"
 
 source path: "#{project.files_path}/private-chef-scripts"
 
+license :project_license
+
 build do
   copy "#{project_dir}/*", "#{install_dir}/bin"
 end

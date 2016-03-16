@@ -18,6 +18,8 @@ name "private-chef-cookbooks"
 
 source path: "#{project.files_path}/#{name}"
 
+license :project_license
+
 dependency "berkshelf2"
 
 build do

@@ -17,6 +17,9 @@
 name "knife-opc"
 default_version "master"
 
+license "Apache 2.0"
+license_file "https://github.com/chef/knife-opc/blob/master/LICENSE"
+
 source git: "git://github.com/opscode/knife-opc.git"
 
 dependency "ruby"
