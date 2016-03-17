@@ -119,7 +119,7 @@ describe "Client keys endpoint", :keys, :client_keys do
     if Pedant.config[:org][:create_me]
       @test_org = platform.create_org(org_name)
     else
-      @test_org = platform.get_org(org_name)
+      @test_org = platform.org_from_config
     end
   end
 
@@ -741,7 +741,7 @@ describe "Client keys endpoint", :keys, :client_keys do
           it_should_behave_like 'successful client key get'
         end
 
-        context 'when a user that is a member of the same org is making the request' do
+        context 'when a user that is a member of the same org is making the request', :multiuser do
           include_context 'when the current_requestor is a user in the main org'
           it_should_behave_like 'successful client key get'
         end
@@ -751,7 +751,7 @@ describe "Client keys endpoint", :keys, :client_keys do
           it_should_behave_like 'successful client key get'
         end
 
-        context 'when a user is not a member of the same org is making a request' do
+        context 'when a user is not a member of the same org is making a request', :multiuser do
           include_context 'when the current_requestor is a user in a different org'
 
           it 'list client keys returns a 403', :authentication do
