@@ -17,7 +17,7 @@
 name "postgresql92"
 default_version "9.2.15"
 
-license "Postgresql"
+license "PostgreSQL"
 license_file "COPYRIGHT"
 
 source url: "https://ftp.postgresql.org/pub/source/v9.2.15/postgresql-9.2.15.tar.bz2",

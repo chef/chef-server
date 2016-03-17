@@ -17,7 +17,7 @@
 name "bookshelf"
 source path: "#{project.files_path}/../../src/bookshelf", options: {:exclude => ["_build"]}
 
-license "Apache 2.0"
+license "Apache-2.0"
 license_file "LICENSE.md"
 
 dependency "erlang"

@@ -17,7 +17,7 @@
 name "chef-server"
 maintainer "Chef Software, Inc."
 homepage   "https://www.chef.io"
-license "Apache 2.0"
+license "Apache-2.0"
 license_file "LICENSE"
 
 package_name    "chef-server-core"
