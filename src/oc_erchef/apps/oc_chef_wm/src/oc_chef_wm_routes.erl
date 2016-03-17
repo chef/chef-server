@@ -116,6 +116,12 @@ org_route(client_key, Req, Args) ->
     {BaseURI, Org} = extract_from_req(Req),
     Template = template_for_type(client_key),
     render_template(Template, BaseURI, [Org, ParentName, Name]);
+org_route(org_user_key, Req, Args) ->
+    {object_name, ParentName} = lists:keyfind(object_name, 1, Args),
+    {name, Name} = lists:keyfind(name, 1, Args),
+    {BaseURI, Org} = extract_from_req(Req),
+    Template = template_for_type(org_user_key),
+    render_template(Template, BaseURI, [Org, ParentName, Name]);
 org_route(user_key, Req, Args) ->
     {object_name, ParentName} = lists:keyfind(object_name, 1, Args),
     {name, Name} = lists:keyfind(name, 1, Args),
@@ -161,7 +167,8 @@ bulk_route_fun(Type, Req) ->
 bulk_route_fun(Type, Name, Req) when Type =:= data_bag_item;
                                      Type =:= cookbook_version;
                                      Type =:= cookbook_artifact_version;
-                                     Type =:= client_key ->
+                                     Type =:= client_key;
+                                     Type =:= org_user_key ->
     {BaseURI, Org} = extract_from_req(Req),
     Template = template_for_type(Type),
     fun(SubName) ->
@@ -173,7 +180,6 @@ bulk_route_fun(Type, Name, Req) when Type =:= user_key ->
     fun(SubName) ->
             render_template(Template, BaseURI, [Name, SubName])
     end.
-
 
 %% Internal bulk_route_fun that renders URLs with orgname
 org_bulk_route_fun(association, Req) ->
@@ -254,6 +260,8 @@ template_for_type(user) ->
     "/users/~s";
 template_for_type(user_key) ->
     "/users/~s/keys/~s";
+template_for_type(org_user_key) ->
+    "/organizations/~s/users/~s/keys/~s";
 template_for_type(client_key) ->
     "/organizations/~s/clients/~s/keys/~s";
 template_for_type(policy) ->

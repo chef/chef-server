@@ -253,6 +253,8 @@
           'old_name' :: binary()    %% In case of update, this will contain the original name
         }).
 
+-type chef_key() :: #chef_key{}.
+
 %% These types and records are just convenient shorthands for subsets of our
 %% records that are used in the SQL layers.
 

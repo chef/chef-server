@@ -20,3 +20,17 @@ get:
     responses:
       200:
         body: { schema: User }
+
+  /keys:
+    description: |
+      List keys for an org-scoped named user.
+      Accessable by any user or client within the same org.
+    type: item_endpoint
+    get: !include ../shared/keys-get.yaml
+
+    /{key}:
+      description: |
+        Get a named key for an org-scoped named user.
+        Accessable by any user or client within the same org.
+      type: item_endpoint
+      get: !include ../shared/keys-list.yaml

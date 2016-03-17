@@ -15,6 +15,7 @@
 
 require 'json'
 require 'pedant/rspec/keys_util'
+require_relative '../../shared_context/keys_context.rb'
 
 describe "User keys endpoint", :keys, :user_keys do
   include Pedant::RSpec::KeysUtil
@@ -107,9 +108,11 @@ describe "User keys endpoint", :keys, :user_keys do
       raise
     end
 
+    # orgs static in the tests, only create once
     if Pedant.config[:org][:create_me]
-      # orgs static in the tests, only create once
-      post("#{platform.server}/organizations", superuser, payload: { "name" => org_name, "full_name" => org_name } ).should look_like(status: 201)
+      @test_org = platform.create_org(org_name)
+    else
+      @test_org = platform.get_org(org_name)
     end
   end
 
@@ -514,7 +517,7 @@ describe "User keys endpoint", :keys, :user_keys do
       end
     end
 
-    context "posting keys" do
+    context "posting keys to /users/user" do
       let(:key_url) { "#{platform.server}/users/#{org_user_name}/keys" }
 
       it_behaves_like "basic keys POST validation"
@@ -570,13 +573,31 @@ describe "User keys endpoint", :keys, :user_keys do
       end
     end
 
-    context "PUT", :authorization do
+    context "posting keys to /orgs/org/users/user/keys" do
+     it "should return a 405" do
+        post("#{platform.server}/organizations/#{org_name}/users/#{org_user_name}/keys", superuser, payload: key_payload).should look_like(status: 405)
+      end
+    end
+
+    context "PUT to /users/user/keys", :authorization do
       let(:key_url) { "#{platform.server}/users/#{org_user_name}/keys" }
       it_behaves_like "PUT like a PATCH"
       it_behaves_like "basic keys PUT validation"
     end
 
-    context "DELETE", :authorization do
+    context "PUT to /orgs/org/users/user/keys" do
+     it "should return a 405" do
+        post("#{platform.server}/organizations/#{org_name}/users/#{org_user_name}/keys", superuser, payload: key_payload).should look_like(status: 405)
+      end
+    end
+
+    context "DELETE /orgs/org/users/user/keys/key" do
+     it "should return a 405" do
+        delete("#{platform.server}/organizations/#{org_name}/users/#{org_user_name}/keys/some_key", superuser, payload: {}).should look_like(status: 405)
+      end
+    end
+
+    context "DELETE /users/user/keys/key", :authorization do
       before(:all) do
         post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
       end
@@ -610,7 +631,7 @@ describe "User keys endpoint", :keys, :user_keys do
           delete_user_key(org_user_name, "alt_key", requestor: org_user).should look_like(status: 200)
         end
 
-        it "the user itself, authenticating with the key it is trying to delete should fail with 403" do
+        it "the user itself, authenticating with the key it is trying to delete should fail with 403", :authorization do
           delete_user_key(org_user_name, "alt_key", requestor: requestor(org_user_name, keys[:alt_key][:private]))
             .should look_like(
               status: 403,
@@ -647,18 +668,24 @@ describe "User keys endpoint", :keys, :user_keys do
             platform.remove_user_from_org(org_name, other_org_user).should look_like(status: 200)
           end
 
-          it "should fail with a 403" do
+          it "should fail with a 403", :authorization do
             delete_user_key(org_user_name, "alt_key", requestor: other_org_user).should look_like(status: 403)
           end
         end
 
-        it "a user not affiliated with the org should fail with a 403" do
+        it "a user not affiliated with the org should fail with a 403", :authorization do
           delete_user_key(org_user_name, "alt_key", requestor: other_org_user).should look_like(status: 403)
         end
 
-        it "the org admin should fail with a 403" do
+        it "the org admin should fail with a 403", :authorization do
           delete_user_key(org_user_name, "alt_key", requestor: org_admin_user).should look_like(status: 403)
         end
+      end
+    end
+
+    context "PUT /orgs/org/users/user/keys/key" do
+     it "should return a 405" do
+        put("#{platform.server}/organizations/#{org_name}/users/#{org_user_name}/keys/some_key", superuser, payload: {}).should look_like(status: 405)
       end
     end
 
@@ -687,7 +714,7 @@ describe "User keys endpoint", :keys, :user_keys do
           put(key_url, org_user, payload: key_payload).should look_like(status: 200)
         end
 
-        it "the user itself, authenticating with the key it is trying to delete should fail with 403" do
+        it "the user itself, authenticating with the key it is trying to delete should fail with 403", :authorization do
           put(key_url, requestor(org_user_name, keys[:alt_key][:private]), payload: key_payload)
             .should look_like(
               status: 403,
@@ -726,330 +753,401 @@ describe "User keys endpoint", :keys, :user_keys do
             platform.remove_user_from_org(org_name, other_org_user).should look_like(status: 200)
           end
 
-          it "should fail with a 403" do
+          it "should fail with a 403", :authorization do
             put(key_url, other_org_user, payload: key_payload).should look_like(status: 403)
           end
         end
 
-        it "a user not affiliated with the org should fail with a 403" do
+        it "a user not affiliated with the org should fail with a 403", :authorization do
           put(key_url, other_org_user, payload: key_payload).should look_like(status: 403)
         end
 
-        it "the org admin should fail with a 403" do
+        it "the org admin should fail with a 403", :authorization do
           put(key_url, org_admin_user, payload: key_payload).should look_like(status: 403)
         end
       end
     end
 
     context "listing key(s)" do
-      before(:each) do
-        platform.associate_user_with_org(org_name, org_user).should look_like(status: 201)
-        post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
-      end
+      context "GET /organizations/organization/users/user/keys" do
+        context "when multiple keys are present" do
+          before(:each) do
+            platform.associate_user_with_org(org_name, org_user).should look_like(status: 201)
+            add_user_key(org_user_name, :key, "key1", :expires => unexpired_date).should look_like(status: 201)
+            add_user_key(org_user_name, :alt_key, "key2", :expires => expired_date).should look_like(status: 201)
+          end
 
-      after (:each) do
-        delete("#{org_base_url}/clients/#{org_client_name}", superuser).should look_like(status: 200)
-        platform.remove_user_from_org(org_name, org_user).should look_like(status: 200)
-      end
+          after(:each) do
+            platform.remove_user_from_org(org_name, org_user).should look_like(status: 200)
+            delete_user_key(org_user_name, "key1").should look_like(status: 200)
+            delete_user_key(org_user_name, "key2").should look_like(status: 200)
+          end
 
-      context "when GET /users/user/keys is called (list keys)" do
-        it "by an invalid user fails with a 401", :authentication do
-          get("#{platform.server}/users/#{user['name']}/keys", requestor("bob", user['private_key']))
-            .should look_like(status: 401)
-        end
+          shared_examples_for 'successful user key get' do
+            context "when GET /organizations/organization/users/user/keys is called (list keys)" do
+              it "all keys should be listed with correct expiry indicators" do
+                list_org_scoped_user_keys(org_name, org_user_name, current_requestor).should look_like({
+                                                                                                         :status => 200,
+                                                                                                         :body => [
+                                                                                                           { "name" => "default", "uri" => "#{platform.server}/organizations/#{org_name}/users/#{org_user_name}/keys/default", "expired" => false },
+                                                                                                           { "name" => "key1", "uri" => "#{platform.server}/organizations/#{org_name}/users/#{org_user_name}/keys/key1", "expired" => false },
+                                                                                                           { "name" => "key2", "uri" => "#{platform.server}/organizations/#{org_name}/users/#{org_user_name}/keys/key2", "expired" => true }
+                                                                                                         ]})
+              end
 
-        it "by a client in the same org fails with a 401", :authentication do
-          list_user_keys(org_user_name, org_client).should look_like(status: 401)
-        end
+              context "when GET is called on the URIs that are returned" do
+                it "should return status 200" do
+                  user_keys = list_org_scoped_user_keys(org_name, org_user_name, current_requestor)
+                  user_keys.should look_like(status: 200)
+                  JSON.parse(user_keys).each do |key|
+                    get(key["uri"], current_requestor).should look_like(status: 200)
+                  end
+                end
+              end
+            end
 
-        it "who isn't valid by a user who is valid fails with a 404" do
-          get("#{platform.server}/users/bob/keys", org_user).should look_like(status: 404)
-        end
-      end
+            context "when GET /organizations/organization/users/user/keys/key is called (get single key)" do
+              context "when it is called for each valid key" do
+                it "should properly return the default key with valid expiration" do
+                  get_org_scoped_user_key(org_name, org_user_name, current_requestor, "default")
+                    .should look_like(
+                              status:  200,
+                              body: { "name" => "default",
+                                      "public_key" => keys[:org_user][:public],
+                                      "expiration_date" => "infinity"
+                                    }
+                            )
+                end
 
-      context "when GET /users/user/keys/default is called" do
-        it "by an invalid user fails with a 401", :authentication do
-          get("#{platform.server}/users/#{user['name']}/keys/default", requestor("bob", user['private_key']))
-            .should look_like(status: 401)
-        end
+                it "should properly return the first custom key with valid expiration" do
+                  get_org_scoped_user_key(org_name, org_user_name, current_requestor, "key1").should look_like({
+                                                                                                                 :status => 200,
+                                                                                                                 :body => { "name" => "key1", "public_key" => keys[:key][:public], "expiration_date" => unexpired_date }
+                                                                                                               })
+                end
 
-        it "by a client in the same org fails with a 401", :authentication do
-          get_user_key(org_user_name, org_client, "default").should look_like(status: 401)
-        end
+                it "should properly return the second custom key with valid expiration" do
+                  get_org_scoped_user_key(org_name, org_user_name, current_requestor, "key2").should look_like({
+                                                                                                                 :status => 200,
+                                                                                                                 :body => { "name" => "key2", "public_key" => keys[:alt_key][:public], "expiration_date" => expired_date }
+                                                                                                               })
+                end
+              end
+            end
+          end # shared_examples_for successful user key get
 
-        it "who isn't valid by a user who is valid fails with a 404" do
-          get("#{platform.server}/users/bob/keys/default", org_user).should look_like(status: 404)
-        end
-      end
+          # contexts from '../../shared_context/keys_context.rb'
+          context 'when the superuser is making the request' do
+            include_context 'when the current_requestor is the superuser'
+            it_should_behave_like 'successful user key get'
+          end
 
-      context "when multiple keys are present" do
+          context 'when a user that is a member of the same org is making the request' do
+            include_context 'when the current_requestor is a user in the main org'
+            it_should_behave_like 'successful user key get'
+          end
+
+          context 'when a client is a member of the same org is making the request' do
+            include_context 'when the current_requestor is a client in the main org'
+            it_should_behave_like 'successful user key get'
+          end
+
+          context 'when a user is not a member of the same org is making a request' do
+            include_context 'when the current_requestor is a user in a different org'
+            it 'list user keys returns a 403', :authentication do
+              list_org_scoped_user_keys(org_name, org_user_name, current_requestor).should look_like(:status => 403)
+            end
+
+            it 'get user keys returns a 403', :authentication do
+              get_org_scoped_user_key(org_name, org_user_name, current_requestor, 'key1').should look_like(:status => 403)
+            end
+          end
+
+          context 'when a client is not a member of the same org is making a request' do
+            include_context 'when the current_requestor is a client in a different org'
+
+            it 'list user keys returns a 401', :authentication do
+              list_org_scoped_user_keys(org_name, org_user_name, current_requestor).should look_like(:status => 401)
+            end
+
+            it 'get user keys returns a 401', :authentication do
+              get_org_scoped_user_key(org_name, org_user_name, current_requestor, 'key1').should look_like(:status => 401)
+            end
+          end
+        end # context when multiple keys are present
+
+        context "invalid cases", :user_keys do
+          before(:each) do
+            platform.associate_user_with_org(org_name, org_user).should look_like(status: 201)
+            post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
+          end
+
+          after (:each) do
+            delete("#{org_base_url}/clients/#{org_client_name}", superuser).should look_like(status: 200)
+            platform.remove_user_from_org(org_name, org_user).should look_like(status: 200)
+          end
+
+          context "when GET /organizations/org/users/user/keys is called (list keys)" do
+            it "by an invalid user fails with a 401", :authentication do
+              get("#{platform.server}/organizations/#{org_name}/users/#{user['name']}/keys", requestor("bob", user['private_key'])).should look_like(status: 401)
+            end
+
+            it "by an invalid org fails with a 404", :authentication do
+              get("#{platform.server}/organizations/some_invalid_org/users/#{org_user_name}/keys", org_user).should look_like(status: 404)
+            end
+
+            it "who isn't valid by a user who is valid fails with a 404" do
+              get("#{platform.server}/organizations/#{org_name}/users/bob/keys", org_user).should look_like(status: 404)
+            end
+          end
+
+          context "when GET /organizations/org/users/user/keys/default is called" do
+            it "by an invalid user fails with a 401", :authentication do
+              get("#{platform.server}/organizations/#{org_name}/users/#{user['name']}/keys/default", requestor("bob", user['private_key'])).should look_like(status: 401)
+            end
+
+            it "who isn't valid by a user who is valid fails with a 404" do
+              get("#{platform.server}/organizations/#{org_name}/users/bob/keys/default", org_user).should look_like(status: 404)
+            end
+          end
+        end # of a user
+      end # context GET /organizations/organization/users/user/keys
+
+      context "GET /users/user/keys" do
         before(:each) do
-          add_user_key(org_user_name, :key, "key1", expires: unexpired_date).should look_like(status: 201)
-          add_user_key(org_user_name, :alt_key, "key2", expires: expired_date).should look_like(status: 201)
+          platform.associate_user_with_org(org_name, org_user).should look_like(status: 201)
+          post("#{org_base_url}/clients", superuser, payload: org_client_payload).should look_like(status: 201)
         end
 
-        after(:each) do
-          delete_user_key(org_user_name, "key1").should look_like(status: 200)
-          delete_user_key(org_user_name, "key2").should look_like(status: 200)
+        after (:each) do
+          delete("#{org_base_url}/clients/#{org_client_name}", superuser).should look_like(status: 200)
+          platform.remove_user_from_org(org_name, org_user).should look_like(status: 200)
         end
 
         context "when GET /users/user/keys is called (list keys)" do
-          it "all keys should be listed with correct expiry indicators" do
-            list_user_keys(org_user_name, superuser).should look_like(
-              status: 200,
-              body: [
-                { "name" => "default", "uri" => "#{platform.server}/users/#{org_user_name}/keys/default", "expired" => false },
-                { "name" => "key1", "uri" => "#{platform.server}/users/#{org_user_name}/keys/key1", "expired" => false },
-                { "name" => "key2", "uri" => "#{platform.server}/users/#{org_user_name}/keys/key2", "expired" => true }
-              ]
-            )
+          it "by an invalid user fails with a 401", :authentication do
+            get("#{platform.server}/users/#{user['name']}/keys", requestor("bob", user['private_key']))
+              .should look_like(status: 401)
           end
 
-          context "when GET is called on the URIs that are returned" do
-            it "should return status 200" do
-              user_keys = list_user_keys(org_user_name, superuser)
-              JSON.parse(user_keys).each do |key|
-                get(key["uri"], superuser).should look_like(status: 200)
+          it "by a client in the same org fails with a 401", :authentication do
+            list_user_keys(org_user_name, org_client).should look_like(status: 401)
+          end
+
+          it "who isn't valid by a user who is valid fails with a 404" do
+            get("#{platform.server}/users/bob/keys", org_user).should look_like(status: 404)
+          end
+        end
+
+        context "when GET /users/user/keys/default is called" do
+          it "by an invalid user fails with a 401", :authentication do
+            get("#{platform.server}/users/#{user['name']}/keys/default", requestor("bob", user['private_key']))
+              .should look_like(status: 401)
+          end
+
+          it "by a client in the same org fails with a 401", :authentication do
+            get_user_key(org_user_name, org_client, "default").should look_like(status: 401)
+          end
+
+          it "who isn't valid by a user who is valid fails with a 404" do
+            get("#{platform.server}/users/bob/keys/default", org_user).should look_like(status: 404)
+          end
+        end
+
+        context "when multiple keys are present" do
+          before(:each) do
+            add_user_key(org_user_name, :key, "key1", expires: unexpired_date).should look_like(status: 201)
+            add_user_key(org_user_name, :alt_key, "key2", expires: expired_date).should look_like(status: 201)
+          end
+
+          after(:each) do
+            delete_user_key(org_user_name, "key1").should look_like(status: 200)
+            delete_user_key(org_user_name, "key2").should look_like(status: 200)
+          end
+
+          context "when GET /users/user/keys is called (list keys)" do
+            it "all keys should be listed with correct expiry indicators" do
+              list_user_keys(org_user_name, superuser).should look_like(
+                                                                status: 200,
+                                                                body: [
+                                                                  { "name" => "default", "uri" => "#{platform.server}/users/#{org_user_name}/keys/default", "expired" => false },
+                                                                  { "name" => "key1", "uri" => "#{platform.server}/users/#{org_user_name}/keys/key1", "expired" => false },
+                                                                  { "name" => "key2", "uri" => "#{platform.server}/users/#{org_user_name}/keys/key2", "expired" => true }
+                                                                ]
+                                                              )
+            end
+
+            context "when GET is called on the URIs that are returned" do
+              it "should return status 200" do
+                user_keys = list_user_keys(org_user_name, superuser)
+                JSON.parse(user_keys).each do |key|
+                  get(key["uri"], superuser).should look_like(status: 200)
+                end
+              end
+            end
+          end
+
+          context "when GET /users/user/keys/key is called (get single key)" do
+            context "when it is called for each valid key" do
+              it "should properly return the default key with valid expiration" do
+                get_user_key(org_user_name, superuser, "default")
+                  .should look_like(
+                            status: 200,
+                            body: {
+                              "name" => "default",
+                              "public_key" => keys[:org_user][:public],
+                              "expiration_date" => "infinity"
+                            }
+                          )
+              end
+
+              it "should properly return the first custom key with valid expiration" do
+                get_user_key(org_user_name, superuser, "key1").should look_like(
+                                                                        status: 200,
+                                                                        body: {
+                                                                          "name" => "key1",
+                                                                          "public_key" => keys[:key][:public],
+                                                                          "expiration_date" => unexpired_date
+                                                                        }
+                                                                      )
+              end
+
+              it "should properly return the second custom key with valid expiration" do
+                get_user_key(org_user_name, superuser, "key2").should look_like(
+                                                                        status: 200,
+                                                                        body: {
+                                                                          "name" => "key2",
+                                                                          "public_key" => keys[:alt_key][:public],
+                                                                          "expiration_date" => expired_date
+                                                                        }
+                                                                      )
               end
             end
           end
         end
 
-        context "when GET /users/user/keys/key is called (get single key)" do
-          context "when it is called for each valid key" do
-            it "should properly return the default key with valid expiration" do
-              get_user_key(org_user_name, superuser, "default")
-                .should look_like(
-                  status: 200,
-                  body: {
-                    "name" => "default",
-                    "public_key" => keys[:org_user][:public],
-                    "expiration_date" => "infinity"
-                  }
-                )
+        context "by an org admin", :authorization do
+          context "when GET /users/user/keys is called" do
+            it "for a user that is a member of the same org succeeds with a 200" do
+              list_user_keys(org_user_name, org_admin_user).should look_like(status: 200)
             end
 
-            it "should properly return the first custom key with valid expiration" do
-              get_user_key(org_user_name, superuser, "key1").should look_like(
-                status: 200,
-                body: {
-                  "name" => "key1",
-                  "public_key" => keys[:key][:public],
-                  "expiration_date" => unexpired_date
-                }
-              )
+            it "for a user that is not a member of the same org fails with a 403", :authorization do
+              list_user_keys(other_org_user_name, org_admin_user).should look_like(status: 403)
+            end
+          end
+
+          context "when GET /users/user/keys/key is called" do
+            it "for a user that is a member of the same org succeeds with a 200" do
+              get_user_key(org_user_name, org_admin_user, "default").should look_like(status: 200)
             end
 
-            it "should properly return the second custom key with valid expiration" do
-              get_user_key(org_user_name, superuser, "key2").should look_like(
-                status: 200,
-                body: {
-                  "name" => "key2",
-                  "public_key" => keys[:alt_key][:public],
-                  "expiration_date" => expired_date
-                }
-              )
+            it "for a user that is not a member of the same org fails with a 403", :authorization do
+              get_user_key(other_org_user_name, org_admin_user, "default").should look_like(status: 403)
             end
           end
         end
-      end
 
-      context "by an org admin", :authorization do
-        context "when GET /organizations/org/clients/client/keys is called" do
-          it "for a client that is a member of the same org succeeds with a 200" do
-            list_client_keys(org_name, org_client_name, org_admin_user).should look_like(status: 200)
+        context "by an org client", :authorization do
+
+          let(:client_payload) do
+            { "name" => client['name'], "public_key" => client['public_key'],
+              "admin" => "true"
+            }
           end
 
-          it "for a client that is a member of a different org fails with a 403" do
-            list_client_keys(other_org_name, other_org_client_name, org_admin_user).should look_like(status: 403)
-          end
-        end
-
-        context "when GET /users/user/keys is called" do
-          it "for a user that is a member of the same org succeeds with a 200" do
-            list_user_keys(org_user_name, org_admin_user).should look_like(status: 200)
+          # create client before each test
+          before(:each) do
+            post("#{org_base_url}/clients", superuser, payload: client_payload)
           end
 
-          it "for a user that is not a member of the same org fails with a 403" do
-            list_user_keys(other_org_user_name, org_admin_user).should look_like(status: 403)
-          end
-        end
-
-        context "when GET /organizations/org/clients/client/keys/key is called" do
-          it "for a client that is a member of the same org succeeds with a 200" do
-            get_client_key(org_name, org_client_name, org_admin_user, "default").should look_like(status: 200)
+          # delete client after each test
+          after(:each) do
+            delete("#{org_base_url}/clients/#{client['name']}", superuser)
           end
 
-          it "for a client that is a member of a different org fails with a 403" do
-            get_client_key(other_org_name, other_org_client_name, org_admin_user, "default").should look_like(status: 403)
+          context "when GET /users/user/keys is called" do
+            it "for a user that is a member of the same org fails with a 401" do
+              list_user_keys(org_user_name, org_client).should look_like(status: 401)
+            end
+
+            it "for a user that is not a member of the same org fails with a 401" do
+              list_user_keys(other_org_user_name, org_client).should look_like(status: 401)
+            end
           end
-        end
 
-        context "when GET /users/user/keys/key is called" do
-          it "for a user that is a member of the same org succeeds with a 200" do
-            get_user_key(org_user_name, org_admin_user, "default").should look_like(status: 200)
-          end
+          context "when GET /users/user/keys/key is called" do
+            it "for a user that is a member of the same org fails with a 401" do
+              get_user_key(org_user_name, org_client, "default").should look_like(status: 401)
+            end
 
-          it "for a user that is not a member of the same org fails with a 403" do
-            get_user_key(other_org_user_name, org_admin_user, "default").should look_like(status: 403)
-          end
-        end
-      end
-
-      context "by an org client", :authorization do
-
-        let(:client_payload) do
-          { "name" => client['name'], "public_key" => client['public_key'],
-            "admin" => "true"
-          }
-        end
-
-        # create client before each test
-        before(:each) do
-          post("#{org_base_url}/clients", superuser, payload: client_payload)
-        end
-
-        # delete client after each test
-        after(:each) do
-          delete("#{org_base_url}/clients/#{client['name']}", superuser)
-        end
-
-        context "when GET /organizations/org/clients/client/keys is called" do
-          it "for a client that is a member of the same org fails with a 403" do
-            list_client_keys(org_name, client['name'], org_client).should look_like(status: 403)
-          end
-          it "for a itself succeeds with a 200" do
-            list_client_keys(org_name, org_client_name, org_client).should look_like(status: 200)
-          end
-          it "for a client that is a member of a different org fails with a 401" do
-            list_client_keys(other_org_name, other_org_client_name, org_client).should look_like(status: 401)
+            it "for a user that is not a member of the same org fails with a 401" do
+              get_user_key(other_org_user_name, org_client, "default").should look_like(status: 401)
+            end
           end
         end
 
-        context "when GET /users/user/keys is called" do
-          it "for a user that is a member of the same org fails with a 401" do
-            list_user_keys(org_user_name, org_client).should look_like(status: 401)
+        context "by an org member who is not an admin", :authorization do
+          before (:each) do
+            platform.associate_user_with_org(other_org_name, other_org_user)
           end
 
-          it "for a user that is not a member of the same org fails with a 401" do
-            list_user_keys(other_org_user_name, org_client).should look_like(status: 401)
-          end
-        end
-
-        context "when GET /organizations/org/clients/client/keys/key is called" do
-          it "for a client that is a member of the same org fails with a 403" do
-            get_client_key(org_name, client['name'], org_client, "default").should look_like(status: 403)
-          end
-          it "for a itself succeeds with a 200" do
-            get_client_key(org_name, org_client_name, org_client, "default").should look_like(status: 200)
-          end
-          it "for a client that is a member of a different org fails with a 401" do
-            get_client_key(other_org_name, other_org_client_name, org_client, "default").should look_like(status: 401)
-          end
-        end
-
-        context "when GET /users/user/keys/key is called" do
-          it "for a user that is a member of the same org fails with a 401" do
-            get_user_key(org_user_name, org_client, "default").should look_like(status: 401)
+          after (:each) do
+            platform.remove_user_from_org(other_org_name, other_org_user)
           end
 
-          it "for a user that is not a member of the same org fails with a 401" do
-            get_user_key(other_org_user_name, org_client, "default").should look_like(status: 401)
-          end
-        end
-      end
+          context "when GET /users/user/keys is called" do
+            it "for a user that is a member of the same org fails with a 403", :authorization do
+              list_user_keys(user['name'], org_user).should look_like(status: 403)
+            end
 
-      context "by an org member who is not an admin", :authorization do
-        before (:each) do
-          platform.associate_user_with_org(other_org_name, other_org_user)
-        end
-
-        after (:each) do
-          platform.remove_user_from_org(other_org_name, other_org_user)
-        end
-
-        context "when GET /organizations/org/clients/client/keys is called" do
-          it "for a client that is a member of the same org succeeds with a 200" do
-            list_client_keys(org_name, org_client_name, org_user).should look_like(status: 200)
+            it "for a user that is not a member of the same org fails with a 403", :authorization do
+              list_user_keys(org_user_name, other_org_user).should look_like(status: 403)
+            end
           end
 
-          it "for a client that is a member of a different org fails with a 403" do
-            list_client_keys(org_name, org_client_name, other_org_user).should look_like(status: 403)
+          context "when GET /users/user/keys/key is called" do
+            it "for a user that is a member of the same org fails with a 403", :authorization do
+              get_user_key(user['name'], org_user, "default").should look_like(status: 403)
+            end
+
+            it "for a user that is not a member of the same org fails with a 403", :authorization do
+              get_user_key(org_user_name, other_org_user, "default").should look_like(status: 403)
+            end
           end
         end
 
-        context "when GET /users/user/keys is called" do
-          it "for a user that is a member of the same org fails with a 403" do
-            list_user_keys(user['name'], org_user).should look_like(status: 403)
+        context "by an unaffiliated user", :authorization do
+          before (:each) do
+            post("#{platform.server}/organizations/#{other_org_name}/clients", superuser, payload: other_org_client_payload).should look_like(status: 201)
           end
 
-          it "for a user that is not a member of the same org fails with a 403" do
-            list_user_keys(org_user_name, other_org_user).should look_like(status: 403)
-          end
-        end
-
-        context "when GET /organizations/org/clients/client/key is called" do
-          it "for a client that is a member of the same org succeeds with a 200" do
-            get_client_key(org_name, org_client_name, org_user, "default").should look_like(status: 200)
+          after (:each) do
+            delete("#{platform.server}/organizations/#{other_org_name}/clients/#{other_org_client_name}", superuser).should look_like(status: 200)
           end
 
-          it "for a client that is a member of a different org fails with a 403" do
-            get_client_key(org_name, org_client_name, other_org_user, "default").should look_like(status: 403)
+          context "when GET /users/user/keys is called" do
+            it "attempting to see their own keys succeeds with a 200" do
+              list_user_keys(org_user_name, org_user).should look_like(status: 200)
+            end
+
+            it "attempting to see someone else's keys fails with a 403", :authorization do
+              list_user_keys(other_org_user_name, org_user).should look_like(status: 403)
+            end
           end
-        end
 
-        context "when GET /users/user/keys/key is called" do
-          it "for a user that is a member of the same org fails with a 403" do
-            get_user_key(user['name'], org_user, "default").should look_like(status: 403)
-          end
+          context "when GET /users/user/keys/key is called" do
+            it "attempting to see their own keys succeeds with a 200" do
+              get_user_key(org_user_name, org_user, "default").should look_like(status: 200)
+            end
 
-          it "for a user that is not a member of the same org fails with a 403" do
-            get_user_key(org_user_name, other_org_user, "default").should look_like(status: 403)
-          end
-        end
-      end
-
-      context "by an unaffiliated user", :authorization do
-        before (:each) do
-          post("#{platform.server}/organizations/#{other_org_name}/clients", superuser, payload: other_org_client_payload).should look_like(status: 201)
-        end
-
-        after (:each) do
-          delete("#{platform.server}/organizations/#{other_org_name}/clients/#{other_org_client_name}", superuser).should look_like(status: 200)
-        end
-
-        context "when GET /organizations/org/clients/client/keys is called" do
-          it "attempting to see an org client's keys fails with a 403" do
-            list_client_keys(other_org_name, other_org_client_name, org_user).should look_like(status: 403)
+            it "attempting to see someone else's key fails with a 403", :authorization do
+              get_user_key(other_org_user_name, org_user, "default").should look_like(status: 403)
+            end
           end
         end
+      end # GET /users/user/keys
+    end # context listing key(s)
+  end # context managing keys
+end # describe /keys endpoint
 
-        context "when GET /users/user/keys is called" do
-          it "attempting to see their own keys succeeds with a 200" do
-            list_user_keys(org_user_name, org_user).should look_like(status: 200)
-          end
-
-          it "attempting to see someone else's keys fails with a 403" do
-            list_user_keys(other_org_user_name, org_user).should look_like(status: 403)
-          end
-        end
-
-        context "when GET /organizations/org/clients/client/keys/key is called" do
-          it "attempting to see an org client's key fails with a 403" do
-            get_client_key(other_org_name, other_org_client_name, org_user, "default").should look_like(status: 403)
-          end
-        end
-
-        context "when GET /users/user/keys/key is called" do
-          it "attempting to see their own keys succeeds with a 200" do
-            get_user_key(org_user_name, org_user, "default").should look_like(status: 200)
-          end
-
-          it "attempting to see someone else's key fails with a 403" do
-            get_user_key(other_org_user_name, org_user, "default").should look_like(status: 403)
-          end
-        end
-      end
-    end
-  end
-end

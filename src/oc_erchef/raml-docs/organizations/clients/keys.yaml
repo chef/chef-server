@@ -7,6 +7,7 @@ get:
   description: |
     Retrieves all of the client's key identifers and their associated
     URIs and expiry states.
+    Accessable by any user or client within the same org.
   responses:
     200:
       body:
@@ -42,6 +43,7 @@ post:
   get:
     description: |
       Retrieves the specified public key and it's associated data.
+      Accessable by any user or client within the same org.
     responses:
       200:
         body:

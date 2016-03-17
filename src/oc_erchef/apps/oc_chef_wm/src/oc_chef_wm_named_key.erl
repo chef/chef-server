@@ -62,6 +62,18 @@ init_resource_state(_Config) ->
 request_type() ->
     "keys".
 
+%% /users/:user/keys/:key OR
+%% /organizations/:org/users/:user/keys/:key
+allowed_methods(Req, #base_state{resource_args = user} = State) ->
+    case wrq:path_info(organization_id, Req) of
+        %% /users/:user/keys/:key
+        undefined ->
+           {['GET', 'DELETE', 'PUT'], Req, State};
+        %% For /orgs/:org/users/:user/keys/:key, we've only implemented GET so far.
+        _ ->
+            {['GET'], Req, State}
+    end;
+%% /organizations/:org/clients/:client/keys/:key
 allowed_methods(Req, State) ->
     {['GET', 'DELETE', 'PUT'], Req, State}.
 

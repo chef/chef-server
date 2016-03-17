@@ -161,6 +161,8 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
             invert_perm(check_permission(group, AuthzId, Req1, State1));
         {{group_id, AuthzId}, Req1, State1} ->
             invert_perm(check_permission(group, AuthzId, Req1, State1));
+        {{member_of, MemberAuthzId, {Type, GroupName}}, Req1, State1} ->
+            check_recursive_group_membership(MemberAuthzId, GroupName, Type, Req1, State1);
         {{Type, ObjectId, Permission}, Req1, State1} when Type =:= object;
                                                           Type =:= actor ->
             invert_perm(check_permission(Permission, Type, ObjectId, Req1, State1));
@@ -461,17 +463,12 @@ authorized_by_org_membership_check(Req, #base_state{organization_name = OrgName,
             end
     end.
 
+
+-spec set_forbidden_msg(atom(), wm_req(), chef_wm:base_state()) ->
+                               {wm_req(), chef_wm:base_state()}.
 set_forbidden_msg(Perm, Req, State) when is_atom(Perm)->
     Msg = iolist_to_binary(["missing ", atom_to_binary(Perm, utf8), " permission"]),
-    JsonMsg = chef_json:encode({[{<<"error">>, [Msg]}]}),
-    Req1 = wrq:set_resp_body(JsonMsg, Req),
-    {Req1, State#base_state{log_msg = {Perm, forbidden}}}.
-
-%% Assumes the permission can be derived from the HTTP verb of the request; this is the
-%% original behavior of this function, prior to the addition of set_forbidden_msg/3.
-set_forbidden_msg(Req, State) ->
-    Perm = http_method_to_authz_perm(Req),
-    set_forbidden_msg(Perm, Req, State).
+    set_custom_forbidden_msg(Msg, Req, State).
 
 forbidden_message(not_member_of_org, User, Org) ->
     Msg = iolist_to_binary([<<"'">>, User, <<"' not associated with organization '">>, Org, <<"'">>]),
@@ -1318,3 +1315,66 @@ default_malformed_request_message(Any, _Req, _State) ->
 
 allow_all(Req, State) ->
     {authorized, Req, State}.
+
+%% @private
+
+-spec check_recursive_group_membership(object_id(), string(), global | local, wm_req(), chef_wm:base_state()) ->
+                                              {true | false, wm_req(), chef_wm:base_state()}.
+check_recursive_group_membership(MemberAuthzId, GroupName, global, Req, State) ->
+    check_recursive_group_membership(MemberAuthzId, GroupName, fetch_global_group, [GroupName], Req, State);
+check_recursive_group_membership(MemberAuthzId, GroupName, local, Req, #base_state{organization_guid = OrgId} = State) ->
+    check_recursive_group_membership(MemberAuthzId, GroupName, fetch_group, [OrgId, GroupName], Req, State).
+
+-spec check_recursive_group_membership(object_id(), string(), atom(), list(), wm_req(), chef_wm:base_state()) ->
+                                              {true | false, wm_req(), chef_wm:base_state()}.
+check_recursive_group_membership(MemberAuthzId, GroupName, FetchMethod, FetchArgs, Req,
+                                 #base_state{chef_authz_context = AuthzContext} = State) ->
+    case apply(oc_chef_authz_db, FetchMethod, lists:append([AuthzContext], FetchArgs)) of
+        {not_found, authz_group} ->
+            Msg = iolist_to_binary(["Could not find group ", GroupName, " needed for authentication for ",
+                                      atom_to_binary(http_method_to_authz_perm(Req), utf8), "access on this endpoint."]),
+            {Req1, State1} = set_custom_forbidden_msg(Msg, Req, State),
+            {true, Req1, State1};
+        Group ->
+            GroupAuthzId = Group#oc_chef_group.authz_id,
+            resolve_permissions_from_recursive_group_membership(MemberAuthzId, GroupAuthzId, GroupName, Req, State)
+    end.
+
+-spec resolve_permissions_from_recursive_group_membership(object_id(), object_id(), string(), wm_req(), chef_wm:base_state()) ->
+                                                                 {true | false, wm_req(), chef_wm:base_state()}.
+resolve_permissions_from_recursive_group_membership(MemberAuthzId, GroupAuthzId, GroupName, Req, State) ->
+    case oc_chef_authz:is_actor_transitive_member_of_group(oc_chef_authz:superuser_id(), MemberAuthzId, GroupAuthzId) of
+        {error, not_found} ->
+            {Req1, State1} = set_membership_not_found_forbidden_msg(Req, State, GroupName),
+            {true, Req1, State1};
+        false ->
+            {Req1, State1} = set_membership_not_found_forbidden_msg(Req, State, GroupName),
+            {true, Req1, State1};
+        true ->
+            {false, Req, State}
+    end.
+
+-spec set_membership_not_found_forbidden_msg(wm_req(), chef_wm:base_state(), string()) ->
+                                                    {wm_req(), chef_wm:base_state()}.
+set_membership_not_found_forbidden_msg(Req, State, GroupName) ->
+    Perm = http_method_to_authz_perm(Req),
+    Msg = iolist_to_binary(["Requestor not found to be a member of group ",
+                            GroupName, " which is necessary for ", atom_to_binary(Perm, utf8),
+                            " access for this request."]),
+    set_custom_forbidden_msg(Msg, Req, State).
+
+-spec set_custom_forbidden_msg(binary(), wm_req(), chef_wm:base_state()) ->
+                                      {wm_req(), chef_wm:base_state()}.
+set_custom_forbidden_msg(Msg, Req, State) ->
+    JsonMsg = chef_json:encode({[{<<"error">>, [Msg]}]}),
+    Req1 = wrq:set_resp_body(JsonMsg, Req),
+    Perm = http_method_to_authz_perm(Req),
+    {Req1, State#base_state{log_msg = {Perm, forbidden}}}.
+
+%% Assumes the permission can be derived from the HTTP verb of the request; this is the
+%% original behavior of this function, prior to the addition of set_forbidden_msg/3.
+-spec set_forbidden_msg(wm_req(), chef_wm:base_state()) ->
+                               {wm_req(), chef_wm:base_state()}.
+set_forbidden_msg(Req, State) ->
+    Perm = http_method_to_authz_perm(Req),
+    set_forbidden_msg(Perm, Req, State).

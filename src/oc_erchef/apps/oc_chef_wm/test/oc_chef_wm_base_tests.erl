@@ -22,6 +22,12 @@
 -include("oc_chef_wm.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
+-define(ACTOR_ID,       <<"33333333333333333333333333333333">>).
+-define(GROUP_AUTHZ_ID, <<"22222222222222222222222222222222">>).
+-define(ORG_ID,         <<"12341234123412341234123412341234">>).
+-define(ORG_NAME, <<"ponyville">>).
+-define(GROUP_NAME, "test_group").
+
 stats_hero_label_test_() ->
 
     application:set_env(chef_objects, s3_url, "http://s3.amazonaws.com"),
@@ -40,6 +46,133 @@ stats_hero_label_test_() ->
                 ?_assertError({bad_prefix, {bad, juju}},
                               oc_chef_wm_base:stats_hero_label({bad, juju})) ],
     GoodTests ++ BadTests.
+
+check_recursive_group_membership_test_() ->
+    {foreach,
+     fun() ->
+             meck:new(oc_chef_authz),
+             meck:expect(oc_chef_authz, superuser_id, fun() ->
+                                                              unused
+                                                      end),
+             meck:new(wrq),
+             meck:expect(wrq, method, fun(_Req) ->
+                                              'GET'
+                                      end),
+             meck:expect(wrq, set_resp_body, fun(_Json, Req) ->
+                                                     Req
+                                             end)
+     end,
+     fun(_) ->
+             meck:unload()
+     end,
+     [
+      {"a global group when not a member returns true (forbidden)",
+       fun() ->
+               Req = make_req_data(),
+               State = make_base_state(),
+               meck:new(oc_chef_authz_db),
+               meck:expect(oc_chef_authz_db, fetch_global_group, fun(mock_authz_context, ?GROUP_NAME) ->
+                                                                         #oc_chef_group{ authz_id = ?GROUP_AUTHZ_ID }
+                                                                 end),
+               meck:expect(oc_chef_authz, is_actor_transitive_member_of_group, fun(_RequestorId, _MemberId, _GroupId) ->
+                                                                                     false
+                                                                             end),
+               {Result, _, _} = oc_chef_wm_base:check_recursive_group_membership(?ACTOR_ID, ?GROUP_NAME, global, Req, State),
+               ?assertEqual(true, Result)
+       end},
+      {"a local group when not a member returns true (forbidden)",
+       fun() ->
+               Req = make_req_data(),
+               State = make_base_state(),
+               meck:new(oc_chef_authz_db),
+               meck:expect(oc_chef_authz_db, fetch_group, fun(mock_authz_context, ?ORG_ID, ?GROUP_NAME) ->
+                                                                  #oc_chef_group{ authz_id = ?GROUP_AUTHZ_ID }
+                                                          end),
+               meck:expect(oc_chef_authz, is_actor_transitive_member_of_group, fun(_RequestorId, _MemberId, _GroupId) ->
+                                                                                       false
+                                                                               end),
+               {Result, _, _} = oc_chef_wm_base:check_recursive_group_membership(?ACTOR_ID, ?GROUP_NAME, local, Req, State),
+               ?assertEqual(true, Result)
+       end},
+      {"a global group is not found returns true (forbidden)",
+       fun() ->
+               Req = make_req_data(),
+               State = make_base_state(),
+               meck:new(oc_chef_authz_db),
+               meck:expect(oc_chef_authz_db, fetch_global_group, fun(mock_authz_context, ?GROUP_NAME) ->
+                                                                         #oc_chef_group{ authz_id = ?GROUP_AUTHZ_ID }
+                                                                 end),
+               meck:expect(oc_chef_authz, is_actor_transitive_member_of_group, fun(_RequestorId, _MemberId, _GroupId) ->
+                                                                                       {error, not_found}
+                                                                               end),
+               {Result, _, _} = oc_chef_wm_base:check_recursive_group_membership(?ACTOR_ID, ?GROUP_NAME, global, Req, State),
+               ?assertEqual(true, Result)
+       end},
+      {"a local group is not found returns true (forbidden)",
+       fun() ->
+               Req = make_req_data(),
+               State = make_base_state(),
+               meck:new(oc_chef_authz_db),
+               meck:expect(oc_chef_authz_db, fetch_group, fun(mock_authz_context, ?ORG_ID, ?GROUP_NAME) ->
+                                                                  #oc_chef_group{ authz_id = ?GROUP_AUTHZ_ID }
+                                                          end),
+               meck:expect(oc_chef_authz, is_actor_transitive_member_of_group, fun(_RequestorId, _MemberId, _GroupId) ->
+                                                                                       {error, not_found}
+                                                                               end),
+               {Result, _, _} = oc_chef_wm_base:check_recursive_group_membership(?ACTOR_ID, ?GROUP_NAME, local, Req, State),
+               ?assertEqual(true, Result)
+       end},
+      {"actor is a member of a global group returns false (not forbidden)",
+       fun() ->
+               Req = make_req_data(),
+               State = make_base_state(),
+               meck:new(oc_chef_authz_db),
+               meck:expect(oc_chef_authz_db, fetch_global_group, fun(mock_authz_context, ?GROUP_NAME) ->
+                                                                         #oc_chef_group{ authz_id = ?GROUP_AUTHZ_ID }
+                                                                 end),
+               meck:expect(oc_chef_authz, is_actor_transitive_member_of_group, fun(_RequestorId, _MemberId, _GroupId) ->
+                                                                                       true
+                                                                               end),
+               {Result, _, _} = oc_chef_wm_base:check_recursive_group_membership(?ACTOR_ID, ?GROUP_NAME, global, Req, State),
+               ?assertEqual(false, Result)
+       end},
+      {"actor is a member of a local group returns false (not forbidden)",
+       fun() ->
+               Req = make_req_data(),
+               State = make_base_state(),
+               meck:new(oc_chef_authz_db),
+               meck:expect(oc_chef_authz_db, fetch_group, fun(mock_authz_context, ?ORG_ID, ?GROUP_NAME) ->
+                                                                  #oc_chef_group{ authz_id = ?GROUP_AUTHZ_ID }
+                                                          end),
+               meck:expect(oc_chef_authz, is_actor_transitive_member_of_group, fun(_RequestorId, _MemberId, _GroupId) ->
+                                                                                       true
+                                                                               end),
+               {Result, _, _} = oc_chef_wm_base:check_recursive_group_membership(?ACTOR_ID, ?GROUP_NAME, local, Req, State),
+               ?assertEqual(false, Result)
+       end},
+      {"when a global group is not found returns true (forbidden)",
+       fun() ->
+               Req = make_req_data(),
+               State = make_base_state(),
+               meck:new(oc_chef_authz_db),
+               meck:expect(oc_chef_authz_db, fetch_global_group, fun(mock_authz_context, ?GROUP_NAME) ->
+                                                                         {not_found, authz_group}
+                                                                 end),
+               {Result, _, _} = oc_chef_wm_base:check_recursive_group_membership(?ACTOR_ID, ?GROUP_NAME, global, Req, State),
+               ?assertEqual(true, Result)
+       end},
+      {"when a local group is not found returns true (forbidden)",
+       fun() ->
+               Req = make_req_data(),
+               State = make_base_state(),
+               meck:new(oc_chef_authz_db),
+               meck:expect(oc_chef_authz_db, fetch_group, fun(mock_authz_context, ?ORG_ID, ?GROUP_NAME) ->
+                                                                  {not_found, authz_group}
+                                                          end),
+               {Result, _, _} = oc_chef_wm_base:check_recursive_group_membership(?ACTOR_ID, ?GROUP_NAME, local, Req, State),
+               ?assertEqual(true, Result)
+       end}
+     ]}.
 
 verify_request_signature_test_() ->
     {foreach,
@@ -92,7 +225,8 @@ make_req_data() ->
 
 make_base_state() ->
     #base_state{
-       organization_name = <<"ponyville">>,
-       organization_guid = <<"12341234123412341234123412341234">>,
-       auth_skew = 900
+       organization_name = ?ORG_NAME,
+       organization_guid = ?ORG_ID,
+       auth_skew = 900,
+       chef_authz_context = mock_authz_context
       }.
