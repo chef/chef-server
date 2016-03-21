@@ -34,6 +34,7 @@ override :ruby, version: "2.1.4"
 override :rubygems, version: "2.4.5"
 override :'omnibus-ctl', version: "0.4.2"
 override :bundler, version: "1.10.6"
+override :nodejs, version: "0.10.35"
 # creates required build directories
 dependency "preparation"
 
