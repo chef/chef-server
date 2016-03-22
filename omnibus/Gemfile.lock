@@ -1,13 +1,13 @@
 GIT
   remote: git://github.com/chef/omnibus-software.git
-  revision: 8d92d016355e25af6525876c6ea6930c8fd35b2d
+  revision: 3e392f27c2a7d49a2aded125d825d54ac191ea1a
   specs:
     omnibus-software (4.0.0)
       omnibus (>= 5.2.0)
 
 GIT
   remote: git://github.com/chef/omnibus.git
-  revision: afdd6ede314242dfd0c9a0dcbc86a65037f2f118
+  revision: e75b1bff54814036684fe091dc9a2f72087f5378
   specs:
     omnibus (5.2.0)
       aws-sdk (~> 2)
@@ -22,16 +22,16 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
-    addressable (2.3.8)
-    aws-sdk (2.2.27)
-      aws-sdk-resources (= 2.2.27)
-    aws-sdk-core (2.2.27)
+    addressable (2.4.0)
+    aws-sdk (2.2.28)
+      aws-sdk-resources (= 2.2.28)
+    aws-sdk-core (2.2.28)
       jmespath (~> 1.0)
-    aws-sdk-resources (2.2.27)
-      aws-sdk-core (= 2.2.27)
-    berkshelf (4.2.3)
+    aws-sdk-resources (2.2.28)
+      aws-sdk-core (= 2.2.28)
+    berkshelf (4.3.0)
       addressable (~> 2.3, >= 2.3.4)
-      berkshelf-api-client (~> 2.0)
+      berkshelf-api-client (~> 2.0, >= 2.0.2)
       buff-config (~> 1.0)
       buff-extensions (~> 1.0)
       buff-shell_out (~> 0.1)
@@ -43,12 +43,13 @@ GEM
       minitar (~> 0.5, >= 0.5.4)
       octokit (~> 4.0)
       retryable (~> 2.0)
-      ridley (~> 4.4, >= 4.4.3)
+      ridley (~> 4.5)
       solve (~> 2.0)
       thor (~> 0.19)
-    berkshelf-api-client (2.0.1)
+    berkshelf-api-client (2.0.2)
       faraday (~> 0.9.1)
       httpclient (~> 2.7.0)
+      ridley (~> 4.5)
     buff-config (1.0.1)
       buff-extensions (~> 1.0)
       varia_model (~> 0.4)
@@ -63,8 +64,9 @@ GEM
     celluloid-io (0.16.2)
       celluloid (>= 0.16.0)
       nio4r (>= 1.1.0)
-    chef (12.7.2)
-      chef-config (= 12.7.2)
+    chef (12.8.1)
+      bundler (>= 1.10)
+      chef-config (= 12.8.1)
       chef-zero (~> 4.5)
       diff-lcs (~> 1.2, >= 1.2.4)
       erubis (~> 2.7)
@@ -87,7 +89,7 @@ GEM
       specinfra (~> 2.10)
       syslog-logger (~> 1.6)
       uuidtools (~> 2.1.5)
-    chef-config (12.7.2)
+    chef-config (12.8.1)
       mixlib-config (~> 2.0)
       mixlib-shellout (~> 2.0)
     chef-sugar (3.3.0)
@@ -97,7 +99,7 @@ GEM
       mixlib-log (~> 1.3)
       rack
       uuidtools (~> 2.1)
-    chefspec (4.5.0)
+    chefspec (4.6.0)
       chef (>= 11.14)
       fauxhai (~> 3.0, >= 3.0.1)
       rspec (~> 3.0)
@@ -130,7 +132,7 @@ GEM
     mixlib-log (1.6.0)
     mixlib-shellout (2.2.6)
     mixlib-versioning (1.1.0)
-    molinillo (0.2.3)
+    molinillo (0.4.4)
     multi_json (1.11.2)
     multipart-post (2.0.0)
     net-scp (1.2.1)
@@ -143,8 +145,8 @@ GEM
       net-ssh-gateway (>= 1.2.0)
     net-telnet (0.1.1)
     nio4r (1.2.1)
-    octokit (4.2.0)
-      sawyer (~> 0.6.0, >= 0.5.3)
+    octokit (4.3.0)
+      sawyer (~> 0.7.0, >= 0.5.3)
     ohai (8.12.1)
       chef-config (>= 12.5.0.alpha.1, < 13)
       ffi (~> 1.9)
@@ -162,7 +164,7 @@ GEM
     rack (1.6.4)
     rake (11.1.1)
     retryable (2.0.3)
-    ridley (4.4.3)
+    ridley (4.5.0)
       addressable
       buff-config (~> 1.0)
       buff-extensions (~> 1.0)
@@ -184,7 +186,7 @@ GEM
       rspec-core (~> 3.4.0)
       rspec-expectations (~> 3.4.0)
       rspec-mocks (~> 3.4.0)
-    rspec-core (3.4.3)
+    rspec-core (3.4.4)
       rspec-support (~> 3.4.0)
     rspec-expectations (3.4.0)
       diff-lcs (>= 1.2.0, < 2.0)
@@ -200,20 +202,20 @@ GEM
       builder (< 4)
       rspec-core (>= 2, < 4, != 2.12.0)
     ruby-progressbar (1.7.5)
-    sawyer (0.6.0)
-      addressable (~> 2.3.5)
+    sawyer (0.7.0)
+      addressable (>= 2.3.5, < 2.5)
       faraday (~> 0.8, < 0.10)
     semverse (1.2.1)
-    serverspec (2.30.0)
+    serverspec (2.31.0)
       multi_json
       rspec (~> 3.0)
       rspec-its
-      specinfra (~> 2.48)
+      specinfra (~> 2.53)
     sfl (2.2)
-    solve (2.0.2)
-      molinillo (~> 0.2.3)
+    solve (2.0.3)
+      molinillo (~> 0.4.2)
       semverse (~> 1.1)
-    specinfra (2.51.2)
+    specinfra (2.54.1)
       net-scp
       net-ssh (>= 2.7, < 3.1)
       net-telnet
