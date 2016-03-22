@@ -48,7 +48,7 @@ if [ "$#" -ne 1 ]; then
     usage
 fi
 
-github_changelog_generator --enhancement-labels "enhancement,Enhancement,New Feature" --bug-labels "bug,Bug,Improvement,Upstream Bug" --exclude-labels "duplicate,question,invalid,wontfix,no_changelog" -o NEW_CHANGELOG.md --future-release $chef_version
+github_changelog_generator -u chef -p chef-server -t $CHANGELOG_GITHUB_TOKEN --enhancement-labels "enhancement,Enhancement,New Feature" --bug-labels "bug,Bug,Improvement,Upstream Bug" --exclude-labels "duplicate,question,invalid,wontfix,no_changelog" -o NEW_CHANGELOG.md --future-release $chef_version
 
 ar x $1 data.tar.gz
 tar -xzf data.tar.gz opt/opscode/version-manifest.json
