@@ -3,6 +3,7 @@
 %% ex: ts=4 sw=4 ft=erlang et
 
 [
+ {kernel, [{inet_dist_use_interface, {127,0,0,1}}]},
  %% SASL config
  {sasl, [
          {sasl_error_logger, {file, "<%= File.join(@log_directory, 'sasl-error.log') %>"}},
