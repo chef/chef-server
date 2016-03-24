@@ -22,7 +22,7 @@
 %% under the License.
 %%
 
--module(chef_wm_status).
+-module(chef_wm_metrics).
 
 -ifdef(TEST).
 -compile(export_all).
@@ -46,17 +46,35 @@ content_types_provided(Req, State) ->
     {[{"application/json", to_json}], Req, State}.
 
 to_json(Req, State) ->
-    case check_health() of
-        {fail, Body} ->
-            {{halt, 500}, wrq:set_resp_body(Body, Req), State};
-        {pong, Body} ->
-            {Body, Req, State}
-    end.
+    Body = check_metrics(),
+    {Body, Req, State}.
 
 %% private functions
 
--spec check_health() -> {pong | fail, binary()}.
-check_health() ->
-    Status = <<"test">>
-    StatList = [{<<"test">>, <<"one">>}],
-    {Status, chef_json:encode({StatList})}.
+-spec check_metrics() -> {binary()}.
+check_metrics() ->
+    %% Add: chef_index_http, chef_depsolver
+    Pools = [sqerl, oc_chef_authz_http],
+    Metrics = {get_metrics(Pools)},
+    chef_json:encode(Metrics).
+
+% get_free_members([{_,{_,free,{_,_,_}}} | T]) ->
+%     get_free_members(T, 1, 1);
+% get_free_members([{_,{_,_,{_,_,_}}} | T]) ->
+%     get_free_members(T, 0, 1).
+get_free_members([{_,{_,free,{_,_,_}}} | T], Free, Total) ->
+    get_free_members(T, Free+1, Total+1);
+get_free_members([{_,{_,_,{_,_,_}}} | T], Free, Total) ->
+    get_free_members(T, Free, Total+1);
+get_free_members([], Free, Total) -> {[{<<"free">>, list_to_binary(integer_to_list(Free))}, {<<"total">>, list_to_binary(integer_to_list(Total))}]}.
+
+get_metrics([H | T]) ->
+    PoolMembers = pooler:pool_stats(H),
+    FreeMembers = [{?A2B(H), get_free_members(PoolMembers, 0, 0)}],
+    get_metrics(T, FreeMembers);
+get_metrics([]) -> ok.
+get_metrics([H | T], Metrics) ->
+    PoolMembers = pooler:pool_stats(H),
+    FreeMembers = lists:append(Metrics,[{?A2B(H), get_free_members(PoolMembers, 0, 0)}]),
+    get_metrics(T, FreeMembers);
+get_metrics([], Metrics) -> Metrics.
