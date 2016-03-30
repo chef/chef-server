@@ -63,7 +63,7 @@ build do
       f.write <<-EOH.gsub(/^ {8}/, '')
         cookbook_path   "#{install_dir}/embedded/cookbooks"
         cache_path "/var/opt/opscode/local-mode-cache"
-        file_cache_path "#{install_dir}/embedded/cookbooks/cache"
+        file_cache_path "/var/opt/opscode/local-mode-cache"
         verbose_logging true
         ssl_verify_mode :verify_peer
         client_fork false
