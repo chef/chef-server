@@ -19,7 +19,7 @@ Requirements:
 * VirtualBox 4.3+
 * Vagrant 1.7+
 * At least one recent Chef Server 12.0.9+ debian package download,
-  which you can grab from https://packagecloud.io/chef/current. Note
+  which you can grab from https://bintray.com/chef/current/chef-server. Note
   that you should download the chef-server-core package, and not run the
   installer. dvm will then look for the package in either the Downloads dir
   on your machine or the omnibus/pkg directory under the chef-server repo

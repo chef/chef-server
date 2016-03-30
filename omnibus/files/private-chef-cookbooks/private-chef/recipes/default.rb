@@ -121,15 +121,6 @@ include_recipe "private-chef::sysctl-updates"
 # Run plugins first, mostly for ha
 include_recipe "private-chef::plugin_chef_run"
 
-# If the add-on repository exists, include the recipe
-# to ensure that it's disabled.  Since chef-server-core
-# lives in the same repository as the add-ons, this
-# avoids unplanned upgrades to chef-server-core
-if OmnibusHelper.new(node).repository_configured? "chef-stable"
-  include_recipe "private-chef::add_ons_repository"
-end
-
-
 # Configure Services
 [
   "rabbitmq",
