@@ -76,7 +76,7 @@ prune_%:
 
 # Bundle install and build chef-server
 dev-build: clear_pkg_cache prune
-	kitchen exec default-$(DEV_PLATFORM) -c "bash -l -c 'cd chef-server/omnibus && bundle install && time bundle exec omnibus build chef-server'"
+	kitchen exec default-$(DEV_PLATFORM) -c "bash -l -c 'cd chef-server/omnibus && source ~/load-omnibus-toolchain.sh && bundle install && time bundle exec omnibus build chef-server'"
 
 install:
 	bundle install

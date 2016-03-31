@@ -171,14 +171,20 @@ class OmnibusHelper
       !(node['private_chef']['ldap'].nil? || node['private_chef']['ldap'].empty?)
   end
 
-  def repository_configured?(name)
+  def platform_package_suffix
     case node['platform_family']
-    when 'rhel'
-      File.exists? "/etc/yum.repos.d/#{name}.repo"
     when 'debian'
-      File.exists? "/etc/apt/sources.list.d/#{name}.list"
+      'deb'
+    when 'rhel', 'suse'
+      'rpm'
     else
-     false
+      # TODO: probably don't actually want to fail out?
+      raise "I don't know how to install addons for platform family: #{node['platform_family']}"
     end
+  end
+
+  def remote_install_addons?
+    # chef-solo and chef-client -z return different things :(
+    (node['private_chef']['addons']['path'] == nil) || (node['private_chef']['addons']['path'] == {})
   end
 end

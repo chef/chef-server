@@ -51,19 +51,3 @@ template "/etc/opscode-reporting/opscode-reporting.rb" do
   action :create
   only_if { node['provisioning'].has_key? 'opscode-reporting-config' }
 end
-
-# Install required external packages.
-# TODO eventually support auto-download of these packages from packagecloud
- #node['chef-server']['installers'].each do |package_name|
-  #package package_name do
-    #source "/installers/#{package_name}"
-    #provider Chef::Provider::Package::Dpkg
-    #action :install
-    #not_if { File.exists? "/var/chef/cache/#{package_name}-installed" }
-  #end
-  #file "/var/chef/cache/#{package_name}-installed" do
-    #action :create
-  #end
-
-#end
-
