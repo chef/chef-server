@@ -22,8 +22,8 @@ In order to release, you will need the following accounts/permissions:
 - Local checkouts of the chef-server and chef-web-downloads repositories
 - Push access to the chef-server github repository
 - Chef Software, Inc Slack account
-- blog.chef.io wordpress account
 - VPN account for Chef Software, Inc.
+- Account on [https://discourse.chef.io](https://discourse.chef.io) using your Chef email address
 - Login for wilson.ci.opscode.us (This is linked to your github
 account.)
 - Access to artifactory.chef.co
@@ -77,14 +77,8 @@ The git SHA of the build you are testing can be found in
 
 - [ ] Check RELEASE_NOTES.md to ensure that it describes the
   most important user-facing changes in the release. This file should
-  form the basis of the blog post in the following step. Update as
+  form the basis of the post to Discourse that comes in a later step. Update as
   appropriate.
-
-- [ ] Write a blog post for blog.chef.io. This requires a wordpress
-  login. If the release contains a fix for a security vulnerability,
-  you MUST tag the post as "security". The blog post should include a
-  link to the downloads page (download.chef.io). Save the post as a
-  draft.
 
 ### Building and Releasing the Release
 
@@ -106,8 +100,9 @@ The git SHA of the build you are testing can be found in
   "#engineering-services" room.  Once this is done, the release is
   available to the public via the APT and YUM repositories.
 
-- [ ] Support should already know a release is coming; however, as a
-  courtesy, drop a message in the Customer Support slack channel.
+- [ ] Chef employees should already know a release is coming; however, as a
+  courtesy, drop a message in the #cft-announce slack channel that the release
+  is coming. Provide the release number and any highlights of the release.
 
 - [ ] In your local checkout of the chef-web-downloads repository,
 generate an update to the download pages using rake:
@@ -132,10 +127,18 @@ based on the branch you just created.
   change to the live website; however, it might take a few minutes for
   the deploy to complete and then a few more for CDN caches to expire.
 
-- [ ] Publish your draft blog post.
+- [ ] Write and then publish a Discourse post on https://discourse.chef.io
+  once the release is live. This post should contain a link to the downloads
+  page ([https://downloads.chef.io](https://downloads.chef.io)) and its contents
+  should be based on the information that was added to the RELEASE_NOTES.md file
+  in an earlier step. *The post should  be published to the Chef Release
+  Announcements category on https://discourse.chef.io. If it is a security
+  release, it should also be published to the Chef Security Announcements
+  category.* Full details on the policy of making release announcements on
+  Discourse can be found on the wiki under the Engineering section ->
+  Policy and Processes -> Release Announcements and Security Alerts
 
-- [ ] Send an email to the chef and chef-dev mailing lists announcing
-the release with a link to the blog post.
+- [ ] Let `#cft-announce` know about the release, including a link to the Discourse post.
 
 Chef Server is now released.
 
