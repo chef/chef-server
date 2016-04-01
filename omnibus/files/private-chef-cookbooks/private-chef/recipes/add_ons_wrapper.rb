@@ -53,10 +53,7 @@ if OmnibusHelper.new(node).remote_install_addons?
       channel: :stable,
       product_name: pkg.split(/(chef-|opscode-)(.*)/).last,
       product_version: :latest,
-      platform: node['platform'],
-      platform_version: node['platform_version'],
-      architecture: node['kernel']['machine'],
-    ).artifact_info
+    ).detect_platform.artifact_info
 
     pkg_file = File.join(addon_path, File.basename(artifact_info.url))
 
