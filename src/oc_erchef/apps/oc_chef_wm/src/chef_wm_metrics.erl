@@ -53,20 +53,27 @@ to_json(Req, State) ->
 
 -spec check_metrics() -> {binary()}.
 check_metrics() ->
-    %% Add: chef_index_http, chef_depsolver
-    Pools = [sqerl, oc_chef_authz_http],
-    Metrics = {get_metrics(Pools)},
-    chef_json:encode(Metrics).
+    Pools = [sqerl, oc_chef_authz_http, chef_index_http, chef_depsolver],
+    Metrics = get_metrics(Pools),
+    %%Count = list_to_binary(node_count()),
+    chef_json:encode({[{<<"pooler_metrics">>,{Metrics}},{<<"node_count">>, list_to_binary(node_count())}]}).
 
-% get_free_members([{_,{_,free,{_,_,_}}} | T]) ->
-%     get_free_members(T, 1, 1);
-% get_free_members([{_,{_,_,{_,_,_}}} | T]) ->
-%     get_free_members(T, 0, 1).
+node_count() ->
+   case chef_sql:count_nodes() of
+     {ok, none} ->
+       integer_to_list(0);
+     {ok, Number} ->
+       integer_to_list(Number);
+     {error, Error} ->
+       Error
+   end.
+
 get_free_members([{_,{_,free,{_,_,_}}} | T], Free, Total) ->
     get_free_members(T, Free+1, Total+1);
 get_free_members([{_,{_,_,{_,_,_}}} | T], Free, Total) ->
     get_free_members(T, Free, Total+1);
-get_free_members([], Free, Total) -> {[{<<"free">>, list_to_binary(integer_to_list(Free))}, {<<"total">>, list_to_binary(integer_to_list(Total))}]}.
+get_free_members([], Free, Total) ->
+    {[{<<"free">>, list_to_binary(integer_to_list(Free))}, {<<"total">>, list_to_binary(integer_to_list(Total))}]}.
 
 get_metrics([H | T]) ->
     PoolMembers = pooler:pool_stats(H),
