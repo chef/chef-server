@@ -639,63 +639,54 @@ EOF
     end
 
     def consume_existing_secrets
+      @secrets = {}
       existing_secrets.each do |k, v|
+        @secrets[k] ||= Mash.new
         v.each do |pk, p|
+          @secrets[k][pk] ||= Mash.new
           if not PrivateChef[k]
-            @extra_secrets ||= Hash.new
-            @extra_secrets[k] ||= Hash.new
             Chef::Log.warn("The secret for #{k} doesn't appear to be valid, you should remove it.")
-            @extra_secrets[k][pk] = p
           else
             PrivateChef[k][pk] = p
           end
+          @secrets[k][pk] = p
         end
       end
     end
 
     def write_secrets_file
       if File.directory?("/etc/opscode")
+
+        required_keys = {
+          'redis_lb' => ['password'],
+          'rabbitmq' => ['password', 'actions_password', 'management_password'],
+          'postgresql' => ['db_superuser_password'],
+          'opscode_erchef' => ['sql_password', 'sql_ro_password'],
+          'oc_id' => ['sql_password', 'sql_ro_password', 'secret_key_base'],
+          'drbd' => ['shared_secret'],
+          'keepalived' => ['vrrp_instance_password'],
+          'oc_bifrost' => ['superuser_id', 'sql_password', 'sql_ro_password'],
+          'bookshelf' => ['sql_password', 'sql_ro_password', 'access_key_id', 'secret_access_key']
+        }
+
+        # This hash was previously built statically, but when a customer templates private-chef-secrets
+        # and adds an extra key (or has an obsolete one) they may not want us to remove it from the JSON file
+        # otherwise, we could cause a fight between chef-server-ctl reconfigure and their automation.
+
+        out_hash = @secrets if @secrets
+
+        out_hash ||= {}
+        required_keys.each do |k,v|
+          out_hash[k] ||= {}
+          v.each do |hash_key|
+            out_hash[k][hash_key] = PrivateChef[k][hash_key]
+          end
+        end
+
         # This was originally directly written via f.puts(Chef::JSONCompat.to_json_pretty)
         # Let's instead assemble this hash externally so that if it fails for any reason
         # we don't wipe out the secrets file.
-        out_hash = {
-          'redis_lb' => {
-            'password' => PrivateChef['redis_lb']['password']
-          },
-          'rabbitmq' => {
-            'password' => PrivateChef['rabbitmq']['password'],
-            'actions_password' => PrivateChef['rabbitmq']['actions_password'],
-            'management_password' => PrivateChef['rabbitmq']['management_password']
-          },
-          'postgresql' => {
-            'db_superuser_password' => PrivateChef['postgresql']['db_superuser_password']
-          },
-          'opscode_erchef' => {
-            'sql_password' => PrivateChef['opscode_erchef']['sql_password'],
-            'sql_ro_password' => PrivateChef['opscode_erchef']['sql_ro_password']
-          },
-          'oc_id' => {
-            'sql_password' => PrivateChef['oc_id']['sql_password'],
-            'sql_ro_password' => PrivateChef['oc_id']['sql_ro_password'],
-            'secret_key_base' => PrivateChef['oc_id']['secret_key_base']
-          },
-          'drbd' => {
-            'shared_secret' => PrivateChef['drbd']['shared_secret']
-          },
-          'keepalived' => {
-            'vrrp_instance_password' => PrivateChef['keepalived']['vrrp_instance_password']
-          },
-          'oc_bifrost' => {
-            'superuser_id' => PrivateChef['oc_bifrost']['superuser_id'],
-            'sql_password' => PrivateChef['oc_bifrost']['sql_password'],
-            'sql_ro_password' => PrivateChef['oc_bifrost']['sql_ro_password']
-          },
-          'bookshelf' => {
-            'sql_password' => PrivateChef['bookshelf']['sql_password'],
-            'sql_ro_password' => PrivateChef['bookshelf']['sql_ro_password'],
-            'access_key_id' => PrivateChef['bookshelf']['access_key_id'],
-            'secret_access_key' => PrivateChef['bookshelf']['secret_access_key']
-          }}.merge(@extra_secrets)
+
         out_json = Chef::JSONCompat.to_json_pretty(out_hash)
 
         File.open("/etc/opscode/private-chef-secrets.json", "w") do |f|
