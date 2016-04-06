@@ -55,18 +55,8 @@ to_json(Req, State) ->
 check_metrics() ->
     Pools = [sqerl, oc_chef_authz_http, chef_index_http, chef_depsolver],
     Metrics = get_metrics(Pools),
-    %%Count = list_to_binary(node_count()),
-    chef_json:encode({[{<<"pooler_metrics">>,{Metrics}},{<<"node_count">>, list_to_binary(node_count())}]}).
-
-node_count() ->
-   case chef_sql:count_nodes() of
-     {ok, none} ->
-       integer_to_list(0);
-     {ok, Number} ->
-       integer_to_list(Number);
-     {error, Error} ->
-       Error
-   end.
+    % chef_json:encode({[{<<"pooler_metrics">>,{Metrics}},{<<"node_count">>, list_to_binary(node_count())}]}).
+    chef_json:encode({[{<<"pooler_metrics">>,{Metrics}}]}).
 
 get_free_members([{_,{_,free,{_,_,_}}} | T], Free, Total) ->
     get_free_members(T, Free+1, Total+1);
