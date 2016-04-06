@@ -44,7 +44,7 @@ class PreflightValidator
   end
 
   def secrets_exists?
-    PrivateChef.existing_secrets.length > 0
+    File.exist?("/etc/opscode/private-chef-secrets.json")
   end
 
   def backend?
