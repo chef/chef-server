@@ -631,7 +631,7 @@ EOF
     end
 
     def existing_secrets
-      existing_secrets ||= if File.exists?("/etc/opscode/private-chef-secrets.json")
+      @existing_secrets ||= if File.exists?("/etc/opscode/private-chef-secrets.json")
                               Chef::JSONCompat.from_json(File.read("/etc/opscode/private-chef-secrets.json"))
                             else
                               {}
@@ -639,17 +639,13 @@ EOF
     end
 
     def consume_existing_secrets
-      @secrets = {}
       existing_secrets.each do |k, v|
-        @secrets[k] ||= Mash.new
         v.each do |pk, p|
-          @secrets[k][pk] ||= Mash.new
           if not PrivateChef[k]
             Chef::Log.warn("The secret for #{k} doesn't appear to be valid, you should remove it.")
           else
             PrivateChef[k][pk] = p
           end
-          @secrets[k][pk] = p
         end
       end
     end
@@ -673,7 +669,7 @@ EOF
         # and adds an extra key (or has an obsolete one) they may not want us to remove it from the JSON file
         # otherwise, we could cause a fight between chef-server-ctl reconfigure and their automation.
 
-        out_hash = @secrets if @secrets
+        out_hash = @existing_secrets if @existing_secrets
 
         out_hash ||= {}
         required_keys.each do |k,v|
