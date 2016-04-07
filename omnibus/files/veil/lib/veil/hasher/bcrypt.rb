@@ -22,11 +22,7 @@ module Veil
             raise Veil::InvalidSecret.new("#{opts[:secret]} is not valid secret")
           end
         else
-          # BCrypt is capped at 55 character input:
-          #   secret = 53
-          #   version >= 1
-          #   service >= 1
-          @secret = SecureRandom.hex(53)
+          @secret = SecureRandom.hex(512)
           @salt = ::BCrypt::Engine.generate_salt(opts[:cost] || 10)
         end
       end
@@ -38,8 +34,7 @@ module Veil
       #
       # @return [String] SHA512 hex digest of hashed data
       def encrypt(data)
-        # Append the secret to the data because BCrypt will truncate our data to 55 characters.
-        hex_digest(::BCrypt::Engine.hash_secret([data, secret].join, salt))
+        hex_digest(::BCrypt::Engine.hash_secret(hex_digest([data, secret].join), salt))
       end
 
       # Return the instance as a Hash

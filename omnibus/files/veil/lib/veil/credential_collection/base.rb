@@ -15,7 +15,7 @@ module Veil
 
       attr_reader :credentials, :hasher
 
-      def_delegators :@credentials, :size, :length, :find, :map, :select, :each, :[]
+      def_delegators :@credentials, :size, :length, :find, :map, :select, :each, :[], :keys
 
       def initialize(opts = {})
         @hasher = Veil::Hasher.create(opts[:hasher] || {})
@@ -111,6 +111,10 @@ module Veil
 
       def rotate_hasher
         @hasher = Veil::Hasher.create
+        rotate_credentials
+      end
+
+      def rotate_credentials
         credentials.each do |cred_or_set_name, cred_or_set|
           if cred_or_set.is_a?(Veil::Credential)
             cred_or_set.rotate(hasher)
@@ -120,7 +124,7 @@ module Veil
         end
       end
 
-     private
+      private
 
       def expand_credentials_hash(creds_hash)
         expanded = Hash.new

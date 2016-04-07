@@ -52,10 +52,10 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 1.11)
+  bundler
   chefstyle
   pry
-  rake (~> 10.0)
+  rake
   rspec (~> 3.0)
   veil!
 

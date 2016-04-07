@@ -355,7 +355,7 @@ module PrivateChef
       if ! callback.nil?
         instance_exec(node_name, &callback)
       else
-        gen_secrets_default
+        gen_secrets_default(node_name)
       end
     end
 
@@ -432,11 +432,16 @@ module PrivateChef
       PrivateChef["nginx"]["url"] ||= "https://#{PrivateChef['api_fqdn']}"
     end
 
-    def gen_secrets_default
+    def gen_secrets_default(node_name)
       secrets_json = "/etc/opscode/private-chef-secrets.json"
       credentials =
         if File.exist?(secrets_json)
           Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_json)
+        elsif PrivateChef["topology"] == "ha" && !PrivateChef["servers"][node_name]["bootstrap"]
+          Chef::Log.fatal("In an H/A topology the secrets must be created on the bootstrap node. "\
+                          "Please copy the contents of /etc/opscode/ from your bootstrap Server " \
+                          "to complete the setup")
+          exit(44)
         else
           Veil::CredentialCollection::ChefSecretsFile.new(path: secrets_json)
         end

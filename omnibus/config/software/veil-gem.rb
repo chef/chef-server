@@ -16,7 +16,7 @@
 #
 name "veil-gem"
 default_version "master"
-source path: "#{Omnibus::Config.project_root}/../src/veil"
+source path: "#{project.files_path}/veil"
 
 license :project_license
 

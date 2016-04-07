@@ -2,11 +2,11 @@ require "veil"
 require "time"
 require "optparse"
 
-add_command_under_category "rotate-credentials", "credential-rotation", "Rotate Chef Server service credentials", 2 do
+add_command_under_category "rotate-credentials", "credential-rotation", "Rotate Chef Server credentials for a given service", 2 do
   ensure_configured!
 
   OptionParser.new do |opts|
-    opts.banner = "Usage: chef-server-ctl rotate-credential $service_name"
+    opts.banner = "Usage: chef-server-ctl rotate-credentials $service_name"
 
     opts.on("-h", "--help", "Show this message") do
       puts opts
@@ -18,7 +18,7 @@ add_command_under_category "rotate-credentials", "credential-rotation", "Rotate 
     service = ARGV[3]
 
     unless service
-      log("You must provide a credential service name and credential", :error)
+      log("You must provide a credential service name", :error)
       exit(1)
     end
 
@@ -50,17 +50,40 @@ add_command_under_category "rotate-credentials", "credential-rotation", "Rotate 
   end
 end
 
-add_command_under_category "rotate-shared-credential", "credential-rotation", "Rotate the Chef Server shared service credential and all service credentials", 2 do
+add_command_under_category "rotate-all-credentials", "credential-rotation", "Rotate all Chef Server service credentials", 2 do
   ensure_configured!
 
-  OptionParser.new do |opts|
-    opts.banner = "Usage: chef-server-ctl rotate-shared-credential [options]"
+  begin
+    timestamp = Time.now.iso8601
+    secrets_file = "/etc/opscode/private-chef-secrets.json"
+    secrets_file_backup = File.expand_path(File.join(File.dirname(secrets_file), "#{File.basename(secrets_file)}#{timestamp}.json"))
+    log("Backing up #{secrets_file} to #{secrets_file_backup}...")
+    FileUtils.cp(secrets_file, secrets_file_backup)
 
-    opts.on("-h", "--help", "Show this message") do
-      puts opts
-      exit
+    log("Rotating all Chef Server service credentials...", :notice)
+    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file)
+    credentials.rotate_credentials
+    credentials.save
+
+    status = run_chef("#{base_path}/embedded/cookbooks/dna.json")
+    if status.success?
+      log("Removing #{secrets_file_backup}...")
+      FileUtils.rm(secrets_file_backup)
+      log("All credentials have been rotated!", :notice)
+      log("Run 'chef-server-ctl rotate-all-credentials' on each Chef Server", :notice)
+      exit(0)
+    else
+      log("Credential rotation failed", :error)
+      exit(1)
     end
-  end.parse!(ARGV)
+  rescue => e
+    log(e.message, :error)
+    exit(1)
+  end
+end
+
+add_command_under_category "rotate-shared-secrets", "credential-rotation", "Rotate the Chef Server shared secrets and all service credentials", 2 do
+  ensure_configured!
 
   begin
     timestamp = Time.now.iso8601
@@ -69,7 +92,7 @@ add_command_under_category "rotate-shared-credential", "credential-rotation", "R
     log("Backing up #{secrets_file} to #{secrets_file_backup}...")
     FileUtils.cp(secrets_file, secrets_file_backup)
 
-    log("Rotating shared credential...", :notice)
+    log("Rotating shared credential secrets and service credentials...", :notice)
     credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file)
     credentials.rotate_hasher
     credentials.save
@@ -78,7 +101,7 @@ add_command_under_category "rotate-shared-credential", "credential-rotation", "R
     if status.success?
       log("Removing #{secrets_file_backup}...")
       FileUtils.rm(secrets_file_backup)
-      log("The shared credential and all service credentials have been rotated!", :notice)
+      log("The shared secrets and all service credentials have been rotated!", :notice)
       log("Please copy #{secrets_file} to each Chef Server and run 'chef-server-ctl reconfigure'", :notice)
       exit(0)
     else
@@ -89,6 +112,14 @@ add_command_under_category "rotate-shared-credential", "credential-rotation", "R
     log(e.message, :error)
     exit(1)
   end
+end
+
+add_command_under_category "show-service-credentials", "credential-rotation", "Show the service credentials", 2 do
+  ensure_configured!
+
+  credentials = Veil::CredentialCollection::ChefSecretsFile.from_file("/etc/opscode/private-chef-secrets.json")
+  pp(credentials.legacy_credentials_hash)
+  exit(0)
 end
 
 def ensure_configured!

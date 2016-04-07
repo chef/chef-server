@@ -164,6 +164,28 @@ describe Veil::CredentialCollection::Base do
     end
   end
 
+  describe "#rotate_credentials" do
+    it "doesn't create a new hasher" do
+      hasher = subject.hasher
+      subject.rotate_credentials
+      expect(subject.hasher).to eq(hasher)
+    end
+
+    it "rotates all credentials" do
+      subject.add("foo")
+      foo_val = subject["foo"].value
+      subject.add("bar", "baz", length: 25)
+      baz_val = subject["bar"]["baz"].value
+
+      subject.rotate_credentials
+
+      expect(subject["foo"].value).to_not eq(foo_val)
+      expect(subject["foo"].version).to eq(1)
+      expect(subject["bar"]["baz"].value).to_not eq(baz_val)
+      expect(subject["bar"]["baz"].version).to eq(1)
+    end
+  end
+
   describe "#rotate" do
     context "when the credential exists" do
       it "rotates the credential" do
