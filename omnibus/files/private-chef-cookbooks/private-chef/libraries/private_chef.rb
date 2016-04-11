@@ -669,7 +669,7 @@ EOF
         # and adds an extra key (or has an obsolete one) they may not want us to remove it from the JSON file
         # otherwise, we could cause a fight between chef-server-ctl reconfigure and their automation.
 
-        out_hash = @existing_secrets if @existing_secrets
+        out_hash = existing_secrets if existing_secrets.length > 0
 
         out_hash ||= {}
         required_keys.each do |k,v|
