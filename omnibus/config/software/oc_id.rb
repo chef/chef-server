@@ -31,6 +31,10 @@ relative_path "oc-id"
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
+  bundle "config build.nokogiri --use-system-libraries" \
+         " --with-xml2-config=#{install_dir}/embedded/bin/xml2-config" \
+         " --with-xslt-config=#{install_dir}/embedded/bin/xslt-config"
+
   bundle "install" \
          " --path=#{install_dir}/embedded/service/gem" \
          " --without development test doc", env: env
