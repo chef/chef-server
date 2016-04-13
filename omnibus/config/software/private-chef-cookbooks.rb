@@ -40,19 +40,19 @@ build do
         r << 'recipe[private-chef::default]'
       end
 
-      f.write JSON.fast_generate(
+      f.write FFI_Yajl::Encoder.encode(
         run_list: run_list
       )
     end
     File.open("#{install_dir}/embedded/cookbooks/show-config.json", "w") do |f|
-      f.write JSON.fast_generate(
+      f.write FFI_Yajl::Encoder.encode(
         run_list: [
           'recipe[private-chef::show_config]'
         ]
       )
     end
     File.open("#{install_dir}/embedded/cookbooks/post_upgrade_cleanup.json", "w") do |f|
-      f.write JSON.fast_generate(
+      f.write FFI_Yajl::Encoder.encode(
         run_list: [
           'recipe[private-chef::post_11_upgrade_cleanup]',
           'recipe[private-chef::post_12_upgrade_cleanup]'
