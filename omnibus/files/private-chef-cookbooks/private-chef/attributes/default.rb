@@ -93,6 +93,26 @@ default['private_chef']['opscode-solr']['data_dir'] = "/var/opt/opscode/opscode-
 ####
 default['private_chef']['server-api-version'] = 0
 
+####
+# HAProxy
+#
+# HAProxy is only used when use_chef_backend is true. All Postgresql
+# and Elasticsearch requests are routed to it and then forwarded to
+# the current chef-backend leader.
+####
+default['private_chef']['haproxy']['enable'] = true
+default['private_chef']['haproxy']['ha'] = false
+default['private_chef']['haproxy']['dir'] = "/var/opt/opscode/haproxy"
+default['private_chef']['haproxy']['log_directory'] = "/var/log/opscode/haproxy"
+default['private_chef']['haproxy']['log_rotation']['file_maxbytes'] = 104857600
+default['private_chef']['haproxy']['log_rotation']['num_to_keep'] = 10
+default['private_chef']['haproxy']['listen'] = '0.0.0.0'
+default['private_chef']['haproxy']['local_postgresql_port'] = 5432
+default['private_chef']['haproxy']['remote_postgresql_port'] = 5432
+default['private_chef']['haproxy']['local_elasticsearch_port'] = 9200
+default['private_chef']['haproxy']['remote_elasticsearch_port'] = 9200
+default['private_chef']['haproxy']['leaderl_healthcheck_port'] = 7331
+default['private_chef']['haproxy']['etcd_port'] = 2379
 
 ####
 # RabbitMQ

@@ -23,6 +23,9 @@ module PrivateChef
   # Set this for default org mode
   default_orgname nil
 
+  use_chef_backend false
+  chef_backend_members []
+
   addons Mash.new
   rabbitmq Mash.new
   external_rabbitmq Mash.new
@@ -212,6 +215,8 @@ module PrivateChef
         "ldap",
         "user",
         "ha",
+        "use_chef_backend",
+        "chef_backend_members",
         "disabled_plugins",
         "enabled_plugins",
         "license",
@@ -224,7 +229,9 @@ module PrivateChef
       (default_keys | keys_from_extensions).each do |key|
         # @todo: Just pick a naming convention and adhere to it
         # consistently
-        rkey = if key =~ /^oc_/ || key == "redis_lb"
+        rkey = if key =~ /^oc_/ || key == "redis_lb" ||
+                  key == "use_chef_backend" ||
+                  key == "chef_backend_members"
                  key # leave oc_* keys as is
                else
                  key.gsub('_', '-')
