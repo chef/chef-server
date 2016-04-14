@@ -42,6 +42,7 @@ dependency "private-chef-scripts" # assorted scripts used by installed instance
 dependency "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
 dependency "ctl-man" # install man page
 dependency "openresty"
+dependency "rb-readline"
 dependency "redis-gem" # gem for interacting with redis
 dependency "openresty-lpeg"  # lua-based routing
 dependency "runit"
