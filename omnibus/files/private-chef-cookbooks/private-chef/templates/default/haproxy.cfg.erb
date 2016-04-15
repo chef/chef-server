@@ -1,3 +1,6 @@
+global
+        stats socket /var/opt/opscode/haproxy/haproxy.sock mode 600
+
 frontend postgresql
          bind <%= @listen %>:<%= @local_postgresql_port %>
          mode tcp
