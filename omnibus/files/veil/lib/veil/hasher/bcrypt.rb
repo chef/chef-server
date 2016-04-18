@@ -27,19 +27,25 @@ module Veil
         end
       end
 
-      # Hash data with the stored secret and salt
+      # Hash the credential group, name and version with the stored secret and salt
       #
-      # @param [String] data
-      #   The service name and version to be encrypted with the shared key
+      # @param [String] group
+      #   The service group name, eg: postgresql
+      #
+      # @param [String] name
+      #   The credential name, eg: sql_password
+      #
+      # @param [Integer] version
+      #   The Credential version, eg: 1
       #
       # @return [String] SHA512 hex digest of hashed data
-      def encrypt(data)
-        hex_digest(::BCrypt::Engine.hash_secret(hex_digest([data, secret].join), salt))
+      def encrypt(group, name, version)
+        hex_digest(::BCrypt::Engine.hash_secret(hex_digest([secret, group, name, version].join), salt))
       end
 
       # Return the instance as a Hash
       #
-      # @return [Hash]
+      # @return [Hash<Symbol,String>]
       def to_hash
         {
           type: self.class.name,

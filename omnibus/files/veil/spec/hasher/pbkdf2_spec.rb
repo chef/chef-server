@@ -1,7 +1,9 @@
 require "spec_helper"
 
 describe Veil::Hasher::PBKDF2 do
-  let(:data)        { "android" }
+  let(:group)       { "android" }
+  let(:name)        { "artoo" }
+  let(:version)     { 2 }
   let(:salt)        { "nacl" }
   let(:secret)      { "sauce" }
   let(:iterations)  { 100 }
@@ -24,14 +26,14 @@ describe Veil::Hasher::PBKDF2 do
     context "from a hash" do
       it "builds an identical instance" do
         new_instance = described_class.new(subject.to_hash)
-        expect(new_instance.encrypt("slow forever")).to eq(subject.encrypt("slow forever"))
+        expect(new_instance.encrypt("slow", "forever", 5)).to eq(subject.encrypt("slow", "forever", 5))
       end
     end
   end
 
   describe "#encrypt" do
     it "deterministically encrypts data" do
-      encrypted_data = subject.encrypt(data)
+      encrypted_data = subject.encrypt(group, name, version)
 
       new_instance = described_class.new(
         secret: secret,
@@ -40,7 +42,7 @@ describe Veil::Hasher::PBKDF2 do
         hash_function: digest
       )
 
-      expect(new_instance.encrypt(data)).to eq(encrypted_data)
+      expect(new_instance.encrypt(group, name, version)).to eq(encrypted_data)
     end
   end
 

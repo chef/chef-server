@@ -1,7 +1,9 @@
 require "spec_helper"
 
 describe Veil::Hasher::BCrypt do
-  let(:data)        { "let me enter" }
+  let(:group)       { "postgresql" }
+  let(:name)        { "sql_ro_password" }
+  let(:version)     { "5" }
   let(:cost)        { 11 }
   let(:salt)        { "$2a$11$4xS0IHHxU5sOYZ0Z5X53Qe" }
   let(:secret)      { "only friends tell each other" }
@@ -16,21 +18,21 @@ describe Veil::Hasher::BCrypt do
     context "from a hash" do
       it "builds an identical instance" do
         new_instance = described_class.new(subject.to_hash)
-        expect(new_instance.encrypt("slow forever")).to eq(subject.encrypt("slow forever"))
+        expect(new_instance.encrypt("slow", "forever", 1)).to eq(subject.encrypt("slow", "forever", 1))
       end
     end
   end
 
   describe "#encrypt" do
     it "deterministically encrypts data" do
-      encrypted_data = subject.encrypt(data)
+      encrypted_data = subject.encrypt(group, name, version)
 
       new_instance = described_class.new(
         secret: secret,
         salt: salt,
       )
 
-      expect(new_instance.encrypt(data)).to eq(encrypted_data)
+      expect(new_instance.encrypt(group, name, version)).to eq(encrypted_data)
     end
   end
 

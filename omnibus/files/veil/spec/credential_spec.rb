@@ -17,7 +17,8 @@ describe Veil::Credential do
       name: "eros",
       version: 23,
       value: "some crazy secret",
-      length: 66
+      length: 66,
+      group: "portals"
     }
   end
 
@@ -32,16 +33,13 @@ describe Veil::Credential do
       expect(cred.version).to eq(credential_hash[:version])
       expect(cred.value).to eq(credential_hash[:value])
       expect(cred.length).to eq(credential_hash[:length])
+      expect(cred.group).to eq(credential_hash[:group])
     end
   end
 
   describe "#new" do
     it "sets a default version to 0" do
       expect(subject.version).to eq(0)
-    end
-
-    it "sets a default length to 128" do
-      expect(subject.length).to eq(128)
     end
   end
 end

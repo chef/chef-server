@@ -26,9 +26,9 @@ module Veil
       #   Optional parameter overrides
       #
       # @return [String] SHA512 hex digest of hashed data
-      def encrypt(data)
+      def encrypt(group, name, version)
         hex_digest(OpenSSL::PKCS5.pbkdf2_hmac(
-          [data, secret].join,
+          [secret, group, name, version].join,
           salt,
           iterations,
           hash_function.length,

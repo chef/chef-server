@@ -47,8 +47,8 @@ describe Veil::CredentialCollection::Base do
       end
     end
 
-    context "with a namespace and name" do
-      it "creates a new credential the right namespace and name" do
+    context "with a group and name" do
+      it "creates a new credential the right group and name" do
         subject.add("my_db", "password")
         expect(subject["my_db"]["password"]).to be_instance_of(Veil::Credential)
         expect(subject["my_db"]["password"].name).to eq("password")
@@ -63,8 +63,8 @@ describe Veil::CredentialCollection::Base do
       end
     end
 
-    context "with a namespace, name, and lenth" do
-      it "creates a new credential the right namespace and name" do
+    context "with a group, name, and lenth" do
+      it "creates a new credential the right group and name" do
         subject.add("my_db", "password", length: 15)
         expect(subject["my_db"]["password"]).to be_instance_of(Veil::Credential)
         expect(subject["my_db"]["password"].name).to eq("password")
@@ -72,8 +72,8 @@ describe Veil::CredentialCollection::Base do
       end
     end
 
-    context "with a namespace, name, default" do
-      it "creates a new credential the right namespace and name" do
+    context "with a group, name, default" do
+      it "creates a new credential the right group and name" do
         subject.add("my_db", "password", value: "super_unison")
         expect(subject["my_db"]["password"]).to be_instance_of(Veil::Credential)
         expect(subject["my_db"]["password"].name).to eq("password")
@@ -82,7 +82,7 @@ describe Veil::CredentialCollection::Base do
     end
 
     context "with a name and default" do
-      it "creates a new credential the right namespace and name" do
+      it "creates a new credential the right group and name" do
         subject.add("luau", value: "new_math")
         expect(subject["luau"]).to be_instance_of(Veil::Credential)
         expect(subject["luau"].name).to eq("luau")
@@ -124,7 +124,7 @@ describe Veil::CredentialCollection::Base do
       end
     end
 
-    context "with a namespace and cred" do
+    context "with a group and cred" do
       context "with a match" do
         it "returns the value and removes the credential" do
           subject.add("grandfunk", "railroad")

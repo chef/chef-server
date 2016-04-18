@@ -6,35 +6,40 @@ module Veil
       end
     end
 
-    attr_reader :version, :value, :name, :length
+    attr_reader :version, :value, :name, :length, :group
     alias_method :credential, :value
 
     def initialize(opts = {})
       validate_opts!(opts)
       @name = opts[:name]
       @version = opts[:version] || 0
-      @length = [opts[:length] || 128, 128].min
-      @value = opts[:value][0...@length]
+      @group = opts[:group] || nil
+      @value = opts[:value]
+      @length = opts[:length] || value.length
     end
 
     def eql?(other)
-      (@name == other.name) && (@value == other.value) && (@version == other.version)
+      (@name == other.name) &&
+        (@group == other.group) &&
+        (@value == other.value) &&
+        (@version == other.version)
     end
 
     def hash
-      [@name, @value, @version].hash
+      [@name, @group, @value, @version].hash
     end
 
     def rotate(hasher)
       raise InvalidHasher.new("You must supply a valid hasher to rotate a credential") unless hasher.respond_to?(:encrypt)
       @version += 1
-      @value = hasher.encrypt([name, version].join)[0...length]
+      @value = hasher.encrypt(group, name, version)[0...length]
     end
 
     def to_hash
       {
         type: self.class.name,
         name: name,
+        group: group,
         value: value,
         version: version,
         length: length
