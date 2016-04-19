@@ -14,7 +14,9 @@
 # limitations under the License.
 #
 haproxy_dir = node['private_chef']['haproxy']['dir']
+haproxy_socket = ::File.join(haproxy_dir, "haproxy.sock")
 haproxy_log_dir = node['private_chef']['haproxy']['log_directory']
+
 [
   haproxy_dir,
   haproxy_log_dir
@@ -36,36 +38,17 @@ end
 #
 def get_chef_backend_cluster_members
   members = nil
-  ret = {}
   node['private_chef']['chef_backend_members'].each do |member|
     begin
-      client = Chef::HTTP.new("http://#{member}:#{node['private_chef']['haproxy']['etcd_port']}")
-      members = JSON.parse(client.get("/v2/members"))["members"]
-      if members && !members.empty?
-        break
-      else
-        next
-      end
-    rescue
-      next
+      members = ChefBackend.etcd_members(member, node['private_chef']['haproxy']['etcd_port'])
+      break if members && !members.empty?
+    rescue StandardError => e
+      Chef::Log.warn("Error attempting to get cluster members from #{member}:")
+      Chef::Log.warn("  #{e}")
+      Chef::Log.warn("Trying next configured chef_backend member.")
     end
   end
-  if members
-    members.each do |m|
-      ret[m["name"]] = URI.parse(m["peerURLs"].first).host
-    end
-    ret
-  else
-    nil
-  end
-end
-
-def configured_members
-  ret = {}
-  node['private_chef']['chef_backend_members'].each_with_index do |member, i|
-    ret["#{backend}#{i}"] = member
-  end
-  ret
+  members
 end
 
 chef_backend_members = begin
@@ -74,14 +57,14 @@ chef_backend_members = begin
                            Chef::Log.info("Using Chef Backend members discovered via etcd")
                            members
                          else
-                           Chef::Log.info("Member discovery failed")
-                           Chef::Log.info("Using statically configured member list")
-                           configured_members
+                           Chef::Log.warn("Member discovery failed")
+                           Chef::Log.warn("Using statically configured member list")
+                           ChefBackend.configured_members(node)
                          end
                        rescue e
-                         Chef::Log.info("member discoverry failed: #{e}")
-                         Chef::Log.info("Using statically configured member list")
-                         configured_members
+                         Chef::Log.warn("member discoverry failed: #{e}")
+                         Chef::Log.warn("Using statically configured member list")
+                         ChefBackend.configured_members(node)
                        end
 
 template File.join(haproxy_dir, "haproxy.cfg") do
@@ -94,7 +77,6 @@ template File.join(haproxy_dir, "haproxy.cfg") do
 end
 
 component_runit_service "haproxy"
-
 
 # On startup, all backend servers will be marked as UP.
 #
@@ -110,10 +92,10 @@ ruby_block "wait for haproxy status socket" do
   block do
     connected = false
     10.times do
-      if ::File.exist?("/var/opt/opscode/haproxy/haproxy.sock")
+      if ::File.exist?(haproxy_socket)
         require 'socket'
         begin
-          UNIXSocket.new("/var/opt/opscode/haproxy/haproxy.sock")
+          UNIXSocket.new(haproxy_socket)
           connected = true
           break
         rescue
@@ -136,49 +118,32 @@ ruby_block "wait for backend leader to stabilize" do
   block do
     stable = false
     10.times do
-      require 'socket'
       begin
-        s = UNIXSocket.new("/var/opt/opscode/haproxy/haproxy.sock")
-        s.puts "show stat;quit"
-        _header = s.gets
-        table = []
-        up_servers = {
+        require 'socket'
+        s = HAProxyStatus.new(UNIXSocket.new(haproxy_socket))
+        active_servers = {
           "chef_backend_elasticsearch" => [],
-          "chef_backend_postgresql" => [],
+          "chef_backend_postgresql" => []
         }
-        while line = s.gets
-          table << line
-        end
 
-        table.each do |l|
-          # show stat returns a csv formatted output. For now we do
-          # the parsing ourselves since we have simple needs.
-          split_line = l.split(",")
-          pxname = split_line[0] # Name of the service (ex: chef_backend_elasticsearch)
-          svname = split_line[1] # Name of this server or "BACKEND" or "FRONTEND"
-          state = split_line[17] # UP/DOWN/MAINT
-
-          # Ignore lines of the table not related to backend server entries
-          if svname != "BACKEND" && state == "UP" &&
-             ["chef_backend_elasticsearch", "chef_backend_postgresql"].include?(pxname)
-            up_servers[pxname] << svname
-          end
+        s.server_stats.each do |server|
+          active_servers[server[:pxname]] << server[:svname] if server[:status] == "UP"
         end
 
         # We expect the status checks to fail on all but 1 backend
         # (the current leader) thus we wait for that to be the case.
-        if up_servers["chef_backend_elasticsearch"].count == 1 &&
-           up_servers["chef_backend_postgresql"].count == 1
+        if active_servers["chef_backend_elasticsearch"].count == 1 &&
+           active_servers["chef_backend_postgresql"].count == 1
           stable = true
           break
         else
           Chef::Log.warn("HAProxy still inconsistent:")
           Chef::Log.warn("  Postgresql servers UP:")
-          up_servers["chef_backend_postgresql"].each do |server_name|
+          active_servers["chef_backend_postgresql"].each do |server_name|
             Chef::Log.warn("   -#{server_name}")
           end
           Chef::Log.warn("  Elasticsearch servers UP:")
-          up_servers["chef_backend_elasticsearch"].each do |server_name|
+          active_servers["chef_backend_elasticsearch"].each do |server_name|
             Chef::Log.warn("   -#{server_name}")
           end
           Chef::Log.warn("Retrying in 2 seconds")
