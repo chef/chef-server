@@ -125,8 +125,13 @@ class PreflightChecks
   # the defaults set in the recipe.
   def run!
     begin
-      BootstrapPreflightValidator.new(node).run!
-      PostgresqlPreflightValidator.new(node).run!
+      # When Chef Backend is configured, this is too early to verify
+      # postgresql accessibility since we need to configure HAProxy
+      # first
+      if ! PrivateChef['use_chef_backend']
+        BootstrapPreflightValidator.new(node).run!
+        PostgresqlPreflightValidator.new(node).run!
+      end
       SolrPreflightValidator.new(node).run!
       BookshelfPreflightValidator.new(node).run!
     rescue PreflightValidationFailed => e
