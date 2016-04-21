@@ -1,5 +1,5 @@
 #
-# Author:: Adam Jacob (<adam@opscode.com>)
+# Author:: Adam Jacob (<adam@chef.io>)
 # Copyright:: Copyright (c) 2011 Opscode, Inc.
 # License:: Apache License, Version 2.0
 #

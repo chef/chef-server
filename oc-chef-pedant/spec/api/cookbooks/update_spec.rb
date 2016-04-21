@@ -862,11 +862,11 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
 
         context "with metadata.providing" do
           # In erchef, we are not validating the "providing" metadata
-          # See: http://tickets.opscode.com/browse/CHEF-3976
+          # See: http://tickets.chef.io/browse/CHEF-3976
 
           after(:each) { delete_cookbook admin_user, cookbook_name, cookbook_version }
 
-          # http://docs.opscode.com/config_rb_metadata.html#provides
+          # http://docs.chef.io/config_rb_metadata.html#provides
           should_change_with_metadata 'providing', 'cats::sleep'
           should_change_with_metadata 'providing', 'here(:kitty, :time_to_eat)'
           should_change_with_metadata 'providing', 'service[snuggle]'

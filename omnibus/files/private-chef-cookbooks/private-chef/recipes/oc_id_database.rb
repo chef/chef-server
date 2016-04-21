@@ -1,5 +1,5 @@
 #
-# Author:: James Casey <james@getchef.com>
+# Author:: James Casey <james@chef.io>
 # Copyright:: Copyright (c) 2014 Opscode, Inc.
 # License:: Apache License, Version 2.0
 #

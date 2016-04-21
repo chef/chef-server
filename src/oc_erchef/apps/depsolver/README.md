@@ -69,7 +69,7 @@ License and Authors
 ----------
 
 * Author:: Eric Merritt (<ericbmerritt@gmail.com>)
-* Author:: James Casey (<james@opscode.com>)
+* Author:: James Casey (<james@chef.io>)
 
 Copyright 2012 Opscode, Inc. All Rights Reserved.
 

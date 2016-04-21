@@ -1136,7 +1136,7 @@ https://raw.githubusercontent.com/antirez/redis/2.8/00-RELEASENOTES
 ### postgresql 9.1 removed
 
 ### private-chef-administration
-* Removed. Docs can be found at docs.opscode.com
+* Removed. Docs can be found at docs.chef.io
 
 ### private-chef-cookbooks
 * Introduce pluggable HA architecture as an alternative to DRBD

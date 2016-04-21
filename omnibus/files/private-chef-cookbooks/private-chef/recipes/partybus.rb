@@ -1,5 +1,5 @@
 #
-# Author:: Stephen Delano (<stephen@opscode.com>)
+# Author:: Stephen Delano (<stephen@chef.io>)
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 #
 # All Rights Reserved
@@ -57,7 +57,7 @@ ruby_block 'migration-level file sanity check' do
     rescue Exception => e
       message = <<-EOF
 ERROR:
-The /var/opt/opscode/upgrades/migration-level file is missing or corrupt!  Please read http://docs.getchef.com/install_server_pre.html and correct this file before proceeding
+The /var/opt/opscode/upgrades/migration-level file is missing or corrupt!  Please read http://docs.chef.io/install_server_pre.html and correct this file before proceeding
 
 * If this is a new installation:
   run: "cd /opt/opscode/embedded/service/partybus ; /opt/opscode/embedded/bin/bundle exec bin/partybus init"

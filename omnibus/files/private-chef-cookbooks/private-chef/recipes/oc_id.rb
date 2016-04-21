@@ -1,5 +1,5 @@
 #
-# Author:: James Casey <james@getchef.com>
+# Author:: James Casey <james@chef.io>
 # Copyright:: Copyright (c) 2014-2015 Chef Software, Inc.
 #
 # All Rights Reserved

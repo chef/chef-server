@@ -328,7 +328,7 @@ describe "Groups Endpoint" do
 
     # Note: In the below tests, using a non-existent group_id should
     # return 404, NOT 500!  See
-    # https://tickets.corp.opscode.com/browse/PL-536
+    # https://tickets.corp.chef.io/browse/PL-536
 
     # Add an actor / group to the group
     #

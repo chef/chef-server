@@ -26,11 +26,11 @@
   },
   "example": {
     "blah": {
-      "url": "https://api.opscode.com/organizations/essentials/cookbooks/blah",
+      "url": "https://api.chef.io/organizations/essentials/cookbooks/blah",
       "versions": [
         {
           "version": "1.5.1",
-          "url": "https://api.opscode.com/organizations/essentials/cookbooks/blah/1.5.1"
+          "url": "https://api.chef.io/organizations/essentials/cookbooks/blah/1.5.1"
         }
       ]
     }

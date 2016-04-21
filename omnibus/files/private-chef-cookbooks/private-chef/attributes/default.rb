@@ -1,4 +1,4 @@
-# Author:: Adam Jacob (<adam@opscode.com>)
+# Author:: Adam Jacob (<adam@chef.io>)
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 #
 # All Rights Reserved
@@ -31,11 +31,11 @@ default['private_chef']['api_version'] = "12.0.0"
 default['private_chef']['flavor'] = "cs"
 default['private_chef']['install_path'] = "/opt/opscode"
 
-default['private_chef']['notification_email'] = "pc-default@opscode.com"
-default['private_chef']['from_email'] = '"Opscode" <donotreply@opscode.com>'
+default['private_chef']['notification_email'] = "pc-default@chef.io"
+default['private_chef']['from_email'] = '"Opscode" <donotreply@chef.io>'
 default['private_chef']['role'] = "standalone"
 default['private_chef']['license']['nodes'] = 25
-default['private_chef']['license']['upgrade_url'] = "http://www.getchef.com/contact/on-premises-simple"
+default['private_chef']['license']['upgrade_url'] = "http://www.chef.io/contact/on-premises-simple"
 
 default['private_chef']['default_orgname'] = nil
 

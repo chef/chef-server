@@ -1,6 +1,6 @@
 
 maintainer       "Chef's"
-maintainer_email "chef@opscode.com"
+maintainer_email "chef@chef.io"
 name             "joy_of_cooking"
 license          "All rights reserved"
 description      "Installs/Configures joy_of_cooking"

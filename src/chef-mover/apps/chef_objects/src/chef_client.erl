@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 80-*-
 %% ex: ts=4 sw=4 et
-%% @author Douglas Triggs <doug@opscode.com>
-%% @author Seth Falcon <seth@opscode.com>
+%% @author Douglas Triggs <doug@chef.io>
+%% @author Seth Falcon <seth@chef.io>
 %% Copyright 2012 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,

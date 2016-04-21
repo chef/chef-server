@@ -116,7 +116,7 @@ require 'mixlib/authorization/org_auth_policy'
 
 #== Default Authz Policy/Settings for Organizations
 #
-# SEE ALSO: https://wiki.corp.opscode.com/display/CORP/Authorization+Matrix
+# SEE ALSO: https://wiki.corp.chef.io/display/CORP/Authorization+Matrix
 Mixlib::Authorization::OrgAuthPolicy.default do |org|
 
 
@@ -250,7 +250,7 @@ reduction.
 Current users table stores hashed password and salt in a JSON
 blob. Want schema to look like the osc_users table. Want to upgrade
 to bcrypt password protection. See:
-http://wiki.corp.opscode.com/display/CORP/RFC+Extensible+Password+Hashing
+http://wiki.corp.chef.io/display/CORP/RFC+Extensible+Password+Hashing
 ** TODO Write Sequel migration to add new fields to users table
 ** TODO Research endpoint details
 - [ ] Is verify_password/authenticate_user the only thing in OHC that

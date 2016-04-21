@@ -1,5 +1,5 @@
 #
-# Author:: Marc Paradise <marc@opscode.com>
+# Author:: Marc Paradise <marc@chef.io>
 # Copyright:: Copyright (c) 2013 Opscode, Inc.
 #
 # All Rights Reserved

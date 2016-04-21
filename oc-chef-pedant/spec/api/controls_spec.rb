@@ -2,7 +2,7 @@
 # -*- indent-level => 4;indent-tabs-mode: nil; fill-column: 92 -*-
 # ex => ts=4 sw=4 et
 #
-# Author => : Prajakta Purohit (<prajakta@getchef.com>)
+# Author => : Prajakta Purohit (<prajakta@chef.io>)
 # Copyright => : Copyright (c) 2014 Opscode, Inc.
 #
 

@@ -44,7 +44,7 @@ describe 'authenticate_user', :users do
           'first_name' => platform.non_admin_user.name,
           'last_name' => platform.non_admin_user.name,
           'display_name' => platform.non_admin_user.name,
-          'email' => platform.non_admin_user.name + "@opscode.com",
+          'email' => platform.non_admin_user.name + "@chef.io",
           'username' => platform.non_admin_user.name
         }
       }
@@ -58,7 +58,7 @@ describe 'authenticate_user', :users do
         'first_name' => platform.non_admin_user.name,
         'last_name' => platform.non_admin_user.name,
         'display_name' => platform.non_admin_user.name,
-        'email' => platform.non_admin_user.name + "@opscode.com",
+        'email' => platform.non_admin_user.name + "@chef.io",
         'username' => platform.non_admin_user.name
       }} }
   let(:authentication_error_msg) { ["Failed to authenticate: Username and password incorrect"] }
@@ -160,7 +160,7 @@ describe 'authenticate_user', :users do
         let(:create_body) do
           {
             "username" => username,
-            "email" => "#{username}@opscode.com",
+            "email" => "#{username}@chef.io",
             "first_name" => username,
             "last_name" => username,
             "display_name" => username,
@@ -172,7 +172,7 @@ describe 'authenticate_user', :users do
           {
             "username" => username,
             "display_name" => username,
-            "email" => "#{username}@opscode.com",
+            "email" => "#{username}@chef.io",
             "external_authentication_uid" => username
           }
         end

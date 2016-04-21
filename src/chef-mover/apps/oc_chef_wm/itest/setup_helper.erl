@@ -1,6 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Stephen Delano <stephen@opscode.com>
+%% @author Stephen Delano <stephen@chef.io>
 %% Copyright 2013 Opscode, Inc. All Rights Reserved.
 
 -module(setup_helper).

@@ -1,12 +1,12 @@
 %% ex: ts=4 sw=4 et
-%% @author Seth Falcon <seth@getchef.com>
-%% @author Mark Anderson <mark@getchef.com>
-%% @author Christopher Maier <cm@getchef.com>
-%% @author James Casey <james@getchef.com>
-%% @author Mark Mzyk <mmzyk@getchef.com>
-%% @author Seth Chisamore <schisamo@getchef.com>
-%% @author Ho-Sheng <hosh@getchef.com>
-%% @author Marc Pardise <marc@getchef.com>
+%% @author Seth Falcon <seth@chef.io>
+%% @author Mark Anderson <mark@chef.io>
+%% @author Christopher Maier <cm@chef.io>
+%% @author James Casey <james@chef.io>
+%% @author Mark Mzyk <mmzyk@chef.io>
+%% @author Seth Chisamore <schisamo@chef.io>
+%% @author Ho-Sheng <hosh@chef.io>
+%% @author Marc Pardise <marc@chef.io>
 %% Copyright 2011-2014 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,

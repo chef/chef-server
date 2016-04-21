@@ -1,5 +1,5 @@
 #
-# Author:: Douglas Triggs (<doug@getchef.com>)
+# Author:: Douglas Triggs (<doug@chef.io>)
 # Copyright:: Copyright (c) 2014 Chef Software, Inc.
 #
 # All Rights Reserved

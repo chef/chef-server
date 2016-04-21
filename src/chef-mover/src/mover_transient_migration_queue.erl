@@ -1,6 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil -*-
 %% ex: ts=4 sw=4 et
-%% @author Marc A. Paradise <marc@opscode.com>
+%% @author Marc A. Paradise <marc@chef.io>
 %% @copyright {{copyright_year}} {{copyright_holder}}
 
 -module(mover_transient_migration_queue).

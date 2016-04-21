@@ -1,5 +1,5 @@
 #
-# Author:: Stephen Delano (<stpehen@getchef.com.com>)
+# Author:: Stephen Delano (<stpehen@chef.io.com>)
 # Copyright:: Copyright (c) 2014 Chef Software, Inc.
 #
 # All Rights Reserved
