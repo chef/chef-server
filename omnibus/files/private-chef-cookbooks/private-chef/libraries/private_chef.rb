@@ -43,6 +43,8 @@ module PrivateChef
   lb Mash.new
   lb['xdl_defaults'] ||= Mash.new
   lb_internal Mash.new
+  haproxy Mash.new
+  haproxy['log_rotation'] ||= Mash.new
   postgresql Mash.new
   postgresql['log_rotation'] ||= Mash.new
   redis_lb Mash.new
@@ -215,6 +217,7 @@ module PrivateChef
         "ldap",
         "user",
         "ha",
+        "haproxy",
         "use_chef_backend",
         "chef_backend_members",
         "disabled_plugins",
