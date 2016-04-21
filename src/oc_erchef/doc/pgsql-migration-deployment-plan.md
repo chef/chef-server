@@ -116,7 +116,7 @@ open:
 
 ### 3.3) Status Update
 1. status update to twitter
-1. status update to status.opscode.com
+1. status update to status.chef.io
 1. status update to #Operations channel that this has been completed
 
 ### 3.4) Place OHC into maintenance mode
@@ -227,7 +227,7 @@ Impacts of failed user validation:
 
 ### 7.2) End Downtime
 1. Status update: twitter
-1. Status update: status.opscode.com
+1. Status update: status.chef.io
 1. Post status to #operations
 
 ### 7.3) Resume daemonized CCR 
@@ -240,14 +240,14 @@ Impacts of failed user validation:
 
 Create a new user account: 
 
-1. www.opscode.com -> Sign Up -> Free Trial -> [enter requested info]
+1. www.chef.io -> Sign Up -> Free Trial -> [enter requested info]
 1. Use a unique email address and company short name
 1. Verify the account by email. In preprod you must change the url in
-   the emailed validation link from www.opscode.com to com-rs-preprod.opscode.com
+   the emailed validation link from www.chef.io to com-rs-preprod.chef.io
 
 Invite the new user into the existing org: 
 
-1. Go to manage.opscode.com and log in if necessary 
+1. Go to manage.chef.io and log in if necessary 
 1. Choose "users" tab
 1. Choose "invite" tab 
 1. Provide new user name 
@@ -255,7 +255,7 @@ Invite the new user into the existing org:
 
 Dissociate the user from the org: 
 
-1. Go to manage.opscode.com
+1. Go to manage.chef.io
 1. Choose "users" tab 
 1. Choose "dissociate" link next to the newly-joined user 
 
@@ -271,7 +271,7 @@ Using orgmapper, delete the user created above from OHC. Assuming a user named
     exit
 ```
 * Follow these instructions to remove the user from the community site: 
-  [Delete a User](https://wiki.corp.opscode.com/display/CORP/Orgmapper+Tips+and+Tricks#OrgmapperTipsandTricks-orgmapperDeleteauser)
+  [Delete a User](https://wiki.corp.chef.io/display/CORP/Orgmapper+Tips+and+Tricks#OrgmapperTipsandTricks-orgmapperDeleteauser)
 
 ### 8.3) Opscode Support (webui)
 At support.opscode.us: 
@@ -284,14 +284,14 @@ At support.opscode.us:
     1. Customer should now appear on the OPC customer page
 
 ### 8.4) Opscode Accountmanagement (webui)
-* Sign into www.opscode.com - if this is preprod, use the account
+* Sign into www.chef.io - if this is preprod, use the account
   created before migration, in section 1.1
 * Confirm that it's possible to view org plan and billing data:
-    * (https://www.opscode.com/account)
+    * (https://www.chef.io/account)
 * Confirm that it's possible to view and create tickets at
-    * (http://www.opscode.com/support/tickets/)
+    * (http://www.chef.io/support/tickets/)
 * verify ``:customer`` information is correct:  
-    * (http://www.opscode.com/support/tickets/new?debug=1)
+    * (http://www.chef.io/support/tickets/new?debug=1)
 
 ```
     Customer Ifon

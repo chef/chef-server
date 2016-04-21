@@ -361,7 +361,7 @@ module Pedant
     def create_min_user(username, options = {})
       payload = {
         "username" => username,
-        "email" => "#{username}@opscode.com",
+        "email" => "#{username}@chef.io",
         "first_name" => username,
         "last_name" => username,
         "display_name" => username,

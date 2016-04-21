@@ -7,7 +7,7 @@
 
 
 Helper module for calling various Chef REST endpoints.
-__Authors:__ John Keiser ([`jkeiser@opscode.com`](mailto:jkeiser@opscode.com)).
+__Authors:__ John Keiser ([`jkeiser@chef.io`](mailto:jkeiser@chef.io)).
 <a name="index"></a>
 
 ## Function Index ##

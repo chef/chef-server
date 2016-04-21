@@ -1,6 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
-%% @author Christopher Maier <cm@opscode.com>
+%% @author Christopher Maier <cm@chef.io>
 %% @copyright 2012
 
 -module(chef_data_bag_tests).

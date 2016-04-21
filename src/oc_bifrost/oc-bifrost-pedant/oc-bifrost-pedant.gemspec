@@ -4,10 +4,10 @@ Gem::Specification.new do |s|
   s.date          = '2013-01-24'
   s.summary       = "Opscode Chef API Testing Framework"
   s.authors       = ["Opscode Software Engineering"]
-  s.email         = 'dev@opscode.com'
+  s.email         = 'dev@chef.io'
   s.require_paths = ['lib', 'spec']
   s.files         = Dir['lib/**/*'] + Dir['spec/**/*'] + Dir['bin/*'] + Dir['fixtures/**/*']
-  s.homepage      = 'http://opscode.com'
+  s.homepage      = 'http://chef.io'
 
   s.bindir        = 'bin'
   s.executables   = ['oc-bifrost-pedant']

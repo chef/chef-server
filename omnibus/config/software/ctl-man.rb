@@ -1,6 +1,6 @@
 # Copyright:: Copyright (c) 2014 Chef, Inc.
 # License:: Apache License, Version 2.0
-# Author:: Douglas Triggs <doug@getchef.com>
+# Author:: Douglas Triggs <doug@chef.io>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

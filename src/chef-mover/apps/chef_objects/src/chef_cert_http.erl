@@ -1,6 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author James Casey <james@opscode.com>
+%% @author James Casey <james@chef.io>
 %% @doc interface to the certificate generation service
 %%
 %% Copyright 2012 Opscode, Inc. All Rights Reserved.
@@ -54,7 +54,7 @@ gen_cert(Guid, RequestId) ->
 -spec body_for_post(Guid::binary()) -> <<_:64,_:_*8>>.
 %% @doc construct a body which can be posted to the certificate server
 body_for_post(Guid) ->
-    <<"common_name=URI:http://opscode.com/GUIDS/", Guid/binary>>.
+    <<"common_name=URI:http://chef.io/GUIDS/", Guid/binary>>.
 
 -spec parse_json_response(Body::string()) -> {Cert::binary(),
                                               Keypair::binary()}.

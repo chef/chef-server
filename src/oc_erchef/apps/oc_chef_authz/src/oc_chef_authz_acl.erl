@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Douglas Triggs <doug@getchef.com>
-%% @author Mark Anderson <mark@getchef.com>
+%% @author Douglas Triggs <doug@chef.io>
+%% @author Mark Anderson <mark@chef.io>
 %% Copyright 2014 Chef, Inc. All Rights Reserved.
 
 -module(oc_chef_authz_acl).

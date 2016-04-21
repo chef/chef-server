@@ -383,7 +383,7 @@ body(Json) -> chef_json:encode(Json).
       \"metadata\": {
         \"dependencies\": {\"ruby\": [], \"rubygems\": []},
         \"name\": \"unicorn\",
-        \"maintainer_email\": \"ops@opscode.com\",
+        \"maintainer_email\": \"ops@chef.io\",
         \"attributes\": {},
         \"license\": \"Apache 2.0\",
         \"suggestions\": {},

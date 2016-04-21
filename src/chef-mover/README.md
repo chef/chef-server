@@ -107,7 +107,7 @@ your dev laptop is connected remotely:
 
 * in the same vagrant ssh session:
 
-        ssh -L 5984:localhost:5984 $YOURUSERNAME@gateway.opscode.com
+        ssh -L 5984:localhost:5984 $YOURUSERNAME@gateway.chef.io
 
 * then once connected:
 
@@ -115,7 +115,7 @@ your dev laptop is connected remotely:
 
 Leave this session open for the duration of your testing.
 If you are on-site at HQ you can skip the intermediary tunnel through
-gateway.opscode.com
+gateway.chef.io
 
 Moser will now be able to connect to preprod couch as needed to look up
 authz ids.

@@ -39,14 +39,14 @@
     "start": 0,
     "rows": [
       {
-        "url": "https://api.opscode.com/organizations/essentials/nodes/monkey",
+        "url": "https://api.chef.io/organizations/essentials/nodes/monkey",
         "data": {
           "node_name": "monkey",
           "apache_port": 8080
         }
       },
       {
-        "url": "https://api.opscode.com/organizations/essentials/nodes/giraffe",
+        "url": "https://api.chef.io/organizations/essentials/nodes/giraffe",
         "data": {
           "node_name": "giraffe",
           "apache_port": null

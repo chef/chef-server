@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Mark Anderson <mark@chef.io>
-%% @author Tim Dysinger <dysinger@opscode.com>
+%% @author Tim Dysinger <dysinger@chef.io>
 %% Copyright 2012-16 Chef, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,

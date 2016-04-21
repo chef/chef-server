@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Tyler Cloke <tyler@getchef.com>
-%% @author Mark Anderson <mark@getchef.com>
+%% @author Tyler Cloke <tyler@chef.io>
+%% @author Mark Anderson <mark@chef.io>
 %% Copyright 2014 Opscode, Inc. All Rights Reserved.
 
 -module(oc_chef_organization).

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Author:: Adam Jacob (<adam@opscode.com>)
+# Author:: Adam Jacob (<adam@chef.io>)
 # Copyright:: Copyright (c) 2011 Opscode, Inc.
 #
 # All Rights Reserved

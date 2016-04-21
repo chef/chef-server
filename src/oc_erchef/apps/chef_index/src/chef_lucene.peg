@@ -68,7 +68,7 @@ space <- [ \t]+ ~;
 special_char <- '[' / ']' / '\\' / '"' / [!(){}^~*?:] ~;
 
 %{
-%% @author Seth Falcon <seth@opscode.com>
+%% @author Seth Falcon <seth@chef.io>
 %% Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,

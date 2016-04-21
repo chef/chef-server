@@ -1,6 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author John Keiser <jkeiser@opscode.com>
+%% @author John Keiser <jkeiser@chef.io>
 %% @doc Helper module for calling various Chef REST endpoints
 %% @end
 %%

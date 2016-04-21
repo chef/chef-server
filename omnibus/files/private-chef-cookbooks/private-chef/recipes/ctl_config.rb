@@ -1,5 +1,5 @@
 #
-# Author:: Tyler Cloke (<tyler@getchef.com>)
+# Author:: Tyler Cloke (<tyler@chef.io>)
 # Copyright:: Copyright (c) 2014, Chef Software, Inc.
 # License:: Apache License, Version 2.0
 #
