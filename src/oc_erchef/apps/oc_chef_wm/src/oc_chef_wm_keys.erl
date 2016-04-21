@@ -172,8 +172,8 @@ auth_info('GET', Req, #base_state{organization_guid = undefined,
 %% For the org scoped ones, we want to check if the requestor is a member
 %% of public_key_read_access group on GET requests to give all users and clients
 %% access on all users and clients if they share an org.
-auth_info('GET', Req, #base_state{resource_state = #key_state{parent_authz_id = ActorId}} = State) ->
-    {{member_of, ActorId, {local, "public_key_read_access"}}, Req, State};
+auth_info('GET', Req, #base_state{requestor = #chef_requestor{authz_id = RequestorAuthzId}} = State) ->
+    {{member_of, RequestorAuthzId, {local, "public_key_read_access"}}, Req, State};
 %% Non GET methods
 auth_info(_Method, Req, #base_state{resource_state = #key_state{parent_authz_id = AuthzId}}= State) ->
     {{actor, AuthzId, update}, Req, State}.
