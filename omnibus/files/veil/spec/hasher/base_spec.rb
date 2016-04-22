@@ -7,7 +7,7 @@ describe Veil::Hasher::Base do
 
   describe "#hex_digest" do
     it "returns a SHA512 hex digest of the data" do
-      expect(subject.send(:hex_digest, data)).to eq(OpenSSL::HMAC.new(data, OpenSSL::Digest::SHA512.new).to_s)
+      expect(subject.send(:hex_digest, data)).to eq(Digest::SHA512.hexdigest(data))
     end
   end
 end

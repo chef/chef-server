@@ -17,16 +17,16 @@ requiring the the secrets file to be copied.
 
 Credentials are generated using:
 
-    sha_512_hmac(
+    sha_512(
       secure_hash(
-        sha_512_hmac(shared_secret + service_name + credential_name + credential_version),
+        sha_512(shared_secret + service_name + credential_name + credential_version),
         shared_salt
       )
     )
 
 where
 
-- `sha_512_hmac` is an SHA512 HMAC of the given data.
+- `sha_512` is an SHA512 of the given data.
 
 - `secure_hash` is a secure hashing algorithm such as BCrypt
   or PBKDF2 with their relevant work-factor tunables set very high.
