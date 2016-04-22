@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 class PostgresqlPreflightValidator < PreflightValidator
 
   def initialize(node)
@@ -96,6 +95,12 @@ class PostgresqlPreflightValidator < PreflightValidator
         fail_with err_CSPG010_postgres_not_available
       when /.*password authentication failed.*/
         # This is what we want to see.
+      when /role .* does not exist/
+        # This indicates we were successfully able to connect to Postgres
+        # AND we authenticated! This is likely because the pg_hba is set
+        # to trust our connection. Such an example would be configuring
+        # Chef Server to use an "external" Postgres, such as Delivery's,
+        # when running on the same host.
       when /.*no pg_hba.conf entry.*/
         # This is also possible, depending on if they've set up pg_hba
         # by host or user or both. This is OK, since it confirms that we're
