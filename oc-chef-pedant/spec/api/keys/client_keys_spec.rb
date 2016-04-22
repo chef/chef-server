@@ -874,7 +874,7 @@ describe "Client keys endpoint", :keys, :client_keys do
             it_should_behave_like 'multiple actors READ access to the client keys endpoints depends on public_key_read_access membership'
           end
 
-          context 'when there are multiple users associated to the org' do
+          context 'when there are multiple users associated to the org', :multiuser do
             before(:all) do
               @user_1 = platform.create_user("pedant_test_user_#{rand_id}")
               @user_2 = platform.create_user("pedant_test_user_2_#{rand_id}")
