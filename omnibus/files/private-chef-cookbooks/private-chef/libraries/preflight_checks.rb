@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require "veil"
+
 class PreflightValidationFailed < StandardError
 
 end
@@ -44,7 +46,9 @@ class PreflightValidator
   end
 
   def secrets_exists?
-    File.exist?("/etc/opscode/private-chef-secrets.json")
+    secrets_json = "/etc/opscode/private-chef-secrets.json"
+    File.exist?(secrets_json) &&
+      Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_json).size > 0
   end
 
   def backend?
