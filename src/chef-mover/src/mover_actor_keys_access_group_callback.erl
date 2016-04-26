@@ -87,6 +87,9 @@ users_group_query() ->
 admins_group_query() ->
     <<"SELECT name, id, authz_id FROM groups WHERE name = 'admins' AND org_id = $1">>.
 
+select_group_query() ->
+    <<"SELECT name, id, authz_id FROM groups WHERE name = $1 AND org_id = $2">>.
+
 clients_group_query() ->
     <<"SELECT name, id, authz_id FROM groups WHERE name = 'clients' AND org_id = $1">>.
 
@@ -134,21 +137,28 @@ add_group_to_group(#group{authz_id = IdToAdd}, TargetId) ->
     mv_oc_chef_authz:add_to_group(TargetId, group, IdToAdd, superuser).
 
 create_group(Name, OrgId) ->
-    Now = os:timestamp(),
-    SuperuserId = mv_oc_chef_authz:superuser_id(),
-    {ok, AuthzId} = mv_oc_chef_authz:create_resource(SuperuserId, group),
-    case sqerl:execute(group_create_query(), [
-                                              chef_object_base_make_org_prefix_id(OrgId, Name),
-                                              OrgId,
-                                              AuthzId,
-                                              Name,
-                                              SuperuserId,
-                                              Now,
-                                              Now
-                                             ]) of
-        {ok, _} ->
+    case sqerl:select(select_group_query(), [Name, OrgId], rows_as_scalars, [authz_id]) of
+        {ok, none} ->
+            Now = os:timestamp(),
+            SuperuserId = mv_oc_chef_authz:superuser_id(),
+            {ok, AuthzId} = mv_oc_chef_authz:create_resource(SuperuserId, group),
+            case sqerl:execute(group_create_query(), [
+                                                      chef_object_base_make_org_prefix_id(OrgId, Name),
+                                                      OrgId,
+                                                      AuthzId,
+                                                      Name,
+                                                      SuperuserId,
+                                                      Now,
+                                                      Now
+                                                     ]) of
+                {ok, _} ->
+                    AuthzId;
+                {error, _} ->
+                    {error, failure_creating_group}
+            end;
+        {ok, [AuthzId | _]} ->
             AuthzId;
-        {error, _} ->
+        _ ->
             {error, failure_creating_group}
     end.
 
