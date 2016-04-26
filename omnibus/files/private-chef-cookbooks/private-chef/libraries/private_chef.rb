@@ -446,6 +446,15 @@ module PrivateChef
           Veil::CredentialCollection::ChefSecretsFile.new(path: secrets_json)
         end
 
+      # Transition from erchef's sql_user/password etc living under 'postgresql'
+      # in older versions to 'opscode_erchef' in newer versions
+      if credentials["postgresql"] && credentials["postgresql"]["sql_password"]
+        credentials.delete("opscode_erchef", "sql_password")
+        credentials.add("opscode_erchef", "sql_password", value: credentials["postgresql"]["sql_password"])
+        credentials.delete("postgresql", "sql_password")
+        credentials.delete("postgresql", "sql_user")
+      end
+
       credentials.add("redis_lb", "password", length: 50)
       credentials.add("rabbitmq", "password", length: 50)
       credentials.add("rabbitmq", "actions_password", length: 50)
