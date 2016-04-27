@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Author:: Ho-Sheng Hsiao (<hosh@opscode.com>)
+# Author:: Ho-Sheng Hsiao (<hosh@chef.io>)
 # Copyright:: Copyright (c) 2013 Opscode, Inc.
 
 

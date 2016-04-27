@@ -361,7 +361,7 @@ module Pedant
     def create_min_user(username, options = {})
       payload = {
         "username" => username,
-        "email" => "#{username}@opscode.com",
+        "email" => "#{username}@chef.io",
         "first_name" => username,
         "last_name" => username,
         "display_name" => username,
@@ -427,6 +427,14 @@ module Pedant
       alter_group(orgname, groupname, :remove, :user, user.name, actor)
     end
 
+    def add_client_to_group(orgname, client, groupname, actor=nil)
+      alter_group(orgname, groupname, :add, :client, client.name, actor)
+    end
+
+    def remove_client_from_group(orgname, client, groupname, actor=nil)
+      alter_group(orgname, groupname, :remove, :client, client.name, actor)
+    end
+
     def add_group_to_group(orgname, object_name, groupname, actor=nil)
       alter_group(orgname, groupname, :add, :group, object_name, actor)
     end
@@ -440,7 +448,7 @@ module Pedant
       # to suffice
       actor ||= superuser
 
-      type_map = { :user => :users, :group => :groups }
+      type_map = { :user => :users, :group => :groups, :client => :clients }
 
       group_url = "#{@server}/organizations/#{orgname}/groups/#{groupname}"
       r = get(group_url, actor)
@@ -450,7 +458,8 @@ module Pedant
         :groupname => groupname,
         :actors => {
           :users => group["actors"],
-          :groups => group["groups"]
+          :groups => group["groups"],
+          :clients => group["clients"]
         }
       }
 

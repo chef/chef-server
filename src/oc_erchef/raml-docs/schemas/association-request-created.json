@@ -6,7 +6,7 @@
       "description": "URI to the created invite",
       "type": "string",
       "format": "uri",
-      "example": "https://api.opscode.com/organizations/essentials/association_requests/92290982a3c91bd471466daae3c95f75"
+      "example": "https://api.chef.io/organizations/essentials/association_requests/92290982a3c91bd471466daae3c95f75"
     },
     "organization_user": {
       "type": "object",
@@ -43,7 +43,7 @@
   },
 
   "example": {
-    "uri": "https://api.opscode.com/organizations/essentials/association_requests/92290982a3c91bd471466daae3c95f75",
+    "uri": "https://api.chef.io/organizations/essentials/association_requests/92290982a3c91bd471466daae3c95f75",
     "organization_user": {
       "username": "jkeiser"
     },
@@ -51,7 +51,7 @@
       "name": "essentials"
     },
     "user": {
-      "email": "pivotaluser@opscode.com",
+      "email": "pivotaluser@chef.io",
       "first_name": "CommunitySite"
     }
   }

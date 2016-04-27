@@ -27,8 +27,8 @@ get:
           schema: NamedChildList
           example: |
             {
-              "apache2": "https://api.opscode.com/organizations/foo/cookbooks/apache2/1.0.0",
-              "mysql": "https://api.opscode.com/organizations/foo/cookbooks/mysql/3.4.1"
+              "apache2": "https://api.chef.io/organizations/foo/cookbooks/apache2/1.0.0",
+              "mysql": "https://api.chef.io/organizations/foo/cookbooks/mysql/3.4.1"
             }
 
 /_recipes:

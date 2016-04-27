@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil -*-
 %% ex: ts=4 sw=4 et
-%% @author Mark Mzyk <mmzyk@getchef.com>
-%% @author Marc Paradise <marc@getchef.com>
+%% @author Mark Mzyk <mmzyk@chef.io>
+%% @author Marc Paradise <marc@chef.io>
 %% Copyright 2011-2014 Chef, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,

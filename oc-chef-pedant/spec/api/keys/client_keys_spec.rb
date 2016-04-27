@@ -774,6 +774,143 @@ describe "Client keys endpoint", :keys, :client_keys do
             get_client_key(org_name, org_client_name, current_requestor, 'key1').should look_like(:status => 401)
           end
         end
+
+        # public_key_read_access testing
+        shared_examples_for 'multiple actors READ access to the client keys endpoints depends on public_key_read_access membership' do
+          context 'when an actor is removed from the public_key_read_access group' do
+            before do
+              platform.remove_group_from_group(org_name, groupname, 'public_key_read_access')
+            end
+
+            after do
+              platform.add_group_to_group(org_name, groupname, 'public_key_read_access')
+            end
+
+            it 'the first actor can no longer list client keys, returning a 403', :authentication do
+              list_client_keys(org_name, test_client_name_1, current_requestor).should look_like(:status => 403)
+              list_client_keys(org_name, test_client_name_2, current_requestor).should look_like(:status => 403)
+            end
+
+            it 'the first actor can no longer get client keys, returning a 403', :authentication do
+              get_client_key(org_name, test_client_name_1, current_requestor, 'default').should look_like(:status => 403)
+              get_client_key(org_name, test_client_name_2, current_requestor, 'default').should look_like(:status => 403)
+            end
+
+            it 'the second actor can no longer list client keys, returning a 403', :authentication do
+              list_client_keys(org_name, test_client_name_1, other_requestor).should look_like(:status => 403)
+              list_client_keys(org_name, test_client_name_2, other_requestor).should look_like(:status => 403)
+            end
+
+            it 'the second actor can no longer get client keys, returning a 403', :authentication do
+              get_client_key(org_name, test_client_name_1, other_requestor, 'default').should look_like(:status => 403)
+              get_client_key(org_name, test_client_name_2, other_requestor, 'default').should look_like(:status => 403)
+            end
+
+            context 'when a single actor is added back into the the public_key_read_access group' do
+              before do
+                platform.send(add_method, org_name, current_requestor, 'public_key_read_access')
+              end
+
+              after do
+                platform.send(remove_method, org_name, current_requestor, 'public_key_read_access')
+              end
+
+              it 'other actors, by default, can no longer list client keys, returning a 403', :authentication do
+                list_client_keys(org_name, test_client_name_1, other_requestor).should look_like(:status => 403)
+                list_client_keys(org_name, test_client_name_2, other_requestor).should look_like(:status => 403)
+              end
+
+              it 'other actors, by default, can no longer get client keys, returning a 403', :authentication do
+                get_client_key(org_name, test_client_name_1, other_requestor, 'default').should look_like(:status => 403)
+                get_client_key(org_name, test_client_name_2, other_requestor, 'default').should look_like(:status => 403)
+              end
+
+              it 'the added actor can list client keys', :authentication do
+                list_client_keys(org_name, test_client_name_1, current_requestor).should look_like(:status => 200)
+                list_client_keys(org_name, test_client_name_2, current_requestor).should look_like(:status => 200)
+              end
+
+              it 'the added actor can get client keys', :authentication do
+                get_client_key(org_name, test_client_name_1, current_requestor, 'default').should look_like(:status => 200)
+                get_client_key(org_name, test_client_name_2, current_requestor, 'default').should look_like(:status => 200)
+              end
+            end
+          end
+        end #shared_examples_for
+
+        context 'when multiple clients exist' do
+          before(:all) do
+            @client_name_1 = "pedant_test_client_#{rand_id}"
+            @client_name_2 = "pedant_test_client_2_#{rand_id}"
+            @client_1 = platform.create_client(@client_name_1, @test_org)
+            @client_2 = platform.create_client(@client_name_2, @test_org)
+          end
+
+          after(:all) do
+            platform.delete_client(@client_1, @test_org)
+            platform.delete_client(@client_2, @test_org)
+          end
+
+          context 'when the first client is making requests with an unmodified public_key_read_access group' do
+            let(:current_requestor) { @client_1 }
+            it_should_behave_like 'successful client key get'
+          end
+
+          context 'when the second client is making requests with an unmodified public_key_read_access group' do
+            let(:current_requestor) { @client_2 }
+            it_should_behave_like 'successful client key get'
+          end
+
+          context 'when clients are added and removed from the public_key_read_access group' do
+            let(:test_client_name_1) { @client_name_1 }
+            let(:test_client_name_2) { @client_name_2 }
+            let(:current_requestor) { @client_1 }
+            let(:other_requestor) { @client_2 }
+            let(:groupname) { 'clients' }
+            let(:add_method) { :add_client_to_group }
+            let(:noun) { :client }
+            let(:remove_method) { :remove_client_from_group }
+
+            it_should_behave_like 'multiple actors READ access to the client keys endpoints depends on public_key_read_access membership'
+          end
+
+          context 'when there are multiple users associated to the org', :multiuser do
+            before(:all) do
+              @user_1 = platform.create_user("pedant_test_user_#{rand_id}")
+              @user_2 = platform.create_user("pedant_test_user_2_#{rand_id}")
+              platform.associate_user_with_org(org_name, @user_1)
+              platform.associate_user_with_org(org_name, @user_2)
+            end
+
+            after(:all) do
+              platform.delete_user(@user_1)
+              platform.delete_user(@user_2)
+            end
+
+            context 'when the user client is making requests with an unmodified public_key_read_access group' do
+              let(:current_requestor) { @user_1 }
+              it_should_behave_like 'successful client key get'
+            end
+
+            context 'when the user client is making requests with an unmodified public_key_read_access group' do
+              let(:current_requestor) { @user_2 }
+              it_should_behave_like 'successful client key get'
+            end
+
+            context 'when users are added and removed from the public_key_read_access group' do
+              let(:test_client_name_1) { @client_name_1 }
+              let(:test_client_name_2) { @client_name_2 }
+              let(:current_requestor) { @user_1 }
+              let(:other_requestor) { @user_2 }
+              let(:groupname) { 'users' }
+              let(:add_method) { :add_user_to_group }
+              let(:noun) { :user }
+              let(:remove_method) { :remove_user_from_group }
+
+              it_should_behave_like 'multiple actors READ access to the client keys endpoints depends on public_key_read_access membership'
+            end
+          end
+        end
       end # context when multiple keys are present
     end # context listing key(s)
   end # context managing keys

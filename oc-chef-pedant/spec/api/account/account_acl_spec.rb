@@ -825,7 +825,7 @@ describe "ACL API", :acl do
                 "version" => version,
                 "name" => new_object,
                 "maintainer" => "spacemonkey",
-                "maintainer_email" => "spacemonkey@opscode.com",
+                "maintainer_email" => "spacemonkey@chef.io",
                 "description" => "",
                 "long_description" => "",
                 "license" => "",

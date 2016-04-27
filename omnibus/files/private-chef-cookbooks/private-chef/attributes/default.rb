@@ -1,4 +1,4 @@
-# Author:: Adam Jacob (<adam@opscode.com>)
+# Author:: Adam Jacob (<adam@chef.io>)
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 #
 # All Rights Reserved
@@ -31,11 +31,11 @@ default['private_chef']['api_version'] = "12.0.0"
 default['private_chef']['flavor'] = "cs"
 default['private_chef']['install_path'] = "/opt/opscode"
 
-default['private_chef']['notification_email'] = "pc-default@opscode.com"
-default['private_chef']['from_email'] = '"Opscode" <donotreply@opscode.com>'
+default['private_chef']['notification_email'] = "pc-default@chef.io"
+default['private_chef']['from_email'] = '"Opscode" <donotreply@chef.io>'
 default['private_chef']['role'] = "standalone"
 default['private_chef']['license']['nodes'] = 25
-default['private_chef']['license']['upgrade_url'] = "http://www.getchef.com/contact/on-premises-simple"
+default['private_chef']['license']['upgrade_url'] = "http://www.chef.io/contact/on-premises-simple"
 
 default['private_chef']['default_orgname'] = nil
 
@@ -93,6 +93,26 @@ default['private_chef']['opscode-solr']['data_dir'] = "/var/opt/opscode/opscode-
 ####
 default['private_chef']['server-api-version'] = 0
 
+####
+# HAProxy
+#
+# HAProxy is only used when use_chef_backend is true. All Postgresql
+# and Elasticsearch requests are routed to it and then forwarded to
+# the current chef-backend leader.
+####
+default['private_chef']['haproxy']['enable'] = true
+default['private_chef']['haproxy']['ha'] = false
+default['private_chef']['haproxy']['dir'] = "/var/opt/opscode/haproxy"
+default['private_chef']['haproxy']['log_directory'] = "/var/log/opscode/haproxy"
+default['private_chef']['haproxy']['log_rotation']['file_maxbytes'] = 104857600
+default['private_chef']['haproxy']['log_rotation']['num_to_keep'] = 10
+default['private_chef']['haproxy']['listen'] = '0.0.0.0'
+default['private_chef']['haproxy']['local_postgresql_port'] = 5432
+default['private_chef']['haproxy']['remote_postgresql_port'] = 5432
+default['private_chef']['haproxy']['local_elasticsearch_port'] = 9200
+default['private_chef']['haproxy']['remote_elasticsearch_port'] = 9200
+default['private_chef']['haproxy']['leaderl_healthcheck_port'] = 7331
+default['private_chef']['haproxy']['etcd_port'] = 2379
 
 ####
 # RabbitMQ

@@ -1,4 +1,4 @@
-%% @author Mark Anderson <mark@opscode.com>
+%% @author Mark Anderson <mark@chef.io>
 %% @version 0.0.1
 %% @doc authorization - Interface to the opscode authorization servize
 %%

@@ -14,8 +14,8 @@
 %% specific language governing permissions and limitations
 %% under the License.
 %%
-%% @author Ho-Sheng Hsiao <hosh@opscode.com>
-%% @author Tim Dysinger <dysinger@opscode.com>
+%% @author Ho-Sheng Hsiao <hosh@chef.io>
+%% @author Tim Dysinger <dysinger@chef.io>
 
 -module(bksw_wm_base).
 

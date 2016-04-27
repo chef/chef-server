@@ -1,6 +1,6 @@
 #
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
-# Author:: Adam Jacob (<adam@opscode.com>)
+# Author:: Adam Jacob (<adam@chef.io>)
 #
 
 require 'uuidtools'
@@ -120,6 +120,10 @@ include_recipe "enterprise::runit"
 include_recipe "private-chef::sysctl-updates"
 # Run plugins first, mostly for ha
 include_recipe "private-chef::plugin_chef_run"
+
+if node['private_chef']['use_chef_backend']
+  include_recipe "private-chef::haproxy"
+end
 
 # Configure Services
 [

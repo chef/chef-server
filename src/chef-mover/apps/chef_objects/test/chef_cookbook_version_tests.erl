@@ -1,6 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
-%% @author Seth Falcon <seth@opscode.com>
+%% @author Seth Falcon <seth@chef.io>
 %% Copyright 2012 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -153,7 +153,7 @@ bad_dependencies_test_() ->
 
     ].
 
-% http://tickets.opscode.com/browse/CHEF-3976
+% http://tickets.chef.io/browse/CHEF-3976
 providing_constraint_test_() ->
     CB0 = basic_cookbook(<<"php">>, <<"1.2.3">>),
     NameVer = {<<"php">>, <<"1.2.3">>},

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Authors:: Chef Support Team <support-team@getchef.com>
+# Authors:: Chef Support Team <support-team@chef.io>
 #
 
 [ -r /etc/opscode/private-chef.sh ] && source /etc/opscode/private-chef.sh

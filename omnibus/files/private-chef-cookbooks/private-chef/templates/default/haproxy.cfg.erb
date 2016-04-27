@@ -1,0 +1,28 @@
+global
+        stats socket /var/opt/opscode/haproxy/haproxy.sock mode 600
+
+frontend postgresql
+         bind <%= @listen %>:<%= @local_postgresql_port %>
+         mode tcp
+         default_backend chef_backend_postgresql
+
+frontend elasticsearch
+         bind <%= @listen %>:<%= @local_elasticsearch_port %>
+         mode tcp
+         default_backend chef_backend_elasticsearch
+
+backend chef_backend_postgresql
+        mode tcp
+        option httpchk GET /leader HTTP/1.1\r\nHost:localhost:<%= @leaderl_healthcheck_port %>\r\n\r\n
+        default-server inter 2s rise 1 fall 1
+        <% @chef_backend_members.each do |name, ip| -%>
+        server <%= name %> <%= ip %>:<%= @remote_postgresql_port %> check port <%= @leaderl_healthcheck_port %>
+        <% end -%>
+
+backend chef_backend_elasticsearch
+        mode tcp
+        option httpchk GET /leader HTTP/1.1\r\nHost:localhost:<%= @leaderl_healthcheck_port %>\r\n\r\n
+        default-server inter 2s rise 1 fall 1
+        <% @chef_backend_members.each do |name, ip| -%>
+        server <%= name %> <%= ip %>:<%= @remote_elasticsearch_port %> check port <%= @leaderl_healthcheck_port %>
+        <% end -%>

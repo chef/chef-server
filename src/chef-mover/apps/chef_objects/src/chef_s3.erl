@@ -1,8 +1,8 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Mark Anderson <mark@opscode.com>
-%% @author Christopher Maier <cm@opscode.com>
-%% @author Seth Chisamore <schisamo@opscode.com>
+%% @author Mark Anderson <mark@chef.io>
+%% @author Christopher Maier <cm@chef.io>
+%% @author Seth Chisamore <schisamo@chef.io>
 %% @author Ho-Sheng Hsiao <hosh@ospcode.com>
 %% @doc chef_s3 - Manage S3 activities for erchef
 %%

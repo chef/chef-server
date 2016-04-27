@@ -2,45 +2,45 @@
 %project=enterprise_chef
 %uri=https://github.com/opscode/enterprise-chef-server-schema
 
-drop_osc_users [oss_chef:osc_users] 2013-09-05T19:22:00Z Christopher Maier <cm@opscode.com> # Remove osc_users table
-users [drop_osc_users] 2013-09-04T13:54:01Z Christopher Maier <cm@opscode.com> # users table
-opc_customers 2013-09-04T16:05:27Z Christopher Maier <cm@opscode.com> # OPC customers table
-opc_users [users opc_customers] 2013-09-04T16:15:19Z Christopher Maier <cm@opscode.com> # OPC users table
-reporting_schema_info 2013-09-04T21:07:31Z Christopher Maier <cm@opscode.com> # Add reporting_schema_info table
-widen_uuid_fields [oss_chef:roles oss_chef:clients oss_chef:data_bags oss_chef:data_bag_items oss_chef:environments] 2013-09-05T20:25:39Z Christopher Maier <cm@opscode.com> # Widen UUID fields used by Solr
-delete_migrated_couch_data [oss_chef:cookbook_version_checksums oss_chef:checksums oss_chef:cookbook_versions oss_chef:cookbooks oss_chef:environments oss_chef:roles oss_chef:clients oss_chef:data_bag_items oss_chef:data_bags] 2013-09-04T21:18:40Z Christopher Maier <cm@opscode.com> # Add delete_migrated_couch_data stored procedure
-org_migration_state 2013-09-04T21:27:50Z Christopher Maier <cm@opscode.com> # Add org_migration_state table
-@2.0.0 2013-09-04T21:58:35Z Christopher Maier <cm@opscode.com> # Use Sqitch for schema management
-@2.0.1 2013-09-23T09:52:31Z Christopher Maier <cm@opscode.com> # Placeholder version to keep in sync with repo tag
+drop_osc_users [oss_chef:osc_users] 2013-09-05T19:22:00Z Christopher Maier <cm@chef.io> # Remove osc_users table
+users [drop_osc_users] 2013-09-04T13:54:01Z Christopher Maier <cm@chef.io> # users table
+opc_customers 2013-09-04T16:05:27Z Christopher Maier <cm@chef.io> # OPC customers table
+opc_users [users opc_customers] 2013-09-04T16:15:19Z Christopher Maier <cm@chef.io> # OPC users table
+reporting_schema_info 2013-09-04T21:07:31Z Christopher Maier <cm@chef.io> # Add reporting_schema_info table
+widen_uuid_fields [oss_chef:roles oss_chef:clients oss_chef:data_bags oss_chef:data_bag_items oss_chef:environments] 2013-09-05T20:25:39Z Christopher Maier <cm@chef.io> # Widen UUID fields used by Solr
+delete_migrated_couch_data [oss_chef:cookbook_version_checksums oss_chef:checksums oss_chef:cookbook_versions oss_chef:cookbooks oss_chef:environments oss_chef:roles oss_chef:clients oss_chef:data_bag_items oss_chef:data_bags] 2013-09-04T21:18:40Z Christopher Maier <cm@chef.io> # Add delete_migrated_couch_data stored procedure
+org_migration_state 2013-09-04T21:27:50Z Christopher Maier <cm@chef.io> # Add org_migration_state table
+@2.0.0 2013-09-04T21:58:35Z Christopher Maier <cm@chef.io> # Use Sqitch for schema management
+@2.0.1 2013-09-23T09:52:31Z Christopher Maier <cm@chef.io> # Placeholder version to keep in sync with repo tag
 
-containers 2013-09-23T17:46:57Z Mark Anderson <mark@opscode.com> # Add containers table
-password_hash_type 2013-09-24T14:29:08Z Marc Paradise <marc@opscode.com> # new enum for supported password hash types
-users_password_hash_split [users] 2013-09-24T14:42:14Z Marc Paradise <marc@opscode.com># add columns to user that split out password hash and salt
+containers 2013-09-23T17:46:57Z Mark Anderson <mark@chef.io> # Add containers table
+password_hash_type 2013-09-24T14:29:08Z Marc Paradise <marc@chef.io> # new enum for supported password hash types
+users_password_hash_split [users] 2013-09-24T14:42:14Z Marc Paradise <marc@chef.io># add columns to user that split out password hash and salt
 @2.1.0 2013-09-25T01:26:17Z Marc Paradise <marc@alienix># 2.1.0 - to be synced with release tag
-groups 2013-09-23T18:21:28Z Mark Anderson <mark@opscode.com> # Add groups in sql
-@2.2.0 2013-09-25T05:53:40Z Mark Anderson <mark@opscode.com> # Add groups in sql
-@2.2.1 2013-10-01T20:57:23Z Mark Anderson <mark@opscode.com> # sync with 2.2.1 git tag
+groups 2013-09-23T18:21:28Z Mark Anderson <mark@chef.io> # Add groups in sql
+@2.2.0 2013-09-25T05:53:40Z Mark Anderson <mark@chef.io> # Add groups in sql
+@2.2.1 2013-10-01T20:57:23Z Mark Anderson <mark@chef.io> # sync with 2.2.1 git tag
 
-opc_users_customer_id_index [opc_users] 2013-10-09T14:09:35Z Oliver Ferrigni <oliver@opscode.com># Add index opc_users(customer_id)
-@2.2.2 2013-10-10T18:28:40Z Oliver Ferrigni <oliver@opscode.com># Tag with 2.2.2
-@2.2.3 2013-10-14T20:26:26Z Oliver Ferrigni <oliver@opscode.com># Makefile updates
+opc_users_customer_id_index [opc_users] 2013-10-09T14:09:35Z Oliver Ferrigni <oliver@chef.io># Add index opc_users(customer_id)
+@2.2.2 2013-10-10T18:28:40Z Oliver Ferrigni <oliver@chef.io># Tag with 2.2.2
+@2.2.3 2013-10-14T20:26:26Z Oliver Ferrigni <oliver@chef.io># Makefile updates
 
-drop_reporting_schema_info [reporting_schema_info] 2014-01-08T22:04:01Z Mark Mzyk <mmzyk@opscode.com> # Drop reporting_schema_info table that is not needed
-add_migration_type [org_migration_state] 2014-01-07T18:28:10Z Oliver Ferrigni <oliver@getchef.com> # Add column migration type to org_migration_status
-create_composite_key_org_migration_state 2014-01-07T23:36:23Z Oliver Ferrigni <oliver@getchef.com> # Adjust the primary key to be a composite key of org_id and migration type
-migrate_org_migration_status_to_migratation_type 2014-01-08T16:33:23Z Oliver Ferrigni <oliver@getchef.com> # Convert to using migration_type exploding purge_successful rows into two rows
-@2.2.4 2014-01-21T22:00:55Z Oliver Ferrigni <oliver@getchef.com># Tag with 2.2.4
+drop_reporting_schema_info [reporting_schema_info] 2014-01-08T22:04:01Z Mark Mzyk <mmzyk@chef.io> # Drop reporting_schema_info table that is not needed
+add_migration_type [org_migration_state] 2014-01-07T18:28:10Z Oliver Ferrigni <oliver@chef.io> # Add column migration type to org_migration_status
+create_composite_key_org_migration_state 2014-01-07T23:36:23Z Oliver Ferrigni <oliver@chef.io> # Adjust the primary key to be a composite key of org_id and migration type
+migrate_org_migration_status_to_migratation_type 2014-01-08T16:33:23Z Oliver Ferrigni <oliver@chef.io> # Convert to using migration_type exploding purge_successful rows into two rows
+@2.2.4 2014-01-21T22:00:55Z Oliver Ferrigni <oliver@chef.io># Tag with 2.2.4
 
-organizations 2014-05-29T17:45:19Z Mark Anderson <mark@getchef.com> # Add an organizations table
-org_user_associations 2014-05-29T20:26:29Z Mark Anderson <mark@getchef.com> # Add the org user association table
-org_user_invites 2014-05-29T20:59:32Z Mark Anderson <mark@getchef.com> # Add the org user invite table
-@2.2.6 2014-06-04T00:07:12Z Mark Anderson <mark@getchef.com> # Tag with 2.2.6
+organizations 2014-05-29T17:45:19Z Mark Anderson <mark@chef.io> # Add an organizations table
+org_user_associations 2014-05-29T20:26:29Z Mark Anderson <mark@chef.io> # Add the org user association table
+org_user_invites 2014-05-29T20:59:32Z Mark Anderson <mark@chef.io> # Add the org user invite table
+@2.2.6 2014-06-04T00:07:12Z Mark Anderson <mark@chef.io> # Tag with 2.2.6
 
-fix_unique_constraints_and_indices_in_org_user_association 2014-07-15T17:32:22Z Tyler Cloke <tyler@getchef.com> # Clean up org_user_associations table
-fix_unique_constraints_and_indices_in_org_user_invites 2014-07-16T11:01:01Z Tyler Cloke <tyler@getchef.com> # Clean up org_user_invites table
-@2.3.1 2014-07-21T20:14:42Z Tyler Cloke <tyler@getchef.com> # Tag with 2.3.1
-osc_password_hash_type_update [password_hash_type] 2014-08-15T15:47:45Z Mark Mzyk <mmzyk@getchef.com> # Updates the password hash type to contain the OSC hash types
-@2.4.0 2014-08-21T18:15:04Z Mark Mzyk <mmzyk@getchef.com> # Tag with 2.4.0
+fix_unique_constraints_and_indices_in_org_user_association 2014-07-15T17:32:22Z Tyler Cloke <tyler@chef.io> # Clean up org_user_associations table
+fix_unique_constraints_and_indices_in_org_user_invites 2014-07-16T11:01:01Z Tyler Cloke <tyler@chef.io> # Clean up org_user_invites table
+@2.3.1 2014-07-21T20:14:42Z Tyler Cloke <tyler@chef.io> # Tag with 2.3.1
+osc_password_hash_type_update [password_hash_type] 2014-08-15T15:47:45Z Mark Mzyk <mmzyk@chef.io> # Updates the password hash type to contain the OSC hash types
+@2.4.0 2014-08-21T18:15:04Z Mark Mzyk <mmzyk@chef.io> # Tag with 2.4.0
 
 multiple_keys 2014-12-29T23:45:05Z Mark Anderson <mark@chef.io> # Add keys table to support multiple keys
 keys_drop_trigger 2015-01-03T01:25:39Z Mark Anderson <mark@chef.io># Keys table drop trigger to maintain consistency
