@@ -75,7 +75,7 @@ class BootstrapPreflightValidator < PreflightValidator
   # backend components, allow data bootstrapping to be bypassed when
   # no chef-server-running.json is present but a secrets file is present.
   def bypass_bootstrap?
-    first_run? && secrets_exists? && PrivateChef['postgresql']['external']
+    first_run? && secrets_exists? && PrivateChef["use_chef_backend"]
   end
 
   private
