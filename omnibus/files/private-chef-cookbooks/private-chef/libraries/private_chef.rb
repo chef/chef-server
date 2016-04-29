@@ -450,29 +450,30 @@ module PrivateChef
       # in older versions to 'opscode_erchef' in newer versions
       if credentials["postgresql"] && credentials["postgresql"]["sql_password"]
         credentials.delete("opscode_erchef", "sql_password")
-        credentials.add("opscode_erchef", "sql_password", value: credentials["postgresql"]["sql_password"])
+        credentials.add("opscode_erchef", "sql_password", value: credentials["postgresql"]["sql_password"].value)
         credentials.delete("postgresql", "sql_password")
         credentials.delete("postgresql", "sql_user")
       end
 
-      credentials.add("redis_lb", "password", length: 50)
-      credentials.add("rabbitmq", "password", length: 50)
-      credentials.add("rabbitmq", "actions_password", length: 50)
-      credentials.add("rabbitmq", "management_password", length: 50)
-      credentials.add("drbd", "shared_secret", length: 30)
-      credentials.add("keepalived", "vrrp_instance_password", length: 50)
-      credentials.add("opscode_erchef", "sql_password", length: 30)
-      credentials.add("opscode_erchef", "sql_ro_password", length: 30)
-      credentials.add("oc_bifrost", "superuser_id", length: 16)
-      credentials.add("oc_bifrost", "sql_password", length: 50)
-      credentials.add("oc_bifrost", "sql_ro_password", length: 50)
-      credentials.add("oc_id", "secret_key_base", length: 50)
-      credentials.add("oc_id", "sql_password", length: 50)
-      credentials.add("oc_id", "sql_ro_password", length: 50)
-      credentials.add("bookshelf", "access_key_id", length: 20)
-      credentials.add("bookshelf", "secret_access_key", length: 40)
-      credentials.add("bookshelf", "sql_password", length: 40)
-      credentials.add("bookshelf", "sql_ro_password", length: 40)
+      credentials.add("redis_lb", "password", length: 100)
+      credentials.add("rabbitmq", "password", length: 100)
+      credentials.add("rabbitmq", "actions_password", length: 100)
+      credentials.add("rabbitmq", "management_password", length: 100)
+      credentials.add("drbd", "shared_secret", length: 60)
+      credentials.add("keepalived", "vrrp_instance_password", length: 100)
+      credentials.add("opscode_erchef", "sql_password", length: 60)
+      credentials.add("opscode_erchef", "sql_ro_password", length: 60)
+      # Freeze oc_bifrost superuser_id so it will not be rotated
+      credentials.add("oc_bifrost", "superuser_id", length: 32, frozen: true)
+      credentials.add("oc_bifrost", "sql_password", length: 100)
+      credentials.add("oc_bifrost", "sql_ro_password", length: 100)
+      credentials.add("oc_id", "secret_key_base", length: 100)
+      credentials.add("oc_id", "sql_password", length: 100)
+      credentials.add("oc_id", "sql_ro_password", length: 100)
+      credentials.add("bookshelf", "access_key_id", length: 40)
+      credentials.add("bookshelf", "secret_access_key", length: 80)
+      credentials.add("bookshelf", "sql_password", length: 80)
+      credentials.add("bookshelf", "sql_ro_password", length: 80)
 
       # Always use the value in chef-server.rb if we're using external postgresql.
       # Other external services either don't require credentials or don't overload
@@ -481,7 +482,7 @@ module PrivateChef
         credentials.remove("postgresql", "db_superuser_password")
         credentials.add("postgresql", "db_superuser_password", value: PrivateChef["postgresql"]["db_superuser_password"])
       else
-        credentials.add("postgresql", "db_superuser_password", length: 50)
+        credentials.add("postgresql", "db_superuser_password", length: 100)
       end
 
       credentials.legacy_credentials_hash.each do |service, creds|

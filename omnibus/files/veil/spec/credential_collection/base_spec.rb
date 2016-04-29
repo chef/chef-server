@@ -164,6 +164,26 @@ describe Veil::CredentialCollection::Base do
       expect(subject["bar"]["baz"].value).to_not eq(baz_val)
       expect(subject["bar"]["baz"].version).to eq(1)
     end
+
+    context "with frozen credentials" do
+      it "rotates all credentials that are not frozen" do
+        subject.add("foo")
+        foo_val = subject["foo"].value
+        subject.add("bar", "baz", length: 25)
+        baz_val = subject["bar"]["baz"].value
+        subject.add("qux", "quux", frozen: true)
+        baz_val = subject["qux"]["quux"].value
+
+        subject.rotate_hasher
+
+        expect(subject["foo"].value).to_not eq(foo_val)
+        expect(subject["foo"].version).to eq(1)
+        expect(subject["bar"]["baz"].value).to_not eq(baz_val)
+        expect(subject["bar"]["baz"].version).to eq(1)
+        expect(subject["qux"]["quux"].value).to eq(baz_val)
+        expect(subject["qux"]["quux"].version).to eq(0)
+      end
+    end
   end
 
   describe "#rotate_credentials" do
@@ -185,6 +205,26 @@ describe Veil::CredentialCollection::Base do
       expect(subject["foo"].version).to eq(1)
       expect(subject["bar"]["baz"].value).to_not eq(baz_val)
       expect(subject["bar"]["baz"].version).to eq(1)
+    end
+
+    context "with frozen credentials" do
+      it "rotates all credentials that are not frozen" do
+        subject.add("foo")
+        foo_val = subject["foo"].value
+        subject.add("bar", "baz", length: 25)
+        baz_val = subject["bar"]["baz"].value
+        subject.add("qux", "quux", frozen: true)
+        baz_val = subject["qux"]["quux"].value
+
+        subject.rotate_credentials
+
+        expect(subject["foo"].value).to_not eq(foo_val)
+        expect(subject["foo"].version).to eq(1)
+        expect(subject["bar"]["baz"].value).to_not eq(baz_val)
+        expect(subject["bar"]["baz"].version).to eq(1)
+        expect(subject["qux"]["quux"].value).to eq(baz_val)
+        expect(subject["qux"]["quux"].version).to eq(0)
+      end
     end
   end
 
@@ -223,18 +263,35 @@ describe Veil::CredentialCollection::Base do
         expect(subject["desert"]["mercury_six"].version).to eq(1)
       end
     end
+
+    context "with a frozen credential" do
+      it "does not rotate the credential" do
+        subject.add("mannequin", "republic", frozen: true)
+        old_val = subject["mannequin"]["republic"].value
+
+        subject.rotate("mannequin", "republic")
+
+        expect(subject["mannequin"]["republic"].value).to eq(old_val)
+        expect(subject["mannequin"]["republic"].version).to eq(0)
+      end
+    end
   end
 
   describe "#to_hash" do
     it "returns a valid hash" do
       subject.add("foo")
       subject.add("bar", "baz", length: 31)
+      subject.add("saint", "matthew", frozen: true)
 
       new_instance = described_class.new(subject.to_hash)
       expect(new_instance["foo"].version).to eq(subject["foo"].version)
       expect(new_instance["foo"].value).to eq(subject["foo"].value)
       expect(new_instance["bar"]["baz"].version).to eq(subject["bar"]["baz"].version)
       expect(new_instance["bar"]["baz"].value).to eq(subject["bar"]["baz"].value)
+      expect(new_instance["bar"]["baz"].length).to eq(subject["bar"]["baz"].length)
+      expect(new_instance["saint"]["matthew"].version).to eq(subject["saint"]["matthew"].version)
+      expect(new_instance["saint"]["matthew"].value).to eq(subject["saint"]["matthew"].value)
+      expect(new_instance["saint"]["matthew"].frozen).to eq(subject["saint"]["matthew"].frozen)
     end
   end
 end

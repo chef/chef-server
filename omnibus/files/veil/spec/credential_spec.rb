@@ -17,7 +17,7 @@ describe Veil::Credential do
       name: "eros",
       version: 23,
       value: "some crazy secret",
-      length: 66,
+      length: 17,
       group: "portals"
     }
   end
@@ -40,6 +40,55 @@ describe Veil::Credential do
   describe "#new" do
     it "sets a default version to 0" do
       expect(subject.version).to eq(0)
+    end
+  end
+
+  describe "#rotate!" do
+    it "increments the version and hashes a new value" do
+      cred = described_class.new(group: "foo", name: "bar", version: 2, value: "thing")
+      cred.rotate!(hasher)
+      expect(cred.version).to eq(3)
+      expect(cred.value).to_not eq("thing")
+    end
+
+    context "when the hasher is invalid" do
+      it "raises an invalid hasher error" do
+        expect { subject.rotate!(1) }.to raise_error(Veil::InvalidHasher)
+      end
+    end
+
+    context "when the credential is frozen" do
+      it "raises a runtime error" do
+        cred = described_class.new(group: "foo", name: "bar", version: 3, value: "thing", frozen: true)
+        expect { cred.rotate!(1) }.to raise_error(RuntimeError)
+      end
+    end
+  end
+
+  describe "#rotate" do
+    it "increments the version and hashes a new value" do
+      cred = described_class.new(group: "foo", name: "bar", version: 2, value: "thing")
+      cred.rotate(hasher)
+      expect(cred.version).to eq(3)
+      expect(cred.value).to_not eq("thing")
+    end
+
+    context "when the hasher is invalid" do
+      it "does not rotate the credential" do
+        cred = described_class.new(group: "foo", name: "bar", version: 3, value: "thing", frozen: true)
+        expect(cred.rotate(1)).to eq(false)
+        expect(cred.version).to eq(3)
+        expect(cred.value).to eq("thing")
+      end
+    end
+
+    context "when the credential is frozen" do
+      it "does not rotate the credential" do
+        cred = described_class.new(group: "foo", name: "bar", version: 3, value: "thing", frozen: true)
+        expect(cred.rotate(hasher)).to eq(false)
+        expect(cred.version).to eq(3)
+        expect(cred.value).to eq("thing")
+      end
     end
   end
 end
