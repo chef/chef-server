@@ -14,8 +14,8 @@ module Veil
       @name = opts[:name]
       @version = opts[:version] || 0
       @group = opts[:group] || nil
-      @value = opts[:value]
-      @length = opts[:length] || value.length
+      @length = opts[:length] || 128
+      @value = opts[:value][0...@length]
     end
 
     def eql?(other)

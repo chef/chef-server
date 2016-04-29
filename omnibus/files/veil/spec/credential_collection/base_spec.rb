@@ -60,6 +60,7 @@ describe Veil::CredentialCollection::Base do
         subject.add("conspiracy", length: 23)
         expect(subject["conspiracy"]).to be_instance_of(Veil::Credential)
         expect(subject["conspiracy"].length).to eq(23)
+        expect(subject["conspiracy"].value.length).to eq(23)
       end
     end
 
@@ -69,6 +70,7 @@ describe Veil::CredentialCollection::Base do
         expect(subject["my_db"]["password"]).to be_instance_of(Veil::Credential)
         expect(subject["my_db"]["password"].name).to eq("password")
         expect(subject["my_db"]["password"].length).to eq(15)
+        expect(subject["my_db"]["password"].value.length).to eq(15)
       end
     end
 
