@@ -134,7 +134,7 @@ The git SHA of the build you are testing can be found in
 - [ ] Wait for the pipeline to complete.
 
 - [ ] Use julia to promote the build: `@julia artifactory promote
-  chef-server VERSION from current to stable`.  Please do this in the
+  chef-server VERSION`.  Please do this in the
   #eng-services-support room.  Once this is done, the release is
   available to the public via the APT and YUM repositories.
 
