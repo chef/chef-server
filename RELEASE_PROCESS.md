@@ -147,7 +147,7 @@ generate an update to the download pages using rake:
 
 ```
 git co -b YOUR_INITIALS/release-chef-server-VERSION
-rake fetch
+rake fetch[chef-server]
 git add data/
 # make sure all the changes are what you expect
 # write a simple commit message
