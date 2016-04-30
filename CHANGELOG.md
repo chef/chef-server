@@ -1,5 +1,61 @@
 # Chef Server Changelog
 
+## [12.6.0](https://github.com/chef/chef-server/tree/12.6.0) (2016-04-29)
+[Full Changelog](https://github.com/chef/chef-server/compare/12.5.0...12.6.0)
+
+**Closed issues:**
+
+- chef-server-ctl grant-server-admin-permissions needs cli help [\#806](https://github.com/chef/chef-server/issues/806)
+- chef-server-ctl cannot load such file -- chef/key \(LoadError\) [\#632](https://github.com/chef/chef-server/issues/632)
+
+**Merged pull requests:**
+
+- Revert changes to sqitch plan files to avoid upgrade breakage [\#826](https://github.com/chef/chef-server/pull/826) ([stevendanna](https://github.com/stevendanna))
+- \[travis\] Fixup GECODE\_PATH in travis config [\#823](https://github.com/chef/chef-server/pull/823) ([stevendanna](https://github.com/stevendanna))
+- Dynamically generate the wait-for-rabbit script [\#821](https://github.com/chef/chef-server/pull/821) ([adamleff](https://github.com/adamleff))
+- \[oc-chef-pedant\] Tag multiuser tests as multi-user [\#819](https://github.com/chef/chef-server/pull/819) ([stevendanna](https://github.com/stevendanna))
+- Bug fix: treat a successful PG conn and auth as a preflight success [\#818](https://github.com/chef/chef-server/pull/818) ([adamleff](https://github.com/adamleff))
+- Fix bug where requestor membership of public\_key\_read\_access was not being properly tested for keys access. [\#817](https://github.com/chef/chef-server/pull/817) ([tylercloke](https://github.com/tylercloke))
+- \[omnibus\] Expose haproxy config in chef-server.rb [\#816](https://github.com/chef/chef-server/pull/816) ([stevendanna](https://github.com/stevendanna))
+- getchef.com and opscode.com -\> chef.io [\#815](https://github.com/chef/chef-server/pull/815) ([jkeiser](https://github.com/jkeiser))
+- \[oc\_id\] Set HOME in oc\_id's runsv script [\#814](https://github.com/chef/chef-server/pull/814) ([stevendanna](https://github.com/stevendanna))
+- \[expander\] Set HOME in expander's runsv script [\#811](https://github.com/chef/chef-server/pull/811) ([stevendanna](https://github.com/stevendanna))
+- \[omnibus\] Add rb-readline to the build [\#809](https://github.com/chef/chef-server/pull/809) ([stevendanna](https://github.com/stevendanna))
+- Use HAProxy to route Postgresql and ElasticSearch connections [\#808](https://github.com/chef/chef-server/pull/808) ([stevendanna](https://github.com/stevendanna))
+- Pick up latest omnibus/omnibus-software [\#805](https://github.com/chef/chef-server/pull/805) ([schisamo](https://github.com/schisamo))
+- Fix error in error handling for server admins permission migration [\#804](https://github.com/chef/chef-server/pull/804) ([paulmooring](https://github.com/paulmooring))
+- Work to support chef-server on IBM POWER platforms [\#797](https://github.com/chef/chef-server/pull/797) ([edolnx](https://github.com/edolnx))
+- Use mixlib-installs’ built-in platform detection during add-on install [\#796](https://github.com/chef/chef-server/pull/796) ([schisamo](https://github.com/schisamo))
+- Update RELEASE\_PROCESS.md to reflect the new announcement process [\#795](https://github.com/chef/chef-server/pull/795) ([mmzyk](https://github.com/mmzyk))
+- Modernize Add-On Install [\#794](https://github.com/chef/chef-server/pull/794) ([schisamo](https://github.com/schisamo))
+- Update upgrade docs in RELEASE\_PROCESS.md. [\#789](https://github.com/chef/chef-server/pull/789) ([tylercloke](https://github.com/tylercloke))
+
+### Components
+New Components
+* mixlib-install (b2495ce9db896ce8c9c0444282e67da9d5a62a7b)
+* rb-readline (cf67cd06ae89e8b2710ba930c3015639240ac7b7)
+* haproxy (1.6.4)
+
+Updated Components
+* config_guess (bb8fb402 -> 706fbe57)
+* rubygems (2.4.5 -> 2.4.5)
+* libossp-uuid (1.6.2 -> 1.6.2)
+* ohai (218d894f -> 780f7c5f)
+* appbundler (c6193c09 -> a8376ff7)
+* chef_backup-gem (bd29c56a -> a402a2ef)
+* chef (e9194179 -> b94e2ef4)
+
+### Contributors
+* Steven Danna
+* Paul Mooring
+* Adam Leff
+* John Keiser
+* Tyler Cloke
+* Seth Chisamore
+* Carl Perry
+* Kartik Null Cating-Subramanian
+* mmzyk
+
 ## [12.5.0](https://github.com/chef/chef-server/tree/12.5.0) (2016-03-22)
 [Full Changelog](https://github.com/chef/chef-server/compare/12.4.1...12.5.0)
 
