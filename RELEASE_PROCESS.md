@@ -10,7 +10,7 @@ Chef Server.
 
 This document is NOT aspirational.  We have a number of automation
 tools that we intend to use to improve the release release process;
-however, many are not fully integrated with our process yet.. Do not
+however, many are not fully integrated with our process yet. Do not
 add them to this document until they are ready to be part of the
 release process and can be used by any team member to perform a
 release.
@@ -24,13 +24,12 @@ In order to release, you will need the following accounts/permissions:
 - Chef Software, Inc Slack account
 - VPN account for Chef Software, Inc.
 - Account on [https://discourse.chef.io](https://discourse.chef.io) using your Chef email address
-- Login for wilson.ci.opscode.us (This is linked to your github
 - Login for wilson.ci.chef.co (This is linked to your github account.)
 - Access to artifactory.chef.co
 - Access to delivery.chef.co
 - The CHANGELOG_GITHUB_TOKEN environment variable set to a github token gathered
   [here](https://github.com/settings/tokens/new?description=GitHub%20Changelog%20Generator%20token).
-  Read access to repositories and issues should be sufficient.
+  Read access to repositories and issues should be sufficient. (Check the "Full control of private repositories" box.)
 - Install Github Changelog Generator
   + `gem install github_changelog_generator`
 
@@ -52,8 +51,9 @@ run. However, upgrade testing must still be done in advance of the
 release:
 
 - [ ] Run the Chef Delivery-based automated upgrade testing.
-  * Checkout the `chef-server-acceptance` project from delivery.chef.co.
-  * Update relevant attributes in `.delivery/build/attributes/default.rb`:
+  * Clone the `chef-server-acceptance` project from delivery.chef.co.
+    * If you get an access rights error, make sure your public github key is included in your delivery profile.
+  * On a branch, update relevant attributes in `.delivery/build/attributes/default.rb`:
     * Update `chef_server_test_url-override` to be the URL corresponding to
       the latest package you'd like to test at artifactory.chef.co (probably
       a git poll build that you want to ship as the next version).
@@ -135,7 +135,7 @@ The git SHA of the build you are testing can be found in
 
 - [ ] Use julia to promote the build: `@julia artifactory promote
   chef-server VERSION`.  Please do this in the
-  #eng-services-support room.  Once this is done, the release is
+  `#eng-services-support` room.  Once this is done, the release is
   available to the public via the APT and YUM repositories.
 
 - [ ] Chef employees should already know a release is coming; however, as a
