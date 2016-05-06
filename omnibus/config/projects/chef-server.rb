@@ -96,9 +96,5 @@ dependency "private-chef-cookbooks"
 dependency "chef-ha-plugin-config"
 dependency "chef" # for embedded chef-client -z runs (built from master - build last)
 
-package :rpm do
-  signing_passphrase ENV['OMNIBUS_RPM_SIGNING_PASSPHRASE']
-end
-
 exclude "**/.git"
 exclude "**/bundler/git"
