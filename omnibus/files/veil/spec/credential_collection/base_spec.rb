@@ -23,12 +23,23 @@ describe Veil::CredentialCollection::Base do
     end
 
     context "with credential options" do
-      it "the credential instance" do
+      it "builds the credentials" do
         subject.add("foo", "bar", length: 22)
         creds_hash = subject.to_hash[:credentials]
 
         new_instance = described_class.new(credentials: creds_hash)
         expect(new_instance["foo"]["bar"].value).to eq(subject["foo"]["bar"].value)
+      end
+    end
+
+    context "with version options" do
+      it "defaults to version 1" do
+        expect(subject.version).to eq(1)
+      end
+
+      it "sets the version" do
+        new_instance = described_class.new(version: 12)
+        expect(new_instance.version).to eq(12)
       end
     end
   end

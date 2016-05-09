@@ -78,5 +78,15 @@ describe Veil::CredentialCollection::ChefSecretsFile do
       expect(new_creds["redis_lb"]["password"].value).to eq(creds["redis_lb"]["password"].value)
       expect(new_creds["postgresql"]["sql_ro_password"].value).to eq(creds["postgresql"]["sql_ro_password"].value)
     end
+
+    it "saves the version number" do
+      file.rewind
+      creds = described_class.new(path: file.path, version: 12)
+      creds.save
+
+      file.rewind
+      new_creds = described_class.from_file(file.path)
+      expect(new_creds.version).to eq(12)
+    end
   end
 end

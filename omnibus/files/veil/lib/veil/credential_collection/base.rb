@@ -13,18 +13,20 @@ module Veil
 
       extend Forwardable
 
-      attr_reader :credentials, :hasher
+      attr_reader :credentials, :hasher, :version
 
       def_delegators :@credentials, :size, :length, :find, :map, :select, :each, :[], :keys
 
       def initialize(opts = {})
         @hasher = Veil::Hasher.create(opts[:hasher] || {})
         @credentials = expand_credentials_hash(opts[:credentials] || {})
+        @version = opts[:version] || 1
       end
 
       def to_hash
         {
           type: self.class.name,
+          version: version,
           hasher: hasher.to_h,
           credentials: credentials_as_hash
         }

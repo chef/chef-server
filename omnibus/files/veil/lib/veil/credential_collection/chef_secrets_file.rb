@@ -32,6 +32,7 @@ module Veil
       #   a hash of options to pass to the constructor
       def initialize(opts = {})
         @path = (opts[:path] && File.expand_path(opts[:path])) || "/etc/opscode/private-chef-secrets.json"
+        @version = opts[:version] || 1
         super(opts)
       end
 
