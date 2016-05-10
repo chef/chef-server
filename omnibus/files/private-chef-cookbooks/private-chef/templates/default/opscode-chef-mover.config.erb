@@ -90,7 +90,7 @@
                   %% chef server can talk to bookshelf.
                   {s3_url, "http://<%= node['private_chef']['bookshelf']['listen'] %>:<%= node['private_chef']['bookshelf']['port'] %>"},
                   <% else -%>
-                  {s3_url, "<%= node['private_chef']['nginx']['x_forwarded_proto'] %>://<%= @helper.vip_for_uri('bookshelf') %>"},
+                  {s3_url, "<%= node['private_chef']['nginx']['x_forwarded_proto'] %>://<%= @helper.vip_for_uri('bookshelf') %>:<%= node['private_chef']['nginx']['x_forwarded_proto'] == 'https' ? node['private_chef']['nginx']['ssl_port'] : node['private_chef']['nginx']['non_ssl_port'] %>"},
                   <% end %>
                   <% # Re-using erchef's configuration here %>
                   {s3_platform_bucket_name, "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>"},
