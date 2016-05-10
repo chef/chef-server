@@ -83,5 +83,6 @@ install:
 
 travis:
 	bundle exec rake test:csc
+	bundle exec rake test:veil
 	bundle exec rake test:routing
 	bundle exec rake test:private_chef_cookbooks
