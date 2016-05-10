@@ -33,6 +33,7 @@ The core chef REST API server, packaging/installation,  and its primary dependen
 
 * [Oliver Ferrigni](http://github.com/oferrigni)
 * [Steven Danna](https://www.github.com/stevendanna)
+* [Ryan Cragun](https://www.github.com/ryancragun)
 
 # Supporting Components
 
