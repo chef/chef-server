@@ -619,6 +619,7 @@ default['private_chef']['bookshelf']['log_directory'] = "/var/log/opscode/booksh
 default['private_chef']['bookshelf']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['bookshelf']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['bookshelf']['vip'] = node['private_chef']['lb']['api_fqdn']
+default['private_chef']['bookshelf']['vip_port'] = 443
 default['private_chef']['bookshelf']['listen'] = '127.0.0.1'
 default['private_chef']['bookshelf']['port'] = 4321
 default['private_chef']['bookshelf']['stream_download'] = true

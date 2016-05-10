@@ -63,6 +63,16 @@ class OmnibusHelper
     end
   end
 
+  def bookshelf_s3_url
+    # Using URI#to_s to strip ":443" for https and ":80" for http
+    URI("#{node['private_chef']['nginx']['x_forwarded_proto']}://#{vip_for_uri('bookshelf')}:#{node['private_chef']['bookshelf']['vip_port']}").to_s
+  end
+
+  def nginx_ssl_url
+    # Using URI#to_s to strip ":443" for https and ":80" for http
+    URI("#{node['private_chef']['nginx']['url']}:#{node['private_chef']['nginx']['ssl_port']}").to_s
+  end
+
   def db_connection_uri
     db_protocol = "postgres"
     db_user     = node['private_chef']['opscode-erchef']['sql_user']
