@@ -51,16 +51,14 @@ run. However, upgrade testing must still be done in advance of the
 release:
 
 - [ ] Run the Chef Delivery-based automated upgrade testing.
-  * Clone the `chef-server-acceptance` project from delivery.chef.co.
+  * Clone the `engineering-services/qa-chef-server-cluster` project from delivery.chef.co.
     * If you get an access rights error, make sure your public github key is included in your delivery profile.
   * On a branch, update relevant attributes in `.delivery/build/attributes/default.rb`:
-    * Update `chef_server_test_url-override` to be the URL corresponding to
+    * Update `chef_server_test_url_override` to be the URL corresponding to
       the latest package you'd like to test at artifactory.chef.co (probably
       a git poll build that you want to ship as the next version).
       Remember to use the current channel instead of the unstable stable on
       artifactory as those are the builds that passed tests on wilson.
-    * Update `chef_server_latest_released_version` to match the last release of
-      the Chef Server. Should match the version at the [download page](https://downloads.chef.io/chef-server/).
     * Ensure that all entries in `default['delivery-matrix']['acceptance']['matrix']`
       array are uncommented.
   * Commit the change and run `delivery review`.
