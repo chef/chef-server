@@ -51,7 +51,7 @@ default['private_chef']['fips_enabled'] = false
 default['private_chef']['addons']['install'] = false
 default['private_chef']['addons']['path'] = nil
 default['private_chef']['addons']['packages'] =
-  %w{opscode-reporting opscode-manage opscode-analytics opscode-push-jobs-server chef-ha chef-sync}
+  %w{opscode-reporting opscode-manage opscode-analytics opscode-push-jobs-server chef-ha}
 default['private_chef']['addons']['ubuntu_supported_codenames'] =
   %w{lucid precise trusty}
 default['private_chef']['addons']['ubuntu_distribution'] =
