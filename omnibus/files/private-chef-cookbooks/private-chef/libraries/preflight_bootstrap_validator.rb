@@ -50,7 +50,6 @@ class BootstrapPreflightValidator < PreflightValidator
       end
     end
 
-
     # TODO:
     # If the pivotal key file exists locally:
     #  - fetch pivotal public key(s) from opscode_chef keys view + users
@@ -75,13 +74,21 @@ class BootstrapPreflightValidator < PreflightValidator
   # backend components, allow data bootstrapping to be bypassed when
   # no chef-server-running.json is present but a secrets file is present.
   def bypass_bootstrap?
-    first_run? && secrets_exists? && PrivateChef["use_chef_backend"]
+    first_run? && all_creds_exist? && PrivateChef["postgresql"]["external"]
   end
 
   private
 
+  def all_creds_exist?
+    pivotal_key_exists? && secrets_exists?
+  end
+
+  def pivotal_key_exists?
+    File.exist? "/etc/opscode/pivotal.pem"
+  end
+
   def validate_sane_state
-    if File.exists? "/etc/opscode/pivotal.pem"
+    if pivotal_key_exists?
       unless secrets_exists?
         fail_with err_BOOT006_pivotal_with_no_secrets
       end
