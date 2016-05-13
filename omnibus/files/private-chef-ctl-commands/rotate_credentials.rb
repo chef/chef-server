@@ -1,6 +1,7 @@
 require "veil"
 require "time"
 require "optparse"
+require "highline"
 
 add_command_under_category "rotate-credentials", "credential-rotation", "Rotate Chef Server credentials for a given service", 2 do
   ensure_configured!
@@ -14,6 +15,7 @@ add_command_under_category "rotate-credentials", "credential-rotation", "Rotate 
     end
   end.parse!(ARGV)
 
+  # Rotate and save the credentials
   begin
     service = ARGV[3]
 
@@ -22,21 +24,24 @@ add_command_under_category "rotate-credentials", "credential-rotation", "Rotate 
       exit(1)
     end
 
-    timestamp = Time.now.iso8601
-    secrets_file = "/etc/opscode/private-chef-secrets.json"
-    secrets_file_backup = File.expand_path(File.join(File.dirname(secrets_file), "#{File.basename(secrets_file)}#{timestamp}.json"))
-    log("Backing up #{secrets_file} to #{secrets_file_backup}...")
-    FileUtils.cp(secrets_file, secrets_file_backup)
+    backup_file = backup_secrets_file
 
     log("Rotating #{service}'s credentials...", :notice)
-    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file)
+    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file("/etc/opscode/private-chef-secrets.json")
     credentials.rotate(service)
     credentials.save
+  rescue => e
+    # Rollback and exit before we try and apply potentially broken credentials
+    restore_secrets_file(backup_file)
+    log(e.message, :error)
+    exit(1)
+  end
 
+  # Apply the changes
+  begin
     status = run_chef("#{base_path}/embedded/cookbooks/dna.json")
     if status.success?
-      log("Removing #{secrets_file_backup}...")
-      FileUtils.rm(secrets_file_backup)
+      remove_backup_file(backup_file)
       log("#{service}'s credentials have been rotated!", :notice)
       log("Run 'chef-server-ctl rotate-credentials #{service}' on each Chef Server", :notice)
       exit(0)
@@ -53,22 +58,26 @@ end
 add_command_under_category "rotate-all-credentials", "credential-rotation", "Rotate all Chef Server service credentials", 2 do
   ensure_configured!
 
+  # Rotate and save the credentials
   begin
-    timestamp = Time.now.iso8601
-    secrets_file = "/etc/opscode/private-chef-secrets.json"
-    secrets_file_backup = File.expand_path(File.join(File.dirname(secrets_file), "#{File.basename(secrets_file)}#{timestamp}.json"))
-    log("Backing up #{secrets_file} to #{secrets_file_backup}...")
-    FileUtils.cp(secrets_file, secrets_file_backup)
+    backup_file = backup_secrets_file
 
     log("Rotating all Chef Server service credentials...", :notice)
-    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file)
+    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file("/etc/opscode/private-chef-secrets.json")
     credentials.rotate_credentials
     credentials.save
+  rescue => e
+    # Rollback and exit before we try and apply potentially broken credentials
+    restore_secrets_file(backup_file)
+    log(e.message, :error)
+    exit(1)
+  end
 
+  # Apply the changes
+  begin
     status = run_chef("#{base_path}/embedded/cookbooks/dna.json")
     if status.success?
-      log("Removing #{secrets_file_backup}...")
-      FileUtils.rm(secrets_file_backup)
+      remove_backup_file(backup_file)
       log("All credentials have been rotated!", :notice)
       log("Run 'chef-server-ctl rotate-all-credentials' on each Chef Server", :notice)
       exit(0)
@@ -85,22 +94,28 @@ end
 add_command_under_category "rotate-shared-secrets", "credential-rotation", "Rotate the Chef Server shared secrets and all service credentials", 2 do
   ensure_configured!
 
-  begin
-    timestamp = Time.now.iso8601
-    secrets_file = "/etc/opscode/private-chef-secrets.json"
-    secrets_file_backup = File.expand_path(File.join(File.dirname(secrets_file), "#{File.basename(secrets_file)}#{timestamp}"))
-    log("Backing up #{secrets_file} to #{secrets_file_backup}...")
-    FileUtils.cp(secrets_file, secrets_file_backup)
+  secrets_file = "/etc/opscode/private-chef-secrets.json"
+  backup_file = backup_secrets_file
 
+  # Rotate and save the credentials
+  begin
     log("Rotating shared credential secrets and service credentials...", :notice)
     credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file)
     credentials.rotate_hasher
     credentials.save
+  rescue => e
+    # Rollback and exit before we try and apply potentially broken credentials
+    restore_secrets_file(backup_file)
+    log(e.message, :error)
+    exit(1)
+  end
 
+  # Apply the changes
+  begin
+    File.delete(credential_prehook_file_path) if File.exist?(credential_prehook_file_path)
     status = run_chef("#{base_path}/embedded/cookbooks/dna.json")
     if status.success?
-      log("Removing #{secrets_file_backup}...")
-      FileUtils.rm(secrets_file_backup)
+      remove_backup_file(backup_file)
       log("The shared secrets and all service credentials have been rotated!", :notice)
       log("Please copy #{secrets_file} to each Chef Server and run 'chef-server-ctl reconfigure'", :notice)
       exit(0)
@@ -120,6 +135,77 @@ add_command_under_category "show-service-credentials", "credential-rotation", "S
   credentials = Veil::CredentialCollection::ChefSecretsFile.from_file("/etc/opscode/private-chef-secrets.json")
   pp(credentials.legacy_credentials_hash)
   exit(0)
+end
+
+add_command_under_category "require-credential-rotation", "credential-rotation", "Disable the Chef Server and require credential rotation", 2 do
+  @agree_to_disable = false
+  @ui = HighLine.new
+
+  OptionParser.new do |opts|
+    opts.banner = "Usage: chef-server-ctl require-credential-rotation [--yes]"
+
+    opts.on("-h", "--help", "Show this message") do
+      puts opts
+      exit
+    end
+
+    opts.on("-y", "--yes", "Agree to disable the Chef Server and require credential rotation") do
+      @agree_to_disable = true
+    end
+  end.parse!(ARGV)
+
+  # Agree to disable and require rotation
+  msg = "Are you sure you want to disable the Chef Server and require credential rotation?" \
+          "\n Type 'yes' to confirm: "
+  exit(1) unless @agree_to_disable || @ui.ask("<%= color(%Q(#{msg}), :yellow) %>") =~ /yes/i
+
+  # Shut down Chef Server
+  run_sv_command("stop")
+
+  # Disable services
+  get_all_services.each do |service|
+    File.unlink("#{service_path}/#{service}") if service_enabled?(service)
+  end
+
+  # Create global pre hook that'll prevent ctl commands from running until the
+  # credentials have been rotated
+  File.open(credential_prehook_file_path, "a+") do |file|
+    file.write <<-EOF.gsub(/^\s{6}/, "")
+      add_global_pre_hook "require_credential_rotation" do
+        # Allow running "chef-server-ctl rotate-shared-secrets"
+        return true if ARGV.include?("opscode") && ARGV.include?("rotate-shared-secrets")
+
+        raise("You must rotate the Chef Server credentials to enable the Chef Server. "\
+              "Please run 'sudo chef-server-ctl rotate-shared-secrets'")
+      end
+    EOF
+  end
+
+  exit(0)
+end
+
+def backup_secrets_file(backup_file = nil)
+  timestamp = Time.now.iso8601
+  secrets_file = "/etc/opscode/private-chef-secrets.json"
+  backup_file ||= File.expand_path(File.join(File.dirname(secrets_file), "#{File.basename(secrets_file)}#{timestamp}.json"))
+  log("Backing up #{secrets_file} to #{backup_file}...")
+  FileUtils.cp(secrets_file, backup_file)
+  backup_file
+end
+
+def restore_secrets_file(backup_file)
+  secrets_file = "/etc/opscode/private-chef-secrets.json"
+  log("Restoring #{backup_file} to #{secrets_file}...")
+  FileUtils.cp(secrets_file, backup_file)
+end
+
+def remove_backup_file(backup_file)
+  log("Removing #{backup_file}...")
+  FileUtils.rm(backup_file)
+end
+
+def credential_prehook_file_path
+  File.expand_path(File.join(__FILE__, "../", "require_credential_rotation_hook.rb"))
 end
 
 def ensure_configured!

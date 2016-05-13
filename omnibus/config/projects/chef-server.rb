@@ -32,7 +32,7 @@ override :rabbitmq, version: "3.3.4"
 override :erlang, version: "17.5"
 override :ruby, version: "2.1.4"
 override :rubygems, version: "2.4.5"
-override :'omnibus-ctl', version: "0.4.2"
+override :'omnibus-ctl', version: "master"
 override :bundler, version: "1.10.6"
 # creates required build directories
 dependency "preparation"
