@@ -3,6 +3,11 @@ require "time"
 require "optparse"
 require "highline"
 
+# rotate-credentials will generate new credential values for all credentials for
+# a given service by incrementing the value and creating a new hash value.
+# Because the shared secrets are known on all nodes in the cluster the user can
+# choose between copying the secrets file to each node in the cluster and
+# reconfiguring or by running this command on all nodes.
 add_command_under_category "rotate-credentials", "credential-rotation", "Rotate Chef Server credentials for a given service", 2 do
   ensure_configured!
 
@@ -55,6 +60,11 @@ add_command_under_category "rotate-credentials", "credential-rotation", "Rotate 
   end
 end
 
+# rotate-all-credentials will generate new credential values for all service
+# credentials by incrementing the version and creating a new hash value. Because
+# the shared secrets are known on all nodes in the cluster the user can choose
+# between copying the secrets file to each node in the cluster and reconfiguring
+# or by running this command on all nodes.
 add_command_under_category "rotate-all-credentials", "credential-rotation", "Rotate all Chef Server service credentials", 2 do
   ensure_configured!
 
@@ -91,6 +101,10 @@ add_command_under_category "rotate-all-credentials", "credential-rotation", "Rot
   end
 end
 
+# rotate-shared-secrets will create a new shared secret and salt and generate
+# new service credentials for all services. It will then do a chef run to apply
+# the new credentials. As the shared secret and salt is securely and randomly
+# generated the user must copy the secrets file to all nodes in the cluster.
 add_command_under_category "rotate-shared-secrets", "credential-rotation", "Rotate the Chef Server shared secrets and all service credentials", 2 do
   ensure_configured!
 
@@ -136,6 +150,13 @@ add_command_under_category "show-service-credentials", "credential-rotation", "S
   exit(0)
 end
 
+# require-credential-rotation is designed to put the Chef Server in a state
+# where it's offline and requires complete credential rotation to restart.
+# This sort of thing is useful if you're creating public Chef Server images
+# and you want to make sure that the Chef Server doesn't start up until all
+# secrets have been rotated. It's important to note that credential rotation
+# does not rotate the pivotal, user or client keys, or remove any Chef Server
+# policy or cookbooks that have been uploaded.
 add_command_under_category "require-credential-rotation", "credential-rotation", "Disable the Chef Server and require credential rotation", 2 do
   @agree_to_disable = false
   @ui = HighLine.new
