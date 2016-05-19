@@ -27,7 +27,7 @@ add_command_under_category "rotate-credentials", "credential-rotation", "Rotate 
     backup_file = backup_secrets_file
 
     log("Rotating #{service}'s credentials...", :notice)
-    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file("/etc/opscode/private-chef-secrets.json")
+    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file_path)
     credentials.rotate(service)
     credentials.save
   rescue => e
@@ -63,7 +63,7 @@ add_command_under_category "rotate-all-credentials", "credential-rotation", "Rot
     backup_file = backup_secrets_file
 
     log("Rotating all Chef Server service credentials...", :notice)
-    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file("/etc/opscode/private-chef-secrets.json")
+    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file_path)
     credentials.rotate_credentials
     credentials.save
   rescue => e
@@ -94,13 +94,12 @@ end
 add_command_under_category "rotate-shared-secrets", "credential-rotation", "Rotate the Chef Server shared secrets and all service credentials", 2 do
   ensure_configured!
 
-  secrets_file = "/etc/opscode/private-chef-secrets.json"
   backup_file = backup_secrets_file
 
   # Rotate and save the credentials
   begin
     log("Rotating shared credential secrets and service credentials...", :notice)
-    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file)
+    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file_path)
     credentials.rotate_hasher
     credentials.save
   rescue => e
@@ -117,7 +116,7 @@ add_command_under_category "rotate-shared-secrets", "credential-rotation", "Rota
     if status.success?
       remove_backup_file(backup_file)
       log("The shared secrets and all service credentials have been rotated!", :notice)
-      log("Please copy #{secrets_file} to each Chef Server and run 'chef-server-ctl reconfigure'", :notice)
+      log("Please copy #{secrets_file_path} to each Chef Server and run 'chef-server-ctl reconfigure'", :notice)
       exit(0)
     else
       log("Shared credential rotation failed", :error)
@@ -132,7 +131,7 @@ end
 add_command_under_category "show-service-credentials", "credential-rotation", "Show the service credentials", 2 do
   ensure_configured!
 
-  credentials = Veil::CredentialCollection::ChefSecretsFile.from_file("/etc/opscode/private-chef-secrets.json")
+  credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file_path)
   pp(credentials.legacy_credentials_hash)
   exit(0)
 end
@@ -173,6 +172,9 @@ add_command_under_category "require-credential-rotation", "credential-rotation",
     file.write <<-EOF.gsub(/^\s{6}/, "")
       add_global_pre_hook "require_credential_rotation" do
         # Allow running "chef-server-ctl rotate-shared-secrets"
+        # "chef-server-ctl" is a wapper that runs "omnibus-ctl opscode $command"
+        # so we'll look for our command and opscode in the args
+
         return true if ARGV.include?("opscode") && ARGV.include?("rotate-shared-secrets")
 
         raise("You must rotate the Chef Server credentials to enable the Chef Server. "\
@@ -186,17 +188,19 @@ end
 
 def backup_secrets_file(backup_file = nil)
   timestamp = Time.now.iso8601
-  secrets_file = "/etc/opscode/private-chef-secrets.json"
-  backup_file ||= File.expand_path(File.join(File.dirname(secrets_file), "#{File.basename(secrets_file)}#{timestamp}.json"))
-  log("Backing up #{secrets_file} to #{backup_file}...")
-  FileUtils.cp(secrets_file, backup_file)
+  backup_file ||= File.expand_path(File.join(File.dirname(secrets_file_path), "#{File.basename(secrets_file_path)}#{timestamp}.json"))
+  log("Backing up #{secrets_file_path} to #{backup_file}...")
+  FileUtils.cp(secrets_file_path, backup_file)
   backup_file
 end
 
 def restore_secrets_file(backup_file)
-  secrets_file = "/etc/opscode/private-chef-secrets.json"
-  log("Restoring #{backup_file} to #{secrets_file}...")
-  FileUtils.cp(secrets_file, backup_file)
+  log("Restoring #{backup_file} to #{secrets_file_path}...")
+  FileUtils.cp(secrets_file_path, backup_file)
+end
+
+def secrets_file_path
+  "/etc/opscode/private-chef-secrets.json"
 end
 
 def remove_backup_file(backup_file)
