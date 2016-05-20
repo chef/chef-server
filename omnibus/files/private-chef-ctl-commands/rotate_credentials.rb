@@ -194,15 +194,18 @@ add_command_under_category "require-credential-rotation", "credential-rotation",
       add_global_pre_hook "require_credential_rotation" do
         # Allow running "chef-server-ctl rotate-shared-secrets"
         # "chef-server-ctl" is a wapper that runs "omnibus-ctl opscode $command"
-        # so we'll look for our command and opscode in the args
+        # so we'll look for that in ARGV
 
-        return true if ARGV.include?("opscode") && ARGV.include?("rotate-shared-secrets")
+        return true if ARGV == %w{omnibus-ctl opscode rotate-shared-secrets}
 
         raise("You must rotate the Chef Server credentials to enable the Chef Server. "\
               "Please run 'sudo chef-server-ctl rotate-shared-secrets'")
       end
     EOF
   end
+
+  log("The Chef Server has been disabled until credentials have been rotated. "\
+      "Run 'sudo chef-server-ctl rotate-shared-secrets' to rotate them.")
 
   exit(0)
 end
