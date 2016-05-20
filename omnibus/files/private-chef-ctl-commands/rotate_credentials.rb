@@ -156,7 +156,10 @@ end
 # and you want to make sure that the Chef Server doesn't start up until all
 # secrets have been rotated. It's important to note that credential rotation
 # does not rotate the pivotal, user or client keys, or remove any Chef Server
-# policy or cookbooks that have been uploaded.
+# policy or cookbooks that have been uploaded. When the user rotates the shared
+# credentials the chef-client reconfigure run will re-enable/link the services,
+# restart the Chef Server and remove the sentinel file that enables the
+# pre-hook.
 add_command_under_category "require-credential-rotation", "credential-rotation", "Disable the Chef Server and require credential rotation", 2 do
   @agree_to_disable = false
   @ui = HighLine.new
