@@ -90,8 +90,8 @@ describe "chef-server-ctl rotate credentials" do
 
   context "require-credential-rotation" do
     let(:ui) { HighLine.new }
-    let(:prehook_file_path) { "/tmp/prehook" }
-    let(:prehook_file) { StringIO.new }
+    let(:data_path) { "/tmp/var/opt/opscode" }
+    let(:prehook_file_path) { File.join(data_path, "require_credential_rotation") }
 
     before do
       allow(HighLine).to receive(:new).and_return(ui)
@@ -99,9 +99,13 @@ describe "chef-server-ctl rotate credentials" do
       allow(subject.ctl).to receive(:get_all_services).and_return([])
       allow(subject.ctl).to receive(:run_sv_command).with("stop")
       allow(subject.ctl)
-        .to receive(:credential_prehook_file_path)
+        .to receive(:credential_rotation_required_file)
         .and_return(prehook_file_path)
-      allow(File).to receive(:open).with(prehook_file_path, "a+").and_yield(prehook_file)
+      allow(subject.ctl)
+        .to receive(:data_path)
+        .and_return(data_path)
+      allow(File).to receive(:directory?).with(data_path).and_return(true)
+      allow(FileUtils).to receive(:touch).with(prehook_file_path).and_return(true)
     end
 
     it "bypasses cofirmation if passed --yes" do
@@ -144,10 +148,61 @@ describe "chef-server-ctl rotate credentials" do
         .to raise_error(SystemExit) { |e| expect(e.status).to eq(0) }
     end
 
-    it "writes the pre-hook lock" do
-      expect(prehook_file).to receive(:write).with(/require_credential_rotation/)
+    it "enables the credential rotation pre hook" do
+      expect(FileUtils).to receive(:touch).with(prehook_file_path)
       expect { subject.run_test_omnibus_command("require-credential-rotation", %w{--yes}) }
         .to raise_error(SystemExit) { |e| expect(e.status).to eq(0) }
+    end
+  end
+
+  context "require_credential_rotation_pre_hook" do
+    let(:credential_rotation_required_file) do
+      "/tmp/var/opt/opscode/credential_rotation_required"
+    end
+
+    before do
+      allow(subject.ctl)
+        .to receive(:credential_rotation_required_file)
+        .and_return(credential_rotation_required_file)
+    end
+
+    context "when rotation is required" do
+      before do
+        allow(File)
+          .to receive(:exist?)
+          .with(credential_rotation_required_file)
+          .and_return(true)
+      end
+
+      it "allows 'chef-server-ctl rotate-shared-secrets' to be run" do
+        expect do
+          subject.run_global_pre_hooks(%w{omnibus-ctl opscode rotate-shared-secrets})
+        end.to_not raise_error
+      end
+
+      it "raises an error and exits with non rotation commands" do
+        # with non rotation args
+        expect do
+          subject.run_global_pre_hooks(%w{omnibus-ctl opscode reconfigure})
+        end.to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
+
+        # with no args
+        expect { subject.run_global_pre_hooks }
+          .to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
+      end
+    end
+
+    context "when rotation is not required" do
+      before do
+        allow(File)
+          .to receive(:exist?)
+          .with(credential_rotation_required_file)
+          .and_return(false)
+      end
+
+      it "returns if credential rotation is not required" do
+        expect { subject.run_global_pre_hooks }.to_not raise_error
+      end
     end
   end
 end

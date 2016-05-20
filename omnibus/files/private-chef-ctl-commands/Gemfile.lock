@@ -39,10 +39,10 @@ GIT
 
 GIT
   remote: git://github.com/chef/omnibus-ctl.git
-  revision: 3f61f2e1af8b261743aad8dd767c1d4b0173a4d6
+  revision: a0ccf08af008c5fd248a5dcc5af9ff1c48f2a1a9
   branch: master
   specs:
-    omnibus-ctl (0.3.4)
+    omnibus-ctl (0.5.0)
 
 PATH
   remote: ../veil
@@ -158,4 +158,4 @@ DEPENDENCIES
   veil!
 
 BUNDLED WITH
-   1.11.2
+   1.12.4

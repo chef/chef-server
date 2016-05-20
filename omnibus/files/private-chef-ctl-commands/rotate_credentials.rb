@@ -125,7 +125,7 @@ add_command_under_category "rotate-shared-secrets", "credential-rotation", "Rota
 
   # Apply the changes
   begin
-    File.delete(credential_prehook_file_path) if File.exist?(credential_prehook_file_path)
+    File.delete(credential_rotation_required_file) if File.exist?(credential_rotation_required_file)
     status = run_chef("#{base_path}/embedded/cookbooks/dna.json")
     if status.success?
       remove_backup_file(backup_file)
@@ -187,27 +187,27 @@ add_command_under_category "require-credential-rotation", "credential-rotation",
     File.unlink("#{service_path}/#{service}") if service_enabled?(service)
   end
 
-  # Create global pre hook that'll prevent ctl commands from running until the
-  # credentials have been rotated
-  File.open(credential_prehook_file_path, "a+") do |file|
-    file.write <<-EOF.gsub(/^\s{6}/, "")
-      add_global_pre_hook "require_credential_rotation" do
-        # Allow running "chef-server-ctl rotate-shared-secrets"
-        # "chef-server-ctl" is a wapper that runs "omnibus-ctl opscode $command"
-        # so we'll look for that in ARGV
-
-        return true if ARGV == %w{omnibus-ctl opscode rotate-shared-secrets}
-
-        raise("You must rotate the Chef Server credentials to enable the Chef Server. "\
-              "Please run 'sudo chef-server-ctl rotate-shared-secrets'")
-      end
-    EOF
-  end
+  # Enable the credential rotation pre-hook by touching the enable file
+  FileUtils.mkdir_p(data_path) unless File.directory?(data_path)
+  FileUtils.touch(credential_rotation_required_file)
 
   log("The Chef Server has been disabled until credentials have been rotated. "\
       "Run 'sudo chef-server-ctl rotate-shared-secrets' to rotate them.")
 
   exit(0)
+end
+
+add_global_pre_hook "require_credential_rotation" do
+  # exit if credential rotation is not required
+  return unless File.exist?(credential_rotation_required_file)
+
+  # Allow running "chef-server-ctl rotate-shared-secrets"
+  # "chef-server-ctl" is a wapper that runs "omnibus-ctl opscode $command"
+  # so we'll look for that in ARGV
+  return if ARGV == %w{omnibus-ctl opscode rotate-shared-secrets}
+
+  raise("You must rotate the Chef Server credentials to enable the Chef Server. "\
+        "Please run 'sudo chef-server-ctl rotate-shared-secrets'")
 end
 
 def backup_secrets_file(backup_file = nil)
@@ -232,8 +232,8 @@ def remove_backup_file(backup_file)
   FileUtils.rm(backup_file)
 end
 
-def credential_prehook_file_path
-  File.expand_path(File.join(__FILE__, "../", "require_credential_rotation_hook.rb"))
+def credential_rotation_required_file
+  File.join(data_path, "credential_rotation_required")
 end
 
 def ensure_configured!
