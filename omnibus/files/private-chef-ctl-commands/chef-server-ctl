@@ -216,6 +216,17 @@ EOM
         "/admin/ping?wt=json"
       end
     end
+
+    # Override reconfigure to skip license checking
+    def reconfigure(*args)
+      status = run_chef("#{base_path}/embedded/cookbooks/dna.json")
+      if status.success?
+        log "#{display_name} Reconfigured!"
+        exit! 0
+      else
+        exit! 1
+      end
+    end
   end
 end
 

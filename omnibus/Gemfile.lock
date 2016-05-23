@@ -1,13 +1,13 @@
 GIT
   remote: git://github.com/chef/omnibus-software.git
-  revision: 89b3385eee74bf19d8d68ddb8b6f240d9bd28d70
+  revision: 91797cdae99ca91cb87af877ceb4953610d45152
   specs:
     omnibus-software (4.0.0)
       omnibus (>= 5.2.0)
 
 GIT
   remote: git://github.com/chef/omnibus.git
-  revision: b62510242eceae2f52f2701f6ee0c4ef48ae8b4a
+  revision: ea5273b9cc3e3de32b93ae959ba76cc148613d60
   specs:
     omnibus (5.4.0)
       aws-sdk (~> 2)
@@ -24,12 +24,12 @@ GEM
   remote: https://rubygems.org/
   specs:
     addressable (2.4.0)
-    aws-sdk (2.3.3)
-      aws-sdk-resources (= 2.3.3)
-    aws-sdk-core (2.3.3)
+    aws-sdk (2.3.5)
+      aws-sdk-resources (= 2.3.5)
+    aws-sdk-core (2.3.5)
       jmespath (~> 1.0)
-    aws-sdk-resources (2.3.3)
-      aws-sdk-core (= 2.3.3)
+    aws-sdk-resources (2.3.5)
+      aws-sdk-core (= 2.3.5)
     berkshelf (4.3.0)
       addressable (~> 2.3, >= 2.3.4)
       berkshelf-api-client (~> 2.0, >= 2.0.2)
@@ -150,7 +150,7 @@ GEM
     nio4r (1.2.1)
     octokit (4.3.0)
       sawyer (~> 0.7.0, >= 0.5.3)
-    ohai (8.15.1)
+    ohai (8.16.0)
       chef-config (>= 12.5.0.alpha.1, < 13)
       ffi (~> 1.9)
       ffi-yajl (~> 2.2)
@@ -204,7 +204,7 @@ GEM
     rspec_junit_formatter (0.2.3)
       builder (< 4)
       rspec-core (>= 2, < 4, != 2.12.0)
-    ruby-progressbar (1.8.0)
+    ruby-progressbar (1.8.1)
     sawyer (0.7.0)
       addressable (>= 2.3.5, < 2.5)
       faraday (~> 0.8, < 0.10)
@@ -246,4 +246,4 @@ DEPENDENCIES
   rspec
 
 BUNDLED WITH
-   1.12.3
+   1.12.4
