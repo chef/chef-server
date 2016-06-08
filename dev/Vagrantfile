@@ -108,7 +108,7 @@ def define_chef_server(config, attributes)
 
     config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
     config.vm.provision "shell", inline: install_hack(installer)
-    config.vm.provision "chef_solo" do |chef|
+    config.vm.provision "chef_zero" do |chef|
       chef.install = false
       chef.binary_path = "/opt/opscode/embedded/bin"
       chef.node_name = config.vm.hostname
@@ -118,6 +118,7 @@ def define_chef_server(config, attributes)
       chef.add_recipe("dev::user-env")
       chef.add_recipe("dev::dvm")
       chef.json = json || {}
+      chef.nodes_path = "nodes"
     end
     # Makes more sense here than in a one-off line in the dvm recipe, which
     # has no direct connection...
