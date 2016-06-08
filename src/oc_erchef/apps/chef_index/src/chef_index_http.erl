@@ -16,13 +16,13 @@
 
 -define(DEFAULT_HEADERS, [{"Content-Type", "application/xml"}]).
 
-request(Path, Method, Body) ->
-    request(Path, Method, Body, ?DEFAULT_HEADERS).
+request(Url, Method, Body) ->
+    request(Url, Method, Body, ?DEFAULT_HEADERS).
 
-request(Path, Method, Body, Headers) ->
+request(Url, Method, Body, Headers) ->
     SolrConfig = envy:get(chef_index, solr_service, list),
     Timeout = proplists:get_value(timeout, SolrConfig),
-    oc_httpc:request(?MODULE, Path, Headers, Method, Body, Timeout).
+    oc_httpc:request(?MODULE, Url, Headers, Method, Body, Timeout).
 
 
 

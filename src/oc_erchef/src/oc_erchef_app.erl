@@ -29,4 +29,3 @@ server_api_version(max) ->
     {ok, ?API_MAX_VER};
 server_api_version(deprecated) ->
     {ok, ?API_DEPRECATED_VER}.
-

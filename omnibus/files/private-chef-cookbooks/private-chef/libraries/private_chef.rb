@@ -226,13 +226,16 @@ module PrivateChef
       (default_keys | keys_from_extensions).each do |key|
         # @todo: Just pick a naming convention and adhere to it
         # consistently
-        rkey = if key =~ /^oc_/ || key == "redis_lb" ||
-                  key == "use_chef_backend" ||
-                  key == "chef_backend_members"
-                 key # leave oc_* keys as is
-               else
-                 key.gsub("_", "-")
-               end
+        rkey = if key =~ /^oc_/ || %w{
+          redis_lb
+          use_chef_backend
+          chef_backend_members
+          data_collector
+        }.include?(key)
+          key
+        else
+          key.gsub("_", "-")
+        end
         results["private_chef"][rkey] = PrivateChef[key]
       end
       results["private_chef"]["default_orgname"] = PrivateChef["default_orgname"]

@@ -125,9 +125,11 @@ log_failure(_,_,_) ->
 -spec spawn_health_checks() -> [{binary(), <<_:32>>}].
 spawn_health_checks() ->
     Parent = self(),
-    Workers = [ {erlang:spawn_monitor(fun() ->
-                                              check_health_worker(Mod, Parent, ping_timeout())
-                                      end), Mod} || Mod <- ping_modules() ],
+    Workers = [{
+        erlang:spawn_monitor(
+            fun() -> check_health_worker(Mod, Parent, ping_timeout()) end
+        ),
+        Mod} || Mod <- ping_modules() ],
     %% Elements of Workers are {{Pid, MonRef}, Mod} tuples
     gather_health_workers(Workers, []).
 
