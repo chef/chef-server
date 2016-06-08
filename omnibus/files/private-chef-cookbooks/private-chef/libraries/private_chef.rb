@@ -89,6 +89,8 @@ module PrivateChef
   backup Mash.new
   backup["strategy"] = "tar"
 
+  data_collector Mash.new
+
   # - legacy config mashes -
   # these config values are here so that if any config has been previously
   # set for these projects in an older version of private-chef/chef-server.rb
@@ -215,6 +217,7 @@ module PrivateChef
         "enabled_plugins",
         "license",
         "backup",
+        "data_collector",
 
         # keys for cleanup and back-compat
         "couchdb",

@@ -1,6 +1,6 @@
 %% -*- mode: erlang -*-
 %% -*- tab-width: 4;erlang-indent-level: 4;indent-tabs-mode: nil -*-
-%% ex: ts=4 sw=4 ft=erlang et
+%% ex: ts=4 sw=4 ft=eruby.erlang et
 [
     {kernel, [{inet_dist_use_interface, {127,0,0,1}}]},
     %% SASL config
@@ -111,7 +111,14 @@
         {max_request_size, <%= node['private_chef']['opscode-erchef']['max_request_size'] %>},
         {server_version, "<%= node['private_chef']['version'] %>"},
         {health_ping_timeout, <%= node['private_chef']['opscode-erchef']['health_ping_timeout'] %>},
-        {health_ping_modules, [oc_chef_authz, chef_sql, chef_<%= node['private_chef']['opscode-erchef']['search_provider'] %>]},
+        {health_ping_modules, [
+            <% if node['private_chef']['data_collector']['root_url'] %>
+            data_collector,
+            <% end %>
+            oc_chef_authz,
+            chef_sql,
+            chef_<%= node['private_chef']['opscode-erchef']['search_provider'] %>
+        ]},
         {base_resource_url, <%= @helper.erl_atom_or_string(node['private_chef']['opscode-erchef']['base_resource_url']) %>},
         {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
         {strict_search_result_acls, <%= @strict_search_result_acls %>},
@@ -241,6 +248,20 @@
         {depsolver_timeout, <%= @depsolver_timeout %>},
         {depsolver_pooler_timeout, <%= @depsolver_pooler_timeout %>}
     ]},
+
+    <% if node['private_chef']['data_collector']['root_url'] %>
+    {data_collector, [
+        {root_url,                "<%= node['private_chef']['data_collector']['root_url'] %>"},
+        {token,                   "<%= node['private_chef']['data_collector']['token'] %>"},
+        {timeout,                 <%= node['private_chef']['data_collector']['timeout'] %>},
+        {init_count,              <%= node['private_chef']['data_collector']['http_init_count'] %>},
+        {max_count,               <%= node['private_chef']['data_collector']['http_max_count'] %>},
+        {cull_interval,           <%= node['private_chef']['data_collector']['http_cull_interval'] %>},
+        {max_age,                 <%= node['private_chef']['data_collector']['http_max_age'] %>},
+        {max_connection_duration, <%= node['private_chef']['data_collector']['http_max_connection_duration'] %>},
+        {ibrowse_options,         <%= node['private_chef']['data_collector']['ibrowse_options'] %>}
+    ]},
+    <% end %>
 
     {stats_hero, [
         %% Set sender pool size to DB max_connections to avoid contention
