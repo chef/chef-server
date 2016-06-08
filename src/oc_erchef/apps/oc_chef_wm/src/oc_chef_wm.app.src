@@ -24,7 +24,8 @@
                   syntax_tools,
                   goldrush,
                   lager,
-                  eldap
+                  eldap,
+                  data_collector
                  ]},
   {mod, {oc_chef_wm_app, []}},
   {env, []}
