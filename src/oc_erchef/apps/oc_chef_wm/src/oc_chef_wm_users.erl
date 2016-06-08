@@ -117,7 +117,11 @@ to_json(Req, State) ->
             {chef_json:encode(verbose_users_as_ejson()), Req, State};
         _ ->
             oc_chef_wm_base:list_objects_json(Req, State#base_state{resource_state =
-                                                                 #chef_user{email = wrq:get_qs_value("email", Req)} })
+                                                                        #chef_user{email =
+                                                                                       wrq:get_qs_value("email", Req),
+                                                                                   external_authentication_uid =
+                                                                                       wrq:get_qs_value("external_authentication_uid", Req)}
+                                                                   })
     end.
 
 verbose_users_as_ejson() ->
