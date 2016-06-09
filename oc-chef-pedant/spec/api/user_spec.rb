@@ -64,6 +64,52 @@ describe "users", :users do
             })
         end
 
+        context "saml user" do
+          let(:username) do
+            "user_with_external_uid"
+          end
+
+          let(:external_auth_id) do
+            "sam.l.jackson"
+          end
+
+          let(:user_options) do
+            { :overrides => {
+                :first_name => "external",
+                :last_name => "user",
+                :display_name => "SAML USER",
+                :external_authentication_uid => external_auth_id
+              }
+            }
+          end
+
+          let(:filtered_external_users_body) do
+            { username => "#{request_url}/#{username}" }
+          end
+
+          before :each do
+            @user = platform.create_user(username, user_options)
+          end
+
+          after :each do
+            platform.delete_user(@user)
+          end
+
+          it "returns no users when filtering by non-existing external_authentication_uid", :smoke do
+            get("#{request_url}?external_authentication_uid=somenonexistingemail@somewhere.com", platform.superuser).should look_like({
+                :status => 200,
+                :body_exact => empty_users_body
+              })
+          end
+
+          it "returns a single user when filtering by that user's external_authentication_uid", :smoke do
+            get("#{request_url}?external_authentication_uid=#{external_auth_id}", platform.superuser).should look_like({
+                :status => 200,
+                :body_exact => filtered_external_users_body
+              })
+          end
+        end
+
         it "returns a verbose list of users upon request" do
           body = JSON.parse(get("#{request_url}?verbose=true", platform.superuser))
           [ platform.non_admin_user.name, platform.admin_user.name, platform.superuser.name ].each do |name|
