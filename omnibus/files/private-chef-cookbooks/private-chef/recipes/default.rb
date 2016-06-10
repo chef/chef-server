@@ -54,7 +54,7 @@ end
 
 # Do a sanity check to make sure both SAML and LDAP are not enabled at the same time
 ldap_enabled = !(node['private_chef']['ldap'].nil? || node['private_chef']['ldap'].empty?)
-saml_enabled = node['chef_manage']['saml'] && node['chef_manage']['saml']['enabled']
+saml_enabled = node['chef_manage'] && node['chef_manage']['saml'] && node['chef_manage']['saml']['enabled']
 
 if ldap_enabled && saml_enabled
   Chef::Log.fatal("Both SAML and LDAP auth are enabled at the same time - please enable only one of those auth types.")
