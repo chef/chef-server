@@ -31,7 +31,7 @@ build do
   env = with_standard_compiler_flags(with_embedded_path)
 
   if ppc64? || ppc64le?
-    make "LUADIR=#{install_dir}/embedded/lua/include", env: env
+    make "LUADIR=#{install_dir}/embedded/include", env: env
   else
     make "LUADIR=#{install_dir}/embedded/luajit/include/luajit-2.1", env: env
   end
