@@ -17,7 +17,8 @@
 -define(DEFAULT_HEADERS, [{"Content-Type", "application/json"}]).
 
 request(Path, Method, Body) ->
-    request(Path, Method, Body, ?DEFAULT_HEADERS).
+    Headers = request_headers(),
+    request(Path, Method, Body, Headers).
 
 request(Path, Method, Body, Headers) ->
     {ok, Timeout} = application:get_env(data_collector, timeout),
@@ -29,11 +30,11 @@ request(Path, Method, Body, Headers) ->
 %%
 -spec get(list()) -> ok | {error, term()}.
 get(Path) ->
-    get(Path, [], ?DEFAULT_HEADERS).
+    get(Path, [], request_headers()).
 
 -spec get(list(), iolist() | binary()) -> ok | {error, term()}.
 get(Path, Body) ->
-    get(Path, Body, ?DEFAULT_HEADERS).
+    get(Path, Body, request_headers()).
 
 -spec get(list(), iolist() | binary(), list()) -> ok | {error, term()}.
 get(Path, Body, Headers) ->
@@ -41,7 +42,7 @@ get(Path, Body, Headers) ->
 
 -spec post(list(), iolist() | binary()) -> ok | {error, term()}.
 post(Path, Body) ->
-    post(Path, Body, ?DEFAULT_HEADERS).
+    post(Path, Body, request_headers()).
 
 -spec post(list(), iolist() | binary(), list()) -> ok | {error, term()}.
 post(Path, Body, Headers) ->
@@ -49,11 +50,19 @@ post(Path, Body, Headers) ->
 
 -spec delete(list(), iolist() | binary()) -> ok | {error, term()}.
 delete(Path, Body) ->
-    delete(Path, Body, ?DEFAULT_HEADERS).
+    delete(Path, Body, request_headers()).
 
 -spec delete(list(), iolist() | binary(), list()) -> ok | {error, term()}.
 delete(Path, Body, Headers) ->
     request_with_caught_errors(Path, delete, Body, Headers).
+
+request_headers() ->
+    case application:get_env(data_collector, token) of
+        {ok, Token} ->
+            ?DEFAULT_HEADERS ++ [{"X-Data-Collector-Token", Token}];
+        undefined ->
+            ?DEFAULT_HEADERS
+    end.
 
 request_with_caught_errors(Path, Method, Body, Headers) when is_list(Body)->
     request_with_caught_errors(Path, Method, iolist_to_binary(Body), Headers);

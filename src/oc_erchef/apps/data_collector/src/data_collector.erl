@@ -2,7 +2,8 @@
 %% ex: ts=4 sw=4 et
 %%
 %% @author Ryan Cragun <ryan@chef.io>
-%% @author John Keiser <jkeiser@chef.io.
+%% @author John Keiser <jkeiser@chef.io>
+%% @author Adam Leff <adamleff@chef.io>
 %%
 %% Copyright 2016 Chef Software, Inc. All Rights Reserved.
 %%
@@ -39,8 +40,10 @@ ping() ->
 update(Body) when is_list(Body) ->
     update(iolist_to_binary(Body));
 update(Body) ->
-    %% TODO: Transform to data collector JSON
-    data_collector_http:post("/", Body).
+    case is_enabled() of
+        true -> data_collector_http:post("/", Body);
+        _ -> ok
+    end.
 
 -spec is_enabled() -> true | false.
 is_enabled() ->

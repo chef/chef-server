@@ -165,8 +165,8 @@ routing_key(EntityType, Method) ->
 publish(RoutingKey, Msg)->
     QueueMonitorEnabled =
       chef_wm_rabbitmq_management:get_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false),
-    publish(RoutingKey, Msg, QueueMonitorEnabled).
-
+    publish(RoutingKey, Msg, QueueMonitorEnabled),
+    data_collector:update(Msg).
 
 -spec publish(RoutingKey :: binary(),
               Msg :: binary(),
