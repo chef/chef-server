@@ -69,6 +69,7 @@ result_to_user_ejson_test_() ->
                   {"mail", ["bob@example.com"]},
                   {"givenName",["Bob"]},
                   {"displayName", ["Bobby"]},
+                  {"cn", ["Bobby Bob"]},
                   {"o",["BigCorporation"]},
                   {"objectClass", ["person","organizationalPerson","inetOrgPerson"]},
                   {"uid",["bob^bob"]}]}],
@@ -79,6 +80,7 @@ result_to_user_ejson_test_() ->
                           {"mail", ["bob@example.com"]},
                           {"givenName",["Bob"]},
                           {"displayName", ["Bobby"]},
+                          {"cn", ["Bobby Bob"]},
                           {"o",["BigCorporation"]},
                           {"objectClass", ["person","organizationalPerson","inetOrgPerson"]},
                           {"uid",["bob^bob", "bobby"]}]}],
@@ -89,6 +91,7 @@ result_to_user_ejson_test_() ->
                             {"mail", ["bob@example.com"]},
                             {"givenName",["Bob"]},
                             {"displayName", ["Bobby"]},
+                            {"cn", ["Bobby Bob"]},
                             {"o",["BigCorporation"]},
                             {"objectClass", ["person","organizationalPerson","inetOrgPerson"]},
                             {"uid",["bob^bob", "bobby"]}]}],
@@ -96,6 +99,11 @@ result_to_user_ejson_test_() ->
       fun() ->
               {_, _, {RetUser}} = oc_chef_wm_authn_ldap:result_to_user_ejson(LoginAttr,UserName,LdapUser),
               ?assertEqual(<<"Bobby">>, proplists:get_value(<<"display_name">>, RetUser))
+      end},
+     {"sets common_name in returned user from cn in the LDAP record",
+      fun() ->
+              {_, _, {RetUser}} = oc_chef_wm_authn_ldap:result_to_user_ejson(LoginAttr,UserName,LdapUser),
+              ?assertEqual(<<"Bobby Bob">>, proplists:get_value(<<"common_name">>, RetUser))
       end},
      {"sets first_name in returned user from givenName in the LDAP record",
       fun() ->

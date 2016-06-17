@@ -200,6 +200,7 @@ result_to_user_ejson(LoginAttr, UserName, [{eldap_entry, CN, DataIn}|_]) ->
     LookupFields = [{"displayname", <<"display_name">>},
                     {"givenname", <<"first_name">>},
                     {"sn", <<"last_name">>},
+                    {"cn", <<"common_name">>},
                     {"c", <<"country">>},
                     {"l", <<"city">>},
                     {"mail", <<"email">>} ],
