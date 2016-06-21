@@ -89,6 +89,8 @@ module PrivateChef
   backup Mash.new
   backup["strategy"] = "tar"
 
+  data_collector Mash.new
+
   # - legacy config mashes -
   # these config values are here so that if any config has been previously
   # set for these projects in an older version of private-chef/chef-server.rb
@@ -215,6 +217,7 @@ module PrivateChef
         "enabled_plugins",
         "license",
         "backup",
+        "data_collector",
 
         # keys for cleanup and back-compat
         "couchdb",
@@ -223,13 +226,16 @@ module PrivateChef
       (default_keys | keys_from_extensions).each do |key|
         # @todo: Just pick a naming convention and adhere to it
         # consistently
-        rkey = if key =~ /^oc_/ || key == "redis_lb" ||
-                  key == "use_chef_backend" ||
-                  key == "chef_backend_members"
-                 key # leave oc_* keys as is
-               else
-                 key.gsub("_", "-")
-               end
+        rkey = if key =~ /^oc_/ || %w{
+          redis_lb
+          use_chef_backend
+          chef_backend_members
+          data_collector
+        }.include?(key)
+          key
+        else
+          key.gsub("_", "-")
+        end
         results["private_chef"][rkey] = PrivateChef[key]
       end
       results["private_chef"]["default_orgname"] = PrivateChef["default_orgname"]

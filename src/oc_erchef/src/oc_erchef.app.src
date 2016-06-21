@@ -32,7 +32,8 @@
                   runtime_tools,
                   tools,
                   uuid,
-                  webtool
+                  webtool,
+                  data_collector
                  ]},
   {mod, { oc_erchef_app, []}},
   {env, []}
