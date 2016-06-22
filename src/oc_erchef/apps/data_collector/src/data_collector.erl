@@ -24,8 +24,8 @@
 -module(data_collector).
 -export([
          ping/0,
-         update/1,
-         is_enabled/0
+         is_enabled/0,
+         token/0
         ]).
 
 -spec ping() -> pong | pang.
@@ -35,13 +35,6 @@ ping() ->
         _ -> pang
     end.
 
--spec update(iolist() | binary()) -> ok | {error, term()}.
-update(Body) when is_list(Body) ->
-    update(iolist_to_binary(Body));
-update(Body) ->
-    %% TODO: Transform to data collector JSON
-    data_collector_http:post("/", Body).
-
 -spec is_enabled() -> boolean().
 is_enabled() ->
     case application:get_env(data_collector, root_url) of
@@ -49,4 +42,13 @@ is_enabled() ->
             true;
         undefined ->
             false
+    end.
+
+-spec token() -> list() | atom().
+token() ->
+    case application:get_env(data_collector, token) of
+        {ok, Token} ->
+            Token;
+        undefined ->
+            undefined
     end.

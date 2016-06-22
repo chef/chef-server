@@ -16,8 +16,19 @@
 
 -define(DEFAULT_HEADERS, [{"Content-Type", "application/json"}]).
 
+default_headers() ->
+    maybe_add_data_collector_token_header(?DEFAULT_HEADERS).
+
+maybe_add_data_collector_token_header(Headers) ->
+    case data_collector:token() of
+        undefined ->
+            Headers;
+        Token ->
+            [{"x-data-collector-token", Token} | Headers]
+    end.
+
 request(Path, Method, Body) ->
-    request(Path, Method, Body, ?DEFAULT_HEADERS).
+    request(Path, Method, Body, default_headers()).
 
 request(Path, Method, Body, Headers) ->
     {ok, Timeout} = application:get_env(data_collector, timeout),
@@ -29,11 +40,11 @@ request(Path, Method, Body, Headers) ->
 %%
 -spec get(list()) -> ok | {error, term()}.
 get(Path) ->
-    get(Path, [], ?DEFAULT_HEADERS).
+    get(Path, [], default_headers()).
 
 -spec get(list(), iolist() | binary()) -> ok | {error, term()}.
 get(Path, Body) ->
-    get(Path, Body, ?DEFAULT_HEADERS).
+    get(Path, Body, default_headers()).
 
 -spec get(list(), iolist() | binary(), list()) -> ok | {error, term()}.
 get(Path, Body, Headers) ->
@@ -41,7 +52,7 @@ get(Path, Body, Headers) ->
 
 -spec post(list(), iolist() | binary()) -> ok | {error, term()}.
 post(Path, Body) ->
-    post(Path, Body, ?DEFAULT_HEADERS).
+    post(Path, Body, default_headers()).
 
 -spec post(list(), iolist() | binary(), list()) -> ok | {error, term()}.
 post(Path, Body, Headers) ->
@@ -49,7 +60,7 @@ post(Path, Body, Headers) ->
 
 -spec delete(list(), iolist() | binary()) -> ok | {error, term()}.
 delete(Path, Body) ->
-    delete(Path, Body, ?DEFAULT_HEADERS).
+    delete(Path, Body, default_headers()).
 
 -spec delete(list(), iolist() | binary(), list()) -> ok | {error, term()}.
 delete(Path, Body, Headers) ->

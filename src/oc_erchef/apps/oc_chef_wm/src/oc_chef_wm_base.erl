@@ -640,7 +640,7 @@ is_user_in_org(Type, DbContext, Name, OrgName) ->
 
 %% These are modules that we instrument with stats_hero and aggregate into common prefix via
 %% stats_hero_label.
--type metric_module() :: oc_chef_authz | chef_s3 | chef_sql | chef_solr.
+-type metric_module() :: oc_chef_authz | chef_s3 | chef_sql | chef_solr | data_collector.
 
 %% @doc Given a `{Mod, Fun}' tuple, generate a stats hero metric with a prefix appropriate
 %% for stats_hero aggregation. An error is thrown if `Mod' is unknown. This is where we
@@ -656,6 +656,8 @@ stats_hero_label({chef_s3, Fun}) ->
     chef_metrics:label(s3, {chef_s3, Fun});
 stats_hero_label({chef_depsolver, Fun}) ->
     chef_metrics:label(depsolver, {chef_depsolver, Fun});
+stats_hero_label({data_collector, Fun}) ->
+    chef_metrics:label(data_collector, {data_collector, Fun});
 stats_hero_label({BadPrefix, Fun}) ->
     erlang:error({bad_prefix, {BadPrefix, Fun}}).
 
@@ -663,7 +665,7 @@ stats_hero_label({BadPrefix, Fun}) ->
 %% @doc The prefixes that stats_hero should use for aggregating timing data over each
 %% request.
 stats_hero_upstreams() ->
-    [<<"authz">>, <<"depsolver">>, <<"rdbms">>, <<"s3">>, <<"solr">>].
+    [<<"authz">>, <<"depsolver">>, <<"data_collector">>, <<"rdbms">>, <<"s3">>, <<"solr">>].
 
 
 
@@ -787,13 +789,20 @@ finish_request(Req, #base_state{reqid = ReqId,
 finish_request(_Req, Anything) ->
     lager:error("chef_wm:finish_request/2 did not receive #base_state{}~nGot: ~p~n", [Anything]).
 
-log_action(Req, State)->
-    Action = envy:get(oc_chef_wm, enable_actions, false, boolean),
-    maybe_log_action(Action, Req, State).
+log_action(Req, State) ->
+    ActionEnabled = envy:get(oc_chef_wm, enable_actions, false, boolean),
+    DataCollectorEnabled = data_collector:is_enabled(),
+    maybe_log_action(ActionEnabled, Req, State),
+    maybe_notify_data_collector(DataCollectorEnabled, Req, State).
 
 maybe_log_action(true, Req, State) ->
     oc_chef_action:log_action(Req, State);
 maybe_log_action(false, _Req, _State) ->
+    ok.
+
+maybe_notify_data_collector(true, Req, State) ->
+    oc_chef_data_collector:notify(Req, State);
+maybe_notify_data_collector(false, _Req, _State) ->
     ok.
 
 init(ResourceMod, Config) ->

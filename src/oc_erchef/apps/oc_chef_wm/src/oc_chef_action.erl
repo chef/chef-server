@@ -24,7 +24,10 @@
 
 -include("oc_chef_wm.hrl").
 
--export([log_action/2]).
+-export([
+         log_action/2,
+         create_message/3
+        ]).
 
 -ifdef(TEST).
 -compile([export_all]).
@@ -92,21 +95,31 @@ log_action(Req, #base_state{resource_state = ResourceState} = State) ->
 
 -spec  log_action0(Req :: wm_req(),
                    State :: #base_state{}) -> ok.
-log_action0(Req, #base_state{resource_state = ResourceState} = State) ->
+log_action0(Req, State) ->
     ShouldSendBody = envy:get(oc_chef_wm, enable_actions_body, true, boolean),
-    {FullActionPayload, EntityType, EntitySpecificPayload} = extract_entity_info(Req, ResourceState),
-    Payload = case ShouldSendBody of
-        true -> FullActionPayload;
+    Msg = create_message(Req, State, ShouldSendBody),
+    RoutingKey = routing_key(Req, State),
+    publish(RoutingKey, Msg).
+
+-spec create_message(Req :: wm_req(), State :: #base_state{}, SendFullPayload :: boolean()) -> binary().
+create_message(Req, #base_state{resource_state = ResourceState} = State, SendFullPayload) ->
+    {FullPayload, _EntityType, EntitySpecificPayload} = extract_entity_info(Req, ResourceState),
+    Payload = case SendFullPayload of
+        true -> FullPayload;
         false -> []
     end,
     Task = task(Req, State),
-    MsgType = routing_key(EntityType, Task),
-    Msg = construct_payload(Payload, Task, Req, State, EntitySpecificPayload),
-    publish(MsgType, Msg).
+    construct_payload(Payload, Task, Req, State, EntitySpecificPayload).
 
 %%
 %% Internal functions
 %%
+
+-spec routing_key(Req :: wm_req(), State :: #base_state{}) -> binary().
+routing_key(Req, #base_state{resource_state = ResourceState} = State) ->
+    {_FullPayload, EntityType, _EntitySpecificPayload} = extract_entity_info(Req, ResourceState),
+    Method = task(Req, State),
+    iolist_to_binary([<<"erchef.">>, EntityType, <<".">>, Method]).
 
 -spec construct_payload(FullActionPayload :: [{binary(), binary()},...],
                         Task :: binary(),
@@ -155,10 +168,6 @@ maybe_add_remote_request_id(Msg, undefined) ->
     Msg;
 maybe_add_remote_request_id(Msg, RemoteRequestId) ->
     ej:set({<<"remote_request_id">>}, Msg, RemoteRequestId).
-
--spec routing_key(EntityType :: <<_:32,_:_*8>>, Method :: <<_:48>>) -> binary().
-routing_key(EntityType, Method) ->
-    iolist_to_binary([<<"erchef.">>, EntityType, <<".">>, Method]).
 
 -spec publish(RoutingKey :: binary(),
               Msg :: binary()) -> ok.
