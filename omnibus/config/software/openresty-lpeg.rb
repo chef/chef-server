@@ -30,7 +30,7 @@ relative_path "lpeg-#{version}"
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
-  if ppc64? || ppc64le?
+  if ppc64? || ppc64le? || ohai['kernel']['machine'] == "s390x"
     make "LUADIR=#{install_dir}/embedded/include", env: env
   else
     make "LUADIR=#{install_dir}/embedded/luajit/include/luajit-2.1", env: env
