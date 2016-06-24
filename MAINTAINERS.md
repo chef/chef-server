@@ -26,7 +26,7 @@ The core chef REST API server, packaging/installation,  and its primary dependen
 ### Lieutenants
 
 * [Marc Paradise](http://github.com/marcparadise)
-* [Mark Anderson](http://github.com/manderson26)
+* [Mark Anderson](http://github.com/markan)
 * [Tyler Cloke](http://github.com/tylercloke)
 
 ### Maintainers

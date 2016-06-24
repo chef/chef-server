@@ -1,5 +1,5 @@
 [{<<"envy">>,
-  {git,"https://github.com/manderson26/envy",
+  {git,"https://github.com/markan/envy",
        {ref,"8ba233bae37d87c319f3b4c5ae6973576986b36c"}},
   0},
  {<<"eper">>,

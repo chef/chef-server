@@ -7,7 +7,7 @@
        {ref,"132a9a3c0662a2377eaf7ebee694a496a0957160"}},
   0},
  {<<"envy">>,
-  {git,"git://github.com/manderson26/envy.git",
+  {git,"git://github.com/markan/envy.git",
        {ref,"8ba233bae37d87c319f3b4c5ae6973576986b36c"}},
   1},
  {<<"eper">>,
