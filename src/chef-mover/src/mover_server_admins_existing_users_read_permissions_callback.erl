@@ -43,12 +43,11 @@ migration_action(UserRecord, _AcctInfo) ->
 
 add_permission_to_existing_user_for_server_admins(BifrostSuperuserId, Username, ServerAdminsAuthzId, UserAuthzid, Permission) ->
     case mv_oc_chef_authz:add_ace_for_entity(BifrostSuperuserId, group,  ServerAdminsAuthzId, actor, UserAuthzid, Permission) of
-	{error, Error} ->
-	    lager:error("Failed to update " ++ binary_to_list(Permission) ++ " permission for user " ++ binary_to_list(Username) ++ " with error:"),
-	    lager:error(Error),
-	    throw(migration_error);
-	_ ->
-	    ok
+        {error, Error} ->
+            lager:error("Failed to update ~p permissions for user ~p with error: ~p", [Permission, Username, Error]),
+            throw(migration_error);
+        _ ->
+            ok
     end.
 
 get_users() ->
