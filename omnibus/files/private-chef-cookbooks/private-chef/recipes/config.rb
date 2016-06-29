@@ -37,13 +37,6 @@ if File.exists?("/etc/opscode/chef-server-running.json")
   node.consume_attributes({"previous_run" => old_config['private_chef']})
 end
 
-# used for checking if LDAP and SAML are both enabled
-chef_manage = { "chef_manage" => {} }
-if ::File.exists?("/var/opt/chef-manage/etc/chef-manage-running.json")
-  chef_manage = JSON.parse(IO.read("/var/opt/chef-manage/etc/chef-manage-running.json"))
-end
-node.consume_attributes({"chef_manage" => chef_manage["chef-manage"]})
-
 if File.exists?("/etc/opscode/chef-server.json") &&
     !(File.exist?("/etc/opscode/private-chef.rb") || File.exist?("/etc/opscode/chef-server.rb"))
   Chef::Log.fatal("Configuration via /etc/opscode/chef-server.json is not supported. Please use /etc/opscode/chef-server.rb")
