@@ -47,7 +47,9 @@ oc_chef_data_collector_failed_actions_test_() ->
     ErrorCodes = [500, 400, 401, 402, 403, 404],
     MockedModules = [wrq, data_collector_http],
     {foreach,
-     fun() -> oc_chef_wm_test_utils:setup(MockedModules) end,
+     fun() -> oc_chef_wm_test_utils:setup(MockedModules),
+              chef_index_test_utils:start_stats_hero()
+     end,
      fun(_) -> oc_chef_wm_test_utils:cleanup(MockedModules) end,
      [{"skips notifying" ++ integer_to_list(ErrorCode) ++ "errors",
        fun() ->
