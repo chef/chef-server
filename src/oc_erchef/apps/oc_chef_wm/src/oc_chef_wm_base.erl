@@ -752,6 +752,7 @@ finish_request(Req, #base_state{reqid = ReqId,
                                 server_api_version = APIVersion,
                                 darklaunch = Darklaunch}=State) ->
     try
+        log_action(Req, State),
         Code = wrq:response_code(Req),
         PerfTuples = stats_hero:snapshot(ReqId, agg),
         UserId = wrq:get_req_header("x-ops-userid", Req),
@@ -763,7 +764,6 @@ finish_request(Req, #base_state{reqid = ReqId,
         AnnotatedReq = maybe_annotate_org_specific(OrgName, Darklaunch, Req1),
         stats_hero:report_metrics(ReqId, Code),
         stats_hero:stop_worker(ReqId),
-        log_action(Req, State),
         case Code of
             500 ->
                 % Sanitize response body
