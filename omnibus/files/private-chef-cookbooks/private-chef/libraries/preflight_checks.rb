@@ -136,6 +136,7 @@ class PreflightChecks
         BootstrapPreflightValidator.new(node).run!
         PostgresqlPreflightValidator.new(node).run!
       end
+      AuthPreflightValidator.new(node).run!
       SolrPreflightValidator.new(node).run!
       BookshelfPreflightValidator.new(node).run!
     rescue PreflightValidationFailed => e

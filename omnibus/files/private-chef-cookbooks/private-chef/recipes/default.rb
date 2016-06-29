@@ -52,15 +52,6 @@ if OmnibusHelper.has_been_bootstrapped? or
   node.set['private_chef']['bootstrap']['enable'] = false
 end
 
-# Do a sanity check to make sure both SAML and LDAP are not enabled at the same time
-ldap_enabled = !(node['private_chef']['ldap'].nil? || node['private_chef']['ldap'].empty?)
-saml_enabled = node['chef_manage'] && node['chef_manage']['saml'] && node['chef_manage']['saml']['enabled']
-
-if ldap_enabled && saml_enabled
-  Chef::Log.fatal("Both SAML and LDAP auth are enabled at the same time - please enable only one of those auth types.")
-  exit!(1)
-end
-
 # Create the Chef User
 include_recipe "private-chef::users"
 
