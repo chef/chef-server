@@ -79,7 +79,8 @@ dev-build: clear_pkg_cache prune
 	kitchen exec default-$(DEV_PLATFORM) -c "bash -l -c 'cd chef-server/omnibus && source ~/load-omnibus-toolchain.sh && bundle install && time bundle exec omnibus build chef-server'"
 
 install:
-	bundle install
+	gem install bundler -v 1.12.0
+	bundle _1.12.0_ install
 
 travis:
 	bundle exec rake test:csc
