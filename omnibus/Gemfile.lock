@@ -245,11 +245,9 @@ PLATFORMS
 
 DEPENDENCIES
   berkshelf
+  bundler (> 1.10)
   chefspec
   omnibus!
   omnibus-software!
   rake
   rspec
-
-BUNDLED WITH
-   1.12.5
