@@ -27,7 +27,6 @@ install_dir     "/opt/opscode"
 build_version   "12.7.0"
 build_iteration 1
 
-override :berkshelf2, version: "2.0.18"
 override :rabbitmq, version: "3.3.4"
 override :erlang, version: "17.5"
 override :ruby, version: "2.1.4"
