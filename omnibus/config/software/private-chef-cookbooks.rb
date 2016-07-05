@@ -20,7 +20,7 @@ source path: "#{project.files_path}/#{name}"
 
 license :project_license
 
-dependency "berkshelf2"
+dependency "berkshelf"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
@@ -29,8 +29,9 @@ build do
       " -v 2.1.3" \
       " --no-rdoc --no-ri", env: env
 
-  command "berks install" \
-          " --path=#{install_dir}/embedded/cookbooks", env: env, cwd: "#{project_dir}/private-chef"
+
+  command "berks vendor #{install_dir}/embedded/cookbooks",
+          env: env, cwd: "#{project_dir}/private-chef"
 
   block do
     fips_enabled = (project.overrides[:fips] && project.overrides[:fips][:enabled]) || false
