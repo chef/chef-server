@@ -1,6 +1,6 @@
 # Chef Server Changelog
 
-## [12.8.0](https://github.com/chef/chef-server/tree/12.8.0) (2016-07-05)
+## [12.8.0](https://github.com/chef/chef-server/tree/12.8.0) (2016-07-06)
 [Full Changelog](https://github.com/chef/chef-server/compare/12.7.0...12.8.0)
 
 **Closed issues:**
@@ -18,6 +18,23 @@
 - Fix logging in server\_admins\_existing\_users\_read\_permissions [\#866](https://github.com/chef/chef-server/pull/866) ([stevendanna](https://github.com/stevendanna))
 - \[IPO-203\] Update oc\_chef\_wm to send actions to the Data Collector [\#865](https://github.com/chef/chef-server/pull/865) ([ryancragun](https://github.com/ryancragun))
 - \[IPO-202\] Add initial Data Collector application and /\_status check [\#858](https://github.com/chef/chef-server/pull/858) ([ryancragun](https://github.com/ryancragun))
+
+### Components
+New Components
+* libarchive (3.1.2)
+* dep-selector-libgecode (1.2.0)
+* berkshelf (d563dc5b5f81f62546d41dd40c43e38986bfcf75)
+
+Updated Components
+* cacerts (2016.01.20 -> 2016-04-20)
+* config_guess (e39075a3 -> 5b4e8a5d)
+* libxml2 (2.9.3 -> 2.9.4)
+* libxslt (1.1.28 -> 1.1.29)
+* ohai (d1e2fe98 -> f9992941)
+* chef (de78e390 -> f5cae5ea)
+
+Removed Components
+* berkshelf2 (2.0.18)
 
 ## [12.7.0](https://github.com/chef/chef-server/tree/12.7.0) (2016-06-20)
 [Full Changelog](https://github.com/chef/chef-server/compare/12.6.0...12.7.0)
