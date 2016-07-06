@@ -30,6 +30,7 @@ In order to release, you will need the following accounts/permissions:
 - The CHANGELOG_GITHUB_TOKEN environment variable set to a github token gathered
   [here](https://github.com/settings/tokens/new?description=GitHub%20Changelog%20Generator%20token).
   Read access to repositories and issues should be sufficient. (Check the "Full control of private repositories" box.)
+- Run `export CHANGELOG_GITHUB_TOKEN="«your-40-digit-github-token»"` to set your new token that you just created
 - Install Github Changelog Generator
   + `gem install github_changelog_generator`
 
