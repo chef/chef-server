@@ -11,6 +11,7 @@ cache:
     - $HOME/.cpanm
     - $HOME/.cpan
     - $HOME/perl5
+    - $HOME/.cache/rebar3/
 before_cache:
   # Prevent build log from changing cache cand causing repackage
   - rm -f $HOME/.cpanm/work/*/build.log
