@@ -23,7 +23,7 @@ license_file "LICENSE.txt"
 source url: "http://archive.apache.org/dist/lucene/solr/#{version}/solr-#{version}.tgz",
        md5: "8ae107a760b3fc1ec7358a303886ca06"
 
-if ppc64? || ppc64le?
+if ppc64? || ppc64le? || ohai['kernel']['machine'] == "s390x"
   dependency "ibm-jre"
 elsif intel? && _64_bit?
   dependency "server-jre"
