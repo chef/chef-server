@@ -3,12 +3,12 @@
 %% @author Tyler Cloke <tyler@chef.io>
 %% @copyright 2015 Chef Software, Inc.
 %%
-%% This migration iterates through all existing users and grants
+%% This migration iterates through all existing orgs and grants
 %% the server-admins global group READ, UPDATE, and DELETE access on them,
 %% as having access on the container does not update permissions for
-%% existing users.
+%% existing orgs.
 
--module(mover_server_admins_existing_users_read_permissions_callback).
+-module(mover_server_admins_existing_orgs_permissions_callback).
 
 -export([
          migration_init/0,
@@ -25,37 +25,39 @@
 
 -define(GLOBAL_PLACEHOLDER_ORG_ID, <<"00000000000000000000000000000000">>).
 
--record(user, {username, authz_id}).
+-record(org, {name, authz_id}).
 -record(group, {authz_id}).
 
 migration_init() ->
     mv_oc_chef_authz_http:create_pool(),
-    mover_transient_migration_queue:initialize_queue(?MODULE, get_users()).
+    mover_transient_migration_queue:initialize_queue(?MODULE, get_orgs()).
 
-migration_action(UserRecord, _AcctInfo) ->
-    Username = UserRecord#user.username,
-    UserAuthzid = UserRecord#user.authz_id,
+
+migration_action(OrgRecord, _AcctInfo) ->
+    OrgName = OrgRecord#org.name,
+    OrgAuthzId = OrgRecord#org.authz_id,
     BifrostSuperuserId = mv_oc_chef_authz:superuser_id(),
     ServerAdminsAuthzId = get_server_admins_authz_id(),
-    add_permission_to_existing_user_for_server_admins(BifrostSuperuserId, Username, ServerAdminsAuthzId, UserAuthzid, read),
-    add_permission_to_existing_user_for_server_admins(BifrostSuperuserId, Username, ServerAdminsAuthzId, UserAuthzid, update),
-    add_permission_to_existing_user_for_server_admins(BifrostSuperuserId, Username, ServerAdminsAuthzId, UserAuthzid, delete).
+    add_permission_to_existing_org_for_server_admins(BifrostSuperuserId, OrgName, ServerAdminsAuthzId, OrgAuthzId, read),
+    add_permission_to_existing_org_for_server_admins(BifrostSuperuserId, OrgName, ServerAdminsAuthzId, OrgAuthzId, update),
+    add_permission_to_existing_org_for_server_admins(BifrostSuperuserId, OrgName, ServerAdminsAuthzId, OrgAuthzId, delete).
 
-add_permission_to_existing_user_for_server_admins(BifrostSuperuserId, Username, ServerAdminsAuthzId, UserAuthzid, Permission) ->
-    case mv_oc_chef_authz:add_ace_for_entity(BifrostSuperuserId, group,  ServerAdminsAuthzId, actor, UserAuthzid, Permission) of
+add_permission_to_existing_org_for_server_admins(BifrostSuperuserId, OrgName, ServerAdminsAuthzId, OrgAuthzId, Permission) ->
+    case mv_oc_chef_authz:add_ace_for_entity(BifrostSuperuserId, group, ServerAdminsAuthzId, object, OrgAuthzId, Permission) of
         {error, Error} ->
-            lager:error("Failed to update ~p permissions for user ~p with error: ~p", [Permission, Username, Error]),
+            lager:error("Failed to update ~p permissions for org ~p with error: ~p", [Permission, OrgName, Error]),
+            lager:error("~p ~p ~p ~p ~p", [BifrostSuperuserId, OrgName, ServerAdminsAuthzId, OrgAuthzId, Permission]),
             throw(migration_error);
         _ ->
             ok
     end.
 
-get_users() ->
-    {ok, Users} = sqerl:select(get_users_sql(), [], rows_as_records, [user, record_info(fields, user)]),
-    Users.
+get_orgs() ->
+    {ok, Orgs} = sqerl:select(get_orgs_sql(), [], rows_as_records, [org, record_info(fields, org)]),
+    Orgs.
 
-get_users_sql() ->
-    <<"SELECT username, authz_id FROM users WHERE NOT username='pivotal'">>.
+get_orgs_sql() ->
+    <<"SELECT name, authz_id FROM orgs">>.
 
 get_server_admins_authz_id() ->
     {ok, [ServerAdmin]} = sqerl:select(get_server_admins_authz_id_sql(), [], rows_as_records, [group, record_info(fields, group)]),
@@ -81,7 +83,7 @@ next_object() ->
     mover_transient_migration_queue:next(?MODULE).
 
 migration_type() ->
-    <<"users_read_access_on_server_admins">>.
+    <<"orgs_access_on_server_admins">>.
 
 supervisor() ->
     mover_transient_worker_sup.
