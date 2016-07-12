@@ -40,7 +40,7 @@ class ChefServerDataBootstrap
     @superuser_authz_id = create_actor_in_authz(bifrost_superuser_id)
     users_authz_id = create_container_in_authz(superuser_authz_id)
     orgs_authz_id = create_container_in_authz(superuser_authz_id)
-    create_server_admins_global_group_in_bifrost(users_authz_id)
+    create_server_admins_global_group_in_bifrost(users_authz_id, orgs_authz_id)
 
     # put pivotal in server-admins global group
     insert_authz_actor_into_group(server_admins_authz_id, superuser_authz_id)
@@ -64,13 +64,16 @@ class ChefServerDataBootstrap
   private
 
   # Create and set up permissions for the server admins group.
-  def create_server_admins_global_group_in_bifrost(users_authz_id)
-    @server_admins_authz_id = create_group_in_authz(bifrost_superuser_id)
+  def create_server_admins_global_group_in_bifrost(users_authz_id, orgs_authz_id)
+    @server_admins_authz_id = create_group_in_authz(bifrost['superuser_id'])
     %w{create read update delete}.each do |permission|
-      # grant server admins group permission on the users container,
+      # grant server admins group permission on the users and orgs container,
       # as the erchef superuser.
       grant_authz_object_permission(permission, "groups", "containers", users_authz_id,
                                     server_admins_authz_id, superuser_authz_id)
+      grant_authz_object_permission(permission, "groups", "containers", orgs_authz_id,
+                                    server_admins_authz_id, superuser_authz_id)
+
       # grant superuser actor permissions on the server admin group,
       # as the bifrost superuser
       grant_authz_object_permission(permission, "actors", "groups", server_admins_authz_id,
@@ -213,3 +216,5 @@ class ChefServerDataBootstrap
     end
   end
 end
+
+  
