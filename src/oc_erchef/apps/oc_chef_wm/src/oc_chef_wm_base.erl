@@ -444,22 +444,30 @@ authorized_by_org_membership_check(Req, #base_state{requestor=#chef_requestor{ty
     {true, Req, State};
 authorized_by_org_membership_check(Req, #base_state{organization_name = undefined} = State) ->
     {true, Req, State};
-authorized_by_org_membership_check(Req, #base_state{organization_name = OrgName, chef_db_context = DbContext} = State) ->
+authorized_by_org_membership_check(Req, #base_state{organization_name = OrgName,
+                                                    chef_db_context = DbContext,
+                                                    requestor = #chef_requestor{authz_id = RequestorAuthzId}} = State) ->
     {UserName, BypassesChecks} = get_user(Req, State#base_state{superuser_bypasses_checks = true}),
     case BypassesChecks of
         true -> {true, Req, State};
         _ ->
-            case chef_db:is_user_in_org(DbContext, UserName, OrgName) of
-                true ->
-                    {true, Req, State};
-                false ->
-                    Msg = forbidden_message(not_member_of_org, UserName, OrgName),
-                    {false, wrq:set_resp_body(chef_json:encode(Msg), Req),
-                     State#base_state{log_msg = user_not_in_org}};
-                Error ->
-                    Msg = forbidden_message(unverified_org_membership, UserName, OrgName),
-                    {false, wrq:set_resp_body(chef_json:encode(Msg), Req),
-                     State#base_state{log_msg = {user_not_in_org_error, Error}}}
+            %% If user is a member of the global group server-admins,
+            %% we do not want to fail on org membership check, only acls.
+            case is_server_admin(DbContext, RequestorAuthzId) of
+                true -> {true, Req, State};
+                _ ->
+                    case chef_db:is_user_in_org(DbContext, UserName, OrgName) of
+                        true ->
+                            {true, Req, State};
+                        false ->
+                            Msg = forbidden_message(not_member_of_org, UserName, OrgName),
+                            {false, wrq:set_resp_body(chef_json:encode(Msg), Req),
+                             State#base_state{log_msg = user_not_in_org}};
+                        Error ->
+                            Msg = forbidden_message(unverified_org_membership, UserName, OrgName),
+                            {false, wrq:set_resp_body(chef_json:encode(Msg), Req),
+                             State#base_state{log_msg = {user_not_in_org_error, Error}}}
+                    end
             end
     end.
 
@@ -540,6 +548,15 @@ is_superuser(Req = #wm_reqdata{}) ->
 is_superuser(UserName) ->
     Superusers = envy:get(oc_chef_wm, superusers, [], list),
     lists:member(UserName, Superusers).
+
+%% Tells whether this user is a member of the global group server-admin.
+-spec is_server_admin(chef_db:db_context(), binary()) -> boolean().
+is_server_admin(DbContext, RequestorAuthzId) ->
+    ServerAdminsAuthzId = chef_db:get_server_admins_authz_id(DbContext),
+    oc_chef_authz:is_actor_transitive_member_of_group(
+      oc_chef_authz:superuser_id(),
+      RequestorAuthzId,
+      ServerAdminsAuthzId).
 
 %% Get the username from the request (and tell whether it is a superuser)
 -spec get_user(Req :: #wm_reqdata{}, #base_state{}) -> {binary(), boolean()}.

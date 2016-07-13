@@ -77,6 +77,8 @@
          %% for license
          count_nodes/1,
 
+         get_server_admins_authz_id/1,
+
          is_user_in_org/3,
          create/3,
          delete/2,
@@ -571,6 +573,10 @@ list_common_orgs(User1Id, User2Id, #context{reqid=ReqId}) ->
 -spec is_user_in_org(#context{}, binary(), binary()) -> boolean() | {error, _}.
 is_user_in_org(#context{reqid = ReqId}, UserName, OrgName) ->
     ?SH_TIME(ReqId, chef_sql, is_user_in_org, (UserName, OrgName)).
+
+-spec get_server_admins_authz_id(#context{}) -> boolean() | {error, _}.
+get_server_admins_authz_id(#context{reqid = ReqId}) ->
+    ?SH_TIME(ReqId, chef_sql, get_server_admins_authz_id, ()).
 
 -spec bulk_get(#context{}, binary(), chef_type(), [binary()]) ->
                       [binary()|ej:json_object()] | {error, _}.
