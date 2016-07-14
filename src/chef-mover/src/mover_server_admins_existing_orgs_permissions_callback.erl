@@ -25,7 +25,7 @@
 
 -define(GLOBAL_PLACEHOLDER_ORG_ID, <<"00000000000000000000000000000000">>).
 
--record(org, {name, authz_id}).
+-record(org, {name, id, authz_id}).
 -record(group, {authz_id}).
 
 migration_init() ->
@@ -35,18 +35,31 @@ migration_init() ->
 
 migration_action(OrgRecord, _AcctInfo) ->
     OrgName = OrgRecord#org.name,
+    OrgId = OrgRecord#org.authz_id,
     OrgAuthzId = OrgRecord#org.authz_id,
     BifrostSuperuserId = mv_oc_chef_authz:superuser_id(),
     ServerAdminsAuthzId = get_server_admins_authz_id(),
+    %% TODO: how to handle deleted admins group?
+    OrgAdminsAuthzId = get_org_admin_authz_id(OrgId),
+
+    %% Grant server-admins permissions on existing org.
     add_permission_to_existing_org_for_server_admins(BifrostSuperuserId, OrgName, ServerAdminsAuthzId, OrgAuthzId, read),
     add_permission_to_existing_org_for_server_admins(BifrostSuperuserId, OrgName, ServerAdminsAuthzId, OrgAuthzId, update),
-    add_permission_to_existing_org_for_server_admins(BifrostSuperuserId, OrgName, ServerAdminsAuthzId, OrgAuthzId, delete).
-
+    add_permission_to_existing_org_for_server_admins(BifrostSuperuserId, OrgName, ServerAdminsAuthzId, OrgAuthzId, delete),
+    
+    %% Add server-admins to admins group.
+    case mv_oc_chef_authz:add_to_group(OrgAdminsAuthzId, group, ServerAdminsAuthzId, superuser) of 
+        {error, Error} ->
+            lager:error("Failed to add server-admins (~p) to the admins group (~p) for this org (~p)", [ServerAdminsAuthzId, OrgAdminsAuthzId, OrgName]),
+            throw(error);
+        _ -> 
+            ok
+    end.
+                               
 add_permission_to_existing_org_for_server_admins(BifrostSuperuserId, OrgName, ServerAdminsAuthzId, OrgAuthzId, Permission) ->
     case mv_oc_chef_authz:add_ace_for_entity(BifrostSuperuserId, group, ServerAdminsAuthzId, object, OrgAuthzId, Permission) of
         {error, Error} ->
             lager:error("Failed to update ~p permissions for org ~p with error: ~p", [Permission, OrgName, Error]),
-            lager:error("~p ~p ~p ~p ~p", [BifrostSuperuserId, OrgName, ServerAdminsAuthzId, OrgAuthzId, Permission]),
             throw(migration_error);
         _ ->
             ok
@@ -57,14 +70,21 @@ get_orgs() ->
     Orgs.
 
 get_orgs_sql() ->
-    <<"SELECT name, authz_id FROM orgs">>.
+    <<"SELECT name, id, authz_id FROM orgs">>.
+
+get_org_admin_authz_id(OrgId) ->
+    {ok, [ServerAdmin]} = sqerl:select(get_org_admin_authz_id(OrgId), [], rows_as_records, [group], record_info(fields, group)]),
+    ServerAdmin#group.authz_id.
+
+get_org_admin_authz_id_sql() ->
+    erlang:iolist_to_binary([<<"SELECT authz_id FROM groups WHERE name='admins' AND org_id=$1"]).
 
 get_server_admins_authz_id() ->
     {ok, [ServerAdmin]} = sqerl:select(get_server_admins_authz_id_sql(), [], rows_as_records, [group, record_info(fields, group)]),
     ServerAdmin#group.authz_id.
 
 get_server_admins_authz_id_sql() ->
-    erlang:iolist_to_binary([<<"SELECT authz_id FROM groups WHERE name='server-admins' and org_id='">>, ?GLOBAL_PLACEHOLDER_ORG_ID , <<"'">>]).
+    erlang:iolist_to_binary([<<"SELECT authz_id FROM groups WHERE name='server-admins' AND org_id='">>, ?GLOBAL_PLACEHOLDER_ORG_ID , <<"'">>]).
 
 migration_complete() ->
     mv_oc_chef_authz_http:delete_pool().
