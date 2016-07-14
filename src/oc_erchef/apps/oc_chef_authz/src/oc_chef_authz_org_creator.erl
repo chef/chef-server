@@ -38,6 +38,9 @@
 
 -define(ALL_PERMS, [create, read, update, delete, grant]).
 
+%% NOTE: The defaults from the orgs container are being completely disregarded
+%% by this code, meaning object specific org container ACEs won't populated here :(
+
 %%
 %% We use a simple declarative language to describe permissions. This could use some
 %% cleanup, but eventually something like this could be uploaded as JSON, and users
@@ -69,15 +72,20 @@
         [{create_containers, ?CONTAINERS},
          {create_groups, ?GROUPS},
          {create_org_read_access_group},
+         {cache_server_admins_global_group},
          {add_to_groups, user, [creator], [admins, users]},
          {add_to_groups, group, [admins, users], [read_access_group]},
          {add_to_groups, group, [users, clients], [public_key_read_access]},
+         {add_to_groups, group, [server_admins], [admins]},
 
          %% ACLs are expanded, then applied
          {acls,
           [
            %% Billing admins is very restrictive.
            {add_acl, [{group, 'billing-admins'}], [read,update], [{user, creator},{group, 'billing-admins'}]},
+
+           {add_acl,
+            [{organization}], [read, update, delete], [{group, server_admins}]},
 
            %% Creator (superuser normally) goes everywhere
            {add_acl,
@@ -181,6 +189,12 @@ process_policy_step({create_org_read_access_group},
         Error ->
             {error, Error}
     end;
+process_policy_step({cache_server_admins_global_group},
+                    #oc_chef_organization{server_api_version=ApiVersion},
+                    _Requestor, Cache) ->
+    DbContext = chef_db:make_context(ApiVersion, base64:encode(term_to_binary(make_ref()))),
+    ServerAdminsAuthzId = chef_db:get_server_admins_authz_id(DbContext),
+    {add_cache(Cache, {group, server_admins}, ServerAdminsAuthzId), []};
 process_policy_step({acls, Steps}, _Org, _User, Cache) ->
     {Cache, process_acls(Steps)}.
 
