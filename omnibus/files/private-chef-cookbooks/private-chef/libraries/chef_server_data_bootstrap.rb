@@ -64,6 +64,8 @@ class ChefServerDataBootstrap
       # as the erchef superuser.
       grant_authz_object_permission(permission, "groups", "containers", users_authz_id,
                                     server_admins_authz_id, superuser_authz_id)
+      # NOTE: org creator ignores the org container perms anyway, so this is really only used
+      # for list and create.
       grant_authz_object_permission(permission, "groups", "containers", orgs_authz_id,
                                     server_admins_authz_id, superuser_authz_id)
 

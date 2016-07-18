@@ -550,7 +550,7 @@ is_superuser(UserName) ->
     lists:member(UserName, Superusers).
 
 %% Tells whether this user is a member of the global group server-admin.
--spec is_server_admin(chef_db:db_context(), binary()) -> boolean().
+-spec is_server_admin(chef_db:db_context(), binary()) -> boolean() | {error, atom()}.
 is_server_admin(DbContext, RequestorAuthzId) ->
     ServerAdminsAuthzId = chef_db:get_server_admins_authz_id(DbContext),
     oc_chef_authz:is_actor_transitive_member_of_group(

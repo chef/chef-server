@@ -574,7 +574,7 @@ list_common_orgs(User1Id, User2Id, #context{reqid=ReqId}) ->
 is_user_in_org(#context{reqid = ReqId}, UserName, OrgName) ->
     ?SH_TIME(ReqId, chef_sql, is_user_in_org, (UserName, OrgName)).
 
--spec get_server_admins_authz_id(#context{}) -> boolean() | {error, _}.
+-spec get_server_admins_authz_id(#context{}) -> binary() | {error, _}.
 get_server_admins_authz_id(#context{reqid = ReqId}) ->
     ?SH_TIME(ReqId, chef_sql, get_server_admins_authz_id, ()).
 
