@@ -106,14 +106,6 @@ chef_object_flatten_group(ObjectRec) ->
     end,
     Tail.
 
-throw_not_found(Type) ->
-    lager:error("Bifrost could not find the " ++ Type ++ " permission on the users container."),
-    throw(not_found).
-
-throw_server_error() ->
-    lager:error("There was an error communicating with bifrost."),
-    throw(server_error).
-
 create_server_admins_authz_group(SuperuserAuthzId) ->
     case mv_oc_chef_authz:create_resource(SuperuserAuthzId, group) of
         {ok, AuthzId} ->
