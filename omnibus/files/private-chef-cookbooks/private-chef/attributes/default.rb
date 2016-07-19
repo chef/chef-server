@@ -501,6 +501,12 @@ default['private_chef']['nginx']['client_max_body_size'] = '250m'
 default['private_chef']['nginx']['cache_max_size'] = '5000m'
 default['private_chef']['nginx']['server_names_hash_bucket_size'] = 128
 default['private_chef']['nginx']['enable_ipv6'] = false
+#
+# If your nodes don't have access to your chef automate server you can configure
+# a reverse proxy in nginx to forward requests to the data collectore via the 
+# chef server
+default['private-chef']['nginx']['insights_proxy'] = false
+default['private-chef']['nginx']['insights_server'] = nil
 
 ###
 # PostgreSQL

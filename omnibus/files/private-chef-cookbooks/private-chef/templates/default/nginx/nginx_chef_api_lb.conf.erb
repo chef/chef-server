@@ -45,6 +45,17 @@
       alias /opt/opscode/version-manifest.txt;
     }
 
+    <% if node['private_chef']['nginx']['insights_proxy'] -%>
+    location "/data-collector/v0/" {
+      proxy_set_header        Host           $http_host;
+      proxy_set_header        X-Real-IP      $remote_addr;
+      proxy_set_header        X-Forwared-For $proxy_add_x_forwarded_for;
+      proxy_pass_request_headers on;
+      proxy_redirect off;
+      proxy_pass <%= node['private_chef']['nginx']['insights_server'] %>/data-collector/v0/;
+    }
+    <% end -%>
+
     # bookshelf
     <% if node['private_chef']['opscode-erchef']['nginx_bookshelf_caching'] != :off -%>
     location ~ "/<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>/{0,1}.*$" {
