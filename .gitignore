@@ -11,3 +11,4 @@ NEW_CHANGELOG.md
 version-manifest.json
 MODIFIED_COMPONENTS_CHANGELOG.md
 /dev/nodes
+dev/*.deb
