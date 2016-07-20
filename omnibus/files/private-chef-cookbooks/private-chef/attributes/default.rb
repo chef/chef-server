@@ -501,12 +501,6 @@ default['private_chef']['nginx']['client_max_body_size'] = '250m'
 default['private_chef']['nginx']['cache_max_size'] = '5000m'
 default['private_chef']['nginx']['server_names_hash_bucket_size'] = 128
 default['private_chef']['nginx']['enable_ipv6'] = false
-#
-# If your nodes don't have access to your chef automate server you can configure
-# a reverse proxy in nginx to forward requests to the data collectore via the 
-# chef server
-default['private-chef']['nginx']['insights_proxy'] = false
-default['private-chef']['nginx']['insights_server'] = nil
 
 ###
 # PostgreSQL
@@ -834,3 +828,8 @@ default['private_chef']['data_collector']['http_cull_interval'] = "{1, min}"
 default['private_chef']['data_collector']['http_max_connection_duration'] = "{70,sec}"
 # Options for the ibrowse connections (see ibrowse).
 default['private_chef']['data_collector']['ibrowse_options'] = "[{connect_timeout, 10000}]"
+# If your nodes don't have access to your chef automate server you can configure
+# a reverse proxy in nginx to forward requests to the data collectore via the 
+# chef server
+default['private-chef']['data_collector']['proxy'] = false
+default['private-chef']['data_collector']['root_url'] = nil
