@@ -22,6 +22,7 @@ module Pedant
         def digester
           Mixlib::Authentication::Digester
         end
+
         def self.digester
           Mixlib::Authentication::Digester
         end
@@ -37,13 +38,26 @@ module Pedant
           body = to_json(body) if body.class == Hash
 
           signing_description = options.include?(:signing_description) ?
-            options[:signing_description] : "version=1.0"
+                                  options[:signing_description] : "version=1.0"
+
+          version = if signing_description =~ /version=([0-9\.]*)/
+                      $1
+                    else
+                      "1.0"
+                    end
+
+          digest = if version == "1.3"
+                     OpenSSL::Digest::SHA256
+                   else
+                     OpenSSL::Digest::SHA1
+                   end
+
           user_id = options.include?(:user_id) ?
             options[:user_id] : requestor.name
           timestamp = options.include?(:timestamp) ?
             options[:timestamp] : Time.now.utc.iso8601
           hashed_body = options.include?(:hashed_body) ?
-            options[:hashed_body] : digester.hash_string(body)
+            options[:hashed_body] : digester.hash_string(body, digest)
 
           private_key = options.include?(:private_key) ?
             options[:private_key] : requestor.signing_key
@@ -52,7 +66,7 @@ module Pedant
           path = options.include?(:path) ?
             options[:path] : URI.parse(url).path
           hashed_path = options.include?(:hashed_path) ?
-            options[:hashed_path] : digester.hash_string(path)
+            options[:hashed_path] : digester.hash_string(path, digest)
 
           header_hash = {}
           header_hash["X-Ops-Sign"] = signing_description if signing_description
@@ -60,13 +74,30 @@ module Pedant
           header_hash["X-Ops-Timestamp"] = timestamp if timestamp
           header_hash["X-Ops-Content-Hash"] = hashed_body if hashed_body
 
-          string_to_sign = options[:string_to_sign] ||
-            "Method:#{http_method.to_s.upcase}\nHashed Path:#{hashed_path}\n" +
-            "X-Ops-Content-Hash:#{hashed_body}\nX-Ops-Timestamp:#{timestamp}\n" +
-            "X-Ops-UserId:#{user_id}"
-          signature = options.include?(:signature) ?
-            options[:signature] :
-            Base64.encode64(private_key.private_encrypt(string_to_sign)).chomp
+          server_api_version = "0"
+
+          string_to_sign = if options[:string_to_sign]
+                             options[:string_to_sign]
+                           elsif version == "1.3"
+                             "Method:#{http_method.to_s.upcase}\nPath:#{path}\n" +
+                             "X-Ops-Content-Hash:#{hashed_body}\nX-Ops-Sign:version=#{version}\n" +
+                             "X-Ops-Timestamp:#{timestamp}\n" +
+                             "X-Ops-UserId:#{user_id}\n" +
+                             "X-Ops-Server-API-Version:#{server_api_version}"
+                           else
+                             "Method:#{http_method.to_s.upcase}\nHashed Path:#{hashed_path}\n" +
+                             "X-Ops-Content-Hash:#{hashed_body}\nX-Ops-Timestamp:#{timestamp}\n" +
+                             "X-Ops-UserId:#{user_id}"
+                           end
+
+          signature = if options.include?(:signature)
+                        options[:signature]
+                      elsif version == "1.3"
+                        Base64.encode64(private_key.sign(digest.new, string_to_sign)).chomp
+                      else
+                        Base64.encode64(private_key.private_encrypt(string_to_sign)).chomp
+                      end
+
           if signature
             # lines - X-Ops-Authorization-1, ... (starts at 1, not 0!)
             signature_lines = signature.split(/\n/)
@@ -79,8 +110,7 @@ module Pedant
           end
 
           Mixlib::Authentication::Log.debug "String to sign: '#{string_to_sign}'\n" +
-            "Header hash: #{header_hash.inspect}"
-
+                                            "Header hash: #{header_hash.inspect}"
           header_hash
         end
 
@@ -138,7 +168,27 @@ module Pedant
           end
         end
 
-        context "with successful user" do
+        context "with signing protocol 1.3", :authentication do
+          let(:user) { success_user }
+          let(:expected_status) {
+            if method == :POST
+              201
+            else
+              200
+            end
+          }
+
+          let(:auth_headers) {
+            manufacture_signed_headers(user, method, url, body,
+                                       :signing_description => "algorithm=sha256;version=1.3")
+          }
+
+          it "returns successfully" do
+            response.should look_like({ :status => expected_status })
+          end
+        end
+
+        context "with successful user", :authentication do
           let(:user) { success_user }
           context "with everything correct" do
             let(:auth_headers) { manufacture_signed_headers(user, method, url, body) }
@@ -181,6 +231,7 @@ module Pedant
                                      :timestamp => 'xxx')
           with_modified_auth_headers('old X-Ops-Timestamp', 401,
                                      :timestamp => (Time.now.utc - 60*60).iso8601)
+
           context 'recent X-Ops-Timestamp' do
             let(:auth_headers) { manufacture_signed_headers(user, method, url, body,
                                                             :timestamp => (Time.now.utc - 30).iso8601) }
