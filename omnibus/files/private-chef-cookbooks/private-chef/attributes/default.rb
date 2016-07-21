@@ -808,8 +808,11 @@ default['private_chef']['folsom_graphite']['retry_interval'] = 2000
 # data_collector configuration for erchef. These are used to configure an
 # opscoderl_httpc pool of HTTP connecton workers.
 # If a root_url and token are present the erchef will start the data_collector
-# application.
+# application. If proxy and root_url are present, nginx will send data_collector
+# events to the insights server
 
+# Proxy events to the insights data collector
+# default['private_chef']['data_collector']['proxy']
 # Fully qualified URL to the data collector server (e.g.: https://localhost/insights).
 # default['private_chef']['data_collector']['root_url']
 # The authentication token to pass via the header to the data collector server
@@ -828,8 +831,3 @@ default['private_chef']['data_collector']['http_cull_interval'] = "{1, min}"
 default['private_chef']['data_collector']['http_max_connection_duration'] = "{70,sec}"
 # Options for the ibrowse connections (see ibrowse).
 default['private_chef']['data_collector']['ibrowse_options'] = "[{connect_timeout, 10000}]"
-# If your nodes don't have access to your chef automate server you can configure
-# a reverse proxy in nginx to forward requests to the data collectore via the 
-# chef server
-default['private-chef']['data_collector']['proxy'] = false
-default['private-chef']['data_collector']['root_url'] = nil
