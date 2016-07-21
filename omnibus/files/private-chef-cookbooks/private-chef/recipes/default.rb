@@ -52,8 +52,9 @@ if OmnibusHelper.has_been_bootstrapped? or
   node.set['private_chef']['bootstrap']['enable'] = false
 end
 
-# Create the Chef User
+# Create the Chef User and private keys (pivotal/webui)
 include_recipe "private-chef::users"
+include_recipe "private-chef::private_keys"
 
 # merge xdarklaunch values into the disk-based darklaunch
 # so that we have a single source of truth for xdl-related
@@ -67,22 +68,6 @@ file "/etc/opscode/dark_launch_features.json" do
   group "root"
   mode "0644"
   content Chef::JSONCompat.to_json_pretty(darklaunch_values)
-end
-
-webui_key = OpenSSL::PKey::RSA.generate(2048) unless File.exists?('/etc/opscode/webui_pub.pem')
-
-file "/etc/opscode/webui_pub.pem" do
-  owner "root"
-  group "root"
-  mode "0644"
-  content webui_key.public_key.to_s unless File.exists?('/etc/opscode/webui_pub.pem')
-end
-
-file "/etc/opscode/webui_priv.pem" do
-  owner OmnibusHelper.new(node).ownership['owner']
-  group "root"
-  mode "0600"
-  content webui_key.to_pem.to_s unless File.exists?('/etc/opscode/webui_pub.pem')
 end
 
 directory "/etc/chef" do
