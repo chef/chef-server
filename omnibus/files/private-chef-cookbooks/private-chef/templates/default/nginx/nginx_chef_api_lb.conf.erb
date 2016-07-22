@@ -46,7 +46,7 @@
     }
 
     <% if node['private_chef']['data_collector']['proxy'] -%>
-    location "/data-collector/v0/" {
+    location "/data-collector/" {
       proxy_set_header        Host           $http_host;
       proxy_set_header        X-Real-IP      $remote_addr;
       proxy_set_header        X-Forwared-For $proxy_add_x_forwarded_for;
