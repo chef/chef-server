@@ -23,17 +23,6 @@ if (!OmnibusHelper.has_been_bootstrapped? &&
   include_recipe "private-chef::add_ons_wrapper"
 end
 
-pivotal_key_path = "/etc/opscode/pivotal.pem"
-if File.exists?(pivotal_key_path)
-  pivotal_key = OpenSSL::PKey::RSA.new(File.read(pivotal_key_path))
-else
-  pivotal_key = OpenSSL::PKey::RSA.generate(2048)
-end
-
-# Setting at the top level so that we don't export this to chef-server-running.json
-node.set['bootstrap']['superuser_public_key'] = pivotal_key.public_key.to_s
-
-
 # These should always be running by this point, but let's be certain.
 %w{postgresql oc_bifrost}.each do |service|
   execute "/opt/opscode/bin/chef-server-ctl start #{service}" do
@@ -49,18 +38,9 @@ ruby_block "bootstrap-chef-server-data" do
   notifies :restart, 'service[opscode-erchef]'
 end
 
-file pivotal_key_path do
-  owner OmnibusHelper.new(node).ownership['owner']
-  group "root"
-  mode "0600"
-  content pivotal_key.to_pem.to_s
-  sensitive true
-end
-
 file OmnibusHelper.bootstrap_sentinel_file do
   owner "root"
   group "root"
   mode "0600"
-  content "You've been bootstrapped, punk. Delete me if you feel lucky. Do ya, Punk?"
+  content "bootstrapped on #{DateTime.now} (you punk)" unless File.exists?(OmnibusHelper.bootstrap_sentinel_file)
 end
-
