@@ -29,6 +29,7 @@
 
 -record(container, {authz_id}).
 -record(user, {authz_id}).
+-record(group, {authz_id}).
 -record(mover_chef_group, {
           id,
           org_id,	  
@@ -47,20 +48,33 @@ migration_init() ->
 migration_action(GlobalOrgId, _AcctInfo) ->
     BifrostSuperuserAuthzId = mv_oc_chef_authz:superuser_id(),
     ErchefSuperuserAuthzId = get_erchef_superuser_authz_id(),
-    ServerAdminsAuthzId = case create_server_admins_authz_group(BifrostSuperuserAuthzId) of
-        AuthzId when is_binary(AuthzId) ->
-            AuthzId;
-        AuthzError ->
-            lager:error("Could not create new authz group for server-admins."),
-            throw(AuthzError)
-    end,
-    
-    case create_server_admins_global_group(ServerAdminsAuthzId, GlobalOrgId) of
-        {chef_sql, {GroupError, _}} ->
-	    lager:error("Could not create new erchef group for server-admins."),
-            throw(GroupError);
-	_ -> true
-    end,
+
+    %% if server-admins is already created, skip this step
+    ServerAdminsAuthzId =
+        case get_server_admins_authz_group_if_exists() of
+            needs_created ->
+                lager:info("Global group server-admins does not exist, creating."),
+                CreatedServerAdminsAuthzId =
+                    case create_server_admins_authz_group(BifrostSuperuserAuthzId) of
+                        AuthzId when is_binary(AuthzId) ->
+                            AuthzId;
+                        AuthzError ->
+                            lager:error("Could not create new authz group for server-admins."),
+                            throw(AuthzError)
+                    end,
+
+                case create_server_admins_global_group(CreatedServerAdminsAuthzId,
+                                                       GlobalOrgId) of
+                    {chef_sql, {GroupError, _}} ->
+                        lager:error("Could not create new erchef group for server-admins."),
+                        throw(GroupError);
+                    _ -> true
+                end,
+                CreatedServerAdminsAuthzId;
+            ExistingServerAdminsAuthzId ->
+                lager:warning("Global group server-admins already exists, skipping creation."),
+                ExistingServerAdminsAuthzId
+        end,
 
     %% Put pivotal in the global group
     mv_oc_chef_authz:add_to_group(ServerAdminsAuthzId, actor, ErchefSuperuserAuthzId, BifrostSuperuserAuthzId),
@@ -121,6 +135,16 @@ get_erchef_superuser_authz_id() ->
 
 get_erchef_superuser_authz_id_sql() ->
     <<"SELECT authz_id FROM users WHERE username='pivotal'">>.
+
+%% for idempotence, returns authz_id id or needs_created.
+get_server_admins_authz_group_if_exists() ->
+    case sqerl:select(get_server_admins_authz_group_if_exists_sql(), [], rows_as_records, [group, record_info(fields, group)]) of
+        {ok, [Group]} -> Group#group.authz_id;
+        {ok, none}   -> needs_created
+    end.
+
+get_server_admins_authz_group_if_exists_sql() ->
+    erlang:iolist_to_binary([<<"SELECT authz_id FROM groups WHERE name='server-admins' and org_id='">>, ?GLOBAL_PLACEHOLDER_ORG_ID , <<"'">>]).
 
 create_server_admins_global_group(ServerAdminsAuthzId, GlobalOrgId) ->
     RequestorId = mv_oc_chef_authz:superuser_id(),                                                      
