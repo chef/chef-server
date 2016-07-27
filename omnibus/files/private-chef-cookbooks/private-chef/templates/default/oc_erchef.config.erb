@@ -314,8 +314,8 @@
         {pools, [
             [
                 {name, sqerl},
-                {max_count, <%= @db_pool_size %>},
-                {init_count, <%= @db_pool_size %>},
+                {max_count, <%= @db_pool_max || @db_pool_size %>},
+                {init_count, <%= @db_pool_init || @db_pool_size %>},
                 {start_mfa, {sqerl_client, start_link, []}},
                 {queue_max, <%= @db_pool_queue_max %>}
             ],
