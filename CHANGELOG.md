@@ -1,5 +1,10 @@
 # Chef Server Changelog
 
+## (unknown)
+
+### private-chef-cookbooks/private-chef
+- Fix logrotate configuration to make it work with SELinux enabled.
+
 ## [12.8.0](https://github.com/chef/chef-server/tree/12.8.0) (2016-07-06)
 [Full Changelog](https://github.com/chef/chef-server/compare/12.7.0...12.8.0)
 
