@@ -118,7 +118,7 @@ def define_chef_server(config, attributes)
       chef.add_recipe("dev::user-env")
       chef.add_recipe("dev::dvm")
       chef.json = json || {}
-      #chef.nodes_path = "nodes"
+      chef.nodes_path = "nodes"
     end
     # Makes more sense here than in a one-off line in the dvm recipe, which
     # has no direct connection...
