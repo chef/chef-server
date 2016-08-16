@@ -58,6 +58,12 @@ bcrypt_round_trip_test_() ->
                  || {P, Data} <- PassData ]
        end},
 
+      {"salt is null roundtrip",
+       fun() ->
+               P = "a long password",
+               ?assertEqual(false, chef_password:verify(P, {<<"Corned Beef">>, null, <<"some type">>}))
+       end},
+
       {"salt not specified roundtrip",
        fun() ->
                P = "a long password",
@@ -143,7 +149,6 @@ upgrade_test_() ->
        end}
      ]}.
 
-
 slow_compare_test_() ->
     Tests = [
              %% positive cases
@@ -208,4 +213,3 @@ do_ec_migration(SHA, Salt) ->
     {ok, BcryptSalt} = bcrypt:gen_salt(),
     {ok, HashedPass} = bcrypt:hashpw(SHA, BcryptSalt),
     {list_to_binary(HashedPass), Salt, ?MIGRATION_HASH_TYPE}.
-
