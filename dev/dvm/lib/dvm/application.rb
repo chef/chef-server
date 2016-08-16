@@ -9,7 +9,8 @@ module DVM
     # TODO module Project, class method 'base_name', enumerate and generate...
     "omnibus" => DVM::OmnibusProject,
     "erlang" => DVM::ErlangProject,
-    "ruby" => DVM::RubyProject
+    "ruby" => DVM::RubyProject,
+    "rails" => DVM::RailsProject
   }
   class Application < Thor
     def initialize(args, local_options,config)

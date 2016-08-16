@@ -27,7 +27,7 @@ vm:
   # All settings below apply only to the chef-server vm
   cpus: 4
   memory: 4096
-  packages: [ ntp, curl, wget, htop, uuid-dev, tmux, vim, iotop ]
+  packages: [ ntp, curl, wget, htop, uuid-dev, tmux, vim, iotop, zlib1g-dev, liblzma-dev ]
   omnibus-autoload: [] # see config.yml for details and to add components
   # Override this in config.yml to set a custom path for your dotfiles
   # that's external to this repository.
@@ -71,6 +71,7 @@ vm:
        - VERSION
        - partybus/config.rb
        - oc-reporting-pedant/Gemfile.lock # friggin ugh
+       - config/database.yml # we'll need to use the one from omnibus
 
   cover:
     base_output_path: /vagrant/testdata/cover # maps to dev/testdata/cover
@@ -87,9 +88,10 @@ projects:
       cookie: erchef
       node: erchef@127.0.0.1
   oc-id:
-    type: ruby
+    type: rails
     service:
       name: oc_id
+      port: 9090
   oc_bifrost:
     type: erlang
     database: bifrost
