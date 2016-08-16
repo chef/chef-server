@@ -44,3 +44,20 @@ directory "/opt/opscode/embedded/service/chef-server-bootstrap" do
   ignore_failure true
 end
 
+#
+# Opscode Expander Reindexer from Chef Server 12.3.1 and earlier
+#
+
+# opscode-expander-reindexer was removed in 56c156bc71201dc8bf921ef69cfff4db3e9ff898
+runit_service "opscode-expander-reindexer" do
+  action [:stop, :disable]
+end
+
+link "/opt/opscode/init/opscode-expander-reindexer" do
+  action :delete
+end
+
+directory "/opt/opscode/sv/opscode-expander-reindexer" do
+  action :delete
+  recursive true
+end
