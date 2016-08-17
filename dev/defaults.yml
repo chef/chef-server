@@ -71,7 +71,9 @@ vm:
        - VERSION
        - partybus/config.rb
        - oc-reporting-pedant/Gemfile.lock # friggin ugh
-       - config/database.yml # we'll need to use the one from omnibus
+       - config/database.yml # [oc-id] we'll need to use the one from omnibus
+       - config/settings/production.yml # [oc-id] we'll need to use the one from omnibus
+       - config/initializers/secret_token.rb # [oc-id] we'll need to use the one from omnibus
 
   cover:
     base_output_path: /vagrant/testdata/cover # maps to dev/testdata/cover
@@ -89,6 +91,14 @@ projects:
       node: erchef@127.0.0.1
   oc-id:
     type: rails
+    install_options: --without development test doc
+    build_steps:
+      - bundle exec rake assets:precompile
+      - bundle exec rake db:migrate
+    symlinks:
+      config/database.yml: config/database.yml
+      config/settings/production.yml: config/production.yml
+      config/initializers/secret_token.rb: config/secret_token.rb
     service:
       name: oc_id
       port: 9090
