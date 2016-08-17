@@ -104,7 +104,7 @@
           {column_transforms, []}
          ]},
  {stats_hero, [
-                {udp_socket_pool_size, <%= node['private_chef']['postgresql']['max_connections'] %> },
+                {udp_socket_pool_size, <%= @udp_socket_pool_size %> },
                 {protocol, <%= node['private_chef']['estatsd']['protocol'] %>},
                 {estatsd_host, "<%= node['private_chef']['estatsd']['vip'] %>" },
                 {estatsd_port, <%= node['private_chef']['estatsd']['port'] %> }
