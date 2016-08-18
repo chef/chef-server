@@ -24,6 +24,7 @@ name "gpg-key"
 default_version "1.0.1"
 
 license :project_license
+skip_transitive_dependency_licensing true
 
 version "1.0.1" do
   source md5: "369efc3a19b9118cdf51c7e87a34f266"

@@ -28,6 +28,8 @@ dependency "rubygems"
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
+  bundle "install --without development", env: env
+
   gem "build mixlib-install.gemspec", env: env
   gem "install mixlib-install-*.gem", env: env
 end

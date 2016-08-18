@@ -19,6 +19,7 @@ default_version "0.12"
 
 license "MIT"
 license_file "lpeg.html"
+skip_transitive_dependency_licensing true
 
 source url: "http://www.inf.puc-rio.br/~roberto/lpeg/lpeg-#{version}.tar.gz",
        md5: "4abb3c28cd8b6565c6a65e88f06c9162"

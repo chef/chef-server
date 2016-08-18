@@ -8,7 +8,8 @@ gem 'bundler', '>1.10'
 # Install omnibus software
 group :omnibus do
   gem 'omnibus', github: 'chef/omnibus'
-  gem 'omnibus-software', github: 'chef/omnibus-software'
+  gem 'omnibus-software', github: 'chef/omnibus-software', branch: 'sersut/chef-server-dep-licensing'
+  gem 'license_scout', github: 'chef/license_scout', branch: 'sersut/chef-server-fixup'
 end
 
 group :test do

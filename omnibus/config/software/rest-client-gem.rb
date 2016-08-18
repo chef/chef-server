@@ -15,18 +15,21 @@
 #
 
 name "rest-client"
-default_version "1.8.0"
+default_version "v1.8.0"
 
 license "MIT"
 license_file "https://github.com/rest-client/rest-client/blob/master/LICENSE"
+
+source git: "https://github.com/rest-client/rest-client.git"
 
 dependency "ruby"
 dependency "rubygems"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
-  gem "install rest-client" \
-      " --version '#{version}'" \
-      " --bindir '#{install_dir}/embedded/bin'" \
-      " --no-ri --no-rdoc", env: env
+
+  bundle "install --without development test", env: env
+
+  gem "build rest-client.gemspec", env: env
+  gem "install rest-client-*.gem", env: env
 end

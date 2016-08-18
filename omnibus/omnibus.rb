@@ -18,3 +18,7 @@ fetcher_read_timeout 120
 # ------------------------------
 # software_gems ['omnibus-software', 'my-company-software']
 # local_software_dirs ['/path/to/local/software']
+
+# TODO::Licensing Enable this when we complete Berkshelf based dependency
+# license gatherer.
+# fatal_transitive_dependency_licensing_warnings true

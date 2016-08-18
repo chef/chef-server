@@ -20,8 +20,9 @@ dependency "zlib"
 dependency "pcre"
 dependency "openssl"
 
-license "GPLv2"
+license "GPL-2.0"
 license_file "LICENSE"
+skip_transitive_dependency_licensing true
 
 # HTTPS is available but certificate validation fails on OS X
 source url: "http://www.haproxy.org/download/1.6/src/haproxy-#{version}.tar.gz",

@@ -19,6 +19,7 @@ name "private-chef-ctl"
 source path: "#{project.files_path}/private-chef-ctl-commands"
 
 license :project_license
+skip_transitive_dependency_licensing true
 
 dependency "highline-gem"
 dependency "sequel-gem"

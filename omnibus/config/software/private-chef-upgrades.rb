@@ -19,6 +19,7 @@ name "private-chef-upgrades"
 source path: "#{project.files_path}/private-chef-upgrades"
 
 license :project_license
+skip_transitive_dependency_licensing true
 
 build do
   sync project_dir, "#{install_dir}/embedded/upgrades/"
