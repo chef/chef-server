@@ -182,22 +182,11 @@ has_grant_on(ObjectType, ObjectId, ActorId) ->
 convert_group_names_to_ids(GroupNames, OrgId) ->
     oc_chef_group:find_group_authz_ids(GroupNames, OrgId, fun chef_sql:select_rows/1).
 
-convert_actor_names_to_ids(Names, OrgId) ->
-    ClientIds = oc_chef_group:find_client_authz_ids(Names, OrgId,
-                                                    fun chef_sql:select_rows/1),
-    UserIds = oc_chef_group:find_user_authz_ids(Names, fun chef_sql:select_rows/1),
-    ClientIds ++ UserIds.
-
 names_to_ids(Ace, OrgId) ->
     ActorNames = ej:get({<<"actors">>}, Ace),
     GroupNames = ej:get({<<"groups">>}, Ace),
-    ActorIds = convert_actor_names_to_ids(ActorNames, OrgId),
-    % Check to make sure everything got converted; if something is missing,
-    % there was an invalid actor or group name in the request body
-    case length(ActorNames) == length(ActorIds) of
-        false ->
-            throw(bad_actor);
-        _ ->
+    case fetch_actors(OrgId, ActorNames) of
+        {ok, ActorIds} ->
             GroupIds = convert_group_names_to_ids(GroupNames, OrgId),
             case length(GroupNames) == length(GroupIds) of
                 false ->
@@ -205,8 +194,35 @@ names_to_ids(Ace, OrgId) ->
                 _ ->
                     Ace1 = ej:set({<<"actors">>}, Ace, ActorIds),
                     ej:set({<<"groups">>}, Ace1, GroupIds)
-            end
+            end;
+        {error, Reason} ->
+            throw(Reason)
     end.
+
+fetch_actors(OrgId, ActorNames) ->
+    {ok, Actors} = oc_chef_authz_db:find_org_actors_by_name(OrgId, ActorNames),
+    {Missing, Remaining} = lists:partition(fun is_missing_actor/1, Actors),
+    {Ambiguous, Valid} = lists:partition(fun is_ambiguous_actor/1, Remaining),
+    case {Valid, Missing, Ambiguous} of
+        {Ids, [], []}      -> {ok, [id_from_record(R) || R <- Ids]};
+        {_, Missing, []}   -> {error, {bad_actor, names_from_records(Missing)}};
+        {_, [], Ambiguous} -> {error, {ambiguous_actor, names_from_records(Ambiguous)}};
+        {_, _, Ambiguous}  -> {error, {ambiguous_actor, names_from_records(Ambiguous)}}
+    end.
+
+names_from_records(Records) ->
+    [ Name || {Name, _, _} <- Records].
+
+id_from_record({_, UserAuthzId, null}) -> UserAuthzId;
+id_from_record({_, null, ClientAuthzId}) -> ClientAuthzId.
+
+is_missing_actor({_, UserAuthzId, ClientAuthzId}) ->
+    UserAuthzId =:= null andalso ClientAuthzId =:= null.
+
+is_ambiguous_actor({_, UserAuthzId, ClientAuthzId}) ->
+    UserAuthzId =/= null andalso ClientAuthzId =/= null.
+
+
 
 %%
 %% Reverse mapping of ids to names (this should have a lot of commonality with groups)

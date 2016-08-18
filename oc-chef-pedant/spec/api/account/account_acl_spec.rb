@@ -4,6 +4,13 @@ require 'pedant/acl'
 describe "ACL API", :acl do
   include Pedant::ACL
 
+    # Generate random string identifier prefixed with current pid
+    # TODO - we have about 6 flavors of this. Let's clean them up
+    # and move them into Platform.
+    def rand_id
+      "#{Process.pid}_#{rand(10**7...10**8).to_s}"
+    end
+
   # (temporarily?) deprecating /users/*/_acl endpoint due to its broken state and lack of usefulness
   skip "/users/<name>/_acl endpoint" do
     let(:username) { platform.admin_user.name }
@@ -42,7 +49,6 @@ describe "ACL API", :acl do
         end
       end
     end
-
 
     %w(create read update delete grant).each do |permission|
       context "/users/<user>/_acl/#{permission} endpoint" do
@@ -724,8 +730,54 @@ describe "ACL API", :acl do
     end # context /organizations/_acl/<permission> endpoint
   end # loop (each) over permissions
 
-  context "/<type>/<name>/_acl endpoint" do
+  # Special case that doesn't fit into the generic behaviors above - specifically
+  # when a client & a user of the same name exist, updates to an acl specifying
+  # the common name as the actor should fail with a 422, because we have no
+  # way of knowing if the caller wanted to add the client or the user to the ACL.
+  context "when a client exists with the same name as a user", :validation  do
+    let(:admin_requestor){admin_user}
+    let(:requestor){admin_requestor}
+    let(:shared_name) { "pedant-acl-#{rand_id}" }
+    let(:request_url) { api_url("/clients/#{shared_name}/_acl/read") }
+    let(:acl_request_body) {
+      { read: { actors: ['pivotal', shared_name],
+                         groups: ['admins'] } }
+    }
 
+    before :each do
+      @user = platform.create_user(shared_name, associate: false)
+      @client = platform.create_client(shared_name, platform.test_org)
+    end
+
+    after :each do
+      platform.delete_user(@user)
+      platform.delete_client(@client)
+    end
+
+    context "and the user is a member of the organization" do
+      before :each do
+        platform.associate_user_with_org(platform.test_org.name, @user)
+      end
+
+      it "updates of the object ACL results in a 422 due to ambiguous request" do
+        put(request_url, platform.admin_user, payload: acl_request_body)
+          .should look_like(status: 422)
+      end
+    end
+
+    context "and the user is not a member of the organization" do
+      # TODO - once we support separating clients and users in the ACL GET API
+      # response (up next), we can verify that the correct actor was added too.
+      it "there is no ambiguity and the object ACL update succeeds" do
+        put(request_url, platform.admin_user, payload: acl_request_body)
+          .should look_like(status: 200)
+      end
+    end
+
+
+  end
+
+  context "/<type>/<name>/_acl endpoint" do
     # TODO: Sanity check: users don't seem to have any ACLs, or at least, nothing is
     # accessible from external API as far as I can tell:
     # - [jkeiser] Users have ACLs, but they are at /users/NAME/_acl

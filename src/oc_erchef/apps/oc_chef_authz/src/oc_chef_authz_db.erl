@@ -36,7 +36,8 @@
          fetch_group/3,
          make_context/3,
          statements/1,
-         make_org_prefixed_group_name/2
+         make_org_prefixed_group_name/2,
+         find_org_actors_by_name/2
         ]).
 
 -ifdef(TEST).
@@ -182,3 +183,18 @@ fetch_group(#oc_chef_authz_context{reqid = ReqId, server_api_version = ApiVersio
         {error, _} = Error ->
             Error
     end.
+
+find_org_actors_by_name(OrgId, ActorNames) ->
+    case sqerl:select(find_org_actors_by_name, [OrgId, ActorNames]) of
+        {ok, L} when is_list(L) ->
+            % WIP - change this to a record.
+            R = [{proplists:get_value(<<"name_in">>, Row),
+                  proplists:get_value(<<"u_authz_id">>, Row),
+                  proplists:get_value(<<"c_authz_id">>, Row)} || Row <- L],
+            {ok, R};
+        {ok, none} ->
+            {ok, []};
+        {error, Error} ->
+            {error, Error}
+    end.
+
