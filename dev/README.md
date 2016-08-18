@@ -30,7 +30,14 @@ Requirements:
   you've acquired root by using `sudo -i`. Otherwise dvm won't be in your
   path.
 
-Go!
+First, add the following configuration to your `/etc/hosts` file:
+
+    192.168.33.100 api.chef-server.dev
+    192.168.33.150 database.chef-server.dev
+    192.168.33.151 backend.chef-server.dev
+    192.168.33.155 reportingdb.chef-server.dev
+
+Next, bring up the VMs!
 
     cd dev
     vagrant up

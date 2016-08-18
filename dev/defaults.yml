@@ -23,6 +23,16 @@ vm:
     # chef reporting will be configured to use
     # this vm as an external postgresql server from the start.
     use-external: true
+  # Override this in config.yml if you want to bring up a separate chef-backend
+  # box, and if you want to automatically configure chef-server to use it in a
+  # 1 FE / 1 BE topology.
+  chef-backend:
+    # enable a separate backend vm but do not use it unless
+    # use-external is set.
+    start: false
+    # When this is set to true, and start is true,
+    # we will install chef-backend and configure the chef-server to use it.
+    use-external: true
 
   # All settings below apply only to the chef-server vm
   cpus: 4
