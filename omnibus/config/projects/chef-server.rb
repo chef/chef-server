@@ -29,10 +29,10 @@ build_iteration 1
 
 override :rabbitmq, version: "3.3.4"
 override :erlang, version: "17.5"
-override :ruby, version: "2.1.4"
-override :rubygems, version: "2.4.5"
+override :ruby, version: "2.3.1"
+override :rubygems, version: "2.6.6"
 override :'omnibus-ctl', version: "master"
-override :bundler, version: "1.10.6"
+override :bundler, version: "1.12.5"
 # creates required build directories
 dependency "preparation"
 
