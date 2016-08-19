@@ -20,6 +20,9 @@
          has_grant_on/3,
          update_part/5]).
 
+-ifdef(TEST).
+-compile([export_all]).
+-endif.
 
 -define(DEFAULT_HEADERS, []).
 
@@ -216,13 +219,13 @@ names_from_records(Records) ->
 id_from_record({_, UserAuthzId, null}) -> UserAuthzId;
 id_from_record({_, null, ClientAuthzId}) -> ClientAuthzId.
 
-is_missing_actor({_, UserAuthzId, ClientAuthzId}) ->
-    UserAuthzId =:= null andalso ClientAuthzId =:= null.
+is_missing_actor({_, null, null}) -> true;
+is_missing_actor({_, _, _}) -> false.
 
-is_ambiguous_actor({_, UserAuthzId, ClientAuthzId}) ->
-    UserAuthzId =/= null andalso ClientAuthzId =/= null.
-
-
+is_ambiguous_actor({_, UserAZ, ClientAZ}) when UserAZ =/= null andalso
+                                               ClientAZ =/= null ->
+    true;
+is_ambiguous_actor({_, _, _}) -> false.
 
 %%
 %% Reverse mapping of ids to names (this should have a lot of commonality with groups)

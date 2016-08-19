@@ -112,14 +112,14 @@ from_json(Req, #base_state{organization_guid = OrgId,
         forbidden ->
             {{halt, 400}, Req, State};
         {ambiguous_actor, Actors} ->
-            Msg = {[{<<"error">>, iolist_to_binary([<<"The actor(s)">>, Actors,
-                                    <<"exist as both clients and users within this organization.  Please resubmit using the attributes 'clients' and 'users' instead of 'actors' to disambiguate your request.">>])}]},
-            Req1 = wrq:set_resp_body(chef_json:encode(Msg), Req),
+            Text = iolist_to_binary([<<"The actor(s) ">>, names_to_string(Actors), <<" exist as both ">>,
+                                     <<"clients and users within this organization.">>]),
+            Req1 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, [Text]}]}), Req),
             {{halt, 422}, Req1, State#base_state{log_msg = {ambiguous_actor, Actors}}};
         {bad_actor, Actors} ->
-            Msg = {[{<<"error">>, iolist_to_binary([<<"The actor(s)">>, Actors,
-                                    <<"do not exist in this organization as clients or users.">>])}]},
-            Req1 = wrq:set_resp_body(chef_json:encode(Msg), Req),
+            Text = iolist_to_binary([<<"The actor(s) ">>, names_to_string(Actors), " do not >>",
+                                     <<"exist in this organization as clients or users.">>]),
+            Req1 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, [Text]}]}), Req),
             {{halt, 400}, Req1, State#base_state{log_msg = {bad_actor, Actors}}};
         bad_group ->
             Msg = <<"Invalid/missing group in request body">>,
@@ -134,8 +134,10 @@ from_json(Req, #base_state{organization_guid = OrgId,
 
 %% Internal functions
 
-format_actor_list(Actors) ->
-    gTkkkkgT
+names_to_string(Names) ->
+    string:join(lists:map(fun erlang:binary_to_list/1, Names), ", ").
+
+
 check_json_validity(Part, Ace) ->
   case chef_object_base:strictly_valid(acl_spec(Part), [Part], Ace) of
     ok ->
