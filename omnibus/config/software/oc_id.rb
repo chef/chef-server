@@ -26,6 +26,8 @@ dependency "nodejs"
 dependency "ruby"
 dependency "bundler"
 
+skip_transitive_dependency_licensing true
+
 relative_path "oc-id"
 
 build do
