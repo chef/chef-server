@@ -72,7 +72,7 @@
   0},
  {<<"jiffy">>,
   {git,"https://github.com/davisp/jiffy",
-       {ref,"f661ee9fd80e5b6b03e9dfbb17d1c72fb6cfdba9"}},
+       {ref,"4c0bfbc0fa0de12dcc4ff263888eeaa431ae6ed2"}},
   0},
  {<<"lager">>,
   {git,"https://github.com/basho/lager",

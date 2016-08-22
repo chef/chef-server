@@ -111,15 +111,16 @@ from_json(Req, #base_state{organization_guid = OrgId,
     case update_from_json(AclState, Part, OrgId) of
         forbidden ->
             {{halt, 400}, Req, State};
-        bad_actor ->
-            % We don't actually know which one, so can't use a more specific
-            % message without checking every single object (which we don't yet
-            % do efficiently); we only get back a list of Ids that has a
-            % different length than the list of names we started with.
-            Msg = <<"Invalid/missing actor in request body">>,
-            Msg1 = {[{<<"error">>, [Msg]}]},
-            Req1 = wrq:set_resp_body(chef_json:encode(Msg1), Req),
-            {{halt, 400}, Req1, State#base_state{log_msg = bad_actor}};
+        {ambiguous_actor, Actors} ->
+            Text = iolist_to_binary([<<"The actor(s) ">>, names_to_string(Actors), <<" exist as both ">>,
+                                     <<"clients and users within this organization.">>]),
+            Req1 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, [Text]}]}), Req),
+            {{halt, 422}, Req1, State#base_state{log_msg = {ambiguous_actor, Actors}}};
+        {bad_actor, Actors} ->
+            Text = iolist_to_binary([<<"The actor(s) ">>, names_to_string(Actors), " do not >>",
+                                     <<"exist in this organization as clients or users.">>]),
+            Req1 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, [Text]}]}), Req),
+            {{halt, 400}, Req1, State#base_state{log_msg = {bad_actor, Actors}}};
         bad_group ->
             Msg = <<"Invalid/missing group in request body">>,
             Msg1 = {[{<<"error">>, [Msg]}]},
@@ -132,6 +133,10 @@ from_json(Req, #base_state{organization_guid = OrgId,
     end.
 
 %% Internal functions
+
+names_to_string(Names) ->
+    string:join(lists:map(fun erlang:binary_to_list/1, Names), ", ").
+
 
 check_json_validity(Part, Ace) ->
   case chef_object_base:strictly_valid(acl_spec(Part), [Part], Ace) of
@@ -156,10 +161,12 @@ update_from_json(#acl_state{type = Type, authz_id = AuthzId, acl_data = Data},
     try
         oc_chef_authz_acl:update_part(Part, Data, Type, AuthzId, OrgId)
     catch
+        throw:{ambiguous_actor, Actors} ->
+            {ambiguous_actor, Actors};
         throw:forbidden ->
             forbidden;
-        throw:bad_actor ->
-            bad_actor;
+        throw:{bad_actor, Actors} ->
+            {bad_actor, Actors};
         throw:bad_group ->
             bad_group
     end.
