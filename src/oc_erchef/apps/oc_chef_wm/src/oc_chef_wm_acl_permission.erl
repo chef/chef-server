@@ -112,20 +112,20 @@ from_json(Req, #base_state{organization_guid = OrgId,
         forbidden ->
             {{halt, 400}, Req, State};
         {ambiguous_actor, Actors} ->
-            Text = iolist_to_binary([<<"The actor(s) ">>, names_to_string(Actors), <<" exist as both ">>,
+            Text = iolist_to_binary([<<"The actor(s) ">>, chef_wm_malformed:bin_str_join(Actors, ", "), <<" exist as both ">>,
                                      <<"clients and users within this organization.">>]),
             Req1 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, [Text]}]}), Req),
             {{halt, 422}, Req1, State#base_state{log_msg = {ambiguous_actor, Actors}}};
+        {invalid, Type, Names} ->
+            Text = iolist_to_binary([<<"The ">>, atom_to_list(Type), <<"(s) ">>, chef_wm_malformed:bin_str_join(Names, ", "),
+                                     <<" do not exist in this organization.">>]),
+            Req1 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, [Text]}]}), Req),
+            {{halt, 400}, Req1, State#base_state{log_msg = {invalid_object_in_ace, Names}}};
         {bad_actor, Actors} ->
-            Text = iolist_to_binary([<<"The actor(s) ">>, names_to_string(Actors), " do not >>",
+            Text = iolist_to_binary([<<"The actor(s) ">>, chef_wm_malformed:bin_str_join(Actors, ", "), " do not >>",
                                      <<"exist in this organization as clients or users.">>]),
             Req1 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, [Text]}]}), Req),
             {{halt, 400}, Req1, State#base_state{log_msg = {bad_actor, Actors}}};
-        bad_group ->
-            Msg = <<"Invalid/missing group in request body">>,
-            Msg1 = {[{<<"error">>, [Msg]}]},
-            Req1 = wrq:set_resp_body(chef_json:encode(Msg1), Req),
-            {{halt, 400}, Req1, State#base_state{log_msg = bad_group}};
         _Other ->
             % So we return 200 instead of 204, for backwards compatibility:
             Req1 = wrq:set_resp_body(<<"{}">>, Req),
@@ -134,27 +134,14 @@ from_json(Req, #base_state{organization_guid = OrgId,
 
 %% Internal functions
 
-names_to_string(Names) ->
-    string:join(lists:map(fun erlang:binary_to_list/1, Names), ", ").
-
-
 check_json_validity(Part, Ace) ->
-  case chef_object_base:strictly_valid(acl_spec(Part), [Part], Ace) of
+  case chef_object_base:strictly_valid(oc_chef_authz_acl:acl_spec(Part), [Part], Ace) of
     ok ->
       ok;
     Other ->
       throw(Other)
-  end.
-
-acl_spec(Part) ->
-    {[
-      {Part,
-       {[
-         {<<"actors">>, {array_map, string}},
-         {<<"groups">>, {array_map, string}}
-        ]}}
-     ]}.
-
+  end,
+  oc_chef_authz_acl:validate_actors_clients_users(Part, Ace).
 
 update_from_json(#acl_state{type = Type, authz_id = AuthzId, acl_data = Data},
                  Part, OrgId) ->
@@ -167,8 +154,8 @@ update_from_json(#acl_state{type = Type, authz_id = AuthzId, acl_data = Data},
             forbidden;
         throw:{bad_actor, Actors} ->
             {bad_actor, Actors};
-        throw:bad_group ->
-            bad_group
+        throw:{invalid, T1, Names} ->
+            {invalid, T1, Names}
     end.
 
 malformed_request_message(Any, _Req, _State) ->

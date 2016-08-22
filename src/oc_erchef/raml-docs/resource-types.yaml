@@ -46,7 +46,7 @@ acl_permission_endpoint:
       type: string
   put:
     description: Modify the given permission.
-    body: { schema: Acl }
+    body: { schema: AclUpdate }
     responses:
       200:
         body: { schema: ObjectUri }

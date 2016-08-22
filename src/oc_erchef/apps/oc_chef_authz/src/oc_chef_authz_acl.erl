@@ -2,14 +2,26 @@
 %% ex: ts=4 sw=4 et
 %% @author Douglas Triggs <doug@chef.io>
 %% @author Mark Anderson <mark@chef.io>
-%% Copyright 2014 Chef, Inc. All Rights Reserved.
+%% Copyright 2014-2016 Chef Software, Inc.
+%% This file is provided to you under the Apache License,
+%% Version 2.0 (the "License"); you may not use this file
+%% except in compliance with the License.  You may obtain
+%% a copy of the License at
+%%
+%%   http://www.apache.org/licenses/LICENSE-2.0
+%%
+%% Unless required by applicable law or agreed to in writing,
+%% software distributed under the License is distributed on an
+%% "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+%% KIND, either express or implied.  See the License for the
+%% specific language governing permissions and limitations
+%% under the License.
+%%
 
 -module(oc_chef_authz_acl).
 
 -include("oc_chef_types.hrl").
 -include("chef_types.hrl").
-
-
 
 -export([acl_path/2,
          acl_path/3,
@@ -18,7 +30,9 @@
          fetch_cookbook_id/3,
          fetch/2,
          has_grant_on/3,
-         update_part/5]).
+         validate_actors_clients_users/2,
+         update_part/5,
+         acl_spec/1]).
 
 -ifdef(TEST).
 -compile([export_all]).
@@ -30,6 +44,47 @@
 -record(context, {server_api_version,
                   reqid :: binary(),
                   darklaunch = undefined}).
+
+acl_spec(Part) ->
+    {[
+      {Part,
+       {[
+         {<<"groups">>, {array_map, string}},
+         {<<"actors">>, {array_map, string}},
+         {{opt, <<"clients">>}, {array_map, string}},
+         {{opt, <<"users">>}, {array_map, string}}
+        ]}}
+     ]}.
+
+% If client is present, user must be present
+% If user is present, client must be present.
+% If clients and users are present, actors must be an empty list.
+%
+% This is to ensure 'least surprise' - if you submit a
+% request containing actors, clients, and users it's not
+% going to be clear which one(s) are picked up for the update.
+%
+% This function assumes `acl_spec` has been applied in order to ensure
+% that `groups` and `actors`  are always present and that
+% the data types provided for each attribute are correct.
+validate_actors_clients_users(Part, FullACL) ->
+    ACL = ej:get({Part}, FullACL),
+    Actors = ej:get({<<"actors">>}, ACL),
+    Clients = ej:get({<<"clients">>}, ACL),
+    Users = ej:get({<<"users">>}, ACL),
+    case {Clients, Users} of
+        {undefined, undefined} ->
+            ok;
+        {_, undefined} ->
+            throw({one_requires_all, <<"clients">>, [<<"users">>]});
+        {undefined, _} ->
+            throw({one_requires_all, <<"users">>, [<<"clients">>]});
+        {_, _} ->
+            case Actors of
+                [] -> ok;
+                _ -> throw(actors_must_be_empty)
+            end
+    end.
 
 update_part(Part, AceRecord, Type, AuthzId, OrgId) ->
     Ids = names_to_ids(ej:get({Part}, AceRecord), OrgId),
@@ -177,55 +232,83 @@ has_grant_on(ObjectType, ObjectId, ActorId) ->
             Other
     end.
 
+%% Convert names provde in the ACE to their corresponding
+%% authz ids.
+names_to_ids(ACE, OrgId) ->
+    ActorIds = case ej:get({<<"clients">>}, ACE) of
+        undefined ->
+            fetch_actors(OrgId, ej:get({<<"actors">>}, ACE));
+        Clients ->
+            safe_fetch_ids(user, undefined, ej:get({<<"users">>}, ACE)) ++
+            safe_fetch_ids(client, OrgId, Clients)
+    end,
+    GroupIds = safe_fetch_ids(group, OrgId, ej:get({<<"groups">>}, ACE)),
 
+    % Though we split out clients/users, the authz API
+    % requires a unified list of actor IDs:
+    ACE1 = ej:set({<<"actors">>}, ACE, ActorIds),
+    ej:set({<<"groups">>}, ACE1, GroupIds).
 
-%%
-%% Map groups and clients/users to names (this should have a lot of commonality with groups)
-%%
-convert_group_names_to_ids(GroupNames, OrgId) ->
-    oc_chef_group:find_group_authz_ids(GroupNames, OrgId, fun chef_sql:select_rows/1).
-
-names_to_ids(Ace, OrgId) ->
-    ActorNames = ej:get({<<"actors">>}, Ace),
-    GroupNames = ej:get({<<"groups">>}, Ace),
-    case fetch_actors(OrgId, ActorNames) of
-        {ok, ActorIds} ->
-            GroupIds = convert_group_names_to_ids(GroupNames, OrgId),
-            case length(GroupNames) == length(GroupIds) of
-                false ->
-                    throw(bad_group);
-                _ ->
-                    Ace1 = ej:set({<<"actors">>}, Ace, ActorIds),
-                    ej:set({<<"groups">>}, Ace1, GroupIds)
-            end;
-        {error, Reason} ->
-            throw(Reason)
-    end.
+%% Retrieves authz records for the given set of names
+%% and returns a list of authz ids.
+%% If the list of retrieved names + IDs
+%% does not match the list of names provided, this raises
+%% {invalid, Type, MissingList}}
+safe_fetch_ids(_Type, _OrgId, []) ->
+    % Save the cost of a query for an empty list -
+    % fairly common for users and to a lesser extent groups.
+    [];
+safe_fetch_ids(Type, OrgId, Names) ->
+    Records = oc_chef_authz_db:authz_records_by_name(Type, OrgId, Names),
+    FoundNames = lists:sort(names_from_records(Records)),
+    GivenNames = lists:sort(Names),
+    case GivenNames -- FoundNames of
+        [] ->
+            ok;
+        Missing ->
+            throw({invalid, Type, Missing})
+    end,
+    ids_from_records(Records).
 
 fetch_actors(OrgId, ActorNames) ->
     {ok, Actors} = oc_chef_authz_db:find_org_actors_by_name(OrgId, ActorNames),
     {Missing, Remaining} = lists:partition(fun is_missing_actor/1, Actors),
     {Ambiguous, Valid} = lists:partition(fun is_ambiguous_actor/1, Remaining),
     case {Valid, Missing, Ambiguous} of
-        {Ids, [], []}      -> {ok, [id_from_record(R) || R <- Ids]};
-        {_, Missing, []}   -> {error, {bad_actor, names_from_records(Missing)}};
-        {_, [], Ambiguous} -> {error, {ambiguous_actor, names_from_records(Ambiguous)}};
-        {_, _, Ambiguous}  -> {error, {ambiguous_actor, names_from_records(Ambiguous)}}
+        {Ids, [], []}      -> ids_from_records(Ids);
+        {_, Missing, []}   -> throw({bad_actor, names_from_records(Missing)});
+        {_, [], Ambiguous} -> throw({ambiguous_actor, names_from_records(Ambiguous)});
+        {_, _, Ambiguous}  -> throw({ambiguous_actor, names_from_records(Ambiguous)})
     end.
 
 names_from_records(Records) ->
-    [ Name || {Name, _, _} <- Records].
+    [ name_from_record(R) || R  <- Records].
 
-id_from_record({_, UserAuthzId, null}) -> UserAuthzId;
-id_from_record({_, null, ClientAuthzId}) -> ClientAuthzId.
+name_from_record({Name, _,  _}) ->
+    Name;
+name_from_record({Name, _}) ->
+    Name.
 
-is_missing_actor({_, null, null}) -> true;
-is_missing_actor({_, _, _}) -> false.
+ids_from_records(Records) ->
+    [ id_from_record(R) || R <- Records ].
+
+id_from_record({_, AuthzId}) ->
+    AuthzId;
+id_from_record({_, UserAuthzId, null}) ->
+    UserAuthzId;
+id_from_record({_, null, ClientAuthzId}) ->
+    ClientAuthzId.
+
+is_missing_actor({_, null, null}) ->
+    true;
+is_missing_actor({_, _, _}) ->
+    false.
 
 is_ambiguous_actor({_, UserAZ, ClientAZ}) when UserAZ =/= null andalso
                                                ClientAZ =/= null ->
     true;
-is_ambiguous_actor({_, _, _}) -> false.
+is_ambiguous_actor({_, _, _}) ->
+    false.
 
 %%
 %% Reverse mapping of ids to names (this should have a lot of commonality with groups)

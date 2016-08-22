@@ -1,0 +1,7 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "update $permission (create, read, update, delete, grant) of a Chef object",
+  "properties": {
+    "$permission": { "$ref": "common.json#AclUpdatePermission" }
+  }
+}
