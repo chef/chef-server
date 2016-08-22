@@ -809,7 +809,14 @@ module Pedant
       # client can just use validator to test; don't bother making a new one
       include_context "with testing data bag"
       include_context "with testing data bag items" do
-        let(:items){ [{'id' => "test_item", "key" => "value"}]}
+        let(:items) {
+          array = [{'id' => 'test_item', 'key' => 'value'}]
+          # add a bunch of junk so reindex will scroll
+          for i in 0..1010
+            array << {'id' => "test_item#{i}", 'key' => 'value'}
+          end
+          array
+        }
       end
 
       # Arguments supplied to the reindexing escript after the subcommand.

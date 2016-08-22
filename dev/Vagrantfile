@@ -6,6 +6,7 @@ require "yaml"
 load "dvmtools.rb"
 CS_VM_ADDRESS="192.168.33.100"
 DB_VM_ADDRESS="192.168.33.150"
+BE_VM_ADDRESS="192.168.33.151"
 REPORTING_DB_VM_ADDRESS="192.168.33.155"
 DB_SUPERUSER="bofh"
 DB_SUPERPASS="i1uvd3v0ps"
@@ -45,6 +46,15 @@ Vagrant.configure("2") do |config|
     attributes['vm']['reporting_postgresql'] = nil
   end
 
+  if attributes['vm'].has_key? 'chef-backend'
+    if attributes['vm']['chef-backend']['start']
+      config.vm.define("backend") do |c|
+        define_backend_server(c, attributes)
+      end
+    end
+  else
+    attributes['vm']['chef-backend'] = nil
+  end
 
   config.vm.define("chef-server", primary: true) do |c|
     define_chef_server(c, attributes)
@@ -53,7 +63,7 @@ end
 
 
 def define_chef_server(config, attributes)
-  provisioning, installer, installer_path = prepare()
+  provisioning, installer, installer_path = prepare('INSTALLER', 'chef-server-core', 'Chef Server 12+')
   config.vm.hostname = "api.chef-server.dev"
   config.vm.network "private_network", ip: CS_VM_ADDRESS
 
@@ -114,12 +124,19 @@ def define_chef_server(config, attributes)
       chef.node_name = config.vm.hostname
       chef.cookbooks_path = "cookbooks"
       chef.add_recipe("provisioning::chef-server")
+      # If we're running chef-backend, let _it_ create the chef-server.rb
+      chef.add_recipe("provisioning::chef-server-rb") unless chef_backend_active?(attributes)
       chef.add_recipe("dev::system")
       chef.add_recipe("dev::user-env")
       chef.add_recipe("dev::dvm")
       chef.json = json || {}
       chef.nodes_path = "nodes"
     end
+
+    if chef_backend_active?(attributes)
+      config.vm.provision "shell", inline: "cp /installers/api.chef-server.dev.rb /etc/opscode/chef-server.rb"
+    end
+
     # Makes more sense here than in a one-off line in the dvm recipe, which
     # has no direct connection...
     config.vm.provision "shell", inline: "chef-server-ctl reconfigure"
@@ -144,6 +161,30 @@ def define_db_server(config, attributes)
   # Using shell here to ave the trouble of downloading
   # chef-client for the node.  May reconsider...
   config.vm.provision "shell", inline: configure_postgres
+end
+
+def define_backend_server(config, attribute)
+  provisioning, installer, installer_path = prepare('BE_INSTALLER', 'chef-backend', 'Chef Backend 1.1+')
+  config.vm.hostname = "backend.chef-server.dev"
+  config.vm.network "private_network", ip: BE_VM_ADDRESS
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ["modifyvm", :id,
+                  "--name", "backend",
+                  # Elasticsearch requires much RAM
+                  "--memory", 2048,
+                  "--cpus", 2,
+                  "--usb", "off",
+                  "--usbehci", "off"
+    ]
+  end
+
+  if provisioning
+    config.vm.synced_folder installer_path, "/installers"
+
+    config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
+    config.vm.provision "shell", inline: install_hack(installer)
+    config.vm.provision "shell", inline: configure_backend
+  end
 end
 
 
@@ -176,11 +217,11 @@ end
 ##############
 
 
-def prepare
+def prepare(installer_env, package_name, title)
   action = ARGV[0]
   if action =~ /^(provision|up|reload)$/
-    installer = prompt_installer
-    raise "Please set INSTALLER to the path of a .deb package for Chef Server 12+." if installer.nil?
+    installer = prompt_installer(installer_env, package_name)
+    raise "Please set #{installer_env} to the path of a .deb package for #{title}." if installer.nil?
     raise "#{installer} does not exist! Please fix this." unless File.file?(installer)
     installer_path = File.dirname(File.expand_path(installer))
     provisioning = true
@@ -188,16 +229,16 @@ def prepare
   [provisioning, installer, installer_path]
 end
 
-def prompt_installer
-  puts "Looking in #{Dir.home}/Downloads and #{base_path}/omnibus/pkg for installable chef-server-core package."
+def prompt_installer(installer_env, package_name)
+  puts "Looking in #{Dir.home}/Downloads and #{base_path}/omnibus/pkg for installable #{package_name} package."
   # TODO allow config override of location, multiple locations, search pattern, max count?
-  files = Dir.glob("#{Dir.home}/Downloads/chef-server-core*.deb") + Dir.glob("#{base_path}/omnibus/pkg/chef-server-core*.deb")
+  files = Dir.glob("#{Dir.home}/Downloads/#{package_name}*.deb") + Dir.glob("#{base_path}/omnibus/pkg/#{package_name}*.deb")
 
-  if ENV['INSTALLER']
-    if ENV['INSTALLER'] =~ /^.*chef-server-core.*deb$/ and File.file?(ENV['INSTALLER'])
-      user_installer = File.expand_path(ENV['INSTALLER'])
+  if ENV[installer_env]
+    if ENV[installer_env] =~ /^.*#{package_name}.*deb$/ and File.file?(ENV[installer_env])
+      user_installer = File.expand_path(ENV[installer_env])
     else
-      puts "INSTALLER #{ENV['INSTALLER']} is not a valid chef-server-core package. Ignoring."
+      puts "#{installer_env} #{ENV[installer_env]} is not a valid #{package_name} package. Ignoring."
     end
   end
 
@@ -207,7 +248,7 @@ def prompt_installer
 
   files = files.sort_by{ |f| File.mtime(f) }.last(10)
   files.reverse!
-  files << "[INSTALLER]: #{user_installer}" if user_installer
+  files << "[#{installer_env}]: #{user_installer}" if user_installer
 
   selection = 0
 
@@ -233,7 +274,7 @@ def prompt_installer
     end
 
   else
-    selection = get_selection(files)
+    selection = get_selection(installer_env, files)
   end
 
   if selection == files.length  and user_installer
@@ -244,13 +285,13 @@ def prompt_installer
 
 end
 
-def get_selection(files)
+def get_selection(env, files)
   selection = 0
   files.each_index do |x|
     puts " #{x+1}) #{files[x]}\n"
   end
   loop do
-    print "Select an image, or set the INSTALLER variable and run again: [1 - #{files.length}]: "
+    print "Select an image, or set the #{env} variable and run again: [1 - #{files.length}]: "
     selection = $stdin.gets.chomp.to_i
     break if selection > 0 and selection <= files.length
   end
@@ -326,6 +367,20 @@ service postgresql restart
 export PATH=/usr/lib/postgresql/9.2/bin:$PATH
 sudo -u postgres psql -c "CREATE USER bofh SUPERUSER ENCRYPTED PASSWORD 'i1uvd3v0ps';"
 BASH
+end
+
+def configure_backend
+<<BASH
+cat > /etc/chef-backend/chef-backend.rb <<EOF
+publish_address "#{BE_VM_ADDRESS}"
+EOF
+chef-backend-ctl create-cluster --accept-license
+chef-backend-ctl gen-server-config api.chef-server.dev > /installers/api.chef-server.dev.rb
+BASH
+end
+
+def chef_backend_active?(attributes)
+  attributes['vm']['chef-backend']['start'] and attributes['vm']['chef-backend']['use-external']
 end
 
 def base_path
