@@ -1,4 +1,7 @@
+#%RAML 0.8
+
 Acl:                       !include schemas/acl.json
+AclUpdate:                 !include schemas/acl_update.json
 AssociationRequest:        !include schemas/association-request.json
 AssociationRequestCount:   !include schemas/association-request-count.json
 AssociationRequestCreate:  !include schemas/association-request-create.json

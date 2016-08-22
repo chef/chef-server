@@ -36,9 +36,31 @@
     "description": "A version constraint. A series of comma separated constraints, each of which may include VERSION, \"> VERSION\", \"< VERSION\", \">= VERSION\", \"<= VERSION\", \"= VERSION\" and \"~> VERSION\".",
     "type": "string"
   },
+  AclUpdatePermission: {
+    "description": "An access control list for updating a single permission (create, read, update, grant or delete) for an object.  Uses ",
+    "properties": {
+      "actors": {
+        "description": "The clients and users authorized for this permission on this Chef object.  Must have value [] if clients and users fields are used.",
+        "$ref": "common.json#ChefName"
+      },
+      "clients": {
+        "description": "The clients authorized for this permission on this Chef object.  Required if 'users' is included in the body.",
+        "$ref": "common.json#ChefName"
+      },
+      "users": {
+        "description": "The users authorized for this permission on this Chef object.  Required if 'clients' is included in the body. Can only be used if 'actors' = []",
+        "$ref": "common.json#ChefName"
+      },
+      "groups": {
+        "description": "The groups authorized for this permission on this Chef object.",
+        "type": "array",
+        "items": { "$ref": "common.json#ChefName" }
+      }
+    }
+  },
 
   "AclPermission": {
-    "description": "An access control list for a single permission (create, read, update, grant or delete) for an object.",
+    "description": "The access control list returned when GETing a single permission (create, read, update, grant or delete) for an object.",
     "properties": {
       "actors": {
         "description": "The clients and users authorized for this permission on this Chef object.",

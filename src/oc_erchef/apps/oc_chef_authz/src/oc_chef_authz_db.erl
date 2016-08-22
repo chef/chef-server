@@ -37,7 +37,8 @@
          make_context/3,
          statements/1,
          make_org_prefixed_group_name/2,
-         find_org_actors_by_name/2
+         find_org_actors_by_name/2,
+         authz_records_by_name/3
         ]).
 
 -ifdef(TEST).
@@ -198,3 +199,21 @@ find_org_actors_by_name(OrgId, ActorNames) ->
             {error, Error}
     end.
 
+authz_records_by_name(client, OrgId, ClientNames) ->
+    object_authz_records(find_client_authz_id_in_names, [OrgId, ClientNames]);
+authz_records_by_name(user, _OrgId, UserNames) ->
+    object_authz_records(find_user_authz_id_in_names, [UserNames]);
+authz_records_by_name(group, OrgId, GroupNames) ->
+    object_authz_records(find_group_authz_id_in_names, [OrgId, GroupNames]).
+
+% On success returns [ {Name, AuthzId}, ... ]
+object_authz_records(QueryName, Args) ->
+    case chef_sql:select_rows({QueryName, Args}) of
+        List when is_list(List) ->
+            [{proplists:get_value(<<"name">>, R),
+              proplists:get_value(<<"authz_id">>, R)} || R <- List];
+        not_found ->
+            [];
+        Other ->
+            Other
+    end.
