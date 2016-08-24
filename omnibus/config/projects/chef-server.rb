@@ -24,7 +24,7 @@ package_name    "chef-server-core"
 replace         "private-chef"
 conflict        "private-chef"
 install_dir     "/opt/opscode"
-build_version   "12.8.0"
+build_version   "12.8.1"
 build_iteration 1
 
 override :rabbitmq, version: "3.3.4"

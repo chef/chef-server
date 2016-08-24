@@ -91,7 +91,7 @@ malformed_request_message({one_requires_all, Have, Missing}, _Req, _State) ->
                                        MissingFmt, "'"])]}]};
 malformed_request_message(actors_must_be_empty, _Req, _State) ->
     {[{<<"error">>, [iolist_to_binary(["When providing 'users' and 'clients' fields, the",
-                                       " 'actors' field must have a value of []." ])}]};
+                                       " 'actors' field must have a value of []." ])]}]};
 
 % Invalid client name
 malformed_request_message({client_name_mismatch}, _Req, _State) ->
