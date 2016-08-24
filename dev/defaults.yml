@@ -33,6 +33,12 @@ vm:
     # When this is set to true, and start is true,
     # we will install chef-backend and configure the chef-server to use it.
     use-external: true
+  # Override this in config.yml if you want to install chef server plugins with
+  # specific packages.
+  plugins:
+    chef-manage: false
+    reporting: false
+    push-jobs-server: false
 
   # All settings below apply only to the chef-server vm
   cpus: 4
