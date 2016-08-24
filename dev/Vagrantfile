@@ -64,6 +64,10 @@ end
 
 def define_chef_server(config, attributes)
   provisioning, installer, installer_path = prepare('INSTALLER', 'chef-server-core', 'Chef Server 12+')
+  m_provisioning, m_installer, m_installer_path = prepare('MANAGE_PKG', 'chef-manage', 'Chef Manage 1.4+') if plugin_active?('chef-manage', attributes)
+  ps_provisioning, ps_installer, ps_installer_path = prepare('PUSH_JOBS_PKG', 'opscode-push-jobs-server', 'Push Jobs Server 1.1+') if plugin_active?('push-jobs-server', attributes)
+  r_provisioning, r_installer, r_installer_path = prepare('REPORTING_PKG', 'opscode-reporting', 'Chef Reporting 1.6+') if plugin_active?('reporting', attributes)
+
   config.vm.hostname = "api.chef-server.dev"
   config.vm.network "private_network", ip: CS_VM_ADDRESS
 
@@ -117,7 +121,7 @@ def define_chef_server(config, attributes)
     config.vm.synced_folder File.expand_path(dotfiles_path), "/dotfiles"
 
     config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
-    config.vm.provision "shell", inline: install_hack(installer)
+    config.vm.provision "shell", inline: install_hack(installer, 'opscode')
     config.vm.provision "chef_zero" do |chef|
       chef.install = false
       chef.binary_path = "/opt/opscode/embedded/bin"
@@ -140,6 +144,24 @@ def define_chef_server(config, attributes)
     # Makes more sense here than in a one-off line in the dvm recipe, which
     # has no direct connection...
     config.vm.provision "shell", inline: "chef-server-ctl reconfigure"
+
+    if plugin_active?('chef-manage', attributes)
+      config.vm.provision "shell", "inline": install_hack(m_installer, 'chef-manage')
+      config.vm.provision "shell", "inline": "chef-manage-ctl reconfigure --accept-license"
+    end
+
+    if plugin_active?('push-jobs-server', attributes)
+      backend_compat_message('push-jobs-server') if chef_backend_active?(attributes)
+      config.vm.provision "shell", "inline": install_hack(ps_installer, 'opscode-push-jobs-server')
+      config.vm.provision "shell", "inline": "opscode-push-jobs-server-ctl reconfigure"
+    end
+
+    if plugin_active?('reporting', attributes)
+      backend_compat_message('reporting') if chef_backend_active?(attributes)
+      config.vm.provision "shell", "inline": install_hack(r_installer, 'opscode-reporting')
+      config.vm.provision "shell", "inline": "opscode-reporting-ctl reconfigure --accept-license"
+    end
+
   end
 end
 
@@ -337,16 +359,16 @@ end
 # we already have a chef-client install included with the server package, and since
 # we're going to run in solo mode, it will run for VM provisioning without
 # interfering with the server install.
-def install_hack(installer)
+def install_hack(installer, omnibus = "opscode")
   server_installer_name = File.basename(installer)
   return ";" if server_installer_name.nil?
 <<SCRIPT
 cp /home/vagrant/.gitconfig /root/.gitconfig
-if [ -d "/opt/opscode/embedded" ]
+if [ -d "/opt/#{omnibus}/embedded" ]
 then
   echo "Bypassing server install, it appears done."
 else
-  echo "PATH=/opt/opscode/embedded/bin:$PATH" > /root/.bashrc
+  echo "PATH=/opt/#{omnibus}/embedded/bin:$PATH" > /root/.bashrc
   sudo dpkg -i "/installers/#{server_installer_name}"
 fi
 SCRIPT
@@ -379,8 +401,18 @@ chef-backend-ctl gen-server-config api.chef-server.dev > /installers/api.chef-se
 BASH
 end
 
+def backend_compat_message(plugin)
+  puts ""
+  puts "WARNING: #{plugin} may not work with Chef Backend"
+  puts ""
+end
+
 def chef_backend_active?(attributes)
   attributes['vm']['chef-backend']['start'] and attributes['vm']['chef-backend']['use-external']
+end
+
+def plugin_active?(plugin, attributes)
+  attributes['vm']['plugins'][plugin]
 end
 
 def base_path
