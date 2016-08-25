@@ -40,84 +40,76 @@
 %% should return a `{Req, State}' tuple or throw.  The `ErrorMsgFun' will be called as
 %% `ErrorMsgFun(Reason, Req, State)' where `Reason' is the term thrown by `ValidateFun'.
 %%
+%%
 malformed_request_message(bad_clock, Req, State) ->
     {GetHeader, _State1} = chef_wm_util:get_header_fun(Req, State),
     User = case GetHeader(<<"X-Ops-UserId">>) of
                undefined -> <<"">>;
                UID -> UID
            end,
-    Msg = iolist_to_binary([<<"Failed to authenticate as ">>, User,
-                            <<". Synchronize the clock on your host.">>]),
-    {[{<<"error">>, [Msg]}]};
+    error_envelope([<<"Failed to authenticate as ">>, User,
+                    <<". Synchronize the clock on your host.">>]);
 malformed_request_message({bad_date, Field}, _Req, _State) ->
-    {[{<<"error">>, [?BAD_DATE_MESSAGE(Field)]}]};
+    error_envelope([?BAD_DATE_MESSAGE(Field)])
 malformed_request_message(bad_sign_desc, _Req, _State) ->
-    Msg = <<"Unsupported authentication protocol version">>,
-    {[{<<"error">>, [Msg]}]};
+    error_envelope([<<"Unsupported authentication protocol version">>]);
 malformed_request_message({missing_headers, Missing}, _Req, _State) ->
-    Msg = iolist_to_binary([
-                            <<"missing required authentication header(s) ">>,
-                            bin_str_join(Missing, <<", ">>)]),
-    {[{<<"error">>, [Msg]}]};
+    error_envelope([<<"missing required authentication header(s) ">>,
+                    bin_str_join(Missing, <<", ">>)]);
+
 malformed_request_message({bad_headers, Bad}, _Req, _State) ->
-    Msg = iolist_to_binary([
-                            <<"bad header(s) ">>,
-                            bin_str_join(Bad, <<", ">>)]),
-    {[{<<"error">>, [Msg]}]};
-
-%% acl_constraint_violation messages
-malformed_request_message(attempted_admin_group_removal_grant_ace, _Req, _State) ->
-  {[{<<"error">>, [<<"Admin group cannot be removed from the Grant ACE">>]}]};
-
-%% End acl_constraint_violation messages
+    error_envelope([<<"bad header(s) ">>, bin_str_join(Bad, <<", ">>)]);
 
 malformed_request_message({error, invalid_json}, _Req, _State) ->
     %% in theory, there might be some sort of slightly useful error detail from
     %% chef_json/jiffy, but thus far nothing specific enough to beat out this. Also, would
     %% not passing internal library error messages out to the user when possible.
-    {[{<<"error">>, [<<"invalid JSON">>]}]};
+    error_envelope([<<"invalid JSON">>);
 malformed_request_message({mismatch, {FieldName, Pat, Val}}, _Req, _State) ->
-    {[{<<"error">>, [iolist_to_binary(["Field '", FieldName, "' invalid : ", Val, " does not match ", Pat])]}]};
+    error_envelope(["Field '", FieldName, "' invalid : ", Val, " does not match ", Pat]);
 malformed_request_message({missing, FieldName}, _Req, _State) ->
-    {[{<<"error">>, [iolist_to_binary(["Field '", FieldName, "' missing"])]}]};
+    error_envelope(["Field '", FieldName, "' missing"]);
 malformed_request_message({both_missing, Field1, _Field2}, _Req, _State) ->
-    {[{<<"error">>, [iolist_to_binary(["Field '", Field1, "' missing"])]}]};
+    error_envelope(["Field '", Field1, "' missing"]);
 
 % _acls-related failures:
+malformed_request_message(attempted_admin_group_removal_grant_ace, _Req, _State) ->
+    error_envelope([<<"Admin group cannot be removed from the Grant ACE">>]);
+
 malformed_request_message({one_requires_all, Have, Missing}, _Req, _State) ->
     MissingFmt = bin_str_join(Missing, ", "),
-    {[{<<"error">>, [iolist_to_binary(["You provided '", Have, "' with your request.",
+    error_envelope(["You provided '", Have, "' with your request.",
                                        " Including this field also requires that you provide '",
-                                       MissingFmt, "'"])]}]};
+                                       MissingFmt, "'"]);
 malformed_request_message(actors_must_be_empty, _Req, _State) ->
-    {[{<<"error">>, [iolist_to_binary(["When providing 'users' and 'clients' fields, the",
-                                       " 'actors' field must have a value of []." ])]}]};
+    error_envelope(["When providing 'users' and 'clients' fields, the",
+                                       " 'actors' field must have a value of []." ]);
 
 % Invalid client name
 malformed_request_message({client_name_mismatch}, _Req, _State) ->
-    {[{<<"error">>, [<<"name and clientname must match">>]}]};
+    error_envelope([<<"name and clientname must match">>);
 malformed_request_message({bad_client_name, Name, Pattern}, _Req, _State) ->
-    {[{<<"error">>, [iolist_to_binary(["Invalid client name '", Name,
-                                       "' using regex: '", Pattern, "'."])]}]};
+    error_envelope(["Invalid client name '", Name,
+                                       "' using regex: '", Pattern, "'."]);
 %% generic invalid name case
 malformed_request_message({bad_object_name, Name, Pattern}, _Req, _State) ->
-    {[{<<"error">>, [iolist_to_binary(["Invalid name '", Name,
-                                       "' using regex: '", Pattern, "'."])]}]};
+    error_envelope(["Invalid name '", Name,
+                                       "' using regex: '", Pattern, "'."]);
 
 %% Not sure if we want to be this specific, or just want to fold this into an 'invalid JSON'
 %% case.  At any rate, here it is.
 malformed_request_message({bad_string_list, {Field, _Value}}, _Req, _State) ->
-    {[{<<"error">>, [iolist_to_binary(["Field '", Field, "' is not a list of strings"])]}]};
+    error_envelope(["Field '", Field, "' is not a list of strings"]);
 malformed_request_message({bad_ejson_proplist, {Field, _Value}}, _Req, _State) ->
-    {[{<<"error">>, [iolist_to_binary(["Field '", Field, "' is not a hash"])]}]};
+    error_envelope(["Field '", Field, "' is not a hash"]);
 malformed_request_message({url_json_name_mismatch, {_UrlName, _Mismatch, Type}}, _Req, _State) ->
-    {[{<<"error">>, [iolist_to_binary([Type, <<" name mismatch.">>])]}]};
+    error_envelope([Type, <<" name mismatch.">>]);
 malformed_request_message({bad_run_list, {Field, _Value}}, _Req, _State) ->
-    {[{<<"error">>, [iolist_to_binary(["Field '", Field, "' is not a valid run list"])]}]};
+    error_envelope(["Field '", Field, "' is not a valid run list"]);
 malformed_request_message({bad_run_lists, {Field, _Value}}, _Req, _State) ->
-    {[{<<"error">>, [iolist_to_binary(["Field '", Field, "' contains invalid run lists"])]}]};
+    error_envelope(["Field '", Field, "' contains invalid run lists"]);
 malformed_request_message(invalid_num_versions, _Req, _State) ->
-    {[{<<"error">>, [<<"You have requested an invalid number of versions (x >= 0 || 'all')">>]}]};
+    error_envelope([<<"You have requested an invalid number of versions (x >= 0 || 'all')">>);
 
 %% This is used by some custom validation for validation patterns that can't be expressed well as ej:valid rules
 malformed_request_message({invalid_key, Key}, _Req, _State) ->
@@ -231,12 +223,9 @@ to_binary(O) ->
     %% Catch-all case
     list_to_binary(io_lib:format("~p", [O])).
 
--spec binary_message([atom() | string() | binary()]) -> binary().
-binary_message(Parts)  ->
-    iolist_to_binary([to_binary(P) || P <- Parts]).
 
 -spec error_envelope(binary() | [binary()]) -> ej:json_object().
 error_envelope(Parts) when is_list(Parts) ->
-    error_envelope(binary_message(Parts));
+    error_envelope([to_binary(P) || P <- Parts]);
 error_envelope(Message) when is_binary(Message) ->
     chef_wm_util:error_message_envelope(Message).
