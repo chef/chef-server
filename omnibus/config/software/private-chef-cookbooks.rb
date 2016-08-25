@@ -29,8 +29,7 @@ build do
       " -v 2.1.3" \
       " --no-rdoc --no-ri", env: env
 
-  command "berks vendor #{install_dir}/embedded/cookbooks",
-          env: env, cwd: "#{project_dir}/private-chef"
+  command "berks vendor #{install_dir}/embedded/cookbooks", env: env
 
   block do
     fips_enabled = (project.overrides[:fips] && project.overrides[:fips][:enabled]) || false
