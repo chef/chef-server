@@ -35,6 +35,7 @@ First, add the following configuration to your `/etc/hosts` file:
     192.168.33.100 api.chef-server.dev manage.chef-server.dev
     192.168.33.150 database.chef-server.dev
     192.168.33.151 backend.chef-server.dev
+    192.168.33.153 ldap.chef-server.dev
     192.168.33.155 reportingdb.chef-server.dev
 
 Next, bring up the VMs!
@@ -95,6 +96,32 @@ system library and declared in a project's app.src is typically
 available.
 
 Ruby project dependency loading support coming soon.
+
+### Installing Chef Server Plugins
+
+If you wish to install Chef Server plugins with pre-downloaded or pre-built
+binaries, set the corresponding attribute in your `config.yml` to true and
+make sure that you have the package in your install path, or you have set the
+plugin environment variable (see below).
+
+  * Chef Management Console - `MANAGE_PKG`
+  * Push Jobs Server - `PUSH_JOBS_PKG`
+  * Chef Reporting - `REPORTING_PKG`
+
+### Configuring LDAP
+
+If you wish to setup your Chef Server to use an external LDAP service, please set
+`ldap start` to true in your config.yml. This LDAP server comes pre-configured
+with two users: `child` and `douglas`. You can add more by adding more LDIF files
+in the ldap-data directory of the provisioning cookbook.
+
+_Note: The password should be the same as the username (for simplicity)_
+
+### Setting up Chef Backend
+
+If you wish to setup a development environment that is a 1 frontend, 1 backend
+HA topology, set `chef-backend start` to true in your config.yml. _Warning: Chef Backend
+is not compatible with the Push Jobs Server, Chef Reporting or LDAP DVM configurations._
 
 ### Installer Options
 
