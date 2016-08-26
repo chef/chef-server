@@ -1,4 +1,4 @@
-%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
+%% -*- erlang-indent-level: 4; indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
 %%
 %% @author Marc A. Paradise <marc@chef.io>
@@ -109,8 +109,21 @@ validate_actors_clients_users_test_() ->
       }
      ].
 
+part_with_actors_test_() ->
+    Subject = fun oc_chef_authz_acl:part_with_actors/4,
+    [
+     {"when 'granular' is set, response includes clients, users, empty actors",
+      ?_assertEqual({[{<<"users">>, [<<"u1">>]},
+                      {<<"clients">>, [<<"c1">>]},
+                      {<<"actors">>, []}]},
+                    Subject({[]}, [<<"c1">>], [<<"u1">>], granular))},
+     {"when 'granular' is not set, response is only 'actors'",
+      ?_assertEqual({[{<<"actors">>, [<<"c1">>, <<"u1">>]}]},
+                    Subject({[]}, [<<"c1">>], [<<"u1">>], undefined))}
+    ].
+
 %%
-%% Helpers for inputs and outputs.
+%% Helpers for test inputs and outputs.
 %%
 
 valid_user_data_response(_, Names) ->

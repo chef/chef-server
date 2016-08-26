@@ -80,10 +80,14 @@ validate_request('GET', Req, #base_state{chef_db_context = DbContext,
 auth_info(Req, State) ->
     check_acl_auth(Req, State).
 
-to_json(Req, #base_state{resource_state = AclState} = State) ->
-    case fetch(AclState) of
+to_json(Req, #base_state{resource_state = #acl_state{type = Type, authz_id = AuthzId}} = State) ->
+    Granular = case wrq:get_qs_value("detail", Req) of
+                   "granular" -> granular;
+                   _ -> undefined
+               end,
+    case oc_chef_authz_acl:fetch(Type, AuthzId, Granular) of
         forbidden ->
-            {{halt, 403}, Req, State#base_state{log_msg = acl_not_found}};
+            {{halt, 403}, Req, State#base_state{log_msg = requestor_access_failed}};
         Ejson ->
             Json = chef_json:encode(Ejson),
             {Json, Req, State}
@@ -128,9 +132,6 @@ check_acl_auth(Req, #base_state{requestor_id = RequestorId,
                     Other
             end
     end.
-
-fetch(#acl_state{type = Type, authz_id = AuthzId}) ->
-    oc_chef_authz_acl:fetch(Type,AuthzId).
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).

@@ -30,6 +30,7 @@
          fetch_id/4,
          fetch_cookbook_id/3,
          fetch/2,
+         fetch/3,
          has_grant_on/3,
          validate_actors_clients_users/2,
          update_part/5,
@@ -204,14 +205,16 @@ fetch_cookbook_id(DbContext, Name, OrgId) ->
             AuthzId
     end.
 
--spec fetch(chef_type(), id()) -> list() | {error, term()}.
 fetch(Type, AuthzId) ->
+    fetch(Type, AuthzId, undefined).
+
+fetch(Type, AuthzId, Granular) ->
     Path = acl_path(Type, AuthzId),
     SuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
     Result = oc_chef_authz_http:request(Path, get, ?DEFAULT_HEADERS, [], SuperuserId),
     case Result of
         {ok, Record} ->
-            ids_to_names(Record);
+            ids_to_names(Record, Granular);
         {error, forbidden} ->
             forbidden;
         Other ->
@@ -329,27 +332,34 @@ convert_actor_ids_to_names(AuthzIds) ->
         oc_chef_group:find_clients_names(AuthzIds, fun chef_sql:select_rows/1),
     {UserNames, DefunctActorAuthzIds} =
         oc_chef_group:find_users_names(RemainingAuthzIds, fun chef_sql:select_rows/1),
-    {ClientNames ++ UserNames, DefunctActorAuthzIds}.
+    {ClientNames, UserNames, DefunctActorAuthzIds}.
 
--spec process_part(binary(), ejson_term()) -> ejson_term().
-process_part(Part, Record) ->
+ids_to_names(Record, Granular) ->
+    Record1 = process_part(<<"create">>, Record, Granular),
+    Record2 = process_part(<<"read">>, Record1, Granular),
+    Record3 = process_part(<<"update">>, Record2, Granular),
+    Record4 = process_part(<<"delete">>, Record3, Granular),
+    process_part(<<"grant">>, Record4, Granular).
+
+-spec process_part(binary(), ejson_term(), granular|undefined) -> ejson_term().
+process_part(Part, Record, Granular) ->
     Members = ej:get({Part}, Record),
     ActorIds = ej:get({<<"actors">>}, Members),
     GroupIds = ej:get({<<"groups">>}, Members),
-    {ActorNames, DefunctActorAuthzIds} = convert_actor_ids_to_names(ActorIds),
+    {ClientNames, UserNames, DefunctActorAuthzIds} = convert_actor_ids_to_names(ActorIds),
     {GroupNames, DefunctGroupAuthzIds} = convert_group_ids_to_names(GroupIds),
-    % We do this for groups, probably good to do it here too
     oc_chef_authz_cleanup:add_authz_ids(DefunctActorAuthzIds, DefunctGroupAuthzIds),
-    Members1 = ej:set({<<"actors">>}, Members, ActorNames),
+    Members1 = part_with_actors(Members, ClientNames, UserNames, Granular),
     Members2 = ej:set({<<"groups">>}, Members1, GroupNames),
     ej:set({Part}, Record, Members2).
 
-ids_to_names(Record) ->
-    Record1 = process_part(<<"create">>, Record),
-    Record2 = process_part(<<"read">>, Record1),
-    Record3 = process_part(<<"update">>, Record2),
-    Record4 = process_part(<<"delete">>, Record3),
-    process_part(<<"grant">>, Record4).
+part_with_actors(PartRecord, Clients, Users, granular) ->
+    PartRecord0 = ej:set({<<"users">>}, PartRecord, Users),
+    PartRecord1 = ej:set({<<"clients">>}, PartRecord0, Clients),
+    ej:set({<<"actors">>}, PartRecord1, []);
+part_with_actors(PartRecord, Clients, Users, _) ->
+    ej:set({<<"actors">>}, PartRecord, Clients ++ Users).
+
 
 
 % Path helper functions

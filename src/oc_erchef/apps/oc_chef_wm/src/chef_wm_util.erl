@@ -163,7 +163,9 @@ not_found_message(policy_group, Name) ->
 
 %% "Cannot load data bag item not_really_there for data bag sack"
 
--spec error_message_envelope(binary() | ejson_term()) -> ejson_term().
+-spec error_message_envelope(binary() | list() | ejson_term()) -> ejson_term().
+error_message_envelope(Message) when is_list(Message) ->
+    error_message_envelope(iolist_to_binary(Message));
 error_message_envelope(Message) when is_binary(Message) orelse
                                      is_tuple(Message) ->
     %% Tuple guard is really intended for grabbing EJson-encoded json objects, but we don't

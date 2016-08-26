@@ -817,6 +817,8 @@ describe "ACL API", :acl do
         # the defaults of defaults, which are overridden below for the different
         # types:
         let(:actors) { ["pivotal", platform.admin_user.name].uniq }
+        let(:users) { ["pivotal", platform.admin_user.name].uniq }
+        let(:clients) { [] }
         let(:groups) { ["admins"] }
         let(:read_groups) { groups }
         let(:update_groups) { groups }
@@ -831,6 +833,14 @@ describe "ACL API", :acl do
             "grant" => {"actors" => actors, "groups" => grant_groups}
           }}
 
+        let(:granular_acl_body) {{
+          "create" => {"actors" => [], "users" => users, "clients" => clients, "groups" => groups},
+          "read" => {"actors" => [], "users" => users, "clients" => clients, "groups" => read_groups},
+          "update" => {"actors" => [], "users" => users, "clients" => clients, "groups" => update_groups},
+          "delete" => {"actors" => [], "users" => users, "clients" => clients, "groups" => delete_groups},
+          "grant" => {"actors" => [], "users" => users, "clients" => clients, "groups" => grant_groups},
+        }}
+
         # Mainly this is for the different creation bodies, but also for the
         # different default ACLs for each type, etc.  We love consistency!
         case type
@@ -841,6 +851,9 @@ describe "ACL API", :acl do
             # actors list
             ["pivotal", new_object, setup_user.name].uniq
           }
+          let(:clients) { [ new_object ] }
+          let(:users) { ["pivotal", setup_user.name].uniq }
+
           let(:read_groups) { ["users", "admins"] }
           let(:delete_groups) { ["users", "admins"] }
         when "groups"
@@ -854,6 +867,7 @@ describe "ACL API", :acl do
               "containerpath" => "/"
             }}
           let(:actors) { [platform.admin_user.name] }
+          let(:users) {  [platform.admin_user.name] }
           let(:groups) { [] }
           let(:grant_groups) { [] }
         when "data"
@@ -968,8 +982,15 @@ describe "ACL API", :acl do
             it "can get object ACL" do
               get(request_url, platform.admin_user).should look_like({
                   :status => 200,
-                  :body => acl_body
+                  :body_exact => acl_body
                 })
+            end
+            it "can get a granular object ACL" do
+              get("#{request_url}?detail=granular", platform.admin_user).should look_like({
+                  :status => 200,
+                  :body_exact => granular_acl_body
+                })
+
             end
           end
 
