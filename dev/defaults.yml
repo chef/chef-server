@@ -30,16 +30,10 @@ vm:
     # enable a separate backend vm but do not use it unless
     # use-external is set.
     start: false
-    # When this is set to true, and start is true,
-    # we will install chef-backend and configure the chef-server to use it.
-    use-external: true
   ldap:
     # enable a separate ldap vm but do not use it unless
     # use-external is set.
     start: false
-    # When this is set to true, and start is strue,
-    # we will setup the LDAP server and configure the chef-server to use it.
-    use-external: true
   # Override this in config.yml if you want to install chef server plugins with
   # specific packages.
   plugins:

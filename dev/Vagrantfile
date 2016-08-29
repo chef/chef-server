@@ -127,7 +127,7 @@ def define_chef_server(config, attributes)
       json = simple_deep_merge(json, { "provisioning" => { "opscode-reporting-config" => pg } })
     end
 
-    if attributes['vm']['ldap']['start'] and attributes['vm']['ldap']['use-external']
+    if attributes['vm']['ldap']['start']
       backend_compat_message('ldap') if chef_backend_active?(attributes)
       ldap = { "ldap['base_dn']" => '"ou=chefs,dc=chef-server,dc=dev"',
                "ldap['bind_dn']" => '"cn=admin,dc=chef-server,dc=dev"',
@@ -460,7 +460,7 @@ def backend_compat_message(plugin)
 end
 
 def chef_backend_active?(attributes)
-  attributes['vm']['chef-backend']['start'] and attributes['vm']['chef-backend']['use-external']
+  attributes['vm']['chef-backend']['start']
 end
 
 def plugin_active?(plugin, attributes)
