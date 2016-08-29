@@ -1,4 +1,5 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
+%%
 %% ex: ts=4 sw=4 et
 %% @author Douglas Triggs <doug@chef.io>
 %% @author Mark Anderson <mark@chef.io>
@@ -20,8 +21,8 @@
 
 -module(oc_chef_authz_acl).
 
--include("oc_chef_types.hrl").
 -include("chef_types.hrl").
+-include("oc_chef_types.hrl").
 
 -export([acl_path/2,
          acl_path/3,
@@ -45,6 +46,7 @@
                   reqid :: binary(),
                   darklaunch = undefined}).
 
+-spec acl_spec(binary()) -> ejson_term().
 acl_spec(Part) ->
     {[
       {Part,
@@ -86,6 +88,8 @@ validate_actors_clients_users(Part, FullACL) ->
             end
     end.
 
+-spec update_part(string(), ejson_term(), chef_type() | chef_authz_type(), id(), id())->
+    {ok, ejson_term()}.
 update_part(Part, AceRecord, Type, AuthzId, OrgId) ->
     Ids = names_to_ids(ej:get({Part}, AceRecord), OrgId),
     Data = chef_json:encode(Ids),
@@ -102,6 +106,7 @@ update_part(Part, AceRecord, Type, AuthzId, OrgId) ->
 % TODO: we only need the authz id, so grabbing complete objects is wasteful.
 % Also, this might be more suited to be moved to oc_chef_wm_util or
 % something. In the meantime, this gets us up and running.
+-spec fetch_id(chef_type(), term(), binary(), id()) -> not_found | id().
 fetch_id(organization, _DbContext, _Name, _OrgId) ->
     % TODO: This needs to be implemented; orgs not in SQL yet.  Will also
     % require additional changes elsewhere to work
@@ -188,6 +193,7 @@ fetch_id(environment, DbContext, Name, OrgId) ->
             AuthzId
     end.
 
+-spec fetch_cookbook_id(term(), binary(), id()) -> not_found | id().
 fetch_cookbook_id(DbContext, Name, OrgId) ->
     % cookbook endpoint pattern is utterly different from the others, generic
     % fetch does not handle cookbooks (and, well, versioning)
@@ -198,7 +204,7 @@ fetch_cookbook_id(DbContext, Name, OrgId) ->
             AuthzId
     end.
 
-%% Refactor this a bit
+-spec fetch(chef_type(), id()) -> list() | {error, term()}.
 fetch(Type, AuthzId) ->
     Path = acl_path(Type, AuthzId),
     SuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
@@ -218,6 +224,8 @@ fetch(Type, AuthzId) ->
 %%
 %% This API only supports actors not groups, and other ACE types are
 %% difficult since grant is required to read them.
+-spec has_grant_on(chef_type() | chef_authz_type(), id(), id()) ->
+    true | false | {error, term()}.
 has_grant_on(ObjectType, ObjectId, ActorId) ->
     Path = acl_auth_path(ObjectType, ObjectId, ActorId),
     SuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
@@ -323,6 +331,7 @@ convert_actor_ids_to_names(AuthzIds) ->
         oc_chef_group:find_users_names(RemainingAuthzIds, fun chef_sql:select_rows/1),
     {ClientNames ++ UserNames, DefunctActorAuthzIds}.
 
+-spec process_part(binary(), ejson_term()) -> ejson_term().
 process_part(Part, Record) ->
     Members = ej:get({Part}, Record),
     ActorIds = ej:get({<<"actors">>}, Members),
@@ -345,6 +354,8 @@ ids_to_names(Record) ->
 
 % Path helper functions
 % Translate types; in ACLs, everything is an object, actor, group, or container
+
+-spec acl_path(chef_type() | chef_authz_type(), id() ) -> string().
 acl_path(node, AuthzId) ->
     acl_path(object, AuthzId);
 acl_path(role, AuthzId) ->
@@ -368,12 +379,16 @@ acl_path(policy_group, AuthzId) ->
 acl_path(Type, AuthzId) ->
     "/" ++ type_to_resource(Type) ++ "/" ++ binary_to_list(AuthzId) ++ "/acl".
 
+
+-spec acl_path(chef_type() | chef_authz_type(), id(), string() ) -> string().
 acl_path(Type, AuthzId, Part) ->
     acl_path(Type,AuthzId) ++ "/" ++ Part.
 
+-spec acl_auth_path(chef_type() | chef_authz_type(), id(), binary() ) -> string().
 acl_auth_path(Type, AuthzId, RequestorId) ->
     acl_path(Type, AuthzId) ++ "/grant/actors/" ++ binary_to_list(RequestorId).
 
+-spec type_to_resource(chef_authz_type()) -> string().
 type_to_resource(actor) ->
     "actors";
 type_to_resource(container) ->
