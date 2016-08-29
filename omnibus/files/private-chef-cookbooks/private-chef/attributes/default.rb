@@ -466,14 +466,9 @@ default['private_chef']['nginx']['stub_status']['listen_port'] = "9999"
 default['private_chef']['nginx']['stub_status']['location'] = "/nginx_status"
 default['private_chef']['nginx']['stub_status']['allow_list'] = ["127.0.0.1"]
 # Based off of the Mozilla recommended cipher suite
-# https://wiki.mozilla.org/Security/Server_Side_TLS#Recommended_Ciphersuite
-#
-# SSLV3 was removed because of the poodle attack. (https://www.openssl.org/~bodo/ssl-poodle.pdf)
-#
-# If your infrastructure still has requirements for the vulnerable/venerable SSLV3, you can add
-# "SSLv3" to the below line.
-default['private_chef']['nginx']['ssl_protocols'] = "TLSv1 TLSv1.1 TLSv1.2"
-default['private_chef']['nginx']['ssl_ciphers'] = "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA"
+# https://mozilla.github.io/server-side-tls/ssl-config-generator/?server=nginx-1.8.1&openssl=1.0.1u&hsts=no&profile=modern
+default['private_chef']['nginx']['ssl_protocols'] = "TLSv1.2"
+default['private_chef']['nginx']['ssl_ciphers'] = "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:!aNULL:!eNULL:!EXPORT"
 #
 # The SSL Certificate and DH Param will be automatically generated if
 # these are nil.  Otherwise we expect these attributes to point at the
