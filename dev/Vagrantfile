@@ -3,6 +3,7 @@
 
 
 require "yaml"
+require "fileutils"
 load "dvmtools.rb"
 CS_VM_ADDRESS="192.168.33.100"
 DB_VM_ADDRESS="192.168.33.150"
@@ -13,6 +14,12 @@ DB_SUPERUSER="bofh"
 DB_SUPERPASS="i1uvd3v0ps"
 LDAP_PASSWORD="TheWheelsOnTheBusGoBoom"
 
+nodes_dir = File.join(File.expand_path(File.dirname(__FILE__)), 'nodes')
+unless File.directory?(nodes_dir)
+  puts "nodes directory is missing...creating it now"
+  puts
+  FileUtils.mkdir(nodes_dir)
+end
 
 Vagrant.configure("2") do |config|
   attributes = load_settings
