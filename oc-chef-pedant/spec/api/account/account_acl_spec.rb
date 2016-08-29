@@ -5,8 +5,6 @@ describe "ACL API", :acl do
   include Pedant::ACL
 
     # Generate random string identifier prefixed with current pid
-    # TODO - we have about 6 flavors of this. Let's clean them up
-    # and move them into Platform.
     def rand_id
       "#{Process.pid}_#{rand(10**7...10**8).to_s}"
     end
@@ -59,7 +57,6 @@ describe "ACL API", :acl do
         end
         let(:acl_url) { "#{platform.server}/users/#{username}/_acl" }
         let(:request_url)  { "#{platform.server}/users/#{username}/_acl/#{permission}" }
-
         context "PUT /users/<user>/_acl/#{permission}" do
           let(:actors) { ["pivotal", username].uniq }
           let(:groups) { [] }
@@ -734,7 +731,7 @@ describe "ACL API", :acl do
   # when a client & a user of the same name exist, updates to an acl specifying
   # the common name as the actor should fail with a 422, because we have no
   # way of knowing if the caller wanted to add the client or the user to the ACL.
-  context "when a client exists with the same name as a user", :validation  do
+  context "when a client exists with the same name as a user", :validation do
     let(:admin_requestor){admin_user}
     let(:requestor){admin_requestor}
     let(:shared_name) { "pedant-acl-#{rand_id}" }
@@ -760,17 +757,36 @@ describe "ACL API", :acl do
       end
 
       it "updates of the object ACL results in a 422 due to ambiguous request" do
-        put(request_url, platform.admin_user, payload: acl_request_body)
-          .should look_like(status: 422)
+        expect(put(request_url, platform.admin_user, payload: acl_request_body)).
+          to look_like(status: 422)
+      end
+
+      context "and 'clients' and 'users' fields are provided in the request" do
+        let(:acl_request_body) {
+          { read: { "actors" => [],
+                    "users" => ['pivotal', shared_name ],
+                    "clients" => [ shared_name ],
+                    "groups" => ['admins'] } }
+        }
+
+        it "updates of the object ACL using 'clients' and 'users' are successful" do
+          expect(put(request_url, platform.admin_user, payload: acl_request_body))
+            .to have_status_code 200
+
+          # Verify that the returned list contains this actor twice (once
+          # as client and once as user), since we don't separate them in the GET.
+          res = get(api_url("/clients/#{shared_name}/_acl"), platform.admin_user)
+          read_ace = JSON.parse(res.body)['read']
+          expect(read_ace['actors'].sort).to eq [shared_name, shared_name, "pivotal"]
+        end
       end
     end
 
     context "and the user is not a member of the organization" do
-      # TODO - once we support separating clients and users in the ACL GET API
-      # response (up next), we can verify that the correct actor was added too.
       it "there is no ambiguity and the object ACL update succeeds" do
-        put(request_url, platform.admin_user, payload: acl_request_body)
-          .should look_like(status: 200)
+        expect(put(request_url, platform.admin_user, payload: acl_request_body))
+          .to have_status_code 200
+
       end
     end
 
@@ -1142,29 +1158,70 @@ describe "ACL API", :acl do
             end # context GET /<type>/<name>/_acl/<permission>
 
             context "PUT /#{type}/<name>/_acl/#{permission}" do
-
+              let(:clients) { [platform.non_admin_client.name] }
+              let(:users) {
+                  [platform.non_admin_user.name, platform.admin_user.name, "pivotal"]
+              }
               let(:groups_and_actors) {{
                   "actors" => [platform.non_admin_user.name,
-                    platform.admin_user.name, "pivotal"].uniq,
+                    platform.admin_user.name, "pivotal"].uniq + clients,
                   "groups" => ["admins", "users", "clients"]
                 }}
               let(:update_body) {{
                   permission => groups_and_actors
                 }}
 
-              context "admin user" do
-                it "can update ACL" do
-                  put(permission_request_url, platform.admin_user,
-                    :payload => update_body).should look_like({
-                      :status => 200
-                    })
-                  check_body = acl_body
-                  check_body[permission] = groups_and_actors
+              context "admin user"  do
+                context "using the new 'users' and 'clients' attributes" do
+                  let(:update_body) {
+                    { permission => {
+                      "actors" => [], # back-compat, empty actors and
+                                      # clients/users present indicates
+                                      # that clients/users should be used.
+                      "users" => users,
+                      "clients" => clients,
+                      "groups" => ["admins", "users", "clients"]}
+                    }
+                  }
 
-                  get(request_url, platform.admin_user).should look_like({
-                      :status => 200,
-                      :body => check_body
-                    })
+                  let(:response_body) {
+                    { permission =>  groups_and_actors }
+                  }
+
+                  it "can update ACL" do
+                    put(permission_request_url, platform.admin_user,
+                        :payload => update_body).should have_status_code 200
+                    # Note thet resulting GET body should look the same -
+                    # we are not returning clients/users separately at this point
+                    # to avoid a confusing response that includes both 'actors'
+                    # and 'clients/users', when we only accept one of those options containing
+                    # values. If we revisit and determine it's needed,
+                    # it will be a new APIv2 behavior.
+                    check_body = acl_body
+                    check_body[permission] = groups_and_actors
+
+                    get(request_url, platform.admin_user).should look_like({
+                        :status => 200,
+                        :body => check_body
+                      })
+                  end
+                end
+
+                context "using the legacy 'actors' attribute" do
+                  let(:update_body) { { permission => groups_and_actors } }
+                  it "can update ACL" do
+                    put(permission_request_url, platform.admin_user,
+                      :payload => update_body).should look_like({
+                        :status => 200
+                      })
+                    check_body = acl_body
+                    check_body[permission] = groups_and_actors
+
+                    get(request_url, platform.admin_user).should look_like({
+                        :status => 200,
+                        :body => check_body
+                      })
+                  end
                 end
               end
 
@@ -1241,6 +1298,85 @@ describe "ACL API", :acl do
                       })
                   end
                 end
+                context "includes valid actor list and valid client list" do
+                  let(:update_body) {
+                    {
+                      permission => {
+                        "actors" => ["pivotal", platform.admin_user.name,
+                          platform.non_admin_user.name],
+                        "clients" =>  [platform.non_admin_client.name],
+                        "groups" => ["admins", "users", "clients"]
+                      }
+                    }
+                  }
+
+                  it "returns 400", :validation do
+                    response = put(permission_request_url, platform.admin_user,
+                      :payload => update_body)
+                    expect(response).to have_status_code 400
+                  end
+                end
+
+                context "includes valid actor list and valid user list" do
+                  let(:update_body) {
+                    {
+                      permission => {
+                        "actors" => ["pivotal", platform.admin_user.name,
+                          platform.non_admin_user.name],
+                        "users" =>  ["pivotal"],
+                        "groups" => ["admins", "users", "clients"]
+                      }
+                    }
+                  }
+
+                  it "returns 400", :validation do
+                    response = put(permission_request_url, platform.admin_user,
+                      :payload => update_body)
+                    expect(response).to have_status_code 400
+                  end
+                end
+
+                context "includes valid actor list and valid user and client lists" do
+                  let(:update_body) {
+                    {
+                      permission => {
+                        "actors" => ["pivotal", platform.admin_user.name,
+                          platform.non_admin_user.name],
+                        "users" =>  ["pivotal"],
+                        "clients" => [ platform.non_admin_client.name ],
+                        "groups" => ["admins", "users", "clients"]
+                      }
+                    }
+                  }
+
+                  it "returns 400", :validation do
+                    response = put(permission_request_url, platform.admin_user,
+                      :payload => update_body)
+                    expect(response).to have_status_code 400
+                  end
+                end
+
+                context "invalid client" do
+                  let(:update_body) {{
+                      permission => {
+                        "actors" => [],
+                        "users" => ["pivotal", platform.admin_user.name,
+                          platform.non_admin_user.name],
+                        "clients" => [platform.non_admin_client.name, "bogus"],
+                        "groups" => ["admins", "users", "clients"]
+                      }
+                    }}
+
+                  it "returns 400", :validation do
+                    response = put(permission_request_url, platform.admin_user,
+                      :payload => update_body)
+                    expect(response).to have_status_code 400
+                    get(request_url, platform.admin_user).should look_like({
+                        :status => 200,
+                        :body => acl_body
+                      })
+                  end
+                end
 
                 context "invalid group" do
                   let(:update_body) {{
@@ -1253,9 +1389,7 @@ describe "ACL API", :acl do
 
                   it "returns 400", :validation do
                     put(permission_request_url, platform.admin_user,
-                      :payload => update_body).should look_like({
-                        :status => 400
-                      })
+                      :payload => update_body).should have_status_code 400
                     get(request_url, platform.admin_user).should look_like({
                         :status => 200,
                         :body => acl_body

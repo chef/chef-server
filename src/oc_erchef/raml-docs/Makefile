@@ -12,7 +12,7 @@ else
 		echo "You don't have raml2html, but we'll assume you want it" ; \
 		$(NPM) install -g raml2html; \
     fi;
-	$(RAML2HTML) index.raml > index.html
+	raml2html ./index.raml > index.html
 endif
 
 clean:

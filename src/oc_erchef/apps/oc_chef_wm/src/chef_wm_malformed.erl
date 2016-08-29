@@ -24,7 +24,8 @@
 -include("oc_chef_wm.hrl").
 
 -export([
-         malformed_request_message/3
+         malformed_request_message/3,
+         bin_str_join/2
         ]).
 
 %% @doc Handle common malformed request tasks with resource-specific callbacks
@@ -81,6 +82,18 @@ malformed_request_message({missing, FieldName}, _Req, _State) ->
     {[{<<"error">>, [iolist_to_binary(["Field '", FieldName, "' missing"])]}]};
 malformed_request_message({both_missing, Field1, _Field2}, _Req, _State) ->
     {[{<<"error">>, [iolist_to_binary(["Field '", Field1, "' missing"])]}]};
+
+% _acls-related failures:
+malformed_request_message({one_requires_all, Have, Missing}, _Req, _State) ->
+    MissingFmt = bin_str_join(Missing, ", "),
+    {[{<<"error">>, [iolist_to_binary(["You provided '", Have, "' with your request.",
+                                       " Including this field also requires that you provide '",
+                                       MissingFmt, "'"])]}]};
+malformed_request_message(actors_must_be_empty, _Req, _State) ->
+    {[{<<"error">>, [iolist_to_binary(["When providing 'users' and 'clients' fields, the",
+                                       " 'actors' field must have a value of []." ])]}]};
+
+% Invalid client name
 malformed_request_message({client_name_mismatch}, _Req, _State) ->
     {[{<<"error">>, [<<"name and clientname must match">>]}]};
 malformed_request_message({bad_client_name, Name, Pattern}, _Req, _State) ->

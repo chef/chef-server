@@ -64,6 +64,9 @@
                             %% these belong to EC and should
                             %% eventually be included in a pluggable
                             %% fashion.
+                            'policy' |
+                            'policy_group' |
+                            'organization' |
                             'oc_chef_container' |
                             'oc_chef_group'.
 
