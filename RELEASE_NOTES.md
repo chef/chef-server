@@ -27,8 +27,7 @@ For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
   must be set to `[]` in the request.
 * 400 responses in object ACL updates will now include the specific
   missing or incorrect entities where appropriate.
-* The GET
-  The GET API response for object ACL has not been changed by default,
+* The GET API response for object ACL has not been changed by default,
   but if the query argument `?detail=granular` is provided, the json
   body will contain `actors` which will be an empty array; and
   `clients:[...]`, `users:[...]`.  This body is compatible

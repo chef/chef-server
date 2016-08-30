@@ -205,6 +205,7 @@ fetch_cookbook_id(DbContext, Name, OrgId) ->
             AuthzId
     end.
 
+-spec fetch(chef_type(), id()) -> list() | {error, term()}.
 fetch(Type, AuthzId) ->
     fetch(Type, AuthzId, undefined).
 
@@ -214,7 +215,7 @@ fetch(Type, AuthzId, Granular) ->
     Result = oc_chef_authz_http:request(Path, get, ?DEFAULT_HEADERS, [], SuperuserId),
     case Result of
         {ok, Record} ->
-            ids_to_names(Record, Granular);
+            convert_all_ids_to_names(Record, Granular);
         {error, forbidden} ->
             forbidden;
         Other ->
@@ -334,15 +335,16 @@ convert_actor_ids_to_names(AuthzIds) ->
         oc_chef_group:find_users_names(RemainingAuthzIds, fun chef_sql:select_rows/1),
     {ClientNames, UserNames, DefunctActorAuthzIds}.
 
-ids_to_names(Record, Granular) ->
-    Record1 = process_part(<<"create">>, Record, Granular),
-    Record2 = process_part(<<"read">>, Record1, Granular),
-    Record3 = process_part(<<"update">>, Record2, Granular),
-    Record4 = process_part(<<"delete">>, Record3, Granular),
-    process_part(<<"grant">>, Record4, Granular).
 
--spec process_part(binary(), ejson_term(), granular|undefined) -> ejson_term().
-process_part(Part, Record, Granular) ->
+convert_all_ids_to_names(Record, Granular) ->
+    convert_ids_to_names_in_part([<<"create">>, <<"read">>, <<"update">>,
+                                  <<"delete">>, <<"grant">>],
+                                 Record, Granular).
+
+-spec convert_ids_to_names_in_part(list(binary()), ejson_term(), granular|undefined) -> ejson_term().
+convert_ids_to_names_in_part([], Record, _Granular) ->
+    Record;
+convert_ids_to_names_in_part([Part | Rest], Record, Granular) ->
     Members = ej:get({Part}, Record),
     ActorIds = ej:get({<<"actors">>}, Members),
     GroupIds = ej:get({<<"groups">>}, Members),
@@ -351,7 +353,9 @@ process_part(Part, Record, Granular) ->
     oc_chef_authz_cleanup:add_authz_ids(DefunctActorAuthzIds, DefunctGroupAuthzIds),
     Members1 = part_with_actors(Members, ClientNames, UserNames, Granular),
     Members2 = ej:set({<<"groups">>}, Members1, GroupNames),
-    ej:set({Part}, Record, Members2).
+    NewRecord = ej:set({Part}, Record, Members2),
+    convert_ids_to_names_in_part(Rest, NewRecord, Granular).
+
 
 part_with_actors(PartRecord, Clients, Users, granular) ->
     PartRecord0 = ej:set({<<"users">>}, PartRecord, Users),
