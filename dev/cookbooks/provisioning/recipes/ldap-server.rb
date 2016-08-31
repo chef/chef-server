@@ -92,7 +92,7 @@ cookbook_file '/etc/ldap/data/ou-chefs.ldif' do
 end
 
 execute 'configure-ou' do
-  command "ldapadd -x -H ldapi:/// -D cn=admin,#{node['ldap']['basedn']} -w #{node['ldap']['password']} -f /etc/ldap/data/ou-chefs.ldif"
+  command "ldapadd -x -H ldapi:/// -D cn=admin,#{node['ldap']['basedn']} -w '#{node['ldap']['password']}' -f /etc/ldap/data/ou-chefs.ldif"
   action :nothing
 end
 
@@ -110,7 +110,7 @@ end
   end
 
   execute "configure-#{user}" do
-    command "ldapadd -x -H ldapi:/// -D cn=admin,#{node['ldap']['basedn']} -w #{node['ldap']['password']} -f /etc/ldap/data/user-#{user}.ldif"
+    command "ldapadd -x -H ldapi:/// -D cn=admin,#{node['ldap']['basedn']} -w '#{node['ldap']['password']}' -f /etc/ldap/data/user-#{user}.ldif"
     user 'openldap'
     action :nothing
   end
