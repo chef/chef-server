@@ -12,7 +12,7 @@ LDAP_VM_ADDRESS="192.168.33.152"
 REPORTING_DB_VM_ADDRESS="192.168.33.155"
 DB_SUPERUSER="bofh"
 DB_SUPERPASS="i1uvd3v0ps"
-LDAP_PASSWORD="TheWheelsOnTheBusGoBoom"
+LDAP_PASSWORD='H0\/\/!|\/|3tY0ur|\/|0th3r'
 
 nodes_dir = File.join(File.expand_path(File.dirname(__FILE__)), 'nodes')
 unless File.directory?(nodes_dir)
@@ -131,7 +131,7 @@ def define_chef_server(config, attributes)
       backend_compat_message('ldap') if chef_backend_active?(attributes)
       ldap = { "ldap['base_dn']" => '"ou=chefs,dc=chef-server,dc=dev"',
                "ldap['bind_dn']" => '"cn=admin,dc=chef-server,dc=dev"',
-               "ldap['bind_password']" => "\"#{LDAP_PASSWORD}\"",
+               "ldap['bind_password']" => "'#{LDAP_PASSWORD}'",
                "ldap['host']" => "'#{LDAP_VM_ADDRESS}'",
                "ldap['login_attribute']" => '"uid"'
              }
@@ -150,6 +150,7 @@ def define_chef_server(config, attributes)
 
     config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
     config.vm.provision "shell", inline: install_hack(installer, 'opscode')
+    config.vm.provision "shell", inline: 'echo "PATH=/opt/opscode/embedded/bin:$PATH" > /root/.bashrc'
     config.vm.provision "chef_zero" do |chef|
       chef.install = false
       chef.binary_path = "/opt/opscode/embedded/bin"
@@ -420,7 +421,6 @@ if [ -d "/opt/#{omnibus}/embedded" ]
 then
   echo "Bypassing server install, it appears done."
 else
-  echo "PATH=/opt/#{omnibus}/embedded/bin:$PATH" > /root/.bashrc
   sudo dpkg -i "/installers/#{server_installer_name}"
 fi
 SCRIPT
