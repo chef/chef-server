@@ -156,6 +156,15 @@ class OmnibusHelper
     self.class.erl_atom_or_string(term)
   end
 
+  def self.escape_characters_in_string(string)
+    pattern = /(\'|\"|\.|\*|\/|\-|\\)/
+    string.gsub(pattern){|match|"\\"  + match}
+  end
+
+  def escape_characters_in_string(string)
+    self.class.escape_characters_in_string(string)
+  end
+
   def s3_url_caching(setting)
     case setting.to_s
     when "off"
