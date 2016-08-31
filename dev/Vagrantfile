@@ -12,7 +12,7 @@ LDAP_VM_ADDRESS="192.168.33.152"
 REPORTING_DB_VM_ADDRESS="192.168.33.155"
 DB_SUPERUSER="bofh"
 DB_SUPERPASS="i1uvd3v0ps"
-LDAP_PASSWORD="TheWheelsOnTheBusGoBoom"
+LDAP_PASSWORD='H0\/\/!|\/|3tY0ur|\/|0th3r'
 
 nodes_dir = File.join(File.expand_path(File.dirname(__FILE__)), 'nodes')
 unless File.directory?(nodes_dir)
