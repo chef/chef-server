@@ -26,6 +26,9 @@ dependency 'rubygems'
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
+
+  bundle "install --without development", env: env
+
   gem "build chef_backup.gemspec", env: env
   gem "install chef_backup*.gem -n #{install_dir}/embedded/bin --no-rdoc --no-ri", env: env
 end

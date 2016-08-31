@@ -9,6 +9,7 @@ gem 'bundler', '>1.10'
 group :omnibus do
   gem 'omnibus', github: 'chef/omnibus'
   gem 'omnibus-software', github: 'chef/omnibus-software'
+  gem 'license_scout', github: 'chef/license_scout'
 end
 
 group :test do

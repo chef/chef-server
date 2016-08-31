@@ -29,6 +29,8 @@ dependency "bundler"
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
+  bundle "install --without development test", env: env
+
   gem "build knife-opc.gemspec", env: env
   gem "install knife-opc-*.gem", env: env
 end
