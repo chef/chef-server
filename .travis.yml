@@ -75,7 +75,7 @@ matrix:
       before_script: cd oc-chef-pedant
       script: bundle exec rake chef_zero_spec
       env:
-        - "GEMFILE_MOD=\"gem 'rake'; gem 'chef-zero', github: 'chef/chef-zero'\""
+        - "GEMFILE_MOD=\"gem 'rake'; gem 'chef-zero', github: 'chef/chef-zero', branch: 'master' \""
       # Remove things only used by erlang
       install:
       after_failure:
@@ -93,7 +93,7 @@ matrix:
       before_script: cd oc-chef-pedant
       script: bundle exec rake chef_zero_spec
       env:
-        - "GEMFILE_MOD=\"gem 'rake'; gem 'chef-zero', github: 'chef/chef-zero'\""
+        - "GEMFILE_MOD=\"gem 'rake'; gem 'chef-zero', github: 'chef/chef-zero', branch: 'master' \""
         - CHEF_FS=1
       # Remove things only used by erlang
       install:

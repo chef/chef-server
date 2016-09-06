@@ -363,7 +363,9 @@
 -record(acl_state, {
           type,
           authz_id,
-          acl_data
+          acl_data,
+          granular :: 'granular' | undefined
+
          }).
 
 -record(association_state, {

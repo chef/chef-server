@@ -112,19 +112,24 @@ from_json(Req, #base_state{organization_guid = OrgId,
         forbidden ->
             {{halt, 400}, Req, State};
         {ambiguous_actor, Actors} ->
-            Text = iolist_to_binary([<<"The actor(s) ">>, chef_wm_malformed:bin_str_join(Actors, ", "), <<" exist as both ">>,
-                                     <<"clients and users within this organization.">>]),
-            Req1 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, [Text]}]}), Req),
+            Message = [<<"The following actor(s) exist as both clients and users within this organization: ">>,
+                       chef_wm_malformed:bin_str_join(Actors, ", "),
+                       <<". To perform this update, supply separate 'clients' and 'users' ">>,
+                       <<"fields in your request, and use an empty array for the value of 'actors'.">>],
+            Body = chef_wm_util:error_message_envelope(Message),
+            Req1 = wrq:set_resp_body(chef_json:encode(Body), Req),
             {{halt, 422}, Req1, State#base_state{log_msg = {ambiguous_actor, Actors}}};
         {invalid, Type, Names} ->
-            Text = iolist_to_binary([<<"The ">>, atom_to_list(Type), <<"(s) ">>, chef_wm_malformed:bin_str_join(Names, ", "),
-                                     <<" do not exist in this organization.">>]),
-            Req1 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, [Text]}]}), Req),
+            Body = chef_wm_util:error_message_envelope([<<"The ">>, atom_to_list(Type),
+                                                        <<"(s) ">>, chef_wm_malformed:bin_str_join(Names, ", "),
+                                                        <<" do not exist in this organization.">>]),
+            Req1 = wrq:set_resp_body(chef_json:encode(Body), Req),
             {{halt, 400}, Req1, State#base_state{log_msg = {invalid_object_in_ace, Names}}};
         {bad_actor, Actors} ->
-            Text = iolist_to_binary([<<"The actor(s) ">>, chef_wm_malformed:bin_str_join(Actors, ", "), " do not >>",
-                                     <<"exist in this organization as clients or users.">>]),
-            Req1 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, [Text]}]}), Req),
+            Body = chef_wm_util:error_message_envelope([<<"The actor(s) ">>,
+                                                        chef_wm_malformed:bin_str_join(Actors, ", "),
+                                                        <<" do not exist in this organization as clients or users.">>]),
+            Req1 = wrq:set_resp_body(chef_json:encode(Body), Req),
             {{halt, 400}, Req1, State#base_state{log_msg = {bad_actor, Actors}}};
         _Other ->
             % So we return 200 instead of 204, for backwards compatibility:
