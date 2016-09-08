@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.executables   = ['oc-chef-pedant']
 
   s.add_dependency('rspec', '~> 3.2')
-  s.add_dependency('activesupport', '~> 3.2') # For active_support/concern
+  s.add_dependency('activesupport', '~> 5.0') # For active_support/concern
   s.add_dependency('mixlib-authentication', '~> 1.4')
   s.add_dependency('mixlib-config', '~> 2.0')
   s.add_dependency('mixlib-shellout', '>= 1.1')
