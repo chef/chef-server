@@ -1,13 +1,15 @@
 require 'spec_helper'
 
 describe ProfilesController do
+  let(:username) { 'jimmy' }
+  let(:email) { 'jim.kirk@federation-captains.org' }
   let(:fake_user) {
     User.new({
-      :username => 'jimmy',
+      :username => username,
       :first_name => 'jimmy',
       :last_name => 'jammy',
       :middle_name => 'jam',
-      :email => 'jimmy@example.com',
+      :email => email,
       :public_key => 'fake public key',
       :display_name => 'jimmy jammy',
       :password => 'awesomefuntimes'
@@ -36,28 +38,91 @@ describe ProfilesController do
     end
 
     it 'assigns the current user' do
-      expect(assigns(:user).username).to eq('jimmy')
+      expect(assigns(:user).username).to eq(username)
     end
   end
 
   describe 'PUT #update' do
-    it 'redirects to the profile page if the update succeeded' do
-      put :update, :user => {
-        :first_name => 'sally',
-        :last_name => 'solly'
+    let(:put_user) do
+      {
+        first_name: 'sally',
+        last_name: 'solly'
       }
+    end
+
+    it 'redirects to the profile page if the update succeeded' do
+      put :update, user: put_user
 
       expect(response).to redirect_to(profile_path)
     end
 
     it 'renders the show template if the update failed' do
       allow(fake_user).to receive(:chef).and_raise(StandardError)
-      put :update, :user => {
-        :first_name => 'sally',
-        :last_name => 'solly'
-      }
+      put :update, user: put_user
 
       expect(response).to render_template('show')
+    end
+  end
+
+  describe 'GET #change_email' do
+    let(:new_email) { 'new-email@somewhere.org' }
+    let(:signature) { Signature.new(username, new_email, expires, Settings.secret_key_base) }
+    let(:expires) { 1.day.from_now.to_i }
+
+    describe 'invalid params' do
+      it 'requires a username' do
+        get :change_email, email: new_email, signature: signature, expires: expires
+        expect(response).to render_template('show')
+        expect(flash[:alert]).to match /invalid signature/
+      end
+
+      it 'requires a new email' do
+        get :change_email, username: username, signature: signature, expires: expires
+        expect(response).to render_template('show')
+        expect(flash[:alert]).to match /invalid signature/
+      end
+
+      it 'requires an expiration date' do
+        get :change_email, username: username, email: new_email, signature: signature
+        expect(response).to render_template('show')
+        expect(flash[:alert]).to match /invalid signature/
+      end
+
+      it 'requires a signature' do
+        get :change_email, username: username, email: new_email, expires: expires
+        expect(response).to render_template('show')
+        expect(flash[:alert]).to match /invalid signature/
+      end
+
+      it 'requires a valid signature - signing the new email address' do
+        get :change_email, username: username, email: new_email, expires: expires, signature: 'foo'
+        expect(response).to render_template('show')
+        expect(flash[:alert]).to match /invalid signature/
+      end
+    end
+
+    describe 'expired link' do
+      let(:expires) { 1.day.ago.to_i }
+
+      it 'rejects an expired link' do
+        get :change_email, username: username, email: new_email, expires: expires, signature: signature
+        expect(response).to render_template('show')
+        expect(flash[:alert]).to match /invalid signature/
+      end
+    end
+
+    describe 'valid params' do
+      before do
+        get :change_email, username: username, email: new_email, expires: expires, signature: signature
+      end
+
+      it 'redirects to the profile page' do
+        expect(response).to redirect_to(profile_path)
+      end
+
+      it 'updates the email address' do
+        expect(fake_user.email).to eql(new_email)
+      end
     end
   end
 

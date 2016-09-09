@@ -2,10 +2,11 @@ require 'digest/sha1'
 
 # Manages signatures used for password resets
 class Signature
-  attr_reader :expiration, :secret_token, :username
+  attr_reader :email, :expiration, :secret_token, :username
 
-  def initialize(username, expiration, secret_token)
+  def initialize(username, email, expiration, secret_token)
     @username = username
+    @email = email
     @expiration = expiration
     @secret_token = secret_token
   end
@@ -28,7 +29,7 @@ class Signature
   private
 
   def canonical_string
-    ["--#{username}", "--#{expiration}", "--#{secret_token}"].join
+    ["--#{username}", "--#{expiration}", "--#{email}", "--#{secret_token}"].join
   end
 
   def expired?

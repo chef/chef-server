@@ -49,10 +49,19 @@ class PasswordResetsController < ApplicationController
       render 'show', status: :forbidden
     else
       begin
+        # User should not be able to use a password reset link generated for an
+        # old email address after the user has legitimately changed their
+        # primary email. The email provided in the request can be trusted because
+        # it's already verified when we examine the signature.
         user = User.find(escaped_username)
-        user.update_attributes('password' => params[:password])
-        session[:username] = user.username
-        redirect_to signin_path
+        if user.email != params[:email]
+          flash.now[:alert] = I18n.t("errors.password_resets.invalid_signature")
+          render 'show', status: :forbidden
+        else
+          user.update_attributes('password' => params[:password])
+          session[:username] = user.username
+          redirect_to signin_path
+        end
       rescue Net::HTTPServerException => e
         if e.response.code.to_i == 404
           flash[:notice] = I18n.t("errors.password_resets.completion")
@@ -78,11 +87,10 @@ class PasswordResetsController < ApplicationController
   end
 
   def valid_signature?
-    params[:signature].present? &&
-    params[:username].present? &&
-    params[:expires].present? &&
+    [:signature, :username, :email, :expires].all? { |p| params[p].present? } &&
     Signature.new(
       params[:username],
+      params[:email],
       params[:expires],
       Settings.secret_key_base
     ).valid_for?(params[:signature])

@@ -1,0 +1,16 @@
+Hello <%= @user.first_name %>,
+
+It looks like you've just tried to change the email address associated with
+your Chef user account. If you did not initiate this request, please ignore
+this email. If you are indeed trying to update your account, follow
+this link to confirm your new email address.
+
+<%= email_profile_url(
+  username: @user.username,
+  email: @email,
+  expires: @expires,
+  signature: @signature).html_safe %>
+
+Thanks,
+
+The Chef Team
