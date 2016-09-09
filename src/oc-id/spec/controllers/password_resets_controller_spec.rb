@@ -144,7 +144,7 @@ describe PasswordResetsController do
 
       describe 'invalid params' do
         it 'requires an email' do
-          get :show, expires: expires, signature: signature
+          get :show, expires: expires, signature: signature, username: name
           expect(response).to redirect_to(action: 'new')
           expect(flash[:alert]).to match /invalid signature/
         end
@@ -210,11 +210,13 @@ describe PasswordResetsController do
     end
 
     describe 'valid params' do
+      let(:name) { 'jimmy' }
+      let(:email) { 'jim@federation-captains.org' }
+      let(:expires) { 1.day.from_now.to_i }
+      let(:signature) { Signature.new(name, email, expires, Settings.secret_key_base) }
+
       Timecop.freeze(Time.utc(2015, 2, 19, 12, 12, 12)) do
-        let!(:name) { 'jimmy' }
-        let!(:email) { 'jim@federation-captains.org' }
         let!(:expires) { 1.day.from_now.to_i }
-        let!(:signature) { Signature.new(name, email, expires, Settings.secret_key_base) }
 
         describe 'nebulous errors talking to the chef server' do
           describe 'chef server returns a 404' do
@@ -255,6 +257,35 @@ describe PasswordResetsController do
 
             it 'renders the show template' do
               expect(response).to render_template('show')
+            end
+          end
+
+          describe 'email mismatch' do
+            let!(:user) do
+              User.new(
+                first_name: 'Jimmy',
+                last_name: 'Kirk',
+                email: 'evil-kirk@alternate-timeline.com',
+                username: name,
+                display_name: 'Jimmy Kirk'
+              )
+            end
+
+            before do
+              allow(User).to receive(:find).with(name).and_return(user)
+              put :update, password: 'haha', signature: signature, expires: expires, username: name, email: email
+            end
+
+            it 'shows a flash message explaining the problem' do
+              expect(flash[:alert]).to match(/invalid signature/)
+            end
+
+            it 'renders the show template' do
+              expect(response).to render_template('show')
+            end
+
+            it 'returns a 403' do
+              expect(response.status).to eql(403)
             end
           end
         end

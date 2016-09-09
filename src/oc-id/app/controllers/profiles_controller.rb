@@ -55,6 +55,9 @@ class ProfilesController < ApplicationController
   #
   # This should really be a PUT but we are using GET to make it easier to access
   # the end-point from an email without having to dive into javascript.
+  # The initiating action for this is a POST/PUT to /id/profile that contains
+  # an email change. The handler for that sends an email with a link to this
+  # end-point to confirm the change.
   #
   def change_email
     @user = current_user
@@ -88,7 +91,7 @@ class ProfilesController < ApplicationController
   private
 
   def valid_signature?
-    [:signature, :username, :expires].all? { |p| params[p].present? } &&
+    [:signature, :username, :email, :expires].all? { |p| params[p].present? } &&
     Signature.new(
       params[:username],
       params[:email],
