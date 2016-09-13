@@ -15,7 +15,7 @@
 #
 
 name "knife-opc"
-default_version "master"
+default_version "mp/SPOOL-321"
 
 license "Apache-2.0"
 license_file "https://github.com/chef/knife-opc/blob/master/LICENSE"
