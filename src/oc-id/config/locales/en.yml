@@ -41,11 +41,12 @@ en:
     emails:
       problem: "There was a problem with your new email address."
       invalid_signature: "The given email reset link is expired or has an invalid signature."
+      invalid_username: "'%{name}' is not a valid username."
   password_resets:
     new:
       form_caption: Enter your Chef username and we'll send you a link to reset it.
   profile:
     update_successful: "Profile updated successfully."
     password_changed: "Password changed."
-    email_changed: "Email changed."
+    email_changed: "Email changed for account %{name}."
     email_change_sent: "If the new email address you entered exists, you should receive an email with a link shortly."
