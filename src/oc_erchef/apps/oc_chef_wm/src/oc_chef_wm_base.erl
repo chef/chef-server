@@ -451,23 +451,24 @@ authorized_by_org_membership_check(Req, #base_state{organization_name = OrgName,
     case BypassesChecks of
         true -> {true, Req, State};
         _ ->
-            %% If user is a member of the global group server-admins,
-            %% we do not want to fail on org membership check, only acls.
-            case is_server_admin(DbContext, RequestorAuthzId) of
-                true -> {true, Req, State};
-                _ ->
-                    case chef_db:is_user_in_org(DbContext, UserName, OrgName) of
+            case chef_db:is_user_in_org(DbContext, UserName, OrgName) of
+                true ->
+                    {true, Req, State};
+                false ->
+                    %% If user is a member of the global group server-admins,
+                    %% we do not want to fail on org membership check, only acls.
+                    case is_server_admin(DbContext, RequestorAuthzId) of
                         true ->
                             {true, Req, State};
                         false ->
                             Msg = forbidden_message(not_member_of_org, UserName, OrgName),
                             {false, wrq:set_resp_body(chef_json:encode(Msg), Req),
-                             State#base_state{log_msg = user_not_in_org}};
-                        Error ->
-                            Msg = forbidden_message(unverified_org_membership, UserName, OrgName),
-                            {false, wrq:set_resp_body(chef_json:encode(Msg), Req),
-                             State#base_state{log_msg = {user_not_in_org_error, Error}}}
-                    end
+                             State#base_state{log_msg = user_not_in_org}}
+                    end;
+                Error ->
+                    Msg = forbidden_message(unverified_org_membership, UserName, OrgName),
+                    {false, wrq:set_resp_body(chef_json:encode(Msg), Req),
+                     State#base_state{log_msg = {user_not_in_org_error, Error}}}
             end
     end.
 
