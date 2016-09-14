@@ -6,7 +6,7 @@ define_upgrade do
 
     start_services(["oc_bifrost", "postgresql"])
     force_restart_service("opscode-chef-mover")
-    log "Graning CRUD on the orgs container to server admins."
+    log "Granting CRUD on the orgs container to server admins."
 
     run_command("/opt/opscode/embedded/bin/escript " +
                 "/opt/opscode/embedded/service/opscode-chef-mover/scripts/migrate " +

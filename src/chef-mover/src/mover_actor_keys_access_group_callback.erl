@@ -35,10 +35,10 @@ migration_action(#org{name = OrgName, id=OrgId} = Org, _) ->
     AdminsGroupAuthzId = AdminsGroup#group.authz_id,
     ClientGroup = client_group(Org),
     case process_group(UserGroup, AccessGroupAuthzId, OrgName) of
-	{error, Error} ->
-	    Error;
-	ok ->
-	    Result = process_group(ClientGroup, AccessGroupAuthzId, OrgName),
+        {error, Error} ->
+            Error;
+        ok ->
+            Result = process_group(ClientGroup, AccessGroupAuthzId, OrgName),
             add_permissions(Result, AccessGroupAuthzId, AdminsGroupAuthzId)
     end.
 
@@ -62,19 +62,19 @@ process_group(Group, AccessGroupAuthzId, OrgName) ->
         ok ->
             ok;
         {error, failure_creating_group} ->
-            lager:warn("Failed to create keys access group for Organization ~p so cannot be migrated", [OrgName]),
+            lager:warning("Failed to create keys access group for Organization ~p so cannot be migrated", [OrgName]),
             ok;
         {error, no_user_group} ->
-            lager:warn("Organization ~p has no user group and cannot be migrated.", [OrgName]),
+            lager:warning("Organization ~p has no user group and cannot be migrated.", [OrgName]),
             ok;
         {error, no_admins_group} ->
-            lager:warn("Organization ~p has no admins group and cannot be migrated.", [OrgName]),
+            lager:warning("Organization ~p has no admins group and cannot be migrated.", [OrgName]),
             ok;
         {error, no_client_group} ->
-            lager:warn("Organization ~p has no client group and cannot be migrated.", [OrgName]),
+            lager:warning("Organization ~p has no client group and cannot be migrated.", [OrgName]),
             ok;
         {error, not_found} ->
-            lager:warn("Organization ~p is missing bifrost data for either the users or clients group and cannot be migrated.", [OrgName]),
+            lager:warning("Organization ~p is missing bifrost data for either the users or clients group and cannot be migrated.", [OrgName]),
             ok;
         {error, Error} ->
             lager:error("Organization ~p failed during group addition.", [OrgName]),

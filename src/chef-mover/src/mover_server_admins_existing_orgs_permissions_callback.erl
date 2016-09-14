@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Tyler Cloke <tyler@chef.io>
-%% @copyright 2015 Chef Software, Inc.
+%% @copyright 2016 Chef Software, Inc.
 %%
 %% This migration iterates through all existing orgs and grants
 %% the server-admins global group READ, UPDATE, and DELETE access on them,
@@ -32,7 +32,7 @@
 -record(group, {authz_id}).
 -record(mover_chef_group, {
           id,
-          org_id,	  
+          org_id,
           authz_id,
           name,
           last_updated_by,
@@ -56,8 +56,8 @@ migration_action(OrgRecord, _AcctInfo) ->
     OrgAdminsAuthzId =
         case get_org_admins_authz_group_if_exists(OrgId) of
             admins_group_missing ->
-                lager:warn("There was no admins group for org ~p with id ~p. Creating one from scratch.", [OrgName, OrgId]),
-                lager:warn("This probably means that this org is broken as it has no admins, but now you can add a new one via server-admins!"),
+                lager:warning("There was no admins group for org ~p with id ~p. Creating one from scratch.", [OrgName, OrgId]),
+                lager:warning("This probably means that this org is broken as it has no admins, but now you can add a new one via server-admins!"),
                 NewAdminsGroupAuthzId = case create_group_in_authz(BifrostSuperuserId) of
                                             AuthzId when is_binary(AuthzId) ->
                                                 AuthzId;
@@ -82,16 +82,16 @@ migration_action(OrgRecord, _AcctInfo) ->
     add_permission_to_existing_org_for_server_admins(BifrostSuperuserId, OrgName, ServerAdminsAuthzId, OrgAuthzId, read),
     add_permission_to_existing_org_for_server_admins(BifrostSuperuserId, OrgName, ServerAdminsAuthzId, OrgAuthzId, update),
     add_permission_to_existing_org_for_server_admins(BifrostSuperuserId, OrgName, ServerAdminsAuthzId, OrgAuthzId, delete),
-    
+
     %% Add server-admins to admins group.
-    case mv_oc_chef_authz:add_to_group(OrgAdminsAuthzId, group, ServerAdminsAuthzId, superuser) of 
+    case mv_oc_chef_authz:add_to_group(OrgAdminsAuthzId, group, ServerAdminsAuthzId, superuser) of
         {error, Error} ->
             lager:error("Failed to add server-admins ~p to the admins group ~p for org ~p with id ~p.", [ServerAdminsAuthzId, OrgAdminsAuthzId, OrgName, OrgId]),
             throw(Error);
-        _ -> 
+        _ ->
             ok
     end.
-                               
+
 add_permission_to_existing_org_for_server_admins(BifrostSuperuserId, OrgName, ServerAdminsAuthzId, OrgAuthzId, Permission) ->
     case mv_oc_chef_authz:add_ace_for_entity(BifrostSuperuserId, group, ServerAdminsAuthzId, object, OrgAuthzId, Permission) of
         {error, Error} ->
@@ -122,7 +122,7 @@ get_org_admins_authz_group_if_exists(OrgId) ->
         {ok, [ServerAdmin]} ->
             ServerAdmin#group.authz_id;
         {ok, none} ->
-            admins_group_missing            
+            admins_group_missing
     end.
 
 get_org_admins_authz_group_if_exists_sql(OrgId) ->
@@ -142,7 +142,7 @@ migration_complete() ->
 %% Vendored or slightly modified from mover_server_admins_global_group_callback.
 %%
 create_admins_group(GroupAuthzId, OrgId) ->
-    RequestorId = mv_oc_chef_authz:superuser_id(),                                                      
+    RequestorId = mv_oc_chef_authz:superuser_id(),
     Object = new_group_record(OrgId, GroupAuthzId, <<"admins">>, RequestorId),
     create_insert(Object, GroupAuthzId, RequestorId).
 
