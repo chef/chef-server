@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Tyler Cloke <tyler@chef.io>
-%% @copyright 2015 Chef Software, Inc.
+%% @copyright 2016 Chef Software, Inc.
 %%
 %% This migration grants READ, CREATE, UPDATE, and DELETE perms to
 %% server admins on the orgs container.
