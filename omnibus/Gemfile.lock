@@ -1,9 +1,8 @@
 GIT
   remote: git://github.com/chef/license_scout.git
-  revision: dfbf29902b32121a48cec6e8eecb06ec8fdb3ff4
+  revision: b29c341d5abcfaa69a71f051b0c156ff24ccb634
   specs:
-    license_scout (0.1.0)
-      berkshelf (~> 4.3)
+    license_scout (0.1.2)
       ffi-yajl (~> 2.2)
       mixlib-shellout (~> 2.2)
 
@@ -146,7 +145,7 @@ GEM
     mixlib-authentication (1.4.1)
       mixlib-log
     mixlib-cli (1.7.0)
-    mixlib-config (2.2.2)
+    mixlib-config (2.2.4)
     mixlib-log (1.7.1)
     mixlib-shellout (2.2.7)
     mixlib-versioning (1.1.0)
@@ -265,4 +264,4 @@ DEPENDENCIES
   rspec
 
 BUNDLED WITH
-   1.12.5
+   1.13.1
