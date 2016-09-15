@@ -46,6 +46,7 @@
          stats_hero_label/1,
          stats_hero_upstreams/0,
          is_superuser/1,
+         get_superuser_requestor/1,
          is_user_in_org/4,
          set_forbidden_msg/3,
          user_in_group/3,
@@ -359,6 +360,9 @@ do_create_in_container(Container, Req,
                                    organization_guid = OrgId,
                                    resource_state = RS} = State,
                        EffectiveRequestorId) ->
+    %% This transfers the container permissions to the object being created (see permission
+    %% templates above). However organization creation will overwrite these permissions, so
+    %% the organizations container is ignored.
     case oc_chef_authz:create_entity_if_authorized(AuthzContext, OrgId,
                                                    EffectiveRequestorId, Container) of
         {ok, AuthzId} ->
@@ -549,6 +553,36 @@ is_superuser(Req = #wm_reqdata{}) ->
 is_superuser(UserName) ->
     Superusers = envy:get(oc_chef_wm, superusers, [], list),
     lists:member(UserName, Superusers).
+
+%% The superuser name has historically been pivotal, but we have a list of superusers as a
+%% config item, not anything hardcoded. We could hardcode it here, but this is the first
+%% place we actually refer to it by name. Otherwise it's set up by the bootstrapping
+%% process.
+%%
+%% If it's in the list, we choose pivotal, otherwise we pick the first superuser.
+get_superuser_name() ->
+    Superusers = envy:get(oc_chef_wm, superusers, [], list),
+    DefaultName = <<"pivotal">>,
+    case lists:member(DefaultName, Superusers) of
+        true ->
+            DefaultName;
+        _ ->
+            lists:first(Superusers)
+    end.
+
+get_superuser_requestor(#base_state{ chef_db_context = DbContext }) ->
+    SuperuserName = get_superuser_name(),
+    case chef_db:fetch_requestors(DbContext, undefined, SuperuserName) of
+        %% This is messy to report. Pretty much any server error here
+        not_found ->
+            {not_found, SuperuserName};
+        {error, no_connections} ->
+            {no_connections};
+        {error, Error} ->
+            lager:error("Error looking for superuser ~p, got ~p", [SuperuserName, Error]);
+        [Requestor] ->
+            Requestor
+    end.
 
 %% Tells whether this user is a member of the global group server-admin.
 -spec is_server_admin(chef_db:db_context(), binary()) -> boolean() | {error, atom()}.

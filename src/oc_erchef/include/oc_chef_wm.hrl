@@ -379,7 +379,8 @@
 -record(organization_state, {
           organization_data,
           organization_authz_id,
-          oc_chef_organization :: #oc_chef_organization{}
+          oc_chef_organization :: #oc_chef_organization{},
+          superuser :: #chef_requestor{}
          }).
 
 -record(key_state, {

@@ -69,7 +69,14 @@ validate_request('GET', Req, #base_state{organization_guid = OrgId, server_api_v
 validate_request('POST', Req, #base_state{resource_state = OrganizationState}= State) ->
     Body = wrq:req_body(Req),
     {ok, EJson} = oc_chef_organization:parse_binary_json(Body),
-    {Req, State#base_state{resource_state = OrganizationState#organization_state{organization_data = EJson}}}.
+    %% Historically, the only valid requestor was pivotal because it was the only one with
+    %% CREATE on the organizations container, With the introduction of the server_admins
+    %% construct, others can do this. However there's some assumptions around the creator of
+    %% the org being pivotal, so we use that here. Someday we may be able to remove pivotal entirely.
+    #chef_requestor{} = SuperuserRequestor = oc_chef_wm_base:get_superuser_requestor(State),
+    {Req, State#base_state{resource_state =
+                               OrganizationState#organization_state{organization_data = EJson,
+                                                                    superuser = SuperuserRequestor}}}.
 
 -spec auth_info(wm_req(), chef_wm:base_state()) ->
                        chef_wm:auth_info_return().
@@ -162,9 +169,10 @@ create_from_json(#wm_reqdata{} = Req,
 
 maybe_create_org({true, Req,
                   #base_state{
-                     resource_state = #organization_state{oc_chef_organization = OrganizationData},
-                     requestor = Requestor} = State}) ->
-    Result = oc_chef_authz_org_creator:create_org(OrganizationData, Requestor),
+                     resource_state = #organization_state{
+                                         oc_chef_organization = OrganizationData,
+                                         superuser = SuperuserRequestor} } = State}) ->
+    Result = oc_chef_authz_org_creator:create_org(OrganizationData, SuperuserRequestor),
     maybe_create_environment(Result, Req, State);
 maybe_create_org({_Error, _Body, #base_state{}} = Result) ->
     %% Note: We don't handle the case where the org create failed yet somehow created an org
@@ -181,14 +189,17 @@ maybe_create_environment(ok, Req,
                                                 oc_chef_organization = #oc_chef_organization{
                                                                           id = OrgId,
                                                                           name = OrgName
-                                                                         }}} = State) ->
+                                                                         },
+                                               superuser = SuperuserRequestor}} = State) ->
     EnvEJson = chef_environment:set_default_values(
                  {[{<<"name">>, <<"_default">>},
                    {<<"description">>, <<"The default Chef environment">>}]}),
 
     %% We have to fake up a a base state record for the environment create, but don't want
-    %% it when we are done
+    %% it when we are done. Note that this includes doing the work as superuser.
     EnvState = State#base_state{resource_mod = chef_wm_environments,
+                                requestor = SuperuserRequestor,
+                                requestor_id = SuperuserRequestor#chef_requestor.authz_id,
                                 organization_guid = OrgId,
                                 organization_name = OrgName},
     AfterEnvCreate = fun({Status, Rec, _DiscardState}) ->
@@ -203,7 +214,8 @@ maybe_create_client(true, Req,
                                            oc_chef_organization = #oc_chef_organization{
                                                                      id = OrgId,
                                                                      name = OrgName
-                                                                    }} = ResourceState} = State) ->
+                                                                    },
+                                           superuser = SuperuserRequestor} = ResourceState} = State) ->
     ClientName = <<OrgName/binary,"-validator">>,
     ClientEJson = {[{<<"name">>, ClientName},
                     {<<"create_key">>, true},
@@ -224,6 +236,8 @@ maybe_create_client(true, Req,
     State1 = State#base_state{resource_state = ResourceState#organization_state{organization_data = OrgEJson}},
 
     ClientState = State#base_state{resource_mod = chef_wm_clients,
+                                   requestor = SuperuserRequestor,
+                                   requestor_id = SuperuserRequestor#chef_requestor.authz_id,
                                    organization_guid = OrgId,
                                    organization_name = OrgName},
     AfterClientCreate = fun(X) -> finish_org_create(X, OrgEJson, State1) end,
