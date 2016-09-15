@@ -360,7 +360,19 @@ make_query_from_params(Req) ->
 extract_path(_Item, []) ->
     null;
 extract_path(Item, Path) ->
-    ej:get(list_to_tuple(Path), Item, null).
+    try ej:get(list_to_tuple(Path), Item, null) of
+        Result -> Result
+    catch
+        %% Don't throw a 500 when the user input is invalid
+        %%   This typically happens when the user provides an invalid attribute
+        %%   key, typically trying to access a value as a hash that is actually
+        %%   a string (i.e. uptime.seconds)
+        error:function_clause ->
+            <<"ERROR - Attribute does not exist">>;
+        _Error:Reason ->
+            error_logger:warning_msg("There was an issue extracting attribute ~p from ~p: ~p", [Path, Item, Reason]),
+            <<"ERROR - Invalid Attribute or Object">>
+    end.
 
 make_search_results(BulkGetFun, Ids, BatchSize, Start, NumFound) ->
     Ans0 = search_result_start(Start, NumFound),
