@@ -19,4 +19,9 @@ fetcher_read_timeout 120
 # software_gems ['omnibus-software', 'my-company-software']
 # local_software_dirs ['/path/to/local/software']
 
-fatal_transitive_dependency_licensing_warnings true
+# This is temporarily disabled due to a high number of failures
+# while trying to resolve sqitch licensing due to the cpan
+# service timing out. .  We'll re-enable it
+# once we have a process available that lets us declare
+# component licensing outside of the build itself.
+fatal_transitive_dependency_licensing_warnings false
