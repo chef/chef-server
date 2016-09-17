@@ -259,7 +259,12 @@ names_to_ids(ACE, OrgId) ->
             safe_fetch_ids(user, Context, ej:get({<<"users">>}, ACE)) ++
             safe_fetch_ids(client, Context, Clients)
     end,
-    GroupIds = safe_fetch_ids(group, Context, ej:get({<<"groups">>}, ACE)),
+    %% Global groups can be intermixed with org local groups. This creates some ambiguity as
+    %% to which group we mean.  By ordering the global org first we choose global over local
+    %% preferentially.
+    Groups = ej:get({<<"groups">>}, ACE),
+    GroupIds = safe_fetch_ids(group, [?GLOBAL_PLACEHOLDER_ORG_ID, OrgId], Groups),
+    lager:error("GroupIds ~p -> ~p ~p", [Groups, GroupIds]),
 
     % Though we split out clients/users, the authz API
     % requires a unified list of actor IDs:
@@ -277,13 +282,39 @@ safe_fetch_ids(_Type, _Context, []) ->
     % Save the cost of a query for an empty list -
     % fairly common for users and to a lesser extent groups.
     [];
-safe_fetch_ids(Type, Context, Names) ->
-    case oc_chef_authz_scoped_name:names_to_authz_id(Type, Names, Context) of
-        {AuthzIds, []} ->
-            AuthzIds;
-        {_, Errors} ->
-            ErrorNames = lists:flatten([Name || {_, Name} <- Errors ]),
-            throw({invalid, Type, ErrorNames})
+safe_fetch_ids(Type, OrgId, Names) when not is_list(OrgId) ->
+    safe_fetch_ids(Type, [OrgId], Names);
+safe_fetch_ids(Type, OrgIds, Names) ->
+    {Missing, Records} = safe_fetch_ids_rec(Type, OrgIds, Names, []),
+    case Missing of
+        [] ->
+            ok;
+        _ ->
+            throw({invalid, Type, Missing})
+    end,
+    ids_from_records(Records).
+
+% Recursively expands the types for each org id, removing the found names 
+safe_fetch_ids_rec(_Type, [], Names, Records) ->
+    {Names, Records};
+safe_fetch_ids_rec(_Type, _OrgIds, [], Records) ->
+    {[], Records};
+safe_fetch_ids_rec(Type, [OrgId | OrgIds], Names, RecordsAcc) ->
+    Records = oc_chef_authz_db:authz_records_by_name(Type, OrgId, Names),
+    FoundNames = lists:sort(names_from_records(Records)),
+    GivenNames = lists:sort(Names),
+    Missing = GivenNames -- FoundNames,
+    safe_fetch_ids_rec(Type, OrgIds, Missing, Records ++ RecordsAcc).
+
+fetch_actors(OrgId, ActorNames) ->
+    {ok, Actors} = oc_chef_authz_db:find_org_actors_by_name(OrgId, ActorNames),
+    {Missing, Remaining} = lists:partition(fun is_missing_actor/1, Actors),
+    {Ambiguous, Valid} = lists:partition(fun is_ambiguous_actor/1, Remaining),
+    case {Valid, Missing, Ambiguous} of
+        {Ids, [], []}      -> ids_from_records(Ids);
+        {_, Missing, []}   -> throw({bad_actor, names_from_records(Missing)});
+        {_, [], Ambiguous} -> throw({ambiguous_actor, names_from_records(Ambiguous)});
+        {_, _, Ambiguous}  -> throw({ambiguous_actor, names_from_records(Ambiguous)})
     end.
 
 fetch_actors(Context, ActorNames) ->

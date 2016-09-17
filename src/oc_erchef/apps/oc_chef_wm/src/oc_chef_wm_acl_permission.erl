@@ -189,6 +189,7 @@ check_json_validity(Part, Ace) ->
 update_from_json(#acl_state{type = Type, authz_id = AuthzId, acl_data = Data},
                  Part, OrgId) ->
     try
+        lager:error("update_part ~p -- ~p -- ~p", [Part, Data, Type]),
         oc_chef_authz_acl:update_part(Part, Data, Type, AuthzId, OrgId)
     catch
         throw:{ambiguous_actor, Actors} ->
