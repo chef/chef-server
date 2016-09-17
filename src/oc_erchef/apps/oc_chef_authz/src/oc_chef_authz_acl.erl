@@ -254,7 +254,12 @@ names_to_ids(ACE, OrgId) ->
             safe_fetch_ids(user, undefined, ej:get({<<"users">>}, ACE)) ++
             safe_fetch_ids(client, OrgId, Clients)
     end,
-    GroupIds = safe_fetch_ids(group, OrgId, ej:get({<<"groups">>}, ACE)),
+    %% Global groups can be intermixed with org local groups. This creates some ambiguity as
+    %% to which group we mean.  By ordering the global org first we choose global over local
+    %% preferentially.
+    Groups = ej:get({<<"groups">>}, ACE),
+    GroupIds = safe_fetch_ids(group, [?GLOBAL_PLACEHOLDER_ORG_ID, OrgId], Groups),
+    lager:error("GroupIds ~p -> ~p ~p", [Groups, GroupIds]),
 
     % Though we split out clients/users, the authz API
     % requires a unified list of actor IDs:
@@ -270,17 +275,29 @@ safe_fetch_ids(_Type, _OrgId, []) ->
     % Save the cost of a query for an empty list -
     % fairly common for users and to a lesser extent groups.
     [];
-safe_fetch_ids(Type, OrgId, Names) ->
-    Records = oc_chef_authz_db:authz_records_by_name(Type, OrgId, Names),
-    FoundNames = lists:sort(names_from_records(Records)),
-    GivenNames = lists:sort(Names),
-    case GivenNames -- FoundNames of
+safe_fetch_ids(Type, OrgId, Names) when not is_list(OrgId) ->
+    safe_fetch_ids(Type, [OrgId], Names);
+safe_fetch_ids(Type, OrgIds, Names) ->
+    {Missing, Records} = safe_fetch_ids_rec(Type, OrgIds, Names, []),
+    case Missing of
         [] ->
             ok;
-        Missing ->
+        _ ->
             throw({invalid, Type, Missing})
     end,
     ids_from_records(Records).
+
+% Recursively expands the types for each org id, removing the found names 
+safe_fetch_ids_rec(_Type, [], Names, Records) ->
+    {Names, Records};
+safe_fetch_ids_rec(_Type, _OrgIds, [], Records) ->
+    {[], Records};
+safe_fetch_ids_rec(Type, [OrgId | OrgIds], Names, RecordsAcc) ->
+    Records = oc_chef_authz_db:authz_records_by_name(Type, OrgId, Names),
+    FoundNames = lists:sort(names_from_records(Records)),
+    GivenNames = lists:sort(Names),
+    Missing = GivenNames -- FoundNames,
+    safe_fetch_ids_rec(Type, OrgIds, Missing, Records ++ RecordsAcc).
 
 fetch_actors(OrgId, ActorNames) ->
     {ok, Actors} = oc_chef_authz_db:find_org_actors_by_name(OrgId, ActorNames),
