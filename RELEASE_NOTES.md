@@ -7,9 +7,41 @@ in the release. For a detailed list of changed components, refer to
 This document contains release notes for the current major release and all patches.
 For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
-## 12.8.1
+## 12.9.0 (2016-09-22)
 
 ### Chef Server
+
+* clean up legacy expander-reindexer service
+* Fix logrotate configuration to make it work with SELinux enabled
+* constrain ACL updates so that all users provided in an ACE must also
+  be in the organization. Users from outside the organization that are
+  already in the ACL of an object or container will not be removed.
+  *  Note that we do not recommend adding users
+    directly to ACLs - instead, the best approach is to use groups and
+    control membership based on your organizational policies
+  * See important compatibility note below.
+* ACL updates now permit adding a client to ACLs when a user of the same
+  name exists in the system [111](https://github.com/chef/chef-server/issues/111)
+* chef-server-ctl user-delete will now report in which organizations the
+  user is an adminstrator of when that blocks deletion.  It also
+  provides a new option to attempt to auto-remove those users from the
+  admin groups, but will prevent removal if doing so would leave the
+  admin group(s) empty.
+* The Identity Management component will now send a verification email
+  when updating email addesses, and the update will be made only after
+* Identity Management now uses secure cookies.
+  the verification link is clicked.
+* LDAP bind passwords now support special characters.
+* Fix crash that can occur when logging into an ldap-enabled server when
+  bypassing LDAP.
+* multiple improvements to DVM, the development environment that resides in
+  the Chef Server repository
+
+#### Security
+
+* This release includes a fix for an issue where policies of the
+  same name could be accessed across organizations [643](https://github.com/chef/chef-server/pull/643)
+* Fixed logging LDAP password in event of some errors [156](https://github.com/chef/chef-server/issues/156)
 
 #### API Changes
 
@@ -33,6 +65,23 @@ For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
   `clients:[...]`, `users:[...]`.  This body is compatible
   with the PUT API changes, and can be used in that request without
   modification.
+
+##### Compatibility Notes
+
+* ACLs: updating ACLs of a specific user (`/users/USER/_acl`) will not
+  succeed.  This undocumented API is very rarely used and is not supported by
+  tooling provided by Chef Software.
+
+  If you make internal use of PUTs to this endpoint, please wait until 12.9.1
+  to upgrade.  This will fix both the newly introduced issue, as well as an
+  older issue that prevented the endpoint from working in many other cases in
+  12.8 and prior.
+
+  This change is being tracked as [#938](https://github.com/chef/chef-server/issues/938).
+* ACLs: users must be a member of an organization in order to be added
+  to the ACLs of an object within an organization. If you GET an ACE
+  that contains a user not in the org, you will not be able to re-PUT
+  the same ACE.
 
 ## 12.8.0 (2016-07-06)
 

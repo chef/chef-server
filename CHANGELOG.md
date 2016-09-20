@@ -1,9 +1,61 @@
 # Chef Server Changelog
 
-## (unknown)
+## [12.9.0](https://github.com/chef/chef-server/tree/12.9.0) (2016-09-21)
+[Full Changelog](https://github.com/chef/chef-server/compare/12.8.0...12.9.0)
 
-### private-chef-cookbooks/private-chef
-- Fix logrotate configuration to make it work with SELinux enabled.
+**Fixed bugs:**
+
+- Make activesupport dependency less restrictive [\#930](https://github.com/chef/chef-server/pull/930) ([rhass](https://github.com/rhass))
+- same name could be accessed across organizations [643](https://github.com/chef/chef-server/pull/643)
+* Fixed logging LDAP password in event of some errors [156](https://github.com/chef/chef-server/issues/156)
+
+**Closed issues:**
+
+- chef-server 12.6.0 does not include cleanup script for opscode-expander-reindexer [\#846](https://github.com/chef/chef-server/issues/846)
+- mover\_server\_admins\_global\_group\_callback: duplicate key [\#822](https://github.com/chef/chef-server/issues/822)
+- erchef dumps LDAP password [\#156](https://github.com/chef/chef-server/issues/156)
+
+**Merged pull requests:**
+
+- Re-enable fatal licensing warnings [\#936](https://github.com/chef/chef-server/pull/936) ([sersut](https://github.com/sersut))
+- License scout build fix [\#932](https://github.com/chef/chef-server/pull/932) ([marcparadise](https://github.com/marcparadise))
+- Fix typos. [\#931](https://github.com/chef/chef-server/pull/931) ([ksubrama](https://github.com/ksubrama))
+- Fix bug where we can update a different user during an email change [\#929](https://github.com/chef/chef-server/pull/929) ([ksubrama](https://github.com/ksubrama))
+- Use recent versions of activesupport [\#928](https://github.com/chef/chef-server/pull/928) ([jkeiser](https://github.com/jkeiser))
+- Don't 500 if search attribute is invalid [\#925](https://github.com/chef/chef-server/pull/925) ([tduffield](https://github.com/tduffield))
+- Enable verification of email address when its changed in the profile. [\#924](https://github.com/chef/chef-server/pull/924) ([ksubrama](https://github.com/ksubrama))
+- Support special characters in LDAP bind password [\#921](https://github.com/chef/chef-server/pull/921) ([tduffield](https://github.com/tduffield))
+- New webmachine to fix multi-host header, and tests to cover it. [\#920](https://github.com/chef/chef-server/pull/920) ([marcparadise](https://github.com/marcparadise))
+- Add LDAP server to DVM [\#919](https://github.com/chef/chef-server/pull/919) ([tduffield](https://github.com/tduffield))
+- Add a 'detail=granular' query option to GET ACL endpoint [\#917](https://github.com/chef/chef-server/pull/917) ([marcparadise](https://github.com/marcparadise))
+- Add plugin support to DVM [\#913](https://github.com/chef/chef-server/pull/913) ([tduffield](https://github.com/tduffield))
+- Allow the ACLs endpoint to accept 'clients' and 'users' [\#912](https://github.com/chef/chef-server/pull/912) ([marcparadise](https://github.com/marcparadise))
+- Add licensing information for the transitive dependencies of Chef Server [\#911](https://github.com/chef/chef-server/pull/911) ([sersut](https://github.com/sersut))
+- Downgrade Ruby to 2.2.5 [\#910](https://github.com/chef/chef-server/pull/910) ([tduffield](https://github.com/tduffield))
+- Update Gemfile.lock [\#909](https://github.com/chef/chef-server/pull/909) ([tduffield](https://github.com/tduffield))
+- Bring in omnibus branch with mysys2 fixes [\#908](https://github.com/chef/chef-server/pull/908) ([tduffield](https://github.com/tduffield))
+- Version Bumping [\#906](https://github.com/chef/chef-server/pull/906) ([tduffield](https://github.com/tduffield))
+- \[SPOOL-197\] \[\#111\] clients can be added to ACL even if user exist [\#905](https://github.com/chef/chef-server/pull/905) ([marcparadise](https://github.com/marcparadise))
+- SPOOL-322: Fix Elasticsearch Reindex [\#904](https://github.com/chef/chef-server/pull/904) ([tduffield](https://github.com/tduffield))
+- Tweak rails DVM setup to be more like erlang [\#903](https://github.com/chef/chef-server/pull/903) ([tduffield](https://github.com/tduffield))
+- Use udp\_socket\_pool\_size attribute in place of postgresql/max\_connect… [\#902](https://github.com/chef/chef-server/pull/902) ([cbalan](https://github.com/cbalan))
+- Cleanup expander-reindexer from system [\#901](https://github.com/chef/chef-server/pull/901) ([tduffield](https://github.com/tduffield))
+- force chef\_password:verify to fail if salt is null [\#900](https://github.com/chef/chef-server/pull/900) ([tduffield](https://github.com/tduffield))
+- Secure oc-id session cookies [\#899](https://github.com/chef/chef-server/pull/899) ([tduffield](https://github.com/tduffield))
+- Update dep-selector to 1.0.4 [\#896](https://github.com/chef/chef-server/pull/896) ([tduffield](https://github.com/tduffield))
+- Minor logrotate configuration fixes [\#895](https://github.com/chef/chef-server/pull/895) ([mhorbul](https://github.com/mhorbul))
+- Use Timeout::timeout for net/http [\#894](https://github.com/chef/chef-server/pull/894) ([thommay](https://github.com/thommay))
+- Added db init and max pool size options [\#891](https://github.com/chef/chef-server/pull/891) ([paulmooring](https://github.com/paulmooring))
+- Add .mailmap [\#888](https://github.com/chef/chef-server/pull/888) ([stevendanna](https://github.com/stevendanna))
+- Add option to proxy insights data collector via the chef server [\#887](https://github.com/chef/chef-server/pull/887) ([stephenbm](https://github.com/stephenbm))
+- if pivotal.pem \(and webui pair\) exists, ensure permissions in default recipe [\#885](https://github.com/chef/chef-server/pull/885) ([srenatus](https://github.com/srenatus))
+- Ignore debs in the dev folder and fix Vagrant file [\#883](https://github.com/chef/chef-server/pull/883) ([stevendanna](https://github.com/stevendanna))
+- Add pedant test coverage for 1.3 signing proto [\#882](https://github.com/chef/chef-server/pull/882) ([stevendanna](https://github.com/stevendanna))
+- Make server-admins creation migration idempotent. [\#881](https://github.com/chef/chef-server/pull/881) ([tylercloke](https://github.com/tylercloke))
+- Remove old jenkins build config [\#878](https://github.com/chef/chef-server/pull/878) ([stevendanna](https://github.com/stevendanna))
+- \[travis\] Save rebar3 cache between builds [\#874](https://github.com/chef/chef-server/pull/874) ([stevendanna](https://github.com/stevendanna))
+- Add s390x platform support for z-systems [\#869](https://github.com/chef/chef-server/pull/869) ([jaymalasinha](https://github.com/jaymalasinha))
+- Fix policy\_groups policy authorization to pull from the correct org [\#643](https://github.com/chef/chef-server/pull/643) ([jkeiser](https://github.com/jkeiser))
 
 ## [12.8.0](https://github.com/chef/chef-server/tree/12.8.0) (2016-07-06)
 [Full Changelog](https://github.com/chef/chef-server/compare/12.7.0...12.8.0)
