@@ -17,6 +17,8 @@ require 'uri'
 require 'pathname'
 require 'fileutils'
 require 'pedant/acl'
+require 'mixlib/shellout'
+
 module Pedant
 
   # Representation of the Chef Server platform
@@ -178,6 +180,7 @@ module Pedant
           requestor_cache[key] = user
           make_owner(user, @test_org) if user_hash[:admin]
           make_user(user, @test_org) if user_hash[:associate] and !user_hash[:admin]
+          make_server_admin(user) if user_hash[:server_admin]
 
           create_requestor_accessor(key)
         end
@@ -480,6 +483,17 @@ module Pedant
 
     def make_user(user, org)
       associate_in_groups(user, org, ["users"])
+    end
+
+    def make_server_admin(user)
+      #
+      # We lack API level methods for editing global groups, so we have to use the chef-server-ctl command.
+      # This breaks running pedant against a remote API until we have that method, but given that
+      # server-admins is maturing as a feature it's important to be able to test.
+      #
+      cmd = Mixlib::ShellOut.new("chef-server-ctl grant-server-admin-permissions #{user.name}")
+      cmd.run_command
+      cmd.error!
     end
 
     # Helper function to associate a user with an org, and place the

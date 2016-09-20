@@ -4,6 +4,7 @@
 # Author:: Tyler Cloke (<tyler@chef.io>)
 # Copyright:: Copyright (c) 2013 Opscode, Inc.
 
+require 'securerandom'
 require 'pedant/rspec/common'
 require 'json'
 
@@ -68,7 +69,7 @@ describe "/organizations", :organizations do
   end
 
   describe "POST /organizations" do
-    let(:orgname) { "test-#{Time.now.to_i}-#{Process.pid}" }
+    let(:orgname) { "test-#{Time.now.to_i}-#{SecureRandom.hex}-#{Process.pid}" }
     after :each do
       platform.delete_org(orgname)
     end
@@ -81,7 +82,7 @@ describe "/organizations", :organizations do
       }
     end
 
-    context "when the user posts a new organization with a valid body and name" do
+    context "when the superuser posts a new organization with a valid body and name" do
       it "should respond with a valid newly created organization" do
         post("#{platform.server}/organizations", superuser, :payload => request_body).should look_like(
           :body => {
@@ -91,24 +92,46 @@ describe "/organizations", :organizations do
           :status => 201
         )
       end
+    end
 
-      context "but an organization of the same name already exists" do
-        before :each do
-          post("#{platform.server}/organizations", superuser, :payload => request_body)
-        end
-
-        it "it rejects the new org as conflicting" do
-          post("#{platform.server}/organizations", superuser, :payload => request_body).should look_like( :status => 409)
-        end
+    context "when a non-superuser posts a new organization with a valid body and name" do
+      it "should respond with a valid newly created organization" do
+        post("#{platform.server}/organizations", normal_user, :payload => request_body).should look_like(
+          :status => 403
+        )
       end
+    end
+
+    context "when a non-superuser in server-admins posts a new organization with a valid body and name" do
+      it "should respond with a valid newly created organization" do
+        require 'pp'; pp server_admin_user: platform.server_admin_user, platform_keys: platform.methods.sort - Object.methods
+
+        post("#{platform.server}/organizations", platform.server_admin_user, :payload => request_body).should look_like(
+          :body => {
+            "clientname" => "#{orgname}-validator",
+            "uri" => "#{platform.server}/organizations/#{orgname}"
+          },
+          :status => 201
+        )
+      end
+    end
+
+    context "but an organization of the same name already exists" do
+      before :each do
+        post("#{platform.server}/organizations", superuser, :payload => request_body)
+      end
+
+      it "it rejects the new org as conflicting" do
+        post("#{platform.server}/organizations", superuser, :payload => request_body).should look_like( :status => 409)
+      end
+    end
 
       # Note:
       # Currently excluded because it fails intermittently.
       # To re-enable, please remove ', :intermittent_failure => true'
-      it "should respond with data containing a valid private key",  :intermittent_failure => true do
-        result = JSON.parse(post("#{platform.server}/organizations", superuser, :payload => request_body))
-        /-----BEGIN RSA PRIVATE KEY-----/.should match(result["private_key"])
-      end
+    it "should respond with data containing a valid private key",  :intermittent_failure => true do
+      result = JSON.parse(post("#{platform.server}/organizations", superuser, :payload => request_body))
+      /-----BEGIN RSA PRIVATE KEY-----/.should match(result["private_key"])
     end
 
     context "when the user attempts to create a new org with invalid data", :validation do

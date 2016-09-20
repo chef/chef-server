@@ -154,6 +154,15 @@ requestors({
                  :create_knife => true,
                  :associate => false
                },
+
+               # A server admin user that is not a member of the testing organization
+               :server_admin => {
+                 :name => "pedant_server_admin_#{chef_server_uid}",
+                 :create_me => true,
+                 :create_knife => true,
+                 :associate => false,
+                 :server_admin => true
+               }
              }
            })
 
