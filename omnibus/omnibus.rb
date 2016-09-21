@@ -24,4 +24,4 @@ fetcher_read_timeout 120
 # service timing out. .  We'll re-enable it
 # once we have a process available that lets us declare
 # component licensing outside of the build itself.
-fatal_transitive_dependency_licensing_warnings false
+fatal_transitive_dependency_licensing_warnings true
