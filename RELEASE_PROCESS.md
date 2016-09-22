@@ -115,7 +115,8 @@ The git SHA of the build you are testing can be found in
 - [ ] Check RELEASE_NOTES.md to ensure that it describes the
   most important user-facing changes in the release. This file should
   form the basis of the post to Discourse that comes in a later step. Update as
-  appropriate.
+  appropriate.  If a there is a major version change, transfer all
+  contents to PRIOR_RELEASE_NOTES.md before adding release notes.
 
 ### Building and Releasing the Release
 

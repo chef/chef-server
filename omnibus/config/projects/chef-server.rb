@@ -15,7 +15,7 @@
 #
 
 name "chef-server"
-maintainer "Chef Software, Inc."
+maintainer "Chef Software, Inc. <maintainers@chef.io>"
 homepage   "https://www.chef.io"
 license "Apache-2.0"
 license_file "LICENSE"
@@ -24,7 +24,7 @@ package_name    "chef-server-core"
 replace         "private-chef"
 conflict        "private-chef"
 install_dir     "/opt/opscode"
-build_version   "12.8.1"
+build_version   "12.9.0"
 build_iteration 1
 
 override :rabbitmq, version: "3.3.4"
