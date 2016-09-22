@@ -22,7 +22,7 @@ You will also need to set up the repository with the appropriate branches. We do
 
     http://wiki.chef.io/display/chef/Working+with+git
 
-Once your repository is set up, you can start working on the code.
+Once your repository is set up, you can start working on the code. **If your changes will affect oc_reporting, make sure to sync your changes in the [chef_index](https://github.com/chef/chef_index) repository.**
 
 # LINKS:
 
