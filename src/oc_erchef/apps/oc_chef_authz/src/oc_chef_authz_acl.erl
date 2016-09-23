@@ -259,7 +259,6 @@ names_to_ids(ACE, OrgId) ->
     %% preferentially.
     Groups = ej:get({<<"groups">>}, ACE),
     GroupIds = safe_fetch_ids(group, [?GLOBAL_PLACEHOLDER_ORG_ID, OrgId], Groups),
-    lager:error("GroupIds ~p -> ~p ~p", [Groups, GroupIds]),
 
     % Though we split out clients/users, the authz API
     % requires a unified list of actor IDs:
@@ -267,27 +266,31 @@ names_to_ids(ACE, OrgId) ->
     ej:set({<<"groups">>}, ACE1, GroupIds).
 
 %% Retrieves authz records for the given set of names
-%% and returns a list of authz ids.
-%% If the list of retrieved names + IDs
-%% does not match the list of names provided, this raises
-%% {invalid, Type, MissingList}}
+%% and returns a list of name/authz ids pairs.
+%%
+%% If the list of retrieved names + IDs does not match the list of names provided, this
+%% raises {invalid, Type, MissingList}}
+
+-type safe_fetch_ids('client' | 'user'| 'group', binary() | [binary()], [binary()]) ->
+        [{binary(), binary()}] | [{binary(), binary() | null, binary() | null}].
 safe_fetch_ids(_Type, _OrgId, []) ->
     % Save the cost of a query for an empty list -
     % fairly common for users and to a lesser extent groups.
     [];
-safe_fetch_ids(Type, OrgId, Names) when not is_list(OrgId) ->
+safe_fetch_ids(Type, OrgId, Names) when is_binary(OrgId) ->
     safe_fetch_ids(Type, [OrgId], Names);
 safe_fetch_ids(Type, OrgIds, Names) ->
-    {Missing, Records} = safe_fetch_ids_rec(Type, OrgIds, Names, []),
+    SortedNames = lists:sort(Names),
+    {Missing, Records} = safe_fetch_ids_rec(Type, OrgIds, SortedNames, []),
     case Missing of
         [] ->
             ok;
-        _ ->
+        Missing ->
             throw({invalid, Type, Missing})
     end,
     ids_from_records(Records).
 
-% Recursively expands the types for each org id, removing the found names 
+% Recursively expands the types for each org id, removing the found names
 safe_fetch_ids_rec(_Type, [], Names, Records) ->
     {Names, Records};
 safe_fetch_ids_rec(_Type, _OrgIds, [], Records) ->
@@ -295,8 +298,7 @@ safe_fetch_ids_rec(_Type, _OrgIds, [], Records) ->
 safe_fetch_ids_rec(Type, [OrgId | OrgIds], Names, RecordsAcc) ->
     Records = oc_chef_authz_db:authz_records_by_name(Type, OrgId, Names),
     FoundNames = lists:sort(names_from_records(Records)),
-    GivenNames = lists:sort(Names),
-    Missing = GivenNames -- FoundNames,
+    Missing = Names -- FoundNames,
     safe_fetch_ids_rec(Type, OrgIds, Missing, Records ++ RecordsAcc).
 
 fetch_actors(OrgId, ActorNames) ->
