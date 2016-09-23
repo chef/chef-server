@@ -51,8 +51,6 @@
 
          bulk_get_authz_ids/2,
 
-	 get_server_admins_authz_id/0,
-
          %% checksum ops
          mark_checksums_as_uploaded/2,
          non_uploaded_checksums/2,
@@ -176,16 +174,6 @@ is_user_in_org(UserName, OrgName) ->
             true;
         {error, Error} ->
             {error, Error}
-    end.
-
--spec get_server_admins_authz_id() -> boolean() | {error, _}.
-get_server_admins_authz_id() ->
-    case sqerl:select(fetch_server_admins_authz_id,
-                      [], rows_as_scalars, [authz_id]) of
-        {ok, [AuthzId]} when is_binary(AuthzId) ->
-            AuthzId;
-        {error, Reason} ->
-            {error, Reason}
     end.
 
 %%

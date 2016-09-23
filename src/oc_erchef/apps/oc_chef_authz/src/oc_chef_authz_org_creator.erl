@@ -193,7 +193,7 @@ process_policy_step({cache_server_admins_global_group},
                     #oc_chef_organization{server_api_version=ApiVersion},
                     _Requestor, Cache) ->
     DbContext = chef_db:make_context(ApiVersion, base64:encode(term_to_binary(make_ref()))),
-    ServerAdminsAuthzId = chef_db:get_server_admins_authz_id(DbContext),
+    ServerAdminsAuthzId = oc_chef_authz_db:get_server_admins_authz_id(DbContext),
     {add_cache(Cache, {group, server_admins}, ServerAdminsAuthzId), []};
 process_policy_step({acls, Steps}, _Org, _User, Cache) ->
     {Cache, process_acls(Steps)}.

@@ -38,7 +38,8 @@
          statements/1,
          make_org_prefixed_group_name/2,
          find_org_actors_by_name/2,
-         authz_records_by_name/3
+         authz_records_by_name/3,
+         get_server_admins_authz_id/0,
         ]).
 
 -ifdef(TEST).
@@ -216,4 +217,14 @@ object_authz_records(QueryName, Args) ->
             [];
         Other ->
             Other
+    end.
+
+-spec get_server_admins_authz_id() -> boolean() | {error, _}.
+get_server_admins_authz_id() ->
+    case sqerl:select(fetch_server_admins_authz_id,
+                      [], rows_as_scalars, [authz_id]) of
+        {ok, [AuthzId]} when is_binary(AuthzId) ->
+            AuthzId;
+        {error, Reason} ->
+            {error, Reason}
     end.
