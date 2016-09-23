@@ -82,7 +82,7 @@ parent_not_found:
 conflict:
   responses:
     409:
-      description: Whemn the resource already exists.
+      description: When the resource already exists.
       body:
         schema: Errors
 
