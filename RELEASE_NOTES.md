@@ -7,6 +7,37 @@ in the release. For a detailed list of changed components, refer to
 This document contains release notes for the current major release and all patches.
 For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 12.9.1 (2016-9-26)
+
+### Security Updates
+
+* The update of OpenSSL 1.0.1u addresses the following:
+  * [CVE-2016-6304](https://www.openssl.org/news/vulnerabilities.html#2016-6304)
+  * [CVE-2016-2183](https://www.openssl.org/news/vulnerabilities.html#2016-2183)
+  * [CVE-2016-6303](https://www.openssl.org/news/vulnerabilities.html#2016-6303)
+  * [CVE-2016-6302](https://www.openssl.org/news/vulnerabilities.html#2016-6302)
+  * [CVE-2016-2182](https://www.openssl.org/news/vulnerabilities.html#2016-2182)
+  * [CVE-2016-2180](https://www.openssl.org/news/vulnerabilities.html#2016-2180)
+  * [CVE-2016-2177](https://www.openssl.org/news/vulnerabilities.html#2016-2177)
+  * [CVE-2016-2178](https://www.openssl.org/news/vulnerabilities.html#2016-2178)
+  * [CVE-2016-2179](https://www.openssl.org/news/vulnerabilities.html#2016-2179)
+  * [CVE-2016-2181](https://www.openssl.org/news/vulnerabilities.html#2016-2181)
+  * [CVE-2016-6306](https://www.openssl.org/news/vulnerabilities.html#2016-6306)
+
+##### Compatibility Notes
+
+* The fixes to the ACL apis which 12.9.0 referenced being fixed in 12.9.1 have been
+  delayed to 12.9.2 in order to release this security update:
+  
+  > ACLs: updating ACLs of a specific user (`/users/USER/_acl`) will not
+  > succeed.  This undocumented API is very rarely used and is not supported by
+  > tooling provided by Chef Software.
+
+  > If you make internal use of PUTs to this endpoint, please wait until 12.9.2
+  > to upgrade.  This will fix both the newly introduced issue, as well as an
+  > older issue that prevented the endpoint from working in many other cases in
+  > 12.8 and prior.
+
 ## 12.9.0 (2016-09-22)
 
 ### Chef Server
@@ -72,7 +103,7 @@ For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
   succeed.  This undocumented API is very rarely used and is not supported by
   tooling provided by Chef Software.
 
-  If you make internal use of PUTs to this endpoint, please wait until 12.9.1
+  If you make internal use of PUTs to this endpoint, please wait until 12.9.2
   to upgrade.  This will fix both the newly introduced issue, as well as an
   older issue that prevented the endpoint from working in many other cases in
   12.8 and prior.

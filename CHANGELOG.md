@@ -1,5 +1,19 @@
 # Chef Server Changelog
 
+## [12.9.1](https://github.com/chef/chef-server/tree/12.9.1) (2016-09-26)
+[Full Changelog](https://github.com/chef/chef-server/compare/12.9.0...12.9.1)
+
+**Merged pull requests:**
+
+- Fix typo [\#941](https://github.com/chef/chef-server/pull/941) ([martinmosegaard](https://github.com/martinmosegaard))
+- Fix CHEFDK\_GECODE\_PATH for latest ChefDK [\#940](https://github.com/chef/chef-server/pull/940) ([stevendanna](https://github.com/stevendanna))
+
+### Components
+Updated Components
+* openssl (1.0.1t -> 1.0.1u)
+* veil-gem (master -> master)
+* chef (8e1312bb -> 7ed29654)
+
 ## [12.9.0](https://github.com/chef/chef-server/tree/12.9.0) (2016-09-21)
 [Full Changelog](https://github.com/chef/chef-server/compare/12.8.0...12.9.0)
 
