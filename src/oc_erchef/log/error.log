@@ -1,0 +1,131 @@
+2016-09-29 15:34:27.067 [error] <0.5646.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(0) -> false)
+
+2016-09-29 15:34:27.070 [error] <0.5649.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(-5) -> false)
+
+2016-09-29 15:34:27.073 [error] <0.5652.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(5.0) -> false)
+
+2016-09-29 15:34:27.076 [error] <0.5655.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(-5.0) -> false)
+
+2016-09-29 15:34:27.079 [error] <0.5658.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer("This is bad") -> false)
+
+2016-09-29 15:34:27.082 [error] <0.5661.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(<<"This is also bad">>) -> false)
+
+2016-09-29 15:34:27.085 [error] <0.5664.0> Missing config item for 'chef_config_test' 'chef_config_test_option'
+
+2016-09-29 15:34:41.874 [error] <0.6511.0> Checking presence of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-29 15:34:41.877 [error] <0.6518.0> Checking presence of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd") raised exception throw:oops
+
+2016-09-29 15:34:41.880 [error] <0.6525.0> Checking presence of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-29 15:34:46.885 [error] <0.6521.0> Checking presence of checksum: <<"cccccccccccccccccccccccccccccccf">> for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" has taken longer than 5000 ms
+
+2016-09-29 15:34:46.888 [error] <0.6531.0> Checking presence of file (checksum: <<"cccccccccccccccccccccccccccccccd">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-cccccccccccccccccccccccccccccccd") raised exception throw:oops
+
+2016-09-29 15:34:46.888 [error] <0.6532.0> Checking presence of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-29 15:34:46.901 [error] <0.6562.0> Deletion of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-29 15:34:46.904 [error] <0.6569.0> Deletion of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd") raised exception throw:oops
+
+2016-09-29 15:34:46.907 [error] <0.6576.0> Deletion of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-29 15:34:51.911 [error] <0.6572.0> Deletion of checksum: <<"cccccccccccccccccccccccccccccccf">> for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" has taken longer than 5000 ms
+
+2016-09-29 15:34:51.914 [error] <0.6582.0> Deletion of file (checksum: <<"cccccccccccccccccccccccccccccccd">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-cccccccccccccccccccccccccccccccd") raised exception throw:oops
+
+2016-09-29 15:34:51.915 [error] <0.6583.0> Deletion of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-29 15:35:06.593 [error] <0.7675.0> {oc_chef_authz_http_ping,pang,req_timedout}
+2016-09-29 15:35:15.080 [error] <0.5413.0>@chef_wm_rabbitmq_management:parse_max_length_response:218 Invalid RabbitMQ response while getting queue max length throw {error,{2,invalid_json}}
+2016-09-29 15:35:15.089 [error] <0.5413.0>@chef_wm_rabbitmq_management:parse_current_length_response:201 Invalid RabbitMQ response while getting queue length throw {error,{2,invalid_json}}
+2016-09-29 15:35:16.588 [error] <0.8965.0>@chef_wm_rabbitmq_management:get_max_length:157 Unknown response from RabbitMQ management console: foo
+2016-09-29 15:35:16.642 [error] <0.8975.0>@chef_wm_rabbitmq_management:get_current_length:177 Unknown response from RabbitMQ management console: foo
+2016-09-29 15:35:18.155 [error] <0.9089.0> Bad typecheck for config item for 'oc_chef_wm' 'max_request_size' (#Fun<chef_wm_enforce.0.94025955>(0) -> {invalid_value,0,"value must be positive int or atom 'disabled'"})
+
+2016-09-29 15:35:18.158 [error] <0.9092.0> Bad typecheck for config item for 'oc_chef_wm' 'max_request_size' (#Fun<chef_wm_enforce.0.94025955>(-1) -> {invalid_value,-1,"value must be positive int or atom 'disabled'"})
+
+2016-09-29 15:35:18.161 [error] <0.9095.0> Bad typecheck for config item for 'oc_chef_wm' 'max_request_size' (#Fun<chef_wm_enforce.0.94025955>(not_disabled) -> {invalid_value,not_disabled,"value must be positive int or atom 'disabled'"})
+
+2016-09-29 15:35:20.622 [error] <0.9206.0> Missing config item for 'chef_index' 'solr_service'
+
+2016-09-29 15:35:20.622 [error] <0.9206.0> {chef_index_http,get,error,config_missing_item}
+2016-09-29 15:35:20.628 [error] <0.9205.0> {chef_sql,ping,exit,{noproc,{gen_server,call,[sqerl,{take_member,0},infinity]}}}
+2016-09-29 15:35:20.628 [error] <0.9201.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"fail">>},{<<"chef_sql">>,<<"fail">>}]}}}
+2016-09-29 15:35:21.255 [error] <0.9227.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"pong">>},{<<"chef_sql">>,<<"fail">>}]}}}
+2016-09-29 15:35:22.468 [error] <0.9257.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"fail">>},{<<"chef_sql">>,<<"pong">>}]}}}
+2016-09-29 15:35:23.587 [error] <0.9287.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"pong">>},{<<"chef_sql">>,<<"fail">>}]}}}
+2016-09-29 15:35:24.736 [error] <0.9317.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"fail">>},{<<"chef_sql">>,<<"pong">>}]}}}
+2016-09-29 15:35:26.818 [error] <0.9379.0>@chef_wm_status:log_failure:116 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"pong">>},{<<"chef_sql">>,<<"pong">>}]}},{<<"analytics_queue">>,{[{queue_at_capacity,true},{dropped_since_last_check,0},{max_length,0},{last_recorded_length,0},{total_dropped,0},{check_count,0},{mailbox_length,0}]}}}
+2016-09-29 15:54:48.888 [error] <0.5600.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(0) -> false)
+
+2016-09-29 15:54:48.891 [error] <0.5603.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(-5) -> false)
+
+2016-09-29 15:54:48.894 [error] <0.5606.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(5.0) -> false)
+
+2016-09-29 15:54:48.897 [error] <0.5609.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(-5.0) -> false)
+
+2016-09-29 15:54:48.900 [error] <0.5612.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer("This is bad") -> false)
+
+2016-09-29 15:54:48.903 [error] <0.5615.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(<<"This is also bad">>) -> false)
+
+2016-09-29 15:54:48.906 [error] <0.5618.0> Missing config item for 'chef_config_test' 'chef_config_test_option'
+
+2016-09-29 15:55:03.703 [error] <0.6465.0> Checking presence of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-29 15:55:03.706 [error] <0.6472.0> Checking presence of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd") raised exception throw:oops
+
+2016-09-29 15:55:03.710 [error] <0.6479.0> Checking presence of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-29 15:55:08.713 [error] <0.6475.0> Checking presence of checksum: <<"cccccccccccccccccccccccccccccccf">> for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" has taken longer than 5000 ms
+
+2016-09-29 15:55:08.716 [error] <0.6485.0> Checking presence of file (checksum: <<"cccccccccccccccccccccccccccccccd">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-cccccccccccccccccccccccccccccccd") raised exception throw:oops
+
+2016-09-29 15:55:08.716 [error] <0.6486.0> Checking presence of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-29 15:55:08.728 [error] <0.6516.0> Deletion of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-29 15:55:08.731 [error] <0.6523.0> Deletion of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd") raised exception throw:oops
+
+2016-09-29 15:55:08.734 [error] <0.6530.0> Deletion of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-29 15:55:13.737 [error] <0.6526.0> Deletion of checksum: <<"cccccccccccccccccccccccccccccccf">> for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" has taken longer than 5000 ms
+
+2016-09-29 15:55:13.740 [error] <0.6536.0> Deletion of file (checksum: <<"cccccccccccccccccccccccccccccccd">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-cccccccccccccccccccccccccccccccd") raised exception throw:oops
+
+2016-09-29 15:55:13.740 [error] <0.6537.0> Deletion of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-29 15:55:30.838 [error] <0.7566.0> {oc_chef_authz_http_ping,pang,server_error}
+2016-09-29 15:55:31.534 [error] <0.7629.0> {oc_chef_authz_http_ping,pang,req_timedout}
+2016-09-29 15:55:42.673 [error] <0.5367.0>@chef_wm_rabbitmq_management:parse_max_length_response:218 Invalid RabbitMQ response while getting queue max length throw {error,{2,invalid_json}}
+2016-09-29 15:55:42.682 [error] <0.5367.0>@chef_wm_rabbitmq_management:parse_current_length_response:201 Invalid RabbitMQ response while getting queue length throw {error,{2,invalid_json}}
+2016-09-29 15:55:44.681 [error] <0.8919.0>@chef_wm_rabbitmq_management:get_max_length:157 Unknown response from RabbitMQ management console: foo
+2016-09-29 15:55:44.761 [error] <0.8929.0>@chef_wm_rabbitmq_management:get_current_length:177 Unknown response from RabbitMQ management console: foo
+2016-09-29 15:55:46.623 [error] <0.9043.0> Bad typecheck for config item for 'oc_chef_wm' 'max_request_size' (#Fun<chef_wm_enforce.0.94025955>(0) -> {invalid_value,0,"value must be positive int or atom 'disabled'"})
+
+2016-09-29 15:55:46.626 [error] <0.9046.0> Bad typecheck for config item for 'oc_chef_wm' 'max_request_size' (#Fun<chef_wm_enforce.0.94025955>(-1) -> {invalid_value,-1,"value must be positive int or atom 'disabled'"})
+
+2016-09-29 15:55:46.629 [error] <0.9049.0> Bad typecheck for config item for 'oc_chef_wm' 'max_request_size' (#Fun<chef_wm_enforce.0.94025955>(not_disabled) -> {invalid_value,not_disabled,"value must be positive int or atom 'disabled'"})
+
+2016-09-29 15:55:49.762 [error] <0.9160.0> Missing config item for 'chef_index' 'solr_service'
+
+2016-09-29 15:55:49.762 [error] <0.9160.0> {chef_index_http,get,error,config_missing_item}
+2016-09-29 15:55:49.770 [error] <0.9159.0> {chef_sql,ping,exit,{noproc,{gen_server,call,[sqerl,{take_member,0},infinity]}}}
+2016-09-29 15:55:49.770 [error] <0.9155.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"fail">>},{<<"chef_sql">>,<<"fail">>}]}}}
+2016-09-29 15:55:50.642 [error] <0.9181.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"pong">>},{<<"chef_sql">>,<<"fail">>}]}}}
+2016-09-29 15:55:52.223 [error] <0.9211.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"fail">>},{<<"chef_sql">>,<<"pong">>}]}}}
+2016-09-29 15:55:53.725 [error] <0.9241.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"pong">>},{<<"chef_sql">>,<<"fail">>}]}}}
+2016-09-29 15:55:55.458 [error] <0.9271.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"fail">>},{<<"chef_sql">>,<<"pong">>}]}}}
+2016-09-29 15:55:59.098 [error] <0.9333.0>@chef_wm_status:log_failure:116 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"pong">>},{<<"chef_sql">>,<<"pong">>}]}},{<<"analytics_queue">>,{[{queue_at_capacity,true},{dropped_since_last_check,0},{max_length,0},{last_recorded_length,0},{total_dropped,0},{check_count,0},{mailbox_length,0}]}}}
