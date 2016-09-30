@@ -1142,3 +1142,1106 @@
 2016-09-29 15:55:58.002 [info] <0.9312.0>@chef_wm_actions_queue_monitoring:handle_call:216 Manually setting Queue Monitor queue_at_capacity true
 2016-09-29 15:55:59.098 [error] <0.9333.0>@chef_wm_status:log_failure:116 /_status
 {{status,fail},{upstreams,{[{<<"chef_solr">>,<<"pong">>},{<<"chef_sql">>,<<"pong">>}]}},{<<"analytics_queue">>,{[{queue_at_capacity,true},{dropped_since_last_check,0},{max_length,0},{last_recorded_length,0},{total_dropped,0},{check_count,0},{mailbox_length,0}]}}}
+2016-09-30 10:15:04.944 [info] <0.6.0> Application lager started on node nonode@nohost
+2016-09-30 10:15:05.016 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:05.062 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:15:05.081 [info] <0.6.0> Application opscoderl_httpc started on node nonode@nohost
+2016-09-30 10:15:05.171 [info] <0.6.0> Application data_collector started on node nonode@nohost
+2016-09-30 10:15:05.175 [info] <0.6.0> Application data_collector exited with reason: stopped
+2016-09-30 10:15:05.175 [info] <0.6.0> Application opscoderl_httpc exited with reason: stopped
+2016-09-30 10:15:05.176 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:15:05.177 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:05.523 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:05.524 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:15:05.524 [info] <0.6.0> Application opscoderl_httpc started on node nonode@nohost
+2016-09-30 10:15:05.543 [info] <0.6.0> Application data_collector started on node nonode@nohost
+2016-09-30 10:15:05.548 [info] <0.6.0> Application data_collector exited with reason: stopped
+2016-09-30 10:15:05.549 [info] <0.6.0> Application opscoderl_httpc exited with reason: stopped
+2016-09-30 10:15:05.551 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:15:05.552 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:05.794 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:05.795 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:15:05.795 [info] <0.6.0> Application opscoderl_httpc started on node nonode@nohost
+2016-09-30 10:15:05.795 [info] <0.6.0> Application data_collector started on node nonode@nohost
+2016-09-30 10:15:05.796 [info] <0.6.0> Application data_collector exited with reason: stopped
+2016-09-30 10:15:05.799 [info] <0.6.0> Application opscoderl_httpc exited with reason: stopped
+2016-09-30 10:15:05.800 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:15:05.801 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:06.008 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:06.008 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:15:06.009 [info] <0.6.0> Application opscoderl_httpc started on node nonode@nohost
+2016-09-30 10:15:06.014 [info] <0.6.0> Application data_collector started on node nonode@nohost
+2016-09-30 10:15:06.021 [info] <0.6.0> Application data_collector exited with reason: stopped
+2016-09-30 10:15:06.024 [info] <0.6.0> Application opscoderl_httpc exited with reason: stopped
+2016-09-30 10:15:06.024 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:15:06.025 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:06.771 [error] <0.5600.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(0) -> false)
+
+2016-09-30 10:15:06.774 [error] <0.5603.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(-5) -> false)
+
+2016-09-30 10:15:06.777 [error] <0.5606.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(5.0) -> false)
+
+2016-09-30 10:15:06.780 [error] <0.5609.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(-5.0) -> false)
+
+2016-09-30 10:15:06.784 [error] <0.5612.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer("This is bad") -> false)
+
+2016-09-30 10:15:06.789 [error] <0.5615.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(<<"This is also bad">>) -> false)
+
+2016-09-30 10:15:06.792 [error] <0.5618.0> Missing config item for 'chef_config_test' 'chef_config_test_option'
+
+2016-09-30 10:15:07.205 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:07.803 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:07.803 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:08.384 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:08.384 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:08.783 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:08.783 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:09.272 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:09.272 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:09.627 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:09.628 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:10.164 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:10.164 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:10.735 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:10.736 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:11.219 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:11.220 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:11.670 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:11.670 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:12.026 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:12.027 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:12.502 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:12.502 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:12.849 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:12.850 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:13.640 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:13.641 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:14.012 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:14.012 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:14.436 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:14.436 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:14.956 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:14.957 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:15.396 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:15.397 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:15.845 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:15.845 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:16.446 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:16.447 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:16.942 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:16.943 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:17.305 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:17.305 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:17.640 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:17.916 [info] <0.6096.0> chef_keygen_cache configured size: 4 start_size: 4 max_workers: 2
+2016-09-30 10:15:17.944 [info] <0.6096.0> chef_keygen_cache pre-filling: 0% (0/4)
+
+2016-09-30 10:15:17.978 [info] <0.6096.0> chef_keygen_cache pre-filling: 50% (2/4)
+
+2016-09-30 10:15:18.014 [info] <0.6096.0> chef_keygen_cache starting with 4 keys in cache
+
+2016-09-30 10:15:18.472 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:15:19.362 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:15:19.363 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:15:19.428 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:15:19.429 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:15:19.439 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:15:19.440 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:15:19.477 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:15:19.479 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:15:19.573 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:15:19.573 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:15:19.595 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:15:21.602 [error] <0.6465.0> Checking presence of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-30 10:15:21.605 [error] <0.6472.0> Checking presence of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd") raised exception throw:oops
+
+2016-09-30 10:15:21.612 [error] <0.6479.0> Checking presence of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-30 10:15:26.616 [error] <0.6475.0> Checking presence of checksum: <<"cccccccccccccccccccccccccccccccf">> for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" has taken longer than 5000 ms
+
+2016-09-30 10:15:26.620 [error] <0.6485.0> Checking presence of file (checksum: <<"cccccccccccccccccccccccccccccccd">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-cccccccccccccccccccccccccccccccd") raised exception throw:oops
+
+2016-09-30 10:15:26.621 [error] <0.6486.0> Checking presence of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-30 10:15:26.634 [error] <0.6516.0> Deletion of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-30 10:15:26.637 [error] <0.6523.0> Deletion of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd") raised exception throw:oops
+
+2016-09-30 10:15:26.640 [error] <0.6530.0> Deletion of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-30 10:15:31.642 [error] <0.6526.0> Deletion of checksum: <<"cccccccccccccccccccccccccccccccf">> for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" has taken longer than 5000 ms
+
+2016-09-30 10:15:31.645 [error] <0.6536.0> Deletion of file (checksum: <<"cccccccccccccccccccccccccccccccd">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-cccccccccccccccccccccccccccccccd") raised exception throw:oops
+
+2016-09-30 10:15:31.646 [error] <0.6537.0> Deletion of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-30 10:15:31.955 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:15:32.009 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:15:32.011 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:15:32.019 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:15:32.020 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:15:32.045 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:15:32.296 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:15:32.332 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:15:32.333 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:15:32.377 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:15:32.377 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:15:32.381 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:15:33.250 [info] <0.6743.0> starting stats_hero_sup
+
+2016-09-30 10:15:33.265 [info] <0.6744.0> starting stats_hero_sender_sup with 5 senders
+
+2016-09-30 10:15:33.300 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:15:46.468 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:15:46.468 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:46.482 [info] <0.6.0> Application epgsql started on node nonode@nohost
+2016-09-30 10:15:46.492 [info] <0.6.0> Application sqerl started on node nonode@nohost
+2016-09-30 10:15:46.559 [info] <0.6.0> Application oc_chef_authz started on node nonode@nohost
+2016-09-30 10:15:46.640 [info] <0.6.0> Application oc_chef_authz exited with reason: stopped
+2016-09-30 10:15:46.640 [info] <0.6.0> Application sqerl exited with reason: stopped
+2016-09-30 10:15:46.640 [info] <0.6.0> Application epgsql exited with reason: stopped
+2016-09-30 10:15:46.641 [info] <0.6.0> Application ssl exited with reason: stopped
+2016-09-30 10:15:46.641 [info] <0.6.0> Application public_key exited with reason: stopped
+2016-09-30 10:15:46.642 [info] <0.6.0> Application stats_hero exited with reason: stopped
+2016-09-30 10:15:46.643 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:46.644 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:15:46.644 [info] <0.6.0> Application asn1 exited with reason: stopped
+2016-09-30 10:15:46.644 [info] <0.6.0> Application crypto exited with reason: stopped
+2016-09-30 10:15:46.650 [info] <0.6.0> Application crypto started on node nonode@nohost
+2016-09-30 10:15:46.650 [info] <0.6.0> Application asn1 started on node nonode@nohost
+2016-09-30 10:15:46.651 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:15:46.651 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:46.651 [info] <0.7178.0> starting stats_hero_sup
+
+2016-09-30 10:15:46.651 [info] <0.7179.0> starting stats_hero_sender_sup with 1 senders
+
+2016-09-30 10:15:46.652 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:15:46.652 [info] <0.6.0> Application public_key started on node nonode@nohost
+2016-09-30 10:15:46.652 [info] <0.6.0> Application ssl started on node nonode@nohost
+2016-09-30 10:15:46.652 [info] <0.6.0> Application epgsql started on node nonode@nohost
+2016-09-30 10:15:46.652 [info] <0.6.0> Application sqerl started on node nonode@nohost
+2016-09-30 10:15:46.659 [info] <0.6.0> Application oc_chef_authz started on node nonode@nohost
+2016-09-30 10:15:46.716 [info] <0.6.0> Application oc_chef_authz exited with reason: stopped
+2016-09-30 10:15:46.716 [info] <0.6.0> Application sqerl exited with reason: stopped
+2016-09-30 10:15:46.717 [info] <0.6.0> Application epgsql exited with reason: stopped
+2016-09-30 10:15:46.717 [info] <0.6.0> Application ssl exited with reason: stopped
+2016-09-30 10:15:48.086 [info] <0.6.0> Application crypto started on node nonode@nohost
+2016-09-30 10:15:48.086 [info] <0.6.0> Application asn1 started on node nonode@nohost
+2016-09-30 10:15:48.088 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:15:48.088 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:48.088 [info] <0.7463.0> starting stats_hero_sup
+
+2016-09-30 10:15:48.088 [info] <0.7464.0> starting stats_hero_sender_sup with 1 senders
+
+2016-09-30 10:15:48.089 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:15:48.089 [info] <0.6.0> Application public_key started on node nonode@nohost
+2016-09-30 10:15:48.089 [info] <0.6.0> Application ssl started on node nonode@nohost
+2016-09-30 10:15:48.089 [info] <0.6.0> Application epgsql started on node nonode@nohost
+2016-09-30 10:15:48.089 [info] <0.6.0> Application sqerl started on node nonode@nohost
+2016-09-30 10:15:48.101 [info] <0.6.0> Application oc_chef_authz started on node nonode@nohost
+2016-09-30 10:15:48.774 [info] <0.6.0> Application oc_chef_authz exited with reason: stopped
+2016-09-30 10:15:48.774 [info] <0.6.0> Application sqerl exited with reason: stopped
+2016-09-30 10:15:48.775 [info] <0.6.0> Application epgsql exited with reason: stopped
+2016-09-30 10:15:48.775 [info] <0.6.0> Application ssl exited with reason: stopped
+2016-09-30 10:15:48.775 [info] <0.6.0> Application public_key exited with reason: stopped
+2016-09-30 10:15:48.776 [info] <0.6.0> Application stats_hero exited with reason: stopped
+2016-09-30 10:15:48.777 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:48.783 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:15:48.783 [info] <0.6.0> Application asn1 exited with reason: stopped
+2016-09-30 10:15:48.783 [info] <0.6.0> Application crypto exited with reason: stopped
+2016-09-30 10:15:48.784 [info] <0.6.0> Application crypto started on node nonode@nohost
+2016-09-30 10:15:48.784 [info] <0.6.0> Application asn1 started on node nonode@nohost
+2016-09-30 10:15:48.785 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:15:48.785 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:48.785 [info] <0.7526.0> starting stats_hero_sup
+
+2016-09-30 10:15:48.786 [info] <0.7527.0> starting stats_hero_sender_sup with 1 senders
+
+2016-09-30 10:15:48.786 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:15:48.787 [info] <0.6.0> Application public_key started on node nonode@nohost
+2016-09-30 10:15:49.335 [error] <0.7566.0> {oc_chef_authz_http_ping,pang,server_error}
+2016-09-30 10:15:49.349 [info] <0.6.0> Application oc_chef_authz exited with reason: stopped
+2016-09-30 10:15:49.349 [info] <0.6.0> Application sqerl exited with reason: stopped
+2016-09-30 10:15:49.349 [info] <0.6.0> Application epgsql exited with reason: stopped
+2016-09-30 10:15:49.349 [info] <0.6.0> Application ssl exited with reason: stopped
+2016-09-30 10:15:49.349 [info] <0.6.0> Application public_key exited with reason: stopped
+2016-09-30 10:15:49.350 [info] <0.6.0> Application stats_hero exited with reason: stopped
+2016-09-30 10:15:49.350 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:49.358 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:15:49.358 [info] <0.6.0> Application asn1 exited with reason: stopped
+2016-09-30 10:15:49.358 [info] <0.6.0> Application crypto exited with reason: stopped
+2016-09-30 10:15:49.358 [info] <0.6.0> Application crypto started on node nonode@nohost
+2016-09-30 10:15:49.358 [info] <0.6.0> Application asn1 started on node nonode@nohost
+2016-09-30 10:15:49.359 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:15:49.359 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:49.359 [info] <0.7589.0> starting stats_hero_sup
+
+2016-09-30 10:15:49.359 [info] <0.7590.0> starting stats_hero_sender_sup with 1 senders
+
+2016-09-30 10:15:49.360 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:15:49.360 [info] <0.6.0> Application public_key started on node nonode@nohost
+2016-09-30 10:15:49.360 [info] <0.6.0> Application ssl started on node nonode@nohost
+2016-09-30 10:15:49.360 [info] <0.6.0> Application epgsql started on node nonode@nohost
+2016-09-30 10:15:49.360 [info] <0.6.0> Application sqerl started on node nonode@nohost
+2016-09-30 10:15:49.361 [info] <0.6.0> Application oc_chef_authz started on node nonode@nohost
+2016-09-30 10:15:49.802 [error] <0.7629.0> {oc_chef_authz_http_ping,pang,req_timedout}
+2016-09-30 10:15:49.815 [info] <0.6.0> Application oc_chef_authz exited with reason: stopped
+2016-09-30 10:15:49.815 [info] <0.6.0> Application sqerl exited with reason: stopped
+2016-09-30 10:15:49.815 [info] <0.6.0> Application epgsql exited with reason: stopped
+2016-09-30 10:15:49.815 [info] <0.6.0> Application ssl exited with reason: stopped
+2016-09-30 10:15:49.815 [info] <0.6.0> Application public_key exited with reason: stopped
+2016-09-30 10:15:49.816 [info] <0.6.0> Application stats_hero exited with reason: stopped
+2016-09-30 10:15:49.816 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:49.822 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:15:49.822 [info] <0.6.0> Application asn1 exited with reason: stopped
+2016-09-30 10:15:49.822 [info] <0.6.0> Application crypto exited with reason: stopped
+2016-09-30 10:15:51.493 [info] <0.6.0> Application crypto started on node nonode@nohost
+2016-09-30 10:15:51.493 [info] <0.6.0> Application asn1 started on node nonode@nohost
+2016-09-30 10:15:51.494 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:15:51.494 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:51.494 [info] <0.7744.0> starting stats_hero_sup
+
+2016-09-30 10:15:51.494 [info] <0.7745.0> starting stats_hero_sender_sup with 1 senders
+
+2016-09-30 10:15:51.495 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:15:51.495 [info] <0.6.0> Application public_key started on node nonode@nohost
+2016-09-30 10:15:51.495 [info] <0.6.0> Application ssl started on node nonode@nohost
+2016-09-30 10:15:51.496 [info] <0.6.0> Application epgsql started on node nonode@nohost
+2016-09-30 10:15:51.496 [info] <0.6.0> Application sqerl started on node nonode@nohost
+2016-09-30 10:15:51.497 [info] <0.6.0> Application oc_chef_authz started on node nonode@nohost
+2016-09-30 10:15:51.676 [info] <0.6.0> Application oc_chef_authz exited with reason: stopped
+2016-09-30 10:15:51.676 [info] <0.6.0> Application sqerl exited with reason: stopped
+2016-09-30 10:15:51.676 [info] <0.6.0> Application epgsql exited with reason: stopped
+2016-09-30 10:15:51.676 [info] <0.6.0> Application ssl exited with reason: stopped
+2016-09-30 10:15:51.676 [info] <0.6.0> Application public_key exited with reason: stopped
+2016-09-30 10:15:51.677 [info] <0.6.0> Application stats_hero exited with reason: stopped
+2016-09-30 10:15:51.678 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:51.678 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:15:51.678 [info] <0.6.0> Application asn1 exited with reason: stopped
+2016-09-30 10:15:51.678 [info] <0.6.0> Application crypto exited with reason: stopped
+2016-09-30 10:15:51.898 [info] <0.6.0> Application crypto started on node nonode@nohost
+2016-09-30 10:15:51.918 [info] <0.6.0> Application asn1 started on node nonode@nohost
+2016-09-30 10:15:51.919 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:15:51.919 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:51.919 [info] <0.7803.0> starting stats_hero_sup
+
+2016-09-30 10:15:51.919 [info] <0.7804.0> starting stats_hero_sender_sup with 1 senders
+
+2016-09-30 10:15:51.920 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:15:51.920 [info] <0.6.0> Application public_key started on node nonode@nohost
+2016-09-30 10:15:51.920 [info] <0.6.0> Application ssl started on node nonode@nohost
+2016-09-30 10:15:52.186 [info] <0.6.0> Application oc_chef_authz exited with reason: stopped
+2016-09-30 10:15:52.186 [info] <0.6.0> Application sqerl exited with reason: stopped
+2016-09-30 10:15:52.186 [info] <0.6.0> Application epgsql exited with reason: stopped
+2016-09-30 10:15:52.186 [info] <0.6.0> Application ssl exited with reason: stopped
+2016-09-30 10:15:52.186 [info] <0.6.0> Application public_key exited with reason: stopped
+2016-09-30 10:15:52.187 [info] <0.6.0> Application stats_hero exited with reason: stopped
+2016-09-30 10:15:52.188 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:52.189 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:15:52.189 [info] <0.6.0> Application asn1 exited with reason: stopped
+2016-09-30 10:15:52.189 [info] <0.6.0> Application crypto exited with reason: stopped
+2016-09-30 10:15:52.364 [info] <0.6.0> Application crypto started on node nonode@nohost
+2016-09-30 10:15:52.364 [info] <0.6.0> Application asn1 started on node nonode@nohost
+2016-09-30 10:15:52.365 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:15:52.365 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:15:52.365 [info] <0.7862.0> starting stats_hero_sup
+
+2016-09-30 10:15:52.365 [info] <0.7863.0> starting stats_hero_sender_sup with 1 senders
+
+2016-09-30 10:15:52.366 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:15:52.366 [info] <0.6.0> Application public_key started on node nonode@nohost
+2016-09-30 10:15:52.367 [info] <0.6.0> Application ssl started on node nonode@nohost
+2016-09-30 10:15:52.367 [info] <0.6.0> Application epgsql started on node nonode@nohost
+2016-09-30 10:15:52.368 [info] <0.6.0> Application sqerl started on node nonode@nohost
+2016-09-30 10:15:52.370 [info] <0.6.0> Application oc_chef_authz started on node nonode@nohost
+2016-09-30 10:15:52.563 [info] <0.7894.0> oc_chef_authz_cleanup:process_batch actors_removed 10/1 groups_removed 10/1
+
+2016-09-30 10:15:52.567 [info] <0.6.0> Application oc_chef_authz exited with reason: stopped
+2016-09-30 10:15:52.568 [info] <0.6.0> Application sqerl exited with reason: stopped
+2016-09-30 10:15:52.568 [info] <0.6.0> Application epgsql exited with reason: stopped
+2016-09-30 10:15:52.568 [info] <0.6.0> Application ssl exited with reason: stopped
+2016-09-30 10:15:52.568 [info] <0.6.0> Application public_key exited with reason: stopped
+2016-09-30 10:15:52.569 [info] <0.6.0> Application stats_hero exited with reason: stopped
+2016-09-30 10:15:52.569 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:52.570 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:15:52.570 [info] <0.6.0> Application asn1 exited with reason: stopped
+2016-09-30 10:15:52.570 [info] <0.6.0> Application crypto exited with reason: stopped
+2016-09-30 10:15:52.699 [info] <0.6.0> Application crypto started on node nonode@nohost
+2016-09-30 10:15:52.699 [info] <0.6.0> Application asn1 started on node nonode@nohost
+2016-09-30 10:15:52.701 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:15:53.161 [warning] <0.5.0> lager_error_logger_h dropped 3 messages in the last second that exceeded the limit of 50 messages/sec
+2016-09-30 10:15:53.161 [info] <0.8020.0> oc_chef_authz_cleanup:process_batch actors_removed 4/4 groups_removed 4/4
+
+2016-09-30 10:15:53.184 [info] <0.6.0> Application oc_chef_authz exited with reason: stopped
+2016-09-30 10:15:53.185 [info] <0.6.0> Application sqerl exited with reason: stopped
+2016-09-30 10:15:53.185 [info] <0.6.0> Application epgsql exited with reason: stopped
+2016-09-30 10:15:53.185 [info] <0.6.0> Application ssl exited with reason: stopped
+2016-09-30 10:15:53.186 [info] <0.6.0> Application public_key exited with reason: stopped
+2016-09-30 10:15:53.187 [info] <0.6.0> Application stats_hero exited with reason: stopped
+2016-09-30 10:15:53.188 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:15:53.190 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:15:53.190 [info] <0.6.0> Application asn1 exited with reason: stopped
+2016-09-30 10:15:53.190 [info] <0.6.0> Application crypto exited with reason: stopped
+2016-09-30 10:15:53.492 [error] <0.5367.0> {oc_chef_group,update,error_in_bifrost,[{error,forbidden,<<"a11forbidden-0100000000000000000">>}]}
+2016-09-30 10:15:53.495 [error] <0.5367.0> {oc_chef_group,update,error_in_bifrost,[{error,forbidden,<<"a11forbidden-0100000000000000000">>},{error,forbidden,<<"a11forbidden-0200000000000000000">>}]}
+2016-09-30 10:15:53.498 [error] <0.5367.0> {oc_chef_group,update,error_in_bifrost,[{error,forbidden,<<"a11forbidden-0100000000000000000">>},{error,server_error,<<"a11client-0300000000000000000000">>}]}
+2016-09-30 10:15:53.501 [error] <0.5367.0> {oc_chef_group,update,error_in_bifrost,[{error,server_error,<<"a11serverr-010000000000000000000">>}]}
+2016-09-30 10:15:53.504 [error] <0.5367.0> {oc_chef_group,update,error_in_bifrost,[{error,server_error,<<"a11serverr-010000000000000000000">>},{error,server_error,<<"a11serverr-020000000000000000000">>}]}
+2016-09-30 10:15:53.680 [info] <0.8049.0> starting stats_hero_sup
+
+2016-09-30 10:15:53.680 [info] <0.8050.0> starting stats_hero_sender_sup with 5 senders
+
+2016-09-30 10:15:53.681 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:15:59.011 [info] <0.8220.0>@chef_index_batch:handle_call:187 Stop requested from {<0.5367.0>,#Ref<0.0.0.103261>}
+2016-09-30 10:15:59.370 [info] <0.8236.0>@chef_index_batch:handle_call:187 Stop requested from {<0.5367.0>,#Ref<0.0.0.103305>}
+2016-09-30 10:15:59.573 [info] <0.8252.0>@chef_index_batch:handle_call:187 Stop requested from {<0.8255.0>,#Ref<0.0.0.103328>}
+2016-09-30 10:15:59.689 [info] <0.8259.0>@chef_index_batch:handle_call:187 Stop requested from {<0.5367.0>,#Ref<0.0.0.103351>}
+2016-09-30 10:15:59.918 [info] <0.8270.0>@chef_index_batch:handle_call:187 Stop requested from {<0.8273.0>,#Ref<0.0.0.103374>}
+2016-09-30 10:16:00.006 [info] <0.8277.0>@chef_index_batch:handle_call:187 Stop requested from {<0.5367.0>,#Ref<0.0.0.103397>}
+2016-09-30 10:16:02.595 [error] <0.5367.0>@chef_wm_rabbitmq_management:parse_max_length_response:218 Invalid RabbitMQ response while getting queue max length throw {error,{2,invalid_json}}
+2016-09-30 10:16:02.604 [error] <0.5367.0>@chef_wm_rabbitmq_management:parse_current_length_response:201 Invalid RabbitMQ response while getting queue length throw {error,{2,invalid_json}}
+2016-09-30 10:16:02.714 [info] <0.8596.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.715 [info] <0.8598.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.715 [info] <0.8599.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.715 [info] <0.8600.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.716 [info] <0.8601.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.716 [info] <0.8602.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.716 [info] <0.8603.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.717 [info] <0.8604.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.718 [info] <0.8605.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.718 [info] <0.8606.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.719 [info] <0.8607.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.719 [info] <0.8608.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.720 [info] <0.8609.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.723 [info] <0.8610.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.723 [info] <0.8611.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.724 [info] <0.8612.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.724 [info] <0.8613.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.725 [info] <0.8614.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.725 [info] <0.8615.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.726 [info] <0.8616.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.726 [info] <0.8617.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.727 [info] <0.8618.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.728 [info] <0.8619.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.729 [info] <0.8620.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.731 [info] <0.8621.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.732 [info] <0.8622.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.733 [info] <0.8623.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.734 [info] <0.8624.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.734 [info] <0.8625.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.735 [info] <0.8626.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.736 [info] <0.8627.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.737 [info] <0.8628.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.738 [info] <0.8629.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.738 [info] <0.8630.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.738 [info] <0.8631.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.740 [info] <0.8632.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.742 [info] <0.8633.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.742 [info] <0.8634.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.743 [info] <0.8635.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.744 [info] <0.8636.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.746 [info] <0.8637.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.747 [info] <0.8638.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.748 [info] <0.8639.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.749 [info] <0.8640.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.751 [info] <0.8641.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.751 [info] <0.8642.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.752 [info] <0.8643.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.753 [info] <0.8644.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.754 [info] <0.8645.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.756 [info] <0.8646.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.756 [info] <0.8647.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.757 [info] <0.8648.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.757 [info] <0.8649.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.758 [info] <0.8650.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.758 [info] <0.8651.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.759 [info] <0.8652.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.760 [info] <0.8653.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.761 [info] <0.8654.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.761 [info] <0.8655.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.763 [info] <0.8656.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.764 [info] <0.8657.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.765 [info] <0.8658.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.771 [info] <0.8659.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.778 [info] <0.8660.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.783 [info] <0.8661.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.785 [info] <0.8662.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.788 [info] <0.8663.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.790 [info] <0.8664.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.794 [info] <0.8665.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.795 [info] <0.8666.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.796 [info] <0.8667.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.800 [info] <0.8668.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.806 [info] <0.8669.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.811 [info] <0.8670.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.812 [info] <0.8671.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.816 [info] <0.8672.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.816 [info] <0.8673.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.818 [info] <0.8674.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.823 [info] <0.8675.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.833 [info] <0.8676.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.836 [info] <0.8677.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.842 [info] <0.8678.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.857 [info] <0.8679.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.877 [info] <0.8680.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.886 [info] <0.8681.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.888 [info] <0.8682.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.892 [info] <0.8683.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.896 [info] <0.8684.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.901 [info] <0.8685.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.903 [info] <0.8686.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.906 [info] <0.8687.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.908 [info] <0.8688.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.914 [info] <0.8689.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.926 [info] <0.8690.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.927 [info] <0.8691.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.935 [info] <0.8692.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.948 [info] <0.8693.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.953 [info] <0.8694.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.970 [info] <0.8695.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:02.979 [info] <0.8696.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:03.039 [info] <0.8706.0>@chef_wm_rabbitmq_management:get_max_length:154 RabbitMQ max-length policy not set
+2016-09-30 10:16:03.042 [info] <0.8697.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:03.110 [info] <0.8716.0>@chef_wm_rabbitmq_management:get_current_length:174 Queue not bound in /analytics exchange
+2016-09-30 10:16:03.124 [info] <0.8707.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:03.203 [info] <0.8726.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 0 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:16:03.206 [info] <0.8717.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:03.277 [info] <0.8736.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 7 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:16:03.281 [info] <0.8727.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:03.342 [info] <0.8746.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 7 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:16:03.345 [info] <0.8737.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:03.411 [info] <0.8756.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 7 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:16:03.411 [info] <0.8757.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 7 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:16:03.415 [info] <0.8747.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:03.555 [info] <0.8767.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 99 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:16:03.556 [warning] <0.8767.0>@chef_wm_rabbitmq_management:check_current_queue_length:271 Queue Monitor has detected RabbitMQ for VHost "/analytics", queue "alaska" capacity at 100.0%
+2016-09-30 10:16:03.556 [warning] <0.8767.0>@chef_wm_rabbitmq_management:check_current_queue_length:277 Queue Monitor has dropped 0 messages for VHost "/analytics", queue "alaska" since last check due to queue limit exceeded
+2016-09-30 10:16:03.559 [info] <0.8758.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:03.649 [info] <0.8777.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 99 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:16:03.649 [warning] <0.8777.0>@chef_wm_rabbitmq_management:check_current_queue_length:271 Queue Monitor has detected RabbitMQ for VHost "/analytics", queue "alaska" capacity at 100.0%
+2016-09-30 10:16:03.650 [warning] <0.8777.0>@chef_wm_rabbitmq_management:check_current_queue_length:277 Queue Monitor has dropped 0 messages for VHost "/analytics", queue "alaska" since last check due to queue limit exceeded
+2016-09-30 10:16:03.650 [info] <0.8778.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 99 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:16:03.650 [warning] <0.8778.0>@chef_wm_rabbitmq_management:check_current_queue_length:271 Queue Monitor has detected RabbitMQ for VHost "/analytics", queue "alaska" capacity at 100.0%
+2016-09-30 10:16:03.650 [warning] <0.8778.0>@chef_wm_rabbitmq_management:check_current_queue_length:277 Queue Monitor has dropped 2 messages for VHost "/analytics", queue "alaska" since last check due to queue limit exceeded
+2016-09-30 10:16:03.653 [info] <0.8768.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:03.757 [info] <0.8779.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:03.843 [info] <0.8801.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 99 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:16:03.843 [warning] <0.8801.0>@chef_wm_rabbitmq_management:check_current_queue_length:271 Queue Monitor has detected RabbitMQ for VHost "/analytics", queue "alaska" capacity at 100.0%
+2016-09-30 10:16:03.843 [warning] <0.8801.0>@chef_wm_rabbitmq_management:check_current_queue_length:277 Queue Monitor has dropped 0 messages for VHost "/analytics", queue "alaska" since last check due to queue limit exceeded
+2016-09-30 10:16:03.938 [info] <0.8792.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:04.041 [info] <0.8820.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 99 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:16:04.041 [warning] <0.8820.0>@chef_wm_rabbitmq_management:check_current_queue_length:271 Queue Monitor has detected RabbitMQ for VHost "/analytics", queue "alaska" capacity at 100.0%
+2016-09-30 10:16:04.041 [warning] <0.8820.0>@chef_wm_rabbitmq_management:check_current_queue_length:277 Queue Monitor has dropped 0 messages for VHost "/analytics", queue "alaska" since last check due to queue limit exceeded
+2016-09-30 10:16:04.286 [info] <0.8833.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 0 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:16:04.326 [info] <0.8811.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:04.409 [info] <0.8845.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 99 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:16:04.410 [warning] <0.8845.0>@chef_wm_rabbitmq_management:check_current_queue_length:271 Queue Monitor has detected RabbitMQ for VHost "/analytics", queue "alaska" capacity at 100.0%
+2016-09-30 10:16:04.410 [warning] <0.8845.0>@chef_wm_rabbitmq_management:check_current_queue_length:277 Queue Monitor has dropped 0 messages for VHost "/analytics", queue "alaska" since last check due to queue limit exceeded
+2016-09-30 10:16:04.533 [info] <0.8836.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:04.554 [info] <0.8855.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:04.668 [warning] <0.8870.0>@chef_wm_actions_queue_monitoring:is_queue_at_capacity:163 Queue monitor timeout exit {timeout,{gen_server,call,[chef_wm_actions_queue_monitoring,is_queue_at_capacity,0]}} 
+2016-09-30 10:16:04.673 [info] <0.8868.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:04.767 [info] <0.8881.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 0 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:16:04.767 [info] <0.8872.0>@chef_wm_actions_queue_monitoring:handle_call:216 Manually setting Queue Monitor queue_at_capacity true
+2016-09-30 10:16:04.767 [info] <0.8872.0>@chef_wm_actions_queue_monitoring:handle_call:216 Manually setting Queue Monitor queue_at_capacity false
+2016-09-30 10:16:04.770 [info] <0.8872.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:04.777 [info] <0.8882.0>@chef_wm_actions_queue_monitoring:handle_call:243 Queue Monitoring timer already stopped
+2016-09-30 10:16:04.777 [info] <0.8882.0>@chef_wm_actions_queue_monitoring:handle_call:240 Queue Monitoring timer already started
+2016-09-30 10:16:04.780 [info] <0.8882.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:04.785 [info] <0.8886.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:04.847 [info] <0.8899.0>@chef_wm_rabbitmq_management:get_max_length:151 Can't connect to RabbitMQ management console to fetch max-length
+2016-09-30 10:16:04.856 [info] <0.8890.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:04.942 [info] <0.8909.0>@chef_wm_rabbitmq_management:get_current_length:169 Can't connect to RabbitMQ management console to fetch current length
+2016-09-30 10:16:04.948 [info] <0.8900.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:04.994 [error] <0.8919.0>@chef_wm_rabbitmq_management:get_max_length:157 Unknown response from RabbitMQ management console: foo
+2016-09-30 10:16:04.997 [info] <0.8910.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:05.080 [error] <0.8929.0>@chef_wm_rabbitmq_management:get_current_length:177 Unknown response from RabbitMQ management console: foo
+2016-09-30 10:16:05.084 [info] <0.8920.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:05.109 [warning] <0.8941.0>@chef_wm_actions_queue_monitoring:handle_info:286 Unknown process exit detected in Queue Monitor foo bar
+2016-09-30 10:16:06.508 [error] <0.9043.0> Bad typecheck for config item for 'oc_chef_wm' 'max_request_size' (#Fun<chef_wm_enforce.0.94025955>(0) -> {invalid_value,0,"value must be positive int or atom 'disabled'"})
+
+2016-09-30 10:16:06.511 [error] <0.9046.0> Bad typecheck for config item for 'oc_chef_wm' 'max_request_size' (#Fun<chef_wm_enforce.0.94025955>(-1) -> {invalid_value,-1,"value must be positive int or atom 'disabled'"})
+
+2016-09-30 10:16:06.514 [error] <0.9049.0> Bad typecheck for config item for 'oc_chef_wm' 'max_request_size' (#Fun<chef_wm_enforce.0.94025955>(not_disabled) -> {invalid_value,not_disabled,"value must be positive int or atom 'disabled'"})
+
+2016-09-30 10:16:10.008 [error] <0.9160.0> Missing config item for 'chef_index' 'solr_service'
+
+2016-09-30 10:16:10.008 [error] <0.9160.0> {chef_index_http,get,error,config_missing_item}
+2016-09-30 10:16:10.016 [error] <0.9159.0> {chef_sql,ping,exit,{noproc,{gen_server,call,[sqerl,{take_member,0},infinity]}}}
+2016-09-30 10:16:10.016 [error] <0.9155.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"fail">>},{<<"chef_sql">>,<<"fail">>}]}}}
+2016-09-30 10:16:10.962 [error] <0.9181.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"pong">>},{<<"chef_sql">>,<<"fail">>}]}}}
+2016-09-30 10:16:12.399 [error] <0.9211.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"fail">>},{<<"chef_sql">>,<<"pong">>}]}}}
+2016-09-30 10:16:13.915 [error] <0.9241.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"pong">>},{<<"chef_sql">>,<<"fail">>}]}}}
+2016-09-30 10:16:15.441 [error] <0.9271.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"fail">>},{<<"chef_sql">>,<<"pong">>}]}}}
+2016-09-30 10:16:17.600 [info] <0.9281.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:16:17.600 [info] <0.9312.0>@chef_wm_actions_queue_monitoring:handle_call:216 Manually setting Queue Monitor queue_at_capacity true
+2016-09-30 10:16:18.382 [error] <0.9333.0>@chef_wm_status:log_failure:116 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"pong">>},{<<"chef_sql">>,<<"pong">>}]}},{<<"analytics_queue">>,{[{queue_at_capacity,true},{dropped_since_last_check,0},{max_length,0},{last_recorded_length,0},{total_dropped,0},{check_count,0},{mailbox_length,0}]}}}
+2016-09-30 10:22:44.058 [info] <0.6.0> Application lager started on node nonode@nohost
+2016-09-30 10:22:44.082 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:44.102 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:22:44.107 [info] <0.6.0> Application opscoderl_httpc started on node nonode@nohost
+2016-09-30 10:22:44.128 [info] <0.6.0> Application data_collector started on node nonode@nohost
+2016-09-30 10:22:44.131 [info] <0.6.0> Application data_collector exited with reason: stopped
+2016-09-30 10:22:44.132 [info] <0.6.0> Application opscoderl_httpc exited with reason: stopped
+2016-09-30 10:22:44.132 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:22:44.133 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:44.331 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:44.332 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:22:44.332 [info] <0.6.0> Application opscoderl_httpc started on node nonode@nohost
+2016-09-30 10:22:44.342 [info] <0.6.0> Application data_collector started on node nonode@nohost
+2016-09-30 10:22:44.346 [info] <0.6.0> Application data_collector exited with reason: stopped
+2016-09-30 10:22:44.346 [info] <0.6.0> Application opscoderl_httpc exited with reason: stopped
+2016-09-30 10:22:44.347 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:22:44.348 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:44.582 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:44.583 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:22:44.583 [info] <0.6.0> Application opscoderl_httpc started on node nonode@nohost
+2016-09-30 10:22:44.583 [info] <0.6.0> Application data_collector started on node nonode@nohost
+2016-09-30 10:22:44.583 [info] <0.6.0> Application data_collector exited with reason: stopped
+2016-09-30 10:22:44.586 [info] <0.6.0> Application opscoderl_httpc exited with reason: stopped
+2016-09-30 10:22:44.587 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:22:44.589 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:44.850 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:44.850 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:22:44.851 [info] <0.6.0> Application opscoderl_httpc started on node nonode@nohost
+2016-09-30 10:22:44.856 [info] <0.6.0> Application data_collector started on node nonode@nohost
+2016-09-30 10:22:44.864 [info] <0.6.0> Application data_collector exited with reason: stopped
+2016-09-30 10:22:44.867 [info] <0.6.0> Application opscoderl_httpc exited with reason: stopped
+2016-09-30 10:22:44.869 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:22:44.870 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:45.636 [error] <0.5596.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(0) -> false)
+
+2016-09-30 10:22:45.639 [error] <0.5599.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(-5) -> false)
+
+2016-09-30 10:22:45.642 [error] <0.5602.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(5.0) -> false)
+
+2016-09-30 10:22:45.645 [error] <0.5605.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(-5.0) -> false)
+
+2016-09-30 10:22:45.648 [error] <0.5608.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer("This is bad") -> false)
+
+2016-09-30 10:22:45.651 [error] <0.5611.0> Bad typecheck for config item for 'chef_config_test' 'chef_config_test_option' (pos_integer(<<"This is also bad">>) -> false)
+
+2016-09-30 10:22:45.654 [error] <0.5614.0> Missing config item for 'chef_config_test' 'chef_config_test_option'
+
+2016-09-30 10:22:46.031 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:46.480 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:46.481 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:46.988 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:46.989 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:47.467 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:47.467 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:47.895 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:47.896 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:48.257 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:48.257 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:48.781 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:48.781 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:49.271 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:49.272 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:49.702 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:49.702 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:50.038 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:50.039 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:50.414 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:50.414 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:50.791 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:50.792 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:51.167 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:51.167 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:51.807 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:51.808 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:52.301 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:52.302 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:52.748 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:52.749 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:53.276 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:53.277 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:53.776 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:53.776 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:54.260 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:54.261 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:54.848 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:54.849 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:55.561 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:55.562 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:55.930 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:55.930 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:22:56.349 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:22:56.623 [info] <0.6092.0> chef_keygen_cache configured size: 4 start_size: 4 max_workers: 2
+2016-09-30 10:22:56.641 [info] <0.6092.0> chef_keygen_cache pre-filling: 0% (0/4)
+
+2016-09-30 10:22:56.677 [info] <0.6092.0> chef_keygen_cache pre-filling: 50% (2/4)
+
+2016-09-30 10:22:56.688 [info] <0.6092.0> chef_keygen_cache starting with 4 keys in cache
+
+2016-09-30 10:22:57.052 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:22:57.604 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:22:57.605 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:22:57.662 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:22:57.663 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:22:57.677 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:22:57.678 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:22:57.709 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:22:57.711 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:22:57.813 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:22:57.813 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:22:57.833 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:22:59.594 [error] <0.6461.0> Checking presence of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-30 10:22:59.597 [error] <0.6468.0> Checking presence of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd") raised exception throw:oops
+
+2016-09-30 10:22:59.600 [error] <0.6475.0> Checking presence of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-30 10:23:04.604 [error] <0.6471.0> Checking presence of checksum: <<"cccccccccccccccccccccccccccccccf">> for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" has taken longer than 5000 ms
+
+2016-09-30 10:23:04.607 [error] <0.6481.0> Checking presence of file (checksum: <<"cccccccccccccccccccccccccccccccd">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-cccccccccccccccccccccccccccccccd") raised exception throw:oops
+
+2016-09-30 10:23:04.608 [error] <0.6482.0> Checking presence of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-30 10:23:04.621 [error] <0.6512.0> Deletion of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-30 10:23:04.624 [error] <0.6519.0> Deletion of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbd") raised exception throw:oops
+
+2016-09-30 10:23:04.627 [error] <0.6526.0> Deletion of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-30 10:23:09.628 [error] <0.6522.0> Deletion of checksum: <<"cccccccccccccccccccccccccccccccf">> for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" has taken longer than 5000 ms
+
+2016-09-30 10:23:09.631 [error] <0.6532.0> Deletion of file (checksum: <<"cccccccccccccccccccccccccccccccd">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-cccccccccccccccccccccccccccccccd") raised exception throw:oops
+
+2016-09-30 10:23:09.631 [error] <0.6533.0> Deletion of file (checksum: <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe">>) for org <<"deadbeefdeadbeefdeadbeefdeadbeef">> from bucket "testbucket" (key: "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbe") failed because the file was not found
+
+2016-09-30 10:23:09.869 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:23:09.899 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:23:09.900 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:23:09.905 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:23:09.905 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:23:09.921 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:23:10.157 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:23:10.194 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:23:10.195 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:23:10.234 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:23:10.241 [info] <0.6.0> Application bcrypt started on node nonode@nohost
+2016-09-30 10:23:10.251 [info] <0.6.0> Application bcrypt exited with reason: stopped
+2016-09-30 10:23:10.931 [info] <0.6739.0> starting stats_hero_sup
+
+2016-09-30 10:23:10.943 [info] <0.6740.0> starting stats_hero_sender_sup with 5 senders
+
+2016-09-30 10:23:10.976 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:23:22.791 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:23:22.791 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:23:22.804 [info] <0.6.0> Application epgsql started on node nonode@nohost
+2016-09-30 10:23:22.810 [info] <0.6.0> Application sqerl started on node nonode@nohost
+2016-09-30 10:23:22.850 [info] <0.6.0> Application oc_chef_authz started on node nonode@nohost
+2016-09-30 10:23:22.901 [info] <0.6.0> Application oc_chef_authz exited with reason: stopped
+2016-09-30 10:23:22.901 [info] <0.6.0> Application sqerl exited with reason: stopped
+2016-09-30 10:23:22.901 [info] <0.6.0> Application epgsql exited with reason: stopped
+2016-09-30 10:23:22.902 [info] <0.6.0> Application ssl exited with reason: stopped
+2016-09-30 10:23:22.902 [info] <0.6.0> Application public_key exited with reason: stopped
+2016-09-30 10:23:22.903 [info] <0.6.0> Application stats_hero exited with reason: stopped
+2016-09-30 10:23:22.904 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:23:22.904 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:23:22.904 [info] <0.6.0> Application asn1 exited with reason: stopped
+2016-09-30 10:23:22.904 [info] <0.6.0> Application crypto exited with reason: stopped
+2016-09-30 10:23:22.915 [info] <0.6.0> Application crypto started on node nonode@nohost
+2016-09-30 10:23:22.915 [info] <0.6.0> Application asn1 started on node nonode@nohost
+2016-09-30 10:23:22.916 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:23:22.917 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:23:22.917 [info] <0.7174.0> starting stats_hero_sup
+
+2016-09-30 10:23:22.917 [info] <0.7175.0> starting stats_hero_sender_sup with 1 senders
+
+2016-09-30 10:23:22.918 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:23:22.918 [info] <0.6.0> Application public_key started on node nonode@nohost
+2016-09-30 10:23:22.922 [info] <0.6.0> Application ssl started on node nonode@nohost
+2016-09-30 10:23:22.926 [info] <0.6.0> Application epgsql started on node nonode@nohost
+2016-09-30 10:23:22.926 [info] <0.6.0> Application sqerl started on node nonode@nohost
+2016-09-30 10:23:22.936 [info] <0.6.0> Application oc_chef_authz started on node nonode@nohost
+2016-09-30 10:23:22.990 [info] <0.6.0> Application oc_chef_authz exited with reason: stopped
+2016-09-30 10:23:22.990 [info] <0.6.0> Application sqerl exited with reason: stopped
+2016-09-30 10:23:22.990 [info] <0.6.0> Application epgsql exited with reason: stopped
+2016-09-30 10:23:22.991 [info] <0.6.0> Application ssl exited with reason: stopped
+2016-09-30 10:23:23.013 [info] <0.6.0> Application crypto started on node nonode@nohost
+2016-09-30 10:23:23.013 [info] <0.6.0> Application asn1 started on node nonode@nohost
+2016-09-30 10:23:23.014 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:23:23.014 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:23:23.014 [info] <0.7231.0> starting stats_hero_sup
+
+2016-09-30 10:23:23.015 [info] <0.7232.0> starting stats_hero_sender_sup with 1 senders
+
+2016-09-30 10:23:23.015 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:23:23.015 [info] <0.6.0> Application public_key started on node nonode@nohost
+2016-09-30 10:23:23.016 [info] <0.6.0> Application ssl started on node nonode@nohost
+2016-09-30 10:23:23.016 [info] <0.6.0> Application epgsql started on node nonode@nohost
+2016-09-30 10:23:23.016 [info] <0.6.0> Application sqerl started on node nonode@nohost
+2016-09-30 10:23:23.029 [info] <0.6.0> Application oc_chef_authz started on node nonode@nohost
+2016-09-30 10:23:23.089 [info] <0.6.0> Application oc_chef_authz exited with reason: stopped
+2016-09-30 10:23:23.089 [info] <0.6.0> Application sqerl exited with reason: stopped
+2016-09-30 10:23:23.089 [info] <0.6.0> Application epgsql exited with reason: stopped
+2016-09-30 10:23:23.090 [info] <0.6.0> Application ssl exited with reason: stopped
+2016-09-30 10:23:23.090 [info] <0.6.0> Application public_key exited with reason: stopped
+2016-09-30 10:23:23.091 [info] <0.6.0> Application stats_hero exited with reason: stopped
+2016-09-30 10:23:23.092 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:23:23.093 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:23:23.093 [info] <0.6.0> Application asn1 exited with reason: stopped
+2016-09-30 10:23:23.093 [info] <0.6.0> Application crypto exited with reason: stopped
+2016-09-30 10:23:23.112 [info] <0.6.0> Application crypto started on node nonode@nohost
+2016-09-30 10:23:23.112 [info] <0.6.0> Application asn1 started on node nonode@nohost
+2016-09-30 10:23:23.113 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:23:23.113 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:23:23.113 [info] <0.7288.0> starting stats_hero_sup
+
+2016-09-30 10:23:23.113 [info] <0.7289.0> starting stats_hero_sender_sup with 1 senders
+
+2016-09-30 10:23:23.113 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:23:23.113 [info] <0.6.0> Application public_key started on node nonode@nohost
+2016-09-30 10:23:24.372 [warning] <0.5.0> lager_error_logger_h dropped 9 messages in the last second that exceeded the limit of 50 messages/sec
+2016-09-30 10:23:24.372 [info] <0.6.0> Application crypto started on node nonode@nohost
+2016-09-30 10:23:24.372 [info] <0.6.0> Application asn1 started on node nonode@nohost
+2016-09-30 10:23:24.374 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:23:24.374 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:23:24.374 [info] <0.7459.0> starting stats_hero_sup
+
+2016-09-30 10:23:24.374 [info] <0.7460.0> starting stats_hero_sender_sup with 1 senders
+
+2016-09-30 10:23:24.375 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:23:24.375 [info] <0.6.0> Application public_key started on node nonode@nohost
+2016-09-30 10:23:24.376 [info] <0.6.0> Application ssl started on node nonode@nohost
+2016-09-30 10:23:24.376 [info] <0.6.0> Application epgsql started on node nonode@nohost
+2016-09-30 10:23:24.376 [info] <0.6.0> Application sqerl started on node nonode@nohost
+2016-09-30 10:23:24.385 [info] <0.6.0> Application oc_chef_authz started on node nonode@nohost
+2016-09-30 10:23:24.963 [info] <0.6.0> Application oc_chef_authz exited with reason: stopped
+2016-09-30 10:23:24.963 [info] <0.6.0> Application sqerl exited with reason: stopped
+2016-09-30 10:23:24.963 [info] <0.6.0> Application epgsql exited with reason: stopped
+2016-09-30 10:23:24.963 [info] <0.6.0> Application ssl exited with reason: stopped
+2016-09-30 10:23:24.963 [info] <0.6.0> Application public_key exited with reason: stopped
+2016-09-30 10:23:24.964 [info] <0.6.0> Application stats_hero exited with reason: stopped
+2016-09-30 10:23:24.964 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:23:24.969 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:23:24.969 [info] <0.6.0> Application asn1 exited with reason: stopped
+2016-09-30 10:23:24.969 [info] <0.6.0> Application crypto exited with reason: stopped
+2016-09-30 10:23:24.970 [info] <0.6.0> Application crypto started on node nonode@nohost
+2016-09-30 10:23:24.970 [info] <0.6.0> Application asn1 started on node nonode@nohost
+2016-09-30 10:23:24.970 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:23:24.971 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:23:24.971 [info] <0.7522.0> starting stats_hero_sup
+
+2016-09-30 10:23:24.971 [info] <0.7523.0> starting stats_hero_sender_sup with 1 senders
+
+2016-09-30 10:23:24.971 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:23:24.971 [info] <0.6.0> Application public_key started on node nonode@nohost
+2016-09-30 10:23:25.614 [warning] <0.5.0> lager_error_logger_h dropped 1 messages in the last second that exceeded the limit of 50 messages/sec
+2016-09-30 10:23:25.614 [error] <0.7562.0> {oc_chef_authz_http_ping,pang,server_error}
+2016-09-30 10:23:25.629 [info] <0.6.0> Application oc_chef_authz exited with reason: stopped
+2016-09-30 10:23:25.629 [info] <0.6.0> Application sqerl exited with reason: stopped
+2016-09-30 10:23:25.629 [info] <0.6.0> Application epgsql exited with reason: stopped
+2016-09-30 10:23:25.629 [info] <0.6.0> Application ssl exited with reason: stopped
+2016-09-30 10:23:25.629 [info] <0.6.0> Application public_key exited with reason: stopped
+2016-09-30 10:23:25.630 [info] <0.6.0> Application stats_hero exited with reason: stopped
+2016-09-30 10:23:25.630 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:23:25.635 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:23:25.635 [info] <0.6.0> Application asn1 exited with reason: stopped
+2016-09-30 10:23:25.635 [info] <0.6.0> Application crypto exited with reason: stopped
+2016-09-30 10:23:25.635 [info] <0.6.0> Application crypto started on node nonode@nohost
+2016-09-30 10:23:25.635 [info] <0.6.0> Application asn1 started on node nonode@nohost
+2016-09-30 10:23:25.636 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:23:25.636 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:23:25.636 [info] <0.7585.0> starting stats_hero_sup
+
+2016-09-30 10:23:25.636 [info] <0.7586.0> starting stats_hero_sender_sup with 1 senders
+
+2016-09-30 10:23:25.637 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:23:25.637 [info] <0.6.0> Application public_key started on node nonode@nohost
+2016-09-30 10:23:25.637 [info] <0.6.0> Application ssl started on node nonode@nohost
+2016-09-30 10:23:25.637 [info] <0.6.0> Application epgsql started on node nonode@nohost
+2016-09-30 10:23:25.637 [info] <0.6.0> Application sqerl started on node nonode@nohost
+2016-09-30 10:23:25.637 [info] <0.6.0> Application oc_chef_authz started on node nonode@nohost
+2016-09-30 10:23:26.069 [error] <0.7625.0> {oc_chef_authz_http_ping,pang,req_timedout}
+2016-09-30 10:23:26.083 [info] <0.6.0> Application oc_chef_authz exited with reason: stopped
+2016-09-30 10:23:26.083 [info] <0.6.0> Application sqerl exited with reason: stopped
+2016-09-30 10:23:26.083 [info] <0.6.0> Application epgsql exited with reason: stopped
+2016-09-30 10:23:26.084 [info] <0.6.0> Application ssl exited with reason: stopped
+2016-09-30 10:23:26.084 [info] <0.6.0> Application public_key exited with reason: stopped
+2016-09-30 10:23:26.084 [info] <0.6.0> Application stats_hero exited with reason: stopped
+2016-09-30 10:23:26.084 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:23:26.090 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:23:26.090 [info] <0.6.0> Application asn1 exited with reason: stopped
+2016-09-30 10:23:26.090 [info] <0.6.0> Application crypto exited with reason: stopped
+2016-09-30 10:23:27.413 [info] <0.6.0> Application crypto started on node nonode@nohost
+2016-09-30 10:23:27.414 [info] <0.6.0> Application asn1 started on node nonode@nohost
+2016-09-30 10:23:27.415 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:23:27.415 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:23:27.415 [info] <0.7740.0> starting stats_hero_sup
+
+2016-09-30 10:23:27.415 [info] <0.7741.0> starting stats_hero_sender_sup with 1 senders
+
+2016-09-30 10:23:27.415 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:23:27.415 [info] <0.6.0> Application public_key started on node nonode@nohost
+2016-09-30 10:23:27.416 [info] <0.6.0> Application ssl started on node nonode@nohost
+2016-09-30 10:23:27.416 [info] <0.6.0> Application epgsql started on node nonode@nohost
+2016-09-30 10:23:27.416 [info] <0.6.0> Application sqerl started on node nonode@nohost
+2016-09-30 10:23:27.416 [info] <0.6.0> Application oc_chef_authz started on node nonode@nohost
+2016-09-30 10:23:27.547 [info] <0.6.0> Application oc_chef_authz exited with reason: stopped
+2016-09-30 10:23:27.547 [info] <0.6.0> Application sqerl exited with reason: stopped
+2016-09-30 10:23:27.547 [info] <0.6.0> Application epgsql exited with reason: stopped
+2016-09-30 10:23:27.548 [info] <0.6.0> Application ssl exited with reason: stopped
+2016-09-30 10:23:27.548 [info] <0.6.0> Application public_key exited with reason: stopped
+2016-09-30 10:23:27.548 [info] <0.6.0> Application stats_hero exited with reason: stopped
+2016-09-30 10:23:27.549 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:23:27.549 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:23:27.549 [info] <0.6.0> Application asn1 exited with reason: stopped
+2016-09-30 10:23:27.549 [info] <0.6.0> Application crypto exited with reason: stopped
+2016-09-30 10:23:27.645 [info] <0.6.0> Application crypto started on node nonode@nohost
+2016-09-30 10:23:27.645 [info] <0.6.0> Application asn1 started on node nonode@nohost
+2016-09-30 10:23:27.646 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:23:27.646 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:23:27.646 [info] <0.7799.0> starting stats_hero_sup
+
+2016-09-30 10:23:27.646 [info] <0.7800.0> starting stats_hero_sender_sup with 1 senders
+
+2016-09-30 10:23:27.647 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:23:27.647 [info] <0.6.0> Application public_key started on node nonode@nohost
+2016-09-30 10:23:27.647 [info] <0.6.0> Application ssl started on node nonode@nohost
+2016-09-30 10:23:28.055 [warning] <0.5.0> lager_error_logger_h dropped 4 messages in the last second that exceeded the limit of 50 messages/sec
+2016-09-30 10:23:28.055 [info] <0.7890.0> oc_chef_authz_cleanup:process_batch actors_removed 10/1 groups_removed 10/1
+
+2016-09-30 10:23:28.059 [info] <0.6.0> Application oc_chef_authz exited with reason: stopped
+2016-09-30 10:23:28.059 [info] <0.6.0> Application sqerl exited with reason: stopped
+2016-09-30 10:23:28.059 [info] <0.6.0> Application epgsql exited with reason: stopped
+2016-09-30 10:23:28.060 [info] <0.6.0> Application ssl exited with reason: stopped
+2016-09-30 10:23:28.060 [info] <0.6.0> Application public_key exited with reason: stopped
+2016-09-30 10:23:28.061 [info] <0.6.0> Application stats_hero exited with reason: stopped
+2016-09-30 10:23:28.061 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:23:28.062 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:23:28.062 [info] <0.6.0> Application asn1 exited with reason: stopped
+2016-09-30 10:23:28.062 [info] <0.6.0> Application crypto exited with reason: stopped
+2016-09-30 10:23:28.261 [info] <0.6.0> Application crypto started on node nonode@nohost
+2016-09-30 10:23:28.261 [info] <0.6.0> Application asn1 started on node nonode@nohost
+2016-09-30 10:23:28.263 [info] <0.6.0> Application ibrowse started on node nonode@nohost
+2016-09-30 10:23:28.264 [info] <0.6.0> Application pooler started on node nonode@nohost
+2016-09-30 10:23:28.264 [info] <0.7921.0> starting stats_hero_sup
+
+2016-09-30 10:23:28.265 [info] <0.7922.0> starting stats_hero_sender_sup with 1 senders
+
+2016-09-30 10:23:28.266 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:23:28.266 [info] <0.6.0> Application public_key started on node nonode@nohost
+2016-09-30 10:23:28.267 [info] <0.6.0> Application ssl started on node nonode@nohost
+2016-09-30 10:23:28.268 [info] <0.6.0> Application epgsql started on node nonode@nohost
+2016-09-30 10:23:28.268 [info] <0.6.0> Application sqerl started on node nonode@nohost
+2016-09-30 10:23:28.272 [info] <0.6.0> Application oc_chef_authz started on node nonode@nohost
+2016-09-30 10:23:28.447 [info] <0.7953.0> oc_chef_authz_cleanup:process_batch actors_removed 1/1 groups_removed 1/1
+
+2016-09-30 10:23:28.450 [info] <0.6.0> Application oc_chef_authz exited with reason: stopped
+2016-09-30 10:23:28.450 [info] <0.6.0> Application sqerl exited with reason: stopped
+2016-09-30 10:23:28.450 [info] <0.6.0> Application epgsql exited with reason: stopped
+2016-09-30 10:23:28.451 [info] <0.6.0> Application ssl exited with reason: stopped
+2016-09-30 10:23:28.451 [info] <0.6.0> Application public_key exited with reason: stopped
+2016-09-30 10:23:28.451 [info] <0.6.0> Application stats_hero exited with reason: stopped
+2016-09-30 10:23:28.452 [info] <0.6.0> Application pooler exited with reason: stopped
+2016-09-30 10:23:28.452 [info] <0.6.0> Application ibrowse exited with reason: stopped
+2016-09-30 10:23:28.452 [info] <0.6.0> Application asn1 exited with reason: stopped
+2016-09-30 10:23:28.452 [info] <0.6.0> Application crypto exited with reason: stopped
+2016-09-30 10:23:28.538 [info] <0.6.0> Application crypto started on node nonode@nohost
+2016-09-30 10:23:28.538 [info] <0.6.0> Application asn1 started on node nonode@nohost
+2016-09-30 10:23:29.161 [warning] <0.5.0> lager_error_logger_h dropped 6 messages in the last second that exceeded the limit of 50 messages/sec
+2016-09-30 10:23:29.161 [info] <0.8045.0> starting stats_hero_sup
+
+2016-09-30 10:23:29.161 [info] <0.8046.0> starting stats_hero_sender_sup with 5 senders
+
+2016-09-30 10:23:29.162 [info] <0.6.0> Application stats_hero started on node nonode@nohost
+2016-09-30 10:23:33.950 [info] <0.8216.0>@chef_index_batch:handle_call:187 Stop requested from {<0.5363.0>,#Ref<0.0.0.102836>}
+2016-09-30 10:23:34.211 [info] <0.8232.0>@chef_index_batch:handle_call:187 Stop requested from {<0.5363.0>,#Ref<0.0.0.102880>}
+2016-09-30 10:23:34.363 [info] <0.8248.0>@chef_index_batch:handle_call:187 Stop requested from {<0.8251.0>,#Ref<0.0.0.102903>}
+2016-09-30 10:23:34.473 [info] <0.8255.0>@chef_index_batch:handle_call:187 Stop requested from {<0.5363.0>,#Ref<0.0.0.102926>}
+2016-09-30 10:23:34.738 [info] <0.8266.0>@chef_index_batch:handle_call:187 Stop requested from {<0.8269.0>,#Ref<0.0.0.102949>}
+2016-09-30 10:23:34.866 [info] <0.8273.0>@chef_index_batch:handle_call:187 Stop requested from {<0.5363.0>,#Ref<0.0.0.102972>}
+2016-09-30 10:23:37.139 [error] <0.5363.0>@chef_wm_rabbitmq_management:parse_max_length_response:218 Invalid RabbitMQ response while getting queue max length throw {error,{2,invalid_json}}
+2016-09-30 10:23:37.148 [error] <0.5363.0>@chef_wm_rabbitmq_management:parse_current_length_response:201 Invalid RabbitMQ response while getting queue length throw {error,{2,invalid_json}}
+2016-09-30 10:23:37.366 [info] <0.8592.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.367 [info] <0.8594.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.368 [info] <0.8595.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.369 [info] <0.8596.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.370 [info] <0.8597.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.370 [info] <0.8598.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.371 [info] <0.8599.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.372 [info] <0.8600.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.373 [info] <0.8601.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.373 [info] <0.8602.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.374 [info] <0.8603.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.375 [info] <0.8604.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.376 [info] <0.8605.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.377 [info] <0.8606.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.378 [info] <0.8607.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.379 [info] <0.8608.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.381 [info] <0.8609.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.381 [info] <0.8610.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.383 [info] <0.8611.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.383 [info] <0.8612.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.384 [info] <0.8613.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.386 [info] <0.8614.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.387 [info] <0.8615.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.389 [info] <0.8616.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.390 [info] <0.8617.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.391 [info] <0.8618.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.392 [info] <0.8619.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.393 [info] <0.8620.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.394 [info] <0.8621.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.396 [info] <0.8622.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.417 [info] <0.8623.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.420 [info] <0.8624.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.423 [info] <0.8625.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.427 [info] <0.8626.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.431 [info] <0.8627.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.432 [info] <0.8628.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.432 [info] <0.8629.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.435 [info] <0.8630.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.436 [info] <0.8631.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.437 [info] <0.8632.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.440 [info] <0.8633.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.444 [info] <0.8634.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.444 [info] <0.8635.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.448 [info] <0.8636.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.451 [info] <0.8637.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.452 [info] <0.8638.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.493 [info] <0.8639.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.496 [info] <0.8640.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.498 [info] <0.8641.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.502 [info] <0.8642.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.503 [info] <0.8643.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.504 [info] <0.8644.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.513 [info] <0.8645.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.515 [info] <0.8646.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.520 [info] <0.8647.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.523 [info] <0.8648.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.535 [info] <0.8649.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.540 [info] <0.8650.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.546 [info] <0.8651.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.550 [info] <0.8652.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.568 [info] <0.8653.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.569 [info] <0.8654.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.583 [info] <0.8655.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.585 [info] <0.8656.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.591 [info] <0.8657.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.592 [info] <0.8658.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.599 [info] <0.8659.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.602 [info] <0.8660.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.605 [info] <0.8661.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.606 [info] <0.8662.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.616 [info] <0.8663.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.624 [info] <0.8664.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.625 [info] <0.8665.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.633 [info] <0.8666.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.657 [info] <0.8667.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.684 [info] <0.8668.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.685 [info] <0.8669.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.691 [info] <0.8670.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.692 [info] <0.8671.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.693 [info] <0.8672.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.695 [info] <0.8673.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.700 [info] <0.8674.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.701 [info] <0.8675.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.723 [info] <0.8676.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.725 [info] <0.8677.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.751 [info] <0.8678.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.767 [info] <0.8679.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.785 [info] <0.8680.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.786 [info] <0.8681.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.787 [info] <0.8682.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.796 [info] <0.8683.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.817 [info] <0.8684.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.830 [info] <0.8685.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.850 [info] <0.8686.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.852 [info] <0.8687.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.881 [info] <0.8688.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.893 [info] <0.8689.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.895 [info] <0.8690.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.936 [info] <0.8691.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:37.972 [info] <0.8692.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:38.106 [info] <0.8702.0>@chef_wm_rabbitmq_management:get_max_length:154 RabbitMQ max-length policy not set
+2016-09-30 10:23:38.109 [info] <0.8693.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:38.192 [info] <0.8712.0>@chef_wm_rabbitmq_management:get_current_length:174 Queue not bound in /analytics exchange
+2016-09-30 10:23:38.195 [info] <0.8703.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:38.300 [info] <0.8722.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 0 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:23:38.304 [info] <0.8713.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:38.403 [info] <0.8732.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 7 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:23:38.409 [info] <0.8723.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:38.502 [info] <0.8742.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 7 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:23:38.505 [info] <0.8733.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:38.591 [info] <0.8752.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 7 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:23:38.592 [info] <0.8753.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 7 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:23:38.595 [info] <0.8743.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:38.670 [info] <0.8763.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 99 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:23:38.670 [warning] <0.8763.0>@chef_wm_rabbitmq_management:check_current_queue_length:271 Queue Monitor has detected RabbitMQ for VHost "/analytics", queue "alaska" capacity at 100.0%
+2016-09-30 10:23:38.670 [warning] <0.8763.0>@chef_wm_rabbitmq_management:check_current_queue_length:277 Queue Monitor has dropped 0 messages for VHost "/analytics", queue "alaska" since last check due to queue limit exceeded
+2016-09-30 10:23:38.674 [info] <0.8754.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:38.749 [info] <0.8773.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 99 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:23:38.750 [warning] <0.8773.0>@chef_wm_rabbitmq_management:check_current_queue_length:271 Queue Monitor has detected RabbitMQ for VHost "/analytics", queue "alaska" capacity at 100.0%
+2016-09-30 10:23:38.750 [warning] <0.8773.0>@chef_wm_rabbitmq_management:check_current_queue_length:277 Queue Monitor has dropped 0 messages for VHost "/analytics", queue "alaska" since last check due to queue limit exceeded
+2016-09-30 10:23:38.750 [info] <0.8774.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 99 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:23:38.750 [warning] <0.8774.0>@chef_wm_rabbitmq_management:check_current_queue_length:271 Queue Monitor has detected RabbitMQ for VHost "/analytics", queue "alaska" capacity at 100.0%
+2016-09-30 10:23:38.750 [warning] <0.8774.0>@chef_wm_rabbitmq_management:check_current_queue_length:277 Queue Monitor has dropped 2 messages for VHost "/analytics", queue "alaska" since last check due to queue limit exceeded
+2016-09-30 10:23:38.754 [info] <0.8764.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:38.877 [info] <0.8775.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:38.985 [info] <0.8797.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 99 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:23:38.986 [warning] <0.8797.0>@chef_wm_rabbitmq_management:check_current_queue_length:271 Queue Monitor has detected RabbitMQ for VHost "/analytics", queue "alaska" capacity at 100.0%
+2016-09-30 10:23:38.986 [warning] <0.8797.0>@chef_wm_rabbitmq_management:check_current_queue_length:277 Queue Monitor has dropped 0 messages for VHost "/analytics", queue "alaska" since last check due to queue limit exceeded
+2016-09-30 10:23:39.136 [info] <0.8788.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:39.270 [info] <0.8816.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 99 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:23:39.270 [warning] <0.8816.0>@chef_wm_rabbitmq_management:check_current_queue_length:271 Queue Monitor has detected RabbitMQ for VHost "/analytics", queue "alaska" capacity at 100.0%
+2016-09-30 10:23:39.270 [warning] <0.8816.0>@chef_wm_rabbitmq_management:check_current_queue_length:277 Queue Monitor has dropped 0 messages for VHost "/analytics", queue "alaska" since last check due to queue limit exceeded
+2016-09-30 10:23:39.429 [info] <0.8829.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 0 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:23:39.473 [info] <0.8807.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:39.597 [info] <0.8841.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 99 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:23:39.597 [warning] <0.8841.0>@chef_wm_rabbitmq_management:check_current_queue_length:271 Queue Monitor has detected RabbitMQ for VHost "/analytics", queue "alaska" capacity at 100.0%
+2016-09-30 10:23:39.597 [warning] <0.8841.0>@chef_wm_rabbitmq_management:check_current_queue_length:277 Queue Monitor has dropped 0 messages for VHost "/analytics", queue "alaska" since last check due to queue limit exceeded
+2016-09-30 10:23:39.745 [info] <0.8832.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:39.782 [info] <0.8851.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:39.929 [warning] <0.8866.0>@chef_wm_actions_queue_monitoring:is_queue_at_capacity:163 Queue monitor timeout exit {timeout,{gen_server,call,[chef_wm_actions_queue_monitoring,is_queue_at_capacity,0]}} 
+2016-09-30 10:23:39.932 [info] <0.8864.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:40.016 [info] <0.8877.0>@chef_wm_rabbitmq_management:check_current_queue_length:266 Queue Monitor current length = 0 for VHost "/analytics" and Queue "alaska"
+2016-09-30 10:23:40.016 [info] <0.8868.0>@chef_wm_actions_queue_monitoring:handle_call:216 Manually setting Queue Monitor queue_at_capacity true
+2016-09-30 10:23:40.017 [info] <0.8868.0>@chef_wm_actions_queue_monitoring:handle_call:216 Manually setting Queue Monitor queue_at_capacity false
+2016-09-30 10:23:40.020 [info] <0.8868.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:40.054 [info] <0.8878.0>@chef_wm_actions_queue_monitoring:handle_call:243 Queue Monitoring timer already stopped
+2016-09-30 10:23:40.054 [info] <0.8878.0>@chef_wm_actions_queue_monitoring:handle_call:240 Queue Monitoring timer already started
+2016-09-30 10:23:40.061 [info] <0.8878.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:40.066 [info] <0.8882.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:40.170 [info] <0.8895.0>@chef_wm_rabbitmq_management:get_max_length:151 Can't connect to RabbitMQ management console to fetch max-length
+2016-09-30 10:23:40.173 [info] <0.8886.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:40.311 [info] <0.8905.0>@chef_wm_rabbitmq_management:get_current_length:169 Can't connect to RabbitMQ management console to fetch current length
+2016-09-30 10:23:40.317 [info] <0.8896.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:40.405 [error] <0.8915.0>@chef_wm_rabbitmq_management:get_max_length:157 Unknown response from RabbitMQ management console: foo
+2016-09-30 10:23:40.412 [info] <0.8906.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:40.493 [error] <0.8925.0>@chef_wm_rabbitmq_management:get_current_length:177 Unknown response from RabbitMQ management console: foo
+2016-09-30 10:23:40.496 [info] <0.8916.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:40.542 [warning] <0.8937.0>@chef_wm_actions_queue_monitoring:handle_info:286 Unknown process exit detected in Queue Monitor foo bar
+2016-09-30 10:23:42.042 [error] <0.9039.0> Bad typecheck for config item for 'oc_chef_wm' 'max_request_size' (#Fun<chef_wm_enforce.0.94025955>(0) -> {invalid_value,0,"value must be positive int or atom 'disabled'"})
+
+2016-09-30 10:23:42.045 [error] <0.9042.0> Bad typecheck for config item for 'oc_chef_wm' 'max_request_size' (#Fun<chef_wm_enforce.0.94025955>(-1) -> {invalid_value,-1,"value must be positive int or atom 'disabled'"})
+
+2016-09-30 10:23:42.048 [error] <0.9045.0> Bad typecheck for config item for 'oc_chef_wm' 'max_request_size' (#Fun<chef_wm_enforce.0.94025955>(not_disabled) -> {invalid_value,not_disabled,"value must be positive int or atom 'disabled'"})
+
+2016-09-30 10:23:45.788 [error] <0.9156.0> Missing config item for 'chef_index' 'solr_service'
+
+2016-09-30 10:23:45.788 [error] <0.9156.0> {chef_index_http,get,error,config_missing_item}
+2016-09-30 10:23:45.798 [error] <0.9155.0> {chef_sql,ping,exit,{noproc,{gen_server,call,[sqerl,{take_member,0},infinity]}}}
+2016-09-30 10:23:45.798 [error] <0.9151.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"fail">>},{<<"chef_sql">>,<<"fail">>}]}}}
+2016-09-30 10:23:46.691 [error] <0.9177.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"pong">>},{<<"chef_sql">>,<<"fail">>}]}}}
+2016-09-30 10:23:48.296 [error] <0.9207.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"fail">>},{<<"chef_sql">>,<<"pong">>}]}}}
+2016-09-30 10:23:49.814 [error] <0.9237.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"pong">>},{<<"chef_sql">>,<<"fail">>}]}}}
+2016-09-30 10:23:51.582 [error] <0.9267.0>@chef_wm_status:log_failure:110 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"fail">>},{<<"chef_sql">>,<<"pong">>}]}}}
+2016-09-30 10:23:53.574 [info] <0.9277.0>@chef_wm_actions_queue_monitoring:handle_call:234 Stopping Queue Monitor
+2016-09-30 10:23:53.575 [info] <0.9308.0>@chef_wm_actions_queue_monitoring:handle_call:216 Manually setting Queue Monitor queue_at_capacity true
+2016-09-30 10:23:54.663 [error] <0.9329.0>@chef_wm_status:log_failure:116 /_status
+{{status,fail},{upstreams,{[{<<"chef_solr">>,<<"pong">>},{<<"chef_sql">>,<<"pong">>}]}},{<<"analytics_queue">>,{[{queue_at_capacity,true},{dropped_since_last_check,0},{max_length,0},{last_recorded_length,0},{total_dropped,0},{check_count,0},{mailbox_length,0}]}}}

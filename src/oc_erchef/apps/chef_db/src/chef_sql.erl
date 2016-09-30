@@ -1718,17 +1718,17 @@ proplists_to_dict(ResultSetProplist, Key, Value) ->
     lists:foldl(fun(Row, Dict) ->
                         K = proplists:get_value(Key, Row),
                         if
-                          K == unknown -> lager:debug("Unable to find ~p", [K]);
+                          K == unknown -> lager:error("proplists_to_dict: Unable to find key ~p", [K]);
                           true -> ok
                         end,
                         case dict:is_key(K, Dict) of
                           true ->
-                            lager:debug("Duplicate key found ~p", [K]);
+                            lager:error("proplists_to_dict: Duplicate key found ~p", [K]);
                           false -> ok
                         end,
                         V = proplists:get_value(Value, Row),
                         if
-                          V == unknown -> lager:debug("Unable to find ~p", [V]);
+                          V == unknown -> lager:error("proplists_to_dict: Unable to find value ~p", [V]);
                           true -> ok
                         end,
                         dict:store(K, V, Dict)

@@ -216,11 +216,14 @@ send_to_index_queue(OrgId, Index, [SO|Rest], NameIdDict) ->
     PreliminaryEJson = decompress_and_decode(SO),
     NameKey = name_key(chef_object_type(Index)),
     ItemName = ej:get({NameKey}, PreliminaryEJson),
-    {ok, ObjectId} = dict:find(ItemName, NameIdDict),
-    StubRec = stub_record(Index, OrgId, ObjectId, ItemName, PreliminaryEJson),
-    %% Since we get here via valid `Index', we don't have to check that the objects are
-    %% indexable.
-    ok = oc_chef_object_db:add_to_solr_async(StubRec, PreliminaryEJson),
+    case dict:find(ItemName, NameIdDict) of 
+      {ok, ObjectId} ->
+        StubRec = stub_record(Index, OrgId, ObjectId, ItemName, PreliminaryEJson),
+        %% Since we get here via valid `Index', we don't have to check that the objects are
+        %% indexable.
+        ok = oc_chef_object_db:add_to_solr_async(StubRec, PreliminaryEJson);
+      _ -> lager:error("send_to_index_queue: ~p", [{PreliminaryEJson, NameKey, ItemName}])
+    end,
     send_to_index_queue(OrgId, Index, Rest, NameIdDict).
 
 %% @doc Determine the proper key to use to retrieve the unique name of
