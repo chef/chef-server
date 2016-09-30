@@ -55,7 +55,6 @@ This repository contains the core services that make up the Chef Server.
 If you're looking to contribute to certain parts of the Chef server, familiarity with the following related tools is also beneficial, depending on the area.
 
 - rebar (used for dependency management in Erlang)
-- keepalived (used for HA setups in the server)
 - sqitch (database migrations)
 - lua (routing rules in openresty)
 
