@@ -22,7 +22,7 @@ license "Apache-2.0"
 license_file "LICENSE"
 
 dependency "postgresql92" # for libpq
-dependency "nodejs"
+dependency "nodejs-binary"
 dependency "ruby"
 dependency "bundler"
 
@@ -30,6 +30,7 @@ relative_path "oc-id"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
+  env['PATH'] = "#{env['PATH']}:#{install_dir}/embedded/nodejs/bin"
 
   bundle "config build.nokogiri --use-system-libraries" \
          " --with-xml2-config=#{install_dir}/embedded/bin/xml2-config" \
