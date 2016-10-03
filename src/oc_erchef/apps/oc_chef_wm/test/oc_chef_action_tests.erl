@@ -257,6 +257,20 @@ extract_entity_info_test_() ->
                Ret = oc_chef_action:extract_entity_info(req, State),
                Expected = parent_entity({[{<<"name">>, <<"new-key">>}]}, <<"client">>, <<"bob">>, <<"key">>, <<"new-key">>),
                ?assertEqual(Expected, Ret)
+      end},
+     {"policy entity info",
+      fun() -> State = #policy_state{policy_data= {[{<<"name">>,<<"expected_policy_name">>}]}},
+               Stub = fun(policy, req) ->
+                          <<"expected_policy_name">>;
+                         (policy_group, req) ->
+                          <<"expected_policy_group_name">>
+                      end,
+               meck:expect(chef_wm_util,object_name, Stub),
+               Ret = oc_chef_action:extract_entity_info(req, State),
+               Expected = parent_entity({[{<<"name">>, <<"expected_policy_name">>}]},
+                                        <<"policy_group">>, <<"expected_policy_group_name">>,
+                                        <<"policy">>, <<"expected_policy_name">>),
+               ?assertEqual(Expected, Ret)
       end}
      ]
     }.

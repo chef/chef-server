@@ -19,7 +19,7 @@ notify(Req, #base_state{reqid = ReqId, resource_state = ResourceState, resource_
     is_record(ResourceState, organization_state);
     is_record(ResourceState, role_state);
     is_record(ResourceState, user_state);
-    is_record(ResourceState, key_state) ->
+    is_record(ResourceState, key_state) -> %% TODO: policy and cookbook_artifact_version
         case {wrq:method(Req), req_success(Req), ResourceMod} of
             %% Skip GET because we're not updating anything
             {'GET', _, _} ->

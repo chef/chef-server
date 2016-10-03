@@ -300,7 +300,15 @@ extract_entity_info(Req, #key_state{key_data = FullActionPayload, parent_name = 
                                     {<<"entity_name">>, Name },
                                     {<<"parent_type">>, atom_to_binary(ParentType, utf8)},
                                     {<<"parent_name">>, ParentName}
-                                   ]}.
+                                   ]};
+extract_entity_info(Req, #policy_state{policy_data = FullActionPayload}) ->
+    PolicyName = chef_wm_util:object_name(policy, Req),
+    PolicyGroupName = chef_wm_util:object_name(policy_group, Req),
+    {FullActionPayload, <<"policy">>, [{<<"entity_type">>, <<"policy">>},
+                                     {<<"entity_name">>, PolicyName},
+                                     {<<"parent_type">>, <<"policy_group">>},
+                                     {<<"parent_name">>, PolicyGroupName}
+                                    ]}.
 
 get_corrected_name(undefined, NameKey, FullActionPayload) ->
     ej:get({NameKey}, FullActionPayload);
