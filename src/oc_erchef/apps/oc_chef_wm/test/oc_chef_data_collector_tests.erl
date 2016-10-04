@@ -212,7 +212,7 @@ test_notify_policy() ->
                          {<<"data">>, {[{<<"name">>, <<"expected_policy_name">>}]}}]},
     Stub = fun(policy, req) ->
                <<"expected_policy_name">>;
-              (policy_group, req) ->
+              (policy_group_asoc_name, req) ->
                <<"expected_policy_group_name">>
            end,
     MeckFun = fun() -> meck:expect(chef_wm_util,object_name, Stub) end,

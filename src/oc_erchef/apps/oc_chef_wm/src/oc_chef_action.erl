@@ -303,7 +303,7 @@ extract_entity_info(Req, #key_state{key_data = FullActionPayload, parent_name = 
                                    ]};
 extract_entity_info(Req, #policy_state{policy_data = FullActionPayload}) ->
     PolicyName = chef_wm_util:object_name(policy, Req),
-    PolicyGroupName = chef_wm_util:object_name(policy_group, Req),
+    PolicyGroupName = chef_wm_util:object_name(policy_group_asoc_name, Req),
     {FullActionPayload, <<"policy">>, [{<<"entity_type">>, <<"policy">>},
                                      {<<"entity_name">>, PolicyName},
                                      {<<"parent_type">>, <<"policy_group">>},
@@ -311,8 +311,8 @@ extract_entity_info(Req, #policy_state{policy_data = FullActionPayload}) ->
                                     ]};
 extract_entity_info(_Req, #cookbook_artifact_version_state{oc_chef_cookbook_artifact_version = CBAInfo,
                                                            cookbook_artifact_version_data = FullActionPayload}) ->
-    Name = oc_chef_cookbook_artifact_version:name(CBAInfo),
-    Identifier = oc_chef_cookbook_artifact_version:identifier(CBAInfo),
+    Name = iolist_to_binary(oc_chef_cookbook_artifact_version:name(CBAInfo)),
+    Identifier = iolist_to_binary(oc_chef_cookbook_artifact_version:identifier(CBAInfo)),
     {FullActionPayload, <<"cookbook_artifact_version">>, [{<<"entity_type">>, <<"cookbook_artifact_version">>},
                                         {<<"entity_name">>, Identifier},
                                         {<<"parent_type">>, <<"cookbook_artifact">>},

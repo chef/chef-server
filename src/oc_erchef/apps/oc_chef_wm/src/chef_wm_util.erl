@@ -257,7 +257,11 @@ object_name(key, Req) ->
 object_name(policy, Req) ->
     extract_from_path(policy_name, Req);
 object_name(policy_group, Req) ->
-    extract_from_path(policy_group_name, Req).
+    extract_from_path(policy_group_name, Req);
+%% For requests to `/policy_groups/:policy_group/policies/:policy_name`,
+%% the lookup key is `policy_group` without the `_name`
+object_name(policy_group_asoc_name, Req) ->
+    extract_from_path(policy_group, Req).
 
 
 
