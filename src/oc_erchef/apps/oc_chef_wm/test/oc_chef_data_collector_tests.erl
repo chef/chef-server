@@ -32,7 +32,6 @@ oc_chef_data_collector_notify_unsupported_entities_test_() ->
               {"depsolver", #depsolver_state{}},
               {"sandbox", #sandbox_state{}},
               {"control", #control_state{}},
-              {"policy", #policy_state{}},
               {"chef_role", #chef_role{}},
               {"chef_environment", #chef_environment{}}],
     [{"checking state " ++ ResourceName,
@@ -80,7 +79,9 @@ oc_chef_data_collector_notify_test_() ->
       test_notify_organization() ++
       test_notify_role() ++
       test_notify_user() ++
-      test_notify_key()
+      test_notify_key() ++
+      test_notify_policy() ++
+      test_notify_cookbook_artifact()
     ]}.
 
 test_notify_acl() ->
@@ -202,8 +203,44 @@ test_notify_key() ->
                                               {"PUT", 201, 'update'},
                                               {"POST", 201, 'create'},
                                               {"DELETE", 200, 'delete'}]].
+test_notify_policy() ->
+    ResourceState = #policy_state{policy_data= {[{<<"name">>,<<"expected_policy_name">>}]}},
+    ExpectedMsgData = {"policy",
+                       "expected_policy_name",
+                        [{<<"parent_type">>, <<"policy_group">>},
+                         {<<"parent_name">>, <<"expected_policy_group_name">>},
+                         {<<"data">>, {[{<<"name">>, <<"expected_policy_name">>}]}}]},
+    Stub = fun(policy, req) ->
+               <<"expected_policy_name">>;
+              (policy_group, req) ->
+               <<"expected_policy_group_name">>
+           end,
+    MeckFun = fun() -> meck:expect(chef_wm_util,object_name, Stub) end,
+    [ test_notify("key", ReqMethod, ResponseCode, ResourceState, ExpectedMsgData, Task, MeckFun)
+      || {ReqMethod, ResponseCode, Task} <- [ {"PUT", 200, 'update'},
+                                              {"PUT", 201, 'update'},
+                                              {"POST", 201, 'create'},
+                                              {"DELETE", 200, 'delete'}]].
+
+test_notify_cookbook_artifact() ->
+    ObjectState = #oc_chef_cookbook_artifact_version{ identifier = <<"abc123">>, name = <<"nginx">>},
+    ResourceState = #cookbook_artifact_version_state{oc_chef_cookbook_artifact_version = ObjectState,
+                                                     cookbook_artifact_version_data = {[{<<"name">>, <<"nginx">>}]}},
+    ExpectedMsgData = {"cookbook_artifact_version",
+                       "abc123",
+                        [{<<"parent_type">>, <<"cookbook_artifact">>},
+                         {<<"parent_name">>, <<"nginx">>},
+                         {<<"data">>, {[{<<"name">>, <<"nginx">>}]}}]},
+    [ test_notify("key", ReqMethod, ResponseCode, ResourceState, ExpectedMsgData, Task)
+      || {ReqMethod, ResponseCode, Task} <- [ {"PUT", 200, 'update'},
+                                              {"PUT", 201, 'update'},
+                                              {"POST", 201, 'create'},
+                                              {"DELETE", 200, 'delete'}]].
 
 test_notify(EntityType, ReqMethod, ResponseCode, ResourceState, ExpectedMsgData, Task) ->
+    test_notify(EntityType, ReqMethod, ResponseCode, ResourceState, ExpectedMsgData, Task, fun() -> ok end).
+
+test_notify(EntityType, ReqMethod, ResponseCode, ResourceState, ExpectedMsgData, Task, CustomMeckFun) ->
     [{EntityType ++ " " ++ ReqMethod ++ " returning " ++ integer_to_list(ResponseCode) ++ " sends the " ++ EntityType ++ " to the data collector",
      fun() ->
         {ExpectedEntityType, ExpectedEntityName, ExpectedEntityData} = ExpectedMsgData,
@@ -231,6 +268,7 @@ test_notify(EntityType, ReqMethod, ResponseCode, ResourceState, ExpectedMsgData,
             ok
         end),
         State = make_state(ResourceState),
+        CustomMeckFun(),
         oc_chef_data_collector:notify(req, State)
      end
     }].

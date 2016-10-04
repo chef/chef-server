@@ -35,6 +35,7 @@
          org_id/1,
          type_name/1,
          authz_id/1,
+         identifier/1,
          create_query/1,
          update_query/1,
          delete_query/1,
