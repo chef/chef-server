@@ -73,6 +73,9 @@ type_name(#oc_chef_cookbook_artifact_version{}) ->
 authz_id(#oc_chef_cookbook_artifact_version{authz_id = AuthzId}) ->
     AuthzId.
 
+identifier(#oc_chef_cookbook_artifact_version{identifier = Identifier}) ->
+    Identifier.
+
 create_query(_ObjectRec) ->
     insert_cookbook_artifact_version.
 

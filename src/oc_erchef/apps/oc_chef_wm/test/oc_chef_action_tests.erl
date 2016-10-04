@@ -271,6 +271,16 @@ extract_entity_info_test_() ->
                                         <<"policy_group">>, <<"expected_policy_group_name">>,
                                         <<"policy">>, <<"expected_policy_name">>),
                ?assertEqual(Expected, Ret)
+      end},
+     {"cookbook artifact version entity info",
+      fun() -> State = #cookbook_artifact_version_state{oc_chef_cookbook_artifact_version = #oc_chef_cookbook_artifact_version{
+                  identifier = <<"abc123">>,
+                  name = <<"nginx">>},
+                                                 cookbook_artifact_version_data = {[{<<"name">>, <<"nginx">>}]}},
+               Ret = oc_chef_action:extract_entity_info(req, State),
+               Expected = parent_entity({[{<<"name">>, <<"nginx">>}]}, <<"cookbook_artifact">>, <<"nginx">>,
+                                         <<"cookbook_artifact_version">>, <<"abc123">>),
+               ?assertEqual(Expected, Ret)
       end}
      ]
     }.
