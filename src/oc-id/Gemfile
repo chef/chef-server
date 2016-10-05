@@ -2,7 +2,6 @@ source 'https://rubygems.org'
 
 gem 'rails', '= 4.2.5.2'
 gem 'chef', '~> 11.14'
-gem 'coffee-rails', '~> 4.0.0'
 gem 'jbuilder', '~> 1.2'
 gem 'jquery-rails'
 gem 'jwt' # For Zendesk SSO
@@ -10,7 +9,6 @@ gem 'rails_config', '~> 0.4.2'
 gem 'rb-readline', '~> 0.5.2', require: false
 gem 'sass-rails', '>= 4.0.3'
 gem 'turbolinks', '~> 2.2.1'
-gem 'uglifier', '~> 2.4.0'
 gem 'unicorn-rails', '~> 1.1.0'
 gem 'omniauth', '~> 1.2.1'
 gem 'omniauth-chef'
@@ -23,6 +21,16 @@ gem 'responders', '~> 2.0'
 gem 'newrelic_rpm'
 
 gem 'doorkeeper', '~> 1.4.0'
+
+#
+# These gems require a javascript runtime.  We don't want to ship a
+# javascript runtime so we put them in a separate group such that they
+# don't get automatically required by rake.
+#
+group :node do
+  gem 'coffee-rails', '~> 4.0.0'
+  gem 'uglifier', '~> 2.4.0'
+end
 
 group :development, :test do
   # Loading it this way makes it work with Ruby 2.1.2. See
