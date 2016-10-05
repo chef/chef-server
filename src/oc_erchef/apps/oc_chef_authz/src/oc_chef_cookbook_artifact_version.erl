@@ -35,6 +35,7 @@
          org_id/1,
          type_name/1,
          authz_id/1,
+         identifier/1,
          create_query/1,
          update_query/1,
          delete_query/1,
@@ -72,6 +73,9 @@ type_name(#oc_chef_cookbook_artifact_version{}) ->
 
 authz_id(#oc_chef_cookbook_artifact_version{authz_id = AuthzId}) ->
     AuthzId.
+
+identifier(#oc_chef_cookbook_artifact_version{identifier = Identifier}) ->
+    Identifier.
 
 create_query(_ObjectRec) ->
     insert_cookbook_artifact_version.

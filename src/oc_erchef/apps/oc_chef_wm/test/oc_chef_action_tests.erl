@@ -257,6 +257,30 @@ extract_entity_info_test_() ->
                Ret = oc_chef_action:extract_entity_info(req, State),
                Expected = parent_entity({[{<<"name">>, <<"new-key">>}]}, <<"client">>, <<"bob">>, <<"key">>, <<"new-key">>),
                ?assertEqual(Expected, Ret)
+      end},
+     {"policy entity info",
+      fun() -> State = #policy_state{policy_data= {[{<<"name">>,<<"expected_policy_name">>}]}},
+               Stub = fun(policy, req) ->
+                          <<"expected_policy_name">>;
+                         (policy_group_asoc_name, req) ->
+                          <<"expected_policy_group_name">>
+                      end,
+               meck:expect(chef_wm_util,object_name, Stub),
+               Ret = oc_chef_action:extract_entity_info(req, State),
+               Expected = parent_entity({[{<<"name">>, <<"expected_policy_name">>}]},
+                                        <<"policy_group">>, <<"expected_policy_group_name">>,
+                                        <<"policy">>, <<"expected_policy_name">>),
+               ?assertEqual(Expected, Ret)
+      end},
+     {"cookbook artifact version entity info",
+      fun() -> State = #cookbook_artifact_version_state{oc_chef_cookbook_artifact_version = #oc_chef_cookbook_artifact_version{
+                  identifier = <<"abc123">>,
+                  name = "nginx"},
+                                                 cookbook_artifact_version_data = {[{<<"name">>, <<"nginx">>}]}},
+               Ret = oc_chef_action:extract_entity_info(req, State),
+               Expected = parent_entity({[{<<"name">>, <<"nginx">>}]}, <<"cookbook_artifact">>, <<"nginx">>,
+                                         <<"cookbook_artifact_version">>, <<"abc123">>),
+               ?assertEqual(Expected, Ret)
       end}
      ]
     }.
