@@ -15,7 +15,7 @@
 #
 
 name "mixlib-install"
-default_version "v1.0.0"
+default_version "v2.0.0"
 
 license "Apache-2.0"
 license_file "LICENSE"
