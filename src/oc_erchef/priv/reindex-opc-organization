@@ -98,7 +98,15 @@ perform(drop, _Context, {OrgId, OrgName}) ->
     ok = rpc:call(?ERCHEF, chef_index, delete_search_db, [OrgId]);
 perform(reindex, Context, {_OrgId, OrgName}=OrgInfo) ->
     io:format("Sending all data for organization '~s' to be indexed again.  It may take some time before everything is available via search.~n", [OrgName]),
-    ok = rpc:call(?ERCHEF, chef_reindex, reindex, [Context, OrgInfo]);
+    {ok, Missing} = rpc:call(?ERCHEF, chef_reindex, reindex, [Context, OrgInfo]),
+    case Missing of
+        [] ->
+            ok;
+        _ ->
+            io:format(standard_error, "~nThe following objects in organization \"~s\" were unable to be reindexed:~n~n", [OrgName]),
+            [io:format(standard_error, "\t~s ~s~n", [Type, Name]) || {Type, Name} <- Missing],
+            io:format(standard_error, "~n", [])
+    end;
 perform(complete, Context, OrgInfo) ->
     %% Just do everything
     perform(drop, Context, OrgInfo),
