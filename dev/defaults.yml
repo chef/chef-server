@@ -205,7 +205,7 @@ projects:
   # Reporting
   #
   omnibus-reporting:
-    name: omnibus-reporting
+    embedded_in: "oc_reporting"
     type: omnibus
     external: true
     components:
@@ -218,6 +218,7 @@ projects:
         source_path: opscode-reporting-ctl-commands
         dest_path: /opt/opscode-reporting/embedded/service/omnibus-ctl
         reconfigure_on_load: false
+
   oc-reporting-pedant:
     type: ruby
     external: true
