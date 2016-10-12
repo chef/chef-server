@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/chef/license_scout.git
-  revision: 4fd26d99d0617d6336ae372f026c190617800e6b
+  revision: ca9e8fe08581bc6352d6d23389dcfdcddc44a76b
   specs:
     license_scout (0.1.2)
       ffi-yajl (~> 2.2)
@@ -8,7 +8,7 @@ GIT
 
 GIT
   remote: git://github.com/chef/omnibus-software.git
-  revision: 88d41163a7dfa7718d34c3b5193c793e383a2ebb
+  revision: b04ac7e2fc3c8cd40dccc09c260ac8c51229fd1a
   specs:
     omnibus-software (4.0.0)
       chef-sugar (>= 3.4.0)
