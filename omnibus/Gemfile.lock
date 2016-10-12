@@ -8,7 +8,8 @@ GIT
 
 GIT
   remote: git://github.com/chef/omnibus-software.git
-  revision: 88d41163a7dfa7718d34c3b5193c793e383a2ebb
+  revision: 82d58b398f35c001f80cfb76d4de988d8c592555
+  branch: sersut/rm-test-mockmodule
   specs:
     omnibus-software (4.0.0)
       chef-sugar (>= 3.4.0)
