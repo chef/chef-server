@@ -218,9 +218,12 @@ module Opscode
           completed
           log.error { "Failed to post to solr (connection error): #{indexed_object}" }
 
-          EM.add_timer(retry_wait) do
-            post_to_solr(document, retries += 1, &logger_block)
-          end unless retries >= max_retries
+          if retries < max_retries
+            log.info { "Retrying solr connection: #{indexed_object} attempt #{retries}" }
+            EM.add_timer(retry_wait) do
+              post_to_solr(document, retries += 1, &logger_block)
+            end
+          end
         end
       end
 
