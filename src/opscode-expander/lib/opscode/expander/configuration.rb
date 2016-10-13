@@ -109,6 +109,14 @@ module Opscode
           invalid("The cluster size (node-count) cannot be smaller than the index") unless node_count >= index.to_i
         end
 
+        configurable :max_retries do
+          invalid("You must specify the retry count as an integer") unless max_retries.kind_of?(Integer)
+        end
+
+        configurable :retry_wait do
+          invalid("You must specify the retry count as an integer") unless retry_wait.kind_of?(Integer)
+        end
+
         configurable :ps_tag, ""
 
         configurable :solr_url, "http://localhost:8983"

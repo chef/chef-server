@@ -106,7 +106,7 @@ module Opscode
       end
 
       def add
-        post_to_solr(pointyize_add) do
+        post_to_solr(pointyize_add, 0) do
           ["indexed #{indexed_object}",
            "transit,xml,solr-post |",
            [transit_time, @xml_time, @solr_post_time].join(","),
@@ -118,7 +118,7 @@ module Opscode
       end
 
       def delete
-        post_to_solr(pointyize_delete) { "deleted #{indexed_object} transit-time[#{transit_time}s]"}
+        post_to_solr(pointyize_delete, 0) { "deleted #{indexed_object} transit-time[#{transit_time}s]"}
       rescue Exception => e
         log.error { "#{e.class.name}: #{e.message}\n#{e.backtrace.join("\n")}"}
       end
@@ -201,7 +201,7 @@ module Opscode
         xml
       end
 
-      def post_to_solr(document, &logger_block)
+      def post_to_solr(document, retries, &logger_block)
         log.debug("POSTing document to SOLR:\n#{document}")
         http_req = EventMachine::HttpRequest.new(solr_url).post(:body => document, :timeout => 1200, :head => CONTENT_TYPE_XML)
         http_request_started
@@ -217,6 +217,10 @@ module Opscode
         http_req.errback do
           completed
           log.error { "Failed to post to solr (connection error): #{indexed_object}" }
+
+          EM.add_timer(retry_wait) do
+            post_to_solr(document, retries += 1, &logger_block)
+          end unless retries >= max_retries
         end
       end
 
@@ -232,6 +236,14 @@ module Opscode
 
       def solr_url
         @solr_url ||= Expander.config.solr_url + '/solr/update'
+      end
+
+      def max_retries
+        @max_retries ||= Expander.config.max_retries
+      end
+
+      def retry_wait
+        @retry_wait ||= Expander.config.retry_wait
       end
 
       def indexed_object
