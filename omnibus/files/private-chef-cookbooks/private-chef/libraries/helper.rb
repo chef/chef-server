@@ -157,6 +157,7 @@ class OmnibusHelper
   end
 
   def self.escape_characters_in_string(string)
+    return "" unless string.is_a? String
     pattern = /(\'|\"|\.|\*|\/|\-|\\)/
     string.gsub(pattern){|match|"\\"  + match}
   end

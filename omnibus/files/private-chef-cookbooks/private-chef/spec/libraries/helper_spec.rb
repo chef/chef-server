@@ -22,6 +22,23 @@ describe OmnibusHelper do
     end
   end
 
+  describe "escape_characters_in_string" do
+    subject(:helper) { described_class.escape_characters_in_string(input_string) }
+    let(:input_string) { "foo'" }
+
+    it "escapes special characters" do
+      expect(helper).to eq("foo\\'")
+    end
+
+    context "with nil" do
+      let(:input_string) { nil }
+
+      it "returns an empty string" do
+        expect(helper).to eq("")
+      end
+    end
+  end
+
   describe '#nginx_ssl_url' do
     let(:node) do
       {
