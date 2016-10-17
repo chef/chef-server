@@ -204,10 +204,10 @@ module Opscode
       def post_to_solr(document, retries, &logger_block)
         log.debug("POSTing document to SOLR:\n#{document}")
         http_req = EventMachine::HttpRequest.new(solr_url).post(:body => document, :timeout => 1200, :head => CONTENT_TYPE_XML)
-        http_request_started
+        http_request_started if retries == 0
 
         http_req.callback do
-          completed
+          completed if retries == 0
           if http_req.response_header.status == 200
             log.info(&logger_block)
           else
@@ -215,15 +215,16 @@ module Opscode
           end
         end
         http_req.errback do
-          completed
           log.error { "Failed to post to solr (connection error): #{indexed_object}" }
 
           if retries < max_retries
             log.info { "Retrying solr connection: #{indexed_object} attempt #{retries}" }
             EM.add_timer(retry_wait) do
-              post_to_solr(document, retries += 1, &logger_block)
+              post_to_solr(document, retries + 1, &logger_block)
             end
           end
+
+          completed if retries == 0
         end
       end
 
