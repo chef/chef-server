@@ -29,6 +29,7 @@ build_iteration 1
 
 override :rabbitmq, version: "3.3.4"
 override :erlang, version: "17.5"
+override :redis, version: "3.0.7"
 override :ruby, version: "2.2.5"
 override :rubygems, version: "2.6.6"
 override :'omnibus-ctl', version: "master"
