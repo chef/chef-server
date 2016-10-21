@@ -253,7 +253,8 @@ default['private_chef']['opscode-expander']['log_rotation']['file_maxbytes'] = 1
 default['private_chef']['opscode-expander']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['opscode-expander']['consumer_id'] = "default"
 default['private_chef']['opscode-expander']['nodes'] = 2
-
+default['private_chef']['opscode-expander']['max_retries'] = 1
+default['private_chef']['opscode-expander']['retry_wait'] = 1
 ####
 # Erlang Chef Server API
 ####
