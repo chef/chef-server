@@ -8,5 +8,5 @@ amqp_pass '<%= node['private_chef']['rabbitmq']['password'] %>'
 amqp_vhost '<%= node['private_chef']['rabbitmq']['vhost'] %>'
 ps_tag ''
 
-max_retries <%= @options['max_retries'] %>
-retry_wait <%= @options['retry_wait'] %>
+max_retries <%= @max_retries %>
+retry_wait <%= @retry_wait %>
