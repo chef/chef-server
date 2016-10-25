@@ -101,6 +101,12 @@ module Pedant
     # RestClient::Response object).  Testing methods should use this to
     # carry out any validation tests of the response.
     def authenticated_request(method, url, requestor, opts={}, &validator)
+      headers, payload = construct_request(method, url, requestor, opts)
+      do_request(method, url, headers, payload, &validator)
+    end
+
+    # Construct an authenticated request against a Chef Server
+    def construct_request(method, url, requestor, opts={})
       user_headers = opts[:headers] || {}
       version = opts[:server_api_version]
       payload_raw = opts[:payload] || ""
@@ -131,11 +137,17 @@ module Pedant
       else
         host = "#{uri.host}:#{uri.port}"
       end
+
       final_headers = standard_headers.
         merge(auth_headers).
         merge(user_headers).
         merge(version_headers).
         merge({'Host' => host})
+
+      [final_headers, payload]
+    end
+
+    def do_request(method, url, final_headers, payload, &validator)
 
       response_handler = lambda{|response, request, result| response}
 

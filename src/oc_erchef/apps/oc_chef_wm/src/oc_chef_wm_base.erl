@@ -30,6 +30,7 @@
          finish_request/2,
          forbidden/2,
          is_authorized/2,     %% verify request signature and org membership if appropriate
+         is_authorized/3,     %% verify request signature and org membership if appropriate, with custom extractor fun
          malformed_request/2, %% verify request headers and size requirements, call module verify_request
          ping/2,
          post_is_create/2,
@@ -39,7 +40,8 @@
 
 %% "Grab Bag" common functionality - we may want to consider relocating these
 %% since most aren't core operations of webmachine in chef server
--export([check_cookbook_authz/3,
+-export([authorization_data_extractor/3,
+         check_cookbook_authz/3,
          delete_object/3,
          object_creation_hook/2,
          object_creation_error_hook/3,
@@ -60,6 +62,9 @@
          allow_all/2, % mix in for auth_info when any actor can use the resource.
          list_objects_json/2, % Can also be used in lieu of to_json  in a resource module.
          update_from_json/4]).
+
+%% Type of function used for extracting authorization-related request data
+-type extractor() :: fun((atom(), wm_req(), #base_state{}) -> any()).
 
 %% @doc Determines if service is available.
 %%
@@ -414,10 +419,19 @@ check_permission(Perm, AuthzObjectType, AuthzId, Req, #base_state{requestor_id=R
             {{halt, 500}, Req, State#base_state{log_msg={error, is_authorized_on_resource}}}
     end.
 
+
+-spec authorization_data_extractor(atom(), wm_req(), #base_state{}) -> any().
+authorization_data_extractor(path, Req, _State) ->
+    iolist_to_binary(wrq:path(Req)).
+
+is_authorized(Req, State) ->
+    is_authorized(Req, State, fun authorization_data_extractor/3).
+
 %% part of being authorized is being a member of the org; otherwise we
 %% fail out early.
-is_authorized(Req, State) ->
-    case verify_request_signature(Req, State) of
+-spec is_authorized(wm_req(), #base_state{}, extractor()) -> any().
+is_authorized(Req, State, Extractor) ->
+    case verify_request_signature(Req, State, Extractor) of
         {true, Req1, State1} ->
             case authorized_by_org_membership_check(Req1,State1) of
                 {false, Req2, State2} ->
@@ -954,8 +968,8 @@ build_api_info_header_body(RequestedAPIVersion, ActualAPIVersion) ->
                                       {response_version, integer_to_binary(ActualAPIVersion)}
                                      ]})).
 
--spec verify_request_signature(#wm_reqdata{}, #base_state{}) ->
-                                      {boolean() | {halt, integer()}, #wm_reqdata{}, #base_state{}}.
+-spec verify_request_signature(#wm_reqdata{}, #base_state{}, extractor()) ->
+                                      {boolean() | {halt, integer()}, #wm_reqdata{}, #base_state{} }.
 %% @doc Perform request signature verification (authenticate)
 %%
 %% Fetches user or client certificate and uses it verify the signature
@@ -966,7 +980,8 @@ verify_request_signature(Req,
                          #base_state{organization_name = OrgName,
                                      organization_guid = OrgId,
                                      auth_skew = AuthSkew,
-                                     chef_db_context = DbContext}=State) ->
+                                     chef_db_context = DbContext}=State,
+                         Extractor) ->
     Name = wrq:get_req_header("x-ops-userid", Req),
     case chef_db:fetch_requestors(DbContext, OrgId, Name) of
         not_found ->
@@ -987,7 +1002,7 @@ verify_request_signature(Req,
             PublicKey = select_user_or_webui_key(Req, Requestors),
             Body = body_or_default(Req, <<>>),
             HTTPMethod = method_as_binary(Req),
-            Path = iolist_to_binary(wrq:path(Req)),
+            Path = Extractor(path, Req, State),
             {GetHeader, State1} = chef_wm_util:get_header_fun(Req, State),
             case chef_authn:authenticate_user_request(GetHeader, HTTPMethod,
                                                       Path, Body, PublicKey,

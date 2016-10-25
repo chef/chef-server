@@ -55,3 +55,4 @@ SystemRecoveryAuthenticatedUser: !include schemas/system-recovery-authenticated-
 User:                      !include schemas/user.json
 UserCreate:                !include schemas/user-create.json
 UserCreated:               !include schemas/user-created.json
+Validate:                  !include schemas/validate.json

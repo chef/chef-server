@@ -1,0 +1,6 @@
+description: Validate a forwarded request
+type: validation_endpoint
+
+/~{validatedata}:
+  description: Validate a forwarded request
+  type: validation_endpoint
