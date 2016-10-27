@@ -73,6 +73,12 @@ http {
   }
   <%- end -%>
 
+  <% if node['private_chef']['data_collector']['root_url'] && node['private_chef']['data_collector']['token'] -%>
+  upstream data-collector {
+    server <%= URI.parse(node['private_chef']['data_collector']['root_url']).host %>:<%= URI.parse(node['private_chef']['data_collector']['root_url']).port %>;
+  }
+  <% end -%>
+
   # Include upstream definitions for addons
   include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_upstreams.conf;
 
@@ -169,5 +175,3 @@ http {
 
   include <%= node['private_chef']['nginx']['dir'] %>/etc/nginx.d/*.conf;
 }
-
-
