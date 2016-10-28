@@ -28,6 +28,8 @@ if ppc64? || ppc64le? || ohai['kernel']['machine'] == "s390x"
   dependency "ibm-jre"
 elsif intel? && _64_bit?
   dependency "server-jre"
+elsif armhf?
+  dependency "jre-from-jdk"
 else
   raise "A JRE is required by opscode-solr4, but none are known for this platform"
 end
