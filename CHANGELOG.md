@@ -1,5 +1,90 @@
 # Chef Server Changelog
 
+## [12.10.0](https://github.com/chef/chef-server/tree/12.10.0) (2016-10-31)
+[Full Changelog](https://github.com/chef/chef-server/compare/12.9.1...12.10.0)
+
+**Implemented enhancements:**
+
+- Update TLS Ciphers. [\#918](https://github.com/chef/chef-server/pull/918) ([rhass](https://github.com/rhass))
+
+**Closed issues:**
+
+- /etc/opscode/pivotal.pem is missing [\#986](https://github.com/chef/chef-server/issues/986)
+- Disabling redirect with "non\_ssl\_port" and "enable\_non\_ssl" does not work as expected. [\#973](https://github.com/chef/chef-server/issues/973)
+- Intermittent "401 Unauthorized" failures from Chef server using Chef client [\#968](https://github.com/chef/chef-server/issues/968)
+- Problems creating new nodes after restoring Chef 12 server from backup [\#893](https://github.com/chef/chef-server/issues/893)
+- chef server core 12.0 rc6 rpm thinks its newer than ga [\#40](https://github.com/chef/chef-server/issues/40)
+
+**Merged pull requests:**
+
+- Bump omnibus-software to pick up openssl version 1.0.2j. [\#981](https://github.com/chef/chef-server/pull/981) ([sersut](https://github.com/sersut))
+- Remove old comment in omnibus.rb [\#980](https://github.com/chef/chef-server/pull/980) ([stevendanna](https://github.com/stevendanna))
+- Use instance variables in expander.rb template [\#979](https://github.com/chef/chef-server/pull/979) ([stevendanna](https://github.com/stevendanna))
+- Adds retry behavior for expander [\#978](https://github.com/chef/chef-server/pull/978) ([paulmooring](https://github.com/paulmooring))
+- Pin lua to 5.1 [\#977](https://github.com/chef/chef-server/pull/977) ([stevendanna](https://github.com/stevendanna))
+- Update omnibus software for latest redis and lua [\#976](https://github.com/chef/chef-server/pull/976) ([danielsdeleo](https://github.com/danielsdeleo))
+- Don't pass nil to escape\_characters\_in\_string [\#974](https://github.com/chef/chef-server/pull/974) ([stevendanna](https://github.com/stevendanna))
+- Don't delete ctl symlink for amazon linux [\#970](https://github.com/chef/chef-server/pull/970) ([srenatus](https://github.com/srenatus))
+- Bump omnibus-software to 59e7d9 [\#967](https://github.com/chef/chef-server/pull/967) ([srenatus](https://github.com/srenatus))
+- Bump omnibus software to b04ac7e2 [\#965](https://github.com/chef/chef-server/pull/965) ([danielsdeleo](https://github.com/danielsdeleo))
+- Do not fail complete reindex when one object fails [\#964](https://github.com/chef/chef-server/pull/964) ([smith](https://github.com/smith))
+- Simple script for analyzing disk space usage [\#963](https://github.com/chef/chef-server/pull/963) ([stevendanna](https://github.com/stevendanna))
+- Update omnibus-software for latest berks & chef improvements [\#962](https://github.com/chef/chef-server/pull/962) ([stevendanna](https://github.com/stevendanna))
+- a ctl-command to dump indexable data to json [\#961](https://github.com/chef/chef-server/pull/961) ([marcparadise](https://github.com/marcparadise))
+- Don't include source in erlang releases [\#958](https://github.com/chef/chef-server/pull/958) ([stevendanna](https://github.com/stevendanna))
+- Make loading reporting in dvm easier [\#956](https://github.com/chef/chef-server/pull/956) ([ksubrama](https://github.com/ksubrama))
+- Remove nodejs from the final package [\#955](https://github.com/chef/chef-server/pull/955) ([stevendanna](https://github.com/stevendanna))
+- Cleanup cached gem files in ruby install [\#954](https://github.com/chef/chef-server/pull/954) ([stevendanna](https://github.com/stevendanna))
+- Bump omnibus-software [\#953](https://github.com/chef/chef-server/pull/953) ([stevendanna](https://github.com/stevendanna))
+- Policy data collector [\#951](https://github.com/chef/chef-server/pull/951) ([danielsdeleo](https://github.com/danielsdeleo))
+- Add cleanup build step [\#950](https://github.com/chef/chef-server/pull/950) ([stevendanna](https://github.com/stevendanna))
+- Install nodejs from binary packages [\#949](https://github.com/chef/chef-server/pull/949) ([stevendanna](https://github.com/stevendanna))
+- Update contributing docs [\#948](https://github.com/chef/chef-server/pull/948) ([tas50](https://github.com/tas50))
+- \[omnibus\] update mixlib-install to 2.0 for PackageRouter support [\#943](https://github.com/chef/chef-server/pull/943) ([wrightp](https://github.com/wrightp))
+
+### Components
+
+**New Components**
+
+* libintl-perl (1.23)
+* nodejs-binary (6.7.0)
+* berkshelf-no-depselector (03b43842afabd1f9c3bf127dafb1dc1dd0daba64)
+* cleanup (1.0.0)
+
+**Updated Components**
+* config\_guess (9152ce40 -> 084a4076)
+* openssl (1.0.1u -> 1.0.2j)
+* mixlib-install (b2495ce9 -> 9c9dad45)
+* openresty (1.9.7.2 -> 1.11.2.1)
+* knife-opc (2ce18240 -> a08237d4)
+* ohai (567dcb84 -> 582dcc7a)
+* appbundler (379a06cc -> 76cb1728)
+* rb-readline (cf67cd06 -> 5e1c55db)
+* chef_backup-gem (cc8e5bf9 -> 67b1f51a)
+* veil-gem (master -> master)
+* redis (3.0.4 -> 3.0.7)
+* chef (3e8b93b9 -> fc30a44a)
+
+**Removed Components**
+* bzip2 (1.0.6)
+* python (2.7.9)
+* nodejs (0.10.35)
+* dep-selector-libgecode (1.2.0)
+* berkshelf (8f7d2e1d3c8341ffe6774e92a6a136c28a0bff03)
+
+### Contributors
+* Marc Paradise
+* Serdar Sutay
+* Steven Danna
+* Paul Mooring
+* Daniel DeLeo
+* Stephan Renatus
+* Nathan L Smith
+* Kartik Null Cating-Subramanian
+* Patrick Wright
+* Ryan Hass
+* Tim Smith
+
 ## [12.9.1](https://github.com/chef/chef-server/tree/12.9.1) (2016-09-26)
 [Full Changelog](https://github.com/chef/chef-server/compare/12.9.0...12.9.1)
 
