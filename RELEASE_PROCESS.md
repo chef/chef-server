@@ -117,6 +117,8 @@ The git SHA of the build you are testing can be found in
   form the basis of the post to Discourse that comes in a later step. Update as
   appropriate.  If a there is a major version change, transfer all
   contents to PRIOR_RELEASE_NOTES.md before adding release notes.
+- [ ] Open a PR with these changes and post the link to #chef-server-rfr
+  and #spool.
 
 ### Building and Releasing the Release
 
@@ -132,8 +134,8 @@ The git SHA of the build you are testing can be found in
   above as the GIT_REF parameter.
 
 - [ ] Wait for the pipeline to complete.
-
 - [ ] Use julia to promote the build: `@julia artifactory promote
+
   chef-server VERSION`.  Please do this in the
   `#eng-services-support` room.  Once this is done, the release is
   available to the public via the APT and YUM repositories.
