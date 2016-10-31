@@ -7,6 +7,47 @@ in the release. For a detailed list of changed components, refer to
 This document contains release notes for the current major release and all patches.
 For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 12.10.0 (2016-10-31)
+
+### Chef Server
+- Smaller download - the download size has been reduced by around 35% via removal of redundant, cached, and unused components. The installed size has been similarly reduced.
+- add retry support to opscode-expander
+- `chef-server-ctl reindex` will now continue even if some objects are
+  not indexable, and will show which objects failed at the conclusion
+  of the run.
+- Data Collector support for Policyfiles.
+- `chef-server-ctl install` add-on installation now pulls from the
+  correct source.
+- Regression fix: that caused errors on reconfigure when LDAP bind password
+  is nil has been fixed.
+
+### Security Updates
+
+* Upgrade to OpenSSL 1.0.2j.  The prior release (1.0.1u) is approaching EOL.
+* Updated TLS ciphers. See compatibility notes, below.
+
+### Compatibility Notes
+
+1. The change of TLS ciphers can cause older tooling to fail to negotiate
+   SSL sessions with the Chef Server. The changes to the cipher list are
+   captured [here](https://github.com/chef/chef-server/pull/918#issuecomment-244430458).
+   Upgrading any custom clients of the Chef Server API to use a current SSL
+   release will resolve this.
+   * Alternatively, you can set `nginx['ssl_protocols']` in
+     `/etc/opscode/chef-server.rb` to a set of ciphers that are
+     compatible with your tooling, then running `chef-server-ctl
+     reconfigure` to pick up the changes.
+2. With this TLS cipher suite change, the Reporting add-on will report
+   errors when `opscode-reporting-ctl test` is run.  A fix for this is
+   available in the `current` channel for reporting, and will be
+   released to stable in November. This issue does not otherwise affect the
+   Reporting add-on, but you can resolve this locally by modifying
+   `/etc/opscode-reporting/pedant_config.rb` and adding the following
+   line:
+```
+ssl_version :TLSv1_2
+```
+
 ## 12.9.1 (2016-9-26)
 
 ### Security Updates
@@ -28,7 +69,7 @@ For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
 * The fixes to the ACL apis which 12.9.0 referenced being fixed in 12.9.1 have been
   delayed to 12.9.2 in order to release this security update:
-  
+
   > ACLs: updating ACLs of a specific user (`/users/USER/_acl`) will not
   > succeed.  This undocumented API is very rarely used and is not supported by
   > tooling provided by Chef Software.
