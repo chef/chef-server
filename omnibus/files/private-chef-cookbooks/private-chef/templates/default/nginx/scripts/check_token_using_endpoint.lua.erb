@@ -1,11 +1,12 @@
+-- ngx.req.read_body() is recommended when using ngx.location.capture()
+-- Also we need to pass the body of the request to the /validate call.
 ngx.req.read_body()
-local res
 
 if ngx.var.request_method ~= "POST" then
   ngx.exit(ngx.HTTP_NOT_ALLOWED)
 end
 
-res = ngx.location.capture("/organizations/" .. ngx.var.request_org .. "/validate" .. ngx.var.request_uri,
+local res = ngx.location.capture("/organizations/" .. ngx.var.request_org .. "/validate" .. ngx.var.request_uri,
     { method = ngx.HTTP_POST,
       always_forward_body = true,
       copy_all_vars = true,
