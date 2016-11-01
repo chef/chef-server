@@ -1,24 +1,24 @@
 ngx.req.read_body()
 local res
 
-if ngx.var.request_method == "POST" then
-  meth = ngx.HTTP_POST
-else
-  meth = ngx.HTTP_GET
+if ngx.var.request_method ~= "POST" then
+  ngx.exit(ngx.HTTP_NOT_ALLOWED)
 end
 
 res = ngx.location.capture("/organizations/" .. ngx.var.request_org .. "/validate" .. ngx.var.request_uri,
-    { method = meth,
+    { method = ngx.HTTP_POST,
       always_forward_body = true,
       copy_all_vars = true,
-      vars = { request_org = ngx.var.request_org, upstream = "http://opscode_erchef" }
+      vars = { upstream = "http://opscode_erchef" }
     })
 
+<% if node['private_chef']['data_collector']['root_url'] && node['private_chef']['data_collector']['token'] -%>
 if res.status == ngx.HTTP_OK then
   ngx.var.upstream = '<%= URI.parse(node['private_chef']['data_collector']['root_url']).scheme %>://data-collector<%= URI.parse(node['private_chef']['data_collector']['root_url']).path %>'
   ngx.req.set_header("x-data-collector-token", "<%= node['private_chef']['data_collector']['token'] %>")
   ngx.req.set_header("x-data-collector-auth", "version=1.0")
   return
 end
+<% end -%>
 
 ngx.exit(res.status)
