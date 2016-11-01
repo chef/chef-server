@@ -154,13 +154,16 @@ git add data/
 # make sure all the changes are what you expect
 # write a simple commit message
 git commit -v
-git push origin YOUR_INITIALS/release-chef-server-VERSION
 ```
 
-- [ ] Open a GitHub pull request for the chef-web-downloads repository
-based on the branch you just created.
+- [ ] Create a delivery change request. See the README in
+  chef-web-downloads for setup instructions if this doesn't work.
 
-- [ ] Have someone review and merge the PR.
+```
+delivery review
+```
+
+- [ ] Have someone review and approve the change request.
 
 - [ ] Once committed to master, an automated process will make the
   change to the live website; however, it might take a few minutes for
