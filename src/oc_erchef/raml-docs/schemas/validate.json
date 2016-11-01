@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "properties": {
+      "requestor_name": {
+	  "description": "The name of the validated requestor",
+	  "$ref": "common.json#ChefName"
+      },
+      "requestor_type": {
+          "description": "The type of the principal (user or client)",
+          "type": "string",
+          "enum": [ "user", "client" ]
+      }
+  },
+  "example": {
+      "requestor_name": "yargh",
+      "requestor_type": "client"
+  }
+}

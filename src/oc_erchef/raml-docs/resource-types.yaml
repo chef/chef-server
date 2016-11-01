@@ -53,3 +53,13 @@ acl_permission_endpoint:
 
 identifiers_endpoint:
   type: list_endpoint
+
+validation_endpoint:
+  get?:
+    is: [chef_endpoint]
+  put?:
+    is: [chef_endpoint]
+  post?:
+    is: [chef_endpoint]
+  delete?:
+    is: [chef_endpoint]

@@ -192,7 +192,8 @@ verify_request_signature_test_() ->
                meck:expect(chef_db, fetch_requestors, fun(_Context, _OrgId, _Name) ->
                                                               {error, no_connections}
                                                       end),
-               {Return, _Req1, State1} = oc_chef_wm_base:verify_request_signature(Req, State),
+               Extractor = fun oc_chef_wm_base:authorization_data_extractor/3,
+               {Return, _Req1, State1} = oc_chef_wm_base:verify_request_signature(Req, State, Extractor),
                ?assertEqual({halt, 503}, Return),
                ?assertEqual({error_finding_user_or_client, no_connections}, State1#base_state.log_msg)
        end},
@@ -203,7 +204,8 @@ verify_request_signature_test_() ->
                meck:expect(chef_db, fetch_requestors, fun(_Context, _OrgId, _Name) ->
                                                               {error, uh_oh}
                                                       end),
-               {Return, _Req1, State1} = oc_chef_wm_base:verify_request_signature(Req, State),
+               Extractor = fun oc_chef_wm_base:authorization_data_extractor/3,
+               {Return, _Req1, State1} = oc_chef_wm_base:verify_request_signature(Req, State, Extractor),
                ?assertEqual({halt, 500}, Return),
                ?assertEqual({error_finding_user_or_client, uh_oh}, State1#base_state.log_msg)
        end},
@@ -214,7 +216,8 @@ verify_request_signature_test_() ->
                meck:expect(chef_db, fetch_requestors, fun(_Context, _OrgId, _Name) ->
                                                               not_found
                                                       end),
-               {Return, _Req1, State1} = oc_chef_wm_base:verify_request_signature(Req, State),
+               Extractor = fun oc_chef_wm_base:authorization_data_extractor/3,
+               {Return, _Req1, State1} = oc_chef_wm_base:verify_request_signature(Req, State, Extractor),
                ?assertEqual(false, Return),
                ?assertEqual({not_found, user_or_client}, State1#base_state.log_msg)
        end}
