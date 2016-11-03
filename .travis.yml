@@ -16,6 +16,7 @@ addons:
   postgresql: "9.3"
   apt:
     sources:
+      - debian-sid
       - chef-stable-precise
     packages:
       - sqitch
