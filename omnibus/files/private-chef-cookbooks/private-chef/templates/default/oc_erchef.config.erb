@@ -92,6 +92,15 @@
             {base_dn, "<%= node['private_chef']['ldap']['base_dn'] || "" %>" },
             {group_dn, "<%= node['private_chef']['ldap']['group_dn'] || "" %>" },
             {login_attribute, "<%= node['private_chef']['ldap']['login_attribute'] || "samaccountname" %>" },
+            %% LDAP Attribute Mappings
+            {display_name_attribute, "<%= node['private_chef']['ldap']['display_name_attribute'] || 'displayname' %>" },
+            {first_name_attribute,   "<%= node['private_chef']['ldap']['first_name_attribute']   || 'givenname' %>" },
+            {last_name_attribute,    "<%= node['private_chef']['ldap']['last_name_attribute']    || 'sn' %>" },
+            {common_name_attribute,  "<%= node['private_chef']['ldap']['common_name_attribute']  || 'cn' %>" },
+            {country_attribute,      "<%= node['private_chef']['ldap']['country_attribute']      || 'c' %>" },
+            {city_attribute,         "<%= node['private_chef']['ldap']['city_attribute']         || 'l' %>" },
+            {email_attribute,        "<%= node['private_chef']['ldap']['email_attribute']        || 'mail' %>" },
+
             {case_sensitive_login_attribute, <%= node['private_chef']['ldap']['case_sensitive_login_attribute'] || false %>},
             {encryption, <%= @ldap_encryption_type %>}
         ]},

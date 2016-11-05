@@ -21,6 +21,50 @@
 -module(oc_chef_wm_authn_ldap_tests).
 -include_lib("eunit/include/eunit.hrl").
 
+-define(DEFAULT_CONFIG, [{host,"192.168.33.152"},
+                         {port,389},
+                         {timeout,60000},
+                         {bind_dn,"cn=admin,dc=chef-server,dc=dev"},
+                         {bind_password,"H0\\/\\/!|\\/|3tY0ur|\\/|0th3r"},
+                         {base_dn,"ou=chefs,dc=chef-server,dc=dev"},
+                         {group_dn,[]},
+                         {login_attribute,"uid"},
+                         {display_name_attribute,"displayname"},
+                         {first_name_attribute,"givenname"},
+                         {last_name_attribute,"sn"},
+                         {common_name_attribute,"cn"},
+                         {country_attribute,"c"},
+                         {city_attribute,"l"},
+                         {email_attribute,"mail"},
+                         {case_sensitive_login_attribute,false},
+                         {encryption,none}]).
+
+-define(CUSTOM_CONFIG, [{host,"192.168.33.152"},
+                        {port,389},
+                        {timeout,60000},
+                        {bind_dn,"cn=admin,dc=chef-server,dc=dev"},
+                        {bind_password,"H0\\/\\/!|\\/|3tY0ur|\\/|0th3r"},
+                        {base_dn,"ou=chefs,dc=chef-server,dc=dev"},
+                        {group_dn,[]},
+                        {login_attribute,"uid"},
+                        %% This is changed from the default of 'displayname'
+                        {display_name_attribute,"nomdeguerre"},
+                        %% This is changed from the default of 'givenname'
+                        {first_name_attribute,"nomdeplume"},
+                        %% This is changed from the default of 'sn'
+                        {last_name_attribute,"surname"},
+                        %% This is changed from the default of 'cn'
+                        {common_name_attribute,"uncommonname"},
+                        %% This is changed from the default of 'c'
+                        {country_attribute,"notc"},
+                        %% This is changed from the default of 'l'
+                        {city_attribute,"homebase"},
+                        %% This is changed from the default of 'mail'
+                        {email_attribute,"email"},
+                        {case_sensitive_login_attribute,false},
+                        {encryption,none}]).
+
+
 value_of_test_() ->
     Data = [{"key1", ["a_value"]}, {"key2", ["first", "second"]}],
     [{"returns a scalar (binary) value for the given key in a proplist where the values are arrays",
@@ -60,6 +104,7 @@ canonical_username_test_() ->
     ].
 
 result_to_user_ejson_test_() ->
+    application:set_env(oc_chef_wm, ldap, ?DEFAULT_CONFIG),
     LoginAttr = "uid",
     UserName = <<"bob^bob">>,
     LdapUser = [{eldap_entry, "uid=bob^bob,ou=Person,dc=example,dc=com",
@@ -73,6 +118,17 @@ result_to_user_ejson_test_() ->
                   {"o",["BigCorporation"]},
                   {"objectClass", ["person","organizationalPerson","inetOrgPerson"]},
                   {"uid",["bob^bob"]}]}],
+    StrangeLdapUser = [{eldap_entry, "uid=bob^bob,ou=Person,dc=example,dc=com",
+                          [{"notc", ["USA"]},
+                           {"homebase",["Seattle"]},
+                           {"surname", ["Rabbit"]},
+                           {"email", ["bob@example.com"]},
+                           {"nomdeplume",["Bob"]},
+                           {"nomdeguerre", ["Bobby"]},
+                           {"uncommonname", ["Bobby Bob"]},
+                           {"o",["BigCorporation"]},
+                           {"objectClass", ["person","organizationalPerson","inetOrgPerson"]},
+                           {"uid",["bob^bob"]}]}],
     LdapUserExtraUid = [{eldap_entry, "uid=bob^bob,ou=Person,dc=example,dc=com",
                          [{"c", ["USA"]},
                           {"l",["Seattle"]},
@@ -155,4 +211,54 @@ result_to_user_ejson_test_() ->
       fun() ->
               {_, _, {RetUser}} = oc_chef_wm_authn_ldap:result_to_user_ejson(LoginAttr,UserName,LdapUserExtraUid),
               ?assertEqual(<<"bob@example.com">>, proplists:get_value(<<"email">>, RetUser))
-      end}].
+      end},
+     {"uses a non-default display_name field when configurd to",
+      fun() ->
+              application:set_env(oc_chef_wm, ldap, ?CUSTOM_CONFIG),
+              {_, _, {RetUser}} = oc_chef_wm_authn_ldap:result_to_user_ejson(LoginAttr,UserName,StrangeLdapUser),
+              ?assertEqual(<<"Bobby">>, proplists:get_value(<<"display_name">>, RetUser)),
+              application:set_env(oc_chef_wm, ldap, ?DEFAULT_CONFIG)
+      end},
+     {"uses a non-default first_name field when configurd to",
+      fun() ->
+              application:set_env(oc_chef_wm, ldap, ?CUSTOM_CONFIG),
+              {_, _, {RetUser}} = oc_chef_wm_authn_ldap:result_to_user_ejson(LoginAttr,UserName,StrangeLdapUser),
+              ?assertEqual(<<"Bob">>, proplists:get_value(<<"first_name">>, RetUser)),
+              application:set_env(oc_chef_wm, ldap, ?DEFAULT_CONFIG)
+      end},
+     {"uses a non-default last_name field when configurd to",
+      fun() ->
+              application:set_env(oc_chef_wm, ldap, ?CUSTOM_CONFIG),
+              {_, _, {RetUser}} = oc_chef_wm_authn_ldap:result_to_user_ejson(LoginAttr,UserName,StrangeLdapUser),
+              ?assertEqual(<<"Rabbit">>, proplists:get_value(<<"last_name">>, RetUser)),
+              application:set_env(oc_chef_wm, ldap, ?DEFAULT_CONFIG)
+      end},
+     {"uses a non-default common_name field when configurd to",
+      fun() ->
+              application:set_env(oc_chef_wm, ldap, ?CUSTOM_CONFIG),
+              {_, _, {RetUser}} = oc_chef_wm_authn_ldap:result_to_user_ejson(LoginAttr,UserName,StrangeLdapUser),
+              ?assertEqual(<<"Bobby Bob">>, proplists:get_value(<<"common_name">>, RetUser)),
+              application:set_env(oc_chef_wm, ldap, ?DEFAULT_CONFIG)
+      end},
+     {"uses a non-default country field when configurd to",
+      fun() ->
+              application:set_env(oc_chef_wm, ldap, ?CUSTOM_CONFIG),
+              {_, _, {RetUser}} = oc_chef_wm_authn_ldap:result_to_user_ejson(LoginAttr,UserName,StrangeLdapUser),
+              ?assertEqual(<<"USA">>, proplists:get_value(<<"country">>, RetUser)),
+              application:set_env(oc_chef_wm, ldap, ?DEFAULT_CONFIG)
+      end},
+     {"uses a non-default city field when configurd to",
+      fun() ->
+              application:set_env(oc_chef_wm, ldap, ?CUSTOM_CONFIG),
+              {_, _, {RetUser}} = oc_chef_wm_authn_ldap:result_to_user_ejson(LoginAttr,UserName,StrangeLdapUser),
+              ?assertEqual(<<"Seattle">>, proplists:get_value(<<"city">>, RetUser)),
+              application:set_env(oc_chef_wm, ldap, ?DEFAULT_CONFIG)
+      end},
+     {"uses a non-default mail field when configurd to",
+      fun() ->
+              application:set_env(oc_chef_wm, ldap, ?CUSTOM_CONFIG),
+              {_, _, {RetUser}} = oc_chef_wm_authn_ldap:result_to_user_ejson(LoginAttr,UserName,StrangeLdapUser),
+              ?assertEqual(<<"bob@example.com">>, proplists:get_value(<<"email">>, RetUser)),
+              application:set_env(oc_chef_wm, ldap, ?DEFAULT_CONFIG)
+      end}
+    ].
