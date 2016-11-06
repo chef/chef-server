@@ -6,4 +6,5 @@ cookbook 'private-chef', :path => './private-chef'
 cookbook 'apt', '~> 2.0'
 cookbook 'yum', '~> 3.0'
 
-cookbook 'runit', '= 1.6.0'
+cookbook 'runit', '~> 3.0'
+
