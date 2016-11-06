@@ -28,7 +28,6 @@ build_version   "12.10.1"
 build_iteration 1
 
 override :rabbitmq, version: "3.3.4"
-override :erlang, version: "17.5"
 override :lua, version: "5.1.5"
 override :ruby, version: "2.2.5"
 override :rubygems, version: "2.6.6"
