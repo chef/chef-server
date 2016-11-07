@@ -79,6 +79,12 @@ http {
   }
   <% end -%>
 
+  <% if node['private_chef']['profiles']['root_url'] && node['private_chef']['data_collector']['token'] -%>
+  upstream compliance-profiles {
+    server <%= URI.parse(node['private_chef']['profiles']['root_url']).host %>:<%= URI.parse(node['private_chef']['profiles']['root_url']).port %>;
+  }
+  <% end -%>
+
   # Include upstream definitions for addons
   include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_upstreams.conf;
 

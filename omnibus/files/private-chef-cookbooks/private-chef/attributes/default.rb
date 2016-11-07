@@ -834,3 +834,15 @@ default['private_chef']['data_collector']['http_cull_interval'] = "{1, min}"
 default['private_chef']['data_collector']['http_max_connection_duration'] = "{70,sec}"
 # Options for the ibrowse connections (see ibrowse).
 default['private_chef']['data_collector']['ibrowse_options'] = "[{connect_timeout, 10000}]"
+
+##
+# Compliance Profiles
+##
+# Used to proxy Compliance Profile requests to the Automate Profiles storage
+#
+default['private_chef']['profiles'] = {}
+# Fully qualified URL to the compliance profiles server:
+# default['private_chef']['profiles']['root_url'] = 'https://profiles.example.com'
+# The authentication token to pass via the header to the data collector server
+# Define the token unless already set in this file
+# default['private_chef']['data_collector']['token'] = '123456789...'
