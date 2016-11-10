@@ -1,5 +1,43 @@
 # Chef Server Changelog
 
+## [12.11.0](https://github.com/chef/chef-server/tree/12.11.0) (2016-11-10)
+[Full Changelog](https://github.com/chef/chef-server/compare/12.10.0...12.11.0)
+
+**Merged pull requests:**
+
+- Add AES256-GCM-SHA384 to the allowed SSL ciphers [\#1007](https://github.com/chef/chef-server/pull/1007) ([ryancragun](https://github.com/ryancragun))
+- \[OPS-174\] expose compliance profiles configurables in chef-server.rb [\#1006](https://github.com/chef/chef-server/pull/1006) ([srenatus](https://github.com/srenatus))
+- Add profiles forwarding to Automate endpoint [\#999](https://github.com/chef/chef-server/pull/999) ([alexpop](https://github.com/alexpop))
+- remove odd git links [\#997](https://github.com/chef/chef-server/pull/997) ([thommay](https://github.com/thommay))
+- Add retries to rvm install in travis [\#996](https://github.com/chef/chef-server/pull/996) ([stevendanna](https://github.com/stevendanna))
+- Simplify MAINTAINERS.md [\#994](https://github.com/chef/chef-server/pull/994) ([stevendanna](https://github.com/stevendanna))
+- Enable mixlib-install to resolve backwards compatible packages [\#992](https://github.com/chef/chef-server/pull/992) ([wrightp](https://github.com/wrightp))
+- Set environment before exec in chef-server-ctl psql [\#991](https://github.com/chef/chef-server/pull/991) ([stevendanna](https://github.com/stevendanna))
+- Bump version, update RELEASE\_PROCESS [\#990](https://github.com/chef/chef-server/pull/990) ([stevendanna](https://github.com/stevendanna))
+- omnibus: Add arm build support for opscode-solr4 [\#985](https://github.com/chef/chef-server/pull/985) ([elthariel](https://github.com/elthariel))
+- Security features for /data-collector/ endpoint [\#984](https://github.com/chef/chef-server/pull/984) ([sersut](https://github.com/sersut))
+- Add validation endpoint to Chef Server. [\#982](https://github.com/chef/chef-server/pull/982)  ([markan](https://github.com/markan))
+
+### Components
+Updated Components
+* mixlib-install (9c9dad45 -> 8622e934)
+* server-jre (8u74 -> 8u91)
+* berkshelf-no-depselector (03b43842 -> 305b4fa8)
+* ohai (582dcc7a -> c34212ea)
+* chef (fc30a44a -> b86319aa)
+
+### Contributors
+* Ryan Cragun
+* Steven Danna
+* Stephan Renatus
+* Alex Pop
+* Thom May
+* Patrick Wright
+* Serdar Sutay
+* Mark Anderson
+* Julien 'Lta' BALLET
+
+
 ## [12.10.0](https://github.com/chef/chef-server/tree/12.10.0) (2016-10-31)
 [Full Changelog](https://github.com/chef/chef-server/compare/12.9.1...12.10.0)
 

@@ -7,6 +7,52 @@ in the release. For a detailed list of changed components, refer to
 This document contains release notes for the current major release and all patches.
 For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 12.11.0 (2016-11-10)
+
+### Chef Server
+
+- A new endpoint
+
+        /organizations/ORGNAME/validate/PATH
+
+  is now available. This endpoint accepts a signed request and
+  validates it as if it had been sent to `PATH`. It returns 200 if the
+  request is authentic and 401 if it is not.
+
+- A new endpoint
+
+        /organizations/ORGNAME/data-collector
+
+  is now available. This endpoint forwards requests for a
+  data-collector service after authenticating the request using Chef
+  Server's standard authentication headers.  To use this endpoint,
+  users must set both of the following options in
+  `/etc/opscode/chef-server.rb`:
+
+        data_collector['token']
+        data_collector['root_url']
+
+- A new endpoint
+
+        /organizations/ORGNAME/owners/OWNER/compliance[/PROFILE]
+
+  is now available. This endpoint forwards requests for compliance
+  profiles to a user-configurable Chef Automate server after
+  authenticating the request using Chef Server's standard
+  authentication headers. To use this endpoint, users must set both
+  of the following options in `/etc/opscode/chef-server.rb`:
+
+        profiles['root_url']
+        data_collector['token']
+
+### Security Updates
+
+- The default allowed SSL ciphers now include AES256-GCM-SHA384 to
+  ensure compatibility with AWS's Classic ELB health check tool.
+
+- `chef-server-ctl psql` previously revealed the postgresql password
+  via `ps`.
+
 ## 12.10.0 (2016-10-31)
 
 ### Chef Server
