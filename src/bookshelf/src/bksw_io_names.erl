@@ -61,7 +61,7 @@ sha_to_hex_str(<<SHA:160/big-unsigned-integer>>) ->
 -spec write_path(string() | binary(), string() | binary()) -> binary().
 write_path(Bucket, Path) ->
     Root = bksw_conf:disk_store(),
-    {T1, T2, T3} = erlang:now(),
+    {T1, T2, T3} = erlang:timestamp(),
     UniqueExt = io_lib:format(".~p~p~p_bkwbuf", [T1, T2, T3]),
     iolist_to_binary([Root, "/", encode(Bucket), "-", sha_str(encode(Path)), UniqueExt]).
 
