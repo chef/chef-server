@@ -8,7 +8,8 @@ GIT
 
 GIT
   remote: git://github.com/chef/omnibus-software.git
-  revision: f1aa0f05e01438f3d6e3bc73f6fe60f105d466db
+  revision: eee39da8de001f543e532a997ab0c929d8bc1cd7
+  branch: ssd/nodejs-s390x
   specs:
     omnibus-software (4.0.0)
       chef-sugar (>= 3.4.0)
