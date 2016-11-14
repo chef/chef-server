@@ -15,8 +15,8 @@ local res = ngx.location.capture("/organizations/" .. ngx.var.request_org .. "/v
 
 <% if node['private_chef']['data_collector']['root_url'] && node['private_chef']['data_collector']['token'] -%>
 if res.status == ngx.HTTP_OK then
-  ngx.var.upstream = '<%= URI.parse(node['private_chef']['data_collector']['root_url']).scheme %>://data-collector<%= URI.parse(node['private_chef']['data_collector']['root_url']).path %>'
-  ngx.req.set_uri('/data-collector/v0/')
+  ngx.var.upstream = '<%= URI.parse(node['private_chef']['data_collector']['root_url']).scheme %>://data-collector'
+  ngx.req.set_uri('<%= URI.parse(node['private_chef']['data_collector']['root_url']).path %>')
   ngx.req.set_header("x-data-collector-token", "<%= node['private_chef']['data_collector']['token'] %>")
   ngx.req.set_header("x-data-collector-auth", "version=1.0")
   return
