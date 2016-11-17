@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/chef/license_scout.git
-  revision: c6c4a7bbcdbc73733217764db3bd5d278f63533e
+  revision: 3a4298c7c637d2ece9f9faef24a5473d2e6d2058
   specs:
     license_scout (0.1.2)
       ffi-yajl (~> 2.2)
@@ -8,7 +8,7 @@ GIT
 
 GIT
   remote: git://github.com/chef/omnibus-software.git
-  revision: f1aa0f05e01438f3d6e3bc73f6fe60f105d466db
+  revision: 5b05141342680cb2546bf81ca932e90db73622e2
   specs:
     omnibus-software (4.0.0)
       chef-sugar (>= 3.4.0)
@@ -16,7 +16,7 @@ GIT
 
 GIT
   remote: git://github.com/chef/omnibus.git
-  revision: 25078ff10e322c4c9ec7fd5b6ecc44136f13342d
+  revision: a941ac3ceaafbf50b311403dff8f8d0c5c5dbde9
   specs:
     omnibus (5.5.0)
       aws-sdk (~> 2)
@@ -34,12 +34,14 @@ GEM
   remote: https://rubygems.org/
   specs:
     addressable (2.4.0)
-    aws-sdk (2.6.14)
-      aws-sdk-resources (= 2.6.14)
-    aws-sdk-core (2.6.14)
+    aws-sdk (2.6.23)
+      aws-sdk-resources (= 2.6.23)
+    aws-sdk-core (2.6.23)
+      aws-sigv4 (~> 1.0)
       jmespath (~> 1.0)
-    aws-sdk-resources (2.6.14)
-      aws-sdk-core (= 2.6.14)
+    aws-sdk-resources (2.6.23)
+      aws-sdk-core (= 2.6.23)
+    aws-sigv4 (1.0.0)
     berkshelf (4.3.5)
       addressable (~> 2.3, >= 2.3.4)
       berkshelf-api-client (~> 2.0, >= 2.0.2)
@@ -264,4 +266,4 @@ DEPENDENCIES
   rspec
 
 BUNDLED WITH
-   1.13.1
+   1.13.6
