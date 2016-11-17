@@ -468,9 +468,15 @@ default['private_chef']['nginx']['stub_status']['location'] = "/nginx_status"
 default['private_chef']['nginx']['stub_status']['allow_list'] = ["127.0.0.1"]
 # Based off of the Mozilla recommended cipher suite
 # https://mozilla.github.io/server-side-tls/ssl-config-generator/?server=nginx-1.8.1&openssl=1.0.1u&hsts=no&profile=modern
-# AES256-GCM-SHA384 has been added to support AWS's classic ELB health check.
-default['private_chef']['nginx']['ssl_protocols'] = "TLSv1.2"
-default['private_chef']['nginx']['ssl_ciphers'] = "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:AES256-GCM-SHA384:!aNULL:!eNULL:!EXPORT"
+#
+# Current modifications:
+#
+# - AES256-GCM-SHA384 has been added to support AWS's classic ELB health check.
+# - AES added for pushy-server 1.x compatibility
+# - TLS1 and TLSv1.1 added for pushy-server 1.x compatibility
+#
+default['private_chef']['nginx']['ssl_protocols'] = "TLSv1 TLSv1.1 TLSv1.2"
+default['private_chef']['nginx']['ssl_ciphers'] = "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:AES256-GCM-SHA384:AES:!aNULL:!eNULL:!EXPORT"
 #
 # The SSL Certificate and DH Param will be automatically generated if
 # these are nil.  Otherwise we expect these attributes to point at the
