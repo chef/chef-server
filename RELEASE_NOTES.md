@@ -5,7 +5,17 @@ in the release. For a detailed list of changed components, refer to
 [CHANGELOG.md](CHANGELOG.md).
 
 This document contains release notes for the current major release and all patches.
-For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
+For prior releases, see
+[PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
+
+## 12.11.1 (2016-11-18)
+
+This release addresses an incompatibility with Push Jobs Server 1 by:
+
+- Re-enabling TLS 1.0 and 1.1 in the default TLS configuration
+- Re-enabling the AES cipher suite in the default TLS configuration
+
+Further, Chef Server is now available on the s390x platform.
 
 ## 12.11.0 (2016-11-10)
 

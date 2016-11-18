@@ -1,5 +1,22 @@
 # Chef Server Changelog
 
+## [12.11.1](https://github.com/chef/chef-server/tree/12.11.1) (2016-11-17)
+[Full Changelog](https://github.com/chef/chef-server/compare/12.11.0...12.11.1)
+
+**Merged pull requests:**
+
+- Update omnibus-software to latest for node s390x fix [\#1017](https://github.com/chef/chef-server/pull/1017) ([smith](https://github.com/smith))
+- Loosen TLS config for pushy-server 1.x [\#1016](https://github.com/chef/chef-server/pull/1016) ([stevendanna](https://github.com/stevendanna))
+
+### Components
+Updated Components
+* berkshelf-no-depselector (305b4fa8 -> abb27143)
+* chef (ed93e0fb -> c21db758)
+
+### Contributors
+* Nathan L Smith
+* Steven Danna
+
 ## [12.11.0](https://github.com/chef/chef-server/tree/12.11.0) (2016-11-10)
 [Full Changelog](https://github.com/chef/chef-server/compare/12.10.0...12.11.0)
 
