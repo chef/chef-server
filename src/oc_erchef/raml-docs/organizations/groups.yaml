@@ -1,0 +1,46 @@
+description: Groups of users for authorization.
+type: list_endpoint
+
+get:
+  description: List all groups.
+  responses:
+    200:
+      body: { schema: NamedChildList }
+
+post:
+  description: Create a group.
+  body: { schema: GroupCreate }
+  responses:
+    201:
+      body: { schema: ObjectUri }
+
+/{group}:
+  description: A group of users for authorization.
+  type: item_endpoint
+  uriParameters:
+    group:
+      description: Name of the node.
+      type: string
+
+  get:
+    description: Get the group.
+    responses:
+      200:
+        body: { schema: Group }
+
+  put:
+    description: Update this group.
+    body: { schema: GroupUpdate }
+    responses:
+      200:
+        body: { schema: GroupUpdate }
+      201:
+        body: { schema: GroupUpdate }
+
+  delete:
+    description: Delete this group.
+    responses:
+      200:
+        body: { schema: Group }
+
+  /_acl: !include ../acl_endpoint.yaml

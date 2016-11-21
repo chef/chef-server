@@ -1,4 +1,4 @@
-%% @author Ho-Sheng Hsiao <hosh@opscode.com>
+%% @author Ho-Sheng Hsiao <hosh@chef.io>
 %% @doc group operations
 %%
 %% Copyright 2013 Opscode, Inc. All Rights Reserved.

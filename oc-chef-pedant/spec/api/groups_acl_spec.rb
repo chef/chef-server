@@ -47,7 +47,7 @@ describe "Groups ACL", :acl do
               :payload => payload).should look_like({:status => 200})
         end
 
-        it "returns Fordidden trying to remove grant ace from #{test_group} group using non-superuser" do
+        it "returns Forbidden trying to remove grant ace from #{test_group} group using non-superuser", :authorization do
           response = put(write_acl_url, platform.admin_user,
                          :payload => request_body)
           response.should look_like({:status => 403})

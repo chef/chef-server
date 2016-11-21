@@ -1,5 +1,5 @@
-#
-# Copyright 2012-2014 Chef Software, Inc.
+#1
+# Copyright 2012-2016 Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,21 +15,28 @@
 #
 
 name "postgresql92"
-default_version "9.2.14"
+default_version "9.2.15"
 
-source url: "http://ftp.postgresql.org/pub/source/v9.2.14/postgresql-9.2.14.tar.bz2",
-       md5: "ce2e50565983a14995f5dbcd3c35b627"
+license "PostgreSQL"
+license_file "COPYRIGHT"
+skip_transitive_dependency_licensing true
+
+source url: "https://ftp.postgresql.org/pub/source/v9.2.15/postgresql-9.2.15.tar.bz2",
+       md5: "235b4fc09eff4569a7972be65c449ecc"
 
 dependency "zlib"
 dependency "openssl"
 dependency "libedit"
 dependency "ncurses"
 dependency "libossp-uuid"
+dependency "config_guess"
 
-relative_path "postgresql-9.2.14"
+relative_path "postgresql-9.2.15"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
+
+  update_config_guess(target: "config")
 
   command "./configure" \
           " --prefix=#{install_dir}/embedded/postgresql/9.2" \

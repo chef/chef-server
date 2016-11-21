@@ -1,15 +1,15 @@
 #
-# Author:: Adam Jacob (<adam@opscode.com>)
+# Author:: Adam Jacob (<adam@chef.io>)
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 #
 # All Rights Reserved
 #
 
-require 'mixlib/config'
-require 'chef/mash'
-require 'chef/json_compat'
-require 'chef/mixin/deep_merge'
-require 'securerandom'
+require "mixlib/config"
+require "chef/mash"
+require "chef/json_compat"
+require "chef/mixin/deep_merge"
+require "veil"
 
 module PrivateChef
   extend(Mixlib::Config)
@@ -23,39 +23,44 @@ module PrivateChef
   # Set this for default org mode
   default_orgname nil
 
+  use_chef_backend false
+  chef_backend_members []
+
   addons Mash.new
   rabbitmq Mash.new
   external_rabbitmq Mash.new
-  rabbitmq['log_rotation'] ||= Mash.new
+  rabbitmq["log_rotation"] ||= Mash.new
   opscode_solr4 Mash.new
-  opscode_solr4['log_rotation'] ||= Mash.new
+  opscode_solr4["log_rotation"] ||= Mash.new
   opscode_expander Mash.new
-  opscode_expander['log_rotation'] ||= Mash.new
+  opscode_expander["log_rotation"] ||= Mash.new
   opscode_erchef Mash.new
-  opscode_erchef['log_rotation'] ||= Mash.new
+  opscode_erchef["log_rotation"] ||= Mash.new
   oc_chef_authz Mash.new
   # Need old path for cookbook migration:
   opscode_chef Mash.new
 
   lb Mash.new
-  lb['xdl_defaults'] ||= Mash.new
+  lb["xdl_defaults"] ||= Mash.new
   lb_internal Mash.new
+  haproxy Mash.new
+  haproxy['log_rotation'] ||= Mash.new
   postgresql Mash.new
-  postgresql['log_rotation'] ||= Mash.new
+  postgresql["log_rotation"] ||= Mash.new
   redis_lb Mash.new
-  redis_lb['log_rotation'] ||= Mash.new
+  redis_lb["log_rotation"] ||= Mash.new
   oc_bifrost Mash.new
-  oc_bifrost['log_rotation'] ||= Mash.new
+  oc_bifrost["log_rotation"] ||= Mash.new
   oc_id Mash.new
-  oc_id['log_rotation'] ||= Mash.new
+  oc_id["log_rotation"] ||= Mash.new
   bookshelf Mash.new
-  bookshelf['log_rotation'] ||= Mash.new
+  bookshelf["log_rotation"] ||= Mash.new
   bootstrap Mash.new
   drbd Mash.new # For DRBD specific settings
   keepalived Mash.new
   estatsd Mash.new
   nginx Mash.new
-  nginx['log_rotation'] ||= Mash.new
+  nginx["log_rotation"] ||= Mash.new
   log_retention Mash.new
   log_rotation Mash.new
   dark_launch Mash.new
@@ -65,6 +70,7 @@ module PrivateChef
   license Mash.new
 
   folsom_graphite Mash.new
+  profiles Mash.new
 
   servers Mash.new
   backend_vips Mash.new
@@ -82,7 +88,9 @@ module PrivateChef
   enabled_plugins []
 
   backup Mash.new
-  backup['strategy'] = 'tar'
+  backup["strategy"] = "tar"
+
+  data_collector Mash.new
 
   # - legacy config mashes -
   # these config values are here so that if any config has been previously
@@ -121,7 +129,7 @@ module PrivateChef
       end
     end
 
-    VALID_EXTENSION_CONFIGS= %i(server_config_required config_values gen_backend gen_frontend gen_secrets gen_api_fqdn) unless defined?(VALID_EXTENSION_CONFIGS)
+    VALID_EXTENSION_CONFIGS = %i{server_config_required config_values gen_backend gen_frontend gen_secrets gen_api_fqdn} unless defined?(VALID_EXTENSION_CONFIGS)
     def register_extension(name, extension)
       bad_keys = extension.keys - VALID_EXTENSION_CONFIGS
 
@@ -142,7 +150,7 @@ module PrivateChef
       end
     end
 
-    def server(name=nil, opts={})
+    def server(name = nil, opts = {})
       if name
         PrivateChef["servers"] ||= Mash.new
         PrivateChef["servers"][name] = Mash.new(opts)
@@ -150,38 +158,29 @@ module PrivateChef
       PrivateChef["servers"]
     end
 
-    def backend_vip(name=nil, opts={})
+    def backend_vip(name = nil, opts = {})
       if name
-        PrivateChef['backend_vips'] ||= Mash.new
-        PrivateChef['backend_vips']["fqdn"] = name
-        opts.each do |k,v|
-          PrivateChef['backend_vips'][k] = v
+        PrivateChef["backend_vips"] ||= Mash.new
+        PrivateChef["backend_vips"]["fqdn"] = name
+        opts.each do |k, v|
+          PrivateChef["backend_vips"][k] = v
         end
 
         # Keepalived needs an address with network to properly configure an IPv6 vip
-        if PrivateChef['backend_vips']['ipaddress'] =~ /(.*)\/(\d+)/
+        if PrivateChef["backend_vips"]["ipaddress"] =~ /(.*)\/(\d+)/
           # If we have an address of the form addr/mask, split it out
-          PrivateChef['backend_vips']['ipaddress'] = $1
-          PrivateChef['backend_vips']['ipaddress_with_netmask'] = "#{$1}/#{$2}"
-        elsif PrivateChef['backend_vips']['ipaddress'] =~ /\:/
+          PrivateChef["backend_vips"]["ipaddress"] = $1
+          PrivateChef["backend_vips"]["ipaddress_with_netmask"] = "#{$1}/#{$2}"
+        elsif PrivateChef["backend_vips"]["ipaddress"] =~ /\:/
           # IPv6 addresses must have the mask
           Chef::Log.fatal("backend_vip ipaddress field appears to be a IPv6 address without a netmask  (e.g /64, /48)")
           exit 66
         else
           # bare addresses (IPv4) can not have a mask (to preserve backwards compatibility)
-          PrivateChef['backend_vips']['ipaddress_with_netmask'] = PrivateChef['backend_vips']['ipaddress']
+          PrivateChef["backend_vips"]["ipaddress_with_netmask"] = PrivateChef["backend_vips"]["ipaddress"]
         end
       end
-      PrivateChef['backend_vips']
-    end
-
-    # guards against creating secrets on non-bootstrap node
-    def generate_hex_if_bootstrap(chars, ha_guard)
-      if ha_guard
-        Chef::Log.fatal("Attempt to create secrets on non-bootstrap node in an H/A topology, please copy /etc/opscode/* around instead.")
-        exit 44
-      end
-      SecureRandom.hex(chars)
+      PrivateChef["backend_vips"]
     end
 
     def generate_hash
@@ -197,6 +196,7 @@ module PrivateChef
         "opscode_erchef",
         "oc_chef_authz",
         "folsom_graphite",
+        "profiles",
         "lb",
         "lb_internal",
         "postgresql",
@@ -212,10 +212,14 @@ module PrivateChef
         "ldap",
         "user",
         "ha",
+        "haproxy",
+        "use_chef_backend",
+        "chef_backend_members",
         "disabled_plugins",
         "enabled_plugins",
         "license",
         "backup",
+        "data_collector",
 
         # keys for cleanup and back-compat
         "couchdb",
@@ -224,27 +228,33 @@ module PrivateChef
       (default_keys | keys_from_extensions).each do |key|
         # @todo: Just pick a naming convention and adhere to it
         # consistently
-        rkey = if key =~ /^oc_/ || key == "redis_lb"
-                 key # leave oc_* keys as is
-               else
-                 key.gsub('_', '-')
-               end
-        results['private_chef'][rkey] = PrivateChef[key]
+        rkey = if key =~ /^oc_/ || %w{
+          redis_lb
+          use_chef_backend
+          chef_backend_members
+          data_collector
+        }.include?(key)
+          key
+        else
+          key.gsub("_", "-")
+        end
+        results["private_chef"][rkey] = PrivateChef[key]
       end
-      results['private_chef']['default_orgname'] = PrivateChef['default_orgname']
-      results['private_chef']['oc-chef-pedant'] = PrivateChef['oc_chef_pedant']
-      results['private_chef']['notification_email'] = PrivateChef['notification_email']
-      results['private_chef']['from_email'] = PrivateChef['from_email']
-      results['private_chef']['role'] = PrivateChef['role']
-      results['private_chef']['topology'] = PrivateChef['topology']
-      results['private_chef']['servers'] = PrivateChef['servers']
-      results['private_chef']['backend_vips'] = PrivateChef['backend_vips']
-      results['private_chef']['logs'] = {}
-      results['private_chef']['logs']['log_retention'] = PrivateChef['log_retention']
-      results['private_chef']['logs']['log_rotation'] = PrivateChef['log_rotation']
-      results['private_chef']['dark_launch'] = PrivateChef['dark_launch']
-      results['private_chef']['opscode-erchef']['max_request_size'] = PrivateChef["opscode_erchef"]["max_request_size"]
-      results['private_chef']['folsom_graphite'] = PrivateChef['folsom_graphite']
+      results["private_chef"]["default_orgname"] = PrivateChef["default_orgname"]
+      results["private_chef"]["oc-chef-pedant"] = PrivateChef["oc_chef_pedant"]
+      results["private_chef"]["notification_email"] = PrivateChef["notification_email"]
+      results["private_chef"]["from_email"] = PrivateChef["from_email"]
+      results["private_chef"]["role"] = PrivateChef["role"]
+      results["private_chef"]["topology"] = PrivateChef["topology"]
+      results["private_chef"]["servers"] = PrivateChef["servers"]
+      results["private_chef"]["backend_vips"] = PrivateChef["backend_vips"]
+      results["private_chef"]["logs"] = {}
+      results["private_chef"]["logs"]["log_retention"] = PrivateChef["log_retention"]
+      results["private_chef"]["logs"]["log_rotation"] = PrivateChef["log_rotation"]
+      results["private_chef"]["dark_launch"] = PrivateChef["dark_launch"]
+      results["private_chef"]["opscode-erchef"]["max_request_size"] = PrivateChef["opscode_erchef"]["max_request_size"]
+      results["private_chef"]["folsom_graphite"] = PrivateChef["folsom_graphite"]
+      results["private_chef"]["profiles"] = PrivateChef["profiles"]
       results
     end
 
@@ -256,7 +266,7 @@ module PrivateChef
     def keys_from_extensions
       PrivateChef["registered_extensions"].map do |name, ext|
         if ext[:config_values]
-          ext[:config_values].keys.map {|k| k.to_s}
+          ext[:config_values].keys.map { |k| k.to_s }
         end
       end.flatten.compact
     end
@@ -266,7 +276,7 @@ module PrivateChef
       PrivateChef["enabled_plugins"] << "chef-ha-#{PrivateChef["ha"]["provider"]}"
       PrivateChef["ha"]["path"] ||= "/var/opt/opscode/drbd/data"
       hapath = PrivateChef["ha"]["path"]
-      PrivateChef['bookshelf']['data_dir'] = "#{hapath}/bookshelf"
+      PrivateChef["bookshelf"]["data_dir"] = "#{hapath}/bookshelf"
       PrivateChef["rabbitmq"]["data_dir"] ||= "#{hapath}/rabbitmq"
       PrivateChef["opscode_solr4"]["data_dir"] ||= "#{hapath}/opscode-solr4"
       PrivateChef["redis_lb"]["data_dir"] ||= "#{hapath}/redis_lb"
@@ -275,8 +285,8 @@ module PrivateChef
       # in order to delete the data directories for opscode-solr and couchdb
       # after installing Chef Server 12, we need to have access to the configuration
       # data as if it were configured for Enterprise Chef 11.
-      PrivateChef['couchdb']['data_dir'] = "#{hapath}/couchdb"
-      PrivateChef['opscode_solr']['data_dir'] = "#{hapath}/opscode-solr"
+      PrivateChef["couchdb"]["data_dir"] = "#{hapath}/couchdb"
+      PrivateChef["opscode_solr"]["data_dir"] = "#{hapath}/opscode-solr"
 
       # The postgresql data directory is scoped to the current version;
       # changes in the directory trigger upgrades from an old PostgreSQL
@@ -284,22 +294,22 @@ module PrivateChef
       PrivateChef["postgresql"]["data_dir"] ||= "#{hapath}/postgresql_#{node['private_chef']['postgresql']['version']}"
 
       # Need old path for cookbook migration
-      PrivateChef['opscode_chef']['checksum_path'] ||= "#{hapath}/opscode-chef/checksum"
+      PrivateChef["opscode_chef"]["checksum_path"] ||= "#{hapath}/opscode-chef/checksum"
     end
 
     def gen_keepalived(node_name)
-      PrivateChef['servers'].each do |k, v|
-        next unless v['role'] == "backend"
+      PrivateChef["servers"].each do |k, v|
+        next unless v["role"] == "backend"
         next if k == node_name
-        PrivateChef['servers'][node_name]['peer_ipaddress'] = v['ipaddress']
+        PrivateChef["servers"][node_name]["peer_ipaddress"] = v["ipaddress"]
       end
       PrivateChef["keepalived"]["enable"] ||= true
       PrivateChef["keepalived"]["ipv6_on"] ||= PrivateChef["use_ipv6"]
       PrivateChef["keepalived"]["vrrp_instance_interface"] = backend_vip["device"]
       PrivateChef["keepalived"]["vrrp_instance_ipaddress"] = backend_vip["ipaddress_with_netmask"]
       PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"]
-      PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_bind"] = PrivateChef['servers'][node_name]['ipaddress']
-      PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_peer"] = PrivateChef['servers'][node_name]['peer_ipaddress']
+      PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_bind"] = PrivateChef["servers"][node_name]["ipaddress"]
+      PrivateChef["keepalived"]["vrrp_instance_vrrp_unicast_peer"] = PrivateChef["servers"][node_name]["peer_ipaddress"]
       PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"]
       PrivateChef["bookshelf"]["ha"] ||= true
       PrivateChef["oc_id"]["ha"] ||= true
@@ -340,7 +350,7 @@ module PrivateChef
       end
     end
 
-    def gen_backend(bootstrap=false)
+    def gen_backend(bootstrap = false)
       callback = callback_for(:gen_backend)
       if ! callback.nil?
         instance_exec(bootstrap, &callback)
@@ -389,7 +399,7 @@ module PrivateChef
       PrivateChef["rabbitmq"]["node_ip_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["redis_lb"]["listen"] ||= PrivateChef["default_listen_address"]
       PrivateChef["opscode_solr4"]["ip_address"] ||= PrivateChef["default_listen_address"]
-      PrivateChef["postgresql"]["listen_address"] ||= '*' #PrivateChef["default_listen_address"]
+      PrivateChef["postgresql"]["listen_address"] ||= "*" #PrivateChef["default_listen_address"]
 
       authaddr = []
       authaddr << "0.0.0.0/0" # if PrivateChef["use_ipv4"]
@@ -415,7 +425,7 @@ module PrivateChef
       PrivateChef["postgresql"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["lb"]["cache_cookbook_files"] ||= true
       PrivateChef["lb"]["upstream"] ||= Mash.new
-      if PrivateChef["use_ipv6"] && PrivateChef["backend_vips"]["ipaddress"].include?(':')
+      if PrivateChef["use_ipv6"] && PrivateChef["backend_vips"]["ipaddress"].include?(":")
         PrivateChef["lb"]["upstream"]["bookshelf"] ||= [ "[#{PrivateChef["backend_vips"]["ipaddress"]}]" ]
       else
         PrivateChef["lb"]["upstream"]["bookshelf"] ||= [ PrivateChef["backend_vips"]["ipaddress"] ]
@@ -425,59 +435,84 @@ module PrivateChef
     end
 
     def gen_api_fqdn_default
-      PrivateChef["lb"]["api_fqdn"] ||= PrivateChef['api_fqdn']
-      PrivateChef["lb"]["web_ui_fqdn"] ||= PrivateChef['api_fqdn']
-      PrivateChef["nginx"]["server_name"] ||= PrivateChef['api_fqdn']
+      PrivateChef["lb"]["api_fqdn"] ||= PrivateChef["api_fqdn"]
+      PrivateChef["lb"]["web_ui_fqdn"] ||= PrivateChef["api_fqdn"]
+      PrivateChef["nginx"]["server_name"] ||= PrivateChef["api_fqdn"]
       PrivateChef["nginx"]["url"] ||= "https://#{PrivateChef['api_fqdn']}"
     end
 
     def gen_secrets_default(node_name)
-      consume_existing_secrets
-      # Transition from erchef's sql_user/password etc living under 'postgresql' in older versions,
-      # to 'opscode_erchef' in newer versions.
-      if PrivateChef['postgresql'].has_key? 'sql_password'
-        PrivateChef['opscode_erchef']['sql_password'] ||= PrivateChef['postgresql']['sql_password']
-        PrivateChef['postgresql'].delete 'sql_password'
-        PrivateChef['postgresql'].delete 'sql_user'
-      end
-      if PrivateChef['postgresql'].has_key? 'sql_ro_password'
-        PrivateChef['opscode_erchef']['sql_ro_password'] ||= PrivateChef['postgresql']['sql_ro_password']
-        PrivateChef['postgresql'].delete 'sql_ro_password'
-        PrivateChef['postgresql'].delete 'sql_ro_user'
+      secrets_json = "/etc/opscode/private-chef-secrets.json"
+      credentials =
+        if File.exist?(secrets_json)
+          Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_json)
+        elsif PrivateChef["topology"] == "ha" && !PrivateChef["servers"][node_name]["bootstrap"]
+          Chef::Log.fatal("In an H/A topology the secrets must be created on the bootstrap node. "\
+                          "Please copy the contents of /etc/opscode/ from your bootstrap Server " \
+                          "to complete the setup")
+          exit(44)
+        else
+          Veil::CredentialCollection::ChefSecretsFile.new(path: secrets_json)
+        end
+
+      # Transition from erchef's sql_user/password etc living under 'postgresql'
+      # in older versions to 'opscode_erchef' in newer versions
+      if credentials["postgresql"] && credentials["postgresql"]["sql_password"]
+        credentials.delete("opscode_erchef", "sql_password")
+        credentials.add("opscode_erchef", "sql_password", value: credentials["postgresql"]["sql_password"].value)
+        credentials.delete("postgresql", "sql_password")
+        credentials.delete("postgresql", "sql_user")
       end
 
-      me = PrivateChef["servers"][node_name]
-      ha_guard = PrivateChef['topology'] == 'ha' && !me['bootstrap']
+      credentials.add("redis_lb", "password", length: 100)
+      credentials.add("rabbitmq", "password", length: 100)
+      credentials.add("rabbitmq", "actions_password", length: 100)
+      credentials.add("rabbitmq", "management_password", length: 100)
+      credentials.add("drbd", "shared_secret", length: 60)
+      credentials.add("keepalived", "vrrp_instance_password", length: 100)
+      credentials.add("opscode_erchef", "sql_password", length: 60)
+      credentials.add("opscode_erchef", "sql_ro_password", length: 60)
+      # Freeze oc_bifrost superuser_id so it will not be rotated
+      credentials.add("oc_bifrost", "superuser_id", length: 32, frozen: true)
+      credentials.add("oc_bifrost", "sql_password", length: 100)
+      credentials.add("oc_bifrost", "sql_ro_password", length: 100)
+      credentials.add("oc_id", "secret_key_base", length: 100)
+      credentials.add("oc_id", "sql_password", length: 100)
+      credentials.add("oc_id", "sql_ro_password", length: 100)
+      credentials.add("bookshelf", "access_key_id", length: 40)
+      credentials.add("bookshelf", "secret_access_key", length: 80)
+      credentials.add("bookshelf", "sql_password", length: 80)
+      credentials.add("bookshelf", "sql_ro_password", length: 80)
 
-      PrivateChef['postgresql']['db_superuser_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['redis_lb']['password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['rabbitmq']['password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['rabbitmq']['jobs_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['rabbitmq']['actions_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['rabbitmq']['management_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['drbd']['shared_secret'] ||= generate_hex_if_bootstrap(30, ha_guard)
-      PrivateChef['keepalived']['vrrp_instance_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['opscode_erchef']['sql_password'] ||= generate_hex_if_bootstrap(30, ha_guard)
-      PrivateChef['opscode_erchef']['sql_ro_password'] ||= generate_hex_if_bootstrap(30, ha_guard)
-      PrivateChef['oc_bifrost']['superuser_id'] ||= generate_hex_if_bootstrap(16, ha_guard)
-      PrivateChef['oc_bifrost']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['oc_bifrost']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['oc_id']['secret_key_base'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['oc_id']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['oc_id']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
-      PrivateChef['bookshelf']['access_key_id'] ||= generate_hex_if_bootstrap(20, ha_guard)
-      PrivateChef['bookshelf']['secret_access_key'] ||= generate_hex_if_bootstrap(40, ha_guard)
+      # Always use the value in chef-server.rb if we're using external postgresql.
+      # Other external services either don't require credentials or don't overload
+      # the namespace.
+      if PrivateChef["postgresql"]["external"]
+        credentials.remove("postgresql", "db_superuser_password")
+        credentials.add("postgresql", "db_superuser_password", value: PrivateChef["postgresql"]["db_superuser_password"])
+      else
+        credentials.add("postgresql", "db_superuser_password", length: 100)
+      end
+
+      credentials.legacy_credentials_hash.each do |service, creds|
+        creds.each do |name, value|
+          PrivateChef[service][name] ||= value
+        end
+      end
+
+      credentials.save
+      system("chmod 0600 #{credentials.path}")
     end
 
     def gen_redundant(node_name, topology)
       me = PrivateChef["servers"][node_name]
       case me["role"]
       when "backend"
-        gen_backend(me['bootstrap'])
+        gen_backend(me["bootstrap"])
         # TODO(ssd): Move these into gen_backend callback for HA
         # plugin once that is split out
-        gen_hapaths if topology == 'ha'
-        gen_keepalived(node_name) if topology == 'ha'
+        gen_hapaths if topology == "ha"
+        gen_keepalived(node_name) if topology == "ha"
         gen_api_fqdn
       when "frontend"
         gen_frontend
@@ -491,7 +526,7 @@ module PrivateChef
       required_ldap_config_values = %w{ host base_dn }
       # ensure a bind password was provided along with the optional bind_dn
       required_ldap_config_values << "bind_password" if PrivateChef["ldap"].key?("bind_dn")
-      PrivateChef["ldap"]["system_adjective"] ||= 'AD/LDAP'
+      PrivateChef["ldap"]["system_adjective"] ||= "AD/LDAP"
       required_ldap_config_values.each do |val|
         unless PrivateChef["ldap"].key?(val)
           # ensure all values have been set
@@ -510,9 +545,9 @@ module PrivateChef
       # to use either 'ssl_enabled' or 'tls_enabled'. The ability to directly set 'encryption' is
       # deprecated.
       #
-      ldap_encryption = PrivateChef['ldap']['encryption']
-      ssl_enabled = PrivateChef['ldap']['ssl_enabled']
-      tls_enabled = PrivateChef['ldap']['tls_enabled']
+      ldap_encryption = PrivateChef["ldap"]["encryption"]
+      ssl_enabled = PrivateChef["ldap"]["ssl_enabled"]
+      tls_enabled = PrivateChef["ldap"]["tls_enabled"]
 
       # Some edge case checks, tell them if they set more than one value and which one we're using.
       # This can go away once ldap_encryption support is removed
@@ -546,9 +581,13 @@ module PrivateChef
       end
       PrivateChef["ldap"]["ssl_enabled"] = ssl_enabled
       PrivateChef["ldap"]["tls_enabled"] = tls_enabled
-      PrivateChef["ldap"]["encryption_type"] = ssl_enabled ? "simple_tls" :
-                                               tls_enabled ? "start_tls" :
-                                               "none"
+      PrivateChef["ldap"]["encryption_type"] = if ssl_enabled
+                                                 "simple_tls"
+                                               elsif tls_enabled
+                                                 "start_tls"
+                                               else
+                                                 "none"
+                                               end
     end
 
     # True if the given topology requires per-server config via `server` blocks
@@ -576,7 +615,7 @@ EOF
       # TODO(ssd): This can be cleaned up once the "default"
       # topologies are also implemented using registered extensions
       case topology
-      when "standalone","manual"
+      when "standalone", "manual"
         PrivateChef[:api_fqdn] ||= node_name
         gen_api_fqdn
       when "ha", "tier"
@@ -597,26 +636,25 @@ EOF
     def generate_config(node_name)
       assert_server_config(node_name) if server_config_required?
       gen_secrets(node_name)
-      write_secrets_file
 
       # Under ipv4 default to 0.0.0.0 in order to ensure that
       # any service that needs to listen externally on back-end
       # does so.
       PrivateChef["default_listen_address"] = "0.0.0.0"
       # 'ipv4, ipv6, maybe add both
-      case PrivateChef['ip_version']
-      when 'ipv4', nil
+      case PrivateChef["ip_version"]
+      when "ipv4", nil
         PrivateChef["use_ipv4"] = true
         PrivateChef["use_ipv6"] = false
         PrivateChef["default_listen_address"] = "0.0.0.0"
-      when 'ipv6'
+      when "ipv6"
         PrivateChef["use_ipv4"] = false
         PrivateChef["use_ipv6"] = true
         PrivateChef["default_listen_address"] = "::"
       end
 
       # Transition Solr memory and JVM settings from OSC11 to Chef 12.
-      import_legacy_service_config('opscode_solr', 'opscode_solr4', ['heap_size', 'new_size', 'java_opts'])
+      import_legacy_service_config("opscode_solr", "opscode_solr4", ["heap_size", "new_size", "java_opts"])
 
       PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
 
@@ -627,76 +665,6 @@ EOF
       end
 
       generate_hash
-    end
-
-    def existing_secrets
-      @existing_secrets ||= if File.exists?("/etc/opscode/private-chef-secrets.json")
-                              Chef::JSONCompat.from_json(File.read("/etc/opscode/private-chef-secrets.json"))
-                            else
-                              {}
-                            end
-    end
-
-    def consume_existing_secrets
-      existing_secrets.each do |k, v|
-        v.each do |pk, p|
-          if not PrivateChef[k]
-            Chef::Log.info("Ignoring unused secret for #{k}.")
-          else
-            PrivateChef[k][pk] = p
-          end
-        end
-      end
-    end
-
-    def write_secrets_file
-      if File.directory?("/etc/opscode")
-        # This was originally directly written via f.puts(Chef::JSONCompat.to_json_pretty)
-        # Let's instead assemble this hash externally so that if it fails for any reason
-        # we don't wipe out the secrets file.
-        out_json = Chef::JSONCompat.to_json_pretty({
-          'redis_lb' => {
-            'password' => PrivateChef['redis_lb']['password']
-          },
-          'rabbitmq' => {
-            'password' => PrivateChef['rabbitmq']['password'],
-            'jobs_password' => PrivateChef['rabbitmq']['jobs_password'],
-            'actions_password' => PrivateChef['rabbitmq']['actions_password'],
-            'management_password' => PrivateChef['rabbitmq']['management_password']
-          },
-          'postgresql' => {
-            'db_superuser_password' => PrivateChef['postgresql']['db_superuser_password']
-          },
-          'opscode_erchef' => {
-            'sql_password' => PrivateChef['opscode_erchef']['sql_password'],
-            'sql_ro_password' => PrivateChef['opscode_erchef']['sql_ro_password']
-          },
-          'oc_id' => {
-            'sql_password' => PrivateChef['oc_id']['sql_password'],
-            'sql_ro_password' => PrivateChef['oc_id']['sql_ro_password'],
-            'secret_key_base' => PrivateChef['oc_id']['secret_key_base']
-          },
-          'drbd' => {
-            'shared_secret' => PrivateChef['drbd']['shared_secret']
-          },
-          'keepalived' => {
-            'vrrp_instance_password' => PrivateChef['keepalived']['vrrp_instance_password']
-          },
-          'oc_bifrost' => {
-            'superuser_id' => PrivateChef['oc_bifrost']['superuser_id'],
-            'sql_password' => PrivateChef['oc_bifrost']['sql_password'],
-            'sql_ro_password' => PrivateChef['oc_bifrost']['sql_ro_password']
-          },
-          'bookshelf' => {
-            'access_key_id' => PrivateChef['bookshelf']['access_key_id'],
-            'secret_access_key' => PrivateChef['bookshelf']['secret_access_key']
-          }})
-
-        File.open("/etc/opscode/private-chef-secrets.json", "w") do |f|
-          f.puts(out_json)
-          system("chmod 0600 /etc/opscode/private-chef-secrets.json")
-        end
-      end
     end
   end
 end

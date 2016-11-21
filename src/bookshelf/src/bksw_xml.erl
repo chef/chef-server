@@ -1,6 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Tim Dysinger <dysinger@opscode.com>
+%% @author Tim Dysinger <dysinger@chef.io>
 %% Copyright 2012 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -25,9 +25,8 @@
          access_denied_error/1,
          model/0, write/1, write_erl/0, write_hrl/0]).
 
--include("bksw_obj.hrl").
 -include("amazon_s3.hrl").
-
+-include("internal.hrl").
 
 %%===================================================================
 %% Public API
@@ -37,6 +36,8 @@ list_buckets(Buckets) ->
     #'ListAllMyBucketsResult'{'Owner' = owner(),
                               'Buckets' = buckets(Buckets)}.
 
+list_objects(Bucket, none) ->
+    list_objects(Bucket, []);
 list_objects(Bucket, Objects) ->
     #'ListBucketResult'{'Name' = Bucket, 'Prefix' = "",
                         'Marker' = "", 'MaxKeys' = 10000, 'IsTruncated' = false,
@@ -51,9 +52,20 @@ buckets(Buckets) ->
                                 [bucket(V1) || V1 <- Buckets]}.
 
 bucket(#bucket{name = Name, date = Date}) ->
+  #'ListAllMyBucketsEntry'{'Name' = Name,
+                             'CreationDate' = bksw_format:to_date(Date)};
+bucket(#db_bucket{bucket_name = Name, created_at = Date}) ->
     #'ListAllMyBucketsEntry'{'Name' = Name,
                              'CreationDate' = bksw_format:to_date(Date)}.
 
+object(#db_file{name = Name, created_at = Date, data_size = Size,
+                hash_md5 = Digest}) ->
+     #'ListEntry'{'Key' = Name,
+                 'LastModified' = bksw_format:to_date(Date),
+                 'ETag' = bksw_format:to_etag(Digest),
+                 'Size' = io_lib:format("~w", [Size]),
+                 'Owner' = owner(),
+                 'StorageClass' = "STANDARD"};
 object(#object{name = Name, date = Date, size = Size,
                digest = Digest}) ->
     #'ListEntry'{'Key' = Name,

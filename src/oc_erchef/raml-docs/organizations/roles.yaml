@@ -1,0 +1,66 @@
+description: Groupings of run lists and attributes which can be applied to any node.
+type: list_endpoint
+
+get:
+  description: List all roles.
+  responses:
+    200:
+      body: { schema: NamedChildList }
+
+post:
+  description: Create a role.
+  responses:
+    201:
+      body: { schema: ObjectUri }
+
+/{role}:
+  description: A grouping of run list and attributes which can be applied to any node.
+  type: item_endpoint
+  uriParameters:
+    role:
+      description: Name of the role.
+      type: string
+
+  get:
+    description: Get a node.
+    responses:
+      200:
+        body: { schema: Role }
+
+  put:
+    description: Update a node.
+    body: { schema: Role }
+    responses:
+      200:
+        body: { schema: Role }
+
+  delete:
+    description: Delete a node.
+    responses:
+      200:
+        body: { schema: Role }
+
+  /environments:
+    description: The list of environments for which this role has an env_run_list.
+    type: list_endpoint
+
+    get:
+      responses:
+        200:
+          body: { schema: EnvironmentList }
+
+    /{environment}:
+      description: The run list for the role, in the given environment.
+      type: item_endpoint
+      uriParameters:
+        environment:
+          description: Name of the environment.
+          type: string
+
+      get:
+        description: Get the run list for this role in this environment.
+        responses:
+          200:
+            body: { schema: RunList }
+
+  /_acl: !include ../acl_endpoint.yaml

@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup' # so we don't need to type 'bundle exec' to run it
+
+require 'rspec/core'
+require 'pedant'
+
+Pedant.config.suite = "bifrost"
+Pedant.setup(ARGV)
+puts Pedant::UI.new.info_banner
+
+exit RSpec::Core::Runner.run(Pedant.config.rspec_args)

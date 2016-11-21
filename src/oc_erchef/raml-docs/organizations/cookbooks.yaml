@@ -1,0 +1,99 @@
+description: Cookbooks used to manage nodes.
+type: list_endpoint
+
+get:
+  description: List all cookbooks and their versions.
+  queryParameters:
+    num_versions:
+      description: Number of versions to return (or all). The latest n versions will be returned.
+      default: 1
+  responses:
+    200:
+      body: { schema: CookbookVersionList }
+
+/_latest:
+  description: The latest version of all cookbooks.
+  type: list_endpoint
+  get:
+    description: List all cookbooks with their latest version.
+    queryParameters:
+      num_versions:
+        description: Number of versions to return (or "all" for all versions). The latest n versions will be returned.
+        default: 1
+    responses:
+      200:
+        description: The list of child cookbooks.
+        body:
+          schema: NamedChildList
+          example: |
+            {
+              "apache2": "https://api.chef.io/organizations/foo/cookbooks/apache2/1.0.0",
+              "mysql": "https://api.chef.io/organizations/foo/cookbooks/mysql/3.4.1"
+            }
+
+/_recipes:
+  description: All fully-qualified recipes available in the latest version of all cookbooks.
+  type: list_endpoint
+  get:
+    description: List all fully-qualified recipes available in the latest version of all cookbooks.
+    responses:
+      200:
+        body: { schema: CookbookRecipeList }
+
+/{cookbook}:
+  description: A cookbook (with all its versions).
+  type: list_endpoint
+  uriParameters:
+    cookbook:
+      description: Name of the cookbook.
+      type: string
+
+  /{cookbook_version}:
+    description: A version of a cookbook, with references to its files.
+    type: item_endpoint
+    uriParameters:
+      cookbook_version:
+        description: Version of the cookbook. "_latest" and "latest" will always refer to the latest version, but only work for get.
+        type: string
+
+    get:
+      description: Get the cookbook.
+      responses:
+        200:
+          body: { schema: CookbookVersion }
+
+    put:
+      description: |
+        Create or update the cookbook.
+
+        The cookbook is expected to have already uploaded its URLs. The typical
+        process of uploading a cookbook is to:
+
+        1. POST to /sandboxes with the list of files in the cookbook.
+        2. Upload the files to the locations returned by POST /sandboxes.
+        3. PUT to /sandboxes/ID to let the server know you are done with it.
+        4. PUT to /cookbooks/NAME/VERSION once all files are uploaded.
+      is: [chef_endpoint,parent_not_found,conflict,validated]
+      body: { schema: CookbookVersion }
+      queryParameters:
+        force:
+          description: Set true to force update even if the cookbook is frozen.
+          type: boolean
+          default: false
+      responses:
+        200:
+          description: When the cookbook is updated.
+          body: { schema: CookbookVersion }
+        201:
+          description: When the cookbook is created.
+          body: { schema: CookbookVersion }
+        409:
+          description: When the cookbook exists and is frozen, and "force" was not passed.
+
+    delete:
+      description: Delete this version of the cookbook.
+      responses:
+        200:
+          body: { schema: CookbookVersion }
+
+  /_acl: !include ../acl_endpoint.yaml

@@ -92,6 +92,17 @@ template "#{rabbitmq_etc_dir}/rabbitmq.config" do
              :ssl_versions => ssl_versions)
 end
 
+# write out a wait script used by other Chef Server services.
+# This needs to be rendered rather than static due to the ability
+# for the user to change the node name and data directory.
+template "/opt/opscode/bin/wait-for-rabbit" do
+  source "wait-for-rabbit.erb"
+  owner "root"
+  group "root"
+  mode "0755"
+  variables( config: rabbitmq )
+end
+
 component_runit_service "rabbitmq"
 
 if is_data_master?
@@ -112,7 +123,7 @@ if is_data_master?
     retries 10
   end
 
-  [ rabbitmq['vhost'], rabbitmq['reindexer_vhost'], rabbitmq['jobs_vhost'], rabbitmq['actions_vhost'] ].each do |vhost|
+  [ rabbitmq['vhost'], rabbitmq['actions_vhost'] ].each do |vhost|
     execute "#{rmq_ctl} add_vhost #{vhost}" do
       environment (rabbitmq_env)
       user opc_username
@@ -120,18 +131,12 @@ if is_data_master?
       retries 20
     end
   end
+
   # create chef user for the queue
   execute "#{rmq_ctl} add_user #{rabbitmq['user']} #{rabbitmq['password']}" do
     environment (rabbitmq_env)
     not_if "#{rmq_ctl_chpst} list_users |grep #{rabbitmq['user']}", :environment => rabbitmq_env, :user => "root"
     user opc_username
-    retries 10
-  end
-
-  execute "#{rmq_ctl} add_user #{rabbitmq['jobs_user']} #{rabbitmq['jobs_password']}" do
-    environment (rabbitmq_env)
-    user opc_username
-    not_if "#{rmq_ctl_chpst} list_users |grep #{rabbitmq['jobs_user']}", :environment => rabbitmq_env, :user => "root"
     retries 10
   end
 
@@ -142,7 +147,6 @@ if is_data_master?
     retries 10
   end
 
-
   execute "#{rmq_ctl} add_user #{rabbitmq['management_user']} #{rabbitmq['management_password']}" do
     environment (rabbitmq_env)
     user opc_username
@@ -150,8 +154,29 @@ if is_data_master?
     retries 10
   end
 
-  #
+  # Update the passwords if they've changed
+  execute "#{rmq_ctl} change_password #{rabbitmq['user']} #{rabbitmq['password']}" do
+    environment (rabbitmq_env)
+    only_if { node["previous_run"] && node["previous_run"]["rabbitmq"]["password"] != rabbitmq["password"] }
+    user opc_username
+    retries 10
+  end
 
+  execute "#{rmq_ctl} change_password #{rabbitmq['actions_user']} #{rabbitmq['actions_password']}" do
+    environment (rabbitmq_env)
+    user opc_username
+    only_if { node["previous_run"] && node["previous_run"]["rabbitmq"]["actions_password"] != rabbitmq["actions_password"] }
+    retries 10
+  end
+
+  execute "#{rmq_ctl} change_password #{rabbitmq['management_user']} #{rabbitmq['management_password']}" do
+    environment (rabbitmq_env)
+    user opc_username
+    only_if { node["previous_run"] && node["previous_run"]["rabbitmq"]["management_password"] != rabbitmq["management_password"] }
+    retries 10
+  end
+
+  #
   # grant the mapper user the ability to do anything with the /chef vhost
   # the three regex's map to config, write, read permissions respectively
   #
@@ -159,20 +184,6 @@ if is_data_master?
     environment (rabbitmq_env)
     user opc_username
     not_if "#{rmq_ctl_chpst} list_user_permissions #{rabbitmq['user']}|grep #{rabbitmq['vhost']}", :environment => rabbitmq_env, :user => "root"
-    retries 10
-  end
-
-  execute "#{rmq_ctl} set_permissions -p #{rabbitmq['reindexer_vhost']} #{rabbitmq['user']} \".*\" \".*\" \".*\"" do
-    environment (rabbitmq_env)
-    user opc_username
-    not_if "#{rmq_ctl_chpst} list_user_permissions #{rabbitmq['user']}|grep #{rabbitmq['reindexer_vhost']}", :environment => rabbitmq_env, :user => "root"
-    retries 10
-  end
-
-  execute "#{rmq_ctl} set_permissions -p #{rabbitmq['jobs_vhost']} #{rabbitmq['jobs_user']} \".*\" \".*\" \".*\"" do
-    environment (rabbitmq_env)
-    user opc_username
-    not_if "#{rmq_ctl_chpst} list_user_permissions #{rabbitmq['jobs_user']}|grep #{rabbitmq['jobs_vhost']}", :environment => rabbitmq_env, :user => "root"
     retries 10
   end
 
@@ -205,13 +216,24 @@ if is_data_master?
     retries 10
   end
 
-  execute "#{rmq_plugins} enable rabbitmq_management" do
-    environment (rabbitmq_env)
-    user opc_username
-    not_if "#{rmq_plugins} list | grep rabbitmq_management | grep -v rabbit_management_agent | grep E"
-    # management plugin needs a rabbit restart
-    notifies :restart, 'runit_service[rabbitmq]', :delayed
-    retries 10
+  rabbitmq_management_is_up = "#{rmq_plugins} list | grep rabbitmq_management  | grep -v rabbitmq_management_agent | grep -v rabbitmq_management_visualiser | grep E"
+  if rabbitmq['management_enabled']
+    execute "#{rmq_plugins} enable rabbitmq_management" do
+      environment (rabbitmq_env)
+      user opc_username
+      not_if rabbitmq_management_is_up
+      # management plugin needs a rabbit restart
+      notifies :restart, 'runit_service[rabbitmq]', :delayed
+      retries 10
+    end
+  else
+    execute "#{rmq_plugins} disable rabbitmq_management" do
+      environment (rabbitmq_env)
+      user opc_username
+      notifies :restart, 'runit_service[rabbitmq]', :delayed
+      only_if rabbitmq_management_is_up
+      retries 10
+    end
   end
 
   execute "#{rmq_ctl} set_user_tags #{rabbitmq['management_user']} administrator" do

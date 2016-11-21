@@ -1,6 +1,6 @@
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 # License:: Apache License, Version 2.0
-# Author:: Marc A. Paradise <marc@opscode.com>
+# Author:: Marc A. Paradise <marc@chef.io>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

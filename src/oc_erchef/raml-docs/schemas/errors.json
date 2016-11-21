@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "description": "An array of error strings used in error responses.",
+  "properties": {
+    "errors": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": "1"
+    }
+  }
+}

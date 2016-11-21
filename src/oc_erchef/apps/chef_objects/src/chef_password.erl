@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
-%% @author Seth Falcon <seth@getchef.com>
-%% @author Marc Paradise <marc@getchef.com>
+%% @author Seth Falcon <seth@chef.io>
+%% @author Marc Paradise <marc@chef.io>
 %% Copyright 2012-14 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -99,9 +99,18 @@ verify(Password, {HashedPass, Salt, _}) ->
     end.
 
 sha1(Salt, Password, osc) ->
-    hexstring(crypto:hash(sha, ["--", Salt, "--", Password, "--"]));
+    hexstring(safe_crypto(["--", Salt, "--", Password, "--"]));
 sha1(Salt, Password, ec) ->
-    hexstring(crypto:hash(sha, [Salt, "--", Password, "--"])).
+    hexstring(safe_crypto([Salt, "--", Password, "--"])).
+
+%% Eat any exceptions so secure data doesn't escape
+-spec safe_crypto(list()) -> binary().
+safe_crypto(Data) ->
+    try crypto:hash(sha, Data) of
+        Digest -> Digest
+    catch
+        _:_ -> crypto:hash(sha, ["crypto", "hash", "failure"])
+    end.
 
 hexstring(<<X:160/big-unsigned-integer>>) ->
     lists:flatten(io_lib:format("~40.16.0b", [X])).
@@ -128,4 +137,3 @@ to_str(S) when is_list(S) ->
     S;
 to_str(S) when is_binary(S) ->
     binary_to_list(S).
-

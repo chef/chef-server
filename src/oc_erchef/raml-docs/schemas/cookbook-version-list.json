@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "description": "A list of cookbooks and their supported versions.",
+  "properties": {
+    "[A-Za-z0-9-_.:]{1..255}": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "description": "The URL to the cookbook.",
+          "type": "string",
+
+          "format": "uri"
+        },
+        "versions": {
+          "type": "object",
+          "properties": {
+            "[A-Za-z0-9-_.:]{1..255}": {
+              "type": "array",
+              "items": { "$ref": "cookbook-common.json#/CookbookListVersion" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "example": {
+    "blah": {
+      "url": "https://api.chef.io/organizations/essentials/cookbooks/blah",
+      "versions": [
+        {
+          "version": "1.5.1",
+          "url": "https://api.chef.io/organizations/essentials/cookbooks/blah/1.5.1"
+        }
+      ]
+    }
+  }
+}

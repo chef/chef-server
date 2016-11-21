@@ -25,13 +25,11 @@ end
 
 oc_bifrost_dir = node['private_chef']['oc_bifrost']['dir']
 oc_bifrost_bin_dir = File.join(oc_bifrost_dir, "bin")
-oc_bifrost_etc_dir = File.join(oc_bifrost_dir, "etc")
 oc_bifrost_log_dir = node['private_chef']['oc_bifrost']['log_directory']
 oc_bifrost_sasl_log_dir = File.join(oc_bifrost_log_dir, "sasl")
 [
   oc_bifrost_dir,
   oc_bifrost_bin_dir,
-  oc_bifrost_etc_dir,
   oc_bifrost_log_dir,
   oc_bifrost_sasl_log_dir
 ].each do |dir_name|

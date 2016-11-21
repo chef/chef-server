@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "description": "The unique name of this key under the given user or client.",
+        "$ref": "common.json#ChefName"
+      },
+      "uri": {
+        "description": "The URI to this key.",
+        "type": "string",
+
+        "format": "uri"
+      },
+      "expired": {
+        "description": "Whether this key is expired or not.",
+        "type": "boolean"
+      }
+    }
+  }
+}

@@ -16,16 +16,21 @@
 
 name "opscode-chef-mover"
 source path: "#{project.files_path}/../../src/chef-mover", options: {:exclude => ["_build"]}
+license :project_license
 dependency "erlang"
-dependency "rebar"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
+  fips_enabled = project.overrides[:fips] && project.overrides[:fips][:enabled]
+  profile_name = fips_enabled ? "fips" : "default"
+
   env['USE_SYSTEM_GECODE'] = "1"
   env['REL_VERSION'] = "#{project.build_version}"
+  env['REBAR_PROFILE'] = profile_name
+
   make "omnibus", env: env
 
-  sync "#{project_dir}/_build/default/rel/mover/", "#{install_dir}/embedded/service/opscode-chef-mover/"
+  sync "#{project_dir}/_build/#{profile_name}/rel/mover/", "#{install_dir}/embedded/service/opscode-chef-mover/"
   delete "#{install_dir}/embedded/service/opscode-chef-mover/log"
 
   mkdir "#{install_dir}/embedded/service/opscode-chef-mover/scripts"

@@ -1,6 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Stephen Delano <stephen@opscode.com>
+%% @author Stephen Delano <stephen@chef.io>
 %% Copyright 2013 Opscode, Inc. All Rights Reserved.
 
 -module(oc_chef_authz).
@@ -34,3 +34,9 @@ make_context(ApiVersion, ReqId, Darklaunch) ->
     #oc_chef_authz_context{server_api_version = ApiVersion,
                            reqid = ReqId,
                            darklaunch = Darklaunch }.
+
+is_actor_transitive_member_of_group(_SuperuserId, _ActorId, _GroupId) ->
+    true.
+
+superuser_id() ->
+    <<"00000000000000000000000000000000">>.

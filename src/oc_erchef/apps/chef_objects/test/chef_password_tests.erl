@@ -1,6 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
-%% @author Seth Falcon <seth@opscode.com>
+%% @author Seth Falcon <seth@chef.io>
 %% Copyright 2012 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -56,6 +56,12 @@ bcrypt_round_trip_test_() ->
                PassData = [ {P, chef_password:encrypt(P)} || P <- Passwords ],
                [ ?_assertEqual(true, chef_password:verify(P, Data))
                  || {P, Data} <- PassData ]
+       end},
+
+      {"salt is null roundtrip",
+       fun() ->
+               P = "a long password",
+               ?assertEqual(false, chef_password:verify(P, {<<"Corned Beef">>, null, <<"some type">>}))
        end},
 
       {"salt not specified roundtrip",
@@ -143,7 +149,6 @@ upgrade_test_() ->
        end}
      ]}.
 
-
 slow_compare_test_() ->
     Tests = [
              %% positive cases
@@ -208,4 +213,3 @@ do_ec_migration(SHA, Salt) ->
     {ok, BcryptSalt} = bcrypt:gen_salt(),
     {ok, HashedPass} = bcrypt:hashpw(SHA, BcryptSalt),
     {list_to_binary(HashedPass), Salt, ?MIGRATION_HASH_TYPE}.
-

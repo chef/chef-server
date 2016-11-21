@@ -1,0 +1,28 @@
+description: Registries to coordinate the upload of cookbooks.
+type: list_endpoint
+
+post:
+  description: Create a sandbox.
+  body: { schema: SandboxCreate }
+  responses:
+    201:
+      body: { schema: SandboxCreated }
+
+/{sandbox}:
+  description: A registry to coordinate the upload of a cookbook.
+  type: item_endpoint
+  uriParameters:
+    sandbox:
+      description: ID of the sandbox.
+      type: string
+
+  put:
+    description: Complete a sandbox. When the sandbox is completed, it is removed.
+    body: { schema: SandboxComplete }
+    responses:
+      200:
+        body: { schema: SandboxCompleted }
+      503:
+        description: When the uploaded URLs could not be reached.
+        body:
+          schema: Errors

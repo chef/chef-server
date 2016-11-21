@@ -114,7 +114,7 @@ environment_not_found_message(EnvName) ->
 -spec not_found_message( node | role | data_bag | data_bag_item1 |
                          data_bag_item2 | client | data_bag_missing_for_item_post |
                          environment | sandbox | sandboxes | cookbook |
-                         cookbook_version | user | invitation,
+                         cookbook_version | user | invitation | policy | policy_group,
                          bin_or_string() | {bin_or_string(), bin_or_string()} ) -> ejson().
 not_found_message(node, Name) ->
     error_message_envelope(iolist_to_binary(["node '", Name, "' not found"]));
@@ -154,6 +154,8 @@ not_found_message(invitation, Id) ->
     {[{<<"error">>, iolist_to_binary(["Cannot find association request: ", Id])}]};
 not_found_message(key, {OwnerName, KeyName}) ->
     {[{<<"error">>, iolist_to_binary(["There is no key named ", KeyName, " associated with ", OwnerName, "."])}]};
+not_found_message(policy, Name) ->
+    error_message_envelope(iolist_to_binary(["policy '", Name, "' not found"]));
 not_found_message(policy_group, Name) ->
     error_message_envelope(iolist_to_binary(["policy_group '", Name, "' not found"])).
 
@@ -161,7 +163,9 @@ not_found_message(policy_group, Name) ->
 
 %% "Cannot load data bag item not_really_there for data bag sack"
 
--spec error_message_envelope(binary() | ejson_term()) -> ejson_term().
+-spec error_message_envelope(binary() | list() | ejson_term()) -> ejson_term().
+error_message_envelope(Message) when is_list(Message) ->
+    error_message_envelope(iolist_to_binary(Message));
 error_message_envelope(Message) when is_binary(Message) orelse
                                      is_tuple(Message) ->
     %% Tuple guard is really intended for grabbing EJson-encoded json objects, but we don't
@@ -217,7 +221,8 @@ set_location_of_created_resource(Uri, Req0) when is_binary(Uri) ->
 %% the spec will be updated
 -spec object_name(cookbook | node | role | data_bag | data_bag_item |
                   environment | principal | sandbox | client | user |
-                  group | container | organization | invitation | key,
+                  group | container | organization | invitation | key |
+                  policy | policy_group,
                   Request :: #wm_reqdata{}) -> binary() | undefined.
 object_name(node, Req) ->
     extract_from_path(node_name, Req);
@@ -248,7 +253,15 @@ object_name(organization, Req) ->
 object_name(invitation, Req) ->
     extract_from_path(invitation_id, Req);
 object_name(key, Req) ->
-    extract_from_path(key_name, Req).
+    extract_from_path(key_name, Req);
+object_name(policy, Req) ->
+    extract_from_path(policy_name, Req);
+object_name(policy_group, Req) ->
+    extract_from_path(policy_group_name, Req);
+%% For requests to `/policy_groups/:policy_group/policies/:policy_name`,
+%% the lookup key is `policy_group` without the `_name`
+object_name(policy_group_asoc_name, Req) ->
+    extract_from_path(policy_group, Req).
 
 
 

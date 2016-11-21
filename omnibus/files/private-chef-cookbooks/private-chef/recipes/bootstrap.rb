@@ -1,75 +1,46 @@
 #
-# Author:: Adam Jacob (<adam@opscode.com>)
-# Copyright:: Copyright (c) 2011 Opscode, Inc.
+# Author:: Adam Jacob <adam@chef.io>
+# Copyright:: Copyright (c) 2011-2015 Chef Software, Inc.
 #
-# All Rights Reserved
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
 
-require 'securerandom'
-
-# Enterprise Addon Install
-# On a new install, download and install all of the Chef
-# addons from package repositories. Only perform this
-# action during a fresh install, and not during an upgrade.
+# When we're running a new standalone install and are configured
+# to install addons, do so now from the package repositories.
 if (!OmnibusHelper.has_been_bootstrapped? &&
     node['private_chef']['topology'] == "standalone" &&
     node['private_chef']['addons']['install'])
   include_recipe "private-chef::add_ons_wrapper"
 end
 
-opscode_test_dir = "/opt/opscode/embedded/service/chef-server-bootstrap"
-opscode_test_config_dir = "/opt/opscode/embedded/service/chef-server-bootstrap/bootstrapper-config"
-
-template File.join(opscode_test_config_dir, "config.rb") do
-  source "bootstrap-config.rb.erb"
-  owner "root"
-  group "root"
-  mode "0600"
+# These should always be running by this point, but let's be certain.
+%w{postgresql oc_bifrost}.each do |service|
+  execute "/opt/opscode/bin/chef-server-ctl start #{service}" do
+    not_if { OmnibusHelper.has_been_bootstrapped? }
+  end
 end
 
-bootstrap_script = File.join(opscode_test_config_dir, "pivotal.yml")
-
-template bootstrap_script do
-  source "bootstrap-script.rb.erb"
-  owner "root"
-  group "root"
-  mode "0600"
-  not_if { OmnibusHelper.has_been_bootstrapped? }
-end
-
-execute "/opt/opscode/bin/private-chef-ctl start" do
-  not_if { OmnibusHelper.has_been_bootstrapped? }
-  retries 20
-end
-
-execute "bootstrap-platform" do
-  command "/opt/opscode/embedded/bin/bundle exec ./bin/bootstrap-platform ./bootstrapper-config/config.rb ./bootstrapper-config/pivotal.yml"
-  cwd opscode_test_dir
-  retries 3
+ruby_block "bootstrap-chef-server-data" do
+  block do
+    ChefServerDataBootstrap.new(node).bootstrap
+  end
   not_if { OmnibusHelper.has_been_bootstrapped? }
   notifies :restart, 'service[opscode-erchef]'
-end
-
-# Once we've bootstrapped the Enterprise Chef server
-# we can delete the bootstrap script that contains
-# the superuser password. Although this password cannot
-# be used to authenticate with the API, it should
-# nevertheless be deleted. We have elected not to
-# trigger the delete from the execute resource immediately
-# above so that we can ensure that bootstrap scripts from
-# previous installs are also cleaned up.
-template bootstrap_script do
-  action :delete
-end
-
-# Once we've bootstrapped, we can also delete pivotal.pub
-file "/etc/opscode/pivotal.pub" do
-  action :delete
 end
 
 file OmnibusHelper.bootstrap_sentinel_file do
   owner "root"
   group "root"
   mode "0600"
-  content "You've been bootstrapped, punk. Delete me if you feel lucky. Do ya, Punk?"
+  content "bootstrapped on #{DateTime.now} (you punk)" unless File.exists?(OmnibusHelper.bootstrap_sentinel_file)
 end

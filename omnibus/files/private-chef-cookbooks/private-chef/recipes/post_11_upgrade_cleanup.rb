@@ -1,5 +1,5 @@
 #
-# Author:: Christopher Maier (<cm@opscode.com>)
+# Author:: Christopher Maier (<cm@chef.io>)
 # Copyright:: Copyright (c) 2013 Opscode, Inc.
 #
 # All Rights Reserved

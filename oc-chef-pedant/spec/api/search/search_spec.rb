@@ -432,7 +432,7 @@ describe 'Search API endpoint', :search do
 
 #        perform_a_search_that_returns_no_results
 
-        # Fix for http://tickets.opscode.com/browse/CHEF-3975
+        # Fix for http://tickets.chef.io/browse/CHEF-3975
         context "with nested keys (CHEF-3975)" do
           let(:items) { [ alice, bob, carol ] }
           let(:alice) { { 'id' => "alice", 'ssh' => { 'public_key' => "---RSA Public Key--- Alice", 'private_key' => "---RSA Private Key-- Alice" } } }
@@ -495,7 +495,7 @@ describe 'Search API endpoint', :search do
           performing_a_search "should succeed"
         end
 
-        # Fix for http://tickets.opscode.com/browse/CHEF-3975
+        # Fix for http://tickets.chef.io/browse/CHEF-3975
         context "with nested keys (CHEF-3975)" do
           let(:items) { [ alice, carol ] }
           let(:alice) { { 'id' => "alice", 'ssh' => { 'public_key' => "---RSA Public Key--- Alice", 'private_key' => "---RSA Private Key-- Alice" } } }

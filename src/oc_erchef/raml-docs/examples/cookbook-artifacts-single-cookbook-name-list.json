@@ -1,0 +1,19 @@
+{
+  "aar": {
+    "url": "https://chef.example/organizations/org1/cookbook_artifacts/aar",
+    "versions": [
+      {
+        "url": "https://chef.example/organizations/org1/cookbook_artifacts/aar/c89808699edb7abe0569d6dd761d94912f998733",
+        "identifier": "c89808699edb7abe0569d6dd761d94912f998733"
+      },
+      {
+        "url": "https://chef.example/organizations/org1/cookbook_artifacts/aar/0c64b56efa1d30a5149a13eb12d8c8af14b2365b",
+        "identifier": "0c64b56efa1d30a5149a13eb12d8c8af14b2365b"
+      },
+      {
+        "url": "https://chef.example/organizations/org1/cookbook_artifacts/aar/6d5e28e83be3c1de4f6ca73ba0812e7e9e27da61",
+        "identifier": "6d5e28e83be3c1de4f6ca73ba0812e7e9e27da61"
+      }
+    ]
+  }
+}

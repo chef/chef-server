@@ -1,6 +1,6 @@
 #
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
-# Author:: Adam Jacob (<adam@opscode.com>)
+# Author:: Adam Jacob (<adam@chef.io>)
 #
 
 require 'uuidtools'
@@ -47,14 +47,14 @@ log 'opscode_webui deprecation notice' do
   only_if { opscode_webui_deprecation_notice.applicable? }
 end
 
-# @todo: This seems like it might belong in the PrivateChef helper;
-#   many other attributes like are set automatically there as well.
-if OmnibusHelper.has_been_bootstrapped?
+if OmnibusHelper.has_been_bootstrapped? or
+    BootstrapPreflightValidator.new(node).bypass_bootstrap?
   node.set['private_chef']['bootstrap']['enable'] = false
 end
 
-# Create the Chef User
+# Create the Chef User and private keys (pivotal/webui)
 include_recipe "private-chef::users"
+include_recipe "private-chef::private_keys"
 
 # merge xdarklaunch values into the disk-based darklaunch
 # so that we have a single source of truth for xdl-related
@@ -68,66 +68,6 @@ file "/etc/opscode/dark_launch_features.json" do
   group "root"
   mode "0644"
   content Chef::JSONCompat.to_json_pretty(darklaunch_values)
-end
-
-webui_key = OpenSSL::PKey::RSA.generate(2048) unless File.exists?('/etc/opscode/webui_pub.pem')
-
-file "/etc/opscode/webui_pub.pem" do
-  owner "root"
-  group "root"
-  mode "0644"
-  content webui_key.public_key.to_s unless File.exists?('/etc/opscode/webui_pub.pem')
-end
-
-file "/etc/opscode/webui_priv.pem" do
-  owner OmnibusHelper.new(node).ownership['owner']
-  group "root"
-  mode "0600"
-  content webui_key.to_pem.to_s unless File.exists?('/etc/opscode/webui_pub.pem')
-end
-
-worker_key = OpenSSL::PKey::RSA.generate(2048) unless File.exists?('/etc/opscode/worker-public.pem')
-
-file "/etc/opscode/worker-public.pem" do
-  owner "root"
-  group "root"
-  mode "0644"
-  content worker_key.public_key.to_s unless File.exists?('/etc/opscode/worker-public.pem')
-end
-
-file "/etc/opscode/worker-private.pem" do
-  owner OmnibusHelper.new(node).ownership['owner']
-  group "root"
-  mode "0600"
-  content worker_key.to_pem.to_s unless File.exists?('/etc/opscode/worker-public.pem')
-end
-
-# If we are doing initial key generation,
-# generate a new key.
-unless File.exists?('/etc/opscode/pivotal.pem')
-  pivotal_key = OpenSSL::PKey::RSA.generate(2048)
-end
-
-# This will be cleaned up during bootstrap.
-# Only generate if pivotal.pem doesn't exist,
-# because that means we are doing initial key generation
-# per the step directly above.
-unless File.exists?('/etc/opscode/pivotal.pem')
-  file "/etc/opscode/pivotal.pub" do
-    owner OmnibusHelper.new(node).ownership['owner']
-    group "root"
-    mode "0644"
-    content pivotal_key.public_key.to_s
-  end
-end
-
-# If we are doing initial key generation (aka pivotal.pem hasn't yet
-# been created), create pivotal.pem.
-file "/etc/opscode/pivotal.pem" do
-  owner OmnibusHelper.new(node).ownership['owner']
-  group "root"
-  mode "0600"
-  content pivotal_key.to_pem.to_s unless File.exists?('/etc/opscode/pivotal.pem')
 end
 
 directory "/etc/chef" do
@@ -165,12 +105,8 @@ include_recipe "private-chef::sysctl-updates"
 # Run plugins first, mostly for ha
 include_recipe "private-chef::plugin_chef_run"
 
-# If the add-on repository exists, include the recipe
-# to ensure that it's disabled.  Since chef-server-core
-# lives in the same repository as the add-ons, this
-# avoids unplanned upgrades to chef-server-core
-if OmnibusHelper.new(node).repository_configured? "chef-stable"
-  include_recipe "private-chef::add_ons_repository"
+if node['private_chef']['use_chef_backend']
+  include_recipe "private-chef::haproxy"
 end
 
 # Configure Services
@@ -213,17 +149,11 @@ end
       runit_service service do
         action :disable
       end
-      # opscode-expander is paired with expander-reindexer,
-      # so disable that too.
-      if service == 'opscode-expander'
-        runit_service 'opscode-expander-reindexer' do
-          action :disable
-        end
-      end
     end
   end
 end
 
+include_recipe "private-chef::cleanup"
 include_recipe "private-chef::actions" if darklaunch_values["actions"]
 
 include_recipe "private-chef::private-chef-sh"

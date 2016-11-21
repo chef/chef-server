@@ -1,0 +1,35 @@
+#%RAML 0.8
+---
+description: Organization invites for the user
+type: list_endpoint
+
+get:
+  description: List organizations this user has been invited to (but has not accepted).
+  responses:
+    200:
+      body: { schema: AssociationRequestUserList}
+
+/count:
+  description: Count of organization invites for this user.
+  type: item_endpoint
+
+  get:
+    responses:
+      200:
+        body: { schema: AssociationRequestCount }
+
+/{association_request}:
+  description: An association request for this user.
+  type: item_endpoint
+  uriParameters:
+    association_request:
+      description: ID of the association request.
+      type: string
+
+  put:
+    description: Accept or reject an organization invite.
+    body: { schema: AssociationRequestResponse }
+    responses:
+      200:
+        description: When the accept or reject was processed successfully.
+        body: { schema: AssociationRequestResponseSuccess }

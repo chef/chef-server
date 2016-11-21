@@ -64,6 +64,9 @@
                             %% these belong to EC and should
                             %% eventually be included in a pluggable
                             %% fashion.
+                            'policy' |
+                            'policy_group' |
+                            'organization' |
                             'oc_chef_container' |
                             'oc_chef_group'.
 
@@ -252,6 +255,8 @@
           %% that are part of the DB table, add them above this comment.
           'old_name' :: binary()    %% In case of update, this will contain the original name
         }).
+
+-type chef_key() :: #chef_key{}.
 
 %% These types and records are just convenient shorthands for subsets of our
 %% records that are used in the SQL layers.

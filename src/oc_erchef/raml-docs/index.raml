@@ -1,0 +1,38 @@
+#%RAML 0.8
+---
+title: Chef Server
+version: 1
+mediaType: application/json
+documentation:
+  - title: Chef Server API
+    content:
+      API for the Chef Server.
+
+schemas:
+  - !include schemas.yaml
+resourceTypes:
+  - !include resource-types.yaml
+traits:
+  - !include traits.yaml
+
+/organizations: !include organizations.yaml
+/organizations/{organization}/association_requests: !include organizations/association_requests.yaml
+/organizations/{organization}/clients:              !include organizations/clients.yaml
+/organizations/{organization}/cookbooks:            !include organizations/cookbooks.yaml
+/organizations/{organization}/cookbook_artifacts:   !include organizations/cookbook_artifacts.yaml
+/organizations/{organization}/containers:           !include organizations/containers.yaml
+/organizations/{organization}/controls:             !include organizations/controls.yaml
+/organizations/{organization}/data:                 !include organizations/data.yaml
+/organizations/{organization}/environments:         !include organizations/environments.yaml
+/organizations/{organization}/groups:               !include organizations/groups.yaml
+/organizations/{organization}/nodes:                !include organizations/nodes.yaml
+/organizations/{organization}/policies:             !include organizations/policies.yaml
+/organizations/{organization}/policy_groups:        !include organizations/policy_groups.yaml
+/organizations/{organization}/roles:                !include organizations/roles.yaml
+/organizations/{organization}/principals:           !include organizations/principals.yaml
+/organizations/{organization}/sandboxes:            !include organizations/sandboxes.yaml
+/organizations/{organization}/search:               !include organizations/search.yaml
+/organizations/{organization}/users:                !include organizations/users.yaml
+/organizations/{organization}/validate:             !include organizations/validate.yaml
+/users: !include users.yaml
+/:                                                  !include server_endpoints.yaml

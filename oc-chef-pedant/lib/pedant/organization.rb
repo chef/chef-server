@@ -17,10 +17,13 @@ module Pedant
     #   content of a private key file, the name of a file containing a
     #   private key, or a proper {Pedant::Requestor} object.  If it is
     #   one of the first two, a Requestor will be created from it.
+    #   Can also pass nil if no validator setup wanted.
     def initialize(name, validator)
       @name = name
 
-      if validator.is_a? Pedant::Requestor
+      if validator.nil?
+        @validator = nil
+      elsif validator.is_a? Pedant::Requestor
         @validator = validator
         @validator_key = validator.signing_key
       else

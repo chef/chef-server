@@ -1,0 +1,71 @@
+description: Data bags, containing arbitrary JSON data.
+type: list_endpoint
+
+get:
+  description: List all data bags.
+  responses:
+    200:
+      body: { schema: NamedChildList }
+
+post:
+  description: Create a data bag.
+  body: { schema: DataBag }
+  responses:
+    201:
+      body: { schema: ObjectUri }
+
+/{data_bag}:
+  description: A data bag, which can contain many items.
+  type: list_endpoint
+  uriParameters:
+    data_bag:
+      description: Name of the data bag.
+      type: string
+
+  get:
+    description: List data bag items in this data bag.
+    responses:
+      200:
+        body: { schema: NamedChildList }
+
+  post:
+    description: Create a data bag item.
+    body: { schema: DataBagItem }
+    responses:
+      200:
+        body: { schema: DataBagItemPostResponse }
+
+  delete:
+    description: Delete this data bag and all items in it.
+    responses:
+      200:
+        body: { schema: DataBag }
+
+  /{data_bag_item}:
+    description: A data bag item, which contains arbitrary JSON data.
+    type: item_endpoint
+    uriParameters:
+      data_bag_item:
+        description: Name of the data bag item.
+        type: string
+
+    get:
+      description: Read this data bag item.
+      responses:
+        200:
+          body: { schema: DataBagItem }
+
+    put:
+      description: Update this data bag item.
+      body: { schema: DataBagItem }
+      responses:
+        200:
+          body: { schema: DataBagItemPostResponse }
+
+    delete:
+      description: Delete this data bag item.
+      responses:
+        200:
+          body: { schema: DataBagItemDeleteResponse }
+
+  /_acl: !include ../acl_endpoint.yaml

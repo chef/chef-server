@@ -3,15 +3,56 @@ class EcPostgres
   def self.with_connection(node, database = 'template1', opts = {})
     require 'pg'
     postgres = node['private_chef']['postgresql'].merge(opts)
-    connection = ::PGconn.open('user' => postgres['db_superuser'],
-                               'host' => postgres['vip'],
-                               'password' => postgres['db_superuser_password'],
-                               'port' => postgres['port'],
-                               'dbname' => database)
+    connection = nil
+
+    # Some callers expect failure - this gives the option to suppress
+    # error logging to avoid confusing output.
+    if opts['silent']
+      silent = true
+      # If a caller specfies silent, it means they anticipate an error to be
+      # likely. Don't force over a minute of retries in that case.
+      retries = opts['retries'] || 1
+    else
+      silent = false
+      retries = opts['retries'] || 5
+    end
+    max_retries = retries
+    begin
+      connection = ::PGconn.open('user' => postgres['db_superuser'],
+                                 'host' => postgres['vip'],
+                                 'password' => postgres['db_superuser_password'],
+                                 'port' => postgres['port'],
+                                 'dbname' => database)
+    rescue => e
+      if retries > 0
+        sleep_time = 2**((max_retries - retries))
+        retries -= 1
+        unless silent
+          Chef::Log.warn "Error from postgresql: #{e.message.chomp}. Retrying after #{sleep_time}s. Retries remaining: #{retries + 1}"
+        end
+        sleep sleep_time
+        retry
+      else
+        unless silent
+          Chef::Log.error "Error from postgresql: #{e.message.chomp}. Retries have been exhausted."
+        end
+        raise
+      end
+    end
+
     begin
       yield connection
     ensure
       connection.close
+    end
+  end
+
+  def self.with_service_connection(node, database, service_name)
+    service = node['private_chef'][service_name]
+    with_connection(node, database,
+                    db_superuser: service['sql_user'],
+                    db_superuser_password: service['sql_password']) do |connection|
+      yield connection
     end
   end
 

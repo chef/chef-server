@@ -1,5 +1,5 @@
 %% @copyright 2012 Opscode, Inc. All Rights Reserved
-%% @author Tim Dysinger <dysinger@opscode.com>
+%% @author Tim Dysinger <dysinger@chef.io>
 %%
 %% Licensed to the Apache Software Foundation (ASF) under one or more
 %% contributor license agreements.  See the NOTICE file distributed
@@ -31,10 +31,17 @@ start(_StartType, _StartArgs) ->
             application:start(sync);
         _ -> ok
     end,
+
+    {ok, _OtherApps} = maybe_start_sqerl(bksw_conf:storage_type()),
     bksw_sup:start_link().
 
 stop(_State) ->
     ok.
+
+maybe_start_sqerl(filesystem) ->
+    {ok, []};
+maybe_start_sqerl(sql) ->
+    application:ensure_all_started(sqerl, permanent).
 
 %% @doc Print an informative message about how to use a remote shell
 %% attached to a live bookshelf node. The idea is to call this from a

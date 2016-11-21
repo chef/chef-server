@@ -13,19 +13,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require "veil"
+
 class PreflightValidationFailed < StandardError
 
 end
 
 class PreflightValidator
   attr_reader :node, :previous_run, :helper
+  attr_reader :cs_pg_attr, :node_pg_attr
   def initialize(node)
     @helper = OmnibusHelper.new(node)
     @node = node
     @previous_run = node['previous_run']
-    def fail_with error
-      raise PreflightValidationFailed, error
-    end
+
+    # Note that PrivateChef['postgresql'] will currently contain
+    # ONLY the settings specified in chef-server.rb plus some
+    # attributes set on initialization of the class.
+    @cs_pg_attr = PrivateChef['postgresql']
+
+    # Represents the recipe defaults
+    @node_pg_attr = node['private_chef']['postgresql']
+
+  end
+
+  def fail_with error
+    raise PreflightValidationFailed, error
+  end
+
+  def first_run?
+    previous_run.nil?
+  end
+
+  def secrets_exists?
+    secrets_json = "/etc/opscode/private-chef-secrets.json"
+    File.exist?(secrets_json) &&
+      Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_json).size > 0
   end
 
   def backend?
@@ -39,6 +62,41 @@ class PreflightValidator
     EnterpriseChef::Helpers.backend? faux_node
   end
 
+  # Postgresql connectivity and validation functions.
+  def named_db_exists?(connection, name)
+    connection.exec("SELECT count(*) AS result FROM pg_database WHERE datname='#{name}'")[0]['result'] == '1'
+  end
+
+  def named_role_exists?(connection, username)
+    # If a record exists, the role exists:
+    connection.exec("select usesuper from pg_catalog.pg_user where usename = '#{username}'").ntuples > 0
+  end
+
+  def connect_as(type, opts)
+    options = { 'silent' => false, 'retries' => 5, 'db_name' => 'template1' }
+    options.merge! opts
+
+    port = cs_pg_attr.has_key?('port') ? cs_pg_attr['port'] : node_pg_attr['port']
+    host = cs_pg_attr['vip']
+    if type == :invalid_user
+      user = 'chef_server_conn_test'
+      password = 'invalid'
+    else
+      user = cs_pg_attr['db_superuser']
+      password = cs_pg_attr['db_superuser_password']
+    end
+    # No error handling - the caller is expected to handle any exception.
+    EcPostgres.with_connection(node, options['db_name'], { 'db_superuser' => user,
+                                                           'db_superuser_password' => password,
+                                                           'vip' => host,
+                                                           'port' => port,
+                                                           'silent' => options['silent'],
+                                                           'retries' => options['retries']}) do |conn|
+       if block_given?
+         yield(conn)
+       end
+    end
+  end
   # Helper function that let get the correct top-level value for a service
   # node entry, given that we haven't yet merged PrivateChef
   # into the node.
@@ -71,8 +129,16 @@ class PreflightChecks
   # the defaults set in the recipe.
   def run!
     begin
-      PostgresqlPreflightValidator.new(node).run!
+      # When Chef Backend is configured, this is too early to verify
+      # postgresql accessibility since we need to configure HAProxy
+      # first
+      if ! PrivateChef['use_chef_backend']
+        BootstrapPreflightValidator.new(node).run!
+        PostgresqlPreflightValidator.new(node).run!
+      end
+      AuthPreflightValidator.new(node).run!
       SolrPreflightValidator.new(node).run!
+      BookshelfPreflightValidator.new(node).run!
     rescue PreflightValidationFailed => e
       # use of exit! prevents exit handlers from running, ensuring the last thing
       # the customer sees is the descriptive error we've provided.
@@ -80,5 +146,5 @@ class PreflightChecks
       exit! 128
     end
   end
-  LINE_SEP = "-----------------------------------------------------------------------"
+  LINE_SEP = "-----------------------------------------------------------------------" unless defined?(LINE_SEP)
 end

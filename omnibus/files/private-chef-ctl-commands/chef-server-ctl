@@ -8,6 +8,17 @@ module Omnibus
   # external services supported by Chef Server. As additional services
   # are external-enabled, controls/configuration will need to be added here.
   class ChefServerCtl < Omnibus::Ctl
+
+    def db_data
+      d = [%w{oc_bifrost bifrost},
+           %w{opscode-erchef opscode_chef},
+           %w{oc_id oc_id}]
+      if running_service_config('bookshelf')['storage_type'] == 'sql'
+        d << %w{bookshelf bookshelf}
+      end
+      d
+    end
+
     # Note that as we expand our external service support,
     # we may want to consider farming external_X functions to
     # service-specific classes
@@ -17,9 +28,7 @@ module Omnibus
       # NOTE a better way to handle this particular action may be through a chef_run of a 'cleanse' recipe,
       # since here we're explicitly reversing the actions we did in-recipe to set the DBs up....
       superuser = postgres['db_superuser']
-      [%w{oc_bifrost bifrost},
-       %w{opscode-erchef opscode_chef},
-       %w{oc_id oc_id}].each do |service|
+      db_data.each do |service|
         key, dbname = service
         service_config = running_service_config(key)
         exec_list << "DROP DATABASE #{dbname};"
@@ -205,6 +214,17 @@ EOM
         "/chef"
       else
         "/admin/ping?wt=json"
+      end
+    end
+
+    # Override reconfigure to skip license checking
+    def reconfigure(*args)
+      status = run_chef("#{base_path}/embedded/cookbooks/dna.json")
+      if status.success?
+        log "#{display_name} Reconfigured!"
+        exit! 0
+      else
+        exit! 1
       end
     end
   end

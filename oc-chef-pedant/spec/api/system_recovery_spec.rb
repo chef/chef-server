@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Author:: Tyler Cloke (<tyler@getchef.com>)
+# Author:: Tyler Cloke (<tyler@chef.io>)
 # Copyright:: Copyright (c) 2014 Chef, Inc.
 
 # TODO: there is no LDAP testing here because to
@@ -34,7 +34,7 @@ describe 'system_recovery', :users do
   let(:create_body) do
     {
       display_name: username,
-      email: "#{username}@getchef.com",
+      email: "#{username}@chef.io",
       password: password,
       username: username,
       external_auth_id: external_auth_id,
@@ -70,7 +70,7 @@ describe 'system_recovery', :users do
             :body => {
               "display_name" => username,
               "username" => username,
-              "email" => "#{username}@getchef.com",
+              "email" => "#{username}@chef.io",
               "recovery_authentication_enabled" => true
             },
             :status => 200
@@ -124,7 +124,7 @@ describe 'system_recovery', :users do
       let(:unrecoverable_user_create_body) do
         {
           display_name: unrecoverable_username,
-          email: "#{unrecoverable_username}@getchef.com",
+          email: "#{unrecoverable_username}@chef.io",
           password: "foobar",
           username: unrecoverable_username,
           external_auth_id: unrecoverable_external_auth_id,

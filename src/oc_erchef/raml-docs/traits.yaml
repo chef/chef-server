@@ -1,0 +1,108 @@
+#%RAML 0.8
+---
+chef_endpoint:
+  description: Base for a Chef endpoint, which returns JSON, authenticates, and is versioned.
+  headers:
+    Accept:
+      description: Acceptable response types. Must include application/json.
+      type: string
+    X-Ops-Server-Api-Version:
+      displayName: X-Ops-Server-Api-Version
+      description: Information describing server API versioning info (see example).
+      example: |
+        {
+          "min_version": "Integer describing the minimum API version the server supports.",
+          "max_version": "Integer describing the maximum API version the server supports.",
+          "request_version" : "Integer describing the desired API version from the client passed via X-Ops-Server-API-Version, defaulting to 0 if X-Ops-Server-API-Version was not sent by the client. If X-Ops-Server-API-Version sent by the client contained an invalid value (not an integer), then this value is -1.",
+          "response_version" : "Integer describing the API version used by the server to process the request. It either matches what the client requested in X-Ops-Server-API-Version or is -1 if a 406 occurred (which happens when X-Ops-Server-API-Version sent by the client was invalid or not in the supported range of the server)."
+        }
+    X-Ops-Timestamp:
+      description: The timestamp of this message in UTC, in format YYYY-MM-DDTH:M:SZ
+#        regex: \d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ
+      example: 2015-08-12T13:02:23Z
+    X-Ops-Userid:
+      description: The name of the user or client
+    X-Chef-Version:
+      description: Version of the chef client
+#        regex: \d+\.\d+\.\d+
+    X-Ops-Content-Hash:
+      description: A hash of the body of the request, using SHA1, encoded in Base64 with line breaks every 60 characters.
+    X-Ops-Sign:
+      description: Metadata about the signature (such as version).
+      example: version=1.0
+    X-Ops-Authorization-N:
+      description: |
+        A signed copy of the following header data, signed with the client or
+        user's private key, and encoded in Base64. Must be broken into a series
+        of sequential headers of no more than 60 Base64 characters, e.g.
+        `X-Ops-Authorization-1`, `X-Ops-Authorization-2`, etc. which
+        concatenated together form the signed data.
+        ```
+        Method:HTTP_METHOD
+        Hashed Path:HASHED_PATH
+        X-Ops-Content-Hash:HASHED_BODY
+        X-Ops-Timestamp:TIME
+        X-Ops-UserId:USERID
+        ```
+  responses:
+    401:
+      description: When authentication fails.
+      body:
+        schema: Errors
+    403:
+      description: When the requester does not have permission to perform this action.
+      body:
+        schema: Errors
+    406:
+      description: When the Accept header does not include application/json.
+      body:
+        schema: Errors
+
+validated:
+  responses:
+    400:
+      description: When the request parameters or body have missing or invalid fields
+      body:
+        schema: Errors
+
+not_found:
+  responses:
+    404:
+      description: When the resource (or parent resource) does not exist.
+      body:
+        schema: Errors
+
+parent_not_found:
+  responses:
+    404:
+      description: When the parent resource does not exist.
+      body:
+        schema: Errors
+
+conflict:
+  responses:
+    409:
+      description: When the resource already exists.
+      body:
+        schema: Errors
+
+rename_conflict:
+  responses:
+    409:
+      description: When the resources is being renamed and a resource with the new name already exists.
+      body:
+        schema: Errors
+
+renamed:
+  responses:
+    201:
+      headers:
+        Location:
+          description: Location of newly-created resource (URI).
+
+created:
+  responses:
+    201:
+      headers:
+        Location:
+          description: Location of newly-created resource (URI).

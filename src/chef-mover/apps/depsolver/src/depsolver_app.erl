@@ -18,11 +18,11 @@
 %% under the License.
 %%
 %%%-------------------------------------------------------------------
-%%% @author Oliver Ferrigni <oliver@opscode.com>
+%%% @author Oliver Ferrigni <oliver@chef.io>
 %%% @doc
 %%%
 %%% @end
-%%% Created :  5 Jun 2013 by Oliver Ferrigni <oliver@opscode.com>
+%%% Created :  5 Jun 2013 by Oliver Ferrigni <oliver@chef.io>
 %%%-------------------------------------------------------------------
 -module(depsolver_app).
 

@@ -2,6 +2,7 @@ sudo: false
 branches:
   only:
     - master
+
 cache:
   apt: true
   directories:
@@ -10,13 +11,14 @@ cache:
     - $HOME/.cpanm
     - $HOME/.cpan
     - $HOME/perl5
+    - $HOME/.cache/rebar3/
 before_cache:
   # Prevent build log from changing cache cand causing repackage
   - rm -f $HOME/.cpanm/work/*/build.log
   - rm -f $HOME/.cpanm/build.log
 language: erlang
 otp_release:
-  - 17.4
+  - 17.5
 addons:
   postgresql: "9.3"
   apt:
@@ -34,7 +36,7 @@ env:
   global:
     - PERL5LIB=~/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:~/perl5/lib/perl5:/etc/perl:/usr/local/lib/perl/5.14.2:/usr/local/share/perl/5.14.2:/usr/lib/perl5:/usr/share/perl5:/usr/lib/perl/5.14:/usr/share/perl/5.14:/usr/local/lib/site_perl
     - USE_OMNIBUS_FILES=0
-    - CHEFDK_GECODE_PATH=/opt/chefdk/embedded/lib/ruby/gems/2.1.0/gems/dep-selector-libgecode-1.0.2/lib/dep-selector-libgecode/vendored-gecode
+    - CHEFDK_GECODE_PATH=/opt/chefdk/embedded/lib/ruby/gems/2.3.0/gems/dep-selector-libgecode-1.3.1/lib/dep-selector-libgecode/vendored-gecode
     - PATH=~/perl5/bin:$PATH
     - LUALIB=~/.luarocks/lib/lua/5.2
   matrix:
@@ -44,12 +46,12 @@ env:
   - COMPONENT=src/chef-mover
   - COMPONENT=src/oc_bifrost
   - COMPONENT=src/bookshelf
+
 install:
   - luarocks install --local lpeg
   - luarocks install --local lua-cjson
   - eval $(luarocks path)
-  - rvm install --binary 2.1.4
-  - rvm use 2.1.4
+  - travis_retry rvm use 2.2.5 --install --binary --fuzzy
   - cpanm --notest --quiet --local-lib=$HOME/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
   - cpanm --notest --quiet App::Sqitch
   - cd $COMPONENT && travis_retry make install
@@ -59,3 +61,43 @@ script:
 
 after_failure:
   - cat logs/raw.log
+
+matrix:
+  include:
+    - language: ruby
+      rvm: 2.2.5
+      gemfile: oc-chef-pedant/Gemfile
+      # We remove Gemfile.lock because Travis does
+      # "bundle install --path bundle/vendor" which breaks our ability
+      # to bundle install from the chef-zero spec.
+      before_install: gem install bundler -v 1.12.5 && rm -f oc-chef-pedant/Gemfile.lock
+      before_script: cd oc-chef-pedant
+      script: bundle exec rake chef_zero_spec
+      env:
+        - "GEMFILE_MOD=\"gem 'rake'; gem 'chef-zero', github: 'chef/chef-zero', branch: 'master' \""
+      # Remove things only used by erlang
+      install:
+      after_failure:
+      otp_release:
+      addons:
+      before_cache:
+      cache:
+    - language: ruby
+      rvm: 2.2.5
+      gemfile: oc-chef-pedant/Gemfile
+      # We remove Gemfile.lock because Travis does
+      # "bundle install --path bundle/vendor" which breaks our ability
+      # to bundle install from the chef-zero spec.
+      before_install: gem install bundler -v 1.12.5 && rm -f oc-chef-pedant/Gemfile.lock
+      before_script: cd oc-chef-pedant
+      script: bundle exec rake chef_zero_spec
+      env:
+        - "GEMFILE_MOD=\"gem 'rake'; gem 'chef-zero', github: 'chef/chef-zero', branch: 'master' \""
+        - CHEF_FS=1
+      # Remove things only used by erlang
+      install:
+      after_failure:
+      otp_release:
+      addons:
+      before_cache:
+      cache:

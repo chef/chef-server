@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "properties": {
+    "name": {
+      "description": "The name of the node (unique within an organization).",
+      "$ref": "common.json#ChefName",
+      "required": true
+    },
+    "chef_environment": {
+      "description": "The environment the node is in.",
+      "$ref": "common.json#ChefName",
+      "default": "_default"
+    },
+    "run_list": {
+      "description": "The run list for the node.",
+      "$ref": "common.json#RunList"
+    },
+    "override": {
+      "description": "Override-level attributes specific to this node.",
+      "type": "object",
+      "additionalProperties": true
+    },
+    "normal": {
+      "description": "Normal-level attributes specific to this node.",
+      "type": "object",
+      "additionalProperties": true
+    },
+    "default": {
+      "description": "Default-level attributes specific to this node.",
+      "type": "object",
+      "additionalProperties": true
+    },
+    "automatic": {
+      "description": "Automatic-level attributes (generally overwritten by chef-client each time it runs).",
+      "type": "object",
+      "additionalProperties": true
+    },
+    "json_class": {
+      "description": "Must have the value Chef::Node.",
+      "type": "string",
+      "enum": [ "Chef::Node" ]
+    },
+    "chef_type": {
+      "description": "Must have the value \"node\"",
+      "type": "string",
+      "enum": [ "node" ]
+    }
+  }
+}

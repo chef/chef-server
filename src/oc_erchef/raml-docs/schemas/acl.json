@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "description": "The full permissions for a Chef object.",
+  "properties": {
+    "create": { "$ref": "common.json#AclPermission" },
+    "read": { "$ref": "common.json#AclPermission" },
+    "update": { "$ref": "common.json#AclPermission" },
+    "delete": { "$ref": "common.json#AclPermission" },
+    "grant": { "$ref": "common.json#AclPermission" }
+  }
+}

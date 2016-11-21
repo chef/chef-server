@@ -1,12 +1,11 @@
 #
-# Author:: Seth Chisamore (<schisamo@opscode.com>)
+# Author:: Seth Chisamore (<schisamo@chef.io>)
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 #
 # All Rights Reserved
 
 cookbook_migration = "/opt/opscode/embedded/bin/cookbook_migration.sh"
 
-checksum_path = node['private_chef']['opscode-chef']['checksum_path']
 data_path = node['private_chef']['bookshelf']['data_dir']
 
 template cookbook_migration do
@@ -21,12 +20,10 @@ end
 # Note that data_path will not be a subdir of bookshelf_dir in HA configurations
 #
 bookshelf_dir = node['private_chef']['bookshelf']['dir']
-bookshelf_etc_dir = File.join(bookshelf_dir, "etc")
 bookshelf_log_dir = node['private_chef']['bookshelf']['log_directory']
 bookshelf_sasl_log_dir = File.join(bookshelf_log_dir, "sasl")
 [
   bookshelf_dir,
-  bookshelf_etc_dir,
   bookshelf_log_dir,
   bookshelf_sasl_log_dir,
   data_path
@@ -51,12 +48,15 @@ end
 
 bookshelf_config = File.join(bookshelf_dir, "sys.config")
 
+bookshelf_params = node['private_chef']['bookshelf'].to_hash.dup # is dup implicit in #to_hash?
+bookshelf_params['postgresql'] = node['private_chef']['postgresql'].dup
+
 template bookshelf_config do
   source "bookshelf.config.erb"
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode "644"
-  variables(node['private_chef']['bookshelf'].to_hash)
+  variables(bookshelf_params)
   notifies :restart, 'runit_service[bookshelf]' if is_data_master?
 end
 

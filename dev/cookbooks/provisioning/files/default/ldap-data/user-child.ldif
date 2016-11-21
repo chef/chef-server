@@ -1,0 +1,12 @@
+dn: cn=Julia Child,ou=chefs,dc=chef-server,dc=dev
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: Julia Child
+sn: Child
+displayName: Julia Child
+givenName: Julia
+mail: child@chef-server.dev
+uid: child
+userPassword: child

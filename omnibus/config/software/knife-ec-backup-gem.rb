@@ -17,6 +17,12 @@
 name "knife-ec-backup"
 default_version "2.0.6"
 
+license "Apache-2.0"
+license_file "https://github.com/chef/knife-ec-backup/blob/master/LICENSE"
+# No need to collect license information for dependencies since
+# --ignore-dependencies flag is passed in during gem install.
+skip_transitive_dependency_licensing true
+
 dependency "pg-gem"
 dependency "sequel-gem"
 

@@ -18,6 +18,9 @@ name "chef-ha-plugin-config"
 description "generates chef-server-plugin.rb"
 default_version "0.0.1"
 
+license :project_license
+skip_transitive_dependency_licensing true
+
 build do
   block do
     File.open("#{install_dir}/chef-server-plugin.rb", "w") do |f|

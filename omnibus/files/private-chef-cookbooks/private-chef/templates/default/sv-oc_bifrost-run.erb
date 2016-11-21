@@ -1,4 +1,4 @@
 #!/bin/sh
 exec 2>&1
 
-exec chpst -P -u <%= node['private_chef']['user']['username'] %> -U <%= node['private_chef']['user']['username'] %> env HOME=<%= node['private_chef']['oc_bifrost']['dir'] %> /opt/opscode/embedded/service/oc_bifrost/bin/oc_bifrost foreground
+exec chpst -P -u <%= node['private_chef']['user']['username'] %> -U <%= node['private_chef']['user']['username'] %> env ERL_EPMD_ADDRESS=127.0.0.1 HOME=<%= node['private_chef']['oc_bifrost']['dir'] %> /opt/opscode/embedded/service/oc_bifrost/bin/oc_bifrost foreground

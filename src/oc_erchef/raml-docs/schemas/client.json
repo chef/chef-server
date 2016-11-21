@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "properties": {
+    "name": {
+      "description": "The name of the client (unique within an organization).",
+      "$ref": "common.json#ChefName",
+      "required": true
+    },
+    "clientname": {
+      "description": "Same as name.",
+      "$ref": "common.json#ChefName"
+    },
+    "validator": {
+      "description": "Whether or not the client is a validator.",
+      "type": "boolean"
+    },
+    "public_key": {
+      "description": "The public key corresponding to the client's private key, for authentication.",
+      "type": "PublicKey"
+    },
+    "orgname": {
+      "description": "The name of the organization the client is in.",
+      "$ref": "common.json#ChefName"
+    },
+    "json_class": {
+      "description": "Must have the value Chef::ApiClient.",
+      "type": "string",
+      "enum": [ "Chef::ApiClient" ]
+    },
+    "chef_type": {
+      "description": "Must have the value \"client\"",
+      "type": "string",
+      "enum": [ "client" ]
+    }
+  },
+  "example": {
+    "name": "foo",
+    "clientname": "foo",
+    "validator": "false,",
+    "orgname": "essentials",
+    "json_class": "Chef::ApiClient",
+    "chef_type": "client"
+  }
+}

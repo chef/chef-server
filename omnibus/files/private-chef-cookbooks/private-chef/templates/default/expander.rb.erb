@@ -5,10 +5,8 @@ amqp_host '<%= node['private_chef']['rabbitmq']['vip'] %>'
 amqp_port <%= node['private_chef']['rabbitmq']['node_port'] %>
 amqp_user '<%= node['private_chef']['rabbitmq']['user'] %>'
 amqp_pass '<%= node['private_chef']['rabbitmq']['password'] %>'
-<% if @reindexer == true %>
-amqp_vhost '<%= node['private_chef']['rabbitmq']['reindexer_vhost'] %>'
-ps_tag '-reindexer'
-<% else %>
 amqp_vhost '<%= node['private_chef']['rabbitmq']['vhost'] %>'
 ps_tag ''
-<% end %>
+
+max_retries <%= @max_retries %>
+retry_wait <%= @retry_wait %>

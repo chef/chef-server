@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "properties": {
+    "uri": {
+      "description": "URI to the created invite",
+      "type": "string",
+      "format": "uri",
+      "example": "https://api.chef.io/organizations/essentials/association_requests/92290982a3c91bd471466daae3c95f75"
+    },
+    "organization_user": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "description": "Username of invited user.",
+          "$ref": "common.json#ChefName"
+        }
+      }
+    },
+    "organization": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Name of organization user was invited to.",
+          "$ref": "common.json#ChefName"
+        }
+      }
+    },
+    "user": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "description": "Email of invited user.",
+          "type": "string",
+          "format": "email"
+        },
+        "first_name": {
+          "description": "First name of invited user.",
+          "type": "string"
+        }
+      }
+    }
+  },
+
+  "example": {
+    "uri": "https://api.chef.io/organizations/essentials/association_requests/92290982a3c91bd471466daae3c95f75",
+    "organization_user": {
+      "username": "jkeiser"
+    },
+    "organization": {
+      "name": "essentials"
+    },
+    "user": {
+      "email": "pivotaluser@chef.io",
+      "first_name": "CommunitySite"
+    }
+  }
+}

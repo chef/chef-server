@@ -2,7 +2,7 @@
 # -*- indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 # ex: ts=4 sw=4 et
 #
-# Author:: Douglas Triggs (<cm@opscode.com>)
+# Author:: Douglas Triggs (<cm@chef.io>)
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 #
 

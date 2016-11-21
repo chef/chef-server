@@ -48,9 +48,17 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
           "name"=>"pedant_basic",
           "identifier"=>"1111111111111111111111111111111111111111",
           "version"=>"1.0.0",
+          "attributes" => [],
           "chef_type"=>"cookbook_version",
+          "definitions" => [],
+          "files" => [],
           "frozen?"=>false,
+          "providers" => [],
           "recipes"=>[],
+          "resources" => [],
+          "root_files" => [],
+          "templates" => [],
+          "libraries" => [],
           "metadata"=> {
             "version"=>"1.0.0",
             "name"=>"pedant_basic",
@@ -156,7 +164,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
       shared_examples_for "valid_cookbook_artifact" do
 
-        it "create returns 200" do
+        it "create returns 201" do
           #create it
           put(request_url, requestor, :payload => payload) do |response|
             expect(response.code).to eq(201)
@@ -303,7 +311,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
             'service[snuggle]'           => '0.0.1'  }
         ].each do |valid_provides|
 
-          # http://docs.opscode.com/config_rb_metadata.html#provides
+          # http://docs.chef.io/config_rb_metadata.html#provides
           context "with metadata.providing set to valid value #{valid_provides}" do
 
             let(:payload) { update_payload_metadata("providing", valid_provides) }

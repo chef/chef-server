@@ -69,6 +69,13 @@ table.insert(shared_acct_tests, {"/users/borg//association_requests/",        {D
 table.insert(shared_acct_tests, {"/users/borg//association_requests/abc",     {DEF_ORG, "acct_erchef", "association_requests", "borg"}})
 table.insert(shared_acct_tests, {"/users/borg/organizations",                 {DEF_ORG, "acct_erchef", "associations", "borg"}})
 
+-- {dest_uri, {org_name_expected, route_id_expected, endpoint_expected, object_name_expected } }
+-- user keys endpoints
+table.insert(shared_chef_tests, {"/users/actor/keys", {DEF_ORG, "erchef", "keys"}})
+table.insert(shared_chef_tests, {"/users/actor/keys/", {DEF_ORG, "erchef", "keys"}})
+table.insert(shared_chef_tests, {"/users/actor/keys/key", {DEF_ORG, "erchef", "keys", "key"}})
+table.insert(shared_chef_tests, {"/users/actor/keys/key/", {DEF_ORG, "erchef", "keys", "key"}})
+
 -- Verify that association_requests + junk is not being improperly routed to association_requests
 -- endpoint or account. Its invalid and should not route anywhere at all.
 table.insert(api_tests, {"/users/borg//association_requests0abc", {nil} })
@@ -139,6 +146,12 @@ table.insert(shared_chef_tests, {"/organizations/testorg/" .. val .. "/abc/subco
 table.insert(shared_chef_tests, {"/organizations/testorg/" .. val .. "/b@d!dent", {TEST_ORG, "erchef", val, "b@d!dent"}})
 end
 
+for _k, val in pairs{ "clients", "users" } do
+table.insert(shared_chef_tests, {"/organizations/testorg/" .. val .. "/actor/keys", {TEST_ORG, "erchef", "keys"}})
+table.insert(shared_chef_tests, {"/organizations/testorg/" .. val .. "/actor/keys/", {TEST_ORG, "erchef", "keys"}})
+table.insert(shared_chef_tests, {"/organizations/testorg/" .. val .. "/actor/keys/key", {TEST_ORG, "erchef", "keys", "key"}})
+table.insert(shared_chef_tests, {"/organizations/testorg/" .. val .. "/actor/keys/key/", {TEST_ORG, "erchef", "keys", "key"}})
+end
 
 table.insert(api_tests, {"/organizations/testorg/nodes/_acl",        {TEST_ORG, "acct_erchef", "acls", nil}})
 

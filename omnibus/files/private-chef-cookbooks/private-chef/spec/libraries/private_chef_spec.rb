@@ -2,8 +2,10 @@ require_relative '../../libraries/private_chef.rb'
 require 'chef/log'
 
 def expect_existing_secrets
-  allow(File).to receive(:exists?).with("/etc/opscode/private-chef-secrets.json").and_return(true)
-  allow(File).to receive(:read).with("/etc/opscode/private-chef-secrets.json").and_return(secrets)
+  allow(File).to receive(:exist?).and_call_original
+  allow(File).to receive(:exist?).with("/etc/opscode/private-chef-secrets.json").and_return(true)
+  allow(IO).to receive(:read).and_call_original
+  allow(IO).to receive(:read).with("/etc/opscode/private-chef-secrets.json").and_return(secrets)
 end
 
 def config_for(hostname)
@@ -21,6 +23,8 @@ describe PrivateChef do
     load ::File.expand_path("#{::File.dirname(__FILE__)}/../../libraries/private_chef.rb")
     PrivateChef[:node] = node
     allow(PrivateChef).to receive(:exit!).and_raise(SystemExit)
+    allow_any_instance_of(Veil::CredentialCollection::ChefSecretsFile).to receive(:save).and_return(true)
+    allow_any_instance_of(Kernel).to receive(:system).with("chmod 0600 /etc/opscode/private-chef-secrets.json").and_return(true)
   }
 
   # Example content of /etc/opscode/private-chef-secrets.json
@@ -32,7 +36,6 @@ describe PrivateChef do
   },
   "rabbitmq": {
     "password": "a866861140c2c7bc2dc67c9f7696be2b2108321e18acb08922c28a075a8dbb8e773d82142e9cc52c96fdf6928c901c3ab360",
-    "jobs_password": "0b46135781879d28515981b7cc85e69895bafecdea8a7aa68851624e1cdde2d439166614708cac2519729e458d9e46d13140",
     "actions_password": "80ee6755aa6b4051aa99837ae213668f67f8941b6bb06142e0d9c99d9a4cd4210a07d30e430b49b41903b76554e01be11401",
     "management_password":"82ee6755aa6b4051aa99837ae213668f68f8941b6bb06142e0d9c99d9a4cd4210a07d30e430b49b41903b76554e01be11401"
   },
@@ -60,6 +63,8 @@ describe PrivateChef do
     "sql_ro_password": "f3003275a303dccc3e8b93bcde838e2254a82e1c6feb0db034e5e64c263e55643e14f8f75003c7080f7a145328d8a26c8242"
   },
   "bookshelf": {
+    "sql_password": "8506ed8b4d4840dbd00da13157f48d4a362aac2101c3a1f4463e39e33ec46c7144681d1232cea80b7e7c382cc3f34b580f78",
+    "sql_ro_password": "ca000f92407cca27995f925a5004aae08310819f3cd27dcb8cbd08e500b35f61acb2d98b709d39308b704d4481b2ee19b493",
     "access_key_id": "331fe88b6a86c4801218fd3e831a68b710544069",
     "secret_access_key": "393dd9330f834102f3650a6ac6938530ccbfbe1c86cb7d732f9893768e4e06eb172cc326da17f435"
   }}

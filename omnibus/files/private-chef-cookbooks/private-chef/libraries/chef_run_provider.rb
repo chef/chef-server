@@ -8,10 +8,13 @@ class Chef
       action :run do
         converge_by "Running chef-run with run list #{new_resource.run_list}" do
           old_config = Chef::Config.save
+          old_initialization_options = Chef::Cookbook::FileVendor.initialization_options
+          old_vendor_class = Chef::Cookbook::FileVendor.vendor_class
           mutate_chef_config
           converge
           Chef::Config.restore(old_config)
-          Chef::Cookbook::FileVendor.instance_variable_set(:@initialization_options, Chef::Config[:cookbook_path])
+          Chef::Cookbook::FileVendor.instance_variable_set(:@initialization_options, old_initialization_options)
+          Chef::Cookbook::FileVendor.instance_variable_set(:@vendor_class, old_vendor_class)
         end
       end
 
@@ -22,8 +25,9 @@ class Chef
         if !new_resource.show_run
           Chef::Config[:force_logger] = true
         end
-        Chef::Config[:solo] = true
+        Chef::Config[:solo_legacy_mode] = true
       end
+
 
       def my_node
         @my_node ||= my_client.build_node

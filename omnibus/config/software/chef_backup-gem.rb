@@ -1,5 +1,5 @@
 #
-# Copyright:: Copyright (c) 2014 Chef Software, Inc.
+# Copyright:: Copyright (c) 2016 Chef Software, Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,15 +15,20 @@
 # limitations under the License.
 #
 name 'chef_backup-gem'
-default_version '0.0.1.dev.4'
+default_version 'master'
+source git: "https://github.com/chef/chef_backup.git"
+
+license "Apache-2.0"
+license_file "https://github.com/chef/chef_backup/blob/master/LICENSE"
 
 dependency 'ruby'
 dependency 'rubygems'
-# rsync dependency must be met by pre-installation on the server,
-# Because of rsync's GPLv3 licensing, we can't include it in the shipped
-# chef-server without further evaluation.
-#dependency 'rsync'
 
 build do
-  gem "install chef_backup -n #{install_dir}/embedded/bin --no-rdoc --no-ri -v #{version}"
+  env = with_standard_compiler_flags(with_embedded_path)
+
+  bundle "install --without development", env: env
+
+  gem "build chef_backup.gemspec", env: env
+  gem "install chef_backup*.gem -n #{install_dir}/embedded/bin --no-rdoc --no-ri", env: env
 end

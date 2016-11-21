@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Author:: Douglas Triggs (<doug@getchef.com>)
+# Author:: Douglas Triggs (<doug@chef.io>)
 # Copyright:: Copyright (c) 2014 Chef, Inc.
 
 require 'pedant/rspec/node_util'

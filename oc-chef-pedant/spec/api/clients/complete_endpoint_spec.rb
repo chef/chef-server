@@ -16,7 +16,7 @@
 require 'pedant/rspec/client_util'
 require 'pedant/rspec/validations'
 
-describe "Client API endpoint" do
+describe "Client API endpoint", :clients do
   include Pedant::RSpec::ClientUtil
 
   # Just until we rename the requestors

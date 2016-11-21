@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "type" : "object",
+  "required" : true,
+  "properties" : {
+    "public_key" :
+      { "type" : "string",
+        "description" : "A valid PKCS#1 public key string.",
+        "required" : true },
+    "name" :
+      { "type" : "string",
+        "description" : "A unique name for this key under the given user or client.",
+        "required" : true },
+    "expiration_date" :
+      { "type" : "date",
+        "description" : "An ISO 8601 fomatted string: YYYY-MM-DDTHH:MM:SSZ e.g. 2013-12-24T21:00:00Z in UTC timezone or the string 'infinity'.",
+        "required" : true }
+  }
+}

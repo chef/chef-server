@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Tyler Cloke <tyler@getchef.com>
-%% @author Marc Paradise <marc@getchef.com>
+%% @author Tyler Cloke <tyler@chef.io>
+%% @author Marc Paradise <marc@chef.io>
 %% Copyright 2014 Chef Software, Inc. All Rights Reserved.
 
 -module(oc_chef_org_user_invite).

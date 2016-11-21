@@ -1,0 +1,36 @@
+description: A list of users who are members of the organization.
+type: list_endpoint
+
+get:
+  description: List the users who are members of the organization.
+  responses:
+    200:
+      body: { schema: OrgMembers }
+
+/{user}:
+  description: User information about an org member.
+  type: item_endpoint
+  uriParameters:
+    user:
+      description: Name of the user.
+      type: string
+
+  get:
+    description: Get user information about an org member.
+    responses:
+      200:
+        body: { schema: User }
+
+  /keys:
+    description: |
+      List keys for an org-scoped named user.
+      Accessable by any user or client within the same org.
+    type: item_endpoint
+    get: !include ../shared/keys-get.yaml
+
+    /{key}:
+      description: |
+        Get a named key for an org-scoped named user.
+        Accessable by any user or client within the same org.
+      type: item_endpoint
+      get: !include ../shared/keys-list.yaml

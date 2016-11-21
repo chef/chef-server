@@ -1,6 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Marc A. Paradise <marc@opscode.com>
+%% @author Marc A. Paradise <marc@chef.io>
 %% @copyright (C) 2013, Opscode Inc.
 %%
 %% @doc

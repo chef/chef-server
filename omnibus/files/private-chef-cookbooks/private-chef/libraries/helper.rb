@@ -63,6 +63,16 @@ class OmnibusHelper
     end
   end
 
+  def bookshelf_s3_url
+    # Using URI#to_s to strip ":443" for https and ":80" for http
+    URI("#{node['private_chef']['nginx']['x_forwarded_proto']}://#{vip_for_uri('bookshelf')}:#{node['private_chef']['bookshelf']['vip_port']}").to_s
+  end
+
+  def nginx_ssl_url
+    # Using URI#to_s to strip ":443" for https and ":80" for http
+    URI("#{node['private_chef']['nginx']['url']}:#{node['private_chef']['nginx']['ssl_port']}").to_s
+  end
+
   def db_connection_uri
     db_protocol = "postgres"
     db_user     = node['private_chef']['opscode-erchef']['sql_user']
@@ -146,6 +156,16 @@ class OmnibusHelper
     self.class.erl_atom_or_string(term)
   end
 
+  def self.escape_characters_in_string(string)
+    return "" unless string.is_a? String
+    pattern = /(\'|\"|\.|\*|\/|\-|\\)/
+    string.gsub(pattern){|match|"\\"  + match}
+  end
+
+  def escape_characters_in_string(string)
+    self.class.escape_characters_in_string(string)
+  end
+
   def s3_url_caching(setting)
     case setting.to_s
     when "off"
@@ -171,14 +191,20 @@ class OmnibusHelper
       !(node['private_chef']['ldap'].nil? || node['private_chef']['ldap'].empty?)
   end
 
-  def repository_configured?(name)
+  def platform_package_suffix
     case node['platform_family']
-    when 'rhel'
-      File.exists? "/etc/yum.repos.d/#{name}.repo"
     when 'debian'
-      File.exists? "/etc/apt/sources.list.d/#{name}.list"
+      'deb'
+    when 'rhel', 'suse'
+      'rpm'
     else
-     false
+      # TODO: probably don't actually want to fail out?
+      raise "I don't know how to install addons for platform family: #{node['platform_family']}"
     end
+  end
+
+  def remote_install_addons?
+    # chef-solo and chef-client -z return different things :(
+    (node['private_chef']['addons']['path'] == nil) || (node['private_chef']['addons']['path'] == {})
   end
 end

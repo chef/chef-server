@@ -1,0 +1,284 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "CookbookListVersion": {
+    "description": "A list of cookbook versions.",
+    "properties": {
+      "version": {
+        "description": "The version of the cookbook.",
+        "$ref": "common.json#Version"
+      },
+      "url": {
+        "description": "The URL to the cookbook.",
+        "type": "string",
+
+        "format": "uri"
+      }
+    },
+    "example": {
+      "version": "1.5.1",
+      "url": "https://api.chef.io/organizations/essentials/cookbooks/blah/1.5.1"
+    }
+  },
+
+  "CookbookVersionFileArray": {
+    "description": "A list of files in a cookbook",
+    "type": "array",
+    "items": {
+      "description": "A file in a cookbook.",
+      "properties": {
+        "name": {
+          "description": "The name of the file, not including any subdirectories.",
+          "type": "string"
+        },
+        "path": {
+          "description": "The path to the file, relative to the cookbook.",
+          "type": "string"
+        },
+        "checksum": {
+          "description": "The SHA256 checksum of the file.",
+          "$ref": "common.json#SHA256Checksum"
+        },
+        "specificity": {
+          "description": "The specificity of the file (the second part of the path). Only relevant to files and templates.",
+          "type": "string",
+          "default": "default"
+        },
+        "url": {
+          "description": "The URL where the file can be downloaded. If not specified on PUT, the server will assume the file is at the location specified by the sandboxes endpoint.",
+          "type": "string",
+
+          "format": "uri"
+        }
+      }
+    },
+    "example": [
+      {
+        "name": "z.rb",
+        "path": "files/y/z.rb",
+        "checksum": "26ab0db90d72e28ad0ba1e22ee510510",
+        "specificity": "y",
+        "url": "https://s3-external-1.amazonaws.com:443/opscode-platform-production-data/organization-919d0e3f527743f6b0a792290982a3c9/checksum-26ab0db90d72e28ad0ba1e22ee510510?AWSAccessKeyId=AKIAIQKPG2CTSTRVDO4Q&Expires=1448327321&Signature=yUul86fBHCGQ%2BBMcmahwZlSRMDM%3D"
+      }
+    ]
+  },
+
+  "CookbookVersionMetadata": {
+    "description": "Metadata about a cookbook.",
+    "properties": {
+      "name": {
+        "description": "The cookbook name.",
+        "$ref": "common.json#ChefName"
+      },
+      "version": {
+        "description": "The cookbook version.",
+        "type": "Version"
+      },
+      "description": {
+        "description": "A short description of the cookbook.",
+        "type": "string"
+      },
+      "long_description": {
+        "description": "A long description of the cookbook.",
+        "type": "string"
+      },
+      "maintainer": {
+        "description": "The cookbook maintainer's name or alias.",
+        "type": "string"
+      },
+      "maintainer_email": {
+        "description": "The cookbook maintainer's email.",
+        "type": "string",
+        "format": "email"
+      },
+      "license": {
+        "description": "The license of the cookbook.",
+        "type": "string"
+      },
+      "source_url": {
+        "description": "The URL to the source code for this cookbook.",
+        "type": "string",
+
+        "format": "uri"
+      },
+      "issues_url": {
+        "description": "The URL to the bug tracker for this cookbook.",
+        "type": "string",
+
+        "format": "uri"
+      },
+      "privacy": {
+        "description": "Whether this cookbook is private or not.",
+        "type": "boolean"
+      },
+      "platforms": {
+        "description": "The platforms (and versions) on which the cookbook runs.",
+        "type": "object",
+        "additionalProperties": {
+          "description": "The version of the platform.",
+          "type": "VersionSpecifier"
+        },
+        "example": {
+          "redhat": ">= 0.0.0",
+          "centos": ">= 0.0.0",
+          "scientific": ">= 0.0.0",
+          "amazon": ">= 0.0.0",
+          "fedora": ">= 0.0.0"
+        }
+      },
+      "dependencies": {
+        "description": "Cookbooks this cookbook depends on. Will be included automatically in the run list of nodes that include this cookbook.",
+        "$ref": "#/CookbookVersionConstraintList"
+      },
+      "recommendations": {
+        "description": "Cookbooks that you should probably load with this cookbook (may not work without them).",
+        "$ref": "#/CookbookVersionConstraintList"
+      },
+      "suggestions": {
+        "description": "Cookbooks that you might want to load with this cookbook, but are optional.",
+        "$ref": "#/CookbookVersionConstraintList"
+      },
+      "conflicting": {
+        "description": "Cookbooks that will conflict with this cookbook.",
+        "$ref": "#/CookbookVersionConstraintList"
+      },
+      "providing": {
+        "description": "Recipes, resources and definitions provided by this cookbook. TODO this looks like a cookbook version constraint list; perhaps needs some love.",
+        "$ref": "#/CookbookVersionConstraintList"
+      },
+      "replacing": {
+        "description": "Cookbooks this cookbook replaces.",
+        "$ref": "#/CookbookVersionConstraintList"
+      },
+      "recipes": {
+        "description": "Recipes provided by this cookbook.",
+        "additionalProperties": {
+          "description": "A description of the recipe.",
+          "type": "string"
+        }
+      },
+      "attributes": {
+        "description": "Documentation for attributes.",
+        "type": "object",
+        "additionalProperties": {
+          "type": "AttributeDocumentation"
+        }
+      },
+      "groupings": {
+        "description": "Documentation for attribute groups.",
+        "type": "object",
+        "additionalProperties": {
+          "type": "AttributeGroupDocumentation"
+        }
+      }
+    },
+    "example": {
+      "name": "blah",
+      "description": "x",
+      "maintainer": "me",
+      "maintainer_email": "jkeiser@chef.io",
+      "license": "All rights reserved",
+      "platforms": {
+
+      },
+      "recommendations": {
+
+      },
+      "suggestions": {
+
+      },
+      "conflicting": {
+
+      },
+      "providing": {
+        "blah": ">= 0.0.0"
+      },
+      "replacing": {
+
+      },
+      "groupings": {
+
+      },
+      "recipes": {
+        "blah": ""
+      },
+      "version": "1.5.1",
+      "source_url": "",
+      "issues_url": "",
+      "privacy": "false,",
+      "attributes": {
+
+      },
+      "dependencies": {
+        "blork": ">= 0.0.0"
+      },
+      "long_description": ""
+    }
+  },
+
+  "CookbookVersionConstraintList": {
+    "description": "A list of cookbooks, with version constraints on each.",
+    "type": "object",
+    "patternProperties": {
+      "[A-Za-z0-9-_.:]{1..255}": {
+        "description": "Constraint on the versions of the cookbook.",
+        "$ref": "common.json#VersionConstraint"
+      }
+    },
+    "example": {
+      "redhat": ">= 0.0.0",
+      "centos": ">= 0.0.0",
+      "scientific": ">= 0.0.0",
+      "amazon": ">= 0.0.0",
+      "fedora": ">= 0.0.0"
+    }
+  },
+
+  "AttributeDocumentation": {
+    "properties": {
+      "display_name": {
+        "description": "A name for the attribute.",
+        "type": "string"
+      },
+      "description": {
+        "description": "A description of the attribute.",
+        "type": "string"
+      },
+      "choice": {
+        "description": "A list of possible values for the attribute.",
+        "type": "array"
+      },
+      "type": {
+        "description": "The type of the attribute (string, array or hash).",
+        "type": "string",
+        "enum": [ "string", "array", "hash" ]
+      },
+      "required": {
+        "description": "The level of user input (required, recommended or optional).",
+        "type": "string",
+        "enum": [ "required", "recommended", "optional" ]
+      },
+      "recipes": {
+        "description": "The recipes that use this attribute.",
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "default": {
+        "description": "The default value for the attribute."
+      }
+    }
+  },
+
+  "AttributeGroupDocumentation": {
+    "properties": {
+      "title": {
+        "description": "The title of the attribute grouping.",
+        "type": "string"
+      },
+      "description": {
+        "description": "A description of the attribute.",
+        "type": "string"
+      }
+    }
+  }
+}

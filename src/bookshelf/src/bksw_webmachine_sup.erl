@@ -1,6 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Tim Dysinger <dysinger@opscode.com>
+%% @author Tim Dysinger <dysinger@chef.io>
 %% Copyright 2012 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -45,7 +45,7 @@ init(_Args) ->
     error_logger:info_msg("bookshelf using config: ~p~n",
                           [bksw_conf:summarize_config()]),
     %% This will reconfigure the system each time we startup.
-    WebConfig = bksw_conf:get_configuration(),
+    WebConfig = bksw_conf:get_wm_configuration(),
     WebMachine = {webmachine_mochiweb,
                   {webmachine_mochiweb, start, [WebConfig]},
                   permanent, 5000, worker, dynamic},

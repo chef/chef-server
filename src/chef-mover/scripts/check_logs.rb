@@ -1,7 +1,7 @@
 #!/opt/opscode/embedded/bin/ruby
 #
-# @author Mark Anderson <mark@opscode.com>
-# @author Marc Paradise <marc@opscode.com>
+# @author Mark Anderson <mark@chef.io>
+# @author Marc Paradise <marc@chef.io>
 #
 # Copyright 2013 Opscode Inc
 # All Rights Reserved

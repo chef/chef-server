@@ -1,8 +1,10 @@
 #!/bin/bash
 
-# see: http://tickets.opscode.com/browse/CHEF-3022
-if [ ! -e /etc/redhat-release -o "x$1" == "x0" ]; then
+# rpm calls `postrm 0` if this is package removal; and `postrm 1` if this is an
+# upgrade. dpkg calls postrm only if it's a removal.
+# So we want to execute the rm if we're NOT rhel-ish, OR the argument is correct.
+# (See also: http://tickets.opscode.com/browse/CHEF-3022)
+if [[ ! ( -e /etc/redhat-release || -e /etc/system-release ) || "$1" == "0" ]]; then
   rm -f /usr/bin/private-chef-ctl
   rm -f /usr/bin/chef-server-ctl
 fi
-

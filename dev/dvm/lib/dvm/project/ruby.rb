@@ -8,7 +8,7 @@ module DVM
     attr_reader :gem_path, :with_binstubs
     def initialize(project_name, config)
       super
-      @gem_path = project['gem-path'] || "/opt/ospcode/embedded/service/gem"
+      @gem_path = project['gem-path'] || "/opt/opscode/embedded/service/gem"
       @with_binstubs = project.has_key?('with-binstubs') ? project['with-binstubs'] : false
 
     end

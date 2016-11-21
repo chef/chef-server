@@ -1,12 +1,11 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Stephen Delano <stephen@opscode.com>
+%% @author Stephen Delano <stephen@chef.io>
 %% Copyright 2013 Opscode, Inc. All Rights Reserved.
 
 -module(oc_chef_group).
 
 -include("oc_chef_types.hrl").
--include_lib("mixer/include/mixer.hrl").
 
 -behaviour(chef_object).
 
@@ -380,6 +379,8 @@ find_authz_id_in_names(QueryName, Args, CallbackFun) ->
             Other
     end.
 
+query_and_diff_authz_ids(_QueryName, [], _) ->
+    {[], []};
 query_and_diff_authz_ids(QueryName, AuthzIds, CallbackFun) ->
     case CallbackFun({QueryName, [AuthzIds]}) of
         not_found ->

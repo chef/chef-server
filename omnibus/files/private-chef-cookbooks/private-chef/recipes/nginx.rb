@@ -115,7 +115,9 @@ lbconf = node['private_chef']['lb'].to_hash.merge(nginx_vars).merge(
  'resolver.lua',
  'route_checks.lua',
  'routes.lua',
- 'dispatch_route.lua'].each do |script|
+ 'dispatch_route.lua',
+ 'check_token_using_endpoint.lua',
+ 'check_token_using_endpoint_compliance.lua'].each do |script|
   template File.join(nginx_scripts_dir, script) do
     source "nginx/scripts/#{script}.erb"
     owner 'root'
@@ -177,7 +179,7 @@ template '/etc/opscode/logrotate.d/nginx' do
   group 'root'
   mode '0644'
   variables(node['private_chef']['nginx'].to_hash.merge(
-    'postrotate' => '/opt/opscode/embedded/sbin/nginx -s reopen',
+    'postrotate' => "/opt/opscode/embedded/sbin/nginx -c #{nginx_config} -s reopen",
     'owner' => OmnibusHelper.new(node).ownership['owner'],
     'group' => OmnibusHelper.new(node).ownership['group']
   ))

@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "ChefName": {
+    "description": "The name of a Chef object.",
+    "minLength": 1,
+    "maxLength": 255,
+    "pattern": "^[A-Za-z0-9-_.:]*$"
+  },
+
+  "Base64": {
+    "type": "string",
+    "pattern": "^[A-Za-z0-9+/]+={0-3}$"
+  },
+
+  "Guid": {
+    "description": "A GUID.",
+    "type": "string",
+    "minLength": 32,
+    "maxLength": 32,
+    "pattern": "^[0-9A-Fa-f-]*$"
+  },
+
+  "PublicKey": {
+    "description": "A valid PKCS#1 public key.",
+    "type": "string"
+  },
+
+  "Version": {
+    "description": "A version.",
+    "type": "string",
+    "pattern": "^\\d+\\.\\d+\\.\\d+$"
+  },
+
+  "VersionConstraint": {
+    "description": "A version constraint. A series of comma separated constraints, each of which may include VERSION, \"> VERSION\", \"< VERSION\", \">= VERSION\", \"<= VERSION\", \"= VERSION\" and \"~> VERSION\".",
+    "type": "string"
+  },
+  "AclUpdatePermission": {
+    "description": "An access control list for updating a single permission (create, read, update, grant or delete) for an object.  Uses ",
+    "properties": {
+      "actors": {
+        "description": "The clients and users authorized for this permission on this Chef object.  Must have value [] if clients and users fields are used.",
+        "$ref": "common.json#ChefName"
+      },
+      "clients": {
+        "description": "The clients authorized for this permission on this Chef object.  Required if 'users' is included in the body.",
+        "$ref": "common.json#ChefName"
+      },
+      "users": {
+        "description": "The users authorized for this permission on this Chef object.  Required if 'clients' is included in the body. Can only be used if 'actors' = []",
+        "$ref": "common.json#ChefName"
+      },
+      "groups": {
+        "description": "The groups authorized for this permission on this Chef object.",
+        "type": "array",
+        "items": { "$ref": "common.json#ChefName" }
+      }
+    }
+  },
+
+  "AclPermission": {
+    "description": "The access control list returned when GETing a single permission (create, read, update, grant or delete) for an object.",
+    "properties": {
+      "actors": {
+        "description": "The clients and users authorized for this permission on this Chef object.",
+        "$ref": "common.json#ChefName"
+      },
+      "groups": {
+        "description": "The groups authorized for this permission on this Chef object.",
+        "type": "array",
+        "items": { "$ref": "common.json#ChefName" }
+      }
+    }
+  },
+
+  "RunList": {
+    "description": "An ordered list of recipes to run.",
+    "type": "array",
+    "items": {
+      "type": "string",
+      "pattern": "^\\w+(::\\w+)?(@\\d+\\.\\d+\\.\\d+)?$"
+    }
+  }
+}

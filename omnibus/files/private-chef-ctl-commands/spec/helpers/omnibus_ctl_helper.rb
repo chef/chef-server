@@ -1,4 +1,4 @@
-require 'omnibus-ctl'
+require "omnibus-ctl"
 
 class OmnibusCtlHelper
   attr_accessor :ctl
@@ -23,5 +23,13 @@ class OmnibusCtlHelper
       ARGV << arg
     end
     @ctl.run([command])
+  end
+
+  def run_global_pre_hooks(args = [])
+    ARGV.clear
+    args.each do |arg|
+      ARGV << arg
+    end
+    @ctl.run_global_pre_hooks
   end
 end

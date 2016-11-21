@@ -1,7 +1,8 @@
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
 # Used for rspec testing only
-gem 'rspec'
-gem 'chef', github: 'chef/chef', branch: 'master'
-gem 'omnibus-ctl', github: 'chef/omnibus-ctl', branch: 'master'
-gem 'chef_backup', github: 'chef/chef_backup', branch: 'master'
+gem "rspec"
+gem "chef", github: "chef/chef", branch: "master"
+gem "omnibus-ctl", github: "chef/omnibus-ctl", branch: "master"
+gem "chef_backup", github: "chef/chef_backup", branch: "master"
+gem "veil", path: File.join("..", "veil")

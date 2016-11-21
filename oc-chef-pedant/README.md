@@ -75,7 +75,7 @@ There are some tests that only make sense to run in certain environments or that
 
 WARNING: Do not perform this testing on a production environment as it interacts with actual LDAP credentials.
 
-You will need LDAP running on your EC test server with a valid LDAP user. Follow the instructions here to get LDAP running with EC http://docs.opscode.com/server_ldap.html.
+You will need LDAP running on your EC test server with a valid LDAP user. Follow the instructions here to get LDAP running with EC http://docs.chef.io/server_ldap.html.
 
 Please update the entries in `pedant_config.rb`. Set `ldap_testing` to true,
 and fill in ldap({}) with your LDAP credentials a user on the test server you pointed EC at above.

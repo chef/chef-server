@@ -1,0 +1,5 @@
+  description: Access control for the given object.
+  type: acl_endpoint
+
+  /{permission}:
+    type: acl_permission_endpoint

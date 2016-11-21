@@ -1,0 +1,47 @@
+description: Systems which are managed by cookbooks.
+type: list_endpoint
+
+get:
+  description: List all nodes.
+  responses:
+    200:
+      body: { schema: NamedChildList }
+
+post:
+  description: Create a node.
+  body: { schema: Node }
+  responses:
+    201:
+      body: { schema: ObjectUri }
+
+/{node}:
+  description: A system which is managed by cookbooks.
+  type: item_endpoint
+  uriParameters:
+    node:
+      description: Name of the node.
+      type: string
+
+  get:
+    description: Get a node.
+    responses:
+      200:
+        body: { schema: Node }
+
+  put:
+    description: Update a node.
+    body: { schema: Node }
+    responses:
+      200:
+        body: { schema: Node }
+
+  delete:
+    description: Delete a node.
+    responses:
+      200:
+        body: { schema: Node }
+
+  /_acl: !include ../acl_endpoint.yaml
+
+  /_identifiers:
+    type: identifiers_endpoint

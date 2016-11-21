@@ -173,6 +173,14 @@ server_api_version         <%= node['private_chef']['server-api-version'] %>
 
 <%- if @log_http_requests %>
 
+# Actions enabled. Allowing tests that require actions to be bypassed if
+# actions aren't available.
+actions_enabled <%= @actions_enabled %>
+
 # Log HTTP Requests
 log_file "<%= File.join(@log_directory, "http-traffic.log") %>"
+<%- end %>
+
+<%- if @reindex_endpoint %>
+reindex_endpoint "<%= @reindex_endpoint %>"
 <%- end %>

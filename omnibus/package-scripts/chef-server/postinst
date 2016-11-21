@@ -18,6 +18,8 @@ ln -sf /opt/opscode/chef-server-plugin.rb /var/opt/opscode/plugins/chef-ha-drbd.
 
 mkdir -p /etc/opscode
 touch /etc/opscode/chef-server.rb
+# chef-server.rb might contain secrets, restrict permissions of other.
+chmod o-rwx /etc/opscode/chef-server.rb
 
 # Ensure all files/directories in $INSTALLER_DIR are owned by root. This
 # has been fixed on new installs but upgrades from old installs need to
@@ -31,6 +33,11 @@ if [ -e /etc/opscode/chef-server-running.json ]; then
   echo
   echo -e "\033[1;31mchef-server-ctl upgrade\033[0m"
   echo
+  echo "After the upgrade command completes, your Chef services will"
+  echo "remain in a down state. To bring them back up run:"
+  echo
+  echo -e "\033[1;31mchef-server-ctl start\033[0m"
+  echo
   echo "Then, to remove configuration files, logs, directories,"
   echo "users, etc. that were used by internal services that"
   echo "have been removed from this version of Chef Server,"
@@ -40,6 +47,9 @@ if [ -e /etc/opscode/chef-server-running.json ]; then
   echo
   echo "(Add the '--no-op' option to see what would be removed by"
   echo "this command)"
+  echo
+  echo "For detailed upgrade instructions please see:"
+  echo "https://docs.chef.io/upgrade_server.html"
 fi
 
 exit 0

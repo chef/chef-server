@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "allOf": [
+    { "$ref": "key.json#Key" },
+    {
+      "type": "object",
+      "properties": {
+        "uri": {
+          "description": "URI to the created key",
+          "type": "string",
+
+          "format": "uri"
+        },
+        "private_key": {
+          "description": "The created private key",
+          "$ref": "common.json#PrivateKey"
+        }
+      }
+    }
+  ]
+}

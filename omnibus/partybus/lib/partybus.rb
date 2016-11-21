@@ -10,6 +10,9 @@ module Partybus
 
   class Config
 
+    SECRETS_FILE = "/etc/opscode/private-chef-secrets.json"
+    RUNNING_CONFIG_FILE = "/etc/opscode/chef-server-running.json"
+
     attr_accessor :database_connection_string
     attr_accessor :database_unix_user
     attr_accessor :database_migration_directory
@@ -23,20 +26,34 @@ module Partybus
 
     attr_accessor :running_server
     attr_accessor :postgres
+    attr_accessor :secrets
 
     def initialize
-      if File.exists?("/etc/opscode/chef-server-running.json")
-        @running_server = JSON.parse(IO.read("/etc/opscode/chef-server-running.json"))
+      if File.exists?(RUNNING_CONFIG_FILE)
+        @running_server = JSON.parse(IO.read(RUNNING_CONFIG_FILE))
         @postgres = @running_server['private_chef']['postgresql']
       else
         log <<EOF
 ***
-ERROR: Cannot find /etc/opscode/chef-server-running.json
+ERROR: Cannot find #{RUNNING_CONFIG_FILE}
 ***
-Try running `chef-server-ctl reconfigure` before upgrading
+Try running `chef-server-ctl reconfigure` before upgrading.
 
 EOF
         exit(1)
+      end
+      if File.exists?(SECRETS_FILE)
+        @secrets = JSON.parse(IO.read(SECRETS_FILE))
+      else
+        log <<EOF
+***
+ERROR: Cannot find #{SECRETS_FILE}
+***
+Try running `chef-server-ctl reconfigure` before upgrading.
+
+EOF
+        exit(1)
+
       end
     end
 

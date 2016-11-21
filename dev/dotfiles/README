@@ -4,3 +4,12 @@ allowing you to modify shell and application dotfiles to suit your needs.
 Take care that if you provide a custom .bashrc, that you set up your PATH as:
 
 export PATH=/opt/opscode/embedded/bin:$PATH
+
+You can also choose to specify a custom dotfiles location, so that it's not tied to this repository
+(allowing you to safely nuke the repo and not lose your dotfiles)
+
+To do this, edit or create config.yml and add the following:
+
+    vm:
+      dotfile_host_path=/path/to/your/dotfiles
+

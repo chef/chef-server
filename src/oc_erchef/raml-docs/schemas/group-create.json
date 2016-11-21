@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "properties": {
+    "groupname": {
+      "description": "The name of the group (unique within an organization).",
+      "$ref": "common.json#ChefName",
+      "required": true
+    }
+  }
+}

@@ -17,6 +17,8 @@ http {
                     '"$request" $status "$request_time" $body_bytes_sent '
                     '"$http_referer" "$http_user_agent" "$upstream_addr" "$upstream_status" "$upstream_response_time" "$http_x_chef_version" "$http_x_ops_sign" "$http_x_ops_userid" "$http_x_ops_timestamp" "$http_x_ops_content_hash" $request_length';
 
+  server_names_hash_bucket_size <%= @server_names_hash_bucket_size %>;
+
   sendfile <%= @sendfile %>;
   tcp_nopush <%= @tcp_nopush %>;
   tcp_nodelay <%= @tcp_nodelay %>;
@@ -70,6 +72,18 @@ http {
     <%- end -%>
   }
   <%- end -%>
+
+  <% if node['private_chef']['data_collector']['root_url'] && node['private_chef']['data_collector']['token'] -%>
+  upstream data-collector {
+    server <%= URI.parse(node['private_chef']['data_collector']['root_url']).host %>:<%= URI.parse(node['private_chef']['data_collector']['root_url']).port %>;
+  }
+  <% end -%>
+
+  <% if node['private_chef']['profiles']['root_url'] && node['private_chef']['data_collector']['token'] -%>
+  upstream compliance-profiles {
+    server <%= URI.parse(node['private_chef']['profiles']['root_url']).host %>:<%= URI.parse(node['private_chef']['profiles']['root_url']).port %>;
+  }
+  <% end -%>
 
   # Include upstream definitions for addons
   include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_upstreams.conf;
@@ -167,5 +181,3 @@ http {
 
   include <%= node['private_chef']['nginx']['dir'] %>/etc/nginx.d/*.conf;
 }
-
-

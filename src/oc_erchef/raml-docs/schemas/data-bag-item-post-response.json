@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "description": "Represents a data bag item containing arbitrary JSON data.",
+  "properties": {
+    "id": {
+      "description": "The name of this data bag item.",
+      "$ref": "common.json#ChefName"
+    },
+    "json_class": {
+      "description": "Has the value Chef::DataBagItem.",
+      "type": "string",
+      "enum": [ "Chef::DataBagItem" ]
+    },
+    "chef_type": {
+      "description": "Has the value \"data_bag_item\"",
+      "type": "string",
+      "enum": [ "data_bag_item" ]
+    }
+  },
+  "additionalProperties": true
+}

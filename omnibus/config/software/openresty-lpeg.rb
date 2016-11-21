@@ -17,6 +17,10 @@
 name "openresty-lpeg"
 default_version "0.12"
 
+license "MIT"
+license_file "lpeg.html"
+skip_transitive_dependency_licensing true
+
 source url: "http://www.inf.puc-rio.br/~roberto/lpeg/lpeg-#{version}.tar.gz",
        md5: "4abb3c28cd8b6565c6a65e88f06c9162"
 
@@ -27,6 +31,10 @@ relative_path "lpeg-#{version}"
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
-  make "LUADIR=#{install_dir}/embedded/luajit/include/luajit-2.1", env: env
+  if ppc64? || ppc64le? || ohai['kernel']['machine'] == "s390x"
+    make "LUADIR=#{install_dir}/embedded/include", env: env
+  else
+    make "LUADIR=#{install_dir}/embedded/luajit/include/luajit-2.1", env: env
+  end
   command "install -p -m 0755 lpeg.so #{install_dir}/embedded/lualib", env: env
 end

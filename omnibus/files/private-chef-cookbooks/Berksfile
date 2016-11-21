@@ -1,0 +1,9 @@
+source "https://supermarket.chef.io"
+
+cookbook 'enterprise', :git => 'https://github.com/chef-cookbooks/enterprise-chef-common', :tag => '0.10.1'
+cookbook 'chef-ha-drbd', :path => './chef-ha-drbd'
+cookbook 'private-chef', :path => './private-chef'
+cookbook 'apt', '~> 2.0'
+cookbook 'yum', '~> 3.0'
+
+cookbook 'runit', '= 1.6.0'

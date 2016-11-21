@@ -130,6 +130,7 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
                                  resource_state = #organization_state{
                                                      oc_chef_organization = Organization}
                                 } = State) ->
+    %% Delete ORGNAME_read_access_group
     delete_read_access_group(Req, State),
     ok = oc_chef_wm_base:delete_object(DbContext, Organization, RequestorId),
     Ejson = oc_chef_organization:assemble_organization_ejson(Organization),

@@ -149,7 +149,7 @@ not_found_message(client, Name) ->
 not_found_message(user, Name) ->
     %error_message_envelope(iolist_to_binary(["user '", Name, "' not found"]));
 %TODO - verify this does not break other tests which require specific wording - otherwise
-    %we'll needd to update associated test in oc-chef-pedant:associations_spec
+    %we'll need to update associated test in oc-chef-pedant:associations_spec
     {[{<<"error">>, iolist_to_binary(["Could not find user ", Name])}]};
 not_found_message(association, {Name, OrgName} ) ->
     {[{<<"error">>, iolist_to_binary(["Cannot find a user ", Name, " in organization ", OrgName])}]};
@@ -376,4 +376,3 @@ lists_diff_sorted(FirstList, SecondList) ->
     SecondSet = sets:from_list(SecondList),
     {lists:sort(sets:to_list(sets:subtract(FirstSet, SecondSet))),
      lists:sort(sets:to_list(sets:subtract(SecondSet, FirstSet)))}.
-

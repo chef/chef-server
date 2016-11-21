@@ -50,7 +50,11 @@ end
 
 def enqueue_data_for_org(org)
   status = Dir.chdir(File.join(base_path, "embedded", "service", "opscode-erchef", "bin")) do
-    run_command("./reindex-opc-organization complete #{org} >/dev/null")
+    if running_config["private_chef"]["fips_enabled"]
+      run_command("./reindex-opc-organization complete #{org} http://127.0.0.1 >/dev/null")
+    else
+      run_command("./reindex-opc-organization complete #{org} >/dev/null")
+    end
   end
   if !status.success?
     $stderr.puts "Failed to enqueue data for #{org}!"

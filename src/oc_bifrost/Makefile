@@ -16,11 +16,39 @@ ifeq ($(REBAR3),)
 REBAR3 = rebar3
 endif
 
+# If the user hasn't set POSTGRES_USER, default to postgres
+POSTGRES_USER ?= 'postgres'
+
 all: $(REBAR3)
-	@$(REBAR3) do clean, compile, eunit, ct, dialyzer
+	@$(REBAR3) do clean, compile, eunit, dialyzer
 
 rel: all
 	@$(REBAR3) release
+
+pedant: pedant_setup test_pedant pedant_cleanup
+
+pedant_setup: provision_test_db rel start_test_rel
+
+pedant_cleanup: stop_test_rel destroy_test_db
+
+start_test_rel:
+	_build/default/rel/oc_bifrost/bin/oc_bifrost start
+
+stop_test_rel:
+	_build/default/rel/oc_bifrost/bin/oc_bifrost stop
+
+test_pedant:
+	cd oc-bifrost-pedant && bundle install
+	cd oc-bifrost-pedant && bin/oc-bifrost-pedant --config pedant_config.rb
+
+provision_test_db:
+	psql -c 'CREATE DATABASE bifrost_test;' -U $(POSTGRES_USER)
+	psql -c "CREATE USER bifrost_test_user SUPERUSER UNENCRYPTED PASSWORD 'bifrost_test_user_password';" -U $(POSTGRES_USER)
+	cd schema && sqitch deploy db:pg:bifrost_test
+
+destroy_test_db:
+	psql -c "DROP USER bifrost_test_user;" -U $(POSTGRES_USER)
+	psql -c 'DROP DATABASE bifrost_test;' -U $(POSTGRES_USER)
 
 update: $(REBAR3)
 	@$(REBAR3) update
@@ -31,11 +59,8 @@ $(REBAR3):
 
 install: $(REBAR3)
 
-travis: update all
+travis: update all pedant
 	@echo "Travis'd!"
-
-ct: $(REBAR3)
-	$(REBAR3) do ct --dir apps/chef_db/itest, ct --dir apps/oc_chef_authz/itest, ct --dir apps/oc_chef_wm/itest
 
 version_clean:
 	@rm -f VERSION

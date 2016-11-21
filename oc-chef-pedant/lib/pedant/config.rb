@@ -16,10 +16,8 @@
 require 'mixlib/config'
 require 'pedant/command_line'
 require 'pedant/gem'
-
-# RSpec ReRun requires this until some version after 0.2.0
-require 'rspec/legacy_formatters'
-require 'rspec-rerun/formatters/failures_formatter'
+require 'rspec-rerun/formatter'
+require 'rspec-rerun/tasks'
 
 module Pedant
   class Config
@@ -74,21 +72,26 @@ module Pedant
         args.concat(self[:tags].map { |tag| ['-t', tag.to_s] } )
       end
 
+      if self[:seed]
+        args.concat([ '--seed', self[:seed] ])
+      end
+
       args.concat(rspec_formatting_args)
 
-      # Load up the failures file if we're re-running
-      if rerun
-        args.concat(%W[-O #{::RSpec::Rerun::Formatters::FailuresFormatter::FILENAME}])
+      if rerun && File.exist?(::RSpec::Rerun::Formatter::FILENAME)
+        puts "Rerunning only failed tasks"
+        args.concat ::RSpec::Rerun::Tasks.failing_specs
       else
         # Remove the failures file if we aren't running with --rerun;
         # otherwise, if it exists, we would only ever run those tests,
         # even if they all pass!
-        FileUtils.rm(::RSpec::Rerun::Formatters::FailuresFormatter::FILENAME, :force => true)
-      end
+        FileUtils.rm(::RSpec::Rerun::Formatter::FILENAME, :force => true)
 
-      _test_dirs = test_directories
-      puts "Running tests from the following directories:", _test_dirs
-      args.concat _test_dirs
+        # This is the set of tests we're running.
+        _test_dirs = test_directories
+        puts "Running tests from the following directories:", _test_dirs
+        args.concat _test_dirs
+      end
 
       args.flatten
     end
@@ -100,9 +103,7 @@ module Pedant
                     else
                       %w[ --color -f documentation --tty]
                     end
-
-      # Always use the failures formatter, in case we want to rerun failures
-      format_args.concat(%W[-f #{::RSpec::Rerun::Formatters::FailuresFormatter}])
+      format_args + %w(--require rspec-rerun/formatter --format RSpec::Rerun::Formatter)
     end
 
     # Default Values
@@ -144,5 +145,7 @@ module Pedant
     # Default orgname is nil by default
     default_orgname(nil)
 
+    # The lb endpoint to use for reindex-opc-organization
+    reindex_endpoint("https://127.0.0.1")
   end
 end

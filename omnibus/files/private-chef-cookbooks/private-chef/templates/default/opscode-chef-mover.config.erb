@@ -2,7 +2,9 @@
 %% -*- tab-width: 4;erlang-indent-level: 4;indent-tabs-mode: nil -*-
 %% ex: ts=4 sw=4 ft=erlang et
 [
- {kernel, [{start_pg2, true}]},
+ {kernel, [{start_pg2, true},
+           {inet_dist_use_interface, {127,0,0,1}}
+          ]},
  %% SASL config
  {sasl, [
          {sasl_error_logger, {file, "<%= File.join(@log_directory, 'sasl-error.log') %>"}},
@@ -78,7 +80,18 @@
   {chef_objects, [
                   {s3_access_key_id, "<%= node['private_chef']['bookshelf']['access_key_id'] %>"},
                   {s3_secret_key_id, "<%= node['private_chef']['bookshelf']['secret_access_key'] %>"},
+                  <% if node['private_chef']['fips_enabled'] -%>
+                  %% When we're using a fips openssl, we default to using http for bookshelf.
+                  %% The reason for this is because we do not have a TLS implementation for
+                  %% Erlang when we turn on fips.
+                  %%
+                  %% This is the reason that the only supported configuration for the fips
+                  %% package is standalone. We will allow http over localhost so that the
+                  %% chef server can talk to bookshelf.
+                  {s3_url, "http://<%= node['private_chef']['bookshelf']['listen'] %>:<%= node['private_chef']['bookshelf']['port'] %>"},
+                  <% else -%>
                   {s3_url, "<%= node['private_chef']['nginx']['x_forwarded_proto'] %>://<%= @helper.vip_for_uri('bookshelf') %>"},
+                  <% end %>
                   <% # Re-using erchef's configuration here %>
                   {s3_platform_bucket_name, "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>"},
                   {s3_url_ttl, <%= node['private_chef']['opscode-erchef']['s3_url_ttl'] %>},
@@ -86,8 +99,7 @@
                   {s3_parallel_ops_fanout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_fanout'] %>}
                  ]},
   {stats_hero, [
-               %% Set sender pool size to DB max_connections to avoid contention
-               {udp_socket_pool_size, <%= node['private_chef']['postgresql']['max_connections'] %> },
+               {udp_socket_pool_size, <%= @udp_socket_pool_size || @db_pool_size %> },
                {estatsd_host, "<%= node['private_chef']['estatsd']['vip'] %>"},
                {estatsd_port, <%= node['private_chef']['estatsd']['port'] %>}
               ]},

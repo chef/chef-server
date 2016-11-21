@@ -4,6 +4,11 @@ require 'pedant/acl'
 describe "ACL API", :acl do
   include Pedant::ACL
 
+    # Generate random string identifier prefixed with current pid
+    def rand_id
+      "#{Process.pid}_#{rand(10**7...10**8).to_s}"
+    end
+
   # (temporarily?) deprecating /users/*/_acl endpoint due to its broken state and lack of usefulness
   skip "/users/<name>/_acl endpoint" do
     let(:username) { platform.admin_user.name }
@@ -14,7 +19,7 @@ describe "ACL API", :acl do
 
     context "GET /users/<user>/_acl"  do
 
-      let(:actors) { ["pivotal", username] }
+      let(:actors) { ["pivotal", username].uniq }
       let(:groups) { [] }
 
       let(:acl_body) {{
@@ -29,7 +34,7 @@ describe "ACL API", :acl do
         it "can get user acl" do
           get(request_url, platform.superuser).should look_like({
              :status => 200,
-             :body_exact => acl_body
+             :body => acl_body
           })
         end
       end
@@ -37,12 +42,11 @@ describe "ACL API", :acl do
         it "can get user acl" do
           get(request_url, platform.admin_user).should look_like({
              :status => 200,
-             :body_exact => acl_body
+             :body => acl_body
           })
         end
       end
     end
-
 
     %w(create read update delete grant).each do |permission|
       context "/users/<user>/_acl/#{permission} endpoint" do
@@ -53,9 +57,8 @@ describe "ACL API", :acl do
         end
         let(:acl_url) { "#{platform.server}/users/#{username}/_acl" }
         let(:request_url)  { "#{platform.server}/users/#{username}/_acl/#{permission}" }
-
         context "PUT /users/<user>/_acl/#{permission}" do
-          let(:actors) { ["pivotal", username] }
+          let(:actors) { ["pivotal", username].uniq }
           let(:groups) { [] }
           let(:default_body) {{
               "create" => {"actors" => actors, "groups" => groups},
@@ -83,7 +86,7 @@ describe "ACL API", :acl do
             # rest of the test suite if the permissions aren't right
             get(acl_url, platform.admin_user).should look_like({
                                                                  :status => 200,
-                                                                 :body_exact => default_body
+                                                                 :body => default_body
                                                                })
           end
 
@@ -97,7 +100,7 @@ describe "ACL API", :acl do
               modified_body[permission] = request_body[permission]
               get(acl_url, platform.admin_user).should look_like({
                                                                    :status => 200,
-                                                                   :body_exact => modified_body
+                                                                   :body => modified_body
                                                                  })
             end
           end
@@ -110,7 +113,7 @@ describe "ACL API", :acl do
                                                              })
               get(acl_url, platform.admin_user).should look_like({
                                                                    :status => 200,
-                                                                   :body_exact => default_body
+                                                                   :body => default_body
                                                                  })
             end
           end
@@ -123,7 +126,7 @@ describe "ACL API", :acl do
                                                              })
               get(acl_url, platform.admin_user).should look_like({
                                                                    :status => 200,
-                                                                   :body_exact => default_body
+                                                                   :body => default_body
                                                                  })
             end
           end
@@ -136,7 +139,7 @@ describe "ACL API", :acl do
                                                              })
               get(acl_url, platform.admin_user).should look_like({
                                                                    :status => 200,
-                                                                   :body_exact => default_body
+                                                                   :body => default_body
                                                                  })
             end
           end
@@ -149,7 +152,7 @@ describe "ACL API", :acl do
                                                              })
               get(acl_url, platform.admin_user).should look_like({
                                                                    :status => 200,
-                                                                   :body_exact => default_body
+                                                                   :body => default_body
                                                                  })
             end
           end
@@ -172,7 +175,7 @@ describe "ACL API", :acl do
                                                                })
                 get(acl_url, platform.admin_user).should look_like({
                                                                      :status => 200,
-                                                                     :body_exact => default_body
+                                                                     :body => default_body
                                                                    })
               end
             end
@@ -193,7 +196,7 @@ describe "ACL API", :acl do
                                                                })
                 get(acl_url, platform.admin_user).should look_like({
                                                                      :status => 200,
-                                                                     :body_exact => default_body
+                                                                     :body => default_body
                                                                    })
               end
             end
@@ -212,7 +215,7 @@ describe "ACL API", :acl do
                                                                })
                 get(acl_url, platform.admin_user).should look_like({
                                                                      :status => 200,
-                                                                     :body_exact => default_body
+                                                                     :body => default_body
                                                                    })
               end
             end
@@ -232,7 +235,7 @@ describe "ACL API", :acl do
                                                                })
                 get(acl_url, platform.admin_user).should look_like({
                                                                      :status => 200,
-                                                                     :body_exact => default_body
+                                                                     :body => default_body
                                                                    })
               end
             end
@@ -247,7 +250,7 @@ describe "ACL API", :acl do
                                                                })
                 get(acl_url, platform.admin_user).should look_like({
                                                                      :status => 200,
-                                                                     :body_exact => default_body
+                                                                     :body => default_body
                                                                    })
               end
             end
@@ -265,25 +268,6 @@ describe "ACL API", :acl do
     end
   end
 
-  context "/ANY/_acl" do
-    let(:request_url) {api_url("ANY/_acl")}
-    let(:actors) { ["pivotal"] }
-    let(:groups) { ["admins"] }
-    let(:read_groups) { ["admins", "users"] }
-    let(:acl_body) {{
-        "create" => {"actors" => actors, "groups" => groups},
-        "read" => {"actors" => actors, "groups" => read_groups},
-        "update" => {"actors" => actors, "groups" => groups},
-        "delete" => {"actors" => actors, "groups" => groups},
-        "grant" => {"actors" => actors, "groups" => groups}
-      }}
-    it "can get org acl by default" do
-      get(request_url, platform.admin_user).should look_like({
-              :status => 200,
-              :body_exact => acl_body
-            })
-    end
-  end
   context "/organizations/_acl endpoint" do
     let(:request_url) { api_url("organizations/_acl") }
 
@@ -303,7 +287,7 @@ describe "ACL API", :acl do
         it "can get object ACL" do
           get(request_url, platform.admin_user).should look_like({
               :status => 200,
-              :body_exact => acl_body
+              :body => acl_body
             })
         end
       end
@@ -355,7 +339,7 @@ describe "ACL API", :acl do
           # support multi-org tests.
           get(request_url, platform.admin_user).should look_like({
               :status => 200,
-              :body_exact => acl_body
+              :body => acl_body
             })
         end
 
@@ -460,7 +444,7 @@ describe "ACL API", :acl do
         let(:request_body) {{
             permission => {
               "actors" => ["pivotal", platform.admin_user.name,
-                platform.non_admin_user.name],
+                platform.non_admin_user.name].uniq,
               "groups" => groups
             }
           }}
@@ -475,7 +459,7 @@ describe "ACL API", :acl do
           # rest of the test suite if the permissions aren't right
           get(acl_url, platform.admin_user).should look_like({
               :status => 200,
-              :body_exact => default_body
+              :body => default_body
             })
         end
 
@@ -489,7 +473,7 @@ describe "ACL API", :acl do
             modified_body[permission] = request_body[permission]
             get(acl_url, platform.admin_user).should look_like({
                 :status => 200,
-                :body_exact => modified_body
+                :body => modified_body
               })
           end
         end
@@ -502,7 +486,7 @@ describe "ACL API", :acl do
               })
             get(acl_url, platform.admin_user).should look_like({
                 :status => 200,
-                :body_exact => default_body
+                :body => default_body
               })
           end
         end
@@ -515,7 +499,7 @@ describe "ACL API", :acl do
               })
             get(acl_url, platform.admin_user).should look_like({
                 :status => 200,
-                :body_exact => default_body
+                :body => default_body
               })
           end
         end
@@ -528,7 +512,7 @@ describe "ACL API", :acl do
               })
             get(acl_url, platform.admin_user).should look_like({
                 :status => 200,
-                :body_exact => default_body
+                :body => default_body
               })
           end
         end
@@ -541,7 +525,7 @@ describe "ACL API", :acl do
               })
             get(acl_url, platform.admin_user).should look_like({
                 :status => 200,
-                :body_exact => default_body
+                :body => default_body
               })
           end
         end
@@ -563,7 +547,7 @@ describe "ACL API", :acl do
                 })
               get(acl_url, platform.admin_user).should look_like({
                   :status => 200,
-                  :body_exact => default_body
+                  :body => default_body
                 })
             end
           end
@@ -584,7 +568,7 @@ describe "ACL API", :acl do
                 })
               get(acl_url, platform.admin_user).should look_like({
                   :status => 200,
-                  :body_exact => default_body
+                  :body => default_body
                 })
             end
           end
@@ -603,7 +587,7 @@ describe "ACL API", :acl do
                 })
               get(acl_url, platform.admin_user).should look_like({
                   :status => 200,
-                  :body_exact => default_body
+                  :body => default_body
                 })
             end
           end
@@ -623,7 +607,7 @@ describe "ACL API", :acl do
                 })
               get(acl_url, platform.admin_user).should look_like({
                   :status => 200,
-                  :body_exact => default_body
+                  :body => default_body
                 })
             end
           end
@@ -638,7 +622,7 @@ describe "ACL API", :acl do
                 })
               get(acl_url, platform.admin_user).should look_like({
                   :status => 200,
-                  :body_exact => default_body
+                  :body => default_body
                 })
             end
           end
@@ -657,7 +641,7 @@ describe "ACL API", :acl do
             # rest of the test suite if the permissions aren't right
             get(acl_url, platform.admin_user).should look_like({
                 :status => 200,
-                :body_exact => default_body
+                :body => default_body
               })
           end
 
@@ -743,12 +727,77 @@ describe "ACL API", :acl do
     end # context /organizations/_acl/<permission> endpoint
   end # loop (each) over permissions
 
-  context "/<type>/<name>/_acl endpoint" do
+  # Special case that doesn't fit into the generic behaviors above - specifically
+  # when a client & a user of the same name exist, updates to an acl specifying
+  # the common name as the actor should fail with a 422, because we have no
+  # way of knowing if the caller wanted to add the client or the user to the ACL.
+  context "when a client exists with the same name as a user", :validation do
+    let(:admin_requestor){admin_user}
+    let(:requestor){admin_requestor}
+    let(:shared_name) { "pedant-acl-#{rand_id}" }
+    let(:request_url) { api_url("/clients/#{shared_name}/_acl/read") }
+    let(:acl_request_body) {
+      { read: { actors: ['pivotal', shared_name],
+                         groups: ['admins'] } }
+    }
 
+    before :each do
+      @user = platform.create_user(shared_name, associate: false)
+      @client = platform.create_client(shared_name, platform.test_org)
+    end
+
+    after :each do
+      platform.delete_user(@user)
+      platform.delete_client(@client)
+    end
+
+    context "and the user is a member of the organization" do
+      before :each do
+        platform.associate_user_with_org(platform.test_org.name, @user)
+      end
+
+      it "updates of the object ACL results in a 422 due to ambiguous request" do
+        expect(put(request_url, platform.admin_user, payload: acl_request_body)).
+          to look_like(status: 422)
+      end
+
+      context "and 'clients' and 'users' fields are provided in the request" do
+        let(:acl_request_body) {
+          { read: { "actors" => [],
+                    "users" => ['pivotal', shared_name ],
+                    "clients" => [ shared_name ],
+                    "groups" => ['admins'] } }
+        }
+
+        it "updates of the object ACL using 'clients' and 'users' are successful" do
+          expect(put(request_url, platform.admin_user, payload: acl_request_body))
+            .to have_status_code 200
+
+          # Verify that the returned list contains this actor twice (once
+          # as client and once as user), since we don't separate them in the GET.
+          res = get(api_url("/clients/#{shared_name}/_acl"), platform.admin_user)
+          read_ace = JSON.parse(res.body)['read']
+          expect(read_ace['actors'].sort).to eq [shared_name, shared_name, "pivotal"]
+        end
+      end
+    end
+
+    context "and the user is not a member of the organization" do
+      it "there is no ambiguity and the object ACL update succeeds" do
+        expect(put(request_url, platform.admin_user, payload: acl_request_body))
+          .to have_status_code 200
+
+      end
+    end
+
+
+  end
+
+  context "/<type>/<name>/_acl endpoint" do
     # TODO: Sanity check: users don't seem to have any ACLs, or at least, nothing is
     # accessible from external API as far as I can tell:
     # - [jkeiser] Users have ACLs, but they are at /users/NAME/_acl
-    %w(clients groups containers data nodes roles environments cookbooks).each do |type|
+    %w(clients groups containers data nodes roles environments cookbooks policies policy_groups).each do |type|
       context "for #{type} type" do
 
         let(:new_object) { "new-object" }
@@ -767,7 +816,9 @@ describe "ACL API", :acl do
         # default ACLs are different on almost every different types -- so these are
         # the defaults of defaults, which are overridden below for the different
         # types:
-        let(:actors) { ["pivotal", platform.admin_user.name] }
+        let(:actors) { ["pivotal", platform.admin_user.name].uniq }
+        let(:users) { ["pivotal", platform.admin_user.name].uniq }
+        let(:clients) { [] }
         let(:groups) { ["admins"] }
         let(:read_groups) { groups }
         let(:update_groups) { groups }
@@ -782,6 +833,14 @@ describe "ACL API", :acl do
             "grant" => {"actors" => actors, "groups" => grant_groups}
           }}
 
+        let(:granular_acl_body) {{
+          "create" => {"actors" => [], "users" => users, "clients" => clients, "groups" => groups},
+          "read" => {"actors" => [], "users" => users, "clients" => clients, "groups" => read_groups},
+          "update" => {"actors" => [], "users" => users, "clients" => clients, "groups" => update_groups},
+          "delete" => {"actors" => [], "users" => users, "clients" => clients, "groups" => delete_groups},
+          "grant" => {"actors" => [], "users" => users, "clients" => clients, "groups" => grant_groups},
+        }}
+
         # Mainly this is for the different creation bodies, but also for the
         # different default ACLs for each type, etc.  We love consistency!
         case type
@@ -790,8 +849,11 @@ describe "ACL API", :acl do
             # As long as 'new_object' isn't a validator (and you're on
             # the Erchef client endpoint), new_object will be in the
             # actors list
-            ["pivotal", new_object, setup_user.name]
+            ["pivotal", new_object, setup_user.name].uniq
           }
+          let(:clients) { [ new_object ] }
+          let(:users) { ["pivotal", setup_user.name].uniq }
+
           let(:read_groups) { ["users", "admins"] }
           let(:delete_groups) { ["users", "admins"] }
         when "groups"
@@ -805,6 +867,7 @@ describe "ACL API", :acl do
               "containerpath" => "/"
             }}
           let(:actors) { [platform.admin_user.name] }
+          let(:users) {  [platform.admin_user.name] }
           let(:groups) { [] }
           let(:grant_groups) { [] }
         when "data"
@@ -844,7 +907,7 @@ describe "ACL API", :acl do
                 "version" => version,
                 "name" => new_object,
                 "maintainer" => "spacemonkey",
-                "maintainer_email" => "spacemonkey@opscode.com",
+                "maintainer_email" => "spacemonkey@chef.io",
                 "description" => "",
                 "long_description" => "",
                 "license" => "",
@@ -855,10 +918,38 @@ describe "ACL API", :acl do
             }}
           let(:groups) { ["users", "admins"] }
           let(:read_groups) { ["users", "clients", "admins"] }
+        when "policies"
+          let(:creation_url) { api_url("#{type}/#{new_object}/revisions") }
+          let(:creation_body) {{
+            "revision_id" => "909c26701e291510eacdc6c06d626b9fa5350d25",
+            "name" => new_object,
+            "run_list" => [ "recipe[policyfile_demo::default]" ],
+            "cookbook_locks" => {
+              "policyfile_demo" => {
+                "identifier" => "f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+                "version" => "1.2.3"
+              }
+            }
+          }}
+        when "policy_groups"
+          let(:creation_url) {
+            api_url("#{type}/#{new_object}/policies/acl_test_policy")
+          }
+          let(:creation_body) {{
+            "revision_id" => "909c26701e291510eacdc6c06d626b9fa5350d25",
+            "name" => "acl_test_policy",
+            "run_list" => [ "recipe[policyfile_demo::default]" ],
+            "cookbook_locks" => {
+              "policyfile_demo" => {
+                "identifier" => "f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+                "version" => "1.2.3"
+              }
+            }
+          }}
         end
 
         before :each do
-          if (type == "cookbooks")
+          if (type == "cookbooks" || type == "policy_groups")
             # Inconsistent API needs a PUT here.  We love consistency!
             put(creation_url, setup_user,
               :payload => creation_body).should look_like({
@@ -873,6 +964,14 @@ describe "ACL API", :acl do
         end
 
         after :each do
+          if (type == "policy_groups")
+            # Policy groups are only created indirectly when we create policies;
+            # deleting the group doesn't delete the policy so we do it explicitly
+            delete(api_url("policies/acl_test_policy"),
+              platform.admin_user).should look_like({
+                :status => 200
+              })
+          end
           delete(deletion_url, platform.admin_user).should look_like({
               :status => 200
             })
@@ -885,6 +984,13 @@ describe "ACL API", :acl do
                   :status => 200,
                   :body_exact => acl_body
                 })
+            end
+            it "can get a granular object ACL" do
+              get("#{request_url}?detail=granular", platform.admin_user).should look_like({
+                  :status => 200,
+                  :body_exact => granular_acl_body
+                })
+
             end
           end
 
@@ -1013,7 +1119,7 @@ describe "ACL API", :acl do
             it "should return the acl", :validation do
               get(request_url, platform.admin_user).should look_like({
                 :status => 200,
-                :body_exact => acl_body
+                :body => acl_body
               })
             end
           end
@@ -1073,29 +1179,70 @@ describe "ACL API", :acl do
             end # context GET /<type>/<name>/_acl/<permission>
 
             context "PUT /#{type}/<name>/_acl/#{permission}" do
-
+              let(:clients) { [platform.non_admin_client.name] }
+              let(:users) {
+                  [platform.non_admin_user.name, platform.admin_user.name, "pivotal"]
+              }
               let(:groups_and_actors) {{
                   "actors" => [platform.non_admin_user.name,
-                    platform.admin_user.name, "pivotal"],
+                    platform.admin_user.name, "pivotal"].uniq + clients,
                   "groups" => ["admins", "users", "clients"]
                 }}
               let(:update_body) {{
                   permission => groups_and_actors
                 }}
 
-              context "admin user" do
-                it "can update ACL" do
-                  put(permission_request_url, platform.admin_user,
-                    :payload => update_body).should look_like({
-                      :status => 200
-                    })
-                  check_body = acl_body
-                  check_body[permission] = groups_and_actors
+              context "admin user"  do
+                context "using the new 'users' and 'clients' attributes" do
+                  let(:update_body) {
+                    { permission => {
+                      "actors" => [], # back-compat, empty actors and
+                                      # clients/users present indicates
+                                      # that clients/users should be used.
+                      "users" => users,
+                      "clients" => clients,
+                      "groups" => ["admins", "users", "clients"]}
+                    }
+                  }
 
-                  get(request_url, platform.admin_user).should look_like({
-                      :status => 200,
-                      :body_exact => check_body
-                    })
+                  let(:response_body) {
+                    { permission =>  groups_and_actors }
+                  }
+
+                  it "can update ACL" do
+                    put(permission_request_url, platform.admin_user,
+                        :payload => update_body).should have_status_code 200
+                    # Note thet resulting GET body should look the same -
+                    # we are not returning clients/users separately at this point
+                    # to avoid a confusing response that includes both 'actors'
+                    # and 'clients/users', when we only accept one of those options containing
+                    # values. If we revisit and determine it's needed,
+                    # it will be a new APIv2 behavior.
+                    check_body = acl_body
+                    check_body[permission] = groups_and_actors
+
+                    get(request_url, platform.admin_user).should look_like({
+                        :status => 200,
+                        :body => check_body
+                      })
+                  end
+                end
+
+                context "using the legacy 'actors' attribute" do
+                  let(:update_body) { { permission => groups_and_actors } }
+                  it "can update ACL" do
+                    put(permission_request_url, platform.admin_user,
+                      :payload => update_body).should look_like({
+                        :status => 200
+                      })
+                    check_body = acl_body
+                    check_body[permission] = groups_and_actors
+
+                    get(request_url, platform.admin_user).should look_like({
+                        :status => 200,
+                        :body => check_body
+                      })
+                  end
                 end
               end
 
@@ -1107,7 +1254,7 @@ describe "ACL API", :acl do
                     })
                   get(request_url, platform.admin_user).should look_like({
                       :status => 200,
-                      :body_exact => acl_body
+                      :body => acl_body
                     })
                 end
               end
@@ -1120,7 +1267,7 @@ describe "ACL API", :acl do
                     })
                   get(request_url, platform.admin_user).should look_like({
                       :status => 200,
-                      :body_exact => acl_body
+                      :body => acl_body
                     })
                 end
               end
@@ -1133,7 +1280,7 @@ describe "ACL API", :acl do
                     })
                   get(request_url, platform.admin_user).should look_like({
                       :status => 200,
-                      :body_exact => acl_body
+                      :body => acl_body
                     })
                 end
               end
@@ -1146,7 +1293,7 @@ describe "ACL API", :acl do
                     })
                   get(request_url, platform.admin_user).should look_like({
                       :status => 200,
-                      :body_exact => acl_body
+                      :body => acl_body
                     })
                 end
               end
@@ -1168,7 +1315,86 @@ describe "ACL API", :acl do
                       })
                     get(request_url, platform.admin_user).should look_like({
                         :status => 200,
-                        :body_exact => acl_body
+                        :body => acl_body
+                      })
+                  end
+                end
+                context "includes valid actor list and valid client list" do
+                  let(:update_body) {
+                    {
+                      permission => {
+                        "actors" => ["pivotal", platform.admin_user.name,
+                          platform.non_admin_user.name],
+                        "clients" =>  [platform.non_admin_client.name],
+                        "groups" => ["admins", "users", "clients"]
+                      }
+                    }
+                  }
+
+                  it "returns 400", :validation do
+                    response = put(permission_request_url, platform.admin_user,
+                      :payload => update_body)
+                    expect(response).to have_status_code 400
+                  end
+                end
+
+                context "includes valid actor list and valid user list" do
+                  let(:update_body) {
+                    {
+                      permission => {
+                        "actors" => ["pivotal", platform.admin_user.name,
+                          platform.non_admin_user.name],
+                        "users" =>  ["pivotal"],
+                        "groups" => ["admins", "users", "clients"]
+                      }
+                    }
+                  }
+
+                  it "returns 400", :validation do
+                    response = put(permission_request_url, platform.admin_user,
+                      :payload => update_body)
+                    expect(response).to have_status_code 400
+                  end
+                end
+
+                context "includes valid actor list and valid user and client lists" do
+                  let(:update_body) {
+                    {
+                      permission => {
+                        "actors" => ["pivotal", platform.admin_user.name,
+                          platform.non_admin_user.name],
+                        "users" =>  ["pivotal"],
+                        "clients" => [ platform.non_admin_client.name ],
+                        "groups" => ["admins", "users", "clients"]
+                      }
+                    }
+                  }
+
+                  it "returns 400", :validation do
+                    response = put(permission_request_url, platform.admin_user,
+                      :payload => update_body)
+                    expect(response).to have_status_code 400
+                  end
+                end
+
+                context "invalid client" do
+                  let(:update_body) {{
+                      permission => {
+                        "actors" => [],
+                        "users" => ["pivotal", platform.admin_user.name,
+                          platform.non_admin_user.name],
+                        "clients" => [platform.non_admin_client.name, "bogus"],
+                        "groups" => ["admins", "users", "clients"]
+                      }
+                    }}
+
+                  it "returns 400", :validation do
+                    response = put(permission_request_url, platform.admin_user,
+                      :payload => update_body)
+                    expect(response).to have_status_code 400
+                    get(request_url, platform.admin_user).should look_like({
+                        :status => 200,
+                        :body => acl_body
                       })
                   end
                 end
@@ -1184,12 +1410,10 @@ describe "ACL API", :acl do
 
                   it "returns 400", :validation do
                     put(permission_request_url, platform.admin_user,
-                      :payload => update_body).should look_like({
-                        :status => 400
-                      })
+                      :payload => update_body).should have_status_code 400
                     get(request_url, platform.admin_user).should look_like({
                         :status => 200,
-                        :body_exact => acl_body
+                        :body => acl_body
                       })
                   end
                 end
@@ -1208,7 +1432,7 @@ describe "ACL API", :acl do
                       })
                     get(request_url, platform.admin_user).should look_like({
                         :status => 200,
-                        :body_exact => acl_body
+                        :body => acl_body
                       })
                   end
                 end
@@ -1228,7 +1452,7 @@ describe "ACL API", :acl do
                       })
                     get(request_url, platform.admin_user).should look_like({
                         :status => 200,
-                        :body_exact => acl_body
+                        :body => acl_body
                       })
                   end
                 end
@@ -1243,7 +1467,7 @@ describe "ACL API", :acl do
                       })
                     get(request_url, platform.admin_user).should look_like({
                         :status => 200,
-                        :body_exact => acl_body
+                        :body => acl_body
                       })
                   end
                 end

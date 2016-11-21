@@ -17,6 +17,9 @@
 name "oc-chef-pedant"
 source path: "#{project.files_path}/../../oc-chef-pedant"
 
+license "Apache-2.0"
+license_file "LICENSE"
+
 dependency "ruby"
 dependency "bundler"
 

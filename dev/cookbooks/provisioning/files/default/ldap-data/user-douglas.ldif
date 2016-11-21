@@ -1,0 +1,12 @@
+dn: cn=Tom Douglas,ou=chefs,dc=chef-server,dc=dev
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: Tom Douglas
+sn: Douglas
+displayName: Tom Douglas
+givenName: Tom
+mail: douglas@chef-server.dev
+uid: douglas
+userPassword: douglas

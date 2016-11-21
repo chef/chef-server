@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "user": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "$ref": "common.json#ChefName"
+          }
+        }
+      }
+    }
+  },
+  "example": [
+    {
+      "user": {
+        "username": "cdoherty-chef"
+      }
+    },
+    {
+      "user": {
+        "username": "jkeiser"
+      }
+    },
+    {
+      "user": {
+        "username": "jkeiser-oc"
+      }
+    },
+    {
+      "user": {
+        "username": "mdennard"
+      }
+    }
+  ]
+}

@@ -1,15 +1,15 @@
 GIT
   remote: git://github.com/opscode/dep-selector
-  revision: 7a75df69ae482768b439a28ab5e237459c6fa263
+  revision: 96b84448a9e399ec7326ef84f76458015c68e0c2
   branch: master
   specs:
-    dep_selector (1.0.3)
+    dep_selector (1.0.4)
       dep-selector-libgecode (~> 1.0)
       ffi (~> 1.9)
 
 GIT
   remote: git://github.com/sdelano/erlectricity
-  revision: b8b627fbc4b82cbfe2807ab62733ba0a65d0c209
+  revision: 4ad8379b4e3ff2c6d4e852daaf04bc9103676d19
   branch: master
   specs:
     erlectricity (1.1.1)
@@ -17,8 +17,8 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
-    dep-selector-libgecode (1.0.2)
-    ffi (1.9.8)
+    dep-selector-libgecode (1.3.1)
+    ffi (1.9.14)
     uuidtools (2.1.5)
 
 PLATFORMS
@@ -28,3 +28,6 @@ DEPENDENCIES
   dep_selector!
   erlectricity!
   uuidtools
+
+BUNDLED WITH
+   1.12.5

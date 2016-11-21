@@ -17,7 +17,8 @@
          has_permission/4,
          remove_from_group/3,
          statements/0,
-         update_acl/5]).
+         update_acl/5,
+         is_recursive_member_of_group/3]).
 
 ping() ->
     case select(ping, [], first_as_scalar, [ping]) of
@@ -184,6 +185,21 @@ group_membership(TargetType, GroupId) ->
             L;
         {ok, none} ->
             [];
+        {error, Error} ->
+            {error, Error}
+    end.
+
+%% TODO currently only supports actor since db query depends on db function
+%% groups_for_actor and a similar db function for groups does not exist.
+is_recursive_member_of_group_query(actor) -> is_actor_recursive_member_of_group.
+
+%% Returns all groups this actor is a member of,
+%% including parents of those groups, recursively.
+-spec is_recursive_member_of_group(auth_type(), auth_id(), auth_id()) -> boolean() | {error, term()}.
+is_recursive_member_of_group(Type, MemberAuthzId, ParentGroupAuthzId) ->
+    case select(is_recursive_member_of_group_query(Type), [MemberAuthzId, ParentGroupAuthzId], rows_as_scalars, [exists]) of
+        {ok, [Answer]} ->
+            Answer;
         {error, Error} ->
             {error, Error}
     end.

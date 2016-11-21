@@ -111,20 +111,26 @@ from_json(Req, #base_state{organization_guid = OrgId,
     case update_from_json(AclState, Part, OrgId) of
         forbidden ->
             {{halt, 400}, Req, State};
-        bad_actor ->
-            % We don't actually know which one, so can't use a more specific
-            % message without checking every single object (which we don't yet
-            % do efficiently); we only get back a list of Ids that has a
-            % different length than the list of names we started with.
-            Msg = <<"Invalid/missing actor in request body">>,
-            Msg1 = {[{<<"error">>, [Msg]}]},
-            Req1 = wrq:set_resp_body(chef_json:encode(Msg1), Req),
-            {{halt, 400}, Req1, State#base_state{log_msg = bad_actor}};
-        bad_group ->
-            Msg = <<"Invalid/missing group in request body">>,
-            Msg1 = {[{<<"error">>, [Msg]}]},
-            Req1 = wrq:set_resp_body(chef_json:encode(Msg1), Req),
-            {{halt, 400}, Req1, State#base_state{log_msg = bad_group}};
+        {ambiguous_actor, Actors} ->
+            Message = [<<"The following actor(s) exist as both clients and users within this organization: ">>,
+                       chef_wm_malformed:bin_str_join(Actors, ", "),
+                       <<". To perform this update, supply separate 'clients' and 'users' ">>,
+                       <<"fields in your request, and use an empty array for the value of 'actors'.">>],
+            Body = chef_wm_util:error_message_envelope(Message),
+            Req1 = wrq:set_resp_body(chef_json:encode(Body), Req),
+            {{halt, 422}, Req1, State#base_state{log_msg = {ambiguous_actor, Actors}}};
+        {invalid, Type, Names} ->
+            Body = chef_wm_util:error_message_envelope([<<"The ">>, atom_to_list(Type),
+                                                        <<"(s) ">>, chef_wm_malformed:bin_str_join(Names, ", "),
+                                                        <<" do not exist in this organization.">>]),
+            Req1 = wrq:set_resp_body(chef_json:encode(Body), Req),
+            {{halt, 400}, Req1, State#base_state{log_msg = {invalid_object_in_ace, Names}}};
+        {bad_actor, Actors} ->
+            Body = chef_wm_util:error_message_envelope([<<"The actor(s) ">>,
+                                                        chef_wm_malformed:bin_str_join(Actors, ", "),
+                                                        <<" do not exist in this organization as clients or users.">>]),
+            Req1 = wrq:set_resp_body(chef_json:encode(Body), Req),
+            {{halt, 400}, Req1, State#base_state{log_msg = {bad_actor, Actors}}};
         _Other ->
             % So we return 200 instead of 204, for backwards compatibility:
             Req1 = wrq:set_resp_body(<<"{}">>, Req),
@@ -134,34 +140,27 @@ from_json(Req, #base_state{organization_guid = OrgId,
 %% Internal functions
 
 check_json_validity(Part, Ace) ->
-  case chef_object_base:strictly_valid(acl_spec(Part), [Part], Ace) of
+  case chef_object_base:strictly_valid(oc_chef_authz_acl:acl_spec(Part), [Part], Ace) of
     ok ->
       ok;
     Other ->
       throw(Other)
-  end.
-
-acl_spec(Part) ->
-    {[
-      {Part,
-       {[
-         {<<"actors">>, {array_map, string}},
-         {<<"groups">>, {array_map, string}}
-        ]}}
-     ]}.
-
+  end,
+  oc_chef_authz_acl:validate_actors_clients_users(Part, Ace).
 
 update_from_json(#acl_state{type = Type, authz_id = AuthzId, acl_data = Data},
                  Part, OrgId) ->
     try
         oc_chef_authz_acl:update_part(Part, Data, Type, AuthzId, OrgId)
     catch
+        throw:{ambiguous_actor, Actors} ->
+            {ambiguous_actor, Actors};
         throw:forbidden ->
             forbidden;
-        throw:bad_actor ->
-            bad_actor;
-        throw:bad_group ->
-            bad_group
+        throw:{bad_actor, Actors} ->
+            {bad_actor, Actors};
+        throw:{invalid, T1, Names} ->
+            {invalid, T1, Names}
     end.
 
 malformed_request_message(Any, _Req, _State) ->

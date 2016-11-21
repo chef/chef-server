@@ -1,0 +1,93 @@
+#%RAML 0.8
+---
+description: Users on the Chef server.
+type: list_endpoint
+
+get:
+  description: List all users.
+  responses:
+    200:
+      body:
+        schema: User
+        example: |
+          {
+            "user1" : "https://chef.example/users/user1",
+            "user2" : "https://chef.example/users/user2",
+            "user3" : "https://chef.example/users/user3"
+          }
+post:
+  description: Create a new user.
+  body:
+    example: !include examples/users-post.json
+    schema: definitions/user.json#UserPost
+  responses:
+    201:
+      body:
+        schema: User
+        example: |
+          {
+            "uri"=>"https://127.0.0.1/users/test4",
+            "chef_key" : {
+              "name" : "default",
+              "public_key" : "-----BEGIN PUBLIC KEY-----",
+              "private_key" : "-----BEGIN RSA PRIVATE KEY-----"
+          }
+
+/{user}:
+  description: A user on the Chef server.
+  type: item_endpoint
+  uriParameters:
+    user:
+      description: Username of the user you wish to perform an action on.
+      type: string
+
+  get:
+    description: |
+      Retrieve an individual, existing Chef user, including all defined fields.
+      If an optional field is not defined, it will not be returned.
+      No longer contains public key. Use the keys API to retrieve a key.
+    responses:
+      200:
+        body:
+          schema: User
+          example: |
+            {
+              "username" : "user1",
+              "email" : "user1@chef.example",
+              "display_name" : "Brian Boitano",
+              "first_name" : "Brian",
+              "last_name" : "Boitano"
+            }
+  put:
+    description: |
+      Update an existing user. Note that user keys must now be updated via the keys API.
+      You can no longer put the public_key field.
+    body:
+      schema: UserPut
+      example: !include examples/users-put.json
+    responses:
+      200:
+        body:
+          schema: User
+          example: |
+            {"uri" : "https://127.0.0.1/users/user1"}
+
+  delete:
+    description: Delete an existing user.
+    responses:
+      200:
+        body:
+          schema: User
+          example: |
+            {
+              "username" : "user1",
+              "email" : "user1@chef.example",
+              "display_name" : "Brian Boitano",
+              "first_name" : "Brian",
+              "last_name" : "Boitano"
+            }
+
+  /keys: !include users/keys.yaml
+  /association_requests: !include users/association_requests.yaml
+
+  /_acl: !include acl_endpoint.yaml

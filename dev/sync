@@ -70,7 +70,8 @@ BEGIN {
     @all_stats = { walltime: 0.0,  transferred: 0, created: 0, deleted: 0, bytes: 0, time: 0.0}
     # Determine our ssh args up front, so we won't need to do this on every sync.
     ssh_info = {}
-    `vagrant ssh-config chef-server`.split("\n").each do |line|
+    vagrant_cmd_string = ENV['VAGRANT_PATH'].nil? ? 'vagrant' : ENV['VAGRANT_PATH']
+    `#{vagrant_cmd_string} ssh-config chef-server`.split("\n").each do |line|
       k, v = line.split(" ")
       ssh_info[k.strip] = v.strip
     end

@@ -44,11 +44,11 @@
 %% reindexing.  Does not drop existing index entries beforehand; this
 %% is explicitly a separate step.
 -spec reindex(Ctx :: chef_db:db_context(),
-              OrgInfo :: org_info()) -> ok.
+              OrgInfo :: org_info()) -> {ok, list()}.
 reindex(Ctx, {OrgId, _OrgName}=OrgInfo) ->
     AllIndexes = fetch_org_indexes(Ctx, OrgId),
-    [ reindex(Ctx, OrgInfo, Index) || Index <- AllIndexes ],
-    ok.
+    Missing = [ reindex(Ctx, OrgInfo, Index) || Index <- AllIndexes ],
+    {ok, lists:flatten(Missing)}.
 
 fetch_org_indexes(Ctx, OrgId) ->
     BuiltInIndexes = [node, role, environment, client],
@@ -103,7 +103,7 @@ fetch_org_indexes(Ctx, OrgId) ->
 %% the given indexable type.
 -spec reindex(DbContext :: chef_db:db_context(),
               OrgInfo :: org_info(),
-              Index :: index()) -> ok.
+              Index :: index()) -> list().
 reindex(Ctx, {OrgId, _OrgName}=OrgInfo, Index) ->
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
     %% Grab all the database IDs to do batch retrieval on
@@ -115,7 +115,7 @@ reindex(Ctx, {OrgId, _OrgName}=OrgInfo, Index) ->
 -spec reindex_by_id(DbContext :: chef_db:db_context(),
                     OrgInfo :: org_info(),
                     Index :: index(),
-                    Ids :: [<<_:256>>]) -> ok.
+                    Ids :: [<<_:256>>]) -> list().
 reindex_by_id(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Ids) ->
     %% This is overkill, but workable until we have more robust reindexing
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
@@ -125,7 +125,7 @@ reindex_by_id(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Ids) ->
 -spec reindex_by_name(DbContext :: chef_db:db_context(),
                       OrgInfo :: org_info(),
                       Index :: index(),
-                      Names :: [binary()]) -> ok.
+                      Names :: [binary()]) -> list().
 reindex_by_name(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Names) ->
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
     Ids = lists:foldl(
@@ -174,13 +174,12 @@ decompress_and_decode(Object) ->
                     BatchSize :: non_neg_integer(),
                     OrgInfo :: org_info(),
                     Index :: index(),
-                    NameIdDict :: dict()) -> ok.
+                    NameIdDict :: dict()) -> list().
 batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict) when is_list(Ids) ->
-    DoBatch = fun(Batch, _Acc) ->
-                      ok = index_a_batch(Ctx, Batch, OrgInfo, Index, NameIdDict),
-                      ok
+    DoBatch = fun(Batch, MissingList) ->
+                      [index_a_batch(Ctx, Batch, OrgInfo, Index, NameIdDict) | MissingList]
                  end,
-    chefp:batch_fold(DoBatch, Ids, ok, BatchSize).
+    chefp:batch_fold(DoBatch, Ids, [], BatchSize).
 
 %% @doc Helper function to retrieve and index objects for a single
 %% batch of database IDs.
@@ -188,11 +187,10 @@ batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict) when is_list(Ids)
                     BatchOfIds :: [object_id()],
                     OrgInfo :: org_info(),
                     Index :: index(),
-                    NameIdDict :: dict()) -> ok.
+                    NameIdDict :: dict()) -> list().
 index_a_batch(Ctx, BatchOfIds, {OrgId, OrgName}, Index, NameIdDict) ->
     SerializedObjects = chef_db:bulk_get(Ctx, OrgName, chef_object_type(Index), BatchOfIds),
-    ok = send_to_index_queue(OrgId, Index, SerializedObjects, NameIdDict),
-    ok.
+    send_to_index_queue(OrgId, Index, SerializedObjects, NameIdDict, []).
 
 %% @doc Resolve an index to the name of the corresponding Chef object type.
 chef_object_type(Index) when is_binary(Index) -> data_bag_item;
@@ -204,10 +202,11 @@ chef_object_type(Index)                       -> Index.
 -spec send_to_index_queue(OrgId :: object_id(),
                           Index :: index(),
                           SerializedObjects :: [binary()] | [ej:json_object()],
-                          NameIdDict :: dict()) -> ok.
-send_to_index_queue(_, _, [], _) ->
-    ok;
-send_to_index_queue(OrgId, Index, [SO|Rest], NameIdDict) ->
+                          NameIdDict :: dict(),
+                          MissingList :: list()) -> list().
+send_to_index_queue(_, _, [], _, MissingList) ->
+    MissingList;
+send_to_index_queue(OrgId, Index, [SO|Rest], NameIdDict, MissingList) ->
     %% All object types are returned from chef_db:bulk_get/4 as
     %% binaries (compressed or not) EXCEPT for clients, which are
     %% returned as EJson directly, because none of their
@@ -216,12 +215,18 @@ send_to_index_queue(OrgId, Index, [SO|Rest], NameIdDict) ->
     PreliminaryEJson = decompress_and_decode(SO),
     NameKey = name_key(chef_object_type(Index)),
     ItemName = ej:get({NameKey}, PreliminaryEJson),
-    {ok, ObjectId} = dict:find(ItemName, NameIdDict),
-    StubRec = stub_record(Index, OrgId, ObjectId, ItemName, PreliminaryEJson),
-    %% Since we get here via valid `Index', we don't have to check that the objects are
-    %% indexable.
-    ok = oc_chef_object_db:add_to_solr_async(StubRec, PreliminaryEJson),
-    send_to_index_queue(OrgId, Index, Rest, NameIdDict).
+    NewMissingList = case dict:find(ItemName, NameIdDict) of
+        {ok, ObjectId} ->
+            StubRec = stub_record(Index, OrgId, ObjectId, ItemName, PreliminaryEJson),
+            %% Since we get here via valid `Index', we don't have to check that the objects are
+            %% indexable.
+            oc_chef_object_db:add_to_solr_async(StubRec, PreliminaryEJson),
+            MissingList;
+        error ->
+            lager:warning("skipping: no id found for name ~p", [ItemName]),
+            [{Index, ItemName} | MissingList]
+    end,
+    send_to_index_queue(OrgId, Index, Rest, NameIdDict, NewMissingList).
 
 %% @doc Determine the proper key to use to retrieve the unique name of
 %% an object from its EJson representation.

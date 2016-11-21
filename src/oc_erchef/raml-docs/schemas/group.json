@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "properties": {
+    "groupname": {
+      "description": "The name of the group (unique within an organization).",
+      "$ref": "common.json#ChefName",
+      "required": true
+    },
+    "orgname": {
+      "description": "The organization containing the group.",
+      "$ref": "common.json#ChefName"
+    },
+    "name": {
+      "description": "The name of the group (same as name).",
+      "$ref": "common.json#ChefName",
+      "required": true
+    },
+    "actors": {
+      "description": "All users or clients who are members of this group (ties broken by the /principals/<name> endpoint).",
+      "type": "array",
+      "items": {
+        "$ref": "common.json#ChefName"
+      }
+    },
+    "users": {
+      "description": "Users who are members of this group.",
+      "type": "array",
+      "items": {
+        "$ref": "common.json#ChefName"
+      }
+    },
+    "clients": {
+      "description": "Clients who are members of this group.",
+      "type": "array",
+      "items": {
+        "$ref": "common.json#ChefName"
+      }
+    },
+    "groups": {
+      "description": "Sub-groups of this group.",
+      "type": "array",
+      "items": {
+        "$ref": "common.json#ChefName"
+      }
+    }
+  }
+}

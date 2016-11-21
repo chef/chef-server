@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Mark Anderson <mark@opscode.com>
-%% @author Marc Paradise <marc@getchef.com>
+%% @author Mark Anderson <mark@chef.io>
+%% @author Marc Paradise <marc@chef.io>
 %% @doc authorization - Interface to the opscode authorization servize
 %%
 %% Copyright 2011-2014 Chef Software, Inc. All Rights Reserved.
@@ -32,9 +32,13 @@
          fetch_read_access_group/2,
          fetch_group_authz_id/3,
          fetch_global_group_authz_id/3,
+         fetch_global_group/2,
          fetch_group/3,
          make_context/3,
-         statements/1
+         statements/1,
+         make_org_prefixed_group_name/2,
+         find_org_actors_by_name/2,
+         authz_records_by_name/3
         ]).
 
 -ifdef(TEST).
@@ -131,8 +135,6 @@ fetch_group_authz_id(#oc_chef_authz_context{server_api_version = ApiVersion, req
 container_record_to_authz_id(#oc_chef_authz_context{}, #chef_container{authz_id = Id}) ->
     Id.
 
-
-
 %% TODO: refactor, clean this up
 %% We need a clean api for fetching a group w/o expansion of members
 %% We need a clean api for fetching the global admins group
@@ -158,10 +160,13 @@ fetch_global_group(#oc_chef_authz_context{} = Ctx, GroupName) ->
     fetch_group(Ctx, ?GLOBAL_PLACEHOLDER_ORG_ID, GroupName).
 
 make_read_access_group_name(OrgName) ->
-  lists:flatten(io_lib:format("~s_read_access_group", [OrgName])).
+    make_org_prefixed_group_name(OrgName, "read_access_group").
 
 make_global_admins_group_name(OrgName) ->
-  lists:flatten(io_lib:format("~s_global_admins", [OrgName])).
+    make_org_prefixed_group_name(OrgName, "global_admins").
+
+make_org_prefixed_group_name(OrgName, Suffix) ->
+    lists:flatten(io_lib:format("~s_~s", [OrgName, Suffix])).
 
 fetch_group(#oc_chef_authz_context{reqid = ReqId, server_api_version = ApiVersion}, OrgId, Name) ->
     case stats_hero:ctime(ReqId, {chef_sql, fetch},
@@ -178,4 +183,37 @@ fetch_group(#oc_chef_authz_context{reqid = ReqId, server_api_version = ApiVersio
             {not_found, authz_group};
         {error, _} = Error ->
             Error
+    end.
+
+find_org_actors_by_name(OrgId, ActorNames) ->
+    case sqerl:select(find_org_actors_by_name, [OrgId, ActorNames]) of
+        {ok, L} when is_list(L) ->
+            % WIP - change this to a record.
+            R = [{proplists:get_value(<<"name_in">>, Row),
+                  proplists:get_value(<<"u_authz_id">>, Row),
+                  proplists:get_value(<<"c_authz_id">>, Row)} || Row <- L],
+            {ok, R};
+        {ok, none} ->
+            {ok, []};
+        {error, Error} ->
+            {error, Error}
+    end.
+
+authz_records_by_name(client, OrgId, ClientNames) ->
+    object_authz_records(find_client_authz_id_in_names, [OrgId, ClientNames]);
+authz_records_by_name(user, _OrgId, UserNames) ->
+    object_authz_records(find_user_authz_id_in_names, [UserNames]);
+authz_records_by_name(group, OrgId, GroupNames) ->
+    object_authz_records(find_group_authz_id_in_names, [OrgId, GroupNames]).
+
+% On success returns [ {Name, AuthzId}, ... ]
+object_authz_records(QueryName, Args) ->
+    case chef_sql:select_rows({QueryName, Args}) of
+        List when is_list(List) ->
+            [{proplists:get_value(<<"name">>, R),
+              proplists:get_value(<<"authz_id">>, R)} || R <- List];
+        not_found ->
+            [];
+        Other ->
+            Other
     end.

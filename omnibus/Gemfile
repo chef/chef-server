@@ -3,11 +3,13 @@ source 'https://rubygems.org'
 gem 'rake'
 gem 'chefspec'
 gem 'berkshelf'
+gem 'bundler', '>1.10'
 
 # Install omnibus software
 group :omnibus do
   gem 'omnibus', github: 'chef/omnibus'
   gem 'omnibus-software', github: 'chef/omnibus-software'
+  gem 'license_scout', github: 'chef/license_scout'
 end
 
 group :test do

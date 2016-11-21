@@ -3,6 +3,7 @@
 %% ex: ts=4 sw=4 ft=erlang et
 
 [
+ {kernel, [{inet_dist_use_interface, {127,0,0,1}}]},
  %% SASL config
  {sasl, [
          {sasl_error_logger, {file, "<%= File.join(@log_directory, 'sasl-error.log') %>"}},
@@ -78,11 +79,49 @@
               {port, <%= @port %>},
               {keys, {"<%= @access_key_id %>",
                       "<%= @secret_access_key %>"}},
+              {storage_type, <%= @storage_type %>},
               {disk_store, "<%= @data_dir %>"},
+<% if @storage_type.to_s == "sql" -%>
+              {sql_retry_count, <%= @sql_retry_count -%>},
+              {sql_retry_delay, <%= @sql_retry_delay -%>},
+              {abandoned_upload_cleanup_interval, <%= @abandoned_upload_cleanup_interval -%>},
+              {deleted_data_cleanup_interval, <%= @deleted_data_cleanup_interval -%>},
+<% end -%>
               {stream_download, <%= @stream_download %>},
               {log_dir, "<%= @log_directory %>"}
              ]},
-  {webmachine, [
+<% if @storage_type.to_s == "sql" -%>
+ {sqerl, [
+           {db_driver_mod, sqerl_pgsql_client},
+           {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
+
+           %% Database connection parameters
+           {db_host, "<%= @postgresql['vip'] %>"},
+           {db_port, <%=  @postgresql['port'] %>},
+           {db_user, "<%= @sql_user %>"},
+           {db_pass, "<%= @sql_password %>"},
+           {db_name, "bookshelf" },
+           {idle_check, 10000},
+           {pooler_timeout, <%= @db_pooler_timeout %>},
+           {db_timeout, <%= @sql_db_timeout %>},
+           {prepared_statements, {bksw_sql, statements, [pgsql]}},
+           {column_transforms,
+                              [{<<"created_at">>,
+                                {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}},
+                               {<<"updated_at">>,
+                                {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}}]
+           }
+          ]},
+ {pooler, [
+           {pools, [[{name, sqerl},
+                     {max_count, <%= @db_pool_size %> },
+                     {init_count, <%= @db_pool_size %> },
+                     {queue_max, <%= @db_pool_queue_max %>},
+                     {start_mfa, {sqerl_client, start_link, []}}]]}
+           %%,{metrics_module, folsom_metrics}
+          ]},
+<% end -%>
+ {webmachine, [
           {log_handlers, [
 %%% Log handling is disabled, because it is redundant (nginx also logs requests)
 %%% If debug logging is needed, this can be uncommented to start logging somewhat verbose logs

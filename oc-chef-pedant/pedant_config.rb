@@ -198,5 +198,9 @@ debug_org_creation false
 old_runlists_and_search true
 
 
+# Actions enabled. Allowing tests that require actions to be bypassed if
+# actions aren't available.
+actions_enabled true
+
 # Log HTTP Requests
 log_file "/var/log/opscode/oc-chef-pedant/http-traffic.log"

@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "description": "The list of outstanding invites to an organization.",
+  "type": "array",
+  "items": {
+    "properties": {
+      "id": {
+        "description": "id unique to this association request.",
+        "type": "string"
+      },
+      "username": {
+        "description": "Name of user invited to the organization.",
+        "$ref": "common.json#ChefName"
+      }
+    }
+  }
+}

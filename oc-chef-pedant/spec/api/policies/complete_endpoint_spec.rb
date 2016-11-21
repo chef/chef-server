@@ -537,7 +537,7 @@ describe "Policies API endpoint", :policies do
         expect(parse(response.body)).to eq(parse(payload))
       end
 
-      context "when the policy name in request doens't match URL" do
+      context "when the policy name in request doesn't match URL" do
 
         it "POST /policies/:policy_name/revisions returns 400", :validation do
           response = post(named_policy_revisions_url, requestor, payload: minimum_valid_policy_payload)
@@ -739,7 +739,7 @@ describe "Policies API endpoint", :policies do
 
         let(:request_method) { :GET }
 
-        it "GET /policies/:group/:name returns 404" do
+        it "GET /policy_groups/:group_name/policies/:policy_name returns 404" do
           expect(response.code).to eq(404)
         end
 
@@ -751,7 +751,7 @@ describe "Policies API endpoint", :policies do
 
         let(:request_method) { :DELETE }
 
-        it "DELETE /policies/:group/:name returns 404" do
+        it "DELETE /policy_groups/:group_name/policies/:policy_name returns 404" do
           expect(response.code).to eq(404)
         end
 
@@ -769,7 +769,7 @@ describe "Policies API endpoint", :policies do
 
           let(:request_payload) { canonical_policy_payload }
 
-          it "PUT /policies/:group/:name returns 201" do
+          it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
             expect(response.code).to eq(201)
           end
 
@@ -780,7 +780,7 @@ describe "Policies API endpoint", :policies do
 
           let(:request_payload) { minimum_valid_policy_payload }
 
-          it "PUT /policies/:group/:name returns 201" do
+          it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
             expect(response.code).to eq(201)
           end
 
@@ -799,12 +799,12 @@ describe "Policies API endpoint", :policies do
               mutate_json(minimum_valid_policy_payload) { |p| p["name"] = name_with_all_valid_chars }
             end
 
-            it "PUT /policies/:group/:name returns 201" do
+            it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
               expect(response.code).to eq(201)
             end
           end
 
-          context "when the name is close to the maximum size" do
+          context "when the name is close to the maximum size", :chef_zero_quirks do
 
             # On Chef Zero, some backends will append `.json` to a file name,
             # which can exceed the common limit of 255 characters.
@@ -818,12 +818,12 @@ describe "Policies API endpoint", :policies do
               mutate_json(minimum_valid_policy_payload) { |p| p["name"] = max_size_name }
             end
 
-            it "PUT /policies/:group/:name returns 201" do
+            it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
               expect(response.code).to eq(201)
             end
           end
 
-          context "when a revision_id is the maximum size" do
+          context "when a revision_id is the maximum size", :chef_zero_quirks do
 
             let(:max_size_revision_id) { 'a' * 255 }
 
@@ -833,7 +833,7 @@ describe "Policies API endpoint", :policies do
               end
             end
 
-            it "PUT /policies/:group/:name returns 201" do
+            it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
               expect(response.code).to eq(201)
             end
           end
@@ -849,7 +849,7 @@ describe "Policies API endpoint", :policies do
             end
 
 
-            it "PUT /policies/:group/:name returns 201" do
+            it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
               expect(response.code).to eq(201)
             end
           end
@@ -867,7 +867,7 @@ describe "Policies API endpoint", :policies do
               end
             end
 
-            it "PUT /policies/:group/:name returns 201" do
+            it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
               expect(response.code).to eq(201)
             end
           end
@@ -885,7 +885,7 @@ describe "Policies API endpoint", :policies do
               end
             end
 
-            it "PUT /policies/:group/:name returns 201" do
+            it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
               expect(response.code).to eq(201)
             end
           end
@@ -904,11 +904,11 @@ describe "Policies API endpoint", :policies do
               response_obj["error"].first
             end
 
-            it "PUT /policies/:group/:name returns 400", :validation do
+            it "PUT /policy_groups/:group_name/policies/:policy_name returns 400", :validation do
               expect(response.code).to eq(400)
             end
 
-            it "PUT /policies/:group/:name body contains a well-formed error message", :validation do
+            it "PUT /policy_groups/:group_name/policies/:policy_name body contains a well-formed error message", :validation do
               expect(error_message).to eq(expected_error_message)
             end
 
@@ -1198,7 +1198,7 @@ describe "Policies API endpoint", :policies do
         let(:request_payload) { nil }
 
         it "retrieves the policy document" do
-          expect(JSON.parse(response.body)).to eq(JSON.parse(canonical_policy_payload))
+          expect(parse(response.body)).to eq(parse(canonical_policy_payload))
         end
 
       end
@@ -1224,13 +1224,13 @@ describe "Policies API endpoint", :policies do
 
         it "PUT /policies/:group/:name returns 200" do
           expect(response.code).to eq(200)
-          expect(response.body).to eq(updated_canonical_policy_payload)
+          expect(parse(response.body)).to eq(parse(updated_canonical_policy_payload))
         end
 
         it "GET /policies/:group/:name subsequently returns the updated document" do
           retrieved_doc = get(static_named_policy_url, requestor)
           expect(retrieved_doc.code).to eq(200)
-          expect(retrieved_doc.body).to eq(updated_canonical_policy_payload)
+          expect(parse(retrieved_doc.body)).to eq(parse(updated_canonical_policy_payload))
         end
       end
 
@@ -1248,7 +1248,7 @@ describe "Policies API endpoint", :policies do
 
         it "DELETE /policies/:group/:name returns the deleted document" do
           expect(response.code).to eq(200)
-          expect(JSON.parse(response.body)).to eq(JSON.parse(canonical_policy_payload))
+          expect(parse(response.body)).to eq(parse(canonical_policy_payload))
         end
 
         it "DELETE /policies/:group/:name removes the policy from the data store" do
@@ -1263,4 +1263,3 @@ describe "Policies API endpoint", :policies do
 
   end
 end
-

@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "allOf": [
+    { "$ref": "organization.json" },
+    {
+      "properties": {
+        "url": {
+          "description": "The URL to the created organization.",
+          "type": "string",
+
+          "format": "uri"
+        },
+        "clientname": {
+          "description": "The name of the validator client.",
+          "$ref": "common.json#ChefName"
+        },
+        "private_key": {
+          "description": "The private key generated for the validator client.",
+          "$ref": "common.json#PrivateKey"
+        }
+      }
+    }
+  ]
+}

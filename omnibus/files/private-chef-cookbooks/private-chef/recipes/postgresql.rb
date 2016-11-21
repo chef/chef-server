@@ -1,5 +1,5 @@
 #
-# Author:: Adam Jacob (<adam@opscode.com>)
+# Author:: Adam Jacob (<adam@chef.io>)
 # Copyright:: Copyright (c) 2011 Opscode, Inc.
 # License:: Apache License, Version 2.0
 #
@@ -16,7 +16,6 @@
 # limitations under the License.
 #
 
-include_recipe "private-chef::old_postgres_cleanup"
 
 postgresql_dir = node['private_chef']['postgresql']['dir']
 postgresql_data_dir = node['private_chef']['postgresql']['data_dir']
@@ -130,7 +129,7 @@ if is_data_master?
       2.times do |i|
         # Note that we have to include the port even for a local pipe, because the port number
         # is included in the pipe default.
-        `echo 'SELECT * FROM pg_database;' | su - opscode-pgsql -c '/opt/opscode/embedded/bin/psql -p #{node['private_chef']['postgresql']['port']}  -U  opscode-pgsql postgres -t -A'`
+        `echo 'SELECT * FROM pg_database;' | su - #{node['private_chef']['postgresql']['username']} -c '/opt/opscode/embedded/bin/psql -p #{node['private_chef']['postgresql']['port']} -U #{node['private_chef']['postgresql']['db_superuser']} postgres -t -A'`
 	if $?.exitstatus != 0
           Chef::Log.fatal("Could not connect to database, retrying in 10 seconds.")
           sleep 10
@@ -166,4 +165,5 @@ ERR
   include_recipe "private-chef::erchef_database"
   include_recipe "private-chef::bifrost_database"
   include_recipe "private-chef::oc_id_database"
+  include_recipe "private-chef::bookshelf_database" if node["private_chef"]["bookshelf"]["storage_type"].to_s == "sql"
 end

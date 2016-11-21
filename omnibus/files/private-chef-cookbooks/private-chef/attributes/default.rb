@@ -1,4 +1,4 @@
-# Author:: Adam Jacob (<adam@opscode.com>)
+# Author:: Adam Jacob (<adam@chef.io>)
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 #
 # All Rights Reserved
@@ -31,13 +31,19 @@ default['private_chef']['api_version'] = "12.0.0"
 default['private_chef']['flavor'] = "cs"
 default['private_chef']['install_path'] = "/opt/opscode"
 
-default['private_chef']['notification_email'] = "pc-default@opscode.com"
-default['private_chef']['from_email'] = '"Opscode" <donotreply@opscode.com>'
+default['private_chef']['notification_email'] = "pc-default@chef.io"
+default['private_chef']['from_email'] = '"Opscode" <donotreply@chef.io>'
 default['private_chef']['role'] = "standalone"
 default['private_chef']['license']['nodes'] = 25
-default['private_chef']['license']['upgrade_url'] = "http://www.getchef.com/contact/on-premises-simple"
+default['private_chef']['license']['upgrade_url'] = "http://www.chef.io/contact/on-premises-simple"
 
 default['private_chef']['default_orgname'] = nil
+
+# Enable fips mode (openssl)
+# This requires the chef-server-fips package. If you do not have this,
+# your chef-server will probably not work. If you have to manually
+# change this, you're doing it wrong.
+default['private_chef']['fips_enabled'] = false
 
 ###
 # Options for installing addons
@@ -45,9 +51,9 @@ default['private_chef']['default_orgname'] = nil
 default['private_chef']['addons']['install'] = false
 default['private_chef']['addons']['path'] = nil
 default['private_chef']['addons']['packages'] =
-  %w{opscode-reporting opscode-manage opscode-analytics opscode-push-jobs-server chef-ha chef-sync}
+  %w{opscode-reporting opscode-manage opscode-analytics opscode-push-jobs-server chef-ha}
 default['private_chef']['addons']['ubuntu_supported_codenames'] =
-  %w{lucid natty precise}
+  %w{lucid precise trusty}
 default['private_chef']['addons']['ubuntu_distribution'] =
   node['private_chef']['addons']['ubuntu_supported_codenames'].include?(node['lsb']['codename']) ?
   node['lsb']['codename'] : 'lucid'
@@ -87,6 +93,26 @@ default['private_chef']['opscode-solr']['data_dir'] = "/var/opt/opscode/opscode-
 ####
 default['private_chef']['server-api-version'] = 0
 
+####
+# HAProxy
+#
+# HAProxy is only used when use_chef_backend is true. All Postgresql
+# and Elasticsearch requests are routed to it and then forwarded to
+# the current chef-backend leader.
+####
+default['private_chef']['haproxy']['enable'] = true
+default['private_chef']['haproxy']['ha'] = false
+default['private_chef']['haproxy']['dir'] = "/var/opt/opscode/haproxy"
+default['private_chef']['haproxy']['log_directory'] = "/var/log/opscode/haproxy"
+default['private_chef']['haproxy']['log_rotation']['file_maxbytes'] = 104857600
+default['private_chef']['haproxy']['log_rotation']['num_to_keep'] = 10
+default['private_chef']['haproxy']['listen'] = '0.0.0.0'
+default['private_chef']['haproxy']['local_postgresql_port'] = 5432
+default['private_chef']['haproxy']['remote_postgresql_port'] = 5432
+default['private_chef']['haproxy']['local_elasticsearch_port'] = 9200
+default['private_chef']['haproxy']['remote_elasticsearch_port'] = 9200
+default['private_chef']['haproxy']['leaderl_healthcheck_port'] = 7331
+default['private_chef']['haproxy']['etcd_port'] = 2379
 
 ####
 # RabbitMQ
@@ -101,10 +127,6 @@ default['private_chef']['rabbitmq']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['rabbitmq']['vhost'] = '/chef'
 default['private_chef']['rabbitmq']['user'] = 'chef'
 default['private_chef']['rabbitmq']['password'] = 'chefrocks'
-default['private_chef']['rabbitmq']['reindexer_vhost'] = '/reindexer'
-default['private_chef']['rabbitmq']['jobs_vhost'] = '/jobs'
-default['private_chef']['rabbitmq']['jobs_user'] = 'jobs'
-default['private_chef']['rabbitmq']['jobs_password'] = 'workcomplete'
 default['private_chef']['rabbitmq']['actions_user'] = 'actions'
 default['private_chef']['rabbitmq']['actions_password'] = 'changeme'
 default['private_chef']['rabbitmq']['actions_vhost'] = '/analytics'
@@ -229,10 +251,10 @@ default['private_chef']['opscode-expander']['dir'] = "/var/opt/opscode/opscode-e
 default['private_chef']['opscode-expander']['log_directory'] = "/var/log/opscode/opscode-expander"
 default['private_chef']['opscode-expander']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['opscode-expander']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['opscode-expander']['reindexer_log_directory'] = "/var/log/opscode/opscode-expander-reindexer"
 default['private_chef']['opscode-expander']['consumer_id'] = "default"
 default['private_chef']['opscode-expander']['nodes'] = 2
-
+default['private_chef']['opscode-expander']['max_retries'] = 1
+default['private_chef']['opscode-expander']['retry_wait'] = 1
 ####
 # Erlang Chef Server API
 ####
@@ -249,7 +271,7 @@ default['private_chef']['opscode-erchef']['port'] = 8000
 default['private_chef']['opscode-erchef']['auth_skew'] = '900'
 default['private_chef']['opscode-erchef']['authz_pooler_timeout'] = '0'
 default['private_chef']['opscode-erchef']['bulk_fetch_batch_size'] = '5'
-default['private_chef']['opscode-erchef']['udp_socket_pool_size'] = '20'
+default['private_chef']['opscode-erchef']['udp_socket_pool_size'] = nil
 default['private_chef']['opscode-erchef']['sql_user'] = "opscode_chef"
 default['private_chef']['opscode-erchef']['sql_password'] = "snakepliskin"
 default['private_chef']['opscode-erchef']['sql_ro_user'] = "opscode_chef_ro"
@@ -265,6 +287,8 @@ default['private_chef']['opscode-erchef']['sql_ro_password'] = "shmunzeltazzen"
 # in the queue before timing out.  Request queueing is only effective
 # if db_pooler_timeout > 0
 default['private_chef']['opscode-erchef']['db_pool_size'] = 20
+default['private_chef']['opscode-erchef']['db_pool_max'] = nil
+default['private_chef']['opscode-erchef']['db_pool_init'] = nil
 default['private_chef']['opscode-erchef']['db_pool_queue_max'] = 20
 default['private_chef']['opscode-erchef']['db_pooler_timeout'] = 2000
 default['private_chef']['opscode-erchef']['sql_db_timeout'] = 5000
@@ -325,6 +349,11 @@ default['private_chef']['opscode-erchef']['keygen_timeout'] = 1000
 default['private_chef']['opscode-erchef']['keygen_key_size'] = 2048
 default['private_chef']['opscode-erchef']['strict_search_result_acls'] = false
 default['private_chef']['opscode-erchef']['ssl_session_caching']['enabled'] = false
+
+# The amount of milliseconds before we timeout and assume an endpoint is down for
+# the /_status endpoint.
+
+default['private_chef']['opscode-erchef']['health_ping_timeout'] = 400
 
 ###
 # Legacy path (required for cookbok migration)
@@ -401,6 +430,7 @@ default['private_chef']['lb']['redis_connection_pool_size'] = 250
 default['private_chef']['lb']['maint_refresh_interval'] = 600
 default['private_chef']['lb']['ban_refresh_interval'] = 600
 default['private_chef']['lb']['chef_min_version'] = 10
+default['private_chef']['lb']['access_by_lua_file'] = false
 
 ###
 # Load balancer route configuration
@@ -437,14 +467,16 @@ default['private_chef']['nginx']['stub_status']['listen_port'] = "9999"
 default['private_chef']['nginx']['stub_status']['location'] = "/nginx_status"
 default['private_chef']['nginx']['stub_status']['allow_list'] = ["127.0.0.1"]
 # Based off of the Mozilla recommended cipher suite
-# https://wiki.mozilla.org/Security/Server_Side_TLS#Recommended_Ciphersuite
+# https://mozilla.github.io/server-side-tls/ssl-config-generator/?server=nginx-1.8.1&openssl=1.0.1u&hsts=no&profile=modern
 #
-# SSLV3 was removed because of the poodle attack. (https://www.openssl.org/~bodo/ssl-poodle.pdf)
+# Current modifications:
 #
-# If your infrastructure still has requirements for the vulnerable/venerable SSLV3, you can add
-# "SSLv3" to the below line.
+# - AES256-GCM-SHA384 has been added to support AWS's classic ELB health check.
+# - AES added for pushy-server 1.x compatibility
+# - TLS1 and TLSv1.1 added for pushy-server 1.x compatibility
+#
 default['private_chef']['nginx']['ssl_protocols'] = "TLSv1 TLSv1.1 TLSv1.2"
-default['private_chef']['nginx']['ssl_ciphers'] = "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA"
+default['private_chef']['nginx']['ssl_ciphers'] = "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:AES256-GCM-SHA384:AES:!aNULL:!eNULL:!EXPORT"
 #
 # The SSL Certificate and DH Param will be automatically generated if
 # these are nil.  Otherwise we expect these attributes to point at the
@@ -472,6 +504,7 @@ default['private_chef']['nginx']['gzip_types'] = [ "text/plain", "text/css", "ap
 default['private_chef']['nginx']['keepalive_timeout'] = 65
 default['private_chef']['nginx']['client_max_body_size'] = '250m'
 default['private_chef']['nginx']['cache_max_size'] = '5000m'
+default['private_chef']['nginx']['server_names_hash_bucket_size'] = 128
 default['private_chef']['nginx']['enable_ipv6'] = false
 
 ###
@@ -555,9 +588,12 @@ default['private_chef']['oc_bifrost']['listen'] = '127.0.0.1'
 default['private_chef']['oc_bifrost']['port'] = 9463
 default['private_chef']['oc_bifrost']['superuser_id'] = '5ca1ab1ef005ba111abe11eddecafbad'
 default['private_chef']['oc_bifrost']['db_pool_size'] = '20'
+default['private_chef']['oc_bifrost']['db_pool_max'] = nil
+default['private_chef']['oc_bifrost']['db_pool_init'] = nil
 # The db_pool is only effective for a db_pooler_timeout > 0
 default['private_chef']['oc_bifrost']['db_pooler_timeout'] = 2000
 default['private_chef']['oc_bifrost']['db_pool_queue_max'] = 20
+default['private_chef']['oc_bifrost']['udp_socket_pool_size'] = nil
 default['private_chef']['oc_bifrost']['sql_user'] = "bifrost"
 default['private_chef']['oc_bifrost']['sql_password'] = "challengeaccepted"
 default['private_chef']['oc_bifrost']['sql_ro_user'] = "bifrost_ro"
@@ -591,6 +627,7 @@ default['private_chef']['bookshelf']['log_directory'] = "/var/log/opscode/booksh
 default['private_chef']['bookshelf']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['bookshelf']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['bookshelf']['vip'] = node['private_chef']['lb']['api_fqdn']
+default['private_chef']['bookshelf']['vip_port'] = 443
 default['private_chef']['bookshelf']['listen'] = '127.0.0.1'
 default['private_chef']['bookshelf']['port'] = 4321
 default['private_chef']['bookshelf']['stream_download'] = true
@@ -598,6 +635,21 @@ default['private_chef']['bookshelf']['access_key_id'] = "generated-by-default"
 default['private_chef']['bookshelf']['secret_access_key'] = "generated-by-default"
 # Default: set to Host: header. Override to hardcode a url, "http://..."
 default['private_chef']['bookshelf']['external_url'] = :host_header
+default['private_chef']['bookshelf']['storage_type'] = :filesystem
+# This retries connections that are rejected because pooler queue is maxed out.
+default['private_chef']['bookshelf']['sql_retry_count'] = 0
+# Intervals are in milliseconds
+default['private_chef']['bookshelf']['sql_retry_delay'] = 10
+default['private_chef']['bookshelf']['abandoned_upload_cleanup_interval'] = 19 * (60 * 1000)
+default['private_chef']['bookshelf']['deleted_data_cleanup_interval'] = 7 * (60 * 1000)
+default['private_chef']['bookshelf']['db_pool_size'] = 20
+default['private_chef']['bookshelf']['db_pool_queue_max'] = 200
+default['private_chef']['bookshelf']['db_pooler_timeout'] = 2000
+default['private_chef']['bookshelf']['sql_db_timeout'] = 5000
+default['private_chef']['bookshelf']['sql_ro_user'] = 'bookshelf_ro'
+default['private_chef']['bookshelf']['sql_ro_password'] = 'should_never_be_used'
+default['private_chef']['bookshelf']['sql_user'] = 'bookshelf'
+default['private_chef']['bookshelf']['sql_password'] = 'should_never_be_used'
 
 ###
 # Chef Identity
@@ -619,6 +671,8 @@ default['private_chef']['oc_id']['sql_ro_password'] = "look-but-don't-touch"
 default['private_chef']['oc_id']['db_pool_size'] = '20'
 default['private_chef']['oc_id']['sentry_dsn'] = nil
 default['private_chef']['oc_id']['sign_up_url'] = nil
+default['private_chef']['oc_id']['email_from_address'] = node['private_chef']['from_email']
+default['private_chef']['oc_id']['origin'] = node['private_chef']['api_fqdn']
 
 default['private_chef']['oc_id']['administrators'] = []
 
@@ -663,6 +717,7 @@ default['private_chef']['opscode-chef-mover']['bulk_fetch_batch_size'] = '5'
 default['private_chef']['opscode-chef-mover']['max_cache_size'] = '10000'
 default['private_chef']['opscode-chef-mover']['cache_ttl'] = '3600'
 default['private_chef']['opscode-chef-mover']['db_pool_size'] = '5'
+default['private_chef']['opscode-chef-mover']['udp_socket_pool_size'] = nil
 default['private_chef']['opscode-chef-mover']['sql_db_timeout'] = 5000
 default['private_chef']['opscode-chef-mover']['ibrowse_max_sessions'] = 256
 default['private_chef']['opscode-chef-mover']['ibrowse_max_pipeline_size'] = 1
@@ -757,3 +812,46 @@ default['private_chef']['folsom_graphite']['prefix'] = "stats_prefix"
 default['private_chef']['folsom_graphite']['send_interval'] = 10000
 # if a connection fails, how frequently do we attempt to reconnect?
 default['private_chef']['folsom_graphite']['retry_interval'] = 2000
+
+#
+# Data Collector
+#
+# data_collector configuration for erchef. These are used to configure an
+# opscoderl_httpc pool of HTTP connecton workers.
+# If a root_url and token are present the erchef will start the data_collector
+# application. If proxy and root_url are present, nginx will send data_collector
+# events to the insights server
+
+# Proxy events to the insights data collector
+# default['private_chef']['data_collector']['proxy']
+
+# Fully qualified URL to the data collector server (e.g.: https://localhost/insights).
+# default['private_chef']['data_collector']['root_url']
+# The authentication token to pass via the header to the data collector server
+# default['private_chef']['data_collector']['token']
+# Timeout for requests to the data collector server in milliseconds.
+default['private_chef']['data_collector']['timeout'] = 30000
+# How many HTTP workers to start in the pool.
+default['private_chef']['data_collector']['http_init_count'] = 25
+# Maximum number of HTTP workers in the pool.
+default['private_chef']['data_collector']['http_max_count'] = 100
+# Maximum age of a server pool worker before terminating it.
+default['private_chef']['data_collector']['http_max_age'] = "{70, sec}"
+# How often to cull aged-out connections.
+default['private_chef']['data_collector']['http_cull_interval'] = "{1, min}"
+# Maximum age of a connection before terminating it.
+default['private_chef']['data_collector']['http_max_connection_duration'] = "{70,sec}"
+# Options for the ibrowse connections (see ibrowse).
+default['private_chef']['data_collector']['ibrowse_options'] = "[{connect_timeout, 10000}]"
+
+##
+# Compliance Profiles
+##
+# Used to proxy Compliance Profile requests to the Automate Profiles storage
+#
+default['private_chef']['profiles'] = {}
+# Fully qualified URL to the compliance profiles server:
+# default['private_chef']['profiles']['root_url'] = 'https://profiles.example.com'
+# The authentication token to pass via the header to the data collector server
+# Define the token unless already set in this file
+# default['private_chef']['data_collector']['token'] = '123456789...'

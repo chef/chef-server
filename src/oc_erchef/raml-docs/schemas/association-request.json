@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "description": "An invitation to join an organization, which has not yet been accepted.",
+  "properties": {
+    "id": {
+      "description": "id unique to this association request.",
+      "type": "string"
+    },
+    "orgname": {
+      "description": "Name of organization user is invited to.",
+      "$ref": "common.json#ChefName"
+    },
+    "username": {
+      "description": "Name of user invited to the organization.",
+      "$ref": "common.json#ChefName"
+    }
+  }
+}

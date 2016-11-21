@@ -37,6 +37,7 @@ describe Expander::VNodeSupervisor do
   end
 
   it "subscribes to the control queue" do
+    pending "disabled until broadcast_message is used"
     control_queue_msg = nil
     AMQP.start(OPSCODE_EXPANDER_MQ_CONFIG) do
       @vnode_supervisor.start([])

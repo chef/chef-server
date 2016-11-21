@@ -2,8 +2,8 @@
 # -*- indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 # ex: ts=4 sw=4 et
 #
-# Author:: Mark Anderson (<mark@opscode.com>)
-# Author:: Christopher Maier (<cm@opscode.com>)
+# Author:: Mark Anderson (<mark@chef.io>)
+# Author:: Christopher Maier (<cm@chef.io>)
 # Copyright:: Copyright (c) 2011 Opscode, Inc.
 #
 

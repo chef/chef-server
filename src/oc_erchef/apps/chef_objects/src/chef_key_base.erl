@@ -230,4 +230,7 @@ key_owner_type(Owner) when Owner =:= client;
     client_key;
 key_owner_type(Owner) when Owner =:= user;
                            Owner =:= chef_user ->
-    user_key.
+    user_key;
+key_owner_type(Owner) when Owner =:= org_user;
+                           Owner =:= chef_org_user ->
+    org_user_key.

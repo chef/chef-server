@@ -24,3 +24,4 @@ _rel
 deps.plt
 VERSION
 _build
+*failures

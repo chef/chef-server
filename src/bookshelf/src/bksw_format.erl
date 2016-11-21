@@ -1,5 +1,5 @@
 %% @copyright 2012 Opscode, Inc. All Rights Reserved
-%% @author Tim Dysinger <dysinger@opscode.com>
+%% @author Tim Dysinger <dysinger@chef.io>
 %%
 %% Licensed to the Apache Software Foundation (ASF) under one or more
 %% contributor license agreements.  See the NOTICE file distributed
@@ -24,6 +24,11 @@
 %%===================================================================
 %% API functions
 %%===================================================================
+
+to_date(undefined) ->
+    <<"1970-01-01T00:00:00.000Z">>;
+to_date({datetime, Date}) ->
+    iso8601:format(Date);
 to_date(Date) ->
     iso8601:format(Date).
 

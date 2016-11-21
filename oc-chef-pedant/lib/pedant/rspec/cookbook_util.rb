@@ -177,7 +177,7 @@ module Pedant
       end
 
       def new_cookbook_artifact(name, identifier, opts = {})
-        {
+        result = {
           "name" => "#{name}",
           "identifier" => identifier,
           "version" => opts[:version] || default_version, # version doesn't matter for cookbook_artifacts
@@ -185,6 +185,14 @@ module Pedant
           "chef_type" => "cookbook_version",
           "frozen?" => false,
           "recipes" => opts[:recipes] || [],
+          "definitions" => [],
+          "libraries" => [],
+          "attributes" => [],
+          "files" => [],
+          "templates" => [],
+          "resources" => [],
+          "providers" => [],
+          "root_files" => [],
           "metadata" => {
             "version" => opts[:version] || default_version,
             "name" => name, # not actually used
@@ -200,6 +208,8 @@ module Pedant
             "recipes" => opts[:meta_recipes] || {}
           }
         }
+        result["metadata"]["providing"] = opts[:providing] if opts[:providing]
+        result
       end
 
       def delete_cookbook_artifact(requestor, name, identifier)
@@ -224,7 +234,11 @@ module Pedant
         recipes = recipe_specs.zip(checksums).map do |r, sum|
           dummy_recipe(r[:name], sum)
         end.sort { |a, b| a[:name] <=> b[:name] }
-        opts = { :recipes => recipes }
+        opts = {
+          recipes: recipes,
+          meta_recipes: recipes.each_with_object({}) { |r,h| h["#{cookbook_name}::#{r["name"][0..-4]}"] = "" },
+          providing: recipes.each_with_object({}) { |r,h| h["#{cookbook_name}::#{r["name"][0..-4]}"] = ">= 0.0.0" }
+        }
         make_cookbook_artifact(admin_user, cookbook_name, identifier, opts)
       end
 
@@ -350,7 +364,7 @@ module Pedant
             "recipes" => opts[:meta_recipes] || {},
             "version" => version
           },
-            "frozen?" => opts[:frozen] || false
+          "frozen?" => opts[:frozen] || false
         }
       end
 

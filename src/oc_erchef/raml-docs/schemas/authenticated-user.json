@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "properties": {
+    "status": {
+      "description": "Whether the authenticated account is linked to a Chef user (if using LDAP or AD, a user's username and password may be correct, but they may not have a linked Chef account)",
+      "enum": [ "linked", "unlinked" ]
+    },
+    "user": {
+      "description": "The Chef user (or in the case of unlinked user, the default information about the Chef user from LDAP or AD)",
+      "type": "object",
+      "properties": {
+        "username": {
+          "description": "A unique namespace matching the format [a-z0-9\\-_]+",
+          "type": "string",
+          "required": true
+        },
+        "display_name": {
+          "description": "Human-readable name to be rendered into UIs and other human-readable locations",
+          "type": "string",
+          "required": true
+        },
+        "email": {
+          "description": "Valid email address for the new user",
+          "type": "string",
+          "required": true
+        },
+        "first_name": {
+          "description": "The first name of the new user",
+          "type": "string",
+          "required": false
+        },
+        "middle_name": {
+          "description": "The middle name of the new user",
+          "type": "string",
+          "required": false
+        },
+        "last_name": {
+          "description": "The last name of the new user",
+          "type": "string",
+          "required": false
+        },
+        "external_authentication_uid": {
+          "description": "The external authentication UID of the user (their AD or LDAP ID, generally)",
+          "type": "boolean",
+          "required": false
+        },
+        "recovery_authentication_enabled": {
+          "description": "Whether this user may log in with their password from the system_recovery endpoint when AD is down",
+          "type": "boolean",
+          "default": false,
+          "required": false
+        }
+      }
+    }
+  },
+
+  "example": {
+    "status": "linked",
+    "user": {
+      "user" : "user1",
+      "display_name" : "Real Name",
+      "email" : "user1@chef.example",
+      "password" : "guest",
+      "create_key" : true,
+      "external_authentication_uid": "jkeiser",
+      "system_recovery_enabled": false
+    }
+  }
+}

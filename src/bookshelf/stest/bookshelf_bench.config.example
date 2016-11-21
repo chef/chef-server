@@ -90,4 +90,9 @@
            {get_uri_t, {"localhost", 4321, {"/bookshelf/~s", [random_get_url_g]}}},
            {put_uri_t, {"localhost", 4321, {"/bookshelf/~s", [random_put_url_g]}}}
           ]}.
-{code_paths, ["."]}.
+ {code_paths, ["_build/default/lib/bookshelf_bench/ebin",
+ 	      "_build/default/lib/mini_s3/ebin",
+ 	      "_build/default/lib/ibrowse/ebin",
+               "_build/default/lib/envy/ebin"
+ 	       ]}.
+

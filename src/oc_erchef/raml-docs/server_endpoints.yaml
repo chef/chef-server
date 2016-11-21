@@ -1,0 +1,48 @@
+/_status:
+  description: Server status.
+  get:
+    responses:
+      200:
+        body: { schema: ServerStatus }
+
+/authenticate_user:
+  post:
+    description: Authenticate a user. Only the superuser may make this request.
+    body: { schema: AuthenticateUser }
+    responses:
+      200:
+        description: When the user is authenticated.
+        body: { schema: AuthenticatedUser }
+      401:
+        description: When the username or password is wrong.
+      504:
+        description: When the LDAP or AD server cannot be reached.
+        body: { schema: Errors }
+
+/system_recovery:
+  post:
+    description: Authenticate a user when system recovery is enabled.
+    body: { schema: AuthenticateUser }
+    responses:
+      200:
+        body: { schema: SystemRecoveryAuthenticatedUser }
+      401:
+        description: When the user's password does not match.
+      403:
+        description: When the user does not exist or is not authorized to use system recovery (their recovery_authentication_enabled bit is not set to true).
+
+/license:
+  description: Server license.
+  get:
+    description: Get the server license.
+    responses:
+      200:
+        body: { schema: ServerLicense }
+
+/server_api_version:
+  description: The Chef API versions supported by this server.
+  get:
+    description: Get the Chef API versions supported by this server.
+    responses:
+      200:
+        body: { schema: ServerApiVersion }

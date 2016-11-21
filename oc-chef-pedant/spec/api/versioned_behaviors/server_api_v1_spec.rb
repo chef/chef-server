@@ -7,7 +7,15 @@ describe "Server API v1 Behaviors", :api_v1 do
   context "[v1+]" do
     shared(:pubkey_regex) { /^(-----BEGIN (RSA )?PUBLIC KEY)/ }
     shared(:privkey_regex) { /^(-----BEGIN (RSA )?PRIVATE KEY)/ }
-    shared(:org_name) { @org_name ||= unique_name("api-v1-org")}
+
+    shared(:org_name) do
+      if Pedant.config[:org][:create_me]
+        unique_name("api-v1-org")
+      else
+        Pedant.config[:org][:name]
+      end
+    end
+
     shared(:org_client_url){ "#{platform.server}/organizations/#{org_name}/clients" }
     shared(:user_url){ "#{platform.server}/users" }
     shared(:client_name) { unique_name("api-v1-client") }
@@ -15,7 +23,6 @@ describe "Server API v1 Behaviors", :api_v1 do
     shared(:named_client_url) { "#{org_client_url}/#{client_name}" }
     shared(:named_user_url) { "#{user_url}/#{user_name}" }
     shared(:valid_pubkey) { @valid_pubkey ||= platform.gen_rsa_key("client-v1-test")[:public]}
-    shared(:org) { $org }
     shared(:default_client_payload) {
       {
           "name" => client_name,
@@ -38,11 +45,16 @@ describe "Server API v1 Behaviors", :api_v1 do
       # Note that a client is created by the server during org creation,
       # so we'll want to set our api version from the start.
       platform.use_max_server_api_version
-      $org = platform.create_org(org_name)
+
+      if Pedant.config[:org][:create_me]
+        platform.create_org(org_name)
+      end
     end
 
     after(:all) do
-      platform.delete_org(org_name)
+      if Pedant.config[:org][:create_me]
+        platform.delete_org(org_name)
+      end
       platform.reset_server_api_version
     end
     context "org creation", :organizations do
@@ -113,7 +125,7 @@ describe "Server API v1 Behaviors", :api_v1 do
                                                                "expiration_date" => "infinity" }  } })
       end
 
-      it "should reply with an error if both create_key:true and public_key are specified" do
+      it "should reply with an error if both create_key:true and public_key are specified", :validation do
         result = post(resource_url, superuser,
                       payload: create_payload.with('public_key', valid_pubkey).with("create_key", true))
         result.should have_status_code 400
@@ -126,7 +138,7 @@ describe "Server API v1 Behaviors", :api_v1 do
 
       end
 
-      it "should reply with an error if private_key:true is specified for key generation" do
+      it "should reply with an error if private_key:true is specified for key generation", :validation do
         # TODO error message check?
         result = post(resource_url, superuser,
                       payload: create_payload.with('private_key', true))
@@ -154,14 +166,14 @@ describe "Server API v1 Behaviors", :api_v1 do
         put(named_resource_url, superuser, payload: create_payload).should have_status_code 200
       end
 
-      it "should not allow create_key:true" do
+      it "should not allow create_key:true", :validation do
         put(named_resource_url, superuser, payload: create_payload.with('create_key', true)).should have_status_code 400
       end
 
-      it "should not allow public_key to be provided" do
+      it "should not allow public_key to be provided", :validation do
         put(named_resource_url, superuser, payload: create_payload.with('public_key', valid_pubkey)).should have_status_code 400
       end
-      it "should not allow private_key:true to be specified" do
+      it "should not allow private_key:true to be specified", :validation do
         put(named_resource_url, superuser, payload: create_payload.with('private_key', true)).should have_status_code 400
       end
     end

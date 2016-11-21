@@ -13,26 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require "pg"
-
 class PostgresqlPreflightValidator < PreflightValidator
-  attr_reader :cs_pg_attr, :node_pg_attr
 
   def initialize(node)
     super
 
-    # Note that PrivateChef['postgresql'] will currently contain
-    # ONLY the settings specified in chef-server.rb plus some
-    # attributes set on initialization of the class.
-    @cs_pg_attr = PrivateChef['postgresql']
-
-    # Represents the recipe defaults
-    @node_pg_attr = node['private_chef']['postgresql']
   end
 
-
   def run!
-    #
     verify_unchanged_external_flag
 
     # Our additional validations only apply when a database server exists,
@@ -40,12 +28,28 @@ class PostgresqlPreflightValidator < PreflightValidator
     # if external DB is configured.
     return unless cs_pg_attr['external']
     external_postgres_config_validation
+
     # In the future, we should be able to run these
     # on non-backend nodes:
     connectivity_validation
     backend_validation
   end
 
+  def bookshelf_in_sql?
+    @cs_pg_attr['bookshelf'] && @cs_pg_attr['bookshelf']['storage_type'].to_s == "sql"
+  end
+
+  def databases_to_check
+    d = %w{bifrost opscode_chef oc_id}
+    d << 'bookshelf' if bookshelf_in_sql?
+    d
+  end
+
+  def roles_to_check
+    d = %w{opscode-erchef oc_id oc_bifrost}
+    d << 'bookshelf' if bookshelf_in_sql?
+    d
+  end
 
   def external_postgres_config_validation
     # For now we're only performing these checks for external pgsql mode:
@@ -81,9 +85,9 @@ class PostgresqlPreflightValidator < PreflightValidator
   def connectivity_validation
     # all nodes are expected to be able to reach the database node
     # and connect to it - let's make a connection intended to fail
-    # just to verify connectivity to the service.
+    # with an auth-related error just to verify connectivity to the service.
     begin
-      connect_as(:invalid_user)
+      connect_as(:invalid_user, 'silent' => true, 'retries' => 0)
     rescue ::PG::ConnectionBad => e
       # A bit messy but PG gem does not expose error codes to us:
       case e.message
@@ -91,6 +95,12 @@ class PostgresqlPreflightValidator < PreflightValidator
         fail_with err_CSPG010_postgres_not_available
       when /.*password authentication failed.*/
         # This is what we want to see.
+      when /role .* does not exist/
+        # This indicates we were successfully able to connect to Postgres
+        # AND we authenticated! This is likely because the pg_hba is set
+        # to trust our connection. Such an example would be configuring
+        # Chef Server to use an "external" Postgres, such as Delivery's,
+        # when running on the same host.
       when /.*no pg_hba.conf entry.*/
         # This is also possible, depending on if they've set up pg_hba
         # by host or user or both. This is OK, since it confirms that we're
@@ -106,12 +116,20 @@ class PostgresqlPreflightValidator < PreflightValidator
 
   def backend_validation
     begin
-      connect_as(:superuser) do |connection|
+      connect_as(:superuser, 'silent' => true) do |connection|
         backend_verify_database_access(connection)
         backend_verify_postgres_version(connection)
-        %w{bifrost opscode_chef oc_id}.each {|db| backend_verify_named_db_not_present(connection, db) }
+        # The database should only exist if we haven't bootstrapped the previous
+        # run, or secrets haven't been copied from previous node.
+        if first_run?
+          if secrets_exists?
+            return
+          end
+        else
+          return
+        end
+        databases_to_check.each {|db| backend_verify_named_db_not_present(connection, db)}
         backend_verify_cs_roles_not_present(connection)
-
       end
     rescue ::PG::InsufficientPrivilege => e
       fail_with err_CSPG013_not_superuser
@@ -131,7 +149,6 @@ class PostgresqlPreflightValidator < PreflightValidator
     end
   end
 
-private
   def backend_verify_database_access(connection)
     # Make sure we have the access we need.
     # Note on not escaping username: we already connected with the same attribute,
@@ -164,9 +181,7 @@ private
   # Throws CSPG017 if any of the reserved usernames we
   # need to create are already in the datbase.
   def backend_verify_cs_roles_not_present(connection)
-    # This test is only valid on our initial run
-    return if previous_run
-    %w{opscode-erchef oc_id oc_bifrost}.each do |service|
+    roles_to_check.each do |service|
       %w{sql_user sql_ro_user}.each do |key|
         username = service_key_value(service, key)
         fail_with err_CSPG017_role_exists(username) if named_role_exists?(connection, username)
@@ -174,40 +189,11 @@ private
     end
   end
 
-  def named_role_exists?(connection, username)
-    # If a record exists, the role exists:
-    connection.exec("select usesuper from pg_catalog.pg_user where usename = '#{username}'").ntuples > 0
-  end
-
-
   def backend_verify_named_db_not_present(connection, name)
-    # This test is only valid on our initial run - bootstrap itself is not a sufficent check,
-    # because we may have partially bootstrapped.
-    return if previous_run
-    r = connection.exec("SELECT count(*) AS result FROM pg_database WHERE datname='#{name}'")
-    fail_with err_CSPG016_database_exists(name) unless r[0]['result'] == '0'
+    fail_with err_CSPG016_database_exists(name) if named_db_exists?(connection, name)
   end
 
-  def connect_as(type)
-    port = cs_pg_attr.has_key?('port') ? cs_pg_attr['port'] : node_pg_attr['port']
-    host = cs_pg_attr['vip']
-    if type == :invalid_user
-      user = 'chef_server_conn_test'
-      password = 'invalid'
-    else
-      user = cs_pg_attr['db_superuser']
-      password = cs_pg_attr['db_superuser_password']
-    end
-    # We just want this to throw an exception or not - caller knows what to do with it.
-    EcPostgres.with_connection(node, 'template1', { 'db_superuser' => user,
-                                                    'db_superuser_password' => password,
-                                                    'vip' => host,
-                                                    'port' => port}) do |conn|
-       if block_given?
-         yield(conn)
-       end
-    end
-  end
+private
 
   def err_CSPG001_cannot_change_external_flag
 <<EOM
@@ -219,7 +205,6 @@ CSPG001: The value of postgresql['external'] must be set prior to the initial
          to a new instance configured for an external database and vice-versa.
 EOM
   end
-
 
   def err_CSPG002_missing_superuser_id
 <<EOM
@@ -326,7 +311,6 @@ CSPG015: The database server you provided does not have the default database
 EOM
   end
 
-
   def err_CSPG016_database_exists(dbname)
 <<EOM
 CSPG016: The Chef Server database named '#{dbname}' already exists on the
@@ -351,4 +335,3 @@ EOM
 
   end
 end
-

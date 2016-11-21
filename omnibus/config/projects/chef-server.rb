@@ -15,26 +15,25 @@
 #
 
 name "chef-server"
-maintainer "Chef Software, Inc."
+maintainer "Chef Software, Inc. <maintainers@chef.io>"
 homepage   "https://www.chef.io"
+license "Apache-2.0"
+license_file "LICENSE"
 
 package_name    "chef-server-core"
 replace         "private-chef"
 conflict        "private-chef"
 install_dir     "/opt/opscode"
-# last released version is 12.1.2
-build_version   "12.2.0"
+build_version   "12.11.1"
 build_iteration 1
 
-override :cacerts, version: '2014.08.20'
-override :rebar, version: "2.0.0"
-override :berkshelf2, version: "2.0.18"
 override :rabbitmq, version: "3.3.4"
 override :erlang, version: "17.5"
-override :ruby, version: "2.1.4"
-override :rubygems, version: "2.4.5"
-override :'omnibus-ctl', version: "0.4.2"
-override :bundler, version: "1.10.6"
+override :lua, version: "5.1.5"
+override :ruby, version: "2.2.5"
+override :rubygems, version: "2.6.6"
+override :'omnibus-ctl', version: "master"
+override :bundler, version: "1.12.5"
 # creates required build directories
 dependency "preparation"
 
@@ -43,16 +42,19 @@ dependency "private-chef-scripts" # assorted scripts used by installed instance
 dependency "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
 dependency "ctl-man" # install man page
 dependency "openresty"
+dependency "rb-readline"
 dependency "redis-gem" # gem for interacting with redis
 dependency "openresty-lpeg"  # lua-based routing
 dependency "runit"
 dependency "chef_backup-gem" # chef-server-ctl backup
+dependency "veil-gem" # chef-server-ctl rotate-credentials
 
 # the backend
 dependency "postgresql92"
 dependency "rabbitmq"
 dependency "redis" # dynamic routing controls
 dependency "opscode-solr4"
+dependency "haproxy"
 dependency "opscode-expander"
 dependency "pg-gem" # used by private-chef-ctl reconfigure
 
@@ -70,7 +72,6 @@ dependency "bookshelf"
 
 # the front-end services
 dependency "oc_bifrost"
-dependency "chef-server-bootstrap"
 dependency "oc_id"
 
 # log management
@@ -95,6 +96,7 @@ dependency "private-chef-upgrades"
 dependency "private-chef-cookbooks"
 dependency "chef-ha-plugin-config"
 dependency "chef" # for embedded chef-client -z runs (built from master - build last)
+dependency "cleanup" # MUST BE LAST DO NOT MOVE
 
 package :rpm do
   signing_passphrase ENV['OMNIBUS_RPM_SIGNING_PASSPHRASE']

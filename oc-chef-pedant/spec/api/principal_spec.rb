@@ -2,7 +2,7 @@
 # -*- indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 # ex: ts=4 sw=4 et
 #
-# Author:: Douglas Triggs (<doug@opscode.com>)
+# Author:: Douglas Triggs (<doug@chef.io>)
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 #
 
@@ -198,7 +198,7 @@ describe "Principals API Endpoint", :principals do
         end
       end
 
-      context 'when requesting an outside user' do
+      context 'when requesting an outside user', :multiuser do
         let(:principal_user_name) { outside_user.name }
         let(:user_body) {
           {

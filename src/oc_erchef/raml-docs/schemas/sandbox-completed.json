@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "properties": {
+    "guid": {
+      "description": "The unique identifier of the sandbox.",
+      "type": "string"
+    },
+    "name": {
+      "description": "The unique identifier of the sandbox.",
+      "type": "string"
+    },
+    "checksums": {
+      "description": "A list of the uploaded checksums.",
+      "type": "array",
+      "items": {
+        "description": "The checksums that were uploaded.",
+        "minLength": 32,
+        "maxLength": 32,
+        "pattern": "^[0-9a-f]*$"
+      }
+    },
+    "create_time": {
+      "type": "date",
+      "description" : "The timestamp at which the sandbox was created. An ISO 8601 fomatted string: YYYY-MM-DDTHH:MM:SSZ e.g. 2013-12-24T21:00:00Z in UTC timezone or the string 'infinity'."
+    },
+    "is_complete": {
+      "description": "true if the URLs in this sandbox were successfully uploaded.",
+      "type": "boolean"
+    }
+  },
+  "example": {
+    "guid": "92290982a3c9ca4a74db2737ce729a9c",
+    "name": "92290982a3c9ca4a74db2737ce729a9c",
+    "checksums": [
+      "b026324c6904b2a9cb4b88d6d61c81d1"
+    ],
+    "create_time": "2015-12-09T01:15:48+00:00",
+    "is_completed": true
+  }
+}

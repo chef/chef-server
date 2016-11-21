@@ -1,0 +1,19 @@
+{
+  "properties": {
+    "name": {
+      "description": "A full name for the data bag, will be set to data_bag_item_<data_bag>_<id>.",
+      "type": "string"
+    },
+    "json_class": {
+      "description": "Has the value Chef::DataBagItem.",
+      "type": "string",
+      "enum": [ "Chef::DataBagItem" ]
+    },
+    "chef_type": {
+      "description": "Has the value \"data_bag_item\"",
+      "type": "string",
+      "enum": [ "data_bag_item" ]
+    },
+    "raw_data": { "$ref": "data-bag-item.json" }
+  }
+}

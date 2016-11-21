@@ -66,7 +66,7 @@ end
 ruby_block "dotfiles" do
   block do
     require "fileutils"
-    copyfiles = Dir.glob("/vagrant/dotfiles/.*").reject { |name| name =~ /.*\.$/ }
+    copyfiles = Dir.glob("/dotfiles/.*").reject { |name| name =~ /.*\.$/ }
     FileUtils.cp(copyfiles, "/home/vagrant")
   end
 end

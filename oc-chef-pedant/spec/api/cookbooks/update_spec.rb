@@ -140,16 +140,16 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
 
       it "adding all new checksums should succeed" do
         payload = new_cookbook(cookbook_name, cookbook_version)
-        payload["files"] = [{"name" => "name1", "path" => "path/name1",
+        payload["files"] = [{"name" => "name1", "path" => "files/default/name1",
                               "checksum" => checksums[0],
                               "specificity" => "default"},
-                            {"name" => "name2", "path" => "path/name2",
+                            {"name" => "name2", "path" => "files/default/name2",
                               "checksum" => checksums[1],
                               "specificity" => "default"},
-                            {"name" => "name3", "path" => "path/name3",
+                            {"name" => "name3", "path" => "files/default/name3",
                               "checksum" => checksums[2],
                               "specificity" => "default"},
-                            {"name" => "name4", "path" => "path/name4",
+                            {"name" => "name4", "path" => "files/default/name4",
                               "checksum" => checksums[3],
                               "specificity" => "default"}]
 
@@ -180,10 +180,10 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
 
       it "should return url when adding checksums" do
         payload = new_cookbook(cookbook_name, cookbook_version)
-        payload["files"] = [{"name" => "name1", "path" => "path/name1",
+        payload["files"] = [{"name" => "name1", "path" => "files/default/name1",
                               "checksum" => checksums[0],
                               "specificity" => "default"},
-                            {"name" => "name2", "path" => "path/name2",
+                            {"name" => "name2", "path" => "files/default/name2",
                               "checksum" => checksums[1],
                               "specificity" => "default"}]
 
@@ -192,7 +192,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
           response.
             should look_like({
                                :status => 200,
-                               :body_exact => payload
+                               :body => payload
                              })
         end
         # TODO original description indicated ruby returned URI, and also b ody_exact was commented out below.
@@ -204,17 +204,17 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
           response.
             should look_like({
                                :status => 200,
-                               :body_exact => payload
+                               :body => payload
                              })
         end
       end
 
       it "adding invalid checksum should fail", :validation do
         payload = new_cookbook(cookbook_name, cookbook_version)
-        payload["files"] = [{"name" => "name1", "path" => "path/name1",
+        payload["files"] = [{"name" => "name1", "path" => "files/path/name1",
                               "checksum" => checksums[0],
                               "specificity" => "default"},
-                            {"name" => "name2", "path" => "path/name2",
+                            {"name" => "name2", "path" => "files/path/name2",
                               "checksum" => "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                               "specificity" => "default"}]
 
@@ -239,7 +239,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
           response.
             should look_like({
                                :status => 200,
-                               :body_exact => payload
+                               :body => payload
                              })
         end
       end # it adding invalid checksum should fail
@@ -247,16 +247,16 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
       it "deleting all checksums should succeed" do
         delete_cookbook(admin_user, cookbook_name, cookbook_version)
         payload = new_cookbook(cookbook_name, cookbook_version)
-        payload["files"] = [{"name" => "name1", "path" => "path/name1",
+        payload["files"] = [{"name" => "name1", "path" => "files/default/name1",
                               "checksum" => checksums[0],
                               "specificity" => "default"},
-                            {"name" => "name2", "path" => "path/name2",
+                            {"name" => "name2", "path" => "files/default/name2",
                               "checksum" => checksums[1],
                               "specificity" => "default"},
-                            {"name" => "name3", "path" => "path/name3",
+                            {"name" => "name3", "path" => "files/default/name3",
                               "checksum" => checksums[2],
                               "specificity" => "default"},
-                            {"name" => "name4", "path" => "path/name4",
+                            {"name" => "name4", "path" => "files/default/name4",
                               "checksum" => checksums[3],
                               "specificity" => "default"}]
         upload_cookbook(admin_user, cookbook_name, cookbook_version, payload)
@@ -862,11 +862,11 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
 
         context "with metadata.providing" do
           # In erchef, we are not validating the "providing" metadata
-          # See: http://tickets.opscode.com/browse/CHEF-3976
+          # See: http://tickets.chef.io/browse/CHEF-3976
 
           after(:each) { delete_cookbook admin_user, cookbook_name, cookbook_version }
 
-          # http://docs.opscode.com/config_rb_metadata.html#provides
+          # http://docs.chef.io/config_rb_metadata.html#provides
           should_change_with_metadata 'providing', 'cats::sleep'
           should_change_with_metadata 'providing', 'here(:kitty, :time_to_eat)'
           should_change_with_metadata 'providing', 'service[snuggle]'
@@ -917,4 +917,3 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
     end # context when modifying metadata
   end # context PUT /cookbooks/<name>/<version> [update]
 end
-

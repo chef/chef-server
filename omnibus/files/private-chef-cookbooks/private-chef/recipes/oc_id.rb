@@ -1,5 +1,5 @@
 #
-# Author:: James Casey <james@getchef.com>
+# Author:: James Casey <james@chef.io>
 # Copyright:: Copyright (c) 2014-2015 Chef Software, Inc.
 #
 # All Rights Reserved
@@ -35,6 +35,8 @@ app_settings = {
   },
   'sentry_dsn' => node['private_chef']['oc_id']['sentry_dsn'],
   'sign_up_url' => sign_up_url,
+  'email_from_address' => node['private_chef']['oc_id']['email_from_address'],
+  'origin' => node['private_chef']['oc_id']['origin']
 }
 
 oc_id_dir = node['private_chef']['oc_id']['dir']

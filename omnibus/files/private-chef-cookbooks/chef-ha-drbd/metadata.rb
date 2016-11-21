@@ -1,6 +1,6 @@
 name "chef-ha-drbd"
 maintainer        "Chef, Inc."
-maintainer_email  "cookbooks@opscode.com"
+maintainer_email  "cookbooks@chef.io"
 license           "Apache 2.0"
 description       "Sets up HA DRDB for the chef server"
 long_description  "Sets up HA DRDB for the chef server"

@@ -206,7 +206,7 @@ describe "Testing the Nodes API endpoint", :nodes do
 
         end
 
-        context "when policy name is invalid" do
+        context "when policy name is invalid", :validation do
 
           shared_examples_for "invalid_policy_name" do
 
@@ -302,7 +302,7 @@ describe "Testing the Nodes API endpoint", :nodes do
 
         end
 
-        context "when policy name is invalid" do
+        context "when policy name is invalid", :validation do
 
           shared_examples_for "invalid_policy_group" do
 
@@ -510,7 +510,7 @@ describe "Testing the Nodes API endpoint", :nodes do
 
         end
 
-        context "when policy name is invalid" do
+        context "when policy name is invalid", :validation do
 
           shared_examples_for "invalid_policy_name" do
 
@@ -606,7 +606,7 @@ describe "Testing the Nodes API endpoint", :nodes do
 
         end
 
-        context "when policy name is invalid" do
+        context "when policy name is invalid", :validation do
 
           shared_examples_for "invalid_policy_group" do
 

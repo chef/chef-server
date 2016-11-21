@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Author:: Adam Jacob (<adam@opscode.com>)
+# Author:: Adam Jacob (<adam@chef.io>)
 # Copyright:: Copyright (c) 2011 Opscode, Inc.
 #
 # All Rights Reserved
@@ -133,9 +133,13 @@ node.default['private_chef']['opscode-solr4']['heap_size'] = solr_mem
 node.default['private_chef']['opscode-solr4']['new_size'] = new_size
 
 node.default['private_chef']['opscode-solr4']['command'] =  "java -Xmx#{solr_mem}M -Xms#{solr_mem}M"
-node.default['private_chef']['opscode-solr4']['command'] << "#{java_opts}"
+node.default['private_chef']['opscode-solr4']['command'] << " #{java_opts}" unless java_opts.empty?
+# Enable GC Logging (very useful for debugging issues) to an separate file only works with Oracle JRE
+if node['kernel']['machine'] == "x86_64"
+  node.default['private_chef']['opscode-solr4']['command'] << " -Xloggc:#{File.join(solr_log_dir, "gclog.log")}"
+end
 # Enable GC Logging (very useful for debugging issues)
-node.default['private_chef']['opscode-solr4']['command'] << " -Xloggc:#{File.join(solr_log_dir, "gclog.log")} -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -XX:+PrintGCApplicationStoppedTime -XX:+PrintGCApplicationConcurrentTime -XX:+PrintTenuringDistribution"
+node.default['private_chef']['opscode-solr4']['command'] << " -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -XX:+PrintGCApplicationStoppedTime -XX:+PrintGCApplicationConcurrentTime -XX:+PrintTenuringDistribution"
 node.default['private_chef']['opscode-solr4']['command'] << " -Dsolr.data.dir=#{solr_data_dir}"
 node.default['private_chef']['opscode-solr4']['command'] << " -Dsolr.solr.home=#{solr_home_dir}"
 node.default['private_chef']['opscode-solr4']['command'] << " -Djava.io.tmpdir=#{solr_temp_dir}"

@@ -30,6 +30,7 @@
          finish_request/2,
          forbidden/2,
          is_authorized/2,     %% verify request signature and org membership if appropriate
+         is_authorized/3,     %% verify request signature and org membership if appropriate, with custom extractor fun
          malformed_request/2, %% verify request headers and size requirements, call module verify_request
          ping/2,
          post_is_create/2,
@@ -39,7 +40,8 @@
 
 %% "Grab Bag" common functionality - we may want to consider relocating these
 %% since most aren't core operations of webmachine in chef server
--export([check_cookbook_authz/3,
+-export([authorization_data_extractor/3,
+         check_cookbook_authz/3,
          delete_object/3,
          object_creation_hook/2,
          object_creation_error_hook/3,
@@ -60,6 +62,9 @@
          allow_all/2, % mix in for auth_info when any actor can use the resource.
          list_objects_json/2, % Can also be used in lieu of to_json  in a resource module.
          update_from_json/4]).
+
+%% Type of function used for extracting authorization-related request data
+-type extractor() :: fun((atom(), wm_req(), #base_state{}) -> any()).
 
 %% @doc Determines if service is available.
 %%
@@ -161,6 +166,8 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
             invert_perm(check_permission(group, AuthzId, Req1, State1));
         {{group_id, AuthzId}, Req1, State1} ->
             invert_perm(check_permission(group, AuthzId, Req1, State1));
+        {{member_of, MemberAuthzId, {Type, GroupName}}, Req1, State1} ->
+            check_recursive_group_membership(MemberAuthzId, GroupName, Type, Req1, State1);
         {{Type, ObjectId, Permission}, Req1, State1} when Type =:= object;
                                                           Type =:= actor ->
             invert_perm(check_permission(Permission, Type, ObjectId, Req1, State1));
@@ -412,10 +419,19 @@ check_permission(Perm, AuthzObjectType, AuthzId, Req, #base_state{requestor_id=R
             {{halt, 500}, Req, State#base_state{log_msg={error, is_authorized_on_resource}}}
     end.
 
+
+-spec authorization_data_extractor(atom(), wm_req(), #base_state{}) -> any().
+authorization_data_extractor(path, Req, _State) ->
+    iolist_to_binary(wrq:path(Req)).
+
+is_authorized(Req, State) ->
+    is_authorized(Req, State, fun authorization_data_extractor/3).
+
 %% part of being authorized is being a member of the org; otherwise we
 %% fail out early.
-is_authorized(Req, State) ->
-    case verify_request_signature(Req, State) of
+-spec is_authorized(wm_req(), #base_state{}, extractor()) -> any().
+is_authorized(Req, State, Extractor) ->
+    case verify_request_signature(Req, State, Extractor) of
         {true, Req1, State1} ->
             case authorized_by_org_membership_check(Req1,State1) of
                 {false, Req2, State2} ->
@@ -461,17 +477,12 @@ authorized_by_org_membership_check(Req, #base_state{organization_name = OrgName,
             end
     end.
 
+
+-spec set_forbidden_msg(atom(), wm_req(), chef_wm:base_state()) ->
+                               {wm_req(), chef_wm:base_state()}.
 set_forbidden_msg(Perm, Req, State) when is_atom(Perm)->
     Msg = iolist_to_binary(["missing ", atom_to_binary(Perm, utf8), " permission"]),
-    JsonMsg = chef_json:encode({[{<<"error">>, [Msg]}]}),
-    Req1 = wrq:set_resp_body(JsonMsg, Req),
-    {Req1, State#base_state{log_msg = {Perm, forbidden}}}.
-
-%% Assumes the permission can be derived from the HTTP verb of the request; this is the
-%% original behavior of this function, prior to the addition of set_forbidden_msg/3.
-set_forbidden_msg(Req, State) ->
-    Perm = http_method_to_authz_perm(Req),
-    set_forbidden_msg(Perm, Req, State).
+    set_custom_forbidden_msg(Msg, Req, State).
 
 forbidden_message(not_member_of_org, User, Org) ->
     Msg = iolist_to_binary([<<"'">>, User, <<"' not associated with organization '">>, Org, <<"'">>]),
@@ -643,7 +654,7 @@ is_user_in_org(Type, DbContext, Name, OrgName) ->
 
 %% These are modules that we instrument with stats_hero and aggregate into common prefix via
 %% stats_hero_label.
--type metric_module() :: oc_chef_authz | chef_s3 | chef_sql | chef_solr.
+-type metric_module() :: oc_chef_authz | chef_s3 | chef_sql | chef_solr | data_collector.
 
 %% @doc Given a `{Mod, Fun}' tuple, generate a stats hero metric with a prefix appropriate
 %% for stats_hero aggregation. An error is thrown if `Mod' is unknown. This is where we
@@ -659,6 +670,8 @@ stats_hero_label({chef_s3, Fun}) ->
     chef_metrics:label(s3, {chef_s3, Fun});
 stats_hero_label({chef_depsolver, Fun}) ->
     chef_metrics:label(depsolver, {chef_depsolver, Fun});
+stats_hero_label({data_collector, Fun}) ->
+    chef_metrics:label(data_collector, {data_collector, Fun});
 stats_hero_label({BadPrefix, Fun}) ->
     erlang:error({bad_prefix, {BadPrefix, Fun}}).
 
@@ -666,7 +679,7 @@ stats_hero_label({BadPrefix, Fun}) ->
 %% @doc The prefixes that stats_hero should use for aggregating timing data over each
 %% request.
 stats_hero_upstreams() ->
-    [<<"authz">>, <<"depsolver">>, <<"rdbms">>, <<"s3">>, <<"solr">>].
+    [<<"authz">>, <<"depsolver">>, <<"data_collector">>, <<"rdbms">>, <<"s3">>, <<"solr">>].
 
 
 
@@ -753,6 +766,7 @@ finish_request(Req, #base_state{reqid = ReqId,
                                 server_api_version = APIVersion,
                                 darklaunch = Darklaunch}=State) ->
     try
+        log_action(Req, State),
         Code = wrq:response_code(Req),
         PerfTuples = stats_hero:snapshot(ReqId, agg),
         UserId = wrq:get_req_header("x-ops-userid", Req),
@@ -764,7 +778,6 @@ finish_request(Req, #base_state{reqid = ReqId,
         AnnotatedReq = maybe_annotate_org_specific(OrgName, Darklaunch, Req1),
         stats_hero:report_metrics(ReqId, Code),
         stats_hero:stop_worker(ReqId),
-        log_action(Req, State),
         case Code of
             500 ->
                 % Sanitize response body
@@ -790,13 +803,20 @@ finish_request(Req, #base_state{reqid = ReqId,
 finish_request(_Req, Anything) ->
     lager:error("chef_wm:finish_request/2 did not receive #base_state{}~nGot: ~p~n", [Anything]).
 
-log_action(Req, State)->
-    Action = envy:get(oc_chef_wm, enable_actions, false, boolean),
-    maybe_log_action(Action, Req, State).
+log_action(Req, State) ->
+    ActionEnabled = envy:get(oc_chef_wm, enable_actions, false, boolean),
+    DataCollectorEnabled = data_collector:is_enabled(),
+    maybe_log_action(ActionEnabled, Req, State),
+    maybe_notify_data_collector(DataCollectorEnabled, Req, State).
 
 maybe_log_action(true, Req, State) ->
     oc_chef_action:log_action(Req, State);
 maybe_log_action(false, _Req, _State) ->
+    ok.
+
+maybe_notify_data_collector(true, Req, State) ->
+    oc_chef_data_collector:notify(Req, State);
+maybe_notify_data_collector(false, _Req, _State) ->
     ok.
 
 init(ResourceMod, Config) ->
@@ -948,8 +968,8 @@ build_api_info_header_body(RequestedAPIVersion, ActualAPIVersion) ->
                                       {response_version, integer_to_binary(ActualAPIVersion)}
                                      ]})).
 
--spec verify_request_signature(#wm_reqdata{}, #base_state{}) ->
-                                      {boolean() | {halt, integer()}, #wm_reqdata{}, #base_state{}}.
+-spec verify_request_signature(#wm_reqdata{}, #base_state{}, extractor()) ->
+                                      {boolean() | {halt, integer()}, #wm_reqdata{}, #base_state{} }.
 %% @doc Perform request signature verification (authenticate)
 %%
 %% Fetches user or client certificate and uses it verify the signature
@@ -960,7 +980,8 @@ verify_request_signature(Req,
                          #base_state{organization_name = OrgName,
                                      organization_guid = OrgId,
                                      auth_skew = AuthSkew,
-                                     chef_db_context = DbContext}=State) ->
+                                     chef_db_context = DbContext}=State,
+                         Extractor) ->
     Name = wrq:get_req_header("x-ops-userid", Req),
     case chef_db:fetch_requestors(DbContext, OrgId, Name) of
         not_found ->
@@ -981,7 +1002,7 @@ verify_request_signature(Req,
             PublicKey = select_user_or_webui_key(Req, Requestors),
             Body = body_or_default(Req, <<>>),
             HTTPMethod = method_as_binary(Req),
-            Path = iolist_to_binary(wrq:path(Req)),
+            Path = Extractor(path, Req, State),
             {GetHeader, State1} = chef_wm_util:get_header_fun(Req, State),
             case chef_authn:authenticate_user_request(GetHeader, HTTPMethod,
                                                       Path, Body, PublicKey,
@@ -1318,3 +1339,66 @@ default_malformed_request_message(Any, _Req, _State) ->
 
 allow_all(Req, State) ->
     {authorized, Req, State}.
+
+%% @private
+
+-spec check_recursive_group_membership(object_id(), string(), global | local, wm_req(), chef_wm:base_state()) ->
+                                              {true | false, wm_req(), chef_wm:base_state()}.
+check_recursive_group_membership(MemberAuthzId, GroupName, global, Req, State) ->
+    check_recursive_group_membership(MemberAuthzId, GroupName, fetch_global_group, [GroupName], Req, State);
+check_recursive_group_membership(MemberAuthzId, GroupName, local, Req, #base_state{organization_guid = OrgId} = State) ->
+    check_recursive_group_membership(MemberAuthzId, GroupName, fetch_group, [OrgId, GroupName], Req, State).
+
+-spec check_recursive_group_membership(object_id(), string(), atom(), list(), wm_req(), chef_wm:base_state()) ->
+                                              {true | false, wm_req(), chef_wm:base_state()}.
+check_recursive_group_membership(MemberAuthzId, GroupName, FetchMethod, FetchArgs, Req,
+                                 #base_state{chef_authz_context = AuthzContext} = State) ->
+    case apply(oc_chef_authz_db, FetchMethod, lists:append([AuthzContext], FetchArgs)) of
+        {not_found, authz_group} ->
+            Msg = iolist_to_binary(["Could not find group ", GroupName, " needed for authentication for ",
+                                      atom_to_binary(http_method_to_authz_perm(Req), utf8), "access on this endpoint."]),
+            {Req1, State1} = set_custom_forbidden_msg(Msg, Req, State),
+            {true, Req1, State1};
+        Group ->
+            GroupAuthzId = Group#oc_chef_group.authz_id,
+            resolve_permissions_from_recursive_group_membership(MemberAuthzId, GroupAuthzId, GroupName, Req, State)
+    end.
+
+-spec resolve_permissions_from_recursive_group_membership(object_id(), object_id(), string(), wm_req(), chef_wm:base_state()) ->
+                                                                 {true | false, wm_req(), chef_wm:base_state()}.
+resolve_permissions_from_recursive_group_membership(MemberAuthzId, GroupAuthzId, GroupName, Req, State) ->
+    case oc_chef_authz:is_actor_transitive_member_of_group(oc_chef_authz:superuser_id(), MemberAuthzId, GroupAuthzId) of
+        {error, not_found} ->
+            {Req1, State1} = set_membership_not_found_forbidden_msg(Req, State, GroupName),
+            {true, Req1, State1};
+        false ->
+            {Req1, State1} = set_membership_not_found_forbidden_msg(Req, State, GroupName),
+            {true, Req1, State1};
+        true ->
+            {false, Req, State}
+    end.
+
+-spec set_membership_not_found_forbidden_msg(wm_req(), chef_wm:base_state(), string()) ->
+                                                    {wm_req(), chef_wm:base_state()}.
+set_membership_not_found_forbidden_msg(Req, State, GroupName) ->
+    Perm = http_method_to_authz_perm(Req),
+    Msg = iolist_to_binary(["Requestor not found to be a member of group ",
+                            GroupName, " which is necessary for ", atom_to_binary(Perm, utf8),
+                            " access for this request."]),
+    set_custom_forbidden_msg(Msg, Req, State).
+
+-spec set_custom_forbidden_msg(binary(), wm_req(), chef_wm:base_state()) ->
+                                      {wm_req(), chef_wm:base_state()}.
+set_custom_forbidden_msg(Msg, Req, State) ->
+    JsonMsg = chef_json:encode({[{<<"error">>, [Msg]}]}),
+    Req1 = wrq:set_resp_body(JsonMsg, Req),
+    Perm = http_method_to_authz_perm(Req),
+    {Req1, State#base_state{log_msg = {Perm, forbidden}}}.
+
+%% Assumes the permission can be derived from the HTTP verb of the request; this is the
+%% original behavior of this function, prior to the addition of set_forbidden_msg/3.
+-spec set_forbidden_msg(wm_req(), chef_wm:base_state()) ->
+                               {wm_req(), chef_wm:base_state()}.
+set_forbidden_msg(Req, State) ->
+    Perm = http_method_to_authz_perm(Req),
+    set_forbidden_msg(Perm, Req, State).

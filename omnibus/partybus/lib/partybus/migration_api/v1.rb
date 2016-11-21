@@ -97,19 +97,39 @@ EOF
         runner.run_command(command, options)
       end
 
-      def run_sqitch(ec_target, osc_target="@1.0.4")
-        args =  " --db-user #{Partybus.config.postgres['db_superuser']}"
-        args << " --db-name opscode_chef"
-        args << " --db-host #{Partybus.config.postgres['vip']}"
-        args << " --db-port #{Partybus.config.postgres['port']}"
-        args << " --engine pg"
+      # Caller may use 'opts' to override :username :password,
+      # :database, and/or :path.
+      def run_sqitch(target, service, opts = {})
+        options = default_opts_for_service(service).merge(opts)
+        command = <<-EOM.gsub(/\s+/," ").strip!
+          sqitch --engine pg
+            --db-name #{options[:database]}
+            --db-host #{Partybus.config.postgres['vip']}
+            --db-port #{Partybus.config.postgres['port']}
+            --db-user #{options[:username]}
+            --top-dir /opt/opscode/embedded/service/#{options[:path]}
+            deploy #{target} --verify
+        EOM
+        run_command(command, env: {"PGPASSWORD" => options[:password]})
+      end
 
-        cmd = "cd /opt/opscode/embedded/service/opscode-erchef/schema"
-        cmd << " && cd baseline && sqitch #{args} deploy --to-target #{osc_target} --verify"
-        cmd << " && cd .. && sqitch #{args} deploy --to-target #{ec_target} --verify;"
-        run_command(cmd,
-                    :cwd => "/opt/opscode/embedded/service/opscode-erchef/schema",
-                    :env => {"PGPASSWORD" => Partybus.config.postgres['db_superuser_password']})
+      def default_opts_for_service(service)
+        username = Partybus.config.postgres['db_superuser']
+        password = Partybus.config.postgres['db_superuser_password']
+        path = "#{service}/schema"
+        case service
+        when 'oc_erchef'
+          database = 'opscode_chef'
+          path = 'opscode-erchef/schema'
+        when 'oc_bifrost'
+          database = 'bifrost'
+          path = 'oc_bifrost/db'
+        when 'bookshelf'
+          database = 'bookshelf'
+        end
+
+        {username: username, password: password,
+         database: database, path: path }
       end
 
 

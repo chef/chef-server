@@ -24,7 +24,6 @@
 
 -export([entry_list/1,
          entry_delete/2,
-         entry_exists/2,
          open_for_read/2,
          open_for_write/2,
          entry_md/1,
@@ -32,7 +31,6 @@
          write/2,
          read/2,
          finish_read/1,
-         abort_write/1,
          finish_write/1]).
 
 -export([
@@ -122,13 +120,6 @@ entry_delete(FullPath) ->
             error_logger:error_msg("Error deleting bucket entry ~p: ~p~n", [FullPath, Error]),
             false
     end.
-
--spec entry_exists(binary(), binary()) -> boolean().
-entry_exists(Bucket, Path) ->
-    FullPath = bksw_io_names:entry_path(Bucket, Path),
-    Ans = filelib:is_regular(FullPath),
-    ?LOG_DEBUG("entry_exists ~p ~p ~p", [Bucket, Path, Ans]),
-    Ans.
 
 -spec open_for_write(binary(), binary()) -> {ok, #entryref{}} | {error, term()}.
 open_for_write(Bucket, Entry) ->
@@ -239,11 +230,6 @@ write(#entryref{fd=Fd, ctx=Ctx,
                        [Bucket, Entry, Error]),
             Error
     end.
-
--spec abort_write(#entryref{}) -> ok | {error, file:posix() | badarg}.
-abort_write(#entryref{fd=Fd, path=Path}) ->
-    file:close(Fd),
-    file:delete(Path).
 
 -spec finish_write(#entryref{}) -> {ok, binary()} | {error, file:posix() | badarg}.
 finish_write(#entryref{fd=Fd, path=Path, bucket=Bucket, entry=Entry, ctx=Ctx}) ->

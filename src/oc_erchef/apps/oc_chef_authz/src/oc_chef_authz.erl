@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 % ex: ts=4 sw=4 et
-%% @author Mark Anderson <mark@opscode.com>
-%% @author Marc Paradise <marc@getchef.com>
+%% @author Mark Anderson <mark@chef.io>
+%% @author Marc Paradise <marc@chef.io>
 %% @doc authorization - Interface to the opscode authorization servize
 %%
 %% This module is an Erlang port of the mixlib-authorization Ruby gem.
@@ -47,7 +47,8 @@
          set_ace_for_entity/5,
          superuser_id/0,
          object_type_to_resource/1,
-         pluralize_resource/1
+         pluralize_resource/1,
+         is_actor_transitive_member_of_group/3
         ]).
 
 -ifdef(TEST).
@@ -332,6 +333,19 @@ is_authorized_on_resource(RequestorId, ResourceType, ResourceId, ActorType, Acto
         {error, server_error} -> {error, server_error}
     end.
 
+%
+% Recursively check if ActorId is a member of GroupId.
+% Corresponds to GET /groups/:id/transitive_member/:member_id
+%
+-spec is_actor_transitive_member_of_group(requestor_id(), object_id(), actor_id())
+                                         -> true|false|{error, not_found}|{error,server_error}.
+is_actor_transitive_member_of_group(RequestorId, ActorId, GroupId) ->
+    Url = make_url([groups, GroupId, transitive_member, actors, ActorId]),
+    case oc_chef_authz_http:request(Url, get, [], [], RequestorId) of
+        {ok, Result} -> ej:get({<<"is_member">>}, Result);
+        {error, not_found} -> {error, not_found};
+        {error, server_error} -> {error, server_error}
+    end.
 
 %
 % Create entity in authz

@@ -1,0 +1,58 @@
+{
+  "type": "object",
+  "required": true,
+  "properties": {
+    "username": {
+      "description": "A unique namespace matching the format [a-z0-9\\-_]+",
+      "type": "string",
+      "required": true
+    },
+    "display_name": {
+      "description": "Human-readable name to be rendered into UIs and other human-readable locations",
+      "type": "string",
+      "required": true
+    },
+    "email": {
+      "description": "Valid email address for the new user",
+      "type": "string",
+      "format": "email",
+      "required": true
+    },
+    "password": {
+      "description": "Hashed password for the new user that is over 6 characters",
+      "type": "string",
+      "required": true
+    },
+    "first_name": {
+      "description": "The first name of the new user",
+      "type": "string",
+      "required": false
+    },
+    "middle_name": {
+      "description": "The middle name of the new user",
+      "type": "string",
+      "required": false
+    },
+    "last_name": {
+      "description": "The last name of the new user",
+      "type": "string",
+      "required": false
+    },
+    "external_authentication_uid": {
+      "description": "The external authentication UID of the user (their AD or LDAP ID, generally)",
+      "type": "boolean",
+      "required": false
+    },
+    "recovery_authentication_enabled": {
+      "description": "Whether this user may log in with their password when AD is down",
+      "type": "boolean",
+      "default": false,
+      "required": false
+    },
+    "public_key": {
+      "description": "A valid PKCS#1 public key. Cannot be passed with create_key. If not passed, the new user will be created without a default public key (unless create_key is passed). If passed, the server will return chef_key containing the public_key in its response body.",
+      "$ref": "common.json#/PublicKey",
+      "required": false
+    }
+  }
+}

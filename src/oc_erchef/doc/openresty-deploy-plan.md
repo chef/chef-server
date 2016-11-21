@@ -61,13 +61,13 @@ The Openresty load balancer has been tested in preprod for correctness, but we'd
 
 We will let the new server bake for one day (overnight) before deploying openresty to the rest(y) of the fleet.
 
-**Note:** `ocvmb` does not currently install Chef from omnibus: [link](https://tickets.corp.opscode.com/browse/OC-7369)
+**Note:** `ocvmb` does not currently install Chef from omnibus: [link](https://tickets.corp.chef.io/browse/OC-7369)
 
 The plan:
 
 1. Create the VM
 
-   On a server without an existing load balancer, use `ocvmb` to create a new external load balancer. ([`ocvmb` docs on wiki](http://wiki.corp.opscode.com/display/CORP/Rackspace+Production#RackspaceProduction-CreatingVMsusing%7B%7Bocvmb%7D%7D))
+   On a server without an existing load balancer, use `ocvmb` to create a new external load balancer. ([`ocvmb` docs on wiki](http://wiki.corp.chef.io/display/CORP/Rackspace+Production#RackspaceProduction-CreatingVMsusing%7B%7Bocvmb%7D%7D))
 
    SSH to the host (use the one below or pick a different empty one):
 

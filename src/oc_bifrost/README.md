@@ -34,137 +34,31 @@ after [Bifrost][], the burning rainbow bridge to Asgard in Norse mythology.
 [Bifrost]:http://en.wikipedia.org/wiki/Bifrost
 [opscode-authz]:https://github.com/opscode/opscode-authz
 
+TODO
+====
+
+The URI's returned in response bodies are very wrong. I have marked some of the relevant tests
+with `TODO URI`, but `full_uri/1` in `bifrost_wm_util.erl` is where the bad URIs are coming from.
+Looks like everything URI related needs an overhaul.
+
 Testing and Development
 =======================
 
-We're using [Berkshelf][] to make things easy.
+Everything works through the Makefile. You need to install a few prerequisite
+packages before the Makefile commands with work.  See
+[schema/README.md](schema/README.md) for more information.
 
-First, you'll need to configure Berkshelf to talk to our preprod Chef
-Server.  Create or add to a `~/.berkshelf/config.json` file the
-following information:
+You will need to install postgres, pgTAP, sqitch and Erlang. To find out the
+correct version of Erlang to install, please see the omnibus project definition
+as this is the version that is guaranteed to work with the tests.
 
-``` javascript
+Run `make ct` for the itests.
 
-{
-    "chef": {
-      "chef_server_url": "https://opsmaster-api.opscode.us/organizations/preprod",
-      "node_name": <YOUR_OPSMASTER_ACCOUNT_NAME>,
-      "client_key": <PATH_TO_YOUR_OPSMASTER_SSH_KEY>
-    },
-    "ssl": {
-      "verify": false
-      }
-    }
-}
-```
+Run `make pedant` to run pedant tests. Note that you will need a working
+postgres server running. It will assume you want to use the postgres users
+`postgres`, but if you are running locally on OS X, it might be set up properly.
+If you wish to use a different user (like your own username), just set `$POSTGRES_USER`
+before running `make pedant`.
 
-The `ssl` directive is important!
-
-Also, while we still have a monolithic [chef repo][], we'll need to
-refer to our platform roles and data bags in order to replicate our
-production environment as much as possible in a local Vagrant setting.
-The easiest way to make this work is to set an environment variable
-that points to a local checkout of the platform cookbooks repo, which
-the [Vagrantfile](Vagrantfile) then uses.
-
-```
-export OPSCODE_PLATFORM_REPO=/path/to/local/checkout/of/repo
-```
-
-The following environmental variable is used for locating local cookbooks
-(however, even if no local cookbooks are used and the variable is empty or
-pointing at an empty directory, it's still required):
-
-    export OPSCODE_COOKBOOKS=/path/to/working/cookbooks
-
-Also, the following environmental variable must point to all the opscode
-cookbooks being worked on (i.e., oc_bifrost, etc. which are mounted into
-the VM):
-
-    export OPSCODE_SRC=/path/to/src/oc/
-
-Now you're ready to grab all the dependencies.  We're installing
-binary stubs into `bin` to ensure everything is as self-contained as
-possible.
-
-The `Vagrantfile` will only work for the latest installer-based
-versions of Vagrant.  If you do not already have this, please download
-it from http://downloads.vagrantup.com.  Note that it __will not
-work__ with earlier gem-based versions of Vagrant!  Please see
-[these instructions](doc/vagrant.md) for help in transitioning.
-
-You'll need to set up the Berkshelf plugin for Vagrant:
-
-    /usr/bin/vagrant plugin install vagrant-berkshelf
-
-You will also need the Omnibus plugin, to ensure that we have an
-up-to-date version of Chef on the VMs:
-
-    /usr/bin/vagrant plugin install vagrant-omnibus
-
-Now, to fire up and provision all the VMs:
-
-```
-/usr/bin/vagrant up
-```
-
-We currently have 3 VMs:
-
-- `db`: the database server
-- `api`: the API server
-- `metrics`: an estatsd / graphite / gdash server, useful for
-  developing graphs for Bifrost.
-
-Remember: you can interact with each VM individually by providing its name, e.g.:
-
-    /usr/bin/vagrant up db
-
-Go muck around on a specific machine now:
-
-    /usr/bin/vagrant ssh db
-
-To re-run `chef-client` on your test machine:
-
-    /usr/bin/vagrant provision db
-
-If you screw something up horribly, just destroy the machine and start
-again:
-
-    /usr/bin/vagrant destroy db
-
-Eventually, we'll be adding Test Kitchen support for running
-[oc-bifrost-pedant][] and our pgTAP database schema tests.
-
-Cookbook Hacking
-================
-
-If you want to hack on the [opscode-bifrost][] cookbook, you'll need to
-make a minor tweak to the Berksfile.
-
-First, perform a local checkout of the cookbook.  Then, modify the
-dependency line in `Berksfile`.
-
-Change this:
-
-``` ruby
-cookbook "opscode-bifrost, git: "git@github.com:opscode-cookbooks/opscode-bifrost"
-```
-
-to this:
-
-``` ruby
-cookbook "opscode-bifrost", path: "/path/to/local/checkout/of/opscode-bifrost"
-```
-
-Re-provision your machine and you'll be running off the local version
-of the cookbook.
-
-[Berkshelf]:http://berkshelf.com
-[oc-bifrost-pedant]:https://github.com/opscode/oc-bifrost-pedant
-[opscode-bifrost]:https://github.com/opscode-cookbooks/opscode-bifrost
-[chef repo]:https://github.com/opscode/opscode-platform-cookbooks
-
-Cutting A Release
-=================
-
-See [Cutting a New Release of Bifrost](doc/release.md) for the gory details.
+If you wish to reset your system/database state back to the beginning before
+trying `make` again, run `make stop_test_rel` and `make destroy_test_db`.

@@ -25,7 +25,8 @@ describe "chef-server-ctl *key(s)*" do
 
   # marco for testing mandatory args
   def mandatory_argument_should_exist(command, arg_name, arg_list, arg_number)
-    expect { @helper.run_test_omnibus_command(command, arg_list) }.to raise_error(SystemExit, Regexp.new(KeyCtlHelper.new.argument_missing_msg(arg_name, arg_number)))
+    expect { @helper.run_test_omnibus_command(command, arg_list) }
+      .to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
   end
 
   let(:public_key) {
@@ -55,7 +56,8 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
   shared_examples_for "a key command with option parsing" do
     context "when an invalid argument is passed" do
       it "should return a proper error" do
-        expect { @helper.run_test_omnibus_command(command, ["--wrong"]) }.to raise_error(SystemExit, KeyCtlHelper.new.invalid_arg_msg("--wrong"))
+        expect { @helper.run_test_omnibus_command(command, ["--wrong"]) }
+          .to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
       end
     end
   end
@@ -63,7 +65,8 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
   shared_examples_for "a key command with options that require input" do
     context "when a valid argument is missing valid input" do
       it "should return a proper error" do
-        expect { @helper.run_test_omnibus_command(command, [valid_arg_missing_input]) }.to raise_error(SystemExit, KeyCtlHelper.new.missing_valid_input_msg(valid_arg_missing_input))
+        expect { @helper.run_test_omnibus_command(command, [valid_arg_missing_input]) }
+          .to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
       end
     end
   end
@@ -71,7 +74,8 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
   shared_examples_for "a key command with multiple options that require input" do
     context "when a command that requires input is passed another command" do
       it "should return a proper error" do
-        expect { @helper.run_test_omnibus_command(command, arguments) }.to raise_error(SystemExit, KeyCtlHelper.new.missing_input_msg(argument_followed_by_invalid_input))
+        expect { @helper.run_test_omnibus_command(command, arguments) }
+          .to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
       end
     end
   end
@@ -220,17 +224,20 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
       context "when --key-name isn't passed" do
         context "when --public-key-path points to a key with an invalid header" do
           it "should exit_failure and print the proper message" do
-            expect { @helper.run_test_omnibus_command(command, base_arguments.concat(["-p", not_a_key_path])) }.to raise_error(SystemExit, KeyCtlHelper.new.not_a_public_key_msg)
+            expect { @helper.run_test_omnibus_command(command, base_arguments.concat(["-p", not_a_key_path])) }
+              .to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
           end
         end
         context "when --public-key-path points to a file that doesn't exist" do
           it "should exit_failure and print the proper message" do
-            expect { @helper.run_test_omnibus_command(command, base_arguments.concat(["-p", "/dev/null/not_there"])) }.to raise_error(SystemExit, KeyCtlHelper.new.public_key_path_msg)
+            expect { @helper.run_test_omnibus_command(command, base_arguments.concat(["-p", "/dev/null/not_there"])) }
+              .to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
           end
         end
         context "when --public-key-path is not passed" do
           it "should exit_failure and print the proper message" do
-            expect { @helper.run_test_omnibus_command(command, base_arguments) }.to raise_error(SystemExit, KeyCtlHelper.new.pass_key_name_if_public_key_missing)
+            expect { @helper.run_test_omnibus_command(command, base_arguments) }
+              .to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
           end
         end
       end
@@ -273,9 +280,9 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
 
     context "when an invalid date is passed" do
       it "should fail with the proper error message" do
-        expect {
-          @helper.run_test_omnibus_command("add-user-key",["username", "-p", public_key_path, "-e", "invalid-date"])
-        }.to raise_error(SystemExit, Regexp.new(KeyCtlHelper.new.invalid_date_msg))
+        expect do
+          @helper.run_test_omnibus_command("add-user-key", ["username", "-p", public_key_path, "-e", "invalid-date"])
+        end.to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
       end
     end
 
@@ -317,9 +324,9 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
 
     context "when an invalid date is passed" do
       it "should fail with the proper error message" do
-        expect {
+        expect do
           @helper.run_test_omnibus_command("add-client-key",["testclient", "testorg", "-p", public_key_path,"-e", "invalid-date"])
-        }.to raise_error(SystemExit, Regexp.new(KeyCtlHelper.new.invalid_date_msg))
+        end.to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
       end
     end
 

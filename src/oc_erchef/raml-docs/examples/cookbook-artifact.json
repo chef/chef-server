@@ -1,0 +1,145 @@
+{
+  "recipes": [
+    {
+      "name": "default.rb",
+      "path": "recipes/default.rb",
+      "checksum": "1f8e6b5602dd7b6bcc8b641d989218b9",
+      "specificity": "default",
+      "url": "https://chef.example:443/bookshelf/organization-2ffe41fa6706a3fe9f4c53deb9037bea/checksum-1f8e6b5602dd7b6bcc8b641d989218b9?AWSAccessKeyId=284d80968672122578fe65bbf1e9e3d4fc5c5042&Expires=1429051458&Signature=ho8N4IU%2BXfS/xdjgh6GD4lTmdHI%3D"
+    }
+  ],
+  "definitions": [
+
+  ],
+  "libraries": [
+
+  ],
+  "attributes": [
+    {
+      "name": "default.rb",
+      "path": "attributes/default.rb",
+      "checksum": "6f4b12d8bd93efb151abfc278df35a37",
+      "specificity": "default",
+      "url": "https://chef.example:443/bookshelf/organization-2ffe41fa6706a3fe9f4c53deb9037bea/checksum-6f4b12d8bd93efb151abfc278df35a37?AWSAccessKeyId=284d80968672122578fe65bbf1e9e3d4fc5c5042&Expires=1429051458&Signature=O4ArJhRWFz0CjIvvIUnGrJqKf5o%3D"
+    }
+  ],
+  "files": [
+
+  ],
+  "templates": [
+    {
+      "name": "aar.conf.erb",
+      "path": "templates/default/aar.conf.erb",
+      "checksum": "05212b9aaa561cf34cda41f59878e78a",
+      "specificity": "default",
+      "url": "https://chef.example:443/bookshelf/organization-2ffe41fa6706a3fe9f4c53deb9037bea/checksum-05212b9aaa561cf34cda41f59878e78a?AWSAccessKeyId=284d80968672122578fe65bbf1e9e3d4fc5c5042&Expires=1429051458&Signature=3YYf9M2F6qow4BUGjxh8Plfa%2BPE%3D"
+    },
+    {
+      "name": "AAR_config.py.erb",
+      "path": "templates/default/AAR_config.py.erb",
+      "checksum": "6a592c04f81ddbcedff01f2dcaede8cb",
+      "specificity": "default",
+      "url": "https://chef.example:443/bookshelf/organization-2ffe41fa6706a3fe9f4c53deb9037bea/checksum-6a592c04f81ddbcedff01f2dcaede8cb?AWSAccessKeyId=284d80968672122578fe65bbf1e9e3d4fc5c5042&Expires=1429051458&Signature=HCAjzHRWqIlu4gY1ANPpI8472gM%3D"
+    },
+    {
+      "name": "login.html.erb",
+      "path": "templates/default/login.html.erb",
+      "checksum": "515c97b2909dd02692d67064300c5ddb",
+      "specificity": "default",
+      "url": "https://chef.example:443/bookshelf/organization-2ffe41fa6706a3fe9f4c53deb9037bea/checksum-515c97b2909dd02692d67064300c5ddb?AWSAccessKeyId=284d80968672122578fe65bbf1e9e3d4fc5c5042&Expires=1429051458&Signature=7tEwU%2BAaAHNMpqszspGctGwvGhE%3D"
+    },
+    {
+      "name": "make_AARdb.sql.erb",
+      "path": "templates/default/make_AARdb.sql.erb",
+      "checksum": "86fce029b4a8cfd1837d91d5fbd77b13",
+      "specificity": "default",
+      "url": "https://chef.example:443/bookshelf/organization-2ffe41fa6706a3fe9f4c53deb9037bea/checksum-86fce029b4a8cfd1837d91d5fbd77b13?AWSAccessKeyId=284d80968672122578fe65bbf1e9e3d4fc5c5042&Expires=1429051458&Signature=mAegwFoLNZaZAXSjdcKO07aUoHQ%3D"
+    },
+    {
+      "name": "repairRequest.html.erb",
+      "path": "templates/default/repairRequest.html.erb",
+      "checksum": "73b75750c4b564f883f9b36258b18297",
+      "specificity": "default",
+      "url": "https://chef.example:443/bookshelf/organization-2ffe41fa6706a3fe9f4c53deb9037bea/checksum-73b75750c4b564f883f9b36258b18297?AWSAccessKeyId=284d80968672122578fe65bbf1e9e3d4fc5c5042&Expires=1429051458&Signature=HwrlZ3qqmR8gFxLinUxNrQZZees%3D"
+    }
+  ],
+  "resources": [
+
+  ],
+  "providers": [
+
+  ],
+  "root_files": [
+    {
+      "name": "chefignore",
+      "path": "chefignore",
+      "checksum": "f3cf7fa53465dd0049e3df823e7cbe05",
+      "specificity": "default",
+      "url": "https://chef.example:443/bookshelf/organization-2ffe41fa6706a3fe9f4c53deb9037bea/checksum-f3cf7fa53465dd0049e3df823e7cbe05?AWSAccessKeyId=284d80968672122578fe65bbf1e9e3d4fc5c5042&Expires=1429051458&Signature=pXMk9paW8tIIj3XLeOuF8K4%2B/RI%3D"
+    },
+    {
+      "name": "metadata.rb",
+      "path": "metadata.rb",
+      "checksum": "6b2f03ef614b72bb5def7d3c439281e8",
+      "specificity": "default",
+      "url": "https://chef.example:443/bookshelf/organization-2ffe41fa6706a3fe9f4c53deb9037bea/checksum-6b2f03ef614b72bb5def7d3c439281e8?AWSAccessKeyId=284d80968672122578fe65bbf1e9e3d4fc5c5042&Expires=1429051458&Signature=CF3KlPpPN0Uk0m0tL7qiPrCzW64%3D"
+    },
+    {
+      "name": "README.md",
+      "path": "README.md",
+      "checksum": "58261893614855240cd440aea553178c",
+      "specificity": "default",
+      "url": "https://chef.example:443/bookshelf/organization-2ffe41fa6706a3fe9f4c53deb9037bea/checksum-58261893614855240cd440aea553178c?AWSAccessKeyId=284d80968672122578fe65bbf1e9e3d4fc5c5042&Expires=1429051458&Signature=fxDDx2KKUwMVzoWI7gVCVPMi5AE%3D"
+    }
+  ],
+  "version": "0.1.0",
+  "name": "aar",
+  "identifier": "c89808699edb7abe0569d6dd761d94912f998733",
+  "frozen?": false,
+  "chef_type": "cookbook_version",
+  "metadata": {
+    "name": "aar",
+    "description": "Installs/Configures aar",
+    "long_description": "Installs/Configures aar",
+    "maintainer": "The Authors",
+    "maintainer_email": "you@example.com",
+    "license": "all_rights",
+    "platforms": {
+
+    },
+    "dependencies": {
+      "apt": ">= 0.0.0",
+      "ark": ">= 0.0.0",
+      "python": ">= 0.0.0",
+      "database": ">= 0.0.0",
+      "mysql2_chef_gem": ">= 0.0.0"
+    },
+    "recommendations": {
+
+    },
+    "suggestions": {
+
+    },
+    "conflicting": {
+
+    },
+    "providing": {
+      "aar": ">= 0.0.0"
+    },
+    "replacing": {
+
+    },
+    "attributes": {
+
+    },
+    "groupings": {
+
+    },
+    "recipes": {
+      "aar": ""
+    },
+    "version": "0.1.0",
+    "source_url": "",
+    "issues_url": ""
+  }
+}

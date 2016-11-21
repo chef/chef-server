@@ -3,14 +3,21 @@
 
 KNOWN_ADDONS = %w(
   chef-ha
-  chef-sync
-  opscode-manage
+  chef-manage
   opscode-push-jobs-server
   opscode-reporting
 )
 
 add_command_under_category "install", "general", "Install addon package by name, with optional --path parameter indicating directory containing packages", 2 do
   package = ARGV[3]
+
+  # Rewrite deprecated package name to current package name if it
+  # happens to appear.
+  if package == "opscode-manage"
+    STDERR.puts "opscode-manage has been renamed to chef-manage, installing chef-manage instead."
+    package = "chef-manage"
+  end
+
   path_arg = "--path"
   if (ARGV.include?(path_arg))
     install_path = ARGV[ARGV.index(path_arg) + 1]

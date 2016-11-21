@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "properties": {
+    "run_list": { "$ref": "common.json#RunList" }
+  },
+  "example": {
+    "run_list": [
+      "zed@0.0.1",
+      "role[bar]",
+      "mysql::server",
+      "recipe[gem]",
+      "nginx::base@0.99.2",
+      "cron",
+      "foo"
+    ]
+  }
+}

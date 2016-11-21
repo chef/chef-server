@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# Author:: Ho-Sheng Hsiao (<hosh@opscode.com>)
-# Author:: Tyler Cloke (<tyler@getchef.com>)
+# Author:: Ho-Sheng Hsiao (<hosh@chef.io>)
+# Author:: Tyler Cloke (<tyler@chef.io>)
 # Copyright:: Copyright (c) 2013 Opscode, Inc.
 
 require 'pedant/rspec/common'

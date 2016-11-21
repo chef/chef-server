@@ -1,5 +1,5 @@
 #
-# Author:: Tyler Cloke (<tyler@getchef.com>)
+# Author:: Tyler Cloke (<tyler@chef.io>)
 # Copyright:: Copyright (c) 2012-2014 Chef Software, Inc.
 # License:: Apache License, Version 2.0
 #
@@ -22,6 +22,9 @@
 # store the key locally so rhel can use it when verifying add ons
 name "gpg-key"
 default_version "1.0.1"
+
+license :project_license
+skip_transitive_dependency_licensing true
 
 version "1.0.1" do
   source md5: "369efc3a19b9118cdf51c7e87a34f266"

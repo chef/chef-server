@@ -1,9 +1,9 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
-%% @author James Casey <james@opscode.com>
+%% @author James Casey <james@chef.io>
 %%
 %% Regex from chef_json_validator.erl
-%% @author Marc Paradise <marc@opscode.com>
+%% @author Marc Paradise <marc@chef.io>
 %% Copyright 2012-2013 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,

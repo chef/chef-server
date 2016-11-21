@@ -1,0 +1,36 @@
+description: List of containers (objects describing endpoints under the organization).
+type: list_endpoint
+
+get:
+  description: List all containers.
+  responses:
+    200:
+      body: { schema: NamedChildList }
+
+post:
+  description: Create a container.
+  responses:
+    201:
+      body: { schema: ObjectUri }
+
+/{container}:
+  description: Object describing an endpoint under the organization (i.e. clients, cookbooks, data, etc.).
+  type: item_endpoint
+  uriParameters:
+    container:
+      description: Name of the container (top-level organization endpoint).
+      type: string
+
+  get:
+    description: Get this container.
+    responses:
+      200:
+        body: { schema: Container }
+
+  delete:
+    description: Delete this container.
+    responses:
+      200:
+        body: { schema: Container }
+
+  /_acl: !include ../acl_endpoint.yaml

@@ -155,6 +155,8 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
               "specificity" => "default"
             }
           ]
+          cba["metadata"]["providing"] = { "#{cookbook_name}::#{recipe_name}"=>">= 0.0.0" }
+          cba["metadata"]["recipes"] = { "#{cookbook_name}::#{recipe_name}"=>"" }
         end
       end
 
@@ -224,4 +226,3 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
     end
   end # context GET /cookbook_artifacts/<name>/<version>
 end # describe cookbook_artifacts API endpoint
-

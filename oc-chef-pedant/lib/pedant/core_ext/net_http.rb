@@ -14,12 +14,13 @@
 # until a longer-term solution (such as submitting a patch upstream) is
 # implemented.
 require 'net/http'
+require 'timeout'
 
 module Net
   class HTTP < Protocol
     def connect
       D "opening connection to #{conn_address()}..."
-      s = timeout(@open_timeout) { TCPSocket.open(conn_address(), conn_port()) }
+      s = Timeout::timeout(@open_timeout) { TCPSocket.open(conn_address(), conn_port()) }
       D "opened"
       if use_ssl?
         ssl_parameters = Hash.new

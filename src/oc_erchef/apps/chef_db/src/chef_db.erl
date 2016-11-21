@@ -17,12 +17,12 @@
 %% specific language governing permissions and limitations
 %% under the License.
 %%
-%% @author Seth Falcon <seth@opscode.com>
-%% @author Daniel Deleo <dan@opscode.com>
-%% @author Mark Anderson <mark@opscode.com>
-%% @author Christopher Maier <cm@opscode.com>
-%% @author Mark Mzyk <mmzyk@opscode.com>
-%% @author Seth Chisamore <schisamo@opscode.com>
+%% @author Seth Falcon <seth@chef.io>
+%% @author Daniel Deleo <dan@chef.io>
+%% @author Mark Anderson <mark@chef.io>
+%% @author Christopher Maier <cm@chef.io>
+%% @author Mark Mzyk <mmzyk@chef.io>
+%% @author Seth Chisamore <schisamo@chef.io>
 
 -module(chef_db).
 

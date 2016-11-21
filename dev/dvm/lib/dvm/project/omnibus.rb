@@ -2,8 +2,22 @@ require_relative "omnibus_dep"
 
 module DVM
   class OmnibusProject < Project
+    attr_reader :embedded_in
+
     def initialize(project_name, config)
       super
+      # Omnibus projects now live with their corresponding project.
+      # Change the default paths to reflect that.
+      @embedded_in = project['embedded_in']
+      if embedded_in
+        @name = project['name'] || embedded_in
+        if external
+          @path = project['path'] || "external-deps/#{embedded_in}/omnibus"
+        else
+          @path = project['path'] || "src/#{embedded_in}/omnibus"
+        end
+        @project_dir = "/host/#{path}"
+      end
     end
     def parse_deps()
       #  for us, deps are more subprojects.

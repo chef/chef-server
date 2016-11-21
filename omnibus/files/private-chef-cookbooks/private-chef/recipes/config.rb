@@ -72,6 +72,11 @@ else
   end
 
   if chef_server_rb_exists
+    # Restrict 'other' permissions on chef-server.rb as it may contain sensitive info,
+    # such as the LDAP bind password. Using FileUtils to fix, as a file resource only
+    # sets permissions in absolute mode. This addresses config files created before the
+    # fix was implemented in the postinst script.
+    FileUtils.chmod('o-rwx', chef_server_path)
     PrivateChef.from_file(chef_server_path)
   end
 

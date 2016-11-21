@@ -34,7 +34,7 @@ module Pedant
 
       @signing_key = case key
                     when String then
-                      raw = if key =~ /^-----BEGIN RSA PRIVATE KEY-----.*/
+                      raw = if key =~ /^-----BEGIN (RSA )?PRIVATE KEY-----.*/
                               key
                             else
                               IO.read(key).strip

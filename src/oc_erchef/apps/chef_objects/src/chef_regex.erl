@@ -1,8 +1,8 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
-%% @author James Casey <james@opscode.com>
-%% @author Marc Paradise <marc@opscode.com>
-%% @author Seth Falcon <seth@opscode.com>
+%% @author James Casey <james@chef.io>
+%% @author Marc Paradise <marc@chef.io>
+%% @author Seth Falcon <seth@chef.io>
 %%
 %% Regex used in erchef
 %%
@@ -44,7 +44,7 @@
 
 %% Versions can only take the form MAJOR.MINOR or MAJOR.MINOR.PATCH.
 %%
-%% See http://wiki.opscode.com/display/chef/Version+Constraints
+%% See http://wiki.chef.io/display/chef/Version+Constraints
 -define(VERSION_REGEX, "[[:digit:]]+(\\.[[:digit:]]+){1,2}").
 
 %% Standard ISO8601 UTC format
@@ -55,7 +55,7 @@
 
 %% Cookbooks, Recipes, and Roles have common naming conventions.
 %% There is a concrete reference for role names at
-%% http://wiki.opscode.com/display/chef/Roles#Roles-name.  Judging
+%% http://wiki.chef.io/display/chef/Roles#Roles-name.  Judging
 %% from the cookbook names and recipes in the opscode/cookbooks
 %% repository, this regular expression applies to them as well.
 -define(NAME_REGEX, "[.[:alnum:]_-]+").

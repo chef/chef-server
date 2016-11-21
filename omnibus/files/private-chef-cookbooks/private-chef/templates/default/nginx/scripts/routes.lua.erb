@@ -76,6 +76,7 @@ local p_keys = P"keys"
 local p_policyfile = P"policies"
 local p_policy_groups = P"policy_groups"
 local p_cookbook_artifacts = P"cookbook_artifacts"
+local p_universe = P"universe"
 
 
 -- Composite patterns
@@ -117,7 +118,7 @@ local c_maybe_identifier = (p_sep * c_identifier)^-1
 local p_erchef_endpoint = p_cookbooks + p_data + p_roles + p_sandboxes +
                           p_environments + p_clients + p_nodes + p_principals +
                           p_groups + p_containers + p_controls +
-                          p_policy_groups + p_policyfile + p_cookbook_artifacts
+                          p_policy_groups + p_policyfile + p_cookbook_artifacts + p_universe
 
 
 -- endpoints that map directly to erchef
@@ -135,7 +136,8 @@ local p_erchef_users = (p_sep * Cendpoint(p_users) * p_trailing_sep) +
                        (p_sep * Cendpoint(p_auth_user) * p_trailing_sep) +
                        (p_sep * Cendpoint(p_system_recovery) * p_trailing_sep)
 
-local p_keys_route = ((p_named_org_prefix * p_clients * p_sep * p_identifier * Cendpoint(p_keys)) +
+local p_keys_route = ((p_named_org_prefix * p_clients * p_sep * p_identifier * p_sep * Cendpoint(p_keys)) +
+                      (p_named_org_prefix * p_users * p_sep * p_identifier * p_sep * Cendpoint(p_keys)) +
                       (p_sep * p_users * p_sep * p_identifier * p_sep * Cendpoint(p_keys))) *
                         ((p_sep * c_identifier)^-1 * p_trailing_sep)
 
@@ -197,8 +199,9 @@ local uri_resolvers = {
   -- p_acl_endpont must come first because a trailing _acl takes precedence
   -- over any other identifiers which may be in the url.
 
-  api = ((p_acl_endpoint + p_internal_acct_erchef_endpoints) * c_acct_erchef) +
-        (p_erchef * c_erchef),
+  api = (p_acl_endpoint * c_acct_erchef) +
+        (p_erchef * c_erchef) +
+        (p_internal_acct_erchef_endpoints * c_acct_erchef),
 
   -- This one is easy - everything passes through, though we'll still need to capture components
   -- (org name, object name, endpoint name) where we can, so that post-route hooks can be applied.

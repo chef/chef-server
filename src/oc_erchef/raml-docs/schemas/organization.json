@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "description": "A Chef organization.",
+  "properties": {
+    "name": {
+      "description": "The short name of the organization used in URLs and references.",
+      "$ref": "common.json#ChefName"
+    },
+    "full_name": {
+      "description": "The full name of the organization.",
+      "type": "string"
+    },
+    "guid": {
+      "description": "A GUID unique to the organization.",
+      "$ref": "common.json#Guid"
+    }
+  },
+  "example": {
+    "name": "foo",
+    "full_name": "foo",
+    "guid": "919d0e3f527743f6b0a792290982a3c9"
+  }
+}

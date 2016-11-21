@@ -16,6 +16,11 @@ require 'pedant/rspec/common'
 #  Use of platform.bad_user can also be a source of pain in concurrent runs
 #
 describe "opscode-account user association", :association do
+  # Generate a random 7-digit number
+  def rand_id
+    rand(10**7...10**8).to_s
+  end
+
   let(:users_url) { "#{platform.server}/users" }
   let(:org_assoc_url) { api_url("association_requests") }
   let(:default_users_body)        { default_pedant_user_names.map { |user| {"user" => {"username" => user} } } }
@@ -174,8 +179,8 @@ describe "opscode-account user association", :association do
   end
 
   context "/users/USER/organizations endpoint" do
-    let(:test_username) { "test-user-#{Time.now.to_i}-#{Process.pid}" }
-    let(:test_orgname2) { "test-org-#{Time.now.to_i}-#{Process.pid}" }
+    let(:test_username) { "test-user-#{rand_id}-#{Process.pid}" }
+    let(:test_orgname2) { "test-org-#{rand_id}-#{Process.pid}" }
     let(:test_user) { platform.create_user(test_username) }
     let(:test_org2) { platform.create_org(test_orgname2)}
     let(:test_user2) { platform.create_user(test_username + "-2") }
@@ -196,7 +201,7 @@ describe "opscode-account user association", :association do
 
     context "invoking" do
       %w{post put delete}.each do |method|
-        it "#{method} fails appopriately" do
+        it "#{method} fails appropriately" do
           result = send(method, user_org_url, platform.superuser, {})
           result.should look_like({ :status => 405 })
         end
@@ -589,7 +594,7 @@ describe "opscode-account user association", :association do
 
       context "and a valid invite is issued" do
         let(:org) { platform.test_org.name }
-        let(:invited_user_name) { "test-user-#{Time.now.to_i}-#{Process.pid}" }
+        let(:invited_user_name) { "test-user-#{rand_id}-#{Process.pid}" }
         let(:invited_user) { platform.create_user(invited_user_name) }
 
         before :each do
@@ -616,9 +621,9 @@ describe "opscode-account user association", :association do
       context "when the inviting admin" do
         let(:bad_user) { platform.bad_user.name }
         let(:org) { platform.test_org.name }
-        let(:admin_username) { "test-admin-#{Time.now.to_i}-#{Process.pid}" }
+        let(:admin_username) { "test-admin-#{rand_id}-#{Process.pid}" }
         let(:test_admin_user) { platform.create_user(admin_username) }
-        let(:test_username) { "test-user-#{Time.now.to_i}-#{Process.pid}" }
+        let(:test_username) { "test-user-#{rand_id}-#{Process.pid}" }
         let(:test_user) { platform.create_user(test_username) }
         let(:invalid_invite_msg) {
             "This invitation is no longer valid. Please notify an administrator and request to be re-invited to the organization."
@@ -675,9 +680,9 @@ describe "opscode-account user association", :association do
 
       context "OC-11708 - when last updator of users group is dissociated" do
         let(:org) { platform.test_org.name }
-        let(:admin_username) { "test-admin-#{Time.now.to_i}-#{Process.pid}" }
+        let(:admin_username) { "test-admin-#{rand_id}-#{Process.pid}" }
         let(:test_admin_user) { platform.create_user(admin_username) }
-        let(:test_username) { "test-user-#{Time.now.to_i}-#{Process.pid}" }
+        let(:test_username) { "test-user-#{rand_id}-#{Process.pid}" }
         let(:test_user) { platform.create_user(test_username) }
 
         before(:each) do
@@ -829,7 +834,7 @@ describe "opscode-account user association", :association do
           "first_name" => username,
           "last_name" => username,
           "display_name" => username,
-          "email" => "#{username}@opscode.com",
+          "email" => "#{username}@chef.io",
           "username" => username,
           "public_key" => public_key_regex
         }
@@ -927,7 +932,7 @@ describe "opscode-account user association", :association do
     end # context POST /organizations/<org>/users/<name>
 
     context "DELETE /organizations/<org>/users/<name>" do
-      let(:username) { "test-#{Time.now.to_i}-#{Process.pid}" }
+      let(:username) { "test-#{rand_id}-#{Process.pid}" }
       let(:test_user) { platform.create_user(username) }
       let(:org) { platform.test_org.name }
 
@@ -1003,7 +1008,7 @@ describe "opscode-account user association", :association do
       end
 
       context "OC-11708 - when last updator of users group is dissociated" do
-        let(:admin_username) { "test-admin-#{Time.now.to_i}-#{Process.pid}" }
+        let(:admin_username) { "test-admin-#{rand_id}-#{Process.pid}" }
         let(:test_admin_user) { platform.create_user(admin_username) }
 
         before(:each) do

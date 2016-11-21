@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 #
-# Author:: Christopher Maier (<cm@opscode.com>)
-# Author:: John Keiser (<jkeiser@opscode.com>)
-# Author:: Douglas Triggs (<doug@opscode.com>)
-# Author:: Ho-Sheng Hsiao (<hosh@opscode.com>)
+# Author:: Christopher Maier (<cm@chef.io>)
+# Author:: John Keiser (<jkeiser@chef.io>)
+# Author:: Douglas Triggs (<doug@chef.io>)
+# Author:: Ho-Sheng Hsiao (<hosh@chef.io>)
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 #
 

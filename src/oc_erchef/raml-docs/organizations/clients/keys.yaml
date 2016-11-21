@@ -1,0 +1,82 @@
+#%RAML 0.8
+---
+description: View and add keys for the named client.
+type: list_endpoint
+
+get:
+  description: |
+    Retrieves all of the client's key identifers and their associated
+    URIs and expiry states.
+    Accessable by any user or client within the same org.
+  responses:
+    200:
+      body:
+        schema: KeyList
+        example: |
+          [ { "name" : "default",
+              "uri" : "https://chef.example/organizations/example/client/client1/keys/default",
+              "expired" : false },
+            { "name" : "key1",
+              "uri" : "https://chef.example/organizations/example/client/client1/keys/key1",
+              "expired" : true } ]
+
+post:
+  body:
+    schema: Key
+    example: !include ../../examples/keys-post.json
+  description: Add a new key for the named client.
+  responses:
+    201:
+      body:
+        schema: Key
+        example: |
+          { "uri" : "https://chef.example/organizations/example/clients/client1/keys/key1" }
+
+/{key}:
+  type: renameable_item_endpoint
+  description: View and add keys for the named client in an organization.
+  uriParameters:
+    key:
+      description: Name of the key owned by the client.
+      type: string
+
+  get:
+    description: |
+      Retrieves the specified public key and it's associated data.
+      Accessable by any user or client within the same org.
+    responses:
+      200:
+        body:
+          schema: Key
+          example: !include ../../examples/named-key-example.json
+
+  put:
+    description: Update one or more attributes of a key for a client in an organization.
+    body:
+      schema: Key
+      example: !include ../../examples/keys-post.json
+    responses:
+      200:
+        description: |
+          Received when the existing resource has been updated.
+          Returns the updated key object.
+        body:
+          schema: Key
+          example: !include ../../examples/named-key-example.json
+      201:
+        description: |
+          Received when the resource has been updated with a new name, and a new URI generated.
+          If a response code 201 is received, the original URI used to access the named key
+          is no longer valid.
+        body:
+          schema: Key
+          example: !include ../../examples/named-key-example.json
+
+  delete:
+    description: Deletes the named key.
+    responses:
+      200:
+        description: Returns the deleted key in the body on successful delete.
+        body:
+          schema: Key
+          example: !include ../../examples/named-key-example.json

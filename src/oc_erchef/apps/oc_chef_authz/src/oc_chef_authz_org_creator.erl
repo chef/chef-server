@@ -1,6 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Mark Anderson <mark@getchef.com>
+%% @author Mark Anderson <mark@chef.io>
 %% Copyright 2014 Chef, Inc. All Rights Reserved.
 
 -module(oc_chef_authz_org_creator).
@@ -34,7 +34,7 @@
                      groups, nodes, roles, sandboxes, policies, policy_groups,
                      cookbook_artifacts]).
 
--define(GROUPS, [admins, 'billing-admins', clients, users]).
+-define(GROUPS, [admins, 'billing-admins', clients, users, public_key_read_access]).
 
 -define(ALL_PERMS, [create, read, update, delete, grant]).
 
@@ -71,6 +71,7 @@
          {create_org_read_access_group},
          {add_to_groups, user, [creator], [admins, users]},
          {add_to_groups, group, [admins, users], [read_access_group]},
+         {add_to_groups, group, [users, clients], [public_key_read_access]},
 
          %% ACLs are expanded, then applied
          {acls,
@@ -87,6 +88,7 @@
            {add_acl,
             [mk_tl(container, ?CONTAINERS), mk_tl(group, [admins, clients, users]), {organization}],
             ?ALL_PERMS, [{group, admins}]},
+           {add_acl, [{group, public_key_read_access}], [read, update], [{group, admins}]},
 
            %% users
            {add_acl,
@@ -97,7 +99,6 @@
            {add_acl, [{container, sandboxes}], [create], [{group, users}]},
 
            %% clients
-
            {add_acl, [{container, nodes}], [read, create], [{group, clients}]},
            {add_acl, [{container, policies}], [read], [{group, clients}]},
            {add_acl, [{container, policy_groups}], [read], [{group, clients}]},
@@ -169,7 +170,7 @@ process_policy_step({add_to_groups, ActorType, Members, Groups},
         {Type,MemberId} <- MemberIds],
     {Cache, []};
 process_policy_step({create_org_read_access_group},
-                    #oc_chef_organization{name=OrgName, server_api_version = ApiVersion},
+                    #oc_chef_organization{name=OrgName, server_api_version=ApiVersion},
                     #chef_requestor{authz_id=RequestorId}, Cache) ->
     ReadAccessGroupName = oc_chef_authz_db:make_read_access_group_name(OrgName),
     %% TODO: Fix this to be the global groups org id.

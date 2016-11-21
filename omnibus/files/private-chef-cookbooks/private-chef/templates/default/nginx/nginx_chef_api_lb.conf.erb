@@ -45,6 +45,38 @@
       alias /opt/opscode/version-manifest.txt;
     }
 
+    <% if node['private_chef']['data_collector']['proxy'] -%>
+    location "/data-collector/" {
+      proxy_set_header        Host           $http_host;
+      proxy_set_header        X-Real-IP      $remote_addr;
+      proxy_set_header        X-Forwared-For $proxy_add_x_forwarded_for;
+      proxy_pass_request_headers on;
+      proxy_redirect off;
+      proxy_pass <%= node['private_chef']['data_collector']['root_url'] %>;
+    }
+    <% end -%>
+
+    <% if node['private_chef']['data_collector']['root_url'] && node['private_chef']['data_collector']['token'] -%>
+    location ~ /organizations/([^/]+)/data-collector {
+      set $request_org $1;
+      access_by_lua_file '<%= @script_path %>/check_token_using_endpoint.lua';
+      proxy_pass $upstream;
+    }
+    <% end -%>
+
+    <% if node['private_chef']['profiles']['root_url'] && node['private_chef']['data_collector']['token'] -%>
+    # Compliance endpoint to forward profiles calls to the Automate API:
+    #   /organizations/ORG/owners/OWNER/compliance[/PROFILE]
+    # Supports the legacy(chef-gate) URLs as well:
+    #   /compliance/organizations/ORG/owners/OWNER/compliance[/PROFILE]
+    location ~ (?:/compliance)?/organizations/([^/]+)/owners/([^/]+)/compliance(.*) {
+      set $request_org $1;
+      set $new_uri "/compliance/profiles/$2$3";
+      access_by_lua_file '/var/opt/opscode/nginx/etc/scripts/check_token_using_endpoint_compliance.lua';
+      proxy_pass $upstream;
+    }
+    <% end -%>
+
     # bookshelf
     <% if node['private_chef']['opscode-erchef']['nginx_bookshelf_caching'] != :off -%>
     location ~ "/<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>/{0,1}.*$" {
@@ -93,21 +125,13 @@
     location / {
       satisfy any;
 
-      access_by_lua '
-        if ngx.var.http_x_ops_userid then
-          -- we will pass this access check since this is to be treated
-          -- as an REST API invocation.  As long as we pass, the request will
-          -- continue since we specified "satisfy any"
-          return
-        else
-          -- by exiting this way, we will force nginx to
-          -- also evaluate the subnets above because either this access
-          -- check must pass, OR the allow/deny must pass due to "satisfy any"
-          -- We are effectively saying here: "ok, this request is going to go
-          -- to manage, so apply those other access rules first."
-          ngx.exit(ngx.DECLINED)
-        end
-      ';
+      <% if @access_by_lua_file %>
+      # access_by_lua_file acts as an access phase handler and executes Lua code
+      # contained in the given file for every request.  This is disabled by
+      # default, separate from the lua dispatch routing, and intended to do
+      # initial access authentication.
+      access_by_lua_file '<%= @access_by_lua_file %>';
+      <% end %>
 
       set $mode "api";
       set $upstream "";

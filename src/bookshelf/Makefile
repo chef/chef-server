@@ -20,7 +20,7 @@ endif
 
 ## TODO: put 'ct' back in here
 all: $(REBAR3)
-	@$(REBAR3) do clean, compile, eunit, dialyzer
+	@$(REBAR3) do clean, compile, eunit, dialyzer, xref
 
 rel: all
 	@$(REBAR3) release
@@ -48,7 +48,7 @@ VERSION: version_clean
 ## For Travis
 install: $(REBAR3)
 
-travis: update all
+travis: update all ct
 	@echo "Travis'd!"
 
 ## for Omnbibus

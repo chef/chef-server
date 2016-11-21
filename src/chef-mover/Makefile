@@ -30,7 +30,9 @@ distclean:
 install: $(REBAR3) distclean
 	$(REBAR3) update
 
-travis: all
+travis: $(REBAR3)
+	@$(REBAR3) do clean, compile
+	@$(REBAR3) eunit --app mover
 	@echo "Travis'd!"
 
 version_clean:

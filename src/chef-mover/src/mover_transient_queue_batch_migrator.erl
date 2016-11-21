@@ -1,6 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil;fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Tyler Cloke <tyler@getchef.com>
+%% @author Tyler Cloke <tyler@chef.io>
 %% @copyright 2013 Chef, Inc.
 %%
 %% A simpler version of mover_batch_migrator for transient queues

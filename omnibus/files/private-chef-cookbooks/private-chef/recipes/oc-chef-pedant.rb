@@ -1,5 +1,5 @@
 #
-# Author:: Seth Chisamore (<schisamo@opscode.com>)
+# Author:: Seth Chisamore (<schisamo@chef.io>)
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 #
 # All Rights Reserved
@@ -36,13 +36,16 @@ end
 # at least one shared protocol version. Leaving failure unhandled here,
 # since it means that a pedant run is not possible.
 ssl_version = allowed_versions.first.gsub(".", "_").to_sym
+reindex_endpoint = node['private_chef']['fips_enabled'] ?
+  "http://127.0.0.1" : "https://127.0.0.1"
 
 template pedant_config do
   owner "root"
   group "root"
   mode  "0755"
   variables({
-    :api_url  => node['private_chef']['nginx']['url'],
+    :actions_enabled => node['private_chef']['dark_launch']['actions'],
+    :api_url  => OmnibusHelper.new(node).nginx_ssl_url,
     :solr_url => OmnibusHelper.new(node).solr_root,
     :opscode_account_internal_url => node['private_chef']['lb_internal']['vip'],
     :opscode_account_internal_port => node['private_chef']['lb_internal']['account_port'],
@@ -50,6 +53,7 @@ template pedant_config do
     :erchef_internal_port => node['private_chef']['opscode-erchef']['port'],
     :default_orgname => node['private_chef']['default_orgname'],
     :hostname => node['hostname'],
-    :ssl_version =>  ssl_version
+    :ssl_version =>  ssl_version,
+    :reindex_endpoint => reindex_endpoint
   }.merge(node['private_chef']['oc-chef-pedant'].to_hash))
 end

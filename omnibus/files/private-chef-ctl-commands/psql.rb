@@ -19,6 +19,7 @@ known_dbs = {
   "opscode_chef" => {"dbname" => "opscode_chef", "config_key" => "opscode-erchef", "hashseed" => "private_chef"},
   "bifrost" => {"dbname" => "bifrost", "config_key" => "oc_bifrost", "hashseed" => "private_chef"},
   "oc_id" => {"dbname" => "oc_id", "config_key" => "oc_id", "hashseed" => "private_chef"},
+  "bookshelf" => {"dbname" => "bookshelf", "config_key" => "bookshelf", "hashseed" => "private_chef"},
   "push-jobs" => {"dbname" => "opscode_pushy", "config_key" => "postgresql", "hashseed" => "pushy"},
   "reporting" => {"dbname" => "opscode_reporting", "config_key" => "postgresql", "hashseed" => "reporting"}
 }
@@ -85,8 +86,9 @@ add_command_under_category "psql", "Database", "Launches an interactive psql ses
     STDOUT.puts "DBName: #{db_name}"
   end
 
-  cmd = "PGPASSWORD=#{db_password} PAGER=less LESS='-iMSx4 -FX' /opt/opscode/embedded/bin/psql --host #{db_host} --username #{db_username} --port #{db_port} --dbname #{db_name}#{psql_options}"
-
+  ENV['PGPASSWORD'] = db_password
+  ENV['PAGER'] = 'less'
+  ENV['LESS'] = '-iMSx4 -FX'
+  cmd = "/opt/opscode/embedded/bin/psql --host #{db_host} --username #{db_username} --port #{db_port} --dbname #{db_name}#{psql_options}"
   exec cmd
-
 end

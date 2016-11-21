@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "properties": {
+    "limit_exceeded": {
+      "description": "Whether the number of node granted under the license has been exceeded",
+      "type": "boolean"
+    },
+    "node_license": {
+      "description": "The number of nodes granted under the license",
+      "type": "integer"
+    },
+    "node_count": {
+      "description": "The number of nodes currently used",
+      "type": "integer"
+    },
+    "upgrade_url": {
+      "description": "The URL for more information on how to upgrade",
+      "type": "string",
+
+      "format": "uri"
+    }
+  },
+  "example": {
+    "limit_exceeded": true,
+    "node_license": 25,
+    "node_count": 370007,
+    "upgrade_url": "http://www.chef.io/contact/on-premises-simple"
+  }
+}

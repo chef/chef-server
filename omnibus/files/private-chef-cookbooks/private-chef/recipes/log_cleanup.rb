@@ -1,6 +1,6 @@
 #
-# Author:: Lamont Granquist (<lamont@opscode.com>)
-# Author:: Seth Chisamore (<schisamo@opscode.com>)
+# Author:: Lamont Granquist (<lamont@chef.io>)
+# Author:: Seth Chisamore (<schisamo@chef.io>)
 # Copyright:: Copyright (c) 2012-2013 Opscode, Inc.
 #
 # All Rights Reserved

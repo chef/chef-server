@@ -64,6 +64,52 @@ describe "users", :users do
             })
         end
 
+        context "saml user" do
+          let(:username) do
+            "user_with_external_uid"
+          end
+
+          let(:external_auth_id) do
+            "sam.l.jackson"
+          end
+
+          let(:user_options) do
+            { :overrides => {
+                :first_name => "external",
+                :last_name => "user",
+                :display_name => "SAML USER",
+                :external_authentication_uid => external_auth_id
+              }
+            }
+          end
+
+          let(:filtered_external_users_body) do
+            { username => "#{request_url}/#{username}" }
+          end
+
+          before :each do
+            @user = platform.create_user(username, user_options)
+          end
+
+          after :each do
+            platform.delete_user(@user)
+          end
+
+          it "returns no users when filtering by non-existing external_authentication_uid", :smoke do
+            get("#{request_url}?external_authentication_uid=somenonexistingemail@somewhere.com", platform.superuser).should look_like({
+                :status => 200,
+                :body_exact => empty_users_body
+              })
+          end
+
+          it "returns a single user when filtering by that user's external_authentication_uid", :smoke do
+            get("#{request_url}?external_authentication_uid=#{external_auth_id}", platform.superuser).should look_like({
+                :status => 200,
+                :body_exact => filtered_external_users_body
+              })
+          end
+        end
+
         it "returns a verbose list of users upon request" do
           body = JSON.parse(get("#{request_url}?verbose=true", platform.superuser))
           [ platform.non_admin_user.name, platform.admin_user.name, platform.superuser.name ].each do |name|
@@ -134,7 +180,7 @@ describe "users", :users do
       let(:request_body) do
         {
           "username" => username,
-          "email" => "#{username}@opscode.com",
+          "email" => "#{username}@chef.io",
           "first_name" => username,
           "last_name" => username,
           "display_name" => username,
@@ -204,7 +250,7 @@ describe "users", :users do
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username
@@ -222,7 +268,7 @@ describe "users", :users do
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
@@ -247,7 +293,7 @@ describe "users", :users do
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "password" => "badger badger"
@@ -266,7 +312,7 @@ describe "users", :users do
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "display_name" => username,
               "password" => "badger badger"
             }
@@ -325,7 +371,7 @@ describe "users", :users do
         context "without username" do
           let(:request_body) do
             {
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
@@ -365,7 +411,7 @@ describe "users", :users do
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => "Yi Ling",
               "last_name" => "van Dijk",
               "display_name" => username,
@@ -390,7 +436,7 @@ describe "users", :users do
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
@@ -416,7 +462,7 @@ describe "users", :users do
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "some user",
@@ -441,7 +487,7 @@ describe "users", :users do
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "超人",
@@ -466,7 +512,7 @@ describe "users", :users do
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => "Guðrún",
               "last_name" => "Guðmundsdóttir",
               "display_name" => username,
@@ -492,7 +538,7 @@ describe "users", :users do
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
@@ -513,7 +559,7 @@ describe "users", :users do
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
@@ -533,7 +579,7 @@ describe "users", :users do
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
@@ -581,7 +627,7 @@ describe "users", :users do
           "first_name" => username,
           "last_name" => username,
           "display_name" => username,
-          "email" => "#{username}@opscode.com",
+          "email" => "#{username}@chef.io",
           "username" => username,
           "public_key" => public_key_regex
         }
@@ -660,7 +706,7 @@ describe "users", :users do
       let(:request_body) do
         {
           "username" => username,
-          "email" => "#{username}@opscode.com",
+          "email" => "#{username}@chef.io",
           "first_name" => username,
           "last_name" => username,
           "display_name" => "new name",
@@ -707,7 +753,7 @@ describe "users", :users do
       let(:request_body) do
         {
           "username" => username,
-          "email" => "#{username}@opscode.com",
+          "email" => "#{username}@chef.io",
           "first_name" => username,
           "last_name" => username,
           "display_name" => "new name",
@@ -718,7 +764,7 @@ describe "users", :users do
       let(:request_body_with_ext_id) do
         {
           "username" => username,
-          "email" => "#{username}@opscode.com",
+          "email" => "#{username}@chef.io",
           "first_name" => username,
           "last_name" => username,
           "display_name" => "new name",
@@ -729,7 +775,7 @@ describe "users", :users do
       let(:request_body_with_recovery) do
         {
           "username" => username,
-          "email" => "#{username}@opscode.com",
+          "email" => "#{username}@chef.io",
           "first_name" => username,
           "last_name" => username,
           "display_name" => "new name",
@@ -740,7 +786,7 @@ describe "users", :users do
       let(:modified_user) do
         {
           "username" => username,
-          "email" => "#{username}@opscode.com",
+          "email" => "#{username}@chef.io",
           "first_name" => username,
           "last_name" => username,
           "display_name" => "new name",
@@ -787,7 +833,7 @@ EOF
         response = post("#{platform.server}/users", platform.superuser,
           :payload => {
             "username" => username,
-            "email" => "#{username}@opscode.com",
+            "email" => "#{username}@chef.io",
             "first_name" => username,
             "last_name" => username,
             "display_name" => username,
@@ -938,7 +984,7 @@ EOF
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "new name"
@@ -961,7 +1007,7 @@ EOF
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "new name",
@@ -986,7 +1032,7 @@ EOF
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "password" => "badger badger"
@@ -1005,7 +1051,7 @@ EOF
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "display_name" => "new name",
               "password" => "badger badger"
             }
@@ -1014,7 +1060,7 @@ EOF
           let(:modified_user) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "display_name" => "new name",
               "public_key" => public_key_regex
             }
@@ -1069,7 +1115,7 @@ EOF
         context "without username" do
           let(:request_body) do
             {
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
@@ -1109,7 +1155,7 @@ EOF
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => "Ren Kai",
               "last_name" => "de Boers",
               "display_name" => username,
@@ -1120,7 +1166,7 @@ EOF
           let(:modified_user) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => "Ren Kai",
               "last_name" => "de Boers",
               "display_name" => username,
@@ -1144,7 +1190,7 @@ EOF
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "some user",
@@ -1155,7 +1201,7 @@ EOF
           let(:modified_user) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "some user",
@@ -1179,7 +1225,7 @@ EOF
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "ギリギリ",
@@ -1190,7 +1236,7 @@ EOF
           let(:modified_user) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "ギリギリ",
@@ -1214,7 +1260,7 @@ EOF
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => "Eliška",
               "last_name" => "Horáčková",
               "display_name" => username,
@@ -1225,7 +1271,7 @@ EOF
           let(:modified_user) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => "Eliška",
               "last_name" => "Horáčková",
               "display_name" => username,
@@ -1249,7 +1295,7 @@ EOF
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "new name",
@@ -1271,7 +1317,7 @@ EOF
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "new name",
@@ -1298,7 +1344,7 @@ EOF
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "new name",
@@ -1331,7 +1377,7 @@ EOF
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "new name",
@@ -1368,7 +1414,7 @@ EOF
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "new name",
@@ -1406,7 +1452,7 @@ EOF
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "new name",
@@ -1444,7 +1490,7 @@ EOF
           let(:request_body) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => "new name",
@@ -1470,7 +1516,7 @@ EOF
           let(:request_body) do
             {
               "username" => new_name,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
@@ -1481,7 +1527,7 @@ EOF
           let(:modified_user) do
             {
               "username" => new_name,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
@@ -1524,7 +1570,7 @@ EOF
           let(:request_body) do
             {
               "username" => new_name,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
@@ -1550,7 +1596,7 @@ EOF
           let(:request_body) do
             {
               "username" => new_name,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
@@ -1575,7 +1621,7 @@ EOF
           let(:request_body) do
             {
               "username" => new_name,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
@@ -1600,7 +1646,7 @@ EOF
           let(:request_body) do
             {
               "username" => platform.non_admin_user.name,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
@@ -1611,7 +1657,7 @@ EOF
           let(:unmodified_user) do
             {
               "username" => username,
-              "email" => "#{username}@opscode.com",
+              "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
@@ -1650,7 +1696,7 @@ EOF
         post("#{platform.server}/users", platform.superuser,
           :payload => {
             "username" => username,
-            "email" => "#{username}@opscode.com",
+            "email" => "#{username}@chef.io",
             "first_name" => username,
             "last_name" => username,
             "display_name" => username,

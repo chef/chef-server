@@ -23,13 +23,32 @@ vm:
     # chef reporting will be configured to use
     # this vm as an external postgresql server from the start.
     use-external: true
+  # Override this in config.yml if you want to bring up a separate chef-backend
+  # box, and if you want to automatically configure chef-server to use it in a
+  # 1 FE / 1 BE topology.
+  chef-backend:
+    # enable a separate backend vm but do not use it unless
+    # use-external is set.
+    start: false
+  ldap:
+    # enable a separate ldap vm but do not use it unless
+    # use-external is set.
+    start: false
+  # Override this in config.yml if you want to install chef server plugins with
+  # specific packages.
+  plugins:
+    chef-manage: false
+    reporting: false
+    push-jobs-server: false
 
   # All settings below apply only to the chef-server vm
   cpus: 4
   memory: 4096
-  packages: [ ntp, curl, wget, htop, uuid-dev, tmux, vim, iotop ]
+  packages: [ ntp, curl, wget, htop, uuid-dev, tmux, vim, iotop, zlib1g-dev, liblzma-dev ]
   omnibus-autoload: [] # see config.yml for details and to add components
-
+  # Override this in config.yml to set a custom path for your dotfiles
+  # that's external to this repository.
+  dotfile_path: dotfiles
   # TODO whitelist as well?
   # Note that we can't exclude .git from top-level projects, and by extension from anything,
   # otherwise rebar commands begin to fail.
@@ -69,6 +88,9 @@ vm:
        - VERSION
        - partybus/config.rb
        - oc-reporting-pedant/Gemfile.lock # friggin ugh
+       - config/database.yml # [oc-id] we'll need to use the one from omnibus
+       - config/settings/production.yml # [oc-id] we'll need to use the one from omnibus
+       - config/initializers/secret_token.rb # [oc-id] we'll need to use the one from omnibus
 
   cover:
     base_output_path: /vagrant/testdata/cover # maps to dev/testdata/cover
@@ -85,9 +107,18 @@ projects:
       cookie: erchef
       node: erchef@127.0.0.1
   oc-id:
-    type: ruby
+    type: rails
+    install_options: --without development test doc
+    build_steps:
+      - bundle exec rake assets:precompile
+      - bundle exec rake db:migrate
+    symlinks:
+      config/database.yml: config/database.yml
+      config/settings/production.yml: config/production.yml
+      config/initializers/secret_token.rb: config/secret_token.rb
     service:
       name: oc_id
+      port: 9090
   oc_bifrost:
     type: erlang
     database: bifrost
@@ -174,7 +205,7 @@ projects:
   # Reporting
   #
   omnibus-reporting:
-    name: omnibus-reporting
+    embedded_in: "oc_reporting"
     type: omnibus
     external: true
     components:
@@ -187,6 +218,7 @@ projects:
         source_path: opscode-reporting-ctl-commands
         dest_path: /opt/opscode-reporting/embedded/service/omnibus-ctl
         reconfigure_on_load: false
+
   oc-reporting-pedant:
     type: ruby
     external: true

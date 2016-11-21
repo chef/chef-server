@@ -32,7 +32,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
   include Pedant::RSpec::CookbookUtil
 
-  context "PUT /cookbooks/<name>/<version> [update]" do
+  context "PUT /cookbook_artifacts/<name>/<version> [update]" do
 
     # for respects_maximum_payload_size
     let(:request_method) { :PUT }
@@ -120,6 +120,6 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         end # it invalid user returns 401 and does not update cookbook
       end # with invalid user
     end # context with permissions for
-  end # context PUT /cookbooks/<name>/<version> [update]
+  end # context PUT /cookbook_artifacts/<name>/<version> [update]
 end
 

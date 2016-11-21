@@ -100,7 +100,7 @@ To run the server:
 In a real production environment you're going to want to run this behind a load
 balancer with SSL, configure process monitoring, logging, etc.
 
-A [community cookbook for Chef identity](https://supermarket.getchef.com/cookbooks/oc-id)
+A [community cookbook for Chef identity](https://supermarket.chef.io/cookbooks/oc-id)
 is available on Supermarket. It is not created by or maintained by Chef
 Software, but should work for running the app.
 
@@ -114,7 +114,7 @@ Chef identity
 
 |                      |                                          |
 |:---------------------|:-----------------------------------------|
-| **Author:**          | Chris Nunciato <cnunciato@getchef.com>
+| **Author:**          | Chris Nunciato <cnunciato@chef.io>
 | **Copyright:**       | Copyright (c) 2014 Chef Software, Inc.
 | **License:**         | Apache License, Version 2.0
 

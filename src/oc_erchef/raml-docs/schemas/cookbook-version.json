@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "description": "Represents a single version of a cookbook.",
+  "properties": {
+    "name": {
+      "description": "The fully-qualified name+version of the cookbook.",
+      "$ref": "common.json#ChefNameVersion",
+      "example": "blah-1.5.1"
+    },
+    "cookbook": {
+      "description": "The name of the cookbook.",
+      "type": "string",
+      "example": "blah"
+    },
+    "version": {
+      "description": "The version of the cookbook.",
+      "$ref": "common.json#Version",
+      "example": "1.5.1"
+    },
+    "frozen?": {
+      "description": "Whether or not this cookbook is frozen.",
+      "type": "boolean"
+    },
+    "metadata": {
+      "description": "Cookbook metadata.",
+      "$ref": "cookbook-common.json#/CookbookVersionMetadata"
+    },
+    "recipes": {
+      "description": "Files in the cookbook under the recipes/ subdirectory.",
+      "$ref": "cookbook-common.json#CookbookVersionFileArray"
+    },
+    "definitions": {
+      "description": "Files in the cookbook under the definitions/ subdirectory.",
+      "$ref": "cookbook-common.json#CookbookVersionFileArray"
+    },
+    "libraries": {
+      "description": "Files in the cookbook under the libraries/ subdirectory.",
+      "$ref": "cookbook-common.json#CookbookVersionFileArray"
+    },
+    "attributes": {
+      "description": "Files in the cookbook under the attributes/ subdirectory.",
+      "$ref": "cookbook-common.json#CookbookVersionFileArray"
+    },
+    "files": {
+      "description": "Files in the cookbook under the files/ subdirectory.",
+      "$ref": "cookbook-common.json#CookbookVersionFileArray"
+    },
+    "templates": {
+      "description": "Files in the cookbook under the templates/ subdirectory.",
+      "$ref": "cookbook-common.json#CookbookVersionFileArray"
+    },
+    "resources": {
+      "description": "Files in the cookbook under the resources/ subdirectory.",
+      "$ref": "cookbook-common.json#CookbookVersionFileArray"
+    },
+    "providers": {
+      "description": "Files in the cookbook under the providers/ subdirectory.",
+      "$ref": "cookbook-common.json#CookbookVersionFileArray"
+    },
+    "root_files": {
+      "description": "Files under the root directory of the cookbook.",
+      "$ref": "cookbook-common.json#CookbookVersionFileArray"
+    },
+    "chef_type": {
+      "description": "Must be cookbook_version.",
+      "type": "string",
+      "enum": [ "cookbook_version" ]
+    },
+    "json_class": {
+      "description": "Must be Chef::CookbookVersion.",
+      "type": "string",
+      "enum": [ "Chef::CookbookVersion" ]
+    }
+  }
+}

@@ -1,0 +1,5 @@
+dn: ou=chefs,dc=chef-server,dc=dev
+objectClass: top
+objectClass: organizationalUnit
+description: Famous Chefs
+ou: chefs

@@ -17,6 +17,8 @@
 name "opscode-expander"
 source path: "#{project.files_path}/../../src/opscode-expander"
 
+license :project_license
+
 dependency "ruby"
 dependency "bundler"
 

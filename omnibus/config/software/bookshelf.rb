@@ -17,15 +17,21 @@
 name "bookshelf"
 source path: "#{project.files_path}/../../src/bookshelf", options: {:exclude => ["_build"]}
 
+license "Apache-2.0"
+license_file "LICENSE.md"
+
 dependency "erlang"
-dependency "rebar"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
+  fips_enabled = project.overrides[:fips] && project.overrides[:fips][:enabled]
+  profile_name = fips_enabled ? "fips" : "default"
+
   env['REL_VERSION'] = "#{project.build_version}"
+  env['REBAR_PROFILE'] = profile_name
 
   make "omnibus", env: env
 
-  sync "#{project_dir}/_build/default/rel/bookshelf/", "#{install_dir}/embedded/service/bookshelf/"
+  sync "#{project_dir}/_build/#{profile_name}/rel/bookshelf/", "#{install_dir}/embedded/service/bookshelf/"
   delete "#{install_dir}/embedded/service/bookshelf/log"
 end

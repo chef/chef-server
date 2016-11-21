@@ -135,12 +135,12 @@ bind(Session, BindDN, BindPassword) ->
     case eldap:simple_bind(Session, BindDN, BindPassword) of
         ok -> ok;
         {error, Error} ->
-            lager:error("Could not bind as ~p, please check private-chef.rb for correct bind_dn, bind_password, host, port and encrpytion values. Error: ~p", [BindDN, Error]),
+            lager:error("Could not bind as ~p, please check chef-server.rb for correct bind_dn, bind_password, host, port and encrpytion values. Error: ~p", [BindDN, Error]),
             {error, Error}
     end.
 
 maybe_encrypt_session(_Encryption, {error, Error}, _Timeout) ->
-    lager:error("Failed to connect to ldap host or an error occurred during connection setup. Please check private-chef.rb for correct host, port, and encryption values: ~p", [Error]),
+    lager:error("Failed to connect to ldap host or an error occurred during connection setup. Please check chef-server.rb for correct host, port, and encryption values: ~p", [Error]),
     error;
 maybe_encrypt_session(start_tls, {ok, Session}, Timeout) ->
     case eldap:start_tls(Session, [], Timeout) of
@@ -200,6 +200,7 @@ result_to_user_ejson(LoginAttr, UserName, [{eldap_entry, CN, DataIn}|_]) ->
     LookupFields = [{"displayname", <<"display_name">>},
                     {"givenname", <<"first_name">>},
                     {"sn", <<"last_name">>},
+                    {"cn", <<"common_name">>},
                     {"c", <<"country">>},
                     {"l", <<"city">>},
                     {"mail", <<"email">>} ],

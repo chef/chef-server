@@ -18,6 +18,8 @@ Copy and edit the bookshelf_bench.config (detailed instructions are commented in
 cp bookshelf_bench.config.example bookshelf_bench.config
 ```
 
+Make sure to update the S3 access keys!
+
 Run the benchmark:
 
 ```

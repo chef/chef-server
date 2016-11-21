@@ -1,6 +1,0 @@
-#%RAML 0.8
----
-X-Ops-Server-Api-Version:
-  displayName: X-Ops-Server-Api-Version
-  description: Information describing server API versioning info (see http://bit.ly/1LPni1S for details).
-

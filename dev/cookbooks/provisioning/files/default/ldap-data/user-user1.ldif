@@ -1,0 +1,12 @@
+dn: cn=User One,ou=chefs,dc=chef-server,dc=dev
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: User One
+sn: One
+displayName: User One
+givenName: User
+mail: user1@chef-server.dev
+uid: user1
+userPassword: password

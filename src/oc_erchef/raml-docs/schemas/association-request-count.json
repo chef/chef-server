@@ -1,0 +1,10 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "properties": {
+    "value": {
+      "description": "The count of non-accepted invitations.",
+      "type": "integer"
+    }
+  }
+}

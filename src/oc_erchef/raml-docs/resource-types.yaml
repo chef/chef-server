@@ -1,0 +1,65 @@
+item_endpoint:
+  get?:
+    is: [chef_endpoint,not_found]
+  put?:
+    is: [chef_endpoint,not_found,validated]
+  post?:
+    is: [chef_endpoint,validated]
+  delete?:
+    is: [chef_endpoint,not_found]
+
+renameable_item_endpoint:
+  get?:
+    is: [chef_endpoint,not_found]
+  put?:
+    is: [chef_endpoint,not_found,validated,rename_conflict,renamed]
+  post?:
+    is: [chef_endpoint,validated]
+  delete?:
+    is: [chef_endpoint,not_found]
+
+list_endpoint:
+  get?:
+    is: [chef_endpoint,not_found]
+  put?:
+    is: [chef_endpoint,not_found,validated]
+  post?:
+    is: [chef_endpoint,parent_not_found,conflict,validated,created]
+  delete?:
+    is: [chef_endpoint,not_found]
+
+acl_endpoint:
+  description: The ACLs for this object.
+  type: list_endpoint
+  get:
+    description: Read all permissions on this object.
+    responses:
+      200:
+        body: { schema: Acl }
+
+acl_permission_endpoint:
+  description: A single permission on the object. Must be create, read, update, delete, grant (CRUDG).
+  type: item_endpoint
+  uriParameters:
+    permission:
+      description: The permission you are operating on (create, read, update, delete or grant).
+      type: string
+  put:
+    description: Modify the given permission.
+    body: { schema: AclUpdate }
+    responses:
+      200:
+        body: { schema: ObjectUri }
+
+identifiers_endpoint:
+  type: list_endpoint
+
+validation_endpoint:
+  get?:
+    is: [chef_endpoint]
+  put?:
+    is: [chef_endpoint]
+  post?:
+    is: [chef_endpoint]
+  delete?:
+    is: [chef_endpoint]

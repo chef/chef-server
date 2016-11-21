@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "properties": {
+    "total": {
+      "description": "Total number of results returned by the search",
+      "type": "integer"
+    },
+    "start": {
+      "description": "The starting index of this set of results within the total set of results",
+      "type": "integer"
+    },
+    "rows": {
+      "description": "The results.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "description": "The URL to the object on the server (e.g. https://api.chef.io/organizations/foo/nodes/bar)",
+            "type": "string",
+
+            "format": "uri"
+          },
+          "data": {
+            "description": "The desired data. Each key corresponds to a key from the POST.",
+            "type": "string",
+            "additionalProperties": {
+              "description": "The value of the attribute on the object (or null if the attribute was not on the object).",
+              "type": "any"
+            }
+          }
+        }
+      }
+    }
+  },
+  "example": {
+    "total": 2,
+    "start": 0,
+    "rows": [
+      {
+        "url": "https://api.chef.io/organizations/essentials/nodes/monkey",
+        "data": {
+          "node_name": "monkey",
+          "apache_port": 8080
+        }
+      },
+      {
+        "url": "https://api.chef.io/organizations/essentials/nodes/giraffe",
+        "data": {
+          "node_name": "giraffe",
+          "apache_port": null
+        }
+      }
+    ]
+  }
+}

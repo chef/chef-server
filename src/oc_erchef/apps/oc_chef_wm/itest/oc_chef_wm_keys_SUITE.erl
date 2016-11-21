@@ -42,6 +42,9 @@
 -define(ORG_NAME, <<"testorg">>).
 -define(ORG_AUTHZ_ID, <<"10000000000000000000000000000002">>).
 
+-define(ORG_KEYS_ACCESS_GROUP_NAME, "public_key_read_access").
+-define(ORG_KEYS_ACCESS_GROUP_AUTHZ_ID, <<"20000000000000000000000000000002">>).
+
 -define(KEY1NAME, <<"key1">>).
 -define(KEY1EXPIRE, {datetime, {{2099,12,31},{00,00,00}}}).
 -define(KEY1EXPIRESTRING, <<"2099-12-31T00:00:00Z">>).
@@ -66,6 +69,23 @@ init_per_suite(LastConfig) ->
 
 end_per_suite(Config) ->
     setup_helper:base_end_per_suite(Config).
+
+load_mocks() ->
+    meck:new(oc_chef_authz_db, [passthrough]),
+    meck:expect(oc_chef_authz_db, fetch_group, fun(_Context, _OrgName, _GroupName) ->
+						       #oc_chef_group{server_api_version=?API_MIN_VER,
+								      id=nil,
+								      for_requestor_id=nil,
+								      authz_id=?ORG_KEYS_ACCESS_GROUP_AUTHZ_ID,
+								      org_id=?ORG_AUTHZ_ID,
+								      name=?ORG_KEYS_ACCESS_GROUP_NAME,
+								      last_updated_by=nil,
+								      created_at=nil,
+								      updated_at=nil}
+						      end).
+
+unload_mocks() ->
+    meck:unload(oc_chef_authz_db).
 
 all() ->
     [list_client_default_key,
@@ -127,11 +147,13 @@ all() ->
 
 %% GET /organizations/org/clients/client/keys && GET /users/client/keys
 list_client_default_key(_) ->
+    load_mocks(),
     Result = http_key_request(get, client, ?CLIENT_NAME),
     ?assertMatch({ok, "200", _, _} , Result),
     BodyEJ = decoded_response_body(Result),
     ExpectedEJ = client_key_list_ejson(?CLIENT_NAME, [?DEFAULT_KEY_ENTRY]),
-    ?assertMatch(ExpectedEJ, BodyEJ).
+    ?assertMatch(ExpectedEJ, BodyEJ),
+    unload_mocks().
 
 list_user_default_key(_) ->
     Result = http_key_request(get, user, ?USER_NAME),
@@ -141,11 +163,13 @@ list_user_default_key(_) ->
     ?assertMatch(ExpectedEJ, BodyEJ).
 
 list_client_multiple_keys(_) ->
+    load_mocks(),
     Result = http_key_request(get, client, ?CLIENT_NAME),
     ?assertMatch({ok, "200", _, _} , Result),
     BodyEJ = decoded_response_body(Result),
     ExpectedEJ = client_key_list_ejson(?CLIENT_NAME, [?DEFAULT_KEY_ENTRY, ?KEY_1_ENTRY, ?KEY_2_ENTRY]),
-    ?assertMatch(ExpectedEJ, BodyEJ).
+    ?assertMatch(ExpectedEJ, BodyEJ),
+    unload_mocks().
 
 list_user_multiple_keys(_) ->
     Result = http_key_request(get, user, ?USER_NAME),
@@ -155,8 +179,10 @@ list_user_multiple_keys(_) ->
     ?assertMatch(ExpectedEJ, BodyEJ).
 
 list_client_no_keys(_) ->
+    load_mocks(),
     Result = http_key_request(get, client, ?ADMIN_USER_NAME),
-    ?assertMatch({ok, "200", _, "[]"} , Result).
+    ?assertMatch({ok, "200", _, "[]"} , Result),
+    unload_mocks().
 
 list_user_no_keys(_) ->
     Result = http_key_request(get, user, ?ADMIN_USER_NAME),
@@ -164,11 +190,13 @@ list_user_no_keys(_) ->
 
 %% GET /organizations/org/clients/client/keys/key && GET /users/client/keys/key
 get_client_default_key(Config) ->
+    load_mocks(),
     Result = http_named_key_request(get, client, ?CLIENT_NAME, "default"),
     ?assertMatch({ok, "200", _, _}, Result),
     BodyEJ = decoded_response_body(Result),
     ExpectedEJ = new_key_ejson(Config, <<"default">>, <<"infinity">>),
-    ?assertMatch(ExpectedEJ, BodyEJ).
+    ?assertMatch(ExpectedEJ, BodyEJ),
+    unload_mocks().
 
 get_user_default_key(Config) ->
     Result = http_named_key_request(get, user, ?USER_NAME, "default"),
@@ -178,6 +206,7 @@ get_user_default_key(Config) ->
     ?assertMatch(ExpectedEJ, BodyEJ).
 
 get_client_multiple_keys(Config) ->
+    load_mocks(),
     %% KEY1
     Result = http_named_key_request(get, client, ?CLIENT_NAME, ?KEY1NAME),
     ?assertMatch({ok, "200", _, _}, Result),
@@ -190,7 +219,8 @@ get_client_multiple_keys(Config) ->
     ?assertMatch({ok, "200", _, _} , Result2),
     BodyEJ2 = decoded_response_body(Result2),
     ExpectedEJ2 = new_key_ejson(Config, ?KEY2NAME, ?KEY2EXPIRESTRING),
-    ?assertMatch(ExpectedEJ2, BodyEJ2).
+    ?assertMatch(ExpectedEJ2, BodyEJ2),
+    unload_mocks().
 
 get_user_multiple_keys(Config) ->
     %% KEY1
@@ -243,10 +273,14 @@ delete_invalid_client_key(_Config) ->
     ?assertMatch({ok, "404", _, _}, Result).
 
 put_rename_client_key(_Config) ->
-    validate_rename(client , "201", "404").
+    load_mocks(),
+    validate_rename(client , "201", "404"),
+    unload_mocks().
 
 put_rename_duplicate_client_key(_Config) ->
-    validate_rename(client, "409", "200").
+    load_mocks(),
+    validate_rename(client, "409", "200"),
+    unload_mocks().
 
 put_rename_user_key(_Config) ->
     validate_rename(user, "201", "404").
@@ -255,7 +289,9 @@ put_rename_duplicate_user_key(_Config) ->
     validate_rename(user, "409", "200").
 
 put_full_client_key(Config) ->
-    validate_put_full_key(Config, client).
+    load_mocks(),
+    validate_put_full_key(Config, client),
+    unload_mocks().
 
 put_full_user_key(Config) ->
     validate_put_full_key(Config, user).
@@ -267,12 +303,16 @@ put_generate_new_user_key(Config) ->
     validate_put_partial_key_valid(Config, user, <<"create_key">>, true).
 
 put_valid_partial_user_key(Config) ->
+    load_mocks(),
     validate_put_partial_key_valid(Config, user, <<"expiration_date">>, ?KEY2EXPIRESTRING),
-    validate_put_partial_key_valid(Config, user, <<"public_key">>, proplists:get_value(alt_pubkey, Config)).
+    validate_put_partial_key_valid(Config, user, <<"public_key">>, proplists:get_value(alt_pubkey, Config)),
+    unload_mocks().
 
 put_valid_partial_client_key(Config) ->
+    load_mocks(),
     validate_put_partial_key_valid(Config, client, <<"expiration_date">>, ?KEY2EXPIRESTRING),
-    validate_put_partial_key_valid(Config, client, <<"public_key">>, proplists:get_value(alt_pubkey, Config)).
+    validate_put_partial_key_valid(Config, client, <<"public_key">>, proplists:get_value(alt_pubkey, Config)),
+    unload_mocks().
 
 put_invalid_partial_user_key(_Config) ->
     validate_put_partial_key_invalid(user, <<"name">>, <<"bob^was^here">>),
@@ -620,7 +660,7 @@ http_named_key_request(Method, client, Requestor, Name, Body) ->
                            {"accept", "application/json"},
                            {"content-type", "application/json"}], Method, Body).
 
-% Some helpers to keep noise out of the tes.
+% Some helpers to keep noise out of the test.
 make_org(OrgName, OrgAuthzId) ->
     Org = chef_object:new_record(oc_chef_organization, ?API_MIN_VER, nil, OrgAuthzId,
                                  {[{<<"name">>, OrgName}, {<<"full_name">>, OrgName}]}),

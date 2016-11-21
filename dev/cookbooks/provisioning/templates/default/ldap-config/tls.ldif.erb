@@ -1,0 +1,10 @@
+dn: cn=config
+changetype: modify
+replace: olcTLSCertificateFile
+olcTLSCertificateFile: <%= node['ldap']['ssl_cert'] %>
+-
+replace: olcTLSCertificateKeyFile
+olcTLSCertificateKeyFile: <%= node['ldap']['ssl_key'] %>
+-
+replace: olcTLSVerifyClient
+olcTLSVerifyClient: never

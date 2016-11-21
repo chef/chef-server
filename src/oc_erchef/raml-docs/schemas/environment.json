@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "properties": {
+    "name": {
+      "description": "The name of the environment (unique within an organization).",
+      "$ref": "common.json#ChefName",
+      "required": true
+    },
+    "description": {
+      "description": "Description of this environment.",
+      "type": "string"
+    },
+    "cookbook_versions": {
+      "description": "The list of allowable cookbook versions within this environment.",
+      "$ref": "cookbook-common.json#CookbookVersionConstraintList"
+    },
+    "default_attributes": {
+      "description": "A nested hash of default-precedence attributes to merge onto every node in this environment",
+      "type": "object",
+      "additionalProperties": true
+    },
+    "override_attributes": {
+      "description": "A nested hash of override-precedence attributes to merge onto every node in this environment",
+      "type": "object",
+      "additionalProperties": true
+    },
+    "json_class": {
+      "description": "Must have the value Chef::Environment.",
+      "type": "string",
+      "enum": [ "Chef::Environment" ]
+    },
+    "chef_type": {
+      "description": "Must have the value \"environment\"",
+      "type": "string",
+      "enum": [ "environment" ]
+    }
+  }
+}

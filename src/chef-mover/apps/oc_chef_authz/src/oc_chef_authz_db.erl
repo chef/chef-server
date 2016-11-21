@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Mark Anderson <mark@opscode.com>
-%% @author Marc Paradise <marc@getchef.com>
+%% @author Mark Anderson <mark@chef.io>
+%% @author Marc Paradise <marc@chef.io>
 %% @doc authorization - Interface to the opscode authorization servize
 %%
 %% Copyright 2011-2014 Chef Software, Inc. All Rights Reserved.

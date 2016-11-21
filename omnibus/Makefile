@@ -4,7 +4,7 @@
 #
 # e.g., 'make -f build_node.mk $TARGET'
 
-DEV_PLATFORM ?= ubuntu-1004
+DEV_PLATFORM ?= ubuntu-1404
 DEV_PROJECT=opscode-omnibus
 
 .DEFAULT_GOAL=dev
@@ -76,12 +76,14 @@ prune_%:
 
 # Bundle install and build chef-server
 dev-build: clear_pkg_cache prune
-	kitchen exec default-$(DEV_PLATFORM) -c "bash -l -c 'cd chef-server/omnibus && bundle install && time bundle exec omnibus build chef-server'"
+	kitchen exec default-$(DEV_PLATFORM) -c "bash -l -c 'cd chef-server/omnibus && source ~/load-omnibus-toolchain.sh && bundle install && time bundle exec omnibus build chef-server'"
 
 install:
-	bundle install
+	gem install bundler -v 1.12.0
+	bundle _1.12.0_ install
 
 travis:
 	bundle exec rake test:csc
+	bundle exec rake test:veil
 	bundle exec rake test:routing
 	bundle exec rake test:private_chef_cookbooks

@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": [ "pong", "fail" ]
+    },
+    "upstreams": {
+      "additionalProperties": {
+        "type": "string",
+        "enum": [ "pong", "fail" ]
+      }
+    },
+    "keygen": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "description": "Number of available keys",
+          "type": "integer"
+        },
+        "max": {
+          "description": "Maximum number of available keys",
+          "type": "integer"
+        },
+        "max_workers": {
+          "description": "Desired maximum number of workers generating keys",
+          "type": "integer"
+        },
+        "cur_max_workers": {
+          "description": "Current number of workers who can generate keys",
+          "type": "integer"
+        },
+        "inflight": {
+          "description": "Number of keys currently being generated",
+          "type": "integer"
+        },
+        "avail_workers": {
+          "description": "Current number of idle workers",
+          "type": "integer"
+        },
+        "additionalProperties": true
+      }
+    },
+    "additionalProperties": true
+  },
+  "example": {
+    "status": "pong",
+    "upstreams": {
+      "chef_solr": "pong",
+      "chef_sql": "pong",
+      "oc_chef_authz": "pong"
+    },
+    "keygen": {
+      "keys": 10,
+      "max": 10,
+      "max_workers": 4,
+      "cur_max_workers": 4,
+      "inflight": 0,
+      "avail_workers": 4,
+      "start_size": 0
+    },
+    "analytics_queue": {
+      "queue_at_capacity": false,
+      "dropped_since_last_check": 0,
+      "max_length": 0,
+      "last_recorded_length": 0,
+      "total_dropped": 0,
+      "check_count": 24016,
+      "mailbox_length": 0
+    }
+  }
+}

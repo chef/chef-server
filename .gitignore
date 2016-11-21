@@ -1,3 +1,14 @@
 .DS_Store
 erln8.config
 config.yml
+.bundle
+vendor
+src/bookshelf/test/bkswt_api_SUITE_data/pg_data
+src/bookshelf/test/bkswt_api_SUITE_data/pg.log
+*.tar.gz
+opt/
+NEW_CHANGELOG.md
+version-manifest.json
+MODIFIED_COMPONENTS_CHANGELOG.md
+/dev/nodes
+dev/*.deb

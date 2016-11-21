@@ -1,0 +1,23 @@
+description: Users and clients which are members of this organization.
+type: list_endpoint
+
+/{principal}:
+  description: |
+    The user or client with the given name in the organization. In general, this will return the first match of these:
+
+    1. Org members (if a user named x is a member of the org)
+    2. Clients (if a client named x is in the org)
+    3. Users (if a user on the server is named x)
+
+    All authentication with the given name will use the user or client that principals returns.
+  type: item_endpoint
+  uriParameters:
+    principal:
+      description: Name of the referenced user or client.
+      type: string
+
+  get:
+    description: Get the user or client with the given name in the organization. Only one will be returned.
+    responses:
+      200:
+        body: { schema: Principals }

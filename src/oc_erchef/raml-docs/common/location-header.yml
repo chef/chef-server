@@ -1,6 +1,0 @@
-#%RAML 0.8
----
-Location:
-  displayName: Location
-  description: location of newly-created resource
-

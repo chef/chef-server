@@ -21,7 +21,6 @@ You will need a few dependencies. On mac:
 
 ```
 brew install lua
-brew install luarocks
 luarocks install lpeg
 luarocks install lua-cjson
 ```

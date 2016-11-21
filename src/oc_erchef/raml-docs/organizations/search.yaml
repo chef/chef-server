@@ -1,0 +1,108 @@
+description: |
+  A list of the indexes that can be searched. The indices include
+  client, environment, node, and role, which will search through all
+  clients, environments, nodes and roles in the org, respectively.
+
+  There is also one index for each data bag, named the same as the
+  data bag. If there are data bags named client, environment, node or
+  role, the data bag's index will not show up (the name will point to
+  the index for the corresponding object type instead).
+type: list_endpoint
+
+get:
+  responses:
+    200:
+      body: { schema: NamedChildList }
+
+/{search_index}:
+  description: |
+    A search index. The indices include
+    client, environment, node, and role, which will search through all
+    clients, environments, nodes and roles in the org, respectively.
+
+    There is also one index for each data bag, named the same as the
+    data bag. If there are data bags named client, environment, node or
+    role, the data bag's index will not show up (the name will point to
+    the index for the corresponding object type instead).
+
+    All documents are broken up into keys with the *name* of each field,
+    along with its *value*. /search/node?q=chef_environment:desert will
+    return nodes in the environment "desert".
+
+    Deeply nested fields such as attributes and data bags have special
+    keys as well. You may search these both by their leaf name, and their
+    fully-qualified name (with underscores in between).
+
+    For example, this node:
+
+    ```
+    {
+      "name": "node",
+      "normal": {
+        "a": {
+          "b": {
+            "c": "hi"
+          }
+        }
+      }
+    }
+    ```
+
+    Will be returned if you search for c:hi, *or* a_b_c:hi.
+
+  type: list_endpoint
+  uriParameters:
+    search_index:
+      description: Name of the search index.
+      type: string
+
+  get:
+    description: Search.
+    queryParameters:
+      q:
+        description: The search query, in SOLR's Lucene syntax (see https://wiki.apache.org/solr/SolrQuerySyntax for details).
+        type: string
+        default: "*:*"
+      sort:
+        description: |
+          The name of the key to sort by. May optionally be followed by " DESC"
+          (including the space) to sort in descending order. If sort is not
+          specified, the return order is unspecified.
+        type: string
+      start:
+        description: The first row to return from the total result set.
+        type: integer
+        default: 0
+      rows:
+        description: The maximum number of rows to return. Defaults to all rows.
+        type: integer
+
+    responses:
+      200:
+        body: { schema: SearchResults }
+
+  post:
+    description: Search with custom results.
+    queryParameters:
+      q:
+        description: The search query, in SOLR's Lucene syntax (see https://wiki.apache.org/solr/SolrQuerySyntax for details).
+        type: string
+        default: "*:*"
+      sort:
+        description: |
+          The name of the key to sort by. May optionally be followed by " DESC"
+          (including the space) to sort in descending order. If sort is not
+          specified, the return order is unspecified.
+        type: string
+      start:
+        description: The first row to return from the total result set.
+        type: integer
+        default: 0
+      rows:
+        description: The maximum number of rows to return. Defaults to all rows.
+        type: integer
+
+    body: { schema: SearchCustomResultsPost }
+    responses:
+      200:
+        body: { schema: SearchCustomResults }
