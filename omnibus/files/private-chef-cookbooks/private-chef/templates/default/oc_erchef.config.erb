@@ -274,25 +274,43 @@
         {pooler_timeout, <%= @authz_pooler_timeout %>}
     ]},
 
-    {sqerl, [
-        {db_driver_mod, sqerl_pgsql_client},
-        {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
-        %% Database connection parameters
-        {db_host, "<%= node['private_chef']['postgresql']['vip'] %>"},
-        {db_port, <%= node['private_chef']['postgresql']['port'] %>},
-        {db_user, "<%= node['private_chef']['opscode-erchef']['sql_user'] %>"},
-        {db_pass, "<%= node['private_chef']['opscode-erchef']['sql_password'] %>"},
-        {db_name, "opscode_chef" },
-        {idle_check, 10000},
-        {pooler_timeout, <%= @db_pooler_timeout %>},
-        {db_timeout, <%= node['private_chef']['opscode-erchef']['sql_db_timeout'] %>},
-        {prepared_statements, {oc_chef_sql, statements, [pgsql]}},
-        {column_transforms, [
-            {<<"created_at">>, {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}},
-            {<<"updated_at">>, {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}}
-        ]}
-    ]},
 
+      {sqerl, [
+               {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
+               {pooler_timeout, <%= @oc_erchef['db_pooler_timeout'] %>},
+               {db_driver_mod, sqerl_pgsql_client},
+               {databases, [
+                            {bifrost, [
+                                       {db_host, "<%= node['private_chef']['postgresql']['vip'] %>" },
+                                       {db_port, <%= node['private_chef']['postgresql']['port'] %> },
+                                       {db_user, "<%= @oc_bifrost['sql_user'] %>" },
+                                       {db_pass, "<%= @oc_bifrost['sql_password'] %>" },
+                                       {db_name, "bifrost" },
+                                       {idle_check, 10000},
+                                       {db_timeout, <%= @oc_bifrost['sql_db_timeout'] %>},
+                                       {prepared_statements, {bifrost_db, statements, []} },
+                                       {column_transforms, []}
+                                      ]},
+                            % This pool is used by default when no sqerl pool exists for a calling application.
+                            {sqerl, [
+                                     %% Database connection parameters
+                                     {db_host, "<%= node['private_chef']['postgresql']['vip'] %>"},
+                                     {db_port, <%= node['private_chef']['postgresql']['port'] %> },
+                                     {db_user, "<%= @oc_erchef['sql_user'] %>"},
+                                     {db_pass, "<%= @oc_erchef['sql_password'] %>"},
+                                     {db_name, "opscode_chef" },
+                                     {idle_check, 10000},
+                                     {db_timeout, <%= @oc_erchef['sql_db_timeout'] %>},
+                                     {prepared_statements, {oc_chef_sql, statements, [pgsql]}},
+                                     {column_transforms,
+                                                        [{<<"created_at">>,
+                                                          {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}},
+                                                         {<<"updated_at">>,
+                                                          {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}}
+                                                        ]}
+                                    ]}
+                            ]}
+      ]},
     {webmachine, [
         {log_handlers, [
             {oc_wm_request_logger, [
@@ -309,25 +327,31 @@
         {default_max_pipeline_size, <%= @ibrowse_max_pipeline_size %>}
     ]},
 
-    {pooler, [
-        {pools, [
-            [
-                {name, sqerl},
-                {max_count, <%= @db_pool_max || @db_pool_size %>},
-                {init_count, <%= @db_pool_init || @db_pool_size %>},
-                {start_mfa, {sqerl_client, start_link, []}},
-                {queue_max, <%= @db_pool_queue_max %>}
-            ],
-            [
-                {name, chef_depsolver},
-                {max_count, <%= @depsolver_worker_count %>},
-                {init_count, <%= @depsolver_worker_count %>},
-                {queue_max, <%= @depsolver_pool_queue_max %>},
-                {start_mfa, {chef_depsolver_worker, start_link, []}}
-            ]
-        ]
-    },
+  {pooler, [
+           {pools, [[{name, sqerl},
+                     {max_count, <%= @oc_erchef['db_pool_size'] %>},
+                     {init_count, <%= @oc_erchef['db_pool_init_size'] %>},
+                     {start_mfa, {sqerl_client, start_link, []}},
+                     {queue_max, <%= @oc_erchef['db_pool_queue_max'] %>}],
+                    [{name, bifrost},
+                     {max_count, <%= @oc_bifrost['db_pool_size'] %>},
+                     {init_count, <%= @oc_bifrost['db_pool_size'] %>},
+                     {start_mfa, {sqerl_client, start_link, [{pool, bifrost}]}},
+                     {queue_max, <%= @oc_bifrost['db_pool_queue_max'] %>}],
+                    [{name, chef_depsolver},
+                     {max_count, <%= @oc_erchef['depsolver_worker_count'] %>},
+                     {init_count, <%= @oc_erchef['depsolver_worker_count'] %>},
+                     {queue_max, <%= @oc_erchef['depsolver_pool_queue_max'] %>},
+                     {start_mfa, {chef_depsolver_worker, start_link, []}}]]},
+           {metrics_module, folsom_metrics}
+          ]},
 
+ {bifrost, [
+             {ip, "<%= @oc_bifrost['listen'] %>" },
+             {port, <%= @oc_bifrost['port'] %> },
+             {superuser_id, "<%= @oc_bifrost['superuser_id'] %>"},
+             {root_metric_key, "bifrost"},
+             {enable_extended_perf_log, <%= @oc_bifrost['extended_perf_log'] %>},
     {metrics_module, folsom_metrics}
 ]}
 
