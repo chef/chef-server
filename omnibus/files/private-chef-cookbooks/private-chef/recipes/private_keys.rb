@@ -31,7 +31,7 @@ pivotal_key = if File.exists?(pivotal_key_path)
               end
 
 # Setting at the top level so that we don't export this to chef-server-running.json
-node.set['bootstrap']['superuser_public_key'] = pivotal_key.public_key.to_s
+node.default['bootstrap']['superuser_public_key'] = pivotal_key.public_key.to_s
 
 file pivotal_key_path do
   owner OmnibusHelper.new(node).ownership['owner']
