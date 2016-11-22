@@ -120,8 +120,8 @@
             chef_<%= @oc_erchef['search_provider'] %>
         ]},
         {base_resource_url, <%= @helper.erl_atom_or_string(@oc_erchef['base_resource_url']) %>},
-        {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
-        {strict_search_result_acls, <%= @strict_search_result_acls %>},
+        {bulk_fetch_batch_size, <%= @oc_erchef['bulk_fetch_batch_size'] %>},
+        {strict_search_result_acls, <%= @oc_erchef['strict_search_result_acls'] %>},
 
         {rabbitmq, [
             {management,[
@@ -214,13 +214,13 @@
         {search_batch_max_wait, <%= @oc_erchef['search_batch_max_wait'] %>},
         {solr_service, [
             {root_url, "<%= @helper.solr_url() %>"},
-            {timeout, <%= @solr_timeout %>},
-            {init_count, <%= @solr_http_init_count %>},
-            {max_count, <%= @solr_http_max_count %>},
-            {cull_interval, <%= @solr_http_cull_interval %>},
-            {max_age, <%= @solr_http_max_age %>},
-            {max_connection_duration, <%= @solr_http_max_connection_duration %>},
-            {ibrowse_options, <%= @solr_ibrowse_options %>}
+            {timeout, <%= @oc_erchef['solr_timeout'] %>},
+            {init_count, <%= @oc_erchef['solr_http_init_count'] %>},
+            {max_count, <%= @oc_erchef['solr_http_max_count'] %>},
+            {cull_interval, <%= @oc_erchef['solr_http_cull_interval'] %>},
+            {max_age, <%= @oc_erchef['solr_http_max_age'] %>},
+            {max_connection_duration, <%= @oc_erchef['solr_http_max_connection_duration'] %>},
+            {ibrowse_options, <%= @oc_erchef['solr_ibrowse_options'] %>}
         ]}
     ]},
 
@@ -264,14 +264,15 @@
     <% end %>
 
     {stats_hero, [
-        {udp_socket_pool_size, <%= @udp_socket_pool_size || @db_pool_size %> },
+                  % Note - pool size becomes shared between this and bifrost so we're doubling it
+        {udp_socket_pool_size, <%= @oc_erchef['udp_socket_pool_size'] || @oc_erchef['db_pool_size'] * 2 %> },
         {protocol, <%= node['private_chef']['estatsd']['protocol'] %>},
         {estatsd_host, "<%= @helper.normalize_host(node['private_chef']['estatsd']['vip']) %>"},
         {estatsd_port, <%= node['private_chef']['estatsd']['port'] %>}
     ]},
 
     {opscoderl_httpc, [
-        {pooler_timeout, <%= @authz_pooler_timeout %>}
+        {pooler_timeout, <%= @oc_erchef['authz_pooler_timeout'] %>}
     ]},
 
 
@@ -288,7 +289,7 @@
                                        {db_name, "bifrost" },
                                        {idle_check, 10000},
                                        {db_timeout, <%= @oc_bifrost['sql_db_timeout'] %>},
-                                       {prepared_statements, {bifrost_db, statements, []} },
+                                       {prepared_statements, none},
                                        {column_transforms, []}
                                       ]},
                             % This pool is used by default when no sqerl pool exists for a calling application.
@@ -328,21 +329,28 @@
     ]},
 
   {pooler, [
-           {pools, [[{name, sqerl},
-                     {max_count, <%= @oc_erchef['db_pool_size'] %>},
-                     {init_count, <%= @oc_erchef['db_pool_init'] || @oc_erchef['db_pool_size'] %>},
-                     {start_mfa, {sqerl_client, start_link, []}},
-                     {queue_max, <%= @oc_erchef['db_pool_queue_max'] %>}],
-                    [{name, bifrost},
-                     {max_count, <%= @oc_bifrost['db_pool_size'] %>},
-                     {init_count, <%= @oc_bifrost['db_pool_init'] || @oc_bifrost['db_pool_size'] %>},
-                     {start_mfa, {sqerl_client, start_link, [{pool, bifrost}]}},
-                     {queue_max, <%= @oc_bifrost['db_pool_queue_max'] %>}],
-                    [{name, chef_depsolver},
-                     {max_count, <%= @oc_erchef['depsolver_worker_count'] %>},
-                     {init_count, <%= @oc_erchef['depsolver_worker_count'] %>},
-                     {queue_max, <%= @oc_erchef['depsolver_pool_queue_max'] %>},
-                     {start_mfa, {chef_depsolver_worker, start_link, []}}]]},
+            {pools, [
+                     % The default sqerl connection pool, used when a pool context is not specified.
+                     [{name, sqerl},
+                      {max_count, <%= @oc_erchef['db_pool_max'] || @oc_erchef['db_pool_size'] %>},
+                      {init_count, <%= @oc_erchef['db_pool_init'] || @oc_erchef['db_pool_size'] %>},
+                      {start_mfa, {sqerl_client, start_link, []}},
+                      {queue_max, <%= @oc_erchef['db_pool_queue_max'] %>}
+                     ],
+                     % This is avasilable for ui:
+                     [{name, bifrost},
+                      {max_count, <%= @oc_bifrost['db_pool_max'] || @oc_bifrost['db_pool_size']  %>},
+                      {init_count, <%= @oc_bifrost['db_pool_init'] || @oc_bifrost['db_pool_size'] %>},
+                      {start_mfa, {sqerl_client, start_link, [{pool, bifrost}]}},
+                      {queue_max, <%= @oc_bifrost['db_pool_queue_max'] %>}
+                     ],
+                     [{name, chef_depsolver},
+                      {max_count, <%= @oc_erchef['depsolver_worker_count'] %>},
+                      {init_count, <%= @oc_erchef['depsolver_worker_count'] %>},
+                      {queue_max, <%= @oc_erchef['depsolver_pool_queue_max'] %>},
+                       {start_mfa, {chef_depsolver_worker, start_link, []}}
+                     ]
+              ]},
            {metrics_module, folsom_metrics}
           ]},
 
