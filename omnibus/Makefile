@@ -65,13 +65,13 @@ clear_pkg_cache: clear_pkg_cache_deb
 
 clear_pkg_cache_%:
 	cd .kitchen/kitchen-vagrant/kitchen-omnibus-default-$(DEV_PLATFORM) \
-	&& vagrant ssh -c 'rm -v -f /var/cache/omnibus/pkg/*.$*'
+	&& vagrant ssh -c 'rm -v -f /var/cache/omnibus/pkg/*.$* || true'
 	cd .kitchen/kitchen-vagrant/kitchen-omnibus-default-$(DEV_PLATFORM) \
-	&& vagrant ssh -c 'rm -v -f /var/cache/omnibus/pkg/*.$*.metadata.json'
+	&& vagrant ssh -c 'rm -v -f /var/cache/omnibus/pkg/*.$*.metadata.json || true'
 
 prune_%:
-	ls -1t pkg/*.$* | tail -n+2 | xargs rm -v
-	ls -1t pkg/*.$*.metadata.json | tail -n+2 | xargs rm -v
+	(ls -1t pkg/*.$* | tail -n+2 | xargs rm -v) || true
+	(ls -1t pkg/*.$*.metadata.json | tail -n+2 | xargs rm -v) || true
 
 
 # Bundle install and build chef-server
