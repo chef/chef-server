@@ -1,13 +1,13 @@
 #
 # Author:: Adam Jacob (<adam@chef.io>)
-# Copyright:: Copyright (c) 2011-2015 Chef Software, Inc.
+# Copyright:: Copyright (c) 2011-2016 Chef Software, Inc.
 #
 # All Rights Reserved
 
-oc_erchef = node['private_chef']['oc_erchef']
+oc_erchef = node['private_chef']['opscode-erchef']
 oc_bifrost = node['private_chef']['oc_bifrost']
-opscode_erchef_dir = oc_erchef['dir']
-rpscode_erchef_log_dir = oc_erchef['log_directory']
+opscode_erchef_dir =  oc_erchef['dir']
+opscode_erchef_log_dir = oc_erchef['log_directory']
 opscode_erchef_sasl_log_dir = File.join(opscode_erchef_log_dir, "sasl")
 [
   opscode_erchef_dir,
@@ -52,6 +52,8 @@ template erchef_config do
     oc_bifrost: oc_bifrost,
     ldap_enabled: ldap_authentication_enabled,
     ldap_encryption_type: ldap_encryption_type,
+    log_rotation: oc_erchef['log_rotation'],
+    log_directory: opscode_erchef_log_dir,
     enable_ssl: enable_ssl,
     actions_vip: actions_vip,
     actions_port: actions_port,
@@ -59,7 +61,7 @@ template erchef_config do
     actions_password: actions_password,
     actions_vhost: actions_vhost,
     actions_exchange: actions_exchange,
-    helper => OmnibusHelper.new(node)))
+    helper: OmnibusHelper.new(node)})
   notifies :run, 'execute[remove_erchef_siz_files]', :immediately
   notifies :restart, 'runit_service[opscode-erchef]' unless backend_secondary?
 end
