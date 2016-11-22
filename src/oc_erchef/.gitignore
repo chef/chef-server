@@ -20,3 +20,5 @@ deps.plt
 apps/chef_index/src/chef_lucene.erl
 VERSION
 _build
+log/
+*.coverdata
