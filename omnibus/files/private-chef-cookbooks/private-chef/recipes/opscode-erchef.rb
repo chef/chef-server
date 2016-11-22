@@ -50,11 +50,18 @@ template erchef_config do
   variables({
     oc_erchef: oc_erchef,
     oc_bifrost: oc_bifrost,
+    data_collector: node['private_chef']['data_collector'],
+
+    # Snowflakes to get rid of with top-level vars:
     ldap_enabled: ldap_authentication_enabled,
     ldap_encryption_type: ldap_encryption_type,
     log_rotation: oc_erchef['log_rotation'],
     log_directory: opscode_erchef_log_dir,
+    # We need to keep these because of the logic above in setting
+    # them based on other attributes.
     enable_ssl: enable_ssl,
+    # We can just pass in rabbitmq from above -
+    # we'll want to do rabbit_index and rabbit_actions because they can be different:
     actions_vip: actions_vip,
     actions_port: actions_port,
     actions_user: actions_user,

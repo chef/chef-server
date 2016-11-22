@@ -28,6 +28,8 @@ opscode-chef-mover
 # High level options
 ###
 default['private_chef']['api_version'] = "12.0.0"
+# TODO - pull this from build-time configj
+default['private_chef']['version'] = "12.11.1"
 default['private_chef']['flavor'] = "cs"
 default['private_chef']['install_path'] = "/opt/opscode"
 
