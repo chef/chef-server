@@ -30,7 +30,7 @@ translate(<<"OC001">>) -> group_cycle;
 translate(Code) -> sqerl_pgsql_errors:translate_code(Code).
 
 select(Statement, Params, Transform, TransformParams) ->
-    case sqerl:select(Statement, Params, Transform, TransformParams) of
+    case sqerl:select_with(sqerl:make_context(bifrost), Statement, Params, Transform, TransformParams) of
         {error, {Code, Message}} ->
             {error, {translate(Code), Message}};
         Other ->
@@ -38,7 +38,7 @@ select(Statement, Params, Transform, TransformParams) ->
     end.
 
 statement(Statement, Params, Transform) ->
-    case sqerl:statement(Statement, Params, Transform) of
+    case sqerl:statement_with(sqerl:make_context(bifrost), Statement, Params, Transform) of
         {error, {Code, Message}} ->
             {error, {translate(Code), Message}};
         Other ->
