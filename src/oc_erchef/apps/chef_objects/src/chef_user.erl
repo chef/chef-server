@@ -342,26 +342,29 @@ delete_null_public_key(Ejson) ->
             Ejson
     end.
 
-% Our user spec does not include 'username' because one of
-% 'name'|'username' may be present. Check for either/or here,
-% and use the ej:valid function to ensure consistent error
-% formatting in case of problem.
+%% Our user spec does not include 'username' because one of
+%% 'name'|'username' may be present. Check for either/or here,
+%% and use the ej:valid function to ensure consistent error
+%% formatting in case of problem.
+%%
+%% Prefer 'name' over 'username' since that is what we prefer in the
+%% function username_from_ejson/1.
 validate_user_name(User) ->
-  RE = chef_regex:regex_for(user_name),
-  UserNameSpec = {[ {<<"username">>, {string_match, RE}} ]},
-  NameSpec = {[ {<<"name">>, {string_match, RE}} ]},
-  case ej:valid(UserNameSpec, User) of
-    ok -> ok;
-    #ej_invalid{type = missing} ->
-      case ej:valid(NameSpec, User) of
-        ok ->
-          ok;
+    RE = chef_regex:regex_for(user_name),
+    NameSpec = {[ {<<"name">>, {string_match, RE}} ]},
+    UserNameSpec = {[ {<<"username">>, {string_match, RE}} ]},
+    case ej:valid(NameSpec, User) of
+        ok -> ok;
+        #ej_invalid{type = missing} ->
+            case ej:valid(UserNameSpec, User) of
+                ok ->
+                    ok;
+                BadSpec ->
+                    throw(BadSpec#ej_invalid{key = <<"username">>})
+            end;
         BadSpec ->
-          throw(BadSpec#ej_invalid{key = <<"username">>})
-      end;
-    BadSpec ->
-      throw(BadSpec)
- end.
+            throw(BadSpec)
+    end.
 
 password_data(#chef_user{hashed_password = HashedPassword,
                                          salt = Salt,

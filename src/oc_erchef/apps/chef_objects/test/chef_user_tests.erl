@@ -249,6 +249,24 @@ parse_binary_json_tests(Version) ->
               ?_assertMatch({ok, _}, chef_user:parse_binary_json(Version, chef_json:encode(UserEJson2), create, undefined))
       end
      },
+     {?VD("Ignores invalid username if name exists"),
+      fun() ->
+              UserEJson = {make_min_valid_create_user_ejson()},
+              UserEJson1 = ej:set({<<"name">>}, UserEJson, <<"validname">>),
+              UserEJson2 = ej:set({<<"username">>}, UserEJson1, <<"invalid!">>),
+              Actual = chef_user:parse_binary_json(Version, chef_json:encode(UserEJson2), create, undefined),
+              ?_assertMatch({ok, _}, Actual)
+      end
+     },
+     {?VD("Errors on invalid name even if valid username exists"),
+      fun() ->
+              UserEJson = {make_min_valid_create_user_ejson()},
+              UserEJson1 = ej:set({<<"username">>}, UserEJson, <<"validname">>),
+              UserEJson2 = ej:set({<<"name">>}, UserEJson1, <<"invalid!">>),
+              ?assertThrow(#ej_invalid{key= <<"name">>},
+                           chef_user:parse_binary_json(Version, chef_json:encode(UserEJson2), create, undefined))
+      end
+     },
      {?VD("Error thrown with bad name"),
       fun() ->
               UserEJson = {make_min_valid_create_user_ejson()},
