@@ -70,10 +70,6 @@ dependency "gpg-key"
 dependency "keepalived"
 dependency "bookshelf"
 
-# the front-end services
-dependency "oc_bifrost"
-dependency "oc_id"
-
 # log management
 dependency "logrotate"
 
