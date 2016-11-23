@@ -73,7 +73,7 @@
         {bulk_fetch_batch_size, <%= @oc_erchef['bulk_fetch_batch_size'] %>},
         {superusers, [<<"pivotal">>]},
         %% metrics config
-        {root_metric_key, "<%= @root_metric_key %>"},
+        {root_metric_key, "<%= @oc_erchef['root_metric_key'] %>"},
 
         {authz_timeout, <%= @oc_erchef['authz_timeout'] %>},
         {authz_fanout, <%= @oc_erchef['authz_fanout'] %>},
@@ -289,7 +289,7 @@
                                        {db_name, "bifrost" },
                                        {idle_check, 10000},
                                        {db_timeout, <%= @oc_bifrost['sql_db_timeout'] %>},
-                                       {prepared_statements, none},
+                                       {prepared_statements, { bifrost_db, statements, [] }},
                                        {column_transforms, []}
                                       ]},
                             % This pool is used by default when no sqerl pool exists for a calling application.
@@ -313,12 +313,20 @@
                             ]}
       ]},
     {webmachine, [
-        {log_handlers, [
+          {log_handlers, [
+            {webmachine_perf_log_handler, [
+                {file, "<%= File.join(@log_directory, 'wm-perf.log') %>"},
+                {file_size, <%= (@log_rotation['file_maxbytes'].to_f/1024/1024).round %>},  %% Size in MB
+                 {files, <%= @log_rotation['num_to_keep'] %>} ]},
             {oc_wm_request_logger, [
                 {file, "<%= File.join(@log_directory, 'requests.log') %>"},
                 {file_size, <%= (@log_rotation['file_maxbytes'].to_f/1024/1024).round %>},  %% Size in MB
                 {files, <%= @log_rotation['num_to_keep'] %>},
-                {annotations, [req_id, org_name, msg, darklaunch, perf_stats, user, req_api_version]}
+                 {annotations, [req_id, org_name, msg, darklaunch, perf_stats, user, req_api_version,
+                                % bifrost only - but it only shows things that are present, so it own't harm
+                                requestor_id, created_authz_id, perf_stats, msg
+
+                               ]}
             ]}
         ]}
     ]},
