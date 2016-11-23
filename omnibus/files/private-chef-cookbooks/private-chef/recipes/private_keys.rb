@@ -45,7 +45,7 @@ webui_priv_key_path = "/etc/opscode/webui_priv.pem"
 webui_key = if File.exists?(webui_priv_key_path)
                 OpenSSL::PKey::RSA.new(File.read(webui_priv_key_path))
             else
-                webui_key = OpenSSL::PKey::RSA.generate(2048) if new_webui
+                webui_key = OpenSSL::PKey::RSA.generate(2048)
             end
 
   file "/etc/opscode/webui_pub.pem" do
