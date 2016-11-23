@@ -69,6 +69,7 @@ dependency "gpg-key"
 
 dependency "keepalived"
 dependency "bookshelf"
+dependency "oc_id"
 
 # log management
 dependency "logrotate"
