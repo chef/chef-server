@@ -11,7 +11,7 @@ s3_bucket      'opscode-omnibus-cache'
 
 # Customize compiler bits
 # ------------------------------
-build_retries 3
+build_retries 0 #TODO NOPE
 fetcher_read_timeout 120
 
 # Load additional software
