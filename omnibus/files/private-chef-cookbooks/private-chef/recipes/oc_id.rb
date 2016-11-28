@@ -172,6 +172,11 @@ nginx_dir = node['private_chef']['nginx']['dir']
 nginx_etc_dir = File.join(nginx_dir, "etc")
 nginx_addon_dir = File.join(nginx_etc_dir, "addon.d")
 
+directory nginx_addon_dir do
+  action :create
+  recursive true
+end
+
 # LB configs
 ["upstreams", "external"].each do |config|
   file = File.join(nginx_addon_dir, "40-oc_id_#{config}.conf")

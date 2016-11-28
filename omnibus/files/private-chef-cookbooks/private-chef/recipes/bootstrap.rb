@@ -24,7 +24,7 @@ if (!OmnibusHelper.has_been_bootstrapped? &&
 end
 
 # These should always be running by this point, but let's be certain.
-%w{postgresql oc_bifrost}.each do |service|
+%w{postgresql oc_bifrost opscode-erchef}.each do |service|
   execute "/opt/opscode/bin/chef-server-ctl start #{service}" do
     not_if { OmnibusHelper.has_been_bootstrapped? }
   end
