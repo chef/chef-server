@@ -10,11 +10,12 @@
 # replaces.
 #
 execute "/opt/opscode/bin/private-chef-ctl stop opscode-authz" do
-  retries 20
+  retries 5
+  only_if{ ::Dir.exist? '/opt/opscode/sv/opscode-authz' }
 end
 
-runit_service "opscode-authz" do
-  action :disable
+component_runit_supervisor "opscode-authz" do
+  action :delete
 end
 
 directory "/opt/opscode/sv/opscode-authz" do
@@ -23,41 +24,36 @@ directory "/opt/opscode/sv/opscode-authz" do
 end
 # END AUTHZ CLEANUP
 
-oc_bifrost_dir = node['private_chef']['oc_bifrost']['dir']
-oc_bifrost_bin_dir = File.join(oc_bifrost_dir, "bin")
-oc_bifrost_log_dir = node['private_chef']['oc_bifrost']['log_directory']
-oc_bifrost_sasl_log_dir = File.join(oc_bifrost_log_dir, "sasl")
-[
-  oc_bifrost_dir,
-  oc_bifrost_bin_dir,
-  oc_bifrost_log_dir,
-  oc_bifrost_sasl_log_dir
-].each do |dir_name|
-  directory dir_name do
-    owner OmnibusHelper.new(node).ownership['owner']
-    group OmnibusHelper.new(node).ownership['group']
-    mode node['private_chef']['service_dir_perms']
-    recursive true
-  end
+# BEGIN oc_bifrost CLEAN
+# It is now part of oc_erchef
+execute "/opt/opscode/bin/chef-server-ctl stop oc_bifrost" do
+  retries 5
+  only_if{ ::Dir.exist? '/opt/opscode/sv/oc_bifrost' }
 end
 
-link "/opt/opscode/embedded/service/oc_bifrost/log" do
-  to oc_bifrost_log_dir
+
+component_runit_supervisor "oc_bifrost" do
+  action :delete
 end
 
-oc_bifrost_config = File.join(oc_bifrost_dir, "sys.config")
-
-template oc_bifrost_config do
-  source "oc_bifrost.config.erb"
-  owner OmnibusHelper.new(node).ownership['owner']
-  group OmnibusHelper.new(node).ownership['group']
-  mode "644"
-  variables(node['private_chef']['oc_bifrost'].to_hash)
-  notifies :restart, 'runit_service[oc_bifrost]' unless backend_secondary?
+directory node['private_chef']['oc_bifrost']['dir'] do
+  action :delete
+  recursive true
 end
 
-link "/opt/opscode/embedded/service/oc_bifrost/sys.config" do
-  to oc_bifrost_config
+directory '/opt/opscode/sv/oc_bifrost' do
+  action :delete
+  recursive true
+end
+directory '/opt/opscode/service/oc_bifrost' do
+  action :delete
+  recursive true
 end
 
-component_runit_service "oc_bifrost"
+file File.join(node['private_chef']['oc_bifrost']['dir'], "sys.config") do
+  action :delete
+end
+file "/opt/opscode/embedded/service/oc_bifrost/sys.config" do
+  action :delete
+end
+

@@ -43,16 +43,18 @@ init([]) ->
                                                  "dispatch.conf"])),
 
     WebConfig = [
+                 {name, rest_bifrost},
+                 {dispatch_group, rest_bifrost},
                  {ip, Ip},
                  {port, Port},
+                 % TODO - why is this here, and not pulling from config?
                  {log_dir, "priv/log"},
                  {dispatch, add_dynamic_config(Dispatch)},
                  {nodelay, true} % TCP 'no delay' for latency
                 ],
 
-    Web = {webmachine_mochiweb,
-           {webmachine_mochiweb, start, [WebConfig]},
-           permanent, 5000, worker, dynamic},
+    Web = {rest_bifrost,
+           {webmachine_mochiweb, start, [WebConfig]}, permanent, 5000, worker, dynamic},
 
     Processes = [Web],
     {ok, {{one_for_one, 10, 10}, Processes}}.

@@ -41,6 +41,7 @@ build do
 
   make "omnibus", env: env
 
+  sync "#{project_dir}/apps/oc_bifrost/schema", "#{install_dir}/embedded/service/oc_erchef/bifrost_schema"
   sync "#{project_dir}/_build/#{profile_name}/rel/oc_erchef/", "#{install_dir}/embedded/service/opscode-erchef/", exclude: ['**/.git', '**/.gitignore']
   delete "#{install_dir}/embedded/service/opscode-erchef/log"
 end

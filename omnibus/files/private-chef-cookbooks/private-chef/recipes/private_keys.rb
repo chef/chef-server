@@ -24,34 +24,40 @@
 # is the node adding the pivotal user.
 
 pivotal_key_path = "/etc/opscode/pivotal.pem"
-new_pivotal = !File.exists?(pivotal_key_path)
-pivotal_key = OpenSSL::PKey::RSA.generate(2048) if new_pivotal
+pivotal_key = if File.exists?(pivotal_key_path)
+                OpenSSL::PKey::RSA.new(File.read(pivotal_key_path))
+              else
+                OpenSSL::PKey::RSA.generate(2048)
+              end
 
 # Setting at the top level so that we don't export this to chef-server-running.json
-node.set['bootstrap']['superuser_public_key'] = pivotal_key.public_key.to_s if new_pivotal
+node.default['bootstrap']['superuser_public_key'] = pivotal_key.public_key.to_s
 
 file pivotal_key_path do
   owner OmnibusHelper.new(node).ownership['owner']
   group "root"
   mode "0600"
-  content pivotal_key.to_pem.to_s if new_pivotal
+  content pivotal_key.to_pem.to_s
   sensitive true
 end
 
 webui_priv_key_path = "/etc/opscode/webui_priv.pem"
-new_webui = !File.exists?(webui_priv_key_path)
-webui_key = OpenSSL::PKey::RSA.generate(2048) if new_webui
+webui_key = if File.exists?(webui_priv_key_path)
+                OpenSSL::PKey::RSA.new(File.read(webui_priv_key_path))
+            else
+                webui_key = OpenSSL::PKey::RSA.generate(2048)
+            end
 
-file "/etc/opscode/webui_pub.pem" do
+  file "/etc/opscode/webui_pub.pem" do
   owner "root"
   group "root"
   mode "0644"
-  content webui_key.public_key.to_s if new_webui
+  content webui_key.public_key.to_s
 end
 
 file webui_priv_key_path do
   owner OmnibusHelper.new(node).ownership['owner']
   group "root"
   mode "0600"
-  content webui_key.to_pem.to_s if new_webui
+  content webui_key.to_pem.to_s
 end

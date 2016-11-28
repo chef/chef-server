@@ -33,7 +33,8 @@
                   tools,
                   uuid,
                   webtool,
-                  data_collector
+                  data_collector,
+                  bifrost
                  ]},
   {mod, { oc_erchef_app, []}},
   {env, []}

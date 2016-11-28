@@ -53,12 +53,15 @@ init([]) ->
     Ip = envy:get(oc_chef_wm, ip, string),
     Port = envy:get(oc_chef_wm, port, pos_integer),
     WebConfig = [
+                 {name, rest_erchef},
+                 {dispatch_group, rest_erchef},
                  {ip, Ip},
                  {port, Port},
+                 % TODO - why is this here, and not pulling from config?
                  {log_dir, "priv/log"},
                  {dispatch, dispatch_table()}],
 
-    Web = {webmachine_mochiweb,
+    Web = {rest_erchef,
            {webmachine_mochiweb, start, [WebConfig]},
            permanent, 5000, worker, dynamic},
 
