@@ -186,20 +186,18 @@ class ChefServerDataBootstrap
       else
         RestClient.send(method, "http://#{bifrost['vip']}:#{bifrost['port']}/#{rel_path}",  body, headers)
       end
-    rescue RestClient::Exception => e
+    rescue RestClient::Exception, Errno::ECONNREFUSED => e
+      error = e.respond_to?(:response) ? e.response.chomp : e.message
       if retries > 0
         sleep_time = 2**((5 - retries))
         retries -= 1
-        Chef::Log.warn "Error from bifrost: #{e.response.chomp}, retrying after #{sleep_time}s. Retries remaining: #{retries}"
+        Chef::Log.warn "Error from bifrost: #{error}, retrying after #{sleep_time}s. Retries remaining: #{retries}"
         sleep sleep_time
         retry
       else
-        Chef::Log.error "Error from bifrost #{e.response.chomp}, retries have been exhausted"
+        Chef::Log.error "Error from bifrost: #{error}, retries have been exhausted"
         raise
       end
     end
-
   end
-
 end
-
