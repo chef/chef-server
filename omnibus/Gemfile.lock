@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/chef/license_scout.git
-  revision: 3a4298c7c637d2ece9f9faef24a5473d2e6d2058
+  revision: 117084aa76a5dcbcb751e2be8f6e997b1440b74d
   specs:
     license_scout (0.1.2)
       ffi-yajl (~> 2.2)
@@ -8,7 +8,7 @@ GIT
 
 GIT
   remote: git://github.com/chef/omnibus-software.git
-  revision: 5b05141342680cb2546bf81ca932e90db73622e2
+  revision: 32196fe31fa62ebb11960626ac412a5eff9138ec
   specs:
     omnibus-software (4.0.0)
       chef-sugar (>= 3.4.0)
@@ -16,7 +16,7 @@ GIT
 
 GIT
   remote: git://github.com/chef/omnibus.git
-  revision: a941ac3ceaafbf50b311403dff8f8d0c5c5dbde9
+  revision: e478d5dabf05a803047e56dbcdcf6b3b61e1bde6
   specs:
     omnibus (5.5.0)
       aws-sdk (~> 2)
@@ -34,13 +34,13 @@ GEM
   remote: https://rubygems.org/
   specs:
     addressable (2.4.0)
-    aws-sdk (2.6.23)
-      aws-sdk-resources (= 2.6.23)
-    aws-sdk-core (2.6.23)
+    aws-sdk (2.6.29)
+      aws-sdk-resources (= 2.6.29)
+    aws-sdk-core (2.6.29)
       aws-sigv4 (~> 1.0)
       jmespath (~> 1.0)
-    aws-sdk-resources (2.6.23)
-      aws-sdk-core (= 2.6.23)
+    aws-sdk-resources (2.6.29)
+      aws-sdk-core (= 2.6.29)
     aws-sigv4 (1.0.0)
     berkshelf (4.3.5)
       addressable (~> 2.3, >= 2.3.4)
@@ -243,7 +243,7 @@ GEM
       sfl
     syslog-logger (1.6.8)
     systemu (2.6.5)
-    thor (0.19.1)
+    thor (0.19.4)
     timers (4.0.4)
       hitimes
     uuidtools (2.1.5)
