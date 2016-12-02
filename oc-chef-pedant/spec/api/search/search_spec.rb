@@ -1,4 +1,4 @@
-# Copyright: Copyright (c) 2012 Opscode, Inc.
+# Copyright: Copyright (c) 2012-2016 Chef Software, Inc.
 # License: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -65,6 +65,7 @@ describe 'Search API endpoint', :search do
       let(:request_method){:GET}
       can_perform_basic_searches_for :environment
       can_perform_a_search_that_is_acl_filtered_for :environment
+      can_perform_a_search_with_limited_rows_for :environment
     end # GET
 
     context 'POST'  do
@@ -96,6 +97,7 @@ describe 'Search API endpoint', :search do
       can_perform_basic_searches_for :node
 
       can_perform_a_search_that_is_acl_filtered_for :node
+      can_perform_a_search_with_limited_rows_for :node
 
       unless Pedant.config['old_runlists_and_search']
         recipe_variants("pedant_testing_cookbook", "1.0.0").each do |run_list_recipe|
@@ -333,6 +335,7 @@ describe 'Search API endpoint', :search do
       let(:request_method){:GET}
       can_perform_basic_searches_for :role
       can_perform_a_search_that_is_acl_filtered_for :role
+      can_perform_a_search_with_limited_rows_for :role
     end # GET
 
     # Partial Search
