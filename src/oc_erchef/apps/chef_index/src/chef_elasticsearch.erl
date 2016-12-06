@@ -31,7 +31,7 @@ update(Body) ->
                     {error, {solr_400, string()}} |
                     {error, {solr_500, string()}}.
 search(#chef_solr_query{} = Query) ->
-    Url = "/chef/_search?scroll=1m",
+    Url = "/chef/_search",
     {ok, Code, _Head, Body} = chef_index_http:request(Url, get, query_body(Query)),
     case Code of
         "200" ->
@@ -45,33 +45,11 @@ search(#chef_solr_query{} = Query) ->
     end.
 
 handle_successful_search(ResponseBody) ->
-    EjsonBody = jiffy:decode(ResponseBody),
-    ScrollId = ej:get({<<"_scroll_id">>}, EjsonBody),
-    Response = ej:get({<<"hits">>}, EjsonBody),
+    Response = ej:get({<<"hits">>}, jiffy:decode(ResponseBody)),
     NumFound = ej:get({<<"total">>}, Response),
     DocList  = ej:get({<<"hits">>}, Response),
     Ids = [ ej:get({<<"_id">>}, Doc) || Doc <- DocList ],
-    scroll(ScrollId, NumFound, length(Ids), Ids).
-
-scroll(ScrollId, NumFound, NumFound, Ids) ->
-    ok = chef_index_http:delete("/_search/scroll", ScrollId),
-    {ok, undefined, NumFound, Ids};
-scroll(ScrollId, NumFound, _, Ids) ->
-    Url = "/_search/scroll?scroll=1m",
-    {ok, Code, _Head, Body} = chef_index_http:request(Url, get, ScrollId),
-    case Code of
-        "200" ->
-            DocList = ej:get({<<"hits">>, <<"hits">>}, jiffy:decode(Body)),
-            NewIds = [ ej:get({<<"_id">>}, Doc) || Doc <- DocList ],
-            AllIds = lists:append([ Ids, NewIds ]),
-            scroll(ScrollId, NumFound, length(AllIds), AllIds);
-        %% For now keep these error messages
-        %% consistent with chef_solr
-        "400" ->
-            {error, {solr_400, Url}};
-        "500" ->
-            {error, {solr_500, Url}}
-    end.
+    {ok, undefined, NumFound, Ids}.
 
 transform_data(Data) ->
     Data.
@@ -138,7 +116,7 @@ delete_search_db_by_type(OrgId, Type)
                              query_string = chef_index_query:search_db_from_orgid(OrgId) ++
                                 "AND" ++ chef_index_query:search_type_constraint(Type)
                             },
-    {ok, _, _, Ids} = search(Query),
+    {ok, _, _, Ids} = search_with_scroll(Query),
     delete_ids(Ids).
 
 -spec delete_search_db(OrgId :: binary()) -> ok.
@@ -149,8 +127,54 @@ delete_search_db(OrgId) ->
                              search_provider = elasticsearch,
                              query_string = chef_index_query:search_db_from_orgid(OrgId)
                             },
-    {ok, _, _, Ids} = search(Query),
+    {ok, _, _, Ids} = search_with_scroll(Query),
     delete_ids(Ids).
+
+%% Do a search query using the Elasticsearch Scroll API. We only use this when
+%% doing the search used for reindexing.
+-spec search_with_scroll(#chef_solr_query{}) ->
+                    {ok, non_neg_integer(), non_neg_integer(), [binary()]} |
+                    {error, {solr_400, string()}} |
+                    {error, {solr_500, string()}}.
+search_with_scroll(#chef_solr_query{} = Query) ->
+    Url = "/chef/_search?scroll=1m",
+    {ok, Code, _Head, Body} = chef_index_http:request(Url, get, query_body(Query)),
+    case Code of
+        "200" ->
+            EjsonBody = jiffy:decode(Body),
+            ScrollId = ej:get({<<"_scroll_id">>}, EjsonBody),
+            Response = ej:get({<<"hits">>}, EjsonBody),
+            NumFound = ej:get({<<"total">>}, Response),
+            DocList  = ej:get({<<"hits">>}, Response),
+            Ids = [ ej:get({<<"_id">>}, Doc) || Doc <- DocList ],
+            scroll(ScrollId, NumFound, length(Ids), Ids);
+        %% For now keep these error messages
+        %% consistent with chef_solr
+        "400" ->
+            {error, {solr_400, Url}};
+        "500" ->
+            {error, {solr_500, Url}}
+    end.
+
+scroll(ScrollId, NumFound, NumFound, Ids) ->
+    ok = chef_index_http:delete("/_search/scroll", ScrollId),
+    {ok, undefined, NumFound, Ids};
+scroll(ScrollId, NumFound, _, Ids) ->
+    Url = "/_search/scroll?scroll=1m",
+    {ok, Code, _Head, Body} = chef_index_http:request(Url, get, ScrollId),
+    case Code of
+        "200" ->
+            DocList = ej:get({<<"hits">>, <<"hits">>}, jiffy:decode(Body)),
+            NewIds = [ ej:get({<<"_id">>}, Doc) || Doc <- DocList ],
+            AllIds = lists:append([ Ids, NewIds ]),
+            scroll(ScrollId, NumFound, length(AllIds), AllIds);
+        %% For now keep these error messages
+        %% consistent with chef_solr
+        "400" ->
+            {error, {solr_400, Url}};
+        "500" ->
+            {error, {solr_500, Url}}
+    end.
 
 delete_ids([]) ->
     ok = commit(),

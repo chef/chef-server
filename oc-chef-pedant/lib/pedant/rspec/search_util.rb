@@ -1,4 +1,4 @@
-# Copyright: Copyright (c) 2012 Opscode, Inc.
+# Copyright: Copyright (c) 2012-2016 Chef Software, Inc.
 # License: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -322,6 +322,46 @@ module Pedant
             performing_a_search "should return all testing #{object_type}s"
           end
         end # can_perform_basic_searches_for
+
+        # Search for limited rows to see if we get the correct number back.
+        # Where we're using this we can assume `setup_multiple_objects` has
+        # already been called and we have 5 of the thing we're looking for.
+        def can_perform_a_search_with_limited_rows_for(object_type)
+          context "when searching for a limited number of rows" do
+            let(:rows) { 2 }
+            # This will make it so we only search for the things that are being
+            # created here, and not things like the _default environment.
+            let(:query) { "name:pedant_multiple_*" }
+
+            before :each do
+              force_solr_commit
+            end
+
+            it "returns the limited number of rows" do
+              expect(
+                parse(
+                  search_result object_type, "#{query}&rows=#{rows}"
+                )["rows"].length
+              ).to eq rows
+            end
+
+            it "honors the start parameter" do
+              expect(
+                parse(
+                  search_result object_type, "#{query}&start=#{rows}"
+                )["rows"].length
+              ).to eq(objects.length - rows)
+            end
+
+            it "has 0 rows when starting at the last item" do
+              expect(
+                parse(
+                  search_result object_type, "#{query}&start=#{objects.length}"
+                )["rows"].length
+              ).to eq 0
+            end
+          end
+        end
 
         # Creates an object of the given type, with `attribute_value`
         # stored under `attribute_key`.  Performs a partial search to
@@ -830,6 +870,15 @@ module Pedant
         do_search(type, name, false)
       end
 
+      def should_not_find_any(type)
+        with_search_polling do
+          result = authenticated_request(:GET, api_url("/search/#{type}"), requestor, {})
+          result.should have_status_code 200
+          total = parse(result)["total"]
+          total.should eq(0)
+        end
+      end
+
       def do_search(type, name, should_find=true)
         with_search_polling do
           result = authenticated_request(:GET, api_url("/search/#{type}"), requestor, {})
@@ -867,7 +916,7 @@ module Pedant
         should_not_find("role", role_name)
         should_not_find("environment", environment_name)
         should_not_find("client", admin_client.name)
-        should_not_find(temporary_data_bag_name, "test_item")
+        should_not_find_any(temporary_data_bag_name)
 
         # Now, send everything to be re-indexed
         `#{executable} reindex #{reindex_args.join(" ")} #{Pedant::Config.reindex_endpoint}`
