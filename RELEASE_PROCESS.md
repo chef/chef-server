@@ -19,7 +19,7 @@ release.
 
 In order to release, you will need the following accounts/permissions:
 
-- Local checkouts of the chef-server and chef-web-downloads repositories
+- Local checkout of the chef-server repository
 - Push access to the chef-server github repository
 - Chef Software, Inc Slack account
 - VPN account for Chef Software, Inc.
@@ -134,40 +134,17 @@ The git SHA of the build you are testing can be found in
   above as the GIT_REF parameter.
 
 - [ ] Wait for the pipeline to complete.
-- [ ] Use julia to promote the build: `@julia artifactory promote
+- [ ] Use julia to promote the build:
 
-  chef-server VERSION`.  Please do this in the
-  `#eng-services-support` room.  Once this is done, the release is
-  available to the public via the APT and YUM repositories.
+        @julia artifactory promote chef-server VERSION
+
+  Please do this in the `#eng-services-support` room.  Once this is
+  done, the release is available to the public via the APT and YUM
+  repositories and downloads.chef.io.
 
 - [ ] Chef employees should already know a release is coming; however, as a
   courtesy, drop a message in the #cft-announce slack channel that the release
   is coming. Provide the release number and any highlights of the release.
-
-- [ ] In your local checkout of the chef-web-downloads repository,
-generate an update to the download pages using rake:
-
-```
-git co -b YOUR_INITIALS/release-chef-server-VERSION
-rake fetch[chef-server]
-git add data/
-# make sure all the changes are what you expect
-# write a simple commit message
-git commit -v
-```
-
-- [ ] Create a delivery change request. See the README in
-  chef-web-downloads for setup instructions if this doesn't work.
-
-```
-delivery review
-```
-
-- [ ] Have someone review and approve the change request.
-
-- [ ] Once committed to master, an automated process will make the
-  change to the live website; however, it might take a few minutes for
-  the deploy to complete and then a few more for CDN caches to expire.
 
 - [ ] Write and then publish a Discourse post on https://discourse.chef.io
   once the release is live. This post should contain a link to the downloads
