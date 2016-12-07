@@ -124,7 +124,7 @@ http {
   server {
     <%= @helper.listen_port(node['private_chef']['lb_internal']['chef_port']) %>
     # The name doesn't matter; this is the only listener on this port
-    server_name <%= node['fqdn'] %>;
+    server_name <%= @server_name %>;
 
     client_max_body_size <%= @client_max_body_size %>;
     proxy_set_header        Host            $host;
@@ -156,7 +156,7 @@ http {
   # internal service access for oc_bifrost
   server {
     <%= @helper.listen_port(node['private_chef']['lb_internal']['oc_bifrost_port']) %>
-    server_name <%= node['fqdn'] %>;
+    server_name <%= @server_name %>;
 
     client_max_body_size <%= @client_max_body_size %>;
     proxy_set_header        Host            $host;
