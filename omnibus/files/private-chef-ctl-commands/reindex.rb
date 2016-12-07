@@ -102,7 +102,17 @@ add_command_under_category "reindex", "general", "Reindex all server data for a 
 
   OptionParser.new do |opts|
     opts.on("-w", "--wait", "Wait for reindex queue to clear before exiting") do |w|
-      options[:wait] = w
+      # Don't attempt to wait if the search_queue_mode is "batch"
+      search_queue_mode = running_config["private_chef"]["opscode-erchef"]["search_queue_mode"]
+      if search_queue_mode == "batch"
+        $stderr.puts <<-EOF
+The search queue mode is currently configured to be "#{search_queue_mode}."
+Ignoring "wait" option.
+EOF
+        options[:wait] = false
+      else
+        options[:wait] = w
+      end
     end
 
     opts.on("-d", "--disable-api", "Disable writes during reindexing") do |n|
