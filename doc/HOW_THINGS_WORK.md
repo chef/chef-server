@@ -7,8 +7,9 @@ consider writing an explanation here.
 
 Chef Server performs searches by querying a search index. This index
 is updated on every write to the Chef Server. That is, every time we
-write to oc_erchef's postgresql database, we usually also need to
-write to the search index.
+write to oc_erchef's postgresql database to update an object (such as
+a node, data bag, role, etc.), we usually also need to write to the
+search index.
 
 This section describes how data gets from erchef to the search index.
 For how we query this data later, see Search Queries.
@@ -46,7 +47,9 @@ and returns a response to the user.  Another service named
 `opscode-expander` reads the object from the queue, expands it (see
 Document Expansion for details), and posts it to solr. Note that a
 failure to write to the search index will not trigger a failure of the
-API request that wrote the data since it happens asynchronously via a queue.
+API request that wrote the data since it happens asynchronously via a
+queue. However, a failure to place the item on rabbitmq will cause a
+500 error.
 
 ### Batch
 ```
@@ -121,7 +124,7 @@ straightforward:
 Thus, unlike in `rabbitmq` mode, the request to the search index
 happens synchronously and the API request will fail if the search
 index update fails.  Unlike `batch`, each write request to erchef will
-generate a request to the search index.
+generate an immediate inline request to the search index.
 
 ### Document Expansion
 
@@ -168,7 +171,7 @@ Namely:
 
 - "Leaf" attributes are also indexed without their leading key
   elements to make searching for deeply nested values easier. (note
-  the `attr2__=__foo` and the `attr1_attr1__=__foo`). One consequence
+  the `attr2__=__foo` and the `attr1_attr2__=__foo`). One consequence
   of this is that top-level attributes and "leaf" attributes are
   indistinguishable to the search index.  This means that a search for
   `role:foo` might return more than the user expected if a leaf
@@ -215,7 +218,7 @@ object types and organizations.
    search. The search index does *NOT* return data.
 
 4. Erchef queries the database for each object returned by the
-   searhc. Any IDs that do not exist in the database are
+   search. Any IDs that do not exist in the database are
    ignored. If strict_search_result_acls is enabled, results that the
    requesting user does not have permission to READ are also filtered
    from the results set.
