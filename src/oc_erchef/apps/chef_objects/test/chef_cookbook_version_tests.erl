@@ -53,10 +53,16 @@ basic_cookbook(Name, Version, Options) ->
                         ]}}
      ]}.
 
-minimal_cookbook_is_valid_test() ->
+minimal_cookbook_v0_is_valid_test() ->
     CookbookEjson = basic_cookbook(<<"php">>, <<"1.2.3">>),
-    Got = chef_cookbook_version:validate_cookbook(CookbookEjson, {<<"php">>, <<"1.2.3">>}),
+    Got = chef_cookbook_version:validate_cookbook(CookbookEjson, {<<"php">>, <<"1.2.3">>}, false),
     ?assertEqual({ok, CookbookEjson}, Got).
+
+minimal_cookbook_v2_is_valid_test() ->
+    CookbookEjson = basic_cookbook(<<"php">>, <<"1.2.3">>),
+    Got = chef_cookbook_version:validate_cookbook(CookbookEjson, {<<"php">>, <<"1.2.3">>}, true),
+    ?assertEqual({ok, CookbookEjson}, Got).
+
 
 valid_resources_test() ->
     CB0 = basic_cookbook(<<"php">>, <<"1.2.3">>),
@@ -68,7 +74,7 @@ valid_resources_test() ->
                    {<<"checksum">>, <<"abababababababababababababababab">>},
                    {<<"specificity">>, <<"default">>}
                   ]}]),
-    ?assertEqual({ok, CB}, chef_cookbook_version:validate_cookbook(CB, NameVer)).
+    ?assertEqual({ok, CB}, chef_cookbook_version:validate_cookbook(CB, NameVer, false)).
 
 top_level_key_validation_test() ->
     Name = <<"test_name">>,
@@ -79,7 +85,7 @@ top_level_key_validation_test() ->
       fun() ->
               C = ej:set({<<"not_valid_key">>}, Cookbook, <<"some junk">>),
               ?assertThrow({invalid_key, <<"not_valid_key">>},
-                           chef_cookbook_version:validate_role(C, {Name, Version}))
+                           chef_cookbook_version:validate_cookbook(C, {Name, Version}, false))
       end}
     ].
 
@@ -91,21 +97,21 @@ bad_resources_test_() ->
       fun() ->
               CB = ej:set({<<"resources">>}, CB0, {[]}),
               ?assertThrow(#ej_invalid{type = json_type},
-                           chef_cookbook_version:validate_cookbook(CB, NameVer))
+                           chef_cookbook_version:validate_cookbook(CB, NameVer, false))
       end},
 
      {"resource value must be an array not a string",
       fun() ->
               CB = ej:set({<<"resources">>}, CB0, <<"not-this">>),
               ?assertThrow(#ej_invalid{type = json_type},
-                           chef_cookbook_version:validate_cookbook(CB, NameVer))
+                           chef_cookbook_version:validate_cookbook(CB, NameVer, false))
       end},
 
      {"resource array value must not be empty",
       fun() ->
               CB = ej:set({<<"resources">>}, CB0, [{[]}]),
               ?assertThrow(#ej_invalid{type = array_elt},
-                           chef_cookbook_version:validate_cookbook(CB, NameVer))
+                           chef_cookbook_version:validate_cookbook(CB, NameVer, false))
       end}
 
     ].
@@ -123,7 +129,7 @@ valid_dependencies_test() ->
                   {<<"cc">>, <<"<= 1.2.3">>},
                   {<<"dd">>, <<"4.4.4">>}
                  ]}),
-    ?assertEqual({ok, CB}, chef_cookbook_version:validate_cookbook(CB, NameVer)).
+    ?assertEqual({ok, CB}, chef_cookbook_version:validate_cookbook(CB, NameVer, false)).
 
 bad_dependencies_test_() ->
     CB0 = basic_cookbook(<<"php">>, <<"1.2.3">>),
@@ -136,7 +142,7 @@ bad_dependencies_test_() ->
                             {<<"not valid name">>, <<"> 1.0.0">>}
                            ]}),
               ?assertThrow(#ej_invalid{type = object_key},
-                           chef_cookbook_version:validate_cookbook(CB, NameVer))
+                           chef_cookbook_version:validate_cookbook(CB, NameVer, false))
 
       end},
 
@@ -147,7 +153,7 @@ bad_dependencies_test_() ->
                             {<<"apache2">>, <<"1b">>}
                            ]}),
               ?assertThrow(#ej_invalid{type = object_value},
-                           chef_cookbook_version:validate_cookbook(CB, NameVer))
+                           chef_cookbook_version:validate_cookbook(CB, NameVer, false))
 
       end}
 
@@ -174,7 +180,7 @@ providing_constraint_test_() ->
     [
       fun() ->
               CB = SetProviding(P),
-              ?assertEqual({ok, CB}, chef_cookbook_version:validate_cookbook(CB, NameVer))
+              ?assertEqual({ok, CB}, chef_cookbook_version:validate_cookbook(CB, NameVer, false))
       end || P <- AllowedValues
     ].
 
@@ -219,7 +225,7 @@ assemble_cookbook_ejson_test_() ->
                                               AuthzId,
                                               CBEJson),
 
-              MinCb = chef_cookbook_version:minimal_cookbook_ejson(Record, VHostUrl),
+              MinCb = chef_cookbook_version:minimal_cookbook_ejson(Record, VHostUrl, 1),
               ?assertEqual(undefined, ej:get({"metadata", "attributes"}, MinCb)),
               ?assertEqual(undefined, ej:get({"metadata", "long_description"}, MinCb)),
               ?assertEqual({[{<<"ruby">>, []}]}, ej:get({"metadata", "dependencies"}, MinCb))

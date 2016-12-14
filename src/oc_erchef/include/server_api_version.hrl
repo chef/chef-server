@@ -10,12 +10,15 @@
 % and not product version.
 -define(API_v1, 1).
 
+% Deprecates cookbook segments
+-define(API_v2, 2).
+
 %% Highest level of deprecated API version that will be removed in the nxt major product release.
 %% This is used in eunit tests for version range testing across objects.
 -define(API_DEPRECATED_VER, ?API_v0).
 
 
 -define(API_MIN_VER, ?API_v0).
--define(API_MAX_VER, ?API_v1).
+-define(API_MAX_VER, ?API_v2).
 
 -type api_version() :: non_neg_integer() | -1.

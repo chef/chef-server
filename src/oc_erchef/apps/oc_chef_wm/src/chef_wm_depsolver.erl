@@ -277,7 +277,7 @@ wm_halt(Code, Req, State, ErrorData, LogMsg) ->
 %% Note the cookbook object we return back is a stripped-down version,
 %% removing large fields such as long_description and attributes in
 %% the metadata that are not required by chef-client
-assemble_response(Req, State, CookbookVersions) ->
+assemble_response(Req, #base_state{server_api_version = ApiVersion} = State, CookbookVersions) ->
     case oc_chef_wm_base:check_cookbook_authz(CookbookVersions, Req, State) of
         ok ->
             %% We iterate over the list again since we only want to construct the s3urls
@@ -285,7 +285,7 @@ assemble_response(Req, State, CookbookVersions) ->
             %% cookbook which has just enough information for chef-client to run
             JsonList = {
                     [ { CBV#chef_cookbook_version.name,
-                       chef_cookbook_version:minimal_cookbook_ejson(CBV, chef_wm_util:base_uri(Req)) }
+                       chef_cookbook_version:minimal_cookbook_ejson(CBV, chef_wm_util:base_uri(Req), ApiVersion) }
                       || CBV <- CookbookVersions ]
                     },
             CBMapJson = chef_json:encode(JsonList),

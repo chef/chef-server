@@ -184,14 +184,24 @@ validation_constraints() ->
 -spec to_json(#oc_chef_cookbook_artifact_version{}, string()) -> ejson_term().
 to_json(#oc_chef_cookbook_artifact_version{metadata = RawMetadata,
                                            serialized_object = SerializedObject,
-                                           org_id = OrgId},
+                                           org_id = OrgId,
+                                           server_api_version = ApiVersion},
         ExternalUrl) ->
+
+    CBJson = chef_db_compression:decompress_and_decode(SerializedObject),
+    AllFiles = chef_cookbook_version:wants_all_files(ApiVersion),
+    CBJson1 = case AllFiles of
+                 true -> chef_cookbook_version:ensure_v2_metadata(CBJson);
+                 false -> chef_cookbook_version:ensure_v0_metadata(CBJson)
+             end,
+
     BaseJson = ej:set({<<"metadata">>},
-                      chef_db_compression:decompress_and_decode(SerializedObject),
+                      CBJson1,
                       chef_db_compression:decompress_and_decode(RawMetadata)),
+
     JSONWithoutHacks = ej:delete({<<"json_class">>}, BaseJson),
     %% add the download URLs
-    chef_cookbook_version:annotate_with_s3_urls(JSONWithoutHacks, OrgId, ExternalUrl).
+    chef_cookbook_version:annotate_with_urls(JSONWithoutHacks, OrgId, ExternalUrl).
 
 set_api_version(ObjectRec, Version) ->
     ObjectRec#oc_chef_cookbook_artifact_version{server_api_version = Version}.
