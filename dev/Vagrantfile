@@ -81,9 +81,9 @@ end
 
 def define_chef_server(config, attributes)
   provisioning, installer, installer_path = prepare('INSTALLER', 'chef-server-core', 'Chef Server 12+')
-  m_provisioning, m_installer, m_installer_path = prepare('MANAGE_PKG', 'chef-manage', 'Chef Manage 1.4+') if plugin_active?('chef-manage', attributes)
-  ps_provisioning, ps_installer, ps_installer_path = prepare('PUSH_JOBS_PKG', 'opscode-push-jobs-server', 'Push Jobs Server 1.1+') if plugin_active?('push-jobs-server', attributes)
-  r_provisioning, r_installer, r_installer_path = prepare('REPORTING_PKG', 'opscode-reporting', 'Chef Reporting 1.6+') if plugin_active?('reporting', attributes)
+  _m_provisioning, m_installer, _path = prepare('MANAGE_PKG', 'chef-manage', 'Chef Manage 1.4+') if plugin_active?('chef-manage', attributes)
+  _ps_provisioning, ps_installer, _path = prepare('PUSH_JOBS_PKG', 'opscode-push-jobs-server', 'Push Jobs Server 1.1+') if plugin_active?('push-jobs-server', attributes)
+  _r_provisioning, r_installer, _path = prepare('REPORTING_PKG', 'opscode-reporting', 'Chef Reporting 1.6+') if plugin_active?('reporting', attributes)
 
   config.vm.hostname = "api.chef-server.dev"
   config.vm.network "private_network", ip: CS_VM_ADDRESS
@@ -96,6 +96,7 @@ def define_chef_server(config, attributes)
                   "--usb", "off",
                   "--usbehci", "off"
     ]
+    vb.customize ["storagectl", :id, "--name", "SATAController", "--hostiocache" , "on"]
   end
   if provisioning
     json = {
@@ -207,6 +208,7 @@ def define_ldap_server(config, attributes)
                   "--usb", "off",
                   "--usbehci", "off"
     ]
+    vb.customize ["storagectl", :id, "--name", "SATAController", "--hostiocache" , "on"]
   end
 
   config.vm.provision "chef_zero" do |chef|
@@ -231,6 +233,7 @@ def define_db_server(config, attributes)
                   "--usb", "off",
                   "--usbehci", "off"
     ]
+    vb.customize ["storagectl", :id, "--name", "SATAController", "--hostiocache" , "on"]
   end
 
   # Using shell here to ave the trouble of downloading
@@ -251,6 +254,7 @@ def define_backend_server(config, attribute)
                   "--usb", "off",
                   "--usbehci", "off"
     ]
+    vb.customize ["storagectl", :id, "--name", "SATAController", "--hostiocache" , "on"]
   end
 
   if provisioning
@@ -276,6 +280,7 @@ def define_db_server_reporting(config, attributes)
                   "--usb", "off",
                   "--usbehci", "off"
     ]
+    vb.customize ["storagectl", :id, "--name", "SATAController", "--hostiocache" , "on"]
   end
 
   # Using shell here to ave the trouble of downloading
