@@ -1,4 +1,4 @@
-require "digest"
+require "openssl"
 require "veil/exceptions"
 
 module Veil
@@ -37,7 +37,7 @@ module Veil
       #
       # @return [String]
       def hex_digest(data)
-        Digest::SHA512.hexdigest(data)
+        OpenSSL::Digest::SHA512.hexdigest(data)
       end
     end
   end
