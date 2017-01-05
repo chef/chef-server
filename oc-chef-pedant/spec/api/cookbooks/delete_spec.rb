@@ -69,7 +69,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_delete do
 
       context "when deleting existent version of an existing cookbook", :smoke do
         let(:recipe_name) { "test_recipe" }
-        let(:recipe_content) { "hello-#{unique_suffix}" }
+        let(:recipe_content) { "hello-#{unique_suffix}-#{rand(1000)}-#{rand(1000)}" }
         let(:recipe_spec) do
             {
               :name => recipe_name,

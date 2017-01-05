@@ -249,12 +249,12 @@ sql_tests() ->
       put_object_sql,
       object_roundtrip_sql,
       object_delete_sql,
+      cache_control_sql,
       sec_fail_sql,
       signed_url_sql,
       signed_url_fail_sql,
       at_the_same_time_sql,
       noop ].
-
 
 filesystem_tests() ->
     [ bucket_basic,
@@ -265,6 +265,7 @@ filesystem_tests() ->
       put_object,
       object_roundtrip,
       object_delete,
+      cache_control,
       sec_fail,
       signed_url,
       signed_url_fail,
@@ -293,6 +294,8 @@ head_object_sql(Arg) ->
     head_object(Arg).
 put_object_sql(Arg) ->
     put_object(Arg).
+cache_control_sql(Arg) ->
+    cache_control(Arg).
 object_roundtrip_sql(Arg) ->
     object_roundtrip(Arg).
 object_delete_sql(Arg) ->
@@ -405,9 +408,7 @@ put_object(suite) ->
     [];
 put_object(Config) when is_list(Config) ->
     S3Conf = proplists:get_value(s3_conf, Config),
-
     Bucket = random_bucket(),
-
     ensure_bucket(Bucket, S3Conf),
 
     BucketContents = mini_s3:list_objects(Bucket, [], S3Conf),
@@ -432,6 +433,42 @@ put_object(Config) when is_list(Config) ->
     % Cleanup
     ?assertEqual(ok, mini_s3:delete_bucket(Bucket, S3Conf)).
 
+has_header(_Header, []) ->
+    false;
+has_header(Header, [{Name, _Value}|T]) ->
+    Needle = string:to_lower(Header),
+    case string:to_lower(Name) of
+        Needle ->
+            true;
+        _Other ->
+            has_header(Header, T)
+    end.
+
+cache_control(doc) ->
+    ["Send a Cache-Control header "];
+cache_control(suite) ->
+    [];
+cache_control(Config) when is_list(Config) ->
+    S3Conf = proplists:get_value(s3_conf, Config),
+    Bucket = random_bucket(),
+    ensure_bucket(Bucket, S3Conf),
+
+    NameExists = random_path(),
+    NameMissing = random_path(),
+
+    Data = "TestData\nMore test data",
+    mini_s3:put_object(Bucket, NameExists, Data, [], [], S3Conf),
+
+    SignedUrl = mini_s3:s3_url('get', Bucket, NameMissing, 1000, [], S3Conf),
+    {ok, Result} = httpc:request(erlang:binary_to_list(SignedUrl)),
+    {{_, 404, _}, HeadersMissing, _} = Result,
+
+    SignedUrl2 = mini_s3:s3_url('get', Bucket, NameExists, 1000, [], S3Conf),
+    {ok, Result2} = httpc:request(erlang:binary_to_list(SignedUrl2)),
+    {{_, 200, _}, HeadersExists, _} = Result2,
+
+    ?assertMatch(false, has_header("Cache-Control", HeadersMissing)),
+    ?assertMatch(true, has_header("Cache-Control", HeadersExists)).
 
 object_roundtrip(doc) ->
     ["Can put a object and get it back"];

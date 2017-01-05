@@ -79,7 +79,7 @@ code_change(_OldVsn, State, _Extra) ->
 do_delete_cleanup(#state{deleted_cleanup_interval = Interval}) ->
     case sqerl:select(purge_expired, [Interval], first_as_scalar, [purge_expired]) of
         {ok, Count} ->
-            lager:debug("Cleanup task: cleaned up %p expired file_data elements", [Count]),
+            lager:debug("Cleanup task: cleaned up ~p expired file_data elements", [Count]),
             Count;
         _Error ->
             lager:debug("Cleanup task: error cleaning up expired file_data elements", []),
@@ -89,7 +89,7 @@ do_delete_cleanup(#state{deleted_cleanup_interval = Interval}) ->
 do_upload_cleanup(#state{upload_cleanup_interval = Interval}) ->
     case sqerl:select(cleanup_abandoned_uploads, [Interval], first_as_scalar, [cleanup_abandoned_uploads]) of
         {ok, Count} ->
-            lager:debug("Cleanup task: cleaned up %p expired file_data elements", [Count]),
+            lager:debug("Cleanup task: cleaned up ~p expired file_data elements", [Count]),
             Count;
         _Error ->
             lager:debug("Cleanup task: error cleaning up expired file_data elements", []),

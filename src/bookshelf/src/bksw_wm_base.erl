@@ -46,6 +46,10 @@ finish_request(Rq0, Ctx) ->
             500 ->
                 Rq1 = create_500_response(Rq0, Ctx),
                 {true, Rq1, Ctx};
+            %% Ensure we don't tell upstream servers to cache 404s
+            C when C >= 400 andalso C < 500 ->
+                Rq1 = wrq:remove_resp_header("Cache-Control", Rq0),
+                {true, Rq1, Ctx};
             _ ->
                 {true, Rq0, Ctx}
         end
