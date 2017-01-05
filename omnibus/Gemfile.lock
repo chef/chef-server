@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/chef/license_scout.git
-  revision: 117084aa76a5dcbcb751e2be8f6e997b1440b74d
+  revision: 7e77abf6808990ea3dcb7466cc573c672440e4b6
   specs:
     license_scout (0.1.2)
       ffi-yajl (~> 2.2)
@@ -8,7 +8,7 @@ GIT
 
 GIT
   remote: git://github.com/chef/omnibus-software.git
-  revision: 32196fe31fa62ebb11960626ac412a5eff9138ec
+  revision: 7f1b5f2bef8ca0d248d943688dd78cceaa1b18c5
   specs:
     omnibus-software (4.0.0)
       chef-sugar (>= 3.4.0)
@@ -16,7 +16,7 @@ GIT
 
 GIT
   remote: git://github.com/chef/omnibus.git
-  revision: e478d5dabf05a803047e56dbcdcf6b3b61e1bde6
+  revision: 712ba4cbaee85fdd307a3c8e970a981a2127f6c7
   specs:
     omnibus (5.5.0)
       aws-sdk (~> 2)
@@ -34,13 +34,13 @@ GEM
   remote: https://rubygems.org/
   specs:
     addressable (2.4.0)
-    aws-sdk (2.6.29)
-      aws-sdk-resources (= 2.6.29)
-    aws-sdk-core (2.6.29)
+    aws-sdk (2.6.44)
+      aws-sdk-resources (= 2.6.44)
+    aws-sdk-core (2.6.44)
       aws-sigv4 (~> 1.0)
       jmespath (~> 1.0)
-    aws-sdk-resources (2.6.29)
-      aws-sdk-core (= 2.6.29)
+    aws-sdk-resources (2.6.44)
+      aws-sdk-core (= 2.6.44)
     aws-sigv4 (1.0.0)
     berkshelf (4.3.5)
       addressable (~> 2.3, >= 2.3.4)
@@ -168,7 +168,7 @@ GEM
     nio4r (1.2.1)
     octokit (4.3.0)
       sawyer (~> 0.7.0, >= 0.5.3)
-    ohai (8.21.0)
+    ohai (8.22.1)
       chef-config (>= 12.5.0.alpha.1, < 13)
       ffi (~> 1.9)
       ffi-yajl (~> 2.2)
@@ -266,4 +266,4 @@ DEPENDENCIES
   rspec
 
 BUNDLED WITH
-   1.13.6
+   1.13.7
