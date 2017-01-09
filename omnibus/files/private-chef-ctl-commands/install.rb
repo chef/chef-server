@@ -18,6 +18,19 @@ add_command_under_category "install", "general", "Install addon package by name,
     package = "chef-manage"
   end
 
+  if package == "opscode-reporting"
+    STDERR.puts "
+     Chef Reporting is a legacy product, and is no longer receiving new feature updates.
+     
+     Are you a new Chef customer, or looking to gain better insight into your fleet? Take advantage of Chef Automate.
+     You'll get a graphical interface and query language that gives you insight into operational, compliance, and workflow events. 
+     You can download Chef Automate here: https://downloads.chef.io/automate/
+     
+     Your install of Chef Reporting will begin in 5 seconds…
+     "
+     sleep(5)
+  end
+
   path_arg = "--path"
   if (ARGV.include?(path_arg))
     install_path = ARGV[ARGV.index(path_arg) + 1]
