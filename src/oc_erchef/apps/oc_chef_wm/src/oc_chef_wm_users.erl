@@ -138,11 +138,8 @@ verbose_user(#chef_user{username = UserName, email = EMail, serialized_object = 
                   {<<"first_name">>, ej:get({<<"first_name">>}, EJ, "")},
                   {<<"last_name">>, ej:get({<<"last_name">>}, EJ, "")} ]} }.
 
-
-
-conflict_message(Name) ->
-    Msg = iolist_to_binary([<<"User '">>, Name, <<"' already exists">>]),
-    {[{<<"error">>, [Msg]}]}.
+conflict_message(_Name) ->
+    {[{<<"error">>, [<<"Username or email address already in use.">>]}]}.
 
 malformed_request_message(Any, _Req, _state) ->
     error({unexpected_malformed_request_message, Any}).
