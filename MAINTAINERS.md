@@ -1,19 +1,20 @@
-This file lists how the chef-server project is maintained. When making changes to the system, this file tells you who needs to review your patch - you need a simple majority of maintainers for the relevant subsystems to provide a :+1: on your pull request. Additionally, you need to not receive a veto from a Lieutenant or the Project Lead.
+This file lists the official maintainers of the Chef Server project.
 
-Check out [How Chef is Maintained](https://github.com/chef/chef-rfc/blob/master/rfc030-maintenance-policy.md#how-the-project-is-maintained) for details on the process, how to become a maintainer, lieutenant, or the project lead.
+Refer to this list to find out who needs to review your pull request.  Two maintainer approvals are required to merge a change.
 
-# Project Lead
-
-- [Stephen Delano](https://github.com/sdelano)
-
-# Lieutenants
-
-- [Marc Paradise](https://github.com/marcparadise)
-- [Steven Danna](https://github.com/stevendanna)
-- [Mark Anderson](https://github.com/markan)
-- [Tyler Cloke](https://github.com/tylercloke)
+If undertaking a large change, ping the @chef/chef-server-maintainers group for discussion and guidance.
 
 # Maintainers
 
-- [Oliver Ferrigni](https://github.com/oferrigni)
+- [Marc Paradise](https://github.com/marcparadise)
+- [Mark Anderson](https://github.com/markan)
 - [Ryan Cragun](https://github.com/ryancragun)
+- [Stephen Delano](https://github.com/sdelano)
+- [Steven Danna](https://github.com/stevendanna)
+- [Tyler Cloke](https://github.com/tylercloke)
+
+# Past Maintainers
+
+This is kept as a 'thank you' for the contributions of past maintainers.   You may not be active in this project, but you're not forgotten.
+
+- [Oliver Ferrigni](https://github.com/oferrigni)
