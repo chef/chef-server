@@ -15,5 +15,4 @@ Check out [How Chef is Maintained](https://github.com/chef/chef-rfc/blob/master/
 
 # Maintainers
 
-- [Oliver Ferrigni](https://github.com/oferrigni)
 - [Ryan Cragun](https://github.com/ryancragun)
