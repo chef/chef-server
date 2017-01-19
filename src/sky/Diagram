@@ -1,0 +1,50 @@
+
+
+Client Supervisor					Server
+
+wss:// connection setup
+
+Client connects via HTTP
+
+							Server gets HTTP connection and validates it
+
+Connection set up		------------------	Connection set up (TLS, HTTP Validation
+
+	       						Server converts to websocket
+
+Client gets websocket conversion
+
+Client sends HELLO (or maybe just first ping)
+
+							Server gets HELLO, sends back some sort of ACK
+							   (May be configuration information in the future)
+
+
+Client processes ACK
+
+
+
+Time elapses................
+
+Client sends PING
+
+							Server gets PING, updates liveness info
+
+							Server may ACK (could be useful for client restart)
+
+
+
+........At any time (asynchronously).....
+
+							Server sends 'start chef client'
+
+Client acknowledges start, or sez why not
+
+
+
+........At any time (asynchronously).....
+
+							Server sends updated config
+
+
+Client updates its config
