@@ -53,6 +53,7 @@ GEM
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
+    rake (12.0.0)
     rdoc (4.2.2)
       json (~> 1.4)
     rspec (3.5.0)
@@ -84,7 +85,8 @@ PLATFORMS
 DEPENDENCIES
   oc-chef-pedant!
   pry
+  rake
   rest-client!
 
 BUNDLED WITH
-   1.12.5
+   1.13.7
