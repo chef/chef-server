@@ -20,7 +20,7 @@ module Net
   class HTTP < Protocol
     def connect
       D "opening connection to #{conn_address()}..."
-      s = Timeout::timeout(@open_timeout) { TCPSocket.open(conn_address(), conn_port()) }
+      s = Timeout.timeout(@open_timeout) { TCPSocket.open(conn_address(), conn_port()) }
       D "opened"
       if use_ssl?
         ssl_parameters = Hash.new
@@ -58,8 +58,8 @@ module Net
             HTTPResponse.read_new(@socket).value
           end
           # Server Name Indication (SNI) RFC 3546
-          s.hostname = @address if s.respond_to? :hostname=
-            timeout(@open_timeout) { s.connect }
+          s.hostname = @address if s.respond_to? :'hostname='
+          Timeout.timeout(@open_timeout) { s.connect }
           if @ssl_context.verify_mode != OpenSSL::SSL::VERIFY_NONE
             s.post_connection_check(@address)
           end
@@ -95,4 +95,3 @@ module Net
 
   end # HTTP
 end # Net
-
