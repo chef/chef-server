@@ -899,6 +899,28 @@ module Pedant
         end
       end
 
+      def wait_until_queues_are_empty(i = 10)
+        return if i == 0
+        if queues_empty?
+          puts "RabbitMQ queue is empty (or failed to call rabbitmqctl list_queues)"
+        else
+          puts "Waiting for RabbitMQ queue to be empty (#{i} tries remaining)"
+          sleep 1
+          wait_until_queues_are_empty(i - 1)
+        end
+      end
+
+      # queues are not readable (e.g. there's no rabbitmq) OR empty
+      def queues_empty?
+        output = `/opt/opscode/embedded/service/rabbitmq/sbin/rabbitmqctl list_queues -p /chef | awk '{sum += $2} END {print sum}'`
+        status = $?
+          if !status.success?
+            true
+        else
+          output.to_i == 0
+        end
+      end
+
       it "works for all object types" do
         # Ensure that a search against each Chef object type is
         # successful BEFORE any reindexing operations.
@@ -921,6 +943,9 @@ module Pedant
         # Now, send everything to be re-indexed
         `#{executable} reindex #{reindex_args.join(" ")} #{Pedant::Config.reindex_endpoint}`
 
+        # wait for reindex to have finished
+        wait_until_queues_are_empty
+
         # Verify that the reindexing worked by finding all the items
         # again.  Remember, there are implicit Solr commit calls being
         # made here; it'd take a bit longer for these to succeed
@@ -932,6 +957,5 @@ module Pedant
         should_find(temporary_data_bag_name, "test_item")
       end
     end # reindexing test
-
   end # RSpec
 end # Pedant
