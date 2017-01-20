@@ -1,4 +1,4 @@
--name sky
+-name sky@127.0.0.1
 
 -setcookie sky_cookie
 

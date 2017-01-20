@@ -1,3 +1,4 @@
+{"1.1.0",
 [{<<"cf">>,{pkg,<<"cf">>,<<"0.2.2">>},1},
  {<<"cowboy">>,
   {git,"https://github.com/ninenines/cowboy.git",
@@ -47,4 +48,9 @@
  {<<"sync">>,
   {git,"https://github.com/rustyio/sync.git",
        {ref,"20846b02126846d69f1f4b2d00fcad580ef5c0d0"}},
-  0}].
+  0}]}.
+[
+{pkg_hash,[
+ {<<"cf">>, <<"7F2913FFF90ABCABD0F489896CFEB0B0674F6C8DF6C10B17A83175448029896C">>},
+ {<<"erlware_commons">>, <<"087467DE5833C0BB5B3CCDD387F9E9C1FB816A75B7A709629BF24B5ED3246C51">>}]}
+].
