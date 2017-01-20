@@ -8,17 +8,6 @@ If you want to file an issue about Chef Server or contribute a change, you're in
 
 If you need to file an issue against another Chef project, you can find a list of projects and where to file issues in the [community contributions section](https://docs.chef.io/community_contributions.html#issues-and-bug-reports) of the [Chef docs](https://docs.chef.io).
 
-## Building a Chef Server package locally:
-
-You can build a Chef Server package locally with vagrant and test-kitchen.
-
-```shell
-cd omnibus/
-make dev dev-build
-```
-
-Once the build is complete, the package should be in omnibus/pkg. By default the dev-build target will create an Ubuntu 10.04 build.
-
 ## Components of the Chef Server
 
 This repository contains the core services that make up the Chef Server.
@@ -36,6 +25,23 @@ This repository contains the core services that make up the Chef Server.
     |-- oc_erchef: The core REST API server
     `-- opscode-expander: a service that transforms Chef data before sending it to Solr for indexing
 ```
+
+## Working on the Chef Server
+
+The quickest way to get a Chef Server development environment is to
+follow the [instructions](https://github.com/chef/chef-server/blob/master/dev/README.md) in the `dev` directory.
+This environment is based on Vagrant and features hot reloading of code.
+
+## Building a Chef Server package locally:
+
+You can build a Chef Server package locally with vagrant and test-kitchen.
+
+```shell
+cd omnibus/
+make dev dev-build
+```
+
+Once the build is complete, the package should be in omnibus/pkg. By default the dev-build target will create an Ubuntu 10.04 build.
 
 ## Dependencies contained in other repositories
 

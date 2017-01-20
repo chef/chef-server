@@ -50,6 +50,31 @@ In a separate terminal session/pane/window:
     sudo -i
     dvm quickstart oc_erchef
 
+To use your running Chef Server through standard commands such as knife,
+you'll need to create an organisation and a user, and then create a
+knife config on your workstation.
+
+    vagrant ssh
+    sudo -i
+    # create a user to access chef with
+    chef-server-ctl user-create -f /tmp/admin.pem admin Admin User admin@example.com password 
+    # create an organization
+    chef-server-ctl org-create -f /tmp/test-validator.pem test Test
+    # associate the user with the organization
+    chef-server-ctl org-user-add test admin
+
+Now on your workstation, create `.chef/knife.rb` in the root of your
+chef-server checkout, with the following:
+
+    current_dir = File.dirname(__FILE__)
+	log_level                :info
+	log_location             STDOUT
+	node_name                "admin"
+	client_key               "#{current_dir}/admin.pem"
+	chef_server_url          "https://api.chef-server.dev/organizations/test"
+
+Then place `/tmp/admin.pem` from the vagrant node into the `.chef` directory.
+
 ### What can I do?
 
 Start editing erchef files, pedant files, cookbooks, upgrade definitions,
