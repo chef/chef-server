@@ -5,29 +5,59 @@
 
 -compile([export_all]).
 
-%server_test_() ->
-%    [
-%     hoax:fixture(?MODULE, "server_")
-%    ].
+-define(HOST, "127.0.0.1").
+-define(DEFAULT_PORT, 8080).
 
-%server_starts_and_stops_gen_test_() ->
-%    [ fun server_starts_and_stops/0 ].
+server_test_() ->
+    [
+     hoax:fixture(?MODULE, "server_")
+    ].
 
 
-server_starts_and_stops_test() ->
-    start_server(),
+server_starts_and_stops() ->
+    {ok, Apps} = start_server(),
     %% try connecting
-    ?assert(1 == 2),
     %% cleanup
-    stop_server().
+    stop_server(Apps).
+
+server_can_be_connected_to() ->
+    Path = "organizations/test/websocket/me",
+    {ok, Apps} = start_server(),
+
+    application:ensure_all_started(gun),
+
+    {ok, Pid} = gun:open(?HOST, ?DEFAULT_PORT, #{retry=>0}),
+    {ok, http} = gun:await_up(Pid),
+    Ref = monitor(process, Pid),
+    gun:ws_upgrade(Pid, Path, [], #{compress => false}),
+    receive
+        {gun_ws_upgrade, Pid, ok, _} ->
+            ok;
+        Msg ->
+            io:format("Unexpected message ~p", [Msg]),
+            error(failed)
+    end,
+    close(Pid, Ref),
+    stop_server(Apps).
+
+
 
 
 %% helpers to manage the server
 start_server() ->
-    
-    sky_app:start([], []).
+    case application:ensure_all_started(sky) of
+        {ok, Apps} ->
+            {ok, Apps};
+        {error, Error} ->
+            erlang:error({application_start_failed, Error})
+    end.
+
+stop_server(Apps) ->
+    [application:stop(A) || A <- lists:flatten(Apps)],
+    ok.
 
 
-stop_server() ->
-    sky_app:stop([]).
- 
+close(Pid, Ref) ->
+	demonitor(Ref),
+	gun:close(Pid),
+	gun:flush(Pid).
