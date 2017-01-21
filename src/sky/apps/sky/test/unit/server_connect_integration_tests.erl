@@ -21,12 +21,13 @@ server_starts_and_stops() ->
     stop_server(Apps).
 
 server_can_be_connected_to() ->
-    Path = "organizations/test/websocket/me",
+    Path = "/organizations/testorg/websocket/someclient",
     {ok, Apps} = start_server(),
 
     application:ensure_all_started(gun),
 
     {ok, Pid} = gun:open(?HOST, ?DEFAULT_PORT, #{retry=>0}),
+
     {ok, http} = gun:await_up(Pid),
     Ref = monitor(process, Pid),
     gun:ws_upgrade(Pid, Path, [], #{compress => false}),
@@ -40,8 +41,49 @@ server_can_be_connected_to() ->
     close(Pid, Ref),
     stop_server(Apps).
 
+server_says_something_after_connecting() ->
+    {ok, Apps} = start_server(),
+
+    application:ensure_all_started(gun),
+
+    {Pid, Ref} = open_connection_to_server(),
+
+    receive
+        {gun_ws, Pid, Frame} ->
+            ?assertEqual({text, <<"CONFIG:60:DEADBEEF">>}, Frame);
+        _Msg ->
+            ?debugFmt("Unexpected message ~p", [_Msg])
+    end,
+    close(Pid, Ref),
+    stop_server(Apps).
 
 
+open_connection_to_server() ->
+    Path = "/organizations/testorg/websocket/someclient",
+    {ok, Pid} = gun:open(?HOST, ?DEFAULT_PORT, #{retry=>0}),
+
+    {ok, http} = gun:await_up(Pid),
+    Ref = monitor(process, Pid),
+    _StreamRef = gun:ws_upgrade(Pid, Path, [], #{compress => false}),
+    receive
+        {gun_ws_upgrade, Pid, ok, _} ->
+            ok;
+        Msg ->
+            io:format("Unexpected message ~p", [Msg]),
+            error(failed)
+    end,
+    {Pid, Ref}.
+
+watch_messages(Text, Timeout) ->
+    receive
+        Msg ->
+            ?debugFmt("~p saw message ~p", [Text, Msg]),
+            watch_messages(Text, Timeout)
+    after
+        Timeout ->
+            ?debugFmt("~p timed out", [Text]),
+            ok
+    end.
 
 %% helpers to manage the server
 start_server() ->
@@ -58,6 +100,6 @@ stop_server(Apps) ->
 
 
 close(Pid, Ref) ->
-	demonitor(Ref),
-	gun:close(Pid),
-	gun:flush(Pid).
+        demonitor(Ref),
+        gun:close(Pid),
+        gun:flush(Pid).
