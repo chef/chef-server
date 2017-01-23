@@ -21,4 +21,4 @@ fetcher_read_timeout 120
 
 fatal_transitive_dependency_licensing_warnings true
 # PROJECT should be set by jenkins during the build
-fips_mode (ENV["PROJECT"] || "").casecmp?("chef-server-fips")
+fips_mode ((ENV["PROJECT"] || "").downcase == "chef-server-fips")
