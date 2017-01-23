@@ -1,3 +1,4 @@
+.DEFAULT_GOAL=all
 REBAR3_URL=https://s3.amazonaws.com/rebar3/rebar3
 
 # If there is a rebar in the current directory, use it
