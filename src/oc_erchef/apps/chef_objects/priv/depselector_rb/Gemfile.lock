@@ -1,5 +1,5 @@
 GIT
-  remote: git://github.com/chef/dep-selector
+  remote: https://github.com/chef/dep-selector
   revision: 96b84448a9e399ec7326ef84f76458015c68e0c2
   branch: master
   specs:
@@ -8,7 +8,7 @@ GIT
       ffi (~> 1.9)
 
 GIT
-  remote: git://github.com/sdelano/erlectricity
+  remote: https://github.com/sdelano/erlectricity
   revision: 4ad8379b4e3ff2c6d4e852daaf04bc9103676d19
   branch: master
   specs:

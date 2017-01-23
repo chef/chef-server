@@ -1,3 +1,5 @@
+.DEFAULT_GOAL=all
+
 distclean:
 	rm -rf _build
 

@@ -45,9 +45,9 @@ with_etag(Etag, Rq) ->
 generate_id() ->
     %% According to the docs erlang/new will always return a unique value on on the same
     %% node. There is still some small opportunity here for there to be unconnected nodes
-    %% with the same node name that call erlang:now/0 in the same microsecond. However, that
+    %% with the same node name that call erlang:timestamp/0 in the same microsecond. However, that
     %% is both unlikely enough and low impact enough that I dont think its worth adding
     %% extra to this.
 
-    Id = term_to_binary({node(), erlang:now()}),
+    Id = term_to_binary({node(), erlang:timestamp()}),
     bksw_format:to_base64(Id).
