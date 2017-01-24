@@ -138,8 +138,15 @@ node.default['private_chef']['opscode-solr4']['command'] << " #{java_opts}" unle
 if node['kernel']['machine'] == "x86_64"
   node.default['private_chef']['opscode-solr4']['command'] << " -Xloggc:#{File.join(solr_log_dir, "gclog.log")}"
 end
+
 # Enable GC Logging (very useful for debugging issues)
-node.default['private_chef']['opscode-solr4']['command'] << " -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -XX:+PrintGCApplicationStoppedTime -XX:+PrintGCApplicationConcurrentTime -XX:+PrintTenuringDistribution"
+if node['private_chef']['opscode-solr4']['log_gc']
+  node.default['private_chef']['opscode-solr4']['command'] << " -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -XX:+PrintGCApplicationStoppedTime -XX:+PrintGCApplicationConcurrentTime -XX:+PrintTenuringDistribution"
+  # have java rotate the gclog.log (to avoid issues around copytruncate and sparse
+  # files, see SPOOL-383)
+  node.default['private_chef']['opscode-solr4']['command'] << " -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=#{node['private_chef']['opscode-solr4']['log_rotation']['num_to_keep']} -XX:GCLogFileSize=#{node['private_chef']['opscode-solr4']['log_rotation']['file_maxbytes']}"
+end
+
 node.default['private_chef']['opscode-solr4']['command'] << " -Dsolr.data.dir=#{solr_data_dir}"
 node.default['private_chef']['opscode-solr4']['command'] << " -Dsolr.solr.home=#{solr_home_dir}"
 node.default['private_chef']['opscode-solr4']['command'] << " -Djava.io.tmpdir=#{solr_temp_dir}"
@@ -148,13 +155,7 @@ node.default['private_chef']['opscode-solr4']['command'] << " -jar '#{solr_jetty
 
 component_runit_service "opscode-solr4"
 
-# log rotation
-template "/etc/opscode/logrotate.d/opscode-solr4" do
-  source "logrotate.erb"
-  owner "root"
-  group "root"
-  mode "0644"
-  variables(node['private_chef']['opscode-solr4'].to_hash.merge(
-    'copytruncate' => true
-  ))
+# log rotation is now handled by java
+file "/etc/opscode/logrotate.d/opscode-solr4" do
+  action :delete
 end

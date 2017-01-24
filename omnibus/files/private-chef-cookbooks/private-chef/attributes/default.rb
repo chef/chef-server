@@ -224,6 +224,7 @@ default['private_chef']['opscode-solr4']['temp_directory'] = "/var/opt/opscode/o
 default['private_chef']['opscode-solr4']['log_directory'] = "/var/log/opscode/opscode-solr4"
 default['private_chef']['opscode-solr4']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['opscode-solr4']['log_rotation']['num_to_keep'] = 10
+default['private_chef']['opscode-solr4']['log_gc'] = true
 # defaults for heap size and new generation size are computed in the chef-solr
 # recipe based on node memory
 default['private_chef']['opscode-solr4']['heap_size'] = nil
