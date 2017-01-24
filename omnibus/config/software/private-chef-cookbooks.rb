@@ -32,10 +32,9 @@ build do
   command "berks vendor #{install_dir}/embedded/cookbooks", env: env
 
   block do
-    fips_enabled = (project.overrides[:fips] && project.overrides[:fips][:enabled]) || false
     File.open("#{install_dir}/embedded/cookbooks/dna.json", "w") do |f|
       run_list = Array.new.tap do |r|
-        r << 'recipe[private-chef::fips]' if fips_enabled
+        r << 'recipe[private-chef::fips]' if fips_mode?
         r << 'recipe[private-chef::default]'
       end
 

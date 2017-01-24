@@ -19,8 +19,6 @@ self.instance_eval(chef_server_contents)
 name "chef-server-fips"
 package_name "chef-server-fips-core"
 
-override :fips, enabled: true
-
 # Use chef's scripts for everything.
 resources_path "#{resources_path}/../chef-server"
 package_scripts_path "#{package_scripts_path}/../chef-server"
