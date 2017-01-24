@@ -1,7 +1,7 @@
 -module(server_connect_integration_tests).
 
 -include_lib("eunit/include/eunit.hrl").
-%-include_lib("hoax/include/hoax.hrl").
+-include_lib("hoax/include/hoax.hrl").
 
 -compile([export_all]).
 
