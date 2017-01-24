@@ -1,6 +1,4 @@
-distclean:
-	rm -rf _build
-
+.DEFAULT_GOAL=all
 
 ## For Rebar
 REBAR3_URL=https://s3.amazonaws.com/rebar3/rebar3
@@ -37,6 +35,9 @@ ct: $(REBAR3)
 
 version_clean:
 	@rm -f VERSION
+
+distclean:
+	rm -rf _build
 
 ## echo -n only works in bash shell
 SHELL=bash

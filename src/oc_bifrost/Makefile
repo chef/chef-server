@@ -1,6 +1,4 @@
-distclean:
-	rm -rf _build
-
+.DEFAULT_GOAL=all
 REBAR3_URL=https://s3.amazonaws.com/rebar3/rebar3
 
 # If there is a rebar in the current directory, use it
@@ -64,6 +62,9 @@ travis: update all pedant
 
 version_clean:
 	@rm -f VERSION
+
+distclean:
+	rm -rf _build
 
 ## echo -n only works in bash shell
 SHELL=bash
