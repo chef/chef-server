@@ -1,22 +1,14 @@
 GIT
-  remote: git://github.com/chef/license_scout.git
-  revision: 4bf6f5cf21bc0ff8de327dfc0a245b625134d6b0
+  remote: https://github.com/chef/license_scout
+  revision: 383ad28edeea0f587aee57b969c77a21b7909e77
   specs:
     license_scout (0.1.2)
       ffi-yajl (~> 2.2)
       mixlib-shellout (~> 2.2)
 
 GIT
-  remote: git://github.com/chef/omnibus-software.git
-  revision: 9f7c4536e484ab68fcbae96e527a3fbaf961bb15
-  specs:
-    omnibus-software (4.0.0)
-      chef-sugar (>= 3.4.0)
-      omnibus (>= 5.5.0)
-
-GIT
-  remote: git://github.com/chef/omnibus.git
-  revision: 26fdb1fcc4f781119e9959f57b87f83d3f148938
+  remote: https://github.com/chef/omnibus
+  revision: efd598e477148e5ed7a83579131c6604fafe5800
   specs:
     omnibus (5.5.0)
       aws-sdk (~> 2)
@@ -30,18 +22,26 @@ GIT
       ruby-progressbar (~> 1.7)
       thor (~> 0.18)
 
+GIT
+  remote: https://github.com/chef/omnibus-software
+  revision: fc1134fb5644c9ed347eb5b423e45ebb0affc6a7
+  specs:
+    omnibus-software (4.0.0)
+      chef-sugar (>= 3.4.0)
+      omnibus (>= 5.5.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
     addressable (2.5.0)
       public_suffix (~> 2.0, >= 2.0.2)
-    aws-sdk (2.6.48)
-      aws-sdk-resources (= 2.6.48)
-    aws-sdk-core (2.6.48)
+    aws-sdk (2.7.1)
+      aws-sdk-resources (= 2.7.1)
+    aws-sdk-core (2.7.1)
       aws-sigv4 (~> 1.0)
       jmespath (~> 1.0)
-    aws-sdk-resources (2.6.48)
-      aws-sdk-core (= 2.6.48)
+    aws-sdk-resources (2.7.1)
+      aws-sdk-core (= 2.7.1)
     aws-sigv4 (1.0.0)
     berkshelf (5.3.0)
       addressable (~> 2.3, >= 2.3.4)
@@ -169,7 +169,7 @@ GEM
     nio4r (2.0.0)
     octokit (4.6.2)
       sawyer (~> 0.8.0, >= 0.5.3)
-    ohai (8.22.1)
+    ohai (8.23.0)
       chef-config (>= 12.5.0.alpha.1, < 13)
       ffi (~> 1.9)
       ffi-yajl (~> 2.2)
