@@ -63,11 +63,17 @@ send_message(Pid, Message) ->
 
 %-spec init([binary(), binary(), binary()]) -> {ok, closed, #state{} }.
 init([Host, Port, Org, Name]) ->
-    State = #state{host=Host, port=Port, org = Org, name = Name, websocket = undefined},
+    State = #state{
+               host = Host,
+               port = Port,
+               org = Org,
+               name = Name,
+               websocket = undefined,
+               heartbeat_cancel_ref = undefined},
     {ok, closed, State}.
 
 %% closed --> "please open" --> gun:open --> wait_for_open
-closed(open_request, State = #state{host=Host, port=Port} ) ->
+closed(open_request, State = #state{host = Host, port = Port} ) ->
   {ok, Pid} = gun:open(Host, Port, #{retry => 0}),
   State1 = State#state{websocket = Pid},
   {next_state, wait_for_open, State1}.
@@ -76,7 +82,7 @@ closed({send_message, _Message}, _From, State) ->
   {reply, {error, closed}, closed, State}.
 
 %% wait_for_open   --> "ok, I'm up" --> gun:ws_upgrade --> wait_for_upgrade
-wait_for_open(ready_for_upgrade, State = #state{websocket=Websocket}) ->
+wait_for_open(ready_for_upgrade, State = #state{websocket = Websocket}) ->
   Path = build_resource(State),
   gun:ws_upgrade(Websocket, Path, [], #{compress => false}),
   {next_state, wait_for_upgrade, State}.
@@ -86,7 +92,8 @@ wait_for_open({send_message, _Message}, _From, State) ->
 
 %% wait_for_upgrade --> "I'm upgraded" --> n/a --> open
 wait_for_upgrade(upgraded_to_websocket, State) ->
-  {next_state, open, State}.
+  State1 = set_heartbeat(State),
+  {next_state, open, State1}.
 
 wait_for_upgrade({send_message, _Message}, _From, State) ->
   {reply, {error, closed}, wait_for_upgrade, State}.
@@ -94,17 +101,23 @@ wait_for_upgrade({send_message, _Message}, _From, State) ->
 %% open --> "Message from server" --> route_message --> open
 %% open --> "Pls send msg to server" --> send_message --> open
 %% open --> connection drops --> cleanup --> closed
-open({receive_message, Message}, State) ->
-  lager:info("Received message: ~p", [Message]), %TODO Add detail on recipient
+open({receive_message, Message}, State = #state{org = Org, name = Name}) ->
+  lager:info("Received message (~p/~p): ~p", [Org, Name, Message]),
   {next_state, open, State};
 open(connection_dropped, State = #state{websocket = Websocket}) ->
   gun:close(Websocket),
   gen_fsm:send_event(self(), open_request),
-  {next_state, closed, State#state{websocket = undefined}}.
+  State1 = cancel_heartbeat(State),
+  {next_state, closed, State1#state{websocket = undefined}};
+open(send_heartbeat, State = #state{websocket = Websocket}) ->
+  ok = gun:ws_send(Websocket, {text, "Hello"}),
+  State1 = set_heartbeat(State),
+  {next_state, open, State1}.
 
 open({send_message, Message}, _From, State = #state{websocket=Websocket}) ->
   ok = gun:ws_send(Websocket, {text, Message}),
   {reply, ok, open, State}.
+
 
 %%--------------------------------------------------------------------
 %%% @private
@@ -164,3 +177,11 @@ code_change(_OldVsn, _StateName, State, _Extra) ->
 %%%===================================================================
 build_resource(#state{org = Org, name = Name}) ->
   lists:flatten(io_lib:format("/organizations/~w/websocket/~w", [Org, Name])).
+
+set_heartbeat(State) ->
+  Ref = gen_fsm:send_event_after(?HEARTBEAT, send_heartbeat),
+  State#state{heartbeat_cancel_ref = Ref}.
+
+cancel_heartbeat(State = #state{heartbeat_cancel_ref = HeartbeatCancelRef}) ->
+  _ = gen_fsm:cancel_timer(HeartbeatCancelRef),
+  State#state{heartbeat_cancel_ref = undefined}.

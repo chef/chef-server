@@ -12,6 +12,7 @@
           port, % :: integer(),
           org, % :: binary(),
           name, % :: binary(),
-          websocket % :: pid() | undefined
+          websocket, % :: pid() | undefined,
+          heartbeat_cancel_ref % :: pid() | undefined
          }).
 

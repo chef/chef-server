@@ -65,11 +65,15 @@ wait_for_open_receives_send_message_and_returns_error() ->
     ?assertEqual(InputState, State).
 
 wait_for_upgrade_receives_upgraded_to_websocket_and_transitions_to_open() ->
-    InputState = #state{},
+    hoax:expect(receive
+                gen_fsm:send_event_after(?HEARTBEAT, send_heartbeat) ->
+                    dummyRef
+                end),
 
+    InputState = #state{},
     {next_state, open, State} = sky_client:wait_for_upgrade(upgraded_to_websocket, InputState),
 
-    ?assertEqual(InputState, State).
+    ?assertEqual(InputState#state{heartbeat_cancel_ref = dummyRef}, State).
 
 wait_for_upgrade_receives_send_message_and_returns_error() ->
     InputState = #state{},
@@ -77,6 +81,47 @@ wait_for_upgrade_receives_send_message_and_returns_error() ->
     {reply, {error, closed}, wait_for_upgrade, State} = sky_client:wait_for_upgrade({send_message, dummyMessage}, dummyCaller, InputState),
 
     ?assertEqual(InputState, State).
+
+open_receives_message_and_logs_message() ->
+  InputState = #state{},
+
+  {next_state, open, State} = sky_client:open({receive_message, testMessage}, InputState),
+
+  ?assertEqual(InputState, State).
+
+open_receives_connection_dropped_and_closes_and_reopens() ->
+   hoax:expect(receive
+               gun:close(dummyWebsocket) ->
+                        ok;
+               gen_fsm:send_event(self(), open_request) ->
+                        ok;
+               gen_fsm:cancel_timer(dummyRef) ->
+                        ok
+               end),
+
+    InputState = #state{websocket = dummyWebsocket, heartbeat_cancel_ref = dummyRef},
+
+    {next_state, closed, State} = sky_client:open(connection_dropped, InputState),
+
+    ?assertEqual(InputState#state{websocket = undefined, heartbeat_cancel_ref = undefined}, State),
+
+    ?verifyAll.
+
+open_receives_send_heartbeat_and_sends_heartbeat() ->
+    hoax:expect(receive
+                gun:ws_send(dummyWebsocket, {text, "Hello"}) ->
+                        ok;
+                gen_fsm:send_event_after(?HEARTBEAT, send_heartbeat) ->
+                    dummyRef
+                end),
+
+    InputState = #state{websocket = dummyWebsocket},
+
+    {next_state, open, State} = sky_client:open(send_heartbeat, InputState),
+
+    ?assertEqual(InputState#state{heartbeat_cancel_ref = dummyRef}, State),
+
+    ?verifyAll.
 
 open_receives_send_message_and_sends_message() ->
     hoax:expect(receive
@@ -92,9 +137,3 @@ open_receives_send_message_and_sends_message() ->
 
     ?verifyAll.
 
-open_receives_message_and_logs_message() ->
-  InputState = #state{},
-
-  {next_state, open, State} = sky_client:open({receive_message, testMessage}, InputState),
-
-  ?assertEqual(InputState, State).
