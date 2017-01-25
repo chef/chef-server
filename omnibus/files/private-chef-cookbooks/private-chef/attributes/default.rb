@@ -39,11 +39,7 @@ default['private_chef']['license']['upgrade_url'] = "http://www.chef.io/contact/
 
 default['private_chef']['default_orgname'] = nil
 
-# Enable fips mode (openssl)
-# This requires the chef-server-fips package. If you do not have this,
-# your chef-server will probably not work. If you have to manually
-# change this, you're doing it wrong.
-default['private_chef']['fips_enabled'] = false
+default['private_chef']['fips_enabled'] = ChefConfig.fips?
 
 ###
 # Options for installing addons

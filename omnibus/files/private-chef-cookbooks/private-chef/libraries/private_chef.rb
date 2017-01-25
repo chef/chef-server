@@ -82,6 +82,7 @@ module PrivateChef
   from_email nil
   role nil
   user Mash.new
+  fips nil
 
   ldap Mash.new
   disabled_plugins []
@@ -244,6 +245,7 @@ module PrivateChef
       results["private_chef"]["oc-chef-pedant"] = PrivateChef["oc_chef_pedant"]
       results["private_chef"]["notification_email"] = PrivateChef["notification_email"]
       results["private_chef"]["from_email"] = PrivateChef["from_email"]
+      results["private_chef"]["fips_enabled"] = PrivateChef["fips"]
       results["private_chef"]["role"] = PrivateChef["role"]
       results["private_chef"]["topology"] = PrivateChef["topology"]
       results["private_chef"]["servers"] = PrivateChef["servers"]
