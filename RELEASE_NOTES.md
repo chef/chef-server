@@ -13,23 +13,23 @@ For prior releases, see
 This release addresses a number of bugs, the most notable are describe
 below.
 
-- `chef-server-ctl backup` correctly backs up configuration
+### `chef-server-ctl backup` correctly backs up configuration
 
 Starting in version 12.10.0, a bug in the backup command produced
 backups that did not include the configuration data in the resulting
 tarball. This bug is now resolved. We recommend taking a new backup
 after upgrading to 12.12.0.
 
-- Search respects rows parameter when using ElasticSearch
+### Search respects rows parameter when using ElasticSearch
 
 When configured to use ElasticSearch, the Chef Server now correctly
 respects the `rows` parameter to search requests rather than returning
 all rows.
 
-We recommend upgrading to 12.12.0 for all users of Chef Backend, which
-uses ElasticSearch as the search index.
+We recommend upgrading to 12.12.0 for all users of Chef Backend to
+receive this search fix.
 
-- Solr 4 GC log rotation
+### Solr 4 GC Logging
 
 Chef Server now uses Java's native rotation for the gclog.  This
 prevents situations where logrotate creates large sparse files on disk
@@ -43,6 +43,24 @@ written to.
 
 To remove the older GC logs, run `chef-server-ctl cleanup` after
 upgrading.
+
+To suppress the GC Log completely, the Chef Server now accepts the
+following option in `/etc/opscode/chef-server.rb`:
+
+    # true (default) to enable gc logging,
+    # false to disable gc logging
+    opscode-solr4['log_gc'] = false
+
+### oc_id email configuration options
+
+The oc_id service now includes configuration for outbound email to
+ensure password reset emails can be sent correctly.  Chef Server now
+accepts the following options in `/etc/opscode/chef-server.rb`:
+
+    # defaults to the value of the from_email configuration option
+    oc_id['email_from_address'] = "oc_id@example.com"
+    # defaults to the api_fqdn
+    oc_id['origin'] = "mail.yourco.io"
 
 ## 12.11.1 (2016-11-18)
 
