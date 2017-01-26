@@ -8,7 +8,7 @@ start(_Type, _Args) ->
     Dispatch = cowboy_router:compile([
                                       {'_', [{"/", sky_generic_handler, []},
                                              %% Note: Investigate constraints here.
-                                             {"/organizations/:orgname/websocket/:client", sky_websocket_handler, []}
+                                             {"/organizations/:orgname/websocket/:clientname", sky_websocket_handler, []}
                                             ]}
                                      ]),
     {ok, _} = cowboy:start_clear(my_http_listener, 100,

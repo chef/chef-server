@@ -6,14 +6,17 @@
 -export([websocket_info/2]).
 
 -record(state, {
-          organization = undefined,
-          name = undefined
+          orgname = undefined,
+          clientname = undefined
          }).
 
 -define(DISCONNECT_TIMEOUT, 3*60*1000).
 
 init(Req, _Opts) ->
-    State = #state{ organization = <<"testdummy">> },
+    OrgName = cowboy_req:binding(orgname, Req),
+    ClientName = cowboy_req:binding(clientname, Req),
+    State = #state{ orgname = OrgName, clientname = ClientName },
+    gproc:reg({n, l, {OrgName, ClientName}),
     % Note: Req goes away after this; must extract all the things we need first.
     {cowboy_websocket, Req, State, ?DISCONNECT_TIMEOUT}.
 
