@@ -32,7 +32,7 @@ dependency "bundler"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
-  profile_name = fips_mode? ? "fips" : "default"
+  profile_name = "default"
 
   env['USE_SYSTEM_GECODE'] = "1"
   env['REL_VERSION'] = "#{project.build_version}"
