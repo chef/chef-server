@@ -1,17 +1,15 @@
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
-gem 'rake'
-gem 'chefspec'
-gem 'berkshelf'
-gem 'bundler', '>1.10'
+gem "omnibus", github: "chef/omnibus", branch: "master"
+gem "omnibus-software", github: "chef/omnibus-software", branch: "master"
+gem "license_scout", github: "chef/license_scout", branch: "master"
 
-# Install omnibus software
-group :omnibus do
-  gem 'omnibus', git: 'https://github.com/chef/omnibus'
-  gem 'omnibus-software', git: 'https://github.com/chef/omnibus-software'
-  gem 'license_scout', git: 'https://github.com/chef/license_scout'
-end
-
-group :test do
-  gem 'rspec'
+group :development do
+  gem "berkshelf"
+  gem "test-kitchen"
+  gem "kitchen-vagrant"
+  gem "winrm-fs"
+  gem "pry"
+  gem "pry-byebug"
+  gem "pry-stack_explorer"
 end
