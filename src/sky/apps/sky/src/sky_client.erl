@@ -83,9 +83,10 @@ closed({send_message, _Message}, _From, State) ->
 
 %% wait_for_open   --> "ok, I'm up" --> gun:ws_upgrade --> wait_for_upgrade
 wait_for_open(ready_for_upgrade, State = #state{websocket = Websocket}) ->
-  Path = build_resource(State),
-  gun:ws_upgrade(Websocket, Path, [], #{compress => false}),
-  {next_state, wait_for_upgrade, State}.
+    Path = build_resource(State),
+    lager:info("Opening path '~p'", [Path]),
+    gun:ws_upgrade(Websocket, Path, [], #{compress => false}),
+    {next_state, wait_for_upgrade, State}.
 
 wait_for_open({send_message, _Message}, _From, State) ->
   {reply, {error, closed}, wait_for_open, State}.
@@ -110,7 +111,7 @@ open(connection_dropped, State = #state{websocket = Websocket}) ->
   State1 = cancel_heartbeat(State),
   {next_state, closed, State1#state{websocket = undefined}};
 open(send_heartbeat, State = #state{websocket = Websocket}) ->
-  ok = gun:ws_send(Websocket, {text, "Hello"}),
+  ok = gun:ws_send(Websocket, {text, "CLIENT_HEARTBEAT"}),
   State1 = set_heartbeat(State),
   {next_state, open, State1}.
 
@@ -176,7 +177,7 @@ code_change(_OldVsn, _StateName, State, _Extra) ->
 %%% Internal functions
 %%%===================================================================
 build_resource(#state{org = Org, name = Name}) ->
-  lists:flatten(io_lib:format("/organizations/~w/websocket/~w", [Org, Name])).
+    erlang:iolist_to_binary(["/organizations/", Org, "/websocket/", Name]).
 
 set_heartbeat(State) ->
   Ref = gen_fsm:send_event_after(?HEARTBEAT, send_heartbeat),

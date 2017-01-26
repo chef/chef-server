@@ -7,6 +7,9 @@
 
 -compile([export_all]).
 
+-define(TESTORG, "testorg").
+-define(TESTCLIENT, "testclient").
+
 server_test_() ->
     [
      hoax:fixture(?MODULE, "init_"),
@@ -17,10 +20,10 @@ server_test_() ->
     ].
 
 init_returns_expected_state() ->
-    {ok, StateName, State} = sky_client:init([dummyHost, dummyPort, dummyOrg, dummyName]),
+    {ok, StateName, State} = sky_client:init([dummyHost, dummyPort, ?TESTORG, ?TESTCLIENT]),
 
     ?assertEqual(closed, StateName),
-    ?assertEqual(#state{host = dummyHost, port = dummyPort, org = dummyOrg, name = dummyName, websocket = undefined}, State).
+    ?assertEqual(#state{host = dummyHost, port = dummyPort, org = ?TESTORG, name = ?TESTCLIENT, websocket = undefined}, State).
 
 closed_recieves_open_request_and_opens() ->
     hoax:expect(receive
@@ -45,11 +48,11 @@ closed_receives_send_message_and_returns_error() ->
 
 wait_for_open_receives_ready_for_upgrade_and_upgrades() ->
     hoax:expect(receive
-                gun:ws_upgrade(dummyWebsocket, "/organizations/dummyOrg/websocket/dummyName", [], #{compress => false}) ->
+                gun:ws_upgrade(dummyWebsocket, <<"/organizations/"?TESTORG"/websocket/"?TESTCLIENT>>, [], #{compress => false}) ->
                         ok
                 end),
 
-    InputState = #state{org = dummyOrg, name = dummyName, websocket = dummyWebsocket},
+    InputState = #state{org = ?TESTORG, name = ?TESTCLIENT, websocket = dummyWebsocket},
 
     {next_state, wait_for_upgrade, State} = sky_client:wait_for_open(ready_for_upgrade, InputState),
 
@@ -109,7 +112,7 @@ open_receives_connection_dropped_and_closes_and_reopens() ->
 
 open_receives_send_heartbeat_and_sends_heartbeat() ->
     hoax:expect(receive
-                gun:ws_send(dummyWebsocket, {text, "Hello"}) ->
+                gun:ws_send(dummyWebsocket, {text, "CLIENT_HEARTBEAT"}) ->
                         ok;
                 gen_fsm:send_event_after(?HEARTBEAT, send_heartbeat) ->
                     dummyRef

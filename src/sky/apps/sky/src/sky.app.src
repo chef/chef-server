@@ -6,7 +6,9 @@
   {applications,
    [kernel,
     stdlib,
-    cowboy
+    lager,
+    cowboy,
+    gun %% Needed for the client side stuff.
    ]},
   {env,[]},
   {modules, []},

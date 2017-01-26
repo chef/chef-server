@@ -21,7 +21,7 @@ init(Req, _Opts) ->
 %% memory (there's a CPU/latency cost, but we don't need that snappy
 %% of a protocol)
 websocket_init(State) ->
-    erlang:start_timer(1000, self(), <<"Hello!">>),
+    erlang:start_timer(1000, self(), <<"SERVER_HEARTBEAT">>),
     ServerHelloMsg = make_server_hello(State),
     {reply, {text, ServerHelloMsg}, State}.
 
@@ -33,7 +33,7 @@ websocket_handle(_Data, State) ->
 %% We can subscribe to the pings and gather liveness info.
 
 websocket_info({timeout, _Ref, Msg}, State) ->
-    erlang:start_timer(1000, self(), ok),
+    erlang:start_timer(1000, self(), <<"SERVER_HEARTBEAT">>),
     {reply, {text, Msg}, State};
 websocket_info(_Info, State) ->
     {ok, State}.
