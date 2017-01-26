@@ -70,6 +70,7 @@ init([Host, Port, Org, Name]) ->
                name = Name,
                websocket = undefined,
                heartbeat_cancel_ref = undefined},
+    gen_fsm:send_event(self(), open_request),
     {ok, closed, State}.
 
 %% closed --> "please open" --> gun:open --> wait_for_open

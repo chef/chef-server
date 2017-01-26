@@ -8,5 +8,10 @@ start_link() ->
 	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 init([]) ->
-	Procs = [],
-	{ok, {{one_for_one, 1, 5}, Procs}}.
+  SupFlags = #{strategy => one_for_one},
+	ChildSpecs = [#{id => sky_client_sup,
+                  start => {sky_client_sup, start_link, []},
+                  restart => permanent,
+                  shutdown => infinity,
+                  type => supervisor}],
+	{ok, {SupFlags, ChildSpecs}}.

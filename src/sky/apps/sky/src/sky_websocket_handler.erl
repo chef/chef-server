@@ -33,7 +33,7 @@ websocket_handle(_Data, State) ->
 %% We can subscribe to the pings and gather liveness info.
 
 websocket_info({timeout, _Ref, Msg}, State) ->
-    erlang:start_timer(1000, self(), <<"SERVER_HEARTBEAT">>),
+    erlang:start_timer(60000, self(), <<"SERVER_HEARTBEAT">>),
     {reply, {text, Msg}, State};
 websocket_info(_Info, State) ->
     {ok, State}.
