@@ -19,7 +19,6 @@ This repository contains the core services that make up the Chef Server.
 `-- src
     |-- bookshelf: S3-compatible engine for storing cookbook data
     |-- chef-mover: data migration orchestrator used in upgrades
-    |-- chef-server-bootstrap: ruby tool to instantiate key data structures in a new chef server
     |-- oc-id: OAuth2 provider for extensions like Analytics or Supermarket
     |-- oc_bifrost: Chef Server's authorization service
     |-- oc_erchef: The core REST API server
@@ -70,7 +69,7 @@ For information on contributing to this project see <https://github.com/chef/che
 
 ## License & Authors
 
-**Copyright:** 2008-2016, Chef Software, Inc.
+**Copyright:** 2008-2017, Chef Software, Inc.
 
 ```text
 Licensed under the Apache License, Version 2.0 (the "License");
