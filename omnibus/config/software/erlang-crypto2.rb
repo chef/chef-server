@@ -1,5 +1,5 @@
 #
-# Copyright 2012-2014 Chef Software, Inc.
+# Copyright 2012-2017 Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,23 +14,26 @@
 # limitations under the License.
 #
 
-name "bookshelf"
-source path: "#{project.files_path}/../../src/bookshelf", options: {:exclude => ["_build"]}
+name "erlang-crypto2"
+default_version "er-459/update-crypto"
 
-license "Apache-2.0"
-license_file "LICENSE.md"
+source git: "https://github.com/chef/erlang-crypto2.git"
+
+license "BSD-3-Clause"
+license_file "LICENSE"
+# https://github.com/chef/license_scout/issues/61
+skip_transitive_dependency_licensing true
 
 dependency "erlang"
+dependency "rebar"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
-  profile_name = "default"
 
-  env['REL_VERSION'] = "#{project.build_version}"
-  env['REBAR_PROFILE'] = profile_name
+  command "rebar compile", env: env
 
-  make "omnibus", env: env
-
-  sync "#{project_dir}/_build/#{profile_name}/rel/bookshelf/", "#{install_dir}/embedded/service/bookshelf/"
-  delete "#{install_dir}/embedded/service/bookshelf/log"
+  crypto2_dir = "#{install_dir}/embedded/lib/erlang-crypto2"
+  mkdir crypto2_dir
+  copy "#{project_dir}/ebin", "#{crypto2_dir}/ebin"
+  copy "#{project_dir}/priv", "#{crypto2_dir}/priv"
 end

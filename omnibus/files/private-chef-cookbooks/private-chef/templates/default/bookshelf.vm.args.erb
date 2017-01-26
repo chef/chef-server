@@ -1,0 +1,42 @@
+## Name of the node
+-name bookshelf@127.0.0.1
+
+## Cookie for distributed erlang
+-setcookie bookshelf
+
+## Add a directory to the code path where hot patches can be
+## placed and easily accessed.
+-pa lib/patches
+
+## Heartbeat management; auto-restarts VM if it dies or becomes unresponsive
+## (Disabled by default..use with caution!)
+##-heart
+
+## Enable kernel poll
++K true
+
+## Increase maximum IO ports from default (65536) to 196608
+## This change helps bookshelf cope with bursty
+## concurrent load
+## Once we are on R16, we should use: +Q 196608
+-env ERL_MAX_PORTS 196608
+
+## Increase maximum concurrent Erlang process from
+## default (262144) to 524288
+## NOTE: This value MUST be a power of 2
+## N band (N - 1) == 0
++P 524288
+
+## Increase async worker thread pool size from
+## R15 default of 0 to R16 default of 10.
+## Async workers prevents IO from blocking the
+## schedulers and increases performance of IO-heavy
+## apps, like bookshelf.
++A 10
+
+<%- if node['private_chef']['fips_enabled'] -%>
+## Runtime switches to enable loading custom crypto module
+## that supports OpenSSL-FIPS
+-env ERLANG_CRYPTO2_PATH /opt/opscode/embedded/lib/erlang-crypto2/priv
+-pa /opt/opscode/embedded/lib/erlang-crypto2/ebin
+<%- end -%>

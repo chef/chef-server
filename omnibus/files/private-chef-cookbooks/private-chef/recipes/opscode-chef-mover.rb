@@ -42,6 +42,19 @@ link "/opt/opscode/embedded/service/opscode-chef-mover/sys.config" do
   to mover_config
 end
 
+vmargs_config = File.join(opscode_chef_mover_dir, "vm.args")
+
+template vmargs_config do
+  source "opscode-chef-mover.vm.args.erb"
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
+  mode "644"
+end
+
+link "/opt/opscode/embedded/service/opscode-chef-mover/vm.args" do
+  to vmargs_config
+end
+
 # We want the service defined, but dead
 component_runit_service "opscode-chef-mover" do
   action :down

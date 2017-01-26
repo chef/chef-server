@@ -80,4 +80,18 @@ link "/opt/opscode/embedded/service/opscode-erchef/sys.config" do
   to erchef_config
 end
 
+vmargs_config = File.join(opscode_erchef_dir, "vm.args")
+
+template vmargs_config do
+  source "oc_erchef.vm.args.erb"
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
+  mode "644"
+  notifies :restart, 'runit_service[opscode-erchef]' unless backend_secondary?
+end
+
+link "/opt/opscode/embedded/service/opscode-erchef/vm.args" do
+  to vmargs_config
+end
+
 component_runit_service "opscode-erchef"

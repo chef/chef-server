@@ -97,6 +97,7 @@ dependency "oc-chef-pedant"
 dependency "private-chef-upgrades"
 dependency "private-chef-cookbooks"
 dependency "chef-ha-plugin-config"
+dependency "erlang-crypto2"
 dependency "chef" # for embedded chef-client -z runs (built from master - build last)
 dependency "cleanup" # MUST BE LAST DO NOT MOVE
 

@@ -64,4 +64,18 @@ link "/opt/opscode/embedded/service/bookshelf/sys.config" do
   to bookshelf_config
 end
 
+vmargs_config = File.join(bookshelf_dir, "vm.args")
+
+template vmargs_config do
+  source "bookshelf.vm.args.erb"
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
+  mode "644"
+  notifies :restart, 'runit_service[bookshelf]' if is_data_master?
+end
+
+link "/opt/opscode/embedded/service/bookshelf/vm.args" do
+  to vmargs_config
+end
+
 component_runit_service "bookshelf"

@@ -60,4 +60,18 @@ link "/opt/opscode/embedded/service/oc_bifrost/sys.config" do
   to oc_bifrost_config
 end
 
+vmargs_config = File.join(oc_bifrost_dir, "vm.args")
+
+template vmargs_config do
+  source "oc_bifrost.vm.args.erb"
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
+  mode "644"
+  notifies :restart, 'runit_service[oc_bifrost]' unless backend_secondary?
+end
+
+link "/opt/opscode/embedded/service/oc_bifrost/vm.args" do
+  to vmargs_config
+end
+
 component_runit_service "oc_bifrost"
