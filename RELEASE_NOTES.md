@@ -8,6 +8,42 @@ This document contains release notes for the current major release and all patch
 For prior releases, see
 [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 12.12.0 (2017-01-26)
+
+This release addresses a number of bugs, the most notable are describe
+below.
+
+- `chef-server-ctl backup` correctly backs up configuration
+
+Starting in version 12.10.0, a bug in the backup command produced
+backups that did not include the configuration data in the resulting
+tarball. This bug is now resolved. We recommend taking a new backup
+after upgrading to 12.12.0.
+
+- Search respects rows parameter when using ElasticSearch
+
+When configured to use ElasticSearch, the Chef Server now correctly
+respects the `rows` parameter to search requests rather than returning
+all rows.
+
+We recommend upgrading to 12.12.0 for all users of Chef Backend, which
+uses ElasticSearch as the search index.
+
+- Solr 4 GC log rotation
+
+Chef Server now uses Java's native rotation for the gclog.  This
+prevents situations where logrotate creates large sparse files on disk
+which may be problematic to manage with tools that can't handle sparse
+files.
+
+As a consequence of this change, the Solr 4 GC log can now be found at
+`/var/log/opscode/opscode-solr4/gclog.log.N.current` where N is an
+integer. The `.current` extension denotes the log currently being
+written to.
+
+To remove the older GC logs, run `chef-server-ctl cleanup` after
+upgrading.
+
 ## 12.11.1 (2016-11-18)
 
 This release addresses an incompatibility with Push Jobs Server 1 by:

@@ -1,5 +1,89 @@
 # Chef Server Changelog
 
+## [12.11.2](https://github.com/chef/chef-server/tree/12.11.2) (2017-01-26)
+[Full Changelog](https://github.com/chef/chef-server/compare/12.11.1...12.11.2)
+
+### Components
+Updated Components
+* ruby (2.2.5 -> 2.2.6)
+* rubygems (2.6.6 -> 2.6.8)
+* omnibus-ctl (a0ccf08a -> 4db34135)
+* server-jre (8u91 -> 8u121)
+* knife-opc (a08237d4 -> 00a6866c)
+* berkshelf-no-depselector (abb27143 -> f49321c9)
+* ohai (c34212ea -> e5abf16c)
+* appbundler (76cb1728 -> 6582b688)
+* rb-readline (5e1c55db -> 323fed5a)
+* chef_backup-gem (67b1f51a -> bc1105b7)
+* chef (c21db758 -> fcb0ccc2)
+
+### Contributors
+* Steven Danna
+* Stephan Renatus
+* Mark Harrison
+* Thom May
+* Marc Paradise
+* Larry Eichenbaum
+* Matt Campbell
+* Shadae Holmes
+* Bryan McLellan
+* Nathan L Smith
+* Ryan Cragun
+* Sean Nolen
+
+**Fixed bugs:**
+
+- chef-server-ctl password command does not accept special characters  [\#366](https://github.com/chef/chef-server/issues/366)
+- Chef Server API should not allow usernames with spaces [\#90](https://github.com/chef/chef-server/issues/90)
+- Confusing error message with duplicate email address [\#59](https://github.com/chef/chef-server/issues/59)
+
+**Closed issues:**
+
+- enable fips mode with  chef-server-fips-core package [\#1024](https://github.com/chef/chef-server/issues/1024)
+- error in chef-server-ctl reconfigure in docker. [\#960](https://github.com/chef/chef-server/issues/960)
+- Data bag search doesn't work correctly for encrypted arrays [\#876](https://github.com/chef/chef-server/issues/876)
+- rebar3 warning during build [\#630](https://github.com/chef/chef-server/issues/630)
+- oc\_id: email configuration [\#547](https://github.com/chef/chef-server/issues/547)
+- Add settings to production.yml for sending mail [\#185](https://github.com/chef/chef-server/issues/185)
+
+**Merged pull requests:**
+
+- Bump omnibus-software to roll back to runit 2.1.1 [\#1063](https://github.com/chef/chef-server/pull/1063) ([stevendanna](https://github.com/stevendanna))
+- Minor README changes [\#1062](https://github.com/chef/chef-server/pull/1062) ([stevendanna](https://github.com/stevendanna))
+- Update omnibus-software to get the latest server-jre [\#1059](https://github.com/chef/chef-server/pull/1059) ([stevendanna](https://github.com/stevendanna))
+- Fix the fips build [\#1056](https://github.com/chef/chef-server/pull/1056) ([stevendanna](https://github.com/stevendanna))
+- Remove coverdata files from oc\_erchef dir [\#1055](https://github.com/chef/chef-server/pull/1055) ([stevendanna](https://github.com/stevendanna))
+- Fix Makefiles to not distclean by default [\#1054](https://github.com/chef/chef-server/pull/1054) ([stevendanna](https://github.com/stevendanna))
+- Update depselector\_rb Gemfile to use HTTPS [\#1053](https://github.com/chef/chef-server/pull/1053) ([stevendanna](https://github.com/stevendanna))
+- Revert ruby to 2.2.6 [\#1052](https://github.com/chef/chef-server/pull/1052) ([stevendanna](https://github.com/stevendanna))
+- Make oc-chef-pedant wait for queues to be empty in reindex tests [\#1051](https://github.com/chef/chef-server/pull/1051) ([srenatus](https://github.com/srenatus))
+- \[SPOOL-490\] Make java handle GC log rotation [\#1050](https://github.com/chef/chef-server/pull/1050) ([srenatus](https://github.com/srenatus))
+- Lock chef-client and ohai to 12.17.44 and 8.22.1 [\#1049](https://github.com/chef/chef-server/pull/1049) ([marcparadise](https://github.com/marcparadise))
+- Update maintainers with recent changes [\#1048](https://github.com/chef/chef-server/pull/1048) ([marcparadise](https://github.com/marcparadise))
+- Move to Ruby 2.3.3 [\#1046](https://github.com/chef/chef-server/pull/1046) ([stevendanna](https://github.com/stevendanna))
+- update index to include the reconfigure steps... [\#1045](https://github.com/chef/chef-server/pull/1045) ([larryebaum](https://github.com/larryebaum))
+- \[erchef\] Improve error message on user conflict [\#1044](https://github.com/chef/chef-server/pull/1044) ([stevendanna](https://github.com/stevendanna))
+- \[oc-id\] Bump omniauth to 1.3.2 [\#1042](https://github.com/chef/chef-server/pull/1042) ([stevendanna](https://github.com/stevendanna))
+- \[CON-514\] chef-server ctl install for chef reporting warning added [\#1041](https://github.com/chef/chef-server/pull/1041) ([Shadae](https://github.com/Shadae))
+- Update server-jre to 8u111 [\#1040](https://github.com/chef/chef-server/pull/1040) ([stevendanna](https://github.com/stevendanna))
+- Bump license\_scout, omnibus, and omnibus-software [\#1039](https://github.com/chef/chef-server/pull/1039) ([stevendanna](https://github.com/stevendanna))
+- \[bookshelf\] Don't send Cache-Control headers for 404 responses [\#1038](https://github.com/chef/chef-server/pull/1038) ([stevendanna](https://github.com/stevendanna))
+- Use OpenSSL::Digest instead of Digest for FIPS [\#1035](https://github.com/chef/chef-server/pull/1035) ([btm](https://github.com/btm))
+- Start developer documentation [\#1033](https://github.com/chef/chef-server/pull/1033) ([stevendanna](https://github.com/stevendanna))
+- Pass email address along when resetting password [\#1032](https://github.com/chef/chef-server/pull/1032) ([mivok](https://github.com/mivok))
+- Ignore `-w` option on `chef-server-ctl reindex` with Elasticsearch [\#1031](https://github.com/chef/chef-server/pull/1031) ([smith](https://github.com/smith))
+- Remove chef-web-downloads from RELEASE\_PROCESS [\#1030](https://github.com/chef/chef-server/pull/1030) ([stevendanna](https://github.com/stevendanna))
+- replace node\[fqdn\] with server\_name in nginx.conf [\#1029](https://github.com/chef/chef-server/pull/1029) ([srenatus](https://github.com/srenatus))
+- Return correct number of rows when searching with Elasticsearch [\#1028](https://github.com/chef/chef-server/pull/1028) ([smith](https://github.com/smith))
+- Update docs for development environment [\#1027](https://github.com/chef/chef-server/pull/1027) ([thommay](https://github.com/thommay))
+- Move to the latest omnibus-software [\#1026](https://github.com/chef/chef-server/pull/1026) ([stevendanna](https://github.com/stevendanna))
+- Retry connection errors when bootstrapping bifrost [\#1025](https://github.com/chef/chef-server/pull/1025) ([ryancragun](https://github.com/ryancragun))
+- Bump version for development [\#1019](https://github.com/chef/chef-server/pull/1019) ([stevendanna](https://github.com/stevendanna))
+- Release note version update [\#1011](https://github.com/chef/chef-server/pull/1011) ([tas50](https://github.com/tas50))
+- Accept passwords with special chars in `chef-server-ctl password` [\#1005](https://github.com/chef/chef-server/pull/1005) ([stevendanna](https://github.com/stevendanna))
+- Validate user's 'name' before 'username' [\#1004](https://github.com/chef/chef-server/pull/1004) ([stevendanna](https://github.com/stevendanna))
+- Added email host and from address configuration for oc\_id [\#553](https://github.com/chef/chef-server/pull/553) ([dissonanz](https://github.com/dissonanz))
+
 ## [12.11.1](https://github.com/chef/chef-server/tree/12.11.1) (2016-11-17)
 [Full Changelog](https://github.com/chef/chef-server/compare/12.11.0...12.11.1)
 
