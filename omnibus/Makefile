@@ -82,7 +82,10 @@ install:
 	gem install bundler -v 1.12.0
 	bundle _1.12.0_ install
 
-travis:
+verify_encoding:
+	../scripts/filetype-check.sh .
+
+travis: verify_encoding
 	bundle exec rake test:csc
 	bundle exec rake test:veil
 	bundle exec rake test:routing
