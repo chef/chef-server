@@ -45,7 +45,9 @@ function transition
 
 <%- keepalive_services.each do |service| -%>
       log_me "Starting service <%= service %>"
-      /opt/opscode/bin/private-chef-ctl start <%= service %> || error_exit "Cannot start <%= service %>"
+      /opt/opscode/bin/private-chef-ctl start <%= service %> >> $LOGNAME 2>&1
+      log_me "Start exit code: $?"
+      /opt/opscode/init/<%= service %> status >> $LOGNAME 2>&1 || error_exit "Cannot start <%= service %>. Status exit code: $?"
       <%- if node['private_chef']['keepalived']['service_posthooks'][service] -%>
         log_me "Doing post-start hook for <%= service %>"
         <%= node['private_chef']['keepalived']['service_posthooks'][service] %>
