@@ -19,7 +19,7 @@ start_client(Host, Port, Org, Name) ->
     supervisor:start_child(?MODULE, [Host, Port, Org, Name]).
 
 spawn_all_clients(Host, Port, Org, Name, Count) ->
-    ClientNames = [ io_lib:format("~s~4..0B", [Name, I]) || I <- lists:seq(1, Count)],
+    ClientNames = [ lists:flatten(io_lib:format("~s~5..0B", [Name, I])) || I <- lists:seq(1, Count)],
     [ start_client(Host, Port, Org, NameI) || NameI <- ClientNames ].
 
 
