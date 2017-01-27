@@ -48,6 +48,8 @@ Updated Components
 
 **Merged pull requests:**
 
+- Fail if files include UTF-8 characters [\#1067](https://github.com/chef/chef-server/pull/1067) ([marcparadise](https://github.com/marcparadise))
+- Log service start exit code. Use status to verify started service [\#1066](https://github.com/chef/chef-server/pull/1066) ([marcparadise](https://github.com/marcparadise))
 - Bump omnibus-software to roll back to runit 2.1.1 [\#1063](https://github.com/chef/chef-server/pull/1063) ([stevendanna](https://github.com/stevendanna))
 - Minor README changes [\#1062](https://github.com/chef/chef-server/pull/1062) ([stevendanna](https://github.com/stevendanna))
 - Update omnibus-software to get the latest server-jre [\#1059](https://github.com/chef/chef-server/pull/1059) ([stevendanna](https://github.com/stevendanna))
