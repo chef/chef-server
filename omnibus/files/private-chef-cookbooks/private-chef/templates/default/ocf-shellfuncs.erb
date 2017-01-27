@@ -3,7 +3,7 @@
 #   Common helper functions for the OCF Resource Agents supplied by
 #   heartbeat.
 #
-# Copyright (c) 2004 SUSE LINUX AG, Lars Marowsky-Brée
+# Copyright (c) 2004 SUSE LINUX AG, Lars Marowsky-Bree
 #                    All Rights Reserved.
 #
 #
@@ -20,7 +20,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-# 
+#
 
 # Build version: e2619435b0758c707a70b9cfb6cea836f6b091b8
 
@@ -158,7 +158,7 @@ __ocf_set_defaults() {
 
   if [ "x$__OCF_ACTION" = "xmeta-data" ]; then
     OCF_RESOURCE_INSTANCE="undef"
-  fi  
+  fi
 
   if [ -z "$OCF_RESOURCE_INSTANCE" ]; then
     ha_log "ERROR: Need to tell us our resource instance name."
@@ -184,7 +184,7 @@ ha_log() {
     fi >&2
     return 0
   fi
-  if [ "x${HA_LOGD}" = "xyes" ] ; then 
+  if [ "x${HA_LOGD}" = "xyes" ] ; then
     ha_logger -t "${HA_LOGTAG}" "$@"
     if [ "$?" -eq "0" ] ; then
       return 0
@@ -203,7 +203,7 @@ ha_log() {
             *INFO*|info)  loglevel=info;;
     esac
     logger -t "$HA_LOGTAG" -p ${HA_LOGFACILITY}.${loglevel} "${*}"
-        fi  
+        fi
         if
     [ -n "$HA_LOGFILE" ]
   then
@@ -238,7 +238,7 @@ ha_debug() {
     return 0
   fi
 
-        if [ "x${HA_LOGD}" = "xyes" ] ; then  
+        if [ "x${HA_LOGD}" = "xyes" ] ; then
     ha_logger -t "${HA_LOGTAG}" -D "ha-debug" "$@"
                 if [ "$?" -eq "0" ] ; then
                         return 0
@@ -273,7 +273,7 @@ ha_parameter() {
     if
   [ "X$VALUE" = X ]
     then
-  
+
   case $1 in
       keepalive)  VALUE=2;;
       deadtime)
@@ -355,14 +355,14 @@ ocf_run() {
         loglevel=`echo $1 | sed -e s/-//g`
         shift 1;;
     *)
-        ;;    
+        ;;
       esac
   done
 
   output=`"$@" 2>&1`
   rc=$?
   output=`echo $output`
-  if [ $rc -eq 0 ]; then 
+  if [ $rc -eq 0 ]; then
       if [ "$verbose" -a ! -z "$output" ]; then
     ocf_log info "$output"
       fi
@@ -398,7 +398,7 @@ ocf_take_lock() {
     local rnd=$(ocf_maybe_random)
 
     sleep 0.$rnd
-    while 
+    while
   ocf_pidfile_status $lockfile
     do
   ocf_log info "Sleeping until $lockfile is released..."

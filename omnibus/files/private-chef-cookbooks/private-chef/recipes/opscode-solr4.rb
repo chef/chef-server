@@ -42,12 +42,12 @@ end
 
 ## Solr 4 Home Structure
 # .
-# ├── collection1
-# │   ├── conf
-# │   │   ├── schema.xml
-# │   │   └── solrconfig.xml
-# │   └── core.properties
-# └── solr.xml
+# +-- collection1
+# |   +-- conf
+# |   |   +-- schema.xml
+# |   |   +-- solrconfig.xml
+# |   +-- core.properties
+# +-- solr.xml
 
 cookbook_file File.join(solr_home_dir, "solr.xml") do
   source "solr4/solr.xml"
