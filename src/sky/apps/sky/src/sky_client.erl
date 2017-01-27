@@ -95,7 +95,10 @@ wait_for_open({send_message, _Message}, _From, State) ->
 %% wait_for_upgrade --> "I'm upgraded" --> n/a --> open
 wait_for_upgrade(upgraded_to_websocket, State) ->
   State1 = set_heartbeat(State),
-  {next_state, open, State1}.
+  {next_state, open, State1};
+wait_for_upgrade(connection_dropped, State) ->
+  State1 = cleanup_and_trigger_reopen(State),
+  {next_state, closed, State1}.
 
 wait_for_upgrade({send_message, _Message}, _From, State) ->
   {reply, {error, closed}, wait_for_upgrade, State}.
@@ -106,11 +109,9 @@ wait_for_upgrade({send_message, _Message}, _From, State) ->
 open({receive_message, Message}, State = #state{org = Org, name = Name}) ->
   lager:info("Received message (~p/~p): ~p", [Org, Name, Message]),
   {next_state, open, State};
-open(connection_dropped, State = #state{websocket = Websocket}) ->
-  gun:close(Websocket),
-  gen_fsm:send_event(self(), open_request),
-  State1 = cancel_heartbeat(State),
-  {next_state, closed, State1#state{websocket = undefined}};
+open(connection_dropped, State) ->
+  State1 = cleanup_and_trigger_reopen(State),
+  {next_state, closed, State1};
 open(send_heartbeat, State = #state{websocket = Websocket}) ->
   ok = gun:ws_send(Websocket, {text, "CLIENT_HEARTBEAT"}),
   State1 = set_heartbeat(State),
@@ -184,6 +185,14 @@ set_heartbeat(State) ->
   Ref = gen_fsm:send_event_after(?HEARTBEAT, send_heartbeat),
   State#state{heartbeat_cancel_ref = Ref}.
 
+cancel_heartbeat(State = #state{heartbeat_cancel_ref = undefined}) ->
+  State;
 cancel_heartbeat(State = #state{heartbeat_cancel_ref = HeartbeatCancelRef}) ->
   _ = gen_fsm:cancel_timer(HeartbeatCancelRef),
   State#state{heartbeat_cancel_ref = undefined}.
+
+cleanup_and_trigger_reopen(State = #state{websocket = Websocket}) ->
+  gun:close(Websocket),
+  gen_fsm:send_event(self(), open_request),
+  State1 = cancel_heartbeat(State),
+  State1#state{websocket = undefined}.
