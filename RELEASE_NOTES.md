@@ -49,7 +49,7 @@ following option in `/etc/opscode/chef-server.rb`:
 
     # true (default) to enable gc logging,
     # false to disable gc logging
-    opscode-solr4['log_gc'] = false
+    opscode_solr4['log_gc'] = false
 
 ### oc_id email configuration options
 
