@@ -50,6 +50,7 @@ dependency "openresty-lpeg"  # lua-based routing
 dependency "runit"
 dependency "chef_backup-gem" # chef-server-ctl backup
 dependency "veil-gem" # chef-server-ctl rotate-credentials
+dependency "erlang-crypto2"
 
 # the backend
 dependency "postgresql92"
@@ -97,7 +98,6 @@ dependency "oc-chef-pedant"
 dependency "private-chef-upgrades"
 dependency "private-chef-cookbooks"
 dependency "chef-ha-plugin-config"
-dependency "erlang-crypto2"
 dependency "chef" # for embedded chef-client -z runs (built from master - build last)
 dependency "cleanup" # MUST BE LAST DO NOT MOVE
 

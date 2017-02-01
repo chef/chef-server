@@ -21,15 +21,13 @@ dependency "erlang"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
-  profile_name = "default"
 
   env['USE_SYSTEM_GECODE'] = "1"
   env['REL_VERSION'] = "#{project.build_version}"
-  env['REBAR_PROFILE'] = profile_name
 
   make "omnibus", env: env
 
-  sync "#{project_dir}/_build/#{profile_name}/rel/mover/", "#{install_dir}/embedded/service/opscode-chef-mover/"
+  sync "#{project_dir}/_build/default/rel/mover/", "#{install_dir}/embedded/service/opscode-chef-mover/"
   delete "#{install_dir}/embedded/service/opscode-chef-mover/log"
 
   mkdir "#{install_dir}/embedded/service/opscode-chef-mover/scripts"
