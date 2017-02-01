@@ -19,9 +19,7 @@ Requirements:
 * VirtualBox 4.3+
 * Vagrant 1.7+
 * At least one recent Chef Server 12.0.9+ debian package download,
-  which you can grab from https://bintray.com/chef/current/chef-server. Note
-  that you should download the chef-server-core package, and not run the
-  installer. dvm will then look for the package in either the Downloads dir
+  which you can get using this command (if you have the most recent chefdk) `mixlib-install download chef-server -p ubuntu -a x86_64 -l 14`. dvm will then look for the package in either the Downloads dir
   on your machine or the omnibus/pkg directory under the chef-server repo
   where dvm is running. You can also set the INSTALLER environment variable
   to tell dvm where to find the package if it is not in one of those locations.
@@ -57,7 +55,7 @@ knife config on your workstation.
     vagrant ssh
     sudo -i
     # create a user to access chef with
-    chef-server-ctl user-create -f /tmp/admin.pem admin Admin User admin@example.com password 
+    chef-server-ctl user-create -f /tmp/admin.pem admin Admin User admin@example.com password
     # create an organization
     chef-server-ctl org-create -f /tmp/test-validator.pem test Test
     # associate the user with the organization

@@ -8,6 +8,19 @@ This document contains release notes for the current major release and all patch
 For prior releases, see
 [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## Unreleased
+
+### FIPS runtime flag exposed
+
+We are updating the Chef Server package to expose a `fips` configuration flag
+in the `chef-server.rb`. Setting `fips true` and reconfiguring will start the
+server in FIPS mode. The default value of this flag is `false` except
+on systems where FIPS is enabled at the Kernel where it defaults to `true`.
+
+The only supported systems at this time for FIPS mode are RHEL. Package for
+other systems will be missing the required OpenSSL FIPS module and will fail
+to start if reconfigured with `fips true`.
+
 ## 12.12.0 (2017-01-26)
 
 This release addresses a number of bugs, the most notable are describe
