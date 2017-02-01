@@ -11,9 +11,8 @@
      [{listener, [
                {ip, "<%= node['private_chef']['rabbitmq']['node_ip_address'] %>"},
                {port,     <%= node['private_chef']['rabbitmq']['management_port'] %> },
-               {ssl,      true}
+               {ssl, <%= node['private_chef']['fips_enabled'] ? false : true %> }
                % The Rabbit Management Plugin will use the global Rabbit SSL Config
               ]}
   ]}
 ].
-
