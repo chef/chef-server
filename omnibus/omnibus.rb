@@ -20,5 +20,6 @@ fetcher_read_timeout 120
 # local_software_dirs ['/path/to/local/software']
 
 fatal_transitive_dependency_licensing_warnings true
-# PROJECT should be set by jenkins during the build
-fips_mode ((ENV["PROJECT"] || "").downcase == "chef-server-fips")
+
+# PROJECT_NAME should be set by jenkins during the build
+fips_mode ((ENV["PROJECT_NAME"] || "").downcase == "chef-server-fips")
