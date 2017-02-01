@@ -80,7 +80,7 @@ dev-build: clear_pkg_cache prune
 
 install:
 	gem install bundler -v 1.12.0
-	bundle _1.12.0_ install
+	bundle _1.12.0_ install --without development
 
 verify_encoding:
 	../scripts/filetype-check.sh .
