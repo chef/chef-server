@@ -87,6 +87,17 @@ EOF
     }
   }
 
+  context "When FIPS is enabled at the kernel" do
+    let(:config) { <<-EOF
+fips true
+EOF
+    }
+    it "sets fips_enabled to true" do
+      rendered_config = config_for("api.chef.io")
+      expect(rendered_config["private_chef"]["fips_enabled"]).to eq(true)
+    end
+  end
+
   context "in a standalone topology" do
     let(:config) { <<-EOF
 topology "standalone"

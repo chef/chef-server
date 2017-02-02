@@ -34,7 +34,6 @@ build do
   block do
     File.open("#{install_dir}/embedded/cookbooks/dna.json", "w") do |f|
       run_list = Array.new.tap do |r|
-        r << 'recipe[private-chef::fips]' if fips_mode?
         r << 'recipe[private-chef::default]'
       end
 
