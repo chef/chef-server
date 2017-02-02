@@ -25,15 +25,19 @@ license_file "LICENSE"
 skip_transitive_dependency_licensing true
 
 dependency "erlang"
-dependency "rebar"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
-  command "rebar compile", env: env
+  # All of the apps include a rebar3 executable. Just use one of them to build
+  # this application. We do not want to include rebar in the final package
+  # so don't use a software dependency
+  rebar3_path = "#{project.files_path}/../../src/bookshelf/rebar3"
+
+  command "#{rebar3_path} compile", env: env
 
   crypto2_dir = "#{install_dir}/embedded/lib/erlang-crypto2"
   mkdir crypto2_dir
-  copy "#{project_dir}/ebin", "#{crypto2_dir}/ebin"
+  copy "#{project_dir}/_build/default/lib/fips_crypto/ebin", "#{crypto2_dir}/ebin"
   copy "#{project_dir}/priv", "#{crypto2_dir}/priv"
 end
