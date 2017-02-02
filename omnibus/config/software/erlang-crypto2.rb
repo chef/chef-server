@@ -15,7 +15,7 @@
 #
 
 name "erlang-crypto2"
-default_version "er-459/update-crypto"
+default_version "master"
 
 source git: "https://github.com/chef/erlang-crypto2.git"
 
