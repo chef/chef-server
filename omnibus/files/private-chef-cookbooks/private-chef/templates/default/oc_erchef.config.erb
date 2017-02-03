@@ -130,7 +130,12 @@
                 {password, <<"<%= @node['private_chef']['rabbitmq']['management_password'] %>">>},
                 % rabbitmq management http connection pool
                 {rabbitmq_management_service, [
+                    <% if node['private_chef']['fips_enabled'] -%>
+                    %% See note about Bookshelf
+                    {root_url, "http://<%= @actions_vip %>:<%= @node['private_chef']['rabbitmq']['management_port'] %>/api"},
+                    <% else -%>
                     {root_url, "https://<%= @actions_vip %>:<%= @node['private_chef']['rabbitmq']['management_port'] %>/api"},
+                    <% end %>
                     {timeout, <%= @node['private_chef']['rabbitmq']['rabbit_mgmt_timeout'] %>},
                     {init_count, <%= @node['private_chef']['rabbitmq']['rabbit_mgmt_http_init_count'] %>},
                     {max_count, <%= @node['private_chef']['rabbitmq']['rabbit_mgmt_http_max_count'] %>},

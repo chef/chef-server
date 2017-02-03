@@ -226,3 +226,36 @@ object types and organizations.
 5. Erchef responds to the API request either (in the case of a normal
    search) with the full document or (in the case of a partial search
    via a POST) with a reduced version of the document.
+
+## FIPS Integration
+
+This assumes you understand what the FIPS 140-2 validation is. Putting the
+Chef Server into *FIPS mode* means:
+
+1. It sets `OPENSSL_FIPS=1` in the environment, so shelling out to `openssl`
+will activate the FIPS module.
+2. Using the erlang-crypto2 app it activates the FIPS module for any native
+calls.
+3. Also using the erlang-crypto2 app it overwrites certain crypto calls that are
+unsupported (IE, MD5) in the OpenSSL FIPS module with direct Erlang code.
+
+The server can be switched into and out of FIPS mode at runtime. Edit the
+`chef-server.rb` config by adding `fips true` or `fips false` to force FIPS
+mode as necessary. On systems where FIPS is enabled at the kernel level this
+config is defaulted to true. On all other systems it is defaulted to false. FIPS
+mode is currently only supported on RHEL systems.
+
+### FIPS Implementation Details
+
+The erlang-crypto2 app provides `crypto` module implementation. To support
+switching to this crypto module at runtime we perform the following:
+
+* Build the erlang-crypto2 app as a separate omnibus definition using the same
+Erlang libraries used to build all other Erlang apps. Copy the `ebin` and `priv`
+folders from the build into a custom location inside the omnibus package.
+* If `fips true` is set and the server is reconfigured, we update the `vm.args`
+to put the erlang-crypto2 `ebin` folder at the front of the load path.
+* We also export the path to the `priv` folder as an environment variable. When
+the erlang-crypto2 app is loaded it uses an `on_load` function to load the
+crypto NIFs. We could not figure out how to specify the correct `priv` folder
+except by hardcoding it into this environment variable.

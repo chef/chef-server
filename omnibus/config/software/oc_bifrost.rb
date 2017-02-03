@@ -25,14 +25,12 @@ dependency "sqitch"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
-  profile_name = fips_mode? ? "fips" : "default"
 
   env['REL_VERSION'] = "#{project.build_version}"
-  env['REBAR_PROFILE'] = profile_name
 
   make "omnibus", env: env
 
-  sync "#{project_dir}/_build/#{profile_name}/rel/oc_bifrost/", "#{install_dir}/embedded/service/oc_bifrost/"
+  sync "#{project_dir}/_build/default/rel/oc_bifrost/", "#{install_dir}/embedded/service/oc_bifrost/"
   sync "#{project_dir}/schema", "#{install_dir}/embedded/service/oc_bifrost/db/"
   delete "#{install_dir}/embedded/service/oc_bifrost/log"
 end
