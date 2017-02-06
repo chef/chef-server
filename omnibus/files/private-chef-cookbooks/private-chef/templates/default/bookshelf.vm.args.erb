@@ -37,6 +37,6 @@
 <%- if node['private_chef']['fips_enabled'] -%>
 ## Runtime switches to enable loading custom crypto module
 ## that supports OpenSSL-FIPS
--env ERLANG_CRYPTO2_PATH <%= File.join(node['private_chef']['install_path'], "/embedded/lib/erlang-crypto2/priv") =%>
--pa <%= File.join(node['private_chef']['install_path'], "/embedded/lib/erlang-crypto2/ebin") =%>
+-env ERLANG_CRYPTO2_PATH <%= File.join(node['private_chef']['install_path'], "/embedded/lib/erlang-crypto2/priv") %>
+-pa <%= File.join(node['private_chef']['install_path'], "/embedded/lib/erlang-crypto2/ebin") %>
 <%- end -%>
