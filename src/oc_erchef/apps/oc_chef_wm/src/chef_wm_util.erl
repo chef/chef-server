@@ -307,18 +307,12 @@ parse_number(Str) when is_list(Str) ->
             Num;
         _ ->
             throw(invalid_num_versions)
-    end;
-parse_number(_) ->
-    throw(invalid_num_versions).
+    end.
 
 scheme(Req) ->
     case wrq:get_req_header("x-forwarded-proto", Req) of
         undefined ->
-            case wrq:scheme(Req) of
-                https -> "https";
-                http -> "http";
-                P -> erlang:atom_to_list(P)
-            end;
+            erlang:atom_to_list(wrq:scheme(Req));
         Proto -> Proto
     end.
 
