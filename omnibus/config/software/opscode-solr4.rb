@@ -24,7 +24,8 @@ skip_transitive_dependency_licensing true
 source url: "http://archive.apache.org/dist/lucene/solr/#{version}/solr-#{version}.tgz",
        md5: "8ae107a760b3fc1ec7358a303886ca06"
 
-if ppc64? || ppc64le? || ohai['kernel']['machine'] == "s390x"
+
+if ppc64? || ppc64le? || s390x?
   dependency "ibm-jre"
 elsif intel? && _64_bit?
   dependency "server-jre"
@@ -39,7 +40,10 @@ relative_path "solr-#{version}"
 service_dir = "#{install_dir}/embedded/service/opscode-solr4"
 
 build do
-  env = with_standard_compiler_flags(with_embedded_path)
+  env = with_standard_compiler_flags(with_embedded_path) 
+  unless @ibm_jre
+    env['PATH'] = "#{env['PATH']}:#{install_dir}/embedded/jre/bin"
+  end
 
   # copy over the licenses
   sync "licenses/", "#{service_dir}/licenses/"
@@ -54,4 +58,18 @@ build do
   delete "#{service_dir}/jetty/example*"
   delete "#{service_dir}/jetty/multicore"
   delete "#{service_dir}/jetty/solr"
+
+  # Replace the built-in admin.html with a blank page to effectively disable the admin
+  # interface to solr.  Note that this does not disable API access.
+  touch "admin.html"
+
+  if ppc64? || ppc64le? || s390x?
+    # s390, PPC et all have `zip` but do not include `jre` in the JRE
+    command "zip  #{service_dir}/jetty/webapps/solr.war admin.html"
+  else
+    # x86_64 platforms have `jar` in the jre, but `zip` is not on the system.
+    command "jar -uf #{service_dir}/jetty/webapps/solr.war admin.html", env: env
+  end
+
+  delete "admin.html"
 end
