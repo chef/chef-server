@@ -39,8 +39,8 @@ chef_index_batch_test_() ->
                WrapperSize = maps:get(wrapper_size, State),
                meck:expect(chef_index, update,
                            fun(solr, Payload) ->
-                                   ExpectedSize = byte_size(iolist_to_binary(Payload)),
-                                   ?assertEqual(CurrentSize+WrapperSize, ExpectedSize),
+                                   ActualSize = byte_size(iolist_to_binary(Payload)),
+                                   ?assertEqual(CurrentSize+WrapperSize, ActualSize),
                                    ok
                            end),
                chef_index_batch:flush(),
@@ -65,7 +65,7 @@ chef_index_batch_test_() ->
                meck:expect(chef_index, update, fun(solr, _Payload) -> ok end),
                application:set_env(chef_index, search_batch_max_wait, 10),
                restart_server(),
-               add_item(<<"abcdefg">>),
+               add_item_no_wait(<<"abcdefg">>),
                ?assertEqual(ok, wait_for_res())
        end
       },
@@ -75,7 +75,7 @@ chef_index_batch_test_() ->
                meck:expect(chef_index, update, fun(solr, _Payload) -> ok end),
                application:set_env(chef_index, search_batch_max_size, 70),
                restart_server(),
-               add_item(<<"abcd">>), % The wrapper size is 66
+               add_item_no_wait(<<"abcd">>), % The wrapper size is 66
                ?assertEqual(ok, wait_for_res())
        end
       }
@@ -95,7 +95,14 @@ restart_server() ->
     stop_server(),
     chef_index_batch:start_link().
 
+%% If you want to call this twice in one test, wait_for_added/0 has to be
+%% adjusted: it currently only checks that the queue size gets from zero to
+%% one (or rather, non-zero).
 add_item(Item) ->
+    add_item_no_wait(Item),
+    wait_for_added().
+
+add_item_no_wait(Item) ->
     Us = self(),
     spawn_link(
       fun() ->
@@ -118,4 +125,15 @@ wait_for_started() ->
     receive
         started ->
             ok
+    end.
+
+%% Note that this cannot work if the item added is bigger than max_size -- these
+%% will be flushed immediately, and this _could_ have happened before we started
+%% waiting/looping.
+wait_for_added() ->
+    case chef_index_batch:status() of
+        #{ item_queue := [] } ->
+            timer:sleep(10),
+            wait_for_added();
+        _ -> ok
     end.
