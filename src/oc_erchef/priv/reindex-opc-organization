@@ -98,19 +98,33 @@ perform(drop, _Context, {OrgId, OrgName}) ->
     ok = rpc:call(?ERCHEF, chef_index, delete_search_db, [OrgId]);
 perform(reindex, Context, {_OrgId, OrgName}=OrgInfo) ->
     io:format("Sending all data for organization '~s' to be indexed again.  It may take some time before everything is available via search.~n", [OrgName]),
-    {ok, Missing} = rpc:call(?ERCHEF, chef_reindex, reindex, [Context, OrgInfo]),
-    case Missing of
-        [] ->
-            ok;
-        _ ->
-            io:format(standard_error, "~nThe following objects in organization \"~s\" were unable to be reindexed:~n~n", [OrgName]),
-            [io:format(standard_error, "\t~s ~s~n", [Type, Name]) || {Type, Name} <- Missing],
-            io:format(standard_error, "~n", [])
+    case rpc:call(?ERCHEF, chef_reindex, reindex, [Context, OrgInfo]) of
+        {ok, Missing} ->
+            case Missing of
+                [] -> ok;
+                _ -> print_missing(Missing, OrgName)
+            end;
+        {error, Failed, Missing} ->
+            print_missing(Missing, OrgName),
+            print_errors(Failed, OrgName),
+            halt(1)
     end;
 perform(complete, Context, OrgInfo) ->
     %% Just do everything
     perform(drop, Context, OrgInfo),
     perform(reindex, Context, OrgInfo).
+
+print_errors(Failed, OrgName) ->
+    io:format(standard_error, "Reindexing the organization \"~s\" has failed.~n", [OrgName]),
+    io:format(standard_error, "The following objects failed to be reindexed in the last batch:~n~n", []),
+    [io:format(standard_error, "\t~s[~s]: ~s~n", [Type, Id, Reason]) || {{Type, Id, _Db}, Reason} <- Failed].
+
+print_missing([], _OrgName) ->
+    ok;
+print_missing(Missing, OrgName) ->
+    io:format(standard_error, "~nThe following objects in organization \"~s\" were not sent for indexing:~n~n", [OrgName]),
+    [io:format(standard_error, "\t~s ~s~n", [Type, Name]) || {Type, Name} <- Missing],
+    io:format(standard_error, "~n", []).
 
 make_context(OrgName, IntLB) ->
     {ok, ServerAPIMinVersion} = rpc:call(?ERCHEF, oc_erchef_app, server_api_version, [min]),

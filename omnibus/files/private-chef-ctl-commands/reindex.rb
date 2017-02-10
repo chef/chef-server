@@ -51,9 +51,9 @@ end
 def enqueue_data_for_org(org)
   status = Dir.chdir(File.join(base_path, "embedded", "service", "opscode-erchef", "bin")) do
     if running_config["private_chef"]["fips_enabled"]
-      run_command("./reindex-opc-organization complete #{org} http://127.0.0.1 >/dev/null")
+      run_command("./reindex-opc-organization complete #{org} http://127.0.0.1")
     else
-      run_command("./reindex-opc-organization complete #{org} >/dev/null")
+      run_command("./reindex-opc-organization complete #{org}")
     end
   end
   if !status.success?

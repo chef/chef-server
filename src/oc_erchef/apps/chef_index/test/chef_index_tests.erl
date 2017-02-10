@@ -72,6 +72,16 @@ chef_index_test_() ->
                ?assert(meck:validate(chef_index_expand))
        end
       },
+      {"add_batch adds each item passed to it",
+       fun() ->
+               application:set_env(chef_index, search_queue_mode, inline),
+               meck:expect(chef_index_expand, send_item, fun(?EXPECTED_DOC) -> ok end),
+               chef_index:add_batch([{role, <<"a1">>, <<"db1">>, Item},
+                                     {role, <<"a1">>, <<"db1">>, Item},
+                                     {role, <<"a1">>, <<"db1">>, Item}]),
+               ?assertEqual(3, meck:num_calls(chef_index_expand, send_item, '_'))
+       end
+      },
       {"delete calls chef_index_queue:delete when search_queue_mode is rabbitmq",
        fun() ->
                application:set_env(chef_index, search_queue_mode, rabbitmq),

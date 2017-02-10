@@ -277,6 +277,42 @@ default['private_chef']['opscode-erchef']['sql_user'] = "opscode_chef"
 default['private_chef']['opscode-erchef']['sql_password'] = "snakepliskin"
 default['private_chef']['opscode-erchef']['sql_ro_user'] = "opscode_chef_ro"
 default['private_chef']['opscode-erchef']['sql_ro_password'] = "shmunzeltazzen"
+#
+# Reindex configurables
+#
+# NOTE: The semantics of reindexing are very different between
+# ElasticSearch and Solr. Solr reindexing is only placing an item on a
+# queue, thus it is unlikely to fail at the erchef level.  Rather, you
+# will want to tune opscode-expander.
+#
+# These configuration items are consulted during reindex requests.
+# Such requests originate from users running chef-server-ctl reindex.
+#
+#   reindex_batch_size - Number of items to fetch from the database
+#                        and send to the search index at a time.
+#
+# reindex_sleep_min_ms - Minimum number of milliseconds to sleep
+#                        before retrying a failed attempt to index an
+#                        item. Retries are delayed a random number of
+#                        miliseconds between reindex_sleep_min_ms and
+#                        reindex_sleep_max_ms. Set both this and
+#                        reindex_sleep_max_ms to 0 to skip the sleep.
+#
+# reindex_sleep_max_ms - Maximum number of milliseconds to sleep
+#                        before retrying a failed attempt to index an
+#                        item. Retries are delayed a random number of
+#                        miliseconds between reindex_sleep_min_ms and
+#                        reindex_sleep_max_ms. Set both this and
+#                        reindex_sleep_min_ms to 0 to skip the sleep.
+#
+# reindex_item_retries - Number of times to retry indexing an object
+#                        if it fails.
+#
+default['private_chef']['opscode-erchef']['reindex_batch_size'] = 10
+default['private_chef']['opscode-erchef']['reindex_sleep_min_ms'] = 500
+default['private_chef']['opscode-erchef']['reindex_sleep_max_ms'] = 2000
+default['private_chef']['opscode-erchef']['reindex_item_retries'] = 3
+#
 # Pool configuration for postgresql connections
 #
 # db_pool_size - the number of pgsql connections in the pool
