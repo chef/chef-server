@@ -28,23 +28,6 @@
     <!-- Set connectors                                              -->
     <!-- =========================================================== -->
 
-  <!--
-    <Call name="addConnector">
-      <Arg>
-          <New class="org.eclipse.jetty.server.nio.SelectChannelConnector">
-            <Set name="host"><SystemProperty name="jetty.host" /></Set>
-            <Set name="port"><SystemProperty name="jetty.port" default="8983"/></Set>
-            <Set name="maxIdleTime">50000</Set>
-            <Set name="Acceptors">2</Set>
-            <Set name="statsOn">false</Set>
-            <Set name="confidentialPort">8443</Set>
-	    <Set name="lowResourcesConnections">5000</Set>
-	    <Set name="lowResourcesMaxIdleTime">5000</Set>
-          </New>
-      </Arg>
-    </Call>
-  -->
-
     <!-- This connector is currently being used for Solr because it
           showed better performance than nio.SelectChannelConnector
           for typical Solr requests.  -->
@@ -62,20 +45,20 @@
     </Call>
 
     <!-- if the connector below is uncommented, then jetty will also accept SSL
-         connections on port 8984, using a self signed certificate and can 
-         optionally require the client to authenticate with a certificate. 
+         connections on port 8984, using a self signed certificate and can
+         optionally require the client to authenticate with a certificate.
          (which can be the same as the server certificate_
-         
+
          # Run solr example with SSL on port 8984
          java -jar start.jar
-         # 
+         #
          # Run post.jar so that it trusts the server cert...
          java -Djavax.net.ssl.trustStore=../etc/solrtest.keystore -Durl=https://localhost:8984/solr/update -jar post.jar *.xml
 
          # Run solr example with SSL requiring client certs on port 8984
          java -Djetty.ssl.clientAuth=true -jar start.jar
          #
-         # Run post.jar so that it trusts the server cert, 
+         # Run post.jar so that it trusts the server cert,
          # and authenticates with a client cert
          java -Djavax.net.ssl.keyStorePassword=secret -Djavax.net.ssl.keyStore=../etc/solrtest.keystore -Djavax.net.ssl.trustStore=../etc/solrtest.keystore -Durl=https://localhost:8984/solr/update -jar post.jar *.xml
 
@@ -99,7 +82,7 @@
     -->
 
     <!-- =========================================================== -->
-    <!-- Set handler Collection Structure                            --> 
+    <!-- Set handler Collection Structure                            -->
     <!-- =========================================================== -->
     <Set name="handler">
       <New id="Handlers" class="org.eclipse.jetty.server.handler.HandlerCollection">
@@ -118,11 +101,11 @@
         </Set>
       </New>
     </Set>
-    
+
     <!-- =========================================================== -->
     <!-- Configure Request Log                                       -->
     <!-- =========================================================== -->
-    <!-- 
+    <!--
     <Ref id="Handlers">
       <Call name="addHandler">
         <Arg>
@@ -156,9 +139,6 @@
     <Set name="dumpAfterStart">false</Set>
     <Set name="dumpBeforeStop">false</Set>
 
-
-
-
     <Call name="addBean">
       <Arg>
         <New id="DeploymentManager" class="org.eclipse.jetty.deploy.DeploymentManager">
@@ -169,28 +149,10 @@
             <Arg>org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern</Arg>
             <Arg>.*/servlet-api-[^/]*\.jar$</Arg>
           </Call>
-          
-          
-          <!-- Add a customize step to the deployment lifecycle -->
-          <!-- uncomment and replace DebugBinding with your extended AppLifeCycle.Binding class 
-          <Call name="insertLifeCycleNode">
-            <Arg>deployed</Arg>
-            <Arg>starting</Arg>
-            <Arg>customise</Arg>
-          </Call>
-          <Call name="addLifeCycleBinding">
-            <Arg>
-              <New class="org.eclipse.jetty.deploy.bindings.DebugBinding">
-                <Arg>customise</Arg>
-              </New>
-            </Arg>
-          </Call>
-          -->
-          
         </New>
       </Arg>
     </Call>
-    
+
     <Ref id="DeploymentManager">
       <Call name="addAppProvider">
         <Arg>
@@ -201,5 +163,4 @@
         </Arg>
       </Call>
     </Ref>
-
 </Configure>
