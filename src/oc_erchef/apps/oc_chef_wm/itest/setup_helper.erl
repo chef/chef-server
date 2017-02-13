@@ -50,6 +50,12 @@ start_server(Config) ->
 
     application:set_env(lager, error_logger_redirect, false),
 
+    % Use canned openssl response instead: always returns the same key, but does
+    % so very fast.
+    application:set_env(chef_authn, openssl_path,
+                        filename:join(code:priv_dir(oc_chef_wm),
+                                      "../test/mock_openssl.sh")),
+
     % TODO: we should automate setting these, if it matters at all
     application:set_env(oc_chef_wm, default_orgname, <<"org">>),
     application:set_env(oc_chef_wm, api_version, "12.0.0"),
