@@ -40,9 +40,12 @@ relative_path "solr-#{version}"
 service_dir = "#{install_dir}/embedded/service/opscode-solr4"
 
 build do
-  env = with_standard_compiler_flags(with_embedded_path) 
+  env = with_standard_compiler_flags(with_embedded_path)
+
+  embedded_jre_path = "#{install_dir}/embedded/jre/bin"
+
   unless @ibm_jre
-    env['PATH'] = "#{env['PATH']}:#{install_dir}/embedded/jre/bin"
+    env['PATH'] = "#{env['PATH']}:#{embedded_jre_path}"
   end
 
   # copy over the licenses
@@ -63,12 +66,36 @@ build do
   # interface to solr.  Note that this does not disable API access.
   touch "admin.html"
 
-  if ppc64? || ppc64le? || s390x?
-    # s390, PPC et all have `zip` but do not include `jre` in the JRE
-    command "zip  #{service_dir}/jetty/webapps/solr.war admin.html"
-  else
-    # x86_64 platforms have `jar` in the jre, but `zip` is not on the system.
+  #
+  # Locate an executable in the current $PATH.
+  #
+  # @param [String] executable
+  #   path or name of the executable you are looking for
+  #
+  # @param [Hash] env
+  #   an environment with a PATH that you would like to search
+  #
+  # @return [String, nil]
+  #   the path to the executable, or +nil+ if not present
+  #
+  def which(executable, env=ENV)
+    if File.file?(executable) && File.executable?(executable)
+      executable
+    elsif env["PATH"]
+      path = env["PATH"].split(File::PATH_SEPARATOR).find do |path|
+        File.executable?(File.join(path, executable))
+      end
+
+      path && File.expand_path(executable, path)
+    end
+  end
+
+  if which("jar", env)
     command "jar -uf #{service_dir}/jetty/webapps/solr.war admin.html", env: env
+  elsif which("zip", env)
+    command "zip  #{service_dir}/jetty/webapps/solr.war admin.html", env: env
+  else
+    raise "Builder does not have a zip or jar executable"
   end
 
   delete "admin.html"
