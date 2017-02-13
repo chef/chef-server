@@ -238,6 +238,10 @@ default['private_chef']['opscode-solr4']['max_commit_docs'] = 1000
 default['private_chef']['opscode-solr4']['auto_soft_commit'] = 1000
 default['private_chef']['opscode-solr4']['commit_interval'] = 60000 # in ms
 default['private_chef']['opscode-solr4']['poll_seconds'] = 20 # slave -> master poll interval in seconds, max of 60 (see solrconfig.xml.erb)
+# By default we only allow the /admin/ping API (for health checking).
+# To enable the rest of the admin API, set the enable_full_admin_api
+# to true.
+default['private_chef']['opscode-solr4']['enable_full_admin_api'] = false
 
 ####
 # Chef Expander
