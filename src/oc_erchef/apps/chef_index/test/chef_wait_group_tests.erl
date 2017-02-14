@@ -21,14 +21,14 @@ wait_returns_error_if_the_worker_fails_test() ->
     chef_wait_group:add(Pid, test_id1, []),
     ?assertEqual({error, [], [{test_id1, {throw, badfun}}]}, chef_wait_group:wait(Pid)).
 
-wait_returns_error_with_finished_jobs_and_faild_jobs_test() ->
+wait_returns_error_with_finished_jobs_and_failed_jobs_test() ->
     {ok, Pid} = chef_wait_group:start_link(fun(Arg) ->
                                                      Arg = item1,
                                                      ok
                                              end, []),
     chef_wait_group:add(Pid, test_id1, [item1]),
     chef_wait_group:add(Pid, test_id2, [item2]),
-    ?assertEqual({error, [{test_id1, ok}], [{test_id2, {error,{badmatch,item1}}}]},
+    ?assertEqual({error, [{test_id1, ok}], [{test_id2, {error, {badmatch, item1}}}]},
                  chef_wait_group:wait(Pid)).
 
 wait_blocks_until_jobs_are_done_test() ->

@@ -35,7 +35,7 @@
 
 -record(chef_wait_group_state, {
           waiting_pid :: {pid(), term()},
-          waiting_workers = []:: list(),
+          waiting_workers = [] :: list(),
           done_jobs = [] :: list(),
           failed_jobs = [] :: list(),
           job_fun :: fun()
@@ -66,7 +66,7 @@ add(Pid, JobName, JobArgs) when is_list(JobArgs)->
 add(Pid, JobName, JobArgs) ->
     add(Pid, JobName, [JobArgs]).
 
--spec wait(pid()) -> {ok, list()}|{error, already_waiting}|{error, list(), list()}.
+-spec wait(pid()) -> {ok, list()} | {error, already_waiting} | {error, list(), list()}.
 wait(Pid) ->
     gen_server:call(Pid, gather, infinity).
 

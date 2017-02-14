@@ -100,10 +100,7 @@ perform(reindex, Context, {_OrgId, OrgName}=OrgInfo) ->
     io:format("Sending all data for organization '~s' to be indexed again.  It may take some time before everything is available via search.~n", [OrgName]),
     case rpc:call(?ERCHEF, chef_reindex, reindex, [Context, OrgInfo]) of
         {ok, Missing} ->
-            case Missing of
-                [] -> ok;
-                _ -> print_missing(Missing, OrgName)
-            end;
+            print_missing(Missing, OrgName);
         {error, Failed, Missing} ->
             print_missing(Missing, OrgName),
             print_errors(Failed, OrgName),

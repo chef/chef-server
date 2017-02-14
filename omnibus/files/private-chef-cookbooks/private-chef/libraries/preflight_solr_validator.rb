@@ -12,20 +12,40 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+require_relative './preflight_checks.rb'
+
 class SolrPreflightValidator < PreflightValidator
-  attr_reader :cs_solr_attr, :node_solr_attr, :cs_erchef_attr
+  attr_reader :cs_solr_attr, :node_solr_attr, :cs_erchef_attr, :node_erchef_attr
 
   def initialize(node)
     super
     @cs_solr_attr = PrivateChef['opscode_solr4']
-    @node_solr_attr = node['private_chef']['opscode-solr4']
     @cs_erchef_attr = PrivateChef['opscode_erchef']
+    @node_erchef_attr = node['private_chef']['opscode-erchef']
+    @node_solr_attr = node['private_chef']['opscode-solr4']
   end
 
   def run!
+    verify_sane_reindex_sleep_times
     warn_unchanged_external_flag
     verify_external_url
     verify_erchef_config
+  end
+
+  def verify_sane_reindex_sleep_times
+    final_min = cs_erchef_attr['reindex_sleep_min_ms'] || node_erchef_attr['reindex_sleep_min_ms']
+    final_max = cs_erchef_attr['reindex_sleep_max_ms'] || node_erchef_attr['reindex_sleep_max_ms']
+    if final_min > final_max
+      fail_with <<-EOM
+
+opscode_erchef['reindex_sleep_min_ms'] (#{final_min}) is greater than
+opscode_erchef['reindex_sleep_max_ms'] (#{final_max})
+
+The maximum sleep time should be greater or equal to the minimum sleep
+time.
+EOM
+    end
   end
 
   def warn_unchanged_external_flag

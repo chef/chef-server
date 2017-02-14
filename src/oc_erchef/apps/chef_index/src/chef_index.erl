@@ -110,9 +110,9 @@ add_batch(Batch) ->
     [chef_wait_group:add(BatchWorker, {TypeName, Id, DbName}, Item) || {TypeName, Id, DbName, _} = Item <- Batch],
     case chef_wait_group:wait(BatchWorker) of
         {ok, Results}  ->
-            case all_ok(Results) of
-                true -> ok;
-                false -> {error, not_ok(Results)}
+            case not_ok(Results) of
+                [] -> ok;
+                R -> {error, R}
             end;
         {error, Results, FailedJobs} ->
             {error, [not_ok(Results)|FailedJobs]}
@@ -150,17 +150,13 @@ wait_before_retry(0, 0) ->
 wait_before_retry(Min, Min) ->
     lager:info("chef_index: waiting ~B ms before retry", [Min]),
     timer:sleep(Min);
+wait_before_retry(Min, Max) when Min > Max ->
+    lager:error("chef_index: reindex_sleep_max_ms less than reindex_sleep_min_ms. Sleeping ~B", [Max]),
+    timer:sleep(Max);
 wait_before_retry(Min, Max) ->
-    Rand01 = random:uniform(),
-    %% Tranform (0, 1) -> (Min, Max)
-    %% Round to an integer since timer:sleep only takes an integer
-    RandMinMax = round(Min + (Rand01*(Max - Min))),
+    RandMinMax = Min + random:uniform(Max - Min),
     lager:info("chef_index: waiting ~B ms before retry", [RandMinMax]),
     timer:sleep(RandMinMax).
-
-all_ok(Results) ->
-    Ok = fun({_, Res}) -> Res =:= ok end,
-    lists:all(Ok, Results).
 
 not_ok(Results) ->
     NotOk = fun({_, Res}) -> Res =/= ok end,
