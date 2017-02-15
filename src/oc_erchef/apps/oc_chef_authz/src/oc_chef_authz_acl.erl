@@ -29,8 +29,8 @@
          acl_auth_path/3,
          fetch_id/4,
          fetch_cookbook_id/3,
-         fetch/2,
          fetch/3,
+         fetch/4,
          has_grant_on/3,
          validate_actors_clients_users/2,
          update_part/5,
@@ -204,16 +204,16 @@ fetch_cookbook_id(DbContext, Name, OrgId) ->
             AuthzId
     end.
 
--spec fetch(chef_type(), id()) -> list() | {error, term()}.
-fetch(Type, AuthzId) ->
-    fetch(Type, AuthzId, undefined).
+-spec fetch(chef_type(), binary(), id()) -> list() | {error, term()}.
+fetch(Type, OrgId, AuthzId) ->
+    fetch(Type, OrgId, AuthzId, undefined).
 
-fetch(Type, AuthzId, Granular) ->
+fetch(Type, OrgId, AuthzId, Granular) ->
     Path = acl_path(Type, AuthzId),
     Result = oc_chef_authz_http:request(Path, get, ?DEFAULT_HEADERS, [], superuser_id()),
     case Result of
         {ok, Record} ->
-            convert_all_ids_to_names(Record, Granular);
+            convert_all_ids_to_names(OrgId, Record, Granular);
         {error, forbidden} ->
             forbidden;
         Other ->
@@ -244,14 +244,15 @@ has_grant_on(ObjectType, ObjectId, ActorId) ->
 %% Convert names provde in the ACE to their corresponding
 %% authz ids.
 names_to_ids(ACE, OrgId) ->
+    Context = oc_chef_authz_scoped_name:initialize_context(OrgId),
     ActorIds = case ej:get({<<"clients">>}, ACE) of
         undefined ->
-            fetch_actors(OrgId, ej:get({<<"actors">>}, ACE));
+            fetch_actors(Context, ej:get({<<"actors">>}, ACE));
         Clients ->
-            safe_fetch_ids(user, undefined, ej:get({<<"users">>}, ACE)) ++
-            safe_fetch_ids(client, OrgId, Clients)
+            safe_fetch_ids(user, Context, ej:get({<<"users">>}, ACE)) ++
+            safe_fetch_ids(client, Context, Clients)
     end,
-    GroupIds = safe_fetch_ids(group, OrgId, ej:get({<<"groups">>}, ACE)),
+    GroupIds = safe_fetch_ids(group, Context, ej:get({<<"groups">>}, ACE)),
 
     % Though we split out clients/users, the authz API
     % requires a unified list of actor IDs:
@@ -263,96 +264,57 @@ names_to_ids(ACE, OrgId) ->
 %% If the list of retrieved names + IDs
 %% does not match the list of names provided, this raises
 %% {invalid, Type, MissingList}}
-safe_fetch_ids(_Type, _OrgId, []) ->
+
+
+safe_fetch_ids(_Type, _Context, []) ->
     % Save the cost of a query for an empty list -
     % fairly common for users and to a lesser extent groups.
     [];
-safe_fetch_ids(Type, OrgId, Names) ->
-    Records = oc_chef_authz_db:authz_records_by_name(Type, OrgId, Names),
-    FoundNames = lists:sort(names_from_records(Records)),
-    GivenNames = lists:sort(Names),
-    case GivenNames -- FoundNames of
-        [] ->
-            ok;
-        Missing ->
-            throw({invalid, Type, Missing})
-    end,
-    ids_from_records(Records).
-
-fetch_actors(OrgId, ActorNames) ->
-    {ok, Actors} = oc_chef_authz_db:find_org_actors_by_name(OrgId, ActorNames),
-    {Missing, Remaining} = lists:partition(fun is_missing_actor/1, Actors),
-    {Ambiguous, Valid} = lists:partition(fun is_ambiguous_actor/1, Remaining),
-    case {Valid, Missing, Ambiguous} of
-        {Ids, [], []}      -> ids_from_records(Ids);
-        {_, Missing, []}   -> throw({bad_actor, names_from_records(Missing)});
-        {_, [], Ambiguous} -> throw({ambiguous_actor, names_from_records(Ambiguous)});
-        {_, _, Ambiguous}  -> throw({ambiguous_actor, names_from_records(Ambiguous)})
+safe_fetch_ids(Type, Context, Names) ->
+    case oc_chef_authz_scoped_name:names_to_authz_id(Type, Names, Context) of
+        {AuthzIds, []} ->
+            AuthzIds;
+        {_, Errors} ->
+            ErrorNames = lists:flatten([Name || {_, Name} <- Errors ]),
+            throw({invalid, Type, ErrorNames})
     end.
 
-names_from_records(Records) ->
-    [ name_from_record(R) || R  <- Records].
+fetch_actors(Context, ActorNames) ->
+    case oc_chef_authz_scoped_name:names_to_authz_id(actor, ActorNames, Context) of
+        {AuthzIds, []} ->
+            AuthzIds;
+        {_, [{Error, Names} | _]}
+          when Error =:= ill_formed_name orelse
+               Error =:= inappropriate_scoped_name orelse
+               Error =:= orgname_not_found orelse
+               Error =:= not_found ->
+            throw({bad_actor, Names});
+        {_, [{ambiguous, Names} | _]} ->
+            throw({ambiguous_actor, Names})
+    end.
 
-name_from_record({Name, _,  _}) ->
-    Name;
-name_from_record({Name, _}) ->
-    Name.
-
-ids_from_records(Records) ->
-    [ id_from_record(R) || R <- Records ].
-
-id_from_record({_, AuthzId}) ->
-    AuthzId;
-id_from_record({_, UserAuthzId, null}) ->
-    UserAuthzId;
-id_from_record({_, null, ClientAuthzId}) ->
-    ClientAuthzId.
-
-is_missing_actor({_, null, null}) ->
-    true;
-is_missing_actor({_, _, _}) ->
-    false.
-
-is_ambiguous_actor({_, UserAZ, ClientAZ}) when UserAZ =/= null andalso
-                                               ClientAZ =/= null ->
-    true;
-is_ambiguous_actor({_, _, _}) ->
-    false.
 
 %%
 %% Reverse mapping of ids to names (this should have a lot of commonality with groups)
 %%
-convert_group_ids_to_names(AuthzIds) ->
-    oc_chef_group:find_groups_names(AuthzIds, fun chef_sql:select_rows/1).
-
-convert_actor_ids_to_names(AuthzIds) ->
-    {ClientNames, RemainingAuthzIds} =
-        oc_chef_group:find_clients_names(AuthzIds, fun chef_sql:select_rows/1),
-    {UserNames, DefunctActorAuthzIds} =
-        oc_chef_group:find_users_names(RemainingAuthzIds, fun chef_sql:select_rows/1),
-    {ClientNames, UserNames, DefunctActorAuthzIds}.
-
-
-convert_all_ids_to_names(Record, Granular) ->
+convert_all_ids_to_names(OrgId, Record, Granular) ->
     convert_ids_to_names_in_part([<<"create">>, <<"read">>, <<"update">>,
                                   <<"delete">>, <<"grant">>],
-                                 Record, Granular).
+                                 OrgId, Record, Granular).
 
--spec convert_ids_to_names_in_part(list(binary()), ejson_term(), granular|undefined) -> ejson_term().
-convert_ids_to_names_in_part([], Record, _Granular) ->
+-spec convert_ids_to_names_in_part(list(binary()), binary(), ejson_term(), granular|undefined) -> ejson_term().
+convert_ids_to_names_in_part([], _OrgId, Record, _Granular) ->
     Record;
-convert_ids_to_names_in_part([Part | Rest], Record, Granular) ->
+convert_ids_to_names_in_part([Part | Rest], OrgId, Record, Granular) ->
     Members = ej:get({Part}, Record),
     ActorIds = ej:get({<<"actors">>}, Members),
     GroupIds = ej:get({<<"groups">>}, Members),
-    {ClientNames, UserNames, DefunctActorAuthzIds} = convert_actor_ids_to_names(ActorIds),
-    {GroupNames, DefunctGroupAuthzIds} = convert_group_ids_to_names(GroupIds),
-    oc_chef_authz_cleanup:add_authz_ids(DefunctActorAuthzIds, DefunctGroupAuthzIds),
+    Context = oc_chef_authz_scoped_name:initialize_context(OrgId),
+    {ClientNames, UserNames, GroupNames} = oc_chef_authz_scoped_name:convert_ids_to_names(ActorIds, GroupIds, Context),
     Members1 = part_with_actors(Members, ClientNames, UserNames, Granular),
     Members2 = ej:set({<<"groups">>}, Members1, GroupNames),
     NewRecord = ej:set({Part}, Record, Members2),
-    convert_ids_to_names_in_part(Rest, NewRecord, Granular).
-
+    convert_ids_to_names_in_part(Rest, OrgId, NewRecord, Granular).
 
 part_with_actors(PartRecord, Clients, Users, granular) ->
     PartRecord0 = ej:set({<<"users">>}, PartRecord, Users),

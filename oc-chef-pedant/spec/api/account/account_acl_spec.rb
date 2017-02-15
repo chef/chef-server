@@ -4,10 +4,19 @@ require 'pedant/acl'
 describe "ACL API", :acl do
   include Pedant::ACL
 
-    # Generate random string identifier prefixed with current pid
-    def rand_id
-      "#{Process.pid}_#{rand(10**7...10**8).to_s}"
-    end
+  # Generate random string identifier prefixed with current pid
+  def rand_id
+    "#{Process.pid}_#{rand(10**7...10**8).to_s}"
+  end
+
+  let(:test_orgname2) { "test-org-#{rand_id}-#{Process.pid}" }
+  let(:server_admins) {
+    "::server-admins"
+  }
+  let(:other_admins) {
+    "#{test_orgname2}::admins"
+  }
+  let(:nonlocal_groups) { [server_admins, other_admins ] }
 
   # (temporarily?) deprecating /users/*/_acl endpoint due to its broken state and lack of usefulness
   skip "/users/<name>/_acl endpoint" do
@@ -429,9 +438,16 @@ describe "ACL API", :acl do
       let(:acl_url) { api_url("organizations/_acl") }
       let(:request_url) { api_url("organizations/_acl/#{permission}") }
 
+      before :each do
+        platform.create_org(test_orgname2)
+      end
+      after :each do
+        delete("#{platform.server}/organizations/#{test_orgname2}", platform.superuser)
+      end
+
       context "PUT /organizations/_acl/#{permission}" do
         let(:actors) { ["pivotal"] }
-        let(:groups) { ["admins"] }
+        let(:groups) { ["admins" ] }
         let(:read_groups) { ["admins", "users"] }
         let(:default_body) {{
             "create" => {"actors" => actors, "groups" => groups},
@@ -444,8 +460,8 @@ describe "ACL API", :acl do
         let(:request_body) {{
             permission => {
               "actors" => ["pivotal", platform.admin_user.name,
-                platform.non_admin_user.name].uniq,
-              "groups" => groups
+                           platform.non_admin_user.name].uniq,
+              "groups" => groups + nonlocal_groups
             }
           }}
 
@@ -794,6 +810,14 @@ describe "ACL API", :acl do
   end
 
   context "/<type>/<name>/_acl endpoint" do
+
+    before do
+      platform.create_org(test_orgname2)
+    end
+    after do
+      delete("#{platform.server}/organizations/#{test_orgname2}", platform.superuser)
+    end
+
     # TODO: Sanity check: users don't seem to have any ACLs, or at least, nothing is
     # accessible from external API as far as I can tell:
     # - [jkeiser] Users have ACLs, but they are at /users/NAME/_acl
@@ -1187,16 +1211,18 @@ describe "ACL API", :acl do
               let(:users) {
                   [platform.non_admin_user.name, platform.admin_user.name, "pivotal"]
               }
+              let(:local_groups) { ["admins", "users", "clients"] }
+
               let(:groups_and_actors) {{
                   "actors" => [platform.non_admin_user.name,
-                    platform.admin_user.name, "pivotal"].uniq + clients,
-                  "groups" => ["admins", "users", "clients"]
+                               platform.admin_user.name, "pivotal"].uniq + clients,
+                  "groups" => local_groups
                 }}
               let(:update_body) {{
                   permission => groups_and_actors
                 }}
 
-              context "admin user"  do
+              context "admin user" do
                 context "using the new 'users' and 'clients' attributes" do
                   let(:update_body) {
                     { permission => {
@@ -1205,10 +1231,10 @@ describe "ACL API", :acl do
                                       # that clients/users should be used.
                       "users" => users,
                       "clients" => clients,
-                      "groups" => ["admins", "users", "clients"]}
+                      "groups" => local_groups
+                      }
                     }
                   }
-
                   let(:response_body) {
                     { permission =>  groups_and_actors }
                   }
@@ -1216,7 +1242,7 @@ describe "ACL API", :acl do
                   it "can update ACL" do
                     put(permission_request_url, platform.admin_user,
                         :payload => update_body).should have_status_code 200
-                    # Note thet resulting GET body should look the same -
+                    # Note that resulting GET body should look the same -
                     # we are not returning clients/users separately at this point
                     # to avoid a confusing response that includes both 'actors'
                     # and 'clients/users', when we only accept one of those options containing
@@ -1228,7 +1254,7 @@ describe "ACL API", :acl do
                     get(request_url, platform.admin_user).should look_like({
                         :status => 200,
                         :body => check_body
-                      })
+                        })
                   end
                 end
 
@@ -1247,6 +1273,36 @@ describe "ACL API", :acl do
                         :body => check_body
                       })
                   end
+                end
+
+                # Note that we don't test every single permutation of the API with non local groups
+                # to avoid too much combinatorial explosion. However this should be sufficient for now.
+                context "with non-local groups" do
+                   let(:update_body) {
+                    { permission => {
+                      "actors" => users + clients,
+                      "groups" => local_groups + nonlocal_groups
+                      }
+                    }
+                   }
+                   let(:extended_groups_and_actors) {
+                     x = groups_and_actors.dup
+                     x["groups"] = local_groups + nonlocal_groups
+                   }
+
+                  it "can update ACL"  do
+                    put(permission_request_url, platform.admin_user,
+                        :payload => update_body).should have_status_code 200
+                    check_body = acl_body.dup
+                    check_body[permission] = update_body[permission]
+
+                    get(request_url, platform.admin_user).should look_like({
+                        :status => 200,
+                        :body => check_body
+                        })
+                  end
+
+
                 end
               end
 
@@ -1392,7 +1448,7 @@ describe "ACL API", :acl do
                       }
                     }}
 
-                  it "returns 400", :validation do
+                  it "returns 400", :validation  do
                     response = put(permission_request_url, platform.admin_user,
                       :payload => update_body)
                     expect(response).to have_status_code 400

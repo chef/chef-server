@@ -23,6 +23,8 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
+-define(ORGID, <<"some_org_id">>).
+
 %% Test generators that setup and run the tests
 oc_chef_authz_acl_constraints_test_() ->
   [
@@ -80,9 +82,9 @@ check_acl_constraints_no_failures() ->
   Type = group,
   AclPerm = <<"grant">>,
   Ace = {[{<<"grant">>,{[{<<"actors">>,[<<"pivotal">>]},{<<"groups">>,[]}]}}]},
-  AclChecks = [ fun(_AuthzId, _Type, _AclPerm, _Ace) -> false end ],
+  AclChecks = [ fun(_OrgId, _AuthzId, _Type, _AclPerm, _Ace) -> false end ],
   [
-    ?_assertEqual(ok, oc_chef_authz_acl_constraints:check_acl_constraints(AuthzId, Type, AclPerm, Ace, AclChecks))
+    ?_assertEqual(ok, oc_chef_authz_acl_constraints:check_acl_constraints(?ORGID, AuthzId, Type, AclPerm, Ace, AclChecks))
   ].
 
 check_acl_constraints_failures() ->
@@ -93,14 +95,14 @@ check_acl_constraints_failures() ->
   Type = group,
   AclPerm = <<"grant">>,
   Ace = {[{<<"grant">>,{[{<<"actors">>,[<<"pivotal">>]},{<<"groups">>,[]}]}}]},
-  AclChecks = [ fun(_AuthzId, _Type, _AclPerm, _Ace) -> {true, failure_message_here} end ],
-  Test1 = ?_assertEqual([failure_message_here], oc_chef_authz_acl_constraints:check_acl_constraints(AuthzId, Type, AclPerm, Ace, AclChecks)),
+  AclChecks = [ fun(_OrgId, _AuthzId, _Type, _AclPerm, _Ace) -> {true, failure_message_here} end ],
+  Test1 = ?_assertEqual([failure_message_here], oc_chef_authz_acl_constraints:check_acl_constraints(?ORGID, AuthzId, Type, AclPerm, Ace, AclChecks)),
   AclChecks2 = [
-                fun(_AuthzId, _Type, _AclPerm, _Ace) -> false end,
-                fun(_AuthzId, _Type, _AclPerm, _Ace) -> {true, failure_one} end,
-                fun(_AuthzId, _Type, _AclPerm, _Ace) -> {true, failure_two} end
+                fun(_OrgId, _AuthzId, _Type, _AclPerm, _Ace) -> false end,
+                fun(_OrgId, _AuthzId, _Type, _AclPerm, _Ace) -> {true, failure_one} end,
+                fun(_OrgId, _AuthzId, _Type, _AclPerm, _Ace) -> {true, failure_two} end
                ],
-  Test2 = ?_assertEqual([failure_one, failure_two], oc_chef_authz_acl_constraints:check_acl_constraints(AuthzId, Type, AclPerm, Ace, AclChecks2)),
+  Test2 = ?_assertEqual([failure_one, failure_two], oc_chef_authz_acl_constraints:check_acl_constraints(?ORGID, AuthzId, Type, AclPerm, Ace, AclChecks2)),
   [ Test1, Test2 ].
 
 check_acl_constraints_not_grant_ace() ->
@@ -118,7 +120,7 @@ check_acl_constraints_not_grant_ace() ->
   AclPerm = <<"create">>,
   Ace = {[{<<"create">>,{[{<<"actors">>,[<<"pivotal">>]},{<<"groups">>,[]}]}}]},
   [
-    ?_assertEqual(ok, oc_chef_authz_acl_constraints:check_acl_constraints(AuthzId, Type, AclPerm, Ace, oc_chef_authz_acl_constraints:acl_checks()))
+    ?_assertEqual(ok, oc_chef_authz_acl_constraints:check_acl_constraints(?ORGID, AuthzId, Type, AclPerm, Ace, oc_chef_authz_acl_constraints:acl_checks()))
   ].
 
 

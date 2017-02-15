@@ -93,7 +93,7 @@ validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
         %% they know what they are doing. With great power and all.
         {Req1, State1};
       false ->
-        case oc_chef_authz_acl_constraints:check_acl_constraints(AuthzId, Type, Part, Ace) of
+        case oc_chef_authz_acl_constraints:check_acl_constraints(OrgId, AuthzId, Type, Part, Ace) of
           ok ->
             {Req1, State1};
           [ Violation | _T ] ->
