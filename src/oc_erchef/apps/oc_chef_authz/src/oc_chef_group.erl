@@ -56,13 +56,7 @@
 % TODO: move these somewhere generic; also used by oc_chef_wm_acl
 -export([
          fetch_bare/2,
-         fetch_new/2,
-         find_clients_names/2,
-         find_client_authz_ids/3,
-         find_groups_names/2,
-         find_group_authz_ids/3,
-         find_users_names/2,
-         find_user_authz_ids/2
+         fetch_new/2
         ]).
 
 name(#oc_chef_group{name = Name}) ->
@@ -192,9 +186,10 @@ update(#oc_chef_group{
     case chef_object_default_callbacks:update(Record, CallbackFun) of
         %% If the group exists, N should be 1.
         N when is_integer(N) andalso N > 0 ->
-            ClientAuthzIds = find_client_authz_ids(Clients, OrgId, CallbackFun),
-            UserAuthzIds = find_user_authz_ids(Users, CallbackFun),
-            GroupAuthzIds = find_group_authz_ids(Groups, OrgId, CallbackFun),
+            LookupContext = oc_chef_authz_scoped_name:initialize_context(OrgId, CallbackFun),
+            ClientAuthzIds = oc_chef_authz_scoped_name:find_client_authz_ids(Clients, LookupContext),
+            UserAuthzIds = oc_chef_authz_scoped_name:find_user_authz_ids(Users, LookupContext),
+            GroupAuthzIds = oc_chef_authz_scoped_name:find_group_authz_ids(Groups, LookupContext),
             UserSideActorsAuthzIds = UserAuthzIds ++ ClientAuthzIds,
             %% Subtract from the Authz returned ids, the list of known good ids.
             %% The remainder are stale ids in authz that should be removed.
@@ -285,59 +280,37 @@ fetch_base(#oc_chef_group{}=Record, TransformFun, CallbackFun) ->
 fetch_bare(Record, CallBackFun) ->
     fetch_base(Record, fun(x) -> x end, CallBackFun).
 
-fetch_new(#oc_chef_group{for_requestor_id = RequestorId} = Record, CallbackFun) ->
+fetch_new(#oc_chef_group{org_id = OrgId,
+                         for_requestor_id = RequestorId} = Record,
+          CallbackFun) ->
     FetchMembers =
         fun(#oc_chef_group{authz_id = GroupAuthzId} = GroupRecord) ->
-                case fetch_authz_ids(GroupAuthzId, RequestorId) of
-                    forbidden ->
-                        forbidden;
-                    {ActorAuthzIds, GroupAuthzIds} ->
-                        {ClientNames, RemainingAuthzIds} = find_clients_names(ActorAuthzIds,
-                                                                              CallbackFun),
-                        {Usernames, DefunctActorAuthzIds} = find_users_names(RemainingAuthzIds,
-                                                                             CallbackFun),
-                        {GroupNames, DefunctGroupAuthzIds} = find_groups_names(GroupAuthzIds,
-                                                                               CallbackFun),
-                        oc_chef_authz_cleanup:add_authz_ids(DefunctActorAuthzIds,
-                                                        DefunctGroupAuthzIds),
-                        Result = GroupRecord#oc_chef_group{clients = ClientNames,
-                                                           users =  Usernames,
-                                                           groups =  GroupNames,
-                                                           auth_side_actors = ActorAuthzIds,
-                                                           auth_side_groups = GroupAuthzIds},
-                        Result
-                end
+                LookupContext = oc_chef_authz_scoped_name:initialize_context(OrgId, CallbackFun),
+                maybe_find_names(fetch_authz_ids(GroupAuthzId, RequestorId), GroupRecord, LookupContext)
         end,
     fetch_base(Record, FetchMembers, CallbackFun).
 
-fetch(#oc_chef_group{for_requestor_id = RequestorId} = Record, CallbackFun) ->
+fetch(#oc_chef_group{org_id = OrgId, for_requestor_id = RequestorId} = Record, CallbackFun) ->
     case chef_object_default_callbacks:fetch(Record, CallbackFun) of
         #oc_chef_group{authz_id = GroupAuthzId} = GroupRecord ->
-            case fetch_authz_ids(GroupAuthzId, RequestorId) of
-                forbidden ->
-                    forbidden;
-                {ActorAuthzIds, GroupAuthzIds} ->
-                    {ClientNames, RemainingAuthzIds} = find_clients_names(ActorAuthzIds,
-                                                                          CallbackFun),
-                    {Usernames, DefunctActorAuthzIds} = find_users_names(RemainingAuthzIds,
-                                                                         CallbackFun),
-                    {GroupNames, DefunctGroupAuthzIds} = find_groups_names(GroupAuthzIds,
-                                                                           CallbackFun),
-                    oc_chef_authz_cleanup:add_authz_ids(DefunctActorAuthzIds,
-                                                        DefunctGroupAuthzIds),
-                    Result = GroupRecord#oc_chef_group{clients = ClientNames,
-                                                       users =  Usernames,
-                                                       groups =  GroupNames,
-                                                       auth_side_actors = ActorAuthzIds,
-                                                       auth_side_groups = GroupAuthzIds},
-                    Result
-            end;
+            LookupContext = oc_chef_authz_scoped_name:initialize_context(OrgId, CallbackFun),
+            maybe_find_names(fetch_authz_ids(GroupAuthzId, RequestorId), GroupRecord, LookupContext);
         not_found ->
             not_found;
         Other ->
             Other
     end.
-
+ 
+maybe_find_names(forbidden, _, _) ->
+    forbidden;
+maybe_find_names({ActorAuthzIds, GroupAuthzIds}, GroupRecord, Context) ->
+    {ClientNames, Usernames, GroupNames} = oc_chef_authz_scoped_name:convert_ids_to_names(ActorAuthzIds, GroupAuthzIds, Context),
+    Result = GroupRecord#oc_chef_group{clients = ClientNames,
+                                       users =  Usernames,
+                                       groups =  GroupNames,
+                                       auth_side_actors = ActorAuthzIds,
+                                       auth_side_groups = GroupAuthzIds},
+    Result.
 
 fetch_authz_ids(GroupAuthzId, RequestorId) ->
     Result = oc_chef_authz_http:request("/groups/" ++ binary_to_list(GroupAuthzId), get, ?DEFAULT_HEADERS, [], RequestorId),
@@ -350,53 +323,6 @@ fetch_authz_ids(GroupAuthzId, RequestorId) ->
             Other
     end.
 
-find_clients_names(ActorsAuthzIds, CallbackFun) ->
-    query_and_diff_authz_ids(find_client_name_in_authz_ids, ActorsAuthzIds, CallbackFun).
-
-find_users_names(UsersAuthzIds, CallbackFun) ->
-    query_and_diff_authz_ids(find_user_name_in_authz_ids, UsersAuthzIds, CallbackFun).
-
-find_groups_names(GroupsAuthzIds, CallbackFun) ->
-    query_and_diff_authz_ids(find_group_name_in_authz_ids, GroupsAuthzIds, CallbackFun).
-
-find_client_authz_ids(ClientNames, OrgId, CallbackFun) ->
-    find_authz_id_in_names(find_client_authz_id_in_names, [OrgId, ClientNames], CallbackFun).
-
-find_group_authz_ids(GroupNames, OrgId, CallbackFun) ->
-    find_authz_id_in_names(find_group_authz_id_in_names, [OrgId, GroupNames], CallbackFun).
-
-find_user_authz_ids(UserNames, CallbackFun) ->
-    find_authz_id_in_names(find_user_authz_id_in_names, [UserNames], CallbackFun).
-
-find_authz_id_in_names(QueryName, Args, CallbackFun) ->
-    case CallbackFun({QueryName, Args}) of
-        List when is_list(List) ->
-            Flattened = lists:flatten(List),
-            proplists:get_all_values(<<"authz_id">>, Flattened);
-        not_found ->
-            [];
-        Other ->
-            Other
-    end.
-
-query_and_diff_authz_ids(_QueryName, [], _) ->
-    {[], []};
-query_and_diff_authz_ids(QueryName, AuthzIds, CallbackFun) ->
-    case CallbackFun({QueryName, [AuthzIds]}) of
-        not_found ->
-            {[], AuthzIds};
-        Results when is_list(Results)->
-            {ResultNames, FoundAuthzIds} = lists:foldl(
-                                             fun([{_NameKey, Name},
-                                                  {<<"authz_id">>, AuthzId}],
-                                                 {NamesIn, AuthzIdsIn}) ->
-                                                     {[Name | NamesIn], [AuthzId | AuthzIdsIn]}
-                                             end, {[],[]}, Results),
-            DiffedList = sets:to_list(sets:subtract(sets:from_list(AuthzIds), sets:from_list(FoundAuthzIds))),
-            {lists:reverse(ResultNames), DiffedList};
-        _Other ->
-            {[], []}
-    end.
 
 fields_for_insert(#oc_chef_group{id = Id,
           authz_id = AuthzId,
