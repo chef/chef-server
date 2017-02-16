@@ -11,5 +11,5 @@ then
   echo "Sleeping 120 seconds to allow the Chef Server to reconfigure in FIPS mode"
   echo ""
   sleep 120
-  sudo chef-server-ctl test -J $WORKSPACE/pedant-fips.xml
+  sudo chef-server-ctl test -J $WORKSPACE/pedant-fips.xml --smoke
 fi
