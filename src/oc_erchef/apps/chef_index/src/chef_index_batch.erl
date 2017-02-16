@@ -120,12 +120,17 @@ init([]) ->
     end.
 
 spawn_flusher(Time) ->
+    %% FIXME: this process will stay around even after someone calls
+    %% chef_index_batch:stop(). It would be nice if this process also
+    %% died on stop. Potentially we could send a message to it from
+    %% the parent in terminate() and receive that message here
+    %% or..something.
     spawn_link(
       fun Flusher() ->
-                      timer:sleep(Time),
-                      gen_server:cast(?MODULE, flush),
-                      Flusher()
-              end
+              timer:sleep(Time),
+              gen_server:cast(?MODULE, flush),
+              Flusher()
+      end
      ).
 
 -spec flush(#chef_idx_batch_state{}) -> #chef_idx_batch_state{}.
@@ -140,7 +145,7 @@ flush(State = #chef_idx_batch_state{item_queue = Queue,
     Self = self(),
     spawn(
       fun() ->
-              lager:debug("Batch posting to solr ~p documents (~p bytes)", [length(DocsToAdd), CurrentSize+WrapperSize]),
+              lager:debug("Batch posting to ~s ~p documents (~p bytes)", [Provider, length(DocsToAdd), CurrentSize+WrapperSize]),
               Now = os:timestamp(),
               Res = chef_index:update(Provider, Doc),
               Now1 = os:timestamp(),

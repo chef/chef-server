@@ -10,7 +10,7 @@
 -export([safe_delete/3,
          delete/3,
          add_to_solr/3,
-         add_to_solr_async/2,
+         add_batch_to_solr/1,
          bulk_delete_from_solr/4,
          delete_from_solr/2]).
 
@@ -150,23 +150,26 @@ maybe_delete_authz_id_or_error(1, Object, RequestorId) ->
 
 -spec add_to_solr(tuple(), ejson_term() | {ejson_term(), _}, binary()) -> ok.
 add_to_solr(ObjectRec, ObjectEjson, ReqId) ->
-    add_to_solr1(ObjectRec, ObjectEjson, fun chef_index:add/5, ReqId).
-
--spec add_to_solr_async(tuple(), ejson_term() | {ejson_term(), _}) -> ok.
-add_to_solr_async(ObjectRec, ObjectEjson) ->
-    add_to_solr1(ObjectRec, ObjectEjson, fun chef_index:add_async/5, none).
-
-add_to_solr1(ObjectRec, ObjectEjson, SendTo, ReqId) ->
     case chef_object:is_indexed(ObjectRec) of
         true ->
-            IndexEjson = chef_object:ejson_for_indexing(ObjectRec, ObjectEjson),
-            DbName = dbname(chef_object:org_id(ObjectRec)),
-            Id = chef_object:id(ObjectRec),
-            TypeName = chef_object:type_name(ObjectRec),
-            SendTo(TypeName, Id, DbName, IndexEjson, ReqId);
+            {TypeName, Id, DbName, IndexEjson} = object_rec_to_index_args(ObjectRec, ObjectEjson),
+            chef_index:add(TypeName, Id, DbName, IndexEjson, ReqId);
         false ->
             ok
     end.
+
+-spec add_batch_to_solr([{tuple(), ejson_term()} | {ejson_term(), _}]) -> ok | {error, list()}.
+add_batch_to_solr(Batch) ->
+    BatchForIndex = [ object_rec_to_index_args(ObjectRec, ObjectEjson)
+                      || {ObjectRec, ObjectEjson} <- Batch, chef_object:is_indexed(ObjectRec) =:= true ],
+    chef_index:add_batch(BatchForIndex).
+
+object_rec_to_index_args(ObjectRec, ObjectEjson) ->
+    IndexEjson = chef_object:ejson_for_indexing(ObjectRec, ObjectEjson),
+    Id = chef_object:id(ObjectRec),
+    DbName = dbname(chef_object:org_id(ObjectRec)),
+    TypeName = chef_object:type_name(ObjectRec),
+    {TypeName, Id, DbName, IndexEjson}.
 
 %% @doc Helper function to easily delete an object from Solr, instead
 %% of calling chef_index_queue directly.

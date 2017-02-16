@@ -43,12 +43,23 @@
 %% environments, nodes, and roles) from an organization to Solr for
 %% reindexing.  Does not drop existing index entries beforehand; this
 %% is explicitly a separate step.
--spec reindex(Ctx :: chef_db:db_context(),
-              OrgInfo :: org_info()) -> {ok, list()}.
-reindex(Ctx, {OrgId, _OrgName}=OrgInfo) ->
+-spec reindex(Ctx :: chef_db:db_context(), OrgInfo :: org_info()) ->
+                     {ok, list()} | {error, list(), list()}.
+reindex(Ctx, {OrgId, OrgName}=OrgInfo) ->
+    lager:info("reindexing[~s]: reindex requested for ~s", [OrgName, OrgName]),
     AllIndexes = fetch_org_indexes(Ctx, OrgId),
-    Missing = [ reindex(Ctx, OrgInfo, Index) || Index <- AllIndexes ],
-    {ok, lists:flatten(Missing)}.
+    Results = [reindex(Ctx, OrgInfo, Index) || Index <- AllIndexes ],
+    {FailedList, MissingList} = lists:unzip(Results),
+    FlatFailures = lists:flatten(FailedList),
+    FlatMissing = lists:flatten(MissingList),
+    case FlatFailures of
+        [] ->
+            lager:info("reindexing[~s]: reindex complete!", [OrgName]),
+            {ok, FlatMissing};
+        F ->
+            lager:info("reindexing[~s]: reindex FAILED!", [OrgName]),
+            {error, F, FlatMissing}
+    end.
 
 fetch_org_indexes(Ctx, OrgId) ->
     BuiltInIndexes = [node, role, environment, client],
@@ -103,29 +114,30 @@ fetch_org_indexes(Ctx, OrgId) ->
 %% the given indexable type.
 -spec reindex(DbContext :: chef_db:db_context(),
               OrgInfo :: org_info(),
-              Index :: index()) -> list().
-reindex(Ctx, {OrgId, _OrgName}=OrgInfo, Index) ->
+              Index :: index()) -> {list(), list()}.
+reindex(Ctx, {OrgId, OrgName}=OrgInfo, Index) ->
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
     %% Grab all the database IDs to do batch retrieval on
     AllIds = all_ids_from_name_id_dict(NameIdDict),
-    BatchSize = envy:get(oc_chef_wm, bulk_fetch_batch_size, pos_integer),
+    BatchSize = envy:get(oc_chef_wm, reindex_batch_size, pos_integer),
+    lager:info("reindexing[~s]: ~p items of type ~p to reindex", [OrgName, length(AllIds), Index]),
     batch_reindex(Ctx, AllIds, BatchSize, OrgInfo, Index, NameIdDict).
 
 %% @doc Reindex the objects with the specified `Ids' in the given `Index'.
 -spec reindex_by_id(DbContext :: chef_db:db_context(),
                     OrgInfo :: org_info(),
                     Index :: index(),
-                    Ids :: [<<_:256>>]) -> list().
+                    Ids :: [<<_:256>>]) -> {list(), list()}.
 reindex_by_id(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Ids) ->
     %% This is overkill, but workable until we have more robust reindexing
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
-    {ok, BatchSize} = application:get_env(oc_chef_wm, bulk_fetch_batch_size),
+    {ok, BatchSize} = application:get_env(oc_chef_wm, reindex_batch_size),
     batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict).
 
 -spec reindex_by_name(DbContext :: chef_db:db_context(),
                       OrgInfo :: org_info(),
                       Index :: index(),
-                      Names :: [binary()]) -> list().
+                      Names :: [binary()]) -> {list(), list()}.
 reindex_by_name(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Names) ->
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
     Ids = lists:foldl(
@@ -138,7 +150,7 @@ reindex_by_name(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Names) ->
                             Acc
                     end
             end, [], Names),
-    {ok, BatchSize} = application:get_env(oc_chef_wm, bulk_fetch_batch_size),
+    {ok, BatchSize} = application:get_env(oc_chef_wm, reindex_batch_size),
     batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict).
 
 all_ids_from_name_id_dict(NameIdDict) ->
@@ -174,12 +186,17 @@ decompress_and_decode(Object) ->
                     BatchSize :: non_neg_integer(),
                     OrgInfo :: org_info(),
                     Index :: index(),
-                    NameIdDict :: dict()) -> list().
+                    NameIdDict :: dict()) -> {list(), list()}.
 batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict) when is_list(Ids) ->
-    DoBatch = fun(Batch, MissingList) ->
-                      [index_a_batch(Ctx, Batch, OrgInfo, Index, NameIdDict) | MissingList]
-                 end,
-    chefp:batch_fold(DoBatch, Ids, [], BatchSize).
+    DoBatch = fun(Batch, {FailedList, MissingList}) ->
+                      case index_a_batch(Ctx, Batch, OrgInfo, Index, NameIdDict) of
+                          {ok, NewMissing} ->
+                              {FailedList, lists:append(NewMissing, MissingList)};
+                          {{error, Failures}, NewMissing} ->
+                              {lists:append(Failures, FailedList), lists:append(NewMissing, MissingList)}
+                      end
+              end,
+    chefp:batch_fold(DoBatch, Ids, {[], []}, BatchSize).
 
 %% @doc Helper function to retrieve and index objects for a single
 %% batch of database IDs.
@@ -187,10 +204,11 @@ batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict) when is_list(Ids)
                     BatchOfIds :: [object_id()],
                     OrgInfo :: org_info(),
                     Index :: index(),
-                    NameIdDict :: dict()) -> list().
+                    NameIdDict :: dict()) -> {ok, list()} | {{error, list()}, list()}.
 index_a_batch(Ctx, BatchOfIds, {OrgId, OrgName}, Index, NameIdDict) ->
+    lager:debug("reindexing[~s] indexing batch of ~p ~ss", [OrgName, length(BatchOfIds), Index]),
     SerializedObjects = chef_db:bulk_get(Ctx, OrgName, chef_object_type(Index), BatchOfIds),
-    send_to_index_queue(OrgId, Index, SerializedObjects, NameIdDict, []).
+    send_to_index_queue(OrgName, OrgId, Index, SerializedObjects, NameIdDict).
 
 %% @doc Resolve an index to the name of the corresponding Chef object type.
 chef_object_type(Index) when is_binary(Index) -> data_bag_item;
@@ -199,34 +217,70 @@ chef_object_type(Index)                       -> Index.
 %% @doc Converts a list of serialized_objects into proper index data,
 %% taking into account the kind of objects they are, and places each
 %% item on the index queue.
--spec send_to_index_queue(OrgId :: object_id(),
-                          Index :: index(),
-                          SerializedObjects :: [binary()] | [ej:json_object()],
-                          NameIdDict :: dict(),
-                          MissingList :: list()) -> list().
-send_to_index_queue(_, _, [], _, MissingList) ->
-    MissingList;
-send_to_index_queue(OrgId, Index, [SO|Rest], NameIdDict, MissingList) ->
+-spec send_to_index_queue(
+        OrgName :: binary(),
+        OrgId :: object_id(),
+        Index :: index(),
+        SerializedObjects :: [binary()] | [ej:json_object()],
+        NameIdDict :: dict()) -> {ok, list()} | {{error, list()}, list()}.
+send_to_index_queue(OrgName, OrgId, Index, SerializedObjects, NameIdDict) ->
     %% All object types are returned from chef_db:bulk_get/4 as
     %% binaries (compressed or not) EXCEPT for clients, which are
     %% returned as EJson directly, because none of their
     %% information is actually stored as a JSON "blob" in the
     %% database.
-    PreliminaryEJson = decompress_and_decode(SO),
     NameKey = name_key(chef_object_type(Index)),
+    {Existing, Missing} = stub_records_for_indexing(SerializedObjects, NameKey, NameIdDict, Index, OrgId),
+    Res = add_batch(Existing, OrgName),
+    {Res, Missing}.
+
+add_batch(Batch, OrgName) ->
+    case oc_chef_object_db:add_batch_to_solr(Batch) of
+        ok -> ok;
+        {error, Failures} ->
+            Failures1 = humanize_failures(Failures, []),
+            %% We log the failures to the log as well so we can find
+            %% them even if we don't get the command output
+            log_failures(OrgName, Failures1),
+            {error, Failures1}
+    end.
+
+log_failures(_OrgName, []) ->
+    ok;
+log_failures(OrgName, [Failure|Rest]) ->
+    {{TypeName, Id, _DbName}, Reason} = Failure,
+    lager:error("reindexing[~s] item ~s[~s] failed to reindex: ~s", [OrgName, TypeName, Id, Reason]),
+    log_failures(OrgName, Rest).
+
+humanize_failures([], Acc) ->
+    Acc;
+humanize_failures([H|T], Acc) ->
+    {Id, Reason} = H,
+    humanize_failures(T, [{Id, pretty_reason(Reason)} | Acc]).
+
+pretty_reason({error,{error,no_members}}) ->
+    "no_members: Ran out of HTTP workers talking to search backend";
+pretty_reason(Other) ->
+    io_lib:format("error: ~p", [Other]).
+
+stub_records_for_indexing(SerializedObjects, NameKey, NameIdDict, Index, OrgId) ->
+    stub_records_for_indexing(SerializedObjects, NameKey, NameIdDict, Index, OrgId, [], []).
+
+stub_records_for_indexing([], _NameKey, _NameIdDict, _Index, _OrgId, ExistingAcc, MissingAcc) ->
+    {ExistingAcc, MissingAcc};
+stub_records_for_indexing([SO|Rest], NameKey, NameIdDict, Index, OrgId, ExistingAcc, MissingAcc) ->
+    PreliminaryEJson = decompress_and_decode(SO),
     ItemName = ej:get({NameKey}, PreliminaryEJson),
-    NewMissingList = case dict:find(ItemName, NameIdDict) of
-        {ok, ObjectId} ->
-            StubRec = stub_record(Index, OrgId, ObjectId, ItemName, PreliminaryEJson),
-            %% Since we get here via valid `Index', we don't have to check that the objects are
-            %% indexable.
-            oc_chef_object_db:add_to_solr_async(StubRec, PreliminaryEJson),
-            MissingList;
-        error ->
-            lager:warning("skipping: no id found for name ~p", [ItemName]),
-            [{Index, ItemName} | MissingList]
-    end,
-    send_to_index_queue(OrgId, Index, Rest, NameIdDict, NewMissingList).
+    {NewEAcc, NewMAcc} = case dict:find(ItemName, NameIdDict) of
+                             {ok, ObjectId} ->
+
+                                 StubRec = stub_record(Index, OrgId, ObjectId, ItemName, PreliminaryEJson),
+                                 {[{StubRec, PreliminaryEJson}|ExistingAcc], MissingAcc};
+                             error ->
+                                 lager:warning("skipping: no id found for name ~p", [ItemName]),
+                                 {ExistingAcc, [{Index, ItemName} | MissingAcc]}
+                         end,
+    stub_records_for_indexing(Rest, NameKey, NameIdDict, Index, OrgId, NewEAcc, NewMAcc).
 
 %% @doc Determine the proper key to use to retrieve the unique name of
 %% an object from its EJson representation.

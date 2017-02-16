@@ -78,6 +78,11 @@
         {authz_timeout, <%= node['private_chef']['opscode-erchef']['authz_timeout'] %>},
         {authz_fanout, <%= node['private_chef']['opscode-erchef']['authz_fanout'] %>},
 
+        {reindex_batch_size, <%= @reindex_batch_size -%>},
+        {reindex_sleep_min_ms, <%= @reindex_sleep_min_ms -%>},
+        {reindex_sleep_max_ms, <%= @reindex_sleep_max_ms -%>},
+        {reindex_item_retries, <%= @reindex_item_retries -%>},
+
         {enable_actions, <%= node['private_chef']['dark_launch']['actions'] %>},
         <% if @ldap_enabled -%>
         {ldap, [
