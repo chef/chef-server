@@ -41,5 +41,9 @@ wait_blocks_until_jobs_are_done_test() ->
 
 gen_server_exits_after_wait_test() ->
     {ok, Pid} = chef_wait_group:start_link(fun() -> ok end, []),
+    MonRef = erlang:monitor(process, Pid),
     chef_wait_group:wait(Pid),
-    ?assertEqual(false, erlang:is_process_alive(Pid)).
+    %% Test will timeout if the gen_server doesn't exit
+    receive
+        {'DOWN', MonRef, process, Pid, normal} -> ok
+    end.
