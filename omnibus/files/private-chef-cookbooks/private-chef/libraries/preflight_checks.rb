@@ -138,6 +138,7 @@ class PreflightChecks
       end
       AuthPreflightValidator.new(node).run!
       SolrPreflightValidator.new(node).run!
+      SslPreflightValidator.new(node).run!
       BookshelfPreflightValidator.new(node).run!
     rescue PreflightValidationFailed => e
       # use of exit! prevents exit handlers from running, ensuring the last thing
