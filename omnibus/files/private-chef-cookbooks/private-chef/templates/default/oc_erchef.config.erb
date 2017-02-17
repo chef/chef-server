@@ -79,9 +79,6 @@
         {authz_fanout, <%= node['private_chef']['opscode-erchef']['authz_fanout'] %>},
 
         {reindex_batch_size, <%= @reindex_batch_size -%>},
-        {reindex_sleep_min_ms, <%= @reindex_sleep_min_ms -%>},
-        {reindex_sleep_max_ms, <%= @reindex_sleep_max_ms -%>},
-        {reindex_item_retries, <%= @reindex_item_retries -%>},
 
         {enable_actions, <%= node['private_chef']['dark_launch']['actions'] %>},
         <% if @ldap_enabled -%>
@@ -222,6 +219,9 @@
         {search_queue_mode, <%= node['private_chef']['opscode-erchef']['search_queue_mode'] %>},
         {search_batch_max_size, <%= node['private_chef']['opscode-erchef']['search_batch_max_size'] %>},
         {search_batch_max_wait, <%= node['private_chef']['opscode-erchef']['search_batch_max_wait'] %>},
+        {reindex_sleep_min_ms, <%= @reindex_sleep_min_ms -%>},
+        {reindex_sleep_max_ms, <%= @reindex_sleep_max_ms -%>},
+        {reindex_item_retries, <%= @reindex_item_retries -%>},
         {solr_service, [
             {root_url, "<%= @helper.solr_url() %>"},
             {timeout, <%= @solr_timeout %>},
