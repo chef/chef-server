@@ -1,9 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 set -evx
 
 sudo chef-server-ctl test -J $WORKSPACE/pedant.xml --all
 
-if [ $OMNIBUS_FIPS_MODE == "true" ]
+if [ "$OMNIBUS_FIPS_MODE" == "true" ]
 then
   sudo sh -c 'echo "fips true" >> /etc/opscode/chef-server.rb'
   sudo chef-server-ctl reconfigure
