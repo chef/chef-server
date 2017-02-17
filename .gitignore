@@ -13,3 +13,4 @@ MODIFIED_COMPONENTS_CHANGELOG.md
 /dev/nodes
 dev/*.deb
 src/oc_erchef/log
+compile_commands.json
