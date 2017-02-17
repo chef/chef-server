@@ -912,11 +912,16 @@ module Pedant
 
       # queues are not readable (e.g. there's no rabbitmq) OR empty
       def queues_empty?
+        ENV['PATH'] = "/opt/opscode/embedded/bin:#{ENV['PATH']}"
         output = `/opt/opscode/embedded/service/rabbitmq/sbin/rabbitmqctl list_queues -p /chef | awk '{sum += $2} END {print sum}'`
         status = $?
-          if !status.success?
-            true
+        if !status.success?
+          STDERR.puts "Command exitstatus: #{status.exitstatus}"
+          STDERR.puts "Command output: #{output}"
+          true
         else
+          STDERR.puts "Command exitstatus: #{status.exitstatus}"
+          STDERR.puts "Command output: #{output}"
           output.to_i == 0
         end
       end
