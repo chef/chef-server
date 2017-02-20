@@ -169,7 +169,7 @@ set_storage_type_for_test_case(Casename) ->
 init_per_testcase(upgrade_from_v0, Config) ->
     %% This fixes another rebar brokenness. We cant specify any options to
     %% common test in rebar
-    Seed = now(),
+    Seed = os:timestamp(),
     random:seed(Seed),
     error_logger:info_msg("Using random seed: ~p~n", [Seed]),
     Format0Data = filename:join([?config(data_dir, Config),
