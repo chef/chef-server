@@ -1,7 +1,50 @@
 # Chef Server Changelog
 
-## [12.11.2](https://github.com/chef/chef-server/tree/12.11.2) (2017-01-26)
-[Full Changelog](https://github.com/chef/chef-server/compare/12.11.1...12.11.2)
+## [12.13.0](https://github.com/chef/chef-server/tree/12.13.0) (2017-02-20)
+[Full Changelog](https://github.com/chef/chef-server/compare/12.12.0...12.13.0)
+
+### Components
+New Components
+* erlang-crypto2 (d60d87ed)
+
+Updated Components
+* omnibus-ctl (4db34135 -> b719d582)
+* berkshelf-no-depselector (f49321c9 -> ed797b94)
+* rb-readline (323fed5a -> 68457ded)
+
+### Contributors
+* Rachel Adler
+* Tyler Ball
+* Tyler Cloke
+* Steven Danna
+* Marc Paradise
+* Stephan Renatus
+
+**Merged pull requests:**
+
+- \[reindex\] Move new config items to the correct section of the config [\#1091](https://github.com/chef/chef-server/pull/1091) ([stevendanna](https://github.com/stevendanna))
+- \[pedant\] Fix PATH in queues\_empty? helper, add debug output [\#1089](https://github.com/chef/chef-server/pull/1089) ([stevendanna](https://github.com/stevendanna))
+- \[chef\_index\] Fix racy chef\_wait\_group test [\#1088](https://github.com/chef/chef-server/pull/1088) ([stevendanna](https://github.com/stevendanna))
+- use sudo to update chef-server.rb [\#1087](https://github.com/chef/chef-server/pull/1087) ([marcparadise](https://github.com/marcparadise))
+- Update omnibus-software [\#1086](https://github.com/chef/chef-server/pull/1086) ([srenatus](https://github.com/srenatus))
+- Update Marc's mailmap entry [\#1085](https://github.com/chef/chef-server/pull/1085) ([stevendanna](https://github.com/stevendanna))
+- \[solr4\] Clean up unused and unwanted configuration [\#1083](https://github.com/chef/chef-server/pull/1083) ([stevendanna](https://github.com/stevendanna))
+- Use canned response openssl mock in oc\_chef\_wm tests [\#1082](https://github.com/chef/chef-server/pull/1082) ([srenatus](https://github.com/srenatus))
+- \[erchef\] Improve reindex reliability when using ElasticSearch [\#1081](https://github.com/chef/chef-server/pull/1081) ([stevendanna](https://github.com/stevendanna))
+- Make chef\_index\_batch\_tests a less flaky [\#1080](https://github.com/chef/chef-server/pull/1080) ([srenatus](https://github.com/srenatus))
+- Remove the default admin page from solr4. [\#1078](https://github.com/chef/chef-server/pull/1078) ([marcparadise](https://github.com/marcparadise))
+- Post-release upgrade of some dependencies [\#1077](https://github.com/chef/chef-server/pull/1077) ([srenatus](https://github.com/srenatus))
+- \[ER-455\] Run pedant tests with FIPS enabled [\#1076](https://github.com/chef/chef-server/pull/1076) ([tyler-ball](https://github.com/tyler-ball))
+- \[ER-459\] Ruby templating missing newline [\#1074](https://github.com/chef/chef-server/pull/1074) ([tyler-ball](https://github.com/tyler-ball))
+- Testing branch for sql timeouts [\#1073](https://github.com/chef/chef-server/pull/1073) ([marcparadise](https://github.com/marcparadise))
+- FIPS pipeline not building openssl-fips [\#1069](https://github.com/chef/chef-server/pull/1069) ([tyler-ball](https://github.com/tyler-ball))
+- Use xz compression \(level 1\) for RPM and DEBs [\#1068](https://github.com/chef/chef-server/pull/1068) ([srenatus](https://github.com/srenatus))
+- \[ER-459\] Add crypto2 to the Erlang load path in FIPS mode [\#1065](https://github.com/chef/chef-server/pull/1065) ([rmoshier](https://github.com/rmoshier))
+- \[ER-444\] Enable FIPS configuration at runtime via chef-server.rb [\#1061](https://github.com/chef/chef-server/pull/1061) ([tyler-ball](https://github.com/tyler-ball))
+
+
+## [12.12.0](https://github.com/chef/chef-server/tree/12.12.0) (2017-01-26)
+[Full Changelog](https://github.com/chef/chef-server/compare/12.11.1...12.12.0)
 
 ### Components
 Updated Components

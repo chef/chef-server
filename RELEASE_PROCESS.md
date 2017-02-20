@@ -61,7 +61,7 @@ release:
       Remember to use the current channel instead of the unstable stable on
       artifactory as those are the builds that passed tests on wilson.
     * Ensure that all entries in `default['delivery-matrix']['acceptance']['matrix']`
-      array are uncommented.
+      array are uncommented (except for `ha_ec_upgrade_aws`).
   * Commit the change and run `delivery review`.
   * When the lint and unit tests pass, approve the change and watch the
     matrix of tests run. This change will spin off several new changes, so look for
@@ -76,7 +76,7 @@ release:
     don't leave any unused instances
     up.
   * If you did have test failure due to an environmental issue unrelated to the
-    release, ask #chef-server and #delivery-support for help.
+    release, ask #chef-server and #automate-support for help.
     * If delivery.chef.co builders are too constrainted to run the full matrix
       of 10 jobs comment the second half of the entries in the
       `default['delivery-matrix']['acceptance']['matrix']` array and run a build.
@@ -89,7 +89,7 @@ release:
   high-urgency, high-severity customer issue or security issue, please
   *specifically* test that the issue in question is fixed.
 
-If one of these tests has failed, you cannot ship a release today.
+If one of these tests has failed, you cannot ship a release until it's fixed.
 Note, no changes other than CHANGELOG/RELEASE_NOTES changes should
 land on master between testing and releasing since we typically tag
 HEAD of master. If something large does land on master, the release

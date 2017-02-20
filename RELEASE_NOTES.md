@@ -8,16 +8,30 @@ This document contains release notes for the current major release and all patch
 For prior releases, see
 [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
-## Unreleased
+## 12.13.0 (2017-02-20)
+
+### New platform: RHEL6/s390x
+
+Support for a new platform was added: Red Hat Enterprise Linux 6 on s390x.
+
+### Solr4 Admin API/UI disabled by default
+
+With this release, the admin UI of Solr4 has been removed. The underlying API
+has also been disabled. Users that depend on the admin API endpoints can enable
+them via adding
+
+    opscode_solr4['enable_full_admin_api'] = true
+
+to `chef-server.rb`.
 
 ### FIPS runtime flag exposed
 
-We are updating the Chef Server package to expose a `fips` configuration flag
-in the `chef-server.rb`. Setting `fips true` and reconfiguring will start the
+The Chef Server package now exposes a `fips` configuration flag in
+`chef-server.rb`. Setting `fips true` and reconfiguring will start the
 server in FIPS mode. The default value of this flag is `false` except
 on systems where FIPS is enabled at the Kernel where it defaults to `true`.
 
-The only supported systems at this time for FIPS mode are RHEL. Package for
+The only supported systems at this time for FIPS mode are RHEL. Packages for
 other systems will be missing the required OpenSSL FIPS module and will fail
 to start if reconfigured with `fips true`.
 

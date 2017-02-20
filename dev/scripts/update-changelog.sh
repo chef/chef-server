@@ -48,11 +48,14 @@ if [ "$#" -ne 1 ]; then
     usage
 fi
 
-github_changelog_generator -u chef -p chef-server -t $CHANGELOG_GITHUB_TOKEN --enhancement-labels "enhancement,Enhancement,New Feature" --bug-labels "bug,Bug,Improvement,Upstream Bug" --exclude-labels "duplicate,question,invalid,wontfix,no_changelog" -o NEW_CHANGELOG.md --future-release $chef_version
+pushd $basedir/../../omnibus
+bundle install --with=release
+bundle exec github_changelog_generator -u chef -p chef-server -t $CHANGELOG_GITHUB_TOKEN --enhancement-labels "enhancement,Enhancement,New Feature" --bug-labels "bug,Bug,Improvement,Upstream Bug" --exclude-labels "duplicate,question,invalid,wontfix,no_changelog" -o $currentdir/NEW_CHANGELOG.md --future-release $chef_version
+popd
 
 ar x $1 data.tar.gz
 tar -xzf data.tar.gz ./opt/opscode/version-manifest.json
+
 cd $basedir/../../omnibus
-bundle install
 bundle exec omnibus manifest chef-server -l fatal > $currentdir/version-manifest.json
 bundle exec omnibus changelog generate --starting-manifest=$currentdir/opt/opscode/version-manifest.json --ending-manifest=$currentdir/version-manifest.json | grep -v "( -> )" > $currentdir/MODIFIED_COMPONENTS_CHANGELOG.md
