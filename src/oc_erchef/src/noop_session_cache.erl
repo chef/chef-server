@@ -5,7 +5,7 @@
 -behaviour(ssl_session_cache_api).
 
 -export([init/1, terminate/1, lookup/2, update/3, delete/2, foldl/3,
-         select_session/2]).
+         select_session/2, size/1]).
 
 %%--------------------------------------------------------------------
 %% Description: Return table reference. Called by ssl_manager process.
@@ -51,8 +51,15 @@ foldl(_Fun, _Acc0, _Cache) ->
     [].
 
 %%--------------------------------------------------------------------
-%% Description: Selects a session that could be reused. Should be callable
-%% from any process.
+%% Description: Selects a session that could be reused. Should be
+%% callable from any process.
 %%--------------------------------------------------------------------
 select_session(_Cache, _PartialKey) ->
     [].
+
+%%--------------------------------------------------------------------
+%% Description: Size of the cache.
+%% Will only be called from the ssl_manager process.
+%%--------------------------------------------------------------------
+size(_Cache) ->
+    0.
