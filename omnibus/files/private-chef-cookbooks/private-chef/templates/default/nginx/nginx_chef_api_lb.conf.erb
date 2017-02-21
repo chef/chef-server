@@ -77,8 +77,9 @@
     }
     <% end -%>
 
+    <% if node['private_chef']['bookshelf']['enable'] -%>
     # bookshelf
-    <% if node['private_chef']['opscode-erchef']['nginx_bookshelf_caching'] != :off -%>
+      <% if node['private_chef']['opscode-erchef']['nginx_bookshelf_caching'] != :off -%>
     location ~ "/<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>/{0,1}.*$" {
       set $destination @cached;
       if ($request_method !~ ^(GET)$) {
@@ -96,10 +97,11 @@
     location @uncached {
       proxy_pass http://bookshelf;
     }
-    <% else -%>
+      <% else -%>
     location ~ "/<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>/{0,1}.*$" {
       proxy_pass http://bookshelf;
     }
+      <% end -%>
     <% end -%>
 
     # erchef status endpoint
