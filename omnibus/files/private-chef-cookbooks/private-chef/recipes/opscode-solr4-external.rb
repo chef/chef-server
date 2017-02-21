@@ -29,7 +29,9 @@ when 'elasticsearch'
                               "type" => "whitespace"
                             }
                           }
-                        }
+                        },
+                        "number_of_shards" => node['private_chef']['opscode-solr4']['elasticsearch_shard_count'],
+                        "number_of_replicas" => node['private_chef']['opscode-solr4']['elasticsearch_replica_count']
                       },
                       "mappings" => {
                         "object" => {
