@@ -6,24 +6,24 @@
 
 DEV_PLATFORM ?= ubuntu-1404
 DEV_PROJECT=opscode-omnibus
-
+DEV_BASE=kitchen-omnibus-default-
 .DEFAULT_GOAL=dev
 
 dev:
-	kitchen converge default-$(DEV_PLATFORM)
+	kitchen converge $(DEV_BASE)$(DEV_PLATFORM)
 
 dev-login:
-	kitchen login default-$(DEV_PLATFORM)
+	kitchen login $(DEV_BASE)$(DEV_PLATFORM)
 
 dev-destroy:
-	kitchen destroy default-$(DEV_PLATFORM)
+	kitchen destroy $(DEV_BASE)$(DEV_PLATFORM)
 
 dev-suspend:
-	cd .kitchen/kitchen-vagrant/default-$(DEV_PLATFORM) \
+	cd .kitchen/kitchen-vagrant/$(DEV_BASE)$(DEV_PLATFORM) \
 	&& vagrant suspend
 
 dev-resume:
-	cd .kitchen/kitchen-vagrant/default-$(DEV_PLATFORM) \
+	cd .kitchen/kitchen-vagrant/$(DEV_BASE)$(DEV_PLATFORM) \
 	&& vagrant resume
 
 from_scratch: dev-destroy dev
@@ -39,11 +39,11 @@ update:
 
 extract_dev_cache:
 	mkdir -p $(DEV_PLATFORM)_git_cache
-	cd .kitchen/kitchen-vagrant/default-$(DEV_PLATFORM) \
+	cd .kitchen/kitchen-vagrant/$(DEV_BASE)$(DEV_PLATFORM) \
 	&& vagrant ssh -c 'cp -R /var/cache/omnibus/cache/git_cache /home/vagrant/$(DEV_PROJECT)/$(DEV_PLATFORM)_git_cache'
 
 deploy_dev_cache:
-	cd .kitchen/kitchen-vagrant/default-$(DEV_PLATFORM) \
+	cd .kitchen/kitchen-vagrant/$(DEV_BASE)$(DEV_PLATFORM) \
 	&& vagrant ssh -c 'mkdir -p /var/cache/omnibus/cache && rm -rf /var/cache/omnibus/cache/* && cp -R /home/vagrant/$(DEV_PROJECT)/$(DEV_PLATFORM)_git_cache/* /var/cache/omnibus/cache'
 
 # Remove all but the most recent installer package (and its metadata
@@ -64,9 +64,9 @@ prune: prune_deb
 clear_pkg_cache: clear_pkg_cache_deb
 
 clear_pkg_cache_%:
-	cd .kitchen/kitchen-vagrant/kitchen-omnibus-default-$(DEV_PLATFORM) \
+	cd .kitchen/kitchen-vagrant/kitchen-omnibus-$(DEV_BASE)$(DEV_PLATFORM) \
 	&& vagrant ssh -c 'rm -v -f /var/cache/omnibus/pkg/*.$*'
-	cd .kitchen/kitchen-vagrant/kitchen-omnibus-default-$(DEV_PLATFORM) \
+	cd .kitchen/kitchen-vagrant/kitchen-omnibus-$(DEV_BASE)$(DEV_PLATFORM) \
 	&& vagrant ssh -c 'rm -v -f /var/cache/omnibus/pkg/*.$*.metadata.json'
 
 prune_%:
@@ -76,7 +76,7 @@ prune_%:
 
 # Bundle install and build chef-server
 dev-build: clear_pkg_cache prune
-	kitchen exec default-$(DEV_PLATFORM) -c "bash -l -c 'cd chef-server/omnibus && source ~/load-omnibus-toolchain.sh && bundle install && time bundle exec omnibus build chef-server'"
+	kitchen exec $(DEV_BASE)$(DEV_PLATFORM) -c "bash -l -c 'cd chef-server/omnibus && source ~/load-omnibus-toolchain.sh && bundle install && time bundle exec omnibus build chef-server'"
 
 install:
 	gem install bundler -v 1.12.0
