@@ -242,6 +242,8 @@ default['private_chef']['opscode-solr4']['poll_seconds'] = 20 # slave -> master 
 # To enable the rest of the admin API, set the enable_full_admin_api
 # to true.
 default['private_chef']['opscode-solr4']['enable_full_admin_api'] = false
+default['private_chef']['opscode-solr4']['elasticsearch_shard_count'] = 5
+default['private_chef']['opscode-solr4']['elasticsearch_replica_count'] = 1
 
 ####
 # Chef Expander
