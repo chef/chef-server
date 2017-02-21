@@ -49,36 +49,45 @@ end
   end
 end
 
-ssl_keyfile = File.join(nginx_ca_dir, "#{node['private_chef']['nginx']['server_name']}.key")
-ssl_crtfile = File.join(nginx_ca_dir, "#{node['private_chef']['nginx']['server_name']}.crt")
-ssl_dhparam = File.join(nginx_ca_dir, 'dhparams.pem')
 
-# Generate self-signed SSL certificate
-openssl_x509 ssl_crtfile do
-  common_name node['private_chef']['nginx']['server_name']
-  org node['private_chef']['nginx']['ssl_company_name']
-  org_unit node['private_chef']['nginx']['ssl_organizational_unit_name']
-  country node['private_chef']['nginx']['ssl_country_name']
-  key_length node['private_chef']['nginx']['ssl_key_length']
-  expire node['private_chef']['nginx']['ssl_duration']
-  owner 'root'
-  group 'root'
-  mode '0644'
+
+# Generate self-signed SSL certificate unless the user has provided one
+if (node['private_chef']['nginx']['ssl_certificate'].nil? &&
+    node['private_chef']['nginx']['ssl_certificate_key'].nil?)
+
+   ssl_keyfile = File.join(nginx_ca_dir, "#{node['private_chef']['nginx']['server_name']}.key")
+   ssl_crtfile = File.join(nginx_ca_dir, "#{node['private_chef']['nginx']['server_name']}.crt")
+
+   openssl_x509 ssl_crtfile do
+     common_name node['private_chef']['nginx']['server_name']
+     org node['private_chef']['nginx']['ssl_company_name']
+     org_unit node['private_chef']['nginx']['ssl_organizational_unit_name']
+     country node['private_chef']['nginx']['ssl_country_name']
+     key_length node['private_chef']['nginx']['ssl_key_length']
+     expire node['private_chef']['nginx']['ssl_duration']
+     owner 'root'
+     group 'root'
+     mode '0644'
+   end
+
+  node.default['private_chef']['nginx']['ssl_certificate'] = ssl_crtfile
+  node.default['private_chef']['nginx']['ssl_certificate_key'] = ssl_keyfile
 end
 
-# Generate dhparam.pem for better secrecy
-openssl_dhparam ssl_dhparam do
-  key_length node['private_chef']['nginx']['dhparam_key_length']
-  generator node['private_chef']['nginx']['dhparam_generator_id']
-  owner 'root'
-  group 'root'
-  mode '0644'
-end
+# Generate dhparam.pem unless the user has provided a dhparam file
+if node['private_chef']['nginx']['ssl_dhparam'].nil?
+  ssl_dhparam = File.join(nginx_ca_dir, 'dhparams.pem')
 
-# Save node attributes back for use in config template generation
-node.default['private_chef']['nginx']['ssl_certificate'] ||= ssl_crtfile
-node.default['private_chef']['nginx']['ssl_certificate_key'] ||= ssl_keyfile
-node.default['private_chef']['nginx']['ssl_dhparam'] ||= ssl_dhparam
+  openssl_dhparam ssl_dhparam do
+    key_length node['private_chef']['nginx']['dhparam_key_length']
+    generator node['private_chef']['nginx']['dhparam_generator_id']
+    owner 'root'
+    group 'root'
+    mode '0644'
+  end
+
+  node.default['private_chef']['nginx']['ssl_dhparam'] = ssl_dhparam
+end
 
 # Create static html directory
 remote_directory nginx_html_dir do
