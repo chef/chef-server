@@ -8,9 +8,15 @@
 %% Application callbacks
 -export([start/2, stop/1]).
 
+%% make this "start properly" for eunit tests, without starting any sqerl pools.
+-ifndef(TEST).
 start(_StartType, _StartArgs) ->
     set_sqerl_environment(),
     pooler:new_pool(sqerl_pool_config()).
+-else.
+start(_StartType, _StartArgs) ->
+    {ok, self()}.
+-endif.
 
 sqerl_pool_config() ->
     MaxCount  = envy:get(chef_db, sql_pool_max_count, pos_integer),
