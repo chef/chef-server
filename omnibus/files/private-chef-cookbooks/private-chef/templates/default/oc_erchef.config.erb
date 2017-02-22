@@ -56,6 +56,12 @@
         {error_logger_hwm, <%= @log_rotation['max_messages_per_second'] %>}
     ]},
 
+    {chef_secrets, [
+        {provider, chef_secrets_json_file},
+        %% TODO: don't hard code this path
+        {provider_config, [{secrets_file, "/etc/opscode/private-chef-secrets.json"}]}
+    ]},
+
     {oc_chef_wm, [
         {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
         {api_version, "<%= node['private_chef']['api_version'] %>"},
@@ -87,6 +93,7 @@
             {port, <%= node['private_chef']['ldap']['port'] || (@ssl_enabled ? 636 : 389) %> },
             {timeout, <%= node['private_chef']['ldap']['timeout'] || 60000 %> },
             {bind_dn, "<%= node['private_chef']['ldap']['bind_dn'] || "" %>" },
+            %% TODO: user-provided pass, what do?
             {bind_password, "<%= @helper.escape_characters_in_string(node['private_chef']['ldap']['bind_password']) %>" },
             {base_dn, "<%= node['private_chef']['ldap']['base_dn'] || "" %>" },
             {group_dn, "<%= node['private_chef']['ldap']['group_dn'] || "" %>" },
@@ -106,7 +113,6 @@
         {actions_host, "<%= @actions_vip %>"},
         {actions_port, <%= @actions_port %> },
         {actions_user, <<"<%= @actions_user %>">>},
-        {actions_password, <<"<%= @actions_password %>">>},
         {actions_vhost, <<"<%= @actions_vhost %>">>},
         {actions_exchange, <<"<%= @actions_exchange %>">>},
         {actions_fqdn, <<"<%= node['private_chef']['lb']['api_fqdn'] %>">>},
@@ -127,9 +133,8 @@
 
         {rabbitmq, [
             {management,[
-                {user, <<"<%= @node['private_chef']['rabbitmq']['management_user'] %>">>},
+                {user, "<%= @node['private_chef']['rabbitmq']['management_user'] %>"},
                 {port, <%= @node['private_chef']['rabbitmq']['management_port'] %>},
-                {password, <<"<%= @node['private_chef']['rabbitmq']['management_password'] %>">>},
                 % rabbitmq management http connection pool
                 {rabbitmq_management_service, [
                     <% if node['private_chef']['fips_enabled'] -%>
@@ -144,12 +149,9 @@
                     {cull_interval, {<%= @node['private_chef']['rabbitmq']['rabbit_mgmt_http_cull_interval'] %>, sec}},
                     {max_age, {<%= @node['private_chef']['rabbitmq']['rabbit_mgmt_http_max_age'] %>, sec}},
                     {max_connection_duration, {<%= @node['private_chef']['rabbitmq']['rabbit_mgmt_http_max_connection_duration'] %>, sec}},
+
                     {ibrowse_options, [
-                        <%= @node['private_chef']['rabbitmq']['rabbit_mgmt_ibrowse_options'] %>,
-                        {basic_auth, {
-                            "<%= node['private_chef']['rabbitmq']['management_user'] %>",
-                            "<%= node['private_chef']['rabbitmq']['management_password'] %>"
-                        }}
+                        <%= @node['private_chef']['rabbitmq']['rabbit_mgmt_ibrowse_options'] %>
                     ]}
                 ]}
             ]},
@@ -191,20 +193,15 @@
             {max_connection_duration, <%= node['private_chef']['oc_chef_authz']['http_max_connection_duration'] %>},
             {ibrowse_options, <%= node['private_chef']['oc_chef_authz']['ibrowse_options'] %>}
         ]},
-        %% COUCHDB REMOVE THESE
-        {couchdb_host, "127.0.0.1"},
-        {couchdb_port, 5987 },
-        %% END COUCHDB REMOVE THESE
         {authz_superuser_id, <<"<%= node['private_chef']['oc_bifrost']['superuser_id'] %>">>},
         {cleanup_batch_size, <%= node['private_chef']['opscode-erchef']['cleanup_batch_size'] %>}
     ]},
 
     {chef_db, [
-        {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
-        %% COUCHDB REMOVE THESE
-        {couchdb_host, "127.0.0.1"},
-        {couchdb_port, 5987 }
-        %% END COUCHDB REMOVE THESE
+        {sql_pool_max_count, <%= @db_pool_max || @db_pool_size %>},
+        {sql_pool_init_count, <%= @db_pool_init || @db_pool_size %>},
+        {sql_pool_queue_max, <%= @db_pool_queue_max %>},
+        {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>}
     ]},
 
     {chef_index, [
@@ -212,7 +209,6 @@
         {rabbitmq_host, "<%= node['private_chef']['rabbitmq']['vip'] %>"},
         {rabbitmq_port, <%= node['private_chef']['rabbitmq']['node_port'] %> },
         {rabbitmq_user, <<"<%= node['private_chef']['rabbitmq']['user'] %>">>},
-        {rabbitmq_password, <<"<%= node['private_chef']['rabbitmq']['password'] %>">>},
         {rabbitmq_vhost, <<"<%= node['private_chef']['rabbitmq']['vhost'] %>">>},
         {rabbitmq_exchange, <<"">>},
         {search_provider, <%= node['private_chef']['opscode-erchef']['search_provider'] %>},
@@ -290,8 +286,8 @@
         %% Database connection parameters
         {db_host, "<%= node['private_chef']['postgresql']['vip'] %>"},
         {db_port, <%= node['private_chef']['postgresql']['port'] %>},
+        %% TODO(ssd): Should this move into chef_secrets as well
         {db_user, "<%= node['private_chef']['opscode-erchef']['sql_user'] %>"},
-        {db_pass, "<%= node['private_chef']['opscode-erchef']['sql_password'] %>"},
         {db_name, "opscode_chef" },
         {idle_check, 10000},
         {pooler_timeout, <%= @db_pooler_timeout %>},
@@ -321,13 +317,6 @@
 
     {pooler, [
         {pools, [
-            [
-                {name, sqerl},
-                {max_count, <%= @db_pool_max || @db_pool_size %>},
-                {init_count, <%= @db_pool_init || @db_pool_size %>},
-                {start_mfa, {sqerl_client, start_link, []}},
-                {queue_max, <%= @db_pool_queue_max %>}
-            ],
             [
                 {name, chef_depsolver},
                 {max_count, <%= @depsolver_worker_count %>},

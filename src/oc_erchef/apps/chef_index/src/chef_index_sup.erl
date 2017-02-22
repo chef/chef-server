@@ -66,7 +66,7 @@ child_spec() ->
             Host = envy_parse:host_to_ip(chef_index, rabbitmq_host),
             Port = envy:get(chef_index,rabbitmq_port, non_neg_integer),
             User = envy:get(chef_index,rabbitmq_user, binary),
-            Password = envy:get(chef_index,rabbitmq_password, binary),
+            {ok, Password} = chef_secrets:get(<<"rabbitmq">>, <<"password">>),
             ExchangeName = envy:get(chef_index,rabbitmq_exchange, binary),
             VHost = envy:get(chef_index, rabbitmq_vhost, binary),
 

@@ -27,5 +27,6 @@
                   stats_hero,
                   sqerl
                  ]},
+  {mod, {chef_db_app, []}},
   {env, []}
  ]}.

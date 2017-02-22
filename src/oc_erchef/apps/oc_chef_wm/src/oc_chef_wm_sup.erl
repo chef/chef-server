@@ -253,7 +253,7 @@ amqp_child_spec() ->
     Host = envy_parse:host_to_ip(oc_chef_wm, actions_host),
     Port = envy:get(oc_chef_wm, actions_port, non_neg_integer),
     User = envy:get(oc_chef_wm, actions_user, binary),
-    Password = envy:get(oc_chef_wm, actions_password, binary),
+    {ok, Password} = chef_secrets:get(<<"rabbitmq">>, <<"actions_password">>),
     VHost = envy:get(oc_chef_wm, actions_vhost, binary),
     ExchgName = envy:get(oc_chef_wm, actions_exchange, binary),
     Exchange = {#'exchange.declare'{exchange=ExchgName,
