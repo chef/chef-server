@@ -25,6 +25,7 @@
                   kernel,
                   stdlib,
                   stats_hero,
+                  chef_secrets,
                   sqerl
                  ]},
   {mod, {chef_db_app, []}},
