@@ -3,7 +3,7 @@
        {ref,"641d0a009b043a3a19e0ec56c1f4f4dfe918e135"}},
   0},
  {<<"chef_secrets">>,
-  {git,"git@github.com:chef/chef_secrets.git",
+  {git,"https://github.com//chef/chef_secrets",
        {ref,"90a21bd4bf4a34267d2844346f8ae862bf33ceaf"}},
   0},
  {<<"ej">>,
