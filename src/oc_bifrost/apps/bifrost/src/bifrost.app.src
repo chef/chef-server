@@ -1,7 +1,7 @@
 %%-*- mode: erlang -*-
 {application, bifrost,
  [{description, "Bifrost: Opscode Authorization API"},
-  {vsn, {cmd,"cat ../../VERSION | awk '{print $0}'"}},
+  {vsn, {cmd,"awk '{print $0}' ../../VERSION"}},
   {modules, []},
   {registered, []},
   {mod, {bifrost_app, []}},
@@ -14,6 +14,7 @@
                   ej,
                   jiffy,
                   envy,
+                  chef_secrets,
                   sqerl,
                   opscoderl_wm,
                   runtime_tools,

@@ -16,6 +16,10 @@
          {error_logger_mf_maxbytes, <%= @log_rotation['file_maxbytes'] %>},
          {error_logger_mf_maxfiles, <%= @log_rotation['num_to_keep'] %>}
         ]},
+ {chef_secrets, [
+                 {provider, chef_secrets_json_file},
+                 {provider_config, [{secrets_file, "/etc/opscode/private-chef-secrets.json"}]}
+                ]},
  {lager, [
           %% What handlers to install with what arguments
           %% The defaults for the logfiles are to rotate the files when
@@ -91,11 +95,11 @@
  },
  {sqerl, [
           {db_driver_mod, sqerl_pgsql_client},
+          {config_cb, {chef_secrets_sqerl, config, [<<"bifrost">>, <<"sql_password">>]}},
           {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
           {db_host, "<%= node['private_chef']['postgresql']['vip'] %>" },
           {db_port, <%= node['private_chef']['postgresql']['port'] %> },
           {db_user, "<%= node['private_chef']['oc_bifrost']['sql_user'] %>" },
-          {db_pass, "<%= node['private_chef']['oc_bifrost']['sql_password'] %>" },
           {db_name, "bifrost" },
           {idle_check, 10000},
           {pooler_timeout, <%= @db_pooler_timeout %>},
