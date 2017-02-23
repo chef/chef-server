@@ -65,7 +65,7 @@ dynamic_config() ->
     superuser_config() ++ stats_hero_config().
 
 superuser_config() ->
-    {ok, SuperuserId} = application:get_env(bifrost, superuser_id),
+    {ok, SuperuserId} = chef_secrets:get(<<"bifrost">>, <<"superuser_id">>),
     [{superuser_id, SuperuserId}].
 
 stats_hero_config() ->
