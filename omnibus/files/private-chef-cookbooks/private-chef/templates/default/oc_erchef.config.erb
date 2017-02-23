@@ -193,7 +193,6 @@
             {max_connection_duration, <%= node['private_chef']['oc_chef_authz']['http_max_connection_duration'] %>},
             {ibrowse_options, <%= node['private_chef']['oc_chef_authz']['ibrowse_options'] %>}
         ]},
-        {authz_superuser_id, <<"<%= node['private_chef']['oc_bifrost']['superuser_id'] %>">>},
         {cleanup_batch_size, <%= node['private_chef']['opscode-erchef']['cleanup_batch_size'] %>}
     ]},
 
