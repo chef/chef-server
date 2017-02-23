@@ -55,6 +55,11 @@ start_server(Config) ->
     application:set_env(chef_authn, openssl_path,
                         filename:join(code:priv_dir(oc_chef_wm),
                                       "../test/mock_openssl.sh")),
+    %% Set chef_secrets
+    application:set_env(chef_secrets, provider, chef_secrets_json_file),
+    FakeSecretsFile = filename:join(code:priv_dir(oc_chef_wm),
+                                    "../test/secrets.json"),
+    application:set_env(chef_secrets, provider_config, [{secrets_file, FakeSecretsFile}]),
 
     % TODO: we should automate setting these, if it matters at all
     application:set_env(oc_chef_wm, default_orgname, <<"org">>),
