@@ -60,8 +60,6 @@ os_getenv(Key, Default) ->
 load_inline_config() ->
     StaticBookshelfConfig = [{ip, "127.0.0.1"},
                              {port, 4321},
-                             {keys, {"e1efc99729beb175",
-                                     "fc683cd9ed1990ca"}},
                              {disk_store, "/tmp/bukkits"},
                              {sql_retry_count, 0},
                              {sql_retry_delay, 5000},
@@ -69,7 +67,6 @@ load_inline_config() ->
     StaticSqerlConfig = [{db_host, "localhost"},
                          {db_port, 5432},
                          {db_user, os_getenv("CT_SQL_USER", os:getenv("USER")) },
-                         {db_pass, os_getenv("CT_SQL_PASSWORD", "pass-ignored")},
                          {db_name, "bookshelf"},
                          {idle_check, 10000},
                          {pooler_timeout, 4000},
@@ -137,6 +134,13 @@ stop_db(Config) ->
 run_cmd(Args) ->
     os:cmd(string:join(Args, " ")).
 
+setup_chef_secrets() ->
+    application:set_env(sqerl, config_cb, {chef_secrets_sqerl, config, [{<<"bookshelf">>, <<"sql_password">>}]}),
+
+    application:set_env(chef_secrets, provider, chef_secrets_json_file),
+    FakeSecretsFile = filename:join(code:priv_dir(bookshelf), "../test/secrets.json"),
+    application:set_env(chef_secrets, provider_config, [{secrets_file, FakeSecretsFile}]).
+
 %%====================================================================
 %% TEST SERVER CALLBACK FUNCTIONS
 %%====================================================================
@@ -145,6 +149,7 @@ init_per_suite(Config) ->
         true ->
             ok;
         false ->
+            setup_chef_secrets(),
             start_db(Config)
     end,
     Config.
@@ -178,12 +183,11 @@ init_per_testcase(upgrade_from_v0, Config) ->
     CMD = ["cd ", Format0Data, "; tar cf - * | (cd ", DiskStore, "; tar xf -; mkdir bucket-4)"],
     ct:pal("copying format 0 data into disk store with command:~n~s~n", [CMD]),
     os:cmd(CMD),
-    AccessKeyID = random_string(10, "abcdefghijklmnopqrstuvwxyz"),
-    SecretAccessKey = random_string(30, "abcdefghijklmnopqrstuvwxyz"),
+    AccessKeyID = "e1efc99729beb175",
+    SecretAccessKey = "fc683cd9ed1990ca",
 
     application:set_env(bookshelf, reqid_header_name, "X-Request-Id"),
     application:set_env(bookshelf, disk_store, DiskStore),
-    application:set_env(bookshelf, keys, {AccessKeyID, SecretAccessKey}),
     application:set_env(bookshelf, log_dir, LogDir),
     application:set_env(bookshelf, stream_download, true),
     {ok, Apps} = start_bookshelf(),
