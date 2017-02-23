@@ -18,7 +18,7 @@
 {application, chef_objects,
  [
   {description, "Chef object types and support modules"},
-  {vsn, {cmd,"awk '{print $0}' ../../VERSION"}},
+  {vsn, {cmd,"cat ../../VERSION | awk '{print $0}'"}},
   {registered, []},
   {applications, [
                   kernel,
