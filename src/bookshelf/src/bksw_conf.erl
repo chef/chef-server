@@ -32,7 +32,9 @@
          summarize_config/0]).
 
 %% Exported for common test
+-ifdef(TEST).
 -export([port/0, ip/0, keys/0]).
+-endif.
 
 -include("internal.hrl").
 
@@ -143,13 +145,9 @@ port() ->
     envy:get(bookshelf, port, 4321, positive_integer).
 
 keys() ->
-    case envy:get(bookshelf, keys, undefined, any) of
-        undefined ->
-            error({missing_config, {bookshelf, keys}});
-        {AWSAccessKey, SecretKey} ->
-            {bksw_util:to_binary(AWSAccessKey),
-             bksw_util:to_binary(SecretKey)}
-    end.
+    {ok, AWSAccessKey} = chef_secrets:get(<<"bookshelf">>, <<"access_key_id">>),
+    {ok, SecretKey} = chef_secrets:get(<<"bookshelf">>, <<"secret_access_key">>),
+    {AWSAccessKey, SecretKey}.
 
 log_dir() ->
     envy:get(bookshelf, log_dir, code:priv_dir(bookshelf), any).

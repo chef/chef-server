@@ -19,7 +19,7 @@
 {application, bookshelf,
  [{description  , "Bookshelf Rest Interface: Amazon S3 Compatible"
    "Object Store Rest API"},
-  {vsn, {cmd,"cat VERSION | awk '{print $0}'"}},
+  {vsn, {cmd,"awk '{print $0}' VERSION"}},
   {mod, {bksw_app, []}},
   {registered, [bksw_sup]},
   {applications , [
@@ -39,5 +39,6 @@
                     opscoderl_wm,
                     iso8601,
                     runtime_tools,
+                    chef_secrets,
                     tools
                   ]}]}.

@@ -228,8 +228,6 @@
     ]},
 
     {chef_objects, [
-        {s3_access_key_id, "<%= node['private_chef']['bookshelf']['access_key_id'] %>"},
-        {s3_secret_key_id, "<%= node['private_chef']['bookshelf']['secret_access_key'] %>"},
         <% if node['private_chef']['fips_enabled'] -%>
         %% When we're using a fips openssl, we default to using http for bookshelf.
         %% The reason for this is because we do not have a TLS implementation for
@@ -279,7 +277,7 @@
 
     {sqerl, [
         {db_driver_mod, sqerl_pgsql_client},
-        {config_cb, {chef_secrets_sqerl, config,[{<<"opscode_erchef">>, <<"sql_password">>}]}},
+        {config_cb, {chef_secrets_sqerl, config, [{<<"opscode_erchef">>, <<"sql_password">>}]}},
         {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
         %% Database connection parameters
         {db_host, "<%= node['private_chef']['postgresql']['vip'] %>"},
