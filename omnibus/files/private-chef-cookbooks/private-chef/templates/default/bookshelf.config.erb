@@ -75,10 +75,13 @@
           %% opscode-chef-mover, FWIW.
           {error_logger_hwm, 1000}
         ]},
+ {chef_secrets, [
+                 {provider, chef_secrets_json_file},
+                 %% TODO: don't hard code this path
+                 {provider_config, [{secrets_file, "/etc/opscode/private-chef-secrets.json"}]}
+                ]},
  {bookshelf, [{ip, "<%= @listen %>"},
               {port, <%= @port %>},
-              {keys, {"<%= @access_key_id %>",
-                      "<%= @secret_access_key %>"}},
               {storage_type, <%= @storage_type %>},
               {disk_store, "<%= @data_dir %>"},
 <% if @storage_type.to_s == "sql" -%>
@@ -93,13 +96,13 @@
 <% if @storage_type.to_s == "sql" -%>
  {sqerl, [
            {db_driver_mod, sqerl_pgsql_client},
+           {config_cb, {chef_secrets_sqerl, config, [{<<"bookshelf">>, <<"sql_password">>}]}},
            {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
 
            %% Database connection parameters
            {db_host, "<%= @postgresql['vip'] %>"},
            {db_port, <%=  @postgresql['port'] %>},
            {db_user, "<%= @sql_user %>"},
-           {db_pass, "<%= @sql_password %>"},
            {db_name, "bookshelf" },
            {idle_check, 10000},
            {pooler_timeout, <%= @db_pooler_timeout %>},
