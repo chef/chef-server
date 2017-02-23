@@ -51,14 +51,20 @@ make_key_test() ->
           access_key_id::string(),
           secret_access_key::string(),
           bucket_access_type=virtual_hosted::mini_s3:bucket_access_type()
-
 }).
+
+setup_chef_secrets() ->
+    application:set_env(chef_secrets, provider, chef_secrets_json_file),
+    FakeSecretsFile = filename:join(code:priv_dir(chef_objects), "../test/secrets.json"),
+    application:set_env(chef_secrets, provider_config, [{secrets_file, FakeSecretsFile}]),
+    application:ensure_all_started(chef_secrets).
+
 setup_s3(InternalS3Url, ExternalS3Url) ->
+    setup_chef_secrets(),
+
     MockedModules = [mini_s3],
     chef_objects_test_utils:mock(MockedModules, [passthrough]),
     application:set_env(chef_objects, s3_platform_bucket_name, "testbucket"),
-    application:set_env(chef_objects, s3_access_key_id, "super_id"),
-    application:set_env(chef_objects, s3_secret_key_id, "super_secret"),
     application:set_env(chef_objects, s3_url, InternalS3Url),
     application:set_env(chef_objects, s3_external_url, ExternalS3Url),
 
@@ -94,7 +100,8 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                {InternalS3Url, ExternalS3Url, ExpectedExpiry}
        end,
        fun(_) ->
-               chef_objects_test_utils:unmock(MockedModules)
+               chef_objects_test_utils:unmock(MockedModules),
+               application:stop(chef_secrets)
        end,
        [
         fun({_InternalS3Url, _ExternalS3Url, ExpectedExpiry}) ->
