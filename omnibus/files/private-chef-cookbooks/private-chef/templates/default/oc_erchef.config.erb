@@ -198,9 +198,6 @@
     ]},
 
     {chef_db, [
-        {sql_pool_max_count, <%= @db_pool_max || @db_pool_size %>},
-        {sql_pool_init_count, <%= @db_pool_init || @db_pool_size %>},
-        {sql_pool_queue_max, <%= @db_pool_queue_max %>},
         {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>}
     ]},
 
@@ -282,6 +279,7 @@
 
     {sqerl, [
         {db_driver_mod, sqerl_pgsql_client},
+        {config_cb, {chef_secrets_sqerl, config,[{<<"opscode_erchef">>, <<"sql_password">>}]}},
         {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
         %% Database connection parameters
         {db_host, "<%= node['private_chef']['postgresql']['vip'] %>"},
@@ -317,6 +315,13 @@
 
     {pooler, [
         {pools, [
+            [
+                {name, sqerl},
+                {max_count, <%= @db_pool_max || @db_pool_size %>},
+                {init_count, <%= @db_pool_init || @db_pool_size %>},
+                {start_mfa, {sqerl_client, start_link, []}},
+                {queue_max, <%= @db_pool_queue_max %>}
+            ],
             [
                 {name, chef_depsolver},
                 {max_count, <%= @depsolver_worker_count %>},
