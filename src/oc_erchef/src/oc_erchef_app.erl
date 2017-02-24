@@ -12,12 +12,12 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    %% when start is invoked, any non-included apps are already started
-    %% This means that chef_secrets is started - so it's safe to
-    %% start pooler and any other included apps that needed to wait for pooler. See
-    %% comment in app.src for details.
+    %% When start is invoked, any non-included apps are already started.
+    %% This means that chef_secrets is started - so it's safe to start
+    %% pooler and any other included apps that needed to wait for pooler.
+    %% See comment in app.src for details.
     { ok, AppList } =  application:get_key(oc_erchef, included_applications),
-    [ application:ensure_all_started(App) || App <- AppList ],
+    [ application:ensure_all_started(App, permanent) || App <- AppList ],
 
     %% If we're in a dev vm environment, start the code sync & compile tools
     case os:getenv("DEVVM") of
