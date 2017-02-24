@@ -56,8 +56,13 @@ all() ->
     ].
 
 init_per_testcase(_, Config) ->
+    setup_helper:mock_authz(?AUTHZ_ID),
     delete_all_containers(),
     Config.
+
+end_per_testcase(_, _Config) ->
+    setup_helper:unmock_authz(),
+    ok.
 
 delete_all_containers() ->
     Result = case sqerl:adhoc_delete("containers", all) of

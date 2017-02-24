@@ -71,5 +71,8 @@ travis_env:
 	@echo export LD_LIBRARY_PATH=$(CHEFDK_GECODE_PATH)/lib
 	@echo export CPLUS_INCLUDE_PATH=$(CHEFDK_GECODE_PATH)/include
 
+clean_beam:
+	find _build/ -name '*.beam' -delete
+
 distclean:
 	@rm -rf _build

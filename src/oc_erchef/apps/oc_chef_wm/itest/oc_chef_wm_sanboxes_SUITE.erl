@@ -31,6 +31,7 @@ end_per_suite(Config) ->
     setup_helper:base_end_per_suite(Config).
 
 init_per_testcase(TestName, Config) ->
+    setup_helper:mock_authz(?AUTHZ_ID),
     %% we don't have bookshelf around, and don't want to pollute
     %% some S3 bucket, so let's mock that part out
     %% and as usual, mocks need to happen in the same thread as the
@@ -59,6 +60,7 @@ init_per_testcase(TestName, Config) ->
     Config.
 
 end_per_testcase(_, Config) ->
+    setup_helper:unmock_authz(),
     ok = meck:unload(chef_s3),
     Config.
 

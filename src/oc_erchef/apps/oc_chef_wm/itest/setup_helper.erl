@@ -33,7 +33,9 @@
          base_init_per_suite/1,
          base_end_per_suite/1,
          get_config/2,
-         make_user/3
+         make_user/3,
+         mock_authz/1,
+         unmock_authz/0
         ]).
 
 -define(TEST_DB_NAME, "oc_chef_wm_itests").
@@ -56,6 +58,7 @@ start_server(Config) ->
                         filename:join(code:priv_dir(oc_chef_wm),
                                       "../test/mock_openssl.sh")),
     %% Set chef_secrets
+    application:stop(chef_secrets),
     application:set_env(chef_secrets, provider, chef_secrets_json_file),
     FakeSecretsFile = filename:join(code:priv_dir(oc_chef_wm),
                                     "../test/secrets.json"),
@@ -100,6 +103,8 @@ start_server(Config) ->
                          {ibrowse_options, [{connect_timeout, 10000}]},
                          {timeout, 300}
                         ]),
+    meck:new(darklaunch_app),
+    meck:expect(darklaunch_app, start, fun(_, _) -> {ok, self()} end),
     [ {ok, _} = application:ensure_all_started(A) || A <- needed_apps() ],
     Config.
 
@@ -108,6 +113,7 @@ needed_apps() ->
      asn1,
      crypto,
      stats_hero,
+     chef_secrets,
      pooler,
      public_key,
      ssl,
@@ -206,3 +212,50 @@ make_user(Config, Name, AuthzId) ->
     Response = chef_db:create(User, ?config(context, Config), AuthzId),
     ?assertEqual(Response, ok),
     User.
+
+mock_authz(ClientAuthzId) ->
+    meck:new(oc_chef_authz, [passthrough]),
+    meck:expect(oc_chef_authz, create_entity_if_authorized,
+                fun(_, _, _, _) ->
+                        ct:pal("create_entity_if_authorized()~n", []),
+                        <<RandomInt:128>> = crypto:rand_bytes(16),
+                        RandomId = iolist_to_binary(io_lib:format("~32.16.0b", [RandomInt])),
+                        {ok, RandomId}
+                end),
+    meck:expect(oc_chef_authz, delete_resource,
+                fun(_, _, _) ->
+                        ct:pal("delete_resource()~n", []),
+                        ok
+                end),
+    meck:expect(oc_chef_authz, get_container_aid_for_object,
+                fun(_, _, _) ->
+                        ct:pal("get_container_aid_for_object()~n", []),
+                        <<"00000000000000000000000000000000">>
+                end),
+    meck:expect(oc_chef_authz, is_authorized_on_resource,
+                fun(_, _, _, _, _, _) ->
+                        ct:pal("is_authorized_on_resource()~n", []),
+                        true
+                end),
+    meck:expect(oc_chef_authz, is_actor_transitive_member_of_group,
+                fun(_, _, _) ->
+                        ct:pal(" is_actor_transitive_member_of_group()~n", []),
+                        true
+                end),
+
+    meck:new(chef_authn, [passthrough]),
+    meck:expect(chef_authn, authenticate_user_request,
+                fun(_, _, _, _, _, _) ->
+                        ct:pal("authenticate_user_request()~n", []),
+                        {name, <<"mock_user">>, #chef_requestor{name = <<"default">>, authz_id = ClientAuthzId, type = <<"client">> }}
+                end),
+    meck:expect(chef_authn, validate_headers,
+                fun(_, _) ->
+                        ct:pal("validate_headers()~n", []),
+                        [{'algorithm', <<"SHA1">>}, {'version', <<"1.0">>}]
+                end),
+    ok.
+
+unmock_authz() ->
+    meck:unload(chef_authn),
+    meck:unload(oc_chef_authz).

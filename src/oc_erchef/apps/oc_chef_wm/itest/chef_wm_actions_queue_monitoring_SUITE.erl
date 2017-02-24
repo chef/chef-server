@@ -74,15 +74,15 @@ end_per_testcase(_, Config) ->
 
     % leave rabbit up for troubleshooting failed tests
     setup_helper:base_end_per_suite(Config),
+    setup_helper:unmock_authz(),
     Config.
 
 all() -> [basic_queue_monitor, queue_full_dont_start].
 
 
-
-
-
 basic_queue_monitor(Config) ->
+    setup_helper:mock_authz(?CLIENT_AUTHZ_ID),
+
     default_env_with_queue_monitor(Config),
 
     setup_rabbit(Config),
