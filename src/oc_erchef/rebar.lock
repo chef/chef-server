@@ -132,7 +132,7 @@
   1},
  {<<"sqerl">>,
   {git,"https://github.com/chef/sqerl",
-       {ref,"31e18cc02d1ed3560873701635f74e96a30ab7bd"}},
+       {ref,"220bb1c000807f0016b96ffb787b35a993858d50"}},
   0},
  {<<"stats_hero">>,
   {git,"https://github.com/chef/stats_hero",
