@@ -39,5 +39,6 @@
                     opscoderl_wm,
                     iso8601,
                     runtime_tools,
+                    chef_secrets,
                     tools
                   ]}]}.

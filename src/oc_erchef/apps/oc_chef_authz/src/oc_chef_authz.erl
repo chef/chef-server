@@ -81,7 +81,8 @@ make_context(ApiVersion, ReqId, Darklaunch)  ->
 
 -spec superuser_id() -> oc_authz_id().
 superuser_id() ->
-    envy:get(oc_chef_authz, authz_superuser_id, binary).
+    {ok, SuperuserId} = chef_secrets:get(<<"oc_bifrost">>, <<"superuser_id">>),
+    SuperuserId.
 
 -spec requestor_or_superuser(object_id() | superuser) -> oc_authz_id().
 requestor_or_superuser(superuser) ->

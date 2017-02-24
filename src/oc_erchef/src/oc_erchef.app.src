@@ -6,15 +6,37 @@
   {description, ""},
   {vsn, {cmd,"cat VERSION | awk '{print $0}'"}},
   {registered, []},
+  %% TODO holy crap, ugh.
+  %% each of these applications lists pooler as a depency -
+  %% and if they start automatically, then pooler will be started
+  %% before anything in the applications list below - including chef_secrets,
+  %% which many of thse don't have as a dependency.   In the case
+  %% of sqerl, the pooler procs will automatically attempt access
+  %% the secrets they need to connect to the pg server - so we have to
+  %% ensure that pooler is started after chef_secrets.
+  %%
+  %% By using included_applications, we'll prevent them from starting
+  %% automatically - but that means in oc_erchef_app, we will need
+  %% to start them behand after we know secrets is running.
+  %%
+  %% Idea: instead of having to monitor which list an application belongs in,
+  %% we cou;ld instead make all (or most) applications  included,
+  %% and just manage startup ourselves.
+  {included_applications, [
+                           pooler,
+                           chef_db,
+                           chef_objects,
+                           sqerl,
+                           opscoderl_httpc,
+                           oc_chef_authz,
+                           oc_chef_wm,
+                           data_collector
+                          ]},
   {applications, [
-                  kernel,
-                  stdlib,
-                  chef_db,
+                  lager,
+                  chef_secrets,
                   chef_index,
-                  chef_objects,
                   depsolver,
-                  oc_chef_authz,
-                  oc_chef_wm,
                   bear,
                   chef_authn,
                   ej,
@@ -27,13 +49,11 @@
                   mini_s3,
                   observer,
                   opscoderl_folsom,
-                  opscoderl_httpc,
                   quickrand,
                   runtime_tools,
                   tools,
                   uuid,
-                  webtool,
-                  data_collector
+                  webtool
                  ]},
   {mod, { oc_erchef_app, []}},
   {env, []}

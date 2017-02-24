@@ -6,15 +6,23 @@
   {registered, []},
   {mod, {bifrost_app, []}},
   {env, []},
+  {included_applications, [
+                           pooler,
+                           sqerl
+                          ]},
+  %% Don't put anything that depends on pooler into this array.
+  %% (sqerl, started by pooler, depends on chef_secrets without OTP-wise
+  %% depending on it; so we take control of starting up included_applications
+  %% manually in bifrost_app.erl.)
   {applications, [kernel,
                   stdlib,
                   lager,
                   sasl,
+                  chef_secrets,
                   stats_hero,
                   ej,
                   jiffy,
                   envy,
-                  sqerl,
                   opscoderl_wm,
                   runtime_tools,
                   tools
