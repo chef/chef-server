@@ -95,7 +95,7 @@
  },
  {sqerl, [
           {db_driver_mod, sqerl_pgsql_client},
-          {config_cb, {chef_secrets_sqerl, config, [<<"bifrost">>, <<"sql_password">>]}},
+          {config_cb, {chef_secrets_sqerl, config, [{<<"oc_bifrost">>, <<"sql_password">>}]}},
           {ip_mode, [ <%=PrivateChef['use_ipv6'] ? "ipv6,ipv4" : "ipv4" %> ] },
           {db_host, "<%= node['private_chef']['postgresql']['vip'] %>" },
           {db_port, <%= node['private_chef']['postgresql']['port'] %> },

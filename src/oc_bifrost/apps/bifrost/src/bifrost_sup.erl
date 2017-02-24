@@ -65,8 +65,8 @@ dynamic_config() ->
     superuser_config() ++ stats_hero_config().
 
 superuser_config() ->
-    {ok, SuperuserId} = chef_secrets:get(<<"bifrost">>, <<"superuser_id">>),
-    [{superuser_id, SuperuserId}].
+    {ok, SuperuserId} = chef_secrets:get(<<"oc_bifrost">>, <<"superuser_id">>),
+    [{superuser_id, erlang:binary_to_list(SuperuserId)}].
 
 stats_hero_config() ->
     {ok, MetricKey} = application:get_env(bifrost, root_metric_key),
