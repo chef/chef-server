@@ -19,7 +19,7 @@
        {ref,"defae88f9ea9f9875b1148947bbdf38c867c8ec7"}},
   0},
  {<<"chef_secrets">>,
-  {git,"git@github.com:chef/chef_secrets.git",
+  {git,"https://github.com/chef/chef_secrets",
        {ref,"90a21bd4bf4a34267d2844346f8ae862bf33ceaf"}},
   0},
  {<<"darklaunch">>,
