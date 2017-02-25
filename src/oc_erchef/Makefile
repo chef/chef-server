@@ -27,11 +27,19 @@ $(REBAR3):
 install: $(REBAR3) distclean
 	$(REBAR3) update
 
-travis: all ct rel
+travis: all rel
+	@$(REBAR3) ct
 	@echo "Travis'd!"
 
+# TODO (ssd): The `ct` rebar task only runs cleanly if you run it by
+# itself. If, for instance, you were to try to do this:
+#
+#    $(REBAR3) do clean, compile eunit, dialyzer, ct
+#
+# The ct tests would not run and would instead produce an error trying
+# to reload CTH. This appears to be a bug upstream in rebar.
 ct: $(REBAR3)
-	$(REBAR3) do ct --dir apps/chef_db/itest, ct --dir apps/oc_chef_authz/itest, ct --dir apps/oc_chef_wm/itest
+	$(REBAR3) ct
 
 version_clean:
 	@rm -f VERSION
