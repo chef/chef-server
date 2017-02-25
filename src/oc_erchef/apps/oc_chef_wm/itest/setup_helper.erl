@@ -52,8 +52,12 @@ start_server(Config) ->
 
     application:set_env(lager, error_logger_redirect, false),
 
-    % Use canned openssl response instead: always returns the same key, but does
-    % so very fast.
+    %% Set bcrypt rounds to the minimum, speeding up password hashing during
+    %% user record creation
+    application:set_env(bcrypt, default_log_rounds, 4, [{persistent, true}]),
+
+    %% Use canned openssl response instead: always returns the same key, but does
+    %% so very fast.
     application:set_env(chef_authn, openssl_path,
                         filename:join(code:priv_dir(oc_chef_wm),
                                       "../test/mock_openssl.sh")),

@@ -67,12 +67,11 @@ end_per_testcase(_, Config) ->
         true ->
             catch(exit(whereis(fake_rabbit), kill)),
             meck:unload(bunnyc),
-                meck:unload(chef_wm_rabbitmq_management);
+            meck:unload(chef_wm_rabbitmq_management);
         false -> ok
     end,
     application:set_env(oc_chef_wm, enable_actions, false),
-
-    % leave rabbit up for troubleshooting failed tests
+    %% leave rabbit up for troubleshooting failed tests
     setup_helper:base_end_per_suite(Config),
     setup_helper:unmock_authz(),
     Config.
@@ -88,8 +87,6 @@ basic_queue_monitor(Config) ->
     setup_rabbit(Config),
 
     _FinalConfig = setup_chef(Config),
-    lager:start(),
-    lager:set_loglevel(lager_console_backend, debug),
 
     %% create 5 databags, queue should not be at capacity
     [ {ok, "201", _, _} = make_data_bag(?CLIENT_NAME, X) || X <- lists:seq(1,5)],
@@ -161,13 +158,13 @@ basic_queue_monitor(Config) ->
     ?assertEqual(false, proplists:get_value(queue_at_capacity, Status6)),
     ?assertEqual(5, proplists:get_value(last_recorded_length, Status6)),
     ?assertEqual(2, proplists:get_value(total_dropped, Status6)),
-
     ok.
 
-
 queue_full_dont_start(Config) ->
+    setup_helper:mock_authz(?CLIENT_AUTHZ_ID),
     default_env_with_queue_monitor(Config),
     MaxLength = ?config(max_length, Config),
+    ?Q_SETTING(prevent_erchef_startup_on_full_capacity, true),
 
     setup_rabbit(Config),
 
@@ -188,27 +185,32 @@ queue_full_dont_start(Config) ->
       end || X <- lists:seq(1,15)],
     ibrowse:stop(),
 
+    %% TODO: There are about 500000000 reasons setup_chef could fail considering
+    %% the amount of mocking and cargo culting in that path. The idea of this
+    %% test is that it would only fail if we hit the queue at capacity check in
+    %% the oc_chef_wm_sup. FURTHER, I'm pretty sure ?assert works via an
+    %% exception which will then be caught, so this test basically always passes
+    %% currently.
     try
         _FinalConfig = setup_chef(Config),
-        % shouldn't get here
         ?assert(false)
-    catch Error:Reason ->
-        ct:pal("Erchef failed to start (this is expected): ~p~n~p~n", [Error, Reason])
+    catch
+        Error:Reason ->
+            ct:pal("Erchef failed to start (this is expected): ~p~n~p~n", [Error, Reason])
     end,
-
-ok.
+    ok.
 
 wait_until_not_at_capacity() ->
     wait_until(fun () ->
                 CurrentStatus = chef_wm_actions_queue_monitoring:status(),
                 false == proplists:get_value(queue_at_capacity, CurrentStatus)
-               end, 60, 1000).
+               end, 600, 100).
 
 wait_until_queue_length(N) ->
     wait_until(fun () ->
                 CurrentStatus = chef_wm_actions_queue_monitoring:status(),
                 N == proplists:get_value(last_recorded_length, CurrentStatus)
-               end, 60, 1000).
+               end, 600, 100).
 
 wait_until_next_check() ->
     InitialStatus = chef_wm_actions_queue_monitoring:status(),
@@ -216,7 +218,7 @@ wait_until_next_check() ->
     wait_until(fun () ->
                 CurrentStatus = chef_wm_actions_queue_monitoring:status(),
                 NextCheck == proplists:get_value(check_count, CurrentStatus)
-               end, 60, 1000).
+               end, 600, 100).
 
 
 wait_until(Fun, Retry, Delay) when Retry > 0 ->
@@ -275,7 +277,7 @@ default_env_with_queue_monitor(Config) ->
     ?Q_SETTING(queue_length_monitor_enabled, true),
     ?Q_SETTING(queue_length_monitor_vhost, ?config(test_vhost, Config)),
     ?Q_SETTING(queue_length_monitor_queue, "alaska"),
-    ?Q_SETTING(queue_length_monitor_millis, 2000),
+    ?Q_SETTING(queue_length_monitor_millis, 250),
     ?Q_SETTING(drop_on_full_capacity, true),
     ?Q_SETTING(prevent_erchef_startup_on_full_capacity, false),
 
@@ -549,4 +551,3 @@ fake_rabbit_current_length() ->
     receive
         {current_count, N} -> N
     end.
-
