@@ -4,7 +4,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
--define(SUPER_USER_AUTHZ_ID, <<"clarkkent">>).
+-define(SUPER_USER_AUTHZ_ID, <<"test_superuser_id_value">>).
 -define(BATCH_SIZE, 10).
 -define(INTERVAL, 10).
 
@@ -15,7 +15,6 @@ oc_chef_authz_cleanup_test_() ->
              oc_chef_authz_tests:start_apps(),
              application:set_env(oc_chef_authz, cleanup_interval, ?INTERVAL),
              application:set_env(oc_chef_authz, cleanup_batch_size, ?BATCH_SIZE),
-             application:set_env(oc_chef_authz, authz_superuser_id, ?SUPER_USER_AUTHZ_ID),
              %% Cancel the current timer so we can test state transitions individually
              oc_chef_authz_cleanup:stop(),
              [ meck:new(Mod) || Mod <- Mods]

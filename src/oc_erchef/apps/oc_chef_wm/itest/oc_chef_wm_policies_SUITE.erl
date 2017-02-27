@@ -113,11 +113,14 @@ all() ->
      validate_identifiers
     ].
 
-%% setup/teardown
-
 init_per_testcase(_, Config) ->
+    setup_helper:mock_authz(?AUTHZ_ID),
     delete_all_policy_data(),
     Config.
+
+end_per_testcase(_, _Config) ->
+    setup_helper:unmock_authz(),
+    ok.
 
 delete_all_policy_data() ->
     nuke_table_data("policies"),

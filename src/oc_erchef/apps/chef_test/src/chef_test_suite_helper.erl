@@ -79,7 +79,6 @@ random_bogus_port() ->
 % NeededApps is a list of atoms of app to stop
 stop_server(Config, NeededApps) ->
     [begin
-         ct:pal("Stopping ~p~n", [App]),
          application:stop(App)
      end || App <- lists:reverse(NeededApps)],
 

@@ -25,6 +25,7 @@ describe PrivateChef do
     allow(PrivateChef).to receive(:exit!).and_raise(SystemExit)
     allow_any_instance_of(Veil::CredentialCollection::ChefSecretsFile).to receive(:save).and_return(true)
     allow_any_instance_of(Kernel).to receive(:system).with("chmod 0600 /etc/opscode/private-chef-secrets.json").and_return(true)
+    allow_any_instance_of(Kernel).to receive(:system).with("chown opscode /etc/opscode/private-chef-secrets.json").and_return(true)
   }
 
   # Example content of /etc/opscode/private-chef-secrets.json

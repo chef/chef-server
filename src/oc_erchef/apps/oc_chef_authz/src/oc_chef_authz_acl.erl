@@ -95,8 +95,7 @@ update_part(Part, AceRecord, Type, AuthzId, OrgId) ->
     Ids = names_to_ids(ej:get({Part}, AceRecord), OrgId),
     Data = chef_json:encode(Ids),
     Path = acl_path(Type, AuthzId, Part),
-    SuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
-    Result = oc_chef_authz_http:request(Path, put, ?DEFAULT_HEADERS, Data, SuperuserId),
+    Result = oc_chef_authz_http:request(Path, put, ?DEFAULT_HEADERS, Data, superuser_id()),
     case Result of
         {error, forbidden} ->
             throw(forbidden);
@@ -211,8 +210,7 @@ fetch(Type, AuthzId) ->
 
 fetch(Type, AuthzId, Granular) ->
     Path = acl_path(Type, AuthzId),
-    SuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
-    Result = oc_chef_authz_http:request(Path, get, ?DEFAULT_HEADERS, [], SuperuserId),
+    Result = oc_chef_authz_http:request(Path, get, ?DEFAULT_HEADERS, [], superuser_id()),
     case Result of
         {ok, Record} ->
             convert_all_ids_to_names(Record, Granular);
@@ -232,9 +230,8 @@ fetch(Type, AuthzId, Granular) ->
     true | false | {error, term()}.
 has_grant_on(ObjectType, ObjectId, ActorId) ->
     Path = acl_auth_path(ObjectType, ObjectId, ActorId),
-    SuperuserId = envy:get(oc_chef_authz, authz_superuser_id, binary),
     Check = oc_chef_authz_http:request(Path, get, ?DEFAULT_HEADERS, [],
-                                       SuperuserId),
+                                       superuser_id()),
     case Check of
         ok ->
             true;
@@ -364,7 +361,9 @@ part_with_actors(PartRecord, Clients, Users, granular) ->
 part_with_actors(PartRecord, Clients, Users, _) ->
     ej:set({<<"actors">>}, PartRecord, Clients ++ Users).
 
-
+superuser_id() ->
+    {ok, Id} = chef_secrets:get(<<"oc_bifrost">>, <<"superuser_id">>),
+    Id.
 
 % Path helper functions
 % Translate types; in ACLs, everything is an object, actor, group, or container

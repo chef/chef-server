@@ -52,86 +52,90 @@ init_per_suite(Config) ->
     setup_helper:make_user(Config2, ?USER_NAME, ?USER_AUTHZ_ID),
     Config2.
 
-
 end_per_suite(Config) ->
     {ok, 1} = sqerl:execute(<<"DELETE FROM users WHERE username = $1">>, [?USER_NAME]),
     setup_helper:base_end_per_suite(Config).
 
+init_per_testcase(_, Config) ->
+    setup_helper:mock_authz(?CLIENT_AUTHZ_ID),
+    Config.
+
+end_per_testcase(_, Config) ->
+    setup_helper:unmock_authz(),
+    Config.
+
 endpoint_gives_valid_response(_Config) ->
     {Code, EJ} = api_get("server_api_version", ?API_MIN_VER),
-    ?assertEqual(Code, "200"),
+    ?assertEqual("200", Code),
     ?assertMatch(EJ, expected_version_endpoint_response()).
 
 version_not_specified_accepted(_Config) ->
     % Here and below use an unrelated endpoint to test
     % cross-endpoint behavior
     {Code, _} = api_get("license", undefined),
-    ?assertEqual(Code, "200").
+    ?assertEqual("200", Code).
 
 invalid_version_too_high_rejected(_Config) ->
     TestVersion = ?API_MAX_VER + 1,
     {Code, EJ} = api_get("license", TestVersion),
-    ?assertEqual(Code, "406"),
+    ?assertEqual("406", Code),
     ?assertMatch(EJ, expected_error_response(TestVersion)).
 
 invalid_version_too_low_rejected(_Config) ->
     TestVersion = ?API_MIN_VER - 1,
     {Code, EJ} = api_get("license", TestVersion),
-    ?assertEqual(Code, "406"),
+    ?assertEqual("406", Code),
     ?assertMatch(EJ, expected_error_response(TestVersion)).
 
 invalid_version_blank_rejected(_Config) ->
     {Code, EJ} = api_get("license", ""),
-    ?assertEqual(Code, "406"),
-    ?assertMatch(EJ, expected_error_response("")).
+    ?assertEqual("406", Code),
+    ?assertEqual(expected_error_response(""), EJ).
 
 invalid_version_bad_value_rejected(_Config) ->
     TestVersion = "nope",
     {Code, EJ} = api_get("license", TestVersion),
-    ?assertEqual(Code, "406"),
-    ?assertMatch(EJ, expected_error_response(TestVersion)).
+    ?assertEqual("406", Code),
+    ?assertEqual(expected_error_response(TestVersion), EJ).
 
 valid_min_version_accepted(_Config) ->
     {Code, _} = api_get("license", ?API_MIN_VER),
-    ?assertEqual(Code, "200").
+    ?assertEqual("200", Code).
 
 valid_max_version_accepted(_Config) ->
     {Code, _} = api_get("license", ?API_MAX_VER),
-    ?assertEqual(Code, "200").
+    ?assertEqual("200", Code).
 
 valid_in_range_version_accepted(_Config) ->
     {Code, _} = api_get("license", ?API_MIN_VER + 1),
-    ?assertEqual(Code, "200").
+    ?assertEqual("200", Code).
 
 valid_header_returned_when_valid_version_header_sent(_Config) ->
     {ok, Code, Headers, _ResponseBody} = http_request(get, "license", ?API_MIN_VER),
     MatchData = expected_header_response(?API_MIN_VER, ?API_MIN_VER),
-    ?assertEqual(Code, "200"),
-    ?assertEqual(chef_json:decode(proplists:get_value("X-Ops-Server-API-Version", Headers)), MatchData).
+    ?assertEqual("200", Code),
+    ?assertEqual(MatchData, chef_json:decode(proplists:get_value("X-Ops-Server-API-Version", Headers))).
 
 valid_header_returned_when_no_version_header_sent(_Config) ->
     {ok, Code, Headers, _ResponseBody} = http_request(get, "license", undefined),
     MatchData = expected_header_response(0, ?API_MIN_VER),
-    ?assertEqual(Code, "200"),
-    ?assertEqual(chef_json:decode(proplists:get_value("X-Ops-Server-API-Version", Headers)), MatchData).
+    ?assertEqual("200", Code),
+    ?assertEqual(MatchData, chef_json:decode(proplists:get_value("X-Ops-Server-API-Version", Headers))).
 
 valid_header_returned_when_invalid_header_sent(_Config) ->
     {ok, Code, Headers, ResponseBody} = http_request(get, "license", pineapple),
     MatchData = expected_header_response(-1, -1),
-    ?assertEqual(chef_json:decode(ResponseBody), expected_error_response("pineapple")),
-    ?assertEqual(Code, "406"),
-    ?assertEqual(chef_json:decode(proplists:get_value("X-Ops-Server-API-Version", Headers)), MatchData).
+    ?assertEqual(expected_error_response("pineapple"), chef_json:decode(ResponseBody)),
+    ?assertEqual("406", Code),
+    ?assertEqual(MatchData, chef_json:decode(proplists:get_value("X-Ops-Server-API-Version", Headers))).
 
 valid_header_returned_when_unsupported_header_sent(_Config) ->
     %% a version we will never support
     {ok, Code, Headers, ResponseBody} = http_request(get, "license", -100),
     MatchData = expected_header_response(-100, -1),
-    ?assertEqual(chef_json:decode(ResponseBody), expected_error_response(-100)),
-    ?assertEqual(Code, "406"),
-    ?assertEqual(chef_json:decode(proplists:get_value("X-Ops-Server-API-Version", Headers)), MatchData).
-
-end_per_testcase(_, Config) ->
-    Config.
+    ?assertEqual(expected_error_response(-100), chef_json:decode(ResponseBody)),
+    ?assertEqual("406", Code),
+    ?assertEqual(MatchData, chef_json:decode(proplists:get_value("X-Ops-Server-API-Version", Headers))).
 
 expected_header_response(RequestVersion, ResponseVersion) ->
     {[

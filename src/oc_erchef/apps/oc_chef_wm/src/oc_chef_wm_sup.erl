@@ -10,7 +10,7 @@
 -include_lib("amqp_client/include/amqp_client.hrl").
 
 %% External exports
--export([start_link/0, upgrade/0]).
+-export([start_link/0]).
 
 %% supervisor callbacks
 -export([init/1]).
@@ -23,25 +23,6 @@
 %% @doc API for starting the supervisor.
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
-
-%% @spec upgrade() -> ok
-%% @doc Add processes if necessary.
-upgrade() ->
-    {ok, {_, Specs}} = init([]),
-
-    Old = sets:from_list(
-            [Name || {Name, _, _, _} <- supervisor:which_children(?MODULE)]),
-    New = sets:from_list([Name || {Name, _, _, _, _, _} <- Specs]),
-    Kill = sets:subtract(Old, New),
-
-    sets:fold(fun (Id, ok) ->
-                      supervisor:terminate_child(?MODULE, Id),
-                      supervisor:delete_child(?MODULE, Id),
-                      ok
-              end, ok, Kill),
-
-    [supervisor:start_child(?MODULE, Spec) || Spec <- Specs],
-    ok.
 
 %% @spec init([]) -> SupervisorTree
 %% @doc ervisor callback.
@@ -253,7 +234,7 @@ amqp_child_spec() ->
     Host = envy_parse:host_to_ip(oc_chef_wm, actions_host),
     Port = envy:get(oc_chef_wm, actions_port, non_neg_integer),
     User = envy:get(oc_chef_wm, actions_user, binary),
-    Password = envy:get(oc_chef_wm, actions_password, binary),
+    {ok, Password} = chef_secrets:get(<<"rabbitmq">>, <<"actions_password">>),
     VHost = envy:get(oc_chef_wm, actions_vhost, binary),
     ExchgName = envy:get(oc_chef_wm, actions_exchange, binary),
     Exchange = {#'exchange.declare'{exchange=ExchgName,

@@ -27,6 +27,7 @@
                   bcrypt,
                   ibrowse,
                   folsom,
+                  chef_secrets,
                   pooler
                  ]},
   {env, [

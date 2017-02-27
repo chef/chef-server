@@ -1,4 +1,3 @@
-%% M
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 80 -*-
 %% ex: ts=4 sw=4 et
 %% @author Tyler Cloke <tyler@chef.io>
@@ -479,144 +478,148 @@ post_multiple_valid_client_keys(Config) ->
     Result2 = http_key_request(post, client, ?ADMIN_USER_NAME, Body2),
     ?assertMatch({ok, "201", _, _}, Result2).
 
-
 %% Test case initializers
-init_per_testcase(TestCase, Config) when TestCase =:= post_new_key_invalid_date;
-                                         TestCase =:= post_new_key_invalid_digits_date;
-                                         TestCase =:= post_new_key_well_formed_invalid_date;
-                                         TestCase =:= post_new_key_invalid_utc_date ->
+init_per_testcase(TestCase, Config) ->
+    setup_helper:mock_authz(?CLIENT_AUTHZ_ID),
+    init_per_testcase0(TestCase, Config).
+
+init_per_testcase0(TestCase, Config) when TestCase =:= post_new_key_invalid_date;
+                                          TestCase =:= post_new_key_invalid_digits_date;
+                                          TestCase =:= post_new_key_well_formed_invalid_date;
+                                          TestCase =:= post_new_key_invalid_utc_date ->
     make_admin_non_admin_and_client(Config);
-init_per_testcase(TestCase, Config) when TestCase =:= post_client_new_valid_key;
-                                         TestCase =:= post_client_create_key;
-                                         TestCase =:= post_conflicting_client_key;
-                                         TestCase =:= post_multiple_valid_client_keys ->
+init_per_testcase0(TestCase, Config) when TestCase =:= post_client_new_valid_key;
+                                          TestCase =:= post_client_create_key;
+                                          TestCase =:= post_conflicting_client_key;
+                                          TestCase =:= post_multiple_valid_client_keys ->
     make_admin_and_client(Config);
-init_per_testcase(TestCase, Config) when TestCase =:= post_user_new_valid_key;
-                                         TestCase =:= post_user_create_key;
-                                         TestCase =:= post_key_with_infinity_date;
-                                         TestCase =:= post_key_with_invalid_key_name;
-                                         TestCase =:= post_key_with_invalid_public_key;
-                                         TestCase =:= post_conflicting_user_key;
-                                         TestCase =:= post_multiple_valid_user_keys ->
+init_per_testcase0(TestCase, Config) when TestCase =:= post_user_new_valid_key;
+                                          TestCase =:= post_user_create_key;
+                                          TestCase =:= post_key_with_infinity_date;
+                                          TestCase =:= post_key_with_invalid_key_name;
+                                          TestCase =:= post_key_with_invalid_public_key;
+                                          TestCase =:= post_conflicting_user_key;
+                                          TestCase =:= post_multiple_valid_user_keys ->
     make_admin_non_admin_and_client(Config);
-init_per_testcase(list_user_default_key,  Config) ->
+init_per_testcase0(list_user_default_key,  Config) ->
     make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
     Config;
-init_per_testcase(list_client_default_key, Config) ->
+init_per_testcase0(list_client_default_key, Config) ->
     make_client(Config, ?CLIENT_NAME),
     Config;
-init_per_testcase(Case, Config) when Case =:= list_client_multiple_keys;
-                                     Case =:= put_rename_duplicate_client_key ->
+init_per_testcase0(Case, Config) when Case =:= list_client_multiple_keys;
+                                      Case =:= put_rename_duplicate_client_key ->
     make_client(Config, ?CLIENT_NAME),
     ClientId = client_id(Config, ?CLIENT_NAME),
     add_key(Config, ClientId, ?KEY1NAME, ?KEY1EXPIRE),
     add_key(Config, ClientId, ?KEY2NAME, ?KEY2EXPIRE),
     Config;
-init_per_testcase(Case, Config) when Case =:= list_user_multiple_keys;
-                                     Case =:= put_rename_duplicate_user_key->
+init_per_testcase0(Case, Config) when Case =:= list_user_multiple_keys;
+                                      Case =:= put_rename_duplicate_user_key->
     make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
     UserId = user_id(?USER_NAME),
     add_key(Config, UserId, ?KEY1NAME, ?KEY1EXPIRE),
     add_key(Config, UserId, ?KEY2NAME, ?KEY2EXPIRE),
     Config;
-init_per_testcase(TestCase, Config) when TestCase =:= get_client_no_keys;
-                                         TestCase =:= list_client_no_keys ->
+init_per_testcase0(TestCase, Config) when TestCase =:= get_client_no_keys;
+                                          TestCase =:= list_client_no_keys ->
     make_client(Config, ?CLIENT_NAME),
     sqerl:adhoc_delete(<<"keys">>, all),
     % make this user after clearing keys, so that we have a user
     % who can make the request.
     make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
     Config;
-init_per_testcase(list_user_no_keys, Config) ->
+init_per_testcase0(list_user_no_keys, Config) ->
     make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
     sqerl:adhoc_delete(<<"keys">>, all),
     make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
     Config;
-init_per_testcase(get_user_default_key,  Config) ->
+init_per_testcase0(get_user_default_key,  Config) ->
     make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
     Config;
-init_per_testcase(get_client_default_key, Config) ->
+init_per_testcase0(get_client_default_key, Config) ->
     make_client(Config, ?CLIENT_NAME),
     Config;
-init_per_testcase(get_client_multiple_keys, Config) ->
+init_per_testcase0(get_client_multiple_keys, Config) ->
     make_client(Config, ?CLIENT_NAME),
     ClientId = client_id(Config, ?CLIENT_NAME),
     add_key(Config, ClientId, ?KEY1NAME, ?KEY1EXPIRE),
     add_key(Config, ClientId, ?KEY2NAME, ?KEY2EXPIRE),
     Config;
-init_per_testcase(get_user_multiple_keys, Config) ->
+init_per_testcase0(get_user_multiple_keys, Config) ->
     make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
     UserId = user_id(?USER_NAME),
     add_key(Config, UserId, ?KEY1NAME, ?KEY1EXPIRE),
     add_key(Config, UserId, ?KEY2NAME, ?KEY2EXPIRE),
     Config;
-init_per_testcase(get_user_no_keys, Config) ->
+init_per_testcase0(get_user_no_keys, Config) ->
     make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
     sqerl:adhoc_delete(<<"keys">>, all),
     make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
     Config;
-init_per_testcase(get_client_wrong_key, Config) ->
+init_per_testcase0(get_client_wrong_key, Config) ->
     make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
     make_client(Config, ?CLIENT_NAME),
     Config;
-init_per_testcase(get_user_wrong_key, Config) ->
+init_per_testcase0(get_user_wrong_key, Config) ->
     make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
     make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
     Config;
-init_per_testcase(get_key_for_nonexistent_user, Config) ->
+init_per_testcase0(get_key_for_nonexistent_user, Config) ->
     make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
     Config;
-init_per_testcase(get_key_for_nonexistent_client, Config) ->
+init_per_testcase0(get_key_for_nonexistent_client, Config) ->
     make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
     Config;
-init_per_testcase(Case, Config) when Case =:= delete_invalid_client_key;
-                                     Case =:= delete_valid_client_key;
-                                     Case =:= put_rename_client_key;
-                                     Case =:= put_valid_partial_client_key;
-                                     Case =:= put_invalid_partial_client_key;
-                                     Case =:= put_full_client_key;
-                                     Case =:= put_generate_new_client_key ->
+init_per_testcase0(Case, Config) when Case =:= delete_invalid_client_key;
+                                      Case =:= delete_valid_client_key;
+                                      Case =:= put_rename_client_key;
+                                      Case =:= put_valid_partial_client_key;
+                                      Case =:= put_invalid_partial_client_key;
+                                      Case =:= put_full_client_key;
+                                      Case =:= put_generate_new_client_key ->
     make_client(Config, ?CLIENT_NAME),
     ClientId = client_id(Config, ?CLIENT_NAME),
     add_key(Config, ClientId, ?KEY1NAME, ?KEY1EXPIRE),
     Config;
 % TODO see "TODO - authing requestor" above.
-%init_per_testcase(delete_authing_client_key, Config) ->
-    %make_client(Config, ?CLIENT_NAME),
-    %Config;
-%init_per_testcase(delete_authing_client_key_with_different_user, Config) ->
-    %make_admin_and_client(Config),
-    %ClientId = client_id(Config, ?CLIENT_NAME),
-    %add_key(Config, ClientId, ?KEY1NAME, ?KEY1EXPIRE),
-    %Config;
-init_per_testcase(Case, Config) when Case =:= delete_invalid_user_key;
-                                     Case =:= delete_valid_user_key;
-                                     Case =:= put_rename_user_key;
-                                     Case =:= put_rename_duplicate_user_key;
-                                     Case =:= put_valid_partial_user_key;
-                                     Case =:= put_invalid_partial_user_key;
-                                     Case =:= put_full_user_key;
-                                     Case =:= put_generate_new_user_key ->
+%init_per_testcase0(delete_authing_client_key, Config) ->
+%make_client(Config, ?CLIENT_NAME),
+%Config;
+%init_per_testcase0(delete_authing_client_key_with_different_user, Config) ->
+%make_admin_and_client(Config),
+%ClientId = client_id(Config, ?CLIENT_NAME),
+%add_key(Config, ClientId, ?KEY1NAME, ?KEY1EXPIRE),
+%Config;
+init_per_testcase0(Case, Config) when Case =:= delete_invalid_user_key;
+                                      Case =:= delete_valid_user_key;
+                                      Case =:= put_rename_user_key;
+                                      Case =:= put_rename_duplicate_user_key;
+                                      Case =:= put_valid_partial_user_key;
+                                      Case =:= put_invalid_partial_user_key;
+                                      Case =:= put_full_user_key;
+                                      Case =:= put_generate_new_user_key ->
     make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
     UserId = user_id(?USER_NAME),
     add_key(Config, UserId, ?KEY1NAME, ?KEY1EXPIRE),
     Config.
 
 % TODO see "TODO - authing requestor" above.
-%init_per_testcase(delete_authing_user_key, Config) ->
+%init_per_testcase0(delete_authing_user_key, Config) ->
 %    make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
 %    Config;
-%init_per_testcase(delete_authing_user_key_with_different_user, Config) ->
+%init_per_testcase0(delete_authing_user_key_with_different_user, Config) ->
 %    make_user(Config, ?USER_NAME, ?USER_AUTHZ_ID),
 %    make_user(Config, ?ADMIN_USER_NAME, ?ADMIN_AUTHZ_ID),
 %    UserId = user_id(?USER_NAME),
 %    add_key(Config, UserId, ?KEY1NAME, ?KEY1EXPIRE),
 %    Config;
-%init_per_testcase(_, Config) ->
+%init_per_testcase0(_, Config) ->
 %    Config.
 
 %% Test case cleanup
 end_per_testcase(_, Config) ->
+    setup_helper:unmock_authz(),
     sqerl:adhoc_delete("clients", all),
     sqerl:adhoc_delete("users", all),
     Config.
@@ -796,4 +799,3 @@ default_requestor(client) ->
     ?CLIENT_NAME;
 default_requestor(user) ->
     ?USER_NAME.
-

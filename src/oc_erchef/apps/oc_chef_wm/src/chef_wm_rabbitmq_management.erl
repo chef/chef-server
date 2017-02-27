@@ -73,12 +73,21 @@ get_rabbit_management_setting(Key, Default) ->
     try
         RabbitConfig = envy:get(oc_chef_wm, rabbitmq, [], any),
         MgmtConfig = proplists:get_value(management, RabbitConfig, []),
-        proplists:get_value(Key, MgmtConfig, Default)
+        Config = proplists:get_value(Key, MgmtConfig, Default),
+        add_auth_to_ibrowse_options(Config, MgmtConfig)
     catch Error:Reason ->
         lager:info("Can't get configuration setting ~p ~p: ~p ~p",
                    [Key, Default, Error, Reason]),
         Default
     end.
+
+add_auth_to_ibrowse_options(Config, MgmtConfig) ->
+    Username = proplists:get_value(user, MgmtConfig),
+    {ok, Password} = chef_secrets:get(<<"rabbitmq">>, <<"management_password">>),
+    IbrowseOptions = proplists:get_value(ibrowse_options, Config),
+    Config1 = proplists:delete(ibrowse_options, Config),
+    IbrowseOptions1 = [{basic_auth, {Username, erlang:binary_to_list(Password)}} | IbrowseOptions],
+    [{ibrowse_options, IbrowseOptions1} | Config1].
 
 get_rabbit_queue_monitor_setting(Key, Default) ->
     try
@@ -293,4 +302,3 @@ parse_integer(Val) when is_list(Val) ->
         {Int, _Rest} -> Int
     end;
 parse_integer(_) -> undefined.
-

@@ -376,15 +376,20 @@ create_entity_if_authorized_test_() ->
      end]}.
 
 needed_apps() ->
-    [crypto, asn1, ibrowse, pooler, stats_hero, public_key, ssl, epgsql, sqerl, oc_chef_authz].
+    [crypto, asn1, ibrowse, chef_secrets, pooler, stats_hero, public_key, ssl, epgsql, sqerl, oc_chef_authz].
+
+setup_chef_secrets() ->
+    application:set_env(chef_secrets, provider, chef_secrets_json_file),
+    FakeSecretsFile = filename:join(code:priv_dir(oc_chef_authz), "../test/chef_secrets.json"),
+    application:set_env(chef_secrets, provider_config, [{secrets_file, FakeSecretsFile}]),
+    application:ensure_all_started(chef_secrets).
 
 start_apps() ->
     error_logger:tty(false),
 
     chef_test_suite_helper:set_app_env(stats_hero),
-
+    setup_chef_secrets(),
     application:set_env(oc_chef_authz, cleanup_batch_size, 100),
-    application:set_env(oc_chef_authz, authz_superuser_id, <<"superuser">>),
     application:set_env(oc_chef_authz, cleanup_interval, 5000),
     application:set_env(oc_chef_authz, authz_service,
                         [{root_url, "http://test-authz-service:2323"},

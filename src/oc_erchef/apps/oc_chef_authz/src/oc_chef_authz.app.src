@@ -23,6 +23,6 @@
   {applications, [kernel,
                   stdlib,
                   stats_hero,
-                  sqerl]},
+                  chef_db]},
   {mod, {oc_chef_authz_app, []}}
  ]}.

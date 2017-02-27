@@ -17,6 +17,7 @@
 -define(CLIENT_NAME, <<"test-client">>).
 -define(ORG_NAME, <<"cookbook-artifact-test">>).
 
+
 init_per_suite(Config) ->
     Config2 = setup_helper:base_init_per_suite([{org_name, ?ORG_NAME},
                                                 {org_authz_id, ?ORG_AUTHZ_ID},
@@ -35,16 +36,20 @@ init_per_suite(Config) ->
 end_per_suite(Config) ->
     setup_helper:base_end_per_suite(Config).
 
-init_per_testcase(http_delete, Config) ->
+init_per_testcase(Case, Config) ->
+    setup_helper:mock_authz(?AUTHZ_ID),
+    init_per_testcase0(Case, Config).
+
+init_per_testcase0(http_delete, Config) ->
     OrgId = ?config(org_id, Config),
     NewChecksum = <<"b804944c17edc107073d6a1f27aa3842">>,
     ok = chef_sql:mark_checksums_as_uploaded(OrgId,
                                              [NewChecksum]),
 
     mock_chef_s3(true, [{new_checksum, NewChecksum} | Config]);
-init_per_testcase(http_delete_then_fetch_all_cookbook_artifacts, Config) ->
+init_per_testcase0(http_delete_then_fetch_all_cookbook_artifacts, Config) ->
     mock_chef_s3(true, Config);
-init_per_testcase(_, Config) ->
+init_per_testcase0(_, Config) ->
     mock_chef_s3(false, Config).
 
 mock_chef_s3(MockChefS3Delete, Config) ->
@@ -77,6 +82,7 @@ end_per_testcase(http_delete_then_fetch_all_cookbook_artifacts, Config) ->
                                              canonical_example_checksums()),
     end_per_testcase(generic, Config);
 end_per_testcase(_, Config) ->
+    setup_helper:unmock_authz(),
     ok = meck:unload(chef_s3),
     Config.
 
