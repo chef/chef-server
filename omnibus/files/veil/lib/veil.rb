@@ -1,6 +1,0 @@
-require "veil/version"
-require "veil/exceptions"
-require "veil/utils"
-require "veil/hasher"
-require "veil/credential"
-require "veil/credential_collection"
