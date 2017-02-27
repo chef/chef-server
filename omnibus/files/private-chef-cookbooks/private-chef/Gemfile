@@ -2,4 +2,4 @@ source "https://rubygems.org"
 
 # Used for rspec testing only
 gem "chefspec"
-gem "veil", path: File.join("../../", "veil")
+gem "veil", git: "https://github.com/chef/chef_secrets.git"

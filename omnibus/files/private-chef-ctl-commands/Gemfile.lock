@@ -46,17 +46,18 @@ GIT
       mixlib-shellout
 
 GIT
-  remote: https://github.com/chef/omnibus-ctl.git
-  revision: a0ccf08af008c5fd248a5dcc5af9ff1c48f2a1a9
-  specs:
-    omnibus-ctl (0.5.0)
-
-PATH
-  remote: ../veil
+  remote: https://github.com/chef/chef_secrets.git
+  revision: 2c89a21b8d85d510e202eab10562b7af190c5b4a
   specs:
     veil (0.1.0)
       bcrypt
       pbkdf2
+
+GIT
+  remote: https://github.com/chef/omnibus-ctl.git
+  revision: a0ccf08af008c5fd248a5dcc5af9ff1c48f2a1a9
+  specs:
+    omnibus-ctl (0.5.0)
 
 GEM
   remote: https://rubygems.org/
