@@ -19,15 +19,6 @@ namespace :test do
       end
     }
   end
-  task :veil do
-    Bundler.with_clean_env {
-      if system "cd files/veil/ && bundle install && bundle exec rake spec"
-        exit 0
-      else
-        exit 1
-      end
-    }
-  end
   task :routing do
     if ENV["LUALIB"].nil?
       puts "$LUALIB is not set. It should be set to a path that contains lpeg.so and cjson.so. See tests/routing/README.md for details."

@@ -16,9 +16,10 @@
 #
 name "veil-gem"
 default_version "master"
-source path: "#{project.files_path}/veil"
+source git: "https://github.com/chef/chef_secrets.git"
 
-license :project_license
+license "Apache-2.0"
+license_file "LICENSE"
 
 dependency "ruby"
 dependency "rubygems"
