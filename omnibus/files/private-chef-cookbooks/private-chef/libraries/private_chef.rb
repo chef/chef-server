@@ -502,7 +502,13 @@ module PrivateChef
         end
       end
 
+      # TODO 2017-02-27 sr: make veil ensure that this is securely stored in a
+      # file that has the correct owner user/group, and permissions.
+      # Also, this way, _every_ service gets access to _every_ credential.
+      # When fixing this, also take care that the user might have a different
+      # name.
       credentials.save
+      system("chown opscode #{credentials.path}")
       system("chmod 0600 #{credentials.path}")
     end
 
