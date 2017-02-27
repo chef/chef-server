@@ -38,7 +38,6 @@ start_server(Config) ->
                               {ibrowse_options, [{connect_timeout, 5000}]}]},
              {couchdb_host, "localhost"},
              {couchdb_port, 6984},
-             {authz_superuser_id, <<"beefbeefbeef">>},
              {cleanup_interval, 60000},
              {cleanup_batch_size, 100}]),
 

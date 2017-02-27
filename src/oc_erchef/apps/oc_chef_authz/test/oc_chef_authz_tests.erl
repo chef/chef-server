@@ -390,7 +390,6 @@ start_apps() ->
     chef_test_suite_helper:set_app_env(stats_hero),
     setup_chef_secrets(),
     application:set_env(oc_chef_authz, cleanup_batch_size, 100),
-    application:set_env(oc_chef_authz, authz_superuser_id, <<"superuser">>),
     application:set_env(oc_chef_authz, cleanup_interval, 5000),
     application:set_env(oc_chef_authz, authz_service,
                         [{root_url, "http://test-authz-service:2323"},
