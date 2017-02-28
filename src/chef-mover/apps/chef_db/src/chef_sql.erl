@@ -33,6 +33,9 @@
 -compile(export_all).
 -endif.
 
+-ifdef(namespaced_types).
+-type dict() :: dict:dict().
+-endif.
 
 -export([
          create_name_id_dict/2,
