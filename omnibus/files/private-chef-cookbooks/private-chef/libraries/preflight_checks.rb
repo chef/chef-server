@@ -46,9 +46,7 @@ class PreflightValidator
   end
 
   def secrets_exists?
-    secrets_json = "/etc/opscode/private-chef-secrets.json"
-    File.exist?(secrets_json) &&
-      Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_json).size > 0
+    PrivateChef.credentials.length > 0
   end
 
   def backend?

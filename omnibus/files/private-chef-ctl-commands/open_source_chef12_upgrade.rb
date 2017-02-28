@@ -498,6 +498,7 @@ EOF
     # or else give the user a way to specify them
     # The server root is likely the same as was set for the knife config
     # used by knife download
+    # TODO 2017-02-28 mp: closer look her when we're looking at cleaning migrations
     config = <<-EOH
     chef_server_root '#{@options.chef12_server_url}'
     node_name 'pivotal'

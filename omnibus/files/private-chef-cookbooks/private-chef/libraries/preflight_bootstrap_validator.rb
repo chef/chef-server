@@ -22,7 +22,8 @@ class BootstrapPreflightValidator < PreflightValidator
 
   def run!
     # Sanity checks: for any configuration we should expect that
-    # neither pivotal.pem nor private-chef-secrets.json exists, or that both exist.
+    # private-chef-secrets.json exists and contains the superuser key, or
+    # that the file is missing entirely.
     validate_sane_state
 
     # The remaining validation tests apply only if we haven't completed
@@ -55,7 +56,7 @@ class BootstrapPreflightValidator < PreflightValidator
     #  - fetch pivotal public key(s) from opscode_chef keys view + users
     #  - extract public key from local pivotal.pem
     #   * If we fail with an auth error at this time, it means that either the
-    #     username/password for erchef are not set up (in which case db/schema bootstrap has
+    #     username/password for erchefare not set up (in which case db/schema bootstrap has
     #     not been run and we are working from an outdated secrets file), or we
     #     don't have the correct credentials due to an old secrets file.
     #     This should raise its own error.
@@ -84,7 +85,7 @@ class BootstrapPreflightValidator < PreflightValidator
   end
 
   def pivotal_key_exists?
-    File.exist? "/etc/opscode/pivotal.pem"
+    PrivateChef.credentials.exist?('chef-server', 'superuser_key')
   end
 
   def validate_sane_state
@@ -105,9 +106,6 @@ class BootstrapPreflightValidator < PreflightValidator
     end
     connect_as(:superuser, 'silent' => true,'db_name' => 'opscode_chef') do |conn|
       begin
-        # The opscode_chef database may not exist - so we'll explicitly
-        # connect to it after obtaining a known-cgood connection to the
-        # default DB 'template1'
         r = conn.exec("select count(*) result from  users where username = 'pivotal'")
         return r[0]['result'] == '1'
       rescue
@@ -171,9 +169,11 @@ BOOT005: Your configuration indicates that you may be starting this node
 EOM
   end
 
+  # TODO 2017-02-28 mp:  actually this path is no longer possible.  If chef secrets is not there
+  # then the pivotal key cannot be.
   def err_BOOT006_pivotal_with_no_secrets
 <<EOM
-BOOT006: The pivotal user key is present (/etc/opscode/pivotal.pem)
+BOOT006: The superuser key is present in the key store,
          but the file /etc/opscode/private-chef-secrets.json is missing.
 
          Ensure that pivotal.pem is copied over into /etc/opscode from the
@@ -185,9 +185,12 @@ EOM
   end
 
   def err_BOOT007_secrets_with_no_pivotal
+# TODO 2017-02-28 mp: we'll want to replace pc-secrets references with the configured
+    # path supplied by user
+# TODO 2017-02-28 mp: I think there are doc updates to go with this wording change.
 <<EOM
 BOOT007: The secrets file (/etc/opscode/private-chef-secrets.json) is present
-         but the file /etc/opscode/pivotal.pem is missing.
+         but it does not contain the superuser key.
 
          Ensure that private-chef-secrets.json is copied into /etc/opscode from the
          first Chef Server node that you brought online, then run
@@ -197,7 +200,7 @@ EOM
 
   def err_BOOT008_pivotal_public_key_mismatch
 <<EOM
-BOOT008: The pivotal key file /etc/opscode/pivotal.pem exists, but its public key
+BOOT008: The pivotal key in /etc/opscode/private-chef-secrets.json exists, but its public key
          does not match the key for the pivotal user in chef-server.
 
          Critical maintenance operations cannot be performed.
@@ -234,7 +237,7 @@ BOOT011: Unable to configure this node because the superuser 'pivotal'
          does not exist in the database.
 
          If this is the first node you're attempting to reconfigure,
-         please remove the files 'pivotal.pem' and 'private-chef-secrets.json'
+         please remove the file 'private-chef-secrets.json'
          from '/etc/opscode' before attempting to run reconfigure again.
 EOM
   end

@@ -1,6 +1,6 @@
 #
 # Author:: Stephan Renatus <srenatus@chef.io>
-# Copyright:: Copyright (c) 2016 Chef Software, Inc.
+# Copyright:: Copyright (c) 2016-2017 Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,35 +23,43 @@
 # present (that is, it was copied here), or will be generated because _this_
 # is the node adding the pivotal user.
 
-pivotal_key_path = "/etc/opscode/pivotal.pem"
-new_pivotal = !File.exists?(pivotal_key_path)
-pivotal_key = OpenSSL::PKey::RSA.generate(2048) if new_pivotal
-
-# Setting at the top level so that we don't export this to chef-server-running.json
-node.set['bootstrap']['superuser_public_key'] = pivotal_key.public_key.to_s if new_pivotal
-
-file pivotal_key_path do
-  owner OmnibusHelper.new(node).ownership['owner']
-  group "root"
-  mode "0600"
-  content pivotal_key.to_pem.to_s if new_pivotal
-  sensitive true
+unless PrivateChef.credentials.exist?('chef-server', 'superuser_key')
+  pivotal_key = OpenSSL::PKey::RSA.generate(2048)
+  PrivateChef.credentials.add('chef-server', 'superuser_key',
+                              value: pivotal_key.to_pem,
+                              frozen: true )
+  # Used only io chef_server_data_bootstrap.rb  to provide the key for pivotal
+  # user creation.  Setting it here so that we can keep the related OpenSSL call wrangling
+  # to one place.
+  # Setting at the top level so that we don't export this to chef-server-running.json
+  node.set['bootstrap']['superuser_public_key'] = pivotal_key.public_key.to_s
+  # TODO 2017-02-28 mp: let's consider making this the default behavior
+  # of any write to CredentialsCollection -
+  PrivateChef.credentials.save
 end
 
-webui_priv_key_path = "/etc/opscode/webui_priv.pem"
-new_webui = !File.exists?(webui_priv_key_path)
-webui_key = OpenSSL::PKey::RSA.generate(2048) if new_webui
+unless PrivateChef.credentials.exist?('chef-server', 'webui_key')
+  webui_key = OpenSSL::PKey::RSA.generate(2048)
+  PrivateChef.credentials.add('chef-server', 'webui_key',
+                              value: webui_key.to_pem,
+                              frozen: true)
+  PrivateChef.credentials.save
+end
 
 file "/etc/opscode/webui_pub.pem" do
   owner "root"
   group "root"
   mode "0644"
-  content webui_key.public_key.to_s if new_webui
+  content webui_key.public_key.to_s unless webui_key.nil?
+end
+#  These keys are no longer kept directly on the FS
+#  delete them if they're present.
+file "/etc/opscode/pivotal.pem"  do
+  action :delete
+  sensitive true
 end
 
-file webui_priv_key_path do
-  owner OmnibusHelper.new(node).ownership['owner']
-  group "root"
-  mode "0600"
-  content webui_key.to_pem.to_s if new_webui
+file "/etc/opscode/webui_priv.pem" do
+  action :delete
+  sensitive true
 end

@@ -44,7 +44,9 @@ describe BootstrapPreflightValidator do
 
       context "when the secrets file doesn't exist" do
         before do
-          allow(File).to receive(:exist?).with("/etc/opscode/pivotal.pem").and_return(true)
+          credentials = double(Object)
+          allow(PrivateChef).to_receive(:credentials?).and_return(credentials)
+          allow(credentials).to receive(:exist?).with('chef-server', 'superuser_key').and_return(true)
           allow(File).to receive(:exist?).with("/etc/opscode/private-chef-secrets.json").and_return(false)
         end
 

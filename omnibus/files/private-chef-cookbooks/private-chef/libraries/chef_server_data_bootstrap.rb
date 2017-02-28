@@ -90,11 +90,16 @@ class ChefServerDataBootstrap
   # insert the erchef superuser's key into the erchef keys table,
   # and the user record into the users table.
   def create_superuser_in_erchef(conn)
+    require 'openssl'
+
+    raw_key = PrivateChef.credentials.get('chef-server', 'superuser_key')
+    public_key = OpenSSL::PKey::RSA.new(raw_key).public_key.to_s
+
     user_id = SecureRandom.uuid.gsub("-", "")
     simple_insert(conn, 'keys',
                     id: user_id,
                     key_name: 'default',
-                    public_key: node['bootstrap']['superuser_public_key'],
+                    public_key: public_key,
                     key_version: 0,
                     created_at: bootstrap_time,
                     expires_at: "infinity")
