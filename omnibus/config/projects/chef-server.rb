@@ -28,7 +28,7 @@ build_version   "12.13.1"
 build_iteration 1
 
 override :rabbitmq, version: "3.3.4"
-override :erlang, version: "17.5"
+override :erlang, version: "18.3"
 override :lua, version: "5.1.5"
 override :'omnibus-ctl', version: "master"
 override :chef, version: "v12.17.44"
