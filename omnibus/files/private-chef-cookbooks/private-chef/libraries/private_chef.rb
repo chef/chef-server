@@ -443,20 +443,31 @@ module PrivateChef
       PrivateChef["nginx"]["url"] ||= "https://#{PrivateChef['api_fqdn']}"
     end
 
-    def gen_secrets_default(node_name)
+    def credentials
+      return @credentials if @credentials
+
+      # TODO 2017-02-28 mp:  configurable location:
       secrets_json = "/etc/opscode/private-chef-secrets.json"
-      credentials =
+      @credentials =
         if File.exist?(secrets_json)
           Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_json)
-        elsif PrivateChef["topology"] == "ha" && !PrivateChef["servers"][node_name]["bootstrap"]
-          Chef::Log.fatal("In an H/A topology the secrets must be created on the bootstrap node. "\
-                          "Please copy the contents of /etc/opscode/ from your bootstrap Server " \
-                          "to complete the setup")
-          exit(44)
+        #elsif PrivateChef["topology"] == "ha" && !PrivateChef["servers"][node_name]["bootstrap"]
+          # TODO - take a look at bootstrap preflight and see if this is covered - if not,
+          # handle it separately there.  Disabling it here for now since w e should
+          # be able to rely on referencing credentials without raising once
+          # we're past preflight.
+          # note: Looks like this should be pre-caught with BOOT006?
+          #
+          #Chef::Log.fatal("In an H/A topology the secrets must be created on the bootstrap node. "\
+          #                "Please copy the contents of /etc/opscode/ from your bootstrap Server " \
+          #                "to complete the setup")
+          #exit(44)
         else
           Veil::CredentialCollection::ChefSecretsFile.new(path: secrets_json)
         end
+    end
 
+    def gen_secrets_default(node_name)
       # Transition from erchef's sql_user/password etc living under 'postgresql'
       # in older versions to 'opscode_erchef' in newer versions
       if credentials["postgresql"] && credentials["postgresql"]["sql_password"]
@@ -497,6 +508,7 @@ module PrivateChef
       end
 
       credentials.legacy_credentials_hash.each do |service, creds|
+        next if service == "chef-server"
         creds.each do |name, value|
           PrivateChef[service][name] ||= value
         end

@@ -20,12 +20,13 @@ if is_data_master?
 
   # Write out the config files for actions to load in order to interface with this EC
   # instance
-  #
+  # TODO 2017-02-28 mp: well this won't do...
   file "/etc/opscode-analytics/webui_priv.pem" do
     owner OmnibusHelper.new(node).ownership['owner']
     group "root"
     mode "0600"
-    content lazy {::File.open('/etc/opscode/webui_priv.pem').read}
+    sensitive true
+    content lazy { PrivateChef.credentials.get('chef-server', 'webui_key') }
   end
 
   rabbitmq = OmnibusHelper.new(node).rabbitmq_configuration
