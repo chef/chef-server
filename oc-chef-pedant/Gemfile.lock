@@ -1,5 +1,13 @@
 GIT
-  remote: git://github.com/opscode/rest-client.git
+  remote: git://github.com/chef/chef_secrets.git
+  revision: 1f99484d191729e8b26fd4215264847d31812842
+  specs:
+    veil (0.1.0)
+      bcrypt (~> 3.1)
+      pbkdf2
+
+GIT
+  remote: git://github.com/chef/rest-client.git
   revision: ba0d12258b77791d8f7d9776d008eb6fa3580ccc
   specs:
     rest-client (1.7.0.alpha)
@@ -21,27 +29,28 @@ PATH
       rspec (~> 3.2)
       rspec-rerun (~> 1.0)
       rspec_junit_formatter (~> 0.2)
+      veil (>= 0.0.1)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (5.0.0.1)
+    activesupport (5.0.1)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (~> 0.7)
       minitest (~> 5.1)
       tzinfo (~> 1.1)
-    builder (3.2.2)
+    bcrypt (3.1.11)
+    builder (3.2.3)
     coderay (1.1.1)
-    concurrent-ruby (1.0.2)
-    diff-lcs (1.2.5)
+    concurrent-ruby (1.0.5)
+    diff-lcs (1.3)
     erubis (2.7.0)
-    i18n (0.7.0)
-    json (1.8.3)
+    i18n (0.8.1)
     method_source (0.8.2)
     mime-types (3.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2016.0521)
-    minitest (5.9.0)
+    minitest (5.10.1)
     mixlib-authentication (1.4.1)
       mixlib-log
     mixlib-config (2.2.4)
@@ -49,18 +58,18 @@ GEM
     mixlib-shellout (2.2.7)
     net-http-spy (0.2.1)
     netrc (0.7.9)
+    pbkdf2 (0.1.0)
     pry (0.10.4)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
     rake (12.0.0)
-    rdoc (4.2.2)
-      json (~> 1.4)
+    rdoc (5.1.0)
     rspec (3.5.0)
       rspec-core (~> 3.5.0)
       rspec-expectations (~> 3.5.0)
       rspec-mocks (~> 3.5.0)
-    rspec-core (3.5.3)
+    rspec-core (3.5.4)
       rspec-support (~> 3.5.0)
     rspec-expectations (3.5.0)
       diff-lcs (>= 1.2.0, < 2.0)
@@ -75,7 +84,7 @@ GEM
       builder (< 4)
       rspec-core (>= 2, < 4, != 2.12.0)
     slop (3.6.0)
-    thread_safe (0.3.5)
+    thread_safe (0.3.6)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
 
@@ -87,6 +96,7 @@ DEPENDENCIES
   pry
   rake
   rest-client!
+  veil!
 
 BUNDLED WITH
-   1.13.7
+   1.14.5

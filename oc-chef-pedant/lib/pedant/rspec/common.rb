@@ -487,13 +487,12 @@ module Pedant
         # Platform object
 
         shared(:superuser) { platform.superuser }
-        shared(:superuser_key_file) { platform.superuser_key_file }
-        shared(:webui_key_file) { Pedant::Config.webui_key || (fail "Missing webui_key in Pedant config!") }
+        shared(:superuser_key) { platform.superuser_key }
 
         # Given a requestor, create a new one with the same name, but
         # with the web UI's private key for 'impersonation' tests
         def impersonate(requestor_to_impersonate)
-          Pedant::Requestor.new(requestor_to_impersonate.name, webui_key_file)
+          Pedant::Requestor.new(requestor_to_impersonate.name, platform.webui_key)
         end
 
         # Need a well-formed yet invalid key for a requestor to test authentiction

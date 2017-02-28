@@ -452,7 +452,7 @@ module PrivateChef
         if File.exist?(secrets_json)
           Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_json)
         #elsif PrivateChef["topology"] == "ha" && !PrivateChef["servers"][node_name]["bootstrap"]
-          # TODO - take a look at bootstrap preflight and see if this is covered - if not,
+          # TODO mp 2017/02/28 - take a look at bootstrap preflight and see if this is covered - if not,
           # handle it separately there.  Disabling it here for now since w e should
           # be able to rely on referencing credentials without raising once
           # we're past preflight.

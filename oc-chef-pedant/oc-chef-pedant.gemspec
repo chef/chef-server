@@ -22,4 +22,5 @@ Gem::Specification.new do |s|
   s.add_dependency('net-http-spy', '~> 0.2')
   s.add_dependency('erubis', '~> 2.7')
   s.add_dependency('rspec-rerun', '~> 1.0')
+  s.add_dependency('veil', '>= 0.0.1')
 end
