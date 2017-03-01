@@ -467,6 +467,7 @@ module PrivateChef
         end
     end
 
+
     def gen_secrets_default(node_name)
       # Transition from erchef's sql_user/password etc living under 'postgresql'
       # in older versions to 'opscode_erchef' in newer versions
@@ -653,8 +654,31 @@ EOF
       end
     end
 
+    # TODO mp 2017/03/01 - I like the secrets interface as set up in push server.
+    # This may be a thing to consider moving to enterprise-common and updating
+    # chef-server and others to use it
+    def add_key_from_file_if_present(group, name, path)
+      if File.readable?(path)
+        credentials.add_key_from_file(group, name, path)
+        true
+      else
+        false
+      end
+    end
+
+    # If known private keys are on disk, add them to Veil and commit them.
+    def migrate_keys
+      did_something = add_key_from_file_if_present("chef-server", "superuser_key", "/etc/opscode/pivotal.pem")
+      did_something ||= add_key_from_file_if_present("chef-server", "webui_key", "/etc/opscode/webui_priv.pem")
+      # Ensure these are committed to disk before continuing -
+      # the secrets recipe will delete the old files.
+      credentials.save if did_something
+    end
+
+
     def generate_config(node_name)
       assert_server_config(node_name) if server_config_required?
+      migrate_keys
       gen_secrets(node_name)
 
       # Under ipv4 default to 0.0.0.0 in order to ensure that

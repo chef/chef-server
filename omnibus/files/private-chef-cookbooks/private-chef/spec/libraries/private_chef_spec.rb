@@ -390,4 +390,38 @@ EOF
     end
 
   end
+  context "Key File Migration" do
+    let(:secrets_mock) { double(Object) }
+    let(:superuser_key_path) { "/etc/opscode/pivotal.pem" }
+    let(:webui_key_path) { "/etc/opscode/webui_priv.pem" }
+
+    describe "#migrate_keys" do
+      it "should attempt to migrate known keys" do
+        expect(PrivateChef).to receive(:add_key_from_file_if_present).with("chef-server", "superuser_key", superuser_key_path)
+        expect(PrivateChef).to receive(:add_key_from_file_if_present).with("chef-server", "webui_key", webui_key_path)
+        PrivateChef.migrate_keys
+      end
+    end
+
+    describe "#add_key_from_file_if_present" do
+      before do
+        allow(PrivateChef).to receive(:credentials).and_return secrets_mock
+      end
+
+      it "should add a key that exists and return true" do
+        expect(File).to receive(:readable?).with("/my_key").and_return true
+        expect(secrets_mock).to receive(:add_key_from_file).with("group", "name", "/my_key")
+        result = PrivateChef.add_key_from_file_if_present("group", "name", "/my_key")
+        expect(result).to be true
+      end
+
+      it "should not add a key that does not and return false" do
+        expect(File).to receive(:readable?).with("/my_key").and_return false
+        result = PrivateChef.add_key_from_file_if_present("group", "name", "/my_key")
+        expect(result).to be false
+
+      end
+
+    end
+  end
 end

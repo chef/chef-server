@@ -45,6 +45,7 @@ end
 opscode_webui_deprecation_notice = OpscodeWebuiDeprecationNotice.new(
   PrivateChef['opscode_webui']
 )
+
 log 'opscode_webui deprecation notice' do
   message opscode_webui_deprecation_notice.message
   level :warn
