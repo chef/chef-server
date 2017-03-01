@@ -61,8 +61,13 @@ sha_to_hex_str(<<SHA:160/big-unsigned-integer>>) ->
 -spec write_path(string() | binary(), string() | binary()) -> binary().
 write_path(Bucket, Path) ->
     Root = bksw_conf:disk_store(),
-    {T1, T2, T3} = erlang:now(),
-    UniqueExt = io_lib:format(".~p~p~p_bkwbuf", [T1, T2, T3]),
+
+    %% Note 2017-02-21 sr: technically, this could collide when called by two
+    %% uploads happening at the same moment. Using erlang:unique_integer is not
+    %% bounded -- so we add a random integer, similar to what ruby does.
+    {T1, T2, T3} = os:timestamp(),
+    Rand = rand:uniform(9999999),
+    UniqueExt = io_lib:format(".~p~p~p~7..0B_bkwbuf", [T1, T2, T3, Rand]),
     iolist_to_binary([Root, "/", encode(Bucket), "-", sha_str(encode(Path)), UniqueExt]).
 
 -ifdef(TEST).

@@ -43,11 +43,9 @@ with_etag(Etag, Rq) ->
 %% Internal Functions
 %%===================================================================
 generate_id() ->
-    %% According to the docs erlang/new will always return a unique value on on the same
-    %% node. There is still some small opportunity here for there to be unconnected nodes
-    %% with the same node name that call erlang:now/0 in the same microsecond. However, that
-    %% is both unlikely enough and low impact enough that I dont think its worth adding
-    %% extra to this.
-
-    Id = term_to_binary({node(), erlang:now()}),
+    %% erlang:unique_integer/1 is unique during the lifetime of the node, i.e.,
+    %% it reset on node restarts -- thus we add os:timestamp/0
+    %% We can't use os:timestamp/0 only, since it's not guaranteed to be unique
+    %% in multiple invocations.
+    Id = term_to_binary({node(), os:timestamp(), erlang:unique_integer([positive])}),
     bksw_format:to_base64(Id).

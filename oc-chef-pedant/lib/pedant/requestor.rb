@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'mixlib/authentication/signedheaderauth'
 require 'openssl'
+require 'mixlib/authentication/signedheaderauth'
 require 'erubis'
 require 'pathname'
 require 'tmpdir'

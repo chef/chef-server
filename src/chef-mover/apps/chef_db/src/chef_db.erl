@@ -144,6 +144,10 @@
 
 -type object_rec() :: tuple().
 
+-ifdef(namespaced_types).
+-type dict() :: dict:dict().
+-endif.
+
 %% -type chef_object_name() :: 'chef_node' |
 %%                             'chef_role'.
 
