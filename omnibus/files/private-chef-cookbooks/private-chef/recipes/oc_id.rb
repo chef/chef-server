@@ -97,6 +97,7 @@ link settings_file do
   to "#{oc_id_config_dir}/production.yml"
 end
 
+# TODO mp 2017-03-01: secret in a file
 template "#{oc_id_config_dir}/secret_token.rb" do
   source "oc_id.secret_token.rb"
   owner OmnibusHelper.new(node).ownership['owner']
@@ -104,15 +105,18 @@ template "#{oc_id_config_dir}/secret_token.rb" do
   mode '640'
   notifies :restart, 'runit_service[oc_id]' unless backend_secondary?
 end
+
 secrets_file = "/opt/opscode/embedded/service/oc_id/config/initializers/secret_token.rb"
 file secrets_file do
   action :delete
   not_if  { File.symlink?(secrets_file) }
 end
+
 link secrets_file do
   to "#{oc_id_config_dir}/secret_token.rb"
 end
 
+# TODO mp 2017-03-01: secret in a file
 template "#{oc_id_config_dir}/database.yml" do
   source "oc_id.database.yml.erb"
   owner OmnibusHelper.new(node).ownership['owner']
@@ -120,11 +124,13 @@ template "#{oc_id_config_dir}/database.yml" do
   mode '640'
   notifies :restart, 'runit_service[oc_id]' unless backend_secondary?
 end
+
 database_file = "/opt/opscode/embedded/service/oc_id/config/database.yml"
 file database_file do
   action :delete
   not_if  { File.symlink?(database_file) }
 end
+
 link database_file do
   to "#{node['private_chef']['oc_id']['dir']}/config/database.yml"
 end

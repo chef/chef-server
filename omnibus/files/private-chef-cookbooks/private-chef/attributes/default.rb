@@ -42,6 +42,17 @@ default['private_chef']['default_orgname'] = nil
 default['private_chef']['fips_enabled'] = ChefConfig.fips?
 
 ###
+# Controls whether or not service authentication data is stored
+# node attributes and chef-server-running.json.  This should only be set to true when
+# it is not possible to upgrade to newer versions of add-ons that don't
+# require this.
+###
+# TODO mp 2017-03-01: default true for now
+default['private_chef']['insecure_addon_compat_enabled'] = false
+#
+default['private_chef']['addons']['install'] = false
+
+###
 # Options for installing addons
 ###
 default['private_chef']['addons']['install'] = false

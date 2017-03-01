@@ -107,9 +107,11 @@ ruby_block "set_lb_redis_values" do
   only_if { is_data_master? }
   block do
     require "redis"
+
+    # TODO mp 2017-03-01: secret in a file
     redis = Redis.new(:host => redis_data.vip,
                       :port => redis_data.port,
-                      :password => redis_data.password)
+                      :password => PrivateChef.credentials.get('redis_lb', 'password'))
     xdl = node['private_chef']['lb']['xdl_defaults']
     banned_ips = PrivateChef['banned_ips']
     maint_mode_ips = PrivateChef['maint_mode_whitelist_ips']
@@ -140,7 +142,7 @@ ruby_block "set_lb_redis_values" do
           redis.sadd   "maint_data", ip
         end
       end
-      # Note that we'll preserve 503 mode until everything is
+      # Note that we'll preserve 504 mode until everything is
       # populated.
       if (!xdl.nil?)
         xdl.each do |key, value|

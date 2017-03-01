@@ -23,6 +23,13 @@ module PrivateChef
   # Set this for default org mode
   default_orgname nil
 
+  # By default, do not enable legacy plugins -
+  # this prevents us from writing credentials data to attributes
+  # and chef-server-running.json
+  # TODO mp 2017-03-01: default true until all add-ons are available.
+  # false now for testing of no-addon cases.
+  insecure_addon_compat_enabled false
+
   use_chef_backend false
   chef_backend_members []
 
@@ -507,12 +514,16 @@ module PrivateChef
         credentials.add("postgresql", "db_superuser_password", length: 100)
       end
 
-      credentials.legacy_credentials_hash.each do |service, creds|
-        next if service == "chef-server"
-        creds.each do |name, value|
-          PrivateChef[service][name] ||= value
+      if PrivateChef["insecure_plugin_compat_enabled"]
+        credentials.legacy_credentials_hash.each do |service, creds|
+          creds.each do |name, value|
+            next if service == "chef-server"
+            PrivateChef[service][name] ||= value
+            PrivateChef[service][name] ||= value
+          end
         end
       end
+
 
       # TODO 2017-02-27 sr: make veil ensure that this is securely stored in a
       # file that has the correct owner user/group, and permissions.
