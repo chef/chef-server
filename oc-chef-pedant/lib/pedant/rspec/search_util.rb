@@ -927,6 +927,11 @@ module Pedant
       end
 
       it "works for all object types" do
+        # Wait for queues to have emptied: with_search_polling's
+        # `force_solr_commit` could happen without every object having made it
+        # to solr before.
+        wait_until_queues_are_empty
+
         # Ensure that a search against each Chef object type is
         # successful BEFORE any reindexing operations.
         should_find("node", node_name)
