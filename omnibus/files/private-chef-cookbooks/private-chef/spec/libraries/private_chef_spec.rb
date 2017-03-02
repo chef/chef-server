@@ -136,6 +136,11 @@ server "backend-passive.chef.io",
 EOF
     }
 
+    before  do
+      allow(File).to receive(:exist?).with("/etc/opscode/private-chef-secrets.json").and_return false
+    end
+
+
     it "generates secrets on the backend bootstrap node" do
       rendered_config = config_for("backend-active.chef.io")
       expect(rendered_config["private_chef"]["rabbitmq"]).to have_key("password")

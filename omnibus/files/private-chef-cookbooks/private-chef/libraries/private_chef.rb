@@ -443,32 +443,38 @@ module PrivateChef
       PrivateChef["nginx"]["url"] ||= "https://#{PrivateChef['api_fqdn']}"
     end
 
-    def credentials
-      return @credentials if @credentials
+    # TODO mp 2017/03/01 - a bit off here.  node_name is only needed to
+    # eval for 'exit 44' condition below.  Let's move this to a preflight check
+    # so that we don't have to do the extra step, and so that there's no chance
+    # of PrivateChef.credentials failing due to constraints that should be
+    # verified earlier on..
+    def credentials(node_name = nil)
+      # If we receive a node name, refresh the creds so we can do the sanity check below,
+      # at least until we move it.
+      return @credentials if @credentials and node_name.nil?
 
       # TODO 2017-02-28 mp:  configurable location:
       secrets_json = "/etc/opscode/private-chef-secrets.json"
-      @credentials =
+
+      @credentials ||=
         if File.exist?(secrets_json)
           Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_json)
-        #elsif PrivateChef["topology"] == "ha" && !PrivateChef["servers"][node_name]["bootstrap"]
-          # TODO mp 2017/02/28 - take a look at bootstrap preflight and see if this is covered - if not,
-          # handle it separately there.  Disabling it here for now since w e should
-          # be able to rely on referencing credentials without raising once
-          # we're past preflight.
-          # note: Looks like this should be pre-caught with BOOT006?
-          #
-          #Chef::Log.fatal("In an H/A topology the secrets must be created on the bootstrap node. "\
-          #                "Please copy the contents of /etc/opscode/ from your bootstrap Server " \
-          #                "to complete the setup")
-          #exit(44)
+        elsif PrivateChef["topology"] == "ha" && !PrivateChef["servers"][node_name]["bootstrap"]
+          Chef::Log.fatal("In an H/A topology the secrets must be created on the bootstrap node. "\
+                          "Please copy the contents of /etc/opscode/ from your bootstrap Server " \
+                          "to complete the setup")
+          exit(44)
         else
           Veil::CredentialCollection::ChefSecretsFile.new(path: secrets_json)
         end
     end
 
 
+
     def gen_secrets_default(node_name)
+      # TODO: bit of a hack to force init with the node's name for ha sanity check
+      credentials(node_name)
+
       # Transition from erchef's sql_user/password etc living under 'postgresql'
       # in older versions to 'opscode_erchef' in newer versions
       if credentials["postgresql"] && credentials["postgresql"]["sql_password"]
@@ -678,8 +684,8 @@ EOF
 
     def generate_config(node_name)
       assert_server_config(node_name) if server_config_required?
-      migrate_keys
       gen_secrets(node_name)
+      migrate_keys
 
       # Under ipv4 default to 0.0.0.0 in order to ensure that
       # any service that needs to listen externally on back-end
