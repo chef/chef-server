@@ -81,8 +81,8 @@ module Pedant
     # Let's not expose the secrets store by default
 
     # TODO 2017-02-28 mp:  configurable location:
-    credentials = Veil::CredentialCollection::ChefSecretsFile.
-      from_file("/etc/opscode/private-chef-secrets.json")
+    path = ENV['SECRETS_FILE'] || "/etc/opscode/private-chef-secrets.json"
+    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(path)
 
     config.pedant_platform = Pedant::Platform.new(config.chef_server,
                                                   credentials.get('chef-server', 'superuser_key'),
