@@ -14,6 +14,17 @@ def config_for(hostname)
 end
 
 describe PrivateChef do
+  let(:node) {
+    {
+      "private_chef" => {
+        "postgresql" => {
+          "version" => "9.2"
+        },
+        "user" => { "username" => "opscode" },
+      },
+    }
+  }
+
   before(:each) {
     PrivateChef.reset
     # May Cthulhu have mercy on our souls. PrivateChef.reset seems to do
@@ -21,7 +32,7 @@ describe PrivateChef do
     # the default Mashes
     Object.send(:remove_const, :PrivateChef)
     load ::File.expand_path("#{::File.dirname(__FILE__)}/../../libraries/private_chef.rb")
-    PrivateChef[:node] = node
+    allow(PrivateChef).to receive(:node).and_return(node)
     allow(PrivateChef).to receive(:exit!).and_raise(SystemExit)
     allow_any_instance_of(Veil::CredentialCollection::ChefSecretsFile).to receive(:save).and_return(true)
     allow_any_instance_of(Kernel).to receive(:system).with("chmod 0600 /etc/opscode/private-chef-secrets.json").and_return(true)
@@ -78,15 +89,6 @@ EOF
     filename
   }
 
-  let(:node) {
-    {
-      "private_chef" => {
-        "postgresql" => {
-          "version" => "9.2"
-        }
-      }
-    }
-  }
 
   context "When FIPS is enabled at the kernel" do
     let(:config) { <<-EOF

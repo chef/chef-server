@@ -458,8 +458,6 @@ module PrivateChef
         end
     end
 
-
-
     def gen_secrets_default(node_name)
       # Sanity check:  don't generate secrets if we're in an HA cluster and are not the bootstap node.
       unless File.exist? secrets_json#
