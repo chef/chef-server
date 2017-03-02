@@ -85,8 +85,8 @@ module Pedant
       from_file("/etc/opscode/private-chef-secrets.json")
 
     config.pedant_platform = Pedant::Platform.new(config.chef_server,
-                                                credentials.get('chef-server', 'superuser_key'),
-                                                config.superuser_name)
+                                                  credentials.get('chef-server', 'superuser_key'),
+                                                  config.superuser_name)
   end
 
   def self.configure_rspec

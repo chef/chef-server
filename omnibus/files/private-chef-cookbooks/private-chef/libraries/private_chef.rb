@@ -107,7 +107,6 @@ module PrivateChef
   registered_extensions Mash.new
 
   class << self
-
     def from_file(filename)
       # We're overriding this here so that we can get more meaningful errors from
       # the reconfigure chef run; we don't particularly care what line in the chef
@@ -449,16 +448,14 @@ module PrivateChef
     # of PrivateChef.credentials failing due to constraints that should be
     # verified earlier on..
     def credentials(node_name = nil)
-      # If we receive a node name, refresh the creds so we can do the sanity check below,
-      # at least until we move it.
-      return @credentials if @credentials and node_name.nil?
-
       # TODO 2017-02-28 mp:  configurable location:
       secrets_json = "/etc/opscode/private-chef-secrets.json"
 
       @credentials ||=
         if File.exist?(secrets_json)
-          Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_json)
+          owner = OmnibusHelper.new(node).ownership
+          Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_json,
+                                                                user: owner['owner'], group: owner['group'])
         elsif PrivateChef["topology"] == "ha" && !PrivateChef["servers"][node_name]["bootstrap"]
           Chef::Log.fatal("In an H/A topology the secrets must be created on the bootstrap node. "\
                           "Please copy the contents of /etc/opscode/ from your bootstrap Server " \
@@ -521,14 +518,7 @@ module PrivateChef
         end
       end
 
-      # TODO 2017-02-27 sr: make veil ensure that this is securely stored in a
-      # file that has the correct owner user/group, and permissions.
-      # Also, this way, _every_ service gets access to _every_ credential.
-      # When fixing this, also take care that the user might have a different
-      # name.
       credentials.save
-      system("chown opscode #{credentials.path}")
-      system("chmod 0600 #{credentials.path}")
     end
 
     def gen_redundant(node_name, topology)
