@@ -56,7 +56,7 @@ class BootstrapPreflightValidator < PreflightValidator
     #  - fetch pivotal public key(s) from opscode_chef keys view + users
     #  - extract public key from local pivotal.pem
     #   * If we fail with an auth error at this time, it means that either the
-    #     username/password for erchefare not set up (in which case db/schema bootstrap has
+    #     username/password for erchef are not set up (in which case db/schema bootstrap has
     #     not been run and we are working from an outdated secrets file), or we
     #     don't have the correct credentials due to an old secrets file.
     #     This should raise its own error.
@@ -176,7 +176,7 @@ EOM
 BOOT006: The superuser key is present in the key store,
          but the file /etc/opscode/private-chef-secrets.json is missing.
 
-         Ensure that pivotal.pem is copied over into /etc/opscode from the
+         Ensure that the secrets file has been copied into /etc/opscode from the
          first Chef Server node that you brought online, then run
          'chef-server-ctl reconfigure' again.
 

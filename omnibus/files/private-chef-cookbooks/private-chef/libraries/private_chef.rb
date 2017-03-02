@@ -442,35 +442,34 @@ module PrivateChef
       PrivateChef["nginx"]["url"] ||= "https://#{PrivateChef['api_fqdn']}"
     end
 
-    # TODO mp 2017/03/01 - a bit off here.  node_name is only needed to
-    # eval for 'exit 44' condition below.  Let's move this to a preflight check
-    # so that we don't have to do the extra step, and so that there's no chance
-    # of PrivateChef.credentials failing due to constraints that should be
-    # verified earlier on..
-    def credentials(node_name = nil)
-      # TODO 2017-02-28 mp:  configurable location:
-      secrets_json = "/etc/opscode/private-chef-secrets.json"
+    # TODO 2017-02-28 mp:  configurable location:
+    def secrets_json
+      "/etc/opscode/private-chef-secrets.json"
+    end
 
+    def credentials
+      owner = OmnibusHelper.new(node).ownership
+      owner_opts = { user: owner['owner'], group: owner['group'] }
       @credentials ||=
         if File.exist?(secrets_json)
-          owner = OmnibusHelper.new(node).ownership
-          Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_json,
-                                                                user: owner['owner'], group: owner['group'])
-        elsif PrivateChef["topology"] == "ha" && !PrivateChef["servers"][node_name]["bootstrap"]
-          Chef::Log.fatal("In an H/A topology the secrets must be created on the bootstrap node. "\
-                          "Please copy the contents of /etc/opscode/ from your bootstrap Server " \
-                          "to complete the setup")
-          exit(44)
+          Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_json, owner_opts)
         else
-          Veil::CredentialCollection::ChefSecretsFile.new(path: secrets_json)
+          Veil::CredentialCollection::ChefSecretsFile.new(owner_opts.merge(path: secrets_json))
         end
     end
 
 
 
     def gen_secrets_default(node_name)
-      # TODO: bit of a hack to force init with the node's name for ha sanity check
-      credentials(node_name)
+      # Sanity check:  don't generate secrets if we're in an HA cluster and are not the bootstap node.
+      unless File.exist? secrets_json#
+        if  PrivateChef["topology"] == "ha" && !PrivateChef["servers"][node_name]["bootstrap"]
+          Chef::Log.fatal("In an H/A topology the secrets must be created on the bootstrap node. "\
+                          "Please copy the contents of /etc/opscode/ from your bootstrap Server " \
+                          "to complete the setup")
+          exit(44)
+        end
+      end
 
       # Transition from erchef's sql_user/password etc living under 'postgresql'
       # in older versions to 'opscode_erchef' in newer versions
