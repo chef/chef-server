@@ -488,6 +488,7 @@ module Pedant
 
         shared(:superuser) { platform.superuser }
         shared(:superuser_key) { platform.superuser_key }
+        shared(:webui_key) { platform.webui_key }
 
         # Given a requestor, create a new one with the same name, but
         # with the web UI's private key for 'impersonation' tests

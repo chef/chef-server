@@ -16,7 +16,7 @@
 require 'pedant/rspec/knife_util'
 require 'pedant/rspec/user_util'
 
-describe 'knife', :validation do
+describe 'knife', :validation, :knife do
   context 'opc' do
     context 'org' do
       context 'create' do

@@ -85,7 +85,7 @@ module Pedant
     credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(path)
 
     config.pedant_platform = Pedant::Platform.new(config.chef_server,
-                                                  credentials.get('chef-server', 'superuser_key'),
+                                                  credentials,
                                                   config.superuser_name)
   end
 

@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'pedant/rspec/common'
+require 'pedant/platform'
+
 module Pedant
   module RSpec
     module AuthHeadersUtil
@@ -335,7 +338,7 @@ module Pedant
 
         # X-Ops-Request-Source
         context 'when X-Ops-Request-Source is web' do
-          if Pedant::Config.webui_key
+          if Pedant::Config.pedant_platform.webui_key
             # If no webui_key defined (i.e., in pushy pedant) skip
             # these tests
 
@@ -363,7 +366,7 @@ module Pedant
 
             context 'impersonating successful user' do
               it 'succeeds',
-                :skip => 'no webui_key defined in pedant config' do
+                :skip => 'no webui_key available in key store' do
                 ;
               end
             end
