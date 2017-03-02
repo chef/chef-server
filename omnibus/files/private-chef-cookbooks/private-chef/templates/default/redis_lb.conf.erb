@@ -6,8 +6,6 @@ port <%= @port %>
 bind <%= @bind %> <%= @listen == @bind ? "" : @listen %>
 <% end %>
 
-requirepass "<%= @password %>"
-
 tcp-keepalive <%= @keepalive %>
 timeout <%= @timeout %>
 loglevel <%= @loglevel %>
