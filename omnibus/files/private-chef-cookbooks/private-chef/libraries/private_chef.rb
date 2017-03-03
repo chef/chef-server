@@ -451,13 +451,11 @@ module PrivateChef
     end
 
     def credentials
-      owner = OmnibusHelper.new(node).ownership
-      owner_opts = { user: owner['owner'], group: owner['group'] }
       @credentials ||=
         if File.exist?(secrets_json)
-          Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_json, owner_opts)
+          Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_json)
         else
-          Veil::CredentialCollection::ChefSecretsFile.new(owner_opts.merge(path: secrets_json))
+          Veil::CredentialCollection::ChefSecretsFile.new(path: secrets_json)
         end
     end
 
