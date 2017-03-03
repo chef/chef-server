@@ -106,6 +106,8 @@ module PrivateChef
 
   registered_extensions Mash.new
 
+  insecure_addon_compat false
+
   class << self
     def from_file(filename)
       # We're overriding this here so that we can get more meaningful errors from
@@ -256,6 +258,7 @@ module PrivateChef
       results["private_chef"]["opscode-erchef"]["max_request_size"] = PrivateChef["opscode_erchef"]["max_request_size"]
       results["private_chef"]["folsom_graphite"] = PrivateChef["folsom_graphite"]
       results["private_chef"]["profiles"] = PrivateChef["profiles"]
+      results["private_chef"]["insecure_addon_compat"] = PrivateChef["insecure_addon_compat"]
       results
     end
 
@@ -508,10 +511,14 @@ module PrivateChef
         credentials.add("postgresql", "db_superuser_password", length: 100)
       end
 
-      credentials.legacy_credentials_hash.each do |service, creds|
-        next if service == "chef-server"
-        creds.each do |name, value|
-          PrivateChef[service][name] ||= value
+      # TODO 2017-03-03 sr: remove "|| true" when we can cope with secrets not
+      #                     being in node attrs
+      if PrivateChef["insecure_addon_compat"] || true
+        credentials.legacy_credentials_hash.each do |service, creds|
+          next if service == "chef-server"
+          creds.each do |name, value|
+            PrivateChef[service][name] ||= value
+          end
         end
       end
 
@@ -652,7 +659,7 @@ EOF
     # chef-server and others to use it
     def add_key_from_file_if_present(group, name, path)
       if File.readable?(path)
-        credentials.add_key_from_file(group, name, path)
+        credentials.add_from_file(path, group, name)
         true
       else
         false

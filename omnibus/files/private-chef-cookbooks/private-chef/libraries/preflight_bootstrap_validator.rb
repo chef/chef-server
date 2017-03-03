@@ -85,7 +85,10 @@ class BootstrapPreflightValidator < PreflightValidator
   end
 
   def pivotal_key_exists?
-    PrivateChef.credentials.exist?('chef-server', 'superuser_key')
+    # on upgrades, we haven't had a chance to ingest the pivotal key, so we
+    # still need to check if the file is on disk
+    ::File.exist?("/etc/opscode/pivotal.pem") ||
+      PrivateChef.credentials.exist?('chef-server', 'superuser_key')
   end
 
   def validate_sane_state

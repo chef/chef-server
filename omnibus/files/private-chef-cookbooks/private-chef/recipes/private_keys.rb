@@ -46,20 +46,41 @@ unless PrivateChef.credentials.exist?('chef-server', 'webui_key')
   PrivateChef.credentials.save
 end
 
+webui_key = OpenSSL::PKey::RSA.new(PrivateChef.credentials.get('chef-server', 'webui_key'))
+
 file "/etc/opscode/webui_pub.pem" do
   owner "root"
   group "root"
   mode "0644"
   content webui_key.public_key.to_s unless webui_key.nil?
 end
-#  These keys are no longer kept directly on the FS
-#  delete them if they're present.
-file "/etc/opscode/pivotal.pem"  do
-  action :delete
-  sensitive true
-end
 
-file "/etc/opscode/webui_priv.pem" do
-  action :delete
-  sensitive true
+if node['private_chef']['insecure_addon_compat']
+  file "/etc/opscode/pivotal.pem"  do
+    owner "root"
+    group "root"
+    mode "0644"
+    sensitive true
+    content PrivateChef.credentials.get('chef-server', 'superuser_key')
+  end
+
+  file "/etc/opscode/webui_priv.pem" do
+    owner "root"
+    group "root"
+    mode "0644"
+    sensitive true
+    content webui_key.to_pem
+  end
+else
+  #  These keys are no longer kept directly on the FS
+  #  delete them if they're present.
+  file "/etc/opscode/pivotal.pem"  do
+    action :delete
+    sensitive true
+  end
+
+  file "/etc/opscode/webui_priv.pem" do
+    action :delete
+    sensitive true
+  end
 end
