@@ -240,7 +240,7 @@ process_batch(State = #state{authz_ids = {ActorSet, GroupSet}}) ->
                LengthGroups,
                check_for_zero(LengthRemainingGroups, LengthGroups)])
     end,
-    SuperUserAuthzId = oc_chef_authz:superuser_id(),
+    SuperUserAuthzId = mv_oc_chef_authz:superuser_id(),
     delete_authz_ids(SuperUserAuthzId, actor, ActorAuthzIdsToRemove),
     delete_authz_ids(SuperUserAuthzId, group, GroupAuthzIdsToRemove),
     create_timer(State#state{authz_ids = {sets:from_list(RemainingActors), sets:from_list(RemainingGroups)}}).
