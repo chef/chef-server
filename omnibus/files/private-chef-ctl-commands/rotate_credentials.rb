@@ -32,7 +32,7 @@ add_command_under_category "rotate-credentials", "credential-rotation", "Rotate 
     backup_file = backup_secrets_file
 
     log("Rotating #{service}'s credentials...", :notice)
-    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file_path)
+    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file_path, owner)
     credentials.rotate(service)
     credentials.save
   rescue => e
@@ -73,7 +73,7 @@ add_command_under_category "rotate-all-credentials", "credential-rotation", "Rot
     backup_file = backup_secrets_file
 
     log("Rotating all Chef Server service credentials...", :notice)
-    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file_path)
+    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file_path, owner)
     credentials.rotate_credentials
     credentials.save
   rescue => e
@@ -113,7 +113,7 @@ add_command_under_category "rotate-shared-secrets", "credential-rotation", "Rota
   # Rotate and save the credentials
   begin
     log("Rotating shared credential secrets and service credentials...", :notice)
-    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file_path)
+    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file_path, owner)
     credentials.rotate_hasher
     credentials.save
   rescue => e
@@ -145,7 +145,7 @@ end
 add_command_under_category "show-service-credentials", "credential-rotation", "Show the service credentials", 2 do
   ensure_configured!
 
-  credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file_path)
+  credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file_path, owner)
   pp(credentials.legacy_credentials_hash)
   exit(0)
 end
@@ -244,6 +244,10 @@ def ensure_configured!
     log("You must reconfigure the Chef Server before a backup can be performed", :error)
     exit(1)
   end
+end
+
+def owner
+  { user: running_config["private_chef"]["user"]["username"] }
 end
 
 def log(message, level = :info)

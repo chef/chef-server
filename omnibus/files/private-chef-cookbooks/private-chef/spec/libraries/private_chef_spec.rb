@@ -4,6 +4,7 @@ require 'chef/log'
 def expect_existing_secrets
   allow(File).to receive(:exist?).and_call_original
   allow(File).to receive(:exist?).with("/etc/opscode/private-chef-secrets.json").and_return(true)
+  allow(File).to receive(:exist?).with("/etc/opscode/pivotal.pem").and_return(false)
   allow(IO).to receive(:read).and_call_original
   allow(IO).to receive(:read).with("/etc/opscode/private-chef-secrets.json").and_return(secrets)
 end
@@ -417,14 +418,14 @@ EOF
 
       it "should add a key that exists and return true" do
         expect(File).to receive(:readable?).with("/my_key").and_return true
-        expect(secrets_mock).to receive(:add_key_from_file).with("group", "name", "/my_key")
+        expect(secrets_mock).to receive(:add_from_file).with("/my_key", "group", "name")
         result = PrivateChef.add_key_from_file_if_present("group", "name", "/my_key")
         expect(result).to be true
       end
 
       it "should not add a key that does not and return false" do
         expect(File).to receive(:readable?).with("/my_key").and_return false
-        result = PrivateChef.add_key_from_file_if_present("group", "name", "/my_key")
+        result = PrivateChef.add_key_from_file_if_present( "group", "name", "/my_key")
         expect(result).to be false
 
       end

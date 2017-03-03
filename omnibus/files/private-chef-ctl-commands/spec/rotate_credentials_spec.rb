@@ -29,12 +29,15 @@ describe "chef-server-ctl rotate credentials" do
            save: true)
   end
 
+  let(:running_config) { { 'private_chef' => { 'user' => { 'username' => 'opscode' } } } }
+
   before do
     allow(subject.ctl).to receive(:ensure_configured!).and_return(true)
     allow(subject.ctl).to receive(:backup_secrets_file).and_return("/tmp/backup.json")
     allow(subject.ctl).to receive(:restore_secrets_file).and_return(true)
     allow(subject.ctl).to receive(:remove_backup_file).and_return(true)
     allow(subject.ctl).to receive(:run_chef).and_return(double("ProcessStatus", success?: true))
+    allow(subject.ctl).to receive(:running_config).and_return(running_config)
     allow(Veil::CredentialCollection::ChefSecretsFile).to receive(:from_file).and_return(veil_creds)
   end
 
