@@ -24,7 +24,7 @@ GIT
 
 GIT
   remote: https://github.com/chef/omnibus-software
-  revision: 79ba746f2e921b4ea7f8a9050e4025635eade335
+  revision: c0715498df6704fdbc2362994012e4a517040c88
   specs:
     omnibus-software (4.0.0)
       chef-sugar (>= 3.4.0)
@@ -292,4 +292,4 @@ DEPENDENCIES
   rspec
 
 BUNDLED WITH
-   1.13.7
+   1.14.3
