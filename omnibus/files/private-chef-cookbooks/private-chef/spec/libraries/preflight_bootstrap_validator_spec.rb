@@ -22,6 +22,20 @@ describe BootstrapPreflightValidator do
   let(:subject) { BootstrapPreflightValidator.new(node_object) }
 
   describe "#bypass_bootstrap?" do
+    let(:superuser_key_exists) { true }
+    let(:num_secrets) { 1 }
+    let(:credentials) { double(Object) }
+    # TODO mp 2017/03/01
+    let(:secret_count ) { num_secrets + ( superuser_key_exists ? 2 : 0 ) }
+    before do
+      credentials = double(Object)
+      allow(PrivateChef).to receive(:credentials).and_return(credentials)
+      allow(credentials).to receive(:length).and_return( secret_count )
+      allow(credentials).to receive(:exist?).with('chef-server', anything()).and_return(superuser_key_exists)
+      allow(File).to receive(:exist?).with("/etc/opscode/private-chef-secrets.json").and_return(false)
+      allow(File).to receive(:exist?).with("/etc/opscode/pivotal.pem").and_return(false)
+    end
+
     context "when a previous run exists" do
       let(:node_object) do { "private_chef" => {},
                              "previous_run" => {"some" => "has"}}
@@ -42,38 +56,21 @@ describe BootstrapPreflightValidator do
         { "private_chef" => {} }
       end
 
-      context "when the secrets file doesn't exist" do
-        before do
-          allow(File).to receive(:exist?).with("/etc/opscode/pivotal.pem").and_return(true)
-          allow(File).to receive(:exist?).with("/etc/opscode/private-chef-secrets.json").and_return(false)
-        end
-
+      context "when the superuser key does exist and creds do" do
+      let(:num_secrets) { 0 }
         it "returns false" do
           expect(subject.bypass_bootstrap?).to eq(false)
         end
       end
 
-      context "when the pivotal.pem file doesn't exist" do
-        before do
-          allow(File).to receive(:exist?).with("/etc/opscode/pivotal.pem").and_return(false)
-          allow(File).to receive(:exist?).with("/etc/opscode/private-chef-secrets.json").and_return(true)
-        end
-
+      context "when the superuser key doesn't exist and creds do" do
+        let(:superuser_key_exists) { false }
         it "returns false" do
           expect(subject.bypass_bootstrap?).to eq(false)
         end
       end
 
-      context "when both private-chef-secrets.json and pivotal.pem exist" do
-        before do
-          allow(File).to receive(:exist?).with("/etc/opscode/pivotal.pem").and_return(true)
-          allow(File).to receive(:exist?).with("/etc/opscode/private-chef-secrets.json").and_return(true)
-          allow(Veil::CredentialCollection::ChefSecretsFile).to receive(:from_file)
-                                                                 .with("/etc/opscode/private-chef-secrets.json")
-                                                                 .and_return(double("SecretsFile", size: 10))
-        end
-
-
+      context "when credentials and superuser key both exist" do
         context "when postgresql is running externally" do
           before do
             allow(PrivateChef).to receive(:[]).with('postgresql').and_return({"external" => true})

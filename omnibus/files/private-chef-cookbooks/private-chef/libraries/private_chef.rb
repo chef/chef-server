@@ -106,8 +106,9 @@ module PrivateChef
 
   registered_extensions Mash.new
 
-  class << self
+  insecure_addon_compat false
 
+  class << self
     def from_file(filename)
       # We're overriding this here so that we can get more meaningful errors from
       # the reconfigure chef run; we don't particularly care what line in the chef
@@ -257,6 +258,7 @@ module PrivateChef
       results["private_chef"]["opscode-erchef"]["max_request_size"] = PrivateChef["opscode_erchef"]["max_request_size"]
       results["private_chef"]["folsom_graphite"] = PrivateChef["folsom_graphite"]
       results["private_chef"]["profiles"] = PrivateChef["profiles"]
+      results["private_chef"]["insecure_addon_compat"] = PrivateChef["insecure_addon_compat"]
       results
     end
 
@@ -443,19 +445,32 @@ module PrivateChef
       PrivateChef["nginx"]["url"] ||= "https://#{PrivateChef['api_fqdn']}"
     end
 
-    def gen_secrets_default(node_name)
-      secrets_json = "/etc/opscode/private-chef-secrets.json"
-      credentials =
+    # TODO 2017-02-28 mp:  configurable location:
+    def secrets_json
+      "/etc/opscode/private-chef-secrets.json"
+    end
+
+    def credentials
+      owner = OmnibusHelper.new(node).ownership
+      owner_opts = { user: owner['owner'], group: owner['group'] }
+      @credentials ||=
         if File.exist?(secrets_json)
-          Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_json)
-        elsif PrivateChef["topology"] == "ha" && !PrivateChef["servers"][node_name]["bootstrap"]
+          Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_json, owner_opts)
+        else
+          Veil::CredentialCollection::ChefSecretsFile.new(owner_opts.merge(path: secrets_json))
+        end
+    end
+
+    def gen_secrets_default(node_name)
+      # Sanity check:  don't generate secrets if we're in an HA cluster and are not the bootstap node.
+      unless File.exist? secrets_json
+        if  PrivateChef["topology"] == "ha" && !PrivateChef["servers"][node_name]["bootstrap"]
           Chef::Log.fatal("In an H/A topology the secrets must be created on the bootstrap node. "\
                           "Please copy the contents of /etc/opscode/ from your bootstrap Server " \
                           "to complete the setup")
           exit(44)
-        else
-          Veil::CredentialCollection::ChefSecretsFile.new(path: secrets_json)
         end
+      end
 
       # Transition from erchef's sql_user/password etc living under 'postgresql'
       # in older versions to 'opscode_erchef' in newer versions
@@ -496,20 +511,18 @@ module PrivateChef
         credentials.add("postgresql", "db_superuser_password", length: 100)
       end
 
-      credentials.legacy_credentials_hash.each do |service, creds|
-        creds.each do |name, value|
-          PrivateChef[service][name] ||= value
+      # TODO 2017-03-03 sr: remove "|| true" when we can cope with secrets not
+      #                     being in node attrs
+      if PrivateChef["insecure_addon_compat"] || true
+        credentials.legacy_credentials_hash.each do |service, creds|
+          next if service == "chef-server"
+          creds.each do |name, value|
+            PrivateChef[service][name] ||= value
+          end
         end
       end
 
-      # TODO 2017-02-27 sr: make veil ensure that this is securely stored in a
-      # file that has the correct owner user/group, and permissions.
-      # Also, this way, _every_ service gets access to _every_ credential.
-      # When fixing this, also take care that the user might have a different
-      # name.
       credentials.save
-      system("chown opscode #{credentials.path}")
-      system("chmod 0600 #{credentials.path}")
     end
 
     def gen_redundant(node_name, topology)
@@ -641,9 +654,32 @@ EOF
       end
     end
 
+    # TODO mp 2017/03/01 - I like the secrets interface as set up in push server.
+    # This may be a thing to consider moving to enterprise-common and updating
+    # chef-server and others to use it
+    def add_key_from_file_if_present(group, name, path)
+      if File.readable?(path)
+        credentials.add_from_file(path, group, name)
+        true
+      else
+        false
+      end
+    end
+
+    # If known private keys are on disk, add them to Veil and commit them.
+    def migrate_keys
+      did_something = add_key_from_file_if_present("chef-server", "superuser_key", "/etc/opscode/pivotal.pem")
+      did_something ||= add_key_from_file_if_present("chef-server", "webui_key", "/etc/opscode/webui_priv.pem")
+      # Ensure these are committed to disk before continuing -
+      # the secrets recipe will delete the old files.
+      credentials.save if did_something
+    end
+
+
     def generate_config(node_name)
       assert_server_config(node_name) if server_config_required?
       gen_secrets(node_name)
+      migrate_keys
 
       # Under ipv4 default to 0.0.0.0 in order to ensure that
       # any service that needs to listen externally on back-end

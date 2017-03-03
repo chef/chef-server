@@ -4,6 +4,7 @@ require 'chef/log'
 def expect_existing_secrets
   allow(File).to receive(:exist?).and_call_original
   allow(File).to receive(:exist?).with("/etc/opscode/private-chef-secrets.json").and_return(true)
+  allow(File).to receive(:exist?).with("/etc/opscode/pivotal.pem").and_return(false)
   allow(IO).to receive(:read).and_call_original
   allow(IO).to receive(:read).with("/etc/opscode/private-chef-secrets.json").and_return(secrets)
 end
@@ -14,6 +15,17 @@ def config_for(hostname)
 end
 
 describe PrivateChef do
+  let(:node) {
+    {
+      "private_chef" => {
+        "postgresql" => {
+          "version" => "9.2"
+        },
+        "user" => { "username" => "opscode" },
+      },
+    }
+  }
+
   before(:each) {
     PrivateChef.reset
     # May Cthulhu have mercy on our souls. PrivateChef.reset seems to do
@@ -21,7 +33,7 @@ describe PrivateChef do
     # the default Mashes
     Object.send(:remove_const, :PrivateChef)
     load ::File.expand_path("#{::File.dirname(__FILE__)}/../../libraries/private_chef.rb")
-    PrivateChef[:node] = node
+    allow(PrivateChef).to receive(:node).and_return(node)
     allow(PrivateChef).to receive(:exit!).and_raise(SystemExit)
     allow_any_instance_of(Veil::CredentialCollection::ChefSecretsFile).to receive(:save).and_return(true)
     allow_any_instance_of(Kernel).to receive(:system).with("chmod 0600 /etc/opscode/private-chef-secrets.json").and_return(true)
@@ -78,15 +90,6 @@ EOF
     filename
   }
 
-  let(:node) {
-    {
-      "private_chef" => {
-        "postgresql" => {
-          "version" => "9.2"
-        }
-      }
-    }
-  }
 
   context "When FIPS is enabled at the kernel" do
     let(:config) { <<-EOF
@@ -135,6 +138,11 @@ server "backend-passive.chef.io",
   :role => 'backend'
 EOF
     }
+
+    before  do
+      allow(File).to receive(:exist?).with("/etc/opscode/private-chef-secrets.json").and_return false
+    end
+
 
     it "generates secrets on the backend bootstrap node" do
       rendered_config = config_for("backend-active.chef.io")
@@ -389,5 +397,39 @@ EOF
       expect(PrivateChef["registered_extensions"][name][:not_here]).to eq(nil)
     end
 
+  end
+  context "Key File Migration" do
+    let(:secrets_mock) { double(Object) }
+    let(:superuser_key_path) { "/etc/opscode/pivotal.pem" }
+    let(:webui_key_path) { "/etc/opscode/webui_priv.pem" }
+
+    describe "#migrate_keys" do
+      it "should attempt to migrate known keys" do
+        expect(PrivateChef).to receive(:add_key_from_file_if_present).with("chef-server", "superuser_key", superuser_key_path)
+        expect(PrivateChef).to receive(:add_key_from_file_if_present).with("chef-server", "webui_key", webui_key_path)
+        PrivateChef.migrate_keys
+      end
+    end
+
+    describe "#add_key_from_file_if_present" do
+      before do
+        allow(PrivateChef).to receive(:credentials).and_return secrets_mock
+      end
+
+      it "should add a key that exists and return true" do
+        expect(File).to receive(:readable?).with("/my_key").and_return true
+        expect(secrets_mock).to receive(:add_from_file).with("/my_key", "group", "name")
+        result = PrivateChef.add_key_from_file_if_present("group", "name", "/my_key")
+        expect(result).to be true
+      end
+
+      it "should not add a key that does not and return false" do
+        expect(File).to receive(:readable?).with("/my_key").and_return false
+        result = PrivateChef.add_key_from_file_if_present( "group", "name", "/my_key")
+        expect(result).to be false
+
+      end
+
+    end
   end
 end

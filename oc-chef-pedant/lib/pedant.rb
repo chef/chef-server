@@ -37,6 +37,8 @@ require 'pedant/ui'
 require 'pedant/rspec/matchers'
 require 'pedant/rspec/common'
 
+require 'veil'
+
 module Pedant
   def self.config
     # This is a bit of a hack: for some reason, we have UTF-8/US-ASCII encoding
@@ -76,8 +78,14 @@ module Pedant
   end
 
   def self.create_platform
+    # Let's not expose the secrets store by default
+
+    # TODO 2017-02-28 mp:  configurable location:
+    path = ENV['SECRETS_FILE'] || "/etc/opscode/private-chef-secrets.json"
+    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(path)
+
     config.pedant_platform = Pedant::Platform.new(config.chef_server,
-                                                  config.superuser_key,
+                                                  credentials,
                                                   config.superuser_name)
   end
 

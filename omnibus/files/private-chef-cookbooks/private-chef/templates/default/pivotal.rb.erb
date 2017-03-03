@@ -1,6 +1,17 @@
+require "tempfile"
+require "veil"
+
+secrets_file = ENV['SECRETS_FILE'] || "/etc/opscode/private-chef-secrets.json"
+credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file)
+
+key = Tempfile.new("latovip")
+key.puts credentials.get("chef-server", "superuser_key")
+key.flush
+key.close
+
 node_name "pivotal"
 chef_server_url "<%= @prefix %>://<%= @vip %>"
 chef_server_root "<%= @prefix %>://<%= @vip %>"
 no_proxy "<%= node['private_chef']['lb']['vip'] %>"
-client_key "/etc/opscode/pivotal.pem"
+client_key key.path
 ssl_verify_mode :verify_none

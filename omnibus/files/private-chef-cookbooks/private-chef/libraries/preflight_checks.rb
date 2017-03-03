@@ -45,10 +45,15 @@ class PreflightValidator
     previous_run.nil?
   end
 
+  # TODO mp 2017/03/01 - ugh -  at the very least let's change this to use a single shared
+  # source of known keys, instead of having yet another place we retype key names.
+  # However, the need for this in the first place is more about things being more complicated
+  # because of the bootstrap process than anything else...
   def secrets_exists?
-    secrets_json = "/etc/opscode/private-chef-secrets.json"
-    File.exist?(secrets_json) &&
-      Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_json).size > 0
+    len = PrivateChef.credentials.length
+    len -= 1 if PrivateChef.credentials.exist?('chef-server', 'webui_key')
+    len -= 1 if PrivateChef.credentials.exist?('chef-server', 'superuser_key')
+    len > 0
   end
 
   def backend?

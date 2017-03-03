@@ -28,17 +28,18 @@ module Pedant
 
     attr_reader :test_org, :test_org_owner, :validate_org, :internal_account_url,
                 :internal_server, :ldap, :ldap_testing,
-                :server, :superuser, :superuser_key_file
+                :server, :superuser, :superuser_key_data, :webui_key
 
     # Create a Platform object for a given server (specified by
     # protocol, hostname, and port ONLY).  You must supply the
-    # superuser's key file, which can either be the path to the file,
-    # or the contents of the file.
-    def initialize(server, superuser_key_file, superuser_name='pivotal')
+    # superuser's key data in PEM form.
+    #
+    def initialize(server, creds_or_key_data , superuser_name='pivotal')
+      load_credentials(creds_or_key_data)
+
       @server = (Pedant.config.explicit_port_url ? explicit_port_url(server) : server )
       puts "Configured URL: #{@server}"
-      @superuser_key_file = superuser_key_file
-      @superuser = Pedant::Requestor.new(superuser_name, superuser_key_file, platform: self)
+      @superuser = Pedant::Requestor.new(superuser_name, @superuser_key_data, platform: self)
       @test_org = org_from_config
       @internal_account_url = Pedant::Config[:internal_account_url]
       @internal_server = Pedant::Config.internal_server || (fail "Missing internal_server in Pedant config.")
@@ -46,6 +47,19 @@ module Pedant
       @ldap_testing = Pedant::Config[:ldap_testing]
       self.pedant_run_timestamp # Cache the global timestamp at initialization
       self
+    end
+
+    def load_credentials(creds_or_key_data)
+      case creds_or_key_data
+      when String
+        @superuser_key_data = creds_or_key_data
+      else
+        creds = creds_or_key_data
+        @superuser_key_data = creds.get('chef-server', 'superuser_key')
+        if creds.exist?('chef-server', 'webui_key')
+          @webui_key = creds.get('chef-server', 'webui_key')
+        end
+      end
     end
 
     DEFAULT_ORG_REWRITE = /^\/?(search|nodes|cookbooks|data|roles|sandboxes|environments|clients|principals|runs|groups|containers|keys)/
