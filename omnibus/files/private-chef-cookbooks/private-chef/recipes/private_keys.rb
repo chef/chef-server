@@ -48,6 +48,15 @@ end
 
 webui_key = OpenSSL::PKey::RSA.new(PrivateChef.credentials.get('chef-server', 'webui_key'))
 
+# This file gets created before the opscode user exists -
+# we'll need to change ownership after the fact.
+helper = OmnibusHelper.new(node).ownership
+file "/etc/opscode/private-chef-secrets.json" do
+  owner helper['owner']
+  group helper['group']
+  mode "0600"
+end
+
 file "/etc/opscode/webui_pub.pem" do
   owner "root"
   group "root"
