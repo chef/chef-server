@@ -67,15 +67,9 @@ matrix:
   include:
     - language: ruby
       rvm: 2.2.5
-      gemfile: oc-chef-pedant/Gemfile
-      # We remove Gemfile.lock because Travis does
-      # "bundle install --path bundle/vendor" which breaks our ability
-      # to bundle install from the chef-zero spec.
-      before_install: gem install bundler -v 1.12.5 && rm -f oc-chef-pedant/Gemfile.lock
-      before_script: cd oc-chef-pedant
-      script: bundle exec rake chef_zero_spec
-      env:
-        - "GEMFILE_MOD=\"gem 'rake'; gem 'chef-zero', github: 'chef/chef-zero', branch: 'master' \""
+      gemfile: .travis/Gemfile
+      before_script: cd .travis/
+      script: ./run.sh
       # Remove things only used by erlang
       install:
       after_failure:
@@ -85,15 +79,10 @@ matrix:
       cache:
     - language: ruby
       rvm: 2.2.5
-      gemfile: oc-chef-pedant/Gemfile
-      # We remove Gemfile.lock because Travis does
-      # "bundle install --path bundle/vendor" which breaks our ability
-      # to bundle install from the chef-zero spec.
-      before_install: gem install bundler -v 1.12.5 && rm -f oc-chef-pedant/Gemfile.lock
-      before_script: cd oc-chef-pedant
-      script: bundle exec rake chef_zero_spec
+      gemfile: .travis/Gemfile
+      before_script: cd .travis
+      script: ./run.sh
       env:
-        - "GEMFILE_MOD=\"gem 'rake'; gem 'chef-zero', github: 'chef/chef-zero', branch: 'master' \""
         - CHEF_FS=1
       # Remove things only used by erlang
       install:

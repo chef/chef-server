@@ -1,0 +1,6 @@
+source 'https://rubygems.org'
+
+gem 'veil', github: 'chef/chef_secrets'
+gem 'chef-zero', github: 'chef/chef-zero'
+
+gem 'oc-chef-pedant', path: '../'
