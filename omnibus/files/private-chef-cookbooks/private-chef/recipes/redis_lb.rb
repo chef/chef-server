@@ -109,7 +109,7 @@ ruby_block "set_lb_redis_values" do
     require "redis"
     redis = Redis.new(:host => redis_data.vip,
                       :port => redis_data.port,
-                      :password => redis_data.password)
+                      :password => PrivateChef.credentials.get("redis_lb", "password"))
     xdl = node['private_chef']['lb']['xdl_defaults']
     banned_ips = PrivateChef['banned_ips']
     maint_mode_ips = PrivateChef['maint_mode_whitelist_ips']

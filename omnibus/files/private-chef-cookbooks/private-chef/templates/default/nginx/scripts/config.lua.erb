@@ -52,15 +52,20 @@ local function connect_redis()
       ngx.log(ngx.ERR, "failed to connect redis: ", err)
    end
 
-   local ok, err = red:auth("<%= @redis_password %>")
-   if not ok then
-      if auth_not_required(err) then
-         ok = true
-      else
-         ngx.log(ngx.ERR, "failed to authenticate to redis: ", err)
+   local redis_password = os.getenv("REDIS_PASSWORD")
+   if redis_password == nil then
+      ngx.log(ngx.ERR, "REDIS_PASSWORD not found in the environment")
+      ok = false
+   else
+      local ok, err = red:auth(redis_password)
+      if not ok then
+         if auth_not_required(err) then
+            ok = true
+         else
+            ngx.log(ngx.ERR, "failed to authenticate to redis: ", err)
+        end
       end
    end
-
    return ok, red
 end
 

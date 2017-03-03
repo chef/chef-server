@@ -35,7 +35,9 @@ template mover_config do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode "644"
-  variables(node['private_chef']['opscode-chef-mover'].to_hash.merge({:helper => OmnibusHelper.new(node)}))
+  variables(node['private_chef']['opscode-chef-mover'].to_hash.merge({:helper => OmnibusHelper.new(node),
+                                                                      :redis_password => PrivateChef.credentials.get("redis_lb", "password")
+                                                                     }))
 end
 
 link "/opt/opscode/embedded/service/opscode-chef-mover/sys.config" do
