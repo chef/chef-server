@@ -62,6 +62,8 @@ end
 def create_secrets_file(file_path)
   credentials = Veil::CredentialCollection::ChefSecretsFile.new(path: file_path)
   key = OpenSSL::PKey::RSA.new(2048).to_pem
+  webui_key = OpenSSL::PKey::RSA.new(2048).to_pem
   credentials.add("chef-server", "superuser_key", value: key)
+  credentials.add("chef-server", "webui_key", value: webui_key)
   credentials.save
 end
