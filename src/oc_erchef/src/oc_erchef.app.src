@@ -33,8 +33,7 @@
                            oc_chef_wm,
                            data_collector
                           ]},
-  {applications, [
-                  lager,
+  {applications, [lager,
                   chef_secrets,
                   chef_index,
                   depsolver,
@@ -54,8 +53,7 @@
                   runtime_tools,
                   tools,
                   uuid,
-                  webtool
-                 ]},
+                  webtool]},
   {mod, { oc_erchef_app, []}},
   {env, []}
  ]}.
