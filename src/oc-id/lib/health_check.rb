@@ -51,7 +51,7 @@ class HealthCheck
 
   #
   # Try to fetch /users/pivotal, which will only succeed if we have the correct
-  # webui_priv.pem key in place.
+  # webui private key via the secrets file.
   #
   def erchef_key
     erchef_health_metric do
