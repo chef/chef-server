@@ -1,7 +1,7 @@
 user <%= node['private_chef']['user']['username'] %> <%= node['private_chef']['user']['username']%>;
 worker_processes <%= @worker_processes %>;
 error_log /var/log/opscode/nginx/error.log<%= node['private_chef']['lb']['debug'] ? " debug" : "" %>;
-
+env REDIS_PASSWORD;
 daemon off;
 
 events {

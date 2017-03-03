@@ -164,7 +164,7 @@
           % If dry_run is true, eredis host and port will be ignored.
           {eredis_host, "127.0.0.1"},
           {eredis_port, 16379},
-          {eredis_password, "<%= node['private_chef']['redis_lb']['password'] %>"},
+          {eredis_password, "<%= @redis_password %>"},
           {solr_url, "<%= node['private_chef']['opscode-solr4']['url'] %>"}
          ]},
  {chef_reindex, [
