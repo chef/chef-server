@@ -1,3 +1,3 @@
 #!/bin/sh
 exec 2>&1
-exec /opt/opscode/embedded/bin/veil-env-helper -s REDIS_PASSWORD=redis_lb.password chpst -P -o 131071 -u <%= node["private_chef"]["user"]["username"] %> -U <%= node["private_chef"]["user"]["username"] %> -o 100000 env HOME="<%= node["private_chef"]["redis_lb"]["dir"] %>" /opt/opscode/embedded/bin/redis-server <%= File.join(node["private_chef"]["redis_lb"]["dir"], "etc", "redis.conf") %>
+exec /opt/opscode/embedded/bin/veil-env-helper -s REDIS_PASSWORD=redis_lb.password -- chpst -P -o 131071 -u <%= node["private_chef"]["user"]["username"] %> -U <%= node["private_chef"]["user"]["username"] %> -o 100000 env HOME="<%= node["private_chef"]["redis_lb"]["dir"] %>" /opt/opscode/embedded/bin/redis-server <%= File.join(node["private_chef"]["redis_lb"]["dir"], "etc", "redis.conf") %>
