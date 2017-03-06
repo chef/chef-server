@@ -504,6 +504,8 @@ module PrivateChef
         credentials.add("postgresql", "db_superuser_password", length: 100)
       end
 
+      migrate_and_check_ldap_bind_password
+
       # TODO 2017-03-03 sr: remove "|| true" when we can cope with secrets not
       #                     being in node attrs
       if PrivateChef["insecure_addon_compat"] || true
@@ -516,6 +518,23 @@ module PrivateChef
       end
 
       credentials.save
+    end
+
+    def migrate_and_check_ldap_bind_password
+      if PrivateChef["ldap"] && PrivateChef["ldap"]["bind_password"]
+        pass_in_config = PrivateChef["ldap"]["bind_password"]
+
+        if credentials.exists?("ldap", "bind_password")
+          pass_in_secrets = credentials.get("ldap", "bind_password")
+
+          if pass_in_secrets != pass_in_config
+            Chef::Log.warn("LDAP bind_password configured in both secrets store and chef-server.rb -- overriding secrets store password with configuration file password."
+          end
+        end
+
+        # not in store, but in config -- we expect it in the store later
+        credentials.add("ldap", "bind_password", value: pass_in_config, frozen: true)
+      end
     end
 
     def gen_redundant(node_name, topology)
@@ -536,10 +555,25 @@ module PrivateChef
       end
     end
 
+    def ensure_bind_password
+      # if bind_dn is not set, don't care if there's a bind_password
+      return unless PrivateChef["ldap"].key?("bind_dn")
+
+      has_in_secrets = credentials.exists?("ldap", "bind_password")
+
+      # gen_secrets takes care of moving the secret from config to bind_password
+      # (if it's not already in the secrets store, having been put there
+      # manually)
+      unless has_in_secrets
+        raise "Missing required LDAP config value bind_password (required when configuring bind_dn)"
+      end
+    end
+
+
     def gen_ldap
       required_ldap_config_values = %w{ host base_dn }
-      # ensure a bind password was provided along with the optional bind_dn
-      required_ldap_config_values << "bind_password" if PrivateChef["ldap"].key?("bind_dn")
+      ensure_bind_password
+
       PrivateChef["ldap"]["system_adjective"] ||= "AD/LDAP"
       required_ldap_config_values.each do |val|
         unless PrivateChef["ldap"].key?(val)
