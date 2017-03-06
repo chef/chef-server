@@ -133,47 +133,59 @@ if is_data_master?
   end
 
   # create chef user for the queue
-  execute "#{rmq_ctl} add_user #{rabbitmq['user']} #{rabbitmq['password']}" do
+  execute "#{rmq_ctl} add_user #{rabbitmq['user']} [PASSWORD]" do
+    command "#{rmq_ctl} add_user #{rabbitmq['user']} #{rabbitmq['password']}"
     environment (rabbitmq_env)
     not_if "#{rmq_ctl_chpst} list_users |grep #{rabbitmq['user']}", :environment => rabbitmq_env, :user => "root"
     user opc_username
     retries 10
+    sensitive true
   end
 
-  execute "#{rmq_ctl} add_user #{rabbitmq['actions_user']} #{rabbitmq['actions_password']}" do
+  execute "#{rmq_ctl} add_user #{rabbitmq['actions_user']} [PASSWORD]" do
+    command "#{rmq_ctl} add_user #{rabbitmq['actions_user']} #{rabbitmq['actions_password']}"
     environment (rabbitmq_env)
     user opc_username
     not_if "#{rmq_ctl_chpst} list_users |grep #{rabbitmq['actions_user']}", :environment => rabbitmq_env, :user => "root"
     retries 10
+    sensitive true
   end
 
-  execute "#{rmq_ctl} add_user #{rabbitmq['management_user']} #{rabbitmq['management_password']}" do
+  execute "#{rmq_ctl} add_user #{rabbitmq['management_user']} [PASSWORD]" do
+    command "#{rmq_ctl} add_user #{rabbitmq['management_user']} #{rabbitmq['management_password']}"
     environment (rabbitmq_env)
     user opc_username
     not_if "#{rmq_ctl_chpst} list_users |grep #{rabbitmq['management_user']}", :environment => rabbitmq_env, :user => "root"
     retries 10
+    sensitive true
   end
 
   # Update the passwords if they've changed
-  execute "#{rmq_ctl} change_password #{rabbitmq['user']} #{rabbitmq['password']}" do
+  execute "#{rmq_ctl} change_password #{rabbitmq['user']} [PASSWORD]" do
+    command "#{rmq_ctl} change_password #{rabbitmq['user']} #{rabbitmq['password']}"
     environment (rabbitmq_env)
     only_if { node["previous_run"] && node["previous_run"]["rabbitmq"]["password"] != rabbitmq["password"] }
     user opc_username
     retries 10
+    sensitive true
   end
 
-  execute "#{rmq_ctl} change_password #{rabbitmq['actions_user']} #{rabbitmq['actions_password']}" do
+  execute "#{rmq_ctl} change_password #{rabbitmq['actions_user']} [PASSWORD]" do
+    command "#{rmq_ctl} change_password #{rabbitmq['actions_user']} #{rabbitmq['actions_password']}"
     environment (rabbitmq_env)
     user opc_username
     only_if { node["previous_run"] && node["previous_run"]["rabbitmq"]["actions_password"] != rabbitmq["actions_password"] }
     retries 10
+    sensitive true
   end
 
-  execute "#{rmq_ctl} change_password #{rabbitmq['management_user']} #{rabbitmq['management_password']}" do
+  execute "#{rmq_ctl} change_password #{rabbitmq['management_user']} [PASSWORD]" do
+    command "#{rmq_ctl} change_password #{rabbitmq['management_user']} #{rabbitmq['management_password']}"
     environment (rabbitmq_env)
     user opc_username
     only_if { node["previous_run"] && node["previous_run"]["rabbitmq"]["management_password"] != rabbitmq["management_password"] }
     retries 10
+    sensitive true
   end
 
   #
