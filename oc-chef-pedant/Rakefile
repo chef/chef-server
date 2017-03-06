@@ -33,8 +33,6 @@ def bundle_exec_with_chef(test_gem, commands)
       gemfile.puts(line)
     end
     gemfile.puts("gem #{CURRENT_GEM_NAME.inspect}, path: #{CURRENT_GEM_PATH.inspect}")
-    # veil is not on rubygems
-    gemfile.puts("gem 'veil', github: 'chef/chef_secrets'")
     gemfile.puts("gemspec path: #{gem_path.inspect}")
     gemfile.close
     Dir.chdir(gem_path) do
