@@ -5,6 +5,8 @@ module("config", package.seeall)
 -- NOTE: assumption that the following is defined globally:
 -- redis = require("resty/redis")
 
+local redis_password = os.getenv("REDIS_PASSWORD")
+
 local failsafe_config = {}
 failsafe_config["dl_default"] = { }
 failsafe_config["dl_default"][1] = "503_mode"
@@ -52,7 +54,6 @@ local function connect_redis()
       ngx.log(ngx.ERR, "failed to connect redis: ", err)
    end
 
-   local redis_password = os.getenv("REDIS_PASSWORD")
    if redis_password == nil then
       ngx.log(ngx.ERR, "REDIS_PASSWORD not found in the environment")
       ok = false
