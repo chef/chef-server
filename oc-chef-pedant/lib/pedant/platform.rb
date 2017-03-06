@@ -31,12 +31,12 @@ module Pedant
                 :server, :superuser, :superuser_key_data, :webui_key
 
     # Create a Platform object for a given server (specified by
-    # protocol, hostname, and port ONLY).  You must supply the
+    # protocol, hostname, and port ONLY). You must supply the
     # superuser's key data in PEM form.
     #
-    def initialize(server, creds_or_key_data , superuser_name='pivotal')
-      load_credentials(creds_or_key_data)
-
+    def initialize(server, superuser_key, webui_key, superuser_name='pivotal')
+      @superuser_key_data = superuser_key
+      @webui_key = webui_key
       @server = (Pedant.config.explicit_port_url ? explicit_port_url(server) : server )
       puts "Configured URL: #{@server}"
       @superuser = Pedant::Requestor.new(superuser_name, @superuser_key_data, platform: self)
@@ -47,19 +47,6 @@ module Pedant
       @ldap_testing = Pedant::Config[:ldap_testing]
       self.pedant_run_timestamp # Cache the global timestamp at initialization
       self
-    end
-
-    def load_credentials(creds_or_key_data)
-      case creds_or_key_data
-      when String
-        @superuser_key_data = creds_or_key_data
-      else
-        creds = creds_or_key_data
-        @superuser_key_data = creds.get('chef-server', 'superuser_key')
-        if creds.exist?('chef-server', 'webui_key')
-          @webui_key = creds.get('chef-server', 'webui_key')
-        end
-      end
     end
 
     DEFAULT_ORG_REWRITE = /^\/?(search|nodes|cookbooks|data|roles|sandboxes|environments|clients|principals|runs|groups|containers|keys)/

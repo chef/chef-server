@@ -3,15 +3,12 @@ require 'tempfile'
 require 'bundler'
 require 'json'
 require 'openssl'
-require 'veil'
 
 CURRENT_GEM_NAME = 'oc-chef-pedant'
 CURRENT_GEM_PATH = File.expand_path('../..', __FILE__)
 
 task :chef_zero_spec do
-  tmp_file = Tempfile.new("secrets").path
-  create_secrets_file(tmp_file)
-  @secrets_path = tmp_file
+  populate_secrets_env
   bundle_exec_with_chef("chef-zero", "rake pedant")
 end
 
@@ -53,15 +50,15 @@ def bundle_exec_with_chef(test_gem, commands)
 end
 
 def bundler_env
-  { "BUNDLE_GEMFILE" => @gemfile_path, "RUBYOPT" => nil, "GEMFILE_MOD" => nil,
-    "SECRETS_FILE" => @secrets_path }
+  { "BUNDLE_GEMFILE" => @gemfile_path,
+    "RUBYOPT" => nil,
+    "GEMFILE_MOD" => nil,
+    "SUPERUSER_KEY" => @superuser_key,
+    "WEBUI_KEY" => @webui_key
+  }
 end
 
-def create_secrets_file(file_path)
-  credentials = Veil::CredentialCollection::ChefSecretsFile.new(path: file_path)
-  key = OpenSSL::PKey::RSA.new(2048).to_pem
-  webui_key = OpenSSL::PKey::RSA.new(2048).to_pem
-  credentials.add("chef-server", "superuser_key", value: key)
-  credentials.add("chef-server", "webui_key", value: webui_key)
-  credentials.save
+def populate_secrets_env
+  @superuser_key = OpenSSL::PKey::RSA.new(2048).to_pem
+  @webui_key = OpenSSL::PKey::RSA.new(2048).to_pem
 end

@@ -3,8 +3,6 @@ source 'https://rubygems.org'
 gemspec
 gem 'rest-client', github: 'chef/rest-client'
 # For debugging in dvm
-# gem 'veil',path: '/host/external-deps/chef_secrets'
-gem 'veil', github: 'chef/chef_secrets'
 gem 'pry'
 gem 'rake'
 
