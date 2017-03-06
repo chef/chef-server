@@ -193,9 +193,15 @@ module Opscode
         end
 
         def amqp_config
-          {:host => amqp_host, :port => amqp_port, :user => amqp_user, :pass => amqp_pass, :vhost => amqp_vhost}
+          amqp_config = {:host => amqp_host, :port => amqp_port, :user => amqp_user, :vhost => amqp_vhost}
+          pass = if ENV['AMQP_PASS']
+                   ENV['AMQP_PASS']
+                 else amqp_pass
+                   amqp_pass
+                 end
+          amqp_config[:pass] = pass
+          amqp_config
         end
-
       end
 
       module CLI

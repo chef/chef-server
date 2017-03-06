@@ -6,4 +6,4 @@ cd /opt/opscode/embedded/service/opscode-expander
 export HOME=/opt/opscode/embedded/service/opscode-expander
 
 exec 2>&1
-exec /opt/opscode/embedded/bin/chpst -P -U <%= node['private_chef']['user']['username'] %> -u <%= node['private_chef']['user']['username'] %> /opt/opscode/embedded/bin/bundle exec /opt/opscode/embedded/service/opscode-expander/bin/opscode-expander-cluster -n <%= node['private_chef']['opscode-expander']['nodes'] %> -c <%= File.join(node["private_chef"]['opscode-expander']['dir'], "etc", "expander.rb") %>
+exec /opt/opscode/embedded/bin/veil-env-helper -s AMQP_PASS=rabbitmq.password -- /opt/opscode/embedded/bin/chpst -P -U <%= node['private_chef']['user']['username'] %> -u <%= node['private_chef']['user']['username'] %> /opt/opscode/embedded/bin/bundle exec /opt/opscode/embedded/service/opscode-expander/bin/opscode-expander-cluster -n <%= node['private_chef']['opscode-expander']['nodes'] %> -c <%= File.join(node["private_chef"]['opscode-expander']['dir'], "etc", "expander.rb") %>
