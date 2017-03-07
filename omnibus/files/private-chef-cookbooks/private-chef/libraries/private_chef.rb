@@ -519,9 +519,9 @@ module PrivateChef
           credentials.add("postgresql", "db_superuser_password",
                           value: PrivateChef["postgresql"]["db_superuser_password"],
                           frozen: true, force: true)
-        else
-          credentials.add("postgresql", "db_superuser_password", length: 100)
         end
+      else
+        credentials.add("postgresql", "db_superuser_password", length: 100)
       end
     end
 
