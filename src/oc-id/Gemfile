@@ -11,16 +11,17 @@ gem 'sass-rails', '>= 4.0.3'
 gem 'turbolinks', '~> 2.2.1'
 gem 'unicorn-rails', '~> 1.1.0'
 gem 'omniauth', '~> 1.3.2'
-gem 'omniauth-chef'
 gem 'nokogiri', '~> 1.6.2'
 gem 'pg'
 gem 'mixlib-authentication', '~> 1.3.0'
 gem 'sentry-raven'
-gem 'chef-web-core', git: 'https://github.com/chef/chef-web-core.git'
 gem 'responders', '~> 2.0'
 gem 'newrelic_rpm'
-
 gem 'doorkeeper', '~> 1.4.0'
+
+gem 'veil', git: 'https://github.com/chef/chef_secrets'
+gem 'omniauth-chef', git: 'https://github.com/chef/omniauth-chef'
+gem 'chef-web-core', git: 'https://github.com/chef/chef-web-core.git'
 
 #
 # These gems require a javascript runtime.  We don't want to ship a

@@ -22,12 +22,12 @@ class SessionsController < ApplicationController
 
   private
 
-    def credentials
-      request.env['omniauth.auth']
-    end
+  def credentials
+    request.env['omniauth.auth']
+  end
 
-    def session_parameters
-      { provider: credentials[:provider], uid: credentials[:uid] }
-    end
+  def session_parameters
+    { provider: credentials[:provider], uid: credentials[:uid] }
+  end
 
 end

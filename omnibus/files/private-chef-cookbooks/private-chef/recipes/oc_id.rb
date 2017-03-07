@@ -28,7 +28,7 @@ app_settings = {
   'chef' => {
     'endpoint' => "https://#{node['private_chef']['lb_internal']['vip']}",
     'superuser' => 'pivotal',
-    'key_path' => '/etc/opscode/webui_priv.pem'
+    'secrets_file' => '/etc/opscode/private-chef-secrets.json'
   },
   'doorkeeper' => {
     'administrators' => node['private_chef']['oc_id']['administrators'] || []
@@ -145,7 +145,7 @@ execute "oc_id_schema" do
   environment("RAILS_ENV" => "production",
               "VERSION" => `ls -1 /opt/opscode/embedded/service/oc_id/db/migrate | tail -n 1 | sed -e "s/_.*//g"`.chomp,
               "PATH" => "/opt/opscode/embedded/bin")
-
+  sensitive true
   only_if { is_data_master? }
 end
 

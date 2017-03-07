@@ -10,6 +10,22 @@ GIT
       sass-rails (>= 3.2.5)
 
 GIT
+  remote: https://github.com/chef/chef_secrets
+  revision: d9695b10fc05d10b6b32d79e82c568f13510888a
+  specs:
+    veil (0.1.0)
+      bcrypt (~> 3.1)
+      pbkdf2
+
+GIT
+  remote: https://github.com/chef/omniauth-chef
+  revision: b17ea7fe7cc5d2ddc2e1241f9fcf31d32abc07cf
+  specs:
+    omniauth-chef (0.3.0)
+      chef (~> 11)
+      omniauth (~> 1.2)
+
+GIT
   remote: https://github.com/nixme/jazz_hands
   revision: 5e4b48f145883ecb14b55bf04eacc28ac9662676
   branch: bring-your-own-debugger
@@ -66,6 +82,7 @@ GEM
       tzinfo (~> 1.1)
     arel (6.0.3)
     awesome_print (1.7.0)
+    bcrypt (3.1.11)
     better_errors (2.1.1)
       coderay (>= 1.0.0)
       erubis (>= 2.6.6)
@@ -230,9 +247,7 @@ GEM
     omniauth (1.3.2)
       hashie (>= 1.2, < 4)
       rack (>= 1.0, < 3)
-    omniauth-chef (0.2.0)
-      chef (~> 11)
-      omniauth (~> 1.2)
+    pbkdf2 (0.1.0)
     pg (0.18.4)
     pkg-config (1.1.7)
     plist (3.1.0)
@@ -410,7 +425,7 @@ DEPENDENCIES
   newrelic_rpm
   nokogiri (~> 1.6.2)
   omniauth (~> 1.3.2)
-  omniauth-chef
+  omniauth-chef!
   pg
   pry-byebug
   quiet_assets
@@ -430,6 +445,7 @@ DEPENDENCIES
   turbolinks (~> 2.2.1)
   uglifier (~> 2.4.0)
   unicorn-rails (~> 1.1.0)
+  veil!
 
 BUNDLED WITH
-   1.13.7
+   1.14.3

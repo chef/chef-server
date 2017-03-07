@@ -21,12 +21,12 @@ To run this app you'll need:
 * A Postgres database instance
 * A reachable Enterprise Chef 11 or Chef 12 server URL
 * A privileged key for that Chef server (usually stored in
-  /etc/opscode/webui_priv.pem on the Chef server)
+  /etc/opscode/private-chef-secrets.json on the Chef server)
 
 ## Configuration
 
 For instructions on configuring the Chef identity that is included with Chef
-server, see the 
+server, see the
 [chef-server.rb Settings documentation](https://docs.chef.io/config_rb_server_optional_settings.html#oc-id).
 
 [RailsConfig](https://github.com/railsconfig/rails_config) is used for
