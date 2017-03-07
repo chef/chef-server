@@ -2,9 +2,10 @@ require_relative '../../libraries/private_chef.rb'
 require 'chef/log'
 
 def expect_existing_secrets
-  allow(File).to receive(:exist?).and_call_original
-  allow(File).to receive(:exist?).with("/etc/opscode/private-chef-secrets.json").and_return(true)
-  allow(File).to receive(:exist?).with("/etc/opscode/pivotal.pem").and_return(false)
+  allow(File).to receive(:exists?).and_call_original
+  allow(File).to receive(:exists?).with("/etc/opscode/private-chef-secrets.json").and_return(true)
+  allow(File).to receive(:size).with("/etc/opscode/private-chef-secrets.json").and_return(1)
+  allow(File).to receive(:exists?).with("/etc/opscode/pivotal.pem").and_return(false)
   allow(IO).to receive(:read).and_call_original
   allow(IO).to receive(:read).with("/etc/opscode/private-chef-secrets.json").and_return(secrets)
 end
@@ -36,8 +37,7 @@ describe PrivateChef do
     allow(PrivateChef).to receive(:node).and_return(node)
     allow(PrivateChef).to receive(:exit!).and_raise(SystemExit)
     allow_any_instance_of(Veil::CredentialCollection::ChefSecretsFile).to receive(:save).and_return(true)
-    allow_any_instance_of(Kernel).to receive(:system).with("chmod 0600 /etc/opscode/private-chef-secrets.json").and_return(true)
-    allow_any_instance_of(Kernel).to receive(:system).with("chown opscode /etc/opscode/private-chef-secrets.json").and_return(true)
+    allow(File).to receive(:exists?).with("/etc/opscode/private-chef-secrets.json").and_return(false)
   }
 
   # Example content of /etc/opscode/private-chef-secrets.json
@@ -140,7 +140,7 @@ EOF
     }
 
     before  do
-      allow(File).to receive(:exist?).with("/etc/opscode/private-chef-secrets.json").and_return false
+      allow(File).to receive(:exists?).with("/etc/opscode/private-chef-secrets.json").and_return false
     end
 
 
