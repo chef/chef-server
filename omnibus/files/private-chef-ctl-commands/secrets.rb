@@ -1,4 +1,6 @@
 add_command_under_category "set-ldap-bind-password", "Secrets Management", "Add or change LDAP bind password", 2 do
+  require 'highline'
+
   ARGV.delete("--yes") # remove --yes so users can give it in all cases in automation
   bind_password = get_secret("BIND_PASSWORD", "LDAP bind password")
   set_secret("ldap", "bind_password", bind_password)
@@ -33,11 +35,13 @@ def get_secret(env_key, prompt='secret')
   elsif ENV[env_key]
     ENV[env_key]
   else
-    prompt_for_password(prompt)
+    pass1 = HighLine.ask("Enter #{prompt}: " ) { |q| q.echo = false }
+    pass2 = HighLine.ask("Re-enter #{prompt}: " ) { |q| q.echo = false }
+    if pass1 == pass2
+      pass2
+    else
+      STDERR.puts "ERROR: Passwords don't match"
+      exit(1)
+    end
   end
-end
-
-def prompt_for_password(prompt)
-  require 'highline'
-  HighLine.ask("Enter #{prompt}: " ) { |q| q.echo = "*" }
 end

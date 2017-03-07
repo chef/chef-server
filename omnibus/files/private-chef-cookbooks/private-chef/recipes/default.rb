@@ -188,3 +188,9 @@ file "/etc/opscode/chef-server-running.json" do
 
   content Chef::JSONCompat.to_json_pretty(file_content)
 end
+
+ruby_block "print reconfigure warnings" do
+  block do
+    ChefServer::Warnings.print_warnings
+  end
+end
