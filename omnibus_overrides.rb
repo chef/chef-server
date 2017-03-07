@@ -1,4 +1,3 @@
-override :rabbitmq, version: "3.6.6"
 override :erlang, version: "18.3"
 override :lua, version: "5.1.5"
 override :'omnibus-ctl', version: "master"
