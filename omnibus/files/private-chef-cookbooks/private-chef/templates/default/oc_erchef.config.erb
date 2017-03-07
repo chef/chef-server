@@ -93,8 +93,6 @@
             {port, <%= node['private_chef']['ldap']['port'] || (@ssl_enabled ? 636 : 389) %> },
             {timeout, <%= node['private_chef']['ldap']['timeout'] || 60000 %> },
             {bind_dn, "<%= node['private_chef']['ldap']['bind_dn'] || "" %>" },
-            %% TODO: user-provided pass, what do?
-            {bind_password, "<%= @helper.escape_characters_in_string(node['private_chef']['ldap']['bind_password']) %>" },
             {base_dn, "<%= node['private_chef']['ldap']['base_dn'] || "" %>" },
             {group_dn, "<%= node['private_chef']['ldap']['group_dn'] || "" %>" },
             {login_attribute, "<%= node['private_chef']['ldap']['login_attribute'] || "samaccountname" %>" },

@@ -28,11 +28,7 @@ unless PrivateChef.credentials.exist?('chef-server', 'superuser_key')
   PrivateChef.credentials.add('chef-server', 'superuser_key',
                               value: pivotal_key.to_pem,
                               frozen: true )
-  # Used only io chef_server_data_bootstrap.rb  to provide the key for pivotal
-  # user creation.  Setting it here so that we can keep the related OpenSSL call wrangling
-  # to one place.
-  # Setting at the top level so that we don't export this to chef-server-running.json
-  node.set['bootstrap']['superuser_public_key'] = pivotal_key.public_key.to_s
+
   # TODO 2017-02-28 mp: let's consider making this the default behavior
   # of any write to CredentialsCollection -
   PrivateChef.credentials.save

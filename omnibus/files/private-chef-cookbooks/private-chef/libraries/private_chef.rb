@@ -10,6 +10,7 @@ require "chef/mash"
 require "chef/json_compat"
 require "chef/mixin/deep_merge"
 require "veil"
+require_relative "./warnings.rb"
 
 module PrivateChef
   extend(Mixlib::Config)
@@ -494,15 +495,8 @@ module PrivateChef
       credentials.add("bookshelf", "sql_password", length: 80)
       credentials.add("bookshelf", "sql_ro_password", length: 80)
 
-      # Always use the value in chef-server.rb if we're using external postgresql.
-      # Other external services either don't require credentials or don't overload
-      # the namespace.
-      if PrivateChef["postgresql"]["external"]
-        credentials.remove("postgresql", "db_superuser_password")
-        credentials.add("postgresql", "db_superuser_password", value: PrivateChef["postgresql"]["db_superuser_password"])
-      else
-        credentials.add("postgresql", "db_superuser_password", length: 100)
-      end
+      migrate_and_check_db_superuser_password
+      migrate_and_check_ldap_bind_password
 
       # TODO 2017-03-03 sr: remove "|| true" when we can cope with secrets not
       #                     being in node attrs
@@ -516,6 +510,48 @@ module PrivateChef
       end
 
       credentials.save
+    end
+
+    def migrate_and_check_db_superuser_password
+      if PrivateChef["postgresql"]["external"]
+        if PrivateChef["postgresql"] && PrivateChef["postgresql"]["db_superuser_password"]
+          warn_if_cred_mismatch("postgresql", "db_superuser_password", "set-db-superuser-password")
+          credentials.add("postgresql", "db_superuser_password",
+                          value: PrivateChef["postgresql"]["db_superuser_password"],
+                          frozen: true, force: true)
+        end
+      else
+        credentials.add("postgresql", "db_superuser_password", length: 100)
+      end
+    end
+
+    def migrate_and_check_ldap_bind_password
+      if PrivateChef["ldap"] && PrivateChef["ldap"]["bind_password"]
+        warn_if_cred_mismatch("ldap", "bind_password", "set-ldap-bind-password")
+        # not in store, but in config -- we expect it in the store later
+        credentials.add("ldap", "bind_password", value: PrivateChef["ldap"]["bind_password"], frozen: true, force: true)
+      end
+    end
+
+    def warn_if_cred_mismatch(group, name, command_name)
+      pass_in_config = PrivateChef[group][name]
+
+      if credentials.exist?(group, name)
+        pass_in_secrets = credentials.get(group, name)
+
+        if pass_in_secrets != pass_in_config
+          ChefServer::Warnings.warn <<WARN
+#{group}['#{name}'] in secrets store does not match the value
+configured in chef-server.rb -- overriding secrets store password with
+configuration file password.
+
+If this is unexpected, consider removing the secret from
+chef-server.rb and setting the correct value with:
+
+    chef-server-ctl #{command_name}
+WARN
+        end
+      end
     end
 
     def gen_redundant(node_name, topology)
@@ -536,10 +572,25 @@ module PrivateChef
       end
     end
 
+    def ensure_bind_password
+      # if bind_dn is not set, don't care if there's a bind_password
+      return unless PrivateChef["ldap"].key?("bind_dn")
+
+      has_in_secrets = credentials.exist?("ldap", "bind_password")
+
+      # gen_secrets takes care of moving the secret from config to bind_password
+      # (if it's not already in the secrets store, having been put there
+      # manually)
+      unless has_in_secrets
+        raise "Missing required LDAP config value bind_password (required when configuring bind_dn)"
+      end
+    end
+
+
     def gen_ldap
       required_ldap_config_values = %w{ host base_dn }
-      # ensure a bind password was provided along with the optional bind_dn
-      required_ldap_config_values << "bind_password" if PrivateChef["ldap"].key?("bind_dn")
+      ensure_bind_password
+
       PrivateChef["ldap"]["system_adjective"] ||= "AD/LDAP"
       required_ldap_config_values.each do |val|
         unless PrivateChef["ldap"].key?(val)

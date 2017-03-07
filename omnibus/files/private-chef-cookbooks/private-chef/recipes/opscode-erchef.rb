@@ -36,7 +36,6 @@ rabbitmq = OmnibusHelper.new(node).rabbitmq_configuration
 actions_vip = rabbitmq['vip']
 actions_port = rabbitmq['node_port']
 actions_user = rabbitmq['actions_user']
-actions_password = rabbitmq['actions_password']
 actions_vhost = rabbitmq['actions_vhost']
 actions_exchange = rabbitmq['actions_exchange']
 
@@ -50,7 +49,6 @@ template erchef_config do
                                                                  :actions_vip => actions_vip,
                                                                  :actions_port => actions_port,
                                                                  :actions_user => actions_user,
-                                                                 :actions_password => actions_password,
                                                                  :actions_vhost => actions_vhost,
                                                                  :actions_exchange => actions_exchange,
                                                                  :ldap_encryption_type => ldap_encryption_type,

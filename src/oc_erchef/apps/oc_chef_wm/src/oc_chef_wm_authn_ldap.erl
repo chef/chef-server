@@ -81,7 +81,10 @@ maybe_ssl_options(_, Options) ->
 
 find_and_authenticate_user(Session, User, Password, Config) ->
     BindDN = proplists:get_value(bind_dn, Config),
-    BindPass = proplists:get_value(bind_password, Config),
+    BindPass = case chef_secrets:get(<<"ldap">>, <<"bind_password">>) of
+                   {ok, Pass} -> Pass;
+                   {error, not_found} -> undefined
+               end,
     BaseDN = proplists:get_value(base_dn, Config),
     LoginAttr = proplists:get_value(login_attribute, Config, "samaccountname"),
     Base = {base, BaseDN},
@@ -95,10 +98,10 @@ find_and_authenticate_user(Session, User, Password, Config) ->
 
     % Auth so we can search for the user
     ok = case {BindDN, BindPass} of
-             {"", ""} ->
+             {"", undefined} ->
                  % This is a workaround for an upstream eldap bug.
                  % eldap does not correctly process the anon_auth configuration,
-                 % however, passing anon for both the BindDN and BindPass bypasses the
+                 % however, passing anon for both the BindDN and BindPass bypasses.
                  %
                  % TODO: Remove once a fix is accepted upstream and we can upgrade our
                  % erlang version to pull in the fix.

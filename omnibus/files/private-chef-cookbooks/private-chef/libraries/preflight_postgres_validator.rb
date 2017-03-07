@@ -57,7 +57,11 @@ class PostgresqlPreflightValidator < PreflightValidator
     # These values must be explictly set in chef-server.rb:
     fail_with err_CSPG004_missing_external_host unless cs_pg_attr.has_key? 'vip'
     fail_with err_CSPG002_missing_superuser_id unless cs_pg_attr.has_key? 'db_superuser'
-    fail_with err_CSPG003_missing_superuser_password unless cs_pg_attr.has_key? 'db_superuser_password'
+    fail_with err_CSPG003_missing_superuser_password unless has_superuser_password?
+  end
+
+  def has_superuser_password?
+    PrivateChef.credentials.exists?("postgresql", "db_superuser_password") || cs_pg_attr.has_key?("db_superuser_password")
   end
 
   # We do not support changing from managed to external DB or vice-versa, so the
