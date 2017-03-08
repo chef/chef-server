@@ -47,6 +47,7 @@ def get_secret(env_key, prompt='secret')
   if password_arg
     password_arg
   elsif ENV[env_key]
+    puts "Using value of environment variable #{env_key}. To interactively enter the password, unset this environment variable."
     ENV[env_key]
   else
     pass1 = HighLine.ask("Enter #{prompt}: " ) { |q| q.echo = false }
