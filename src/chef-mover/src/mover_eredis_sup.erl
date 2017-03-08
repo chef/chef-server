@@ -21,7 +21,7 @@ start_link() ->
 init([]) ->
     Host = envy:get(mover, eredis_host, string),
     Port = envy:get(mover, eredis_port, integer),
-    Password = chef_secrets:get(<<"redis_lb">>, <<"password">>),
+    {ok, Password} = chef_secrets:get(<<"redis_lb">>, <<"password">>),
     StartUp = {?MODULE, eredis_start_link, [Host, Port, Password]},
     Child = [{eredis, StartUp, permanent, brutal_kill, worker, [eredis]}],
     {ok, {{one_for_one, 60, 10}, Child}}.
