@@ -115,7 +115,7 @@ EOF
 
       def default_opts_for_service(service)
         username = Partybus.config.postgres['db_superuser']
-        password = Partybus.config.postgres['db_superuser_password']
+        password = Partybus.config.secrets['postgresql']['db_superuser_password'].value
         path = "#{service}/schema"
         case service
         when 'oc_erchef'

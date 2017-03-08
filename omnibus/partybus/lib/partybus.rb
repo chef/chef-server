@@ -1,3 +1,5 @@
+require 'veil'
+
 module Partybus
 
   def self.config
@@ -43,7 +45,7 @@ EOF
         exit(1)
       end
       if File.exists?(SECRETS_FILE)
-        @secrets = JSON.parse(IO.read(SECRETS_FILE))
+        @secrets = Veil::CredentialCollection::ChefSecretsFile.new(path: SECRETS_FILE)
       else
         log <<EOF
 ***

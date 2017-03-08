@@ -19,6 +19,10 @@
 
 rabbitmq = node["private_chef"]["rabbitmq"]
 
+password = PrivateChef.credentials.get("rabbitmq", "password")
+actions_password = PrivateChef.credentials.get("rabbitmq", "actions_password")
+management_password = PrivateChef.credentials.get("rabbitmq", "management_password")
+
 rabbitmq_dir = rabbitmq['dir']
 rabbitmq_etc_dir = File.join(rabbitmq_dir, "etc")
 rabbitmq_ca_dir = rabbitmq_etc_dir
@@ -134,7 +138,7 @@ if is_data_master?
 
   # create chef user for the queue
   execute "#{rmq_ctl} add_user #{rabbitmq['user']} [PASSWORD]" do
-    command "#{rmq_ctl} add_user #{rabbitmq['user']} #{rabbitmq['password']}"
+    command "#{rmq_ctl} add_user #{rabbitmq['user']} #{password}"
     environment (rabbitmq_env)
     not_if "#{rmq_ctl_chpst} list_users |grep #{rabbitmq['user']}", :environment => rabbitmq_env, :user => "root"
     user opc_username
@@ -143,7 +147,7 @@ if is_data_master?
   end
 
   execute "#{rmq_ctl} add_user #{rabbitmq['actions_user']} [PASSWORD]" do
-    command "#{rmq_ctl} add_user #{rabbitmq['actions_user']} #{rabbitmq['actions_password']}"
+    command "#{rmq_ctl} add_user #{rabbitmq['actions_user']} #{actions_password}"
     environment (rabbitmq_env)
     user opc_username
     not_if "#{rmq_ctl_chpst} list_users |grep #{rabbitmq['actions_user']}", :environment => rabbitmq_env, :user => "root"
@@ -152,7 +156,7 @@ if is_data_master?
   end
 
   execute "#{rmq_ctl} add_user #{rabbitmq['management_user']} [PASSWORD]" do
-    command "#{rmq_ctl} add_user #{rabbitmq['management_user']} #{rabbitmq['management_password']}"
+    command "#{rmq_ctl} add_user #{rabbitmq['management_user']} #{management_password}"
     environment (rabbitmq_env)
     user opc_username
     not_if "#{rmq_ctl_chpst} list_users |grep #{rabbitmq['management_user']}", :environment => rabbitmq_env, :user => "root"
@@ -160,30 +164,31 @@ if is_data_master?
     sensitive true
   end
 
-  # Update the passwords if they've changed
+  # Update the passwords if they've changed (we'll notice by trying to
+  # authenticate the user with the (possibly) new password)
   execute "#{rmq_ctl} change_password #{rabbitmq['user']} [PASSWORD]" do
-    command "#{rmq_ctl} change_password #{rabbitmq['user']} #{rabbitmq['password']}"
+    command "#{rmq_ctl} change_password #{rabbitmq['user']} #{password}"
     environment (rabbitmq_env)
-    only_if { node["previous_run"] && node["previous_run"]["rabbitmq"]["password"] != rabbitmq["password"] }
     user opc_username
+    not_if "#{rmq_ctl_chpst} authenticate_user #{rabbitmq['user']} #{password}", :environment => rabbitmq_env, :user => "root"
     retries 10
     sensitive true
   end
 
   execute "#{rmq_ctl} change_password #{rabbitmq['actions_user']} [PASSWORD]" do
-    command "#{rmq_ctl} change_password #{rabbitmq['actions_user']} #{rabbitmq['actions_password']}"
+    command "#{rmq_ctl} change_password #{rabbitmq['actions_user']} #{actions_password}"
     environment (rabbitmq_env)
     user opc_username
-    only_if { node["previous_run"] && node["previous_run"]["rabbitmq"]["actions_password"] != rabbitmq["actions_password"] }
+    not_if "#{rmq_ctl_chpst} authenticate_user #{rabbitmq['actions_user']} #{actions_password}", :environment => rabbitmq_env, :user => "root"
     retries 10
     sensitive true
   end
 
   execute "#{rmq_ctl} change_password #{rabbitmq['management_user']} [PASSWORD]" do
-    command "#{rmq_ctl} change_password #{rabbitmq['management_user']} #{rabbitmq['management_password']}"
+    command "#{rmq_ctl} change_password #{rabbitmq['management_user']} #{management_password}"
     environment (rabbitmq_env)
     user opc_username
-    only_if { node["previous_run"] && node["previous_run"]["rabbitmq"]["management_password"] != rabbitmq["management_password"] }
+    not_if "#{rmq_ctl_chpst} authenticate_user #{rabbitmq['management_user']} #{management_password}", :environment => rabbitmq_env, :user => "root"
     retries 10
     sensitive true
   end
@@ -251,7 +256,7 @@ if is_data_master?
   execute "#{rmq_ctl} set_user_tags #{rabbitmq['management_user']} administrator" do
     environment (rabbitmq_env)
     user opc_username
-    not_if "#{rmq_ctl_chpst} list_users | grep rabbitmgmt | grep administrator", :environment => rabbitmq_env, :user => "root"
+    not_if "#{rmq_ctl_chpst} list_users | grep #{rabbitmq['management_user']} | grep administrator", :environment => rabbitmq_env, :user => "root"
     retries 10
   end
 
