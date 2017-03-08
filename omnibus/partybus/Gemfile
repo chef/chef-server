@@ -3,3 +3,4 @@ source "http://rubygems.org"
 gem "sequel", "~> 3.34.1"
 
 gem "pg", "~> 0.16.0"
+gem "veil", git: "https://github.com/chef/chef_secrets"
