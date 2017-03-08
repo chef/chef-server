@@ -477,7 +477,6 @@ module PrivateChef
 
       credentials.add("redis_lb", "password", length: 100)
       credentials.add("rabbitmq", "password", length: 100)
-      credentials.add("rabbitmq", "actions_password", length: 100)
       credentials.add("rabbitmq", "management_password", length: 100)
       credentials.add("drbd", "shared_secret", length: 60)
       credentials.add("keepalived", "vrrp_instance_password", length: 100)
@@ -495,27 +494,61 @@ module PrivateChef
       credentials.add("bookshelf", "sql_password", length: 80)
       credentials.add("bookshelf", "sql_ro_password", length: 80)
 
+      generate_rabbit_actions_password
       migrate_and_check_db_superuser_password
       migrate_and_check_ldap_bind_password
-
       # TODO 2017-03-03 sr: remove "|| true" when we can cope with secrets not
       #                     being in node attrs
-      if PrivateChef["insecure_addon_compat"] || true
-        credentials.legacy_credentials_hash.each do |service, creds|
-          next if service == "chef-server"
-          creds.each do |name, value|
-            PrivateChef[service][name] ||= value
-          end
-        end
-      end
+      save_credentials_to_config if (PrivateChef["insecure_addon_compat"] || true)
 
       credentials.save
+    end
+
+    #
+    # This has the end-result of making the credentials accessible via
+    # node attributes in the cookbooks, since the PrivateChef
+    # configuration object is eventually merged into the node object.
+    #
+    def save_credentials_to_config
+      credentials.legacy_credentials_hash.each do |service, creds|
+        next if service == "chef-server"
+        creds.each do |name, value|
+          PrivateChef[service][name] ||= value
+        end
+      end
+    end
+
+    #
+    # The actions queue can be hosted on an external RabbitMQ instance
+    # managed by analytics. In this case, the user provides the
+    # RabbitMQ information in the external_rabbitmq configuration key.
+    #
+    def generate_rabbit_actions_password
+      if PrivateChef["external_rabbitmq"]["enabled"] && PrivateChef["external_rabbitmq"]["actions_password"]
+        warn_if_cred_mismatch(group: "rabbitmq",
+                              name: "actions_password",
+                              command_name: "set-actions-password",
+                              config_value: PrivateChef["external_rabbitmq"]["actions_password"],
+                              config_key_desc: "external_rabbitmq['actions_password']")
+
+        # NOTE: This is stored under the rabbitmq (rather than
+        # external_rabbitmq) section so that applications don't need
+        # to know whether they are talking to a local or remote
+        # rabbitmq for the actions queue.
+        credentials.add("rabbitmq", "actions_password",
+                        value: PrivateChef["external_rabbitmq"]["actions_password"],
+                        frozen: true, force: true)
+      else
+        credentials.add("rabbitmq", "actions_password", length: 100)
+      end
     end
 
     def migrate_and_check_db_superuser_password
       if PrivateChef["postgresql"]["external"]
         if PrivateChef["postgresql"] && PrivateChef["postgresql"]["db_superuser_password"]
-          warn_if_cred_mismatch("postgresql", "db_superuser_password", "set-db-superuser-password")
+          warn_if_cred_mismatch(group: "postgresql",
+                                name: "db_superuser_password",
+                                command_name: "set-db-superuser-password")
           credentials.add("postgresql", "db_superuser_password",
                           value: PrivateChef["postgresql"]["db_superuser_password"],
                           frozen: true, force: true)
@@ -527,21 +560,25 @@ module PrivateChef
 
     def migrate_and_check_ldap_bind_password
       if PrivateChef["ldap"] && PrivateChef["ldap"]["bind_password"]
-        warn_if_cred_mismatch("ldap", "bind_password", "set-ldap-bind-password")
+        warn_if_cred_mismatch(group: "ldap", name: "bind_password", command_name: "set-ldap-bind-password")
         # not in store, but in config -- we expect it in the store later
         credentials.add("ldap", "bind_password", value: PrivateChef["ldap"]["bind_password"], frozen: true, force: true)
       end
     end
 
-    def warn_if_cred_mismatch(group, name, command_name)
-      pass_in_config = PrivateChef[group][name]
+    def warn_if_cred_mismatch(opts)
+      group = opts[:group]
+      name = opts[:name]
+      return if !credentials.exist?(group, name)
 
-      if credentials.exist?(group, name)
-        pass_in_secrets = credentials.get(group, name)
+      pass_in_config = opts[:config_value] || PrivateChef[group][name]
+      pass_in_secrets = opts[:secrets_value] || credentials.get(group, name)
+      command_name = opts[:command_name]
+      config_key_desc = opts[:config_key_desc] || "#{group}['#{name}']"
 
-        if pass_in_secrets != pass_in_config
-          ChefServer::Warnings.warn <<WARN
-#{group}['#{name}'] in secrets store does not match the value
+      if pass_in_secrets != pass_in_config
+        ChefServer::Warnings.warn <<WARN
+#{config_key_desc} in secrets store does not match the value
 configured in chef-server.rb -- overriding secrets store password with
 configuration file password.
 
@@ -550,7 +587,6 @@ chef-server.rb and setting the correct value with:
 
     chef-server-ctl #{command_name}
 WARN
-        end
       end
     end
 
