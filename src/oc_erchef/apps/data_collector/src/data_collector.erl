@@ -46,9 +46,9 @@ is_enabled() ->
 
 -spec token() -> list() | atom().
 token() ->
-    case application:get_env(data_collector, token) of
+    case chef_secrets:get(<<"data_collector">>, <<"token">>) of
         {ok, Token} ->
             Token;
-        undefined ->
+        {error, not_found} ->
             undefined
     end.
