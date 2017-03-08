@@ -8,6 +8,11 @@ This document contains release notes for the current major release and all patch
 For prior releases, see
 [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 12.14.0 (2017-03-23)
+
+Chef Analytics is no longer supported effective with this release.  Contact your Chef Account Representative
+if you have questions or need further information.
+
 ## 12.13.0 (2017-02-20)
 
 ### New platform: RHEL6/s390x
