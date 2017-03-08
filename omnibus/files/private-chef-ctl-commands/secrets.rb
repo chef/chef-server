@@ -20,6 +20,20 @@ add_command_under_category "set-db-superuser-password", "Secrets Management", "A
   set_secret("postgresql", "db_superuser_password", password)
 end
 
+add_command_under_category "set-actions-password", "Secrets Management", "Add or change the rabbitmq actions queue password", 2 do
+  require 'highline'
+
+  if !ARGV.delete("--yes")
+    STDERR.puts "WARN: Manually setting the actions password is only supported for external rabbitmq instances"
+    if !HighLine.agree("Would you like to continue (y/n)? ")
+      exit(0)
+    end
+  end
+
+  password = get_secret("ACTIONS_PASSWORD", "actions queue password")
+  set_secret("rabbitmq", "actions_password", password)
+end
+
 def set_secret(group, key, secret)
   # TODO(ssd) 2017-03-07: We could just use veil directly here since we already require it other places
   # in the -ctl commands...

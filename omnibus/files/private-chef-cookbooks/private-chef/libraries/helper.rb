@@ -17,11 +17,16 @@ class OmnibusHelper
 
   def rabbitmq_configuration
     external = node['private_chef']['external-rabbitmq']['enable']
-    if external
-      node['private_chef']['external-rabbitmq']
-    else
-      node['private_chef']['rabbitmq']
-    end
+    config = if external
+               node['private_chef']['external-rabbitmq'].to_hash
+             else
+               node['private_chef']['rabbitmq'].to_hash
+             end
+
+    # TODO(ssd) 2017-03-07: We need to look into how analytics integrates with the chef-server
+    # to figure out how this credential flows through the system.
+    config['actions_password'] = PrivateChef.credentials.get("rabbitmq", "actions_password")
+    config
   end
 
   # Normalizes hosts. If the host part is an ipv6 literal, then it

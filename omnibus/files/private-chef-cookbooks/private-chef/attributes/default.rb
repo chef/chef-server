@@ -186,6 +186,12 @@ default['private_chef']['rabbitmq']['rabbit_mgmt_ibrowse_options'] =  "{connect_
 
 ####
 # External RabbitMQ
+#
+# When enabled, the "external-rabbitmq" manages the *actions* queue.
+# The expander queue is still on the local expander installation. This
+# option is used for Analytics installations which host their own
+# rabbitmq queue.
+#
 ####
 default['private_chef']['external-rabbitmq']['enable'] = false
 default['private_chef']['external-rabbitmq']['actions_user'] = 'actions'
