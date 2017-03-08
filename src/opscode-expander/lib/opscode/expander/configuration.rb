@@ -1,6 +1,7 @@
 require 'pp'
 require 'optparse'
 require 'singleton'
+require 'veil'
 
 require 'opscode/expander/flattener'
 require 'opscode/expander/loggable'
@@ -133,6 +134,11 @@ module Opscode
 
         configurable :log_level, :info
 
+        configurable :veil_config, {
+                       provider: 'chef-secrets-file',
+                       path: '/etc/opscode/private-chef-secrets.json'
+                     }
+
         # override the setter for log_level to also actually set the level
         def log_level=(level)
           if level #don't accept nil for an answer
@@ -192,10 +198,21 @@ module Opscode
           (lower_bound...upper_bound).to_a
         end
 
-        def amqp_config
-          {:host => amqp_host, :port => amqp_port, :user => amqp_user, :pass => amqp_pass, :vhost => amqp_vhost}
+        def veil
+          @veil ||= Veil::CredentialCollection.from_config(veil_config)
         end
 
+        def amqp_config
+          amqp_config = {:host => amqp_host, :port => amqp_port, :user => amqp_user, :vhost => amqp_vhost}
+          pass = if veil.exist?("rabbitmq", "password")
+                   veil.get("rabbitmq", "password")
+                 else
+                   amqp_pass
+                 end
+
+          amqp_config[:pass] = pass
+          amqp_config
+        end
       end
 
       module CLI
