@@ -19,7 +19,7 @@ setup_chef_secrets() ->
     FakeSecretsFile = filename:join(code:priv_dir(data_collector), "../test/secrets.json"),
     application:set_env(chef_secrets, provider, chef_secrets_json_file),
     application:set_env(chef_secrets, provider_config, [{secrets_file, FakeSecretsFile}]),
-    ok = application:ensure_all_started(chef_secrets).
+    application:ensure_all_started(chef_secrets).
 
 setup(MockedModules) ->
     [meck:new(M) || M <- MockedModules],
