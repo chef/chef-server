@@ -14,7 +14,7 @@ define_upgrade do
     keyname = pc['opscode-erchef'].has_key?('sql_user') ? 'opscode-erchef' : 'postgresql'
     connection = ::PGconn.open('user' => pc[keyname]['sql_user'],
                                'host' => pc['postgresql']['vip'],
-                               'password' => Partybus.config.secrets.get(keyname, 'sql_password'),
+                               'password' => Partybus.config.secrets.get('opscode_erchef', 'sql_password'),
                                'port' => pc['postgresql']['port'],
                                'dbname' => 'opscode_chef')
     begin
