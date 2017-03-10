@@ -1,25 +1,49 @@
-add_command_under_category "set-ldap-bind-password", "Secrets Management", "Add or change LDAP bind password", 2 do
-  ARGV.delete("--yes") # remove --yes so users can give it in all cases in automation
-  bind_password = get_secret("BIND_PASSWORD", "LDAP bind password")
-  set_secret("ldap", "bind_password", bind_password)
-end
-
 add_command_under_category "set-db-superuser-password", "Secrets Management", "Add or change DB superuser password", 2 do
 
   confirm_continue!("WARN: Manually setting the DB superuser password is only supported for external postgresql instances")
-  password = get_secret("DB_PASSWORD", "DB superuser password")
-  set_secret("postgresql", "db_superuser_password", password)
+  password = get_secret("DB_PASSWORD", "DB superuser password", ARGV[3])
+  set_secret_("postgresql", "db_superuser_password", password)
 end
 
 add_command_under_category "set-actions-password", "Secrets Management", "Add or change the rabbitmq actions queue password", 2 do
   confirm_continue!("WARN: Manually setting the actions password is only supported for external rabbitmq instances")
-  password = get_secret("ACTIONS_PASSWORD", "actions queue password")
-  set_secret("rabbitmq", "actions_password", password)
+  password = get_secret("ACTIONS_PASSWORD", "actions queue password", ARGV[3])
+  set_secret_("rabbitmq", "actions_password", password)
 end
 
-add_command_under_category "set-data-collector-token", "Secrets Management", "Set or change the data collector token", 2 do
-  password = get_secret("DATA_COLLECTOR_TOKEN", "the data collector token provided by Automate")
-  set_secret("data_collector", "token", password)
+KNOWN_CREDENTIALS = {
+  "ldap" => ["bind_password"],
+  "data_collector" => ["token"],
+  "rabbitmq" => ["password", "management_password"],
+  "redis_lb" => ["password"],
+  "drbd" => ["shared_secret"],
+  "keepalived" => ["vrrp_instance_password"],
+  "opscode_erchef" => ["sql_password", "sql_ro_password"],
+  "oc_bifrost" => ["superuser_id", "sql_password", "sql_ro_password"],
+  "oc_id" => ["secret_key_base", "sql_password", "sql_ro_password"],
+  "bookshelf" => ["access_key_id", "secret_access_key", "sql_password", "sql_ro_password"],
+}
+
+add_command_under_category "set-secret", "Secrets Management", "Set or change secret NAME of GROUP", 2 do
+  group = ARGV[3]
+  name = ARGV[4]
+
+  unless is_known_credential(group, name)
+    msg = "chef-server-ctl set-secret: Unknown credential: '#{name}' (group '#{group}')"
+    STDERR.puts msg
+    raise SystemExit.new(1, msg)
+  end
+
+  env_name = "#{group.upcase}_#{name.upcase}"
+  disp_name = "#{group} #{name}"
+  password = get_secret(env_name, disp_name, ARGV[5])
+  set_secret_(group, name, password)
+end
+
+def is_known_credential(group, name)
+  return false unless KNOWN_CREDENTIALS[group]
+
+  KNOWN_CREDENTIALS[group].member? name
 end
 
 def confirm_continue!(message)
@@ -32,7 +56,7 @@ def confirm_continue!(message)
   end
 end
 
-def set_secret(group, key, secret)
+def set_secret_(group, key, secret)
   # TODO(ssd) 2017-03-07: We could just use veil directly here since we already require it other places
   # in the -ctl commands...
   require 'mixlib/shellout'
@@ -40,8 +64,7 @@ def set_secret(group, key, secret)
   cmd.run_command
 end
 
-def get_secret(env_key, prompt='secret')
-  password_arg = ARGV[3]
+def get_secret(env_key, prompt='secret', password_arg = nil)
   if password_arg
     password_arg
   elsif ENV[env_key]
