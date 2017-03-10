@@ -64,7 +64,6 @@
                 {couchdb_host, "127.0.0.1"},
                 {couchdb_port, 5987 },
                 %% END COUCHDB REMOVE THESE
-                {authz_superuser_id, <<"<%= node['private_chef']['oc_bifrost']['superuser_id'] %>">>},
                 {cleanup_batch_size, <%= node['private_chef']['opscode-erchef']['cleanup_batch_size'] %>}
                ]},
 
@@ -78,8 +77,6 @@
              %% END COUCHDB REMOVE THESE
             ]},
   {chef_objects, [
-                  {s3_access_key_id, "<%= node['private_chef']['bookshelf']['access_key_id'] %>"},
-                  {s3_secret_key_id, "<%= node['private_chef']['bookshelf']['secret_access_key'] %>"},
                   <% if node['private_chef']['fips_enabled'] -%>
                   %% When we're using a fips openssl, we default to using http for bookshelf.
                   %% The reason for this is because we do not have a TLS implementation for
@@ -103,16 +100,20 @@
                {estatsd_host, "<%= node['private_chef']['estatsd']['vip'] %>"},
                {estatsd_port, <%= node['private_chef']['estatsd']['port'] %>}
               ]},
-
+ {chef_secrets, [
+                 {provider, chef_secrets_json_file},
+                 %% TODO: don't hard code this path
+                 {provider_config, [{secrets_file, "/etc/opscode/private-chef-secrets.json"}]}
+                ]},
  {sqerl, [
            %% The database system you are using (e.g. pgsql)
            {db_driver_mod, sqerl_pgsql_client},
 
            %% Database connection parameters
+           {config_cb, {chef_secrets_sqerl, config, [{<<"opscode_erchef">>, <<"sql_password">>}]}},
            {db_host, "<%= node['private_chef']['postgresql']['vip'] %>"},
            {db_port, 5432},
            {db_user, "<%= node['private_chef']['opscode-erchef']['sql_user'] %>"},
-           {db_pass, "<%= node['private_chef']['opscode-erchef']['sql_password'] %>"},
            {db_name, "opscode_chef" },
            {idle_check, 10000},
            {db_timeout, <%= node['private_chef']['opscode-chef-mover']['sql_db_timeout'] %>},
@@ -164,7 +165,6 @@
           % If dry_run is true, eredis host and port will be ignored.
           {eredis_host, "127.0.0.1"},
           {eredis_port, 16379},
-          {eredis_password, "<%= @redis_password %>"},
           {solr_url, "<%= node['private_chef']['opscode-solr4']['url'] %>"}
          ]},
  {chef_reindex, [
