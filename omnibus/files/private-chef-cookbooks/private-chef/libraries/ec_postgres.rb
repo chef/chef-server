@@ -20,7 +20,7 @@ class EcPostgres
     begin
       connection = ::PGconn.open('user' => postgres['db_superuser'],
                                  'host' => postgres['vip'],
-                                 'password' => postgres['db_superuser_password'],
+                                 'password' => PrivateChef.credentials.get('postgresql', 'db_superuser_password'),
                                  'port' => postgres['port'],
                                  'dbname' => database)
     rescue => e
@@ -48,10 +48,12 @@ class EcPostgres
   end
 
   def self.with_service_connection(node, database, service_name)
+
     service = node['private_chef'][service_name]
+    service_name = "opscode_erchef" if service_name == "opscode-erchef"
     with_connection(node, database,
                     db_superuser: service['sql_user'],
-                    db_superuser_password: service['sql_password']) do |connection|
+                    db_superuser_password: PrivateChef.credentials.get(service_name, 'sql_password')) do |connection|
       yield connection
     end
   end

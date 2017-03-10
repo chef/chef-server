@@ -3,12 +3,12 @@ postgres = node['private_chef']['postgresql']
 erchef = node['private_chef']['opscode-erchef']
 
 private_chef_pg_user erchef['sql_user'] do
-  password erchef['sql_password']
+  password PrivateChef.credentials.get('opscode_erchef', 'sql_password')
   superuser false
 end
 
 private_chef_pg_user erchef['sql_ro_user'] do
-  password erchef['sql_ro_password']
+  password PrivateChef.credentials.get('opscode_erchef', 'sql_ro_password')
   superuser false
 end
 
@@ -34,7 +34,7 @@ private_chef_pg_sqitch "/opt/opscode/embedded/service/opscode-erchef/schema/base
   hostname  postgres['vip']
   port      postgres['port']
   username  postgres['db_superuser']
-  password  postgres['db_superuser_password']
+  password  PrivateChef.credentials.get('postgresql', 'db_superuser_password')
   database  "opscode_chef"
   action :nothing
   notifies :deploy, "private_chef_pg_sqitch[/opt/opscode/embedded/service/opscode-erchef/schema]", :immediately
@@ -44,7 +44,7 @@ private_chef_pg_sqitch "/opt/opscode/embedded/service/opscode-erchef/schema" do
   hostname  postgres['vip']
   port      postgres['port']
   username  postgres['db_superuser']
-  password  postgres['db_superuser_password']
+  password  PrivateChef.credentials.get('postgresql', 'db_superuser_password')
   database "opscode_chef"
   action :nothing
 end

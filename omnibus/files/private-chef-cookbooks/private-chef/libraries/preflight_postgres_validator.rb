@@ -61,7 +61,7 @@ class PostgresqlPreflightValidator < PreflightValidator
   end
 
   def has_superuser_password?
-    PrivateChef.credentials.exists?("postgresql", "db_superuser_password") || cs_pg_attr.has_key?("db_superuser_password")
+    PrivateChef.credentials.exists?("postgresql", "db_superuser_password")
   end
 
   # We do not support changing from managed to external DB or vice-versa, so the
