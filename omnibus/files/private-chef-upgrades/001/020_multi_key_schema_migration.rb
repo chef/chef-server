@@ -12,10 +12,9 @@ define_upgrade do
     running_config = JSON.parse(File.read("/etc/opscode/chef-server-running.json"))
     pc = running_config['private_chef']
     keyname = pc['opscode-erchef'].has_key?('sql_user') ? 'opscode-erchef' : 'postgresql'
-    sql_password = Partybus.config.secrets[keyname]['sql_password'].value
     connection = ::PGconn.open('user' => pc[keyname]['sql_user'],
                                'host' => pc['postgresql']['vip'],
-                               'password' => sql_password,
+                               'password' => Partybus.config.secrets.get(keyname, 'sql_password'),
                                'port' => pc['postgresql']['port'],
                                'dbname' => 'opscode_chef')
     begin
