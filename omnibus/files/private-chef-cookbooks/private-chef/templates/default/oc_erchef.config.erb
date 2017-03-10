@@ -250,7 +250,6 @@
     <% if node['private_chef']['data_collector']['root_url'] %>
     {data_collector, [
         {root_url,                "<%= node['private_chef']['data_collector']['root_url'] %>"},
-        {token,                   "<%= node['private_chef']['data_collector']['token'] %>"},
         {timeout,                 <%= node['private_chef']['data_collector']['timeout'] %>},
         {init_count,              <%= node['private_chef']['data_collector']['http_init_count'] %>},
         {max_count,               <%= node['private_chef']['data_collector']['http_max_count'] %>},

@@ -497,6 +497,7 @@ module PrivateChef
       generate_rabbit_actions_password
       migrate_and_check_db_superuser_password
       migrate_and_check_ldap_bind_password
+      migrate_and_check_data_collector_token
       # TODO 2017-03-03 sr: remove "|| true" when we can cope with secrets not
       #                     being in node attrs
       save_credentials_to_config if (PrivateChef["insecure_addon_compat"] || true)
@@ -559,10 +560,16 @@ module PrivateChef
     end
 
     def migrate_and_check_ldap_bind_password
-      if PrivateChef["ldap"] && PrivateChef["ldap"]["bind_password"]
+      if PrivateChef["ldap"]["bind_password"]
         warn_if_cred_mismatch(group: "ldap", name: "bind_password", command_name: "set-ldap-bind-password")
-        # not in store, but in config -- we expect it in the store later
         credentials.add("ldap", "bind_password", value: PrivateChef["ldap"]["bind_password"], frozen: true, force: true)
+      end
+    end
+
+    def migrate_and_check_data_collector_token
+      if PrivateChef["data_collector"]["token"]
+        warn_if_cred_mismatch(group: "data_collector", name: "token", command_name: "set-data-collector-token")
+        credentials.add("data_collector", "token", value: PrivateChef["data_collector"]["token"], frozen: true, force: true)
       end
     end
 

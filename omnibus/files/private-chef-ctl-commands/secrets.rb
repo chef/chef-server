@@ -1,37 +1,35 @@
 add_command_under_category "set-ldap-bind-password", "Secrets Management", "Add or change LDAP bind password", 2 do
-  require 'highline'
-
   ARGV.delete("--yes") # remove --yes so users can give it in all cases in automation
   bind_password = get_secret("BIND_PASSWORD", "LDAP bind password")
   set_secret("ldap", "bind_password", bind_password)
 end
 
 add_command_under_category "set-db-superuser-password", "Secrets Management", "Add or change DB superuser password", 2 do
-  require 'highline'
 
-  if !ARGV.delete("--yes")
-    STDERR.puts "WARN: Manually setting the DB superuser password is only supported for external postgresql instances"
-    if !HighLine.agree("Would you like to continue (y/n)? ")
-      exit(0)
-    end
-  end
-
+  confirm_continue!("WARN: Manually setting the DB superuser password is only supported for external postgresql instances")
   password = get_secret("DB_PASSWORD", "DB superuser password")
   set_secret("postgresql", "db_superuser_password", password)
 end
 
 add_command_under_category "set-actions-password", "Secrets Management", "Add or change the rabbitmq actions queue password", 2 do
-  require 'highline'
-
-  if !ARGV.delete("--yes")
-    STDERR.puts "WARN: Manually setting the actions password is only supported for external rabbitmq instances"
-    if !HighLine.agree("Would you like to continue (y/n)? ")
-      exit(0)
-    end
-  end
-
+  confirm_continue!("WARN: Manually setting the actions password is only supported for external rabbitmq instances")
   password = get_secret("ACTIONS_PASSWORD", "actions queue password")
   set_secret("rabbitmq", "actions_password", password)
+end
+
+add_command_under_category "set-data-collector-token", "Secrets Management", "Set or change the data collector token", 2 do
+  password = get_secret("DATA_COLLECTOR_TOKEN", "the data collector token provided by Automate")
+  set_secret("data_collector", "token", password)
+end
+
+def confirm_continue!(message)
+  require 'highline'
+  return if ARGV.delete("--yes")
+
+  STDERR.puts message
+  if !HighLine.agree("Would you like to continue (y/n)? ")
+    exit(0)
+  end
 end
 
 def set_secret(group, key, secret)

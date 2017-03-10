@@ -17,7 +17,8 @@ local res = ngx.location.capture("/organizations/" .. ngx.var.request_org .. "/v
 if res.status == ngx.HTTP_OK then
   ngx.var.upstream = 'https://compliance-profiles'
   ngx.req.set_uri(ngx.var.new_uri)
-  ngx.req.set_header("x-data-collector-token", "<%= node['private_chef']['data_collector']['token'] %>")
+  -- Secrets are provided by chef_secrets and will be preloaded into the environment.
+  ngx.req.set_header("x-data-collector-token", os.getenv("DATA_COLLECTOR_TOKEN"))
   ngx.req.set_header("x-data-collector-auth", "version=1.0")
   return
 else

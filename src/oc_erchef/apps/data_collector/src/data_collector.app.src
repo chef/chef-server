@@ -26,9 +26,8 @@
     {vsn, {cmd,"cat ../../VERSION | awk '{print $0}'"}},
     {registered, []},
     {applications, [
-        kernel,
-        stdlib,
         lager,
+        chef_secrets,
         opscoderl_httpc
     ]},
     {mod, {data_collector_app, []}}
