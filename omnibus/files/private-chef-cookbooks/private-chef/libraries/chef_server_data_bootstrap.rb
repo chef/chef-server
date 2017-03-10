@@ -29,11 +29,15 @@ class ChefServerDataBootstrap
   end
 
 
+  def bifrost_superuser_id
+      @superuser_id ||= PrivateChef.credentials.get('oc_bifrost', 'superuser_id')
+  end
+
   def bootstrap
     # This is done in two steps - we'll first create the bifrost objects and
     # dependencies.  If this fails, it can be re-run idempotently without
     # risk of causing the run to fail.
-    @superuser_authz_id = create_actor_in_authz(bifrost['superuser_id'])
+    @superuser_authz_id = create_actor_in_authz(bifrost_superuser_id)
     users_authz_id = create_container_in_authz(superuser_authz_id)
     orgs_authz_id = create_container_in_authz(superuser_authz_id)
     create_server_admins_global_group_in_bifrost(users_authz_id)
@@ -58,7 +62,7 @@ class ChefServerDataBootstrap
 
   # Create and set up permissions for the server admins group.
   def create_server_admins_global_group_in_bifrost(users_authz_id)
-    @server_admins_authz_id = create_group_in_authz(bifrost['superuser_id'])
+    @server_admins_authz_id = create_group_in_authz(bifrost_superuser_id)
     %w{create read update delete}.each do |permission|
       # grant server admins group permission on the users container,
       # as the erchef superuser.
@@ -67,12 +71,12 @@ class ChefServerDataBootstrap
       # grant superuser actor permissions on the server admin group,
       # as the bifrost superuser
       grant_authz_object_permission(permission, "actors", "groups", server_admins_authz_id,
-                                    superuser_authz_id, bifrost['superuser_id'])
+                                    superuser_authz_id, bifrost_superuser_id)
     end
 
     # Grant server-admins read permissions on itself as the bifrost superuser.
     grant_authz_object_permission("read", "groups", "groups", server_admins_authz_id,
-                                  server_admins_authz_id, bifrost['superuser_id'])
+                                  server_admins_authz_id, bifrost_superuser_id)
   end
 
   # Insert the server admins global group into the erchef groups table.
@@ -111,7 +115,7 @@ class ChefServerDataBootstrap
                     authz_id: @superuser_authz_id,
                     created_at: bootstrap_time,
                     updated_at: bootstrap_time,
-                    last_updated_by: bifrost['superuser_id'],
+                    last_updated_by: bifrost_superuser_id,
                     pubkey_version: 0, # Old constrant requires it to be not-null
                     serialized_object: JSON.generate(
                       first_name: "Chef",
