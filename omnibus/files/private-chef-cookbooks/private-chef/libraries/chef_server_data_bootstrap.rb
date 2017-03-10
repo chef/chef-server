@@ -49,8 +49,11 @@ class ChefServerDataBootstrap
     # objects in erchef.  By separating them, we increase the chance that a
     # bootstrap failed due to an error out of bifrost can be recovered
     # by re-running it.
-
-    EcPostgres.with_service_connection(node, 'opscode_chef', 'opscode-erchef') do |conn|
+    username = node['private_chef']['opscode-erchef']['sql_user']
+    password = PrivateChef.credentials.get('opscode_erchef', 'sql_password')
+    EcPostgres.with_connection(node, 'opscode_chef',
+                               'db_superuser' => username,
+                               'db_superuser_password' => password) do |conn|
       create_superuser_in_erchef(conn)
       create_server_admins_global_group_in_erchef(conn)
       create_global_container_in_erchef(conn, 'organizations', orgs_authz_id)

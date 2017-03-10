@@ -260,6 +260,7 @@ default['private_chef']['opscode-expander']['consumer_id'] = "default"
 default['private_chef']['opscode-expander']['nodes'] = 2
 default['private_chef']['opscode-expander']['max_retries'] = 1
 default['private_chef']['opscode-expander']['retry_wait'] = 1
+
 ####
 # Erlang Chef Server API
 ####
@@ -279,6 +280,7 @@ default['private_chef']['opscode-erchef']['bulk_fetch_batch_size'] = '5'
 default['private_chef']['opscode-erchef']['udp_socket_pool_size'] = nil
 default['private_chef']['opscode-erchef']['sql_user'] = "opscode_chef"
 default['private_chef']['opscode-erchef']['sql_ro_user'] = "opscode_chef_ro"
+
 #
 # Reindex configurables
 #

@@ -5,6 +5,10 @@ erchef = node['private_chef']['opscode-erchef']
 private_chef_pg_user erchef['sql_user'] do
   password PrivateChef.credentials.get('opscode_erchef', 'sql_password')
   superuser false
+  not_if {
+    puts "Starting with: #{erchef['sql_user']} #### #{PrivateChef.credentials.get('opscode_erchef', 'sql_password')}"
+    false
+  }
 end
 
 private_chef_pg_user erchef['sql_ro_user'] do

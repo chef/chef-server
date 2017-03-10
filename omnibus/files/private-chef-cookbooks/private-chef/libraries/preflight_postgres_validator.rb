@@ -213,9 +213,9 @@ EOM
   def err_CSPG002_missing_superuser_id
 <<EOM
 CSPG002: You have not set a database superuser name under
-         "postgresql['db_superuser'] in
-         chef-server.rb.  This is required for external database support - please set
-         it now and then re-run 'chef-server-ctl reconfigure'.
+         "postgresql['db_superuser']" in chef-server.rb.  This is required
+         for external database support - please set it now and
+         then re-run 'chef-server-ctl reconfigure'.
 
          See https://docs.chef.io/server_components.html#postgresql-settings
          for more information.
@@ -224,9 +224,9 @@ EOM
 
   def err_CSPG003_missing_superuser_password
 <<EOM
-CSPG003: You have not set a database superuser password under
-         "postgresql['db_superuser_password']" in chef-server.rb.  This is
-         required for external database support - please set it now and then
+CSPG003: You have not set a database superuser password using
+         chef-server-ctl set-db-superuser-password. This is required
+         for external database support - please run this now, then
          re-run 'chef-server-ctl reconfigure'.
 
          See https://docs.chef.io/server_components.html#postgresql-settings
