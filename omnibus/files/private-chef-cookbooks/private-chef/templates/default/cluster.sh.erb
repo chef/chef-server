@@ -71,6 +71,9 @@ function transition
       /opt/opscode/bin/private-chef-ctl graceful-kill <%= service %> || error_exit "Cannot kill <%= service %>"
 <%- end -%>
 
+      log_me "Done stopping services."
+      log_me "lsof /var/opt/opscode/drbd/data:"
+      lsof | grep /var/opt/opscode/drbd/data >> $LOGNAME 2>&1 || true
       if [ -x '/var/opt/opscode/keepalived/bin/ha_backend_storage' ]; then
         log_me "Attempting HA storage detach"
         /var/opt/opscode/keepalived/bin/ha_backend_storage detach >> $LOGNAME 2>&1
