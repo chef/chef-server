@@ -13,7 +13,7 @@ local res = ngx.location.capture("/organizations/" .. ngx.var.request_org .. "/v
       vars = { upstream = "http://opscode_erchef" }
     })
 
-<% if node['private_chef']['data_collector']['root_url'] && PrivateChef.secrets.exist?('data_collector', 'token') -%>
+<% if node['private_chef']['data_collector']['root_url'] && PrivateChef.credentials.exist?('data_collector', 'token') -%>
 if res.status == ngx.HTTP_OK then
   ngx.var.upstream = '<%= URI.parse(node['private_chef']['data_collector']['root_url']).scheme %>://data-collector'
   ngx.req.set_uri('<%= URI.parse(node['private_chef']['data_collector']['root_url']).path %>')

@@ -8,11 +8,11 @@ module("config", package.seeall)
 local redis_password = os.getenv("REDIS_PASSWORD")
 
 local failsafe_config = {}
-failsafe_config["dl_default"] = { }
+failsafe_config["dl_default"] = {}
 failsafe_config["dl_default"][1] = "503_mode"
 failsafe_config["dl_default"][2] = true
 
--- Client must set tehse via set_ban_refresh_interval
+-- Client must set these via set_ban_refresh_interval
 -- and set_maint_refresh_interval.
 maint_refresh_interval = nil
 ban_refresh_interval = nil

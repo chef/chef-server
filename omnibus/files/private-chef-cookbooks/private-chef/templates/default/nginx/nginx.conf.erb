@@ -4,7 +4,7 @@ error_log /var/log/opscode/nginx/error.log<%= node['private_chef']['lb']['debug'
 # Enviroment variables that we wish to access while running must be declared here,
 # otherwise they will not be available.
 env REDIS_PASSWORD;
-env DATA_COLLECTOR_TOKEN
+env DATA_COLLECTOR_TOKEN;
 daemon off;
 
 events {

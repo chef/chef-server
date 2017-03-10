@@ -19,7 +19,7 @@ if res.status == ngx.HTTP_OK then
   ngx.req.set_uri(ngx.var.new_uri)
   -- Secrets are provided by chef_secrets and will be preloaded into the environment.
   ngx.req.set_header("x-data-collector-token", os.getenv("DATA_COLLECTOR_TOKEN"))
-  ngx.req.set_header("x-data-collector-auth", "version=1.0")gT
+  ngx.req.set_header("x-data-collector-auth", "version=1.0")
   return
 else
   ngx.log(ngx.STDERR, "Validation of " .. ngx.var.request_uri .." returned status " .. res.status);

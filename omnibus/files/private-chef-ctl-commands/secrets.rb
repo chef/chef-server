@@ -18,15 +18,13 @@ add_command_under_category "set-actions-password", "Secrets Management", "Add or
 end
 
 add_command_under_category "set-data-collector-token", "Secrets Management", "Set or change the data collector token", 2 do
-  password = get_secret("DATA_COLLECTOR_TOKEN", "The Data Collector token provided by Automate.")
+  password = get_secret("DATA_COLLECTOR_TOKEN", "the data collector token provided by Automate")
   set_secret("data_collector", "token", password)
 end
 
 def confirm_continue!(message)
   require 'highline'
-  if ARGV.delete("--yes")
-    exit(0)
-  end
+  return if ARGV.delete("--yes")
 
   STDERR.puts message
   if !HighLine.agree("Would you like to continue (y/n)? ")
