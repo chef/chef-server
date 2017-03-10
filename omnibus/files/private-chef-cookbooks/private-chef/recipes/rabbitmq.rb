@@ -107,7 +107,9 @@ template "/opt/opscode/bin/wait-for-rabbit" do
   variables( config: rabbitmq )
 end
 
-component_runit_service "rabbitmq"
+component_runit_service "rabbitmq" do
+  control ['t']
+end
 
 if is_data_master?
   rmq_ctl = "/opt/opscode/embedded/bin/rabbitmqctl"
