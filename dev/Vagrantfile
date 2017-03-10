@@ -374,6 +374,7 @@ def get_selection(env, files)
 end
 
 def host_timezone
+  return ENV['DVM_TZ'] if ENV.has_key? 'DVM_TZ'
   require "time"
   # Note that we have to reverse the offset sign if we're using Etc/GMT,
   # reference: http://en.wikipedia.org/wiki/Tz_database#Area
