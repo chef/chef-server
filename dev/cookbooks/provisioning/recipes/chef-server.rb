@@ -12,6 +12,17 @@ file "/var/chef/cache/apt-update-done" do
 end
 package %w{build-essential git}
 
+# Pre-place a known dhparams pem for nginx - this can save from
+# 2-5 minutes of startup time.
+#
+directory "/var/opt/opscode/nginx/ca" do
+  recursive  true
+end
+
+cookbook_file "/var/opt/opscode/nginx/ca/dhparams.pem" do
+  source 'dhparams.dev'
+  action :create
+end
 
 template "/etc/hosts" do
   source "hosts.erb"
@@ -42,3 +53,4 @@ template "/etc/opscode-reporting/opscode-reporting.rb" do
   action :create
   only_if { node['provisioning'].has_key? 'opscode-reporting-config' }
 end
+
