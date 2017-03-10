@@ -1,5 +1,3 @@
-require 'veil'
-
 module Partybus
 
   def self.config
@@ -44,12 +42,13 @@ Try running `chef-server-ctl reconfigure` before upgrading.
 EOF
         exit(1)
       end
-      if File.exists?(SECRETS_FILE)
-        @secrets = Veil::CredentialCollection::ChefSecretsFile.new(path: SECRETS_FILE)
+      if File.readable?(SECRETS_FILE)
+        require 'veil'
+        @secrets = Veil::CredentialCollection::ChefSecretsFile.from_file(SECRETS_FILE)
       else
         log <<EOF
 ***
-ERROR: Cannot find #{SECRETS_FILE}
+ERROR: Cannot find or access #{SECRETS_FILE}
 ***
 Try running `chef-server-ctl reconfigure` before upgrading.
 
