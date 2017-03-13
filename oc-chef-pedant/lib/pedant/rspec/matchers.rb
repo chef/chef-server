@@ -74,20 +74,7 @@ module RSpec
           when Regexp
             spec =~ value
           when Array
-            # we care about contents, not order; i.e., treat them
-            # (kind of) like sets
-            return true if spec == value
-            return false if value.length < spec.length
-            return false if strict? and value.length != spec.length
-            # Note this is going to be slow for large arrays,
-            # though our actual usage shows we don't have any arrays on a
-            # scale that would matter.
-            return true if spec.all? { |s| value.include? s }
-            # Our comparisons are more complex than simple value
-              spec.each_with_index  do |newspec, x|
-                return false unless PedantHashComparator.new(newspec, @mode).matches? value[x]
-              end
-              return true
+            array_matches?(spec, value)
           when Hash
             PedantHashComparator.new(spec, @mode).matches?(value)
           when Proc then
@@ -97,6 +84,23 @@ module RSpec
           end
         end
 
+      end
+
+      def array_matches?(spec, value)
+        # we care about contents, not order; i.e., treat them
+        # (kind of) like sets
+        return true if spec == value
+        return false if value.length < spec.length
+        return false if strict? and value.length != spec.length
+        # Note this is going to be slow for large arrays,
+        # though our actual usage shows we don't have any arrays on a
+        # scale that would matter.
+        return true if spec.all? { |s| value.include? s }
+        # Our comparisons are more complex than simple value
+        spec.each_with_index  do |newspec, x|
+          return false unless PedantHashComparator.new(newspec, @mode).matches? value[x]
+        end
+        return true
       end
 
       def friendly_actual
