@@ -122,9 +122,7 @@ default['private_chef']['rabbitmq']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['rabbitmq']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['rabbitmq']['vhost'] = '/chef'
 default['private_chef']['rabbitmq']['user'] = 'chef'
-default['private_chef']['rabbitmq']['password'] = 'chefrocks'
 default['private_chef']['rabbitmq']['actions_user'] = 'actions'
-default['private_chef']['rabbitmq']['actions_password'] = 'changeme'
 default['private_chef']['rabbitmq']['actions_vhost'] = '/analytics'
 default['private_chef']['rabbitmq']['actions_exchange'] = 'actions'
 default['private_chef']['rabbitmq']['node_ip_address'] = '127.0.0.1'
@@ -140,7 +138,6 @@ default['private_chef']['rabbitmq']['ssl_versions'] = ['tlsv1.2', 'tlsv1.1']
 # RabbitMQ Management Plugin
 ####
 default['private_chef']['rabbitmq']['management_user'] = "rabbitmgmt"
-default['private_chef']['rabbitmq']['management_password'] = "chefrocks"
 default['private_chef']['rabbitmq']['management_port'] = 15672
 default['private_chef']['rabbitmq']['management_enabled'] = true
 
@@ -195,7 +192,6 @@ default['private_chef']['rabbitmq']['rabbit_mgmt_ibrowse_options'] =  "{connect_
 ####
 default['private_chef']['external-rabbitmq']['enable'] = false
 default['private_chef']['external-rabbitmq']['actions_user'] = 'actions'
-default['private_chef']['external-rabbitmq']['actions_password'] = 'changeme'
 default['private_chef']['external-rabbitmq']['actions_vhost'] = '/analytics'
 default['private_chef']['external-rabbitmq']['actions_exchange'] = 'actions'
 default['private_chef']['external-rabbitmq']['node_port'] = '5672'
@@ -264,6 +260,7 @@ default['private_chef']['opscode-expander']['consumer_id'] = "default"
 default['private_chef']['opscode-expander']['nodes'] = 2
 default['private_chef']['opscode-expander']['max_retries'] = 1
 default['private_chef']['opscode-expander']['retry_wait'] = 1
+
 ####
 # Erlang Chef Server API
 ####
@@ -282,9 +279,8 @@ default['private_chef']['opscode-erchef']['authz_pooler_timeout'] = '0'
 default['private_chef']['opscode-erchef']['bulk_fetch_batch_size'] = '5'
 default['private_chef']['opscode-erchef']['udp_socket_pool_size'] = nil
 default['private_chef']['opscode-erchef']['sql_user'] = "opscode_chef"
-default['private_chef']['opscode-erchef']['sql_password'] = "snakepliskin"
 default['private_chef']['opscode-erchef']['sql_ro_user'] = "opscode_chef_ro"
-default['private_chef']['opscode-erchef']['sql_ro_password'] = "shmunzeltazzen"
+
 #
 # Reindex configurables
 #
@@ -573,7 +569,6 @@ default['private_chef']['postgresql']['log_rotation']['file_maxbytes'] = 1048576
 default['private_chef']['postgresql']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['postgresql']['username'] = "opscode-pgsql"
 default['private_chef']['postgresql']['db_superuser'] = 'opscode-pgsql'
-default['private_chef']['postgresql']['db_superuser_password'] = 'doallthethings'
 default['private_chef']['postgresql']['shell'] = "/bin/sh"
 default['private_chef']['postgresql']['home'] = "/var/opt/opscode/postgresql"
 default['private_chef']['postgresql']['user_path'] = "/opt/opscode/embedded/bin:/opt/opscode/bin:$PATH"
@@ -631,7 +626,6 @@ default['private_chef']['oc_bifrost']['log_rotation']['max_messages_per_second']
 default['private_chef']['oc_bifrost']['vip'] = '127.0.0.1'
 default['private_chef']['oc_bifrost']['listen'] = '127.0.0.1'
 default['private_chef']['oc_bifrost']['port'] = 9463
-default['private_chef']['oc_bifrost']['superuser_id'] = '5ca1ab1ef005ba111abe11eddecafbad'
 default['private_chef']['oc_bifrost']['db_pool_size'] = '20'
 default['private_chef']['oc_bifrost']['db_pool_max'] = nil
 default['private_chef']['oc_bifrost']['db_pool_init'] = nil
@@ -640,9 +634,7 @@ default['private_chef']['oc_bifrost']['db_pooler_timeout'] = 2000
 default['private_chef']['oc_bifrost']['db_pool_queue_max'] = 20
 default['private_chef']['oc_bifrost']['udp_socket_pool_size'] = nil
 default['private_chef']['oc_bifrost']['sql_user'] = "bifrost"
-default['private_chef']['oc_bifrost']['sql_password'] = "challengeaccepted"
 default['private_chef']['oc_bifrost']['sql_ro_user'] = "bifrost_ro"
-default['private_chef']['oc_bifrost']['sql_ro_password'] = "foreveralone"
 default['private_chef']['oc_bifrost']['sql_db_timeout'] = 5000
 # Enable extended performance logging data for bifrost.  Setting this to false
 # will cut bifrost request log size approximately in half.
@@ -676,8 +668,6 @@ default['private_chef']['bookshelf']['vip_port'] = 443
 default['private_chef']['bookshelf']['listen'] = '127.0.0.1'
 default['private_chef']['bookshelf']['port'] = 4321
 default['private_chef']['bookshelf']['stream_download'] = true
-default['private_chef']['bookshelf']['access_key_id'] = "generated-by-default"
-default['private_chef']['bookshelf']['secret_access_key'] = "generated-by-default"
 # Default: set to Host: header. Override to hardcode a url, "http://..."
 default['private_chef']['bookshelf']['external_url'] = :host_header
 default['private_chef']['bookshelf']['storage_type'] = :filesystem
@@ -692,9 +682,7 @@ default['private_chef']['bookshelf']['db_pool_queue_max'] = 200
 default['private_chef']['bookshelf']['db_pooler_timeout'] = 2000
 default['private_chef']['bookshelf']['sql_db_timeout'] = 5000
 default['private_chef']['bookshelf']['sql_ro_user'] = 'bookshelf_ro'
-default['private_chef']['bookshelf']['sql_ro_password'] = 'should_never_be_used'
 default['private_chef']['bookshelf']['sql_user'] = 'bookshelf'
-default['private_chef']['bookshelf']['sql_password'] = 'should_never_be_used'
 
 ###
 # Chef Identity
@@ -710,9 +698,7 @@ default['private_chef']['oc_id']['vip'] = "127.0.0.1"
 default['private_chef']['oc_id']['port'] = 9090
 default['private_chef']['oc_id']['sql_database'] = "oc_id"
 default['private_chef']['oc_id']['sql_user'] = "oc_id"
-default['private_chef']['oc_id']['sql_password'] = "snakepliskin"
 default['private_chef']['oc_id']['sql_ro_user'] = "oc_id_ro"
-default['private_chef']['oc_id']['sql_ro_password'] = "look-but-don't-touch"
 default['private_chef']['oc_id']['db_pool_size'] = '20'
 default['private_chef']['oc_id']['sentry_dsn'] = nil
 default['private_chef']['oc_id']['sign_up_url'] = nil
@@ -808,6 +794,7 @@ default['private_chef']['keepalived']['vrrp_instance_interface'] = "eth0"
 default['private_chef']['keepalived']['vrrp_instance_virtual_router_id'] = "1"
 default['private_chef']['keepalived']['vrrp_instance_priority'] = "100"
 default['private_chef']['keepalived']['vrrp_instance_advert_int'] = "1"
+# TODO mp 2017-03-10 this one too
 default['private_chef']['keepalived']['vrrp_instance_password'] = "sneakybeaky"
 default['private_chef']['keepalived']['vrrp_instance_ipaddress'] = node['ipaddress']
 default['private_chef']['keepalived']['vrrp_instance_ipaddress_dev'] = 'eth0'

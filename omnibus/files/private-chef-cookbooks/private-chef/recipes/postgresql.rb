@@ -153,7 +153,7 @@ ERR
 
   # Update the postgresql superuser  with a password for tcp-based access.
   private_chef_pg_user node['private_chef']['postgresql']['db_superuser'] do
-    password node['private_chef']['postgresql']['db_superuser_password']
+    password PrivateChef.credentials.get('postgresql', 'db_superuser_password')
     # This initial password set must be done over local socket:
     local_connection true
     # Don't make superuser into a non-superuser...

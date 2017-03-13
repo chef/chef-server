@@ -466,6 +466,7 @@ module PrivateChef
         end
       end
 
+      # TODO
       # Transition from erchef's sql_user/password etc living under 'postgresql'
       # in older versions to 'opscode_erchef' in newer versions
       if credentials["postgresql"] && credentials["postgresql"]["sql_password"]
@@ -480,8 +481,8 @@ module PrivateChef
       credentials.add("rabbitmq", "management_password", length: 100)
       credentials.add("drbd", "shared_secret", length: 60)
       credentials.add("keepalived", "vrrp_instance_password", length: 100)
-      credentials.add("opscode_erchef", "sql_password", length: 60)
-      credentials.add("opscode_erchef", "sql_ro_password", length: 60)
+      credentials.add("opscode_erchef", "sql_password", length: 100)
+      credentials.add("opscode_erchef", "sql_ro_password", length: 100)
       # Freeze oc_bifrost superuser_id so it will not be rotated
       credentials.add("oc_bifrost", "superuser_id", length: 32, frozen: true)
       credentials.add("oc_bifrost", "sql_password", length: 100)
@@ -491,17 +492,15 @@ module PrivateChef
       credentials.add("oc_id", "sql_ro_password", length: 100)
       credentials.add("bookshelf", "access_key_id", length: 40)
       credentials.add("bookshelf", "secret_access_key", length: 80)
-      credentials.add("bookshelf", "sql_password", length: 80)
-      credentials.add("bookshelf", "sql_ro_password", length: 80)
+      credentials.add("bookshelf", "sql_password", length: 100)
+      credentials.add("bookshelf", "sql_ro_password", length: 100)
+      # First attempt to pull in any configured token,
 
       generate_rabbit_actions_password
       migrate_and_check_db_superuser_password
       migrate_and_check_ldap_bind_password
       migrate_and_check_data_collector_token
-      # TODO 2017-03-03 sr: remove "|| true" when we can cope with secrets not
-      #                     being in node attrs
-      save_credentials_to_config if (PrivateChef["insecure_addon_compat"] || true)
-
+      save_credentials_to_config if (PrivateChef["insecure_addon_compat"])
       credentials.save
     end
 

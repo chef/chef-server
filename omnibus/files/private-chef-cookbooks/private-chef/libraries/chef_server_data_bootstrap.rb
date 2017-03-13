@@ -29,11 +29,15 @@ class ChefServerDataBootstrap
   end
 
 
+  def bifrost_superuser_id
+      @superuser_id ||= PrivateChef.credentials.get('oc_bifrost', 'superuser_id')
+  end
+
   def bootstrap
     # This is done in two steps - we'll first create the bifrost objects and
     # dependencies.  If this fails, it can be re-run idempotently without
     # risk of causing the run to fail.
-    @superuser_authz_id = create_actor_in_authz(bifrost['superuser_id'])
+    @superuser_authz_id = create_actor_in_authz(bifrost_superuser_id)
     users_authz_id = create_container_in_authz(superuser_authz_id)
     orgs_authz_id = create_container_in_authz(superuser_authz_id)
     create_server_admins_global_group_in_bifrost(users_authz_id)
@@ -45,8 +49,11 @@ class ChefServerDataBootstrap
     # objects in erchef.  By separating them, we increase the chance that a
     # bootstrap failed due to an error out of bifrost can be recovered
     # by re-running it.
-
-    EcPostgres.with_service_connection(node, 'opscode_chef', 'opscode-erchef') do |conn|
+    username = node['private_chef']['opscode-erchef']['sql_user']
+    password = PrivateChef.credentials.get('opscode_erchef', 'sql_password')
+    EcPostgres.with_connection(node, 'opscode_chef',
+                               'db_superuser' => username,
+                               'db_superuser_password' => password) do |conn|
       create_superuser_in_erchef(conn)
       create_server_admins_global_group_in_erchef(conn)
       create_global_container_in_erchef(conn, 'organizations', orgs_authz_id)
@@ -58,7 +65,7 @@ class ChefServerDataBootstrap
 
   # Create and set up permissions for the server admins group.
   def create_server_admins_global_group_in_bifrost(users_authz_id)
-    @server_admins_authz_id = create_group_in_authz(bifrost['superuser_id'])
+    @server_admins_authz_id = create_group_in_authz(bifrost_superuser_id)
     %w{create read update delete}.each do |permission|
       # grant server admins group permission on the users container,
       # as the erchef superuser.
@@ -67,12 +74,12 @@ class ChefServerDataBootstrap
       # grant superuser actor permissions on the server admin group,
       # as the bifrost superuser
       grant_authz_object_permission(permission, "actors", "groups", server_admins_authz_id,
-                                    superuser_authz_id, bifrost['superuser_id'])
+                                    superuser_authz_id, bifrost_superuser_id)
     end
 
     # Grant server-admins read permissions on itself as the bifrost superuser.
     grant_authz_object_permission("read", "groups", "groups", server_admins_authz_id,
-                                  server_admins_authz_id, bifrost['superuser_id'])
+                                  server_admins_authz_id, bifrost_superuser_id)
   end
 
   # Insert the server admins global group into the erchef groups table.
@@ -111,7 +118,7 @@ class ChefServerDataBootstrap
                     authz_id: @superuser_authz_id,
                     created_at: bootstrap_time,
                     updated_at: bootstrap_time,
-                    last_updated_by: bifrost['superuser_id'],
+                    last_updated_by: bifrost_superuser_id,
                     pubkey_version: 0, # Old constrant requires it to be not-null
                     serialized_object: JSON.generate(
                       first_name: "Chef",

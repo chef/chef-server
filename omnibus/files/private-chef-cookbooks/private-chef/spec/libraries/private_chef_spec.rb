@@ -110,13 +110,13 @@ EOF
 
     it "generates secrets" do
       rendered_config = config_for("api.chef.io")
-      expect(rendered_config["private_chef"]["rabbitmq"]).to have_key("password")
+      expect(PrivateChef.credentials.exist?("rabbitmq", "password")).to eq(true)
     end
 
     it "does not regenerate a secret if it already exists" do
       expect_existing_secrets
-      rendered_config = config_for("api.chef.io")
-      expect(rendered_config["private_chef"]["rabbitmq"]["password"]).to eq("a866861140c2c7bc2dc67c9f7696be2b2108321e18acb08922c28a075a8dbb8e773d82142e9cc52c96fdf6928c901c3ab360")
+      config_for("api.chef.io")
+      expect(PrivateChef.credentials.get("rabbitmq", "password")).to eq("a866861140c2c7bc2dc67c9f7696be2b2108321e18acb08922c28a075a8dbb8e773d82142e9cc52c96fdf6928c901c3ab360")
     end
   end
 
@@ -145,8 +145,8 @@ EOF
 
 
     it "generates secrets on the backend bootstrap node" do
-      rendered_config = config_for("backend-active.chef.io")
-      expect(rendered_config["private_chef"]["rabbitmq"]).to have_key("password")
+      config_for("backend-active.chef.io")
+      expect(PrivateChef.credentials.exist?("rabbitmq", "password")).to eq(true)
     end
 
     it "enables opscode-chef-mover on the bootstrap node" do

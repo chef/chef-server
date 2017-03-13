@@ -20,11 +20,11 @@ id_attrs = node['private_chef']['oc_id']
 
 # create users
 private_chef_pg_user id_attrs['sql_user'] do
-  password id_attrs['sql_password']
+  password PrivateChef.credentials.get('oc_id', 'sql_password')
 end
 
 private_chef_pg_user id_attrs['sql_ro_user'] do
-  password id_attrs['sql_ro_password']
+  password PrivateChef.credentials.get('oc_id', 'sql_ro_password')
 end
 
 

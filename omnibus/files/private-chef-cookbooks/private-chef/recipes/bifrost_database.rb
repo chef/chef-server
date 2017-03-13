@@ -8,12 +8,12 @@ postgres_attrs = node['private_chef']['postgresql']
 # create users
 
 private_chef_pg_user bifrost_attrs['sql_user'] do
-  password bifrost_attrs['sql_password']
+  password PrivateChef.credentials.get('oc_bifrost', 'sql_password')
   superuser false
 end
 
 private_chef_pg_user bifrost_attrs['sql_ro_user'] do
-  password bifrost_attrs['sql_ro_password']
+  password PrivateChef.credentials.get('oc_bifrost', 'sql_ro_password')
   superuser false
 end
 
@@ -43,7 +43,7 @@ private_chef_pg_sqitch "/opt/opscode/embedded/service/oc_bifrost/db" do
   hostname postgres_attrs['vip']
   port     postgres_attrs['port']
   username  postgres_attrs['db_superuser']
-  password  postgres_attrs['db_superuser_password']
+  password PrivateChef.credentials.get('postgresql', 'db_superuser_password')
   database "bifrost"
   action :nothing
 end
