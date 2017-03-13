@@ -114,7 +114,7 @@ def erchef_db_connection
   pg_config = running_service_config('postgresql')
   ::PGconn.open('user' => erchef_config['sql_user'],
                 'host' => pg_config['vip'],
-                'password' => erchef_config['sql_password'],
+                'password' => credentials.get('opscode_erchef', 'sql_password'),
                 'port' => pg_config['port'],
                 'dbname' => 'opscode_chef')
 end

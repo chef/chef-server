@@ -8,7 +8,6 @@ module Omnibus
   # external services supported by Chef Server. As additional services
   # are external-enabled, controls/configuration will need to be added here.
   class ChefServerCtl < Omnibus::Ctl
-
     def db_data
       d = [%w{oc_bifrost bifrost},
            %w{opscode-erchef opscode_chef},
@@ -17,6 +16,11 @@ module Omnibus
         d << %w{bookshelf bookshelf}
       end
       d
+    end
+
+    def credentials
+      secrets_file = ENV['SECRETS_FILE'] || "/etc/opscode/private-chef-secrets.json"
+      @credentials ||= Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file)
     end
 
     # Note that as we expand our external service support,
@@ -106,7 +110,7 @@ module Omnibus
 
     def postgresql_connection(postgres)
       PGconn.open('user' => postgres['db_superuser'], 'host' => postgres['vip'],
-                  'password' => postgres['db_superuser_password'],
+                  'password' => credentials.get('postgresql', 'db_superuser_password'),
                   'port' => postgres['port'], 'dbname' => 'template1')
     end
 
