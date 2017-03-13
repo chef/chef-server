@@ -338,8 +338,7 @@ module Pedant
 
         # X-Ops-Request-Source
         context 'when X-Ops-Request-Source is web' do
-          # TODO mp 2017/03/02 revisit for pushy integration - with webui key present, will it behave?
-          if Pedant::Config.pedant_platform.webui_key
+          if Pedant::Config.webui_proxy_auth_tests
             # If no webui_key defined (i.e., in pushy pedant) skip
             # these tests
 
