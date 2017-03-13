@@ -15,3 +15,10 @@ chef_server_root "<%= @prefix %>://<%= @vip %>"
 no_proxy "<%= node['private_chef']['lb']['vip'] %>"
 client_key key.path
 ssl_verify_mode :verify_none
+
+at_exit do
+  # By holding onto key to reference it in at_exit,
+  # we ensure that it won't be GC'd and unlinked before
+  # knife is done with it.
+  key.unlink
+end
