@@ -476,32 +476,92 @@ module PrivateChef
         credentials.delete("postgresql", "sql_user")
       end
 
-      credentials.add("redis_lb", "password", length: 100)
-      credentials.add("rabbitmq", "password", length: 100)
-      credentials.add("rabbitmq", "management_password", length: 100)
-      credentials.add("drbd", "shared_secret", length: 60)
-      credentials.add("keepalived", "vrrp_instance_password", length: 100)
-      credentials.add("opscode_erchef", "sql_password", length: 100)
-      credentials.add("opscode_erchef", "sql_ro_password", length: 100)
-      # Freeze oc_bifrost superuser_id so it will not be rotated
-      credentials.add("oc_bifrost", "superuser_id", length: 32, frozen: true)
-      credentials.add("oc_bifrost", "sql_password", length: 100)
-      credentials.add("oc_bifrost", "sql_ro_password", length: 100)
-      credentials.add("oc_id", "secret_key_base", length: 100)
-      credentials.add("oc_id", "sql_password", length: 100)
-      credentials.add("oc_id", "sql_ro_password", length: 100)
-      credentials.add("bookshelf", "access_key_id", length: 40)
-      credentials.add("bookshelf", "secret_access_key", length: 80)
-      credentials.add("bookshelf", "sql_password", length: 100)
-      credentials.add("bookshelf", "sql_ro_password", length: 100)
-      # First attempt to pull in any configured token,
+      required_secrets = [
+        {group: "postgresql", name: "db_superuser_password", length: 100, set_command: "set-db-superuser-password"},
+        {group: "redis_lb", name: "password", length: 100},
+        {group: "rabbitmq", name: "password", length: 100},
+        {group: "rabbitmq", name: "management_password", length: 100},
+        {group: "drbd", name: "shared_secret", length: 60},
+        {group: "keepalived", name: "vrrp_instance_password", length: 100},
+        {group: "opscode_erchef", name: "sql_password", length: 60},
+        {group: "opscode_erchef", name: "sql_ro_password", length: 60},
+        {group: "oc_bifrost", name: "superuser_id", length: 32, frozen: true},
+        {group: "oc_bifrost", name: "sql_password", length: 100},
+        {group: "oc_bifrost", name: "sql_ro_password", length: 100},
+        {group: "oc_id", name: "secret_key_base", length: 100},
+        {group: "oc_id", name: "sql_password", length: 100},
+        {group: "oc_id", name: "sql_ro_password", length: 100},
+        {group: "bookshelf", name: "access_key_id", length: 40},
+        {group: "bookshelf", name: "secret_access_key", length: 80},
+        {group: "bookshelf", name: "sql_password", length: 80},
+        {group: "bookshelf", name: "sql_ro_password", length: 80}
+      ]
+
+      optional_secrets = [
+        {group: "ldap", name: "bind_password"},
+        {group: "data_collector", name: "token"}
+      ]
+
+      optional_secrets.each do |secret|
+        add_secret(secret, false)
+      end
+
+      required_secrets.each do |secret|
+        add_secret(secret)
+      end
 
       generate_rabbit_actions_password
-      migrate_and_check_db_superuser_password
-      migrate_and_check_ldap_bind_password
-      migrate_and_check_data_collector_token
+
       save_credentials_to_config if (PrivateChef["insecure_addon_compat"])
       credentials.save
+    end
+
+    def add_secret(secret_spec, create_if_missing = true)
+      group = secret_spec[:group]
+      name = secret_spec[:name]
+
+      config_value = PrivateChef[group][name]
+
+      if config_value
+        warn_if_cred_mismatch(secret_spec)
+        credentials.add(group, name, value: config_value, frozen: true, force: true)
+      elsif create_if_missing
+        credentials.add(group, name, length: secret_spec[:length], frozen: secret_spec[:frozen])
+      end
+    end
+
+    def warn_if_cred_mismatch(opts)
+      group = opts[:group]
+      name = opts[:name]
+      return if !credentials.exist?(group, name)
+
+      pass_in_config = opts[:config_value] || PrivateChef[group][name]
+      pass_in_secrets = opts[:secrets_value] || credentials.get(group, name)
+      command_name = opts[:set_command] || "set-secret #{group} #{name}"
+      config_key_desc = opts[:config_key_desc] || "#{group}['#{name}']"
+
+      if pass_in_secrets != pass_in_config
+        warning = <<WARN
+#{config_key_desc} in secrets store does not match the value
+configured in chef-server.rb -- overriding secrets store password with
+configuration file password.
+WARN
+        if command_name
+          warning << <<WARN2
+If this is unexpected, consider removing the secret from
+chef-server.rb and setting the correct value with:
+
+    chef-server-ctl #{command_name}
+WARN2
+        end
+      elsif pass_in_config
+        warning = <<WARN
+#{config_key_desc} is configured in plain in chef-server.rb -- remove
+it to have the value provided from the secret store instead.
+WARN
+      end
+
+      ChefServer::Warnings.warn warning if warning
     end
 
     #
@@ -540,59 +600,6 @@ module PrivateChef
                         frozen: true, force: true)
       else
         credentials.add("rabbitmq", "actions_password", length: 100)
-      end
-    end
-
-    def migrate_and_check_db_superuser_password
-      if PrivateChef["postgresql"]["external"]
-        if PrivateChef["postgresql"] && PrivateChef["postgresql"]["db_superuser_password"]
-          warn_if_cred_mismatch(group: "postgresql",
-                                name: "db_superuser_password",
-                                command_name: "set-db-superuser-password")
-          credentials.add("postgresql", "db_superuser_password",
-                          value: PrivateChef["postgresql"]["db_superuser_password"],
-                          frozen: true, force: true)
-        end
-      else
-        credentials.add("postgresql", "db_superuser_password", length: 100)
-      end
-    end
-
-    def migrate_and_check_ldap_bind_password
-      if PrivateChef["ldap"]["bind_password"]
-        warn_if_cred_mismatch(group: "ldap", name: "bind_password", command_name: "set-ldap-bind-password")
-        credentials.add("ldap", "bind_password", value: PrivateChef["ldap"]["bind_password"], frozen: true, force: true)
-      end
-    end
-
-    def migrate_and_check_data_collector_token
-      if PrivateChef["data_collector"]["token"]
-        warn_if_cred_mismatch(group: "data_collector", name: "token", command_name: "set-data-collector-token")
-        credentials.add("data_collector", "token", value: PrivateChef["data_collector"]["token"], frozen: true, force: true)
-      end
-    end
-
-    def warn_if_cred_mismatch(opts)
-      group = opts[:group]
-      name = opts[:name]
-      return if !credentials.exist?(group, name)
-
-      pass_in_config = opts[:config_value] || PrivateChef[group][name]
-      pass_in_secrets = opts[:secrets_value] || credentials.get(group, name)
-      command_name = opts[:command_name]
-      config_key_desc = opts[:config_key_desc] || "#{group}['#{name}']"
-
-      if pass_in_secrets != pass_in_config
-        ChefServer::Warnings.warn <<WARN
-#{config_key_desc} in secrets store does not match the value
-configured in chef-server.rb -- overriding secrets store password with
-configuration file password.
-
-If this is unexpected, consider removing the secret from
-chef-server.rb and setting the correct value with:
-
-    chef-server-ctl #{command_name}
-WARN
       end
     end
 
