@@ -1,6 +1,6 @@
 [{<<"chef_secrets">>,
   {git,"https://github.com/chef/chef_secrets",
-       {ref,"b16d303c72061a6d87edb4bd88be948761f72b04"}},
+       {ref,"72417d9abb2cff241d44df6a81e48819400d6b67"}},
   0},
  {<<"edown">>,
   {git,"https://github.com/uwiger/edown.git",
