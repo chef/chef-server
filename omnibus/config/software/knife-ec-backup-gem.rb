@@ -15,10 +15,12 @@
 #
 
 name "knife-ec-backup"
-default_version "2.0.6"
+default_version "master"
+source git: "https://github.com/chef/knife-ec-backup.git"
+
 
 license "Apache-2.0"
-license_file "https://github.com/chef/knife-ec-backup/blob/master/LICENSE"
+license_file "LICENSE"
 # No need to collect license information for dependencies since
 # --ignore-dependencies flag is passed in during gem install.
 skip_transitive_dependency_licensing true
@@ -29,13 +31,8 @@ dependency "sequel-gem"
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
-  # Ignore dependencies, since they are already installed on the system by
-  # omnibus from one of the dependencies. This ensures we can properly link the
-  # pg to the needed headers without needing to pass options through
-  # knife-ec-backup.
-  gem "install knife-ec-backup" \
-      " --version '#{version}'" \
-      " --bindir '#{install_dir}/embedded/bin'" \
-      " --ignore-dependencies" \
-      " --no-ri --no-rdoc", env: env
+  bundle "install --without development", env: env
+
+  gem "build knife-ec-backup.gemspec", env: env
+  gem "install knife-ec-backup*.gem --no-rdoc --no-ri --without development", env: env
 end
