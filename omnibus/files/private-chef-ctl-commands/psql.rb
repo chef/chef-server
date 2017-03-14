@@ -69,10 +69,12 @@ add_command_under_category "psql", "Database", "Launches an interactive psql ses
   if (ARGV.include? "--as-admin")
     cfg = running_service_config('postgresql')
     db_username=cfg['db_superuser']
-    db_password=cfg['db_superuser_password']
+    db_password=credentials.get('postgresql', 'db_superuser_password')
   else
     db_username=db_config[seed][db_hash_key]["sql_#{ro}user"]
-    db_password=db_config[seed][db_hash_key]["sql_#{ro}password"]
+    # Sorry.
+    db_hash_key = "opscode_erchef" if db_hash_key == "opscode-erchef"
+    db_password=credentials.get(db_hash_key, "sql_#{ro}password")
   end
 
   db_host = db_config[seed]['postgresql']['vip']

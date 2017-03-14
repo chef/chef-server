@@ -374,6 +374,8 @@ EOF
     sql_host = running_config['chef_server']['postgresql']['vip']
     sql_port = running_config['chef_server']['postgresql']['port']
     sql_user = running_config['chef_server']['postgresql']['sql_user']
+
+    # The existing OSC 11 system will still have the password in attributes.
     sql_password = running_config['chef_server']['postgresql']['sql_password']
     [sql_host, sql_port, sql_user, sql_password]
   end
@@ -498,12 +500,27 @@ EOF
     # or else give the user a way to specify them
     # The server root is likely the same as was set for the knife config
     # used by knife download
-    # TODO 2017-02-28 mp: closer look her when we're looking at cleaning migrations
     config = <<-EOH
+    require "tempfile"
+    require "veil"
+    secrets_file = ENV['SECRETS_FILE'] || "/etc/opscode/private-chef-secrets.json"
+    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file)
+    key = Tempfile.new("latovip")
+    key.puts credentials.get("chef-server", "superuser_key")
+    key.flush
+    key.close
+
+
     chef_server_root '#{@options.chef12_server_url}'
     node_name 'pivotal'
     client_key '/etc/opscode/pivotal.pem'
     ssl_verify_mode :verify_none
+    at_exit do
+      # By holding onto key to reference it in at_exit,
+      # we ensure that it won't be GC'd and unlinked before
+      # knife is done with it.
+      key.unlink
+    end
     EOH
 
     log "Writing knife-ec-backup config to /tmp/knife-ec-backup-config.rb"
