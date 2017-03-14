@@ -18,4 +18,4 @@ done
 
 echo "waiting for rabbitmq..."
 HOME=/root PATH=/opt/opscode/embedded/bin:$PATH /opt/opscode/embedded/bin/rabbitmqctl wait <%= @config['data_dir'] %>/<%= @config['nodename'] %>.pid 2>/tmp/stderr
-echo "rabbbitmq might be up..."
+echo "rabbitmq might be up..."
