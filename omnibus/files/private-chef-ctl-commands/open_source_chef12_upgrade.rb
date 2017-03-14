@@ -513,7 +513,7 @@ EOF
 
     chef_server_root '#{@options.chef12_server_url}'
     node_name 'pivotal'
-    client_key '/etc/opscode/pivotal.pem'
+    client_key key.path
     ssl_verify_mode :verify_none
     at_exit do
       # By holding onto key to reference it in at_exit,
