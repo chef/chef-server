@@ -931,6 +931,8 @@ describe "ACL API", :acl do
               }
             }
           }}
+          let(:groups) { ["users", "admins"] }
+          let(:read_groups) { ["users", "clients", "admins"] }
         when "policy_groups"
           let(:creation_url) {
             api_url("#{type}/#{new_object}/policies/acl_test_policy")
@@ -946,6 +948,8 @@ describe "ACL API", :acl do
               }
             }
           }}
+          let(:groups) { ["users", "admins"] }
+          let(:read_groups) { ["users", "clients", "admins"] }
         end
 
         before :each do
