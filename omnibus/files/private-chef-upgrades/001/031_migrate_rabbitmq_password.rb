@@ -1,6 +1,8 @@
 define_upgrade do
   if Partybus.config.bootstrap_server # TODO: do we want this?
 
+    start_services(["rabbitmq"])
+
     rmq = Partybus.config.running_server["private_chef"]["rabbitmq"]
     [
       [rmq["user"], "password"],
@@ -10,5 +12,7 @@ define_upgrade do
       pass = Partybus.config.secrets.get('rabbitmq', passname)
       run_command("/opt/opscode/embedded/bin/rabbitmqctl change_password #{name} #{pass}")
     end
+
+    stop_services(["rabbitmq"])
   end
 end
