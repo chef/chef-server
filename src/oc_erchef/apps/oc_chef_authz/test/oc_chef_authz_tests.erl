@@ -379,9 +379,12 @@ needed_apps() ->
     [crypto, asn1, ibrowse, chef_secrets, pooler, stats_hero, public_key, ssl, epgsql, sqerl, oc_chef_authz].
 
 setup_chef_secrets() ->
-    application:set_env(chef_secrets, provider, chef_secrets_json_file),
-    FakeSecretsFile = filename:join(code:priv_dir(oc_chef_authz), "../test/chef_secrets.json"),
-    application:set_env(chef_secrets, provider_config, [{secrets_file, FakeSecretsFile}]),
+    application:set_env(chef_secrets, provider, chef_secrets_mock_provider),
+    application:set_env(chef_secrets, provider_config, []),
+    {ok, FileContent} = file:read_file(filename:join(code:priv_dir(oc_chef_authz), "../test/chef_secrets.json")),
+    FakeSecretsData = jiffy:decode(FileContent),
+    meck:new(chef_secrets_mock_provider, [non_strict]),
+    meck:expect(chef_secrets_mock_provider, read, fun(_Config) -> {ok, FakeSecretsData} end),
     application:ensure_all_started(chef_secrets).
 
 start_apps() ->
@@ -410,8 +413,8 @@ ping_test_() ->
              [ meck:new(M) || M <- MockMods ],
              MockMods
      end,
-     fun(MockMods) ->
-             [ meck:unload(M) || M <- MockMods ],
+     fun(_MockMods) ->
+             meck:unload(),
              stop_apps(),
              error_logger:tty(true),
              ok

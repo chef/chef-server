@@ -21,7 +21,7 @@ oc_chef_authz_cleanup_test_() ->
      end,
      fun(_) ->
              oc_chef_authz_tests:stop_apps(),
-             [ meck:unload(Mod) || Mod <- Mods ]
+             meck:unload()
      end,
      [
       {"initial state defaults to empty sets",

@@ -16,9 +16,12 @@ run_tests(MockedModules, Tests) ->
     }.
 
 setup_chef_secrets() ->
-    FakeSecretsFile = filename:join(code:priv_dir(data_collector), "../test/secrets.json"),
-    application:set_env(chef_secrets, provider, chef_secrets_json_file),
-    application:set_env(chef_secrets, provider_config, [{secrets_file, FakeSecretsFile}]),
+    application:set_env(chef_secrets, provider, chef_secrets_mock_provider),
+    application:set_env(chef_secrets, provider_config, []),
+    {ok, FileContent} = file:read_file(filename:join(code:priv_dir(data_collector), "../test/secrets.json")),
+    FakeSecretsData = jiffy:decode(FileContent),
+    meck:new(chef_secrets_mock_provider, [non_strict]),
+    meck:expect(chef_secrets_mock_provider, read, fun(_Config) -> {ok, FakeSecretsData} end),
     application:ensure_all_started(chef_secrets).
 
 setup(MockedModules) ->
@@ -47,5 +50,5 @@ cleanup(MockedModules) ->
     application:stop(ibrowse),
     application:stop(pooler),
     [ ?assert(meck:validate(M)) || M <- MockedModules],
-    [ meck:unload(M) || M <- MockedModules],
+    meck:unload(),
     ok.

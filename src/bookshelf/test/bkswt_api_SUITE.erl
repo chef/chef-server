@@ -136,10 +136,12 @@ run_cmd(Args) ->
 
 setup_chef_secrets() ->
     application:set_env(sqerl, config_cb, {chef_secrets_sqerl, config, [{<<"bookshelf">>, <<"sql_password">>}]}),
-
-    application:set_env(chef_secrets, provider, chef_secrets_json_file),
-    FakeSecretsFile = filename:join(code:priv_dir(bookshelf), "../test/secrets.json"),
-    application:set_env(chef_secrets, provider_config, [{secrets_file, FakeSecretsFile}]).
+    application:set_env(chef_secrets, provider, chef_secrets_mock_provider),
+    application:set_env(chef_secrets, provider_config, []),
+    {ok, FileContent} = file:read_file(filename:join(code:priv_dir(bookshelf), "../test/secrets.json")),
+    FakeSecretsData = jiffy:decode(FileContent),
+    meck:new(chef_secrets_mock_provider, [non_strict]),
+    meck:expect(chef_secrets_mock_provider, read, fun(_Config) -> {ok, FakeSecretsData} end).
 
 %%====================================================================
 %% TEST SERVER CALLBACK FUNCTIONS
@@ -149,7 +151,6 @@ init_per_suite(Config) ->
         true ->
             ok;
         false ->
-            setup_chef_secrets(),
             start_db(Config)
     end,
     Config.
@@ -171,6 +172,7 @@ init_per_testcase(upgrade_from_v0, Config) ->
     %% common test in rebar
     Seed = os:timestamp(),
     random:seed(Seed),
+    setup_chef_secrets(),
     error_logger:info_msg("Using random seed: ~p~n", [Seed]),
     Format0Data = filename:join([?config(data_dir, Config),
                                  "format_0_data"]),
@@ -204,6 +206,7 @@ init_per_testcase(upgrade_from_v0, Config) ->
     [{s3_conf, S3State}, {disk_store, DiskStore}, {apps, lists:reverse(Apps)} | Config];
 init_per_testcase(Casename, Config0) ->
     load_default_config(),
+    setup_chef_secrets(),
     set_storage_type_for_test_case(Casename),
     Apps = case ?STANDALONE_BOOKSHELF of
                true ->
@@ -233,6 +236,7 @@ init_per_testcase(Casename, Config0) ->
     [{s3_conf, S3State}, {apps, lists:reverse(Apps)} | Config0].
 
 end_per_testcase(_TestCase, Config) ->
+    meck:unload(),
     stop_bookshelf(Config),
     ok.
 
