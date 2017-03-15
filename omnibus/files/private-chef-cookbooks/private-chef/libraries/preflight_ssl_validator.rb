@@ -22,7 +22,48 @@ class SslPreflightValidator < PreflightValidator
   end
 
   def run!
+    verify_fips_sanity
     verify_cert_pair
+  end
+
+  def verify_fips_sanity
+    if PrivateChef['fips'] && !fips_supported_ssl?
+      fail_with <<EOF
+You have enabled FIPS-mode in chef-server.rb but FIPS does not appear
+to be supported on this platform.
+
+#{openssl_exe} reported its version as:
+
+    #{openssl_version}
+
+which does not contain the expected -fips identifier.
+EOF
+    end
+  end
+
+  def openssl_exe
+    '/opt/opscode/embedded/bin/openssl'
+  end
+
+  def openssl_version
+    @openssl_version ||= begin
+                           `#{openssl_exe} version`
+                         rescue
+                           "unknown"
+                         end
+  end
+
+  def fips_supported_ssl?
+    case openssl_version
+    when /^unknown/
+      Chef::Log.warn("Failed to parse openssl version, assuming it would have supported FIPS")
+      # We could report false here if we wanted to be pessimistic
+      true
+    when /OpenSSL .*-fips/
+      true
+    else
+      false
+    end
   end
 
   def verify_cert_pair
