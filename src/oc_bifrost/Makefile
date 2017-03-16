@@ -39,8 +39,10 @@ install_pedant:
 	cd oc-bifrost-pedant && bundle install --binstubs=vendor/bin
 
 test_pedant:
+	@echo "Sleeping 30 seconds to allow bifrost to start"
+	@sleep 30
 	cd oc-bifrost-pedant && bundle exec bin/oc-bifrost-pedant --config pedant_config.rb
-	sleep 60
+
 
 provision_test_db:
 	psql -c 'CREATE DATABASE bifrost_test;' -U $(POSTGRES_USER)
