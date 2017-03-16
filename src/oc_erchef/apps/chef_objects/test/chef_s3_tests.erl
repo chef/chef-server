@@ -54,9 +54,12 @@ make_key_test() ->
 }).
 
 setup_chef_secrets() ->
-    application:set_env(chef_secrets, provider, chef_secrets_json_file),
-    FakeSecretsFile = filename:join(code:priv_dir(chef_objects), "../test/secrets.json"),
-    application:set_env(chef_secrets, provider_config, [{secrets_file, FakeSecretsFile}]),
+    application:set_env(chef_secrets, provider, chef_secrets_mock_provider),
+    application:set_env(chef_secrets, provider_config, []),
+    {ok, FileContent} = file:read_file(filename:join(code:priv_dir(chef_objects), "../test/secrets.json")),
+    FakeSecretsData = jiffy:decode(FileContent),
+    meck:new(chef_secrets_mock_provider, [non_strict]),
+    meck:expect(chef_secrets_mock_provider, read, fun(_Config) -> {ok, FakeSecretsData} end),
     application:ensure_all_started(chef_secrets).
 
 setup_s3(InternalS3Url, ExternalS3Url) ->
@@ -72,7 +75,7 @@ setup_s3(InternalS3Url, ExternalS3Url) ->
     meck:expect(mini_s3, get_object_metadata, 4, mock_metadata).
 
 generate_presigned_url_uses_configured_s3_url_test_() ->
-    MockedModules = [mini_s3],
+    MockedModules = [mini_s3, chef_secrets_mock_provider],
     HostHeaderUrl = "https://api.example.com:443",
     OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
     Checksum = <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,

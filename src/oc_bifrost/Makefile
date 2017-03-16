@@ -25,19 +25,24 @@ rel: all
 
 pedant: pedant_setup test_pedant pedant_cleanup
 
-pedant_setup: provision_test_db rel start_test_rel
+pedant_setup: provision_test_db rel install_pedant start_test_rel
 
 pedant_cleanup: stop_test_rel destroy_test_db
 
 start_test_rel:
-	_build/default/rel/oc_bifrost/bin/oc_bifrost start
+	PATH=$(CURDIR)/oc-bifrost-pedant/vendor/bin:$(PATH) _build/default/rel/oc_bifrost/bin/oc_bifrost start
 
 stop_test_rel:
 	_build/default/rel/oc_bifrost/bin/oc_bifrost stop
 
+install_pedant:
+	cd oc-bifrost-pedant && bundle install --binstubs=vendor/bin
+
 test_pedant:
-	cd oc-bifrost-pedant && bundle install
-	cd oc-bifrost-pedant && bin/oc-bifrost-pedant --config pedant_config.rb
+	@echo "Sleeping 30 seconds to allow bifrost to start"
+	@sleep 30
+	cd oc-bifrost-pedant && bundle exec bin/oc-bifrost-pedant --config pedant_config.rb
+
 
 provision_test_db:
 	psql -c 'CREATE DATABASE bifrost_test;' -U $(POSTGRES_USER)
@@ -45,8 +50,8 @@ provision_test_db:
 	cd schema && sqitch deploy db:pg:bifrost_test
 
 destroy_test_db:
-	psql -c "DROP USER bifrost_test_user;" -U $(POSTGRES_USER)
-	psql -c 'DROP DATABASE bifrost_test;' -U $(POSTGRES_USER)
+	psql -c "DROP USER IF EXISTS bifrost_test_user;" -U $(POSTGRES_USER)
+	psql -c 'DROP DATABASE IF EXISTS bifrost_test;' -U $(POSTGRES_USER)
 
 update: $(REBAR3)
 	@$(REBAR3) update

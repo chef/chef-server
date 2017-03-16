@@ -62,6 +62,7 @@ script:
 
 after_failure:
   - cat logs/raw.log
+  - cat /tmp/console.log
 
 matrix:
   include:

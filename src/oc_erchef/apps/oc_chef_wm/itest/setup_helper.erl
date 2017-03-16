@@ -62,11 +62,17 @@ start_server(Config) ->
                         filename:join(code:priv_dir(oc_chef_wm),
                                       "../test/mock_openssl.sh")),
     %% Set chef_secrets
+
+   %% TODO(ssd) 2017-03-15: Tests in one of the other applications aren't cleaning up after
+   %% themselves.  When all the ct tests are run together, this means that chef_secret might
+   %% be running already with different test configuration.
     application:stop(chef_secrets),
-    application:set_env(chef_secrets, provider, chef_secrets_json_file),
-    FakeSecretsFile = filename:join(code:priv_dir(oc_chef_wm),
-                                    "../test/secrets.json"),
-    application:set_env(chef_secrets, provider_config, [{secrets_file, FakeSecretsFile}]),
+    application:set_env(chef_secrets, provider, chef_secrets_mock_provider),
+    application:set_env(chef_secrets, provider_config, []),
+    {ok, FileContent} = file:read_file(filename:join(code:priv_dir(oc_chef_wm), "../test/secrets.json")),
+    FakeSecretsData = jiffy:decode(FileContent),
+    meck:new(chef_secrets_mock_provider, [non_strict]),
+    meck:expect(chef_secrets_mock_provider, read, fun(_Config) -> {ok, FakeSecretsData} end),
 
     % TODO: we should automate setting these, if it matters at all
     application:set_env(oc_chef_wm, default_orgname, <<"org">>),

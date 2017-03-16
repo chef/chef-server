@@ -2,5 +2,5 @@
 exec 2>&1
 
 /opt/opscode/bin/wait-for-rabbit
-
+export PATH=/opt/opscode/embedded/bin:$PATH
 exec chpst -P -u <%= node['private_chef']['user']['username'] %> -U <%= node['private_chef']['user']['username'] %> env ERL_EPMD_ADDRESS=127.0.0.1 HOME=<%= node['private_chef']['opscode-erchef']['dir'] %> <%= "OPENSSL_FIPS=1" if node['private_chef']['fips_enabled'] %> /opt/opscode/embedded/service/opscode-erchef/bin/oc_erchef foreground
