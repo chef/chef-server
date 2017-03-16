@@ -96,14 +96,17 @@ dependency "chef-ha-plugin-config"
 dependency "chef" # for embedded chef-client -z runs (built from master - build last)
 dependency "cleanup" # MUST BE LAST DO NOT MOVE
 
+# if this is a release build, use a higher compression level
+xz_level = ENV['PIPELINE_TRIGGER_JOB_NAME'] == 'chef-server-12-trigger-release' ? 6 : 1
+
 package :rpm do
   signing_passphrase ENV['OMNIBUS_RPM_SIGNING_PASSPHRASE']
-  compression_level 1
+  compression_level xz_level
   compression_type :xz
 end
 
 package :deb do
-  compression_level 1
+  compression_level xz_level
   compression_type :xz
 end
 
