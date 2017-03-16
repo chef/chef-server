@@ -39,7 +39,7 @@ install_pedant:
 	cd oc-bifrost-pedant && bundle install --binstubs=vendor/bin
 
 test_pedant:
-	# cd oc-bifrost-pedant && bundle exec bin/oc-bifrost-pedant --config pedant_config.rb
+	cd oc-bifrost-pedant && bundle exec bin/oc-bifrost-pedant --config pedant_config.rb
 	sleep 60
 
 provision_test_db:
