@@ -96,10 +96,8 @@ class BootstrapPreflightValidator < PreflightValidator
       unless secrets_exists?
         fail_with err_BOOT006_pivotal_with_no_secrets
       end
-    else
-      if secrets_exists?
-        fail_with err_BOOT007_secrets_with_no_pivotal
-      end
+    elsif secrets_exists?
+      fail_with err_BOOT007_secrets_with_no_pivotal
     end
   end
 
@@ -172,17 +170,14 @@ BOOT005: Your configuration indicates that you may be starting this node
 EOM
   end
 
-  # TODO 2017-02-28 mp:  actually this path is no longer possible.  If chef secrets is not there
-  # then the pivotal key cannot be.
   def err_BOOT006_pivotal_with_no_secrets
 <<EOM
 BOOT006: The superuser key is present in the key store,
-         but the file /etc/opscode/private-chef-secrets.json is missing.
+         but the other expected credentials are missing.
 
          Ensure that the secrets file has been copied into /etc/opscode from the
          first Chef Server node that you brought online, then run
          'chef-server-ctl reconfigure' again.
-
 EOM
 
   end
@@ -192,12 +187,16 @@ EOM
     # path supplied by user
 # TODO 2017-02-28 mp: I think there are doc updates to go with this wording change.
 <<EOM
-BOOT007: The secrets file (/etc/opscode/private-chef-secrets.json) is present
-         but it does not contain the superuser key.
+BOOT007: The secrets file (/etc/opscode/private-chef-secrets.json) is
+         present but it does not contain the superuser key and no
+         pivotal.pem could be found on disk.
 
-         Ensure that private-chef-secrets.json is copied into /etc/opscode from the
-         first Chef Server node that you brought online, then run
-         'chef-server-ctl reconfigure' again.
+         Please check that private-chef-secrets.json has been copied
+         from the first Chef Server node that you brought online. If
+         you are upgrading from 12.13.0 or older, also check that
+         pivotal.pem and webui_priv.pem have been copied as well.
+
+         Then run 'chef-server-ctl reconfigure' again.
 EOM
   end
 
