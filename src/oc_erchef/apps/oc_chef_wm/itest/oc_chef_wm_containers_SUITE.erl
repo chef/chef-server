@@ -32,13 +32,16 @@
 -define(ORG_AUTHZ_ID, <<"10000000000000000000000000000000">>).
 -define(AUTHZ_ID, <<"00000000000000000000000000000001">>).
 -define(CLIENT_NAME, <<"test-client">>).
+-define(DEFAULT_HEADERS, [{"x-ops-userid", "test-client"},
+                          {"accept", "application/json"}]).
+-define(assertStatus(StatusCode, HttpcResponse), ?assertMatch({ok, {{_, StatusCode, _}, _, _}}, HttpcResponse)).
 
 init_per_suite(Config) ->
     setup_helper:base_init_per_suite([{org_name, <<"org">>},
-                                   {org_authz_id, ?ORG_AUTHZ_ID},
-                                   {authz_id, ?AUTHZ_ID},
-                                   {client_name, ?CLIENT_NAME}
-                                   | Config]).
+                                      {org_authz_id, ?ORG_AUTHZ_ID},
+                                      {authz_id, ?AUTHZ_ID},
+                                      {client_name, ?CLIENT_NAME}
+                                      | Config]).
 
 end_per_suite(Config) ->
     setup_helper:base_end_per_suite(Config).
@@ -66,56 +69,51 @@ end_per_testcase(_, _Config) ->
 
 delete_all_containers() ->
     Result = case sqerl:adhoc_delete("containers", all) of
-        {ok, Count} ->
-            Count;
-        Error ->
-            throw(Error)
-    end,
+                 {ok, Count} ->
+                     Count;
+                 Error ->
+                     throw(Error)
+             end,
     lager:info("Delete containers: ~p", [Result]),
     ok.
 
 list_when_no_containers(_) ->
     Result = http_list_containers(),
-    ?assertMatch({ok, "200", _, _} , Result),
-    ok.
+    ?assertStatus(200, Result).
 
 list_when_created_containers(_) ->
     Containers = ["foo", "bar"],
     [ http_create_container(Container) || Container <- Containers ],
-    {ok, ResponseCode, _, ResponseBody} = http_list_containers(),
-    ?assertEqual("200", ResponseCode),
-    Ejson = chef_json:decode(ResponseBody),
+    Response = http_list_containers(),
+    ?assertStatus(200, Response),
+    Ejson = chef_json:decode(respBody(Response)),
     {ContainerList} = Ejson,
     [ ?assertEqual(true, proplists:is_defined(list_to_binary(Container), ContainerList))
       || Container <- Containers ].
 
 create_container(_) ->
     Result = http_create_container("foo"),
-    ?assertMatch({ok, "201", _, _} , Result),
-    ok.
+    ?assertStatus(201, Result).
 
 create_with_bad_name(_) ->
     Result = http_create_container("name with spaces"),
-    ?assertMatch({ok, "400", _, _}, Result),
-    ok.
+    ?assertStatus(400, Result).
 
 delete_container(_) ->
     http_create_container("foo"),
     Result = http_delete_container("foo"),
-    ?assertMatch({ok, "200", _, _} , Result),
-    ok.
+    ?assertStatus(200, Result).
 
 fetch_non_existant_container(_) ->
-    Result = {ok, _, _, ResponseBody} = http_fetch_container("bar"),
-    ?assertMatch({ok, "404", _, ResponseBody} , Result),
-    ?assertEqual([<<"Cannot load container bar">>], ej:get({"error"}, chef_json:decode(ResponseBody))),
-    ok.
+    Result = http_fetch_container("bar"),
+    ?assertStatus(404, Result),
+    ?assertEqual([<<"Cannot load container bar">>], ej:get({"error"}, chef_json:decode(respBody(Result)))).
 
 fetch_existant_container(_) ->
     http_create_container("foo"),
-    {ok, ResponseCode, _, ResponseBody} = http_fetch_container("foo"),
-    ?assertMatch("200", ResponseCode),
-    Ejson = chef_json:decode(ResponseBody),
+    Response = http_fetch_container("foo"),
+    ?assertStatus(200, Response),
+    Ejson = chef_json:decode(respBody(Response)),
     ?assertEqual(<<"foo">>, ej:get({"containername"}, Ejson)),
     ?assertEqual(<<"foo">>, ej:get({"containerpath"}, Ejson)).
 
@@ -124,38 +122,32 @@ update_container(_) ->
     UpdateJson = {[{<<"containername">>, <<"bar">>},
                    {<<"containerpath">>, <<"foo">>},
                    {<<"extra-data">>, <<"ignored">>}]},
-    ?assertMatch({ok, "405", _, _}, http_update_container("foo", UpdateJson)),
-    ok.
+    ?assertStatus(405, http_update_container("foo", UpdateJson)).
 
 http_list_containers() ->
-    ibrowse:send_req("http://localhost:8000/organizations/org/containers",
-                     [{"x-ops-userid", "test-client"},
-                      {"accept", "application/json"}],
-                     get).
+    Request = {"http://localhost:8000/organizations/org/containers", ?DEFAULT_HEADERS},
+    httpc:request(get, Request, [], []).
 
 http_fetch_container(Name) ->
-    ibrowse:send_req("http://localhost:8000/organizations/org/containers/" ++ Name,
-                     [{"x-ops-userid", "test-client"},
-                      {"accept", "application/json"}],
-                     get).
+    Request = {"http://localhost:8000/organizations/org/containers/" ++ Name, ?DEFAULT_HEADERS},
+    httpc:request(get, Request, [], []).
 
 http_create_container(Name) ->
-    ibrowse:send_req("http://localhost:8000/organizations/org/containers",
-                     [{"x-ops-userid", "test-client"},
-                      {"accept", "application/json"},
-                      {"content-type", "application/json"}
-                     ],post, chef_json:encode({[{<<"containername">>, list_to_binary(Name)}]})
-                    ).
+    Url = "http://localhost:8000/organizations/org/containers",
+    Body = chef_json:encode({[{<<"containername">>, list_to_binary(Name)}]}),
+    Request = {Url, ?DEFAULT_HEADERS, "application/json", Body},
+    httpc:request(post, Request, [], []).
 
 http_delete_container(Name) ->
-    ibrowse:send_req("http://localhost:8000/organizations/org/containers/" ++ Name,
-                     [{"x-ops-userid", "test-client"},
-                      {"accept", "application/json"}
-                     ], delete).
+    Request = {"http://localhost:8000/organizations/org/containers/" ++ Name, ?DEFAULT_HEADERS},
+    httpc:request(delete, Request, [], []).
 
 http_update_container(Name, Ejson) ->
-    ibrowse:send_req("http://localhost:8000/organizations/org/containers/" ++ Name,
-                     [{"x-ops-userid", "test-client"},
-                      {"accept", "application/json"},
-                      {"content-type", "application/json"}
-                     ], put, chef_json:encode(Ejson)).
+    Request = {"http://localhost:8000/organizations/org/containers/" ++ Name,
+               ?DEFAULT_HEADERS,
+               "application/json",
+               chef_json:encode(Ejson)},
+    httpc:request(put, Request, [], []).
+
+respBody({ok, {{_, _, _}, _, Body}}) ->
+    Body.
