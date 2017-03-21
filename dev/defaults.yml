@@ -130,13 +130,11 @@ projects:
   oc_reporting:
     type:  erlang
     external: true
-    make-target: compile generate rel
     database: opscode_reporting
     omnibus-project: opscode-reporting
     service:
-     rel-type: reltool
+     rel-type: rebar3
      name: opscode-reporting
-     rel-name: oc_reporting
      cookie: oc_reporting
      node: oc_reporting@127.0.0.1
   chef-mover:
