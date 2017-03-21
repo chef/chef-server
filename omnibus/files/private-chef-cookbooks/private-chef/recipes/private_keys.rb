@@ -39,6 +39,10 @@ unless PrivateChef.credentials.exist?('chef-server', 'webui_key')
   PrivateChef.credentials.add('chef-server', 'webui_key',
                               value: webui_key.to_pem,
                               frozen: true)
+  # Store the public key in its own key for easy access
+  PrivateChef.credentials.add('chef-server', 'webui_pub_key',
+                              value: webui_key.public_key.to_s,
+                              frozen: true)
   PrivateChef.credentials.save
 end
 
@@ -51,13 +55,6 @@ file "/etc/opscode/private-chef-secrets.json" do
   owner helper['owner']
   group helper['group']
   mode "0600"
-end
-
-file "/etc/opscode/webui_pub.pem" do
-  owner "root"
-  group "root"
-  mode "0644"
-  content webui_key.public_key.to_s unless webui_key.nil?
 end
 
 if node['private_chef']['insecure_addon_compat']
@@ -76,6 +73,14 @@ if node['private_chef']['insecure_addon_compat']
     sensitive true
     content webui_key.to_pem
   end
+
+  file "/etc/opscode/webui_pub.pem" do
+    owner "root"
+    group "root"
+    mode "0644"
+    sensitive true
+    content webui_key.public_key.to_s unless webui_key.nil?
+  end
 else
   #  These keys are no longer kept directly on the FS
   #  delete them if they're present.
@@ -85,6 +90,11 @@ else
   end
 
   file "/etc/opscode/webui_priv.pem" do
+    action :delete
+    sensitive true
+  end
+
+  file "/etc/opscode/webui_pub.pem" do
     action :delete
     sensitive true
   end
