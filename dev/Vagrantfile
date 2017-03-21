@@ -6,16 +6,32 @@ require "yaml"
 require "fileutils"
 load "dvmtools.rb"
 CS_VM_ADDRESS="192.168.33.100"
+# Used for external db configuration
 DB_VM_ADDRESS="192.168.33.150"
+# Used for tiered configuration
 BE_VM_ADDRESS="192.168.33.151"
+# Used for ldap testing
 LDAP_VM_ADDRESS="192.168.33.152"
+# Reporting testing with external DB separate from chef server DB.
 REPORTING_DB_VM_ADDRESS="192.168.33.155"
+
 DB_SUPERUSER="bofh"
 DB_SUPERPASS="i1uvd3v0ps"
 LDAP_PASSWORD='H0\/\/!|\/|3tY0ur|\/|0th3r'
 
 nodes_dir = File.join(File.expand_path(File.dirname(__FILE__)), 'nodes')
-unless File.directory?(nodes_dir)
+if File.directory?(nodes_dir)
+	# This prevents attributes from previous runs from getting
+	# merged back into node attributes during provisioning.
+	#
+	# It prevents annoying things, like "private-chef-cookbooks never
+	# stops loading from the current repo instead of the package" - because
+	# the node attr that says to do that never got cleared.
+	Dir.glob(File.join(nodes_dir, "*.json")).each do  |nodefile|
+		File.delete(nodefile)
+	end
+
+else
   puts "nodes directory is missing...creating it now"
   puts
   FileUtils.mkdir(nodes_dir)
