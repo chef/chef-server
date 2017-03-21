@@ -168,7 +168,7 @@
     ]},
 
     {chef_authn, [
-        {keyring, [{default, "/etc/opscode/webui_pub.pem"}]},
+        {secrets_module, {chef_secrets, get, [{default, [<<"chef-server">>, <<"webui_pub_key">>]}]}},
         <% unless node['private_chef']['opscode-erchef']['keygen_cache_workers'] == :auto -%>
         {keygen_cache_workers, <%= node['private_chef']['opscode-erchef']['keygen_cache_workers'] %>},
         <% end -%>
