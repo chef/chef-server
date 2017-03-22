@@ -30,9 +30,9 @@ module DVM
     def start(args, background)
       raise DVMArgumentError, "#{name} appears to be already running." if is_running?
       if background
-        exec "#{server_start_cmd} > /var/log/#{omnibus_project}/#{service['name']}/current 2>&1 &"
+        exec "#{server_start_cmd} > /var/log/#{omnibus_project}/#{service['name']}/current 2>&1 &", close_others: false
       else
-        exec server_start_cmd
+        exec server_start_cmd, close_others: false
       end
     end
 
@@ -85,7 +85,7 @@ EOM
     end
 
     def server_start_cmd
-      "cd #{project_dir} && bundle exec rails server -p #{port} -b #{host} -e production"
+      "cd #{project_dir} && bundle exec --keep-file-descriptors bin/rails server -p #{port} -b #{host} -e production"
     end
 
     def enable_service
