@@ -75,11 +75,7 @@
           %% opscode-chef-mover, FWIW.
           {error_logger_hwm, 1000}
         ]},
- {chef_secrets, [
-                 {provider, chef_secrets_json_file},
-                 %% TODO: don't hard code this path
-                 {provider_config, [{secrets_file, "/etc/opscode/private-chef-secrets.json"}]}
-                ]},
+ {chef_secrets, [{provider, chef_secrets_fd}]},
  {bookshelf, [{ip, "<%= @listen %>"},
               {port, <%= @port %>},
               {storage_type, <%= @storage_type %>},

@@ -100,11 +100,7 @@
                {estatsd_host, "<%= node['private_chef']['estatsd']['vip'] %>"},
                {estatsd_port, <%= node['private_chef']['estatsd']['port'] %>}
               ]},
- {chef_secrets, [
-                 {provider, chef_secrets_json_file},
-                 %% TODO: don't hard code this path
-                 {provider_config, [{secrets_file, "/etc/opscode/private-chef-secrets.json"}]}
-                ]},
+ {chef_secrets, [{provider, chef_secrets_fd}]},
  {sqerl, [
            %% The database system you are using (e.g. pgsql)
            {db_driver_mod, sqerl_pgsql_client},

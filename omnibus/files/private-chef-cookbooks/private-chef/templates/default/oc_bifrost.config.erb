@@ -16,10 +16,7 @@
          {error_logger_mf_maxbytes, <%= @log_rotation['file_maxbytes'] %>},
          {error_logger_mf_maxfiles, <%= @log_rotation['num_to_keep'] %>}
         ]},
- {chef_secrets, [
-                 {provider, chef_secrets_json_file},
-                 {provider_config, [{secrets_file, "/etc/opscode/private-chef-secrets.json"}]}
-                ]},
+ {chef_secrets, [{provider, chef_secrets_fd}]},
  {lager, [
           %% What handlers to install with what arguments
           %% The defaults for the logfiles are to rotate the files when
