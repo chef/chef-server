@@ -4,6 +4,7 @@
 
 cd /opt/opscode/embedded/service/opscode-expander
 export HOME=/opt/opscode/embedded/service/opscode-expander
+export PATH=/opt/opscode/embedded/bin:$PATH
 
 exec 2>&1
-exec /opt/opscode/embedded/bin/chpst -P -U <%= node['private_chef']['user']['username'] %> -u <%= node['private_chef']['user']['username'] %> /opt/opscode/embedded/bin/bundle exec /opt/opscode/embedded/service/opscode-expander/bin/opscode-expander-cluster -n <%= node['private_chef']['opscode-expander']['nodes'] %> -c <%= File.join(node["private_chef"]['opscode-expander']['dir'], "etc", "expander.rb") %>
+exec veil-env-helper --use-file -s rabbitmq.password -- chpst -P -U <%= node['private_chef']['user']['username'] %> -u <%= node['private_chef']['user']['username'] %> bundle exec --keep-file-descriptors /opt/opscode/embedded/service/opscode-expander/bin/opscode-expander-cluster -n <%= node['private_chef']['opscode-expander']['nodes'] %> -c <%= File.join(node["private_chef"]['opscode-expander']['dir'], "etc", "expander.rb") %>
