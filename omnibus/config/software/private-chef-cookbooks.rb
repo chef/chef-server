@@ -63,6 +63,7 @@ build do
         cache_path "/var/opt/opscode/local-mode-cache"
         file_cache_path "/var/opt/opscode/local-mode-cache"
         verbose_logging true
+        log_level :fatal
         ssl_verify_mode :verify_peer
         client_fork false
       EOH
