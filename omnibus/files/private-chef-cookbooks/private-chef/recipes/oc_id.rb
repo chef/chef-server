@@ -93,6 +93,7 @@ file settings_file do
   action :delete
   not_if  { File.symlink?(settings_file) }
 end
+
 link settings_file do
   to "#{oc_id_config_dir}/production.yml"
 end
@@ -104,11 +105,13 @@ template "#{oc_id_config_dir}/secret_token.rb" do
   mode '640'
   notifies :restart, 'runit_service[oc_id]' unless backend_secondary?
 end
+
 secrets_file = "/opt/opscode/embedded/service/oc_id/config/initializers/secret_token.rb"
 file secrets_file do
   action :delete
   not_if  { File.symlink?(secrets_file) }
 end
+
 link secrets_file do
   to "#{oc_id_config_dir}/secret_token.rb"
 end
@@ -120,11 +123,13 @@ template "#{oc_id_config_dir}/database.yml" do
   mode '640'
   notifies :restart, 'runit_service[oc_id]' unless backend_secondary?
 end
+
 database_file = "/opt/opscode/embedded/service/oc_id/config/database.yml"
 file database_file do
   action :delete
   not_if  { File.symlink?(database_file) }
 end
+
 link database_file do
   to "#{node['private_chef']['oc_id']['dir']}/config/database.yml"
 end
@@ -163,6 +168,7 @@ end
 # exist in the database, and dump their data to /etc/opscode/oc-id-applications.
 node['private_chef']['oc_id']['applications'].each do |name, app|
   oc_id_application name do
+    write_to_disk node['private_chef']['insecure_addon_compat']
     redirect_uri app['redirect_uri']
     only_if { is_data_master? }
   end
