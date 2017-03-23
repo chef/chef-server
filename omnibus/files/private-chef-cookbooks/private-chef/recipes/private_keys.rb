@@ -27,19 +27,26 @@ unless PrivateChef.credentials.exist?('chef-server', 'superuser_key')
   pivotal_key = OpenSSL::PKey::RSA.generate(2048)
   PrivateChef.credentials.add('chef-server', 'superuser_key',
                               value: pivotal_key.to_pem,
-                              frozen: true )
+                              frozen: true)
 
   # TODO 2017-02-28 mp: let's consider making this the default behavior
   # of any write to CredentialsCollection -
   PrivateChef.credentials.save
 end
 
-unless PrivateChef.credentials.exist?('chef-server', 'webui_key')
+if !PrivateChef.credentials.exist?('chef-server', 'webui_key')
   webui_key = OpenSSL::PKey::RSA.generate(2048)
   PrivateChef.credentials.add('chef-server', 'webui_key',
                               value: webui_key.to_pem,
                               frozen: true)
   # Store the public key in its own key for easy access
+  PrivateChef.credentials.add('chef-server', 'webui_pub_key',
+                              value: webui_key.public_key.to_s,
+                              frozen: true)
+  PrivateChef.credentials.save
+elsif !PrivateChef.credentials.exist?('chef-server', 'webui_pub_key')
+  webui_string = PrivateChef.credentials.get('chef-server', 'webui_key')
+  webui_key = OpenSSL::PKey::RSA.new(webui_string)
   PrivateChef.credentials.add('chef-server', 'webui_pub_key',
                               value: webui_key.public_key.to_s,
                               frozen: true)
