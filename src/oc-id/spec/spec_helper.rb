@@ -23,10 +23,11 @@ f = if ENV['CHEF_SECRETS_FD'].nil?
         puts "CHEF_SECRETS_FD is set to #{ENV['CHEF_SECRETS_FD']}"
         f = IO.new(ENV['CHEF_SECRETS_FD'].to_i, "r")
         if f.closed?
-          puts "File is alrady closed. Likely running from rake."
+          puts "File is already closed. Likely running from rake."
           setup_chef_secrets
+        else
+          f
         end
-        f
       rescue Errno::EBADF, Errno::EINVAL
         puts "CHEF_SECRETS_FD has already been read. Likely running from rake."
         setup_chef_secrets
