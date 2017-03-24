@@ -60,7 +60,7 @@
 -define(SCOPE_SEPARATOR, <<"::">>).
 -define(SCOPED_NAME_REGEX, "^(?:(" ?NAME "+)|(?:(" ?NAME "*)\\:\\:(" ?NAME "+)))$").
 
--type db_callback() :: fun().
+-type db_callback() :: fun((any()) -> any()).
 
 -record(context, {org_id :: binary(),
                   db_context :: any() | undefined,
@@ -80,15 +80,15 @@
 %% Context is used to thread external state information through the system
 %%
 %% Dialyzer is grouchy unless undefined is included in types.
--spec initialize_context(binary() | undefined) -> #context{}.
+-spec initialize_context(binary()) -> #context{}.
 initialize_context(OrgId) ->
     initialize_context(OrgId, make_sql_callback()).
 
--spec initialize_context(binary() | undefined , db_callback() | undefined) -> #context{}.
+-spec initialize_context(binary(), db_callback()) -> #context{}.
 initialize_context(OrgId, CallBackFun) ->
     initialize_context(OrgId, undefined, CallBackFun).
 
-%-spec initialize_context(binary(), tuple(), db_callback()) -> #context{}.
+-spec initialize_context(binary(), tuple() | undefined, db_callback()) -> #context{}.
 initialize_context(OrgId, DbContext, CallBackFun) ->
     #context{org_id = OrgId,
              db_context = DbContext,
@@ -207,17 +207,21 @@ authz_records_by_name(Type, OrgId, Names) ->
     {AuthzIds, Remaining, ordsets:new()}.
 
 %% Helper functions for oc_chef_authz_db:authz_records_by_name and oc_chef_authz_db:find_org_actors_by_name
+-spec names_from_records([{binary(),_} | {binary(),_,_}]) -> [binary()].
 names_from_records(Records) ->
     [ name_from_record(R) || R  <- Records].
 
+-spec name_from_record({binary(),_} | {binary(),_,_}) -> binary().
 name_from_record({Name, _,  _}) ->
     Name;
 name_from_record({Name, _}) ->
     Name.
 
+-spec ids_from_records([{_,binary()} | {_,'null' | binary(),'null' | binary()}]) -> [binary()].
 ids_from_records(Records) ->
     [ id_from_record(R) || R <- Records ].
 
+-spec id_from_record({_, binary()} | {_, binary()|null, binary()|null}) -> binary().
 id_from_record({_, AuthzId}) ->
     AuthzId;
 id_from_record({_, UserAuthzId, null}) ->
@@ -239,6 +243,7 @@ is_ambiguous_actor({_, _, _}) ->
 %%
 %% Some consumers of the name mapper want to split out errors by type
 %%
+-spec filter_by_error_type(atom(), [binary()]) -> [binary()].
 filter_by_error_type(ErrorType, Errors) ->
     %% ET is introduced to work around issue with shadowed variables in list comprehensions
     [ Name || {ET, Name} <- Errors, ET =:= ErrorType ].
