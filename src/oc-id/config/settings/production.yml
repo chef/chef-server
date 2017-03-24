@@ -1,4 +1,3 @@
 chef:
   endpoint: https://api.opscode.us
   superuser: pivotal
-  secrets_file: /etc/opscode/private-chef-secrets.json
