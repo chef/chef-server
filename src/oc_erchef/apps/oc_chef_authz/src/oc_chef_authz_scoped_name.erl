@@ -31,6 +31,8 @@
          parse_scoped_names/2,
          parse_unscoped_names/2,
          convert_ids_to_names/3,
+
+         %% Used by oc_chef_group
          find_client_authz_ids/2,
          find_user_authz_ids/2,
          find_group_authz_ids/2,
@@ -42,7 +44,7 @@
          org_id_to_name/1
         ]).
 
--export([parse_scoped_name/3, fetch_authz_ids/2]).
+-export([parse_scoped_name/3]).
 
 -ifdef(TEST).
 -compile([export_all]).
@@ -58,29 +60,39 @@
 -define(SCOPE_SEPARATOR, <<"::">>).
 -define(SCOPED_NAME_REGEX, "^(?:(" ?NAME "+)|(?:(" ?NAME "*)\\:\\:(" ?NAME "+)))$").
 
--record(context, {org_id :: undefined,
-                  db_context :: undefined,
-                  db_callback_fun :: undefined
+-type db_callback() :: fun().
+
+-record(context, {org_id :: binary(),
+                  db_context :: any() | undefined,
+                  db_callback_fun :: db_callback()
                  }).
 
--record(sname, {full :: undefined,
-                base :: undefined,
-                org :: undefined,
-                org_id :: undefined,
-                authz_id :: undefined
+-record(sname, {full :: binary(),
+                base :: binary() | undefined,
+                org  :: binary() | 'global_org' | undefined,
+                org_id :: binary() | undefined,
+                authz_id :: binary() | undefined
                }).
 
+-type lookup_type() :: 'actor' | 'user' | 'client' | 'group'.
+
+%%
+%% Context is used to thread external state information through the system
+%%
+%% Dialyzer is grouchy unless undefined is included in types.
+-spec initialize_context(binary() | undefined) -> #context{}.
 initialize_context(OrgId) ->
     initialize_context(OrgId, make_sql_callback()).
 
+-spec initialize_context(binary() | undefined , db_callback() | undefined) -> #context{}.
 initialize_context(OrgId, CallBackFun) ->
     initialize_context(OrgId, undefined, CallBackFun).
 
+%-spec initialize_context(binary(), tuple(), db_callback()) -> #context{}.
 initialize_context(OrgId, DbContext, CallBackFun) ->
     #context{org_id = OrgId,
              db_context = DbContext,
              db_callback_fun = CallBackFun}.
-
 
 %%
 %% Takes scoped names to authz ids
@@ -99,6 +111,7 @@ initialize_context(OrgId, DbContext, CallBackFun) ->
 %% { [{Name, AuthzId}, [{Name, ErrorType}] }
 %%
 %%
+-spec names_to_authz_id(lookup_type() ,[binary()], #context{}) -> { [binary()],[{atom(),binary()}] }.
 names_to_authz_id(Type, Names, MapperContext) ->
     %% Lower to fully qualified orgname, name
     ScopedNames = parse_scoped_names(Names, is_scoped_type(Type), MapperContext),
@@ -237,14 +250,17 @@ group_errors(Errors) ->
 %%
 %% No error handling; we probably should generate an error when we have missing
 %%
+-spec find_client_authz_ids([binary()],#context{org_id::binary(), db_callback_fun::db_callback()}) -> [binary()].
 find_client_authz_ids(ClientNames, Context) ->
     {AuthzIds, _Missing} = names_to_authz_id(client, ClientNames, Context),
     AuthzIds.
 
+-spec find_user_authz_ids([binary()],#context{org_id::binary(), db_callback_fun::db_callback()}) -> [binary()].
 find_user_authz_ids(UserNames, Context) ->
     {AuthzIds, _Missing} = names_to_authz_id(user, UserNames, Context),
     AuthzIds.
 
+-spec find_group_authz_ids([binary()],#context{org_id::binary(), db_callback_fun::db_callback()}) -> [binary()].
 find_group_authz_ids(GroupNames, Context) ->
     {AuthzIds, _Missing} = names_to_authz_id(group, GroupNames, Context),
     AuthzIds.
@@ -270,6 +286,9 @@ convert_ids_to_names(ActorAuthzIds, GroupAuthzIds, Context) ->
 %%
 %% Each type of object has different restrictions on its scope.
 %%
+-spec authz_id_to_names('client' | 'group' | 'user', [binary()],
+                        #context{org_id::binary(), db_callback_fun::db_callback()}) ->
+        {[binary()],[binary()]}.
 authz_id_to_names(group, AuthzIds, #context{org_id = OrgId, db_callback_fun = CallbackFun} = Context) ->
     {ScopedNames, DiffedList} = query_and_diff_authz_ids(find_scoped_group_name_in_authz_ids, AuthzIds, CallbackFun),
     {render_names_in_context(OrgId, ScopedNames, Context), DiffedList};
@@ -310,6 +329,7 @@ extract_maybe_scoped_name([{<<"org_id">>, OrgId}, {_NameKey, Name}, {<<"authz_id
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Support routines
 %%
+-spec is_scoped_type(lookup_type()) -> boolean().
 is_scoped_type(group) ->
     true;
 is_scoped_type(_) ->
@@ -322,6 +342,7 @@ is_scoped_type(_) ->
 %%
 
 %% This simplifies testing
+-spec make_regex() -> re:mp().
 make_regex() ->
     {ok, Pattern} = re:compile(?SCOPED_NAME_REGEX),
     Pattern.
@@ -334,6 +355,7 @@ make_regex() ->
 %% Errors:
 %%   ill_formed_name
 %%   inappropriate_scoped_name
+-spec parse_scoped_name(binary(), boolean(), #context{}) -> #sname{} | {atom(), binary()}.
 parse_scoped_name(Name, ScopedOk, Context) ->
     Pattern = make_regex(),
     maybe_parse_scoped_name(Name, Pattern, ScopedOk, Context).
@@ -344,10 +366,13 @@ parse_scoped_names(Names, Context) ->
 parse_unscoped_names(Names, Context) ->
     parse_scoped_names(Names, false, Context).
 
+-spec parse_scoped_names([binary()], boolean(), #context{}) -> [#sname{} | {atom(), binary()}].
 parse_scoped_names(Names, ScopedOk, Context) ->
     Pattern = make_regex(),
     [ maybe_parse_scoped_name(Name, Pattern, ScopedOk, Context) || Name <- Names ].
 
+-spec maybe_parse_scoped_name(binary(), re:mp(), boolean(), #context{}) ->
+                                     #sname{} | {ill_formed_name|inappropriate_scoped_name, binary()}.
 maybe_parse_scoped_name(Name, Pattern, ScopedOk, Context) ->
     process_match(re:run(Name, Pattern, [{capture, all, binary}]), Name, Context, ScopedOk).
 
@@ -373,8 +398,9 @@ set_org_from_context(#sname{} = ScopedName, #context{org_id = OrgId}) when OrgId
     ScopedName#sname{org_id = OrgId}.
 
 %%
-%% Takes a list of {K, V} pairs, and regroups them. Use maps because the syntax is nice
+%% Takes a list of {K, V} pairs with multiple instances of K, and regroups them.
 %%
+-spec group_by_key([{any(), any()}]) -> [{any(), [any()]}].
 group_by_key(L) ->
     Map = lists:foldl(fun({K, V}, Map) ->
                               VL = maps:get(K, Map, []),
@@ -383,54 +409,23 @@ group_by_key(L) ->
                       #{}, L),
     maps:to_list(Map).
 
-
 %%
 %%
 make_sql_callback() ->
     fun chef_sql:select_rows/1.
 
-
 %%
 %% Helper function for working with unscoped names
 %%
+-spec make_scoped_names(binary(), [binary()]) -> [{binary(), binary()}].
 make_scoped_names(OrgName, Names) ->
     [{OrgName, Name} || Name <- Names].
-
-%%
-%%
-%%
-fetch_authz_ids(Type, ScopedNames) ->
-    NamesByOrg = group_by_key(ScopedNames),
-    case fetch_ids_rec(Type, NamesByOrg, {[], []}) of
-        [Found, []] ->
-            Found;
-        [_, Missing] ->
-            throw({invalid, Type, Missing})
-    end.
-
-
-%%
-%%
-%%
-fetch_ids_rec(_type, [], {Found, Missing}) ->
-    {lists:flatten(Found), Missing};
-fetch_ids_rec(Type, [{OrgId, Names} | Remainder], {Found, Missing}) ->
-    Records = oc_chef_authz_db:authz_records_by_name(Type, OrgId, Names),
-    FoundNames = lists:sort(names_from_records(Records)), % Investigate if this sort is redundant (db may already sort)
-    Remaining = Names -- FoundNames, % --/++ on very large lists might be slow.
-    Missing1 = case Remaining of
-                  [] ->
-                      [{OrgId, Remaining} | Missing];
-                  _ ->
-                      Missing
-              end,
-    fetch_ids_rec(Type, Remainder, {[FoundNames | Found], Missing1}).
-
 
 %%
 %% Expansion of authz ids into scoped names
 %% Takes {OrgName, Name} pairs in ScopedNames and returns
 %% list of names with scoping metacharacter inserted
+-spec render_names_in_context(binary(),[{binary(), [binary()]}], #context{}) -> [binary()].
 render_names_in_context(OrgId, ScopedNames, Context) ->
     GroupedScopedNames = group_by_key(ScopedNames),
     {Expanded, _Cache} = lists:foldl(fun(E, A) -> render_names_in_context_f(OrgId, E, A) end,
@@ -455,12 +450,14 @@ render_names_in_context_f(_OrgId, {AnotherOrgId, Names}, {Expanded, Context}) ->
             { [ENames, Expanded], Context }
     end.
 
+-spec make_name(binary(),binary()) -> <<_:16,_:_*8>>.
 make_name(OrgName, Name) ->
     <<OrgName/binary, "::", Name/binary>>.
 
 %%
 %% Lookup org name
 %%
+-spec org_id_to_name(binary()) -> not_found | binary().
 org_id_to_name(OrgId) ->
     %% TODO maybe rework this; it bypasses a bunch of our statistics gathering code.
     case chef_sql:select_rows({find_organization_by_id, [OrgId]}) of
@@ -471,9 +468,11 @@ org_id_to_name(OrgId) ->
 %%
 %% Memoize org id lookup
 %%
+-spec init_org_name_cache() -> map().
 init_org_name_cache() ->
     #{ global_org => ?GLOBAL_PLACEHOLDER_ORG_ID }.
 
+-spec lookup_org_id_cached(binary(), #{}) -> {binary() | not_found, map()}.
 lookup_org_id_cached(OrgName, Cache) ->
     case Cache of
         #{OrgName := OrgId} ->
