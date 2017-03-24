@@ -313,7 +313,7 @@ query_and_diff_authz_ids(QueryName, AuthzIds, CallbackFun) ->
             {ResultNames, FoundAuthzIds} = lists:foldl(fun extract_maybe_scoped_name/2,
                                                        {[],[]}, Results),
             DiffedList = sets:to_list(sets:subtract(sets:from_list(AuthzIds), sets:from_list(FoundAuthzIds))),
-            {lists:reverse(ResultNames), DiffedList};
+            {lists:sort(ResultNames), DiffedList};
         _Other ->
             {[], []}
     end.
