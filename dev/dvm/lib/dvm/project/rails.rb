@@ -71,7 +71,7 @@ EOM
 
     def do_build
       build_steps.each do |step|
-        run_command("#{step}", "Build Step: '#{step}'", cwd: project_dir, env: {'RAILS_ENV' => 'production'})
+        run_command("#{helper} -- #{step}", "Build Step: '#{step}'", cwd: project_dir, env: {'RAILS_ENV' => 'production'})
       end
     end
 
@@ -85,7 +85,7 @@ EOM
     end
 
     def server_start_cmd
-      "cd #{project_dir} && bundle exec --keep-file-descriptors bin/rails server -p #{port} -b #{host} -e production"
+      "cd #{project_dir} && #{helper} -- bundle exec --keep-file-descriptors bin/rails server -p #{port} -b #{host} -e production"
     end
 
     def enable_service

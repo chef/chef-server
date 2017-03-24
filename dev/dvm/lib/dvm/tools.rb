@@ -1,18 +1,12 @@
 module DVM
   module Tools
     def run_command(command, desc = nil, opts = {})
-      dir = opts[:cwd] || Dir.pwd
-      status = system(opts[:env] || {}, command,
-                      chdir: dir,
-                      close_others: false)
-
       no_raise = opts.delete(:no_raise)
-
-      unless no_raise
-        raise "Command Failed" if !status
-      end
-
-      status
+      say desc if desc
+      cmd = Mixlib::ShellOut.new(command, opts)
+      cmd.run_command
+      cmd.error! unless no_raise
+      cmd
     end
 
     def bind_mount(from, to)

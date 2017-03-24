@@ -6,12 +6,14 @@ module DVM
   # TODO: support for 'system' in another system - like omnibus-reporting env...
   class RubyProject < Project
     attr_reader :gem_path, :with_binstubs
+
     def initialize(project_name, config)
       super
       @gem_path = project['gem-path'] || "/opt/opscode/embedded/service/gem"
       @with_binstubs = project.has_key?('with-binstubs') ? project['with-binstubs'] : false
 
     end
+
     def do_load(options)
       if @project['system']
         load_system_ruby_project
@@ -19,11 +21,13 @@ module DVM
         load_ruby_project
       end
     end
+
     def load_system_ruby_project
       # For now we're not loading further gem deps - we can revisit that
       # if/when we have a need to.
       bind_mount(project_dir,   system_gem_path(name))
     end
+
     def load_ruby_project
       # ruby projects that can be run as commands will be updated with a new bundler file in place,
       # so that they can just be run via `dvm run #{name}` without having to mess around
@@ -33,9 +37,11 @@ module DVM
       path = gem_path == "none" ? "" : "--path #{gem_path}"
       run_command("bundle install #{path} #{binstubs}", "Installing in-place...", cwd: project_dir)
     end
+
     def unload
       unmount(@project_dir)
     end
+
     def loaded?
       if project['system']
         path_mounted?(project_dir)
@@ -45,11 +51,12 @@ module DVM
         false
       end
     end
+
     def run(args)
       if @project['system']
         raise DVM::DVMArgumentError, 'Run not supported for system ruby projects - just use it normally via chef-server-ctl or otherwise, as it has been loaded into the server gemset.'
       else
-        exec "cd #{@project_dir} && #{@project['run']} #{args.join(" ")}", close_others: false
+        exec "cd #{@project_dir} && #{helper} -- #{@project['run']} #{args.join(" ")}", close_others: false
       end
     end
   end
