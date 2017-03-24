@@ -107,7 +107,7 @@ module PrivateChef
 
   registered_extensions Mash.new
 
-  insecure_addon_compat false
+  insecure_addon_compat true
 
   class << self
     def from_file(filename)
@@ -571,7 +571,8 @@ WARN
     #
     def save_credentials_to_config
       credentials.legacy_credentials_hash.each do |service, creds|
-        next if service == "chef-server"
+        # Ignore secrets added by add-ons and the keys
+        next if PrivateChef[service].nil?
         creds.each do |name, value|
           PrivateChef[service][name] ||= value
         end
