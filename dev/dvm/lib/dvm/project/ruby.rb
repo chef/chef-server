@@ -49,7 +49,7 @@ module DVM
       if @project['system']
         raise DVM::DVMArgumentError, 'Run not supported for system ruby projects - just use it normally via chef-server-ctl or otherwise, as it has been loaded into the server gemset.'
       else
-        exec "cd #{@project_dir} && #{@project['run']} #{args.join(" ")}"
+        exec "cd #{@project_dir} && #{@project['run']} #{args.join(" ")}", close_others: false
       end
     end
   end

@@ -110,8 +110,7 @@ projects:
     type: rails
     install_options: --without development test doc
     build_steps:
-      - bundle exec rake assets:precompile
-      - bundle exec rake db:migrate
+      - bundle exec --keep-file-descriptors rake assets:precompile db:migrate
     symlinks:
       config/database.yml: config/database.yml
       config/settings/production.yml: config/production.yml

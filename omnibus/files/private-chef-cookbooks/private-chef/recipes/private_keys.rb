@@ -27,14 +27,14 @@ unless PrivateChef.credentials.exist?('chef-server', 'superuser_key')
   pivotal_key = OpenSSL::PKey::RSA.generate(2048)
   PrivateChef.credentials.add('chef-server', 'superuser_key',
                               value: pivotal_key.to_pem,
-                              frozen: true )
+                              frozen: true)
 
   # TODO 2017-02-28 mp: let's consider making this the default behavior
   # of any write to CredentialsCollection -
   PrivateChef.credentials.save
 end
 
-unless PrivateChef.credentials.exist?('chef-server', 'webui_key')
+if !PrivateChef.credentials.exist?('chef-server', 'webui_key')
   webui_key = OpenSSL::PKey::RSA.generate(2048)
   PrivateChef.credentials.add('chef-server', 'webui_key',
                               value: webui_key.to_pem,
@@ -44,18 +44,16 @@ unless PrivateChef.credentials.exist?('chef-server', 'webui_key')
                               value: webui_key.public_key.to_s,
                               frozen: true)
   PrivateChef.credentials.save
+elsif !PrivateChef.credentials.exist?('chef-server', 'webui_pub_key')
+  webui_string = PrivateChef.credentials.get('chef-server', 'webui_key')
+  webui_key = OpenSSL::PKey::RSA.new(webui_string)
+  PrivateChef.credentials.add('chef-server', 'webui_pub_key',
+                              value: webui_key.public_key.to_s,
+                              frozen: true)
+  PrivateChef.credentials.save
 end
 
 webui_key = OpenSSL::PKey::RSA.new(PrivateChef.credentials.get('chef-server', 'webui_key'))
-
-# This file gets created before the opscode user exists -
-# we'll need to change ownership after the fact.
-helper = OmnibusHelper.new(node).ownership
-file "/etc/opscode/private-chef-secrets.json" do
-  owner helper['owner']
-  group helper['group']
-  mode "0600"
-end
 
 if node['private_chef']['insecure_addon_compat']
   file "/etc/opscode/pivotal.pem"  do

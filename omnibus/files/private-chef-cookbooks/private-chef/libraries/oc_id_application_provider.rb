@@ -31,7 +31,9 @@ class Chef
       private
 
       def create!
+
         @attributes ||= begin
+                          env_helper = "veil-env-helper --use-file -s chef-server.webui_key -s oc_id.sql_password -s oc_id.secret_key_base"
                           rails_script = <<EOF
 app = Doorkeeper::Application.find_or_create_by(:name => "#{new_resource.name}");
 app.update_attributes(:redirect_uri => "#{new_resource.redirect_uri}");
@@ -46,7 +48,7 @@ EOF
                           #                            I, [2015-05-07T18:26:37.236655
                           #          (right here) ------^
                           # ```
-                          json = shell_out!("bin/rails runner -e production '#{rails_script}'",
+                          json = shell_out!("#{env_helper} -- bin/rails runner -e production '#{rails_script}'",
                                             :cwd => '/opt/opscode/embedded/service/oc_id').stdout.lines.last.chomp
 
                           Chef::JSONCompat.from_json(json).delete_if { |key| %w[ id created_at updated_at].include? key }

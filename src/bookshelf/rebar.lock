@@ -4,7 +4,7 @@
   0},
  {<<"chef_secrets">>,
   {git,"https://github.com/chef/chef_secrets",
-       {ref,"611921dede330d8f93e54a1972efd02ca917dc23"}},
+       {ref,"3ada796f85085bc3d6777f0bc355ce9345db7adf"}},
   0},
  {<<"ej">>,
   {git,"https://github.com/seth/ej",

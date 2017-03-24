@@ -23,13 +23,8 @@ module ChefResource
     { 'x-ops-request-source' => 'web' }
   end
 
-  def veil
-    file = Settings.chef.secrets_file || '/etc/opscode/private-chef-secrets.json'
-    Veil::CredentialCollection::ChefSecretsFile.from_file(file)
-  end
-
   def key
-    veil.get("chef-server", "webui_key")
+    Secrets.get("chef-server", "webui_key")
   end
 
   def parameters

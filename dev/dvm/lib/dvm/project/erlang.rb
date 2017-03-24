@@ -51,7 +51,7 @@ module DVM
       if background
         run_command("bin/#{relname} start", "Starting #{name}", cwd: relpath, env: { "DEVVM" => "1" } )
       else
-        exec "cd #{relpath} && bin/#{relname} console"
+        exec "cd #{relpath} && bin/#{relname} console", close_others: false
       end
     end
 

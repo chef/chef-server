@@ -1,4 +1,6 @@
 ENV["RAILS_ENV"] ||= 'test'
+ENV["CHEF_SECRETS_DATA"] ||= File.read(File.expand_path("../../config/private-chef-secrets.json", __FILE__))
+
 require File.expand_path("../../config/environment", __FILE__)
 require 'rspec/rails'
 

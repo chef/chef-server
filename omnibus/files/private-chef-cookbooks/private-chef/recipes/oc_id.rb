@@ -134,8 +134,9 @@ link database_file do
   to "#{node['private_chef']['oc_id']['dir']}/config/database.yml"
 end
 
+veil_helper_args = "--use-file -s chef-server.webui_key -s oc_id.sql_password -s oc_id.secret_key_base"
 execute "oc_id_schema" do
-  command "bundle exec rake db:migrate"
+  command "veil-env-helper #{veil_helper_args} -- bundle exec --keep-file-descriptors rake db:migrate"
   cwd "/opt/opscode/embedded/service/oc_id"
 
   # There are other recipes that depend on having a VERSION environment

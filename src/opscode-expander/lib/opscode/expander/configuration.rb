@@ -135,8 +135,7 @@ module Opscode
         configurable :log_level, :info
 
         configurable :veil_config, {
-                       provider: 'chef-secrets-file',
-                       path: '/etc/opscode/private-chef-secrets.json'
+                       provider: 'chef-secrets-env'
                      }
 
         # override the setter for log_level to also actually set the level
