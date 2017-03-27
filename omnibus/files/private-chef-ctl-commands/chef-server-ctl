@@ -2,6 +2,7 @@
 require 'rubygems'
 gem 'omnibus-ctl'
 require 'omnibus-ctl'
+require 'veil'
 
 module Omnibus
   # This implements callbacks for handling commands related to the

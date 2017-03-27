@@ -16,6 +16,17 @@
 
 require "omnibus_ctl_helper"
 
+module Omnibus
+  class Ctl
+    def credentials
+      # This is defined in chef-server-ctl, but chef-server-ctl isn't
+      # actually loaded as part of these tests and attempting to load
+      # it would require some code changes since it expects to be able
+      # to run the command specified in ARGV.
+    end
+  end
+end
+
 describe "chef-server-ctl rotate credentials" do
   subject do
     OmnibusCtlHelper.new(["./rotate_credentials.rb"])
@@ -38,7 +49,7 @@ describe "chef-server-ctl rotate credentials" do
     allow(subject.ctl).to receive(:remove_backup_file).and_return(true)
     allow(subject.ctl).to receive(:run_chef).and_return(double("ProcessStatus", success?: true))
     allow(subject.ctl).to receive(:running_config).and_return(running_config)
-    allow(Veil::CredentialCollection::ChefSecretsFile).to receive(:from_file).and_return(veil_creds)
+    allow(subject.ctl).to receive(:credentials).and_return(veil_creds)
   end
 
   shared_examples "rotation command" do

@@ -1,5 +1,4 @@
 add_command_under_category "set-db-superuser-password", "Secrets Management", "Add or change DB superuser password", 2 do
-
   confirm_continue!("WARN: Manually setting the DB superuser password is only supported for external postgresql instances")
   password = get_secret("DB_PASSWORD", "DB superuser password", ARGV[3])
   set_secret_("postgresql", "db_superuser_password", password)
@@ -24,6 +23,12 @@ KNOWN_CREDENTIALS = {
   "bookshelf" => ["access_key_id", "secret_access_key", "sql_password", "sql_ro_password"],
 }
 
+add_command_under_category "show-secret", "Secrets Management", "Show the value of the given secret in the secret store", 2 do
+  group = ARGV[3]
+  name = ARGV[4]
+  puts credentials.get(group, name)
+end
+
 add_command_under_category "set-secret", "Secrets Management", "Set or change secret NAME of GROUP", 2 do
   group = ARGV[3]
   name = ARGV[4]
@@ -38,6 +43,15 @@ add_command_under_category "set-secret", "Secrets Management", "Set or change se
   disp_name = "#{group} #{name}"
   password = get_secret(env_name, disp_name, ARGV[5])
   set_secret_(group, name, password)
+end
+
+add_command_under_category "remove-secret", "Secrets Management", "Remove secret NAME of GROUP", 2 do
+  group = ARGV[3]
+  name = ARGV[4]
+
+  confirm_continue!("WARN: Removing a secret may render your chef-server inoperable.  Are you sure?")
+  credentials.remove(group, name)
+  credentials.save
 end
 
 def is_known_credential(group, name)

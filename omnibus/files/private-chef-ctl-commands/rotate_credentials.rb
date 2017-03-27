@@ -8,7 +8,7 @@ require "highline"
 # Because the shared secrets are known on all nodes in the cluster the user can
 # choose between copying the secrets file to each node in the cluster and
 # reconfiguring or by running this command on all nodes.
-add_command_under_category "rotate-credentials", "credential-rotation", "Rotate Chef Server credentials for a given service", 2 do
+add_command_under_category "rotate-credentials", "Secrets Management", "Rotate Chef Server credentials for a given service", 2 do
   ensure_configured!
 
   OptionParser.new do |opts|
@@ -32,7 +32,6 @@ add_command_under_category "rotate-credentials", "credential-rotation", "Rotate 
     backup_file = backup_secrets_file
 
     log("Rotating #{service}'s credentials...", :notice)
-    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file_path, owner)
     credentials.rotate(service)
     credentials.save
   rescue => e
@@ -65,7 +64,7 @@ end
 # the shared secrets are known on all nodes in the cluster the user can choose
 # between copying the secrets file to each node in the cluster and reconfiguring
 # or by running this command on all nodes.
-add_command_under_category "rotate-all-credentials", "credential-rotation", "Rotate all Chef Server service credentials", 2 do
+add_command_under_category "rotate-all-credentials", "Secrets Management", "Rotate all Chef Server service credentials", 2 do
   ensure_configured!
 
   # Rotate and save the credentials
@@ -73,7 +72,6 @@ add_command_under_category "rotate-all-credentials", "credential-rotation", "Rot
     backup_file = backup_secrets_file
 
     log("Rotating all Chef Server service credentials...", :notice)
-    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file_path, owner)
     credentials.rotate_credentials
     credentials.save
   rescue => e
@@ -105,7 +103,7 @@ end
 # new service credentials for all services. It will then do a chef run to apply
 # the new credentials. As the shared secret and salt is securely and randomly
 # generated the user must copy the secrets file to all nodes in the cluster.
-add_command_under_category "rotate-shared-secrets", "credential-rotation", "Rotate the Chef Server shared secrets and all service credentials", 2 do
+add_command_under_category "rotate-shared-secrets", "Secrets Management", "Rotate the Chef Server shared secrets and all service credentials", 2 do
   ensure_configured!
 
   backup_file = backup_secrets_file
@@ -113,7 +111,6 @@ add_command_under_category "rotate-shared-secrets", "credential-rotation", "Rota
   # Rotate and save the credentials
   begin
     log("Rotating shared credential secrets and service credentials...", :notice)
-    credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file_path, owner)
     credentials.rotate_hasher
     credentials.save
   rescue => e
@@ -142,10 +139,9 @@ add_command_under_category "rotate-shared-secrets", "credential-rotation", "Rota
   end
 end
 
-add_command_under_category "show-service-credentials", "credential-rotation", "Show the service credentials", 2 do
+add_command_under_category "show-service-credentials", "Secrets Management", "Show the service credentials", 2 do
   ensure_configured!
 
-  credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file_path, owner)
   pp(credentials.legacy_credentials_hash)
   exit(0)
 end
@@ -160,7 +156,7 @@ end
 # credentials the chef-client reconfigure run will re-enable/link the services,
 # restart the Chef Server and remove the sentinel file that enables the
 # pre-hook.
-add_command_under_category "require-credential-rotation", "credential-rotation", "Disable the Chef Server and require credential rotation", 2 do
+add_command_under_category "require-credential-rotation", "Secrets Management", "Disable the Chef Server and require credential rotation", 2 do
   @agree_to_disable = false
   @ui = HighLine.new
 
@@ -244,10 +240,6 @@ def ensure_configured!
     log("You must reconfigure the Chef Server before a backup can be performed", :error)
     exit(1)
   end
-end
-
-def owner
-  { user: running_config["private_chef"]["user"]["username"] }
 end
 
 def log(message, level = :info)
