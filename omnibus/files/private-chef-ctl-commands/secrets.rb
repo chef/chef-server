@@ -21,6 +21,10 @@ KNOWN_CREDENTIALS = {
   "oc_bifrost" => ["superuser_id", "sql_password", "sql_ro_password"],
   "oc_id" => ["secret_key_base", "sql_password", "sql_ro_password"],
   "bookshelf" => ["access_key_id", "secret_access_key", "sql_password", "sql_ro_password"],
+  "manage" => ["secret_key_base", "secret_token"],
+  "saml" => ["client_id", "client_secret"],
+  "push-jobs-server" => ["pushy_priv_key", "pushy_pub_key", "sql_password"],
+  "opscode-reporting" => ["sql_password"],
 }
 
 add_command_under_category "show-secret", "Secrets Management", "Show the value of the given secret in the secret store", 2 do
