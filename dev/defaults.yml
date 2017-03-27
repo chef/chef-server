@@ -106,6 +106,20 @@ projects:
       name: opscode-erchef
       cookie: erchef
       node: erchef@127.0.0.1
+      secrets:
+        args: --use-file
+        list:
+          - chef-server.webui_pub_key
+          - opscode_erchef.sql_password
+          - bookshelf.access_key_id
+          - bookshelf.secret_access_key
+          - rabbitmq.password
+          - rabbitmq.management_password
+          - rabbitmq.actions_password
+          - oc_bifrost.superuser_id
+        optional:
+          - data_collector.token
+          - ldap.bind_password
   oc-id:
     type: rails
     install_options: --without development test doc
@@ -118,6 +132,12 @@ projects:
     service:
       name: oc_id
       port: 9090
+      secrets:
+        args: --use-file
+        list:
+          - chef-server.webui_key
+          - oc_id.sql_password
+          - oc_id.secret_key_base
   oc_bifrost:
     type: erlang
     database: bifrost
@@ -126,16 +146,28 @@ projects:
       name:  oc_bifrost
       cookie: oc_bifrost
       node: oc_bifrost@127.0.0.1
+      secrets:
+        args: --use-file
+        list:
+          - oc_bifrost.sql_password
+          - oc_bifrost.superuser_id
   oc_reporting:
     type:  erlang
     external: true
     database: opscode_reporting
     omnibus-project: opscode-reporting
     service:
-     rel-type: rebar3
-     name: opscode-reporting
-     cookie: oc_reporting
-     node: oc_reporting@127.0.0.1
+      rel-type: rebar3
+      name: opscode-reporting
+      cookie: oc_reporting
+      node: oc_reporting@127.0.0.1
+      secrets:
+        args: --pack
+        list:
+          - chef-server.superuser_key
+          - chef-server.webui_pub_key
+          - opscode-reporting.sql_password
+          - rabbitmq.actions_password
   chef-mover:
     type: erlang
     service:
@@ -144,6 +176,12 @@ projects:
       name:  opscode-chef-mover
       cookie: mover
       node: mover@127.0.0.1
+      secrets:
+        args: --use-file
+        list:
+          - opscode_erchef.sql_password
+          - oc_bifrost.superuser_id
+          - redis_lb.password
   bookshelf:
     type: erlang
     service:
@@ -151,6 +189,13 @@ projects:
       name: bookshelf
       cookie: bookshelf
       node: bookshelf@127.0.0.1
+      secrets:
+        args: --use-file
+        list:
+          - bookshelf.access_key_id
+          - bookshelf.secret_access_key
+        optional:
+          - bookshelf.sql_password
   omnibus:
     path: "omnibus"
     name: opscode-omnibus

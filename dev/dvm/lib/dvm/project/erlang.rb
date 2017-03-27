@@ -49,9 +49,9 @@ module DVM
       # Ensure that our packaged installation isn't running, thereby preventing spewage of startup errors.
       disable_service
       if background
-        run_command("bin/#{relname} start", "Starting #{name}", cwd: relpath, env: { "DEVVM" => "1" } )
+        run_command("#{helper} -- bin/#{relname} start", "Starting #{name}", cwd: relpath, env: { "DEVVM" => "1" } )
       else
-        exec "cd #{relpath} && bin/#{relname} console", close_others: false
+        exec "cd #{relpath} && #{helper} -- bin/#{relname} console", close_others: false
       end
     end
 

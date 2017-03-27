@@ -24,6 +24,26 @@ module DVM
       @service = @project['service']
     end
 
+    def helper
+      veil = service['secrets']
+      return '' unless veil
+
+      "veil-env-helper #{veil['args']} #{secrets_params} #{optional_params}"
+    end
+
+    def secrets_params
+      return '' unless service['secrets']['list']
+      service['secrets']['list'].map do |secret|
+        "-s #{secret}"
+      end.join(' ')
+    end
+
+    def optional_params
+      return '' unless service['secrets']['optional']
+      service['secrets']['optional'].map do |secret|
+        "-o #{secret}"
+      end.join(' ')
+    end
 
     def start(args, detach)
       raise DVM::DVMArgumentError, "Start not supported for #{name}"
