@@ -15,6 +15,13 @@ LDAP_VM_ADDRESS="192.168.33.152"
 # Reporting testing with external DB separate from chef server DB.
 REPORTING_DB_VM_ADDRESS="192.168.33.155"
 
+
+# Just in case you have a hankering to start a VM to run components on the
+# same network that don't fall into the categories above.
+# Enable it by setting config.yml value `vm.custom` to `true`,
+# then bring it up with `vagrant up custom`
+CUSTOM_VM_ADDRESS ="192.168.33.153"
+
 DB_SUPERUSER="bofh"
 DB_SUPERPASS="i1uvd3v0ps"
 LDAP_PASSWORD='H0\/\/!|\/|3tY0ur|\/|0th3r'
@@ -87,6 +94,12 @@ Vagrant.configure("2") do |config|
     end
   else
     attributes['vm']['chef-backend'] = nil
+  end
+
+  if attributes['vm']['start-custom'] == true
+    config.vm.define("custom") do |c|
+      define_custom_server(c, attributes)
+    end
   end
 
   config.vm.define("chef-server", primary: true) do |c|
@@ -253,6 +266,20 @@ def define_db_server(config, attributes)
   # chef-client for the node.  May reconsider...
   config.vm.provision "shell", inline: configure_postgres
 end
+def define_custom_server(config, attributes)
+  config.vm.hostname = "custom.chef-server.dev"
+  config.vm.network "private_network", ip: CUSTOM_VM_ADDRESS
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ["modifyvm", :id,
+                  "--name", "custom",
+                  "--memory", 1024,
+                  "--cpus", 2,
+                  "--usb", "off",
+                  "--usbehci", "off"
+    ]
+  end
+end
+
 
 def define_backend_server(config, attribute)
   provisioning, installer, installer_path = prepare('BE_INSTALLER', 'chef-backend', 'Chef Backend 1.1+')
