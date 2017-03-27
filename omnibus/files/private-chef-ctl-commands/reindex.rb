@@ -19,7 +19,6 @@ require 'chef/config'
 require 'chef/rest'
 require 'chef/org'
 require 'redis'
-require 'veil'
 
 def all_orgs
   Chef::Config.from_file("/etc/opscode/pivotal.rb")
@@ -62,15 +61,11 @@ def enqueue_data_for_org(org)
   end
 end
 
-def veil
-  @veil ||= Veil::CredentialCollection::ChefSecretsFile.from_file("/etc/opscode/private-chef-secrets.json")
-end
-
 def redis
   @redis ||= begin
                vip = running_config["private_chef"]["redis_lb"]["vip"]
                port = running_config["private_chef"]["redis_lb"]["port"]
-               password = veil.get('redis_lb', 'password')
+               password = credentials.get('redis_lb', 'password')
                Redis.new(port: port, ip: vip, password: password)
              end
 end
