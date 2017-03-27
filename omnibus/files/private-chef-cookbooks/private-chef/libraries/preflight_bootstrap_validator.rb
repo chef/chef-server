@@ -78,29 +78,50 @@ class BootstrapPreflightValidator < PreflightValidator
     first_run? && all_creds_exist? && PrivateChef["postgresql"]["external"]
   end
 
+  def validate_sane_state
+    # If nothing is there, this is probably a first run
+    return true unless (secrets_file_exists? || pivotal_pem_exists?)
+
+    unless (new_secrets_layout? || old_secrets_info? || valid_mixed_state?)
+      fail_with err_BOOT006_invalid_secrets_state
+    end
+
+    true
+  end
+
   private
 
   def all_creds_exist?
     pivotal_key_exists? && secrets_exists?
   end
 
-  def pivotal_key_exists?
-    # on upgrades, we haven't had a chance to ingest the pivotal key, so we
-    # still need to check if the file is on disk
-    ::File.exist?("/etc/opscode/pivotal.pem") ||
-      PrivateChef.credentials.exist?('chef-server', 'superuser_key')
+
+  def new_secrets_layout?
+    secrets_exists? && secrets_contains_pivotal?
   end
 
-  def validate_sane_state
-    if pivotal_key_exists?
-      unless secrets_exists?
-        fail_with err_BOOT006_pivotal_with_no_secrets
-      end
-    else
-      if secrets_exists?
-        fail_with err_BOOT007_secrets_with_no_pivotal
-      end
-    end
+  def old_secrets_info?
+    secrets_file_exists? && pivotal_pem_exists?
+  end
+
+  def valid_mixed_state?
+    secrets_exists? && pivotal_pem_exists?
+  end
+
+  def secrets_file_exists?
+    ::File.exist?("/etc/opscode/private-chef-secrets.json")
+  end
+
+  def pivotal_pem_exists?
+    ::File.exist?("/etc/opscode/pivotal.pem")
+  end
+
+  def secrets_contains_pivotal?
+    PrivateChef.credentials.exist?('chef-server', 'superuser_key')
+  end
+
+  def pivotal_key_exists?
+    secrets_contains_pivotal? || pivotal_pem_exists?
   end
 
   def pivotal_user_exists?
@@ -172,33 +193,25 @@ BOOT005: Your configuration indicates that you may be starting this node
 EOM
   end
 
-  # TODO 2017-02-28 mp:  actually this path is no longer possible.  If chef secrets is not there
-  # then the pivotal key cannot be.
-  def err_BOOT006_pivotal_with_no_secrets
+  def err_BOOT006_invalid_secrets_state
 <<EOM
-BOOT006: The superuser key is present in the key store,
-         but the file /etc/opscode/private-chef-secrets.json is missing.
+BOOT006: The secrets data in /etc/opscode appears invalid.
 
-         Ensure that the secrets file has been copied into /etc/opscode from the
-         first Chef Server node that you brought online, then run
-         'chef-server-ctl reconfigure' again.
+         Please ensure you have copied
 
+            /etc/opscode/private-chef-secrets.json
+
+         from the existing Chef Server to this chef-server.
+
+         If you are upgrading from Chef Server 12.13.0 or older,
+         please also copy the following files:
+
+            /etc/opscode/webui_priv.pem
+            /etc/opscode/pivotal.pem
+
+         Once copied run 'chef-server-ctl reconfigure' again.
 EOM
 
-  end
-
-  def err_BOOT007_secrets_with_no_pivotal
-# TODO 2017-02-28 mp: we'll want to replace pc-secrets references with the configured
-    # path supplied by user
-# TODO 2017-02-28 mp: I think there are doc updates to go with this wording change.
-<<EOM
-BOOT007: The secrets file (/etc/opscode/private-chef-secrets.json) is present
-         but it does not contain the superuser key.
-
-         Ensure that private-chef-secrets.json is copied into /etc/opscode from the
-         first Chef Server node that you brought online, then run
-         'chef-server-ctl reconfigure' again.
-EOM
   end
 
   def err_BOOT008_pivotal_public_key_mismatch
