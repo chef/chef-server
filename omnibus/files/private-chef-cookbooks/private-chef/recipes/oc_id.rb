@@ -27,8 +27,7 @@ end
 app_settings = {
   'chef' => {
     'endpoint' => "https://#{node['private_chef']['lb_internal']['vip']}",
-    'superuser' => 'pivotal',
-    'secrets_file' => '/etc/opscode/private-chef-secrets.json'
+    'superuser' => 'pivotal'
   },
   'doorkeeper' => {
     'administrators' => node['private_chef']['oc_id']['administrators'] || []
