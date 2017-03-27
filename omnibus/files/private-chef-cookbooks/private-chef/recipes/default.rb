@@ -160,6 +160,10 @@ end
 
 include_recipe "private-chef::cleanup"
 
+if darklaunch_values["actions"] && node['private_chef']['insecure_addon_compat']
+  include_recipe "private-chef::actions"
+end
+
 include_recipe "private-chef::private-chef-sh"
 include_recipe "private-chef::oc-chef-pedant"
 include_recipe "private-chef::log_cleanup"
