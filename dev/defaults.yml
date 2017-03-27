@@ -96,6 +96,9 @@ vm:
     base_output_path: /vagrant/testdata/cover # maps to dev/testdata/cover
   node-attributes:
     placeholder: true
+  # Overriding config.vm.stsrt-custom to true will create an empty VM of the same
+  # distro as the chef server, with 2GB/2core, using CUSTOM_VM_ADDRESS
+  start-custom: false
 
 projects:
   oc_erchef:
