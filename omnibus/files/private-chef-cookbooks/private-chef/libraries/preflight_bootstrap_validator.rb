@@ -21,11 +21,6 @@ class BootstrapPreflightValidator < PreflightValidator
   end
 
   def run!
-    # Sanity checks: for any configuration we should expect that
-    # private-chef-secrets.json exists and contains the superuser key, or
-    # that the file is missing entirely.
-    validate_sane_state
-
     # The remaining validation tests apply only if we haven't completed
     # a successful reconfigure
     return unless first_run?
@@ -78,38 +73,10 @@ class BootstrapPreflightValidator < PreflightValidator
     first_run? && all_creds_exist? && PrivateChef["postgresql"]["external"]
   end
 
-  def validate_sane_state
-    # If nothing is there, this is probably a first run
-    return true unless (secrets_file_exists? || pivotal_pem_exists?)
-
-    unless (new_secrets_layout? || old_secrets_info? || valid_mixed_state?)
-      fail_with err_BOOT006_invalid_secrets_state
-    end
-
-    true
-  end
-
   private
 
   def all_creds_exist?
     pivotal_key_exists? && secrets_exists?
-  end
-
-
-  def new_secrets_layout?
-    secrets_exists? && secrets_contains_pivotal?
-  end
-
-  def old_secrets_info?
-    secrets_file_exists? && pivotal_pem_exists?
-  end
-
-  def valid_mixed_state?
-    secrets_exists? && pivotal_pem_exists?
-  end
-
-  def secrets_file_exists?
-    ::File.exist?("/etc/opscode/private-chef-secrets.json")
   end
 
   def pivotal_pem_exists?
@@ -191,27 +158,6 @@ BOOT005: Your configuration indicates that you may be starting this node
 
          Pending: remediation  walkthrough
 EOM
-  end
-
-  def err_BOOT006_invalid_secrets_state
-<<EOM
-BOOT006: The secrets data in /etc/opscode appears invalid.
-
-         Please ensure you have copied
-
-            /etc/opscode/private-chef-secrets.json
-
-         from the existing Chef Server to this chef-server.
-
-         If you are upgrading from Chef Server 12.13.0 or older,
-         please also copy the following files:
-
-            /etc/opscode/webui_priv.pem
-            /etc/opscode/pivotal.pem
-
-         Once copied run 'chef-server-ctl reconfigure' again.
-EOM
-
   end
 
   def err_BOOT008_pivotal_public_key_mismatch
