@@ -186,6 +186,7 @@ def define_chef_server(config, attributes)
       chef.node_name = config.vm.hostname
       chef.cookbooks_path = "cookbooks"
       chef.add_recipe("provisioning::hosts")
+      chef.add_recipe("provisioning::chef-server")
       # If we're running chef-backend, let _it_ create the chef-server.rb
       chef.add_recipe("provisioning::chef-server-rb") unless chef_backend_active?(attributes)
       chef.add_recipe("dev::system")
