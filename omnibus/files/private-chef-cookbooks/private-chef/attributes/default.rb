@@ -794,8 +794,6 @@ default['private_chef']['keepalived']['vrrp_instance_interface'] = "eth0"
 default['private_chef']['keepalived']['vrrp_instance_virtual_router_id'] = "1"
 default['private_chef']['keepalived']['vrrp_instance_priority'] = "100"
 default['private_chef']['keepalived']['vrrp_instance_advert_int'] = "1"
-# TODO mp 2017-03-10 this one too
-default['private_chef']['keepalived']['vrrp_instance_password'] = "sneakybeaky"
 default['private_chef']['keepalived']['vrrp_instance_ipaddress'] = node['ipaddress']
 default['private_chef']['keepalived']['vrrp_instance_ipaddress_dev'] = 'eth0'
 default['private_chef']['keepalived']['vrrp_instance_vrrp_unicast_bind'] = node['ipaddress']

@@ -24,7 +24,7 @@ KNOWN_CREDENTIALS = {
   "manage" => ["secret_key_base", "secret_token"],
   "saml" => ["client_id", "client_secret"],
   "push-jobs-server" => ["pushy_priv_key", "pushy_pub_key", "sql_password"],
-  "opscode-reporting" => ["sql_password"],
+  "opscode-reporting" => ["rabbitmq_password", "sql_password", "sql_ro_password"],
 }
 
 add_command_under_category "show-secret", "Secrets Management", "Show the value of the given secret in the secret store", 2 do
