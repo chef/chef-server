@@ -99,8 +99,9 @@ add_command_under_category "upgrade", "general", "Upgrade your private chef inst
 
   def partybus_upgrade
     # Original Enterprise Chef upgrade path
-    reconfigure(false)
     # Put everything in a down state except postgres before we upgrade things.
+    run_command("private-chef-ctl stop")
+    reconfigure(false)
     # How upgrades should handle services:
     #  + It should expect services to be down, but turn off services
     #    if its important that they be off for the upgrade.
