@@ -24,14 +24,6 @@ cookbook_file "/var/opt/opscode/nginx/ca/dhparams.pem" do
   action :create
 end
 
-template "/etc/hosts" do
-  source "hosts.erb"
-  owner "root"
-  group "root"
-  action :create
-  variables({"fqdns" => ["api.chef-server.dev",  "manage.chef-server.dev"]})
-end
-
 directory "/etc/opscode" do
   owner "root"
   group "root"

@@ -5,22 +5,21 @@
 require "yaml"
 require "fileutils"
 load "dvmtools.rb"
-CS_VM_ADDRESS="192.168.33.100"
-# Used for external db configuration
-DB_VM_ADDRESS="192.168.33.150"
-# Used for tiered configuration
-BE_VM_ADDRESS="192.168.33.151"
-# Used for ldap testing
-LDAP_VM_ADDRESS="192.168.33.152"
-# Reporting testing with external DB separate from chef server DB.
-REPORTING_DB_VM_ADDRESS="192.168.33.155"
+
+IPS = {
+  cs: "192.168.33.100",
+  db: "192.168.33.150",
+  be: "192.168.33.151",
+  ldap: "192.168.33.152",
+  custom: "192.168.33.153",
+  reportingdb: "192.168.33.155"
+}
 
 
 # Just in case you have a hankering to start a VM to run components on the
 # same network that don't fall into the categories above.
 # Enable it by setting config.yml value `vm.custom` to `true`,
 # then bring it up with `vagrant up custom`
-CUSTOM_VM_ADDRESS ="192.168.33.153"
 
 DB_SUPERUSER="bofh"
 DB_SUPERPASS="i1uvd3v0ps"
@@ -37,10 +36,8 @@ if File.directory?(nodes_dir)
 	Dir.glob(File.join(nodes_dir, "*.json")).each do  |nodefile|
 		File.delete(nodefile)
 	end
-
 else
   puts "nodes directory is missing...creating it now"
-  puts
   FileUtils.mkdir(nodes_dir)
 end
 
@@ -49,7 +46,7 @@ Vagrant.configure("2") do |config|
 
   # Use the official Ubuntu 14.04 box
   # Vagrant will auto resolve the url to download from Atlas
-  config.vm.box = "ubuntu/trusty64"
+  config.vm.box = "bento/ubuntu-14.04"
   config.ssh.forward_agent = true
 
   # This plugin allows for a much more efficient sync than the vanilla rsync-auto command
@@ -110,12 +107,12 @@ end
 
 def define_chef_server(config, attributes)
   provisioning, installer, installer_path = prepare('INSTALLER', 'chef-server-core', 'Chef Server 12+')
-  m_provisioning, m_installer, m_installer_path = prepare('MANAGE_PKG', 'chef-manage', 'Chef Manage 1.4+') if plugin_active?('chef-manage', attributes)
-  ps_provisioning, ps_installer, ps_installer_path = prepare('PUSH_JOBS_PKG', 'opscode-push-jobs-server', 'Push Jobs Server 1.1+') if plugin_active?('push-jobs-server', attributes)
-  r_provisioning, r_installer, r_installer_path = prepare('REPORTING_PKG', 'opscode-reporting', 'Chef Reporting 1.6+') if plugin_active?('reporting', attributes)
+  _m_provisioning, m_installer, _m_installer_path = prepare('MANAGE_PKG', 'chef-manage', 'Chef Manage 1.4+') if plugin_active?('chef-manage', attributes)
+  _ps_provisioning, ps_installer, _ps_installer_path = prepare('PUSH_JOBS_PKG', 'opscode-push-jobs-server', 'Push Jobs Server 1.1+') if plugin_active?('push-jobs-server', attributes)
+  _r_provisioning, r_installer, _r_installer_path = prepare('REPORTING_PKG', 'opscode-reporting', 'Chef Reporting 1.6+') if plugin_active?('reporting', attributes)
 
   config.vm.hostname = "api.chef-server.dev"
-  config.vm.network "private_network", ip: CS_VM_ADDRESS
+  config.vm.network "private_network", ip: IPS[:cs]
 
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id,
@@ -130,13 +127,14 @@ def define_chef_server(config, attributes)
     json = {
       "install_packages" => attributes["vm"]["packages"],
       "tz" => host_timezone,
-      "omnibus-autoload" => attributes["vm"]["omnibus-autoload"]
+      "omnibus-autoload" => attributes["vm"]["omnibus-autoload"],
+      "provisioning" => { "hosts" => ips_to_fqdns }
     }.merge attributes["vm"]["node-attributes"]
 
     if attributes["vm"]["postgresql"]["start"] and attributes["vm"]["postgresql"]["use-external"]
       # TODO make this stuff common - we have these values in 2-3 places now...
       pg = { "postgresql['external']" => true,
-             "postgresql['vip']" => "\"#{DB_VM_ADDRESS}\"",
+             "postgresql['vip']" => "\"#{IPS[:database]}\"",
              "postgresql['port']" => 5432,
              "postgresql['db_superuser']" => "\"#{DB_SUPERUSER}\"",
              "postgresql['db_superuser_password']" => "\"#{DB_SUPERPASS}\"",
@@ -148,7 +146,7 @@ def define_chef_server(config, attributes)
 
     if attributes["vm"]["reporting_postgresql"]["start"] and attributes["vm"]["reporting_postgresql"]["use-external"]
       pg = { "postgresql['external']" => true,
-             "postgresql['vip']" => "\"#{REPORTING_DB_VM_ADDRESS}\"",
+             "postgresql['vip']" => "\"#{IPS[:reportingdb]}\"",
              "postgresql['port']" => 5432,
              "postgresql['db_superuser']" => "\"#{DB_SUPERUSER}\"",
              "postgresql['db_superuser_password']" => "\"#{DB_SUPERPASS}\""
@@ -161,13 +159,15 @@ def define_chef_server(config, attributes)
       ldap = { "ldap['base_dn']" => '"ou=chefs,dc=chef-server,dc=dev"',
                "ldap['bind_dn']" => '"cn=admin,dc=chef-server,dc=dev"',
                "ldap['bind_password']" => "'#{LDAP_PASSWORD}'",
-               "ldap['host']" => "'#{LDAP_VM_ADDRESS}'",
+               "ldap['host']" => "'#{IPS[:ldap]}'",
                "ldap['login_attribute']" => '"uid"'
              }
       json = simple_deep_merge(json, { "provisioning" => { "chef-server-config" => ldap } })
     end
 
     dotfiles_path = attributes["vm"]["dotfile_path"] || "dotfiles"
+    # This is only used for the initial sync  - it was prone failures when allowed
+    # to run otherwise. Instead, run thet command './sync' in the dev dir after the vm is online.
     config.vm.synced_folder File.absolute_path(File.join(Dir.pwd, "../")), "/host",
       type: "rsync",
       rsync__args: ["--verbose", "--archive", "--delete", "-z", "--no-owner", "--no-group" ],
@@ -185,7 +185,7 @@ def define_chef_server(config, attributes)
       chef.binary_path = "/opt/opscode/embedded/bin"
       chef.node_name = config.vm.hostname
       chef.cookbooks_path = "cookbooks"
-      chef.add_recipe("provisioning::chef-server")
+      chef.add_recipe("provisioning::hosts")
       # If we're running chef-backend, let _it_ create the chef-server.rb
       chef.add_recipe("provisioning::chef-server-rb") unless chef_backend_active?(attributes)
       chef.add_recipe("dev::system")
@@ -225,7 +225,7 @@ end
 
 def define_ldap_server(config, attributes)
   config.vm.hostname = "ldap.chef-server.dev"
-  config.vm.network "private_network", ip: LDAP_VM_ADDRESS
+  config.vm.network "private_network", ip: IPS[:ldap]
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id,
                   "--name", "ldap",
@@ -243,13 +243,16 @@ def define_ldap_server(config, attributes)
     chef.cookbooks_path = "cookbooks"
     chef.add_recipe("provisioning::ldap-server")
     chef.nodes_path = "nodes"
-    chef.json = { 'ldap' => {'password' => LDAP_PASSWORD }}
+    chef.json = {
+      'provisioning' => { 'hosts' =>  ips_to_fqdns },
+      'ldap' => {'password' => LDAP_PASSWORD }
+    }
   end
 end
 
 def define_db_server(config, attributes)
   config.vm.hostname = "database.chef-server.dev"
-  config.vm.network "private_network", ip: DB_VM_ADDRESS
+  config.vm.network "private_network", ip: IPS[:database]
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id,
                   "--name", "database",
@@ -262,13 +265,20 @@ def define_db_server(config, attributes)
     ]
   end
 
-  # Using shell here to ave the trouble of downloading
-  # chef-client for the node.  May reconsider...
+  config.vm.provision "chef_zero" do |chef|
+    chef.node_name = config.vm.hostname
+    chef.cookbooks_path = "cookbooks"
+    chef.nodes_path = "nodes"
+    chef.add_recipe("provisioning::hosts")
+    chef.json = { 'provisioning' => { 'hosts' =>  ips_to_fqdns } }
+  end
   config.vm.provision "shell", inline: configure_postgres
+
 end
+
 def define_custom_server(config, attributes)
   config.vm.hostname = "custom.chef-server.dev"
-  config.vm.network "private_network", ip: CUSTOM_VM_ADDRESS
+  config.vm.network "private_network", ip: IPS[:custom]
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id,
                   "--name", "custom",
@@ -278,13 +288,20 @@ def define_custom_server(config, attributes)
                   "--usbehci", "off"
     ]
   end
+  config.vm.provision "chef_zero" do |chef|
+    chef.cookbooks_path = "cookbooks"
+    chef.nodes_path = "nodes"
+    chef.add_recipe("provisioning::hosts")
+    chef.json = { 'provisioning' => { 'hosts' =>  ips_to_fqdns } }
+  end
+
 end
 
 
 def define_backend_server(config, attribute)
   provisioning, installer, installer_path = prepare('BE_INSTALLER', 'chef-backend', 'Chef Backend 1.1+')
   config.vm.hostname = "backend.chef-server.dev"
-  config.vm.network "private_network", ip: BE_VM_ADDRESS
+  config.vm.network "private_network", ip: IPS[:be]
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id,
                   "--name", "backend",
@@ -299,6 +316,9 @@ def define_backend_server(config, attribute)
   if provisioning
     config.vm.synced_folder installer_path, "/installers"
 
+    chef.cookbooks_path = "cookbooks"
+    chef.add_recipe("provisioning::hosts")
+    chef.json = { 'provisioning' => { 'hosts' =>  ips_to_fqdns } }
     config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
     config.vm.provision "shell", inline: install_hack(installer)
     config.vm.provision "shell", inline: configure_backend
@@ -308,7 +328,7 @@ end
 
 def define_db_server_reporting(config, attributes)
   config.vm.hostname = "reportingdb.chef-server.dev"
-  config.vm.network "private_network", ip: REPORTING_DB_VM_ADDRESS
+  config.vm.network "private_network", ip: IPS[:reportingdb]
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id,
                   "--name", "reportingdb",
@@ -479,7 +499,7 @@ wget --quiet https://www.postgresql.org/media/keys/ACCC4CF8.asc
 apt-key add ACCC4CF8.asc
 apt-get update
 apt-get install postgresql-9.2 -y
-echo "host    all             all             #{CS_VM_ADDRESS}/32         md5" >> /etc/postgresql/9.2/main/pg_hba.conf
+echo "host    all             all             #{IPS[:cs]}/32         md5" >> /etc/postgresql/9.2/main/pg_hba.conf
 echo "listen_addresses='*'" >> /etc/postgresql/9.2/main/postgresql.conf
 service postgresql restart
 export PATH=/usr/lib/postgresql/9.2/bin:$PATH
@@ -490,11 +510,21 @@ end
 def configure_backend
 <<BASH
 cat > /etc/chef-backend/chef-backend.rb <<EOF
-publish_address "#{BE_VM_ADDRESS}"
+publish_address "#{IPS[:be]}"
 EOF
 chef-backend-ctl create-cluster --accept-license
 chef-backend-ctl gen-server-config api.chef-server.dev > /installers/api.chef-server.dev.rb
 BASH
+end
+
+
+def ips_to_fqdns
+  final = []
+  IPS.map do |shortname, ip|
+    next if shortname == :cs  # this is handled in-template provisioning/templates/hosts.erb
+    final << "#{ip} #{shortname}.chef-server.dev #{shortname}"
+  end
+  final
 end
 
 def backend_compat_message(plugin)
