@@ -23,7 +23,7 @@ KNOWN_CREDENTIALS = {
   "bookshelf" => ["access_key_id", "secret_access_key", "sql_password", "sql_ro_password"],
   "manage" => ["secret_key_base", "secret_token"],
   "saml" => ["client_id", "client_secret"],
-  "push-jobs-server" => ["pushy_priv_key", "pushy_pub_key", "sql_password"],
+  "push-jobs-server" => ["pushy_priv_key", "pushy_pub_key", "sql_password", "sql_ro_password"],
   "opscode-reporting" => ["rabbitmq_password", "sql_password", "sql_ro_password"],
 }
 
