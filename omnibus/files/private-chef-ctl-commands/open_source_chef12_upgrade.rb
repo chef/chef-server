@@ -30,6 +30,9 @@ class OpenSourceChef11Upgrade
   # Main function
   def run_upgrade
 
+    # Chef 11 doesn't cope with having SVDIR set, so we unset it
+    ENV.delete('SVDIR')
+
     org_name, org_full_name = determine_org_name
 
     validate_org_names(org_name, org_full_name)
