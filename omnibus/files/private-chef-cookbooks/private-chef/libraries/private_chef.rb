@@ -763,7 +763,7 @@ EOF
     # If known private keys are on disk, add them to Veil and commit them.
     def migrate_keys
       did_something = add_key_from_file_if_present("chef-server", "superuser_key", "/etc/opscode/pivotal.pem")
-      did_something ||= add_key_from_file_if_present("chef-server", "webui_key", "/etc/opscode/webui_priv.pem")
+      did_something |= add_key_from_file_if_present("chef-server", "webui_key", "/etc/opscode/webui_priv.pem")
       # Ensure these are committed to disk before continuing -
       # the secrets recipe will delete the old files.
       credentials.save if did_something
