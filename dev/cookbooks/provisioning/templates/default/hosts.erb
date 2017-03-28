@@ -1,6 +1,10 @@
 127.0.0.1 localhost
 <% @fqdns.each do |fqdn| %>
-192.168.33.100  <%=fqdn.split(".")[0]%>
+192.168.33.100  <%=fqdn.split(".")[0]%> <%=fqdn%>
+<% end %>
+
+<% @global_fqdns.each do |entry| %>
+<%=entry%>
 <% end %>
 
 ::1 localhost ip6-localhost ip6-loopback
