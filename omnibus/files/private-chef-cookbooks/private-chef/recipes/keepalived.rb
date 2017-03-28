@@ -25,12 +25,14 @@ directory keepalived_log_dir do
   mode node['private_chef']['service_dir_perms']
 end
 
+vrrp_instance_password = PrivateChef.credentials.get('keepalived', 'vrrp_instance_password')
+
 template File.join(keepalived_etc_dir, "keepalived.conf") do
   source "keepalived.conf.erb"
   owner "root"
   group "root"
   mode "0644"
-  variables(node['private_chef']['keepalived'].to_hash)
+  variables(node['private_chef']['keepalived'].to_hash.merge('vrrp_instance_password' => vrrp_instance_password))
   notifies :restart, 'runit_service[keepalived]'
 end
 

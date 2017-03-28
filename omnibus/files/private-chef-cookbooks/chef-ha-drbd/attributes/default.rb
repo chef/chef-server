@@ -4,7 +4,6 @@
 default['private_chef']['drbd']['dir'] = "/var/opt/opscode/drbd"
 default['private_chef']['drbd']['data_dir'] = "/var/opt/opscode/drbd/data"
 default['private_chef']['drbd']['sync_rate'] = "40M"
-default['private_chef']['drbd']['shared_secret'] = "promisespromises"
 default['private_chef']['drbd']['device'] = "/dev/drbd0"
 default['private_chef']['drbd']['disk'] = "/dev/opscode/drbd"
 default['private_chef']['drbd']['notify_split_brain_sh'] = '/usr/lib/drbd/notify-split-brain.sh'
