@@ -133,6 +133,12 @@ link database_file do
   to "#{node['private_chef']['oc_id']['dir']}/config/database.yml"
 end
 
+# Ensure log files are owned by opscode. In Chef 12.14 the svlogd
+# service was changed to run as opscode rather than root. This is done
+# as an execute to avoid issues with the `current` file not being
+# there on the first run.
+execute "chown #{OmnibusHelper.new(node).ownership['owner']}:#{OmnibusHelper.new(node).ownership['group']} #{oc_id_log_dir}/*"
+
 veil_helper_args = "--use-file -s chef-server.webui_key -s oc_id.sql_password -s oc_id.secret_key_base"
 execute "oc_id_schema" do
   command "veil-env-helper #{veil_helper_args} -- bundle exec --keep-file-descriptors rake db:migrate"

@@ -3,9 +3,6 @@
 define_upgrade do
   service = "oc_id"
   if File.exist?("/var/log/opscode/#{service}/")
-    # ensure logs are all owned by the opscode user
-    run_command("chown opscode:opscode /var/log/opscode/#{service}/*")
-
     # restart log service
     run_command("/opt/opscode/embedded/bin/sv force-restart /opt/opscode/sv/#{service}/log")
   end
