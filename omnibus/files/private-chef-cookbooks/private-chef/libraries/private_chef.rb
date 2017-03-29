@@ -555,10 +555,12 @@ chef-server.rb and setting the correct value with:
 WARN2
         end
       elsif pass_in_config
-        warning = <<WARN
+        unless PrivateChef["insecure_addon_compat"]
+          warning = <<WARN
 #{config_key_desc} is configured in plain in chef-server.rb -- remove
 it to have the value provided from the secret store instead.
 WARN
+        end
       end
 
       ChefServer::Warnings.warn warning if warning
