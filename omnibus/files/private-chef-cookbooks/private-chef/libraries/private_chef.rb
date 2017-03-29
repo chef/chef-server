@@ -557,8 +557,9 @@ WARN2
       elsif pass_in_config
         unless PrivateChef["insecure_addon_compat"]
           warning = <<WARN
-#{config_key_desc} is configured in plain in chef-server.rb -- remove
-it to have the value provided from the secret store instead.
+#{config_key_desc} has been saved to the secrets store
+but is also still in chef-server.rb. Please remove this from
+chef-server.rb.
 WARN
         end
       end
