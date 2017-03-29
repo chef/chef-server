@@ -1,9 +1,10 @@
 define_upgrade do
   if Partybus.config.bootstrap_server # TODO: do we want this?
+    rmq = Partybus.config.running_server["private_chef"]["rabbitmq"]
+    return unless rmq["enable"]
 
     start_services(["rabbitmq"])
 
-    rmq = Partybus.config.running_server["private_chef"]["rabbitmq"]
     [
       [rmq["user"], "password"],
       [rmq["actions_user"], "actions_password"],
