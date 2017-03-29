@@ -137,7 +137,7 @@ end
 # service was changed to run as opscode rather than root. This is done
 # as an execute to avoid issues with the `current` file not being
 # there on the first run.
-execute "chown #{OmnibusHelper.new(node).ownership['owner']}:#{OmnibusHelper.new(node).ownership['group']} #{oc_id_log_dir}/*"
+execute "chown -R #{OmnibusHelper.new(node).ownership['owner']}:#{OmnibusHelper.new(node).ownership['group']} #{oc_id_log_dir}"
 
 veil_helper_args = "--use-file -s chef-server.webui_key -s oc_id.sql_password -s oc_id.secret_key_base"
 execute "oc_id_schema" do
