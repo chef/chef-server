@@ -57,17 +57,17 @@ webui_key = OpenSSL::PKey::RSA.new(PrivateChef.credentials.get('chef-server', 'w
 
 if node['private_chef']['insecure_addon_compat']
   file "/etc/opscode/pivotal.pem"  do
-    owner "root"
+    owner OmnibusHelper.new(node).ownership['owner']
     group "root"
-    mode "0644"
+    mode "0600"
     sensitive true
     content PrivateChef.credentials.get('chef-server', 'superuser_key')
   end
 
   file "/etc/opscode/webui_priv.pem" do
-    owner "root"
+    owner OmnibusHelper.new(node).ownership['owner']
     group "root"
-    mode "0644"
+    mode "0600"
     sensitive true
     content webui_key.to_pem
   end
