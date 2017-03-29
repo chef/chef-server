@@ -112,6 +112,7 @@ ruby_block "wait for haproxy status socket" do
       Kernel.exit! 1
     end
   end
+  notifies :start, 'runit_service[haproxy]', :before
 end
 
 ruby_block "wait for backend leader to stabilize" do
