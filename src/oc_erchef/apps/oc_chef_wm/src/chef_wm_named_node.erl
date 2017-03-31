@@ -57,9 +57,10 @@ request_type() ->
   "nodes".
 
 allowed_methods(Req, State) ->
-    {['GET', 'PUT', 'DELETE'], Req, State}.
+    {['HEAD', 'GET', 'PUT', 'DELETE'], Req, State}.
 
 validate_request(Method, Req, State) when Method == 'GET';
+                                          Method == 'HEAD';
                                           Method == 'DELETE' ->
     {Req, State};
 validate_request('PUT', Req, #base_state{resource_state = NodeState} = State) ->
@@ -87,8 +88,13 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
     end.
 
 to_json(Req, #base_state{resource_state = NodeState} = State) ->
-    #node_state{chef_node = Node} = NodeState,
-    {chef_db_compression:decompress(Node#chef_node.serialized_object), Req, State}.
+    case wrq:method(Req) of
+      'HEAD' ->
+        {<<>>, Req, State};
+      _ ->
+        #node_state{chef_node = Node} = NodeState,
+        {chef_db_compression:decompress(Node#chef_node.serialized_object), Req, State}
+    end.
 
 from_json(Req, #base_state{resource_state = #node_state{chef_node = Node,
                                                         node_data = NodeData}} = State) ->

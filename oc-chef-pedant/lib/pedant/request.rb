@@ -173,6 +173,10 @@ module Pedant
       authenticated_request :GET, url, requestor, opts, &validator
     end
 
+    def head(url, requestor, opts={}, &validator)
+      authenticated_request :HEAD, url, requestor, opts, &validator
+    end
+
     def put(url, requestor, opts={}, &validator)
       authenticated_request :PUT, url, requestor, opts, &validator
     end
