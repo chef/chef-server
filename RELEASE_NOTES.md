@@ -10,38 +10,8 @@ For prior releases, see
 
 ## 12.14.0 (2017-03-23)
 
-### Reduce password proliferation
-
-We've substantially reduced the number of configuration files
-that contain plaintext passwords. Now, no passwords or
-credentials are rendered outside of `/etc/opscode/` in Chef
-Server's default configuration.
-
-To ensure backwards compatibility, Chef Server still renders
-passwords and keys to multiple files in `/etc/opscode`. However,
-if you are not using any Chef Server add-ons or if you have
-updated to the latest releases of all add-ons, you can set:
-
-   insecure_addon_compat false
-
-in chef-server.rb and remove these other occurrences of secrets as
-well.
-
-If you are using LDAP integration, external postgresql, or other
-Chef Server features that require providing passwords in
-`/etc/opscode/chef-server.rb`, we've also provided commands that
-allow you to set these passwords outside of the configuration
-file. For information about these commands see:
-
-https://docs.chef.io/ctl_chef_server.html#secrets-management
-
-Note: Users of the DRBD-based HA configuration may still see
-passwords related to keepalived and DRBD in /var/opt/opscode.
-
-For further information see:
-
-See [Chef Server Secrets Management](https://docs.chef.io/server_security.html#chef-server-credentials-management)
-for more details.
+Chef Analytics is no longer supported effective with this release.  Contact your Chef Account Representative
+if you have questions or need further information.
 
 ## 12.13.0 (2017-02-20)
 
