@@ -202,6 +202,12 @@ module Pedant
         }
       end
 
+      let(:head_success_response) do
+        {
+          :status => 200
+        }
+      end
+
       let(:fetch_node_list_empty_response) do
         {
           :status => 200,
