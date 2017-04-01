@@ -27,7 +27,6 @@ describe BootstrapPreflightValidator do
     let(:superuser_key_exists) { true }
     let(:num_secrets) { 1 }
     let(:credentials) { double(Object) }
-    # TODO mp 2017/03/01
     let(:secret_count ) { num_secrets + ( superuser_key_exists ? 2 : 0 ) }
     before do
       credentials = double(Object)

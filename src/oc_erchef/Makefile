@@ -31,8 +31,8 @@ travis: all rel
 	@$(REBAR3) ct
 	@echo "Travis'd!"
 
-# TODO (ssd): The `ct` rebar task only runs cleanly if you run it by
-# itself. If, for instance, you were to try to do this:
+# NOTE 2017-02-25: The `ct` rebar task only runs cleanly if you run
+# it by itself. If, for instance, you were to try to do this:
 #
 #    $(REBAR3) do clean, compile eunit, dialyzer, ct
 #
