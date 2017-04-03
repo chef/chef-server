@@ -435,7 +435,7 @@ render_names_in_context(OrgId, ScopedNames, Context) ->
     GroupedScopedNames = group_by_key(ScopedNames),
     {Expanded, _Cache} = lists:foldl(fun(E, A) -> render_names_in_context_f(OrgId, E, A) end,
                                      {[], Context}, GroupedScopedNames),
-    lists:flatten(Expanded).
+    lists:sort(lists:flatten(Expanded)).
 
 %% We are in the same scope, omit qualifier
 render_names_in_context_f(OrgId, {OrgId, Names}, {Expanded, Context}) ->
