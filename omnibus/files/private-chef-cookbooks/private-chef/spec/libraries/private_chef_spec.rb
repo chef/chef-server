@@ -102,6 +102,18 @@ EOF
     end
   end
 
+  context "when given types that need to be converted" do
+    let(:config) { <<-EOF
+bookshelf['storage_type'] = :filesystem
+EOF
+    }
+
+    it "coverts bookshelf storage_type to a string" do
+      rendered_config = config_for("api.chef.io")
+      expect(rendered_config["private_chef"]["bookshelf"]["storage_type"]).to eq("filesystem")
+    end
+  end
+
   context "in a standalone topology" do
     let(:config) { <<-EOF
 topology "standalone"

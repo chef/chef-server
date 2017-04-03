@@ -38,11 +38,11 @@ class BookshelfPreflightValidator < PreflightValidator
       true
     else
       previous_value = previous_run['bookshelf']['storage_type']
-      current_value = user_attrs['storage_type'] || :filesystem
+      current_value = user_attrs['storage_type'] || 'filesystem'
 
-      if previous_value.nil? && current_value.to_s == 'filesystem' # case (2)
+      if previous_value.nil? && current_value == 'filesystem' # case (2)
         true
-      elsif previous_value.nil? && current_value.to_s != "filesystem" # case (3)
+      elsif previous_value.nil? && current_value != "filesystem" # case (3)
         fail_with <<EOM
 
 Bookshelf's storage_type was previously the default of 'filesystem';
@@ -52,11 +52,11 @@ bookshelf storage_type post-installation.
 
 Please set
 
-bookshelf['storage_type'] = :filesystem
+bookshelf['storage_type'] = 'filesystem'
 
 in /etc/opscode/chef-server.rb or leave it unset.
 EOM
-      elsif previous_value.to_s == current_value.to_s # case (5)
+      elsif previous_value == current_value # case (5)
         true
       else # everything else is invalid, including case 4 above
         fail_with <<EOM
@@ -67,7 +67,7 @@ At this time it is not possible to change the bookshelf storage_type post-instal
 
 Please set
 
-bookshelf['storage_type'] = :#{previous_value}
+bookshelf['storage_type'] = '#{previous_value}'
 
 in /etc/opscode/chef-server.rb
 EOM

@@ -80,7 +80,7 @@
               {port, <%= @port %>},
               {storage_type, <%= @storage_type %>},
               {disk_store, "<%= @data_dir %>"},
-<% if @storage_type.to_s == "sql" -%>
+<% if @storage_type == "sql" -%>
               {sql_retry_count, <%= @sql_retry_count -%>},
               {sql_retry_delay, <%= @sql_retry_delay -%>},
               {abandoned_upload_cleanup_interval, <%= @abandoned_upload_cleanup_interval -%>},
@@ -89,7 +89,7 @@
               {stream_download, <%= @stream_download %>},
               {log_dir, "<%= @log_directory %>"}
              ]},
-<% if @storage_type.to_s == "sql" -%>
+<% if @storage_type == "sql" -%>
  {sqerl, [
            {db_driver_mod, sqerl_pgsql_client},
            {config_cb, {chef_secrets_sqerl, config, [{<<"bookshelf">>, <<"sql_password">>}]}},
