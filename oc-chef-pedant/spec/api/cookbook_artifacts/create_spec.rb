@@ -250,7 +250,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
         let(:malformed_constraint) { "s395dss@#" }
 
-        %w{platforms dependencies recommendations suggestions conflicting replacing}.each do |section|
+        %w{platforms dependencies}.each do |section|
 
           context "with metadata section '#{section}' set to a string", skip: "FIXME - missing server validation" do
 

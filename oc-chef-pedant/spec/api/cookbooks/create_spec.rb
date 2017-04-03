@@ -119,7 +119,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
       end # context checking segments
 
       context "checking metadata sections" do
-        %w{platforms dependencies recommendations suggestions conflicting replacing}.each do |section|
+        %w{platforms dependencies}.each do |section|
           should_fail_to_create_metadata(section, "foo", 400, "Field 'metadata.#{section}' invalid")
           should_fail_to_create_metadata(section, {"foo" => malformed_constraint},
                                          400, "Invalid value '#{malformed_constraint}' for metadata.#{section}")
