@@ -52,7 +52,7 @@ install:
   - luarocks install --local lpeg
   - luarocks install --local lua-cjson
   - eval $(luarocks path)
-  - travis_retry rvm use 2.2.6 --install --binary --fuzzy
+  - travis_retry rvm use 2.3.4 --install --binary --fuzzy
   - cpanm --notest --quiet --local-lib=$HOME/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
   - cpanm --notest --quiet App::Sqitch
   - cd $COMPONENT && travis_retry make install
