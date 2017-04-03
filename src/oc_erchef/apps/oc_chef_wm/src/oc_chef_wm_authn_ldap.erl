@@ -231,9 +231,10 @@ value_of(Key, Data, Default) ->
     [R|_] = proplists:get_value(Key, Data, [Default]),
     characters_to_binary(R).
 
-characters_to_binary(Characters) when is_list(Characters);
-                                      is_binary(Characters) ->
-    unicode:characters_to_binary(Characters);
+characters_to_binary(Characters) when is_list(Characters) ->
+    list_to_binary(Characters);
+characters_to_binary(Characters) when is_binary(Characters) ->
+    Characters;
 % In case of unexpected value, don't crash the auth process:
 characters_to_binary(Atom) when is_atom(Atom) ->
     atom_to_binary(Atom, utf8).
