@@ -354,13 +354,8 @@ module Pedant
             "license" => opts[:license] || default_license,
             "platforms" => {},
             "dependencies" => {},
-            "recommendations" => {},
-            "suggestions" => {},
-            "conflicting" => {},
             "providing" => {},
-            "replacing" => {},
             "attributes" => {},
-            "groupings" => {},
             "recipes" => opts[:meta_recipes] || {},
             "version" => version
           },

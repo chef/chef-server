@@ -881,36 +881,19 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_update do
 
         end
 
-        context "for groupings" do
-          json_error = "Field 'metadata.groupings' invalid"
-          should_fail_to_change_metadata('groupings', [], 400, json_error)
-          should_change_metadata('groupings', {})
-          should_change_metadata('groupings', :delete)
-          should_fail_to_change_metadata('groupings', "foo", 400, json_error)
-          should_fail_to_change_metadata('groupings', ["foo"], 400, json_error)
-          should_change_metadata('groupings', {"foo" => {}})
-        end # context for groupings
+          context "for dependencies" do
+            json_error = "Field 'metadata.dependencies' invalid"
+            should_fail_to_change_metadata("dependencies", [], 400, json_error)
+            should_change_metadata("dependencies", {})
 
-        ['dependencies', 'recommendations', 'suggestions', 'conflicting',
-         'replacing'].each do |type|
-          context "for #{type}" do
-            json_error = "Field 'metadata.#{type}' invalid"
-            should_fail_to_change_metadata(type, [], 400, json_error)
-            should_change_metadata(type, {})
+            # Attempting to delete dependencies will result in it
+            # getting set to an empty hash, since we need to have
+            # something present for that key
+            should_change_metadata("dependencies", :delete, {})
 
-            if type == "dependencies"
-              # Attempting to delete dependencies will result in it
-              # getting set to an empty hash, since we need to have
-              # something present for that key
-              should_change_metadata(type, :delete, {})
-            else
-               should_change_metadata(type, :delete)
-            end
-
-            should_fail_to_change_metadata(type, "foo", 400, json_error)
-            should_fail_to_change_metadata(type, ["foo"], 400, json_error)
-            should_fail_to_change_metadata(type, {"foo" => {}}, 400, "Invalid value '{[]}' for metadata.#{type}")
-          end # context for #{type}
+            should_fail_to_change_metadata("dependencies", "foo", 400, json_error)
+            should_fail_to_change_metadata("dependencies", ["foo"], 400, json_error)
+            should_fail_to_change_metadata("dependencies", {"foo" => {}}, 400, "Invalid value '{[]}' for metadata.dependencies")
         end # [loop over dependencies, recommendations, suggestions,
             #            conflicting, replacing]
       end # context for collections
