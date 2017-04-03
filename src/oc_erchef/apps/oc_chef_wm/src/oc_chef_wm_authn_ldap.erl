@@ -110,14 +110,15 @@ find_and_authenticate_user(Session, User, Password, Config) ->
                  bind(Session, BindDN, BindPass)
          end,
 
-    % And then search
+    %% And then search
     {ok, Result} = search_result(eldap:search(Session, [Base, Filter])),
     case result_to_user_ejson(LoginAttr, User, Result) of
         {error, Reason} ->
             {error, Reason};
         {CN, UserName, Data} ->
-            % We found the user identified by username, now we need to
-            % see if we can authorize as that user, using the provided password.
+            %% We found the user identified by username, now we need
+            %% to see if we can authorize as that user, using the
+            %% provided password.
             case eldap:simple_bind(Session, CN, Password) of
                 ok -> {UserName, Data};
                 {error, Error} ->
@@ -129,8 +130,9 @@ find_and_authenticate_user(Session, User, Password, Config) ->
 search_result({ok, {eldap_search_result, Result, _}}) ->
     {ok, Result};
 search_result({error, Reason}) ->
-    % An error response means some kind of failure occurred - no matching results
-    % would not result in an error tuple, but rather an empty result set.
+    %% An error response means some kind of failure occurred - no
+    %% matching results would not result in an error tuple, but rather
+    %% an empty result set.
     lager:error("LDAP search failed unexpectedly: ~p", [Reason]),
     error.
 
@@ -177,7 +179,6 @@ result_to_user_ejson(_, UserName, []) ->
     lager:info("User ~p not found in LDAP", [UserName]),
     {error, unauthorized};
 result_to_user_ejson(LoginAttr, UserName, [{eldap_entry, CN, DataIn}|_]) ->
-
     % No guarantees on casing, so let's not make assumptions:
     Data = [ { string:to_lower(Key), Value} || {Key, Value} <- DataIn ],
 
@@ -200,19 +201,26 @@ result_to_user_ejson(LoginAttr, UserName, [{eldap_entry, CN, DataIn}|_]) ->
     %
     % Note that any missing fields in the user's directory entry (LookupFields)
     % will have "unknown" substituted in the returned json record.
-    LookupFields = [{"displayname", <<"display_name">>},
-                    {"givenname", <<"first_name">>},
-                    {"sn", <<"last_name">>},
-                    {"cn", <<"common_name">>},
-                    {"c", <<"country">>},
-                    {"l", <<"city">>},
-                    {"mail", <<"email">>} ],
-
-    Terms = [ {Name, value_of(Key, Data, "unknown") } || {Key, Name} <- LookupFields ],
+    Terms = [ {Name, value_of(Key, Data, "unknown") } || {Key, Name} <- ldap_attribute_map() ],
     Result = Terms ++ [ { <<"username">>, CanonicalUserName },
                         { <<"external_authentication_uid">>, UserName },
                         { <<"recovery_authentication_enabled">>, false } ],
     {CN, CanonicalUserName, {Result}}.
+
+
+ldap_attribute_map() ->
+    Config = envy:get(oc_chef_wm, ldap, list),
+    Map = [{proplists:get_value(display_name_attribute, Config, "displayname"), <<"display_name">>},
+           {proplists:get_value(first_name_attribute, Config, "givenname"), <<"first_name">>},
+           {proplists:get_value(last_name_attribute, Config, "sn"), <<"last_name">>},
+           {proplists:get_value(common_name_attribute, Config, "cn"), <<"common_name">>},
+           {proplists:get_value(country_attribute, Config, "c"), <<"country">>},
+           {proplists:get_value(city_attribute, Config, "l"), <<"city">>},
+           {proplists:get_value(email_attribute, Config, "mail"), <<"email">>}],
+    %% We call to_lower on all ldap field names in the ldap response,
+    %% thus we need to do the same on the field names provided by the
+    %% user via the configuration.
+    [ {string:to_lower(LdapAttr), ChefAttr} || {LdapAttr, ChefAttr} <- Map ].
 
 close({ok, Session}) ->
     eldap:close(Session);

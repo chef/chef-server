@@ -823,6 +823,32 @@ default['private_chef']['ldap'] = nil
 # default['private_chef']['ldap']['enable_tls'] = false
 
 ##
+# LDAP Attribute Mapping
+##
+# Attributes from a user's LDAP record are used during account-linking
+# to populate the erchef user record when it is created.  The
+# following attributes controls which LDAP record is used for the
+# specified information.
+#
+# For example, if the user's LDAP record stores their email address in
+# a field named 'address' instead of 'mail', then you could set:
+#
+#   default['private_chef']['ldap']['email_attribute'] = "address"
+#
+# in private-chef.rb this would look like:
+#
+#  ldap['email_attribute'] = "address"
+#
+##
+# default['private_chef']['ldap']['display_name_attribute'] = "displayname"
+# default['private_chef']['ldap']['first_name_attribute'] = "givenname"
+# default['private_chef']['ldap']['last_name_attribute'] = "sn"
+# default['private_chef']['ldap']['common_name_attribute'] = "cn"
+# default['private_chef']['ldap']['country_attribute'] = "c"
+# default['private_chef']['ldap']['city_attribute'] = "l"
+# default['private_chef']['ldap']['email_attribute'] = "mail"
+
+##
 # Upgrades/Partybus
 ##
 default['private_chef']['upgrades']['dir'] = "/var/opt/opscode/upgrades"
