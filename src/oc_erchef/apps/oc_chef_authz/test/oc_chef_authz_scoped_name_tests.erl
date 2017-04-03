@@ -45,7 +45,7 @@
 -define(GLOBAL_NAME_AUTHZ_ID, global_name_authz_id).
 -define(ORGLOCAL_NAME_AUTHZ_ID, orglocal_name_authz_id).
 
--define(SCOPE_PERMUTATIONS, [{?ORG1_ID, ?PLAIN_GROUP}, {?ORG2_ID, ?PLAIN_GROUP}, {?GLOBAL_PLACEHOLDER_ORG_ID, ?PLAIN_GROUP}]).
+-define(SCOPE_PERMUTATIONS, lists:sort([{?ORG1_ID, ?PLAIN_GROUP}, {?ORG2_ID, ?PLAIN_GROUP}, {?GLOBAL_PLACEHOLDER_ORG_ID, ?PLAIN_GROUP}])).
 
 %% Copypast for oc_chef_authz_scoped_name.erl
 %-record(context, {org_name :: undefined,
@@ -309,7 +309,8 @@ render_names_in_context_test_() ->
       {"longer list returns and and no errors",
        fun() ->
                Answer = Subject(?ORG1_ID, ?SCOPE_PERMUTATIONS, Context),
-               ?assertEqual([?ORGLOCAL_GROUP,?PLAIN_GROUP, ?M:make_name(<<>>,?PLAIN_GROUP)],
+               Expected = lists:sort([?ORGLOCAL_GROUP,?PLAIN_GROUP, ?M:make_name(<<>>,?PLAIN_GROUP)]),
+               ?assertEqual(Expected,
                             Answer)
        end
       }
