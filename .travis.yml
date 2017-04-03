@@ -67,7 +67,7 @@ after_failure:
 matrix:
   include:
     - language: ruby
-      rvm: 2.2.5
+      rvm: 2.3.4
       gemfile: oc-chef-pedant/Gemfile
       # We remove Gemfile.lock because Travis does
       # "bundle install --path bundle/vendor" which breaks our ability
@@ -85,7 +85,7 @@ matrix:
       before_cache:
       cache:
     - language: ruby
-      rvm: 2.2.5
+      rvm: 2.3.4
       gemfile: oc-chef-pedant/Gemfile
       # We remove Gemfile.lock because Travis does
       # "bundle install --path bundle/vendor" which breaks our ability
