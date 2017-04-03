@@ -135,7 +135,9 @@ module PrivateChef
     # Mutate PrivateChef to account for common cases of user-provided
     # types not being what we want
     def transform_to_consistent_types
-      PrivateChef['bookshelf']['storage_type'] = PrivateChef['bookshelf']['storage_type'].to_s
+      if PrivateChef['bookshelf']['storage_type']
+        PrivateChef['bookshelf']['storage_type'] = PrivateChef['bookshelf']['storage_type'].to_s
+      end
     end
 
     VALID_EXTENSION_CONFIGS = %i{server_config_required config_values gen_backend gen_frontend gen_secrets gen_api_fqdn} unless defined?(VALID_EXTENSION_CONFIGS)
