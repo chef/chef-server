@@ -45,10 +45,10 @@ class PreflightValidator
     previous_run.nil?
   end
 
-  # TODO mp 2017/03/01 - ugh -  at the very least let's change this to use a single shared
-  # source of known keys, instead of having yet another place we retype key names.
-  # However, the need for this in the first place is more about things being more complicated
-  # because of the bootstrap process than anything else...
+  # secrets_exists? is actualy answering the question "have we generated passwords yet".
+  # To do that, we discount any private keys (generated separately from passwords)
+  # and see if we have any entries after that is done.  When we revamp bootstrap,
+  # we'll be able to make this better...
   def secrets_exists?
     len = PrivateChef.credentials.length
     len -= 1 if PrivateChef.credentials.exist?('chef-server', 'webui_key')

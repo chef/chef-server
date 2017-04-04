@@ -23,8 +23,6 @@ class OmnibusHelper
                node['private_chef']['rabbitmq'].to_hash
              end
 
-    # TODO(ssd) 2017-03-07: We need to look into how analytics integrates with the chef-server
-    # to figure out how this credential flows through the system.
     config['actions_password'] = PrivateChef.credentials.get("rabbitmq", "actions_password")
     config
   end

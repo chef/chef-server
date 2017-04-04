@@ -1,12 +1,12 @@
 add_command_under_category "set-db-superuser-password", "Secrets Management", "Add or change DB superuser password", 2 do
   confirm_continue!("WARN: Manually setting the DB superuser password is only supported for external postgresql instances")
-  password = get_secret("DB_PASSWORD", "DB superuser password", ARGV[3])
+  password = capture_secret_value("DB_PASSWORD", "DB superuser password", ARGV[3])
   set_secret_("postgresql", "db_superuser_password", password)
 end
 
 add_command_under_category "set-actions-password", "Secrets Management", "Add or change the rabbitmq actions queue password", 2 do
   confirm_continue!("WARN: Manually setting the actions password is only supported for external rabbitmq instances")
-  password = get_secret("ACTIONS_PASSWORD", "actions queue password", ARGV[3])
+  password = capture_secret_value("ACTIONS_PASSWORD", "actions queue password", ARGV[3])
   set_secret_("rabbitmq", "actions_password", password)
 end
 
@@ -45,7 +45,7 @@ add_command_under_category "set-secret", "Secrets Management", "Set or change se
 
   env_name = "#{group.upcase}_#{name.upcase}"
   disp_name = "#{group} #{name}"
-  password = get_secret(env_name, disp_name, ARGV[5])
+  password = capture_secret_value(env_name, disp_name, ARGV[5])
   set_secret_(group, name, password)
 end
 
@@ -75,14 +75,11 @@ def confirm_continue!(message)
 end
 
 def set_secret_(group, key, secret)
-  # TODO(ssd) 2017-03-07: We could just use veil directly here since we already require it other places
-  # in the -ctl commands...
-  require 'mixlib/shellout'
-  cmd = Mixlib::ShellOut.new("/opt/opscode/embedded/bin/veil-ingest-secret #{group}.#{key}", input: secret)
-  cmd.run_command
+  credentials.add(group, key, value: secret, frozen: true, force: true)
+  credentials.save
 end
 
-def get_secret(env_key, prompt='secret', password_arg = nil)
+def capture_secret_value(env_key, prompt='secret', password_arg = nil)
   if password_arg
     password_arg
   elsif ENV[env_key]

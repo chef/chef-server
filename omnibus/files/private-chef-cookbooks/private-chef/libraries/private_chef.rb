@@ -1,4 +1,4 @@
-#
+
 # Author:: Adam Jacob (<adam@chef.io>)
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 #
@@ -759,9 +759,6 @@ EOF
       end
     end
 
-    # TODO mp 2017/03/01 - I like the secrets interface as set up in push server.
-    # This may be a thing to consider moving to enterprise-common and updating
-    # chef-server and others to use it
     def add_key_from_file_if_present(group, name, path)
       if File.readable?(path)
         credentials.add_from_file(path, group, name)

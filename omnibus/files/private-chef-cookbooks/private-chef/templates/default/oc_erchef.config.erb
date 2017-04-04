@@ -283,7 +283,6 @@
         %% Database connection parameters
         {db_host, "<%= node['private_chef']['postgresql']['vip'] %>"},
         {db_port, <%= node['private_chef']['postgresql']['port'] %>},
-        %% TODO(ssd): Should this move into chef_secrets as well
         {db_user, "<%= node['private_chef']['opscode-erchef']['sql_user'] %>"},
         {db_name, "opscode_chef" },
         {idle_check, 10000},
