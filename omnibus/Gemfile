@@ -13,7 +13,7 @@ end
 group :omnibus do
   gem 'omnibus', git: 'https://github.com/chef/omnibus'
   gem 'omnibus-software', git: 'https://github.com/chef/omnibus-software'
-  gem 'license_scout', git: 'https://github.com/chef/license_scout', branch: "mp/yum-epl-and-compat-resource-license"
+  gem 'license_scout', git: 'https://github.com/chef/license_scout'
 end
 
 group :test do

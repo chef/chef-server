@@ -5,12 +5,26 @@ skip_transitive_dependency_licensing true
 license :project_license
 
 # global
+
+# libiconv (unicode character conversion library) was originally
+# a dependency declared in several components out of omnibus-software.
+# It was recently removed (2017Q1) from most of these components as a dep, and
+# build flags were updated to not link it into the components.
+#
+# This led to chef-server no longer pulling it indirectly. This broke popt, which
+# is defined upstream and pulled in by logrotate.
+#
+# TODO mp 2017-04-06 - a little further digging to see if the right answer is to
+#                      conditionally add the dependency for popt on s390x.
+
 dependency "libiconv"
+
 dependency "private-chef-scripts" # assorted scripts used by installed instance
+
 dependency "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
 dependency "ctl-man" # install man page
-dependency "openresty"
-dependency "rb-readline"
+dependency "openresty" # load balanacer
+dependency "rb-readline" # a replacement for readline due to
 dependency "redis-gem" # gem for interacting with redis
 dependency "openresty-lpeg"  # lua-based routing
 dependency "runit"
