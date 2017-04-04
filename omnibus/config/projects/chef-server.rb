@@ -35,6 +35,7 @@ instance_eval(IO.read(overrides_path), overrides_path)
 dependency "preparation"
 
 # global
+dependency "libiconv"
 dependency "private-chef-scripts" # assorted scripts used by installed instance
 dependency "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
 dependency "ctl-man" # install man page
