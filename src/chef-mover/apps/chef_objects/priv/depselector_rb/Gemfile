@@ -1,5 +1,0 @@
-source 'https://rubygems.org'
-
-gem 'dep_selector', :git => 'git://github.com/opscode/dep-selector', :branch => 'master'
-gem 'erlectricity', :git => 'git://github.com/sdelano/erlectricity', :branch => 'master'
-gem 'uuidtools'
