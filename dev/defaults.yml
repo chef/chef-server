@@ -232,6 +232,12 @@ projects:
     path: oc-chef-pedant
     database: opscode_chef
     run: bin/oc-chef-pedant -c /var/opt/opscode/oc-chef-pedant/etc/pedant_config.rb
+    service:
+      secrets:
+        args:
+        list:
+          - chef-server.webui_key
+          - chef-server.superuser_key
 
   #
   # External Components
