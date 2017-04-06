@@ -1,11 +1,6 @@
 #!/bin/sh
-
-/opt/opscode/bin/wait-for-rabbit
-
-cd /opt/opscode/embedded/service/opscode-solr4/jetty
-
+exec 2>&1
 ulimit -n 50000
 
-exec 2>&1
+cd /opt/opscode/embedded/service/opscode-solr4/jetty
 exec chpst -P -o 50000 -U <%= node['private_chef']['user']['username'] %> -u <%= node['private_chef']['user']['username'] %> /usr/bin/env PATH=/opt/opscode/embedded/bin:/opt/opscode/bin:/opt/opscode/embedded/jre/bin:$PATH JAVA_HOME=/opt/opscode/embedded/jre <%= node['private_chef']['opscode-solr4']['command'] %>
-

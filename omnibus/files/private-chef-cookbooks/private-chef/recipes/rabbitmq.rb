@@ -96,18 +96,8 @@ template "#{rabbitmq_etc_dir}/rabbitmq.config" do
              :ssl_versions => ssl_versions)
 end
 
-# write out a wait script used by other Chef Server services.
-# This needs to be rendered rather than static due to the ability
-# for the user to change the node name and data directory.
-template "/opt/opscode/bin/wait-for-rabbit" do
-  source "wait-for-rabbit.erb"
-  owner "root"
-  group "root"
-  mode "0755"
-  variables( config: rabbitmq )
-end
-
 component_runit_service "rabbitmq" do
+  runit_attributes(check: true)
   control ['t']
 end
 

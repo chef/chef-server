@@ -131,6 +131,7 @@ default['private_chef']['rabbitmq']['nodename'] = 'rabbit@localhost'
 default['private_chef']['rabbitmq']['vip'] = '127.0.0.1'
 default['private_chef']['rabbitmq']['consumer_id'] = 'hotsauce'
 default['private_chef']['rabbitmq']['env_path'] = "/opt/opscode/bin:/opt/opscode/embedded/bin:/usr/bin:/bin"
+default['private_chef']['rabbitmq']['startup_timeout'] = 100
 
 default['private_chef']['rabbitmq']['ssl_versions'] = ['tlsv1.2', 'tlsv1.1']
 
@@ -800,10 +801,6 @@ default['private_chef']['keepalived']['vrrp_instance_vrrp_unicast_bind'] = node[
 default['private_chef']['keepalived']['vrrp_instance_vrrp_unicast_peer'] = nil
 default['private_chef']['keepalived']['vrrp_instance_preempt_delay'] = 30
 default['private_chef']['keepalived']['vrrp_instance_nopreempt'] = true
-
-default['private_chef']['keepalived']['service_posthooks'] = {
-    "rabbitmq" => "/opt/opscode/bin/wait-for-rabbit"
-}
 
 ##
 # LDAP Authentication Integration
