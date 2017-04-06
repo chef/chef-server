@@ -21,6 +21,7 @@ source path: "#{project.files_path}/../../src/oc-id"
 license "Apache-2.0"
 license_file "LICENSE"
 
+dependency "nokogiri" # for
 dependency "postgresql92" # for libpq
 dependency "nodejs-binary"
 dependency "ruby"
