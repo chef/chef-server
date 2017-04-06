@@ -92,7 +92,8 @@ EOF
       end
 
       def run_command(command, options={})
-        log("\tRunning Command: #{command} with options #{options.inspect}")
+        log_msg = options[:log_msg] || "Running Command: #{command} with options #{options.inspect}"
+        log("\t#{log_msg}")
         runner = Partybus::CommandRunner.new
         runner.run_command(command, options)
       end

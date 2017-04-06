@@ -11,7 +11,8 @@ define_upgrade do
       [rmq["management_user"], "management_password"]
     ].each do |name, passname|
       pass = Partybus.config.secrets.get('rabbitmq', passname)
-      run_command("/opt/opscode/embedded/bin/rabbitmqctl change_password #{name} #{pass}")
+      run_command("/opt/opscode/embedded/bin/rabbitmqctl change_password #{name} #{pass}",
+                  log_msg: "rabbitmq password upgrade for user #{name}")
     end
 
     stop_services(["rabbitmq"])
