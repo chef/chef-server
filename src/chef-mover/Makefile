@@ -45,13 +45,6 @@ REL_VERSION ?= $$(git log --oneline --decorate | grep -v -F "jenkins" | grep -F 
 VERSION: version_clean
 	@echo -n $(REL_VERSION) > VERSION
 
-bundle_clean:
-	@cd apps/chef_objects/priv/depselector_rb; rm -rf .bundle
-
-bundle:
-	@echo bundling up depselector, This might take a while...
-	@cd apps/chef_objects/priv/depselector_rb; bundle install --deployment --path .bundle
-
 ## for Omnbibus
 omnibus: $(REBAR3) distclean
 	$(REBAR3) update

@@ -20,7 +20,13 @@ source path: "#{project.files_path}/../../src/oc-id"
 
 license "Apache-2.0"
 license_file "LICENSE"
-
+# We use the nokogiri gem in the project,
+# which pulls in libxml2.  On s390 the libxml2 lib is not built
+# at the time we're building oc_id, and so fails.
+# We add nokogiri as a dep because it's a direct dependency,
+# and makeds more sense than adding the thing that is stopping
+# it from building on s390 (libxml2).
+dependency "nokogiri"
 dependency "postgresql92" # for libpq
 dependency "nodejs-binary"
 dependency "ruby"
