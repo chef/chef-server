@@ -28,7 +28,7 @@ module Pedant
 
     attr_reader :test_org, :test_org_owner, :validate_org, :internal_account_url,
                 :internal_server, :ldap, :ldap_testing,
-                :server, :superuser, :superuser_key_data, :webui_key
+                :server, :base_resource_url, :superuser, :superuser_key_data, :webui_key
 
     # Create a Platform object for a given server (specified by
     # protocol, hostname, and port ONLY). You must supply the
@@ -38,9 +38,14 @@ module Pedant
       @superuser_key_data = superuser_key
       @webui_key = webui_key
       @server = (Pedant.config.explicit_port_url ? explicit_port_url(server) : server )
-      puts "Configured URL: #{@server}"
+      puts "Configured server URL: #{@server}"
+
+      @base_resource_url = Pedant::Config.base_resource_url || @server
+      puts "Configured base resource URL: #{@base_resource_url}"
+
       @superuser = Pedant::Requestor.new(superuser_name, @superuser_key_data, platform: self)
       @test_org = org_from_config
+
       @internal_account_url = Pedant::Config[:internal_account_url]
       @internal_server = Pedant::Config.internal_server || (fail "Missing internal_server in Pedant config.")
       @ldap = Pedant::Config[:ldap]
@@ -76,6 +81,20 @@ module Pedant
       path_prefix = "/organizations/#{org.name}"
       slash = path_fragment.start_with?('/') ? '' : '/'
       "#{internal_server}#{path_prefix}#{slash}#{path_fragment}"
+    end
+
+    # Construct the appropriate URL for returned resources
+    #
+    def resource_url(path_fragment = '/', org=test_org)
+      "#{@base_resource_url}#{path_helper(path_fragment, org)}"
+    end
+
+    # Helper for above
+    def path_helper(path_fragment, org)
+      orgname = org.respond_to?(:name) ? org.name : org.to_s
+      path_prefix = "/organizations/#{orgname}"
+      slash = path_fragment.start_with?('/') ? '' : '/'
+      "#{path_prefix}#{slash}#{path_fragment}"
     end
 
     ################################################################################
