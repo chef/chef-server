@@ -10,7 +10,7 @@ module ChefResource
   end
 
   def chef
-    ::Chef::REST.new endpoint, Settings.chef.superuser, nil, parameters
+    ::Chef::ServerAPI.new endpoint, Settings.chef.superuser, nil, parameters
   end
 
   private
