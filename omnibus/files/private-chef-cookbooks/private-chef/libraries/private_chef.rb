@@ -596,7 +596,7 @@ WARN
     # RabbitMQ information in the external_rabbitmq configuration key.
     #
     def generate_rabbit_actions_password
-      if PrivateChef["external_rabbitmq"]["enabled"] && PrivateChef["external_rabbitmq"]["actions_password"]
+      if PrivateChef["external_rabbitmq"]["enable"] && PrivateChef["external_rabbitmq"]["actions_password"]
         warn_if_cred_mismatch(group: "rabbitmq",
                               name: "actions_password",
                               command_name: "set-actions-password",
