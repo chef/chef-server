@@ -417,13 +417,6 @@ describe "opscode-account groups", :groups do
     let(:test_group) { "test-group" }
     let(:test_orgname2) { "test-org-#{rand_id}-#{Process.pid}" }
 
-    before do
-      platform.create_org(test_orgname2)
-    end
-    after do
-      delete("#{platform.server}/organizations/#{test_orgname2}", platform.superuser)
-    end
-
     before :each do
       post(api_url("groups"), platform.admin_user,
         :payload => {"id" => test_group}).should look_like({:status => 201})

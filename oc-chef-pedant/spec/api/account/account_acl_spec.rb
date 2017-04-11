@@ -438,13 +438,6 @@ describe "ACL API", :acl do
       let(:acl_url) { api_url("organizations/_acl") }
       let(:request_url) { api_url("organizations/_acl/#{permission}") }
 
-      before :each do
-        platform.create_org(test_orgname2)
-      end
-      after :each do
-        delete("#{platform.server}/organizations/#{test_orgname2}", platform.superuser)
-      end
-
       context "PUT /organizations/_acl/#{permission}" do
         let(:actors) { ["pivotal"] }
         let(:groups) { ["admins" ] }
@@ -810,13 +803,6 @@ describe "ACL API", :acl do
   end
 
   context "/<type>/<name>/_acl endpoint" do
-
-    before do
-      platform.create_org(test_orgname2)
-    end
-    after do
-      delete("#{platform.server}/organizations/#{test_orgname2}", platform.superuser)
-    end
 
     # TODO: Sanity check: users don't seem to have any ACLs, or at least, nothing is
     # accessible from external API as far as I can tell:
@@ -1209,7 +1195,7 @@ describe "ACL API", :acl do
             context "PUT /#{type}/<name>/_acl/#{permission}" do
               let(:clients) { [platform.non_admin_client.name] }
               let(:users) {
-                  [platform.non_admin_user.name, platform.admin_user.name, "pivotal"]
+                [platform.non_admin_user.name, platform.admin_user.name, "pivotal"].uniq
               }
               let(:local_groups) { ["admins", "users", "clients"] }
 
