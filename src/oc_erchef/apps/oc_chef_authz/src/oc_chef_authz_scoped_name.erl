@@ -121,7 +121,7 @@ names_to_authz_id(Type, Names, MapperContext) ->
 
     %% Map org names to org ids
     {NamesWithOrgIds, Errors2, _} =
-        lists:foldl(fun(Name, Acc) -> lookup_org_id(Name, Acc, MapperContext) end,
+        lists:foldl(fun(Name, Acc) -> lookup_org_id(Name, Acc) end,
                     {[], Errors, OrgCache}, ProperNames),
 
     %% group by org id for efficiency (can't do it sooner because we don't know all the org ids
@@ -144,10 +144,10 @@ filter_errors(Error, {Parsed, Errors}) ->
 %%
 %% already have id for orgname, skip
 %% Errors: orgname_not_found
-lookup_org_id(#sname{org_id = OrgId} = Name, {AccNames, Errors, Cache}, _Context) when OrgId =/= undefined ->
+lookup_org_id(#sname{org_id = OrgId} = Name, {AccNames, Errors, Cache}) when OrgId =/= undefined ->
     { [Name | AccNames], Errors, Cache };
 %% Need to lookup name
-lookup_org_id(#sname{org = OrgName} = Name, {AccNames, Errors, Cache}, _Context) ->
+lookup_org_id(#sname{org = OrgName} = Name, {AccNames, Errors, Cache}) ->
     case lookup_org_id_cached(OrgName, Cache) of
         {not_found, Cache1} ->
             {AccNames, [{orgname_not_found, Name} | Errors], Cache1};
@@ -274,7 +274,7 @@ find_group_authz_ids(GroupNames, Context) ->
 %%
 %%
 convert_ids_to_names(ActorAuthzIds, GroupAuthzIds, Context) ->
-    {ClientNames, RemainingAuthzIds} = authz_id_to_names(client, ActorAuthzIds,Context),
+    {ClientNames, RemainingAuthzIds} = authz_id_to_names(client, ActorAuthzIds, Context),
     {UserNames, DefunctActorAuthzIds} = authz_id_to_names(user, RemainingAuthzIds, Context),
     {GroupNames, DefunctGroupAuthzIds} = authz_id_to_names(group, GroupAuthzIds, Context),
     oc_chef_authz_cleanup:add_authz_ids(DefunctActorAuthzIds, DefunctGroupAuthzIds),
@@ -294,9 +294,9 @@ convert_ids_to_names(ActorAuthzIds, GroupAuthzIds, Context) ->
 -spec authz_id_to_names('client' | 'group' | 'user', [binary()],
                         #context{org_id::binary(), db_callback_fun::db_callback()}) ->
         {[binary()],[binary()]}.
-authz_id_to_names(group, AuthzIds, #context{org_id = OrgId, db_callback_fun = CallbackFun} = Context) ->
+authz_id_to_names(group, AuthzIds, #context{org_id = OrgId, db_callback_fun = CallbackFun}) ->
     {ScopedNames, DiffedList} = query_and_diff_authz_ids(find_scoped_group_name_in_authz_ids, AuthzIds, CallbackFun),
-    {render_names_in_context(OrgId, ScopedNames, Context), DiffedList};
+    {render_names_in_context(OrgId, ScopedNames), DiffedList};
 authz_id_to_names(client, AuthzIds, #context{db_callback_fun = CallbackFun}) ->
     query_and_diff_authz_ids(find_client_name_in_authz_ids, AuthzIds, CallbackFun);
 authz_id_to_names(user, AuthzIds, #context{db_callback_fun = CallbackFun}) ->
@@ -430,29 +430,29 @@ make_scoped_names(OrgName, Names) ->
 %% Expansion of authz ids into scoped names
 %% Takes {OrgName, Name} pairs in ScopedNames and returns
 %% list of names with scoping metacharacter inserted
--spec render_names_in_context(binary(),[{binary(), [binary()]}], #context{}) -> [binary()].
-render_names_in_context(OrgId, ScopedNames, Context) ->
+-spec render_names_in_context(binary(),[{binary(), [binary()]}]) -> [binary()].
+render_names_in_context(OrgId, ScopedNames) ->
     GroupedScopedNames = group_by_key(ScopedNames),
-    {Expanded, _Cache} = lists:foldl(fun(E, A) -> render_names_in_context_f(OrgId, E, A) end,
-                                     {[], Context}, GroupedScopedNames),
+    Expanded = lists:foldl(fun(E, A) -> render_names_in_context_f(OrgId, E, A) end,
+                              [], GroupedScopedNames),
     lists:sort(lists:flatten(Expanded)).
 
 %% We are in the same scope, omit qualifier
-render_names_in_context_f(OrgId, {OrgId, Names}, {Expanded, Context}) ->
-    { [Names | Expanded], Context};
+render_names_in_context_f(OrgId, {OrgId, Names}, Expanded) ->
+    [Names | Expanded];
 %% we are in a different scope, but it's the global scope. Use abbreviated version.
-render_names_in_context_f(_OrgId, {?GLOBAL_PLACEHOLDER_ORG_ID, Names}, {Expanded, Context}) ->
+render_names_in_context_f(_OrgId, {?GLOBAL_PLACEHOLDER_ORG_ID, Names}, Expanded) ->
     ENames = [ make_name(<<>>, Name) || Name <- Names],
-    { [ENames | Expanded], Context};
-render_names_in_context_f(_OrgId, {AnotherOrgId, Names}, {Expanded, Context}) ->
+    [ENames | Expanded];
+render_names_in_context_f(_OrgId, {AnotherOrgId, Names}, Expanded) ->
     %% Design note: we drop missing orgs silently. Org deletion leaks many objects and we must
     %% be robust to that.
     case org_id_to_name(AnotherOrgId) of
         not_found ->
-            {Expanded, Context};
+            Expanded;
         OrgName ->
             ENames = [ make_name(OrgName, Name) || Name <- Names ],
-            { [ENames, Expanded], Context }
+            [ENames, Expanded]
     end.
 
 -spec make_name(binary(),binary()) -> <<_:16,_:_*8>>.
@@ -471,7 +471,7 @@ org_id_to_name(OrgId) ->
     end.
 
 %%
-%% Memoize org id lookup
+%% Memorize org id lookup
 %%
 -spec init_org_name_cache() -> map().
 init_org_name_cache() ->
