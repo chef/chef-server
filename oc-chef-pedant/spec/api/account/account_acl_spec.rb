@@ -440,7 +440,7 @@ describe "ACL API", :acl do
 
       context "PUT /organizations/_acl/#{permission}" do
         let(:actors) { ["pivotal"] }
-        let(:groups) { ["admins" ] }
+        let(:groups) { ["admins"] }
         let(:read_groups) { ["admins", "users"] }
         let(:default_body) {{
             "create" => {"actors" => actors, "groups" => groups},
@@ -798,8 +798,6 @@ describe "ACL API", :acl do
 
       end
     end
-
-
   end
 
   context "/<type>/<name>/_acl endpoint" do
@@ -1434,7 +1432,7 @@ describe "ACL API", :acl do
                       }
                     }}
 
-                  it "returns 400", :validation  do
+                  it "returns 400", :validation do
                     response = put(permission_request_url, platform.admin_user,
                       :payload => update_body)
                     expect(response).to have_status_code 400

@@ -279,9 +279,8 @@ query_and_diff_authz_ids_test_() ->
 %%
 %%
 render_names_in_context_test_() ->
-    Subject = fun ?M:render_names_in_context/3,
+    Subject = fun ?M:render_names_in_context/2,
 
-    Context = mk_context_reverse(mk_lookup_map()),
     OrgMap = mk_orgid_map(),
     {foreach,
      fun() ->
@@ -296,19 +295,19 @@ render_names_in_context_test_() ->
      [
       {"empty list returns nothing and no errors",
        fun() ->
-               Answer = Subject(?ORG1_ID, [], Context),
+               Answer = Subject(?ORG1_ID, []),
                ?assertEqual([], Answer)
        end
       },
       {"simple list returns and and no errors",
        fun() ->
-               Answer = Subject(?ORG1_ID, [{?ORG1_ID,?PLAIN_GROUP}], Context),
+               Answer = Subject(?ORG1_ID, [{?ORG1_ID,?PLAIN_GROUP}]),
                ?assertEqual([?PLAIN_GROUP], Answer)
        end
       },
       {"longer list returns and and no errors",
        fun() ->
-               Answer = Subject(?ORG1_ID, ?SCOPE_PERMUTATIONS, Context),
+               Answer = Subject(?ORG1_ID, ?SCOPE_PERMUTATIONS),
                Expected = lists:sort([?ORGLOCAL_GROUP,?PLAIN_GROUP, ?M:make_name(<<>>,?PLAIN_GROUP)]),
                ?assertEqual(Expected,
                             Answer)
