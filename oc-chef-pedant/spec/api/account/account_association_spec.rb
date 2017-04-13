@@ -125,10 +125,11 @@ describe "opscode-account user association", :association do
 
   def invite_user(orgname, username, inviter)
     url = "#{platform.server}/organizations/#{orgname}/association_requests"
+    resource_url = platform.resource_url("association_requests", orgname)
     post(url, inviter, :payload=>make_invite_payload(username)) do |response|
       response.should look_like({ :status => 201 })
       uri = parse(response)['uri']
-      uri.split('/')[0..-2].should == url.split('/')
+      uri.split('/')[0..-2].should == resource_url.split('/')
       return uri.split('/')[-1]
     end
     return nil

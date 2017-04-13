@@ -108,7 +108,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
       it 'should respond with a cookbook collection containing all versions of each cookbook' do
         list_response = get(request_url, requestor)
         expect(list_response.code).to eq(200)
-        expect(parse(list_response)).to eq(expected_cookbook_artifact_collection)
+        expect(parse(list_response)).to strictly_match(expected_cookbook_artifact_collection)
       end
 
     end
