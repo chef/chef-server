@@ -29,6 +29,7 @@ module Opscode
 
         @item.each do |key, value|
           flatten_each([key.to_s], value)
+          flatten_each(['toplevel-' + key.to_s], value)
         end
 
         @flattened_item.each_value { |values| values.uniq! }
