@@ -33,11 +33,11 @@ init([]) ->
 
     Ip = envy:get(oc_chef_wm, ip, string),
     Port = envy:get(oc_chef_wm, port, pos_integer),
-    WebConfig = [
-                 {ip, Ip},
-                 {port, Port},
-                 {log_dir, "priv/log"},
-                 {dispatch, dispatch_table()}],
+    WebConfig = get_webmachine_config(
+                  [ {ip, Ip},
+                    {port, Port},
+                    {log_dir, "priv/log"},
+                    {dispatch, dispatch_table()}]),
 
     Web = {webmachine_mochiweb,
            {webmachine_mochiweb, start, [WebConfig]},
@@ -246,3 +246,16 @@ amqp_child_spec() ->
     lager:info("Chef Actions: Connecting to RabbitMQ at ~p:~p~s (exchange: ~p)", [Host, Port, VHost, ExchgName]),
     {oc_chef_action_queue, {bunnyc, start_link, [oc_chef_action_queue, Network, Exchange, []]},
       permanent, 5000, worker, dynamic}.
+
+if_defined_config(Key, ConfigKey) ->
+    case envy:get(oc_chef_wm, ConfigKey, undefined) of
+        undefined -> [];
+        Value -> {Key, Value}
+    end.
+
+get_webmachine_config(Default) ->
+    lists:flatten([ if_defined_config(max, http_connection_max),
+                    if_defined_config(backlog, http_connection_backlog),
+                    if_defined_config(acceptor_pool, http_connection_acceptor_pool),
+                    Default
+                  ]).
