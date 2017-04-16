@@ -61,7 +61,9 @@ function transition
       fi
 
       ;;
-    backup)
+    # If we see a reason for a FAULT, we should try to relinquish control gracefully, like a BACKUP.
+    # Worst case, the FAULT state will keep us out of the mix.
+    backup|fault)
 <%- keepalive_services.reverse.each do |service| -%>
       log_me "Stopping service <%= service %>"
       /opt/opscode/bin/private-chef-ctl graceful-kill <%= service %> || error_exit "Cannot kill <%= service %>"
@@ -90,9 +92,6 @@ function transition
           fi
       fi
 
-      ;;
-    fault)
-      # Um... we are on the way elsewhere
       ;;
     *)
   esac
