@@ -138,6 +138,7 @@ then
     echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/pg_stat_activity.txt" 2>&1
     echo "SELECT * FROM sqitch.tags;" |  chef-server-ctl psql oc_erchef --as-admin --options -tA  > "$tmpdir/opscode_chef_sqitch_tags.txt" 2>&1
     echo "SELECT * FROM sqitch.tags;" |  chef-server-ctl psql bifrost --as-admin --options -tA > "$tmpdir/bifrost_sqitch_tags.txt" 2>&1
+    echo "SELECT * FROM sqitch.tags;" |  chef-server-ctl psql reporting --as-admin --options -tA > "$tmpdir/reporting_sqitch_tags.txt" 2>&1
     if [[ -S "/tmp/.s.PGSQL.5432" ]]; then
         su -m $POSTGRESQL_UNIX_USER -c 'ulimit -a' > "$tmpdir/ulimit_a_opscode-pgsql.txt"
     fi
@@ -176,9 +177,9 @@ then
     found_manage=true
 fi
 
-if [[ -e /opt/opscode-reporting/bin/opscode-reporting-ctl ]];
+#Use socket to make sure we're on the primary in an HA system
+if [[ -e /opt/opscode-reporting/bin/opscode-reporting-ctl && -S "/tmp/.s.PGSQL.5432" ]];
 then
-    /opt/opscode-reporting/bin/opscode-reporting-ctl status > "$tmpdir/opscode-reporting-ctl_status.txt"
     found_reporting=true
 fi
 
