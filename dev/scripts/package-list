@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+require 'artifactory'
+
+product= ARGV[0] || "chef-server"
+package_name = if product == "chef-server"
+                 "chef-server-core"
+               else
+                 product
+               end
+
+count = if ARGV[1] == "all"
+          :all
+        elsif ARGV[1]
+          ARGV[1].to_i
+        else
+          10
+        end
+
+def download_url(version, product, package_name)
+  "http://artifactory.chef.co/simple/omnibus-current-local/com/getchef/#{product}/#{version}/ubuntu/14.04/#{package_name}_#{version}-1_amd64.deb"
+end
+
+client = Artifactory::Client.new(endpoint: ENV['ARTIFACTORY_ENDPOINT'] || 'http://artifactory.chef.co')
+url = "#{client.endpoint}/api/storage/omnibus-current-local/com/getchef/#{product}"
+list = client.get(url)["children"].map {|v| v["uri"].gsub('/', '')}
+
+list_for_printing = if count == :all
+                      list.sort.reverse
+                    else
+                      list.sort.reverse.take(count)
+                    end
+
+list_for_printing.each do |ver|
+  puts "#{ver} #{download_url(ver, product, package_name)}"
+end
