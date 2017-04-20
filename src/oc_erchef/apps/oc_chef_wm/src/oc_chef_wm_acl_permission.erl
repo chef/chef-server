@@ -120,8 +120,9 @@ from_json(Req, #base_state{organization_guid = OrgId,
             Req1 = wrq:set_resp_body(chef_json:encode(Body), Req),
             {{halt, 422}, Req1, State#base_state{log_msg = {ambiguous_actor, Actors}}};
         {invalid, Type, Names} ->
+            FullNames = [ extract_full_name(N) || N <- Names ],
             Body = chef_wm_util:error_message_envelope([<<"The ">>, atom_to_list(Type),
-                                                        <<"(s) ">>, chef_wm_malformed:bin_str_join(Names, ", "),
+                                                        <<"(s) ">>, chef_wm_malformed:bin_str_join(FullNames, ", "),
                                                         <<" do not exist in this organization.">>]),
             Req1 = wrq:set_resp_body(chef_json:encode(Body), Req),
             {{halt, 400}, Req1, State#base_state{log_msg = {invalid_object_in_ace, Names}}};
@@ -137,7 +138,15 @@ from_json(Req, #base_state{organization_guid = OrgId,
             {true, Req1, State}
     end.
 
+%%
 %% Internal functions
+%%
+
+%% Extracts the full_name from a record, only if they are not binary() or list()
+extract_full_name(N) when is_binary(N) orelse is_list(N) ->
+    N;
+extract_full_name(N) ->
+    oc_chef_authz_scoped_name:full_name(N).
 
 check_json_validity(Part, Ace) ->
   case chef_object_base:strictly_valid(oc_chef_authz_acl:acl_spec(Part), [Part], Ace) of
