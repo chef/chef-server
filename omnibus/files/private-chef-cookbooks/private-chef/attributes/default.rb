@@ -41,6 +41,9 @@ default['private_chef']['default_orgname'] = nil
 
 default['private_chef']['fips_enabled'] = ChefConfig.fips?
 
+default['private_chef']['required_recipe']['enable'] = false
+default['private_chef']['required_recipe']['path'] = nil
+
 ###
 # Options for installing addons
 ###

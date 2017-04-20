@@ -54,6 +54,7 @@ template pedant_config do
     :default_orgname => node['private_chef']['default_orgname'],
     :hostname => node['hostname'],
     :ssl_version =>  ssl_version,
-    :reindex_endpoint => reindex_endpoint
+    :reindex_endpoint => reindex_endpoint,
+    :required_recipe_enabled => node['private_chef']['required_recipe']['enable']
   }.merge(node['private_chef']['oc-chef-pedant'].to_hash))
 end

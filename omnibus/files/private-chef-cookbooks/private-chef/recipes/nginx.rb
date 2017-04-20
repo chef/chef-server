@@ -49,8 +49,6 @@ end
   end
 end
 
-
-
 # Generate self-signed SSL certificate unless the user has provided one
 if (node['private_chef']['nginx']['ssl_certificate'].nil? &&
     node['private_chef']['nginx']['ssl_certificate_key'].nil?)
@@ -72,6 +70,17 @@ if (node['private_chef']['nginx']['ssl_certificate'].nil? &&
 
   node.default['private_chef']['nginx']['ssl_certificate'] = ssl_crtfile
   node.default['private_chef']['nginx']['ssl_certificate_key'] = ssl_keyfile
+end
+
+# Copy the required_recipe source into the nginx static root directory and
+# ensure that it's only modifiable by root.
+if node['private_chef']['required_recipe']['enable']
+  remote_file ::File.join(nginx_html_dir, 'required_recipe') do
+    source "file://#{node['private_chef']['required_recipe']['path']}"
+    owner 'root'
+    group 'root'
+    mode '0644'
+  end
 end
 
 # Generate dhparam.pem unless the user has provided a dhparam file

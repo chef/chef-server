@@ -175,6 +175,9 @@ server_api_version         <%= node['private_chef']['server-api-version'] %>
 # actions aren't available.
 actions_enabled <%= @actions_enabled %>
 
+# Enable/Disable tests if the required_recipe endpoint is turned on
+required_recipe_enabled <%= @required_recipe_enabled %>
+
 # Log HTTP Requests
 log_file "<%= File.join(@log_directory, "http-traffic.log") %>"
 <%- end %>

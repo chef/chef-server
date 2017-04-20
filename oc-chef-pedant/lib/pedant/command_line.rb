@@ -149,7 +149,7 @@ module Pedant
                 principals acl containers groups association omnibus organizations
                 usags controls keys cookbook-artifacts license headers server-api-version
                 policies pedantic self-test api-v0 api-v1 object-identifiers
-                multiuser universe chef-zero-quirks user-keys client-keys)
+                multiuser universe chef-zero-quirks user-keys client-keys required-recipe)
       export_options(opts, tags)
     end
 

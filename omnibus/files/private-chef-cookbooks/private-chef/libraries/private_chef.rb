@@ -93,6 +93,7 @@ module PrivateChef
   backup["strategy"] = "tar"
 
   data_collector Mash.new
+  required_recipe Mash.new
 
   # - legacy config mashes -
   # these config values are here so that if any config has been previously
@@ -231,6 +232,7 @@ module PrivateChef
         "license",
         "backup",
         "data_collector",
+        "required_recipe",
 
         # keys for cleanup and back-compat
         "couchdb",
@@ -244,6 +246,7 @@ module PrivateChef
           use_chef_backend
           chef_backend_members
           data_collector
+          required_recipe
         }.include?(key)
           key
         else
