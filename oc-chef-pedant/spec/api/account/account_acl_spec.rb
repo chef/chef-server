@@ -9,14 +9,22 @@ describe "ACL API", :acl do
     "#{Process.pid}_#{rand(10**7...10**8).to_s}"
   end
 
-  let(:test_orgname2) { "test-org-#{rand_id}-#{Process.pid}" }
   let(:server_admins) {
     "::server-admins"
   }
   let(:other_admins) {
-    "#{test_orgname2}::admins"
+    "#{@test_orgname2}::admins"
   }
   let(:nonlocal_groups) { [server_admins, other_admins ] }
+
+  before(:all) do
+    @test_orgname2 = "test-org-#{rand_id}"
+    platform.create_org(@test_orgname2)
+  end
+
+  after(:all) do
+    platform.delete_org(@test_orgname2)
+  end
 
   # (temporarily?) deprecating /users/*/_acl endpoint due to its broken state and lack of usefulness
   skip "/users/<name>/_acl endpoint" do
@@ -273,7 +281,6 @@ describe "ACL API", :acl do
       # here, but some of the semantics around what they should be are unclear to me
       #
 
-
     end
   end
 
@@ -458,6 +465,7 @@ describe "ACL API", :acl do
             }
           }}
 
+
         after :each do
           reset_body = {permission => default_body[permission]}
           put(request_url, platform.admin_user,
@@ -561,7 +569,33 @@ describe "ACL API", :acl do
             end
           end
 
-          context "invalid group" do
+          context "invalid group (organization not found)" do
+            let(:test_org_not_exist) { "test-org-#{rand_id}" }
+            let(:admins_from_org_not_exist) {
+              "#{test_org_not_exist}::admins"
+            }
+            let(:groups_with_org_not_exist) { ["admins", server_admins, admins_from_org_not_exist ] }
+            let(:request_body) {{
+                permission => {
+                  "actors" => ["pivotal", platform.admin_user.name,
+                    platform.non_admin_user.name],
+                  "groups" => groups_with_org_not_exist,
+                }
+              }}
+
+            it "returns 400", :validation do
+              put(request_url, platform.admin_user,
+                :payload => request_body).should look_like({
+                  :status => 400
+                })
+              get(acl_url, platform.admin_user).should look_like({
+                  :status => 200,
+                  :body => default_body
+                })
+            end
+          end
+
+          context "invalid group (group not found)" do
             let(:request_body) {{
                 permission => {
                   "actors" => ["pivotal", platform.admin_user.name,
