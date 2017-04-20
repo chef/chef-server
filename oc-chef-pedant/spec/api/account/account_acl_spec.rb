@@ -19,11 +19,11 @@ describe "ACL API", :acl do
 
   before(:all) do
     @test_orgname2 = "test-org-#{rand_id}"
-    platform.create_org(@test_orgname2)
+    platform.create_org(@test_orgname2) if Pedant.config[:org][:create_me]
   end
 
   after(:all) do
-    platform.delete_org(@test_orgname2)
+    platform.delete_org(@test_orgname2) if Pedant.config[:org][:create_me]
   end
 
   # (temporarily?) deprecating /users/*/_acl endpoint due to its broken state and lack of usefulness
