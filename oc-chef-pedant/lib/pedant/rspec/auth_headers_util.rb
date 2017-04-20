@@ -235,6 +235,9 @@ module Pedant
           with_modified_auth_headers('old X-Ops-Timestamp', 401,
                                      :timestamp => (Time.now.utc - 60*60).iso8601)
 
+          with_modified_auth_headers('future X-Ops-Timestamp', 401,
+                                     :timestamp => (Time.now.utc + 60*60).iso8601)
+
           context 'recent X-Ops-Timestamp' do
             let(:auth_headers) { manufacture_signed_headers(user, method, url, body,
                                                             :timestamp => (Time.now.utc - 30).iso8601) }
