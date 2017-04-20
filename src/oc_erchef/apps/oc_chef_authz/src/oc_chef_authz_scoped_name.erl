@@ -460,7 +460,7 @@ lookup_org_id_cached(OrgName, Cache) ->
             case chef_sql:fetch_org_metadata(OrgName) of
                 not_found ->
                     %% negative results are worth caching
-                    {not_found, maps:update(OrgName, not_found, Cache)};
+                    {not_found, maps:put(OrgName, not_found, Cache)};
                 {OrgId, _AuthzId} ->
                     {OrgId, maps:put(OrgName, OrgId, Cache)}
             end
