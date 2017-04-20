@@ -24,24 +24,16 @@
 -include("oc_chef_types.hrl").
 
 -export([names_to_authz_id/3,
-         filter_by_error_type/2,
-         authz_id_to_names/3]).
-
--export([make_scoped_names/2,
-         parse_scoped_names/2,
-         parse_unscoped_names/2,
-         convert_ids_to_names/3,
+         initialize_context/2,
+         initialize_context/1,
+         org_id_to_name/1,
+         full_name/1,
 
          %% Used by oc_chef_group
          find_client_authz_ids/2,
          find_user_authz_ids/2,
          find_group_authz_ids/2,
-
-         make_sql_callback/0,
-         initialize_context/1,
-         initialize_context/2,
-         make_name/2,
-         org_id_to_name/1
+         convert_ids_to_names/3
         ]).
 
 -export([parse_scoped_name/3]).
@@ -75,6 +67,13 @@
                }).
 
 -type lookup_type() :: 'actor' | 'user' | 'client' | 'group'.
+
+%%
+%% Accessors for Scope name record
+%%
+-spec full_name(#sname{}) -> binary().
+full_name(#sname{full = FullName}) ->
+    FullName.
 
 %%
 %% Context is used to thread external state information through the system
@@ -135,6 +134,58 @@ names_to_authz_id(Type, Names, MapperContext) ->
 
     {lists:flatten(AuthzIds), group_errors(Errors3)}.
 
+
+%%
+%% Reverse mapping of ids to names
+%%
+convert_ids_to_names(ActorAuthzIds, GroupAuthzIds, Context) ->
+    {ClientNames, RemainingAuthzIds} = authz_id_to_names(client, ActorAuthzIds, Context),
+    {UserNames, DefunctActorAuthzIds} = authz_id_to_names(user, RemainingAuthzIds, Context),
+    {GroupNames, DefunctGroupAuthzIds} = authz_id_to_names(group, GroupAuthzIds, Context),
+    oc_chef_authz_cleanup:add_authz_ids(DefunctActorAuthzIds, DefunctGroupAuthzIds),
+    {ClientNames, UserNames, GroupNames}.
+
+%% Helper functions
+%%
+%% No error handling; we probably should generate an error when we have missing
+%%
+-spec find_client_authz_ids([binary()],#context{org_id::binary(), db_callback_fun::db_callback()}) -> [binary()].
+find_client_authz_ids(ClientNames, Context) ->
+    {AuthzIds, _Missing} = names_to_authz_id(client, ClientNames, Context),
+    AuthzIds.
+
+-spec find_user_authz_ids([binary()],#context{org_id::binary(), db_callback_fun::db_callback()}) -> [binary()].
+find_user_authz_ids(UserNames, Context) ->
+    {AuthzIds, _Missing} = names_to_authz_id(user, UserNames, Context),
+    AuthzIds.
+
+-spec find_group_authz_ids([binary()],#context{org_id::binary(), db_callback_fun::db_callback()}) -> [binary()].
+find_group_authz_ids(GroupNames, Context) ->
+    {AuthzIds, _Missing} = names_to_authz_id(group, GroupNames, Context),
+    AuthzIds.
+
+%%
+%% Lookup org name
+%%
+-spec org_id_to_name(binary()) -> not_found | binary().
+org_id_to_name(OrgId) ->
+    %% TODO maybe rework this; it bypasses a bunch of our statistics gathering code.
+    case chef_sql:select_rows({find_organization_by_id, [OrgId]}) of
+        [Org|_Others] ->  proplists:get_value(<<"name">>, Org);
+        _ -> not_found
+    end.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Internal functions
+%%
+
+%% Default sql callback
+make_sql_callback() ->
+    fun chef_sql:select_rows/1.
+
+group_errors(Errors) ->
+    group_by_key(lists:flatten(Errors)).
+
 filter_errors(#sname{} = ScopedName, {Parsed, Errors}) ->
     { [ScopedName | Parsed], Errors };
 filter_errors(Error, {Parsed, Errors}) ->
@@ -165,8 +216,6 @@ group_by_org_ids(Names) ->
 group_by_org_ids(#sname{org_id = OrgId} = Name, Acc) ->
     Old = maps:get(OrgId, Acc, []),
     maps:put(OrgId, [Name | Old], Acc).
-
-
 
 %%
 %% Actually lookup names
@@ -241,53 +290,10 @@ is_ambiguous_actor({_, _, _}) ->
     false.
 
 %%
-%% Some consumers of the name mapper want to split out errors by type
-%%
--spec filter_by_error_type(atom(), [binary()]) -> [binary()].
-filter_by_error_type(ErrorType, Errors) ->
-    %% ET is introduced to work around issue with shadowed variables in list comprehensions
-    [ Name || {ET, Name} <- Errors, ET =:= ErrorType ].
-
-group_errors(Errors) ->
-    group_by_key(lists:flatten(Errors)).
-
-%% Helper functions
-%%
-%% No error handling; we probably should generate an error when we have missing
-%%
--spec find_client_authz_ids([binary()],#context{org_id::binary(), db_callback_fun::db_callback()}) -> [binary()].
-find_client_authz_ids(ClientNames, Context) ->
-    {AuthzIds, _Missing} = names_to_authz_id(client, ClientNames, Context),
-    AuthzIds.
-
--spec find_user_authz_ids([binary()],#context{org_id::binary(), db_callback_fun::db_callback()}) -> [binary()].
-find_user_authz_ids(UserNames, Context) ->
-    {AuthzIds, _Missing} = names_to_authz_id(user, UserNames, Context),
-    AuthzIds.
-
--spec find_group_authz_ids([binary()],#context{org_id::binary(), db_callback_fun::db_callback()}) -> [binary()].
-find_group_authz_ids(GroupNames, Context) ->
-    {AuthzIds, _Missing} = names_to_authz_id(group, GroupNames, Context),
-    AuthzIds.
-
-%%
-%%
-%%
-convert_ids_to_names(ActorAuthzIds, GroupAuthzIds, Context) ->
-    {ClientNames, RemainingAuthzIds} = authz_id_to_names(client, ActorAuthzIds, Context),
-    {UserNames, DefunctActorAuthzIds} = authz_id_to_names(user, RemainingAuthzIds, Context),
-    {GroupNames, DefunctGroupAuthzIds} = authz_id_to_names(group, GroupAuthzIds, Context),
-    oc_chef_authz_cleanup:add_authz_ids(DefunctActorAuthzIds, DefunctGroupAuthzIds),
-    {ClientNames, UserNames, GroupNames}.
-
-%%
 %% Takes authz ids to scoped names
 %%
 %% Returns {NamesFound, UnmappedAuthzIds} We can have UnmappedAuthzIds if an entity was
 %% deleted on the server but not in bifrost, or if we have a mix of clients and users
-%%
-
-
 %%
 %% Each type of object has different restrictions on its scope.
 %%
@@ -318,11 +324,6 @@ query_and_diff_authz_ids(QueryName, AuthzIds, CallbackFun) ->
             {[], []}
     end.
 
-%extract_maybe_scoped_name([Name, AuthzId],  {Names, AuthzIds}) ->
-%    {[Name| Names], [AuthzId | AuthzIds]};
-%extract_maybe_scoped_name([OrgId, Name, AuthzId],  {Names, AuthzIds}) ->
-%    {[{OrgId, Name} | Names], [AuthzId | AuthzIds]}.
-
 %% Scoped names are triples with org_id, name, and authz_id
 extract_maybe_scoped_name([{_NameKey, Name}, {<<"authz_id">>, AuthzId}],
                           {NamesIn, AuthzIdsIn}) ->
@@ -342,7 +343,7 @@ is_scoped_type(_) ->
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Tools for parsing/unparsing scoped names into {orgname, name} tuples
-%% These use a org name as 'context' to resove and emit scoped names
+%% These use a org name as 'context' to resolve and emit scoped names
 %% Org names are either binaries, or they are the special atom global_org
 %%
 
@@ -364,12 +365,6 @@ make_regex() ->
 parse_scoped_name(Name, ScopedOk, Context) ->
     Pattern = make_regex(),
     maybe_parse_scoped_name(Name, Pattern, ScopedOk, Context).
-
-parse_scoped_names(Names, Context) ->
-    parse_scoped_names(Names, true, Context).
-
-parse_unscoped_names(Names, Context) ->
-    parse_scoped_names(Names, false, Context).
 
 -spec parse_scoped_names([binary()], boolean(), #context{}) -> [#sname{} | {atom(), binary()}].
 parse_scoped_names(Names, ScopedOk, Context) ->
@@ -415,18 +410,6 @@ group_by_key(L) ->
     maps:to_list(Map).
 
 %%
-%%
-make_sql_callback() ->
-    fun chef_sql:select_rows/1.
-
-%%
-%% Helper function for working with unscoped names
-%%
--spec make_scoped_names(binary(), [binary()]) -> [{binary(), binary()}].
-make_scoped_names(OrgName, Names) ->
-    [{OrgName, Name} || Name <- Names].
-
-%%
 %% Expansion of authz ids into scoped names
 %% Takes {OrgName, Name} pairs in ScopedNames and returns
 %% list of names with scoping metacharacter inserted
@@ -458,17 +441,6 @@ render_names_in_context_f(_OrgId, {AnotherOrgId, Names}, Expanded) ->
 -spec make_name(binary(),binary()) -> <<_:16,_:_*8>>.
 make_name(OrgName, Name) ->
     <<OrgName/binary, "::", Name/binary>>.
-
-%%
-%% Lookup org name
-%%
--spec org_id_to_name(binary()) -> not_found | binary().
-org_id_to_name(OrgId) ->
-    %% TODO maybe rework this; it bypasses a bunch of our statistics gathering code.
-    case chef_sql:select_rows({find_organization_by_id, [OrgId]}) of
-        [Org|_Others] ->  proplists:get_value(<<"name">>, Org);
-        _ -> not_found
-    end.
 
 %%
 %% Memorize org id lookup
