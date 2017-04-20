@@ -47,6 +47,7 @@ http {
     routes = require("routes")
     resolver = require("resolver")
     route_checks = require("route_checks")
+    validator = require("validator")
 
     config.set_maint_refresh_interval(<%=@maint_refresh_interval%>)
     config.set_ban_refresh_interval(<%=@ban_refresh_interval%>)
