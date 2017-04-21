@@ -186,7 +186,22 @@ update(#oc_chef_group{
     case chef_object_default_callbacks:update(Record, CallbackFun) of
         %% If the group exists, N should be 1.
         N when is_integer(N) andalso N > 0 ->
-            LookupContext = oc_chef_authz_scoped_name:initialize_context(OrgId, CallbackFun),
+            %% Alright, here we go:
+            %%
+            %% The main problem here is that we are trying to measure time inside a fun call that
+            %% is already being measured, yes! Right here we are being call from chef_db:update()
+            %% that itself is calling chef_sql:update() that itself (you still with me?) is calling
+            %% chef_object:update() wich would be this case right here. So the question woulb be:
+            %%
+            %% => Do we wanna measure time inside a call that is already being measured?
+            %%
+            %% I don't think so, therefor we are proposing to create a different change to address
+            %% the problem globally. Why? Well we are going to modify core modules that might or might
+            %% not require modifications to a few other modules.
+            %%
+            %% Until we have this conversation I'm mocking the ReqId in YOLO mode.
+            ReqId = <<"mock">>,
+            LookupContext = oc_chef_authz_scoped_name:initialize_context(ReqId, OrgId, CallbackFun),
             ClientAuthzIds = oc_chef_authz_scoped_name:find_client_authz_ids(Clients, LookupContext),
             UserAuthzIds = oc_chef_authz_scoped_name:find_user_authz_ids(Users, LookupContext),
             GroupAuthzIds = oc_chef_authz_scoped_name:find_group_authz_ids(Groups, LookupContext),
@@ -285,7 +300,9 @@ fetch_new(#oc_chef_group{org_id = OrgId,
           CallbackFun) ->
     FetchMembers =
         fun(#oc_chef_group{authz_id = GroupAuthzId} = GroupRecord) ->
-                LookupContext = oc_chef_authz_scoped_name:initialize_context(OrgId, CallbackFun),
+                %% Modking the ReaId
+                ReqId = <<"mock">>,
+                LookupContext = oc_chef_authz_scoped_name:initialize_context(ReqId, OrgId, CallbackFun),
                 maybe_find_names(fetch_authz_ids(GroupAuthzId, RequestorId), GroupRecord, LookupContext)
         end,
     fetch_base(Record, FetchMembers, CallbackFun).
@@ -293,7 +310,9 @@ fetch_new(#oc_chef_group{org_id = OrgId,
 fetch(#oc_chef_group{org_id = OrgId, for_requestor_id = RequestorId} = Record, CallbackFun) ->
     case chef_object_default_callbacks:fetch(Record, CallbackFun) of
         #oc_chef_group{authz_id = GroupAuthzId} = GroupRecord ->
-            LookupContext = oc_chef_authz_scoped_name:initialize_context(OrgId, CallbackFun),
+            %% Modking the ReaId
+            ReqId = <<"mock">>,
+            LookupContext = oc_chef_authz_scoped_name:initialize_context(ReqId, OrgId, CallbackFun),
             maybe_find_names(fetch_authz_ids(GroupAuthzId, RequestorId), GroupRecord, LookupContext);
         not_found ->
             not_found;
