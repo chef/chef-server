@@ -190,8 +190,7 @@ class OmnibusHelper
   end
 
   def ldap_authentication_enabled?
-    node['private_chef'].attribute?('ldap') &&
-      !(node['private_chef']['ldap'].nil? || node['private_chef']['ldap'].empty?)
+    node['private_chef']["ldap"] && node['private_chef']['ldap']['enabled']
   end
 
   def platform_package_suffix

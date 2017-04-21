@@ -42,8 +42,7 @@ describe PrivateChef do
 
   # Example content of /etc/opscode/private-chef-secrets.json
   # used when testing non-bootstrap config parsing.
-  let(:secrets) {<<EOF
-  {
+  let(:default_secrets) {<<EOF
   "redis_lb": {
     "password": "a24799bbeecee698792c6c9a26b453700bd52b709868a61f184cd9a0fdb32619cdeb494ddc98ce814aa14eda01fcc06cb335"
   },
@@ -80,9 +79,11 @@ describe PrivateChef do
     "sql_ro_password": "ca000f92407cca27995f925a5004aae08310819f3cd27dcb8cbd08e500b35f61acb2d98b709d39308b704d4481b2ee19b493",
     "access_key_id": "331fe88b6a86c4801218fd3e831a68b710544069",
     "secret_access_key": "393dd9330f834102f3650a6ac6938530ccbfbe1c86cb7d732f9893768e4e06eb172cc326da17f435"
-  }}
+  }
 EOF
   }
+
+  let(:secrets) { "{" + default_secrets + "}" }
 
   let(:config_file) {
     filename = "/fake/config.rb"
@@ -90,6 +91,38 @@ EOF
     filename
   }
 
+  context "When ldap is enabled" do
+    let(:config) { <<-EOF
+  ldap["base_dn"] = "foo"
+  ldap["host"] = "myhost"
+  EOF
+    }
+    it "sets ldap['enabled'] to true" do
+      rendered_config = config_for("api.chef.io")
+      expect(rendered_config["private_chef"]["ldap"]["enabled"]).to eq(true)
+    end
+  end
+
+  context "when ldap is NOT configured but bind_password is still in the secrets" do
+    let(:secrets) {<<-EOF
+      {
+          #{default_secrets},
+          "ldap": {
+            "bind_password": "foobar"
+          }
+      }
+      EOF
+    }
+    let(:config) { <<-EOF
+  EOF
+    }
+    it "sets ldap['enabled'] to false" do
+      expect_existing_secrets
+      rendered_config = config_for("api.chef.io")
+      expect(rendered_config["private_chef"]["ldap"]["bind_password"]).to eq("foobar")
+      expect(rendered_config["private_chef"]["ldap"]["enabled"]).to eq(false)
+    end
+  end
 
   context "When FIPS is enabled at the kernel" do
     let(:config) { <<-EOF
