@@ -220,6 +220,14 @@ Further, Chef Server is now available on the s390x platform.
 ssl_version :TLSv1_2
 ```
 
+3. Users of Push Jobs Server 1.1.6 or older should re-enable TLS 1.1
+   by putting the following in `/etc/opscode/chef-server.rb`
+
+        nginx['ssl_protocols'] = "TLSv1.1 TLSv1.2"
+
+   and running `chef-server-ctl reconfigure`.
+
+
 ## 12.9.1 (2016-9-26)
 
 ### Security Updates
