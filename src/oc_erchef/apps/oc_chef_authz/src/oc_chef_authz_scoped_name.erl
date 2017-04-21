@@ -381,7 +381,7 @@ maybe_parse_scoped_name(Name, Pattern, ScopedOk, Context) ->
 %% If no match, then we have bad name
 process_match(nomatch, Name, _Context, _ScopedOk) ->
     {ill_formed_name, Name};
-%% If we only onl match the name, then it is an unscoped name, and we use the org context
+%% If we only match the name, then it is an unscoped name, and we use the org context
 process_match({match, [Name, Name]}, Name, Context, _ScopedOk) ->
     set_org_from_context(#sname{base = Name, full = Name}, Context);
 %% Anything not a simple, unqualified name should be rejected
@@ -429,9 +429,10 @@ render_names_in_context_f(_OrgId, {?GLOBAL_PLACEHOLDER_ORG_ID, Names}, Expanded)
     [ENames | Expanded];
 render_names_in_context_f(_OrgId, {AnotherOrgId, Names}, Expanded) ->
     %% Design note: we drop missing orgs silently. Org deletion leaks many objects and we must
-    %% be robust to that.
+    %% be robust to that. Thought we will log a warning message to be transparent.
     case org_id_to_name(AnotherOrgId) of
         not_found ->
+            lager:warning("Unable to find organization with id '~p'~n", [AnotherOrgId]),
             Expanded;
         OrgName ->
             ENames = [ make_name(OrgName, Name) || Name <- Names ],
