@@ -278,8 +278,8 @@ query_and_diff_authz_ids_test_() ->
 
 %%
 %%
-render_names_in_context_test_() ->
-    Subject = fun ?M:render_names_in_context/2,
+render_names_from_org_id_test_() ->
+    Subject = fun ?M:render_names_from_org_id/2,
 
     OrgMap = mk_orgid_map(),
     {foreach,
