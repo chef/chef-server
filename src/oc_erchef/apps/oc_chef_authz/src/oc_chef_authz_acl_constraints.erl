@@ -26,16 +26,16 @@
 -compile([export_all]).
 -endif.
 
--export([check_acl_constraints/5]).
+-export([check_acl_constraints/6]).
 
--spec check_acl_constraints(binary(), binary(), atom(), binary(), tuple()) -> ok | [atom(),...].
-check_acl_constraints(OrgId, AuthzId, Type, AclPerm, Ace) ->
-  check_acl_constraints(OrgId, AuthzId, Type, AclPerm, Ace, acl_checks()).
+-spec check_acl_constraints(binary(), binary(), binary(), atom(), binary(), tuple()) -> ok | [atom(),...].
+check_acl_constraints(OrgId, AuthzId, ReqId, Type, AclPerm, Ace) ->
+  check_acl_constraints(OrgId, AuthzId, ReqId, Type, AclPerm, Ace, acl_checks()).
 
 
--spec check_acl_constraints(binary(), binary(), atom(), binary(), tuple(), [fun()]) -> ok | [atom(),...].
-check_acl_constraints(OrgId, AuthzId, Type, AclPerm, Ace, AclChecks) ->
-  case lists:filtermap(fun(Check) -> Check(OrgId, AuthzId, Type, AclPerm, Ace) end, AclChecks) of
+-spec check_acl_constraints(binary(), binary(), binary(), atom(), binary(), tuple(), [fun()]) -> ok | [atom(),...].
+check_acl_constraints(OrgId, AuthzId, ReqId, Type, AclPerm, Ace, AclChecks) ->
+  case lists:filtermap(fun(Check) -> Check(OrgId, AuthzId, ReqId, Type, AclPerm, Ace) end, AclChecks) of
     [] ->
       ok;
     Failures ->
@@ -45,12 +45,12 @@ check_acl_constraints(OrgId, AuthzId, Type, AclPerm, Ace, AclChecks) ->
 -spec acl_checks() -> [fun()].
 acl_checks() ->
   [
-    fun check_admins_group_removal_from_grant_ace/5
+    fun check_admins_group_removal_from_grant_ace/6
   ].
 
--spec check_admins_group_removal_from_grant_ace(binary(),binary(), atom(),binary(),tuple())
+-spec check_admins_group_removal_from_grant_ace(binary(), binary(), binary(), atom(), binary(), tuple())
       -> false | {true, attempted_admin_group_removal_grant_ace}.
-check_admins_group_removal_from_grant_ace(OrgId, AuthzId, Type, AclPerm, NewAce) ->
+check_admins_group_removal_from_grant_ace(OrgId, AuthzId, ReqId, Type, AclPerm, NewAce) ->
   %% It is necessary to pull the current ace and compare to the new ace.
   %% This is because there are some groups that don't have the admin
   %% group by default, such as billing-admins. This will have the effect
@@ -59,7 +59,7 @@ check_admins_group_removal_from_grant_ace(OrgId, AuthzId, Type, AclPerm, NewAce)
   case AclPerm of
     <<"grant">> ->
       NewGroups = extract_acl_groups(AclPerm, NewAce),
-      CurrentAce = oc_chef_authz_acl:fetch(Type, OrgId, AuthzId),
+      CurrentAce = oc_chef_authz_acl:fetch(Type, OrgId, AuthzId, ReqId),
       CurrentGroups = extract_acl_groups(AclPerm, CurrentAce),
       case check_admins_group_removal(CurrentGroups, NewGroups) of
         not_removed ->

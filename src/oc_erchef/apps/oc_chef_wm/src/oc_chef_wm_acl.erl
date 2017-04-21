@@ -80,12 +80,14 @@ validate_request('GET', Req, #base_state{chef_db_context = DbContext,
 auth_info(Req, State) ->
     check_acl_auth(Req, State).
 
-to_json(Req, #base_state{organization_guid = OrgId, resource_state = #acl_state{type = Type, authz_id = AuthzId}} = State) ->
+to_json(Req, #base_state{reqid = ReqId,
+                         organization_guid = OrgId,
+                         resource_state = #acl_state{type = Type, authz_id = AuthzId}} = State) ->
     Granular = case wrq:get_qs_value("detail", Req) of
                    "granular" -> granular;
                    _ -> undefined
                end,
-    case oc_chef_authz_acl:fetch(Type, OrgId, AuthzId, Granular) of
+    case oc_chef_authz_acl:fetch(Type, OrgId, AuthzId, ReqId, Granular) of
         forbidden ->
             {{halt, 403}, Req, State#base_state{log_msg = requestor_access_failed}};
         Ejson ->

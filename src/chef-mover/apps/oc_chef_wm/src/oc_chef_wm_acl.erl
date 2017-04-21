@@ -79,8 +79,8 @@ validate_request('GET', Req, #base_state{chef_db_context = DbContext,
 auth_info(Req, State) ->
     check_acl_auth(Req, State).
 
-to_json(Req, #base_state{resource_state = AclState} = State) ->
-    case fetch(AclState) of
+to_json(Req, #base_state{reqid = ReqId, resource_state = AclState} = State) ->
+    case fetch(ReqId, AclState) of
         forbidden ->
             {{halt, 403}, Req, State#base_state{log_msg = acl_not_found}};
         Ejson ->
@@ -128,8 +128,8 @@ check_acl_auth(Req, #base_state{requestor_id = RequestorId,
             end
     end.
 
-fetch(#acl_state{type = Type, authz_id = AuthzId}) ->
-    oc_chef_authz_acl:fetch(Type,AuthzId).
+fetch(ReqId, #acl_state{type = Type, authz_id = AuthzId}) ->
+    oc_chef_authz_acl:fetch(Type, AuthzId, ReqId).
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).

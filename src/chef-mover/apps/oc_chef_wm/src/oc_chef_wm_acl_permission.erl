@@ -80,10 +80,11 @@ validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
 auth_info(Req, State) ->
     oc_chef_wm_acl:check_acl_auth(Req, State).
 
-from_json(Req, #base_state{organization_guid = OrgId,
+from_json(Req, #base_state{reqid = ReqId,
+                           organization_guid = OrgId,
                            resource_state = AclState} = State) ->
     Part = wrq:path_info(acl_permission, Req),
-    case update_from_json(AclState, Part, OrgId) of
+    case update_from_json(AclState, Part, OrgId, ReqId) of
         forbidden ->
             {{halt, 400}, Req, State};
         bad_actor ->
@@ -119,9 +120,9 @@ acl_spec(Part) ->
 
 
 update_from_json(#acl_state{type = Type, authz_id = AuthzId, acl_data = Data},
-                 Part, OrgId) ->
+                 Part, OrgId, ReqId) ->
     try
-        oc_chef_authz_acl:update_part(Part, Data, Type, AuthzId, OrgId)
+        oc_chef_authz_acl:update_part(Part, Data, Type, AuthzId, OrgId, ReqId)
     catch
         throw:forbidden ->
             forbidden;

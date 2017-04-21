@@ -29,11 +29,11 @@
          acl_auth_path/3,
          fetch_id/4,
          fetch_cookbook_id/3,
-         fetch/3,
+         fetch/5,
          fetch/4,
          has_grant_on/3,
          validate_actors_clients_users/2,
-         update_part/5,
+         update_part/6,
          acl_spec/1]).
 
 -ifdef(TEST).
@@ -89,10 +89,10 @@ validate_actors_clients_users(Part, FullACL) ->
             end
     end.
 
--spec update_part(string(), ejson_term(), chef_type() | chef_authz_type(), id(), id())->
+-spec update_part(string(), ejson_term(), chef_type() | chef_authz_type(), id(), id(), id())->
     {ok, ejson_term()}.
-update_part(Part, AceRecord, Type, AuthzId, OrgId) ->
-    Ids = names_to_ids(ej:get({Part}, AceRecord), OrgId),
+update_part(Part, AceRecord, Type, AuthzId, OrgId, ReqId) ->
+    Ids = names_to_ids(ej:get({Part}, AceRecord), OrgId, ReqId),
     Data = chef_json:encode(Ids),
     Path = acl_path(Type, AuthzId, Part),
     Result = oc_chef_authz_http:request(Path, put, ?DEFAULT_HEADERS, Data, superuser_id()),
@@ -204,16 +204,16 @@ fetch_cookbook_id(DbContext, Name, OrgId) ->
             AuthzId
     end.
 
--spec fetch(chef_type(), binary(), id()) -> list() | {error, term()}.
-fetch(Type, OrgId, AuthzId) ->
-    fetch(Type, OrgId, AuthzId, undefined).
+-spec fetch(chef_type(), binary(), id(), binary()) -> list() | {error, term()}.
+fetch(Type, OrgId, AuthzId, ReqId) ->
+    fetch(Type, OrgId, AuthzId, ReqId, undefined).
 
-fetch(Type, OrgId, AuthzId, Granular) ->
+fetch(Type, OrgId, AuthzId, ReqId, Granular) ->
     Path = acl_path(Type, AuthzId),
     Result = oc_chef_authz_http:request(Path, get, ?DEFAULT_HEADERS, [], superuser_id()),
     case Result of
         {ok, Record} ->
-            convert_all_ids_to_names(OrgId, Record, Granular);
+            convert_all_ids_to_names(OrgId, ReqId, Record, Granular);
         {error, forbidden} ->
             forbidden;
         Other ->
@@ -243,8 +243,8 @@ has_grant_on(ObjectType, ObjectId, ActorId) ->
 
 %% Convert names provde in the ACE to their corresponding
 %% authz ids.
-names_to_ids(ACE, OrgId) ->
-    Context = oc_chef_authz_scoped_name:initialize_context(OrgId),
+names_to_ids(ACE, OrgId, ReqId) ->
+    Context = oc_chef_authz_scoped_name:initialize_context(ReqId, OrgId),
     ActorIds = case ej:get({<<"clients">>}, ACE) of
         undefined ->
             fetch_actors(Context, ej:get({<<"actors">>}, ACE));
@@ -290,31 +290,31 @@ fetch_actors(Context, ActorNames) ->
                Error =:= not_found ->
             throw({bad_actor, Names});
         {_, [{ambiguous, Names} | _]} ->
-            throw({ambiguous_actor, Names})
-    end.
+        throw({ambiguous_actor, Names})
+end.
 
 
 %%
 %% Reverse mapping of ids to names (this should have a lot of commonality with groups)
 %%
-convert_all_ids_to_names(OrgId, Record, Granular) ->
+convert_all_ids_to_names(OrgId, ReqId, Record, Granular) ->
     convert_ids_to_names_in_part([<<"create">>, <<"read">>, <<"update">>,
                                   <<"delete">>, <<"grant">>],
-                                 OrgId, Record, Granular).
+                                 OrgId, ReqId, Record, Granular).
 
--spec convert_ids_to_names_in_part(list(binary()), binary(), ejson_term(), granular|undefined) -> ejson_term().
-convert_ids_to_names_in_part([], _OrgId, Record, _Granular) ->
+-spec convert_ids_to_names_in_part(list(binary()), binary(), binary(), ejson_term(), granular|undefined) -> ejson_term().
+convert_ids_to_names_in_part([], _OrgId, _ReqId, Record, _Granular) ->
     Record;
-convert_ids_to_names_in_part([Part | Rest], OrgId, Record, Granular) ->
+convert_ids_to_names_in_part([Part | Rest], OrgId, ReqId, Record, Granular) ->
     Members = ej:get({Part}, Record),
     ActorIds = ej:get({<<"actors">>}, Members),
     GroupIds = ej:get({<<"groups">>}, Members),
-    Context = oc_chef_authz_scoped_name:initialize_context(OrgId),
+    Context = oc_chef_authz_scoped_name:initialize_context(ReqId, OrgId),
     {ClientNames, UserNames, GroupNames} = oc_chef_authz_scoped_name:convert_ids_to_names(ActorIds, GroupIds, Context),
     Members1 = part_with_actors(Members, ClientNames, UserNames, Granular),
     Members2 = ej:set({<<"groups">>}, Members1, GroupNames),
     NewRecord = ej:set({Part}, Record, Members2),
-    convert_ids_to_names_in_part(Rest, OrgId, NewRecord, Granular).
+    convert_ids_to_names_in_part(Rest, OrgId, ReqId, NewRecord, Granular).
 
 part_with_actors(PartRecord, Clients, Users, granular) ->
     PartRecord0 = ej:set({<<"users">>}, PartRecord, Users),

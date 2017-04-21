@@ -25,7 +25,7 @@
 
 -export([names_to_authz_id/3,
          initialize_context/2,
-         initialize_context/1,
+         initialize_context/3,
          full_name/1,
 
          %% Used by oc_chef_group
@@ -53,7 +53,8 @@
 
 -type db_callback() :: fun((any()) -> any()).
 
--record(context, {org_id :: binary(),
+-record(context, {reqid :: binary(),
+                  org_id :: binary(),
                   db_context :: any() | undefined,
                   db_callback_fun :: db_callback()
                  }).
@@ -78,17 +79,18 @@ full_name(#sname{full = FullName}) ->
 %% Context is used to thread external state information through the system
 %%
 %% Dialyzer is grouchy unless undefined is included in types.
--spec initialize_context(binary()) -> #context{}.
-initialize_context(OrgId) ->
-    initialize_context(OrgId, make_sql_callback()).
+-spec initialize_context(binary(), binary()) -> #context{}.
+initialize_context(ReqId, OrgId) ->
+    initialize_context(ReqId, OrgId, make_sql_callback()).
 
--spec initialize_context(binary(), db_callback()) -> #context{}.
-initialize_context(OrgId, CallBackFun) ->
-    initialize_context(OrgId, undefined, CallBackFun).
+-spec initialize_context(binary(), binary(), db_callback()) -> #context{}.
+initialize_context(ReqId, OrgId, CallBackFun) ->
+    initialize_context(ReqId, OrgId, undefined, CallBackFun).
 
--spec initialize_context(binary(), tuple() | undefined, db_callback()) -> #context{}.
-initialize_context(OrgId, DbContext, CallBackFun) ->
-    #context{org_id = OrgId,
+-spec initialize_context(binary(), binary(), tuple() | undefined, db_callback()) -> #context{}.
+initialize_context(ReqId, OrgId, DbContext, CallBackFun) ->
+    #context{reqid = ReqId,
+             org_id = OrgId,
              db_context = DbContext,
              db_callback_fun = CallBackFun}.
 
@@ -110,7 +112,7 @@ initialize_context(OrgId, DbContext, CallBackFun) ->
 %%
 %%
 -spec names_to_authz_id(lookup_type() ,[binary()], #context{}) -> { [binary()],[{atom(),binary()}] }.
-names_to_authz_id(Type, Names, MapperContext) ->
+names_to_authz_id(Type, Names, #context{reqid = ReqId} = MapperContext) ->
     %% Lower to fully qualified orgname, name
     ScopedNames = parse_scoped_names(Names, is_scoped_type(Type), MapperContext),
     {ProperNames, Errors} = lists:foldl(fun filter_errors/2, {[], []}, ScopedNames),
@@ -119,7 +121,7 @@ names_to_authz_id(Type, Names, MapperContext) ->
 
     %% Map org names to org ids
     {NamesWithOrgIds, Errors2, _} =
-        lists:foldl(fun(Name, Acc) -> lookup_org_id(Name, Acc) end,
+        lists:foldl(fun(Name, Acc) -> lookup_org_id(ReqId, Name, Acc) end,
                     {[], Errors, OrgCache}, ProperNames),
 
     %% group by org id for efficiency (can't do it sooner because we don't know all the org ids
@@ -166,10 +168,12 @@ find_group_authz_ids(GroupNames, Context) ->
 %%
 %% Lookup org name
 %%
--spec org_id_to_name(binary()) -> not_found | binary().
-org_id_to_name(OrgId) ->
-    %% TODO maybe rework this; it bypasses a bunch of our statistics gathering code.
-    case chef_sql:select_rows({find_organization_by_id, [OrgId]}) of
+-spec org_id_to_name(binary(), binary()) -> not_found | binary().
+org_id_to_name(ReqId, OrgId) ->
+    case stats_hero:ctime(ReqId, {chef_sql, fetch},
+                          fun() ->
+                                chef_sql:select_rows({find_organization_by_id, [OrgId]})
+                          end) of
         [Org|_Others] ->  proplists:get_value(<<"name">>, Org);
         _ -> not_found
     end.
@@ -194,11 +198,11 @@ filter_errors(Error, {Parsed, Errors}) ->
 %%
 %% already have id for orgname, skip
 %% Errors: orgname_not_found
-lookup_org_id(#sname{org_id = OrgId} = Name, {AccNames, Errors, Cache}) when OrgId =/= undefined ->
+lookup_org_id(_ReqId, #sname{org_id = OrgId} = Name, {AccNames, Errors, Cache}) when OrgId =/= undefined ->
     { [Name | AccNames], Errors, Cache };
 %% Need to lookup name
-lookup_org_id(#sname{org = OrgName} = Name, {AccNames, Errors, Cache}) ->
-    case lookup_org_id_cached(OrgName, Cache) of
+lookup_org_id(ReqId, #sname{org = OrgName} = Name, {AccNames, Errors, Cache}) ->
+    case lookup_org_id_cached(ReqId, OrgName, Cache) of
         {not_found, Cache1} ->
             {AccNames, [{orgname_not_found, Name} | Errors], Cache1};
         {OrgId, Cache1} ->
@@ -299,19 +303,24 @@ is_ambiguous_actor({_, _, _}) ->
 -spec authz_id_to_names('client' | 'group' | 'user', [binary()],
                         #context{org_id::binary(), db_callback_fun::db_callback()}) ->
         {[binary()],[binary()]}.
-authz_id_to_names(group, AuthzIds, #context{org_id = OrgId, db_callback_fun = CallbackFun}) ->
-    {ScopedNames, DiffedList} = query_and_diff_authz_ids(find_scoped_group_name_in_authz_ids, AuthzIds, CallbackFun),
-    {render_names_from_org_id(OrgId, ScopedNames), DiffedList};
-authz_id_to_names(client, AuthzIds, #context{db_callback_fun = CallbackFun}) ->
-    query_and_diff_authz_ids(find_client_name_in_authz_ids, AuthzIds, CallbackFun);
-authz_id_to_names(user, AuthzIds, #context{db_callback_fun = CallbackFun}) ->
-    query_and_diff_authz_ids(find_user_name_in_authz_ids, AuthzIds, CallbackFun).
+authz_id_to_names(group, AuthzIds, #context{reqid = ReqId,
+                                            org_id = OrgId,
+                                            db_callback_fun = CallbackFun}) ->
+    {ScopedNames, DiffedList} = query_and_diff_authz_ids(find_scoped_group_name_in_authz_ids, AuthzIds, CallbackFun, ReqId),
+    {render_names_from_org_id(OrgId, ReqId, ScopedNames), DiffedList};
+authz_id_to_names(client, AuthzIds, #context{reqid = ReqId, db_callback_fun = CallbackFun}) ->
+    query_and_diff_authz_ids(find_client_name_in_authz_ids, AuthzIds, CallbackFun, ReqId);
+authz_id_to_names(user, AuthzIds, #context{reqid = ReqId, db_callback_fun = CallbackFun}) ->
+    query_and_diff_authz_ids(find_user_name_in_authz_ids, AuthzIds, CallbackFun, ReqId).
 
-query_and_diff_authz_ids(_QueryName, [], _) ->
+query_and_diff_authz_ids(_QueryName, [], _, _) ->
     %% Sometimes the list of authz ids is empty; shortcut that and save a DB call.
     {[], []};
-query_and_diff_authz_ids(QueryName, AuthzIds, CallbackFun) ->
-    case CallbackFun({QueryName, [AuthzIds]}) of
+query_and_diff_authz_ids(QueryName, AuthzIds, CallbackFun, ReqId) ->
+    case stats_hero:ctime(ReqId, {chef_sql, fetch},
+                  fun() ->
+                        CallbackFun({QueryName, [AuthzIds]})
+                  end) of
         not_found ->
             {[], AuthzIds};
         Results when is_list(Results)->
@@ -412,24 +421,24 @@ group_by_key(L) ->
 %% Expansion of authz ids into scoped names
 %% Takes {OrgName, Name} pairs in ScopedNames and returns
 %% list of names with scoping metacharacter inserted
--spec render_names_from_org_id(binary(),[{binary(), [binary()]}]) -> [binary()].
-render_names_from_org_id(OrgId, ScopedNames) ->
+-spec render_names_from_org_id(binary(), binary(),[{binary(), [binary()]}]) -> [binary()].
+render_names_from_org_id(OrgId, ReqId, ScopedNames) ->
     GroupedScopedNames = group_by_key(ScopedNames),
-    Expanded = lists:foldl(fun(E, A) -> render_names_from_org_id_f(OrgId, E, A) end,
+    Expanded = lists:foldl(fun(E, A) -> render_names_from_org_id_f(OrgId, ReqId, E, A) end,
                               [], GroupedScopedNames),
     lists:sort(lists:flatten(Expanded)).
 
 %% We are in the same scope, omit qualifier
-render_names_from_org_id_f(OrgId, {OrgId, Names}, Expanded) ->
+render_names_from_org_id_f(OrgId, _ReqId, {OrgId, Names}, Expanded) ->
     [Names | Expanded];
 %% we are in a different scope, but it's the global scope. Use abbreviated version.
-render_names_from_org_id_f(_OrgId, {?GLOBAL_PLACEHOLDER_ORG_ID, Names}, Expanded) ->
+render_names_from_org_id_f(_OrgId, _ReqId, {?GLOBAL_PLACEHOLDER_ORG_ID, Names}, Expanded) ->
     ENames = [ make_name(<<>>, Name) || Name <- Names],
     [ENames | Expanded];
-render_names_from_org_id_f(_OrgId, {AnotherOrgId, Names}, Expanded) ->
+render_names_from_org_id_f(_OrgId, ReqId, {AnotherOrgId, Names}, Expanded) ->
     %% Design note: we drop missing orgs silently. Org deletion leaks many objects and we must
     %% be robust to that. Thought we will log a warning message to be transparent.
-    case org_id_to_name(AnotherOrgId) of
+    case org_id_to_name(ReqId, AnotherOrgId) of
         not_found ->
             lager:warning("Unable to find organization with id '~p'~n", [AnotherOrgId]),
             Expanded;
@@ -449,15 +458,18 @@ make_name(OrgName, Name) ->
 init_org_name_cache() ->
     #{ global_org => ?GLOBAL_PLACEHOLDER_ORG_ID }.
 
--spec lookup_org_id_cached(binary(), #{}) -> {binary() | not_found, map()}.
-lookup_org_id_cached(OrgName, Cache) ->
+-spec lookup_org_id_cached(binary(), binary(), #{}) -> {binary() | not_found, map()}.
+lookup_org_id_cached(ReqId, OrgName, Cache) ->
     case Cache of
         #{OrgName := OrgId} ->
             %% it would be nice to do this in the fun head (OrgId,  #{OrgName := OrgId})
             %% but erlang match and maps don't work that way.
             {OrgId, Cache};
         _ ->
-            case chef_sql:fetch_org_metadata(OrgName) of
+            case stats_hero:ctime(ReqId, {chef_sql, fetch},
+                          fun() ->
+                                chef_sql:fetch_org_metadata(OrgName)
+                          end) of
                 not_found ->
                     %% negative results are worth caching
                     {not_found, maps:put(OrgName, not_found, Cache)};
