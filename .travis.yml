@@ -6,6 +6,7 @@ branches:
 cache:
   apt: true
   directories:
+    - src/oc_erchef/_build/default/rebar3_17.5_plt
     - src/oc-id/vendor/bundle
     - $HOME/.luarocks/rocks
     - $HOME/.cpanm
