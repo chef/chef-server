@@ -780,6 +780,12 @@ EOF
       credentials.save if did_something
     end
 
+    # When insecure_addon_compat is true, PrivateChef["ldap"] may be
+    # non-empty after the secrets from veil are merged into the
+    # configuration. The user may have inadvertantly left the password
+    # in the secrets file, even when all other LDAP configuration has
+    # been removed. This function is called before the secrets merge
+    # allowing us to detect whether the user wants ldap or not.
     def set_ldap_enabled
       PrivateChef["ldap"]["enabled"] = !PrivateChef["ldap"].empty?
     end
