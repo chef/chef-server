@@ -189,14 +189,14 @@ describe "Policies API endpoint", :policies do
         expect(list_policies.code).to eq(200)
         response_obj = parse(list_policies.body)
         expect(response_obj).to be_a_kind_of(Hash)
-        expect(response_obj).to eq(expected_policies_list)
+        expect(response_obj).to strictly_match(expected_policies_list)
       end
 
       it "GET /policy_groups returns a data structure with the groups assigned policy revision", :policy_groups do
         expect(list_policy_groups.code).to eq(200)
         response_obj = parse(list_policy_groups.body)
         expect(response_obj).to be_a_kind_of(Hash)
-        expect(response_obj).to eq(expected_policy_group_list)
+        expect(response_obj).to strictly_match(expected_policy_group_list)
       end
     end
 
@@ -230,14 +230,14 @@ describe "Policies API endpoint", :policies do
         expect(list_policies.code).to eq(200)
         response_obj = parse(list_policies.body)
         expect(response_obj).to be_a_kind_of(Hash)
-        expect(response_obj).to eq(expected_policy_list)
+        expect(response_obj).to strictly_match(expected_policy_list)
       end
 
       it "GET /policy_groups returns a data structure with the groups assigned policy revision", :policy_groups do
         expect(list_policy_groups.code).to eq(200)
         response_obj = parse(list_policy_groups.body)
         expect(response_obj).to be_a_kind_of(Hash)
-        expect(response_obj).to eq(expected_policy_group_list)
+        expect(response_obj).to strictly_match(expected_policy_group_list)
       end
     end
 
@@ -383,16 +383,16 @@ describe "Policies API endpoint", :policies do
         expect(list_policies.code).to eq(200)
         response_obj = parse(list_policies.body)
         expect(response_obj).to be_a_kind_of(Hash)
-        expect(response_obj).to eq(expected_policies_list)
+        expect(response_obj).to strictly_match(expected_policies_list)
       end
 
       it "GET /policy_groups returns a data structure with all policy group->policy rev associations", :policy_groups do
         expect(list_policy_groups.code).to eq(200)
         response_obj = parse(list_policy_groups.body)
         expect(response_obj).to be_a_kind_of(Hash)
-        expect(response_obj["dev"]).to eq(expected_dev_group_data)
-        expect(response_obj["test"]).to eq(expected_test_group_data)
-        expect(response_obj["prod"]).to eq(expected_prod_group_data)
+        expect(response_obj["dev"]).to strictly_match(expected_dev_group_data)
+        expect(response_obj["test"]).to strictly_match(expected_test_group_data)
+        expect(response_obj["prod"]).to strictly_match(expected_prod_group_data)
       end
 
     end
@@ -443,13 +443,13 @@ describe "Policies API endpoint", :policies do
         it "GET /policy_groups/:policy_group_name returns 200 with an empty JSON Object" do
           response = get(named_policy_group_url, requestor)
           expect(response.code).to eq(200)
-          expect(parse(response.body)).to eq(expected_body)
+          expect(parse(response.body)).to strictly_match(expected_body)
         end
 
         it "DELETE /policy_groups/:policy_group_name returns 200 with an empty JSON Object" do
           response = delete(named_policy_group_url, requestor)
           expect(response.code).to eq(200)
-          expect(parse(response.body)).to eq(expected_body)
+          expect(parse(response.body)).to strictly_match(expected_body)
         end
 
       end
@@ -468,13 +468,13 @@ describe "Policies API endpoint", :policies do
         it "GET /policy_groups/:policy_group_name returns 200 with a JSON Object showing associated policies" do
           response = get(named_policy_group_url, requestor)
           expect(response.code).to eq(200)
-          expect(parse(response.body)).to eq(expected_body)
+          expect(parse(response.body)).to strictly_match(expected_body)
         end
 
         it "DELETE /policy_groups/:policy_group_name returns 200 with a JSON Object showing associated policies" do
           response = delete(named_policy_group_url, requestor)
           expect(response.code).to eq(200)
-          expect(parse(response.body)).to eq(expected_body)
+          expect(parse(response.body)).to strictly_match(expected_body)
         end
 
         it "DELETE /policy_groups/:policy_group_name deletes policy associations" do

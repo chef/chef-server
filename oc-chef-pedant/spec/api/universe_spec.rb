@@ -78,7 +78,7 @@ describe 'Universe API Endpoint', :universe do
     it "returns the expected results" do
       response_obj = parse(universe.body)
       expect(response_obj).to be_a_kind_of(Hash)
-      expect(response_obj).to eq(expected_response)
+      expect(response_obj).to strictly_match(expected_response)
     end
   end
 end

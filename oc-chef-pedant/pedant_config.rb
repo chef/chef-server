@@ -8,6 +8,7 @@
 # contexts as long as the Chef Server is running on localhost.
 #
 ################################################################################
+base_resource_url "https://localhost"
 
 # A unique identification string used to create orgs and users specific
 # to a each single chef server's nodes' OS. Simply using "Process.pid"

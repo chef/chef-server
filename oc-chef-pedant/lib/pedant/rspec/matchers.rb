@@ -69,19 +69,7 @@ module RSpec
         @expected.keys.all? do |key|
           spec = @expected[key]
           value = actual[key]
-
-          case spec
-          when Regexp
-            spec =~ value
-          when Array
-            array_matches?(spec, value)
-          when Hash
-            PedantHashComparator.new(spec, @mode).matches?(value)
-          when Proc then
-            spec.call(value)
-          else
-            spec == value
-          end
+          compare_value(spec, value)
         end
 
       end
@@ -95,12 +83,63 @@ module RSpec
         # Note this is going to be slow for large arrays,
         # though our actual usage shows we don't have any arrays on a
         # scale that would matter.
-        return true if spec.all? { |s| value.include? s }
-        # Our comparisons are more complex than simple value
-        spec.each_with_index  do |newspec, x|
-          return false unless PedantHashComparator.new(newspec, @mode).matches? value[x]
+        return true if spec.all? do |s|
+          value.any? do |v|
+            compare_value(s,v)
+          end
         end
-        return true
+        return false
+      end
+
+      def compare_value(spec, value)
+        case spec
+        when String
+          normalize(spec) == normalize(value)
+        when Regexp
+          spec =~ value
+        when Array
+          array_matches?(spec, value)
+        when Hash
+          PedantHashComparator.new(spec, @mode).matches?(value)
+        when Proc then
+          spec.call(value)
+        else
+          spec == value
+        end
+      end
+
+      # This is a bit of a hack, but appears to be the best of a bad set of choices.
+      #
+      # When we're operating in a proxied configuration, the configuration value
+      # opscode_erchef['base_resource_url'] might be different than the actual host/port that erchef
+      # is listening on. For example, in an automate/opsworks configuration the server might be
+      # listening on FQDN:8443), but the correct URI to return would be
+      # based off of the automate FQDN:443. However, the chef server tests universally use the listening
+      # port for the server as the base for the API resources, and worse, they conflate the API to
+      # access and the resource expected.
+      #
+      # So we get many, many failures where we construct an expected return value using the listen
+      # address (e.g FQDN:8443), but the return has resources correctly constructed using
+      # base_resource_url.
+      #
+      # Properly disambiguating that usage requires a large number of changes, and is fragile in that
+      # we don't test proxied configurations in our mainline release path.
+      #
+      # Pedant could be configured to address all API calls in tests to the proxied base url, but
+      # sometimes we need the un-proxied URL (for example, when we are testing endpoints that are
+      # not externally exposed).
+      #
+      # Normalizing out the difference is the least fragile change at the cost of some possibly
+      # confusing behavior.
+      #
+      # A possible enhancement would be to add 'superstrict' as an option for the comparator, where
+      # we would suppress this normalization and do a strict equality test.
+      def normalize(candidate)
+        if candidate.is_a?(String)
+          candidate.sub(/#{Pedant::Config.pedant_platform.server}/, Pedant::Config.pedant_platform.base_resource_url)
+        else
+          candidate
+        end
       end
 
       def friendly_actual
@@ -146,10 +185,6 @@ to the spec
 to fail, but it succeeded!
 """
       end
-
-
-
-
     end
   end
 end # PedantHashComparator

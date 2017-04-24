@@ -4,6 +4,16 @@
 # defaults, and not all settings are appropriate in all settings.
 
 ################################################################################
+#
+
+# The base_resource_url gets set whenever we are operating behind a proxy,
+# notably in the automate-chef-server all in one installation
+#
+<%- if @base_resource_url && @base_resource_url.to_s != "host_header" %>
+base_resource_url "<%= @base_resource_url %>"
+<%- else %>
+# base_resource_url "<%= @base_resource_url %>"
+<%- end %>
 
 # A unique identification string used to create orgs and users specific
 # to a each single chef server's nodes' OS. Simply using "Process.pid"
