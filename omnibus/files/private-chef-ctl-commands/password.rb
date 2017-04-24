@@ -70,5 +70,5 @@ def run_knife_opc_cmd(cmd, message)
 end
 
 def ldap_authentication_enabled?
-  running_config['private_chef']['ldap'] && !running_config['private_chef']['ldap'].empty?
+  running_config['private_chef']['ldap'] && running_config['private_chef']['ldap']['enabled']
 end
