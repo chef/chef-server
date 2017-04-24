@@ -781,7 +781,7 @@ EOF
     end
 
     def set_ldap_enabled
-      PrivateChef["ldap"]["enabled"] = !( PrivateChef["ldap"].nil? || PrivateChef["ldap"].empty? )
+      PrivateChef["ldap"]["enabled"] = !PrivateChef["ldap"].empty?
     end
 
     def generate_config(node_name)
