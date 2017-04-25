@@ -1,0 +1,17 @@
+#!/bin/sh
+exec 2>&1
+
+# Die if rabbitmq isn't available
+{{#unless bind.has_rabbitmq ~}}
+exit 1
+{{/unless ~}}
+
+export PATH=/opt/opscode/embedded/bin:$PATH
+export HOME={{pkg.svc_var_path}}
+export ERL_EPMD_ADDRESS=127.0.0.1
+
+{{#if cfg.fips_enabled ~}}
+export OPENSSL_FIPS=1
+{{/if ~}}
+
+exec oc_erchef foreground
