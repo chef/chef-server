@@ -27,15 +27,15 @@ LDAP_PASSWORD='H0\/\/!|\/|3tY0ur|\/|0th3r'
 
 nodes_dir = File.join(File.expand_path(File.dirname(__FILE__)), 'nodes')
 if File.directory?(nodes_dir)
-	# This prevents attributes from previous runs from getting
-	# merged back into node attributes during provisioning.
-	#
-	# It prevents annoying things, like "private-chef-cookbooks never
-	# stops loading from the current repo instead of the package" - because
-	# the node attr that says to do that never got cleared.
-	Dir.glob(File.join(nodes_dir, "*.json")).each do  |nodefile|
-		File.delete(nodefile)
-	end
+  # This prevents attributes from previous runs from getting
+  # merged back into node attributes during provisioning.
+  #
+  # It prevents annoying things, like "private-chef-cookbooks never
+  # stops loading from the current repo instead of the package" - because
+  # the node attr that says to do that never got cleared.
+  Dir.glob(File.join(nodes_dir, "*.json")).each do  |nodefile|
+    File.delete(nodefile)
+  end
 else
   puts "nodes directory is missing...creating it now"
   FileUtils.mkdir(nodes_dir)
@@ -115,10 +115,10 @@ def define_chef_server(config, attributes)
   config.vm.network "private_network", ip: IPS[:cs]
 
   vmattr = attributes["vm"]
-	customize_vm(config, memory: vmattr["memory"], cpus: vmattr["cpus"], name: "chef-server")
+  customize_vm(config, memory: vmattr["memory"], cpus: vmattr["cpus"], name: "chef-server")
   if provisioning
-	  autoload = vmattr["omnibus-autoload"]
-		show_autoload_banner(autoload)
+    autoload = vmattr["omnibus-autoload"]
+    show_autoload_banner(autoload)
     json = {
       "install_packages" => vmattr["packages"],
       "tz" => host_timezone,
@@ -145,7 +145,7 @@ def define_chef_server(config, attributes)
              "postgresql['port']" => 5432,
              "postgresql['db_superuser']" => "\"#{DB_SUPERUSER}\"",
              "postgresql['db_superuser_password']" => "\"#{DB_SUPERPASS}\""
-           }
+      }
       json = simple_deep_merge(json, { "provisioning" => { "opscode-reporting-config" => pg } })
     end
 
@@ -156,7 +156,7 @@ def define_chef_server(config, attributes)
                "ldap['bind_password']" => "'#{LDAP_PASSWORD}'",
                "ldap['host']" => "'#{IPS[:ldap]}'",
                "ldap['login_attribute']" => '"uid"'
-             }
+      }
       json = simple_deep_merge(json, { "provisioning" => { "chef-server-config" => ldap } })
     end
 
@@ -170,28 +170,28 @@ def define_chef_server(config, attributes)
     config.vm.synced_folder installer_path, "/installers"
     config.vm.synced_folder File.expand_path(dotfiles_path), "/dotfiles"
 
-		# Preserve gitconfig from host
+    # Preserve gitconfig from host
     config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
-		# Install the chef-server package now so that its chef client is available to us
+    # Install the chef-server package now so that its chef client is available to us
     config.vm.provision "shell", inline: install_hack(installer, 'opscode')
-		# Force the path we want for root - this may no longer be needed...
+    # Force the path we want for root - this may no longer be needed...
     config.vm.provision "shell", inline: 'echo "PATH=/opt/opscode/embedded/bin:$PATH" > /root/.bashrc'
 
-		# Set up the chef-zero recipes to run
-		recipes = %w{provisioning::hosts provisioning::chef-server
-		             provisioning::chef-server-rb
-		             dev::system dev::user-env dev::dvm}
-		set_chef_zero_provisioning(config, recipes: recipes, binary_path: "/opt/opscode/embedded/bin", json: json)
+    # Set up the chef-zero recipes to run
+    recipes = %w{provisioning::hosts provisioning::chef-server
+                 provisioning::chef-server-rb
+                 dev::system dev::user-env dev::dvm}
+    set_chef_zero_provisioning(config, recipes: recipes, binary_path: "/opt/opscode/embedded/bin", json: json)
 
     if chef_backend_active?(attributes)
-			# Grab the chef-server.rb that chef-backend generates for us and overwrite the one we
-			# made in provisioning
+      # Grab the chef-server.rb that chef-backend generates for us and overwrite the one we
+      # made in provisioning
       config.vm.provision "shell", inline: "cp /installers/api.chef-server.dev.rb /etc/opscode/chef-server.rb"
     end
 
-		# We do a number of things that can affect the initial configuration - by
-		# running reconfigure here we can ensure that they're all completed
-		# first  -- no matter what kind of pre-reconfigure provisioning we doing.
+    # We do a number of things that can affect the initial configuration - by
+    # running reconfigure here we can ensure that they're all completed
+    # first  -- no matter what kind of pre-reconfigure provisioning we doing.
     config.vm.provision "shell", inline: "chef-server-ctl reconfigure"
 
     if plugin_active?('chef-manage', attributes)
@@ -234,20 +234,20 @@ end
 def define_db_server(config, attributes)
   config.vm.hostname = "database.chef-server.dev"
   config.vm.network "private_network", ip: IPS[:database]
-	customize_vm(config, name: "database", memory: 512, cpus: 1)
-	set_chef_zero_provisioning(config,
-														 recipes: ["provisioning::hosts"],
-														 json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
+  customize_vm(config, name: "database", memory: 512, cpus: 1)
+  set_chef_zero_provisioning(config,
+                             recipes: ["provisioning::hosts"],
+                             json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
   config.vm.provision "shell", path: "scripts/configure-postgres.sh"
 end
 
 def define_custom_server(config, attributes)
   config.vm.hostname = "custom.chef-server.dev"
   config.vm.network "private_network", ip: IPS[:custom]
-	customize_vm(config, name: "custom", memory: 2048, cpus: 2)
-	set_chef_zero_provisioning(config,
-														 recipes: ["provisioning::hosts"],
-														 json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
+  customize_vm(config, name: "custom", memory: 2048, cpus: 2)
+  set_chef_zero_provisioning(config,
+                             recipes: ["provisioning::hosts"],
+                             json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
 end
 
 
@@ -255,12 +255,12 @@ def define_backend_server(config, attribute)
   provisioning, installer, installer_path = prepare('BE_INSTALLER', 'chef-backend', 'Chef Backend 1.1+')
   config.vm.hostname = "backend.chef-server.dev"
   config.vm.network "private_network", ip: IPS[:be]
-	customize_vm(config, name: "backend", memory: 2048, cpus: 2)
+  customize_vm(config, name: "backend", memory: 2048, cpus: 2)
   if provisioning
     config.vm.synced_folder installer_path, "/installers"
-		set_chef_zero_provisioning(config,
-															 recipes: ["provisioning::hosts"],
-															 json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
+    set_chef_zero_provisioning(config,
+                               recipes: ["provisioning::hosts"],
+                               json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
     config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
     config.vm.provision "shell", inline: install_hack(installer)
     config.vm.provision "shell", path: "scripts/provision-backend.sh"
@@ -271,10 +271,10 @@ end
 def define_db_server_reporting(config, attributes)
   config.vm.hostname = "reportingdb.chef-server.dev"
   config.vm.network "private_network", ip: IPS[:reportingdb]
-	customize_vm(config, name: "reportingdb", memory: 512, cpus: 1)
-	set_chef_zero_provisioning(config,
-														 recipes: ["provisioning::hosts"],
-														 json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
+  customize_vm(config, name: "reportingdb", memory: 512, cpus: 1)
+  set_chef_zero_provisioning(config,
+                             recipes: ["provisioning::hosts"],
+                             json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
   # Using shell here to ave the trouble of downloading
   # chef-client for the node.  May reconsider...
   config.vm.provision "shell", inline: configure_postgres
@@ -413,7 +413,7 @@ end
 def install_hack(installer, omnibus = "opscode")
   server_installer_name = File.basename(installer)
   return ";" if server_installer_name.nil?
-<<SCRIPT
+  <<SCRIPT
 cp /home/vagrant/.gitconfig /root/.gitconfig
 if [ -d "/opt/#{omnibus}/embedded" ]
 then
@@ -452,24 +452,24 @@ def base_path
 end
 
 def show_autoload_banner(autoload)
-	if autoload.length > 0
-		puts " *** "
-		puts " * The following omnibus components will be loaded prior to reconfigure: "
-		autoload.each { |a| puts "   > #{a}" }
-		puts " *** "
-		puts " "
-	end
+  if autoload.length > 0
+    puts " *** "
+    puts " * The following omnibus components will be loaded prior to reconfigure: "
+    autoload.each { |a| puts "   > #{a}" }
+    puts " *** "
+    puts " "
+  end
 end
 
 def set_chef_zero_provisioning(config, opts)
-	config.vm.provision "chef_zero" do |chef|
-		chef.node_name = config.vm.hostname
-		chef.cookbooks_path = "cookbooks"
-		chef.nodes_path = "nodes"
+  config.vm.provision "chef_zero" do |chef|
+    chef.node_name = config.vm.hostname
+    chef.cookbooks_path = "cookbooks"
+    chef.nodes_path = "nodes"
     chef.binary_path = opts[:chef_path] if opts.has_key?(:chef_path)
-		opts[:recipes].each { |recipe| chef.add_recipe(recipe) }
-		chef.json = opts[:json]
-	end
+    opts[:recipes].each { |recipe| chef.add_recipe(recipe) }
+    chef.json = opts[:json]
+  end
 end
 
 def customize_vm(config, opts)
@@ -480,7 +480,7 @@ def customize_vm(config, opts)
                   "--cpus", opts[:cpus] || 2,
                   "--usb", "off",
                   "--usbehci", "off"]
-		vb.customize ["storagectl", :id, "--name", "SATA Controller", "--hostiocache", "on"]
+    vb.customize ["storagectl", :id, "--name", "SATA Controller", "--hostiocache", "on"]
   end
 end
 
