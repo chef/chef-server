@@ -393,7 +393,11 @@ process_match({match, [_, <<>>, <<>>, BaseName]}, Name, _, true) ->
 process_match({match, [_, <<>>, OrgName, BaseName]}, Name, _, true) ->
     #sname{org = OrgName, base = BaseName, full = Name}.
 
-set_org_from_context(#sname{} = ScopedName, #context{org_id = OrgId}) when OrgId =/= undefined ->
+%% If our context is undefined, assume we are coming from a "global" endpoint such as
+%% /users/USERNAME/_acl/PERM.
+set_org_from_context(#sname{} = ScopedName, #context{org_id = undefined}) ->
+    ScopedName#sname{org_id = ?GLOBAL_PLACEHOLDER_ORG_ID};
+set_org_from_context(#sname{} = ScopedName, #context{org_id = OrgId}) ->
     ScopedName#sname{org_id = OrgId}.
 
 %%
