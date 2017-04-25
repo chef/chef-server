@@ -417,6 +417,15 @@ describe "opscode-account groups", :groups do
     let(:test_group) { "test-group" }
     let(:test_orgname2) { "test-org-#{rand_id}-#{Process.pid}" }
 
+    before(:all) do
+      @test_orgname2 = "test-org-#{rand_id}"
+      platform.create_org(@test_orgname2) if Pedant.config[:org][:create_me]
+    end
+
+    after(:all) do
+      platform.delete_org(@test_orgname2) if Pedant.config[:org][:create_me]
+    end
+
     before :each do
       post(api_url("groups"), platform.admin_user,
         :payload => {"id" => test_group}).should look_like({:status => 201})
@@ -630,7 +639,7 @@ describe "opscode-account groups", :groups do
           "::server-admins"
         }
         let(:other_admins) {
-          "#{test_orgname2}::admins"
+          "#{@test_orgname2}::admins"
         }
         let(:new_group_payload_with_global) {{
           "groupname" => test_group,
