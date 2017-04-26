@@ -103,11 +103,9 @@ initialize_context(OrgId, DbContext, CallBackFun) ->
 %%   (if the later is present, otherwise inserting the current in-context org)
 %% * Mapping the org name to id
 %% * Looking up the org id, name pair in the appropriate table(s)
-
 %%
 %% Output:
 %% { [{Name, AuthzId}, [{Name, ErrorType}] }
-%%
 %%
 -spec names_to_authz_id(lookup_type() ,[binary()], #context{}) -> { [binary()],[{atom(),binary()}] }.
 names_to_authz_id(Type, Names, MapperContext) ->
@@ -238,6 +236,14 @@ extract_full_names(ScopedNames, UnscopedNameSet) ->
 %% Abstract away difference in lookups between actors, clients, users and groups.
 %%
 %% Returns AuthzIds, missing names and names that are judged ambiguous
+%%
+
+%% The first two function heads are for cases where this is called from a global context
+%% where no organization_id set in the request.
+authz_records_by_name(actor, undefined, Names) ->
+    authz_records_by_name(user, undefined, Names);
+authz_records_by_name(actor, ?GLOBAL_PLACEHOLDER_ORG_ID, Names) ->
+    authz_records_by_name(user, undefined, Names);
 authz_records_by_name(actor, OrgId, Names) ->
     {ok, Actors} = oc_chef_authz_db:find_org_actors_by_name(OrgId, Names),
     {Missing, Remaining} = lists:partition(fun is_missing_actor/1, Actors),

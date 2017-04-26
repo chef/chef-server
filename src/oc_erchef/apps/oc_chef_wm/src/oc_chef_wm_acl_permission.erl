@@ -108,35 +108,64 @@ auth_info(Req, State) ->
 from_json(Req, #base_state{organization_guid = OrgId,
                            resource_state = AclState} = State) ->
     Part = wrq:path_info(acl_permission, Req),
-    case update_from_json(AclState, Part, OrgId) of
-        forbidden ->
-            {{halt, 400}, Req, State};
-        {ambiguous_actor, Actors} ->
-            Message = [<<"The following actor(s) exist as both clients and users within this organization: ">>,
-                       chef_wm_malformed:bin_str_join(Actors, ", "),
-                       <<". To perform this update, supply separate 'clients' and 'users' ">>,
-                       <<"fields in your request, and use an empty array for the value of 'actors'.">>],
-            Body = chef_wm_util:error_message_envelope(Message),
-            Req1 = wrq:set_resp_body(chef_json:encode(Body), Req),
-            {{halt, 422}, Req1, State#base_state{log_msg = {ambiguous_actor, Actors}}};
-        {invalid, Type, Names} ->
-            FullNames = [ extract_full_name(N) || N <- Names ],
-            Body = chef_wm_util:error_message_envelope([<<"The ">>, atom_to_list(Type),
-                                                        <<"(s) ">>, chef_wm_malformed:bin_str_join(FullNames, ", "),
-                                                        <<" do not exist in this organization.">>]),
-            Req1 = wrq:set_resp_body(chef_json:encode(Body), Req),
-            {{halt, 400}, Req1, State#base_state{log_msg = {invalid_object_in_ace, Names}}};
-        {bad_actor, Actors} ->
-            Body = chef_wm_util:error_message_envelope([<<"The actor(s) ">>,
-                                                        chef_wm_malformed:bin_str_join(Actors, ", "),
-                                                        <<" do not exist in this organization as clients or users.">>]),
-            Req1 = wrq:set_resp_body(chef_json:encode(Body), Req),
-            {{halt, 400}, Req1, State#base_state{log_msg = {bad_actor, Actors}}};
-        _Other ->
-            % So we return 200 instead of 204, for backwards compatibility:
-            Req1 = wrq:set_resp_body(<<"{}">>, Req),
-            {true, Req1, State}
-    end.
+    construct_return(update_from_json(AclState, Part, OrgId), OrgId, Req, State).
+
+construct_return(forbidden, _OrgId, Req, State) ->
+    {{halt, 400}, Req, State};
+construct_return({ambiguous_actor, Actors}, _OrgId, Req, State) ->
+    Message = [<<"The following actor(s) exist as both clients and users within this organization: ">>,
+               chef_wm_malformed:bin_str_join(Actors, ", "),
+               <<". To perform this update, supply separate 'clients' and 'users' ">>,
+               <<"fields in your request, and use an empty array for the value of 'actors'.">>],
+    Body = chef_wm_util:error_message_envelope(Message),
+    Req1 = wrq:set_resp_body(chef_json:encode(Body), Req),
+    {{halt, 422}, Req1, State#base_state{log_msg = {ambiguous_actor, Actors}}};
+construct_return({invalid, client, Names}, undefined, Req, State) ->
+    Body = chef_wm_util:error_message_envelope([<<"Clients can not be added to global ACL entries.">>]),
+    Req1 = wrq:set_resp_body(chef_json:encode(Body), Req),
+    {{halt, 400}, Req1, State#base_state{log_msg = {invalid_object_in_ace, Names}}};
+construct_return({invalid, user, Names}, undefined, Req, State) ->
+    Body = case [ extract_full_name(N) || N <- Names ] of
+               [SingleName] ->
+                   chef_wm_util:error_message_envelope([<<"The user ">>,
+                                                        chef_wm_malformed:bin_str_join([SingleName], ", "),
+                                                        <<" does not exist.">>]);
+               UserList ->
+                   chef_wm_util:error_message_envelope([<<"The users ">>,
+                                                        chef_wm_malformed:bin_str_join(UserList, ", "),
+                                                        <<" do not exist.">>])
+           end,
+    Req1 = wrq:set_resp_body(chef_json:encode(Body), Req),
+    {{halt, 400}, Req1, State#base_state{log_msg = {invalid_object_in_ace, Names}}};
+construct_return({invalid, Type, Names}, _OrgId, Req, State) ->
+    FullNames = [ extract_full_name(N) || N <- Names ],
+    Body = chef_wm_util:error_message_envelope([<<"The ">>, atom_to_list(Type),
+                                                <<"(s) ">>, chef_wm_malformed:bin_str_join(FullNames, ", "),
+                                                <<" do not exist in this organization.">>]),
+    Req1 = wrq:set_resp_body(chef_json:encode(Body), Req),
+    {{halt, 400}, Req1, State#base_state{log_msg = {invalid_object_in_ace, Names}}};
+construct_return({bad_actor, Actors}, undefined, Req, State) ->
+    Body = chef_wm_util:error_message_envelope([<<"The actor(s) ">>,
+                                                chef_wm_malformed:bin_str_join(Actors, ", "),
+                                                <<" is not a valid user (clients are not allowed in this context).">>]),
+    Req1 = wrq:set_resp_body(chef_json:encode(Body), Req),
+    {{halt, 400}, Req1, State#base_state{log_msg = {bad_actor, Actors}}};
+construct_return({bad_actor, Actors}, _OrgId, Req, State) ->
+    Body = chef_wm_util:error_message_envelope([<<"The actor(s) ">>,
+                                                chef_wm_malformed:bin_str_join(Actors, ", "),
+                                                <<" do not exist in this organization as clients or users.">>]),
+    Req1 = wrq:set_resp_body(chef_json:encode(Body), Req),
+    {{halt, 400}, Req1, State#base_state{log_msg = {bad_actor, Actors}}};
+construct_return({inappropriate_scoped_name, Actors}, _OrgId, Req, State) ->
+    Body = chef_wm_util:error_message_envelope([<<"Scoped actor names are not allowed in this context: ">>,
+                                                chef_wm_malformed:bin_str_join(Actors, ", ")]),
+    Req1 = wrq:set_resp_body(chef_json:encode(Body), Req),
+    {{halt, 400}, Req1, State#base_state{log_msg = {bad_actor, Actors}}};
+construct_return(_Other, _OrgId, Req, State) ->
+    %% So we return 200 instead of 204, for backwards compatibility:
+    Req1 = wrq:set_resp_body(<<"{}">>, Req),
+    {true, Req1, State}.
+
 
 %%
 %% Internal functions
@@ -164,6 +193,8 @@ update_from_json(#acl_state{type = Type, authz_id = AuthzId, acl_data = Data},
     catch
         throw:{ambiguous_actor, Actors} ->
             {ambiguous_actor, Actors};
+        throw:{inappropriate_scoped_name, Actors} ->
+            {inappropriate_scoped_name, Actors};
         throw:forbidden ->
             forbidden;
         throw:{bad_actor, Actors} ->
