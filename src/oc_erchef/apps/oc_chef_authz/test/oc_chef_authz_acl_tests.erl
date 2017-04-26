@@ -25,6 +25,7 @@
 -include_lib("eunit/include/eunit.hrl").
 safe_fetch_ids_test_() ->
     Subject = fun oc_chef_authz_acl:safe_fetch_ids/3,
+    Context = oc_chef_authz_scoped_name:initialize_context(<<"someorg">>, undefined),
     {foreach,
      fun() ->
              meck:new(oc_chef_authz_db),
@@ -35,11 +36,11 @@ safe_fetch_ids_test_() ->
      [
       {"valid: the list of IDs are returned",
        ?_assertEqual([<<"id1">>,<<"id2">>],
-                    Subject(client, <<"someorg">>, [<<"name1">>,<<"name2">>]))
+                    Subject(client, Context, [<<"name1">>,<<"name2">>]))
       },
       {"invalid: an error is raised because a name is missing from the response",
        ?_assertThrow({invalid, user, [<<"name3">>]},
-                    Subject(user, <<"someorg">>, [<<"name1">>,<<"name2">>, <<"name3">>]))
+                    Subject(user, Context, [<<"name1">>,<<"name2">>, <<"name3">>]))
       }
      ]
     }.
@@ -57,30 +58,34 @@ fetch_actors_test_() ->
        fun() ->
                meck:expect(oc_chef_authz_db, find_org_actors_by_name,
                            fun invalid_actor_data_response/2),
+               Context = oc_chef_authz_scoped_name:initialize_context(<<"orgid">>, undefined),
                ?assertThrow({bad_actor, [<<"bob">>, <<"jane">>]},
-                            Subject(<<"orgid">>, [<<"bob">>, <<"jane">>]))
+                            Subject(Context, [<<"bob">>, <<"jane">>]))
 
        end},
       {"ambiguous_actor: actors that have both user and client authz ids",
        fun() ->
                meck:expect(oc_chef_authz_db, find_org_actors_by_name,
                            fun ambiguous_actor_data_response/2),
+               Context = oc_chef_authz_scoped_name:initialize_context(<<"orgid">>, undefined),
                ?assertThrow({ambiguous_actor, [<<"bob">>, <<"jane">>]},
-                            Subject(<<"orgid">>, [<<"bob">>, <<"jane">>]))
+                            Subject(Context, [<<"bob">>, <<"jane">>]))
 
        end},
       {"ok: actors that have only a client authz id",
        fun() ->
                meck:expect(oc_chef_authz_db, find_org_actors_by_name,
                            fun valid_client_data_response/2),
-               FetchActorResponse = Subject(<<"any">>, [<<"bob">>, <<"jane">>]),
+               Context = oc_chef_authz_scoped_name:initialize_context(<<"any">>, undefined),
+               FetchActorResponse = Subject(Context, [<<"bob">>, <<"jane">>]),
                ?assertEqual([<<"id-a">>, <<"id-a">>], FetchActorResponse)
        end},
       {"ok: actors that have only a user authz id",
        fun() ->
                meck:expect(oc_chef_authz_db, find_org_actors_by_name,
                            fun valid_user_data_response/2),
-               FetchActorResponse = Subject(<<"any">>, [<<"bob">>, <<"jane">>]),
+               Context = oc_chef_authz_scoped_name:initialize_context(<<"any">>, undefined),
+               FetchActorResponse = Subject(Context, [<<"bob">>, <<"jane">>]),
                ?assertEqual([<<"id-a">>, <<"id-a">>], FetchActorResponse)
        end}
      ]}.

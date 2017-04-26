@@ -6,7 +6,6 @@ describe "opscode-account groups", :groups do
 
   context "/groups endpoint" do
     let(:request_url) { api_url("groups") }
-
     context "GET /groups" do
       # This is only a partial body -- there are other groups as well, but these
       # should all exist for an organization:
@@ -416,6 +415,16 @@ describe "opscode-account groups", :groups do
   context "/groups/<name> endpoint" do
     let(:request_url) { api_url("groups/#{test_group}") }
     let(:test_group) { "test-group" }
+    let(:test_orgname2) { "test-org-#{rand_id}-#{Process.pid}" }
+
+    before(:all) do
+      @test_orgname2 = "test-org-#{rand_id}"
+      platform.create_org(@test_orgname2) if Pedant.config[:org][:create_me]
+    end
+
+    after(:all) do
+      platform.delete_org(@test_orgname2) if Pedant.config[:org][:create_me]
+    end
 
     before :each do
       post(api_url("groups"), platform.admin_user,
@@ -598,8 +607,9 @@ describe "opscode-account groups", :groups do
         let(:new_group_payload) {{
             "groupname" => test_group,
             "actors" => {"clients" => [platform.non_admin_client.name],
-              "users" => [platform.non_admin_user.name],
-              "groups" => ["users"]}
+                         "users" => [platform.non_admin_user.name],
+                         "groups" => ["users"]
+                        },
           }}
 
         let(:modified_group_body) {{
@@ -624,6 +634,43 @@ describe "opscode-account groups", :groups do
               })
           end
         end
+
+        let(:server_admins) {
+          "::server-admins"
+        }
+        let(:other_admins) {
+          "#{@test_orgname2}::admins"
+        }
+        let(:new_group_payload_with_global) {{
+          "groupname" => test_group,
+          "actors" => {"clients" => [platform.non_admin_client.name],
+                       "users" => [platform.non_admin_user.name],
+                       "groups" => ["users", server_admins, other_admins]
+                      },
+        }}
+        let(:modified_group_body_with_global) {{
+            "actors" => [platform.non_admin_user.name, platform.non_admin_client.name],
+            "users" => [platform.non_admin_user.name],
+            "clients" => [platform.non_admin_client.name],
+            "groups" => ["users", server_admins, other_admins],
+            "orgname" => org,
+            "name" => test_group,
+            "groupname" => test_group
+        }}
+
+        context "admin user can reference global group and other orgs" do
+          it "can update group" do
+            put(request_url, platform.admin_user,
+                :payload => new_group_payload_with_global).should look_like({
+                :status => 200
+              })
+            get(request_url, platform.admin_user).should look_like({
+                :status => 200,
+                :body_exact => modified_group_body_with_global
+            })
+          end
+        end
+
 
         context "admin user cannot remove self from group" do
           let(:initial_group_payload) {{
