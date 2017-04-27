@@ -27,7 +27,16 @@ end
 app_settings = {
   'chef' => {
     'endpoint' => "https://#{node['private_chef']['lb_internal']['vip']}",
-    'superuser' => 'pivotal'
+    'superuser' => 'pivotal',
+    #
+    # Why is this verify_none?
+    #
+    # Since we set the endpoint to 'localhost', even if we set the
+    # trusted_cert_dir to include the user-provided or self-signed
+    # cert in use by nginx, we will likely fail verification since
+    # those are certs for the api_fqdn and not localhost.
+    #
+    'ssl_verify_mode' => 'verify_none'
   },
   'doorkeeper' => {
     'administrators' => node['private_chef']['oc_id']['administrators'] || []
