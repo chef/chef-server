@@ -148,7 +148,7 @@ module Pedant
                 clients depsolver search knife validation authentication authorization
                 principals acl containers groups association omnibus organizations
                 usags controls keys cookbook-artifacts license headers server-api-version
-                policies pedantic self-test api-v0 api-v1 object-identifiers
+                policies pedantic self-test api-v0 api-v1 object-identifiers oc_id
                 multiuser universe chef-zero-quirks user-keys client-keys required-recipe)
       export_options(opts, tags)
     end
