@@ -10,7 +10,8 @@ module ChefResource
   end
 
   def chef
-    ::Chef::ServerAPI.new endpoint, Settings.chef.superuser, nil, parameters
+    ::Chef::Config.ssl_verify_mode Settings.chef.ssl_verify_mode.to_sym || :verify_peer
+    ::Chef::ServerAPI.new endpoint, parameters
   end
 
   private
@@ -28,6 +29,9 @@ module ChefResource
   end
 
   def parameters
-    { headers: headers, raw_key: key }
+    { headers: headers,
+      client_name: Settings.chef.superuser,
+      client_key: nil,
+      raw_key: key }
   end
 end
