@@ -20,7 +20,7 @@ gem 'newrelic_rpm'
 gem 'doorkeeper', '~> 1.4.0'
 
 gem 'veil', git: 'https://github.com/chef/chef_secrets'
-gem 'omniauth-chef', git: 'https://github.com/chef/omniauth-chef', branch: 'ssd/POOL-581'
+gem 'omniauth-chef', git: 'https://github.com/chef/omniauth-chef'
 gem 'chef-web-core', git: 'https://github.com/chef/chef-web-core.git'
 
 #

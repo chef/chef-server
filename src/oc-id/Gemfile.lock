@@ -19,8 +19,7 @@ GIT
 
 GIT
   remote: https://github.com/chef/omniauth-chef
-  revision: 7f336c33f0aebd362ab6b607d6d54a0c09486a65
-  branch: ssd/POOL-581
+  revision: 5bae8dd3e5f6afd2356672b745f29da210698d7d
   specs:
     omniauth-chef (0.3.0)
       chef (~> 12)
@@ -405,7 +404,7 @@ GEM
       eventmachine (~> 1.0.0)
       thin (>= 1.5, < 1.7)
     slop (3.6.0)
-    specinfra (2.67.8)
+    specinfra (2.67.9)
       net-scp
       net-ssh (>= 2.7, < 5.0)
       net-telnet
