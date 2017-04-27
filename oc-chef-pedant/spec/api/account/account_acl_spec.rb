@@ -30,7 +30,7 @@ describe "ACL API", :acl do
     let(:read_groups) { [read_access_group, server_admins] }
     let(:grant_groups) { [] }
 
-    context "GET /users/<user>/_acl"  do
+    context "GET /users/<user>/_acl",  :chef_zero_quirks do
 
       let(:actors) { ["pivotal", username].uniq }
       let(:groups) { [ server_admins ] }
@@ -62,7 +62,7 @@ describe "ACL API", :acl do
     end
 
     %w(create read update delete grant).each do |permission|
-      context "/users/<user>/_acl/#{permission} endpoint" do
+      context "/users/<user>/_acl/#{permission} endpoint",  :chef_zero_quirks do
         if (permission == "read")
           smoketest = :smoke
         else
