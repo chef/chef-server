@@ -1,5 +1,76 @@
 # Chef Server Changelog
 
+## [12.15.0](https://github.com/chef/chef-server/tree/12.15.0) (2017-04-27)
+[Full Changelog](https://github.com/chef/chef-server/compare/12.14.0...12.15.0)
+
+## 12.15.0 (2017-04-27)
+### Components
+New Components
+* server-complete ()
+
+Updated Components
+* cacerts (2016-04- -> 2017-01-)
+* openssl (1.0.2j -> 1.0.2k)
+* omnibus-ctl (43b10417 -> 76347dd8)
+* knife-opc (00a6866c -> 30b6cd85)
+* knife-ec-backup (36fbecfd -> 69b50524)
+* liblzma (5.2.2 -> 5.2.3)
+
+
+### Contributors
+* Steven Danna
+* Salim Afiune
+* Mark Anderson
+* Marc Paradise
+* Jaymala Sinha
+* Ryan Cragun
+* Stephen Delano
+* Stephan Renatus
+* Thom May
+
+**Implemented enhancements:**
+
+- LDAP: Synthesize a displayname from surname, givenname [\#151](https://github.com/chef/chef-server/issues/151)
+- Mapping Capability Between LDAP and Chef Server 12 Attributes [\#104](https://github.com/chef/chef-server/issues/104)
+- Enhance API to handle global groups in local contexts [\#1159](https://github.com/chef/chef-server/pull/1159) ([markan](https://github.com/markan))
+
+**Closed issues:**
+
+- Failure upgrading RabbitMQ from Migration 1.30 to 1.31 [\#1220](https://github.com/chef/chef-server/issues/1220)
+- Allow setting LDAP "displayName" attribute in Chef Server [\#800](https://github.com/chef/chef-server/issues/800)
+- LDAP user name mojibake [\#675](https://github.com/chef/chef-server/issues/675)
+
+**Merged pull requests:**
+
+- Fix Chef 12 oc\_id regression [\#1244](https://github.com/chef/chef-server/pull/1244) ([stevendanna](https://github.com/stevendanna))
+- Fix "chef-server-ctl reconfigure" for ldap configuration changes [\#1240](https://github.com/chef/chef-server/pull/1240) ([jaymalasinha](https://github.com/jaymalasinha))
+- add me \(sr\) to maintainers [\#1239](https://github.com/chef/chef-server/pull/1239) ([srenatus](https://github.com/srenatus))
+- Return 401 for requests from the future [\#1238](https://github.com/chef/chef-server/pull/1238) ([stevendanna](https://github.com/stevendanna))
+- Pull latest omnibus to fix SLES \(Suse\) x86 builds [\#1232](https://github.com/chef/chef-server/pull/1232) ([markan](https://github.com/markan))
+- Tests run in proxied systems [\#1230](https://github.com/chef/chef-server/pull/1230) ([markan](https://github.com/markan))
+- Pin the oc-chef-pedant chef-zero based tests to chef 12.x [\#1228](https://github.com/chef/chef-server/pull/1228) ([srenatus](https://github.com/srenatus))
+- fix typo =\> fix actions\_password migration for external rmq [\#1227](https://github.com/chef/chef-server/pull/1227) ([srenatus](https://github.com/srenatus))
+- \[CLOUD-306\] Add validate upstream location to nginx [\#1226](https://github.com/chef/chef-server/pull/1226) ([ryancragun](https://github.com/ryancragun))
+- Update oc-id [\#1224](https://github.com/chef/chef-server/pull/1224) ([afiune](https://github.com/afiune))
+- Bump nokogiri in oc\_id to 1.7.1+ [\#1223](https://github.com/chef/chef-server/pull/1223) ([stevendanna](https://github.com/stevendanna))
+- Move wait-for-rabbit functionality into runit's check script [\#1222](https://github.com/chef/chef-server/pull/1222) ([srenatus](https://github.com/srenatus))
+- Don't log rabbitmq password during migration 1.31 [\#1221](https://github.com/chef/chef-server/pull/1221) ([stevendanna](https://github.com/stevendanna))
+- Fix Pedant to run in 12.14 world [\#1219](https://github.com/chef/chef-server/pull/1219) ([markan](https://github.com/markan))
+- post 12.14 upgrades [\#1215](https://github.com/chef/chef-server/pull/1215) ([marcparadise](https://github.com/marcparadise))
+- \[CLOUD-296\] Add required\_recipe endpoint [\#1214](https://github.com/chef/chef-server/pull/1214) ([ryancragun](https://github.com/ryancragun))
+- Don't attempt to convert nil storage\_type [\#1211](https://github.com/chef/chef-server/pull/1211) ([stevendanna](https://github.com/stevendanna))
+- don't include erts in relx releases [\#1209](https://github.com/chef/chef-server/pull/1209) ([stevendanna](https://github.com/stevendanna))
+- Remove deprecated metadata [\#1207](https://github.com/chef/chef-server/pull/1207) ([thommay](https://github.com/thommay))
+- Bump ruby to 2.3.4 to support newest chef-zero [\#1206](https://github.com/chef/chef-server/pull/1206) ([stevendanna](https://github.com/stevendanna))
+- Remove more unused templates [\#1205](https://github.com/chef/chef-server/pull/1205) ([stevendanna](https://github.com/stevendanna))
+- Cleaning up some TODOs. [\#1204](https://github.com/chef/chef-server/pull/1204) ([marcparadise](https://github.com/marcparadise))
+- Remove used templates [\#1203](https://github.com/chef/chef-server/pull/1203) ([stevendanna](https://github.com/stevendanna))
+- Re-enable the reindexing tests [\#1202](https://github.com/chef/chef-server/pull/1202) ([stevendanna](https://github.com/stevendanna))
+- dvm - caching and minor refactor [\#1196](https://github.com/chef/chef-server/pull/1196) ([marcparadise](https://github.com/marcparadise))
+- \[ldap\] Don't mangle multi-byte characters [\#1002](https://github.com/chef/chef-server/pull/1002) ([stevendanna](https://github.com/stevendanna))
+- \[ldap\] Allow user customization of field mapping [\#1001](https://github.com/chef/chef-server/pull/1001) ([stevendanna](https://github.com/stevendanna))
+- \[bookshelf/omnibus\] Convert storage\_type to a string consistently [\#710](https://github.com/chef/chef-server/pull/710) ([stevendanna](https://github.com/stevendanna))
+
 ## [12.14.0](https://github.com/chef/chef-server/tree/12.14.0) (2017-03-27)
 [Full Changelog](https://github.com/chef/chef-server/compare/12.13.0...12.14.0)
 
