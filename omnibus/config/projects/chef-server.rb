@@ -24,7 +24,7 @@ package_name    "chef-server-core"
 replace         "private-chef"
 conflict        "private-chef"
 install_dir     "/opt/opscode"
-build_version   "12.14.1"
+build_version   "12.15.0"
 build_iteration 1
 #
 # Load dynamically updated overrides

@@ -8,6 +8,55 @@ This document contains release notes for the current major release and all patch
 For prior releases, see
 [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 12.15.0 (2017-04-27)
+
+### Add required_recipe endpoint
+
+See Chef RFC 89 for a fuller description
+
+Add the ability to serve a required recipe file to chef-clients.
+
+`/organizations/<orgname>/required_recipe` returns 404 for all organizations
+by default.
+
+`/organizations/<orgname>/required_recipe` returns 401 when the request is
+not made by a client from the requested org and the feature is
+enabled.
+
+`/organizations/<orgname>/required_recipe` returns the required recipe and
+200 when the endpoint is enabled and requested by an authorized client.
+
+`required_recipe["enable"]` in chef-server.rb enables the required recipe
+feature.
+
+`required_recipe["path"]` in chef-server.rb specifies the recipe file to
+serve.
+
+### ACLs and groups can refer to global groups
+
+The server-admins group is useful, but it breaks roundtripping when it
+appears in an organizations ACLs and groups. This was particularly
+painful when using the API for backups.
+
+We add a new syntax for referring to global objects from org local
+context. ORGNAME::name and for global objects ::name. This can, and is
+omitted whereever the context is clear. So if the server-admins
+appears in an organizations ACL, you will see the name ::server-admins
+
+### User customization of field mapping
+
+Attributes from a user's LDAP record are used during account-linking to
+populate the erchef user record when it is created. Previously, the
+mapping between LDAP attributes and chef user attributes were fixed.
+Now, they are configurable.
+
+For example, if the user's LDAP record stores their email address in a
+field named 'address' instead of 'mail', then you could set the
+following in private-chef.rb:
+
+ldap['email_attribute'] = "address"
+
+
 ## 12.14.0 (2017-03-23)
 
 ### Reduce password proliferation
