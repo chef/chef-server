@@ -285,10 +285,11 @@ fetch_actors(Context, ActorNames) ->
             AuthzIds;
         {_, [{Error, Names} | _]}
           when Error =:= ill_formed_name orelse
-               Error =:= inappropriate_scoped_name orelse
                Error =:= orgname_not_found orelse
                Error =:= not_found ->
             throw({bad_actor, Names});
+        {_, [{inappropriate_scoped_name, Names} | _]} ->
+            throw({inappropriate_scoped_name, Names});
         {_, [{ambiguous, Names} | _]} ->
             throw({ambiguous_actor, Names})
     end.

@@ -9,12 +9,8 @@ describe "ACL API", :acl do
     "#{Process.pid}_#{rand(10**7...10**8).to_s}"
   end
 
-  let(:server_admins) {
-    "::server-admins"
-  }
-  let(:other_admins) {
-    "#{@test_orgname2}::admins"
-  }
+  let(:server_admins) { "::server-admins" }
+  let(:other_admins) { "#{@test_orgname2}::admins" }
   let(:nonlocal_groups) { [server_admins, other_admins ] }
 
   before(:all) do
@@ -26,25 +22,25 @@ describe "ACL API", :acl do
     platform.delete_org(@test_orgname2) if Pedant.config[:org][:create_me]
   end
 
-  # (temporarily?) deprecating /users/*/_acl endpoint due to its broken state and lack of usefulness
-  skip "/users/<name>/_acl endpoint" do
+  context "/users/<name>/_acl endpoint" do
     let(:username) { platform.admin_user.name }
     let(:request_url) { "#{platform.server}/users/#{username}/_acl" }
 
-    let(:read_access_group) { platform.test_org.name + "_read_access_group"}
-    let(:read_groups) { [read_access_group] }
+    let(:read_access_group) { "::" + platform.test_org.name + "_read_access_group"}
+    let(:read_groups) { [read_access_group, server_admins] }
+    let(:grant_groups) { [] }
 
-    context "GET /users/<user>/_acl"  do
+    context "GET /users/<user>/_acl",  :chef_zero_quirks do
 
       let(:actors) { ["pivotal", username].uniq }
-      let(:groups) { [] }
+      let(:groups) { [ server_admins ] }
 
       let(:acl_body) {{
           "create" => {"actors" => actors, "groups" => groups},
           "read" => {"actors" => actors, "groups" => read_groups},
           "update" => {"actors" => actors, "groups" => groups},
           "delete" => {"actors" => actors, "groups" => groups},
-          "grant" => {"actors" => actors, "groups" => groups}
+          "grant" => {"actors" => actors, "groups" => grant_groups}
         }}
 
       context "superuser" do
@@ -66,7 +62,7 @@ describe "ACL API", :acl do
     end
 
     %w(create read update delete grant).each do |permission|
-      context "/users/<user>/_acl/#{permission} endpoint" do
+      context "/users/<user>/_acl/#{permission} endpoint",  :chef_zero_quirks do
         if (permission == "read")
           smoketest = :smoke
         else
@@ -178,17 +174,18 @@ describe "ACL API", :acl do
           # Nonexistent users are just dropped (perhaps this should be a 400, to match
           # organizations/<object>/_acl
           context "malformed requests" do
-            context "invalid actor" do
+            context "invalid actor", :validation do
               let(:request_body) {{
                   permission => {
                     "actors" => ["pivotal", "bogus", platform.admin_user.name],
                     "groups" => permission == "read" ? read_groups : groups
                   }
                 }}
-              it "returns 200" do
+
+              it "returns 400" do
                 put(request_url, platform.admin_user,
                     :payload => request_body).should look_like({
-                                                                 :status => 200
+                                                                 :status => 400
                                                                })
                 get(acl_url, platform.admin_user).should look_like({
                                                                      :status => 200,
