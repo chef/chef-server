@@ -212,12 +212,12 @@ class OmnibusHelper
 
   def self.chef_server_running_content(node)
     attrs = node['private_chef'].to_hash
-    # To preserve compatibility with other add-ons and tools
-    # which use the presence of an `ldap` key as an indicator that
-    # ldap is enabled on Chef Server, removed the ldap section
-    # if it's disabled.
+    # To preserve compatibility with other add-ons and tools which use
+    # the presence of an `ldap` key as an indicator that ldap is
+    # enabled on Chef Server, removed the ldap section if it's
+    # disabled.
     unless attrs['ldap'] && attrs['ldap']['enabled']
-      attrs.delete('ldap')
+      attrs['ldap'] = {}
     end
 
     # back-compat fixes for opscode-reporting
