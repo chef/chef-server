@@ -209,4 +209,29 @@ class OmnibusHelper
     # chef-solo and chef-client -z return different things :(
     (node['private_chef']['addons']['path'] == nil) || (node['private_chef']['addons']['path'] == {})
   end
+
+  def self.chef_server_running_content(node)
+    attrs = node['private_chef'].to_hash
+    # To preserve compatibility with other add-ons and tools
+    # which use the presence of an `ldap` key as an indicator that
+    # ldap is enabled on Chef Server, removed the ldap section
+    # if it's disabled.
+    unless attrs['ldap'] && attrs['ldap']['enabled']
+      attrs.delete('ldap')
+    end
+
+    # back-compat fixes for opscode-reporting
+    # reporting uses the opscode-solr key for determining the location of the
+    # solr host, so we'll copy the contents over from opscode-solr4
+    attrs['opscode-solr'] ||= {}
+    attrs['opscode-solr']['vip'] = attrs['opscode-solr4']['vip']
+    attrs['opscode-solr']['port'] = attrs['opscode-solr4']['port']
+
+    content = {
+      "private_chef" => attrs,
+      "run_list" => node.run_list,
+      "runit" => node['runit'].to_hash
+    }
+    Chef::JSONCompat.to_json_pretty(content)
+  end
 end
