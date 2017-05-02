@@ -1,4 +1,20 @@
 # Chef Server Changelog
+## [12.15.1](https://github.com/chef/chef-server/tree/12.15.1) (2017-05-02)
+[Full Changelog](https://github.com/chef/chef-server/compare/12.15.0...12.15.1)
+
+**Fixed bugs:**
+
+- Fix regression in bookshelf preflight check [\#1246](https://github.com/chef/chef-server/pull/1246) ([stevendanna](https://github.com/stevendanna))
+
+**Closed issues:**
+
+- Cookbook upload missing subdirectories in libraries [\#751](https://github.com/chef/chef-server/issues/751)
+
+**Merged pull requests:**
+
+- Exclude ldap in -running.json if disabled. [\#1247](https://github.com/chef/chef-server/pull/1247) ([marcparadise](https://github.com/marcparadise))
+- Do not return 400 for valid /users/USERNAME/\_acl/PERM calls [\#1242](https://github.com/chef/chef-server/pull/1242) ([stevendanna](https://github.com/stevendanna))
+
 
 ## [12.15.0](https://github.com/chef/chef-server/tree/12.15.0) (2017-04-27)
 [Full Changelog](https://github.com/chef/chef-server/compare/12.14.0...12.15.0)
@@ -6,7 +22,7 @@
 ## 12.15.0 (2017-04-27)
 ### Components
 New Components
-* server-complete ()
+* server-complete
 
 Updated Components
 * cacerts (2016-04- -> 2017-01-)
@@ -237,6 +253,10 @@ Updated Components
 - \[ER-459\] Add crypto2 to the Erlang load path in FIPS mode [\#1065](https://github.com/chef/chef-server/pull/1065) ([rmoshier](https://github.com/rmoshier))
 - \[ER-444\] Enable FIPS configuration at runtime via chef-server.rb [\#1061](https://github.com/chef/chef-server/pull/1061) ([tyler-ball](https://github.com/tyler-ball))
 
+### Contributors
+* Marc Paradise
+* Steven Danna
+* Jaymala Sinha
 
 ## [12.12.0](https://github.com/chef/chef-server/tree/12.12.0) (2017-01-26)
 [Full Changelog](https://github.com/chef/chef-server/compare/12.11.1...12.12.0)
