@@ -8,13 +8,16 @@ This document contains release notes for the current major release and all patch
 For prior releases, see
 [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
-## 12.15.2 (2017-05-03)
+## 12.15.3 (2017-05-03)
 
 * Fixed regression [regression](https://github.com/chef/chef-server/pull/1246) in Bookshelf's preflight checks.
 * Fixed regression that would cause Manage to be misconfigured
   to enable LDAP by default.
 * PUT to `/users/USERNAME/_acl/PERM` will no longer return a 400 when the
   request is valid.
+
+Note: There was no released version 12.15.1 or 12.15.2 due
+      to issues identified internally.
 
 ## 12.15.0 (2017-04-27)
 
