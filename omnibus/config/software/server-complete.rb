@@ -63,6 +63,9 @@ dependency "logrotate"
 # partybus and upgrade scripts
 dependency "partybus"
 
+# this gem is needed by knife-ec-backup
+dependency "chef" # for embedded chef-client -z runs (built from master - build last)
+
 # used in osc to ec upgrade path
 dependency "knife-ec-backup-gem"
 
@@ -78,4 +81,3 @@ dependency "oc-chef-pedant"
 dependency "private-chef-upgrades"
 dependency "private-chef-cookbooks"
 dependency "chef-ha-plugin-config"
-dependency "chef" # for embedded chef-client -z runs (built from master - build last)
