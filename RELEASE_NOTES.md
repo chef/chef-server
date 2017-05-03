@@ -8,7 +8,7 @@ This document contains release notes for the current major release and all patch
 For prior releases, see
 [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
-## 12.15.1 (2017-05-02)
+## 12.15.2 (2017-05-03)
 
 * Fixed regression [regression](https://github.com/chef/chef-server/pull/1246) in Bookshelf's preflight checks.
 * Fixed regression that would cause Manage to be misconfigured
