@@ -123,13 +123,23 @@ Ruby project dependency loading support coming soon.
 ### Installing Chef Server Plugins
 
 If you wish to install Chef Server plugins with pre-downloaded or pre-built
-binaries, set the corresponding attribute in your `config.yml` to true and
-make sure that you have the package in your install path, or you have set the
-plugin environment variable (see below).
+binaries, set the corresponding attribute in your `config.yml` to true. 
+The corresponding package needs to be either in `~/Downloads`, `../omnibus/pkg`,
+or you can set an environment variable with the path to the package.
 
-  * Chef Management Console - `MANAGE_PKG`
-  * Push Jobs Server - `PUSH_JOBS_PKG`
-  * Chef Reporting - `REPORTING_PKG`
+| Plugin Name | config.yml Attribute | Environment Variable |
+| ------ | -------------------- | -------------------- |
+| Chef Management Console | `chef-manage` | `MANAGE_PKG` |
+| Push Jobs Server | `push-jobs-server` | `PUSH_JOBS_PKG` |
+| Chef Reporting | `reporting` | `REPORTING_PKG` |
+
+For example, this `config.yml` file created in the current directory would enable the Management console.
+
+```
+vm:
+  plugins:
+    chef-manage: true
+```
 
 ### Configuring LDAP
 
