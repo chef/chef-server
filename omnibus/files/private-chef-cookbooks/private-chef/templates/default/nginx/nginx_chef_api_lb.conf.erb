@@ -106,7 +106,7 @@
       access_by_lua_block { validator.validate("GET") }
       proxy_set_header x-data-collector-token $data_collector_token;
       proxy_set_header x-data-collector-auth "version=1.0";
-      rewrite ^<%= @compliance_proxy_regex -%> "/compliance/profiles/$2$3" break;
+      rewrite ^<%= @compliance_proxy_regex -%> /compliance/profiles/$2$3 break;
       proxy_pass https://compliance-profiles;
     }
     <% end -%>
