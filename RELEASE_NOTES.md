@@ -8,7 +8,7 @@ This document contains release notes for the current major release and all patch
 For prior releases, see
 [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
-## 12.15.4 (2017-05-04)
+## 12.15.5 (2017-05-04)
 * Fixed [regression](https://github.com/chef/chef-server/pull/1253) in the nginx proxy
   that prevented Automate-based Compliance profiles from being reachable
 
