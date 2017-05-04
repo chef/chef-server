@@ -1,4 +1,14 @@
 # Chef Server Changelog
+## [12.15.4](https://github.com/chef/chef-server/tree/12.15.4) (2017-05-04)
+[Full Changelog](https://github.com/chef/chef-server/compare/12.15.3...12.15.4)
+
+**Merged pull requests:**
+
+- \[nginx\] regression: proxied compliance requests get HTTP 404 [\#1253](https://github.com/chef/chef-server/pull/1253) ([stevendanna](https://github.com/stevendanna))
+
+Updated Components
+* berkshelf-no-depselector (dd8ec048 -> e3dd3d6f)
+
 ## [12.15.3](https://github.com/chef/chef-server/tree/12.15.2) (2017-05-03)
 [Full Changelog](https://github.com/chef/chef-server/compare/12.15.0...12.15.3)
 
