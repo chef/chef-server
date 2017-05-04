@@ -101,12 +101,12 @@
     #   /organizations/ORG/owners/OWNER/compliance[/PROFILE]
     # Supports the legacy(chef-gate) URLs as well:
     #   /compliance/organizations/ORG/owners/OWNER/compliance[/PROFILE]
-    location ~ (?:/compliance)?/organizations/([^/]+)/owners/([^/]+)/compliance(.*) {
+    location ~ <%= @compliance_proxy_regex -%> {
       set $request_org $1;
       access_by_lua_block { validator.validate("GET") }
       proxy_set_header x-data-collector-token $data_collector_token;
       proxy_set_header x-data-collector-auth "version=1.0";
-      rewrite ^ "/compliance/profiles/$2$3" break;
+      rewrite ^<%= @compliance_proxy_regex -%> "/compliance/profiles/$2$3" break;
       proxy_pass https://compliance-profiles;
     }
     <% end -%>
