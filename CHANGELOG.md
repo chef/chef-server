@@ -1,6 +1,6 @@
 # Chef Server Changelog
-## [12.15.4](https://github.com/chef/chef-server/tree/12.15.4) (2017-05-04)
-[Full Changelog](https://github.com/chef/chef-server/compare/12.15.3...12.15.4)
+## [12.15.5](https://github.com/chef/chef-server/tree/12.15.4) (2017-05-04)
+[Full Changelog](https://github.com/chef/chef-server/compare/12.15.3...12.15.5)
 
 **Merged pull requests:**
 
