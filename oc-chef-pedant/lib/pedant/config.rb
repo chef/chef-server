@@ -136,6 +136,12 @@ module Pedant
     # Error message verification is on by default
     verify_error_messages(true)
 
+    # Compliance proxy tests whether to start a fake compliance
+    # endpoint to test nginx proxying
+    compliance_proxy_tests(false)
+    # Port to start stub compliance proxy on
+    compliance_proxy_port(9998)
+
     # Emits a console bell when run finishes
     bell_on_completion(false)
 

@@ -159,7 +159,12 @@ end
     mode '0644'
     variables(lbconf.merge(
       :server_proto => server_proto,
-      :script_path => nginx_scripts_dir
+      :script_path => nginx_scripts_dir,
+      # Compliance endpoint to forward profiles calls to the Automate API:
+      #   /organizations/ORG/owners/OWNER/compliance[/PROFILE]
+      # Supports the legacy(chef-gate) URLs as well:
+      #   /compliance/organizations/ORG/owners/OWNER/compliance[/PROFILE]
+      :compliance_proxy_regex => '(?:/compliance)?/organizations/([^/]+)/owners/([^/]+)/compliance(.*)'
       )
     )
     notifies :restart, 'runit_service[nginx]' unless backend_secondary?

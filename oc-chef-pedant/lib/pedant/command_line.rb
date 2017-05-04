@@ -17,7 +17,7 @@ require 'optparse'
 
 module Pedant
 
-  class CommandLine < Struct.new(:junit_file, :config_file, :log_file, :include_internal, :only_internal,
+  class CommandLine < Struct.new(:junit_file, :config_file, :log_file, :include_internal, :only_internal, :compliance_proxy_tests,
                                  :run_all, :exclude_internal_orgs, :only_internal_orgs, :verify_error_messages,
                                  :bell_on_completion, :rerun, :seed, :use_default_org, :ssl_version, :server_api_version)
 
@@ -102,6 +102,10 @@ module Pedant
 
       opts.on("--all", "Run all tests.  Supersedes any other filtering-related arguments") do
         self.run_all = true
+      end
+
+      opts.on("--compliance-proxy-tests") do
+        self.compliance_proxy_tests = true
       end
 
       opts.on("--bell", "Emits a console bell after completing tests") do
