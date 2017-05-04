@@ -32,41 +32,33 @@ describe "Compliance Proxy Tests", :compliance_proxy_tests do
       end
     end
 
-    context "/organizations/ORG/owners/OWNER/compliance[/PROFILE]" do
-      let(:good_status) { {"response" => "ok"} }
+    let(:response) { get(request_url, admin_user) }
 
-      context "GET /organizations/ORG/owners/OWNER/compliance" do
-        let(:request_url) { api_url("owners/foobar/compliance") }
-          it "retuns 200" do
-            get(request_url, admin_user).should look_like({:status => 200,
-                                                           :body => good_status})
-          end
+    context "GET /organizations/ORG/owners/OWNER/compliance" do
+      let(:request_url) { api_url("owners/foobar/compliance") }
+      it "returns 200" do
+          expect(response.code).to eq(200)
       end
+    end
 
-      context "GET /organizations/ORG/owners/OWNER/compliance/PROFILE" do
-        let(:request_url) { api_url("owners/foobar/compliance/testprofile") }
-        it "retuns 200" do
-          puts request_url
-          get(request_url, admin_user).should look_like({:status => 200,
-                                                         :body => good_status})
-        end
+    context "GET /organizations/ORG/owners/OWNER/compliance/PROFILE" do
+      let(:request_url) { api_url("owners/foobar/compliance/testprofile") }
+      it "returns 200" do
+        expect(response.code).to eq(200)
       end
+    end
 
-      context "GET /compliance/organizations/ORG/owners/OWNER/compliance" do
-        let(:request_url) { "#{platform.server}/compliance/organizations/#{platform.test_org.name}/owners/foobar/compliance" }
-        it "retuns 200" do
-          puts request_url
-          get(request_url, admin_user).should look_like({:status => 200,
-                                                         :body => good_status})
-        end
+    context "GET /compliance/organizations/ORG/owners/OWNER/compliance" do
+      let(:request_url) { "#{platform.server}/compliance/organizations/#{platform.test_org.name}/owners/foobar/compliance" }
+      it "returns 200" do
+        expect(response.code).to eq(200)
       end
+    end
 
-      context "GET /compliance/organizations/ORG/owners/OWNER/compliance/PROFILE" do
-        let(:request_url) { "#{platform.server}/compliance/organizations/#{platform.test_org.name}/owners/foobar/compliance/testprofile" }
-        it "retuns 200" do
-          get(request_url, admin_user).should look_like({:status => 200,
-                                                         :body => good_status})
-        end
+    context "GET /compliance/organizations/ORG/owners/OWNER/compliance/PROFILE" do
+      let(:request_url) { "#{platform.server}/compliance/organizations/#{platform.test_org.name}/owners/foobar/compliance/testprofile" }
+      it "returns 200" do
+        expect(response.code).to eq(200)
       end
     end
   end
