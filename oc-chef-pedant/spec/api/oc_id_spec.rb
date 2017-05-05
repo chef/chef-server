@@ -49,7 +49,7 @@ describe "oc_id API", :oc_id do
     let(:response) { post(request_url, platform.superuser, headers: request_headers, payload: request_body) }
     it "returns a non-zero file" do
       expect(response.code).to eq(200)
-      expect(response.body.length).to_not be(0)
+      expect(response.body.length).to_not eq(0)
     end
 
     it "returns a valid key" do
