@@ -1,4 +1,19 @@
 # Chef Server Changelog
+
+## [12.15.6](https://github.com/chef/chef-server/tree/12.15.6) (2017-05-05)
+
+[Full Changelog](https://github.com/chef/chef-server/compare/12.15.5...12.15.6)
+
+**Merged pull requests:**
+
+- Use a different user for oc\_id tests to prevent side effects [\#1258](https://github.com/chef/chef-server/pull/1258) ([marcparadise](https://github.com/marcparadise))
+- \[oc-id\] Use the v0 API for all chef interactions [\#1257](https://github.com/chef/chef-server/pull/1257) ([stevendanna](https://github.com/stevendanna))
+
+### Contributors
+* Marc Paradise
+* Steven Danna
+* Jaymala Sinha
+
 ## [12.15.5](https://github.com/chef/chef-server/tree/12.15.4) (2017-05-04)
 [Full Changelog](https://github.com/chef/chef-server/compare/12.15.3...12.15.5)
 
