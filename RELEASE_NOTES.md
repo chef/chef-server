@@ -5,9 +5,12 @@ in the release. For a detailed list of changed components, refer to
 [CHANGELOG.md](CHANGELOG.md).
 
 This document contains release notes for the current major release and all patches.
-For prior releases, see
-[PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
+For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 12.15.5 (2017-05-05)
+* Fixed [regression](https://github.com/chef/chef-server/pull/1257) in oc-id.
+  The identity service was using the wrong Chef Server API version level.
+  .
 ## 12.15.5 (2017-05-04)
 * Fixed [regression](https://github.com/chef/chef-server/pull/1253) in the nginx proxy
   that prevented Automate-based Compliance profiles from being reachable
@@ -25,7 +28,7 @@ Note: There was no released version 12.15.1 or 12.15.2 due
 
 ## 12.15.0 (2017-04-27)
 
-### Add required_recipe endpoint
+### Add required\_recipe endpoint
 
 See Chef RFC 89 for a fuller description
 
