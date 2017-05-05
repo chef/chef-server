@@ -32,6 +32,7 @@ module ChefResource
     { headers: headers,
       client_name: Settings.chef.superuser,
       client_key: nil,
+      api_version: "0",
       raw_key: key }
   end
 end

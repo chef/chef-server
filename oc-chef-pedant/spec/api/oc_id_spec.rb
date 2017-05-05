@@ -17,6 +17,41 @@ describe "oc_id API", :oc_id do
     end
   end
 
+  context "key reset" do
+    let(:username) { platform.non_admin_user.name }
+    let(:password) { "foobar" } #hardcoded at the platform layer
+
+    let(:request_headers) do
+      {
+        "Content-Type" => "application/x-www-form-urlencoded",
+        "Cookie" => csrf[:cookie]
+      }
+    end
+
+    let(:csrf) do
+      response = get("#{platform.server}/id/signin", platform.superuser, headers: {"Accept" => "text/html"})
+      cookie = response.headers[:set_cookie][1].split(";").first
+      # I KNOW. I'll leave it up to reviewers whether we should pull
+      # in nokogiri or hpricot just do to this
+      re = /<meta name="csrf-token" content="(.*)" \/>/
+      token = response.match(re)[1]
+      headers = { "Content-Type" => "application/x-www-form-urlencoded", "Cookie" => cookie }
+      body = "username=#{username}&password=#{password}&authenticity_token=#{CGI.escape(token)}&commit=Sign+In"
+      # Now sign in
+      response = post("#{platform.server}/id/auth/chef/callback", platform.superuser, headers: headers, payload: body)
+      cookie = response.headers[:set_cookie][1].split(";").first
+      { cookie: cookie, token: token}
+    end
+
+    let(:request_url) { "#{platform.server}/id/profile/regen_key" }
+    let(:request_body) { "authenticity_token=#{CGI.escape(csrf[:token])}&commit=Get+a+New+Key" }
+    it "returns a non-zero file" do
+      response = post(request_url, platform.superuser, headers: request_headers, payload: request_body)
+      expect(response.code).to eq(200)
+      expect(response.body.length).to_not be(0)
+    end
+  end
+
   context "signin" do
     let(:username) { platform.non_admin_user.name }
     let(:request_url) { "#{platform.server}/id/auth/chef/callback" }
@@ -59,7 +94,5 @@ describe "oc_id API", :oc_id do
         end
       end
     end
-
-
   end
 end
