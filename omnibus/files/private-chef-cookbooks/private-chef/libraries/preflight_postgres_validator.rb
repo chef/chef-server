@@ -36,7 +36,7 @@ class PostgresqlPreflightValidator < PreflightValidator
   end
 
   def bookshelf_in_sql?
-    @cs_pg_attr['bookshelf'] && @cs_pg_attr['bookshelf']['storage_type'] == "sql"
+    PrivateChef['bookshelf'] && PrivateChef['bookshelf']['storage_type'].to_s == "sql"
   end
 
   def databases_to_check
