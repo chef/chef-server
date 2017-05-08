@@ -15,9 +15,9 @@ def wait_for_http_listener(uri_string, retries = 10)
     if retries <= 0
       raise e
     else
-      puts "GET #{uri_string} failed: #{e} retrying in 1 seconds (#{retries} retries remaining)"
+      puts "GET #{uri_string} failed: #{e} retrying in 0.1 seconds (#{retries} retries remaining)"
       retries -= 1
-      sleep 1
+      sleep 0.1
       retry
     end
   end
@@ -35,9 +35,10 @@ def start_compliance_stub(port)
                                      :SSLVerifyClient => OpenSSL::SSL::VERIFY_NONE,
                                      :SSLCertName => [%w[CN localhost]])
     server.mount_proc '/' do |req, res|
-      if req.path =~ %r{/compliance/profiles/([^/]+)/?}
+      case req.path
+      when %r{/compliance/profiles/([^/]+)/?}
         res.body = '{ "response": "ok" }'
-      elsif req.path =~ %r{/compliance/profiles/([^/]+)/([^/]+)/?}
+      when %r{/compliance/profiles/([^/]+)/([^/]+)/?}
         res.body = '{ "response": "ok" }'
       else
         res.body = '{}'
