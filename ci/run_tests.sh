@@ -1,7 +1,7 @@
 #!/bin/bash
 set -evx
 
-sudo chef-server-ctl test -J $WORKSPACE/pedant.xml --all
+sudo chef-server-ctl test -J $WORKSPACE/pedant.xml --all --compliance-proxy-tests
 
 if [ "$OMNIBUS_FIPS_MODE" == "true" ]
 then
