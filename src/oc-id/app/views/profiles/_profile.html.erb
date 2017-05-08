@@ -1,6 +1,11 @@
 <h3>Profile</h3>
 <%= form_for(@user, :url => :profile, :method => :put, :html => {'data-abide' => ''}) do |f| %>
   <div class="row">
+    <div class="column">
+      <%= error_message_for(@user, :base) %>
+    </div>
+  </div>
+  <div class="row">
     <div class="medium-12 columns">
       <%= f.label :first_name %>
       <%= f.text_field :first_name, :required => true, :class => 'radius' %>
