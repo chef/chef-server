@@ -156,6 +156,8 @@ else
     echo "Platform and version are unknown." > "$tmpdir/platform_version.txt"
 fi
 
+umask > "$tmpdir/umask.txt"
+
 uptime > "$tmpdir/uptime.txt"
 
 cp "/proc/cpuinfo" "$tmpdir/cpuinfo.txt"
