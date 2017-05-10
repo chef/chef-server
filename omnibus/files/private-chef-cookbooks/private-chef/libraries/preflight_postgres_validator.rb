@@ -36,7 +36,7 @@ class PostgresqlPreflightValidator < PreflightValidator
   end
 
   def bookshelf_in_sql?
-    @cs_pg_attr['bookshelf'] && @cs_pg_attr['bookshelf']['storage_type'] == "sql"
+    PrivateChef['bookshelf'] && PrivateChef['bookshelf']['storage_type'].to_s == "sql"
   end
 
   def databases_to_check
@@ -61,7 +61,9 @@ class PostgresqlPreflightValidator < PreflightValidator
   end
 
   def has_superuser_password?
-    PrivateChef.credentials.exist?("postgresql", "db_superuser_password")
+    # NOTE(ssd): Since these checks run before any secrets are migrated to the store, we need to check both
+    # the credentials store and the configuration file.
+    PrivateChef.credentials.exist?("postgresql", "db_superuser_password") || cs_pg_attr['db_superuser_password']
   end
 
   # We do not support changing from managed to external DB or vice-versa, so the
