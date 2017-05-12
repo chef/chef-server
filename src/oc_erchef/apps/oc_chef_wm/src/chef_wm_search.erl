@@ -140,28 +140,32 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                                  filter_permitted_results(ReqId, RequestorId, OrgId, DbContext, IndexType, Ids);
                              false -> Ids
                          end,
-            {DbNumFound, Ans} = make_search_results(BulkGetFun, FilteredIds, BatchSize,
-                                                    Start1, SolrNumFound),
-            State1 = State#base_state{log_msg = search_log_msg(SolrNumFound,
-                                                               solr_ids_length(Ids), DbNumFound)},
-            case IndexType of
-                {data_bag, BagName} when DbNumFound =:= 0 ->
-                    case chef_db:data_bag_exists(DbContext, OrgId, BagName) of
-                        true ->
-                            {Ans, Req, State1};
-                        false ->
-                            Msg = iolist_to_binary([<<"I don't know how to search for ">>,
-                                                    BagName, <<" data objects.">>]),
-                            {{halt, 404},
-                                chef_wm_util:set_json_body(Req, {[{<<"error">>, [Msg]}]}),
-                                State1#base_state{log_msg=lists:flatten(["no data bag: ", BagName])}}
-                    end;
-                _Else ->
-                    {Ans, Req, State1}
-            end;
+
+            {{halt, 200}, wrq:set_resp_body({stream, stream_search_results(BulkGetFun, FilteredIds,
+                                                                           BatchSize, Start1,
+                                                                           SolrNumFound)},
+                                            Req), State};
+
+            %% State1 = State#base_state{log_msg = search_log_msg(SolrNumFound,
+            %%                                                    solr_ids_length(Ids), DbNumFound)},
+            %% case IndexType of
+            %%     {data_bag, BagName} when DbNumFound =:= 0 ->
+            %%         case chef_db:data_bag_exists(DbContext, OrgId, BagName) of
+            %%             true ->
+            %%                 {Ans, Req, State1};
+            %%             false ->
+            %%                 Msg = iolist_to_binary([<<"I don't know how to search for ">>,
+            %%                                         BagName, <<" data objects.">>]),
+            %%                 {{halt, 404},
+            %%                     chef_wm_util:set_json_body(Req, {[{<<"error">>, [Msg]}]}),
+            %%                     State1#base_state{log_msg=lists:flatten(["no data bag: ", BagName])}}
+            %%         end;
+            %%     _Else ->
+            %%         {Ans, Req, State1}
+            %% end;
         {error, {solr_400, _}=Why} ->
             {{halt, 400},
-                chef_wm_util:set_json_body(Req,
+             chef_wm_util:set_json_body(Req,
                     malformed_request_message(Why, Req, State)),
                 State#base_state{log_msg=Why}};
         {error, {solr_500, _}=Why} ->
@@ -171,10 +175,10 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                 State#base_state{log_msg=Why}}
     end.
 
-solr_ids_length({Solr1Ids, _}) ->
-    length(Solr1Ids);
-solr_ids_length(Solr1Ids) ->
-    length(Solr1Ids).
+%% solr_ids_length({Solr1Ids, _}) ->
+%%     length(Solr1Ids);
+%% solr_ids_length(Solr1Ids) ->
+%%     length(Solr1Ids).
 
 %% @doc Check the READ authz permissions on a list of search results, returning only the
 %% list of available results
@@ -213,8 +217,8 @@ filter_permitted_results(ReqId, RequestorId, _OrgId, DbContext, IndexType, Ids) 
 batch_size() ->
     envy:get(oc_chef_wm, bulk_fetch_batch_size, ?DEFAULT_BATCH_SIZE, positive_integer).
 
-search_log_msg(SolrNumFound, NumIds, DbNumFound) ->
-    {search, SolrNumFound, NumIds, DbNumFound}.
+%% search_log_msg(SolrNumFound, NumIds, DbNumFound) ->
+%%     {search, SolrNumFound, NumIds, DbNumFound}.
 
 solr_query(Query, ReqId) ->
         stats_hero:ctime(ReqId, {chef_solr, search},
@@ -374,10 +378,11 @@ extract_path(Item, Path) ->
             <<"ERROR - Invalid Attribute or Object">>
     end.
 
-make_search_results(BulkGetFun, Ids, BatchSize, Start, NumFound) ->
-    Ans0 = search_result_start(Start, NumFound),
-    {N, Ans1} = fetch_result_rows(Ids, BatchSize, BulkGetFun, {0, Ans0}),
-    {N, search_result_finish(Ans1)}.
+stream_search_results(BulkGetFun, Ids, BatchSize, Start, NumFound) ->
+    %% search_result_start(Start, NumFound),
+    %% {N, Ans1} = fetch_result_rows(Ids, BatchSize, BulkGetFun, {0, Ans0}),
+    %% {N, search_result_finish(Ans1)}.
+    search_result_start(Start, NumFound, Ids, BatchSize, BulkGetFun).
 
 %% @doc Fetch a list of `Ids' in batches of size `BatchSize'.
 %%
@@ -393,42 +398,51 @@ make_search_results(BulkGetFun, Ids, BatchSize, Start, NumFound) ->
 %% the RAM required to produce results for large searches. The trade-off is more complicated
 %% processing logic than would be required if we just gathered all of the EJSON into a list
 %% and then encoded it to JSON binary.
-fetch_result_rows([], _BatchSize, _BulkGetFun, {N, Acc}) ->
+stream_result_rows([], _BatchSize, _BulkGetFun, N) ->
     %% fetch complete, return fetched count and inner part of JSON array binary
-    {N, Acc};
-fetch_result_rows(Ids, BatchSize, BulkGetFun, {N, Acc}) when is_list(Ids) ->
+    search_result_end(N);
+stream_result_rows(Ids, BatchSize, BulkGetFun, N) when is_list(Ids) ->
     %% this head match when we are first called with the entire list of Ids. To get things
     %% started, we split the list of Ids into a batch of size `BatchSize' and the rest and
     %% get started.
-    fetch_result_rows(safe_split(BatchSize, Ids), BatchSize, BulkGetFun, {N, Acc});
-fetch_result_rows({Ids, []}, _BatchSize, BulkGetFun, {N, Acc}) ->
-    %% This is the last batch, don't add a "," separator
+    stream_result_rows(safe_split(BatchSize, Ids), BatchSize, BulkGetFun, N);
+stream_result_rows({Ids, []}, _BatchSize, BulkGetFun, N) ->
+    %% %% This is the last batch, don't add a "," separator
+    %% Docs = BulkGetFun(Ids),
+    %% {N + length(Docs), encode_results(Docs, Acc)};
     Docs = BulkGetFun(Ids),
-    {N + length(Docs), encode_results(Docs, Acc)};
-fetch_result_rows({Ids, Rest}, BatchSize, BulkGetFun, {N, Acc}) ->
+    Res = encode_result_rows(Docs),
+    { Res,
+      fun() ->
+              search_result_end(N + length(Docs))
+      end };
+
+stream_result_rows({Ids, Rest}, BatchSize, BulkGetFun, N) ->
     %% processing a batch happens here. we fetch the objects corresponding to the batch of
     %% Ids, encode them and then add them to our accumulator with the "," separator.
     Next = safe_split(BatchSize, Rest),
     Docs = BulkGetFun(Ids),
-    fetch_result_rows(Next, BatchSize, BulkGetFun,
-                      {N + length(Docs),
-                       encode_results(Docs, <<",">>, Acc)}).
+    Res = <<(encode_result_rows(Docs))/binary, ",">>,
+    { Res,
+      fun() ->
+              stream_result_rows(Next, BatchSize, BulkGetFun, N + length(Docs))
+      end }.
 
 %% Catch the case where we're building results ending with
 %% a dangling comma and strip it out. Completely ugly since
 %% we're assuming the separator is a comma.
 %% FIXME Refactor into a more readable/understandable design
-encode_results([], [<<",">>|Acc]) ->
-    Acc;
-encode_results([], Acc) ->
-    Acc;
-encode_results(Results, Acc) ->
-    [encode_result_rows(Results) | Acc].
+%% encode_results([], [<<",">>|Acc]) ->
+%%     Acc;
+%% encode_results([], Acc) ->
+%%     Acc;
+%% encode_results(Results, Acc) ->
+%%     [encode_result_rows(Results) | Acc].
 
-encode_results([], _Prefix, Acc) ->
-    Acc;
-encode_results(Results, Prefix, Acc) ->
-    [Prefix, encode_result_rows(Results) | Acc].
+%% encode_results([], _Prefix, Acc) ->
+%%     Acc;
+%% encode_results(Results, Prefix, Acc) ->
+%%     [Prefix, encode_result_rows(Results) | Acc].
 
 %% Encode a list of items as a JSON array partial. That is, encode as a JSON array and then
 %% strip the '[' and ']' off the result. This allows us to incrementally encode a long array
@@ -476,15 +490,26 @@ safe_split(N, L) ->
 
 %% Return the start of a JSON response for search results. We take this approach to limit
 %% RAM use and avoid having the entire result parsed into EJSON terms at one time.
-search_result_start(Start, Total) ->
-    % {"total":Total,"start":Start,"rows":[i1, i2]}
-    ["\"rows\":[", ",",
-     integer_to_list(Start), "\"start\":", ",",
-     integer_to_list(Total), "\"total\":", "{"].
+search_result_start(Start, Total, Ids, BatchSize, BulkGetFun) ->
+    %% % {"total":Total,"start":Start,"rows":[i1, i2]}
+    %% ["\"rows\":[", ",",
+    %%  integer_to_list(Start), "\"start\":", ",",
+    %%  integer_to_list(Total), "\"total\":", "{"].
 
-search_result_finish(Result) ->
-    %% Note that all we need here is an iolist not a flat binary.
-    lists:reverse([<<"]}">>|Result]).
+    Res = ["{",
+           "\"total\":", integer_to_list(Total), ",",
+           "\"start\":", integer_to_list(Start), ",",
+           "\"rows\":["],
+    { list_to_binary(Res),
+      fun() ->
+              stream_result_rows(Ids, BatchSize, BulkGetFun, 0)
+      end }.
+
+search_result_end(_N) ->
+    %% %% Note that all we need here is an iolist not a flat binary.
+    %% lists:reverse([<<"]}">>|Result]).
+    %% TODO: can we edit the log here with N or is it too late?
+    { <<"]}">>, done }.
 
 malformed_request_message(#ej_invalid{}, _Req, _State) ->
     Msg = <<"invalid partial search request body">>,
