@@ -44,6 +44,8 @@ vm:
   # All settings below apply only to the chef-server vm
   cpus: 4
   memory: 4096
+  # nodejs is included here so that we can run asset compile phase of
+  # oc-id on load.
   packages: [ ntp, curl, wget, htop, uuid-dev, tmux, vim, iotop, zlib1g-dev, liblzma-dev ]
   omnibus-autoload: [] # see config.yml for details and to add components
   # Override this in config.yml to set a custom path for your dotfiles
@@ -91,6 +93,8 @@ vm:
        - config/database.yml # [oc-id] we'll need to use the one from omnibus
        - config/settings/production.yml # [oc-id] we'll need to use the one from omnibus
        - config/initializers/secret_token.rb # [oc-id] we'll need to use the one from omnibus
+       - oc-id/public/id
+       - oc-id/tmp
 
   cover:
     base_output_path: /vagrant/testdata/cover # maps to dev/testdata/cover
@@ -127,7 +131,8 @@ projects:
     type: rails
     install_options: --without development test doc
     build_steps:
-      - bundle exec --keep-file-descriptors rake assets:precompile db:migrate
+      - bundle exec rake assets:precompile --trace
+      - bundle exec --keep-file-descriptors rake db:migrate
     symlinks:
       config/database.yml: config/database.yml
       config/settings/production.yml: config/production.yml

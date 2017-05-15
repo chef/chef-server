@@ -5,6 +5,12 @@ module DVM
       say desc if desc
       cmd = Mixlib::ShellOut.new(command, opts)
       cmd.run_command
+      unless no_raise || cmd.status.exitstatus > 0
+        #{command} failed"
+        puts "*** stdout: #{cmd.stdout}"
+        puts "*** stderr: #{cmd.stderr}"
+      end
+
       cmd.error! unless no_raise
       cmd
     end
