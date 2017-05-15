@@ -49,13 +49,12 @@ def wait_for_empty_queue
 end
 
 def enqueue_data_for_org(org)
-  status = Dir.chdir(File.join(base_path, "embedded", "service", "opscode-erchef", "bin")) do
-    if running_config["private_chef"]["fips_enabled"]
-      run_command("./reindex-opc-organization complete #{org} http://127.0.0.1")
-    else
-      run_command("./reindex-opc-organization complete #{org}")
-    end
-  end
+  reindex_script = File.join(base_path, "embedded", "service", "opscode-erchef", "bin", "reindex-opc-organization")
+  status = if running_config["private_chef"]["fips_enabled"]
+             run_command("#{reindex_script} complete #{org} http://127.0.0.1")
+           else
+             run_command("#{reindex_script} complete #{org}")
+           end
   if !status.success?
     $stderr.puts "Failed to enqueue data for #{org}!"
   end
