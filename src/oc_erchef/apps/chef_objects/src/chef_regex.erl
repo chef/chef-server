@@ -59,7 +59,7 @@
 %% from the cookbook names and recipes in the opscode/cookbooks
 %% repository, this regular expression applies to them as well.
 -define(NAME_CHAR_CLASS, "[.[:alnum:]_-]").
--define(NAME_REGEX, ?NAME_CHAR_CLASS ++ "+").
+-define(NAME_REGEX, ?NAME_CHAR_CLASS "+").
 
 %% This is very similar to NAME_REGEX (differs only with the addition of ':').  This is used
 %% for data bags, data bag items, roles, nodes, and keys.
