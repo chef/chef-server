@@ -1299,16 +1299,23 @@ describe "ACL API", :acl do
                   end
 
                   context "when client with '.' in name is used in actors hash" do
-                    let(:update_body) do
-                      { permission => {
-                          "actors" => [@client_with_dot.name, platform.admin_user.name, "pivotal"],
-                          "groups" => ["admins"]
-                        }
+                    let(:groups_and_actors) do
+                      {
+                        "actors" => [@client_with_dot.name, platform.admin_user.name, "pivotal"],
+                        "groups" => ["admins"]
                       }
+                    end
+
+                    let(:update_body) do
+                      { permission => groups_and_actors }
                     end
 
                     it "returns 200", :acl do
                       put("#{request_url}/#{permission}", platform.admin_user, :payload => update_body).should look_like({:status => 200})
+
+                      check_body = acl_body
+                      check_body[permission] = groups_and_actors
+                      get(request_url, platform.admin_user).should look_like({:status => 200, :body => check_body})
                     end
                   end
                 end
