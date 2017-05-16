@@ -159,10 +159,35 @@ The git SHA of the build you are testing can be found in
 
 - [ ] Let `#cft-announce` know about the release, including a link to the Discourse post.
 
-Chef Server is now released.
 
 ## Post Release
 
-- [ ] Bump the Chef Server version number in
-  `omnibus/config/projects/chef-server.rb` for development to the next
-  logical version number.
+Before the release can be considered complete, the following
+post-release steps must be performed;
+
+- [ ] in `omnibus/config/projects/chef-server.rb`:
+  - [ ] Bump the Chef Server version number for development to the next logical
+        version number.
+  - [ ] Update chef client to the latest stable chef-client version via
+        `override :chef`.  This may include updates to major and minor
+        versions.
+  - [ ] Update `override` versions of components that are listed
+        with `override` versions to the latest stable patch release
+        within the current major.minor version.
+- [ ] in `omnibus/config/software`, update components to latest stable
+      patch release within the current major.minor version.
+- [ ] Perform `berks update` in `omnibus/`
+- [ ] Perform `bundle update` in:
+  - [ ] `oc-chef-pedant/`
+  - [ ] `src/oc-id/`
+  - [ ] `omnibus/`
+- [ ] Perform `./rebar3 update  && ./rebar3 unlock && ./rebar3 upgrade` in:
+  - [ ] `bookshelf`
+  - [ ] `oc_erchef`
+  - [ ] `oc_bifrost`
+- [ ] Submit a post-release PR with these changes and confirm no errors
+      in the Travis CI and our internal CI pipeline.  Merge after
+      review.
+
+Chef Server is now released and ready for the next round of updates.
+
