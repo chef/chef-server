@@ -1222,6 +1222,15 @@ describe "ACL API", :acl do
             end # context GET /<type>/<name>/_acl/<permission>
 
             context "PUT /#{type}/<name>/_acl/#{permission}" do
+              before(:all) do
+                @client_with_dot = platform.create_client("test-client.#{rand_id}")
+              end
+
+              after(:all) do
+                platform.delete_client(@client_with_dot)
+              end
+
+
               let(:clients) { [platform.non_admin_client.name] }
               let(:users) {
                 [platform.non_admin_user.name, platform.admin_user.name, "pivotal"].uniq
@@ -1287,6 +1296,27 @@ describe "ACL API", :acl do
                         :status => 200,
                         :body => check_body
                       })
+                  end
+
+                  context "when client with '.' in name is used in actors hash" do
+                    let(:groups_and_actors) do
+                      {
+                        "actors" => [@client_with_dot.name, platform.admin_user.name, "pivotal"].uniq,
+                        "groups" => ["admins"]
+                      }
+                    end
+
+                    let(:update_body) do
+                      { permission => groups_and_actors }
+                    end
+
+                    it "returns 200", :acl do
+                      put("#{request_url}/#{permission}", platform.admin_user, :payload => update_body).should look_like({:status => 200})
+
+                      check_body = acl_body
+                      check_body[permission] = groups_and_actors
+                      get(request_url, platform.admin_user).should look_like({:status => 200, :body => check_body})
+                    end
                   end
                 end
 

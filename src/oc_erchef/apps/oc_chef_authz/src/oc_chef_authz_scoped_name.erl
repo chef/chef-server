@@ -41,16 +41,6 @@
 -compile([export_all]).
 -endif.
 
-%%
-%% Process names with scoping descriptor.
-%%
-
-%% This is derived from oc_chef_wm/src/oc_chef_wm_groups.erl; investigate what it will take to refactor this.
--define(NAME, "[a-z0-9\-_]").
-
--define(SCOPE_SEPARATOR, <<"::">>).
--define(SCOPED_NAME_REGEX, "^(?:(" ?NAME "+)|(?:(" ?NAME "*)\\:\\:(" ?NAME "+)))$").
-
 -type db_callback() :: fun((any()) -> any()).
 
 -record(context, {org_id :: binary(),
@@ -355,8 +345,9 @@ is_scoped_type(_) ->
 %% This simplifies testing
 -spec make_regex() -> re:mp().
 make_regex() ->
-    {ok, Pattern} = re:compile(?SCOPED_NAME_REGEX),
+    {Pattern, _Message} = chef_regex:regex_for(scoped_name),
     Pattern.
+
 %% A scoped name is of the form scope::name. If scope is elided, then we are in the global
 %% scope. If there is no scope separator, then it is in the current context.
 %%
