@@ -1,4 +1,4 @@
-build_version   "12.15.6"
+build_version   "12.15.7"
 build_iteration 1
 
 override :erlang, version: "18.3"
