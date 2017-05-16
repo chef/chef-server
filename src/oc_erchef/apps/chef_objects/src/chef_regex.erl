@@ -58,7 +58,8 @@
 %% http://wiki.chef.io/display/chef/Roles#Roles-name.  Judging
 %% from the cookbook names and recipes in the opscode/cookbooks
 %% repository, this regular expression applies to them as well.
--define(NAME_REGEX, "[.[:alnum:]_-]+").
+-define(NAME_CHAR_CLASS, "[.[:alnum:]_-]").
+-define(NAME_REGEX, ?NAME_CHAR_CLASS ++ "+").
 
 %% This is very similar to NAME_REGEX (differs only with the addition of ':').  This is used
 %% for data bags, data bag items, roles, nodes, and keys.
@@ -84,6 +85,16 @@
 %% Policyfile run list items must be **fully** qualified (both cookbook name
 %% and recipe name must be present), and do not allow version qualifiers.
 -define(POLICY_FULLY_QUALIFIED_RECIPE_REGEX, "^recipe\\[" ++ ?NAME_REGEX ++ "::" ++ ?NAME_REGEX ++ "\\]$").
+
+%%
+%% Scoped names are used when refering to actors in the body of ACL updates, allowing us to
+%% distinguish between local groups and global groups. Because this regular expression is
+%% run against anything that might be an actor type, we use the more permissive NAME_CHAR_CLASS
+%% even though it includes characters disallowed by the USERNAME_REGEX.
+%%
+-define(SCOPE_SEPARATOR, <<"::">>).
+-define(SCOPED_NAME_REGEX, "^(?:(" ?NAME_CHAR_CLASS "+)|(?:(" ?NAME_CHAR_CLASS "*)\\:\\:(" ?NAME_CHAR_CLASS "+)))$").
+
 
 %% A SHA1 hash
 -define(SHA1_HASH_REGEX, "[a-fA-F0-9]{40}").
@@ -164,4 +175,7 @@ regex_for(policy_file_name) ->
 
 regex_for(policy_identifier) ->
     generate_regex_msg_tuple(?ANCHOR_REGEX(?NAME_REGEX_MAX_255),
-                             <<"Malformed policy name. Must be A-Z, a-z, 0-9, _, -, :, or .">>).
+                             <<"Malformed policy name. Must be A-Z, a-z, 0-9, _, -, :, or .">>);
+regex_for(scoped_name) ->
+    generate_regex_msg_tuple(?ANCHOR_REGEX(?SCOPED_NAME_REGEX),
+                             <<"Malformed scoped name.">>).
