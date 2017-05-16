@@ -1301,7 +1301,7 @@ describe "ACL API", :acl do
                   context "when client with '.' in name is used in actors hash" do
                     let(:groups_and_actors) do
                       {
-                        "actors" => [@client_with_dot.name, platform.admin_user.name, "pivotal"],
+                        "actors" => [@client_with_dot.name, platform.admin_user.name, "pivotal"].uniq,
                         "groups" => ["admins"]
                       }
                     end
