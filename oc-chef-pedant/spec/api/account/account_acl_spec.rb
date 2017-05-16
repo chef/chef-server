@@ -1222,9 +1222,14 @@ describe "ACL API", :acl do
             end # context GET /<type>/<name>/_acl/<permission>
 
             context "PUT /#{type}/<name>/_acl/#{permission}" do
-              before do
-                @client_with_dot = platform.create_client("test-client.#{rand_id}").name
+              before(:all) do
+                @client_with_dot = platform.create_client("test-client.#{rand_id}")
               end
+
+              after(:all) do
+                platform.delete_client(@client_with_dot)
+              end
+
 
               let(:clients) { [platform.non_admin_client.name] }
               let(:users) {
@@ -1296,7 +1301,7 @@ describe "ACL API", :acl do
                   context "when client with '.' in name is used in actors hash" do
                     let(:update_body) do
                       { permission => {
-                          "actors" => [@client_with_dot, platform.admin_user.name, "pivotal"],
+                          "actors" => [@client_with_dot.name, platform.admin_user.name, "pivotal"],
                           "groups" => ["admins"]
                         }
                       }
