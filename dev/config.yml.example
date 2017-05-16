@@ -32,6 +32,11 @@ vm:
   # this vm as an external postgresql server from the start.
   #  use-external: true
 
+  elasticsearch:
+  # enable a separate elasticsearch vm
+  # start: true
+  # version: "5" # options are "2" or "5"
+
   # These will map directly to entries in the generated chef-server.rb
   node-attributes:
     provisioning:

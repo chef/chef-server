@@ -12,10 +12,11 @@
         ]).
 
 -include("chef_solr.hrl").
+-define(JSON_HEADER, [{"Content-Type", "application/json"}]).
 
 -spec ping() -> pong | pang.
 ping() ->
-    case chef_index_http:get("/chef") of
+    case chef_index_http:get("/chef", [], ?JSON_HEADER) of
         ok -> pong;
         _Error -> pang
     end.
@@ -24,7 +25,7 @@ ping() ->
 update(Body) when is_list(Body) ->
     update(iolist_to_binary(Body));
 update(Body) ->
-    chef_index_http:post("/_bulk", Body).
+    chef_index_http:post("/_bulk", Body, ?JSON_HEADER).
 
 -spec search(#chef_solr_query{}) ->
                     {ok, non_neg_integer(), non_neg_integer(), [binary()]} |
@@ -32,7 +33,7 @@ update(Body) ->
                     {error, {solr_500, string()}}.
 search(#chef_solr_query{} = Query) ->
     Url = "/chef/_search",
-    {ok, Code, _Head, Body} = chef_index_http:request(Url, get, query_body(Query)),
+    {ok, Code, _Head, Body} = chef_index_http:request(Url, get, query_body(Query), ?JSON_HEADER),
     case Code of
         "200" ->
             handle_successful_search(Body);
@@ -55,40 +56,46 @@ transform_data(Data) ->
     Data.
 
 commit() ->
-    chef_index_http:post("/_refresh", []).
+    chef_index_http:post("/_refresh", [], ?JSON_HEADER).
 
 query_body(#chef_solr_query{
               query_string = Query,
               filter_query = undefined,
               start = Start,
               rows = Rows}) ->
-    jiffy:encode({[{<<"fields">>, <<"_id">>},
+    jiffy:encode({[{fields_tag(), <<"_id">>},
                    {<<"from">>, Start},
                    {<<"size">>, Rows},
-                   query_string_query_ejson(Query)]});
+                   {<<"query">>, {[query_string_query_ejson(Query)]}}
+                  ]});
 query_body(#chef_solr_query{
               query_string = Query,
               filter_query = FilterQuery,
               start = Start,
               rows = Rows}) ->
     chef_index_query:assert_org_id_filter(FilterQuery),
-    jiffy:encode({[{<<"fields">>, <<"_id">>},
-                   {<<"from">>, Start},
-                   {<<"size">>, Rows},
-                   {<<"sort">>, [{[{<<"X_CHEF_id_CHEF_X">>, {[{<<"order">>, <<"asc">>}]}}]}]},
-                   {<<"query">>, {[
-                                   {<<"filtered">>,{[
-                                                     query_string_query_ejson(Query),
-                                                     {<<"filter">>, {[query_string_query_ejson(FilterQuery)]}}
-                                                    ]}}]}}]}).
+    jiffy:encode({[{ fields_tag(), <<"_id">>},
+        {<<"from">>, Start},
+        {<<"size">>, Rows},
+        {<<"sort">>, [{[{<<"X_CHEF_id_CHEF_X">>, {[{<<"order">>, <<"asc">>}]}}]}]},
+        {<<"query">>, {[
+            {<<"bool">>,{[
+                {<<"must">>, {[query_string_query_ejson(Query)]}},
+                {<<"filter">>, {[query_string_query_ejson(FilterQuery)]}}
+            ]}}]}
+        }]}).
+
+fields_tag() ->
+    case envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer) of
+        5 -> <<"stored_fields">>;
+        _ -> <<"fields">>
+    end.
 
 query_string_query_ejson(QueryString) ->
-    { <<"query">>, {
-          [{<<"query_string">>,{
-                [{<<"lowercase_expanded_terms">>, false},
-                 {<<"query">>, list_to_binary(QueryString)}]}}]
-         }
-    }.
+    {<<"query_string">>,{[
+        {<<"lowercase_expanded_terms">>, false},
+        {<<"query">>, list_to_binary(QueryString)}
+    ]}}.
 
 %%
 %% A note on deleting
@@ -138,7 +145,7 @@ delete_search_db(OrgId) ->
                     {error, {solr_500, string()}}.
 search_with_scroll(#chef_solr_query{} = Query) ->
     Url = "/chef/_search?scroll=1m",
-    {ok, Code, _Head, Body} = chef_index_http:request(Url, get, query_body(Query)),
+    {ok, Code, _Head, Body} = chef_index_http:request(Url, get, query_body(Query), ?JSON_HEADER),
     case Code of
         "200" ->
             EjsonBody = jiffy:decode(Body),
@@ -157,11 +164,11 @@ search_with_scroll(#chef_solr_query{} = Query) ->
     end.
 
 scroll(ScrollId, NumFound, NumFound, Ids) ->
-    ok = chef_index_http:delete("/_search/scroll", ScrollId),
+    ok = chef_index_http:delete("/_search/scroll", ScrollId, ?JSON_HEADER),
     {ok, undefined, NumFound, Ids};
 scroll(ScrollId, NumFound, _, Ids) ->
     Url = "/_search/scroll?scroll=1m",
-    {ok, Code, _Head, Body} = chef_index_http:request(Url, get, ScrollId),
+    {ok, Code, _Head, Body} = chef_index_http:request(Url, get, ScrollId, ?JSON_HEADER),
     case Code of
         "200" ->
             DocList = ej:get({<<"hits">>, <<"hits">>}, jiffy:decode(Body)),
@@ -180,5 +187,5 @@ delete_ids([]) ->
     ok = commit(),
     ok;
 delete_ids([Id | Ids]) ->
-    ok = chef_index_http:delete("/chef/object/" ++ Id, []),
+    ok = chef_index_http:delete("/chef/object/" ++ Id, [], ?JSON_HEADER),
     delete_ids(Ids).

@@ -33,6 +33,8 @@ erchef_config = File.join(opscode_erchef_dir, "sys.config")
 
 rabbitmq = OmnibusHelper.new(node).rabbitmq_configuration
 
+elastic_search_version = OmnibusHelper.new(node).elastic_search_major_version
+
 actions_vip = rabbitmq['vip']
 actions_port = rabbitmq['node_port']
 actions_user = rabbitmq['actions_user']
@@ -52,6 +54,7 @@ template erchef_config do
                                                                  :actions_vhost => actions_vhost,
                                                                  :actions_exchange => actions_exchange,
                                                                  :ldap_encryption_type => ldap_encryption_type,
+                                                                 :solr_elasticsearch_major_version => elastic_search_version,
                                                                  :helper => OmnibusHelper.new(node)))
   notifies :run, 'execute[remove_erchef_siz_files]', :immediately
   notifies :restart, 'runit_service[opscode-erchef]' unless backend_secondary?

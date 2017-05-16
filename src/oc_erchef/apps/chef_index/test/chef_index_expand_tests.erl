@@ -302,6 +302,7 @@ solr_api_test_() ->
 es_api_test_() ->
     MinItem = {[{<<"key1">>, <<"value1">>},
                 {<<"key2">>, <<"value-2">>}]},
+    JsonContentType = [{"Content-Type", "application/json"}],
     {foreach,
      fun() ->
              application:set_env(chef_index, search_provider, elasticsearch)
@@ -315,7 +316,8 @@ es_api_test_() ->
                         chef_index_test_utils:set_provider(elasticsearch),
                         Expect = es_send_item_json_expect(),
                         meck:expect(chef_index_http, post,
-                                    fun("/_bulk", Doc) ->
+                                    fun("/_bulk", Doc, Headers) ->
+                                            ?assertEqual(JsonContentType, Headers),
                                             ?assertEqual(Expect, Doc),
                                             ok
                                     end),
@@ -327,7 +329,8 @@ es_api_test_() ->
                         chef_index_test_utils:set_provider(elasticsearch),
                         Expect = es_send_delete_json_expect(),
                         meck:expect(chef_index_http, post,
-                                    fun("/_bulk", Doc) ->
+                                    fun("/_bulk", Doc, Headers) ->
+                                            ?assertEqual(JsonContentType, Headers),
                                             ?assertEqual(Expect, Doc),
                                             ok
                                     end),
