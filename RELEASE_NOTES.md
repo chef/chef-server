@@ -7,11 +7,23 @@ in the release. For a detailed list of changed components, refer to
 This document contains release notes for the current major release and all patches.
 For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
-## 12.15.5 (2017-05-05)
+## 12.15.7 (2017-05-16)
+
+* Fixed [regression](https://github.com/chef/chef-server/issues/1274) that prevented
+  some Open Source Chef 11 upgrades due to too-strict validations on object names in ACLs. This
+  issue would also prevent editing of ACLs directly on node objects if the
+  node name contained a ".".  This issue was introduced in 12.15.0
+* Fixed [regression](https://github.com/chef/chef-server/pull/1272) that prevented the `reindex`
+  command from working. This issue was a side effect of consolidating the multiple Erlang runtimes
+  that we distributed with Chef Server into one for 12.15.0.
+
+## 12.15.6 (2017-05-05)
+
 * Fixed [regression](https://github.com/chef/chef-server/pull/1257) in oc-id.
   The identity service was using the wrong Chef Server API version level.
   .
 ## 12.15.5 (2017-05-04)
+
 * Fixed [regression](https://github.com/chef/chef-server/pull/1253) in the nginx proxy
   that prevented Automate-based Compliance profiles from being reachable
 
