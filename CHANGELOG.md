@@ -1,5 +1,43 @@
 # Chef Server Changelog
 
+## [12.15.7](https://github.com/chef/chef-server/tree/12.15.7) (2017-05-17)
+[Full Changelog](https://github.com/chef/chef-server/compare/12.15.6...12.15.7)
+
+**Closed issues:**
+
+- Upgrade from Chef 11 to 12 fails in fix\_permissions stage with error 400 for every node [\#1274](https://github.com/chef/chef-server/issues/1274)
+- not install chefserver in my ubuntu, when i tried to install like following below [\#1269](https://github.com/chef/chef-server/issues/1269)
+
+**Merged pull requests:**
+
+- \[erchef\] Fix ACL updates when actor names includes '.' [\#1275](https://github.com/chef/chef-server/pull/1275) ([stevendanna](https://github.com/stevendanna))
+- \[ctl-commands\] Call reindex escript with absolute path [\#1272](https://github.com/chef/chef-server/pull/1272) ([stevendanna](https://github.com/stevendanna))
+- \[pedant\] Downcase chef\_server\_uid [\#1271](https://github.com/chef/chef-server/pull/1271) ([stevendanna](https://github.com/stevendanna))
+- Mp/oc id missing all.svg [\#1267](https://github.com/chef/chef-server/pull/1267) ([marcparadise](https://github.com/marcparadise))
+- Grab umask for gather-logs [\#1266](https://github.com/chef/chef-server/pull/1266) ([marcparadise](https://github.com/marcparadise))
+- Fix issues in postgresql preflight validator [\#1264](https://github.com/chef/chef-server/pull/1264) ([stevendanna](https://github.com/stevendanna))
+- \[pedant\] Enable compliance-proxy-tests, wait for listener [\#1262](https://github.com/chef/chef-server/pull/1262) ([stevendanna](https://github.com/stevendanna))
+
+### Components
+Updated Components
+* berkshelf-no-depselector (e3dd3d6f -> 6016ca10)
+
+### Contributors
+* Marc Paradise
+* Steven Danna
+* Sean Horn
+* Bryan McLellan
+
+## [12.15.6](https://github.com/chef/chef-server/tree/12.15.6) (2017-05-05)
+[Full Changelog](https://github.com/chef/chef-server/compare/12.15.5...12.15.6)
+
+**Merged pull requests:**
+
+- 12.15.6 release prep [\#1259](https://github.com/chef/chef-server/pull/1259) ([marcparadise](https://github.com/marcparadise))
+- Use a different user for oc\_id tests to prevent side effects [\#1258](https://github.com/chef/chef-server/pull/1258) ([marcparadise](https://github.com/marcparadise))
+- \[oc-id\] Use the v0 API for all chef interactions [\#1257](https://github.com/chef/chef-server/pull/1257) ([stevendanna](https://github.com/stevendanna))
+
+
 ## [12.15.6](https://github.com/chef/chef-server/tree/12.15.6) (2017-05-05)
 
 [Full Changelog](https://github.com/chef/chef-server/compare/12.15.5...12.15.6)

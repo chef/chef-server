@@ -39,7 +39,7 @@ In order to release, you will need the following accounts/permissions:
 ### Informing everyone of a pending release.
 
 - [ ] Announce your intention to drive the release to #cft-announce on slack.
-- [ ] Cross-post this intention on #chef-server and #spool.  Determine whether
+- [ ] Cross-post this intention on #chef-server and #pool.  Determine whether
   this upgrade requires a major/minor/patch bump and what the major changes
   are.
 - [ ] Ensure that the chef-server pipeline on wilson is currently green - you
@@ -99,8 +99,8 @@ The git SHA of the build you are testing can be found in
 
 ### Preparing for the release
 
-- [ ] Check that omnibus/config/projects/chef-server.rb has the
-  correct version given the type of changes in this release.
+- [ ] Check that omnibus_overrides.rb has the correct version given
+  the type of changes in this release.
 
 - [ ] Download the previous release of Chef Server (.deb).
 
@@ -118,7 +118,7 @@ The git SHA of the build you are testing can be found in
   appropriate.  If a there is a major version change, transfer all
   contents to PRIOR_RELEASE_NOTES.md before adding release notes.
 - [ ] Open a PR with these changes and post the link to #chef-server-rfr
-  and #spool.
+  and #pool.
 
 ### Building and Releasing the Release
 
@@ -163,6 +163,5 @@ Chef Server is now released.
 
 ## Post Release
 
-- [ ] Bump the Chef Server version number in
-  `omnibus/config/projects/chef-server.rb` for development to the next
-  logical version number.
+- [ ] Bump the Chef Server version number in `omnibus_overrides.rb`
+  for development to the next logical version number.
