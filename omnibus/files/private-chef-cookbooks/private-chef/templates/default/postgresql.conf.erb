@@ -173,7 +173,14 @@ wal_level = <%= node['private_chef']['postgresql']['wal_level'] %>			# minimal, 
 
 # - Checkpoints -
 
-checkpoint_segments =  <%= node['private_chef']['postgresql']['checkpoint_segments'] %>		# in logfile segments, min 1, 16MB each, default 3
+# checkpoint_segments is no longer a thing in pg 95 and later.
+# TODO: as part of actual conversion, determine if we need to modify
+#       the new defaults for its replacements, max_wal_size/min_wal_size -
+#       these defaults are intended to be more generally correct than
+#       the defaults for checkpoint_segments were.
+#       For some guidelines:
+#http://www.databasesoup.com/2016/01/configuration-changes-in-95-transaction.html
+#
 checkpoint_timeout = <%= node['private_chef']['postgresql']['checkpoint_timeout'] %>		# range 30s-1h, default 5min
 checkpoint_completion_target = <%= node['private_chef']['postgresql']['checkpoint_completion_target'] %>	# checkpoint target duration, 0.0 - 1.0, default 0.5
 checkpoint_warning = <%= node['private_chef']['postgresql']['checkpoint_warning'] %>		# 0 disables, default 30s
