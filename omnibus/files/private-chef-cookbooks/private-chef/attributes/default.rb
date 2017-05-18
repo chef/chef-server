@@ -419,6 +419,10 @@ default['private_chef']['oc-chef-pedant']['log_http_requests'] = true
 default['private_chef']['oc-chef-pedant']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['oc-chef-pedant']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['oc-chef-pedant']['debug_org_creation'] = false
+# Set this if you want to override pedant's chef server URL from the nginx ssl
+# URL. This is useful for special cases where you want to run pedant through
+# a proxy that sits in front of the chef server.
+default['private_chef']['oc-chef-pedant']['chef_server'] = nil
 
 ###
 # redis_lb
