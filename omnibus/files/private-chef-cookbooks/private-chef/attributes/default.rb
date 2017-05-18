@@ -616,7 +616,9 @@ default['private_chef']['postgresql']['shared_buffers'] = "#{(shared_bytes/1024)
 
 default['private_chef']['postgresql']['work_mem'] = "8MB"
 default['private_chef']['postgresql']['effective_cache_size'] = "#{(node['memory']['total'].to_i / 2) / (1024)}MB"
-default['private_chef']['postgresql']['checkpoint_segments'] = 3
+# TODO - conversion: checkpoint_segmennts -> max_wal_size, ref:
+#https://www.postgresql.org/docs/9.6/static/release-9-5.html
+default['private_chef']['postgresql']['max_wal_size'] = 3
 default['private_chef']['postgresql']['checkpoint_timeout'] = "5min"
 default['private_chef']['postgresql']['checkpoint_completion_target'] = 0.5
 default['private_chef']['postgresql']['checkpoint_warning'] = "30s"
