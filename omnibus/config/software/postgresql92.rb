@@ -15,14 +15,15 @@
 #
 
 name "postgresql92"
-default_version "9.2.21"
+default_version "9.6.3"
 
 license "PostgreSQL"
 license_file "COPYRIGHT"
 skip_transitive_dependency_licensing true
 
-source url: "https://ftp.postgresql.org/pub/source/v9.2.21/postgresql-9.2.21.tar.bz2",
-       sha256: "0697e843523ee60c563f987f9c65bc4201294b18525d6e5e4b2c50c6d4058ef9"
+source url: "https://ftp.postgresql.org/pub/source/v9.6.3/postgresql-9.6.3.tar.gz",
+       sha256: "df088372230b1dd21d87bb81686471508f4c42094d4f4f32b5d8e686fea69fa6"
+
 
 dependency "zlib"
 dependency "openssl"
@@ -31,7 +32,11 @@ dependency "ncurses"
 dependency "libossp-uuid"
 dependency "config_guess"
 
+<<<<<<< HEAD
 relative_path "postgresql-9.2.21"
+=======
+relative_path "postgresql-9.6.3"
+>>>>>>> Use PG 9.6 - no upgrade included
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
