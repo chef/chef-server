@@ -152,7 +152,8 @@ work_mem = <%= node['private_chef']['postgresql']['work_mem'] %>				# min 64kB
 
 # - Settings -
 
-wal_level = <%= node['private_chef']['postgresql']['wal_level'] %>			# minimal, archive, or hot_standby
+max_replication_slots = <%= node['private_chef']['postgresql']['max_replication_slots'] %>			# minimal, archive, or hot_standby
+wal_level = <%= node['private_chef']['postgresql']['wal_level'] %>
 					# (change requires restart)
 #fsync = on				# turns forced synchronization on or off
 #synchronous_commit = on		# synchronization level; on, off, or local
@@ -185,7 +186,7 @@ checkpoint_timeout = <%= node['private_chef']['postgresql']['checkpoint_timeout'
 checkpoint_completion_target = <%= node['private_chef']['postgresql']['checkpoint_completion_target'] %>	# checkpoint target duration, 0.0 - 1.0, default 0.5
 checkpoint_warning = <%= node['private_chef']['postgresql']['checkpoint_warning'] %>		# 0 disables, default 30s
 
-# - Archiving -
+# - Archiving #-
 
 
 archive_mode = <%= node['private_chef']['postgresql']['archive_mode'] %>		# allows archiving to be done
@@ -203,15 +204,16 @@ archive_timeout = <%= node['private_chef']['postgresql']['archive_timeout'] %>		
 
 # These settings are ignored on a standby server
 
-#max_wal_senders = 0		# max number of walsender processes
-				# (change requires restart)
+max_wal_senders = <%= node['private_chef']['postgresql']['max_wal_senders'] %>
+# max number of walsender processes
+# (change requires restart)
 #wal_sender_delay = 1s		# walsender cycle time, 1-10000 milliseconds
 #wal_keep_segments = 0		# in logfile segments, 16MB each; 0 disables
 #vacuum_defer_cleanup_age = 0	# number of xacts by which cleanup is delayed
 #replication_timeout = 60s	# in milliseconds; 0 disables
 #synchronous_standby_names = ''	# standby servers that provide sync rep
 				# comma-separated list of application_name
-				# from standby(s); '*' = all
+        # from standby(s); '*' = al
 
 # - Standby Servers -
 
