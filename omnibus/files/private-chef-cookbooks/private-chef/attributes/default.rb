@@ -271,6 +271,9 @@ default['private_chef']['opscode-expander']['retry_wait'] = 1
 default['private_chef']['opscode-erchef']['enable'] = true
 default['private_chef']['opscode-erchef']['ha'] = false
 default['private_chef']['opscode-erchef']['dir'] = "/var/opt/opscode/opscode-erchef"
+# sets a ulimit on the data memory segment via `chpst`'s `-d` option. Setting
+# to `nil` disables the limit.
+default['private_chef']['opscode-erchef']['memory_maxbytes'] = nil
 default['private_chef']['opscode-erchef']['log_directory'] = "/var/log/opscode/opscode-erchef"
 default['private_chef']['opscode-erchef']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['opscode-erchef']['log_rotation']['num_to_keep'] = 10
