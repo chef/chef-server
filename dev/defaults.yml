@@ -124,6 +124,7 @@ projects:
           - rabbitmq.management_password
           - rabbitmq.actions_password
           - oc_bifrost.superuser_id
+          - postgresql.db_superuser_password
         optional:
           - data_collector.token
           - ldap.bind_password
@@ -159,6 +160,7 @@ projects:
         list:
           - oc_bifrost.sql_password
           - oc_bifrost.superuser_id
+          - postgresql.db_superuser_password
   oc_reporting:
     type:  erlang
     external: true
