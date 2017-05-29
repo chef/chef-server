@@ -44,7 +44,7 @@ is_enabled() ->
             false
     end.
 
--spec token() -> list() | atom().
+-spec token() -> string() | atom().
 token() ->
     case chef_secrets:get(<<"data_collector">>, <<"token">>) of
         {ok, Token} ->

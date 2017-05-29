@@ -23,7 +23,7 @@ maybe_add_data_collector_token_header(Headers) ->
     case data_collector:token() of
         undefined ->
             Headers;
-        Token ->
+        Token when is_list(Token) ->
             [{"x-data-collector-token", Token} | Headers]
     end.
 
