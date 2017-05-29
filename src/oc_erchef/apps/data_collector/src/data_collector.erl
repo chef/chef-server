@@ -48,7 +48,7 @@ is_enabled() ->
 token() ->
     case chef_secrets:get(<<"data_collector">>, <<"token">>) of
         {ok, Token} ->
-            Token;
+            erlang:binary_to_list(Token);
         {error, not_found} ->
             undefined
     end.
