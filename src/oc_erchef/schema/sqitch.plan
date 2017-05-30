@@ -77,3 +77,5 @@ cbv_type 2015-04-23T08:33:00Z Steven Danna <steve@chef.io> # Add cbv type for ne
 
 node_policy_name_policy_group 2015-09-04T01:15:03Z Daniel DeLeo <ddeleo@lorentz.local># Add policy_name and policy_group fields to node
 @node-policyfile-fields 2015-09-05T01:47:34Z Daniel DeLeo <ddeleo@lorentz.local># Add policyfile fields to node
+
+users_email_functional_index [users] 2017-05-30T12:10:32Z Stephan Renatus <srenatus@chef.io> # Add functional index for index-based lower(email) lookups

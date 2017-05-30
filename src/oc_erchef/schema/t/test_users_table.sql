@@ -73,6 +73,7 @@ BEGIN
   RETURN QUERY SELECT chef_pgtap.has_index('users', 'users_authz_id_key', 'authz_id');
   RETURN QUERY SELECT chef_pgtap.has_index('users', 'users_username_key', 'username');
   RETURN QUERY SELECT chef_pgtap.has_index('users', 'users_email_key', 'email');
+  RETURN QUERY SELECT chef_pgtap.has_index('users', 'users_lower_email_idx', 'lower(email)');
 
   -- Keys
 
