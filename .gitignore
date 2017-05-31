@@ -15,4 +15,8 @@ dev/*.deb
 src/oc_erchef/log
 compile_commands.json
 .kitchen
-
+# IntelliJ IDEA files
+.idea/
+*.iml
+# Vim Files
+*.swp
