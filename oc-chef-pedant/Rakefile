@@ -22,8 +22,6 @@ def bundle_exec_with_chef(test_gem, commands)
         next
       elsif line =~ /^\s*gem '#{CURRENT_GEM_NAME}'|\s*gem "#{CURRENT_GEM_NAME}"/
         next
-      elsif line =~ /^\s*gem 'chef'|\s*gem "chef"/
-        line = "gem 'chef', '~>12'"
       elsif line =~ /^\s*dev_gem\s*['"](.+)['"]\s*$/
         line = "gem '#{$1}', github: 'poise/#{$1}'"
       elsif line =~ /\s*gem\s*['"]#{test_gem}['"]/ # foodcritic      end
