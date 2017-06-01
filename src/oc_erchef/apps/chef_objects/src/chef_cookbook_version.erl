@@ -275,7 +275,7 @@ file_list_spec() ->
     {array_map, {[{<<"name">>, string},
                   {<<"path">>, string},
                   {<<"checksum">>, string},
-                  {<<"specificity">>, string}
+                  {<<"specificity">>, {any_of, {[string, null], <<"specificity must be a string or null">>}}}
                  ]}}.
 
 -define(COOKBOOK_SEGMENTS, [<<"attributes">>,

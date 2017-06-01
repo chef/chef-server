@@ -70,6 +70,18 @@ valid_resources_test() ->
                   ]}]),
     ?assertEqual({ok, CB}, chef_cookbook_version:validate_cookbook(CB, NameVer)).
 
+null_specificity_test() ->
+    CB0 = basic_cookbook(<<"php">>, <<"1.2.3">>),
+    NameVer = {<<"php">>, <<"1.2.3">>},
+    CB = ej:set({<<"resources">>}, CB0,
+                [{[
+                   {<<"name">>, <<"a1">>},
+                   {<<"path">>, <<"c/b/a1">>},
+                   {<<"checksum">>, <<"abababababababababababababababab">>},
+                   {<<"specificity">>, null}
+                  ]}]),
+    ?assertEqual({ok, CB}, chef_cookbook_version:validate_cookbook(CB, NameVer)).
+
 top_level_key_validation_test() ->
     Name = <<"test_name">>,
     Version = <<"1.2.3">>,
