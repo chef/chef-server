@@ -163,7 +163,7 @@ get_external_config(VHostUrl) ->
 aws_config(S3Url) ->
     {ok, S3AccessKeyId} = chef_secrets:get(<<"bookshelf">>, <<"access_key_id">>),
     {ok, S3SecretKeyId} = chef_secrets:get(<<"bookshelf">>, <<"secret_access_key">>),
-    mini_s3:new(S3AccessKeyId, S3SecretKeyId, S3Url, path).
+    mini_s3:new(erlang:binary_to_list(S3AccessKeyId), erlang:binary_to_list(S3SecretKeyId), S3Url, path).
 
 %% @doc returns a url for accessing s3 internally. This is used
 %% to contact bookshelf or S3.
