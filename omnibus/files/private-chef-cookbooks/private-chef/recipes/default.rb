@@ -90,6 +90,11 @@ directory "/var/opt/opscode" do
   action :create
 end
 
+directory "/var/log" do
+  mode "0755"
+  action :create
+end
+
 directory "/var/log/opscode" do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
