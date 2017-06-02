@@ -172,7 +172,7 @@ describe "oc_id API", :oc_id do
     end
   end
 
-  context "/id/profile#change_password" do
+  context "/id/profile#password" do
     let(:new_password) { "barfoo" }
     let(:csrf) { signin }
     let(:request_url) { "#{platform.server}/id/profile/password" }

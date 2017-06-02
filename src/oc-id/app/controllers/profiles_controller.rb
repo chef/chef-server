@@ -37,7 +37,7 @@ class ProfilesController < ApplicationController
   end
 
   #
-  # PUT /id/profile/change_password
+  # PUT /id/profile/password
   #
   # Changes the user's password.
   #
