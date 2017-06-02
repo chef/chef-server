@@ -14,7 +14,7 @@ ifeq ($(REBAR3),)
 REBAR3 = rebar3
 endif
 
-all: $(REBAR3)
+all: $(REBAR3) elvis
 	@$(REBAR3) do clean, compile, eunit, dialyzer
 
 rel: all
@@ -40,6 +40,9 @@ travis: all rel
 # to reload CTH. This appears to be a bug upstream in rebar.
 ct: $(REBAR3)
 	$(REBAR3) ct
+
+elvis:
+	../../scripts/elvis rock
 
 version_clean:
 	@rm -f VERSION
