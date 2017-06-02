@@ -464,6 +464,28 @@ describe "opscode-account groups", :groups do
         end
       end
 
+      context "user requesting not existing group(#1284)" do
+        let(:not_real) { "not-real" }
+        it "should return 404" do
+          get("#{request_url}/#{not_real}", platform.admin_user).should look_like({
+              :status => 404
+          })
+
+          get("#{request_url}/#{not_real}", platform.non_admin_user).should look_like({
+               :status => 404
+          })
+        end
+      end
+
+      context "user requesting not existing group acl(#1284)" do
+        let(:not_real) { "not-real" }
+        it "should return 404" do
+          get("#{request_url}/#{not_real}/_acl", platform.admin_user).should look_like({
+               :status => 404
+          })
+        end
+      end
+
       context "normal user without read ACE returns 403", :authorization do
         it "can't read group" do
           put(api_url("groups/#{test_group}/_acl/read"), platform.admin_user,
