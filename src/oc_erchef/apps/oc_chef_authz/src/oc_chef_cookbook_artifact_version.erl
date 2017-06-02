@@ -152,7 +152,7 @@ record_fields(_ApiVersion) ->
     record_info(fields, oc_chef_cookbook_artifact_version).
 
 update(#oc_chef_cookbook_artifact_version{}, _CallbackFun) ->
-	erlang:error(not_supported).
+    erlang:error(not_supported).
 
 fields_for_insert(#oc_chef_cookbook_artifact_version{} = Rec) ->
     %% doesn't have a char(32) ID like other chef objects, but
@@ -167,7 +167,7 @@ parse_binary_json(Bin) ->
     Ejson = chef_json:decode_body(Bin),
     case ej:valid(validation_constraints(), Ejson) of
         ok ->
-			Ejson;
+            Ejson;
         Bad ->
             throw(Bad)
     end.

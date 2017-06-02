@@ -130,7 +130,7 @@ record_fields(_ApiVersion) ->
     record_info(fields, oc_chef_cookbook_artifact).
 
 update(#oc_chef_cookbook_artifact{}, _CallbackFun) ->
-	erlang:error(not_supported).
+    erlang:error(not_supported).
 
 fields_for_insert(#oc_chef_cookbook_artifact{}) ->
     erlang:error(not_supported).

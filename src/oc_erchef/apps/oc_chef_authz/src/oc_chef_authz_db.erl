@@ -55,10 +55,6 @@
 %% So copied this over for the short term.
 -define(GLOBAL_PLACEHOLDER_ORG_ID, <<"00000000000000000000000000000000">>).
 
--define(gv(Key, PList), proplists:get_value(Key, PList)).
--define(user_db, "opscode_account").
--define(auth_join_db, "opscode_account").
-
 statements(_) ->
     Path = filename:join([code:priv_dir(oc_chef_authz), "pgsql_statements.config"]),
     {ok, Statements} = file:consult(Path),

@@ -85,7 +85,7 @@ create_input_pgr_assoc_record(OrgID, PolicyName, GroupName) ->
 validate_json(Body, NameFromReq) ->
     {ok, Policy} = oc_chef_policy_revision:parse_binary_json(Body),
     ok = validate_name(NameFromReq, Policy),
-	Policy.
+    Policy.
 
 validate_name(NameFromReq, Policy) ->
     NameFromJson = erlang:binary_to_list(ej:get({<<"name">>}, Policy)),

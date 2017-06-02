@@ -151,7 +151,7 @@ parse_binary_json(Bin) ->
     PolicyGroup = chef_json:decode_body(Bin),
     case ej:valid(?VALIDATION_CONSTRAINTS, PolicyGroup) of
         ok ->
-			{ok, PolicyGroup};
+            {ok, PolicyGroup};
         Bad ->
             throw(Bad)
     end.

@@ -300,7 +300,7 @@ fetch(#oc_chef_group{org_id = OrgId, for_requestor_id = RequestorId} = Record, C
         Other ->
             Other
     end.
- 
+
 maybe_find_names(forbidden, _, _) ->
     forbidden;
 maybe_find_names({ActorAuthzIds, GroupAuthzIds}, GroupRecord, Context) ->
