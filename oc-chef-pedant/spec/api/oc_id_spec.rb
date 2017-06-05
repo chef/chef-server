@@ -2,7 +2,6 @@ require 'pedant/rspec/common'
 require 'openssl'
 
 describe "oc_id API", :oc_id do
-
   let(:request_headers) do
     {
       "Content-Type" => "application/x-www-form-urlencoded",
@@ -196,4 +195,16 @@ describe "oc_id API", :oc_id do
       })
     end
   end
+
+  #
+  # Untested endpoints
+  #
+  # The following endpoints are not tested because they require
+  # additional test-system setup.
+  #
+  untested_endpoint("/v1/users", "requires a configured oc-id application")
+  untested_endpoint("/v1/me", "requires a configured oc-id application")
+  untested_endpoint("/v1/me/organizations", "requires a configured oc-id application")
+  untested_endpoint("/zendesk", "requires zendseks configuration")
+  untested_endpoint("/password-reset", "requires email configuration")
 end
