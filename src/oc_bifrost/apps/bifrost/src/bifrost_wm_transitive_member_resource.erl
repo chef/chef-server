@@ -18,8 +18,8 @@ auth_info('GET') ->
     read.
 
 -spec validate_request(wm_req(), base_state()) ->
-			      {{halt, 401 | 403 | 404}, wm_req(), base_state()} |
-			      {boolean(), wm_req(), base_state()}.
+    {{halt, 401 | 403 | 404}, wm_req(), base_state()} |
+    {boolean(), wm_req(), base_state()}.
 validate_request(Req, State) ->
     bifrost_wm_base:validate_requestor(Req, State).
 
@@ -27,23 +27,23 @@ validate_request(Req, State) ->
 %% groups_for_actor and a similar db function for groups does not exist, but
 %% will leave code in for groups in case we ever want to implement.
 -spec to_json(wm_req(), base_state()) ->
-		     {{halt, 404 | 400}, wm_req(), base_state()} |
-		     {binary(), wm_req(), base_state()}.
+    {{halt, 404 | 400}, wm_req(), base_state()} |
+    {binary(), wm_req(), base_state()}.
 to_json(Req, #base_state{reqid = ReqId,
-			 authz_id = GroupAuthzId,
-			 member_id = MemberAuthzId,
-			 member_type = MemberType} = State) ->
+                         authz_id = GroupAuthzId,
+                         member_id = MemberAuthzId,
+                         member_type = MemberType} = State) ->
     try
-	%% check if member_id exists since it doesn't get checked like base_state(authz_id)
-	case ?SH_TIME(ReqId, bifrost_db, exists, (MemberType, MemberAuthzId)) of
-	    false ->
-		{{halt, 404}, Req, State};
-	    true ->
-		IsMember = is_member(ReqId, MemberType, MemberAuthzId, GroupAuthzId),
-		{bifrost_wm_util:encode({[{<<"is_member">>, IsMember}]}), Req, State}
-	end
+        %% check if member_id exists since it doesn't get checked like base_state(authz_id)
+        case ?SH_TIME(ReqId, bifrost_db, exists, (MemberType, MemberAuthzId)) of
+            false ->
+                {{halt, 404}, Req, State};
+            true ->
+                IsMember = is_member(ReqId, MemberType, MemberAuthzId, GroupAuthzId),
+                {bifrost_wm_util:encode({[{<<"is_member">>, IsMember}]}), Req, State}
+        end
     catch
-	throw:{db_error, Error} ->
+        throw:{db_error, Error} ->
             bifrost_wm_error:set_db_exception(Req, State, Error)
     end.
 
@@ -52,8 +52,8 @@ to_json(Req, #base_state{reqid = ReqId,
 is_member(ReqId, MemberType, MemberAuthzId, GroupAuthzId) ->
     %% Recursively get all groups that contain ActorAuthzId and see if GroupAuthzId is in the list.
     case ?SH_TIME(ReqId, bifrost_db, is_recursive_member_of_group, (MemberType, MemberAuthzId, GroupAuthzId)) of
-	{error, Error} ->
-	    throw({db_error, Error});
-	Result ->
-	    Result
+        {error, Error} ->
+            throw({db_error, Error});
+        Result ->
+            Result
     end.

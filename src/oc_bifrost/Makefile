@@ -17,8 +17,11 @@ endif
 # If the user hasn't set POSTGRES_USER, default to postgres
 POSTGRES_USER ?= 'postgres'
 
-all: $(REBAR3)
+all: $(REBAR3) elvis
 	@$(REBAR3) do clean, compile, eunit, dialyzer
+
+elvis:
+	../../scripts/elvis rock
 
 rel: all
 	@$(REBAR3) release
