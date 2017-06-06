@@ -71,6 +71,9 @@
 %% Username validation regex
 -define(USERNAME_REGEX, "[a-z0-9\-_]+").
 
+%% Validation regex for various names
+-define(HUMAN_NAME_REGEX, "[[:word:][:digit:]!'. -]+").
+
 %% Non-blank string regex
 -define(NON_BLANK_REGEX, ".+").
 
@@ -163,6 +166,18 @@ regex_for(policy_fully_qualified_recipe) ->
 regex_for(user_name) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?USERNAME_REGEX),
                             <<"Malformed user name. Must only contain a-z, 0-9, _, or -">>);
+regex_for(firstname) ->
+   generate_regex_msg_tuple(?ANCHOR_REGEX(?HUMAN_NAME_REGEX),
+                            <<"Denied firstname. Must only contain word characters, digits, ', or .">>);
+regex_for(middlename) ->
+   generate_regex_msg_tuple(?ANCHOR_REGEX(?HUMAN_NAME_REGEX),
+                            <<"Denied middlename. Must only contain word characters, digits, ', or .">>);
+regex_for(lastname) ->
+   generate_regex_msg_tuple(?ANCHOR_REGEX(?HUMAN_NAME_REGEX),
+                            <<"Denied lastname. Must only contain word characters, digits, ', or .">>);
+regex_for(display_name) ->
+   generate_regex_msg_tuple(?ANCHOR_REGEX(?HUMAN_NAME_REGEX),
+                            <<"Denied display_name. Must only contain word characters, digits, ', or .">>);
 regex_for(non_blank_string) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?NON_BLANK_REGEX), <<"Field must have a non-empty string value">>);
 

@@ -32,6 +32,10 @@
                       role_name |
                       unqualified_recipe |
                       user_name |
+                      firstname |
+                      middlename |
+                      lastname |
+                      display_name |
                       policy_file_name |
                       policy_identifier.
 
