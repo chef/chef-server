@@ -111,7 +111,7 @@ environment_not_found_message(EnvName) ->
 %% TODO: Why are these messages phrased differently?  This is what the Ruby endpoints were
 %% doing, FYI.  Is this something we're stuck with, or can we update the API and normalize
 %% these messages?
--spec not_found_message( node | role | data_bag | data_bag_item1 |
+-spec not_found_message( node | role | group | data_bag | data_bag_item1 |
                          data_bag_item2 | client | data_bag_missing_for_item_post |
                          environment | sandbox | sandboxes | cookbook |
                          cookbook_version | user | invitation | policy | policy_group,
@@ -120,6 +120,8 @@ not_found_message(node, Name) ->
     error_message_envelope(iolist_to_binary(["node '", Name, "' not found"]));
 not_found_message(role, Name) ->
     error_message_envelope(iolist_to_binary(["Cannot load role ", Name]));
+not_found_message(group, Name) ->
+    error_message_envelope(iolist_to_binary(["group '", Name, "' not found"]));
 not_found_message(data_bag, Name) ->
     error_message_envelope(iolist_to_binary(["Cannot load data bag ", Name]));
 not_found_message(data_bag_item1, {BagName, ItemName}) ->
