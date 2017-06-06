@@ -173,8 +173,8 @@ fetch_entry_md(Req, #context{} = Ctx) ->
                                 error_logger:error_msg("fetch_entry_md no_connections", []),
                                 {error, no_connections}
                         end);
-        {error, _Error} ->
-            error_logger:error_msg("Error occurred during fetch_entry_md: B:~p P:~p '~p'~n", [Bucket,Path,_Error]),
+        {error, Error} ->
+            error_logger:error_msg("Error occurred during fetch_entry_md: B:~p P:~p '~p'~n", [Bucket, Path, Error]),
             {error, Ctx}
     end.
 

@@ -17,7 +17,7 @@ REBAR3 = rebar3
 endif
 
 ## TODO: put 'ct' back in here
-all: $(REBAR3)
+all: $(REBAR3) elvis
 	@$(REBAR3) do clean, compile, eunit, dialyzer, xref
 
 rel: all
@@ -32,6 +32,9 @@ $(REBAR3):
 
 ct: $(REBAR3)
 	$(REBAR3) ct
+
+elvis:
+	../../scripts/elvis rock
 
 version_clean:
 	@rm -f VERSION
