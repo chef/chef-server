@@ -34,6 +34,12 @@ vm:
     # enable a separate ldap vm but do not use it unless
     # use-external is set.
     start: false
+  # Brings up elasticsearch 5 - not connected to chef-server right now.
+  # This is experimental.
+  #elasticsearch:
+    #start: true
+    # The major version family to use - either "2" or "5".
+    #version: "2"
   # Override this in config.yml if you want to install chef server plugins with
   # specific packages.
   plugins:
@@ -100,7 +106,7 @@ vm:
     base_output_path: /vagrant/testdata/cover # maps to dev/testdata/cover
   node-attributes:
     placeholder: true
-  # Overriding config.vm.stsrt-custom to true will create an empty VM of the same
+  # Overriding config.vm.start-custom to true will create an empty VM of the same
   # distro as the chef server, with 2GB/2core, using CUSTOM_VM_ADDRESS
   start-custom: false
 

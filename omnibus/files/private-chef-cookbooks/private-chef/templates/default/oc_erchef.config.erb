@@ -217,6 +217,7 @@
         {reindex_sleep_min_ms, <%= @reindex_sleep_min_ms -%>},
         {reindex_sleep_max_ms, <%= @reindex_sleep_max_ms -%>},
         {reindex_item_retries, <%= @reindex_item_retries -%>},
+        {solr_elasticsearch_major_version, <%= @solr_elasticsearch_major_version %>},
         {solr_service, [
             {root_url, "<%= @helper.solr_url() %>"},
             {timeout, <%= @solr_timeout %>},

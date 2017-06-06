@@ -6,7 +6,7 @@ Chef is a system integration framework written in erlang and ruby and designed t
 
 The Chef Wiki is the definitive source of user documentation.
 
-    http://wiki.chef.io/display/chef/Home
+    https://docs.chef.io/
 
 This README focuses on developers who want to modify Chef source code.  For users who just want to run the latest and greatest Chef development version in their environment, see:
 
@@ -15,12 +15,9 @@ This README focuses on developers who want to modify Chef source code.  For user
 # DEVELOPMENT:
 
 Before working on the code, if you plan to contribute your changes, you need to read the Opscode Contributing document.
-
-    http://wiki.chef.io/display/chef/How+to+Contribute
-
 You will also need to set up the repository with the appropriate branches. We document the process on the Chef Wiki.
 
-    http://wiki.chef.io/display/chef/Working+with+git
+    https://github.com/chef/chef/blob/master/CONTRIBUTING.md
 
 Once your repository is set up, you can start working on the code.
 
@@ -36,7 +33,7 @@ Tickets/Issues:
 
 Documentation:
 
-    http://wiki.chef.io/display/chef/Home/
+    https://docs.chef.io/
 
 # LICENSE:
 

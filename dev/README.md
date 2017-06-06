@@ -33,8 +33,10 @@ First, add the following configuration to your `/etc/hosts` file:
     192.168.33.100 api.chef-server.dev manage.chef-server.dev
     192.168.33.150 database.chef-server.dev
     192.168.33.151 backend.chef-server.dev
-    192.168.33.153 ldap.chef-server.dev
+    192.168.33.152 ldap.chef-server.dev
+    192.168.33.153 custom.chef-server.dev
     192.168.33.155 reportingdb.chef-server.dev
+    192.168.33.156 elasticsearch.chef-server.dev
 
 Next, bring up the VMs!
 
@@ -303,3 +305,13 @@ vm:
     start: true
     use-external: true
 ```
+# Using elasticsearch 
+
+To create a separate elasticsearch vm create a `config.yml` file with the following contents:
+```
+  elasticsearch:
+    start: true
+    # The major version family to use - either "2" or "5".
+    version: "5"
+```
+

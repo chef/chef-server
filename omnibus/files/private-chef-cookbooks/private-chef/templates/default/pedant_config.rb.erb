@@ -75,7 +75,7 @@ search_server "<%= @solr_url %>"
 
 <% if node['private_chef']['opscode-erchef']['search_provider'] == "elasticsearch" %>
 search_commit_url "/_refresh"
-search_url_fmt "/chef/_search?fq=X_CHEF_type_CHEF_X:%{type}&q=%{query}"
+search_url_fmt "/chef/_search?q=X_CHEF_type_CHEF_X:%{type}%%20%{query}"
 <% end %>
 
 # Some tests expect access erchef server directly, instead of routing through

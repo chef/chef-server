@@ -1,5 +1,6 @@
 require 'mixlib/shellout'
 require 'uri'
+require "net/http"
 
 class OmnibusHelper
   attr_reader :node
@@ -56,6 +57,40 @@ class OmnibusHelper
       host += ":" + url.port.to_s
     end
     host
+  end
+
+  def elastic_search_major_version
+    max_requests = 5
+    current_request = 1
+
+    if node['private_chef']['opscode-solr4']['external']
+      # This will throw an exception if you have an invalid URL. We want this behavior.
+      elastic_search_uri = URI.parse(node['private_chef']['opscode-solr4']['external_url'])
+      begin
+        req = Net::HTTP::Get.new(elastic_search_uri)
+        res = Net::HTTP.start(elastic_search_uri.hostname, elastic_search_uri.port, use_ssl: elastic_search_uri.scheme == "https") do |http|
+          http.request(req)
+        end
+      rescue => e
+        # Perform a blind rescue because Net:HTTP throws a variety of exceptions - some of which are platform specific.
+        Chef::Log.error "Failed to connect to elasticsearch service. Retrying.\n#{e}"
+        if current_request == max_requests
+          raise "Failed to connect to elasticsearch service. Ensure node['private_chef']['opscode-solr4']['external_url'] is correct.\n#{e}"
+        else
+          current_request += 1
+          sleep(current_request * 2)  # Exponential back-off.
+          retry
+        end
+      end
+      raise "Unable to interrogate elasticsearch server - HTTP#{res.code}:\n#{res.body}" if res.code.to_i >= 400
+      # This can raise exceptions if the response does not match the format we expect.
+      version = JSON.parse(res.body)['version']['number'].split('.').first.to_i
+      raise "Unsupported elasticsearch version of #{version}. There is current support for the major versions of 2 and 5." if version != 5 && version != 2
+      version
+    else
+      # Elasticsearch is disabled - this configuration setting should never be used in erlang.
+      0
+    end
   end
 
   def solr_url
