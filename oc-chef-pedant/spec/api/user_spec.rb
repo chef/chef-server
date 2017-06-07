@@ -75,10 +75,10 @@ describe "users", :users do
 
           let(:user_options) do
             { :overrides => {
-                :first_name => "external",
-                :last_name => "user",
-                :display_name => "SAML USER",
-                :external_authentication_uid => external_auth_id
+                "first_name" => "external",
+                "last_name" => "user",
+                "display_name" => "SAML USER",
+                "external_authentication_uid" => external_auth_id
               }
             }
           end
@@ -118,6 +118,90 @@ describe "users", :users do
             data.key?("first_name").should be true
             data.key?("last_name").should be true
             data.key?("email").should be true
+          end
+        end
+
+        context "case-insensitive email addresses" do
+          let(:username) { "user_for_email_tests" }
+          let(:email) { "User@aol.com" }
+          let(:user_options) do
+            { :overrides => {
+                "first_name" => "user",
+                "last_name" => "user",
+                "display_name" => "USER USER",
+                "email" => email
+              }
+            }
+          end
+
+          let(:filtered_users_body) do
+            { username => "#{request_url}/#{username}" }
+          end
+
+          before :each do
+            @user = platform.create_user(username, user_options)
+          end
+
+          after :each do
+            platform.delete_user(@user)
+          end
+
+          it "finds a user by email if the query does matches what is stored" do
+            get("#{request_url}?email=#{email}", platform.superuser).should look_like({
+                :status => 200,
+                :body_exact => filtered_users_body
+              })
+          end
+
+          it "finds a user by email if the query is all uppercase" do
+            uppercase = 'USER@AOL.COM'
+            get("#{request_url}?email=#{uppercase}", platform.superuser).should look_like({
+                :status => 200,
+                :body_exact => filtered_users_body
+              })
+          end
+
+          it "finds a user by email if the query is all lowercase" do
+            lowercase = 'user@aol.com'
+            get("#{request_url}?email=#{lowercase}", platform.superuser).should look_like({
+                :status => 200,
+                :body_exact => filtered_users_body
+              })
+          end
+
+          context "when there's another user with that mail (different case)" do
+            let(:username_two) { "user_for_email_tests_two" }
+            let(:email_two) { "useR@aOl.com" }
+            let(:user_options_two) do
+              { :overrides => {
+                  :first_name => "user",
+                  :last_name => "user",
+                  :display_name => "USER USER",
+                  :email => email_two
+                }
+              }
+            end
+
+            let(:filtered_users_body) do
+              { username => "#{request_url}/#{username}",
+                username_two => "#{request_url}/#{username_two}",
+              }
+            end
+
+            before :each do
+              @user2 = platform.create_user(username_two, user_options_two)
+            end
+
+            after :each do
+              platform.delete_user(@user2)
+            end
+
+            it "finds both users by this email" do
+              get("#{request_url}?email=#{email}", platform.superuser).should look_like({
+                  :status => 200,
+                  :body_exact => filtered_users_body
+              })
+            end
           end
         end
 

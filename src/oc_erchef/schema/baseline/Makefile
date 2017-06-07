@@ -6,7 +6,7 @@ TEST_FUNCTIONS = $(wildcard t/test_*.sql)
 
 setup_schema:
 	@echo "Dropping and recreating database '$(TEST_DB)'"
-	@psql --dbname template1 --single-transaction --command 'DROP DATABASE IF EXISTS $(TEST_DB)'
+	@psql --dbname template1 --command 'DROP DATABASE IF EXISTS $(TEST_DB)'
 	@createdb $(TEST_DB)
 	@sqitch --engine pg --db-name $(TEST_DB) deploy
 
