@@ -380,12 +380,12 @@ module Pedant
 
     def create_min_user(username, options = {})
       payload = {
-        "username" => username,
-        "email" => "#{username}@chef.io",
-        "first_name" => username,
-        "last_name" => username,
-        "display_name" => username,
-        "password" => "foobar"
+        username: username,
+        email: "#{username}@chef.io",
+        first_name: username,
+        last_name: username,
+        display_name: username,
+        password: "foobar"
       }
       if options.has_key?(:overrides)
         payload = payload.merge(options[:overrides])
