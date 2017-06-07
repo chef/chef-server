@@ -26,7 +26,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 
--define(VD(D), chef_objects_test_utils:versioned_desc(Version,D)).
+-define(VD(D), chef_objects_test_utils:versioned_desc(Version, D)).
 -define(VDD(D), chef_objects_test_utils:versioned_desc(Version, iolist_to_binary(["[deprecated] ", D]))).
 
 assemble_user_ejson_test_() ->
@@ -287,6 +287,33 @@ parse_binary_json_tests(Version) ->
                                                          create, undefined))
                 || Bad <- BadKeys ]
       end}
+    ]
+    ++
+    [
+     {?VD(lists:flatten(io_lib:format("Errors when invalid ~s", [Field]))),
+      fun() ->
+              HtmlyValue = <<"I <3 Chef">>,
+              UserEJson = {make_min_valid_create_user_ejson()},
+              UserEJson1 = ej:set({Field}, UserEJson, HtmlyValue),
+              ?assertThrow(#ej_invalid{key = Field},
+                           chef_user:parse_binary_json(Version, chef_json:encode(UserEJson1), create, undefined))
+      end
+     }
+     || Field <- [<<"display_name">>, <<"firstname">>, <<"middlename">>, <<"lastname">>]
+    ]
+    ++
+    [
+     {?VD(lists:flatten(io_lib:format("Works with non-ASCII ~s", [Field]))),
+      fun() ->
+              %% "Maryam", #1 female name in the arab world as of 2015
+              Value = <<"مريم 1. O'Mara">>,
+              UserEJson = {make_min_valid_create_user_ejson()},
+              UserEJson1 = ej:set({Field}, UserEJson, Value),
+              ?assertMatch({ok, _},
+                           chef_user:parse_binary_json(Version, chef_json:encode(UserEJson1), create, undefined))
+      end
+     }
+     || Field <- [<<"display_name">>, <<"firstname">>, <<"middlename">>, <<"lastname">>]
     ].
 
 parse_binary_json_non_deprecated_test_() ->
