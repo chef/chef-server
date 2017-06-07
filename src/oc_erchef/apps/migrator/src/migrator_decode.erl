@@ -30,7 +30,7 @@
 %%                                          created_at[timestamp without time zone]:'2017-06-05 18:06:47'
 %%                                          updated_at[timestamp without time zone]:'2017-06-05 18:06:47'
 %%                                          pubkey_version[smallint]:0
-%%                                          admin[boolean]:false">>},
+%%                                          admin[boolean]:false">>,
 %%
 %% migrator_decode:decode(Input) yields:
 %%
@@ -42,8 +42,8 @@
 %%                                  {<<"last_updated_by">>, <<"f1cd13cb541436c290c2b4eb3685f6c2">>},
 %%                                  {<<"created_at">>,<<"2017-06-05 18:06:47">>},
 %%                                  {<<"updated_at">>,<<"2017-06-05 18:06:47">>},
-%%                                  {<<"pubkey_version">>,<<"0">>},
-%%                                  {<<"admin">>,<<"false">>} ] }
+%%                                  {<<"pubkey_version">>,0},
+%%                                  {<<"admin">>,false} ] }
 %%
 %% All fields and values are binary, making them suitable for direct use in sql
 %% queries. This works for now, but I could see a path that uses epgsql_binary
@@ -76,8 +76,13 @@ do_decode(_Other) ->
 
 decode_transaction(Raw) ->
   {Table, Operation, Rest} = extract_op_elements(Raw),
-  Fields = extract_fields(Rest, []),
-  {Table, Operation, Fields}.
+  case processable(Rest) of
+    true ->
+      Fields = extract_fields(Rest, []),
+      {Table, Operation, Fields};
+    false ->
+      {Table, Operation, noop}
+  end.
 
 extract_op_elements(Data) ->
   % Data = clients: INSERT: id[character varying]:'$VALUE'
@@ -85,18 +90,49 @@ extract_op_elements(Data) ->
   [Operation, Rest1] = binary:split(Rest0, <<": ">>), % INSERT, id[character varying]:'$VALUE'
   {Table, Operation, Rest1}.
 
+  % This seems to happen for (maybe) some trigger-based deletes - I think in this cae
+  % we have hit a cleanup path, because the same TX is used for a group of changes:
+  % When it happens, it's the only field , in the form:
+  % <<"table public.cookbook_artifact_version_checksums: DELETE: (no-tuple-data)">>},
+  % <<"table public.checksums: DELETE: org_id[character]:'b22a18ce74e549b0ccb7da11fd5c59ad' checksum[character]:'268750691044b4fbab541d0edb2e0d7b'">>},
+  % <<"table public.cookbook_artifacts: DELETE: id[integer]:17">>},
+  % <<"table public.cookbook_artifact_versions: DELETE: id[bigint]:22">>},
+processable(<<"(no-tuple-data)">>)  ->
+  false;
+processable(_) ->
+  true.
+
 extract_fields(<<>>, Acc) ->
   Acc;
 extract_fields(TxData, Acc) ->
   % Data = id[character varying]:'$VALUE' something_else[....
-  io:fwrite("In: ~p~n", [TxData]),
-  [Field, Rest0] = binary:split(TxData, <<"[">>),   % id, [character varying]:'$VALUE' something_else[....
-  [Type, Rest1] = binary:split(Rest0, <<"]:'">>), % character varying, $VALUE' something_else[....
-  {ok, Pos, Rest2} = find_value_end(Rest1, 0),
-  Value = binary:part(Rest1, 0, Pos),
-  extract_fields(Rest2, [ { Field, Type, Value} | Acc]).
+  % enable this when we fail to match as expected
+  % and you want to see where it left off:
+  %io:fwrite("In: ~p~n", [TxData]),
+  [Field, Rest0] = binary:split(TxData, <<"[">>),
+  % We are not currently using type data when reconstituting these queries.
+  [_Type, Rest1] = binary:split(Rest0, <<"]:">>),
+  {Value, Rest3} = case Rest1 of
+                       <<"'",Rest2/binary>> ->
+                           {ok, Pos, R} = find_quoted_value_end(Rest2, 0),
+                           V = binary:part(Rest1, 1, Pos),
+                           {V, R};
+                       Rest2 ->
+                           % This is unquoted, so we're looking for a space only.
+                           {ok, Pos, R} = find_value_end(Rest2, 0),
+                           V = binary:part(Rest1, 0, Pos),
+                           {V, R}
+                   end,
+
+  extract_fields(Rest3, [ { Field, Value} | Acc]).
 
 
+find_value_end(<<>>, Pos) ->
+  {ok, Pos, <<>>};
+find_value_end(<<" ",Rest/binary>>, Pos) ->
+  {ok, Pos, Rest};
+find_value_end(<<_:1/binary, Rest/binary>>, Pos) ->
+  find_value_end(Rest, Pos + 1).
 
 % We wil need two paths here. Instead of worrying about the
 % mapping of types -> quoted/not, we will look for the
@@ -104,16 +140,16 @@ extract_fields(TxData, Acc) ->
 % otherwise we will look only for space.
 % There are probably better ways, but this works for now:
 % First exclude escaped apostrophes
-find_value_end(<<"\\'",Rest/binary>>, Pos) ->
-  find_value_end(Rest, Pos + 2);
-find_value_end(<<"'">>, Pos) ->
+find_quoted_value_end(<<"\\'",Rest/binary>>, Pos) ->
+  find_quoted_value_end(Rest, Pos + 2);
+find_quoted_value_end(<<"'">>, Pos) ->
   % ' at the end of the line is also an end marker
   {ok, Pos, <<>>};
-find_value_end(<<"' ",Rest/binary>>, Pos) ->
+find_quoted_value_end(<<"' ",Rest/binary>>, Pos) ->
   {ok, Pos, Rest};
-find_value_end(<<>>, Pos) ->
+find_quoted_value_end(<<>>, Pos) ->
   {error, {expected_field_end, Pos}};
-find_value_end(<<_:1/binary, Rest/binary>>, Pos) ->
-  find_value_end(Rest, Pos + 1).
+find_quoted_value_end(<<_:1/binary, Rest/binary>>, Pos) ->
+  find_quoted_value_end(Rest, Pos + 1).
 
 
