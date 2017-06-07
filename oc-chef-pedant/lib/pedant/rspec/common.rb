@@ -387,6 +387,16 @@ module Pedant
           end
         end
 
+        # Used to easily documented endpoints that don't have tests
+        def self.untested_endpoint(endpoint_name, reason)
+          context endpoint_name do
+            it "returns success" do
+              pending(reason)
+              raise NotImplementedError
+            end
+          end
+        end
+
         # Run the given block once (using 'key' to identify
         # the block).  This allows us to do "before :each"
         # cleanup to clean up from previous test runs, since
