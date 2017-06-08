@@ -104,7 +104,7 @@
 
 -spec generate_regex(regex_pattern()) -> re_regex().
 generate_regex(Pattern) ->
-  {ok, Regex} = re:compile(Pattern),
+  {ok, Regex} = re:compile(Pattern, [unicode, ucp]),
   Regex.
 
 -spec generate_regex_msg_tuple(regex_pattern(), re_msg()) -> {re_regex(), re_msg()}.
