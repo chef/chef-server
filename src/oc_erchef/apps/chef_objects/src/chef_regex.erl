@@ -102,14 +102,18 @@
 %% A SHA1 hash
 -define(SHA1_HASH_REGEX, "[a-fA-F0-9]{40}").
 
--spec generate_regex(regex_pattern()) -> re_regex().
-generate_regex(Pattern) ->
-  {ok, Regex} = re:compile(Pattern),
+-spec generate_regex(regex_pattern(), list()) -> re_regex().
+generate_regex(Pattern, Opts) ->
+  {ok, Regex} = re:compile(Pattern, Opts),
   Regex.
 
 -spec generate_regex_msg_tuple(regex_pattern(), re_msg()) -> {re_regex(), re_msg()}.
 generate_regex_msg_tuple(Pattern, Message) ->
-  Regex = generate_regex(Pattern),
+    generate_regex_msg_tuple(Pattern, Message, []).
+
+-spec generate_regex_msg_tuple(regex_pattern(), re_msg(), list()) -> {re_regex(), re_msg()}.
+generate_regex_msg_tuple(Pattern, Message, Opts) ->
+  Regex = generate_regex(Pattern, Opts),
   {Regex, Message}.
 
 -spec regex_for(regex_name()) -> {re_regex(),  re_msg()}.
@@ -168,16 +172,16 @@ regex_for(user_name) ->
                             <<"Malformed user name. Must only contain a-z, 0-9, _, or -">>);
 regex_for(firstname) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?HUMAN_NAME_REGEX),
-                            <<"Denied firstname. Must only contain word characters, digits, ', or .">>);
+                            <<"Denied firstname. Must only contain word characters, digits, ', or .">>, [unicode, ucp]);
 regex_for(middlename) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?HUMAN_NAME_REGEX),
-                            <<"Denied middlename. Must only contain word characters, digits, ', or .">>);
+                            <<"Denied middlename. Must only contain word characters, digits, ', or .">>, [unicode, ucp]);
 regex_for(lastname) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?HUMAN_NAME_REGEX),
-                            <<"Denied lastname. Must only contain word characters, digits, ', or .">>);
+                            <<"Denied lastname. Must only contain word characters, digits, ', or .">>, [unicode, ucp]);
 regex_for(display_name) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?HUMAN_NAME_REGEX),
-                            <<"Denied display_name. Must only contain word characters, digits, ', or .">>);
+                            <<"Denied display_name. Must only contain word characters, digits, ', or .">>, [unicode, ucp]);
 regex_for(non_blank_string) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?NON_BLANK_REGEX), <<"Field must have a non-empty string value">>);
 

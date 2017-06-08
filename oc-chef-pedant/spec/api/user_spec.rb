@@ -174,10 +174,10 @@ describe "users", :users do
             let(:email_two) { "useR@aOl.com" }
             let(:user_options_two) do
               { :overrides => {
-                  :first_name => "user",
-                  :last_name => "user",
-                  :display_name => "USER USER",
-                  :email => email_two
+                  "first_name" => "user",
+                  "last_name" => "user",
+                  "display_name" => "USER USER",
+                  "email" => email_two
                 }
               }
             end
