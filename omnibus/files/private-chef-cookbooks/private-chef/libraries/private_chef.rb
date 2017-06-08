@@ -439,7 +439,6 @@ module PrivateChef
       PrivateChef["opscode_expander"]["enable"] ||= false
       PrivateChef["postgresql"]["enable"] ||= false
       PrivateChef["postgresql"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-      PrivateChef["lb"]["cache_cookbook_files"] ||= true
       PrivateChef["lb"]["upstream"] ||= Mash.new
       if PrivateChef["use_ipv6"] && PrivateChef["backend_vips"]["ipaddress"].include?(":")
         PrivateChef["lb"]["upstream"]["bookshelf"] ||= [ "[#{PrivateChef["backend_vips"]["ipaddress"]}]" ]
