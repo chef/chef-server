@@ -46,7 +46,9 @@ template erchef_config do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode "644"
-  variables(node['private_chef']['opscode-erchef'].to_hash.merge(:ldap_enabled => ldap_authentication_enabled,
+  variables lazy {
+      {
+        node['private_chef']['opscode-erchef'].to_hash.merge(:ldap_enabled => ldap_authentication_enabled,
                                                                  :enable_ssl =>  enable_ssl,
                                                                  :actions_vip => actions_vip,
                                                                  :actions_port => actions_port,
@@ -55,7 +57,9 @@ template erchef_config do
                                                                  :actions_exchange => actions_exchange,
                                                                  :ldap_encryption_type => ldap_encryption_type,
                                                                  :solr_elasticsearch_major_version => elastic_search_version,
-                                                                 :helper => OmnibusHelper.new(node)))
+                                                                 :helper => OmnibusHelper.new(node))
+     }
+   }
   notifies :run, 'execute[remove_erchef_siz_files]', :immediately
   notifies :restart, 'runit_service[opscode-erchef]' unless backend_secondary?
 end
