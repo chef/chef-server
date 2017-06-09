@@ -903,6 +903,10 @@ module Pedant
         return if i == 0
         if queues_empty?
           puts "RabbitMQ queue is empty (or failed to call rabbitmqctl list_queues)"
+          # Why? It may be that expander has pulled the item from the queue
+          # but hasn't posted it to Solr.
+          puts "Waiting an additional 5 seconds"
+          sleep 5
         else
           puts "Waiting for RabbitMQ queue to be empty (#{i} tries remaining)"
           sleep 1
