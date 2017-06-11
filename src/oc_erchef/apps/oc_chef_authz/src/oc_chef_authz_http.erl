@@ -23,8 +23,8 @@
 
 -module(oc_chef_authz_http).
 
--define(x_ops_requester_id, "X-Ops-Requesting-Actor-Id").
--define(x_ops_user, {"X-Ops-User-Id", "front-end-service"}).
+-define(X_OPS_REQUESTER_ID, "X-Ops-Requesting-Actor-Id").
+-define(X_OPS_USER, {"X-Ops-User-Id", "front-end-service"}).
 -define(IBROWSE_OPTIONS, [{response_format, binary}]).
 -define(REQ_ID_HEADER, "X-Request-Id").
 
@@ -105,14 +105,14 @@ handle_response_body(Body) ->
 
 full_headers(ReqId, RequestorId, Headers) ->
     Headers1 = add_requestor_id_header(RequestorId, add_req_id_header(ReqId, Headers)),
-    [?x_ops_user,
+    [?X_OPS_USER,
      {"Accept", "application/json"},
      {"Content-Type", "application/json"} | Headers1].
 
 add_requestor_id_header(undefined, Headers) ->
     Headers;
 add_requestor_id_header(RequestorId, Headers) ->
-    [{?x_ops_requester_id, to_str(RequestorId)} | Headers].
+    [{?X_OPS_REQUESTER_ID, to_str(RequestorId)} | Headers].
 
 add_req_id_header(undefined, Headers) ->
     Headers;

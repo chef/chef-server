@@ -102,8 +102,6 @@
                   reqid :: binary(),
                   darklaunch = undefined}).
 
--define(gv(Key, PList), proplists:get_value(Key, PList)).
-
 -type db_context() :: #context{}.
 
 %% All the names of functions to create various Chef items, found in this module

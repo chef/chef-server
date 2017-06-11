@@ -17,10 +17,10 @@ init([]) ->
     Restart = permanent,
     Shutdown = ?CLEANUP_TIMEOUT,
     Type = worker,
-    
+
     SupFlags = {RestartStrategy, MaxRestarts, MaxSecondsBetweenRestarts},
-    
+
     CleanupWorker = {oc_chef_authz_cleanup, {oc_chef_authz_cleanup, start_link, []},
             Restart, Shutdown, Type, [oc_chef_authz_cleanup]},
-    
+
     {ok, {SupFlags, [CleanupWorker]}}.

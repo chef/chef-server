@@ -104,7 +104,7 @@ validate_request(_Method, Req, #base_state{resource_args = ObjectType, chef_db_c
 -spec to_json(wm_req(), chef_wm:base_state()) ->
                      {ejson_term() | {halt, 500}, wm_req(), chef_wm:base_state()}.
 to_json(Req, #base_state{ chef_db_context = DbContext,
-                          resource_state = #key_state{full_type = FullType, parent_id = Id, 
+                          resource_state = #key_state{full_type = FullType, parent_id = Id,
                                                       parent_name = ObjectName} } = State) ->
     case chef_db:list(#chef_key{id = Id}, DbContext) of
         Keys when is_list(Keys) ->
@@ -121,17 +121,17 @@ from_json(Req, #base_state{resource_state = #key_state{key_data = EJ}} = State) 
 
 % Callback from create_from_json, which allows us to customize our body response.
 -spec finalize_create_body(wm_req(), chef_wm:base_state(), chef_key(), ejson_term()) -> ejson_term().
-finalize_create_body(_Req, #base_state{ resource_state = #key_state{generated_private_key = undefined}}, 
+finalize_create_body(_Req, #base_state{ resource_state = #key_state{generated_private_key = undefined}},
                      _Key, BodyEJ) ->
     BodyEJ;
-finalize_create_body(_Req, #base_state{ resource_state = #key_state{generated_private_key = GenPrivKey}}, 
+finalize_create_body(_Req, #base_state{ resource_state = #key_state{generated_private_key = GenPrivKey}},
                      _Key, BodyEJ) ->
     ej:set({<<"private_key">>}, BodyEJ, GenPrivKey).
 
 %% Permissions:
 %% The permissions model is the same between oc_chef_wm_keys and oc_chef_wm_named_key, and
 %% these functions are mixed into oc_chef_wm_named_key
-%% Keys are considered an attribute of the object that owns them for all 
+%% Keys are considered an attribute of the object that owns them for all
 %% methods with a special case for GET (see below):
 %%   * target object (user or client) must exist
 %%   * In order to view a target's keys, requestor will need read access to that target. (handled in default is_authorized)
@@ -146,10 +146,10 @@ finalize_create_body(_Req, #base_state{ resource_state = #key_state{generated_pr
 %% work for:
 %% + /orgs/:org/clients/:client/keys(/:key)
 %% + /orgs/:org/users/:user/keys(/:key)
--spec auth_info(wm_req(), chef_wm:base_state()) -> 
+-spec auth_info(wm_req(), chef_wm:base_state()) ->
                        {{halt, 404} | {halt, 403} | {actor, object_id()} | {actor, object_id(), update} | authorized,
                         wm_req(), chef_wm:base_state()}.
-auth_info(Req, #base_state{resource_args = TargetType, 
+auth_info(Req, #base_state{resource_args = TargetType,
                            resource_state = #key_state{parent_id = undefined}} = State) ->
     Name = chef_wm_util:object_name(TargetType, Req),
     Message = chef_wm_util:not_found_message(TargetType, Name),
@@ -158,7 +158,7 @@ auth_info(Req, #base_state{resource_args = TargetType,
 auth_info(Req, #base_state{ resource_mod = Mod } = State) ->
     Mod:auth_info(wrq:method(Req), Req, State).
 
--spec auth_info(list(), wm_req(), chef_wm:base_state()) -> 
+-spec auth_info(list(), wm_req(), chef_wm:base_state()) ->
                        {{actor, object_id()} | {member_of, object_id(), {global, string()}},
                         wm_req(), chef_wm:base_state()}.
 %% GET /users/:user/keys(/:key)
@@ -182,8 +182,8 @@ auth_info(_Method, Req, #base_state{resource_state = #key_state{parent_authz_id 
 
 -spec validate_put_or_post(wm_req(), chef_wm:base_state(), ejson_term()) ->
                                   {wm_req(), chef_wm:base_state()}.
-validate_put_or_post(Req, #base_state{resource_args = ObjectType, 
-                                      chef_db_context = Ctx, 
+validate_put_or_post(Req, #base_state{resource_args = ObjectType,
+                                      chef_db_context = Ctx,
                                       organization_guid = OrgId} = State, EJ) ->
     ObjectName = chef_wm_util:object_name(ObjectType, Req),
     ResourceState = make_resource_state_for_object(Ctx, ObjectType, ObjectName, OrgId),

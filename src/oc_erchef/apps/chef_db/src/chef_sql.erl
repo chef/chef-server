@@ -1210,7 +1210,7 @@ unlink_all_checksums_from_cbv(OrgId, CookbookVersionId) ->
 %% Returns a list of deleted checksums (a subset of `Checksums')
 %% for further upstream processing (i.e., deletion from S3).
 -spec delete_orphaned_checksums(OrgId::binary(),
-				Checksums::[binary()]) -> [binary()].
+                                Checksums::[binary()]) -> [binary()].
 delete_orphaned_checksums(OrgId, Checksums) ->
     %% we don't want to delete checksums associated with
     %% cookbook artifact versions

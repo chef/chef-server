@@ -197,7 +197,7 @@ parse_binary_json(Bin) ->
     PolicyRevision = chef_json:decode_body(Bin),
     case ej:valid(?VALIDATION_CONSTRAINTS, PolicyRevision) of
         ok ->
-			{ok, PolicyRevision};
+            {ok, PolicyRevision};
         Bad ->
             throw(Bad)
     end.
@@ -210,7 +210,7 @@ fields_for_insert(#oc_chef_policy_revision{
                 policy_authz_id = PolicyAuthzID,
                 last_updated_by = LastUpdatedBy,
                 serialized_object = SerializedObject}) ->
-	Compressed = chef_db_compression:compress(oc_chef_policy_revision, jiffy:encode(SerializedObject)),
+    Compressed = chef_db_compression:compress(oc_chef_policy_revision, jiffy:encode(SerializedObject)),
     [Id, OrgId, RevisionId, Name, PolicyAuthzID, Compressed, LastUpdatedBy].
 
 

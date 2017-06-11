@@ -85,7 +85,7 @@ stop_server(Config, NeededApps) ->
     %% shut down the db if its on
     try chef_test_db_helper:stop_db(Config)
     catch
-	_:_ -> ct:pal("No database to stop.~n")
+        _:_ -> ct:pal("No database to stop.~n")
     end,
 
     Config.
@@ -105,18 +105,18 @@ set_app_env(stats_hero) ->
                          {udp_socket_pool_size, 1}]);
 set_app_env(pooler) ->
     application:set_env(pooler, pools,
-			[[{name, sqerl},
-			  {max_count, 2},
-			  {init_count, 2},
-			  {start_mfa, {sqerl_client, start_link, []}}]]).
+                        [[{name, sqerl},
+                          {max_count, 2},
+                          {init_count, 2},
+                          {start_mfa, {sqerl_client, start_link, []}}]]).
 
 make_id(Prefix) when is_binary(Prefix) ->
     case size(Prefix) of
         Size when Size > 32 ->
             error(prefix_too_long_for_id);
         Size when Size =:= 32 ->
-              Prefix;
-          Size ->
+            Prefix;
+        Size ->
             iolist_to_binary([Prefix, lists:duplicate(32 - Size, $0)])
     end;
 make_id(Prefix) when is_list(Prefix) ->
@@ -191,11 +191,11 @@ create_record(Record0) ->
 fetch_record(Record0) ->
     Record = chef_object:set_api_version(Record0, ?API_MIN_VER),
     Result = chef_sql:fetch_object(
-      chef_object:fields_for_fetch(Record),
-      element(1, Record),
-      chef_object:find_query(Record),
-      chef_object:record_fields(Record)
-     ),
+               chef_object:fields_for_fetch(Record),
+               element(1, Record),
+               chef_object:find_query(Record),
+               chef_object:record_fields(Record)
+              ),
     case Result of
         {ok, OutRecord} when is_tuple(OutRecord) ->
             Final = chef_object:set_api_version(OutRecord, ?API_MIN_VER),

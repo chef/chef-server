@@ -22,15 +22,15 @@
 -module(chef_config).
 
 -export([
-	 config_option/3
-	]).
+         config_option/3
+        ]).
 
 -type option_type() :: pos_integer.
 -type value_type() :: pos_integer().
 
 -spec config_option(Application :: atom(),
-		    OptionName :: atom(),
-		    Type :: option_type()) ->
-			   Value :: value_type().
+                    OptionName :: atom(),
+                    Type :: option_type()) ->
+    Value :: value_type().
 config_option(Application, OptionName, Type) ->
     envy:get(Application, OptionName, Type).

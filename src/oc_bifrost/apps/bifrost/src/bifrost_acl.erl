@@ -39,7 +39,7 @@ update_acl(ReqId, TargetType, TargetId, Permission, Actors, Groups) ->
         {error, not_null_violation} ->
             throw({db_error, {non_existent_member_for_acl, Actors, Groups}});
         {error, Error} ->
-            throw({db_error, Error}); 
+            throw({db_error, Error});
         ok ->
             ok
     end.

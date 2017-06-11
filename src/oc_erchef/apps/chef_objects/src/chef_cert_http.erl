@@ -40,7 +40,7 @@ gen_cert(Guid, RequestId) ->
     FullHeaders = [{?X_OPS_REQUEST_ID, binary_to_list(RequestId)},
                    {"Accept", "application/json"}
                   ],
-    
+
     Url = envy:get(chef_objects, certificate_root_url, string),
     Body = body_for_post(Guid),
     case ibrowse:send_req(Url, FullHeaders, post, Body) of

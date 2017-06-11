@@ -88,7 +88,7 @@
          <<"normal">>, <<"default">>, <<"override">>, <<"automatic">>, <<"run_list">>,
          <<"policy_name">>, <<"policy_group">> ]).
 
--define(create_if_missing_fields,
+-define(CREATE_IF_MISSING_FIELDS,
         [{<<"chef_environment">>, <<"_default">>},
          {<<"json_class">>,       <<"Chef::Node">>},
          {<<"chef_type">>,        <<"node">>},
@@ -287,7 +287,7 @@ validate_json_node(Node, {update, UrlName}) ->
     end.
 
 insert_autofill_fields(JsonNode) ->
-    insert_autofill_fields(JsonNode, ?create_if_missing_fields).
+    insert_autofill_fields(JsonNode, ?CREATE_IF_MISSING_FIELDS).
 
 %% TODO this also looks like a good candidate for move into
 %% chef_json_validator

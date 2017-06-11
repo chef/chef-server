@@ -62,10 +62,7 @@
 
 -export_type([oc_chef_authz_context/0]).
 
--define(x_ops_requester_id, "X-Ops-Requesting-Actor-Id").
--define(x_ops_user_id, "X-Ops-User-Id").
--define(x_ops_user_id_value, "front-end-service").
--define(atom_bin_perms, [{create, <<"create">>},
+-define(ATOM_BIN_PERMS, [{create, <<"create">>},
                          {read, <<"read">>},
                          {update, <<"update">>},
                          {delete, <<"delete">>},
@@ -641,7 +638,7 @@ extract_ace(JsonBlob) ->
 
 -spec extract_acl(jiffy:json_value()) -> authz_acl().
 extract_acl(JsonBlob) ->
-    [ {PAtom, extract_ace(ej:get({PBin},JsonBlob))} || {PAtom, PBin} <- ?atom_bin_perms ].
+    [ {PAtom, extract_ace(ej:get({PBin},JsonBlob))} || {PAtom, PBin} <- ?ATOM_BIN_PERMS ].
 
 %
 % This is needed by the container permission inheritance
