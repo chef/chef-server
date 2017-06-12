@@ -33,4 +33,6 @@ suites:
         build_user_group: vagrant
         build_user_password: vagrant
         install_dir: /opt/opscode
-    run_list: omnibus::default
+    run_list:
+      - omnibus::default
+      - zip
