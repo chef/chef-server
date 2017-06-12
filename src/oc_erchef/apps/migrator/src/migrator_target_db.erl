@@ -103,8 +103,9 @@ execute({start_tx, _TXID) ->
     ok;
 execute({end_tx, _TXID) ->
     ok;
-
 execute({Entity, Operation, { Fields, Values }} = Term) ->
+    ok.
+
     % Steps here:
     % Is phash2 of {Entity, Operation, Fields} in binary_statement_cache ets table?
     % If not, migrator_encoder:encode(Term)
@@ -115,5 +116,5 @@ execute({Entity, Operation, { Fields, Values }} = Term) ->
     %   prepare it, bind it, put it in cache
     %
     % Bind the statement to Values, execute.
-%%                                }
+    % Don't forget to reindex on target server!
 

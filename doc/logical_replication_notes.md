@@ -1,10 +1,5 @@
 Most notes are in the source files.  This just has the setup instructions.
 
-k Open Things
-
-% R enabling sync mode should require a version check to compare target/dest
-%   end ensure they match
-
 Reconfigure using the cookbooks from this branch. You will need a build out of this branch too
 because it gontains pgsql 9.6 (even though I didn't rename the software def from 9.2)
 
@@ -24,3 +19,19 @@ DB using the current opscode_chef DB as a template:
     $ > GRANT ALL ON DATABASE opscode_chef_target TO "migration_user";
     $ > \q
   %
+
+Next steps (POC):
+
+- script or automate initial data dump
+- apply tx to remote
+- reindex  docat remote
+- cookbook migration
+- more databases - possible move migrator to standalone service?
+  * bookshelf
+  * oc-id (?)
+  * bifrost
+
+Longer term:
+- UI/page with clicky buttons and progress!
+
+
