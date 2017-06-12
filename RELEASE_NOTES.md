@@ -7,6 +7,19 @@ in the release. For a detailed list of changed components, refer to
 This document contains release notes for the current major release and all patches.
 For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 12.15.X (TBD)
+
+* [Stricter validation of non-functional user record fields](https://github.com/chef/chef-server/pull/1294),
+  Chef Server now uses a regular expression to validate first, middle, and last name of a user
+  on creation. The regex used is `[[:word:][:digit:]!'. -]+` (UTF-8). This tries to accomodate
+  a wide range of names, while also strengthening Chef Server's role in preventing XSS attacks
+  in web-based API clients.
+* [Search user by email case-insensitively](https://github.com/chef/chef-server/pull/1283):
+  while technically only the host-part of an email address is to be treated case-insensitively,
+  most email providers treat the _entire_ email address as case-insensitive. Chef Server now
+  adopts that behaviour for _searching users_: querying for `user@host` (`GET /users?email=user%40host`)
+  will now also return users with the recorded email of `USER@HOST` etc.
+
 ## 12.15.7 (2017-05-16)
 
 * Fixed [regression](https://github.com/chef/chef-server/issues/1274) that prevented
