@@ -879,17 +879,34 @@ module Pedant
         end
       end
 
+      def do_paginated_search(type, start=0, page_size=1000, rows_accum=[])
+        result = authenticated_request(:GET, api_url("/search/#{type}?start=#{start}&rows=#{page_size}"), requestor, {})
+        result.should have_status_code 200
+
+        parsed_result = parse(result)
+        rows = parsed_result["rows"]
+        total = parsed_result["total"]
+        parsed_result["start"].should eq(start)
+
+        new_accum = rows_accum + rows
+        next_start = start + page_size
+        if next_start < total
+          do_paginated_search(type, next_start, page_size, new_accum)
+        else
+          new_accum
+        end
+      end
+
       def do_search(type, name, should_find=true)
         with_search_polling do
-          result = authenticated_request(:GET, api_url("/search/#{type}"), requestor, {})
-          result.should have_status_code 200
+          rows = do_paginated_search(type)
           identifiers = case type
                         when "node", "role", "environment"
-                          parse(result)["rows"].map{|r| r['name']}
+                          rows.map{|r| r['name']}
                         when "client"
-                          parse(result)["rows"].map{|r| r['name'] || r['clientname']}
+                          rows.map{|r| r['name'] || r['clientname']}
                         else # data bag
-                          parse(result)["rows"].map{|r| r['raw_data']['id']}
+                          rows.map{|r| r['raw_data']['id']}
                         end
           if should_find
             identifiers.should include(name)
@@ -905,8 +922,8 @@ module Pedant
           puts "RabbitMQ queue is empty (or failed to call rabbitmqctl list_queues)"
           # Why? It may be that expander has pulled the item from the queue
           # but hasn't posted it to Solr.
-          puts "Waiting an additional 5 seconds"
-          sleep 5
+          puts "Waiting an additional second"
+          sleep 1
         else
           puts "Waiting for RabbitMQ queue to be empty (#{i} tries remaining)"
           sleep 1
