@@ -180,6 +180,46 @@ parse_binary_json_tests(Version) ->
                 ?assertEqual(lists:sort(MinValid), lists:sort(GotData))
       end
      },
+     {?VD("Can create user with empty first name"),
+      fun() ->
+                UserEJson = make_min_valid_create_user_ejson() ++ [{<<"first_name">>, <<>>},
+                                                                   {<<"last_name">>, <<"Bobson">>},
+                                                                   {<<"middle_name">>, <<"Joe">>}],
+                UserJson = chef_json:encode({UserEJson}),
+                {ok, {GotData}} = chef_user:parse_binary_json(Version, UserJson, create, undefined),
+                ?assertEqual(lists:sort(UserEJson), lists:sort(GotData))
+      end
+     },
+     {?VD("Can create user with empty last name"),
+      fun() ->
+                UserEJson = make_min_valid_create_user_ejson() ++ [{<<"first_name">>, <<"Alice">>},
+                                                                   {<<"last_name">>, <<>>},
+                                                                   {<<"middle_name">>, <<"Joe">>}],
+                UserJson = chef_json:encode({UserEJson}),
+                {ok, {GotData}} = chef_user:parse_binary_json(Version, UserJson, create, undefined),
+                ?assertEqual(lists:sort(UserEJson), lists:sort(GotData))
+      end
+     },
+     {?VD("Can create user with empty middle name"),
+      fun() ->
+                UserEJson = make_min_valid_create_user_ejson() ++ [{<<"first_name">>, <<"Alice">>},
+                                                                   {<<"last_name">>, <<"Bobson">>},
+                                                                   {<<"middle_name">>, <<>>}],
+                UserJson = chef_json:encode({UserEJson}),
+                {ok, {GotData}} = chef_user:parse_binary_json(Version, UserJson, create, undefined),
+                ?assertEqual(lists:sort(UserEJson), lists:sort(GotData))
+      end
+     },
+     {?VD("Can create user with all required fields and first, middle, and last names"),
+      fun() ->
+                UserEJson = make_min_valid_create_user_ejson() ++ [{<<"first_name">>, <<"Alice">>},
+                                                                   {<<"last_name">>, <<"Bobson">>},
+                                                                   {<<"middle_name">>, <<"Joe">>}],
+                UserJson = chef_json:encode({UserEJson}),
+                {ok, {GotData}} = chef_user:parse_binary_json(Version, UserJson, create, undefined),
+                ?assertEqual(lists:sort(UserEJson), lists:sort(GotData))
+      end
+     },
      {?VD("Can create user when external auth uid is present"),
       fun() ->
                 MinValid = make_external_auth_create_user_ejson(),

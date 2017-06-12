@@ -415,6 +415,83 @@ describe "users", :users do
           end
         end
 
+        context "with a blank middle name" do
+          let(:request_body) do
+            {
+              "username" => username,
+              "email" => "#{username}@chef.io",
+              "display_name" => username,
+              "password" => "badger badger",
+              "first_name" => username,
+              "last_name" => username,
+              "middle_name" => "",
+            }
+          end
+
+          it "can create new user" do
+            post(request_url, platform.superuser,
+              :payload => request_body).should look_like({
+                :status => 201,
+                :body_exact => response_body
+              })
+            get(request_url, platform.superuser).should look_like({
+                :status => 200,
+                :body => users_with_new_user
+              })
+          end
+        end
+
+        context "with a blank first name" do
+          let(:request_body) do
+            {
+              "username" => username,
+              "email" => "#{username}@chef.io",
+              "display_name" => username,
+              "password" => "badger badger",
+              "first_name" => "",
+              "last_name" => username,
+              "middle_name" => username,
+            }
+          end
+
+          it "can create new user" do
+            post(request_url, platform.superuser,
+              :payload => request_body).should look_like({
+                :status => 201,
+                :body_exact => response_body
+              })
+            get(request_url, platform.superuser).should look_like({
+                :status => 200,
+                :body => users_with_new_user
+              })
+          end
+        end
+
+        context "with a blank last name" do
+          let(:request_body) do
+            {
+              "username" => username,
+              "email" => "#{username}@chef.io",
+              "display_name" => username,
+              "password" => "badger badger",
+              "first_name" => username,
+              "last_name" => "",
+              "middle_name" => username,
+            }
+          end
+
+          it "can create new user" do
+            post(request_url, platform.superuser,
+              :payload => request_body).should look_like({
+                :status => 201,
+                :body_exact => response_body
+              })
+            get(request_url, platform.superuser).should look_like({
+                :status => 200,
+                :body => users_with_new_user
+              })
+          end
+        end
         context "without email" do
           let(:request_body) do
             {
