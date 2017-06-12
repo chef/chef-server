@@ -1,3 +1,4 @@
+{"1.1.0",
 [{<<"chef_secrets">>,
   {git,"https://github.com/chef/chef_secrets",
        {ref,"b5748829af948e1f773b0c1c833b5ccf2f0cb7e2"}},
@@ -22,18 +23,12 @@
   {git,"git://github.com/chef/epgsql-1.git",
        {ref,"25d9e2f4441b63296c34da1811d8b79ed4baa444"}},
   1},
- {<<"goldrush">>,
-  {git,"https://github.com/basho/goldrush.git",
-       {ref,"8f1b715d36b650ec1e1f5612c00e28af6ab0de82"}},
-  1},
+ {<<"goldrush">>,{pkg,<<"goldrush">>,<<"0.1.9">>},1},
  {<<"jiffy">>,
   {git,"https://github.com/davisp/jiffy",
        {ref,"a13b9e1ec9849a3bc385fdbd42d5de63c6681bf5"}},
   0},
- {<<"lager">>,
-  {git,"https://github.com/basho/lager",
-       {ref,"81eaef0ce98fdbf64ab95665e3bc2ec4b24c7dac"}},
-  0},
+ {<<"lager">>,{pkg,<<"lager">>,<<"3.5.0">>},0},
  {<<"meck">>,
   {git,"git://github.com/eproxus/meck.git",
        {ref,"f0904dcdace405b03ae711a8e3f30dc284996bc6"}},
@@ -69,4 +64,9 @@
  {<<"webmachine">>,
   {git,"git://github.com/webmachine/webmachine",
        {ref,"4edbea20f05dde54cd83e562ec29ae4cc5669f76"}},
-  1}].
+  1}]}.
+[
+{pkg_hash,[
+ {<<"goldrush">>, <<"F06E5D5F1277DA5C413E84D5A2924174182FB108DABB39D5EC548B27424CD106">>},
+ {<<"lager">>, <<"C7D35985D784CCE9F8FA4056023CE873252B68BC31A81C63E4286857713DD6CE">>}]}
+].

@@ -1,3 +1,4 @@
+{"1.1.0",
 [{<<"cf">>,
   {git,"https://github.com/project-fifo/cf",
        {ref,"52f39d9be068be994653e232b16e0598f186f65d"}},
@@ -30,10 +31,7 @@
   {git,"https://github.com/erlware/erlware_commons",
        {ref,"09168347525916e291c8aa6e3073e260e5f4a116"}},
   0},
- {<<"goldrush">>,
-  {git,"git://github.com/DeadZen/goldrush.git",
-       {ref,"71e63212f12c25827e0c1b4198d37d5d018a7fec"}},
-  1},
+ {<<"goldrush">>,{pkg,<<"goldrush">>,<<"0.1.9">>},1},
  {<<"ibrowse">>,
   {git,"https://github.com/chef/ibrowse",
        {ref,"8f3f6a3a30730b193cc340a8885a960586dc98de"}},
@@ -46,10 +44,7 @@
   {git,"https://github.com/davisp/jiffy",
        {ref,"06aaf440e091c9fd5f8aea557ac760a33bd37130"}},
   1},
- {<<"lager">>,
-  {git,"https://github.com/basho/lager",
-       {ref,"d33ccf3b69de09a628fe38b4d7981bb8671b8a4f"}},
-  0},
+ {<<"lager">>,{pkg,<<"lager">>,<<"3.5.0">>},0},
  {<<"meck">>,
   {git,"https://github.com/eproxus/meck.git",
        {ref,"70d6a33ce7407029dc59e22a5b3c1c61c1348b23"}},
@@ -85,4 +80,9 @@
  {<<"webmachine">>,
   {git,"git://github.com/webmachine/webmachine",
        {ref,"4edbea20f05dde54cd83e562ec29ae4cc5669f76"}},
-  0}].
+  0}]}.
+[
+{pkg_hash,[
+ {<<"goldrush">>, <<"F06E5D5F1277DA5C413E84D5A2924174182FB108DABB39D5EC548B27424CD106">>},
+ {<<"lager">>, <<"C7D35985D784CCE9F8FA4056023CE873252B68BC31A81C63E4286857713DD6CE">>}]}
+].

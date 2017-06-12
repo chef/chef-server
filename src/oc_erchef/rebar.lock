@@ -68,10 +68,7 @@
   {git,"git://github.com/mdaguete/gen_server2.git",
        {ref,"992650004c81ee921183488cb8115de4777e7bd9"}},
   2},
- {<<"goldrush">>,
-  {git,"https://github.com/basho/goldrush.git",
-       {ref,"8f1b715d36b650ec1e1f5612c00e28af6ab0de82"}},
-  1},
+ {<<"goldrush">>,{pkg,<<"goldrush">>,<<"0.1.9">>},1},
  {<<"ibrowse">>,
   {git,"https://github.com/chef/ibrowse",
        {ref,"8f3f6a3a30730b193cc340a8885a960586dc98de"}},
@@ -80,10 +77,7 @@
   {git,"https://github.com/davisp/jiffy",
        {ref,"a13b9e1ec9849a3bc385fdbd42d5de63c6681bf5"}},
   0},
- {<<"lager">>,
-  {git,"https://github.com/basho/lager",
-       {ref,"81eaef0ce98fdbf64ab95665e3bc2ec4b24c7dac"}},
-  0},
+ {<<"lager">>,{pkg,<<"lager">>,<<"3.5.0">>},0},
  {<<"meck">>,
   {git,"git://github.com/eproxus/meck.git",
        {ref,"10c50634b57d1f7ce5205e2fae56e700c4da3397"}},
@@ -150,5 +144,7 @@
   1}]}.
 [
 {pkg_hash,[
- {<<"erlware_commons">>, <<"087467DE5833C0BB5B3CCDD387F9E9C1FB816A75B7A709629BF24B5ED3246C51">>}]}
+ {<<"erlware_commons">>, <<"087467DE5833C0BB5B3CCDD387F9E9C1FB816A75B7A709629BF24B5ED3246C51">>},
+ {<<"goldrush">>, <<"F06E5D5F1277DA5C413E84D5A2924174182FB108DABB39D5EC548B27424CD106">>},
+ {<<"lager">>, <<"C7D35985D784CCE9F8FA4056023CE873252B68BC31A81C63E4286857713DD6CE">>}]}
 ].
