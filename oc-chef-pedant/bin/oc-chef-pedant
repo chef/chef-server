@@ -6,7 +6,7 @@ require 'rspec/core'
 require 'pedant'
 require 'pedant/organization'
 
-Pedant.config.suite = "api"
+Pedant.config.suite = ["api", "running_configs"]
 Pedant.setup(ARGV)
 puts Pedant::UI.new.info_banner
 
