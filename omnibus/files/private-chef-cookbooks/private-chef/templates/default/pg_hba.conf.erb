@@ -70,5 +70,5 @@ host    all         <%= node['private_chef']['postgresql']['db_superuser'] %>   
 host    all         all         <%= cidr %>           md5
 host    all         all         <%= cidr %>           md5
 host    replication opscode-pgsql <%= cidr %>         md5
-
+host    all         migration_user <%= cidr %>         md5
 <% end %>
