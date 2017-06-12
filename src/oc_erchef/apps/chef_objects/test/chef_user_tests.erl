@@ -171,6 +171,7 @@ parse_binary_json_test_() ->
     chef_objects_test_utils:make_all_versions_tests(fun parse_binary_json_tests/1).
 
 parse_binary_json_tests(Version) ->
+    NonfunctionalFields = [<<"display_name">>, <<"first_name">>, <<"middle_name">>, <<"last_name">>],
     [{?VD("Can create user when all required fields are present"),
       fun() ->
                 MinValid = make_min_valid_create_user_ejson(),
@@ -299,21 +300,21 @@ parse_binary_json_tests(Version) ->
                            chef_user:parse_binary_json(Version, chef_json:encode(UserEJson1), create, undefined))
       end
      }
-     || Field <- [<<"display_name">>, <<"firstname">>, <<"middlename">>, <<"lastname">>]
+     || Field <- NonfunctionalFields
     ]
     ++
     [
      {?VD(lists:flatten(io_lib:format("Works with non-ASCII ~s", [Field]))),
       fun() ->
               %% "Maryam", #1 female name in the arab world as of 2015
-              Value = <<"مريم 1. O'Mara">>,
+              Value = <<"مريم 1. O'Mara"/utf8>>,
               UserEJson = {make_min_valid_create_user_ejson()},
               UserEJson1 = ej:set({Field}, UserEJson, Value),
-              ?assertMatch({ok, _},
-                           chef_user:parse_binary_json(Version, chef_json:encode(UserEJson1), create, undefined))
+              {ok, User} = chef_user:parse_binary_json(Version, chef_json:encode(UserEJson1), create, undefined),
+              ?assertEqual(ej:get({Field}, User), Value)
       end
      }
-     || Field <- [<<"display_name">>, <<"firstname">>, <<"middlename">>, <<"lastname">>]
+     || Field <- NonfunctionalFields
     ].
 
 parse_binary_json_non_deprecated_test_() ->

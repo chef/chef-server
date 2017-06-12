@@ -302,7 +302,7 @@ parse_binary_json(_ApiVersion, Bin, Operation, User) ->
 common_user_validation(EJ, User, Operation) ->
     validate_user_name(EJ),
     lists:map(fun(Field) -> validate_field(EJ, Field) end,
-              [firstname, middlename, lastname, display_name]),
+              [first_name, middle_name, last_name, display_name]),
     chef_object_base:validate_ejson(EJ, user_spec(common)),
     chef_object_base:validate_ejson(EJ, user_spec(Operation)),
 
