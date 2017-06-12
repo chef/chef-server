@@ -96,7 +96,22 @@ update_from_ejson(#chef_key{key_name = OldName, key_version = OldPubKeyVersion,
 set_created(#chef_key{} = Key, ActorId) ->
     Now = chef_object_base:sql_date(now),
     Key#chef_key{created_at = Now, updated_at = Now, last_updated_by = ActorId}.
-
+% TODO mp 2017-06-08 - looking at the data out of the pedant run as part of
+% current work on migration/logical replication, I noticed this updated get applied:
+% {<<"keys">>,<<"UPDATE">>,
+%  [{<<"updated_at">>,<<"2017-06-07 21:06:19.316379">>},
+%   {<<"last_updated_by">>,<<"                                ">>},
+%   {<<"expires_at">>,<<"infinity">>},
+%   {<<"created_at">>,<<"2017-06-07 21:06:19.316379">>},
+%   {<<"key_version">>,<<"0">>},
+%   {<<"public_key">>,
+%    <<"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwJzhlcKg2Jen3lBK0cNQ\n7NCJ5PZekylc0CxDVT2JVyZnJJyff6aEyYXQRLaghbou+Zow2O9kDFcpS4iOKiyo\nYljxQrJHm1DSg8CzacLtV6t9l6SIhGwjzdiyF1MONTdjcnX5hAbQxMbdapT8xDq2\n5C5ZsjW+GJfoCb3L9GSM9vkqM4y6r+g1zBf8JOfbPtXmV/gq3G5eqP+RMxc2MAMb\nwgVwUznaMAF84c9X4NteZDgV5hXD+87vrgDRtqV25K7hSEq76qPoEbDhMAxv5ugk\nD1N2Jhwr6xDLMDzLTJ+owFKxvasd9brYhnFNP5QNs/iTW7XoiZDFoFFBuyMTJb9Q\nqwIDAQAB\n-----END PUBLIC KEY-----\n\n">>},
+%   {<<"key_name">>,<<"default">>},
+%   {<<"id">>,<<"e9bf8f66b0729cc33cc1cb67329a5909">>}]}.
+%
+% Above, `last_updated_by` was received by the DB as a blank string.  This is
+% updated through oc_chef_wm_base:update_from_json, which pulls the authzid
+% from the requestor_id of the request state.
 set_updated(#chef_key{} = Key, ActorId) ->
     Now = chef_object_base:sql_date(now),
     Key#chef_key{updated_at = Now, last_updated_by = ActorId}.
