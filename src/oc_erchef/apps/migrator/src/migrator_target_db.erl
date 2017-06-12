@@ -62,42 +62,58 @@
 
 %% API
 start_link(Config) ->
-  gen_server:start_link({local, ?SERVER}, ?MODULE, [], Config).
+    gen_server:start_link({local, ?SERVER}, ?MODULE, [], Config).
 execute(TXTerm) ->
-  gen_server:call(?SERVER, {execute, TXTerm}).
+    gen_server:call(?SERVER, {execute, TXTerm}).
 
 %% gen_server functions
 init(_Args) ->
-  Conn = connect(),
-  {ok, #{}}.
+    Conn = connect(),
+    {ok, #{cache = dict:new()}}.
 
 handle_call({execute, TXTerm}, _From, State) ->
-  {reply, Result, State}
-  {reply, ok, State}.
-handle_call(_Request, _From, State) ->
-  {reply, ok, State}.
+    Result = execute_term(TXTerm),
+    {reply, Result, State}
+
+    handle_call(_Request, _From, State) ->
+    {reply, ok, State}.
 
 handle_cast(_Msg, State) ->
-  {noreply, State}.
+    {noreply, State}.
 
 handle_info(_Info, State) ->
-  {noreply, State};
+    {noreply, State};
 
 terminate(_Reason, _State) ->
-  ok.
+    ok.
 
 code_change(_OldVsn, State, _Extra) ->
-  {ok, State}.
+    {ok, State}.
 
 %% internal
 %%
 connect() ->
-  %% Target is currently hard-coded to a local copy of opscode_chef.  Prior to running,
-  %% nuke and recreate it since this POC conveniently avoids the question of initial sync.
-  %%
-  %{ok, Conn} = epgsql:connect("127.0.0.1", "migration_user", "password", [{database, "opscode_chef_target"}]),
-  ok.
+    %% Target is currently hard-coded to a local copy of opscode_chef.  Prior to running,
+    %% nuke and recreate it since this POC conveniently avoids the question of initial sync.
+    %%
+    %{ok, Conn} = epgsql:connect("127.0.0.1", "migration_user", "password", [{database, "opscode_chef_target"}]),
+    ok.
 
+execute({start_tx, _TXID) ->
+    ok;
+execute({end_tx, _TXID) ->
+    ok;
 
-
+execute({Entity, Operation, { Fields, Values }} = Term) ->
+    % Steps here:
+    % Is phash2 of {Entity, Operation, Fields} in binary_statement_cache ets table?
+    % If not, migrator_encoder:encode(Term)
+    % If so, get the binary query from there.
+    %
+    % Is phash2 of BinaryStatement in this processes's cache?
+    % if no:
+    %   prepare it, bind it, put it in cache
+    %
+    % Bind the statement to Values, execute.
+%%                                }
 
