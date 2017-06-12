@@ -2,6 +2,7 @@ DEPENDENCIES
   apt (~> 2.0)
   omnibus
   yum-epel (~> 0.6)
+  zip (~> 1.1.0)
 
 GRAPH
   apt (2.9.2)
@@ -41,3 +42,4 @@ GRAPH
   yum (5.0.0)
   yum-epel (0.7.1)
     yum (>= 3.6.3)
+  zip (1.1.0)
