@@ -176,18 +176,20 @@ section:
 
 ```shell
 $ kitchen login ubuntu-1204
-[vagrant@ubuntu...] $ cd opscode-omnibus
+[vagrant@ubuntu...] $ . load-omnibus-toolchain.sh
+[vagrant@ubuntu...] $ cd chef-server/omnibus
 [vagrant@ubuntu...] $ bundle install --binstubs
-[vagrant@ubuntu...] $ ...
+...
 [vagrant@ubuntu...] $ bin/omnibus build chef-server -l internal
 ```
 or if you prefer not to use binstubs and to use bundle exec instead:
 
 ```shell
 $ kitchen login ubuntu-1204
-[vagrant@ubuntu...] $ cd opscode-omnibus
+[vagrant@ubuntu...] $ . load-omnibus-toolchain.sh
+[vagrant@ubuntu...] $ cd chef-server/omnibus
 [vagrant@ubuntu...] $ bundle install
-[vagrant@ubuntu...] $ ...
+...
 [vagrant@ubuntu...] $ bundle exec omnibus build chef-server -l internal
 ```
 

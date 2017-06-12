@@ -6,8 +6,6 @@ driver:
     memory: 4096
   synced_folders:
     - ['..', '/home/vagrant/chef-server']
-    - ['../../omnibus', '/home/vagrant/omnibus']
-    - ['../../omnibus-software', '/home/vagrant/omnibus-software']
 
 provisioner:
   name: chef_zero
