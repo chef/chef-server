@@ -15,10 +15,16 @@ start_link() ->
 % Callbacks
 %
 init([])   ->
-    SupFlags = {one_for_one, 10, 10},
-    ChildSpec = {migrator_change_listener,
+  % Increased restart frequence from our usual 10 times/10seconds to 50/10 seconds
+  % to encourage keeping up on data unless things are really screwed...
+    SupFlags = {one_for_one, 50, 10},
+    ListenerSpec = {migrator_change_listener,
                  { migrator_change_listener, start_link, []},
                  permanent, 5000, worker,
                  [migrator_change_listener]},
-    {ok, {SupFlags, [ChildSpec]}}.
+    InserterSpec = {migrator_sqerl_lite,
+                 {migrator_sqerl_list, start_link, []},
+                 permanent, 5000, worker,
+                 [migrator_sqerl_lite]},
+    {ok, {SupFlags, [InserterSpec]}}.
 

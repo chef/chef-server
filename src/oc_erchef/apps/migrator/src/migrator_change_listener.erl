@@ -8,7 +8,6 @@
 
 -export([%% API functions
          start_link/0,
-         startup/0,
 
          %% gen_server behaviour
          init/1,
@@ -18,75 +17,63 @@
          handle_info/2,
          code_change/3]).
 
-%{ok, C2} = epgsql:connect("127.0.0.1", "opscode-pgsql", Password, [{database, "opscode_chef"}]).
-%epgsql:squery(C2, "select * from pg_logical_slot_get_changes('regress ion_slot', '0/3427C8A0', NULL)").
-%location: lsn
-%xid: transaction id
-%data: text
+-define(POLL_INTERVAL_MS, 250).
+
+% This module simply polls for new transactions using a direct sql connection as superuser.
+% The end of this first phase will have it running on localhost, dumping data into a local copy of the DB.
+% Once parsing/statements are worked out, the next step is a remote DB associated with a chef server,
+% perhaps with a manual restore of bifrost and cookbooks.
 %
-% {ok, Password} = chef_secrets:get(<<"postgresql">>, <<"db_superuser_password">>),
-%{ok, C2} = epgsql:connect("127.0.0.1", "opscode-pgsql", Password, [{database, "opscode_chef"}]).
-% D2 = epgsql:squery(C2, "select * from pg_logical_slot_get_changes('regression_slot',NULL, NULL, ['include-xids','force-binary', 'skip-empty-xacts'])").
-% {ok, Def, Data} = D1.% API
-% F | Rest = Data -> one item per change
-% Each record is a tuple:
-%   {LSN, XID, DATA}
+% Because this is PoC/spike work, you won't find new tests here yet.
 %
-% {LSN, XID, Raw} = First.
+% Some thoughts:
+%  - currently this does all parsing in the same proc. We may want to farm that out to
+%    one or more workers, which can sync and sequence on the trans id.  Particularly once we're
+%    doing this for multiple DBs.
+%  - This does attempt to prevent transaction loss by 'peek'ing one change at a time, then
+%    'get'ing it to clear it from the replication slot.  Errors that cause the supervisor to give up
+%    due to restart intensity limits would be considered fatal to the migration.
+%  - I used epgsql directly:
+%       * sqerl only supports one DB connection - presently that's opscode_chef as the erchef user;
+%         as an alterntiave I could have used sqerl for the polling by giving the erchef user
+%         replication privileges, though initially the direction was a bit different and that made less sense.
+%       * we don't need pooling.  There's a dedicated connection to siphone dat from the logical repl slot
+%         and that's it.
+%       * When/if we move this to its own standalone service, that's a thing to revisit and check perf impact of.
+%
+% Open questions:
+%  - how do we handle updatesa that are done as part of triggers or stored procedures?
+%    We don't get a record of the trigger/proc run - instead we get the individual transaction(s) generated
+%    We can just run them directly to get the right data, but that means that the receiving DB
+%    should have its own triggers disabled. This is not used in a lot of spots (artifacts, user/client creation
+%    ar ethe two that comes to mind), but it exists. IIRC bifrost makes heavier use of stored procs.
 %
 %
-% AllRaw = [Data || {_, _, Data} <- Remaining].
-%
-% Raw ex:
-%<<"table public.orgs: INSERT: id[character]:'588a6e1a3944129a89e9d5e2f1f1cec5' authz_id[character]:'3b214ce9d7f790dccebbd2af33711977' name[text]:'pedant_testorg_api_23439' full_name[text]:'pedant_testorg_api_23439' assigned_at[timestamp without time zone]:'2017-06-05 17:16:06' last_updated_by[character]:'c3fbae8bae3f5677e319a8282bc180f2' created_at[timestamp without time zone]:'2017-06-05 17:16:06' updated_at[timestamp without time zone]:'2017-06-05 17:16:06'">>
-%Multiline example that includes json:
-%
-%<<"table public.users: INSERT: id[character]:'0000000000009cd8a4dcbba29e15b0c0' authz_id[character]:'f5477ed38d0fae9f9547dea9f40a24f7' username[text]:'pedant_testorg_api_23439_owner' email[text]:'pedant_testorg_api_23439_owner@chef.io' pubkey_version[integer]:0 public_key[text]:'-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA17bbwaecnsRq44XYvknR\nUGS2PSoz4zmJMYC7vyrijHxTyY7m6q8vzeUh7mL38o3FqkcqoffQ1Vfu0THtlqsv\nbyW/nqbV0OGSmX22YPa4Fjg7aLbQ2++chxG9NBzQGrQNn54+DNipMWNSZyAU6bbd\nXgXnmBTxiaqIpLZSJbZB0NKZYTpRd1GYrJAYmquYs0s+WCdTRH6Ebp1NgIWjpVis\n8I7TE42dcndCp5DcN1xP4MQV6YiqM0Ss7Tmv+XcUsgOkXUTJocsi6OI8d3c+QFWh\nUBZEXxiBtKVN5YS1+IeaQBsuNBIZi2qTEcgIQQxvFnIGjGYU5qrP3jzq6Q1EEYWe\nhwIDAQAB\n-----END PUBLIC KEY-----\n\n' serialized_object[text]:'{\"display_name\":\"pedant_testorg_api_23439_owner\",\"first_name\":\"pedant_testorg_api_23439_owner\",\"last_name\":\"pedant_testorg_api_23439_owner\"}' last_updated_by[character]:'c3fbae8bae3f5677e319a8282bc180f2' created_at[timestamp without time zone]:'2017-06-05 17:16:07' updated_at[timestamp without time zone]:'2017-06-05 17:16:07' external_authentication_uid[text]:null recovery_authentication_enabled[boolean]:false admin[boolean]:false hashed_password[text]:'$2a$12$Mzx1MLByrorRdHFDebOohebyAvtapLvg/h7ZOStu/u8/.jrsEhlaK' salt[text]:'$2a$12$Mzx1MLByrorRdHFDebOohe' hash_type[password_hash_type]:'bcrypt'">>
-%The data we care about will be:
-%BEGIN $txid -> new tx, maybe track it but move on.
-%table $schema.name
-% ^ $schema in our use will always be 'public' except for sqitch tracking, which will be
-%   'sqitch'
-%COMMIT $txid -> end of that tx
-%*******
+% Things to consider:
+%  - Because this application would need to run across all databases to sync
+%    inbound updates for ocid, bifrost, erchef, and bookshelf we will want to move it to its own service.
+%  - this is currently moving in the direction where chef-server.old handles the inbound changes from the repl
+%    slot and applies them to the remote DB directly.
+%       * reverse so that the remote system pulls the changes from the slot and applies them locally. Likely to be
+%         more overhead here, particularly with 'peek' then 'get' approach to preserve unprocessed transactions.
+%       * if exposed ports are a problem we could also do this through other chef-server->chef-server comm channel
+%         over SSL (API, etc).  I don't recommend shipping terms over erlang RPC - reading suggests
+%         people with more experience at this have found it doesn't handle large traffic well because it's a shared
+%         connection for all erl RPC.
+%  - we don't currently pay attention to tx id  - it's possible that some stored procs are nesting transactions
+%    which we're not doing anything special for. I don't think any of our procs use nested transactions,
+%    so this shouldn't be a problem...
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
-% Temp separating this from init for easier debugging.
-startup() ->
-    gen_server:call(?SERVER, startup).
-
 %% gen_server functions
 init(_Args) ->
-
-    %% Doing a port for now. May be sufficient, but might also wwant to considerj
-    %% a direct pgsql connection to the DB as an appropriate user. This will simplify
-    %% handling of begin/end TX.
     {ok, Password} = chef_secrets:get(<<"postgresql">>, <<"db_superuser_password">>),
-    CommandArgs = ["--start", "-h", "127.0.0.1",
-                   "-U", "opscode-pgsql",
-                   "-S", "regression_slot", % slot name - you *did* remember to run
-                   % SELECT * FROM pg_create_logical_replication_slot('migration_slot', 'test_decoding');
-                   %                        % didn't you? Come back when you're ready.
-                   "-f", "-", % out to stdout
-                   "-d", "opscode_chef",
-                   % The options below are taken from here:
-                   % https://doxygen.postgresql.org/test__decoding_8c.html#ae9ad7b4e35a8ca2df15233e16557cbcf
-                   "-o", "skip-empty-xacts",
-                   "-o", "force-binary", % experimenting to see the diff it makes
-                   "--no-password"],
-
-    PortSettings = [
-                    {args,CommandArgs},
-                    {env, [{"PGPASSWORD", binary_to_list(Password)}]},
-                    use_stdio,
-                    binary,
-                    {line, 1024}
-                   ],
-    % Observation - when too much data backlogs in stdout, pg_recvlogical fails to write?!
-    Port = open_port({spawn_executable,
-                      "/opt/opscode/embedded/bin/pg_recvlogical"}, PortSettings),
-    {ok, #{port => Port, txid => undefined}}.
+    {ok, Conn} = epgsql:connect("127.0.0.1", "opscode-pgsql", Password, [{database, "opscode_chef"}]),
+    % Not capturing the ref, we won't be canceling it. The timer is cleaned up automatically
+    % after it expires.
+    erlang:send_after(?POLL_INTERVAL_MS, ?SERVER, poll_interval_expired),
+    {ok, #{conn => Conn}}.
 
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
@@ -94,75 +81,114 @@ handle_call(_Request, _From, State) ->
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
-% Lazily not handling neol - looks like nothing approaches the arbitrary 1k I gave it above.
-% In the real world, this wouldn't do...
-handle_info({_Port, {data, {eol, Message}}}, State) ->
+handle_info(poll_interval_expired, #{conn := Conn} = State) ->
+    check_and_process_incoming_data(Conn),
+    erlang:send_after(?POLL_INTERVAL_MS, ?SERVER, poll_interval_expired),
     {noreply, State};
-handle_info({_Port, {data, Message}}, State) ->
+handle_info({_Port, {data, _Message}}, State) ->
     {noreply, State}.
 
 
-terminate(_Reason, _State) ->
+terminate(_Reason, #{conn := Conn}) ->
+    % Just in case we failed for a reason other than postgres connection issues,
+    % don't leak our connection
+    epgsql:close(Conn),
     ok.
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
-%% internal
-%%
-%%
+%%% Internal
+check_and_process_incoming_data(Conn) ->
+    % If this fails, this proc will terminate and we'll make a new connection.
+    %
+    % The parmeter '1' is for 'upto_nchanges' to ensure that we only get one transaction
+    % at a time , just to keep this a bit simpler for now. I recently added that change,
+    % and have not verified if "1" means "one completed transaction" or "one atomic change to the db".
+    %
+    % This  is using `peek_changes` to preview the data, and `get_changes` after we have processed a change,
+    % allowing us to use the logical replication slot itself as our queue.  This has the overhead
+    % of requesting each change twice, but without the 'get' to clear completed TXs,
+    % the logical slot will eventually expand to fill the disk.
+    %
+    % TODO: The slot name 'regression_slot' was copy-pasted out of the original PG examples...
+    Query = <<"select * from pg_logical_slot_peek_changes('regression_slot', NULL, 1,"
+              "'include-xids','1','force-binary','0','skip-empty-xacts', '1')">>,
 
-% Formatting notes:
-%
-% This is what accounts for the basic format of attributes/columns:
-% https://doxygen.postgresql.org/test__decoding_8c.html#a3986a57a0308de0150ebd45f7734d464
-%
-% The rough shape appears to be:
-%
-% BEGIN $txid
-% table $schemaname.$tablename: $fieldname1[$datatype1]:'$value1' $fieldname2[$datatype2]:'$value2' $fieldnamen[$datatypen]:'$valuen'
-% COMMIT $txid
-%
-% Observations:
-% * literal 'table' can presumably be other things when appropriate
-% * VALUE can span multiple lines when a literal newline is present in the data.
-           % it can also presumable include : and ' - so how do we determine
-           % when we're at the end of hte field...
-% * subsequent fields can be appended to the end of the same line of a multi-line value
-%
-% So far it does not seem that TX data is intermixed, and reading the decoding code
-% seems to agree.
-%
-% Looks like we can do this: use the pg_recv_logical function
-% pg_logical_slot_get_changes which returns LSN, XID, and DATA
-% one record per change within the TX
-% Within the data we are guaratneed the following:
-%   1st: data type.
-%
-% Data fields are not fixed width so binary matching won't help us much here.
-%
+    % 'Data' is a list of tuples returns from the query:
+    {ok, _Fields, Data} = epgsql:squery(Conn, Query),
+    % Again, we'll want better error handling. Or... any at all, really - in this case,
+    % we'll care about repeated failures on the same TX, as opposed to transient/postgres momentarily went
+    % away issues.
+    NumChanges = length(Data),
+    ok = decode_and_apply(Data),
+    clear_replication_slot(Conn, NumChanges),
+    ok.
 
-%slurp_data(<<"BEGIN ", _TXID/binary>>) ->
-    %% Ideally we'd track this txid in state and reconcile it
-    %lager:info("Begin TX ~p", [_TXID]),
-    %ok;
-%slurp_data(<<"COMMIT ", _TXID/binary>>) ->
-    %% This is where we'd clear it from state...
-    %lager:info("Commit TX ~p", [_TXID]),
-    %ok;
-%slurp_data(<<"table: ", Rest/binary>>) ->
-    %% Here is where things get fun. We could have next a single statement on a single line -
-    %% or it could be the beginning of a statement that spans mutiple lines
-    %% table $schemaname.$tablename: $fieldname1[$datatype1]:'$value1' $fieldname2[$datatype2]:'$value2' $fieldnamen[$datatypen]:'$valuen'
-    %slurp_table_update(Rest);
-%slurp_data(All) ->
-    %% here we'd append data to the last value received - it's a continuation.
-    %% At least assuming that "table" is the only leader/object type we'll see...
-    %lager:info(">> ~p", [All]).
+% this performs a pg_logical_slot_get_changes request to remove the TX we successfully
+% applied from the replicatoin slot.
+clear_replication_slot(Conn, ExpectedChangeCount) ->
+    Query = <<"select * from pg_logical_slot_get_changes('regression_slot', NULL, 1,"
+              "'include-xids','1','force-binary','0','skip-empty-xacts', '1')">>,
+    {ok, _Fields, Data} = epgsql:squery(Conn, Query),
+    ActualChangeCount = length(Data),
+    case ExpectedChangeCount == ActualChangeCount of
+        true -> ok;
+        false ->
+            lager:error("Expected ~p changes, got ~p", [ExpectedChangeCount, ActualChangeCount])
+    end,
+    ok.
 
-%slurp_table_update(<<Action/binary, ":">>) ->
-    %ok.
+decode_and_apply([TX|Rest]) ->
+    case migrator_decoder:parse(TX) of
+        {error, {unknown_type, Type}} ->
+            %%  this could be a sequence, or other unhandled type.
+            lager:error("Could not decode transaction, unknown entity type ~p", [Type]);
+        {error, {unknown_entity, SchemaAndTable}} ->
+            %% Haven't worked on other schemas here - the only one I expect we'll use is sqitch,
+            %% which we can ignore if we continue to allow sqitch to manage the schema directly on the
+            %% new system (and if migration versions match...)
+            %% Caveat: make sure the server is not in sync mode during a `chef-server-ctl upgrade`...
+            %%
+            lager:error("Could not decode transaction, unsupported schema: ~p", [SchemaAndTable]);
+        {ok, {Marker, _TXID}} when Marker == begin_tx, Marker== end_tx->
+            % TODO:
+            lager:info("Skipping ~p, no action required until we start caring about transactions....", [Marker]);
+        {ok, Decoded} ->
+            % This will apply the change to the target database.
+            % This will crash the listener if we fail to apply a change.
+            ok = migrator_target_db:execute(Decoded)
+    end,
+    decode_and_apply(Rest);
+decode_and_apply([]) ->
+    ok.
 
+%% This was the original code that used a port to monitor for changes.
+%% This works, but there's less parsing trouble (newlines) we use epgsql to ask directly. Just wanted it captured
+%% in at least one commit in case we want to look closer at it for any reason. Feel free to delete...
+% init(_Args) ->
+%     CommandArgs = ["--start", "-h", "127.0.0.1",
+    %                "-U", "opscode-pgsql",
+    %                "-S", "regression_slot", % slot name - you *did* remember to run
+    %                % SELECT * FROM pg_create_logical_replication_slot('migration_slot', 'test_decoding');
+    %                %                        % didn't you? Come back when you're ready.
+    %                "-f", "-", % out to stdout
+    %                "-d", "opscode_chef",
+    %                % The options below are taken from here:
+    %                % https://doxygen.postgresql.org/test__decoding_8c.html#ae9ad7b4e35a8ca2df15233e16557cbcf
 
-%%
-%%
+%                "-o", "skip-empty-xacts",
+    %                "-o", "force-binary", % experimenting to see the diff it makes
+    %                "--no-password"],
+    %
+    % PortSettings = [
+    %                 {args,CommandArgs},
+    %                 {env, [{"PGPASSWORD", binary_to_list(Password)}]},
+    %                 use_stdio,
+    %                 binary,
+    %                 {line, 1024}
+    %                ],
+    % % Observation - when too much data backlogs in stdout, pg_recvlogical fails to write?!
+    % Port = open_port({spawn_executable,
+    %                   "/opt/opscode/embedded/bin/pg_recvlogical"}, PortSettings),
+    % {ok, #{port => Port, txid => undefined}}.
