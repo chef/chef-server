@@ -170,15 +170,15 @@ regex_for(policy_fully_qualified_recipe) ->
 regex_for(user_name) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?USERNAME_REGEX),
                             <<"Malformed user name. Must only contain a-z, 0-9, _, or -">>);
-regex_for(firstname) ->
+regex_for(first_name) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?HUMAN_NAME_REGEX),
-                            <<"Denied firstname. Must only contain word characters, digits, ', or .">>, [unicode, ucp]);
-regex_for(middlename) ->
+                            <<"Denied first_name. Must only contain word characters, digits, ', or .">>, [unicode, ucp]);
+regex_for(middle_name) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?HUMAN_NAME_REGEX),
-                            <<"Denied middlename. Must only contain word characters, digits, ', or .">>, [unicode, ucp]);
-regex_for(lastname) ->
+                            <<"Denied middle_name. Must only contain word characters, digits, ', or .">>, [unicode, ucp]);
+regex_for(last_name) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?HUMAN_NAME_REGEX),
-                            <<"Denied lastname. Must only contain word characters, digits, ', or .">>, [unicode, ucp]);
+                            <<"Denied last_name. Must only contain word characters, digits, ', or .">>, [unicode, ucp]);
 regex_for(display_name) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?HUMAN_NAME_REGEX),
                             <<"Denied display_name. Must only contain word characters, digits, ', or .">>, [unicode, ucp]);
