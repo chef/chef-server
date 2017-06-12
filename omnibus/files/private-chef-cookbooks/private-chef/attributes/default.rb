@@ -465,7 +465,6 @@ default['private_chef']['lb']['enable'] = true
 default['private_chef']['lb']['vip'] = "127.0.0.1"
 default['private_chef']['lb']['api_fqdn'] = node['fqdn']
 default['private_chef']['lb']['web_ui_fqdn'] = node['fqdn']
-default['private_chef']['lb']['cache_cookbook_files'] = false
 default['private_chef']['lb']['debug'] = false
 default['private_chef']['lb']['upstream']['opscode-erchef'] = [ "127.0.0.1" ]
 default['private_chef']['lb']['upstream']['oc_bifrost'] = [ "127.0.0.1" ]
