@@ -95,4 +95,27 @@ describe "running configs required by chef-server-ctl", :config do
       expect(config["redis_lb"]["vip"].to_i).to_not eq(0)
     end
   end
+
+  context "reconfigure" do
+    #
+    # The cookbooks themselves require chef-server-running.json to
+    # populate previous_run.
+    #
+    it "bookshelf/storage_type" do
+      expect(config["bookshelf"]["storage_type"]).to eq("filesystem").or eq("sql")
+    end
+
+    it "opscode-solr4/external" do
+      expect(config["opscode-solr4"]["external"]).to eq(true).or eq(false)
+    end
+
+    it "postgresql/external" do
+      expect(config["postgresql"]["external"]).to eq(true).or eq(false)
+    end
+
+    it "postgresql/data_dir" do
+      expect(config["postgresql"]["data_dir"].to_s).to_not eq("")
+      expect(File.exist?(config["postgresql"]["data_dir"])).to eq(true)
+    end
+  end
 end
