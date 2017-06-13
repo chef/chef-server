@@ -72,7 +72,10 @@
 -define(USERNAME_REGEX, "[a-z0-9\-_]+").
 
 %% Validation regex for various names
--define(HUMAN_NAME_REGEX, "[[:word:][:digit:]!'. -]+").
+-define(REQUIRED_NAME_REGEX, "[[:word:][:digit:]!'. -]+").
+
+%% Validation regex for various names that can be empty.
+-define(OPTIONAL_NAME_REGEX, "[[:word:][:digit:]!'. -]*").
 
 %% Non-blank string regex
 -define(NON_BLANK_REGEX, ".+").
@@ -171,16 +174,16 @@ regex_for(user_name) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?USERNAME_REGEX),
                             <<"Malformed user name. Must only contain a-z, 0-9, _, or -">>);
 regex_for(first_name) ->
-   generate_regex_msg_tuple(?ANCHOR_REGEX(?HUMAN_NAME_REGEX),
+   generate_regex_msg_tuple(?ANCHOR_REGEX(?OPTIONAL_NAME_REGEX),
                             <<"Denied first_name. Must only contain word characters, digits, ', or .">>, [unicode, ucp]);
 regex_for(middle_name) ->
-   generate_regex_msg_tuple(?ANCHOR_REGEX(?HUMAN_NAME_REGEX),
+   generate_regex_msg_tuple(?ANCHOR_REGEX(?OPTIONAL_NAME_REGEX),
                             <<"Denied middle_name. Must only contain word characters, digits, ', or .">>, [unicode, ucp]);
 regex_for(last_name) ->
-   generate_regex_msg_tuple(?ANCHOR_REGEX(?HUMAN_NAME_REGEX),
+   generate_regex_msg_tuple(?ANCHOR_REGEX(?OPTIONAL_NAME_REGEX),
                             <<"Denied last_name. Must only contain word characters, digits, ', or .">>, [unicode, ucp]);
 regex_for(display_name) ->
-   generate_regex_msg_tuple(?ANCHOR_REGEX(?HUMAN_NAME_REGEX),
+   generate_regex_msg_tuple(?ANCHOR_REGEX(?REQUIRED_NAME_REGEX),
                             <<"Denied display_name. Must only contain word characters, digits, ', or .">>, [unicode, ucp]);
 regex_for(non_blank_string) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?NON_BLANK_REGEX), <<"Field must have a non-empty string value">>);
