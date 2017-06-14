@@ -88,8 +88,7 @@ start_link() ->
 init(_Args) ->
     {ok, Password} = chef_secrets:get(<<"postgresql">>, <<"db_superuser_password">>),
     {ok, Conn} = epgsql:connect("127.0.0.1", "opscode-pgsql", Password, [{database, "opscode_chef"}]),
-    SlotName = unique_slot_name(),
-    setup_replication_slot(Conn, SlotName),
+    SlotName = unique_slot_name(Conn),
     % Not capturing the ref, we won't be canceling it. The timer is cleaned up automatically
     % after it expires.
     erlang:send_after(?POLL_INTERVAL_MS, ?SERVER, poll_interval_expired),
@@ -102,13 +101,13 @@ handle_call(_Request, _From, State) ->
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
-handle_info(poll_interval_expired, #{conn := Conn} = State) ->
-    check_and_process_incoming_data(Conn),
+handle_info(poll_interval_expired, #{conn := Conn,
+                                     slot_name := SlotName} = State) ->
+    check_and_process_incoming_data(Conn, SlotName),
     erlang:send_after(?POLL_INTERVAL_MS, ?SERVER, poll_interval_expired),
     {noreply, State};
 handle_info({_Port, {data, _Message}}, State) ->
     {noreply, State}.
-
 
 terminate(_Reason, #{conn := Conn}) ->
     % Just in case we failed for a reason other than postgres connection issues,
@@ -120,17 +119,21 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %%% Internal
-unique_slot_name() ->
+unique_slot_name(Conn) ->
     case file:read_file(?SLOT_FILE_PATH) of
         {ok, Binary} ->
             Binary;
         {error, enoent} ->
-            save_slot_name()
+            save_slot_name(Conn)
     end.
 
-save_slot_name() ->
+save_slot_name(Conn) ->
     {MegaS, S, MicroS} = os:timestamp(),
     Name = io_lib:format("migrator_repl_slot_~B_~B_~B", [MegaS, S, MicroS]),
+    %% TODO(ssd) 2017-06-14: We should only set this up if it doesn't
+    %% already exist. Also, we need a way to track whether the initial
+    %% sync has been complete or not.
+    setup_replication_slot(Conn, Name),
     ok = file:write_file(?SLOT_FILE_PATH, Name),
     Name.
 
@@ -138,7 +141,7 @@ setup_replication_slot(Conn, SlotName) ->
     Query = iolist_to_binary(["SELECT pg_create_logical_replication_slot('", SlotName, "', 'test_decoding');"]),
     {ok, _Fields, _Data} = epgsql:squery(Conn, Query).
 
-check_and_process_incoming_data(Conn) ->
+check_and_process_incoming_data(Conn, SlotName) ->
     % If this fails, this proc will terminate and we'll make a new connection.
     %
     % The parmeter '1' is for 'upto_nchanges' to ensure that we only get one transaction
@@ -151,9 +154,8 @@ check_and_process_incoming_data(Conn) ->
     % the logical slot will eventually expand to fill the disk.
     %
     % TODO: The slot name 'regression_slot' was copy-pasted out of the original PG examples...
-    Query = <<"select * from pg_logical_slot_peek_changes('regression_slot', NULL, 1,"
-              "'include-xids','1','force-binary','0','skip-empty-xacts', '1')">>,
-
+    Query = iolist_to_binary([<<"select * from pg_logical_slot_peek_changes('">>, SlotName, <<"', NULL, 1,"
+              "'include-xids','1','force-binary','0','skip-empty-xacts', '1')">>]),
     % 'Data' is a list of tuples returns from the query:
     {ok, _Fields, Data} = epgsql:squery(Conn, Query),
     % Again, we'll want better error handling. Or... any at all, really - in this case,
@@ -161,14 +163,17 @@ check_and_process_incoming_data(Conn) ->
     % away issues.
     NumChanges = length(Data),
     ok = decode_and_apply(Data),
-    clear_replication_slot(Conn, NumChanges),
+    clear_replication_slot(Conn, SlotName, NumChanges),
     ok.
 
 % this performs a pg_logical_slot_get_changes request to remove the TX we successfully
 % applied from the replicatoin slot.
-clear_replication_slot(Conn, ExpectedChangeCount) ->
-    Query = <<"select * from pg_logical_slot_get_changes('regression_slot', NULL, 1,"
-              "'include-xids','1','force-binary','0','skip-empty-xacts', '1')">>,
+clear_replication_slot(Conn, SlotName, ExpectedChangeCount) ->
+    %% TODO(ssd) 2017-06-14: The SELECT 1 is an attempt to avoid
+    %% double-transfers of the data.  We should verify that it
+    %% achieves that goal via tcpdump or something.
+    Query = iolist_to_binary([<<"select 1 from pg_logical_slot_get_changes('">>, SlotName, <<"', NULL, 1,"
+              "'include-xids','1','force-binary','0','skip-empty-xacts', '1')">>]),
     {ok, _Fields, Data} = epgsql:squery(Conn, Query),
     ActualChangeCount = length(Data),
     case ExpectedChangeCount == ActualChangeCount of
@@ -179,7 +184,7 @@ clear_replication_slot(Conn, ExpectedChangeCount) ->
     ok.
 
 decode_and_apply([TX|Rest]) ->
-    case migrator_decoder:parse(TX) of
+    case migrator_decode:parse(TX) of
         {error, {unknown_type, Type}} ->
             %%  this could be a sequence, or other unhandled type.
             lager:error("Could not decode transaction, unknown entity type ~p", [Type]);

@@ -99,12 +99,14 @@ connect() ->
     %% {ok, Conn} = epgsql:connect("127.0.0.1", "migration_user", "password", [{database, "opscode_chef_target"}]),
     fake_conn.
 
-execute_term({start_tx, _TXID}) ->
+execute_term({tx_start, TXID}) ->
+    lager:info("Starting replay of: ~p", [TXID]),
     ok;
-execute_term({end_tx, _TXID}) ->
+execute_term({tx_end, TXID}) ->
+    lager:info("Finished replay of: ~p", [TXID]),
     ok;
 execute_term({Entity, Operation, { Fields, Values }}) ->
-    lager:info("EXECUTE: ~p ~p ~p ~p", [Entity, Operation, Fields, Values]),
+    lager:info("WOULD EXECUTE: ~p ~p ~p ~p", [Entity, Operation, Fields, Values]),
     ok.
 
     % Steps here:

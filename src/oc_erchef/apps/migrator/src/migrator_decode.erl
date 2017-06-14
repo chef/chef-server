@@ -61,15 +61,20 @@
 
 -export([parse/1]).
 
-parse(Record) ->
-  do_decode(Record).
+parse({_TlogIdx, _TxIdx, Data} = Record) ->
+    lager:warning("Decoding record: ~p", [Record]),
+    do_decode(Data);
+parse(Other) ->
+    lager:warning("Unknown record: ~p", [Other]),
+    throw(unknown_record).
+
 
 do_decode(<<"BEGIN ", TXID/binary>>) ->
-  {tx_start, TXID};
+    {ok, {tx_start, TXID}};
 do_decode(<<"COMMIT ",TXID/binary>>) ->
-  {tx_end, TXID};
+    {ok, {tx_end, TXID}};
 do_decode(<<"table public.", Rest/binary>>) ->
-  decode_transaction(Rest);
+    decode_transaction(Rest);
 do_decode(<<"table ", Rest/binary>>) ->
     {QualifiedTable, _Rest} = binary:split(Rest, <<":">>),
     {error, {unsupported_schema, QualifiedTable}};
@@ -151,5 +156,3 @@ find_quoted_value_end(<<>>, Pos) ->
   {error, {expected_field_end, Pos}};
 find_quoted_value_end(<<_:1/binary, Rest/binary>>, Pos) ->
   find_quoted_value_end(Rest, Pos + 1).
-
-
