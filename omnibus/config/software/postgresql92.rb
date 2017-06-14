@@ -32,11 +32,7 @@ dependency "ncurses"
 dependency "libossp-uuid"
 dependency "config_guess"
 
-<<<<<<< HEAD
-relative_path "postgresql-9.2.21"
-=======
 relative_path "postgresql-9.6.3"
->>>>>>> Use PG 9.6 - no upgrade included
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
