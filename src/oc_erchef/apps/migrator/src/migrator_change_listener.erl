@@ -35,6 +35,7 @@
          code_change/3]).
 
 -define(POLL_INTERVAL_MS, 250).
+-define(SLOT_FILE_PATH, "/var/opt/opscode/opscode-erchef/migrator-slot-name").
 
 % This module simply polls for new transactions using a direct sql connection as superuser.
 % The end of this first phase will have it running on localhost, dumping data into a local copy of the DB.
@@ -87,10 +88,13 @@ start_link() ->
 init(_Args) ->
     {ok, Password} = chef_secrets:get(<<"postgresql">>, <<"db_superuser_password">>),
     {ok, Conn} = epgsql:connect("127.0.0.1", "opscode-pgsql", Password, [{database, "opscode_chef"}]),
+    SlotName = unique_slot_name(),
+    setup_replication_slot(Conn, SlotName),
     % Not capturing the ref, we won't be canceling it. The timer is cleaned up automatically
     % after it expires.
     erlang:send_after(?POLL_INTERVAL_MS, ?SERVER, poll_interval_expired),
-    {ok, #{conn => Conn}}.
+    {ok, #{conn => Conn,
+           slot_name => SlotName}}.
 
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
@@ -116,6 +120,24 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %%% Internal
+unique_slot_name() ->
+    case file:read_file(?SLOT_FILE_PATH) of
+        {ok, Binary} ->
+            Binary;
+        {error, enoent} ->
+            save_slot_name()
+    end.
+
+save_slot_name() ->
+    {MegaS, S, MicroS} = os:timestamp(),
+    Name = io_lib:format("migrator_repl_slot_~B_~B_~B", [MegaS, S, MicroS]),
+    ok = file:write_file(?SLOT_FILE_PATH, Name),
+    Name.
+
+setup_replication_slot(Conn, SlotName) ->
+    Query = iolist_to_binary(["SELECT pg_create_logical_replication_slot('", SlotName, "', 'test_decoding');"]),
+    {ok, _Fields, _Data} = epgsql:squery(Conn, Query).
+
 check_and_process_incoming_data(Conn) ->
     % If this fails, this proc will terminate and we'll make a new connection.
     %
