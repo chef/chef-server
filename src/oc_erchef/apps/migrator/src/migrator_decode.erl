@@ -134,16 +134,21 @@ coerce_type(<<"text">>, V) ->
     V;
 coerce_type(<<"character">>, V) ->
     V;
+coerce_type(<<"password_hash_type">>, V) ->
+    V;
 coerce_type(<<"bigint">>, V) ->
     binary_to_integer(V);
 coerce_type(<<"integer">>, V) ->
     binary_to_integer(V);
+coerce_type(<<"boolean">>, <<"false">>) ->
+    false;
+coerce_type(<<"boolean">>, <<"true">>) ->
+    true;
 coerce_type(<<"timestamp without time zone">>, <<"infinity">>) ->
     %% TODO(ssd) 2017-06-14: copy/pasta from chef_object's timestamp
     %% parsing code.
     {{294277,1,9},{4,0,54.775807}};
 coerce_type(<<"timestamp without time zone">>, V) ->
-    lager:warning("CONVERTING DATE: ~p", [V]),
     case ec_date:parse(binary_to_list(V)) of
         %% TODO(ssd) 2017-06-14: This throws out sub-second precision on SQL-produced timestamps because
         %% epgsql doesn't know how to deal with the extra term
@@ -153,7 +158,7 @@ coerce_type(<<"timestamp without time zone">>, V) ->
             Other
     end;
 coerce_type(T, V) ->
-    lager:warning("UNHANDLED TYPE ~p", [T]),
+    lager:warning("UNHANDLED TYPE ~p ~p", [T, V]),
     V.
 
 

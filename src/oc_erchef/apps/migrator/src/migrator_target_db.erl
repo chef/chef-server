@@ -60,7 +60,6 @@
          handle_info/2,
          code_change/3]).
 
-
 %% API
 start_link(Config) ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, Config, []).
@@ -74,8 +73,8 @@ init(_Config) ->
            conn => connect()}}.
 
 handle_call({execute, TXTerm}, _From, State = #{conn := Conn}) ->
-    Result = execute_term(TXTerm, Conn),
-    {reply, Result, State};
+    ok = execute_term(TXTerm, Conn),
+    {reply, ok, State};
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
 
@@ -107,10 +106,15 @@ execute_term({tx_end, TXID}, _C) ->
     ok;
 execute_term({_Entity, _Operation, { _Fields, Values }} = Term, Conn) ->
     Query = migrator_encode:encode(Term),
-    lager:info("EXECUTE: ~p with data ~p", [Query, Values]),
+    lager:debug("Replaying: ~p with data ~p", [Query, Values]),
     Res = epgsql:equery(Conn, Query, Values),
-    lager:info("RESULT: ~p", [Res]),
-    ok.
+    case Res of
+        {ok, _} ->
+            ok;
+        Other ->
+            lager:error("Replay failed: ~p", [Other]),
+            Other
+    end.
 
     % Steps here:
     % Is phash2 of {Entity, Operation, Fields} in binary_statement_cache ets table?
