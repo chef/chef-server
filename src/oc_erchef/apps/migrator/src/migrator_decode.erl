@@ -61,8 +61,7 @@
 
 -export([parse/1]).
 
-parse({_TlogIdx, _TxIdx, Data} = Record) ->
-    lager:warning("Decoding record: ~p", [Record]),
+parse({_TlogIdx, _TxIdx, Data}) ->
     do_decode(Data);
 parse(Other) ->
     lager:warning("Unknown record: ~p", [Other]),
@@ -109,27 +108,53 @@ extract_op_elements(Data) ->
 extract_fields(<<>>, {OutFields, OutValues}) ->
     { lists:reverse(OutFields), lists:reverse(OutValues)};
 extract_fields(TxData, {OutFields, OutValues}) ->
-  % Data = id[character varying]:'$VALUE' something_else[....
-  % enable this when we fail to match as expected
-  % and you want to see where it left off:
-  %io:fwrite("In: ~p~n", [TxData]),
-  [Field, Rest0] = binary:split(TxData, <<"[">>),
-  % We are not currently using type data when reconstituting these queries but
-  % this is where it comes from if we need it at any point.
-  [_Type, Rest1] = binary:split(Rest0, <<"]:">>),
-  {Value, Rest3} = case Rest1 of
-                       <<"'",Rest2/binary>> ->
-                           {ok, Pos, R} = find_quoted_value_end(Rest2, 0),
-                           V = binary:part(Rest1, 1, Pos),
-                           {V, R};
-                       Rest2 ->
-                           % This is unquoted, so we're looking for a space only.
-                           {ok, Pos, R} = find_value_end(Rest2, 0),
-                           V = binary:part(Rest1, 0, Pos),
-                           {V, R}
-                   end,
+    %% Data = id[character varying]:'$VALUE' something_else[....
+    %% enable this when we fail to match as expected
+    %% and you want to see where it left off:
+    %% io:fwrite("In: ~p~n", [TxData]),
+    [Field, Rest0] = binary:split(TxData, <<"[">>),
+    %% We are not currently using type data when reconstituting these queries but
+    %% this is where it comes from if we need it at any point.
+    [Type, Rest1] = binary:split(Rest0, <<"]:">>),
+    {Value, Rest3} = case Rest1 of
+                         <<"'",Rest2/binary>> ->
+                             {ok, Pos, R} = find_quoted_value_end(Rest2, 0),
+                             V = binary:part(Rest1, 1, Pos),
+                             {V, R};
+                         Rest2 ->
+                                                % This is unquoted, so we're looking for a space only.
+                             {ok, Pos, R} = find_value_end(Rest2, 0),
+                             V = binary:part(Rest1, 0, Pos),
+                             {V, R}
+                     end,
+    CVal = coerce_type(Type, Value),
+    extract_fields(Rest3, { [ Field | OutFields],  [CVal | OutValues] }).
 
-  extract_fields(Rest3, { [ Field | OutFields],  [Value | OutValues] }).
+coerce_type(<<"text">>, V) ->
+    V;
+coerce_type(<<"character">>, V) ->
+    V;
+coerce_type(<<"bigint">>, V) ->
+    binary_to_integer(V);
+coerce_type(<<"integer">>, V) ->
+    binary_to_integer(V);
+coerce_type(<<"timestamp without time zone">>, <<"infinity">>) ->
+    %% TODO(ssd) 2017-06-14: copy/pasta from chef_object's timestamp
+    %% parsing code.
+    {{294277,1,9},{4,0,54.775807}};
+coerce_type(<<"timestamp without time zone">>, V) ->
+    lager:warning("CONVERTING DATE: ~p", [V]),
+    case ec_date:parse(binary_to_list(V)) of
+        %% TODO(ssd) 2017-06-14: This throws out sub-second precision on SQL-produced timestamps because
+        %% epgsql doesn't know how to deal with the extra term
+        {D, {H, M, S, _}} ->
+            {D, {H, M, S}};
+        Other ->
+            Other
+    end;
+coerce_type(T, V) ->
+    lager:warning("UNHANDLED TYPE ~p", [T]),
+    V.
 
 
 find_value_end(<<>>, Pos) ->

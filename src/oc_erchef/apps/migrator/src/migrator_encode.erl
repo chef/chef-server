@@ -40,18 +40,18 @@ build_query({_, _}) ->
     % begin_tx, end_tx will fit this form - we're not doing anything
     % with those yet.
     {ok, skip};
-build_query({Entity, Type, Data} ) ->
-    {Fields, _Values} = lists:unzip(Data),
+build_query({Entity, Type, {Fields, _Values}} ) ->
     build_typed_query(Entity, Type, Fields).
 
 build_typed_query(Entity, <<"INSERT">>, Fields) ->
-  FormattedFields = join_bin(Fields, <<",">>),
-  Placeholders = placeholders_for_insert(length(Fields)),
+    FormattedFields = join_bin(Fields, <<",">>),
+    Placeholders = placeholders_for_insert(length(Fields)),
     <<"INSERT INTO ",
       Entity/binary,
       " (",
       FormattedFields/binary,
-      " VALUES ( ",
+      ") ",
+      "VALUES (",
       Placeholders/binary,
       ")">>;
 build_typed_query(Entity, <<"UPDATE">>, Fields) ->
@@ -85,15 +85,16 @@ format_primary_key(<<"keys">>, [PK1, PK2 | Fields]) ->
 format_primary_key(_Entity, [PK | Fields]) ->
   {<<PK/binary, "= $1">>, Fields}.
 
-all_to_primary_key(Fields) ->
-  all_to_primary_key(<<>>, 1, Fields).
+all_to_primary_key([First|Rest]) ->
+    Acc = <<First/binary, " = $1">>,
+    all_to_primary_key(Acc, 2, Rest).
 
 all_to_primary_key(Acc, NextPos, [Field| Fields]) ->
-  PosValue = integer_to_binary(NextPos),
-  NewAcc = <<Acc/binary, Field/binary, " = $1", PosValue/binary>>,
-  all_to_primary_key(NewAcc, NextPos + 1,Fields);
+    PosValue = integer_to_binary(NextPos),
+    NewAcc = <<Acc/binary, " AND ", Field/binary, " = $", PosValue/binary>>,
+    all_to_primary_key(NewAcc, NextPos + 1,Fields);
 all_to_primary_key(Acc, _, []) ->
-  Acc.
+    Acc.
 
 %% simple utility function to combine a list of binary strings
 %% into a single binary with a separator.
@@ -121,8 +122,8 @@ placeholders_for_update(Acc, [], _) ->
 %% Generates placeholders for use in a SQL "VALUES" clause,
 %% $1, $2... $n where N matches the number of input fields.
 %% in the form F1=$1, F2=$, Fn=$n
-placeholders_for_insert(Fields) ->
-  placeholders_for_insert(<<>>, length(Fields), 0).
+placeholders_for_insert(Len) ->
+    placeholders_for_insert(<<"$1">>, Len, 1).
 
 placeholders_for_insert(Acc, Count, Count) ->
   Acc;

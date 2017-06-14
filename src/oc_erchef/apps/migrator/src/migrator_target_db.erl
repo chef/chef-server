@@ -73,8 +73,8 @@ init(_Config) ->
     {ok, #{cache => dict:new(),
            conn => connect()}}.
 
-handle_call({execute, TXTerm}, _From, State) ->
-    Result = execute_term(TXTerm),
+handle_call({execute, TXTerm}, _From, State = #{conn := Conn}) ->
+    Result = execute_term(TXTerm, Conn),
     {reply, Result, State};
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
@@ -91,22 +91,25 @@ terminate(_Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
+%%
 %% internal
 %%
 connect() ->
-    %% Target is currently hard-coded to a local copy of opscode_chef. Prior to running,
-    %% nuke and recreate it since this POC conveniently avoids the question of initial sync.
-    %% {ok, Conn} = epgsql:connect("127.0.0.1", "migration_user", "password", [{database, "opscode_chef_target"}]),
-    fake_conn.
+    {ok, Conn} = epgsql:connect("127.0.0.1", "migration_user", "password", [{database, "opscode_chef_target"}]),
+    epgsql:equery(Conn, <<"SET session_replication_role=replica">>, []),
+    Conn.
 
-execute_term({tx_start, TXID}) ->
+execute_term({tx_start, TXID}, _C) ->
     lager:info("Starting replay of: ~p", [TXID]),
     ok;
-execute_term({tx_end, TXID}) ->
+execute_term({tx_end, TXID}, _C) ->
     lager:info("Finished replay of: ~p", [TXID]),
     ok;
-execute_term({Entity, Operation, { Fields, Values }}) ->
-    lager:info("WOULD EXECUTE: ~p ~p ~p ~p", [Entity, Operation, Fields, Values]),
+execute_term({_Entity, _Operation, { _Fields, Values }} = Term, Conn) ->
+    Query = migrator_encode:encode(Term),
+    lager:info("EXECUTE: ~p with data ~p", [Query, Values]),
+    Res = epgsql:equery(Conn, Query, Values),
+    lager:info("RESULT: ~p", [Res]),
     ok.
 
     % Steps here:

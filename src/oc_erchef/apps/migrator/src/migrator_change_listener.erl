@@ -25,7 +25,7 @@
 
 -export([%% API functions
          start_link/0,
-
+         listen/0,
          %% gen_server behaviour
          init/1,
          handle_call/3,
@@ -84,6 +84,9 @@
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
+listen() ->
+    gen_server:call(?MODULE, listen).
+
 %% gen_server functions
 init(_Args) ->
     {ok, Password} = chef_secrets:get(<<"postgresql">>, <<"db_superuser_password">>),
@@ -91,10 +94,13 @@ init(_Args) ->
     SlotName = unique_slot_name(Conn),
     % Not capturing the ref, we won't be canceling it. The timer is cleaned up automatically
     % after it expires.
-    erlang:send_after(?POLL_INTERVAL_MS, ?SERVER, poll_interval_expired),
+
     {ok, #{conn => Conn,
            slot_name => SlotName}}.
 
+handle_call(listen, _From, State) ->
+    erlang:send_after(?POLL_INTERVAL_MS, ?SERVER, poll_interval_expired),
+    {reply, ok, State};
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
 
