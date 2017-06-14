@@ -48,7 +48,8 @@
 %
 -define(SERVER, ?MODULE).
 
--export([%% API functions
+-export([
+         %% API functions
          start_link/1,
          execute/1,
          %% gen_server behaviour:
@@ -62,27 +63,27 @@
 
 %% API
 start_link(Config) ->
-    gen_server:start_link({local, ?SERVER}, ?MODULE, [], Config).
+    gen_server:start_link({local, ?SERVER}, ?MODULE, Config, []).
+
 execute(TXTerm) ->
     gen_server:call(?SERVER, {execute, TXTerm}).
 
 %% gen_server functions
-init(_Args) ->
-    Conn = connect(),
-    {ok, #{cache = dict:new()}}.
+init(_Config) ->
+    {ok, #{cache => dict:new(),
+           conn => connect()}}.
 
 handle_call({execute, TXTerm}, _From, State) ->
     Result = execute_term(TXTerm),
-    {reply, Result, State}
-
-    handle_call(_Request, _From, State) ->
+    {reply, Result, State};
+handle_call(_Request, _From, State) ->
     {reply, ok, State}.
 
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
 handle_info(_Info, State) ->
-    {noreply, State};
+    {noreply, State}.
 
 terminate(_Reason, _State) ->
     ok.
@@ -93,17 +94,17 @@ code_change(_OldVsn, State, _Extra) ->
 %% internal
 %%
 connect() ->
-    %% Target is currently hard-coded to a local copy of opscode_chef.  Prior to running,
+    %% Target is currently hard-coded to a local copy of opscode_chef. Prior to running,
     %% nuke and recreate it since this POC conveniently avoids the question of initial sync.
-    %%
-    %{ok, Conn} = epgsql:connect("127.0.0.1", "migration_user", "password", [{database, "opscode_chef_target"}]),
-    ok.
+    %% {ok, Conn} = epgsql:connect("127.0.0.1", "migration_user", "password", [{database, "opscode_chef_target"}]),
+    fake_conn.
 
-execute({start_tx, _TXID) ->
+execute_term({start_tx, _TXID}) ->
     ok;
-execute({end_tx, _TXID) ->
+execute_term({end_tx, _TXID}) ->
     ok;
-execute({Entity, Operation, { Fields, Values }} = Term) ->
+execute_term({Entity, Operation, { Fields, Values }}) ->
+    lager:info("EXECUTE: ~p ~p ~p ~p", [Entity, Operation, Fields, Values]),
     ok.
 
     % Steps here:
@@ -117,4 +118,3 @@ execute({Entity, Operation, { Fields, Values }} = Term) ->
     %
     % Bind the statement to Values, execute.
     % Don't forget to reindex on target server!
-
