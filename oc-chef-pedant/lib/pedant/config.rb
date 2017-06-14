@@ -58,8 +58,10 @@ module Pedant
     # tests.  Includes only the tests specified by the value of
     # +Pedant.config.suite+.
     def self.test_directories
-      suite = Pedant.config.suite || raise("Test suite unspecified!  Set 'Pedant.config.suite' in the test runner!")
-      Pedant::Gem.test_directories(suite)
+      suites = Pedant.config.suite || raise("Test suite unspecified!  Set 'Pedant.config.suite' in the test runner!")
+      Array(suites).map do |suite|
+        Pedant::Gem.test_directories(suite)
+      end
     end
 
 
