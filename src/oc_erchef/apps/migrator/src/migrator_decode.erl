@@ -168,6 +168,8 @@ extract_fields(TxData, {OutFields, OutValues}) ->
     CVal = coerce_type(Type, Value),
     extract_fields(Rest3, { [ Field | OutFields],  [CVal | OutValues] }).
 
+coerce_type(_T, <<"null">>) ->
+    undefined;
 coerce_type(<<"text">>, V) ->
     V;
 coerce_type(<<"character">>, V) ->
