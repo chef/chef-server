@@ -117,16 +117,31 @@ decode_transaction2({Table, Operation, <<"(no-tuple-data)">>}) ->
     %%
     %%    In short, more research needed here.
     {ok, {Table, Operation, noop}};
-decode_transaction2({Table, Operation, Raw}) ->
-    {ok, {Table, Operation, extract_fields(Raw, {[], []}) }}.
+decode_transaction2({Table, Operation, {OldKey, NewTuple}}) ->
+    {ok, {Table, Operation, extract_fields(OldKey, {[], []}), extract_fields(NewTuple, {[], []}) }};
+decode_transaction2({Table, Operation, NewTuple}) ->
+    {ok, {Table, Operation, extract_fields(NewTuple, {[], []}) }}.
 
 %
 %% Returns the entity being operated on, the operation itself, and the remaining unparsed binary.
 extract_op_elements(Data) ->
-  % Data = clients: INSERT: id[character varying]:'$VALUE'
-  [Table, Rest0]  = binary:split(Data, <<": ">>),     % clients, INSERT: id[character varying]:'$VALUE'
-  [Operation, Rest1] = binary:split(Rest0, <<": ">>), % INSERT, id[character varying]:'$VALUE'
-  {Table, Operation, Rest1}.
+    %% Data = clients: INSERT: id[character varying]:'$VALUE'
+    [Table, Rest0] = binary:split(Data, <<": ">>),
+    [Operation, Rest1] = binary:split(Rest0, <<": ">>),
+    {Table, Operation, extract_new_tuple(Rest1)}.
+
+%%
+%% For UPDATES where one of the primary key fields is being changed,
+%% we get data about the OLD primary key fields.  We need to use the
+%% old primary keys to construct the WHERE clause:
+%%
+%% <<"table public.keys: UPDATE: old-key: id[character]:'8b3430304441db383fd877d1ed0f676a' key_name[text]:'alt_key' new-tuple: id[character]:'8b3430304441db383fd877d1ed0f676a' key_name[text]:'altname1' public_key[text]:'-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAx0FkgowHXIKeroJep8yx\n63ENXRARzluk3obSvpUbmPxwAvWP1gfqSi1JmRlhLufcWNJ+sMwWvp6YVlLnEkTW\nb85YuwPwnRp7ICs5ACLKbP11eO2hdLoxLIo4ryzNvzY6ufba2VjD++E4TkN0tL+h\nkJ6tqEfNOOtSkHns0axZnFrpEe2fhR7z6MpSm1aDQptHUEDHj176KJBCpyyeiQR7\nYQex72fy7wXD4XIp8cx37Ftb6jRJqKmtwCaHxj4OnxNMS0fdDWUeTk3gceQLdDex\nml5/zAYFxFjdUAMNnqAKSi4thySyVrBs21e8q2hRWcJZPh5gbzP1SeBzqDlBFgRb\nHQIDAQAB\n-----END PUBLIC KEY-----\n' key_version[integer]:0 created_at[timestamp without time zone]:'2017-06-15 08:22:27' expires_at[timestamp without time zone]:'2049-12-24 21:00:00' last_updated_by[character]:'0d1552523cccdf029a3d09a19b4a10b1' updated_at[timestamp without time zone]:'2017-06-15 08:22:27'">>
+%%
+extract_new_tuple(<<"old-key: ", Rest/binary>>) ->
+    [OldKey, NewTuple] = binary:split(Rest, <<"new-tuple: ">>),
+    {OldKey, NewTuple};
+extract_new_tuple(Data) ->
+    Data.
 
 extract_fields(<<>>, {OutFields, OutValues}) ->
     { lists:reverse(OutFields), lists:reverse(OutValues)};
@@ -189,7 +204,6 @@ coerce_type(<<"timestamp without time zone">>, V) ->
 coerce_type(T, V) ->
     lager:warning("UNHANDLED TYPE ~p ~p", [T, V]),
     V.
-
 
 find_value_end(<<>>, Pos) ->
   {ok, Pos, <<>>};

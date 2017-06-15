@@ -107,9 +107,10 @@ execute_term({tx_end, TXID}, _C) ->
 execute_term({Entity, Operation, noop}, _C) ->
     lager:debug("Not replying noop ~p ~p", [Operation, Entity]),
     ok;
-execute_term({_Entity, _Operation, { _Fields, Values }} = Term, Conn) ->
-    Query = migrator_encode:encode(Term),
-    lager:debug("Replaying: ~p with data ~p", [Query, Values]),
+execute_term(Term, Conn) ->
+    {Query, Values} = migrator_encode:encode(Term),
+    lager:debug("Replaying: ~p", [Query]),
+    lager:debug("Data ~p", [Values]),
     Res = epgsql:equery(Conn, Query, Values),
     case Res of
         {ok, _} ->

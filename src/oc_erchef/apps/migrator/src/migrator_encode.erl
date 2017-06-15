@@ -40,8 +40,15 @@ build_query({_, _}) ->
     % begin_tx, end_tx will fit this form - we're not doing anything
     % with those yet.
     {ok, skip};
-build_query({Entity, Type, {Fields, _Values}} ) ->
-    build_typed_query(Entity, Type, Fields).
+build_query({Entity, Type, {Pkeys, PkeyValues}, {Fields, Values}}) ->
+    {build_typed_query(Entity, Type, Fields, Pkeys), PkeyValues ++ Values};
+build_query({Entity, Type, {Fields, Values}}) ->
+    {build_typed_query(Entity, Type, Fields), Values}.
+
+build_typed_query(Entity, <<"UPDATE">>, Fields, Pkeys) ->
+    {PrimaryKeyClause, _UpdateFields, UpdateStart} = format_primary_key(Entity, Pkeys),
+    Placeholders = placeholders_for_update(Fields, UpdateStart),
+    update_query(Entity, Placeholders, PrimaryKeyClause).
 
 build_typed_query(Entity, <<"INSERT">>, Fields) ->
     FormattedFields = join_bin(Fields, <<",">>),
@@ -57,15 +64,18 @@ build_typed_query(Entity, <<"INSERT">>, Fields) ->
 build_typed_query(Entity, <<"UPDATE">>, Fields) ->
     {PrimaryKeyClause, UpdateFields, UpdateStart} = format_primary_key(Entity, Fields),
     Placeholders = placeholders_for_update(UpdateFields, UpdateStart),
+    update_query(Entity, Placeholders, PrimaryKeyClause);
+build_typed_query(Entity, <<"DELETE">>, Fields) ->
+    FormattedPK = all_to_primary_key(Fields),
+    <<"DELETE FROM ", Entity/binary, " WHERE ", FormattedPK/binary>>.
+
+update_query(Entity, Placeholders, PrimaryKeyClause) ->
     <<"UPDATE ",
       Entity/binary,
       " SET ",
       Placeholders/binary,
       " WHERE ",
-      PrimaryKeyClause/binary>>;
-build_typed_query(Entity, <<"DELETE">>, Fields) ->
-    FormattedPK = all_to_primary_key(Fields),
-    <<"DELETE FROM ", Entity/binary, " WHERE ", FormattedPK/binary>>.
+      PrimaryKeyClause/binary>>.
 
 format_primary_key(<<"keys">>, [PK1, PK2 | Fields]) ->
   % This is an odd case. Most of our insert and update queries update
