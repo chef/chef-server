@@ -46,7 +46,9 @@ may have.
       log level?
 
 - [ ] Does this change introduce new dependencies? If so, do we
-      believe those dependencies are necessary and stable?
+      believe those dependencies are necessary and stable? Are all new
+      dependencies included in the omnibus package OR documented as
+      things we expect on the hosts (e.g. OpenSSH)?
 
 - [ ] Does this change break the dev environment? If so, can we fix it
       now or have we prioitized time to fix it in the near future?
@@ -69,3 +71,10 @@ may have.
 
 - [ ] Will this change work on all of our supported platforms and
       browsers?
+
+- [ ] Do we expect significant changes in performance due to the
+      changed code? Do we have any indication of the impact related to
+      those performance changes?
+
+- [ ] Should this change be reflected in the release notes? If so, has
+      RELEASE_NOTES.md been updated?
