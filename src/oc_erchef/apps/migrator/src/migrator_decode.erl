@@ -76,10 +76,10 @@ do_decode(<<"COMMIT ",TXID/binary>>, Lsn) ->
 do_decode(<<"table public.", Rest/binary>>, Lsn) ->
     decode_transaction(Rest, Lsn);
 do_decode(<<"table ", Rest/binary>>, _Lsn) ->
-    {QualifiedTable, _Rest} = binary:split(Rest, <<":">>),
+    [QualifiedTable|_Rest] = binary:split(Rest, <<":">>),
     {error, {unsupported_schema, QualifiedTable}};
 do_decode(Other, _Lsn) ->
-    {UnknownType, _Rest} = binary:split(Other, <<":">>),
+    [UnknownType|_Rest] = binary:split(Other, <<":">>),
     % TODO Not doing sequences or other object types yet either.
     {error, {unknown_type, UnknownType}}.
 
@@ -160,7 +160,7 @@ extract_fields(TxData, {OutFields, OutValues}) ->
                              V = binary:part(Rest1, 1, Pos),
                              {V, R};
                          Rest2 ->
-                                                % This is unquoted, so we're looking for a space only.
+                             % This is unquoted, so we're looking for a space only.
                              {ok, Pos, R} = find_value_end(Rest2, 0),
                              V = binary:part(Rest1, 0, Pos),
                              {V, R}

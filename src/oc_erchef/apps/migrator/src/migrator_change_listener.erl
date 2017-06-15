@@ -212,7 +212,7 @@ decode_and_apply([TX|Rest], LastLSN) ->
                      %%  this could be a sequence, or other unhandled type.
                      lager:error("Could not decode transaction, unknown entity type ~p", [Type]),
                      LastLSN;
-        {error, {unknown_entity, SchemaAndTable}} ->
+                 {error, {unsupported_schema, SchemaAndTable}} ->
                      %% Haven't worked on other schemas here - the only one I expect we'll use is sqitch,
                      %% which we can ignore if we continue to allow sqitch to manage the schema directly on the
                      %% new system (and if migration versions match...)
