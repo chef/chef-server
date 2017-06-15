@@ -94,14 +94,28 @@ decode_transaction2({Table, Operation, <<"(no-tuple-data)">>}) ->
     % <<"table public.checksums: DELETE: org_id[character]:'b22a18ce74e549b0ccb7da11fd5c59ad' checksum[character]:'268750691044b4fbab541d0edb2e0d7b'">>},
     % <<"table public.cookbook_artifacts: DELETE: id[integer]:17">>},
     % <<"table public.cookbook_artifact_versions: DELETE: id[bigint]:22">>},
-    %% NOTE(ssd) 2017-06-15:
+    %%
+    %% TODO(ssd) 2017-06-15:
     %%    I think that the above mentioned delete is part of our delete_cookbook_artifact_version query:
     %%
     %%        {delete_cookbook_artifact_version_by_id, <<"SELECT * FROM delete_cookbook_artifact_version($1)">>}.
     %%
-    %%    This function is in schema/deploy/delete_cookbook_artifact_version.sql.  I believe what is happening is that the
-    %%    cookbook artifact in question has no associated checksums so the generated delete has a where clause matches nothing.
+    %%    This function is in schema/deploy/delete_cookbook_artifact_version.sql.
     %%
+    %%    This comment from the test_decoding source is a bit concerning:
+    %%
+    %%         /* if there was no PK, we only know that a delete happened */
+    %%         if (change->data.tp.oldtuple == NULL)
+    %%             appendStringInfoString(ctx->out, " (no-tuple-data)");
+    %%
+    %%    Perhaps the correct right thing to do here is to identify which query it is and redo that query?
+    %%
+    %%    The test_decoding source code can also emit (no-tuple-data) for INSERTS and UPDATES:
+    %%
+    %%      https://github.com/postgres/postgres/blob/master/contrib/test_decoding/test_decoding.c#L433
+    %%      https://github.com/postgres/postgres/blob/master/contrib/test_decoding/test_decoding.c#L451
+    %%
+    %%    In short, more research needed here.
     {ok, {Table, Operation, noop}};
 decode_transaction2({Table, Operation, Raw}) ->
     {ok, {Table, Operation, extract_fields(Raw, {[], []}) }}.
