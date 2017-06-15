@@ -109,8 +109,13 @@ handle_cast(_Msg, State) ->
 
 handle_info(poll_interval_expired, #{conn := Conn,
                                      slot_name := SlotName} = State) ->
-    check_and_process_incoming_data(Conn, SlotName),
-    erlang:send_after(?POLL_INTERVAL_MS, ?SERVER, poll_interval_expired),
+    {ok, NumChanges} = check_and_process_incoming_data(Conn, SlotName),
+    case NumChanges of
+        0 ->
+            erlang:send_after(?POLL_INTERVAL_MS, ?SERVER, poll_interval_expired);
+        _N ->
+            erlang:send_after(0, ?SERVER, poll_interval_expired)
+    end,
     {noreply, State};
 handle_info({_Port, {data, _Message}}, State) ->
     {noreply, State}.
@@ -170,7 +175,7 @@ check_and_process_incoming_data(Conn, SlotName) ->
     NumChanges = length(Data),
     ok = decode_and_apply(Data),
     clear_replication_slot(Conn, SlotName, NumChanges),
-    ok.
+    {ok, NumChanges}.
 
 % this performs a pg_logical_slot_get_changes request to remove the TX we successfully
 % applied from the replicatoin slot.
