@@ -61,32 +61,32 @@
 
 -export([parse/1]).
 
-parse({_TlogIdx, _TxIdx, Data}) ->
+parse({Lsn, _TxIdx, Data}) ->
     lager:debug("Decoding: ~p", [Data]),
-    do_decode(Data);
+    do_decode(Data, Lsn);
 parse(Other) ->
     lager:warning("Unknown record: ~p", [Other]),
     throw(unknown_record).
 
 
-do_decode(<<"BEGIN ", TXID/binary>>) ->
-    {ok, {tx_start, TXID}};
-do_decode(<<"COMMIT ",TXID/binary>>) ->
-    {ok, {tx_end, TXID}};
-do_decode(<<"table public.", Rest/binary>>) ->
-    decode_transaction(Rest);
-do_decode(<<"table ", Rest/binary>>) ->
+do_decode(<<"BEGIN ", TXID/binary>>, Lsn) ->
+    {ok, {tx_start, TXID}, Lsn};
+do_decode(<<"COMMIT ",TXID/binary>>, Lsn) ->
+    {ok, {tx_end, TXID}, Lsn};
+do_decode(<<"table public.", Rest/binary>>, Lsn) ->
+    decode_transaction(Rest, Lsn);
+do_decode(<<"table ", Rest/binary>>, _Lsn) ->
     {QualifiedTable, _Rest} = binary:split(Rest, <<":">>),
     {error, {unsupported_schema, QualifiedTable}};
-do_decode(Other) ->
+do_decode(Other, _Lsn) ->
     {UnknownType, _Rest} = binary:split(Other, <<":">>),
     % TODO Not doing sequences or other object types yet either.
     {error, {unknown_type, UnknownType}}.
 
-decode_transaction(Raw) ->
-  decode_transaction2(extract_op_elements(Raw)).
+decode_transaction(Raw, Lsn) ->
+  decode_transaction2(extract_op_elements(Raw), Lsn).
 
-decode_transaction2({Table, Operation, <<"(no-tuple-data)">>}) ->
+decode_transaction2({Table, Operation, <<"(no-tuple-data)">>}, Lsn) ->
     % This seems to happen for (maybe) some trigger-based deletes - I think in this cae
     % we have hit a cleanup path, because the same TX is used for a group of changes:
     % Subsequent changes - under the same TXID - looked like this:
@@ -116,11 +116,11 @@ decode_transaction2({Table, Operation, <<"(no-tuple-data)">>}) ->
     %%      https://github.com/postgres/postgres/blob/master/contrib/test_decoding/test_decoding.c#L451
     %%
     %%    In short, more research needed here.
-    {ok, {Table, Operation, noop}};
-decode_transaction2({Table, Operation, {OldKey, NewTuple}}) ->
-    {ok, {Table, Operation, extract_fields(OldKey, {[], []}), extract_fields(NewTuple, {[], []}) }};
-decode_transaction2({Table, Operation, NewTuple}) ->
-    {ok, {Table, Operation, extract_fields(NewTuple, {[], []}) }}.
+    {ok, {Table, Operation, noop}, Lsn};
+decode_transaction2({Table, Operation, {OldKey, NewTuple}}, Lsn) ->
+    {ok, {Table, Operation, extract_fields(OldKey, {[], []}), extract_fields(NewTuple, {[], []}) }, Lsn};
+decode_transaction2({Table, Operation, NewTuple}, Lsn) ->
+    {ok, {Table, Operation, extract_fields(NewTuple, {[], []}) }, Lsn}.
 
 %
 %% Returns the entity being operated on, the operation itself, and the remaining unparsed binary.
@@ -175,6 +175,9 @@ coerce_type(<<"text">>, V) ->
 coerce_type(<<"character">>, V) ->
     V;
 coerce_type(<<"character varying">>, V) ->
+    V;
+coerce_type(<<"bytea">>, V) ->
+    %% TODO(ssd) 2017-06-15: Check if this is correct
     V;
 coerce_type(<<"password_hash_type">>, V) ->
     %% TODO(ssd) 2017-06-15: Verify what the right thing to do would

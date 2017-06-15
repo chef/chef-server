@@ -173,50 +173,62 @@ check_and_process_incoming_data(Conn, SlotName) ->
     % we'll care about repeated failures on the same TX, as opposed to transient/postgres momentarily went
     % away issues.
     NumChanges = length(Data),
-    ok = decode_and_apply(Data),
-    clear_replication_slot(Conn, SlotName, NumChanges),
-    {ok, NumChanges}.
+    case NumChanges of
+        0 ->
+            {ok, 0};
+        N ->
+            lager:debug("Peek returned ~p changes", [NumChanges]),
+            {ok, LastLSN} = decode_and_apply(Data),
+            lager:debug("Last LSN: ~p", [LastLSN]),
+            ok = clear_replication_slot(Conn, SlotName, NumChanges, LastLSN),
+            {ok, N}
+    end.
 
 % this performs a pg_logical_slot_get_changes request to remove the TX we successfully
 % applied from the replicatoin slot.
-clear_replication_slot(Conn, SlotName, ExpectedChangeCount) ->
+clear_replication_slot(Conn, SlotName, ExpectedChangeCount, LastLSN) ->
     %% TODO(ssd) 2017-06-14: The SELECT 1 is an attempt to avoid
     %% double-transfers of the data.  We should verify that it
     %% achieves that goal via tcpdump or something.
-    Query = iolist_to_binary([<<"select 1 from pg_logical_slot_get_changes('">>, SlotName, <<"', NULL, 1,"
-              "'include-xids','1','force-binary','0','skip-empty-xacts', '1')">>]),
+    Query = iolist_to_binary([<<"select 1 from pg_logical_slot_get_changes('">>,
+                              SlotName, <<"', '">>, LastLSN, <<"'::pg_lsn, NULL, 'include-xids','1','force-binary','0','skip-empty-xacts', '1')">>]),
     {ok, _Fields, Data} = epgsql:squery(Conn, Query),
     ActualChangeCount = length(Data),
     case ExpectedChangeCount == ActualChangeCount of
-        true -> ok;
+        true ->
+            ok;
         false ->
-            lager:error("Expected ~p changes, got ~p", [ExpectedChangeCount, ActualChangeCount])
-    end,
-    ok.
+            lager:error("Expected ~p changes, got ~p", [ExpectedChangeCount, ActualChangeCount]),
+            {error, mismatch_count}
+    end.
 
-decode_and_apply([TX|Rest]) ->
-    case migrator_decode:parse(TX) of
-        {error, {unknown_type, Type}} ->
-            %%  this could be a sequence, or other unhandled type.
-            lager:error("Could not decode transaction, unknown entity type ~p", [Type]);
+
+decode_and_apply(Txs) ->
+    decode_and_apply(Txs, undefined).
+
+decode_and_apply([TX|Rest], LastLSN) ->
+    NewLSN = case migrator_decode:parse(TX) of
+                 {error, {unknown_type, Type}} ->
+                     %%  this could be a sequence, or other unhandled type.
+                     lager:error("Could not decode transaction, unknown entity type ~p", [Type]),
+                     LastLSN;
         {error, {unknown_entity, SchemaAndTable}} ->
-            %% Haven't worked on other schemas here - the only one I expect we'll use is sqitch,
-            %% which we can ignore if we continue to allow sqitch to manage the schema directly on the
-            %% new system (and if migration versions match...)
-            %% Caveat: make sure the server is not in sync mode during a `chef-server-ctl upgrade`...
-            %%
-            lager:error("Could not decode transaction, unsupported schema: ~p", [SchemaAndTable]);
-        {ok, {Marker, _TXID}} when Marker == begin_tx, Marker== end_tx->
-            % TODO:
-            lager:info("Skipping ~p, no action required until we start caring about transactions....", [Marker]);
-        {ok, Decoded} ->
-            % This will apply the change to the target database.
-            % This will crash the listener if we fail to apply a change.
-            ok = migrator_target_db:execute(Decoded)
-    end,
-    decode_and_apply(Rest);
-decode_and_apply([]) ->
-    ok.
+                     %% Haven't worked on other schemas here - the only one I expect we'll use is sqitch,
+                     %% which we can ignore if we continue to allow sqitch to manage the schema directly on the
+                     %% new system (and if migration versions match...)
+                     %% Caveat: make sure the server is not in sync mode during a `chef-server-ctl upgrade`...
+                     %%
+                     lager:error("Could not decode transaction, unsupported schema: ~p", [SchemaAndTable]),
+                     LastLSN;
+                 {ok, Decoded, LSN} ->
+                     %% This will apply the change to the target database.
+                     %% This will crash the listener if we fail to apply a change.
+                     ok = migrator_target_db:execute(Decoded),
+                     LSN
+             end,
+    decode_and_apply(Rest, NewLSN);
+decode_and_apply([], LastLSN) ->
+    {ok, LastLSN}.
 
 %% This was the original code that used a port to monitor for changes.
 %% This works, but there's less parsing trouble (newlines) we use epgsql to ask directly. Just wanted it captured
