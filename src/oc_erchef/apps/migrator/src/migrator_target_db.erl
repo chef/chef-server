@@ -104,6 +104,9 @@ execute_term({tx_start, TXID}, _C) ->
 execute_term({tx_end, TXID}, _C) ->
     lager:info("Finished replay of: ~p", [TXID]),
     ok;
+execute_term({Entity, Operation, noop}, _C) ->
+    lager:debug("Not replying noop ~p ~p", [Operation, Entity]),
+    ok;
 execute_term({_Entity, _Operation, { _Fields, Values }} = Term, Conn) ->
     Query = migrator_encode:encode(Term),
     lager:debug("Replaying: ~p with data ~p", [Query, Values]),
@@ -113,6 +116,7 @@ execute_term({_Entity, _Operation, { _Fields, Values }} = Term, Conn) ->
             ok;
         Other ->
             lager:error("Replay failed: ~p", [Other]),
+            lager:error("Query was: ~p", [Query]),
             Other
     end.
 

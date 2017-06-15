@@ -55,17 +55,17 @@ build_typed_query(Entity, <<"INSERT">>, Fields) ->
       Placeholders/binary,
       ")">>;
 build_typed_query(Entity, <<"UPDATE">>, Fields) ->
-  {PrimaryKeyClause, UpdateFields} = format_primary_key(Entity, Fields),
-  Placeholders = placeholders_for_update(UpdateFields),
+    {PrimaryKeyClause, UpdateFields, UpdateStart} = format_primary_key(Entity, Fields),
+    Placeholders = placeholders_for_update(UpdateFields, UpdateStart),
     <<"UPDATE ",
-    Entity/binary,
-    "SET ",
-    Placeholders/binary,
-    "WHERE",
-    PrimaryKeyClause/binary>>;
+      Entity/binary,
+      " SET ",
+      Placeholders/binary,
+      " WHERE ",
+      PrimaryKeyClause/binary>>;
 build_typed_query(Entity, <<"DELETE">>, Fields) ->
-  FormattedPK = all_to_primary_key(Fields),
-  <<"DELETE FROM ", Entity/binary, " WHERE ", FormattedPK/binary>>.
+    FormattedPK = all_to_primary_key(Fields),
+    <<"DELETE FROM ", Entity/binary, " WHERE ", FormattedPK/binary>>.
 
 format_primary_key(<<"keys">>, [PK1, PK2 | Fields]) ->
   % This is an odd case. Most of our insert and update queries update
@@ -81,9 +81,9 @@ format_primary_key(<<"keys">>, [PK1, PK2 | Fields]) ->
   % we build these prepared statements and have it tell us
   % what the PK is. This will likely become necessary as we expand functionalty
   % to include additoinal databases.
-  {<<PK1/binary, " = $1 AND ", PK2/binary, "= $2">>, Fields};
+  {<<PK1/binary, " = $1 AND ", PK2/binary, "= $2">>, Fields, 3};
 format_primary_key(_Entity, [PK | Fields]) ->
-  {<<PK/binary, "= $1">>, Fields}.
+  {<<PK/binary, "= $1">>, Fields, 2}.
 
 all_to_primary_key([First|Rest]) ->
     Acc = <<First/binary, " = $1">>,
@@ -109,8 +109,9 @@ join_bin(Acc, [Item|Items], Sep) ->
 
 %% Generates field-assignment pairs for update in a prepared statemetn,
 %% in the form F1=$1, F2=$, Fn=$n
-placeholders_for_update(Fields) ->
-  placeholders_for_update(<<>>, Fields, 1).
+placeholders_for_update([F| Fields], Start) ->
+    StartBin = integer_to_binary(Start),
+    placeholders_for_update(<<F/binary, " = $", StartBin/binary>>, Fields, Start + 1).
 
 placeholders_for_update(Acc, [Field | Fields], Current) ->
   PosValue = integer_to_binary(Current),
