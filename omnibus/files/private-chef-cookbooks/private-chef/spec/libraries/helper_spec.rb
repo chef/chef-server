@@ -1,6 +1,14 @@
 require_relative '../../libraries/helper.rb'
 
-describe OmnibusHelper do
+describe OmnibusHelper, :es5 do
+
+  before do
+    # suppress log output
+    allow(Chef::Log).to receive(:info)
+    allow(Chef::Log).to receive(:error)
+    allow(Chef::Log).to receive(:warn)
+  end
+
   describe '#bookshelf_s3_url' do
     let(:node) do
       {
@@ -59,23 +67,24 @@ describe OmnibusHelper do
 
   describe '#elastic_search_major_version' do
     let(:external) { true }
-    let(:hostname) { 'myserver' }
-    let(:port) { 2000 }
-    let(:external_url) { "http://#{hostname}:#{port}" if hostname }
+    let(:external_url) { 'http://myserver:2000' }
+    let(:provider) { 'elasticsearch' }
     let(:node) do
       {
         'private_chef' => {
           'opscode-solr4' => {
             'external' => external,
             'external_url' => external_url
+          }, 
+          'opscode-erchef' => {
+            'search_provider' => provider
           }
         }
       }
     end
 
     let(:elastic_version) { '2.4.5' }
-    let(:http_code) { '200' }
-    let(:json_response) do <<-EOS
+    let(:response) do <<-EOS
         {
           "name": "Zero-G",
           "cluster_name": "elasticsearch",
@@ -91,18 +100,11 @@ describe OmnibusHelper do
         }
       EOS
     end
-
-    let(:response) do
-      r = double(Net::HTTPResponse)
-      allow(r).to receive(:body).and_return(json_response)
-      allow(r).to receive(:code).and_return(http_code)
-      r
-    end
+    let(:client) { double(Chef::HTTP) }
 
     context 'when elastic search is disabled' do
       let(:external) { false }
-      let(:hostname) { nil }
-      let(:port) { nil }
+      let(:external_url) { nil }
       let(:elastic_version) { '50.0' }
 
       it 'should return a default version 0' do
@@ -114,7 +116,8 @@ describe OmnibusHelper do
     context 'when elastic search is unavailable' do
       it 'should return raise an exception after 5 retries.' do
         helper = described_class.new(node)
-        expect(Net::HTTP).to receive(:start).with(hostname, port, use_ssl: false).exactly(5).times.and_raise('Bad connection')
+        expect(Chef::HTTP).to receive(:new).with(external_url).exactly(5).times.and_return(client)
+        expect(client).to receive(:get).with('').exactly(5).times.and_raise('Bad connection')
         allow(helper).to receive(:sleep).and_return(0)
         expect { helper.elastic_search_major_version }.to raise_error(/Failed to connect/)
       end
@@ -123,7 +126,8 @@ describe OmnibusHelper do
     context 'when elastic search is version 2' do
       it 'should return 2' do
         helper = described_class.new(node)
-        expect(Net::HTTP).to receive(:start).with(hostname, port, use_ssl: false).and_return(response)
+        expect(Chef::HTTP).to receive(:new).with(external_url).and_return(client)
+        expect(client).to receive(:get).with('').and_return(response)
         expect(helper.elastic_search_major_version).to eq(2)
       end
     end
@@ -133,7 +137,8 @@ describe OmnibusHelper do
 
       it 'should return 5' do
         helper = described_class.new(node)
-        expect(Net::HTTP).to receive(:start).with(hostname, port, use_ssl: false).and_return(response)
+        expect(Chef::HTTP).to receive(:new).with(external_url).and_return(client)
+        expect(client).to receive(:get).with('').and_return(response)
         expect(helper.elastic_search_major_version).to eq(5)
       end
     end
@@ -143,18 +148,49 @@ describe OmnibusHelper do
 
       it 'should raise an exception' do
         helper = described_class.new(node)
-        expect(Net::HTTP).to receive(:start).with(hostname, port, use_ssl: false).and_return(response)
+        expect(Chef::HTTP).to receive(:new).with(external_url).and_return(client)
+        expect(client).to receive(:get).with('').and_return(response)
         expect { helper.elastic_search_major_version }.to raise_error(/Unsupported elasticsearch version/)
       end
     end
 
-    context 'when elastic search returns a bad response' do
-      let(:http_code) { '404' }
+    context 'when elastic search response is garbled' do
+      let(:response) do <<-EOS
+          {
+            "name": "L33tHaxors",
+            "version": {
+              "some": "completenonsense"
+            },
+            "tagline": "You Know, for Lulz"
+          }
+        EOS
+      end
 
       it 'should raise an exception' do
         helper = described_class.new(node)
-        expect(Net::HTTP).to receive(:start).with(hostname, port, use_ssl: false).and_return(response)
-        expect { helper.elastic_search_major_version }.to raise_error(/Unable to interrogate/)
+        expect(Chef::HTTP).to receive(:new).with(external_url).and_return(client)
+        expect(client).to receive(:get).with('').and_return(response)
+        expect { helper.elastic_search_major_version }.to raise_error(/Unable to parse elasticsearch response/)
+      end
+    end
+
+    context 'when solr is external' do
+      let(:provider) {"solr"}
+
+      it 'should return 0' do
+        helper = described_class.new(node)
+        expect(helper.elastic_search_major_version).to eq(0)
+      end
+    end
+
+    context 'when solr is internal' do
+      let(:external) { false }
+      let(:external_url) { nil }
+      let(:provider) {"solr"}
+
+      it 'should return a default version 0' do
+        helper = described_class.new(node)
+        expect(helper.elastic_search_major_version).to eq(0)
       end
     end
   end

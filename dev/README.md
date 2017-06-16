@@ -37,6 +37,7 @@ First, add the following configuration to your `/etc/hosts` file:
     192.168.33.153 custom.chef-server.dev
     192.168.33.155 reportingdb.chef-server.dev
     192.168.33.156 elasticsearch.chef-server.dev
+    192.168.33.157 solr.chef-server.dev
 
 Next, bring up the VMs!
 
@@ -313,5 +314,12 @@ To create a separate elasticsearch vm create a `config.yml` file with the follow
     start: true
     # The major version family to use - either "2" or "5".
     version: "5"
+```
+# Using external solr 
+
+To create a separate solr vm create a `config.yml` file with the following contents:
+```
+  external_solr:
+    start: true
 ```
 
