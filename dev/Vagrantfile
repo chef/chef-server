@@ -13,7 +13,8 @@ IPS = {
   ldap: "192.168.33.152",
   custom: "192.168.33.153",
   reportingdb: "192.168.33.155",
-  elasticsearch: "192.168.33.156"
+  elasticsearch: "192.168.33.156",
+  solr: "192.168.33.157"
 }
 
 
@@ -104,6 +105,16 @@ Vagrant.configure("2") do |config|
     attributes['vm']['elasticsearch'] = nil
   end
 
+  if attributes['vm'].has_key? 'external_solr'
+    if attributes['vm']['external_solr']['start'] == true
+      config.vm.define('external_solr') do |c|
+        define_external_solr_server(c, attributes)
+      end
+    end
+  else
+    attributes['vm']['external_solr'] = nil
+  end
+
   if attributes['vm']['start-custom'] == true
     config.vm.define("custom") do |c|
       define_custom_server(c, attributes)
@@ -178,6 +189,15 @@ def define_chef_server(config, attributes)
                         "opscode_erchef['search_queue_mode']" => '"batch"'
       }
       json = simple_deep_merge(json, { "provisioning" => { "chef-server-config" => elasticsearch } })
+    end
+
+    if vmattr['external_solr'] && vmattr['external_solr']['start']
+      external_solr = { "opscode_solr4['external']" => "true",
+                        "opscode_solr4['external_url']" => '"http://solr.chef-server.dev:8983/solr"',
+                        "opscode_erchef['search_provider']" => '"solr"',
+                        "opscode_erchef['search_queue_mode']" => '"batch"'
+      }
+      json = simple_deep_merge(json, { "provisioning" => { "chef-server-config" => external_solr } })
     end
 
     dotfiles_path = vmattr["dotfile_path"] || "dotfiles"
@@ -280,6 +300,20 @@ def define_elasticsearch_server(config, attributes)
   config.vm.provision "shell",
                       path: "scripts/provision-elasticsearch.sh",
                       env: { 'ELASTIC_VERSION' => attributes["vm"]["elasticsearch"]["version"] }
+end
+
+def define_external_solr_server(config, attributes)
+  config.vm.hostname = "solr.chef-server.dev"
+  config.vm.network "private_network", ip: IPS[:solr]
+  customize_vm(config, name: "external_solr", memory: 2048, cpus: 2)
+  set_chef_zero_provisioning(config,
+                             recipes: ["provisioning::hosts"],
+                             json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
+  config.vm.provision "shell", path: "scripts/provision-solr.sh"
+  config.vm.provision "file", source: "../omnibus/files/private-chef-cookbooks/private-chef/files/default/solr4/schema.xml", destination: "/home/vagrant/solr-4.10.4/example/solr/collection1/conf/schema.xml"
+  config.vm.provision "file", source: "../omnibus/files/private-chef-cookbooks/private-chef/files/default/solr4/solr.xml", destination: "/home/vagrant/solr-4.10.4/example/solr/solr.xml"
+  config.vm.provision "shell", path: "scripts/restart-solr.sh"
+  
 end
 
 def define_backend_server(config, attribute)

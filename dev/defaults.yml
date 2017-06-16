@@ -39,9 +39,13 @@ vm:
   #elasticsearch:
     #start: true
     # The major version family to use - either "2" or "5".
-    #version: "2"
+    #version: "5"
   # Override this in config.yml if you want to install chef server plugins with
   # specific packages.
+  #external_solr:
+    # enable a separate external vm
+    #start: true
+  # These will map directly to entries in the generated chef-server.rb
   plugins:
     chef-manage: false
     reporting: false

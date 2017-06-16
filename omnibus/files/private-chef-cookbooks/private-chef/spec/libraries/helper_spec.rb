@@ -1,6 +1,14 @@
 require_relative '../../libraries/helper.rb'
 
-describe OmnibusHelper do
+describe OmnibusHelper, :es5 do
+
+  before do
+    # suppress log output
+    allow(Chef::Log).to receive(:info)
+    allow(Chef::Log).to receive(:error)
+    allow(Chef::Log).to receive(:warn)
+  end
+
   describe '#bookshelf_s3_url' do
     let(:node) do
       {
@@ -62,12 +70,16 @@ describe OmnibusHelper do
     let(:hostname) { 'myserver' }
     let(:port) { 2000 }
     let(:external_url) { "http://#{hostname}:#{port}" if hostname }
+    let(:provider) {"elasticsearch"}
     let(:node) do
       {
         'private_chef' => {
           'opscode-solr4' => {
             'external' => external,
             'external_url' => external_url
+          }, 
+          'opscode-erchef' => {
+            'search_provider' => provider
           }
         }
       }
@@ -155,6 +167,27 @@ describe OmnibusHelper do
         helper = described_class.new(node)
         expect(Net::HTTP).to receive(:start).with(hostname, port, use_ssl: false).and_return(response)
         expect { helper.elastic_search_major_version }.to raise_error(/Unable to interrogate/)
+      end
+    end
+
+    context 'when solr is external' do
+      let(:provider) {"solr"}
+
+      it 'should return 0' do
+        helper = described_class.new(node)
+        expect(helper.elastic_search_major_version).to eq(0)
+      end
+    end
+
+    context 'when solr is internal' do
+      let(:external) { false }
+      let(:hostname) { nil }
+      let(:port) { nil }
+      let(:provider) {"solr"}
+
+      it 'should return a default version 0' do
+        helper = described_class.new(node)
+        expect(helper.elastic_search_major_version).to eq(0)
       end
     end
   end
