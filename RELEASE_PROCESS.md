@@ -26,7 +26,7 @@ In order to release, you will need the following accounts/permissions:
 - Account on [https://discourse.chef.io](https://discourse.chef.io) using your Chef email address
 - Login for wilson.ci.chef.co (This is linked to your github account.)
 - Access to artifactory.chef.co
-- Access to delivery.chef.co
+- Access to automate.chef.co
 - The CHANGELOG_GITHUB_TOKEN environment variable set to a github token gathered
   [here](https://github.com/settings/tokens/new?description=GitHub%20Changelog%20Generator%20token).
   Read access to repositories and issues should be sufficient. (Check the "Full control of private repositories" box.)
@@ -34,8 +34,10 @@ In order to release, you will need the following accounts/permissions:
 - Install Github Changelog Generator
   + `gem install github_changelog_generator`
 
+:warning: If it is a Friday -- do we really need that release today? :warning:
 
 ## THE PROCESS
+
 ### Informing everyone of a pending release.
 
 - [ ] Announce your intention to drive the release to #cft-announce on slack.
@@ -51,8 +53,8 @@ Every commit to chef-server master is tested against a full pedant
 run. However, upgrade testing must still be done in advance of the
 release:
 
-- [ ] Run the Chef Delivery-based automated upgrade testing.
-  * Clone the `engineering-services/qa-chef-server-cluster` project from delivery.chef.co.
+- [ ] Run the Chef Automate-based automated upgrade testing.
+  * Clone the `pool/qa-chef-server-cluster` project from automate.chef.co.
     * If you get an access rights error, make sure your public github key is included in your delivery profile.
   * On a branch, update relevant attributes in `.delivery/build/attributes/default.rb`:
     * Update `chef_server_test_url_override` to be the URL corresponding to
@@ -76,8 +78,8 @@ release:
     don't leave any unused instances
     up.
   * If you did have test failure due to an environmental issue unrelated to the
-    release, ask #chef-server and #automate-support for help.
-    * If delivery.chef.co builders are too constrainted to run the full matrix
+    release, ask #acc-support, #chef-server, or #automate-support for help.
+    * If automate.chef.co builders are too constrainted to run the full matrix
       of 10 jobs comment the second half of the entries in the
       `default['delivery-matrix']['acceptance']['matrix']` array and run a build.
       After that build and all its matrix builds finish, run another build with the first half

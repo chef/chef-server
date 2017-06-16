@@ -46,7 +46,9 @@ may have.
       log level?
 
 - [ ] Does this change introduce new dependencies? If so, do we
-      believe those dependencies are necessary and stable?
+      believe those dependencies are necessary and stable? Are all new
+      dependencies included in the omnibus package OR documented as
+      things we expect on the hosts (e.g. OpenSSH)?
 
 - [ ] Does this change break the dev environment? If so, can we fix it
       now or have we prioitized time to fix it in the near future?
@@ -69,3 +71,23 @@ may have.
 
 - [ ] Will this change work on all of our supported platforms and
       browsers?
+
+      Supported platforms (architectures) are:
+      - el-5, el-6, el-7, sles-11, sles-12, ubuntu 12.04, ubuntu 14.04 (x86_64)
+      - el-7 (ppc64)
+      - el-7, ubuntu 14.04 (ppc64le)
+      - el-6, el-7, sles-11, sles-12 (s390x)
+
+      Note: For outside contributers, it is impossible to verify that.
+      A Chef employee with access to our internal CI infrastructure
+      will support them by executing test runs for outside PRs.
+
+- [ ] Do we expect significant changes in performance due to the
+      changed code? Do we have any indication of the impact related to
+      those performance changes?
+
+- [ ] Should this change be reflected in the release notes? If so, has
+      RELEASE_NOTES.md been updated?
+      (This doesn't include: dev VM changes, test-only changes,
+      code refactorings without behavioral changes, dependency
+      upgrades.)
