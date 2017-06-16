@@ -78,3 +78,6 @@ may have.
 
 - [ ] Should this change be reflected in the release notes? If so, has
       RELEASE_NOTES.md been updated?
+      (This doesn't include: dev VM changes, test-only changes,
+      code refactorings without behavioral changes, dependency
+      upgrades.)
