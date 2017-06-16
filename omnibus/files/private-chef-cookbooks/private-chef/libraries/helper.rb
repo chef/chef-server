@@ -64,33 +64,29 @@ class OmnibusHelper
     current_request = 1
 
     if node['private_chef']['opscode-solr4']['external'] && node['private_chef']['opscode-erchef']['search_provider'] == "elasticsearch"
-      # This will throw an exception if you have an invalid URL. We want this behavior.
-      elastic_search_uri = URI.parse(node['private_chef']['opscode-solr4']['external_url'])
       begin
-        req = Net::HTTP::Get.new(elastic_search_uri)
-        res = Net::HTTP.start(elastic_search_uri.hostname, elastic_search_uri.port, use_ssl: elastic_search_uri.scheme == "https") do |http|
-          http.request(req)
-        end
+        client = Chef::HTTP.new(node['private_chef']['opscode-solr4']['external_url'])
+        response = client.get("")
       rescue => e
         # Perform a blind rescue because Net:HTTP throws a variety of exceptions - some of which are platform specific.
-        Chef::Log.error "Failed to connect to elasticsearch service. Retrying.\n#{e}"
         if current_request == max_requests
           raise "Failed to connect to elasticsearch service. Ensure node['private_chef']['opscode-solr4']['external_url'] is correct.\n#{e}"
         else
+          # Chef HTTP logs the details in the debug log.
+          Chef::Log.error "Failed to connect to elasticsearch service #{current_request}/#{max_requests}. Retrying."
           current_request += 1
           sleep(current_request * 2)  # Exponential back-off.
           retry
         end
       end
-      raise "Unable to interrogate elasticsearch server - HTTP#{res.code}:\n#{res.body}" if res.code.to_i >= 400
-      # This can raise exceptions if the response does not match the format we expect.
       begin
-        version = JSON.parse(res.body)['version']['number'].split('.').first.to_i
-        raise "Unsupported elasticsearch version of #{version}. There is current support for the major versions of 2 and 5." if version != 5 && version != 2
-        version
-      rescue => e
+        version = JSON.parse(response)['version']['number'].split('.').first.to_i
+      rescue StandardError => e
+        # Decorate any JSON parsing exception or numeric exceptions when accessing and parsing the version field.
         raise "Unable to parse elasticsearch response #{e}"
       end
+      raise "Unsupported elasticsearch version of #{version}. There is current support for the major versions of 2 and 5." if version != 5 && version != 2
+      version
     else
       # Elasticsearch is disabled - this configuration setting should never be used in erlang.
       0
