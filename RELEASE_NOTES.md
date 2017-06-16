@@ -14,6 +14,28 @@ For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
   the secret being changed. With the optional flag `--with-restart`,
   `chef-server-ctl set-secret` will attempt to automatically restart the
   dependent services.
+* [Upgrade to PostgreSQL 9.6](https://github.com/chef/chef-server/pull/1310),
+  Chef Server now uses the latest stable version of the 9.6 series (9.6.3). Upgrades of existing
+  installations are done automatically, but creating backups is advised.
+
+  The information below only applies if you have set a custom value for `checkpoint_segments`
+  in your `/etc/opscode/chef-server.rb`. If you have not set a custom value, there is nothing to
+  change:
+
+  The `checkpoint_segments` configuration setting is gone, so if you before have set
+
+      postgresql['checkpoint_segments'] = 10
+
+  you now have to specify (for example, please consult the documentation linked below)
+
+      postgresql['max_wal_size'] = '3G'
+
+  The default setting for `max_wal_size` is 1G. [The PostgreSQL release notes](https://www.postgresql.org/docs/9.6/static/release-9-5.html) mention a conversion
+  rule: `max_wal_size = (3 * checkpoint_segments) * 16MB`. They also say that the default value
+  for `max_wal_size` (1GB) should fit in most settings, so this conversion is not done automatically.
+
+  This update also adds two further new configurables in the ["Checkpoints" group](https://www.postgresql.org/docs/9.6/static/runtime-config-wal.html#RUNTIME-CONFIG-WAL-CHECKPOINTS), `min_wal_size` and
+  `checkpoint_flush_after`.
 
 ## 12.15.8 (2017-06-20)
 
