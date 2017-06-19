@@ -36,21 +36,66 @@ describe "chef-server-ctl set-secret" do
 
   before do
     allow(subject.ctl).to receive(:credentials).and_return(veil_creds)
-    allow(veil_creds).to receive(:add).with("bookshelf", "access_key_id", {:value=>"new_key", :frozen=>true, :force=>true})
     allow(veil_creds).to receive(:save)
   end
 
-  context "set-secret" do
-    it "prompts user to restart required services" do
-      expect {
-        subject.run_test_omnibus_command("set-secret", ['bookshelf', 'access_key_id', 'new_key'])
-      }.to output("You have changed access_key_id for bookshelf. Please restart these necessary services: bookshelf, oc_erchef\n").to_stdout
+  context "when an enabled service depends on the changed secret" do
+    before do
+      allow(veil_creds).to receive(:add).with("bookshelf", "access_key_id", {:value=>"new_key", :frozen=>true, :force=>true})
+      allow(subject.ctl).to receive(:service_enabled?).with("bookshelf").and_return(true)
+      allow(subject.ctl).to receive(:service_enabled?).with("opscode-erchef").and_return(true)
     end
 
-    it "restarts necessary services with --with-restart flag" do
+    it "prompts user to restart services" do
+      expect {
+        subject.run_test_omnibus_command("set-secret", ['bookshelf', 'access_key_id', 'new_key'])
+      }.to output("You have changed access_key_id for bookshelf. Please restart these services: bookshelf, opscode-erchef\n").to_stdout
+    end
+
+    it "restarts services with --with-restart flag" do
       expect(subject.ctl).to receive(:run_sv_command).with("restart", "bookshelf")
-      expect(subject.ctl).to receive(:run_sv_command).with("restart", "oc_erchef")
+      expect(subject.ctl).to receive(:run_sv_command).with("restart", "opscode-erchef")
       subject.run_test_omnibus_command("set-secret", ['bookshelf', 'access_key_id', 'new_key', '--with-restart'])
+    end
+  end
+
+  #this is an unlikely scenario, but worth guarding against confusing messaging about restarting services that are not installed/enabled
+  context "when an enabled service and a not-enabled service depend on the changed secret" do
+    before do
+      allow(veil_creds).to receive(:add).with("bookshelf", "access_key_id", {:value=>"new_key", :frozen=>true, :force=>true})
+      allow(subject.ctl).to receive(:service_enabled?).with("bookshelf").and_return(true)
+      allow(subject.ctl).to receive(:service_enabled?).with("opscode-erchef").and_return(false)
+    end
+
+    it "prompts user to restart only enabled services" do
+      expect {
+        subject.run_test_omnibus_command("set-secret", ['bookshelf', 'access_key_id', 'new_key'])
+      }.to output("You have changed access_key_id for bookshelf. Please restart these services: bookshelf\n").to_stdout
+    end
+
+    it "restarts only enabled services with --with-restart flag" do
+      expect(subject.ctl).to receive(:run_sv_command).with("restart", "bookshelf")
+      expect(subject.ctl).to_not receive(:run_sv_command).with("restart", "opscode-erchef")
+      subject.run_test_omnibus_command("set-secret", ['bookshelf', 'access_key_id', 'new_key', '--with-restart'])
+    end
+  end
+
+  #also unlikely that we'd change a secret for a not-enabled service
+  context "when only non-enabled services depend on the changed secret" do
+    before do
+      allow(veil_creds).to receive(:add).with("opscode-reporting", "rabbitmq_password", {:value=>"new_key", :frozen=>true, :force=>true})
+    end
+
+    it "does not prompt user to restart services" do
+      expect {
+        subject.run_test_omnibus_command("set-secret", ['opscode-reporting', 'rabbitmq_password', 'new_key'])
+      }.to output("You have changed rabbitmq_password for opscode-reporting.\n").to_stdout
+    end
+
+    it "does not restart services with --with-restart flag" do
+      allow(subject.ctl).to receive(:service_enabled?).with("opscode-reporting").and_return(false)
+      expect(subject.ctl).to_not receive(:run_sv_command).with("restart", "opscode-reporting")
+      subject.run_test_omnibus_command("set-secret", ['opscode-reporting', 'rabbitmq_password', 'new_key', '--with-restart'])
     end
   end
 end
