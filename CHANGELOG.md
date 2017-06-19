@@ -1,5 +1,48 @@
 # Chef Server Changelog
 
+## [#](https://github.com/chef/chef-server/tree/#) (2017-06-20)
+[Full Changelog](https://github.com/chef/chef-server/compare/12.15.8...#)
+
+**Fixed bugs:**
+
+- not\_found\_message for "groups" undefined, returns HTTP 500 instead of 404 [\#1284](https://github.com/chef/chef-server/issues/1284)
+- Support Self-Service Org Deletion [\#48](https://github.com/chef/chef-server/issues/48)
+
+**Closed issues:**
+
+- Wrong token used by Chef server to send data to Chef Automate [\#1281](https://github.com/chef/chef-server/issues/1281)
+- Fresh server install on Jessie fails during client run - exception handlers [\#1178](https://github.com/chef/chef-server/issues/1178)
+
+**Merged pull requests:**
+
+- Bump omnibus-software pin [\#1311](https://github.com/chef/chef-server/pull/1311) ([srenatus](https://github.com/srenatus))
+- \[CON-689\] issue 1308 Elasticsearch 5 Support Will Break External Solr [\#1309](https://github.com/chef/chef-server/pull/1309) ([lancewf](https://github.com/lancewf))
+- Update RELEASE\_PROCESS.md and CODE\_REVIEW\_CHECKLIST.md [\#1306](https://github.com/chef/chef-server/pull/1306) ([srenatus](https://github.com/srenatus))
+- Remove analytics plain text secrets when insecure\_addon\_compat false [\#1305](https://github.com/chef/chef-server/pull/1305) ([srenatus](https://github.com/srenatus))
+- Add tests for chef-server-running.json [\#1304](https://github.com/chef/chef-server/pull/1304) ([stevendanna](https://github.com/stevendanna))
+- \[POOL-589\] Allow user creation with blank middle name. [\#1303](https://github.com/chef/chef-server/pull/1303) ([stevendanna](https://github.com/stevendanna))
+- \[pedant\] Paginate search results [\#1301](https://github.com/chef/chef-server/pull/1301) ([srenatus](https://github.com/srenatus))
+- Lazily evaluate ES version detection code [\#1300](https://github.com/chef/chef-server/pull/1300) ([stevendanna](https://github.com/stevendanna))
+- Fix keys for validating name fields [\#1299](https://github.com/chef/chef-server/pull/1299) ([srenatus](https://github.com/srenatus))
+- \[pedant\] Add sleep to re-indexing tests [\#1298](https://github.com/chef/chef-server/pull/1298) ([stevendanna](https://github.com/stevendanna))
+- \[cookbooks\] Removed unused cookbook cache config option [\#1297](https://github.com/chef/chef-server/pull/1297) ([stevendanna](https://github.com/stevendanna))
+- Fix test failures caused by UTF8-data and multiple email addresses [\#1296](https://github.com/chef/chef-server/pull/1296) ([stevendanna](https://github.com/stevendanna))
+- \[cookbooks\] Remove apt and yum dependencies [\#1295](https://github.com/chef/chef-server/pull/1295) ([stevendanna](https://github.com/stevendanna))
+- \[POOL-589\] Add regexp for {first, middle, last, display}name [\#1294](https://github.com/chef/chef-server/pull/1294) ([srenatus](https://github.com/srenatus))
+- Fix `omnibus cache missing` etc [\#1293](https://github.com/chef/chef-server/pull/1293) ([srenatus](https://github.com/srenatus))
+- Upgrade PostgreSQL to 9.2.21 [\#1292](https://github.com/chef/chef-server/pull/1292) ([rhass](https://github.com/rhass))
+- Elvis for oc\_erchef, oc\_bifrost, and bookshelf [\#1290](https://github.com/chef/chef-server/pull/1290) ([srenatus](https://github.com/srenatus))
+- \[POOL-606\] oc-chef-pedant: improve oc\_id API test coverage [\#1289](https://github.com/chef/chef-server/pull/1289) ([srenatus](https://github.com/srenatus))
+- CON-638 Experimental developer support for external ES5 [\#1287](https://github.com/chef/chef-server/pull/1287) ([lancewf](https://github.com/lancewf))
+- Fix 1284: 500 returned instead of 404 for unknown groups. [\#1286](https://github.com/chef/chef-server/pull/1286) ([codeadict](https://github.com/codeadict))
+- Run chef-zero integration tests using master [\#1285](https://github.com/chef/chef-server/pull/1285) ([stevendanna](https://github.com/stevendanna))
+- \[POOL-608\] allow for case insensitive users search by email [\#1283](https://github.com/chef/chef-server/pull/1283) ([srenatus](https://github.com/srenatus))
+- Convert data collector token when returned by chef\_secrets [\#1282](https://github.com/chef/chef-server/pull/1282) ([srenatus](https://github.com/srenatus))
+- Add optional ulimit for erchef [\#1279](https://github.com/chef/chef-server/pull/1279) ([danielsdeleo](https://github.com/danielsdeleo))
+- \[CLOUD-371\] Allow oc-chef-pedant chef\_server URL to be configurable [\#1278](https://github.com/chef/chef-server/pull/1278) ([ryancragun](https://github.com/ryancragun))
+- Pin berkshelf-no-depselector to avoid pulling in 6.0 [\#1277](https://github.com/chef/chef-server/pull/1277) ([stevendanna](https://github.com/stevendanna))
+- Add a CODE\_REVIEW\_CHECKLIST.md [\#1273](https://github.com/chef/chef-server/pull/1273) ([stevendanna](https://github.com/stevendanna))
+
 ## [12.15.7](https://github.com/chef/chef-server/tree/12.15.7) (2017-05-17)
 [Full Changelog](https://github.com/chef/chef-server/compare/12.15.6...12.15.7)
 
