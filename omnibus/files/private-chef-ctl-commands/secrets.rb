@@ -1,3 +1,5 @@
+require 'mixlib/shellout'
+
 add_command_under_category "set-db-superuser-password", "Secrets Management", "Add or change DB superuser password", 2 do
   confirm_continue!("WARN: Manually setting the DB superuser password is only supported for external postgresql instances")
   password = capture_secret_value("DB_PASSWORD", "DB superuser password", ARGV[3])
@@ -107,21 +109,38 @@ end
 def set_secret_(group, key, secret, with_restart=nil)
   credentials.add(group, key, value: secret, frozen: true, force: true)
   credentials.save
-  confirmation_msg = "You have changed #{key} for #{group}."
   lookup = "#{group}.#{key}"
+  puts "#{lookup} changed."
+
   #TODO: do we need to guard against services being empty? (KNOWN_CREDS being out of sync w/ service list)
   #rather/also-- if a service is not in KNOWN_CREDENTIALS, should it be in the restart list?
-  affected_services = SERVICES_REQUIRING_RESTART[lookup].select { |s| service_enabled?(s) }
+  affected_services = Array(SERVICES_REQUIRING_RESTART[lookup]).select { |s| manage_or_other_service_enabled?(s) }
 
-  return puts confirmation_msg unless affected_services.any?
+  return unless affected_services.any?
 
+  service_list = affected_services.sort.join(", ")
   if with_restart
-    affected_services.each { |service| run_sv_command("restart", service) }
+    puts "Restarting these services: #{service_list}"
+    affected_services.each { |service| restart_manage_or_other_service(service) }
   else
-    service_list = affected_services.sort.join(", ")
-    confirmation_msg += " Please restart these services: #{service_list}"
+    puts "Please restart these services: #{service_list}"
   end
-  puts confirmation_msg
+end
+
+def manage_or_other_service_enabled?(service)
+  if service == "chef-manage"
+    File.exist?("/opt/chef-manage/sv/")
+  else
+    service_enabled?(service)
+  end
+end
+
+def restart_manage_or_other_service(service)
+  if service == "chef-manage"
+    Mixlib::ShellOut.new("chef-manage-ctl restart").run_command
+  else
+    run_sv_command_for_service("restart", service)
+  end
 end
 
 def capture_secret_value(env_key, prompt='secret', password_arg = nil)
