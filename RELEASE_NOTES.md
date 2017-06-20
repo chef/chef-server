@@ -7,18 +7,30 @@ in the release. For a detailed list of changed components, refer to
 This document contains release notes for the current major release and all patches.
 For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
-## 12.15.X (TBD)
+## 12.15.8 (2017-06-20)
 
 * [Stricter validation of non-functional user record fields](https://github.com/chef/chef-server/pull/1294),
   Chef Server now uses a regular expression to validate first, middle, and last name of a user
-  on creation. The regex used is `[[:word:][:digit:]!'. -]+` (UTF-8). This tries to accomodate
+  on creation. The regex used is `[[:word:][:digit:]!'. -]*` (UTF-8). This tries to accommodate
   a wide range of names, while also strengthening Chef Server's role in preventing XSS attacks
-  in web-based API clients.
+  in web-based API clients. For compatibility reasons, a user's first, middle, or last name may
+  also be `""` (empty string).
 * [Search user by email case-insensitively](https://github.com/chef/chef-server/pull/1283):
   while technically only the host-part of an email address is to be treated case-insensitively,
   most email providers treat the _entire_ email address as case-insensitive. Chef Server now
   adopts that behaviour for _searching users_: querying for `user@host` (`GET /users?email=user%40host`)
   will now also return users with the recorded email of `USER@HOST` etc.
+* API requests including an _unknown group_ now return 404 instead of 500 ([#1286](https://github.com/chef/chef-server/pull/1286))
+* `opscode-erchef` now allows for configuring an optional ulimit via `opscode_erchef['memory_maxbytes']` ([#1279](https://github.com/chef/chef-server/pull/1279)).
+
+* Fixed [regression](https://github.com/chef/chef-server/pull/1305) where credentials consumed
+  by Analytics would be left plainly on disk after the `insecure_addon_compat` option was set to `false`.
+* Fixed [regression](https://github.com/chef/chef-server/issues/1281) where parts of the available data
+  (e.g. cookbook upload events) weren't sent to Chef Automate with the proper data collector token.
+
+### Security Updates
+
+* [Upgrade zlib to 1.2.11](https://github.com/chef/chef-server/pull/1311): this addresses [CVE-2016-9841](https://nvd.nist.gov/vuln/detail/CVE-2016-9841), [CVE-2016-9842](https://nvd.nist.gov/vuln/detail/CVE-2016-9842), and [CVE-2016-9843](https://nvd.nist.gov/vuln/detail/CVE-2016-9843).
 
 ## 12.15.7 (2017-05-16)
 
