@@ -7,6 +7,14 @@ in the release. For a detailed list of changed components, refer to
 This document contains release notes for the current major release and all patches.
 For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 12.15.X (TBD)
+
+* [Notification of affected services when updating secrets with set-secret](https://github.com/chef/chef-server/pull/1313):
+  `chef-server-ctl set-secret` will notify the user of services that depend on
+  the secret being changed. With the optional flag `--with-restart`,
+  `chef-server-ctl set-secret` will attempt to automatically restart the
+  dependent services.
+
 ## 12.15.8 (2017-06-20)
 
 * [Stricter validation of non-functional user record fields](https://github.com/chef/chef-server/pull/1294),
