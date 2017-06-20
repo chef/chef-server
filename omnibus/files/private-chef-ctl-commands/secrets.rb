@@ -57,6 +57,8 @@ SERVICES_REQUIRING_RESTART = {
   "saml.client_secret" => ["chef-manage"],
 }
 
+MANAGE_SVDIR = "/opt/chef-manage/sv/"
+
 add_command_under_category "show-secret", "Secrets Management", "Show the value of the given secret in the secret store", 2 do
   group = ARGV[3]
   name = ARGV[4]
@@ -128,7 +130,7 @@ end
 
 def manage_or_other_service_enabled?(service)
   if service == "chef-manage"
-    File.exist?("/opt/chef-manage/sv/")
+    File.exist?(MANAGE_SVDIR)
   else
     service_enabled?(service)
   end
@@ -136,7 +138,7 @@ end
 
 def restart_manage_or_other_service(service)
   if service == "chef-manage"
-    Mixlib::ShellOut.new("chef-manage-ctl restart").run_command
+    Mixlib::ShellOut.new("chef-manage-ctl restart", :env => { "SVDIR" => MANAGE_SVDIR }).run_command
   else
     run_sv_command_for_service("restart", service)
   end
