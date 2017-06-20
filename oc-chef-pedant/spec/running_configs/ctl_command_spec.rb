@@ -115,7 +115,12 @@ describe "running configs required by chef-server-ctl", :config do
 
     it "postgresql/data_dir" do
       expect(config["postgresql"]["data_dir"].to_s).to_not eq("")
-      expect(File.exist?(config["postgresql"]["data_dir"])).to eq(true)
+
+      if config["postgresql"]["external"]
+        skip "not used for external postgresql"
+      else
+        expect(File.exist?(config["postgresql"]["data_dir"])).to eq(true)
+      end
     end
   end
 end

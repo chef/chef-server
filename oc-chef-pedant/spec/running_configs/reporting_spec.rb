@@ -83,7 +83,11 @@ describe "running configs required by Reporting", :config do
   context "providers/pg_upgrade" do
 
     it "postgresql/data_dir" do
-      expect(File.exists?(config['postgresql']['data_dir'])).to be true
+      if config['postgresql']['external']
+        skip "not used for external postgresql"
+      else
+        expect(File.exists?(config['postgresql']['data_dir'])).to be true
+      end
     end
 
     it "postgresql/username" do
