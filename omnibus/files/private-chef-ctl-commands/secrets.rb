@@ -113,8 +113,6 @@ def set_secret_(group, key, secret, with_restart=nil)
   lookup = "#{group}.#{key}"
   puts "#{lookup} changed."
 
-  #TODO: do we need to guard against services being empty? (KNOWN_CREDS being out of sync w/ service list)
-  #rather/also-- if a service is not in KNOWN_CREDENTIALS, should it be in the restart list?
   affected_services = Array(SERVICES_REQUIRING_RESTART[lookup]).select { |s| manage_or_other_service_enabled?(s) }
 
   return unless affected_services.any?
