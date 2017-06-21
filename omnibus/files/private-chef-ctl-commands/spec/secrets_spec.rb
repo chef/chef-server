@@ -62,7 +62,7 @@ describe "chef-server-ctl set-secret" do
     end
   end
 
-  #this is an unlikely scenario, but worth guarding against confusing messaging about restarting services that are not installed/enabled
+  # This is an unlikely scenario, but worth guarding against confusing messaging about restarting services that are not installed/enabled.
   context "when an enabled service and a not-enabled service depend on the changed secret" do
     before do
       allow(veil_creds).to receive(:add).with("bookshelf", "access_key_id", {:value=>"new_key", :frozen=>true, :force=>true})
@@ -86,7 +86,7 @@ describe "chef-server-ctl set-secret" do
     end
   end
 
-  #also unlikely that we'd change a secret for a not-enabled service
+  # Also unlikely that we'd change a secret for a not-enabled service.
   context "when only non-enabled services depend on the changed secret" do
     before do
       allow(veil_creds).to receive(:add).with("opscode-reporting", "rabbitmq_password", {:value=>"new_key", :frozen=>true, :force=>true})
@@ -108,7 +108,7 @@ describe "chef-server-ctl set-secret" do
     end
   end
 
-  #chef-manage follows a different path as it has several of its own services
+  # chef-manage follows a different path as it has several of its own services.
   context "when chef-manage depends on the changed secret and is installed" do
     before do
       allow(veil_creds).to receive(:add).with("manage", "secret_key_base", {:value=>"new_key", :frozen=>true, :force=>true})
