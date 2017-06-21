@@ -37,6 +37,9 @@ For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
   This update also adds two further new configurables in the ["Checkpoints" group](https://www.postgresql.org/docs/9.6/static/runtime-config-wal.html#RUNTIME-CONFIG-WAL-CHECKPOINTS), `min_wal_size` and
   `checkpoint_flush_after`.
 
+  As part of the upgrade procdure, running `chef-server-ctl cleanup` will remove Postgres 9.2's data
+  and logs.
+
 ## 12.15.8 (2017-06-20)
 
 * [Stricter validation of non-functional user record fields](https://github.com/chef/chef-server/pull/1294),
