@@ -113,7 +113,40 @@ describe OmnibusHelper, :es5 do
       end
     end
 
+    shared_context "elastic search version request fails" do
+      it 'should return 2 but some of the requests will fail' do
+        helper = described_class.new(node)
+        allow(Chef::HTTP).to receive(:new).with(external_url).and_return(client)
+
+        expect(client).to receive(:get).with('').exactly(times).times.and_raise('Bad connection')
+        expect(client).to receive(:get).with('').and_return(response)
+
+        allow(helper).to receive(:sleep).and_return(0)
+        expect(helper.elastic_search_major_version).to eq(2)
+      end
+    end
+
     context 'when elastic search is unavailable' do
+      context 'should return 2 but the request fails first time only' do
+        let(:times) {1}  
+        it_behaves_like "elastic search version request fails"
+      end
+
+      context 'should return 2 but the request fails the first two times' do
+        let(:times) {2}  
+        it_behaves_like "elastic search version request fails"
+      end
+
+      context 'should return 2 but the request fails the first three times' do
+        let(:times) {3}  
+        it_behaves_like "elastic search version request fails"
+      end
+      
+      context 'should return 2 but the request fails the first four times' do
+        let(:times) {4}  
+        it_behaves_like "elastic search version request fails"
+      end
+
       it 'should return raise an exception after 5 retries.' do
         helper = described_class.new(node)
         expect(Chef::HTTP).to receive(:new).with(external_url).exactly(5).times.and_return(client)
