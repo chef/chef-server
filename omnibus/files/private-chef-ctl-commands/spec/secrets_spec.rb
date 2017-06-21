@@ -50,7 +50,7 @@ describe "chef-server-ctl set-secret" do
       expect(subject.ctl).to_not receive(:run_sv_command_for_service)
       expect {
         subject.run_test_omnibus_command("set-secret", ['bookshelf', 'access_key_id', 'new_key'])
-      }.to output("bookshelf.access_key_id changed.\nPlease restart these services: bookshelf, opscode-erchef\n").to_stdout
+      }.to output("Please restart these services: bookshelf, opscode-erchef\n").to_stdout
     end
 
     it "restarts services with --with-restart flag" do
@@ -58,7 +58,7 @@ describe "chef-server-ctl set-secret" do
       expect(subject.ctl).to receive(:run_sv_command_for_service).with("restart", "opscode-erchef")
       expect {
         subject.run_test_omnibus_command("set-secret", ['bookshelf', 'access_key_id', 'new_key', '--with-restart'])
-      }.to output("bookshelf.access_key_id changed.\nRestarting these services: bookshelf, opscode-erchef\n").to_stdout
+      }.to output("Restarting these services: bookshelf, opscode-erchef\n").to_stdout
     end
   end
 
@@ -74,7 +74,7 @@ describe "chef-server-ctl set-secret" do
       expect(subject.ctl).to_not receive(:run_sv_command_for_service)
       expect {
         subject.run_test_omnibus_command("set-secret", ['bookshelf', 'access_key_id', 'new_key'])
-      }.to output("bookshelf.access_key_id changed.\nPlease restart these services: bookshelf\n").to_stdout
+      }.to output("Please restart these services: bookshelf\n").to_stdout
     end
 
     it "restarts only enabled services with --with-restart flag" do
@@ -82,7 +82,7 @@ describe "chef-server-ctl set-secret" do
       expect(subject.ctl).to_not receive(:run_sv_command_for_service).with("restart", "opscode-erchef")
       expect {
         subject.run_test_omnibus_command("set-secret", ['bookshelf', 'access_key_id', 'new_key', '--with-restart'])
-      }.to output("bookshelf.access_key_id changed.\nRestarting these services: bookshelf\n").to_stdout
+      }.to output("Restarting these services: bookshelf\n").to_stdout
     end
   end
 
@@ -97,14 +97,14 @@ describe "chef-server-ctl set-secret" do
       expect(subject.ctl).to_not receive(:run_sv_command_for_service)
       expect {
         subject.run_test_omnibus_command("set-secret", ['opscode-reporting', 'rabbitmq_password', 'new_key'])
-      }.to output("opscode-reporting.rabbitmq_password changed.\n").to_stdout
+      }.to_not output.to_stdout
     end
 
     it "does not restart services with --with-restart flag" do
       expect(subject.ctl).to_not receive(:run_sv_command_for_service)
       expect {
         subject.run_test_omnibus_command("set-secret", ['opscode-reporting', 'rabbitmq_password', 'new_key', '--with-restart'])
-      }.to output("opscode-reporting.rabbitmq_password changed.\n").to_stdout
+      }.to_not output.to_stdout
     end
   end
 
@@ -118,14 +118,14 @@ describe "chef-server-ctl set-secret" do
     it "prompts user to restart chef-manage" do
       expect {
         subject.run_test_omnibus_command("set-secret", ['manage', 'secret_key_base', 'new_key'])
-      }.to output("manage.secret_key_base changed.\nPlease restart these services: chef-manage\n").to_stdout
+      }.to output("Please restart these services: chef-manage\n").to_stdout
     end
 
     it "restarts chef-manage with --with-restart flag" do
       expect_any_instance_of(Mixlib::ShellOut).to receive(:run_command)
       expect {
         subject.run_test_omnibus_command("set-secret", ['manage', 'secret_key_base', 'new_key', '--with-restart'])
-      }.to output("manage.secret_key_base changed.\nRestarting these services: chef-manage\n").to_stdout
+      }.to output("Restarting these services: chef-manage\n").to_stdout
     end
   end
 
@@ -138,14 +138,14 @@ describe "chef-server-ctl set-secret" do
     it "does not prompt user to restart chef-manage" do
       expect {
         subject.run_test_omnibus_command("set-secret", ['manage', 'secret_key_base', 'new_key'])
-      }.to output("manage.secret_key_base changed.\n").to_stdout
+      }.to_not output.to_stdout
     end
 
     it "does not restart chef-manage with --with-restart flag" do
       expect_any_instance_of(Mixlib::ShellOut).to_not receive(:run_command)
       expect {
         subject.run_test_omnibus_command("set-secret", ['manage', 'secret_key_base', 'new_key', '--with-restart'])
-      }.to output("manage.secret_key_base changed.\n").to_stdout
+      }.to_not output.to_stdout
     end
   end
 end

@@ -110,9 +110,8 @@ end
 def set_secret_(group, key, secret, with_restart=nil)
   credentials.add(group, key, value: secret, frozen: true, force: true)
   credentials.save
-  lookup = "#{group}.#{key}"
-  puts "#{lookup} changed."
 
+  lookup = "#{group}.#{key}"
   affected_services = Array(SERVICES_REQUIRING_RESTART[lookup]).select { |s| manage_or_other_service_enabled?(s) }
 
   return unless affected_services.any?
