@@ -126,7 +126,7 @@ GEM
       slop (~> 3.4)
     public_suffix (2.0.4)
     rack (2.0.1)
-    rb-readline (0.5.3)
+    rb-readline (0.5.4)
     redis (3.2.1)
     rspec (3.5.0)
       rspec-core (~> 3.5.0)
@@ -178,4 +178,4 @@ DEPENDENCIES
   veil!
 
 BUNDLED WITH
-   1.14.5
+   1.15.1
