@@ -51,10 +51,32 @@ use_inline_resources
 # fail between them), we're going to drop off a sentinel file that we
 # can check to see if we've been migrated.
 
-def old_data_dir
-  if node['previous_run']
-    node['previous_run']['postgresql']['data_dir']
+action :upgrade do
+  if upgrade_required?
+    converge_by("Upgrading database cluster") do
+      shutdown_postgres
+      initialize_new_cluster
+      update_to_latest_version
+    end
   end
+end
+
+def old_data_dir
+  # Something to play with - just discover the first initialized data dir
+  # that isn't the new data dir.
+  # Assumption: we will not support installing multiple versions of this package
+  # on top of each other without expecting at least one reconfigure in between...
+  #
+  # Cheat and use gem's version parsing and comparison operators.
+  # Note we're doing a reverse sort to put the highest version at 0,
+  # and we're not checking '==' because we can't have two paths of the same name.
+  ::Dir.glob(::File.join(::File.expand_path("../..", new_data_dir, ), "*/data"))
+       .reject { |dir| dir == new_data_dir } # ignore the new one
+       .map { |dir| [dir, version_from_data_dir(dir)] }
+       .reject { |dir, vsn| !vsn } # filter those with no PG_VERSION
+       .sort { |a, b| Gem::Version.new(a[1]) > Gem::Version.new(b[1]) ? -1 : 1 }
+       .map(&:first) # drop the versions again
+       .first
 end
 
 def new_data_dir
@@ -66,25 +88,25 @@ def sentinel_file
   ::File.join(new_data_dir, "upgraded.sentinel")
 end
 
-# @return [Array<Boolean, String>] Whether or not an upgrade is
-# needed, and the why-run message to describe what we're doing (or why
-# we're not doing anything)
-def upgrade_status
+# @return [Boolean] Whether or not an upgrade is needed, and the
+# why-run message to describe what we're doing (or why we're not doing
+# anything)
+def upgrade_required?
   if old_data_dir.nil?
     # This will only happen if we've never successfully completed a
     # Private Chef installation on this machine before.  In that case,
     # there is (by definition) nothing to upgrade
-    [false, "No prior database cluster detected; nothing to upgrade"]
-
+    Chef::Log.debug "No prior database cluster detected; nothing to upgrade"
+    false
   elsif old_data_dir == new_data_dir
     # If the directories are the same, then we're not changing anything
     # (since we keep data directories in version-scoped
     # directories); i.e., this is just another garden-variety chef run
-    [false, "Database cluster is unchanged; nothing to upgrade"]
-  elsif
-    Dir.exists?(new_data_dir) &&
-    cluster_initialized?(new_data_dir) &&
-    ::File.exists?(sentinel_file)
+    Chef::Log.debug "Database cluster is unchanged; nothing to upgrade"
+    false
+  elsif Dir.exists?(new_data_dir) &&
+      cluster_initialized?(new_data_dir) &&
+      ::File.exists?(sentinel_file)
     # If the directories are different, we may need to do an upgrade,
     # but only if all the steps along the way haven't been completed
     # yet.  We'll look for a sentinel file (which we'll write out
@@ -93,31 +115,17 @@ def upgrade_status
     # If we then make it all the way through the chef run, then the next
     # time through, the old_data_dir will be the same as our
     # new_data_dir
-
-    [false, "Database cluster already upgraded from previous installation; nothing to do"]
+    Chef::Log.debug "Database cluster already upgraded from previous installation; nothing to do"
+    false
   else
     # Hmm, looks like we need to upgrade after all
-    [true, "Upgrading database cluster"]
-  end
-end
-
-action :upgrade do
-  anything_to_do, why_run_message = upgrade_status
-
-  converge_by(why_run_message) do
-    if anything_to_do
-      shutdown_postgres
-      initialize_new_cluster
-      update_to_latest_version
-    end
-    new_resource.updated_by_last_action(anything_to_do)
+    true
   end
 end
 
 # If a pre-existing postgres service exists it will need to be shut
 # down prior to running the upgrade step.
 def shutdown_postgres
-
   runit_service "postgresql" do
     action :nothing # can this just be 'action :stop'?
   end
