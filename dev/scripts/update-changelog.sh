@@ -53,8 +53,7 @@ bundle install --with=release
 bundle exec github_changelog_generator -u chef -p chef-server -t $CHANGELOG_GITHUB_TOKEN --enhancement-labels "enhancement,Enhancement,New Feature" --bug-labels "bug,Bug,Improvement,Upstream Bug" --exclude-labels "duplicate,question,invalid,wontfix,no_changelog" -o $currentdir/NEW_CHANGELOG.md --future-release $chef_version
 popd
 
-ar x $1 data.tar.xz
-tar -xf data.tar.xz ./opt/opscode/version-manifest.json
+ar p $1 data.tar.xz | tar x ./opt/opscode/version-manifest.json
 
 cd $basedir/../../omnibus
 bundle exec omnibus manifest chef-server -l fatal > $currentdir/version-manifest.json
