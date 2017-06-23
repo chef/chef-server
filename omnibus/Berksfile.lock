@@ -1,6 +1,7 @@
 DEPENDENCIES
   apt (~> 2.0)
   omnibus
+  yum-centos
   yum-epel (~> 0.6)
   zip (~> 1.1.0)
 
@@ -11,6 +12,7 @@ GRAPH
     seven_zip (>= 0.0.0)
   chef-ingredient (2.1.2)
   chef-sugar (3.4.0)
+  compat_resource (12.19.0)
   dmg (4.0.0)
   git (6.1.0)
     build-essential (>= 0.0.0)
@@ -40,6 +42,8 @@ GRAPH
   wix (3.2.0)
     windows (>= 2.0)
   yum (5.0.1)
+  yum-centos (2.3.0)
+    compat_resource (>= 12.16.3)
   yum-epel (0.7.1)
     yum (>= 3.6.3)
   zip (1.1.0)
