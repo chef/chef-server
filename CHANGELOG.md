@@ -43,6 +43,31 @@
 - Pin berkshelf-no-depselector to avoid pulling in 6.0 [\#1277](https://github.com/chef/chef-server/pull/1277) ([stevendanna](https://github.com/stevendanna))
 - Add a CODE\_REVIEW\_CHECKLIST.md [\#1273](https://github.com/chef/chef-server/pull/1273) ([stevendanna](https://github.com/stevendanna))
 
+### Components
+Updated Components
+* zlib (1.2.8 -> 1.2.11)
+* openssl (1.0.2k -> 1.0.2l)
+* rb-readline (68457ded -> fd882edc)
+* veil-gem (b5748829 -> 9098dd3c)
+* postgresql92 (9.2.15 -> 9.2.21)
+* berkshelf-no-depselector (6016ca10 -> 6016ca10)
+
+### Contributors
+* Salim Afiune
+* Kartik Null Cating-Subramanian
+* Ryan Cragun
+* Steven Danna
+* Daniel DeLeo
+* Lance Finfrock
+* Ryan Hass
+* Pete Higgins
+* Davida Marion
+* Thom May
+* Dairon Medina
+* Marc Paradise
+* Stephan Renatus
+* Blake Stier
+
 ## [12.15.7](https://github.com/chef/chef-server/tree/12.15.7) (2017-05-17)
 [Full Changelog](https://github.com/chef/chef-server/compare/12.15.6...12.15.7)
 
