@@ -5,7 +5,6 @@ source 'https://api.berkshelf.com'
 cookbook 'apt', '~> 2.0'
 
 cookbook 'omnibus'
-cookbook 'yum-epel', '~> 0.6'
 cookbook 'yum-centos', '~> 2.3'
 cookbook 'zip', '~> 1.1.0'
 
