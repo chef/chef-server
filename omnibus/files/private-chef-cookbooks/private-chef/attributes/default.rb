@@ -592,7 +592,9 @@ default['private_chef']['postgresql']['keepalives_count'] = 2
 default['private_chef']['postgresql']['md5_auth_cidr_addresses'] = [ '127.0.0.1/32', '::1/128' ]
 default['private_chef']['postgresql']['shmmax'] = 17179869184
 default['private_chef']['postgresql']['shmall'] = 4194304
-default['private_chef']['postgresql']['wal_level'] = "minimal"
+default['private_chef']['postgresql']['wal_level'] = "logical"
+default['private_chef']['postgresql']['max_replication_slots'] = 3
+default['private_chef']['postgresql']['max_wal_senders'] = 1
 default['private_chef']['postgresql']['archive_mode'] = "off"
 default['private_chef']['postgresql']['archive_command'] = ""
 default['private_chef']['postgresql']['archive_timeout'] = 0 # 0 is disabled.
@@ -618,7 +620,9 @@ default['private_chef']['postgresql']['shared_buffers'] = "#{(shared_bytes/1024)
 
 default['private_chef']['postgresql']['work_mem'] = "8MB"
 default['private_chef']['postgresql']['effective_cache_size'] = "#{(node['memory']['total'].to_i / 2) / (1024)}MB"
-default['private_chef']['postgresql']['checkpoint_segments'] = 3
+# TODO - conversion: checkpoint_segmennts -> max_wal_size, ref:
+#https://www.postgresql.org/docs/9.6/static/release-9-5.html
+default['private_chef']['postgresql']['max_wal_size'] = 3
 default['private_chef']['postgresql']['checkpoint_timeout'] = "5min"
 default['private_chef']['postgresql']['checkpoint_completion_target'] = 0.5
 default['private_chef']['postgresql']['checkpoint_warning'] = "30s"

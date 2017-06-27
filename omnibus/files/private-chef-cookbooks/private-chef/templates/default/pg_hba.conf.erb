@@ -68,4 +68,7 @@ host    all         <%= node['private_chef']['postgresql']['db_superuser'] %>   
 
 <% node['private_chef']['postgresql']['md5_auth_cidr_addresses'].each do |cidr| %>
 host    all         all         <%= cidr %>           md5
+host    all         all         <%= cidr %>           md5
+host    replication opscode-pgsql <%= cidr %>         md5
+host    all         migration_user <%= cidr %>         md5
 <% end %>
