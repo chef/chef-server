@@ -151,11 +151,14 @@ module Pedant
 
       response_handler = lambda{|response, request, result| response}
 
-      response = if [:PUT, :POST].include? method
-                   RestClient.send method.downcase, url, payload, final_headers, &response_handler
-                 else
-                   RestClient.send method.downcase, url, final_headers, &response_handler
-                 end
+      response = RestClient::Request.execute(method: method,
+                                             url: url,
+                                             payload: [:PUT, :POST].include?(method) ? payload : nil,
+                                             headers: final_headers,
+                                             ssl_version: Pedant::Config.ssl_version,
+                                             verify_ssl: false,
+                                             &response_handler)
+
       if block_given?
         yield(response)
       else
