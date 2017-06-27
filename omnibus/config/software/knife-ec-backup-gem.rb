@@ -31,8 +31,6 @@ dependency "sequel-gem"
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
-  bundle "install --local --without development", env: env
-
   gem "build knife-ec-backup.gemspec", env: env
-  gem "install knife-ec-backup*.gem --no-rdoc --no-ri --without development", env: env
+  gem "install knife-ec-backup*.gem --no-rdoc --no-ri --ignore-dependencies", env: env
 end
