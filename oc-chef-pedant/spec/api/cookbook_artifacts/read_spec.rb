@@ -188,6 +188,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         http = Net::HTTP.new(uri.hostname, uri.port)
         if uri.scheme == "https"
           http.use_ssl = true
+          http.ssl_version = Pedant::Config.ssl_version,
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE
         end
 
