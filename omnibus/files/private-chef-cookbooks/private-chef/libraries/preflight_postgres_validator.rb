@@ -13,14 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require_relative "./warnings.rb"
+
 class PostgresqlPreflightValidator < PreflightValidator
-
-  def initialize(node)
-    super
-
-  end
+  # This check used to verify that the external PG version matches the version
+  # we ship. When we bumped the version we ship to 9.6, we haven't yet
+  # introduced any changes that _require_ 9.6. So, these constants reflect the
+  # actually required PG version.
+  REQUIRED_MAJOR = 9
+  REQUIRED_MINOR = 2
 
   def run!
+    warn_about_removed_attribute('checkpoint_segments')
     verify_unchanged_external_flag
 
     # Our additional validations only apply when a database server exists,
@@ -86,6 +90,16 @@ class PostgresqlPreflightValidator < PreflightValidator
     else
       return
     end
+  end
+
+  # When upgrading to 9.6, checkpoint_segments config was removed. The new
+  # configurables' defaults are such that they should not need tuning. However,
+  # we warn users that have changed the old attribute that their changes don't
+  # have any effect anymore.
+  def warn_about_removed_attribute(attr)
+    return unless cs_pg_attr[attr]
+
+    ChefServer::Warnings.warn err_unused_postgres_configurable(attr)
   end
 
   def connectivity_validation
@@ -170,16 +184,12 @@ class PostgresqlPreflightValidator < PreflightValidator
     # Make sure the server is a supported version.
     r = connection.exec("SHOW server_version;")
     v = r[0]['server_version']
-    major, minor = v.split(".")
-    # Load up our required major/minor:
-    # NOTE: our current entry in version-manifest.json is 'postgres92',effectively hardcoding the version. Necessary
-    # change is captured here: https://github.com/chef/chef-server/issues/441
-    manifest = JSON.parse(File.read("/opt/opscode/version-manifest.json"))
-    required_major, required_minor = manifest['software']['postgresql92']['locked_version'].split(".")
+    major, minor = v.split(".").map(&:to_i)
 
     # Note that we're looking for the same major, and using our minor as the minimum version
-    # This provides compatibility with external databases that use 9.3+ before we officially upgrade to it.
-    unless major == required_major and minor >= required_minor
+    # This provides compatibility with external databases that use < 9.6 before we make use
+    # of any features available in > 9.2.
+    unless major == REQUIRED_MAJOR and minor >= REQUIRED_MINOR
       fail_with err_CSPG014_bad_postgres_version(v)
     end
   end
@@ -298,7 +308,7 @@ EOM
 
   def err_CSPG014_bad_postgres_version(ver)
 <<EOM
-CSPG014: Chef Server currently requires PostgreSQL version 9.2 or greater.
+CSPG014: Chef Server currently requires PostgreSQL version #{REQUIRED_MAJOR}.#{REQUIRED_MINOR} or greater.
          The database you have provided is running version #{ver}.
 
          See https://docs.chef.io/error_messages.html#cspg014-incorrect-version
@@ -339,5 +349,16 @@ CSPG017: The Chef Server database role/user named '#{username}' already exists
          for more information.
 EOM
 
+  end
+
+  def err_unused_postgres_configurable(setting)
+<<EOM
+The setting
+
+    postgresql['#{setting}']
+
+is no longer supported by the version of PostgreSQL included in Chef
+Server. Please check the release notes for details.
+EOM
   end
 end
