@@ -9,7 +9,15 @@ class PG
 end
 
 describe PostgresqlPreflightValidator do
-  let(:node) { { 'private_chef' => {'opscode-erchef' => { 'sql_user' => 'blah' }, 'oc_bifrost' => { 'sql_user' => 'blah' }, 'oc_id' => { 'sql_user' => 'blah' }} } }
+  let(:node) do
+    {
+      'private_chef' => {
+        'opscode-erchef' => { 'sql_user' => 'blah' },
+        'oc_bifrost'     => { 'sql_user' => 'blah' },
+        'oc_id'          => { 'sql_user' => 'blah' },
+      }
+    }
+  end
   let(:first_run_response) { false }
   let(:secrets_exists_response) { false }
   let(:postgres_validator) {
@@ -38,6 +46,89 @@ describe PostgresqlPreflightValidator do
 
     validator
   }
+
+  context "#warn_about_removed_attribute" do
+    before do
+      allow(PrivateChef).to receive(:[]).with('postgresql').and_return(pg_attrs)
+    end
+
+    context "when the attribute is configured" do
+      let(:pg_attrs) { {'foo' => 3000, 'bar' => true } }
+
+      it "adds a warning to the ChefServer::Warnings" do
+        expect(ChefServer::Warnings).to receive(:warn)
+        postgres_validator.warn_about_removed_attribute('foo')
+      end
+    end
+
+    context "when the attribute is not configured" do
+      let(:pg_attrs) { { 'bar' => true } }
+
+      it "adds a warning to the ChefServer::Warnings" do
+        expect(ChefServer::Warnings).not_to receive(:warn)
+        postgres_validator.warn_about_removed_attribute('foo')
+      end
+    end
+  end
+
+  context "#backend_verify_postgres_version" do
+    # shadow other definition so we can call backend_verify_postgres_version
+    let(:postgres_validator) { PostgresqlPreflightValidator.new(node) }
+
+    let(:connection) { double('connection') }
+    let(:version_reply) { [{ 'server_version' => version }] }
+    let(:error_message) { /PostgreSQL version 9\.2 or greater/ }
+
+    before do
+      allow(connection).to receive(:exec).with('SHOW server_version;')
+                                         .and_return(version_reply)
+    end
+
+    context "when external version is <= 8.x" do
+      let(:version) { '8.100' }
+
+      it "fails with a CSPG014 error" do
+        expect(postgres_validator).to receive(:fail_with).with(error_message)
+        postgres_validator.backend_verify_postgres_version(connection)
+      end
+    end
+
+    context "when external version is <= 9.1" do
+      let(:version) { '9.1' }
+
+      it "fails with a CSPG014 error" do
+        expect(postgres_validator).to receive(:fail_with).with(error_message)
+        postgres_validator.backend_verify_postgres_version(connection)
+      end
+    end
+
+    context "when external version is > 9.x" do
+      let(:version) { '10.0' }
+
+      it "fails with a CSPG014 error" do
+        expect(postgres_validator).to receive(:fail_with).with(error_message)
+        postgres_validator.backend_verify_postgres_version(connection)
+      end
+    end
+
+    context "when external version is == 9.2" do
+      let(:version) { '9.2' }
+
+      it "does not fail with a CSPG014 error" do
+        expect(postgres_validator).to_not receive(:fail_with)
+        postgres_validator.backend_verify_postgres_version(connection)
+      end
+    end
+
+    context "when external version is >= 9.2" do
+      let(:version) { '9.6' }
+
+      it "does not fail with a CSPG014 error" do
+        expect(postgres_validator).to_not receive(:fail_with)
+        postgres_validator.backend_verify_postgres_version(connection)
+      end
+    end
+  end
 
   context "#connectivity_validation" do
     context "when a postgres exception is raised" do

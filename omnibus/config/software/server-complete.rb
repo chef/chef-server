@@ -33,7 +33,8 @@ dependency "veil-gem" # chef-server-ctl rotate-credentials
 dependency "erlang-crypto2"
 
 # the backend
-dependency "postgresql92"
+dependency "postgresql92-bin" # for upgrading 9.2 -> 9.6
+dependency "postgresql96"
 dependency "rabbitmq"
 dependency "redis" # dynamic routing controls
 dependency "opscode-solr4"

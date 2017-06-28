@@ -562,7 +562,7 @@ default['private_chef']['nginx']['enable_ipv6'] = false
 # PostgreSQL
 ###
 # For now, we're hardcoding the version directory suffix here:
-default['private_chef']['postgresql']['version'] = "9.2"
+default['private_chef']['postgresql']['version'] = "9.6"
 # In the future, we're probably going to want to do something more elegant so we
 # don't accidentally overwrite this directory if we upgrade PG to 9.3: keeping these
 # directories straight is important because in the distant future (the year 2000)
@@ -593,7 +593,7 @@ default['private_chef']['postgresql']['md5_auth_cidr_addresses'] = [ '127.0.0.1/
 default['private_chef']['postgresql']['shmmax'] = 17179869184
 default['private_chef']['postgresql']['shmall'] = 4194304
 default['private_chef']['postgresql']['wal_level'] = "minimal"
-default['private_chef']['postgresql']['archive_mode'] = "off"
+default['private_chef']['postgresql']['archive_mode'] = "off" # "cannot be enabled when wal_level is set to minimal"
 default['private_chef']['postgresql']['archive_command'] = ""
 default['private_chef']['postgresql']['archive_timeout'] = 0 # 0 is disabled.
 
@@ -617,10 +617,19 @@ end
 default['private_chef']['postgresql']['shared_buffers'] = "#{(shared_bytes/1024).to_i}MB"
 
 default['private_chef']['postgresql']['work_mem'] = "8MB"
-default['private_chef']['postgresql']['effective_cache_size'] = "#{(node['memory']['total'].to_i / 2) / (1024)}MB"
-default['private_chef']['postgresql']['checkpoint_segments'] = 3
+default['private_chef']['postgresql']['effective_cache_size'] = "#{(node['memory']['total'].to_i / 2)/1024}MB"
+# Note: the checkpoint_segments setting was removed.
+# https://www.postgresql.org/docs/9.6/static/release-9-5.html says
+#   max_wal_size = (3 * checkpoint_segments) * 16MB
+# would be a usable conversion rule, but it also says the new setting's default
+# should be OK for most people. Since the conversion rule yields a value that
+# is so much smaller than the default, we don't do the conversion, but merely
+# allow for overriding the default setting.
+default['private_chef']['postgresql']['max_wal_size'] = "1GB"
+default['private_chef']['postgresql']['min_wal_size'] = "80MB"
 default['private_chef']['postgresql']['checkpoint_timeout'] = "5min"
 default['private_chef']['postgresql']['checkpoint_completion_target'] = 0.5
+default['private_chef']['postgresql']['checkpoint_flush_after'] = "256kB"
 default['private_chef']['postgresql']['checkpoint_warning'] = "30s"
 
 ###

@@ -1,5 +1,5 @@
 #
-# Copyright 2012-2017 Chef Software, Inc.
+# Copyright 2017 Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,15 +14,13 @@
 # limitations under the License.
 #
 
-name "postgresql92"
-default_version "9.2.21"
+name "postgresql96"
+
+default_version "9.6.3"
 
 license "PostgreSQL"
 license_file "COPYRIGHT"
 skip_transitive_dependency_licensing true
-
-source url: "https://ftp.postgresql.org/pub/source/v9.2.21/postgresql-9.2.21.tar.bz2",
-       sha256: "0697e843523ee60c563f987f9c65bc4201294b18525d6e5e4b2c50c6d4058ef9"
 
 dependency "zlib"
 dependency "openssl"
@@ -31,15 +29,19 @@ dependency "ncurses"
 dependency "libossp-uuid"
 dependency "config_guess"
 
-relative_path "postgresql-9.2.21"
+source url: "https://ftp.postgresql.org/pub/source/v#{version}/postgresql-#{version}.tar.bz2"
+version("9.6.3") { source sha256: "1645b3736901f6d854e695a937389e68ff2066ce0cde9d73919d6ab7c995b9c6" }
+
+relative_path "postgresql-#{version}"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
+  short_version = version.gsub(/^([0-9]+).([0-9]+).[0-9]+$/, '\1.\2')
 
   update_config_guess(target: "config")
 
   command "./configure" \
-          " --prefix=#{install_dir}/embedded/postgresql/9.2" \
+          " --prefix=#{install_dir}/embedded/postgresql/#{short_version}" \
           " --with-libedit-preferred" \
           " --with-openssl" \
           " --with-ossp-uuid" \
@@ -49,13 +51,8 @@ build do
   make "world -j #{workers}", env: env
   make "install-world -j #{workers}", env: env
 
-
-  # Postgres 9.2 is our "real" Postgres installation (prior versions
-  # that are installed are solely to facilitate upgrades).  As a
-  # result, we need to have the binaries for this version available
-  # with the other binaries used by Private Chef.
   block do
-    Dir.glob("#{install_dir}/embedded/postgresql/9.2/bin/*").sort.each do |bin|
+    Dir.glob("#{install_dir}/embedded/postgresql/#{short_version}/bin/*").sort.each do |bin|
       link bin, "#{install_dir}/embedded/bin/#{File.basename(bin)}"
     end
   end
