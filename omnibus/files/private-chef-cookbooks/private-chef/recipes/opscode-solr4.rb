@@ -124,9 +124,9 @@ new_size =  if node['private_chef']['opscode-solr4']['new_size']
             end
 
 java_opts = node['private_chef']['opscode-solr4']['java_opts']
-java_opts << " -XX:NewSize=#{new_size}M" unless java_opts =~ /NewSize/
-java_opts << " -XX:+UseConcMarkSweepGC" unless java_opts =~ /UseConcMarkSweepGC/
-java_opts << " -XX:+UseParNewGC" unless java_opts =~ /UseParNewGC/
+java_opts += " -XX:NewSize=#{new_size}M" unless java_opts =~ /NewSize/
+java_opts += " -XX:+UseConcMarkSweepGC"  unless java_opts =~ /UseConcMarkSweepGC/
+java_opts += " -XX:+UseParNewGC"         unless java_opts =~ /UseParNewGC/
 
 # Save the values back onto the node attributes
 node.default['private_chef']['opscode-solr4']['heap_size'] = solr_mem
