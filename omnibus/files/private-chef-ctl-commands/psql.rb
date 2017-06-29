@@ -40,11 +40,13 @@ add_command_under_category "psql", "Database", "Launches an interactive psql ses
     psql_options = " #{ARGV[ARGV.index(options_arg) + 1]}"
   end
 
+  known_db_names = known_dbs.keys.sort.join(", ")
+
   if service_name.nil?
-    STDERR.puts "[ERROR] You must supply a service name. Valid names include: #{known_dbs.keys}"
+    STDERR.puts "[ERROR] You must supply a service name. Valid names include: #{known_db_names}"
     exit 1
   elsif !known_dbs[service_name]
-    STDERR.puts  "[ERROR] #{service_name} does not appear to be a valid service name. Valid names include: #{known_dbs.keys}."
+    STDERR.puts  "[ERROR] #{service_name} does not appear to be a valid service name. Valid names include: #{known_db_names}."
     exit 1
   elsif running_config.nil?
     STDERR.puts "[ERROR] Cannot connect to database if you haven't completed a reconfigure"
