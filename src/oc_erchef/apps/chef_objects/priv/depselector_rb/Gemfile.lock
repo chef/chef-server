@@ -8,8 +8,8 @@ GIT
       ffi (~> 1.9)
 
 GIT
-  remote: https://github.com/sdelano/erlectricity
-  revision: 4ad8379b4e3ff2c6d4e852daaf04bc9103676d19
+  remote: https://github.com/chef/erlectricity
+  revision: 61fe8eafa5f25da57fea0ac2d65be0289e734b9e
   branch: master
   specs:
     erlectricity (1.1.1)
@@ -30,4 +30,4 @@ DEPENDENCIES
   uuidtools
 
 BUNDLED WITH
-   1.12.5
+   1.15.1

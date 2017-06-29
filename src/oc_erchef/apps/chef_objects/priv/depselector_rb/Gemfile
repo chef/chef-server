@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
 
-gem 'dep_selector', :git => 'https://github.com/chef/dep-selector', :branch => 'master'
-gem 'erlectricity', :git => 'https://github.com/sdelano/erlectricity', :branch => 'master'
+gem 'dep_selector', git: 'https://github.com/chef/dep-selector', branch: 'master'
+gem 'erlectricity', git: 'https://github.com/chef/erlectricity', branch: 'master'
 gem 'uuidtools'
