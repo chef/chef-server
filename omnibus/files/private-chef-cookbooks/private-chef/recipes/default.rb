@@ -54,7 +54,7 @@ end
 
 if OmnibusHelper.has_been_bootstrapped? or
     BootstrapPreflightValidator.new(node).bypass_bootstrap?
-  node.set['private_chef']['bootstrap']['enable'] = false
+  node.override['private_chef']['bootstrap']['enable'] = false
 end
 
 # Create the Chef User and private keys (pivotal/webui)

@@ -16,7 +16,6 @@
 
 require "omnibus_ctl_helper"
 require 'helpers/key_ctl_helper'
-require 'chef/rest'
 
 describe "chef-server-ctl *key(s)*" do
   before(:all) do

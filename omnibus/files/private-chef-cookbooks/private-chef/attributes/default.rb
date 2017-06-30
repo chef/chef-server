@@ -30,6 +30,7 @@ opscode-chef-mover
 default['private_chef']['api_version'] = "12.0.0"
 default['private_chef']['flavor'] = "cs"
 default['private_chef']['install_path'] = "/opt/opscode"
+default['private-chef']['sysvinit_id'] = 'SV'
 
 default['private_chef']['notification_email'] = "pc-default@chef.io"
 default['private_chef']['from_email'] = '"Opscode" <donotreply@chef.io>'
