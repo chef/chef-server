@@ -39,6 +39,12 @@ For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
   As part of the upgrade procdure, running `chef-server-ctl cleanup` will remove Postgres 9.2's data
   and logs.
+* [EPMD patch](https://github.com/chef/chef-server/pull/1328): The Erlang Port Mapper Daemon (EPMD)
+  included in this package is now patched to only listen on the addresses specified in
+  `ERL_EPMD_ADDRESS`. Before, it would implicitly add ::1 and 127.0.0.1 to the set of addresses to
+  listen on, causing trouble for systems without a ::1.
+
+  The preflight check that was in place to catch these situations has been removed.
 
 ## 12.15.8 (2017-06-20)
 
