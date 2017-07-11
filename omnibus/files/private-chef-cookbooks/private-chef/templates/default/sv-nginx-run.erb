@@ -1,3 +1,5 @@
 #!/bin/sh
 exec 2>&1
-exec /opt/opscode/embedded/bin/veil-env-helper -o DATA_COLLECTOR_TOKEN=data_collector.token -s REDIS_PASSWORD=redis_lb.password -- chpst -P /opt/opscode/embedded/sbin/nginx -c <%= File.join(node['private_chef']['nginx']['dir'], "etc", "nginx.conf") %>
+exec /opt/opscode/embedded/bin/veil-env-helper -o DATA_COLLECTOR_TOKEN=data_collector.token -s REDIS_PASSWORD=redis_lb.password -- \
+  chpst -P <%= "env OPENSSL_CONF=/opt/opscode/embedded/ssl/openssl.fips.cnf" if node['private_chef']['fips_enabled'] %> \
+  /opt/opscode/embedded/sbin/nginx -c <%= File.join(node['private_chef']['nginx']['dir'], "etc", "nginx.conf") %>
