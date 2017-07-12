@@ -12,7 +12,7 @@ end
 # Install omnibus software
 group :omnibus do
   gem 'omnibus', git: 'https://github.com/chef/omnibus'
-  gem 'omnibus-software', git: 'https://github.com/chef/omnibus-software'
+  gem 'omnibus-software', git: 'https://github.com/chef/omnibus-software', branch: 'sr/openresty/patch-nginx-cve-2017-7529'
   gem 'license_scout', git: 'https://github.com/chef/license_scout'
 end
 

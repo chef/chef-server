@@ -8,7 +8,7 @@ GIT
 
 GIT
   remote: https://github.com/chef/omnibus
-  revision: 0224f78be5d8d14c323882786fd210a8c64842ba
+  revision: d9156f453d661f71e5ee894ee6331769025f44c5
   specs:
     omnibus (5.6.1)
       aws-sdk (~> 2)
@@ -25,7 +25,8 @@ GIT
 
 GIT
   remote: https://github.com/chef/omnibus-software
-  revision: 18fa328dce4f8fb68a87734c8a0b9c3dcc4a8f18
+  revision: f8bb6b6c9606ffa587e6568401b529d6fc299fc4
+  branch: sr/openresty/patch-nginx-cve-2017-7529
   specs:
     omnibus-software (4.0.0)
       chef-sugar (>= 3.4.0)
