@@ -25,7 +25,8 @@ GIT
 
 GIT
   remote: https://github.com/chef/omnibus-software
-  revision: 18fa328dce4f8fb68a87734c8a0b9c3dcc4a8f18
+  revision: 24e0371d3a418a1f70c3f5d0f75ec6b8ddbd9f5d
+  branch: sr/openresty/1.11.2.4
   specs:
     omnibus-software (4.0.0)
       chef-sugar (>= 3.4.0)
