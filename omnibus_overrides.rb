@@ -3,6 +3,9 @@ build_iteration 1
 
 override :erlang, version: "18.3"
 override :lua, version: "5.1.5"
+# NOTE 2017/07/12 (sr):  more recent versions have removed `--with-lua51=PATH`,
+# so bumping is some more work
+override :openresty, version: "1.11.2.1"
 override :'omnibus-ctl', version: "master"
 override :chef, version: "v12.19.36"
 override :ohai, version: "v8.23.0"
