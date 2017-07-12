@@ -46,6 +46,11 @@ For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
   The preflight check that was in place to catch these situations has been removed.
 
+### Security Updates
+
+* [Nginx security fix](https://github.com/chef/chef-server/pull/1330): Backport openresty's bundled nginx fixes
+  to openresty v1.22.2.1, to address [CVE-2017-7529](http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-7529).
+
 ## 12.15.8 (2017-06-20)
 
 * [Stricter validation of non-functional user record fields](https://github.com/chef/chef-server/pull/1294),
