@@ -1,6 +1,6 @@
-source "https://supermarket.chef.io"
+source 'https://supermarket.chef.io'
 
-cookbook 'enterprise', :git => 'https://github.com/chef-cookbooks/enterprise-chef-common', :tag => '0.10.3'
-cookbook 'chef-ha-drbd', :path => './chef-ha-drbd'
-cookbook 'private-chef', :path => './private-chef'
+cookbook 'enterprise', git: 'https://github.com/chef-cookbooks/enterprise-chef-common', tag: '0.11.0'
+cookbook 'chef-ha-drbd', path: './chef-ha-drbd'
+cookbook 'private-chef', path: './private-chef'
 cookbook 'runit', '> 1.6.0'
