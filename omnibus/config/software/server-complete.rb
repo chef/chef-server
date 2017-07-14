@@ -31,6 +31,7 @@ dependency "runit"
 dependency "chef_backup-gem" # chef-server-ctl backup
 dependency "veil-gem" # chef-server-ctl rotate-credentials
 dependency "erlang-crypto2"
+dependency "openssl-fips-config" if fips_mode? 
 
 # the backend
 dependency "postgresql92-bin" # for upgrading 9.2 -> 9.6

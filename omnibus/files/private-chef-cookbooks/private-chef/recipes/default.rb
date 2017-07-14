@@ -37,8 +37,6 @@ include_recipe "private-chef::plugin_discovery"
 include_recipe "private-chef::plugin_config_extensions"
 include_recipe "private-chef::config"
 
-include_recipe "private-chef::openssl"
-
 if node['private_chef']['fips_enabled']
   include_recipe "private-chef::fips"
 end
