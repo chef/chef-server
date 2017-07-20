@@ -22,13 +22,12 @@ license :project_license
 
 dependency "bundler"
 dependency "postgresql96"
+dependency "libcs"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
-  bundle "install" \
-         " --path=#{install_dir}/embedded/service/gem" \
-         " --without mysql", env: env
+  bundle "install", env: env
 
   sync project_dir, "#{install_dir}/embedded/service/partybus"
 end

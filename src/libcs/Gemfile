@@ -1,0 +1,35 @@
+source "https://rubygems.org"
+
+gemspec
+
+def override_file
+  @override_file ||= File.read("../../omnibus_overrides.rb")
+end
+
+def gem_version(gem_name)
+  m = override_file.match(/^override :#{gem_name}, version: "(.*)"$/)
+  if !m
+    puts "Could not find the the #{gem_name} version in the omnibus overrides file:"
+    puts override_file
+    raise "Could not parse #{gem_name} version from omnibus_overrides.rb"
+  else
+    m[1].delete("v")
+  end
+end
+
+def chef_version
+  gem_version("chef")
+end
+
+def ohai_version
+  gem_version("ohai")
+end
+
+gem "chef", "= #{chef_version}"
+gem "ohai", "= #{ohai_version}"
+gem "veil", git: "https://github.com/chef/chef_secrets.git"
+gem "knife-ec-backup", git: "https://github.com/opscode/knife-ec-backup.git"
+gem "chef_backup", git: "https://github.com/chef/chef_backup.git"
+gem "knife-opc", git: "https://github.com/opscode/knife-opc.git"
+
+gem "simplecov", require: false, group: :test

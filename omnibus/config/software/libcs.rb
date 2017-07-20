@@ -1,5 +1,5 @@
 #
-# Copyright 2012-2014 Chef Software, Inc.
+# Copyright 2016 Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,23 +14,18 @@
 # limitations under the License.
 #
 
-name "knife-ec-backup"
-default_version "master"
-source git: "https://github.com/chef/knife-ec-backup.git"
+name "libcs"
+source path: "#{project.files_path}/../../src/libcs"
 
+license :project_license
 
-license "Apache-2.0"
-license_file "LICENSE"
-# No need to collect license information for dependencies since
-# --ignore-dependencies flag is passed in during gem install.
-skip_transitive_dependency_licensing true
-
-dependency "pg-gem"
-dependency "sequel-gem"
+dependency "ruby"
+dependency "bundler"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
-  gem "build knife-ec-backup.gemspec", env: env
-  gem "install knife-ec-backup*.gem --no-rdoc --no-ri --ignore-dependencies", env: env
+  bundle "install", env: env
+  gem "build libcs.gemspec", env: env
+  gem "install libcs*.gem -n #{install_dir}/embedded/bin --no-rdoc --no-ri", env: env
 end

@@ -21,15 +21,8 @@ source path: "#{project.files_path}/private-chef-ctl-commands"
 license :project_license
 skip_transitive_dependency_licensing true
 
-dependency "highline-gem"
-dependency "sequel-gem"
+dependency "libcs"
 dependency "omnibus-ctl"
-# TODO
-# chef-server-ctl server-admins commands dep, will be removed in server-admins V2
-# https://gist.github.com/tylercloke/a8d4bc1b915b958ac160#version-2
-dependency "rest-client-gem"
-# Used by `chef-server-ctl install` to resolve download urls
-dependency "mixlib-install"
 
 build do
   block do
