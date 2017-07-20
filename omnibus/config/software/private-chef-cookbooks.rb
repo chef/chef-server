@@ -21,6 +21,7 @@ source path: "#{project.files_path}/#{name}"
 license :project_license
 
 dependency "berkshelf-no-depselector"
+dependency "libcs"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
