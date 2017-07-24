@@ -27,17 +27,14 @@ add_command_under_category "cleanup-bifrost", "cleanup", "Cleanup orphaned bifro
       options[:batch_size] = b.to_i
     end
 
-    opts.on("--force-cleanup", "Clean up tracking tables (does not scan bifrost actors") do |b|
+    opts.on("--force-cleanup", "Clean up tracking tables (does not scan bifrost actors)") do |b|
       options[:cleanup_only] = true
     end
 
+    opts.on("--estimate-only", "Print estimate of orphaned authz objects") do |b|
+      options[:estimate_only] = true
+    end
   end.parse!(cleanup_args)
-
-  if options[:cleanup_only]
-    bifrost_db = setup_bifrost_db
-    remove_bifrost_tracking_table(bifrost_db)
-    exit(0)
-  end
 
   if !options[:batch_size]
     options[:batch_size] = 10000
@@ -46,16 +43,28 @@ add_command_under_category "cleanup-bifrost", "cleanup", "Cleanup orphaned bifro
     exit(1)
   end
 
-  erchef_db = setup_erchef_db
-  bifrost_db = setup_bifrost_db
+  if options[:cleanup_only]
+    remove_bifrost_tracking_table(bifrost_db)
+    exit(0)
+  end
 
+  if options[:estimate_only]
+    print_and_return_estimate(known_actor_list, bifrost_db)
+    exit(0)
+  end
+
+  run_cleanup(bifrost_db, options[:batch_size])
+end
+
+def run_cleanup(bifrost_db, batch_size)
   safety_check(bifrost_db)
   install_bifrost_tracking_table(bifrost_db)
+  # NOTE(ssd) 2017-07-24:
   # For the most part, the tracking table manages in-flight requests for us.
   # However, it is still possible that the following sequence happens:
   #    - new authz_id in bifrost database
   #    - tracking table inserted
-  #    - list gotten
+  #    - known_actor_list fetched
   #    - new record in oc-chef database
   #
   # In the this case, the authz_id won't be in our list of known
@@ -67,16 +76,25 @@ add_command_under_category "cleanup-bifrost", "cleanup", "Cleanup orphaned bifro
   puts "One-time sleep to account for in-flight requests not captured by tracking table"
   sleep 25
   begin
-    known_actor_list = timed "Fetching initial opscode_chef clients and user list" do
-      clients_and_users = erchef_db.exec("SELECT authz_id FROM clients UNION select authz_id FROM users")
-      clients_and_users.map do |real_actor|
-        real_actor['authz_id']
-      end
+    estimated_deletion_count = print_and_return_estimate(known_actor_list, bifrost_db)
+
+    if estimated_deletion_count <= 0
+      puts "Estimated deletion count 0. Aborting"
+      exit(0)
     end
 
-    run_cleanup(known_actor_list, options[:batch_size], bifrost_db)
+    run_bifrost_scan(known_actor_list, batch_size, bifrost_db)
   ensure
     remove_bifrost_tracking_table(bifrost_db)
+  end
+end
+
+def known_actor_list
+  @known_actor_list ||= timed "Fetching initial opscode_chef clients and user list" do
+    clients_and_users = erchef_db.exec("SELECT authz_id FROM clients UNION select authz_id FROM users")
+    clients_and_users.map do |real_actor|
+      real_actor['authz_id']
+    end
   end
 end
 
@@ -99,7 +117,7 @@ def remove_bifrost_tracking_table(db)
   db.exec(DELETE_SQL)
 end
 
-def run_cleanup(known_actor_list, batch_size, db)
+def print_and_return_estimate(known_actor_list, db)
   tcount = timed "Fetchings all actor counts" do
     db.exec_params("SELECT count(*) FROM auth_actor").first['count'].to_i
   end
@@ -111,11 +129,10 @@ def run_cleanup(known_actor_list, batch_size, db)
   puts "Deletion Candidates (est): #{estimated_del_count}"
   puts "----------------------------------------\n"
 
-  if estimated_del_count == 0
-    puts "Aborting scan since 0 deletions were estimated."
-    return
-  end
+  estimated_del_count
+end
 
+def run_bifrost_scan(known_actor_list, batch_size, db)
   total_deleted = 0
   known_actors_str = to_pg_list(known_actor_list)
   loop do
@@ -170,23 +187,27 @@ end
 # TODO(ssd) 2017-07-24: I know these functions need to use veil to get
 # the passwords. Right now has been written to potentialy run against
 # Chef Server 12.11.0
-def setup_erchef_db
-  running_config = JSON.parse(File.read("/etc/opscode/chef-server-running.json"))
-  erchef_config = running_config['private_chef']['opscode-erchef']
-  pg_config = running_config['private_chef']['postgresql']
-  ::PGconn.open('user' => erchef_config['sql_user'],
-                'host' => pg_config['vip'],
-                'password' => erchef_config['sql_password'],
-                'port' => pg_config['port'],
-                'dbname' => 'opscode_chef')
+def erchef_db
+  @erchef_db ||= begin
+                   running_config = JSON.parse(File.read("/etc/opscode/chef-server-running.json"))
+                   erchef_config = running_config['private_chef']['opscode-erchef']
+                   pg_config = running_config['private_chef']['postgresql']
+                   ::PGconn.open('user' => erchef_config['sql_user'],
+                                 'host' => pg_config['vip'],
+                                 'password' => erchef_config['sql_password'],
+                                 'port' => pg_config['port'],
+                                 'dbname' => 'opscode_chef')
+                 end
 end
 
-def setup_bifrost_db
-  running_config = JSON.parse(File.read("/etc/opscode/chef-server-running.json"))
-  pg_config = running_config['private_chef']['postgresql']
-  ::PGconn.open('user' => pg_config['db_superuser'],
-                'host' => pg_config['vip'],
-                'password' => pg_config['db_superuser_password'],
-                'port' => pg_config['port'],
-                'dbname' => 'bifrost')
+def bifrost_db
+  @bifrost_db ||= begin
+                    running_config = JSON.parse(File.read("/etc/opscode/chef-server-running.json"))
+                    pg_config = running_config['private_chef']['postgresql']
+                    ::PGconn.open('user' => pg_config['db_superuser'],
+                                  'host' => pg_config['vip'],
+                                  'password' => pg_config['db_superuser_password'],
+                                  'port' => pg_config['port'],
+                                  'dbname' => 'bifrost')
+                  end
 end
