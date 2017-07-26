@@ -112,7 +112,13 @@ add_command_under_category "upgrade", "general", "Upgrade your private chef inst
     # with postgres being the exception to those rules. We are leaving
     # postgres up atm to avoid having to constantly restart it.
     run_command("private-chef-ctl stop")
-    run_command("private-chef-ctl start postgresql")
+
+    if running_config["private_chef"]["use_chef_backend"]
+      run_command("private-chef-ctl start haproxy")
+    else
+      run_command("private-chef-ctl start postgresql")
+    end
+
     sleep 15
     Dir.chdir(File.join(base_path, "embedded", "service", "partybus"))
     bundle = File.join(base_path, "embedded", "bin", "bundle")
