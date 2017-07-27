@@ -206,30 +206,26 @@ def timed(description)
   res
 end
 
-# TODO(ssd) 2017-07-24: I know these functions need to use veil to get
-# the passwords. Right now has been written to potentialy run against
-# Chef Server 12.11.0
+def connection_params
+  running_config = JSON.parse(File.read("/etc/opscode/chef-server-running.json"))
+  pg_config = running_config['private_chef']['postgresql']
+
+  password = if respond_to?(:credentials) # veil helper method doesn't exist on older chef-servers
+               credentials.get('postgresql', 'db_superuser_password')
+             else
+               pg_config['db_superuser_password']
+             end
+
+  { 'host' => pg_config['vip'],
+    'port' => pg_config['port'],
+    'user' => pg_config['db_superuser'],
+    'password' => password }
+end
+
 def erchef_db
-  @erchef_db ||= begin
-                   running_config = JSON.parse(File.read("/etc/opscode/chef-server-running.json"))
-                   erchef_config = running_config['private_chef']['opscode-erchef']
-                   pg_config = running_config['private_chef']['postgresql']
-                   ::PGconn.open('user' => erchef_config['sql_user'],
-                                 'host' => pg_config['vip'],
-                                 'password' => erchef_config['sql_password'],
-                                 'port' => pg_config['port'],
-                                 'dbname' => 'opscode_chef')
-                 end
+  @erchef_db ||= ::PGconn.open(connection_params.merge('dbname' => 'opscode_chef'))
 end
 
 def bifrost_db
-  @bifrost_db ||= begin
-                    running_config = JSON.parse(File.read("/etc/opscode/chef-server-running.json"))
-                    pg_config = running_config['private_chef']['postgresql']
-                    ::PGconn.open('user' => pg_config['db_superuser'],
-                                  'host' => pg_config['vip'],
-                                  'password' => pg_config['db_superuser_password'],
-                                  'port' => pg_config['port'],
-                                  'dbname' => 'bifrost')
-                  end
+  @bifrost_db ||= ::PGconn.open(connection_params.merge('dbname' => 'bifrost'))
 end
