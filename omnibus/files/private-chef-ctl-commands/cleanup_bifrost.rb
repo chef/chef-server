@@ -10,11 +10,32 @@ CREATE OR REPLACE RULE cleanup_auth_actor_creation_tracking AS ON INSERT TO auth
 COMMIT;
 SQL
 
+CREATE_SQL2 =<<SQL
+CREATE TABLE IF NOT EXISTS cleanup_known_auth_actors(
+    authz_id  CHAR(32)
+);
+SQL
+
 DELETE_SQL =<<SQL
 BEGIN;
 DROP RULE IF EXISTS cleanup_auth_actor_creation_tracking ON auth_actor;
 DROP TABLE IF EXISTS cleanup_tracking_auth_actors;
+DROP TABLE IF EXISTS cleanup_known_auth_actors;
 COMMIT;
+SQL
+
+CLEANUP_SQL = <<SQL
+WITH good_auth_actors AS (
+         SELECT authz_id
+         FROM cleanup_tracking_auth_actors
+              UNION
+              SELECT authz_id FROM cleanup_known_auth_actors),
+     orphaned_auth_actors AS (
+         SELECT authz_id
+         FROM auth_actor
+         WHERE authz_id NOT IN (SELECT authz_id FROM good_auth_actors)
+         LIMIT $1)
+DELETE FROM auth_actor WHERE authz_id IN (SELECT authz_id FROM orphaned_auth_actors)
 SQL
 
 add_command_under_category "cleanup-bifrost", "cleanup", "Cleanup orphaned bifrost objects.", 2 do
@@ -23,8 +44,12 @@ add_command_under_category "cleanup-bifrost", "cleanup", "Cleanup orphaned bifro
 
   OptionParser.new do |opts|
     opts.banner = "chef-server-ctl cleanup-bifrost [options]"
-    opts.on("-b SIZE", "--batch-size", "How many authz actors to delete at a time") do |b|
+    opts.on("-b SIZE", "--batch-size SIZE", "How many authz actors to delete at a time") do |b|
       options[:batch_size] = b.to_i
+    end
+
+    opts.on("-w SECONDS", "--wait-time SECONDS", "How many seconds to wait before stating scan (default: 50)") do |w|
+      options[:wait_time] = w.to_i
     end
 
     opts.on("--force-cleanup", "Clean up tracking tables (does not scan bifrost actors)") do |b|
@@ -43,22 +68,6 @@ add_command_under_category "cleanup-bifrost", "cleanup", "Cleanup orphaned bifro
     exit(1)
   end
 
-  if options[:cleanup_only]
-    remove_bifrost_tracking_table(bifrost_db)
-    exit(0)
-  end
-
-  if options[:estimate_only]
-    print_and_return_estimate(known_actor_list, bifrost_db)
-    exit(0)
-  end
-
-  run_cleanup(bifrost_db, options[:batch_size])
-end
-
-def run_cleanup(bifrost_db, batch_size)
-  safety_check(bifrost_db)
-  install_bifrost_tracking_table(bifrost_db)
   # NOTE(ssd) 2017-07-24:
   # For the most part, the tracking table manages in-flight requests for us.
   # However, it is still possible that the following sequence happens:
@@ -71,11 +80,38 @@ def run_cleanup(bifrost_db, batch_size)
   # clients, won't be in our tracking table, but will show up in our
   # search for orphaned authz_ids.
   #
-  # Thus, this sleep is a 1-time wait to avoid that scenario.
+  # The wait_time is a safety-timer we use to avoid this race.  The
+  # default of 50 seconds is:
   #
-  puts "One-time sleep to account for in-flight requests not captured by tracking table"
-  sleep 25
+  #   (# of db/upstream calls after auth_actor creation * 5 seconds) * 2
+  #
+  if !options[:wait_time]
+    options[:wait_time] = 50
+  elsif options[:wait_time] <= 0
+    puts "Invalid wait time: #{options[:wait_time]}"
+    exit(1)
+  end
+
+  if options[:cleanup_only]
+    remove_bifrost_tracking_table(bifrost_db)
+    exit(0)
+  end
+
+  if options[:estimate_only]
+    print_and_return_estimate(known_actor_list, bifrost_db)
+    exit(0)
+  end
+
+  run_cleanup(bifrost_db, options[:batch_size], options[:wait_time])
+end
+
+def run_cleanup(bifrost_db, batch_size, wait_time)
+  safety_check(bifrost_db)
+  install_bifrost_tracking_table(bifrost_db)
+
   begin
+    puts "Sleeping #{wait_time} seconds to account for in-flight requests not captured by tracking table"
+    sleep wait_time
     estimated_deletion_count = print_and_return_estimate(known_actor_list, bifrost_db)
 
     if estimated_deletion_count <= 0
@@ -104,24 +140,38 @@ def safety_check(db)
   if res.ntuples > 0
     puts "ERROR: cleanup_tracking_auth_actors already exists.  cleanup-bifrost may be running."
     puts "ERROR: If you are sure cleanup-bifrost is not running, you can clean up the tracking tables with: chef-backend-ctl cleanup-bifrost --force-cleanup"
+    exit(1)
   end
 end
 
 def install_bifrost_tracking_table(db)
-  puts "Installing tracking tables into bifrost database"
-  db.exec(CREATE_SQL)
+  timed "Installing tracking tables into bifrost database" do
+    db.exec(CREATE_SQL)
+  end
+end
+
+def install_known_actor_table(db, list)
+  list_str = "('" + list.join("'), ('") + "')"
+  timed "Populating known actor table" do
+    db.exec(CREATE_SQL2)
+    db.exec("INSERT INTO cleanup_known_auth_actors VALUES #{list_str}")
+  end
 end
 
 def remove_bifrost_tracking_table(db)
-  puts "Removing tracking tables into bifrost database"
-  db.exec(DELETE_SQL)
+  timed "Removing tracking tables from bifrost database" do
+    db.exec(DELETE_SQL)
+  end
+end
+
+def fetch_auth_actor_count(db)
+  timed "Fetching count from bifrost auth_actor" do
+    db.exec("SELECT count(*) FROM auth_actor").first['count'].to_i
+  end
 end
 
 def print_and_return_estimate(known_actor_list, db)
-  tcount = timed "Fetchings all actor counts" do
-    db.exec_params("SELECT count(*) FROM auth_actor").first['count'].to_i
-  end
-
+  tcount = fetch_auth_actor_count(db)
   estimated_del_count = [0, tcount - known_actor_list.length].max
   puts "\n----------------------------------------"
   puts " Total chef users+clients: #{known_actor_list.length}"
@@ -134,40 +184,16 @@ end
 
 def run_bifrost_scan(known_actor_list, batch_size, db)
   total_deleted = 0
-  known_actors_str = to_pg_list(known_actor_list)
+  install_known_actor_table(db, known_actor_list)
   loop do
-    puts "Processing batch of #{batch_size}"
-
-    candidates = timed "    Retrieving batch from auth_actors" do
-      db.exec("SELECT authz_id FROM auth_actor WHERE authz_id NOT IN (#{known_actors_str}) LIMIT $1",
-              [batch_size])
-        .map {|r| r['authz_id'] }
+    deletion_count = timed "Processing batch of #{batch_size} unknown auth_actors. " do
+      count = db.exec(CLEANUP_SQL, [batch_size]).cmd_tuples
+      printf "Deleted #{count} actor#{count == 1 ? '' : 's'} (total = #{total_deleted + count})"
+      count
     end
 
-    if candidates.length == 0
-      puts "No more candidates for deletion."
-      break
-    end
-
-    confirmed_candidates = timed "    Ignoring any recently created actors from candidates (n = #{candidates.length})" do
-      sql = "SELECT authz_id FROM cleanup_tracking_auth_actors WHERE authz_id IN (#{to_pg_list(candidates)})"
-      newly_created = db.exec(sql).map {|r| r['authz_id'] }
-      ret = candidates - newly_created
-      printf " (ignored: #{newly_created.length}) (remaining: #{ret.length})"
-      ret
-    end
-
-    if confirmed_candidates.length == 0
-      puts "All candidates in batch were newly created. Stopping"
-      break
-    end
-
-    delete_res = timed "    Deleting batch of #{confirmed_candidates.length} unknown auth_actors" do
-      db.exec("DELETE FROM auth_actor WHERE authz_id IN (#{to_pg_list(confirmed_candidates)})")
-    end
-
-    total_deleted += delete_res.cmd_tuples
-    break if delete_res.cmd_tuples == 0
+    total_deleted += deletion_count
+    break if deletion_count == 0
   end
   puts "Total auth_actors removed: #{total_deleted}"
 end
@@ -178,10 +204,6 @@ def timed(description)
   res = yield
   printf ": #{Time.now - st}\n"
   res
-end
-
-def to_pg_list(array)
-  "'" + array.join("','") + "'"
 end
 
 # TODO(ssd) 2017-07-24: I know these functions need to use veil to get
