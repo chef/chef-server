@@ -61,7 +61,7 @@ chef_backend_members = begin
                            Chef::Log.warn("Using statically configured member list")
                            ChefBackend.configured_members(node)
                          end
-                       rescue e
+                       rescue StandardError => e
                          Chef::Log.warn("member discoverry failed: #{e}")
                          Chef::Log.warn("Using statically configured member list")
                          ChefBackend.configured_members(node)
