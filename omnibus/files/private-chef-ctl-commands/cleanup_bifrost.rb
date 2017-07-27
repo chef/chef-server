@@ -2,7 +2,7 @@ require 'pg'
 
 CREATE_SQL =<<SQL
 BEGIN;
-CREATE TABLE IF NOT EXISTS cleanup_tracking_auth_actors(
+CREATE UNLOGGED TABLE IF NOT EXISTS cleanup_tracking_auth_actors(
     authz_id  CHAR(32)
 );
 
@@ -11,7 +11,7 @@ COMMIT;
 SQL
 
 CREATE_SQL2 =<<SQL
-CREATE TABLE IF NOT EXISTS cleanup_known_auth_actors(
+CREATE UNLOGGED TABLE IF NOT EXISTS cleanup_known_auth_actors(
     authz_id  CHAR(32)
 );
 SQL
