@@ -127,6 +127,9 @@
             data_collector,
             <% end %>
             oc_chef_authz,
+            <% if node['private_chef']['dark_launch']['actions'] %>
+            oc_chef_action,
+            <% end %>
             chef_sql,
             chef_<%= node['private_chef']['opscode-erchef']['search_provider'] %>
         ]},

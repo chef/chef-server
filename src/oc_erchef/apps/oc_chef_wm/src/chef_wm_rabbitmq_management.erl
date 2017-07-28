@@ -40,7 +40,8 @@
          get_rabbit_queue_monitor_setting/2,
          set_rabbit_management_setting/2,
          set_rabbit_queue_monitor_setting/2,
-         set_app_value/5
+         set_app_value/5,
+         check_aliveness/1
         ]).
 
 
@@ -147,6 +148,10 @@ mk_max_length_path(Vhost) ->
 -spec mk_current_length_path(string()) -> string().
 mk_current_length_path(Vhost) ->
     lists:flatten(io_lib:format("/queues/~s", [http_uri:encode(Vhost)])).
+
+-spec mk_aliveness_check_path(string()) -> string().
+mk_aliveness_check_path(Vhost) ->
+    lists:flatten(io_lib:format("/aliveness-test/~s", [http_uri:encode(Vhost)])).
 
 % make an http connection to the rabbitmq management console
 % and return a integer value or undefined
@@ -302,3 +307,14 @@ parse_integer(Val) when is_list(Val) ->
         {Int, _Rest} -> Int
     end;
 parse_integer(_) -> undefined.
+
+-spec check_aliveness(string()) -> boolean().
+check_aliveness(Vhost) ->
+    Aliveness = rabbit_mgmt_server_request(mk_aliveness_check_path(Vhost)),
+    case Aliveness of
+        {ok, "200", _, _} ->
+            true;
+        Resp ->
+            lager:error("Error getting Rabbitmq aliveness: ~p", Resp),
+            false
+    end.

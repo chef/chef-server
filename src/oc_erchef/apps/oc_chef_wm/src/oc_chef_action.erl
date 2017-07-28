@@ -26,7 +26,8 @@
 
 -export([
          log_action/2,
-         create_message/3
+         create_message/3,
+         ping/0
         ]).
 
 -ifdef(TEST).
@@ -393,4 +394,12 @@ req_header(Name, Req) ->
             undefined;
         Header ->
             iolist_to_binary(Header)
+    end.
+
+-spec ping() -> pong | pang.
+ping() ->
+    VHost = envy:get(oc_chef_wm, actions_vhost, binary),
+    case chef_wm_rabbitmq_management:check_aliveness(binary_to_list(VHost)) of
+        true -> pong;
+        _ -> pang
     end.
