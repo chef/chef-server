@@ -44,7 +44,7 @@ setup_env() ->
     application:set_env(oc_chef_wm, health_ping_timeout, ?PING_TIMEOUT),
     application:set_env(oc_chef_wm, health_ping_modules, ?CHECK_MODS),
     application:set_env(oc_chef_wm, rabbitmq, default_config()),
-    chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false),
+    oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false),
     ok.
 
 cleanup_env() ->
@@ -222,7 +222,7 @@ check_queue_mon_affects_overall_status_test_() ->
       fun() ->
               % overall_status will be fail as the queue is at capacity as
               % queue_at_capacity_affects_overall_status is true
-              chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_at_capacity_affects_overall_status, true),
+              oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_at_capacity_affects_overall_status, true),
               {Status, Json} = chef_wm_status:check_health(),
               ?assertEqual(fail, Status),
               Ejson = chef_json:decode(Json),
@@ -234,7 +234,7 @@ check_queue_mon_affects_overall_status_test_() ->
       fun() ->
               % overall_status will be pong as the queue is at capacity, but
               % queue_at_capacity_affects_overall_status is false
-              chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_at_capacity_affects_overall_status, false),
+              oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_at_capacity_affects_overall_status, false),
               {Status, Json} = chef_wm_status:check_health(),
               ?assertEqual(pong, Status),
               Ejson = chef_json:decode(Json),
@@ -246,8 +246,8 @@ check_queue_mon_affects_overall_status_test_() ->
       fun() ->
               % overall_status will be pong as the queue is at capacity, but the queue monitor is
               % disabled
-              chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_at_capacity_affects_overall_status, false),
-              chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false),
+              oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_at_capacity_affects_overall_status, false),
+              oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false),
               {Status, Json} = chef_wm_status:check_health(),
               ?assertEqual(pong, Status),
               Ejson = chef_json:decode(Json),
@@ -258,8 +258,8 @@ check_queue_mon_affects_overall_status_test_() ->
       end,
       fun() ->
               % overall_status not affected as the queue monitor is disabled
-              chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_at_capacity_affects_overall_status, true),
-              chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false),
+              oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_at_capacity_affects_overall_status, true),
+              oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false),
               {Status, Json} = chef_wm_status:check_health(),
               ?assertEqual(pong, Status),
               Ejson = chef_json:decode(Json),

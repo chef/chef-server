@@ -332,8 +332,8 @@ queue_length_test_() ->
       {"check_publish_not_at_capacity",
        fun() ->
             % ensure the publish function is called and no messages are dropped
-            chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, true),
-            chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(drop_on_full_capacity, true),
+            oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, true),
+            oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(drop_on_full_capacity, true),
 
             meck:new(oc_chef_action_queue),
             meck:expect(oc_chef_action_queue, publish, fun (_, _) -> ok end),
@@ -350,8 +350,8 @@ queue_length_test_() ->
        fun() ->
             %% ensure the publish function is called and 1 message is dropped
             %% due to queue being at capacity
-          chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, true),
-            chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(drop_on_full_capacity, true),
+            oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, true),
+            oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(drop_on_full_capacity, true),
 
             meck_response("200", max_length_json(), "200", at_capacity_json()),
             %% ensure that the queue is at capacity before calling
@@ -382,8 +382,8 @@ queue_length_test_() ->
             %% due to queue being at capacity, reset queue length to 0
             %% and 1 message should be published
 
-            chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, true),
-            chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(drop_on_full_capacity, true),
+            oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, true),
+            oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(drop_on_full_capacity, true),
 
             meck_response("200", max_length_json(), "200", at_capacity_json()),
             %% ensure that the queue is at capacity before calling
@@ -425,8 +425,8 @@ queue_length_test_() ->
       {"check_publish_at_capacity_no_drop",
        fun() ->
           % queue is at capacity, but don't drop messages due to configuration
-          chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, true),
-          chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(drop_on_full_capacity, false),
+          oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, true),
+          oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(drop_on_full_capacity, false),
 
           meck_response("200", max_length_json(), "200", at_capacity_json()),
           %% ensure that the queue is at capacity before calling
@@ -451,8 +451,8 @@ queue_length_test_() ->
           % queue length monitor is disabled
           catch(chef_wm_actions_queue_monitoring:stop()),
 
-          chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false),
-          chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(drop_on_full_capacity, false),
+          oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false),
+          oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(drop_on_full_capacity, false),
 
           undefined = whereis(chef_wm_actions_queue_monitoring),
           meck:new(oc_chef_action_queue),
@@ -470,7 +470,7 @@ queue_length_test_() ->
        fun() ->
             % set oc_httpc to sleep for 100 millis, but have is_queue_at_capacity timeout
             % after 10 millis.
-            chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_length_monitor_timeout_millis, 0),
+            oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_length_monitor_timeout_millis, 0),
 
             ?assertEqual(true, chef_wm_actions_queue_monitoring:is_queue_at_capacity())
        end

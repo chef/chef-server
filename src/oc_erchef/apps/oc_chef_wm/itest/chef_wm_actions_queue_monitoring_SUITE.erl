@@ -35,7 +35,7 @@
 -define(ACTIONS_EXCHANGE, <<"actions">>).
 
 -define(Q_SETTING(K, V),
-        chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(K,V)).
+        oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(K,V)).
 
 init_per_suite(InitialConfig) ->
     UseFakeRabbit =
@@ -134,7 +134,7 @@ basic_queue_monitor(Config) ->
 
 
     % don't drop messages from now on
-    chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(drop_on_full_capacity, false),
+    oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(drop_on_full_capacity, false),
 
     make_data_bag(?CLIENT_NAME, 13),
     make_data_bag(?CLIENT_NAME, 14),
@@ -172,7 +172,7 @@ queue_full_dont_start(Config) ->
     case ?config(use_fake_rabbit, Config) of
         true ->
             meck:expect(chef_wm_rabbitmq_management, sync_check_queue_at_capacity,
-                        fun(_Vhost, _Queue) ->
+                        fun(_PoolNameAtom, _Vhost, _Queue) ->
                                 {MaxLength, MaxLength, true}
                         end);
         false -> ok
@@ -347,12 +347,12 @@ setup_rabbit_fake(Config) ->
 
 
     meck:expect(chef_wm_rabbitmq_management, get_max_length,
-                fun(_Vhost) ->
+                fun(_PoolNameAtom, _Vhost) ->
                         ?config(max_length, Config)
                 end),
 
     meck:expect(chef_wm_rabbitmq_management, get_current_length,
-                fun(_Vhost, _Queue) ->
+                fun(_PoolNameAtom, _Vhost, _Queue) ->
                         fake_rabbit_current_length()
                 end),
     ok.

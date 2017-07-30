@@ -88,7 +88,7 @@
 -define(QUEUE, <<"alaska">>).
 -define(GEN_SERVER_TIMEOUT_MILLIS, 5000).
 -define(QUEUE_MONITOR_RUN_EVERY_MILLIS, 60000).
--define(QUEUE_MONITOR_SETTING(Key, Default), chef_wm_rabbitmq_management:get_rabbit_queue_monitor_setting(Key, Default)).
+-define(QUEUE_MONITOR_SETTING(Key, Default), oc_chef_action_queue_config:get_rabbit_queue_monitor_setting(Key, Default)).
 
 -record(queue_monitor_state, {
                 % name of the rabbitmq vhost to monitor, as a string
@@ -306,9 +306,11 @@ handle_info(status_ping, #queue_monitor_state{
     Pid = spawn_link(
             fun () ->
                     Result =
-                      chef_wm_rabbitmq_management:check_current_queue_state(Vhost,
-                                                                            Queue,
-                                                                            Dropped),
+                      chef_wm_rabbitmq_management:check_current_queue_state(
+                        oc_chef_action_queue_config:get_rabbit_management_pool_name(),
+                        Vhost,
+                        Queue,
+                        Dropped),
                     ParentPid ! Result
             end),
     {noreply, State#queue_monitor_state{worker_process=Pid}};

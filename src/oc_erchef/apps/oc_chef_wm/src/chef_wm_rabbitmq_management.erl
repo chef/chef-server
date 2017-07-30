@@ -28,24 +28,17 @@
 -endif.
 
 -export([calc_ratio_and_percent/2,
-         get_max_length/1,
-         get_current_length/2,
-         create_pool/0,
-         delete_pool/0,
-         get_pool_configs/0,
-         check_current_queue_state/3,
-         check_current_queue_length/4,
-         sync_check_queue_at_capacity/2,
-         get_rabbit_management_setting/2,
-         get_rabbit_queue_monitor_setting/2,
-         set_rabbit_management_setting/2,
-         set_rabbit_queue_monitor_setting/2,
-         set_app_value/5,
-         check_aliveness/1
+         get_max_length/2,
+         get_current_length/3,
+         create_pool/2,
+         delete_pool/1,
+         check_current_queue_state/4,
+         check_current_queue_length/5,
+         sync_check_queue_at_capacity/3,
+         check_aliveness/2
         ]).
 
 
--define(POOLNAME, rabbitmq_management_service).
 -define(LOG_THRESHOLD, 0.8).
 
 -type max_length() :: integer().
@@ -56,72 +49,12 @@
 % NOTE: oc_httpc client is configured to prepend /api
 
 %% oc_httpc pool functions --------------------------------------------
-create_pool() ->
-    Pools = get_pool_configs(),
-    [oc_httpc:add_pool(PoolNameAtom, Config) || {PoolNameAtom, Config} <- Pools, Config /= []],
+create_pool(PoolNameAtom, Config) ->
+    oc_httpc:add_pool(PoolNameAtom, Config),
     ok.
 
-delete_pool() ->
-    Pools = get_pool_configs(),
-    [ok = oc_httpc:delete_pool(PoolNameAtom) || {PoolNameAtom, _Config} <- Pools],
-    ok.
-
-get_pool_configs() ->
-    ServiceConfig = get_rabbit_management_setting(rabbitmq_management_service, []),
-    [{?POOLNAME, ServiceConfig}].
-
-get_rabbit_management_setting(Key, Default) ->
-    try
-        RabbitConfig = envy:get(oc_chef_wm, rabbitmq, [], any),
-        MgmtConfig = proplists:get_value(management, RabbitConfig, []),
-        Config = proplists:get_value(Key, MgmtConfig, Default),
-        add_auth_to_ibrowse_options(Config, MgmtConfig)
-    catch Error:Reason ->
-        lager:info("Can't get configuration setting ~p ~p: ~p ~p",
-                   [Key, Default, Error, Reason]),
-        Default
-    end.
-
-add_auth_to_ibrowse_options(Config, MgmtConfig) ->
-    Username = proplists:get_value(user, MgmtConfig),
-    {ok, Password} = chef_secrets:get(<<"rabbitmq">>, <<"management_password">>),
-    IbrowseOptions = proplists:get_value(ibrowse_options, Config),
-    Config1 = proplists:delete(ibrowse_options, Config),
-    IbrowseOptions1 = [{basic_auth, {Username, erlang:binary_to_list(Password)}} | IbrowseOptions],
-    [{ibrowse_options, IbrowseOptions1} | Config1].
-
-get_rabbit_queue_monitor_setting(Key, Default) ->
-    try
-        RabbitConfig = envy:get(oc_chef_wm, rabbitmq, [], any),
-        MonitoringConfig = proplists:get_value(monitoring, RabbitConfig, []),
-        proplists:get_value(Key, MonitoringConfig, Default)
-    catch Error:Reason ->
-        lager:info("Can't get configuration setting ~p ~p: ~p ~p",
-                   [Key, Default, Error, Reason]),
-        Default
-    end.
-
-set_rabbit_management_setting(Key, NewVal) ->
-    set_app_value(oc_chef_wm, rabbitmq, management, Key, NewVal).
-
-set_rabbit_queue_monitor_setting(Key, NewVal) ->
-    set_app_value(oc_chef_wm, rabbitmq, monitoring, Key, NewVal).
-
-%% value MUST already exist in the dict
-set_app_value(App, ConfigKey, SubSectionKey, Prop, NewValue) ->
-    Cfg = envy:get(App, ConfigKey, [], any),
-    NewCfg =
-      lists:map(fun ({SectionKey,SectionValue})
-                          when SectionKey == SubSectionKey ->
-                            {SectionKey,
-                            lists:map(fun ({K, _V}) when K == Prop ->
-                                                {K, NewValue};
-                                            (Val) -> Val
-                                        end, SectionValue)
-                            };
-                    (Val) -> Val
-           end, Cfg),
-      application:set_env(App, ConfigKey, NewCfg).
+delete_pool(PoolNameAtom) ->
+    ok = oc_httpc:delete_pool(PoolNameAtom).
 
 
 -spec calc_ratio_and_percent(integer(), integer()) -> {float(), float()}.
@@ -136,9 +69,9 @@ calc_ratio_and_percent(CurrentLength, MaxLength) ->
     Pcnt = round(Ratio * 100.0),
     {Ratio, Pcnt}.
 
--spec rabbit_mgmt_server_request(string()) -> oc_httpc:response().
-rabbit_mgmt_server_request(Path) ->
-    oc_httpc:request(?POOLNAME, Path, [], get, []).
+-spec rabbit_mgmt_server_request(atom(), string()) -> oc_httpc:response().
+rabbit_mgmt_server_request(PoolNameAtom, Path) ->
+    oc_httpc:request(PoolNameAtom, Path, [], get, []).
 
 -spec mk_max_length_path(string()) -> string().
 mk_max_length_path(Vhost) ->
@@ -155,9 +88,9 @@ mk_aliveness_check_path(Vhost) ->
 
 % make an http connection to the rabbitmq management console
 % and return a integer value or undefined
--spec get_max_length(string()) -> integer() | undefined.
-get_max_length(Vhost) ->
-    MaxResult = rabbit_mgmt_server_request(mk_max_length_path(Vhost)),
+-spec get_max_length(atom(), string()) -> integer() | undefined.
+get_max_length(PoolNameAtom, Vhost) ->
+    MaxResult = rabbit_mgmt_server_request(PoolNameAtom, mk_max_length_path(Vhost)),
     case MaxResult of
         {ok, "200", _, MaxLengthJson} ->
             parse_max_length_response(MaxLengthJson);
@@ -175,9 +108,9 @@ get_max_length(Vhost) ->
 
 % make an http connection to the rabbitmq management console
 % and return a integer value or undefined
--spec get_current_length(string(), string()) -> integer() | undefined.
-get_current_length(Vhost, Queue) ->
-    CurrentResult = rabbit_mgmt_server_request(mk_current_length_path(Vhost)),
+-spec get_current_length(atom(), string(), string()) -> integer() | undefined.
+get_current_length(PoolNameAtom, Vhost, Queue) ->
+    CurrentResult = rabbit_mgmt_server_request(PoolNameAtom, mk_current_length_path(Vhost)),
     case CurrentResult of
         {error, {conn_failed,_}} ->
             lager:info("Can't connect to RabbitMQ management console to fetch current length"),
@@ -235,9 +168,9 @@ parse_max_length_response(Message) ->
     end.
 
 
--spec sync_check_queue_at_capacity(string(), string()) -> {integer(), integer(), boolean()}.
-sync_check_queue_at_capacity(Vhost, Queue) ->
-    Result = check_current_queue_state(Vhost, Queue, 0),
+-spec sync_check_queue_at_capacity(atom(), string(), string()) -> {integer(), integer(), boolean()}.
+sync_check_queue_at_capacity(PoolNameAtom, Vhost, Queue) ->
+    Result = check_current_queue_state(PoolNameAtom, Vhost, Queue, 0),
     case Result of
       skipped  -> {0, 0, false};
       {MaxLength, reset_dropped_since_last_check} -> {MaxLength, 0, false};
@@ -246,30 +179,31 @@ sync_check_queue_at_capacity(Vhost, Queue) ->
 
 
 
--spec check_current_queue_state(string(), string(), integer()) ->
+-spec check_current_queue_state(atom(), string(), string(), integer()) ->
                                                 skipped |
                                                 {max_length(), reset_dropped_since_last_check} |
                                                 {max_length(), current_length(), queue_at_capacity()}.
-check_current_queue_state(Vhost, Queue, DroppedSinceLastCheck) ->
-    case chef_wm_rabbitmq_management:get_max_length(Vhost) of
+check_current_queue_state(PoolNameAtom, Vhost, Queue, DroppedSinceLastCheck) ->
+    case chef_wm_rabbitmq_management:get_max_length(PoolNameAtom, Vhost) of
         undefined -> skipped;
                      % max length isn't configured, or something is broken
                      % don't continue.
         MaxLength ->
             lager:debug("Queue Monitor max length = ~p", [MaxLength]),
-            check_current_queue_length(Vhost,
+            check_current_queue_length(PoolNameAtom,
+                                       Vhost,
                                        Queue,
                                        MaxLength,
                                        DroppedSinceLastCheck)
     end.
 
--spec check_current_queue_length(string(), string(), integer(), integer()) ->
+-spec check_current_queue_length(atom(), string(), string(), integer(), integer()) ->
                                                 {max_length(), reset_dropped_since_last_check} |
                                                 {max_length(), current_length(), queue_at_capacity()}.
-check_current_queue_length(Vhost, Queue, MaxLength, DroppedSinceLastCheck) ->
+check_current_queue_length(PoolNameAtom, Vhost, Queue, MaxLength, DroppedSinceLastCheck) ->
     % use ?MODULE here so I can use meck in integrations testing
     % https://github.com/eproxus/meck/issues/142
-    CurrentLength = ?MODULE:get_current_length(Vhost, Queue),
+    CurrentLength = ?MODULE:get_current_length(PoolNameAtom, Vhost, Queue),
     case CurrentLength of
         undefined ->
             % a queue doesn't appear to be bound to the
@@ -308,9 +242,9 @@ parse_integer(Val) when is_list(Val) ->
     end;
 parse_integer(_) -> undefined.
 
--spec check_aliveness(string()) -> boolean().
-check_aliveness(Vhost) ->
-    Aliveness = rabbit_mgmt_server_request(mk_aliveness_check_path(Vhost)),
+-spec check_aliveness(atom(), string()) -> boolean().
+check_aliveness(PoolNameAtom, Vhost) ->
+    Aliveness = rabbit_mgmt_server_request(PoolNameAtom, mk_aliveness_check_path(Vhost)),
     case Aliveness of
         {ok, "200", _, _} ->
             true;

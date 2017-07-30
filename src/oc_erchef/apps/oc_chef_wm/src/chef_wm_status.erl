@@ -61,7 +61,7 @@ check_health() ->
     Status = overall_status(Pings),
 
     QueueMonStatus =
-        case chef_wm_rabbitmq_management:get_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false) of
+        case oc_chef_action_queue_config:get_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false) of
             false -> % chef_wm_actions_queue_monitoring isn't running, skip it
                     [];
             true -> AnalyticsQ = chef_wm_actions_queue_monitoring:status(),
@@ -92,7 +92,7 @@ overall_status(Pings) ->
 
 -spec is_analytics_queue_at_capacity() -> boolean().
 is_analytics_queue_at_capacity() ->
-    case chef_wm_rabbitmq_management:get_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false) of
+    case oc_chef_action_queue_config:get_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false) of
         % don't try to connect to the queue monitor if it isn't running
         true -> chef_wm_actions_queue_monitoring:is_queue_at_capacity();
         false -> false
@@ -100,7 +100,7 @@ is_analytics_queue_at_capacity() ->
 
 -spec queue_at_capacity_affects_overall_status() -> boolean().
 queue_at_capacity_affects_overall_status() ->
-    chef_wm_rabbitmq_management:get_rabbit_queue_monitor_setting(queue_at_capacity_affects_overall_status, false).
+    oc_chef_action_queue_config:get_rabbit_queue_monitor_setting(queue_at_capacity_affects_overall_status, false).
 
 
 -spec log_failure(fail | pong, [{binary(), <<_:32>>}], list()) -> ok.
