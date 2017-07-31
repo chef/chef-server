@@ -1,5 +1,14 @@
 # Chef Server Changelog
 
+<!-- latest_release -->
+<!-- latest_release -->
+
+<!-- release_rollup -->
+<!-- release_rollup -->
+
+<!-- latest_stable_release -->
+<!-- latest_stable_release -->
+
 ## [12.15.8](https://github.com/chef/chef-server/tree/12.15.8) (2017-06-20)
 [Full Changelog](https://github.com/chef/chef-server/compare/12.15.7...12.15.8)
 

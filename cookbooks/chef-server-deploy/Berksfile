@@ -1,0 +1,11 @@
+# Until such a time that https://supermarket.chef.co is fully operational, we'll
+# need to define some transitive cookbooks pulled in via Github in this Berksfile
+# source 'https://supermarket.chef.co'
+source 'https://ops-supermarket.chef.co/'
+source 'https://supermarket.chef.io'
+
+metadata
+
+# These definitions can be removed when supermarket.chef.co is fully online
+cookbook 'cd-deploy', git: 'git@github.com:chef-cookbooks/cd-deploy.git'
+cookbook 'chefops-dcc', git: 'git@github.com:chef-cookbooks/chefops-dcc'

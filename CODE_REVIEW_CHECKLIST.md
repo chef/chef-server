@@ -51,7 +51,7 @@ may have.
       things we expect on the hosts (e.g. OpenSSH)?
 
 - [ ] Does this change break the dev environment? If so, can we fix it
-      now or have we prioitized time to fix it in the near future?
+      now or have we prioritized time to fix it in the near future?
 
 - [ ] Are failures from external systems or libraries handled? If not,
       do we know what the behavior will be in the case of failure? Is
@@ -78,7 +78,7 @@ may have.
       - el-7, ubuntu 14.04 (ppc64le)
       - el-6, el-7, sles-11, sles-12 (s390x)
 
-      Note: For outside contributers, it is impossible to verify that.
+      Note: For outside contributors, it is impossible to verify that.
       A Chef employee with access to our internal CI infrastructure
       will support them by executing test runs for outside PRs.
 
