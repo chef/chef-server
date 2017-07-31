@@ -22,16 +22,13 @@ when 'solr'
 when 'elasticsearch'
   # The string field type has beein split into 'text' and 'keyword' for ES5
   # Generally, we will want text for partial matching content
-  # (data field)
-  # (data are separated out from 'string' in ES5+:
+  # ('data' field) and 'keyword' for all non-analyzed fields.
   if EsHelper.es_version(node) >= Gem::Version.new("5.0.0")
     text_field_type = "text"
     keyword_field_type = "keyword"
-    puts "*** 5.+ detected"
   else
     keyword_field_type = "string"
     text_field_type = "string"
-    puts "*** earlier version #{EsHelper.es_version(node)}"
   end
 
   elasticsearch_index "chef" do
