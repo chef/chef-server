@@ -24,7 +24,8 @@
                   kernel,
                   stdlib,
                   gen_bunny,
-                  ibrowse
+                  ibrowse,
+                  chef_secrets
                  ]},
   {env, []}
  ]}.

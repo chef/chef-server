@@ -21,7 +21,9 @@
          delete/4,
          delete/5,
          set/5,
-         set/6
+         set/6,
+         create_management_pool/3,
+         ping/1
         ]).
 
 -ifdef(TEST).
@@ -35,6 +37,8 @@
 -type ejson() :: {maybe_improper_list()}. %% Is an ejson object, but the type defn for that is recursive.
 -type solr_url() :: [byte()] | binary() | undefined.
 -type vhost() :: binary().
+
+-define(POOLNAME, rabbitmq_index_management_service).
 
 %%%%
 %% Public API
@@ -103,9 +107,30 @@ package_for_delete(Type, ID, DatabaseName, SolrUrl) ->
   InnerEnvelope = inner_envelope(Type, ID, DatabaseName, {[]}, SolrUrl),
   {[{action, delete}, {payload, InnerEnvelope}]}.
 
+
+create_management_pool(Username, Password, Config) ->
+    chef_wm_rabbitmq_management:create_pool(?POOLNAME, add_basic_auth(Username, Password, Config)).
+
+-spec ping(binary()) -> pong | pang.
+ping(VHost) ->
+    % TODO(jaym) 2017-08-02: chef_wm_rabbitmq_management should be moved to a shared app.
+    % The reason for this is because referencing chef_wm_rabbitmq_management from here
+    % creates a 2 way dependency between chef_index and oc_chef_wm.
+    case chef_wm_rabbitmq_management:check_aliveness(
+           ?POOLNAME, binary_to_list(VHost)) of
+        true -> pong;
+        _ -> pang
+    end.
+
 %%%%
 %% Internal
 %%%%
+
+add_basic_auth(Username, Password, Config) ->
+    IbrowseOptions = proplists:get_value(ibrowse_options, Config),
+    Config1 = proplists:delete(ibrowse_options, Config),
+    IbrowseOptions1 = [{basic_auth, {Username, erlang:binary_to_list(Password)}} | IbrowseOptions],
+    [{ibrowse_options, IbrowseOptions1} | Config1].
 
 -spec inner_envelope(chef_indexable_type(), uuid_binary(), chef_db_name(), ejson(), solr_url()) -> ejson().
 inner_envelope(Type, ID, DatabaseName, Item, SolrUrl) ->
@@ -157,3 +182,4 @@ object_id_to_i(UUID) ->
 unix_time() ->
   {MS, S, _US} = os:timestamp(),
   (1000000 * MS) + S.
+

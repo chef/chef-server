@@ -49,8 +49,27 @@ init([]) ->
     error_logger:info_msg("Starting chef_index_sup.~n", []),
     error_logger:info_msg("Creating HTTP pool for Solr.~n"),
     chef_index_http:create_pool(),
+    maybe_rabbitmq_monitoring(),
     Children = child_spec(),
     {ok, {{one_for_one, 60, 10}, Children}}.
+
+maybe_rabbitmq_monitoring() ->
+    case envy:get(chef_index, search_queue_mode, rabbitmq, envy:one_of([rabbitmq, batch, inline])) of
+        rabbitmq ->
+            Config = envy:get(chef_index, rabbitmq_index_management_service, [], any),
+            {LocalConfig, HttpConfig} = proplists:split(Config, [enabled, user]),
+            case LocalConfig of
+                [[{enabled, true}], [{user, Username}]] ->
+                    {ok, Password} = chef_secrets:get(<<"rabbitmq">>, <<"management_password">>),
+                    chef_index_queue:create_management_pool(Username, Password, HttpConfig);
+                _ ->
+                    error_logger:info_msg("Rabbitmq monitoring is disabled. "
+                                          "chef_index will not check rabbitmq health.~n"),
+                    ok
+            end;
+        _ ->
+            ok
+    end.
 
 %% Return a spec for a bunnyc gen_server or the chef_index_batch gen_server based on the
 %% search_queue_mode configuration.

@@ -249,6 +249,6 @@ check_aliveness(PoolNameAtom, Vhost) ->
         {ok, "200", _, _} ->
             true;
         Resp ->
-            lager:error("Error getting Rabbitmq aliveness: ~p", Resp),
+            lager:error("Error getting Rabbitmq aliveness: ~p", [Resp]),
             false
     end.

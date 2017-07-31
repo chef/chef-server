@@ -127,9 +127,10 @@
             data_collector,
             <% end %>
             oc_chef_authz,
-            <% if node['private_chef']['dark_launch']['actions'] %>
+            <% if node['private_chef']['dark_launch']['actions'] && node['private_chef']['rabbitmq']['management_enabled'] %>
             oc_chef_action,
             <% end %>
+            chef_index,
             chef_sql,
             chef_<%= node['private_chef']['opscode-erchef']['search_provider'] %>
         ]},
@@ -230,6 +231,25 @@
             {max_age, <%= @solr_http_max_age %>},
             {max_connection_duration, <%= @solr_http_max_connection_duration %>},
             {ibrowse_options, <%= @solr_ibrowse_options %>}
+        ]},
+        {rabbitmq_index_management_service, [
+            {enabled, <%= @node['private_chef']['rabbitmq']['management_enabled'] %>},
+            {user, "<%= @node['private_chef']['rabbitmq']['management_user'] %>"},
+            <% if node['private_chef']['fips_enabled'] -%>
+            {root_url, "http://<%= node['private_chef']['rabbitmq']['vip'] %>:<%= @node['private_chef']['rabbitmq']['management_port'] %>/api"},
+            <% else -%>
+            {root_url, "https://<%= node['private_chef']['rabbitmq']['vip'] %>:<%= @node['private_chef']['rabbitmq']['management_port'] %>/api"},
+            <% end %>
+            {timeout, <%= @node['private_chef']['rabbitmq']['rabbit_mgmt_timeout'] %>},
+            {init_count, <%= @node['private_chef']['rabbitmq']['rabbit_mgmt_http_init_count'] %>},
+            {max_count, <%= @node['private_chef']['rabbitmq']['rabbit_mgmt_http_max_count'] %>},
+            {cull_interval, {<%= @node['private_chef']['rabbitmq']['rabbit_mgmt_http_cull_interval'] %>, sec}},
+            {max_age, {<%= @node['private_chef']['rabbitmq']['rabbit_mgmt_http_max_age'] %>, sec}},
+            {max_connection_duration, {<%= @node['private_chef']['rabbitmq']['rabbit_mgmt_http_max_connection_duration'] %>, sec}},
+
+            {ibrowse_options, [
+                <%= @node['private_chef']['rabbitmq']['rabbit_mgmt_ibrowse_options'] %>
+            ]}
         ]}
     ]},
 
