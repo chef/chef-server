@@ -26,6 +26,7 @@
 
 -define(QUEUE_LENGTH_REQ, "/queues/%2Fanalytics").
 -define(MAX_LENGTH_REQ, "/policies/%2Fanalytics/max_length").
+-define(PING_REQ, "/aliveness-test/%2Fanalytics").
 
 -define(EMPTY_STATUS,  [{queue_at_capacity,false},
                         {dropped_since_last_check,0},
@@ -628,3 +629,37 @@ meck_conn_failure() ->
             {error,{conn_failed,undefined}}
         end).
 
+aliveness_test_() ->
+    {foreach,
+     fun() ->
+	     meck:new(oc_httpc)
+     end,
+     fun(_) ->
+             catch(meck:unload(oc_httpc))
+     end,
+     [
+      {"it's alive",
+       fun() ->
+            meck:expect(oc_httpc, request,
+                        fun(_, ?PING_REQ, _, _, _) ->
+                                dummy_response("200", <<"{\"status\": \"ok\"}">>) end),
+            Status = chef_wm_rabbitmq_management:check_aliveness(pool_name, ?VHOST),
+            ?assertMatch(true, Status)
+       end},
+      {"something's wrong, but got response",
+       fun() ->
+               meck:expect(oc_httpc, request,
+                           fun(_, ?PING_REQ, _, _, _) ->
+                                   dummy_response("500", <<"{\"status\": \"fail\"}">>) end),
+            Status = chef_wm_rabbitmq_management:check_aliveness(pool_name, ?VHOST),
+            ?assertMatch(false, Status)
+       end},
+      {"could not connect",
+       fun() ->
+               meck:expect(oc_httpc, request,
+                           fun(_, ?PING_REQ, _, _, _) ->
+                                   {error,{conn_failed,undefined}} end),
+            Status = chef_wm_rabbitmq_management:check_aliveness(pool_name, ?VHOST),
+            ?assertMatch(false, Status)
+       end}
+     ]}.
