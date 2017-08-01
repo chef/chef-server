@@ -20,6 +20,17 @@ case node['private_chef']['opscode-erchef']['search_provider']
 when 'solr'
   Chef::Log.warn("External Solr Support does not include configuring the Solr schema.")
 when 'elasticsearch'
+  # The string field type has beein split into 'text' and 'keyword' for ES5
+  # Generally, we will want text for partial matching content
+  # ('data' field) and 'keyword' for all non-analyzed fields.
+  if EsHelper.es_version(node) >= Gem::Version.new("5.0.0")
+    text_field_type = "text"
+    keyword_field_type = "keyword"
+  else
+    keyword_field_type = "string"
+    text_field_type = "string"
+  end
+
   elasticsearch_index "chef" do
     server_url node['private_chef']['opscode-solr4']['external_url']
     index_definition({"settings" => {
@@ -38,31 +49,31 @@ when 'elasticsearch'
                           "_source" => { "enabled" => false },
                           "_all" => { "enabled" => false },
                           "properties" => {
-                            "X_CHEF_database_CHEF_X" => { "type" => "string",
+                            "X_CHEF_database_CHEF_X" => { "type" => keyword_field_type,
                                                           "index" => "not_analyzed",
                                                           "norms" => {
                                                             "enabled" => false
                                                           }
                                                         },
-                            "X_CHEF_type_CHEF_X" => { "type" => "string",
+                            "X_CHEF_type_CHEF_X" => { "type" => keyword_field_type,
                                                       "index" => "not_analyzed",
                                                       "norms" => {
                                                         "enabled" => false
                                                       }
                                                     },
-                            "X_CHEF_id_CHEF_X" => { "type" => "string",
+                            "X_CHEF_id_CHEF_X" => { "type" => keyword_field_type,
                                                     "index" => "not_analyzed",
                                                     "norms" => {
                                                       "enabled" => false
                                                     }
                                                   },
-                            "data_bag" => { "type" => "string",
+                            "data_bag" => { "type" => keyword_field_type,
                                             "index" => "not_analyzed",
                                             "norms" => {
                                               "enabled" => false
                                             }
                                           },
-                            "content" => { "type" => "string", "index" => "analyzed"}
+                            "content" => { "type" => text_field_type, "index" => "analyzed"}
                           }
                         }
                       }
