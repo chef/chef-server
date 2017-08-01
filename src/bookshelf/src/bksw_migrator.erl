@@ -1,8 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Mark Anderson <mark@chef.io>
-%% @author Tim Dysinger <dysinger@chef.io>
-%% Copyright 2012-16 Chef, Inc. All Rights Reserved.
+%% Copyright 2017 Chef, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -19,7 +18,7 @@
 %% under the License.
 %%
 
--module(bksw_sup).
+-module(bksw_migrator).
 
 -behaviour(supervisor).
 
@@ -48,34 +47,17 @@ init(_Args) ->
 
     WebmachineSup = {bksw_webmachine_sup, {bksw_webmachine_sup, start_link, []},
                      permanent, infinity, supervisor, [bksw_webmachine_sup]},
-
-    Children = lists:flatten([WebmachineSup,
-                              maybe_with_cleanup_task(),
-                              maybe_with_migrator()],
-
-    {ok, {SupFlags, Children}}.
+    {ok, {SupFlags, maybe_with_cleanup_task([WebmachineSup])}}.
 
 
-maybe_with_cleanup_task() ->
+maybe_with_cleanup_task(ChildSpecs) ->
     CleanupTask = {bksw_cleanup_task, {bksw_cleanup_task, start_link, []},
                    permanent, brutal_kill, worker, [bksw_cleanup_task]},
     case bksw_conf:storage_type() of
-        filesystem_to_sql ->
-            CleanupTask;
         sql ->
-            CleanupTask;
+            [CleanupTask| ChildSpecs];
         _ ->
-            []
-    end.
-
-maybe_with_migrator() ->
-    Migrator = {bksw_migration_sup, {bksw_migration_sup, start_link, []},
-                permanent, brutal_kill, worker, [bksw_migration_sup]},
-    case bksw_conf:storage_type() of
-        filesystem_to_sql ->
-            Migrator;
-        _ ->
-            []
+            ChildSpecs
     end.
 
 prepare_storage_type(filesystem) ->
@@ -83,8 +65,6 @@ prepare_storage_type(filesystem) ->
     bksw_io:upgrade_disk_format();
 prepare_storage_type(sql) ->
     ensure_default_bucket().
-prepare_storage_type(filesystem_to_sql) ->
-    bksw_migrator:migrate().
 
 ensure_default_bucket() ->
     DefaultBucket = <<"bookshelf">>,
