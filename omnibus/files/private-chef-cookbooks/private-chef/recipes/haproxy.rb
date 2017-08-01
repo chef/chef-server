@@ -36,37 +36,8 @@ end
 # on etcd to get the most up-to-date list. If any part of that fails,
 # we fall-back to the user-configured list of hosts.
 #
-def get_chef_backend_cluster_members
-  members = nil
-  node['private_chef']['chef_backend_members'].each do |member|
-    begin
-      members = ChefBackend.etcd_members(member, node['private_chef']['haproxy']['etcd_port'])
-      break if members && !members.empty?
-    rescue StandardError => e
-      Chef::Log.warn("Error attempting to get cluster members from #{member}:")
-      Chef::Log.warn("  #{e}")
-      Chef::Log.warn("Trying next configured chef_backend member.")
-    end
-  end
-  members
-end
 
-chef_backend_members = begin
-                         Chef::Log.info("Attempting Chef Backend Member Discovery")
-                         if members = get_chef_backend_cluster_members
-                           Chef::Log.info("Using Chef Backend members discovered via etcd")
-                           members
-                         else
-                           Chef::Log.warn("Member discovery failed")
-                           Chef::Log.warn("Using statically configured member list")
-                           ChefBackend.configured_members(node)
-                         end
-                       rescue e
-                         Chef::Log.warn("member discoverry failed: #{e}")
-                         Chef::Log.warn("Using statically configured member list")
-                         ChefBackend.configured_members(node)
-                       end
-
+chef_backend_members = ChefBackend.members(node)
 template File.join(haproxy_dir, "haproxy.cfg") do
   source "haproxy.cfg.erb"
   owner OmnibusHelper.new(node).ownership['owner']

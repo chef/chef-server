@@ -23,11 +23,18 @@ class Chef
         unless @orig_mappings
           index = JSON.parse(solr_server.get("#{new_resource.index_name}"))
           @orig_mappings = index[new_resource.index_name]['mappings']
-            solr_server.put("#{url}?update_all_types",
-                            Chef::JSONCompat.to_json(mapping))
-          end
         end
+        return @orig_mappings
+      rescue Net::HTTPServerException => e
+        raise unless e.response && e.response.code == '404'
+        return nil
+      end
 
+      def converge_block_for_update
+        converge_by "Updating elasticsearch index #{new_resource.index_name}" do
+          solr_server.put("#{url}?update_all_types",
+                          Chef::JSONCompat.to_json(mapping))
+        end
       end
 
       def converge_block_for_create
