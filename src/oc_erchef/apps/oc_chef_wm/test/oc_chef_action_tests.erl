@@ -20,6 +20,8 @@
 -include("oc_chef_wm.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
+-define(VHOST, <<"/actions">>).
+
 msg(Task) ->
     {[{<<"message_type">>, <<"action">>},
       {<<"message_version">>, <<"0.1.1">>},
@@ -461,6 +463,38 @@ end_to_end_test_() ->
       }
      ]
     }.
+
+ping_test_() ->
+    {foreach,
+     fun() ->
+             application:set_env(oc_chef_wm, actions_vhost, <<"/actions">>),
+             meck:new(chef_wm_rabbitmq_management)
+     end,
+     fun(_) ->
+             meck:unload(chef_wm_rabbitmq_management)
+     end,
+     [{"Aliveness returns true causes pong", 
+       fun() -> 
+               meck:expect(chef_wm_rabbitmq_management, check_aliveness,
+                           fun(_, "/actions") ->
+                                   true
+                           end),
+               Status = oc_chef_action:ping(),
+               ?assertEqual(pong, Status)
+       end
+      },
+      {"Not Aliveness causes pang",
+       fun() -> 
+               meck:expect(chef_wm_rabbitmq_management, check_aliveness,
+                           fun(_, "/actions") ->
+                                   false
+                           end),
+               Status = oc_chef_action:ping(),
+               ?assertEqual(pang, Status)
+       end
+      }]
+    }.
+
 
 %%
 %% Internal helper functions
