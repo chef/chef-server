@@ -1,4 +1,5 @@
 require 'mixlib/shellout'
+require 'ipaddr'
 require 'uri'
 require "net/http"
 
@@ -26,6 +27,13 @@ class OmnibusHelper
 
     config['actions_password'] = PrivateChef.credentials.get("rabbitmq", "actions_password")
     config
+  end
+
+  def self.is_ip?(addr)
+    IPAddr.new addr
+    true
+  rescue IPAddr::InvalidAddressError
+    false
   end
 
   # Normalizes hosts. If the host part is an ipv6 literal, then it

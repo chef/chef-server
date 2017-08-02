@@ -56,13 +56,21 @@ if (node['private_chef']['nginx']['ssl_certificate'].nil? &&
    ssl_keyfile = File.join(nginx_ca_dir, "#{node['private_chef']['nginx']['server_name']}.key")
    ssl_crtfile = File.join(nginx_ca_dir, "#{node['private_chef']['nginx']['server_name']}.crt")
 
+   server_name = node['private_chef']['nginx']['server_name']
+   server_name_type = if OmnibusHelper.is_ip?(server_name)
+                        "IP"
+                      else
+                        "DNS"
+                      end
+
    openssl_x509 ssl_crtfile do
-     common_name node['private_chef']['nginx']['server_name']
+     common_name server_name
      org node['private_chef']['nginx']['ssl_company_name']
      org_unit node['private_chef']['nginx']['ssl_organizational_unit_name']
      country node['private_chef']['nginx']['ssl_country_name']
      key_length node['private_chef']['nginx']['ssl_key_length']
      expire node['private_chef']['nginx']['ssl_duration']
+     subject_alt_name [ "#{server_name_type}:#{server_name}" ]
      owner 'root'
      group 'root'
      mode '0644'
