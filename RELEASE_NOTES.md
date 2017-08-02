@@ -50,6 +50,12 @@ For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
   The preflight check that was in place to catch these situations has been removed.
 
+* [RabbitMQ health check in status endpoint](https://github.com/chef/chef-server/pull/1345): Chef Server's
+  `_status` endpoint now checks the health of the analytics and internal RabbitMQ vhosts. For these checks
+  to work, the RabbitMQ management plugin must be installed. If it is not, the checks are not done. If
+  Chef Server is configured not to use Actions, a check will not be performed against the Actions vhost.
+  If an indexing queue is not used, the `chef_index` RabbitMQ vhost will not be checked.
+
 ## 12.15.8 (2017-06-20)
 
 * [Stricter validation of non-functional user record fields](https://github.com/chef/chef-server/pull/1294),
