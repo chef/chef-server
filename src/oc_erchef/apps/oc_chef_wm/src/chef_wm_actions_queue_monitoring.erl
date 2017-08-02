@@ -134,7 +134,10 @@
                 sync_response_process = undefined,
 
                 % total # of checks, even if unsuccessful
-                check_count = 0
+                check_count = 0,
+
+                % name of the http pool to use
+                pool_name = undefined
                }).
 
 
@@ -198,9 +201,11 @@ init([Vhost, Queue, MaxLength, CurrentLength]) ->
     % used to catch worker msgs
     process_flag(trap_exit, true),
     TRef = start_update_timer(),
+    PoolNameAtom = oc_chef_action_queue_config:get_rabbit_management_pool_name(),
     {ok, #queue_monitor_state{timer=TRef,
                               queue_at_capacity = MaxLength == CurrentLength andalso MaxLength > 0,
                               worker_process = undefined,
+                              pool_name = PoolNameAtom,
                               vhost_to_monitor = Vhost,
                               queue_to_monitor = Queue,
                               max_length = MaxLength,
@@ -300,6 +305,7 @@ handle_info({MaxLength, N, AtCap}, State) ->
 handle_info(status_ping, #queue_monitor_state{
                                 worker_process = undefined,
                                 dropped_since_last_check = Dropped,
+                                pool_name = PoolNameAtom,
                                 vhost_to_monitor = Vhost,
                                 queue_to_monitor = Queue} = State) ->
     ParentPid = self(),
@@ -307,7 +313,7 @@ handle_info(status_ping, #queue_monitor_state{
             fun () ->
                     Result =
                       chef_wm_rabbitmq_management:check_current_queue_state(
-                        oc_chef_action_queue_config:get_rabbit_management_pool_name(),
+                        PoolNameAtom,
                         Vhost,
                         Queue,
                         Dropped),
