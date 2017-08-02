@@ -27,10 +27,10 @@
         ]).
 
 -define(SERVER, ?MODULE).
--define(POOLNAME, rabbitmq_management_service).
+-define(POOLNAME, rabbitmq_actions_management_service).
 
 get_rabbit_management_pool_setting() ->
-  ServiceConfig = get_rabbit_management_setting(rabbitmq_management_service, []),
+  ServiceConfig = get_rabbit_management_setting(rabbitmq_actions_management_service, []),
   {?POOLNAME, ServiceConfig}.
 
 get_rabbit_management_pool_name() ->

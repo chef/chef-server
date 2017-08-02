@@ -48,7 +48,7 @@ default_rabbit_config() ->
             {port, 15672},
             {password, <<"chef123">>},
             % rabbitmq management http connection pool
-            {rabbitmq_management_service,
+            {rabbitmq_actions_management_service,
             [{root_url, "http://127.0.0.1:15672/api"},
             {timeout, 30000},
             {init_count, 25},
