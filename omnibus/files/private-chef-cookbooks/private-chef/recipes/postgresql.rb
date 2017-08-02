@@ -62,40 +62,6 @@ directory postgresql_dir do
   mode node['private_chef']['service_dir_perms']
 end
 
-####
-
-if File.directory?("/etc/sysctl.d") && File.exists?("/etc/init.d/procps")
-  # smells like ubuntu...
-  service "procps" do
-    action :nothing
-  end
-
-  template "/etc/sysctl.d/90-postgresql.conf" do
-    source "90-postgresql.conf.sysctl.erb"
-    owner "root"
-    mode  "0644"
-    variables(node['private_chef']['postgresql'].to_hash)
-    notifies :restart, 'service[procps]', :immediately
-  end
-else
-  # hope this works...
-  execute "sysctl" do
-    command "/sbin/sysctl -p /etc/sysctl.conf"
-    action :nothing
-  end
-
-  # this is why i want cfengine-style editfile resources with appendifnosuchline, etc...
-  bash "add shm settings" do
-    user "root"
-    code <<-EOF
-      echo 'kernel.shmmax = 17179869184' >> /etc/sysctl.conf
-      echo 'kernel.shmall = 4194304' >> /etc/sysctl.conf
-    EOF
-    notifies :run, 'execute[sysctl]', :immediately
-    not_if "egrep '^kernel.shmmax = ' /etc/sysctl.conf"
-  end
-end
-
 # Upgrade the cluster if you gotta
 private_chef_pg_upgrade "upgrade_if_necessary"
 

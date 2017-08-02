@@ -133,6 +133,18 @@ module PrivateChef
       end
     end
 
+    def deprecated_postgresql_settings
+      [ 'shmmax', 'shmall'].each do |setting|
+        if PrivateChef['postgresql'][setting]
+          ChefServer::Warnings.warn <<EOF
+The configuration parameter postgresql['#{setting}'] is no longer used
+by Chef Server. To limit the amount of shared memory used by
+postgresql use postgresql['shared_buffers'] instead.
+EOF
+        end
+      end
+    end
+
     # Mutate PrivateChef to account for common cases of user-provided
     # types not being what we want
     def transform_to_consistent_types
@@ -813,6 +825,7 @@ EOF
 
       # Transition Solr memory and JVM settings from OSC11 to Chef 12.
       import_legacy_service_config("opscode_solr", "opscode_solr4", ["heap_size", "new_size", "java_opts"])
+      deprecated_postgresql_settings
       transform_to_consistent_types
 
       PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]

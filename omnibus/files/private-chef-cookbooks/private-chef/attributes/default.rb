@@ -4,8 +4,6 @@
 # All Rights Reserved
 #
 
-KB_IN_GIG = 1048576
-
 ###
 # Set a project-name for the enterprise-chef-common cookbook
 ###
@@ -590,32 +588,21 @@ default['private_chef']['postgresql']['keepalives_idle'] = 60
 default['private_chef']['postgresql']['keepalives_interval'] = 15
 default['private_chef']['postgresql']['keepalives_count'] = 2
 default['private_chef']['postgresql']['md5_auth_cidr_addresses'] = [ '127.0.0.1/32', '::1/128' ]
-default['private_chef']['postgresql']['shmmax'] = 17179869184
-default['private_chef']['postgresql']['shmall'] = 4194304
 default['private_chef']['postgresql']['wal_level'] = "minimal"
 default['private_chef']['postgresql']['archive_mode'] = "off" # "cannot be enabled when wal_level is set to minimal"
 default['private_chef']['postgresql']['archive_command'] = ""
 default['private_chef']['postgresql']['archive_timeout'] = 0 # 0 is disabled.
 
-# Make sure we don't allocate more shared memory than the max.
-# Especailly relevant on large machines. #597
-#
 # This is based on the tuning parameters here:
+#
 #  https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
-# They generally recomend 25% of avalable memory, and we reserve 15% of shared memory for other uses
-# We limit to 2GB less than shmmax as exessive amounts of shared memory is unhelpful.
-
-# Convert everything to KB to avoid unit confusion
-shmkb = node['private_chef']['postgresql']['shmmax'] / 1024
+#
+# They generally recommend 25% of avalable memory but set an upper
+# bound of for machines with very large amounts of memory.
+pg_autocalc_max = 14*1048576 # 14 GB
 quarter_mem = node['memory']['total'].to_i/4
-postgres_max_mem = [0.85*shmkb, shmkb - 2*KB_IN_GIG].min
-if(quarter_mem > postgres_max_mem)
-  shared_bytes = postgres_max_mem
-else
-  shared_bytes = quarter_mem
-end
-default['private_chef']['postgresql']['shared_buffers'] = "#{(shared_bytes/1024).to_i}MB"
-
+shared_buffer_autocalc_mb = ([quarter_mem, pg_autocalc_max].min / 1024).to_i
+default['private_chef']['postgresql']['shared_buffers'] = "#{shared_buffer_autocalc_mb}MB"
 default['private_chef']['postgresql']['work_mem'] = "8MB"
 default['private_chef']['postgresql']['effective_cache_size'] = "#{(node['memory']['total'].to_i / 2)/1024}MB"
 # Note: the checkpoint_segments setting was removed.
