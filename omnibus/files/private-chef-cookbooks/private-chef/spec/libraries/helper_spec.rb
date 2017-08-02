@@ -1,12 +1,25 @@
 require_relative '../../libraries/helper.rb'
 
-describe OmnibusHelper, :es5 do
-
+describe OmnibusHelper do
   before do
     # suppress log output
     allow(Chef::Log).to receive(:info)
     allow(Chef::Log).to receive(:error)
     allow(Chef::Log).to receive(:warn)
+  end
+
+  describe "#is_ip?" do
+    it "returns true for an IPv4 address" do
+      expect(OmnibusHelper.is_ip?("192.168.33.10")).to eq(true)
+    end
+
+    it "returns true for an IPv6 address" do
+      expect(OmnibusHelper.is_ip?("::1")).to eq(true)
+    end
+
+    it "returns false for a hostname" do
+      expect(OmnibusHelper.is_ip?("1.example.com")).to eq(false)
+    end
   end
 
   describe '#bookshelf_s3_url' do
@@ -75,7 +88,7 @@ describe OmnibusHelper, :es5 do
           'opscode-solr4' => {
             'external' => external,
             'external_url' => external_url
-          }, 
+          },
           'opscode-erchef' => {
             'search_provider' => provider
           }
@@ -128,22 +141,22 @@ describe OmnibusHelper, :es5 do
 
     context 'when elastic search is unavailable' do
       context 'should return 2 but the request fails first time only' do
-        let(:times) {1}  
+        let(:times) { 1 }
         it_behaves_like "elastic search version request fails"
       end
 
       context 'should return 2 but the request fails the first two times' do
-        let(:times) {2}  
+        let(:times) { 2 }
         it_behaves_like "elastic search version request fails"
       end
 
       context 'should return 2 but the request fails the first three times' do
-        let(:times) {3}  
+        let(:times) { 3 }
         it_behaves_like "elastic search version request fails"
       end
-      
+
       context 'should return 2 but the request fails the first four times' do
-        let(:times) {4}  
+        let(:times) { 4 }
         it_behaves_like "elastic search version request fails"
       end
 
