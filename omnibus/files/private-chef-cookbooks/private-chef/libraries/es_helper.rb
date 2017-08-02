@@ -12,21 +12,19 @@ class EsHelper
       @es_version = Gem::Version.new('0.0.0')
       return @es_version
     else
-
-      # If we have not been bootstrapped and are using chef-backend,
-      # we won't be able to use the standard ha-proxy URL. In this case, we'll
-      # hit the cluster members directly.
-      if !OmnibusHelper.has_been_bootstrapped?  && ChefBackend.enabled?(node)
-        port = node['private_chef']['haproxy']['remote_elasticsearch_port']
-        puts "*** #{ChefBackend.members(node)}"
-        ChefBackend.members(node).each do |_, host|
-          @es_version = try_version_from_server("http://#{host}:#{port}")
-          break if @es_version
+      @es_version = try_version_from_server(node['private_chef']['opscode-solr4']['external_url'])
+      unless @es_version
+        # If we're using chef-backend that means our external url is via haproxy
+        # In some situations (pre-bootstrap, reconfigure after stop) haproxy will not be available
+        # at run time. In this case, we'll
+        # hit the cluster members directly.
+        if ChefBackend.enabled?(node)
+          port = node['private_chef']['haproxy']['remote_elasticsearch_port']
+          ChefBackend.members(node).each do |_, host|
+            @es_version = try_version_from_server("http://#{host}:#{port}")
+            break if @es_version
+          end
         end
-      else
-        # If we're using a vanilla external ES, it's expected to be up and running for us
-        # and reachable at the configured url.
-        @es_version = try_version_from_server(node['private_chef']['opscode-solr4']['external_url'])
       end
     end
     @es_version
@@ -40,7 +38,6 @@ class EsHelper
     Gem::Version.new(version)
   rescue => e
     Chef::Log.warn("Could not get version from #{url}")
-    puts "**** Could not get version from #{url}: #{e}"
     false
   end
 end
