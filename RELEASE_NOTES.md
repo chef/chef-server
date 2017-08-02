@@ -34,6 +34,10 @@ For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
   rule: `max_wal_size = (3 * checkpoint_segments) * 16MB`. They also say that the default value
   for `max_wal_size` (1GB) should fit in most settings, so this conversion is not done automatically.
 
+  The `shmmax` and `shmall` configuration settings are no longer used as PostgreSQL 9.6 relies on
+  System V shared memory much less than PostgreSQL 9.2. The `shared_buffers` configuration setting
+  is still respected and can be used to modify the amount of shared memory used by PostgreSQL.
+
   This update also adds two further new configurables in the ["Checkpoints" group](https://www.postgresql.org/docs/9.6/static/runtime-config-wal.html#RUNTIME-CONFIG-WAL-CHECKPOINTS), `min_wal_size` and
   `checkpoint_flush_after`.
 
