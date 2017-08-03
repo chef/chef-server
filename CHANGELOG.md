@@ -1,9 +1,17 @@
 # Chef Server Changelog
 
 <!-- latest_release -->
+## [12.15.9](https://github.com/chef/chef-server/tree/12.15.9) (2017-08-03)
+
+#### Merged Pull Requests
+- Enable chef-server in ACC [#1348](https://github.com/chef/chef-server/pull/1348) ([tduffield](https://github.com/tduffield))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=12.15.8 -->
+### Changes since 12.15.8 release
+
+#### Merged Pull Requests
+- Enable chef-server in ACC [#1348](https://github.com/chef/chef-server/pull/1348) ([tduffield](https://github.com/tduffield)) <!-- 12.15.9 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
