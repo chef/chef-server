@@ -9,7 +9,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,4 +20,4 @@
 
 # This functionality will eventually be incorporated into Expeditor
 # When that happens, this phase can be skipped.
-include_recipe "delivery-truck::publish"
+include_recipe 'delivery-truck::publish'

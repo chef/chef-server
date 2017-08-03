@@ -3,5 +3,5 @@ def fetch_chef_server_version
 end
 
 def fetch_target_host
-  attribute('target_host', default: command('cat /etc/opscode/chef-server.rb | grep -Po "api_fqdn\s[\"\']+\K.*(?=[\"\']+?)"').stdout.strip)
+  attribute('target_host', default: command('grep -Po "api_fqdn\s[\"\']+\K.*(?=[\"\']+?)" /etc/opscode/chef-server.rb').stdout.strip)
 end
