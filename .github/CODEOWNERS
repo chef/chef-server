@@ -1,0 +1,7 @@
+# Order is important. The last matching pattern has the most precedence.
+
+*                                @chef/chef-server-maintainers
+.delivery/**                     @chef/acc-maintainers
+.expeditor/**                    @chef/engineering-services
+cookbooks/chef-server-deploy/**  @chef/acc-maintainers
+terraform/**                     @chef/acc-maintainers

@@ -106,3 +106,42 @@ matrix:
       addons:
       before_cache:
       cache:
+    # Terraform Lint
+    - env:
+        - NAME=lint-terraform
+        - PATH=$HOME/tools/terraform-0.8.1:$PATH
+      install: ./scripts/install_terraform.sh
+      before_script: cd terraform
+      script: make lint
+    # chef-server-deploy-cookbook-cookstyle
+    - env:
+        - NAME=lint-chef-server-deploy-cookbook-cookstyle
+      addons:
+        apt:
+          sources:
+            - chef-stable-precise
+          packages:
+            - chefdk
+      cache:
+        directories:
+          - $HOME/.berkshelf
+      install:
+        - eval "$(/opt/chefdk/bin/chef shell-init bash)"
+      before_script: cd cookbooks/chef-server-deploy
+      script: chef exec cookstyle
+    # chef-server-deploy-cookbook-foodcritic
+    - env:
+        - NAME=chef-server-deploy-cookbook-foodcritic
+      addons:
+        apt:
+          sources:
+            - chef-stable-precise
+          packages:
+            - chefdk
+      cache:
+        directories:
+          - $HOME/.berkshelf
+      install:
+        - eval "$(/opt/chefdk/bin/chef shell-init bash)"
+      before_script: cd cookbooks/chef-server-deploy
+      script: chef exec foodcritic . -t ~supermarket

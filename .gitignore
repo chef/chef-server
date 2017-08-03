@@ -1,6 +1,6 @@
 .DS_Store
 erln8.config
-config.yml
+dev/config.yml
 .bundle
 vendor
 src/bookshelf/test/bkswt_api_SUITE_data/pg_data
@@ -20,3 +20,12 @@ compile_commands.json
 *.iml
 # Vim Files
 *.swp
+
+# Workflow
+.delivery/cli.toml
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*_override.tf

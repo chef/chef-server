@@ -1,6 +1,3 @@
-build_version   "12.15.8"
-build_iteration 1
-
 override :erlang, version: "18.3"
 override :lua, version: "5.1.5"
 override :'omnibus-ctl', version: "master"

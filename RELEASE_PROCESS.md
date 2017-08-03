@@ -19,20 +19,10 @@ release.
 
 In order to release, you will need the following accounts/permissions:
 
-- Local checkout of the chef-server repository
-- Push access to the chef-server github repository
 - Chef Software, Inc Slack account
 - VPN account for Chef Software, Inc.
 - Account on [https://discourse.chef.io](https://discourse.chef.io) using your Chef email address
-- Login for wilson.ci.chef.co (This is linked to your github account.)
-- Access to artifactory.chef.co
 - Access to automate.chef.co
-- The CHANGELOG_GITHUB_TOKEN environment variable set to a github token gathered
-  [here](https://github.com/settings/tokens/new?description=GitHub%20Changelog%20Generator%20token).
-  Read access to repositories and issues should be sufficient. (Check the "Full control of private repositories" box.)
-- Run `export CHANGELOG_GITHUB_TOKEN="«your-40-digit-github-token»"` to set your new token that you just created
-- Install Github Changelog Generator
-  + `gem install github_changelog_generator`
 
 :warning: If it is a Friday -- do we really need that release today? :warning:
 
@@ -40,14 +30,11 @@ In order to release, you will need the following accounts/permissions:
 
 ### Informing everyone of a pending release.
 
-- [ ] Announce your intention to drive the release to #cft-announce on slack.
-- [ ] Cross-post this intention on #chef-server and #pool.  Determine whether
-  this upgrade requires a major/minor/patch bump and what the major changes
-  are.
-- [ ] Ensure that the chef-server pipeline on wilson is currently green - you
-  cannot ship if master is broken.
+- [ ] Announce your intention to drive the release to #cft-announce and #chef-server on slack.
 
 ### Testing the Release
+
+> This process is currently manual. There is working being done to fold this into the ACC pipeline.
 
 Every commit to chef-server master is tested against a full pedant
 run. However, upgrade testing must still be done in advance of the
@@ -101,41 +88,15 @@ The git SHA of the build you are testing can be found in
 
 ### Preparing for the release
 
-- [ ] Check that omnibus_overrides.rb has the correct version given
-  the type of changes in this release.
-
-- [ ] Download the previous release of Chef Server (.deb).
-
-- [ ] Run `./dev/scripts/update-changelog.sh /path/to/deb/from/previous/step`
-
-- [ ] Grab the section on the latest version from `NEW_CHANGELOG.md` and paste
-  it at the top of `CHANGELOG.md`.
-
-- [ ] Copy the components section from `MODIFIED_COMPONENTS_CHANGELOG.md` and
-  paste into `CHANGELOG.md`
-
 - [ ] Check RELEASE_NOTES.md to ensure that it describes the
   most important user-facing changes in the release. This file should
-  form the basis of the post to Discourse that comes in a later step. Update as
-  appropriate.  If a there is a major version change, transfer all
-  contents to PRIOR_RELEASE_NOTES.md before adding release notes.
-- [ ] Open a PR with these changes and post the link to #chef-server-rfr
-  and #pool.
+  form the basis of the post to Discourse that comes in a later step.
+- [ ] Open a PR with these changes (applying the `Omnibus: Skip Build` label)
 
 ### Building and Releasing the Release
 
-- [ ] Tag the chef-server repository with the release version: `git
-  tag -a VERSION_NUMBER`. The first line of the tag message should be
-  the version number. The other lines are up to you. You're the boss!
-  (You can leave them blank).
-
-- [ ] Push the new tag: `git push origin master --tags`.
-
-- [ ] Trigger a release build in Jenkins using the
-  `chef-server-12-trigger-release` trigger.  Use the tag you created
-  above as the GIT_REF parameter.
-
-- [ ] Wait for the pipeline to complete.
+- [ ] Select a version from the `current` channel that you wish to promote to `stable`.
+  Make sure that this version has gone through the upgrade testing. 
 - [ ] Use julia to promote the build:
 
         @julia artifactory promote chef-server VERSION
@@ -162,8 +123,3 @@ The git SHA of the build you are testing can be found in
 - [ ] Let `#cft-announce` know about the release, including a link to the Discourse post.
 
 Chef Server is now released.
-
-## Post Release
-
-- [ ] Bump the Chef Server version number in `omnibus_overrides.rb`
-  for development to the next logical version number.

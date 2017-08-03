@@ -24,6 +24,8 @@ package_name    "chef-server-core"
 replace         "private-chef"
 conflict        "private-chef"
 install_dir     "/opt/opscode"
+build_version   IO.read(File.expand_path("../../../../VERSION", __FILE__)).strip
+build_iteration 1
 
 # In order to prevent unecessary cache expiration,
 # package and package version overrides, build_version
