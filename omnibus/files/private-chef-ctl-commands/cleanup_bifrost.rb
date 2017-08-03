@@ -119,7 +119,9 @@ def run_cleanup(bifrost_db, batch_size, wait_time)
       exit(0)
     end
 
-    run_bifrost_scan(known_actor_list, batch_size, bifrost_db)
+
+    install_known_actor_table(known_actor_list, bifrost_db)
+    run_bifrost_scan(batch_size, bifrost_db)
   ensure
     remove_bifrost_tracking_table(bifrost_db)
   end
@@ -150,11 +152,14 @@ def install_bifrost_tracking_table(db)
   end
 end
 
-def install_known_actor_table(db, list)
-  list_str = "('" + list.join("'), ('") + "')"
+def install_known_actor_table(list, db)
   timed "Populating known actor table" do
     db.exec(CREATE_SQL2)
-    db.exec("INSERT INTO cleanup_known_auth_actors VALUES #{list_str}")
+    db.copy_data("COPY cleanup_known_auth_actors FROM STDIN") do
+      list.each do |id|
+        db.put_copy_data(id.concat("\n"))
+      end
+    end
   end
 end
 
@@ -182,9 +187,8 @@ def print_and_return_estimate(known_actor_list, db)
   estimated_del_count
 end
 
-def run_bifrost_scan(known_actor_list, batch_size, db)
+def run_bifrost_scan(batch_size, db)
   total_deleted = 0
-  install_known_actor_table(db, known_actor_list)
   loop do
     deletion_count = timed "Processing batch of #{batch_size} unknown auth_actors. " do
       count = db.exec(CLEANUP_SQL, [batch_size]).cmd_tuples
