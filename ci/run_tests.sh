@@ -1,6 +1,9 @@
 #!/bin/bash
 set -evx
 
+echo "Sleeping even longer (120 seconds) to let the system settle"
+sleep 120
+
 sudo chef-server-ctl test -J $WORKSPACE/pedant.xml --all --compliance-proxy-tests
 
 if [ "$OMNIBUS_FIPS_MODE" == "true" ]
