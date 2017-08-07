@@ -32,7 +32,7 @@ template partybus_config do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode   "0644"
-  variables(:connection_string => "postgres:/opscode_chef",
+  variables(:connection_string => OmnibusHelper.new(node).db_connection_uri,
             :as_user => node['private_chef']['postgresql']['username'],
             :node_role => node_role,
             :db_service_name => db_service_name,
