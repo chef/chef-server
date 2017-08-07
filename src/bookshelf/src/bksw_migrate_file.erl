@@ -20,6 +20,43 @@
 
 -module(bksw_migrate_file).
 
+
+%% Generally only have one bucket in practice, so this can be kind of dumb
+migrate_buckets() ->
+    BucketsFS = bksw_io:bucket_list(),
+    BucketsSql = bksw_sql:list_buckets(),
+    BucketsMissing = BucketsFS -- BucketsSql,
+    Results = lists:foldl(fun(B, Errors) ->
+                                  case bksw_sql:create_bucket_b(B) of
+                                      true ->
+                                          Errors;
+                                      Error ->
+                                          [{B, Error} | Errors]
+                                  end
+                          end,
+                          []
+                          BucketsMissing),
+    case Results of
+        [] ->
+            {ok, BucketsFS};
+        Errors ->
+            {error, Errors}
+    end.
+
+
+migrate_bucket(Bucket) ->
+    case bksw_sql:create_bucket_b(B) of
+        %% existing bucket
+        true ->
+            Bucket;
+        _ ->
+            {error, failed_to_create_bucket, Bucket}
+    end.
+
+%% This is slow, and can consume a lot of memory in systems with lots of files
+list_files(Buckets) ->
+    [ { Bucket, bksw_io:entry_list(Bucket) } || Bucket <- Buckets ].
+
 %% This uses an optimistic strategy; if a file with the same name
 %% exists we skip migrationg We might want a more pessimistic strategy
 %% in the future, as it's possible that the contents are not the same
@@ -83,7 +120,7 @@ maybe_finalize_file({DataId, #db_file{data_size = Size,
                     Bucket, Entry) ->
     bksw_sql:update_metadata(DataId, Size, ChunkCount, HashMd5, HashSha256, HashSha512),
     %% TODO Figure out what's happening with file creation if exists already
-    File1 = File#db_file{name = Entry, bucket = Bucket, 
+    File1 = File#db_file{name = Entry, bucket = Bucket,
                          file_id = undefined, %% may exist?
                          data_id = DataId},
     case bksw_sql:create_file_link_data(BucketName, Name, DataId) of

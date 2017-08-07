@@ -49,7 +49,8 @@
 %%%===================================================================
 -spec get_context(proplists:proplist()) -> context().
 get_context(Config) ->
-    #context{auth_check_disabled = proplists:get_value(auth_check_disabled, Config),
+    #context{storage_mode = proplists:get_value(storage_type, Config),
+             auth_check_disabled = proplists:get_value(auth_check_disabled, Config),
              access_key_id = proplists:get_value(access_key_id, Config),
              secret_access_key = proplists:get_value(secret_access_key, Config),
              stream_download = proplists:get_value(stream_download, Config),

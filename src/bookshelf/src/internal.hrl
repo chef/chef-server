@@ -81,6 +81,7 @@
          }).
 
 -record(context, {
+                  storage_mode = undefined :: sql | filesystem | sql_then_filesystem,
                   auth_check_disabled = false :: boolean(),
                   %% AWS credentials
                   access_key_id :: binary(),

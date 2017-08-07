@@ -20,59 +20,165 @@
 
 -module(bksw_migrator).
 
--behaviour(supervisor).
+-behaviour(gen_server).
 
+%% API
 -export([start_link/0]).
 
--export([init/1]).
+%% gen_server callbacks
+-export([init/1, handle_call/3, handle_cast/2, handle_info/2,
+         terminate/2, code_change/3]).
 
-%%===================================================================
-%% API functions
-%%===================================================================
+-define(SERVER, ?MODULE).
 
+-record(state, {
+          buckets_to_migrate = 0:: integer,
+          buckets_migrated = 0 :: integer,
+          files_to_migrate = 0:: integer,
+          files_migrated = 0:: integer,
+
+          current_phase :: listing_buckets | migrating_buckets | listing_files | done,
+          buckets :: [binary()],
+          work_queue :: queue,
+
+          workers_in_flight :: [{atom(), {}}]
+
+         }).
+
+%%%===================================================================
+%%% API
+%%%===================================================================
+
+add_bucket(Bucket) ->
+    gen_server:call(?MODULE, {add_bucket, Bucket}).
+
+add_file(Bucket, File) ->
+    gen_server:call(?MODULE, {add_file, Bucket, File}).
+
+add_files(Bucket, Files) ->
+    gen_server:call(?MODULE, {add_file, Bucket, Files}).
+
+
+
+
+
+%%--------------------------------------------------------------------
+%% @doc
+%% Starts the server
+%%
+%% @spec start_link() -> {ok, Pid} | ignore | {error, Error}
+%% @end
+%%--------------------------------------------------------------------
 start_link() ->
-    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+    gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
-%%===================================================================
-%% Supervisor callbacks
-%%===================================================================
-
-init(_Args) ->
-    prepare_storage_type(bksw_conf:storage_type()),
-
-    RestartStrategy = one_for_one,
-    MaxRestarts = 1000,
-    MaxSecondsBetweenRestarts = 3600,
-    SupFlags = {RestartStrategy, MaxRestarts, MaxSecondsBetweenRestarts},
-
-    WebmachineSup = {bksw_webmachine_sup, {bksw_webmachine_sup, start_link, []},
-                     permanent, infinity, supervisor, [bksw_webmachine_sup]},
-    {ok, {SupFlags, maybe_with_cleanup_task([WebmachineSup])}}.
+%%%===================================================================
+%%% gen_server callbacks
+%%%===================================================================
 
 
-maybe_with_cleanup_task(ChildSpecs) ->
-    CleanupTask = {bksw_cleanup_task, {bksw_cleanup_task, start_link, []},
-                   permanent, brutal_kill, worker, [bksw_cleanup_task]},
-    case bksw_conf:storage_type() of
-        sql ->
-            [CleanupTask| ChildSpecs];
-        _ ->
-            ChildSpecs
-    end.
 
-prepare_storage_type(filesystem) ->
-    bksw_io:ensure_disk_store(),
-    bksw_io:upgrade_disk_format();
-prepare_storage_type(sql) ->
-    ensure_default_bucket().
 
-ensure_default_bucket() ->
-    DefaultBucket = <<"bookshelf">>,
-    case bksw_sql:bucket_exists(DefaultBucket) of
-        true ->
-            lager:info("Default bucket ~p already exists.", [DefaultBucket]),
-            ok;
-        false ->
-            lager:info("Create default bucket ~p.", [DefaultBucket]),
-            bksw_sql:create_bucket(DefaultBucket)
-    end.
+%%--------------------------------------------------------------------
+%% @private
+%% @doc
+%% Initializes the server
+%%
+%% @spec init(Args) -> {ok, State} |
+%%                     {ok, State, Timeout} |
+%%                     ignore |
+%%                     {stop, Reason}
+%% @end
+%%--------------------------------------------------------------------
+init([]) ->
+    {ok, #state{}}.
+
+%%--------------------------------------------------------------------
+%% @private
+%% @doc
+%% Handling call messages
+%%
+%% @spec handle_call(Request, From, State) ->
+%%                                   {reply, Reply, State} |
+%%                                   {reply, Reply, State, Timeout} |
+%%                                   {noreply, State} |
+%%                                   {noreply, State, Timeout} |
+%%                                   {stop, Reason, Reply, State} |
+%%                                   {stop, Reason, State}
+%% @end
+%%--------------------------------------------------------------------
+handle_call(_Request, _From, State) ->
+    Reply = ok,
+    {reply, Reply, State}.
+
+%%--------------------------------------------------------------------
+%% @private
+%% @doc
+%% Handling cast messages
+%%
+%% @spec handle_cast(Msg, State) -> {noreply, State} |
+%%                                  {noreply, State, Timeout} |
+%%                                  {stop, Reason, State}
+%% @end
+%%--------------------------------------------------------------------
+handle_cast(_Msg, State) ->
+    {noreply, State}.
+
+%%--------------------------------------------------------------------
+%% @private
+%% @doc
+%% Handling all non call/cast messages
+%%
+%% @spec handle_info(Info, State) -> {noreply, State} |
+%%                                   {noreply, State, Timeout} |
+%%                                   {stop, Reason, State}
+%% @end
+%%--------------------------------------------------------------------
+handle_info(_Info, State) ->
+    {noreply, State}.
+
+%%--------------------------------------------------------------------
+%% @private
+%% @doc
+%% This function is called by a gen_server when it is about to
+%% terminate. It should be the opposite of Module:init/1 and do any
+%% necessary cleaning up. When it returns, the gen_server terminates
+%% with Reason. The return value is ignored.
+%%
+%% @spec terminate(Reason, State) -> void()
+%% @end
+%%--------------------------------------------------------------------
+terminate(_Reason, _State) ->
+    ok.
+
+%%--------------------------------------------------------------------
+%% @private
+%% @doc
+%% Convert process state when code is changed
+%%
+%% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
+%% @end
+%%--------------------------------------------------------------------
+code_change(_OldVsn, State, _Extra) ->
+    {ok, State}.
+
+%%%===================================================================
+%%% Internal functions
+%%%===================================================================
+
+
+
+
+
+%%%%
+%%%%
+%%%%
+simple_migrator() ->
+    BucketsFS = bksw_io:bucket_list(),
+    Migrated = [ migrate_bucket(B) || B <- BucketsFS ],
+    
+    Files = bksw_migrate_file:list_files(Buckets),
+    
+    lists:foldl(
+      fun({Bucket, File}, Acc) ->
+              
