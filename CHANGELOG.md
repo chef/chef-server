@@ -1,7 +1,7 @@
 # Chef Server Changelog
 
-<!-- latest_release 12.15.10 -->
-## [12.15.10](https://github.com/chef/chef-server/tree/12.15.10) (2017-08-07)
+<!-- latest_release 12.15.11 -->
+## [12.15.11](https://github.com/chef/chef-server/tree/12.15.11) (2017-08-07)
 
 #### Merged Pull Requests
 - Add health checks for rabbitmq [#1345](https://github.com/chef/chef-server/pull/1345) ([jaym](https://github.com/jaym))
@@ -11,6 +11,7 @@
 ### Changes since 12.15.8 release
 
 #### Merged Pull Requests
+- Add health checks for rabbitmq [#1345](https://github.com/chef/chef-server/pull/1345) ([jaym](https://github.com/jaym)) <!-- 12.15.11 -->
 - Add health checks for rabbitmq [#1345](https://github.com/chef/chef-server/pull/1345) ([jaym](https://github.com/jaym)) <!-- 12.15.10 -->
 - Enable chef-server in ACC [#1348](https://github.com/chef/chef-server/pull/1348) ([tduffield](https://github.com/tduffield)) <!-- 12.15.9 -->
 <!-- release_rollup -->
