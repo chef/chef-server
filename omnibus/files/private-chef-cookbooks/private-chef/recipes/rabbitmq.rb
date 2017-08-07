@@ -218,6 +218,13 @@ if is_data_master?
     retries 10
   end
 
+  execute "#{rmq_ctl} set_permissions -p #{rabbitmq['vhost']} #{rabbitmq['management_user']} \".*\" \".*\" \".*\"" do
+    environment (rabbitmq_env)
+    user opc_username
+    not_if "#{rmq_ctl_chpst} list_user_permissions #{rabbitmq['management_user']}|grep #{rabbitmq['vhost']}", :environment => rabbitmq_env, :user => "root"
+    retries 10
+  end
+
   execute "#{rmq_ctl} set_permissions -p / #{rabbitmq['management_user']} \".*\" \".*\" \".*\"" do
     environment (rabbitmq_env)
     user opc_username

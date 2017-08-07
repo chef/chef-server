@@ -88,7 +88,7 @@
 -define(QUEUE, <<"alaska">>).
 -define(GEN_SERVER_TIMEOUT_MILLIS, 5000).
 -define(QUEUE_MONITOR_RUN_EVERY_MILLIS, 60000).
--define(QUEUE_MONITOR_SETTING(Key, Default), chef_wm_rabbitmq_management:get_rabbit_queue_monitor_setting(Key, Default)).
+-define(QUEUE_MONITOR_SETTING(Key, Default), oc_chef_action_queue_config:get_rabbit_queue_monitor_setting(Key, Default)).
 
 -record(queue_monitor_state, {
                 % name of the rabbitmq vhost to monitor, as a string
@@ -134,7 +134,10 @@
                 sync_response_process = undefined,
 
                 % total # of checks, even if unsuccessful
-                check_count = 0
+                check_count = 0,
+
+                % name of the http pool to use
+                pool_name = undefined
                }).
 
 
@@ -198,9 +201,11 @@ init([Vhost, Queue, MaxLength, CurrentLength]) ->
     % used to catch worker msgs
     process_flag(trap_exit, true),
     TRef = start_update_timer(),
+    PoolNameAtom = oc_chef_action_queue_config:get_rabbit_management_pool_name(),
     {ok, #queue_monitor_state{timer=TRef,
                               queue_at_capacity = MaxLength == CurrentLength andalso MaxLength > 0,
                               worker_process = undefined,
+                              pool_name = PoolNameAtom,
                               vhost_to_monitor = Vhost,
                               queue_to_monitor = Queue,
                               max_length = MaxLength,
@@ -300,15 +305,18 @@ handle_info({MaxLength, N, AtCap}, State) ->
 handle_info(status_ping, #queue_monitor_state{
                                 worker_process = undefined,
                                 dropped_since_last_check = Dropped,
+                                pool_name = PoolNameAtom,
                                 vhost_to_monitor = Vhost,
                                 queue_to_monitor = Queue} = State) ->
     ParentPid = self(),
     Pid = spawn_link(
             fun () ->
                     Result =
-                      chef_wm_rabbitmq_management:check_current_queue_state(Vhost,
-                                                                            Queue,
-                                                                            Dropped),
+                      chef_wm_rabbitmq_management:check_current_queue_state(
+                        PoolNameAtom,
+                        Vhost,
+                        Queue,
+                        Dropped),
                     ParentPid ! Result
             end),
     {noreply, State#queue_monitor_state{worker_process=Pid}};

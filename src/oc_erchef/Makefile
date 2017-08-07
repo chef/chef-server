@@ -74,7 +74,7 @@ bundle:
 	@cd apps/chef_objects/priv/depselector_rb; bundle install --deployment --path .bundle
 
 
-CHEFDK_GECODE_PATH:=/opt/chefdk/embedded/lib/ruby/gems/2.3.0/gems/dep-selector-libgecode-1.3.1/lib/dep-selector-libgecode/vendored-gecode
+CHEFDK_GECODE_PATH:=/opt/chefdk/embedded/lib/ruby/gems/2.4.0/gems/dep-selector-libgecode-1.3.1/lib/dep-selector-libgecode/vendored-gecode
 travis_env:
 	@echo export TRAVIS=1
 	@echo export USE_SYSTEM_GECODE=1

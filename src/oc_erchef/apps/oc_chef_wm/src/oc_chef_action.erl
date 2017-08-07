@@ -26,7 +26,8 @@
 
 -export([
          log_action/2,
-         create_message/3
+         create_message/3,
+         ping/0
         ]).
 
 -ifdef(TEST).
@@ -173,7 +174,7 @@ maybe_add_remote_request_id(Msg, RemoteRequestId) ->
               Msg :: binary()) -> ok.
 publish(RoutingKey, Msg)->
     QueueMonitorEnabled =
-      chef_wm_rabbitmq_management:get_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false),
+      oc_chef_action_queue_config:get_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false),
     publish(RoutingKey, Msg, QueueMonitorEnabled).
 
 
@@ -184,7 +185,7 @@ publish(RoutingKey, Msg, false) ->
       oc_chef_action_queue:publish(RoutingKey, Msg);
 publish(RoutingKey, Msg, true) ->
     DropOnCapacity =
-      chef_wm_rabbitmq_management:get_rabbit_queue_monitor_setting(drop_on_full_capacity, true),
+      oc_chef_action_queue_config:get_rabbit_queue_monitor_setting(drop_on_full_capacity, true),
     case DropOnCapacity andalso chef_wm_actions_queue_monitoring:is_queue_at_capacity() of
         true ->
             chef_wm_actions_queue_monitoring:message_dropped();
@@ -393,4 +394,13 @@ req_header(Name, Req) ->
             undefined;
         Header ->
             iolist_to_binary(Header)
+    end.
+
+-spec ping() -> pong | pang.
+ping() ->
+    VHost = envy:get(oc_chef_wm, actions_vhost, binary),
+    case chef_wm_rabbitmq_management:check_aliveness(
+           oc_chef_action_queue_config:get_rabbit_management_pool_name(), binary_to_list(VHost)) of
+        true -> pong;
+        _ -> pang
     end.

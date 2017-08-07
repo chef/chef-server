@@ -26,6 +26,7 @@
 
 -define(QUEUE_LENGTH_REQ, "/queues/%2Fanalytics").
 -define(MAX_LENGTH_REQ, "/policies/%2Fanalytics/max_length").
+-define(PING_REQ, "/aliveness-test/%2Fanalytics").
 
 -define(EMPTY_STATUS,  [{queue_at_capacity,false},
                         {dropped_since_last_check,0},
@@ -147,7 +148,7 @@ default_config() ->
             {port, 15672},
             {password, <<"chef123">>},
             % rabbitmq management http connection pool
-            {rabbitmq_management_service,
+            {rabbitmq_actions_management_service,
             [{root_url, "http://127.0.0.1:15672/api"},
             {timeout, 30000},
             {init_count, 25},
@@ -332,8 +333,8 @@ queue_length_test_() ->
       {"check_publish_not_at_capacity",
        fun() ->
             % ensure the publish function is called and no messages are dropped
-            chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, true),
-            chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(drop_on_full_capacity, true),
+            oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, true),
+            oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(drop_on_full_capacity, true),
 
             meck:new(oc_chef_action_queue),
             meck:expect(oc_chef_action_queue, publish, fun (_, _) -> ok end),
@@ -350,8 +351,8 @@ queue_length_test_() ->
        fun() ->
             %% ensure the publish function is called and 1 message is dropped
             %% due to queue being at capacity
-          chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, true),
-            chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(drop_on_full_capacity, true),
+            oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, true),
+            oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(drop_on_full_capacity, true),
 
             meck_response("200", max_length_json(), "200", at_capacity_json()),
             %% ensure that the queue is at capacity before calling
@@ -382,8 +383,8 @@ queue_length_test_() ->
             %% due to queue being at capacity, reset queue length to 0
             %% and 1 message should be published
 
-            chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, true),
-            chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(drop_on_full_capacity, true),
+            oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, true),
+            oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(drop_on_full_capacity, true),
 
             meck_response("200", max_length_json(), "200", at_capacity_json()),
             %% ensure that the queue is at capacity before calling
@@ -425,8 +426,8 @@ queue_length_test_() ->
       {"check_publish_at_capacity_no_drop",
        fun() ->
           % queue is at capacity, but don't drop messages due to configuration
-          chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, true),
-          chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(drop_on_full_capacity, false),
+          oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, true),
+          oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(drop_on_full_capacity, false),
 
           meck_response("200", max_length_json(), "200", at_capacity_json()),
           %% ensure that the queue is at capacity before calling
@@ -451,8 +452,8 @@ queue_length_test_() ->
           % queue length monitor is disabled
           catch(chef_wm_actions_queue_monitoring:stop()),
 
-          chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false),
-          chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(drop_on_full_capacity, false),
+          oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false),
+          oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(drop_on_full_capacity, false),
 
           undefined = whereis(chef_wm_actions_queue_monitoring),
           meck:new(oc_chef_action_queue),
@@ -470,7 +471,7 @@ queue_length_test_() ->
        fun() ->
             % set oc_httpc to sleep for 100 millis, but have is_queue_at_capacity timeout
             % after 10 millis.
-            chef_wm_rabbitmq_management:set_rabbit_queue_monitor_setting(queue_length_monitor_timeout_millis, 0),
+            oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_length_monitor_timeout_millis, 0),
 
             ?assertEqual(true, chef_wm_actions_queue_monitoring:is_queue_at_capacity())
        end
@@ -628,3 +629,37 @@ meck_conn_failure() ->
             {error,{conn_failed,undefined}}
         end).
 
+aliveness_test_() ->
+    {foreach,
+     fun() ->
+	     meck:new(oc_httpc)
+     end,
+     fun(_) ->
+             catch(meck:unload(oc_httpc))
+     end,
+     [
+      {"it's alive",
+       fun() ->
+            meck:expect(oc_httpc, request,
+                        fun(_, ?PING_REQ, _, _, _) ->
+                                dummy_response("200", <<"{\"status\": \"ok\"}">>) end),
+            Status = chef_wm_rabbitmq_management:check_aliveness(pool_name, ?VHOST),
+            ?assertMatch(true, Status)
+       end},
+      {"something's wrong, but got response",
+       fun() ->
+               meck:expect(oc_httpc, request,
+                           fun(_, ?PING_REQ, _, _, _) ->
+                                   dummy_response("500", <<"{\"status\": \"fail\"}">>) end),
+            Status = chef_wm_rabbitmq_management:check_aliveness(pool_name, ?VHOST),
+            ?assertMatch(false, Status)
+       end},
+      {"could not connect",
+       fun() ->
+               meck:expect(oc_httpc, request,
+                           fun(_, ?PING_REQ, _, _, _) ->
+                                   {error,{conn_failed,undefined}} end),
+            Status = chef_wm_rabbitmq_management:check_aliveness(pool_name, ?VHOST),
+            ?assertMatch(false, Status)
+       end}
+     ]}.

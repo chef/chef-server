@@ -452,7 +452,11 @@ def host_timezone
 end
 
 def host_timezone_linux
-  File.read("/etc/timezone").chomp
+  if File.exists?("/etc/timezone")
+    File.read("/etc/timezone").chomp
+  else
+    "UTC"
+  end
 end
 
 def host_timezone_osx

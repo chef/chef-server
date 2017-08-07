@@ -108,3 +108,63 @@ delete_assertion() ->
     meck:expect(chef_index_expand, send_delete, fun(?EXPECTED_DELETE_DOC) -> ok end),
     chef_index:delete(role, <<"a1">>, <<"db1">>, <<"abcd">>),
     ?assert(meck:validate(chef_index_expand)).
+
+ping_test_() ->
+    {foreach,
+     fun() ->
+             application:set_env(chef_index, rabbitmq_vhost, <<"/testvhost">>),
+             application:set_env(chef_index, search_queue_mode, rabbitmq),
+             application:set_env(chef_index, rabbitmq_index_management_service, [{enabled, true}]),
+             meck:new(chef_wm_rabbitmq_management)
+     end,
+     fun(_) ->
+             meck:unload(chef_wm_rabbitmq_management)
+     end,
+     [{"When rabbitmq is not used, the check returns pong", 
+       % This is not a requirement, there's just nothing else that
+       % is currently checked.
+       fun() -> 
+               application:set_env(chef_index, search_queue_mode, batch),
+               meck:expect(chef_wm_rabbitmq_management, check_aliveness,
+                           fun(_, "/testvhost") ->
+                                   throw(shouldnt_be_called)
+                           end),
+               Status = chef_index:ping(),
+               ?assertEqual(pong, Status)
+       end
+      },
+      {"When rabbitmq is enabled but management is not, the check returns pong",
+       % This is not a requirement, there's just nothing else that
+       % is currently checked.
+       fun() ->
+               application:set_env(chef_index, rabbitmq_index_management_service, [{enabled, false}]),
+               meck:expect(chef_wm_rabbitmq_management, check_aliveness,
+                           fun(_, "/testvhost") ->
+                                   throw(shouldnt_be_called)
+                           end),
+               Status = chef_index:ping(),
+               ?assertEqual(pong, Status)
+       end
+      },
+      {"When rabbitmq and management are enabled, and rabbit is alive, returns pong",
+       fun() ->
+               meck:expect(chef_wm_rabbitmq_management, check_aliveness,
+                           fun(_, "/testvhost") ->
+                                   true
+                           end),
+               Status = chef_index:ping(),
+               ?assertEqual(pong, Status)
+       end
+      },
+      {"When rabbitmq and management are enabled, and rabbit is not alive, returns pang",
+       fun() ->
+               meck:expect(chef_wm_rabbitmq_management, check_aliveness,
+                           fun(_, "/testvhost") ->
+                                   false
+                           end),
+               Status = chef_index:ping(),
+               ?assertEqual(pang, Status)
+       end
+      }
+     ]}.
+
