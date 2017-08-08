@@ -100,7 +100,7 @@ resource_exists(Rq0, Ctx) ->
             case fetch_entry_md(Rq0, Ctx) of
                 {error, _Error} ->
                     {false, Rq0, Ctx};
-                {not_found, #context{} = Ctx1 } ->
+                {not_found, #context{} } ->
                     %% Fall back to file storage for check
                     bksw_wm_object:resource_exists(Rq0, Ctx);
                 {#db_file{}, Ctx1} ->
@@ -114,7 +114,7 @@ resource_exists(Rq0, Ctx) ->
             case fetch_entry_md(Rq0, Ctx) of
                 {error, _Error} ->
                     {false, Rq0, Ctx};
-                {not_found, #context{} = Ctx1 } ->
+                {not_found, #context{} } ->
                     %% Fall back to file storage for check
                     %% NOTE: IF WE ARE DOING DELETE, we need to think things carefully through
                     bksw_wm_object:resource_exists(Rq0, Ctx);

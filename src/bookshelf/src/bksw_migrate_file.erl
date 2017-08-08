@@ -20,6 +20,13 @@
 
 -module(bksw_migrate_file).
 
+-export([migrate_buckets/0,
+         migrate_bucket/1,
+         list_files/1,
+         migrate_file/2]).
+
+-include("internal.hrl").
+
 
 %% Generally only have one bucket in practice, so this can be kind of dumb
 migrate_buckets() ->
@@ -34,7 +41,7 @@ migrate_buckets() ->
                                           [{B, Error} | Errors]
                                   end
                           end,
-                          []
+                          [],
                           BucketsMissing),
     case Results of
         [] ->
@@ -45,7 +52,7 @@ migrate_buckets() ->
 
 
 migrate_bucket(Bucket) ->
-    case bksw_sql:create_bucket_b(B) of
+    case bksw_sql:create_bucket_b(Bucket) of
         %% existing bucket
         true ->
             Bucket;
@@ -58,72 +65,79 @@ list_files(Buckets) ->
     [ { Bucket, bksw_io:entry_list(Bucket) } || Bucket <- Buckets ].
 
 %% This uses an optimistic strategy; if a file with the same name
-%% exists we skip migrationg We might want a more pessimistic strategy
+%% exists in SQL we skip migration. We might want a more pessimistic strategy
 %% in the future, as it's possible that the contents are not the same
 %% But since this is for the purposes of Chef cookbooks, which are
 %% essentially immutable, I think we are safe.
 migrate_file(Bucket, Entry) ->
-    case find_file(Bucket, Entry) of
-        {ok, Object} ->
-            ok;
+    case bksw_sql:find_file(Bucket, Entry) of
         {ok, none} ->
             migrate_file_safe(Bucket, Entry);
-        Error -> Error.
+        {ok, _Object} ->
+            ok;
+        Error -> Error
+    end.
 
 %% This is a pessimistic migrator; if we should discover the file exists (perhaps created separately)
 %% we fail if the SHAs don't match, otherwise we succeed.
 migrate_file_safe(Bucket, Entry) ->
-    maybe_finalize_file(handle_open_and_copy(bksw_io:open_for_read(Bucket,Entry), Bucket, Entry)).
+    maybe_finalize_file(handle_open_and_copy(bksw_io:open_for_read(Bucket,Entry)), Bucket, Entry).
 
-handle_open_and_copy({ok, #entryref{} = Ref}) ->
+handle_open_and_copy({ok, #entryref{} = FileRef}) ->
     maybe_read_loop(FileRef, bksw_sql:insert_file_data());
 handle_open_and_copy(Error) ->
     error_logger:error_msg("Error occurred opening file for migration: ~p~n", [Error]),
     Error.
 
 maybe_read_loop(#entryref{} = Ref, {ok, DataId}) ->
-    read_loop(Ref, DataId, bksw_sql:init_transfer_state());
+    read_copy_loop(Ref, DataId, bksw_sql:init_transfer_state());
 maybe_read_loop(#entryref{} = Ref, {error, _} = Error) ->
-    finish_read(Ref),
+    cleanup_read_copy_loop(Ref, undefined),
     error_logger:error_msg("Error occurred opening file for migration: ~p~n", [Error]),
     Error.
 
 read_copy_loop(Ref, DataId, #file_transfer_state{next_chunk = ChunkId} = State) ->
     case bksw_io:read(Ref, ?BLOCK_SIZE) of
         {ok, eof} ->
-            finalize_read_copy_loop(Ref, DataId, State);
+            finish_read_copy_loop(Ref, DataId, State);
         {ok, Data} ->
             ok = bksw_sql:add_file_chunk(DataId, ChunkId, Data),
             State1 = bksw_sql:update_transfer_state(State, Data, 1),
             case byte_size(Data) < ?BLOCK_SIZE of
                 true ->
-                    finalize_read_copy_loop(Ref, DataId, State1);
+                    finish_read_copy_loop(Ref, DataId, State1);
                 false ->
                     read_copy_loop(Ref, DataId, State1)
              end;
         Error = {error, _} ->
-            % cleanup sql here too
-            bksw_io:finish_read(Ref),
+            cleanup_read_copy_loop(Ref, DataId),
             error_logger:error_msg("Error occurred during migration: ~p~n", [Error]),
             Error
      end.
 
-finalize_read_copy_loop(Ref, DataId, State) ->
+finish_read_copy_loop(Ref, DataId, State) ->
     ok = bksw_io:finish_read(Ref),
     {DataId, bksq_sql:finalize_transfer_state(State)}.
+
+cleanup_read_copy_loop(Ref, undefined) ->
+    ok = bksw_io:finish_read(Ref);
+cleanup_read_copy_loop(Ref, _DataId) ->
+    ok = bksw_io:finish_read(Ref),
+    %% TODO cleanup sql here too (however it is safe to abandon, because we clean up elsewhere)
+    ok.
 
 
 maybe_finalize_file({DataId, #db_file{data_size = Size,
                                       hash_md5 = HashMd5,
                                       hash_sha256 = HashSha256,
-                                      hash_sha512 = HashSha512} = File},
+                                      hash_sha512 = HashSha512,
+                                      chunk_count = ChunkCount}},
                     Bucket, Entry) ->
     bksw_sql:update_metadata(DataId, Size, ChunkCount, HashMd5, HashSha256, HashSha512),
     %% TODO Figure out what's happening with file creation if exists already
-    File1 = File#db_file{name = Entry, bucket = Bucket,
-                         file_id = undefined, %% may exist?
-                         data_id = DataId},
-    case bksw_sql:create_file_link_data(BucketName, Name, DataId) of
+    %% Right now we fail out. This should be protected by the existence check before we
+    %% start the copy.
+    case bksw_sql:create_file_link_data(Bucket, Entry, DataId) of
         {ok, _} ->
             ok;
         {error, Reason} ->

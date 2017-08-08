@@ -50,9 +50,5 @@ init(_Args) ->
                  shutdown => brutal_kill,
                  type => worker,
                  modules => [bksw_migrate_leader]},
-    {ok, {SupFlags, [Migrator])}}.
+    {ok, {SupFlags, [Migrator]}}.
 
-
-%% workers generate a lot of binary garbage; might be smarter to make them one-offs
-start_migrate_worker() ->
-    ok.

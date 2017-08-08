@@ -51,7 +51,7 @@ init(_Args) ->
 
     Children = lists:flatten([WebmachineSup,
                               maybe_with_cleanup_task(),
-                              maybe_with_migrator()],
+                              maybe_with_migrator()]),
 
     {ok, {SupFlags, Children}}.
 
@@ -82,7 +82,7 @@ prepare_storage_type(filesystem) ->
     bksw_io:ensure_disk_store(),
     bksw_io:upgrade_disk_format();
 prepare_storage_type(sql) ->
-    ensure_default_bucket().
+    ensure_default_bucket();
 prepare_storage_type(filesystem_to_sql) ->
     bksw_migrator:migrate().
 
