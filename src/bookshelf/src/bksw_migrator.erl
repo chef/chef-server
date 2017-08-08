@@ -23,11 +23,18 @@
 -behaviour(gen_server).
 
 %% API
--export([start_link/0]).
+-export([start_link/0,
+         add_bucket/1,
+         add_files/2,
+         mark_file_migrated/2,
+         stats/0]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
          terminate/2, code_change/3]).
+
+%% Appease the dead code warning
+-export([simple_migrator/0]).
 
 -define(SERVER, ?MODULE).
 
@@ -37,10 +44,9 @@
           files_to_migrate = 0:: integer,
           files_migrated = 0:: integer,
 
-          current_phase :: listing_buckets | migrating_buckets | listing_files | done,
-          buckets :: [binary()],
-          work_queue :: queue,
-
+          current_phase = listing_buckets :: all_at_once | listing_buckets | listing_files | migrating_buckets | done,
+          buckets = [] :: [binary()],
+          work_queue = [] :: list(),
           workers_in_flight :: [{atom(), {}}]
 
          }).
@@ -52,14 +58,14 @@
 add_bucket(Bucket) ->
     gen_server:call(?MODULE, {add_bucket, Bucket}).
 
-add_file(Bucket, File) ->
-    gen_server:call(?MODULE, {add_file, Bucket, File}).
-
 add_files(Bucket, Files) ->
     gen_server:call(?MODULE, {add_file, Bucket, Files}).
 
+mark_file_migrated(Bucket, File) ->
+    gen_server:call(?MODULE, {file_migrated, Bucket, File}).
 
-
+stats() ->
+    gen_server:call(?MODULE, stats).
 
 
 %%--------------------------------------------------------------------
@@ -91,7 +97,9 @@ start_link() ->
 %% @end
 %%--------------------------------------------------------------------
 init([]) ->
-    {ok, #state{}}.
+    InFlight = spawn_link(simple_migrator, []),
+    {ok, #state{current_phase = all_at_once,
+                workers_in_flight = {InFlight, all_at_once} }}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -107,6 +115,10 @@ init([]) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
+handle_call({file_migrated, _Bucket, _File}, _From, #state{files_migrated = M} = State) ->
+    {reply, ok, State#state{files_migrated = M+1}};
+handle_call(stats, _From, #state{files_migrated = M} = State) ->
+    {reply, #{files_migrated => M}, State};
 handle_call(_Request, _From, State) ->
     Reply = ok,
     {reply, Reply, State}.
@@ -134,6 +146,18 @@ handle_cast(_Msg, State) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
+handle_info({'EXIT', Pid, Reason}, #state{workers_in_flight = Workers} = State) ->
+    %% One of our linked processes has died
+    State1 =
+        case lists:keytake(Pid, 1, Workers) of
+            {value, {Pid, Description}, Workers1} ->
+                error_logger:error_msg("Migration worker ~p has died with error ~p", [Description, Workers1]),
+                State#state{workers_in_flight = Workers1};
+            false ->
+                error_logger:error_msg("Migration unexpected worker ~p has died with error ~p", [Pid, Reason]),
+                State
+        end,
+    {noreply, State1};
 handle_info(_Info, State) ->
     {noreply, State}.
 
@@ -167,18 +191,38 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 
 
-
-
-
 %%%%
 %%%%
 %%%%
 simple_migrator() ->
+    process_flag(trap_exit, true),
     BucketsFS = bksw_io:bucket_list(),
-    Migrated = [ migrate_bucket(B) || B <- BucketsFS ],
-    
-    Files = bksw_migrate_file:list_files(Buckets),
-    
-    lists:foldl(
-      fun({Bucket, File}, Acc) ->
-              
+    _BucketsMigrated = [ bksw_migrate_file:migrate_bucket(B) || B <- BucketsFS ],
+
+    Files = bksw_migrate_file:list_files(BucketsFS),
+
+    case lists:foldl(fun migrate_file_step/2, [], Files) of
+        [] ->
+            ok;
+        Errors ->
+            Errors
+    end.
+
+
+%% The actual file migration generates a lot of binary garbage; we execute it
+%% in a separate process to trigger GC.
+migrate_file_step({Bucket, File}, Acc) ->
+    spawn_link(fun() -> migrate_process(self(), Bucket, File) end),
+    receive
+        ok ->
+            mark_file_migrated(Bucket, File),
+            %% We may need to log this differently to help visualize progress
+            error_logger:info_msg("Migrated ~p ~p", [Bucket, File]),
+            Acc;
+        Error ->
+            [{Error, Bucket, File} | Acc]
+    end.
+
+migrate_process(Pid, Bucket, File) ->
+    Result = bksw_migrate_file:migrate_file([Bucket, File]),
+    Pid ! Result.
