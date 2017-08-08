@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/request'
-require 'rspec/core/shared_context'
 require 'pedant/concern'
+require 'pedant/request'
+require 'pedant/utility'
+require 'rspec/core/shared_context'
 require 'uri'
 
 module Pedant
@@ -230,12 +231,20 @@ module Pedant
             objects.each do |o|
               send(object_add_method_symbol, admin_requestor, o)
             end
+            if objects.length > 0
+              Pedant::Utility.wait_until_queues_are_empty(i = 10, safety_sleep: false, quiet: true)
+            end
           end
 
           after :each do
             objects.each do |o|
               send(object_delete_method_symbol, admin_requestor, o['name'])
             end
+            # Technically we should call this here as well, but if the
+            # next test is also a search, it is probably calling
+            # setup_multiple_objects which will wait in the before
+            # anyway.
+            # Pedant::Utility.wait_until_queues_are_empty(i = 10, safety_sleep: false)
           end
         end
 
@@ -916,42 +925,11 @@ module Pedant
         end
       end
 
-      def wait_until_queues_are_empty(i = 10)
-        return if i == 0
-        if queues_empty?
-          puts "RabbitMQ queue is empty (or failed to call rabbitmqctl list_queues)"
-          # Why? It may be that expander has pulled the item from the queue
-          # but hasn't posted it to Solr.
-          puts "Waiting an additional second"
-          sleep 1
-        else
-          puts "Waiting for RabbitMQ queue to be empty (#{i} tries remaining)"
-          sleep 1
-          wait_until_queues_are_empty(i - 1)
-        end
-      end
-
-      # queues are not readable (e.g. there's no rabbitmq) OR empty
-      def queues_empty?
-        ENV['PATH'] = "/opt/opscode/embedded/bin:#{ENV['PATH']}"
-        output = `/opt/opscode/embedded/service/rabbitmq/sbin/rabbitmqctl list_queues -p /chef | awk '{sum += $2} END {print sum}'`
-        status = $?
-        if !status.success?
-          STDERR.puts "Command exitstatus: #{status.exitstatus}"
-          STDERR.puts "Command output: #{output}"
-          true
-        else
-          STDERR.puts "Command exitstatus: #{status.exitstatus}"
-          STDERR.puts "Command output: #{output}"
-          output.to_i == 0
-        end
-      end
-
       it "works for all object types" do
         # Wait for queues to have emptied: with_search_polling's
         # `force_solr_commit` could happen without every object having made it
         # to solr before.
-        wait_until_queues_are_empty
+        Pedant::Utility.wait_until_queues_are_empty
 
         # Ensure that a search against each Chef object type is
         # successful BEFORE any reindexing operations.
@@ -975,7 +953,7 @@ module Pedant
         `#{executable} reindex #{reindex_args.join(" ")} #{Pedant::Config.reindex_endpoint}`
 
         # wait for reindex to have finished
-        wait_until_queues_are_empty
+        Pedant::Utility.wait_until_queues_are_empty
 
         # Verify that the reindexing worked by finding all the items
         # again.  Remember, there are implicit Solr commit calls being
