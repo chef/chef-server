@@ -20,5 +20,8 @@ if is_data_master? and node['private_chef']['postgresql']['external']
   include_recipe "private-chef::erchef_database"
   include_recipe "private-chef::bifrost_database"
   include_recipe "private-chef::oc_id_database"
-  include_recipe "private-chef::bookshelf_database" if node["private_chef"]["bookshelf"]["storage_type"] == "sql"
+  case node["private_chef"]["bookshelf"]["storage_type"]
+  when "sql", "filesystem_to_sql"
+    include_recipe "private-chef::bookshelf_database"
+  end
 end

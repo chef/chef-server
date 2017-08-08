@@ -25,6 +25,7 @@ class BookshelfPreflightValidator < PreflightValidator
 
   def run!
     verify_storage_type_unchanged
+    # verify_storage_type_unchanged
   end
 
   # 5 Cases
@@ -33,6 +34,7 @@ class BookshelfPreflightValidator < PreflightValidator
   # (3) An old storage type was not set and the new_storage_type is :sql => NOT_OK
   # (4) An old storage type was set and is not equal to the new storage type => NOT_OK
   # (5) An old storage type was set and is equal to the new storage type => OK
+  # (6) An old storage type was not set or was filesystem and the new storage type is filesystem_to_sql
   def verify_storage_type_unchanged
     if previous_run.nil? # case (1)
       true
@@ -42,7 +44,10 @@ class BookshelfPreflightValidator < PreflightValidator
 
       if previous_value.nil? && current_value == 'filesystem' # case (2)
         true
-      elsif previous_value.nil? && current_value != "filesystem" # case (3)
+      elsif (previous_value.nil? || previous_value == 'filesystem') &&
+            current_value == 'filesystem_to_sql' # case (6)
+        true
+      elsif previous_value.nil? && current_value != 'filesystem' # case (3)
         fail_with <<EOM
 
 Bookshelf's storage_type was previously the default of 'filesystem';
