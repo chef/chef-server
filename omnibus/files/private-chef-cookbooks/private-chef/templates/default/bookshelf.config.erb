@@ -113,8 +113,8 @@
           ]},
  {pooler, [
            {pools, [[{name, sqerl},
-                     {max_count, <%= @db_pool_size %> },
-                     {init_count, <%= @db_pool_size %> },
+                     {max_count, <%= @db_pool_max || @db_pool_size %> },
+                     {init_count, <%= @db_pool_init || @db_pool_size %> },
                      {queue_max, <%= @db_pool_queue_max %>},
                      {start_mfa, {sqerl_client, start_link, []}}]]}
            %%,{metrics_module, folsom_metrics}
