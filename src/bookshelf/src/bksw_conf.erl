@@ -137,7 +137,12 @@ dispatch_by_storage(filesystem, Config) ->
 dispatch_by_storage(sql, Config) ->
     [{[bucket, obj_part, '*'], bksw_wm_sql_object, Config},
      {[bucket], bksw_wm_sql_bucket, Config},
-     {[], bksw_wm_sql_index, Config}].
+     {[], bksw_wm_sql_index, Config}];
+%% Temporary code prior to migration
+dispatch_by_storage(filesystem_to_sql, Config) ->
+    [{[bucket, obj_part, '*'], bksw_wm_object_object, Config},
+     {[bucket], bksw_wm_bucket, Config},
+     {[], bksw_wm_index, Config}].
 
 ip() ->
     envy:get(bookshelf, ip, "127.0.0.1", string).

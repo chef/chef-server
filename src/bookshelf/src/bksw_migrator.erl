@@ -34,7 +34,7 @@
          terminate/2, code_change/3]).
 
 %% Appease the dead code warning
--export([simple_migrator/0]).
+-export([simple_migrator/0, migrate_file_step/2]).
 
 -define(SERVER, ?MODULE).
 
@@ -97,9 +97,10 @@ start_link() ->
 %% @end
 %%--------------------------------------------------------------------
 init([]) ->
-    InFlight = spawn_link(simple_migrator, []),
+%    InFlight = spawn_link(fun () -> simple_migrator() end ),
+    InFlight = undefined,
     {ok, #state{current_phase = all_at_once,
-                workers_in_flight = {InFlight, all_at_once} }}.
+                workers_in_flight = [{InFlight, all_at_once}] }}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -196,10 +197,9 @@ code_change(_OldVsn, State, _Extra) ->
 %%%%
 simple_migrator() ->
     process_flag(trap_exit, true),
-    BucketsFS = bksw_io:bucket_list(),
-    _BucketsMigrated = [ bksw_migrate_file:migrate_bucket(B) || B <- BucketsFS ],
+    {ok, BucketsMigrated} = bksw_migrate_file:migrate_buckets(),
 
-    Files = bksw_migrate_file:list_files(BucketsFS),
+    Files = bksw_migrate_file:list_files(BucketsMigrated), 
 
     case lists:foldl(fun migrate_file_step/2, [], Files) of
         [] ->
@@ -212,7 +212,8 @@ simple_migrator() ->
 %% The actual file migration generates a lot of binary garbage; we execute it
 %% in a separate process to trigger GC.
 migrate_file_step({Bucket, File}, Acc) ->
-    spawn_link(fun() -> migrate_process(self(), Bucket, File) end),
+    Pid = self(),
+    spawn_link(fun() -> migrate_process(Pid, Bucket, File) end),
     receive
         ok ->
             mark_file_migrated(Bucket, File),
@@ -224,5 +225,5 @@ migrate_file_step({Bucket, File}, Acc) ->
     end.
 
 migrate_process(Pid, Bucket, File) ->
-    Result = bksw_migrate_file:migrate_file([Bucket, File]),
+    Result = bksw_migrate_file:migrate_file(Bucket, File),
     Pid ! Result.

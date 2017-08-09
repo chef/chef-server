@@ -40,7 +40,7 @@ stop(_State) ->
 
 maybe_start_sqerl(filesystem) ->
     {ok, []};
-maybe_start_sqerl(sql) ->
+maybe_start_sqerl(Type) when Type == sql orelse Type == filesystem_to_sql ->
     application:ensure_all_started(sqerl, permanent).
 
 %% @doc Print an informative message about how to use a remote shell

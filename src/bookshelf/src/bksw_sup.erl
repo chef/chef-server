@@ -84,7 +84,7 @@ prepare_storage_type(filesystem) ->
 prepare_storage_type(sql) ->
     ensure_default_bucket();
 prepare_storage_type(filesystem_to_sql) ->
-    bksw_migrator:migrate().
+    ensure_default_bucket().
 
 ensure_default_bucket() ->
     DefaultBucket = <<"bookshelf">>,

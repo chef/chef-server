@@ -44,11 +44,11 @@ init(_Args) ->
     MaxSecondsBetweenRestarts = 3600,
     SupFlags = {RestartStrategy, MaxRestarts, MaxSecondsBetweenRestarts},
 
-    Migrator = #{id => bksw_migrate_leader,
-                 start => {bksw_migrate_leader, start_link, []},
+    Migrator = #{id => bksw_migrator,
+                 start => {bksw_migrator, start_link, []},
                  restart => permanent,
                  shutdown => brutal_kill,
                  type => worker,
-                 modules => [bksw_migrate_leader]},
+                 modules => [bksw_migrator]},
     {ok, {SupFlags, [Migrator]}}.
 

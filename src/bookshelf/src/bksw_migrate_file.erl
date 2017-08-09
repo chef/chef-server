@@ -27,11 +27,11 @@
 
 -include("internal.hrl").
 
-
-%% Generally only have one bucket in practice, so this can be kind of dumb
+%%
+%% Generally only have one bucket "bookshelf" in practice, so this will be fast.
 migrate_buckets() ->
-    BucketsFS = bksw_io:bucket_list(),
-    BucketsSql = bksw_sql:list_buckets(),
+    BucketsFS = [ list_to_binary(Name) || {bucket, Name, _Date} <- bksw_io:bucket_list()],
+    BucketsSql = [ Name || {db_bucket, Name, _Date} <- bksw_sql:list_buckets()],
     BucketsMissing = BucketsFS -- BucketsSql,
     Results = lists:foldl(fun(B, Errors) ->
                                   case bksw_sql:create_bucket_b(B) of
@@ -62,7 +62,10 @@ migrate_bucket(Bucket) ->
 
 %% This is slow, and can consume a lot of memory in systems with lots of files
 list_files(Buckets) ->
-    [ { Bucket, bksw_io:entry_list(Bucket) } || Bucket <- Buckets ].
+    lists:flatten(
+      [ [ { Bucket, File} ||
+          {object, _Path , File, _Date, _Size, _Md5Sum} <- bksw_io:entry_list(Bucket) ] 
+        || Bucket <- Buckets ]).
 
 %% This uses an optimistic strategy; if a file with the same name
 %% exists in SQL we skip migration. We might want a more pessimistic strategy
@@ -71,7 +74,7 @@ list_files(Buckets) ->
 %% essentially immutable, I think we are safe.
 migrate_file(Bucket, Entry) ->
     case bksw_sql:find_file(Bucket, Entry) of
-        {ok, none} ->
+        {ok, not_found} ->
             migrate_file_safe(Bucket, Entry);
         {ok, _Object} ->
             ok;
@@ -117,7 +120,7 @@ read_copy_loop(Ref, DataId, #file_transfer_state{next_chunk = ChunkId} = State) 
 
 finish_read_copy_loop(Ref, DataId, State) ->
     ok = bksw_io:finish_read(Ref),
-    {DataId, bksq_sql:finalize_transfer_state(State)}.
+    {DataId, bksw_sql:finalize_transfer_state(State, #db_file{})}.
 
 cleanup_read_copy_loop(Ref, undefined) ->
     ok = bksw_io:finish_read(Ref);
