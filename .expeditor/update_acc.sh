@@ -9,12 +9,12 @@ connect_to_acc
 add_delivery_remote products chef-server
 
 # Checkout the a new feature branch based on delivery/master
-git fetch --all
+git fetch --all --tags
 git checkout -b deploy-${VERSION} delivery/master
 
 # Merge the changes from the Github ${VERSION} tag into the feature branch
 # This will create a merge commit that can be used for the Workflow patchset
-git merge --no-ff remote/origin/${VERSION}
+git merge --no-ff --no-edit refs/tags/${VERSION}
 
 # Submit the change to Workflow and grab the change id
 change_id=$(delivery_review)
