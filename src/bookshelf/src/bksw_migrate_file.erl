@@ -77,7 +77,7 @@ migrate_file(Bucket, Entry) ->
         {ok, not_found} ->
             migrate_file_safe(Bucket, Entry);
         {ok, _Object} ->
-            ok;
+            no_op;
         Error -> Error
     end.
 

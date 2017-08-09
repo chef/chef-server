@@ -213,17 +213,24 @@ simple_migrator() ->
 %% in a separate process to trigger GC.
 migrate_file_step({Bucket, File}, Acc) ->
     Pid = self(),
-    spawn_link(fun() -> migrate_process(Pid, Bucket, File) end),
+    spawn_link(fun() -> migrate_process(Bucket, File) end),
     receive
-        ok ->
+        {{'EXIT', Pid, normal}, ok} ->
             mark_file_migrated(Bucket, File),
             %% We may need to log this differently to help visualize progress
             error_logger:info_msg("Migrated ~p ~p", [Bucket, File]),
             Acc;
+        {{'EXIT', Pid, normal}, no_op} ->
+            %% We may need to log this differently to help visualize progress
+            error_logger:info_msg("Skipped ~p ~p", [Bucket, File]),
+            Acc;
+        {{'EXIT', Pid, Other}, Error} ->
+            [{Other, Error, Bucket, File} | Acc];
         Error ->
-            [{Error, Bucket, File} | Acc]
+            error_logger:error_msg("Error migrating ~p ~p ~p", [Error, Bucket, File]),
+            Acc
     end.
 
-migrate_process(Pid, Bucket, File) ->
-    Result = bksw_migrate_file:migrate_file(Bucket, File),
-    Pid ! Result.
+migrate_process(Bucket, File) ->
+    bksw_migrate_file:migrate_file(Bucket, File).
+
