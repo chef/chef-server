@@ -89,7 +89,7 @@
               {stream_download, <%= @stream_download %>},
               {log_dir, "<%= @log_directory %>"}
              ]},
-<% if @storage_type == "sql" -%>
+<% if @storage_type == "sql" || @storage_type == "filesystem_to_sql" -%>
  {sqerl, [
            {db_driver_mod, sqerl_pgsql_client},
            {config_cb, {chef_secrets_sqerl, config, [{<<"bookshelf">>, <<"sql_password">>}]}},
