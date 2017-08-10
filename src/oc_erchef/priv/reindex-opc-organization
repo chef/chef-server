@@ -139,8 +139,8 @@ get_org_id(Context, OrgName) ->
 %% @doc Connect to the node actually running Erchef.  Kind of hard to do RPC calls
 %% otherwise....
 init_network() ->
-    net_kernel:start([?SELF, longnames]),
-    erlang:set_cookie(node(), ?ERCHEF_COOKIE),
+    {ok, _} = net_kernel:start([?SELF, longnames]),
+    true = erlang:set_cookie(node(), ?ERCHEF_COOKIE),
     pong = net_adm:ping(?ERCHEF).
 
 find_dl_headers(OrgNameBin, IntLB) when is_binary(OrgNameBin) ->

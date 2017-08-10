@@ -164,11 +164,11 @@ search_with_scroll(#chef_solr_query{} = Query) ->
     end.
 
 scroll(ScrollId, NumFound, NumFound, Ids) ->
-    ok = chef_index_http:delete("/_search/scroll", ScrollId, ?JSON_HEADER),
+    ok = chef_index_http:delete("/_search/scroll", scroll_body(ScrollId), ?JSON_HEADER),
     {ok, undefined, NumFound, Ids};
 scroll(ScrollId, NumFound, _, Ids) ->
-    Url = "/_search/scroll?scroll=1m",
-    {ok, Code, _Head, Body} = chef_index_http:request(Url, get, ScrollId, ?JSON_HEADER),
+    Url = "/_search/scroll",
+    {ok, Code, _Head, Body} = chef_index_http:request(Url, get, scroll_body(ScrollId), ?JSON_HEADER),
     case Code of
         "200" ->
             DocList = ej:get({<<"hits">>, <<"hits">>}, jiffy:decode(Body)),
@@ -182,6 +182,9 @@ scroll(ScrollId, NumFound, _, Ids) ->
         "500" ->
             {error, {solr_500, Url}}
     end.
+
+scroll_body(ScrollId) ->
+    jiffy:encode({[{<<"scroll_id">>, ScrollId}]}).
 
 delete_ids([]) ->
     ok = commit(),
