@@ -940,7 +940,7 @@ module Pedant
         should_find(temporary_data_bag_name, "test_item")
 
         # Now, drop all information from the search index
-        `#{executable} drop #{reindex_args.join(" ")} #{Pedant::Config.reindex_endpoint}`
+        puts `#{executable} drop #{reindex_args.join(" ")} #{Pedant::Config.reindex_endpoint}`
 
         # Verify that searches come up empty
         should_not_find("node", node_name)
@@ -950,7 +950,7 @@ module Pedant
         should_not_find_any(temporary_data_bag_name)
 
         # Now, send everything to be re-indexed
-        `#{executable} reindex #{reindex_args.join(" ")} #{Pedant::Config.reindex_endpoint}`
+        puts `#{executable} reindex #{reindex_args.join(" ")} #{Pedant::Config.reindex_endpoint}`
 
         # wait for reindex to have finished
         Pedant::Utility.wait_until_queues_are_empty
