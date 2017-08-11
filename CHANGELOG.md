@@ -1,16 +1,17 @@
 # Chef Server Changelog
 
-<!-- latest_release 12.15.13 -->
-## [12.15.13](https://github.com/chef/chef-server/tree/12.15.13) (2017-08-09)
+<!-- latest_release 12.15.14 -->
+## [12.15.14](https://github.com/chef/chef-server/tree/12.15.14) (2017-08-11)
 
 #### Merged Pull Requests
-- Expose db_pool_max and db_pool_init attrbiutes for bookshelf like oc_… [#1354](https://github.com/chef/chef-server/pull/1354) ([itmustbejj](https://github.com/itmustbejj))
+- Fixing reindex&#39;s use of elasticsearch scroll API [#1358](https://github.com/chef/chef-server/pull/1358) ([ksubrama](https://github.com/ksubrama))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.15.8 -->
 ### Changes since 12.15.8 release
 
 #### Merged Pull Requests
+- Fixing reindex&#39;s use of elasticsearch scroll API [#1358](https://github.com/chef/chef-server/pull/1358) ([ksubrama](https://github.com/ksubrama)) <!-- 12.15.14 -->
 - Expose db_pool_max and db_pool_init attrbiutes for bookshelf like oc_… [#1354](https://github.com/chef/chef-server/pull/1354) ([itmustbejj](https://github.com/itmustbejj)) <!-- 12.15.13 -->
 - [pedant] Wait for rabbitmq before every search test [#1356](https://github.com/chef/chef-server/pull/1356) ([stevendanna](https://github.com/stevendanna)) <!-- 12.15.12 -->
 - Add health checks for rabbitmq [#1345](https://github.com/chef/chef-server/pull/1345) ([jaym](https://github.com/jaym)) <!-- 12.15.11 -->
