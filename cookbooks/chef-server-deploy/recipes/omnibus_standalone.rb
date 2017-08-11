@@ -17,6 +17,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+node.default['delivery']['delivery_server_fqdn'] = server_fqdn_for('automate')
+node.default['delivery']['chef_server_fqdn'] = server_fqdn_for('chef-server')
+node.default['delivery']['supermarket_fqdn'] = server_fqdn_for('supermarket')
+node.default['delivery']['chef_cert_filename'] = 'wildcard.chef.co.crt'
+node.default['delivery']['chef_key_filename'] = 'wildcard.chef.co.key'
+node.default['delivery']['enable_liveness_agent'] = (environment == 'delivered' ? true : false)
+
 include_recipe 'chefops-dcc::chef-server'
 
 # By default we daemonize chef-client across all of our infrastructure nodes. We
@@ -93,7 +100,10 @@ execute 'add-delivery-user-key' do
   not_if 'chef-server-ctl list-user-keys delivery | grep delivery-2'
 end
 
-node['automate-deploy']['chef_server_orgs'].each do |org_name|
+%w(
+  chef
+  chef-cd
+).each do |org_name|
   chef_org org_name do
     admins %w(
       admin
