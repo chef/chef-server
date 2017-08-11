@@ -16,6 +16,9 @@ git checkout -b deploy-${VERSION} delivery/master
 # This will create a merge commit that can be used for the Workflow patchset
 git merge --no-ff --no-edit refs/tags/${VERSION}
 
+# WIP - enable debug output from delivery CLI
+export RUST_LOG=debug
+
 # Submit the change to Workflow and grab the change id
 change_id=$(delivery_review)
 
