@@ -111,31 +111,55 @@ query_string_query_ejson(QueryString) ->
 %% high number. While this does increase network traffic to/from Elasticsearch, it
 %% reduces the memory load. If network performance becomes a problem, we could
 %% increase the number of rows we return with each query.
+%%
+%% Elasticsearch 5.0 has added back delete-by-query. Therefore if the version is
+%% 5.0 or greater we are using this more efficient request.
 -spec delete_search_db_by_type(OrgId :: binary(), Type :: atom()) -> ok.
 delete_search_db_by_type(OrgId, Type)
   when Type == client orelse Type == data_bag_item orelse
        Type == environment orelse Type == node orelse
        Type == role ->
+    QueryString = chef_index_query:search_db_from_orgid(OrgId) ++
+                                "AND" ++ chef_index_query:search_type_constraint(Type),
     Query = #chef_solr_query{
                              rows = 1000,
                              start = 0,
                              search_provider = elasticsearch,
-                             query_string = chef_index_query:search_db_from_orgid(OrgId) ++
-                                "AND" ++ chef_index_query:search_type_constraint(Type)
+                             query_string = QueryString
                             },
-    {ok, _, _, Ids} = search_with_scroll(Query),
-    delete_ids(Ids).
+    case envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer) of
+        X when X >= 5 ->
+            chef_index_http:post("/chef/_delete_by_query", delete_query_body(QueryString), ?JSON_HEADER),
+            commit(),
+            ok;
+        _ ->
+            {ok, _, _, Ids} = search_with_scroll(Query),
+            delete_ids(Ids)
+    end.
 
 -spec delete_search_db(OrgId :: binary()) -> ok.
 delete_search_db(OrgId) ->
+    QueryString = chef_index_query:search_db_from_orgid(OrgId),
     Query = #chef_solr_query{
                              rows = 1000,
                              start = 0,
                              search_provider = elasticsearch,
-                             query_string = chef_index_query:search_db_from_orgid(OrgId)
+                             query_string = QueryString
                             },
-    {ok, _, _, Ids} = search_with_scroll(Query),
-    delete_ids(Ids).
+    case envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer) of
+        X when X >= 5 ->
+            chef_index_http:post("/chef/_delete_by_query", delete_query_body(QueryString), ?JSON_HEADER),
+            commit(),
+            ok;
+        _ ->
+            {ok, _, _, Ids} = search_with_scroll(Query),
+            delete_ids(Ids)
+    end.
+
+delete_query_body(QueryString) ->
+    jiffy:encode({[
+                   {<<"query">>, {[query_string_query_ejson(QueryString)]}}
+                  ]}).
 
 %% Do a search query using the Elasticsearch Scroll API. We only use this when
 %% doing the search used for reindexing.
@@ -154,7 +178,7 @@ search_with_scroll(#chef_solr_query{} = Query) ->
             NumFound = ej:get({<<"total">>}, Response),
             DocList  = ej:get({<<"hits">>}, Response),
             Ids = [ ej:get({<<"_id">>}, Doc) || Doc <- DocList ],
-            scroll(ScrollId, NumFound, length(Ids), Ids);
+            scroll([ScrollId], NumFound, length(Ids), Ids);
         %% For now keep these error messages
         %% consistent with chef_solr
         "400" ->
@@ -163,18 +187,19 @@ search_with_scroll(#chef_solr_query{} = Query) ->
             {error, {solr_500, Url}}
     end.
 
-scroll(ScrollId, NumFound, NumFound, Ids) ->
-    ok = chef_index_http:delete("/_search/scroll", scroll_body(ScrollId), ?JSON_HEADER),
+scroll(ScrollIds, NumFound, NumFound, Ids) ->
+    ok = chef_index_http:delete("/_search/scroll/", scroll_body(ScrollIds), ?JSON_HEADER),
     {ok, undefined, NumFound, Ids};
-scroll(ScrollId, NumFound, _, Ids) ->
-    Url = "/_search/scroll",
-    {ok, Code, _Head, Body} = chef_index_http:request(Url, get, scroll_body(ScrollId), ?JSON_HEADER),
+scroll([ScrollIdHead | _] = ScrollIds, NumFound, _, Ids) ->
+    Url = "/_search/scroll?scroll=1m",
+    {ok, Code, _Head, Body} = chef_index_http:request(Url, get, ScrollIdHead, ?JSON_HEADER),
     case Code of
         "200" ->
             DocList = ej:get({<<"hits">>, <<"hits">>}, jiffy:decode(Body)),
+            NewScrollId = ej:get({<<"_scroll_id">>}, jiffy:decode(Body)),
             NewIds = [ ej:get({<<"_id">>}, Doc) || Doc <- DocList ],
             AllIds = lists:append([ Ids, NewIds ]),
-            scroll(ScrollId, NumFound, length(AllIds), AllIds);
+            scroll([ NewScrollId | ScrollIds ], NumFound, length(AllIds), AllIds);
         %% For now keep these error messages
         %% consistent with chef_solr
         "400" ->
