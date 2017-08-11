@@ -79,8 +79,14 @@ maybe_with_migrator() ->
     end.
 
 prepare_storage_type(filesystem) ->
-    bksw_io:ensure_disk_store(),
-    bksw_io:upgrade_disk_format();
+    case bksw_io:is_sql_migration_complete() of
+        true ->
+            lager:info("Starting up in filesystem mode, but we've already migrated to sql as indicated by the sentinel file ~p", [bksw_io:sql_migration_complete_marker_path()]),
+            error("Already migrated to sql");
+        false ->
+            bksw_io:ensure_disk_store(),
+            bksw_io:upgrade_disk_format()
+        end;
 prepare_storage_type(sql) ->
     ensure_default_bucket();
 prepare_storage_type(filesystem_to_sql) ->

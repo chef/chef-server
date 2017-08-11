@@ -34,7 +34,7 @@
          terminate/2, code_change/3]).
 
 %% Appease the dead code warning
--export([simple_migrator/0, migrate_file_step/2]).
+-export([simple_migrator/0]).
 
 -define(SERVER, ?MODULE).
 
@@ -196,42 +196,44 @@ code_change(_OldVsn, State, _Extra) ->
 %%%%
 %%%%
 simple_migrator() ->
-    process_flag(trap_exit, true),
+    migrate_unless_done_already(bksw_io:is_sql_migration_complete()).
+
+migrate_unless_done_already(true) ->
+    %% Already done the migration
+    error_logger:info_msg("Migrator considered already complete since I found file ~p, no need to migrate", [bksw_io:sql_migration_complete_marker_path()]),
+    ok;
+migrate_unless_done_already(false) ->
+    error_logger:info_msg("Migrator enumerating and migrating buckets"),
     {ok, BucketsMigrated} = bksw_migrate_file:migrate_buckets(),
+    error_logger:info_msg("Listing files in buckets ~p", [BucketsMigrated]),
 
-    Files = bksw_migrate_file:list_files(BucketsMigrated), 
+    Files = bksw_migrate_file:list_files(BucketsMigrated),
 
-    case lists:foldl(fun migrate_file_step/2, [], Files) of
+    error_logger:info_msg("Migrating files ~p total", [length(Files)]),
+
+    %% stuff the task execution system with the list of files to migrate
+    [ bksw_executor:add_task( fun({B,F}) -> migrate_process(B, F) end, Entry) ||
+        Entry <- Files ],
+    bksw_executor:wait_for_idle(),
+
+    Errors = bksw_executor:error_list(),
+
+    case Errors of
         [] ->
-            ok;
-        Errors ->
-            Errors
-    end.
-
-
-%% The actual file migration generates a lot of binary garbage; we execute it
-%% in a separate process to trigger GC.
-migrate_file_step({Bucket, File}, Acc) ->
-    process_flag(trap_exit, true),
-    Pid = self(),
-    spawn_link(fun() -> migrate_process(Bucket, File) end),
-    receive
-        {{'EXIT', Pid, normal}, ok} ->
-            mark_file_migrated(Bucket, File),
-            %% We may need to log this differently to help visualize progress
-            error_logger:info_msg("Migrated ~p ~p", [Bucket, File]),
-            Acc;
-        {{'EXIT', Pid, normal}, no_op} ->
-            %% We may need to log this differently to help visualize progress
-            error_logger:info_msg("Skipped ~p ~p", [Bucket, File]),
-            Acc;
-        {{'EXIT', Pid, Other}, Error} ->
-            [{Other, Error, Bucket, File} | Acc];
-        Error ->
-            error_logger:error_msg("Error migrating ~p ~p ~p", [Error, Bucket, File]),
-            Acc
+            error_logger:info_msg("Completed migration successfully, safe to run in sql mode"),
+            bksw_io:mark_sql_migration_complete();
+        _ ->
+            error_logger:error_msg("Failed migration from fileysystem to sql; retrying"),
+            simple_migrator()
     end.
 
 migrate_process(Bucket, File) ->
-    bksw_migrate_file:migrate_file(Bucket, File).
-
+    case bksw_migrate_file:migrate_file(Bucket, File) of
+        ok ->
+            ok;
+        no_op ->
+            ok;
+        Error ->
+            error_logger:error_msg("Error migrating ~p", [Error]),
+            error(Error)
+    end.

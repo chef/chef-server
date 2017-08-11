@@ -26,7 +26,9 @@
 -export([start_link/0,
          add_task/2,
          stats/0,
-         error_list/0]).
+         error_list/0,
+         is_idle/0,
+        wait_for_idle/0]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -64,6 +66,18 @@ stats() ->
 error_list() ->
     gen_server:call(?MODULE, error_list).
 
+is_idle() ->
+    gen_server:call(?MODULE, is_idle).
+
+wait_for_idle() ->
+    case is_idle() of
+        false ->
+            timer:sleep(1000),
+            wait_for_idle();
+        _ ->
+            ok
+    end.
+
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
@@ -87,9 +101,19 @@ handle_call(stats, _From, #state{tasks_executed = E,
                                  active_tasks = A} = State) ->
     {reply, #{tasks_executed => E,
               tasks_queued => L,
-              active_tasks => A}, State}.
+              active_tasks => A}, State};
+handle_call(error_list, _From, #state{error_list = L} = State) ->
+    {reply, L, State};
+handle_call(is_idle, _From, #state{active_tasks = #{}, tasks_queued = 0} = State) ->
+    {reply, true, State};
+handle_call(is_idle, _From, #state{} = State) ->
+    {reply, false, State};
+handle_call(Msg, _, State) ->
+    error_logger:error_msg("Unexpected call ~p", [Msg]),
+    {reply, ok, State}.
 
-handle_cast(_Msg, State) ->
+handle_cast(Msg, State) ->
+    error_logger:error_msg("Unexpected cast ~p", [Msg]),
     {noreply, State}.
 
 %%--------------------------------------------------------------------
@@ -141,6 +165,7 @@ handle_info({'EXIT', Pid, Error}, #state{tasks_executed = Execs,
     State2 = kick_tasks(State1),
     {noreply, State2};
 handle_info(_Info, State) ->
+    error_logger:error_msg("Unexpected cast ~p", [_Info]),
     {noreply, State}.
 
 terminate(_Reason, _State) ->

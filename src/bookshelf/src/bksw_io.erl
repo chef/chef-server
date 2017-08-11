@@ -34,6 +34,9 @@
          finish_write/1]).
 
 -export([
+         sql_migration_complete_marker_path/0,
+         is_sql_migration_complete/0,
+         mark_sql_migration_complete/0,
          disk_format_version/0,
          ensure_disk_store/0,
          upgrade_disk_format/0
@@ -48,6 +51,7 @@
 %% file since that reduces the chance of missing the version file
 %% as part of backup/restore.
 -define(FORMAT_VERSION_FILE, "_%_BOOKSHELF_DISK_FORMAT").
+-define(MIGRATION_TO_SQL_COMPLETE_SENTINEL, "_%_MIGRATION_TO_SQL_COMPLETE").
 -define(MAGIC_NUMBER, <<16#b00c:16/integer>>).
 -define(MAGIC_NUMBER_SIZE_BYTES, 2).
 -define(CHECKSUM_SIZE_BYTES, 16).
@@ -312,6 +316,21 @@ make_buckets(Root, [BucketDir|T], Buckets) ->
                        Buckets
                end,
     make_buckets(Root, T, Buckets1).
+
+
+%% Migration to SQL marker
+sql_migration_complete_marker_path() ->
+    Root = bksw_conf:disk_store(),
+    filename:join([Root, ?MIGRATION_TO_SQL_COMPLETE_SENTINEL]).
+
+is_sql_migration_complete() ->
+    filelib:is_file(sql_migration_complete_marker_path()).
+
+
+mark_sql_migration_complete() ->
+    Path = sql_migration_complete_marker_path(),
+    ok = file:write_file(Path, "Sql Migration Complete"),
+    ok.
 
 %% @doc Return the on disk format version. If no version file is
 %% found, returns `{version, 0}' which is the first shipping format.
