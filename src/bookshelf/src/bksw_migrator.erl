@@ -212,6 +212,7 @@ simple_migrator() ->
 %% The actual file migration generates a lot of binary garbage; we execute it
 %% in a separate process to trigger GC.
 migrate_file_step({Bucket, File}, Acc) ->
+    process_flag(trap_exit, true),
     Pid = self(),
     spawn_link(fun() -> migrate_process(Bucket, File) end),
     receive
