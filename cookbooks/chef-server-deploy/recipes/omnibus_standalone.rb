@@ -17,14 +17,105 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-node.default['delivery']['delivery_server_fqdn'] = server_fqdn_for('automate')
-node.default['delivery']['chef_server_fqdn'] = server_fqdn_for('chef-server')
-node.default['delivery']['supermarket_fqdn'] = server_fqdn_for('supermarket')
-node.default['delivery']['chef_cert_filename'] = 'wildcard.chef.co.crt'
-node.default['delivery']['chef_key_filename'] = 'wildcard.chef.co.key'
-node.default['delivery']['enable_liveness_agent'] = (environment == 'delivered' ? true : false)
+node.default['chef-server-deploy']['automate_server_fqdn'] = server_fqdn_for('automate')
+node.default['chef-server-deploy']['chef_server_fqdn'] = server_fqdn_for('chef-server')
+node.default['chef-server-deploy']['supermarket_fqdn'] = server_fqdn_for('supermarket')
+node.default['chef-server-deploy']['enable_liveness_agent'] = (environment == 'delivered' ? true : false)
 
-include_recipe 'chefops-dcc::chef-server'
+################################################################################
+# Chef Server
+################################################################################
+cert_filename = "/etc/opscode/#{node['chef-server-deploy']['chef_cert_filename']}"
+key_filename  = "/etc/opscode/#{node['chef-server-deploy']['chef_key_filename']}"
+automate_liveness_recipe_path = '/etc/opscode/automate-liveness-recipe.rb'
+
+directory '/etc/opscode' do
+  mode '0755'
+end
+
+file cert_filename do
+  mode '0600'
+  content citadel[node['chef-server-deploy']['chef_cert_filename']]
+end
+
+file key_filename do
+  mode '0600'
+  content citadel[node['chef-server-deploy']['chef_key_filename']]
+end
+
+if node['chef-server-deploy']['enable_liveness_agent']
+  remote_file automate_liveness_recipe_path do
+    source liveness_agent_recipe_url
+    mode 0644
+    notifies :reconfigure, 'chef_ingredient[chef-server]'
+  end
+end
+
+chef_ingredient 'chef-server' do
+  channel omnibus_channel_for_environment('chef-server')
+  version version_for_environment('chef-server')
+  # We need to reconfigure after an install/upgrade
+  notifies :reconfigure, 'chef_ingredient[chef-server]'
+
+  action :upgrade
+end
+
+template '/etc/opscode/chef-server.rb' do
+  source 'chef-server.rb.erb'
+  variables(
+    chef_server_deploy: node['chef-server-deploy'],
+    chef_cert_filename: cert_filename,
+    chef_key_filename: key_filename,
+    required_recipe_path: automate_liveness_recipe_path
+  )
+  notifies :reconfigure, 'chef_ingredient[chef-server]', :immediately
+end
+
+################################################################################
+# Push Jobs Server
+################################################################################
+chef_ingredient 'push-jobs-server' do
+  channel :stable
+  platform_version_compatibility_mode true
+  action :upgrade
+  # We need to reconfigure after an install/upgrade
+  notifies :reconfigure, 'chef_ingredient[push-jobs-server]'
+end
+
+ingredient_config 'push-jobs-server' do
+  notifies :reconfigure, 'chef_ingredient[push-jobs-server]'
+end
+
+################################################################################
+# Chef Manage
+################################################################################
+chef_ingredient 'manage' do
+  channel :stable
+  accept_license true
+  if node['chef-server-deploy']['enable_saml']
+    config <<-EOF.gsub(/^\s+/, '')
+    saml.enabled true
+    saml.issuer_url 'https://#{node['chef-server-deploy']['automate_server_fqdn']}/api/v0'
+    EOF
+  end
+  action :upgrade
+  # We need to reconfigure after an install/upgrade
+  notifies :reconfigure, 'chef_ingredient[manage]'
+end
+
+if node['chef-server-deploy']['enable_saml']
+  chef_server_secret 'saml.client_id' do
+    value 'manage'
+  end
+
+  chef_server_secret 'saml.client_secret' do
+    value citadel['manage_oidc_client_secret']
+  end
+end
+
+ingredient_config 'manage' do
+  notifies :reconfigure, 'chef_ingredient[manage]'
+end
 
 # By default we daemonize chef-client across all of our infrastructure nodes. We
 # do not want this behavior on the Chef Server instances as we want the pipeline

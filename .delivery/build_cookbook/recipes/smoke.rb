@@ -20,6 +20,7 @@
 
 # Trigger the Jenkins smoke tests
 expeditor_jenkins_job "#{workflow_change_project}-test" do # ~FC005
+  build_version get_workflow_application_release(workflow_change_project)['version']
   git_ref workflow_change_merge_sha
   initiated_by workflow_project_slug
   action :trigger_async
@@ -62,6 +63,7 @@ end
 
 # Wait for the Jenkins smoke tests to complete
 expeditor_jenkins_job "#{workflow_change_project}-test" do
+  build_version get_workflow_application_release(workflow_change_project)['version']
   git_ref workflow_change_merge_sha
   initiated_by workflow_project_slug
   action :wait_until_complete
