@@ -29,10 +29,12 @@ end
 
 # Only perform SSL verification on hosts where we know the SSL certs are
 # properly configured
-verify = fetch_target_host.include?('cd.chef.co') ? false : true
+verify = false # TODO: switch this back after JEX-633 is complete
+# verify = fetch_target_host.include?('cd.chef.co') ? false : true
+
 chef_server_version = fetch_chef_server_version
 
-describe http("https://#{fetch_target_host}/_status") do
+describe http("https://#{fetch_target_host}/_status", ssl_verify: verify) do
   its('status') { should eq 200 }
 end
 
