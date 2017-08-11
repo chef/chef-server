@@ -23,7 +23,6 @@ expeditor_jenkins_job "#{workflow_change_project}-test" do # ~FC005
   git_ref workflow_change_merge_sha
   initiated_by workflow_project_slug
   action :trigger_async
-  not_if { skip_omnibus_build? }
   only_if { workflow_stage?('acceptance') }
 end
 
@@ -66,6 +65,5 @@ expeditor_jenkins_job "#{workflow_change_project}-test" do
   git_ref workflow_change_merge_sha
   initiated_by workflow_project_slug
   action :wait_until_complete
-  not_if { skip_omnibus_build? }
   only_if { workflow_stage?('acceptance') }
 end
