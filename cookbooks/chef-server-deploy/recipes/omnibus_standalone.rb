@@ -25,6 +25,27 @@ node.default['chef-server-deploy']['enable_liveness_agent'] = (environment == 'd
 ################################################################################
 # Chef Server
 ################################################################################
+
+# Ensure `opscode` user exists so we can set SSL cert ownership correctly.
+# We create the user and group in the way, with the same settings as the
+# Chef recipes that execute during `chef-server-ctl reconfigure`. See the
+# following links for more:
+#
+#   https://git.io/v7Hg6
+#   https://git.io/v7Hgi
+#   https://git.io/v7HgX
+#
+
+user 'opscode' do
+  system true
+  shell '/bin/sh'
+  home '/opt/opscode/embedded'
+end
+
+group 'opscode' do
+  members [ 'opscode' ]
+end
+
 cert_filename = "/etc/opscode/#{node['chef-server-deploy']['chef_cert_filename']}"
 key_filename  = "/etc/opscode/#{node['chef-server-deploy']['chef_key_filename']}"
 automate_liveness_recipe_path = '/etc/opscode/automate-liveness-recipe.rb'
@@ -34,11 +55,15 @@ directory '/etc/opscode' do
 end
 
 file cert_filename do
+  user 'opscode'
+  group 'root'
   mode '0600'
   content citadel[node['chef-server-deploy']['chef_cert_filename']]
 end
 
 file key_filename do
+  user 'opscode'
+  group 'root'
   mode '0600'
   content citadel[node['chef-server-deploy']['chef_key_filename']]
 end
