@@ -28,7 +28,8 @@
          stats/0,
          error_list/0,
          is_idle/0,
-        wait_for_idle/0]).
+         wait_for_idle/0,
+         log_state/0]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -78,6 +79,9 @@ wait_for_idle() ->
             ok
     end.
 
+log_state() ->
+    gen_server:call(?MODULE, log_state).
+
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
@@ -85,6 +89,7 @@ start_link() ->
 %%% gen_server callbacks
 %%%===================================================================
 init([]) ->
+    process_flag(trap_exit, true), %% We don't want to die
     {ok, #state{task_queue = queue:new(),
                 active_tasks = #{}
                }}.
@@ -96,10 +101,12 @@ handle_call({add_task, Task, Data}, _From, State) ->
     State1 = queue_task(State, TaskDesc),
     State2 = kick_tasks(State1),
     {reply, ok, State2};
-handle_call(stats, _From, #state{tasks_executed = E,
+handle_call(stats, _From, #state{tasks_started = S,
+                                 tasks_executed = E,
                                  tasks_queued = L,
                                  active_tasks = A} = State) ->
-    {reply, #{tasks_executed => E,
+    {reply, #{tasks_started => S,
+              tasks_executed => E,
               tasks_queued => L,
               active_tasks => A}, State};
 handle_call(error_list, _From, #state{error_list = L} = State) ->
@@ -108,6 +115,13 @@ handle_call(is_idle, _From, #state{active_tasks = #{}, tasks_queued = 0} = State
     {reply, true, State};
 handle_call(is_idle, _From, #state{} = State) ->
     {reply, false, State};
+handle_call(log_state, _From, #state{tasks_started = S,
+                                     tasks_executed = E,
+                                     tasks_queued = L,
+                                     active_tasks = A} = State) ->
+    error_logger:info_msg("Executor task status: queued ~p started ~p executed ~p in_flight ~p",
+                          [L, S, E, map_size(A)]),
+    {reply, ok, State};
 handle_call(Msg, _, State) ->
     error_logger:error_msg("Unexpected call ~p", [Msg]),
     {reply, ok, State}.
@@ -126,16 +140,18 @@ handle_cast(Msg, State) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
+%% This would be neater in R19 when we have 'take'
 handle_info({'EXIT', Pid, normal}, #state{tasks_executed = E,
                                           active_tasks = Active} = State) ->
     %% One of our linked processes has exited normally
-    State1 = case map:take(Pid, Active) of
-                 {Active2, _Task} ->
-                     State#state{tasks_executed = E+1,
-                                 active_tasks = Active2};
-                 error ->
+    State1 = case maps:get(Pid, Active, undefined) of
+                 undefined ->
                      %% huh, no record of this task, strange
-                     error_logger:error_msg("bksw_executor unexpected task exit ~p", [Pid])
+                     error_logger:error_msg("bksw_executor unexpected task exit ~p", [Pid]);
+                 _Task ->
+                     Active2 = maps:remove(Pid, Active),
+                     State#state{tasks_executed = E+1,
+                                 active_tasks = Active2}
              end,
     State2 = kick_tasks(State1),
     {noreply, State2};
@@ -145,27 +161,32 @@ handle_info({'EXIT', Pid, Error}, #state{tasks_executed = Execs,
                                          max_retries = MaxRetries,
                                          error_list = ErrorList} = State) ->
     %% One of our linked processes has exited with an error
-    State1 = case map:take(Pid, Active) of
-                 {#{retries := R} = Active2, Task} when R < MaxRetries ->
-                     %% Do a retry
-                     queue_task(State#state{tasks_executed = Execs+1,
-                                            tasks_errored = Errors+1,
-                                            active_tasks = Active2},
-                                Task#{retries => R+1} );
-                 {Active2, Task} ->
-                     %% no more retires, mark as an error
-                     State#state{tasks_executed = Execs+1,
-                                 tasks_errored = Errors+1,
-                                 active_tasks = Active2,
-                                 error_list = [{Task, Error} | ErrorList]};
+    error_logger:error_msg("bksw_executor unexpected exit ~p ~p~n~p", [Pid, Error, State]),
+    State1 = case maps:get(Pid, Active, undefined) of
                  error ->
                      %% huh, no record of this task, strange
-                     error_logger:error_msg("bksw_executor unexpected task exit ~p", [Pid])
+                     error_logger:error_msg("bksw_executor unexpected task exit ~p", [Pid]);
+                 Task ->
+                     Active2 = maps:remove(Pid, Active),
+                     case Task of
+                         #{retries := R} when R < MaxRetries ->
+                             %% Do a retry
+                             queue_task(State#state{tasks_executed = Execs+1,
+                                                    tasks_errored = Errors+1,
+                                                    active_tasks = Active2},
+                                        Task#{retries => R+1} );
+                         _ ->
+                             %% no more retires, mark as an error
+                             State#state{tasks_executed = Execs+1,
+                                         tasks_errored = Errors+1,
+                                         active_tasks = Active2,
+                                         error_list = [{Task, Error} | ErrorList]}
+                     end
              end,
     State2 = kick_tasks(State1),
     {noreply, State2};
 handle_info(_Info, State) ->
-    error_logger:error_msg("Unexpected cast ~p", [_Info]),
+    error_logger:error_msg("Unexpected info ~p", [_Info]),
     {noreply, State}.
 
 terminate(_Reason, _State) ->
@@ -183,7 +204,8 @@ queue_task(#state{tasks_queued = L, task_queue = Q} = State, TaskDesc) ->
     State#state{tasks_queued = L+1, task_queue = queue:in(TaskDesc, Q) }.
 
 %% If we have an available slot, remove a task from the task queue and run it
-kick_tasks(#state{tasks_queued = L, task_queue = Q, active_tasks = Active, max_tasks = MaxTasks} = State)
+kick_tasks(#state{tasks_started = S, tasks_queued = L, task_queue = Q,
+                  active_tasks = Active, max_tasks = MaxTasks} = State)
   when map_size(Active) < MaxTasks ->
     case queue:out(Q) of
         %% get a task to start
@@ -192,7 +214,8 @@ kick_tasks(#state{tasks_queued = L, task_queue = Q, active_tasks = Active, max_t
             Pid = spawn_link(fun() -> Task(Data) end),
 
             %% We may have multiple open slots available, so recurse
-            kick_tasks(State#state{tasks_queued = L - 1,
+            kick_tasks(State#state{tasks_started = S + 1,
+                                   tasks_queued = L - 1,
                                    task_queue = Q1,
                                    active_tasks = maps:put(Pid, TaskDesc, Active) });
         {empty, Q} ->

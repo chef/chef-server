@@ -50,5 +50,11 @@ init(_Args) ->
                  shutdown => brutal_kill,
                  type => worker,
                  modules => [bksw_migrator]},
-    {ok, {SupFlags, [Migrator]}}.
+    Executor = #{id => bksw_executor,
+                 start => {bksw_executor, start_link, []},
+                 restart => permanent,
+                 shutdown => brutal_kill,
+                 type => worker,
+                 modules => [bksw_executor]},
+    {ok, {SupFlags, [Migrator, Executor]}}.
 

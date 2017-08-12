@@ -29,7 +29,8 @@
          reset_dispatch/0,
          secret_access_key/1,
          stream_download/0,
-         summarize_config/0]).
+         summarize_config/0,
+         auto_start_migration/0]).
 
 %% Exported for common test
 -ifdef(TEST).
@@ -175,3 +176,7 @@ sql_retry_delay() ->
 
 sql_retry_count() ->
     envy:get(bookshelf, sql_retry_count, 0, integer).
+
+auto_start_migration() ->
+    %% TODO Make this true
+    envy:get(bookshelf, auto_start_migration, false, boolean).

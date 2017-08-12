@@ -24,9 +24,10 @@
 
 %% API
 -export([start_link/0,
-         add_bucket/1,
+         update_phase/1,
          add_files/2,
          mark_file_migrated/2,
+         start_migration/0,
          stats/0]).
 
 %% gen_server callbacks
@@ -39,24 +40,19 @@
 -define(SERVER, ?MODULE).
 
 -record(state, {
-          buckets_to_migrate = 0:: integer,
-          buckets_migrated = 0 :: integer,
           files_to_migrate = 0:: integer,
           files_migrated = 0:: integer,
 
           current_phase = listing_buckets :: all_at_once | listing_buckets | listing_files | migrating_buckets | done,
-          buckets = [] :: [binary()],
-          work_queue = [] :: list(),
-          workers_in_flight :: [{atom(), {}}]
-
+          migration_worker = undefined :: undefined | pid()
          }).
 
 %%%===================================================================
 %%% API
 %%%===================================================================
 
-add_bucket(Bucket) ->
-    gen_server:call(?MODULE, {add_bucket, Bucket}).
+update_phase(Phase) ->
+    gen_server:call(?MODULE, {update_phase, Phase}).
 
 add_files(Bucket, Files) ->
     gen_server:call(?MODULE, {add_file, Bucket, Files}).
@@ -64,17 +60,13 @@ add_files(Bucket, Files) ->
 mark_file_migrated(Bucket, File) ->
     gen_server:call(?MODULE, {file_migrated, Bucket, File}).
 
+%% For testing
+start_migration() ->
+    gen_server:call(?MODULE, start_migration).
+
 stats() ->
     gen_server:call(?MODULE, stats).
 
-
-%%--------------------------------------------------------------------
-%% @doc
-%% Starts the server
-%%
-%% @spec start_link() -> {ok, Pid} | ignore | {error, Error}
-%% @end
-%%--------------------------------------------------------------------
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
@@ -82,25 +74,15 @@ start_link() ->
 %%% gen_server callbacks
 %%%===================================================================
 
-
-
-
-%%--------------------------------------------------------------------
-%% @private
-%% @doc
-%% Initializes the server
-%%
-%% @spec init(Args) -> {ok, State} |
-%%                     {ok, State, Timeout} |
-%%                     ignore |
-%%                     {stop, Reason}
-%% @end
-%%--------------------------------------------------------------------
 init([]) ->
-%    InFlight = spawn_link(fun () -> simple_migrator() end ),
-    InFlight = undefined,
+    InFlight = case bksw_conf:auto_start_migration() of
+                   true ->
+                       spawn_link(fun () -> simple_migrator() end);
+                   false ->
+                       undefined
+               end,
     {ok, #state{current_phase = all_at_once,
-                workers_in_flight = [{InFlight, all_at_once}] }}.
+                migration_worker = InFlight}}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -118,9 +100,24 @@ init([]) ->
 %%--------------------------------------------------------------------
 handle_call({file_migrated, _Bucket, _File}, _From, #state{files_migrated = M} = State) ->
     {reply, ok, State#state{files_migrated = M+1}};
-handle_call(stats, _From, #state{files_migrated = M} = State) ->
-    {reply, #{files_migrated => M}, State};
-handle_call(_Request, _From, State) ->
+handle_call({update_phase, Phase}, _From, #state{} = State) ->
+    {reply, ok, State#state{current_phase = Phase}};
+handle_call(stats, _From, #state{files_migrated = M,
+                                 current_phase = Phase,
+                                 migration_worker = W} = State) ->
+    error_logger:error_msg("bksw_migrator status ~p~n~n", [State]),
+    {reply, #{files_migrated => M,
+              current_phase => Phase,
+              migration_worker => W
+             }, State};
+handle_call(start_migration, _From, #state{migration_worker = undefined} = State) ->
+    InFlight = spawn_link(fun () -> simple_migrator() end ),
+    {reply, ok, State#state{migration_worker = InFlight} };
+handle_call(start_migration, _From, #state{migration_worker = W} = State) ->
+    error_logger:error_msg("Migration worker already in flight ~p", [W]),
+    {reply, ok, State };
+handle_call(Request, _From, State) ->
+    error_logger:error_msg("Unexpected call ~p", [Request, State]),
     Reply = ok,
     {reply, Reply, State}.
 
@@ -134,7 +131,8 @@ handle_call(_Request, _From, State) ->
 %%                                  {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
-handle_cast(_Msg, State) ->
+handle_cast(Msg, State) ->
+    error_logger:error_msg("Unexpected cast ~p", [Msg]),
     {noreply, State}.
 
 %%--------------------------------------------------------------------
@@ -147,19 +145,18 @@ handle_cast(_Msg, State) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
-handle_info({'EXIT', Pid, Reason}, #state{workers_in_flight = Workers} = State) ->
-    %% One of our linked processes has died
-    State1 =
-        case lists:keytake(Pid, 1, Workers) of
-            {value, {Pid, Description}, Workers1} ->
-                error_logger:error_msg("Migration worker ~p has died with error ~p", [Description, Workers1]),
-                State#state{workers_in_flight = Workers1};
-            false ->
-                error_logger:error_msg("Migration unexpected worker ~p has died with error ~p", [Pid, Reason]),
-                State
-        end,
+handle_info({'EXIT', Pid, normal}, #state{migration_worker = Pid} = State) ->
+    %% The migration worker has exited normally
+    State1 = State#state{migration_worker = undefined},
+    error_logger:info_msg("Migration unexpected worker completed has completed", []),
+    {noreply, State1};
+handle_info({'EXIT', Pid, Error}, #state{migration_worker = Pid} = State) ->
+    %% The migration worker has died unexpectedly
+    State1 = State#state{migration_worker = undefined},
+    error_logger:info_msg("Migration worker unexpectedly has died", [Pid, Error]),
     {noreply, State1};
 handle_info(_Info, State) ->
+     error_logger:error_msg("Migratior recieved unexpected info msg", [_Info, State]),
     {noreply, State}.
 
 %%--------------------------------------------------------------------
@@ -214,7 +211,12 @@ migrate_unless_done_already(false) ->
     %% stuff the task execution system with the list of files to migrate
     [ bksw_executor:add_task( fun({B,F}) -> migrate_process(B, F) end, Entry) ||
         Entry <- Files ],
+
+    error_logger:info_msg("Waiting for migration to finish"),
+
     bksw_executor:wait_for_idle(),
+
+    error_logger:info_msg("Migration complete"),
 
     Errors = bksw_executor:error_list(),
 
