@@ -116,7 +116,6 @@ end
 
 # Configure Services
 [
-  "rabbitmq",
   "postgresql",
   "oc_bifrost",
   "oc_id",
@@ -128,6 +127,7 @@ end
   "opscode-chef-mover",
   "redis_lb",
   "nginx",
+  "rabbitmq",
   "keepalived"
 ].each do |service|
   if node["private_chef"][service]["external"]
