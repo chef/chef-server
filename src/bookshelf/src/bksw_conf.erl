@@ -179,4 +179,4 @@ sql_retry_count() ->
 
 auto_start_migration() ->
     %% TODO Make this true
-    envy:get(bookshelf, auto_start_migration, false, boolean).
+    envy:get(bookshelf, auto_start_migration, true, boolean).
