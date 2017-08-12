@@ -27,7 +27,6 @@ default['chef-server-deploy']['delivery_chef_org'] = 'delivery'
 # Key locations
 default['chef-server-deploy']['chef_cert_filename'] = 'wildcard.chef.co.crt'
 default['chef-server-deploy']['chef_key_filename'] = 'wildcard.chef.co.key'
-default['chef-server-deploy']['license_base64_encoded'] = false
 
 # Automatic node run data collection (token randomly generated with `SecureRandom.hex(32)`)
 default['chef-server-deploy']['data_collection_token'] = 'e120f9ed31db404889bf0f40d83673fddf0d07d1b906643717675733ae56ea55'

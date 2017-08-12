@@ -80,6 +80,7 @@ chef_ingredient 'push-jobs-server' do
   action :upgrade
   # We need to reconfigure after an install/upgrade
   notifies :reconfigure, 'chef_ingredient[push-jobs-server]'
+  notifies :reconfigure, 'chef_ingredient[chef-server]'
 end
 
 ingredient_config 'push-jobs-server' do
@@ -156,7 +157,7 @@ EOF
 end
 
 #########################################################################
-# Create default admin users and organizations
+# Create default users and organizations
 #########################################################################
 
 # This ensures the admin user's password is set to a known value across all
@@ -170,27 +171,41 @@ chef_user 'admin' do
   serveradmin true
 end
 
-chef_user 'delivery' do
-  first_name 'Delivery'
-  last_name 'Admin'
-  email 'eng-services-ops#delivery@chef.io'
-  password citadel['automate_admin_password'].chomp
-  serveradmin true
+# Users
+{
+  'delivery' => {
+    password: citadel['automate_admin_password'].chomp,
+    serveradmin: true,
+  },
+  'expeditor' => {
+    password: citadel['expeditor_password'].chomp,
+    serveradmin: false,
+  }
+}.each do |user_name, user_options|
+
+  chef_user user_name do
+    first_name 'Chef'
+    last_name user_name.capitalize
+    email "eng-services-ops##{user_name}@chef.io"
+    password user_options[:password]
+    serveradmin user_options[:serveradmin]
+  end
+
+  file "/etc/opscode/users/#{user_name}-2.pem.pub" do
+    content OpenSSL::PKey::RSA.new(citadel["#{user_name}.pem"]).public_key.to_s
+    user 'root'
+    group 'root'
+    mode '0644'
+  end
+
+  # TODO: Do this in resource
+  execute "add-#{user_name}-user-key" do
+    command lazy { "chef-server-ctl add-user-key #{user_name} --public-key-path /etc/opscode/users/#{user_name}-2.pem.pub --key-name #{user_name}-2" }
+    not_if "chef-server-ctl list-user-keys #{user_name} | grep #{user_name}-2"
+  end
 end
 
-file '/etc/opscode/users/delivery-2.pem.pub' do
-  content OpenSSL::PKey::RSA.new(citadel['delivery.pem']).public_key.to_s
-  user 'root'
-  group 'root'
-  mode '0644'
-end
-
-# TODO: Do this in resource
-execute 'add-delivery-user-key' do
-  command lazy { 'chef-server-ctl add-user-key delivery --public-key-path /etc/opscode/users/delivery-2.pem.pub --key-name delivery-2' }
-  not_if 'chef-server-ctl list-user-keys delivery | grep delivery-2'
-end
-
+# Orgs
 %w(
   chef
   chef-cd
@@ -201,24 +216,4 @@ end
       delivery
     )
   end
-end
-
-# This is the user Chef Expeditor will use to interact with the Chef Server
-chef_user 'expeditor' do
-  first_name 'Chef'
-  last_name 'Expeditor'
-  email 'eng-services-ops#expeditor@chef.io'
-  password citadel['expeditor_password'].chomp
-end
-
-file '/etc/opscode/users/expeditor-2.pem.pub' do
-  content OpenSSL::PKey::RSA.new(citadel['expeditor.pem']).public_key.to_s
-  user 'root'
-  group 'root'
-  mode '0644'
-end
-
-execute 'add-expeditor-user-key' do
-  command lazy { 'chef-server-ctl add-user-key expeditor --public-key-path /etc/opscode/users/expeditor-2.pem.pub --key-name expeditor-2' }
-  not_if 'chef-server-ctl list-user-keys expeditor | grep expeditor-2'
 end
