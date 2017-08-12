@@ -79,12 +79,8 @@ template config_file do
   variables(rabbitmq.to_hash)
 end
 
-# reuse nginx certs for RabbitMQ Management Plugin
-nginx_dir = node['private_chef']['nginx']['dir']
-nginx_ca_dir = File.join(nginx_dir, 'ca')
-ssl_keyfile = File.join(nginx_ca_dir, "#{node['private_chef']['nginx']['server_name']}.key")
-ssl_crtfile = File.join(nginx_ca_dir, "#{node['private_chef']['nginx']['server_name']}.crt")
-
+ssl_crtfile = node['private_chef']['nginx']['ssl_certificate']
+ssl_keyfile = node['private_chef']['nginx']['ssl_certificate_key']
 ssl_versions = node['private_chef']['rabbitmq']['ssl_versions'].map{ |v| "'#{v}'"}.join(",")
 
 template "#{rabbitmq_etc_dir}/rabbitmq.config" do
