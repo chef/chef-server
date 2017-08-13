@@ -9,9 +9,7 @@ module "chef_server_omnibus_standalone_inplace_upgrade_server" {
   aws_private_key      = "${var.aws_private_key}"
   aws_key_name         = "${var.aws_key_name}"
   aws_root_volume_size = 200
-
-  # This value will be switched to chef-server after a migration
-  aws_subdomain = "chef-server-2"
+  aws_subdomain        = "chef-server"
 
   # AWS Tags
   aws_tag_chef_product      = "chef-server"
