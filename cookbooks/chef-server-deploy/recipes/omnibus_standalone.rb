@@ -18,7 +18,7 @@
 # limitations under the License.
 
 node.default['chef-server-deploy']['automate_server_fqdn'] = server_fqdn_for('automate')
-node.default['chef-server-deploy']['chef_server_fqdn'] = server_fqdn_for('chef-server-2')
+node.default['chef-server-deploy']['chef_server_fqdn'] = server_fqdn_for('chef-server')
 node.default['chef-server-deploy']['supermarket_fqdn'] = server_fqdn_for('supermarket')
 node.default['chef-server-deploy']['enable_liveness_agent'] = (environment == 'delivered' ? true : false)
 
