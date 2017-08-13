@@ -3,5 +3,7 @@
 *                                @chef/chef-server-maintainers
 .delivery/**                     @chef/acc-maintainers
 .expeditor/**                    @chef/engineering-services
+.travis.yml                      @chef/chef-server-maintainers @chef/engineering-services
 cookbooks/chef-server-deploy/**  @chef/acc-maintainers
+inspec/**                        @chef/acc-maintainers
 terraform/**                     @chef/acc-maintainers
