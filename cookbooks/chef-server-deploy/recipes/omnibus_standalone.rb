@@ -43,7 +43,7 @@ user 'opscode' do
 end
 
 group 'opscode' do
-  members [ 'opscode' ]
+  members ['opscode']
 end
 
 cert_filename = "/etc/opscode/#{node['chef-server-deploy']['chef_cert_filename']}"
@@ -205,7 +205,7 @@ end
   'expeditor' => {
     password: citadel['expeditor_password'].chomp,
     serveradmin: false,
-  }
+  },
 }.each do |user_name, user_options|
 
   chef_user user_name do
