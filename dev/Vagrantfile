@@ -186,7 +186,10 @@ def define_chef_server(config, attributes)
       elasticsearch = { "opscode_solr4['external']" => "true",
                         "opscode_solr4['external_url']" => '"http://elasticsearch:9200"',
                         "opscode_erchef['search_provider']" => '"elasticsearch"',
-                        "opscode_erchef['search_queue_mode']" => '"batch"'
+                        "opscode_erchef['search_queue_mode']" => '"batch"',
+                        "rabbitmq['enabled']" => "false",
+                        "rabbitmq['management_enabled']" => "false",
+                        "dark_launch['actions']" => "false"
       }
       json = simple_deep_merge(json, { "provisioning" => { "chef-server-config" => elasticsearch } })
     end
