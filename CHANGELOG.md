@@ -1,16 +1,17 @@
 # Chef Server Changelog
 
-<!-- latest_release 12.15.25 -->
-## [12.15.25](https://github.com/chef/chef-server/tree/12.15.25) (2017-08-15)
+<!-- latest_release 12.15.26 -->
+## [12.15.26](https://github.com/chef/chef-server/tree/12.15.26) (2017-08-15)
 
 #### Merged Pull Requests
-- [erchef] Remove input validation for user info [#1343](https://github.com/chef/chef-server/pull/1343) ([stevendanna](https://github.com/stevendanna))
+- Set the correct owner and permissions for SSL certificate and key [#1370](https://github.com/chef/chef-server/pull/1370) ([jaym](https://github.com/jaym))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.15.8 -->
 ### Changes since 12.15.8 release
 
 #### Merged Pull Requests
+- Set the correct owner and permissions for SSL certificate and key [#1370](https://github.com/chef/chef-server/pull/1370) ([jaym](https://github.com/jaym)) <!-- 12.15.26 -->
 - [erchef] Remove input validation for user info [#1343](https://github.com/chef/chef-server/pull/1343) ([stevendanna](https://github.com/stevendanna)) <!-- 12.15.25 -->
 - [omnibus] bump postgres versions [#1372](https://github.com/chef/chef-server/pull/1372) ([srenatus](https://github.com/srenatus)) <!-- 12.15.24 -->
 - Use NGINX cert path attributes to configure RabbitMQ [#1366](https://github.com/chef/chef-server/pull/1366) ([schisamo](https://github.com/schisamo)) <!-- 12.15.21 -->
