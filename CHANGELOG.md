@@ -1,16 +1,17 @@
 # Chef Server Changelog
 
-<!-- latest_release 12.15.24 -->
-## [12.15.24](https://github.com/chef/chef-server/tree/12.15.24) (2017-08-15)
+<!-- latest_release 12.15.25 -->
+## [12.15.25](https://github.com/chef/chef-server/tree/12.15.25) (2017-08-15)
 
 #### Merged Pull Requests
-- [omnibus] bump postgres versions [#1372](https://github.com/chef/chef-server/pull/1372) ([srenatus](https://github.com/srenatus))
+- [erchef] Remove input validation for user info [#1343](https://github.com/chef/chef-server/pull/1343) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.15.8 -->
 ### Changes since 12.15.8 release
 
 #### Merged Pull Requests
+- [erchef] Remove input validation for user info [#1343](https://github.com/chef/chef-server/pull/1343) ([stevendanna](https://github.com/stevendanna)) <!-- 12.15.25 -->
 - [omnibus] bump postgres versions [#1372](https://github.com/chef/chef-server/pull/1372) ([srenatus](https://github.com/srenatus)) <!-- 12.15.24 -->
 - Use NGINX cert path attributes to configure RabbitMQ [#1366](https://github.com/chef/chef-server/pull/1366) ([schisamo](https://github.com/schisamo)) <!-- 12.15.21 -->
 - Fixed deleting ES indexes for ES5 and ES2 [#1367](https://github.com/chef/chef-server/pull/1367) ([lancewf](https://github.com/lancewf)) <!-- 12.15.20 -->
