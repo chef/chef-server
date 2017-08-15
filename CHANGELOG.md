@@ -1,16 +1,17 @@
 # Chef Server Changelog
 
-<!-- latest_release 12.15.26 -->
-## [12.15.26](https://github.com/chef/chef-server/tree/12.15.26) (2017-08-15)
+<!-- latest_release 12.16.2 -->
+## [12.16.2](https://github.com/chef/chef-server/tree/12.16.2) (2017-08-15)
 
 #### Merged Pull Requests
-- Set the correct owner and permissions for SSL certificate and key [#1370](https://github.com/chef/chef-server/pull/1370) ([jaym](https://github.com/jaym))
+- Revert &quot;Make root own the certs, but part of the opscode group&quot; [#1376](https://github.com/chef/chef-server/pull/1376) ([jaym](https://github.com/jaym))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.15.8 -->
 ### Changes since 12.15.8 release
 
 #### Merged Pull Requests
+- Revert &quot;Make root own the certs, but part of the opscode group&quot; [#1376](https://github.com/chef/chef-server/pull/1376) ([jaym](https://github.com/jaym)) <!-- 12.16.2 -->
 - Set the correct owner and permissions for SSL certificate and key [#1370](https://github.com/chef/chef-server/pull/1370) ([jaym](https://github.com/jaym)) <!-- 12.15.26 -->
 - [erchef] Remove input validation for user info [#1343](https://github.com/chef/chef-server/pull/1343) ([stevendanna](https://github.com/stevendanna)) <!-- 12.15.25 -->
 - [omnibus] bump postgres versions [#1372](https://github.com/chef/chef-server/pull/1372) ([srenatus](https://github.com/srenatus)) <!-- 12.15.24 -->
