@@ -301,8 +301,6 @@ parse_binary_json(_ApiVersion, Bin, Operation, User) ->
 %% If user is invalid, an error is thrown
 common_user_validation(EJ, User, Operation) ->
     validate_user_name(EJ),
-    lists:map(fun(Field) -> validate_field(EJ, Field) end,
-              [first_name, middle_name, last_name, display_name]),
     chef_object_base:validate_ejson(EJ, user_spec(common)),
     chef_object_base:validate_ejson(EJ, user_spec(Operation)),
 
@@ -342,22 +340,6 @@ delete_null_public_key(Ejson) ->
             ej:delete({<<"public_key">>}, Ejson);
         _ ->
             Ejson
-    end.
-
-validate_field(User, Field) ->
-    Key = erlang:atom_to_binary(Field, latin1),
-    validate_field(User, Field, Key, ej:get([Key], User)).
-
-validate_field(_User, _Field, _Key, undefined) ->
-    ok;
-validate_field(User, Field, Key, _) ->
-    RE = chef_regex:regex_for(Field),
-    KeySpec = {[ {Key, {string_match, RE}} ]},
-    case ej:valid(KeySpec, User) of
-        ok ->
-            ok;
-        BadSpec ->
-            throw(BadSpec#ej_invalid{key = Key})
     end.
 
 %% Our user spec does not include 'username' because one of
