@@ -7,13 +7,8 @@ in the release. For a detailed list of changed components, refer to
 This document contains release notes for the current major release and all patches.
 For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
-## 12.15.X (TBD)
+## 12.16.1 (2017-08-15)
 
-* [Notification of affected services when updating secrets with set-secret](https://github.com/chef/chef-server/pull/1313):
-  `chef-server-ctl set-secret` will notify the user of services that depend on
-  the secret being changed. With the optional flag `--with-restart`,
-  `chef-server-ctl set-secret` will attempt to automatically restart the
-  dependent services.
 * [Upgrade to PostgreSQL 9.6](https://github.com/chef/chef-server/pull/1310),
   Chef Server now uses the latest stable version of the 9.6 series (9.6.3). Upgrades of existing
   installations are done automatically, but creating backups is advised.
@@ -43,6 +38,10 @@ For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
   As part of the upgrade procdure, running `chef-server-ctl cleanup` will remove Postgres 9.2's data
   and logs.
+
+* Elasticsearch 5 support: Chef Server now supports Elasticsearch 5.
+  This allows Chef Server and Chef Automate 1.6 to use the same Elasticsearch instance.
+
 * [EPMD patch](https://github.com/chef/chef-server/pull/1328): The Erlang Port Mapper Daemon (EPMD)
   included in this package is now patched to only listen on the addresses specified in
   `ERL_EPMD_ADDRESS`. Before, it would implicitly add ::1 and 127.0.0.1 to the set of addresses to
@@ -55,6 +54,12 @@ For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
   to work, the RabbitMQ management plugin must be installed. If it is not, the checks are not done. If
   Chef Server is configured not to use Actions, a check will not be performed against the Actions vhost.
   If an indexing queue is not used, the `chef_index` RabbitMQ vhost will not be checked.
+
+* [Notification of affected services when updating secrets with set-secret](https://github.com/chef/chef-server/pull/1313):
+  `chef-server-ctl set-secret` will notify the user of services that depend on
+  the secret being changed. With the optional flag `--with-restart`,
+  `chef-server-ctl set-secret` will attempt to automatically restart the
+  dependent services.
 
 ## 12.15.8 (2017-06-20)
 
