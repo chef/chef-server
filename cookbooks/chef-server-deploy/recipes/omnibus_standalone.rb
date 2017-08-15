@@ -22,6 +22,13 @@ node.default['chef-server-deploy']['chef_server_fqdn'] = server_fqdn_for('chef-s
 node.default['chef-server-deploy']['supermarket_fqdn'] = server_fqdn_for('supermarket')
 node.default['chef-server-deploy']['enable_liveness_agent'] = (environment == 'delivered' ? true : false)
 
+# By default we daemonize chef-client across all of our infrastructure nodes. We
+# do not want this behavior on the Chef Server instances as we want the pipeline
+# to control the roll out of changes.
+edit_resource(:service, 'chef-client') do
+  action [:disable, :stop]
+end
+
 ################################################################################
 # Chef Server
 ################################################################################
@@ -119,13 +126,6 @@ ingredient_config 'manage' do
   notifies :reconfigure, 'chef_ingredient[manage]'
 end
 
-# By default we daemonize chef-client across all of our infrastructure nodes. We
-# do not want this behavior on the Chef Server instances as we want the pipeline
-# to control the roll out of changes.
-edit_resource(:service, 'chef-client') do
-  action [:disable, :stop]
-end
-
 omnibus_service 'chef-server' do
   action :nothing
 end
@@ -140,20 +140,16 @@ omnibus_service 'chef-server/nginx' do
   action :nothing
 end
 
-# Grant the opscode user access to the json file
-file '/etc/opscode/oc-id-applications/supermarket.json' do
-  owner 'opscode'
-  action :touch
-end
-
 file '/var/opt/opscode/nginx/etc/addon.d/99-supermarket-credentials_external.conf' do
-  content <<-EOF
+  content(lazy do
+    <<-EOF
 location /supermarket-credentials {
   types { }
   default_type application/json;
-  alias /etc/opscode/oc-id-applications/supermarket.json;
+  return 200 "#{oc_id_applciation_config('supermarket')}";
 }
 EOF
+  end)
   notifies :restart, 'omnibus_service[chef-server/nginx]'
 end
 
