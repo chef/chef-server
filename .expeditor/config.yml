@@ -16,13 +16,19 @@ github:
 
 # These actions are taken, in order they are specified, anytime a Pull Request is merged.
 merge_actions:
-  built_in:bump_version:
-    ignore_labels: "Version: Skip Bump"
-  built_in:update_changelog:
-    ignore_labels: "Changelog: Skip Update"
-  built_in:trigger_omnibus_build:
-    ignore_labels: "Omnibus: Skip Build"
-    only_if: built_in:bump_version
+  - built_in:bump_version:
+      ignore_labels:
+        - "Version: Skip Bump"
+        - "Expeditor: Skip All"
+  - built_in:update_changelog:
+      ignore_labels:
+        - "Changelog: Skip Update"
+        - "Expeditor: Skip All"
+  - built_in:trigger_omnibus_build:
+      ignore_labels:
+        - "Omnibus: Skip Build"
+        - "Expeditor: Skip All"
+      only_if: built_in:bump_version
 
 # These actions are taken, in the order specified, when an Omnibus artifact is promoted
 # within Chef's internal artifact storage system.
@@ -30,10 +36,10 @@ merge_actions:
 # TODO: add promoted_to_unstable action to update changelog with modified omnibus components
 artifact_actions:
   promoted_to_unstable:
-    bash:.expeditor/update_acc.sh:
+    - bash:.expeditor/update_acc.sh
   promoted_to_current:
   promoted_to_stable:
-    built_in:rollover_changelog:
+    - built_in:rollover_changelog
 
 ###############################################################################
 # Notes on the tags inside CHANGELOG.md
