@@ -9,7 +9,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+#      http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -146,7 +146,7 @@ file '/var/opt/opscode/nginx/etc/addon.d/99-supermarket-credentials_external.con
 location /supermarket-credentials {
   types { }
   default_type application/json;
-  return 200 "#{oc_id_applciation_config('supermarket')}";
+  return 200 '#{oc_id_applciation_config('supermarket')}';
 }
 EOF
   end)
