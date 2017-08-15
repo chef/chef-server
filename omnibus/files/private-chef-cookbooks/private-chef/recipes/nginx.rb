@@ -72,12 +72,25 @@ if (node['private_chef']['nginx']['ssl_certificate'].nil? &&
      expire node['private_chef']['nginx']['ssl_duration']
      subject_alt_name [ "#{server_name_type}:#{server_name}" ]
      owner 'root'
-     group 'root'
-     mode '0644'
+     group OmnibusHelper.new(node).ownership['group']
+     mode '0640'
    end
 
   node.default['private_chef']['nginx']['ssl_certificate'] = ssl_crtfile
   node.default['private_chef']['nginx']['ssl_certificate_key'] = ssl_keyfile
+end
+
+# The cert and key must be readable by the opscode group since rabbitmq also reads it
+file node['private_chef']['nginx']['ssl_certificate'] do
+  owner 'root'
+  group OmnibusHelper.new(node).ownership['group']
+  mode '0640'
+end
+
+file node['private_chef']['nginx']['ssl_certificate_key'] do
+  owner 'root'
+  group OmnibusHelper.new(node).ownership['group']
+  mode '0640'
 end
 
 # Copy the required_recipe source into the nginx static root directory and
