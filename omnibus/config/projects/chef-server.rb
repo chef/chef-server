@@ -44,7 +44,7 @@ dependency "cleanup" # MUST BE LAST DO NOT MOVE
 
 package :rpm do
   signing_passphrase ENV['OMNIBUS_RPM_SIGNING_PASSPHRASE']
-  compression_level xz_level
+  compression_level 6
   compression_type :xz
 end
 
