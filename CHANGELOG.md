@@ -1,16 +1,17 @@
 # Chef Server Changelog
 
-<!-- latest_release 12.16.5 -->
-## [12.16.5](https://github.com/chef/chef-server/tree/12.16.5) (2017-08-16)
+<!-- latest_release 12.16.6 -->
+## [12.16.6](https://github.com/chef/chef-server/tree/12.16.6) (2017-08-16)
 
 #### Merged Pull Requests
-- Always use compression_level 6 [#1375](https://github.com/chef/chef-server/pull/1375) ([stevendanna](https://github.com/stevendanna))
+- [ctl-commands] Orphaned auth_actor cleanup tool [#1339](https://github.com/chef/chef-server/pull/1339) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.15.8 -->
 ### Changes since 12.15.8 release
 
 #### Merged Pull Requests
+- [ctl-commands] Orphaned auth_actor cleanup tool [#1339](https://github.com/chef/chef-server/pull/1339) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.6 -->
 - Always use compression_level 6 [#1375](https://github.com/chef/chef-server/pull/1375) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.5 -->
 - Revert &quot;Make root own the certs, but part of the opscode group&quot; [#1376](https://github.com/chef/chef-server/pull/1376) ([jaym](https://github.com/jaym)) <!-- 12.16.2 -->
 - Set the correct owner and permissions for SSL certificate and key [#1370](https://github.com/chef/chef-server/pull/1370) ([jaym](https://github.com/jaym)) <!-- 12.15.26 -->
