@@ -42,9 +42,6 @@ dependency "server-complete"
 
 dependency "cleanup" # MUST BE LAST DO NOT MOVE
 
-# if this is a release build, use a higher compression level
-xz_level = ENV['PIPELINE_TRIGGER_JOB_NAME'] == 'chef-server-12-trigger-release' ? 6 : 1
-
 package :rpm do
   signing_passphrase ENV['OMNIBUS_RPM_SIGNING_PASSPHRASE']
   compression_level xz_level
@@ -52,7 +49,7 @@ package :rpm do
 end
 
 package :deb do
-  compression_level xz_level
+  compression_level 6
   compression_type :xz
 end
 
