@@ -7,29 +7,33 @@
 - Set compression_level for RPM [#1379](https://github.com/chef/chef-server/pull/1379) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
-<!-- release_rollup since=12.15.8 -->
-### Changes since 12.15.8 release
+<!-- release_rollup since=12.16.2 -->
+### Changes since 12.16.2 release
 
 #### Merged Pull Requests
-- Set compression_level for RPM [#1379](https://github.com/chef/chef-server/pull/1379) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.7 -->
-- [ctl-commands] Orphaned auth_actor cleanup tool [#1339](https://github.com/chef/chef-server/pull/1339) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.6 -->
 - Always use compression_level 6 [#1375](https://github.com/chef/chef-server/pull/1375) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.5 -->
-- Revert &quot;Make root own the certs, but part of the opscode group&quot; [#1376](https://github.com/chef/chef-server/pull/1376) ([jaym](https://github.com/jaym)) <!-- 12.16.2 -->
-- Set the correct owner and permissions for SSL certificate and key [#1370](https://github.com/chef/chef-server/pull/1370) ([jaym](https://github.com/jaym)) <!-- 12.15.26 -->
-- [erchef] Remove input validation for user info [#1343](https://github.com/chef/chef-server/pull/1343) ([stevendanna](https://github.com/stevendanna)) <!-- 12.15.25 -->
-- [omnibus] bump postgres versions [#1372](https://github.com/chef/chef-server/pull/1372) ([srenatus](https://github.com/srenatus)) <!-- 12.15.24 -->
-- Use NGINX cert path attributes to configure RabbitMQ [#1366](https://github.com/chef/chef-server/pull/1366) ([schisamo](https://github.com/schisamo)) <!-- 12.15.21 -->
-- Fixed deleting ES indexes for ES5 and ES2 [#1367](https://github.com/chef/chef-server/pull/1367) ([lancewf](https://github.com/lancewf)) <!-- 12.15.20 -->
-- Fixing reindex&#39;s use of elasticsearch scroll API [#1358](https://github.com/chef/chef-server/pull/1358) ([ksubrama](https://github.com/ksubrama)) <!-- 12.15.14 -->
-- Expose db_pool_max and db_pool_init attrbiutes for bookshelf like oc_… [#1354](https://github.com/chef/chef-server/pull/1354) ([itmustbejj](https://github.com/itmustbejj)) <!-- 12.15.13 -->
-- [pedant] Wait for rabbitmq before every search test [#1356](https://github.com/chef/chef-server/pull/1356) ([stevendanna](https://github.com/stevendanna)) <!-- 12.15.12 -->
-- Add health checks for rabbitmq [#1345](https://github.com/chef/chef-server/pull/1345) ([jaym](https://github.com/jaym)) <!-- 12.15.11 -->
-- Add health checks for rabbitmq [#1345](https://github.com/chef/chef-server/pull/1345) ([jaym](https://github.com/jaym)) <!-- 12.15.10 -->
-- Enable chef-server in ACC [#1348](https://github.com/chef/chef-server/pull/1348) ([tduffield](https://github.com/tduffield)) <!-- 12.15.9 -->
+- [ctl-commands] Orphaned auth_actor cleanup tool [#1339](https://github.com/chef/chef-server/pull/1339) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.6 -->
+- Set compression_level for RPM [#1379](https://github.com/chef/chef-server/pull/1379) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.7 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [12.16.2](https://github.com/chef/chef-server/tree/12.16.2) (2017-08-16)
+
+#### Merged Pull Requests
+- Enable chef-server in ACC [#1348](https://github.com/chef/chef-server/pull/1348) ([tduffield](https://github.com/tduffield))
+- Add health checks for rabbitmq [#1345](https://github.com/chef/chef-server/pull/1345) ([jaym](https://github.com/jaym))
+- [pedant] Wait for rabbitmq before every search test [#1356](https://github.com/chef/chef-server/pull/1356) ([stevendanna](https://github.com/stevendanna))
+- Expose db_pool_max and db_pool_init attrbiutes for bookshelf like oc_… [#1354](https://github.com/chef/chef-server/pull/1354) ([itmustbejj](https://github.com/itmustbejj))
+- Fixing reindex&#39;s use of elasticsearch scroll API [#1358](https://github.com/chef/chef-server/pull/1358) ([ksubrama](https://github.com/ksubrama))
+- Fixed deleting ES indexes for ES5 and ES2 [#1367](https://github.com/chef/chef-server/pull/1367) ([lancewf](https://github.com/lancewf))
+- Use NGINX cert path attributes to configure RabbitMQ [#1366](https://github.com/chef/chef-server/pull/1366) ([schisamo](https://github.com/schisamo))
+- [omnibus] bump postgres versions [#1372](https://github.com/chef/chef-server/pull/1372) ([srenatus](https://github.com/srenatus))
+- [erchef] Remove input validation for user info [#1343](https://github.com/chef/chef-server/pull/1343) ([stevendanna](https://github.com/stevendanna))
+- Set the correct owner and permissions for SSL certificate and key [#1370](https://github.com/chef/chef-server/pull/1370) ([jaym](https://github.com/jaym))
+- Revert &quot;Make root own the certs, but part of the opscode group&quot; [#1376](https://github.com/chef/chef-server/pull/1376) ([jaym](https://github.com/jaym))
 <!-- latest_stable_release -->
+
+
 
 ## [12.15.8](https://github.com/chef/chef-server/tree/12.15.8) (2017-06-20)
 [Full Changelog](https://github.com/chef/chef-server/compare/12.15.7...12.15.8)
