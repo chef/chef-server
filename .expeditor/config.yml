@@ -4,6 +4,10 @@ product_key: chef-server
 slack:
   notify_channel: chef-server-notify
 
+automate:
+  organization: products
+  project: chef-server
+
 github:
   # The file where the MAJOR.MINOR.PATCH version is kept. The version in this file
   # is bumped automatically via the `built_in:bump_version` merge_action.
@@ -20,15 +24,21 @@ merge_actions:
       ignore_labels:
         - "Version: Skip Bump"
         - "Expeditor: Skip All"
+        - "Expeditor: ACC Only"
   - built_in:update_changelog:
       ignore_labels:
         - "Changelog: Skip Update"
         - "Expeditor: Skip All"
+        - "Expeditor: ACC Only"
   - built_in:trigger_omnibus_build:
       ignore_labels:
         - "Omnibus: Skip Build"
         - "Expeditor: Skip All"
+        - "Expeditor: ACC Only"
       only_if: built_in:bump_version
+  - built_in:update_acc:
+      only_if_labels:
+        - "Expeditor: ACC Only"
 
 # These actions are taken, in the order specified, when an Omnibus artifact is promoted
 # within Chef's internal artifact storage system.
@@ -36,7 +46,7 @@ merge_actions:
 # TODO: add promoted_to_unstable action to update changelog with modified omnibus components
 artifact_actions:
   promoted_to_unstable:
-    - bash:.expeditor/update_acc.sh
+    - built_in:update_acc
   promoted_to_current:
   promoted_to_stable:
     - built_in:rollover_changelog
