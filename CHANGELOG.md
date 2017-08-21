@@ -1,16 +1,17 @@
 # Chef Server Changelog
 
-<!-- latest_release 12.16.7 -->
-## [12.16.7](https://github.com/chef/chef-server/tree/12.16.7) (2017-08-16)
+<!-- latest_release 12.16.8 -->
+## [12.16.8](https://github.com/chef/chef-server/tree/12.16.8) (2017-08-21)
 
 #### Merged Pull Requests
-- Set compression_level for RPM [#1379](https://github.com/chef/chef-server/pull/1379) ([stevendanna](https://github.com/stevendanna))
+- Check for sufficient disk space before upgrade [#1381](https://github.com/chef/chef-server/pull/1381) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.16.2 -->
 ### Changes since 12.16.2 release
 
 #### Merged Pull Requests
+- Check for sufficient disk space before upgrade [#1381](https://github.com/chef/chef-server/pull/1381) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.8 -->
 - Always use compression_level 6 [#1375](https://github.com/chef/chef-server/pull/1375) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.5 -->
 - [ctl-commands] Orphaned auth_actor cleanup tool [#1339](https://github.com/chef/chef-server/pull/1339) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.6 -->
 - Set compression_level for RPM [#1379](https://github.com/chef/chef-server/pull/1379) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.7 -->
