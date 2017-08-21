@@ -54,6 +54,7 @@ use_inline_resources
 action :upgrade do
   if upgrade_required?
     converge_by("Upgrading database cluster") do
+      check_required_disk_space unless ENV['CS_SKIP_PG_DISK_CHECK'] == "1"
       shutdown_postgres
       initialize_new_cluster
       update_to_latest_version
@@ -121,6 +122,37 @@ def upgrade_required?
     # Hmm, looks like we need to upgrade after all
     true
   end
+end
+
+#
+# Since we don't use the --link flag, we need to ensure the disk has
+# enough space for another copy of the postgresql data.
+#
+def check_required_disk_space
+  old_data_dir_size = Du.du(old_data_dir)
+  # new_data_dir might not exist at the point of making this check.
+  # In that case check the first existing directory above it.
+  new_dir = dir_or_existing_parent(new_data_dir)
+  free_disk_space = Statfs.new(new_dir).free_space
+
+  if old_data_dir_size < (free_disk_space * 0.90)
+    Chef::Log.debug("Old data dir size: #{old_data_dir_size}")
+    Chef::Log.debug("  Free disk space: #{free_disk_space}")
+    Chef::Log.debug("Free space is sufficient to start upgrade")
+    true
+  else
+    Chef::Log.fatal("Insufficient free space on disk to complete upgrade.")
+    Chef::Log.fatal("The current postgresql data directory contains #{old_data_dir_size} KB of data but only #{free_disk_space} KB is available on disk.")
+    Chef::Log.fatal("The upgrade process requires at least #{old_data_dir_size/0.90} KB.")
+    raise "Insufficient Disk Space to Upgrade"
+  end
+end
+
+def dir_or_existing_parent(dir)
+  return dir if ::File.exist?(dir)
+  return dir if ::File.expand_path(dir) == "/"
+
+  dir_or_existing_parent(::File.expand_path("#{dir}/.."))
 end
 
 # If a pre-existing postgres service exists it will need to be shut
