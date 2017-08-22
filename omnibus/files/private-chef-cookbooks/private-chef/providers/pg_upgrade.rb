@@ -244,5 +244,6 @@ def update_to_latest_version
     user node['private_chef']['postgresql']['username']
     cwd new_data_dir # TODO: Should this be some other directory, instead?
     creates sentinel_file
+    timeout node['private_chef']['postgresql']['pg_upgrade_timeout']
   end
 end
