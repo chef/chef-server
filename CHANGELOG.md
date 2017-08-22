@@ -1,16 +1,17 @@
 # Chef Server Changelog
 
-<!-- latest_release 12.16.8 -->
-## [12.16.8](https://github.com/chef/chef-server/tree/12.16.8) (2017-08-21)
+<!-- latest_release 12.16.9 -->
+## [12.16.9](https://github.com/chef/chef-server/tree/12.16.9) (2017-08-22)
 
 #### Merged Pull Requests
-- Check for sufficient disk space before upgrade [#1381](https://github.com/chef/chef-server/pull/1381) ([stevendanna](https://github.com/stevendanna))
+- [cookbooks] Make pg_upgrade timeout configurable [#1382](https://github.com/chef/chef-server/pull/1382) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.16.2 -->
 ### Changes since 12.16.2 release
 
 #### Merged Pull Requests
+- [cookbooks] Make pg_upgrade timeout configurable [#1382](https://github.com/chef/chef-server/pull/1382) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.9 -->
 - Check for sufficient disk space before upgrade [#1381](https://github.com/chef/chef-server/pull/1381) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.8 -->
 - Always use compression_level 6 [#1375](https://github.com/chef/chef-server/pull/1375) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.5 -->
 - [ctl-commands] Orphaned auth_actor cleanup tool [#1339](https://github.com/chef/chef-server/pull/1339) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.6 -->
