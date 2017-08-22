@@ -618,6 +618,9 @@ default['private_chef']['postgresql']['checkpoint_timeout'] = "5min"
 default['private_chef']['postgresql']['checkpoint_completion_target'] = 0.5
 default['private_chef']['postgresql']['checkpoint_flush_after'] = "256kB"
 default['private_chef']['postgresql']['checkpoint_warning'] = "30s"
+# These settings affect the pg_upgrade process.  For example, when
+# migrating from postgresql 9.2 to 9.6
+default['private_chef']['postgresql']['pg_upgrade_timeout'] = 7200
 
 ###
 # Bifrost
