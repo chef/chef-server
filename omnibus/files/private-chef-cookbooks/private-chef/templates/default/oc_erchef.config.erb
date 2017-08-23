@@ -56,6 +56,12 @@
         {error_logger_hwm, <%= @log_rotation['max_messages_per_second'] %>}
     ]},
 
+    {prometheus, [{collectors, [default,
+                                <% if node['private_chef']['postgresql']['enable'] && !node['private_chef']['postgresql']['external'] -%>
+                                chef_pgsql_collector,
+                                <% end %>
+                                chef_wm_pooler_collector]}]},
+
     {chef_secrets, [{provider, chef_secrets_fd}]},
 
     {oc_chef_wm, [

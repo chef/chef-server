@@ -78,10 +78,13 @@ module Pedant
   def self.create_platform
     superuser_key = ENV['CHEF_SECRET_CHEF-SERVER.SUPERUSER_KEY'] || ENV['SUPERUSER_KEY']
     webui_key = ENV['CHEF_SECRET_CHEF-SERVER.WEBUI_KEY'] || ENV['WEBUI_KEY']
+    stats_password = ENV['CHEF_SECRET_OPSCODE_ERCHEF.STATS_PASSWORD'] || ENV['STATS_PASSWORD']
     config.pedant_platform = Pedant::Platform.new(config.chef_server,
                                                   superuser_key,
                                                   webui_key,
-                                                  config.superuser_name)
+                                                  config.superuser_name,
+                                                  config.stats_user,
+                                                  stats_password)
   end
 
   def self.configure_rspec
