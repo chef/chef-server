@@ -56,6 +56,8 @@
         {error_logger_hwm, <%= @log_rotation['max_messages_per_second'] %>}
     ]},
 
+    {prometheus, [{collectors, [default, chef_wm_pooler_collector]}]},
+
     {chef_secrets, [{provider, chef_secrets_fd}]},
 
     {oc_chef_wm, [
