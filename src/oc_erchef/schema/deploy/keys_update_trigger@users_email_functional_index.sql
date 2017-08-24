@@ -1,4 +1,4 @@
--- Revert keys_update_trigger
+-- Deploy keys_update_trigger
 --
 -- This keeps the keys table consistent when the clients and user tables update their keys
 --

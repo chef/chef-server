@@ -155,7 +155,6 @@ make_context(ApiVersion, ReqId) ->
 make_context(ApiVersion, ReqId, Darklaunch) ->
     #context{server_api_version = ApiVersion, reqid = ReqId, darklaunch = Darklaunch}.
 
-
 -spec create(object_rec(), #context{}, object_id()) -> ok | {conflict, term()} | {error, term()}.
 create(#chef_cookbook_version{} = Record, DbContext, ActorId) ->
     create_object(DbContext, create_cookbook_version, Record, ActorId);
