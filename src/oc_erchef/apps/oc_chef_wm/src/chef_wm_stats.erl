@@ -53,7 +53,7 @@ content_types_provided(Req, State) ->
      ], Req, State}.
 
 to_json(Req, State) ->
-    {"{}", Req, State}.
+    {chef_wm_prometheus_json_format:format(), Req, State}.
 
 to_text(Req, State) ->
     {prometheus_text_format:format(), Req, State}.
