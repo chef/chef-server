@@ -1,9 +1,17 @@
 # Chef Server Changelog
 
-<!-- latest_release -->
+<!-- latest_release 12.16.10 -->
+## [12.16.10](https://github.com/chef/chef-server/tree/12.16.10) (2017-08-30)
+
+#### Merged Pull Requests
+- Update release notes for 12.16.9 promotion [#1386](https://github.com/chef/chef-server/pull/1386) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=12.16.9 -->
+### Changes since 12.16.9 release
+
+#### Merged Pull Requests
+- Update release notes for 12.16.9 promotion [#1386](https://github.com/chef/chef-server/pull/1386) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.10 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
