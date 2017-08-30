@@ -7,6 +7,17 @@ in the release. For a detailed list of changed components, refer to
 This document contains release notes for the current major release and all patches.
 For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 12.16.9 (2017-08-30)
+
+This release is a minor release addressing two problems in the
+PostgreSQL 9.6 upgrade process
+
+- Ensure that the disk has the required disk space before starting the
+  PostgreSQL upgrade.
+
+- Make pg_upgrade timeout configurable for users with large databases.
+  Also, increase the default timeout to 2 hours.
+
 ## 12.16.1 (2017-08-15)
 
 * [Upgrade to PostgreSQL 9.6](https://github.com/chef/chef-server/pull/1310),
