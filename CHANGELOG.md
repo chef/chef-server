@@ -1,24 +1,22 @@
 # Chef Server Changelog
 
-<!-- latest_release 12.16.9 -->
-## [12.16.9](https://github.com/chef/chef-server/tree/12.16.9) (2017-08-22)
-
-#### Merged Pull Requests
-- [cookbooks] Make pg_upgrade timeout configurable [#1382](https://github.com/chef/chef-server/pull/1382) ([stevendanna](https://github.com/stevendanna))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=12.16.2 -->
-### Changes since 12.16.2 release
-
-#### Merged Pull Requests
-- [cookbooks] Make pg_upgrade timeout configurable [#1382](https://github.com/chef/chef-server/pull/1382) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.9 -->
-- Check for sufficient disk space before upgrade [#1381](https://github.com/chef/chef-server/pull/1381) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.8 -->
-- Always use compression_level 6 [#1375](https://github.com/chef/chef-server/pull/1375) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.5 -->
-- [ctl-commands] Orphaned auth_actor cleanup tool [#1339](https://github.com/chef/chef-server/pull/1339) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.6 -->
-- Set compression_level for RPM [#1379](https://github.com/chef/chef-server/pull/1379) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.7 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [12.16.9](https://github.com/chef/chef-server/tree/12.16.9) (2017-08-30)
+
+#### Merged Pull Requests
+- Set compression_level for RPM [#1379](https://github.com/chef/chef-server/pull/1379) ([stevendanna](https://github.com/stevendanna))
+- [ctl-commands] Orphaned auth_actor cleanup tool [#1339](https://github.com/chef/chef-server/pull/1339) ([stevendanna](https://github.com/stevendanna))
+- Always use compression_level 6 [#1375](https://github.com/chef/chef-server/pull/1375) ([stevendanna](https://github.com/stevendanna))
+- Check for sufficient disk space before upgrade [#1381](https://github.com/chef/chef-server/pull/1381) ([stevendanna](https://github.com/stevendanna))
+- [cookbooks] Make pg_upgrade timeout configurable [#1382](https://github.com/chef/chef-server/pull/1382) ([stevendanna](https://github.com/stevendanna))
+<!-- latest_stable_release -->
+
 ## [12.16.2](https://github.com/chef/chef-server/tree/12.16.2) (2017-08-16)
 
 #### Merged Pull Requests
@@ -33,7 +31,6 @@
 - [erchef] Remove input validation for user info [#1343](https://github.com/chef/chef-server/pull/1343) ([stevendanna](https://github.com/stevendanna))
 - Set the correct owner and permissions for SSL certificate and key [#1370](https://github.com/chef/chef-server/pull/1370) ([jaym](https://github.com/jaym))
 - Revert &quot;Make root own the certs, but part of the opscode group&quot; [#1376](https://github.com/chef/chef-server/pull/1376) ([jaym](https://github.com/jaym))
-<!-- latest_stable_release -->
 
 
 
