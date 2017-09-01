@@ -1,16 +1,17 @@
 # Chef Server Changelog
 
-<!-- latest_release 12.16.10 -->
-## [12.16.10](https://github.com/chef/chef-server/tree/12.16.10) (2017-08-30)
+<!-- latest_release 12.16.11 -->
+## [12.16.11](https://github.com/chef/chef-server/tree/12.16.11) (2017-09-01)
 
 #### Merged Pull Requests
-- Update release notes for 12.16.9 promotion [#1386](https://github.com/chef/chef-server/pull/1386) ([stevendanna](https://github.com/stevendanna))
+- Correct string interpolation [#1388](https://github.com/chef/chef-server/pull/1388) ([b-dean](https://github.com/b-dean))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.16.9 -->
 ### Changes since 12.16.9 release
 
 #### Merged Pull Requests
+- Correct string interpolation [#1388](https://github.com/chef/chef-server/pull/1388) ([b-dean](https://github.com/b-dean)) <!-- 12.16.11 -->
 - Update release notes for 12.16.9 promotion [#1386](https://github.com/chef/chef-server/pull/1386) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.10 -->
 <!-- release_rollup -->
 
