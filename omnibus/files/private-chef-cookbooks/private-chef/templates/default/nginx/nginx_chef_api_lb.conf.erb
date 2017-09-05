@@ -145,6 +145,10 @@
 
     # erchef stats endpoint
     location ~ "^/_stats/?$" {
+      <% if node['private_chef']['opscode-erchef']['stats_user'] -%>
+      auth_basic "Chef Server Admin Stats";
+      auth_basic_user_file <%= node['private_chef']['opscode-erchef']['stats_password_file'] %>;
+      <% end -%>
       types { }
       default_type application/json;
       proxy_pass http://opscode_erchef;

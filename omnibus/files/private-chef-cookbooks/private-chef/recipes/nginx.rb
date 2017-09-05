@@ -169,6 +169,25 @@ lbconf = node['private_chef']['lb'].to_hash.merge(nginx_vars).merge(
   end
 end
 
+if node['private_chef']['opscode-erchef']['stats_user']
+  stats_api_passwd = PrivateChef.credentials.get('opscode_erchef', 'stats_password')
+  stats_passwd_file = node['private_chef']['opscode-erchef']['stats_password_file']
+
+  execute 'stats_api_append_password' do
+    command "openssl passwd -apr1 '#{stats_api_passwd}' >> #{stats_passwd_file}"
+    action :nothing
+    sensitive true
+  end
+
+  file stats_passwd_file do
+    content "#{node['private_chef']['opscode-erchef']['stats_user']}:"
+    mode '0400'
+    owner OmnibusHelper.new(node).ownership['owner']
+    group OmnibusHelper.new(node).ownership['group']
+    notifies :run, 'execute[stats_api_append_password]', :immediately
+  end
+end
+
 %w(https http).each do |server_proto|
   config_key = "chef_#{server_proto}_config".to_sym
   lb_config = chef_lb_configs[config_key]

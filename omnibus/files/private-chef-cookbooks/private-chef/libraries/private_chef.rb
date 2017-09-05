@@ -521,7 +521,8 @@ EOF
 
       optional_secrets = [
         {group: "ldap", name: "bind_password"},
-        {group: "data_collector", name: "token"}
+        {group: "data_collector", name: "token"},
+        {group: "opscode_erchef", name: "stats_password"}
       ]
 
       optional_secrets.each do |secret|
@@ -647,6 +648,14 @@ WARN
       end
     end
 
+    def ensure_stats_password
+      return unless PrivateChef["opscode_erchef"]["stats_user"]
+      unless credentials.exist?("opscode_erchef", "stats_password")
+        raise "Missing required password for admin user when enabling HTTP Basic Auth for stats endopoint\n"\
+          "\tUse `chef-server-ctl set-secret opscode_erchef stats_password` to set your password."
+      end
+    end
+
     def ensure_bind_password
       # if bind_dn is not set, don't care if there's a bind_password
       return unless PrivateChef["ldap"].key?("bind_dn")
@@ -660,7 +669,6 @@ WARN
         raise "Missing required LDAP config value bind_password (required when configuring bind_dn)"
       end
     end
-
 
     def gen_ldap
       required_ldap_config_values = %w{ host base_dn }
@@ -833,7 +841,7 @@ EOF
       generate_config_for_topology(PrivateChef["topology"], node_name)
 
       gen_ldap if PrivateChef["ldap"]["enabled"]
-
+      ensure_stats_password
       generate_hash
     end
   end
