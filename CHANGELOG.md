@@ -1,5 +1,5 @@
 # Chef Server Changelog
-
+<!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
 <!-- latest_release 12.16.11 -->
 ## [12.16.11](https://github.com/chef/chef-server/tree/12.16.11) (2017-09-01)
 
