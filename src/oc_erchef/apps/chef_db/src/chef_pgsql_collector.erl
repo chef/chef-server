@@ -31,7 +31,10 @@
                   {<<"toast_blks_read">>, {pg_stat_toast_blks_read, counter, "Number of disk blocks read from TOAST tables", fun erlang:binary_to_integer/1}},
                   {<<"toast_blks_hit">>, {pg_stat_toast_blks_hit, counter, "Number of buffer hits in TOAST tables", fun erlang:binary_to_integer/1}},
                   {<<"tidx_blks_read">>, {pg_stat_tidx_blks_read, counter, "Number of disk blocks read from TOAST tables", fun erlang:binary_to_integer/1}},
-                  {<<"tidx_blks_hit">>, {pg_stat_tidx_blks_hit, counter, "Number of buffer hits in TOAST table indexes", fun erlang:binary_to_integer/1}}
+                  {<<"tidx_blks_hit">>, {pg_stat_tidx_blks_hit, counter, "Number of buffer hits in TOAST table indexes", fun erlang:binary_to_integer/1}},
+                  % I have no idea why only these two columns come back as numbers instead of as a binary...
+                  {<<"n_active_conns">>, {pg_stat_n_active_conns, gauge, "Number of active connections to the database", fun(X) -> X end}},
+                  {<<"n_conns">>, {pg_stat_n_conns, gauge, "Number of all connections to the database", fun(X) -> X end}}
                  ]).
 
 %%====================================================================
