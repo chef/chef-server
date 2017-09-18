@@ -46,6 +46,7 @@
          set_updated/2,
          set_api_version/2,
          type_name/1,
+         update/2,
          update_from_ejson/2,
          validate_user_name/1,
          serialized_field_value/2,
@@ -61,8 +62,6 @@
          list_query/1,
          update_query/1
         ]).
-
--mixin([{chef_object_default_callbacks, [ update/2 ]}]).
 
 -behaviour(chef_object).
 
@@ -375,6 +374,9 @@ set_password_data(#chef_user{}=User, {HashedPassword, Salt, HashType}) ->
         User#chef_user{hashed_password = HashedPassword,
                        salt = Salt,
                        hash_type = HashType}.
+
+update(Rec, CallbackFun) ->
+    CallbackFun({update_query(Rec), fields_for_update(Rec), {first_as_scalar, [update_user]}}).
 
 %% @doc Return a new `chef_user()' record updated according to the specified EJSON
 %% terms. This provides behavior similar to chef_objects:update_from_ejson()

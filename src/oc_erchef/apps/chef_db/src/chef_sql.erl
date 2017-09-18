@@ -990,7 +990,10 @@ create_object(#chef_sandbox{id=SandboxId,
             %% the failure back up
             Error
     end.
--spec create_object(atom(), tuple() | list()) -> {ok, non_neg_integer()} | {error, term()} | {conflict, term()}.
+-spec create_object(atom(), tuple() | list()) -> {ok, non_neg_integer()} |
+                                                 {ok,[[{binary(),<<>>}]]} |
+                                                 {error, term()} |
+                                                 {conflict, term()}.
 %% okay, that's pretty ugly, but no more so than all the hacks in here and
 %% chef_db for plain old cookbooks, their versions, and their checksums
 %% and at least, it's in a transaction
@@ -1002,6 +1005,14 @@ create_object(insert_cookbook_artifact_version = QueryName, Args) when is_list(A
         {error, {<<"CS001">>, _}} -> {error, invalid_checksum};
         {error, _Why} = Error -> Error;
         {conflict, _Why} = Conflict -> Conflict
+    end;
+create_object(QueryName, Args) when QueryName =:= insert_user;
+                                    QueryName =:= insert_user_v0,
+                                    is_list(Args)  ->
+   case sqerl:select(QueryName, Args, first_as_scalar, [add_user]) of
+        {ok, 1} -> {ok, 1};
+        {ok, 0} -> {error, <<"Record not created '", (term_to_binary(QueryName))/binary, "'.">>};
+        Error -> Error
     end;
 create_object(QueryName, Args) when is_atom(QueryName), is_list(Args) ->
     sqerl:statement(QueryName, Args, count);
@@ -1081,10 +1092,20 @@ delete_object(delete_cookbook_by_orgid_name = Query, OrgId, Name) ->
 update(ObjectRec, ActorId) ->
     chef_object:update(ObjectRec, ActorId, fun select_rows/1).
 
+do_update(QueryName, UpdateFields) when QueryName =:= update_user_by_id;
+                                        QueryName =:= update_user_by_id_v0,
+                                        is_list(UpdateFields)  ->
+    case sqerl:select(QueryName, UpdateFields, first_as_scalar, [update_user]) of
+        {ok, 1} -> {ok, 1};
+        {ok, 0} -> {error, <<"Record not updated '", (term_to_binary(QueryName))/binary, "'.">>};
+        {ok, none} -> {ok, not_found};
+        Error ->
+            Error
+    end;
 do_update(QueryName, UpdateFields) ->
     case sqerl:statement(QueryName, UpdateFields) of
         {ok, 1} -> {ok, 1};
-        {ok, none} -> {ok, not_found};
+        {ok, none} -> not_found;
         Error ->
             Error
     end.

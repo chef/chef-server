@@ -794,6 +794,13 @@ describe "users", :users do
         }
       end
 
+      context "create v0 user" do
+        it "does not show the sentinel value to the user" do
+          response = JSON.parse(get(request_url, platform.superuser))
+          response["public_key"].should_not eql("this_in_not_a_key")
+        end
+      end
+
       context "superuser" do
         it "can get user" do
           get(request_url, platform.superuser).should look_like({
