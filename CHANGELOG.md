@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.16.12 -->
-## [12.16.12](https://github.com/chef/chef-server/tree/12.16.12) (2017-09-14)
+<!-- latest_release 12.16.13 -->
+## [12.16.13](https://github.com/chef/chef-server/tree/12.16.13) (2017-09-18)
 
 #### Merged Pull Requests
-- Update pins to the latest ruby and rubygems [#1392](https://github.com/chef/chef-server/pull/1392) ([stevendanna](https://github.com/stevendanna))
+- Fix build after ruby update [#1393](https://github.com/chef/chef-server/pull/1393) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.16.9 -->
 ### Changes since 12.16.9 release
 
 #### Merged Pull Requests
+- Fix build after ruby update [#1393](https://github.com/chef/chef-server/pull/1393) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.13 -->
 - Update pins to the latest ruby and rubygems [#1392](https://github.com/chef/chef-server/pull/1392) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.12 -->
 - Correct string interpolation [#1388](https://github.com/chef/chef-server/pull/1388) ([b-dean](https://github.com/b-dean)) <!-- 12.16.11 -->
 - Update release notes for 12.16.9 promotion [#1386](https://github.com/chef/chef-server/pull/1386) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.10 -->
