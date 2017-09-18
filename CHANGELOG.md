@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.16.13 -->
-## [12.16.13](https://github.com/chef/chef-server/tree/12.16.13) (2017-09-18)
+<!-- latest_release 12.16.14 -->
+## [12.16.14](https://github.com/chef/chef-server/tree/12.16.14) (2017-09-18)
 
 #### Merged Pull Requests
-- Fix build after ruby update [#1393](https://github.com/chef/chef-server/pull/1393) ([stevendanna](https://github.com/stevendanna))
+- [SUSTAIN-632] Do not update the users table to contain the public key. The keys table should be the only source of truth [#1383](https://github.com/chef/chef-server/pull/1383) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.16.9 -->
 ### Changes since 12.16.9 release
 
 #### Merged Pull Requests
+- [SUSTAIN-632] Do not update the users table to contain the public key. The keys table should be the only source of truth [#1383](https://github.com/chef/chef-server/pull/1383) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.16.14 -->
 - Fix build after ruby update [#1393](https://github.com/chef/chef-server/pull/1393) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.13 -->
 - Update pins to the latest ruby and rubygems [#1392](https://github.com/chef/chef-server/pull/1392) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.12 -->
 - Correct string interpolation [#1388](https://github.com/chef/chef-server/pull/1388) ([b-dean](https://github.com/b-dean)) <!-- 12.16.11 -->
