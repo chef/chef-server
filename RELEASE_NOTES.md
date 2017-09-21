@@ -5,7 +5,16 @@ in the release. For a detailed list of changed components, refer to
 [CHANGELOG.md](CHANGELOG.md).
 
 This document contains release notes for the current major release and all patches.
-For prior releases, see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
+For prior releases,
+see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
+
+## 12.16.14 (2017-09-21)
+
+This release upgrades the version of Ruby to 2.2.8 to address multiple
+upstream security vulnerabilities:
+
+https://www.ruby-lang.org/en/news/2017/09/14/ruby-2-2-8-released/
+
 
 ## 12.16.9 (2017-08-30)
 
