@@ -1,24 +1,22 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.16.14 -->
-## [12.16.14](https://github.com/chef/chef-server/tree/12.16.14) (2017-09-18)
-
-#### Merged Pull Requests
-- [SUSTAIN-632] Do not update the users table to contain the public key. The keys table should be the only source of truth [#1383](https://github.com/chef/chef-server/pull/1383) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=12.16.9 -->
-### Changes since 12.16.9 release
-
-#### Merged Pull Requests
-- [SUSTAIN-632] Do not update the users table to contain the public key. The keys table should be the only source of truth [#1383](https://github.com/chef/chef-server/pull/1383) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.16.14 -->
-- Fix build after ruby update [#1393](https://github.com/chef/chef-server/pull/1393) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.13 -->
-- Update pins to the latest ruby and rubygems [#1392](https://github.com/chef/chef-server/pull/1392) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.12 -->
-- Correct string interpolation [#1388](https://github.com/chef/chef-server/pull/1388) ([b-dean](https://github.com/b-dean)) <!-- 12.16.11 -->
-- Update release notes for 12.16.9 promotion [#1386](https://github.com/chef/chef-server/pull/1386) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.10 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [12.16.14](https://github.com/chef/chef-server/tree/12.16.14) (2017-09-21)
+
+#### Merged Pull Requests
+- Update release notes for 12.16.9 promotion [#1386](https://github.com/chef/chef-server/pull/1386) ([stevendanna](https://github.com/stevendanna))
+- Correct string interpolation [#1388](https://github.com/chef/chef-server/pull/1388) ([b-dean](https://github.com/b-dean))
+- Update pins to the latest ruby and rubygems [#1392](https://github.com/chef/chef-server/pull/1392) ([stevendanna](https://github.com/stevendanna))
+- Fix build after ruby update [#1393](https://github.com/chef/chef-server/pull/1393) ([stevendanna](https://github.com/stevendanna))
+- [SUSTAIN-632] Do not update the users table to contain the public key. The keys table should be the only source of truth [#1383](https://github.com/chef/chef-server/pull/1383) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+<!-- latest_stable_release -->
+
 ## [12.16.9](https://github.com/chef/chef-server/tree/12.16.9) (2017-08-30)
 
 #### Merged Pull Requests
@@ -27,7 +25,6 @@
 - Always use compression_level 6 [#1375](https://github.com/chef/chef-server/pull/1375) ([stevendanna](https://github.com/stevendanna))
 - Check for sufficient disk space before upgrade [#1381](https://github.com/chef/chef-server/pull/1381) ([stevendanna](https://github.com/stevendanna))
 - [cookbooks] Make pg_upgrade timeout configurable [#1382](https://github.com/chef/chef-server/pull/1382) ([stevendanna](https://github.com/stevendanna))
-<!-- latest_stable_release -->
 
 ## [12.16.2](https://github.com/chef/chef-server/tree/12.16.2) (2017-08-16)
 
