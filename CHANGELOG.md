@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 12.16.15 -->
+## [12.16.15](https://github.com/chef/chef-server/tree/12.16.15) (2017-09-22)
+
+#### Merged Pull Requests
+- Stats endpoint [#1384](https://github.com/chef/chef-server/pull/1384) ([jaym](https://github.com/jaym))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=12.16.14 -->
+### Changes since 12.16.14 release
+
+#### Merged Pull Requests
+- Stats endpoint [#1384](https://github.com/chef/chef-server/pull/1384) ([jaym](https://github.com/jaym)) <!-- 12.16.15 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
