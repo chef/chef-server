@@ -507,6 +507,7 @@ EOF
         {group: "keepalived", name: "vrrp_instance_password", length: 100},
         {group: "opscode_erchef", name: "sql_password", length: 60},
         {group: "opscode_erchef", name: "sql_ro_password", length: 60},
+        {group: "opscode_erchef", name: "stats_password", lendth: 100},
         {group: "oc_bifrost", name: "superuser_id", length: 32, frozen: true},
         {group: "oc_bifrost", name: "sql_password", length: 100},
         {group: "oc_bifrost", name: "sql_ro_password", length: 100},
@@ -660,7 +661,6 @@ WARN
         raise "Missing required LDAP config value bind_password (required when configuring bind_dn)"
       end
     end
-
 
     def gen_ldap
       required_ldap_config_values = %w{ host base_dn }
@@ -833,7 +833,6 @@ EOF
       generate_config_for_topology(PrivateChef["topology"], node_name)
 
       gen_ldap if PrivateChef["ldap"]["enabled"]
-
       generate_hash
     end
   end

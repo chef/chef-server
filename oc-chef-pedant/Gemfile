@@ -4,6 +4,8 @@ gemspec
 gem 'rest-client', github: 'chef/rest-client'
 # For debugging in dvm
 gem 'pry'
+gem 'pry-byebug'
+gem 'pry-stack_explorer'
 gem 'rake'
 
 # For "rake chef_zero_spec"

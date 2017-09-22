@@ -143,6 +143,17 @@
       proxy_pass http://opscode_erchef;
     }
 
+    # erchef stats endpoint
+    location ~ "^/_stats/?$" {
+      <% if node['private_chef']['opscode-erchef']['stats_auth_enable'] -%>
+      auth_basic "Chef Server Admin Stats";
+      auth_basic_user_file <%= node['private_chef']['opscode-erchef']['stats_password_file'] %>;
+      <% end -%>
+      types { }
+      default_type application/json;
+      proxy_pass http://opscode_erchef;
+    }
+
     # This variable is set to an empty string here so it can be used in
     # dispatch.lua later on. An add-on can set this variable to be used as an
     # upstream if we determine the request was not intended to go to the API.

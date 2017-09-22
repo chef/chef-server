@@ -28,13 +28,14 @@ module Pedant
 
     attr_reader :test_org, :test_org_owner, :validate_org, :internal_account_url,
                 :internal_server, :ldap, :ldap_testing,
-                :server, :base_resource_url, :superuser, :superuser_key_data, :webui_key
+                :server, :base_resource_url, :superuser, :superuser_key_data, :webui_key,
+                :stats_user, :stats_password
 
     # Create a Platform object for a given server (specified by
     # protocol, hostname, and port ONLY). You must supply the
     # superuser's key data in PEM form.
     #
-    def initialize(server, superuser_key, webui_key, superuser_name='pivotal')
+    def initialize(server, superuser_key, webui_key, superuser_name='pivotal', stats_user, stats_password)
       @superuser_key_data = superuser_key
       @webui_key = webui_key
       @server = (Pedant.config.explicit_port_url ? explicit_port_url(server) : server )
@@ -45,6 +46,9 @@ module Pedant
 
       @superuser = Pedant::Requestor.new(superuser_name, @superuser_key_data, platform: self)
       @test_org = org_from_config
+
+      @stats_user = stats_user
+      @stats_password = stats_password
 
       @internal_account_url = Pedant::Config[:internal_account_url]
       @internal_server = Pedant::Config.internal_server || (fail "Missing internal_server in Pedant config.")

@@ -17,6 +17,15 @@ class OmnibusHelper
     {"owner" => owner, "group" => group}
   end
 
+  def apr1_password(password)
+    cmd = Mixlib::ShellOut.new("openssl passwd -apr1 '#{password}'")
+    cmd.run_command
+    unless cmd.status.success?
+      raise "Failed to generate apr1 password hash"
+    end
+    cmd.stdout
+  end
+
   def rabbitmq_configuration
     external = node['private_chef']['external-rabbitmq']['enable']
     config = if external

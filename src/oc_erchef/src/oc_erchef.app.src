@@ -53,7 +53,8 @@
                   runtime_tools,
                   tools,
                   uuid,
-                  webtool]},
+                  webtool,
+                  prometheus]},
   {mod, { oc_erchef_app, []}},
   {env, []}
  ]}.

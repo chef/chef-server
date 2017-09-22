@@ -251,6 +251,7 @@ projects:
       secrets:
         args:
         list:
+          - opscode_erchef.stats_password
           - chef-server.webui_key
           - chef-server.superuser_key
 

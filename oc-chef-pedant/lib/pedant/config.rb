@@ -114,6 +114,9 @@ module Pedant
     # Default to a config file in the current directory
     config_file "pedant_config.rb"
 
+    # Default user for the stats end-point
+    stats_user "statsuser"
+
     # Maximum time in seconds that search endpoint requests should be
     # retried before giving up (to accommodate the asynchronous
     # commits of Solr)

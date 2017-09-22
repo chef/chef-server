@@ -136,6 +136,7 @@ ssl_version :TLSv1
 superuser_name 'pivotal'
 superuser_key  '/etc/opscode/pivotal.pem'
 webui_key '/etc/opscode/webui_priv.pem'
+stats_user 'statsuser'
 
 requestors({
              :clients => {
