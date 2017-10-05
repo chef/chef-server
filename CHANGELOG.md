@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.16.15 -->
-## [12.16.15](https://github.com/chef/chef-server/tree/12.16.15) (2017-09-22)
+<!-- latest_release 12.16.16 -->
+## [12.16.16](https://github.com/chef/chef-server/tree/12.16.16) (2017-10-05)
 
 #### Merged Pull Requests
-- Stats endpoint [#1384](https://github.com/chef/chef-server/pull/1384) ([jaym](https://github.com/jaym))
+- Removing the Gemfile.lock in an effort to move towards continuous integration [#1396](https://github.com/chef/chef-server/pull/1396) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.16.14 -->
 ### Changes since 12.16.14 release
 
 #### Merged Pull Requests
+- Removing the Gemfile.lock in an effort to move towards continuous integration [#1396](https://github.com/chef/chef-server/pull/1396) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.16.16 -->
 - Stats endpoint [#1384](https://github.com/chef/chef-server/pull/1384) ([jaym](https://github.com/jaym)) <!-- 12.16.15 -->
 <!-- release_rollup -->
 
