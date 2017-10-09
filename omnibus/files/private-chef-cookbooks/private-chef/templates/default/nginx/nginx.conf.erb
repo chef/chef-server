@@ -105,6 +105,33 @@ http {
     proxy_cache_path  <%= File.join(@dir, "cache", "cookbooks") %> levels=1:2 keys_zone=cookbooks:50m max_size=<%= @cache_max_size %> inactive=600m;
     proxy_temp_path <%= File.join(@dir, "cache-tmp") %>;
 
+    <%- if @strict_host_header %>
+    # Reject requests with unknown Host header
+      <%- if @non_ssl_port %>
+    server {
+      listen <%= @non_ssl_port %> default_server;
+      server_tokens off;
+      server_name _;
+      return 404;
+    }
+      <%- end %>
+
+    server {
+      listen <%= @ssl_port %> ssl;
+      server_tokens off;
+
+      ssl_certificate <%= @ssl_certificate %>;
+      ssl_certificate_key <%= @ssl_certificate_key %>;
+      ssl_session_timeout 5m;
+      ssl_protocols <%= @ssl_protocols %>;
+      ssl_ciphers <%= @ssl_ciphers %>;
+      ssl_prefer_server_ciphers on;
+
+      server_name _;
+      return 404;
+  }
+  <% end -%>
+
     # We support three options: serve nothing on non_ssl_port (80),
     # redirect to https, or actually serve the API.
     <%- if @non_ssl_port -%>
@@ -113,6 +140,7 @@ http {
       <%- else -%>
           server {
             <%= @helper.listen_port('http') %>
+            server_name <%= @helper.server_name %>;
             access_log /var/log/opscode/nginx/rewrite-port-80.log;
             return 301 https://$host$request_uri;
           }
@@ -127,8 +155,7 @@ http {
   <%- if node['private_chef']['lb_internal']['enable'] -%>
   server {
     <%= @helper.listen_port(node['private_chef']['lb_internal']['chef_port']) %>
-    # The name doesn't matter; this is the only listener on this port
-    server_name <%= @server_name %>;
+    server_name <%= @helper.server_name %>;
 
     client_max_body_size <%= @client_max_body_size %>;
     proxy_set_header        Host            $host;
@@ -160,7 +187,7 @@ http {
   # internal service access for oc_bifrost
   server {
     <%= @helper.listen_port(node['private_chef']['lb_internal']['oc_bifrost_port']) %>
-    server_name <%= @server_name %>;
+    server_name <%= @helper.server_name %>;
 
     client_max_body_size <%= @client_max_body_size %>;
     proxy_set_header        Host            $host;

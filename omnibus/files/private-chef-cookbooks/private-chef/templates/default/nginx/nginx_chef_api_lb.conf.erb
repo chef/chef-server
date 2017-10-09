@@ -1,6 +1,6 @@
   server {
     <%= @helper.listen_port(@server_proto) %>
-    server_name <%= @server_name %>;
+    server_name <%= @helper.server_name %>;
 
     set_by_lua $data_collector_token 'return os.getenv("DATA_COLLECTOR_TOKEN")';
 
