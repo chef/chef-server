@@ -114,7 +114,7 @@ http {
           server {
             <%= @helper.listen_port('http') %>
             access_log /var/log/opscode/nginx/rewrite-port-80.log;
-            return 301 https://$host$request_uri;
+            return 301 https://$server_name$request_uri;
           }
       <%- end -%>
     <%-  end %>
