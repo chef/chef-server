@@ -8,6 +8,15 @@ This document contains release notes for the current major release and all patch
 For prior releases,
 see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 12.17.0 (2017-10-10)
+
+This release has security updates and enhancements.
+ - Update the version of java to 8u144 to address CVE-2017-3526.
+ - Add a `/_stats` endpoint to Chef Server that conforms to Chef RFC 93
+   (https://github.com/chef/chef-rfc/blob/master/rfc093-server-stats-endpoint.md)
+   Currently, it exposes statistics about connection pool usage inside Erchef,
+   Postgresql, and the Erlang VM. Further statistics will be added as needed.
+
 ## 12.16.14 (2017-09-21)
 
 This release upgrades the version of Ruby to 2.2.8 to address multiple
