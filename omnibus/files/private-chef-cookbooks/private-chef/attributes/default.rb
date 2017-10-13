@@ -561,6 +561,12 @@ default['private_chef']['nginx']['client_max_body_size'] = '250m'
 default['private_chef']['nginx']['cache_max_size'] = '5000m'
 default['private_chef']['nginx']['server_names_hash_bucket_size'] = 128
 default['private_chef']['nginx']['enable_ipv6'] = false
+# Only respond to requests with a Host: header that matches
+# a configured fqdn.
+default['private_chef']['nginx']['strict_host_header'] = false
+# Implicitly add server_name entries for localhost, 127.0.0.1, ::1,
+# and any IPs associated with the machine.
+default['private_chef']['nginx']['use_implicit_hosts'] = true
 
 ###
 # PostgreSQL
