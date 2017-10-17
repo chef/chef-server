@@ -28,7 +28,5 @@
       "chef_server": true
     }
   },
-  "dependencies": [
-    "engineering-services/cd-infrastructure"
-  ]
+  "dependencies": []
 }
