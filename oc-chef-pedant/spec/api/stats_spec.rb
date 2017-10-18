@@ -4,7 +4,7 @@ require 'base64'
 
 describe "/_stats API endpoint", :stats do
 
-  RESPONSE_TYPE_MAP = {
+  ERLANG_RESPONSE_TYPE_MAP = {
     "erlang_vm_time_correction" => "UNTYPED",
     "erlang_vm_thread_pool_size" => "GAUGE",
     "erlang_vm_threads" => "UNTYPED",
@@ -39,7 +39,10 @@ describe "/_stats API endpoint", :stats do
     "erchef_pooler_queued_requestors" => "GAUGE",
     "erchef_pooler_members_max" => "GAUGE",
     "erchef_pooler_members_free" => "GAUGE",
-    "erchef_pooler_members_in_use" => "GAUGE",
+    "erchef_pooler_members_in_use" => "GAUGE"
+  }
+
+  PGSTATS_RESPONSE_TYPE_MAP = {
     "pg_stat_n_conns" => "GAUGE",
     "pg_stat_n_active_conns" => "GAUGE",
     "pg_stat_tidx_blks_hit" => "COUNTER",
@@ -61,6 +64,12 @@ describe "/_stats API endpoint", :stats do
     "pg_stat_seq_scan" => "COUNTER"
   }
 
+  if Pedant::Config.chef_pgsql_collector
+    RESPONSE_TYPE_MAP = ERLANG_RESPONSE_TYPE_MAP.merge(PGSTATS_RESPONSE_TYPE_MAP)
+  else
+    RESPONSE_TYPE_MAP = ERLANG_RESPONSE_TYPE_MAP
+  end
+
   let(:request_url) { "#{platform.server}/_stats" }
   let(:response_body) do
     RESPONSE_TYPE_MAP.map do |name, type|
@@ -77,6 +86,7 @@ describe "/_stats API endpoint", :stats do
   end
 
   # Don't turn on any of the tests unless we have a password.
+  # and are not running on the backend of a tiered setup.
   if Pedant::Config.pedant_platform.stats_password
     it "returns a list of collected statistics", :smoke do
       get(request_url, nil, auth_headers: auth_headers).should look_like({

@@ -195,3 +195,5 @@ log_file "<%= File.join(@log_directory, "http-traffic.log") %>"
 <%- if @reindex_endpoint %>
 reindex_endpoint "<%= @reindex_endpoint %>"
 <%- end %>
+
+chef_pgsql_collector "<%= @chef_pgsql_collector %>"
