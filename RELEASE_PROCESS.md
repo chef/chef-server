@@ -32,6 +32,14 @@ In order to release, you will need the following accounts/permissions:
 
 - [ ] Announce your intention to drive the release to #cft-announce and #chef-server on slack.
 
+### Getting the build to be released into current with a minor/major version bump.
+
+- Update the version file to the version to be released if minor version needs to be bumped rather than just the patch.
+- Update the release notes with the version, date and context.
+- Get the build into current channel by approving it at `https://automate.chef.co/e/chef/#/organizations/products/projects/chef-server/changes`
+  (This is triggered by expeditor once the build and tests in jenkins go through ok once a commit is merged to master)
+- For updating just the patch verion refer the the section below on #Preparing for the release
+
 ### Testing the Release
 
 > This process is currently manual. There is working being done to fold this into the ACC pipeline.
@@ -42,6 +50,7 @@ release:
 
 - [ ] Run the Chef Automate-based automated upgrade testing.
   * Clone the `pool/qa-chef-server-cluster` project from automate.chef.co.
+    (`https://automate.chef.co/e/chef/#/organizations/pool/projects/qa-chef-server-cluster/clone`)
     * If you get an access rights error, make sure your public github key is included in your delivery profile.
   * On a branch, update relevant attributes in `.delivery/build/attributes/default.rb`:
     * Update `chef_server_test_url_override` to be the URL corresponding to
