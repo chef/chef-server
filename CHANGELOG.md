@@ -1,27 +1,24 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.3 -->
-## [12.17.3](https://github.com/chef/chef-server/tree/12.17.3) (2017-10-19)
-
-#### Merged Pull Requests
-- [pedant] Render `false` rather than `&quot;false&quot;` in template [#1404](https://github.com/chef/chef-server/pull/1404) ([stevendanna](https://github.com/stevendanna))
-- Add config item for if pgstats will be collected [#1402](https://github.com/chef/chef-server/pull/1402) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=12.16.14 -->
-### Changes since 12.16.14 release
-
-#### Merged Pull Requests
-- [pedant] Render `false` rather than `&quot;false&quot;` in template [#1404](https://github.com/chef/chef-server/pull/1404) ([stevendanna](https://github.com/stevendanna)) <!-- 12.17.3 -->
-- Add config item for if pgstats will be collected [#1402](https://github.com/chef/chef-server/pull/1402) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.2 -->
-- Update README.md [#1400](https://github.com/chef/chef-server/pull/1400) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.1 -->
-- Update Release_Notes for version 12.17.0 [#1399](https://github.com/chef/chef-server/pull/1399) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.0 -->
-- Mitigate Host Header cache-poisoning attacks [#1398](https://github.com/chef/chef-server/pull/1398) ([stevendanna](https://github.com/stevendanna)) <!-- 12.16.17 -->
-- Removing the Gemfile.lock in an effort to move towards continuous integration [#1396](https://github.com/chef/chef-server/pull/1396) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.16.16 -->
-- Stats endpoint [#1384](https://github.com/chef/chef-server/pull/1384) ([jaym](https://github.com/jaym)) <!-- 12.16.15 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [12.17.3](https://github.com/chef/chef-server/tree/12.17.3) (2017-10-19)
+
+#### Merged Pull Requests
+- Stats endpoint [#1384](https://github.com/chef/chef-server/pull/1384) ([jaym](https://github.com/jaym))
+- Removing the Gemfile.lock in an effort to move towards continuous integration [#1396](https://github.com/chef/chef-server/pull/1396) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Mitigate Host Header cache-poisoning attacks [#1398](https://github.com/chef/chef-server/pull/1398) ([stevendanna](https://github.com/stevendanna))
+- Update Release_Notes for version 12.17.0 [#1399](https://github.com/chef/chef-server/pull/1399) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update README.md [#1400](https://github.com/chef/chef-server/pull/1400) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add config item for if pgstats will be collected [#1402](https://github.com/chef/chef-server/pull/1402) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- [pedant] Render `false` rather than `&quot;false&quot;` in template [#1404](https://github.com/chef/chef-server/pull/1404) ([stevendanna](https://github.com/stevendanna))
+<!-- latest_stable_release -->
+
 ## [12.16.14](https://github.com/chef/chef-server/tree/12.16.14) (2017-09-21)
 
 #### Merged Pull Requests
@@ -30,7 +27,6 @@
 - Update pins to the latest ruby and rubygems [#1392](https://github.com/chef/chef-server/pull/1392) ([stevendanna](https://github.com/stevendanna))
 - Fix build after ruby update [#1393](https://github.com/chef/chef-server/pull/1393) ([stevendanna](https://github.com/stevendanna))
 - [SUSTAIN-632] Do not update the users table to contain the public key. The keys table should be the only source of truth [#1383](https://github.com/chef/chef-server/pull/1383) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
-<!-- latest_stable_release -->
 
 ## [12.16.9](https://github.com/chef/chef-server/tree/12.16.9) (2017-08-30)
 
