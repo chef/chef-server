@@ -56,6 +56,8 @@ template pedant_config do
     :hostname => node['hostname'],
     :ssl_version =>  ssl_version,
     :reindex_endpoint => reindex_endpoint,
-    :required_recipe_enabled => node['private_chef']['required_recipe']['enable']
+    :required_recipe_enabled => node['private_chef']['required_recipe']['enable'],
+    :chef_pgsql_collector => ( node['private_chef']['postgresql']['enable'] &&
+                               !node['private_chef']['postgresql']['external'] )
   }.merge(node['private_chef']['oc-chef-pedant'].to_hash))
 end
