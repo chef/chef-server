@@ -1,9 +1,10 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release unreleased -->
-## Unreleased
+<!-- latest_release 12.17.3 -->
+## [12.17.3](https://github.com/chef/chef-server/tree/12.17.3) (2017-10-19)
 
 #### Merged Pull Requests
+- [pedant] Render `false` rather than `&quot;false&quot;` in template [#1404](https://github.com/chef/chef-server/pull/1404) ([stevendanna](https://github.com/stevendanna))
 - Add config item for if pgstats will be collected [#1402](https://github.com/chef/chef-server/pull/1402) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
@@ -11,6 +12,7 @@
 ### Changes since 12.16.14 release
 
 #### Merged Pull Requests
+- [pedant] Render `false` rather than `&quot;false&quot;` in template [#1404](https://github.com/chef/chef-server/pull/1404) ([stevendanna](https://github.com/stevendanna)) <!-- 12.17.3 -->
 - Add config item for if pgstats will be collected [#1402](https://github.com/chef/chef-server/pull/1402) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.2 -->
 - Update README.md [#1400](https://github.com/chef/chef-server/pull/1400) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.1 -->
 - Update Release_Notes for version 12.17.0 [#1399](https://github.com/chef/chef-server/pull/1399) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.0 -->
