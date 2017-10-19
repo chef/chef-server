@@ -8,7 +8,7 @@ This document contains release notes for the current major release and all patch
 For prior releases,
 see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
-## 12.17.2 (2017-10-17)
+## 12.17.3 (2017-10-19)
 
 This release has security updates and enhancements.
  - Update the version of java to 8u144 to address CVE-2017-3526.
