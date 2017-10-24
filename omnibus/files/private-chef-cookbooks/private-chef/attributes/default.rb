@@ -566,7 +566,7 @@ default['private_chef']['nginx']['enable_ipv6'] = false
 default['private_chef']['nginx']['strict_host_header'] = false
 # Implicitly add server_name entries for localhost, 127.0.0.1, ::1,
 # and any IPs associated with the machine.
-default['private_chef']['nginx']['use_implicit_hosts'] = true
+default['private_chef']['nginx']['use_implicit_hosts'] = false
 
 ###
 # PostgreSQL
