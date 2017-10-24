@@ -8,6 +8,13 @@ This document contains release notes for the current major release and all patch
 For prior releases,
 see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 12.17.4 (2017-10-24)
+
+This release fixes a regression.
+  - Fix for users on clouds where the ohai (v8.23.0) plugin for their cloud
+    doesn't report a list of strings for `public_ipv4` and `private_ipv4`.
+    This fix will ensure a working nginx config on upgrade.
+
 ## 12.17.3 (2017-10-19)
 
 This release has security updates and enhancements.
