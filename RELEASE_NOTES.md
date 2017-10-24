@@ -8,6 +8,14 @@ This document contains release notes for the current major release and all patch
 For prior releases,
 see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 12.17.5 (2017-10-24)
+
+This release fixes a regression.
+  - Set nginx['use_implicit_hosts'] = false by default.
+    This fixes a regression for users deploying on Digital Ocean and
+    potentially other non-AWS cloud platforms where
+    nginx['use_implicit_hosts'] = true results in incorrect nginx configuration.
+
 ## 12.17.3 (2017-10-19)
 
 This release has security updates and enhancements.
