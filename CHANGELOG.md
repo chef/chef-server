@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 12.17.4 -->
+## [12.17.4](https://github.com/chef/chef-server/tree/12.17.4) (2017-10-24)
+
+#### Merged Pull Requests
+- set use_implicit_hosts to false [#1408](https://github.com/chef/chef-server/pull/1408) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=12.17.3 -->
+### Changes since 12.17.3 release
+
+#### Merged Pull Requests
+- set use_implicit_hosts to false [#1408](https://github.com/chef/chef-server/pull/1408) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.4 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
