@@ -41,6 +41,16 @@ merge_actions:
       only_if_labels:
         - "Expeditor: ACC Only"
 
+# Subscription to workload action of pull request merge to master branch on
+# omnibus-software project will allow us to trigger an uncached omnibus build
+# for chef-server when the omnibus-software has modified software config files.
+subscriptions:
+  # chef/omnibus-software
+  - workload: pull_request_merged:chef/omnibus-software:master:*
+    actions:
+      - built_in:trigger_omnibus_expcache_build:
+          only_if_modified:
+      	    - config/software/*
 # These actions are taken, in the order specified, when an Omnibus artifact is promoted
 # within Chef's internal artifact storage system.
 #
