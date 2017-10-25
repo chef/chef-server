@@ -2,7 +2,7 @@
 exec 2>&1
 
 # Die if rabbitmq isn't available
-{{#unless bind.has_rabbitmq ~}}
+{{#unless bind.rabbitmq ~}}
 exit 1
 {{/unless ~}}
 

@@ -54,6 +54,7 @@ do_prepare() {
 
 do_build() {
   _bundler_dir="$(pkg_path_for bundler)"
+  export REL_VERSION="12.99.1"
   export USE_SYSTEM_GECODE=1
   export GEM_HOME="${pkg_path}/vendor/bundle"
   export GEM_PATH="${_bundler_dir}:${GEM_HOME}"
