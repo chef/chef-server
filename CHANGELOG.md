@@ -7,15 +7,18 @@
 - Release 12.17.5 [#1412](https://github.com/chef/chef-server/pull/1412) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
-<!-- release_rollup since=12.17.3 -->
-### Changes since 12.17.3 release
-
-#### Merged Pull Requests
-- Release 12.17.5 [#1412](https://github.com/chef/chef-server/pull/1412) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.5 -->
-- set use_implicit_hosts to false [#1408](https://github.com/chef/chef-server/pull/1408) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.4 -->
+<!-- release_rollup since=12.17.5 -->
+### Changes since 12.17.5 release
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [12.17.5](https://github.com/chef/chef-server/tree/12.17.5) (2017-10-25)
+
+#### Merged Pull Requests
+- set use_implicit_hosts to false [#1408](https://github.com/chef/chef-server/pull/1408) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Release 12.17.5 [#1412](https://github.com/chef/chef-server/pull/1412) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+<!-- latest_stable_release -->
+
 ## [12.17.3](https://github.com/chef/chef-server/tree/12.17.3) (2017-10-19)
 
 #### Merged Pull Requests
@@ -26,7 +29,6 @@
 - Update README.md [#1400](https://github.com/chef/chef-server/pull/1400) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 - Add config item for if pgstats will be collected [#1402](https://github.com/chef/chef-server/pull/1402) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 - [pedant] Render `false` rather than `&quot;false&quot;` in template [#1404](https://github.com/chef/chef-server/pull/1404) ([stevendanna](https://github.com/stevendanna))
-<!-- latest_stable_release -->
 
 ## [12.16.14](https://github.com/chef/chef-server/tree/12.16.14) (2017-09-21)
 
