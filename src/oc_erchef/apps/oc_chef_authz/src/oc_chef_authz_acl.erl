@@ -160,6 +160,13 @@ fetch_id(policy, DbContext, Name, OrgId) ->
         #oc_chef_policy{authz_id = AuthzId} ->
             AuthzId
     end;
+fetch_id(cookbook_artifact, DbContext, Name, OrgId) ->
+    case chef_db:fetch(#oc_chef_cookbook_artifact{org_id = OrgId, name = Name}, DbContext) of
+        not_found ->
+            not_found;
+        #oc_chef_cookbook_artifact{authz_id = AuthzId} ->
+            AuthzId
+    end;
 fetch_id(policy_group, DbContext, Name, OrgId) ->
     case chef_db:fetch(#oc_chef_policy_group{org_id = OrgId, name = Name}, DbContext) of
         not_found ->
@@ -349,6 +356,8 @@ acl_path(user, AuthzId) ->
 acl_path(organization, AuthzId) ->
     acl_path(object, AuthzId);
 acl_path(policy, AuthzId) ->
+    acl_path(object, AuthzId);
+acl_path(cookbook_artifact, AuthzId) ->
     acl_path(object, AuthzId);
 acl_path(policy_group, AuthzId) ->
     acl_path(object, AuthzId);
