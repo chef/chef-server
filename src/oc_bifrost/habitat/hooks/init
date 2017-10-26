@@ -1,0 +1,12 @@
+#!/bin/bash
+
+exec 2>&1
+
+mkdir -p {{pkg.svc_var_path}}/log
+
+ln -sf {{pkg.svc_var_path}}/log {{pkg.path}}/oc_bifrost
+
+for conf in sys.config
+do
+  ln -sf {{pkg.svc_config_path}}/$conf {{pkg.path}}/
+done
