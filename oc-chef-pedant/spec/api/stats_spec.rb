@@ -64,10 +64,23 @@ describe "/_stats API endpoint", :stats do
     "pg_stat_seq_scan" => "COUNTER"
   }
 
+  MNESIA_RESPONSE_TYPE_MAP = {
+    "erlang_mnesia_held_locks" => "GAUGE",
+    "erlang_mnesia_lock_queue" => "GAUGE",
+    "erlang_mnesia_transaction_participants" => "GAUGE",
+    "erlang_mnesia_transaction_coordinators" => "GAUGE",
+    "erlang_mnesia_failed_transactions" => "COUNTER",
+    "erlang_mnesia_committed_transactions" => "GAUGE",
+    "erlang_mnesia_logged_transactions" => "COUNTER",
+    "erlang_mnesia_restarted_transactions" => "COUNTER"
+  }
+
   if Pedant::Config.chef_pgsql_collector
     RESPONSE_TYPE_MAP = ERLANG_RESPONSE_TYPE_MAP.merge(PGSTATS_RESPONSE_TYPE_MAP)
+    PROMETHEUS_RESPONSE_TYPE_MAP = RESPONSE_TYPE_MAP.merge(MNESIA_RESPONSE_TYPE_MAP)
   else
     RESPONSE_TYPE_MAP = ERLANG_RESPONSE_TYPE_MAP
+    PROMETHEUS_RESPONSE_TYPE_MAP = RESPONSE_TYPE_MAP.merge(MNESIA_RESPONSE_TYPE_MAP)
   end
 
   let(:request_url) { "#{platform.server}/_stats" }
@@ -102,7 +115,7 @@ describe "/_stats API endpoint", :stats do
       })
     end
 
-    it "returns promethius output ?format=text", :smoke do
+    it "returns prometheus output ?format=text", :smoke do
       response = get(request_url + "?format=text", nil, auth_headers: auth_headers,
           headers: { "Accept" => "*/*" })
       names = response.split("\n").reduce([]) do |acc, str|
@@ -110,7 +123,7 @@ describe "/_stats API endpoint", :stats do
         acc << m[0] if m
         acc
       end
-      expect(names.uniq).to match_array(RESPONSE_TYPE_MAP.keys)
+      expect(names.uniq).to match_array(PROMETHEUS_RESPONSE_TYPE_MAP.keys)
     end
 
     RESPONSE_TYPE_MAP.each do |name, type|
