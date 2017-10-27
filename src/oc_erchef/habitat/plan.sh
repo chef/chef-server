@@ -4,7 +4,7 @@ pkg_version="0.1.0"
 pkg_license=('Apache-2.0')
 pkg_maintainer="Elliott Davis <edavis@chef.io>"
 pkg_source="nosuchfile.tar.gz"
-pkg_deps=(core/erlang18 core/cacerts core/coreutils core/postgresql core/gcc-libs core/rabbitmq)
+pkg_deps=(core/erlang18 core/cacerts core/coreutils core/postgresql core/gcc-libs)
 pkg_build_deps=(core/make core/git core/gcc core/bundler core/ruby core/gecode)
 pkg_lib_dirs=(lib)
 pkg_include_dirs=(include)
@@ -15,8 +15,20 @@ pkg_upstream_url="https://github.com/chef/chef-server"
 # dir that is always owned by root.
 pkg_svc_user=root
 pkg_svc_group=$pkg_svc_user
+
+pkg_exports=(
+    [port]=oc_chef_wm.port
+)
+
 pkg_binds_optional=(
   [rabbitmq]="port"
+)
+
+pkg_binds=(
+    [oc_bifrost]="port"
+    [bookshelf]="port"   
+    [elasticsearch]="port,url"
+    [postgres]="port"
 )
 
 do_download() {
