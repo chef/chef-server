@@ -50,7 +50,7 @@ subscriptions:
     actions:
       - built_in:trigger_omnibus_expcache_build:
           only_if_modified:
-      	    - config/software/*
+            - config/software/*
 # These actions are taken, in the order specified, when an Omnibus artifact is promoted
 # within Chef's internal artifact storage system.
 #
