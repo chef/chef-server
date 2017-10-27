@@ -12,7 +12,7 @@ db_host="localhost"
 db_port=5432
 db_user="opscode_chef"
 db_pass=""
-db_name="opscode_chef"
+db_name="bifrost"
 db_pooler_timeout=2000
 sql_db_timeout=5000
 

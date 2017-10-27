@@ -10,3 +10,5 @@ for conf in sys.config
 do
   ln -sf {{pkg.svc_config_path}}/$conf {{pkg.path}}/
 done
+
+source "{{pkg.svc_config_path}}/database-migrations.sh"

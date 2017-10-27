@@ -4,7 +4,15 @@ pkg_version="0.1.0"
 pkg_license=('Apache-2.0')
 pkg_maintainer="Elliott Davis <edavis@chef.io>"
 pkg_source="nosuchfile.tar.gz"
-pkg_deps=(core/erlang18 core/cacerts core/coreutils core/postgresql core/gcc-libs)
+pkg_deps=(
+  core/erlang18
+  core/cacerts
+  core/coreutils
+  core/postgresql/9.6.3/20171014214231
+  core/gcc-libs
+  core/sqitch
+  frog-hornets-nest/dbdpg
+)
 pkg_build_deps=(core/make core/git core/gcc)
 pkg_lib_dirs=(lib)
 pkg_include_dirs=(include)
@@ -58,6 +66,7 @@ do_build() {
 
 do_install() {
   cp -rv "_build/default/rel/bookshelf/"* "${pkg_prefix}"
+  cp -R "$HAB_CACHE_SRC_PATH/$pkg_dirname/schema" "$pkg_prefix"
 }
 
 do_check() {

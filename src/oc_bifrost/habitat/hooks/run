@@ -2,12 +2,10 @@
 exec 2>&1
 
 export HOME={{pkg.svc_var_path}}
-# export ERL_EPMD_ADDRESS=127.0.0.1
 
 {{#if cfg.fips_enabled ~}}
 export OPENSSL_FIPS=1
 {{/if ~}}
 
-# {{pkg.path}}/erts-7.3/bin/epmd -daemon
-
+export CHEF_SECRETS_DATA=$(cat {{pkg.svc_config_path}}/secrets.json)
 exec oc_bifrost foreground
