@@ -21,7 +21,9 @@ pkg_exports=(
 )
 
 pkg_binds_optional=(
-  [rabbitmq]="port"
+  [database]="port"
+  [elasticsearch]="http-port"
+  [oc_bifrost]="port"
 )
 
 pkg_binds=(

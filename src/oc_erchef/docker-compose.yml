@@ -1,16 +1,50 @@
-version: '2'
+version: '3'
 services:
-  rabbitmq:
-    image: core/rabbitmq
+  postgresql:
+    image: chefdemo/postgresql:stable
     environment:
-      - HAB_RABBITMQ=rabbitmq={default_vhost='/chef',default_user='',default_pass='',management={enabled=true}}
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-  oc_erchef:
-    image: $HAB_ORIGIN/oc_erchef
+      HAB_POSTGRESQL: |
+        [superuser]
+        name = 'hab'
+        password = 'chefrocks'
+    volumes:
+      - postgresql-data:/hab/svc/postgresql/data
+
+  elasticsearch:
+    image: chefdemo/elasticsearch:stable
+    command: --peer postgresql
+    depends_on:
+      - postgresql
     links:
-      - rabbitmq
+      - postgresql
+
+  oc_bifrost:
+    image: $HAB_ORIGIN/oc_bifrost
+    depends_on:
+      - postgresql
+    links:
+      - postgresql
     environment:
       - FOO=bar
-    command: start $HAB_ORIGIN/oc_erchef --peer rabbitmq --bind rabbitmq:rabbitmq.default
+    command: --peer postgresql
+      --bind database:postgresql.default
+
+  oc_erchef:
+    image: $HAB_ORIGIN/oc_erchef
+    depends_on:
+      - elasticsearch
+      - oc_bifrost
+      - postgresql
+    links:
+      - elasticsearch
+      - oc_bifrost
+      - postgresql
+    environment:
+      - FOO=bar
+    command: --peer postgresql
+      --bind oc_bifrost:oc_bifrost.default
+      --bind database:postgresql.default
+      --bind elasticsearch:elasticsearch.default
+
+volumes:
+  postgresql-data:
