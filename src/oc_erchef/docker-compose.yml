@@ -1,0 +1,16 @@
+version: '2'
+services:
+  rabbitmq:
+    image: core/rabbitmq
+    environment:
+      - HAB_RABBITMQ=rabbitmq={default_vhost='/chef',default_user='',default_pass='',management={enabled=true}}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  oc_erchef:
+    image: $HAB_ORIGIN/oc_erchef
+    links:
+      - rabbitmq
+    environment:
+      - FOO=bar
+    command: start $HAB_ORIGIN/oc_erchef --peer rabbitmq --bind rabbitmq:rabbitmq.default
