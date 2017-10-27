@@ -2,6 +2,5 @@
 exec 2>&1
 
 export HOME={{pkg.svc_var_path}}
-export ERL_EPMD_ADDRESS=127.0.0.1
 
 exec bookshelf foreground
