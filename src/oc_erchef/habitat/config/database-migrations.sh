@@ -13,7 +13,7 @@ HOST="{{member.sys.ip}}"
 PORT="{{member.cfg.port}}"
 USER="{{member.cfg.superuser_name}}"
 PASS="{{member.cfg.superuser_password}}"
-DB="oc_erchef"
+DB="opscode_chef"
     {{/if}}
   {{/eachAlive}}
 {{else}}
@@ -21,7 +21,7 @@ HOST="{{cfg.postgresql.vip}}"
 PORT="{{cfg.postgresql.port}}"
 USER="{{cfg.sql_user}}"
 PASS="{{cfg.sql_password}}"
-DB="oc_erchef"
+DB="opscode_chef"
 {{/if}}
 
 PG_ARGS="--host "$HOST" --port "$PORT" --username "$USER""
@@ -36,5 +36,8 @@ createdb $PG_ARGS $DB "oc_bifrost"
 # Install uuid-ossp extension
 psql $PG_ARGS --command 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp"' $DB
 
-cd "{{pkg.path}}/schema" || exit
+cd "{{pkg.path}}/schema/baseline"
+sqitch --quiet --engine pg deploy "db:pg://${USER}:${PASS}@${HOST}/$DB"
+
+cd "{{pkg.path}}/schema"
 sqitch --quiet --engine pg deploy "db:pg://${USER}:${PASS}@${HOST}/$DB"

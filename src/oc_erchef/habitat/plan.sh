@@ -34,13 +34,6 @@ pkg_binds_optional=(
   [oc_bifrost]="port"
 )
 
-pkg_binds=(
-    [oc_bifrost]="port"
-    [bookshelf]="port"
-    [elasticsearch]="port,url"
-    [postgres]="port"
-)
-
 do_download() {
   return 0
 }
