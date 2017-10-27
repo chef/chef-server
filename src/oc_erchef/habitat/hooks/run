@@ -2,10 +2,10 @@
 exec 2>&1
 
 # Die if rabbitmq isn't available
-# Remove to debug
-#{{#unless bind.rabbitmq ~}}
-#exit 1
-#{{/unless ~}}
+{{~#unless bind.rabbitmq ~}}
+exec echo "No bind.rabbitmq"
+exit 1
+{{~/unless ~}}
 
 export PATH=/opt/opscode/embedded/bin:$PATH
 export HOME={{pkg.svc_var_path}}

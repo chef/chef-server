@@ -15,9 +15,8 @@ pkg_upstream_url="https://github.com/chef/chef-server"
 # dir that is always owned by root.
 pkg_svc_user=root
 pkg_svc_group=$pkg_svc_user
-
-pkg_binds=(
-    [rabbitmq]="port"
+pkg_binds_optional=(
+  [rabbitmq]="port"
 )
 
 do_download() {

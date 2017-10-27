@@ -4,11 +4,12 @@ fips_enabled=false
 
 [lager]
 lager_console_backend="info"
+error_logger_hwm=50
 
 [oc_chef_wm]
 api_version=""
 server_flavor=""
-default_orgname=""
+default_orgname="test"
 listen_ip="0.0.0.0"
 port=1234
 auth_skew=""
