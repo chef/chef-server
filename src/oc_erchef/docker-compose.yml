@@ -21,7 +21,7 @@ services:
   oc_bifrost:
     image: $HAB_ORIGIN/oc_bifrost
     depends_on:
-      - postgresql
+      - elasticsearch
     links:
       - postgresql
     environment:

@@ -8,12 +8,16 @@ pkg_deps=(
   core/erlang18
   core/cacerts
   core/coreutils
+  core/curl
   core/postgresql/9.6.3/20171014214231
   core/gcc-libs
+  core/ruby
   core/sqitch
+  core/gecode
+  core/bundler
   frog-hornets-nest/dbdpg
 )
-pkg_build_deps=(core/make core/git core/gcc core/bundler core/ruby core/gecode)
+pkg_build_deps=(core/make core/git core/gcc)
 pkg_lib_dirs=(lib)
 pkg_include_dirs=(include)
 pkg_bin_dirs=(bin)

@@ -7,4 +7,5 @@ export HOME={{pkg.svc_var_path}}
 export OPENSSL_FIPS=1
 {{/if ~}}
 
+export CHEF_SECRETS_DATA=$(cat {{pkg.svc_config_path}}/veil-secrets.json)
 exec oc_erchef foreground
