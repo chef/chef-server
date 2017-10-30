@@ -1,8 +1,10 @@
 require 'pedant/rspec/common'
 require 'pedant/acl'
+require 'pedant/rspec/cookbook_util'
 
 describe "ACL API", :acl do
   include Pedant::ACL
+  include Pedant::RSpec::CookbookUtil
 
   # Generate random string identifier prefixed with current pid
   def rand_id
@@ -836,7 +838,7 @@ describe "ACL API", :acl do
     # TODO: Sanity check: users don't seem to have any ACLs, or at least, nothing is
     # accessible from external API as far as I can tell:
     # - [jkeiser] Users have ACLs, but they are at /users/NAME/_acl
-    %w(clients groups containers data nodes roles environments cookbooks policies policy_groups).each do |type|
+    %w(cookbook_artifacts clients groups containers data nodes roles environments cookbooks policies policy_groups).each do |type|
       context "for #{type} type" do
 
         let(:new_object) { "new-object" }
@@ -989,10 +991,18 @@ describe "ACL API", :acl do
           }}
           let(:groups) { ["users", "admins"] }
           let(:read_groups) { ["users", "clients", "admins"] }
+        when "cookbook_artifacts"
+          let(:creation_url) { api_url("#{type}/#{new_object}/1111111111111111111111111111111111111111") }
+          let(:creation_body) { new_cookbook_artifact("new-object", "1111111111111111111111111111111111111111", version: "1") }
+          let(:deletion_url) { api_url("#{type}/#{new_object}/1111111111111111111111111111111111111111")}
+          let(:groups) { ["admins", "users"] }
+          let(:read_groups) { ["admins", "clients", "users"] }
+          let(:update_groups) { ["admins", "users"] }
+          let(:delete_groups) { ["admins", "users"] }
         end
 
         before :each do
-          if (type == "cookbooks" || type == "policy_groups")
+          if (type == "cookbooks" || type == "policy_groups" || type == "cookbook_artifacts")
             # Inconsistent API needs a PUT here.  We love consistency!
             put(creation_url, setup_user,
               :payload => creation_body).should look_like({
