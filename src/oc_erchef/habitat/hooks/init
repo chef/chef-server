@@ -13,3 +13,4 @@ done
 
 source "{{pkg.svc_config_path}}/database-migrations.sh"
 # TODO: initial data setup (pivotal user, chef server containers, elasticsearch index, etc)
+source "{{pkg.svc_config_path}}/elasticsearch-init.sh"

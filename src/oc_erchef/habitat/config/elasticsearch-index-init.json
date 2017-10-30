@@ -1,0 +1,57 @@
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "default": {
+          "type": "whitespace"
+        }
+      }
+    },
+    "number_of_shards": 3,
+    "number_of_replicas": 2
+  },
+  "mappings": {
+    "object": {
+      "_source": {
+        "enabled": false
+      },
+      "_all": {
+        "enabled": false
+      },
+      "properties": {
+        "X_CHEF_database_CHEF_X": {
+          "type": "string",
+          "index": "not_analyzed",
+          "norms": {
+            "enabled": false
+          }
+        },
+        "X_CHEF_type_CHEF_X": {
+          "type": "string",
+          "index": "not_analyzed",
+          "norms": {
+            "enabled": false
+          }
+        },
+        "X_CHEF_id_CHEF_X": {
+          "type": "string",
+          "index": "not_analyzed",
+          "norms": {
+            "enabled": false
+          }
+        },
+        "data_bag": {
+          "type": "string",
+          "index": "not_analyzed",
+          "norms": {
+            "enabled": false
+          }
+        },
+        "content": {
+          "type": "string",
+          "index": "analyzed"
+        }
+      }
+    }
+  }
+}
