@@ -18,10 +18,21 @@ services:
     links:
       - postgresql
 
+  bookshelf:
+    image: $HAB_ORIGIN/bookshelf
+    depends_on:
+      - postgresql
+    links:
+      - postgresql
+    environment:
+      - FOO=bar
+    command: --peer postgresql
+      --bind database:postgresql.default
+
   oc_bifrost:
     image: $HAB_ORIGIN/oc_bifrost
     depends_on:
-      - elasticsearch
+      - postgresql
     links:
       - postgresql
     environment:

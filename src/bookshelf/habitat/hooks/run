@@ -3,4 +3,5 @@ exec 2>&1
 
 export HOME={{pkg.svc_var_path}}
 
+export CHEF_SECRETS_DATA=$(cat {{pkg.svc_config_path}}/veil-secrets.json)
 exec bookshelf foreground

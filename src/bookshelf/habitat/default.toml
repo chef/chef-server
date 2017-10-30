@@ -1,3 +1,5 @@
+port=4321
+
 [lager]
 lager_console_backend="info"
 

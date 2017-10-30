@@ -31,7 +31,7 @@ export PGPASSWORD="$PASS"
 until pg_isready $PG_ARGS --quiet; do :; done
 
 # Create delivery db for sqitch to deploy to
-createdb $PG_ARGS $DB "oc_bifrost"
+createdb $PG_ARGS $DB "bookshelf"
 
 # Install uuid-ossp extension
 psql $PG_ARGS --command 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp"' $DB
