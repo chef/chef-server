@@ -2,6 +2,11 @@
 exec 2>&1
 
 export HOME={{pkg.svc_var_path}}
+# these are needed in order to make depselector start up
+export PATH={{pkgPathFor "core/ruby"}}/bin:{{pkgPathFor "core/bundler"}}/bin:${PATH}
+export LD_LIBRARY_PATH={{pkgPathFor "core/libffi"}}/lib:${LD_LIBRARY_PATH}
+export GEM_HOME={{pkgPathFor "core/bundler"}}
+export GEM_PATH={{pkgPathFor "core/bundler"}}
 
 {{#if cfg.fips_enabled ~}}
 export OPENSSL_FIPS=1
