@@ -2,6 +2,9 @@
 exec 2>&1
 
 export HOME={{pkg.svc_var_path}}
+export RELX_CONFIG_PATH="{{pkg.svc_config_path}}/sys.config"
+export VMARGS_PATH="{{pkg.svc_config_path}}/vm.args"
+export CHEF_SECRETS_DATA=$(cat {{pkg.svc_config_path}}/veil-secrets.json)
 # these are needed in order to make depselector start up
 export PATH={{pkgPathFor "core/ruby"}}/bin:{{pkgPathFor "core/bundler"}}/bin:${PATH}
 export LD_LIBRARY_PATH={{pkgPathFor "core/libffi"}}/lib:${LD_LIBRARY_PATH}
@@ -12,5 +15,7 @@ export GEM_PATH={{pkgPathFor "core/bundler"}}
 export OPENSSL_FIPS=1
 {{/if ~}}
 
-export CHEF_SECRETS_DATA=$(cat {{pkg.svc_config_path}}/veil-secrets.json)
+# non root svc user and we need write access to the file
+cp {{pkg.svc_config_path}}/dark_launch_features.json {{pkg.svc_data_path}}
+
 exec oc_erchef foreground
