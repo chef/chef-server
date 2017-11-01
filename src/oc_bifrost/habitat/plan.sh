@@ -8,6 +8,7 @@ pkg_deps=(
   core/erlang18
   core/cacerts
   core/coreutils
+  core/curl
   core/postgresql/9.6.3/20171014214231
   core/gcc-libs
   core/sqitch
