@@ -2,7 +2,7 @@ pkg_name=oc_bifrost
 pkg_origin=chef
 pkg_version="0.1.0"
 pkg_license=('Apache-2.0')
-pkg_maintainer="Mark Anderosn <mark@chef.io>"
+pkg_maintainer="Mark Anderson <mark@chef.io>"
 pkg_source="nosuchfile.tar.gz"
 pkg_deps=(
   core/erlang18
