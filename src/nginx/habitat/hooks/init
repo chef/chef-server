@@ -1,0 +1,26 @@
+#!/bin/bash
+
+exec 2>&1
+
+for dir in logs ca cache cache-tmp etc html tmp; do
+  mkdir -pv "{{pkg.svc_var_path}}/$dir"
+done
+
+# Create SSL certs
+
+# This file is for openssl to put random bits into when doing key generation.
+export RANDFILE="{{pkg.svc_data_path}}/.rnd"
+touch $RANDFILE
+
+# Generate a private key if one does not exist.
+cert_file="{{pkg.svc_data_path}}/ca/{{cfg.server_name}}.cert"
+key_file="{{pkg.svc_data_path}}/ca/{{cfg.server_name}}.key"
+if [[ ! -f "$cert_file" ]]; then
+  openssl req \
+    -newkey rsa:2040 -nodes -keyout "$key_file" \
+    -x509 -days 3650 -out "$cert_file" \
+    -subj "/C=US/O=Chef Software/OU=Chef Delivery/CN=#{{cfg.server_name}}"
+  chmod 600 "$cert_file" "$key_file"
+fi
+
+echo "Fixme init" > {{pkg.svc_var_path}}/version-manifest.txt
