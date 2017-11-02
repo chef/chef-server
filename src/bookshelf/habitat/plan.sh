@@ -19,10 +19,6 @@ pkg_include_dirs=(include)
 pkg_bin_dirs=(bin)
 pkg_description="Bookshelf is an S3 API compatible object store."
 pkg_upstream_url="https://github.com/chef/chef-server"
-# Feelsbad.jpg - we have to do this because we need to symlink in to the $pkg_prefix
-# dir that is always owned by root.
-pkg_svc_user=root
-pkg_svc_group=$pkg_svc_user
 pkg_exports=(
   [port]="port"
 )
