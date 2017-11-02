@@ -1,9 +1,6 @@
 #!/bin/bash
 exec 2>&1
 
-echo "Use of this software is subject to and conditioned on user's acceptance of the Chef Master License and Services Agreement (https://www.chef.io/online-master-agreement/). A valid license file is required."
-
 exec hab pkg exec core/openresty openresty \
-  -c "{{pkg.svc_config_path}}/etc/nginx.conf" \
-  -p "{{pkg.svc_var_path}}" \
-  -g "daemon off;"
+  -c "{{pkg.svc_config_path}}/nginx.conf" \
+  -p "{{pkg.svc_var_path}}"

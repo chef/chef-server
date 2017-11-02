@@ -7,7 +7,6 @@ pkg_license=('Apache-2.0')
 pkg_deps=(
   core/libossp-uuid
   core/openresty
-  core/openssl
 )
 # pkg_build_deps=(
 #   $HAB_ORIGIN/visibility-web
@@ -31,12 +30,7 @@ do_build() {
 
 # NOT RIGHT
 do_install() {
-  mkdir -pv "$pkg_prefix/www/viz" "$pkg_prefix/www/workflow" "$pkg_prefix/www/loading"
-  cp -Rv "$(pkg_path_for visibility-web)"/dist/* "$pkg_prefix/www/viz"
-  cp -Rv "$(pkg_path_for workflow-web)"/dist/* "$pkg_prefix/www/workflow"
-  cp -v "$SRC_PATH/unlicensed_503.html" "$pkg_prefix/www"
-  cp -v "$SRC_PATH/maint_503.html" "$pkg_prefix/www"
-  cp -v "$SRC_PATH/loading.html" "$pkg_prefix/www/loading/index.html"
+    return 0
 }
 
 do_strip() {
@@ -46,10 +40,5 @@ do_strip() {
 
 ## NOT RIGHT
 do_after() {
-  # Replace the license ID in the default JSON file for telemetry
-  tar --extract --file="$SRC_PATH/../lunchtime-poc/delivery.license" \
-    --directory="$CACHE_PATH"
-  local license_id
-  license_id="$(jq --raw-output .guid "$CACHE_PATH/delivery-license")"
-  sed -i -e "s^LICENSE_ID^$license_id^" "$pkg_prefix/config/telemetry.default.json"
+    return 0
 }

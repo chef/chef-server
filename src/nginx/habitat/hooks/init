@@ -2,8 +2,16 @@
 
 exec 2>&1
 
-for dir in logs ca cache cache-tmp etc html tmp; do
+for dir in logs; do
   mkdir -pv "{{pkg.svc_var_path}}/$dir"
+done
+
+for dir in ca cache cache-tmp tmp; do
+  mkdir -pv "{{pkg.svc_data_path}}/$dir"
+done
+
+for dir in static; do
+  mkdir -pv "{{pkg.svc_static_path}}/$dir"
 done
 
 # Create SSL certs
@@ -23,4 +31,4 @@ if [[ ! -f "$cert_file" ]]; then
   chmod 600 "$cert_file" "$key_file"
 fi
 
-echo "Fixme init" > {{pkg.svc_var_path}}/version-manifest.txt
+echo "Fixme init" > {{pkg.svc_conf_path}}/version-manifest.txt
