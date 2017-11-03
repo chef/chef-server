@@ -115,6 +115,13 @@ if is_data_master?
     retries 10
   end
 
+  # Remove default guest users
+  execute "#{rmq_ctl} delete_user guest" do
+    environment (rabbitmq_env)
+    user opc_username
+    only_if "#{rmq_ctl} list_users| grep guest", :environment => rabbitmq_env
+  end
+
   [ rabbitmq['vhost'], rabbitmq['actions_vhost'] ].each do |vhost|
     execute "#{rmq_ctl} add_vhost #{vhost}" do
       environment (rabbitmq_env)
