@@ -1,22 +1,87 @@
-# Author:: Tyler Cloke <tyler@chef.io>
-# Author:: Marc Paradise <marc@chef.io>
-# Copyright:: Copyright (c) 2014-5 Chef, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
+require 'fileutils'
 require 'restclient'
 require 'json'
-require_relative 'ec_postgres'
+
+class EcPostgres
+  # Provides a superuser connection to the specified database
+  def self.with_connection(database = 'template1', opts = {})
+    require 'pg'
+    postgres = {}
+
+{{#if bind.database}}
+  {{#eachAlive bind.database.members as |member|}}
+    {{#if @last}}
+    postgres['vip']="{{member.sys.ip}}"
+    postgres['port']="{{member.cfg.port}}"
+    postgres['db_superuser_password']="{{member.cfg.superuser_name}}"
+    postgres['db_superuser_password']="{{member.cfg.superuser_password}}"
+    {{/if}}
+  {{/eachAlive}}
+{{else}}
+    postgres['vip']="{{cfg.postgresql.vip}}"
+    postgres['port']="{{cfg.postgresql.port}}"
+    postgres['db_superuser_password']="{{cfg.sql_user}}"
+    postgres['db_superuser_password']="{{cfg.sql_password}}"
+{{/if}}
+
+    connection = nil
+
+    # Some callers expect failure - this gives the option to suppress
+    # error logging to avoid confusing output.
+    if opts['silent']
+      silent = true
+      # If a caller specfies silent, it means they anticipate an error to be
+      # likely. Don't force over a minute of retries in that case.
+      retries = opts['retries'] || 1
+    else
+      silent = false
+      retries = opts['retries'] || 5
+    end
+    max_retries = retries
+    begin
+      connection = ::PGconn.open('user' => postgres['db_superuser'],
+                                 'host' => postgres['vip'],
+                                 'password' => postgres['db_superuser_password'],
+                                 'port' => postgres['port'],
+                                 'dbname' => database)
+    rescue => e
+      if retries > 0
+        sleep_time = 2**((max_retries - retries))
+        retries -= 1
+        unless silent
+          puts "Error from postgresql: #{e.message.chomp}. Retrying after #{sleep_time}s. Retries remaining: #{retries + 1}"
+        end
+        sleep sleep_time
+        retry
+      else
+        unless silent
+          puts "Error from postgresql: #{e.message.chomp}. Retries have been exhausted."
+        end
+        raise
+      end
+    end
+
+    begin
+      yield connection
+    ensure
+      connection.close
+    end
+  end
+
+  def self.as_user(user)
+    # Find the user in the password database.
+    u = (user.is_a? Integer) ? Etc.getpwuid(user) : Etc.getpwnam(user)
+
+    old_process_euid = Process.euid
+    Process::UID.eid = u.uid
+    begin
+      yield
+    ensure
+      Process::UID.eid = old_process_euid
+    end
+  end
+end
+
 
 class ChefServerDataBootstrap
 
@@ -29,10 +94,16 @@ class ChefServerDataBootstrap
 
 
   def bifrost_superuser_id
-      @superuser_id ||= 'c946f6e670832bdd49eae8e1fe2bc95d'
+      @superuser_id ||= bifrost_superuser_id_from_secrets_file
+  end
+
+  def bifrost_superuser_id_from_secrets_file
+    secrets = JSON.parse(File.read('{{pkg.svc_config_path}}/veil-secrets.json'))
+    secrets['oc_bifrost']['superuser_id']
   end
 
   def bootstrap
+    puts "Boostrapping Chef Server Data"
     # This is done in two steps - we'll first create the bifrost objects and
     # dependencies.  If this fails, it can be re-run idempotently without
     # risk of causing the run to fail.
@@ -48,16 +119,15 @@ class ChefServerDataBootstrap
     # objects in erchef.  By separating them, we increase the chance that a
     # bootstrap failed due to an error out of bifrost can be recovered
     # by re-running it.
-    username = 'opscode-pgsql'
-    password = 'chefrocks'
-    EcPostgres.with_connection('opscode_chef',
-                               'db_superuser' => username,
-                               'db_superuser_password' => password) do |conn|
+    EcPostgres.with_connection('opscode_chef') do |conn|
       create_superuser_in_erchef(conn)
       create_server_admins_global_group_in_erchef(conn)
       create_global_container_in_erchef(conn, 'organizations', orgs_authz_id)
       create_global_container_in_erchef(conn, 'users', users_authz_id)
     end
+
+    # touch the bootstrapped file
+    FileUtils.touch '{{pkg.svc_data_path}}/bootstrapped'
   end
 
   private
@@ -98,8 +168,8 @@ class ChefServerDataBootstrap
   def create_superuser_in_erchef(conn)
     require 'openssl'
 
-    #raw_key = PrivateChef.credentials.get('chef-server', 'superuser_key')
     raw_key = OpenSSL::PKey::RSA.new(2048)
+    File.write('{{pkg.svc_data_path}}/pivotal.pem', raw_key.to_pem)
     public_key = OpenSSL::PKey::RSA.new(raw_key).public_key.to_s
 
     user_id = SecureRandom.uuid.gsub("-", "")
@@ -144,8 +214,6 @@ class ChefServerDataBootstrap
     placeholders.join(", ")
     conn.exec_params("INSERT INTO #{table} (#{fields.keys.join(", ")}) VALUES (#{placeholders.join(", ")})",
                      fields.values) # confirm ordering
-
-
   end
 
   ## Bifrost access helpers.
@@ -226,5 +294,8 @@ class ChefServerDataBootstrap
   end
 end
 
-puts "Boostrapping Chef Server Data"
-ChefServerDataBootstrap.new.bootstrap
+if File.exist?('{{pkg.svc_data_path}}/bootstrapped')
+  puts 'Chef Server Data alread bootstrapped - Skipping.'
+else
+  ChefServerDataBootstrap.new.bootstrap
+end
