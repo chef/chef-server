@@ -2,7 +2,7 @@
 
 exec 2>&1
 
-for dir in logs; do
+for dir in log tmp; do
   mkdir -pv "{{pkg.svc_var_path}}/$dir"
 done
 
@@ -20,6 +20,11 @@ done
 export RANDFILE="{{pkg.svc_data_path}}/.rnd"
 touch $RANDFILE
 
+dhparam_file="{{pkg.svc_data_path}}/ca/dhparams.pem"
+if [[ ! -f "$dhparam_file" ]]; then
+  openssl dhparam -dsaparam -out $dhparam_file 2048
+fi
+
 # Generate a private key if one does not exist.
 cert_file="{{pkg.svc_data_path}}/ca/{{cfg.server_name}}.cert"
 key_file="{{pkg.svc_data_path}}/ca/{{cfg.server_name}}.key"
@@ -27,7 +32,7 @@ if [[ ! -f "$cert_file" ]]; then
   openssl req \
     -newkey rsa:2040 -nodes -keyout "$key_file" \
     -x509 -days 3650 -out "$cert_file" \
-    -subj "/C=US/O=Chef Software/OU=Chef Delivery/CN=#{{cfg.server_name}}"
+    -subj "/C=US/O=Chef Software/OU=Chef Server/CN=#{{cfg.server_name}}"
   chmod 600 "$cert_file" "$key_file"
 fi
 
