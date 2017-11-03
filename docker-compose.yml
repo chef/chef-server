@@ -65,6 +65,7 @@ services:
       - oc_erchef
       - oc_bifrost
       - bookshelf
+      - elasticsearch
       - postgresql
     links:
       - oc_erchef

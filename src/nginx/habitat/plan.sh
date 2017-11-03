@@ -8,11 +8,11 @@ pkg_deps=(
   core/libossp-uuid
   core/openresty
 )
-# pkg_build_deps=(
-#   $HAB_ORIGIN/visibility-web
-#   $HAB_ORIGIN/workflow-web
-# )
-pkg_expose=(443 80)
+pkg_exposes=(443 80)
+pkg_exports=(
+    [port] = port
+    [ssl-port] = port
+)
 pkg_svc_user="root"
 pkg_svc_group="$pkg_svc_user"
 pkg_binds_optional=(

@@ -8,6 +8,7 @@ client_max_body_size = "250m"
 server_name = "chef-server"
 
 # Port used for SSL traffic
+port = 80
 ssl_port = 443
 
 # # SSL protocols and ciphers
