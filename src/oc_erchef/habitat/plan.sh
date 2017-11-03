@@ -83,7 +83,10 @@ do_build() {
 }
 
 do_install() {
-  cp -rv "_build/default/rel/oc_erchef/"* "${pkg_prefix}"
+  export HOME="${pkg_prefix}"
+  cp Gemfile* ${pkg_prefix}
+  bundle install --path "${pkg_prefix}/vendor/bundle" && bundle config path ${pkg_prefix}/vendor/bundle
+  cp -r "_build/default/rel/oc_erchef/"* "${pkg_prefix}"
   cp -R "$HAB_CACHE_SRC_PATH/$pkg_dirname/schema" "$pkg_prefix"
 }
 

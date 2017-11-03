@@ -5,7 +5,7 @@ export HOME={{pkg.svc_var_path}}
 export RUNNER_LOG_DIR="{{pkg.svc_var_path}}/logs"
 export RELX_CONFIG_PATH="{{pkg.svc_config_path}}/sys.config"
 export VMARGS_PATH="{{pkg.svc_config_path}}/vm.args"
-export CHEF_SECRETS_DATA=$(cat {{pkg.svc_config_path}}/secrets.json)
+export CHEF_SECRETS_DATA=$(cat {{pkg.svc_config_path}}/veil-secrets.json)
 
 {{#if cfg.fips_enabled ~}}
 export OPENSSL_FIPS=1

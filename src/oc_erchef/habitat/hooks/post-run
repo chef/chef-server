@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd {{pkg.path}} && bundle exec ruby "{{pkg.svc_config_path}}/chef_server_data_bootstrap.rb"
+
