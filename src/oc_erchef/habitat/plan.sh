@@ -32,6 +32,7 @@ pkg_binds_optional=(
   [database]="port"
   [elasticsearch]="http-port"
   [oc_bifrost]="port"
+  [bookshelf]="port"
 )
 
 do_download() {
