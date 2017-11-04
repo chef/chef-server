@@ -2,7 +2,7 @@
 
 exec 2>&1
 
-for dir in log tmp; do
+for dir in log logs tmp; do
   mkdir -pv "{{pkg.svc_var_path}}/$dir"
 done
 
@@ -37,3 +37,6 @@ if [[ ! -f "$cert_file" ]]; then
 fi
 
 echo "Fixme init" > {{pkg.svc_conf_path}}/version-manifest.txt
+
+# quick and dirty hack to see the lpeg lua library
+ln -s {{pkgPathFor "irvingpop/openresty-lpeg"}}/lpeg.so {{pkgPathFor "core/openresty"}}/luajit/lib/lua/5.1/

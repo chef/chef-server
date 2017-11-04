@@ -6,17 +6,17 @@ pkg_license=('Apache-2.0')
 
 pkg_deps=(
   core/libossp-uuid
-  core/openresty
+  irvingpop/openresty-lpeg
 )
-pkg_exposes=(443 80)
+#pkg_exposes=(443 80)
 pkg_exports=(
     [port] = port
-    [ssl-port] = port
+    [ssl-port] = ssl_port
 )
 pkg_svc_user="root"
 pkg_svc_group="$pkg_svc_user"
 pkg_binds_optional=(
-  [bookshelf]="port"   
+  [bookshelf]="port"
   [oc_erchef]="port"
   [oc_bifrost]="port"
   [elasticsearch]="http-port"
