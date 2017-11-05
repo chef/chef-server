@@ -9,7 +9,6 @@ pkg_deps=(
   core/cacerts
   core/coreutils
   core/curl
-  core/postgresql/9.6.3/20171014214231
   core/gcc-libs
   core/ruby
   core/sqitch
@@ -24,6 +23,7 @@ pkg_bin_dirs=(bin)
 pkg_description="Erlang implementation of the Chef Server's REST API."
 pkg_upstream_url="https://github.com/chef/chef-server"
 
+pkg_exposes=(port)
 pkg_exports=(
     [port]=oc_chef_wm.port
 )

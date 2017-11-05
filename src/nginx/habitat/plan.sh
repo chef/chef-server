@@ -5,13 +5,14 @@ pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_license=('Apache-2.0')
 
 pkg_deps=(
+  core/curl
   core/libossp-uuid
   irvingpop/openresty-lpeg
 )
-#pkg_exposes=(443 80)
+pkg_exposes=(port ssl-port)
 pkg_exports=(
-    [port] = port
-    [ssl-port] = ssl_port
+    [port]=port
+    [ssl-port]=ssl_port
 )
 pkg_svc_user="root"
 pkg_svc_group="$pkg_svc_user"
