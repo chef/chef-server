@@ -14,6 +14,9 @@ for dir in static; do
   mkdir -pv "{{pkg.svc_static_path}}/$dir"
 done
 
+chown -R hab:hab "{{pkg.svc_config_path}}" "{{pkg.svc_data_path}}" \
+  "{{pkg.svc_var_path}}"
+
 # Create SSL certs
 
 # This file is for openssl to put random bits into when doing key generation.
@@ -35,8 +38,6 @@ if [[ ! -f "$cert_file" ]]; then
     -subj "/C=US/O=Chef Software/OU=Chef Server/CN=#{{cfg.server_name}}"
   chmod 600 "$cert_file" "$key_file"
 fi
-
-echo "Fixme init" > {{pkg.svc_conf_path}}/version-manifest.txt
 
 # quick and dirty hack to see the lpeg lua library
 ln -s {{pkgPathFor "irvingpop/openresty-lpeg"}}/lpeg.so {{pkgPathFor "core/openresty"}}/luajit/lib/lua/5.1/
