@@ -1,17 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.6 -->
-## [12.17.6](https://github.com/chef/chef-server/tree/12.17.6) (2017-10-30)
+<!-- latest_release 12.17.7 -->
+## [12.17.7](https://github.com/chef/chef-server/tree/12.17.7) (2017-11-07)
 
 #### Merged Pull Requests
-- [SUSTAIN-728] Add /_acl for cookbook_artifacts [#1414](https://github.com/chef/chef-server/pull/1414) ([nsdavidson](https://github.com/nsdavidson))
-- Release 12.17.5 [#1412](https://github.com/chef/chef-server/pull/1412) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- [rabbitmq] Remove guest user by default [#1420](https://github.com/chef/chef-server/pull/1420) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.5 -->
 ### Changes since 12.17.5 release
 
 #### Merged Pull Requests
+- [rabbitmq] Remove guest user by default [#1420](https://github.com/chef/chef-server/pull/1420) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.7 -->
 - [SUSTAIN-728] Add /_acl for cookbook_artifacts [#1414](https://github.com/chef/chef-server/pull/1414) ([nsdavidson](https://github.com/nsdavidson)) <!-- 12.17.6 -->
 <!-- release_rollup -->
 
