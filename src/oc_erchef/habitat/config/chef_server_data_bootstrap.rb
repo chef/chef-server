@@ -295,7 +295,7 @@ class ChefServerDataBootstrap
 end
 
 if File.exist?('{{pkg.svc_data_path}}/bootstrapped')
-  puts 'Chef Server Data alread bootstrapped - Skipping.'
+  puts 'Chef Server Data already bootstrapped - Skipping.'
 else
   ChefServerDataBootstrap.new.bootstrap
 end

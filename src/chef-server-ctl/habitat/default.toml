@@ -5,21 +5,21 @@
 # the secrets namespace is initially initted to empty strings,
 # the idea is that we loop through all of these and generate them at
 # "bootstrap" time and then re-inject them into the config
+
+# NOTE: Additional keys have to also be added in the ruby hash here: config/secrets-bootstrap.rb
+
 [secrets]
 
 [secrets.postgresql]
-db_superuser_password = "foo"
+db_superuser_password = ""
 
 [secrets.redis_lb]
-password = "bar"
+password = ""
 
 [secrets.rabbitmq]
 password = ""
 management_password = ""
 actions_password = ""
-
-[secrets.drbd]
-shared_secret = ""
 
 [secrets.keepalived]
 vrrp_instance_password = ""
@@ -46,12 +46,9 @@ sql_ro_password = ""
 
 [secrets.chef-server]
 superuser_key = ""
+superuser_pub_key = ""
 webui_key = ""
 webui_pub_key = ""
-
-[secrets.manage]
-secret_token = ""
-secret_key_base = ""
 
 [secrets.push-jobs-server]
 sql_password = ""
