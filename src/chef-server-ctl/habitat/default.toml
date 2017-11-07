@@ -1,0 +1,60 @@
+# Use this file to templatize your application's native configuration files.
+# See the docs at https://www.habitat.sh/docs/create-packages-configure/.
+# You can safely delete this file if you don't need it.
+#
+# the secrets namespace is initially initted to empty strings,
+# the idea is that we loop through all of these and generate them at
+# "bootstrap" time and then re-inject them into the config
+[secrets]
+
+[[postgresql]]
+db_superuser_password = "foo"
+
+[[redis_lb]]
+password = "bar"
+
+[[rabbitmq]]
+password = ""
+management_password = ""
+actions_password = ""
+
+[[drbd]]
+shared_secret = ""
+
+[[keepalived]]
+vrrp_instance_password = ""
+
+[[opscode_erchef]]
+sql_password = ""
+sql_ro_password = ""
+
+[[oc_bifrost]]
+superuser_id = ""
+sql_password = ""
+sql_ro_password = ""
+
+[[oc_id]]
+secret_key_base = ""
+sql_password = ""
+sql_ro_password = ""
+
+[[bookshelf]]
+access_key_id = ""
+secret_access_key = ""
+sql_password = ""
+sql_ro_password = ""
+
+[[chef-server]]
+superuser_key = ""
+webui_key = ""
+webui_pub_key = ""
+
+[[manage]]
+secret_token = ""
+secret_key_base = ""
+
+[[push-jobs-server]]
+sql_password = ""
+sql_ro_password = ""
+pushy_priv_key = ""
+pushy_pub_key = ""

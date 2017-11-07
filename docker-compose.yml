@@ -1,5 +1,8 @@
 version: '3'
 services:
+  chef-server-ctl:
+    image: $HAB_ORIGIN/chef-server-ctl
+
   postgresql:
     image: chefdemo/postgresql:stable
     environment:
