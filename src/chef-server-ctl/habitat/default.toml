@@ -7,53 +7,53 @@
 # "bootstrap" time and then re-inject them into the config
 [secrets]
 
-[[postgresql]]
+[secrets.postgresql]
 db_superuser_password = "foo"
 
-[[redis_lb]]
+[secrets.redis_lb]
 password = "bar"
 
-[[rabbitmq]]
+[secrets.rabbitmq]
 password = ""
 management_password = ""
 actions_password = ""
 
-[[drbd]]
+[secrets.drbd]
 shared_secret = ""
 
-[[keepalived]]
+[secrets.keepalived]
 vrrp_instance_password = ""
 
-[[opscode_erchef]]
+[secrets.opscode_erchef]
 sql_password = ""
 sql_ro_password = ""
 
-[[oc_bifrost]]
+[secrets.oc_bifrost]
 superuser_id = ""
 sql_password = ""
 sql_ro_password = ""
 
-[[oc_id]]
+[secrets.oc_id]
 secret_key_base = ""
 sql_password = ""
 sql_ro_password = ""
 
-[[bookshelf]]
+[secrets.bookshelf]
 access_key_id = ""
 secret_access_key = ""
 sql_password = ""
 sql_ro_password = ""
 
-[[chef-server]]
+[secrets.chef-server]
 superuser_key = ""
 webui_key = ""
 webui_pub_key = ""
 
-[[manage]]
+[secrets.manage]
 secret_token = ""
 secret_key_base = ""
 
-[[push-jobs-server]]
+[secrets.push-jobs-server]
 sql_password = ""
 sql_ro_password = ""
 pushy_priv_key = ""
