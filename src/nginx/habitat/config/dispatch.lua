@@ -76,7 +76,7 @@ end
 -- Load restrictions and darklaunch constraints for this org.
 -- note that org name may not be valid - we'll use an appropriate default if it's not,
 -- such as when the URI is valid but does not contain an org name.
-route.org_config = config.org_config(route.org_name, mode)
+route.org_config = config.6org_config(route.org_name, mode)
 
 -- API mode means that internal routing rules do not apply, so only flag as internal if
 -- we're not in api mode

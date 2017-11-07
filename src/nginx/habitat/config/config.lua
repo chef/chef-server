@@ -11,6 +11,18 @@ local failsafe_config = {}
 failsafe_config["dl_default"] = {}
 failsafe_config["dl_default"][1] = "503_mode"
 failsafe_config["dl_default"][2] = true
+failsafe_config["dl_default"][3] = "couchdb_containers"
+failsafe_config["dl_default"][4] = false
+failsafe_config["dl_default"][5] = "couchdb_groups"
+failsafe_config["dl_default"][6] = false
+failsafe_config["dl_default"][7] = "couchdb_acls"
+failsafe_config["dl_default"][8] = false
+failsafe_config["dl_default"][9]  = "couchdb_association_requests"
+failsafe_config["dl_default"][10] = false
+failsafe_config["dl_default"][11] = "couchdb_organizations"
+failsafe_config["dl_default"][12] = false
+failsafe_config["dl_default"][13] = "couchdb_associations"
+failsafe_config["dl_default"][14] = false
 
 -- Client must set these via set_ban_refresh_interval
 -- and set_maint_refresh_interval.
@@ -109,14 +121,9 @@ end
 
 -- Connect to redis and retrieve configuration for this org.
 local function get_org_config(orgname)
-  local ok, red = connect_redis()
-  if ok then
-    results = redis_pipelined_get_config(red, orgname)
-    close_redis(red)
-  else
-    results = failsafe_config
-  end
-  return results
+   -- Habitat doesn't support darklaunch
+   results = failsafe_config
+   return results
 end
 
 -- Examines the shared_dict provided and determine if it needs updating
@@ -140,16 +147,20 @@ end
 -- and the remote address is not excluded from maintenance mode
 -- will refresh maint-mode state and whitelisted IPs periodically.
 function config.is_in_maint_mode_for_addr(remote_addr)
-  local maint = ngx.shared.maint_data
-  refresh_expiring_set(maint, "maint_data", maint_refresh_interval)
-  return maint:get("maint_mode")
+   -- Stub out for habitat
+   --  local maint = ngx.shared.maint_data
+   --  refresh_expiring_set(maint, "maint_data", maint_refresh_interval)
+   --  return maint:get("maint_mode")
+   return false
 end
 
 -- This does not attempt to refresh the maintenance mode data, as it's
 -- intended to be invoked only after main data has been loaded/refreshed earlier int he flow
 function config.is_route_in_maint_mode(route_id)
-  local maint = ngx.shared.maint_data
-  return maint:get("maint_mode_" .. route_id)
+   -- Stub out for habitat
+   -- local maint = ngx.shared.maint_data
+   -- return maint:get("maint_mode_" .. route_id)
+   return false
 end
 
 function config.is_route_darklaunched(route_id)

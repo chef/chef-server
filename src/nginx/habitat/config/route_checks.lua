@@ -31,23 +31,26 @@ response[503] = {}
 -- are handled here.
 --
 response[503].default = function(route)
-  if route.org_config["503_mode"] == 1 or
-     config.is_route_in_maint_mode(route.route_id) then
-     return true
+   -- Habitat chef server doesn't support 503 mode yet
+   if route.org_config["503_mode"] == 1 or
+   config.is_route_in_maint_mode(route.route_id) then
+      return true
    end
-  return false
+   return false
 end
 
 response[404].default = function(route)
-  -- route-level darklaunch check:
-  if config.is_route_darklaunched(route.route_id) then
-    return not (route.org_config["dl_" .. route.route_id] == 1)
-  end
-  return false
+   -- route-level darklaunch check:
+   -- Habitat chef server doesn't support 404 mode yet
+   if config.is_route_darklaunched(route.route_id) then
+      return not (route.org_config["dl_" .. route.route_id] == 1)
+   end
+   return false
 end
 
 response[403].default = function(route)
-  return route.org_config["org_blocked"] == 1
+   -- Habitat chef server doesn't support blocked orgs yet
+   return route.org_config["org_blocked"] == 1
 end
 
 --
@@ -57,6 +60,7 @@ end
 -- return true if client is posting to "organizations" endpoint but
 -- new org creation is disabled
 response[503].acct = function(route)
+   -- Habitat chef server doesn't support 503 mode yet
   return route.org_name == nil and
          route.endpoint == "organizations" and
          ngx.req.get_method() == "POST" and
