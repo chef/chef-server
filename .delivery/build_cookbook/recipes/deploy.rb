@@ -28,6 +28,7 @@ infra_nodes.each do |infra_node|
     run_list %W(
       recipe[cd-infrastructure-base::default]
       recipe[chef-server-deploy::#{recipe_for(infra_node)}]
+      recipe[cd-infrastructure-base::audit]
     )
   end
 end
