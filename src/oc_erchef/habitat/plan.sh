@@ -29,6 +29,7 @@ pkg_exports=(
 )
 
 pkg_binds_optional=(
+  [chef-server-ctl]="secrets"
   [database]="port"
   [elasticsearch]="http-port"
   [oc_bifrost]="port"

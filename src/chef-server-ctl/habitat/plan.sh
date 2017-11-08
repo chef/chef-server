@@ -9,19 +9,26 @@ pkg_license=('Apache-2.0')
 pkg_deps=(
   core/coreutils
   core/curl
+  core/jq-static
   core/ruby
   core/bundler
   core/hab-butterfly
 )
-pkg_build_deps=(core/git)
+pkg_build_deps=(
+  core/coreutils
+  core/glibc
+  core/git
+  core/diffutils
+  core/patch
+  core/make
+  core/gcc
+)
 pkg_lib_dirs=(lib)
 pkg_include_dirs=(include)
 pkg_bin_dirs=(bin)
-# pkg_exports=(
-#   [host]=srv.address
-#   [port]=srv.port
-#   [ssl-port]=srv.ssl.port
-# )
+pkg_exports=(
+  [secrets]=secrets
+)
 # pkg_exposes=(port ssl-port)
 # pkg_binds=(
 #   [database]="port host"
@@ -63,8 +70,8 @@ do_build() {
 
 do_install() {
   export HOME="${pkg_prefix}"
+  bundle install --path "${pkg_prefix}/vendor/bundle" --binstubs && bundle config path ${pkg_prefix}/vendor/bundle
   cp Gemfile* ${pkg_prefix}
-  bundle install --path "${pkg_prefix}/vendor/bundle" && bundle config path ${pkg_prefix}/vendor/bundle
 }
 
 do_check() {

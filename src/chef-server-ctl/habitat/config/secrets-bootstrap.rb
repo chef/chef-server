@@ -85,7 +85,9 @@ end
 if changes_to_apply
   puts "Changed Secrets need to be applied."
   File.write('{{pkg.svc_data_path}}/hab-secrets-modified.toml', TOML::Generator.new(new_secrets).body)
-  system "hab config apply chef-server-ctl.default #{Time.now.getutc.to_i} {{pkg.svc_data_path}}/hab-secrets-modified.toml" if changes_to_apply
+  version = Time.now.getutc.to_i
+  system "hab config apply chef-server-ctl.default #{version} {{pkg.svc_data_path}}/hab-secrets-modified.toml"
+  system "hab config apply oc_erchef.default #{version} {{pkg.svc_data_path}}/hab-secrets-modified.toml"
 else
   puts "Secrets Unchanged - nothing to do."
 end
