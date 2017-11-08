@@ -4,7 +4,7 @@ require 'toml'
 require 'openssl'
 require 'securerandom'
 
-required_secrets = {
+REQUIRED_SECRETS = {
   postgresql: {
     db_superuser_password: { length: 100 }
   },
@@ -54,42 +54,47 @@ required_secrets = {
   }
 }
 
-secrets = TOML.load_file('{{pkg.svc_config_path}}/hab-secrets-config.toml')
-new_secrets = Marshal.load(Marshal.dump(secrets))
-changes_to_apply = false
+def secrets_apply_loop
+  secrets = TOML.load_file('{{pkg.svc_config_path}}/hab-secrets-config.toml')
+  new_secrets = Marshal.load(Marshal.dump(secrets))
+  changes_to_apply = false
 
-secrets.each do |top_level_item, top_level_item_value|
-  top_level_item_value.each do |service_item, service_item_value|
-    service_item_value.each do |key, pass|
-      if pass.empty?
-        changes_to_apply = true
-        if required_secrets[service_item.to_sym][key.to_sym].has_key?(:type) && required_secrets[service_item.to_sym][key.to_sym][:type] == 'rsa'
-          priv_key = OpenSSL::PKey::RSA.generate(2048)
-          pub_key = OpenSSL::PKey::RSA.new(priv_key).public_key.to_s
-          if required_secrets[service_item.to_sym][key.to_sym][:private]
-            new_secrets[top_level_item][service_item][key] = priv_key.to_s
-            pub_key_name = required_secrets[service_item.to_sym][key.to_sym][:pub_key_name]
-            new_secrets[top_level_item][service_item][pub_key_name] = pub_key
-            puts "Updated Private/Public Keypair for #{service_item}/#{key}"
+  secrets.each do |top_level_item, top_level_item_value|
+    top_level_item_value.each do |service_item, service_item_value|
+      service_item_value.each do |key, pass|
+        if pass.empty?
+          changes_to_apply = true
+          if REQUIRED_SECRETS[service_item.to_sym][key.to_sym].has_key?(:type) && REQUIRED_SECRETS[service_item.to_sym][key.to_sym][:type] == 'rsa'
+            priv_key = OpenSSL::PKey::RSA.generate(2048)
+            pub_key = OpenSSL::PKey::RSA.new(priv_key).public_key.to_s
+            if REQUIRED_SECRETS[service_item.to_sym][key.to_sym][:private]
+              new_secrets[top_level_item][service_item][key] = priv_key.to_s
+              pub_key_name = REQUIRED_SECRETS[service_item.to_sym][key.to_sym][:pub_key_name]
+              new_secrets[top_level_item][service_item][pub_key_name] = pub_key
+              puts "Updated Private/Public Keypair for #{service_item}/#{key}"
+            end
+          else
+            length = REQUIRED_SECRETS[service_item.to_sym][key.to_sym][:length].to_i
+            new_secrets[top_level_item][service_item][key] = SecureRandom.hex(length)[1..length]
+            puts "Updated Emtpy Key/Value: #{service_item}/#{key} #{new_secrets[top_level_item][service_item][key]}"
           end
-        else
-          length = required_secrets[service_item.to_sym][key.to_sym][:length].to_i
-          new_secrets[top_level_item][service_item][key] = SecureRandom.hex(length)[1..length]
-          puts "Updated Emtpy Key/Value: #{service_item}/#{key} #{new_secrets[top_level_item][service_item][key]}"
         end
       end
     end
   end
+
+  if changes_to_apply
+    puts "Changed Secrets need to be applied."
+    File.write('{{pkg.svc_data_path}}/hab-secrets-modified.toml', TOML::Generator.new(new_secrets).body)
+    version = Time.now.getutc.to_i
+    system "hab config apply chef-server-ctl.default #{version} {{pkg.svc_data_path}}/hab-secrets-modified.toml"
+  else
+    puts "Secrets Unchanged - nothing to do."
+  end
 end
 
-if changes_to_apply
-  puts "Changed Secrets need to be applied."
-  File.write('{{pkg.svc_data_path}}/hab-secrets-modified.toml', TOML::Generator.new(new_secrets).body)
-  version = Time.now.getutc.to_i
-  system "hab config apply chef-server-ctl.default #{version} {{pkg.svc_data_path}}/hab-secrets-modified.toml"
-  system "hab config apply oc_erchef.default #{version} {{pkg.svc_data_path}}/hab-secrets-modified.toml"
-else
-  puts "Secrets Unchanged - nothing to do."
+# forever loop
+while 1
+  secrets_apply_loop
+  sleep 15
 end
-
-sleep 15

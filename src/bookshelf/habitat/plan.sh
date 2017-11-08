@@ -26,6 +26,7 @@ pkg_exposes=(port)
 
 pkg_binds_optional=(
   [database]="port"
+  [chef-server-ctl]="secrets"
 )
 
 do_download() {
