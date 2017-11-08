@@ -54,6 +54,11 @@ do_unpack() {
   # deps into the working directory, but into the cache directory.
   mkdir -p "$HAB_CACHE_SRC_PATH/$pkg_dirname"
   cp -R "$PLAN_CONTEXT/../"* "$HAB_CACHE_SRC_PATH/$pkg_dirname"
+    chef_src_dir="$HAB_CACHE_SRC_PATH/$pkg_dirname/src/github.com/"
+  mkdir -p $chef_src_dir
+  pushd $chef_src_dir
+  git clone https://github.com/chef/chef-server.git
+  popd
 }
 
 do_prepare() {
@@ -72,6 +77,16 @@ do_install() {
   export HOME="${pkg_prefix}"
   bundle install --path "${pkg_prefix}/vendor/bundle" --binstubs && bundle config path ${pkg_prefix}/vendor/bundle
   cp Gemfile* ${pkg_prefix}
+  # install oc-chef-pedant
+  pedant_src_dir="$HAB_CACHE_SRC_PATH/$pkg_dirname/src/github.com/chef-server/oc-chef-pedant"
+  cp -pr $pedant_src_dir ${pkg_prefix}
+  cp Gemfile.local "${pkg_prefix}/oc-chef-pedant/"
+  pushd "${pkg_prefix}/oc-chef-pedant"
+  bundle install --path "vendor/bundle" && bundle config path ${pkg_prefix}/vendor/bundle
+  #export GEM_HOME="${pkg_prefix}/vendor/bundle/ruby/2.4.0"
+  #export GEM_PATH="${GEM_HOME}"
+  # gem build oc-chef-pedant.gemspec && gem install oc-chef-pedant-*.gem --no-ri --no-rdoc
+  popd
 }
 
 do_check() {
