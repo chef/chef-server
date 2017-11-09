@@ -51,7 +51,7 @@ delete_org true
 
 # You MUST specify the address of the server the API requests will be
 # sent to.  Only specify protocol, hostname, and port.
-chef_server "https://172.18.0.8"
+chef_server "https://chef-server-nginx"
 
 # This configration specifies the default orgname. Note that it does *not*
 # mean that Pedant will test things with default org urls. To do that,
@@ -67,7 +67,7 @@ default_orgname nil
 # testing location, you should not specify a value for this parameter.
 # The tests will still run, albeit slower, as they will now need to
 # poll for a period to ensure they are querying committed results.
-search_server "http://127.0.0.1:8983/solr"
+search_server "http://chef-server-elasticsearch:8983/solr"
 
 
 # Some tests expect access erchef server directly, instead of routing through
