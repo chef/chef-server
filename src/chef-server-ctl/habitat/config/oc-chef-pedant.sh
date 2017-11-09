@@ -4,4 +4,4 @@ export SUPERUSER_KEY=`sed ':a;N;$!ba;s/\n/\\n/g' {{pkg.svc_config_path}}/pivotal
 export WEBUI_KEY=`sed ':a;N;$!ba;s/\n/\\n/g' {{pkg.svc_config_path}}/webui_priv.pem`
 
 cd {{pkg.path}}/oc-chef-pedant
-{{pkgPathFor "core/bundler"}/bin/bundle exec bin/oc-chef-pedant --log-file /dev/null -c {{pkg.svc_config_path}}/pendant_config.rb --focus smoke
+{{pkgPathFor "core/bundler"}}/bin/bundle exec bin/oc-chef-pedant --log-file /dev/null -c {{pkg.svc_config_path}}/pendant_config.rb --focus smoke
