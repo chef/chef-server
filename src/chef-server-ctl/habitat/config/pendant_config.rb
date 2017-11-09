@@ -69,6 +69,8 @@ default_orgname nil
 # poll for a period to ensure they are querying committed results.
 search_server "http://elasticsearch:9200/"
 
+search_commit_url "/_refresh"
+search_url_fmt "/chef/_search?q=X_CHEF_type_CHEF_X:%{type}%%20%{query}"
 
 # Some tests expect access erchef server directly, instead of routing through
 # LB.
