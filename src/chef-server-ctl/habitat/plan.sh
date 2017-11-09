@@ -33,9 +33,6 @@ pkg_exports=(
 # pkg_binds=(
 #   [database]="port host"
 # )
-# pkg_binds_optional=(
-#   [storage]="port host"
-# )
 pkg_interpreters=(bin/bash)
 pkg_svc_user="hab"
 pkg_svc_group="$pkg_svc_user"

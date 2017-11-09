@@ -61,10 +61,11 @@ end
 -- new org creation is disabled
 response[503].acct = function(route)
    -- Habitat chef server doesn't support 503 mode yet
-  return route.org_name == nil and
-         route.endpoint == "organizations" and
-         ngx.req.get_method() == "POST" and
-         route.org_config["disable_new_orgs"] == 1
+  return false
+  -- return route.org_name == nil and
+  --       route.endpoint == "organizations" and
+  --       ngx.req.get_method() == "POST" and
+  --       route.org_config["disable_new_orgs"] == 1
 end
 
 --

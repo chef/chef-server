@@ -164,8 +164,10 @@ function config.is_route_in_maint_mode(route_id)
 end
 
 function config.is_route_darklaunched(route_id)
-  local maint = ngx.shared.maint_data
-  return maint:get("dl_" .. route_id)
+   -- Stub out for habitat
+  -- local maint = ngx.shared.maint_data
+  -- return maint:get("dl_" .. route_id)
+   return false
 end
 
 -- return true if the given address is maintenance mode
