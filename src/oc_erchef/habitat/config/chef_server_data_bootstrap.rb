@@ -153,8 +153,10 @@ class ChefServerDataBootstrap
 
   # Insert the server admins global group into the erchef groups table.
   def create_server_admins_global_group_in_erchef(conn)
-    simple_insert(conn, 'groups',
-                  id: SecureRandom.uuid.gsub("-", ""),
+    # cheating and re-using server_admins_authz_id as the primary key id
+    # this may be bad??
+    simple_insert(conn, 'groups', server_admins_authz_id,
+                  id: server_admins_authz_id,
                   org_id: GLOBAL_ORG_ID,
                   authz_id: server_admins_authz_id,
                   name: 'server-admins',
@@ -172,20 +174,21 @@ class ChefServerDataBootstrap
 {{~ #if bind.chef-server-ctl}}
   {{~ #eachAlive bind.chef-server-ctl.members as |member|}}
     {{~ #if @last}}
+    user_id = {{ member.cfg.secrets.chef-server.superuser_id }}
     public_key = <<-EOF
 {{ member.cfg.secrets.chef-server.superuser_pub_key }}
 EOF
     {{~ /if}}
   {{~ /eachAlive}}
 {{~ else}}
+    user_id = SecureRandom.uuid.gsub("-", "")
     raw_key = OpenSSL::PKey::RSA.new(2048)
     File.write('{{pkg.svc_data_path}}/pivotal.pem', raw_key.to_pem)
     public_key = OpenSSL::PKey::RSA.new(raw_key).public_key.to_s
 {{~ /if}}
 
 
-    user_id = SecureRandom.uuid.gsub("-", "")
-    simple_insert(conn, 'keys',
+    simple_insert(conn, 'keys', user_id,
                     id: user_id,
                     key_name: 'default',
                     public_key: public_key,
@@ -193,7 +196,7 @@ EOF
                     created_at: bootstrap_time,
                     expires_at: "infinity")
 
-    simple_insert(conn, 'users',
+    simple_insert(conn, 'users', user_id,
                     id: user_id,
                     username: 'pivotal',
                     email: 'root@localhost.localdomain',
@@ -209,7 +212,7 @@ EOF
   end
 
   def create_global_container_in_erchef(conn, name, authz_id)
-    simple_insert(conn, 'containers',
+    simple_insert(conn, 'containers', authz_id,
                     id: authz_id, # TODO is this right?
                     name: name,
                     authz_id: authz_id,
@@ -220,12 +223,38 @@ EOF
   end
 
   # db helper to construct and execute a simple insert statement
-  def simple_insert(conn, table, fields)
+  def simple_insert(conn, table, pkey, fields)
     placeholders = []
     1.upto(fields.length) { |x| placeholders << "$#{x}" }
     placeholders.join(", ")
-    conn.exec_params("INSERT INTO #{table} (#{fields.keys.join(", ")}) VALUES (#{placeholders.join(", ")})",
-                     fields.values) # confirm ordering
+    begin
+      sql = %{
+        INSERT INTO #{table} (#{fields.keys.join(", ")})
+        VALUES (#{placeholders.join(", ")})
+      }
+      puts "SQL: #{sql}"
+      conn.exec_params(sql, fields.values)
+      #conn.exec_params("INSERT INTO #{table} (#{fields.keys.join(", ")}) VALUES (#{placeholders.join(", ")})",
+      #               fields.values) # confirm ordering
+    rescue PG::UniqueViolation => e
+      puts "Got UniqueViolation #{e.inspect}"
+      sql = %{
+        UPDATE #{table} SET (#{fields.keys.join(", ")})
+        VALUES (#{placeholders.join(", ")}) WHERE id=#{pkey}
+      }
+      conn.exec_params(sql, fields.values)
+      #conn.exec_params("UPDATE #{table} SET (#{fields.keys.join(", ")}) VALUES (#{placeholders.join(", ")}) WHERE id=#{pkey}",
+      #            fields.values) # confirm ordering
+    end
+
+    upsert_sql = %{
+      INSERT INTO #{table} (#{fields.keys.join(', ')})
+      VALUES (#{placeholders.join(', ')})
+      ON CONFLICT(#{fields.keys.join(', ')})
+      DO UPDATE SET (#{fields.keys.join(', ')}) = (#{fields.values.join(', ')})
+    }
+    #puts "QUERY: #{upsert_sql}"
+    #conn.exec_params(upsert_sql)
   end
 
   ## Bifrost access helpers.
@@ -306,8 +335,8 @@ EOF
   end
 end
 
-if File.exist?('{{pkg.svc_data_path}}/bootstrapped')
-  puts 'Chef Server Data already bootstrapped - Skipping.'
-else
+#if File.exist?('{{pkg.svc_data_path}}/bootstrapped')
+#  puts 'Chef Server Data already bootstrapped - Skipping.'
+#else
   ChefServerDataBootstrap.new.bootstrap
-end
+#end

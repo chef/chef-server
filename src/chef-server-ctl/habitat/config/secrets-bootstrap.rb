@@ -41,6 +41,7 @@ REQUIRED_SECRETS = {
 	  sql_ro_password: { length: 80 }
   },
   'chef-server': {
+    superuser_id: { length: 32 },
     superuser_key: { length: 2048, type: 'rsa', private: true, pub_key_name: 'superuser_pub_key' },
     superuser_pub_key: { type: 'rsa', private: false },
 	  webui_key: { length: 2048, type: 'rsa', private: true, pub_key_name: 'webui_pub_key' },
