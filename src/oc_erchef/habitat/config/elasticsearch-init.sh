@@ -14,4 +14,4 @@ HOST="{{cfg.elasticsearch.vip}}"
 PORT="{{cfg.elasticsearch.port}}"
 {{/if}}
 
-curl -XPUT http://${HOST}:${PORT}/chef/ -d @{{pkg.svc_config_path}}/elasticsearch-index-init.json
+curl -sS --retry 10 --retry-delay 2 --retry-connrefused -XPUT http://${HOST}:${PORT}/chef/ -d @{{pkg.svc_config_path}}/elasticsearch-index-init.json

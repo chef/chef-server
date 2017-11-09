@@ -168,9 +168,21 @@ class ChefServerDataBootstrap
   def create_superuser_in_erchef(conn)
     require 'openssl'
 
+
+{{~ #if bind.chef-server-ctl}}
+  {{~ #eachAlive bind.chef-server-ctl.members as |member|}}
+    {{~ #if @last}}
+    public_key = <<-EOF
+{{ member.cfg.secrets.chef-server.superuser_pub_key }}
+EOF
+    {{~ /if}}
+  {{~ /eachAlive}}
+{{~ else}}
     raw_key = OpenSSL::PKey::RSA.new(2048)
     File.write('{{pkg.svc_data_path}}/pivotal.pem', raw_key.to_pem)
     public_key = OpenSSL::PKey::RSA.new(raw_key).public_key.to_s
+{{~ /if}}
+
 
     user_id = SecureRandom.uuid.gsub("-", "")
     simple_insert(conn, 'keys',

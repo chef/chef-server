@@ -67,13 +67,13 @@ default_orgname nil
 # testing location, you should not specify a value for this parameter.
 # The tests will still run, albeit slower, as they will now need to
 # poll for a period to ensure they are querying committed results.
-search_server "http://chef-server-elasticsearch:8983/solr"
+search_server "http://elasticsearch:9200/"
 
 
 # Some tests expect access erchef server directly, instead of routing through
 # LB.
 #
-internal_server "http://127.0.0.1:8000"
+internal_server "http://oc_erchef:8000"
 
 
 # Related to the 'search_server' parameter, this specifies the maximum
@@ -113,6 +113,8 @@ superuser_name 'pivotal'
 superuser_key  '{{pkg.svc_config_path}}/pivotal.pem'
 webui_key '{{pkg.svc_config_path}}/webui_priv.pem'
 stats_user 'statsuser'
+
+suite "api"
 
 requestors({
              :clients => {
