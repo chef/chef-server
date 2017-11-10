@@ -127,7 +127,8 @@ class ChefServerDataBootstrap
     end
 
     # touch the bootstrapped file
-    FileUtils.touch '{{pkg.svc_data_path}}/bootstrapped'
+    # FileUtils.touch '{{pkg.svc_data_path}}/bootstrapped'
+    puts "Chef server successfully bootstrapped"
   end
 
   private
@@ -174,7 +175,7 @@ class ChefServerDataBootstrap
 {{~ #if bind.chef-server-ctl}}
   {{~ #eachAlive bind.chef-server-ctl.members as |member|}}
     {{~ #if @last}}
-    user_id = {{ member.cfg.secrets.chef-server.superuser_id }}
+    user_id = "{{ member.cfg.secrets.chef-server.superuser_id }}"
     public_key = <<-EOF
 {{ member.cfg.secrets.chef-server.superuser_pub_key }}
 EOF
@@ -228,33 +229,22 @@ EOF
     1.upto(fields.length) { |x| placeholders << "$#{x}" }
     placeholders.join(", ")
     begin
+      puts "Bootstrapping superuser data into chefs #{table} table"
       sql = %{
         INSERT INTO #{table} (#{fields.keys.join(", ")})
         VALUES (#{placeholders.join(", ")})
       }
-      puts "SQL: #{sql}"
       conn.exec_params(sql, fields.values)
-      #conn.exec_params("INSERT INTO #{table} (#{fields.keys.join(", ")}) VALUES (#{placeholders.join(", ")})",
-      #               fields.values) # confirm ordering
     rescue PG::UniqueViolation => e
-      puts "Got UniqueViolation #{e.inspect}"
+      # puts "Got UniqueViolation #{e.inspect}"
+      puts "Pre-existing superuser record found in chefs #{table} table, attempting to update"
       sql = %{
         UPDATE #{table} SET (#{fields.keys.join(", ")})
-        VALUES (#{placeholders.join(", ")}) WHERE id=#{pkey}
+        = (#{placeholders.join(", ")}) WHERE id = '{pkey}'
       }
       conn.exec_params(sql, fields.values)
-      #conn.exec_params("UPDATE #{table} SET (#{fields.keys.join(", ")}) VALUES (#{placeholders.join(", ")}) WHERE id=#{pkey}",
-      #            fields.values) # confirm ordering
+      puts "Update successful"
     end
-
-    upsert_sql = %{
-      INSERT INTO #{table} (#{fields.keys.join(', ')})
-      VALUES (#{placeholders.join(', ')})
-      ON CONFLICT(#{fields.keys.join(', ')})
-      DO UPDATE SET (#{fields.keys.join(', ')}) = (#{fields.values.join(', ')})
-    }
-    #puts "QUERY: #{upsert_sql}"
-    #conn.exec_params(upsert_sql)
   end
 
   ## Bifrost access helpers.
