@@ -10,10 +10,6 @@ for dir in ca cache cache-tmp tmp; do
   mkdir -pv "{{pkg.svc_data_path}}/$dir"
 done
 
-for dir in static; do
-  mkdir -pv "{{pkg.svc_static_path}}/$dir"
-done
-
 chown -R hab:hab "{{pkg.svc_config_path}}" "{{pkg.svc_data_path}}" \
   "{{pkg.svc_var_path}}"
 

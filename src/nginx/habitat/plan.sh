@@ -29,8 +29,21 @@ do_build() {
   return 0
 }
 
-# NOT RIGHT
+do_unpack() {
+    mkdir -p "$HAB_CACHE_SRC_PATH/$pkg_dirname"
+    cp -R "$PLAN_CONTEXT/../"* "$HAB_CACHE_SRC_PATH/$pkg_dirname"
+    mkdir -p "$HAB_CACHE_SRC_PATH/$pkg_dirname/static"
+    cp -R "$PLAN_CONTEXT/../../../omnibus/files/private-chef-cookbooks/private-chef/files/default/html" "$HAB_CACHE_SRC_PATH/$pkg_dirname/static"
+    printenv
+    echo $PLAN_CONTEXT $HAB_CACHE_SRC_PATH
+#    attach
+}
+
 do_install() {
+    echo PKG_SVC_STATIC_PATH $pkg_svc_static_path
+    mkdir -p $pkg_svc_static_path
+    cp -R $HAB_CACHE_SRC_PATH/$pkg_dirname/static "$pkg_prefix"
+#    attach
     return 0
 }
 
