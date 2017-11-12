@@ -98,15 +98,13 @@ end
 ################################################################################
 # Chef Manage
 ################################################################################
+node.default['chef-server-deploy']['manage-config']['saml.enabled'] = node['chef-server-deploy']['enable_saml']
+node.default['chef-server-deploy']['manage-config']['saml.issuer_url'] = "'https://#{node['chef-server-deploy']['automate_server_fqdn']}/api/v0'"
+
 chef_ingredient 'manage' do
   channel :stable
   accept_license true
-  if node['chef-server-deploy']['enable_saml']
-    config <<-EOF.gsub(/^\s+/, '')
-    saml.enabled true
-    saml.issuer_url 'https://#{node['chef-server-deploy']['automate_server_fqdn']}/api/v0'
-    EOF
-  end
+  config node['chef-server-deploy']['manage-config'].map { |k, v| "#{k} #{v}" }.join("\n")
   action :upgrade
   # We need to reconfigure after an install/upgrade
   notifies :reconfigure, 'chef_ingredient[manage]'
