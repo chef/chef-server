@@ -51,11 +51,6 @@ do_unpack() {
   # deps into the working directory, but into the cache directory.
   mkdir -p "$HAB_CACHE_SRC_PATH/$pkg_dirname"
   cp -R "$PLAN_CONTEXT/../"* "$HAB_CACHE_SRC_PATH/$pkg_dirname"
-    chef_src_dir="$HAB_CACHE_SRC_PATH/$pkg_dirname/src/github.com/"
-  mkdir -p $chef_src_dir
-  pushd $chef_src_dir
-  git clone https://github.com/chef/chef-server.git
-  popd
 }
 
 do_prepare() {
@@ -63,26 +58,28 @@ do_prepare() {
 }
 
 do_build() {
-  # _bundler_dir="$(pkg_path_for bundler)"
-  export REL_VERSION="12.99.1"
-  export GEM_HOME="${pkg_path}/vendor/bundle"
-  export GEM_PATH="${_bundler_dir}:${GEM_HOME}"
   return 0
 }
 
 do_install() {
+  # install gem dependencies for service hooks directly under $pkg_prefix
   export HOME="${pkg_prefix}"
   bundle install --path "${pkg_prefix}/vendor/bundle" --binstubs && bundle config path ${pkg_prefix}/vendor/bundle
   cp Gemfile* ${pkg_prefix}
-  # install oc-chef-pedant
-  pedant_src_dir="$HAB_CACHE_SRC_PATH/$pkg_dirname/src/github.com/chef-server/oc-chef-pedant"
-  cp -pr $pedant_src_dir ${pkg_prefix}
-  cp Gemfile.local "${pkg_prefix}/oc-chef-pedant/"
-  pushd "${pkg_prefix}/oc-chef-pedant"
-  bundle install --path "vendor/bundle" && bundle config path ${pkg_prefix}/vendor/bundle
-  #export GEM_HOME="${pkg_prefix}/vendor/bundle/ruby/2.4.0"
-  #export GEM_PATH="${GEM_HOME}"
-  # gem build oc-chef-pedant.gemspec && gem install oc-chef-pedant-*.gem --no-ri --no-rdoc
+
+  # install oc-chef-pedant in its own directory under $pkg_prefix
+  export pedant_src_dir=$(abspath $PLAN_CONTEXT/../../../oc-chef-pedant)
+  if [ ! "${pedant_src_dir}" ]; then
+    exit_with "Cannot find oc-chef-pedant src directory. You must run \"hab studio enter\" from the chef-server project root." 56
+  fi
+  cp -pr ${pedant_src_dir} ${pkg_prefix}
+  export pedant_dir="${pkg_prefix}/oc-chef-pedant"
+  export HOME="${pedant_dir}"
+  # TODO: declare chef gem dependency in oc-chef-pedant
+  cp Gemfile.local "${pedant_dir}/Gemfile.local"
+  pushd ${pedant_dir}
+  bundle install --path "${pedant_dir}/vendor/bundle"
+  bundle config path "${pedant_dir}/vendor/bundle"
   popd
 }
 
