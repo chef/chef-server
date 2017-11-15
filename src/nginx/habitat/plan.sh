@@ -7,14 +7,14 @@ pkg_license=('Apache-2.0')
 pkg_deps=(
   core/curl
   core/libossp-uuid
-  irvingpop/openresty-lpeg
+  tcate/openresty-noroot
 )
 pkg_exposes=(port ssl-port)
 pkg_exports=(
     [port]=port
     [ssl-port]=ssl_port
 )
-pkg_svc_user="root"
+pkg_svc_user="hab"
 pkg_svc_group="$pkg_svc_user"
 pkg_binds_optional=(
   [bookshelf]="port"

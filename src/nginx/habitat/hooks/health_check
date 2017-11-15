@@ -6,7 +6,7 @@
 # default return code is 0
 rc=0
 
-{{pkgPathFor "core/curl"}}/bin/curl -k -X GET -sS --fail --max-time 2 https://localhost/_status
+{{pkgPathFor "core/curl"}}/bin/curl -k -X GET -sS --fail --max-time 2 https://localhost:8443/_status
 
 case $? in
     # Zero exit status means curl got back a 200 end everything is ok.

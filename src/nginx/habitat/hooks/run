@@ -3,6 +3,6 @@ exec 2>&1
 
 echo "Starting Chef Server"
 
-exec hab pkg exec core/openresty openresty \
+exec hab pkg exec tcate/openresty-noroot openresty \
   -c "{{pkg.svc_config_path}}/nginx.conf" \
   -p "{{pkg.svc_var_path}}"

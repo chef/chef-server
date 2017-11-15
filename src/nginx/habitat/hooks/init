@@ -36,4 +36,4 @@ if [[ ! -f "$cert_file" ]]; then
 fi
 
 # quick and dirty hack to see the lpeg lua library
-ln -s {{pkgPathFor "irvingpop/openresty-lpeg"}}/lpeg.so {{pkgPathFor "core/openresty"}}/luajit/lib/lua/5.1/
+#ln -s {{pkgPathFor "irvingpop/openresty-lpeg"}}/lpeg.so {{pkgPathFor "core/openresty"}}/luajit/lib/lua/5.1/

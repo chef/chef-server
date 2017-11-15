@@ -25,6 +25,10 @@ services:
       - postgresql
     links:
       - postgresql
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
 
   bookshelf:
     image: $HAB_ORIGIN/bookshelf
@@ -93,8 +97,8 @@ services:
       --bind bookshelf:bookshelf.default
       --bind elasticsearch:elasticsearch.default
     ports:
-      - 80:80
-      - 443:443
+      - 80:8080
+      - 443:8443
 
 volumes:
   postgresql-data:
