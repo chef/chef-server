@@ -51,7 +51,7 @@ delete_org true
 
 # You MUST specify the address of the server the API requests will be
 # sent to.  Only specify protocol, hostname, and port.
-chef_server "https://chef-server-nginx"
+chef_server "https://172.18.0.1"
 
 # This configration specifies the default orgname. Note that it does *not*
 # mean that Pedant will test things with default org urls. To do that,
