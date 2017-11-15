@@ -81,6 +81,20 @@ do_install() {
   bundle install --path "${pedant_dir}/vendor/bundle"
   bundle config path "${pedant_dir}/vendor/bundle"
   popd
+
+  export HOME="${pkg_prefix}"/chef
+  mkdir $HOME
+  pushd $HOME
+
+  cat > Gemfile << EOF
+source 'https://rubygems.org'
+gem 'chef'
+gem 'knife-opc'
+EOF
+  
+  bundle install --path "${HOME}/vendor/bundle" --binstubs && bundle config path ${HOME}/vendor/bundle || attach 
+
+  popd
 }
 
 do_check() {
