@@ -7,7 +7,7 @@ pkg_license=('Apache-2.0')
 pkg_deps=(
   core/curl
   core/libossp-uuid
-  tcate/openresty-noroot
+  chef-server/openresty-noroot
 )
 pkg_exposes=(port ssl-port)
 pkg_exports=(
