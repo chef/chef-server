@@ -9,10 +9,9 @@ pkg_deps=(
   core/cacerts
   core/coreutils
   core/curl
-  core/postgresql/9.6.3/20171014214231
   core/gcc-libs
   core/sqitch
-  frog-hornets-nest/dbdpg
+  chef-server/dbdpg
 )
 pkg_build_deps=(core/make core/git core/gcc core/bundler core/ruby)
 pkg_lib_dirs=(lib)

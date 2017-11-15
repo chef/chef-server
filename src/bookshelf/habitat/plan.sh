@@ -8,10 +8,9 @@ pkg_deps=(
   core/erlang18
   core/cacerts
   core/coreutils
-  core/postgresql/9.6.3/20171014214231
   core/gcc-libs
   core/sqitch
-  frog-hornets-nest/dbdpg
+  chef-server/dbdpg
 )
 pkg_build_deps=(core/make core/git core/gcc)
 pkg_lib_dirs=(lib)

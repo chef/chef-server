@@ -3,7 +3,7 @@
 # TODO: not sure how to handle this. Sqitch bombs when it can't find the timezone
 export TZ="America/Chicago"
 
-export PERL5LIB="$(cat "$(hab pkg path "frog-hornets-nest/dbdpg")/LD_RUN_PATH")"
+export PERL5LIB="$(cat "$(hab pkg path "chef-server/dbdpg")/LD_RUN_PATH")"
 export PATH=$PATH:$(hab pkg path "core/postgresql")/bin:$(hab pkg path "core/sqitch")/bin
 
 {{#if bind.database}}

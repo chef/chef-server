@@ -14,7 +14,7 @@ pkg_deps=(
   core/sqitch
   core/gecode
   core/bundler
-  frog-hornets-nest/dbdpg
+  chef-server/dbdpg
 )
 pkg_build_deps=(core/make core/git core/gcc)
 pkg_lib_dirs=(lib)
