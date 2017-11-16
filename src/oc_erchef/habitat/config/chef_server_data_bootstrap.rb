@@ -13,14 +13,14 @@ class EcPostgres
     {{#if @last}}
     postgres['vip']="{{member.sys.ip}}"
     postgres['port']="{{member.cfg.port}}"
-    postgres['db_superuser_password']="{{member.cfg.superuser_name}}"
+    postgres['db_superuser']="{{member.cfg.superuser_name}}"
     postgres['db_superuser_password']="{{member.cfg.superuser_password}}"
     {{/if}}
   {{/eachAlive}}
 {{else}}
     postgres['vip']="{{cfg.postgresql.vip}}"
     postgres['port']="{{cfg.postgresql.port}}"
-    postgres['db_superuser_password']="{{cfg.sql_user}}"
+    postgres['db_superuser']="{{cfg.sql_user}}"
     postgres['db_superuser_password']="{{cfg.sql_password}}"
 {{/if}}
 
@@ -110,7 +110,7 @@ class ChefServerDataBootstrap
     # This is done in a few stages. First we will see if the pivotal user exist
     EcPostgres.with_connection('opscode_chef') do |conn|
       get_or_create_superuser_in_erchef(conn)
-    end       
+    end
 
     # Next we'll first create the bifrost objects and
     # dependencies.  If this fails, it can be re-run idempotently without
@@ -213,9 +213,9 @@ class ChefServerDataBootstrap
          SELECT add_user(#{make_placeholders(add_user_keys.length)})
       }
       args = extract_args_in_order(add_user_keys, user)
-      
-      require 'pp'; pp sql: sql, args: args, user:user   
-      
+
+      require 'pp'; pp sql: sql, args: args, user:user
+
       result = conn.exec_params(sql, args)
 
       require 'pp'; pp result: result
@@ -230,10 +230,10 @@ class ChefServerDataBootstrap
       @superuser_authz_id = user[:authz_id]
       @superuser_guid = user[:id]
     end
-    superuser
+    user
   end
 
-  def rekey_superuser(conn)   
+  def rekey_superuser(conn)
 {{~ #if bind.chef-server-ctl}}
   {{~ #eachAlive bind.chef-server-ctl.members as |member|}}
     {{~ #if @last}}
@@ -250,11 +250,11 @@ EOF
     @superuser_public_key = OpenSSL::PKey::RSA.new(raw_key).public_key.to_s
 {{~ /if}}
     # we assume the default key exists, because add_user above guarantees it
-    sql = %{ 
-      UPDATE keys SET (public_key, created_at, expires_at) 
+    sql = %{
+      UPDATE keys SET (public_key, created_at, expires_at)
       = ('#{@superuser_public_key}', '#{bootstrap_time}', 'infinity')
-      WHERE id = #{superuser_guid} AND key_name = 'default'
-      }     
+      WHERE id = '#{superuser_guid}' AND key_name = 'default'
+      }
 
     require 'pp'; pp sql: sql
 
@@ -277,7 +277,7 @@ EOF
 
   # db helper to construct and execute a simple insert statement
   def simple_insert(conn, table, pkey, fields)
-    placeholders = make_placeholders(length)
+    placeholders = make_placeholders(fields.length)
     begin
       puts "Bootstrapping superuser data into chefs #{table} table"
       sql = %{
@@ -314,12 +314,12 @@ EOF
 
   def make_placeholders(count)
     (1..count).map {|x| "$#{x}"}.join(", ")
-  end   
-  
-  def extract_args_in_order(keys, hash) 
+  end
+
+  def extract_args_in_order(keys, hash)
      require 'pp'; pp hash: hash, keys: keys
      keys.map {|k| hash.has_key?(k) ? hash[k] : nil}
-  end   
+  end
 
 
   ## Bifrost access helpers.
