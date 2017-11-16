@@ -13,7 +13,7 @@ REQUIRED_SECRETS = {
   },
   rabbitmq: {
     password: { length: 100 },
-	  management_password: { length: 100 },
+    management_password: { length: 100 },
     actions_password: { length: 100 }
   },
   keepalived: {
@@ -21,38 +21,38 @@ REQUIRED_SECRETS = {
   },
   opscode_erchef: {
     sql_password: { length: 60 },
-	  sql_ro_password: { length: 60 },
+    sql_ro_password: { length: 60 },
     stats_password: { length: 100 }
   },
   oc_bifrost: {
     superuser_id: { length: 32 },
-	  sql_password: { length: 100 },
-	  sql_ro_password: { length: 100 }
+    sql_password: { length: 100 },
+    sql_ro_password: { length: 100 }
   },
   oc_id: {
     secret_key_base: { length: 100 },
-	  sql_password: { length: 100 },
-	  sql_ro_password: { length: 100 }
+    sql_password: { length: 100 },
+    sql_ro_password: { length: 100 }
   },
   bookshelf: {
     access_key_id: { length: 40 },
-	  secret_access_key: { length: 80 },
-	  sql_password: { length: 80 },
-	  sql_ro_password: { length: 80 }
+    secret_access_key: { length: 80 },
+    sql_password: { length: 80 },
+    sql_ro_password: { length: 80 }
   },
   'chef-server': {
-    superuser_id: { length: 32 },
-    superuser_key: { length: 2048, type: 'rsa', private: true, pub_key_name: 'superuser_pub_key' },
-    superuser_pub_key: { type: 'rsa', private: false },
-	  webui_key: { length: 2048, type: 'rsa', private: true, pub_key_name: 'webui_pub_key' },
-    webui_pub_key: { type: 'rsa', private: false }
-  },
-	'push-jobs-server': {
-    pushy_priv_key: { length: 2048, type: 'rsa', private: true, pub_key_name: 'pushy_pub_key' },
-    pushy_pub_key: { type: 'rsa', private: false },
-	  sql_password: { length: 60 },
-	  sql_ro_password: { length: 60 }
-  }
+                   superuser_id: { length: 32 },
+                   superuser_key: { length: 2048, type: 'rsa', private: true, pub_key_name: 'superuser_pub_key' },
+                   superuser_pub_key: { type: 'rsa', private: false },
+                   webui_key: { length: 2048, type: 'rsa', private: true, pub_key_name: 'webui_pub_key' },
+                   webui_pub_key: { type: 'rsa', private: false }
+                 },
+  'push-jobs-server': {
+                        pushy_priv_key: { length: 2048, type: 'rsa', private: true, pub_key_name: 'pushy_pub_key' },
+                        pushy_pub_key: { type: 'rsa', private: false },
+                        sql_password: { length: 60 },
+                        sql_ro_password: { length: 60 }
+                      }
 }
 
 def secrets_apply_loop

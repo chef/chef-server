@@ -86,7 +86,7 @@ end
 class ChefServerDataBootstrap
 
   GLOBAL_ORG_ID = "00000000000000000000000000000000"
-  attr_reader :bifrost, :superuser_authz_id, :bootstrap_time, :server_admins_authz_id
+  attr_reader :bifrost, :superuser_guid, :superuser_public_key, :superuser_authz_id, :bootstrap_time, :server_admins_authz_id
 
   def initialize
     @bootstrap_time = Time.now.utc.to_s
@@ -103,11 +103,19 @@ class ChefServerDataBootstrap
   end
 
   def bootstrap
-    puts "Boostrapping Chef Server Data"
-    # This is done in two steps - we'll first create the bifrost objects and
+    # TODO: Need to cleanly guard that we only do this in one instance of chef-server-ctl
+
+
+    puts "Bootstrapping Chef Server Data"
+    # This is done in a few stages. First we will see if the pivotal user exist
+    EcPostgres.with_connection('opscode_chef') do |conn|
+      get_or_create_superuser_in_erchef(conn)
+    end       
+
+    # Next we'll first create the bifrost objects and
     # dependencies.  If this fails, it can be re-run idempotently without
     # risk of causing the run to fail.
-    @superuser_authz_id = create_actor_in_authz(bifrost_superuser_id)
+
     users_authz_id = create_container_in_authz(superuser_authz_id)
     orgs_authz_id = create_container_in_authz(superuser_authz_id)
     create_server_admins_global_group_in_bifrost(users_authz_id)
@@ -120,7 +128,7 @@ class ChefServerDataBootstrap
     # bootstrap failed due to an error out of bifrost can be recovered
     # by re-running it.
     EcPostgres.with_connection('opscode_chef') do |conn|
-      create_superuser_in_erchef(conn)
+      rekey_superuser(conn)
       create_server_admins_global_group_in_erchef(conn)
       create_global_container_in_erchef(conn, 'organizations', orgs_authz_id)
       create_global_container_in_erchef(conn, 'users', users_authz_id)
@@ -168,48 +176,92 @@ class ChefServerDataBootstrap
 
   # insert the erchef superuser's key into the erchef keys table,
   # and the user record into the users table.
-  def create_superuser_in_erchef(conn)
+  # As a side effect it sets the superuser_authz_id
+  def get_or_create_superuser_in_erchef(conn)
     require 'openssl'
+    user = get_superuser(conn)
 
+    if user.nil?
+      # create it
+      # TODO Guard against multiple instances racing
 
+      # this can only be created when initializing a system, and should never ever change after
+      @superuser_authz_id = create_actor_in_authz(bifrost_superuser_id)
+      user_id = SecureRandom.uuid.gsub("-", "")
+
+      user = {id: user_id,
+              username: 'pivotal',
+              email: 'root@localhost.localdomain',
+              authz_id: @superuser_authz_id,
+              created_at: bootstrap_time,
+              updated_at: bootstrap_time,
+              last_updated_by: bifrost_superuser_id,
+              pubkey_version: 0, # Old constraint requires it to be not-null
+              serialized_object: JSON.generate(
+                first_name: "Chef",
+                last_name: "Server",
+                display_name: "Chef Server Superuser"),
+              admin: false,
+              recovery_auth_enabled: false
+             }
+
+      add_user_keys = %i{id authz_id username email public_key pubkey_version hashed_pw
+                         salt hash_type last_updated_by created_at updated_at
+                         external_auth_uid recovery_auth_enabled serialized_object admin}
+
+      sql = %{
+         SELECT add_user(#{make_placeholders(add_user_keys.length)})
+      }
+      args = extract_args_in_order(add_user_keys, user)
+      
+      require 'pp'; pp sql: sql, args: args, user:user   
+      
+      result = conn.exec_params(sql, args)
+
+      require 'pp'; pp result: result
+      if result == "1"
+        puts "Create user succeeded"
+      else
+        puts "Create user failed"
+      end
+
+      user = get_superuser(conn)
+    else
+      @superuser_authz_id = user[:authz_id]
+      @superuser_guid = user[:id]
+    end
+    superuser
+  end
+
+  def rekey_superuser(conn)   
 {{~ #if bind.chef-server-ctl}}
   {{~ #eachAlive bind.chef-server-ctl.members as |member|}}
     {{~ #if @last}}
-    user_id = "{{ member.cfg.secrets.chef-server.superuser_id }}"
-    public_key = <<-EOF
+    @superuser_public_key = <<-EOF
 {{ member.cfg.secrets.chef-server.superuser_pub_key }}
 EOF
     {{~ /if}}
   {{~ /eachAlive}}
 {{~ else}}
-    user_id = SecureRandom.uuid.gsub("-", "")
+    # Right now this only should run if we haven't generated a key in chef-server-ctl
+    # TODO GUARD THIS SOMEHOW.
     raw_key = OpenSSL::PKey::RSA.new(2048)
     File.write('{{pkg.svc_data_path}}/pivotal.pem', raw_key.to_pem)
-    public_key = OpenSSL::PKey::RSA.new(raw_key).public_key.to_s
+    @superuser_public_key = OpenSSL::PKey::RSA.new(raw_key).public_key.to_s
 {{~ /if}}
+    # we assume the default key exists, because add_user above guarantees it
+    sql = %{ 
+      UPDATE keys SET (public_key, created_at, expires_at) 
+      = ('#{@superuser_public_key}', '#{bootstrap_time}', 'infinity')
+      WHERE id = #{superuser_guid} AND key_name = 'default'
+      }     
 
+    require 'pp'; pp sql: sql
 
-    simple_insert(conn, 'keys', user_id,
-                    id: user_id,
-                    key_name: 'default',
-                    public_key: public_key,
-                    key_version: 0,
-                    created_at: bootstrap_time,
-                    expires_at: "infinity")
+    result = conn.exec(sql)
+    require 'pp'; pp result: result
 
-    simple_insert(conn, 'users', user_id,
-                    id: user_id,
-                    username: 'pivotal',
-                    email: 'root@localhost.localdomain',
-                    authz_id: @superuser_authz_id,
-                    created_at: bootstrap_time,
-                    updated_at: bootstrap_time,
-                    last_updated_by: bifrost_superuser_id,
-                    pubkey_version: 0, # Old constrant requires it to be not-null
-                    serialized_object: JSON.generate(
-                      first_name: "Chef",
-                      last_name: "Server",
-                      display_name: "Chef Server Superuser"))
+    puts "Superuser key update successful #{result}"
   end
 
   def create_global_container_in_erchef(conn, name, authz_id)
@@ -225,14 +277,12 @@ EOF
 
   # db helper to construct and execute a simple insert statement
   def simple_insert(conn, table, pkey, fields)
-    placeholders = []
-    1.upto(fields.length) { |x| placeholders << "$#{x}" }
-    placeholders.join(", ")
+    placeholders = make_placeholders(length)
     begin
       puts "Bootstrapping superuser data into chefs #{table} table"
       sql = %{
         INSERT INTO #{table} (#{fields.keys.join(", ")})
-        VALUES (#{placeholders.join(", ")})
+        VALUES (#{placeholders})
       }
       conn.exec_params(sql, fields.values)
     rescue PG::UniqueViolation => e
@@ -240,12 +290,37 @@ EOF
       puts "Pre-existing superuser record found in chefs #{table} table, attempting to update"
       sql = %{
         UPDATE #{table} SET (#{fields.keys.join(", ")})
-        = (#{placeholders.join(", ")}) WHERE id = '{pkey}'
+        = (#{placeholders}) WHERE id = '{pkey}'
       }
       conn.exec_params(sql, fields.values)
       puts "Update successful"
     end
   end
+
+  def get_superuser(conn)
+    users = begin
+                sql = %{
+                SELECT * FROM USERS WHERE username = 'pivotal'
+              }
+              result = conn.exec(sql)
+              Hash[result[0].map{ |k, v| [k.to_sym, v] }]
+            rescue
+              nil
+            end
+    require 'pp'; pp get_superuser_users: users
+
+    users
+  end
+
+  def make_placeholders(count)
+    (1..count).map {|x| "$#{x}"}.join(", ")
+  end   
+  
+  def extract_args_in_order(keys, hash) 
+     require 'pp'; pp hash: hash, keys: keys
+     keys.map {|k| hash.has_key?(k) ? hash[k] : nil}
+  end   
+
 
   ## Bifrost access helpers.
 
