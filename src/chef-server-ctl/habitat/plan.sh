@@ -94,6 +94,14 @@ EOF
   
   bundle install --path "${HOME}/vendor/bundle" --binstubs && bundle config path ${HOME}/vendor/bundle || attach 
 
+  cp $PLAN_CONTEXT/bin/oc-chef-pedant.sh $pkg_prefix/bin/chef-server-test
+#  ln -s $pkg_prefix/config/oc-chef-pedant.sh $pkg_prefix/bin/chef-server-test
+  chmod +x $pkg_prefix/bin/chef-server-test
+
+  cp $PLAN_CONTEXT/bin/knife-pivotal.sh $pkg_prefix/bin/knife
+#  ln -s $pkg_prefix/config/knife-pivotal.sh $pkg_prefix/bin/knife
+  chmod +x $pkg_prefix/bin/knife
+
   popd
 }
 
