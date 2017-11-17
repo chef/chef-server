@@ -196,6 +196,7 @@ class ChefServerDataBootstrap
               created_at: bootstrap_time,
               updated_at: bootstrap_time,
               last_updated_by: bifrost_superuser_id,
+              public_key: superuser_public_key,
               pubkey_version: 0, # Old constraint requires it to be not-null
               serialized_object: JSON.generate(
                 first_name: "Chef",
@@ -218,23 +219,39 @@ class ChefServerDataBootstrap
 
       result = conn.exec_params(sql, args)
 
-      require 'pp'; pp result: result
-      if result == "1"
+      require 'pp'; pp result: result, result0: result[0], result_status: result.cmd_status
+      if result[0]["add_user"] == "1"
         puts "Create user succeeded"
       else
         puts "Create user failed"
       end
 
       user = get_superuser(conn)
-    else
-      @superuser_authz_id = user[:authz_id]
-      @superuser_guid = user[:id]
     end
+    @superuser_authz_id = user[:authz_id]
+    @superuser_guid = user[:id]
     user
   end
 
   def rekey_superuser(conn)
-{{~ #if bind.chef-server-ctl}}
+    set_superuser_public_key()
+    # we assume the default key exists, because add_user above guarantees it
+    sql = %{
+      UPDATE keys SET (public_key, created_at, expires_at)
+      = ('#{@superuser_public_key}', '#{bootstrap_time}', 'infinity')
+      WHERE id = '#{superuser_guid}' AND key_name = 'default'
+      }
+
+    require 'pp'; pp sql_rekey: sql
+
+    result = conn.exec(sql)
+    require 'pp'; pp result: result, result_status: result.cmd_status
+
+    puts "Superuser key update successful #{result}"
+  end
+
+  def set_superuser_public_key()
+{~ #if bind.chef-server-ctl}}
   {{~ #eachAlive bind.chef-server-ctl.members as |member|}}
     {{~ #if @last}}
     @superuser_public_key = <<-EOF
@@ -243,25 +260,8 @@ EOF
     {{~ /if}}
   {{~ /eachAlive}}
 {{~ else}}
-    # Right now this only should run if we haven't generated a key in chef-server-ctl
-    # TODO GUARD THIS SOMEHOW.
-    raw_key = OpenSSL::PKey::RSA.new(2048)
-    File.write('{{pkg.svc_data_path}}/pivotal.pem', raw_key.to_pem)
-    @superuser_public_key = OpenSSL::PKey::RSA.new(raw_key).public_key.to_s
+    @superuser_public_key = "DUMMY KEY FROM BOOTSTRAP"
 {{~ /if}}
-    # we assume the default key exists, because add_user above guarantees it
-    sql = %{
-      UPDATE keys SET (public_key, created_at, expires_at)
-      = ('#{@superuser_public_key}', '#{bootstrap_time}', 'infinity')
-      WHERE id = '#{superuser_guid}' AND key_name = 'default'
-      }
-
-    require 'pp'; pp sql: sql
-
-    result = conn.exec(sql)
-    require 'pp'; pp result: result
-
-    puts "Superuser key update successful #{result}"
   end
 
   def create_global_container_in_erchef(conn, name, authz_id)
