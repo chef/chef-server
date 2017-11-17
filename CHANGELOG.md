@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.8 -->
-## [12.17.8](https://github.com/chef/chef-server/tree/12.17.8) (2017-11-09)
+<!-- latest_release 12.17.9 -->
+## [12.17.9](https://github.com/chef/chef-server/tree/12.17.9) (2017-11-17)
 
 #### Merged Pull Requests
-- InSpec smoke test improvements [#1423](https://github.com/chef/chef-server/pull/1423) ([schisamo](https://github.com/schisamo))
+- Pull in new knife-opc (we track master) for SUSTAIN-784 [#1426](https://github.com/chef/chef-server/pull/1426) ([btm](https://github.com/btm))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.5 -->
 ### Changes since 12.17.5 release
 
 #### Merged Pull Requests
+- Pull in new knife-opc (we track master) for SUSTAIN-784 [#1426](https://github.com/chef/chef-server/pull/1426) ([btm](https://github.com/btm)) <!-- 12.17.9 -->
 - InSpec smoke test improvements [#1423](https://github.com/chef/chef-server/pull/1423) ([schisamo](https://github.com/schisamo)) <!-- 12.17.8 -->
 - [rabbitmq] Remove guest user by default [#1420](https://github.com/chef/chef-server/pull/1420) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.7 -->
 - [SUSTAIN-728] Add /_acl for cookbook_artifacts [#1414](https://github.com/chef/chef-server/pull/1414) ([nsdavidson](https://github.com/nsdavidson)) <!-- 12.17.6 -->
