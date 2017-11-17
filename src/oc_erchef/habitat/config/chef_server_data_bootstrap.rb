@@ -216,11 +216,8 @@ class ChefServerDataBootstrap
       }
       args = extract_args_in_order(add_user_keys, user)
 
-      require 'pp'; pp sql: sql, args: args, user:user
-
       result = conn.exec_params(sql, args)
 
-      require 'pp'; pp result: result, result0: result[0], result_status: result.cmd_status
       if result[0]["add_user"] == "1"
         puts "Create superuser succeeded"
       else
@@ -244,11 +241,7 @@ class ChefServerDataBootstrap
       WHERE id = '#{superuser_guid}' AND key_name = 'default'
       }
 
-    require 'pp'; pp sql_rekey: sql
-
     result = conn.exec(sql)
-    require 'pp'; pp result: result, result_status: result.cmd_status
-
     puts "Superuser key update successful #{result.cmd_status}"
   end
 
@@ -295,8 +288,6 @@ class ChefServerDataBootstrap
             rescue
               nil
             end
-    require 'pp'; pp get_superuser_users: users
-
     users
   end
 
@@ -305,7 +296,6 @@ class ChefServerDataBootstrap
   end
 
   def extract_args_in_order(keys, hash)
-     require 'pp'; pp hash: hash, keys: keys
      keys.map {|k| hash.has_key?(k) ? hash[k] : nil}
   end
 
