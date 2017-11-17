@@ -6,8 +6,8 @@ class EcPostgres
   # Provides a superuser connection to the specified database
   def self.with_connection(database = 'template1', opts = {})
     require 'pg'
-    postgres = {}
 
+    postgres = {}
 {{#if bind.database}}
   {{#eachAlive bind.database.members as |member|}}
     {{#if @last}}
@@ -23,7 +23,7 @@ class EcPostgres
     postgres['db_superuser']="{{cfg.sql_user}}"
     postgres['db_superuser_password']="{{cfg.sql_password}}"
 {{/if}}
-
+    
     connection = nil
 
     # Some callers expect failure - this gives the option to suppress
@@ -39,11 +39,11 @@ class EcPostgres
     end
     max_retries = retries
     begin
-      connection = ::PGconn.open('user' => postgres['db_superuser'],
-                                 'host' => postgres['vip'],
-                                 'password' => postgres['db_superuser_password'],
-                                 'port' => postgres['port'],
-                                 'dbname' => database)
+      connection = ::PG::Connection.open('user' => postgres['db_superuser'],
+                                         'host' => postgres['vip'],
+                                         'password' => postgres['db_superuser_password'],
+                                         'port' => postgres['port'],
+                                         'dbname' => database)
     rescue => e
       if retries > 0
         sleep_time = 2**((max_retries - retries))
@@ -179,6 +179,7 @@ class ChefServerDataBootstrap
   # As a side effect it sets the superuser_authz_id
   def get_or_create_superuser_in_erchef(conn)
     require 'openssl'
+    load_superuser_public_key()
     user = get_superuser(conn)
 
     if user.nil?
@@ -221,9 +222,10 @@ class ChefServerDataBootstrap
 
       require 'pp'; pp result: result, result0: result[0], result_status: result.cmd_status
       if result[0]["add_user"] == "1"
-        puts "Create user succeeded"
+        puts "Create superuser succeeded"
       else
-        puts "Create user failed"
+        puts "Create superuser failed"
+        exit(1)
       end
 
       user = get_superuser(conn)
@@ -234,7 +236,7 @@ class ChefServerDataBootstrap
   end
 
   def rekey_superuser(conn)
-    set_superuser_public_key()
+    load_superuser_public_key()
     # we assume the default key exists, because add_user above guarantees it
     sql = %{
       UPDATE keys SET (public_key, created_at, expires_at)
@@ -247,21 +249,7 @@ class ChefServerDataBootstrap
     result = conn.exec(sql)
     require 'pp'; pp result: result, result_status: result.cmd_status
 
-    puts "Superuser key update successful #{result}"
-  end
-
-  def set_superuser_public_key()
-{~ #if bind.chef-server-ctl}}
-  {{~ #eachAlive bind.chef-server-ctl.members as |member|}}
-    {{~ #if @last}}
-    @superuser_public_key = <<-EOF
-{{ member.cfg.secrets.chef-server.superuser_pub_key }}
-EOF
-    {{~ /if}}
-  {{~ /eachAlive}}
-{{~ else}}
-    @superuser_public_key = "DUMMY KEY FROM BOOTSTRAP"
-{{~ /if}}
+    puts "Superuser key update successful #{result.cmd_status}"
   end
 
   def create_global_container_in_erchef(conn, name, authz_id)
@@ -367,18 +355,7 @@ EOF
     }
     retries = 5
     begin
-      bifrost={}
-{{#if bind.oc_bifrost}}
-  {{#eachAlive bind.oc_bifrost.members as |member|}}
-    {{#if @last}}
-       bifrost['vip']="{{member.sys.ip}}"
-       bifrost['port']="{{member.cfg.port}}"
-    {{/if}}
-  {{/eachAlive}}
-{{else}}
-       bifrost['vip']="{{cfg.oc_bifrost.vip}}"
-       bifrost['port']="{{cfg.oc_bifrost.port}}"
-{{/if}}
+      bifrost = load_bifrost
       if method == :get
         RestClient.get("http://#{bifrost['vip']}:#{bifrost['port']}/#{rel_path}", headers)
       else
@@ -398,6 +375,39 @@ EOF
       end
     end
   end
+
+
+  # These are factored out and put at the end because mustache confuses my editors ruby mode
+  def load_superuser_public_key()
+{{#if bind.chef-server-ctl}}
+  {{~ #eachAlive bind.chef-server-ctl.members as |member|}}
+    {{~ #if @last}}
+    @superuser_public_key = <<-EOF
+{{ member.cfg.secrets.chef-server.superuser_pub_key }}
+EOF
+    {{~ /if}}
+  {{~ /eachAlive}}
+{{else}}
+    @superuser_public_key = "DUMMY KEY FROM BOOTSTRAP"
+{{/if}}
+  end
+ 
+  def load_bifrost()
+    bifrost={}
+{{#if bind.oc_bifrost}}
+  {{#eachAlive bind.oc_bifrost.members as |member|}}
+    {{#if @last}}
+    bifrost['vip']="{{member.sys.ip}}"
+    bifrost['port']="{{member.cfg.port}}"
+    {{/if}}
+  {{/eachAlive}}
+{{else}}
+    bifrost['vip']="{{cfg.oc_bifrost.vip}}"
+    bifrost['port']="{{cfg.oc_bifrost.port}}"
+{{/if}}
+    bifrost
+  end
+
 end
 
 #if File.exist?('{{pkg.svc_data_path}}/bootstrapped')
