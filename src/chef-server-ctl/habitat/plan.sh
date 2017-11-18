@@ -1,7 +1,6 @@
 pkg_name=chef-server-ctl
-pkg_origin=chef
-pkg_version="0.1.0"
-pkg_maintainer="The Habitat Maintainers <humans@habitat.sh>"
+pkg_origin=chef-server
+pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_license=('Apache-2.0')
 # pkg_source="http://some_source_url/releases/${pkg_name}-${pkg_version}.tar.gz"
 # pkg_filename="${pkg_name}-${pkg_version}.tar.gz"
@@ -37,6 +36,18 @@ pkg_interpreters=(bin/bash)
 pkg_svc_user="hab"
 pkg_svc_group="$pkg_svc_user"
 pkg_description="Some description."
+
+pkg_version() {
+  cat "$PLAN_CONTEXT/../../../VERSION"
+}
+
+do_before() {
+  do_default_before
+  if [ ! -f "$PLAN_CONTEXT/../../../VERSION" ]; then
+    exit_with "Cannot find VERSION file! You must run \"hab studio enter\" from the chef-server project root." 56
+  fi
+  update_pkg_version
+}
 
 do_download() {
   return 0

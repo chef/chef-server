@@ -1,21 +1,21 @@
 pkg_name=chef-server-nginx
-pkg_origin=chef.io
-pkg_version="0.1.0"
+pkg_origin=chef-server
 pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_license=('Apache-2.0')
-
 pkg_deps=(
   core/curl
   core/libossp-uuid
   chef-server/openresty-noroot
 )
+pkg_build_deps=()
+pkg_lib_dirs=(lib)
+pkg_include_dirs=(include)
+pkg_bin_dirs=(bin)
 pkg_exposes=(port ssl-port)
 pkg_exports=(
     [port]=port
     [ssl-port]=ssl_port
 )
-pkg_svc_user="hab"
-pkg_svc_group="$pkg_svc_user"
 pkg_binds_optional=(
   [bookshelf]="port"
   [oc_erchef]="port"
@@ -25,7 +25,19 @@ pkg_binds_optional=(
 pkg_description="NGINX configuration and content for Chef Server"
 pkg_upstream_url="https://docs.chef.io/server_components.html"
 
-do_build() {
+pkg_version() {
+  cat "$PLAN_CONTEXT/../../../VERSION"
+}
+
+do_before() {
+  do_default_before
+  if [ ! -f "$PLAN_CONTEXT/../../../VERSION" ]; then
+    exit_with "Cannot find VERSION file! You must run \"hab studio enter\" from the chef-server project root." 56
+  fi
+  update_pkg_version
+}
+
+do_download() {
   return 0
 }
 
@@ -37,6 +49,10 @@ do_unpack() {
     printenv
     echo $PLAN_CONTEXT $HAB_CACHE_SRC_PATH
 #    attach
+}
+
+do_build() {
+  return 0
 }
 
 do_install() {

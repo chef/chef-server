@@ -1,9 +1,7 @@
 pkg_name=oc_erchef
-pkg_origin=chef
-pkg_version="0.1.0"
+pkg_origin=chef-server
 pkg_license=('Apache-2.0')
-pkg_maintainer="Elliott Davis <edavis@chef.io>"
-pkg_source="nosuchfile.tar.gz"
+pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_deps=(
   core/erlang18
   core/cacerts
@@ -35,6 +33,18 @@ pkg_binds_optional=(
   [oc_bifrost]="port"
   [bookshelf]="port"
 )
+
+pkg_version() {
+  cat "$PLAN_CONTEXT/../../../VERSION"
+}
+
+do_before() {
+  do_default_before
+  if [ ! -f "$PLAN_CONTEXT/../../../VERSION" ]; then
+    exit_with "Cannot find VERSION file! You must run \"hab studio enter\" from the chef-server project root." 56
+  fi
+  update_pkg_version
+}
 
 do_download() {
   return 0
@@ -74,7 +84,7 @@ do_prepare() {
 
 do_build() {
   _bundler_dir="$(pkg_path_for bundler)"
-  export REL_VERSION="12.99.1"
+  export REL_VERSION=$pkg_version
   export USE_SYSTEM_GECODE=1
   export GEM_HOME="${pkg_path}/vendor/bundle"
   export GEM_PATH="${_bundler_dir}:${GEM_HOME}"

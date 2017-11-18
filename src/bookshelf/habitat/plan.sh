@@ -1,8 +1,7 @@
 pkg_name=bookshelf
-pkg_origin=chef
-pkg_version="0.1.0"
+pkg_origin=chef-server
 pkg_license=('Apache-2.0')
-pkg_maintainer="Elliott Davis <edavis@chef.io>"
+pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_source="nosuchfile.tar.gz"
 pkg_deps=(
   core/erlang18
@@ -27,6 +26,18 @@ pkg_binds_optional=(
   [database]="port"
   [chef-server-ctl]="secrets"
 )
+
+pkg_version() {
+  cat "$PLAN_CONTEXT/../../../VERSION"
+}
+
+do_before() {
+  do_default_before
+  if [ ! -f "$PLAN_CONTEXT/../../../VERSION" ]; then
+    exit_with "Cannot find VERSION file! You must run \"hab studio enter\" from the chef-server project root." 56
+  fi
+  update_pkg_version
+}
 
 do_download() {
   return 0
@@ -65,6 +76,7 @@ do_prepare() {
 
 
 do_build() {
+  export REL_VERSION=$pkg_version
   make omnibus
 }
 
