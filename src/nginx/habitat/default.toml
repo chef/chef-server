@@ -7,10 +7,6 @@ client_max_body_size = "250m"
 # address at which people will be accessing the server.
 server_name = "chef-server"
 
-# Port used for SSL traffic
-port = 80
-ssl_port = 443
-
 # # SSL protocols and ciphers
 
 # These options provide the current best security with TSLv1
@@ -36,3 +32,10 @@ ssl_ciphers = "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-E
 [data_collector]
 token = "93a49a4f2482c64126f7b6015e6b0f30284287ee4054ff8807fb63d9cbd1c506"
 
+# Ports used for SSL traffic; used to render partials for chef_http[s]_lb_conf
+[http]
+port = 8080
+is_ssl = false
+[https]
+port = 8443
+is_ssl = true
