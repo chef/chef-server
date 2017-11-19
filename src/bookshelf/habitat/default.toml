@@ -8,8 +8,6 @@ listen_ip="0.0.0.0"
 listen_port=4321
 access_key_id="generated-by-default"
 secret_access_key="generated-by-default"
-storage_type="sql"
-storage_type_sql=true
 sql_retry_count=0
 sql_retry_delay=10
 abandoned_upload_cleanup_interval=1140000
@@ -26,6 +24,6 @@ db_pooler_timeout=2000
 sql_db_timeout=5000
 
 [pooler]
-max_count=100
-init_count=25
+max_count=20
+init_count=20
 queue_max=200
