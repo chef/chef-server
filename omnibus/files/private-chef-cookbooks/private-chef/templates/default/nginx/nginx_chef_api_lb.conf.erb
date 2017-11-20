@@ -29,6 +29,13 @@
     proxy_send_timeout      300;
     proxy_read_timeout      300;
 
+    add_header X-Frame-Options DENY;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection 1;
+    <% if @server_proto == 'https' %>
+    add_header Strict-Transport-Security max-age=3156000;
+    <% end %>
+
     error_page 404 =404 /404.html;
     error_page 503 =503 /503.json;
 
