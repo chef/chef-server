@@ -1,4 +1,4 @@
- {{~!-- This file is a partial and is only rendered because habitat doesn't know the difference --}}
+ {{!-- This file is a partial and is only rendered because habitat doesn't know the difference --}}
 # This portion comes from chef_http_lb_common via {{parent}}
   server {
     listen {{port}};

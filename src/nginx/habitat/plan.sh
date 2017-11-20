@@ -13,8 +13,8 @@ pkg_include_dirs=(include)
 pkg_bin_dirs=(bin)
 pkg_exposes=(port ssl-port)
 pkg_exports=(
-    [port]=port
-    [ssl-port]=ssl_port
+    [port]=http.port
+    [ssl-port]=https.port
 )
 pkg_binds_optional=(
   [bookshelf]="port"
