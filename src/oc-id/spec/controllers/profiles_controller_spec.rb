@@ -63,6 +63,7 @@ describe ProfilesController do
     let(:put_user) do
       {
         first_name: 'sally',
+        middle_name: '',
         last_name: 'solly'
       }
     end

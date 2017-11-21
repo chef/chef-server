@@ -4,6 +4,9 @@ class ProfilesController < ApplicationController
   #
   # Shows the user their profile page.
   #
+
+  before_action :verify_user_params, only: [:update]
+
   def show
     redirect_to signin_path unless signed_in?
     @user = current_user
@@ -117,5 +120,17 @@ class ProfilesController < ApplicationController
       Settings.secret_key_base,
       params[:email],
     ).valid_for?(params[:signature])
+  end
+
+  def verify_user_params
+    @user = current_user
+    begin
+      raise TypeError, "Invalid First Name." unless Constants::REGEXP_NAME.match(params[:user][:first_name])
+      raise TypeError, "Invalid Middle Name." unless Constants::REGEXP_EMPTY_OR_NAME.match(params[:user][:middle_name])
+      raise TypeError, "Invalid Last Name." unless Constants::REGEXP_NAME.match(params[:user][:last_name])
+    rescue TypeError => e
+      flash.now[:alert] = e.message.to_s
+      render 'show', :status => :forbidden
+    end
   end
 end
