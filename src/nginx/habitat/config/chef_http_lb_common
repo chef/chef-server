@@ -101,6 +101,9 @@
     # HABITAT: NO ADDONS YET
     #    include /var/opt/opscode/nginx/etc/addon.d/*_external.conf;
 
+    # oc-id
+    include {{../pkg.svc_config_path}}/oc-id-external.conf;
+
     location /_route/ {
       default_type 'application/json';
       content_by_lua_file '{{../pkg.svc_config_path}}/dispatch_route.lua';

@@ -21,9 +21,11 @@ pkg_binds_optional=(
   [oc_erchef]="port"
   [oc_bifrost]="port"
   [elasticsearch]="http-port"
+  [oc_id]="port"
 )
 pkg_description="NGINX configuration and content for Chef Server"
 pkg_upstream_url="https://docs.chef.io/server_components.html"
+pkg_svc_run="openresty -c ${pkg_svc_config_path}/nginx.conf -p ${pkg_svc_var_path}"
 
 pkg_version() {
   cat "$PLAN_CONTEXT/../../../VERSION"

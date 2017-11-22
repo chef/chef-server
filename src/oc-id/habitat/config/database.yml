@@ -1,0 +1,21 @@
+production:
+  adapter: postgresql
+  encoding: unicode
+  pool: 20
+  template: template1
+{{#if bind.database}}
+  {{#eachAlive bind.database.members as |member|}}
+   {{#if @last}}
+  host: {{member.sys.ip}}
+  port: {{member.cfg.port}}
+  username: {{member.cfg.superuser_name}}
+  password: {{member.cfg.superuser_password}}
+    {{/if}}
+  {{/eachAlive}}
+{{else}}
+  host: {{cfg.db.host}}
+  port: {{cfg.db.port}}
+  password: {{cfg.db.password}}
+  username: {{cfg.db.user}}
+{{/if}}
+  database: {{cfg.db.name}}

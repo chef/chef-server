@@ -1,6 +1,11 @@
 source 'https://rubygems.org'
 
-gem 'rails', '= 4.2.5.2'
+# Habitat TODO
+# the original version of rails isn't compatible with any version of core/ruby available on bldr
+#gem 'rails', '= 4.2.5.2'
+# rails 4.2.8 supports ruby 2.4
+# so we might need to publish a stable core/ruby 2.3.x in order to keep using rails 4.2.5.2
+gem 'rails', '= 4.2.8'
 gem 'chef', '~> 12'
 gem 'jbuilder', '~> 1.2'
 gem 'jquery-rails'
@@ -18,6 +23,9 @@ gem 'sentry-raven'
 gem 'responders', '~> 2.0'
 gem 'newrelic_rpm'
 gem 'doorkeeper', '~> 1.4.0'
+# Habitat TODO
+# this might be a side-effect upgrading the rails gem. This was a necessary addition to be able to start rails.
+gem 'tzinfo-data'
 
 gem 'veil', git: 'https://github.com/chef/chef_secrets'
 gem 'omniauth-chef', git: 'https://github.com/chef/omniauth-chef'
@@ -36,7 +44,9 @@ end
 group :development, :test do
   # Loading it this way makes it work with Ruby 2.1.2. See
   # https://github.com/nixme/jazz_hands/issues/25
-  gem 'jazz_hands', git: 'https://github.com/nixme/jazz_hands', branch: 'bring-your-own-debugger'
+  # Habitat TODO
+  # this branch is SUPER old and pins to a very old version of pry which isn't compatible with newer versions of rails
+  #gem 'jazz_hands', git: 'https://github.com/nixme/jazz_hands', branch: 'bring-your-own-debugger'
   gem 'pry-byebug'
   gem 'mailcatcher'
   gem 'rspec-rails', '~> 3.2'

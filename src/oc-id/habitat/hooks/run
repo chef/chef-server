@@ -1,0 +1,17 @@
+#!/bin/bash
+
+exec 2>&1
+
+export RAILS_ENV=production
+export "HOME={{pkg.svc_path}}"
+export LD_RUN_PATH=$(hab pkg path "core/gcc-libs")/lib:$LD_RUN_PATH
+export VERSION=`ls -1 {{pkg.svc_path}}/db/migrate | tail -n 1 | $(hab pkg path "core/sed")/bin/sed -e "s/_.*//g"`
+export LD_LIBRARY_PATH=$LD_RUN_PATH
+export PATH=$HOME/bin:$PATH
+export CHEF_SECRETS_DATA=$(cat {{pkg.svc_config_path}}/veil-secrets.json)
+
+cd $HOME
+echo "DB VERSION: $VERSION"
+$(hab pkg path "core/bundler")/bin/bundle exec bin/rake assets:precompile
+$(hab pkg path "core/bundler")/bin/bundle exec --keep-file-descriptors bin/rake db:migrate
+$(hab pkg path "core/bundler")/bin/bundle exec bin/rails server -p 9090 -b 0.0.0.0

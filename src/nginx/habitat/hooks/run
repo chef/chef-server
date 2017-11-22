@@ -1,8 +1,0 @@
-#!/bin/bash
-exec 2>&1
-
-echo "Starting Chef Server"
-
-exec hab pkg exec chef-server/openresty-noroot openresty \
-  -c "{{pkg.svc_config_path}}/nginx.conf" \
-  -p "{{pkg.svc_var_path}}"
