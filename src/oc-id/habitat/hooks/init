@@ -4,14 +4,19 @@ exec 2>&1
 
 source "{{pkg.svc_config_path}}/database-migrations.sh"
 
-# TODO
-# this rsync is because the rails app needs to access the templated `config` dir
-# as a subdirectory of its root install location.  Symlinking `config` from pkg.path
-# doesn't work because that requires root to write in pkg.path.
-# make this better somehow
+SRC="{{pkg.path}}/oc_id"
+DEST={{pkg.svc_files_path}}
 
-cd {{pkg.svc_path}}
-{{pkgPathFor "core/rsync"}}/bin/rsync -a {{pkg.path}}/oc_id/ . \
+# This rsync is because the rails app needs to access the templated `config` dir
+# as a subdirectory of its install location.  Symlinking `config` from pkg.path
+# doesn't work because that requires root to write in pkg.path.
+# Placing the core oc_id rails app in pkg.svc_files_path allows for a non root
+# container.
+
+cd $DEST
+ln -sf {{pkg.svc_config_path}} config
+{{pkgPathFor "core/rsync"}}/bin/rsync -a $SRC/ . \
+  --keep-dirlinks \
   --exclude vendor/ \
   --exclude database.yml \
   --exclude production.yml

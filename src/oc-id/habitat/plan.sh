@@ -32,11 +32,6 @@ pkg_exports=(
 pkg_exposes=(port)
 pkg_bin_dirs=(binstubs)
 
-# TODO: need to find a way to remove this and default to 'hab'
-# see hooks/init
-pkg_svc_user=root
-pkg_svc_group=$pkg_svc_user
-
 pkg_version() {
   cat "$PLAN_CONTEXT/../../../VERSION"
 }
@@ -57,7 +52,8 @@ do_unpack() {
 }
 
 do_prepare() {
-  return 0
+  # clean up any lingering bundle artifacts
+  rm -rf $PLAN_CONTEXT/../.bundle
 }
 
 do_build() {
