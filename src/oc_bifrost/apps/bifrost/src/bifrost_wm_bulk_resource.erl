@@ -6,18 +6,11 @@
 -mixin([{bifrost_wm_base, [create_path/2]}]).
 
 -export([
-    post_is_create/2,
-    process_post/2
-    ]).
+         process_post/2
+        ]).
 
 init(Config) ->
     bifrost_wm_base:init(?MODULE, Config).
-
-post_is_create(Req, State) ->
-    % We're not creating anything (for a change), just processing information, so
-    % we want to return 200's instead of 201's here; also, instead of from_json, we'll
-    % be using process_post below
-    {false, Req, State}.
 
 allowed_methods(Req, State) ->
     {['POST'], Req, State}.

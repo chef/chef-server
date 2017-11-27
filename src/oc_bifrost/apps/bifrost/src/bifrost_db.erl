@@ -9,6 +9,7 @@
          acl_membership/4,
          add_to_group/3,
          bulk_permission/4,
+         bulk_delete/2,
          create/3,
          delete/2,
          delete_acl/3,
@@ -154,6 +155,21 @@ bulk_permission(ActorId, Targets, Perm, TargetType) ->
         {error, Error} ->
             {error, Error}
     end.
+
+bulk_delete_query(actor) ->
+    bulk_delete_actor;
+bulk_delete_query(group) ->
+    bulk_delete_group.
+
+bulk_delete(AuthzIds, Type) ->
+    DeleteStatement = bulk_delete_query(Type),
+    case sqerl:statement(DeleteStatement, [AuthzIds], count) of
+        {ok, N} when is_integer(N) ->
+            N;
+        {error, Reason} ->
+            {error, Reason}
+    end.
+
 
 -spec has_permission(auth_type(), auth_id(), auth_id(), permission() | any) ->
                             boolean() | {error, _}.
