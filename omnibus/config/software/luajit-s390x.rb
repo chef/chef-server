@@ -17,6 +17,10 @@
 name "luajit-s390x"
 default_version "v2.1"
 
+license "MIT"
+license_file "http://luajit.org/luajit.html"
+skip_transitive_dependency_licensing true
+
 source git: "https://github.com/linux-on-ibm-z/LuaJIT.git"
 
 build do
