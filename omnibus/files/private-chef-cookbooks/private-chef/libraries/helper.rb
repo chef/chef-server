@@ -41,7 +41,7 @@ class OmnibusHelper
   def self.is_ip?(addr)
     IPAddr.new addr
     true
-  rescue IPAddr::InvalidAddressError
+  rescue IPAddr::Error
     false
   end
 
