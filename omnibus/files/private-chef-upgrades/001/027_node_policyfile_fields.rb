@@ -6,3 +6,6 @@ define_upgrade do
   end
 end
 
+define_check do
+  check_sqitch('@node-policyfile-fields', 'oc_erchef')
+end

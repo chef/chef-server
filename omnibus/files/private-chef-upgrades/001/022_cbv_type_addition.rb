@@ -5,3 +5,7 @@ define_upgrade do
     run_sqitch('@cbv-type', 'oc_erchef')
   end
 end
+
+define_check do
+  check_sqitch('@cbv-type', 'oc_erchef')
+end

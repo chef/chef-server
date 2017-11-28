@@ -41,6 +41,11 @@ module Partybus
       runner.run
     end
 
+    def run_check
+      runner = DSLRunner.new(self)
+      runner.check
+    end
+
     private
 
     def parse_path(p)

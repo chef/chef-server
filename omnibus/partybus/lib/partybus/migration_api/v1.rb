@@ -10,8 +10,10 @@ module Partybus
 
       include Logger
 
+      attr_accessor :eval_result
+
       def initialize(&block)
-        self.instance_eval(&block)
+        @eval_result = self.instance_eval(&block)
       end
 
       def maintenance_mode
@@ -114,6 +116,26 @@ EOF
         run_command(command, env: {"PGPASSWORD" => options[:password]})
       end
 
+      CHECK_SQITCH_SQL="SELECT 1 FROM sqitch.tags WHERE tag=$1"
+      def check_sqitch(target, service, opts = {})
+        options = default_opts_for_service(service).merge(opts)
+        c = pg_conn_for(service, opts)
+        result = c.exec(CHECK_SQITCH_SQL, [target])
+        result.cmd_tuples == 1
+      ensure
+        c.close if c
+      end
+
+      def pg_conn_for(service, opts = {})
+        require 'pg'
+        options = default_opts_for_service(service).merge(opts)
+        ::PGconn.open({'user' => options[:username],
+                      'password' => options[:password],
+                      'dbname' => options[:database],
+                      'host' => Partybus.config.postgres['vip'],
+                      'port' => Partybus.config.postgres['port']})
+      end
+
       def default_opts_for_service(service)
         username = Partybus.config.postgres['db_superuser']
         password = Partybus.config.secrets['postgresql']['db_superuser_password'].value
@@ -132,8 +154,6 @@ EOF
         {username: username, password: password,
          database: database, path: path }
       end
-
-
 
       def clean_mover_logs
         log("\tCleaning migration related logs to prep for new migration")

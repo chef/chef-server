@@ -17,3 +17,7 @@ define_upgrade do
                 :cwd => "/opt/opscode/embedded/service/opscode-erchef/schema")
   end
 end
+
+define_check do
+  check_sqitch('@2.2.3', 'oc_erchef')
+end
