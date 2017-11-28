@@ -14,16 +14,23 @@
 # limitations under the License.
 #
 
-name "luajit-s390x"
-default_version "v2.1"
+name "luajit-fork"
+
+if ppc64? || ppc64le?
+  default_version "1401cfb" # Sept 04 2017
+  source git: "https://github.com/PPC64/LuaJIT.git"
+elsif s390x?
+  default_version "v2.1"
+  source git: "https://github.com/linux-on-ibm-z/LuaJIT.git"
+end
 
 license "MIT"
 license_file "http://luajit.org/luajit.html"
 skip_transitive_dependency_licensing true
 
-source git: "https://github.com/linux-on-ibm-z/LuaJIT.git"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
   make "-j #{workers} install PREFIX=#{install_dir}/embedded", env: env
 end
+

@@ -23,8 +23,7 @@ default_version "1.13.6.1"
 dependency "pcre"
 dependency "openssl"
 dependency "zlib"
-dependency "lua" if ppc64? || ppc64le?
-dependency "luajit-s390x" if s390x?
+dependency "luajit-fork" if ppc64? || ppc64le? || s390x?
 
 source_package_name = "openresty"
 
@@ -74,11 +73,8 @@ build do
     configure << "--with-http_v2_module"
   end
 
-  # Currently LuaJIT doesn't support POWER correctly so use Lua51 there instead
-  if ppc64? || ppc64le?
-    # TODO this isn't a thing anymore
-    # configure << "--with-lua51=#{install_dir}/embedded/lib"
-  else
+  # for these platforms, their specific LuaJIT forks are used
+  if ppc64? || ppc64le? || s390x?
     configure << "--with-luajit=#{install_dir}/embedded"
   end
 
