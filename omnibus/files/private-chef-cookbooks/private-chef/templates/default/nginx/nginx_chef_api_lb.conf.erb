@@ -44,19 +44,10 @@
     # Whitelist the docs necessary to serve up error pages and friendly
     # html to non-chef clients hitting this host.
     location ~ "^/[0-9]{3,3}\.(json|html)|favicon.ico|index.html$" {
-      <% unless node['private_chef']['nginx']['show_welcome_page'] %>
-        return 404;
-      <% end -%>
     }
     location "/css/" {
-      <% unless node['private_chef']['nginx']['show_welcome_page'] %>
-        return 404;
-      <% end -%>
     }
     location "/images/" {
-      <% unless node['private_chef']['nginx']['show_welcome_page'] %>
-        return 404;
-      <% end -%>
     }
 
     location /version {
