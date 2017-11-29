@@ -36,9 +36,9 @@ module Partybus
       @major, @minor = parse_path(path)
     end
 
-    def run_migration
+    def run_migration(migration_state)
       runner = DSLRunner.new(self)
-      runner.run
+      runner.run(migration_state)
     end
 
     def run_check

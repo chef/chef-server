@@ -6,6 +6,7 @@ $:.unshift File.expand_path('../../lib', __FILE__)
 require 'partybus'
 require 'partybus/dsl_runner'
 require 'partybus/migrations'
+require 'partybus/migration_state'
 
 # load the config from a file
 require File.expand_path('../../config.rb', __FILE__)
@@ -34,27 +35,9 @@ end
 
 partybus_action = ARGV[0]
 
-def load_current_migration_state
-  Partybus::MigrationState.new(Partybus.config.migration_state_file)
-end
-
 def load_migrations
   migration_files = Dir.glob("#{Partybus.config.partybus_migration_directory}/**/*.rb")
   migration_files.map {|path| Partybus::MigrationFile.new(path)}.sort
-end
-
-def set_initial_migration_state(migrations)
-  write_migration_state(migrations.last)
-end
-
-def write_migration_state(migration)
-  File.open(Partybus.config.migration_state_file, 'w') do |f|
-    f.puts({:major => migration.major, :minor => migration.minor}.to_json)
-  end
-end
-
-def migration_state_has_content?
-  !File.zero?(Partybus.config.migration_state_file)
 end
 
 #
@@ -78,12 +61,7 @@ end
 #
 INFER_LOWER_BOUND_MAJOR=1
 INFER_LOWER_BOUND_MINOR=20
-def infer_migration_state(migrations, force)
-  if migration_state_has_content? && !force
-    log("Migration state file non-empty, inference not required.")
-    exit(0)
-  end
-
+def infer_migration_state(migration_state, migrations)
   log("Infering migration-level from system state")
   applied_version = nil
   migrations.sort.reverse.each do |m|
@@ -108,7 +86,7 @@ def infer_migration_state(migrations, force)
 
   if applied_version
     log "Infered migration level: #{applied_version}"
-    write_migration_state(applied_version)
+    migration_state.init(applied_version)
     exit(0)
   else
     # We still have a chance. If migration 16 is applied but
@@ -118,7 +96,7 @@ def infer_migration_state(migrations, force)
     if migration_16.run_check
       log "Inferring migration level of Chef Server 12.0.0 (1.19) from presence of migration 16 and absence of migration 20"
       migration_19 = migrations.find {|m| m.major == 1 && m.minor == 19}
-      write_migration_state(migration_19)
+      migration_state.init(migration_19)
       exit(0)
     end
 
@@ -128,7 +106,7 @@ def infer_migration_state(migrations, force)
     migration_13 = migrations.find {|m| m.major == 1 && m.minor == 13}
     if migration_13.run_check
       log "Inferred migration level of 1.13"
-      write_migration_state(migration_13)
+      migration_state.init(migration_13)
       exit(0)
     else
       log "Data appears to be from a version of Chef Server before Enterprise Chef 11.1 (migration 1.13)"
@@ -148,41 +126,38 @@ def do_upgrade(migration_state, migrations)
     log("Current Migration Version: #{migration_state}")
     start_time = Time.now
     log("Starting Migration #{migration}")
-    migration.run_migration
+    migration.run_migration(migration_state)
     end_time = Time.now
     elapsed_time = end_time - start_time
     log("Finished Migration #{migration} in #{elapsed_time.round(2)} seconds")
   end
 end
 
-# obtain the file lock on the migration state file
-File.open(Partybus.config.migration_state_file, File::RDWR | File::CREAT) do |f|
-  if f.flock(File::LOCK_EX | File::LOCK_NB)
-    case partybus_action
-    when "init"
-      migrations = load_migrations
-      set_initial_migration_state(migrations)
-    when "infer"
-      force = ARGV[1] == "force"
-      migrations = load_migrations
-      infer_migration_state(migrations, force)
-    when "upgrade"
-
-      if !migration_state_has_content?
-        log "ERROR: migration-level not initialized."
-        log "ERROR: If this is an existing Chef Server install try running `chef-server-ctl rebuild-migration-state` and then retry the upgrade"
-        exit(1)
-      end
-
-      migration_state = load_current_migration_state
-      migrations = load_migrations
-      do_upgrade(migration_state, migrations)
-    when "help"
-      print_usage_and_exit(0)
-    else
-      print_usage_and_exit
-    end
+# Obtain the file lock on the migration state file
+migration_state = Partybus::MigrationState.new
+case partybus_action
+when "init"
+  migrations = load_migrations
+  migration_state.init(migrations.last)
+when "infer"
+  force = ARGV[1] == "force"
+  if migration_state.load_or_upgrade && !force
+    log "Migrations state already initialized."
+    exit(0)
   else
-    log("ERROR: Unable to obtain file lock on #{Partybus.config.migration_state_file}")
+    migrations = load_migrations
+    infer_migration_state(migration_state, migrations)
   end
+when "upgrade"
+  if !migration_state.load_or_upgrade
+    log "ERROR: migration-level not initialized."
+    log "ERROR: If this is an existing Chef Server install try running `chef-server-ctl rebuild-migration-state` and then retry the upgrade"
+    exit(1)
+  end
+  migrations = load_migrations
+  do_upgrade(migration_state, migrations)
+when "help"
+  print_usage_and_exit(0)
+else
+  print_usage_and_exit
 end

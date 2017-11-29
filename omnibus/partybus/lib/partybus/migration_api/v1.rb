@@ -107,8 +107,8 @@ EOF
         command = <<-EOM.gsub(/\s+/," ").strip!
           sqitch --engine pg
             --db-name #{options[:database]}
-            --db-host #{Partybus.config.postgres['vip']}
-            --db-port #{Partybus.config.postgres['port']}
+            --db-host #{Partybus.config.postgresql_host}
+            --db-port #{Partybus.config.postgresql_port}
             --db-user #{options[:username]}
             --top-dir /opt/opscode/embedded/service/#{options[:path]}
             deploy #{target} --verify
@@ -132,12 +132,12 @@ EOF
         ::PGconn.open({'user' => options[:username],
                       'password' => options[:password],
                       'dbname' => options[:database],
-                      'host' => Partybus.config.postgres['vip'],
-                      'port' => Partybus.config.postgres['port']})
+                      'host' => Partybus.config.postgresql_host,
+                      'port' => Partybus.config.postgresql_port})
       end
 
       def default_opts_for_service(service)
-        username = Partybus.config.postgres['db_superuser']
+        username = Partybus.config.postgresql_user
         password = Partybus.config.secrets['postgresql']['db_superuser_password'].value
         path = "#{service}/schema"
         case service

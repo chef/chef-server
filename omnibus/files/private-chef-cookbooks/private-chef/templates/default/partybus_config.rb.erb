@@ -1,12 +1,25 @@
 Partybus.configure do |c|
+  c.partybus_migration_directory  = "/opt/opscode/embedded/upgrades"
+  c.postgresql_port               = <%= node['private_chef']['postgresql']['port'] %>
+  c.postgresql_host               = "<%= node['private_chef']['postgresql']['vip'] %>"
+  c.postgresql_user               = "<%= node['private_chef']['postgresql']['db_superuser'] %>"
+  c.is_data_master                = <%= @is_data_master %>
+  c.bootstrap_server              = <%= @bootstrap_server %>
+  c.legacy_migration_state_file   = "/var/opt/opscode/upgrades/migration-level"
+
+  # Legacy Configuration Options
+  #
+  # The options below are for much older migrations
+  # that are unlikely to run on any supported version of Chef Server.
+  #
+  # If you are having a problem that you think is related to one of
+  # these configuration options, there is most likely a different
+  # problem that has led partybus to run very old migrations.
+  #
   c.database_connection_string    = "<%= @connection_string %>"
   c.database_unix_user            = "<%= @as_user %>"
   c.database_migration_directory  = "/opt/opscode/embedded/service/chef-sql-schema/db/migrate"
-  c.partybus_migration_directory  = "/opt/opscode/embedded/upgrades"
-  c.migration_state_file          = "/var/opt/opscode/upgrades/migration-level"
   c.private_chef_role             = "<%= @node_role %>"
   c.database_service_name         = "<%= @db_service_name %>"
-  c.is_data_master                = <%= @is_data_master %>
-  c.bootstrap_server              = <%= @bootstrap_server %>
   c.couchdb_data_dir              = "<%= node['private_chef']['couchdb']['data_dir'] %>"
 end

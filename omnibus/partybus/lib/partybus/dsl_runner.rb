@@ -3,32 +3,26 @@ require 'partybus/migration_api/v1'
 class Partybus::DSLRunner
 
   attr_reader :api_version
+  MigrationStub = Struct.new(:major, :minor)
 
   def initialize(migration_file)
-    @major_version = migration_file.major
-    @minor_version = migration_file.minor
-    @file_path     = migration_file.path
+    @migration = MigrationStub.new(migration_file.minor, migration_file.major)
+    @file_path = migration_file.path
   end
 
   def load_migration
     instance_eval(IO.read(@file_path))
   end
 
-  def run
+  def run(migration_state)
     load_migration
     run_migration
-    write_migration_file
+    migration_state.apply(@migration)
   end
 
   def check
     load_migration
     run_check
-  end
-
-  def write_migration_file
-    File.open(Partybus.config.migration_state_file, 'w') do |f|
-      f.puts({:major => @major_version, :minor => @minor_version}.to_json)
-    end
   end
 
   def run_migration
