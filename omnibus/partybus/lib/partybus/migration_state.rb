@@ -1,7 +1,11 @@
 require 'pg'
+require 'partybus/migrations'
 
 module Partybus
   class MigrationState
+
+    include MigrationComparable
+
     # NOTE(ssd) 2017-11-28: Why not use sqitch?
     #
     # We are inside the tool responsible for deciding whether or not

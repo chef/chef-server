@@ -54,19 +54,4 @@ module Partybus
       [major, minor]
     end
   end
-
-  class MigrationState
-
-    include MigrationComparable
-
-    def initialize(path)
-      @major, @minor = begin
-                         json_data = JSON.parse(IO.read(path))
-                         [json_data["major"], json_data["minor"]]
-                       rescue JSON::ParserError => e
-                         [0, 0]
-                       end
-    end
-
-  end
 end
