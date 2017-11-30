@@ -24,3 +24,7 @@ define_upgrade do
     end
   end
 end
+
+define_check do
+  check_sqitch('@2.5.3', 'oc_erchef')
+end

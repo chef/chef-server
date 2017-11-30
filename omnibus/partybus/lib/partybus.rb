@@ -33,11 +33,11 @@ module Partybus
         @running_server = JSON.parse(IO.read(RUNNING_CONFIG_FILE))
         @postgres = @running_server['private_chef']['postgresql']
       else
-        log <<EOF
+        STDERR.puts <<EOF
 ***
 ERROR: Cannot find #{RUNNING_CONFIG_FILE}
 ***
-Try running `chef-server-ctl reconfigure` before upgrading.
+Try running `chef-server-ctl reconfigure` first.
 
 EOF
         exit(1)
@@ -46,11 +46,11 @@ EOF
         require 'veil'
         @secrets = Veil::CredentialCollection::ChefSecretsFile.from_file(SECRETS_FILE)
       else
-        log <<EOF
+        STDERR.puts <<EOF
 ***
 ERROR: Cannot find or access #{SECRETS_FILE}
 ***
-Try running `chef-server-ctl reconfigure` before upgrading.
+Try running `chef-server-ctl reconfigure` first.
 
 EOF
         exit(1)

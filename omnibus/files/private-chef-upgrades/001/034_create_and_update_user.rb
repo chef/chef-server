@@ -8,3 +8,7 @@ define_upgrade do
     run_sqitch('@sentinel_public_key_for_users', 'oc_erchef')
   end
 end
+
+define_check do
+  check_sqitch('@sentinel_public_key_for_users', 'oc_erchef')
+end

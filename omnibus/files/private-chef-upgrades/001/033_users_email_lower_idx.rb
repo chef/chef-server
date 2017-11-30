@@ -8,3 +8,7 @@ define_upgrade do
     run_sqitch('@users_email_functional_index', 'oc_erchef')
   end
 end
+
+define_check do
+  check_sqitch('@users_email_functional_index', 'oc_erchef')
+end

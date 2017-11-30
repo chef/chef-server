@@ -24,6 +24,7 @@ Usage: partybus ACTION
 
 Actions:
   init        Set the initial migration level
+  infer       Infer the current migration level
   upgrade     Run through the pending upgrades
   help        Print this help message
 EOU
@@ -43,9 +44,97 @@ def load_migrations
 end
 
 def set_initial_migration_state(migrations)
-  latest_migration = migrations.last
+  write_migration_state(migrations.last)
+end
+
+def write_migration_state(migration)
   File.open(Partybus.config.migration_state_file, 'w') do |f|
-      f.puts({:major => latest_migration.major, :minor => latest_migration.minor}.to_json)
+    f.puts({:major => migration.major, :minor => migration.minor}.to_json)
+  end
+end
+
+def migration_state_has_content?
+  !File.zero?(Partybus.config.migration_state_file)
+end
+
+#
+# We infer the migration state to try to repair installations that
+# have lost their migration state file. Since the data may have come
+# from a backup, we can not rely on the currently installed version to
+# be up-to-date and we don't necessarily know the previously installed
+# version.
+#
+# We know we can not support upgrades from further back than
+# Enterprise Chef 11.1, which shipped migration 1.13:
+#
+#   https://github.com/chef/chef-server/tree/11.1.0/files/private-chef-upgrades/001
+#
+# We also know that migration 1.14 through 1.19 landed together in
+# Chef Server 12.0.
+#
+# Luckily for us, migration 1.20 shipped a sqitch tag.  Further luck:
+# migrations above 1.20 generally appear to be safe-to-reapply so we
+# don't have to detect perfectly.
+#
+INFER_LOWER_BOUND_MAJOR=1
+INFER_LOWER_BOUND_MINOR=20
+def infer_migration_state(migrations, force)
+  if migration_state_has_content? && !force
+    log("Migration state file non-empty, inference not required.")
+    exit(0)
+  end
+
+  log("Infering migration-level from system state")
+  applied_version = nil
+  migrations.sort.reverse.each do |m|
+    if m.run_check
+      log "#{m}: ALREADY APPLIED"
+      applied_version = m
+      break
+    else
+      log "#{m}: NOT APPLIED"
+    end
+
+    # A number of migrations before 1.20 (the Chef Server 12.0) are
+    # mover migrations that are harder to check for.  If we make it
+    # all the way to here, we stop checking and hope one of the two
+    # special cases below apply.
+    if m.major == INFER_LOWER_BOUND_MAJOR &&
+       m.minor == INFER_LOWER_BOUND_MINOR
+      log "No migration greater than #{INFER_LOWER_BOUND_MAJOR}.#{INFER_LOWER_BOUND_MINOR} applied."
+      break
+    end
+  end
+
+  if applied_version
+    log "Infered migration level: #{applied_version}"
+    write_migration_state(applied_version)
+    exit(0)
+  else
+    # We still have a chance. If migration 16 is applied but
+    # migration 20 is not, it means our backup is likely from a 12.0.0
+    # machine
+    migration_16 = migrations.find {|m| m.major == 1 && m.minor == 16}
+    if migration_16.run_check
+      log "Inferring migration level of Chef Server 12.0.0 (1.19) from presence of migration 16 and absence of migration 20"
+      migration_19 = migrations.find {|m| m.major == 1 && m.minor == 19}
+      write_migration_state(migration_19)
+      exit(0)
+    end
+
+    # Since migrations 14-19 shipped as a set in Chef Server 12.0.0
+    # and since we don't support upgrades from versions before
+    # migration 1.13, we either have 1.13 or we fail:
+    migration_13 = migrations.find {|m| m.major == 1 && m.minor == 13}
+    if migration_13.run_check
+      log "Inferred migration level of 1.13"
+      write_migration_state(migration_13)
+      exit(0)
+    else
+      log "Data appears to be from a version of Chef Server before Enterprise Chef 11.1 (migration 1.13)"
+      log "Please contact Chef Support (support@chef.io) for help upgrading your Enterprise Chef installation."
+      exit(1)
+    end
   end
 end
 
@@ -73,7 +162,18 @@ File.open(Partybus.config.migration_state_file, File::RDWR | File::CREAT) do |f|
     when "init"
       migrations = load_migrations
       set_initial_migration_state(migrations)
+    when "infer"
+      force = ARGV[1] == "force"
+      migrations = load_migrations
+      infer_migration_state(migrations, force)
     when "upgrade"
+
+      if !migration_state_has_content?
+        log "ERROR: migration-level not initialized."
+        log "ERROR: If this is an existing Chef Server install try running `chef-server-ctl rebuild-migration-state` and then retry the upgrade"
+        exit(1)
+      end
+
       migration_state = load_current_migration_state
       migrations = load_migrations
       do_upgrade(migration_state, migrations)
