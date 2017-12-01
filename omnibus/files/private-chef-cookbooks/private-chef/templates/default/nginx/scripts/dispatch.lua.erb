@@ -44,9 +44,15 @@ if mode == "api" then
         ngx.exit(ngx.HTTP_OK)
       end
     else
-      -- the request did not originate with a chef client, we'll give something
-      -- more friendly to web browsers.
-      return ngx.exec("/index.html")
+      <% if node['private_chef']['nginx']['show_welcome_page'] -%>
+        -- the request did not originate with a chef client, we'll give something
+        -- more friendly to web browsers.
+        return ngx.exec("/index.html")
+      <% else -%>
+        -- return 404 because the welcome page has been disabled
+        ngx.status = ngx.HTTP_NOT_FOUND
+        ngx.exit(ngx.HTTP_OK)
+      <% end -%>
     end
   end
 

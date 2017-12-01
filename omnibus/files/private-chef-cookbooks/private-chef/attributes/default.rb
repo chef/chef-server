@@ -568,6 +568,8 @@ default['private_chef']['nginx']['strict_host_header'] = false
 # and any IPs associated with the machine.
 default['private_chef']['nginx']['use_implicit_hosts'] = false
 
+default['private_chef']['nginx']['show_welcome_page'] = true
+
 ###
 # PostgreSQL
 ###
