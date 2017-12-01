@@ -12,6 +12,7 @@ pkg_deps=(
   core/ruby
   core/bundler
   core/hab-butterfly
+  core/postgresql
 )
 pkg_build_deps=(
   core/coreutils
@@ -88,6 +89,8 @@ do_install() {
   export HOME="${pedant_dir}"
   # TODO: declare chef gem dependency in oc-chef-pedant
   cp Gemfile.local "${pedant_dir}/Gemfile.local"
+
+  # in pedant dir bundle install
   pushd ${pedant_dir}
   bundle install --path "${pedant_dir}/vendor/bundle"
   bundle config path "${pedant_dir}/vendor/bundle"
@@ -102,8 +105,8 @@ source 'https://rubygems.org'
 gem 'chef'
 gem 'knife-opc'
 EOF
-  
-  bundle install --path "${HOME}/vendor/bundle" --binstubs && bundle config path ${HOME}/vendor/bundle || attach 
+
+  bundle install --path "${HOME}/vendor/bundle" --binstubs && bundle config path ${HOME}/vendor/bundle || attach
 
   cp $PLAN_CONTEXT/bin/oc-chef-pedant.sh $pkg_prefix/bin/chef-server-test
 #  ln -s $pkg_prefix/config/oc-chef-pedant.sh $pkg_prefix/bin/chef-server-test
@@ -114,6 +117,22 @@ EOF
   chmod +x $pkg_prefix/bin/knife
 
   popd
+
+  #
+  # Chef-server-ctl install
+  echo "====== BUILDING CHEF_SERVER_CTL ==== "
+  echo $PLAN_CONTEXT $pkg_prefix
+  ctl_dir=$pkg_prefix/omnibus-ctl
+  cp -R ../../omnibus/files/private-chef-ctl-commands $ctl_dir
+  install $PLAN_CONTEXT/bin/chef-server-ctl.sh $pkg_prefix/bin/chef-server-ctl
+  fix_interpreter $pkg_prefix/omnibus-ctl/chef-server-ctl core/ruby bin/ruby || attach
+
+  pushd $ctl_dir
+  echo `pwd`
+  bundle install --path "${ctl_dir}/vendor/bundle"
+  bundle config path "${ctl_dir}/vendor/bundle"
+  popd
+
 }
 
 do_check() {

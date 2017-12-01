@@ -95,7 +95,7 @@ def secrets_apply_loop
 end
 
 # forever loop
-while 1
+loop do
   secrets_apply_loop
   sleep 15
 end
