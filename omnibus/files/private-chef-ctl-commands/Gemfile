@@ -11,3 +11,6 @@ gem "veil", git: "https://github.com/chef/chef_secrets.git"
 
 # Dependencies of ctl commands
 gem "redis"
+gem "sequel"
+gem "rest-client"
+gem 'pg'
