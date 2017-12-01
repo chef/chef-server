@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.11 -->
-## [12.17.11](https://github.com/chef/chef-server/tree/12.17.11) (2017-11-27)
+<!-- latest_release 12.17.12 -->
+## [12.17.12](https://github.com/chef/chef-server/tree/12.17.12) (2017-12-01)
 
 #### Merged Pull Requests
-- [reconfigure] Rescue all IPAddr errors [#1425](https://github.com/chef/chef-server/pull/1425) ([stevendanna](https://github.com/stevendanna))
+- Disable Welcome Page [#1428](https://github.com/chef/chef-server/pull/1428) ([lancewf](https://github.com/lancewf))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.5 -->
 ### Changes since 12.17.5 release
 
 #### Merged Pull Requests
+- Disable Welcome Page [#1428](https://github.com/chef/chef-server/pull/1428) ([lancewf](https://github.com/lancewf)) <!-- 12.17.12 -->
 - [reconfigure] Rescue all IPAddr errors [#1425](https://github.com/chef/chef-server/pull/1425) ([stevendanna](https://github.com/stevendanna)) <!-- 12.17.11 -->
 - [SUSTAIN-784] Add security headers [#1427](https://github.com/chef/chef-server/pull/1427) ([nsdavidson](https://github.com/nsdavidson)) <!-- 12.17.10 -->
 - Pull in new knife-opc (we track master) for SUSTAIN-784 [#1426](https://github.com/chef/chef-server/pull/1426) ([btm](https://github.com/btm)) <!-- 12.17.9 -->
