@@ -15,8 +15,18 @@
 
 require 'shellwords'
 
-knife_config = "/etc/opscode/pivotal.rb"
-knife_cmd    = "/opt/opscode/embedded/bin/knife"
+habitat_mode = true
+
+if habitat_mode
+  knife_config = "/hab/svc/chef-server-ctl/config/pivotal.rb"
+  knife_path = `hab pkg path "mark/chef-server-ctl"`.chomp + "/chef/bin/knife"
+  bundler_path = `hab pkg path "core/bundler"`.chomp + "/bin/bundle"
+  knife_cmd =  "#{bundler_path} exec #{knife_path}"
+else
+  knife_config = "/etc/opscode/pivotal.rb"
+  knife_cmd    = "/opt/opscode/embedded/bin/knife"
+end
+
 cmd_args     = ARGV[3..-1]
 
 cmds = {

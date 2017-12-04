@@ -14,3 +14,4 @@ gem "redis"
 gem "sequel"
 gem "rest-client"
 gem 'pg'
+gem 'knife-opc'
