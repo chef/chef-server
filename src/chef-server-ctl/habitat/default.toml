@@ -27,6 +27,7 @@ vrrp_instance_password = ""
 [secrets.opscode_erchef]
 sql_password = ""
 sql_ro_password = ""
+stats_password = ""
 
 [secrets.oc_bifrost]
 superuser_id = ""

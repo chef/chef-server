@@ -77,7 +77,7 @@ def secrets_apply_loop
           else
             length = REQUIRED_SECRETS[service_item.to_sym][key.to_sym][:length].to_i
             new_secrets[top_level_item][service_item][key] = SecureRandom.hex(length)[1..length]
-            puts "Updated Emtpy Key/Value: #{service_item}/#{key} #{new_secrets[top_level_item][service_item][key]}"
+            puts "Updated Empty Key/Value: #{service_item}/#{key} #{new_secrets[top_level_item][service_item][key]}"
           end
         end
       end
