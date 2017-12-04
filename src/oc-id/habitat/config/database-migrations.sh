@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 # TODO: not sure how to handle this. Sqitch bombs when it can't find the timezone
 export TZ="America/Chicago"

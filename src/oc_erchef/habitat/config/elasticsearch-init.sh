@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 export PATH=$PATH:$(hab pkg path "core/curl")/bin
 

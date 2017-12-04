@@ -48,8 +48,6 @@ services:
       - postgresql
     links:
       - postgresql
-    environment:
-      - FOO=bar
     command: --peer postgresql
       --bind database:postgresql.default
       --bind chef-server-ctl:chef-server-ctl.default
@@ -60,8 +58,6 @@ services:
       - postgresql
     links:
       - postgresql
-    environment:
-      - FOO=bar
     command: --peer postgresql
       --bind database:postgresql.default
       --bind chef-server-ctl:chef-server-ctl.default
@@ -76,8 +72,6 @@ services:
       - elasticsearch
       - oc_bifrost
       - postgresql
-    environment:
-      - FOO=bar
     volumes:
       - erchef-data:/hab/svc/oc_erchef/data
     command: --peer postgresql
@@ -103,8 +97,6 @@ services:
       - bookshelf
       - elasticsearch
       - postgresql
-    environment:
-      - FOO=bar
     command: --peer postgresql
       --bind oc_erchef:oc_erchef.default
       --bind oc_bifrost:oc_bifrost.default

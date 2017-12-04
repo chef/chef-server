@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 export SUPERUSER_KEY=`sed ':a;N;$!ba;s/\n/\\n/g' {{pkg.svc_config_path}}/pivotal.pem`
 export WEBUI_KEY=`sed ':a;N;$!ba;s/\n/\\n/g' {{pkg.svc_config_path}}/webui_priv.pem`

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 export SUPERUSER_KEY=`sed ':a;N;$!ba;s/\n/\\n/g' /hab/svc/chef-server-ctl/config/pivotal.pem`
 export WEBUI_KEY=`sed ':a;N;$!ba;s/\n/\\n/g' /hab/svc/chef-server-ctl/config/webui_priv.pem`
