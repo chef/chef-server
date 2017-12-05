@@ -29,7 +29,7 @@ cert_file="{{pkg.svc_data_path}}/ca/{{cfg.server_name}}.cert"
 key_file="{{pkg.svc_data_path}}/ca/{{cfg.server_name}}.key"
 if [[ ! -f "$cert_file" ]]; then
   openssl req \
-    -newkey rsa:2040 -nodes -keyout "$key_file" \
+    -newkey rsa:2048 -nodes -keyout "$key_file" \
     -x509 -days 3650 -out "$cert_file" \
     -subj "/C=US/O=Chef Software/OU=Chef Server/CN=#{{cfg.server_name}}"
   chmod 600 "$cert_file" "$key_file"

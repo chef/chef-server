@@ -27,8 +27,10 @@ if [ $ID -ne 0 ]; then
    echo "This command must be run as root."
    exit 1
 fi
-# mark hardcoded TODO FIX! (maybe lay down a config vars file to include?)
-pkg_prefix=$(hab pkg path "mark/chef-server-ctl")/omnibus-ctl
+
+# This uses a config file to find ourselves (and not hardcode our own package name)
+# Could do relative to $0, but that can be messy sometimes
+pkg_prefix=$(cat /hab/svc/chef-server-ctl/config/pkg_path)/omnibus-ctl
 cd $pkg_prefix
 bundler=$(hab pkg path "core/bundler")
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(hab pkg path "core/libffi")/lib
