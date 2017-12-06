@@ -82,14 +82,17 @@
         ]},
  {webmachine, [
           {log_handlers, [
+            <% if node['private_chef']['oc_bifrost']['enable_request_logging'] %>
                {oc_wm_request_logger, [
                        {file, "<%= File.join(@log_directory, 'requests.log') %>"},
                        {file_size, <%= (@log_rotation['file_maxbytes'].to_f/1024/1024).round %>},  %% Size in MB
                        {files, <%= @log_rotation['num_to_keep'] %>},
                          {annotations, [requestor_id, created_authz_id, perf_stats, msg]}
                        ]
-                      }]}]
- },
+               }
+            <% end %>
+        ]}
+ ]},
  {sqerl, [
           {db_driver_mod, sqerl_pgsql_client},
           {config_cb, {chef_secrets_sqerl, config, [{<<"oc_bifrost">>, <<"sql_password">>}]}},
