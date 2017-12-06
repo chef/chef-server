@@ -24,7 +24,11 @@ pkg_upstream_url="https://github.com/chef/chef-server"
 
 pkg_exposes=(port)
 pkg_exports=(
-    [port]=oc_chef_wm.port
+  [port]=oc_chef_wm.port
+  [data_collector_enabled]=data_collector.enabled
+  [data_collector_server]=data_collector.server
+  [data_collector_port]=data_collector.port
+  [data_collector_token]=data_collector.token
 )
 
 pkg_binds_optional=(

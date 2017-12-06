@@ -80,6 +80,10 @@ services:
       --bind database:postgresql.default
       --bind elasticsearch:elasticsearch.default
       --bind chef-server-ctl:chef-server-ctl.default
+    environment:
+      HAB_OC_ERCHEF: |
+        [data_collector]
+        enabled = false
 
   chef-server-nginx:
     image: $HAB_ORIGIN/chef-server-nginx

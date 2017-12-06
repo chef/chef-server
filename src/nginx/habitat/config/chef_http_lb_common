@@ -4,7 +4,17 @@
     listen {{port}};
     server_name api.chef-server.dev;
 
+    {{#if bind.oc_erchef ~}}
+       {{#eachAlive bind.oc_erchef.members as |member| ~}}
+         {{#if @last ~}}
+           {{#if member.cfg.data_collector.enabled ~}}
+    set_by_lua $data_collector_token '{{member.cfg.data_collector_token}}';
+           {{else ~}}
     set_by_lua $data_collector_token 'return os.getenv("DATA_COLLECTOR_TOKEN")';
+           {{/if ~}}
+         {{/if ~}}
+       {{/eachAlive ~}}
+    {{/if ~}}
 
     access_log stdout opscode;
 {{~#if is_ssl}}
@@ -56,7 +66,22 @@
       proxy_pass http://opscode_erchef;
     }
 
-
+{{#if bind.oc_erchef ~}}
+  {{#eachAlive bind.oc_erchef.members as |member| ~}}
+    {{#if @last ~}}
+      {{#if member.cfg.data_collector_enabled ~}}
+    location ~ "^/organizations/([^/]+)/data-collector$" {
+      set $request_org $1;
+      access_by_lua_block { validator.validate("POST") }
+      proxy_set_header x-data-collector-token $data_collector_token;
+      proxy_set_header x-data-collector-auth "version=1.0";
+      rewrite ^ /data-collector/v0/ break;
+      proxy_pass https://data-collector;
+    }
+      {{/if ~}}
+    {{/if ~}}
+  {{/eachAlive ~}}
+{{/if ~}}
 
     location ~ "^/organizations/([^/]+)/required_recipe$" {
       # This endpoint is unique because it is defined via nginx and is not
