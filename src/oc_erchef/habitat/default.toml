@@ -7,54 +7,23 @@ lager_console_backend="info"
 error_logger_hwm=50
 
 [oc_chef_wm]
-api_version=""
-server_flavor=""
-default_orgname="test"
+api_version="12.0.0"
 listen_ip="0.0.0.0"
 port=8000
-auth_skew=""
-bulk_fetch_data_size=""
-root_metric_key=""
-authz_timeout=""
-authz_fanout=""
-reindex_batch_size=""
-enable_actions=""
-node_license=""
-upgrade_url=""
-actions_host=""
-actions_port=""
-actions_vhost=""
-actions_exchange=""
-actions_fqdn=""
-max_request_size=""
+auth_skew=900
+bulk_fetch_data_size=5
+reindex_batch_size=10
+node_license=999999
+max_request_size=1000000
 server_version=""
-health_ping_timeout=""
-search_provider=""
-base_resource_url=""
-bulk_fetch_batch_size=""
-strict_search_result_acls=""
-
-[oc_chef_wm.rabbitmq.management]
-user=""
-port=""
-timeout=""
-init_count=""
-max_count=""
-cull_interval=""
-max_age=""
-max_connection_duration=""
-ibrowse_options=""
-
-[oc_chef_wm.rabbitmq.monitoring]
-queue_length_monitor_enabled=""
-queue_length_monitor_vhost=""
-queue_length_monitor_millis=""
-queue_length_monitor_timeout_millis=""
-drop_on_full_capacity=""
-prevent_erchef_startup_on_full_capacity=""
-queue_at_capacity_affects_overall_status=""
+bulk_fetch_batch_size=5
+strict_search_result_acls=false
 
 [chef_authn]
+keygen_cache_workers=10
+keygen_cache_size=10
+keygen_start_size=0
+keygen_timeout=1000
 
 [oc_chef_authz]
 
@@ -92,10 +61,11 @@ default_max_pipeline_size=""
 
 [pooler.sqerl]
 max_count=100
-init_count=25
-queue_max=200
+init_count=20
+queue_max=20
 
 [pooler.chef_depsolver]
-max_count=100
-init_count=25
-queue_max=200
+max_count=5
+init_count=5
+queue_max=50
+

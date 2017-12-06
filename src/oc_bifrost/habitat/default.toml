@@ -4,14 +4,16 @@ port=9463
 ip_mode="ipv4"
 fips_enabled=false
 
+[bifrost]
+
 [lager]
 lager_console_backend="info"
 
 [sqerl]
 db_host="localhost"
 db_port=5432
-db_user="opscode_chef"
-db_pass=""
+db_user="bifrost"
+db_pass="chefrocks"
 db_name="bifrost"
 db_pooler_timeout=2000
 sql_db_timeout=5000
@@ -21,4 +23,4 @@ sql_db_timeout=5000
 [pooler.sqerl]
 max_count=20
 init_count=20
-queue_max=20
+queue_max=200
