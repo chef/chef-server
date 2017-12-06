@@ -114,6 +114,8 @@ if node['private_chef']['use_chef_backend']
   include_recipe "private-chef::haproxy"
 end
 
+include_recipe "private-chef::fix_permissions"
+
 # Configure Services
 [
   "postgresql",
