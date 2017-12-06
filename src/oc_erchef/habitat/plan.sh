@@ -7,6 +7,7 @@ pkg_deps=(
   core/cacerts
   core/coreutils
   core/curl
+  core/openssl/1.0.2l/20171014213633
   core/gcc-libs
   core/ruby
   core/sqitch
