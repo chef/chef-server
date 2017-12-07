@@ -19,7 +19,7 @@ habitat_mode = true
 
 if habitat_mode
   knife_config = "/hab/svc/chef-server-ctl/config/pivotal.rb"
-  knife_path = `hab pkg path "mark/chef-server-ctl"`.chomp + "/chef/bin/knife"
+  knife_path = `cat /hab/svc/chef-server-ctl/config/pkg_path`.chomp + "/chef/bin/knife"
   bundler_path = `hab pkg path "core/bundler"`.chomp + "/bin/bundle"
   knife_cmd =  "#{bundler_path} exec #{knife_path}"
 else
