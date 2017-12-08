@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.13 -->
-## [12.17.13](https://github.com/chef/chef-server/tree/12.17.13) (2017-12-05)
+<!-- latest_release 12.17.14 -->
+## [12.17.14](https://github.com/chef/chef-server/tree/12.17.14) (2017-12-08)
 
 #### Merged Pull Requests
-- [SUSTAIN-782] Fix permissions on gemfiles created with strict umask on reconfigure [#1431](https://github.com/chef/chef-server/pull/1431) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- [SUSTAIN-600] Make request logging configurable [#1433](https://github.com/chef/chef-server/pull/1433) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.5 -->
 ### Changes since 12.17.5 release
 
 #### Merged Pull Requests
+- [SUSTAIN-600] Make request logging configurable [#1433](https://github.com/chef/chef-server/pull/1433) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.14 -->
 - [SUSTAIN-782] Fix permissions on gemfiles created with strict umask on reconfigure [#1431](https://github.com/chef/chef-server/pull/1431) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.13 -->
 - Disable Welcome Page [#1428](https://github.com/chef/chef-server/pull/1428) ([lancewf](https://github.com/lancewf)) <!-- 12.17.12 -->
 - [reconfigure] Rescue all IPAddr errors [#1425](https://github.com/chef/chef-server/pull/1425) ([stevendanna](https://github.com/stevendanna)) <!-- 12.17.11 -->
