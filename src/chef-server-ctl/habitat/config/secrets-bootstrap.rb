@@ -56,11 +56,13 @@ REQUIRED_SECRETS = {
 }
 
 def secrets_apply_loop
-  secrets = TOML.load_file('{{pkg.svc_config_path}}/hab-secrets-config.toml')
-  new_secrets = Marshal.load(Marshal.dump(secrets))
+  toml_cfg = TOML.load_file('/hab/svc/chef-server-ctl/config/hab-secrets-config.toml')
+  new_secrets = Marshal.load(Marshal.dump(toml_cfg))
   changes_to_apply = false
 
-  secrets.each do |top_level_item, top_level_item_value|
+  toml_cfg.each do |top_level_item, top_level_item_value|
+    # guard against iterating through non-secrets key in default.toml
+    next unless top_level_item == 'secrets'
     top_level_item_value.each do |service_item, service_item_value|
       service_item_value.each do |key, pass|
         if pass.empty?

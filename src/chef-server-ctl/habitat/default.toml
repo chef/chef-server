@@ -2,6 +2,12 @@
 # See the docs at https://www.habitat.sh/docs/create-packages-configure/.
 # You can safely delete this file if you don't need it.
 #
+[chef_server_api]
+# configure the docker host IP to use. Sometimes it's 172.18, other times it's 172.17
+ip = "172.18.0.1"
+port = "80"
+ssl_port = "443"
+
 # the secrets namespace is initially initted to empty strings,
 # the idea is that we loop through all of these and generate them at
 # "bootstrap" time and then re-inject them into the config
