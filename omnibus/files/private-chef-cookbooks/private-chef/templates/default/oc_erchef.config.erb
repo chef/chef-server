@@ -327,12 +327,14 @@
 
     {webmachine, [
         {log_handlers, [
+           <% if node['private_chef']['opscode-erchef']['enable_request_logging'] %>
             {oc_wm_request_logger, [
                 {file, "<%= File.join(@log_directory, 'requests.log') %>"},
                 {file_size, <%= (@log_rotation['file_maxbytes'].to_f/1024/1024).round %>},  %% Size in MB
                 {files, <%= @log_rotation['num_to_keep'] %>},
                 {annotations, [req_id, org_name, msg, darklaunch, perf_stats, user, req_api_version]}
             ]}
+           <% end %>
         ]}
     ]},
 

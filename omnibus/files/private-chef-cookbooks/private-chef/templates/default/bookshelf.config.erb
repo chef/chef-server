@@ -122,15 +122,15 @@
 <% end -%>
  {webmachine, [
           {log_handlers, [
-%%% Log handling is disabled, because it is redundant (nginx also logs requests)
-%%% If debug logging is needed, this can be uncommented to start logging somewhat verbose logs
-%%%              {oc_wm_request_logger, [
-%%%                       {file, "<%= File.join(@log_directory, 'requests.log') %>"},
-%%%                       {file_size, 100},  %% Size in MB
-%%%                       {files, 5},
-%%%                       {annotations, [user, req_id]}
-%%%                       ]
-%%%               }
+          <% if node['private_chef']['bookshelf']['enable_request_logging'] %>
+              {oc_wm_request_logger, [
+                       {file, "<%= File.join(@log_directory, 'requests.log') %>"},
+                       {file_size, 100},  %% Size in MB
+                       {files, 5},
+                       {annotations, [user, req_id]}
+                       ]
+               }
+          <% end -%>
                          ]
           }]}
 ].
