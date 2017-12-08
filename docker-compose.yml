@@ -17,6 +17,10 @@ services:
       - postgresql
     links:
       - postgresql
+    environment:
+      HAB_CHEF_SERVER_CTL: |
+        [secrets.data_collector]
+        token = "${AUTOMATE_TOKEN:-93a49a4f2482c64126f7b6015e6b0f30284287ee4054ff8807fb63d9cbd1c506}"
 
   elasticsearch:
     image: chefdemo/elasticsearch:stable
@@ -107,6 +111,7 @@ services:
       --bind oc_id:oc_id.default
       --bind bookshelf:bookshelf.default
       --bind elasticsearch:elasticsearch.default
+      --bind chef-server-ctl:chef-server-ctl.default
     ports:
       - 80:8080
       - 443:8443

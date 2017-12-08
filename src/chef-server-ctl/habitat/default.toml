@@ -63,3 +63,6 @@ sql_password = ""
 sql_ro_password = ""
 pushy_priv_key = ""
 pushy_pub_key = ""
+
+[secrets.data_collector]
+token = ""

@@ -28,7 +28,6 @@ pkg_exports=(
   [data_collector_enabled]=data_collector.enabled
   [data_collector_server]=data_collector.server
   [data_collector_port]=data_collector.port
-  [data_collector_token]=data_collector.token
 )
 
 pkg_binds_optional=(

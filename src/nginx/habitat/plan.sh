@@ -18,7 +18,8 @@ pkg_exports=(
 )
 pkg_binds_optional=(
   [bookshelf]="port"
-  [oc_erchef]="port data_collector_enabled data_collector_server data_collector_port data_collector_token"
+  [chef-server-ctl]="secrets"
+  [oc_erchef]="port data_collector_enabled data_collector_server data_collector_port"
   [oc_bifrost]="port"
   [elasticsearch]="http-port"
   [oc_id]="port"
