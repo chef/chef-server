@@ -22,11 +22,6 @@ unset BUNDLE_BIN_PATH
 unset BUNDLE_GEMFILE
 unset GEM_PATH
 unset GEM_HOME
-ID=`id -u`
-if [ $ID -ne 0 ]; then
-   echo "This command must be run as root."
-   exit 1
-fi
 
 # This uses a config file to find ourselves (and not hardcode our own package name)
 # Could do relative to $0, but that can be messy sometimes
