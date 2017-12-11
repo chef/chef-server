@@ -4,8 +4,8 @@
     listen {{port}};
     server_name api.chef-server.dev;
 
-    {{#if bind.chef-server-ctl ~}}
-       {{#eachAlive bind.chef-server-ctl.members as |member| ~}}
+    {{#if ../bind.chef-server-ctl ~}}
+       {{#eachAlive ../bind.chef-server-ctl.members as |member| ~}}
          {{#if @last ~}}
     set_by_lua $data_collector_token '{{member.cfg.secrets.data_collector.token}}';
          {{/if ~}}
