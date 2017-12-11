@@ -7,12 +7,14 @@
     {{#if ../bind.chef-server-ctl ~}}
        {{#eachAlive ../bind.chef-server-ctl.members as |member| ~}}
          {{#if @last ~}}
-    set_by_lua $data_collector_token '{{member.cfg.secrets.data_collector.token}}';
+    set_by_lua_block $data_collector_token {
+        return "{{member.cfg.secrets.data_collector.token}}";
+    }
          {{/if ~}}
        {{/eachAlive ~}}
     {{else ~}}
     set_by_lua $data_collector_token 'return os.getenv("DATA_COLLECTOR_TOKEN")';
-    {{/if ~}}
+    {{~/if}}
 
     access_log stdout opscode;
 {{~#if is_ssl}}
