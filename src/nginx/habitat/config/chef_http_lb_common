@@ -66,8 +66,8 @@
       proxy_pass http://opscode_erchef;
     }
 
-{{#if bind.oc_erchef ~}}
-  {{#eachAlive bind.oc_erchef.members as |member| ~}}
+{{#if ../bind.oc_erchef ~}}
+  {{#eachAlive ../bind.oc_erchef.members as |member| ~}}
     {{#if @last ~}}
       {{#if member.cfg.data_collector_enabled ~}}
     location ~ "^/organizations/([^/]+)/data-collector$" {
@@ -81,7 +81,7 @@
       {{/if ~}}
     {{/if ~}}
   {{/eachAlive ~}}
-{{/if ~}}
+{{~/if}}
 
     location ~ "^/organizations/([^/]+)/required_recipe$" {
       # This endpoint is unique because it is defined via nginx and is not
