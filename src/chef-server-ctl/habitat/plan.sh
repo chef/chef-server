@@ -78,6 +78,7 @@ do_install() {
   export HOME="${pkg_prefix}"
   bundle install --path "${pkg_prefix}/vendor/bundle" --binstubs && bundle config path ${pkg_prefix}/vendor/bundle
   cp Gemfile* ${pkg_prefix}
+#  attach
 
   # install oc-chef-pedant in its own directory under $pkg_prefix
   export pedant_src_dir=$(abspath $PLAN_CONTEXT/../../../oc-chef-pedant)
@@ -96,6 +97,7 @@ do_install() {
   bundle config path "${pedant_dir}/vendor/bundle"
   popd
 
+  # in chef dir bundle install
   export HOME="${pkg_prefix}"/chef
   mkdir $HOME
   pushd $HOME
@@ -107,13 +109,10 @@ gem 'knife-opc'
 EOF
 
   bundle install --path "${HOME}/vendor/bundle" --binstubs && bundle config path ${HOME}/vendor/bundle || attach
-
   cp $PLAN_CONTEXT/bin/oc-chef-pedant.sh $pkg_prefix/bin/chef-server-test
-#  ln -s $pkg_prefix/config/oc-chef-pedant.sh $pkg_prefix/bin/chef-server-test
   chmod +x $pkg_prefix/bin/chef-server-test
 
   cp $PLAN_CONTEXT/bin/knife-pivotal.sh $pkg_prefix/bin/knife
-#  ln -s $pkg_prefix/config/knife-pivotal.sh $pkg_prefix/bin/knife
   chmod +x $pkg_prefix/bin/knife
 
   popd
@@ -122,15 +121,15 @@ EOF
   # Chef-server-ctl install
   echo "====== BUILDING CHEF_SERVER_CTL ==== "
   echo $PLAN_CONTEXT $pkg_prefix
-  ctl_dir=$pkg_prefix/omnibus-ctl
-  cp -R ../../omnibus/files/private-chef-ctl-commands $ctl_dir
+  export HOME="${pkg_prefix}"/omnibus-ctl
+
+  cp -R ../../omnibus/files/private-chef-ctl-commands $HOME
   install $PLAN_CONTEXT/bin/chef-server-ctl.sh $pkg_prefix/bin/chef-server-ctl
   fix_interpreter $pkg_prefix/omnibus-ctl/chef-server-ctl core/ruby bin/ruby || attach
 
-  pushd $ctl_dir
-  echo `pwd`
-  bundle install --path "${ctl_dir}/vendor/bundle"
-  bundle config path "${ctl_dir}/vendor/bundle"
+  pushd $HOME
+  bundle install --path "${HOME}/vendor/bundle"
+  bundle config path "${HOME}/vendor/bundle"
   popd
 
 }
