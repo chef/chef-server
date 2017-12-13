@@ -76,9 +76,11 @@ do_build() {
 do_install() {
   # install gem dependencies for service hooks directly under $pkg_prefix
   export HOME="${pkg_prefix}"
-  bundle install --path "${pkg_prefix}/vendor/bundle" --binstubs && bundle config path ${pkg_prefix}/vendor/bundle
+  export RUBY_VENDOR="${pkg_prefix}/vendor/bundle"
+  bundle install --path ${RUBY_VENDOR} --binstubs
+  bundle config path ${RUBY_VENDOR}
+
   cp Gemfile* ${pkg_prefix}
-#  attach
 
   # install oc-chef-pedant in its own directory under $pkg_prefix
   export pedant_src_dir=$(abspath $PLAN_CONTEXT/../../../oc-chef-pedant)
@@ -87,20 +89,20 @@ do_install() {
   fi
   cp -pr ${pedant_src_dir} ${pkg_prefix}
   export pedant_dir="${pkg_prefix}/oc-chef-pedant"
-  export HOME="${pedant_dir}"
+
   # TODO: declare chef gem dependency in oc-chef-pedant
   cp Gemfile.local "${pedant_dir}/Gemfile.local"
 
   # in pedant dir bundle install
   pushd ${pedant_dir}
-  bundle install --path "${pedant_dir}/vendor/bundle"
-  bundle config path "${pedant_dir}/vendor/bundle"
+  bundle install --path ${RUBY_VENDOR}
+  bundle config path ${RUBY_VENDOR}
   popd
 
   # in chef dir bundle install
-  export HOME="${pkg_prefix}"/chef
-  mkdir $HOME
-  pushd $HOME
+  export chef_dir="${pkg_prefix}"/chef
+  mkdir $chef_dir
+  pushd $chef_dir
 
   cat > Gemfile << EOF
 source 'https://rubygems.org'
@@ -108,7 +110,9 @@ gem 'chef'
 gem 'knife-opc'
 EOF
 
-  bundle install --path "${HOME}/vendor/bundle" --binstubs && bundle config path ${HOME}/vendor/bundle || attach
+  bundle install --path ${RUBY_VENDOR} --binstubs
+  bundle config path ${RUBY_VENDOR}
+
   cp $PLAN_CONTEXT/bin/oc-chef-pedant.sh $pkg_prefix/bin/chef-server-test
   chmod +x $pkg_prefix/bin/chef-server-test
 
@@ -121,16 +125,21 @@ EOF
   # Chef-server-ctl install
   echo "====== BUILDING CHEF_SERVER_CTL ==== "
   echo $PLAN_CONTEXT $pkg_prefix
-  export HOME="${pkg_prefix}"/omnibus-ctl
+  export omnibus_ctl_dir="${pkg_prefix}"/omnibus-ctl
 
-  cp -R ../../omnibus/files/private-chef-ctl-commands $HOME
+  cp -R ../../omnibus/files/private-chef-ctl-commands $omnibus_ctl_dir
   install $PLAN_CONTEXT/bin/chef-server-ctl.sh $pkg_prefix/bin/chef-server-ctl
-  fix_interpreter $pkg_prefix/omnibus-ctl/chef-server-ctl core/ruby bin/ruby || attach
+  fix_interpreter $pkg_prefix/omnibus-ctl/chef-server-ctl core/ruby bin/ruby
 
-  pushd $HOME
-  bundle install --path "${HOME}/vendor/bundle"
-  bundle config path "${HOME}/vendor/bundle"
+  pushd ${omnibus_ctl_dir}
+  bundle install --path ${RUBY_VENDOR} --binstubs
+  bundle config path ${RUBY_VENDOR}
   popd
+
+  # We install a bunch of stuff (specifically chef in private-chef-ctl) from git
+  find ${RUBY_VENDOR} -name .git | xargs rm -rf
+  rm -rf "${HOME}/.bundle/cache"
+  rm -rf ${RUBY_VENDOR}/ruby/*/cache
 
 }
 
