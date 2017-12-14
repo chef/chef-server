@@ -36,10 +36,10 @@ end
 group :development, :test do
   # Loading it this way makes it work with Ruby 2.1.2. See
   # https://github.com/nixme/jazz_hands/issues/25
-  gem 'jazz_hands', git: 'https://github.com/nixme/jazz_hands', branch: 'bring-your-own-debugger'
+  gem 'jazz_hands', git: 'https://github.com/chef/jazz_hands', branch: 'praj/bring-your-own-debugger'
+  gem 'rspec-rails', '~> 3.2'
   gem 'pry-byebug'
   gem 'mailcatcher'
-  gem 'rspec-rails', '~> 3.2'
 end
 
 group :development do
