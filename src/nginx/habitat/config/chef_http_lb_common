@@ -32,10 +32,14 @@
     root {{../pkg.path}}/static/html;
     client_max_body_size 250m;
 
-    proxy_set_header Host $host;
+    proxy_set_header Host $http_host; # http_host preserves port # if present
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+{{~#if is_ssl}}
     proxy_set_header X-Forwarded-Proto https;
+{{~else}}
+    proxy_set_header X-Forwarded-Proto http;
+{{~/if}}
     proxy_pass_request_headers on;
     proxy_connect_timeout   1;
     proxy_send_timeout      300;
