@@ -152,9 +152,9 @@
                 {rabbitmq_actions_management_service, [
                     <% if node['private_chef']['fips_enabled'] -%>
                     %% See note about Bookshelf
-                    {root_url, "http://<%= @actions_vip %>:<%= @node['private_chef']['rabbitmq']['management_port'] %>/api"},
+                    {root_url, "http://<%= @helper.normalize_host(@actions_vip) %>:<%= @node['private_chef']['rabbitmq']['management_port'] %>/api"},
                     <% else -%>
-                    {root_url, "https://<%= @actions_vip %>:<%= @node['private_chef']['rabbitmq']['management_port'] %>/api"},
+                    {root_url, "https://<%= @helper.normalize_host(@actions_vip) %>:<%= @node['private_chef']['rabbitmq']['management_port'] %>/api"},
                     <% end %>
                     {timeout, <%= @node['private_chef']['rabbitmq']['rabbit_mgmt_timeout'] %>},
                     {init_count, <%= @node['private_chef']['rabbitmq']['rabbit_mgmt_http_init_count'] %>},
@@ -242,9 +242,9 @@
             {enabled, <%= @node['private_chef']['rabbitmq']['management_enabled'] %>},
             {user, "<%= @node['private_chef']['rabbitmq']['management_user'] %>"},
             <% if node['private_chef']['fips_enabled'] -%>
-            {root_url, "http://<%= node['private_chef']['rabbitmq']['vip'] %>:<%= @node['private_chef']['rabbitmq']['management_port'] %>/api"},
+            {root_url, "http://<%= @helper.vip_for_uri('rabbitmq') %>:<%= @node['private_chef']['rabbitmq']['management_port'] %>/api"},
             <% else -%>
-            {root_url, "https://<%= node['private_chef']['rabbitmq']['vip'] %>:<%= @node['private_chef']['rabbitmq']['management_port'] %>/api"},
+            {root_url, "https://<%= @helper.vip_for_uri('rabbitmq') %>:<%= @node['private_chef']['rabbitmq']['management_port'] %>/api"},
             <% end %>
             {timeout, <%= @node['private_chef']['rabbitmq']['rabbit_mgmt_timeout'] %>},
             {init_count, <%= @node['private_chef']['rabbitmq']['rabbit_mgmt_http_init_count'] %>},
