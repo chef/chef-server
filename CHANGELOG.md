@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.14 -->
-## [12.17.14](https://github.com/chef/chef-server/tree/12.17.14) (2017-12-08)
+<!-- latest_release 12.17.15 -->
+## [12.17.15](https://github.com/chef/chef-server/tree/12.17.15) (2017-12-18)
 
 #### Merged Pull Requests
-- [SUSTAIN-600] Make request logging configurable [#1433](https://github.com/chef/chef-server/pull/1433) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- change to test ipv6 fix [#1439](https://github.com/chef/chef-server/pull/1439) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.5 -->
 ### Changes since 12.17.5 release
 
 #### Merged Pull Requests
+- change to test ipv6 fix [#1439](https://github.com/chef/chef-server/pull/1439) ([markan](https://github.com/markan)) <!-- 12.17.15 -->
 - [SUSTAIN-600] Make request logging configurable [#1433](https://github.com/chef/chef-server/pull/1433) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.14 -->
 - [SUSTAIN-782] Fix permissions on gemfiles created with strict umask on reconfigure [#1431](https://github.com/chef/chef-server/pull/1431) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.13 -->
 - Disable Welcome Page [#1428](https://github.com/chef/chef-server/pull/1428) ([lancewf](https://github.com/lancewf)) <!-- 12.17.12 -->
