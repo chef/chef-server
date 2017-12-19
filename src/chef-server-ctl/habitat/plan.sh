@@ -29,6 +29,9 @@ pkg_bin_dirs=(bin)
 pkg_exports=(
   [secrets]=secrets
 )
+pkg_binds_optional=(
+  [chef-server-nginx]="port ssl-port"
+)
 # pkg_exposes=(port ssl-port)
 # pkg_binds=(
 #   [database]="port host"

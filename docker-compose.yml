@@ -12,11 +12,10 @@ services:
 
   chef-server-ctl:
     image: $HAB_ORIGIN/chef-server-ctl
-    command: --peer postgresql
     depends_on:
       - postgresql
-    links:
-      - postgresql
+    command: --peer postgresql
+      --bind chef-server-nginx:chef-server-nginx.default
     environment:
       HAB_CHEF_SERVER_CTL: |
         [secrets.data_collector]
@@ -26,8 +25,6 @@ services:
     image: chefdemo/elasticsearch:stable
     command: --peer postgresql
     depends_on:
-      - postgresql
-    links:
       - postgresql
     ulimits:
       nofile:
@@ -40,8 +37,6 @@ services:
     image: $HAB_ORIGIN/oc_id
     depends_on:
       - postgresql
-    links:
-      - postgresql
     command: --peer postgresql
       --bind database:postgresql.default
       --bind chef-server-ctl:chef-server-ctl.default
@@ -50,8 +45,6 @@ services:
     image: $HAB_ORIGIN/bookshelf
     depends_on:
       - postgresql
-    links:
-      - postgresql
     command: --peer postgresql
       --bind database:postgresql.default
       --bind chef-server-ctl:chef-server-ctl.default
@@ -59,8 +52,6 @@ services:
   oc_bifrost:
     image: $HAB_ORIGIN/oc_bifrost
     depends_on:
-      - postgresql
-    links:
       - postgresql
     command: --peer postgresql
       --bind database:postgresql.default
@@ -72,12 +63,6 @@ services:
       - elasticsearch
       - oc_bifrost
       - postgresql
-    links:
-      - elasticsearch
-      - oc_bifrost
-      - postgresql
-    volumes:
-      - erchef-data:/hab/svc/oc_erchef/data
     command: --peer postgresql
       --bind bookshelf:bookshelf.default
       --bind oc_bifrost:oc_bifrost.default
@@ -88,17 +73,12 @@ services:
       HAB_OC_ERCHEF: |
         [data_collector]
         enabled = false
+    volumes:
+      - erchef-data:/hab/svc/oc_erchef/data
 
   chef-server-nginx:
     image: $HAB_ORIGIN/chef-server-nginx
     depends_on:
-      - oc_erchef
-      - oc_bifrost
-      - oc_id
-      - bookshelf
-      - elasticsearch
-      - postgresql
-    links:
       - oc_erchef
       - oc_bifrost
       - oc_id
