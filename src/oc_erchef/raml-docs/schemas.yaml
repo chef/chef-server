@@ -1,4 +1,4 @@
-#%RAML 0.8
+#%RAML 1.0
 
 Acl:                       !include schemas/acl.json
 AclUpdate:                 !include schemas/acl_update.json

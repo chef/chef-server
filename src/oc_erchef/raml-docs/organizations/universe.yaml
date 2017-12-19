@@ -1,4 +1,4 @@
-#%RAML 0.8
+#%RAML 1.0
 ---
 description: |
   Universe API
@@ -13,6 +13,7 @@ description: |
   and then use it with Berkshelf.
 get:
   description: Retrieve the universe data
+  is: [chef_endpoint]
   responses:
     200:
       body:

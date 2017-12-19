@@ -1,4 +1,4 @@
-#%RAML 0.8
+#%RAML 1.0
 ---
 description: Users on the Chef server.
 type: list_endpoint
