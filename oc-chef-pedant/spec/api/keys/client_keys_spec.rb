@@ -228,7 +228,7 @@ describe "Client keys endpoint", :keys, :client_keys do
   context "when a client's default key has an expiration date" do
     before(:each) do
       delete_client_key(org_name, client['name'], "default")
-      add_client_key(org_name, client['name'], :key, "default", expires: "2017-12-24T21:00:00Z").should look_like(status: 201)
+      add_client_key(org_name, client['name'], :key, "default", expires: "2025-03-24T21:00:00Z").should look_like(status: 201)
     end
 
     context "and is updated via a PUT to /organizations/:org/clients/:client" do
@@ -247,7 +247,7 @@ describe "Client keys endpoint", :keys, :client_keys do
 
   context "when a client key has an expiration date and isn't expired" do
     before(:each) do
-      add_client_key(org_name, client['name'], :key, key_name, expires: "2017-12-24T21:00:00Z").should look_like(status: 201)
+      add_client_key(org_name, client['name'], :key, key_name, expires: "2025-03-24T21:00:00Z").should look_like(status: 201)
     end
 
     it "should authenticate against the key" do
