@@ -29,3 +29,7 @@ compile_commands.json
 *.tfstate
 *.tfstate.backup
 *_override.tf
+
+# Habitat
+results
+

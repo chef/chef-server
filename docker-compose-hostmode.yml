@@ -1,0 +1,90 @@
+version: '3'
+services:
+  postgresql:
+    image: chefdemo/postgresql:stable
+    network_mode: host
+    environment:
+      HAB_POSTGRESQL: |
+        [superuser]
+        name = 'hab'
+        password = 'chefrocks'
+    volumes:
+      - postgresql-data:/hab/svc/postgresql/data
+
+  chef-server-ctl:
+    image: $HAB_ORIGIN/chef-server-ctl
+    network_mode: host
+    command: --peer 172.17.0.1
+      --listen-gossip 0.0.0.0:9650
+      --listen-http 0.0.0.0:9660
+
+  elasticsearch:
+    image: chefdemo/elasticsearch:stable
+    network_mode: host
+    command: --peer 172.17.0.1
+      --listen-gossip 0.0.0.0:9651
+      --listen-http 0.0.0.0:9661
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - elasticsearch-data:/hab/svc/elasticsearch/data
+
+  oc_id:
+    image: $HAB_ORIGIN/oc_id
+    network_mode: host
+    command: --peer 172.17.0.1
+      --bind database:postgresql.default
+      --bind chef-server-ctl:chef-server-ctl.default
+      --listen-gossip 0.0.0.0:9652
+      --listen-http 0.0.0.0:9662
+
+  bookshelf:
+    image: $HAB_ORIGIN/bookshelf
+    network_mode: host
+    command: --peer 172.17.0.1
+      --bind database:postgresql.default
+      --bind chef-server-ctl:chef-server-ctl.default
+      --listen-gossip 0.0.0.0:9653
+      --listen-http 0.0.0.0:9663
+
+  oc_bifrost:
+    image: $HAB_ORIGIN/oc_bifrost
+    network_mode: host
+    command: --peer 172.17.0.1
+      --bind database:postgresql.default
+      --bind chef-server-ctl:chef-server-ctl.default
+      --listen-gossip 0.0.0.0:9654
+      --listen-http 0.0.0.0:9664
+
+  oc_erchef:
+    image: $HAB_ORIGIN/oc_erchef
+    network_mode: host
+    volumes:
+      - erchef-data:/hab/svc/oc_erchef/data
+    command: --peer 172.17.0.1
+      --bind bookshelf:bookshelf.default
+      --bind oc_bifrost:oc_bifrost.default
+      --bind database:postgresql.default
+      --bind elasticsearch:elasticsearch.default
+      --bind chef-server-ctl:chef-server-ctl.default
+      --listen-gossip 0.0.0.0:9655
+      --listen-http 0.0.0.0:9665
+
+  chef-server-nginx:
+    image: $HAB_ORIGIN/chef-server-nginx
+    network_mode: host
+    command: --peer 172.17.0.1
+      --bind oc_erchef:oc_erchef.default
+      --bind oc_bifrost:oc_bifrost.default
+      --bind oc_id:oc_id.default
+      --bind bookshelf:bookshelf.default
+      --bind elasticsearch:elasticsearch.default
+      --listen-gossip 0.0.0.0:9656
+      --listen-http 0.0.0.0:9666
+
+volumes:
+  postgresql-data:
+  elasticsearch-data:
+  erchef-data:

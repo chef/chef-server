@@ -1,0 +1,8 @@
+#!/bin/sh
+exec 2>&1
+
+{{#if cfg.fips_enabled ~}}
+export OPENSSL_FIPS=1
+{{/if ~}}
+
+cd {{pkg.path}} && bundle exec ruby "{{pkg.svc_config_path}}/secrets-bootstrap.rb"

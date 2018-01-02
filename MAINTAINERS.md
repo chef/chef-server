@@ -13,6 +13,7 @@ If undertaking a large change, ping the @chef/chef-server-maintainers group for 
 - [Steven Danna](https://github.com/stevendanna)
 - [Tyler Cloke](https://github.com/tylercloke)
 - [Stephan Renatus](https://github.com/srenatus)
+- [Jeremy Miller](https://github.com/jeremymv2)
 
 # Past Maintainers
 
