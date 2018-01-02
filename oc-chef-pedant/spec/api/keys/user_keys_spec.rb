@@ -216,7 +216,7 @@ describe "User keys endpoint", :keys, :user_keys do
 
   context "when a user key has an expiration date and isn't expired" do
     before(:each) do
-      add_user_key(user['name'], :key, key_name, expires: "2017-12-24T21:00:00Z").should look_like(status: 201)
+      add_user_key(user['name'], :key, key_name, expires: "2025-03-24T21:00:00Z").should look_like(status: 201)
     end
 
     after(:each) do
@@ -231,7 +231,7 @@ describe "User keys endpoint", :keys, :user_keys do
   context "when a user's default key has an expiration date" do
     before(:each) do
       delete_user_key(user['name'], "default")
-      add_user_key(user['name'], :key, "default", expires: "2017-12-24T21:00:00Z").should look_like(status: 201)
+      add_user_key(user['name'], :key, "default", expires: "2025-03-24T21:00:00Z").should look_like(status: 201)
     end
 
     context "and is updated via a PUT to /users/:user" do
