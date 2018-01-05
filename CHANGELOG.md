@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.17 -->
-## [12.17.17](https://github.com/chef/chef-server/tree/12.17.17) (2018-01-02)
+<!-- latest_release 12.17.18 -->
+## [12.17.18](https://github.com/chef/chef-server/tree/12.17.18) (2018-01-05)
 
 #### Merged Pull Requests
-- It is 2017! Postpone expiration to 2025 [#1443](https://github.com/chef/chef-server/pull/1443) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Praj/sustain 633 [#1438](https://github.com/chef/chef-server/pull/1438) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.15 -->
 ### Changes since 12.17.15 release
 
 #### Merged Pull Requests
+- Praj/sustain 633 [#1438](https://github.com/chef/chef-server/pull/1438) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.18 -->
 - It is 2017! Postpone expiration to 2025 [#1443](https://github.com/chef/chef-server/pull/1443) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.17 -->
 - Update RELEASE_NOTES.md for 12.17.15 release [#1441](https://github.com/chef/chef-server/pull/1441) ([btm](https://github.com/btm)) <!-- 12.17.16 -->
 <!-- release_rollup -->
