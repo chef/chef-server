@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#Override the connect() method to set appropriate IPV6 host headers
 require 'pedant/core_ext/net_http'
 
 require 'pp' # Debugging
