@@ -554,6 +554,18 @@ describe 'Search API endpoint', :search do
       end
     end
 
+    context 'Special characters' do
+      context 'When the Chef server has data bag items with "foo/bar"' do
+        data_bag 'x',
+          'foo' => '{ "id": "foo", "path": "foo/bar" }'
+
+        it 'A search for foo/* returns foo' do
+          with_search_polling do
+            search('x', 'path:foo\/*').map { |row| row['name'] }.should =~ [ 'data_bag_item_x_foo' ]
+          end
+        end
+      end
+    end
   end
 
   # TODO: What if you try to create a data bag named 'reindex' ?
