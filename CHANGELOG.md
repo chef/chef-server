@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.19 -->
-## [12.17.19](https://github.com/chef/chef-server/tree/12.17.19) (2018-01-16)
+<!-- latest_release 12.17.20 -->
+## [12.17.20](https://github.com/chef/chef-server/tree/12.17.20) (2018-01-17)
 
 #### Merged Pull Requests
-- Converge runners with --no-fork [#1445](https://github.com/chef/chef-server/pull/1445) ([scotthain](https://github.com/scotthain))
+- [SUSTAIN-807] Clean up oc_id PID on restart [#1442](https://github.com/chef/chef-server/pull/1442) ([nsdavidson](https://github.com/nsdavidson))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.15 -->
 ### Changes since 12.17.15 release
 
 #### Merged Pull Requests
+- [SUSTAIN-807] Clean up oc_id PID on restart [#1442](https://github.com/chef/chef-server/pull/1442) ([nsdavidson](https://github.com/nsdavidson)) <!-- 12.17.20 -->
 - Converge runners with --no-fork [#1445](https://github.com/chef/chef-server/pull/1445) ([scotthain](https://github.com/scotthain)) <!-- 12.17.19 -->
 - Praj/sustain 633 [#1438](https://github.com/chef/chef-server/pull/1438) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.18 -->
 - It is 2017! Postpone expiration to 2025 [#1443](https://github.com/chef/chef-server/pull/1443) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.17 -->
