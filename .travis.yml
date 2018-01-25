@@ -18,6 +18,11 @@ before_cache:
   # Prevent build log from changing cache cand causing repackage
   - rm -f $HOME/.cpanm/work/*/build.log
   - rm -f $HOME/.cpanm/build.log
+
+before_install:
+  - curl https://raw.githubusercontent.com/chef/ci-studio-common/master/install.sh | bash
+  - export PATH="$PATH:$HOME/ci-studio-common/bin:$HOME/tools/bin"
+
 language: erlang
 otp_release:
   - 18.3
@@ -109,8 +114,7 @@ matrix:
     # Terraform Lint
     - env:
         - NAME=lint-terraform
-        - PATH=$HOME/tools/terraform-0.8.1:$PATH
-      install: ./scripts/install_terraform.sh
+      install: install-tool terraform 0.11.2
       before_script: cd terraform
       script: make lint
     # chef-server-deploy-cookbook-cookstyle
