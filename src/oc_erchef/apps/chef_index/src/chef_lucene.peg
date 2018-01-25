@@ -65,7 +65,7 @@ start_letter <- [a-zA-Z0-9_.*/] / '\\' special_char ~;
 
 space <- [ \t]+ ~;
 
-special_char <- '[' / ']' / '\\' / '"' / [!(){}^~*?:] ~;
+special_char <- '[' / ']' / '\\' / '/' / '"' / [!(){}^~*?:] ~;
 
 %{
 %% @author Seth Falcon <seth@chef.io>
