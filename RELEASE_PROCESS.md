@@ -19,8 +19,8 @@ release.
 
 In order to release, you will need the following accounts/permissions:
 
-- Chef Software, Inc Slack account
-- VPN account for Chef Software, Inc.
+- Chef Software Inc. Slack account
+- VPN account for Chef Software Inc.
 - Account on [https://discourse.chef.io](https://discourse.chef.io) using your Chef email address
 - Access to automate.chef.co
 
@@ -97,11 +97,11 @@ The git SHA of the build you are testing can be found in
 
 - [ ] Select a version from the `current` channel that you wish to promote to `stable`.
   Make sure that this version has gone through the upgrade testing. 
-- [ ] Use julia to promote the build:
+- [ ] Use expeditor to promote the build:
 
-        @julia artifactory promote chef-server VERSION
+        /expeditor promote chef-server VERSION
 
-  Please do this in the `#eng-services-support` room.  Once this is
+  Please do this in the `#releng-support` room.  Once this is
   done, the release is available to the public via the APT and YUM
   repositories and downloads.chef.io.
 
@@ -119,7 +119,5 @@ The git SHA of the build you are testing can be found in
   category.* Full details on the policy of making release announcements on
   Discourse can be found on the wiki under the Engineering section ->
   Policy and Processes -> Release Announcements and Security Alerts
-
-- [ ] Let `#cft-announce` know about the release, including a link to the Discourse post.
 
 Chef Server is now released.
