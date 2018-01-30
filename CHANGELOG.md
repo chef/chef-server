@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.23 -->
-## [12.17.23](https://github.com/chef/chef-server/tree/12.17.23) (2018-01-26)
+<!-- latest_release 12.17.24 -->
+## [12.17.24](https://github.com/chef/chef-server/tree/12.17.24) (2018-01-30)
 
 #### Merged Pull Requests
-- Update release process documentation. [#1452](https://github.com/chef/chef-server/pull/1452) ([rhass](https://github.com/rhass))
+- Add yml header to expeditor config. [#1453](https://github.com/chef/chef-server/pull/1453) ([rhass](https://github.com/rhass))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.15 -->
 ### Changes since 12.17.15 release
 
 #### Merged Pull Requests
+- Add yml header to expeditor config. [#1453](https://github.com/chef/chef-server/pull/1453) ([rhass](https://github.com/rhass)) <!-- 12.17.24 -->
 - Update release process documentation. [#1452](https://github.com/chef/chef-server/pull/1452) ([rhass](https://github.com/rhass)) <!-- 12.17.23 -->
 - [MSYS-722] Escape forward slash for elasticsearch query only. [#1444](https://github.com/chef/chef-server/pull/1444) ([piyushawasthi](https://github.com/piyushawasthi)) <!-- 12.17.22 -->
 - Update Chef Client and Ruby version. [#1448](https://github.com/chef/chef-server/pull/1448) ([rhass](https://github.com/rhass)) <!-- 12.17.21 -->
