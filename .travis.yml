@@ -114,7 +114,7 @@ matrix:
     # Terraform Lint
     - env:
         - NAME=lint-terraform
-      install: install-tool terraform 0.11.2
+      install: install-tool terraform
       before_script: cd terraform
       script: make lint
     # chef-server-deploy-cookbook-cookstyle
