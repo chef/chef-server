@@ -40,6 +40,9 @@ dependency "preparation"
 # the Chef Server dependencies.
 dependency "server-complete"
 
+# Fix the shebangs for the binstubs to use the embedded ruby.
+dependency "shebang-cleanup"
+
 dependency "cleanup" # MUST BE LAST DO NOT MOVE
 
 package :rpm do
