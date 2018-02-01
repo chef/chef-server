@@ -1,3 +1,4 @@
+{"1.1.0",
 [{<<"amqp_client">>,
   {git,"git://github.com/seth/amqp_client.git",
        {ref,"7622ad8093a41b7288a1aa44dd16d3e92ce8f833"}},
@@ -126,6 +127,10 @@
   {git,"git://github.com/opscode/erlang-oauth.git",
        {ref,"2b796ea7973c0f38aad569bf2506bd8026eca004"}},
   2},
+ {<<"observer_cli">>,
+  {git,"https://github.com/zhongwencool/observer_cli",
+       {ref,"4d5f96762bb525b4f857109c10a7d4d53af1a029"}},
+  0},
  {<<"opscoderl_folsom">>,
   {git,"git://github.com/opscode/opscoderl_folsom.git",
        {ref,"d493429f895a904e9fd86d12a68f7075dfa8e227"}},
@@ -158,6 +163,7 @@
   {git,"https://github.com/erlware/rebar_vsn_plugin.git",
        {ref,"fd40c960c7912193631d948fe962e1162a8d1334"}},
   2},
+ {<<"recon">>,{pkg,<<"recon">>,<<"2.3.4">>},1},
  {<<"sqerl">>,
   {git,"https://github.com/chef/sqerl",
        {ref,"2d9792ccbbe86824d47468c119e7d99733ce4546"}},
@@ -173,4 +179,8 @@
  {<<"webmachine">>,
   {git,"git://github.com/webmachine/webmachine",
        {ref,"4edbea20f05dde54cd83e562ec29ae4cc5669f76"}},
-  1}].
+  1}]}.
+[
+{pkg_hash,[
+ {<<"recon">>, <<"B406C2FCCDEAA0D94E23B5E30AE3D635A2D461E363A5C9C6316897037CF050D2">>}]}
+].
