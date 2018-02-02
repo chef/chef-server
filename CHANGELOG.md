@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.26 -->
-## [12.17.26](https://github.com/chef/chef-server/tree/12.17.26) (2018-02-01)
+<!-- latest_release 12.17.27 -->
+## [12.17.27](https://github.com/chef/chef-server/tree/12.17.27) (2018-02-02)
 
 #### Merged Pull Requests
-- Force a release build. [#1458](https://github.com/chef/chef-server/pull/1458) ([rhass](https://github.com/rhass))
+- Force a release build. [#1459](https://github.com/chef/chef-server/pull/1459) ([rhass](https://github.com/rhass))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.15 -->
 ### Changes since 12.17.15 release
 
 #### Merged Pull Requests
+- Force a release build. [#1459](https://github.com/chef/chef-server/pull/1459) ([rhass](https://github.com/rhass)) <!-- 12.17.27 -->
 - Force a release build. [#1458](https://github.com/chef/chef-server/pull/1458) ([rhass](https://github.com/rhass)) <!-- 12.17.26 -->
 - omnibus: pin openresty 1.11.2.1 [#1457](https://github.com/chef/chef-server/pull/1457) ([srenatus](https://github.com/srenatus)) <!-- 12.17.25 -->
 - Add yml header to expeditor config. [#1453](https://github.com/chef/chef-server/pull/1453) ([rhass](https://github.com/rhass)) <!-- 12.17.24 -->
