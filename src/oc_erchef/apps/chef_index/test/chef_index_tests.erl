@@ -60,7 +60,7 @@ chef_index_test_() ->
        fun() ->
                application:set_env(chef_index, search_queue_mode, batch),
                meck:expect(chef_index_batch, add_item, fun(?EXPECTED_DOC) -> ok end),
-               chef_index:add(role, <<"a1">>, <<"db1">>, Item, none),
+               chef_index:add(role, <<"a1">>, <<"db1">>, Item, <<"undefined">>),
                ?assert(meck:validate(chef_index_batch))
        end
       },
@@ -68,7 +68,7 @@ chef_index_test_() ->
        fun() ->
                application:set_env(chef_index, search_queue_mode, inline),
                meck:expect(chef_index_expand, send_item, fun(?EXPECTED_DOC) -> ok end),
-               chef_index:add(role, <<"a1">>, <<"db1">>, Item, none),
+               chef_index:add(role, <<"a1">>, <<"db1">>, Item, <<"undefined">>),
                ?assert(meck:validate(chef_index_expand))
        end
       },
@@ -86,7 +86,7 @@ chef_index_test_() ->
        fun() ->
                application:set_env(chef_index, search_queue_mode, rabbitmq),
                meck:expect(chef_index_queue, delete, fun(<<"testvhost">>, role, <<"a1">>, <<"db1">>) -> ok end),
-               chef_index:delete(role, <<"a1">>, <<"db1">>, none),
+               chef_index:delete(role, <<"a1">>, <<"db1">>, <<"undefined">>),
                ?assert(meck:validate(chef_index_queue))
        end
       },

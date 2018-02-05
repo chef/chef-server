@@ -35,6 +35,8 @@
 
 -include("chef_solr.hrl").
 
+-define(NOT_A_QUERY, <<"not_a_query">>).
+
 search_provider() ->
     envy:get(chef_index, search_provider, solr, envy:one_of([solr, elasticsearch])).
 
@@ -93,7 +95,10 @@ add(TypeName, Id, DbName, IndexEjson, ReqId) ->
     QueueMode = queue_mode(),
     case QueueMode of
         rabbitmq ->
-            ok = chef_index_queue:set(envy:get(chef_index, rabbitmq_vhost, binary), TypeName, Id, DbName, IndexEjson);
+            stats_hero:ctime(ReqId, {index_queue, update},
+                             fun() ->
+                                     ok = chef_index_queue:set(envy:get(chef_index, rabbitmq_vhost, binary), TypeName, Id, DbName, IndexEjson)
+                             end);
         _ -> %% else batch or inline, create doc
             TypeName2 = case TypeName of
                             data_bag_item ->
@@ -129,7 +134,7 @@ add_batch_item_with_retries(Item) ->
 
 add_batch_item_with_retries(Item, Failures, Max) ->
     {TypeName, Id, DbName, IndexEjson} = Item,
-    case chef_index:add(TypeName, Id, DbName, IndexEjson, none) of
+    case chef_index:add(TypeName, Id, DbName, IndexEjson, ?NOT_A_QUERY) of
         ok ->
             ok;
         Error when Failures >= Max ->
@@ -166,7 +171,10 @@ not_ok(Results) ->
 delete(TypeName, Id, DbName, ReqId) ->
     case queue_mode() of
         rabbitmq ->
-            ok = chef_index_queue:delete(envy:get(chef_index, rabbitmq_vhost, binary), TypeName, Id, DbName);
+            stats_hero:ctime(ReqId, {index_queue, delete},
+                             fun() ->
+                                     ok = chef_index_queue:delete(envy:get(chef_index, rabbitmq_vhost, binary), TypeName, Id, DbName)
+                             end);
         _ -> %% batch mode not implemented for delete, always use inline if not rabbitmq
             stats_hero:ctime(ReqId, {chef_solr, delete},
                              fun() ->
