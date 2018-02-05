@@ -70,11 +70,12 @@ check_health() ->
 
     log_failure(Status, Pings, QueueMonStatus),
     KeyGen = chef_keygen_cache:status_for_json(),
-
+    Indexing = chef_index:status(),
 
     StatList = [{<<"status">>, ?A2B(Status)},
                 {<<"upstreams">>, {Pings}},
-                {<<"keygen">>, {KeyGen} }
+                {<<"keygen">>, {KeyGen}},
+                {<<"indexing">>, {Indexing}}
                 ] ++ QueueMonStatus,
 
     {Status, chef_json:encode({StatList})}.

@@ -30,7 +30,8 @@
          add/5,
          add_batch/1,
          search_provider/0,
-         ping/0
+         ping/0,
+         status/0
         ]).
 
 -include("chef_solr.hrl").
@@ -97,7 +98,7 @@ add(TypeName, Id, DbName, IndexEjson, ReqId) ->
         rabbitmq ->
             stats_hero:ctime(ReqId, {index_queue, update},
                              fun() ->
-                                     ok = chef_index_queue:set(envy:get(chef_index, rabbitmq_vhost, binary), TypeName, Id, DbName, IndexEjson)
+                                     ok = chef_index_queue:set(get_vhost(), TypeName, Id, DbName, IndexEjson)
                              end);
         _ -> %% else batch or inline, create doc
             TypeName2 = case TypeName of
@@ -173,7 +174,7 @@ delete(TypeName, Id, DbName, ReqId) ->
         rabbitmq ->
             stats_hero:ctime(ReqId, {index_queue, delete},
                              fun() ->
-                                     ok = chef_index_queue:delete(envy:get(chef_index, rabbitmq_vhost, binary), TypeName, Id, DbName)
+                                     ok = chef_index_queue:delete(get_vhost(), TypeName, Id, DbName)
                              end);
         _ -> %% batch mode not implemented for delete, always use inline if not rabbitmq
             stats_hero:ctime(ReqId, {chef_solr, delete},
@@ -197,6 +198,9 @@ send_to_solr(batch, Doc) ->
 send_to_solr(inline, Doc) ->
     chef_index_expand:send_item(Doc).
 
+get_vhost() ->
+    envy:get(chef_index, rabbitmq_vhost, binary).
+
 ping() ->
     case queue_mode() of
         rabbitmq ->
@@ -204,10 +208,19 @@ ping() ->
             Enabled = proplists:get_value(enabled, Config),
             case Enabled of
                 true ->
-                    chef_index_queue:ping(envy:get(chef_index, rabbitmq_vhost, binary));
+                    chef_index_queue:ping(get_vhost());
                 _ ->
                     pong
             end;
         _ ->
             pong
+    end.
+
+status() ->
+    case queue_mode() of
+        rabbitmq->
+            [{mode, rabbitmq},
+             {indexer_message_queue_length, chef_index_queue:message_queue_len(get_vhost())}];
+        Mode ->
+            [{mode, Mode}]
     end.
