@@ -51,7 +51,7 @@
   {git,"git://github.com/chef/epgsql-1.git",
        {ref,"25d9e2f4441b63296c34da1811d8b79ed4baa444"}},
   1},
- {<<"erlware_commons">>,{pkg,<<"erlware_commons">>,<<"1.0.0">>},0},
+ {<<"erlware_commons">>,{pkg,<<"erlware_commons">>,<<"1.0.4">>},0},
  {<<"folsom">>,
   {git,"https://github.com/boundary/folsom",
        {ref,"38e2cce7c64ce1f0a3a918d90394cfc0a940b1ba"}},
@@ -78,7 +78,7 @@
   0},
  {<<"jiffy">>,
   {git,"https://github.com/davisp/jiffy",
-       {ref,"e19df02c650e71ec16202e473427c7e4f1a70398"}},
+       {ref,"031f9dbbf6c31b83585569cd290504f006540a77"}},
   0},
  {<<"lager">>,
   {git,"https://github.com/basho/lager",
@@ -86,7 +86,7 @@
   0},
  {<<"meck">>,
   {git,"git://github.com/eproxus/meck.git",
-       {ref,"a1f83d3a33642c30df05a79520aa7397712a76bc"}},
+       {ref,"b1a9cadf43adba8426e48f0727f33338750e1169"}},
   1},
  {<<"mini_s3">>,
   {git,"https://github.com/chef/mini_s3",
@@ -103,6 +103,10 @@
  {<<"neotoma">>,
   {git,"https://github.com/seancribbs/neotoma",
        {ref,"760928ec8870da02eb11bccb501e2700925d06c6"}},
+  0},
+ {<<"observer_cli">>,
+  {git,"https://github.com/zhongwencool/observer_cli",
+       {ref,"4d5f96762bb525b4f857109c10a7d4d53af1a029"}},
   0},
  {<<"opscoderl_folsom">>,
   {git,"https://github.com/chef/opscoderl_folsom",
@@ -132,6 +136,7 @@
   {git,"git://github.com/seth/rabbit_common.git",
        {ref,"4388fe57cb63872f5fcf3a2670b4f05de657a64b"}},
   1},
+ {<<"recon">>,{pkg,<<"recon">>,<<"2.3.4">>},1},
  {<<"sqerl">>,
   {git,"https://github.com/chef/sqerl",
        {ref,"2d9792ccbbe86824d47468c119e7d99733ce4546"}},
@@ -142,7 +147,7 @@
   0},
  {<<"sync">>,
   {git,"https://github.com/rustyio/sync.git",
-       {ref,"6e9d730c8674ee3fa27dd8146316f94d2d180f59"}},
+       {ref,"7548dbffd3ed20a674bd423bd7131585ad66cd9e"}},
   0},
  {<<"uuid">>,
   {git,"https://github.com/okeuday/uuid",
@@ -154,5 +159,6 @@
   1}]}.
 [
 {pkg_hash,[
- {<<"erlware_commons">>, <<"087467DE5833C0BB5B3CCDD387F9E9C1FB816A75B7A709629BF24B5ED3246C51">>}]}
+ {<<"erlware_commons">>, <<"8F215709CCB8A99BC0436405CD78A8A92B84AD08969C2B926E239CC3B08AC4DC">>},
+ {<<"recon">>, <<"B406C2FCCDEAA0D94E23B5E30AE3D635A2D461E363A5C9C6316897037CF050D2">>}]}
 ].
