@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.28 -->
-## [12.17.28](https://github.com/chef/chef-server/tree/12.17.28) (2018-02-03)
+<!-- latest_release 12.17.29 -->
+## [12.17.29](https://github.com/chef/chef-server/tree/12.17.29) (2018-02-05)
 
 #### Merged Pull Requests
-- Bump verison for Release. [#1461](https://github.com/chef/chef-server/pull/1461) ([rhass](https://github.com/rhass))
+- Add observer_cli to erlang deps [#1460](https://github.com/chef/chef-server/pull/1460) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.15 -->
 ### Changes since 12.17.15 release
 
 #### Merged Pull Requests
+- Add observer_cli to erlang deps [#1460](https://github.com/chef/chef-server/pull/1460) ([markan](https://github.com/markan)) <!-- 12.17.29 -->
 - Bump verison for Release. [#1461](https://github.com/chef/chef-server/pull/1461) ([rhass](https://github.com/rhass)) <!-- 12.17.28 -->
 - Force a release build. [#1459](https://github.com/chef/chef-server/pull/1459) ([rhass](https://github.com/rhass)) <!-- 12.17.27 -->
 - Force a release build. [#1458](https://github.com/chef/chef-server/pull/1458) ([rhass](https://github.com/rhass)) <!-- 12.17.26 -->
