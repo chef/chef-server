@@ -232,7 +232,7 @@ module Pedant
               send(object_add_method_symbol, admin_requestor, o)
             end
             if objects.length > 0
-              Pedant::Utility.wait_until_queues_are_empty(i = 10, safety_sleep: false, quiet: true)
+              Pedant::Utility.wait_until_queues_are_empty(i = 10, safety_sleep: false, quiet: false)
             end
           end
 
@@ -244,7 +244,7 @@ module Pedant
             # next test is also a search, it is probably calling
             # setup_multiple_objects which will wait in the before
             # anyway.
-            # Pedant::Utility.wait_until_queues_are_empty(i = 10, safety_sleep: false)
+            Pedant::Utility.wait_until_queues_are_empty(i = 10, safety_sleep: false)
           end
         end
 
@@ -929,7 +929,7 @@ module Pedant
         # Wait for queues to have emptied: with_search_polling's
         # `force_solr_commit` could happen without every object having made it
         # to solr before.
-        Pedant::Utility.wait_until_queues_are_empty
+        Pedant::Utility.wait_until_queues_are_empty(quiet: false)
 
         # Ensure that a search against each Chef object type is
         # successful BEFORE any reindexing operations.
@@ -953,7 +953,7 @@ module Pedant
         puts `#{executable} reindex #{reindex_args.join(" ")} #{Pedant::Config.reindex_endpoint}`
 
         # wait for reindex to have finished
-        Pedant::Utility.wait_until_queues_are_empty
+        Pedant::Utility.wait_until_queues_are_empty(quiet: false)
 
         # Verify that the reindexing worked by finding all the items
         # again.  Remember, there are implicit Solr commit calls being
