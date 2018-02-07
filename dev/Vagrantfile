@@ -278,7 +278,7 @@ def define_db_server(config, attributes)
   set_chef_zero_provisioning(config,
                              recipes: ["provisioning::hosts"],
                              json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
-  config.vm.provision "shell", path: "scripts/configure-postgres.sh"
+  config.vm.provision "shell", path: "scripts/provision-postgres.sh"
 end
 
 def define_custom_server(config, attributes)
@@ -342,7 +342,7 @@ def define_db_server_reporting(config, attributes)
                              json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
   # Using shell here to ave the trouble of downloading
   # chef-client for the node.  May reconsider...
-  config.vm.provision "shell", inline: configure_postgres
+  config.vm.provision "shell", inline: "scripts/provision-postgres.sh"
 end
 
 
