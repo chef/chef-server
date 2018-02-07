@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.30 -->
-## [12.17.30](https://github.com/chef/chef-server/tree/12.17.30) (2018-02-07)
+<!-- latest_release 12.17.31 -->
+## [12.17.31](https://github.com/chef/chef-server/tree/12.17.31) (2018-02-07)
 
 #### Merged Pull Requests
-- Flip some bits for tests on PPC64. [#1464](https://github.com/chef/chef-server/pull/1464) ([rhass](https://github.com/rhass))
+- Revert &quot;Flip some bits for tests on PPC64.&quot; [#1466](https://github.com/chef/chef-server/pull/1466) ([rhass](https://github.com/rhass))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.15 -->
 ### Changes since 12.17.15 release
 
 #### Merged Pull Requests
+- Revert &quot;Flip some bits for tests on PPC64.&quot; [#1466](https://github.com/chef/chef-server/pull/1466) ([rhass](https://github.com/rhass)) <!-- 12.17.31 -->
 - Flip some bits for tests on PPC64. [#1464](https://github.com/chef/chef-server/pull/1464) ([rhass](https://github.com/rhass)) <!-- 12.17.30 -->
 - Add observer_cli to erlang deps [#1460](https://github.com/chef/chef-server/pull/1460) ([markan](https://github.com/markan)) <!-- 12.17.29 -->
 - Bump verison for Release. [#1461](https://github.com/chef/chef-server/pull/1461) ([rhass](https://github.com/rhass)) <!-- 12.17.28 -->
