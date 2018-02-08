@@ -1,0 +1,8 @@
+#!/bin/bash
+
+exec 2>&1
+
+echo "Linking conf dirs"
+
+ln -sf {{pkg.path}}/nginx/conf {{pkg.svc_var_path}}/
+ln -sf {{pkg.path}}/nginx/html {{pkg.svc_var_path}}/

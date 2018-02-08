@@ -1,0 +1,16 @@
+{
+  "quick_start": false,
+  "new_theme": true,
+  "private-chef": true,
+  "sql_users": true,
+  "add_type_and_bag_to_items": true,
+  "reporting": true,
+  "actions": true,
+  "503_mode": false,
+  "couchdb_containers": false,
+  "couchdb_groups": false,
+  "couchdb_acls": false,
+  "couchdb_association_requests": false,
+  "couchdb_organizations": false,
+  "couchdb_associations": false
+}

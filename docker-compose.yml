@@ -1,0 +1,128 @@
+# Configurable environment variables:
+# HAB_ORIGIN - denotes the docker origin (dockerhub ID)
+# VERSION -  the version identifier tag on the packages
+# AUTOMATE_ENABLED - enable the Automate data collector (true or false)
+# AUTOMATE_SERVER - the IP address or hostname of the Automate server
+# AUTOMATE_TOKEN - the token for the Automate server data collector
+# USER_ID - the user ID to use
+# GROUP_ID - the group ID to use
+
+version: '2.1'
+services:
+  postgresql:
+    image: chefdemo/postgresql:stable
+    environment:
+      HAB_POSTGRESQL: |
+        [superuser]
+        name = 'hab'
+        password = 'chefrocks'
+    volumes:
+      - postgresql-data:/hab/svc/postgresql/data:Z
+
+  chef-server-ctl:
+    image: ${HAB_ORIGIN:-chefserverofficial}/chef-server-ctl:${VERSION:-latest}
+    user: ${USER_ID:-42}:${GROUP_ID:-42}
+    cap_drop:
+    - NET_BIND_SERVICE
+    - SETUID
+    - SETGID
+    command: --peer postgresql
+    environment:
+      HAB_CHEF_SERVER_CTL: |
+        [chef_server_api]
+        ip = '${HOST_IP:-172.17.0.1}'
+        [secrets.data_collector]
+        token = "${AUTOMATE_TOKEN:-93a49a4f2482c64126f7b6015e6b0f30284287ee4054ff8807fb63d9cbd1c506}"
+
+  elasticsearch:
+    image: chefdemo/elasticsearch:stable
+    command: --peer postgresql
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - elasticsearch-data:/hab/svc/elasticsearch/data:Z
+
+  oc_id:
+    image: ${HAB_ORIGIN:-chefserverofficial}/oc_id:${VERSION:-latest}
+    user: ${USER_ID:-42}:${GROUP_ID:-42}
+    cap_drop:
+    - NET_BIND_SERVICE
+    - SETUID
+    - SETGID
+    command: --peer postgresql
+      --bind database:postgresql.default
+      --bind chef-server-ctl:chef-server-ctl.default
+
+  bookshelf:
+    image: ${HAB_ORIGIN:-chefserverofficial}/bookshelf:${VERSION:-latest}
+    user: ${USER_ID:-42}:${GROUP_ID:-42}
+    cap_drop:
+    - NET_BIND_SERVICE
+    - SETUID
+    - SETGID
+    command: --peer postgresql
+      --bind database:postgresql.default
+      --bind chef-server-ctl:chef-server-ctl.default
+
+  oc_bifrost:
+    image: ${HAB_ORIGIN:-chefserverofficial}/oc_bifrost:${VERSION:-latest}
+    user: ${USER_ID:-42}:${GROUP_ID:-42}
+    cap_drop:
+    - NET_BIND_SERVICE
+    - SETUID
+    - SETGID
+    command: --peer postgresql
+      --bind database:postgresql.default
+      --bind chef-server-ctl:chef-server-ctl.default
+
+  oc_erchef:
+    image: ${HAB_ORIGIN:-chefserverofficial}/oc_erchef:${VERSION:-latest}
+    user: ${USER_ID:-42}:${GROUP_ID:-42}
+    cap_drop:
+    - NET_BIND_SERVICE
+    - SETUID
+    - SETGID
+    command: --peer postgresql
+      --bind bookshelf:bookshelf.default
+      --bind oc_bifrost:oc_bifrost.default
+      --bind database:postgresql.default
+      --bind elasticsearch:elasticsearch.default
+      --bind chef-server-ctl:chef-server-ctl.default
+    environment:
+      HAB_OC_ERCHEF: |
+        [chef_authn]
+        keygen_cache_workers=2
+        keygen_cache_size=10
+        keygen_start_size=0
+        keygen_timeout=20000
+        [data_collector]
+        enabled = ${AUTOMATE_ENABLED:-false}
+        server = "${AUTOMATE_SERVER:-localhost}"
+        port = 443
+
+  chef-server-nginx:
+    image: ${HAB_ORIGIN:-chefserverofficial}/chef-server-nginx:${VERSION:-latest}
+    user: ${USER_ID:-42}:${GROUP_ID:-42}
+    cap_drop:
+    - NET_BIND_SERVICE
+    - SETUID
+    - SETGID
+    command: --peer postgresql
+      --bind oc_erchef:oc_erchef.default
+      --bind oc_bifrost:oc_bifrost.default
+      --bind oc_id:oc_id.default
+      --bind bookshelf:bookshelf.default
+      --bind elasticsearch:elasticsearch.default
+      --bind chef-server-ctl:chef-server-ctl.default
+    volumes:
+      - nginx-data:/hab/svc/chef-server-nginx/data:Z
+    ports:
+      - 80:8080
+      - 443:8443
+
+volumes:
+  postgresql-data:
+  elasticsearch-data:
+  nginx-data:
