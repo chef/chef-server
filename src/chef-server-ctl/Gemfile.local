@@ -1,0 +1,2 @@
+gem 'chef'
+gem 'json', '~>2.0'
