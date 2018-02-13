@@ -157,6 +157,7 @@ module Pedant
                                              headers: final_headers,
                                              ssl_version: Pedant::Config.ssl_version,
                                              verify_ssl: false,
+                                             open_timeout: 300,
                                              &response_handler)
 
       if block_given?
