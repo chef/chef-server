@@ -97,6 +97,21 @@ add_command_under_category "upgrade", "general", "Upgrade your private chef inst
     return answer == 'Y' || answer == 'y'
   end
 
+  def partybus_env
+    env = {}
+    env['PATH'] = "#{File.join(base_path, "embedded", "bin")}:#{ENV['PATH']}"
+  end
+
+  def partybus_init
+    migration_level_file = '/var/opt/opscode/upgrades/migration-level'
+    init =  if !File.exist?(migration_level_file) || File.zero?(migration_level_file)
+              run_command("bundle exec ./bin/partybus init", env: partybus_env)
+            end
+    # We only log the error here to try an allow existing mechanisms to raise
+    # the appropriate error messages.
+    log.error "Failed to initialize migration-level file: #{migration_level_file}" unless init.success?
+  end
+
   def partybus_upgrade
     # Original Enterprise Chef upgrade path
     # Put everything in a down state except postgres before we upgrade things.
@@ -120,9 +135,8 @@ add_command_under_category "upgrade", "general", "Upgrade your private chef inst
     end
 
     sleep 15
-    Dir.chdir(File.join(base_path, "embedded", "service", "partybus"))
-    bundle = File.join(base_path, "embedded", "bin", "bundle")
-    status = run_command("#{bundle} exec ./bin/partybus upgrade")
+    partybus_init
+    status = run_command("bundle exec ./bin/partybus upgrade", env: partybus_env)
     if status.success?
       puts "Chef Server Upgraded!"
       exit 0
