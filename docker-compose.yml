@@ -17,7 +17,7 @@ services:
         name = 'hab'
         password = 'chefrocks'
     volumes:
-      - postgresql-data:/hab/svc/postgresql/data:Z
+      - postgresql-data:/hab/svc/postgresql/data
 
   chef-server-ctl:
     image: ${HAB_ORIGIN:-chefserverofficial}/chef-server-ctl:${VERSION:-latest}
@@ -42,7 +42,7 @@ services:
         soft: 65536
         hard: 65536
     volumes:
-      - elasticsearch-data:/hab/svc/elasticsearch/data:Z
+      - elasticsearch-data:/hab/svc/elasticsearch/data
 
   oc_id:
     image: ${HAB_ORIGIN:-chefserverofficial}/oc_id:${VERSION:-latest}
@@ -117,7 +117,7 @@ services:
       --bind elasticsearch:elasticsearch.default
       --bind chef-server-ctl:chef-server-ctl.default
     volumes:
-      - nginx-data:/hab/svc/chef-server-nginx/data:Z
+      - nginx-data:/hab/svc/chef-server-nginx/data
     ports:
       - 80:8080
       - 443:8443

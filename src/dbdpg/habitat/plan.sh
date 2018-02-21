@@ -1,5 +1,5 @@
 pkg_name=dbdpg
-pkg_origin=frog-hornets-nest
+pkg_origin=chef-server
 pkg_version="3.5.3"
 pkg_maintainer="The Chef Automate Maintainers <support@chef.io>"
 pkg_license=('Artistic-1.0-Perl' 'GPL-2.0')

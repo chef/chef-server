@@ -11,5 +11,5 @@ for dir in dbdpg oc-id openresty-noroot nginx bookshelf chef-server-ctl oc_bifro
   build > /var/log/build-${dir}-$(date +%s).log
   if [[ $dir =~ dbdpg ]]; then continue; fi
   echo "[STATUS] exporting $dir pkg to docker daemon"
-  hab pkg export docker --non-root -i "chefserverofficial/{{pkg_name}}" $(ls -1t results/*.hart | head -1)
+  hab pkg export docker -i "chefserverofficial/{{pkg_name}}" $(ls -1t results/*.hart | head -1)
 done
