@@ -4,11 +4,7 @@
 # All Rights Reserved
 #
 
-begin
-  require_relative "open_source_chef12_upgrade"
-rescue LoadError
-  require "/opt/opscode/embedded/service/omnibus-ctl/open_source_chef12_upgrade"
-end
+require "/opt/opscode/embedded/service/omnibus-ctl/open_source_chef12_upgrade"
 require 'optparse'
 require 'ostruct'
 
