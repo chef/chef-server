@@ -16,6 +16,7 @@
 #Override the connect() method to set appropriate IPV6 host headers
 require 'pedant/core_ext/net_http'
 
+require 'uri'
 require 'pp' # Debugging
 
 require 'rspec'
@@ -48,6 +49,13 @@ module Pedant
     Encoding.default_external = Encoding::UTF_8
     Encoding.default_internal = Encoding::UTF_8
 
+    # The URI gets normalized many places in the chain from pedant to erchef; in particular redundant port
+    # specifications (e.g 443 for https) are stripped out.  We normalize the URI here to make sure that the
+    # specs we check against conform to that requirement.
+    if Config.has_key?(:chef_server)
+      # chomp is to strip the trailing slash, which while technically correct, is improperly handled when we construct our specs
+      Config[:chef_server] = URI.parse(Config[:chef_server]).normalize.to_s.chomp('/')
+    end
     Config
   end
 

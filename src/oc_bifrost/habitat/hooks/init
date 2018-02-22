@@ -1,0 +1,7 @@
+#!/bin/bash
+
+exec 2>&1
+
+mkdir -p {{pkg.svc_var_path}}/logs
+
+source "{{pkg.svc_config_path}}/database-migrations.sh"

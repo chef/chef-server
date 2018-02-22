@@ -1,0 +1,5 @@
+#!/bin/bash
+
+exec 2>&1
+
+exec openresty -g 'daemon off;' -c {{pkg.svc_var_path}}/conf/nginx.conf

@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+
+# Health Check for oc_id
+
+# default return code is 0
+rc=0
+
+{{pkgPathFor "core/curl"}}/bin/curl -X GET -sS --fail --max-time 2 http://localhost:9090/id/signin -I | head -1
+
+case $? in
+    # Zero exit status means curl got back a 200 end everything is ok.
+    0)
+        rc=0 ;;
+    # Anything else is critical.
+    *)
+        rc=2 ;;
+esac
+
+exit $rc
