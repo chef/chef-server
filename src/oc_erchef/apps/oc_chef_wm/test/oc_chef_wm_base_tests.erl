@@ -39,7 +39,8 @@ stats_hero_label_test_() ->
                                      {{chef_sql, fetch_client}, <<"rdbms.chef_sql.fetch_client">>},
                                      {{chef_solr, some_fun}, <<"solr.chef_solr.some_fun">>},
                                      {{oc_chef_authz, some_other_fun}, <<"authz.oc_chef_authz.some_other_fun">>},
-                                     {{chef_s3, delete_checksums}, <<"s3.s3_amazonaws_com.test_bucket.chef_s3.delete_checksums">>}
+                                     {{chef_s3, delete_checksums}, <<"s3.s3_amazonaws_com.test_bucket.chef_s3.delete_checksums">>},
+                                     {{index_queue, update}, <<"index_queue.index_queue.update">>}
                                     ]],
 
     BadTests = [
