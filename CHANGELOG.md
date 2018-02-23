@@ -7,34 +7,39 @@
 - Update release notes for 12.17.33 release. [#1476](https://github.com/chef/chef-server/pull/1476) ([rhass](https://github.com/rhass))
 <!-- latest_release -->
 
-<!-- release_rollup since=12.17.15 -->
-### Changes since 12.17.15 release
+<!-- release_rollup since=12.17.33 -->
+### Changes since 12.17.33 release
 
 #### Merged Pull Requests
-- Update release notes for 12.17.33 release. [#1476](https://github.com/chef/chef-server/pull/1476) ([rhass](https://github.com/rhass)) <!-- 12.17.36 -->
-- habitat mode for chef-server-ctl command [#1475](https://github.com/chef/chef-server/pull/1475) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.17.35 -->
 - Adding Habitization - this PR supersedes PR#1416 [#1472](https://github.com/chef/chef-server/pull/1472) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.17.34 -->
-- Increase Net::HTTP / rest-client open_timeout [#1470](https://github.com/chef/chef-server/pull/1470) ([rhass](https://github.com/rhass)) <!-- 12.17.33 -->
-- Use the version of LicenseScout that comes with the Omnibus gem. [#1468](https://github.com/chef/chef-server/pull/1468) ([tduffield](https://github.com/tduffield)) <!-- 12.17.32 -->
-- Revert &quot;Flip some bits for tests on PPC64.&quot; [#1466](https://github.com/chef/chef-server/pull/1466) ([rhass](https://github.com/rhass)) <!-- 12.17.31 -->
-- Flip some bits for tests on PPC64. [#1464](https://github.com/chef/chef-server/pull/1464) ([rhass](https://github.com/rhass)) <!-- 12.17.30 -->
-- Add observer_cli to erlang deps [#1460](https://github.com/chef/chef-server/pull/1460) ([markan](https://github.com/markan)) <!-- 12.17.29 -->
-- Bump verison for Release. [#1461](https://github.com/chef/chef-server/pull/1461) ([rhass](https://github.com/rhass)) <!-- 12.17.28 -->
-- Force a release build. [#1459](https://github.com/chef/chef-server/pull/1459) ([rhass](https://github.com/rhass)) <!-- 12.17.27 -->
-- Force a release build. [#1458](https://github.com/chef/chef-server/pull/1458) ([rhass](https://github.com/rhass)) <!-- 12.17.26 -->
-- omnibus: pin openresty 1.11.2.1 [#1457](https://github.com/chef/chef-server/pull/1457) ([srenatus](https://github.com/srenatus)) <!-- 12.17.25 -->
-- Add yml header to expeditor config. [#1453](https://github.com/chef/chef-server/pull/1453) ([rhass](https://github.com/rhass)) <!-- 12.17.24 -->
-- Update release process documentation. [#1452](https://github.com/chef/chef-server/pull/1452) ([rhass](https://github.com/rhass)) <!-- 12.17.23 -->
-- [MSYS-722] Escape forward slash for elasticsearch query only. [#1444](https://github.com/chef/chef-server/pull/1444) ([piyushawasthi](https://github.com/piyushawasthi)) <!-- 12.17.22 -->
-- Update Chef Client and Ruby version. [#1448](https://github.com/chef/chef-server/pull/1448) ([rhass](https://github.com/rhass)) <!-- 12.17.21 -->
-- [SUSTAIN-807] Clean up oc_id PID on restart [#1442](https://github.com/chef/chef-server/pull/1442) ([nsdavidson](https://github.com/nsdavidson)) <!-- 12.17.20 -->
-- Converge runners with --no-fork [#1445](https://github.com/chef/chef-server/pull/1445) ([scotthain](https://github.com/scotthain)) <!-- 12.17.19 -->
-- Praj/sustain 633 [#1438](https://github.com/chef/chef-server/pull/1438) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.18 -->
-- It is 2017! Postpone expiration to 2025 [#1443](https://github.com/chef/chef-server/pull/1443) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.17 -->
-- Update RELEASE_NOTES.md for 12.17.15 release [#1441](https://github.com/chef/chef-server/pull/1441) ([btm](https://github.com/btm)) <!-- 12.17.16 -->
+- habitat mode for chef-server-ctl command [#1475](https://github.com/chef/chef-server/pull/1475) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.17.35 -->
+- Update release notes for 12.17.33 release. [#1476](https://github.com/chef/chef-server/pull/1476) ([rhass](https://github.com/rhass)) <!-- 12.17.36 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [12.17.33](https://github.com/chef/chef-server/tree/12.17.33) (2018-02-23)
+
+#### Merged Pull Requests
+- Update RELEASE_NOTES.md for 12.17.15 release [#1441](https://github.com/chef/chef-server/pull/1441) ([btm](https://github.com/btm))
+- It is 2017! Postpone expiration to 2025 [#1443](https://github.com/chef/chef-server/pull/1443) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Praj/sustain 633 [#1438](https://github.com/chef/chef-server/pull/1438) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Converge runners with --no-fork [#1445](https://github.com/chef/chef-server/pull/1445) ([scotthain](https://github.com/scotthain))
+- [SUSTAIN-807] Clean up oc_id PID on restart [#1442](https://github.com/chef/chef-server/pull/1442) ([nsdavidson](https://github.com/nsdavidson))
+- Update Chef Client and Ruby version. [#1448](https://github.com/chef/chef-server/pull/1448) ([rhass](https://github.com/rhass))
+- [MSYS-722] Escape forward slash for elasticsearch query only. [#1444](https://github.com/chef/chef-server/pull/1444) ([piyushawasthi](https://github.com/piyushawasthi))
+- Update release process documentation. [#1452](https://github.com/chef/chef-server/pull/1452) ([rhass](https://github.com/rhass))
+- Add yml header to expeditor config. [#1453](https://github.com/chef/chef-server/pull/1453) ([rhass](https://github.com/rhass))
+- omnibus: pin openresty 1.11.2.1 [#1457](https://github.com/chef/chef-server/pull/1457) ([srenatus](https://github.com/srenatus))
+- Force a release build. [#1458](https://github.com/chef/chef-server/pull/1458) ([rhass](https://github.com/rhass))
+- Force a release build. [#1459](https://github.com/chef/chef-server/pull/1459) ([rhass](https://github.com/rhass))
+- Bump verison for Release. [#1461](https://github.com/chef/chef-server/pull/1461) ([rhass](https://github.com/rhass))
+- Add observer_cli to erlang deps [#1460](https://github.com/chef/chef-server/pull/1460) ([markan](https://github.com/markan))
+- Flip some bits for tests on PPC64. [#1464](https://github.com/chef/chef-server/pull/1464) ([rhass](https://github.com/rhass))
+- Revert &quot;Flip some bits for tests on PPC64.&quot; [#1466](https://github.com/chef/chef-server/pull/1466) ([rhass](https://github.com/rhass))
+- Use the version of LicenseScout that comes with the Omnibus gem. [#1468](https://github.com/chef/chef-server/pull/1468) ([tduffield](https://github.com/tduffield))
+- Increase Net::HTTP / rest-client open_timeout [#1470](https://github.com/chef/chef-server/pull/1470) ([rhass](https://github.com/rhass))
+<!-- latest_stable_release -->
+
 ## [12.17.15](https://github.com/chef/chef-server/tree/12.17.15) (2017-12-21)
 
 #### Merged Pull Requests
@@ -48,7 +53,6 @@
 - [SUSTAIN-782] Fix permissions on gemfiles created with strict umask on reconfigure [#1431](https://github.com/chef/chef-server/pull/1431) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 - [SUSTAIN-600] Make request logging configurable [#1433](https://github.com/chef/chef-server/pull/1433) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 - change to test ipv6 fix [#1439](https://github.com/chef/chef-server/pull/1439) ([markan](https://github.com/markan))
-<!-- latest_stable_release -->
 
 ## [12.17.5](https://github.com/chef/chef-server/tree/12.17.5) (2017-10-25)
 
