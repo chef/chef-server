@@ -23,7 +23,8 @@
          set/5,
          set/6,
          create_management_pool/3,
-         ping/1
+         ping/1,
+         message_queue_len/1
         ]).
 
 -ifdef(TEST).
@@ -122,6 +123,16 @@ ping(VHost) ->
         _ -> pang
     end.
 
+-spec message_queue_len(binary()) -> integer() | undefined.
+message_queue_len(VHost) ->
+    Name = chef_index_sup:server_for_vhost(VHost),
+    case whereis(Name) of
+        undefined -> undefined;
+        Pid ->
+            {message_queue_len, Len} = erlang:process_info(Pid, message_queue_len),
+            Len
+    end.
+
 %%%%
 %% Internal
 %%%%
@@ -182,4 +193,3 @@ object_id_to_i(UUID) ->
 unix_time() ->
   {MS, S, _US} = os:timestamp(),
   (1000000 * MS) + S.
-

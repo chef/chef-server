@@ -95,7 +95,7 @@ term_keyword_test_() ->
 
 term_special_chars_test_() ->
     SpecialChars = ["!", "(", ")", "{", "}", "[", "]",
-                    "^", "\"", "~", "*", "?", ":", "\\"],
+                    "^", "\"", "~", "*", "?", ":", "\\", "/"],
     Formats = ["foo~sbar", "~sb", "a~s", "a~sb"],
     Terms = [ ?i2b(io_lib:format(F, ["\\" ++ C])) ||
                 F <- Formats, C <- SpecialChars ],

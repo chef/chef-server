@@ -654,7 +654,7 @@ is_user_in_org(Type, DbContext, Name, OrgName) ->
 
 %% These are modules that we instrument with stats_hero and aggregate into common prefix via
 %% stats_hero_label.
--type metric_module() :: oc_chef_authz | chef_s3 | chef_sql | chef_solr | data_collector.
+-type metric_module() :: oc_chef_authz | chef_s3 | chef_sql | chef_solr | data_collector | index_queue.
 
 %% @doc Given a `{Mod, Fun}' tuple, generate a stats hero metric with a prefix appropriate
 %% for stats_hero aggregation. An error is thrown if `Mod' is unknown. This is where we
@@ -672,6 +672,8 @@ stats_hero_label({chef_depsolver, Fun}) ->
     chef_metrics:label(depsolver, {chef_depsolver, Fun});
 stats_hero_label({data_collector, Fun}) ->
     chef_metrics:label(data_collector, {data_collector, Fun});
+stats_hero_label({index_queue, Fun}) ->
+    chef_metrics:label(index_queue, {index_queue, Fun});
 stats_hero_label({BadPrefix, Fun}) ->
     erlang:error({bad_prefix, {BadPrefix, Fun}}).
 
@@ -679,7 +681,7 @@ stats_hero_label({BadPrefix, Fun}) ->
 %% @doc The prefixes that stats_hero should use for aggregating timing data over each
 %% request.
 stats_hero_upstreams() ->
-    [<<"authz">>, <<"depsolver">>, <<"data_collector">>, <<"rdbms">>, <<"s3">>, <<"solr">>].
+    [<<"authz">>, <<"depsolver">>, <<"data_collector">>, <<"index_queue">>, <<"rdbms">>, <<"s3">>, <<"solr">>].
 
 
 

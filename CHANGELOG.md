@@ -1,35 +1,65 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.15 -->
-## [12.17.15](https://github.com/chef/chef-server/tree/12.17.15) (2017-12-18)
+<!-- latest_release 12.17.37 -->
+## [12.17.37](https://github.com/chef/chef-server/tree/12.17.37) (2018-02-23)
 
 #### Merged Pull Requests
-- change to test ipv6 fix [#1439](https://github.com/chef/chef-server/pull/1439) ([markan](https://github.com/markan))
+- Add queue insertion information to statistics. [#1462](https://github.com/chef/chef-server/pull/1462) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
-<!-- release_rollup since=12.17.5 -->
-### Changes since 12.17.5 release
+<!-- release_rollup since=12.17.33 -->
+### Changes since 12.17.33 release
 
 #### Merged Pull Requests
-- change to test ipv6 fix [#1439](https://github.com/chef/chef-server/pull/1439) ([markan](https://github.com/markan)) <!-- 12.17.15 -->
-- [SUSTAIN-600] Make request logging configurable [#1433](https://github.com/chef/chef-server/pull/1433) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.14 -->
-- [SUSTAIN-782] Fix permissions on gemfiles created with strict umask on reconfigure [#1431](https://github.com/chef/chef-server/pull/1431) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.13 -->
-- Disable Welcome Page [#1428](https://github.com/chef/chef-server/pull/1428) ([lancewf](https://github.com/lancewf)) <!-- 12.17.12 -->
-- [reconfigure] Rescue all IPAddr errors [#1425](https://github.com/chef/chef-server/pull/1425) ([stevendanna](https://github.com/stevendanna)) <!-- 12.17.11 -->
-- [SUSTAIN-784] Add security headers [#1427](https://github.com/chef/chef-server/pull/1427) ([nsdavidson](https://github.com/nsdavidson)) <!-- 12.17.10 -->
-- Pull in new knife-opc (we track master) for SUSTAIN-784 [#1426](https://github.com/chef/chef-server/pull/1426) ([btm](https://github.com/btm)) <!-- 12.17.9 -->
-- InSpec smoke test improvements [#1423](https://github.com/chef/chef-server/pull/1423) ([schisamo](https://github.com/schisamo)) <!-- 12.17.8 -->
-- [rabbitmq] Remove guest user by default [#1420](https://github.com/chef/chef-server/pull/1420) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.7 -->
-- [SUSTAIN-728] Add /_acl for cookbook_artifacts [#1414](https://github.com/chef/chef-server/pull/1414) ([nsdavidson](https://github.com/nsdavidson)) <!-- 12.17.6 -->
+- Add queue insertion information to statistics. [#1462](https://github.com/chef/chef-server/pull/1462) ([markan](https://github.com/markan)) <!-- 12.17.37 -->
+- Adding Habitization - this PR supersedes PR#1416 [#1472](https://github.com/chef/chef-server/pull/1472) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.17.34 -->
+- habitat mode for chef-server-ctl command [#1475](https://github.com/chef/chef-server/pull/1475) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.17.35 -->
+- Update release notes for 12.17.33 release. [#1476](https://github.com/chef/chef-server/pull/1476) ([rhass](https://github.com/rhass)) <!-- 12.17.36 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [12.17.33](https://github.com/chef/chef-server/tree/12.17.33) (2018-02-23)
+
+#### Merged Pull Requests
+- Update RELEASE_NOTES.md for 12.17.15 release [#1441](https://github.com/chef/chef-server/pull/1441) ([btm](https://github.com/btm))
+- It is 2017! Postpone expiration to 2025 [#1443](https://github.com/chef/chef-server/pull/1443) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Praj/sustain 633 [#1438](https://github.com/chef/chef-server/pull/1438) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Converge runners with --no-fork [#1445](https://github.com/chef/chef-server/pull/1445) ([scotthain](https://github.com/scotthain))
+- [SUSTAIN-807] Clean up oc_id PID on restart [#1442](https://github.com/chef/chef-server/pull/1442) ([nsdavidson](https://github.com/nsdavidson))
+- Update Chef Client and Ruby version. [#1448](https://github.com/chef/chef-server/pull/1448) ([rhass](https://github.com/rhass))
+- [MSYS-722] Escape forward slash for elasticsearch query only. [#1444](https://github.com/chef/chef-server/pull/1444) ([piyushawasthi](https://github.com/piyushawasthi))
+- Update release process documentation. [#1452](https://github.com/chef/chef-server/pull/1452) ([rhass](https://github.com/rhass))
+- Add yml header to expeditor config. [#1453](https://github.com/chef/chef-server/pull/1453) ([rhass](https://github.com/rhass))
+- omnibus: pin openresty 1.11.2.1 [#1457](https://github.com/chef/chef-server/pull/1457) ([srenatus](https://github.com/srenatus))
+- Force a release build. [#1458](https://github.com/chef/chef-server/pull/1458) ([rhass](https://github.com/rhass))
+- Force a release build. [#1459](https://github.com/chef/chef-server/pull/1459) ([rhass](https://github.com/rhass))
+- Bump verison for Release. [#1461](https://github.com/chef/chef-server/pull/1461) ([rhass](https://github.com/rhass))
+- Add observer_cli to erlang deps [#1460](https://github.com/chef/chef-server/pull/1460) ([markan](https://github.com/markan))
+- Flip some bits for tests on PPC64. [#1464](https://github.com/chef/chef-server/pull/1464) ([rhass](https://github.com/rhass))
+- Revert &quot;Flip some bits for tests on PPC64.&quot; [#1466](https://github.com/chef/chef-server/pull/1466) ([rhass](https://github.com/rhass))
+- Use the version of LicenseScout that comes with the Omnibus gem. [#1468](https://github.com/chef/chef-server/pull/1468) ([tduffield](https://github.com/tduffield))
+- Increase Net::HTTP / rest-client open_timeout [#1470](https://github.com/chef/chef-server/pull/1470) ([rhass](https://github.com/rhass))
+<!-- latest_stable_release -->
+
+## [12.17.15](https://github.com/chef/chef-server/tree/12.17.15) (2017-12-21)
+
+#### Merged Pull Requests
+- [SUSTAIN-728] Add /_acl for cookbook_artifacts [#1414](https://github.com/chef/chef-server/pull/1414) ([nsdavidson](https://github.com/nsdavidson))
+- [rabbitmq] Remove guest user by default [#1420](https://github.com/chef/chef-server/pull/1420) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- InSpec smoke test improvements [#1423](https://github.com/chef/chef-server/pull/1423) ([schisamo](https://github.com/schisamo))
+- Pull in new knife-opc (we track master) for SUSTAIN-784 [#1426](https://github.com/chef/chef-server/pull/1426) ([btm](https://github.com/btm))
+- [SUSTAIN-784] Add security headers [#1427](https://github.com/chef/chef-server/pull/1427) ([nsdavidson](https://github.com/nsdavidson))
+- [reconfigure] Rescue all IPAddr errors [#1425](https://github.com/chef/chef-server/pull/1425) ([stevendanna](https://github.com/stevendanna))
+- Disable Welcome Page [#1428](https://github.com/chef/chef-server/pull/1428) ([lancewf](https://github.com/lancewf))
+- [SUSTAIN-782] Fix permissions on gemfiles created with strict umask on reconfigure [#1431](https://github.com/chef/chef-server/pull/1431) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- [SUSTAIN-600] Make request logging configurable [#1433](https://github.com/chef/chef-server/pull/1433) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- change to test ipv6 fix [#1439](https://github.com/chef/chef-server/pull/1439) ([markan](https://github.com/markan))
+
 ## [12.17.5](https://github.com/chef/chef-server/tree/12.17.5) (2017-10-25)
 
 #### Merged Pull Requests
 - set use_implicit_hosts to false [#1408](https://github.com/chef/chef-server/pull/1408) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 - Release 12.17.5 [#1412](https://github.com/chef/chef-server/pull/1412) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
-<!-- latest_stable_release -->
 
 ## [12.17.3](https://github.com/chef/chef-server/tree/12.17.3) (2017-10-19)
 

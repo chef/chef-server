@@ -35,7 +35,7 @@ end
 
 # Execute a CCR on the instances to bring up Chef Server
 parallel_remote_execute "Run CCR on #{infra_node_names}" do
-  command 'sudo /opt/chef/bin/chef-client'
+  command 'sudo /opt/chef/bin/chef-client --no-fork'
   hosts infra_node_names
   private_key aws_private_key
   timeout 7200 # 2 hours

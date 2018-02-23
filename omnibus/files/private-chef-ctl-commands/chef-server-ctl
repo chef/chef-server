@@ -1,4 +1,5 @@
 #!/opt/opscode/embedded/bin/ruby
+
 require 'rubygems'
 gem 'omnibus-ctl'
 require 'omnibus-ctl'
@@ -19,9 +20,15 @@ module Omnibus
       d
     end
 
+    CREDENTIAL_ENV = 'CHEF_SECRETS_DATA'.freeze
+
     def credentials
-      secrets_file = ENV['SECRETS_FILE'] || "/etc/opscode/private-chef-secrets.json"
-      @credentials ||= Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file)
+      if ENV.has_key?(CREDENTIAL_ENV)
+        @credentials = Veil::CredentialCollection::ChefSecretsEnv.new(var_name: CREDENTIAL_ENV)
+      else
+        secrets_file = ENV['SECRETS_FILE'] || "/etc/opscode/private-chef-secrets.json"
+        @credentials ||= Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file)
+      end
     end
 
     # Note that as we expand our external service support,

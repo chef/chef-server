@@ -1,0 +1,68 @@
+# Use this file to templatize your application's native configuration files.
+# See the docs at https://www.habitat.sh/docs/create-packages-configure/.
+# You can safely delete this file if you don't need it.
+#
+
+[chef_server_api]
+ip = "172.18.0.1"
+port = "80"
+ssl_port = "443"
+
+# the secrets namespace is initially initted to empty strings,
+# the idea is that we loop through all of these and generate them at
+# "bootstrap" time and then re-inject them into the config
+
+# NOTE: Additional keys have to also be added in the ruby hash here: config/secrets-bootstrap.rb
+
+[secrets]
+
+[secrets.postgresql]
+db_superuser_password = ""
+
+[secrets.redis_lb]
+password = ""
+
+[secrets.rabbitmq]
+password = ""
+management_password = ""
+actions_password = ""
+
+[secrets.keepalived]
+vrrp_instance_password = ""
+
+[secrets.opscode_erchef]
+sql_password = ""
+sql_ro_password = ""
+stats_password = ""
+
+[secrets.oc_bifrost]
+superuser_id = ""
+sql_password = ""
+sql_ro_password = ""
+
+[secrets.oc_id]
+secret_key_base = ""
+sql_password = ""
+sql_ro_password = ""
+
+[secrets.bookshelf]
+access_key_id = ""
+secret_access_key = ""
+sql_password = ""
+sql_ro_password = ""
+
+[secrets.chef-server]
+superuser_id = ""
+superuser_key = ""
+superuser_pub_key = ""
+webui_key = ""
+webui_pub_key = ""
+
+[secrets.push-jobs-server]
+sql_password = ""
+sql_ro_password = ""
+pushy_priv_key = ""
+pushy_pub_key = ""
+
+[secrets.data_collector]
+token = ""

@@ -5,7 +5,9 @@ def wait_for_http_listener(uri_string, retries = 10)
   uri = URI(uri_string)
   begin
     puts "Trying GET #{uri_string}"
-    Net::HTTP.start(uri.host, uri.port, :use_ssl => true,
+    Net::HTTP.start(uri.host, uri.port,
+                    use_ssl: true,
+                    ssl_version: Pedant::Config.ssl_version, # ??
                     verify_mode: OpenSSL::SSL::VERIFY_NONE) do |http|
       request = Net::HTTP::Get.new uri
       http.request request

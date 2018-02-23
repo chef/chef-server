@@ -1,7 +1,6 @@
 source 'https://rubygems.org'
 
 gemspec
-gem 'rest-client', github: 'chef/rest-client'
 # For debugging in dvm
 gem 'pry'
 gem 'pry-byebug'

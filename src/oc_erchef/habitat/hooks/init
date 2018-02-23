@@ -1,0 +1,9 @@
+#!/bin/bash
+
+exec 2>&1
+
+mkdir -p {{pkg.svc_var_path}}/logs
+
+source "{{pkg.svc_config_path}}/elasticsearch-init.sh"
+source "{{pkg.svc_config_path}}/database-migrations.sh"
+cd {{pkg.path}} && bundle exec ruby "{{pkg.svc_config_path}}/chef_server_data_bootstrap.rb"

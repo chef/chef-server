@@ -9,5 +9,9 @@ gem "rb-readline"
 gem "rspec"
 gem "veil", git: "https://github.com/chef/chef_secrets.git"
 
-# Dependencies of ctl commands
+# Dependencies for ctl commands
 gem "redis"
+gem "sequel"
+gem "rest-client"
+gem 'pg'
+gem 'knife-opc'

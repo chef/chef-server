@@ -44,6 +44,7 @@ setup_env() ->
     application:set_env(oc_chef_wm, health_ping_timeout, ?PING_TIMEOUT),
     application:set_env(oc_chef_wm, health_ping_modules, ?CHECK_MODS),
     application:set_env(oc_chef_wm, rabbitmq, default_config()),
+    application:set_env(chef_index, rabbitmq_vhost, <<"/chef">>),
     oc_chef_action_queue_config:set_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false),
     ok.
 

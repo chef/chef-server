@@ -51,19 +51,13 @@ remote-state: init
 
 	cd $(TF_DIRECTORY) && \
 	rm -rf .terraform && \
-	terraform remote config \
-		-backend=s3 \
-		-backend-config="profile=chef-cd" \
-		-backend-config="bucket=chef-cd-terraform-state" \
-		-backend-config="key=chef-server/$(TF_STATE)" \
-		-backend-config="region=us-west-2" && \
-	terraform get
+	terraform init -backend-config="key=chef-server/$(TF_STATE)"
 
 plan: remote-state
 	cd $(TF_DIRECTORY) && terraform plan -var-file=vars/$(TF_ENVIRONMENT).tfvars
 
 apply: remote-state
-	cd $(TF_DIRECTORY) && terraform apply -var-file=vars/$(TF_ENVIRONMENT).tfvars
+	cd $(TF_DIRECTORY) && terraform apply -auto-approve -var-file=vars/$(TF_ENVIRONMENT).tfvars
 
 destroy: remote-state
 ifeq ($(TF_ENVIRONMENT), dev)

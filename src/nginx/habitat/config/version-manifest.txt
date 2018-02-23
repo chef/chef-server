@@ -1,0 +1,3 @@
+Package: {{pkg.ident}}
+Habitat: {{sys.version}}
+Member: {{sys.member_id}} / {{sys.hostname}}

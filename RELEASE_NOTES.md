@@ -8,6 +8,30 @@ This document contains release notes for the current major release and all patch
 For prior releases,
 see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 12.17.33 (2018-02-22)
+This release upgrades the version of Ruby to 2.4.3.
+
+- Add FIPS support for PPC64 (big-endian).
+- Fixed invalid search query issue with elasticsearch where forward slashes not getting escaped properly..
+
+## 12.17.15 (2017-12-21)
+
+- Fix a regression in IPv6 address handling
+- Allow disabling of request logging
+  - opscode-erchef['enable_request_logging'] defaults to true
+  - oc_bifrost['enable_request_logging'] defaults to true
+  - bookshelf['enable_request_logging'] defaults to false
+    - bookshelf is a change from prior behavior as this logging is redundant with the existing nginx logs
+- `chef-server-ctl reconfigure` fixes permissions on gems with an overly restrictive umask
+- Make the display of the welcome page configurable
+  - nginx['show_welcome_page'] defaults to true
+- Inferring the current database migration level and necessary upgrades for `chef-server-ctl upgrade`
+- Catch server_name resolution errors during `chef-server-ctl reconfigure` and continue
+- Add XSS related HTTP headers when chef-manage is not installed (chef-manage adds these itself)
+- knife-opc upgraded to 12c02a to support prompting for a user password on creation
+- Do not create the default rabbitmq guest useR
+- Add /_acl endpoint for cookbook artifacts
+
 ## 12.17.5 (2017-10-24)
 
 This release fixes a regression.
