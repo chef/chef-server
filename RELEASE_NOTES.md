@@ -8,6 +8,12 @@ This document contains release notes for the current major release and all patch
 For prior releases,
 see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 12.17.33 (2018-02-22)
+This release upgrades the version of Ruby to 2.4.3.
+
+- Add FIPS support for PPC64 (big-endian).
+- Fixed invalid search query issue with elasticsearch where forward slashes not getting escaped properly..
+
 ## 12.17.15 (2017-12-21)
 
 - Fix a regression in IPv6 address handling
