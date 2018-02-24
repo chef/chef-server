@@ -1,4 +1,4 @@
-#%RAML 0.8
+#%RAML 1.0
 ---
 description: Chef Organizations, describing one set of nodes, cookbooks, policies and other objects.
 type: list_endpoint

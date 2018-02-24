@@ -1,4 +1,4 @@
-#%RAML 0.8
+#%RAML 1.0 Library
 ---
 chef_endpoint:
   description: Base for a Chef endpoint, which returns JSON, authenticates, and is versioned.

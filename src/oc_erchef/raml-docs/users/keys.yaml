@@ -1,4 +1,4 @@
-#%RAML 0.8
+#%RAML 1.0
 ---
 description: View and add keys for the named user.
 type: list_endpoint

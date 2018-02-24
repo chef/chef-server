@@ -1,4 +1,4 @@
-#%RAML 0.8
+#%RAML 1.0
 ---
 description: Organization invites for the user
 type: list_endpoint
