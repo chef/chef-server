@@ -98,6 +98,7 @@ do_install() {
 
   # in pedant dir bundle install
   pushd ${pedant_dir}
+  bundle update
   bundle install --path ${RUBY_VENDOR}
   bundle config path ${RUBY_VENDOR}
   popd
@@ -143,7 +144,6 @@ EOF
   find ${RUBY_VENDOR} -name .git | xargs rm -rf
   rm -rf "${HOME}/.bundle/cache"
   rm -rf ${RUBY_VENDOR}/ruby/*/cache
-
 }
 
 do_check() {
