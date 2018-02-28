@@ -102,7 +102,7 @@ do_install() {
   export HOME="${pkg_prefix}"
   cp Gemfile_habitat ${pkg_prefix}/Gemfile
   cp Gemfile_habitat.lock ${pkg_prefix}/Gemfile.lock
-  bundle install --path "${pkg_prefix}/vendor/bundle" && bundle config path ${pkg_prefix}/vendor/bundle
+  bundle install --gemfile ${pkg_prefix}/Gemfile --path "${pkg_prefix}/vendor/bundle" && bundle config path ${pkg_prefix}/vendor/bundle
   cp -r "_build/default/rel/oc_erchef/"* "${pkg_prefix}"
   cp -R "$HAB_CACHE_SRC_PATH/$pkg_dirname/schema" "$pkg_prefix"
 }

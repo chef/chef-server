@@ -42,6 +42,40 @@ make dev dev-build
 
 Once the build is complete, the package should be in omnibus/pkg. By default the dev-build target will create an Ubuntu 10.04 build.
 
+## Habitized Chef Server
+
+The following components now exist as Habitat packages and are available [here](https://bldr.habitat.sh/#/origins/chef-server/packages):
+- nginx
+- bookshelf
+- oc_id
+- oc_erchef
+- oc_bifrost
+- chef-server-ctl
+
+To build the packages locally:
+
+```shell
+./habitat_pkgs_build.sh
+```
+
+A top-level `docker-compose.yml` file exists for running Chef Server from Habitized Docker images:
+
+```shell
+docker-compose down && docker system prune --volumes -f && docker-compose up
+```
+
+Running pedant tests:
+
+```shell
+docker-compose exec chef-server-ctl chef-server-test
+```
+
+Running chef-server-ctl:
+
+```shell
+docker-compose exec chef-server-ctl chef-server-ctl command (subcommands)
+```
+
 ## Dependencies contained in other repositories
 
 - [knife-ec-backup](https://www.github.com/chef/knife-ec-backup), used to ease migrations from Open Source Chef Server 11 (and below)
@@ -77,7 +111,7 @@ For information on contributing to this project see <https://github.com/chef/che
 
 ## License & Authors
 
-**Copyright:** 2008-2017, Chef Software, Inc.
+**Copyright:** 2008-2018, Chef Software, Inc.
 
 ```text
 Licensed under the Apache License, Version 2.0 (the "License");
