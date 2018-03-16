@@ -17,7 +17,7 @@
   0},
  {<<"chef_authn">>,
   {git,"https://github.com/chef/chef_authn",
-       {ref,"f79808e3a5a2fe90a653a3a0fddb7a13c8e6dfa2"}},
+       {ref,"a3ba8f5d07971378f35b152f44df8efaedcf0ec1"}},
   0},
  {<<"chef_secrets">>,
   {git,"https://github.com/chef/chef_secrets",
@@ -51,7 +51,7 @@
   {git,"git://github.com/chef/epgsql-1.git",
        {ref,"25d9e2f4441b63296c34da1811d8b79ed4baa444"}},
   1},
- {<<"erlware_commons">>,{pkg,<<"erlware_commons">>,<<"1.0.4">>},0},
+ {<<"erlware_commons">>,{pkg,<<"erlware_commons">>,<<"1.0.5">>},0},
  {<<"folsom">>,
   {git,"https://github.com/boundary/folsom",
        {ref,"38e2cce7c64ce1f0a3a918d90394cfc0a940b1ba"}},
@@ -78,7 +78,7 @@
   0},
  {<<"jiffy">>,
   {git,"https://github.com/davisp/jiffy",
-       {ref,"031f9dbbf6c31b83585569cd290504f006540a77"}},
+       {ref,"fe43b59f4f5e8aafb111f400a7e4f813cd134b55"}},
   0},
  {<<"lager">>,
   {git,"https://github.com/basho/lager",
@@ -106,7 +106,7 @@
   0},
  {<<"observer_cli">>,
   {git,"https://github.com/zhongwencool/observer_cli",
-       {ref,"4d5f96762bb525b4f857109c10a7d4d53af1a029"}},
+       {ref,"7ba6db58c3873e6e06223c094c05e694734b0c6c"}},
   0},
  {<<"opscoderl_folsom">>,
   {git,"https://github.com/chef/opscoderl_folsom",
@@ -147,7 +147,7 @@
   0},
  {<<"sync">>,
   {git,"https://github.com/rustyio/sync.git",
-       {ref,"7548dbffd3ed20a674bd423bd7131585ad66cd9e"}},
+       {ref,"44a1e0d0c3eab0544010bc973ee46b1f6d602ccf"}},
   0},
  {<<"uuid">>,
   {git,"https://github.com/okeuday/uuid",
@@ -159,6 +159,6 @@
   1}]}.
 [
 {pkg_hash,[
- {<<"erlware_commons">>, <<"8F215709CCB8A99BC0436405CD78A8A92B84AD08969C2B926E239CC3B08AC4DC">>},
+ {<<"erlware_commons">>, <<"FC23D8E304140B65A811F653A76B2FB10B0CE744608CAF86E9125CEB349C9442">>},
  {<<"recon">>, <<"B406C2FCCDEAA0D94E23B5E30AE3D635A2D461E363A5C9C6316897037CF050D2">>}]}
 ].
