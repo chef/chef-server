@@ -69,14 +69,25 @@ module DVM
       File.join(host_raw_dir, path)
     end
 
-    def clone(name, uri)
-      run_command("git clone '#{uri}' '#{name}'", "Cloning #{name} to host. For future reference, you may also symlink it into chef-server/external-deps from another location on the host.",
-                  cwd: host_external_deps_dir)
-    end
-
     def project_dir_exists_on_host?(name)
       puts "Checking #{host_project_dir(name)} "
       File.directory?(host_project_dir(name))
+    end
+
+    def host_external_deps_dir(name = nil)
+      path = [host_raw_dir, "external-deps"]
+      path << name if !name.nil?
+      File.join(path)
+    end
+
+    def external_deps_dir_exists_on_host?(name)
+      puts "Checking #{host_external_deps_dir(name)} "
+      File.directory?(host_external_deps_dir(name))
+    end
+    
+    def clone(name, uri)
+      run_command("git clone '#{uri}' '#{name}'", "Cloning #{name} to host. For future reference, you may also symlink it into chef-server/external-deps from another location on the host.",
+                  cwd: host_external_deps_dir)
     end
 
     def checkout(name, ref)
