@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.38 -->
-## [12.17.38](https://github.com/chef/chef-server/tree/12.17.38) (2018-02-28)
+<!-- latest_release 12.17.39 -->
+## [12.17.39](https://github.com/chef/chef-server/tree/12.17.39) (2018-03-21)
 
 #### Merged Pull Requests
-- resolve lingering issues from PR#1472 [#1477](https://github.com/chef/chef-server/pull/1477) ([jeremymv2](https://github.com/jeremymv2))
+- [upgrades] Don&#39;t early return in upgrade 1.31 [#1478](https://github.com/chef/chef-server/pull/1478) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- [upgrades] Don&#39;t early return in upgrade 1.31 [#1478](https://github.com/chef/chef-server/pull/1478) ([stevendanna](https://github.com/stevendanna)) <!-- 12.17.39 -->
 - resolve lingering issues from PR#1472 [#1477](https://github.com/chef/chef-server/pull/1477) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.17.38 -->
 - Add queue insertion information to statistics. [#1462](https://github.com/chef/chef-server/pull/1462) ([markan](https://github.com/markan)) <!-- 12.17.37 -->
 - Adding Habitization - this PR supersedes PR#1416 [#1472](https://github.com/chef/chef-server/pull/1472) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.17.34 -->
