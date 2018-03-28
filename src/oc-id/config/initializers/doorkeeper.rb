@@ -50,7 +50,12 @@ Doorkeeper.configure do
 
   # Use a custom class for generating the access token.
   # https://github.com/doorkeeper-gem/doorkeeper#custom-access-token-generator
-  # access_token_generator "::Doorkeeper::JWT"
+  # access_token_generator '::Doorkeeper::JWT'
+
+  # The controller Doorkeeper::ApplicationController inherits from.
+  # Defaults to ActionController::Base.
+  # https://github.com/doorkeeper-gem/doorkeeper#custom-base-controller
+  # base_controller 'ApplicationController'
 
   # Reuse access token for the same resource owner within an application (disabled by default)
   # Rationale: https://github.com/doorkeeper-gem/doorkeeper/issues/383
@@ -60,10 +65,10 @@ Doorkeeper.configure do
   use_refresh_token
 
   # Provide support for an owner to be assigned to each registered application (disabled by default)
-  # Optional parameter :confirmation => true (default false) if you want to enforce ownership of
+  # Optional parameter confirmation: true (default false) if you want to enforce ownership of
   # a registered application
   # Note: you must also run the rails g doorkeeper:application_owner generator to provide the necessary support
-  # enable_application_owner :confirmation => false
+  # enable_application_owner confirmation: false
 
   # Define access token scopes for your provider
   # For more information go to
