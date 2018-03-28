@@ -16,10 +16,10 @@
   <tbody>
   <% @applications.each do |application| %>
     <tr id="application_<%= application.id %>">
-      <td><%= link_to application.name, [:oauth, application] %></td>
+      <td><%= link_to application.name, oauth_application_path(application) %></td>
       <td><%= application.redirect_uri %></td>
       <td><%= link_to 'Edit', edit_oauth_application_path(application), class: 'button' %></td>
-      <td><%= delete_button('Destroy', [:oauth, application]) %></td>
+      <td><%= delete_button('Destroy', oauth_application_path(application)) %></td>
     </tr>
   <% end %>
   </tbody>

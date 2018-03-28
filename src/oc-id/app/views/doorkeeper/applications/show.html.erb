@@ -25,6 +25,6 @@
 
   <div class="medium-4">
     <%= link_to 'Edit', edit_oauth_application_path(@application), class: 'button' %>
-    <%= delete_button('Destroy', [:oauth, @application]) %>
+    <%= delete_button('Destroy', oauth_application_path(@application)) %>
   </div>
 </div>
