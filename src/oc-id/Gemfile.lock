@@ -173,7 +173,7 @@ GEM
     debug_inspector (0.0.3)
     diff-lcs (1.3)
     diffy (3.2.0)
-    doorkeeper (2.2.2)
+    doorkeeper (3.1.0)
       railties (>= 3.2)
     erubi (1.7.0)
     erubis (2.7.0)
@@ -464,7 +464,7 @@ DEPENDENCIES
   chef (~> 12)
   chef-web-core!
   coffee-rails (~> 4.0.0)
-  doorkeeper (~> 2.0)
+  doorkeeper (~> 3.0)
   factory_girl_rails (~> 4.4.0)
   jazz_hands!
   jbuilder (~> 1.2)
