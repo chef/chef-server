@@ -1,8 +1,8 @@
 GIT
   remote: https://github.com/chef/dep-selector
-  revision: a7d416379adf199402d6b72d544c6e00201aa52c
+  revision: 48b05738be2c9ce28ca5ed83681291b9e0d87d6c
   specs:
-    dep_selector (1.0.5)
+    dep_selector (1.0.6)
       dep-selector-libgecode (~> 1.0)
       ffi (~> 1.9)
 
@@ -16,7 +16,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     dep-selector-libgecode (1.3.1)
-    ffi (1.9.18)
+    ffi (1.9.23)
     uuidtools (2.1.5)
 
 PLATFORMS
@@ -28,4 +28,4 @@ DEPENDENCIES
   uuidtools
 
 BUNDLED WITH
-   1.15.1
+   1.16.0
