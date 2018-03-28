@@ -1,5 +1,4 @@
 require "chef/config"
-require "chef/rest"
 require "chef/key"
 
 class KeyCtlHelper

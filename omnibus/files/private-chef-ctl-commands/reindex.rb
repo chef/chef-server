@@ -16,7 +16,6 @@
 
 require 'optparse'
 require 'chef/config'
-require 'chef/rest'
 require 'chef/org'
 require 'redis'
 

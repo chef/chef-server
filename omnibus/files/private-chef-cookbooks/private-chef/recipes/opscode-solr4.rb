@@ -123,7 +123,7 @@ new_size =  if node['private_chef']['opscode-solr4']['new_size']
               [(solr_mem / 16), 32].max
             end
 
-java_opts = node['private_chef']['opscode-solr4']['java_opts']
+java_opts = node['private_chef']['opscode-solr4']['java_opts'].dup
 java_opts << " -XX:NewSize=#{new_size}M" unless java_opts =~ /NewSize/
 java_opts << " -XX:+UseConcMarkSweepGC" unless java_opts =~ /UseConcMarkSweepGC/
 java_opts << " -XX:+UseParNewGC" unless java_opts =~ /UseParNewGC/
@@ -132,26 +132,28 @@ java_opts << " -XX:+UseParNewGC" unless java_opts =~ /UseParNewGC/
 node.default['private_chef']['opscode-solr4']['heap_size'] = solr_mem
 node.default['private_chef']['opscode-solr4']['new_size'] = new_size
 
-node.default['private_chef']['opscode-solr4']['command'] =  "java -Xmx#{solr_mem}M -Xms#{solr_mem}M"
-node.default['private_chef']['opscode-solr4']['command'] << " #{java_opts}" unless java_opts.empty?
+command = "java -Xmx#{solr_mem}M -Xms#{solr_mem}M"
+command << " #{java_opts}" unless java_opts.empty?
 # Enable GC Logging (very useful for debugging issues) to an separate file only works with Oracle JRE
 if node['kernel']['machine'] == "x86_64"
-  node.default['private_chef']['opscode-solr4']['command'] << " -Xloggc:#{File.join(solr_log_dir, "gclog.log")}"
+  command << " -Xloggc:#{File.join(solr_log_dir, "gclog.log")}"
 end
 
 # Enable GC Logging (very useful for debugging issues)
 if node['private_chef']['opscode-solr4']['log_gc']
-  node.default['private_chef']['opscode-solr4']['command'] << " -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -XX:+PrintGCApplicationStoppedTime -XX:+PrintGCApplicationConcurrentTime -XX:+PrintTenuringDistribution"
+  command << " -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -XX:+PrintGCApplicationStoppedTime -XX:+PrintGCApplicationConcurrentTime -XX:+PrintTenuringDistribution"
   # have java rotate the gclog.log (to avoid issues around copytruncate and sparse
   # files, see SPOOL-383)
-  node.default['private_chef']['opscode-solr4']['command'] << " -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=#{node['private_chef']['opscode-solr4']['log_rotation']['num_to_keep']} -XX:GCLogFileSize=#{node['private_chef']['opscode-solr4']['log_rotation']['file_maxbytes']}"
+  command << " -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=#{node['private_chef']['opscode-solr4']['log_rotation']['num_to_keep']} -XX:GCLogFileSize=#{node['private_chef']['opscode-solr4']['log_rotation']['file_maxbytes']}"
 end
 
-node.default['private_chef']['opscode-solr4']['command'] << " -Dsolr.data.dir=#{solr_data_dir}"
-node.default['private_chef']['opscode-solr4']['command'] << " -Dsolr.solr.home=#{solr_home_dir}"
-node.default['private_chef']['opscode-solr4']['command'] << " -Djava.io.tmpdir=#{solr_temp_dir}"
-node.default['private_chef']['opscode-solr4']['command'] << " -server"
-node.default['private_chef']['opscode-solr4']['command'] << " -jar '#{solr_jetty_dir}/start.jar'"
+command << " -Dsolr.data.dir=#{solr_data_dir}"
+command << " -Dsolr.solr.home=#{solr_home_dir}"
+command << " -Djava.io.tmpdir=#{solr_temp_dir}"
+command << " -server"
+command << " -jar '#{solr_jetty_dir}/start.jar'"
+
+node.default['private_chef']['opscode-solr4']['command'] = command
 
 component_runit_service "opscode-solr4"
 

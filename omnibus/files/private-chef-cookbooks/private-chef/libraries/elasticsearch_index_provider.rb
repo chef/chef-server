@@ -3,7 +3,8 @@ require 'chef/provider/lwrp_base'
 class Chef
   class Provider
     class ElasticSearchIndex < Chef::Provider::LWRPBase
-      use_inline_resources if defined?(:use_inlined_resources)
+      use_inline_resources
+      provides :elasticsearch_index
 
       action :create do
         if ! index_exists?

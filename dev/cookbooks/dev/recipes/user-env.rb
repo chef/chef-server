@@ -29,22 +29,23 @@ end
     user who
   end
 
-  cookbook_file "user_default.erl" do
+  cookbook_file "#{homedir}/bin/user_default.erl" do
     path "#{homedir}/bin/user_default.erl"
     action :create_if_missing
     source "user_default.erl"
     owner who
     user who
   end
-  execute "set up user_default for erlang console use" do
+  execute "#{homedir}: set up user_default for erlang console use" do
     command "/opt/opscode/embedded/bin/erlc user_default.erl"
     cwd "#{homedir}/bin"
   end
 
-  cookbook_file "b2f" do
+  cookbook_file "#{homedir}: b2f" do
     path "#{homedir}/bin/b2f"
     mode "0777"
     action :create
+    source "b2f"
     owner who
     user who
   end
