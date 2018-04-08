@@ -22,3 +22,4 @@ VERSION
 _build
 _dialyzer_cache
 *.coverdata
+rebar3
