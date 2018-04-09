@@ -110,7 +110,7 @@ do_install() {
 
   cat > Gemfile << EOF
 source 'https://rubygems.org'
-gem 'chef'
+gem 'chef', '~>13.0'
 gem 'knife-opc'
 EOF
 

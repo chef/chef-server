@@ -3,8 +3,8 @@
 # this script builds all the essential habitat packages for running Chef Server
 # additionaly, it exports them as a local docker image
 
-CHEF_SERVER_SRC='/src/src'
-ORIGIN=chefservertesting
+export CHEF_SERVER_SRC='/src/src'
+export ORIGIN=chefservertesting
 
 for dir in dbdpg oc-id openresty-noroot nginx bookshelf chef-server-ctl oc_bifrost oc_erchef; do
   cd $CHEF_SERVER_SRC/$dir

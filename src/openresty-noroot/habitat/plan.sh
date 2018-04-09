@@ -78,7 +78,7 @@ do_install() {
 
   cd $HAB_CACHE_SRC_PATH
   wget $lpeg_source
-  tar -xzf lpeg-${lpeg_version}.tar.gz
+  tar -xzf lpeg-${lpeg_version}.tar.gz --owner=$(id -u) --group=$(id -g)
   cd lpeg-${lpeg_version}
   make "LUADIR=$pkg_prefix/luajit/include/luajit-2.1" || attach
   install -p -m 0755 lpeg.so $pkg_prefix/luajit/lib/lua/5.1/ || attach
