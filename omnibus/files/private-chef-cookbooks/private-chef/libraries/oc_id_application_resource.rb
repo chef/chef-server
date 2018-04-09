@@ -3,7 +3,8 @@ require 'chef/resource/lwrp_base'
 class Chef
   class Resource
     class OcIdApplication < Chef::Resource::LWRPBase
-      self.resource_name = 'oc_id_application'
+      provides :oc_id_application
+      resource_name :oc_id_application
 
       actions :create
       default_action :create

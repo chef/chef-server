@@ -3,8 +3,9 @@ require 'chef/provider/lwrp_base'
 class Chef
   class Provider
     class ChefRun < Chef::Provider::LWRPBase
-      use_inline_resources if defined?(:use_inlined_resources)
-
+      use_inline_resources
+      provides :chef_run
+      
       action :run do
         converge_by "Running chef-run with run list #{new_resource.run_list}" do
           old_config = Chef::Config.save

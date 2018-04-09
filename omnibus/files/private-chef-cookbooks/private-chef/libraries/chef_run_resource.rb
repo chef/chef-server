@@ -3,7 +3,8 @@ require 'chef/resource/lwrp_base'
 class Chef
   class Resource
     class ChefRun < Chef::Resource::LWRPBase
-      self.resource_name = 'chef_run'
+      provides :chef_run
+      resource_name :chef_run
 
       actions :run
       default_action :run
