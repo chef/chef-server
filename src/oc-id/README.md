@@ -71,6 +71,29 @@ You can then run the app in development mode using the usual Rails workflow:
     bin/rake db:migrate
     bin/rails server
 
+### Assets
+
+Historically we built assets in the omnibus pipeline, but that has
+proven difficult because nodejs no longer supports all of our
+platforms. Instead we are committing assets to git. This isn't ideal,
+as it makes it harder alter assets in the dev-vm; they are
+now synchronized from the host. 
+
+You can locally compile assets with the command:
+
+bin/rake assets:precompile
+
+There are a few pain points with this approach.
+* When assets change, their generated name changes because it includes a hash
+* We have a lot of dead assets because we pull in common libraries
+
+Suggested procedure for updating assets:
+
+git rm public/id
+bin/rake assets:precompile
+rm -rf public/id/assets/source public/id/assets/icons/i*
+git add public/id
+
 ## Test
 
 To run the tests:

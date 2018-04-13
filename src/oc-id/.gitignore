@@ -27,7 +27,7 @@ config/environments/*.local.yml# RailsConfig ignores
 
 vendor/bundle/
 
-public/id/
+public/id/source
 
 .ruby-version
 results/

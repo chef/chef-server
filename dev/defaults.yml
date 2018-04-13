@@ -103,7 +103,7 @@ vm:
        - config/database.yml # [oc-id] we'll need to use the one from omnibus
        - config/settings/production.yml # [oc-id] we'll need to use the one from omnibus
        - config/initializers/secret_token.rb # [oc-id] we'll need to use the one from omnibus
-       - oc-id/public/id
+       - oc-id/public/id/source
        - oc-id/tmp
 
   cover:
@@ -141,7 +141,8 @@ projects:
     type: rails
     install_options: --without development test doc
     build_steps:
-      - bundle exec rake assets:precompile --trace
+      # We used to build assets in the pipeline, and needed to build them before loading. Now we've commited those assets to git, and
+      #    - bundle exec rake assets:precompile --trace
       - bundle exec --keep-file-descriptors rake db:migrate
     symlinks:
       config/database.yml: config/database.yml
