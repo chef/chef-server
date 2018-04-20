@@ -79,7 +79,7 @@ matrix:
       # "bundle install --path bundle/vendor" which breaks our ability
       # to bundle install from the chef-zero spec.
       before_install:
-        - curl -LO https://omnitruck.chef.io/install.sh && sudo bash ./install.sh -v 13.8.5 && rm install.sh
+        - gem install chef -v 13.8.5
         - gem install bundler -v 1.12.5 && rm -f oc-chef-pedant/Gemfile.lock
       before_script: cd oc-chef-pedant
       script: bundle exec rake chef_zero_spec
@@ -100,7 +100,7 @@ matrix:
       # bundle install --path bundle/vendor" which breaks our ability
       # to bundle install from the chef-zero spec.
       before_install:
-        - curl -LO https://omnitruck.chef.io/install.sh && sudo bash ./install.sh -v 13.8.5 && rm install.sh
+        - gem install chef -v 13.8.5
         - gem install bundler -v 1.12.5 && rm -f oc-chef-pedant/Gemfile.lock
       before_script: cd oc-chef-pedant
       script: bundle exec rake chef_zero_spec
