@@ -42,6 +42,11 @@ default['private_chef']['fips_enabled'] = ChefConfig.fips?
 default['private_chef']['required_recipe']['enable'] = false
 default['private_chef']['required_recipe']['path'] = nil
 
+### For runit on sysvinit systems; without that we generate a empty tag value in inittab and break sysvinit.
+### Note if you happen to manage the chef-server with chef, and install your own runit, you will need to choose
+### a different value to avoid conflicts.
+default['private_chef']['sysvinit_id'] = 'SV'
+
 ###
 # Options for installing addons
 ###
