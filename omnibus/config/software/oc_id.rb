@@ -1,5 +1,5 @@
 #
-# Copyright 2012-2014 Chef Software, Inc.
+# Copyright 2012-2018 Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,11 +28,17 @@ license_file "LICENSE"
 # it from building on s390 (libxml2).
 dependency "nokogiri"
 dependency "postgresql96" # for libpq
-dependency "nodejs-binary"
 dependency "ruby"
 dependency "bundler"
 
 relative_path "oc-id"
+
+
+#
+# We used to require nodejs-binary and build the assets in the
+# pipeline, but now require the developer to build and commit assets
+# with any change.  This was done mostly due to the lack of support
+# for nodejs on PPC64BE platforms.
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
@@ -45,8 +51,6 @@ build do
   bundle "install" \
          " --path=#{install_dir}/embedded/service/gem" \
          " --without development test doc", env: env
-
-  bundle "exec rake assets:precompile", env: env
 
   sync project_dir, "#{install_dir}/embedded/service/oc_id/", exclude: ['**/.gitignore', 'log/', 'tmp/']
 end
