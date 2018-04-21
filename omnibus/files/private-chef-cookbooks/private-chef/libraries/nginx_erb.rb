@@ -1,3 +1,5 @@
+require 'ipaddr'
+
 class NginxErb
 
   attr_reader :node
@@ -43,18 +45,37 @@ class NginxErb
     @implicit_hosts ||= begin
                           hosts = [ "localhost", "127.0.0.1" ]
                           hosts << "::1" if ipv6?
-
                           hosts << local_ip_addresses
-                          if node['cloud']
-                            hosts << node['cloud']['public_ips'] if node['cloud']['public_ips']
-                            hosts << node['cloud']['private_ips'] if node['cloud']['private_ips']
-                          end
+                          hosts << cloud_ip_addresses
                           hosts.flatten.uniq.join(" ")
                         end
   end
 
   def ipv6?
     node['private_chef']['nginx']['enable_ipv6']
+  end
+
+  def ip_or_nil
+    IPAddr.new(a)
+  rescue
+    nil
+  end
+
+  def cloud_ip_addresses
+    return [] if !node['cloud']
+
+    pub_ips = if node['cloud']['public_ips'].respond_to?(:map)
+                node['cloud']['public_ips'].map { |a| ip_or_nil(a) }.compact!
+              else
+                []
+              end
+
+    prv_ips = if node['cloud']['private_ips'].respond_to?(:map)
+                node['cloud']['private_ips'].map { |a| ip_or_nil(a) }.compact!
+              else
+                []
+              end
+    pub_ips + pub_ips
   end
 
   def local_ip_addresses
