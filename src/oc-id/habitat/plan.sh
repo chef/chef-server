@@ -22,6 +22,8 @@ pkg_build_deps=(
   core/tar
   core/pkg-config
   core/coreutils
+  core/libxml2
+  core/libxslt
 )
 pkg_binds_optional=(
   [database]="port"
@@ -70,8 +72,6 @@ _tar_pipe_app_cp_to() {
   tar="$(pkg_path_for tar)/bin/tar"
 
   "$tar" -cp \
-      --owner=root:0 \
-      --group=root:0 \
       --no-xattrs \
       --exclude-backups \
       --exclude-vcs \
@@ -81,6 +81,7 @@ _tar_pipe_app_cp_to() {
       --files-from=- \
       -f - \
   | "$tar" -x \
+      --no-same-owner \
       -C "$dst_path" \
       -f -
 }
@@ -93,6 +94,10 @@ do_install() {
       | _tar_pipe_app_cp_to "$HOME"
   bundle config path ${HOME}/vendor/bundle
   bundle config build.sqlite3 --with-sqlite3-lib=$(pkg_path_for core/sqlite)/lib
+  bundle config build.nokogiri --with-xml2-include=$(pkg_path_for core/libxml2)/include/libxml2 \
+    --with-xml2-lib=$(pkg_path_for core/libxml2)/lib \
+    --with-xslt-include=$(pkg_path_for core/libxslt)/include/libxslt \
+    --with-xslt-lib=$(pkg_path_for core/libxslt)/lib
   bundle install --path "${HOME}/vendor/bundle" --binstubs="${HOME}/bin" --shebang ruby --deployment
   # fix tzdata location
   echo "Adding core/tzdata zoneinfo search path to tzinfo gem"
