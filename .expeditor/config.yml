@@ -20,6 +20,45 @@ github:
   # The Github Team primarily responsible for handling incoming Pull Requests.
   maintainer_group: chef/chef-server-maintainers
 
+# Habitat + Docker exporting
+habitat_packages:
+  - dbdpg:
+      source: src/dbdpg
+      bldr_paths: src/dbdpg/*
+  - openresty-noroot:
+      source: src/openresty-noroot
+      bldr_paths: src/openresty-noroot/*
+  - oc-id:
+      source: src/oc-id
+      bldr_paths: src/oc-id/*
+      export:
+        - docker
+  - chef-server-nginx:
+      source: src/nginx
+      bldr_paths: src/nginx/*
+      export:
+        - docker
+  - bookshelf:
+      source: src/bookshelf
+      bldr_paths: src/bookshelf/*
+      export:
+        - docker
+  - chef-server-ctl:
+      source: src/chef-server-ctl
+      bldr_paths: src/chef-server-ctl/*
+      export:
+        - docker
+  - oc_bifrost:
+      source: src/oc_bifrost
+      bldr_paths: src/oc_bifrost/*
+      export:
+        - docker
+  - oc_erchef:
+      source: src/oc_erchef
+      bldr_paths: src/oc_erchef/*
+      export:
+        - docker
+
 # These actions are taken, in order they are specified, anytime a Pull Request is merged.
 merge_actions:
   - built_in:bump_version:
@@ -33,6 +72,12 @@ merge_actions:
         - "Expeditor: Skip All"
         - "Expeditor: ACC Only"
   - built_in:trigger_omnibus_build:
+      ignore_labels:
+        - "Omnibus: Skip Build"
+        - "Expeditor: Skip All"
+        - "Expeditor: ACC Only"
+      only_if: built_in:bump_version
+  - built_in:trigger_habitat_package_build:
       ignore_labels:
         - "Omnibus: Skip Build"
         - "Expeditor: Skip All"
