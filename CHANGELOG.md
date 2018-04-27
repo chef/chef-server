@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.47 -->
-## [12.17.47](https://github.com/chef/chef-server/tree/12.17.47) (2018-04-26)
+<!-- latest_release 12.17.48 -->
+## [12.17.48](https://github.com/chef/chef-server/tree/12.17.48) (2018-04-27)
 
 #### Merged Pull Requests
-- Pin chef-zero to 14.0.5 in travis [#1492](https://github.com/chef/chef-server/pull/1492) ([markan](https://github.com/markan))
+- Integrate expeditor hab+docker export functionality [#1493](https://github.com/chef/chef-server/pull/1493) ([irvingpop](https://github.com/irvingpop))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- Integrate expeditor hab+docker export functionality [#1493](https://github.com/chef/chef-server/pull/1493) ([irvingpop](https://github.com/irvingpop)) <!-- 12.17.48 -->
 - Pin chef-zero to 14.0.5 in travis [#1492](https://github.com/chef/chef-server/pull/1492) ([markan](https://github.com/markan)) <!-- 12.17.47 -->
 - allow mixlib-auth 2.0 in pedant [#1491](https://github.com/chef/chef-server/pull/1491) ([lamont-granquist](https://github.com/lamont-granquist)) <!-- 12.17.46 -->
 - [oc-id] Commit assets to git and remove nodejs [#1487](https://github.com/chef/chef-server/pull/1487) ([markan](https://github.com/markan)) <!-- 12.17.45 -->
