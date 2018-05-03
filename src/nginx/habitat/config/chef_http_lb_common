@@ -16,7 +16,7 @@
     set_by_lua $data_collector_token 'return os.getenv("DATA_COLLECTOR_TOKEN")';
     {{~/if}}
 
-    access_log stdout opscode;
+    access_log /dev/stdout opscode;
 {{~#if is_ssl}}
     ssl on;
     ssl_certificate {{../pkg.svc_data_path}}/ca/{{../cfg.server_name}}.cert;
@@ -82,6 +82,20 @@
       rewrite ^ /data-collector/v0/ break;
       proxy_pass https://data-collector;
     }
+
+    # Compliance endpoint to forward profiles calls to the Automate API:
+    #   /organizations/ORG/owners/OWNER/compliance[/PROFILE]
+    # Supports the legacy(chef-gate) URLs as well:
+    #   /compliance/organizations/ORG/owners/OWNER/compliance[/PROFILE]
+    location ~ (?:/compliance)?/organizations/([^/]+)/owners/([^/]+)/compliance(.*) {
+      set $request_org $1;
+      access_by_lua_block { validator.validate("GET") }
+      proxy_set_header x-data-collector-token $data_collector_token;
+      proxy_set_header x-data-collector-auth "version=1.0";
+      rewrite ^(?:/compliance)?/organizations/([^/]+)/owners/([^/]+)/compliance(.*) /compliance/profiles/$2$3 break;
+      proxy_pass https://compliance-profiles;
+    }
+
       {{/if ~}}
     {{/if ~}}
   {{/eachAlive ~}}
@@ -97,7 +111,6 @@
       # a 200 instead of 404.
       return 404;
     }
-
 
     # bookshelf
     location ~ "^/bookshelf/organization-.+" {
