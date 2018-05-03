@@ -1,10 +1,8 @@
 pkg_name=dbdpg
-pkg_origin=chef-server
-pkg_version="3.5.3"
+pkg_origin=chef
+pkg_version="3.7.4"
 pkg_maintainer="The Chef Automate Maintainers <support@chef.io>"
 pkg_license=('Artistic-1.0-Perl' 'GPL-2.0')
-pkg_source=nosuchfile.tgz
-pkg_shasum=7e98a9b975256a4733db1c0e974cad5ad5cb821489323e395ed97bd058e0a90e
 pkg_deps=(
   core/glibc
   core/perl
@@ -17,20 +15,12 @@ pkg_build_deps=(
   core/gcc
   core/make
 )
-pkg_lib_dirs=(lib/perl5/x86_64-linux-thread-multi)
 pkg_description="DBD::Pg is a Perl module that works with the DBI module to provide access to PostgreSQL databases."
 pkg_upstream_url="http://search.cpan.org/dist/DBD-Pg/"
 
-do_download() {
-  return 0
-}
-
-do_unpack() {
-  return 0
-}
-
-do_verify() {
-  return 0
+do_setup_environment() {
+  push_buildtime_env PERL5LIB "${pkg_prefix}/lib/perl5/x86_64-linux-thread-multi"
+  push_runtime_env PERL5LIB "${pkg_prefix}/lib/perl5/x86_64-linux-thread-multi"
 }
 
 do_build() {

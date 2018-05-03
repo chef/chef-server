@@ -7,11 +7,12 @@ client_max_body_size = "250m"
 # address at which people will be accessing the server.
 server_name = "chef-server"
 
-# # SSL protocols and ciphers
+# Access log location. For non-dockerized environments, the default of
+# "access.log" should be fine, but in dockerized environments this should
+# be `/dev/tty` with tty enabled on the container
+access_log = "access.log"
 
-# These options provide the current best security with TSLv1
-# ssl_protocols = "-ALL +TLSv1"
-# ssl_ciphers = "RC4:!MD5"
+# # SSL protocols and ciphers
 
 # This might be necessary for auditors that want no MEDIUM security ciphers and
 # don't understand BEAST attacks

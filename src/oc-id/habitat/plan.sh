@@ -1,5 +1,5 @@
 pkg_name=oc_id
-pkg_origin=chef-server
+pkg_origin=chef
 pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_license=('Apache-2.0')
 pkg_deps=(
@@ -12,7 +12,7 @@ pkg_deps=(
   core/sed
   core/libffi
   core/sqlite
-  chef-server/dbdpg
+  $HAB_ORIGIN/dbdpg
   core/tzdata
 )
 pkg_build_deps=(

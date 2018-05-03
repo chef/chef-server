@@ -1,5 +1,5 @@
 pkg_name=oc_erchef
-pkg_origin=chef-server
+pkg_origin=chef
 pkg_license=('Apache-2.0')
 pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_deps=(
@@ -13,11 +13,9 @@ pkg_deps=(
   core/sqitch
   core/gecode
   core/bundler
-  chef-server/dbdpg
+  $HAB_ORIGIN/dbdpg
 )
 pkg_build_deps=(core/make core/git core/gcc)
-pkg_lib_dirs=(lib)
-pkg_include_dirs=(include)
 pkg_bin_dirs=(bin)
 pkg_description="Erlang implementation of the Chef Server's REST API."
 pkg_upstream_url="https://github.com/chef/chef-server"
@@ -50,14 +48,6 @@ do_before() {
   update_pkg_version
 }
 
-do_download() {
-  return 0
-}
-
-do_verify() {
-  return 0
-}
-
 do_unpack() {
   # Copy everything over to the cache path so we don't write out our compiled
   # deps into the working directory, but into the cache directory.
@@ -81,8 +71,6 @@ do_prepare() {
 
   git config --global http.sslCAInfo \
     "$(pkg_path_for core/cacerts)"/ssl/certs/cacert.pem
-
-  fix_interpreter ./rebar3 core/coreutils bin/env
 }
 
 
