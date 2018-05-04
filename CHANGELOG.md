@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.49 -->
-## [12.17.49](https://github.com/chef/chef-server/tree/12.17.49) (2018-05-03)
+<!-- latest_release 12.17.50 -->
+## [12.17.50](https://github.com/chef/chef-server/tree/12.17.50) (2018-05-04)
 
 #### Merged Pull Requests
-- adding the compliance upstream to chef-server-nginx hab pkg [#1496](https://github.com/chef/chef-server/pull/1496) ([jeremymv2](https://github.com/jeremymv2))
+- Expeditor cleanups after review with releng, plus an nginx logging bugfix for dockerized environments [#1497](https://github.com/chef/chef-server/pull/1497) ([irvingpop](https://github.com/irvingpop))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- Expeditor cleanups after review with releng, plus an nginx logging bugfix for dockerized environments [#1497](https://github.com/chef/chef-server/pull/1497) ([irvingpop](https://github.com/irvingpop)) <!-- 12.17.50 -->
 - adding the compliance upstream to chef-server-nginx hab pkg [#1496](https://github.com/chef/chef-server/pull/1496) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.17.49 -->
 - Integrate expeditor hab+docker export functionality [#1493](https://github.com/chef/chef-server/pull/1493) ([irvingpop](https://github.com/irvingpop)) <!-- 12.17.48 -->
 - Pin chef-zero to 14.0.5 in travis [#1492](https://github.com/chef/chef-server/pull/1492) ([markan](https://github.com/markan)) <!-- 12.17.47 -->
