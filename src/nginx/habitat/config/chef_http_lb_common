@@ -16,7 +16,7 @@
     set_by_lua $data_collector_token 'return os.getenv("DATA_COLLECTOR_TOKEN")';
     {{~/if}}
 
-    access_log /dev/stdout opscode;
+    access_log {{../cfg.access_log}} opscode;
 {{~#if is_ssl}}
     ssl on;
     ssl_certificate {{../pkg.svc_data_path}}/ca/{{../cfg.server_name}}.cert;

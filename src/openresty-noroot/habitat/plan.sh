@@ -1,12 +1,12 @@
 pkg_name=openresty-noroot
-pkg_origin=chef-server
+pkg_origin=chef
 pkg_version=1.11.2.5
 pkg_description="Scalable Web Platform by Extending NGINX with Lua"
 pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_license=('BSD-2-Clause')
 pkg_source=https://openresty.org/download/openresty-${pkg_version}.tar.gz
 pkg_dirname=openresty-${pkg_version}
-pkg_filenam=openresty-${pkg_version}.tar.gz
+pkg_filename=openresty-${pkg_version}.tar.gz
 pkg_upstream_url=http://openresty.org/
 pkg_shasum=f8cc203e8c0fcd69676f65506a3417097fc445f57820aa8e92d7888d8ad657b9
 pkg_deps=(core/glibc core/gcc-libs core/libxml2 core/libxslt core/zlib core/bzip2 core/openssl/1.0.2l/20171014213633 core/pcre core/coreutils core/perl core/which)
@@ -82,7 +82,6 @@ do_install() {
   cd lpeg-${lpeg_version}
   make "LUADIR=$pkg_prefix/luajit/include/luajit-2.1" || attach
   install -p -m 0755 lpeg.so $pkg_prefix/luajit/lib/lua/5.1/ || attach
-#  cp $(hab pkg path "chef-server/openresty-lpeg")/lpeg.so ${pkg_prefix}/luajit/lib/lua/5.1/ || attach
 }
 
 do_end() {
