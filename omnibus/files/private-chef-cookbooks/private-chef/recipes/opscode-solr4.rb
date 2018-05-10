@@ -141,7 +141,7 @@ end
 
 # Enable GC Logging (very useful for debugging issues)
 if node['private_chef']['opscode-solr4']['log_gc']
-  command << " -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -XX:+PrintGCApplicationStoppedTime -XX:+PrintGCApplicationConcurrentTime -XX:+PrintTenuringDistribution"
+  command << " -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCDateStamps -XX:+PrintGCDetails -XX:+PrintGCApplicationStoppedTime -XX:+PrintGCApplicationConcurrentTime -XX:+PrintTenuringDistribution"
   # have java rotate the gclog.log (to avoid issues around copytruncate and sparse
   # files, see SPOOL-383)
   command << " -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=#{node['private_chef']['opscode-solr4']['log_rotation']['num_to_keep']} -XX:GCLogFileSize=#{node['private_chef']['opscode-solr4']['log_rotation']['file_maxbytes']}"
