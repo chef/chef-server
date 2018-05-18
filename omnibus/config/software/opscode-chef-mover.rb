@@ -24,7 +24,7 @@ build do
 
   env['USE_SYSTEM_GECODE'] = "1"
   env['REL_VERSION'] = "#{project.build_version}"
-  env['DEBUG'] = 1
+  env['DEBUG'] = "1"
 
   make "omnibus", env: env
 
