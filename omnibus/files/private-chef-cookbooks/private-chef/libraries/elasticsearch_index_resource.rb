@@ -4,6 +4,7 @@ class Chef
   class Resource
     class ElasticSearchIndex < Chef::Resource::LWRPBase
       provides :elasticsearch_index
+      resource_name :elasticsearch_index
 
       actions [:create, :destroy]
       default_action :create
