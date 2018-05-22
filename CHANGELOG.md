@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.52 -->
-## [12.17.52](https://github.com/chef/chef-server/tree/12.17.52) (2018-05-18)
+<!-- latest_release 12.17.53 -->
+## [12.17.53](https://github.com/chef/chef-server/tree/12.17.53) (2018-05-22)
 
 #### Merged Pull Requests
-- [SUSTAIN-937] Adding resource_name to es index resource [#1500](https://github.com/chef/chef-server/pull/1500) ([nsdavidson](https://github.com/nsdavidson))
+- Unlock and bump chef-mover jiffy. [#1502](https://github.com/chef/chef-server/pull/1502) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- Unlock and bump chef-mover jiffy. [#1502](https://github.com/chef/chef-server/pull/1502) ([markan](https://github.com/markan)) <!-- 12.17.53 -->
 - [SUSTAIN-937] Adding resource_name to es index resource [#1500](https://github.com/chef/chef-server/pull/1500) ([nsdavidson](https://github.com/nsdavidson)) <!-- 12.17.52 -->
 - Add DateStamp to the SOLR GC log [#1498](https://github.com/chef/chef-server/pull/1498) ([markan](https://github.com/markan)) <!-- 12.17.51 -->
 - Expeditor cleanups after review with releng, plus an nginx logging bugfix for dockerized environments [#1497](https://github.com/chef/chef-server/pull/1497) ([irvingpop](https://github.com/irvingpop)) <!-- 12.17.50 -->
