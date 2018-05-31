@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.54 -->
-## [12.17.54](https://github.com/chef/chef-server/tree/12.17.54) (2018-05-30)
+<!-- latest_release 12.17.55 -->
+## [12.17.55](https://github.com/chef/chef-server/tree/12.17.55) (2018-05-31)
 
 #### Merged Pull Requests
-- Ma/update pc and rebar [#1495](https://github.com/chef/chef-server/pull/1495) ([markan](https://github.com/markan))
+- Pull in new enterprise chef common [#1501](https://github.com/chef/chef-server/pull/1501) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- Pull in new enterprise chef common [#1501](https://github.com/chef/chef-server/pull/1501) ([markan](https://github.com/markan)) <!-- 12.17.55 -->
 - Ma/update pc and rebar [#1495](https://github.com/chef/chef-server/pull/1495) ([markan](https://github.com/markan)) <!-- 12.17.54 -->
 - Unlock and bump chef-mover jiffy. [#1502](https://github.com/chef/chef-server/pull/1502) ([markan](https://github.com/markan)) <!-- 12.17.53 -->
 - [SUSTAIN-937] Adding resource_name to es index resource [#1500](https://github.com/chef/chef-server/pull/1500) ([nsdavidson](https://github.com/nsdavidson)) <!-- 12.17.52 -->
