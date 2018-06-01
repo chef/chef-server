@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.55 -->
-## [12.17.55](https://github.com/chef/chef-server/tree/12.17.55) (2018-05-31)
+<!-- latest_release 12.17.56 -->
+## [12.17.56](https://github.com/chef/chef-server/tree/12.17.56) (2018-06-01)
 
 #### Merged Pull Requests
-- Pull in new enterprise chef common [#1501](https://github.com/chef/chef-server/pull/1501) ([markan](https://github.com/markan))
+- Fix enterprise chef common typo [#1507](https://github.com/chef/chef-server/pull/1507) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- Fix enterprise chef common typo [#1507](https://github.com/chef/chef-server/pull/1507) ([markan](https://github.com/markan)) <!-- 12.17.56 -->
 - Pull in new enterprise chef common [#1501](https://github.com/chef/chef-server/pull/1501) ([markan](https://github.com/markan)) <!-- 12.17.55 -->
 - Ma/update pc and rebar [#1495](https://github.com/chef/chef-server/pull/1495) ([markan](https://github.com/markan)) <!-- 12.17.54 -->
 - Unlock and bump chef-mover jiffy. [#1502](https://github.com/chef/chef-server/pull/1502) ([markan](https://github.com/markan)) <!-- 12.17.53 -->
