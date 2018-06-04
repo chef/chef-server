@@ -16,7 +16,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     dep-selector-libgecode (1.3.1)
-    ffi (1.9.23)
+    ffi (1.9.25)
     uuidtools (2.1.5)
 
 PLATFORMS
@@ -28,4 +28,4 @@ DEPENDENCIES
   uuidtools
 
 BUNDLED WITH
-   1.16.0
+   1.16.2
