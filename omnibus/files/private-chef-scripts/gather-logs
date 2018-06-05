@@ -93,7 +93,7 @@ for i in /opt/{chef,$path}*/version-manifest.txt \
     fi
 done
 
-for i in `find /var/log/${path}* -type f -mmin -"$modified_within_last_x_minutes"`; do
+for i in `find -L /var/log/${path}* -type f -mmin -"$modified_within_last_x_minutes"`; do
     if [[ -e "$i" ]]; then
         mkdir -p "$tmpdir/`dirname ${i:1}`"
         tail -"$tail_lines" "$i" > "$tmpdir/${i:1}"
