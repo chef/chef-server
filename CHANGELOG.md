@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.56 -->
-## [12.17.56](https://github.com/chef/chef-server/tree/12.17.56) (2018-06-01)
+<!-- latest_release 12.17.57 -->
+## [12.17.57](https://github.com/chef/chef-server/tree/12.17.57) (2018-06-06)
 
 #### Merged Pull Requests
-- Fix enterprise chef common typo [#1507](https://github.com/chef/chef-server/pull/1507) ([markan](https://github.com/markan))
+- Include the fixie utility in chef-server [#1508](https://github.com/chef/chef-server/pull/1508) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- Include the fixie utility in chef-server [#1508](https://github.com/chef/chef-server/pull/1508) ([markan](https://github.com/markan)) <!-- 12.17.57 -->
 - Fix enterprise chef common typo [#1507](https://github.com/chef/chef-server/pull/1507) ([markan](https://github.com/markan)) <!-- 12.17.56 -->
 - Pull in new enterprise chef common [#1501](https://github.com/chef/chef-server/pull/1501) ([markan](https://github.com/markan)) <!-- 12.17.55 -->
 - Ma/update pc and rebar [#1495](https://github.com/chef/chef-server/pull/1495) ([markan](https://github.com/markan)) <!-- 12.17.54 -->
