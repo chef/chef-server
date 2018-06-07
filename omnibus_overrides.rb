@@ -1,8 +1,8 @@
 override :erlang, version: "18.3"
 override :lua, version: "5.1.5"
 override :'omnibus-ctl', version: "master"
-override :chef, version: "v14.1.12"
-override :ohai, version: "v14.1.3"
+override :chef, version: "v14.2.0"
+override :ohai, version: "v14.2.0"
 override :ruby, version: "2.4.3"
 override :rubygems, version: "2.6.13"
 # This SHA is the last commit before the 6.0 release
