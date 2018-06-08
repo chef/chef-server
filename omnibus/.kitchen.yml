@@ -9,7 +9,8 @@ driver:
 
 provisioner:
   name: chef_zero
-  require_chef_omnibus: 14.1.12
+  product_name: chef
+  product_version: 14.1.12
 
 platforms:
   - name: ubuntu-18.04
