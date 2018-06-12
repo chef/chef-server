@@ -6,12 +6,6 @@
 # from the package upgrade process, but old data, configuration, logs,
 # directories, etc. can be left behind.
 
-def whyrun_supported?
-  true
-end
-
-use_inline_resources
-
 action :clean do
   remove_service if new_resource.is_service
   remove_files

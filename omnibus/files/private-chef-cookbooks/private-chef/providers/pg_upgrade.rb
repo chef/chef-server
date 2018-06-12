@@ -12,12 +12,6 @@
 # Assumes that binaries are stored in
 # /opt/opscode/embedded/postgresql/$VERSION/bin.
 
-def whyrun_supported?
-  true
-end
-
-use_inline_resources
-
 # ASSUMPTIONS
 #
 # Fresh Install: -------------------------------------------------

@@ -3,12 +3,6 @@
 # Uses the value of node['private_chef']['postgresql']['username'] as
 # the user to run the database-creation psql command
 
-def whyrun_supported?
-  true
-end
-
-use_inline_resources
-
 action :create do
   EcPostgres.with_connection(node) do |connection|
     result = connection.exec("SELECT datname FROM pg_database WHERE datname='#{new_resource.database}'")

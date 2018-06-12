@@ -1,10 +1,3 @@
-
-def whyrun_supported?
-  true
-end
-
-use_inline_resources
-
 action :deploy do
   target = new_resource.target_version ? "--to-target #{new_resource.target_version}" : ""
   converge_by "Deploying schema from #{new_resource.name}" do

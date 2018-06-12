@@ -3,12 +3,6 @@
 # Uses the value of node['private_chef']['postgresql']['db_superuser'] and ['db_superuser_password]
 # to make the connection to the postgres server.
 
-def whyrun_supported?
-  true
-end
-
-use_inline_resources
-
 action :create do
   EcPostgres.with_connection(node, new_resource.database) do |connection|
     run_sql(connection, "GRANT #{database_access} ON DATABASE #{new_resource.database} TO #{new_resource.username}")

@@ -3,10 +3,6 @@
 # Uses the value of node['private_chef']['postgresql']['username'] as
 # the user to run the user-creation psql command
 
-def whyrun_supported?
-  true
-end
-
 action :create do
   if new_resource.local_connection
     EcPostgres.with_local_connection(node) do |connection|

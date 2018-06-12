@@ -7,12 +7,6 @@
 # Additionally, the node['private_chef']['postgresql'] hash is used
 # for configuration file template creation.
 
-def whyrun_supported?
-  true
-end
-
-use_inline_resources
-
 # Initialize a PostgreSQL database cluster.  Ensures the data
 # directory exists, runs initdb, and sets up postgresql.conf and
 # pg_hba.conf files.
