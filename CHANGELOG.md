@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.58 -->
-## [12.17.58](https://github.com/chef/chef-server/tree/12.17.58) (2018-06-07)
+<!-- latest_release 12.17.59 -->
+## [12.17.59](https://github.com/chef/chef-server/tree/12.17.59) (2018-06-12)
 
 #### Merged Pull Requests
-- Allow find in gather-logs to follow symlinks. [#1509](https://github.com/chef/chef-server/pull/1509) ([teknofire](https://github.com/teknofire))
+- Upgrade to Chef 14 [#1506](https://github.com/chef/chef-server/pull/1506) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- Upgrade to Chef 14 [#1506](https://github.com/chef/chef-server/pull/1506) ([markan](https://github.com/markan)) <!-- 12.17.59 -->
 - Allow find in gather-logs to follow symlinks. [#1509](https://github.com/chef/chef-server/pull/1509) ([teknofire](https://github.com/teknofire)) <!-- 12.17.58 -->
 - Include the fixie utility in chef-server [#1508](https://github.com/chef/chef-server/pull/1508) ([markan](https://github.com/markan)) <!-- 12.17.57 -->
 - Fix enterprise chef common typo [#1507](https://github.com/chef/chef-server/pull/1507) ([markan](https://github.com/markan)) <!-- 12.17.56 -->
