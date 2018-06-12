@@ -83,7 +83,7 @@ if node['private_chef']['insecure_addon_compat']
 else
   #  These keys are no longer kept directly on the FS
   #  delete them if they're present.
-  %w(/etc/opscode/pivotal.pem file /etc/opscode/webui_priv.pem /etc/opscode/webui_pub.pem).each do |f|
+  %w(/etc/opscode/pivotal.pem /etc/opscode/webui_priv.pem /etc/opscode/webui_pub.pem).each do |f|
     file f do
       action :delete
       sensitive true
