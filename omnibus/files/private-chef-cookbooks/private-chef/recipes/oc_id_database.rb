@@ -38,4 +38,3 @@ private_chef_pg_user_table_access id_attrs['sql_ro_user'] do
   access_profile :read
   only_if { is_data_master? }
 end
-

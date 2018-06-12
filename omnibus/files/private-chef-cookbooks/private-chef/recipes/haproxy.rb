@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 haproxy_dir = node['private_chef']['haproxy']['dir']
 haproxy_socket = ::File.join(haproxy_dir, "haproxy.sock")
 haproxy_log_dir = node['private_chef']['haproxy']['log_directory']
