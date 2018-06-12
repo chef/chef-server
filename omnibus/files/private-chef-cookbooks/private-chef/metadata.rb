@@ -1,5 +1,5 @@
-name "private-chef"
-maintainer        "Opscode, Inc."
+name              "private-chef"
+maintainer        "Chef Software, Inc."
 maintainer_email  "cookbooks@chef.io"
 license           "Apache 2.0"
 description       "Installs and configures Chef Server from Omnibus"
