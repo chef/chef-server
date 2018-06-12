@@ -9,3 +9,5 @@ version           "0.1.0"
 %w{ ubuntu debian redhat centos oracle scientific fedora amazon }.each do |os|
   supports os
 end
+
+chef_version '>= 14'

@@ -13,3 +13,5 @@ end
 
 depends          'enterprise' # grabbed via Berkshelf + Git
 depends          'openssl', '>= 4.4'
+
+chef_version '>= 14'
