@@ -155,5 +155,5 @@ ruby_block "set_lb_redis_values" do
       redis.hdel "dl_default", "503_mode"
     end
   end
-  action :create
+  action :run
 end
