@@ -129,8 +129,9 @@ java_opts << " -XX:+UseConcMarkSweepGC" unless java_opts =~ /UseConcMarkSweepGC/
 java_opts << " -XX:+UseParNewGC" unless java_opts =~ /UseParNewGC/
 
 # Save the values back onto the node attributes
+node.default['private_chef']['opscode-solr4']['java_opts'] = java_opts
 node.default['private_chef']['opscode-solr4']['heap_size'] = solr_mem
-node.default['private_chef']['opscode-solr4']['new_size'] = new_size
+node.default['private_chef']['opscode-solr4']['new_size']  = new_size
 
 command = "java -Xmx#{solr_mem}M -Xms#{solr_mem}M"
 command << " #{java_opts}" unless java_opts.empty?
