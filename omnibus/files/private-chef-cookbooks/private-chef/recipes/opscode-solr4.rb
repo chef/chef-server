@@ -121,7 +121,7 @@ node.default['private_chef']['opscode-solr4']['command'] =  "java -Xmx#{node['pr
 solr_mem = if node['private_chef']['opscode-solr4']['heap_size']
              OmnibusHelper.parse_mem_to_mb(node['private_chef']['opscode-solr4']['heap_size'])
            else
-             node[:memory][:total] =~ /^(\d+)kB/
+             node['memory']['total'] =~ /^(\d+)kB/
              memory_total_in_mb = $1.to_i / 1024
              # Total heap size for solr is the smaller of:
              #    25% of total system memory
