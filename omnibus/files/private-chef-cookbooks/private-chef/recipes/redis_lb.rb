@@ -1,4 +1,4 @@
-# Copyright:: Copyright (c) 2012 Opscode, Inc.
+# Copyright:: 2012-2018 Chef Software, Inc.
 # License:: Apache License, Version 2.0
 # Author:: Marc A. Paradise <marc@chef.io>
 #

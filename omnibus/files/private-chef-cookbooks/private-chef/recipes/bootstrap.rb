@@ -1,6 +1,6 @@
 #
 # Author:: Adam Jacob <adam@chef.io>
-# Copyright:: Copyright (c) 2011-2015 Chef Software, Inc.
+# Copyright:: 2011-2018 Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

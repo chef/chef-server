@@ -1,6 +1,6 @@
 
 # Author:: Adam Jacob (<adam@chef.io>)
-# Copyright:: Copyright (c) 2012 Opscode, Inc.
+# Copyright:: 2012-2018 Chef Software, Inc.
 #
 # All Rights Reserved
 #

@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Opscode, Inc.
+# Copyright:: 2013-2018 Chef Software, Inc.
 # All Rights Reserved
 
 # Perform safe cleanup after old packages and services following a

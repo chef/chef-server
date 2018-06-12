@@ -1,6 +1,6 @@
 
 # Author:: Marc Paradise (<marc@chef.io>)
-# Copyright:: Copyright (c) 2013 Opscode, Inc.
+# Copyright:: 2013-2018 Chef Software, Inc.
 #
 # All Rights Reserved
 

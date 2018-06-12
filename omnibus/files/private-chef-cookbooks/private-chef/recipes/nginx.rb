@@ -1,7 +1,7 @@
 #
 # Author:: Adam Jacob (<adam@chef.io>)
 # Author:: Charles Johnson (<charles@chef.io>)
-# Copyright:: Copyright (c) 2011-2015 CHEF Software, Inc.
+# Copyright:: 2011-2018 Chef Software, Inc.
 #
 # All Rights Reserved
 #

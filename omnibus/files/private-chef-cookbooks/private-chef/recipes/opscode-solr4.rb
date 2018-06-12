@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Author:: Adam Jacob (<adam@chef.io>)
-# Copyright:: Copyright (c) 2011 Opscode, Inc.
+# Copyright:: 2011-2018 Chef Software, Inc.
 #
 # All Rights Reserved
 #
