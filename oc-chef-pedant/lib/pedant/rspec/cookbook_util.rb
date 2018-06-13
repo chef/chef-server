@@ -176,12 +176,11 @@ module Pedant
         end
       end
 
-      def new_cookbook_artifact(name, identifier, opts = {})
+      def new_cookbook_artifact_v0(name, identifier, opts = {})
         result = {
           "name" => "#{name}",
           "identifier" => identifier,
           "version" => opts[:version] || default_version, # version doesn't matter for cookbook_artifacts
-          "json_class" => "Chef::CookbookVersion",
           "chef_type" => "cookbook_version",
           "frozen?" => false,
           "recipes" => opts[:recipes] || [],
@@ -212,6 +211,50 @@ module Pedant
         result
       end
 
+      def new_cookbook_artifact_v2(name, identifier, opts = {})
+        if opts.key?(:recipes)
+          recipes = opts[:recipes].map do |r|
+            r["name"] = "recipes/#{r["name"]}"
+            r
+          end
+        end
+
+        all_files = recipes || []
+
+        result = {
+          "name" => "#{name}",
+          "identifier" => identifier,
+          "version" => opts[:version] || default_version, # version doesn't matter for cookbook_artifacts
+          "chef_type" => "cookbook_version",
+          "frozen?" => false,
+          "all_files" => all_files,
+          "metadata" => {
+            "version" => opts[:version] || default_version,
+            "name" => name, # not actually used
+            "maintainer" => opts[:maintainer] || default_maintainer,
+            "maintainer_email" => opts[:maintainer_email] || default_maintainer_email,
+            "description" => opts[:description] || default_description,
+            "long_description" => opts[:long_description] || default_long_description,
+            "license" => opts[:license] || default_license,
+            "dependencies" => opts[:dependencies] || {},
+            "attributes" => opts[:attributes] || {},
+            # this recipies list is not the same as the top level list
+            # this is a list of recipes and their descriptions
+            "recipes" => opts[:meta_recipes] || {}
+          }
+        }
+        result["metadata"]["providing"] = opts[:providing] if opts[:providing]
+        result
+      end
+
+      def new_cookbook_artifact(name, identifier, opts = {})
+        if platform.server_api_version >= 2
+          new_cookbook_artifact_v2(name, identifier, opts)
+        else
+          new_cookbook_artifact_v0(name, identifier, opts)
+        end
+      end
+
       def delete_cookbook_artifact(requestor, name, identifier)
         res = delete(api_url("/#{cookbook_url_base}/#{name}/#{identifier}"),
                requestor)
@@ -237,7 +280,7 @@ module Pedant
         opts = {
           recipes: recipes,
           meta_recipes: recipes.each_with_object({}) { |r,h| h["#{cookbook_name}::#{r["name"][0..-4]}"] = "" },
-          providing: recipes.each_with_object({}) { |r,h| h["#{cookbook_name}::#{r["name"][0..-4]}"] = ">= 0.0.0" }
+          providing: recipes.each_with_object({}) { |r,h| h["#{cookbook_name}::#{r["name"][0..-4]}"] = ">= 0.0.0" },
         }
         make_cookbook_artifact(admin_user, cookbook_name, identifier, opts)
       end
@@ -248,11 +291,11 @@ module Pedant
       # and passed in as function arugments or automatically computed if a
       # block is provided.
       def verify_checksum_cleanup(segment_type, existing_checksums=nil, updated_checksums=nil, &block)
-        existing_checksums ||= checksums_for_segment_type(segment_type)
+        existing_checksums ||= checksums_for_type(segment_type)
 
         yield if block_given?
 
-        updated_checksums ||= checksums_for_segment_type(segment_type)
+        updated_checksums ||= checksums_for_type(segment_type)
 
         deletions = existing_checksums.keys - updated_checksums.keys
 
@@ -298,7 +341,7 @@ module Pedant
 
       def make_cookbook(requestor, name, version, opts={})
         payload = new_cookbook(name, version, opts)
-        upload_cookbook(requestor, name, version, payload)
+        ensure_2xx(upload_cookbook(requestor, name, version, payload))
       end
 
       def upload_cookbook(requestor, name, version, payload)
@@ -306,8 +349,8 @@ module Pedant
             requestor, :payload => payload)
       end
 
-      def new_cookbook(name, version, opts = {})
-        {
+      def new_cookbook_v0(name, version, opts = {})
+        cb = {
           "name" => "#{name}-#{version}",
           "cookbook_name" => name,
           "version" => version, # not actually used
@@ -330,6 +373,66 @@ module Pedant
             "recipes" => opts[:meta_recipes] || {}
           }
         }
+        if opts.key?(:payload)
+          opts[:payload].each do |part, files|
+            cb[part.to_s] ||= []
+            cb[part.to_s] += files
+          end
+        end
+        cb
+      end
+
+      def new_cookbook_v2(name, version, opts = {})
+        all_files = []
+        if opts.key?(:recipes)
+          all_files = opts[:recipes].each_with_object([]) do |r, acc|
+            af = r.dup
+            af["name"] = "recipes/#{r['name']}"
+            acc << af
+          end
+        end
+
+        if opts.key?(:payload)
+          opts[:payload].each do |part, files|
+            all_files += files.each_with_object([]) do |f, acc|
+              file = f.dup
+              file["name"] = "#{part}/#{file["name"]}"
+              acc << file
+            end
+          end
+        end
+
+        {
+          "name" => "#{name}-#{version}",
+          "cookbook_name" => name,
+          "version" => version, # not actually used
+          "json_class" => "Chef::CookbookVersion",
+          "chef_type" => "cookbook_version",
+          "frozen?" => false,
+          "all_files" => all_files.flatten,
+          "metadata" => {
+            "version" => version,
+            "name" => name, # not actually used
+            "maintainer" => opts[:maintainer] || default_maintainer,
+            "maintainer_email" => opts[:maintainer_email] || default_maintainer_email,
+            "description" => opts[:description] || default_description,
+            "long_description" => opts[:long_description] || default_long_description,
+            "license" => opts[:license] || default_license,
+            "dependencies" => opts[:dependencies] || {},
+            "attributes" => opts[:attributes] || {},
+            # this recipies list is not the same as the top level list
+            # this is a list of recipes and their descriptions
+            "recipes" => opts[:meta_recipes] || {}
+          }
+        }
+      end
+
+      def new_cookbook(name, version, opts = {})
+        if platform.server_api_version >= 2
+          new_cookbook_v2(name, version, opts)
+        else
+          new_cookbook_v0(name, version, opts)
+        end
       end
 
       shared(:default_description) { "A fabulous new cookbook" }
@@ -338,36 +441,7 @@ module Pedant
       shared(:default_maintainer_email) { "youremail@example.com" }
       shared(:default_license) { "Apache v2.0" }
 
-      def full_cookbook(name, version, opts = {})
-        {
-          "name" => "#{name}-#{version}",
-          "cookbook_name" => name,
-            "version" => version,
-            "json_class" => "Chef::CookbookVersion",
-            "chef_type" => "cookbook_version",
-            "recipes" => opts[:recipes] || [],
-            "metadata" => {
-            "name" => name,
-            "description" => opts[:description] || default_description,
-            "long_description" => opts[:long_description] || default_long_description,
-            "maintainer" => opts[:maintainer] || default_maintainer,
-            "maintainer_email" => opts[:maintainer_email] || default_maintainer_email,
-            "license" => opts[:license] || default_license,
-            "platforms" => {},
-            "dependencies" => {},
-            "providing" => {},
-            "attributes" => {},
-            "recipes" => opts[:meta_recipes] || {},
-            "version" => version
-          },
-          "frozen?" => opts[:frozen] || false
-        }
-      end
-
-      # We don't return all the metadata when fetching a cookbook via
-      # the API because it's not used by the client and wastes
-      # bandwidth
-      def retrieved_cookbook(name, version, opts = {})
+      def retrieved_cookbook_v0(name, version, opts = {})
         cookbook = {
           "name" => "#{name}-#{version}",
           "version" => version,
@@ -393,6 +467,53 @@ module Pedant
 
         cookbook["metadata"] = metadata
         cookbook
+      end
+
+      def retrieved_cookbook_v2(name, version, opts = {})
+        all_files = nil
+        if (recipes = opts.key?(:recipes)) && recipes.is_a?(Array)
+          all_files = recipes.map do |r|
+            r["name"] = "recipes/#{r["name"]}"
+            r
+          end
+        end
+
+        cookbook = {
+          "name" => "#{name}-#{version}",
+          "version" => version,
+          "cookbook_name" => name,
+          "json_class" => "Chef::CookbookVersion",
+          "chef_type" => "cookbook_version",
+          "frozen?" => opts[:frozen] || false,
+          "all_files" => all_files || opts[:recipes] || []
+        }
+
+        metadata = {
+          "attributes" => {},
+          "dependencies" => {},
+          "description" => opts[:description] || default_description,
+          "license" => opts[:license] || default_license,
+          "long_description" => opts[:long_description] || default_long_description,
+          "maintainer" => opts[:maintainer] || default_maintainer,
+          "maintainer_email" =>  opts[:maintainer_email] || default_maintainer_email,
+          "name" => name,
+          "recipes" => opts[:meta_recipes] || {},
+          "version" => version
+        }
+
+        cookbook["metadata"] = metadata
+        cookbook
+      end
+
+      # We don't return all the metadata when fetching a cookbook via
+      # the API because it's not used by the client and wastes
+      # bandwidth
+      def retrieved_cookbook(name, version, opts = {})
+        if platform.server_api_version >= 2
+          retrieved_cookbook_v2(name, version, opts)
+        else
+          retrieved_cookbook_v0(name, version, opts)
+        end
       end
 
       # Create a dummy recipe for a cookbook recipe manifest.  The
@@ -496,14 +617,49 @@ module Pedant
       #     "https://...",
       #   }
       #
+
+      def checksums_for_type(type, cb_version = cookbook_version)
+        if platform.server_api_version >= 2
+          checksums_for_all_files(type, cb_version)
+        else
+          checksums_for_segment_type(type, cb_version)
+        end
+      end
+
       def checksums_for_segment_type(segment_type, cb_version=cookbook_version)
-        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cb_version}"),
-          admin_user) do |response|
+        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cb_version}"), admin_user) do |response|
           segment_contents = parse(response)[segment_type.to_s] || []
           segment_contents.inject({}) do |return_hash, segment_member|
             return_hash[segment_member['checksum']] = segment_member['url']
             return_hash
           end
+        end
+      end
+
+      def checksums_for_all_files(type, cb_version = cookbook_version)
+        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cb_version}"), admin_user) do |response|
+          extract_segment(parse(response), type).each_with_object({}) { |file, acc| acc[file["checksum"]] = file["url"] }
+        end
+      end
+
+      def extract_segment(cbv, segment)
+        if platform.server_api_version >= 2
+          files = cbv["all_files"] || []
+          files.select do |f|
+            seg, name = f["name"].split("/")
+            seg = "root_files" if name.nil?
+            seg == segment.to_s
+          end
+        else
+          cbv[segment.to_s]
+        end
+      end
+
+      def select_segment(segment)
+        if platform.server_api_version >= 2
+          "all_files"
+        else
+          segment
         end
       end
 
@@ -526,7 +682,7 @@ module Pedant
         #   key:     key to change
         #   value:   value to use
         def should_not_change(key, value, actual_value)
-          should_change(key, value, true, actual_value)
+          should_change(key, value, true, actual_value, false, {})
         end
 
         # This is used for testing updates with changes to the default
@@ -548,7 +704,7 @@ module Pedant
               payload[key] = value
             end
             put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
-                 admin_user, :payload => payload) do |response|
+                admin_user, :payload => payload) do |response|
                   if (ignores_value)
                     payload[key] = actual_value
                   end
@@ -560,14 +716,13 @@ module Pedant
                 end
 
                 # Verified change (or creation) happened
-                get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
-                    admin_user) do |response|
-                      response.
-                        should look_like({
-                        :status => 200,
-                        :body => payload
-                      })
-                    end
+                get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user) do |response|
+                  response.
+                    should look_like({
+                    :status => 200,
+                    :body => payload
+                  })
+                end
           end
         end
 
@@ -622,8 +777,7 @@ module Pedant
 
                 # Verified change (or creation) did not happen
                 if (create)
-                  get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
-                      admin_user) do |response|
+                  get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user) do |response|
                         response.
                           should look_like({
                           :status => 404
@@ -686,19 +840,21 @@ module Pedant
             end
             put_payload["metadata"] = put_metadata
 
-            put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user, :payload => put_payload) do |response|
+            put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user,
+                :payload => put_payload) do |response|
               # The PUT response returns the payload exactly as it was sent
               response.should look_like({:status => _expected_status, :body_exact => put_payload})
             end
 
-            # Verified change (or creation) happened
-            get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user) do |response|
-              get_response = cookbook.dup
-              if (new_value)
-                get_metadata = get_response["metadata"]
-                get_metadata[key] = new_value
-                get_response["metadata"] = get_metadata
-              end
+                # Verified change (or creation) happened
+                get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user,
+                   ) do |response|
+                  get_response = cookbook.dup
+                  if (new_value)
+                    get_metadata = get_response["metadata"]
+                    get_metadata[key] = new_value
+                    get_response["metadata"] = get_metadata
+                  end
 
               response.should look_like({:status => 200, :body => get_response})
             end

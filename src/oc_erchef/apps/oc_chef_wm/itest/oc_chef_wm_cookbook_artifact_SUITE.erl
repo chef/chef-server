@@ -169,7 +169,7 @@ http_round_trip(Config) ->
 
     %% and the only difference with the original JSON that we sent should
     %% be the download URLs on each file
-    ExpectedGetBody = chef_cookbook_version:annotate_with_s3_urls(CreateEjson, OrgId, ""),
+    ExpectedGetBody = chef_cookbook_version:annotate_with_urls(CreateEjson, OrgId, ""),
     ?assertEqual(ok, ej:valid(ExpectedGetBody, GetBody)).
 
 http_get_nonexistant(_Config) ->
