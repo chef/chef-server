@@ -201,8 +201,9 @@ add_global_pre_hook "require_credential_rotation" do
   return unless File.exist?(credential_rotation_required_file)
 
   # Allow running "chef-server-ctl rotate-shared-secrets"
-  # "chef-server-ctl" is a wapper that runs "omnibus-ctl opscode $command"
+  # "chef-server-ctl" is a wrapper that runs "omnibus-ctl opscode $command"
   # so we'll look for that in ARGV
+  # TODO RETHINK AS PART OF GEM CONVERSION
   return if ARGV == %w{omnibus-ctl opscode rotate-shared-secrets}
 
   raise("You must rotate the Chef Server credentials to enable the Chef Server. "\

@@ -239,11 +239,15 @@ EOF
     # Use the knife-ec-backup config that was written earlier, since it will work
     # and has all the needed data
     # With default_orgname routing enabled, this all just works
+
+    # TODO fix this when we reorg the gem, because it depends on the plugin location!
+    script_path = Pathname.new(__FILE__).dirname.join("knife","fix_permissions.knife")
+    
     cmd = ["/opt/opscode/embedded/bin/knife",
            "exec",
            "-V", # enable info logging
            "-c /tmp/knife-ec-backup-config.rb",
-           "/opt/opscode/embedded/service/omnibus-ctl/knife/fix_permissions.knife"
+           script_path
           ].join(" ")
     status = run_command(cmd)
     msg = "Failed to update permissions for migrated organization."

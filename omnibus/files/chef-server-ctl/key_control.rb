@@ -22,11 +22,8 @@ require "chef/key"
 # Due to how things are being exec'ed, the CWD will be all wrong,
 # so we want to use the full path when loaded from omnibus-ctl,
 # but we need the local relative path for it to work with rspec
-begin
-  require_relative "helpers/key_ctl_helper"
-rescue LoadError
-  require '/opt/opscode/embedded/service/omnibus-ctl/helpers/key_ctl_helper'
-end
+# TODO Check if this is still true in gem-world
+require_relative "helpers/key_ctl_helper"
 
 add_command_under_category "add-client-key", "key-rotation", "Create a new client key", 2 do
   cmd_args = ARGV[1..-1]
