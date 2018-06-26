@@ -1,17 +1,8 @@
 source "https://rubygems.org"
 
-# Used for rspec testing only
-gem "chef", git: "https://github.com/chef/chef.git"
+gemspec
+
+gem "chef" #, git: "https://github.com/chef/chef.git"
 gem "chef_backup", git: "https://github.com/chef/chef_backup.git"
 gem "omnibus-ctl", git: "https://github.com/chef/omnibus-ctl.git"
-gem "pry"
-gem "rb-readline"
-gem "rspec"
-gem "veil", git: "https://github.com/chef/chef_secrets.git"
 
-# Dependencies for ctl commands
-gem "redis"
-gem "sequel"
-gem "rest-client"
-gem 'pg'
-gem 'knife-opc'
