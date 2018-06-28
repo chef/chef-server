@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.summary       = spec.description
   spec.licenses      = "Apache2"
 
-  spec.files         = %w{LICENSE README.md} + Dir.glob("{bin,doc,helpers,lib,spec}/**/*") + Dir.glob("*.rb")
+  spec.files         = %w{LICENSE README.md} + Dir.glob("{bin,doc,helpers,lib,plugins,spec}/**/*")
   spec.bindir        = "bin"
   spec.executables   = "chef-server-ctl"
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})

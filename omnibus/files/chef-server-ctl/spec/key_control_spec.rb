@@ -20,7 +20,7 @@ require 'chef/key'
 
 describe "chef-server-ctl *key(s)*" do
   before(:all) do
-    @helper = OmnibusCtlHelper.new(["./key_control.rb"])
+    @helper = OmnibusCtlHelper.new(["./plugins/key_control.rb"])
   end
 
   # marco for testing mandatory args

@@ -29,7 +29,7 @@ end
 
 describe "chef-server-ctl set-secret" do
   subject do
-    OmnibusCtlHelper.new(["./secrets.rb"])
+    OmnibusCtlHelper.new(["./plugins/secrets.rb"])
   end
 
   let(:veil_creds) { double("ChefSecretsFile", save: true) }

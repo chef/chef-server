@@ -29,7 +29,7 @@ end
 
 describe "chef-server-ctl rotate credentials" do
   subject do
-    OmnibusCtlHelper.new(["./rotate_credentials.rb"])
+    OmnibusCtlHelper.new(["./plugins/rotate_credentials.rb"])
   end
 
   let(:veil_creds) do
