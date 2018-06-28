@@ -141,6 +141,7 @@ http {
           server {
             <%= @helper.listen_port('http') %>
             server_name <%= @helper.server_name %>;
+            more_clear_headers Server;
             access_log /var/log/opscode/nginx/rewrite-port-80.log;
             return 301 https://$host$request_uri;
           }
@@ -156,6 +157,7 @@ http {
   server {
     <%= @helper.listen_port(node['private_chef']['lb_internal']['chef_port']) %>
     server_name <%= @helper.server_name %>;
+    more_clear_headers Server;
 
     client_max_body_size <%= @client_max_body_size %>;
     proxy_set_header        Host            $host;
@@ -188,6 +190,7 @@ http {
   server {
     <%= @helper.listen_port(node['private_chef']['lb_internal']['oc_bifrost_port']) %>
     server_name <%= @helper.server_name %>;
+    more_clear_headers Server;
 
     client_max_body_size <%= @client_max_body_size %>;
     proxy_set_header        Host            $host;
