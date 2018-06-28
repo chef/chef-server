@@ -26,7 +26,7 @@ else
   knife_cmd    = "/opt/opscode/embedded/bin/knife"
 end
 
-cmd_args     = ARGV[3..-1]
+cmd_args     = ARGV[1..-1]
 
 cmds = {
   "org-create"      => ["create", "org", "Create an organization in the chef server."],

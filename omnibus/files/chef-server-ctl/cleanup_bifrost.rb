@@ -39,7 +39,7 @@ DELETE FROM auth_actor WHERE authz_id IN (SELECT authz_id FROM orphaned_auth_act
 SQL
 
 add_command_under_category "cleanup-bifrost", "cleanup", "Cleanup orphaned bifrost objects.", 2 do
-  cleanup_args = ARGV[3..-1]
+  cleanup_args = ARGV[1..-1]
   options = {}
 
   OptionParser.new do |opts|

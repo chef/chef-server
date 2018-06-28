@@ -29,7 +29,7 @@ rescue LoadError
 end
 
 add_command_under_category "add-client-key", "key-rotation", "Create a new client key", 2 do
-  cmd_args = ARGV[3..-1]
+  cmd_args = ARGV[1..-1]
   @helper = KeyCtlHelper.new
   @options = OpenStruct.new
   @options.expiration_date = "infinity"
@@ -59,7 +59,7 @@ add_command_under_category "add-client-key", "key-rotation", "Create a new clien
   end
 
   begin
-    opt_parser.parse!(ARGV[3..-1])
+    opt_parser.parse!(ARGV[1..-1])
   rescue OptionParser::MissingArgument => e
     @helper.parse_missing_arg_error(e)
   rescue OptionParser::InvalidOption => e
@@ -99,7 +99,7 @@ add_command_under_category "add-client-key", "key-rotation", "Create a new clien
 end
 
 add_command_under_category "add-user-key", "key-rotation", "Create a new user key", 2 do
-  cmd_args = ARGV[3..-1]
+  cmd_args = ARGV[1..-1]
   @helper = KeyCtlHelper.new
   @options = OpenStruct.new
   @options.expiration_date = "infinity"
@@ -128,7 +128,7 @@ add_command_under_category "add-user-key", "key-rotation", "Create a new user ke
   end
 
   begin
-    opt_parser.parse!(ARGV[3..-1])
+    opt_parser.parse!(ARGV[1..-1])
   rescue OptionParser::MissingArgument => e
     @helper.parse_missing_arg_error(e)
   rescue OptionParser::InvalidOption => e
@@ -165,7 +165,7 @@ add_command_under_category "add-user-key", "key-rotation", "Create a new user ke
 end
 
 add_command_under_category "list-client-keys", "key-rotation", "List keys for a client", 2 do
-  cmd_args = ARGV[3..-1]
+  cmd_args = ARGV[1..-1]
   @helper = KeyCtlHelper.new
   @options = OpenStruct.new
   @options.show_public_keys = false
@@ -179,7 +179,7 @@ add_command_under_category "list-client-keys", "key-rotation", "List keys for a 
   end
 
   begin
-    opt_parser.parse!(ARGV[3..-1])
+    opt_parser.parse!(ARGV[1..-1])
   rescue OptionParser::MissingArgument => e
     @helper.parse_missing_arg_error(e)
   rescue OptionParser::InvalidOption => e
@@ -206,7 +206,7 @@ add_command_under_category "list-client-keys", "key-rotation", "List keys for a 
 end
 
 add_command_under_category "list-user-keys", "key-rotation", "List keys for a user", 2 do
-  cmd_args = ARGV[3..-1]
+  cmd_args = ARGV[1..-1]
   @helper = KeyCtlHelper.new
 
   @options = OpenStruct.new
@@ -221,7 +221,7 @@ add_command_under_category "list-user-keys", "key-rotation", "List keys for a us
   end
 
   begin
-    opt_parser.parse!(ARGV[3..-1])
+    opt_parser.parse!(ARGV[1..-1])
   rescue OptionParser::MissingArgument => e
     @helper.parse_missing_arg_error(e)
   rescue OptionParser::InvalidOption => e
@@ -246,7 +246,7 @@ add_command_under_category "list-user-keys", "key-rotation", "List keys for a us
 end
 
 add_command_under_category "delete-user-key", "key-rotation", "Delete a key", 2 do
-  cmd_args = ARGV[3..-1]
+  cmd_args = ARGV[1..-1]
   @helper = KeyCtlHelper.new
   @options = OpenStruct.new
   @usage = "Usage: chef-server-ctl delete-user-key USERNAME KEYNAME"
@@ -268,7 +268,7 @@ add_command_under_category "delete-user-key", "key-rotation", "Delete a key", 2 
 end
 
 add_command_under_category "delete-client-key", "key-rotation", "Delete a key", 2 do
-  cmd_args = ARGV[3..-1]
+  cmd_args = ARGV[1..-1]
   @helper = KeyCtlHelper.new
   @options = OpenStruct.new
   @usage = "Usage: chef-server-ctl delete-client-key ORGNAME CLIENTNAME KEYNAME"

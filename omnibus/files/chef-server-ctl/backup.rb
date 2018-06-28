@@ -80,14 +80,14 @@ add_command_under_category 'restore', 'general', 'Restore the Chef Server from b
     end
   end.parse!(ARGV)
 
-  unless ARGV.length >= 4
+  unless ARGV.length >= 2
     log('Invalid command', :error)
     log('USAGE: chef-server-ctl restore $PATH_TO_BACKUP_TARBALL [options]', :error)
     exit(1)
   end
 
   config = stringify_keys(options.to_h)
-  config['restore_param'] = normalize_arg(ARGV[3])
+  config['restore_param'] = normalize_arg(ARGV[1])
 
   begin
     with_temp_dir { ChefBackup::Runner.new(config).restore }

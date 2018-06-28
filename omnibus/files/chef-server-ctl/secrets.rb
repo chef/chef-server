@@ -2,13 +2,13 @@ require 'mixlib/shellout'
 
 add_command_under_category "set-db-superuser-password", "Secrets Management", "Add or change DB superuser password", 2 do
   confirm_continue!("WARN: Manually setting the DB superuser password is only supported for external postgresql instances")
-  password = capture_secret_value("DB_PASSWORD", "DB superuser password", ARGV[3])
+  password = capture_secret_value("DB_PASSWORD", "DB superuser password", ARGV[1])
   set_secret_("postgresql", "db_superuser_password", password)
 end
 
 add_command_under_category "set-actions-password", "Secrets Management", "Add or change the rabbitmq actions queue password", 2 do
   confirm_continue!("WARN: Manually setting the actions password is only supported for external rabbitmq instances")
-  password = capture_secret_value("ACTIONS_PASSWORD", "actions queue password", ARGV[3])
+  password = capture_secret_value("ACTIONS_PASSWORD", "actions queue password", ARGV[1])
   set_secret_("rabbitmq", "actions_password", password)
 end
 
@@ -60,15 +60,15 @@ SERVICES_REQUIRING_RESTART = {
 MANAGE_SVDIR = "/opt/chef-manage/sv/"
 
 add_command_under_category "show-secret", "Secrets Management", "Show the value of the given secret in the secret store", 2 do
-  group = ARGV[3]
-  name = ARGV[4]
+  group = ARGV[1]
+  name = ARGV[2]
   puts credentials.get(group, name)
 end
 
 add_command_under_category "set-secret", "Secrets Management", "Set or change secret NAME of GROUP", 2 do
   with_restart = ARGV.delete("--with-restart")
-  group = ARGV[3]
-  name = ARGV[4]
+  group = ARGV[1]
+  name = ARGV[2]
 
   unless is_known_credential(group, name)
     msg = "chef-server-ctl set-secret: Unknown credential: '#{name}' (group '#{group}')"
@@ -78,13 +78,13 @@ add_command_under_category "set-secret", "Secrets Management", "Set or change se
 
   env_name = "#{group.upcase}_#{name.upcase}"
   disp_name = "#{group} #{name}"
-  password = capture_secret_value(env_name, disp_name, ARGV[5])
+  password = capture_secret_value(env_name, disp_name, ARGV[3])
   set_secret_(group, name, password, with_restart)
 end
 
 add_command_under_category "remove-secret", "Secrets Management", "Remove secret NAME of GROUP", 2 do
-  group = ARGV[3]
-  name = ARGV[4]
+  group = ARGV[1]
+  name = ARGV[2]
 
   confirm_continue!("WARN: Removing a secret may render your chef-server inoperable.  Are you sure?")
   credentials.remove(group, name)

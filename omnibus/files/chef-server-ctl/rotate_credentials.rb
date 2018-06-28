@@ -22,7 +22,7 @@ add_command_under_category "rotate-credentials", "Secrets Management", "Rotate C
 
   # Rotate and save the credentials
   begin
-    service = ARGV[3]
+    service = ARGV[1]
 
     unless service
       log("You must provide a credential service name", :error)

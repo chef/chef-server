@@ -32,7 +32,7 @@ known_dbs['opscode-erchef'] = known_dbs['opscode_chef']
 
 add_command_under_category "psql", "Database", "Launches an interactive psql session with the service database you name. Add '--write' for write access and '--options <OPTIONS>' to specify psql options.", 2 do
 
-  service_name = ARGV[3]
+  service_name = ARGV[1]
   write_arg = '--write'
   ro = ARGV.include?(write_arg) ? '' : 'ro_'
   options_arg = '--options'

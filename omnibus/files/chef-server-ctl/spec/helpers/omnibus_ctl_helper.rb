@@ -17,8 +17,6 @@ class OmnibusCtlHelper
     # irrelevant to the command, but get passed in anyway.
     ARGV.clear
     ARGV << "stub1"
-    ARGV << "stub2"
-    ARGV << "stub3"
     args.each do |arg|
       ARGV << arg
     end

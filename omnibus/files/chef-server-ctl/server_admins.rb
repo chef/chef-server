@@ -22,7 +22,7 @@ PLACEHOLDER_GLOBAL_ORG_ID = "00000000000000000000000000000000"
 
 add_command_under_category "grant-server-admin-permissions", "server-admins", "Grant a user the ability to create other users by added the user to the server-admins group.", 2 do
 
-  cmd_args = ARGV[3..-1]
+  cmd_args = ARGV[1..-1]
   if cmd_args.length != 1
     msg = "Username is the only argument to grant-server-admin-permissions.\nPlease pass a single argument."
     STDERR.puts msg
@@ -56,7 +56,7 @@ end
 
 add_command_under_category "remove-server-admin-permissions", "server-admins", "Remove all special permission granted to a user from being a server-admin.", 2 do
 
-  cmd_args = ARGV[3..-1]
+  cmd_args = ARGV[1..-1]
   if cmd_args.length != 1
     msg = "Username is the only argument to remove-server-admin-permissions.\nPlease pass a single argument."
     STDERR.puts msg
@@ -113,7 +113,7 @@ add_command_under_category "remove-server-admin-permissions", "server-admins", "
 end
 
 add_command_under_category "list-server-admins", "server-admins", "List users that have server-admins permissions.", 2 do
-  cmd_args = ARGV[3..-1]
+  cmd_args = ARGV[1..-1]
   if cmd_args.length != 0
     msg = "This command does not accept arguments."
     STDERR.puts msg

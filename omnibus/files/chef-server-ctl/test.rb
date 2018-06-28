@@ -9,7 +9,7 @@ add_command_under_category "test", "general", "Run the API test suite against lo
   ENV['WEBUI_KEY'] = credentials.get("chef-server", "webui_key")
   ENV['STATS_PASSWORD'] = credentials.get('opscode_erchef', 'stats_password')
 
-  pedant_args = ARGV[3..-1]
+  pedant_args = ARGV[1..-1]
   pedant_args = ["--smoke"] unless pedant_args.any?
   Dir.chdir(File.join(base_path, "embedded", "service", "oc-chef-pedant"))
   pedant_config = File.join(data_path, "oc-chef-pedant", "etc", "pedant_config.rb")

@@ -1,6 +1,6 @@
 add_command_under_category "rebuild-migration-state", "general", "Attempt to rebuild the migration-state file before upgrade.", 2 do
   require 'optparse'
-  rebuild_args = ARGV[3..-1]
+  rebuild_args = ARGV[1..-1]
   options = {}
 
   OptionParser.new do |opts|

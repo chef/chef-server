@@ -95,7 +95,7 @@ ensure
 end
 
 add_command_under_category "reindex", "general", "Reindex all server data for a given organization", 2 do
-  reindex_args = ARGV[3..-1] # Chop off first 3 args, keep the rest... that is, everything after "private-chef-ctl reindex"
+  reindex_args = ARGV[1..-1] # Chop off first 1 args, keep the rest... that is, everything after "private-chef-ctl reindex"
   options = {}
 
   OptionParser.new do |opts|

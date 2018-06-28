@@ -11,22 +11,19 @@ knife_config = "/etc/opscode/pivotal.rb"
 knife_cmd    = "/opt/opscode/embedded/bin/knife opc user password"
 
 add_command_under_category "password", "organization-and-user-management", "Set a user's password or System Recovery Password.", 2 do
-  # ARGV starts at index 2 for the actual arguments for the command, so checking that ARGV.length is 4
-  # checks that private-chef-ctl was passed 2 args (in this case password <username>).
-  #
   # changed arg to turn on ldap to --enable-external-auth since that makes more sense to new users, but left in
   # --disable for older users.
-  unless ARGV.length == 4 || (ARGV.length == 5 && (ARGV[4] == "--disable" || ARGV[4] == "--enable-external-auth"))
+  unless ARGV.length == 2 || (ARGV.length == 3 && (ARGV[2] == "--disable" || ARGV[2] == "--enable-external-auth"))
     STDERR.puts "Usage: private-chef-ctl password <username> [--enable-external-auth]"
     exit 1
   end
 
   running_config
-  username = ARGV[3]
+  username = ARGV[1]
 
   # if --enable-external-auth was not passed, we want to either simply change the password if ldap isn't
   # in use on the system, or change the password and also set the user for system recovery.
-  if ARGV.length == 4
+  if ARGV.length == 2
     password = HighLine.ask("Enter the new password:  " ) { |q| q.echo = "*" }
     password2 = HighLine.ask("Enter the new password again:  " ) { |q| q.echo = "*" }
     if password != password2
