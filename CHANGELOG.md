@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.61 -->
-## [12.17.61](https://github.com/chef/chef-server/tree/12.17.61) (2018-06-14)
+<!-- latest_release 12.17.62 -->
+## [12.17.62](https://github.com/chef/chef-server/tree/12.17.62) (2018-06-29)
 
 #### Merged Pull Requests
-- Update os versions in omnibus kitchen.yml [#1505](https://github.com/chef/chef-server/pull/1505) ([markan](https://github.com/markan))
+- MSYS-848 : Prevent Chef Server headers from exposing openresty name and version [#1514](https://github.com/chef/chef-server/pull/1514) ([piyushawasthi](https://github.com/piyushawasthi))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- MSYS-848 : Prevent Chef Server headers from exposing openresty name and version [#1514](https://github.com/chef/chef-server/pull/1514) ([piyushawasthi](https://github.com/piyushawasthi)) <!-- 12.17.62 -->
 - Update os versions in omnibus kitchen.yml [#1505](https://github.com/chef/chef-server/pull/1505) ([markan](https://github.com/markan)) <!-- 12.17.61 -->
 - Segment-free cookbook data (RFC 67) [#1034](https://github.com/chef/chef-server/pull/1034) ([thommay](https://github.com/thommay)) <!-- 12.17.60 -->
 - Upgrade to Chef 14 [#1506](https://github.com/chef/chef-server/pull/1506) ([markan](https://github.com/markan)) <!-- 12.17.59 -->
