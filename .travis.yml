@@ -48,6 +48,7 @@ env:
     - LUALIB=~/.luarocks/lib/lua/5.2
   matrix:
   - COMPONENT=omnibus
+  - COMPONENT=src/chef-server-ctl
   - COMPONENT=src/oc_erchef
   - COMPONENT=src/oc-id
   - COMPONENT=src/chef-mover

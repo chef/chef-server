@@ -16,7 +16,7 @@
 
 name "chef-server-ctl"
 
-source path: "#{project.files_path}/chef-server-ctl"
+source path: "#{project.files_path}/../../src/chef-server-ctl"
 
 license :project_license
 skip_transitive_dependency_licensing true

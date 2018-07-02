@@ -48,7 +48,6 @@ To run the unit tests:
 
 ```
 bundle install --binstubs
-./bin/rake test:csc
 ./bin/rake test:routing
 ```
 
