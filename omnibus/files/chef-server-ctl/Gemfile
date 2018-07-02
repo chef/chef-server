@@ -1,8 +1,0 @@
-source "https://rubygems.org"
-
-gemspec
-
-gem "chef" #, git: "https://github.com/chef/chef.git"
-gem "chef_backup", git: "https://github.com/chef/chef_backup.git"
-gem "omnibus-ctl", git: "https://github.com/chef/omnibus-ctl.git"
-
