@@ -23,11 +23,11 @@ require "chef/key"
 # so we want to use the full path when loaded from omnibus-ctl,
 # but we need the local relative path for it to work with rspec
 # TODO Check if this is still true in gem-world
-require_relative "helpers/key_ctl_helper"
+require "chef_server_ctl/helpers/key_ctl_helper"
 
 add_command_under_category "add-client-key", "key-rotation", "Create a new client key", 2 do
   cmd_args = ARGV[1..-1]
-  @helper = KeyCtlHelper.new
+  @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
   @options = OpenStruct.new
   @options.expiration_date = "infinity"
   @key = nil
@@ -97,7 +97,7 @@ end
 
 add_command_under_category "add-user-key", "key-rotation", "Create a new user key", 2 do
   cmd_args = ARGV[1..-1]
-  @helper = KeyCtlHelper.new
+  @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
   @options = OpenStruct.new
   @options.expiration_date = "infinity"
   @key = nil
@@ -163,7 +163,7 @@ end
 
 add_command_under_category "list-client-keys", "key-rotation", "List keys for a client", 2 do
   cmd_args = ARGV[1..-1]
-  @helper = KeyCtlHelper.new
+  @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
   @options = OpenStruct.new
   @options.show_public_keys = false
   @usage = "Usage: chef-server-ctl list-client-keys ORGNAME CLIENTNAME [-v, --verbose]"
@@ -204,7 +204,7 @@ end
 
 add_command_under_category "list-user-keys", "key-rotation", "List keys for a user", 2 do
   cmd_args = ARGV[1..-1]
-  @helper = KeyCtlHelper.new
+  @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
 
   @options = OpenStruct.new
   @options.show_public_keys = false
@@ -244,7 +244,7 @@ end
 
 add_command_under_category "delete-user-key", "key-rotation", "Delete a key", 2 do
   cmd_args = ARGV[1..-1]
-  @helper = KeyCtlHelper.new
+  @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
   @options = OpenStruct.new
   @usage = "Usage: chef-server-ctl delete-user-key USERNAME KEYNAME"
 
@@ -266,7 +266,7 @@ end
 
 add_command_under_category "delete-client-key", "key-rotation", "Delete a key", 2 do
   cmd_args = ARGV[1..-1]
-  @helper = KeyCtlHelper.new
+  @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
   @options = OpenStruct.new
   @usage = "Usage: chef-server-ctl delete-client-key ORGNAME CLIENTNAME KEYNAME"
 

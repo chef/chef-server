@@ -15,7 +15,7 @@
 #
 
 require "omnibus_ctl_helper"
-require 'helpers/key_ctl_helper'
+require 'chef_server_ctl/helpers/key_ctl_helper'
 require 'chef/key'
 
 describe "chef-server-ctl *key(s)*" do
@@ -50,7 +50,7 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
   let(:not_a_key_path)       { "#{__dir__}/fixtures/notakey.pub" }
 
   before(:each) do
-    allow_any_instance_of(KeyCtlHelper).to receive(:pivotal_config).and_return("#{__dir__}/fixtures/pivotal.rb")
+    allow_any_instance_of(ChefServerCtl::Helpers::KeyCtlHelper).to receive(:pivotal_config).and_return("#{__dir__}/fixtures/pivotal.rb")
   end
 
   shared_examples_for "a key command with option parsing" do
@@ -214,7 +214,7 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
         allow_any_instance_of(Chef::Key).to receive(:create).and_return(new_key)
       end
       it "should generate a chef key" do
-        expect_any_instance_of(KeyCtlHelper).to receive(populate_key_command).with(actor_name, "testkey", File.read(public_key_path), "infinity").at_least(:once).and_return(Chef::Key.new("no_matter", "user"))
+        expect_any_instance_of(ChefServerCtl::Helpers::KeyCtlHelper).to receive(populate_key_command).with(actor_name, "testkey", File.read(public_key_path), "infinity").at_least(:once).and_return(Chef::Key.new("no_matter", "user"))
         @helper.run_test_omnibus_command(command, arguments)
       end
       it "should call Chef::Key.create" do
@@ -244,7 +244,7 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
       context "when --public-key-path isn't passed and --key-name is passed" do
         it "should create a new public key and print the private key" do
           expect_any_instance_of(Chef::Key).to receive(:create).at_least(:once)
-          expect_any_instance_of(Chef::KeyCtlHelper).to receive(:print_private_key).at_least(:once)
+          expect_any_instance_of(ChefServerCtl::Helpers::KeyCtlHelper).to receive(:print_private_key).at_least(:once)
           @helper.run_test_omnibus_command(command, base_arguments.concat(["-k", "testkey"]))
         end
       end
