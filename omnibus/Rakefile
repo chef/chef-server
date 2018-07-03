@@ -3,7 +3,7 @@ require "bundler"
 namespace :test do
   task :csc do
     Bundler.with_clean_env {
-      if system "cd files/private-chef-ctl-commands/ && bundle install && bundle exec rspec"
+      if system "cd files/chef-server-ctl && bundle install && bundle exec rspec"
         exit 0
       else
         exit 1

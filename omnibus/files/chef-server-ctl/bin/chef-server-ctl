@@ -1,0 +1,254 @@
+#!/opt/opscode/embedded/bin/ruby
+
+require 'rubygems'
+gem 'omnibus-ctl'
+require 'omnibus-ctl'
+require 'veil'
+
+module Omnibus
+  # This implements callbacks for handling commands related to the
+  # external services supported by Chef Server. As additional services
+  # are external-enabled, controls/configuration will need to be added here.
+  class ChefServerCtl < Omnibus::Ctl
+    def db_data
+      d = [%w{oc_bifrost bifrost},
+           %w{opscode-erchef opscode_chef},
+           %w{oc_id oc_id}]
+      if running_service_config('bookshelf')['storage_type'] == 'sql'
+        d << %w{bookshelf bookshelf}
+      end
+      d
+    end
+
+    CREDENTIAL_ENV = 'CHEF_SECRETS_DATA'.freeze
+
+    def credentials
+      if ENV.has_key?(CREDENTIAL_ENV)
+        @credentials = Veil::CredentialCollection::ChefSecretsEnv.new(var_name: CREDENTIAL_ENV)
+      else
+        secrets_file = ENV['SECRETS_FILE'] || "/etc/opscode/private-chef-secrets.json"
+        @credentials ||= Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file)
+      end
+    end
+
+    # Note that as we expand our external service support,
+    # we may want to consider farming external_X functions to
+    # service-specific classes
+    def external_cleanse_postgresql(perform_delete)
+      postgres = external_services['postgresql']
+      exec_list = []
+      # NOTE a better way to handle this particular action may be through a chef_run of a 'cleanse' recipe,
+      # since here we're explicitly reversing the actions we did in-recipe to set the DBs up....
+      superuser = postgres['db_superuser']
+      db_data.each do |service|
+        key, dbname = service
+        service_config = running_service_config(key)
+        exec_list << "DROP DATABASE #{dbname};"
+        exec_list << "REVOKE \"#{service_config['sql_user']}\" FROM \"#{superuser}\";"
+        exec_list << "REVOKE \"#{service_config['sql_ro_user']}\" FROM \"#{superuser}\";"
+        exec_list << "DROP ROLE \"#{service_config['sql_user']}\";"
+        exec_list << "DROP ROLE \"#{service_config['sql_ro_user']}\";"
+      end
+      if perform_delete
+        delete_external_postgresql_data(exec_list, postgres)
+      else
+        path = File.join(backup_dir, 'postgresql-manual-cleanup.sql')
+        dump_exec_list_to_file(path, exec_list)
+        log warn_CLEANSE002_no_postgres_delete(path, postgres)
+      end
+    end
+
+    def delete_external_postgresql_data(exec_list, postgres)
+      last = nil
+      begin
+        require "pg"
+        connection = postgresql_connection(postgres)
+        while exec_list.length > 0
+          last = exec_list.shift
+          connection.exec(last)
+        end
+        puts "Chef Server databases and roles have been successsfully deleted from #{postgres['vip']}"
+      rescue StandardError => e
+        exec_list.insert(0, last) unless last.nil?
+        if exec_list.empty?
+          path = nil
+        else
+          path = Time.now.strftime('/root/%FT%R-chef-server-manual-postgresql-cleanup.sql')
+          dump_exec_list_to_file(path, exec_list)
+        end
+        # Note - we're just showing the error and not exiting, so that
+        # we don't block any other external cleanup that can happen
+        # independent of postgresql.
+        log err_CLEANSE001_postgres_failed(postgres, path, last, e.message)
+      ensure
+        connection.close if connection
+      end
+    end
+
+    def dump_exec_list_to_file(path, list)
+      File.open(path, 'w') do |file|
+        list.each { |line| file.puts line }
+      end
+    end
+
+    def external_status_postgresql(detail_level)
+      postgres = external_services['postgresql']
+      begin
+        require 'pg'
+        connection =postgresql_connection(postgres)
+        if detail_level == :sparse
+          # We connected, that's all we care about for sparse status
+          # We're going to keep the format similar to the existing output
+          "run: postgresql: connected OK to #{postgres['vip']}:#{postgres['port']}"
+          # to hopefully avoid breaking anyone who parses this.
+        else
+          postgres_verbose_status(postgres, connection)
+        end
+      rescue StandardError => e
+        if detail_level == :sparse
+          "down: postgresql: failed to connect to #{postgres['vip']}:#{postgres['port']}: #{e.message.split("\n")[0]}"
+        else
+          log err_STAT001_postgres_failed(postgres, e.message)
+          Kernel.exit! 128
+        end
+      ensure
+        connection.close if connection
+      end
+    end
+
+    def postgresql_connection(postgres)
+      PGconn.open('user' => postgres['db_superuser'], 'host' => postgres['vip'],
+                  'password' => credentials.get('postgresql', 'db_superuser_password'),
+                  'port' => postgres['port'], 'dbname' => 'template1')
+    end
+
+    def postgres_verbose_status(postgres, connection)
+      max_conn = connection.exec("SELECT setting FROM pg_settings WHERE name = 'max_connections'")[0]['setting']
+      total_conn = connection.exec('SELECT sum(numbackends) num FROM pg_stat_database')[0]['num']
+      version = connection.exec('SHOW server_version')[0]['server_version']
+      lock_result =  connection.exec('SELECT pid FROM pg_locks WHERE NOT GRANTED')
+      locks = lock_result.map { |r| r['pid'] }.join(",")
+      locks = 'none' if locks.nil? || locks.empty?
+<<EOM
+PostgreSQL
+  * Connected to PostgreSQL v#{version} on #{postgres['vip']}:#{postgres['port']}
+  * Connections: #{total_conn} active out of #{max_conn} maximum.
+  * Processes ids pending locks: #{locks}
+EOM
+    end
+
+    def err_STAT001_postgres_failed(postgres, message)
+<<EOM
+STAT001: An error occurred while attempting to get status from PostgreSQL
+         running on #{postgres['vip']}:#{postgres['port']}
+
+         The error report follows:
+
+#{format_multiline_message(12, message)}
+
+         See https://docs.chef.io/error_messages.html#stat001-postgres-failed
+         for more information.
+EOM
+    end
+
+    def err_CLEANSE001_postgres_failed(postgres, path, last, message)
+      msg = <<EOM
+CLEANSE001: While local cleanse of Chef Server succeeded, an error
+            occurred while deleting Chef Server data from the external
+            PostgreSQL server at #{postgres['vip']}.
+
+            The error reported was:
+
+#{format_multiline_message(16, message)}
+
+EOM
+      msg << <<-EOM unless last.nil?
+            This occurred when executing the following SQL statement:
+              #{last}
+EOM
+
+      msg << <<-EOM unless path.nil?
+            To complete cleanup of PostgreSQL, please log into PostgreSQL
+            on #{postgres['vip']} as superuser and execute the statements
+            that have been saved to the file below:
+
+              #{path}
+EOM
+
+      msg << <<EOM
+
+            See https://docs.chef.io/error_messages.html#cleanse001-postgres-failed
+            for more information.
+EOM
+     msg
+    end
+    def warn_CLEANSE002_no_postgres_delete(sql_path, postgres)
+      <<EOM
+CLEANSE002: Note that Chef Server data was not removed from your
+            remote PostgreSQL server because you did not specify
+            the '--with-external' option.
+
+            If you do wish to purge Chef Server data from PostgreSQL,
+            you can do by logging into PostgreSQL on
+            #{postgres['vip']}:#{postgres['port']}
+            and executing the appropriate SQL staements manually.
+
+            For your convenience, these statements have been saved
+            for you in:
+
+            #{sql_path}
+
+            See https://docs.chef.io/error_messages.html#cleanse002-postgres-not-purged
+            for more information.
+EOM
+    end
+
+    # External Solr/ElasticSearch Commands
+    def external_status_opscode_solr4(_detail_level)
+      solr = external_services['opscode-solr4']['external_url']
+      begin
+        Chef::HTTP.new(solr).get(solr_status_url)
+        puts "run: opscode-solr4: connected OK to #{solr}"
+      rescue StandardError => e
+        puts "down: opscode-solr4: failed to connect to #{solr}: #{e.message.split("\n")[0]}"
+      end
+    end
+
+    def external_cleanse_opscode_solr4(perform_delete)
+      log <<-EOM
+Cleansing data in a remote Sol4 instance is not currently supported.
+EOM
+    end
+
+    def solr_status_url
+      case running_service_config('opscode-erchef')['search_provider']
+      when "elasticsearch"
+        "/chef"
+      else
+        "/admin/ping?wt=json"
+      end
+    end
+
+    # Override reconfigure to skip license checking
+    def reconfigure(*args)
+      status = run_chef("#{base_path}/embedded/cookbooks/dna.json")
+      if status.success?
+        log "#{display_name} Reconfigured!"
+        exit! 0
+      else
+        exit! 1
+      end
+    end
+  end
+end
+
+# This replaces the default bin/omnibus-ctl command
+require 'pathname'
+file_path = Pathname.new(__FILE__)
+cmd_name = 'opscode' # what does this do? was ARGV[0]
+plugin_path = file_path.dirname.parent.join('plugins') 
+arguments = ARGV[0..-1] # Get the rest of the command line arguments
+
+ctl = Omnibus::ChefServerCtl.new(cmd_name, true, "Chef Server")
+ctl.load_files(plugin_path)
+ctl.run(arguments)
