@@ -21,7 +21,6 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = ">= 2.4.0"
 
-
   spec.add_runtime_dependency "highline", "~> 1.6", ">= 1.6.9"
 
   spec.add_runtime_dependency "ffi-yajl", ">= 1.2.0"
@@ -34,17 +33,20 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "sequel"
   spec.add_runtime_dependency "redis"
+  # TODO
+  # chef-server-ctl server-admins commands dep, will be removed in server-admins V2
+  # https://gist.github.com/tylercloke/a8d4bc1b915b958ac160#version-2
   spec.add_runtime_dependency "rest-client"
   spec.add_runtime_dependency "knife-opc"
-
 
   spec.add_runtime_dependency "uuidtools", "~> 2.1", ">= 2.1.3"
   spec.add_runtime_dependency "veil" # todo get latest from https://github.com/chef/chef_secrets.git
 
-  spec.add_runtime_dependency "chef_backup" # todo get latest from https://github.com/chef/chef_backup.git
-  spec.add_runtime_dependency "omnibus-ctl" # todo get latest from https://github.com/chef/omnibus-ctl.git
+  spec.add_runtime_dependency "chef_backup" # Gemfile has us getting latest from git
+  spec.add_runtime_dependency "omnibus-ctl" # Gemfile has us getting latest from git
 
   spec.add_runtime_dependency "chef", "~> 14.2.0"
+  spec.add_runtime_dependency "appbundler"
 
   spec.add_development_dependency "chefstyle"
   spec.add_development_dependency "bundler"
