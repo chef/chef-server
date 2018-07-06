@@ -86,6 +86,5 @@ verify_encoding:
 	../scripts/filetype-check.sh .
 
 travis: verify_encoding
-	bundle exec rake test:csc
 	bundle exec rake test:routing
 	bundle exec rake test:private_chef_cookbooks

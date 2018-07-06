@@ -1,1 +1,5 @@
 results/
+.bundle/
+bin/*
+pkg/*
+vendor/

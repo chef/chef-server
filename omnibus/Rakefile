@@ -1,15 +1,6 @@
 require "bundler"
 
 namespace :test do
-  task :csc do
-    Bundler.with_clean_env {
-      if system "cd files/private-chef-ctl-commands/ && bundle install && bundle exec rspec"
-        exit 0
-      else
-        exit 1
-      end
-    }
-  end
   task :private_chef_cookbooks do
     Bundler.with_clean_env {
       if system "cd files/private-chef-cookbooks/private-chef && bundle install && bundle exec rspec"
