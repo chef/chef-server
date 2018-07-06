@@ -3,7 +3,6 @@
 # All Rights Reserved
 #
 
-# TODO refactor this for gemified chef-server-ctl
 require_relative 'open_source_chef12_upgrade'
 require 'optparse'
 require 'ostruct'
