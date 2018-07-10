@@ -1,4 +1,4 @@
-<%= form_for([:oauth, application], 'data-abide' => '') do |f| %>
+<%= form_for(application, url: url, 'data-abide' => '') do |f| %>
   <% if application.errors.any? %>
     <div class="alert-box radius alert" data-alert><p>Whoops! Check your form for possible errors</p></div>
   <% end %>
