@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.63 -->
-## [12.17.63](https://github.com/chef/chef-server/tree/12.17.63) (2018-07-06)
+<!-- latest_release 12.17.64 -->
+## [12.17.64](https://github.com/chef/chef-server/tree/12.17.64) (2018-07-10)
 
 #### Merged Pull Requests
-- Ma/appbundle and move [#1516](https://github.com/chef/chef-server/pull/1516) ([markan](https://github.com/markan))
+- Update oc_id gems [#1518](https://github.com/chef/chef-server/pull/1518) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- Update oc_id gems [#1518](https://github.com/chef/chef-server/pull/1518) ([markan](https://github.com/markan)) <!-- 12.17.64 -->
 - Ma/appbundle and move [#1516](https://github.com/chef/chef-server/pull/1516) ([markan](https://github.com/markan)) <!-- 12.17.63 -->
 - MSYS-848 : Prevent Chef Server headers from exposing openresty name and version [#1514](https://github.com/chef/chef-server/pull/1514) ([piyushawasthi](https://github.com/piyushawasthi)) <!-- 12.17.62 -->
 - Update os versions in omnibus kitchen.yml [#1505](https://github.com/chef/chef-server/pull/1505) ([markan](https://github.com/markan)) <!-- 12.17.61 -->
