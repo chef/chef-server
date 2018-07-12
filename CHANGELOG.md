@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.65 -->
-## [12.17.65](https://github.com/chef/chef-server/tree/12.17.65) (2018-07-11)
+<!-- latest_release 12.17.66 -->
+## [12.17.66](https://github.com/chef/chef-server/tree/12.17.66) (2018-07-12)
 
 #### Merged Pull Requests
-- Ma/timestamps in utc [#1503](https://github.com/chef/chef-server/pull/1503) ([markan](https://github.com/markan))
+- support HEAD http request on named node endpoint [#1218](https://github.com/chef/chef-server/pull/1218) ([jeremymv2](https://github.com/jeremymv2))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- support HEAD http request on named node endpoint [#1218](https://github.com/chef/chef-server/pull/1218) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.17.66 -->
 - Ma/timestamps in utc [#1503](https://github.com/chef/chef-server/pull/1503) ([markan](https://github.com/markan)) <!-- 12.17.65 -->
 - Update oc_id gems [#1518](https://github.com/chef/chef-server/pull/1518) ([markan](https://github.com/markan)) <!-- 12.17.64 -->
 - Ma/appbundle and move [#1516](https://github.com/chef/chef-server/pull/1516) ([markan](https://github.com/markan)) <!-- 12.17.63 -->
