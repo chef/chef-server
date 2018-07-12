@@ -8,11 +8,13 @@ If undertaking a large change, ping the @chef/chef-server-maintainers group for 
 
 - [Marc Paradise](https://github.com/marcparadise)
 - [Mark Anderson](https://github.com/markan)
+- [Nolan Davidson](https://github.com/nsdavidson)
+- [Prajakta Purohit](https://github.com/prajaktapurohit)
 - [Ryan Cragun](https://github.com/ryancragun)
+- [Stephan Renatus](https://github.com/srenatus)
 - [Stephen Delano](https://github.com/sdelano)
 - [Steven Danna](https://github.com/stevendanna)
 - [Tyler Cloke](https://github.com/tylercloke)
-- [Stephan Renatus](https://github.com/srenatus)
 
 # Past Maintainers
 
