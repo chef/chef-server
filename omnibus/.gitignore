@@ -8,3 +8,4 @@ vendor/
 tests/**/*.so
 
 .kitchen.local.yml
+Gemfile.lock
