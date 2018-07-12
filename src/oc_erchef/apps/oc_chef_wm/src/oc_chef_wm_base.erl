@@ -539,6 +539,8 @@ http_method_to_authz_perm(#wm_reqdata{}=Req) ->
     http_method_to_authz_perm(wrq:method(Req));
 http_method_to_authz_perm('DELETE') ->
     delete;
+http_method_to_authz_perm('HEAD') ->
+    read;
 http_method_to_authz_perm('GET') ->
     read;
 http_method_to_authz_perm('POST') ->

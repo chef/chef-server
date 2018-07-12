@@ -73,6 +73,8 @@ log_action(Req, #base_state{resource_state = ResourceState,
     case wrq:method(Req) of
         'GET' ->
             ok;
+        'HEAD' ->
+            ok;
         _ElseMethod -> %% POST, PUT, DELETE
             case ResourceMod of
                 oc_chef_wm_authenticate_user ->  %% POST to authenticate_user should not be an action.

@@ -85,6 +85,25 @@ describe "Testing the Nodes API endpoint", :nodes do
     end
   end # GET /nodes/<name>
 
+  context 'HEAD /nodes/<name>' do
+    let(:request_method) { :HEAD }
+    let(:request_url)    { api_url("/nodes/#{node_name}") }
+
+    context 'for a nonexistent node' do
+      let(:node_name){nonexistent_node_name}
+      it 'returns a 404', :smoke do
+        should look_like http_404_response
+      end
+    end
+
+    context 'for an existing node' do
+      include_context 'with temporary testing node'
+      it 'returns a 200', :smoke do
+        should look_like head_success_response
+      end
+    end
+  end # HEAD /nodes/<name>
+
   context 'GET /environments/<environment_name>/nodes' do
     let(:request_method) { :GET }
     let(:request_url)    { api_url("/environments/#{environment_name}/nodes") }
