@@ -15,6 +15,7 @@ REBAR3 = rebar3
 endif
 
 all: $(REBAR3) elvis
+	ps aux | grep postgres
 	@$(REBAR3) do clean, compile, eunit, dialyzer
 
 rel: all
