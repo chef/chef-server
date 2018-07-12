@@ -1,7 +1,7 @@
-name "private-chef"
-maintainer        "Opscode, Inc."
+name              "private-chef"
+maintainer        "Chef Software, Inc."
 maintainer_email  "cookbooks@chef.io"
-license           "Apache 2.0"
+license           "Apache-2.0"
 description       "Installs and configures Chef Server from Omnibus"
 long_description  "Installs and configures Chef Server from Omnibus"
 version           "0.1.1"
@@ -13,3 +13,5 @@ end
 
 depends          'enterprise' # grabbed via Berkshelf + Git
 depends          'openssl', '>= 4.4'
+
+chef_version '>= 14'

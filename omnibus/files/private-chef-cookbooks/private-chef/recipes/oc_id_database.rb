@@ -1,6 +1,6 @@
 #
 # Author:: James Casey <james@chef.io>
-# Copyright:: Copyright (c) 2014 Opscode, Inc.
+# Copyright:: 2014-2018 Chef Software, Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,4 +38,3 @@ private_chef_pg_user_table_access id_attrs['sql_ro_user'] do
   access_profile :read
   only_if { is_data_master? }
 end
-

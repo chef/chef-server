@@ -1,9 +1,20 @@
 # -*- coding: utf-8 -*-
 #
 # Author:: Adam Jacob (<adam@chef.io>)
-# Copyright:: Copyright (c) 2011 Opscode, Inc.
+# Copyright:: 2011-2018 Chef Software, Inc.
+# License:: Apache License, Version 2.0
 #
-# All Rights Reserved
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
 
 solr_dir              = node['private_chef']['opscode-solr4']['dir']            # /var/opt/opscode/opscode-solr4
@@ -110,7 +121,7 @@ node.default['private_chef']['opscode-solr4']['command'] =  "java -Xmx#{node['pr
 solr_mem = if node['private_chef']['opscode-solr4']['heap_size']
              OmnibusHelper.parse_mem_to_mb(node['private_chef']['opscode-solr4']['heap_size'])
            else
-             node[:memory][:total] =~ /^(\d+)kB/
+             node['memory']['total'] =~ /^(\d+)kB/
              memory_total_in_mb = $1.to_i / 1024
              # Total heap size for solr is the smaller of:
              #    25% of total system memory

@@ -1,6 +1,7 @@
 #
 # Author:: Stephan Renatus <srenatus@chef.io>
-# Copyright:: Copyright (c) 2016-2017 Chef Software, Inc.
+# Copyright:: 2016-2018 Chef Software, Inc.
+# License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -82,18 +83,10 @@ if node['private_chef']['insecure_addon_compat']
 else
   #  These keys are no longer kept directly on the FS
   #  delete them if they're present.
-  file "/etc/opscode/pivotal.pem"  do
-    action :delete
-    sensitive true
-  end
-
-  file "/etc/opscode/webui_priv.pem" do
-    action :delete
-    sensitive true
-  end
-
-  file "/etc/opscode/webui_pub.pem" do
-    action :delete
-    sensitive true
+  %w(/etc/opscode/pivotal.pem /etc/opscode/webui_priv.pem /etc/opscode/webui_pub.pem).each do |f|
+    file f do
+      action :delete
+      sensitive true
+    end
   end
 end

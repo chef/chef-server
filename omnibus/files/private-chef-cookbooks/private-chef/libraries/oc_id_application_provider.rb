@@ -5,7 +5,6 @@ class Chef
     class OcIdApplication < Chef::Provider::LWRPBase
       include Chef::Mixin::ShellOut
 
-      use_inline_resources
       provides :oc_id_application
 
       action :create do

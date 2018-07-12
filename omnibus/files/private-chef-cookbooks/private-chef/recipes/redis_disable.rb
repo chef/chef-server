@@ -1,5 +1,6 @@
 #
-# Copyright 2011, Opscode, Inc.
+# Copyright:: 2011-2018 Chef Software, Inc.
+# License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,4 +18,3 @@
 runit_service "redis_lb" do
   action :disable
 end
-

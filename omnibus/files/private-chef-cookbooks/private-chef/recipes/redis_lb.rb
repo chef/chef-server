@@ -1,6 +1,6 @@
-# Copyright:: Copyright (c) 2012 Opscode, Inc.
-# License:: Apache License, Version 2.0
+# Copyright:: 2012-2018 Chef Software, Inc.
 # Author:: Marc A. Paradise <marc@chef.io>
+# License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -155,5 +155,5 @@ ruby_block "set_lb_redis_values" do
       redis.hdel "dl_default", "503_mode"
     end
   end
-  action :create
+  action :run
 end
