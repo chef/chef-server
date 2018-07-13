@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.68 -->
-## [12.17.68](https://github.com/chef/chef-server/tree/12.17.68) (2018-07-12)
+<!-- latest_release 12.17.69 -->
+## [12.17.69](https://github.com/chef/chef-server/tree/12.17.69) (2018-07-13)
 
 #### Merged Pull Requests
-- Resolving Foodcritic warnings &amp; cleaning up licensing [#1510](https://github.com/chef/chef-server/pull/1510) ([tas50](https://github.com/tas50))
+- Add Nolan and Prajakta as maintainers [#1521](https://github.com/chef/chef-server/pull/1521) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- Add Nolan and Prajakta as maintainers [#1521](https://github.com/chef/chef-server/pull/1521) ([markan](https://github.com/markan)) <!-- 12.17.69 -->
 - Resolving Foodcritic warnings &amp; cleaning up licensing [#1510](https://github.com/chef/chef-server/pull/1510) ([tas50](https://github.com/tas50)) <!-- 12.17.68 -->
 - Update Gemfiles and other version locks [#1520](https://github.com/chef/chef-server/pull/1520) ([markan](https://github.com/markan)) <!-- 12.17.67 -->
 - support HEAD http request on named node endpoint [#1218](https://github.com/chef/chef-server/pull/1218) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.17.66 -->
