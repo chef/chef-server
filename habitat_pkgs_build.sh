@@ -6,7 +6,7 @@
 export CHEF_SERVER_SRC='/src/src'
 export ORIGIN=chefservertesting
 
-for dir in dbdpg oc-id openresty-noroot nginx bookshelf chef-server-ctl oc_bifrost oc_erchef; do
+for dir in oc-id openresty-noroot nginx bookshelf chef-server-ctl oc_bifrost oc_erchef; do
   cd $CHEF_SERVER_SRC/$dir
   echo "[STATUS] building $dir"
   build > /var/log/build-${dir}-$(date +%s).log

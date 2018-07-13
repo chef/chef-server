@@ -3,8 +3,6 @@
 # TODO: not sure how to handle this. Sqitch bombs when it can't find the timezone
 export TZ="UTC"
 
-export PATH=$PATH:$(hab pkg path "core/postgresql")/bin:$(hab pkg path "core/sqitch")/bin
-
 {{#if bind.database}}
   {{#eachAlive bind.database.members as |member|}}
     {{#if @last}}

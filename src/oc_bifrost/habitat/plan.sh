@@ -8,8 +8,7 @@ pkg_deps=(
   core/coreutils
   core/curl
   core/gcc-libs
-  core/sqitch
-  $HAB_ORIGIN/dbdpg
+  core/sqitch_pg
 )
 pkg_build_deps=(core/make core/git core/gcc core/bundler core/ruby)
 pkg_bin_dirs=(bin)

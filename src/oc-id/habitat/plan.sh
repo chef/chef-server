@@ -3,7 +3,7 @@ pkg_origin=chef
 pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_license=('Apache-2.0')
 pkg_deps=(
-  core/sqitch
+  core/sqitch_pg
   core/curl
   core/node
   core/bundler
@@ -12,7 +12,6 @@ pkg_deps=(
   core/sed
   core/libffi
   core/sqlite
-  $HAB_ORIGIN/dbdpg
   core/tzdata
 )
 pkg_build_deps=(
