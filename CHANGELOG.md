@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.17.71 -->
-## [12.17.71](https://github.com/chef/chef-server/tree/12.17.71) (2018-07-18)
+<!-- latest_release 12.17.72 -->
+## [12.17.72](https://github.com/chef/chef-server/tree/12.17.72) (2018-07-19)
 
 #### Merged Pull Requests
-- Update doorkeeper gem to 4.4.0 [#1523](https://github.com/chef/chef-server/pull/1523) ([rhass](https://github.com/rhass))
+- Update custom resource in chef-server-deploy. [#1525](https://github.com/chef/chef-server/pull/1525) ([rhass](https://github.com/rhass))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- Update custom resource in chef-server-deploy. [#1525](https://github.com/chef/chef-server/pull/1525) ([rhass](https://github.com/rhass)) <!-- 12.17.72 -->
 - Update doorkeeper gem to 4.4.0 [#1523](https://github.com/chef/chef-server/pull/1523) ([rhass](https://github.com/rhass)) <!-- 12.17.71 -->
 - Update Ruby to 2.5.1 [#1522](https://github.com/chef/chef-server/pull/1522) ([rhass](https://github.com/rhass)) <!-- 12.17.70 -->
 - Add Nolan and Prajakta as maintainers [#1521](https://github.com/chef/chef-server/pull/1521) ([markan](https://github.com/markan)) <!-- 12.17.69 -->
