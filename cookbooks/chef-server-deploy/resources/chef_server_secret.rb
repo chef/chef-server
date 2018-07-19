@@ -5,9 +5,9 @@ property :secret_spec, String, name_property: true
 property :value, String
 
 action :set do
-  execute "Add secret #{secret_spec}" do
-    command ['chef-server-ctl', 'set-secret', secret_spec.split('.'),
-             value].flatten
-    not_if "/opt/opscode/embedded/bin/veil-env-helper -s #{secret_spec} true"
+  execute "Add secret #{new_resource.secret_spec}" do
+    command ['chef-server-ctl', 'set-secret', new_resource.secret_spec.split('.'),
+             new_resource.value].flatten
+    not_if "/opt/opscode/embedded/bin/veil-env-helper -s #{new_resource.secret_spec} true"
   end
 end
