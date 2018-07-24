@@ -8,6 +8,19 @@ This document contains release notes for the current major release and all patch
 For prior releases,
 see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 12.18
+
+- Segment free cookbooks are implemented. (https://github.com/chef/chef-rfc/blob/master/rfc067-cookbook-segment-deprecation.md) This bumps the API version
+- acl for cookbook artifacts
+- Security headers for HTTP
+- Optional disabling of welcome page
+- Ruby updated to 2.5.1
+- Chef Client updated to 14.3
+- `chef-server-ctl` now has version subcommand
+- Datestamps are now in UTC
+- Fixie is now shipped with chef server
+- Security issue with old doorkeeper fixed by upgrading. [CVE-2018-1000211](https://nvd.nist.gov/vuln/detail/CVE-2018-1000211)
+
 ## 12.17.33 (2018-02-22)
 This release upgrades the version of Ruby to 2.4.3.
 
