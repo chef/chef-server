@@ -22,9 +22,6 @@ github:
 
 # Habitat + Docker exporting
 habitat_packages:
-  - dbdpg:
-      source: src/dbdpg
-      bldr_paths: src/dbdpg/*
   - openresty-noroot:
       source: src/openresty-noroot
       bldr_paths: src/openresty-noroot/*

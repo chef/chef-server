@@ -114,7 +114,7 @@ GEM
       mixlib-log
     mixlib-authentication (2.1.1)
     mixlib-cli (1.7.0)
-    mixlib-config (2.2.12)
+    mixlib-config (2.2.13)
       tomlrb
     mixlib-log (2.0.4)
     mixlib-shellout (2.3.2)
@@ -146,6 +146,7 @@ GEM
     parallel (1.12.1)
     parser (2.5.1.2)
       ast (~> 2.4.0)
+    parslet (1.8.2)
     pbkdf2 (0.1.0)
     pg (0.21.0)
     plist (3.4.0)
@@ -205,6 +206,8 @@ GEM
       sfl
     syslog-logger (1.6.8)
     systemu (2.6.5)
+    toml (0.2.0)
+      parslet (~> 1.8.0)
     tomlrb (1.2.7)
     unf (0.1.4)
       unf_ext
@@ -228,6 +231,7 @@ DEPENDENCIES
   omnibus-ctl!
   rake
   rspec
+  toml
 
 BUNDLED WITH
-   1.16.2
+   1.16.1

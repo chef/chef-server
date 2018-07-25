@@ -5,4 +5,4 @@ exec 2>&1
 export OPENSSL_FIPS=1
 {{/if ~}}
 
-cd {{pkg.path}} && bundle exec ruby "{{pkg.svc_config_path}}/secrets-bootstrap.rb"
+cd {{pkg.path}}/omnibus-ctl && bundle exec ruby "{{pkg.svc_config_path}}/secrets-bootstrap.rb"

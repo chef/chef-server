@@ -9,8 +9,23 @@ pkg_dirname=openresty-${pkg_version}
 pkg_filename=openresty-${pkg_version}.tar.gz
 pkg_upstream_url=http://openresty.org/
 pkg_shasum=f8cc203e8c0fcd69676f65506a3417097fc445f57820aa8e92d7888d8ad657b9
-pkg_deps=(core/glibc core/gcc-libs core/libxml2 core/libxslt core/zlib core/bzip2 core/openssl/1.0.2l/20171014213633 core/pcre core/coreutils core/perl core/which)
-pkg_build_deps=(core/gcc core/make)
+pkg_deps=(
+  core/bzip2
+  core/coreutils
+  core/gcc-libs
+  core/glibc
+  core/libxml2
+  core/libxslt
+  core/openssl
+  core/pcre
+  core/perl
+  core/zlib
+)
+pkg_build_deps=(
+  core/gcc
+  core/make
+  core/which
+)
 pkg_lib_dirs=(lib)
 pkg_bin_dirs=(bin nginx/sbin luajit/bin)
 pkg_include_dirs=(include)

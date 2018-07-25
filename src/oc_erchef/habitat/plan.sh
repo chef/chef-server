@@ -7,13 +7,12 @@ pkg_deps=(
   core/cacerts
   core/coreutils
   core/curl
-  core/openssl/1.0.2l/20171014213633
+  core/openssl
   core/gcc-libs
   core/ruby
-  core/sqitch
+  core/sqitch_pg
   core/gecode
   core/bundler
-  $HAB_ORIGIN/dbdpg
 )
 pkg_build_deps=(core/make core/git core/gcc)
 pkg_bin_dirs=(bin)

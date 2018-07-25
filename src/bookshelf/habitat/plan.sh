@@ -7,8 +7,7 @@ pkg_deps=(
   core/cacerts
   core/coreutils
   core/gcc-libs
-  core/sqitch
-  $HAB_ORIGIN/dbdpg
+  core/sqitch_pg
 )
 pkg_build_deps=(core/make core/git core/gcc)
 pkg_bin_dirs=(bin)
