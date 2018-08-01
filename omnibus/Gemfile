@@ -5,10 +5,6 @@ gem 'chefspec'
 gem 'berkshelf'
 gem 'bundler', '>1.10'
 
-group :release do
-  gem 'github_changelog_generator'
-end
-
 # Install omnibus software
 group :omnibus do
   gem 'omnibus', git: 'https://github.com/chef/omnibus'
