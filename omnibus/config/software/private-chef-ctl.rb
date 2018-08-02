@@ -35,9 +35,15 @@ build do
   bundle "install", env: env
 
   gem "build chef-server-ctl.gemspec", env: env
-  gem "install chef-server-ctl-*.gem --no-document --verbose", env: env
+
+  # Hack: install binaries in /tmp because we don't actually want them at all
+  gem "install chef-server-ctl-*.gem --no-ri --no-document --verbose --bindir=/tmp", env: env
 
   appbundle "chef-server-ctl", env: env
 
   link "#{install_dir}/bin/chef-server-ctl", "#{install_dir}/bin/private-chef-ctl"
+
+  # These are necessary until we remove all hardcoded references to embedded/bin/*-ctl
+  link "#{install_dir}/bin/chef-server-ctl", "#{install_dir}/embedded/bin/chef-server-ctl"
+  link "#{install_dir}/bin/chef-server-ctl", "#{install_dir}/embedded/bin/private-chef-ctl"
 end
