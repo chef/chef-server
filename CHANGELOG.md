@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.18.2 -->
-## [12.18.2](https://github.com/chef/chef-server/tree/12.18.2) (2018-08-06)
+<!-- latest_release 12.18.3 -->
+## [12.18.3](https://github.com/chef/chef-server/tree/12.18.3) (2018-08-06)
 
 #### Merged Pull Requests
-- Update sqerl [#1537](https://github.com/chef/chef-server/pull/1537) ([jaym](https://github.com/jaym))
+- [oc-id] Update Gemfile to pick up new rubyzip [#1534](https://github.com/chef/chef-server/pull/1534) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- [oc-id] Update Gemfile to pick up new rubyzip [#1534](https://github.com/chef/chef-server/pull/1534) ([markan](https://github.com/markan)) <!-- 12.18.3 -->
 - Update sqerl [#1537](https://github.com/chef/chef-server/pull/1537) ([jaym](https://github.com/jaym)) <!-- 12.18.2 -->
 - Fix habitat build for the chef-server-ctl container [#1524](https://github.com/chef/chef-server/pull/1524) ([irvingpop](https://github.com/irvingpop)) <!-- 12.18.1 -->
 - Prepare 12.18 Chef Server release. [#1528](https://github.com/chef/chef-server/pull/1528) ([rhass](https://github.com/rhass)) <!-- 12.18.0 -->
