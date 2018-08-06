@@ -166,7 +166,7 @@
  {<<"recon">>,{pkg,<<"recon">>,<<"2.3.4">>},1},
  {<<"sqerl">>,
   {git,"https://github.com/chef/sqerl",
-       {ref,"2d9792ccbbe86824d47468c119e7d99733ce4546"}},
+       {ref,"f36fb5c80777769ff9c27adba9340693cfe964f8"}},
   0},
  {<<"stats_hero">>,
   {git,"https://github.com/opscode/stats_hero",
