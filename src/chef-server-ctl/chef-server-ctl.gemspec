@@ -38,6 +38,7 @@ Gem::Specification.new do |spec|
   # https://gist.github.com/tylercloke/a8d4bc1b915b958ac160#version-2
   spec.add_runtime_dependency "rest-client"
   spec.add_runtime_dependency "knife-opc"
+  spec.add_runtime_dependency "mixlib-log"
 
   spec.add_runtime_dependency "uuidtools", "~> 2.1", ">= 2.1.3"
   spec.add_runtime_dependency "veil" # todo get latest from https://github.com/chef/chef_secrets.git
