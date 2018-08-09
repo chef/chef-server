@@ -5,7 +5,7 @@ add_command_under_category "filtered-dump", "Debug Tools", "Generate a filtered 
   require 'zlib'
   require 'stringio'
 
-  conn = erchef_db_connection
+  conn = ::PG::Connection.open(::ChefServerCtl::Config.erchef_sql_connuri)
   File.write("orgs.json",organizations(conn).to_json)
   File.write("nodes.json", nodes(conn).to_json)
   File.write("data_bag_items.json", data_bag_items(conn).to_json)
@@ -13,7 +13,6 @@ add_command_under_category "filtered-dump", "Debug Tools", "Generate a filtered 
   File.write("roles.json", roles(conn).to_json)
   File.write("clients.json", clients(conn).to_json)
   conn.close
-
 end
 
 def organizations(conn)
@@ -107,14 +106,4 @@ def inflate(conn, data)
     # not in gz format
     data
   end
-end
-
-def erchef_db_connection
-  erchef_config = running_service_config('opscode-erchef')
-  pg_config = running_service_config('postgresql')
-  ::PGconn.open('user' => erchef_config['sql_user'],
-                'host' => pg_config['vip'],
-                'password' => credentials.get('opscode_erchef', 'sql_password'),
-                'port' => pg_config['port'],
-                'dbname' => 'opscode_chef')
 end

@@ -210,26 +210,10 @@ def timed(description)
   res
 end
 
-def connection_params
-  running_config = JSON.parse(File.read("/etc/opscode/chef-server-running.json"))
-  pg_config = running_config['private_chef']['postgresql']
-
-  password = if respond_to?(:credentials) # veil helper method doesn't exist on older chef-servers
-               credentials.get('postgresql', 'db_superuser_password')
-             else
-               pg_config['db_superuser_password']
-             end
-
-  { 'host' => pg_config['vip'],
-    'port' => pg_config['port'],
-    'user' => pg_config['db_superuser'],
-    'password' => password }
-end
-
 def erchef_db
-  @erchef_db ||= ::PGconn.open(connection_params.merge('dbname' => 'opscode_chef'))
+  @erchef_db ||= ::PG::Connection.open(::ChefServerCtl::Config.erchef_sql_connuri)
 end
 
 def bifrost_db
-  @bifrost_db ||= ::PGconn.open(connection_params.merge('dbname' => 'bifrost'))
+  @bifrost_db ||= ::PG::Connection.open(::ChefServerCtl::Config.bifrost_sql_connuri)
 end
