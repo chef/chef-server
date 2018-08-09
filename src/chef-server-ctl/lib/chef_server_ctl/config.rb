@@ -28,10 +28,14 @@ module ChefServerCtl
       @@ctl = ctl
       Log.debug("Using KNIFE_CONFIG_FILE=#{self.knife_config_file}")
       Log.debug("Using KNIFE_BIN=#{self.knife_bin}")
-      # We don't always get run with a full chef-server-running.json :( so this might not always work.
-      # Log.debug("Using BIFROST_URL=#{self.bifrost_url}")
-      Log.debug("Using LB_URL=#{self.lb_url}")
+      Log.debug("Using RABBITMQCTL_BIN=#{self.rabbitmqctl_bin}")
+      Log.debug("Using ERCHEF_REINDEX_SCRIPT=#{self.erchef_reindex_script}")
       Log.debug("Using HABITAT_MODE=#{self.habitat_mode}")
+      # We don't always get run with a full chef-server-running.json
+      # so any setting that fallsback to running_config or
+      # credentials we can't print here. :(
+      # Log.debug("Using BIFROST_URL=#{self.bifrost_url}")
+      # Log.debug("Using LB_URL=#{self.lb_url}")
     end
 
     # knife_config should be the path to a configuration file that
@@ -111,13 +115,16 @@ module ChefServerCtl
     # bifrost_sql_connuri returns a string in the libpq connection URI
     # format. This string is suitable for passing directly to
     # ::PGConn.open.
+    #
+    # We connect to bifrost as the superuser since we need to create
+    # tables in cleanup-bfirost
     def self.bifrost_sql_connuri
       @@bifrost_connuri ||= if ENV['CSC_BIFROST_DB_URI']
                               ENV['CSC_BIFROST_DB_URI']
                             else
-                              bifrost_config = running_service_config('oc_bifrost')
-                              user = bifrost_config['sql_user']
-                              password = @@ctl.credentials.get('oc_bifrost', 'sql_password')
+                              pg_config = @@ctl.running_service_config('postgresql')
+                              user = pg_config['db_superuser']
+                              password = @@ctl.credentials.get('postgresql', 'db_superuser_password')
                               make_connection_string('bifrost', user, password)
                             end
     end
@@ -129,8 +136,8 @@ module ChefServerCtl
       @@erchef_connuri ||= if ENV['CSC_ERCHEF_DB_URI']
                              ENV['CSC_ERCHEF_DB_URI']
                            else
-                             erchef_config = running_service_config('opscode-erchef')
-                             user = echef_config['sql_user']
+                             erchef_config = @@ctl.running_service_config('opscode-erchef')
+                             user = erchef_config['sql_user']
                              password = @@ctl.credentials.get('opscode_erchef', 'sql_password')
                              make_connection_string('opscode_chef', user, password)
                            end
@@ -153,7 +160,7 @@ module ChefServerCtl
       ENV['CSC_HABITAT_MODE'] == "true"
     end
 
-    def self.make_connection_string(dbname, db_user, db_password)
+    def self.make_connection_string(db_name, db_user, db_password)
       pg_config = @@ctl.running_service_config('postgresql')
       host = pg_config['vip']
       port = pg_config['port']
