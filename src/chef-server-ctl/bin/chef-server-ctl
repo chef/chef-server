@@ -4,6 +4,8 @@ require 'rubygems'
 gem 'omnibus-ctl'
 require 'omnibus-ctl'
 require 'veil'
+require 'chef_server_ctl/log'
+require 'chef_server_ctl/config'
 
 module Omnibus
   # This implements callbacks for handling commands related to the
@@ -246,9 +248,23 @@ end
 require 'pathname'
 file_path = Pathname.new(__FILE__)
 cmd_name = 'opscode' # what does this do? was ARGV[0]
-plugin_path = file_path.dirname.parent.join('plugins') 
+plugin_path = file_path.dirname.parent.join('plugins')
 arguments = ARGV[0..-1] # Get the rest of the command line arguments
 
+# Intialize logging
+log_level = if ENV['CSC_LOG_LEVEL']
+              ENV['CSC_LOG_LEVEL'].to_sym
+            else
+              :info
+            end
+
+ChefServerCtl::Log.level = log_level
+
 ctl = Omnibus::ChefServerCtl.new(cmd_name, true, "Chef Server")
+
+#Initialize global configuration
+ChefServerCtl::Config.init(ctl)
+
+# Load plugins and run the command
 ctl.load_files(plugin_path)
 ctl.run(arguments)
