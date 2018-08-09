@@ -16,6 +16,7 @@
 
 require "omnibus_ctl_helper"
 require 'chef_server_ctl/helpers/key_ctl_helper'
+require 'chef_server_ctl/config'
 require 'chef/key'
 
 describe "chef-server-ctl *key(s)*" do
@@ -50,7 +51,7 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
   let(:not_a_key_path)       { "#{__dir__}/fixtures/notakey.pub" }
 
   before(:each) do
-    allow_any_instance_of(ChefServerCtl::Helpers::KeyCtlHelper).to receive(:pivotal_config).and_return("#{__dir__}/fixtures/pivotal.rb")
+    allow(::ChefServerCtl::Config).to receive(:knife_config_file).and_return("#{__dir__}/fixtures/pivotal.rb")
   end
 
   shared_examples_for "a key command with option parsing" do

@@ -28,7 +28,8 @@ module ChefServerCtl
       @@ctl = ctl
       Log.debug("Using KNIFE_CONFIG_FILE=#{self.knife_config_file}")
       Log.debug("Using KNIFE_BIN=#{self.knife_bin}")
-      Log.debug("Using BIFROST_URL=#{self.bifrost_url}")
+      # We don't always get run with a full chef-server-running.json :( so this might not always work.
+      # Log.debug("Using BIFROST_URL=#{self.bifrost_url}")
       Log.debug("Using LB_URL=#{self.lb_url}")
       Log.debug("Using HABITAT_MODE=#{self.habitat_mode}")
     end
@@ -68,7 +69,7 @@ module ChefServerCtl
       if ENV['CSC_FIPS_ENABLED']
         ENV['CSC_FIPS_ENABLED'] == "true"
       else
-        @ctl.running_config["private_chef"]["fips_enabled"]
+        @@ctl.running_config["private_chef"]["fips_enabled"]
       end
     end
 
