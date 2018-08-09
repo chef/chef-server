@@ -251,7 +251,6 @@ cmd_name = 'opscode' # what does this do? was ARGV[0]
 plugin_path = file_path.dirname.parent.join('plugins')
 arguments = ARGV[0..-1] # Get the rest of the command line arguments
 
-
 # Intialize logging
 log_level = if ENV['CSC_LOG_LEVEL']
               ENV['CSC_LOG_LEVEL'].to_sym
@@ -266,6 +265,6 @@ ctl = Omnibus::ChefServerCtl.new(cmd_name, true, "Chef Server")
 #Initialize global configuration
 ChefServerCtl::Config.init(ctl)
 
-
+# Load plugins and run the command
 ctl.load_files(plugin_path)
 ctl.run(arguments)
