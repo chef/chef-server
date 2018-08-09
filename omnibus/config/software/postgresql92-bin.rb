@@ -16,7 +16,7 @@
 
 name "postgresql92-bin"
 
-default_version "9.2.22"
+default_version "9.2.24"
 
 license "PostgreSQL"
 license_file "COPYRIGHT"
@@ -31,7 +31,7 @@ dependency "config_guess"
 
 source url: "https://ftp.postgresql.org/pub/source/v#{version}/postgresql-#{version}.tar.bz2"
 
-version("9.2.22") { source sha256: "a70e94fa58776b559a8f7b5301371ac4922c9e3ed313ccbef20862514de7c192" }
+version("9.2.24") { source sha256: "a754c02f7051c2f21e52f8669a421b50485afcde9a581674d6106326b189d126" }
 
 relative_path "postgresql-#{version}"
 
