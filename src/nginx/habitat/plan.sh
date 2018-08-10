@@ -5,7 +5,7 @@ pkg_license=('Apache-2.0')
 pkg_deps=(
   core/curl
   core/libossp-uuid
-  $HAB_ORIGIN/openresty-noroot
+  ${HAB_ORIGIN:-chef}/openresty-noroot
 )
 pkg_build_deps=()
 pkg_exposes=(port ssl-port)
