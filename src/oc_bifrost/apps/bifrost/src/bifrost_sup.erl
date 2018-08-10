@@ -19,12 +19,16 @@ init([]) ->
 
     {ok, Ip} = application:get_env(bifrost, ip),
     {ok, Port} = application:get_env(bifrost, port),
+    Ssl = application:get_env(bifrost, ssl, false),
+    SslOpts = application:get_env(bifrost, ssl_opts, []),
     {ok, Dispatch} = file:consult(filename:join([code:priv_dir(bifrost),
                                                  "dispatch.conf"])),
 
     WebConfig = [
                  {ip, Ip},
                  {port, Port},
+                 {ssl, Ssl},
+                 {ssl_opts, SslOpts},
                  {log_dir, "priv/log"},
                  {dispatch, add_dynamic_config(Dispatch)},
                  {nodelay, true} % TCP 'no delay' for latency
