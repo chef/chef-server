@@ -17,10 +17,10 @@ start_link() ->
 
 init([]) ->
 
-    {ok, Ip} = application:get_env(bifrost, ip),
-    {ok, Port} = application:get_env(bifrost, port),
-    Ssl = application:get_env(bifrost, ssl, false),
-    SslOpts = application:get_env(bifrost, ssl_opts, []),
+    Ip = envy:get(bifrost, ip, string),
+    Port = envy:get(bifrost, port, integer),
+    Ssl = envy:get(bifrost, ssl, false, boolean),
+    SslOpts = envy:get(bifrost, ssl_opts, [], list),
     {ok, Dispatch} = file:consult(filename:join([code:priv_dir(bifrost),
                                                  "dispatch.conf"])),
 
