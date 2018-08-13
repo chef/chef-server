@@ -613,7 +613,8 @@ default['private_chef']['postgresql']['home'] = "/var/opt/opscode/postgresql"
 default['private_chef']['postgresql']['user_path'] = "/opt/opscode/embedded/bin:/opt/opscode/bin:$PATH"
 default['private_chef']['postgresql']['vip'] = "127.0.0.1"
 default['private_chef']['postgresql']['port'] = 5432
-default['private_chef']['postgresql']['listen_address'] = '127.0.0.1,::1' # listen on both loopback
+# We want to listen on all the loopback addresses, because we can't control which one localhost resolves to.
+default['private_chef']['postgresql']['listen_address'] = node['network']['interfaces']['lo']['addresses'].keys.join(',')
 default['private_chef']['postgresql']['max_connections'] = 350
 default['private_chef']['postgresql']['keepalives_idle'] = 60
 default['private_chef']['postgresql']['keepalives_interval'] = 15
