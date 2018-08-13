@@ -17,14 +17,18 @@ start_link() ->
 
 init([]) ->
 
-    {ok, Ip} = application:get_env(bifrost, ip),
-    {ok, Port} = application:get_env(bifrost, port),
+    Ip = envy:get(bifrost, ip, string),
+    Port = envy:get(bifrost, port, integer),
+    Ssl = envy:get(bifrost, ssl, false, boolean),
+    SslOpts = envy:get(bifrost, ssl_opts, [], list),
     {ok, Dispatch} = file:consult(filename:join([code:priv_dir(bifrost),
                                                  "dispatch.conf"])),
 
     WebConfig = [
                  {ip, Ip},
                  {port, Port},
+                 {ssl, Ssl},
+                 {ssl_opts, SslOpts},
                  {log_dir, "priv/log"},
                  {dispatch, add_dynamic_config(Dispatch)},
                  {nodelay, true} % TCP 'no delay' for latency
