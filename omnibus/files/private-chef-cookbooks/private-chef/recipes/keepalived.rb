@@ -44,7 +44,7 @@ template File.join(keepalived_etc_dir, "keepalived.conf") do
   group "root"
   mode "0644"
   variables(node['private_chef']['keepalived'].to_hash.merge('vrrp_instance_password' => vrrp_instance_password))
-  notifies :restart, 'runit_service[keepalived]'
+  notifies :restart, 'component_runit_service[keepalived]'
 end
 
 template File.join(keepalived_bin_dir, "cluster.sh") do

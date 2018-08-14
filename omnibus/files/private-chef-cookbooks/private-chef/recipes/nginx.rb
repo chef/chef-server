@@ -176,7 +176,7 @@ lbconf = node['private_chef']['lb'].to_hash.merge(nginx_vars).merge(
     # Note that due to JIT compile of lua resources, any
     # changes to them will require a full restart to be picked up.
     # This includes any embedded lua.
-    notifies :restart, 'runit_service[nginx]' unless backend_secondary?
+    notifies :restart, 'component_runit_service[nginx]' unless backend_secondary?
   end
 end
 
@@ -191,12 +191,12 @@ if node['private_chef']['opscode-erchef']['stats_auth_enable']
     owner OmnibusHelper.new(node).ownership['owner']
     group OmnibusHelper.new(node).ownership['group']
     sensitive true
-    notifies :restart, 'runit_service[nginx]' unless backend_secondary?
+    notifies :restart, 'component_runit_service[nginx]' unless backend_secondary?
   end
 elsif stats_passwd_file
   file stats_passwd_file do
     action :delete
-    notifies :restart, 'runit_service[nginx]' unless backend_secondary?
+    notifies :restart, 'component_runit_service[nginx]' unless backend_secondary?
   end
 end
 
@@ -219,7 +219,7 @@ end
       :compliance_proxy_regex => '(?:/compliance)?/organizations/([^/]+)/owners/([^/]+)/compliance(.*)'
       )
     )
-    notifies :restart, 'runit_service[nginx]' unless backend_secondary?
+    notifies :restart, 'component_runit_service[nginx]' unless backend_secondary?
   end
 end
 
@@ -232,7 +232,7 @@ template nginx_config do
   group 'root'
   mode '0644'
   variables(lbconf.merge(chef_lb_configs).merge(:temp_dir => nginx_tempfile_dir))
-  notifies :restart, 'runit_service[nginx]' unless backend_secondary?
+  notifies :restart, 'component_runit_service[nginx]' unless backend_secondary?
 end
 
 # Write out README.md for addons dir

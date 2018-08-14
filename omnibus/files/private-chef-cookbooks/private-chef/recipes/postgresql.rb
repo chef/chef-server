@@ -65,7 +65,7 @@ end
 private_chef_pg_upgrade "upgrade_if_necessary"
 
 private_chef_pg_cluster postgresql_data_dir do
-  notifies :restart, 'runit_service[postgresql]' if is_data_master?
+  notifies :restart, 'component_runit_service[postgresql]' if is_data_master?
 end
 
 link postgresql_data_dir_symlink do

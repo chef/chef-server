@@ -74,7 +74,7 @@ template File.join(haproxy_dir, "haproxy.cfg") do
   group OmnibusHelper.new(node).ownership['group']
   mode "600"
   variables(node['private_chef']['haproxy'].to_hash.merge(chef_backend_members: chef_backend_members))
-  notifies :restart, 'runit_service[haproxy]'
+  notifies :restart, 'component_runit_service[haproxy]'
 end
 
 component_runit_service "haproxy"

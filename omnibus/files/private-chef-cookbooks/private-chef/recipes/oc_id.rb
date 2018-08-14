@@ -102,7 +102,7 @@ file "#{oc_id_config_dir}/production.yml" do
   group OmnibusHelper.new(node).ownership['group']
   mode '640'
   content mutable_hash.to_yaml
-  notifies :restart, 'runit_service[oc_id]' unless backend_secondary?
+  notifies :restart, 'component_runit_service[oc_id]' unless backend_secondary?
 end
 
 #
@@ -123,7 +123,7 @@ template "#{oc_id_config_dir}/secret_token.rb" do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode '640'
-  notifies :restart, 'runit_service[oc_id]' unless backend_secondary?
+  notifies :restart, 'component_runit_service[oc_id]' unless backend_secondary?
 end
 
 secrets_file = "/opt/opscode/embedded/service/oc_id/config/initializers/secret_token.rb"
@@ -141,7 +141,7 @@ template "#{oc_id_config_dir}/database.yml" do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode '640'
-  notifies :restart, 'runit_service[oc_id]' unless backend_secondary?
+  notifies :restart, 'component_runit_service[oc_id]' unless backend_secondary?
 end
 
 database_file = "/opt/opscode/embedded/service/oc_id/config/database.yml"
@@ -227,6 +227,6 @@ end
     owner "root"
     group "root"
     mode "0644"
-    notifies :restart, 'runit_service[nginx]' unless backend_secondary?
+    notifies :restart, 'component_runit_service[nginx]' unless backend_secondary?
   end
 end

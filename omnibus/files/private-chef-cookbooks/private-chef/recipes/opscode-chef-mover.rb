@@ -71,5 +71,6 @@ end
 
 # We want the service defined, but dead
 component_runit_service "opscode-chef-mover" do
-  action :down
+  action :enable
+  runit_attributes(start_down: true)
 end
