@@ -35,10 +35,8 @@ add_command_under_category "grant-server-admin-permissions", "server-admins", "G
   server_admins_authz_id = get_server_admins_authz_id(db)
   user_authz_id = get_user_authz_id(db, username)
 
-  bifrost_config = running_service_config('oc_bifrost')
-  superuser_id = bifrost_config['superuser_id']
-  vip = bifrost_config['vip']
-  port = bifrost_config['port']
+  superuser_id = ::ChefServerCtl::Config.bifrost_superuser_id
+  base_url = ::ChefServerCtl::Config.bifrost_url
 
   # put the user in the server-admins authz group
   headers = {
@@ -46,8 +44,6 @@ add_command_under_category "grant-server-admin-permissions", "server-admins", "G
     :accept => :json,
     'X-Ops-Requesting-Actor-Id' => superuser_id
   }
-
-  base_url = "http://#{vip}:#{port}"
 
   RestClient.put("#{base_url}/groups/#{server_admins_authz_id}/actors/#{user_authz_id}", "{}", headers)
 
@@ -71,14 +67,12 @@ add_command_under_category "remove-server-admin-permissions", "server-admins", "
     raise SystemExit.new(1, msg)
   end
 
-  bifrost_config = running_service_config('oc_bifrost')
-  superuser_id = bifrost_config['superuser_id']
-  vip = bifrost_config['vip']
-  port = bifrost_config['port']
-
   db = setup_erchef_db
   server_admins_authz_id = get_server_admins_authz_id(db)
   user_authz_id = get_user_authz_id(db, username)
+
+  superuser_id = ::ChefServerCtl::Config.bifrost_superuser_id
+  base_url = ::ChefServerCtl::Config.bifrost_url
 
   # put the user in the server-admins authz group
   headers = {
@@ -86,9 +80,6 @@ add_command_under_category "remove-server-admin-permissions", "server-admins", "
     :accept => :json,
     'X-Ops-Requesting-Actor-Id' => superuser_id
   }
-
-  base_url = "http://#{vip}:#{port}"
-
   results = JSON.parse(RestClient.get("#{base_url}/groups/#{server_admins_authz_id}", headers))
 
   users = db.exec_params("SELECT * from USERS WHERE authz_id IN #{create_sql_collection_string(results['actors'])}")
@@ -120,10 +111,8 @@ add_command_under_category "list-server-admins", "server-admins", "List users th
     raise SystemExit.new(1, msg)
   end
 
-  bifrost_config = running_service_config('oc_bifrost')
-  superuser_id = bifrost_config['superuser_id']
-  vip = bifrost_config['vip']
-  port = bifrost_config['port']
+  superuser_id = ::ChefServerCtl::Config.bifrost_superuser_id
+  base_url = ::ChefServerCtl::Config.bifrost_url
 
   db = setup_erchef_db
   server_admins_authz_id = get_server_admins_authz_id(db)
@@ -134,8 +123,6 @@ add_command_under_category "list-server-admins", "server-admins", "List users th
     :accept => :json,
     'X-Ops-Requesting-Actor-Id' => superuser_id
   }
-
-  base_url = "http://#{vip}:#{port}"
 
   results = JSON.parse(RestClient.get("#{base_url}/groups/#{server_admins_authz_id}", headers))
 
@@ -153,13 +140,7 @@ def create_sql_collection_string(arr)
 end
 
 def setup_erchef_db
-  erchef_config = running_service_config('opscode-erchef')
-  pg_config = running_service_config('postgresql')
-  ::PGconn.open('user' => erchef_config['sql_user'],
-                'host' => pg_config['vip'],
-                'password' => credentials.get('opscode_erchef', 'sql_password'),
-                'port' => pg_config['port'],
-                'dbname' => 'opscode_chef')
+  ::PG::Connection.open(::ChefServerCtl::Config.erchef_sql_connuri)
 end
 
 def get_server_admins_authz_id(db)
