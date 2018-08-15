@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.18.4 -->
-## [12.18.4](https://github.com/chef/chef-server/tree/12.18.4) (2018-08-13)
+<!-- latest_release 12.18.5 -->
+## [12.18.5](https://github.com/chef/chef-server/tree/12.18.5) (2018-08-15)
 
 #### Merged Pull Requests
-- Allow SSL configuration in bifrost sys.config [#1541](https://github.com/chef/chef-server/pull/1541) ([danielsdeleo](https://github.com/danielsdeleo))
+- Postgres listens on loopbacks, not localhost [#1540](https://github.com/chef/chef-server/pull/1540) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- Postgres listens on loopbacks, not localhost [#1540](https://github.com/chef/chef-server/pull/1540) ([markan](https://github.com/markan)) <!-- 12.18.5 -->
 - Allow SSL configuration in bifrost sys.config [#1541](https://github.com/chef/chef-server/pull/1541) ([danielsdeleo](https://github.com/danielsdeleo)) <!-- 12.18.4 -->
 - [oc-id] Update Gemfile to pick up new rubyzip [#1534](https://github.com/chef/chef-server/pull/1534) ([markan](https://github.com/markan)) <!-- 12.18.3 -->
 - Update sqerl [#1537](https://github.com/chef/chef-server/pull/1537) ([jaym](https://github.com/jaym)) <!-- 12.18.2 -->
