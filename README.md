@@ -1,3 +1,15 @@
+# Пример использования Chef в facebook 
+
+Пример использования Chef в facebook  : : управление конфигурацией Серверов в Фейсбук [до 50 000 Core_конфигов Серверов e Facebook… на один сервер Мастер-сервер для управления]
+
+“Chef 11 is a powerful automation platform that allows us to create unprecedented utility supercomputers from 50 to 50,000 cores.
+
+https://sdtimes.com/opscode-unleashes-new-generation-of-chef/
+
+Chef пилился при активном участии Facebook'а, которые управляют, наверное, самой большой в мире инсталляцией Chef'а, система была переписана на Erlang + PostgreSQL.
+
+Согласно заявлению Opscode, благодаря изменениям требования к оперативной памяти уменьшились в 10 раз, а масштабируемость системы увеличилась в 4 раза (до 10 000 клиентов на один сервер).
+
 # Chef Server
 
 [![Build Status](https://travis-ci.org/chef/chef-server.svg?branch=master)](https://travis-ci.org/chef/chef-server)
