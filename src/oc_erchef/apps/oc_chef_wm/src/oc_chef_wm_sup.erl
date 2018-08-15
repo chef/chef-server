@@ -33,11 +33,16 @@ init([]) ->
 
     Ip = envy:get(oc_chef_wm, ip, string),
     Port = envy:get(oc_chef_wm, port, pos_integer),
+    Ssl = envy:get(oc_chef_wm, ssl, false, boolean),
+    SslOpts = envy:get(oc_chef_wm, ssl_opts, [], list),
+
     WebConfig = [
                  {ip, Ip},
                  {port, Port},
                  {log_dir, "priv/log"},
-                 {dispatch, dispatch_table()}],
+                 {dispatch, dispatch_table()},
+                 {ssl, Ssl},
+                 {ssl_opts, SslOpts}],
 
     Web = {webmachine_mochiweb,
            {webmachine_mochiweb, start, [WebConfig]},
