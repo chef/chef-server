@@ -35,17 +35,18 @@ add_command_under_category "grant-server-admin-permissions", "server-admins", "G
   server_admins_authz_id = get_server_admins_authz_id(db)
   user_authz_id = get_user_authz_id(db, username)
 
-  superuser_id = ::ChefServerCtl::Config.bifrost_superuser_id
-  base_url = ::ChefServerCtl::Config.bifrost_url
-
   # put the user in the server-admins authz group
-  headers = {
-    :content_type => :json,
-    :accept => :json,
-    'X-Ops-Requesting-Actor-Id' => superuser_id
-  }
-
-  RestClient.put("#{base_url}/groups/#{server_admins_authz_id}/actors/#{user_authz_id}", "{}", headers)
+  req_params = {
+    method: :put,
+    url: "#{::ChefServerCtl::Config.bifrost_url}/groups/#{server_admins_authz_id}/actors/#{user_authz_id}",
+    body: "{}",
+    headers: {
+      :content_type => :json,
+      :accept => :json,
+      "X-Ops-Requesting-Actor-Id" => ::ChefServerCtl::Config.bifrost_superuser_id,
+    },
+  }.merge(::ChefServerCtl::Config.ssl_params)
+  RestClient::Request.execute(req_params)
 
   puts "User #{username} was added to server-admins. This user can now list, read, create, and delete users (even for orgs they are not members of) for this Chef Server."
 end
@@ -71,16 +72,17 @@ add_command_under_category "remove-server-admin-permissions", "server-admins", "
   server_admins_authz_id = get_server_admins_authz_id(db)
   user_authz_id = get_user_authz_id(db, username)
 
-  superuser_id = ::ChefServerCtl::Config.bifrost_superuser_id
-  base_url = ::ChefServerCtl::Config.bifrost_url
-
   # put the user in the server-admins authz group
-  headers = {
-    :content_type => :json,
-    :accept => :json,
-    'X-Ops-Requesting-Actor-Id' => superuser_id
-  }
-  results = JSON.parse(RestClient.get("#{base_url}/groups/#{server_admins_authz_id}", headers))
+  req_params = {
+    method: :get,
+    url: "#{::ChefServerCtl::Config.bifrost_url}/groups/#{server_admins_authz_id}",
+    headers: {
+      :content_type => :json,
+      :accept => :json,
+      "X-Ops-Requesting-Actor-Id" => ::ChefServerCtl::Config.bifrost_superuser_id,
+    },
+  }.merge(::ChefServerCtl::Config.ssl_params)
+  results = JSON.parse(RestClient::Request.execute(req_params))
 
   users = db.exec_params("SELECT * from USERS WHERE authz_id IN #{create_sql_collection_string(results['actors'])}")
   user_found = false
@@ -97,7 +99,9 @@ add_command_under_category "remove-server-admin-permissions", "server-admins", "
     raise SystemExit.new(1, msg)
   end
 
-  RestClient.delete("#{base_url}/groups/#{server_admins_authz_id}/actors/#{user_authz_id}", headers)
+  req_params[:method] = :delete
+  req_params[:url] = "#{::ChefServerCtl::Config.bifrost_url}/groups/#{server_admins_authz_id}/actors/#{user_authz_id}"
+  RestClient::Request.execute(req_params)
 
   puts "User #{username} was removed from server-admins. This user can no longer list, read, create, and delete users for this Chef Server except for where they have default permissions (such as within an org)."
 
@@ -111,25 +115,25 @@ add_command_under_category "list-server-admins", "server-admins", "List users th
     raise SystemExit.new(1, msg)
   end
 
-  superuser_id = ::ChefServerCtl::Config.bifrost_superuser_id
-  base_url = ::ChefServerCtl::Config.bifrost_url
-
   db = setup_erchef_db
   server_admins_authz_id = get_server_admins_authz_id(db)
 
   # get all the user authz_ids for all memebers of the server-admins authz group
-  headers = {
-    :content_type => :json,
-    :accept => :json,
-    'X-Ops-Requesting-Actor-Id' => superuser_id
-  }
-
-  results = JSON.parse(RestClient.get("#{base_url}/groups/#{server_admins_authz_id}", headers))
+  req_params = {
+    method: :get,
+    url: "#{::ChefServerCtl::Config.bifrost_url}/groups/#{server_admins_authz_id}",
+    headers: {
+      :content_type => :json,
+      :accept => :json,
+      "X-Ops-Requesting-Actor-Id" => ::ChefServerCtl::Config.bifrost_superuser_id,
+    },
+  }.merge(::ChefServerCtl::Config.ssl_params)
+  results = JSON.parse(RestClient::Request.execute(req_params))
 
   # get the user's authz id
   users = db.exec_params("SELECT * from USERS WHERE authz_id IN #{create_sql_collection_string(results['actors'])}")
   users.each do |user|
-    puts user['username']
+    puts user["username"]
   end
 end
 
