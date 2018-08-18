@@ -148,22 +148,26 @@ module Pedant
     end
 
     def do_request(method, url, final_headers, payload, &validator)
-
       response_handler = lambda{|response, request, result| response}
 
-      response = RestClient::Request.execute(method: method,
-                                             url: url,
-                                             payload: [:PUT, :POST].include?(method) ? payload : nil,
-                                             headers: final_headers,
-                                             ssl_version: Pedant::Config.ssl_version,
-                                             verify_ssl: false,
-                                             open_timeout: 300,
-                                             &response_handler)
-
-      if block_given?
-        yield(response)
-      else
-        response
+      begin
+        request_time = Time.now.utc
+        response = RestClient::Request.execute(method: method,
+                                               url: url,
+                                               payload: [:PUT, :POST].include?(method) ? payload : nil,
+                                               headers: final_headers,
+                                               ssl_version: Pedant::Config.ssl_version,
+                                               verify_ssl: false,
+                                               open_timeout: 300,
+                                               &response_handler)
+        if block_given?
+          yield(response)
+        else
+          response
+        end
+      rescue RestClient::Exceptions::OpenTimeout => e
+        puts "RestClient::Exceptions::OpenTimeout started #{request_time} took #{Time.now.utc - request_time} with method #{method} to #{url} #{e}"
+        throw e
       end
     end
 
