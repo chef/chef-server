@@ -11,6 +11,13 @@ automate:
   project: chef-server
 
 github:
+  release_branch:
+    - master:
+        # we'll have to bump this later, as globs won't let us do > 18
+        version_constraint: "12.19.*"
+    - 12-18-stable:
+        # this branch should only be active 
+        version_constraint: "12.18.*"
   # The file where the MAJOR.MINOR.PATCH version is kept. The version in this file
   # is bumped automatically via the `built_in:bump_version` merge_action.
   version_file: "VERSION"
