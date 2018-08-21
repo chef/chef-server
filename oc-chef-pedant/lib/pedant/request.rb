@@ -165,9 +165,9 @@ module Pedant
         else
           response
         end
-      rescue RestClient::Exceptions::OpenTimeout => e
-        puts "RestClient::Exceptions::OpenTimeout started #{request_time} took #{Time.now.utc - request_time} with method #{method} to #{url} #{e}"
-        throw e
+      rescue RestClient::Exceptions::OpenTimeout, RestClient::Exceptions::ReadTimeout => e
+        puts "#{e.class} error from request started #{request_time} took #{Time.now.utc - request_time} with method #{method} to #{url} \n#{e.message} #{e.original_exception}"
+        raise e
       end
     end
 
