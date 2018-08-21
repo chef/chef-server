@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.18.8 -->
-## [12.18.8](https://github.com/chef/chef-server/tree/12.18.8) (2018-08-16)
+<!-- latest_release 12.18.9 -->
+## [12.18.9](https://github.com/chef/chef-server/tree/12.18.9) (2018-08-21)
 
 #### Merged Pull Requests
-- Update postgresql [#1539](https://github.com/chef/chef-server/pull/1539) ([markan](https://github.com/markan))
+- Update oc-bifrost-pedant to use rest-client 1.8.X [#1547](https://github.com/chef/chef-server/pull/1547) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- Update oc-bifrost-pedant to use rest-client 1.8.X [#1547](https://github.com/chef/chef-server/pull/1547) ([tas50](https://github.com/tas50)) <!-- 12.18.9 -->
 - Update postgresql [#1539](https://github.com/chef/chef-server/pull/1539) ([markan](https://github.com/markan)) <!-- 12.18.8 -->
 - Update tag for enterprise cookbook. [#1551](https://github.com/chef/chef-server/pull/1551) ([rhass](https://github.com/rhass)) <!-- 12.18.7 -->
 - Remove old github changelog generator [#1530](https://github.com/chef/chef-server/pull/1530) ([tas50](https://github.com/tas50)) <!-- 12.18.6 -->
