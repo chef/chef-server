@@ -298,6 +298,7 @@ checksum_test_() ->
                         Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
                                      <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbba">>,
                                      <<"ccccccccccccccccccccccccccccccca">>],
+                        ?debugFmt("~p", [Checksums]),
 
                         ?assertEqual({{ok, [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
                                             <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbba">>,
