@@ -8,8 +8,18 @@ This document contains release notes for the current major release and all patch
 For prior releases,
 see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 12.19
+
+
 ## 12.18
 
+- Postgresql updated to 9.6.10
+- In a standalone install postgresql listens on all loopbacks, not
+  just localhost. This 
+- Enhance bifrost to use SSL/TLS
+- Updates to ruby libraries (rubyzip)
+- Updates to erlang libraries (sqerl, epgsql)
+- Improvements to the habitized chef-server 
 - Segment free cookbooks are implemented. (https://github.com/chef/chef-rfc/blob/master/rfc067-cookbook-segment-deprecation.md) This bumps the API version
 - acl for cookbook artifacts
 - Security headers for HTTP
