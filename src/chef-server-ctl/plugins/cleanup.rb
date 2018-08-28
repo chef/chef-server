@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Opscode, Inc.
+# Copyright 2013-2018 Chef Software, Inc.
 # All Rights Reserved
 
 add_command_under_category "cleanup", "general", "Perform post-upgrade removal of now-obsolete data, configuration files, logs, etc.  Add the '--no-op' flag to see what *would* be removed.", 2 do

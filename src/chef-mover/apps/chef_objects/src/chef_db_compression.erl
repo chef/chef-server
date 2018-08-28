@@ -2,7 +2,7 @@
 %% ex: ts=4 sw=4 et
 %% @author Kevin Smith <kevin@chef.io>
 %% @author Seth Falcon <seth@chef.io>
-%% Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
+%% Copyright 2011-2018 Chef Software, Inc.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file

@@ -1,6 +1,6 @@
 # Author:: Tyler Cloke <tyler@chef.io>
 # Author:: Marc Paradise <marc@chef.io>
-# Copyright:: Copyright (c) 2014-5 Chef, Inc.
+# Copyright:: Copyright 2014-2018 Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

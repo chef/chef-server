@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Stephen Delano <stephen@chef.io>
-%% Copyright 2013 Opscode, Inc. All Rights Reserved.
+%% Copyright 2013-2018 Chef Software, Inc.
 
 -module(oc_chef_container).
 

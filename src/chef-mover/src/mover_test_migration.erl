@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Marc Paradise <marc@chef.io>
-%% @copyright 2017 Chef Software, Inc.
+%% @Copyright 2017-2018 Chef Software, Inc.
 %%
 %% This module exists to validate chef-mover connectivity to
 %% the components it needs (postgres, redis, bifrost)

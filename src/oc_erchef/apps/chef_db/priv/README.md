@@ -28,7 +28,7 @@ Note that depending on settings the database and or username are subject to be d
 
 # LICENSE
 
-Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
+Copyright 2011-2018 Chef Software, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.  You may obtain a copy of the License at
 

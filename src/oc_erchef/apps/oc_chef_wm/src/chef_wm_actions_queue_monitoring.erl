@@ -4,7 +4,7 @@
 %%% @doc
 %%% monitor RabbitMQ length of analytics queues
 %%% @end
-%% Copyright 2015 Chef Software, Inc.
+%% Copyright 2015-2018 Chef Software, Inc.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file

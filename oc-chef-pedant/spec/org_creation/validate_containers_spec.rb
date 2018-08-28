@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Author:: Ho-Sheng Hsiao (<hosh@chef.io>)
-# Copyright:: Copyright (c) 2013 Opscode, Inc.
+# Copyright:: Copyright 2013-2018 Chef Software, Inc.
 
 
 describe "Org Creation", :org_creation do

@@ -2,7 +2,7 @@
 %% ex: ts=4 sw=4 et
 %% @author Tyler Cloke <tyler@chef.io>
 %% @author Mark Anderson <mark@chef.io>
-%% Copyright 2014 Opscode, Inc. All Rights Reserved.
+%% Copyright 2014-2018 Chef Software, Inc.
 
 -module(oc_chef_organization).
 

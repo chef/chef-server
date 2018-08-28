@@ -3,7 +3,7 @@
 %% @author Mark Anderson <mark@chef.io>
 %% @version 0.0.1
 %% @end
-%% Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
+%% Copyright 2011-2018 Chef Software, Inc.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
