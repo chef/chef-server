@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Author:: Douglas Triggs (<doug@chef.io>)
-# Copyright:: Copyright (c) 2014 Chef, Inc.
+# Copyright:: Copyright 2014-2018 Chef Software, Inc.
 
 describe "Headers", :headers do
   let (:request_url) { api_url("users") }

@@ -1,5 +1,5 @@
 # Author:: Ryan Cragun <me@ryan.ec>
-# Copyright:: Copyright (c) 2017 Chef, Inc.
+# Copyright:: Copyright 2017-2018 Chef Software, Inc.
 
 require "pedant/rspec/common"
 

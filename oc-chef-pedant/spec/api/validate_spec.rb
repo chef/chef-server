@@ -3,7 +3,7 @@
 # ex: ts=4 sw=4 et
 #
 # Author:: Mark Anderson <mark@chef.io>
-# Copyright:: Copyright (c) 2016 Chef, Inc.
+# Copyright:: Copyright 2016-2018 Chef Software, Inc.
 #
 
 describe "Validation API Endpoint", :authentication do

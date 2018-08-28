@@ -3,7 +3,7 @@
 # ex => ts=4 sw=4 et
 #
 # Author => : Prajakta Purohit (<prajakta@chef.io>)
-# Copyright => : Copyright (c) 2014 Opscode, Inc.
+# Copyright => : Copyright 2014-2018 Chef Software, Inc.
 #
 
 require 'pedant/rspec/common'

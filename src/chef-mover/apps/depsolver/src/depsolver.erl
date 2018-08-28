@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4; indent-tabs-mode: nil; fill-column: 80 -*-
 %% ex: ts=4 sw=4 et
 %%
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright 2012-2018 Chef Software, Inc.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file

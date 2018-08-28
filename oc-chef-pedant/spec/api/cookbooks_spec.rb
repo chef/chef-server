@@ -4,7 +4,7 @@
 # Author:: James Casey (<james@chef.io>)
 # Author:: Douglas Triggs (<doug@chef.io>)
 # Author:: Ho-Sheng Hsiao (<hosh@chef.io>)
-# Copyright:: Copyright (c) 2012 Opscode, Inc.
+# Copyright:: Copyright 2012-2018 Chef Software, Inc.
 #
 
 require 'pp'

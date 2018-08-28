@@ -1,5 +1,5 @@
 #
-# Copyright:: Copyright (c) 2014 Chef Software, Inc.
+# Copyright:: Copyright 2014-2018 Chef Software, Inc.
 #
 # All Rights Reserved
 #

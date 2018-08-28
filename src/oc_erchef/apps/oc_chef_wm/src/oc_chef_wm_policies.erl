@@ -2,7 +2,7 @@
 %% ex: ts=4 sw=4 et
 %% @author Oliver Ferrigni <oliver@chef.io>
 %% @author Jean Rouge <jean@chef.io>
-%% Copyright 2013-2014 Chef Software, Inc. All Rights Reserved.
+%% Copyright 2013-2018 Chef Software, Inc.
 
 -module(oc_chef_wm_policies).
 
