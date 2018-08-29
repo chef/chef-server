@@ -73,7 +73,7 @@ merge_actions:
         - "Changelog: Skip Update"
         - "Expeditor: Skip All"
         - "Expeditor: ACC Only"
-  - built_in:trigger_omnibus_build:
+  - built_in:trigger_omnibus_release_build:
       ignore_labels:
         - "Omnibus: Skip Build"
         - "Expeditor: Skip All"
