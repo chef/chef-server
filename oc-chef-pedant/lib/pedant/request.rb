@@ -148,7 +148,16 @@ module Pedant
       [final_headers, payload]
     end
 
+    # We are seeing strange stalls in CI These numbers are nearly completely arbitrary; the main
+    # justification is that I never seem to observe stalls > 1 seconds
+    # in practice
+    RETRY_COUNT = 3
+    RETRY_DELAY = 1.0
     def do_request(method, url, final_headers, payload, &validator)
+      do_request_with_retry(method, url, final_headers, payload, RETRY_COUNT, &validator)
+    end
+
+    def do_request_with_retry(method, url, final_headers, payload, retries_left, &validator)
       response_handler = lambda{|response, request, result| response}
 
       begin
@@ -170,8 +179,19 @@ module Pedant
         orig = e.original_exception
         req_id = final_headers['X-REMOTE-REQUEST-ID'] || "id missing"
         puts "#{e.class} error from request started #{request_time} took #{Time.now.utc - request_time} with method #{method} to #{url} #{req_id}\n"
-        puts "Msg #{e.message} #{orig} C #{orig.class} V #{orig.instance_variables}"
-        raise e
+        puts "Retries left #{retries_left} Msg #{e.message} #{orig} C #{orig.class} V #{orig.instance_variables}"
+        puts "#{e.backtrace}"
+
+        if retries_left > 0
+          sleep RETRY_DELAY
+          do_request_with_retry(method, url, final_headers, payload, retries_left -1 , &validator)
+          ## We might want to just succeed in the future, but I'm a
+          ## little but jumpy about normalizing deviance with the
+          ## retries. We should track thatcount, but let's just see if
+          ## it works on retry first.
+        else
+          raise e
+        end
       end
     end
 
