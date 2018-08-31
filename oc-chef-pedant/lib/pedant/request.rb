@@ -21,6 +21,7 @@ module Pedant
   module Request
     require 'rest_client'
     require 'mixlib/shellout'
+    require 'uuidtools'
     include Pedant::JSON
 
     # TODO: alternative suggestions?
@@ -142,7 +143,7 @@ module Pedant
         merge(auth_headers).
         merge(user_headers).
         merge(version_headers).
-        merge({'Host' => host})
+        merge({'Host' => host, 'X-REMOTE-REQUEST-ID' => UUIDTools::UUID.random_create.to_s})
 
       [final_headers, payload]
     end
@@ -166,7 +167,10 @@ module Pedant
           response
         end
       rescue RestClient::Exceptions::OpenTimeout, RestClient::Exceptions::ReadTimeout => e
-        puts "#{e.class} error from request started #{request_time} took #{Time.now.utc - request_time} with method #{method} to #{url} \n#{e.message} #{e.original_exception}"
+        orig = e.original_exception
+        req_id = final_headers['X-REMOTE-REQUEST-ID'] || "id missing"
+        puts "#{e.class} error from request started #{request_time} took #{Time.now.utc - request_time} with method #{method} to #{url} #{req_id}\n"
+        puts "Msg #{e.message} #{orig} C #{orig.class} V #{orig.instance_variables}"
         raise e
       end
     end
