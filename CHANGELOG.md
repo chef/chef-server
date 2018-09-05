@@ -1,9 +1,10 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release unreleased -->
-## Unreleased
+<!-- latest_release 12.19.1 -->
+## [12.19.1](https://github.com/chef/chef-server/tree/12.19.1) (2018-09-05)
 
 #### Merged Pull Requests
+- [expeditor] Modernize to use subscriptions [#1568](https://github.com/chef/chef-server/pull/1568) ([markan](https://github.com/markan))
 - Bump version to 12.19.0 [#1558](https://github.com/chef/chef-server/pull/1558) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
@@ -11,6 +12,7 @@
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- [expeditor] Modernize to use subscriptions [#1568](https://github.com/chef/chef-server/pull/1568) ([markan](https://github.com/markan)) <!-- 12.19.1 -->
 - Bump version to 12.19.0 [#1558](https://github.com/chef/chef-server/pull/1558) ([markan](https://github.com/markan)) <!-- 12.19.0 -->
 - Add config for 12.18 release branch. [#1557](https://github.com/chef/chef-server/pull/1557) ([markan](https://github.com/markan)) <!-- 12.18.10 -->
 - Update oc-bifrost-pedant to use rest-client 1.8.X [#1547](https://github.com/chef/chef-server/pull/1547) ([tas50](https://github.com/tas50)) <!-- 12.18.9 -->
