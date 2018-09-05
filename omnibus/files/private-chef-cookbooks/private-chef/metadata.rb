@@ -12,6 +12,5 @@ recipe            "chef-server", "Configures the Chef Server from Omnibus"
 end
 
 depends          'enterprise' # grabbed via Berkshelf + Git
-depends          'openssl', '>= 4.4'
 
-chef_version '>= 14'
+chef_version '>= 14.4'
