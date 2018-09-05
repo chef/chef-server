@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.19.2 -->
-## [12.19.2](https://github.com/chef/chef-server/tree/12.19.2) (2018-09-05)
+<!-- latest_release 12.19.3 -->
+## [12.19.3](https://github.com/chef/chef-server/tree/12.19.3) (2018-09-05)
 
 #### Merged Pull Requests
-- [nginx] Add request id to nginx log [#1565](https://github.com/chef/chef-server/pull/1565) ([markan](https://github.com/markan))
+- [oc-chef-pedant] Add logging for timeouts. [#1555](https://github.com/chef/chef-server/pull/1555) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- [oc-chef-pedant] Add logging for timeouts. [#1555](https://github.com/chef/chef-server/pull/1555) ([markan](https://github.com/markan)) <!-- 12.19.3 -->
 - [nginx] Add request id to nginx log [#1565](https://github.com/chef/chef-server/pull/1565) ([markan](https://github.com/markan)) <!-- 12.19.2 -->
 - [expeditor] Modernize to use subscriptions [#1568](https://github.com/chef/chef-server/pull/1568) ([markan](https://github.com/markan)) <!-- 12.19.1 -->
 - Bump version to 12.19.0 [#1558](https://github.com/chef/chef-server/pull/1558) ([markan](https://github.com/markan)) <!-- 12.19.0 -->
