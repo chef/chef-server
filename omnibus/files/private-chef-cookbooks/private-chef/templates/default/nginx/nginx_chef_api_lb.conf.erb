@@ -81,6 +81,7 @@
       access_by_lua_block { validator.validate("POST") }
       proxy_set_header x-data-collector-token $data_collector_token;
       proxy_set_header x-data-collector-auth "version=1.0";
+      proxy_set_header x-orgname $request_org;
       rewrite ^ <%= URI.parse(node['private_chef']['data_collector']['root_url']).path %> break;
       proxy_pass <%= URI.parse(node['private_chef']['data_collector']['root_url']).scheme %>://data-collector;
     }

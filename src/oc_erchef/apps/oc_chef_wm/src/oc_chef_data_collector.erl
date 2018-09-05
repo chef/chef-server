@@ -5,7 +5,7 @@
 -export([notify/2]).
 
 -spec notify(Req :: wm_req(), State :: #base_state{}) -> ok.
-notify(Req, #base_state{reqid = ReqId, resource_state = ResourceState, resource_mod = ResourceMod} = State) when
+notify(Req, #base_state{reqid = ReqId, resource_state = ResourceState, resource_mod = ResourceMod, organization_name = OrgName} = State) when
     is_record(ResourceState, acl_state);
     is_record(ResourceState, association_state);
     is_record(ResourceState, client_state);
@@ -34,7 +34,7 @@ notify(Req, #base_state{reqid = ReqId, resource_state = ResourceState, resource_
                 case stats_hero:ctime(ReqId, {data_collector, notify},
                                       fun() ->
                                               Msg = oc_chef_action:create_message(Req, State, true),
-                                              data_collector_http:post("/", Msg)
+                                              data_collector_http:post("/", Msg, [{"x-orgname", binary_to_list(OrgName)}])
                                       end) of
                     ok ->
                         ok;

@@ -52,11 +52,12 @@ get(Path, Body, Headers) ->
 
 -spec post(list(), iolist() | binary()) -> ok | {error, term()}.
 post(Path, Body) ->
-    post(Path, Body, default_headers()).
+    post(Path, Body, []).
 
 -spec post(list(), iolist() | binary(), list()) -> ok | {error, term()}.
 post(Path, Body, Headers) ->
-    request_with_caught_errors(Path, post, Body, Headers).
+    request_with_caught_errors(Path, post, Body,
+                               lists:append(default_headers(), Headers)).
 
 -spec delete(list(), iolist() | binary()) -> ok | {error, term()}.
 delete(Path, Body) ->

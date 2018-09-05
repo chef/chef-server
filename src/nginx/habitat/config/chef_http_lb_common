@@ -79,6 +79,7 @@
       access_by_lua_block { validator.validate("POST") }
       proxy_set_header x-data-collector-token $data_collector_token;
       proxy_set_header x-data-collector-auth "version=1.0";
+      proxy_set_header x-orgname $request_org;
       rewrite ^ /data-collector/v0/ break;
       proxy_pass https://data-collector;
     }
