@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.18.11 -->
-## [12.18.11](https://github.com/chef/chef-server/tree/12.18.11) (2018-08-29)
+<!-- latest_release 12.18.12 -->
+## [12.18.12](https://github.com/chef/chef-server/tree/12.18.12) (2018-09-06)
 
 #### Merged Pull Requests
-- Tell expeditor to trigger a release build. [#1564](https://github.com/chef/chef-server/pull/1564) ([rhass](https://github.com/rhass))
+- Ma/backport to 12 18 [#1569](https://github.com/chef/chef-server/pull/1569) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- Ma/backport to 12 18 [#1569](https://github.com/chef/chef-server/pull/1569) ([markan](https://github.com/markan)) <!-- 12.18.12 -->
 - Tell expeditor to trigger a release build. [#1564](https://github.com/chef/chef-server/pull/1564) ([rhass](https://github.com/rhass)) <!-- 12.18.11 -->
 - Add config for 12.18 release branch. [#1557](https://github.com/chef/chef-server/pull/1557) ([markan](https://github.com/markan)) <!-- 12.18.10 -->
 - Update oc-bifrost-pedant to use rest-client 1.8.X [#1547](https://github.com/chef/chef-server/pull/1547) ([tas50](https://github.com/tas50)) <!-- 12.18.9 -->
