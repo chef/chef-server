@@ -21,6 +21,7 @@ module Pedant
   module Request
     require 'rest_client'
     require 'mixlib/shellout'
+    require 'uuidtools'
     include Pedant::JSON
 
     # TODO: alternative suggestions?
@@ -142,28 +143,55 @@ module Pedant
         merge(auth_headers).
         merge(user_headers).
         merge(version_headers).
-        merge({'Host' => host})
+        merge({'Host' => host, 'X-REMOTE-REQUEST-ID' => UUIDTools::UUID.random_create.to_s})
 
       [final_headers, payload]
     end
 
+    # We are seeing strange stalls in CI These numbers are nearly completely arbitrary; the main
+    # justification is that I never seem to observe stalls > 1 seconds
+    # in practice
+    RETRY_COUNT = 3
+    RETRY_DELAY = 1.0
     def do_request(method, url, final_headers, payload, &validator)
+      do_request_with_retry(method, url, final_headers, payload, RETRY_COUNT, &validator)
+    end
 
+    def do_request_with_retry(method, url, final_headers, payload, retries_left, &validator)
       response_handler = lambda{|response, request, result| response}
 
-      response = RestClient::Request.execute(method: method,
-                                             url: url,
-                                             payload: [:PUT, :POST].include?(method) ? payload : nil,
-                                             headers: final_headers,
-                                             ssl_version: Pedant::Config.ssl_version,
-                                             verify_ssl: false,
-                                             open_timeout: 300,
-                                             &response_handler)
+      begin
+        request_time = Time.now.utc
+        response = RestClient::Request.execute(method: method,
+                                               url: url,
+                                               payload: [:PUT, :POST].include?(method) ? payload : nil,
+                                               headers: final_headers,
+                                               ssl_version: Pedant::Config.ssl_version,
+                                               verify_ssl: false,
+                                               open_timeout: 300,
+                                               &response_handler)
+        if block_given?
+          yield(response)
+        else
+          response
+        end
+      rescue RestClient::Exceptions::OpenTimeout, RestClient::Exceptions::ReadTimeout => e
+        orig = e.original_exception
+        req_id = final_headers['X-REMOTE-REQUEST-ID'] || "id missing"
+        puts "#{e.class} error from request started #{request_time} took #{Time.now.utc - request_time} with method #{method} to #{url} #{req_id}\n"
+        puts "Retries left #{retries_left} Msg #{e.message} #{orig} C #{orig.class} V #{orig.instance_variables}"
+        puts "#{e.backtrace}"
 
-      if block_given?
-        yield(response)
-      else
-        response
+        if retries_left > 0
+          sleep RETRY_DELAY
+          do_request_with_retry(method, url, final_headers, payload, retries_left -1 , &validator)
+          ## We might want to just succeed in the future, but I'm a
+          ## little but jumpy about normalizing deviance with the
+          ## retries. We should track thatcount, but let's just see if
+          ## it works on retry first.
+        else
+          raise e
+        end
       end
     end
 
