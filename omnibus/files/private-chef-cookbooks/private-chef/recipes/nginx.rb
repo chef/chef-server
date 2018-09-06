@@ -74,7 +74,7 @@ if (node['private_chef']['nginx']['ssl_certificate'].nil? &&
                         "DNS"
                       end
 
-   openssl_x509 ssl_crtfile do
+   openssl_x509_certificate ssl_crtfile do
      common_name server_name
      org node['private_chef']['nginx']['ssl_company_name']
      org_unit node['private_chef']['nginx']['ssl_organizational_unit_name']

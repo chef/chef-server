@@ -45,7 +45,6 @@ action_class do
     Chef::Config[:solo_legacy_mode] = true
   end
 
-
   def my_node
     @my_node ||= my_client.build_node
   end
