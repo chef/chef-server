@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.18.12 -->
-## [12.18.12](https://github.com/chef/chef-server/tree/12.18.12) (2018-09-06)
+<!-- latest_release 12.18.13 -->
+## [12.18.13](https://github.com/chef/chef-server/tree/12.18.13) (2018-09-06)
 
 #### Merged Pull Requests
-- Ma/backport to 12 18 [#1569](https://github.com/chef/chef-server/pull/1569) ([markan](https://github.com/markan))
+- Force new RC build. [#1571](https://github.com/chef/chef-server/pull/1571) ([rhass](https://github.com/rhass))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- Force new RC build. [#1571](https://github.com/chef/chef-server/pull/1571) ([rhass](https://github.com/rhass)) <!-- 12.18.13 -->
 - Ma/backport to 12 18 [#1569](https://github.com/chef/chef-server/pull/1569) ([markan](https://github.com/markan)) <!-- 12.18.12 -->
 - Tell expeditor to trigger a release build. [#1564](https://github.com/chef/chef-server/pull/1564) ([rhass](https://github.com/rhass)) <!-- 12.18.11 -->
 - Add config for 12.18 release branch. [#1557](https://github.com/chef/chef-server/pull/1557) ([markan](https://github.com/markan)) <!-- 12.18.10 -->
