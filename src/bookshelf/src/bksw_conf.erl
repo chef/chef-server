@@ -78,7 +78,9 @@ get_wm_configuration() ->
     [{ip, ip()},
      {port, port()},
      {dispatch, dispatch()},
-     {log_dir, log_dir()}].
+     {log_dir, log_dir()},
+     {ssl, ssl()},
+     {ssl_opts, ssl_opts()}].
 
 -spec access_key_id(context()) -> binary().
 access_key_id(#context{access_key_id=AccessKeyId}) ->
@@ -143,6 +145,12 @@ ip() ->
 
 port() ->
     envy:get(bookshelf, port, 4321, positive_integer).
+
+ssl() ->
+    envy:get(bookshelf, ssl, false, boolean).
+
+ssl_opts() ->
+    envy:get(bookshelf, ssl_opts, [], list).
 
 keys() ->
     {ok, AWSAccessKey} = chef_secrets:get(<<"bookshelf">>, <<"access_key_id">>),
