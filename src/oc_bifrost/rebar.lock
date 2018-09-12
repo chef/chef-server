@@ -17,7 +17,7 @@
   1},
  {<<"eper">>,
   {git,"git://github.com/massemanet/eper.git",
-       {ref,"f23776f716aaa8e8746ea4195a11df3605d6a885"}},
+       {ref,"17b0f97ea8287b72e8ebbe7132214db182ff1a1d"}},
   0},
  {<<"epgsql">>,
   {git,"git://github.com/chef/epgsql-1.git",
@@ -29,7 +29,7 @@
   1},
  {<<"jiffy">>,
   {git,"https://github.com/davisp/jiffy",
-       {ref,"031f9dbbf6c31b83585569cd290504f006540a77"}},
+       {ref,"ee8b48cb448a999e1fddbb5e2e32e7dfe33acf5c"}},
   0},
  {<<"lager">>,
   {git,"https://github.com/basho/lager",
@@ -37,7 +37,7 @@
   0},
  {<<"meck">>,
   {git,"git://github.com/eproxus/meck.git",
-       {ref,"b1a9cadf43adba8426e48f0727f33338750e1169"}},
+       {ref,"12572c19983253a2c65cd4339dc3748ac3e83eea"}},
   1},
  {<<"mixer">>,
   {git,"git://github.com/chef/mixer.git",
@@ -49,7 +49,7 @@
   0},
  {<<"observer_cli">>,
   {git,"https://github.com/zhongwencool/observer_cli",
-       {ref,"4d5f96762bb525b4f857109c10a7d4d53af1a029"}},
+       {ref,"d1fd9926ed99f91cba6057a96149a9b4ae017e5e"}},
   0},
  {<<"opscoderl_wm">>,
   {git,"https://github.com/chef/opscoderl_wm.git",
@@ -59,10 +59,10 @@
   {git,"git://github.com/seth/pooler.git",
        {ref,"b6c522a67a1d067122705ef725535a8664dd8514"}},
   1},
- {<<"recon">>,{pkg,<<"recon">>,<<"2.3.4">>},1},
+ {<<"recon">>,{pkg,<<"recon">>,<<"2.3.6">>},1},
  {<<"sqerl">>,
   {git,"https://github.com/chef/sqerl.git",
-       {ref,"f36fb5c80777769ff9c27adba9340693cfe964f8"}},
+       {ref,"687f630705dede2cc82791b5f494c9fe5c7c4a75"}},
   0},
  {<<"stats_hero">>,
   {git,"git://github.com/chef/stats_hero.git",
@@ -70,7 +70,7 @@
   0},
  {<<"sync">>,
   {git,"https://github.com/rustyio/sync.git",
-       {ref,"7548dbffd3ed20a674bd423bd7131585ad66cd9e"}},
+       {ref,"44a1e0d0c3eab0544010bc973ee46b1f6d602ccf"}},
   0},
  {<<"webmachine">>,
   {git,"git://github.com/chef/webmachine",
@@ -78,5 +78,5 @@
   1}]}.
 [
 {pkg_hash,[
- {<<"recon">>, <<"B406C2FCCDEAA0D94E23B5E30AE3D635A2D461E363A5C9C6316897037CF050D2">>}]}
+ {<<"recon">>, <<"2BCAD0CF621FB277CABBB6413159CD3AA30265C2DEE42C968697988B30108604">>}]}
 ].
