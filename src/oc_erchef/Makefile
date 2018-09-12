@@ -15,7 +15,10 @@ REBAR3 = rebar3
 endif
 
 all: $(REBAR3) elvis
-	@$(REBAR3) do clean, compile, eunit, dialyzer
+	@$(REBAR3) do clean, compile
+	$(REBAR3) eunit --application chef_objects
+	$(REBAR3) eunit 
+	$(REBAR3) dialyzer
 
 rel: all
 	@$(REBAR3) release
