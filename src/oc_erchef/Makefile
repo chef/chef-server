@@ -21,7 +21,10 @@ DB_PASS = "erchef_test_user_password"
 include Makefile.db
 
 all: $(REBAR3) elvis
-	@$(REBAR3) do clean, compile, eunit, dialyzer
+	@$(REBAR3) do clean, compile
+	$(REBAR3) eunit --application chef_objects
+	$(REBAR3) eunit 
+	$(REBAR3) dialyzer
 
 rel: all
 	@$(REBAR3) release
