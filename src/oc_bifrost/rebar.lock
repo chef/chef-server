@@ -66,7 +66,7 @@
   0},
  {<<"stats_hero">>,
   {git,"https://github.com/chef/stats_hero.git",
-       {ref,"e6d26d4cbfb22f9d532a97ec41ff0f00f9917e05"}},
+       {ref,"0811d3045874f6c16b76c04ac9358322e029c4b7"}},
   0},
  {<<"sync">>,
   {git,"https://github.com/rustyio/sync.git",
