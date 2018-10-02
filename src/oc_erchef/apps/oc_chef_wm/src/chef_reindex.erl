@@ -259,10 +259,10 @@ humanize_failures([H|T], Acc) ->
     case H of
         {Id, Reason} ->
             humanize_failures(T, [{Id, pretty_reason(Reason)} | Acc]);
-        X ->
-            lager:error("humanize failures couldn't make sense of failure ~s~p", [X]),
-            humanize_failures(T, [{Id, pretty_reason(Reason)} | Acc]);
-    end.
+        Unknown ->
+            lager:error("humanize failures couldn't make sense of failure ~s~p", [Unknown]),
+            humanize_failures(T, [{<<"unparsed reason">>, io:format("~s", [Unknown])}, Acc])
+        end.
 
 
 pretty_reason({error,{error,no_members}}) ->
