@@ -261,7 +261,7 @@ humanize_failures([H|T], Acc) ->
             humanize_failures(T, [{Id, pretty_reason(Reason)} | Acc]);
         Unknown ->
             lager:error("humanize failures couldn't make sense of failure ~s~p", [Unknown]),
-            humanize_failures(T, [{<<"unparsed reason">>, io:format("~s", [Unknown])}, Acc])
+            humanize_failures(T, [{<<"unparsed reason">>, io:format("~s", [Unknown])} |  Acc])
         end.
 
 
