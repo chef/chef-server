@@ -23,7 +23,7 @@ strict_search_result_acls=false
 keygen_cache_workers=10
 keygen_cache_size=10
 keygen_start_size=0
-keygen_timeout=1000
+keygen_timeout=5000
 
 [oc_chef_authz]
 
