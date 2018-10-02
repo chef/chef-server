@@ -35,6 +35,7 @@
 -export([
          make_context/0,
          reindex/2,
+         reindex/3,
          reindex_by_id/4,
          reindex_by_name/4
         ]).
@@ -255,8 +256,14 @@ log_failures(OrgName, [Failure|Rest]) ->
 humanize_failures([], Acc) ->
     Acc;
 humanize_failures([H|T], Acc) ->
-    {Id, Reason} = H,
-    humanize_failures(T, [{Id, pretty_reason(Reason)} | Acc]).
+    case H of
+        {Id, Reason} ->
+            humanize_failures(T, [{Id, pretty_reason(Reason)} | Acc]);
+        X ->
+            lager:error("humanize failures couldn't make sense of failure ~s~p", [X]),
+            humanize_failures(T, [{Id, pretty_reason(Reason)} | Acc]);
+    end.
+
 
 pretty_reason({error,{error,no_members}}) ->
     "no_members: Ran out of HTTP workers talking to search backend";

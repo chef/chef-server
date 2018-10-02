@@ -54,7 +54,8 @@ start_link() ->
 -spec add_item(iolist()) -> term().
 add_item(Doc) ->
     Size = byte_size(iolist_to_binary(Doc)),
-    gen_server:call(?MODULE, {add_item, Doc, Size}).
+    Timeout = envy:get(chef_index, add_item_timeout, 30000),
+    gen_server:call(?MODULE, {add_item, Doc, Size}, Timeout).
 
 flush() ->
     gen_server:cast(?MODULE, flush).
