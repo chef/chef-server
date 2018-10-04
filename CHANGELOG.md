@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.19.5 -->
-## [12.19.5](https://github.com/chef/chef-server/tree/12.19.5) (2018-09-11)
+<!-- latest_release 12.19.6 -->
+## [12.19.6](https://github.com/chef/chef-server/tree/12.19.6) (2018-10-04)
 
 #### Merged Pull Requests
-- Merge mTLS changes. [#1572](https://github.com/chef/chef-server/pull/1572) ([markan](https://github.com/markan))
+- increase authn:keygen_timeout for oc_erchef hab pkg [#1579](https://github.com/chef/chef-server/pull/1579) ([jeremymv2](https://github.com/jeremymv2))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.17.33 -->
 ### Changes since 12.17.33 release
 
 #### Merged Pull Requests
+- increase authn:keygen_timeout for oc_erchef hab pkg [#1579](https://github.com/chef/chef-server/pull/1579) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.19.6 -->
 - Merge mTLS changes. [#1572](https://github.com/chef/chef-server/pull/1572) ([markan](https://github.com/markan)) <!-- 12.19.5 -->
 - Update chef-client to 14.4.56 [#1567](https://github.com/chef/chef-server/pull/1567) ([tas50](https://github.com/tas50)) <!-- 12.19.4 -->
 - [oc-chef-pedant] Add logging for timeouts. [#1555](https://github.com/chef/chef-server/pull/1555) ([markan](https://github.com/markan)) <!-- 12.19.3 -->
