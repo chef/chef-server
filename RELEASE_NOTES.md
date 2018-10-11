@@ -8,18 +8,30 @@ This document contains release notes for the current major release and all patch
 For prior releases,
 see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
-## 12.18
+## 12.18.13
 
 - Segment free cookbooks are implemented. (https://github.com/chef/chef-rfc/blob/master/rfc067-cookbook-segment-deprecation.md) This bumps the API version
-- acl for cookbook artifacts
+- ACLs for cookbook artifacts
+- /nodes/NODENAME endpoint has HEAD operation
 - Security headers for HTTP
 - Optional disabling of welcome page
-- Ruby updated to 2.5.1
-- Chef Client updated to 14.3
 - `chef-server-ctl` now has version subcommand
-- Datestamps are now in UTC
+- `chef-server-ctl` appbundled to better control gem loading.
+- Support for SSL auth between internal Chef Server Services.
+  This includes connections to bifrost and the internal Postgresql server
+- All datestamps in logs are now in UTC. SOLR GC log now datestamped.
+- Nginx logs now include the request id
 - Fixie is now shipped with chef server
-- Security issue with old doorkeeper fixed by upgrading. [CVE-2018-1000211](https://nvd.nist.gov/vuln/detail/CVE-2018-1000211)
+- Security issue with old doorkeeper fixed by
+  upgrading. [CVE-2018-1000211](https://nvd.nist.gov/vuln/detail/CVE-2018-1000211)
+- Fixed issue migrating rabbitmq passwords (migration 031)
+- Chef indexing queue times now reported in stats in log messages and status endpoint
+- Ruby updated to 2.5.1
+- Update gems
+- Chef Client updated to 14.3
+- Postgresql updated to 9.6.10 and 9.2.24 (latter only for upgrades from older Chef Servers)
+- Fix for SUSE SLES-11 sysvinit install
+- Removed nodejs (a build dependency that was shipped)
 
 ## 12.17.33 (2018-02-22)
 This release upgrades the version of Ruby to 2.4.3.
