@@ -1,75 +1,73 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.18.14 -->
-## [12.18.14](https://github.com/chef/chef-server/tree/12.18.14) (2018-10-12)
-
-#### Merged Pull Requests
-- Add release notes [#1581](https://github.com/chef/chef-server/pull/1581) ([markan](https://github.com/markan))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=12.17.33 -->
-### Changes since 12.17.33 release
-
-#### Merged Pull Requests
-- Add release notes [#1581](https://github.com/chef/chef-server/pull/1581) ([markan](https://github.com/markan)) <!-- 12.18.14 -->
-- Force new RC build. [#1571](https://github.com/chef/chef-server/pull/1571) ([rhass](https://github.com/rhass)) <!-- 12.18.13 -->
-- Ma/backport to 12 18 [#1569](https://github.com/chef/chef-server/pull/1569) ([markan](https://github.com/markan)) <!-- 12.18.12 -->
-- Tell expeditor to trigger a release build. [#1564](https://github.com/chef/chef-server/pull/1564) ([rhass](https://github.com/rhass)) <!-- 12.18.11 -->
-- Add config for 12.18 release branch. [#1557](https://github.com/chef/chef-server/pull/1557) ([markan](https://github.com/markan)) <!-- 12.18.10 -->
-- Update oc-bifrost-pedant to use rest-client 1.8.X [#1547](https://github.com/chef/chef-server/pull/1547) ([tas50](https://github.com/tas50)) <!-- 12.18.9 -->
-- Update postgresql [#1539](https://github.com/chef/chef-server/pull/1539) ([markan](https://github.com/markan)) <!-- 12.18.8 -->
-- Update tag for enterprise cookbook. [#1551](https://github.com/chef/chef-server/pull/1551) ([rhass](https://github.com/rhass)) <!-- 12.18.7 -->
-- Remove old github changelog generator [#1530](https://github.com/chef/chef-server/pull/1530) ([tas50](https://github.com/tas50)) <!-- 12.18.6 -->
-- Postgres listens on loopbacks, not localhost [#1540](https://github.com/chef/chef-server/pull/1540) ([markan](https://github.com/markan)) <!-- 12.18.5 -->
-- Allow SSL configuration in bifrost sys.config [#1541](https://github.com/chef/chef-server/pull/1541) ([danielsdeleo](https://github.com/danielsdeleo)) <!-- 12.18.4 -->
-- [oc-id] Update Gemfile to pick up new rubyzip [#1534](https://github.com/chef/chef-server/pull/1534) ([markan](https://github.com/markan)) <!-- 12.18.3 -->
-- Update sqerl [#1537](https://github.com/chef/chef-server/pull/1537) ([jaym](https://github.com/jaym)) <!-- 12.18.2 -->
-- Fix habitat build for the chef-server-ctl container [#1524](https://github.com/chef/chef-server/pull/1524) ([irvingpop](https://github.com/irvingpop)) <!-- 12.18.1 -->
-- Prepare 12.18 Chef Server release. [#1528](https://github.com/chef/chef-server/pull/1528) ([rhass](https://github.com/rhass)) <!-- 12.18.0 -->
-- Trigger an RC build. [#1527](https://github.com/chef/chef-server/pull/1527) ([rhass](https://github.com/rhass)) <!-- 12.17.74 -->
-- Update the Release Process document [#1409](https://github.com/chef/chef-server/pull/1409) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 12.17.73 -->
-- Update custom resource in chef-server-deploy. [#1525](https://github.com/chef/chef-server/pull/1525) ([rhass](https://github.com/rhass)) <!-- 12.17.72 -->
-- Update doorkeeper gem to 4.4.0 [#1523](https://github.com/chef/chef-server/pull/1523) ([rhass](https://github.com/rhass)) <!-- 12.17.71 -->
-- Update Ruby to 2.5.1 [#1522](https://github.com/chef/chef-server/pull/1522) ([rhass](https://github.com/rhass)) <!-- 12.17.70 -->
-- Add Nolan and Prajakta as maintainers [#1521](https://github.com/chef/chef-server/pull/1521) ([markan](https://github.com/markan)) <!-- 12.17.69 -->
-- Resolving Foodcritic warnings &amp; cleaning up licensing [#1510](https://github.com/chef/chef-server/pull/1510) ([tas50](https://github.com/tas50)) <!-- 12.17.68 -->
-- Update Gemfiles and other version locks [#1520](https://github.com/chef/chef-server/pull/1520) ([markan](https://github.com/markan)) <!-- 12.17.67 -->
-- support HEAD http request on named node endpoint [#1218](https://github.com/chef/chef-server/pull/1218) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.17.66 -->
-- Ma/timestamps in utc [#1503](https://github.com/chef/chef-server/pull/1503) ([markan](https://github.com/markan)) <!-- 12.17.65 -->
-- Update oc_id gems [#1518](https://github.com/chef/chef-server/pull/1518) ([markan](https://github.com/markan)) <!-- 12.17.64 -->
-- Ma/appbundle and move [#1516](https://github.com/chef/chef-server/pull/1516) ([markan](https://github.com/markan)) <!-- 12.17.63 -->
-- MSYS-848 : Prevent Chef Server headers from exposing openresty name and version [#1514](https://github.com/chef/chef-server/pull/1514) ([piyushawasthi](https://github.com/piyushawasthi)) <!-- 12.17.62 -->
-- Update os versions in omnibus kitchen.yml [#1505](https://github.com/chef/chef-server/pull/1505) ([markan](https://github.com/markan)) <!-- 12.17.61 -->
-- Segment-free cookbook data (RFC 67) [#1034](https://github.com/chef/chef-server/pull/1034) ([thommay](https://github.com/thommay)) <!-- 12.17.60 -->
-- Upgrade to Chef 14 [#1506](https://github.com/chef/chef-server/pull/1506) ([markan](https://github.com/markan)) <!-- 12.17.59 -->
-- Allow find in gather-logs to follow symlinks. [#1509](https://github.com/chef/chef-server/pull/1509) ([teknofire](https://github.com/teknofire)) <!-- 12.17.58 -->
-- Include the fixie utility in chef-server [#1508](https://github.com/chef/chef-server/pull/1508) ([markan](https://github.com/markan)) <!-- 12.17.57 -->
-- Fix enterprise chef common typo [#1507](https://github.com/chef/chef-server/pull/1507) ([markan](https://github.com/markan)) <!-- 12.17.56 -->
-- Pull in new enterprise chef common [#1501](https://github.com/chef/chef-server/pull/1501) ([markan](https://github.com/markan)) <!-- 12.17.55 -->
-- Ma/update pc and rebar [#1495](https://github.com/chef/chef-server/pull/1495) ([markan](https://github.com/markan)) <!-- 12.17.54 -->
-- Unlock and bump chef-mover jiffy. [#1502](https://github.com/chef/chef-server/pull/1502) ([markan](https://github.com/markan)) <!-- 12.17.53 -->
-- [SUSTAIN-937] Adding resource_name to es index resource [#1500](https://github.com/chef/chef-server/pull/1500) ([nsdavidson](https://github.com/nsdavidson)) <!-- 12.17.52 -->
-- Add DateStamp to the SOLR GC log [#1498](https://github.com/chef/chef-server/pull/1498) ([markan](https://github.com/markan)) <!-- 12.17.51 -->
-- Expeditor cleanups after review with releng, plus an nginx logging bugfix for dockerized environments [#1497](https://github.com/chef/chef-server/pull/1497) ([irvingpop](https://github.com/irvingpop)) <!-- 12.17.50 -->
-- adding the compliance upstream to chef-server-nginx hab pkg [#1496](https://github.com/chef/chef-server/pull/1496) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.17.49 -->
-- Integrate expeditor hab+docker export functionality [#1493](https://github.com/chef/chef-server/pull/1493) ([irvingpop](https://github.com/irvingpop)) <!-- 12.17.48 -->
-- Pin chef-zero to 14.0.5 in travis [#1492](https://github.com/chef/chef-server/pull/1492) ([markan](https://github.com/markan)) <!-- 12.17.47 -->
-- allow mixlib-auth 2.0 in pedant [#1491](https://github.com/chef/chef-server/pull/1491) ([lamont-granquist](https://github.com/lamont-granquist)) <!-- 12.17.46 -->
-- [oc-id] Commit assets to git and remove nodejs [#1487](https://github.com/chef/chef-server/pull/1487) ([markan](https://github.com/markan)) <!-- 12.17.45 -->
-- fix builds in privilege restricted environments like builder [#1489](https://github.com/chef/chef-server/pull/1489) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.17.44 -->
-- Add sysvinitrc tag [#1488](https://github.com/chef/chef-server/pull/1488) ([markan](https://github.com/markan)) <!-- 12.17.43 -->
-- Added chef-server-ctl version functionality [#1485](https://github.com/chef/chef-server/pull/1485) ([thomascate](https://github.com/thomascate)) <!-- 12.17.42 -->
-- lock to chef 13.x for habitat pkgs [#1483](https://github.com/chef/chef-server/pull/1483) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.17.41 -->
-- Ma/update all the things [#1482](https://github.com/chef/chef-server/pull/1482) ([markan](https://github.com/markan)) <!-- 12.17.40 -->
-- [upgrades] Don&#39;t early return in upgrade 1.31 [#1478](https://github.com/chef/chef-server/pull/1478) ([stevendanna](https://github.com/stevendanna)) <!-- 12.17.39 -->
-- resolve lingering issues from PR#1472 [#1477](https://github.com/chef/chef-server/pull/1477) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.17.38 -->
-- Add queue insertion information to statistics. [#1462](https://github.com/chef/chef-server/pull/1462) ([markan](https://github.com/markan)) <!-- 12.17.37 -->
-- Adding Habitization - this PR supersedes PR#1416 [#1472](https://github.com/chef/chef-server/pull/1472) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.17.34 -->
-- habitat mode for chef-server-ctl command [#1475](https://github.com/chef/chef-server/pull/1475) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.17.35 -->
-- Update release notes for 12.17.33 release. [#1476](https://github.com/chef/chef-server/pull/1476) ([rhass](https://github.com/rhass)) <!-- 12.17.36 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [12.18.14](https://github.com/chef/chef-server/tree/12.18.14) (2018-10-15)
+
+#### Merged Pull Requests
+- Update release notes for 12.17.33 release. [#1476](https://github.com/chef/chef-server/pull/1476) ([rhass](https://github.com/rhass))
+- habitat mode for chef-server-ctl command [#1475](https://github.com/chef/chef-server/pull/1475) ([jeremymv2](https://github.com/jeremymv2))
+- Adding Habitization - this PR supersedes PR#1416 [#1472](https://github.com/chef/chef-server/pull/1472) ([jeremymv2](https://github.com/jeremymv2))
+- Add queue insertion information to statistics. [#1462](https://github.com/chef/chef-server/pull/1462) ([markan](https://github.com/markan))
+- resolve lingering issues from PR#1472 [#1477](https://github.com/chef/chef-server/pull/1477) ([jeremymv2](https://github.com/jeremymv2))
+- [upgrades] Don&#39;t early return in upgrade 1.31 [#1478](https://github.com/chef/chef-server/pull/1478) ([stevendanna](https://github.com/stevendanna))
+- Ma/update all the things [#1482](https://github.com/chef/chef-server/pull/1482) ([markan](https://github.com/markan))
+- lock to chef 13.x for habitat pkgs [#1483](https://github.com/chef/chef-server/pull/1483) ([jeremymv2](https://github.com/jeremymv2))
+- Added chef-server-ctl version functionality [#1485](https://github.com/chef/chef-server/pull/1485) ([thomascate](https://github.com/thomascate))
+- Add sysvinitrc tag [#1488](https://github.com/chef/chef-server/pull/1488) ([markan](https://github.com/markan))
+- fix builds in privilege restricted environments like builder [#1489](https://github.com/chef/chef-server/pull/1489) ([jeremymv2](https://github.com/jeremymv2))
+- [oc-id] Commit assets to git and remove nodejs [#1487](https://github.com/chef/chef-server/pull/1487) ([markan](https://github.com/markan))
+- allow mixlib-auth 2.0 in pedant [#1491](https://github.com/chef/chef-server/pull/1491) ([lamont-granquist](https://github.com/lamont-granquist))
+- Pin chef-zero to 14.0.5 in travis [#1492](https://github.com/chef/chef-server/pull/1492) ([markan](https://github.com/markan))
+- Integrate expeditor hab+docker export functionality [#1493](https://github.com/chef/chef-server/pull/1493) ([irvingpop](https://github.com/irvingpop))
+- adding the compliance upstream to chef-server-nginx hab pkg [#1496](https://github.com/chef/chef-server/pull/1496) ([jeremymv2](https://github.com/jeremymv2))
+- Expeditor cleanups after review with releng, plus an nginx logging bugfix for dockerized environments [#1497](https://github.com/chef/chef-server/pull/1497) ([irvingpop](https://github.com/irvingpop))
+- Add DateStamp to the SOLR GC log [#1498](https://github.com/chef/chef-server/pull/1498) ([markan](https://github.com/markan))
+- [SUSTAIN-937] Adding resource_name to es index resource [#1500](https://github.com/chef/chef-server/pull/1500) ([nsdavidson](https://github.com/nsdavidson))
+- Unlock and bump chef-mover jiffy. [#1502](https://github.com/chef/chef-server/pull/1502) ([markan](https://github.com/markan))
+- Ma/update pc and rebar [#1495](https://github.com/chef/chef-server/pull/1495) ([markan](https://github.com/markan))
+- Pull in new enterprise chef common [#1501](https://github.com/chef/chef-server/pull/1501) ([markan](https://github.com/markan))
+- Fix enterprise chef common typo [#1507](https://github.com/chef/chef-server/pull/1507) ([markan](https://github.com/markan))
+- Include the fixie utility in chef-server [#1508](https://github.com/chef/chef-server/pull/1508) ([markan](https://github.com/markan))
+- Allow find in gather-logs to follow symlinks. [#1509](https://github.com/chef/chef-server/pull/1509) ([teknofire](https://github.com/teknofire))
+- Upgrade to Chef 14 [#1506](https://github.com/chef/chef-server/pull/1506) ([markan](https://github.com/markan))
+- Segment-free cookbook data (RFC 67) [#1034](https://github.com/chef/chef-server/pull/1034) ([thommay](https://github.com/thommay))
+- Update os versions in omnibus kitchen.yml [#1505](https://github.com/chef/chef-server/pull/1505) ([markan](https://github.com/markan))
+- MSYS-848 : Prevent Chef Server headers from exposing openresty name and version [#1514](https://github.com/chef/chef-server/pull/1514) ([piyushawasthi](https://github.com/piyushawasthi))
+- Ma/appbundle and move [#1516](https://github.com/chef/chef-server/pull/1516) ([markan](https://github.com/markan))
+- Update oc_id gems [#1518](https://github.com/chef/chef-server/pull/1518) ([markan](https://github.com/markan))
+- Ma/timestamps in utc [#1503](https://github.com/chef/chef-server/pull/1503) ([markan](https://github.com/markan))
+- support HEAD http request on named node endpoint [#1218](https://github.com/chef/chef-server/pull/1218) ([jeremymv2](https://github.com/jeremymv2))
+- Update Gemfiles and other version locks [#1520](https://github.com/chef/chef-server/pull/1520) ([markan](https://github.com/markan))
+- Resolving Foodcritic warnings &amp; cleaning up licensing [#1510](https://github.com/chef/chef-server/pull/1510) ([tas50](https://github.com/tas50))
+- Add Nolan and Prajakta as maintainers [#1521](https://github.com/chef/chef-server/pull/1521) ([markan](https://github.com/markan))
+- Update Ruby to 2.5.1 [#1522](https://github.com/chef/chef-server/pull/1522) ([rhass](https://github.com/rhass))
+- Update doorkeeper gem to 4.4.0 [#1523](https://github.com/chef/chef-server/pull/1523) ([rhass](https://github.com/rhass))
+- Update custom resource in chef-server-deploy. [#1525](https://github.com/chef/chef-server/pull/1525) ([rhass](https://github.com/rhass))
+- Update the Release Process document [#1409](https://github.com/chef/chef-server/pull/1409) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Trigger an RC build. [#1527](https://github.com/chef/chef-server/pull/1527) ([rhass](https://github.com/rhass))
+- Prepare 12.18 Chef Server release. [#1528](https://github.com/chef/chef-server/pull/1528) ([rhass](https://github.com/rhass))
+- Fix habitat build for the chef-server-ctl container [#1524](https://github.com/chef/chef-server/pull/1524) ([irvingpop](https://github.com/irvingpop))
+- Update sqerl [#1537](https://github.com/chef/chef-server/pull/1537) ([jaym](https://github.com/jaym))
+- [oc-id] Update Gemfile to pick up new rubyzip [#1534](https://github.com/chef/chef-server/pull/1534) ([markan](https://github.com/markan))
+- Allow SSL configuration in bifrost sys.config [#1541](https://github.com/chef/chef-server/pull/1541) ([danielsdeleo](https://github.com/danielsdeleo))
+- Postgres listens on loopbacks, not localhost [#1540](https://github.com/chef/chef-server/pull/1540) ([markan](https://github.com/markan))
+- Remove old github changelog generator [#1530](https://github.com/chef/chef-server/pull/1530) ([tas50](https://github.com/tas50))
+- Update tag for enterprise cookbook. [#1551](https://github.com/chef/chef-server/pull/1551) ([rhass](https://github.com/rhass))
+- Update postgresql [#1539](https://github.com/chef/chef-server/pull/1539) ([markan](https://github.com/markan))
+- Update oc-bifrost-pedant to use rest-client 1.8.X [#1547](https://github.com/chef/chef-server/pull/1547) ([tas50](https://github.com/tas50))
+- Add config for 12.18 release branch. [#1557](https://github.com/chef/chef-server/pull/1557) ([markan](https://github.com/markan))
+- Tell expeditor to trigger a release build. [#1564](https://github.com/chef/chef-server/pull/1564) ([rhass](https://github.com/rhass))
+- Ma/backport to 12 18 [#1569](https://github.com/chef/chef-server/pull/1569) ([markan](https://github.com/markan))
+- Force new RC build. [#1571](https://github.com/chef/chef-server/pull/1571) ([rhass](https://github.com/rhass))
+- Add release notes [#1581](https://github.com/chef/chef-server/pull/1581) ([markan](https://github.com/markan))
+<!-- latest_stable_release -->
+
 ## [12.17.33](https://github.com/chef/chef-server/tree/12.17.33) (2018-02-23)
 
 #### Merged Pull Requests
@@ -91,7 +89,6 @@
 - Revert &quot;Flip some bits for tests on PPC64.&quot; [#1466](https://github.com/chef/chef-server/pull/1466) ([rhass](https://github.com/rhass))
 - Use the version of LicenseScout that comes with the Omnibus gem. [#1468](https://github.com/chef/chef-server/pull/1468) ([tduffield](https://github.com/tduffield))
 - Increase Net::HTTP / rest-client open_timeout [#1470](https://github.com/chef/chef-server/pull/1470) ([rhass](https://github.com/rhass))
-<!-- latest_stable_release -->
 
 ## [12.17.15](https://github.com/chef/chef-server/tree/12.17.15) (2017-12-21)
 
