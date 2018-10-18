@@ -1,4 +1,4 @@
-override :erlang, version: "18.3"
+override :erlang, version: "18.3.4.9"
 override :lua, version: "5.1.5"
 override :'omnibus-ctl', version: "master"
 override :chef, version: "v14.5.33"
