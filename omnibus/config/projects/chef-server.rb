@@ -40,7 +40,9 @@ dependency "preparation"
 # the Chef Server dependencies.
 dependency "server-complete"
 
-dependency "cleanup" # MUST BE LAST DO NOT MOVE
+# THESE MUST BE LAST DO NOT MOVE
+dependency "ruby-cleanup"
+dependency "cleanup"
 
 package :rpm do
   signing_passphrase ENV['OMNIBUS_RPM_SIGNING_PASSPHRASE']
