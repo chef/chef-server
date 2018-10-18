@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.19.6 -->
-## [12.19.6](https://github.com/chef/chef-server/tree/12.19.6) (2018-10-04)
+<!-- latest_release 12.19.7 -->
+## [12.19.7](https://github.com/chef/chef-server/tree/12.19.7) (2018-10-18)
 
 #### Merged Pull Requests
-- increase authn:keygen_timeout for oc_erchef hab pkg [#1579](https://github.com/chef/chef-server/pull/1579) ([jeremymv2](https://github.com/jeremymv2))
+- Use our standard ruby-cleanup definition [#1582](https://github.com/chef/chef-server/pull/1582) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.18.14 -->
 ### Changes since 12.18.14 release
 
 #### Merged Pull Requests
+- Use our standard ruby-cleanup definition [#1582](https://github.com/chef/chef-server/pull/1582) ([tas50](https://github.com/tas50)) <!-- 12.19.7 -->
 - Bump version to 12.19.0 [#1558](https://github.com/chef/chef-server/pull/1558) ([markan](https://github.com/markan)) <!-- 12.19.0 -->
 - [expeditor] Modernize to use subscriptions [#1568](https://github.com/chef/chef-server/pull/1568) ([markan](https://github.com/markan)) <!-- 12.19.1 -->
 - [nginx] Add request id to nginx log [#1565](https://github.com/chef/chef-server/pull/1565) ([markan](https://github.com/markan)) <!-- 12.19.2 -->
