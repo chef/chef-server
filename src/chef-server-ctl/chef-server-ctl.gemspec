@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["mark@chef.io"]
   spec.description   = %q{Commands to control Chef Server}
   spec.summary       = spec.description
-  spec.licenses      = "Apache2"
+  spec.licenses      = "Apache-2.0"
 
   spec.files         = %w{LICENSE README.md} + Dir.glob("{bin,doc,helpers,lib,plugins,spec}/**/*")
   spec.bindir        = "bin"
@@ -45,7 +45,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "chef_backup" # Gemfile has us getting latest from git
   spec.add_runtime_dependency "omnibus-ctl" # Gemfile has us getting latest from git
 
-  spec.add_runtime_dependency "chef", "~> 14.4.0"
+  spec.add_runtime_dependency "chef", "~> 14.5.0"
   spec.add_runtime_dependency "appbundler"
 
   spec.add_development_dependency "chefstyle"

@@ -10,7 +10,7 @@ driver:
 provisioner:
   name: chef_zero
   product_name: chef
-  product_version: 14.2.0
+  product_version: 14.5.33
 
 platforms:
   - name: ubuntu-18.04
@@ -18,8 +18,6 @@ platforms:
   - name: ubuntu-16.04
     run_list: apt::default
   - name: ubuntu-14.04
-    run_list: apt::default
-  - name: ubuntu-12.04
     run_list: apt::default
   - name: centos-6
   - name: centos-7
