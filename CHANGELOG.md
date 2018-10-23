@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.19.7 -->
-## [12.19.7](https://github.com/chef/chef-server/tree/12.19.7) (2018-10-18)
+<!-- latest_release 12.19.8 -->
+## [12.19.8](https://github.com/chef/chef-server/tree/12.19.8) (2018-10-23)
 
 #### Merged Pull Requests
-- Use our standard ruby-cleanup definition [#1582](https://github.com/chef/chef-server/pull/1582) ([tas50](https://github.com/tas50))
+- Update Chef 14.4 -&gt; 14.5 [#1583](https://github.com/chef/chef-server/pull/1583) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.18.14 -->
 ### Changes since 12.18.14 release
 
 #### Merged Pull Requests
+- Update Chef 14.4 -&gt; 14.5 [#1583](https://github.com/chef/chef-server/pull/1583) ([tas50](https://github.com/tas50)) <!-- 12.19.8 -->
 - Use our standard ruby-cleanup definition [#1582](https://github.com/chef/chef-server/pull/1582) ([tas50](https://github.com/tas50)) <!-- 12.19.7 -->
 - Bump version to 12.19.0 [#1558](https://github.com/chef/chef-server/pull/1558) ([markan](https://github.com/markan)) <!-- 12.19.0 -->
 - [expeditor] Modernize to use subscriptions [#1568](https://github.com/chef/chef-server/pull/1568) ([markan](https://github.com/markan)) <!-- 12.19.1 -->
