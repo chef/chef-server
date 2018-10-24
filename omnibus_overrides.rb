@@ -3,7 +3,7 @@ override :lua, version: "5.1.5"
 override :'omnibus-ctl', version: "master"
 override :chef, version: "v14.5.33"
 override :ohai, version: "v14.5.4"
-override :ruby, version: "2.5.1"
+override :ruby, version: "2.5.3"
 override :rubygems, version: "2.7.7"
 # This SHA is the last commit before the 6.0 release
 override :'berkshelf-no-depselector', version: '6016ca10b2f46508b1b107264228668776f505d9'
