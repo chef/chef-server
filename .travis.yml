@@ -150,3 +150,9 @@ matrix:
         - eval "$(/opt/chefdk/bin/chef shell-init bash)"
       before_script: cd cookbooks/chef-server-deploy
       script: chef exec foodcritic . -t ~supermarket
+    # license-scout
+    - env:
+        - NAME=license-scout
+      language: minimal
+      install: true
+      script: docker run --rm --volume $(pwd):/workdir --workdir /workdir --env OCTOKIT_ACCESS_TOKEN --env EXPEDITOR=true chefes/lita-worker .expeditor/license_scout.sh

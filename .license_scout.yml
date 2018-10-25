@@ -1,0 +1,132 @@
+---
+name: chef-server
+directories:
+  - ./
+  - ./src/bookshelf
+  - ./src/chef-mover
+  - ./src/chef-server-ctl
+  - ./src/nginx
+  - ./src/oc_bifrost
+  - ./src/oc_erchef
+  - ./src/oc-id
+  - ./src/openresty-noroot
+  - ./src/opscode-expander
+
+habitat:
+  channel_for_origin:
+    - origin: chef
+      channel: unstable
+
+allowed_licenses:
+  - Apache-1.0
+  - Apache-1.1
+  - Apache-2.0
+  - Artistic-2.0
+  - BSD-1-Clause
+  - BSD-2-Clause
+  - BSD-3-Clause
+  - BSD-3-Clause-Attribution
+  - BSD-Source-Code
+  - BSL-2.0
+  - bzip2-1.0.6
+  - CC0-1.0
+  - CC-BY-2.0
+  - CC-BY-3.0
+  - CC-BY-4.0
+  - curl
+  - gnuplot
+  - ICU
+  - ISC
+  - MIT
+  - MPL-2.0
+  - OpenSSL
+  - PHP-3.0
+  - PHP-3.01
+  - PostgreSQL
+  - Python-2.0
+  - Ruby
+  - SAX-PD
+  - Unlicense
+  - WTFPL
+  - Zlib
+
+fallbacks:
+  ruby:
+    - name: amqp
+      license_id: Ruby
+      license_content: https://raw.githubusercontent.com/ruby-amqp/amqp/master/README.md
+    - name: compass
+      license_id: MIT
+      license_content: https://raw.githubusercontent.com/Compass/compass/stable/LICENSE.markdown
+    - name: coolline
+      license_id: Zlib
+      license_content: https://raw.githubusercontent.com/Mon-Ouie/coolline/master/LICENSE
+    - name: em-http-request
+      license_id: MIT
+      license_content: https://raw.githubusercontent.com/igrigorik/em-http-request/master/README.md
+    - name: net-telnet
+      license_id: Ruby
+      license_content: https://raw.githubusercontent.com/ruby/net-telnet/master/LICENSE.txt
+    - name: pbkdf2
+      license_id: MIT
+      license_content: https://raw.githubusercontent.com/emerose/pbkdf2-ruby/master/LICENSE.TXT
+    - name: pry-remote
+      license_id: MIT
+      license_content: https://raw.githubusercontent.com/emerose/pbkdf2-ruby/master/LICENSE.TXT
+    - name: syslog-logger
+      license_id: MIT
+      license_content: https://raw.githubusercontent.com/ngmoco/syslog_logger/master/README.rdoc
+    - name: unicorn-rails
+      license_id: MIT
+      license_content: https://raw.githubusercontent.com/samuelkadolph/unicorn-rails/master/LICENSE
+  habitat:
+    - name: core/bundler
+      license_id: MIT
+      license_content: https://raw.githubusercontent.com/bundler/bundler/master/LICENSE.md
+
+exceptions:
+  ruby:
+    - name: kgio
+      reason: Exception made by Chef Legal (unmodified library, used as-is)
+    - name: newrelic_rpm
+      reason: Exception made by Chef Legal (unmodified library, used as-is)
+    - name: raindrops
+      reason: Exception made by Chef Legal (unmodified library, used as-is)
+  habitat:
+    - name: core/attr
+      reason: Exception made by Chef Legal
+    - name: core/bash
+      reason: Exception made by Chef Legal
+    - name: core/busybox-static
+      reason: Exception made by Chef Legal
+    - name: core/coreutils
+      reason: Exception made by Chef Legal
+    - name: core/gcc-libs
+      reason: Exception made by Chef Legal
+    - name: core/gdbm
+      reason: Exception made by Chef Legal
+    - name: core/glibc
+      reason: Exception made by Chef Legal
+    - name: core/gmp
+      reason: Exception made by Chef Legal
+    - name: core/grep
+      reason: Exception made by Chef Legal
+    - name: core/less
+      reason: Exception made by Chef Legal
+    - name: core/libcap
+      reason: Exception made by Chef Legal
+    - name: core/libtool
+      reason: Exception made by Chef Legal
+    - name: core/linux-headers
+      reason: Exception made by Chef Legal
+    - name: core/readline
+      reason: Exception made by Chef Legal
+    - name: core/rsync
+      reason: Exception made by Chef Legal
+    - name: core/ruby
+      reason: Exception made by Chef Legal
+    - name: core/sed
+      reason: Exception made by Chef Legal
+    - name: core/sqitch_pg
+      reason: Exception made by Chef Legal
+
