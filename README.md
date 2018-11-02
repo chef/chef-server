@@ -8,6 +8,13 @@ If you want to file an issue about Chef Server or contribute a change, you're in
 
 If you need to file an issue against another Chef project, you can find a list of projects and where to file issues in the [community contributions section](https://docs.chef.io/community_contributions.html#issues-and-bug-reports) of the [Chef docs](https://docs.chef.io).
 
+## Getting Help
+
+We use GitHub issues to track bugs and feature requests. If you need help please post to our Mailing List or join the Chef Community Slack.
+
+ * Chef Community Slack at http://community-slack.chef.io/.
+ * Chef Mailing List https://discourse.chef.io/
+
 ## Components of the Chef Server
 
 This repository contains the core services that make up the Chef Server.
