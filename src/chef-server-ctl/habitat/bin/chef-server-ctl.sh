@@ -27,7 +27,7 @@ RUBY_BIN_DIR=$(hab pkg path "core/ruby")/bin
 export PATH=$PATH:$BUNDLE_BIN_DIR:$RUBY_BIN_DIR
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(hab pkg path "core/libffi")/lib
 export CHEF_SECRETS_DATA=$(cat /hab/svc/chef-server-ctl/config/hab-secrets-config.json)
-export CSC_KNIFE_CONFIG=/hab/svc/chef-server-ctl/config/pivotal.rb
+export CSC_KNIFE_CONFIG_FILE=/hab/svc/chef-server-ctl/config/pivotal.rb
 export CSC_KNIFE_BIN="${BUNDLE_BIN_DIR}/bundle exec ${pkg_prefix}/chef/bin/knife"
 
 bundle exec binstubs/chef-server-ctl "$@"
