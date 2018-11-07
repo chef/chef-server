@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.19.12 -->
-## [12.19.12](https://github.com/chef/chef-server/tree/12.19.12) (2018-11-07)
+<!-- latest_release 12.19.13 -->
+## [12.19.13](https://github.com/chef/chef-server/tree/12.19.13) (2018-11-07)
 
 #### Merged Pull Requests
-- Update issue template [#1588](https://github.com/chef/chef-server/pull/1588) ([markan](https://github.com/markan))
+- [chef-server-ctl] Make chef-server-ctl configurable [#1573](https://github.com/chef/chef-server/pull/1573) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.18.14 -->
 ### Changes since 12.18.14 release
 
 #### Merged Pull Requests
+- [chef-server-ctl] Make chef-server-ctl configurable [#1573](https://github.com/chef/chef-server/pull/1573) ([markan](https://github.com/markan)) <!-- 12.19.13 -->
 - Update issue template [#1588](https://github.com/chef/chef-server/pull/1588) ([markan](https://github.com/markan)) <!-- 12.19.12 -->
 - Update erlang to 18.3.4.9 [#1585](https://github.com/chef/chef-server/pull/1585) ([markan](https://github.com/markan)) <!-- 12.19.11 -->
 - Modernize Expeditor config; Promote harts/containers [#1542](https://github.com/chef/chef-server/pull/1542) ([schisamo](https://github.com/schisamo)) <!-- 12.19.10 -->
