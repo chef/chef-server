@@ -20,8 +20,9 @@ require "omnibus_ctl_helper"
 
 describe "chef-server-ctl reindex" do
   subject(:reindex) do
-    OmnibusCtlHelper.new(["./plugins/reindex.rb"]).
-      run_test_omnibus_command("reindex", args)
+    ctlHelper = OmnibusCtlHelper.new(["./plugins/reindex.rb"])
+    ::ChefServerCtl::Config.init(ctlHelper.ctl)
+    ctlHelper.run_test_omnibus_command("reindex", args)
   end
   let(:args) { [] }
   let(:config) do

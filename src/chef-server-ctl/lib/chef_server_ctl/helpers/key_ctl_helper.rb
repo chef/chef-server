@@ -5,7 +5,7 @@ module ChefServerCtl
   module Helpers
     class KeyCtlHelper
       def initialize
-        Chef::Config.from_file(pivotal_config)
+        Chef::Config.from_file(ChefServerCtl::Config.knife_config_file)
       end
 
       # Optparse doesn't properly handle the case where you specify an argument with mandatory input
@@ -31,10 +31,6 @@ module ChefServerCtl
       def exit_failure(msg)
         STDERR.puts msg
         raise SystemExit.new(1, msg)
-      end
-
-      def pivotal_config
-        "/etc/opscode/pivotal.rb"
       end
 
       def populate_client_key(clientname, name, public_key, expiration_date)

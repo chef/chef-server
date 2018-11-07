@@ -7,6 +7,14 @@ GIT
       mixlib-shellout (~> 2.0)
 
 GIT
+  remote: https://github.com/chef/chef_secrets.git
+  revision: 9098dd3c3ea22c11cadd7ae0a86e69ee5a105bda
+  specs:
+    veil (0.3.0)
+      bcrypt (~> 3.1)
+      pbkdf2
+
+GIT
   remote: https://github.com/chef/omnibus-ctl.git
   revision: e160156deaa0afc037748b10d1c9ef0a5be97dc1
   specs:
@@ -22,6 +30,7 @@ PATH
       ffi-yajl (>= 1.2.0)
       highline (~> 1.6, >= 1.6.9)
       knife-opc
+      mixlib-log
       omnibus-ctl
       pg (~> 0.17, >= 0.17.1)
       pry
@@ -214,9 +223,6 @@ GEM
     unf_ext (0.0.7.5)
     unicode-display_width (1.4.0)
     uuidtools (2.1.5)
-    veil (0.3.0)
-      bcrypt (~> 3.1)
-      pbkdf2
     wmi-lite (1.0.0)
 
 PLATFORMS
@@ -231,6 +237,7 @@ DEPENDENCIES
   rake
   rspec
   toml
+  veil!
 
 BUNDLED WITH
    1.16.5
