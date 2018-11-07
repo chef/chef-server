@@ -7,3 +7,4 @@
 cookbooks/chef-server-deploy/**  @chef/jex-team
 inspec/**                        @chef/jex-team
 terraform/**                     @chef/jex-team
+.github/ISSUE_TEMPLATE/**        @chef/docs-team
