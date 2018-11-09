@@ -166,5 +166,39 @@ module ChefServerCtl
       port = pg_config['port']
       "postgresql://#{db_user}:#{db_password}@#{host}:#{port}/#{db_name}"
     end
+
+    def self.ssl_params
+      return Hash.new unless habitat_mode
+
+      # net/http doesn't allow CN customization so we can't mutually verify
+      params = { verify_ssl: OpenSSL::SSL::VERIFY_NONE }
+      if ENV.key?("CSC_TLS_CRT")
+        crt =
+          if File.exist?(ENV["CSC_TLS_CRT"])
+            File.read(ENV["CSC_TLS_CRT"])
+          else
+            ENV["CSC_TLS_CRT"]
+          end
+
+        params[:ssl_client_cert] = OpenSSL::X509::Certificate.new(crt)
+      end
+
+      if ENV.key?("CSC_TLS_KEY")
+        key =
+          if File.exist?(ENV["CSC_TLS_KEY"])
+            File.read(ENV["CSC_TLS_KEY"])
+          else
+            ENV["CSC_TLS_KEY"]
+          end
+
+        params[:ssl_client_key] = OpenSSL::PKey::RSA.new(key)
+      end
+
+      if ENV.key?("CSC_TLS_CA")
+        params[:ssl_ca_file] = ENV["CSC_TLS_CA"]
+      end
+
+      params
+    end
   end
 end
