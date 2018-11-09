@@ -62,6 +62,13 @@ habitat_packages:
       export:
         - docker
 
+# At the given time, trigger the following scheduled workloads
+# https://expeditor.chef.io/docs/getting-started/subscriptions/#scheduling-workloads
+schedules:
+  - name: nightly_build
+    description: "Run a nightly build in the Jenkins pipeline"
+    cronline: "0 6 * * *"
+
 # These actions are taken, in order they are specified, anytime a Pull Request is merged.
 merge_actions:
   - built_in:bump_version:
@@ -137,6 +144,9 @@ subscriptions:
       - bash:.expeditor/purge_cdn.sh:
           post_commit: true
       - built_in:notify_chefio_slack_channels
+  - workload: schedule_triggered:chef/chef-server:master:nightly_build:*
+    actions:
+      - built_in:trigger_omnibus_expcache_build
 
 promote:
   actions:
