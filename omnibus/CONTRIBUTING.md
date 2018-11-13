@@ -1,10 +1,6 @@
 # Contributing to Chef Server
 
-In order to facilitate the tedious communication tasks involved in releasing Chef Server, we ask that all contributors adhere to a **"publicize as you go"** policy. Each pull request to `opscode-omnibus` should be accompanied by an update to [CHANGELOG.md](CHANGELOG.md) and, if necessary, [RELEASE_NOTES.md](RELEASE_NOTES.md), or a note in the PR explaining that such an update is unnecessary. Changes to these files should occur **above** the most recent release and will be rolled up into the communication for the next release.
-
-## Changelog
-
-The CHANGELOG.md file is intended to provide a concise list of downstream project changes for development and support purposes only. All relevant changes to `opscode-omnibus` should be represented in the CHANGELOG.md. 
+In order to facilitate the tedious communication tasks involved in releasing Chef Server, we ask that all contributors adhere to a **"publicize as you go"** policy. Each pull request to `opscode-omnibus` should be accompanied if necessary to an update to the release [RELEASE_NOTES.md](RELEASE_NOTES.md) or a note in the PR explaining that such an update is unnecessary. Changes to these files should occur **above** the most recent release and will be rolled up into the communication for the next release.
 
 ## Release Notes
 
