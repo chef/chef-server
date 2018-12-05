@@ -375,7 +375,6 @@ default['private_chef']['opscode-erchef']['depsolver_pooler_timeout'] = '0'
 default['private_chef']['opscode-erchef']['depsolver_pool_queue_max'] = '50'
 default['private_chef']['opscode-erchef']['depsolver_worker_count'] = 5
 default['private_chef']['opscode-erchef']['depsolver_timeout'] = 5000
-default['private_chef']['opscode-erchef']['couchdb_max_conn'] = '100'
 default['private_chef']['opscode-erchef']['ibrowse_max_sessions'] = 256
 default['private_chef']['opscode-erchef']['ibrowse_max_pipeline_size'] = 1
 # general search settings used to set up chef_index
