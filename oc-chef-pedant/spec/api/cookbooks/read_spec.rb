@@ -320,6 +320,9 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
               http.use_ssl = true
               http.ssl_version = Pedant::Config.ssl_version
               http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+              http.cert        = Pedant::Config.ssl_client_cert if Pedant::Config.ssl_client_cert
+              http.key         = Pedant::Config.ssl_client_key  if Pedant::Config.ssl_client_key
+              http.ca_file     = Pedant::Config.ssl_ca_file     if Pedant::Config.ssl_ca_file
             end
 
             response = http.get(uri.request_uri, {})

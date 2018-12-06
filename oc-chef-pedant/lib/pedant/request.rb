@@ -26,7 +26,7 @@ module Pedant
 
     # TODO: alternative suggestions?
     # These accessors will at least hide the fact we're using a global...
-    def server_api_version= (v)
+    def server_api_version=(v)
       $server_api_version = v || Pedant::Config.server_api_version
     end
     def server_api_version
@@ -222,8 +222,19 @@ module Pedant
     def reset_server_api_version
       $server_api_version  = Pedant::Config.server_api_version
     end
+
     def use_max_server_api_version
       $server_api_version  = 2 # TODO Pedant::Config.max_server_api_version
+    end
+
+    def ssl_options
+      # be careful to not pass options at all if they are not set. We don't
+      # want to accidentally pass a meaningful nil value in
+      {}.tap do |opts|
+        opts[:ssl_client_cert] = Pedant::Config.ssl_client_cert if Pedant::Config.ssl_client_cert
+        opts[:ssl_client_key]  = Pedant::Config.ssl_client_key if Pedant::Config.ssl_client_key
+        opts[:ssl_ca_file]     = Pedant::Config.ssl_ca_file if Pedant::Config.ssl_ca_file
+      end
     end
 
   end
