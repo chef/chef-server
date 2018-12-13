@@ -69,6 +69,11 @@ schedules:
     description: "Run a nightly build in the Jenkins pipeline"
     cronline: "0 6 * * *"
 
+pipelines:
+  - build/omnibus:
+      description: Beta for Buildkite Omnibus Builds
+      definition: .expeditor/build_omnibus.pipeline.yml
+
 # These actions are taken, in order they are specified, anytime a Pull Request is merged.
 merge_actions:
   - built_in:bump_version:
