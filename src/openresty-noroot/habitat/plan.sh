@@ -35,6 +35,7 @@ pkg_exports=(
 )
 pkg_exposes=(port)
 
+# TODO: current version is 1.0.1, we should try updating
 lpeg_version="0.12"
 lpeg_source="http://www.inf.puc-rio.br/~roberto/lpeg/lpeg-${lpeg_version}.tar.gz"
 
