@@ -115,10 +115,3 @@ EOF
 do_check() {
   return 0
 }
-
-do_end() {
-  # Clean up the `env` link, if we set it up.
-  if [[ -n "$_clean_env" ]]; then
-    rm -fv /usr/bin/env
-  fi
-}
