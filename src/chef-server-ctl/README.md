@@ -10,3 +10,4 @@ To run the unit tests for these commands, simply `cd` back to the base `chef-ser
 bundle install --binstubs
 ./bin/rake test:csc
 ```
+
