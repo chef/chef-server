@@ -48,7 +48,9 @@ habitat_packages:
         - docker
   - chef-server-ctl:
       source: src/chef-server-ctl
-      bldr_paths: src/chef-server-ctl/*
+      bldr_paths:
+        - src/chef-server-ctl/*
+        - oc-chef-pedant/*
       export:
         - docker
   - oc_bifrost:
