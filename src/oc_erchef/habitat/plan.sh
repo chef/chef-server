@@ -91,6 +91,7 @@ do_install() {
   cp Gemfile_habitat.lock ${pkg_prefix}/Gemfile.lock
   bundle install --gemfile ${pkg_prefix}/Gemfile --path "${pkg_prefix}/vendor/bundle" && bundle config path ${pkg_prefix}/vendor/bundle
   cp -r "_build/default/rel/oc_erchef/"* "${pkg_prefix}"
+  fix_interpreter "${pkg_prefix}/bin/reindex-opc-organization" core/coreutils bin/env
   cp -R "$HAB_CACHE_SRC_PATH/$pkg_dirname/schema" "$pkg_prefix"
 }
 
