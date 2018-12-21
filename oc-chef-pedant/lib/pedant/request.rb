@@ -169,7 +169,11 @@ module Pedant
                                                ssl_version: Pedant::Config.ssl_version,
                                                verify_ssl: false,
                                                open_timeout: 300,
+                                               ssl_client_cert: Pedant::Config.ssl_client_cert,
+                                               ssl_client_key: Pedant::Config.ssl_client_key,
+                                               ssl_ca_file: Pedant::Config.ssl_ca_file,
                                                &response_handler)
+
         if block_given?
           yield(response)
         else
@@ -226,16 +230,5 @@ module Pedant
     def use_max_server_api_version
       $server_api_version  = 2 # TODO Pedant::Config.max_server_api_version
     end
-
-    def ssl_options
-      # be careful to not pass options at all if they are not set. We don't
-      # want to accidentally pass a meaningful nil value in
-      {}.tap do |opts|
-        opts[:ssl_client_cert] = Pedant::Config.ssl_client_cert if Pedant::Config.ssl_client_cert
-        opts[:ssl_client_key]  = Pedant::Config.ssl_client_key if Pedant::Config.ssl_client_key
-        opts[:ssl_ca_file]     = Pedant::Config.ssl_ca_file if Pedant::Config.ssl_ca_file
-      end
-    end
-
   end
 end
