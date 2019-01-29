@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.19.21 -->
-## [12.19.21](https://github.com/chef/chef-server/tree/12.19.21) (2018-12-21)
+<!-- latest_release 12.19.22 -->
+## [12.19.22](https://github.com/chef/chef-server/tree/12.19.22) (2019-01-29)
 
 #### Merged Pull Requests
-- [expeditor] Build chef-server-ctl when pedant changes [#1609](https://github.com/chef/chef-server/pull/1609) ([stevendanna](https://github.com/stevendanna))
+- Lock bundler to 1.17 to defer bundler 2.0 upgrade [#1614](https://github.com/chef/chef-server/pull/1614) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.18.14 -->
 ### Changes since 12.18.14 release
 
 #### Merged Pull Requests
+- Lock bundler to 1.17 to defer bundler 2.0 upgrade [#1614](https://github.com/chef/chef-server/pull/1614) ([markan](https://github.com/markan)) <!-- 12.19.22 -->
 - [expeditor] Build chef-server-ctl when pedant changes [#1609](https://github.com/chef/chef-server/pull/1609) ([stevendanna](https://github.com/stevendanna)) <!-- 12.19.21 -->
 - Use the embedded env when running escript [#1589](https://github.com/chef/chef-server/pull/1589) ([stevendanna](https://github.com/stevendanna)) <!-- 12.19.20 -->
 - Pass ssl values to RestClient::Request.execute [#1608](https://github.com/chef/chef-server/pull/1608) ([btm](https://github.com/btm)) <!-- 12.19.19 -->
