@@ -1,13 +1,13 @@
-source 'https://api.berkshelf.com'
+source 'https://supermarket.chef.io'
 
 # The apt cookbook is required to bring the apt cache up-to-date on Ubuntu
 # systems, since the cache can become stale on older boxes.
-cookbook 'apt', '~> 2.0'
+cookbook 'apt'
 
 cookbook 'omnibus'
-cookbook 'yum-epel', '~> 2.1'
-cookbook 'yum-centos', '~> 2.3'
-cookbook 'zip', '~> 1.1.0'
+cookbook 'yum-epel'
+cookbook 'yum-centos'
+cookbook 'zip'
 
 # Uncomment to use the latest version of the Omnibus cookbook from GitHub
-# cookbook 'omnibus', github: 'opscode-cookbooks/omnibus'
+# cookbook 'omnibus', github: 'chef-cookbooks/omnibus'
