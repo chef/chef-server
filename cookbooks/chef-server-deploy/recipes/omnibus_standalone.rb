@@ -74,7 +74,8 @@ template '/etc/opscode/chef-server.rb' do
     chef_server_deploy: node['chef-server-deploy'],
     chef_cert_filename: cert_filename,
     chef_key_filename: key_filename,
-    required_recipe_path: automate_liveness_recipe_path
+    required_recipe_path: automate_liveness_recipe_path,
+    enable_data_collector: (environment == 'delivered' ? true : false)
   )
   notifies :reconfigure, 'chef_ingredient[chef-server]', :immediately
 end

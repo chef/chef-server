@@ -14,9 +14,11 @@ estatsd['vip'] = 'localhost'
 estatsd['port'] = 8125
 estatsd['protocol'] = 'statsd'
 
+<% if @enable_data_collector -%>
 # Automatically send node run data to Automate
 data_collector['root_url'] = 'https://<%= @chef_server_deploy['automate_server_fqdn'] %>/data-collector/v0/'
 data_collector['token'] = '<%= @chef_server_deploy['data_collection_token'] %>'
+<% end -%>
 
 # Enable fetching Compliance profiles from Automate
 profiles['root_url'] = 'https://<%= @chef_server_deploy['automate_server_fqdn'] %>'
