@@ -24,5 +24,19 @@ for dir in "${bundle_install_dirs[@]}"; do
   popd
 done
 
+erlang_install_dirs=(
+  bookshelf
+  chef-mover
+  oc_bifrost
+  oc_erchef
+)
+
+for dir in "${erlang_install_dirs[@]}"; do
+  echo "--- Installing rebar dependencies for $dir"
+  pushd "src/$dir"
+    ./rebar3 get-deps
+  popd
+done
+
 echo "+++ Running License Scout"
 license_scout --only-show-failures

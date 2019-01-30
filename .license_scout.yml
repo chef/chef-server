@@ -51,6 +51,65 @@ allowed_licenses:
   - Zlib
 
 fallbacks:
+  # These erlang overrides are temporary. We may be able to remove some of them once chef/license_scout#194 is resolved
+  erlang:
+    - name: amqp_client
+      license_id: MPL-1.1
+      license_content: https://github.com/seth/amqp_client/blob/master/src/amqp_connection.erl
+    - name: bcrypt
+      license_id: ISC
+      license_content: https://github.com/smarkets/erlang-bcrypt/blob/master/LICENSE
+    - name: bookshelf
+      license_id: Apache-2.0
+      license_content: https://github.com/chef/chef-server/LICENSE
+    - name: cf
+      license_id: BSD-3-Clause
+      license_content: https://github.com/project-fifo/cf/blob/master/LICENSE
+    - name: couchbeam
+      license_id: MIT
+      license_content: https://github.com/chef-boneyard/couchbeam/blob/master/LICENSE
+    - name: edown
+      license_id: Apache-2.0
+      license_content: https://github.com/uwiger/edown/blob/master/NOTICE
+    - name: epgsql
+      license_id: BSD-3-Clause
+      license_content: https://github.com/chef/epgsql-1/blob/master/LICENSE
+    - name: erlsom
+      license_id: LGPL-3.0
+      license_content: https://github.com/willemdj/erlsom/blob/master/COPYING
+    - name: erlware_commons
+      license_id: MIT
+      license_content: https://raw.githubusercontent.com/erlware/erlware_commons/master/COPYING
+    - name: gen_server2
+      license_id: MIT
+      license_content: https://github.com/hyperthunk/gen_server2/blob/master/rebar.config
+    - name: jiffy
+      license_id: MIT
+      license_content: https://github.com/davisp/jiffy/blob/master/LICENSE
+    - name: mochiweb
+      license_id: MIT
+      license_content: https://github.com/mochi/mochiweb/blob/master/LICENSE
+    - name: mover
+      license_id: Apache-2.0
+      license_content: https://github.com/chef/chef-server/LICENSE
+    - name: quickrand
+      license_id: MIT
+      license_content: https://github.com/okeuday/quickrand/blob/master/README.markdown
+    - name: rabbit_common
+      license_id: MPL-1.1
+      license_content: https://github.com/seth/rabbit_common/blob/master/include/rabbit_msg_store.hrl
+    - name: rebar_vsn_plugin
+      license_id: Apache-2.0
+      license_content: https://github.com/erlware/rebar_vsn_plugin/blob/master/src/rebar_vsn_plugin.erl
+    - name: recon
+      license_id: BSD-3-Clause
+      license_content: https://github.com/ferd/recon/blob/master/LICENSE
+    - name: sync
+      license_id: MIT
+      license_content: https://github.com/rustyio/sync/blob/master/src/sync.erl
+    - name: uuid
+      license_id: MIT
+      license_content: https://github.com/okeuday/uuid/blob/master/README.markdown
   ruby:
     - name: amqp
       license_id: Ruby
@@ -85,6 +144,13 @@ fallbacks:
       license_content: https://raw.githubusercontent.com/bundler/bundler/master/LICENSE.md
 
 exceptions:
+  erlang:
+    - name: amqp_client
+      reason: Historic exception made by Chef Legal (unmodified library, used as-is)
+    - name: erlsom
+      reason: Historic exception made by Chef Legal (unmodified library, used as-is)
+    - name: rabbit_common
+      reason: Historic exception made by Chef Legal (unmodiifed library, used as-is)
   ruby:
     - name: kgio
       reason: Exception made by Chef Legal (unmodified library, used as-is)
