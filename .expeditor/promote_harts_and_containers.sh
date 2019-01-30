@@ -32,6 +32,13 @@ jq -r -c ".packages[]" manifest.json | while read service_ident; do
     echo "Promoting ${service_ident} hart to the ${CHANNEL} channel"
     hab pkg promote "${service_ident}" "${CHANNEL}"
 
+    # TODO: remove this if we begin creating a container for `chef/openresty-noroot`
+    if [ "$pkg_name" = "openresty-noroot" ];
+    then
+      echo "Skipping promotion of container for ${service_ident}"
+      continue
+    fi
+
     echo "Promoting ${pkg_origin}/${pkg_name}:${pkg_version}-${pkg_release} container to ${CHANNEL} tag"
     docker pull "${pkg_origin}/${pkg_name}:${pkg_version}-${pkg_release}"
     docker tag "${pkg_origin}/${pkg_name}:${pkg_version}-${pkg_release}" "${pkg_origin}/${pkg_name}:${CHANNEL}"
