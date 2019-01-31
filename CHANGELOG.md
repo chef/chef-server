@@ -1,46 +1,44 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.19.26 -->
-## [12.19.26](https://github.com/chef/chef-server/tree/12.19.26) (2019-01-30)
-
-#### Merged Pull Requests
-- Force a new build. [#1619](https://github.com/chef/chef-server/pull/1619) ([rhass](https://github.com/rhass))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=12.18.14 -->
-### Changes since 12.18.14 release
-
-#### Merged Pull Requests
-- Force a new build. [#1619](https://github.com/chef/chef-server/pull/1619) ([rhass](https://github.com/rhass)) <!-- 12.19.26 -->
-- Add license_scout overrides and exceptions for erlang libraries [#1616](https://github.com/chef/chef-server/pull/1616) ([tduffield](https://github.com/tduffield)) <!-- 12.19.25 -->
-- Empty commit to force hab package builds. [#1615](https://github.com/chef/chef-server/pull/1615) ([rhass](https://github.com/rhass)) <!-- 12.19.24 -->
-- Minor cleanup the omnibus setup [#1595](https://github.com/chef/chef-server/pull/1595) ([tas50](https://github.com/tas50)) <!-- 12.19.23 -->
-- Lock bundler to 1.17 to defer bundler 2.0 upgrade [#1614](https://github.com/chef/chef-server/pull/1614) ([markan](https://github.com/markan)) <!-- 12.19.22 -->
-- [expeditor] Build chef-server-ctl when pedant changes [#1609](https://github.com/chef/chef-server/pull/1609) ([stevendanna](https://github.com/stevendanna)) <!-- 12.19.21 -->
-- Use the embedded env when running escript [#1589](https://github.com/chef/chef-server/pull/1589) ([stevendanna](https://github.com/stevendanna)) <!-- 12.19.20 -->
-- Pass ssl values to RestClient::Request.execute [#1608](https://github.com/chef/chef-server/pull/1608) ([btm](https://github.com/btm)) <!-- 12.19.19 -->
-- [chef-server] Remove do_end function from chef-server-ctl hab plan [#1605](https://github.com/chef/chef-server/pull/1605) ([stevendanna](https://github.com/stevendanna)) <!-- 12.19.18 -->
-- Add note about out of date dep to trigger a rebuild [#1601](https://github.com/chef/chef-server/pull/1601) ([btm](https://github.com/btm)) <!-- 12.19.17 -->
-- Add SSL configuration parameters to pedant [#1590](https://github.com/chef/chef-server/pull/1590) ([stevendanna](https://github.com/stevendanna)) <!-- 12.19.16 -->
-- Remove a few more couchdb configurables [#1526](https://github.com/chef/chef-server/pull/1526) ([stevendanna](https://github.com/stevendanna)) <!-- 12.19.15 -->
-- Server admin mutual TLS support [#1591](https://github.com/chef/chef-server/pull/1591) ([stevendanna](https://github.com/stevendanna)) <!-- 12.19.14 -->
-- [chef-server-ctl] Make chef-server-ctl configurable [#1573](https://github.com/chef/chef-server/pull/1573) ([markan](https://github.com/markan)) <!-- 12.19.13 -->
-- Update issue template [#1588](https://github.com/chef/chef-server/pull/1588) ([markan](https://github.com/markan)) <!-- 12.19.12 -->
-- Update erlang to 18.3.4.9 [#1585](https://github.com/chef/chef-server/pull/1585) ([markan](https://github.com/markan)) <!-- 12.19.11 -->
-- Modernize Expeditor config; Promote harts/containers [#1542](https://github.com/chef/chef-server/pull/1542) ([schisamo](https://github.com/schisamo)) <!-- 12.19.10 -->
-- Update to Ruby 2.5.3 [#1584](https://github.com/chef/chef-server/pull/1584) ([tas50](https://github.com/tas50)) <!-- 12.19.9 -->
-- Update Chef 14.4 -&gt; 14.5 [#1583](https://github.com/chef/chef-server/pull/1583) ([tas50](https://github.com/tas50)) <!-- 12.19.8 -->
-- Use our standard ruby-cleanup definition [#1582](https://github.com/chef/chef-server/pull/1582) ([tas50](https://github.com/tas50)) <!-- 12.19.7 -->
-- Bump version to 12.19.0 [#1558](https://github.com/chef/chef-server/pull/1558) ([markan](https://github.com/markan)) <!-- 12.19.0 -->
-- [expeditor] Modernize to use subscriptions [#1568](https://github.com/chef/chef-server/pull/1568) ([markan](https://github.com/markan)) <!-- 12.19.1 -->
-- [nginx] Add request id to nginx log [#1565](https://github.com/chef/chef-server/pull/1565) ([markan](https://github.com/markan)) <!-- 12.19.2 -->
-- [oc-chef-pedant] Add logging for timeouts. [#1555](https://github.com/chef/chef-server/pull/1555) ([markan](https://github.com/markan)) <!-- 12.19.3 -->
-- Update chef-client to 14.4.56 [#1567](https://github.com/chef/chef-server/pull/1567) ([tas50](https://github.com/tas50)) <!-- 12.19.4 -->
-- Merge mTLS changes. [#1572](https://github.com/chef/chef-server/pull/1572) ([markan](https://github.com/markan)) <!-- 12.19.5 -->
-- increase authn:keygen_timeout for oc_erchef hab pkg [#1579](https://github.com/chef/chef-server/pull/1579) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.19.6 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [12.19.26](https://github.com/chef/chef-server/tree/12.19.26) (2019-01-31)
+
+#### Merged Pull Requests
+- increase authn:keygen_timeout for oc_erchef hab pkg [#1579](https://github.com/chef/chef-server/pull/1579) ([jeremymv2](https://github.com/jeremymv2))
+- Merge mTLS changes. [#1572](https://github.com/chef/chef-server/pull/1572) ([markan](https://github.com/markan))
+- Update chef-client to 14.4.56 [#1567](https://github.com/chef/chef-server/pull/1567) ([tas50](https://github.com/tas50))
+- [oc-chef-pedant] Add logging for timeouts. [#1555](https://github.com/chef/chef-server/pull/1555) ([markan](https://github.com/markan))
+- [nginx] Add request id to nginx log [#1565](https://github.com/chef/chef-server/pull/1565) ([markan](https://github.com/markan))
+- [expeditor] Modernize to use subscriptions [#1568](https://github.com/chef/chef-server/pull/1568) ([markan](https://github.com/markan))
+- Bump version to 12.19.0 [#1558](https://github.com/chef/chef-server/pull/1558) ([markan](https://github.com/markan))
+- Use our standard ruby-cleanup definition [#1582](https://github.com/chef/chef-server/pull/1582) ([tas50](https://github.com/tas50))
+- Update Chef 14.4 -&gt; 14.5 [#1583](https://github.com/chef/chef-server/pull/1583) ([tas50](https://github.com/tas50))
+- Update to Ruby 2.5.3 [#1584](https://github.com/chef/chef-server/pull/1584) ([tas50](https://github.com/tas50))
+- Modernize Expeditor config; Promote harts/containers [#1542](https://github.com/chef/chef-server/pull/1542) ([schisamo](https://github.com/schisamo))
+- Update erlang to 18.3.4.9 [#1585](https://github.com/chef/chef-server/pull/1585) ([markan](https://github.com/markan))
+- Update issue template [#1588](https://github.com/chef/chef-server/pull/1588) ([markan](https://github.com/markan))
+- [chef-server-ctl] Make chef-server-ctl configurable [#1573](https://github.com/chef/chef-server/pull/1573) ([markan](https://github.com/markan))
+- Server admin mutual TLS support [#1591](https://github.com/chef/chef-server/pull/1591) ([stevendanna](https://github.com/stevendanna))
+- Remove a few more couchdb configurables [#1526](https://github.com/chef/chef-server/pull/1526) ([stevendanna](https://github.com/stevendanna))
+- Add SSL configuration parameters to pedant [#1590](https://github.com/chef/chef-server/pull/1590) ([stevendanna](https://github.com/stevendanna))
+- Add note about out of date dep to trigger a rebuild [#1601](https://github.com/chef/chef-server/pull/1601) ([btm](https://github.com/btm))
+- [chef-server] Remove do_end function from chef-server-ctl hab plan [#1605](https://github.com/chef/chef-server/pull/1605) ([stevendanna](https://github.com/stevendanna))
+- Pass ssl values to RestClient::Request.execute [#1608](https://github.com/chef/chef-server/pull/1608) ([btm](https://github.com/btm))
+- Use the embedded env when running escript [#1589](https://github.com/chef/chef-server/pull/1589) ([stevendanna](https://github.com/stevendanna))
+- [expeditor] Build chef-server-ctl when pedant changes [#1609](https://github.com/chef/chef-server/pull/1609) ([stevendanna](https://github.com/stevendanna))
+- Lock bundler to 1.17 to defer bundler 2.0 upgrade [#1614](https://github.com/chef/chef-server/pull/1614) ([markan](https://github.com/markan))
+- Minor cleanup the omnibus setup [#1595](https://github.com/chef/chef-server/pull/1595) ([tas50](https://github.com/tas50))
+- Empty commit to force hab package builds. [#1615](https://github.com/chef/chef-server/pull/1615) ([rhass](https://github.com/rhass))
+- Add license_scout overrides and exceptions for erlang libraries [#1616](https://github.com/chef/chef-server/pull/1616) ([tduffield](https://github.com/tduffield))
+- Force a new build. [#1619](https://github.com/chef/chef-server/pull/1619) ([rhass](https://github.com/rhass))
+<!-- latest_stable_release -->
+
 ## [12.18.14](https://github.com/chef/chef-server/tree/12.18.14) (2018-10-15)
 
 #### Merged Pull Requests
@@ -96,7 +94,6 @@
 - Update postgresql [#1539](https://github.com/chef/chef-server/pull/1539) ([markan](https://github.com/markan))
 - Update oc-bifrost-pedant to use rest-client 1.8.X [#1547](https://github.com/chef/chef-server/pull/1547) ([tas50](https://github.com/tas50))
 - Add config for 12.18 release branch. [#1557](https://github.com/chef/chef-server/pull/1557) ([markan](https://github.com/markan))
-<!-- latest_stable_release -->
 
 ## [12.17.33](https://github.com/chef/chef-server/tree/12.17.33) (2018-02-23)
 
