@@ -25,7 +25,7 @@ PATH
   specs:
     chef-server-ctl (1.0.0)
       appbundler
-      chef (~> 14.5.0)
+      chef (~> 14.10.9)
       chef_backup
       ffi-yajl (>= 1.2.0)
       highline (~> 1.6, >= 1.6.9)
@@ -52,10 +52,10 @@ GEM
     ast (2.4.0)
     bcrypt (3.1.12)
     builder (3.2.3)
-    chef (14.5.33)
+    chef (14.10.9)
       addressable
       bundler (>= 1.10)
-      chef-config (= 14.5.33)
+      chef-config (= 14.10.9)
       chef-zero (>= 13.0)
       diff-lcs (~> 1.2, >= 1.2.4)
       erubis (~> 2.7)
@@ -63,8 +63,7 @@ GEM
       ffi-yajl (~> 2.2)
       highline (~> 1.6, >= 1.6.9)
       iniparse (~> 1.4)
-      iso8601 (~> 0.11.0)
-      mixlib-archive (~> 0.4)
+      mixlib-archive (>= 0.4, < 2.0)
       mixlib-authentication (~> 2.1)
       mixlib-cli (~> 1.7)
       mixlib-log (~> 2.0, >= 2.0.3)
@@ -83,17 +82,17 @@ GEM
       specinfra (~> 2.10)
       syslog-logger (~> 1.6)
       uuidtools (~> 2.1.5)
-    chef-config (14.5.33)
+    chef-config (14.10.9)
       addressable
       fuzzyurl
       mixlib-config (>= 2.2.12, < 3.0)
       mixlib-shellout (~> 2.0)
       tomlrb (~> 1.2)
-    chef-zero (14.0.6)
+    chef-zero (14.0.11)
       ffi-yajl (~> 2.2)
       hashie (>= 2.0, < 4.0)
       mixlib-log (~> 2.0)
-      rack (~> 2.0)
+      rack (~> 2.0, >= 2.0.6)
       uuidtools (~> 2.1)
     chefstyle (0.10.0)
       rubocop (= 0.55.0)
@@ -102,7 +101,7 @@ GEM
     domain_name (0.5.20180417)
       unf (>= 0.0.5, < 1.0.0)
     erubis (2.7.0)
-    ffi (1.9.25)
+    ffi (1.10.0)
     ffi-yajl (2.3.1)
       libyajl2 (~> 1.2)
     fuzzyurl (0.9.0)
@@ -112,21 +111,20 @@ GEM
       domain_name (~> 0.5)
     iniparse (1.4.4)
     ipaddress (0.8.3)
-    iso8601 (0.11.0)
-    knife-opc (0.4.0)
+    knife-opc (0.4.1)
     libyajl2 (1.2.0)
     method_source (0.9.0)
     mime-types (3.2.2)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2018.0812)
-    mixlib-archive (0.4.18)
+    mixlib-archive (1.0.1)
       mixlib-log
     mixlib-authentication (2.1.1)
     mixlib-cli (1.7.0)
-    mixlib-config (2.2.13)
+    mixlib-config (2.2.18)
       tomlrb
-    mixlib-log (2.0.4)
-    mixlib-shellout (2.4.0)
+    mixlib-log (2.0.9)
+    mixlib-shellout (2.4.4)
     multi_json (1.13.1)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
@@ -158,14 +156,14 @@ GEM
     parslet (1.8.2)
     pbkdf2 (0.1.0)
     pg (0.21.0)
-    plist (3.4.0)
+    plist (3.5.0)
     powerpack (0.1.2)
     proxifier (1.0.3)
     pry (0.11.3)
       coderay (~> 1.1.0)
       method_source (~> 0.9.0)
     public_suffix (3.0.3)
-    rack (2.0.5)
+    rack (2.0.6)
     rainbow (3.0.0)
     rake (12.3.1)
     rb-readline (0.5.5)
@@ -208,7 +206,7 @@ GEM
       rspec-its
       specinfra (~> 2.72)
     sfl (2.3)
-    specinfra (2.76.2)
+    specinfra (2.76.9)
       net-scp
       net-ssh (>= 2.7)
       net-telnet (= 0.1.1)
@@ -217,13 +215,13 @@ GEM
     systemu (2.6.5)
     toml (0.2.0)
       parslet (~> 1.8.0)
-    tomlrb (1.2.7)
+    tomlrb (1.2.8)
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.5)
     unicode-display_width (1.4.0)
     uuidtools (2.1.5)
-    wmi-lite (1.0.0)
+    wmi-lite (1.0.2)
 
 PLATFORMS
   ruby
@@ -240,4 +238,4 @@ DEPENDENCIES
   veil!
 
 BUNDLED WITH
-   1.16.5
+   1.17.3
