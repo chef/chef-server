@@ -72,9 +72,11 @@ schedules:
     cronline: "0 6 * * *"
 
 pipelines:
-  - build/omnibus:
-      description: Beta for Buildkite Omnibus Builds
-      definition: .expeditor/build_omnibus.pipeline.yml
+  - omnibus/release
+  - omnibus/adhoc:
+      definition: .expeditor/release.omnibus.yml
+      env:
+        - ADHOC: true
 
 # These actions are taken, in order they are specified, anytime a Pull Request is merged.
 merge_actions:
