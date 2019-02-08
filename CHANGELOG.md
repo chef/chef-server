@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 12.19.27 -->
+## [12.19.27](https://github.com/chef/chef-server/tree/12.19.27) (2019-02-08)
+
+#### Merged Pull Requests
+- Empty commit to rebuild hartifacts [#1625](https://github.com/chef/chef-server/pull/1625) ([ryancragun](https://github.com/ryancragun))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=12.19.26 -->
+### Changes since 12.19.26 release
+
+#### Merged Pull Requests
+- Empty commit to rebuild hartifacts [#1625](https://github.com/chef/chef-server/pull/1625) ([ryancragun](https://github.com/ryancragun)) <!-- 12.19.27 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
