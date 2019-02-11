@@ -92,7 +92,7 @@ merge_actions:
         - "Changelog: Skip Update"
         - "Expeditor: Skip All"
         - "Expeditor: ACC Only"
-  - built_in:trigger_omnibus_build:
+  - trigger_pipeline:omnibus/release:
       post_commit: true
       ignore_labels:
         - "Omnibus: Skip Build"
@@ -115,32 +115,24 @@ merge_actions:
       post_commit: true
       ignore_labels:
         - "Expeditor: Skip All"
-  - built_in:update_acc:
-      post_commit: true
-      only_if_labels:
-        - "Expeditor: ACC Only"
-
-# Subscription to workload action of pull request merge to master branch on
-# omnibus-software project will allow us to trigger an uncached omnibus build
-# for chef-server when the omnibus-software has modified software config files.
-subscriptions:
-  # chef/omnibus-software
-  - workload: pull_request_merged:chef/omnibus-software:master:*
-    actions:
-      - built_in:trigger_omnibus_expcache_build:
-          only_if_modified:
-            - config/software/*
 
 # These actions are taken, in the order specified, when an Omnibus artifact is promoted
 # within Chef's internal artifact storage system.
 #
 # TODO: add action to update changelog with modified omnibus components
 subscriptions:
-  - workload: artifact_published:unstable:chef-server:*
+  # Subscription to workload action of pull request merge to master branch on
+  # omnibus-software project will allow us to trigger an uncached omnibus build
+  # for chef-server when the omnibus-software has modified software config files.
+  # chef/omnibus-software
+  - workload: pull_request_merged:chef/omnibus-software:master:*
     actions:
-      - built_in:update_acc
+      - trigger_pipeline:omnibus/adhoc:
+          only_if_modified:
+            - config/software/*
   - workload: artifact_published:current:chef-server:*
     actions:
+      - built_in:update_acc
       - bash:.expeditor/promote_harts_and_containers.sh:
           post_commit: true
       - bash:.expeditor/purge_cdn.sh:
@@ -155,7 +147,7 @@ subscriptions:
       - built_in:notify_chefio_slack_channels
   - workload: schedule_triggered:chef/chef-server:master:nightly_build:*
     actions:
-      - built_in:trigger_omnibus_expcache_build
+      - trigger_pipeline:omnibus/adhoc
 
 promote:
   actions:
