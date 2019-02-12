@@ -18,15 +18,6 @@
 # limitations under the License.
 #
 
-# Trigger the Jenkins smoke tests
-expeditor_jenkins_job "#{workflow_change_project}-test" do # ~FC005
-  build_version get_workflow_application_release(workflow_change_project)['version']
-  git_ref workflow_change_merge_sha
-  initiated_by workflow_project_slug
-  action :trigger_async
-  only_if { workflow_stage?('acceptance') }
-end
-
 # If there are every additional activities that you want to do while your
 # omnibus test is happening (i.e. run inspec tests), you can do them
 # here between the async trigger and the wait_for_complete.
@@ -59,13 +50,4 @@ parallel_execute "Execute inspec smoke tests against #{workflow_stage}" do
     'PATH' => chefdk_path,
     'HOME' => workflow_workspace
   )
-end
-
-# Wait for the Jenkins smoke tests to complete
-expeditor_jenkins_job "#{workflow_change_project}-test" do
-  build_version get_workflow_application_release(workflow_change_project)['version']
-  git_ref workflow_change_merge_sha
-  initiated_by workflow_project_slug
-  action :wait_until_complete
-  only_if { workflow_stage?('acceptance') }
 end

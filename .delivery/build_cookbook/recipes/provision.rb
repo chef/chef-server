@@ -28,15 +28,6 @@ end
 # Let delivery-truck do the workflow release promotion
 include_recipe 'delivery-truck::provision'
 
-# Promote the omnibus artifact to current
-expeditor_artifactory workflow_change_project do
-  ref_type 'omnibus.version'
-  ref ::File.read(::File.join(workflow_workspace_repo, 'VERSION')).strip
-  channel 'current'
-  action :promote
-  only_if { workflow_stage?('union') }
-end
-
 # Stand up the Supermarket instance
 execute 'apply-terraform' do
   command 'make apply'
