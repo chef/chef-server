@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.19.28 -->
-## [12.19.28](https://github.com/chef/chef-server/tree/12.19.28) (2019-02-12)
+<!-- latest_release 12.19.29 -->
+## [12.19.29](https://github.com/chef/chef-server/tree/12.19.29) (2019-02-13)
 
 #### Merged Pull Requests
-- This is an empty commit to test omnibus buildkite release pipeline [#1627](https://github.com/chef/chef-server/pull/1627) ([jeremiahsnapp](https://github.com/jeremiahsnapp))
+- chef-server-ctl should leverage HAB_LISTEN_CTL envvar if available [#1628](https://github.com/chef/chef-server/pull/1628) ([jeremymv2](https://github.com/jeremymv2))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.19.26 -->
 ### Changes since 12.19.26 release
 
 #### Merged Pull Requests
+- chef-server-ctl should leverage HAB_LISTEN_CTL envvar if available [#1628](https://github.com/chef/chef-server/pull/1628) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.19.29 -->
 - This is an empty commit to test omnibus buildkite release pipeline [#1627](https://github.com/chef/chef-server/pull/1627) ([jeremiahsnapp](https://github.com/jeremiahsnapp)) <!-- 12.19.28 -->
 - Empty commit to rebuild hartifacts [#1625](https://github.com/chef/chef-server/pull/1625) ([ryancragun](https://github.com/ryancragun)) <!-- 12.19.27 -->
 <!-- release_rollup -->
