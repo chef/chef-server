@@ -8,6 +8,13 @@ ip = "172.18.0.1"
 port = "80"
 ssl_port = "443"
 
+# In certain tests pedant wants to directly access the Solr/Elasticsearch, but
+# binding to it will create circular binds, which we want avoid.
+# The compromise is to allow users to specify the ES URL directly, but if they
+# don't it's no big deal because it is just for the pedant test suite
+[pedant_config]
+search_server = "http://elasticsearch:9200/"
+
 # the secrets namespace is initially initted to empty strings,
 # the idea is that we loop through all of these and generate them at
 # "bootstrap" time and then re-inject them into the config
