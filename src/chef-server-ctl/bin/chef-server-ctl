@@ -6,6 +6,7 @@ require 'omnibus-ctl'
 require 'veil'
 require 'chef_server_ctl/log'
 require 'chef_server_ctl/config'
+require "license_acceptance/acceptor"
 
 module Omnibus
   # This implements callbacks for handling commands related to the
@@ -233,6 +234,9 @@ EOM
 
     # Override reconfigure to skip license checking
     def reconfigure(*args)
+
+      LicenseAcceptance::Acceptor.check_and_persist!("infra-server", ChefServerCtl::VERSION.to_s)
+
       status = run_chef("#{base_path}/embedded/cookbooks/dna.json")
       if status.success?
         log "#{display_name} Reconfigured!"
