@@ -7,6 +7,6 @@ production:
   host: <%= node['private_chef']['postgresql']['vip'] %>
   port: <%= node['private_chef']['postgresql']['port'] %>
   database: <%= node['private_chef']['oc_id']['sql_database'] %>
-  username: <%= node['private_chef']['oc_id']['sql_user'] %>
+  username: <%= node['private_chef']['oc_id']['sql_connection_user'] || node['private_chef']['oc_id']['sql_user'] %>
   password: <%= "\<%= Secrets.get('oc_id', 'sql_password') %\>" %>
   sslmode: <%= node['private_chef']['postgresql']['sslmode'] %>

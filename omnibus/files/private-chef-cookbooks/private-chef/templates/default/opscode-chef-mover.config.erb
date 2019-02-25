@@ -109,7 +109,7 @@
            {config_cb, {chef_secrets_sqerl, config, [{<<"opscode_erchef">>, <<"sql_password">>}]}},
            {db_host, "<%= node['private_chef']['postgresql']['vip'] %>"},
            {db_port, 5432},
-           {db_user, "<%= node['private_chef']['opscode-erchef']['sql_user'] %>"},
+           {db_user, "<%= node['private_chef']['opscode-erchef']['sql_connection_user'] || node['private_chef']['opscode-erchef']['sql_user'] %>"},
            {db_name, "opscode_chef" },
            {db_options, [{ssl, <%= @helper.postgresql_sslmodes[node['private_chef']['postgresql']['sslmode']] %>}]},
            {idle_check, 10000},
