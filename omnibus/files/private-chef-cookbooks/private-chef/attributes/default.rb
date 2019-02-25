@@ -364,6 +364,7 @@ default['private_chef']['opscode-erchef']['bulk_fetch_batch_size'] = '5'
 default['private_chef']['opscode-erchef']['udp_socket_pool_size'] = nil
 default['private_chef']['opscode-erchef']['sql_user'] = 'opscode_chef'
 default['private_chef']['opscode-erchef']['sql_ro_user'] = 'opscode_chef_ro'
+default['private_chef']['opscode-erchef']['sql_connection_user'] = nil
 default['private_chef']['opscode-erchef']['enable_request_logging'] = true
 
 #
@@ -669,6 +670,7 @@ default['private_chef']['postgresql']['log_rotation']['file_maxbytes'] = 1048576
 default['private_chef']['postgresql']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['postgresql']['username'] = 'opscode-pgsql'
 default['private_chef']['postgresql']['db_superuser'] = 'opscode-pgsql'
+default['private_chef']['postgresql']['db_connection_superuser'] = nil
 default['private_chef']['postgresql']['shell'] = '/bin/sh'
 default['private_chef']['postgresql']['home'] = '/var/opt/opscode/postgresql'
 default['private_chef']['postgresql']['user_path'] = '/opt/opscode/embedded/bin:/opt/opscode/bin:$PATH'
@@ -741,6 +743,7 @@ default['private_chef']['oc_bifrost']['db_pool_queue_max'] = 20
 default['private_chef']['oc_bifrost']['udp_socket_pool_size'] = nil
 default['private_chef']['oc_bifrost']['sql_user'] = 'bifrost'
 default['private_chef']['oc_bifrost']['sql_ro_user'] = 'bifrost_ro'
+default['private_chef']['oc_bifrost']['sql_connection_user'] = nil
 default['private_chef']['oc_bifrost']['sql_db_timeout'] = 5000
 # Enable extended performance logging data for bifrost.  Setting this to false
 # will cut bifrost request log size approximately in half.
@@ -792,6 +795,7 @@ default['private_chef']['bookshelf']['db_pooler_timeout'] = 2000
 default['private_chef']['bookshelf']['sql_db_timeout'] = 5000
 default['private_chef']['bookshelf']['sql_ro_user'] = 'bookshelf_ro'
 default['private_chef']['bookshelf']['sql_user'] = 'bookshelf'
+default['private_chef']['bookshelf']['sql_connection_user'] = nil
 # Request logging (enable_request_logging)is disabled because
 # it is redendant (nginx also logs requests)
 # If debug logging is needed, enable_request_logging can be set to true
@@ -813,6 +817,7 @@ default['private_chef']['oc_id']['port'] = 9090
 default['private_chef']['oc_id']['sql_database'] = 'oc_id'
 default['private_chef']['oc_id']['sql_user'] = 'oc_id'
 default['private_chef']['oc_id']['sql_ro_user'] = 'oc_id_ro'
+default['private_chef']['oc_id']['sql_connection_user'] = nil
 default['private_chef']['oc_id']['db_pool_size'] = '20'
 default['private_chef']['oc_id']['sentry_dsn'] = nil
 default['private_chef']['oc_id']['sign_up_url'] = nil
