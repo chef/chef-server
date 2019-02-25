@@ -47,7 +47,7 @@ end
 private_chef_pg_sqitch "/opt/opscode/embedded/service/opscode-erchef/schema/baseline" do
   hostname  postgres['vip']
   port      postgres['port']
-  username  postgres['db_superuser']
+  username  postgres['db_connection_superuser'] || postgres['db_superuser']
   password  PrivateChef.credentials.get('postgresql', 'db_superuser_password')
   database  "opscode_chef"
   action :nothing
@@ -57,7 +57,7 @@ end
 private_chef_pg_sqitch "/opt/opscode/embedded/service/opscode-erchef/schema" do
   hostname  postgres['vip']
   port      postgres['port']
-  username  postgres['db_superuser']
+  username  postgres['db_connection_superuser'] || postgres['db_superuser']
   password  PrivateChef.credentials.get('postgresql', 'db_superuser_password')
   database "opscode_chef"
   action :nothing

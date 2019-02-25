@@ -98,7 +98,7 @@
            %% Database connection parameters
            {db_host, "<%= @postgresql['vip'] %>"},
            {db_port, <%=  @postgresql['port'] %>},
-           {db_user, "<%= @sql_user %>"},
+           {db_user, "<%= @sql_connection_user || @sql_user %>"},
            {db_name, "bookshelf" },
            {idle_check, 10000},
            {pooler_timeout, <%= @db_pooler_timeout %>},

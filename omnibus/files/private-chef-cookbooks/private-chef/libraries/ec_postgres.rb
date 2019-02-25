@@ -19,7 +19,7 @@ class EcPostgres
     end
     max_retries = retries
     begin
-      connection = ::PGconn.open('user' => postgres['db_superuser'],
+      connection = ::PGconn.open('user' => postgres['db_connection_superuser'] || postgres['db_superuser'],
                                  'host' => postgres['vip'],
                                  'password' => postgres['db_superuser_password'],
                                  'port' => postgres['port'],

@@ -272,7 +272,7 @@ EOM
   def err_CSPG011_invalid_superuser_account
 <<EOM
 CSPG011: I could not authenticate to #{cs_pg_attr['vip']} as
-         #{cs_pg_attr['db_superuser']} using the password provided.
+         #{cs_pg_attr['db_connection_superuser'] || cs_pg_attr['db_superuser']} using the password provided.
          Please make sure that the the password you provided in
          chef-server.rb under "postgresql['db_superuser_password'] is correct
          for this user.
@@ -285,7 +285,7 @@ EOM
   def err_CSPG012_invalid_pg_hba
 <<EOM
 CSPG012: There is a missing or incorrect pg_hba.conf entry for the
-         user '#{cs_pg_attr['db_superuser']}' and/or this originating host.
+         user '#{cs_pg_attr['db_connection_superuser'] || cs_pg_attr['db_superuser']}' and/or this originating host.
          Please ensure that pg_hba.conf entries exist to allow the superuser
          account to connect from the Chef Server backend nodes, and to
          allow the application accounts to connect from all Chef Server

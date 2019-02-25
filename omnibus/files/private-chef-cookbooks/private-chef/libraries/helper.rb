@@ -130,7 +130,7 @@ class OmnibusHelper
 
   def db_connection_uri
     db_protocol = "postgres"
-    db_user     = node['private_chef']['opscode-erchef']['sql_user']
+    db_user     = node['private_chef']['opscode-erchef']['sql_connection_user'] || node['private_chef']['opscode-erchef']['sql_user']
     db_password = PrivateChef.credentials.get('opscode_erchef', 'sql_password')
     db_vip      = vip_for_uri('postgresql')
     db_name     = "opscode_chef"
@@ -140,7 +140,7 @@ class OmnibusHelper
 
   def bifrost_db_connection_uri
     db_protocol = "postgres"
-    db_user     = node['private_chef']['oc_bifrost']['sql_user']
+    db_user     = node['private_chef']['oc_bifrost']['sql_connection_user'] || node['private_chef']['oc_bifrost']['sql_user']
     db_password = PrivateChef.credentials.get('oc_bifrost', 'sql_password')
     db_vip      = vip_for_uri('postgresql')
     db_name     = "bifrost"

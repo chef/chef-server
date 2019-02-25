@@ -58,7 +58,7 @@ end
 private_chef_pg_sqitch "/opt/opscode/embedded/service/oc_bifrost/db" do
   hostname postgres_attrs['vip']
   port     postgres_attrs['port']
-  username  postgres_attrs['db_superuser']
+  username  postgres_attrs['db_connection_superuser'] || postgres_attrs['db_superuser']
   password PrivateChef.credentials.get('postgresql', 'db_superuser_password')
   database "bifrost"
   action :nothing
