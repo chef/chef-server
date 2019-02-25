@@ -86,21 +86,21 @@ class PreflightValidator
       user = 'chef_server_conn_test'
       password = 'invalid'
     else
-      user = cs_pg_attr['db_superuser']
+      user = cs_pg_attr['db_connection_superuser'] || cs_pg_attr['db_superuser']
       password = cs_pg_attr['db_superuser_password']
     end
     # No error handling - the caller is expected to handle any exception.
-    EcPostgres.with_connection(node, options['db_name'], 'db_superuser' => user,
-                                                         'db_superuser_password' => password,
-                                                         'vip' => host,
-                                                         'port' => port,
-                                                         'sslmode' => sslmode,
-                                                         'silent' => options['silent'],
-                                                         'retries' => options['retries']) do |conn|
-                                                           if block_given?
-                                                             yield(conn)
-                                                           end
-                                                         end
+    EcPostgres.with_connection(node, options['db_name'], { 'db_connection_superuser' => user,
+                                                           'db_superuser_password' => password,
+                                                           'vip' => host,
+                                                           'port' => port,
+                                                           'sslmode' => sslmode,
+                                                           'silent' => options['silent'],
+                                                           'retries' => options['retries']}) do |conn|
+       if block_given?
+         yield(conn)
+       end
+    end
   end
 
   # Helper function that let get the correct top-level value for a service

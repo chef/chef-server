@@ -64,7 +64,7 @@
 # "local" is for Unix domain socket connections only
 local   all         <%= node['private_chef']['postgresql']['username'] %>                               peer
 
-host    all         <%= node['private_chef']['postgresql']['db_superuser'] %>         samehost           md5
+host    all         <%= node['private_chef']['postgresql']['db_connection_superuser'] || node['private_chef']['postgresql']['db_superuser'] %>         samehost           md5
 
 <% node['private_chef']['postgresql']['md5_auth_cidr_addresses'].each do |cidr| %>
 host    all         all         <%= cidr %>           md5
