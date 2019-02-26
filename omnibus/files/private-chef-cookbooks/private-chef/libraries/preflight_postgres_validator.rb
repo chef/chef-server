@@ -125,6 +125,10 @@ class PostgresqlPreflightValidator < PreflightValidator
         # This is also possible, depending on if they've set up pg_hba
         # by host or user or both. This is OK, since it confirms that we're
         # able to connect to the postgres instance.
+      when /.*The Username should be in <username@hostname> format.*/
+        # This is possible if the external postgres is an Azure Database
+        # for PostgreSQL instance. It's also OK, and indicates that the
+        # postgres instance can be connected to.
       else
         # This shouldn't be possible, but we still don't want to dump an
         # unhelpful stack trace on the screen. Let's at least catch it and
