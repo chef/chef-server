@@ -119,7 +119,7 @@ module Omnibus
     end
 
     def postgresql_connection(postgres)
-      PGconn.open('user' => postgres['db_superuser'], 'host' => postgres['vip'],
+      PGconn.open('user' => postgres['db_connection_superuser'] || postgres['db_superuser'], 'host' => postgres['vip'],
                   'password' => credentials.get('postgresql', 'db_superuser_password'),
                   'port' => postgres['port'], 'dbname' => 'template1')
     end
