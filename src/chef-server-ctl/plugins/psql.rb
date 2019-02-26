@@ -34,7 +34,6 @@ add_command_under_category "psql", "Database", "Launches an interactive psql ses
 
   service_name = ARGV[1]
   write_arg = '--write'
-  ro = ARGV.include?(write_arg) ? '' : 'ro_'
   options_arg = '--options'
   if (ARGV.include?(options_arg))
     psql_options = " #{ARGV[ARGV.index(options_arg) + 1]}"
@@ -70,13 +69,17 @@ add_command_under_category "psql", "Database", "Launches an interactive psql ses
   # gather-logs to be able to do its thing correctly.
   if (ARGV.include? "--as-admin")
     cfg = running_service_config('postgresql')
-    db_username=cfg['db_superuser']
+    db_username=cfg['db_connection_superuser'] || cfg['db_superuser']
     db_password=credentials.get('postgresql', 'db_superuser_password')
   else
-    db_username=db_config[seed][db_hash_key]["sql_#{ro}user"]
+    if ARGV.include?(write_arg)
+      db_username=db_config[seed][db_hash_key]['sql_connection_user'] || db_config[seed][db_hash_key]['sql_user']
+    else
+      db_username=db_config[seed][db_hash_key]['sql_ro_user']
+    end
     # Sorry.
     db_hash_key = "opscode_erchef" if db_hash_key == "opscode-erchef"
-    db_password=credentials.get(db_hash_key, "sql_#{ro}password")
+    db_password=credentials.get(db_hash_key, "sql_#{'ro_' if ARGV.include?(write_arg)}password")
   end
 
   db_host = db_config[seed]['postgresql']['vip']
