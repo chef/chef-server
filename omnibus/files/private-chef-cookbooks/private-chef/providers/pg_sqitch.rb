@@ -28,7 +28,8 @@ action :deploy do
                deploy #{target} --verify
       EOM
       environment "PERL5LIB" => "", # force us to use omnibus perl
-                  "PGPASSWORD" => new_resource.password
+                  "PGPASSWORD" => new_resource.password,
+                  "PGSSLMODE" => node['private_chef']['postgresql']['sslmode']
 
       # Sqitch Return Codes
       # 0 - when changes are applied
