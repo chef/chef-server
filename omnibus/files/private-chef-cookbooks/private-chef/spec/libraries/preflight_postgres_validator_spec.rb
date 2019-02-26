@@ -174,8 +174,17 @@ describe PostgresqlPreflightValidator do
         end
       end
 
-      context 'when we receive an unexpected error' do
-        let (:pg_exception) { PG::ConnectionBad.new('FATAL: something funky happened') }
+      context "when we connect to Azure PostgreSQL" do
+        let (:pg_exception) { PG::ConnectionBad.new('FATAL:  Invalid Username specified. Please check the Username and retry connection. The Username should be in <username@hostname> format.') }
+
+        it "does not raise an error" do
+          expect(postgres_validator).to_not receive(:fail_with)
+          expect { postgres_validator.connectivity_validation }.to_not raise_error
+        end
+      end
+
+      context "when we receive an unexpected error" do
+        let (:pg_exception) { PG::ConnectionBad.new("FATAL: something funky happened") }
 
         it 'raises a CSPG999 error' do
           expect(postgres_validator).to receive(:fail_with).with('CSPG999: FATAL: something funky happened')
