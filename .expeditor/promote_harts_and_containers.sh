@@ -8,8 +8,8 @@ then
   exit 1
 fi
 
-# VERSION and CHANNEL are passed in via Expeditor when an omnibus package of
-# version VERSION is promoted to CHANNEL
+# EXPEDITOR_VERSION and EXPEDITOR_CHANNEL are passed in via Expeditor when an omnibus package of
+# version EXPEDITOR_VERSION is promoted to EXPEDITOR_CHANNEL
 
 # Download the manifest
 aws s3 cp "s3://chef-automate-artifacts/manifests/chef-server/${EXPEDITOR_VERSION}.json" manifest.json --profile chef-cd
@@ -44,7 +44,7 @@ jq -r -c ".packages[]" manifest.json | while read service_ident; do
     docker tag "${pkg_origin}/${pkg_name}:${pkg_version}-${pkg_release}" "${pkg_origin}/${pkg_name}:${EXPEDITOR_CHANNEL}"
     docker push "${pkg_origin}/${pkg_name}:${EXPEDITOR_CHANNEL}"
 
-    if [ "$CHANNEL" = "stable" ];
+    if [ "${EXPEDITOR_CHANNEL}" = "stable" ];
     then
       docker tag "${pkg_origin}/${pkg_name}:${pkg_version}-${pkg_release}" "${pkg_origin}/${pkg_name}:latest"
       docker push "${pkg_origin}/${pkg_name}:latest"
