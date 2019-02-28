@@ -111,6 +111,7 @@
            {db_port, 5432},
            {db_user, "<%= node['private_chef']['opscode-erchef']['sql_connection_user'] || node['private_chef']['opscode-erchef']['sql_user'] %>"},
            {db_name, "opscode_chef" },
+           {db_options, [{ssl, <%= { 'disable' => false, 'prefer' => true, 'require' => 'required' }[node['private_chef']['postgresql']['sslmode']] %>}]},
            {idle_check, 10000},
            {db_timeout, <%= node['private_chef']['opscode-chef-mover']['sql_db_timeout'] %>},
            {prepared_statements, {oc_chef_sql, statements, [pgsql]}},

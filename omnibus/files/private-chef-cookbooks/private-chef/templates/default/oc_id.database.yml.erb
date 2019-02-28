@@ -9,3 +9,4 @@ production:
   database: <%= node['private_chef']['oc_id']['sql_database'] %>
   username: <%= node['private_chef']['oc_id']['sql_connection_user'] || node['private_chef']['oc_id']['sql_user'] %>
   password: <%= "\<%= Secrets.get('oc_id', 'sql_password') %\>" %>
+  sslmode: <%= node['private_chef']['postgresql']['sslmode'] %>

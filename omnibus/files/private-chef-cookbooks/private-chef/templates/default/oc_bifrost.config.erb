@@ -101,6 +101,7 @@
           {db_port, <%= node['private_chef']['postgresql']['port'] %> },
           {db_user, "<%= node['private_chef']['oc_bifrost']['sql_connection_user'] || node['private_chef']['oc_bifrost']['sql_user'] %>" },
           {db_name, "bifrost" },
+          {db_options, [{ssl, <%= { 'disable' => false, 'prefer' => true, 'require' => 'required' }[node['private_chef']['postgresql']['sslmode']] %>}]},
           {idle_check, 10000},
           {pooler_timeout, <%= @db_pooler_timeout %>},
           {db_timeout, <%= node['private_chef']['oc_bifrost']['sql_db_timeout'] %>},
