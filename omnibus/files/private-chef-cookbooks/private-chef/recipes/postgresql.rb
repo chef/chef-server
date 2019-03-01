@@ -94,7 +94,7 @@ if is_data_master?
       2.times do |i|
         # Note that we have to include the port even for a local pipe, because the port number
         # is included in the pipe default.
-        user = node['private_chef']['postgresql']['db_connection_superuser'] || node['private_chef']['postgresql']['db_superuser']}
+        user = node['private_chef']['postgresql']['db_connection_superuser'] || node['private_chef']['postgresql']['db_superuser']
         `echo 'SELECT * FROM pg_database;' | su - #{node['private_chef']['postgresql']['username']} -c '/opt/opscode/embedded/bin/psql -p #{node['private_chef']['postgresql']['port']} -U #{user} "dbname=postgres sslmode=#{node['private_chef']['postgresql']['sslmode']}" -t -A'`
 	if $?.exitstatus != 0
           Chef::Log.fatal("Could not connect to database, retrying in 10 seconds.")
