@@ -148,11 +148,3 @@ subscriptions:
   - workload: schedule_triggered:chef/chef-server:master:nightly_build:*
     actions:
       - trigger_pipeline:omnibus/adhoc
-
-promote:
-  actions:
-    - built_in:promote_artifactory_artifact
-  channels:
-    - unstable
-    - current
-    - stable
