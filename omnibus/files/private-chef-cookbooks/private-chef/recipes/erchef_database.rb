@@ -50,6 +50,7 @@ private_chef_pg_sqitch "/opt/opscode/embedded/service/opscode-erchef/schema/base
   username  postgres['db_superuser']
   password  PrivateChef.credentials.get('postgresql', 'db_superuser_password')
   database  "opscode_chef"
+  sslmode   postgres['sslmode']
   action :nothing
   notifies :deploy, "private_chef_pg_sqitch[/opt/opscode/embedded/service/opscode-erchef/schema]", :immediately
 end
@@ -60,6 +61,7 @@ private_chef_pg_sqitch "/opt/opscode/embedded/service/opscode-erchef/schema" do
   username  postgres['db_superuser']
   password  PrivateChef.credentials.get('postgresql', 'db_superuser_password')
   database "opscode_chef"
+  sslmode   postgres['sslmode']
   action :nothing
 end
 
