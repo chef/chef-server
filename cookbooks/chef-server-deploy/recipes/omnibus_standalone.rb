@@ -141,7 +141,7 @@ end
 
 file '/var/opt/opscode/nginx/etc/addon.d/99-supermarket-credentials_external.conf' do
   content(lazy do
-    <<-EOF
+  <<-EOF
 location /supermarket-credentials {
   types { }
   default_type application/json;
