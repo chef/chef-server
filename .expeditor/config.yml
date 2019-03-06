@@ -72,6 +72,7 @@ schedules:
     cronline: "0 6 * * *"
 
 pipelines:
+  - verify
   - omnibus/release
   - omnibus/adhoc:
       definition: .expeditor/release.omnibus.yml

@@ -1,0 +1,39 @@
+steps:
+
+#########################################################################
+  # Lint Tests
+#########################################################################
+
+- label: lint-terraform
+  command:
+    - cd /workdir/terraform
+    - make lint
+  expeditor:
+    executor:
+      docker:
+
+- label: lint-chef-server-deploy-cookbook-cookstyle
+  command:
+    - cd /workdir/cookbooks/chef-server-deploy
+    - chef exec cookstyle
+  expeditor:
+    executor:
+      docker:
+
+- label: chef-server-deploy-cookbook-foodcritic
+  command:
+    - cd /workdir/cookbooks/chef-server-deploy
+    - chef exec foodcritic . -t ~supermarket
+  expeditor:
+    executor:
+      docker:
+
+- label: license-scout
+  command:
+    - .expeditor/license_scout.sh
+  expeditor:
+    executor:
+      docker:
+        environment:
+          - OCTOKIT_ACCESS_TOKEN
+          - EXPEDITOR=true
