@@ -27,9 +27,9 @@ $(REBAR3):
 install: $(REBAR3) distclean
 	$(REBAR3) update
 
-travis: all rel
+ci: all rel
 	@$(REBAR3) ct
-	@echo "Travis'd!"
+	@echo "CI'd!"
 
 # NOTE 2017-02-25: The `ct` rebar task only runs cleanly if you run
 # it by itself. If, for instance, you were to try to do this:
