@@ -163,6 +163,7 @@ steps:
   command:
     - /workdir/scripts/bk_install.sh
     - cd /workdir/src/bookshelf; make install
+    - make ci
   expeditor:
     executor:
       docker:
@@ -184,9 +185,10 @@ steps:
 - label: With chef-zero
   command:
     - /workdir/scripts/bk_install.sh
+    - gem uninstall bundler
+    - gem install bundler -v 1.12.5 && rm -f oc-chef-pedant/Gemfile.lock  # todo:  remove heavy dependency on bundler version 1.12.5 later
     - cd /workdir/oc-chef-pedant
-    - echo "Hello..."
-    # - bundle exec rake chef_zero_spec
+    - bundle exec rake chef_zero_spec
   expeditor:
     executor:
       docker:
@@ -207,6 +209,8 @@ steps:
 - label: With ChefFS=1
   command:
     - /workdir/scripts/bk_install.sh
+    - gem uninstall bundler
+    - gem install bundler -v 1.12.5 && rm -f oc-chef-pedant/Gemfile.lock  # todo:  remove heavy dependency on bundler version 1.12.5 later
     - cd /workdir/oc-chef-pedant
     - bundle exec rake chef_zero_spec
   expeditor:
