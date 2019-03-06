@@ -6,3 +6,5 @@ luarocks install --local lua-cjson
 eval $(luarocks path)
 cpanm --notest --quiet --local-lib=$HOME/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
 cpanm --notest --quiet App::Sqitch
+
+service postgresql restart
