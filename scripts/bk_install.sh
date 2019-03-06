@@ -1,4 +1,5 @@
 apt-get update -y && apt-get install -y lua5.1 luarocks
+service postgresql restart
 gem install bundler --version '1.17.3' --no-document
 luarocks install --local lpeg
 luarocks install --local lua-cjson
