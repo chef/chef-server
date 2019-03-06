@@ -150,6 +150,7 @@ steps:
   command:
     - /workdir/scripts/bk_install.sh
     - cd /workdir/src/oc_bifrost; make install
+    - make ci
   expeditor:
     executor:
       docker:
