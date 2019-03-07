@@ -34,13 +34,8 @@ steps:
   expeditor:
     executor:
       docker:
-        image: "chefes/lita-worker"
         environment:
-          - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin:/opt/asdf/installs/ruby/2.5.1/bin
-          - PERL5LIB=~/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:~/perl5/lib/perl5:/etc/perl:/usr/local/lib/perl/5.14.2:/usr/local/share/perl/5.14.2:/usr/lib/perl5:/usr/share/perl5:/usr/lib/perl/5.14:/usr/share/perl/5.14:/usr/local/lib/site_perl
-          - LUALIB=~/.luarocks/lib/lua/5.2
-          - ELIXIR_VERSION=1.4
-          - ERLANG_VERSION=18.3
+          - EXPEDITOR=true
           - OCTOKIT_ACCESS_TOKEN
 
 #########################################################################
@@ -84,8 +79,8 @@ steps:
         privileged: true
         image: "chefes/a1-buildkite"
         environment:
-            - OCTOKIT_ACCESS_TOKEN
-            - COMPONENT=src/oc_erchef
+          - OCTOKIT_ACCESS_TOKEN
+          - COMPONENT=src/oc_erchef
 
 - label: oc-id
   command:
@@ -99,8 +94,8 @@ steps:
         privileged: true
         image: "chefes/a1-buildkite"
         environment:
-            - OCTOKIT_ACCESS_TOKEN
-            - COMPONENT=src/oc-id
+          - OCTOKIT_ACCESS_TOKEN
+          - COMPONENT=src/oc-id
 
 - label: chef-mover
   command:
@@ -112,8 +107,8 @@ steps:
         privileged: true
         image: "chefes/a1-buildkite"
         environment:
-            - OCTOKIT_ACCESS_TOKEN
-            - COMPONENT=src/chef-mover
+          - OCTOKIT_ACCESS_TOKEN
+          - COMPONENT=src/chef-mover
 
 - label: oc_bifrost
   command:
@@ -126,8 +121,15 @@ steps:
         privileged: true
         image: "chefes/a1-buildkite"
         environment:
-            - OCTOKIT_ACCESS_TOKEN
-            - COMPONENT=src/oc_bifrost
+          - USE_OMNIBUS_FILES=0
+          - USE_SYSTEM_GECODE=1
+          - CHEFDK_GECODE_PATH=/opt/chefdk/embedded/lib/ruby/gems/2.5.0/gems/dep-selector-libgecode-1.3.1/lib/dep-selector-libgecode/vendored-gecode
+          - LIBRARY_PATH=$CHEFDK_GECODE_PATH/lib
+          - LD_LIBRARY_PATH=$CHEFDK_GECODE_PATH/lib
+          - LUALIB=~/.luarocks/lib/lua/5.2
+          - CPLUS_INCLUDE_PATH=$CHEFDK_GECODE_PATH/include
+          - OCTOKIT_ACCESS_TOKEN
+          - COMPONENT=src/oc_bifrost
 
 - label: bookshelf
   command:
@@ -140,8 +142,8 @@ steps:
         privileged: true
         image: "chefes/a1-buildkite"
         environment:
-            - OCTOKIT_ACCESS_TOKEN
-            - COMPONENT=src/bookshelf
+          - OCTOKIT_ACCESS_TOKEN
+          - COMPONENT=src/bookshelf
 
 # #########################################################################
 #   # Pedant Tests
@@ -152,8 +154,8 @@ steps:
     - /workdir/scripts/bk_tests/bk_install.sh
     - gem uninstall bundler -v 1.17.3
     - gem install bundler -v 1.12.5 && rm -f oc-chef-pedant/Gemfile.lock  # todo:  remove heavy dependency on bundler version 1.12.5 later
+    - bundle install
     - cd /workdir/oc-chef-pedant
-    - bundle install --path vendor/bundle
     - bundle exec rake chef_zero_spec
   expeditor:
     executor:
@@ -161,18 +163,25 @@ steps:
         privileged: true
         image: "chefes/a1-buildkite"
         environment:
+          - USE_OMNIBUS_FILES=0
+          - CHEFDK_GECODE_PATH=/opt/chefdk/embedded/lib/ruby/gems/2.5.0/gems/dep-selector-libgecode-1.3.1/lib/dep-selector-libgecode/vendored-gecode
+          - LIBRARY_PATH=$CHEFDK_GECODE_PATH/lib
+          - LD_LIBRARY_PATH=$CHEFDK_GECODE_PATH/lib
+          - CPLUS_INCLUDE_PATH=$CHEFDK_GECODE_PATH/include
+          - LUALIB=~/.luarocks/lib/lua/5.2
           - OCTOKIT_ACCESS_TOKEN
           - EXPEDITOR=true
           - USE_OMNIBUS_FILES=0
           - PEDANT_OPTS="--skip-oc_id"
+          - BUNDLE_GEMFILE=$PWD/oc-chef-pedant/Gemfile
 
 - label: With ChefFS=1
   command:
     - /workdir/scripts/bk_tests/bk_install.sh
     - gem uninstall bundler -v 1.17.3
     - gem install bundler -v 1.12.5 && rm -f oc-chef-pedant/Gemfile.lock  # todo:  remove heavy dependency on bundler version 1.12.5 later
+    - bundle install
     - cd /workdir/oc-chef-pedant
-    - bundle install --path vendor/bundle
     - bundle exec rake chef_zero_spec
   expeditor:
     executor:
@@ -180,8 +189,15 @@ steps:
         privileged: true
         image: "chefes/a1-buildkite"
         environment:
+          - USE_OMNIBUS_FILES=0
+          - CHEFDK_GECODE_PATH=/opt/chefdk/embedded/lib/ruby/gems/2.5.0/gems/dep-selector-libgecode-1.3.1/lib/dep-selector-libgecode/vendored-gecode
+          - LIBRARY_PATH=$CHEFDK_GECODE_PATH/lib
+          - LD_LIBRARY_PATH=$CHEFDK_GECODE_PATH/lib
+          - CPLUS_INCLUDE_PATH=$CHEFDK_GECODE_PATH/include
+          - LUALIB=~/.luarocks/lib/lua/5.2
           - OCTOKIT_ACCESS_TOKEN
           - EXPEDITOR=true
           - USE_OMNIBUS_FILES=0
           - PEDANT_OPTS="--skip-oc_id"
           - CHEF_FS=1
+          - BUNDLE_GEMFILE=$PWD/oc-chef-pedant/Gemfile
