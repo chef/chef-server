@@ -1,2 +1,4 @@
 Style/RedundantConditional:
     Enabled: false
+Layout/ClosingHeredocIndentation:
+    Enabled: false
