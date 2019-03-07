@@ -121,13 +121,7 @@ steps:
         privileged: true
         image: "chefes/a1-buildkite"
         environment:
-          - USE_OMNIBUS_FILES=0
-          - USE_SYSTEM_GECODE=1
-          - CHEFDK_GECODE_PATH=/opt/chefdk/embedded/lib/ruby/gems/2.5.0/gems/dep-selector-libgecode-1.3.1/lib/dep-selector-libgecode/vendored-gecode
-          - LIBRARY_PATH=$CHEFDK_GECODE_PATH/lib
-          - LD_LIBRARY_PATH=$CHEFDK_GECODE_PATH/lib
           - LUALIB=~/.luarocks/lib/lua/5.2
-          - CPLUS_INCLUDE_PATH=$CHEFDK_GECODE_PATH/include
           - OCTOKIT_ACCESS_TOKEN
           - COMPONENT=src/oc_bifrost
 
@@ -173,7 +167,8 @@ steps:
           - EXPEDITOR=true
           - USE_OMNIBUS_FILES=0
           - PEDANT_OPTS="--skip-oc_id"
-          - BUNDLE_GEMFILE=$PWD/oc-chef-pedant/Gemfile
+          - GEMFILE_MOD="gem 'rake'; gem 'chef-zero', github\:\ 'chef/chef-zero' "
+          - BUNDLE_GEMFILE=/workdir/oc-chef-pedant/Gemfile
 
 - label: With ChefFS=1
   command:
@@ -200,4 +195,4 @@ steps:
           - USE_OMNIBUS_FILES=0
           - PEDANT_OPTS="--skip-oc_id"
           - CHEF_FS=1
-          - BUNDLE_GEMFILE=$PWD/oc-chef-pedant/Gemfile
+          - BUNDLE_GEMFILE=/workdir/oc-chef-pedant/Gemfile
