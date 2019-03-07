@@ -16,13 +16,6 @@ endif
 
 # If the user hasn't set POSTGRES_USER, default to postgres
 POSTGRES_USER ?= 'postgres'
-POSTGRES_CMD = sudo -u  postgres psql -U $(POSTGRES_USER)
-
-
-# sqitch and psql use a .pgpass file pointed to by $PGPASSFILE environment variable
-# hostname:port:database:username:password
-# https://www.postgresql.org/docs/9.6/libpq-pgpass.html
-PGPASSFILE=$(PWD)/.pgpass
 
 all: $(REBAR3) elvis
 	@$(REBAR3) do clean, compile, eunit, dialyzer
@@ -54,15 +47,14 @@ test_pedant:
 	cd oc-bifrost-pedant && bundle exec bin/oc-bifrost-pedant --config pedant_config.rb
 
 
-provision_test_db: pg_password
-	$(POSTGRES_CMD) -c 'CREATE DATABASE bifrost_test;'
-	$(POSTGRES_CMD) -c "CREATE USER bifrost_test_user SUPERUSER UNENCRYPTED PASSWORD 'bifrost_test_user_password';"
-	cd schema && PGPASSFILE=$(PGPASSFILE) PGHOST=localhost PGUSER=bifrost_test_user sqitch deploy db:pg:bifrost_test
+provision_test_db:
+	psql -c 'CREATE DATABASE bifrost_test;' -U $(POSTGRES_USER)
+	psql -c "CREATE USER bifrost_test_user SUPERUSER UNENCRYPTED PASSWORD 'bifrost_test_user_password';" -U $(POSTGRES_USER)
+	cd schema && sqitch deploy db:pg:bifrost_test
 
 destroy_test_db:
-	$(POSTGRES_CMD) -c 'DROP DATABASE IF EXISTS bifrost_test;'
-	$(POSTGRES_CMD) -c "DROP USER IF EXISTS bifrost_test_user;"
-
+	psql -c "DROP USER IF EXISTS bifrost_test_user;" -U $(POSTGRES_USER)
+	psql -c 'DROP DATABASE IF EXISTS bifrost_test;' -U $(POSTGRES_USER)
 
 update: $(REBAR3)
 	@$(REBAR3) update
@@ -73,24 +65,14 @@ $(REBAR3):
 
 install: $(REBAR3)
 
-travis: ci
-
 ci: update all pedant
-	@echo "ci completed!"
+	@echo "CI completed!"
 
 version_clean:
 	@rm -f VERSION
 
 distclean:
 	rm -rf _build
-
-#
-# sqitch and psql use a .pgpass file pointed to by $PGPASSFILE environment variable
-# hostname:port:database:username:password
-# https://metacpan.org/pod/distribution/App-Sqitch/lib/sqitch-authentication.pod
-pg_password:
-	echo "localhost:5432:bifrost_test:bifrost_test_user:bifrost_test_user_password" > $(PGPASSFILE)
-	chmod 600 $(PGPASSFILE)
 
 ## echo -n only works in bash shell
 SHELL=bash
@@ -107,5 +89,5 @@ omnibus: $(REBAR3) distclean
 ## For dvm
 dvm_file = $(wildcard /vagrant/dvm.mk)
 ifeq ($(dvm_file),/vagrant/dvm.mk)
-        include /vagrant/dvm.mk
+	include /vagrant/dvm.mk
 endif
