@@ -112,7 +112,7 @@ steps:
 
 - label: oc_bifrost
   command:
-    - /workdir/scripts/bk_install.sh
+    - /workdir/scripts/bk_tests/bk_install.sh
     - cd /workdir/src/oc_bifrost; make install
     - make ci
   expeditor:
@@ -184,6 +184,7 @@ steps:
     - /workdir/scripts/bk_tests/bk_install.sh
     - gem install bundler -v 1.12.5 && rm -f oc-chef-pedant/Gemfile.lock  # todo:  remove heavy dependency on bundler version 1.12.5 later
     - gem uninstall bundler -v '>= 1.17.3' -a
+    - cp scripts/bk_tests/chef_zero-Gemfile oc-chef-pedant/Gemfile
     - bundle install
     - cd /workdir/oc-chef-pedant
     - bundle exec rake chef_zero_spec
