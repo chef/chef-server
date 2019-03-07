@@ -20,7 +20,7 @@
 node.default['chef-server-deploy']['automate_server_fqdn'] = server_fqdn_for('automate')
 node.default['chef-server-deploy']['chef_server_fqdn'] = server_fqdn_for('chef-server')
 node.default['chef-server-deploy']['supermarket_fqdn'] = server_fqdn_for('supermarket')
-node.default['chef-server-deploy']['enable_liveness_agent'] = (environment == 'delivered' ? true : false)
+node.default['chef-server-deploy']['enable_liveness_agent'] = environment == 'delivered'
 
 # By default we daemonize chef-client across all of our infrastructure nodes. We
 # do not want this behavior on the Chef Server instances as we want the pipeline
@@ -75,7 +75,7 @@ template '/etc/opscode/chef-server.rb' do
     chef_cert_filename: cert_filename,
     chef_key_filename: key_filename,
     required_recipe_path: automate_liveness_recipe_path,
-    enable_data_collector: (environment == 'delivered' ? true : false)
+    enable_data_collector: environment == 'delivered'
   )
   notifies :reconfigure, 'chef_ingredient[chef-server]', :immediately
 end
