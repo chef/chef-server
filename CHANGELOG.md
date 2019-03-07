@@ -1,24 +1,22 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.19.31 -->
-## [12.19.31](https://github.com/chef/chef-server/tree/12.19.31) (2019-03-07)
-
-#### Merged Pull Requests
-- Force a habitat rebuild to pull in new openssl [#1637](https://github.com/chef/chef-server/pull/1637) ([stevendanna](https://github.com/stevendanna))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=12.19.26 -->
-### Changes since 12.19.26 release
-
-#### Merged Pull Requests
-- Force a habitat rebuild to pull in new openssl [#1637](https://github.com/chef/chef-server/pull/1637) ([stevendanna](https://github.com/stevendanna)) <!-- 12.19.31 -->
-- Rebuild the hartifacts (OpenSSL was updated) [#1636](https://github.com/chef/chef-server/pull/1636) ([jaym](https://github.com/jaym)) <!-- 12.19.30 -->
-- chef-server-ctl should leverage HAB_LISTEN_CTL envvar if available [#1628](https://github.com/chef/chef-server/pull/1628) ([jeremymv2](https://github.com/jeremymv2)) <!-- 12.19.29 -->
-- This is an empty commit to test omnibus buildkite release pipeline [#1627](https://github.com/chef/chef-server/pull/1627) ([jeremiahsnapp](https://github.com/jeremiahsnapp)) <!-- 12.19.28 -->
-- Empty commit to rebuild hartifacts [#1625](https://github.com/chef/chef-server/pull/1625) ([ryancragun](https://github.com/ryancragun)) <!-- 12.19.27 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [12.19.31](https://github.com/chef/chef-server/tree/12.19.31) (2019-03-07)
+
+#### Merged Pull Requests
+- Empty commit to rebuild hartifacts [#1625](https://github.com/chef/chef-server/pull/1625) ([ryancragun](https://github.com/ryancragun))
+- This is an empty commit to test omnibus buildkite release pipeline [#1627](https://github.com/chef/chef-server/pull/1627) ([jeremiahsnapp](https://github.com/jeremiahsnapp))
+- chef-server-ctl should leverage HAB_LISTEN_CTL envvar if available [#1628](https://github.com/chef/chef-server/pull/1628) ([jeremymv2](https://github.com/jeremymv2))
+- Rebuild the hartifacts (OpenSSL was updated) [#1636](https://github.com/chef/chef-server/pull/1636) ([jaym](https://github.com/jaym))
+- Force a habitat rebuild to pull in new openssl [#1637](https://github.com/chef/chef-server/pull/1637) ([stevendanna](https://github.com/stevendanna))
+<!-- latest_stable_release -->
+
 ## [12.19.26](https://github.com/chef/chef-server/tree/12.19.26) (2019-01-31)
 
 #### Merged Pull Requests
@@ -49,7 +47,6 @@
 - Empty commit to force hab package builds. [#1615](https://github.com/chef/chef-server/pull/1615) ([rhass](https://github.com/rhass))
 - Add license_scout overrides and exceptions for erlang libraries [#1616](https://github.com/chef/chef-server/pull/1616) ([tduffield](https://github.com/tduffield))
 - Force a new build. [#1619](https://github.com/chef/chef-server/pull/1619) ([rhass](https://github.com/rhass))
-<!-- latest_stable_release -->
 
 ## [12.18.14](https://github.com/chef/chef-server/tree/12.18.14) (2018-10-15)
 
