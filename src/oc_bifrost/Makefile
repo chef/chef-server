@@ -73,8 +73,10 @@ $(REBAR3):
 
 install: $(REBAR3)
 
+travis: ci
+
 ci: update all pedant
-	@echo "CI completed!"
+	@echo "ci completed!"
 
 version_clean:
 	@rm -f VERSION
@@ -105,5 +107,5 @@ omnibus: $(REBAR3) distclean
 ## For dvm
 dvm_file = $(wildcard /vagrant/dvm.mk)
 ifeq ($(dvm_file),/vagrant/dvm.mk)
-	include /vagrant/dvm.mk
+        include /vagrant/dvm.mk
 endif
