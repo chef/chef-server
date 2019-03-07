@@ -1,7 +1,7 @@
 begin
   require 'rspec/core/rake_task'
 
-  namespace :travis do
+  namespace :bk do
     desc "Run all specs in except for the request specs"
     RSpec::Core::RakeTask.new(:ci => ["assets:precompile", :environment]) do |task|
       ENV["RAILS_ENV"] = "test"
@@ -14,5 +14,5 @@ rescue LoadError
   # included. Whenever you run a rake task or load the app it loads all of the
   # tasks in lib/tasks, so this will fail in those cases. We don't need this
   # task in those cases, so just fail gracefully and print a warning.
-  $stderr.puts "RSpec is not available in this environment. Not loading travis:ci Rake task."
+  $stderr.puts "RSpec is not available in this environment. Not loading buildkite ci Rake task."
 end
