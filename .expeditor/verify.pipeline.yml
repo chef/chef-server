@@ -88,6 +88,8 @@ steps:
         image: "chefes/a1-buildkite"
         environment:
           - LUALIB=~/.luarocks/lib/lua/5.2
+          - ELIXIR_VERSION=1.4
+          - ERLANG_VERSION=18.3
           - COMPONENT=src/oc_erchef
 
 - label: oc-id
