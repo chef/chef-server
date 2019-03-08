@@ -87,9 +87,10 @@ steps:
         privileged: true
         image: "chefes/a1-buildkite"
         environment:
+          - USE_OMNIBUS_FILES=0
+          - CHEFDK_GECODE_PATH=/opt/chefdk/embedded/lib/ruby/gems/2.4.0/gems/dep-selector-libgecode-1.3.1/lib/dep-selector-libgecode/vendored-gecode
+          - PATH=~/perl5/bin:$PATH
           - LUALIB=~/.luarocks/lib/lua/5.2
-          - ELIXIR_VERSION=1.4
-          - ERLANG_VERSION=18.3
           - COMPONENT=src/oc_erchef
 
 - label: oc-id
