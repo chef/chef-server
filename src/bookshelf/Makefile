@@ -52,8 +52,10 @@ VERSION: version_clean
 ## For Travis
 install: $(REBAR3)
 
+travis: ci
+
 ci: update all ct
-	@echo "CI'd!"
+	@echo "CI completed!"
 
 ## for Omnbibus
 omnibus: $(REBAR3) distclean

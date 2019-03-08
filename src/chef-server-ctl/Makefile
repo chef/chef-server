@@ -3,5 +3,7 @@
 install:
 	bundle install
 
-travis:
+travis: ci
+	
+ci:
 	bundle exec rspec

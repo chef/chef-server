@@ -85,6 +85,8 @@ install:
 verify_encoding:
 	../scripts/filetype-check.sh .
 
-travis: verify_encoding
+travis: ci
+
+ci: verify_encoding
 	bundle exec rake test:routing
 	bundle exec rake test:private_chef_cookbooks
