@@ -188,8 +188,9 @@ base_init_per_suite(Config0) ->
     ok = chef_db:create(ClientRecord,
                         FakeContext,
                         AuthzId),
-    ct:pal("pwd: ~p", [os:cmd("pwd")]),
-    {ok, PubKey} = file:read_file(filename:join([?config(data_dir, Config2), "..","spki_public.pem"])),
+    PubKeyFile = filename:absname_join(filename:dirname(?FILE), "spki_public.pem"),
+    ct:pal("Opening pubkey file: ~p", [PubKeyFile]),
+    {ok, PubKey} = file:read_file(PubKeyFile),
     [{context, FakeContext},
      {org, OrganizationRecord},
      {org_id, OrgId},
@@ -210,7 +211,9 @@ get_config(Key, Config) ->
     end.
 
 base_end_per_suite(Config) ->
-    chef_test_suite_helper:stop_server(Config, needed_apps()).
+    V = chef_test_suite_helper:stop_server(Config, needed_apps()),
+    ct:pal("App: ~p~n", [application:which_applications()]),
+    V.
 
 make_user(Config, Name, AuthzId) ->
     User = chef_object:new_record(chef_user, ?API_MIN_VER, ?OSC_ORG_ID, AuthzId,

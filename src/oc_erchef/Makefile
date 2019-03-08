@@ -14,6 +14,12 @@ ifeq ($(REBAR3),)
 REBAR3 = rebar3
 endif
 
+# DB Setup for tests
+DB_NAME = "erchef_test"
+DB_USER = "erchef_test_user"
+DB_PASS = "erchef_test_user_password"
+include ../Makefile.db
+
 all: $(REBAR3) elvis
 	@$(REBAR3) do clean, compile, eunit, dialyzer
 
@@ -28,12 +34,17 @@ install: $(REBAR3) distclean
 	$(REBAR3) update
 
 travis: ci
-	
+
 ci: all rel
 	@$(REBAR3) ct
 	@echo "CI'd!"
 
-# NOTE 2017-02-25: The `ct` rebar task only runs cleanly if you run
+ci_eunit: 
+
+ci_ct: 
+	@$(REBAR3) do clean, compile, ct
+
+# Note 2017-02-25: The `ct` rebar task only runs cleanly if you run
 # it by itself. If, for instance, you were to try to do this:
 #
 #    $(REBAR3) do clean, compile eunit, dialyzer, ct
@@ -41,7 +52,7 @@ ci: all rel
 # The ct tests would not run and would instead produce an error trying
 # to reload CTH. This appears to be a bug upstream in rebar.
 ct: $(REBAR3)
-	$(REBAR3) ct
+	DB_USER=$(DB_USER) $(REBAR3) ct
 
 elvis:
 	../../scripts/elvis rock

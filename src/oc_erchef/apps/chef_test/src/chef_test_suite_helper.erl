@@ -97,7 +97,7 @@ run_cmds(CMDS) ->
       end || C <- CMDS ].
 
 space_join(L) ->
-    [ [Elt, " "] || Elt <- L ].
+    lists:flatten([ [Elt, " "] || Elt <- L ]).
 
 set_app_env(stats_hero) ->
     set_env(stats_hero, [{estatsd_host, "localhost"},
