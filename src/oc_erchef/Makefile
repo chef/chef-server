@@ -27,9 +27,11 @@ $(REBAR3):
 install: $(REBAR3) distclean
 	$(REBAR3) update
 
-travis: all rel
+travis: ci
+	
+ci: all rel
 	@$(REBAR3) ct
-	@echo "Travis'd!"
+	@echo "CI'd!"
 
 # NOTE 2017-02-25: The `ct` rebar task only runs cleanly if you run
 # it by itself. If, for instance, you were to try to do this:
@@ -74,7 +76,7 @@ bundle:
 	@cd apps/chef_objects/priv/depselector_rb; bundle install --deployment --path .bundle
 
 
-CHEFDK_GECODE_PATH:=/opt/chefdk/embedded/lib/ruby/gems/2.4.0/gems/dep-selector-libgecode-1.3.1/lib/dep-selector-libgecode/vendored-gecode
+CHEFDK_GECODE_PATH:=/opt/chefdk/embedded/lib/ruby/gems/2.5.0/gems/dep-selector-libgecode-1.3.1/lib/dep-selector-libgecode/vendored-gecode
 travis_env:
 	@echo export TRAVIS=1
 	@echo export USE_SYSTEM_GECODE=1

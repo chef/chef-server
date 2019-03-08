@@ -5,6 +5,10 @@ set -eou pipefail
 if [[ "${EXPEDITOR:-false}" == "true" ]]; then
   apt-get update
   apt-get install -y libpq-dev libsqlite3-dev
+  # Pin ruby to 2.5.3 since chef-server tests heavily depend
+  asdf global ruby 2.5.3
+  # Install gem for 2.5.3 path
+  gem install license_scout
 fi
 
 bundle_install_dirs=(
@@ -16,11 +20,7 @@ bundle_install_dirs=(
 for dir in "${bundle_install_dirs[@]}"; do
   echo "--- Installing gem dependencies for $dir"
   pushd "src/$dir"
-    if [[ "${EXPEDITOR:-false}" == "true" ]]; then
-      "$(hab pkg path core/ruby25)"/bin/bundle install
-    else
-      bundle install
-    fi
+    bundle install
   popd
 done
 

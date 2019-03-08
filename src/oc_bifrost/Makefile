@@ -65,8 +65,10 @@ $(REBAR3):
 
 install: $(REBAR3)
 
-travis: update all pedant
-	@echo "Travis'd!"
+travis: ci
+
+ci: update all pedant
+	@echo "CI completed!"
 
 version_clean:
 	@rm -f VERSION
