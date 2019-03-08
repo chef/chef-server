@@ -48,26 +48,43 @@ load_config_from_file() ->
                  end,
     load_config(ConfigPath).
 
-%% os:getenv/2 is a recent thing
-os_getenv(Key, Default) ->
-    case os:getenv(Key) of
-        false ->
-            Default;
-        Value ->
-            Value
-    end.
+load_config(File) ->
+    {ok, [Terms]} = file:consult(File),
+    [subkeys_to_env(Term, Subkeys) || {Term, Subkeys} <- Terms].
+
+subkeys_to_env(Term, Subkeys) ->
+    [application:set_env(Term, Subkey, Value) || {Subkey, Value} <- Subkeys].
+
+%%
+%% We expect an external instance of postgres set up and the following environment variables
+%% This makes it easy to use something like pg_virtualenv
+%% PGHOST:     default localhost
+%% PGDATABASE: default bookshelf
+%% PGUSER:     default bookshelf
+%% PGPASSWORD: default test_sql_password
+get_db_config() ->
+    Host =     os:getenv("PGHOST", "localhost"),
+    Db =       os:getenv("PGDATABASE", "bookshelf"),
+    User =     os:getenv("PGUSER", "bookshelf"),
+    Password = os:getenv("PGPASSWORD", "test_sql_password"),
+    #{host => Host,
+      db => Db,
+      user => User,
+      password => Password
+     }.
 
 load_inline_config() ->
+    DbConf = get_db_config(),
     StaticBookshelfConfig = [{ip, "127.0.0.1"},
                              {port, 4321},
                              {disk_store, "/tmp/bukkits"},
                              {sql_retry_count, 0},
                              {sql_retry_delay, 5000},
                              {reqid_header_name, "X-Request-Id"}],
-    StaticSqerlConfig = [{db_host, "localhost"},
+    StaticSqerlConfig = [{db_host, maps:get(host, DbConf)},
                          {db_port, 5432},
-                         {db_user, os_getenv("CT_SQL_USER", os:getenv("USER")) },
-                         {db_name, "bookshelf"},
+                         {db_user, maps:get(user, DbConf)},
+                         {db_name, maps:get(db, DbConf)},
                          {idle_check, 10000},
                          {pooler_timeout, 4000},
                          {prepared_statements, {bksw_sql, statements, [pgsql]}},
@@ -82,13 +99,6 @@ load_inline_config() ->
                                          {start_mfa, {sqerl_client, start_link, []}}]]),
     [application:set_env(sqerl, Key, Value) || {Key, Value} <- StaticSqerlConfig],
     [application:set_env(bookshelf, Key, Value) || {Key, Value} <- StaticBookshelfConfig].
-
-load_config(File) ->
-    {ok, [Terms]} = file:consult(File),
-    [subkeys_to_env(Term, Subkeys) || {Term, Subkeys} <- Terms].
-
-subkeys_to_env(Term, Subkeys) ->
-    [application:set_env(Term, Subkey, Value) || {Subkey, Value} <- Subkeys].
 
 start_bookshelf() ->
     %% For common test, we don't want to stop sasl or else we end up not getting
@@ -111,26 +121,6 @@ start_bookshelf() ->
 stop_bookshelf(Config) ->
     [application:stop(A)|| A <- lists:flatten([?config(apps, Config), pooler, sqerl])].
 
-start_db(Config) ->
-    DataDir = ?config(data_dir, Config),
-    RootDir = the_real_root_dir(DataDir),
-    Schema = filename:join([RootDir, "schema"]),
-    PgData = filename:join([DataDir, "pg_data"]),
-    PgLog = filename:join([DataDir, "pg.log"]),
-    run_cmd(["rm -rf", PgData]),
-    run_cmd(["mkdir -p", DataDir]),
-    run_cmd(["initdb -D", PgData]),
-    run_cmd(["pg_ctl", "-l", PgLog, "-D", PgData, "start"]),
-    run_cmd(["sleep 1 && createdb -h localhost bookshelf"]),
-    run_cmd(["cd", Schema, "&& sqitch --engine pg --db-name bookshelf deploy"]),
-    ok.
-
-stop_db(Config) ->
-    DataDir = ?config(data_dir, Config),
-    PgData = filename:join([DataDir, "pg_data"]),
-    run_cmd(["pg_ctl", "-D", PgData, "stop"]),
-    ok.
-
 run_cmd(Args) ->
     os:cmd(string:join(Args, " ")).
 
@@ -147,16 +137,9 @@ setup_chef_secrets() ->
 %% TEST SERVER CALLBACK FUNCTIONS
 %%====================================================================
 init_per_suite(Config) ->
-    case ?STANDALONE_BOOKSHELF of
-        true ->
-            ok;
-        false ->
-            start_db(Config)
-    end,
     Config.
 
-end_per_suite(Config) ->
-    stop_db(Config),
+end_per_suite(_Config) ->
     ok.
 
 set_storage_type_for_test_case(Casename) ->

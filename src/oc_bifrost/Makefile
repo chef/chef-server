@@ -14,8 +14,11 @@ ifeq ($(REBAR3),)
 REBAR3 = rebar3
 endif
 
-# If the user hasn't set POSTGRES_USER, default to postgres
-POSTGRES_USER ?= 'postgres'
+# DB Setup for tests
+DB_NAME = "bifrost_test"
+DB_USER = "bifrost_test_user"
+DB_PASS = "bifrost_test_user_password"
+include ../Makefile.db
 
 all: $(REBAR3) elvis
 	@$(REBAR3) do clean, compile, eunit, dialyzer
@@ -28,7 +31,7 @@ rel: all
 
 pedant: pedant_setup test_pedant pedant_cleanup
 
-pedant_setup: provision_test_db rel install_pedant start_test_rel
+pedant_setup: provision_test_db provision_schema rel install_pedant start_test_rel
 
 pedant_cleanup: stop_test_rel destroy_test_db
 
@@ -45,16 +48,6 @@ test_pedant:
 	@echo "Sleeping 30 seconds to allow bifrost to start"
 	@sleep 30
 	cd oc-bifrost-pedant && bundle exec bin/oc-bifrost-pedant --config pedant_config.rb
-
-
-provision_test_db:
-	psql -c 'CREATE DATABASE bifrost_test;' -U $(POSTGRES_USER)
-	psql -c "CREATE USER bifrost_test_user SUPERUSER UNENCRYPTED PASSWORD 'bifrost_test_user_password';" -U $(POSTGRES_USER)
-	cd schema && sqitch deploy db:pg:bifrost_test
-
-destroy_test_db:
-	psql -c "DROP USER IF EXISTS bifrost_test_user;" -U $(POSTGRES_USER)
-	psql -c 'DROP DATABASE IF EXISTS bifrost_test;' -U $(POSTGRES_USER)
 
 update: $(REBAR3)
 	@$(REBAR3) update
