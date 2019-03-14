@@ -1,6 +1,7 @@
 .DS_Store
 erln8.config
 dev/config.yml
+dev/dotfiles
 .bundle
 vendor
 src/bookshelf/test/bkswt_api_SUITE_data/pg_data
@@ -21,6 +22,12 @@ compile_commands.json
 # Vim Files
 *.swp
 
+# oc-id
+src/oc-id/bin
+
+# erlang artifacts
+_build
+
 # Workflow
 .delivery/cli.toml
 
@@ -36,3 +43,5 @@ results
 # CI
 manifest.json
 chef-server-dependency-licenses.json
+
+license-cache
