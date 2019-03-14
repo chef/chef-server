@@ -39,10 +39,12 @@ ci: all rel
 	@$(REBAR3) ct
 	@echo "CI'd!"
 
-ci_eunit: 
+#
+# These exist because the full ci test was taking a long time, this is intended to split the work roughly in two
+ci_eunit: all
 
 ci_ct: 
-	@$(REBAR3) do clean, compile, ct
+	@$(REBAR3) do clean, compile, release, ct
 
 # Note 2017-02-25: The `ct` rebar task only runs cleanly if you run
 # it by itself. If, for instance, you were to try to do this:
