@@ -77,9 +77,12 @@ steps:
 
 - label: oc_erchef_unit
   command:
+    - date
     - /workdir/scripts/bk_tests/bk_install.sh
+    - date
     - cd /workdir/src/oc_erchef; make install
     - make ci_eunit
+    - date
   expeditor:
     executor:
       docker:
@@ -95,9 +98,12 @@ steps:
 
 - label: oc_erchef_ct
   command:
+    - date
     - /workdir/scripts/bk_tests/bk_install.sh
+    - date
     - cd /workdir/src/oc_erchef; make install
     - make ci_ct
+    - date
   expeditor:
     executor:
       docker:
