@@ -30,5 +30,5 @@ build do
   bundle "install --without development", env: env
 
   gem "build chef_backup.gemspec", env: env
-  gem "install chef_backup*.gem -n #{install_dir}/embedded/bin --no-rdoc --no-ri", env: env
+  gem "install chef_backup*.gem -n #{install_dir}/embedded/bin --no-document", env: env
 end
