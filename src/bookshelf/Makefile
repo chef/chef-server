@@ -24,7 +24,7 @@ DB_NAME = bookshelf
 DB_USER = bookshelf
 DB_PASS = test_sql_password
 
-include ../Makefile.db
+include Makefile.db
 
 ## TODO: put 'ct' back in here
 all: $(REBAR3) elvis
