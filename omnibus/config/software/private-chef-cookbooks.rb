@@ -27,7 +27,7 @@ build do
 
   gem "install uuidtools " \
       " -v 2.1.3" \
-      " --no-rdoc --no-ri", env: env
+      " --no-document", env: env
 
   command "berks vendor #{install_dir}/embedded/cookbooks", env: env
 

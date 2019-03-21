@@ -30,11 +30,62 @@
          delete_all_from_table/1
         ]).
 
+
+%%
+%% We expect an external instance of postgres set up and the following environment variables
+%% This makes it easy to use something like pg_virtualenv
+%% PGHOST:     default localhost
+%% PGDATABASE: default bookshelf
+%% PGUSER:     default bookshelf
+%% PGPASSWORD: default test_sql_password
+get_db_config(DbName) ->
+    Host =     os:getenv("PGHOST", "localhost"),
+    Db =       os:getenv("PGDATABASE", DbName),
+    User =     os:getenv("PGUSER", os:getenv("USER")),
+    Password = os:getenv("PGPASSWORD", "test_sql_password"),
+    #{host => Host,
+      db => Db,
+      user => User,
+      password => Password,
+      port => 5432
+     }.
+
+
+%%
+%%
+%%
+maybe_init_db(false, _, DbConfig) ->
+    DbConfig;
+maybe_init_db(_, Config, DbConfig) ->
+    DataDir = ?config(data_dir, Config),
+    PgData = filename:join(DataDir, "pg_data"),
+    PgLog = filename:join(DataDir, "pg.log"),
+    Port = chef_test_suite_helper:random_bogus_port(),
+
+    PgHost = maps:get(host, DbConfig),
+    PortStr = integer_to_list(Port),
+    DbConfig1 = DbConfig#{port=> port},
+
+    CMDS = [
+            ["rm -rf", ?config(data_dir, Config)],
+            ["mkdir -p", DataDir],
+            ["initdb -D", PgData],
+            ["pg_ctl -D", PgData, "-l", PgLog, "-o \"-h ",  PgHost, " -p ", PortStr,   "-k '' \" start"],
+            %% db start is async, sleep? :(
+            ["sleep 1"]],
+    CmdOut = chef_test_suite_helper:run_cmds(CMDS),
+    ct:pal("Cmd~n~p", [CmdOut]),
+    DbConfig1.
+
+
 %% Set statements field on Config to overide default prepared_statements for sqerl.
 %% You should set it to the function that can be called by sqerl to define the statements.
 %% I.e. NewConfig = [{statements, {chef_db_SUITE, statements, []}} | Config].
 %% They default to oc_chef_sql:statements(pgsql) like everything.
 start_db(Config, DbName) ->
+    DbConfig = get_db_config(DbName),
+    DbConfig1 = maybe_init_db(os:getenv("TEST_SETUP_DB"), Config, DbConfig),
+
     DataDir = ?config(data_dir, Config),
 
     %% Will the real root dir please stand up!
@@ -51,25 +102,25 @@ start_db(Config, DbName) ->
     OSCSchema = filename:join([ECSchema, "baseline"]),
     PgData = filename:join(DataDir, "pg_data"),
     PgLog = filename:join(DataDir, "pg.log"),
-    Port = chef_test_suite_helper:random_bogus_port(),
+
+    PgHost = maps:get(host, DbConfig1),
+    Port = maps:get(port, DbConfig1),
     PortStr = integer_to_list(Port),
+
     CMDS = [
-            ["rm -rf", ?config(data_dir, Config)],
-            ["mkdir -p", DataDir],
-            ["initdb -D", PgData],
-            ["pg_ctl -D", PgData, "-l", PgLog, "-o \"-h localhost -p ", PortStr,   "-k '' \" start"],
-            %% db start is async, sleep? :(
-            ["sleep 1 && createdb -h localhost -p ", PortStr, DbName],
-            ["cd", OSCSchema, "&& sqitch --engine pg --db-name", DbName,
-             "--db-port", PortStr, " --db-host localhost deploy"],
-            ["cd", ECSchema, "&& sqitch --engine pg --db-name", DbName,
-             "--db-port", PortStr, " --db-host localhost deploy"],
-            ["psql -p", PortStr, DbName, " -h localhost <", Schema]
+            ["dropdb -h ", PgHost, " -p ", PortStr, " ", DbName],
+            ["createdb -h ", PgHost, " -p ", PortStr, " ", DbName],
+            ["cd", OSCSchema, ["&& sqitch db:pg:", DbName],
+             "--db-port", PortStr, "--db-host", PgHost, "deploy"],
+            ["cd", ECSchema, ["&& sqitch db:pg:", DbName],
+             "--db-port", PortStr, "--db-host", PgHost, "deploy"],
+            ["psql -p", PortStr, DbName, "-h", PgHost, " <", Schema]
            ],
 
     %% FIXME: we should fail explicitely here if any of the commands above
     %% fail
-    chef_test_suite_helper:run_cmds(CMDS),
+    CmdOut = chef_test_suite_helper:run_cmds(CMDS),
+    ct:pal("Cmd\n~p", [CmdOut]),
     % make sure it's seen in output, don't use lager.
     %CmdsResult = chef_test_suite_helper:run_cmds(CMDS),
     %io:format(user, "db_start: ~n~p~n", [CmdsResult]),
@@ -84,8 +135,8 @@ start_db(Config, DbName) ->
     chef_test_suite_helper:set_env(sqerl,
             [{db_host, "localhost"},
              {db_port, Port},
-             {db_user, os:getenv("USER")},
-             {db_pass, "pass-ignored"},
+             {db_user, maps:get(user, DbConfig1)},
+             {db_pass, maps:get(password, DbConfig1)},
              {db_name, DbName },
              {idle_check, 10000},
              {prepared_statements, Statements},
@@ -93,7 +144,7 @@ start_db(Config, DbName) ->
               [{<<"created_at">>, {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}},
                {<<"updated_at">>, {sqerl_transformers, convert_YMDHMS_tuple_to_datetime}}]}]),
 
-    [{pg_port, Port}, {pg_data, PgData}, {pg_log, PgLog}, {pg_name, DbName} | Config].
+    [{pg_port, Port}, {pg_data, PgData}, {pg_log, PgLog}, {pg_name, DbName}, {pg_map, DbConfig1} | Config].
 
 the_real_root_dir("") ->
     {error, not_found};
@@ -117,12 +168,29 @@ maybe_find_files(Dir) ->
     end.
 
 stop_db(Config) ->
+    PgMap = ?config(pg_map, Config),
+
+    DbName  = maps:get(name, PgMap),
+    PgHost  = maps:get(host, PgMap),
+    PortStr = integer_to_list(maps:get(port, PgMap)),
+
+    CMDS = [["dropdb -h ", PgHost, " -p ", PortStr, " ", DbName]],
+
+    CmdOut = chef_test_suite_helper:run_cmds(CMDS),
+    ct:pal("stop_db results:~n~p~n", [CmdOut]),
+
+    maybe_stop_db(os:getenv("TEST_SETUP_DB"), Config),
+    ok.
+
+maybe_stop_db(false, _Config) ->
+    ok;
+maybe_stop_db(_, Config) ->
     PgData = ?config(pg_data, Config),
     CMDS = [
             ["pg_ctl -D", PgData, "-m fast", "stop"]
            ],
     CmdsResult = chef_test_suite_helper:run_cmds(CMDS),
-    ct:pal("stop_db results:~n~s~n", [CmdsResult]),
+    ct:pal("maybe_stop_db results:~n~s~n", [CmdsResult]),
     ok.
 
 delete_all_from_table(TableName) ->

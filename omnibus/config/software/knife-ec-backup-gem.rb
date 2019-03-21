@@ -32,5 +32,5 @@ build do
   env = with_standard_compiler_flags(with_embedded_path)
 
   gem "build knife-ec-backup.gemspec", env: env
-  gem "install knife-ec-backup*.gem --no-rdoc --no-ri --ignore-dependencies", env: env
+  gem "install knife-ec-backup*.gem --no-document --ignore-dependencies", env: env
 end

@@ -1,0 +1,35 @@
+# Common code for setting up test databases
+# This was deliberately set up to mesh well with pg_virtualenv
+#
+# We expect the following variables to be set, e.g. something like;
+# DB_NAME = bookshelf
+# DB_USER = bookshelf
+# DB_PASS = test_sql_password
+
+# sqitch and psql use a .pgpass file pointed to by $PGPASSFILE environment variable
+# hostname:port:database:username:password
+# https://www.postgresql.org/docs/9.6/libpq-pgpass.html
+PGPASSFILE=$(PWD)/.pgpass
+
+# If the user hasn't set POSTGRES_USER, default to postgres
+POSTGRES_USER ?= 'postgres'
+POSTGRES_CMD = sudo -u  postgres psql -U $(POSTGRES_USER)
+
+provision_test_db: $(PGPASSFILE)
+	$(POSTGRES_CMD) -c "CREATE DATABASE $(DB_NAME)"
+	$(POSTGRES_CMD) -c "CREATE USER $(DB_USER) SUPERUSER UNENCRYPTED PASSWORD '$(DB_PASS)';"
+
+provision_schema:
+	cd schema && PGPASSFILE=$(PGPASSFILE) PGHOST=localhost PGUSER=$(DB_USER) sqitch deploy db:pg:$(DB_NAME)
+
+destroy_test_db:
+	$(POSTGRES_CMD) -c 'DROP DATABASE IF EXISTS $(DB_NAME);'
+	$(POSTGRES_CMD) -c "DROP USER IF EXISTS $(DB_USER)"
+	rm -f $(PGPASSFILE)
+#
+# sqitch and psql use a .pgpass file pointed to by $PGPASSFILE environment variable
+# hostname:port:database:username:password
+# https://metacpan.org/pod/distribution/App-Sqitch/lib/sqitch-authentication.pod
+ $(PGPASSFILE):
+	echo "localhost:5432:$(DB_NAME):$(DB_USER):$(DB_PASS)" > $(PGPASSFILE)
+	chmod 600 $(PGPASSFILE)

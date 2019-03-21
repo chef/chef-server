@@ -35,7 +35,7 @@ build do
   bundle "install", env: env
 
   gem "build chef-server-ctl.gemspec", env: env
-  gem "install chef-server-ctl-*.gem --no-ri --no-rdoc --verbose", env: env
+  gem "install chef-server-ctl-*.gem --no-document --verbose", env: env
 
   appbundle "chef-server-ctl", env: env
 

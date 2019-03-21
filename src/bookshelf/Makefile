@@ -16,6 +16,16 @@ ifeq ($(REBAR3),)
 REBAR3 = rebar3
 endif
 
+# sqitch and psql use a .pgpass file pointed to by $PGPASSFILE environment variable
+# hostname:port:database:username:password
+# https://www.postgresql.org/docs/9.6/libpq-pgpass.html
+PGPASSFILE=$(PWD)/.pgpass
+DB_NAME = bookshelf
+DB_USER = bookshelf
+DB_PASS = test_sql_password
+
+include Makefile.db
+
 ## TODO: put 'ct' back in here
 all: $(REBAR3) elvis
 	@$(REBAR3) do clean, compile, eunit, dialyzer, xref
@@ -54,7 +64,7 @@ install: $(REBAR3)
 
 travis: ci
 
-ci: update all ct
+ci: update all provision_test_db provision_schema ct destroy_test_db
 	@echo "CI completed!"
 
 ## for Omnbibus
