@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.19.33 -->
-## [12.19.33](https://github.com/chef/chef-server/tree/12.19.33) (2019-03-15)
+<!-- latest_release 12.19.34 -->
+## [12.19.34](https://github.com/chef/chef-server/tree/12.19.34) (2019-03-21)
 
 #### Merged Pull Requests
-- Jsinha/migrate all tests tobk [#1640](https://github.com/chef/chef-server/pull/1640) ([jaymalasinha](https://github.com/jaymalasinha))
+- Fix unit tests [#1644](https://github.com/chef/chef-server/pull/1644) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.19.31 -->
 ### Changes since 12.19.31 release
 
 #### Merged Pull Requests
+- Fix unit tests [#1644](https://github.com/chef/chef-server/pull/1644) ([markan](https://github.com/markan)) <!-- 12.19.34 -->
 - Jsinha/migrate all tests tobk [#1640](https://github.com/chef/chef-server/pull/1640) ([jaymalasinha](https://github.com/jaymalasinha)) <!-- 12.19.33 -->
 - Update gitignore [#1645](https://github.com/chef/chef-server/pull/1645) ([markan](https://github.com/markan)) <!-- 12.19.32 -->
 <!-- release_rollup -->
