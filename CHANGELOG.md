@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.19.34 -->
-## [12.19.34](https://github.com/chef/chef-server/tree/12.19.34) (2019-03-21)
+<!-- latest_release 12.19.35 -->
+## [12.19.35](https://github.com/chef/chef-server/tree/12.19.35) (2019-03-22)
 
 #### Merged Pull Requests
-- Fix unit tests [#1644](https://github.com/chef/chef-server/pull/1644) ([markan](https://github.com/markan))
+- Parameterize the search_server in the habitized pedant config [#1629](https://github.com/chef/chef-server/pull/1629) ([irvingpop](https://github.com/irvingpop))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.19.31 -->
 ### Changes since 12.19.31 release
 
 #### Merged Pull Requests
+- Parameterize the search_server in the habitized pedant config [#1629](https://github.com/chef/chef-server/pull/1629) ([irvingpop](https://github.com/irvingpop)) <!-- 12.19.35 -->
 - Fix unit tests [#1644](https://github.com/chef/chef-server/pull/1644) ([markan](https://github.com/markan)) <!-- 12.19.34 -->
 - Jsinha/migrate all tests tobk [#1640](https://github.com/chef/chef-server/pull/1640) ([jaymalasinha](https://github.com/jaymalasinha)) <!-- 12.19.33 -->
 - Update gitignore [#1645](https://github.com/chef/chef-server/pull/1645) ([markan](https://github.com/markan)) <!-- 12.19.32 -->
