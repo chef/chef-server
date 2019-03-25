@@ -42,6 +42,7 @@ steps:
       docker:
         environment:
           - EXPEDITOR=true
+          - OCTOKIT_ACCESS_TOKEN
 
 #########################################################################
   # Component Tests
