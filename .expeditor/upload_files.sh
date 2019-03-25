@@ -4,6 +4,9 @@ set -eou pipefail
 
 VERSION=$(cat VERSION)
 export VERSION
+# Should ensure License Scout doesn't get rate limited
+OCTOKIT_ACCESS_TOKEN=$GITHUB_TOKEN
+export OCTOKIT_ACCESS_TOKEN
 
 # Generate the License Scout Dependency Manifest
 .expeditor/license_scout.sh
