@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.19.36 -->
-## [12.19.36](https://github.com/chef/chef-server/tree/12.19.36) (2019-03-22)
+<!-- latest_release 12.19.37 -->
+## [12.19.37](https://github.com/chef/chef-server/tree/12.19.37) (2019-03-26)
 
 #### Merged Pull Requests
-- Update openresty to 1.13.6.2 [#1623](https://github.com/chef/chef-server/pull/1623) ([markan](https://github.com/markan))
+- Update ruby and chef versions [#1647](https://github.com/chef/chef-server/pull/1647) ([jaymalasinha](https://github.com/jaymalasinha))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.19.31 -->
 ### Changes since 12.19.31 release
 
 #### Merged Pull Requests
+- Update ruby and chef versions [#1647](https://github.com/chef/chef-server/pull/1647) ([jaymalasinha](https://github.com/jaymalasinha)) <!-- 12.19.37 -->
 - Update openresty to 1.13.6.2 [#1623](https://github.com/chef/chef-server/pull/1623) ([markan](https://github.com/markan)) <!-- 12.19.36 -->
 - Parameterize the search_server in the habitized pedant config [#1629](https://github.com/chef/chef-server/pull/1629) ([irvingpop](https://github.com/irvingpop)) <!-- 12.19.35 -->
 - Fix unit tests [#1644](https://github.com/chef/chef-server/pull/1644) ([markan](https://github.com/markan)) <!-- 12.19.34 -->
