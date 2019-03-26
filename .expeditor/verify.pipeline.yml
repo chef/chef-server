@@ -42,6 +42,7 @@ steps:
       docker:
         environment:
           - EXPEDITOR=true
+          - OCTOKIT_ACCESS_TOKEN
 
 #########################################################################
   # Component Tests
@@ -55,7 +56,6 @@ steps:
   expeditor:
     executor:
       docker:
-        privileged: true
         image: "chefes/a1-buildkite"
         environment:
           - LUALIB=~/.luarocks/lib/lua/5.2
@@ -70,7 +70,6 @@ steps:
   expeditor:
     executor:
       docker:
-        privileged: true
         image: "chefes/a1-buildkite"
         environment:
           - COMPONENT=src/chef-server-ctl
@@ -86,10 +85,9 @@ steps:
   expeditor:
     executor:
       docker:
-        privileged: true
         image: "chefes/a1-buildkite"
         environment:
-          - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin:/opt/asdf/installs/ruby/2.5.1/bin
+          - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin:/opt/asdf/installs/ruby/2.5.5/bin
           - PERL5LIB=~/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:~/perl5/lib/perl5:/etc/perl:/usr/local/lib/perl/5.14.2:/usr/local/share/perl/5.14.2:/usr/lib/perl5:/usr/share/perl5:/usr/lib/perl/5.14:/usr/share/perl/5.14:/usr/local/lib/site_perl
           - LUALIB=~/.luarocks/lib/lua/5.2
           - ELIXIR_VERSION=1.4
@@ -107,18 +105,17 @@ steps:
   expeditor:
     executor:
       docker:
-        privileged: true
         image: "chefes/a1-buildkite"
         environment:
-          - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin:/opt/asdf/installs/ruby/2.5.1/bin
+          - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin:/opt/asdf/installs/ruby/2.5.5/bin
           - PERL5LIB=~/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:~/perl5/lib/perl5:/etc/perl:/usr/local/lib/perl/5.14.2:/usr/local/share/perl/5.14.2:/usr/lib/perl5:/usr/share/perl5:/usr/lib/perl/5.14:/usr/share/perl/5.14:/usr/local/lib/site_perl
           - LUALIB=~/.luarocks/lib/lua/5.2
           - ELIXIR_VERSION=1.4
           - ERLANG_VERSION=18.3
           - COMPONENT=src/oc_erchef
 
-          
-          
+
+
 - label: oc-id
   command:
     - apt-get update -y && apt-get install -y libsqlite3-dev
@@ -128,7 +125,6 @@ steps:
   expeditor:
     executor:
       docker:
-        privileged: true
         image: "chefes/a1-buildkite"
         environment:
           - COMPONENT=src/oc-id
@@ -141,10 +137,9 @@ steps:
   expeditor:
     executor:
       docker:
-        privileged: true
         image: "chefes/a1-buildkite"
         environment:
-          - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin:/opt/asdf/installs/ruby/2.5.1/bin
+          - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin:/opt/asdf/installs/ruby/2.5.5/bin
           - PERL5LIB=~/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:~/perl5/lib/perl5:/etc/perl:/usr/local/lib/perl/5.14.2:/usr/local/share/perl/5.14.2:/usr/lib/perl5:/usr/share/perl5:/usr/lib/perl/5.14:/usr/share/perl/5.14:/usr/local/lib/site_perl
           - LUALIB=~/.luarocks/lib/lua/5.2
           - ERLANG_VERSION=18.3
@@ -158,10 +153,9 @@ steps:
   expeditor:
     executor:
       docker:
-        privileged: true
         image: "chefes/a1-buildkite"
         environment:
-          - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin:/opt/asdf/installs/ruby/2.5.1/bin
+          - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin:/opt/asdf/installs/ruby/2.5.5/bin
           - PERL5LIB=~/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:~/perl5/lib/perl5:/etc/perl:/usr/local/lib/perl/5.14.2:/usr/local/share/perl/5.14.2:/usr/lib/perl5:/usr/share/perl5:/usr/lib/perl/5.14:/usr/share/perl/5.14:/usr/local/lib/site_perl
           - LUALIB=~/.luarocks/lib/lua/5.2
           - ERLANG_VERSION=18.3
@@ -175,10 +169,9 @@ steps:
   expeditor:
     executor:
       docker:
-        privileged: true
         image: "chefes/a1-buildkite"
         environment:
-          - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin:/opt/asdf/installs/ruby/2.5.1/bin
+          - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin:/opt/asdf/installs/ruby/2.5.5/bin
           - PERL5LIB=~/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:~/perl5/lib/perl5:/etc/perl:/usr/local/lib/perl/5.14.2:/usr/local/share/perl/5.14.2:/usr/lib/perl5:/usr/share/perl5:/usr/lib/perl/5.14:/usr/share/perl/5.14:/usr/local/lib/site_perl
           - LUALIB=~/.luarocks/lib/lua/5.2
           - COMPONENT=src/bookshelf
@@ -198,7 +191,6 @@ steps:
   expeditor:
     executor:
       docker:
-        privileged: true
         image: "chefes/a1-buildkite"
         environment:
           - LUALIB=~/.luarocks/lib/lua/5.2
@@ -217,7 +209,6 @@ steps:
   expeditor:
     executor:
       docker:
-        privileged: true
         image: "chefes/a1-buildkite"
         environment:
           - LUALIB=~/.luarocks/lib/lua/5.2
