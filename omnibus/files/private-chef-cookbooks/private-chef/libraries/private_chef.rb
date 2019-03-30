@@ -637,7 +637,7 @@ WARN
                         value: PrivateChef["external_rabbitmq"]["actions_password"],
                         frozen: true, force: true)
       else
-        credentials.add("rabbitmq", "actions_password", length: 100)
+        add_secret(group: "rabbitmq", name: "actions_password", length: 100)
       end
     end
 
