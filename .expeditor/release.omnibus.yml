@@ -1,7 +1,7 @@
 ---
 project-name: chef-server
 config: omnibus/omnibus.rb
-install-dir: opscode
+install-dir: /opt/opscode
 test-path: omnibus/omnibus-test.sh
 fips-platforms:
   - el-*-x86_64
