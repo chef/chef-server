@@ -5,9 +5,9 @@ set -eou pipefail
 if [[ "${EXPEDITOR:-false}" == "true" ]]; then
   apt-get update
   apt-get install -y libpq-dev libsqlite3-dev
-  # Pin ruby to 2.5.3 since chef-server tests heavily depend
-  asdf local ruby 2.5.3
-  # Install gem for 2.5.3 path
+  # Pin ruby to 2.5.5 since chef-server tests heavily depend
+  asdf local ruby 2.5.5
+  # Install gem for 2.5.5 path
   gem install license_scout
 fi
 
