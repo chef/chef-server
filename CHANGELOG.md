@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.19.38 -->
-## [12.19.38](https://github.com/chef/chef-server/tree/12.19.38) (2019-04-03)
+<!-- latest_release 12.19.39 -->
+## [12.19.39](https://github.com/chef/chef-server/tree/12.19.39) (2019-04-03)
 
 #### Merged Pull Requests
-- Update license scout ruby pin [#1655](https://github.com/chef/chef-server/pull/1655) ([jaymalasinha](https://github.com/jaymalasinha))
+- Double the erchef max_request_size [#1649](https://github.com/chef/chef-server/pull/1649) ([irvingpop](https://github.com/irvingpop))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.19.31 -->
 ### Changes since 12.19.31 release
 
 #### Merged Pull Requests
+- Double the erchef max_request_size [#1649](https://github.com/chef/chef-server/pull/1649) ([irvingpop](https://github.com/irvingpop)) <!-- 12.19.39 -->
 - Update license scout ruby pin [#1655](https://github.com/chef/chef-server/pull/1655) ([jaymalasinha](https://github.com/jaymalasinha)) <!-- 12.19.38 -->
 - Update ruby and chef versions [#1647](https://github.com/chef/chef-server/pull/1647) ([jaymalasinha](https://github.com/jaymalasinha)) <!-- 12.19.37 -->
 - Update openresty to 1.13.6.2 [#1623](https://github.com/chef/chef-server/pull/1623) ([markan](https://github.com/markan)) <!-- 12.19.36 -->
