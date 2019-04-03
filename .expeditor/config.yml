@@ -27,42 +27,7 @@ github:
         version_constraint: "12.18.*"
 
 # Habitat + Docker exporting
-habitat_packages:
-  - openresty-noroot:
-      source: src/openresty-noroot
-      bldr_paths: src/openresty-noroot/*
-  - oc_id:
-      source: src/oc-id
-      bldr_paths: src/oc-id/*
-      export:
-        - docker
-  - chef-server-nginx:
-      source: src/nginx
-      bldr_paths: src/nginx/*
-      export:
-        - docker
-  - bookshelf:
-      source: src/bookshelf
-      bldr_paths: src/bookshelf/*
-      export:
-        - docker
-  - chef-server-ctl:
-      source: src/chef-server-ctl
-      bldr_paths:
-        - src/chef-server-ctl/*
-        - oc-chef-pedant/*
-      export:
-        - docker
-  - oc_bifrost:
-      source: src/oc_bifrost
-      bldr_paths: src/oc_bifrost/*
-      export:
-        - docker
-  - oc_erchef:
-      source: src/oc_erchef
-      bldr_paths: src/oc_erchef/*
-      export:
-        - docker
+
 
 # At the given time, trigger the following scheduled workloads
 # https://expeditor.chef.io/docs/getting-started/subscriptions/#scheduling-workloads
@@ -73,6 +38,7 @@ schedules:
 
 pipelines:
   - verify
+  - habitat/build
   - omnibus/release
   - omnibus/adhoc:
       definition: .expeditor/release.omnibus.yml
@@ -100,22 +66,13 @@ merge_actions:
         - "Expeditor: Skip All"
         - "Expeditor: ACC Only"
       only_if: built_in:bump_version
-  - built_in:trigger_habitat_package_build:
+  - trigger_pipeline:habitat/build:
       post_commit: true
       ignore_labels:
         - "Omnibus: Skip Build"
         - "Expeditor: Skip All"
         - "Expeditor: ACC Only"
       only_if: built_in:bump_version
-  - bash:.expeditor/upload_files.sh:
-      post_commit: true
-      only_if: built_in:trigger_habitat_package_build
-      ignore_labels:
-        - "Expeditor: Skip All"
-  - bash:.expeditor/purge_cdn.sh:
-      post_commit: true
-      ignore_labels:
-        - "Expeditor: Skip All"
 
 # These actions are taken, in the order specified, when an Omnibus artifact is promoted
 # within Chef's internal artifact storage system.
@@ -149,6 +106,13 @@ subscriptions:
   - workload: schedule_triggered:chef/chef-server:master:nightly_build:*
     actions:
       - trigger_pipeline:omnibus/adhoc
+  # Run these actions when the freshly built Habitat packages have been uploaded to Depot
+  - workload: buildkite_hab_build_group_published:{{agent_id}}:*
+    actions:
+      - bash:.expeditor/upload_files.sh:
+          post_commit: true
+      - bash:.expeditor/purge_cdn.sh:
+          post_commit: true
 
 promote:
   actions:
