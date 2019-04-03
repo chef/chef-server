@@ -25,11 +25,18 @@ pkg_description="NGINX configuration and content for Chef Server"
 pkg_upstream_url="https://docs.chef.io/server_components.html"
 pkg_svc_run="openresty -c ${pkg_svc_config_path}/nginx.conf -p ${pkg_svc_var_path}"
 
+# set_pwd gives a consistent current working directory when building
+# foo/bar/habitat/ vs foo/bar
+set_pwd() {
+    cd "$PLAN_CONTEXT/../"
+}
+
 pkg_version() {
   cat "$PLAN_CONTEXT/../../../VERSION"
 }
 
 do_before() {
+  set_pwd
   do_default_before
   if [ ! -f "$PLAN_CONTEXT/../../../VERSION" ]; then
     exit_with "Cannot find VERSION file! You must run \"hab studio enter\" from the chef-server project root." 56
@@ -38,6 +45,7 @@ do_before() {
 }
 
 do_unpack() {
+    set_pwd
     mkdir -p "$HAB_CACHE_SRC_PATH/$pkg_dirname"
     cp -R "$PLAN_CONTEXT/../"* "$HAB_CACHE_SRC_PATH/$pkg_dirname"
     mkdir -p "$HAB_CACHE_SRC_PATH/$pkg_dirname/static"
@@ -45,10 +53,12 @@ do_unpack() {
 }
 
 do_build() {
+  set_pwd
   return 0
 }
 
 do_install() {
+    set_pwd
     echo PKG_SVC_STATIC_PATH $pkg_svc_static_path
     mkdir -p $pkg_svc_static_path
     cp -R $HAB_CACHE_SRC_PATH/$pkg_dirname/static "$pkg_prefix"
@@ -56,11 +66,13 @@ do_install() {
 }
 
 do_strip() {
+  set_pwd
   return 0
 }
 
 
 ## NOT RIGHT
 do_after() {
+    set_pwd
     return 0
 }

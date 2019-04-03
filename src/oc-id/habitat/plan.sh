@@ -34,11 +34,18 @@ pkg_exports=(
 pkg_exposes=(port)
 pkg_bin_dirs=(binstubs)
 
+# set_pwd gives a consistent current working directory when building
+# foo/bar/habitat/ vs foo/bar
+set_pwd() {
+    cd "$PLAN_CONTEXT/../"
+}
+
 pkg_version() {
   cat "$PLAN_CONTEXT/../../../VERSION"
 }
 
 do_before() {
+  set_pwd
   do_default_before
   if [ ! -f "$PLAN_CONTEXT/../../../VERSION" ]; then
     exit_with "Cannot find VERSION file! You must run \"hab studio enter\" from the chef-server project root." 56
@@ -47,6 +54,7 @@ do_before() {
 }
 
 do_unpack() {
+  set_pwd
   # Copy everything over to the cache path so we don't write out our compiled
   # deps into the working directory, but into the cache directory.
   mkdir -p "$HAB_CACHE_SRC_PATH/$pkg_dirname"
@@ -54,11 +62,13 @@ do_unpack() {
 }
 
 do_prepare() {
+  set_pwd
   # clean up any lingering bundle artifacts
   rm -rf $PLAN_CONTEXT/../.bundle
 }
 
 do_build() {
+  set_pwd
   export LD_LIBRARY_PATH="$(pkg_path_for core/libffi)/lib:$(pkg_path_for core/sqlite)/lib"
   export USE_SYSTEM_LIBFFI=1
   export C_INCLUDE_PATH="$(pkg_path_for core/sqlite)/include"
@@ -86,6 +96,7 @@ _tar_pipe_app_cp_to() {
 }
 
 do_install() {
+  set_pwd
   _bundler_dir="$(pkg_path_for bundler)"
   export HOME="${pkg_prefix}/oc_id"
   mkdir $HOME
@@ -107,5 +118,6 @@ do_install() {
 
 # needed due to libffi Bad value error
 do_strip() {
+  set_pwd
   return 0
 }

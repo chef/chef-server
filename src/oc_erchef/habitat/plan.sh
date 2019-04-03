@@ -35,11 +35,18 @@ pkg_binds_optional=(
   [bookshelf]="port"
 )
 
+# set_pwd gives a consistent current working directory when building
+# foo/bar/habitat/ vs foo/bar
+set_pwd() {
+    cd "$PLAN_CONTEXT/../"
+}
+
 pkg_version() {
   cat "$PLAN_CONTEXT/../../../VERSION"
 }
 
 do_before() {
+  set_pwd
   do_default_before
   if [ ! -f "$PLAN_CONTEXT/../../../VERSION" ]; then
     exit_with "Cannot find VERSION file! You must run \"hab studio enter\" from the chef-server project root." 56
@@ -48,6 +55,7 @@ do_before() {
 }
 
 do_unpack() {
+  set_pwd
   # Copy everything over to the cache path so we don't write out our compiled
   # deps into the working directory, but into the cache directory.
   mkdir -p "$HAB_CACHE_SRC_PATH/$pkg_dirname"
@@ -55,6 +63,7 @@ do_unpack() {
 }
 
 do_prepare() {
+  set_pwd
   # The `/usr/bin/env` path is hardcoded in jiffy, so we'll add a symlink since fix_interpreter won't work.
   if [[ ! -r /usr/bin/env ]]; then
     ln -sv "$(pkg_path_for coreutils)/bin/env" /usr/bin/env
@@ -74,6 +83,7 @@ do_prepare() {
 
 
 do_build() {
+  set_pwd
   _bundler_dir="$(pkg_path_for bundler)"
   export REL_VERSION=$pkg_version
   export USE_SYSTEM_GECODE=1
@@ -86,6 +96,7 @@ do_build() {
 }
 
 do_install() {
+  set_pwd
   export HOME="${pkg_prefix}"
   cp Gemfile_habitat ${pkg_prefix}/Gemfile
   cp Gemfile_habitat.lock ${pkg_prefix}/Gemfile.lock
@@ -96,10 +107,12 @@ do_install() {
 }
 
 do_check() {
+  set_pwd
   make
 }
 
 do_end() {
+  set_pwd
   # Clean up the `env` link, if we set it up.
   if [[ -n "$_clean_env" ]]; then
     rm -fv /usr/bin/env

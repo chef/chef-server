@@ -31,11 +31,18 @@ pkg_svc_user="hab"
 pkg_svc_group="$pkg_svc_user"
 pkg_description="Some description."
 
+# set_pwd gives a consistent current working directory when building
+# foo/bar/habitat/ vs foo/bar
+set_pwd() {
+    cd "$PLAN_CONTEXT/../"
+}
+
 pkg_version() {
   cat "$PLAN_CONTEXT/../../../VERSION"
 }
 
 do_before() {
+  set_pwd
   do_default_before
   if [ ! -f "$PLAN_CONTEXT/../../../VERSION" ]; then
     exit_with "Cannot find VERSION file! You must run \"hab studio enter\" from the chef-server project root." 56
@@ -44,14 +51,17 @@ do_before() {
 }
 
 do_unpack() {
+  set_pwd
   return 0
 }
 
 do_build() {
+  set_pwd
   return 0
 }
 
 do_install() {
+  set_pwd
   export HOME="${pkg_prefix}"
   export RUBY_VENDOR="${pkg_prefix}/vendor/bundle"
 
@@ -113,5 +123,6 @@ EOF
 }
 
 do_check() {
+  set_pwd
   return 0
 }
