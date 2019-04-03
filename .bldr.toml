@@ -26,5 +26,5 @@ plan_path = "src/oc_bifrost/habitat"
 export_targets = ["docker"]
 
 [oc_erchef]
-plan_path = "src/oc_erchef"
+plan_path = "src/oc_erchef/habitat"
 export_targets = ["docker"]
