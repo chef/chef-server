@@ -26,10 +26,15 @@ The following Gemfile.locks need to be updated to do a complete
 sweep. We strongly recommend using bundler 1.17.x until bundler 2.1 is
 out and stable.
 
+For personal sanity, remove all .bundle and vendor directories before
+starting and after you complete the updates. 
+
 - oc-chef-pedant/Gemfile.lock
 - src/oc-id/Gemfile.lock
   Due to the rails version, we've locked a lot of dependencies. Make
   sure we can build and run oc-id before merging to master.
+  You'll need the libsqlite3-dev library if doing this on Ubuntu
+
 - src/opscode-expander/Gemfile.lock
 - src/oc\_erchef/apps/chef_objects/priv/depselector\_rb/Gemfile.lock
 - src/chef-server-ctl/Gemfile.lock
@@ -40,9 +45,17 @@ Note:
   omnibus-software deliberately to keep up with the latest build
   dependencies.
 
+Note:
+- It's best to run
+    bundle install --binstubs --path=vendor/bundle
+  in the appropriate directories to keep your main ruby install
+  clean. However do not forget to clean those up before doing an
+  omnibus build, as the files there (especially .so files) can cause
+  strange build failures, especially during the final consistency checks.
+
 ## Updating Chef Client
 
-- Ensure that the versions in the following locations are consisitent.
+- Ensure that the versions in the following locations are consistent.
     - omnibus_overrides.rb
       You will also need to update Ohai
     - src/chef-server-ctl/chef-server-ctl.gemspec
