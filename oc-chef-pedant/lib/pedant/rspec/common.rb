@@ -212,7 +212,7 @@ module Pedant
         # We're only testing whether the size is a problem or not.
         def self.respects_maximum_payload_size
           context 'with a payload size', :validation do
-            let(:maximum_request_size){1000000}
+            let(:maximum_request_size){2000000}
             context 'exactly equal to the maximum allowable size' do
               let(:request_payload) { Pedant::Utility.get_pedant_file("payloads/maxfile.json").read }
               # We use this form of `it` because the
