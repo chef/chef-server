@@ -152,31 +152,29 @@ describe "Sandboxes API Endpoint", :sandboxes do
     end
 
     it 'should actually require checksums to create a sandbox', :cleanup do
-      pending 'Fix this in Erchef' do
-        post(api_url("/sandboxes"),
-             admin_user,
-             :payload => {"checksums" => {}}) do |response|
-          response.should look_like({
-                                      :status => 400,
-                                      :error => ["Missing checksums!"]
-                                    })
-        end
+      pending 'Fix this in Erchef'
+      post(api_url("/sandboxes"),
+           admin_user,
+           :payload => {"checksums" => {}}) do |response|
+        response.should look_like({
+                                    :status => 400,
+                                    :error => ["Missing checksums!"]
+                                  })
       end
     end
 
     it 'should require valid checksums to create a sandbox', :cleanup do
-      pending 'Fix this in Erchef' do
-        post(api_url("/sandboxes"),
-             admin_user,
-             :payload => {
-               "checksums" => {
-                 "Not-A-Checksum-----$@%@#!" => nil
-               }}) do |response|
-          response.should look_like({
-                                      :status => 400,
-                                      :error => ["Invalid checksum!"]
-                                    })
-        end
+      pending 'Fix this in Erchef'
+      post(api_url("/sandboxes"),
+           admin_user,
+           :payload => {
+             "checksums" => {
+               "Not-A-Checksum-----$@%@#!" => nil
+             }}) do |response|
+        response.should look_like({
+                                    :status => 400,
+                                    :error => ["Invalid checksum!"]
+                                  })
       end
     end
 
@@ -252,34 +250,33 @@ describe "Sandboxes API Endpoint", :sandboxes do
     end
 
     it 'erroneously reports a file is not uploaded when trying to commit an already committed sandbox', :cleanup do
-      pending 'fix this in Erchef' do
-        file1 = Pedant::Utility.new_random_file
-        checksum = Pedant::Utility.checksum(file1)
+      pending 'fix this in Erchef'
+      file1 = Pedant::Utility.new_random_file
+      checksum = Pedant::Utility.checksum(file1)
+      
+      sandbox = create_sandbox([file1])
+      sandbox_id = sandbox["sandbox_id"]
+      upload_to_sandbox(file1, sandbox).should look_like({
+                                                           :status => 200,
+                                                           :body_exact => {
+                                                             "uri" => sandbox["checksums"][checksum]["url"]
+                                                           }
+                                                         })
 
-        sandbox = create_sandbox([file1])
-        sandbox_id = sandbox["sandbox_id"]
-        upload_to_sandbox(file1, sandbox).should look_like({
-                                                             :status => 200,
-                                                             :body_exact => {
-                                                               "uri" => sandbox["checksums"][checksum]["url"]
-                                                             }
-                                                           })
+      commit_sandbox(sandbox).should look_like({
+                                                 :status => 200,
+                                                 :body => {
+                                                   "guid" => sandbox_id,
+                                                   "checksums" => [checksum]
+                                                 }
+                                               })
+      r = commit_sandbox(sandbox)
+      r.should have_status_code 400
+      json = parse(r)
 
-        commit_sandbox(sandbox).should look_like({
-                                                   :status => 200,
-                                                   :body => {
-                                                     "guid" => sandbox_id,
-                                                     "checksums" => [checksum]
-                                                   }
-                                                 })
-        r = commit_sandbox(sandbox)
-        r.should have_status_code 400
-        json = parse(r)
+      # Yes it was uploaded... we just did that
+      json["error"].should_not eq ["Cannot update sandbox #{sandbox_id}: checksum #{checksum} was not uploaded"]
 
-        # Yes it was uploaded... we just did that
-        json["error"].should_not eq ["Cannot update sandbox #{sandbox_id}: checksum #{checksum} was not uploaded"]
-
-      end
     end
 
     # 'is_completed' isn't actually set to 'true' in the Ruby endpoint
@@ -303,21 +300,17 @@ describe "Sandboxes API Endpoint", :sandboxes do
     end
 
     it "should not leak CouchDB '_rev' fields after committing a sandbox", :cleanup do
-      pending "Fix this in Erchef" do
-        file1 = Pedant::Utility.new_random_file
-        file2 = Pedant::Utility.new_random_file
-
-        sandbox = create_sandbox([file1, file2])
-        [file1, file2].each {|f| upload_to_sandbox(f, sandbox)}
-
-        r = commit_sandbox(sandbox)
-        r.should have_status_code 200
-
-        json = parse(r)
-        json.should_not have_key "_rev"
-
-      end
-
+      file1 = Pedant::Utility.new_random_file
+      file2 = Pedant::Utility.new_random_file
+      
+      sandbox = create_sandbox([file1, file2])
+      [file1, file2].each {|f| upload_to_sandbox(f, sandbox)}
+      
+      r = commit_sandbox(sandbox)
+      r.should have_status_code 200
+      
+      json = parse(r)
+      json.should_not have_key "_rev"
     end
 
     respects_maximum_payload_size
