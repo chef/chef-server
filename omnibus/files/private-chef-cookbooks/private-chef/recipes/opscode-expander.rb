@@ -38,7 +38,7 @@ template expander_config do
   mode "0644"
   options = node['private_chef']['opscode-expander'].to_hash
   variables(options)
-  notifies :restart, 'runit_service[opscode-expander]' if is_data_master?
+  notifies :restart, 'component_runit_service[opscode-expander]' if is_data_master?
 end
 
 link "/opt/opscode/embedded/service/opscode-expander/conf/opscode-expander.rb" do

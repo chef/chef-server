@@ -36,7 +36,7 @@ ruby_block "bootstrap-chef-server-data" do
     ChefServerDataBootstrap.new(node).bootstrap
   end
   not_if { OmnibusHelper.has_been_bootstrapped? }
-  notifies :restart, 'service[opscode-erchef]'
+  notifies :restart, 'component_runit_service[opscode-erchef]'
 end
 
 file OmnibusHelper.bootstrap_sentinel_file do

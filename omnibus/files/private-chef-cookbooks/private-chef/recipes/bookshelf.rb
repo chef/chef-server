@@ -69,7 +69,7 @@ template bookshelf_config do
   group OmnibusHelper.new(node).ownership['group']
   mode "644"
   variables(bookshelf_params)
-  notifies :restart, 'runit_service[bookshelf]' if is_data_master?
+  notifies :restart, 'component_runit_service[bookshelf]' if is_data_master?
 end
 
 link "/opt/opscode/embedded/service/bookshelf/sys.config" do
@@ -83,7 +83,7 @@ template vmargs_config do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode "644"
-  notifies :restart, 'runit_service[bookshelf]' if is_data_master?
+  notifies :restart, 'component_runit_service[bookshelf]' if is_data_master?
 end
 
 link "/opt/opscode/embedded/service/bookshelf/vm.args" do

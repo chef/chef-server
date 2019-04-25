@@ -64,7 +64,7 @@ template oc_bifrost_config do
   group OmnibusHelper.new(node).ownership['group']
   mode "644"
   variables(node['private_chef']['oc_bifrost'].to_hash)
-  notifies :restart, 'runit_service[oc_bifrost]'
+  notifies :restart, 'component_runit_service[oc_bifrost]'
 end
 
 link "/opt/opscode/embedded/service/oc_bifrost/sys.config" do
@@ -78,7 +78,7 @@ template vmargs_config do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode "644"
-  notifies :restart, 'runit_service[oc_bifrost]'
+  notifies :restart, 'component_runit_service[oc_bifrost]'
 end
 
 link "/opt/opscode/embedded/service/oc_bifrost/vm.args" do

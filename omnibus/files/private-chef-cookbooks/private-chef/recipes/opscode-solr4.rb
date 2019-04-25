@@ -65,14 +65,14 @@ cookbook_file File.join(solr_home_dir, "solr.xml") do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode "0644"
-  notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
+  notifies :restart, 'component_runit_service[opscode-solr4]' if is_data_master?
 end
 
 file File.join(solr_collection_dir, "core.properties") do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode "0644"
-  notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
+  notifies :restart, 'component_runit_service[opscode-solr4]' if is_data_master?
   content <<EOF
 name=collection1
 EOF
@@ -84,7 +84,7 @@ template File.join(solr_conf_dir, "solrconfig.xml") do
   group OmnibusHelper.new(node).ownership['group']
   mode "0644"
   variables(node['private_chef']['opscode-solr4'].to_hash)
-  notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
+  notifies :restart, 'component_runit_service[opscode-solr4]' if is_data_master?
 end
 
 cookbook_file File.join(solr_conf_dir, "schema.xml") do
@@ -92,7 +92,7 @@ cookbook_file File.join(solr_conf_dir, "schema.xml") do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode "0644"
-  notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
+  notifies :restart, 'component_runit_service[opscode-solr4]' if is_data_master?
 end
 
 template File.join(solr_jetty_dir, "etc", "jetty.xml") do
@@ -101,7 +101,7 @@ template File.join(solr_jetty_dir, "etc", "jetty.xml") do
   mode "0644"
   source "solr4/jetty.xml.erb"
   variables(node['private_chef']['opscode-solr4'].to_hash.merge(node['private_chef']['logs'].to_hash))
-  notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
+  notifies :restart, 'component_runit_service[opscode-solr4]' if is_data_master?
 end
 
 template File.join(solr_jetty_dir, "contexts", "solr-jetty-context.xml") do
@@ -109,7 +109,7 @@ template File.join(solr_jetty_dir, "contexts", "solr-jetty-context.xml") do
   group OmnibusHelper.new(node).ownership['group']
   mode "0644"
   source "solr4/solr-jetty-context.xml.erb"
-  notifies :restart, 'runit_service[opscode-solr4]' if is_data_master?
+  notifies :restart, 'component_runit_service[opscode-solr4]' if is_data_master?
 end
 
 

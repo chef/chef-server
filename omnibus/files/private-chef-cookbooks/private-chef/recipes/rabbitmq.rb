@@ -242,14 +242,14 @@ if is_data_master?
       user opc_username
       not_if rabbitmq_management_is_up
       # management plugin needs a rabbit restart
-      notifies :restart, 'runit_service[rabbitmq]', :delayed
+      notifies :restart, 'component_runit_service[rabbitmq]', :delayed
       retries 10
     end
   else
     execute "#{rmq_plugins} disable rabbitmq_management" do
       environment (rabbitmq_env)
       user opc_username
-      notifies :restart, 'runit_service[rabbitmq]', :delayed
+      notifies :restart, 'component_runit_service[rabbitmq]', :delayed
       only_if rabbitmq_management_is_up
       retries 10
     end

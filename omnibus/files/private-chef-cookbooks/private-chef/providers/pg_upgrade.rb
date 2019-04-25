@@ -168,12 +168,12 @@ end
 # If a pre-existing postgres service exists it will need to be shut
 # down prior to running the upgrade step.
 def shutdown_postgres
-  runit_service "postgresql" do
+  component_runit_service "postgresql" do
     action :nothing # can this just be 'action :stop'?
   end
 
   log "Shutting down PostgreSQL for update" do
-    notifies :stop, "runit_service[postgresql]", :immediately
+    notifies :stop, "component_runit_service[postgresql]", :immediately
   end
 end
 
