@@ -80,6 +80,12 @@ link postgresql_data_dir_symlink do
   not_if { postgresql_data_dir == postgresql_data_dir_symlink }
 end
 
+File.open("/dotfiles/node.json", "w") do |f| f.write node.to_json end
+
+component_runit_service "postgresql" do
+  control ['t']
+end
+
 # NOTE: These recipes are written idempotently, but require a running
 # PostgreSQL service.  They should run each time (on the appropriate
 # backend machine, of course), because they also handle schema
