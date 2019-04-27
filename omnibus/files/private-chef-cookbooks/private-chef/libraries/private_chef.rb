@@ -288,7 +288,7 @@ EOF
       results["private_chef"]["logs"]["log_retention"] = PrivateChef["log_retention"]
       results["private_chef"]["logs"]["log_rotation"] = PrivateChef["log_rotation"]
       results["private_chef"]["dark_launch"] = PrivateChef["dark_launch"]
-      results["private_chef"]["opscode-erchef"]["max_request_size"] = PrivateChef["opscode_erchef"]["max_request_size"]
+#      results["private_chef"]["opscode-erchef"]["max_request_size"] = PrivateChef["opscode_erchef"]["max_request_size"]
       results["private_chef"]["folsom_graphite"] = PrivateChef["folsom_graphite"]
       results["private_chef"]["profiles"] = PrivateChef["profiles"]
       results["private_chef"]["insecure_addon_compat"] = PrivateChef["insecure_addon_compat"]
