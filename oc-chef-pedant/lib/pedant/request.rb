@@ -36,9 +36,13 @@ module Pedant
     # Grab the the version of Chef / Knife that's on the box in order
     # to properly set the X-Chef-Version header
     KNIFE_VERSION = begin
+                      # Historically we've not included chef in our Gemfile/lock, so this always fails.
                       require 'chef/version'
                       Chef::VERSION
                     rescue LoadError
+                      # This apparently is needed in some cases for pedant to work. We should
+                      # explore whether we can simplify this mess
+                      #
                       # Don't want Bundler to poison the shelling out :(
                       cmd = Mixlib::ShellOut.new("knife --version", :environment => {
                                                    'BUNDLE_GEMFILE' => nil,
@@ -48,8 +52,8 @@ module Pedant
                                                    'RUBYOPT' => nil
                                                  })
                       cmd.run_command
-                      cmd.stdout =~ /^Chef: (.*)$/
-                      $1 || raise("Cannot determine Chef version from output of `knife --version`: #{cmd.stdout}")
+                      cmd.stdout =~ /^Chef(?:\s+Infra Client)?: (.*)$/
+                      $1 || raise("Cannot determine Chef version from output of `knife --version`: '#{cmd.stdout}'")
                     end
 
     # Headers that are added to all requests
