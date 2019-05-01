@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.19.42 -->
-## [12.19.42](https://github.com/chef/chef-server/tree/12.19.42) (2019-04-12)
+<!-- latest_release 12.19.43 -->
+## [12.19.43](https://github.com/chef/chef-server/tree/12.19.43) (2019-05-01)
 
 #### Merged Pull Requests
-- Update chef-client in one more location. [#1660](https://github.com/chef/chef-server/pull/1660) ([markan](https://github.com/markan))
+- [nginx] Don&#39;t log 404s to the error log [#1663](https://github.com/chef/chef-server/pull/1663) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.19.31 -->
 ### Changes since 12.19.31 release
 
 #### Merged Pull Requests
+- [nginx] Don&#39;t log 404s to the error log [#1663](https://github.com/chef/chef-server/pull/1663) ([stevendanna](https://github.com/stevendanna)) <!-- 12.19.43 -->
 - Update chef-client in one more location. [#1660](https://github.com/chef/chef-server/pull/1660) ([markan](https://github.com/markan)) <!-- 12.19.42 -->
 - Update pedant to match new maximum request size [#1661](https://github.com/chef/chef-server/pull/1661) ([markan](https://github.com/markan)) <!-- 12.19.41 -->
 - Remove `/habitat` from end of `plan_path` [#1659](https://github.com/chef/chef-server/pull/1659) ([tduffield](https://github.com/tduffield)) <!-- 12.19.40 -->
