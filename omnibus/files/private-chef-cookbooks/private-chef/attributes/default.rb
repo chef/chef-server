@@ -952,6 +952,3 @@ default['private_chef']['data_collector']['ibrowse_options'] = "[{connect_timeou
 default['private_chef']['profiles'] = {}
 # Fully qualified URL to the compliance profiles server:
 # default['private_chef']['profiles']['root_url'] = 'https://profiles.example.com'
-# The authentication token to pass via the header to the data collector server
-# Define the token unless already set in this file
-# default['private_chef']['data_collector']['token'] = '123456789...'
