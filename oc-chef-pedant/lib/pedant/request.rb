@@ -48,7 +48,7 @@ module Pedant
                                                    'RUBYOPT' => nil
                                                  })
                       cmd.run_command
-                      cmd.stdout =~ /^Chef(?:\s+Infra)?: (.*)$/
+                      cmd.stdout =~ /^Chef(?:\s+Infra Client)?: (.*)$/
                       $1 || raise("Cannot determine Chef version from output of `knife --version`: '#{cmd.stdout}'")
                     end
 
