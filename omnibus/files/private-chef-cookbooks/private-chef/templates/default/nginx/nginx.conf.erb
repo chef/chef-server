@@ -20,6 +20,10 @@ http {
                     '"$request" $status "$request_time" $body_bytes_sent '
                     '"$http_referer" "$http_user_agent" "$upstream_addr" "$upstream_status" "$upstream_response_time" "$http_x_chef_version" "$http_x_ops_sign" "$http_x_ops_userid" "$http_x_ops_timestamp" "$http_x_ops_content_hash" $request_length "$http_x_remote_request_id"';
 
+  # In the Chef API a 404 is not an error. These 404s will still be
+  # logged to the request log.
+  log_not_found off;
+
   server_names_hash_bucket_size <%= @server_names_hash_bucket_size %>;
 
   sendfile <%= @sendfile %>;
@@ -77,13 +81,13 @@ http {
   }
   <%- end -%>
 
-  <% if node['private_chef']['data_collector']['root_url'] && node['private_chef']['data_collector']['token'] -%>
+  <% if node['private_chef']['data_collector']['root_url'] -%>
   upstream data-collector {
     server <%= URI.parse(node['private_chef']['data_collector']['root_url']).host %>:<%= URI.parse(node['private_chef']['data_collector']['root_url']).port %>;
   }
   <% end -%>
 
-  <% if node['private_chef']['profiles']['root_url'] && node['private_chef']['data_collector']['token'] -%>
+  <% if node['private_chef']['profiles']['root_url'] -%>
   upstream compliance-profiles {
     server <%= URI.parse(node['private_chef']['profiles']['root_url']).host %>:<%= URI.parse(node['private_chef']['profiles']['root_url']).port %>;
   }

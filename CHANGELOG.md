@@ -1,16 +1,21 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.19.39 -->
-## [12.19.39](https://github.com/chef/chef-server/tree/12.19.39) (2019-04-03)
+<!-- latest_release 12.19.44 -->
+## [12.19.44](https://github.com/chef/chef-server/tree/12.19.44) (2019-05-07)
 
 #### Merged Pull Requests
-- Double the erchef max_request_size [#1649](https://github.com/chef/chef-server/pull/1649) ([irvingpop](https://github.com/irvingpop))
+- render profiles and data-collector upstreams correctly [#1665](https://github.com/chef/chef-server/pull/1665) ([sdelano](https://github.com/sdelano))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.19.31 -->
 ### Changes since 12.19.31 release
 
 #### Merged Pull Requests
+- render profiles and data-collector upstreams correctly [#1665](https://github.com/chef/chef-server/pull/1665) ([sdelano](https://github.com/sdelano)) <!-- 12.19.44 -->
+- [nginx] Don&#39;t log 404s to the error log [#1663](https://github.com/chef/chef-server/pull/1663) ([stevendanna](https://github.com/stevendanna)) <!-- 12.19.43 -->
+- Update chef-client in one more location. [#1660](https://github.com/chef/chef-server/pull/1660) ([markan](https://github.com/markan)) <!-- 12.19.42 -->
+- Update pedant to match new maximum request size [#1661](https://github.com/chef/chef-server/pull/1661) ([markan](https://github.com/markan)) <!-- 12.19.41 -->
+- Remove `/habitat` from end of `plan_path` [#1659](https://github.com/chef/chef-server/pull/1659) ([tduffield](https://github.com/tduffield)) <!-- 12.19.40 -->
 - Double the erchef max_request_size [#1649](https://github.com/chef/chef-server/pull/1649) ([irvingpop](https://github.com/irvingpop)) <!-- 12.19.39 -->
 - Update license scout ruby pin [#1655](https://github.com/chef/chef-server/pull/1655) ([jaymalasinha](https://github.com/jaymalasinha)) <!-- 12.19.38 -->
 - Update ruby and chef versions [#1647](https://github.com/chef/chef-server/pull/1647) ([jaymalasinha](https://github.com/jaymalasinha)) <!-- 12.19.37 -->

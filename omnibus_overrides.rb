@@ -1,3 +1,7 @@
+#
+# When updating this, check doc/FrequentTasks.md for checklists to ensure all
+# the various usages are updated in lockstep
+#
 override :erlang, version: "18.3.4.9"
 override :lua, version: "5.1.5"
 override :rubygems, version: "3.0.2"

@@ -75,7 +75,7 @@
     }
     <% end -%>
 
-    <% if node['private_chef']['data_collector']['root_url'] && node['private_chef']['data_collector']['token'] -%>
+    <% if node['private_chef']['data_collector']['root_url'] -%>
     location ~ "^/organizations/([^/]+)/data-collector$" {
       set $request_org $1;
       access_by_lua_block { validator.validate("POST") }
@@ -106,7 +106,7 @@
     <% end -%>
     }
 
-    <% if node['private_chef']['profiles']['root_url'] && node['private_chef']['data_collector']['token'] -%>
+    <% if node['private_chef']['profiles']['root_url'] -%>
     # Compliance endpoint to forward profiles calls to the Automate API:
     #   /organizations/ORG/owners/OWNER/compliance[/PROFILE]
     # Supports the legacy(chef-gate) URLs as well:

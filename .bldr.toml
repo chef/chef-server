@@ -1,20 +1,20 @@
 [openresty-noroot]
-plan_path = "src/openresty-noroot/habitat"
+plan_path = "src/openresty-noroot"
 
 [oc_id]
-plan_path = "src/oc-id/habitat"
+plan_path = "src/oc-id"
 export_targets = ["docker"]
 
 [chef-server-nginx]
-plan_path = "src/nginx/habitat"
+plan_path = "src/nginx"
 export_targets = ["docker"]
 
 [bookshelf]
-plan_path = "src/bookshelf/habitat"
+plan_path = "src/bookshelf"
 export_targets = ["docker"]
 
 [chef-server-ctl]
-plan_path = "src/chef-server-ctl/habitat"
+plan_path = "src/chef-server-ctl"
 paths = [
   "src/chef-server-ctl/*",
   "oc-chef-pedant/*"
@@ -22,9 +22,9 @@ paths = [
 export_targets = ["docker"]
 
 [oc_bifrost]
-plan_path = "src/oc_bifrost/habitat"
+plan_path = "src/oc_bifrost"
 export_targets = ["docker"]
 
 [oc_erchef]
-plan_path = "src/oc_erchef/habitat"
+plan_path = "src/oc_erchef"
 export_targets = ["docker"]
