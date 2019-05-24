@@ -17,8 +17,8 @@
 name "chef-server"
 maintainer "Chef Software, Inc. <maintainers@chef.io>"
 homepage   "https://www.chef.io"
-license "Apache-2.0"
-license_file "LICENSE"
+license "Chef EULA"
+license_file "CHEF-EULA.md"
 
 package_name    "chef-server-core"
 replace         "private-chef"
