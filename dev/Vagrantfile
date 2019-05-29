@@ -6,7 +6,8 @@ require "yaml"
 require "fileutils"
 load "dvmtools.rb"
 
-VMName = "chef-server-1"
+VMName = "chef-server-1" 
+
 
 IPS = {
   cs: "192.168.33.100",
