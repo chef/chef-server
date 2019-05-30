@@ -165,6 +165,7 @@ EOF
     end
   end
 
+# HA is deprecated
   context "in an HA topology" do
     let(:config) { <<-EOF
 topology "ha"
@@ -188,19 +189,54 @@ EOF
       allow(File).to receive(:exists?).with("/etc/opscode/private-chef-secrets.json").and_return false
     end
 
+    it "exits with a clear error warning that HA is unsupported" do
+      expect(Chef::Log).to receive(:fatal).with(/DRBD_HA_002/)
+      expect { config_for("backend-active.chef.io") }.to raise_error SystemExit
+    end
+    it "exits with a clear error warning that HA is unsupported" do
+      expect(Chef::Log).to receive(:fatal).with(/DRBD_HA_002/)
+      expect { config_for("backend-passive.chef.io") }.to raise_error SystemExit
+    end
+    it "exits with a clear error warning that HA is unsupported" do
+      expect(Chef::Log).to receive(:fatal).with(/DRBD_HA_002/)
+      expect { config_for("frontend.chef.io") }.to raise_error SystemExit
+    end
+  end
 
-    it "generates secrets on the backend bootstrap node" do
-      config_for("backend-active.chef.io")
+# Tiered
+  context "in an tiered topology" do
+    let(:config) { <<-EOF
+topology "tier"
+
+server "frontend.chef.io",
+  :role => 'frontend'
+
+backend_vip "backend.chef.io",
+  :ipaddress => "10.0.0.1"
+
+server "backend.chef.io",
+  :role => 'backend',
+  :bootstrap => true
+EOF
+    }
+
+    before  do
+      allow(File).to receive(:exists?).with("/etc/opscode/private-chef-secrets.json").and_return false
+    end
+
+
+    it "generates secrets on the bootstrap node" do
+      config_for("backend.chef.io")
       expect(PrivateChef.credentials.exist?("rabbitmq", "password")).to eq(true)
     end
 
     it "enables opscode-chef-mover on the bootstrap node" do
-      rendered_config = config_for("backend-active.chef.io")
+      rendered_config = config_for("backend.chef.io")
       expect(rendered_config["private_chef"]["opscode-chef-mover"]["enable"]).to eq(true)
     end
 
     it "enables bootstrap recipe on the bootstrap node" do
-      rendered_config = config_for("backend-active.chef.io")
+      rendered_config = config_for("backend.chef.io")
       expect(rendered_config["private_chef"]["bootstrap"]["enable"]).to eq(true)
     end
 
@@ -216,32 +252,8 @@ EOF
       expect(rendered_config["private_chef"]["bootstrap"]["enable"]).to eq(false)
     end
 
-    it "disables bootstrap recipe on the non-bootstrap backend node" do
-      expect_existing_secrets
-      rendered_config = config_for("backend-passive.chef.io")
-      expect(rendered_config["private_chef"]["bootstrap"]["enable"]).to eq(false)
-    end
-
-    it "refuses to generate secrets on non-bootstrap node" do
-      expect(Chef::Log).to receive(:fatal)
-      expect {config_for("backend-passive.chef.io")}.to raise_error SystemExit
-    end
-
-    it "sets the relavent data directory paths to the shared store" do
-      rendered_config = config_for("backend-active.chef.io")
-      expect(rendered_config["private_chef"]["bookshelf"]["data_dir"]).to eq("/var/opt/opscode/drbd/data/bookshelf")
-      expect(rendered_config["private_chef"]["rabbitmq"]["data_dir"]).to eq("/var/opt/opscode/drbd/data/rabbitmq")
-      expect(rendered_config["private_chef"]["opscode-solr4"]["data_dir"]).to eq("/var/opt/opscode/drbd/data/opscode-solr4")
-      expect(rendered_config["private_chef"]["redis_lb"]["data_dir"]).to eq("/var/opt/opscode/drbd/data/redis_lb")
-
-      # Legacy Paths
-      expect(rendered_config["private_chef"]["couchdb"]["data_dir"]).to eq("/var/opt/opscode/drbd/data/couchdb")
-      expect(rendered_config["private_chef"]["opscode-solr"]["data_dir"]).to eq("/var/opt/opscode/drbd/data/opscode-solr")
-      expect(rendered_config["private_chef"]["opscode-chef"]["checksum_path"]).to eq("/var/opt/opscode/drbd/data/opscode-chef/checksum")
-    end
-
     it "sets backend services to listen on INADDR_ANY if the machine is a backend" do
-      rendered_config = config_for("backend-active.chef.io")
+      rendered_config = config_for("backend.chef.io")
       expect(rendered_config["private_chef"]["rabbitmq"]["node_ip_address"]).to eq("0.0.0.0")
       expect(rendered_config["private_chef"]["bookshelf"]["listen"]).to eq("0.0.0.0")
       expect(rendered_config["private_chef"]["redis_lb"]["listen"]).to eq("0.0.0.0")
@@ -271,9 +283,9 @@ EOF
   end
 
   describe "#generate_config" do
-    context "when the topology is HA" do
+    context "when the topology is tiered" do
       let(:config) { <<-EOF
-topology "ha"
+topology "tier"
 
 server "frontend.chef.io",
   :role => "frontend"
