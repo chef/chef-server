@@ -21,10 +21,6 @@ dependency "libiconv"
 
 dependency "private-chef-scripts" # assorted scripts used by installed instance
 
-# moved earlier because it is external to this repo and pinned, so should change infrequently
-dependency "chef" # for embedded chef-client -z runs (built from master - build last)
-
-dependency "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
 dependency "openresty" # load balanacer
 dependency "rb-readline" # a replacement for readline due to
 dependency "redis-gem" # gem for interacting with redis
@@ -44,6 +40,11 @@ dependency "opscode-solr4"
 dependency "haproxy"
 dependency "opscode-expander"
 dependency "pg-gem" # used by private-chef-ctl reconfigure
+
+# moved earlier because it is external to this repo and pinned, so should change infrequently
+dependency "chef" # for embedded chef-client -z runs (built from master - build last)
+
+dependency "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
 
 # Pull in knife-opc which is wrapped by chef-server-ctl to
 # allow user to create users and orgs, and handle org associations
@@ -65,9 +66,6 @@ dependency "logrotate"
 
 # partybus and upgrade scripts
 dependency "partybus"
-
-# this gem is needed by knife-ec-backup
-dependency "chef" # for embedded chef-client -z runs (built from master - build last)
 
 # used in osc to ec upgrade path
 dependency "knife-ec-backup-gem"
