@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 12.19.46 -->
-## [12.19.46](https://github.com/chef/chef-server/tree/12.19.46) (2019-05-31)
+<!-- latest_release 13.0.0 -->
+## [13.0.0](https://github.com/chef/chef-server/tree/13.0.0) (2019-05-31)
 
 #### Merged Pull Requests
-- Ma/use specific path [#1671](https://github.com/chef/chef-server/pull/1671) ([markan](https://github.com/markan))
+- Bump version to v13 for Chef EULA major release [#1667](https://github.com/chef/chef-server/pull/1667) ([btm](https://github.com/btm))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.19.31 -->
 ### Changes since 12.19.31 release
 
 #### Merged Pull Requests
+- Bump version to v13 for Chef EULA major release [#1667](https://github.com/chef/chef-server/pull/1667) ([btm](https://github.com/btm)) <!-- 13.0.0 -->
 - Ma/use specific path [#1671](https://github.com/chef/chef-server/pull/1671) ([markan](https://github.com/markan)) <!-- 12.19.46 -->
 - Update the omnibus build license to the Chef EULA [#1666](https://github.com/chef/chef-server/pull/1666) ([btm](https://github.com/btm)) <!-- 12.19.45 -->
 - render profiles and data-collector upstreams correctly [#1665](https://github.com/chef/chef-server/pull/1665) ([sdelano](https://github.com/sdelano)) <!-- 12.19.44 -->
