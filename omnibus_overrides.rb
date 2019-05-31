@@ -4,12 +4,14 @@
 #
 override :erlang, version: "18.3.4.9"
 override :lua, version: "5.1.5"
-override :rubygems, version: "3.0.2"
-override :bundler, version: '~> 1.17'
+override :rubygems, version: "3.0.3"
+override :bundler, version: "1.17.2" # currently pinned to what ships in Ruby to prevent double bundler
 override :'omnibus-ctl', version: "master"
-override :chef, version: "v14.11.21"
-override :ohai, version: "v14.8.11"
-override :ruby, version: "2.5.5"
+override :chef, version: "v15.0.300"
+override :ohai, version: "v15.0.35"
+override :ruby, version: "2.6.3"
+
+
 # This SHA is the last commit before the 6.0 release
 override :'berkshelf-no-depselector', version: '6016ca10b2f46508b1b107264228668776f505d9'
 
