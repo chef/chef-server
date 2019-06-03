@@ -70,7 +70,7 @@ template erchef_config do
                                                          :helper => helper)
   }
   notifies :run, 'execute[remove_erchef_siz_files]', :immediately
-  notifies :restart, 'runit_service[opscode-erchef]' unless backend_secondary?
+  notifies :restart, 'runit_service[opscode-erchef]'
 end
 
 # Erchef still ultimately uses disk_log [1] for request logging, and if
@@ -101,7 +101,7 @@ template vmargs_config do
   owner helper.ownership['owner']
   group helper.ownership['group']
   mode "644"
-  notifies :restart, 'runit_service[opscode-erchef]' unless backend_secondary?
+  notifies :restart, 'runit_service[opscode-erchef]'
 end
 
 link "/opt/opscode/embedded/service/opscode-erchef/vm.args" do

@@ -1,3 +1,0 @@
-#!/bin/sh
-exec 2>&1
-exec chpst -P /opt/opscode/embedded/sbin/keepalived --log-console --log-detail --dump-conf --dont-fork --use-file=<%= File.join(node["private_chef"]["keepalived"]["dir"], "etc", "keepalived.conf") %>

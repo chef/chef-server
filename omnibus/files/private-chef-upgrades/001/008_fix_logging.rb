@@ -26,7 +26,6 @@ define_upgrade do
     opscode-account
     nagios
     nrpe
-    keepalived
     fcgiwrap
     php-fpm
   }.each do |service|

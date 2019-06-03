@@ -825,31 +825,6 @@ default['private_chef']['estatsd']['port'] = 9466
 default['private_chef']['estatsd']['protocol'] = "estatsd"
 
 ##
-# Keepalived
-##
-default['private_chef']['keepalived']['enable'] = false
-default['private_chef']['keepalived']['dir'] = "/var/opt/opscode/keepalived"
-default['private_chef']['keepalived']['ipv6_on'] = false
-default['private_chef']['keepalived']['log_directory'] = "/var/log/opscode/keepalived"
-default['private_chef']['keepalived']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['keepalived']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['keepalived']['smtp_server'] = "127.0.0.1"
-default['private_chef']['keepalived']['smtp_connect_timeout'] = "30"
-default['private_chef']['keepalived']['vrrp_sync_group'] = "PC_GROUP"
-default['private_chef']['keepalived']['vrrp_sync_instance'] = "PC_VI"
-default['private_chef']['keepalived']['vrrp_instance_state'] = "BACKUP"
-default['private_chef']['keepalived']['vrrp_instance_interface'] = "eth0"
-default['private_chef']['keepalived']['vrrp_instance_virtual_router_id'] = "1"
-default['private_chef']['keepalived']['vrrp_instance_priority'] = "100"
-default['private_chef']['keepalived']['vrrp_instance_advert_int'] = "1"
-default['private_chef']['keepalived']['vrrp_instance_ipaddress'] = node['ipaddress']
-default['private_chef']['keepalived']['vrrp_instance_ipaddress_dev'] = 'eth0'
-default['private_chef']['keepalived']['vrrp_instance_vrrp_unicast_bind'] = node['ipaddress']
-default['private_chef']['keepalived']['vrrp_instance_vrrp_unicast_peer'] = nil
-default['private_chef']['keepalived']['vrrp_instance_preempt_delay'] = 30
-default['private_chef']['keepalived']['vrrp_instance_nopreempt'] = true
-
-##
 # LDAP Authentication Integration
 ##
 default['private_chef']['ldap'] = nil
