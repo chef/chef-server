@@ -46,7 +46,6 @@ directory "/etc/opscode/logrotate.d" do
   action :nothing
 end.run_action(:create)
 
-include_recipe "private-chef::plugin_discovery"
 include_recipe "private-chef::plugin_config_extensions"
 include_recipe "private-chef::config"
 
