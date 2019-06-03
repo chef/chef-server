@@ -68,6 +68,9 @@ component_runit_service "postgresql" do
   control ['t']
 end
 
+#
+# This is delayed because we sometimes need to restart oc_erchef and other clients to release the connections and allow a restart.
+#
 private_chef_pg_cluster postgresql_data_dir do
   notifies :restart, 'component_runit_service[postgresql]', :delayed if is_data_master?
 end
