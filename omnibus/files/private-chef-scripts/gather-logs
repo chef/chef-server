@@ -26,7 +26,6 @@ then
     path='opscode'
     ctl_cmd='private-chef-ctl'
     config_name='*chef*.rb'
-    ha=$(egrep -qs 'topology[[:space:]]+.*ha' /etc/$path/$config_name)$?
 
     if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
     then
@@ -101,17 +100,6 @@ for i in `find -L /var/log/${path}* -type f -mmin -"$modified_within_last_x_minu
 done
 
 $ctl_cmd status > "$tmpdir/$ctl_cmd"_status.txt
-
-if [[ ($type == 'CS') && ($ha == 0) ]]; then
-    for i in /var/log/$path/keepalived/cluster.log /proc/drbd; do
-        if [[ -e "$i" ]]; then
-            mkdir -p "$tmpdir/`dirname ${i:1}`"
-            tail -"$tail_lines" "$i" > "$tmpdir/${i:1}"
-        fi
-    done
-
-    $ctl_cmd ha-status > "$tmpdir/$ctl_cmd"_ha-status.txt
-fi
 
 # Try to determine with /tmp/.s.PGSQL.5432 if postgresql is running before gathering psql logs
 # There are two cases in which this could fail:

@@ -2,7 +2,6 @@
 # All Rights Reserved
 
 KNOWN_ADDONS = %w(
-  chef-ha
   chef-manage
   opscode-push-jobs-server
   opscode-reporting

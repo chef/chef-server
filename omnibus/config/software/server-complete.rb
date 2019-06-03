@@ -51,7 +51,6 @@ dependency "knife-opc-gem"
 # use when verifying add ons
 dependency "gpg-key"
 
-dependency "keepalived"
 dependency "bookshelf"
 
 # the front-end services
@@ -84,4 +83,3 @@ dependency "oc_erchef"
 dependency "oc-chef-pedant"
 dependency "private-chef-upgrades"
 dependency "private-chef-cookbooks"
-dependency "chef-ha-plugin-config"

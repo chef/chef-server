@@ -15,8 +15,8 @@
 # limitations under the License.
 #
 
-BACKUP_PLUGIN_LOCATIONS = %w(/opt/opscode/chef-server-plugin.rb
-                             /opt/chef-ha/chef-server-plugin.rb)
+# TODO Does this go away with HA?
+BACKUP_PLUGIN_LOCATIONS = %w(/opt/opscode/chef-server-plugin.rb)
 
 node.default['available-plugins'] = EnterprisePluginCollection.from_glob("/var/opt/opscode/plugins/*.rb")
 
