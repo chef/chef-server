@@ -51,7 +51,6 @@ dependency "knife-opc-gem"
 # use when verifying add ons
 dependency "gpg-key"
 
-dependency "keepalived"
 dependency "bookshelf"
 
 # the front-end services
