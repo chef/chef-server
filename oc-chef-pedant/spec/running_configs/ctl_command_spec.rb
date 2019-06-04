@@ -53,26 +53,10 @@ describe "running configs required by chef-server-ctl", :config do
     end
   end
 
-  context "ha" do
+  context "runit" do
     it "runit/sv_dir" do
       expect(complete_config["runit"]["sv_dir"].to_s).to_not eq("")
       expect(File.exist?(complete_config["runit"]["sv_dir"])).to be(true)
-    end
-
-    it "keepalived/enable" do
-      expect(config['keepalived']['enable']).to be(true).or be(false)
-    end
-
-    it "keepalived/vrrp_instance_ipaddress" do
-      expect(config['keepalived']['vrrp_instance_ipaddress'])
-    end
-
-    it "keepalived/vrrp_instance_ipaddress_dev" do
-      expect(config['keepalived']['vrrp_instance_ipaddress_dev'])
-    end
-
-    it "keepalived/vrrp_instance_interface" do
-      expect(config['keepalived']['vrrp_instance_interface'])
     end
   end
 
