@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.1 -->
-## [13.0.1](https://github.com/chef/chef-server/tree/13.0.1) (2019-06-03)
+<!-- latest_release 13.0.2 -->
+## [13.0.2](https://github.com/chef/chef-server/tree/13.0.2) (2019-06-05)
 
 #### Merged Pull Requests
-- Remove Keepalived/DRBD based HA [#1664](https://github.com/chef/chef-server/pull/1664) ([markan](https://github.com/markan))
+- Remove more keepalived stuff [#1673](https://github.com/chef/chef-server/pull/1673) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.19.31 -->
 ### Changes since 12.19.31 release
 
 #### Merged Pull Requests
+- Remove more keepalived stuff [#1673](https://github.com/chef/chef-server/pull/1673) ([markan](https://github.com/markan)) <!-- 13.0.2 -->
 - Remove Keepalived/DRBD based HA [#1664](https://github.com/chef/chef-server/pull/1664) ([markan](https://github.com/markan)) <!-- 13.0.1 -->
 - Bump version to v13 for Chef EULA major release [#1667](https://github.com/chef/chef-server/pull/1667) ([btm](https://github.com/btm)) <!-- 13.0.0 -->
 - Ma/use specific path [#1671](https://github.com/chef/chef-server/pull/1671) ([markan](https://github.com/markan)) <!-- 12.19.46 -->
