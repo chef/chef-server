@@ -66,9 +66,6 @@ describe PrivateChef do
   "drbd": {
     "shared_secret": "f872f5deb67b1a7faa9b47b829fb278c7ef83dc861e039ebe07255ec8618"
   },
-  "keepalived": {
-    "vrrp_instance_password": "06064a047e7070ac5d8f8181366afadba3dbb03455bfa8d96f7f2901e687ac27b6ad74a850b14cb313f931b2936aee367721"
-  },
   "oc_bifrost": {
     "superuser_id": "b293108b4a58a346758c091a8ca7462a",
     "sql_password": "dfaac052d330cb64aa82dd493bd342e93583cb61823fb3ed7792f21f928f9ef0b85d88c995b02ce216d193e9138217f8a5ed",

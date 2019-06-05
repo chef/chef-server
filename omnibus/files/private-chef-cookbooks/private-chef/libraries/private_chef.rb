@@ -69,7 +69,6 @@ module PrivateChef
   bookshelf["log_rotation"] ||= Mash.new
   bootstrap Mash.new
   drbd Mash.new # For DRBD specific settings
-  keepalived Mash.new
   estatsd Mash.new
   nginx Mash.new
   nginx["log_rotation"] ||= Mash.new
@@ -241,7 +240,6 @@ EOF
         "bookshelf",
         "bootstrap",
         "drbd",
-        "keepalived",
         "estatsd",
         "nginx",
         "ldap",
@@ -452,7 +450,6 @@ EOF
         {group: "rabbitmq", name: "password", length: 100},
         {group: "rabbitmq", name: "management_password", length: 100},
         {group: "drbd", name: "shared_secret", length: 60},
-        {group: "keepalived", name: "vrrp_instance_password", length: 100},
         {group: "opscode_erchef", name: "sql_password", length: 60},
         {group: "opscode_erchef", name: "sql_ro_password", length: 60},
         {group: "opscode_erchef", name: "stats_password", lendth: 100},

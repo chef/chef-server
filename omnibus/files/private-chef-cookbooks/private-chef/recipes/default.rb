@@ -110,14 +110,6 @@ directory "/var/log/opscode" do
   action :create
 end
 
-# Put keepalived into a safe state before proceeding with
-# the opscode-runsvdir -> opscode-private-chef transition
-private_chef_keepalived_safemode 'warmfuzzy' do
-  only_if { ha? }
-  only_if { is_data_master? }
-  only_if 'initctl status opscode-runsvdir | grep start'
-end
-
 include_recipe "enterprise::runit"
 include_recipe "private-chef::sysctl-updates"
 # Run plugins first, mostly for ha
@@ -142,8 +134,7 @@ include_recipe "private-chef::fix_permissions"
   "opscode-chef-mover",
   "redis_lb",
   "nginx",
-  "rabbitmq",
-  "keepalived"
+  "rabbitmq"
 ].each do |service|
   if node["private_chef"][service]["external"]
     begin
