@@ -1,5 +1,5 @@
 source 'https://supermarket.chef.io'
 
-cookbook 'enterprise', git: 'https://github.com/chef-cookbooks/enterprise-chef-common', tag: 'v0.14.1'
+cookbook 'enterprise', git: 'https://github.com/chef-cookbooks/enterprise-chef-common', tag: 'v0.15.1'
 cookbook 'private-chef', path: './private-chef'
-cookbook 'runit', '> 1.6.0'
+cookbook 'runit' # we use the version locked in enterprise-chef-common

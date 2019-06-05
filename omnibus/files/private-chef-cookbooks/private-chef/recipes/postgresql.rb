@@ -64,17 +64,20 @@ end
 # Upgrade the cluster if you gotta
 private_chef_pg_upgrade "upgrade_if_necessary"
 
+component_runit_service "postgresql" do
+  control ['t']
+end
+
+#
+# This is delayed because we sometimes need to restart oc_erchef and other clients to release the connections and allow a restart.
+#
 private_chef_pg_cluster postgresql_data_dir do
-  notifies :restart, 'runit_service[postgresql]' if is_data_master?
+  notifies :restart, 'component_runit_service[postgresql]', :delayed if is_data_master?
 end
 
 link postgresql_data_dir_symlink do
   to postgresql_data_dir
   not_if { postgresql_data_dir == postgresql_data_dir_symlink }
-end
-
-component_runit_service "postgresql" do
-  control ['t']
 end
 
 # NOTE: These recipes are written idempotently, but require a running
