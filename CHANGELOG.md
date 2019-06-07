@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.3 -->
-## [13.0.3](https://github.com/chef/chef-server/tree/13.0.3) (2019-06-05)
+<!-- latest_release 13.0.4 -->
+## [13.0.4](https://github.com/chef/chef-server/tree/13.0.4) (2019-06-07)
 
 #### Merged Pull Requests
-- Ma/update runit [#1668](https://github.com/chef/chef-server/pull/1668) ([markan](https://github.com/markan))
+- Remove Ubuntu 14.04 from build matrix [#1662](https://github.com/chef/chef-server/pull/1662) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.19.31 -->
 ### Changes since 12.19.31 release
 
 #### Merged Pull Requests
+- Remove Ubuntu 14.04 from build matrix [#1662](https://github.com/chef/chef-server/pull/1662) ([markan](https://github.com/markan)) <!-- 13.0.4 -->
 - Ma/update runit [#1668](https://github.com/chef/chef-server/pull/1668) ([markan](https://github.com/markan)) <!-- 13.0.3 -->
 - Remove more keepalived stuff [#1673](https://github.com/chef/chef-server/pull/1673) ([markan](https://github.com/markan)) <!-- 13.0.2 -->
 - Remove Keepalived/DRBD based HA [#1664](https://github.com/chef/chef-server/pull/1664) ([markan](https://github.com/markan)) <!-- 13.0.1 -->
