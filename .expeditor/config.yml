@@ -33,7 +33,7 @@ github:
 # https://expeditor.chef.io/docs/getting-started/subscriptions/#scheduling-workloads
 schedules:
   - name: nightly_build
-    description: "Run a nightly build in the Jenkins pipeline"
+    description: "Run a nightly build in the omnibus/adhoc pipeline"
     cronline: "0 6 * * *"
 
 pipelines:
