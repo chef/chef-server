@@ -6,6 +6,9 @@ require "yaml"
 require "fileutils"
 load "dvmtools.rb"
 
+VMName = "chef-server-1" 
+
+
 IPS = {
   cs: "192.168.33.100",
   db: "192.168.33.150",
@@ -121,7 +124,7 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  config.vm.define("chef-server", primary: true) do |c|
+  config.vm.define(VMName, primary: true) do |c|
     define_chef_server(c, attributes)
   end
 end
@@ -133,11 +136,11 @@ def define_chef_server(config, attributes)
   _ps_provisioning, ps_installer, _ps_installer_path = prepare('PUSH_JOBS_PKG', 'opscode-push-jobs-server', 'Push Jobs Server 1.1+') if plugin_active?('push-jobs-server', attributes)
   _r_provisioning, r_installer, _r_installer_path = prepare('REPORTING_PKG', 'opscode-reporting', 'Chef Reporting 1.6+') if plugin_active?('reporting', attributes)
 
-  config.vm.hostname = "api.chef-server.dev"
+  config.vm.hostname = "api.#{VMName}.dev"
   config.vm.network "private_network", ip: IPS[:cs]
 
   vmattr = attributes["vm"]
-  customize_vm(config, memory: vmattr["memory"], cpus: vmattr["cpus"], name: "chef-server")
+  customize_vm(config, memory: vmattr["memory"], cpus: vmattr["cpus"], name: VMName)
   if provisioning
     autoload = vmattr["omnibus-autoload"]
     show_autoload_banner(autoload)
@@ -193,7 +196,7 @@ def define_chef_server(config, attributes)
 
     if vmattr['external_solr'] && vmattr['external_solr']['start']
       external_solr = { "opscode_solr4['external']" => "true",
-                        "opscode_solr4['external_url']" => '"http://solr.chef-server.dev:8983/solr"',
+                        "opscode_solr4['external_url']" => '"http://solr.#{VMName}.dev:8983/solr"',
                         "opscode_erchef['search_provider']" => '"solr"',
                         "opscode_erchef['search_queue_mode']" => '"batch"'
       }
@@ -226,7 +229,7 @@ def define_chef_server(config, attributes)
     if chef_backend_active?(attributes)
       # Grab the chef-server.rb that chef-backend generates for us and overwrite the one we
       # made in provisioning
-      config.vm.provision "shell", inline: "cp /installers/api.chef-server.dev.rb /etc/opscode/chef-server.rb"
+      config.vm.provision "shell", inline: "cp /installers/api.#{VMName}.dev.rb /etc/opscode/chef-server.rb"
     end
 
     # We do a number of things that can affect the initial configuration - by
@@ -255,7 +258,7 @@ def define_chef_server(config, attributes)
 end
 
 def define_ldap_server(config, attributes)
-  config.vm.hostname = "ldap.chef-server.dev"
+  config.vm.hostname = "ldap.#{VMName}.dev"
   config.vm.network "private_network", ip: IPS[:ldap]
   customize_vm(config, name: "ldap", memory: 512, cpus: 1)
 
@@ -272,7 +275,7 @@ def define_ldap_server(config, attributes)
 end
 
 def define_db_server(config, attributes)
-  config.vm.hostname = "database.chef-server.dev"
+  config.vm.hostname = "database.#{VMName}.dev"
   config.vm.network "private_network", ip: IPS[:database]
   customize_vm(config, name: "database", memory: 512, cpus: 1)
   set_chef_zero_provisioning(config,
@@ -282,7 +285,7 @@ def define_db_server(config, attributes)
 end
 
 def define_custom_server(config, attributes)
-  config.vm.hostname = "custom.chef-server.dev"
+  config.vm.hostname = "custom.#{VMName}.dev"
   config.vm.network "private_network", ip: IPS[:custom]
   customize_vm(config, name: "custom", memory: 2048, cpus: 2)
   set_chef_zero_provisioning(config,
@@ -291,7 +294,7 @@ def define_custom_server(config, attributes)
 end
 
 def define_elasticsearch_server(config, attributes)
-  config.vm.hostname = "elasticsearch.chef-server.dev"
+  config.vm.hostname = "elasticsearch.#{VMName}.dev"
   config.vm.network "private_network", ip: IPS[:elasticsearch]
   customize_vm(config, name: "elasticsearch", memory: 2048, cpus: 2)
   set_chef_zero_provisioning(config,
@@ -303,7 +306,7 @@ def define_elasticsearch_server(config, attributes)
 end
 
 def define_external_solr_server(config, attributes)
-  config.vm.hostname = "solr.chef-server.dev"
+  config.vm.hostname = "solr.#{VMName}.dev"
   config.vm.network "private_network", ip: IPS[:solr]
   customize_vm(config, name: "external_solr", memory: 2048, cpus: 2)
   set_chef_zero_provisioning(config,
@@ -318,7 +321,7 @@ end
 
 def define_backend_server(config, attribute)
   provisioning, installer, installer_path = prepare('BE_INSTALLER', 'chef-backend', 'Chef Backend 1.1+')
-  config.vm.hostname = "backend.chef-server.dev"
+  config.vm.hostname = "backend.#{VMName}.dev"
   config.vm.network "private_network", ip: IPS[:be]
   customize_vm(config, name: "backend", memory: 2048, cpus: 2)
   if provisioning
@@ -334,7 +337,7 @@ end
 
 
 def define_db_server_reporting(config, attributes)
-  config.vm.hostname = "reportingdb.chef-server.dev"
+  config.vm.hostname = "reportingdb.#{VMName}.dev"
   config.vm.network "private_network", ip: IPS[:reportingdb]
   customize_vm(config, name: "reportingdb", memory: 512, cpus: 1)
   set_chef_zero_provisioning(config,
@@ -497,7 +500,7 @@ def ips_to_fqdns
   final = []
   IPS.map do |shortname, ip|
     next if shortname == :cs  # this is handled in-template provisioning/templates/hosts.erb
-    final << "#{ip} #{shortname}.chef-server.dev #{shortname}"
+    final << "#{ip} #{shortname}.#{VMName}.dev #{shortname}"
   end
   final
 end
