@@ -273,6 +273,8 @@
         {s3_url, "<%= @helper.bookshelf_s3_url %>"},
         <% end %>
         {s3_external_url, <%= @helper.erl_atom_or_string(node['private_chef']['bookshelf']['external_url']) %>},
+        {s3_signing_version, <%= node['private_chef']['opscode-erchef']['s3_signing_version'] %>}
+        {s3_bucket_access, default['private_chef']['opscode-erchef']['s3_bucket_access'] = 'v2'},
         {s3_platform_bucket_name, "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>"},
         {s3_url_ttl, <%= node['private_chef']['opscode-erchef']['s3_url_ttl'] %>},
         {s3_url_expiry_window_size, <%= @helper.s3_url_caching(node['private_chef']['opscode-erchef']['s3_url_expiry_window_size']) %>},

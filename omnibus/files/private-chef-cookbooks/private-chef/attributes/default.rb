@@ -393,6 +393,8 @@ default['private_chef']['opscode-erchef']['solr_http_max_connection_duration'] =
 default['private_chef']['opscode-erchef']['solr_ibrowse_options'] = "[{connect_timeout, 10000}]"
 # Default: generate signed URLs based upon Host: header. Override with a url, "http:// ..."
 default['private_chef']['opscode-erchef']['base_resource_url'] = :host_header
+default['private_chef']['opscode-erchef']['s3_bucket_access'] = 'path'
+default['private_chef']['opscode-erchef']['s3_signing_version'] = 'v2'
 default['private_chef']['opscode-erchef']['s3_bucket'] = 'bookshelf'
 default['private_chef']['opscode-erchef']['s3_url_ttl'] = 28800
 default['private_chef']['opscode-erchef']['nginx_bookshelf_caching'] = :off
