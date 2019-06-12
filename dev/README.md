@@ -166,6 +166,19 @@ you can specify it with the $INSTALLER variable. Also, you can automate the sele
 to use with $AUTOPACKAGE. So, to automatically select a custom package, set $INSTALLER to it's path
 and $AUTOPACKAGE to 1.
 
+### Multiple vms
+
+If you are fortunate enough to have a host beefy enough to run
+multiple VMs you will hit a snag; the 'chef-server' VM name is
+global, and there can only be one. To use a different name, set the
+environment variable export VAGRANT\_MACHINE\_VARIANT to add a suffix
+to the vm names.
+
+Example:
+```
+export VAGRANT_MACHINE_VARIANT='1'
+```
+
 ### Coverage Analysis
 
 Erlang has built-in support for code coverage analaysis which will

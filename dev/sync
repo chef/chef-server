@@ -71,7 +71,11 @@ BEGIN {
     # Determine our ssh args up front, so we won't need to do this on every sync.
     ssh_info = {}
     vagrant_cmd_string = ENV['VAGRANT_PATH'].nil? ? 'vagrant' : ENV['VAGRANT_PATH']
-    `#{vagrant_cmd_string} ssh-config chef-server`.split("\n").each do |line|
+
+    variant = ENV['VAGRANT_MACHINE_VARIANT'] ? ("-" + ENV['VAGRANT_MACHINE_VARIANT'] ) : ''
+    @machine_name = 'chef-server' + variant
+
+    `#{vagrant_cmd_string} ssh-config #{@machine_name}`.split("\n").each do |line|
       k, v = line.split(" ")
       ssh_info[k.strip] = v.strip
     end
