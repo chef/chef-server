@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.6 -->
-## [13.0.6](https://github.com/chef/chef-server/tree/13.0.6) (2019-06-08)
+<!-- latest_release 13.0.7 -->
+## [13.0.7](https://github.com/chef/chef-server/tree/13.0.7) (2019-06-12)
 
 #### Merged Pull Requests
-- Ma/named dev vm [#1670](https://github.com/chef/chef-server/pull/1670) ([markan](https://github.com/markan))
+- Update observer-cli SHA. [#1677](https://github.com/chef/chef-server/pull/1677) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.19.31 -->
 ### Changes since 12.19.31 release
 
 #### Merged Pull Requests
+- Update observer-cli SHA. [#1677](https://github.com/chef/chef-server/pull/1677) ([markan](https://github.com/markan)) <!-- 13.0.7 -->
 - Ma/named dev vm [#1670](https://github.com/chef/chef-server/pull/1670) ([markan](https://github.com/markan)) <!-- 13.0.6 -->
 - Add OSS Practices [#1675](https://github.com/chef/chef-server/pull/1675) ([markan](https://github.com/markan)) <!-- 13.0.5 -->
 - Remove Ubuntu 14.04 from build matrix [#1662](https://github.com/chef/chef-server/pull/1662) ([markan](https://github.com/markan)) <!-- 13.0.4 -->
