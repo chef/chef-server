@@ -6,8 +6,8 @@ require "yaml"
 require "fileutils"
 load "dvmtools.rb"
 
-VMName = "chef-server-1" 
-
+Variant = ENV['VAGRANT_MACHINE_VARIANT'] ? ("-" + ENV['VAGRANT_MACHINE_VARIANT'] ) : ''
+VMName = "chef-server#{Variant}" 
 
 IPS = {
   cs: "192.168.33.100",
@@ -260,7 +260,7 @@ end
 def define_ldap_server(config, attributes)
   config.vm.hostname = "ldap.#{VMName}.dev"
   config.vm.network "private_network", ip: IPS[:ldap]
-  customize_vm(config, name: "ldap", memory: 512, cpus: 1)
+  customize_vm(config, name: "ldap#{Variant}", memory: 512, cpus: 1)
 
   config.vm.provision "chef_zero" do |chef|
     chef.node_name = config.vm.hostname
@@ -277,7 +277,7 @@ end
 def define_db_server(config, attributes)
   config.vm.hostname = "database.#{VMName}.dev"
   config.vm.network "private_network", ip: IPS[:database]
-  customize_vm(config, name: "database", memory: 512, cpus: 1)
+  customize_vm(config, name: "database#{Variant}", memory: 512, cpus: 1)
   set_chef_zero_provisioning(config,
                              recipes: ["provisioning::hosts"],
                              json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
@@ -287,7 +287,7 @@ end
 def define_custom_server(config, attributes)
   config.vm.hostname = "custom.#{VMName}.dev"
   config.vm.network "private_network", ip: IPS[:custom]
-  customize_vm(config, name: "custom", memory: 2048, cpus: 2)
+  customize_vm(config, name: "custom#{Variant}", memory: 2048, cpus: 2)
   set_chef_zero_provisioning(config,
                              recipes: ["provisioning::hosts"],
                              json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
@@ -296,7 +296,7 @@ end
 def define_elasticsearch_server(config, attributes)
   config.vm.hostname = "elasticsearch.#{VMName}.dev"
   config.vm.network "private_network", ip: IPS[:elasticsearch]
-  customize_vm(config, name: "elasticsearch", memory: 2048, cpus: 2)
+  customize_vm(config, name: "elasticsearch#{Variant}", memory: 2048, cpus: 2)
   set_chef_zero_provisioning(config,
                              recipes: ["provisioning::hosts"],
                              json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
@@ -308,7 +308,7 @@ end
 def define_external_solr_server(config, attributes)
   config.vm.hostname = "solr.#{VMName}.dev"
   config.vm.network "private_network", ip: IPS[:solr]
-  customize_vm(config, name: "external_solr", memory: 2048, cpus: 2)
+  customize_vm(config, name: "external_solr#{Variant}", memory: 2048, cpus: 2)
   set_chef_zero_provisioning(config,
                              recipes: ["provisioning::hosts"],
                              json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
@@ -323,7 +323,7 @@ def define_backend_server(config, attribute)
   provisioning, installer, installer_path = prepare('BE_INSTALLER', 'chef-backend', 'Chef Backend 1.1+')
   config.vm.hostname = "backend.#{VMName}.dev"
   config.vm.network "private_network", ip: IPS[:be]
-  customize_vm(config, name: "backend", memory: 2048, cpus: 2)
+  customize_vm(config, name: "backend#{Variant}", memory: 2048, cpus: 2)
   if provisioning
     config.vm.synced_folder installer_path, "/installers"
     set_chef_zero_provisioning(config,
@@ -339,7 +339,7 @@ end
 def define_db_server_reporting(config, attributes)
   config.vm.hostname = "reportingdb.#{VMName}.dev"
   config.vm.network "private_network", ip: IPS[:reportingdb]
-  customize_vm(config, name: "reportingdb", memory: 512, cpus: 1)
+  customize_vm(config, name: "reportingdb#{Variant}", memory: 512, cpus: 1)
   set_chef_zero_provisioning(config,
                              recipes: ["provisioning::hosts"],
                              json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
