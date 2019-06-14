@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.7 -->
-## [13.0.7](https://github.com/chef/chef-server/tree/13.0.7) (2019-06-12)
+<!-- latest_release 13.0.8 -->
+## [13.0.8](https://github.com/chef/chef-server/tree/13.0.8) (2019-06-14)
 
 #### Merged Pull Requests
-- Update observer-cli SHA. [#1677](https://github.com/chef/chef-server/pull/1677) ([markan](https://github.com/markan))
+- [dev-vm] Fixup incomplete rename work. [#1678](https://github.com/chef/chef-server/pull/1678) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.19.31 -->
 ### Changes since 12.19.31 release
 
 #### Merged Pull Requests
+- [dev-vm] Fixup incomplete rename work. [#1678](https://github.com/chef/chef-server/pull/1678) ([markan](https://github.com/markan)) <!-- 13.0.8 -->
 - Update observer-cli SHA. [#1677](https://github.com/chef/chef-server/pull/1677) ([markan](https://github.com/markan)) <!-- 13.0.7 -->
 - Ma/named dev vm [#1670](https://github.com/chef/chef-server/pull/1670) ([markan](https://github.com/markan)) <!-- 13.0.6 -->
 - Add OSS Practices [#1675](https://github.com/chef/chef-server/pull/1675) ([markan](https://github.com/markan)) <!-- 13.0.5 -->
