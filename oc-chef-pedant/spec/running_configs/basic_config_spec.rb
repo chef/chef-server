@@ -1,23 +1,69 @@
 require 'json'
 require 'pedant/rspec/common'
-
-describe "running configs required by Reporting", :config do
+#
+# These tests originally came from the reporting plugin, but really are general config tests that apply everywhere
+# For example, the postgres test below probably should remain even when reporting is totally gone.
+#
+describe "running configs required by Chef Server and plugins", :config do
   let (:config) { JSON.parse(IO.read("/etc/opscode/chef-server-running.json"))['private_chef'] }
 
-  context "oc-reporting-pedant" do
-
-    it "api_version" do
-      expect(config['api_version'].to_s).not_to eq ''
+  context "basic config" do
+    it "role" do
+      expect(config['role'].to_s).to eq("standalone").or eq("backend").or eq("frontend")
     end
 
-    it "nginx/ssl_protocols" do
-      expect(config['nginx']['ssl_protocols'].to_s).to_not eq ''
+    it "topology" do
+      expect(config['topology'].to_s).to eq("tier").or eq("ha").or eq("standalone")
     end
   end
 
-  context "nginx" do
-    it "nginx/dir" do
-      expect(File.exists?(File.join(config['nginx']['dir'], "etc/addon.d"))).to be true
+  context "opscode-solr" do
+
+    it "opscode-solr4/external" do
+      expect(config['opscode-solr4']['external']).to be(true).or be(false)
+    end
+
+    it "opscode-solr4/external_url" do
+      if config['opscode-solr4']['external']
+        expect(config['opscode-solr4']['external_url'].to_s).not_to eq ''
+      else
+        skip "not using external solr"
+      end
+    end
+
+    it "opscode-solr4/vip" do
+      expect(config['opscode-solr4']['vip'].to_s).not_to eq ''
+    end
+
+    it "opscode-solr4/port" do
+      expect(config['opscode-solr4']['port'].to_i).not_to eq 0
+    end
+  end
+
+  context "postgresql" do
+
+    it "postgresql/vip" do
+      expect(config['postgresql']['vip'].to_s).not_to eq ''
+    end
+
+    it "postgresql/port" do
+      expect(config['postgresql']['port'].to_i).not_to eq 0
+    end
+
+    it "postgresql/username" do
+      expect(config['postgresql']['username'].to_s).not_to eq ''
+    end
+
+    it "postgresql/db_superuser" do
+      expect(config['postgresql']['db_superuser'].to_s).not_to eq ''
+    end
+
+    it "postgresql/vip or backend_vips/ipaddress" do
+      if config['role'] == 'standalone'
+        expect(config['postgresql']['vip'].to_s).not_to eq ''
+      else
+        expect(config['backend_vips']['ipaddress'].to_s).not_to eq ''
+      end
     end
   end
 
@@ -66,7 +112,7 @@ describe "running configs required by Reporting", :config do
     end
   end
 
-  context "oc-reporting-config" do
+  context "general-config" do
 
     it "oc_bifrost/vip" do
       expect(config['oc_bifrost']['vip'].to_s).not_to eq ''
