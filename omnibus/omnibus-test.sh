@@ -61,7 +61,7 @@ y/8SReCpC71R+Vl6d4+Dw6GFdL+6k6W558dPfq3UeV8HPWQEaM7/jXDUKJZ0tB6a
 -----END DH PARAMETERS-----
 " | sudo tee /etc/opscode/dhparam.pem
 
-sudo chef-server-ctl reconfigure || true
+sudo chef-server-ctl reconfigure --chef-license=accept-no-persist || true
 sleep 120
 
 echo ""
@@ -85,7 +85,7 @@ fi
 
 if [[ "${OMNIBUS_FIPS_MODE:-false}" == "true" ]]; then
   echo "fips true" | sudo tee -a /etc/opscode/chef-server.rb
-  sudo chef-server-ctl reconfigure
+  sudo chef-server-ctl reconfigure  --chef-license=accept-no-persist
   echo ""
   echo "Sleeping 120 seconds to allow the Chef Server to reconfigure in FIPS mode"
   echo ""

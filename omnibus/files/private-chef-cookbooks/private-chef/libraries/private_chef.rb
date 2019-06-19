@@ -275,23 +275,25 @@ EOF
         end
         results["private_chef"][rkey] = PrivateChef[key]
       end
-      results["private_chef"]["default_orgname"] = PrivateChef["default_orgname"]
-      results["private_chef"]["oc-chef-pedant"] = PrivateChef["oc_chef_pedant"]
-      results["private_chef"]["notification_email"] = PrivateChef["notification_email"]
-      results["private_chef"]["from_email"] = PrivateChef["from_email"]
-      results["private_chef"]["fips_enabled"] = PrivateChef["fips"]
-      results["private_chef"]["role"] = PrivateChef["role"]
-      results["private_chef"]["topology"] = PrivateChef["topology"]
-      results["private_chef"]["servers"] = PrivateChef["servers"]
-      results["private_chef"]["backend_vips"] = PrivateChef["backend_vips"]
+      #
+      # Before Chef Client 15 deep merge of attributes dropped 'nil' even if it was higher precedence.
+      #
+      set_target_array_if_not_nil(results["private_chef"], "default_orgname", PrivateChef["default_orgname"])
+      set_target_array_if_not_nil(results["private_chef"], "oc-chef-pedant", PrivateChef["oc_chef_pedant"])
+      set_target_array_if_not_nil(results["private_chef"], "notification_email", PrivateChef["notification_email"])
+      set_target_array_if_not_nil(results["private_chef"], "from_email", PrivateChef["from_email"])
+      set_target_array_if_not_nil(results["private_chef"], "fips_enabled", PrivateChef["fips"])
+      set_target_array_if_not_nil(results["private_chef"], "role", PrivateChef["role"])
+      set_target_array_if_not_nil(results["private_chef"], "topology", PrivateChef["topology"])
+      set_target_array_if_not_nil(results["private_chef"], "servers", PrivateChef["servers"])
+      set_target_array_if_not_nil(results["private_chef"], "backend_vips", PrivateChef["backend_vips"])
       results["private_chef"]["logs"] = {}
-      results["private_chef"]["logs"]["log_retention"] = PrivateChef["log_retention"]
-      results["private_chef"]["logs"]["log_rotation"] = PrivateChef["log_rotation"]
-      results["private_chef"]["dark_launch"] = PrivateChef["dark_launch"]
-      results["private_chef"]["opscode-erchef"]["max_request_size"] = PrivateChef["opscode_erchef"]["max_request_size"]
-      results["private_chef"]["folsom_graphite"] = PrivateChef["folsom_graphite"]
-      results["private_chef"]["profiles"] = PrivateChef["profiles"]
-      results["private_chef"]["insecure_addon_compat"] = PrivateChef["insecure_addon_compat"]
+      set_target_array_if_not_nil(results["private_chef"]["logs"], "log_retention", PrivateChef["log_retention"])
+      set_target_array_if_not_nil(results["private_chef"], "dark_launch", PrivateChef["dark_launch"])
+      set_target_array_if_not_nil(results["private_chef"]["opscode-erchef"], "max_request_size", PrivateChef["opscode_erchef"]["max_request_size"])
+      set_target_array_if_not_nil(results["private_chef"], "folsom_graphite", PrivateChef["folsom_graphite"])
+      set_target_array_if_not_nil(results["private_chef"], "profiles", PrivateChef["profiles"])
+      set_target_array_if_not_nil(results["private_chef"], "insecure_addon_compat", PrivateChef["insecure_addon_compat"])
       results
     end
 
@@ -799,6 +801,12 @@ EOF
 
       gen_ldap if PrivateChef["ldap"]["enabled"]
       generate_hash
+    end
+
+    def set_target_array_if_not_nil(target_array, key, value)
+      if !value.nil?
+        target_array[key] = value
+      end
     end
   end
 end
