@@ -25,7 +25,7 @@ PATH
   specs:
     chef-server-ctl (1.0.0)
       appbundler
-      chef (~> 15.0.214)
+      chef (~> 15.0.300)
       chef_backup
       ffi-yajl (>= 1.2.0)
       highline (~> 1.6, >= 1.6.9)
