@@ -5,12 +5,18 @@ Do *NOT* accept the commit level BuildKite checks as
 sufficient. Always do a complete BuildKite build and run of chef
 pedant before merge.
 
+## Getting Started
+ - Generally all the updates are done inside the dev-vm /host/
+   to avoid inconsistensies with ruby versions.
+ - stop the sync function if it is running
+
 ## Updating Ruby
-- omnibus_overrides.rb
+- omnibus_overrides.rb needs to be updated with the latest acceptable
+  version of Ruby.
 
 - Expeditor and BuildKite scripts
   It is best to keep the version we're using for tests the same as
-  what we're shipping in Chef Server.
+  what we're shipping in Chef Server (match with omnibus_overrides)
     - scripts/bk\_tests/bk\_install.sh
     - .expeditor/verify.pipeline.yml
     - .expeditor/license_scout.sh
@@ -48,10 +54,16 @@ Note:
 Note:
 - It's best to run
     bundle install --binstubs --path=vendor/bundle
+    bundle update
   in the appropriate directories to keep your main ruby install
   clean. However do not forget to clean those up before doing an
   omnibus build, as the files there (especially .so files) can cause
   strange build failures, especially during the final consistency checks.
+
+Note:
+- On the dev-vm /dotfiles dir is mounted from your host. It is useful for
+copying files back from the dev-vm to the host.
+- The ./sync utility is used to copy files from the host into dev-vm.
 
 ## Updating Chef Client
 
