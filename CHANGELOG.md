@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.9 -->
-## [13.0.9](https://github.com/chef/chef-server/tree/13.0.9) (2019-06-19)
+<!-- latest_release 13.0.10 -->
+## [13.0.10](https://github.com/chef/chef-server/tree/13.0.10) (2019-06-19)
 
 #### Merged Pull Requests
-- Ma/license check [#1674](https://github.com/chef/chef-server/pull/1674) ([markan](https://github.com/markan))
+- Praj/rubygems update [#1681](https://github.com/chef/chef-server/pull/1681) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.19.31 -->
 ### Changes since 12.19.31 release
 
 #### Merged Pull Requests
+- Praj/rubygems update [#1681](https://github.com/chef/chef-server/pull/1681) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.10 -->
 - Ma/license check [#1674](https://github.com/chef/chef-server/pull/1674) ([markan](https://github.com/markan)) <!-- 13.0.9 -->
 - [dev-vm] Fixup incomplete rename work. [#1678](https://github.com/chef/chef-server/pull/1678) ([markan](https://github.com/markan)) <!-- 13.0.8 -->
 - Update observer-cli SHA. [#1677](https://github.com/chef/chef-server/pull/1677) ([markan](https://github.com/markan)) <!-- 13.0.7 -->
