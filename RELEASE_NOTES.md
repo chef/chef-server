@@ -8,10 +8,75 @@ This document contains release notes for the current major release and all patch
 For prior releases,
 see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
-## 12.19
+## 13.0.11 (2019-06-19)
+
+### Chef Server is now Chef Infra Server
+
+Chef Server has a new name, but don’t worry, it’s the same Chef Server you’ve grown used to. You’ll notice new branding throughout the application and documentation but the command `chef-server-ctl` remains the same.
+
+### Chef EULA
+
+Chef Infra Server requires an EULA to be accepted by users before it can be installed. Users can accept the EULA in a variety of ways:
+
+- `chef-server-ctl reconfigure --chef-license accept`
+- `chef-server-ctl reconfigure --chef-license accept-no-persist`
+- `CHEF_LICENSE="accept" chef-server-ctl reconfigure`
+- `CHEF_LICENSE="accept-no-persist" chef-server-ctl reconfigure`
+
+Finally, if users run `chef-server-ctl reconfigure` without any of these options, they will receive an interactive prompt asking for license acceptance. If the license is accepted, a marker file will be written to the filesystem unless `accept-no-persist` is specified. Once this marker file is persisted, users no longer need to set any of these flags.
+
+See our [Frequently Asked Questions document](https://www.chef.io/bmc-faq/) for more information on the EULA and license acceptance.
+
+### Deprecation notice
+
+- [Deprecated PowerPC and s390x platforms](https://blog.chef.io/2018/11/01/end-of-life-announcement-for-chef-server-for-linux-on-ibm-z-and-linux-on-ibm-power-systems/)
+- [Deprecated Keepalived/DRBD-based HA](https://blog.chef.io/2018/10/02/end-of-life-announcement-for-drbd-based-ha-support-in-chef-server/)
+- Deprecated Ubuntu 14.04 support. (Ubuntu 14 was EoL’d at the end of April 2019)
+
+### Updates and Improvements
+
+- Updated OpenResty to 1.13.6.2
+    - This fixes two CVEs: CVE-2018-9230 and CVE-2017-7529.
+    - This version cannot be built on PowerPC and s390x because those platforms are not supported in mainline luajit.
+- Updated Ruby version to 2.5.5
+- Updated Chef Infra Client to 14.11.21
+- Updated runit cookbook to 5.1.1
+- Migrated unit tests from Travis to Buildkite. Reorganized them for improved speed, stability and portability.
+- Added some Habitat packaging improvements with parameterized search_server.
+- Erchef request size increased from 1,000,000 to 2,000,000 bytes to better support inspec scanning via the audit cookbook.
+- Nginx error logs no longer log 404s. In the Chef API, 404s are typically not errors as they are often the expected response about an object that doesn't exist. The logs will continue to show 404s in the request logs.
+- Profiles and data-collector upstreams now render correctly if their root_url is configured. If the data_collector token secret is not set, a 401 response code and an error message will be seen instead of 404.
+
+## 12.19.31 (2019-03-07)
+
+This release was triggered by the update to Habitat base plans. (https://blog.chef.io/2019/01/28/base-plans-refresh-is-coming-to-habitat-core-plans/)
+Omnibus release was done to keep in sync with the Habitat release.
+
+- `chef-server-ctl` leverages HAB_LISTEN_CTL envvar if available.
 
 
-## 12.18
+## 12.19.26 (2019-01-31)
+
+This release contains some minor improvements and updates to include software:
+
+- Added request id to nginx log to easily track the Chef request through the logs.
+- Bundler pinned to 1.17 to avoid taking the 2.0 upgrade.
+- Erlang updated to 18.3.4.9
+    - Fixed two CVEs CVE-2017-1000385 and CVE-2016-10253. SSL headers got stricter which unfortunately broke LDAP. (Issue #1642)
+    - Removed `et`, `debugger`, `gs`, and `observer` as they depend on `wx`, which is not available on all platforms.
+- Ruby updated to 2.5.3.
+- Chef Client updated to 14.5.
+- Erchef and Bookshelf can optionally use mTLS protocol for their internal communications.
+- Added configuration for pedant SSL-signed requests to include mTLS support.
+- Habitat package improvements:
+    - Increased `authn:keygen_timeout` amount for `oc_erchef` hab pkg.
+    - Removed `do_end` function from `chef-server-ctl` hab plan.
+    - Enhanced `chef-server-ctl` to function in more habitat environments.
+    - `chef-server-ctl` commands pass relevant TLS options during bifrost API calls.
+- Used standard ruby-cleanup definition, which shrinks install size by ~5% on disk.
+- Removed unused couchdb configurables.
+
+## 12.18.14 (2018-10-15)
 
 - Postgresql updated to 9.6.10
 - In a standalone install postgresql listens on all loopbacks, not
