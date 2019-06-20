@@ -5,26 +5,20 @@ channel="${CHANNEL:-unstable}"
 product="${PRODUCT:-chef-server}"
 version="${VERSION:-latest}"
 
-echo "--- Installing $channel $product $version"
-package_file="$(install-omnibus-product -c "$channel" -P "$product" -v "$version" | tail -n 1)"
-
-if [[ "$package_file" == *.rpm ]]; then
-  check-rpm-signed "$package_file"
-fi
-
-echo "--- Testing $channel $product $version"
-
 export PATH="/opt/opscode/bin:/opt/opscode/embedded/bin:$PATH"
 export INSTALL_DIR="/opt/opscode"
 
-echo ""
-echo ""
-echo "============================================================"
-echo "Verifying ownership of package files"
-echo "============================================================"
-echo ""
+echo "--- Installing $channel $product $version"
+package_file="$(/opt/omnibus-toolchain/bin/install-omnibus-product -c "$channel" -P "$product" -v "$version" -i "$INSTALL_DIR" | tail -n 1)"
 
-NONROOT_FILES="$(find "$INSTALL_DIR" ! -uid 0 -print)"
+echo "--- Verifying omnibus package is signed"
+/opt/omnibus-toolchain/bin/check-omnibus-package-signed "$package_file"
+
+sudo rm -f "$package_file"
+
+echo "--- Verifying ownership of package files"
+
+NONROOT_FILES="$(find "$INSTALL_DIR" ! -user 0 -print)"
 if [[ "$NONROOT_FILES" == "" ]]; then
   echo "Packages files are owned by root.  Continuing verification."
 else
@@ -33,12 +27,7 @@ else
   exit 1
 fi
 
-echo ""
-echo ""
-echo "============================================================"
-echo "Reconfiguring $product"
-echo "============================================================"
-echo ""
+echo "--- Reconfiguring $channel $product $version"
 
 sudo mkdir -p /etc/opscode
 
@@ -64,12 +53,7 @@ y/8SReCpC71R+Vl6d4+Dw6GFdL+6k6W558dPfq3UeV8HPWQEaM7/jXDUKJZ0tB6a
 sudo chef-server-ctl reconfigure --chef-license=accept-no-persist || true
 sleep 120
 
-echo ""
-echo ""
-echo "============================================================"
-echo "Running verification for $product"
-echo "============================================================"
-echo ""
+echo "--- Running verification for $channel $product $version"
 
 echo "Sleeping even longer (120 seconds) to let the system settle"
 sleep 120
