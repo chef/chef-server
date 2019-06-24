@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.11 -->
-## [13.0.11](https://github.com/chef/chef-server/tree/13.0.11) (2019-06-21)
+<!-- latest_release 13.0.12 -->
+## [13.0.12](https://github.com/chef/chef-server/tree/13.0.12) (2019-06-24)
 
 #### Merged Pull Requests
-- Update Release Notes for release 13.0.11 [#1682](https://github.com/chef/chef-server/pull/1682) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Delete the broken link for chef-ha-drbd plugin. [#1686](https://github.com/chef/chef-server/pull/1686) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.19.31 -->
 ### Changes since 12.19.31 release
 
 #### Merged Pull Requests
+- Delete the broken link for chef-ha-drbd plugin. [#1686](https://github.com/chef/chef-server/pull/1686) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.12 -->
 - Update Release Notes for release 13.0.11 [#1682](https://github.com/chef/chef-server/pull/1682) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.11 -->
 - Praj/rubygems update [#1681](https://github.com/chef/chef-server/pull/1681) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.10 -->
 - Ma/license check [#1674](https://github.com/chef/chef-server/pull/1674) ([markan](https://github.com/markan)) <!-- 13.0.9 -->
