@@ -99,8 +99,8 @@ describe "/_stats API endpoint", :stats do
   end
 
   # Don't turn on any of the tests unless we have a password.
-  # and are not running on the backend of a tiered setup.
-  if Pedant::Config.pedant_platform.stats_password
+  # These test should not run on the backend of a tiered setup.
+  if Pedant::Config.pedant_platform.stats_password && !(Pedant::Config.topology == "tiered" || Pedant::Config.role == "backend")
     it "returns a list of collected statistics", :smoke do
       get(request_url, nil, auth_headers: auth_headers).should look_like({
         :status => 200,
