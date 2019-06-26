@@ -50,7 +50,8 @@ y/8SReCpC71R+Vl6d4+Dw6GFdL+6k6W558dPfq3UeV8HPWQEaM7/jXDUKJZ0tB6a
 -----END DH PARAMETERS-----
 " | sudo tee /etc/opscode/dhparam.pem
 
-sudo chef-server-ctl reconfigure --chef-license=accept-no-persist || true
+# At least for now we want to fail if reconfigure fails
+sudo chef-server-ctl reconfigure --chef-license=accept-no-persist
 sleep 120
 
 echo "--- Running verification for $channel $product $version"
@@ -58,14 +59,7 @@ echo "--- Running verification for $channel $product $version"
 echo "Sleeping even longer (120 seconds) to let the system settle"
 sleep 120
 
-if [[ "$(uname -m)" == "s390x" ]]; then
-  # FIX ME FIX ME FIX ME
-  # This is to see if we can get the build passing at all on the s390x platform
-  # FIX ME FIX ME FIX ME
-  sudo chef-server-ctl test -J pedant.xml --smoke --compliance-proxy-tests
-else
-  sudo chef-server-ctl test -J pedant.xml --all --compliance-proxy-tests
-fi
+sudo chef-server-ctl test -J pedant.xml --all --compliance-proxy-tests
 
 if [[ "${OMNIBUS_FIPS_MODE:-false}" == "true" ]]; then
   echo "fips true" | sudo tee -a /etc/opscode/chef-server.rb
