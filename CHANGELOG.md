@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.14 -->
-## [13.0.14](https://github.com/chef/chef-server/tree/13.0.14) (2019-06-24)
+<!-- latest_release 13.0.15 -->
+## [13.0.15](https://github.com/chef/chef-server/tree/13.0.15) (2019-06-26)
 
 #### Merged Pull Requests
-- Alter the delivery build recipe to accept the chef license. [#1688](https://github.com/chef/chef-server/pull/1688) ([markan](https://github.com/markan))
+- Do not run /_stats endpoint tests on backend of a tiered topology. [#1689](https://github.com/chef/chef-server/pull/1689) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=12.19.31 -->
 ### Changes since 12.19.31 release
 
 #### Merged Pull Requests
+- Do not run /_stats endpoint tests on backend of a tiered topology. [#1689](https://github.com/chef/chef-server/pull/1689) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.15 -->
 - Alter the delivery build recipe to accept the chef license. [#1688](https://github.com/chef/chef-server/pull/1688) ([markan](https://github.com/markan)) <!-- 13.0.14 -->
 - [chef-server-ctl] Fix chef dependency in hab build [#1687](https://github.com/chef/chef-server/pull/1687) ([markan](https://github.com/markan)) <!-- 13.0.13 -->
 - Delete the broken link for chef-ha-drbd plugin. [#1686](https://github.com/chef/chef-server/pull/1686) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.12 -->
