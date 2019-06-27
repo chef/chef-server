@@ -97,6 +97,28 @@ component_runit_service "rabbitmq" do
   control ['t']
 end
 
+# Does this belong inside the is_data_master block below?
+# Walk of shame moment. We're not sure why the graceful stop of
+# rabbitmq is failing. Things seemed to work in runit 4.1.1, but it's
+# not working in 5.1.1. Instead we are timing out during stop/restart
+# actions This is a workaround to ensure we are actually restarting
+# the process in a clean-ish way. Hopefully we will either figure out
+# the root cause or remove rabbitmq soon.
+#
+script 'hard_kill_rabbitmq' do
+  interpreter "bash"
+  code <<-EOH
+timeout 60 /opt/opscode/embedded/bin/sv stop /opt/opscode/service/rabbitmq
+if [ $? -ne 0 ] 
+then
+   kill --term `/opt/opscode/sv/rabbitmq/supervise/pid`
+fi
+
+/opt/opscode/embedded/bin/sv start /opt/opscode/service/rabbitmq
+EOH
+  action :nothing
+end
+
 if is_data_master?
   rmq_ctl = "/opt/opscode/embedded/bin/rabbitmqctl"
   rmq_plugins = "/opt/opscode/embedded/bin/rabbitmq-plugins"
@@ -242,14 +264,14 @@ if is_data_master?
       user opc_username
       not_if rabbitmq_management_is_up
       # management plugin needs a rabbit restart
-      notifies :restart, 'component_runit_service[rabbitmq]', :delayed
+      notifies :run, 'script[hard_kill_rabbitmq]', :delayed
       retries 10
     end
   else
     execute "#{rmq_plugins} disable rabbitmq_management" do
       environment (rabbitmq_env)
       user opc_username
-      notifies :restart, 'component_runit_service[rabbitmq]', :delayed
+      notifies :run, 'script[hard_kill_rabbitmq]', :delayed
       only_if rabbitmq_management_is_up
       retries 10
     end
