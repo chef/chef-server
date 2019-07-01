@@ -1,20 +1,18 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.17 -->
+<!-- latest_release -->
+<!-- latest_release -->
+
+<!-- release_rollup -->
+<!-- release_rollup -->
+
+<!-- latest_stable_release -->
 ## [13.0.17](https://github.com/chef/chef-server/tree/13.0.17) (2019-07-01)
 
 #### Merged Pull Requests
 - Remove 12.19.* version constraint on master [#1693](https://github.com/chef/chef-server/pull/1693) ([markan](https://github.com/markan))
-<!-- latest_release -->
-
-<!-- release_rollup since=13.0.16 -->
-### Changes since 13.0.16 release
-
-#### Merged Pull Requests
-- Remove 12.19.* version constraint on master [#1693](https://github.com/chef/chef-server/pull/1693) ([markan](https://github.com/markan)) <!-- 13.0.17 -->
-<!-- release_rollup -->
-
 <!-- latest_stable_release -->
+
 ## [13.0.16](https://github.com/chef/chef-server/tree/13.0.16) (2019-07-01)
 
 #### Merged Pull Requests
@@ -50,7 +48,6 @@
 - Alter the delivery build recipe to accept the chef license. [#1688](https://github.com/chef/chef-server/pull/1688) ([markan](https://github.com/markan))
 - Do not run /_stats endpoint tests on backend of a tiered topology. [#1689](https://github.com/chef/chef-server/pull/1689) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 - [chef-server-ctl] Fix rabbitmq fail on first reconfigure [#1691](https://github.com/chef/chef-server/pull/1691) ([markan](https://github.com/markan))
-<!-- latest_stable_release -->
 
 ## [12.19.31](https://github.com/chef/chef-server/tree/12.19.31) (2019-03-07)
 
