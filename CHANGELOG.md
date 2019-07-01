@@ -7,46 +7,51 @@
 - Remove 12.19.* version constraint on master [#1693](https://github.com/chef/chef-server/pull/1693) ([markan](https://github.com/markan))
 <!-- latest_release -->
 
-<!-- release_rollup since=12.19.31 -->
-### Changes since 12.19.31 release
+<!-- release_rollup since=13.0.16 -->
+### Changes since 13.0.16 release
 
 #### Merged Pull Requests
 - Remove 12.19.* version constraint on master [#1693](https://github.com/chef/chef-server/pull/1693) ([markan](https://github.com/markan)) <!-- 13.0.17 -->
-- [chef-server-ctl] Fix rabbitmq fail on first reconfigure [#1691](https://github.com/chef/chef-server/pull/1691) ([markan](https://github.com/markan)) <!-- 13.0.16 -->
-- Do not run /_stats endpoint tests on backend of a tiered topology. [#1689](https://github.com/chef/chef-server/pull/1689) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.15 -->
-- Alter the delivery build recipe to accept the chef license. [#1688](https://github.com/chef/chef-server/pull/1688) ([markan](https://github.com/markan)) <!-- 13.0.14 -->
-- [chef-server-ctl] Fix chef dependency in hab build [#1687](https://github.com/chef/chef-server/pull/1687) ([markan](https://github.com/markan)) <!-- 13.0.13 -->
-- Delete the broken link for chef-ha-drbd plugin. [#1686](https://github.com/chef/chef-server/pull/1686) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.12 -->
-- Update Release Notes for release 13.0.11 [#1682](https://github.com/chef/chef-server/pull/1682) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.11 -->
-- Praj/rubygems update [#1681](https://github.com/chef/chef-server/pull/1681) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.10 -->
-- Ma/license check [#1674](https://github.com/chef/chef-server/pull/1674) ([markan](https://github.com/markan)) <!-- 13.0.9 -->
-- [dev-vm] Fixup incomplete rename work. [#1678](https://github.com/chef/chef-server/pull/1678) ([markan](https://github.com/markan)) <!-- 13.0.8 -->
-- Update observer-cli SHA. [#1677](https://github.com/chef/chef-server/pull/1677) ([markan](https://github.com/markan)) <!-- 13.0.7 -->
-- Ma/named dev vm [#1670](https://github.com/chef/chef-server/pull/1670) ([markan](https://github.com/markan)) <!-- 13.0.6 -->
-- Add OSS Practices [#1675](https://github.com/chef/chef-server/pull/1675) ([markan](https://github.com/markan)) <!-- 13.0.5 -->
-- Remove Ubuntu 14.04 from build matrix [#1662](https://github.com/chef/chef-server/pull/1662) ([markan](https://github.com/markan)) <!-- 13.0.4 -->
-- Ma/update runit [#1668](https://github.com/chef/chef-server/pull/1668) ([markan](https://github.com/markan)) <!-- 13.0.3 -->
-- Remove more keepalived stuff [#1673](https://github.com/chef/chef-server/pull/1673) ([markan](https://github.com/markan)) <!-- 13.0.2 -->
-- Remove Keepalived/DRBD based HA [#1664](https://github.com/chef/chef-server/pull/1664) ([markan](https://github.com/markan)) <!-- 13.0.1 -->
-- Bump version to v13 for Chef EULA major release [#1667](https://github.com/chef/chef-server/pull/1667) ([btm](https://github.com/btm)) <!-- 13.0.0 -->
-- Ma/use specific path [#1671](https://github.com/chef/chef-server/pull/1671) ([markan](https://github.com/markan)) <!-- 12.19.46 -->
-- Update the omnibus build license to the Chef EULA [#1666](https://github.com/chef/chef-server/pull/1666) ([btm](https://github.com/btm)) <!-- 12.19.45 -->
-- render profiles and data-collector upstreams correctly [#1665](https://github.com/chef/chef-server/pull/1665) ([sdelano](https://github.com/sdelano)) <!-- 12.19.44 -->
-- [nginx] Don&#39;t log 404s to the error log [#1663](https://github.com/chef/chef-server/pull/1663) ([stevendanna](https://github.com/stevendanna)) <!-- 12.19.43 -->
-- Update chef-client in one more location. [#1660](https://github.com/chef/chef-server/pull/1660) ([markan](https://github.com/markan)) <!-- 12.19.42 -->
-- Update pedant to match new maximum request size [#1661](https://github.com/chef/chef-server/pull/1661) ([markan](https://github.com/markan)) <!-- 12.19.41 -->
-- Remove `/habitat` from end of `plan_path` [#1659](https://github.com/chef/chef-server/pull/1659) ([tduffield](https://github.com/tduffield)) <!-- 12.19.40 -->
-- Double the erchef max_request_size [#1649](https://github.com/chef/chef-server/pull/1649) ([irvingpop](https://github.com/irvingpop)) <!-- 12.19.39 -->
-- Update license scout ruby pin [#1655](https://github.com/chef/chef-server/pull/1655) ([jaymalasinha](https://github.com/jaymalasinha)) <!-- 12.19.38 -->
-- Update ruby and chef versions [#1647](https://github.com/chef/chef-server/pull/1647) ([jaymalasinha](https://github.com/jaymalasinha)) <!-- 12.19.37 -->
-- Update openresty to 1.13.6.2 [#1623](https://github.com/chef/chef-server/pull/1623) ([markan](https://github.com/markan)) <!-- 12.19.36 -->
-- Parameterize the search_server in the habitized pedant config [#1629](https://github.com/chef/chef-server/pull/1629) ([irvingpop](https://github.com/irvingpop)) <!-- 12.19.35 -->
-- Fix unit tests [#1644](https://github.com/chef/chef-server/pull/1644) ([markan](https://github.com/markan)) <!-- 12.19.34 -->
-- Jsinha/migrate all tests tobk [#1640](https://github.com/chef/chef-server/pull/1640) ([jaymalasinha](https://github.com/jaymalasinha)) <!-- 12.19.33 -->
-- Update gitignore [#1645](https://github.com/chef/chef-server/pull/1645) ([markan](https://github.com/markan)) <!-- 12.19.32 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [13.0.16](https://github.com/chef/chef-server/tree/13.0.16) (2019-07-01)
+
+#### Merged Pull Requests
+- Update gitignore [#1645](https://github.com/chef/chef-server/pull/1645) ([markan](https://github.com/markan))
+- Jsinha/migrate all tests tobk [#1640](https://github.com/chef/chef-server/pull/1640) ([jaymalasinha](https://github.com/jaymalasinha))
+- Fix unit tests [#1644](https://github.com/chef/chef-server/pull/1644) ([markan](https://github.com/markan))
+- Parameterize the search_server in the habitized pedant config [#1629](https://github.com/chef/chef-server/pull/1629) ([irvingpop](https://github.com/irvingpop))
+- Update openresty to 1.13.6.2 [#1623](https://github.com/chef/chef-server/pull/1623) ([markan](https://github.com/markan))
+- Update ruby and chef versions [#1647](https://github.com/chef/chef-server/pull/1647) ([jaymalasinha](https://github.com/jaymalasinha))
+- Update license scout ruby pin [#1655](https://github.com/chef/chef-server/pull/1655) ([jaymalasinha](https://github.com/jaymalasinha))
+- Double the erchef max_request_size [#1649](https://github.com/chef/chef-server/pull/1649) ([irvingpop](https://github.com/irvingpop))
+- Remove `/habitat` from end of `plan_path` [#1659](https://github.com/chef/chef-server/pull/1659) ([tduffield](https://github.com/tduffield))
+- Update pedant to match new maximum request size [#1661](https://github.com/chef/chef-server/pull/1661) ([markan](https://github.com/markan))
+- Update chef-client in one more location. [#1660](https://github.com/chef/chef-server/pull/1660) ([markan](https://github.com/markan))
+- [nginx] Don&#39;t log 404s to the error log [#1663](https://github.com/chef/chef-server/pull/1663) ([stevendanna](https://github.com/stevendanna))
+- render profiles and data-collector upstreams correctly [#1665](https://github.com/chef/chef-server/pull/1665) ([sdelano](https://github.com/sdelano))
+- Update the omnibus build license to the Chef EULA [#1666](https://github.com/chef/chef-server/pull/1666) ([btm](https://github.com/btm))
+- Ma/use specific path [#1671](https://github.com/chef/chef-server/pull/1671) ([markan](https://github.com/markan))
+- Bump version to v13 for Chef EULA major release [#1667](https://github.com/chef/chef-server/pull/1667) ([btm](https://github.com/btm))
+- Remove Keepalived/DRBD based HA [#1664](https://github.com/chef/chef-server/pull/1664) ([markan](https://github.com/markan))
+- Remove more keepalived stuff [#1673](https://github.com/chef/chef-server/pull/1673) ([markan](https://github.com/markan))
+- Ma/update runit [#1668](https://github.com/chef/chef-server/pull/1668) ([markan](https://github.com/markan))
+- Remove Ubuntu 14.04 from build matrix [#1662](https://github.com/chef/chef-server/pull/1662) ([markan](https://github.com/markan))
+- Add OSS Practices [#1675](https://github.com/chef/chef-server/pull/1675) ([markan](https://github.com/markan))
+- Ma/named dev vm [#1670](https://github.com/chef/chef-server/pull/1670) ([markan](https://github.com/markan))
+- Update observer-cli SHA. [#1677](https://github.com/chef/chef-server/pull/1677) ([markan](https://github.com/markan))
+- [dev-vm] Fixup incomplete rename work. [#1678](https://github.com/chef/chef-server/pull/1678) ([markan](https://github.com/markan))
+- Ma/license check [#1674](https://github.com/chef/chef-server/pull/1674) ([markan](https://github.com/markan))
+- Praj/rubygems update [#1681](https://github.com/chef/chef-server/pull/1681) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update Release Notes for release 13.0.11 [#1682](https://github.com/chef/chef-server/pull/1682) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Delete the broken link for chef-ha-drbd plugin. [#1686](https://github.com/chef/chef-server/pull/1686) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- [chef-server-ctl] Fix chef dependency in hab build [#1687](https://github.com/chef/chef-server/pull/1687) ([markan](https://github.com/markan))
+- Alter the delivery build recipe to accept the chef license. [#1688](https://github.com/chef/chef-server/pull/1688) ([markan](https://github.com/markan))
+- Do not run /_stats endpoint tests on backend of a tiered topology. [#1689](https://github.com/chef/chef-server/pull/1689) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- [chef-server-ctl] Fix rabbitmq fail on first reconfigure [#1691](https://github.com/chef/chef-server/pull/1691) ([markan](https://github.com/markan))
+<!-- latest_stable_release -->
+
 ## [12.19.31](https://github.com/chef/chef-server/tree/12.19.31) (2019-03-07)
 
 #### Merged Pull Requests
@@ -55,7 +60,6 @@
 - chef-server-ctl should leverage HAB_LISTEN_CTL envvar if available [#1628](https://github.com/chef/chef-server/pull/1628) ([jeremymv2](https://github.com/jeremymv2))
 - Rebuild the hartifacts (OpenSSL was updated) [#1636](https://github.com/chef/chef-server/pull/1636) ([jaym](https://github.com/jaym))
 - Force a habitat rebuild to pull in new openssl [#1637](https://github.com/chef/chef-server/pull/1637) ([stevendanna](https://github.com/stevendanna))
-<!-- latest_stable_release -->
 
 ## [12.19.26](https://github.com/chef/chef-server/tree/12.19.26) (2019-01-31)
 
