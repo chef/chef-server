@@ -19,12 +19,7 @@ github:
   # details from the Pull Request via the `built_in:update_changelog` merge_action.
   changelog_file: "CHANGELOG.md"
   release_branch:
-    - master:
-        # we'll have to bump this later, as globs won't let us do > 18
-        version_constraint: "12.19.*"
-    - 12-18-stable:
-        # this branch should only be active
-        version_constraint: "12.18.*"
+    - master
 
 # Habitat + Docker exporting
 
