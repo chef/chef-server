@@ -6,7 +6,7 @@ plan_path = "src/oc-id"
 export_targets = ["docker"]
 
 [chef-server-nginx]
-plan_path = "src/nginx"
+plan_path = "src/nginx/habitat"
 export_targets = ["docker"]
 
 [bookshelf]
