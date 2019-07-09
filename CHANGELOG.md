@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.18 -->
-## [13.0.18](https://github.com/chef/chef-server/tree/13.0.18) (2019-07-08)
+<!-- latest_release 13.0.19 -->
+## [13.0.19](https://github.com/chef/chef-server/tree/13.0.19) (2019-07-09)
 
 #### Merged Pull Requests
-- Update yard to current [#1696](https://github.com/chef/chef-server/pull/1696) ([tas50](https://github.com/tas50))
+- Update github templates, add lock config, and update codeowners [#1695](https://github.com/chef/chef-server/pull/1695) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- Update github templates, add lock config, and update codeowners [#1695](https://github.com/chef/chef-server/pull/1695) ([tas50](https://github.com/tas50)) <!-- 13.0.19 -->
 - Update yard to current [#1696](https://github.com/chef/chef-server/pull/1696) ([tas50](https://github.com/tas50)) <!-- 13.0.18 -->
 <!-- release_rollup -->
 
