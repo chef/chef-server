@@ -918,6 +918,8 @@ default['private_chef']['data_collector']['http_cull_interval'] = "{1, min}"
 default['private_chef']['data_collector']['http_max_connection_duration'] = "{70,sec}"
 # Options for the ibrowse connections (see ibrowse).
 default['private_chef']['data_collector']['ibrowse_options'] = "[{connect_timeout, 10000}]"
+# Select whether data_collector affects overall status in _status endpoint
+default['private_chef']['data_collector']['health_check'] = true
 
 ##
 # Compliance Profiles
