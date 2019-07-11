@@ -178,7 +178,6 @@ end
     serveradmin: false,
   },
 }.each do |user_name, user_options|
-
   chef_user user_name do
     first_name 'Chef'
     last_name user_name.capitalize
