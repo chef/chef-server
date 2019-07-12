@@ -129,7 +129,7 @@
         {server_version, "<%= node['private_chef']['version'] %>"},
         {health_ping_timeout, <%= node['private_chef']['opscode-erchef']['health_ping_timeout'] %>},
         {health_ping_modules, [
-            <% if node['private_chef']['data_collector']['root_url'] && node['private_chef']['data_collector']['health_check'] == true %>
+            <% if node['private_chef']['data_collector']['root_url'] && node['private_chef']['data_collector']['health_check'] %>
             data_collector,
             <% end %>
             oc_chef_authz,
