@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.20 -->
-## [13.0.20](https://github.com/chef/chef-server/tree/13.0.20) (2019-07-11)
+<!-- latest_release 13.0.21 -->
+## [13.0.21](https://github.com/chef/chef-server/tree/13.0.21) (2019-07-18)
 
 #### Merged Pull Requests
-- Bump bundler to 1.17.3 [#1705](https://github.com/chef/chef-server/pull/1705) ([markan](https://github.com/markan))
+- Dvm changes to get external postgres working. [#1708](https://github.com/chef/chef-server/pull/1708) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- Dvm changes to get external postgres working. [#1708](https://github.com/chef/chef-server/pull/1708) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.21 -->
 - Bump bundler to 1.17.3 [#1705](https://github.com/chef/chef-server/pull/1705) ([markan](https://github.com/markan)) <!-- 13.0.20 -->
 - Update github templates, add lock config, and update codeowners [#1695](https://github.com/chef/chef-server/pull/1695) ([tas50](https://github.com/tas50)) <!-- 13.0.19 -->
 - Update yard to current [#1696](https://github.com/chef/chef-server/pull/1696) ([tas50](https://github.com/tas50)) <!-- 13.0.18 -->
