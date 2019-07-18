@@ -154,7 +154,7 @@ def define_chef_server(config, attributes)
     if vmattr["postgresql"]["start"] and vmattr["postgresql"]["use-external"]
       # TODO make this stuff common - we have these values in 2-3 places now...
       pg = { "postgresql['external']" => true,
-             "postgresql['vip']" => "\"#{IPS[:database]}\"",
+             "postgresql['vip']" => "\"#{IPS[:db]}\"",
              "postgresql['port']" => 5432,
              "postgresql['db_superuser']" => "\"#{DB_SUPERUSER}\"",
              "postgresql['db_superuser_password']" => "\"#{DB_SUPERPASS}\"",
@@ -276,13 +276,13 @@ def define_ldap_server(config, attributes)
 end
 
 def define_db_server(config, attributes)
-  config.vm.hostname = "database.#{VMName}.dev"
-  config.vm.network "private_network", ip: IPS[:database]
+  config.vm.hostname = "db.#{VMName}.dev"
+  config.vm.network "private_network", ip: IPS[:db]
   customize_vm(config, name: "database#{Variant}", memory: 512, cpus: 1)
   set_chef_zero_provisioning(config,
                              recipes: ["provisioning::hosts"],
                              json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
-  config.vm.provision "shell", path: "scripts/configure-postgres.sh"
+  config.vm.provision "shell", path: "scripts/provision-postgres.sh", args: "#{IPS[:cs]}"
 end
 
 def define_custom_server(config, attributes)
