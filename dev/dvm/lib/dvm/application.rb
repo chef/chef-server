@@ -142,7 +142,8 @@ module DVM
     def psql(project_name)
       ensure_project(project_name)
       database = @projects[project_name].database
-      exec "sudo -u opscode-pgsql /opt/opscode/embedded/bin/psql #{database}"
+      #exec "sudo -u opscode-pgsql /opt/opscode/embedded/bin/psql #{database}"
+      exec "sudo -u opscode-pgsql /opt/opscode/embedded/bin/psql \"dbname=#{database} sslmode=require\""
     end
 
 
