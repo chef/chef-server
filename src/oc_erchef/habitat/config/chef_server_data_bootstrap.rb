@@ -43,6 +43,7 @@ class EcPostgres
                                          'host' => postgres['vip'],
                                          'password' => postgres['db_superuser_password'],
                                          'port' => postgres['port'],
+                                         #'sslmode' => postgres['sslmode'],
                                          'dbname' => database)
     rescue => e
       if retries > 0

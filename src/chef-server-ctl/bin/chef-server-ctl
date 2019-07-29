@@ -120,9 +120,10 @@ module Omnibus
     end
 
     def postgresql_connection(postgres)
-      PGconn.open('user' => postgres['db_superuser'], 'host' => postgres['vip'],
+      PG::Connection.open('user' => postgres['db_superuser'], 'host' => postgres['vip'],
                   'password' => credentials.get('postgresql', 'db_superuser_password'),
-                  'port' => postgres['port'], 'dbname' => 'template1')
+                  'port' => postgres['port'], 'sslmode' => postgres['sslmode'],
+                  'dbname' => 'template1')
     end
 
     def postgres_verbose_status(postgres, connection)

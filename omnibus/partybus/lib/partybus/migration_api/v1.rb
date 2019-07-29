@@ -130,9 +130,11 @@ EOF
         require 'pg'
         options = default_opts_for_service(service).merge(opts)
         ::PGconn.open({'user' => options[:username],
+        #::PG::Connection.open({'user' => options[:username],
                       'password' => options[:password],
                       'dbname' => options[:database],
                       'host' => Partybus.config.postgres['vip'],
+                      #'sslmode' => postgres['sslmode'],
                       'port' => Partybus.config.postgres['port']})
       end
 

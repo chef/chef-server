@@ -623,7 +623,9 @@ default['private_chef']['postgresql']['wal_level'] = "minimal"
 default['private_chef']['postgresql']['archive_mode'] = "off" # "cannot be enabled when wal_level is set to minimal"
 default['private_chef']['postgresql']['archive_command'] = ""
 default['private_chef']['postgresql']['archive_timeout'] = 0 # 0 is disabled.
-default['private_chef']['postgresql']['sslmode'] = 'disable'
+# disable | allow | prefer | require | verify-ca | verify-full
+# for now: require
+default['private_chef']['postgresql']['sslmode'] = 'require'
 
 # This is based on the tuning parameters here:
 #
