@@ -19,12 +19,12 @@ class EcPostgres
     end
     max_retries = retries
     begin
-      connection = ::PGconn.open('user' => postgres['db_superuser'],
-                                 'host' => postgres['vip'],
-                                 'password' => postgres['db_superuser_password'],
-                                 'port' => postgres['port'],
-                                 'sslmode' => postgres['sslmode'],
-                                 'dbname' => database)
+      connection = ::PG::Connection.open('user' => postgres['db_superuser'],
+                                 'host' =>         postgres['vip'],
+                                 'password' =>     postgres['db_superuser_password'],
+                                 'port' =>         postgres['port'],
+                                 'sslmode' =>      postgres['sslmode'],
+                                 'dbname' =>       database)
     rescue => e
       if retries > 0
         sleep_time = 2**((max_retries - retries))
@@ -57,7 +57,7 @@ class EcPostgres
     require 'pg'
     postgres = node['private_chef']['postgresql']
     as_user(postgres['username']) do
-      connection = ::PGconn.open('dbname' => database, :port => postgres['port'])
+      connection = ::PG::Connection.open('dbname' => database, :port => postgres['port'])
       begin
         yield connection
       ensure

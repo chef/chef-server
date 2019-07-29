@@ -13,9 +13,11 @@ define_upgrade do
     pc = running_config['private_chef']
     keyname = pc['opscode-erchef'].has_key?('sql_user') ? 'opscode-erchef' : 'postgresql'
     connection = ::PGconn.open('user' => pc[keyname]['sql_user'],
+    # connection = ::PG::Connnection.open('user' => pc[keyname]['sql_user'],
                                'host' => pc['postgresql']['vip'],
                                'password' => Partybus.config.secrets.get('opscode_erchef', 'sql_password'),
                                'port' => pc['postgresql']['port'],
+                               # 'sslmode' => postgres['sslmode'],
                                'dbname' => 'opscode_chef')
     begin
       connection.exec("select migrate_keys();")
