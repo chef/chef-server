@@ -78,14 +78,24 @@ max_connections = <%= node['private_chef']['postgresql']['max_connections'] %>		
 
 #authentication_timeout = 1min		# 1s-600s
 
-ssl = on				        # off | on (change requires restart)
+# currently untested because this doesn't render/sync to anything on the database vm;
+# it has its own postgresql.conf
+<%=
+    if node['private_chef']['postgresql']['sslmode'] == 'disable'
+'ssl = off'
+    else
+# this will be much cleaner after we implement how to handle certs
+"ssl = on				        # off | on (change requires restart)
 # certs for external postgresql setup (should probably move to postgresql data directory and eliminate these settings)
 # not sure what effect these have (if any) on internal postgresql setup
 ssl_cert_file = '/etc/ssl/certs/ssl-cert-snakeoil.pem'          # (change requires restart)
 ssl_key_file =  '/etc/ssl/private/ssl-cert-snakeoil.key'        # (change requires restart)
 # certs for internal postgresql setup (should probably move to postgresql data directory and eliminate these settings)
 #ssl_cert_file = '/host/src/ssl-sync/api.chef-server.dev.crt'
-#ssl_key_file  = '/host/src/ssl-sync/api.chef-server.dev.key'
+#ssl_key_file  = '/host/src/ssl-sync/api.chef-server.dev.key'"
+    end
+%>
+
 
 #ssl_ciphers = 'ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH'	# allowed SSL ciphers
 					# (change requires restart)
