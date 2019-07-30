@@ -38,7 +38,7 @@ class ZendeskSSOURL
     JWT.encode({
       iat: iat,
       jti: jti,
-      name: user.first_name,
+      name: [user.first_name, user.last_name].join(' '),
       email: user.email,
     }, settings.shared_secret)
   end
