@@ -104,6 +104,7 @@ EOF
       # :database, and/or :path.
       def run_sqitch(target, service, opts = {})
         options = default_opts_for_service(service).merge(opts)
+        # sslmode below ???
         command = <<-EOM.gsub(/\s+/," ").strip!
           sqitch --engine pg
             --db-name #{options[:database]}
@@ -129,12 +130,14 @@ EOF
       def pg_conn_for(service, opts = {})
         require 'pg'
         options = default_opts_for_service(service).merge(opts)
-        ::PGconn.open({'user' => options[:username],
-        #::PG::Connection.open({'user' => options[:username],
+        ::PG::Connection.open({'user' => options[:username],
                       'password' => options[:password],
                       'dbname' => options[:database],
                       'host' => Partybus.config.postgres['vip'],
+                      'sslmode' => 'require',
                       #'sslmode' => postgres['sslmode'],
+                      #'sslmode' => Partybus.config.postgres['sslmode'],
+                      #'sslmode' => options['sslmode'],
                       'port' => Partybus.config.postgres['port']})
       end
 
