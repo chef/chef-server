@@ -9,6 +9,7 @@ gem 'bundler', '>1.10'
 group :omnibus do
   gem 'omnibus', git: 'https://github.com/chef/omnibus'
   gem 'omnibus-software', git: 'https://github.com/chef/omnibus-software'
+  gem 'artifactory'
 end
 
 group :test do
