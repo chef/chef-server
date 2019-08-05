@@ -279,6 +279,70 @@ default['private_chef']['opscode-expander']['nodes'] = 2
 default['private_chef']['opscode-expander']['max_retries'] = 1
 default['private_chef']['opscode-expander']['retry_wait'] = 1
 
+
+####
+# Elasticsearch
+####
+var_base = "/var/opt/opscode"
+log_base = "/var/log/opscode"
+
+default['private_chef']['elasticsearch']['enable'] = true
+elasticsearch = default['private_chef']['elasticsearch']
+
+# These attributes cannot be overridden in chef-server.rb
+#elasticsearch['tunable_blacklist'] = %w{dir data_dir try_start}
+#elasticsearch['try_start'] = true
+elasticsearch['dir'] = "#{var_base}/elasticsearch"
+elasticsearch['data_dir'] = "#{var_base}/elasticsearch/data"
+elasticsearch['plugins_directory'] = "#{var_base}/elasticsearch/plugins"
+elasticsearch['scripts_directory'] = "#{var_base}/elasticsearch/scripts"
+elasticsearch['temp_directory'] = "#{var_base}/elasticsearch/tmp"
+elasticsearch['log_directory'] = "#{log_base}/elasticsearch"
+elasticsearch['log_rotation']['file_maxbytes'] = 104857600
+elasticsearch['log_rotation']['num_to_keep'] = 10
+elasticsearch['port'] = 9200
+elasticsearch['enable_gc_log'] = false
+elasticsearch['initial_cluster_join_timeout'] = 90
+
+# each item in this list will be placed as-is into java_opts config file.
+# entries are set in chef-server.rb as
+# elasticsearch.jvm_opts = [
+#  "-xoption1",
+#  "-xoption2",
+#  ...
+#  "optionN"
+# ]
+#
+# If you wish to override heap start/max size or new generation size, set them
+# in chef-server.rb.  The defaults are are computed in the elasticsearch
+# recipe based on node memory, but can be overridden as
+# elasticsearch.heap_size = $value
+# elasticsearch.new_size = $value
+# Note that in both cases, $value is a number that represents megabytes
+elasticsearch['jvm_opts'] = []
+
+#
+# NOTE: if new_size or heap_size is also specificed directly in java_opts,
+# it will be ignored in favor of the chef-server.rb values or the defaults
+# as calculated here.  Only use chef-server.rb to set heap and new sizes.
+#
+# TODO - we'll want to put limits in place and validate them.
+#
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/heap-size.html
+#
+# Running this with different values to determine the zero-based
+# compression threshold:
+#
+# $ /opt/opscode/embedded/jre/bin/java -XX:+UnlockDiagnosticVMOptions -XX:+PrintCompressedOopsMode -Xmx28G 2>&1 | grep "ero"
+# heap address: 0x00000000c0000000, size: 28672 MB, Compressed Oops mode: Zero based, Oop shift amount: 3
+#
+# ... turns up that our limit is around 28G, which is where the max
+# should be set. (TODO)
+#
+#
+elasticsearch['heap_size'] = Elasticsearch.heap_size_default(node)
+elasticsearch['new_size'] = Elasticsearch.new_size_default(node)
+
 ####
 # Erlang Chef Server API
 ####

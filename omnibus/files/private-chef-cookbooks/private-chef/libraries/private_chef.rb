@@ -44,6 +44,7 @@ module PrivateChef
   rabbitmq["log_rotation"] ||= Mash.new
   opscode_solr4 Mash.new
   opscode_solr4["log_rotation"] ||= Mash.new
+  elasticsearch Mash.new
   opscode_expander Mash.new
   opscode_expander["log_rotation"] ||= Mash.new
   opscode_erchef Mash.new
@@ -226,6 +227,7 @@ EOF
         "rabbitmq",
         "external_rabbitmq",
         "opscode_solr4",
+        "elasticsearch",
         "opscode_expander",
         "opscode_erchef",
         "oc_chef_authz",
