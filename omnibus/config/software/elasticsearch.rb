@@ -18,35 +18,12 @@ name "elasticsearch"
 default_version "6.8.1"
 
 dependency "server-jre"
-#dependency "openjdk"
 
 license "Apache-2.0"
 license_file "LICENSE.txt"
 skip_transitive_dependency_licensing true
 
-#TODO: Look at deleting the older versions.
-source url: "https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/#{version}/elasticsearch-#{version}.tar.gz"
 relative_path "elasticsearch-#{version}"
-
-version "2.3.1" do
-  source sha256: "f0092e73038e0472fcdd923e5f2792e13692ea0f09ca034a54dd49b217110ebb"
-end
-
-version "2.4.1" do
-  source sha256: "23a369ef42955c19aaaf9e34891eea3a055ed217d7fbe76da0998a7a54bbe167"
-end
-
-version "5.4.1" do
-  # Newer versions appear to live in an alternative location that does
-  # not also contain the older versions. We can make this default when we drop 2.x.
-  source url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-#{version}.tar.gz",
-         sha256: "09d6422bd33b82f065760cd49a31f2fec504f2a5255e497c81050fd3dceec485"
-end
-
-version "5.6.16" do
-  source url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-#{version}.tar.gz",
-         sha256: "6b035a59337d571ab70cea72cc55225c027ad142fbb07fd8984e54261657c77f"
-end
 
 version "6.8.1" do
   source url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-#{version}.tar.gz",

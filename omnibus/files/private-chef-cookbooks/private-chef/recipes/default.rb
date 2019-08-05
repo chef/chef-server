@@ -134,7 +134,8 @@ include_recipe "private-chef::fix_permissions"
   "opscode-chef-mover",
   "redis_lb",
   "nginx",
-  "rabbitmq"
+  "rabbitmq",
+  "elasticsearch"
 ].each do |service|
   if node["private_chef"][service]["external"]
     begin
