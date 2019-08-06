@@ -1,9 +1,7 @@
 # Order is important. The last matching pattern has the most precedence.
 
 *                                @chef/chef-server-maintainers
-.delivery/**                     @chef/jex-team
 .expeditor/**                    @chef/jex-team
-.travis.yml                      @chef/chef-server-maintainers @chef/jex-team
 cookbooks/chef-server-deploy/**  @chef/jex-team
 inspec/**                        @chef/jex-team
 terraform/**                     @chef/jex-team
