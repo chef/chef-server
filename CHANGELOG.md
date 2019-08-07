@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.23 -->
-## [13.0.23](https://github.com/chef/chef-server/tree/13.0.23) (2019-08-06)
+<!-- latest_release 13.0.24 -->
+## [13.0.24](https://github.com/chef/chef-server/tree/13.0.24) (2019-08-07)
 
 #### Merged Pull Requests
-- Fix logins to zendesk when user signups with a single name [#1710](https://github.com/chef/chef-server/pull/1710) ([teknofire](https://github.com/teknofire))
+- implement 1703 exclude data collector from status endpoint [#1716](https://github.com/chef/chef-server/pull/1716) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- implement 1703 exclude data collector from status endpoint [#1716](https://github.com/chef/chef-server/pull/1716) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.24 -->
 - Fix logins to zendesk when user signups with a single name [#1710](https://github.com/chef/chef-server/pull/1710) ([teknofire](https://github.com/teknofire)) <!-- 13.0.23 -->
 - Remove the old delivery directory [#1694](https://github.com/chef/chef-server/pull/1694) ([tas50](https://github.com/tas50)) <!-- 13.0.22 -->
 - Dvm changes to get external postgres working. [#1708](https://github.com/chef/chef-server/pull/1708) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.21 -->
