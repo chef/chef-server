@@ -279,6 +279,31 @@ EOF
     end
   end
 
+  context "When we disable _status reporting for the data_collector endpoint" do
+    let(:config) { "data_collector['health_check'] = false" }
+    it "sets ['private_chef']['data_collector']['health_check'] to false" do
+      rendered_config = config_for("api.chef.io")
+      expect(rendered_config["private_chef"]["data_collector"]["health_check"]).to be_falsey
+    end
+  end
+ 
+  context "When we enable _status reporting for the data_collector endpoint" do
+    context "using a boolean" do
+      let(:config) { "data_collector['health_check'] = true" }
+      it "sets ['private_chef']['data_collector']['health_check'] truthy" do
+        rendered_config = config_for("api.chef.io")
+        expect(rendered_config["private_chef"]["data_collector"]["health_check"]).to be_truthy
+      end
+    end
+    context "using a string" do
+      let!(:config) { "data_collector['health_check'] = 'true'" }
+      it "sets ['private_chef']['data_collector']['health_check'] truthy" do
+        rendered_config = config_for("api.chef.io")
+        expect(rendered_config["private_chef"]["data_collector"]["health_check"]).to be_truthy
+      end
+    end
+  end
+
   describe "#generate_config" do
     context "when the topology is tiered" do
       let(:config) { <<-EOF
