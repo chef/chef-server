@@ -36,53 +36,22 @@ In order to release, you will need the following accounts/permissions:
 
 - Update the version file to the version to be released if minor version needs to be bumped rather than just the patch.
 - Update the release notes with the version, date and context.
-- Get the build into current channel by approving it at `https://automate.chef.co/e/chef/#/organizations/products/projects/chef-server/changes`
-  (This is triggered by expeditor once the build and tests in jenkins go through ok once a commit is merged to master)
+- Run all the tasks for update from FrequentTasks.doc
+- Make sure the omnibus build is into current channel.
+  (This is triggered by expeditor once the build and tests in buildkite go through ok once a commit is merged to master)
+- Make sure the habitat builds are passing.
 - For updating just the patch verion refer the the section below on #Preparing for the release
 
 ### Testing the Release
 
-> This process is currently manual. There is working being done to fold this into the ACC pipeline.
+> This process is currently manual. There is working being done to fold this into a testing pipeline.
 
-Every commit to chef-server master is tested against a full pedant
-run. However, upgrade testing must still be done in advance of the
-release:
+Every merge to chef-server master is built and this clean build is tested
+with all pedant tests. We only run smoke tests for the FIPS mode. Upgrade
+and addon testing must be done in advance of the release.
 
-- [ ] Run the Chef Automate-based automated upgrade testing.
-  * Clone the `pool/qa-chef-server-cluster` project from automate.chef.co.
-    (`https://automate.chef.co/e/chef/#/organizations/pool/projects/qa-chef-server-cluster/clone`)
-    * If you get an access rights error, make sure your public github key is included in your delivery profile.
-  * On a branch, update relevant attributes in `.delivery/build/attributes/default.rb`:
-    * Update `chef_server_test_url_override` to be the URL corresponding to
-      the latest package you'd like to test at artifactory.chef.co (probably
-      a git poll build that you want to ship as the next version).
-      Remember to use the current channel instead of the unstable stable on
-      artifactory as those are the builds that passed tests on wilson.
-    * Ensure that all entries in `default['delivery-matrix']['acceptance']['matrix']`
-      array are uncommented (except for `ha_ec_upgrade_aws`).
-  * Commit the change and run `delivery review`.
-  * When the lint and unit tests pass, approve the change and watch the
-    matrix of tests run. This change will spin off several new changes, so look for
-    them in the root of the project in the delivery UI.
-    After your change, you should see one change per entry in the upgrade test matrix.
-    It will be named "Merged change...".
-  * If you had no failures, AWS instances will be cleaned up for you and the cookbook cleans up any
-    instances over 24 hours old the next time it runs, but it's good to log into
-    AWS and look for any machine instances tagged with
-    `qa-chef-server-cluster-delivery-builder` in `US West (Oregon) us-west-2`
-    region and delete them once all your tests have finished to make sure we
-    don't leave any unused instances
-    up.
-  * If you did have test failure due to an environmental issue unrelated to the
-    release, ask #acc-support, #chef-server, or #automate-support for help.
-    * If automate.chef.co builders are too constrainted to run the full matrix
-      of 10 jobs comment the second half of the entries in the
-      `default['delivery-matrix']['acceptance']['matrix']` array and run a build.
-      After that build and all its matrix builds finish, run another build with the first half
-      commented and the second half uncommented (see below for where to find matrix builds).
-      Regardless, you should make sure every matrix entry gets run before you ship,
-      so always double-check these attributes, even if running the full matrix, as some
-      might be commented out from previous runs.
+- [ ] Test as per the matrix from: https://docs.google.com/spreadsheets/d/1_gwxdrMnUiV8t2noi8zs1HyGivtIGMEx9KbYriIw7BY/edit#gid=536218507
+
 - [ ] If this release is being made to address a specific
   high-urgency, high-severity customer issue or security issue, please
   *specifically* test that the issue in question is fixed.
@@ -100,7 +69,6 @@ The git SHA of the build you are testing can be found in
 - [ ] Check RELEASE_NOTES.md to ensure that it describes the
   most important user-facing changes in the release. This file should
   form the basis of the post to Discourse that comes in a later step.
-- [ ] Open a PR with these changes (applying the `Omnibus: Skip Build` label)
 
 ### Building and Releasing the Release
 
@@ -108,9 +76,9 @@ The git SHA of the build you are testing can be found in
   Make sure that this version has gone through the upgrade testing. 
 - [ ] Use expeditor to promote the build:
 
-        /expeditor promote chef-server VERSION
+        /expeditor promote chef/chef-server:master VERSION
 
-  Please do this in the `#releng-support` room.  Once this is
+  Please do this in the `#chef-server-notify` room.  Once this is
   done, the release is available to the public via the APT and YUM
   repositories and downloads.chef.io.
 
