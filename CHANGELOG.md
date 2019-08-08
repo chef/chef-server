@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.27 -->
-## [13.0.27](https://github.com/chef/chef-server/tree/13.0.27) (2019-08-07)
+<!-- latest_release 13.0.28 -->
+## [13.0.28](https://github.com/chef/chef-server/tree/13.0.28) (2019-08-08)
 
 #### Merged Pull Requests
-- Add buildkite specific checks to pull request template. [#1715](https://github.com/chef/chef-server/pull/1715) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Bump postgresql from 9.6.10 to 9.6.14 (latest minor) [#1717](https://github.com/chef/chef-server/pull/1717) ([btm](https://github.com/btm))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- Bump postgresql from 9.6.10 to 9.6.14 (latest minor) [#1717](https://github.com/chef/chef-server/pull/1717) ([btm](https://github.com/btm)) <!-- 13.0.28 -->
 - Add buildkite specific checks to pull request template. [#1715](https://github.com/chef/chef-server/pull/1715) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.27 -->
 - Update the release process doc with current world process. [#1700](https://github.com/chef/chef-server/pull/1700) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.26 -->
 - Doc updates [#1699](https://github.com/chef/chef-server/pull/1699) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.25 -->
