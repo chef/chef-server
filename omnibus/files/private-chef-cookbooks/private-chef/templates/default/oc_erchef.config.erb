@@ -315,7 +315,7 @@
         {db_port, <%= node['private_chef']['postgresql']['port'] %>},
         {db_user, "<%= node['private_chef']['opscode-erchef']['sql_user'] %>"},
         {db_name, "opscode_chef" },
-        {db_options, [{ssl, <%= { 'disable' => false, 'prefer' => true, 'require' => 'required' }[node['private_chef']['postgresql']['sslmode']] %>}]},
+        {db_options, [{ssl, <%= @helper.postgresql_sslmodes[node['private_chef']['postgresql']['sslmode']] %>}]},
         {idle_check, 10000},
         {pooler_timeout, <%= @db_pooler_timeout %>},
         {db_timeout, <%= node['private_chef']['opscode-erchef']['sql_db_timeout'] %>},
