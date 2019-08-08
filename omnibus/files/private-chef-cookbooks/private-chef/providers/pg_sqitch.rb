@@ -27,7 +27,8 @@ action :deploy do
                --top-dir #{new_resource.name}
                deploy #{target} --verify
       EOM
-      environment "PERL5LIB" => "", # force us to use omnibus perl
+      environment "PERL5LIB" => "/opt/opscode/embedded/lib", # force us to use omnibus perl
+                  "LD_LIBRARY_PATH" => "/opt/opscode/embedded/lib",  # force us to use omnibus libraries
                   "PGPASSWORD" => new_resource.password
 
       # Sqitch Return Codes
