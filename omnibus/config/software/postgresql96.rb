@@ -16,7 +16,7 @@
 
 name "postgresql96"
 
-default_version "9.6.10"
+default_version "9.6.14"
 
 license "PostgreSQL"
 license_file "COPYRIGHT"
@@ -31,6 +31,7 @@ dependency "config_guess"
 
 source url: "https://ftp.postgresql.org/pub/source/v#{version}/postgresql-#{version}.tar.bz2"
 version("9.6.10") { source sha256: "8615acc56646401f0ede97a767dfd27ce07a8ae9c952afdb57163b7234fe8426" }
+version("9.6.14") { source sha256: "3f08c265c9ae814f727461408ab24fdf3d954c4f7ae42d9c97b3c7e03fc31a22" }
 
 relative_path "postgresql-#{version}"
 
