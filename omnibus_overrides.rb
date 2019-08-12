@@ -5,11 +5,11 @@
 override :erlang, version: "18.3.4.9"
 override :lua, version: "5.1.5"
 override :rubygems, version: "3.0.3"
-override :bundler, version: "1.17.3"
+override :bundler, version: "1.17.2"  # pin to avoid double bundle error
 override :'omnibus-ctl', version: "master"
-override :chef, version: "v15.0.300"
-override :ohai, version: "v15.0.35"
-override :ruby, version: "2.5.5"
+override :chef, version: "v15.2.20"
+override :ohai, version: "v15.2.5"
+override :ruby, version: "2.6.3"
 
 
 # This SHA is the last commit before the 6.0 release
