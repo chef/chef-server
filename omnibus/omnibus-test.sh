@@ -6,7 +6,6 @@ product="${PRODUCT:-chef-server}"
 version="${VERSION:-latest}"
 
 export PATH="/opt/opscode/bin:/opt/opscode/embedded/bin:$PATH"
-export LD_LIBRARY_PATH="/opt/opscode/embedded/lib"
 export INSTALL_DIR="/opt/opscode"
 
 echo "--- Installing $channel $product $version"
