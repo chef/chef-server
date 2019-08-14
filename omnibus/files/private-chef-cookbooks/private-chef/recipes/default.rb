@@ -28,10 +28,6 @@ require 'openssl'
   end
 end
 
-# Ensure that all our Omnibus-ed binaries are the ones that get used;
-# much better than having to specify this on each resource!
-ENV['PATH'] = "/opt/opscode/bin:/opt/opscode/embedded/bin:#{ENV['PATH']}"
-
 directory "/etc/opscode" do
   owner "root"
   group "root"
@@ -109,6 +105,10 @@ directory "/var/log/opscode" do
   mode "0755"
   action :create
 end
+
+# Ensure that all our Omnibus-ed binaries are the ones that get used;
+# much better than having to specify this on each resource!
+ENV['PATH'] = "/opt/opscode/bin:/opt/opscode/embedded/bin:#{ENV['PATH']}"
 
 include_recipe "enterprise::runit"
 include_recipe "private-chef::sysctl-updates"
