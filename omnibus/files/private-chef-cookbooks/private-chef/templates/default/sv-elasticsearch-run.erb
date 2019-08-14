@@ -4,7 +4,7 @@ ulimit -n 50000
 
 export ES_HOME=<%= node['private_chef']['elasticsearch']['dir'] %>            #/var/opt/opscode/elasticsearch
 export ES_DATA=<%= node['private_chef']['elasticsearch']['dir'] %>/data       #/var/opt/opscode/elasticsearch/data   
-export JAVA_HOME=/opt/opscode/embedded/jre/bin
+export JAVA_HOME=/home/vagrant/jdk-11.0.4+11-jre/bin
 export ES_PATH_CONF=<%= node['private_chef']['elasticsearch']['dir'] %>/config
 export PATH=<%= node['private_chef']['install_path'] %>/embedded/bin:$JAVA_HOME:$ES_HOME:$PATH #/opt/opscode/embedded/bin
 
