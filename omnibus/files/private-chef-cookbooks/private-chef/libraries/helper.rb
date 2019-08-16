@@ -286,4 +286,10 @@ class OmnibusHelper
     }
     Chef::JSONCompat.to_json_pretty(content)
   end
+
+  def postgresql_sslmodes
+    # see: https://www.postgresql.org/docs/9.6/libpq-ssl.html
+    # allowable choices come from the PGSSLMODE environment var for libpq.
+    { 'disable' => false, 'require' => 'required' }
+  end
 end

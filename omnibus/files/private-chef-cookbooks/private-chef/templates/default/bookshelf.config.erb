@@ -100,6 +100,7 @@
            {db_port, <%=  @postgresql['port'] %>},
            {db_user, "<%= @sql_user %>"},
            {db_name, "bookshelf" },
+           {db_options, [{ssl, <%= @helper.postgresql_sslmodes[@postgresql['sslmode']] %>}]},
            {idle_check, 10000},
            {pooler_timeout, <%= @db_pooler_timeout %>},
            {db_timeout, <%= @sql_db_timeout %>},

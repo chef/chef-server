@@ -68,7 +68,7 @@ template bookshelf_config do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode "644"
-  variables(bookshelf_params)
+  variables(bookshelf_params.merge :helper => OmnibusHelper.new(node))
   notifies :restart, 'component_runit_service[bookshelf]' if is_data_master?
 end
 

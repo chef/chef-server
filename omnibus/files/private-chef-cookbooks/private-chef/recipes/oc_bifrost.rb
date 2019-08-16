@@ -20,6 +20,7 @@
 # Remove all traces of the legacy opscode-authz service that oc_bifrost
 # replaces.
 #
+
 execute "/opt/opscode/bin/private-chef-ctl stop opscode-authz" do
   retries 20
 end
@@ -63,7 +64,7 @@ template oc_bifrost_config do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode "644"
-  variables(node['private_chef']['oc_bifrost'].to_hash)
+  variables(node['private_chef']['oc_bifrost'].to_hash.merge :helper => OmnibusHelper.new(node))
   notifies :restart, 'component_runit_service[oc_bifrost]'
 end
 

@@ -83,6 +83,7 @@ class PreflightValidator
 
     port = cs_pg_attr.has_key?('port') ? cs_pg_attr['port'] : node_pg_attr['port']
     host = cs_pg_attr['vip']
+    sslmode = cs_pg_attr.has_key?('sslmode') ? cs_pg_attr['sslmode'] : node_pg_attr['sslmode']
     if type == :invalid_user
       user = 'chef_server_conn_test'
       password = 'invalid'
@@ -95,6 +96,7 @@ class PreflightValidator
                                                            'db_superuser_password' => password,
                                                            'vip' => host,
                                                            'port' => port,
+                                                           'sslmode' => sslmode,
                                                            'silent' => options['silent'],
                                                            'retries' => options['retries']}) do |conn|
        if block_given?

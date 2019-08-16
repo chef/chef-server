@@ -623,6 +623,10 @@ default['private_chef']['postgresql']['wal_level'] = "minimal"
 default['private_chef']['postgresql']['archive_mode'] = "off" # "cannot be enabled when wal_level is set to minimal"
 default['private_chef']['postgresql']['archive_command'] = ""
 default['private_chef']['postgresql']['archive_timeout'] = 0 # 0 is disabled.
+# see: https://www.postgresql.org/docs/9.6/libpq-ssl.html
+# allowable choices come from the PGSSLMODE environment var for libpq.
+# supported sslmode values: disable | require
+default['private_chef']['postgresql']['sslmode'] = 'disable'
 
 # This is based on the tuning parameters here:
 #
