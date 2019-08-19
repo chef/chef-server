@@ -286,7 +286,7 @@ default['private_chef']['opscode-expander']['retry_wait'] = 1
 var_base = "/var/opt/opscode"
 log_base = "/var/log/opscode"
 
-default['private_chef']['elasticsearch']['enable'] = true
+default['private_chef']['elasticsearch']['enable'] = false
 elasticsearch = default['private_chef']['elasticsearch']
 
 # These attributes cannot be overridden in chef-server.rb
