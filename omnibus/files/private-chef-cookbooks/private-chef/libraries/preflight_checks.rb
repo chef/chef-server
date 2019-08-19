@@ -145,6 +145,7 @@ class PreflightChecks
       end
       AuthPreflightValidator.new(node).run!
       SolrPreflightValidator.new(node).run!
+      ElasticsearchPreflightValidator.new(node).run!
       SslPreflightValidator.new(node).run!
       BookshelfPreflightValidator.new(node).run!
       RequiredRecipePreflightValidator.new(node).run!
