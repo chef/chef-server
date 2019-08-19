@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.31 -->
-## [13.0.31](https://github.com/chef/chef-server/tree/13.0.31) (2019-08-16)
+<!-- latest_release 13.0.32 -->
+## [13.0.32](https://github.com/chef/chef-server/tree/13.0.32) (2019-08-19)
 
 #### Merged Pull Requests
-- Zanecodes ssl [#1711](https://github.com/chef/chef-server/pull/1711) ([lbakerchef](https://github.com/lbakerchef))
+- Praj/add elasticsearch support [#1721](https://github.com/chef/chef-server/pull/1721) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- Praj/add elasticsearch support [#1721](https://github.com/chef/chef-server/pull/1721) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.32 -->
 - Zanecodes ssl [#1711](https://github.com/chef/chef-server/pull/1711) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.0.31 -->
 - fix X-Forwared-For typo [#1719](https://github.com/chef/chef-server/pull/1719) ([srenatus](https://github.com/srenatus)) <!-- 13.0.30 -->
 - Stop building Chef Infra Server on SLES 11 [#1718](https://github.com/chef/chef-server/pull/1718) ([schisamo](https://github.com/schisamo)) <!-- 13.0.29 -->
