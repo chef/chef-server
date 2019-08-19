@@ -691,7 +691,10 @@ default['private_chef']['postgresql']['archive_timeout'] = 0 # 0 is disabled.
 # allowable choices come from the PGSSLMODE environment var for libpq.
 # supported sslmode values: disable | require
 default['private_chef']['postgresql']['sslmode'] = 'disable'
-
+# for now, copy these by hand into the directory, `chmod 0600 *.key; chown root *.key`
+# later, this will be automated and these comments will be removed
+default['private_chef']['postgresql']['ssl_cert_file'] = "#{default['private_chef']['postgresql']['data_dir']}/api.chef-server.dev.crt"
+default['private_chef']['postgresql']['ssl_key_file']  = "#{default['private_chef']['postgresql']['data_dir']}/api.chef-server.dev.key"
 # This is based on the tuning parameters here:
 #
 #  https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
