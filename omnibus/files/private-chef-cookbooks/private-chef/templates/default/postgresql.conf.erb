@@ -77,7 +77,9 @@ max_connections = <%= node['private_chef']['postgresql']['max_connections'] %>		
 # - Security and Authentication -
 
 #authentication_timeout = 1min		# 1s-600s
-#ssl = off				# (change requires restart)
+ssl = <%= (node['private_chef']['postgresql']['sslmode'] == 'disable' ? 'off' : 'on') + ' # (change requires restart)' %>
+ssl_cert_file = <%= "'#{node['private_chef']['postgresql']['ssl_cert_file']}' # (change requires restart)" %> %>
+ssl_key_file  = <%= "'#{node['private_chef']['postgresql']['ssl_key_file']}'  # (change requires restart)" %> %>
 #ssl_ciphers = 'ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH'	# allowed SSL ciphers
 					# (change requires restart)
 #ssl_renegotiation_limit = 512MB	# amount of data between renegotiations
