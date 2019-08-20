@@ -163,7 +163,7 @@ command.
 Please either use ChefDK or install the latest test-kitchen from Rubygems.
 
 ```shell
-$ kitchen converge ubuntu-1204
+$ kitchen converge ubuntu-1604
 ```
 
 Test Kitchen uses a regex syntax to match on plaforms, so for example ubuntu 10.04
@@ -174,9 +174,10 @@ Then login to the instance and build the project as described in the Usage
 section:
 
 ```shell
-$ kitchen login ubuntu-1204
+$ kitchen login ubuntu-1604
 [vagrant@ubuntu...] $ . load-omnibus-toolchain.sh
 [vagrant@ubuntu...] $ cd chef-server/omnibus
+[vagrant@ubuntu...] $ sudo chown -R vagrant ~/.bundle/ 
 [vagrant@ubuntu...] $ bundle install --binstubs
 ...
 [vagrant@ubuntu...] $ bin/omnibus build chef-server -l internal
@@ -184,9 +185,10 @@ $ kitchen login ubuntu-1204
 or if you prefer not to use binstubs and to use bundle exec instead:
 
 ```shell
-$ kitchen login ubuntu-1204
+$ kitchen login ubuntu-1604
 [vagrant@ubuntu...] $ . load-omnibus-toolchain.sh
 [vagrant@ubuntu...] $ cd chef-server/omnibus
+[vagrant@ubuntu...] $ sudo chown -R vagrant ~/.bundle/
 [vagrant@ubuntu...] $ bundle install
 ...
 [vagrant@ubuntu...] $ bundle exec omnibus build chef-server -l internal
