@@ -663,8 +663,7 @@ default['private_chef']['postgresql']['version'] = "9.6"
 default['private_chef']['postgresql']['enable'] = true
 default['private_chef']['postgresql']['external'] = false
 default['private_chef']['postgresql']['ha'] = false
-default['private_chef']['postgresql']['dir'] = "/var/opt/opscode/postgresql/#{node['private_chef']['postgresql']['version']}"
-default['private_chef']['postgresql']['data_dir'] = "/var/opt/opscode/postgresql/#{node['private_chef']['postgresql']['version']}/data"
+default['private_chef']['postgresql']['dir'] =           "/var/opt/opscode/postgresql/#{node['private_chef']['postgresql']['version']}"
 default['private_chef']['postgresql']['log_directory'] = "/var/log/opscode/postgresql/#{node['private_chef']['postgresql']['version']}"
 default['private_chef']['postgresql']['log_min_duration_statement'] = -1
 default['private_chef']['postgresql']['log_rotation']['file_maxbytes'] = 104857600
@@ -691,10 +690,10 @@ default['private_chef']['postgresql']['archive_timeout'] = 0 # 0 is disabled.
 # allowable choices come from the PGSSLMODE environment var for libpq.
 # supported sslmode values: disable | require
 default['private_chef']['postgresql']['sslmode'] = 'disable'
-# for now, copy these by hand into the directory, `chmod 0600 *.key; chown root *.key`
+# for now, copy the nginx certs by hand into the postgres data directory, chmod and chown
 # later, this will be automated and these comments will be removed
-default['private_chef']['postgresql']['ssl_cert_file'] = "#{default['private_chef']['postgresql']['data_dir']}/api.chef-server.dev.crt"
-default['private_chef']['postgresql']['ssl_key_file']  = "#{default['private_chef']['postgresql']['data_dir']}/api.chef-server.dev.key"
+default['private_chef']['postgresql']['ssl_cert_file'] = "#{default['private_chef']['postgresql']['dir']}/data/#{node['fqdn']}.crt"
+default['private_chef']['postgresql']['ssl_key_file']  = "#{default['private_chef']['postgresql']['dir']}/data/#{node['fqdn']}.key"
 # This is based on the tuning parameters here:
 #
 #  https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
