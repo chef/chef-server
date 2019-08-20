@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.33 -->
-## [13.0.33](https://github.com/chef/chef-server/tree/13.0.33) (2019-08-19)
+<!-- latest_release 13.0.34 -->
+## [13.0.34](https://github.com/chef/chef-server/tree/13.0.34) (2019-08-20)
 
 #### Merged Pull Requests
-- Update to the latest non-license version of chef. [#1722](https://github.com/chef/chef-server/pull/1722) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update README.md [#1723](https://github.com/chef/chef-server/pull/1723) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- Update README.md [#1723](https://github.com/chef/chef-server/pull/1723) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.0.34 -->
 - Update to the latest non-license version of chef. [#1722](https://github.com/chef/chef-server/pull/1722) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.33 -->
 - Praj/add elasticsearch support [#1721](https://github.com/chef/chef-server/pull/1721) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.32 -->
 - Zanecodes ssl [#1711](https://github.com/chef/chef-server/pull/1711) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.0.31 -->
