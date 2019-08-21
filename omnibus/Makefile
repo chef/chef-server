@@ -4,7 +4,7 @@
 #
 # e.g., 'make -f build_node.mk $TARGET'
 
-DEV_PLATFORM ?= ubuntu-1404
+DEV_PLATFORM ?= ubuntu-1604
 DEV_PROJECT=opscode-omnibus
 
 .DEFAULT_GOAL=dev

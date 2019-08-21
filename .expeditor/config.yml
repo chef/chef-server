@@ -85,7 +85,6 @@ subscriptions:
             - config/software/*
   - workload: artifact_published:current:chef-server:*
     actions:
-      - built_in:update_acc
       - bash:.expeditor/promote_harts_and_containers.sh:
           post_commit: true
       - bash:.expeditor/purge_cdn.sh:
