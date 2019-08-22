@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.36 -->
-## [13.0.36](https://github.com/chef/chef-server/tree/13.0.36) (2019-08-21)
+<!-- latest_release 13.0.37 -->
+## [13.0.37](https://github.com/chef/chef-server/tree/13.0.37) (2019-08-22)
 
 #### Merged Pull Requests
-- Praj/remove deprecations [#1727](https://github.com/chef/chef-server/pull/1727) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Enable RHEL 8 packages [#1707](https://github.com/chef/chef-server/pull/1707) ([jaymalasinha](https://github.com/jaymalasinha))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- Enable RHEL 8 packages [#1707](https://github.com/chef/chef-server/pull/1707) ([jaymalasinha](https://github.com/jaymalasinha)) <!-- 13.0.37 -->
 - Praj/remove deprecations [#1727](https://github.com/chef/chef-server/pull/1727) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.36 -->
 - Update the omnibus kitchen.yml to the latest non-licensed version of chef [#1726](https://github.com/chef/chef-server/pull/1726) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.35 -->
 - Update README.md [#1723](https://github.com/chef/chef-server/pull/1723) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.0.34 -->
