@@ -693,8 +693,8 @@ default['private_chef']['postgresql']['archive_timeout'] = 0 # 0 is disabled.
 default['private_chef']['postgresql']['sslmode'] = 'disable'
 # for now, copy the nginx certs by hand into the postgres data directory, chmod and chown
 # later, this will be automated and these comments will be removed
-default['private_chef']['postgresql']['ssl_cert_file'] = "#{default['private_chef']['postgresql']['data_dir']}/#{node['fqdn']}.crt"
-default['private_chef']['postgresql']['ssl_key_file']  = "#{default['private_chef']['postgresql']['data_dir']}/#{node['fqdn']}.key"
+default['private_chef']['postgresql']['ssl_cert_file'] = "#{node['private_chef']['postgresql']['data_dir']}/#{node['fqdn']}.crt"
+default['private_chef']['postgresql']['ssl_key_file']  = "#{node['private_chef']['postgresql']['data_dir']}/#{node['fqdn']}.key"
 # This is based on the tuning parameters here:
 #
 #  https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
