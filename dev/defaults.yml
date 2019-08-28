@@ -113,6 +113,13 @@ vm:
   # Overriding config.vm.start-custom to true will create an empty VM of the same
   # distro as the chef server, with 2GB/2core, using CUSTOM_VM_ADDRESS
   start-custom: false
+  #
+  # oc_id:
+  #   administrators:
+  #     - admin
+  #   applications:
+  #     # provide an app name and its redirect_uri
+  #     supermarket: http://localhost:3000/auth/chef_oauth2/callback
 
 projects:
   oc_erchef:
