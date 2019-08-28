@@ -203,6 +203,10 @@ def define_chef_server(config, attributes)
       json = simple_deep_merge(json, { "provisioning" => { "chef-server-config" => external_solr } })
     end
 
+    if vmattr['oc_id']
+      json = simple_deep_merge(json, { "oc_id" => vmattr['oc_id'] })
+    end
+
     dotfiles_path = vmattr["dotfile_path"] || "dotfiles"
     # This is only used for the initial sync  - it was prone failures when allowed
     # to run otherwise. Instead, run thet command './sync' in the dev dir after the vm is online.
@@ -553,7 +557,9 @@ def customize_vm(config, opts)
                   "--memory", opts[:memory] || 512,
                   "--cpus", opts[:cpus] || 2,
                   "--usb", "off",
-                  "--usbehci", "off"]
+                  "--usbehci", "off",
+                  "--audio", "none"]
+
     vb.customize ["storagectl", :id, "--name", "SATA Controller", "--hostiocache", "on"]
   end
 end

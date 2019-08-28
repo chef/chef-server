@@ -88,6 +88,13 @@ EOM
       "cd #{project_dir} && #{helper} -- bundle exec --keep-file-descriptors bin/rails server -p #{port} -b #{host} -e production"
     end
 
+    def console
+      raise DVMArgumentError, "Project is not loaded. Cannot console without loading the project first." unless is_running?
+      console_cmd = "cd #{project_dir} && #{helper} -- bundle exec --keep-file-descriptors bin/rails console production"
+      say("Running: #{console_cmd}")
+      exec console_cmd
+    end
+
     def enable_service
       run_command("chef-server-ctl start #{service['name']}", "Starting #{omnibus_project} #{service['name']}")
     end

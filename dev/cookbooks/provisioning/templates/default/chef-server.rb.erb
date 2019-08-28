@@ -4,3 +4,13 @@ topology "standalone"
 <% node['provisioning']['chef-server-config'].each_pair do |k, v| %>
 <%= k%>=<%= v%>
 <% end %>
+
+<% if node['oc_id'] %>
+oc_id['administrators'] ||= <%= node['oc_id']['administrators'] || [] %>
+oc_id['applications'] ||= {}
+  <% node['oc_id']['applications'].each do |app_name, redirect_uri| %>
+oc_id['applications']['<%= app_name %>'] = {
+  'redirect_uri' => '<%= redirect_uri %>'
+}
+  <% end %>
+<% end %>
