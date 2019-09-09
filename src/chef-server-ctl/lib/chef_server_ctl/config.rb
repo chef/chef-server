@@ -164,7 +164,7 @@ module ChefServerCtl
       pg_config = @@ctl.running_service_config('postgresql')
       host = pg_config['vip']
       port = pg_config['port']
-      "postgresql://#{db_user}:#{db_password}@#{host}:#{port}/#{db_name}"
+      "postgresql:///#{db_name}?user=#{db_user}&password=#{db_password}&host=#{host}&port=#{port}"
     end
 
     def self.ssl_params
