@@ -308,6 +308,17 @@ vm:
     use-external: true
 ```
 
+To use an external Azure database for Chef Server, create a `config.yml` file with the following contents:
+
+```
+vm:
+  postgresql:
+    start: true
+    use-external: true
+    use-azure:    true
+    ip-azure:     <AZURE POSTGRESQL IP ADDRESS>
+```
+
 To use separate external databases for Chef Server and Chef Reporting, create a `config.yml` file with the following contents:
 
 ```
