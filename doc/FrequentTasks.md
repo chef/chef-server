@@ -81,3 +81,45 @@ copying files back from the dev-vm to the host.
 
 - Build Chef Server, and do a chef-server-ctl reconfigure. Fix any new
   warnings about deprecations and the like.
+
+## Updating rebar3
+
+- It is helpful to periodically update the copy of the rebar3 tooling
+  that is included with Chef Infra Server.
+- The following erlang apps need to be updated:
+  - bookshelf
+  - chef-mover
+  - oc_erchef
+  - oc_bifrost
+- Check for the current rebar3 version with `./rebar3 --version`
+- Latest version for rebar3 can be found at: https://www.rebar3.org/
+- Download and update the current rebar3 executable with it.
+
+## Updating the erlang dependencies using rebar3
+
+- There are 2 approaches to updating the dependencies
+  - From the dev-vm (Preferred method)
+  - From the host machine (mac in most cases)
+- Updating the erlang deps from the dev-vm
+  - cd chef-server/dev
+  - vagrant up
+  - vagrant ssh
+  - In another window/tab on the host machine 
+    - make changes to the rebar.config if needed
+      and run sync to sync the changes with the dev-vm.
+    - Make sure to stop the sync after it is complete.
+  - In the dev-vm
+    - cd /host/src/oc_erchef #Repeat for every erlang app
+    - ./rebar3 update
+  - This will create an updated rebar.lock file.
+  - cp rebar.lock /dotfiles #dotfiles folder is shared on host
+  - On the host (mac)
+    - cp chef-server/dev/dotfiles/rebar.lock chef-server/src/oc_erchef
+  - Repeat the above steps for all the erlang apps.
+- Updating the erlang deps from the host machine
+  - cd chef-server/src/oc_erchef
+  - rm -fr \_build
+  - ./rebar3 update
+  - rm -fr \_build # not removing this can cause strange build problems where omnibus builds pick up mac architecture libraries
+  - The lockfile will be updated in place. .
+  - Repeat above steps for all the erlang apps.
