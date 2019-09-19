@@ -1,79 +1,96 @@
-# Existing environments: dev, acceptance, union, rehearsal, delivered.
-TF_ENVIRONMENT ?= dev
-TF_DIRECTORY ?= acceptance
-TF_STATE ?= $(TF_ENVIRONMENT).tfstate
-
-ifeq ($(TF_ENVIRONMENT), dev)
-	# We have 4 isolated dev environments
-	export TF_STATE=dev-$(TF_ENVIRONMENT_INDEX).tfstate
-	export TF_VAR_environment=dev-$(TF_ENVIRONMENT_INDEX)
-
-	export TF_VAR_chef_environment ?= $(TF_ENVIRONMENT)
-	export TF_VAR_chef_server_url ?= https://chef-server.chef.co/organizations/chef
-	export TF_VAR_chef_user_name ?= $(USER)
-	export TF_VAR_chef_user_key ?= $(HOME)/.chef/$(USER).pem
-	export TF_VAR_aws_key_name ?= $(USER)
-	export TF_VAR_aws_private_key ?= $(HOME)/.ssh/id_rsa
-else ifeq ($(TF_ENVIRONMENT), acceptance)
-	export TF_DIRECTORY = acceptance
+ifneq ($(AWS_DEFAULT_PROFILE),)
+	export TF_VAR_aws_profile ?= $(AWS_DEFAULT_PROFILE)
 endif
 
-$(TF_VAR_aws_private_key):
-	$(error Oops, looks like you are missing your AWS private key \($(TF_VAR_aws_private_key)\). Please make sure the file exists, has the correct permissions \(0600\), and is not password protected.)
-
-$(TF_VAR_chef_user_key):
-	$(error Oops, looks like you are missing your Chef user key \($(TF_VAR_chef_user_key)\). Please make sure the file exists. If you need to regenerate it, please visit $(TF_VAR_chef_server_url).)
-
-init: $(TF_VAR_aws_private_key) $(TF_VAR_chef_user_key)
-	$(info ===============================================================)
-ifeq ($(TF_ENVIRONMENT), dev)
-ifeq ($(TF_ENVIRONMENT_INDEX),)
-	$(error The dev environment requires an index! Please export $$TF_ENVIRONMENT_INDEX and try again.)
+ifneq ($(AWS_SSH_KEY_ID),)
+	export TF_VAR_aws_ssh_key_id ?= $(AWS_SSH_KEY_ID)
 endif
-	$(info Environment........$(TF_VAR_environment))
-else
-	$(info Environment........$(TF_ENVIRONMENT))
+
+ifneq ($(AWS_DEPT),)
+	export TF_VAR_aws_department ?= $(AWS_DEPT)
 endif
-	$(info Terraform State....$(TF_STATE))
-	$(info Chef Environment...$(TF_VAR_chef_environment))
-	$(info Chef Server URL....$(TF_VAR_chef_server_url))
-	$(info Chef User Name.....$(TF_VAR_chef_user_name))
-	$(info Chef User Key......$(TF_VAR_chef_user_key))
-	$(info AWS Keypair Name...$(TF_VAR_aws_key_name))
-	$(info AWS Private Key....$(TF_VAR_aws_private_key))
-	$(info ===============================================================)
-	$(info )
 
-remote-state: init
-	# We make sure that existing local state is deleted before configuring
-	# the remote state. If it is not removed state gets contaminated between
-	# environments.
+ifneq ($(AWS_CONTACT),)
+	export TF_VAR_aws_contact ?= $(AWS_CONTACT)
+endif
 
-	cd $(TF_DIRECTORY) && \
+ifneq ($(AWS_DEFAULT_REGION),)
+	export TF_VAR_aws_region ?= $(AWS_DEFAULT_REGION)
+endif
+
+ifneq ($(AWS_DEFAULT_INSTANCE_TYPE),)
+	export TF_VAR_aws_instance_type ?= $(AWS_DEFAULT_INSTANCE_TYPE)
+endif
+
+ifneq ($(PLATFORM),)
+	export TF_VAR_platform ?= $(PLATFORM)
+endif
+
+ifneq ($(UNSTABLE_VERSION),)
+	export TF_VAR_unstable_version ?= $(UNSTABLE_VERSION)
+endif
+
+ifneq ($(STABLE_VERSION),)
+	export TF_VAR_stable_version ?= $(STABLE_VERSION)
+endif
+
+verify-aws:
+ifeq ($(TF_VAR_aws_department),)
+	$(error The department that owns the resources must be provided via the "AWS_DEPT" environment variable.)
+endif
+
+ifeq ($(TF_VAR_aws_contact),)
+	$(error The primary contact for the resources must be provided via the "AWS_CONTACT" environment variable.)
+endif
+
+create-vpc: verify-aws
+	cd aws_vpc && \
 	rm -rf .terraform && \
-	terraform init -backend-config="key=chef-server/$(TF_STATE)"
+	terraform init && \
+	terraform apply -auto-approve
 
-plan: remote-state
-	cd $(TF_DIRECTORY) && terraform plan -var-file=vars/$(TF_ENVIRONMENT).tfvars
+show-vpc: verify-aws
+	cd aws_vpc && \
+	terraform show
 
-apply: remote-state
-	cd $(TF_DIRECTORY) && terraform apply -auto-approve -var-file=vars/$(TF_ENVIRONMENT).tfvars
+destroy-vpc: verify-aws
+	cd aws_vpc && \
+	terraform destroy -auto-approve && \
+	rm -rf .terraform terraform.tfstate*
 
-destroy: remote-state
-ifeq ($(TF_ENVIRONMENT), dev)
-	cd $(TF_DIRECTORY) && terraform destroy -var-file=vars/$(TF_ENVIRONMENT).tfvars
-else
-	@echo "The destroy target is only supported for dev environments."
+check-scenario: verify-aws
+ifeq ($(TF_VAR_aws_ssh_key_id),)
+	$(error The ID of an AWS SSH key must be provided via the "AWS_SSH_KEY_ID" environment variable.)
 endif
 
-show: remote-state
-	cd $(TF_DIRECTORY) && terraform show
+ifeq ($(SCENARIO),)
+	$(error A valid scenario must be provided via the "SCENARIO" environment variable.)
+endif
 
-output: remote-state
-	cd $(TF_DIRECTORY) && terraform output
+ifeq ($(TF_VAR_unstable_version),)
+	$(error An unstable version of chef-server must be provided via the "UNSTABLE_VERSION" environment variable.)
+endif
 
-console: remote-state
-	cd $(TF_DIRECTORY) && terraform console
+ifeq ($(TF_VAR_stable_version),)
+	$(error A stable version of chef-server must be provided via the "STABLE_VERSION" environment variable.)
+endif
+
+init: check-scenario
+	cd scenarios/$(SCENARIO) && test -d .terraform || terraform init
+
+plan: init
+	cd scenarios/$(SCENARIO) && terraform plan
+
+show: init
+	cd scenarios/$(SCENARIO) && terraform show
+
+apply: init
+	cd scenarios/$(SCENARIO) && terraform apply -auto-approve
+
+destroy: init
+	cd scenarios/$(SCENARIO) && \
+	terraform destroy -auto-approve && \
+	rm -rf .terraform terraform.tfstate*
 
 # Lint _all_ the directories (including modules)
 # terraform fmt will always exit 0, so we need to check to see if the diff
@@ -86,4 +103,4 @@ lint:
 		exit 1; \
 	fi
 
-.PHONY: init remote-state plan apply destroy show output console lint
+.PHONY: create-vpc show-vpc destroy-vpc verify-aws check-scenario init plan show apply destroy lint
