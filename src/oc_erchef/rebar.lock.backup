@@ -105,7 +105,7 @@
        {ref,"760928ec8870da02eb11bccb501e2700925d06c6"}},
   0},
  {<<"observer_cli">>,
-  {git,"https://github.com/zhongwencool/observer_cli",
+  {git,"https://github.com/zhongwencool/observer_cli.git",
        {ref,"14faec950d73a9b96d3cfd708cc4b22ce823693e"}},
   0},
  {<<"opscoderl_folsom">>,
