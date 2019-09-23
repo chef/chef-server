@@ -54,7 +54,7 @@ end
 if node['chef-server-deploy']['enable_liveness_agent']
   remote_file automate_liveness_recipe_path do
     source liveness_agent_recipe_url
-    mode 0644
+    mode '644'
     notifies :reconfigure, 'chef_ingredient[chef-server]'
   end
 end
