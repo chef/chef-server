@@ -90,7 +90,7 @@ make_checksums(N) ->
 make_checksums(0, Acc) ->
     Acc;
 make_checksums(N, Acc) ->
-    CSum = md5_to_hex(crypto:md5(crypto:rand_bytes(4))),
+    CSum = md5_to_hex(crypto:md5(crypto:strong_rand_bytes(4))),
     make_checksums(N - 1, [{CSum, null} | Acc]).
 
 
