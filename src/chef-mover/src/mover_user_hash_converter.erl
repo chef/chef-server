@@ -59,7 +59,7 @@ convert_password_hash(undefined, _Salt) ->
     % User password is unknown, so they cna't log in anyway.
     % Let's generate a new password so that we don't leave their account
     % unprotected.
-    NewPass = base64:encode_to_string(crypto:rand_bytes(18)),
+    NewPass = base64:encode_to_string(crypto:strong_rand_bytes(18)),
     {ok, BCryptHash} = hash_password(NewPass),
     {bcrypt, "", BCryptHash};
 convert_password_hash(SHA1Hash, Salt) ->

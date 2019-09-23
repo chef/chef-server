@@ -231,7 +231,7 @@ mock_authz(ClientAuthzId) ->
     meck:expect(oc_chef_authz, create_entity_if_authorized,
                 fun(_, _, _, _) ->
                         ct:pal("create_entity_if_authorized()~n", []),
-                        <<RandomInt:128>> = crypto:rand_bytes(16),
+                        <<RandomInt:128>> = crypto:strong_rand_bytes(16),
                         RandomId = iolist_to_binary(io_lib:format("~32.16.0b", [RandomInt])),
                         {ok, RandomId}
                 end),
