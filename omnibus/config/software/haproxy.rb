@@ -1,5 +1,5 @@
 #
-# Copyright 2016 Chef Software, Inc.
+# Copyright 2016-2019 Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,27 +44,17 @@ build do
    "USE_PCRE_JIT" => "1",
    "USE_ZLIB" => "1",
    "USE_OPENSSL" => "1",
+   # Required to resolve hostnames to IPv6 addresses
+   # off-by-default because of prolems on older glibc's
+   # TODO(ssd): Should we turn this off on RHEL5?
+   "USE_GETADDRINFO" => "1",
+   "TARGET" => "linux2628"
   }
-  # Required to resolve hostnames to IPv6 addresses
-  # off-by-default because of prolems on older glibc's
-  # TODO(ssd): Should we turn this off on RHEL5?
-  build_options['USE_GETADDRINFO'] = "1"
+
   if intel?
     build_options["USE_REGPARM"] = "1"
   end
-  build_options['TARGET'] = if ohai["kernel"] && ohai["kernel"]["name"] == "Linux"
-                              version = Gem::Version.new(String(ohai["kernel"]["release"]).split("-").first)
-                              case
-                              when version >= Gem::Version.new("2.6.28")
-                                "linux2628"
-                              when version >= Gem::Version.new("2.6")
-                                "linux26"
-                              else
-                                "linux24e"
-                              end
-                            else
-                              "generic"
-                            end
+
   build_args = ""
   build_options.each { |k,v| build_args << " #{k}=#{v}"}
   make "haproxy #{build_args}", env: env
