@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.40 -->
-## [13.0.40](https://github.com/chef/chef-server/tree/13.0.40) (2019-09-18)
+<!-- latest_release 13.0.41 -->
+## [13.0.41](https://github.com/chef/chef-server/tree/13.0.41) (2019-09-23)
 
 #### Merged Pull Requests
-- Update Feature Request template to point to the Aha! Portal. [#1730](https://github.com/chef/chef-server/pull/1730) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update tests to use ruby 2.5.6 [#1756](https://github.com/chef/chef-server/pull/1756) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- Update tests to use ruby 2.5.6 [#1756](https://github.com/chef/chef-server/pull/1756) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.41 -->
 - Update Feature Request template to point to the Aha! Portal. [#1730](https://github.com/chef/chef-server/pull/1730) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.40 -->
 - Documentation to include updating to rebar3 and updating with rebar3 [#1746](https://github.com/chef/chef-server/pull/1746) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.39 -->
 - development environment improvements, mostly for oc-id [#1724](https://github.com/chef/chef-server/pull/1724) ([robbkidd](https://github.com/robbkidd)) <!-- 13.0.38 -->
