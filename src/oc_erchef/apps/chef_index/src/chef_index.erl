@@ -127,10 +127,6 @@ add_batch(Batch) ->
 
 add_batch_item_with_retries(Item) ->
     MaxRetries = envy:get(chef_index, reindex_item_retries, 3, non_neg_integer),
-    %% We don't need secure random numbers, we just want to make sure
-    %% that we get some variance across our workers. If we don't seed
-    %% here all items end up getting the same random numbers.
-    random:seed(os:timestamp()),
     add_batch_item_with_retries(Item, 0, MaxRetries).
 
 add_batch_item_with_retries(Item, Failures, Max) ->
@@ -161,7 +157,7 @@ wait_before_retry(Min, Max) when Min > Max ->
     lager:error("chef_index: reindex_sleep_max_ms less than reindex_sleep_min_ms. Sleeping ~B", [Max]),
     timer:sleep(Max);
 wait_before_retry(Min, Max) ->
-    RandMinMax = Min + random:uniform(Max - Min),
+    RandMinMax = Min + rand:uniform(Max - Min),
     lager:info("chef_index: waiting ~B ms before retry", [RandMinMax]),
     timer:sleep(RandMinMax).
 

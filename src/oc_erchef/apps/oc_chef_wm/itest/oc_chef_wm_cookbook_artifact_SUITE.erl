@@ -296,7 +296,7 @@ filter_checksums_to_delete(Config) ->
     %% (each with probability 80%)
     RandomReferencedChecksums = lists:foldl(
         fun(Candidate, Acc) ->
-            case random:uniform(5) =:= 1 of
+            case rand:uniform(5) =:= 1 of
                 true -> Acc;
                 false -> [Candidate | Acc]
             end
@@ -311,7 +311,7 @@ filter_checksums_to_delete(Config) ->
     ),
     %% then let's shuffle em all
     AllChecksums = RandomChecksums ++ RandomReferencedChecksums,
-    ChecksumsToDelete = [X || {_, X} <- lists:sort([ {random:uniform(), C} || C <- AllChecksums ])],
+    ChecksumsToDelete = [X || {_, X} <- lists:sort([ {rand:uniform(), C} || C <- AllChecksums ])],
     ActualResult = oc_chef_cookbook_artifact:filter_checksums_to_delete(OrgId, ChecksumsToDelete),
     %% and these 2 should be equal modulo the order!
     ?assertEqual(lists:sort(RandomChecksums),
