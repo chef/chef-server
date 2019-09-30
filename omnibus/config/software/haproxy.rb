@@ -46,7 +46,6 @@ build do
    "USE_OPENSSL" => "1",
    # Required to resolve hostnames to IPv6 addresses
    # off-by-default because of prolems on older glibc's
-   # TODO(ssd): Should we turn this off on RHEL5?
    "USE_GETADDRINFO" => "1",
    "TARGET" => "linux2628"
   }
