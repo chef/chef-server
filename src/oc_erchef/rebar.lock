@@ -51,7 +51,6 @@
   {git,"git://github.com/chef/epgsql-1.git",
        {ref,"d62690920cfb5ab7927f067a51cf38ffc469563a"}},
   1},
- {<<"erlware_commons">>,{pkg,<<"erlware_commons">>,<<"1.0.4">>},0},
  {<<"folsom">>,
   {git,"https://github.com/boundary/folsom",
        {ref,"38e2cce7c64ce1f0a3a918d90394cfc0a940b1ba"}},
@@ -155,6 +154,5 @@
   1}]}.
 [
 {pkg_hash,[
- {<<"erlware_commons">>, <<"8F215709CCB8A99BC0436405CD78A8A92B84AD08969C2B926E239CC3B08AC4DC">>},
  {<<"recon">>, <<"B406C2FCCDEAA0D94E23B5E30AE3D635A2D461E363A5C9C6316897037CF050D2">>}]}
 ].
