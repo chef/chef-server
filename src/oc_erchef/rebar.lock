@@ -69,7 +69,7 @@
   1},
  {<<"ibrowse">>,
   {git,"https://github.com/chef/ibrowse",
-       {ref,"8f3f6a3a30730b193cc340a8885a960586dc98de"}},
+       {branch,"ma/revert_ipv6"}},
   0},
  {<<"jiffy">>,
   {git,"https://github.com/davisp/jiffy",

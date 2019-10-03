@@ -4,7 +4,7 @@
   1},
  {<<"ibrowse">>,
   {git,"git://github.com/opscode/ibrowse.git",
-       {ref,"8f3f6a3a30730b193cc340a8885a960586dc98de"}},
+       {branch,"ma/revert_ipv6"}},
   1},
  {<<"opscoderl_httpc">>,
   {git,"https://github.com/chef/opscoderl_httpc",
