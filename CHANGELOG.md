@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.42 -->
-## [13.0.42](https://github.com/chef/chef-server/tree/13.0.42) (2019-10-01)
+<!-- latest_release 13.0.43 -->
+## [13.0.43](https://github.com/chef/chef-server/tree/13.0.43) (2019-10-03)
 
 #### Merged Pull Requests
-- Bump omnibus chef-infra to 15.4.20 [#1774](https://github.com/chef/chef-server/pull/1774) ([christopher-snapp](https://github.com/christopher-snapp))
+- Cookstyle updates for the chef-server-deploy cookbook [#1762](https://github.com/chef/chef-server/pull/1762) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- Cookstyle updates for the chef-server-deploy cookbook [#1762](https://github.com/chef/chef-server/pull/1762) ([tas50](https://github.com/tas50)) <!-- 13.0.43 -->
 - Bump omnibus chef-infra to 15.4.20 [#1774](https://github.com/chef/chef-server/pull/1774) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.42 -->
 - Update tests to use ruby 2.5.6 [#1756](https://github.com/chef/chef-server/pull/1756) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.41 -->
 - Update Feature Request template to point to the Aha! Portal. [#1730](https://github.com/chef/chef-server/pull/1730) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.40 -->
