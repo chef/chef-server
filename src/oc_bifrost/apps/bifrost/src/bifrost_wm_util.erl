@@ -15,7 +15,7 @@
 -spec generate_authz_id() -> auth_id().
 generate_authz_id() ->
     lists:flatten([io_lib:format("~4.16.0b", [X]) ||
-                      <<X:16>> <= crypto:rand_bytes(16) ]).
+                      <<X:16>> <= crypto:strong_rand_bytes(16) ]).
 
 %% Extract the requestor from the request headers and return updated base state.
 -spec get_requestor(wm_req(), base_state()) -> base_state().

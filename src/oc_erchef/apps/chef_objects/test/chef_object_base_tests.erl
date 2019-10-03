@@ -81,7 +81,7 @@ make_org_prefix_id_test_() ->
     ].
 
 make_org_id() ->
-    <<TL:32, TM:16, THV:16, CSR:8, CSL:8, N:48>> = crypto:rand_bytes(16),
+    <<TL:32, TM:16, THV:16, CSR:8, CSL:8, N:48>> = crypto:strong_rand_bytes(16),
     Fmt = "~8.16.0b~4.16.0b~4.16.0b~2.16.0b~2.16.0b~12.16.0b",
     iolist_to_binary((io_lib:format(Fmt, [TL, TM, THV, CSR, CSL, N]))).
 

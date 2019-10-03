@@ -16,7 +16,7 @@
         ]).
 
 create_entity_if_authorized(_Context, _OrgId, _Creator, _ObjectType) ->
-    <<RandomInt:128>> = crypto:rand_bytes(16),
+    <<RandomInt:128>> = crypto:strong_rand_bytes(16),
     RandomId = iolist_to_binary(io_lib:format("~32.16.0b", [RandomInt])),
     {ok, RandomId}.
 
