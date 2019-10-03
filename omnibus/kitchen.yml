@@ -10,7 +10,7 @@ driver:
 provisioner:
   name: chef_zero
   product_name: chef
-  product_version: 14.13.11
+  product_version: 15.3.14
 
 platforms:
   - name: ubuntu-18.04
