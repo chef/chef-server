@@ -31,10 +31,8 @@ data "template_file" "hosts_config" {
   template = "${file("${path.module}/templates/hosts.tpl")}"
 
   vars {
-    back_end_ip    = "${module.back_end.private_ipv4_address}"
-    front_end_ip   = "${module.front_end.private_ipv4_address}"
-    back_end_ipv6  = "${module.back_end.public_ipv6_address}"
-    front_end_ipv6 = "${module.front_end.public_ipv6_address}"
+    back_end_ip  = "${var.enable_ipv6 == true ? module.back_end.public_ipv6_address : module.back_end.private_ipv4_address}"
+    front_end_ip = "${var.enable_ipv6 == true ? module.front_end.public_ipv6_address : module.front_end.private_ipv4_address}"
   }
 }
 
@@ -43,8 +41,10 @@ data "template_file" "chef_server_config" {
   template = "${file("${path.module}/templates/chef-server.rb.tpl")}"
 
   vars {
-    back_end_ipv6  = "${module.back_end.public_ipv6_address}"
-    front_end_ipv6 = "${module.front_end.public_ipv6_address}"
+    enable_ipv6  = "${var.enable_ipv6}"
+    back_end_ip  = "${var.enable_ipv6 == "true" ? module.back_end.public_ipv6_address : module.back_end.private_ipv4_address}"
+    front_end_ip = "${var.enable_ipv6 == "true" ? module.front_end.public_ipv6_address : module.front_end.private_ipv4_address}"
+    cidr         = "${var.enable_ipv6 == "true" ? 64 : 32}"
   }
 }
 
