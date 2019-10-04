@@ -110,7 +110,7 @@ copying files back from the dev-vm to the host.
     - Make sure to stop the sync after it is complete.
   - In the dev-vm
     - cd /host/src/oc_erchef #Repeat for every erlang app
-    - ./rebar3 update
+    - ./rebar3 upgrade
   - This will create an updated rebar.lock file.
   - cp rebar.lock /dotfiles #dotfiles folder is shared on host
   - On the host (mac)
@@ -119,7 +119,7 @@ copying files back from the dev-vm to the host.
 - Updating the erlang deps from the host machine
   - cd chef-server/src/oc_erchef
   - rm -fr \_build
-  - ./rebar3 update
+  - ./rebar3 upgrade
   - rm -fr \_build # not removing this can cause strange build problems where omnibus builds pick up mac architecture libraries
   - The lockfile will be updated in place. .
   - Repeat above steps for all the erlang apps.
