@@ -29,6 +29,7 @@ _build
 
 # Terraform
 .terraform/
+.terraform.tfstate.lock.info
 *.tfstate
 *.tfstate.backup
 *_override.tf
