@@ -21,4 +21,4 @@ override :'berkshelf-no-depselector', version: '6016ca10b2f46508b1b1072642286687
 # in mainline luajit. There's forks for ppc64, and s390x, but going forward with
 # those was so far blocked by ppc64 not being supported even with the PPC64
 # fork.
-override :openresty, version: "1.13.6.2"
+override :openresty, version: "1.15.8.1"
