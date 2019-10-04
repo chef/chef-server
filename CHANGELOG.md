@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.45 -->
-## [13.0.45](https://github.com/chef/chef-server/tree/13.0.45) (2019-10-04)
+<!-- latest_release 13.0.46 -->
+## [13.0.46](https://github.com/chef/chef-server/tree/13.0.46) (2019-10-04)
 
 #### Merged Pull Requests
-- Initial refactor of Terraform for on-demand integration testing [#1768](https://github.com/chef/chef-server/pull/1768) ([christopher-snapp](https://github.com/christopher-snapp))
+- Update the command to do the right thing [#1747](https://github.com/chef/chef-server/pull/1747) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- Update the command to do the right thing [#1747](https://github.com/chef/chef-server/pull/1747) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.46 -->
 - Initial refactor of Terraform for on-demand integration testing [#1768](https://github.com/chef/chef-server/pull/1768) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.45 -->
 - Remove foodcritic testing from Buildkite [#1763](https://github.com/chef/chef-server/pull/1763) ([tas50](https://github.com/tas50)) <!-- 13.0.44 -->
 - Cookstyle updates for the chef-server-deploy cookbook [#1762](https://github.com/chef/chef-server/pull/1762) ([tas50](https://github.com/tas50)) <!-- 13.0.43 -->
