@@ -80,6 +80,10 @@ The `workspace` name is the combination of the following variables `SCENARIO-ENA
 
 To get a list of the workspaces that are still active you may run the `make list-active-workspaces` command.
 
+### Destroying Active Scenarios
+
+To destroy all active scenarios you may run either the `make destroy-all` or `make clean` commands.
+
 ## Adding a new Scenario
 
 1. Duplicate an existing scenario directory that is similar to the one you desire. For example, if you wanted to add a

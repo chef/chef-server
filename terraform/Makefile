@@ -1,3 +1,4 @@
+SCENARIOS = $(shell ls -1 scenarios 2>/dev/null | tr -d /)
 WORKSPACES = $(shell find scenarios/*/terraform.tfstate.d -maxdepth 1 -type d 2>/dev/null | sed 's|.*tfstate.d/||;/tfstate.d/d;')
 
 ifneq ($(AWS_DEFAULT_PROFILE),)
@@ -48,6 +49,18 @@ ifneq ($(SCENARIO),)
 	export TF_VAR_scenario ?= $(SCENARIO)
 endif
 
+ifeq ($(WORKSPACE),)
+    ifeq ($(TF_VAR_enable_ipv6), "true")
+        export WORKSPACE = "$(TF_VAR_scenario)-ipv6-$(TF_VAR_platform)"
+    else
+        export WORKSPACE = "$(TF_VAR_scenario)-ipv4-$(TF_VAR_platform)"
+    endif
+else
+	export TF_VAR_scenario = $(shell sed 's/-ipv.-.*//' <<<$(WORKSPACE))
+	export TF_VAR_enable_ipv6 = $(shell grep -q '\-ipv6-' <<<$(WORKSPACE) && echo true || echo false)
+	export TF_VAR_platform = $(shell sed 's/.*-ipv.-//' <<<$(WORKSPACE))
+endif
+
 verify-aws:
 ifeq ($(TF_VAR_aws_department),)
 	$(error The department that owns the resources must be provided via the "AWS_DEPT" environment variable.)
@@ -58,21 +71,24 @@ ifeq ($(TF_VAR_aws_contact),)
 endif
 
 create-vpc: verify-aws
+	@set -e; \
 	cd aws_vpc && \
 	rm -rf .terraform && \
 	terraform init && \
 	terraform apply -auto-approve
 
 show-vpc: verify-aws
+	@set -e; \
 	cd aws_vpc && \
 	terraform show
 
 destroy-vpc: verify-aws
+	@set -e; \
 	cd aws_vpc && \
 	terraform destroy -auto-approve && \
 	rm -rf .terraform terraform.tfstate*
 
-check-scenario: verify-aws
+verify-scenario: verify-aws
 ifeq ($(TF_VAR_aws_ssh_key_id),)
 	$(error The ID of an AWS SSH key must be provided via the "AWS_SSH_KEY_ID" environment variable.)
 endif
@@ -89,22 +105,68 @@ ifeq ($(TF_VAR_stable_version),)
 	$(error A stable version of chef-server must be provided via the "STABLE_VERSION" environment variable.)
 endif
 
-init: check-scenario
-	cd scenarios/$(SCENARIO) && test -d .terraform || terraform init
+init: verify-scenario
+	@set -e; \
+	cd scenarios/$(TF_VAR_scenario) && (test -d .terraform || terraform init) && \
+	test -d "terraform.tfstate.d/$(WORKSPACE)" || terraform workspace new "$(WORKSPACE)"
 
 plan: init
-	cd scenarios/$(SCENARIO) && terraform plan
+	@set -e; \
+	echo -e "\n\nGenerating Plan for $(WORKSPACE)\n" && \
+	cd scenarios/$(TF_VAR_scenario) && \
+	terraform workspace select "$(WORKSPACE)" && \
+	terraform plan
 
 show: init
-	cd scenarios/$(SCENARIO) && terraform show
+	@set -e; \
+	cd scenarios/$(TF_VAR_scenario) && \
+	terraform workspace select "$(WORKSPACE)" && \
+	terraform show
 
 apply: init
-	cd scenarios/$(SCENARIO) && terraform apply -auto-approve
+	@set -e; \
+	echo -e "\n\nApplying $(WORKSPACE)\n" && \
+	cd scenarios/$(TF_VAR_scenario) && \
+	terraform workspace select "$(WORKSPACE)" && \
+	terraform apply -auto-approve
+
+apply-all:
+	@set -e; \
+	for scenario in $(SCENARIOS); do \
+		workspace="$${scenario}-$(shell [ $(TF_VAR_enable_ipv6) = 'true' ] && echo ipv6 || echo ipv4)-$(TF_VAR_platform)"; \
+		mkdir -p "scenarios/$${scenario}/terraform.tfstate.d/$$workspace"; \
+		output="/tmp/$$workspace.log"; \
+		echo -e "\nApplying $$workspace:\n\toutput log can be found in $${output}"; \
+		WORKSPACE="$$workspace" $(MAKE) apply > "$$output" 2>&1 & \
+		sleep 1; \
+	done; \
+	echo -en "\nWaiting for scenarios to complete ... "; \
+	wait; \
+	echo 'Done';
 
 destroy: init
-	cd scenarios/$(SCENARIO) && \
+	@set -e; \
+	echo -e "\n\nDestroying $(WORKSPACE)\n" && \
+	cd scenarios/$(TF_VAR_scenario) && \
+	terraform workspace select "$(WORKSPACE)" && \
 	terraform destroy -auto-approve && \
-	rm -rf .terraform terraform.tfstate*
+	terraform workspace select default && \
+	terraform workspace delete $(WORKSPACE) && \
+	(rmdir terraform.tfstate.d 2>/dev/null && rm -rf .terraform)
+
+destroy-all:
+	@set -e; \
+	[ -z "$(WORKSPACES)" ] && exit 0; \
+	for workspace in $(WORKSPACES); do \
+		echo -e "\nDestroying $$workspace"; \
+		WORKSPACE=$$workspace UNSTABLE_VERSION=x STABLE_VERSION=x $(MAKE) destroy & \
+		sleep 1; \
+	done; \
+	echo -en "\nWaiting for scenario cleanup to complete ... "; \
+	wait; \
+	echo 'Done';
+
+clean: destroy-all
 
 list-active-workspaces:
 	@set -e; \
@@ -114,7 +176,7 @@ list-active-workspaces:
 # terraform fmt will always exit 0, so we need to check to see if the diff
 # returns anything in order to determine if lint fails
 lint:
-	set -e; \
+	@set -e; \
 	LINT_OUTPUT=$$(terraform fmt --diff --list --write=false ./); \
 	if test -n "$$LINT_OUTPUT"; then \
 		echo "$$LINT_OUTPUT"; \
