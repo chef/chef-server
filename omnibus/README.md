@@ -182,7 +182,14 @@ $ kitchen login ubuntu-1604
 ...
 [vagrant@ubuntu...] $ bin/omnibus build chef-server -l internal
 ```
-or if you prefer not to use binstubs and to use bundle exec instead:
+
+Alternatively, paste this single line into your shell after `kitchen login ...` :
+
+```shell
+cd && . load-omnibus-toolchain.sh && cd chef-server/omnibus && sudo chown -R vagrant ~/.bundle/  && bundle install --binstubs && bin/omnibus build chef-server -l internal
+```
+
+Or if you prefer not to use binstubs and want to use bundle exec instead:
 
 ```shell
 $ kitchen login ubuntu-1604
@@ -192,6 +199,12 @@ $ kitchen login ubuntu-1604
 [vagrant@ubuntu...] $ bundle install
 ...
 [vagrant@ubuntu...] $ bundle exec omnibus build chef-server -l internal
+```
+
+Alternatively, paste this single line into your shell after `kitchen login ...` :
+
+```shell
+cd && . load-omnibus-toolchain.sh && cd chef-server/omnibus && sudo chown -R vagrant ~/.bundle/  && bundle install && bin/omnibus build chef-server -l internal
 ```
 
 For a complete list of all commands and platforms, run `kitchen list` or
