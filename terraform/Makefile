@@ -44,6 +44,10 @@ else
 	export TF_VAR_enable_ipv6 ?= "true"
 endif
 
+ifneq ($(SCENARIO),)
+	export TF_VAR_scenario ?= $(SCENARIO)
+endif
+
 verify-aws:
 ifeq ($(TF_VAR_aws_department),)
 	$(error The department that owns the resources must be provided via the "AWS_DEPT" environment variable.)
@@ -73,8 +77,8 @@ ifeq ($(TF_VAR_aws_ssh_key_id),)
 	$(error The ID of an AWS SSH key must be provided via the "AWS_SSH_KEY_ID" environment variable.)
 endif
 
-ifeq ($(SCENARIO),)
-	$(error A valid scenario must be provided via the "SCENARIO" environment variable.)
+ifeq ($(TF_VAR_scenario),)
+	$(error A valid $(SCENARIO) scenario must be provided via the "SCENARIO" environment variable.)
 endif
 
 ifeq ($(TF_VAR_unstable_version),)

@@ -48,6 +48,11 @@ variable "platform" {
 #########################################################################
 # Chef Server
 #########################################################################
+variable "scenario" {
+  type        = "string"
+  description = "The name of the scenario being executed."
+}
+
 variable "unstable_version" {
   type        = "string"
   description = "The version of chef server build artifact to install (e.g. 13.0.38+20190904060033)"
@@ -56,4 +61,9 @@ variable "unstable_version" {
 variable "stable_version" {
   type        = "string"
   description = "The stable version of chef server to install (e.g. 13.0.17)"
+}
+
+variable "enable_ipv6" {
+  type        = "string"
+  description = "Use IPv6 in the chef-server.rb config and /etc/hosts."
 }

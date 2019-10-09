@@ -9,7 +9,7 @@ module "chef_server" {
   aws_ssh_key_id    = "${var.aws_ssh_key_id}"
   aws_instance_type = "${var.aws_instance_type}"
   platform          = "${var.platform}"
-  name              = "omnibus-standalone-upgrade-from-stable"
+  name              = "${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 resource "null_resource" "chef_server_config" {

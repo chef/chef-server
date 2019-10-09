@@ -9,7 +9,7 @@ module "back_end" {
   aws_ssh_key_id    = "${var.aws_ssh_key_id}"
   aws_instance_type = "${var.aws_instance_type}"
   platform          = "${var.platform}"
-  name              = "backend-omnibus-tiered-fresh-install"
+  name              = "backend-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 module "front_end" {
@@ -23,7 +23,7 @@ module "front_end" {
   aws_ssh_key_id    = "${var.aws_ssh_key_id}"
   aws_instance_type = "${var.aws_instance_type}"
   platform          = "${var.platform}"
-  name              = "frontend-omnibus-tiered-fresh-install"
+  name              = "frontend-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 # generate static hosts configuration

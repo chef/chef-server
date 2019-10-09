@@ -48,6 +48,11 @@ variable "platform" {
 #########################################################################
 # Chef Server
 #########################################################################
+variable "scenario" {
+  type        = "string"
+  description = "The name of the scenario being executed."
+}
+
 variable "unstable_version" {
   type        = "string"
   description = "The version of chef server build artifact to install (e.g. 13.0.38+20190904060033)"
