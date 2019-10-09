@@ -43,7 +43,6 @@ variable "aws_instance_type" {
 variable "platform" {
   type        = "string"
   description = "Operating System of the instance to be created."
-  default     = "rhel-7"
 }
 
 #########################################################################

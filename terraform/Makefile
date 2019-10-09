@@ -24,6 +24,8 @@ endif
 
 ifneq ($(PLATFORM),)
 	export TF_VAR_platform ?= $(PLATFORM)
+else
+	export TF_VAR_platform ?= "ubuntu-18.04"
 endif
 
 ifneq ($(UNSTABLE_VERSION),)
@@ -36,6 +38,8 @@ endif
 
 ifneq ($(ENABLE_IPV6),)
 	export TF_VAR_enable_ipv6 ?= $(ENABLE_IPV6)
+else
+	export TF_VAR_enable_ipv6 ?= "true"
 endif
 
 verify-aws:

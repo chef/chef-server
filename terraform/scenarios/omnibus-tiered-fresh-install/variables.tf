@@ -43,7 +43,6 @@ variable "aws_instance_type" {
 variable "platform" {
   type        = "string"
   description = "Operating System of the instance to be created."
-  default     = "ubuntu-16.04"
 }
 
 #########################################################################
@@ -57,5 +56,4 @@ variable "unstable_version" {
 variable "enable_ipv6" {
   type        = "string"
   description = "Use IPv6 in the chef-server.rb config and /etc/hosts."
-  default     = "true"
 }
