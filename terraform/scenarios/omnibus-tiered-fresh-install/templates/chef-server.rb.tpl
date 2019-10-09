@@ -1,15 +1,15 @@
 topology = "tier"
 
 server "backend.internal",
-  :ipaddress => "${back_end_ipv6}/64",
+  :ipaddress => "${back_end_ip}/${cidr}",
   :role => "backend",
   :bootstrap => true
 
 backend_vip "backend.internal",
-  :ipaddress => "${back_end_ipv6}/64"
+  :ipaddress => "${back_end_ip}/${cidr}"
 
 server "frontend.internal",
-  :ipaddress => "${front_end_ipv6}/64",
+  :ipaddress => "${front_end_ip}/${cidr}",
   :role => "frontend"
 
 api_fqdn = "frontend.internal"
@@ -24,4 +24,4 @@ insecure_addon_compat = false
 
 data_collector['token'] = 'foobar'
 
-nginx['enable_ipv6'] = true
+nginx['enable_ipv6'] = ${enable_ipv6}

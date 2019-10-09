@@ -53,3 +53,9 @@ variable "unstable_version" {
   type        = "string"
   description = "The version of chef server build artifact to install (e.g. 13.0.38+20190904060033)"
 }
+
+variable "enable_ipv6" {
+  type        = "string"
+  description = "Use IPv6 in the chef-server.rb config and /etc/hosts."
+  default     = "true"
+}

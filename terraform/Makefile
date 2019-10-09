@@ -34,6 +34,10 @@ ifneq ($(STABLE_VERSION),)
 	export TF_VAR_stable_version ?= $(STABLE_VERSION)
 endif
 
+ifneq ($(ENABLE_IPV6),)
+	export TF_VAR_enable_ipv6 ?= $(ENABLE_IPV6)
+endif
+
 verify-aws:
 ifeq ($(TF_VAR_aws_department),)
 	$(error The department that owns the resources must be provided via the "AWS_DEPT" environment variable.)
