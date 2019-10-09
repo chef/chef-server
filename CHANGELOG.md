@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.48 -->
-## [13.0.48](https://github.com/chef/chef-server/tree/13.0.48) (2019-10-09)
+<!-- latest_release 13.0.49 -->
+## [13.0.49](https://github.com/chef/chef-server/tree/13.0.49) (2019-10-09)
 
 #### Merged Pull Requests
-- Add support for testing a scenario via IPv4 or IPv6 [#1788](https://github.com/chef/chef-server/pull/1788) ([christopher-snapp](https://github.com/christopher-snapp))
+- Bump nokogiri from 1.8.5 to 1.10.4 in /src/oc-id [#1765](https://github.com/chef/chef-server/pull/1765) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- Bump nokogiri from 1.8.5 to 1.10.4 in /src/oc-id [#1765](https://github.com/chef/chef-server/pull/1765) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 13.0.49 -->
 - Add support for testing a scenario via IPv4 or IPv6 [#1788](https://github.com/chef/chef-server/pull/1788) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.48 -->
 - update openresty [#1706](https://github.com/chef/chef-server/pull/1706) ([markan](https://github.com/markan)) <!-- 13.0.47 -->
 - Update the command to do the right thing [#1747](https://github.com/chef/chef-server/pull/1747) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.46 -->
