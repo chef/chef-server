@@ -1,3 +1,5 @@
+WORKSPACES = $(shell find scenarios/*/terraform.tfstate.d -maxdepth 1 -type d 2>/dev/null | sed 's|.*tfstate.d/||;/tfstate.d/d;')
+
 ifneq ($(AWS_DEFAULT_PROFILE),)
 	export TF_VAR_aws_profile ?= $(AWS_DEFAULT_PROFILE)
 endif
@@ -100,6 +102,10 @@ destroy: init
 	terraform destroy -auto-approve && \
 	rm -rf .terraform terraform.tfstate*
 
+list-active-workspaces:
+	@set -e; \
+	tr ' ' '\n' <<<"$(WORKSPACES)"
+
 # Lint _all_ the directories (including modules)
 # terraform fmt will always exit 0, so we need to check to see if the diff
 # returns anything in order to determine if lint fails
@@ -111,4 +117,4 @@ lint:
 		exit 1; \
 	fi
 
-.PHONY: create-vpc show-vpc destroy-vpc verify-aws check-scenario init plan show apply destroy lint
+.PHONY: create-vpc show-vpc destroy-vpc verify-aws verify-scenario init plan show apply apply-all destroy destroy-all clean list-active-workspaces lint

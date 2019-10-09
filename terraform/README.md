@@ -70,6 +70,16 @@ An example of a typical scenario lifecycle might look like this:
 
 ***NOTE:*** **There is no automatic reaping of the scenario.**
 
+## Working with Active Scenarios
+
+### List Active Scenarios
+
+For terraform to track multiple concurrent scenarios it uses a concept called a `workspace`.
+
+The `workspace` name is the combination of the following variables `SCENARIO-ENABLE_IPV6-PLATFORM` (e.g. `omnibus-tiered-fresh-install-ipv6-rhel-7`)
+
+To get a list of the workspaces that are still active you may run the `make list-active-workspaces` command.
+
 ## Adding a new Scenario
 
 1. Duplicate an existing scenario directory that is similar to the one you desire. For example, if you wanted to add a
