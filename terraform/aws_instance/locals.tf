@@ -14,5 +14,6 @@ locals {
     rhel-8       = "${data.aws_ami.rhel_8.id}"
     ubuntu-16.04 = "${data.aws_ami.ubuntu_1604.id}"
     ubuntu-18.04 = "${data.aws_ami.ubuntu_1804.id}"
+    sles-12      = "${data.aws_ami.sles_12.id}"
   }
 }

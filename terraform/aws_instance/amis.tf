@@ -82,3 +82,20 @@ data "aws_ami" "ubuntu_1804" {
 
   owners = ["099720109477"]
 }
+
+# identify suse 12 ami
+data "aws_ami" "sles_12" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["suse-sles-12-sp*hvm-ssd-x86_64"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["013907871322"]
+}

@@ -53,7 +53,7 @@ Environment variables are used to control how the scenarios are executed and can
 | `AWS_DEFAULT_PROFILE` | The name of the AWS profile used to connect to an AWS account. | chef-engineering (default) |
 | `AWS_DEFAULT_REGION` | The AWS region to spawn resources within. | us-west-1 (default) |
 | `AWS_DEFAULT_INSTANCE_TYPE` | The AWS instance type that determines the amount of resources server instances are allocated. | t3.medium (default) |
-| `PLATFORM` | The operating system used by server instances. | rhel-7, rhel-8, ubuntu-16.04, ubuntu-18.04 |
+| `PLATFORM` | The operating system used by server instances. | rhel-6, rhel-7, rhel-8, ubuntu-16.04, ubuntu-18.04, sles-12 |
 | `ENABLE_IPV6` | Use IPv6 in the chef-server.rb config and /etc/hosts | true (default) |
 
 ### Scenario Lifecycle
