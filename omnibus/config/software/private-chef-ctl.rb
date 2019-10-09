@@ -37,7 +37,7 @@ build do
   gem "build chef-server-ctl.gemspec", env: env
 
   # Hack: install binaries in /tmp because we don't actually want them at all
-  gem "install chef-server-ctl-*.gem --no-ri --no-document --verbose --bindir=/tmp", env: env
+  gem "install chef-server-ctl-*.gem --no-document --verbose --bindir=/tmp", env: env
 
   appbundle "chef-server-ctl", env: env
 
