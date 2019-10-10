@@ -31,12 +31,12 @@ else
 	export TF_VAR_platform ?= "ubuntu-18.04"
 endif
 
-ifneq ($(UNSTABLE_VERSION),)
-	export TF_VAR_unstable_version_url ?= $(shell platform=$(TF_VAR_platform); for channel in unstable current stable; do mixlib-install download chef-server --url -c $$channel -a x86_64 -p $$(echo $${platform%-*} | sed 's/rhel/el/') -l $${platform\#\#*-} -v $(UNSTABLE_VERSION) 2>/dev/null && break; done | head -n1)
+ifneq ($(INSTALL_VERSION),)
+	export TF_VAR_install_version_url ?= $(shell platform=$(TF_VAR_platform); for channel in unstable current stable; do mixlib-install download chef-server --url -c $$channel -a x86_64 -p $$(echo $${platform%-*} | sed 's/rhel/el/') -l $${platform\#\#*-} -v $(INSTALL_VERSION) 2>/dev/null && break; done | head -n1)
 endif
 
-ifneq ($(STABLE_VERSION),)
-	export TF_VAR_stable_version_url ?= $(shell platform=$(TF_VAR_platform); for channel in unstable current stable; do mixlib-install download chef-server --url -c $$channel -a x86_64 -p $$(echo $${platform%-*} | sed 's/rhel/el/') -l $${platform\#\#*-} -v $(STABLE_VERSION) 2>/dev/null && break; done | head -n1)
+ifneq ($(UPGRADE_VERSION),)
+	export TF_VAR_upgrade_version_url ?= $(shell platform=$(TF_VAR_platform); for channel in unstable current stable; do mixlib-install download chef-server --url -c $$channel -a x86_64 -p $$(echo $${platform%-*} | sed 's/rhel/el/') -l $${platform\#\#*-} -v $(UPGRADE_VERSION) 2>/dev/null && break; done | head -n1)
 endif
 
 ifneq ($(ENABLE_IPV6),)
@@ -97,12 +97,12 @@ ifeq ($(TF_VAR_scenario),)
 	$(error A valid $(SCENARIO) scenario must be provided via the "SCENARIO" environment variable.)
 endif
 
-ifeq ($(TF_VAR_unstable_version_url),)
-	$(error A chef-server artifact couldn't be found of version $(UNSTABLE_VERSION) for $(TF_VAR_platform).)
+ifeq ($(TF_VAR_install_version_url),)
+	$(error A chef-server artifact couldn't be found of version $(INSTALL_VERSION) for $(TF_VAR_platform).)
 endif
 
-ifeq ($(TF_VAR_stable_version_url),)
-	$(error A chef-server artifact couldn't be found of version $(STABLE_VERSION) for $(TF_VAR_platform).)
+ifeq ($(TF_VAR_upgrade_version_url),)
+	$(error A chef-server artifact couldn't be found of version $(UPGRADE_VERSION) for $(TF_VAR_platform).)
 endif
 
 init: verify-scenario
@@ -159,7 +159,7 @@ destroy-all:
 	[ -z "$(WORKSPACES)" ] && exit 0; \
 	for workspace in $(WORKSPACES); do \
 		echo -e "\nDestroying $$workspace"; \
-		WORKSPACE=$$workspace TF_VAR_unstable_version_url=x TF_VAR_stable_version_url=x $(MAKE) destroy & \
+		WORKSPACE=$$workspace TF_VAR_install_version_url=x TF_VAR_upgrade_version_url=x $(MAKE) destroy & \
 		sleep 1; \
 	done; \
 	echo -en "\nWaiting for scenario cleanup to complete ... "; \

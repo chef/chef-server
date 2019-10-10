@@ -53,9 +53,9 @@ variable "scenario" {
   description = "The name of the scenario being executed."
 }
 
-variable "unstable_version_url" {
+variable "install_version_url" {
   type        = "string"
-  description = "The URL to an unstable chef-server artifact."
+  description = "The URL to a chef-server used during initial install."
 }
 
 variable "enable_ipv6" {

@@ -32,8 +32,8 @@ resource "null_resource" "chef_server_config" {
   provisioner "remote-exec" {
     inline = [
       "set -evx",
-      "curl -vo /tmp/${replace(var.stable_version_url, "/^.*\\//", "")} ${var.stable_version_url}",
-      "sudo ${replace(var.stable_version_url, "rpm", "") != var.stable_version_url ? "rpm -U" : "dpkg -iEG"} /tmp/${replace(var.stable_version_url, "/^.*\\//", "")}",
+      "curl -vo /tmp/${replace(var.install_version_url, "/^.*\\//", "")} ${var.install_version_url}",
+      "sudo ${replace(var.install_version_url, "rpm", "") != var.install_version_url ? "rpm -U" : "dpkg -iEG"} /tmp/${replace(var.install_version_url, "/^.*\\//", "")}",
       "sudo chown root:root /tmp/chef-server.rb",
       "sudo chown root:root /tmp/dhparam.pem",
       "sudo mv /tmp/chef-server.rb /etc/opscode",
@@ -42,8 +42,8 @@ resource "null_resource" "chef_server_config" {
       "sleep 120",
       "sudo chef-server-ctl user-create janedoe Jane Doe janed@example.com abc123 --filename /tmp/janedoe.pem",
       "sudo chef-server-ctl org-create 4thcoffee 'Fourth Coffee, Inc.' --association_user janedoe --filename /tmp/4thcoffee-validator.pem",
-      "curl -vo /tmp/${replace(var.unstable_version_url, "/^.*\\//", "")} ${var.unstable_version_url}",
-      "sudo ${replace(var.unstable_version_url, "rpm", "") != var.unstable_version_url ? "rpm -U" : "dpkg -iEG"} /tmp/${replace(var.unstable_version_url, "/^.*\\//", "")}",
+      "curl -vo /tmp/${replace(var.upgrade_version_url, "/^.*\\//", "")} ${var.upgrade_version_url}",
+      "sudo ${replace(var.upgrade_version_url, "rpm", "") != var.upgrade_version_url ? "rpm -U" : "dpkg -iEG"} /tmp/${replace(var.upgrade_version_url, "/^.*\\//", "")}",
       "sudo CHEF_LICENSE='accept' chef-server-ctl upgrade",
       "sudo chef-server-ctl start",
       "sudo chef-server-ctl cleanup",

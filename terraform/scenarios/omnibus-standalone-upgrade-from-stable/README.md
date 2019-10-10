@@ -2,6 +2,6 @@
 
 This directory contains the Terraform code used to instantiate a single Chef Infra Server utilizing Omnibus built artifacts as the install and upgrade packages.
 
-The stable version of `chef-server` is installed and configured prior to an upgrade using the unstable artifact.
+The `chef-server` artifact is downloaded from `$install_version_url`, installed, and configured prior to an upgrade using the artifact downloaded from `$upgrade_version_url`.
 
 Once the upgrade has completed, the pedant tests are run against the server.

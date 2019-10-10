@@ -44,8 +44,8 @@ Environment variables are used to control how the scenarios are executed and can
 | `AWS_CONTACT` | The primary contact for the resources, this should be the IAM username  and must be able to receive email by appending @chef.io to it (this  person can explain what/why, might not be the business owner) | csnapp |
 | `AWS_SSH_KEY_ID` | The SSH key pair name within the AWS account that you have the private key for. | csnapp |
 | `SCENARIO` | The name of the sub-directory within `scenarios` containing the test you'd like to run. | omnibus-tiered-fresh-install |
-| `UNSTABLE_VERSION` | The version number of the artifact you are testing. | 13.0.40+20190923060037 |
-| `STABLE_VERSION` | The version number of the artifact you want to test upgrades from. | 12.19.31 |
+| `INSTALL_VERSION` | The version number of the artifact you want to install first. | 12.19.31 |
+| `UPGRADE_VERSION` | The version number of the artifact you want to upgrade to. | 13.0.40+20190923060037 |
 
 ### Optional Environment Variables
 | Environment Variable | Description | Example |
@@ -64,9 +64,9 @@ The naming convention for each scenario is `<PACKAGE_TYPE>-<TOPOLOGY>-<INSTALL_S
 
 An example of a typical scenario lifecycle might look like this:
 
-1. `AWS_DEPT=Eng AWS_CONTACT=csnapp AWS_SSH_KEY_ID=csnapp SCENARIO=omnibus-tiered-fresh-install STABLE_VERSION=12.19.31 UNSTABLE_VERSION=13.0.40+20190923060037 make apply`
+1. `AWS_DEPT=Eng AWS_CONTACT=csnapp AWS_SSH_KEY_ID=csnapp SCENARIO=omnibus-tiered-fresh-install INSTALL_VERSION=12.19.31 UPGRADE_VERSION=13.0.40+20190923060037 make apply`
 2. Optionally, you may SSH into the scenario instances for troubleshooting.
-3. `AWS_DEPT=Eng AWS_CONTACT=csnapp AWS_SSH_KEY_ID=csnapp SCENARIO=omnibus-tiered-fresh-install STABLE_VERSION=12.19.31 UNSTABLE_VERSION=13.0.40+20190923060037 make destroy`
+3. `AWS_DEPT=Eng AWS_CONTACT=csnapp AWS_SSH_KEY_ID=csnapp SCENARIO=omnibus-tiered-fresh-install INSTALL_VERSION=12.19.31 UPGRADE_VERSION=13.0.40+20190923060037 make destroy`
 
 ***NOTE:*** **There is no automatic reaping of the scenario.**
 
