@@ -53,14 +53,14 @@ variable "scenario" {
   description = "The name of the scenario being executed."
 }
 
-variable "unstable_version" {
+variable "unstable_version_url" {
   type        = "string"
-  description = "The version of chef server build artifact to install (e.g. 13.0.38+20190904060033)"
+  description = "The URL to an unstable chef-server artifact."
 }
 
-variable "stable_version" {
+variable "stable_version_url" {
   type        = "string"
-  description = "The stable version of chef server to install (e.g. 13.0.17)"
+  description = "The URL to a stable chef-server artifact."
 }
 
 variable "enable_ipv6" {

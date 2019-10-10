@@ -32,11 +32,11 @@ else
 endif
 
 ifneq ($(UNSTABLE_VERSION),)
-	export TF_VAR_unstable_version ?= $(UNSTABLE_VERSION)
+	export TF_VAR_unstable_version_url ?= $(shell platform=$(TF_VAR_platform); for channel in unstable current stable; do mixlib-install download chef-server --url -c $$channel -a x86_64 -p $$(echo $${platform%-*} | sed 's/rhel/el/') -l $${platform\#\#*-} -v $(UNSTABLE_VERSION) 2>/dev/null && break; done | head -n1)
 endif
 
 ifneq ($(STABLE_VERSION),)
-	export TF_VAR_stable_version ?= $(STABLE_VERSION)
+	export TF_VAR_stable_version_url ?= $(shell platform=$(TF_VAR_platform); for channel in unstable current stable; do mixlib-install download chef-server --url -c $$channel -a x86_64 -p $$(echo $${platform%-*} | sed 's/rhel/el/') -l $${platform\#\#*-} -v $(STABLE_VERSION) 2>/dev/null && break; done | head -n1)
 endif
 
 ifneq ($(ENABLE_IPV6),)
@@ -97,12 +97,12 @@ ifeq ($(TF_VAR_scenario),)
 	$(error A valid $(SCENARIO) scenario must be provided via the "SCENARIO" environment variable.)
 endif
 
-ifeq ($(TF_VAR_unstable_version),)
-	$(error An unstable version of chef-server must be provided via the "UNSTABLE_VERSION" environment variable.)
+ifeq ($(TF_VAR_unstable_version_url),)
+	$(error A chef-server artifact couldn't be found of version $(UNSTABLE_VERSION) for $(TF_VAR_platform).)
 endif
 
-ifeq ($(TF_VAR_stable_version),)
-	$(error A stable version of chef-server must be provided via the "STABLE_VERSION" environment variable.)
+ifeq ($(TF_VAR_stable_version_url),)
+	$(error A chef-server artifact couldn't be found of version $(STABLE_VERSION) for $(TF_VAR_platform).)
 endif
 
 init: verify-scenario
@@ -159,7 +159,7 @@ destroy-all:
 	[ -z "$(WORKSPACES)" ] && exit 0; \
 	for workspace in $(WORKSPACES); do \
 		echo -e "\nDestroying $$workspace"; \
-		WORKSPACE=$$workspace UNSTABLE_VERSION=x STABLE_VERSION=x $(MAKE) destroy & \
+		WORKSPACE=$$workspace TF_VAR_unstable_version_url=x TF_VAR_stable_version_url=x $(MAKE) destroy & \
 		sleep 1; \
 	done; \
 	echo -en "\nWaiting for scenario cleanup to complete ... "; \
