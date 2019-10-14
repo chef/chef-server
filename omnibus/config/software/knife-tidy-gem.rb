@@ -1,5 +1,5 @@
 #
-# Copyright 2012-2014 Chef Software, Inc.
+# Copyright 2019 Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,24 +14,23 @@
 # limitations under the License.
 #
 
-name "knife-ec-backup"
-default_version "master"
-source git: "https://github.com/chef/knife-ec-backup.git"
-
+name "knife-tidy-gem"
+default_version "2.0.1"
 
 license "Apache-2.0"
-license_file "LICENSE"
-# No need to collect license information for dependencies since
-# --ignore-dependencies flag is passed in during gem install.
+license_file "https://github.com/chef/knife-tidy/blob/master/LICENSE"
+# knife-tidy gem does not have any dependencies. We only install it from
+# rubygems here.
 skip_transitive_dependency_licensing true
 
-dependency "pg-gem"
-dependency "sequel-gem"
-dependency "knife-tidy-gem"
+dependency "ruby"
+dependency "rubygems"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
-  gem "build knife-ec-backup.gemspec", env: env
-  gem "install knife-ec-backup*.gem --no-document --ignore-dependencies", env: env
+  gem "install knife-tidy" \
+      " --version '#{version}'" \
+      " --bindir '#{install_dir}/embedded/bin'" \
+      "  --no-document", env: env
 end
