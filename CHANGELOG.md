@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.52 -->
-## [13.0.52](https://github.com/chef/chef-server/tree/13.0.52) (2019-10-09)
+<!-- latest_release 13.0.53 -->
+## [13.0.53](https://github.com/chef/chef-server/tree/13.0.53) (2019-10-14)
 
 #### Merged Pull Requests
-- Add copy/paste execution strings for convenient builds [#1750](https://github.com/chef/chef-server/pull/1750) ([lbakerchef](https://github.com/lbakerchef))
+- Knife-tidy was newly added as a dependency to knife-ec-backup. [#1792](https://github.com/chef/chef-server/pull/1792) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- Knife-tidy was newly added as a dependency to knife-ec-backup. [#1792](https://github.com/chef/chef-server/pull/1792) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.53 -->
 - Add copy/paste execution strings for convenient builds [#1750](https://github.com/chef/chef-server/pull/1750) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.0.52 -->
 - removing forcing of the doc formatter [#1469](https://github.com/chef/chef-server/pull/1469) ([lamont-granquist](https://github.com/lamont-granquist)) <!-- 13.0.51 -->
 - [chef-server-ctl] Install only appbundled version [#1533](https://github.com/chef/chef-server/pull/1533) ([markan](https://github.com/markan)) <!-- 13.0.50 -->
