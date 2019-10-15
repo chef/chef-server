@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.53 -->
-## [13.0.53](https://github.com/chef/chef-server/tree/13.0.53) (2019-10-14)
+<!-- latest_release 13.0.54 -->
+## [13.0.54](https://github.com/chef/chef-server/tree/13.0.54) (2019-10-15)
 
 #### Merged Pull Requests
-- Knife-tidy was newly added as a dependency to knife-ec-backup. [#1792](https://github.com/chef/chef-server/pull/1792) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- upgrade rebar3 to 3.6.2 [#1748](https://github.com/chef/chef-server/pull/1748) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- upgrade rebar3 to 3.6.2 [#1748](https://github.com/chef/chef-server/pull/1748) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.0.54 -->
 - Knife-tidy was newly added as a dependency to knife-ec-backup. [#1792](https://github.com/chef/chef-server/pull/1792) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.53 -->
 - Add copy/paste execution strings for convenient builds [#1750](https://github.com/chef/chef-server/pull/1750) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.0.52 -->
 - removing forcing of the doc formatter [#1469](https://github.com/chef/chef-server/pull/1469) ([lamont-granquist](https://github.com/lamont-granquist)) <!-- 13.0.51 -->
