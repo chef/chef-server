@@ -53,7 +53,7 @@ variable "scenario" {
   description = "The name of the scenario being executed."
 }
 
-variable "install_version_url" {
+variable "upgrade_version_url" {
   type        = "string"
   description = "The URL to a chef-server used during initial install."
 }
