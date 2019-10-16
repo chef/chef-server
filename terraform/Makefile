@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 SCENARIOS = $(shell ls -1 scenarios 2>/dev/null | tr -d /)
 WORKSPACES = $(shell find scenarios/*/terraform.tfstate.d -maxdepth 1 -type d 2>/dev/null | sed 's|.*tfstate.d/||;/tfstate.d/d;')
 
