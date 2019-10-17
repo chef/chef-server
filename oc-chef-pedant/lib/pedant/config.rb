@@ -103,7 +103,7 @@ module Pedant
       format_args = if junit_file
                       %W[-r rspec_junit_formatter -f RspecJunitFormatter -o #{junit_file} -f documentation]
                     else
-                      %w[ --color --tty]
+                      %w[ --color -f documentation --tty]
                     end
       format_args + %w(--require rspec-rerun/formatter --format RSpec::Rerun::Formatter)
     end
