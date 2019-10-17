@@ -37,6 +37,11 @@ variable "aws_instance_type" {
   default     = "t2.medium"
 }
 
+variable "enable_ipv6" {
+  type        = "string"
+  description = "Allocate an IPv6 address in addition to IPv4 address."
+}
+
 variable "platform" {
   type        = "string"
   description = "Operating System of the instance to be created."

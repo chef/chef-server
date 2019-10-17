@@ -23,7 +23,7 @@ resource "aws_subnet" "default" {
   map_public_ip_on_launch = true
 
   ipv6_cidr_block                 = "${cidrsubnet(aws_vpc.default.ipv6_cidr_block, 8, 1)}"
-  assign_ipv6_address_on_creation = true
+  assign_ipv6_address_on_creation = false
 
   tags = {
     Name      = "${local.vpc_name}"

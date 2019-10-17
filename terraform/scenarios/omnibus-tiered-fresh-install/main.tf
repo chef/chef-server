@@ -8,6 +8,7 @@ module "back_end" {
   aws_contact       = "${var.aws_contact}"
   aws_ssh_key_id    = "${var.aws_ssh_key_id}"
   aws_instance_type = "${var.aws_instance_type}"
+  enable_ipv6       = "${var.enable_ipv6}"
   platform          = "${var.platform}"
   name              = "backend-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
@@ -22,6 +23,7 @@ module "front_end" {
   aws_contact       = "${var.aws_contact}"
   aws_ssh_key_id    = "${var.aws_ssh_key_id}"
   aws_instance_type = "${var.aws_instance_type}"
+  enable_ipv6       = "${var.enable_ipv6}"
   platform          = "${var.platform}"
   name              = "frontend-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
