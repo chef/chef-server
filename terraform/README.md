@@ -44,16 +44,16 @@ Environment variables are used to control how the scenarios are executed and can
 | `AWS_CONTACT` | The primary contact for the resources, this should be the IAM username  and must be able to receive email by appending @chef.io to it (this  person can explain what/why, might not be the business owner) | csnapp |
 | `AWS_SSH_KEY_ID` | The SSH key pair name within the AWS account that you have the private key for. | csnapp |
 | `SCENARIO` | The name of the sub-directory within `scenarios` containing the test you'd like to run. | omnibus-tiered-fresh-install |
-| `UNSTABLE_VERSION` | The version number of the artifact you are testing. | 13.0.40+20190923060037 |
-| `STABLE_VERSION` | The version number of the artifact you want to test upgrades from. | 12.19.31 |
+| `INSTALL_VERSION` | The version number of the artifact you want to install first. | 12.19.31 |
+| `UPGRADE_VERSION` | The version number of the artifact you want to upgrade to. | 13.0.40+20190923060037 |
 
 ### Optional Environment Variables
 | Environment Variable | Description | Example |
 |-----------------------------|-----------------------------------------------------------------------------------------------|--------------------------------------------|
 | `AWS_DEFAULT_PROFILE` | The name of the AWS profile used to connect to an AWS account. | chef-engineering (default) |
 | `AWS_DEFAULT_REGION` | The AWS region to spawn resources within. | us-west-1 (default) |
-| `AWS_DEFAULT_INSTANCE_TYPE` | The AWS instance type that determines the amount of resources server instances are allocated. | t3.medium (default) |
-| `PLATFORM` | The operating system used by server instances. | rhel-7, rhel-8, ubuntu-16.04, ubuntu-18.04 |
+| `AWS_DEFAULT_INSTANCE_TYPE` | The AWS instance type that determines the amount of resources server instances are allocated. | t2.medium (default) |
+| `PLATFORM` | The operating system used by server instances. | rhel-6, rhel-7, rhel-8, ubuntu-16.04, ubuntu-18.04, sles-12 |
 | `ENABLE_IPV6` | Use IPv6 in the chef-server.rb config and /etc/hosts | true (default) |
 
 ### Scenario Lifecycle
@@ -64,11 +64,25 @@ The naming convention for each scenario is `<PACKAGE_TYPE>-<TOPOLOGY>-<INSTALL_S
 
 An example of a typical scenario lifecycle might look like this:
 
-1. `AWS_DEPT=Eng AWS_CONTACT=csnapp AWS_SSH_KEY_ID=csnapp SCENARIO=omnibus-tiered-fresh-install STABLE_VERSION=12.19.31 UNSTABLE_VERSION=13.0.40+20190923060037 make apply`
+1. `AWS_DEPT=Eng AWS_CONTACT=csnapp AWS_SSH_KEY_ID=csnapp SCENARIO=omnibus-tiered-fresh-install INSTALL_VERSION=12.19.31 UPGRADE_VERSION=13.0.40+20190923060037 make apply`
 2. Optionally, you may SSH into the scenario instances for troubleshooting.
-3. `AWS_DEPT=Eng AWS_CONTACT=csnapp AWS_SSH_KEY_ID=csnapp SCENARIO=omnibus-tiered-fresh-install STABLE_VERSION=12.19.31 UNSTABLE_VERSION=13.0.40+20190923060037 make destroy`
+3. `AWS_DEPT=Eng AWS_CONTACT=csnapp AWS_SSH_KEY_ID=csnapp SCENARIO=omnibus-tiered-fresh-install INSTALL_VERSION=12.19.31 UPGRADE_VERSION=13.0.40+20190923060037 make destroy`
 
 ***NOTE:*** **There is no automatic reaping of the scenario.**
+
+## Working with Active Scenarios
+
+### List Active Scenarios
+
+For terraform to track multiple concurrent scenarios it uses a concept called a `workspace`.
+
+The `workspace` name is the combination of the following variables `SCENARIO-ENABLE_IPV6-PLATFORM` (e.g. `omnibus-tiered-fresh-install-ipv6-rhel-7`)
+
+To get a list of the workspaces that are still active you may run the `make list-active-workspaces` command.
+
+### Destroying Active Scenarios
+
+To destroy all active scenarios you may run either the `make destroy-all` or `make clean` commands.
 
 ## Adding a new Scenario
 

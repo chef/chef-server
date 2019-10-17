@@ -9,7 +9,7 @@ module "chef_server" {
   aws_ssh_key_id    = "${var.aws_ssh_key_id}"
   aws_instance_type = "${var.aws_instance_type}"
   platform          = "${var.platform}"
-  name              = "omnibus-standalone-upgrade-from-stable"
+  name              = "${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 resource "null_resource" "chef_server_config" {
@@ -32,8 +32,8 @@ resource "null_resource" "chef_server_config" {
   provisioner "remote-exec" {
     inline = [
       "set -evx",
-      "curl -vo /tmp/chef-server-stable.rpm https://packages.chef.io/files/stable/chef-server/${var.stable_version}/el/7/chef-server-core-${var.stable_version}-1.el7.x86_64.rpm",
-      "sudo rpm -U /tmp/chef-server-stable.rpm",
+      "curl -vo /tmp/${replace(var.install_version_url, "/^.*\\//", "")} ${var.install_version_url}",
+      "sudo ${replace(var.install_version_url, "rpm", "") != var.install_version_url ? "rpm -U" : "dpkg -iEG"} /tmp/${replace(var.install_version_url, "/^.*\\//", "")}",
       "sudo chown root:root /tmp/chef-server.rb",
       "sudo chown root:root /tmp/dhparam.pem",
       "sudo mv /tmp/chef-server.rb /etc/opscode",
@@ -42,8 +42,8 @@ resource "null_resource" "chef_server_config" {
       "sleep 120",
       "sudo chef-server-ctl user-create janedoe Jane Doe janed@example.com abc123 --filename /tmp/janedoe.pem",
       "sudo chef-server-ctl org-create 4thcoffee 'Fourth Coffee, Inc.' --association_user janedoe --filename /tmp/4thcoffee-validator.pem",
-      "curl -vo /tmp/chef-server-unstable.rpm https://packages.chef.io/files/unstable/chef-server/${var.unstable_version}/el/7/chef-server-core-${var.unstable_version}-1.el7.x86_64.rpm",
-      "sudo rpm -U /tmp/chef-server-unstable.rpm",
+      "curl -vo /tmp/${replace(var.upgrade_version_url, "/^.*\\//", "")} ${var.upgrade_version_url}",
+      "sudo ${replace(var.upgrade_version_url, "rpm", "") != var.upgrade_version_url ? "rpm -U" : "dpkg -iEG"} /tmp/${replace(var.upgrade_version_url, "/^.*\\//", "")}",
       "sudo CHEF_LICENSE='accept' chef-server-ctl upgrade",
       "sudo chef-server-ctl start",
       "sudo chef-server-ctl cleanup",

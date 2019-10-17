@@ -9,7 +9,7 @@ module "back_end" {
   aws_ssh_key_id    = "${var.aws_ssh_key_id}"
   aws_instance_type = "${var.aws_instance_type}"
   platform          = "${var.platform}"
-  name              = "backend-omnibus-tiered-fresh-install"
+  name              = "backend-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 module "front_end" {
@@ -23,7 +23,7 @@ module "front_end" {
   aws_ssh_key_id    = "${var.aws_ssh_key_id}"
   aws_instance_type = "${var.aws_instance_type}"
   platform          = "${var.platform}"
-  name              = "frontend-omnibus-tiered-fresh-install"
+  name              = "frontend-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 # generate static hosts configuration
@@ -75,8 +75,8 @@ resource "null_resource" "back_end_config" {
   provisioner "remote-exec" {
     inline = [
       "set -evx",
-      "curl -vo /tmp/chef-server.deb https://packages.chef.io/files/unstable/chef-server/${var.unstable_version}/ubuntu/16.04/chef-server-core_${var.unstable_version}-1_amd64.deb",
-      "sudo dpkg -iEG /tmp/chef-server.deb",
+      "curl -vo /tmp/${replace(var.upgrade_version_url, "/^.*\\//", "")} ${var.upgrade_version_url}",
+      "sudo ${replace(var.upgrade_version_url, "rpm", "") != var.upgrade_version_url ? "rpm -U" : "dpkg -iEG"} /tmp/${replace(var.upgrade_version_url, "/^.*\\//", "")}",
       "sudo chown root:root /tmp/chef-server.rb",
       "sudo chown root:root /tmp/dhparam.pem",
       "sudo chown root:root /tmp/hosts",
@@ -115,8 +115,8 @@ resource "null_resource" "front_end_config" {
       "sudo chown root:root /tmp/hosts",
       "sudo mv /tmp/hosts /etc/hosts",
       "sudo tar -C /etc -xzf /tmp/opscode.tgz",
-      "curl -vo /tmp/chef-server.deb https://packages.chef.io/files/unstable/chef-server/${var.unstable_version}/ubuntu/16.04/chef-server-core_${var.unstable_version}-1_amd64.deb",
-      "sudo dpkg -iEG /tmp/chef-server.deb",
+      "curl -vo /tmp/${replace(var.upgrade_version_url, "/^.*\\//", "")} ${var.upgrade_version_url}",
+      "sudo ${replace(var.upgrade_version_url, "rpm", "") != var.upgrade_version_url ? "rpm -U" : "dpkg -iEG"} /tmp/${replace(var.upgrade_version_url, "/^.*\\//", "")}",
       "sudo chef-server-ctl reconfigure --chef-license=accept",
       "sleep 120",
       "sudo chef-server-ctl test",

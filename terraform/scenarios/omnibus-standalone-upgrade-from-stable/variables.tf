@@ -36,25 +36,34 @@ variable "aws_ssh_key_id" {
 
 variable "aws_instance_type" {
   type        = "string"
-  description = "Name of the AWS instance type used to determine size of instances (e.g. t3.medium)."
-  default     = "t3.medium"
+  description = "Name of the AWS instance type used to determine size of instances (e.g. t2.medium)."
+  default     = "t2.medium"
 }
 
 variable "platform" {
   type        = "string"
   description = "Operating System of the instance to be created."
-  default     = "rhel-7"
 }
 
 #########################################################################
 # Chef Server
 #########################################################################
-variable "unstable_version" {
+variable "scenario" {
   type        = "string"
-  description = "The version of chef server build artifact to install (e.g. 13.0.38+20190904060033)"
+  description = "The name of the scenario being executed."
 }
 
-variable "stable_version" {
+variable "install_version_url" {
   type        = "string"
-  description = "The stable version of chef server to install (e.g. 13.0.17)"
+  description = "The URL to a chef-server used during initial install."
+}
+
+variable "upgrade_version_url" {
+  type        = "string"
+  description = "The URL to a chef-server artifact used during upgrades."
+}
+
+variable "enable_ipv6" {
+  type        = "string"
+  description = "Use IPv6 in the chef-server.rb config and /etc/hosts."
 }
