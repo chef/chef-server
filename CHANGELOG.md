@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.57 -->
-## [13.0.57](https://github.com/chef/chef-server/tree/13.0.57) (2019-10-17)
+<!-- latest_release 13.0.58 -->
+## [13.0.58](https://github.com/chef/chef-server/tree/13.0.58) (2019-10-17)
 
 #### Merged Pull Requests
-- Update pinned version of chef-infra to 15.4.45 [#1794](https://github.com/chef/chef-server/pull/1794) ([christopher-snapp](https://github.com/christopher-snapp))
+- Disable auto-ipv6 allocation if ENABLE_IPV6=false [#1795](https://github.com/chef/chef-server/pull/1795) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- Disable auto-ipv6 allocation if ENABLE_IPV6=false [#1795](https://github.com/chef/chef-server/pull/1795) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.58 -->
 - Update pinned version of chef-infra to 15.4.45 [#1794](https://github.com/chef/chef-server/pull/1794) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.57 -->
 - Revert the only change between versions failing tests with command not found on vagrant. [#1793](https://github.com/chef/chef-server/pull/1793) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.56 -->
 - Expand terraform to work across the matrix of distributions [#1791](https://github.com/chef/chef-server/pull/1791) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.55 -->
