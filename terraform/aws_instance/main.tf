@@ -67,6 +67,8 @@ resource "aws_instance" "default" {
     volume_size = 50
   }
 
+  ipv6_address_count = "${var.enable_ipv6 == true ? 1 : 0}"
+
   subnet_id = "${data.aws_subnet.chef_subnet.id}"
 
   vpc_security_group_ids = [

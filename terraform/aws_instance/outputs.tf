@@ -15,7 +15,7 @@ output "private_ipv4_dns" {
 }
 
 output "public_ipv6_address" {
-  value = "${element(aws_instance.default.ipv6_addresses, 0)}"
+  value = "${var.enable_ipv6 == true ? element(concat(aws_instance.default.ipv6_addresses, list("")), 0) : ""}"
 }
 
 output "ssh_username" {
