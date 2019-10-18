@@ -2,7 +2,7 @@
 # When updating this, check doc/FrequentTasks.md for checklists to ensure all
 # the various usages are updated in lockstep
 #
-override :erlang, version: "19.3.6.11"
+override :erlang, version: "20.0"
 override :lua, version: "5.1.5"
 override :rubygems, version: "3.0.3"
 override :bundler, version: "1.17.2"  # pin to avoid double bundle error
