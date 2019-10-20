@@ -28,7 +28,7 @@
 
 -module(oc_chef_authz_cleanup).
 
--behaviour(gen_fsm).
+-behaviour(gen_statem).
 
 %% API
 -export([
@@ -42,11 +42,18 @@
         ]).
 
 %% gen_fsm callbacks
+%% CHANGE FOR gen_statem:
+%%  -export([init/1, callback_mode/0, terminate/3, code_change/4]).
+%%  Add callback__mode/0
+%%  Change arity of the state functions
+%%  Remove handle_info/3
 -export([
          init/1,
-         handle_event/3,
+         callback_mode/0,
+         handle_info/3,
          handle_sync_event/4,
-         handle_info/3, terminate/3,
+         handle_event/4,
+         terminate/3,
          code_change/4]).
 
 %% FSM states
@@ -74,24 +81,27 @@
 %% @end
 %%--------------------------------------------------------------------
 start_link() ->
-    gen_fsm:start_link({local, ?SERVER}, ?MODULE, [], []).
+    gen_statem:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 -spec add_authz_ids([oc_authz_id()], [oc_authz_id()]) -> ok.
 add_authz_ids(Actors, Groups) ->
-    gen_fsm:send_all_state_event(?MODULE, {add, Actors, Groups}).
+    gen_statem:cast(?MODULE, {add, Actors, Groups}).
 
 -spec get_authz_ids() -> {[oc_authz_id()], [oc_authz_id()]}.
 get_authz_ids() ->
-    gen_fsm:sync_send_all_state_event(?MODULE, get_authz_ids, ?CLEANUP_TIMEOUT).
+    gen_statem:call(?MODULE, get_authz_ids, ?CLEANUP_TIMEOUT).
 
 start() ->
-    gen_fsm:send_event(?MODULE, start).
+    gen_statem:cast(?MODULE, start).
 
 stop() ->
-    gen_fsm:send_event(?MODULE, stop).
+    gen_statem:cast(?MODULE, stop).
 
 prune() ->
-    gen_fsm:send_event(?MODULE, prune).
+    gen_statem:cast(?MODULE, prune).
+
+callback_mode() -> handle_event_function.
+
 %%%===================================================================
 %%% gen_fsm callbacks
 %%%===================================================================
@@ -139,8 +149,8 @@ started(_Message, State) ->
 %% @private
 %% @doc
 %% Whenever a gen_fsm receives an event sent using
-%% gen_fsm:send_all_state_event/2, this function is called to handle
-%% the event.
+%% gen_fsm:send_all_state_event/2 (now gen_statem:cast/2), this function
+%% is called to handle the event.
 %%
 %% @spec handle_event(Event, StateName, State) ->
 %%                   {next_state, NextStateName, NextState} |
@@ -148,9 +158,8 @@ started(_Message, State) ->
 %%                   {stop, Reason, NewState}
 %% @end
 %%--------------------------------------------------------------------
-handle_event({add, Actors, Groups}, StateName, State) ->
-    {next_state, StateName, update_state(Actors, Groups, State)
-    }.
+handle_event({add, Actors, Groups}, ok, StateName, State) ->
+    {next_state, ok, StateName, update_state(Actors, Groups, State)}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -273,10 +282,10 @@ update_state(Actors, Groups, #state{authz_ids = {ActorSet, GroupSet}} = State) -
 
 create_timer(State) ->
     Timeout = envy:get(oc_chef_authz, cleanup_interval, ?DEFAULT_INTERVAL, integer),
-    State#state{timer_ref = gen_fsm:start_timer(Timeout, prune)}.
+    State#state{timer_ref = erlang:start_timer(Timeout, self(), prune)}.
 
 cancel_timer( State = #state{timer_ref = inactive}) ->
     State;
 cancel_timer(State = #state{timer_ref = TimerRef}) ->
-    gen_fsm:cancel_timer(TimerRef),
+    erlang:cancel_timer(TimerRef),
     State#state{timer_ref = inactive}.
