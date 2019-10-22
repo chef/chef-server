@@ -56,7 +56,7 @@
 -export([
          init/1,
          callback_mode/0,
-%        handle_info/3,
+         handle_info/3,
 %        handle_sync_event/4,
 %        handle_event/4,
          terminate/3,
@@ -139,7 +139,6 @@ stopped(prunex, State) ->
     {next_state, stopped, process_batch(State)};
 stopped(_Message, State) ->
     {next_state, stopped, State}.
-
 
 started(_, stop, State) ->
     {next_state, stopped, cancel_timer(State)};
@@ -225,8 +224,8 @@ prunex(cast, StateName, State) ->
 %%                   {stop, Reason, NewState}
 %% @end
 %%--------------------------------------------------------------------
-%handle_info(_Info, StateName, State) ->
-%    {next_state, StateName, State}.
+handle_info(_Info, StateName, State) ->
+    {next_state, StateName, State}.
 
 %%--------------------------------------------------------------------
 %% @private
