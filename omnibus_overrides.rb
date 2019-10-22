@@ -2,6 +2,7 @@
 # When updating this, check doc/FrequentTasks.md for checklists to ensure all
 # the various usages are updated in lockstep
 #
+override :rabbitmq, version: "3.6.16"
 override :erlang, version: "20.3.8.9"
 override :lua, version: "5.1.5"
 override :rubygems, version: "3.0.3"
