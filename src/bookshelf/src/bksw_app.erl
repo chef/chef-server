@@ -1,4 +1,4 @@
-%% @copyright 2012 Opscode, Inc. All Rights Reserved
+%% @copyright 2019 Opscode, Inc. All Rights Reserved
 %% @author Tim Dysinger <dysinger@chef.io>
 %%
 %% Licensed to the Apache Software Foundation (ASF) under one or more
@@ -26,6 +26,7 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
+    os:set_signal(sigterm, default),
     case os:getenv("DEVVM") of
         "1" ->
             application:start(sync);
