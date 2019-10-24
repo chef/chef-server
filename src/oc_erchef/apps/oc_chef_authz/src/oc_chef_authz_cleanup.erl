@@ -88,7 +88,8 @@
 %%--------------------------------------------------------------------
 start_link() ->
     %gen_statem:start_link({local, ?SERVER}, ?MODULE, [], []).
-    gen_statem:start_link(?MODULE, [], []).
+    gen_statem:start_link({local, ?SERVER}, ?MODULE, [], []).
+    %gen_statem:start_link(?MODULE, [], []).
 
 -spec add_authz_ids([oc_authz_id()], [oc_authz_id()]) -> ok.
 add_authz_ids(Actors, Groups) ->
