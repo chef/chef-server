@@ -6,7 +6,7 @@ override :erlang, version: "19.3.6.11"
 override :lua, version: "5.1.5"
 override :rubygems, version: "3.0.3"
 override :bundler, version: "1.17.2"  # pin to avoid double bundle error
-override :'omnibus-ctl', version: "master"
+override :'omnibus-ctl', version: "mp/fix-ctrl-c-on-cleanse"
 override :chef, version: "v15.4.45"
 override :ohai, version: "v15.3.1"
 override :ruby, version: "2.6.3"
