@@ -17,7 +17,7 @@ DEPS_PLT = chef_db.plt
 ## to run the correct integration tests.
 -include itest/pgsql_conf.mk
 
-all: compile eunit dialyzer
+all: compile eunit #dialyzer
 
 clean:
 	@rebar skip_deps=true clean
@@ -65,4 +65,4 @@ itest: compile
 	@echo "Review results with: open itest/ct_logs/index.html"
 
 
-.PHONY: all clean allclean distclean compile dialyzer eunit test doc tags itest
+.PHONY: all clean allclean distclean compile eunit test doc tags itest #dialyzer eunit test doc tags itest

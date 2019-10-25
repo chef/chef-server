@@ -35,7 +35,7 @@ ERLANG_DIALYZER_APPS = asn1 \
                        webtool \
                        xmerl
 
-all: compile eunit itest dialyzer
+all: compile eunit itest #dialyzer
 
 # Clean ebin and .eunit of this project
 clean:
@@ -97,4 +97,4 @@ itest: itest_compile
 	@ct_run -spec itest/spec.spec -pa deps/*/ebin -pa ebin
 	@echo "Review results with: open itest/ct_logs/index.html"
 
-.PHONY: all compile eunit test dialyzer clean allclean distclean doc ct itest_util itest_compile itest
+.PHONY: all compile eunit test clean allclean distclean doc ct itest_util itest_compile itest #dialyzer clean allclean distclean doc ct itest_util itest_compile itest
