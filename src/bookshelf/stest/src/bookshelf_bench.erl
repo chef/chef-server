@@ -106,7 +106,7 @@ init([]) ->
     {Time, _ } = timer:tc(fun() ->
                                   %% create all of the checksums in our bucket
                                   [begin
-                                       Data = crypto:rand_bytes(Size),
+                                       Data = crypto:strong_rand_bytes(Size),
                                        mini_s3:put_object("bookshelf",           % bucket name
                                                           integer_to_list(Size), % key
                                                           Data,                  % object data
@@ -144,9 +144,9 @@ handle_call({random_put}, _From, State) ->
 
 handle_call({random_data}, _From, #state{checksums = Checksums,
                                          num_checksums = NumChecksums} = State) ->
-    Index = random:uniform(NumChecksums),
+    Index = rand:uniform(NumChecksums),
     Size = lists:nth(Index, Checksums),
-    Data = crypto:rand_bytes(Size),
+    Data = crypto:strong_rand_bytes(Size),
     {reply, Data, State};
 
 handle_call(_Request, _From, State) ->
@@ -226,7 +226,7 @@ random_data(_ID) ->
 random_url(Method, #state{checksums = Checksums,
                           num_checksums = NumChecksums,
                           s3_config = S3Config} = State) ->
-    Index = random:uniform(NumChecksums),
+    Index = rand:uniform(NumChecksums),
     Size = lists:nth(Index, Checksums),
     FullUrl = mini_s3:s3_url(Method,
                              "bookshelf",

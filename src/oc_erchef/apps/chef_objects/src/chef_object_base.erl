@@ -130,7 +130,7 @@ make_org_prefix_id(OrgId) ->
     %%
     %% It will still be prefixed with an org-specific prefix, though, just like our other
     %% GUIDs.
-    FakeName = crypto:rand_bytes(32),  %% Picked 32 for the hell of it
+    FakeName = crypto:strong_rand_bytes(32),  %% Picked 32 for the hell of it
     make_org_prefix_id(OrgId, FakeName).
 
 -spec make_org_prefix_id(<<_:256>>, string()|binary()) -> <<_:256>>.
@@ -147,12 +147,12 @@ make_org_prefix_id(OrgId) ->
 make_org_prefix_id(OrgId, Name) ->
     %% assume couchdb guid where trailing part has uniqueness
     <<_:20/binary, OrgSuffix:12/binary>> = OrgId,
-    Bin = iolist_to_binary([OrgId, Name, crypto:rand_bytes(6)]),
+    Bin = iolist_to_binary([OrgId, Name, crypto:strong_rand_bytes(6)]),
     <<ObjectPart:80, _/binary>> = crypto:hash(md5, Bin),
     iolist_to_binary(io_lib:format("~s~20.16.0b", [OrgSuffix, ObjectPart])).
 
 make_guid() ->
-    Raw = crypto:rand_bytes(16),
+    Raw = crypto:strong_rand_bytes(16),
     <<Guid:128>> = Raw,
     iolist_to_binary(io_lib:format("~32.16.0b", [Guid])). %% 128 bits/16 bytes/32 hex chars
 

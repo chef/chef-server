@@ -50,7 +50,9 @@
                   runtime_tools,
                   tools,
                   uuid,
-                  webtool,
+                  % webtool caused a build error with erlang19.x
+                  % commenting out for now
+                  %webtool,
                   prometheus]},
   {mod, { oc_erchef_app, []}},
   {env, []}

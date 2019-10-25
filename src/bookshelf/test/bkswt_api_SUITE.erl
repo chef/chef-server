@@ -153,10 +153,7 @@ set_storage_type_for_test_case(Casename) ->
 init_per_testcase(upgrade_from_v0, Config) ->
     %% This fixes another rebar brokenness. We cant specify any options to
     %% common test in rebar
-    Seed = os:timestamp(),
-    random:seed(Seed),
     setup_chef_secrets(),
-    error_logger:info_msg("Using random seed: ~p~n", [Seed]),
     Format0Data = filename:join([?config(data_dir, Config),
                                  "format_0_data"]),
     DiskStore = filename:join(proplists:get_value(priv_dir, Config),
@@ -666,7 +663,7 @@ random_binary() ->
 
 random_string(Length, AllowedChars) ->
     lists:foldl(fun(_, Acc) ->
-                        [lists:nth(random:uniform(length(AllowedChars)),
+                        [lists:nth(rand:uniform(length(AllowedChars)),
                                    AllowedChars) | Acc]
                 end, [], lists:seq(1, Length)).
 

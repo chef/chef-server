@@ -164,7 +164,7 @@ all_orgs() ->
 chef_object_base_make_org_prefix_id(OrgId, Name) ->
     %% assume couchdb guid where trailing part has uniqueness
     <<_:20/binary, OrgSuffix:12/binary>> = OrgId,
-    Bin = iolist_to_binary([OrgId, Name, crypto:rand_bytes(6)]),
+    Bin = iolist_to_binary([OrgId, Name, crypto:strong_rand_bytes(6)]),
     <<ObjectPart:80, _/binary>> = crypto:hash(md5, Bin),
     iolist_to_binary(io_lib:format("~s~20.16.0b", [OrgSuffix, ObjectPart])).
 
