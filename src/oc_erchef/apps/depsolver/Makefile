@@ -36,9 +36,9 @@ else
 DEPSOLVER_PLT=$(GLOBAL_PLT)
 endif
 
-.PHONY: all compile doc clean eunit dialyzer typer shell distclean get-deps
+.PHONY: all compile doc clean eunit typer shell distclean get-deps #dialyzer 
 
-all: compile eunit dialyzer
+all: compile eunit #dialyzer
 
 get-deps:
 	$(REBAR) get-deps
