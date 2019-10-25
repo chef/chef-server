@@ -14,7 +14,7 @@ REBAR3 = rebar3
 endif
 
 all: $(REBAR3)
-	@$(REBAR3) do clean, compile, eunit, dialyzer
+	@$(REBAR3) do clean, compile, eunit #, dialyzer
 
 rel: all
 	@$(REBAR3) release
