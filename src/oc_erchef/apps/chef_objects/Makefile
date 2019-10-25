@@ -36,7 +36,7 @@ ERLANG_DIALYZER_APPS = asn1 \
                        tools \
                        xmerl
 
-all: compile eunit dialyzer
+all: compile eunit #dialyzer
 
 # Clean ebin and .eunit of this project
 clean:
@@ -91,4 +91,4 @@ doc:
 tags:
 	find src deps -name "*.[he]rl" -print | etags -
 
-.PHONY: all compile eunit test dialyzer clean allclean distclean doc tags
+.PHONY: all compile eunit test clean allclean distclean doc tags #dialyzer 

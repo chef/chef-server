@@ -21,7 +21,7 @@ DB_PASS = "bifrost_test_user_password"
 include Makefile.db
 
 all: $(REBAR3) elvis
-	@$(REBAR3) do clean, compile, eunit, dialyzer
+	@$(REBAR3) do clean, compile, eunit #, dialyzer
 
 elvis:
 	../../scripts/elvis rock
