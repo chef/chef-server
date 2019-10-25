@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.59 -->
-## [13.0.59](https://github.com/chef/chef-server/tree/13.0.59) (2019-10-18)
+<!-- latest_release 13.0.60 -->
+## [13.0.60](https://github.com/chef/chef-server/tree/13.0.60) (2019-10-25)
 
 #### Merged Pull Requests
-- Lbaker/land phase2 [#1789](https://github.com/chef/chef-server/pull/1789) ([lbakerchef](https://github.com/lbakerchef))
+- Lbaker/land erlang19 [#1790](https://github.com/chef/chef-server/pull/1790) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- Lbaker/land erlang19 [#1790](https://github.com/chef/chef-server/pull/1790) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.0.60 -->
 - Lbaker/land phase2 [#1789](https://github.com/chef/chef-server/pull/1789) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.0.59 -->
 - Disable auto-ipv6 allocation if ENABLE_IPV6=false [#1795](https://github.com/chef/chef-server/pull/1795) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.58 -->
 - Update pinned version of chef-infra to 15.4.45 [#1794](https://github.com/chef/chef-server/pull/1794) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.57 -->
