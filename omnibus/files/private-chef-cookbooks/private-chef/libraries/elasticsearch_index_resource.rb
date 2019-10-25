@@ -5,8 +5,6 @@ class Chef
     class ElasticSearchIndex < Chef::Resource::LWRPBase
       provides :elasticsearch_index
       resource_name :elasticsearch_index
-
-      actions [:create, :destroy]
       default_action :create
       attribute :index_name, :name_attribute => true
       attribute :server_url, :kind_of => String

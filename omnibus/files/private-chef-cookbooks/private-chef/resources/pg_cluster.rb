@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-actions :init
-
 default_action :init
 
 attribute :data_dir,

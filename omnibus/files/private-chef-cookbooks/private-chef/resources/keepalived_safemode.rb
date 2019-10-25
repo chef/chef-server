@@ -14,6 +14,4 @@
 # limitations under the License.
 #
 
-actions :create
-
 default_action :create

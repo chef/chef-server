@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-actions :upgrade
 default_action :upgrade
 
 # That's right folks, there are no attributes.

@@ -32,7 +32,7 @@ class ElasticsearchPreflightValidator < PreflightValidator
   #checks that system has atleast 4GB memory
   def verify_memory
     system_required_memory_in_gb = 4 #GB
-    node[:memory][:total] =~ /^(\d+)kB/
+    node["memory"]["total"] =~ /^(\d+)kB/
     memory = $1
     if (memory.match(/mb/i) && memory.to_i < system_required_memory_in_gb * 1024) ||
        (memory.match(/kb/i) && memory.to_i < system_required_memory_in_gb * 1024 * 1024)

@@ -30,7 +30,7 @@ services.each do |sv_entry|
   file down_file do
     owner "root"
     group "root"
-    mode   0644
+    mode   "644"
     content ""
   end
 end
