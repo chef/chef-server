@@ -15,6 +15,7 @@
   {git,"git://github.com/boundary/bear.git",
        {ref,"119234548783af19b8ec75c879c5062676b92571"}},
   1},
+ {<<"cf">>,{pkg,<<"cf">>,<<"0.3.1">>},3},
  {<<"chef_authn">>,
   {git,"git://github.com/chef/chef_authn.git",
        {ref,"5d0577f693404898d6f05dbcbb38ffe2cc36c15d"}},
@@ -36,7 +37,7 @@
        {ref,"7e2ace8ccfbd44b993e94aa41a126f0dfe1d52e1"}},
   2},
  {<<"decouch">>,
-  {git,"git://github.com/chef/decouch",
+  {git,"https://github.com/chef/decouch",
        {ref,"152db1491fe5053bc123de3622d1649872c0ac47"}},
   1},
  {<<"edown">>,
@@ -88,7 +89,7 @@
        {ref,"992650004c81ee921183488cb8115de4777e7bd9"}},
   2},
  {<<"goldrush">>,
-  {git,"git://github.com/basho/goldrush.git",
+  {git,"https://github.com/basho/goldrush.git",
        {ref,"8f1b715d36b650ec1e1f5612c00e28af6ab0de82"}},
   1},
  {<<"ibrowse">>,
@@ -129,7 +130,7 @@
   2},
  {<<"observer_cli">>,
   {git,"git://github.com/zhongwencool/observer_cli.git",
-       {ref,"14faec950d73a9b96d3cfd708cc4b22ce823693e"}},
+       {ref,"bcc0dfaa2013a436ce7e597731acab6577321b43"}},
   0},
  {<<"opscoderl_folsom">>,
   {git,"git://github.com/opscode/opscoderl_folsom.git",
@@ -182,5 +183,6 @@
   1}]}.
 [
 {pkg_hash,[
+ {<<"cf">>, <<"5CB902239476E141EA70A740340233782D363A31EEA8AD37049561542E6CD641">>},
  {<<"recon">>, <<"2F7FCBEC2C35034BADE2F9717F77059DC54EB4E929A3049CA7BA6775C0BD66CD">>}]}
 ].

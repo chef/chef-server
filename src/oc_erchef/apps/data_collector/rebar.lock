@@ -1,14 +1,11 @@
-[
- %% these apps are not present in the rebar.conf so
- %% commenting out for now to see what happens.
-%{<<"goldrush">>,
-% {git,"git://github.com/DeadZen/goldrush.git",
-%      {ref,"57e71f2789632a085f0963e1244644fdcb1941b9"}},
-% 1},
-%{<<"ibrowse">>,
-% {git,"git://github.com/chef/ibrowse.git",
-%      {ref,"7b2b0bfd5e15e57706beb2ef0360cdc7f24b37c5"}},
-% 1},
+[{<<"goldrush">>,
+  {git,"https://github.com/basho/goldrush.git",
+       {ref,"8f1b715d36b650ec1e1f5612c00e28af6ab0de82"}},
+  1},
+ {<<"ibrowse">>,
+  {git,"https://github.com/cmullaparthi/ibrowse.git",
+       {ref,"c97136cfb61fcc6f39d4e7da47372a64f7fca04e"}},
+  1},
  {<<"lager">>,
   {git,"git://github.com/basho/lager.git",
        {ref,"81eaef0ce98fdbf64ab95665e3bc2ec4b24c7dac"}},
