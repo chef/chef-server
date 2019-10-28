@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.60 -->
-## [13.0.60](https://github.com/chef/chef-server/tree/13.0.60) (2019-10-25)
+<!-- latest_release 13.0.61 -->
+## [13.0.61](https://github.com/chef/chef-server/tree/13.0.61) (2019-10-28)
 
 #### Merged Pull Requests
-- Lbaker/land erlang19 [#1790](https://github.com/chef/chef-server/pull/1790) ([lbakerchef](https://github.com/lbakerchef))
+- Resolve cookstyle warnings in the cookbooks and remove an old .rubocop.yml file [#1807](https://github.com/chef/chef-server/pull/1807) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- Resolve cookstyle warnings in the cookbooks and remove an old .rubocop.yml file [#1807](https://github.com/chef/chef-server/pull/1807) ([tas50](https://github.com/tas50)) <!-- 13.0.61 -->
 - Lbaker/land erlang19 [#1790](https://github.com/chef/chef-server/pull/1790) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.0.60 -->
 - Lbaker/land phase2 [#1789](https://github.com/chef/chef-server/pull/1789) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.0.59 -->
 - Disable auto-ipv6 allocation if ENABLE_IPV6=false [#1795](https://github.com/chef/chef-server/pull/1795) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.58 -->
