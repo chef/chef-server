@@ -21,7 +21,6 @@
 # directories, etc. can be left behind.
 
 # Completely clean up after a given service / package
-actions :clean
 
 default_action :clean
 

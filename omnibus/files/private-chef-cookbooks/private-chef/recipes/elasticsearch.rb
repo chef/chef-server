@@ -1,4 +1,4 @@
-# Copyright 2019 Chef Software, Inc.
+# Copyright:: 2019 Chef Software, Inc.
 # All Rights Reserved
 
 MAX_MAP_COUNT = 262_144

@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-actions :deploy
 default_action :deploy
 
 attribute :name,           kind_of: String, required: true, name_attribute: true
