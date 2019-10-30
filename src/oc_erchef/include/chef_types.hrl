@@ -92,24 +92,24 @@
 %% These records are used in either the authz or SQL layers
 
 -record(chef_client, {
-          'server_api_version' :: api_version(), % Internal use, api version level expected by server
-          'id' :: object_id(),              % guid for object (unique)
-          'authz_id' :: object_id(),        % authorization guid (unique)
-          'org_id' :: object_id(),          % organization guid
-          'name' :: binary(),               % name of client
+          'server_api_version' :: api_version() | undefined,    % Internal use, api version level expected by server
+          'id' :: object_id() | undefined,          % guid for object (unique)
+          'authz_id' :: object_id() | undefined,    % authorization guid (unique)
+          'org_id' :: object_id() | undefined,      % organization guid
+          'name' :: binary() | undefined,           % name of client
           'validator' = false :: boolean(),         % boolean; true if this is a validator
            % BEGIN DEPRECATED APIv1
           'admin' = false :: boolean(),             % true if this is an admin user
-          'public_key' :: binary(),         % public key
-          'pubkey_version' :: ?KEY_VERSION | ?CERT_VERSION, % 0 = key, 1 = cert %
+          'public_key' :: binary() | undefined,     % public key
+          'pubkey_version' :: ?KEY_VERSION | ?CERT_VERSION | undefined, % 0 = key, 1 = cert %
            % END DEPRECATED APIv1
-          'last_updated_by' :: object_id(), % authz guid of last actor to update object
-          'created_at' :: binary(), % time created at
-          'updated_at' :: binary()  % time created at
+          'last_updated_by' :: object_id() | undefined, % authz guid of last actor to update object
+          'created_at' :: binary() | undefined,     % time created at
+          'updated_at' :: binary() | undefined      % time created at
          }).
 
 -record(chef_cookbook_version, {
-          'server_api_version' :: api_version(), % Internal use, api version level expected by server
+          'server_api_version' :: api_version() | undefined, % Internal use, api version level expected by server
           'id',                % guid for object (unique)
           'major',             % major version
           'minor',             % minor version
@@ -133,7 +133,7 @@
          }).
 
 -record(chef_data_bag, {
-          'server_api_version' :: api_version(), % Internal use, api version level expected by server
+          'server_api_version' :: api_version() | undefined, % Internal use, api version level expected by server
           'id',               % guid for object (unique)
           'authz_id',         % authorization guid (unique)
           'org_id',           % organization guid
@@ -144,7 +144,7 @@
          }).
 
 -record(chef_data_bag_item, {
-          'server_api_version' :: api_version(), % Internal use, api version level expected by server
+          'server_api_version' :: api_version() | undefined, % Internal use, api version level expected by server
           'id',               % guid for object (unique)
           %% right now authz for items is done via the parent data_bag
           %% 'authz_id',         % authorization guid (unique)
@@ -158,7 +158,7 @@
          }).
 
 -record(chef_environment, {
-          'server_api_version' :: api_version(), % Internal use, api version level expected by server
+          'server_api_version' :: api_version() | undefined, % Internal use, api version level expected by server
           'id',               % guid for object (unique)
           'authz_id',         % authorization guid (unique)
           'org_id',           % organization guid
@@ -170,7 +170,7 @@
          }).
 
 -record(chef_node, {
-          'server_api_version' :: api_version(), % Internal use, api version level expected by server
+          'server_api_version' :: api_version() | undefined, % Internal use, api version level expected by server
           'id',               % guid for object (unique)
           'authz_id',         % authorization guid (unique)
           'org_id',           % organization guid
@@ -185,7 +185,7 @@
          }).
 
 -record(chef_role, {
-          'server_api_version' :: api_version(), % Internal use, api version level expected by server
+          'server_api_version' :: api_version() | undefined, % Internal use, api version level expected by server
           'id',               % guid for object (unique)
           'authz_id',         % authorization guid (unique)
           'org_id',           % organization guid
@@ -197,21 +197,21 @@
          }).
 
 -record(chef_sandbox, {
-          'server_api_version' :: api_version(), % Internal use, api version level expected by server
-          'id' :: binary(),         %% sandbox id, 32-char hex string
-          'org_id' :: binary(),     %% organization guid,
+          'server_api_version' :: api_version() | undefined, % Internal use, api version level expected by server
+          'id' :: binary() | undefined ,         %% sandbox id, 32-char hex string
+          'org_id' :: binary() | undefined,      %% organization guid,
           'created_at', %% time record was created; useful mainly for debugging / garbage collection
-          'checksums' :: [{Checksum::binary(), Uploaded::boolean()}]
+          'checksums' :: [{Checksum::binary(), Uploaded::boolean()}] | undefined
          }).
 
 -record(chef_user, {
-        'server_api_version' :: api_version(), % Internal use, api version level expected by server
+        'server_api_version' :: api_version() | undefined, % Internal use, api version level expected by server
         'id',                               %% guid for object (unique)
         'authz_id',                         %% authorization guid (placeholder - not used)
         'username',                         %% username
         'email',                            %% email - left null
         'public_key',                       %% public key - might be null
-        'pubkey_version' :: ?KEY_VERSION | ?CERT_VERSION, %% public key version
+        'pubkey_version' :: ?KEY_VERSION | ?CERT_VERSION | undefined, %% public key version
         'hashed_password',                  %% password
         'salt',                             %% password salt
         'hash_type',                        %% hash used to scramble password
@@ -227,35 +227,35 @@
 
 %% Not a true chef object, but corresponds to  the view keys_by_type.
 -record(chef_requestor, {
-          'server_api_version' :: api_version(), % Internal use, api version level expected by server
-          'id' :: object_id(),
-          'org_id' :: object_id() | global,
+          'server_api_version' :: api_version() | undefined, % Internal use, api version level expected by server
+          'id' :: object_id() | undefined,
+          'org_id' :: object_id() | global | undefined,
           'name',
           'authz_id',
           'type' ,
           'key_name',
           'public_key',
-          'key_version' :: ?KEY_VERSION | ?CERT_VERSION
+          'key_version' :: ?KEY_VERSION | ?CERT_VERSION | undefined
          }
        ).
 
 %% Not a true chef object either, keys are owned by their associated user
 %% or client object and are managed in that context.
 -record(chef_key, {
-          'server_api_version' :: api_version(), % Internal use, api version level expected by server
-          'id'  :: object_id(),     %% guid of user or client, unique with key_name
+          'server_api_version' :: api_version() | undefined, % Internal use, api version level expected by server
+          'id'  :: object_id() | undefined,     %% guid of user or client, unique with key_name
           'key_name',               %% user named string describing key
           'public_key',             %% PKCS#1 public key or a certificate
           'key_version',            %% 0 for public_key, 1 for cert
-          'expires_at' :: calendar:datetime() | infinity(), %% expiration time (utc)
-          'last_updated_by' :: binary(), %% authz id of updater
-          'created_at' :: binary(), %% when created
-          'updated_at' :: binary(),  %% when last updated
+          'expires_at' :: calendar:datetime() | infinity() | undefined, %% expiration time (utc)
+          'last_updated_by' :: binary() | undefined, %% authz id of updater
+          'created_at' :: binary() | undefined, %% when created
+          'updated_at' :: binary() | undefined,  %% when last updated
 
           %% Important note - in 'chef_key:flatten' we explcitly drop this last field
           %% since it's not part of the DB table for insert. If you add more fields
           %% that are part of the DB table, add them above this comment.
-          'old_name' :: binary()    %% In case of update, this will contain the original name
+          'old_name' :: binary() | undefined    %% In case of update, this will contain the original name
         }).
 
 -type chef_key() :: #chef_key{}.
