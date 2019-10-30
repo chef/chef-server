@@ -22,8 +22,8 @@
 
 -record(oc_chef_authz_context,
         {server_api_version,
-         reqid :: binary(),
-         darklaunch :: term()}).
+         reqid :: binary() | undefined,
+         darklaunch :: term() | undefined}).
 
 -type oc_chef_authz_context() :: #oc_chef_authz_context{}.
 

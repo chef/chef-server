@@ -34,11 +34,11 @@
          code_change/3]).
 
 -record(chef_wait_group_state, {
-          waiting_pid :: {pid(), term()},
+          waiting_pid :: {pid(), term()} | undefined,
           waiting_workers = [] :: list(),
           done_jobs = [] :: list(),
           failed_jobs = [] :: list(),
-          job_fun :: fun()
+          job_fun :: fun() | undefined
          }).
 
 %%===================================================================

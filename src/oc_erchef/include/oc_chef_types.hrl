@@ -97,7 +97,7 @@
           org_id,
           name,
           authz_id,
-          version_identifiers :: [ Identifier::binary() | undefined]
+          version_identifiers :: [ Identifier::binary() ] | undefined
          }).
 
 -record(oc_chef_cookbook_artifact_version, {

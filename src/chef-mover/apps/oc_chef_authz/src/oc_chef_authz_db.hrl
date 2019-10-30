@@ -21,9 +21,9 @@
 %%
 
 -record(oc_chef_authz_context,
-        {reqid :: binary(),
-         otto_connection :: couchbeam:server(),
-         darklaunch :: term()}).
+        {reqid :: binary() | undefined,
+         otto_connection :: couchbeam:server() | undefined,
+         darklaunch :: term() | undefined}).
 
 -type oc_chef_authz_context() :: #oc_chef_authz_context{}.
 

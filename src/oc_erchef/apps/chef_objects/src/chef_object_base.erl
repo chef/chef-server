@@ -258,7 +258,7 @@ allowed_keys(ValidKeys, [{Item, _}|Rest]) ->
 %% that needs to return an error message back to the API client.
 -spec throw_invalid_fun_match(binary()) -> none().
 throw_invalid_fun_match(Message) ->
-    throw(#ej_invalid{type = fun_match, msg = Message}).
+    throw(#ej_invalid{type = fun_match, msg = Message, key = <<"">>}).
 
 
 %% Walks through ejson term and set default values
