@@ -32,7 +32,6 @@ ERLANG_DIALYZER_APPS = asn1 \
                        stdlib \
                        syntax_tools \
                        tools \
-                       webtool \
                        xmerl
 
 all: compile eunit itest dialyzer

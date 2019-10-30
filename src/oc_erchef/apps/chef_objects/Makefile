@@ -34,7 +34,6 @@ ERLANG_DIALYZER_APPS = asn1 \
                        syntax_tools \
                        syntax_tools \
                        tools \
-                       webtool \
                        xmerl
 
 all: compile eunit dialyzer
