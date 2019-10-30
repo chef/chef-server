@@ -476,8 +476,8 @@ update_record_tests(Version) ->
         },
         {?VD("unchanged password has no side effects"),
            fun() ->
-                ?assertEqual(User#chef_user.hashed_password, User#chef_user.hashed_password),
-                ?assertEqual(User#chef_user.salt, User#chef_user.salt)
+                ?assertEqual(User#chef_user.hashed_password, User1#chef_user.hashed_password),
+                ?assertEqual(User#chef_user.salt,            User1#chef_user.salt)
            end
         },
         {?VD("password updates related fields"),

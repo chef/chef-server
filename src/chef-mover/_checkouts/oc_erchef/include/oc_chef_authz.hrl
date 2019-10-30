@@ -33,10 +33,10 @@
 -type oc_authz_id() :: <<_:256>>.
 
 -record(authz_group, {actors = [] :: actor_list(),
-		      groups = [] :: group_list()}).
+                      groups = [] :: group_list()}).
 
 -record(authz_ace,  {actors = [] :: actor_list(),
-		     groups = [] :: group_list()}).
+                     groups = [] :: group_list()}).
 
 -type authz_ace() :: #authz_ace{}.
 -type authz_acl() :: [{access_method(), #authz_ace{}},...].

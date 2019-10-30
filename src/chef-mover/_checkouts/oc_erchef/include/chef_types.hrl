@@ -1,4 +1,4 @@
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright 2019 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -18,7 +18,7 @@
 
 %% Authentication Macros
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--define(KEY_VERSION, 0).
+-define(KEY_VERSION,  0).
 -define(CERT_VERSION, 1).
 
 %% Misc Defines
@@ -82,18 +82,18 @@
 %% These records are used in either the authz or SQL layers
 
 -record(chef_client, {
-          'id' :: object_id(),              % guid for object (unique)
-          'authz_id' :: object_id(),        % authorization guid (unique)
-          'org_id' :: object_id(),          % organization guid
-          'name' :: binary(),               % name of client
+          'id' :: object_id() | undefined,          % guid for object (unique)
+          'authz_id' :: object_id() | undefined,    % authorization guid (unique)
+          'org_id' :: object_id() | undefined,      % organization guid
+          'name' :: binary() | undefined,           % name of client
           'validator' = false :: boolean(),         % boolean; true if this is a validator
           'admin' = false :: boolean(),             % true if this is an admin user
-          'public_key' :: binary(),         % public key cert
-          'pubkey_version' :: ?KEY_VERSION | ?CERT_VERSION,
+          'public_key' :: binary() | undefined,     % public key cert
+          'pubkey_version' :: ?KEY_VERSION | ?CERT_VERSION | undefined,
                                             % version/type of public key (certificate)
-          'last_updated_by' :: object_id(), % authz guid of last actor to update object
-          'created_at' :: binary(), % time created at
-          'updated_at' :: binary()  % time created at
+          'last_updated_by' :: object_id() | undefined, % authz guid of last actor to update object
+          'created_at' :: binary() | undefined,     % time created at
+          'updated_at' :: binary() | undefined      % time created at
          }).
 
 -record(chef_cookbook_version, {
@@ -116,7 +116,7 @@
           'authz_id',          % authorization guid (unique)
           'org_id',            % organization guid
           'name',              % cookbook name
-          'checksums' :: [ Checksum::binary()] % file checksums from segments
+          'checksums' :: [ Checksum::binary()] | undefined % file checksums from segments
          }).
 
 -record(chef_data_bag, {
@@ -177,10 +177,10 @@
          }).
 
 -record(chef_sandbox, {
-          'id' :: binary(),         %% sandbox id, 32-char hex string
-          'org_id' :: binary(),     %% organization guid,
+          'id' :: binary() | undefined ,         %% sandbox id, 32-char hex string
+          'org_id' :: binary() | undefined,      %% organization guid,
           'created_at', %% time record was created; useful mainly for debugging / garbage collection
-          'checksums' :: [{Checksum::binary(), Uploaded::boolean()}]
+          'checksums' :: [{Checksum::binary(), Uploaded::boolean()}] | undefined
          }).
 
 -record(chef_user, {
@@ -189,7 +189,7 @@
         'username',                         %% username
         'email',                            %% email - left null
         'public_key',                       %% public key - might be null
-        'pubkey_version' :: ?KEY_VERSION | ?CERT_VERSION, %% public key version
+        'pubkey_version' :: ?KEY_VERSION | ?CERT_VERSION | undefined, %% public key version
         'hashed_password',                  %% password
         'salt',                             %% password salt
         'hash_type',                        %% hash used to scramble password
