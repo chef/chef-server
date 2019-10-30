@@ -21,7 +21,7 @@
 
 %% Authentication Macros
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--define(KEY_VERSION, 0).
+-define(KEY_VERSION,  0).
 -define(CERT_VERSION, 1).
 
 %% Misc Defines
@@ -220,8 +220,10 @@
         'updated_at',                       %% time updated at
         'external_authentication_uid',      %% External UID, such as LDAP - nullable
         'recovery_authentication_enabled',  %%
+
         'serialized_object'                 %%
        }).
+
 
 %% Not a true chef object, but corresponds to  the view keys_by_type.
 -record(chef_requestor, {

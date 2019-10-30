@@ -1,3 +1,4 @@
+
 %% Copyright 2012 Opscode, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -16,9 +17,11 @@
 %%
 
 
+
+
 %% Authentication Macros
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--define(KEY_VERSION, 0).
+-define(KEY_VERSION,  0).
 -define(CERT_VERSION, 1).
 
 %% Misc Defines
@@ -27,6 +30,9 @@
 %% Global Macros
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -define(GLOBAL_PLACEHOLDER_ORG_ID, <<"00000000000000000000000000000000">>).
+
+
+
 
 %% Custom Types
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -54,9 +60,13 @@
                             'chef_role' |
                             'chef_node'|
                             'chef_user' |
+
                             %% these belong to EC and should
                             %% eventually be included in a pluggable
                             %% fashion.
+
+
+
                             'oc_chef_container' |
                             'oc_chef_group'.
 
@@ -82,11 +92,13 @@
 %% These records are used in either the authz or SQL layers
 
 -record(chef_client, {
+
           'id' :: object_id(),              % guid for object (unique)
           'authz_id' :: object_id(),        % authorization guid (unique)
           'org_id' :: object_id(),          % organization guid
           'name' :: binary(),               % name of client
           'validator' = false :: boolean(),         % boolean; true if this is a validator
+
           'admin' = false :: boolean(),             % true if this is an admin user
           'public_key' :: binary(),         % public key cert
           'pubkey_version' :: ?KEY_VERSION | ?CERT_VERSION,
@@ -97,6 +109,7 @@
          }).
 
 -record(chef_cookbook_version, {
+
           'id',                % guid for object (unique)
           'major',             % major version
           'minor',             % minor version
@@ -120,6 +133,7 @@
          }).
 
 -record(chef_data_bag, {
+
           'id',               % guid for object (unique)
           'authz_id',         % authorization guid (unique)
           'org_id',           % organization guid
@@ -130,6 +144,7 @@
          }).
 
 -record(chef_data_bag_item, {
+
           'id',               % guid for object (unique)
           %% right now authz for items is done via the parent data_bag
           %% 'authz_id',         % authorization guid (unique)
@@ -143,6 +158,7 @@
          }).
 
 -record(chef_environment, {
+
           'id',               % guid for object (unique)
           'authz_id',         % authorization guid (unique)
           'org_id',           % organization guid
@@ -154,11 +170,14 @@
          }).
 
 -record(chef_node, {
+
           'id',               % guid for object (unique)
           'authz_id',         % authorization guid (unique)
           'org_id',           % organization guid
           'name',             % node name
           'environment',      % environment
+
+
           'last_updated_by',  % authz guid of last actor to update object
           'created_at',       % time created at
           'updated_at',       % time created at
@@ -166,6 +185,7 @@
          }).
 
 -record(chef_role, {
+
           'id',               % guid for object (unique)
           'authz_id',         % authorization guid (unique)
           'org_id',           % organization guid
@@ -177,6 +197,7 @@
          }).
 
 -record(chef_sandbox, {
+
           'id' :: binary(),         %% sandbox id, 32-char hex string
           'org_id' :: binary(),     %% organization guid,
           'created_at', %% time record was created; useful mainly for debugging / garbage collection
@@ -184,6 +205,7 @@
          }).
 
 -record(chef_user, {
+
         'id',                               %% guid for object (unique)
         'authz_id',                         %% authorization guid (placeholder - not used)
         'username',                         %% username
@@ -202,6 +224,42 @@
         'serialized_object'                 %%
        }).
 
+
+%% THIS IS NOT THE END OF THE FILE !
+%% Please scroll down further.  This spacing was added to preserve side-by-side
+%% comparability and maintainability with oc_erchef/include/chef_types.hrl
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 %% These types are just convenient shorthands for subsets of our
 %% records that are used in the SQL layers.
 
@@ -212,6 +270,8 @@
                        #chef_role{} |
                        #chef_node{} |
                        #chef_user{}.
+
+
 
 -type chef_indexable_object() :: #chef_environment{} |
                                  #chef_data_bag_item{} |
