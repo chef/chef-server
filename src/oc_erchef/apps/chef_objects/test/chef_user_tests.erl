@@ -474,12 +474,19 @@ update_record_tests(Version) ->
                 ?assertEqual(ej:get({<<"garbage">>}, Data), undefined)
            end
         },
-        {?VD("unchanged password has no side effects"),
-           fun() ->
-                ?assertEqual(User#chef_user.hashed_password, User#chef_user.hashed_password),
-                ?assertEqual(User#chef_user.salt, User#chef_user.salt)
-           end
-        },
+% dialyzer flagged this with (line numbers are now wrong):
+%   ===> Compiling _build/test/lib/chef_objects/test/chef_user_tests.erl failed
+%       _build/test/lib/chef_objects/test/chef_user_tests.erl:479: this clause cannot match because a previous clause at line 479 always matches
+%       _build/test/lib/chef_objects/test/chef_user_tests.erl:480: this clause cannot match because a previous clause at line 480 always matches
+% discussed what this test is supposed to be doing with mark.
+% he didn't know or couldn't remember, but maybe it's if you don't touch the password, the salt/hash don't change also?
+% maybe this was supposed to be a User1 vs User thing? but by mistake someone just put User for everything?
+%       {?VD("unchanged password has no side effects"),
+%          fun() ->
+%               ?assertEqual(User#chef_user.hashed_password, User#chef_user.hashed_password),
+%               ?assertEqual(User#chef_user.salt, User#chef_user.salt)
+%          end
+%       },
         {?VD("password updates related fields"),
            fun() ->
                 ?assertNotEqual(User#chef_user.hashed_password, User2#chef_user.hashed_password),
