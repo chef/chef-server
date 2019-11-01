@@ -474,11 +474,19 @@ update_record_tests(Version) ->
                 ?assertEqual(ej:get({<<"garbage">>}, Data), undefined)
            end
         },
+        % this didn't work.
+        % https://github.com/erlang/otp/blob/master/lib/stdlib/include/assert.hrl
+%       {?VD("unchanged password has no side effects"),
+%          fun() ->
+%               UserClone = User,
+%               ?assertEqual(UserClone#chef_user.hashed_password, User#chef_user.hashed_password),
+%               ?assertEqual(UserClone#chef_user.salt,            User#chef_user.salt)
+%          end
+%       },
         {?VD("unchanged password has no side effects"),
            fun() ->
-                UserClone = User,
-                ?assertEqual(UserClone#chef_user.hashed_password, User#chef_user.hashed_password),
-                ?assertEqual(UserClone#chef_user.salt,            User#chef_user.salt)
+                ?assertEqual(User#chef_user.hashed_password, User1#chef_user.hashed_password),
+                ?assertEqual(User#chef_user.salt,            User1#chef_user.salt)
            end
         },
         {?VD("password updates related fields"),
