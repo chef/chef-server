@@ -26,7 +26,7 @@
 -include_lib("ej/include/ej.hrl").
 -include("chef_osc_defaults.hrl").
 -include("chef_types.hrl").
--compile([export_all]).
+-compile([export_all, nowarn_export_all]).
 
 -define(NEEDED_APPS, [ pooler ]).
 

@@ -23,7 +23,7 @@
 -module(depsolver_tests).
 
 -include_lib("eunit/include/eunit.hrl").
--compile([export_all]).
+-compile([export_all, nowarn_export_all]).
 %%===========================================================================
 %% Tests
 %%============================================================================

@@ -4,6 +4,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 -compile(export_all).
+-compile(nowarn_export_all).
 
 ?HOAX_FIXTURE.
 

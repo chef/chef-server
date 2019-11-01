@@ -31,7 +31,7 @@
         ]).
 
 -ifdef(TEST).
--compile([export_all]).
+-compile([export_all, nowarn_export_all]).
 -endif.
 
 -define(CHEF_ACTIONS_MESSAGE_VERSION, <<"0.1.1">>).

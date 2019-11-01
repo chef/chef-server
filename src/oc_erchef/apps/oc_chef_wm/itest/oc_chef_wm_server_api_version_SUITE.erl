@@ -23,7 +23,7 @@
 -include_lib("common_test/include/ct.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
--compile([export_all, {parse_transform, lager_transform}]).
+-compile([export_all, nowarn_export_all, {parse_transform, lager_transform}]).
 
 -define(ORG_NAME, <<"org1">>).
 -define(ORG_AUTHZ_ID, <<"10000000000000000000000000000002">>).

@@ -35,6 +35,7 @@
 
 -ifdef(TEST).
 -compile(export_all).
+-compile(nowarn_export_all).
 -endif.
 
 -include("chef_types.hrl").

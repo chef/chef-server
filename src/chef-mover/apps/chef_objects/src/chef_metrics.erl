@@ -27,6 +27,7 @@
 
 -ifdef(TEST).
 -compile(export_all).
+-compile(nowarn_export_all).
 -endif.
 
 %% @doc Generate a label for stats_hero based on an `Upstream' name

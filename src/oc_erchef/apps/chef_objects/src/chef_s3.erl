@@ -40,6 +40,7 @@
 
 -ifdef(TEST).
 -compile(export_all).
+-compile(nowarn_export_all).
 -endif.
 
 -type http_verb() :: put | get.

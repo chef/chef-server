@@ -53,7 +53,7 @@
         ]).
 
 -ifdef(TEST).
--compile([export_all]).
+-compile([export_all, nowarn_export_all]).
 -endif.
 
 -include("oc_chef_authz.hrl").

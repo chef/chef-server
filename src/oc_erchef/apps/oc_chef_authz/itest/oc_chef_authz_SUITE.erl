@@ -27,7 +27,7 @@
 -include("oc_chef_types.hrl").
 -include("server_api_version.hrl").
 
--compile([export_all]).
+-compile([export_all, nowarn_export_all]).
 
 %% Note: this is also defined in the schema test data
 %% TODO: this is NOT the id of the org we make in init_per_suite/1, which is

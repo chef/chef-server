@@ -60,6 +60,7 @@
 
 -ifdef(TEST).
 -compile(export_all).
+-compile(nowarn_export_all).
 -endif.
 
 -export([start_link/4,

@@ -23,7 +23,7 @@
 
 -module(oc_chef_authz_tests).
 
--compile([export_all]).
+-compile([export_all, nowarn_export_all]).
 
 %% -export([raw_request_test_helper/1,
 %%          test_setup/0,

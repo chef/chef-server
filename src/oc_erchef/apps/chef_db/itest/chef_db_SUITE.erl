@@ -23,7 +23,7 @@
 
 -include_lib("common_test/include/ct.hrl").
 
--compile([export_all]).
+-compile([export_all, nowarn_export_all]).
 
 all() -> [node_ops, user_ops, client_ops, data_bag_ops, data_bag_item_ops,
           sandbox_ops, cookbook_ops,

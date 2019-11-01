@@ -24,7 +24,7 @@
 
 -include_lib("common_test/include/ct.hrl").
 
--compile([export_all]).
+-compile([export_all, nowarn_export_all]).
 
 start_server(Config) ->
     chef_test_suite_helper:set_app_env(stats_hero),

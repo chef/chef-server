@@ -3,7 +3,7 @@
 -include_lib("common_test/include/ct.hrl").
 
 
--compile([export_all]).
+-compile([export_all, nowarn_export_all]).
 
 init(Config0) ->
     Config = init_pg_db(Config0),

@@ -25,7 +25,7 @@
 -include("oc_chef_wm.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
--compile([export_all, {parse_transform, lager_transform}]).
+-compile([export_all, nowarn_export_all, {parse_transform, lager_transform}]).
 
 -define(CLIENT_NAME, <<"client1">>).
 -define(CLIENT_NAME2, <<"client2">>).
