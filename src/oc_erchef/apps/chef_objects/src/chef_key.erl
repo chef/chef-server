@@ -60,6 +60,7 @@
 
 -ifdef(TEST).
 -compile(export_all).
+-compile(nowarn_export_all).
 -endif.
 
 authz_id(#chef_key{}) ->

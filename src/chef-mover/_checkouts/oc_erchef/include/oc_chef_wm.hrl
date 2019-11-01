@@ -33,7 +33,7 @@
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
--compile([export_all]).
+-compile([export_all, nowarn_export_all]).
 -endif.
 %% Since CS12, we have a default-org mode. Under this mode,
 %% certain endpoints can be routed from

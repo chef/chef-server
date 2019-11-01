@@ -20,8 +20,6 @@
 %%
 -module(oc_chef_authz_scoped_name_tests).
 
--compile([export_all]).
-
 -include_lib("eunit/include/eunit.hrl").
 
 -define(M, oc_chef_authz_scoped_name).

@@ -6,8 +6,6 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
--compile([export_all]).
-
 search_test_() ->
     {foreach,
      fun() ->
@@ -59,7 +57,6 @@ search_test_() ->
                                                       Fun()
                                               end),
                ?assertMatch(result,exec_chef_solr())
-
        end}
      ]}.
 

@@ -3,8 +3,6 @@
 -include_lib("hoax/include/hoax.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
--compile(export_all).
-
 ?HOAX_FIXTURE.
 
 %% This test is verifying that the eredis_client start_link -> init code path

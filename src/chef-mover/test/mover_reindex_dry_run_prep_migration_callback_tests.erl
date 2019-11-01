@@ -1,7 +1,5 @@
 -module(mover_reindex_dry_run_prep_migration_callback_tests).
 
--compile([export_all]).
-
 -include_lib("moser/include/moser.hrl").
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("hoax/include/hoax.hrl").

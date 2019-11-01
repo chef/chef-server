@@ -19,8 +19,6 @@
 
 -module(oc_chef_authz_acl_constraints_tests).
 
--compile([export_all]).
-
 -include_lib("eunit/include/eunit.hrl").
 
 -define(ORGID, <<"some_org_id">>).

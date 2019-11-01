@@ -3,8 +3,6 @@
 -include_lib("hoax/include/hoax.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
--compile(export_all).
-
 %% HOAX_FIXTURE(fun Setup/0, fun Teardown/1) injects a new test generator named
 %% hoax_fixture_tests_.  This fixture will include all zero arity functions in
 %% the test module as tests.  The fixture is a foreach test where each test is

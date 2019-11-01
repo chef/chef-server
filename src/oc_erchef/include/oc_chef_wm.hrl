@@ -32,7 +32,7 @@
 -include_lib("stats_hero/include/stats_hero.hrl").
 
 -ifdef(TEST).
--compile([export_all]).
+-compile([export_all, nowarn_export_all]).
 -endif.
 %% Since CS12, we have a default-org mode. Under this mode,
 %% certain endpoints can be routed from

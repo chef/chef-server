@@ -1,6 +1,5 @@
 -module(chef_wait_group_tests).
 -include_lib("eunit/include/eunit.hrl").
--compile([export_all]).
 
 start_link_returns_a_pid_test() ->
     {ok, Pid} = chef_wait_group:start_link(fun() -> ok end, []),

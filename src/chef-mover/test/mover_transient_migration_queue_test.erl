@@ -1,7 +1,5 @@
 -module(mover_transient_migration_queue_test).
 
--compile([export_all]).
-
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("hoax/include/hoax.hrl").
 

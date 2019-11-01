@@ -37,7 +37,7 @@
          acl_spec/1]).
 
 -ifdef(TEST).
--compile([export_all]).
+-compile([export_all, nowarn_export_all]).
 -endif.
 
 -define(DEFAULT_HEADERS, []).

@@ -4,8 +4,6 @@
 -include("oc_chef_authz.hrl").
 -include("oc_chef_types.hrl").
 
--compile([export_all]).
-
 all() -> [fetch_container_sql].
 
 init_per_suite(Config) ->

@@ -22,8 +22,6 @@
 
 -module(oc_chef_group_SUITE).
 
--compile(export_all).
-
 -include_lib("common_test/include/ct.hrl").
 -include("oc_chef_types.hrl").
 -include("chef_types.hrl").

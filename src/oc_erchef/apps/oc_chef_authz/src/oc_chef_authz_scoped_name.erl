@@ -38,7 +38,7 @@
 -export([parse_scoped_name/3]).
 
 -ifdef(TEST).
--compile([export_all]).
+-compile([export_all, nowarn_export_all]).
 -endif.
 
 -type db_callback() :: fun((any()) -> any()).

@@ -20,8 +20,6 @@
 %%
 -module(oc_chef_authz_acl_tests).
 
--compile([export_all]).
-
 -include_lib("eunit/include/eunit.hrl").
 safe_fetch_ids_test_() ->
     Subject = fun oc_chef_authz_acl:safe_fetch_ids/3,
