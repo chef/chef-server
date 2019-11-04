@@ -41,7 +41,12 @@ vm:
   # enable a separate external vm
   # start: true
   # These will map directly to entries in the generated chef-server.rb
-  
+
+  # ldap:
+  # enable a separate ldap vm but do not use it unless use-external is set.
+  # start: true
+
+
   node-attributes:
     provisioning:
       # uncomment to enable default configuration of remote postgres node.
