@@ -88,6 +88,18 @@ resource "null_resource" "chef_server_config" {
     ]
   }
 
+  # install chef-manage
+  provisioner "remote-exec" {
+    inline = [
+      "set -evx",
+      "sudo chef-server-ctl install chef-manage",
+      "sudo chef-server-ctl reconfigure --chef-license=accept",
+      "sleep 30",
+      "sudo chef-manage-ctl reconfigure --accept-license",
+      "sleep 30",
+    ]
+  }
+
   # run pedant test
   provisioner "remote-exec" {
     inline = [
