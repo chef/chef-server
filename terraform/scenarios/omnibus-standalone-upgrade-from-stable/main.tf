@@ -30,6 +30,7 @@ resource "null_resource" "chef_server_config" {
     destination = "/tmp/dhparam.pem"
   }
 
+  # install chef-server
   provisioner "remote-exec" {
     inline = [
       "set -evx",
@@ -40,15 +41,36 @@ resource "null_resource" "chef_server_config" {
       "sudo mv /tmp/chef-server.rb /etc/opscode",
       "sudo mv /tmp/dhparam.pem /etc/opscode",
       "sudo chef-server-ctl reconfigure --chef-license=accept",
-      "sleep 120",
+      "sleep 30",
+    ]
+  }
+
+  # add user + organization
+  provisioner "remote-exec" {
+    inline = [
+      "set -evx",
       "sudo chef-server-ctl user-create janedoe Jane Doe janed@example.com abc123 --filename /tmp/janedoe.pem",
       "sudo chef-server-ctl org-create 4thcoffee 'Fourth Coffee, Inc.' --association_user janedoe --filename /tmp/4thcoffee-validator.pem",
+    ]
+  }
+
+  # upgrade chef-server
+  provisioner "remote-exec" {
+    inline = [
+      "set -evx",
       "curl -vo /tmp/${replace(var.upgrade_version_url, "/^.*\\//", "")} ${var.upgrade_version_url}",
       "sudo ${replace(var.upgrade_version_url, "rpm", "") != var.upgrade_version_url ? "rpm -U" : "dpkg -iEG"} /tmp/${replace(var.upgrade_version_url, "/^.*\\//", "")}",
       "sudo CHEF_LICENSE='accept' chef-server-ctl upgrade",
       "sudo chef-server-ctl start",
       "sudo chef-server-ctl cleanup",
       "sleep 120",
+    ]
+  }
+
+  # run pedant test
+  provisioner "remote-exec" {
+    inline = [
+      "set -evx",
       "sudo chef-server-ctl test -J pedant.xml --all --compliance-proxy-tests",
     ]
   }
