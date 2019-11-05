@@ -229,7 +229,7 @@ def define_chef_server(config, attributes)
     recipes = %w{provisioning::hosts provisioning::chef-server
                  provisioning::chef-server-rb
                  dev::system dev::user-env dev::dvm}
-    set_chef_zero_provisioning(config, recipes: recipes, binary_path: "/opt/opscode/embedded/bin", json: json)
+    set_chef_zero_provisioning(config, accept_license: installer.match(/(?<=_)\d+/)[0].to_i >= 13 ? true : false, recipes: recipes, binary_path: "/opt/opscode/embedded/bin", json: json)
 
     if chef_backend_active?(attributes)
       # Grab the chef-server.rb that chef-backend generates for us and overwrite the one we
@@ -268,6 +268,7 @@ def define_ldap_server(config, attributes)
   customize_vm(config, name: "ldap#{Variant}", memory: 512, cpus: 1)
 
   config.vm.provision "chef_zero" do |chef|
+    chef.arguments = '--chef-license accept'
     chef.node_name = config.vm.hostname
     chef.cookbooks_path = "cookbooks"
     chef.add_recipe("provisioning::ldap-server")
@@ -284,6 +285,7 @@ def define_db_server(config, attributes)
   config.vm.network "private_network", ip: IPS[:db]
   customize_vm(config, name: "database#{Variant}", memory: 512, cpus: 1)
   set_chef_zero_provisioning(config,
+                             accept_license: true,
                              recipes: ["provisioning::hosts"],
                              json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
   config.vm.provision "shell", path: "scripts/provision-postgres.sh", args: "#{IPS[:cs]}"
@@ -294,6 +296,7 @@ def define_custom_server(config, attributes)
   config.vm.network "private_network", ip: IPS[:custom]
   customize_vm(config, name: "custom#{Variant}", memory: 2048, cpus: 2)
   set_chef_zero_provisioning(config,
+                             accept_license: true,
                              recipes: ["provisioning::hosts"],
                              json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
 end
@@ -303,6 +306,7 @@ def define_elasticsearch_server(config, attributes)
   config.vm.network "private_network", ip: IPS[:elasticsearch]
   customize_vm(config, name: "elasticsearch#{Variant}", memory: 2048, cpus: 2)
   set_chef_zero_provisioning(config,
+                             accept_license: true,
                              recipes: ["provisioning::hosts"],
                              json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
   config.vm.provision "shell",
@@ -315,6 +319,7 @@ def define_external_solr_server(config, attributes)
   config.vm.network "private_network", ip: IPS[:solr]
   customize_vm(config, name: "external_solr#{Variant}", memory: 2048, cpus: 2)
   set_chef_zero_provisioning(config,
+                             accept_license: true,
                              recipes: ["provisioning::hosts"],
                              json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
   config.vm.provision "shell", path: "scripts/provision-solr.sh"
@@ -332,6 +337,7 @@ def define_backend_server(config, attribute)
   if provisioning
     config.vm.synced_folder installer_path, "/installers"
     set_chef_zero_provisioning(config,
+                               accept_license: installer.match(/(?<=_)\d+/)[0].to_i >= 13 ? true : false,
                                recipes: ["provisioning::hosts"],
                                json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
     config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
@@ -346,6 +352,7 @@ def define_db_server_reporting(config, attributes)
   config.vm.network "private_network", ip: IPS[:reportingdb]
   customize_vm(config, name: "reportingdb#{Variant}", memory: 512, cpus: 1)
   set_chef_zero_provisioning(config,
+                             accept_license: true,
                              recipes: ["provisioning::hosts"],
                              json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
   # Using shell here to ave the trouble of downloading
@@ -540,7 +547,7 @@ end
 
 def set_chef_zero_provisioning(config, opts)
   config.vm.provision "chef_zero" do |chef|
-    chef.arguments = "--chef-license accept"
+    chef.arguments = "--chef-license accept" if opts[:accept_license]
     chef.node_name = config.vm.hostname
     chef.cookbooks_path = "cookbooks"
     chef.nodes_path = "nodes"
