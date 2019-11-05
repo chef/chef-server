@@ -21,6 +21,14 @@ then
     testing=true
 fi
 
+#Don't continue if bzip isn't installed
+bzip_cmd="$(which bzip2)"
+if [[ ! -e $bzip_cmd ]];
+then
+    echo "ERROR: bzip2 is required for gather-logs functionality. Please install it prior to running gather-logs."
+    exit 1
+fi
+
 if [[ $type == 'CS' ]];
 then
     path='opscode'
@@ -99,6 +107,30 @@ for i in `find -L /var/log/${path}* -type f -mmin -"$modified_within_last_x_minu
     fi
 done
 
+# Add signing proxy log and elastic info from RDS if system is configured using https://github.com/chef-customers/aws_native_chef_server
+if [[ -f "/var/log/aws-signing-proxy/proxy.log" ]];
+then
+    mkdir -p "$tmpdir/var/log/aws-signing-proxy"
+    tail -"$tail_lines" "/var/log/aws-signing-proxy/proxy.log" > "$tmpdir/var/log/aws-signing-proxy/proxy.log"
+fi
+
+# Gather some information from Elasticsearch, if it's available
+gather_es() {
+    curl -s -X GET "http://localhost:$1/_cluster/health?pretty" > "$tmpdir/elasticsearch-cluster-health.txt"
+    curl -s -X GET "http://localhost:$1/_cat/indices?v" > "$tmpdir/elasticsearch-cat-indices.txt"
+    curl -s -X GET "http://localhost:$1/_cat/shards?h=index,shard,prirep,state,unassigned.reason&pretty" > "$tmpdir/elasticsearch-cat-shards.txt"
+    curl -s -X GET "http://localhost:$1/_cluster/allocation/explain?pretty" > "$tmpdir/elasticsearch-cluster-shards-explain.txt"
+}
+ES_9200="$(curl -s -XGET 'http://localhost:9200/' | grep 'for Search')"
+ES_10144="$(curl -s -XGET 'http://localhost:10144/' | grep 'for Search')"
+if [[ -n $ES_9200 ]];
+then
+    gather_es 9200
+elif [[ -n $ES_10144 ]];
+    gather_es 10144
+then
+fi
+
 $ctl_cmd status > "$tmpdir/$ctl_cmd"_status.txt
 
 # Try to determine with /tmp/.s.PGSQL.5432 if postgresql is running before gathering psql logs
@@ -140,6 +172,11 @@ elif [[ -f "/etc/redhat-release" ]];
 then
     cp "/etc/redhat-release" "$tmpdir/platform_version.txt"
     known_platform="rhel"
+elif [[ -f "/etc/os-release" ]] && grep -q "Amazon Linux 2" /etc/os-release;
+then
+    known_platform="aws"
+    cat "/etc/os-release" >> "$tmpdir/platform_version.txt"
+    cat "/etc/system-release-cpe" >> "$tmpdir/platform_version.txt"
 else
     echo "Platform and version are unknown." > "$tmpdir/platform_version.txt"
 fi
@@ -287,6 +324,11 @@ fi
 installed_packages_file="$tmpdir/installed-packages.txt"
 installed_packages_grep="grep -i -E (chef|opscode)"
 if [[ $known_platform == 'rhel' ]];
+then
+
+    rpm -qa | $installed_packages_grep >> "$installed_packages_file"
+
+elif [[ $known_platform == 'aws' ]];
 then
 
     rpm -qa | $installed_packages_grep >> "$installed_packages_file"
