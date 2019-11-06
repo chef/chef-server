@@ -64,7 +64,8 @@
 
 %% FSM states
 -export([
-         stopped/2,
+         %stopped/2,
+         stopped/3,
          started/3
         ]).
 
@@ -103,7 +104,8 @@ start() ->
     %gen_statem:cast(?MODULE, start).
 
 stop() ->
-    gen_statem:cast(?MODULE, stop).
+    gen_statem:stop(?MODULE).
+    %gen_statem:cast(?MODULE, stop).
 
 prune() ->
     gen_statem:cast(?MODULE, prune).
@@ -130,15 +132,15 @@ callback_mode() -> state_functions.
 init([]) ->
     {ok, started, create_timer(#state{})}.
 
-stopped(stop, State) ->
+stopped(_, stop, State) ->
     {next_state, stopped, State};
-stopped(start, State) ->
+stopped(_, start, State) ->
     {next_state, started, create_timer(State)};
-stopped({timeout, _Ref, prune}, State) ->
+stopped(_, {timeout, _Ref, prune}, State) ->
     {net_state, stopped, State};
-stopped(prune, State) ->
+stopped(_, prune, State) ->
     {next_state, stopped, process_batch(State)};
-stopped(_Message, State) ->
+stopped(_, _Message, State) ->
     {next_state, stopped, State}.
 
 started(_, stop, State) ->
@@ -146,7 +148,7 @@ started(_, stop, State) ->
 started(_, start, State) ->
     {next_state, started, State};
 started(_, {timeout, _Ref, prune}, State) ->
-    {net_state, started, process_batch(State)};
+    {next_state, started, process_batch(State)};
 started(_, prune, State) ->
     {next_state, started, process_batch(State)};
 started(_, _Message, State) ->
