@@ -204,20 +204,27 @@ started(_, _Message, State) ->
 %    {reply, from, StateName, State}.
 %handle_event(cast, Msg, StateName, State) ->
 %    {reply, from, StateName, State}.
+
 get_authz_ids({call, _From}, StateName, State) ->
-    {reply, from, {State#state.authz_ids, StateName, State}}.
+    %{reply, from, {State#state.authz_ids, StateName, State}}.
+    {next_state, StateName, {State#state.authz_ids, StateName, State}}.
 
 add(cast, {add, Actors, Groups}, {StateName, State}) ->
-    {reply, from, {next_state, StateName, update_state(Actors, Groups, State)}}.
+    %{reply, from, {next_state, StateName, update_state(Actors, Groups, State)}}.
+    {next_state, StateName, {next_state, StateName, update_state(Actors, Groups, State)}}.
 
 start(cast, StateName, State) ->
-    {reply, from, {StateName, State}}.
+    %{reply, from, {StateName, State}}.
+    {next_state, StateName, {StateName, State}}.
 
 stop(cast, StateName, State) ->
-    {reply, from, {StateName, State}}.
+    %{reply, from, {StateName, State}}.
+    {next_state, StateName, {StateName, State}}.
 
 prune(cast, StateName, State) ->
-    {reply, from, {StateName, State}}.
+    %{reply, from, {StateName, State}}.
+    {next_state, StateName, {StateName, State}}.
+
 %%--------------------------------------------------------------------
 %% @private
 %% @doc
