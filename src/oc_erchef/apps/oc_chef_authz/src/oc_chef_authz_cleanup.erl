@@ -99,8 +99,8 @@ get_authz_ids() ->
     gen_statem:call(?MODULE, get_authz_ids, ?CLEANUP_TIMEOUT).
 
 start() ->
-    start_link(),
-    gen_statem:cast(?MODULE, start).
+    start_link().
+    %gen_statem:cast(?MODULE, start).
 
 stop() ->
     gen_statem:cast(?MODULE, stop).
