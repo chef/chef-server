@@ -40,11 +40,11 @@
          prune/0,
          %prune/3,
 
-         addx/3,
-         startx/3,
-         stopx/3,
-         prunex/3,
-         get_authz_idsx/3
+         add/3,
+         start/3,
+         stop/3,
+         prune/3,
+         get_authz_ids/3
         ]).
 
 %% gen_fsm callbacks
@@ -87,27 +87,26 @@
 %% @end
 %%--------------------------------------------------------------------
 start_link() ->
-    %gen_statem:start_link({local, ?SERVER}, ?MODULE, [], []).
     gen_statem:start_link({local, ?SERVER}, ?MODULE, [], []).
     %gen_statem:start_link(?MODULE, [], []).
 
 -spec add_authz_ids([oc_authz_id()], [oc_authz_id()]) -> ok.
 add_authz_ids(Actors, Groups) ->
-    gen_statem:cast(?MODULE, {addx, Actors, Groups}).
+    gen_statem:cast(?MODULE, {add, Actors, Groups}).
 
 -spec get_authz_ids() -> {[oc_authz_id()], [oc_authz_id()]}.
 get_authz_ids() ->
-    gen_statem:call(?MODULE, get_authz_idsx, ?CLEANUP_TIMEOUT).
+    gen_statem:call(?MODULE, get_authz_ids, ?CLEANUP_TIMEOUT).
 
 start() ->
-    start_link().
-%    gen_statem:cast(?MODULE, startx).
+    start_link(),
+    gen_statem:cast(?MODULE, start).
 
 stop() ->
-    gen_statem:cast(?MODULE, stopx).
+    gen_statem:cast(?MODULE, stop).
 
 prune() ->
-    gen_statem:cast(?MODULE, prunex).
+    gen_statem:cast(?MODULE, prune).
 
 callback_mode() -> state_functions.
 
@@ -135,9 +134,9 @@ stopped(stop, State) ->
     {next_state, stopped, State};
 stopped(start, State) ->
     {next_state, started, create_timer(State)};
-stopped({timeout, _Ref, prunex}, State) ->
-    {next_state, stopped, State};
-stopped(prunex, State) ->
+stopped({timeout, _Ref, prune}, State) ->
+    {net_state, stopped, State};
+stopped(prune, State) ->
     {next_state, stopped, process_batch(State)};
 stopped(_Message, State) ->
     {next_state, stopped, State}.
@@ -146,9 +145,9 @@ started(_, stop, State) ->
     {next_state, stopped, cancel_timer(State)};
 started(_, start, State) ->
     {next_state, started, State};
-started(_, {timeout, _Ref, prunex}, State) ->
-    {next_state, started, process_batch(State)};
-started(_, prunex, State) ->
+started(_, {timeout, _Ref, prune}, State) ->
+    {net_state, started, process_batch(State)};
+started(_, prune, State) ->
     {next_state, started, process_batch(State)};
 started(_, _Message, State) ->
     {next_state, started, State}.
@@ -203,15 +202,19 @@ started(_, _Message, State) ->
 %    {reply, from, StateName, State}.
 %handle_event(cast, Msg, StateName, State) ->
 %    {reply, from, StateName, State}.
-get_authz_idsx({call, _From}, StateName, State) ->
+get_authz_ids({call, _From}, StateName, State) ->
     {reply, from, {State#state.authz_ids, StateName, State}}.
-addx(cast, {addx, Actors, Groups}, {StateName, State}) ->
+
+add(cast, {add, Actors, Groups}, {StateName, State}) ->
     {reply, from, {next_state, StateName, update_state(Actors, Groups, State)}}.
-startx(cast, StateName, State) ->
+
+start(cast, StateName, State) ->
     {reply, from, {StateName, State}}.
-stopx(cast, StateName, State) ->
+
+stop(cast, StateName, State) ->
     {reply, from, {StateName, State}}.
-prunex(cast, StateName, State) ->
+
+prune(cast, StateName, State) ->
     {reply, from, {StateName, State}}.
 %%--------------------------------------------------------------------
 %% @private
@@ -312,7 +315,7 @@ update_state(Actors, Groups, #state{authz_ids = {ActorSet, GroupSet}} = State) -
 
 create_timer(State) ->
     Timeout = envy:get(oc_chef_authz, cleanup_interval, ?DEFAULT_INTERVAL, integer),
-    State#state{timer_ref = erlang:start_timer(Timeout, self(), prunex)}.
+    State#state{timer_ref = erlang:start_timer(Timeout, self(), prune)}.
 
 cancel_timer( State = #state{timer_ref = inactive}) ->
     State;
