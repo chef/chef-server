@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.63 -->
-## [13.0.63](https://github.com/chef/chef-server/tree/13.0.63) (2019-11-12)
+<!-- latest_release 13.0.64 -->
+## [13.0.64](https://github.com/chef/chef-server/tree/13.0.64) (2019-11-12)
 
 #### Merged Pull Requests
-- Split up terraform scenarios&#39; remote-exec scripts [#1816](https://github.com/chef/chef-server/pull/1816) ([christopher-snapp](https://github.com/christopher-snapp))
+- Add external openldap terraform scenario [#1812](https://github.com/chef/chef-server/pull/1812) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- Add external openldap terraform scenario [#1812](https://github.com/chef/chef-server/pull/1812) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.64 -->
 - Split up terraform scenarios&#39; remote-exec scripts [#1816](https://github.com/chef/chef-server/pull/1816) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.63 -->
 - Modify dev/Vagrantfile to handle chef licensing [#1811](https://github.com/chef/chef-server/pull/1811) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.62 -->
 - Resolve cookstyle warnings in the cookbooks and remove an old .rubocop.yml file [#1807](https://github.com/chef/chef-server/pull/1807) ([tas50](https://github.com/tas50)) <!-- 13.0.61 -->
