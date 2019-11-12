@@ -74,6 +74,7 @@ resource "null_resource" "back_end_config" {
     destination = "/tmp/dhparam.pem"
   }
 
+  # install chef-server
   provisioner "remote-exec" {
     inline = [
       "set -evx",
@@ -87,8 +88,22 @@ resource "null_resource" "back_end_config" {
       "sudo mv /tmp/hosts /etc/hosts",
       "sudo chef-server-ctl reconfigure --chef-license=accept",
       "sleep 30",
+    ]
+  }
+
+  # add user + organization
+  provisioner "remote-exec" {
+    inline = [
+      "set -evx",
       "sudo chef-server-ctl user-create janedoe Jane Doe janed@example.com abc123 --filename /tmp/janedoe.pem",
       "sudo chef-server-ctl org-create 4thcoffee 'Fourth Coffee, Inc.' --association_user janedoe --filename /tmp/4thcoffee-validator.pem",
+    ]
+  }
+
+  # copy configuration to front-end
+  provisioner "remote-exec" {
+    inline = [
+      "set -evx",
       "sudo tar -C /etc -czf /tmp/opscode.tgz opscode",
       "scp -o 'UserKnownHostsFile=/dev/null' -o 'StrictHostKeyChecking=no' /tmp/opscode.tgz ${module.back_end.ssh_username}@${module.front_end.public_ipv4_dns}:/tmp",
     ]
@@ -111,6 +126,7 @@ resource "null_resource" "front_end_config" {
     destination = "/tmp/hosts"
   }
 
+  # install chef-server
   provisioner "remote-exec" {
     inline = [
       "set -evx",
@@ -121,10 +137,15 @@ resource "null_resource" "front_end_config" {
       "sudo ${replace(var.upgrade_version_url, "rpm", "") != var.upgrade_version_url ? "rpm -U" : "dpkg -iEG"} /tmp/${replace(var.upgrade_version_url, "/^.*\\//", "")}",
       "sudo chef-server-ctl reconfigure --chef-license=accept",
       "sleep 120",
+    ]
+  }
+
+  # FIXME 20190911 - fix to run all tests rather than just smoke once tiered pedant testing is supported
+  # run smoke test
+  provisioner "remote-exec" {
+    inline = [
+      "set -evx",
       "sudo chef-server-ctl test",
     ]
-
-    # FIXME 20190911 - fix to run all tests rather than just smoke once tiered pedant testing is supported
-    # "sudo chef-server-ctl test -J pedant.xml --all --compliance-proxy-tests"
   }
 }
