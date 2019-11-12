@@ -140,12 +140,32 @@ resource "null_resource" "front_end_config" {
     ]
   }
 
-  # FIXME 20190911 - fix to run all tests rather than just smoke once tiered pedant testing is supported
   # run smoke test
   provisioner "remote-exec" {
     inline = [
       "set -evx",
       "sudo chef-server-ctl test",
+    ]
+  }
+
+  # install push jobs and run push test
+  provisioner "remote-exec" {
+    inline = [
+      "set -evx",
+      "sudo chef-server-ctl install opscode-push-jobs-server",
+      "sudo chef-server-ctl reconfigure --chef-license=accept",
+      "sleep 30",
+      "sudo opscode-push-jobs-server-ctl reconfigure",
+      "sleep 30",
+      "sudo opscode-push-jobs-server-ctl test",
+    ]
+  }
+
+  # run pedant test
+  provisioner "remote-exec" {
+    inline = [
+      "set -evx",
+      "sudo chef-server-ctl test -J pedant.xml --all --compliance-proxy-tests",
     ]
   }
 }

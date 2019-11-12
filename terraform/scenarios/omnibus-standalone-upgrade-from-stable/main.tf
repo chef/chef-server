@@ -67,6 +67,27 @@ resource "null_resource" "chef_server_config" {
     ]
   }
 
+  # run smoke test
+  provisioner "remote-exec" {
+    inline = [
+      "set -evx",
+      "sudo chef-server-ctl test",
+    ]
+  }
+
+  # install push jobs and run push test
+  provisioner "remote-exec" {
+    inline = [
+      "set -evx",
+      "sudo chef-server-ctl install opscode-push-jobs-server",
+      "sudo chef-server-ctl reconfigure --chef-license=accept",
+      "sleep 30",
+      "sudo opscode-push-jobs-server-ctl reconfigure",
+      "sleep 30",
+      "sudo opscode-push-jobs-server-ctl test",
+    ]
+  }
+
   # run pedant test
   provisioner "remote-exec" {
     inline = [
