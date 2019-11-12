@@ -40,33 +40,33 @@
 
 -include("bksw_obj.hrl").
 
--record(entryref, {fd :: file:io_device(),
-                   path :: string() | binary(),
-                   bucket :: binary(),
-                   entry :: binary(),
-                   ctx :: undefined | binary()}).
+-record(entryref, {fd :: file:io_device() | undefined,
+                   path :: string() | binary() | undefined,
+                   bucket :: binary() | undefined,
+                   entry :: binary() | undefined,
+                   ctx :: binary() | undefined}).
 
 -record(db_file, {
-          bucket_name :: binary(),
-          bucket_id   :: integer(),
-          name        :: binary(),
-          file_id     :: integer(),
-          created_at  :: any(), % refine type
-          data_id     :: integer(),
-          complete    :: boolean(),
-          data_size   :: integer(),
-          chunk_count :: integer(),
-          hash_md5    :: binary(),
-          hash_sha256 :: binary(),
-          hash_sha512 :: binary()
+          bucket_name :: binary() | undefined,
+          bucket_id   :: integer() | undefined,
+          name        :: binary() | undefined,
+          file_id     :: integer() | undefined,
+          created_at  :: any() | undefined, % refine type
+          data_id     :: integer() | undefined,
+          complete    :: boolean() | undefined,
+          data_size   :: integer() | undefined,
+          chunk_count :: integer() | undefined,
+          hash_md5    :: binary() | undefined,
+          hash_sha256 :: binary() | undefined,
+          hash_sha512 :: binary() | undefined
          }).
 
 -define(DB_FILE_TX_FM, [db_file, [bucket_name, bucket_id, name, file_id, created_at, data_id, complete, data_size, chunk_count, hash_md5, hash_sha256, hash_sha512]]).
 
 -record(db_bucket, {
-          bucket_name :: binary(),
-          created_at  :: any(),
-          bucket_id   :: integer()
+          bucket_name :: binary() | undefined,
+          created_at  :: any() | undefined,
+          bucket_id   :: integer() | undefined
          }).
 
 -define(DB_BUCKET_TX_FM, [db_bucket, [name, created_at, id]]).
@@ -75,38 +75,38 @@
           size = 0 :: integer(), % transferred size
           next_chunk = 0:: integer(),
           %% These hashes are computed on both upload and download to help insure file integrity
-          hash_context_md5 :: any(), %
-          hash_context_sha256 :: any(),
-          hash_context_sha512 :: any() % refine
+          hash_context_md5 :: any() | undefined, %
+          hash_context_sha256 :: any() | undefined,
+          hash_context_sha512 :: any() | undefined % refine
          }).
 
 -record(context, {
                   auth_check_disabled = false :: boolean(),
                   %% AWS credentials
-                  access_key_id :: binary(),
-                  secret_access_key :: binary(),
+                  access_key_id :: binary() | undefined,
+                  secret_access_key :: binary() | undefined,
 
-                  stream_download :: any(),
+                  stream_download :: any() | undefined,
 
                   % Do we retry sql when we get no_connections. ms to wait
-                  sql_retry_delay :: pos_integer(),
+                  sql_retry_delay :: pos_integer() | undefined,
                   sql_retry_count = 0 :: non_neg_integer(),
 
                   %% unique request ID from nginx header (or generated if not
                   %% found) set by opscoderl_wm:read_req_id.
-                  reqid :: binary(),
+                  reqid :: binary() | undefined,
 
                   %% The name of the HTTP request header containing the unique ID set by the load
                   %% balancer
-                  reqid_header_name :: string(),
+                  reqid_header_name :: string() | undefined,
                   %% List of known buckets, only populated in places we want to avoid
                   %% multiple lookups
-                  bucket_list :: list(),
+                  bucket_list :: list() | undefined,
 
-                  entry_ref :: #entryref{}, % null in sql mode
+                  entry_ref :: #entryref{} | undefined, % null in sql mode
 
-                  entry_md :: #object{} | #db_file{},
+                  entry_md :: #object{} | #db_file{} | undefined,
 
-                  transfer_state :: #file_transfer_state{}
+                  transfer_state :: #file_transfer_state{} | undefined
 
               }).

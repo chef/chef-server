@@ -100,19 +100,19 @@
 %% Shared resource state shared by all chef_wm resource modules.
 -record(base_state, {
           %% Concrete resource impl
-          resource_mod :: atom(),
+          resource_mod :: atom() | undefined,
           %% unique request ID from nginx header (or generated if not
           %% found) set by chef_wm_util:read_req_id.
-          reqid :: binary(),
+          reqid :: binary() | undefined,
 
           %% The name of the HTTP request header containing the unique ID set by the load
           %% balancer
-          reqid_header_name :: string(),
+          reqid_header_name :: string() | undefined,
 
           %% String containing chef server product version.
           %% TODO this is also set as part of x-ops-api-info, which could be confusing.
           %% Let's make this reporting of version a versioned change itself:
-          api_version :: string(),
+          api_version :: string() | undefined,
 
           %% This represents the version which which the server API is expected
           %% to comply, as agreed upon between client and server.
@@ -122,17 +122,16 @@
           server_api_version  = -1 :: integer() | 'bad_value_requested',
 
           %% OTP information for the Erchef server in {ReleaseName, OtpVersion} form.
-          otp_info :: {string(), string()},
+          otp_info :: {string(), string()} | undefined,
 
           %% Indicates what variant of Chef Server this is (e.g. "osc" => Open Source Chef,
           %% "opc" = Opscode Private Chef, etc).
-          server_flavor :: string(),
+          server_flavor :: string() | undefined,
 
           %% A fun/1 that closes over the request headers and returns
           %% header values as binaries or 'undefined'.
           %% chef_rest_wm:init sets this.
-          header_fun = undefined :: fun((binary()|string()) -> binary() | 'undefined')
-                                  | 'undefined',
+          header_fun = undefined :: fun((binary() | string()) -> binary() | 'undefined') | undefined,
 
           %% Message added to erchef log messages (not user visible).
           %% Used to pass extra info usually in non-200 cases to the
@@ -150,15 +149,15 @@
 
           %% The GUID for the organization name that appears in the
           %% request URL.  This gets set in chef_wm_base:malformed_request
-          organization_guid :: object_id(),
+          organization_guid :: object_id() | undefined,
 
           %% The name of the organization parsed from the request URL.
           %% Set by chef_rest_wm:service_available.
-          organization_name :: binary() | ?OSC_ORG_NAME,
+          organization_name :: binary() | ?OSC_ORG_NAME | undefined,
 
           %% The authz identifier of the org, populated based on the presence
           %% of an organization name in the request url
-          organization_authz_id :: object_id(),
+          organization_authz_id :: object_id() | undefined,
 
           %% Run time configurable dark launch info
           %% Set by chef_rest_wm:service_available.
@@ -169,35 +168,35 @@
           %% Opaque db connection context record as returned by
           %% chef_db:make_context.  Allows db layer access to request
           %% ID.  Set in chef_rest_wm:service_available
-          chef_db_context :: chef_db:db_context(),
+          chef_db_context :: chef_db:db_context() | undefined,
 
           %% Opaque db connection context record as returned by chef_authz:make_context.
-          chef_authz_context :: oc_chef_authz:oc_chef_authz_context(),
+          chef_authz_context :: oc_chef_authz:oc_chef_authz_context() | undefined,
 
           %% AuthzId for the actor making the request.
-          requestor_id :: object_id(),
+          requestor_id :: object_id() | undefined,
 
           %% Details for The actor making the request.
-          requestor :: #chef_requestor{} | #chef_client{},
+          requestor :: #chef_requestor{} | #chef_client{} | undefined,
 
           %% A record containing resource-specific state.
-          resource_state :: resource_state(),
+          resource_state :: resource_state() | undefined,
 
           %% Turn this on if superuser is allowed to bypass security checks for
           %% this endpoint.
           superuser_bypasses_checks = false :: true | false,
 
           %% A proplist of config for metric reporting and stats_hero integration.
-          metrics_config :: [{atom(), term()}],
+          metrics_config :: [{atom(), term()}] | undefined,
 
           %% list of resource arguments passed in on init of each resource by webmachine
           %% This will be set to 'Value' of a tuple in the resource argument list in
           %% dispatch.conf matching the form {resource_args, Value}
-          resource_args :: atom(),
+          resource_args :: atom() | undefined,
 
           % Multiple resources may create a key at time of object creation.  Expose it
           % in base_state so that it's available for common handling.
-          key_context ::undefined | #key_context{}
+          key_context :: #key_context{} | undefined
 
          }).
 
@@ -207,7 +206,7 @@
           client_data,
           client_authz_id,
           generated_private_key,
-          chef_client :: #chef_client{} | not_found
+          chef_client :: #chef_client{} | not_found | undefined
          }).
 
 -record(cookbook_state, {
@@ -228,12 +227,12 @@
 
 -record(cookbook_artifact_version_state, {
           authz_id,
-          cookbook_artifact_version_data :: ejson_term(),
-          oc_chef_cookbook_artifact_version :: #oc_chef_cookbook_artifact_version{}
+          cookbook_artifact_version_data :: ejson_term() | undefined,
+          oc_chef_cookbook_artifact_version :: #oc_chef_cookbook_artifact_version{} | undefined
          }).
 
 -record(cookbook_artifacts_state, {
-          oc_chef_cookbook_artifacts :: [#oc_chef_cookbook_artifact{}]
+          oc_chef_cookbook_artifacts :: [#oc_chef_cookbook_artifact{}] | undefined
          }).
 
 -record(data_state, {
@@ -248,21 +247,21 @@
 -record(environment_state, {
           environment_data,
           environment_authz_id,
-          chef_environment :: #chef_environment{},
+          chef_environment :: #chef_environment{} | undefined,
 
           %% Used for when we're returning environment-filtered cookbook version info
-          num_versions :: num_versions(),
+          num_versions :: num_versions() | undefined,
 
           %% Used when we're grabbing specific cookbooks filtered through an environment
           %% `all' indicates that all cookbooks should be returned (duh)
-          cookbook :: binary() | all
+          cookbook :: binary() | all | undefined
          }).
 
 -record(node_state, {
           environment_name,
           node_data,
           node_authz_id,
-          chef_node :: #chef_node{}
+          chef_node :: #chef_node{} | undefined
          }).
 
 -record(role_state, {
@@ -270,7 +269,7 @@
           %% EJson-encoded representation of a Role
           role_data,
           role_authz_id,
-          chef_role :: #chef_role{}
+          chef_role :: #chef_role{} | undefined
          }).
 
 -record(sandbox_state, {
@@ -293,26 +292,26 @@
          }).
 
 -record(depsolver_state, {
-          chef_environment :: #chef_environment{},
+          chef_environment :: #chef_environment{} | undefined,
           %% environment within which to depsolve from the URL
-          environment_name :: binary(),
+          environment_name :: binary() | undefined,
           %% list of required cookbooks from POST.  These have been processed
           %% and if there was a version in the recipe the we store it as a
           %% cookbook name, version tuple
-          run_list_cookbooks :: [binary() | {binary(), binary()}]
+          run_list_cookbooks :: [binary() | {binary(), binary()}] | undefined
         }).
 
 -record(user_state, {
           user_data,
           user_authz_id,
           generated_private_key,
-          chef_user :: #chef_user{} | not_found
+          chef_user :: #chef_user{} | not_found | undefined
       }).
 
 -record(container_state, {
           container_data,
           container_authz_id,
-          oc_chef_container :: #oc_chef_container{}
+          oc_chef_container :: #oc_chef_container{} | undefined
          }).
 
 
@@ -324,7 +323,7 @@
 -record(group_state, {
           group_data,
           group_authz_id,
-          oc_chef_group :: #oc_chef_group{}
+          oc_chef_group :: #oc_chef_group{} | undefined
          }).
 
 -record(policy_state, {
@@ -335,7 +334,7 @@
           created_policy_group = false,
           policy_data_for_response,
           policy_assoc_exists = false,
-          oc_chef_policy_group_revision_association :: #oc_chef_policy_group_revision_association{}
+          oc_chef_policy_group_revision_association :: #oc_chef_policy_group_revision_association{} | undefined
          }).
 
 -record(named_policy_revisions_state, {
@@ -369,7 +368,7 @@
          }).
 
 -record(association_state, {
-          data :: jiffy:json_value(),
+          data :: jiffy:json_value() | undefined,
           user,
           org_user_association,
           org_user_invite,
@@ -379,7 +378,7 @@
 -record(organization_state, {
           organization_data,
           organization_authz_id,
-          oc_chef_organization :: #oc_chef_organization{}
+          oc_chef_organization :: #oc_chef_organization{} | undefined
          }).
 
 -record(key_state, {
@@ -387,16 +386,16 @@
           full_type,
           parent_id,
           parent_authz_id,
-          parent_name :: binary(),
+          parent_name :: binary() | undefined,
           key_data,
           generated_private_key,
-          chef_key :: #chef_key{}
+          chef_key :: #chef_key{} | undefined
          }).
 -type key_state() :: #key_state{}.
 
--record(object_identifier_state, {id :: object_id(),
-                                  authz_id :: object_id(),
-                                  org_id :: object_id()}).
+-record(object_identifier_state, {id :: object_id() | undefined,
+                                  authz_id :: object_id() | undefined,
+                                  org_id :: object_id() | undefined}).
 
 -type resource_state() ::   undefined |
                             #client_state{} |

@@ -252,14 +252,11 @@ allowed_keys(ValidKeys, [{Item, _}|Rest]) ->
             throw({invalid_key, Item})
     end.
 
-
-
 %% @doc throws an ej_invalid for fun_match. Useful for bespoke validation functions
 %% that needs to return an error message back to the API client.
 -spec throw_invalid_fun_match(binary()) -> none().
 throw_invalid_fun_match(Message) ->
     throw(#ej_invalid{type = fun_match, msg = Message}).
-
 
 %% Walks through ejson term and set default values
 %% Factored out from monkey copied code in most objects

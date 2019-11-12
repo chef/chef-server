@@ -1,8 +1,8 @@
--record(object, {path :: binary(),
-                 name :: binary(),
-                 date :: calendar:datetime1970(),
-                 size :: non_neg_integer(),
-                 digest :: binary()}).
+-record(object, {path :: binary() | undefined,
+                 name :: binary() | undefined,
+                 date :: calendar:datetime1970() | undefined,
+                 size :: non_neg_integer() | undefined,
+                 digest :: binary() | undefined}).
 
--record(bucket, {name:: string() | binary(),
-                 date::calendar:datetime1970()}).
+-record(bucket, {name:: string() | binary() | undefined,
+                 date::calendar:datetime1970() | undefined}).

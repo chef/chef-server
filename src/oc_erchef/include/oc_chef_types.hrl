@@ -97,7 +97,7 @@
           org_id,
           name,
           authz_id,
-          version_identifiers :: [ Identifier::binary() ]
+          version_identifiers :: [ Identifier::binary() ] | undefined
          }).
 
 -record(oc_chef_cookbook_artifact_version, {
@@ -111,7 +111,7 @@
           org_id,
           name,
           authz_id,
-          checksums :: [ Checksum::binary() ]
+          checksums :: [ Checksum::binary() ] | undefined
          }).
 
 -record(oc_chef_organization, {

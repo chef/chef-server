@@ -16,10 +16,10 @@
 -type oc_authz_id() :: <<_:256>>.
 
 -record(authz_group, {actors = [] :: actor_list(),
-		      groups = [] :: group_list()}).
+                      groups = [] :: group_list()}).
 
 -record(authz_ace,  {actors = [] :: actor_list(),
-		     groups = [] :: group_list()}).
+                     groups = [] :: group_list()}).
 
 -type authz_ace() :: #authz_ace{}.
 -type authz_acl() :: [{access_method(), #authz_ace{}},...].
@@ -36,9 +36,9 @@
          }).
 
 -record(oc_chef_authz_context,
-        {reqid :: binary(),
-         otto_connection :: couchbeam:server(),
-         darklaunch :: term()}).
+        {reqid           :: binary()           | undefined,
+         otto_connection :: couchbeam:server() | undefined,
+         darklaunch      :: term()             | undefined}).
 
 -type oc_chef_authz_context() :: #oc_chef_authz_context{}.
 
@@ -47,13 +47,13 @@
 -type object_id() :: <<_:256>>.
 -type db_key() :: binary() | string().
 
--type authz_type() :: 'authz_client' |
-                      'authz_container' |
-                      'authz_cookbook' |
-                      'authz_data_bag' |
-                      'authz_environment' |
-                      'authz_group' |
-                      'authz_node' |
+-type authz_type() :: 'authz_client'        |
+                      'authz_container'     |
+                      'authz_cookbook'      |
+                      'authz_data_bag'      |
+                      'authz_environment'   |
+                      'authz_group'         |
+                      'authz_node'          |
                       'authz_role'.
 
 -type container_name() :: binary().

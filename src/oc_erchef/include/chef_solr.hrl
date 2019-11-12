@@ -16,14 +16,15 @@
 %%
 
 -record(chef_solr_query, {
-          query_string :: string(),
-          filter_query :: string(),
+          query_string :: string() | undefined,
+          filter_query :: string() | undefined,
           search_provider = solr :: 'solr' | 'elasticsearch',
-          start :: integer(),
-          rows :: integer(),
-          sort :: string(),
+          start :: integer() | undefined,
+          rows :: integer()  | undefined,
+          sort :: string()   | undefined,
           index :: 'node'
                  | 'role'
                  | 'client'
                  | 'environment'
-                 | {'data_bag', binary()}}).
+                 | {'data_bag', binary()}
+                 | undefined}).

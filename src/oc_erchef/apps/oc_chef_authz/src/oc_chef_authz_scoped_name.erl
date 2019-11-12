@@ -43,12 +43,12 @@
 
 -type db_callback() :: fun((any()) -> any()).
 
--record(context, {org_id :: binary(),
+-record(context, {org_id :: binary() | undefined,
                   db_context :: any() | undefined,
-                  db_callback_fun :: db_callback()
+                  db_callback_fun :: db_callback() | undefined
                  }).
 
--record(sname, {full :: binary(),
+-record(sname, {full :: binary() | undefined,
                 base :: binary() | undefined,
                 org  :: binary() | 'global_org' | undefined,
                 org_id :: binary() | undefined,

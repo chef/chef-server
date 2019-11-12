@@ -16,11 +16,11 @@
 %%
 
 -record(chef_db_cb_version_delete, {
-          'cookbook_delete' :: boolean(),
-          'deleted_checksums' :: [ Checksum::binary()]
+          'cookbook_delete' :: boolean() | undefined,
+          'deleted_checksums' :: [ Checksum::binary()] | undefined
          }).
 
 -record(chef_db_cb_version_update, {
-          'deleted_checksums' :: [ Checksum::binary()],
-          'added_checksums' :: [ Checksum::binary()]
+          'deleted_checksums' :: [ Checksum::binary()] | undefined,
+          'added_checksums' :: [ Checksum::binary()] | undefined
          }).

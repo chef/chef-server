@@ -16,11 +16,11 @@
 %%
 
 -record(chef_solr_query, {
-          query_string :: string(),
-          filter_query :: string(),
-          start :: integer(),
-          rows :: integer(),
-          sort :: string(),
+          query_string :: string() | undefined,
+          filter_query :: string() | undefined,
+          start :: integer() | undefined,
+          rows :: integer() | undefined,
+          sort :: string() | undefined,
           index :: 'node'
                  | 'role'
                  | 'client'

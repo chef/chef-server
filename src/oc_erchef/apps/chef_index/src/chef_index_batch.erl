@@ -36,12 +36,12 @@
          terminate/2, code_change/3]).
 
 -record(chef_idx_batch_state, {
-          wrapper_size :: non_neg_integer(),
-          current_size :: non_neg_integer(),
-          max_size :: non_neg_integer(),
+          wrapper_size :: non_neg_integer() | undefined,
+          current_size :: non_neg_integer() | undefined,
+          max_size :: non_neg_integer() | undefined,
           item_queue = [] :: [{{pid(), term()}, erlang:timestamp(), iolist()}],
-          max_wait :: non_neg_integer(),
-          search_provider = solr :: solr|elasticsearch,
+          max_wait :: non_neg_integer() | undefined,
+          search_provider = solr :: solr | elasticsearch,
           total_docs_queued = 0 :: integer(),
           total_docs_success = 0 :: integer(),
           avg_queue_latency = 0.0 :: float(),

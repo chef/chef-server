@@ -20,35 +20,35 @@
 
           %% Who are we working with?  This is the object in question, i.e., for
           %% /<type>/<id> this is <id>
-          authz_id :: auth_id(),
+          authz_id :: auth_id() | undefined,
 
           %% What is the superuser ID?
-          superuser_id :: auth_id(),
+          superuser_id :: auth_id() | undefined,
 
           %% What kind of resource are we talking about here?
-          request_type :: auth_type(),
+          request_type :: auth_type() | undefined,
 
           %% What type of ACE request is this?
-          action :: permission(),
+          action :: permission() | undefined,
 
           %% What member type are we checking for?  This will always be an actor or
           %% a group
-          member_type :: auth_type(),
+          member_type :: auth_type() | undefined,
 
           %% What's the ID of the member
-          member_id :: auth_id(),
+          member_id :: auth_id() | undefined,
 
           %% Who's asking?
-          requestor_id :: requestor_id(),
+          requestor_id :: requestor_id() | undefined,
 
           %% Which module is handling this request?
-          module :: atom(),
+          module :: atom() | undefined,
 
           %% A unique request identifier, used for aggregating metrics
-          reqid :: request_id(),
+          reqid :: request_id() | undefined,
 
           %% Proplist of config info to pass to stats_hero
-          metrics_config :: [{atom(), term()}]
+          metrics_config :: [{atom(), term()}] | undefined
 
          }).
 
