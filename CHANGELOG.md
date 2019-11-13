@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.67 -->
-## [13.0.67](https://github.com/chef/chef-server/tree/13.0.67) (2019-11-12)
+<!-- latest_release 13.0.68 -->
+## [13.0.68](https://github.com/chef/chef-server/tree/13.0.68) (2019-11-13)
 
 #### Merged Pull Requests
-- Add testing of Chef Manage add-on [#1824](https://github.com/chef/chef-server/pull/1824) ([christopher-snapp](https://github.com/christopher-snapp))
+- Bump loofah from 2.2.3 to 2.3.1 in /src/oc-id [#1820](https://github.com/chef/chef-server/pull/1820) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- Bump loofah from 2.2.3 to 2.3.1 in /src/oc-id [#1820](https://github.com/chef/chef-server/pull/1820) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 13.0.68 -->
 - Add testing of Chef Manage add-on [#1824](https://github.com/chef/chef-server/pull/1824) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.67 -->
 - Add testing of Push Jobs add-on [#1823](https://github.com/chef/chef-server/pull/1823) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.66 -->
 - fix erlang build version, dialyzer warnings, compile warnings [#1817](https://github.com/chef/chef-server/pull/1817) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.0.65 -->
