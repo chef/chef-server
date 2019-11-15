@@ -6,6 +6,8 @@
 -module(user_default).
 % required to expose the record definitions we load in from various includes
 -compile(export_all).
+% export_all triggers compilation warnings which are set to be treated as errors
+-compile(nowarn_export_all).
 %
 % Invoke this from the erlang shell to reload a module in place
 % for example, um(oc_chef_wm_base).

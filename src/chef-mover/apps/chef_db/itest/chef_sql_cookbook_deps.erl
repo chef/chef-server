@@ -1,7 +1,5 @@
 -module(chef_sql_cookbook_deps).
 
--compile([export_all]).
-
 -include_lib("eunit/include/eunit.hrl").
 -include("chef_db.hrl").
 -include("chef_types.hrl").

@@ -3,8 +3,6 @@
 -include_lib("common_test/include/ct.hrl").
 
 
--compile([export_all]).
-
 init(Config0) ->
     Config = init_pg_db(Config0),
     set_env(stats_hero, [{estatsd_host, "localhost"},

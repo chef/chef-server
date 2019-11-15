@@ -23,6 +23,7 @@
 
 -ifdef(TEST).
 -compile(export_all).
+-compile(nowarn_export_all).
 -endif.
 
 -include("oc_chef_wm.hrl").

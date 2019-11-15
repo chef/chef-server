@@ -25,7 +25,7 @@
         ]).
 
 -ifdef(TEST).
--compile([export_all]).
+-compile([export_all, nowarn_export_all]).
 -endif.
 
 -include("chef_index.hrl").
@@ -151,7 +151,7 @@ routing_key(ObjectID) ->
 -spec object_id_to_i(uuid_binary()) -> non_neg_integer().
 %% Strip hypens (if any) from the UUID and convert to an integer.
 object_id_to_i(UUID) ->
-    <<Key:160/unsigned-integer>> = crypto:sha(UUID),
+    <<Key:160/unsigned-integer>> = crypto:hash(sha, UUID),
     Key.
 
 unix_time() ->

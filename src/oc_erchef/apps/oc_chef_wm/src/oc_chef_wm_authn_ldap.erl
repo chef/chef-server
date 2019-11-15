@@ -23,6 +23,7 @@
 
 -ifdef(TEST).
 -compile(export_all).
+-compile(nowarn_export_all).
 -endif.
 
 %% Determines auth method to use for this request based on

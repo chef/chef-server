@@ -12,6 +12,10 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
+    %% erlang 19.3.x SIGTERM changes caused runit failures.
+    %% this reverts to previous working SIGTERM behavior.
+    os:set_signal(sigterm, default),
+
     %% When start is invoked, any non-included apps are already started.
     %% This means that chef_secrets is started - so it's safe to start
     %% pooler and any other included apps that needed to wait for pooler.

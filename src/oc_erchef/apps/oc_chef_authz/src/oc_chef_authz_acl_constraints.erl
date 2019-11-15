@@ -23,7 +23,7 @@
 -include_lib("ej/include/ej.hrl").
 
 -ifdef(TEST).
--compile([export_all]).
+-compile([export_all, nowarn_export_all]).
 -endif.
 
 -export([check_acl_constraints/5]).

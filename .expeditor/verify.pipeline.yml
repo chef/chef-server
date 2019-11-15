@@ -103,8 +103,6 @@ steps:
           - ELIXIR_VERSION=1.4
           - COMPONENT=src/oc_erchef
 
-
-
 - label: oc-id
   command:
     - apt-get update -y && apt-get install -y libsqlite3-dev

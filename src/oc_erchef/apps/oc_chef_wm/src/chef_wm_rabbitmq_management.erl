@@ -25,6 +25,7 @@
 
 -ifdef(TEST).
 -compile(export_all).
+-compile(nowarn_export_all).
 -endif.
 
 -export([calc_ratio_and_percent/2,

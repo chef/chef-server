@@ -47,7 +47,7 @@
 
 %% In order to fully test things
 -ifdef(TEST).
--compile([export_all]).
+-compile([export_all, nowarn_export_all]).
 -endif.
 
 

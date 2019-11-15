@@ -1,7 +1,5 @@
 -module(oc_chef_authz_cleanup_tests).
 
--compile([export_all]).
-
 -include_lib("eunit/include/eunit.hrl").
 
 -define(SUPER_USER_AUTHZ_ID, <<"clarkkent">>).

@@ -20,8 +20,6 @@
 
 -module(oc_chef_group_tests).
 
--compile([export_all]).
-
 -include_lib("eunit/include/eunit.hrl").
 
 handle_error_test_() ->
