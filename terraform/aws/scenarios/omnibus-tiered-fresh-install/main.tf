@@ -1,5 +1,5 @@
 module "back_end" {
-  source = "../../aws_instance"
+  source = "../../modules/aws_instance"
 
   aws_profile       = "${var.aws_profile}"
   aws_region        = "${var.aws_region}"
@@ -14,7 +14,7 @@ module "back_end" {
 }
 
 module "front_end" {
-  source = "../../aws_instance"
+  source = "../../modules/aws_instance"
 
   aws_profile       = "${var.aws_profile}"
   aws_region        = "${var.aws_region}"

@@ -74,19 +74,19 @@ endif
 
 create-vpc: verify-aws
 	@set -e; \
-	cd aws_vpc && \
+	cd modules/aws_vpc && \
 	rm -rf .terraform && \
 	terraform init && \
 	terraform apply -auto-approve
 
 show-vpc: verify-aws
 	@set -e; \
-	cd aws_vpc && \
+	cd modules/aws_vpc && \
 	terraform show
 
 destroy-vpc: verify-aws
 	@set -e; \
-	cd aws_vpc && \
+	cd modules/aws_vpc && \
 	terraform destroy -auto-approve && \
 	rm -rf .terraform terraform.tfstate*
 

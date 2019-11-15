@@ -1,5 +1,5 @@
 module "chef_server" {
-  source = "../../aws_instance"
+  source = "../../modules/aws_instance"
 
   aws_profile       = "${var.aws_profile}"
   aws_region        = "${var.aws_region}"
@@ -14,7 +14,7 @@ module "chef_server" {
 }
 
 module "ldap" {
-  source = "../../aws_instance"
+  source = "../../modules/aws_instance"
 
   aws_profile       = "${var.aws_profile}"
   aws_region        = "${var.aws_region}"
@@ -66,7 +66,7 @@ resource "null_resource" "ldap_cookbook" {
   depends_on = ["null_resource.ldap_config"]
 
   provisioner "local-exec" {
-    command = "chef-run --user ${module.ldap.ssh_username} ${module.ldap.public_ipv4_dns} ${path.module}/../../../dev/cookbooks/provisioning/recipes/ldap-server.rb"
+    command = "chef-run --user ${module.ldap.ssh_username} ${module.ldap.public_ipv4_dns} ${path.module}/../../../../dev/cookbooks/provisioning/recipes/ldap-server.rb"
   }
 }
 
