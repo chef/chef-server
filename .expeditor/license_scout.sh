@@ -6,6 +6,7 @@ if [[ "${EXPEDITOR:-false}" == "true" ]]; then
   apt-get update
   apt-get install -y libpq-dev libsqlite3-dev
   # Pin ruby to 2.5.6 since chef-server tests heavily depend
+  asdf install ruby 2.5.6
   asdf local ruby 2.5.6
   # Install gem for 2.5.6 path
   gem install license_scout
