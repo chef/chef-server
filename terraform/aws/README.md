@@ -87,5 +87,5 @@ To destroy all active scenarios you may run either the `make destroy-all` or `ma
 ## Adding a new Scenario
 
 1. Duplicate an existing scenario directory that is similar to the one you desire. For example, if you wanted to add a
-   `omnibus-tiered-upgrade-from-stable`, you could start with the `omnibus-tiered-fresh-install` scenario file.   
+   `omnibus-tiered-upgrade`, you could start with the `omnibus-tiered-fresh-install` scenario file.   
 2. Update the `main.tf` file to reflect the scenario name as well as any additional test changes you require.
