@@ -1,4 +1,4 @@
-# Omnibus Standalone Upgrade From Stable
+# Omnibus Standalone Upgrade
 
 This directory contains the Terraform code used to instantiate a single Chef Infra Server utilizing Omnibus built artifacts as the install and upgrade packages.
 
