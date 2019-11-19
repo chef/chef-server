@@ -92,7 +92,7 @@ resource "null_resource" "chef_server_config" {
   }
 
   provisioner "file" {
-    source      = "${path.module}/files/dhparam.pem"
+    source      = "${path.module}/../../../common/files/dhparam.pem"
     destination = "/tmp/dhparam.pem"
   }
 
@@ -100,6 +100,7 @@ resource "null_resource" "chef_server_config" {
   provisioner "remote-exec" {
     inline = [
       "set -evx",
+      "echo -e '\nBEGIN INSTALL CHEF SERVER\n'",
       "sudo chown root:root /tmp/hosts",
       "sudo mv /tmp/hosts /etc/hosts",
       "curl -vo /tmp/${replace(var.upgrade_version_url, "/^.*\\//", "")} ${var.upgrade_version_url}",
@@ -110,47 +111,32 @@ resource "null_resource" "chef_server_config" {
       "sudo mv /tmp/dhparam.pem /etc/opscode",
       "sudo chef-server-ctl reconfigure --chef-license=accept",
       "sleep 120",
+      "echo -e '\nEND INSTALL CHEF SERVER\n'",
     ]
   }
 
   # run smoke test
   provisioner "remote-exec" {
-    inline = [
-      "set -evx",
-      "sudo chef-server-ctl test",
-    ]
+    script = "${path.module}/../../../common/files/test_chef_server-smoke.sh"
   }
 
-  # install push jobs and run pedant test
+  # install push jobs addon
   provisioner "remote-exec" {
-    inline = [
-      "set -evx",
-      "sudo chef-server-ctl install opscode-push-jobs-server",
-      "sudo chef-server-ctl reconfigure --chef-license=accept",
-      "sleep 30",
-      "sudo opscode-push-jobs-server-ctl reconfigure",
-      "sleep 30",
-      "sudo opscode-push-jobs-server-ctl test",
-    ]
+    script = "${path.module}/../../../common/files/install_addon_push_jobs.sh"
   }
 
-  # install chef-manage
+  # test push jobs addon
   provisioner "remote-exec" {
-    inline = [
-      "set -evx",
-      "sudo chef-server-ctl install chef-manage",
-      "sudo chef-server-ctl reconfigure --chef-license=accept",
-      "sleep 30",
-      "sudo chef-manage-ctl reconfigure --accept-license",
-      "sleep 30",
-    ]
+    script = "${path.module}/../../../common/files/test_addon_push_jobs.sh"
+  }
+
+  # install chef manage addon
+  provisioner "remote-exec" {
+    script = "${path.module}/../../../common/files/install_addon_chef_manage.sh"
   }
 
   # run pedant test
   provisioner "remote-exec" {
-    inline = [
-      "set -evx",
-      "sudo chef-server-ctl test -J pedant.xml --all --compliance-proxy-tests",
-    ]
+    script = "${path.module}/../../../common/files/test_chef_server-pedant.sh"
   }
 }
