@@ -21,14 +21,6 @@ then
     testing=true
 fi
 
-#Don't continue if bzip isn't installed
-bzip_cmd="$(which bzip2)"
-if [[ ! -e $bzip_cmd ]];
-then
-    echo "ERROR: bzip2 is required for gather-logs functionality. Please install it prior to running gather-logs."
-    exit 1
-fi
-
 if [[ $type == 'CS' ]];
 then
     path='opscode'
@@ -389,8 +381,8 @@ then
 
 fi
 
-tar -C "${tmpdir%/*/*}" -cjpf "$hostname-$timestamp.tbz2" "$hostname/$timestamp/"
+tar -C "${tmpdir%/*/*}" -czpf "$hostname-$timestamp.tar.gz" "$hostname/$timestamp/"
 
 rm -rf "${tmpdir%/*/*}"
 
-echo "Logs gathered in $hostname-$timestamp.tbz2"
+echo "Logs gathered in $hostname-$timestamp.tar.gz"
