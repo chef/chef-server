@@ -127,8 +127,8 @@ if [[ -n $ES_9200 ]];
 then
     gather_es 9200
 elif [[ -n $ES_10144 ]];
-    gather_es 10144
 then
+    gather_es 10144
 fi
 
 $ctl_cmd status > "$tmpdir/$ctl_cmd"_status.txt
