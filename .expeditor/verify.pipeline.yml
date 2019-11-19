@@ -107,6 +107,8 @@ steps:
 
 - label: oc-id
   command:
+    - asdf install ruby 2.5.6
+    - asdf local ruby 2.5.6
     - apt-get update -y && apt-get install -y libsqlite3-dev
     - /workdir/scripts/bk_tests/bk_install.sh
     - cd /workdir/src/oc-id; make install
