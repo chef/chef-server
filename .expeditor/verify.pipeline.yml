@@ -14,6 +14,8 @@ steps:
   command:
     - cd /workdir/terraform/aws
     - make lint
+    - cd /workdir/terraform/azure
+    - make lint
   expeditor:
     executor:
       docker:
