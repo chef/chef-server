@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.70 -->
-## [13.0.70](https://github.com/chef/chef-server/tree/13.0.70) (2019-11-19)
+<!-- latest_release 13.0.71 -->
+## [13.0.71](https://github.com/chef/chef-server/tree/13.0.71) (2019-11-19)
 
 #### Merged Pull Requests
-- Upgrading to postgres 9.6.15 [#1828](https://github.com/chef/chef-server/pull/1828) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- restructure terraform to make way for azure scenarios [#1829](https://github.com/chef/chef-server/pull/1829) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- restructure terraform to make way for azure scenarios [#1829](https://github.com/chef/chef-server/pull/1829) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.71 -->
 - Upgrading to postgres 9.6.15 [#1828](https://github.com/chef/chef-server/pull/1828) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.70 -->
 - Lbaker/land erlang20 final [#1813](https://github.com/chef/chef-server/pull/1813) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.69 -->
 - Bump loofah from 2.2.3 to 2.3.1 in /src/oc-id [#1820](https://github.com/chef/chef-server/pull/1820) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 13.0.68 -->
