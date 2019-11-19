@@ -12,7 +12,7 @@ steps:
 
 - label: lint-terraform
   command:
-    - cd /workdir/terraform
+    - cd /workdir/terraform/aws
     - make lint
   expeditor:
     executor:
