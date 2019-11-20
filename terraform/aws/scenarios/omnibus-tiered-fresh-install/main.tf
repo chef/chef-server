@@ -141,6 +141,16 @@ resource "null_resource" "front_end_config" {
       "echo -e '\nEND INSTALL CHEF SERVER (FRONT-END)\n'",
     ]
   }
+}
+
+resource "null_resource" "chef_server_test" {
+  depends_on = ["null_resource.front_end_config"]
+
+  connection {
+    type = "ssh"
+    user = "${module.front_end.ssh_username}"
+    host = "${module.front_end.public_ipv4_dns}"
+  }
 
   # run smoke test
   provisioner "remote-exec" {
