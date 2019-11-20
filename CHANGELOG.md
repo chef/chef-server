@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.0.75 -->
-## [13.0.75](https://github.com/chef/chef-server/tree/13.0.75) (2019-11-19)
+<!-- latest_release 13.1.0 -->
+## [13.1.0](https://github.com/chef/chef-server/tree/13.1.0) (2019-11-20)
 
 #### Merged Pull Requests
-- Add a scenario to test chef-server tiered upgrade  [#1830](https://github.com/chef/chef-server/pull/1830) ([christopher-snapp](https://github.com/christopher-snapp))
+- Bump Chef Infra Server version to 13.1.0 [#1832](https://github.com/chef/chef-server/pull/1832) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- Bump Chef Infra Server version to 13.1.0 [#1832](https://github.com/chef/chef-server/pull/1832) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.0 -->
 - Add a scenario to test chef-server tiered upgrade  [#1830](https://github.com/chef/chef-server/pull/1830) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.75 -->
 - Add ruby 2.5.6 to verify pipeline [#1831](https://github.com/chef/chef-server/pull/1831) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.74 -->
 - Add Terraform scenario for Azure PostgreSQL [#1826](https://github.com/chef/chef-server/pull/1826) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.73 -->
