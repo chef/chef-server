@@ -195,6 +195,16 @@ resource "null_resource" "front_end_upgrade" {
       "echo -e '\nEND UPGRADE CHEF SERVER (FRONT-END)\n'",
     ]
   }
+}
+
+resource "null_resource" "chef_server_test" {
+  depends_on = ["null_resource.front_end_upgrade"]
+
+  connection {
+    type = "ssh"
+    user = "${module.front_end.ssh_username}"
+    host = "${module.front_end.public_ipv4_dns}"
+  }
 
   # run smoke test
   provisioner "remote-exec" {
@@ -219,5 +229,15 @@ resource "null_resource" "front_end_upgrade" {
   # run pedant test
   provisioner "remote-exec" {
     script = "${path.module}/../../../common/files/test_chef_server-pedant.sh"
+  }
+
+  # run psql test
+  provisioner "remote-exec" {
+    script = "${path.module}/../../../common/files/test_psql.sh"
+  }
+
+  # run gather-logs test
+  provisioner "remote-exec" {
+    script = "${path.module}/../../../common/files/test_gather_logs.sh"
   }
 }

@@ -66,6 +66,16 @@ resource "null_resource" "chef_server_config" {
       "echo -e '\nEND UPGRADE CHEF SERVER\n'",
     ]
   }
+}
+
+resource "null_resource" "chef_server_test" {
+  depends_on = ["null_resource.chef_server_config"]
+
+  connection {
+    type = "ssh"
+    user = "${module.chef_server.ssh_username}"
+    host = "${module.chef_server.public_ipv4_dns}"
+  }
 
   # run smoke test
   provisioner "remote-exec" {
@@ -90,5 +100,15 @@ resource "null_resource" "chef_server_config" {
   # run pedant test
   provisioner "remote-exec" {
     script = "${path.module}/../../../common/files/test_chef_server-pedant.sh"
+  }
+
+  # run psql test
+  provisioner "remote-exec" {
+    script = "${path.module}/../../../common/files/test_psql.sh"
+  }
+
+  # run gather-logs test
+  provisioner "remote-exec" {
+    script = "${path.module}/../../../common/files/test_gather_logs.sh"
   }
 }
