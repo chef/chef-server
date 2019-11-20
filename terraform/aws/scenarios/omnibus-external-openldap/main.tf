@@ -114,6 +114,11 @@ resource "null_resource" "chef_server_config" {
       "echo -e '\nEND INSTALL CHEF SERVER\n'",
     ]
   }
+
+  # add user + organization
+  provisioner "remote-exec" {
+    script = "${path.module}/../../../common/files/add_user.sh"
+  }
 }
 
 resource "null_resource" "chef_server_test" {
