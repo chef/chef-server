@@ -230,4 +230,9 @@ resource "null_resource" "chef_server_test" {
   provisioner "remote-exec" {
     script = "${path.module}/../../../common/files/test_chef_server-pedant.sh"
   }
+
+  # run psql test
+  provisioner "remote-exec" {
+    script = "${path.module}/../../../common/files/test_psql.sh"
+  }
 }
