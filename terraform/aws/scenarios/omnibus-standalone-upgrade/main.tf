@@ -42,7 +42,7 @@ resource "null_resource" "chef_server_config" {
       "sudo mv /tmp/chef-server.rb /etc/opscode",
       "sudo mv /tmp/dhparam.pem /etc/opscode",
       "sudo chef-server-ctl reconfigure --chef-license=accept",
-      "sleep 30",
+      "sleep 120",
       "echo -e '\nEND INSTALL CHEF SERVER\n'",
     ]
   }
