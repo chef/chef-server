@@ -14,6 +14,8 @@ server "frontend.internal",
 
 api_fqdn = "frontend.internal"
 
+profiles['root_url'] = 'http://frontend.internal:9998'
+
 opscode_erchef['keygen_start_size'] = 30
 
 opscode_erchef['keygen_cache_size'] = 60
