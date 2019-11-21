@@ -88,7 +88,7 @@ resource "null_resource" "back_end_config" {
       "sudo mv /tmp/dhparam.pem /etc/opscode",
       "sudo mv /tmp/hosts /etc/hosts",
       "sudo chef-server-ctl reconfigure --chef-license=accept",
-      "sleep 30",
+      "sleep 120",
       "echo -e '\nEND INSTALL CHEF SERVER (BACK-END)\n'",
     ]
   }
