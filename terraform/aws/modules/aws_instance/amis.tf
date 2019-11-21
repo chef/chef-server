@@ -84,12 +84,14 @@ data "aws_ami" "ubuntu_1804" {
 }
 
 # identify suse 12 ami
+# The byos ami does not allow any updates
+# Matching with the latest sp whichh is a pay as you go image.
 data "aws_ami" "sles_12" {
   most_recent = true
 
   filter {
     name   = "name"
-    values = ["suse-sles-12-sp*hvm-ssd-x86_64"]
+    values = ["suse-sles-12-sp?-v????????-hvm-ssd-x86_64"]
   }
 
   filter {
