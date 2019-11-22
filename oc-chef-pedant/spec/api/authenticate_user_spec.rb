@@ -29,6 +29,7 @@ describe 'authenticate_user', :users do
           'first_name' => platform.ldap[:first_name],
           'last_name' => platform.ldap[:last_name],
           'display_name' => platform.ldap[:display_name],
+          'common_name' => platform.ldap[:common_name],
           'email' => platform.ldap[:email],
           'username' => platform.ldap[:account_name],
           'city' => platform.ldap[:city],
@@ -203,7 +204,8 @@ describe 'authenticate_user', :users do
           response.should look_like({
             :status => 401
           })
-          /^Failed to authenticate: Could not locate a record with distinguished name/.should match(JSON.parse(response)["error"])
+          #Reponse Body: {"error":["Failed to authenticate: Username and password incorrect"]}
+          /^Failed to authenticate: (Could not locate a record with distinguished name)|(Username and password incorrect)/.should match(JSON.parse(response)["error"][0])
         else
           response = post(request_url, superuser, :payload => body)
           response.should look_like({
