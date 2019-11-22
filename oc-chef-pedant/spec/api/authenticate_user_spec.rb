@@ -50,17 +50,6 @@ describe 'authenticate_user', :users do
       }
     end
   end
-
-  let(:body) { { 'username' => username, 'password' => password } }
-  let(:response_body) { {
-      'status' => 'linked',
-      'user' => {
-        'first_name' => platform.non_admin_user.name,
-        'last_name' => platform.non_admin_user.name,
-        'display_name' => platform.non_admin_user.name,
-        'email' => platform.non_admin_user.name + "@chef.io",
-        'username' => platform.non_admin_user.name
-      }} }
   let(:authentication_error_msg) { ["Failed to authenticate: Username and password incorrect"] }
 
   context 'GET /authenticate_user' do
