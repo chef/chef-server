@@ -7,7 +7,7 @@
 
     access_log <%= @helper.access_log(@server_proto) %> opscode;
     <% if @server_proto == "https" %>
-      ssl on;
+      listen 443 ssl;
       ssl_certificate <%= @ssl_certificate %>;
       ssl_certificate_key <%= @ssl_certificate_key %>;
       ssl_dhparam <%= @ssl_dhparam %>;
