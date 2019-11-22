@@ -109,6 +109,8 @@ ldap({
        :last_name => "Lastname",
        # Your display name in AD, likely "Firstname Lastname"
        :display_name => "Firstname Lastname",
+       # Your common name in AD, likely "Firstname Lastname"
+       :common_name => "Firstname Lastname",
        # Your email in AD
        :email => "your@email.com",
        # Likely nil
