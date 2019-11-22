@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.7 -->
-## [13.1.7](https://github.com/chef/chef-server/tree/13.1.7) (2019-11-22)
+<!-- latest_release 13.1.8 -->
+## [13.1.8](https://github.com/chef/chef-server/tree/13.1.8) (2019-11-22)
 
 #### Merged Pull Requests
-- Do not overwrite :body and :response_body [#1841](https://github.com/chef/chef-server/pull/1841) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Use localhost instead of the public IP address for ipv6 [#1842](https://github.com/chef/chef-server/pull/1842) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- Use localhost instead of the public IP address for ipv6 [#1842](https://github.com/chef/chef-server/pull/1842) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.8 -->
 - Do not overwrite :body and :response_body [#1841](https://github.com/chef/chef-server/pull/1841) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.7 -->
 - Fix terraform tiered pedant tests [#1840](https://github.com/chef/chef-server/pull/1840) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.6 -->
 - The byos ami for sles does not allow updates. Using a pay as you go version. [#1835](https://github.com/chef/chef-server/pull/1835) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.5 -->
