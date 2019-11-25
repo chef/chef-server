@@ -1,96 +1,93 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.13 -->
-## [13.1.13](https://github.com/chef/chef-server/tree/13.1.13) (2019-11-25)
-
-#### Merged Pull Requests
-- Fix terraform rhel-6 tiered-upgrade compliance tests [#1849](https://github.com/chef/chef-server/pull/1849) ([christopher-snapp](https://github.com/christopher-snapp))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=13.0.17 -->
-### Changes since 13.0.17 release
-
-#### Merged Pull Requests
-- Fix terraform rhel-6 tiered-upgrade compliance tests [#1849](https://github.com/chef/chef-server/pull/1849) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.13 -->
-- Enable LDAP Testing in pedant_config [#1847](https://github.com/chef/chef-server/pull/1847) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.12 -->
-- Adding Terraform scenario for external-postgres [#1845](https://github.com/chef/chef-server/pull/1845) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.11 -->
-- Remove Ruby 2.5.6 Pinning [#1846](https://github.com/chef/chef-server/pull/1846) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.10 -->
-- Update the ldap test fixtures [#1844](https://github.com/chef/chef-server/pull/1844) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.9 -->
-- Use localhost instead of the public IP address for ipv6 [#1842](https://github.com/chef/chef-server/pull/1842) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.8 -->
-- Do not overwrite :body and :response_body [#1841](https://github.com/chef/chef-server/pull/1841) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.7 -->
-- Fix terraform tiered pedant tests [#1840](https://github.com/chef/chef-server/pull/1840) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.6 -->
-- The byos ami for sles does not allow updates. Using a pay as you go version. [#1835](https://github.com/chef/chef-server/pull/1835) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.5 -->
-- Add standalone fresh install terraform scenario [#1838](https://github.com/chef/chef-server/pull/1838) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.4 -->
-- Fix 502 gateway timeout errors in terraform [#1837](https://github.com/chef/chef-server/pull/1837) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.3 -->
-- Speed up Terraform Push Jobs tests [#1836](https://github.com/chef/chef-server/pull/1836) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.2 -->
-- Add chef-server-ctl psql tests to terraform [#1834](https://github.com/chef/chef-server/pull/1834) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.1 -->
-- Bump Chef Infra Server version to 13.1.0 [#1832](https://github.com/chef/chef-server/pull/1832) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.0 -->
-- Add a scenario to test chef-server tiered upgrade  [#1830](https://github.com/chef/chef-server/pull/1830) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.75 -->
-- Add ruby 2.5.6 to verify pipeline [#1831](https://github.com/chef/chef-server/pull/1831) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.74 -->
-- Add Terraform scenario for Azure PostgreSQL [#1826](https://github.com/chef/chef-server/pull/1826) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.73 -->
-- updates to chef-server-ctl gather-logs [#1814](https://github.com/chef/chef-server/pull/1814) ([moutons](https://github.com/moutons)) <!-- 13.0.72 -->
-- restructure terraform to make way for azure scenarios [#1829](https://github.com/chef/chef-server/pull/1829) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.71 -->
-- Upgrading to postgres 9.6.15 [#1828](https://github.com/chef/chef-server/pull/1828) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.70 -->
-- Lbaker/land erlang20 final [#1813](https://github.com/chef/chef-server/pull/1813) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.69 -->
-- Bump loofah from 2.2.3 to 2.3.1 in /src/oc-id [#1820](https://github.com/chef/chef-server/pull/1820) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 13.0.68 -->
-- Add testing of Chef Manage add-on [#1824](https://github.com/chef/chef-server/pull/1824) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.67 -->
-- Add testing of Push Jobs add-on [#1823](https://github.com/chef/chef-server/pull/1823) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.66 -->
-- fix erlang build version, dialyzer warnings, compile warnings [#1817](https://github.com/chef/chef-server/pull/1817) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.0.65 -->
-- Add external openldap terraform scenario [#1812](https://github.com/chef/chef-server/pull/1812) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.64 -->
-- Split up terraform scenarios&#39; remote-exec scripts [#1816](https://github.com/chef/chef-server/pull/1816) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.63 -->
-- Modify dev/Vagrantfile to handle chef licensing [#1811](https://github.com/chef/chef-server/pull/1811) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.62 -->
-- Resolve cookstyle warnings in the cookbooks and remove an old .rubocop.yml file [#1807](https://github.com/chef/chef-server/pull/1807) ([tas50](https://github.com/tas50)) <!-- 13.0.61 -->
-- Lbaker/land erlang19 [#1790](https://github.com/chef/chef-server/pull/1790) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.0.60 -->
-- Lbaker/land phase2 [#1789](https://github.com/chef/chef-server/pull/1789) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.0.59 -->
-- Disable auto-ipv6 allocation if ENABLE_IPV6=false [#1795](https://github.com/chef/chef-server/pull/1795) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.58 -->
-- Update pinned version of chef-infra to 15.4.45 [#1794](https://github.com/chef/chef-server/pull/1794) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.57 -->
-- Revert the only change between versions failing tests with command not found on vagrant. [#1793](https://github.com/chef/chef-server/pull/1793) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.56 -->
-- Expand terraform to work across the matrix of distributions [#1791](https://github.com/chef/chef-server/pull/1791) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.55 -->
-- upgrade rebar3 to 3.6.2 [#1748](https://github.com/chef/chef-server/pull/1748) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.0.54 -->
-- Knife-tidy was newly added as a dependency to knife-ec-backup. [#1792](https://github.com/chef/chef-server/pull/1792) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.53 -->
-- Add copy/paste execution strings for convenient builds [#1750](https://github.com/chef/chef-server/pull/1750) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.0.52 -->
-- removing forcing of the doc formatter [#1469](https://github.com/chef/chef-server/pull/1469) ([lamont-granquist](https://github.com/lamont-granquist)) <!-- 13.0.51 -->
-- [chef-server-ctl] Install only appbundled version [#1533](https://github.com/chef/chef-server/pull/1533) ([markan](https://github.com/markan)) <!-- 13.0.50 -->
-- Bump nokogiri from 1.8.5 to 1.10.4 in /src/oc-id [#1765](https://github.com/chef/chef-server/pull/1765) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 13.0.49 -->
-- Add support for testing a scenario via IPv4 or IPv6 [#1788](https://github.com/chef/chef-server/pull/1788) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.48 -->
-- update openresty [#1706](https://github.com/chef/chef-server/pull/1706) ([markan](https://github.com/markan)) <!-- 13.0.47 -->
-- Update the command to do the right thing [#1747](https://github.com/chef/chef-server/pull/1747) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.46 -->
-- Initial refactor of Terraform for on-demand integration testing [#1768](https://github.com/chef/chef-server/pull/1768) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.45 -->
-- Remove foodcritic testing from Buildkite [#1763](https://github.com/chef/chef-server/pull/1763) ([tas50](https://github.com/tas50)) <!-- 13.0.44 -->
-- Cookstyle updates for the chef-server-deploy cookbook [#1762](https://github.com/chef/chef-server/pull/1762) ([tas50](https://github.com/tas50)) <!-- 13.0.43 -->
-- Bump omnibus chef-infra to 15.4.20 [#1774](https://github.com/chef/chef-server/pull/1774) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.42 -->
-- Update tests to use ruby 2.5.6 [#1756](https://github.com/chef/chef-server/pull/1756) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.0.41 -->
-- Update Feature Request template to point to the Aha! Portal. [#1730](https://github.com/chef/chef-server/pull/1730) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.40 -->
-- Documentation to include updating to rebar3 and updating with rebar3 [#1746](https://github.com/chef/chef-server/pull/1746) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.39 -->
-- development environment improvements, mostly for oc-id [#1724](https://github.com/chef/chef-server/pull/1724) ([robbkidd](https://github.com/robbkidd)) <!-- 13.0.38 -->
-- Enable RHEL 8 packages [#1707](https://github.com/chef/chef-server/pull/1707) ([jaymalasinha](https://github.com/jaymalasinha)) <!-- 13.0.37 -->
-- Praj/remove deprecations [#1727](https://github.com/chef/chef-server/pull/1727) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.36 -->
-- Update the omnibus kitchen.yml to the latest non-licensed version of chef [#1726](https://github.com/chef/chef-server/pull/1726) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.35 -->
-- Update README.md [#1723](https://github.com/chef/chef-server/pull/1723) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.0.34 -->
-- Update to the latest non-license version of chef. [#1722](https://github.com/chef/chef-server/pull/1722) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.33 -->
-- Praj/add elasticsearch support [#1721](https://github.com/chef/chef-server/pull/1721) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.32 -->
-- Zanecodes ssl [#1711](https://github.com/chef/chef-server/pull/1711) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.0.31 -->
-- fix X-Forwared-For typo [#1719](https://github.com/chef/chef-server/pull/1719) ([srenatus](https://github.com/srenatus)) <!-- 13.0.30 -->
-- Stop building Chef Infra Server on SLES 11 [#1718](https://github.com/chef/chef-server/pull/1718) ([schisamo](https://github.com/schisamo)) <!-- 13.0.29 -->
-- Bump postgresql from 9.6.10 to 9.6.14 (latest minor) [#1717](https://github.com/chef/chef-server/pull/1717) ([btm](https://github.com/btm)) <!-- 13.0.28 -->
-- Add buildkite specific checks to pull request template. [#1715](https://github.com/chef/chef-server/pull/1715) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.27 -->
-- Update the release process doc with current world process. [#1700](https://github.com/chef/chef-server/pull/1700) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.26 -->
-- Doc updates [#1699](https://github.com/chef/chef-server/pull/1699) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.25 -->
-- implement 1703 exclude data collector from status endpoint [#1716](https://github.com/chef/chef-server/pull/1716) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.24 -->
-- Fix logins to zendesk when user signups with a single name [#1710](https://github.com/chef/chef-server/pull/1710) ([teknofire](https://github.com/teknofire)) <!-- 13.0.23 -->
-- Remove the old delivery directory [#1694](https://github.com/chef/chef-server/pull/1694) ([tas50](https://github.com/tas50)) <!-- 13.0.22 -->
-- Dvm changes to get external postgres working. [#1708](https://github.com/chef/chef-server/pull/1708) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.0.21 -->
-- Bump bundler to 1.17.3 [#1705](https://github.com/chef/chef-server/pull/1705) ([markan](https://github.com/markan)) <!-- 13.0.20 -->
-- Update github templates, add lock config, and update codeowners [#1695](https://github.com/chef/chef-server/pull/1695) ([tas50](https://github.com/tas50)) <!-- 13.0.19 -->
-- Update yard to current [#1696](https://github.com/chef/chef-server/pull/1696) ([tas50](https://github.com/tas50)) <!-- 13.0.18 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [13.1.13](https://github.com/chef/chef-server/tree/13.1.13) (2019-11-25)
+
+#### Merged Pull Requests
+- Update yard to current [#1696](https://github.com/chef/chef-server/pull/1696) ([tas50](https://github.com/tas50))
+- Update github templates, add lock config, and update codeowners [#1695](https://github.com/chef/chef-server/pull/1695) ([tas50](https://github.com/tas50))
+- Bump bundler to 1.17.3 [#1705](https://github.com/chef/chef-server/pull/1705) ([markan](https://github.com/markan))
+- Dvm changes to get external postgres working. [#1708](https://github.com/chef/chef-server/pull/1708) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Remove the old delivery directory [#1694](https://github.com/chef/chef-server/pull/1694) ([tas50](https://github.com/tas50))
+- Fix logins to zendesk when user signups with a single name [#1710](https://github.com/chef/chef-server/pull/1710) ([teknofire](https://github.com/teknofire))
+- implement 1703 exclude data collector from status endpoint [#1716](https://github.com/chef/chef-server/pull/1716) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Doc updates [#1699](https://github.com/chef/chef-server/pull/1699) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update the release process doc with current world process. [#1700](https://github.com/chef/chef-server/pull/1700) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add buildkite specific checks to pull request template. [#1715](https://github.com/chef/chef-server/pull/1715) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Bump postgresql from 9.6.10 to 9.6.14 (latest minor) [#1717](https://github.com/chef/chef-server/pull/1717) ([btm](https://github.com/btm))
+- Stop building Chef Infra Server on SLES 11 [#1718](https://github.com/chef/chef-server/pull/1718) ([schisamo](https://github.com/schisamo))
+- fix X-Forwared-For typo [#1719](https://github.com/chef/chef-server/pull/1719) ([srenatus](https://github.com/srenatus))
+- Zanecodes ssl [#1711](https://github.com/chef/chef-server/pull/1711) ([lbakerchef](https://github.com/lbakerchef))
+- Praj/add elasticsearch support [#1721](https://github.com/chef/chef-server/pull/1721) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update to the latest non-license version of chef. [#1722](https://github.com/chef/chef-server/pull/1722) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update README.md [#1723](https://github.com/chef/chef-server/pull/1723) ([lbakerchef](https://github.com/lbakerchef))
+- Update the omnibus kitchen.yml to the latest non-licensed version of chef [#1726](https://github.com/chef/chef-server/pull/1726) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Praj/remove deprecations [#1727](https://github.com/chef/chef-server/pull/1727) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Enable RHEL 8 packages [#1707](https://github.com/chef/chef-server/pull/1707) ([jaymalasinha](https://github.com/jaymalasinha))
+- development environment improvements, mostly for oc-id [#1724](https://github.com/chef/chef-server/pull/1724) ([robbkidd](https://github.com/robbkidd))
+- Documentation to include updating to rebar3 and updating with rebar3 [#1746](https://github.com/chef/chef-server/pull/1746) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update Feature Request template to point to the Aha! Portal. [#1730](https://github.com/chef/chef-server/pull/1730) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update tests to use ruby 2.5.6 [#1756](https://github.com/chef/chef-server/pull/1756) ([christopher-snapp](https://github.com/christopher-snapp))
+- Bump omnibus chef-infra to 15.4.20 [#1774](https://github.com/chef/chef-server/pull/1774) ([christopher-snapp](https://github.com/christopher-snapp))
+- Cookstyle updates for the chef-server-deploy cookbook [#1762](https://github.com/chef/chef-server/pull/1762) ([tas50](https://github.com/tas50))
+- Remove foodcritic testing from Buildkite [#1763](https://github.com/chef/chef-server/pull/1763) ([tas50](https://github.com/tas50))
+- Initial refactor of Terraform for on-demand integration testing [#1768](https://github.com/chef/chef-server/pull/1768) ([christopher-snapp](https://github.com/christopher-snapp))
+- Update the command to do the right thing [#1747](https://github.com/chef/chef-server/pull/1747) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- update openresty [#1706](https://github.com/chef/chef-server/pull/1706) ([markan](https://github.com/markan))
+- Add support for testing a scenario via IPv4 or IPv6 [#1788](https://github.com/chef/chef-server/pull/1788) ([christopher-snapp](https://github.com/christopher-snapp))
+- Bump nokogiri from 1.8.5 to 1.10.4 in /src/oc-id [#1765](https://github.com/chef/chef-server/pull/1765) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- [chef-server-ctl] Install only appbundled version [#1533](https://github.com/chef/chef-server/pull/1533) ([markan](https://github.com/markan))
+- removing forcing of the doc formatter [#1469](https://github.com/chef/chef-server/pull/1469) ([lamont-granquist](https://github.com/lamont-granquist))
+- Add copy/paste execution strings for convenient builds [#1750](https://github.com/chef/chef-server/pull/1750) ([lbakerchef](https://github.com/lbakerchef))
+- Knife-tidy was newly added as a dependency to knife-ec-backup. [#1792](https://github.com/chef/chef-server/pull/1792) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- upgrade rebar3 to 3.6.2 [#1748](https://github.com/chef/chef-server/pull/1748) ([lbakerchef](https://github.com/lbakerchef))
+- Expand terraform to work across the matrix of distributions [#1791](https://github.com/chef/chef-server/pull/1791) ([christopher-snapp](https://github.com/christopher-snapp))
+- Revert the only change between versions failing tests with command not found on vagrant. [#1793](https://github.com/chef/chef-server/pull/1793) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update pinned version of chef-infra to 15.4.45 [#1794](https://github.com/chef/chef-server/pull/1794) ([christopher-snapp](https://github.com/christopher-snapp))
+- Disable auto-ipv6 allocation if ENABLE_IPV6=false [#1795](https://github.com/chef/chef-server/pull/1795) ([christopher-snapp](https://github.com/christopher-snapp))
+- Lbaker/land phase2 [#1789](https://github.com/chef/chef-server/pull/1789) ([lbakerchef](https://github.com/lbakerchef))
+- Lbaker/land erlang19 [#1790](https://github.com/chef/chef-server/pull/1790) ([lbakerchef](https://github.com/lbakerchef))
+- Resolve cookstyle warnings in the cookbooks and remove an old .rubocop.yml file [#1807](https://github.com/chef/chef-server/pull/1807) ([tas50](https://github.com/tas50))
+- Modify dev/Vagrantfile to handle chef licensing [#1811](https://github.com/chef/chef-server/pull/1811) ([christopher-snapp](https://github.com/christopher-snapp))
+- Split up terraform scenarios&#39; remote-exec scripts [#1816](https://github.com/chef/chef-server/pull/1816) ([christopher-snapp](https://github.com/christopher-snapp))
+- Add external openldap terraform scenario [#1812](https://github.com/chef/chef-server/pull/1812) ([christopher-snapp](https://github.com/christopher-snapp))
+- fix erlang build version, dialyzer warnings, compile warnings [#1817](https://github.com/chef/chef-server/pull/1817) ([lbakerchef](https://github.com/lbakerchef))
+- Add testing of Push Jobs add-on [#1823](https://github.com/chef/chef-server/pull/1823) ([christopher-snapp](https://github.com/christopher-snapp))
+- Add testing of Chef Manage add-on [#1824](https://github.com/chef/chef-server/pull/1824) ([christopher-snapp](https://github.com/christopher-snapp))
+- Bump loofah from 2.2.3 to 2.3.1 in /src/oc-id [#1820](https://github.com/chef/chef-server/pull/1820) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Lbaker/land erlang20 final [#1813](https://github.com/chef/chef-server/pull/1813) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Upgrading to postgres 9.6.15 [#1828](https://github.com/chef/chef-server/pull/1828) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- restructure terraform to make way for azure scenarios [#1829](https://github.com/chef/chef-server/pull/1829) ([christopher-snapp](https://github.com/christopher-snapp))
+- updates to chef-server-ctl gather-logs [#1814](https://github.com/chef/chef-server/pull/1814) ([moutons](https://github.com/moutons))
+- Add Terraform scenario for Azure PostgreSQL [#1826](https://github.com/chef/chef-server/pull/1826) ([christopher-snapp](https://github.com/christopher-snapp))
+- Add ruby 2.5.6 to verify pipeline [#1831](https://github.com/chef/chef-server/pull/1831) ([christopher-snapp](https://github.com/christopher-snapp))
+- Add a scenario to test chef-server tiered upgrade  [#1830](https://github.com/chef/chef-server/pull/1830) ([christopher-snapp](https://github.com/christopher-snapp))
+- Bump Chef Infra Server version to 13.1.0 [#1832](https://github.com/chef/chef-server/pull/1832) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add chef-server-ctl psql tests to terraform [#1834](https://github.com/chef/chef-server/pull/1834) ([christopher-snapp](https://github.com/christopher-snapp))
+- Speed up Terraform Push Jobs tests [#1836](https://github.com/chef/chef-server/pull/1836) ([christopher-snapp](https://github.com/christopher-snapp))
+- Fix 502 gateway timeout errors in terraform [#1837](https://github.com/chef/chef-server/pull/1837) ([christopher-snapp](https://github.com/christopher-snapp))
+- Add standalone fresh install terraform scenario [#1838](https://github.com/chef/chef-server/pull/1838) ([christopher-snapp](https://github.com/christopher-snapp))
+- The byos ami for sles does not allow updates. Using a pay as you go version. [#1835](https://github.com/chef/chef-server/pull/1835) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Fix terraform tiered pedant tests [#1840](https://github.com/chef/chef-server/pull/1840) ([christopher-snapp](https://github.com/christopher-snapp))
+- Do not overwrite :body and :response_body [#1841](https://github.com/chef/chef-server/pull/1841) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Use localhost instead of the public IP address for ipv6 [#1842](https://github.com/chef/chef-server/pull/1842) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update the ldap test fixtures [#1844](https://github.com/chef/chef-server/pull/1844) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Remove Ruby 2.5.6 Pinning [#1846](https://github.com/chef/chef-server/pull/1846) ([christopher-snapp](https://github.com/christopher-snapp))
+- Adding Terraform scenario for external-postgres [#1845](https://github.com/chef/chef-server/pull/1845) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Enable LDAP Testing in pedant_config [#1847](https://github.com/chef/chef-server/pull/1847) ([christopher-snapp](https://github.com/christopher-snapp))
+- Fix terraform rhel-6 tiered-upgrade compliance tests [#1849](https://github.com/chef/chef-server/pull/1849) ([christopher-snapp](https://github.com/christopher-snapp))
+<!-- latest_stable_release -->
+
 ## [13.0.17](https://github.com/chef/chef-server/tree/13.0.17) (2019-07-01)
 
 #### Merged Pull Requests
 - Remove 12.19.* version constraint on master [#1693](https://github.com/chef/chef-server/pull/1693) ([markan](https://github.com/markan))
-<!-- latest_stable_release -->
 
 ## [13.0.16](https://github.com/chef/chef-server/tree/13.0.16) (2019-07-01)
 
