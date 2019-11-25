@@ -154,7 +154,7 @@ destroy: init
 	terraform destroy -auto-approve && \
 	terraform workspace select default && \
 	terraform workspace delete $(WORKSPACE) && \
-	(rmdir terraform.tfstate.d 2>/dev/null && rm -rf .terraform)
+	(rmdir terraform.tfstate.d 2>/dev/null && rm -rf .terraform) || true
 
 destroy-all:
 	@set -e; \

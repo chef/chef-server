@@ -33,8 +33,8 @@ data "template_file" "hosts_config" {
   template = "${file("${path.module}/templates/hosts.tpl")}"
 
   vars {
-    chef_server_ip = "${var.enable_ipv6 == true ? module.chef_server.public_ipv6_address : module.chef_server.private_ipv4_address}"
-    external_postgresql_ip  = "${var.enable_ipv6 == true ? module.external_postgresql.public_ipv6_address : module.external_postgresql.private_ipv4_address}"
+    chef_server_ip         = "${var.enable_ipv6 == true ? module.chef_server.public_ipv6_address : module.chef_server.private_ipv4_address}"
+    external_postgresql_ip = "${var.enable_ipv6 == true ? module.external_postgresql.public_ipv6_address : module.external_postgresql.private_ipv4_address}"
   }
 }
 
@@ -75,7 +75,7 @@ resource "null_resource" "external_postgresql_config" {
       "echo 'host    all             all            ${module.chef_server.private_ipv4_address}/32         md5' | sudo tee -a /etc/postgresql/9.6/main/pg_hba.conf",
       "echo \"listen_addresses='*'\" | sudo tee -a /etc/postgresql/9.6/main/postgresql.conf",
       "sudo systemctl restart postgresql",
-      "sudo -u postgres psql -c \"CREATE USER bofh SUPERUSER ENCRYPTED PASSWORD 'i1uvd3v0ps';\""
+      "sudo -u postgres psql -c \"CREATE USER bofh SUPERUSER ENCRYPTED PASSWORD 'i1uvd3v0ps';\"",
     ]
   }
 }
@@ -97,7 +97,7 @@ resource "null_resource" "chef_server_config" {
   }
 
   provisioner "file" {
-    content    = "${data.template_file.chef_server_rb.rendered}"
+    content     = "${data.template_file.chef_server_rb.rendered}"
     destination = "/tmp/chef-server.rb"
   }
 
