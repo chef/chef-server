@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.12 -->
-## [13.1.12](https://github.com/chef/chef-server/tree/13.1.12) (2019-11-25)
+<!-- latest_release 13.1.13 -->
+## [13.1.13](https://github.com/chef/chef-server/tree/13.1.13) (2019-11-25)
 
 #### Merged Pull Requests
-- Enable LDAP Testing in pedant_config [#1847](https://github.com/chef/chef-server/pull/1847) ([christopher-snapp](https://github.com/christopher-snapp))
+- Fix terraform rhel-6 tiered-upgrade compliance tests [#1849](https://github.com/chef/chef-server/pull/1849) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.0.17 -->
 ### Changes since 13.0.17 release
 
 #### Merged Pull Requests
+- Fix terraform rhel-6 tiered-upgrade compliance tests [#1849](https://github.com/chef/chef-server/pull/1849) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.13 -->
 - Enable LDAP Testing in pedant_config [#1847](https://github.com/chef/chef-server/pull/1847) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.12 -->
 - Adding Terraform scenario for external-postgres [#1845](https://github.com/chef/chef-server/pull/1845) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.11 -->
 - Remove Ruby 2.5.6 Pinning [#1846](https://github.com/chef/chef-server/pull/1846) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.10 -->
