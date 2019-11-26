@@ -22,17 +22,17 @@
 vip_root = node['private_chef']['lb']['vip']
 if node['private_chef']['nginx']['enable_non_ssl']
   port = node['private_chef']['nginx']['non_ssl_port']
-  prefix = "http"
+  prefix = 'http'
 else
   port = node['private_chef']['nginx']['ssl_port']
-  prefix = "https"
+  prefix = 'https'
 end
 vip = "#{vip_root}:#{port}"
 
-template "/etc/opscode/pivotal.rb" do
-  source "pivotal.rb.erb"
-  owner "root"
-  group "root"
-  mode "0644"
-  variables(:vip => vip, :prefix => prefix)
+template '/etc/opscode/pivotal.rb' do
+  source 'pivotal.rb.erb'
+  owner 'root'
+  group 'root'
+  mode '0644'
+  variables(vip: vip, prefix: prefix)
 end

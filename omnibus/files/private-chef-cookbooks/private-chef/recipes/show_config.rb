@@ -16,9 +16,9 @@
 # limitations under the License.
 #
 
-if File.exists?("/etc/opscode/chef-server.rb")
-	PrivateChef[:node] = node
-	PrivateChef.from_file("/etc/opscode/chef-server.rb")
+if File.exist?('/etc/opscode/chef-server.rb')
+  PrivateChef[:node] = node
+  PrivateChef.from_file('/etc/opscode/chef-server.rb')
 end
 config = PrivateChef.generate_config(node['fqdn'])
 

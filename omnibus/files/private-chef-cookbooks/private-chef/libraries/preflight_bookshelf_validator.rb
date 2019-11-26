@@ -42,35 +42,35 @@ class BookshelfPreflightValidator < PreflightValidator
 
       if previous_value.nil? && current_value == 'filesystem' # case (2)
         true
-      elsif previous_value.nil? && current_value != "filesystem" # case (3)
-        fail_with <<EOM
+      elsif previous_value.nil? && current_value != 'filesystem' # case (3)
+        fail_with <<~EOM
 
-Bookshelf's storage_type was previously the default of 'filesystem';
-however the current configuration would result in a value of
-'#{current_value}'. At this time it is not possible to change the
-bookshelf storage_type post-installation.
+          Bookshelf's storage_type was previously the default of 'filesystem';
+          however the current configuration would result in a value of
+          '#{current_value}'. At this time it is not possible to change the
+          bookshelf storage_type post-installation.
 
-Please set
+          Please set
 
-bookshelf['storage_type'] = 'filesystem'
+          bookshelf['storage_type'] = 'filesystem'
 
-in /etc/opscode/chef-server.rb or leave it unset.
-EOM
+          in /etc/opscode/chef-server.rb or leave it unset.
+        EOM
       elsif previous_value.to_s == current_value # case (5)
         true
       else # everything else is invalid, including case 4 above
-        fail_with <<EOM
+        fail_with <<~EOM
 
-Bookshelf's storage_type was previously '#{previous_value}'; however
-the current configuration would result in a value of '#{current_value}'.
-At this time it is not possible to change the bookshelf storage_type post-installation.
+          Bookshelf's storage_type was previously '#{previous_value}'; however
+          the current configuration would result in a value of '#{current_value}'.
+          At this time it is not possible to change the bookshelf storage_type post-installation.
 
-Please set
+          Please set
 
-bookshelf['storage_type'] = '#{previous_value}'
+          bookshelf['storage_type'] = '#{previous_value}'
 
-in /etc/opscode/chef-server.rb
-EOM
+          in /etc/opscode/chef-server.rb
+        EOM
 
       end
     end

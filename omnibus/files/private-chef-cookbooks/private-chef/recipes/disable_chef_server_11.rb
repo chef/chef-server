@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-open_source_11_sv_dir = "/opt/chef-server/sv"
+open_source_11_sv_dir = '/opt/chef-server/sv'
 
 return unless Dir.exist?(open_source_11_sv_dir)
 
@@ -26,11 +26,11 @@ end
 
 services.each do |sv_entry|
   sv_dir = File.expand_path(sv_entry, open_source_11_sv_dir)
-  down_file = File.expand_path("down", sv_dir)
+  down_file = File.expand_path('down', sv_dir)
   file down_file do
-    owner "root"
-    group "root"
-    mode   "644"
-    content ""
+    owner 'root'
+    group 'root'
+    mode '644'
+    content ''
   end
 end

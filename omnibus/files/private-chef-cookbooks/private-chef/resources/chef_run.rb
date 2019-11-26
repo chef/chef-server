@@ -16,10 +16,10 @@
 
 provides :chef_run
 
-property :run_list, :name_property => true
+property :run_list, name_property: true
 property :cookbook_path
-property :included_attrs, :default => []
-property :show_run, [TrueClass, FalseClass], :default => true
+property :included_attrs, default: []
+property :show_run, [TrueClass, FalseClass], default: true
 
 action :run do
   converge_by "Running chef-run with run list #{new_resource.run_list}" do
@@ -39,7 +39,7 @@ action_class do
     Chef::Config[:cookbook_path] = new_resource.cookbook_path if new_resource.cookbook_path
     Chef::Config[:cache_type] = 'Memory'
     Chef::Config[:no_lazy_load] = true
-    if !new_resource.show_run
+    unless new_resource.show_run
       Chef::Config[:force_logger] = true
     end
     Chef::Config[:solo_legacy_mode] = true
@@ -51,6 +51,7 @@ action_class do
 
   def my_client
     return @my_client if @my_client
+
     @my_client = Chef::Client.new
     @my_client.ohai.data = node.automatic.dup
     @my_client.load_node
@@ -60,12 +61,12 @@ action_class do
 
   def converge
     my_node.run_list.reset!
-    new_resource.run_list.gsub(/\s/, "").split(",").each do |i|
+    new_resource.run_list.gsub(/\s/, '').split(',').each do |i|
       my_node.run_list.add(i)
     end
     my_client.expanded_run_list
     new_resource.included_attrs.each do |attr_name|
-      @my_node.consume_attributes({attr_name => run_context.node[attr_name].to_hash.dup})
+      @my_node.consume_attributes(attr_name => run_context.node[attr_name].to_hash.dup)
     end
     @my_run_context = my_client.setup_run_context
     my_client.converge(@my_run_context)

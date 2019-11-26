@@ -6,15 +6,15 @@ MAX_MAP_COUNT = 262_144
 elasticsearch = node['private_chef']['elasticsearch']
 
 elasticsearch_dir              = elasticsearch['dir']                   # /var/opt/opscode/elasticsearch
-elasticsearch_conf_dir         = File.join(elasticsearch_dir, "config") # /var/opt/opscode/elasticsearch/config
+elasticsearch_conf_dir         = File.join(elasticsearch_dir, 'config') # /var/opt/opscode/elasticsearch/config
 elasticsearch_data_dir         = elasticsearch['data_dir']              # /var/opt/opscode/elasticsearch/data
 elasticsearch_plugins_dir      = elasticsearch['plugins_directory']     # /var/opt/opscode/elasticsearch/plugins
 elasticsearch_scripts_dir      = elasticsearch['scripts_directory']     # /var/opt/opscode/elasticsearch/scripts
 elasticsearch_temp_dir         = elasticsearch['temp_directory']        # /var/log/opscode/elasticsearch/tmp
 elasticsearch_log_dir          = elasticsearch['log_directory']         # /var/log/opscode/elasticsearch
 
-config_file = File.join(elasticsearch_conf_dir, "elasticsearch.yml")
-logging_config_file = File.join(elasticsearch_conf_dir, "logging.yml")
+config_file = File.join(elasticsearch_conf_dir, 'elasticsearch.yml')
+logging_config_file = File.join(elasticsearch_conf_dir, 'logging.yml')
 
 # set up the basic es directory structure
 [ elasticsearch_dir,
@@ -33,21 +33,21 @@ logging_config_file = File.join(elasticsearch_conf_dir, "logging.yml")
   end
 end
 
-execute "sysctl-reload" do
-  command "/sbin/sysctl -p /etc/sysctl.conf || true"
+execute 'sysctl-reload' do
+  command '/sbin/sysctl -p /etc/sysctl.conf || true'
   action :nothing
 end
 
 # Just make sure the file is there, saves a round of error handling
 # when we open it up.
-file "/etc/sysctl.conf" do
-  user "root"
+file '/etc/sysctl.conf' do
+  user 'root'
   action :touch
-  not_if { File.exists?("/etc/sysctl.conf") }
+  not_if { File.exist?('/etc/sysctl.conf') }
 end
 
 sysctl 'vm.max_map_count' do
-  value "#{MAX_MAP_COUNT}"
+  value MAX_MAP_COUNT.to_s
   only_if do
     # This is fairly cautious. Because we have no guarantees around what
     # might already be in sysctl.conf, we'll assume multiple matches are
@@ -58,7 +58,7 @@ sysctl 'vm.max_map_count' do
     # set by the operator, causing problems for ES on next reboot.
     # TODO: foundation for a shared sysctl resource?
     highest_val = 0
-    File.read("/etc/sysctl.conf").split("\n").each do |line|
+    File.read('/etc/sysctl.conf').split("\n").each do |line|
       line.chomp!
       match = /^[[:space:]]*vm\.max_map_count[[:space:]]*=[[:space:]]*([[:digit:]]+)/.match(line)
       if match
@@ -76,53 +76,51 @@ cluster_name = "ChefInfraServer-#{SecureRandom.hex(4)}"
 # No discovery settings since we will have only one chef-server backend node.
 
 # Remove the old env config to ensre it's not left over after an upgrade.
-directory "/opt/opscode/service/elasticsearch/env" do
+directory '/opt/opscode/service/elasticsearch/env' do
   action :delete
   recursive true
 end
 template config_file do
-  source "elasticsearch.yml.erb"
+  source 'elasticsearch.yml.erb'
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
-  mode "0644"
-  variables (lazy { elasticsearch.to_hash.merge({ cluster_name: cluster_name }) })
+  mode '0644'
+  variables (lazy { elasticsearch.to_hash.merge(cluster_name: cluster_name) })
   force_unlink true
   notifies :restart, 'component_runit_service[elasticsearch]', :delayed
 end
 
 template logging_config_file do
-  source "elasticsearch_logging.yml.erb"
+  source 'elasticsearch_logging.yml.erb'
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
-  mode "0644"
+  mode '0644'
   variables(elasticsearch.to_hash)
   force_unlink true
   notifies :restart, 'component_runit_service[elasticsearch]', :delayed
 end
-jvm_config_file = File.join(elasticsearch_conf_dir, "jvm.options")
+jvm_config_file = File.join(elasticsearch_conf_dir, 'jvm.options')
 template jvm_config_file do
-  source "elasticsearch_jvm.opts.erb"
+  source 'elasticsearch_jvm.opts.erb'
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
-  mode "0644"
+  mode '0644'
   variables(jvm_opts: elasticsearch['jvm_opts'],
             log_dir: elasticsearch['log_diriectory'],
             heap_size: elasticsearch['heap_size'],
             new_size: elasticsearch['new_size'],
             enable_gc_log: elasticsearch['enable_gc_log'],
-            tmp_dir: elasticsearch['temp_directory']
-            )
+            tmp_dir: elasticsearch['temp_directory'])
   notifies :restart, 'component_runit_service[elasticsearch]'
 end
 
-log4j_file = File.join(elasticsearch_conf_dir, "log4j2.properties")
+log4j_file = File.join(elasticsearch_conf_dir, 'log4j2.properties')
 cookbook_file log4j_file do
-  source "elasticsearch/es_log4j2.properties"
+  source 'elasticsearch/es_log4j2.properties'
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
-  mode "0744"
+  mode '0744'
 end
-
 
 # It appears that the jvm config file must be in the
 # install directory.  We'll keep it in the config location
@@ -135,9 +133,9 @@ end
 #
 # TODO - what happens on upgrade? Will the config disappear until reconfigure?
 #
-link "/opt/opscode/embedded/elasticsearch/config" do
+link '/opt/opscode/embedded/elasticsearch/config' do
   to elasticsearch_conf_dir
 end
 
-#Define resource for elasticsearch component_runit_service
-component_runit_service "elasticsearch"
+# Define resource for elasticsearch component_runit_service
+component_runit_service 'elasticsearch'

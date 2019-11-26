@@ -1,11 +1,10 @@
 class EnterprisePlugin
-
   def initialize(name)
     @name = name
     @enabled_by_default = false
   end
 
-  def set_or_return(name, value=nil)
+  def set_or_return(name, value = nil)
     if !value.nil?
       instance_variable_set("@#{name}", value)
     else
@@ -13,31 +12,31 @@ class EnterprisePlugin
     end
   end
 
-  def name(value=nil)
+  def name(value = nil)
     set_or_return(:name, value)
   end
 
-  def parent_plugin(value=nil)
+  def parent_plugin(value = nil)
     set_or_return(:parent_plugin, value)
   end
 
-  def cookbook_path(value=nil)
+  def cookbook_path(value = nil)
     set_or_return(:coobook_path, value)
   end
 
-  def enabled_by_default(value=nil)
+  def enabled_by_default(value = nil)
     set_or_return(:enabled_by_default, value)
   end
 
-  def enabled(value=nil)
+  def enabled(value = nil)
     set_or_return(:enabled, value)
   end
 
-  def definition_location(value=nil)
+  def definition_location(value = nil)
     set_or_return(:definition_location, value)
   end
 
-  def config_extension_path(value=nil)
+  def config_extension_path(value = nil)
     set_or_return(:config_extension_path, value)
   end
 
@@ -55,7 +54,6 @@ class EnterprisePlugin
     else
       disabled_run_list
     end
-
   end
 
   def enabled?

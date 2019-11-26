@@ -8,17 +8,17 @@ describe OmnibusHelper do
     allow(Chef::Log).to receive(:warn)
   end
 
-  describe "#is_ip?" do
-    it "returns true for an IPv4 address" do
-      expect(OmnibusHelper.is_ip?("192.168.33.10")).to eq(true)
+  describe '#is_ip?' do
+    it 'returns true for an IPv4 address' do
+      expect(OmnibusHelper.is_ip?('192.168.33.10')).to eq(true)
     end
 
-    it "returns true for an IPv6 address" do
-      expect(OmnibusHelper.is_ip?("::1")).to eq(true)
+    it 'returns true for an IPv6 address' do
+      expect(OmnibusHelper.is_ip?('::1')).to eq(true)
     end
 
-    it "returns false for a hostname" do
-      expect(OmnibusHelper.is_ip?("1.example.com")).to eq(false)
+    it 'returns false for a hostname' do
+      expect(OmnibusHelper.is_ip?('1.example.com')).to eq(false)
     end
   end
 
@@ -27,12 +27,12 @@ describe OmnibusHelper do
       {
         'private_chef' => {
           'nginx' => {
-            'x_forwarded_proto' => 'https'
+            'x_forwarded_proto' => 'https',
           },
           'bookshelf' => {
-            'vip_port' => 8443
-          }
-        }
+            'vip_port' => 8443,
+          },
+        },
       }
     end
 
@@ -43,19 +43,19 @@ describe OmnibusHelper do
     end
   end
 
-  describe "escape_characters_in_string" do
+  describe 'escape_characters_in_string' do
     subject(:helper) { described_class.escape_characters_in_string(input_string) }
     let(:input_string) { "foo'" }
 
-    it "escapes special characters" do
+    it 'escapes special characters' do
       expect(helper).to eq("foo\\'")
     end
 
-    context "with nil" do
+    context 'with nil' do
       let(:input_string) { nil }
 
-      it "returns an empty string" do
-        expect(helper).to eq("")
+      it 'returns an empty string' do
+        expect(helper).to eq('')
       end
     end
   end
@@ -66,9 +66,9 @@ describe OmnibusHelper do
         'private_chef' => {
           'nginx' => {
             'url' => 'https://nginx-url',
-            'ssl_port' => 8443
-          }
-        }
+            'ssl_port' => 8443,
+          },
+        },
       }
     end
 
@@ -87,17 +87,18 @@ describe OmnibusHelper do
         'private_chef' => {
           'opscode-solr4' => {
             'external' => external,
-            'external_url' => external_url
+            'external_url' => external_url,
           },
           'opscode-erchef' => {
-            'search_provider' => provider
-          }
-        }
+            'search_provider' => provider,
+          },
+        },
       }
     end
 
     let(:elastic_version) { '2.4.5' }
-    let(:response) do <<-EOS
+    let(:response) do
+      <<-EOS
         {
           "name": "Zero-G",
           "cluster_name": "elasticsearch",
@@ -126,7 +127,7 @@ describe OmnibusHelper do
       end
     end
 
-    shared_context "elastic search version request fails" do
+    shared_context 'elastic search version request fails' do
       it 'should return 2 but some of the requests will fail' do
         helper = described_class.new(node)
         allow(Chef::HTTP).to receive(:new).with(external_url).and_return(client)
@@ -142,22 +143,22 @@ describe OmnibusHelper do
     context 'when elastic search is unavailable' do
       context 'should return 2 but the request fails first time only' do
         let(:times) { 1 }
-        it_behaves_like "elastic search version request fails"
+        it_behaves_like 'elastic search version request fails'
       end
 
       context 'should return 2 but the request fails the first two times' do
         let(:times) { 2 }
-        it_behaves_like "elastic search version request fails"
+        it_behaves_like 'elastic search version request fails'
       end
 
       context 'should return 2 but the request fails the first three times' do
         let(:times) { 3 }
-        it_behaves_like "elastic search version request fails"
+        it_behaves_like 'elastic search version request fails'
       end
 
       context 'should return 2 but the request fails the first four times' do
         let(:times) { 4 }
-        it_behaves_like "elastic search version request fails"
+        it_behaves_like 'elastic search version request fails'
       end
 
       it 'should return raise an exception after 5 retries.' do
@@ -201,7 +202,8 @@ describe OmnibusHelper do
     end
 
     context 'when elastic search response is garbled' do
-      let(:response) do <<-EOS
+      let(:response) do
+        <<-EOS
           {
             "name": "L33tHaxors",
             "version": {
@@ -221,7 +223,7 @@ describe OmnibusHelper do
     end
 
     context 'when solr is external' do
-      let(:provider) {"solr"}
+      let(:provider) { 'solr' }
 
       it 'should return 0' do
         helper = described_class.new(node)
@@ -232,7 +234,7 @@ describe OmnibusHelper do
     context 'when solr is internal' do
       let(:external) { false }
       let(:external_url) { nil }
-      let(:provider) {"solr"}
+      let(:provider) { 'solr' }
 
       it 'should return a default version 0' do
         helper = described_class.new(node)

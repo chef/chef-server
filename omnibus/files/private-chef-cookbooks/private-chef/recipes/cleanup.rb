@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 #
 # PostgreSQL Cleanup from EC 1.4 and earlier
 #
@@ -23,12 +22,12 @@
 # 'postgres', not 'postgresql'.  We need to cleanup all traces of the
 # previously-named service if it is present.
 
-runit_service "postgres" do
-  action [:stop, :disable]
+runit_service 'postgres' do
+  action %i(stop disable)
 end
 
 # I wish runit_service had a :destroy action...
-directory "/opt/opscode/sv/postgres" do
+directory '/opt/opscode/sv/postgres' do
   action :delete
   recursive true
 end
@@ -39,7 +38,7 @@ end
 
 # Bootstrap is now part of the private_chef cookbook itself and is
 # no longer an additional component - remove any traces of it.
-directory "/opt/opscode/embedded/service/chef-server-bootstrap" do
+directory '/opt/opscode/embedded/service/chef-server-bootstrap' do
   action :delete
   recursive true
   ignore_failure true
@@ -50,15 +49,15 @@ end
 #
 
 # opscode-expander-reindexer was removed in 56c156bc71201dc8bf921ef69cfff4db3e9ff898
-runit_service "opscode-expander-reindexer" do
-  action [:stop, :disable]
+runit_service 'opscode-expander-reindexer' do
+  action %i(stop disable)
 end
 
-link "/opt/opscode/init/opscode-expander-reindexer" do
+link '/opt/opscode/init/opscode-expander-reindexer' do
   action :delete
 end
 
-directory "/opt/opscode/sv/opscode-expander-reindexer" do
+directory '/opt/opscode/sv/opscode-expander-reindexer' do
   action :delete
   recursive true
 end

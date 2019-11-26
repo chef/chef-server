@@ -18,68 +18,68 @@ require_relative '../../libraries/private_chef.rb'
 require_relative '../../libraries/helper.rb'
 
 describe SolrPreflightValidator do
-  let(:solr_preflight) {
-    s = SolrPreflightValidator.new({'private_chef' => {
+  let(:solr_preflight) do
+    s = SolrPreflightValidator.new('private_chef' => {
       'opscode-erchef' => {
         'reindex_sleep_min_ms' => 500,
         'reindex_sleep_max_ms' => 2000,
       },
-      'postgresql' => {}}})
+      'postgresql' => {} })
     allow(s).to receive(:fail_with).and_return(:i_failed)
     s
-  }
+  end
 
-  context "when min and max sleep time has been given in the config" do
+  context 'when min and max sleep time has been given in the config' do
     before(:each) do
       allow(PrivateChef).to receive(:[]).with('postgresql').and_return({})
       allow(PrivateChef).to receive(:[]).with('opscode_solr4').and_return({})
-      allow(PrivateChef).to receive(:[]).with('opscode_erchef').and_return({
+      allow(PrivateChef).to receive(:[]).with('opscode_erchef').and_return(
         'reindex_sleep_min_ms' => min_sleep_time,
         'reindex_sleep_max_ms' => max_sleep_time
-      })
+      )
     end
 
-    context "when min is greater then max" do
+    context 'when min is greater then max' do
       let(:min_sleep_time) { 100 }
       let(:max_sleep_time) { 2 }
 
-      it "raises an error" do
+      it 'raises an error' do
         expect(solr_preflight.verify_sane_reindex_sleep_times).to eq(:i_failed)
       end
     end
   end
 
-  context "when only min sleep time has been given in the config" do
+  context 'when only min sleep time has been given in the config' do
     before(:each) do
       allow(PrivateChef).to receive(:[]).with('postgresql').and_return({})
       allow(PrivateChef).to receive(:[]).with('opscode_solr4').and_return({})
-      allow(PrivateChef).to receive(:[]).with('opscode_erchef').and_return({
-        'reindex_sleep_min_ms' => min_sleep_time,
-      })
+      allow(PrivateChef).to receive(:[]).with('opscode_erchef').and_return(
+        'reindex_sleep_min_ms' => min_sleep_time
+      )
     end
 
-    context "when min is greater then max" do
+    context 'when min is greater then max' do
       let(:min_sleep_time) { 2001 }
 
-      it "raises an error" do
+      it 'raises an error' do
         expect(solr_preflight.verify_sane_reindex_sleep_times).to eq(:i_failed)
       end
     end
   end
 
-  context "when only max sleep time has been given in the config" do
+  context 'when only max sleep time has been given in the config' do
     before(:each) do
       allow(PrivateChef).to receive(:[]).with('postgresql').and_return({})
       allow(PrivateChef).to receive(:[]).with('opscode_solr4').and_return({})
-      allow(PrivateChef).to receive(:[]).with('opscode_erchef').and_return({
-        'reindex_sleep_max_ms' => max_sleep_time,
-      })
+      allow(PrivateChef).to receive(:[]).with('opscode_erchef').and_return(
+        'reindex_sleep_max_ms' => max_sleep_time
+      )
     end
 
-    context "when min is greater then max" do
+    context 'when min is greater then max' do
       let(:max_sleep_time) { 499 }
 
-      it "raises an error" do
+      it 'raises an error' do
         expect(solr_preflight.verify_sane_reindex_sleep_times).to eq(:i_failed)
       end
     end

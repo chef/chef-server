@@ -1,7 +1,7 @@
 require 'mixlib/shellout'
 require 'ipaddr'
 require 'uri'
-require "net/http"
+require 'net/http'
 
 class OmnibusHelper
   attr_reader :node
@@ -14,15 +14,16 @@ class OmnibusHelper
     owner = node['private_chef']['user']['username']
     group = owner
 
-    {"owner" => owner, "group" => group}
+    { 'owner' => owner, 'group' => group }
   end
 
   def apr1_password(password)
     cmd = Mixlib::ShellOut.new("openssl passwd -apr1 '#{password}'")
     cmd.run_command
     unless cmd.status.success?
-      raise "Failed to generate apr1 password hash"
+      raise 'Failed to generate apr1 password hash'
     end
+
     cmd.stdout
   end
 
@@ -34,7 +35,7 @@ class OmnibusHelper
                node['private_chef']['rabbitmq'].to_hash
              end
 
-    config['actions_password'] = PrivateChef.credentials.get("rabbitmq", "actions_password")
+    config['actions_password'] = PrivateChef.credentials.get('rabbitmq', 'actions_password')
     config
   end
 
@@ -69,9 +70,9 @@ class OmnibusHelper
   # Returns scheme://host:port without any path
   def solr_root
     url = URI.parse(solr_url)
-    host = url.scheme + "://" + url.host
+    host = url.scheme + '://' + url.host
     if url.port
-      host += ":" + url.port.to_s
+      host += ':' + url.port.to_s
     end
     host
   end
@@ -80,10 +81,10 @@ class OmnibusHelper
     max_requests = 5
     current_request = 1
 
-    if node['private_chef']['opscode-solr4']['external'] && node['private_chef']['opscode-erchef']['search_provider'] == "elasticsearch"
+    if node['private_chef']['opscode-solr4']['external'] && node['private_chef']['opscode-erchef']['search_provider'] == 'elasticsearch'
       begin
         client = Chef::HTTP.new(node['private_chef']['opscode-solr4']['external_url'])
-        response = client.get("")
+        response = client.get('')
       rescue => e
         # Perform a blind rescue because Net:HTTP throws a variety of exceptions - some of which are platform specific.
         if current_request == max_requests
@@ -92,7 +93,7 @@ class OmnibusHelper
           # Chef HTTP logs the details in the debug log.
           Chef::Log.error "Failed to connect to elasticsearch service #{current_request}/#{max_requests}. Retrying."
           current_request += 1
-          sleep(current_request * 2)  # Exponential back-off.
+          sleep(current_request * 2) # Exponential back-off.
           retry
         end
       end
@@ -103,6 +104,7 @@ class OmnibusHelper
         raise "Unable to parse elasticsearch response #{e}"
       end
       raise "Unsupported elasticsearch version of #{version}. There is current support for the major versions of 2 and 5." if version != 5 && version != 2
+
       version
     else
       # Elasticsearch is disabled - this configuration setting should never be used in erlang.
@@ -129,21 +131,21 @@ class OmnibusHelper
   end
 
   def db_connection_uri
-    db_protocol = "postgres"
+    db_protocol = 'postgres'
     db_user     = node['private_chef']['opscode-erchef']['sql_user']
     db_password = PrivateChef.credentials.get('opscode_erchef', 'sql_password')
     db_vip      = vip_for_uri('postgresql')
-    db_name     = "opscode_chef"
+    db_name     = 'opscode_chef'
 
     "#{db_protocol}://#{db_user}:#{db_password}@#{db_vip}/#{db_name}"
   end
 
   def bifrost_db_connection_uri
-    db_protocol = "postgres"
+    db_protocol = 'postgres'
     db_user     = node['private_chef']['oc_bifrost']['sql_user']
     db_password = PrivateChef.credentials.get('oc_bifrost', 'sql_password')
     db_vip      = vip_for_uri('postgresql')
-    db_name     = "bifrost"
+    db_name     = 'bifrost'
 
     "#{db_protocol}://#{db_user}:#{db_password}@#{db_vip}/#{db_name}"
   end
@@ -151,7 +153,7 @@ class OmnibusHelper
   # This file is touched once initial bootstrapping of the system is
   # done.
   def self.bootstrap_sentinel_file
-    "/var/opt/opscode/bootstrapped"
+    '/var/opt/opscode/bootstrapped'
   end
 
   # Use the presence of a sentinel file as an indicator for whether
@@ -160,7 +162,7 @@ class OmnibusHelper
   # @todo: Is there a more robust way to determine this, i.e., based
   #   on some functional aspect of the system?
   def self.has_been_bootstrapped?
-    File.exists?(bootstrap_sentinel_file)
+    File.exist?(bootstrap_sentinel_file)
   end
 
   # Parse a config string as a memory value returning an integer in MB
@@ -170,9 +172,11 @@ class OmnibusHelper
     if mem_str.is_a?(Integer)
       return mem_str
     end
+
     regex = /(\d+)([GgmMkKbB]{0,2})/
-    m  = regex.match(mem_str)
-    raise "bad arg" if !m
+    m = regex.match(mem_str)
+    raise 'bad arg' unless m
+
     raw_value = m[1].to_i
     units = m[2]
     value = case units
@@ -182,7 +186,7 @@ class OmnibusHelper
               raw_value / 1024
             when /^mb?$/i
               raw_value
-            when ""                       # no units, assume Mb
+            when '' # no units, assume Mb
               raw_value
             when /^gb?$/i
               raw_value * 1024
@@ -203,7 +207,7 @@ class OmnibusHelper
     when String
       "\"#{term}\""
     else
-      "undefined"
+      'undefined'
     end
   end
 
@@ -212,9 +216,10 @@ class OmnibusHelper
   end
 
   def self.escape_characters_in_string(string)
-    return "" unless string.is_a? String
-    pattern = /(\'|\"|\.|\*|\/|\-|\\)/
-    string.gsub(pattern){|match|"\\"  + match}
+    return '' unless string.is_a? String
+
+    pattern = %r{(\'|\"|\.|\*|/|\-|\\)}
+    string.gsub(pattern) { |match| '\\' + match }
   end
 
   def escape_characters_in_string(string)
@@ -223,8 +228,8 @@ class OmnibusHelper
 
   def s3_url_caching(setting)
     case setting.to_s
-    when "off"
-      "off"
+    when 'off'
+      'off'
     when /m$/
       "{#{setting.chop}, minutes}"
     when /%$/
@@ -242,7 +247,7 @@ class OmnibusHelper
   end
 
   def ldap_authentication_enabled?
-    node['private_chef']["ldap"] && node['private_chef']['ldap']['enabled']
+    node['private_chef']['ldap'] && node['private_chef']['ldap']['enabled']
   end
 
   def platform_package_suffix
@@ -259,7 +264,7 @@ class OmnibusHelper
 
   def remote_install_addons?
     # chef-solo and chef-client -z return different things :(
-    (node['private_chef']['addons']['path'] == nil) || (node['private_chef']['addons']['path'] == {})
+    node['private_chef']['addons']['path'].nil? || (node['private_chef']['addons']['path'] == {})
   end
 
   def self.chef_server_running_content(node)
@@ -280,9 +285,9 @@ class OmnibusHelper
     attrs['opscode-solr']['port'] = attrs['opscode-solr4']['port']
 
     content = {
-      "private_chef" => attrs,
-      "run_list" => node.run_list,
-      "runit" => node['runit'].to_hash
+      'private_chef' => attrs,
+      'run_list' => node.run_list,
+      'runit' => node['runit'].to_hash,
     }
     Chef::JSONCompat.to_json_pretty(content)
   end

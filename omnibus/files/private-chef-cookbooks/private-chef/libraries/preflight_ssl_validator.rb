@@ -28,16 +28,16 @@ class SslPreflightValidator < PreflightValidator
 
   def verify_fips_sanity
     if PrivateChef['fips'] && !fips_supported_ssl?
-      fail_with <<EOF
-You have enabled FIPS-mode in chef-server.rb but FIPS does not appear
-to be supported on this platform.
+      fail_with <<~EOF
+        You have enabled FIPS-mode in chef-server.rb but FIPS does not appear
+        to be supported on this platform.
 
-#{openssl_exe} reported its version as:
+        #{openssl_exe} reported its version as:
 
-    #{openssl_version}
+            #{openssl_version}
 
-which does not contain the expected -fips identifier.
-EOF
+        which does not contain the expected -fips identifier.
+      EOF
     end
   end
 
@@ -49,14 +49,14 @@ EOF
     @openssl_version ||= begin
                            `#{openssl_exe} version`
                          rescue
-                           "unknown"
+                           'unknown'
                          end
   end
 
   def fips_supported_ssl?
     case openssl_version
     when /^unknown/
-      Chef::Log.warn("Failed to parse openssl version, assuming it would have supported FIPS")
+      Chef::Log.warn('Failed to parse openssl version, assuming it would have supported FIPS')
       # We could report false here if we wanted to be pessimistic
       true
     when /OpenSSL .*-fips/
@@ -70,23 +70,23 @@ EOF
     cert = @user_config['ssl_certificate']
     key  = @user_config['ssl_certificate_key']
     if !cert.nil? && key.nil?
-        fail_with <<EOF
-Your configuration has specified
+      fail_with <<~EOF
+        Your configuration has specified
 
-nginx['ssl_certificate'] = "#{cert}"
+        nginx['ssl_certificate'] = "#{cert}"
 
-but has not specified nginx['ssl_certificate_key'].  You must specify
-both configuration options or neither.
-EOF
+        but has not specified nginx['ssl_certificate_key'].  You must specify
+        both configuration options or neither.
+      EOF
     elsif cert.nil? && !key.nil?
-        fail_with <<EOF
-Your configuration has specified
+      fail_with <<~EOF
+        Your configuration has specified
 
-nginx['ssl_certificate_key'] = "#{key}"
+        nginx['ssl_certificate_key'] = "#{key}"
 
-but has not specified nginx['ssl_certificate'].  You must specify
-both configuration options or neither.
-EOF
+        but has not specified nginx['ssl_certificate'].  You must specify
+        both configuration options or neither.
+      EOF
     end
   end
 end

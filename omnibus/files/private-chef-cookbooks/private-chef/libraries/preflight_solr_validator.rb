@@ -37,71 +37,72 @@ class SolrPreflightValidator < PreflightValidator
     final_min = cs_erchef_attr['reindex_sleep_min_ms'] || node_erchef_attr['reindex_sleep_min_ms']
     final_max = cs_erchef_attr['reindex_sleep_max_ms'] || node_erchef_attr['reindex_sleep_max_ms']
     if final_min > final_max
-      fail_with <<-EOM
+      fail_with <<~EOM
 
-opscode_erchef['reindex_sleep_min_ms'] (#{final_min}) is greater than
-opscode_erchef['reindex_sleep_max_ms'] (#{final_max})
+        opscode_erchef['reindex_sleep_min_ms'] (#{final_min}) is greater than
+        opscode_erchef['reindex_sleep_max_ms'] (#{final_max})
 
-The maximum sleep time should be greater or equal to the minimum sleep
-time.
-EOM
+        The maximum sleep time should be greater or equal to the minimum sleep
+        time.
+      EOM
     end
   end
 
   def warn_unchanged_external_flag
-    if OmnibusHelper.has_been_bootstrapped? && backend?  && previous_run
-      if cs_solr_attr.has_key?('external') && (cs_solr_attr['external'] != previous_run['opscode-solr4']['external'])
-        Chef::Log.warn <<-EOM
+    if OmnibusHelper.has_been_bootstrapped? && backend? && previous_run
+      if cs_solr_attr.key?('external') && (cs_solr_attr['external'] != previous_run['opscode-solr4']['external'])
+        Chef::Log.warn <<~EOM
 
-The value of opscode_solr4['external'] has been changed.  Search
-results against the new external search index may be incorrect. Please
-run `chef-server-ctl reindex --all` to ensure correct results
+          The value of opscode_solr4['external'] has been changed.  Search
+          results against the new external search index may be incorrect. Please
+          run `chef-server-ctl reindex --all` to ensure correct results
 
-EOM
+        EOM
       end
     else
-      return true
+      true
     end
   end
 
   def verify_external_url
-    if cs_solr_attr['external'] & (! cs_solr_attr['external_url'])
-      fail_with <<EOM
+    if cs_solr_attr['external'] & !cs_solr_attr['external_url']
+      fail_with <<~EOM
 
-No external url specified for Solr depsite opscode_solr4['external']
-being set to true. To use an external solr instance, please set
-opscode_solr4['external_url'] to the external solr endpoint.
+        No external url specified for Solr depsite opscode_solr4['external']
+        being set to true. To use an external solr instance, please set
+        opscode_solr4['external_url'] to the external solr endpoint.
 
-EOM
+      EOM
     end
   end
 
   def verify_erchef_config
     provider = @cs_erchef_attr['search_provider']
-    return true if provider.nil? #default provider
+    return true if provider.nil? # default provider
+
     case provider
     when 'elasticsearch'
-      if ! ['batch', 'inline'].include?(@cs_erchef_attr['search_queue_mode'])
-        fail_with <<-EOM
+      unless %w(batch inline).include?(@cs_erchef_attr['search_queue_mode'])
+        fail_with <<~EOM
 
-The elasticsearch provider is only supported by the batch or inline
-queue modes. To use the elasticsearch provider, please also set:
+          The elasticsearch provider is only supported by the batch or inline
+          queue modes. To use the elasticsearch provider, please also set:
 
-opscode_erchef['search_queue_mode'] = 'batch'
+          opscode_erchef['search_queue_mode'] = 'batch'
 
-in /etc/opscode/chef-server.rb
+          in /etc/opscode/chef-server.rb
 
-EOM
+        EOM
       end
     when 'solr'
     else
-      fail_with <<-EOM
-The specified search provider (#{provider}) is not currently supported.
-Please choose from one of the following search providers:
+      fail_with <<~EOM
+        The specified search provider (#{provider}) is not currently supported.
+        Please choose from one of the following search providers:
 
-solr
-elasticsearch
-EOM
+        solr
+        elasticsearch
+      EOM
     end
   end
 end

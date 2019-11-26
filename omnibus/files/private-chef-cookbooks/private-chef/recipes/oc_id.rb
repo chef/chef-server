@@ -48,20 +48,20 @@ app_settings = {
     # cert in use by nginx, we will likely fail verification since
     # those are certs for the api_fqdn and not localhost.
     #
-    'ssl_verify_mode' => 'verify_none'
+    'ssl_verify_mode' => 'verify_none',
   },
   'doorkeeper' => {
-    'administrators' => node['private_chef']['oc_id']['administrators'] || []
+    'administrators' => node['private_chef']['oc_id']['administrators'] || [],
   },
   'sentry_dsn' => node['private_chef']['oc_id']['sentry_dsn'],
   'sign_up_url' => sign_up_url,
   'email_from_address' => node['private_chef']['oc_id']['email_from_address'],
-  'origin' => node['private_chef']['oc_id']['origin']
+  'origin' => node['private_chef']['oc_id']['origin'],
 }
 
 oc_id_dir = node['private_chef']['oc_id']['dir']
-oc_id_config_dir = File.join(oc_id_dir, "config")
-oc_id_tmp_dir = File.join(oc_id_dir, "tmp")
+oc_id_config_dir = File.join(oc_id_dir, 'config')
+oc_id_tmp_dir = File.join(oc_id_dir, 'tmp')
 oc_id_log_dir = node['private_chef']['oc_id']['log_directory']
 [
   oc_id_dir,
@@ -77,20 +77,20 @@ oc_id_log_dir = node['private_chef']['oc_id']['log_directory']
   end
 end
 
-%w{log tmp}.each do |dir|
+%w(log tmp).each do |dir|
   full_dir = "/opt/opscode/embedded/service/oc_id/#{dir}"
   directory full_dir do
     action :delete
     recursive true
-    not_if  { File.symlink?(full_dir) }
+    not_if { File.symlink?(full_dir) }
   end
 end
 
-link "/opt/opscode/embedded/service/oc_id/log" do
+link '/opt/opscode/embedded/service/oc_id/log' do
   to oc_id_log_dir
 end
 
-link "/opt/opscode/embedded/service/oc_id/tmp" do
+link '/opt/opscode/embedded/service/oc_id/tmp' do
   to oc_id_tmp_dir
 end
 
@@ -108,10 +108,10 @@ end
 #
 ## Symlink settings file into the rails service directory
 #
-settings_file = "/opt/opscode/embedded/service/oc_id/config/settings/production.yml"
+settings_file = '/opt/opscode/embedded/service/oc_id/config/settings/production.yml'
 file settings_file do
   action :delete
-  not_if  { File.symlink?(settings_file) }
+  not_if { File.symlink?(settings_file) }
 end
 
 link settings_file do
@@ -119,17 +119,17 @@ link settings_file do
 end
 
 template "#{oc_id_config_dir}/secret_token.rb" do
-  source "oc_id.secret_token.rb"
+  source 'oc_id.secret_token.rb'
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode '640'
   notifies :restart, 'component_runit_service[oc_id]'
 end
 
-secrets_file = "/opt/opscode/embedded/service/oc_id/config/initializers/secret_token.rb"
+secrets_file = '/opt/opscode/embedded/service/oc_id/config/initializers/secret_token.rb'
 file secrets_file do
   action :delete
-  not_if  { File.symlink?(secrets_file) }
+  not_if { File.symlink?(secrets_file) }
 end
 
 link secrets_file do
@@ -137,17 +137,17 @@ link secrets_file do
 end
 
 template "#{oc_id_config_dir}/database.yml" do
-  source "oc_id.database.yml.erb"
+  source 'oc_id.database.yml.erb'
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode '640'
   notifies :restart, 'component_runit_service[oc_id]'
 end
 
-database_file = "/opt/opscode/embedded/service/oc_id/config/database.yml"
+database_file = '/opt/opscode/embedded/service/oc_id/config/database.yml'
 file database_file do
   action :delete
-  not_if  { File.symlink?(database_file) }
+  not_if { File.symlink?(database_file) }
 end
 
 link database_file do
@@ -161,17 +161,17 @@ end
 execute "chown -R #{OmnibusHelper.new(node).ownership['owner']}:#{OmnibusHelper.new(node).ownership['group']} #{oc_id_log_dir}" do
   only_if do
     begin
-      ::File.stat(::File.join(oc_id_log_dir, "current")).uid != Etc.getpwnam(OmnibusHelper.new(node).ownership['owner']).uid
+      ::File.stat(::File.join(oc_id_log_dir, 'current')).uid != Etc.getpwnam(OmnibusHelper.new(node).ownership['owner']).uid
     rescue Errno::ENOENT
       true
     end
   end
 end
 
-veil_helper_args = "--use-file -s chef-server.webui_key -s oc_id.sql_password -s oc_id.secret_key_base"
-execute "oc_id_schema" do
+veil_helper_args = '--use-file -s chef-server.webui_key -s oc_id.sql_password -s oc_id.secret_key_base'
+execute 'oc_id_schema' do
   command "veil-env-helper #{veil_helper_args} -- bundle exec --keep-file-descriptors rake db:migrate"
-  cwd "/opt/opscode/embedded/service/oc_id"
+  cwd '/opt/opscode/embedded/service/oc_id'
 
   # There are other recipes that depend on having a VERSION environment
   # variable. If that environment variable is set when we run `rake db:migrate`,
@@ -182,19 +182,19 @@ execute "oc_id_schema" do
   # date prefix of the latest file in the db/migrate directory.
   #
   # Also set the RAILS_ENV as is needed.
-  environment("RAILS_ENV" => "production",
-              "VERSION" => `ls -1 /opt/opscode/embedded/service/oc_id/db/migrate | tail -n 1 | sed -e "s/_.*//g"`.chomp,
-              "PATH" => "/opt/opscode/embedded/bin")
+  environment('RAILS_ENV' => 'production',
+              'VERSION' => `ls -1 /opt/opscode/embedded/service/oc_id/db/migrate | tail -n 1 | sed -e "s/_.*//g"`.chomp,
+              'PATH' => '/opt/opscode/embedded/bin')
   sensitive true
   only_if { is_data_master? }
 end
 
-component_runit_service "oc_id" do
+component_runit_service 'oc_id' do
   package 'private_chef'
 end
 
 if node['private_chef']['bootstrap']['enable']
-  execute "/opt/opscode/bin/private-chef-ctl start oc_id" do
+  execute '/opt/opscode/bin/private-chef-ctl start oc_id' do
     retries 20
   end
 end
@@ -210,8 +210,8 @@ node['private_chef']['oc_id']['applications'].each do |name, app|
 end
 
 nginx_dir = node['private_chef']['nginx']['dir']
-nginx_etc_dir = File.join(nginx_dir, "etc")
-nginx_addon_dir = File.join(nginx_etc_dir, "addon.d")
+nginx_etc_dir = File.join(nginx_dir, 'etc')
+nginx_addon_dir = File.join(nginx_etc_dir, 'addon.d')
 
 directory nginx_addon_dir do
   action :create
@@ -219,14 +219,14 @@ directory nginx_addon_dir do
 end
 
 # LB configs
-["upstreams", "external"].each do |config|
+%w(upstreams external).each do |config|
   file = File.join(nginx_addon_dir, "40-oc_id_#{config}.conf")
 
   template file do
     source "oc_id.nginx-#{config}.conf.erb"
-    owner "root"
-    group "root"
-    mode "0644"
+    owner 'root'
+    group 'root'
+    mode '0644'
     notifies :restart, 'component_runit_service[nginx]'
   end
 end

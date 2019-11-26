@@ -22,7 +22,7 @@ require 'openssl'
 # Because these symlinks get removed during the postrm
 # of the chef-server and private-chef packages, we should
 # ensure that they're always here.
-%w{private-chef-ctl chef-server-ctl}.each do |bin|
+%w(private-chef-ctl chef-server-ctl).each do |bin|
   link "/usr/bin/#{bin}" do
     to "/opt/opscode/bin/#{bin}"
   end
@@ -32,26 +32,26 @@ end
 # much better than having to specify this on each resource!
 ENV['PATH'] = "/opt/opscode/bin:/opt/opscode/embedded/bin:#{ENV['PATH']}"
 
-directory "/etc/opscode" do
-  owner "root"
-  group "root"
-  mode "0755"
+directory '/etc/opscode' do
+  owner 'root'
+  group 'root'
+  mode '0755'
   action :nothing
 end.run_action(:create)
 
-directory "/etc/opscode/logrotate.d" do
-  owner "root"
-  group "root"
-  mode "0755"
+directory '/etc/opscode/logrotate.d' do
+  owner 'root'
+  group 'root'
+  mode '0755'
   action :nothing
 end.run_action(:create)
 
-include_recipe "private-chef::plugin_discovery"
-include_recipe "private-chef::plugin_config_extensions"
-include_recipe "private-chef::config"
+include_recipe 'private-chef::plugin_discovery'
+include_recipe 'private-chef::plugin_config_extensions'
+include_recipe 'private-chef::config'
 
 if node['private_chef']['fips_enabled']
-  include_recipe "private-chef::fips"
+  include_recipe 'private-chef::fips'
 end
 
 # Warn about deprecated opscode_webui settings
@@ -65,79 +65,79 @@ log 'opscode_webui deprecation notice' do
   only_if { opscode_webui_deprecation_notice.applicable? }
 end
 
-if OmnibusHelper.has_been_bootstrapped? or
-    BootstrapPreflightValidator.new(node).bypass_bootstrap?
+if OmnibusHelper.has_been_bootstrapped? ||
+   BootstrapPreflightValidator.new(node).bypass_bootstrap?
   node.override['private_chef']['bootstrap']['enable'] = false
 end
 
 # Create the Chef User and private keys (pivotal/webui)
-include_recipe "private-chef::users"
-include_recipe "private-chef::private_keys"
+include_recipe 'private-chef::users'
+include_recipe 'private-chef::private_keys'
 
 # merge xdarklaunch values into the disk-based darklaunch
 # so that we have a single source of truth for xdl-related
 # values
 darklaunch_values = node['private_chef']['dark_launch']
-  .merge(node['private_chef']['lb']['xdl_defaults'])
-  .to_hash
+                    .merge(node['private_chef']['lb']['xdl_defaults'])
+                    .to_hash
 
-file "/etc/opscode/dark_launch_features.json" do
+file '/etc/opscode/dark_launch_features.json' do
   owner OmnibusHelper.new(node).ownership['owner']
-  group "root"
-  mode "0644"
+  group 'root'
+  mode '0644'
   content Chef::JSONCompat.to_json_pretty(darklaunch_values)
 end
 
-directory "/etc/chef" do
-  owner "root"
+directory '/etc/chef' do
+  owner 'root'
   group OmnibusHelper.new(node).ownership['group']
-  mode "0775"
+  mode '0775'
   action :create
 end
 
-directory "/var/opt/opscode" do
-  owner "root"
-  group "root"
-  mode "0755"
+directory '/var/opt/opscode' do
+  owner 'root'
+  group 'root'
+  mode '0755'
   recursive true
   action :create
 end
 
-directory "/var/log/opscode" do
+directory '/var/log/opscode' do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
-  mode "0755"
+  mode '0755'
   action :create
 end
 
-include_recipe "enterprise::runit"
-include_recipe "private-chef::sysctl-updates"
+include_recipe 'enterprise::runit'
+include_recipe 'private-chef::sysctl-updates'
 # Run plugins first, mostly for ha
-include_recipe "private-chef::plugin_chef_run"
+include_recipe 'private-chef::plugin_chef_run'
 
 if node['private_chef']['use_chef_backend']
-  include_recipe "private-chef::haproxy"
+  include_recipe 'private-chef::haproxy'
 end
 
-include_recipe "private-chef::fix_permissions"
+include_recipe 'private-chef::fix_permissions'
 
 # Configure Services
-[
-  "postgresql",
-  "oc_bifrost",
-  "oc_id",
-  "opscode-solr4",
-  "opscode-expander",
-  "bookshelf",
-  "opscode-erchef",
-  "bootstrap",
-  "opscode-chef-mover",
-  "redis_lb",
-  "nginx",
-  "rabbitmq",
-  "elasticsearch"
-].each do |service|
-  if node["private_chef"][service]["external"]
+%w(
+  postgresql
+  oc_bifrost
+  oc_id
+  opscode-solr4
+  opscode-expander
+  bookshelf
+  opscode-erchef
+  bootstrap
+  opscode-chef-mover
+  redis_lb
+  nginx
+  rabbitmq
+  elasticsearch
+).each do |service|
+  if node['private_chef'][service]['external']
     begin
       # Perform any necessary configuration of the external service:
       include_recipe "private-chef::#{service}-external"
@@ -152,11 +152,12 @@ include_recipe "private-chef::fix_permissions"
       action :disable
     end
   else
-    if node["private_chef"][service]["enable"]
+    if node['private_chef'][service]['enable']
       include_recipe "private-chef::#{service}"
     else
       # bootstrap isn't a service, nothing to disable.
       next if service == 'bootstrap'
+
       # All non-enabled services get disabled;
       component_runit_service service do
         action :disable
@@ -165,29 +166,29 @@ include_recipe "private-chef::fix_permissions"
   end
 end
 
-include_recipe "private-chef::cleanup"
+include_recipe 'private-chef::cleanup'
 
-if darklaunch_values["actions"] && node['private_chef']['insecure_addon_compat']
-  include_recipe "private-chef::actions"
+if darklaunch_values['actions'] && node['private_chef']['insecure_addon_compat']
+  include_recipe 'private-chef::actions'
 else
-  include_recipe "private-chef::remove_actions"
+  include_recipe 'private-chef::remove_actions'
 end
 
-include_recipe "private-chef::private-chef-sh"
-include_recipe "private-chef::oc-chef-pedant"
-include_recipe "private-chef::log_cleanup"
-include_recipe "private-chef::partybus"
-include_recipe "private-chef::ctl_config"
-include_recipe "private-chef::disable_chef_server_11"
+include_recipe 'private-chef::private-chef-sh'
+include_recipe 'private-chef::oc-chef-pedant'
+include_recipe 'private-chef::log_cleanup'
+include_recipe 'private-chef::partybus'
+include_recipe 'private-chef::ctl_config'
+include_recipe 'private-chef::disable_chef_server_11'
 
-file "/etc/opscode/chef-server-running.json" do
+file '/etc/opscode/chef-server-running.json' do
   owner OmnibusHelper.new(node).ownership['owner']
-  group "root"
-  mode "0600"
+  group 'root'
+  mode '0600'
   content lazy { OmnibusHelper.chef_server_running_content(node) }
 end
 
-ruby_block "print reconfigure warnings" do
+ruby_block 'print reconfigure warnings' do
   block do
     ChefServer::Warnings.print_warnings
   end

@@ -23,11 +23,11 @@
 # A simple `/etc/cron.hourly/` script now controlls the rotation so we'll
 # cleanup all legacy crontabs.
 #
-file "/etc/cron.d/opc_log_cleanup" do
+file '/etc/cron.d/opc_log_cleanup' do
   action :delete
 end
 
-file "/etc/cron.d/opc_logrotate.cron" do
+file '/etc/cron.d/opc_logrotate.cron' do
   action :delete
 end
 # END LEGACY CRONTAB CLEANUP
@@ -36,16 +36,16 @@ end
 
 # not using /etc/logrotate.d on purpose here so that busted system logrotation will not break
 # the privatechef logrotation.
-template "/etc/opscode/logrotate.conf" do
-  source "logrotate-opscode.conf"
-  mode   "0644"
-  owner  "root"
-  group  "root"
+template '/etc/opscode/logrotate.conf' do
+  source 'logrotate-opscode.conf'
+  mode   '0644'
+  owner  'root'
+  group  'root'
 end
 
-template "/etc/cron.hourly/opc_logrotate" do
-  source "opc_logrotate.cron"
-  mode   "0755"
-  owner  "root"
-  group  "root"
+template '/etc/cron.hourly/opc_logrotate' do
+  source 'opc_logrotate.cron'
+  mode   '0755'
+  owner  'root'
+  group  'root'
 end

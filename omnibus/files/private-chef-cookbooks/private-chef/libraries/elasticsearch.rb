@@ -1,24 +1,23 @@
 # A class that knows about Elasticsearch configuration and usage.
 class Elasticsearch
+  KB = 1024
+  MB = KB * KB
+  GB = MB * KB
 
- KB = 1024
- MB = KB * KB
- GB = MB * KB
-
- def self.node_memory_in_units(node, which, unit)
-   node[:memory][:total] =~ /^(\d+)kB/
-   mem_in_kb = $1.to_i
-   case unit
-   when :kb, :kilobytes
-     mem_in_kb
-   when :bytes, :b
-     mem_in_kb * 1024
-   when :mb, :megabytes
-     mem_in_kb / KB
-   when :gb, :gigabytes
-     mem_in_kb / (KB * KB)
-   end
- end
+  def self.node_memory_in_units(node, _which, unit)
+    node[:memory][:total] =~ /^(\d+)kB/
+    mem_in_kb = Regexp.last_match(1).to_i
+    case unit
+    when :kb, :kilobytes
+      mem_in_kb
+    when :bytes, :b
+      mem_in_kb * 1024
+    when :mb, :megabytes
+      mem_in_kb / KB
+    when :gb, :gigabytes
+      mem_in_kb / (KB * KB)
+    end
+  end
 
   # Supplies the default total heap size for elasticsearch calculated as
   # 25% of the system memory bounded between 1GB - 26GB

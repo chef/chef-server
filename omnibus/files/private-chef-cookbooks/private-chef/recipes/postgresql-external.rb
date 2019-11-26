@@ -16,9 +16,9 @@
 #
 
 # External installations require only that we set up our application databases.
-if is_data_master? and node['private_chef']['postgresql']['external']
-  include_recipe "private-chef::erchef_database"
-  include_recipe "private-chef::bifrost_database"
-  include_recipe "private-chef::oc_id_database"
-  include_recipe "private-chef::bookshelf_database" if node["private_chef"]["bookshelf"]["storage_type"] == "sql"
+if is_data_master? && node['private_chef']['postgresql']['external']
+  include_recipe 'private-chef::erchef_database'
+  include_recipe 'private-chef::bifrost_database'
+  include_recipe 'private-chef::oc_id_database'
+  include_recipe 'private-chef::bookshelf_database' if node['private_chef']['bookshelf']['storage_type'] == 'sql'
 end

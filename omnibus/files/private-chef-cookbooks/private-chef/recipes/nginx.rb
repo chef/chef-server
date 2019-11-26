@@ -41,7 +41,7 @@ nginx_tempfile_dir = File.join(nginx_dir, 'tmp')
   nginx_d_dir,
   nginx_scripts_dir,
   nginx_html_dir,
-  nginx_tempfile_dir
+  nginx_tempfile_dir,
 ].each do |dir_name|
   directory dir_name do
     owner OmnibusHelper.new(node).ownership['owner']
@@ -61,31 +61,31 @@ end
 end
 
 # Generate self-signed SSL certificate unless the user has provided one
-if (node['private_chef']['nginx']['ssl_certificate'].nil? &&
-    node['private_chef']['nginx']['ssl_certificate_key'].nil?)
+if node['private_chef']['nginx']['ssl_certificate'].nil? &&
+   node['private_chef']['nginx']['ssl_certificate_key'].nil?
 
-   ssl_keyfile = File.join(nginx_ca_dir, "#{node['private_chef']['nginx']['server_name']}.key")
-   ssl_crtfile = File.join(nginx_ca_dir, "#{node['private_chef']['nginx']['server_name']}.crt")
+  ssl_keyfile = File.join(nginx_ca_dir, "#{node['private_chef']['nginx']['server_name']}.key")
+  ssl_crtfile = File.join(nginx_ca_dir, "#{node['private_chef']['nginx']['server_name']}.crt")
 
-   server_name = node['private_chef']['nginx']['server_name']
-   server_name_type = if OmnibusHelper.is_ip?(server_name)
-                        "IP"
-                      else
-                        "DNS"
-                      end
+  server_name = node['private_chef']['nginx']['server_name']
+  server_name_type = if OmnibusHelper.is_ip?(server_name)
+                       'IP'
+                     else
+                       'DNS'
+                     end
 
-   openssl_x509_certificate ssl_crtfile do
-     common_name server_name
-     org node['private_chef']['nginx']['ssl_company_name']
-     org_unit node['private_chef']['nginx']['ssl_organizational_unit_name']
-     country node['private_chef']['nginx']['ssl_country_name']
-     key_length node['private_chef']['nginx']['ssl_key_length']
-     expire node['private_chef']['nginx']['ssl_duration']
-     subject_alt_name [ "#{server_name_type}:#{server_name}" ]
-     owner OmnibusHelper.new(node).ownership['owner']
-     group OmnibusHelper.new(node).ownership['group']
-     mode '0600'
-   end
+  openssl_x509_certificate ssl_crtfile do
+    common_name server_name
+    org node['private_chef']['nginx']['ssl_company_name']
+    org_unit node['private_chef']['nginx']['ssl_organizational_unit_name']
+    country node['private_chef']['nginx']['ssl_country_name']
+    key_length node['private_chef']['nginx']['ssl_key_length']
+    expire node['private_chef']['nginx']['ssl_duration']
+    subject_alt_name [ "#{server_name_type}:#{server_name}" ]
+    owner OmnibusHelper.new(node).ownership['owner']
+    group OmnibusHelper.new(node).ownership['group']
+    mode '0600'
+  end
 
   node.default['private_chef']['nginx']['ssl_certificate'] = ssl_crtfile
   node.default['private_chef']['nginx']['ssl_certificate_key'] = ssl_keyfile
@@ -144,19 +144,19 @@ end
 
 # Create nginx config
 chef_lb_configs = {
-  :chef_https_config => File.join(nginx_etc_dir, 'chef_https_lb.conf'),
-  :chef_http_config => File.join(nginx_etc_dir, 'chef_http_lb.conf'),
-  :script_path => nginx_scripts_dir
+  chef_https_config: File.join(nginx_etc_dir, 'chef_https_lb.conf'),
+  chef_http_config: File.join(nginx_etc_dir, 'chef_http_lb.conf'),
+  script_path: nginx_scripts_dir,
 }
 
 nginx_vars = node['private_chef']['nginx'].to_hash
-nginx_vars = nginx_vars.merge(:helper => NginxErb.new(node))
+nginx_vars = nginx_vars.merge(helper: NginxErb.new(node))
 
 # Chef API lb config for HTTPS and HTTP
 lbconf = node['private_chef']['lb'].to_hash.merge(nginx_vars).merge(
-  :redis_host => node['private_chef']['redis_lb']['vip'],
-  :redis_port => node['private_chef']['redis_lb']['port'],
-  :omnihelper => OmnibusHelper.new(node)
+  redis_host: node['private_chef']['redis_lb']['vip'],
+  redis_port: node['private_chef']['redis_lb']['port'],
+  omnihelper: OmnibusHelper.new(node)
 )
 
 ['config.lua',
@@ -165,7 +165,7 @@ lbconf = node['private_chef']['lb'].to_hash.merge(nginx_vars).merge(
  'route_checks.lua',
  'routes.lua',
  'dispatch_route.lua',
- 'validator.lua'
+ 'validator.lua',
 ].each do |script|
   template File.join(nginx_scripts_dir, script) do
     source "nginx/scripts/#{script}.erb"
@@ -210,15 +210,14 @@ end
     group 'root'
     mode '0644'
     variables(lbconf.merge(
-      :server_proto => server_proto,
-      :script_path => nginx_scripts_dir,
+      server_proto: server_proto,
+      script_path: nginx_scripts_dir,
       # Compliance endpoint to forward profiles calls to the Automate API:
       #   /organizations/ORG/owners/OWNER/compliance[/PROFILE]
       # Supports the legacy(chef-gate) URLs as well:
       #   /compliance/organizations/ORG/owners/OWNER/compliance[/PROFILE]
-      :compliance_proxy_regex => '(?:/compliance)?/organizations/([^/]+)/owners/([^/]+)/compliance(.*)'
-      )
-    )
+      compliance_proxy_regex: '(?:/compliance)?/organizations/([^/]+)/owners/([^/]+)/compliance(.*)'
+    ))
     notifies :restart, 'component_runit_service[nginx]'
   end
 end
@@ -231,7 +230,7 @@ template nginx_config do
   owner 'root'
   group 'root'
   mode '0644'
-  variables(lbconf.merge(chef_lb_configs).merge(:temp_dir => nginx_tempfile_dir))
+  variables(lbconf.merge(chef_lb_configs).merge(temp_dir: nginx_tempfile_dir))
   notifies :restart, 'component_runit_service[nginx]'
 end
 

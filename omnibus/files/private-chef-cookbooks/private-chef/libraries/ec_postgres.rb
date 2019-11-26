@@ -20,11 +20,11 @@ class EcPostgres
     max_retries = retries
     begin
       connection = PG::Connection.open('user' => postgres['db_superuser'],
-                                 'host' => postgres['vip'],
-                                 'password' => postgres['db_superuser_password'],
-                                 'port' => postgres['port'],
-                                 'sslmode' => postgres['sslmode'],
-                                 'dbname' => database)
+                                       'host' => postgres['vip'],
+                                       'password' => postgres['db_superuser_password'],
+                                       'port' => postgres['port'],
+                                       'sslmode' => postgres['sslmode'],
+                                       'dbname' => database)
     rescue => e
       if retries > 0
         sleep_time = 2**((max_retries - retries))
@@ -49,7 +49,6 @@ class EcPostgres
     end
   end
 
-
   # By default, with_connection will create a superuser connection over tcp to the specified database.
   # This method will create a unix socket connection to a local database instance. This should only be used
   # to the extent required to set configure tcp access and set a password for the superuser.
@@ -65,6 +64,7 @@ class EcPostgres
       end
     end
   end
+
   private
 
   def self.as_user(user)

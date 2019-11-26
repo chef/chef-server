@@ -17,22 +17,22 @@
 # limitations under the License.
 #
 
-rabbitmq = node["private_chef"]["rabbitmq"]
+rabbitmq = node['private_chef']['rabbitmq']
 
-password = PrivateChef.credentials.get("rabbitmq", "password")
-actions_password = PrivateChef.credentials.get("rabbitmq", "actions_password")
-management_password = PrivateChef.credentials.get("rabbitmq", "management_password")
+password = PrivateChef.credentials.get('rabbitmq', 'password')
+actions_password = PrivateChef.credentials.get('rabbitmq', 'actions_password')
+management_password = PrivateChef.credentials.get('rabbitmq', 'management_password')
 
 rabbitmq_dir = rabbitmq['dir']
-rabbitmq_etc_dir = File.join(rabbitmq_dir, "etc")
+rabbitmq_etc_dir = File.join(rabbitmq_dir, 'etc')
 rabbitmq_ca_dir = rabbitmq_etc_dir
 rabbitmq_data_dir = rabbitmq['data_dir']
-rabbitmq_data_dir_symlink = File.join(rabbitmq_dir, "db")
+rabbitmq_data_dir_symlink = File.join(rabbitmq_dir, 'db')
 rabbitmq_log_dir = rabbitmq['log_directory']
 
 # path needed for rabbitmqctl to run
 rabbitmq_path = rabbitmq['env_path']
-rabbitmq_env = ENV.to_hash.merge("PATH" => rabbitmq_path)
+rabbitmq_env = ENV.to_hash.merge('PATH' => rabbitmq_path)
 
 [ rabbitmq_dir, rabbitmq_etc_dir, rabbitmq_data_dir, rabbitmq_log_dir ].each do |dir_name|
   directory dir_name do
@@ -48,51 +48,51 @@ link rabbitmq_data_dir_symlink do
   not_if { rabbitmq_data_dir_symlink == rabbitmq_data_dir }
 end
 
-rabbitmq_service_dir = "/opt/opscode/embedded/service/rabbitmq"
+rabbitmq_service_dir = '/opt/opscode/embedded/service/rabbitmq'
 
 ######################################################################
 # NOTE:
 # we do the symlinking in the build, but we're just making sure that
 # the links are still there in the cookbook
 ######################################################################
-%w[rabbitmqctl rabbitmq-defaults rabbitmq-env rabbitmq-plugins rabbitmq-server].each do |cmd|
+%w(rabbitmqctl rabbitmq-defaults rabbitmq-env rabbitmq-plugins rabbitmq-server).each do |cmd|
   link "/opt/opscode/embedded/bin/#{cmd}" do
-    to File.join(rabbitmq_service_dir, "sbin", cmd)
+    to File.join(rabbitmq_service_dir, 'sbin', cmd)
   end
 end
 
-config_file = File.join(rabbitmq_etc_dir, "rabbitmq.conf")
+config_file = File.join(rabbitmq_etc_dir, 'rabbitmq.conf')
 
 template "#{rabbitmq_service_dir}/sbin/rabbitmq-defaults" do
-  owner "root"
-  group "root"
-  mode "0755"
-  variables( :rabbitmq_dir => rabbitmq_dir,
-             :config_file => config_file )
+  owner 'root'
+  group 'root'
+  mode '0755'
+  variables(rabbitmq_dir: rabbitmq_dir,
+            config_file: config_file)
 end
 
 template config_file do
-  source "rabbitmq.conf.erb"
-  owner "root"
-  group "root"
-  mode "0644"
+  source 'rabbitmq.conf.erb'
+  owner 'root'
+  group 'root'
+  mode '0644'
   variables(rabbitmq.to_hash)
 end
 
 ssl_crtfile = node['private_chef']['nginx']['ssl_certificate']
 ssl_keyfile = node['private_chef']['nginx']['ssl_certificate_key']
-ssl_versions = node['private_chef']['rabbitmq']['ssl_versions'].map{ |v| "'#{v}'"}.join(",")
+ssl_versions = node['private_chef']['rabbitmq']['ssl_versions'].map { |v| "'#{v}'" }.join(',')
 
 template "#{rabbitmq_etc_dir}/rabbitmq.config" do
-  owner "root"
-  group "root"
-  mode "0755"
-  variables( :ssl_keyfile => ssl_keyfile,
-             :ssl_crtfile => ssl_crtfile,
-             :ssl_versions => ssl_versions)
+  owner 'root'
+  group 'root'
+  mode '0755'
+  variables(ssl_keyfile: ssl_keyfile,
+            ssl_crtfile: ssl_crtfile,
+            ssl_versions: ssl_versions)
 end
 
-component_runit_service "rabbitmq" do
+component_runit_service 'rabbitmq' do
   runit_attributes(check: true)
   control ['t']
 end
@@ -106,23 +106,23 @@ end
 # the root cause or remove rabbitmq soon.
 #
 script 'hard_kill_rabbitmq' do
-  interpreter "bash"
-  code <<-EOH
-timeout 60 /opt/opscode/embedded/bin/sv stop /opt/opscode/service/rabbitmq
-if [ $? -ne 0 ] 
-then
-   kill --term `/opt/opscode/sv/rabbitmq/supervise/pid`
-fi
+  interpreter 'bash'
+  code <<~EOH
+    timeout 60 /opt/opscode/embedded/bin/sv stop /opt/opscode/service/rabbitmq
+    if [ $? -ne 0 ]
+    then
+       kill --term `/opt/opscode/sv/rabbitmq/supervise/pid`
+    fi
 
-/opt/opscode/embedded/bin/sv start /opt/opscode/service/rabbitmq
-EOH
+    /opt/opscode/embedded/bin/sv start /opt/opscode/service/rabbitmq
+  EOH
   action :nothing
 end
 
 if is_data_master?
-  rmq_ctl = "/opt/opscode/embedded/bin/rabbitmqctl"
-  rmq_plugins = "/opt/opscode/embedded/bin/rabbitmq-plugins"
-  opc_ctl = "/opt/opscode/bin/private-chef-ctl"
+  rmq_ctl = '/opt/opscode/embedded/bin/rabbitmqctl'
+  rmq_plugins = '/opt/opscode/embedded/bin/rabbitmq-plugins'
+  opc_ctl = '/opt/opscode/bin/private-chef-ctl'
   opc_username = OmnibusHelper.new(node).ownership['owner']
   rmq_ctl_chpst = "/opt/opscode/embedded/bin/chpst -u #{opc_username} -U #{opc_username} #{rmq_ctl}"
   rmq_plugins_chpst = "/opt/opscode/embedded/bin/chpst -u #{opc_username} -U #{opc_username} #{rmq_plugins}"
@@ -139,16 +139,16 @@ if is_data_master?
 
   # Remove default guest users
   execute "#{rmq_ctl} delete_user guest" do
-    environment (rabbitmq_env)
+    environment rabbitmq_env
     user opc_username
-    only_if "#{rmq_ctl} list_users| grep guest", :environment => rabbitmq_env
+    only_if "#{rmq_ctl} list_users| grep guest", environment: rabbitmq_env
   end
 
   [ rabbitmq['vhost'], rabbitmq['actions_vhost'] ].each do |vhost|
     execute "#{rmq_ctl} add_vhost #{vhost}" do
-      environment (rabbitmq_env)
+      environment rabbitmq_env
       user opc_username
-      not_if "#{rmq_ctl_chpst} list_vhosts| grep #{vhost}", :environment => rabbitmq_env, :user => "root"
+      not_if "#{rmq_ctl_chpst} list_vhosts| grep #{vhost}", environment: rabbitmq_env, user: 'root'
       retries 20
     end
   end
@@ -156,8 +156,8 @@ if is_data_master?
   # create chef user for the queue
   execute "#{rmq_ctl} add_user #{rabbitmq['user']} [PASSWORD]" do
     command "#{rmq_ctl} add_user #{rabbitmq['user']} #{password}"
-    environment (rabbitmq_env)
-    not_if "#{rmq_ctl_chpst} list_users |grep #{rabbitmq['user']}", :environment => rabbitmq_env, :user => "root"
+    environment rabbitmq_env
+    not_if "#{rmq_ctl_chpst} list_users |grep #{rabbitmq['user']}", environment: rabbitmq_env, user: 'root'
     user opc_username
     retries 10
     sensitive true
@@ -165,18 +165,18 @@ if is_data_master?
 
   execute "#{rmq_ctl} add_user #{rabbitmq['actions_user']} [PASSWORD]" do
     command "#{rmq_ctl} add_user #{rabbitmq['actions_user']} #{actions_password}"
-    environment (rabbitmq_env)
+    environment rabbitmq_env
     user opc_username
-    not_if "#{rmq_ctl_chpst} list_users |grep #{rabbitmq['actions_user']}", :environment => rabbitmq_env, :user => "root"
+    not_if "#{rmq_ctl_chpst} list_users |grep #{rabbitmq['actions_user']}", environment: rabbitmq_env, user: 'root'
     retries 10
     sensitive true
   end
 
   execute "#{rmq_ctl} add_user #{rabbitmq['management_user']} [PASSWORD]" do
     command "#{rmq_ctl} add_user #{rabbitmq['management_user']} #{management_password}"
-    environment (rabbitmq_env)
+    environment rabbitmq_env
     user opc_username
-    not_if "#{rmq_ctl_chpst} list_users |grep #{rabbitmq['management_user']}", :environment => rabbitmq_env, :user => "root"
+    not_if "#{rmq_ctl_chpst} list_users |grep #{rabbitmq['management_user']}", environment: rabbitmq_env, user: 'root'
     retries 10
     sensitive true
   end
@@ -185,27 +185,27 @@ if is_data_master?
   # authenticate the user with the (possibly) new password)
   execute "#{rmq_ctl} change_password #{rabbitmq['user']} [PASSWORD]" do
     command "#{rmq_ctl} change_password #{rabbitmq['user']} #{password}"
-    environment (rabbitmq_env)
+    environment rabbitmq_env
     user opc_username
-    not_if "#{rmq_ctl_chpst} authenticate_user #{rabbitmq['user']} #{password}", :environment => rabbitmq_env, :user => "root"
+    not_if "#{rmq_ctl_chpst} authenticate_user #{rabbitmq['user']} #{password}", environment: rabbitmq_env, user: 'root'
     retries 10
     sensitive true
   end
 
   execute "#{rmq_ctl} change_password #{rabbitmq['actions_user']} [PASSWORD]" do
     command "#{rmq_ctl} change_password #{rabbitmq['actions_user']} #{actions_password}"
-    environment (rabbitmq_env)
+    environment rabbitmq_env
     user opc_username
-    not_if "#{rmq_ctl_chpst} authenticate_user #{rabbitmq['actions_user']} #{actions_password}", :environment => rabbitmq_env, :user => "root"
+    not_if "#{rmq_ctl_chpst} authenticate_user #{rabbitmq['actions_user']} #{actions_password}", environment: rabbitmq_env, user: 'root'
     retries 10
     sensitive true
   end
 
   execute "#{rmq_ctl} change_password #{rabbitmq['management_user']} [PASSWORD]" do
     command "#{rmq_ctl} change_password #{rabbitmq['management_user']} #{management_password}"
-    environment (rabbitmq_env)
+    environment rabbitmq_env
     user opc_username
-    not_if "#{rmq_ctl_chpst} authenticate_user #{rabbitmq['management_user']} #{management_password}", :environment => rabbitmq_env, :user => "root"
+    not_if "#{rmq_ctl_chpst} authenticate_user #{rabbitmq['management_user']} #{management_password}", environment: rabbitmq_env, user: 'root'
     retries 10
     sensitive true
   end
@@ -215,52 +215,51 @@ if is_data_master?
   # the three regex's map to config, write, read permissions respectively
   #
   execute "#{rmq_ctl} set_permissions -p #{rabbitmq['vhost']} #{rabbitmq['user']} \".*\" \".*\" \".*\"" do
-    environment (rabbitmq_env)
+    environment rabbitmq_env
     user opc_username
-    not_if "#{rmq_ctl_chpst} list_user_permissions #{rabbitmq['user']}|grep #{rabbitmq['vhost']}", :environment => rabbitmq_env, :user => "root"
+    not_if "#{rmq_ctl_chpst} list_user_permissions #{rabbitmq['user']}|grep #{rabbitmq['vhost']}", environment: rabbitmq_env, user: 'root'
     retries 10
   end
 
   execute "#{rmq_ctl} set_permissions -p #{rabbitmq['actions_vhost']} #{rabbitmq['user']} \".*\" \".*\" \".*\"" do
-    environment (rabbitmq_env)
+    environment rabbitmq_env
     user opc_username
-    not_if "#{rmq_ctl_chpst} list_user_permissions #{rabbitmq['user']}|grep #{rabbitmq['actions_vhost']}", :environment => rabbitmq_env, :user => "root"
+    not_if "#{rmq_ctl_chpst} list_user_permissions #{rabbitmq['user']}|grep #{rabbitmq['actions_vhost']}", environment: rabbitmq_env, user: 'root'
     retries 10
   end
 
   execute "#{rmq_ctl} set_permissions -p #{rabbitmq['actions_vhost']} #{rabbitmq['actions_user']} \".*\" \".*\" \".*\"" do
-    environment (rabbitmq_env)
+    environment rabbitmq_env
     user opc_username
-    not_if "#{rmq_ctl_chpst} list_user_permissions #{rabbitmq['actions_user']}|grep #{rabbitmq['actions_vhost']}", :environment => rabbitmq_env, :user => "root"
+    not_if "#{rmq_ctl_chpst} list_user_permissions #{rabbitmq['actions_user']}|grep #{rabbitmq['actions_vhost']}", environment: rabbitmq_env, user: 'root'
     retries 10
   end
 
-
   execute "#{rmq_ctl} set_permissions -p #{rabbitmq['actions_vhost']} #{rabbitmq['management_user']} \".*\" \".*\" \".*\"" do
-    environment (rabbitmq_env)
+    environment rabbitmq_env
     user opc_username
-    not_if "#{rmq_ctl_chpst} list_user_permissions #{rabbitmq['management_user']}|grep #{rabbitmq['actions_vhost']}", :environment => rabbitmq_env, :user => "root"
+    not_if "#{rmq_ctl_chpst} list_user_permissions #{rabbitmq['management_user']}|grep #{rabbitmq['actions_vhost']}", environment: rabbitmq_env, user: 'root'
     retries 10
   end
 
   execute "#{rmq_ctl} set_permissions -p #{rabbitmq['vhost']} #{rabbitmq['management_user']} \".*\" \".*\" \".*\"" do
-    environment (rabbitmq_env)
+    environment rabbitmq_env
     user opc_username
-    not_if "#{rmq_ctl_chpst} list_user_permissions #{rabbitmq['management_user']}|grep #{rabbitmq['vhost']}", :environment => rabbitmq_env, :user => "root"
+    not_if "#{rmq_ctl_chpst} list_user_permissions #{rabbitmq['management_user']}|grep #{rabbitmq['vhost']}", environment: rabbitmq_env, user: 'root'
     retries 10
   end
 
   execute "#{rmq_ctl} set_permissions -p / #{rabbitmq['management_user']} \".*\" \".*\" \".*\"" do
-    environment (rabbitmq_env)
+    environment rabbitmq_env
     user opc_username
-    not_if "#{rmq_ctl_chpst} list_user_permissions #{rabbitmq['management_user']}|grep \"/\\s\"", :environment => rabbitmq_env, :user => "root"
+    not_if "#{rmq_ctl_chpst} list_user_permissions #{rabbitmq['management_user']}|grep \"/\\s\"", environment: rabbitmq_env, user: 'root'
     retries 10
   end
 
   rabbitmq_management_is_up = "#{rmq_plugins} list | grep rabbitmq_management  | grep -v rabbitmq_management_agent | grep -v rabbitmq_management_visualiser | grep E"
   if rabbitmq['management_enabled']
     execute "#{rmq_plugins} enable rabbitmq_management" do
-      environment (rabbitmq_env)
+      environment rabbitmq_env
       user opc_username
       not_if rabbitmq_management_is_up
       # management plugin needs a rabbit restart
@@ -269,7 +268,7 @@ if is_data_master?
     end
   else
     execute "#{rmq_plugins} disable rabbitmq_management" do
-      environment (rabbitmq_env)
+      environment rabbitmq_env
       user opc_username
       notifies :run, 'script[hard_kill_rabbitmq]', :delayed
       only_if rabbitmq_management_is_up
@@ -278,23 +277,23 @@ if is_data_master?
   end
 
   execute "#{rmq_ctl} set_user_tags #{rabbitmq['management_user']} administrator" do
-    environment (rabbitmq_env)
+    environment rabbitmq_env
     user opc_username
-    not_if "#{rmq_ctl_chpst} list_users | grep #{rabbitmq['management_user']} | grep administrator", :environment => rabbitmq_env, :user => "root"
+    not_if "#{rmq_ctl_chpst} list_users | grep #{rabbitmq['management_user']} | grep administrator", environment: rabbitmq_env, user: 'root'
     retries 10
   end
 
   execute "#{rmq_ctl} set_policy -p /analytics max_length '(erchef|alaska|notifier.notifications|notifier_config)' '{\"max-length\":#{rabbitmq['analytics_max_length']}}' --apply-to queues" do
-    environment (rabbitmq_env)
+    environment rabbitmq_env
     user opc_username
-    only_if do rabbitmq['analytics_max_length'] > 0 end
+    only_if { rabbitmq['analytics_max_length'] > 0 }
     retries 10
   end
 
   execute "#{rmq_ctl} clear_policy -p /analytics max_length" do
-    environment (rabbitmq_env)
+    environment rabbitmq_env
     user opc_username
-    not_if do rabbitmq['analytics_max_length'] > 0 end
+    not_if { rabbitmq['analytics_max_length'] > 0 }
     retries 10
   end
 

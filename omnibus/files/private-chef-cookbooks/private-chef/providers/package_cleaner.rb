@@ -54,7 +54,7 @@ def remove_files
     file f do
       action :delete
       backup false # We're removing cruft from the system; we don't
-                   # want to leave backup cruft
+      # want to leave backup cruft
     end
   end
 end

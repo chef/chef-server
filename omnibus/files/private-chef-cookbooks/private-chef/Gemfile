@@ -1,5 +1,5 @@
-source "https://rubygems.org"
+source 'https://rubygems.org'
 
 # Used for rspec testing only
-gem "chefspec"
-gem "veil", git: "https://github.com/chef/chef_secrets.git"
+gem 'chefspec'
+gem 'veil', git: 'https://github.com/chef/chef_secrets.git'

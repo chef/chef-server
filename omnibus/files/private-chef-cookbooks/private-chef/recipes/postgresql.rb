@@ -18,7 +18,7 @@
 
 postgresql_dir = node['private_chef']['postgresql']['dir']
 postgresql_data_dir = node['private_chef']['postgresql']['data_dir']
-postgresql_data_dir_symlink = File.join(postgresql_dir, "data")
+postgresql_data_dir_symlink = File.join(postgresql_dir, 'data')
 postgresql_log_dir = node['private_chef']['postgresql']['log_directory']
 
 # Postgres User Setup
@@ -38,9 +38,9 @@ directory node['private_chef']['postgresql']['home'] do
   mode node['private_chef']['service_dir_perms']
 end
 
-file File.join(node['private_chef']['postgresql']['home'], ".profile") do
+file File.join(node['private_chef']['postgresql']['home'], '.profile') do
   owner node['private_chef']['postgresql']['username']
-  mode "0644"
+  mode '0644'
   content <<-EOH
     PATH=#{node['private_chef']['postgresql']['user_path']}
   EOH
@@ -62,9 +62,9 @@ directory postgresql_dir do
 end
 
 # Upgrade the cluster if you gotta
-private_chef_pg_upgrade "upgrade_if_necessary"
+private_chef_pg_upgrade 'upgrade_if_necessary'
 
-component_runit_service "postgresql" do
+component_runit_service 'postgresql' do
   control ['t']
 end
 
@@ -87,19 +87,19 @@ end
 # just do a check against node['private_chef']['bootstrap']['enable'],
 # which would only run them one time.
 if is_data_master?
-  execute "/opt/opscode/bin/private-chef-ctl start postgresql" do
+  execute '/opt/opscode/bin/private-chef-ctl start postgresql' do
     retries 20
   end
 
-  ruby_block "wait for postgresql to start" do
+  ruby_block 'wait for postgresql to start' do
     block do
       connectable = false
-      2.times do |i|
+      2.times do |_i|
         # Note that we have to include the port even for a local pipe, because the port number
         # is included in the pipe default.
         `echo 'SELECT * FROM pg_database;' | su - #{node['private_chef']['postgresql']['username']} -c '/opt/opscode/embedded/bin/psql -p #{node['private_chef']['postgresql']['port']} -U #{node['private_chef']['postgresql']['db_superuser']} "dbname=postgres sslmode=#{node['private_chef']['postgresql']['sslmode']}" -t -A'`
-	if $?.exitstatus != 0
-          Chef::Log.fatal("Could not connect to database, retrying in 10 seconds.")
+        if $CHILD_STATUS.exitstatus != 0
+          Chef::Log.fatal('Could not connect to database, retrying in 10 seconds.')
           sleep 10
         else
           connectable = true
@@ -108,12 +108,12 @@ if is_data_master?
       end
 
       unless connectable
-        Chef::Log.fatal <<-ERR
+        Chef::Log.fatal <<~ERR
 
-Could not connect to the postgresql database.
-Please check 'chef-server-ctl tail postgresql' for more information.
+          Could not connect to the postgresql database.
+          Please check 'chef-server-ctl tail postgresql' for more information.
 
-ERR
+        ERR
         exit!(1)
       end
     end
@@ -129,9 +129,9 @@ ERR
   end
 
   # Set up a database for the opscode-pgsql user to log into automatically
-  private_chef_pg_database "opscode-pgsql"
-  include_recipe "private-chef::erchef_database"
-  include_recipe "private-chef::bifrost_database"
-  include_recipe "private-chef::oc_id_database"
-  include_recipe "private-chef::bookshelf_database" if node["private_chef"]["bookshelf"]["storage_type"] == "sql"
+  private_chef_pg_database 'opscode-pgsql'
+  include_recipe 'private-chef::erchef_database'
+  include_recipe 'private-chef::bifrost_database'
+  include_recipe 'private-chef::oc_id_database'
+  include_recipe 'private-chef::bookshelf_database' if node['private_chef']['bookshelf']['storage_type'] == 'sql'
 end
