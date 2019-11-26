@@ -72,7 +72,7 @@ resource "null_resource" "external_postgresql_config" {
       "sudo apt-key add ACCC4CF8.asc",
       "sudo apt-get update",
       "sudo apt-get install -y ssl-cert sysstat postgresql-9.6",
-      "echo 'host    all             all            ${module.chef_server.private_ipv4_address}/32         md5' | sudo tee -a /etc/postgresql/9.6/main/pg_hba.conf",
+      "echo 'host    all             all            ${var.enable_ipv6 == true ? module.chef_server.public_ipv6_address : module.chef_server.private_ipv4_address}/${var.enable_ipv6 == "true" ? 64 : 32}         md5' | sudo tee -a /etc/postgresql/9.6/main/pg_hba.conf",
       "echo \"listen_addresses='*'\" | sudo tee -a /etc/postgresql/9.6/main/postgresql.conf",
       "sudo systemctl restart postgresql",
       "sudo -u postgres psql -c \"CREATE USER bofh SUPERUSER ENCRYPTED PASSWORD 'i1uvd3v0ps';\"",
