@@ -42,3 +42,6 @@ manifest.json
 chef-server-dependency-licenses.json
 
 license-cache
+
+# don't commit berks lock files
+Berksfile.lock
