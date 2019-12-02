@@ -60,7 +60,7 @@ data "template_file" "chef_server_config" {
   template = "${file("${path.module}/templates/chef-server.rb.tpl")}"
 
   vars {
-    postgres_fqdn = "${azurerm_postgresql_server.default.fqdn}"
+    postgresql_fqdn = "${azurerm_postgresql_server.default.fqdn}"
   }
 }
 

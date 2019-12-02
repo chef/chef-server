@@ -10,7 +10,7 @@ profiles['root_url'] = 'http://localhost:9998'
 
 postgresql['external'] = true
 
-postgresql['vip'] = "${external_postgresql_ip}"
+postgresql['vip'] = "${postgresql_ip}"
 postgresql['port'] = 5432
 postgresql['db_superuser'] = "bofh"
 postgresql['db_superuser_password'] = "i1uvd3v0ps"

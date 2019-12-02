@@ -13,7 +13,7 @@ module "chef_server" {
   name              = "chef_server-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
-module "external_postgresql" {
+module "postgresql" {
   source = "../../modules/aws_instance"
 
   aws_profile       = "${var.aws_profile}"
@@ -25,7 +25,7 @@ module "external_postgresql" {
   aws_instance_type = "${var.aws_instance_type}"
   enable_ipv6       = "${var.enable_ipv6}"
   platform          = "ubuntu-16.04"
-  name              = "external_postgresql-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
+  name              = "postgresql-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 # generate static hosts configuration
@@ -33,8 +33,8 @@ data "template_file" "hosts_config" {
   template = "${file("${path.module}/templates/hosts.tpl")}"
 
   vars {
-    chef_server_ip         = "${var.enable_ipv6 == true ? module.chef_server.public_ipv6_address : module.chef_server.private_ipv4_address}"
-    external_postgresql_ip = "${var.enable_ipv6 == true ? module.external_postgresql.public_ipv6_address : module.external_postgresql.private_ipv4_address}"
+    chef_server_ip = "${var.enable_ipv6 == true ? module.chef_server.public_ipv6_address : module.chef_server.private_ipv4_address}"
+    postgresql_ip  = "${var.enable_ipv6 == true ? module.postgresql.public_ipv6_address : module.postgresql.private_ipv4_address}"
   }
 }
 
@@ -43,17 +43,17 @@ data "template_file" "chef_server_rb" {
   template = "${file("${path.module}/templates/chef-server.rb.tpl")}"
 
   vars {
-    external_postgresql_ip = "${var.enable_ipv6 == true ? module.external_postgresql.public_ipv6_address : module.external_postgresql.private_ipv4_address}"
+    postgresql_ip = "${var.enable_ipv6 == true ? module.postgresql.public_ipv6_address : module.postgresql.private_ipv4_address}"
   }
 }
 
-# update external_postgres server
-resource "null_resource" "external_postgresql_config" {
+# update postgres server
+resource "null_resource" "postgresql_config" {
   # provide some connection info
   connection {
     type = "ssh"
-    user = "${module.external_postgresql.ssh_username}"
-    host = "${module.external_postgresql.public_ipv4_dns}"
+    user = "${module.postgresql.ssh_username}"
+    host = "${module.postgresql.public_ipv4_dns}"
   }
 
   provisioner "file" {
@@ -82,7 +82,7 @@ resource "null_resource" "external_postgresql_config" {
 
 # update chef server
 resource "null_resource" "chef_server_config" {
-  depends_on = ["null_resource.external_postgresql_config"]
+  depends_on = ["null_resource.postgresql_config"]
 
   # provide some connection info
   connection {
