@@ -8,6 +8,49 @@ This document contains release notes for the current major release and all patch
 For prior releases,
 see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 13.1.13 (2019-11-25)
+
+### General changes
+
+A lot of work for this release has gone into improving our test infrastructure to test the release with various topologies and configurations. This leads to increased confidence and reduced risk of regressions with future releases of Chef Infra Server. We have also addressed some technical debt, cleaning up our codebase and enabling us to better serve our community with increased velocity.
+
+We have been performing issue triage for Chef Infra Server for three months, and we have been hard at work cleaning up GitHub issues to highlight active issues. Recordings of Chef Infra Server triage sessions can be found [here](https://www.youtube.com/user/getchef). Part of keeping our issue backlog relevant is ensuring that active issues are prominently featured over inactive issues. As a part of this effort we will be more aggressively closing issues that are inactive or do not apply to supported features. If you find that an issue or PR that you are invested in has closed, please feel free to reopen it. All feature requests can be made using the [Aha! Portal](https://chef-software.ideas.aha.io/).
+
+Simplifying the management of Chef’s product portfolio is something that we are very focused on currently. As a part of that effort, we are preparing to move from Solr to Elasticsearch to align with several other projects and products that currently leverage Elasticsearch. Migration to Elasticsearch will also improve performance and provide an up-to-date dependency. Chef Infra server still continues to use Solr4 for search for the purposes of this release, but Elasticsearch packages are now also included albeit still unused.
+
+### Improvements/bug fixes
+
+- `_status` endpoint reports healthy even if data_collector is down not causing unnecessary failovers.
+- Data collector proxy-header X-Forwarded for is set as expected.
+- `chef-server-ctl` is no longer installed in the user path only the appbundled version is installed in the user path
+- Fixes issue with Chef Support Zendesk sign-ins when a first name is not set in Hosted Chef.
+- Added support for running the Chef Infra Server on Red Hat Enterprise Linux 8.
+- Improvements to `chef-server-ctl gather-logs`
+    - Add AWS to known platforms
+    - Add AWS Native Chef Server info
+    - Add elasticsearch info
+    - Switched compression from `bzip2` to `gzip`
+
+### Deprecation notices
+
+- SLES 11 is no longer supported per our [platform policy](https://docs.chef.io/platforms.html#platform-end-of-life-policy), as upstream support ended in March of this year.
+
+### Updates
+
+- Postgres 9.6.10 -> 9.6.15
+- Chef Infra Client v15.3.14 -> v15.4.45
+- OpenResty 1.13.6.2 -> 1.15.8.1
+- Nokogiri 1.8.5 -> 1.10.4 to resolve the following CVE's
+    - [CVE-2019-5477](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-5477)
+- Rebar3 -> 3.12.0
+- Updated erlang deps to be the latest
+- Loofah 2.2.3 -> 2.3.1
+- Erlang R18 -> 20.3.8.9
+- Updated ChefInfraServer setup cookbooks for cookstyle fixes
+- Ruby 2.5.5 -> 2.6.3
+- Openssl 1.0.2s -> 1.0.2t to resolve the following CVE's
+    - [CVE-2019-1563](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-1563) and [CVE-2019-1547](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-1547) 
+
 ## 13.0.11 (2019-06-19)
 
 ### Chef Server is now Chef Infra Server
