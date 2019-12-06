@@ -31,9 +31,7 @@ apt-get install -y lua5.1 luarocks postgresql-9.6 libsqlite3-dev
 
 echo "Configuring postgresql"
 cp /workdir/scripts/bk_tests/pb_hba.conf /etc/postgresql/9.6/main/pg_hba.conf
-
-echo "Setting erlang version to 20.3"
-asdf local erlang 20.3
+asdf local erlang 22.1.8
 erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell
 
 echo "Installing Bundler"
