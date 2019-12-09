@@ -114,7 +114,7 @@ resource "null_resource" "chef_server_test" {
   connection {
     type = "ssh"
     user = "${module.chef_server.ssh_username}"
-    host = "${module.chef_server.public_ipv4_dns}"
+    host = "${module.chef_server.public_ipv4_address}"
   }
 
   # run smoke test
