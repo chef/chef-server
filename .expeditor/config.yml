@@ -39,6 +39,9 @@ pipelines:
       definition: .expeditor/release.omnibus.yml
       env:
         - ADHOC: true
+  - integration_test:
+      description: Run integration test scenarios
+      definition: .expeditor/integration_test.pipeline.yml
 
 # These actions are taken, in order they are specified, anytime a Pull Request is merged.
 merge_actions:
