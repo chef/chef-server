@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 13.1.14 -->
+## [13.1.14](https://github.com/chef/chef-server/tree/13.1.14) (2019-12-11)
+
+#### Merged Pull Requests
+- Add integration_test pipeline [#1857](https://github.com/chef/chef-server/pull/1857) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=13.1.13 -->
+### Changes since 13.1.13 release
+
+#### Merged Pull Requests
+- Add integration_test pipeline [#1857](https://github.com/chef/chef-server/pull/1857) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.14 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
