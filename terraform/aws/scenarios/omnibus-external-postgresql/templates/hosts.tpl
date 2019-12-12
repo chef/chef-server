@@ -8,6 +8,6 @@ ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 ff02::3 ip6-allhosts
 
-${chef_server_ip} chef_server.internal
+${chef_server_ip} chefserver.internal
 
-${external_postgresql_ip} external_postgresql.internal external_postgresql.chef-server.dev
+${postgresql_ip} postgresql.internal

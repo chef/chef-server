@@ -39,7 +39,7 @@ Environment variables are used to control how the scenarios are executed and can
 | `ARM_DEPT` | Department that owns the resources should be one of: EngServ,  Operations, Eng, Training, Solutions, Sales, BD, Success or Partner | Eng |
 | `ARM_CONTACT` | The primary contact for the resources, this should be the IAM username  and must be able to receive email by appending @chef.io to it (this  person can explain what/why, might not be the business owner) | csnapp |
 | `ARM_SSH_KEY_FILE` | The file system path to your SSH **public** key. | ~/.ssh/id_rsa.pub |
-| `SCENARIO` | The name of the sub-directory within `scenarios` containing the test you'd like to run. | omnibus-external-postgres |
+| `SCENARIO` | The name of the sub-directory within `scenarios` containing the test you'd like to run. | omnibus-external-postgresql |
 | `INSTALL_VERSION` | The version number of the artifact you want to install first. | 12.19.31 |
 | `UPGRADE_VERSION` | The version number of the artifact you want to upgrade to. | 13.0.40+20190923060037 |
 
@@ -56,13 +56,13 @@ Environment variables are used to control how the scenarios are executed and can
 
 The test scenarios are each defined in their own terraform directory and are selected by providing the scenario name via the `SCENARIO` environment variable.
 
-The naming convention for each scenario is `<PACKAGE_TYPE>-<TOPOLOGY>-<INSTALL_STRATEGY>` (e.g. `omnibus-external-postgres`)
+The naming convention for each scenario is `<PACKAGE_TYPE>-<TOPOLOGY>-<INSTALL_STRATEGY>` (e.g. `omnibus-external-postgresql`)
 
 An example of a typical scenario lifecycle might look like this:
 
-1. `ARM_DEPT=Eng ARM_CONTACT=csnapp ARM_SSH_KEY_FILE=~/.ssh/id_rsa.pub SCENARIO=omnibus-external-postgres INSTALL_VERSION=12.19.31 UPGRADE_VERSION=13.0.40+20190923060037 make apply`
+1. `ARM_DEPT=Eng ARM_CONTACT=csnapp ARM_SSH_KEY_FILE=~/.ssh/id_rsa.pub SCENARIO=omnibus-external-postgresql INSTALL_VERSION=12.19.31 UPGRADE_VERSION=13.0.40+20190923060037 make apply`
 2. Optionally, you may SSH into the scenario instances for troubleshooting.
-3. `ARM_DEPT=Eng ARM_CONTACT=csnapp ARM_SSH_KEY_FILE=~/.ssh/id_rsa.pub SCENARIO=omnibus-external-postgres INSTALL_VERSION=12.19.31 UPGRADE_VERSION=13.0.40+20190923060037 make destroy`
+3. `ARM_DEPT=Eng ARM_CONTACT=csnapp ARM_SSH_KEY_FILE=~/.ssh/id_rsa.pub SCENARIO=omnibus-external-postgresql INSTALL_VERSION=12.19.31 UPGRADE_VERSION=13.0.40+20190923060037 make destroy`
 
 ***NOTE:*** **There is no automatic reaping of the scenario.**
 
@@ -72,7 +72,7 @@ An example of a typical scenario lifecycle might look like this:
 
 For terraform to track multiple concurrent scenarios it uses a concept called a `workspace`.
 
-The `workspace` name is the combination of the following variables `SCENARIO-ENABLE_IPV6-PLATFORM` (e.g. `omnibus-external-postgres-ipv6-rhel-7`)
+The `workspace` name is the combination of the following variables `SCENARIO-ENABLE_IPV6-PLATFORM` (e.g. `omnibus-external-postgresql-ipv6-rhel-7`)
 
 To get a list of the workspaces that are still active you may run the `make list-active-workspaces` command.
 
@@ -83,5 +83,5 @@ To destroy all active scenarios you may run either the `make destroy-all` or `ma
 ## Adding a new Scenario
 
 1. Duplicate an existing scenario directory that is similar to the one you desire. For example, if you wanted to add a
-   `omnibus-tiered-upgrade-from-stable`, you could start with the `omnibus-external-postgres` scenario file.   
+   `omnibus-tiered-upgrade-from-stable`, you could start with the `omnibus-external-postgresql` scenario file.   
 2. Update the `main.tf` file to reflect the scenario name as well as any additional test changes you require.

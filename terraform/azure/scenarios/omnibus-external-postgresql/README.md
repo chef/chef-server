@@ -1,4 +1,4 @@
-# Omnibus External Postgres
+# Omnibus External PostgreSQL
 
 This directory contains the Terraform code used to instantiate an Azure PostgreSQL database followed by a Chef Infra Server utilizing an Omnibus built artifact downloaded from `$upgrade_version_url` as the install package.
 
