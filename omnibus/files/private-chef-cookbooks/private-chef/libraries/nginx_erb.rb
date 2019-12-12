@@ -1,5 +1,4 @@
 class NginxErb
-
   attr_reader :node
 
   def initialize(node)
@@ -26,7 +25,7 @@ class NginxErb
     if default_orgname
       "\"#{default_orgname}\""
     else
-      "false"
+      'false'
     end
   end
 
@@ -38,18 +37,17 @@ class NginxErb
     end
   end
 
-
   def implicit_hosts
     @implicit_hosts ||= begin
-                          hosts = [ "localhost", "127.0.0.1" ]
-                          hosts << "::1" if ipv6?
+                          hosts = [ 'localhost', '127.0.0.1' ]
+                          hosts << '::1' if ipv6?
 
                           hosts << local_ip_addresses
                           if node['cloud']
                             hosts << node['cloud']['public_ips'] if node['cloud']['public_ips']
                             hosts << node['cloud']['private_ips'] if node['cloud']['private_ips']
                           end
-                          hosts.flatten.uniq.join(" ")
+                          hosts.flatten.uniq.join(' ')
                         end
   end
 
@@ -59,12 +57,13 @@ class NginxErb
 
   def local_ip_addresses
     ret = []
-    node['network']['interfaces'].each do |name, iface|
-      next unless iface["addresses"].respond_to?(:each)
-      iface["addresses"].each do |addr, addr_info|
-        if addr_info["family"] == "inet"
+    node['network']['interfaces'].each do |_name, iface|
+      next unless iface['addresses'].respond_to?(:each)
+
+      iface['addresses'].each do |addr, addr_info|
+        if addr_info['family'] == 'inet'
           ret << addr
-        elsif addr_info["family"] == "inet6" && ipv6?
+        elsif addr_info['family'] == 'inet6' && ipv6?
           ret << addr
         end
       end
@@ -73,11 +72,11 @@ class NginxErb
   end
 
   def listen_port(proto, options = {})
-    listen_port = ""
+    listen_port = ''
     listen_port << case proto
-                   when "http"
-                     node['private_chef']['nginx']['non_ssl_port'].to_s || "80"
-                   when "https"
+                   when 'http'
+                     node['private_chef']['nginx']['non_ssl_port'].to_s || '80'
+                   when 'https'
                      node['private_chef']['nginx']['ssl_port'].to_s
                    else
                      proto.to_s
@@ -100,11 +99,11 @@ class NginxErb
 
   def access_log(proto)
     case proto
-    when "http"
+    when 'http'
       fname = "access-port-#{node['private_chef']['nginx']['non_ssl_port'] || 80}.log"
       "/var/log/opscode/nginx/#{fname}"
-    when "https"
-      "/var/log/opscode/nginx/access.log"
+    when 'https'
+      '/var/log/opscode/nginx/access.log'
     end
   end
 end

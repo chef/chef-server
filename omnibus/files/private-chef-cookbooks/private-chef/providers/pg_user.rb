@@ -86,7 +86,7 @@ def create_user(connection)
   # have the new user's role.
   if node['private_chef']['postgresql']['external']
     statements << "GRANT #{new_resource.username} TO \"#{node['private_chef']['postgresql']['db_superuser']}\""
-    changes <<  "  Grant role '#{new_resource.username}' to database superuser."
+    changes << "  Grant role '#{new_resource.username}' to database superuser."
   end
   converge_by changes do
     statements.each do |statement|

@@ -19,11 +19,11 @@
 helper = OmnibusHelper.new(node)
 opscode_erchef_dir = node['private_chef']['opscode-erchef']['dir']
 opscode_erchef_log_dir = node['private_chef']['opscode-erchef']['log_directory']
-opscode_erchef_sasl_log_dir = File.join(opscode_erchef_log_dir, "sasl")
+opscode_erchef_sasl_log_dir = File.join(opscode_erchef_log_dir, 'sasl')
 [
   opscode_erchef_dir,
   opscode_erchef_log_dir,
-  opscode_erchef_sasl_log_dir
+  opscode_erchef_sasl_log_dir,
 ].each do |dir_name|
   directory dir_name do
     owner helper.ownership['owner']
@@ -33,16 +33,16 @@ opscode_erchef_sasl_log_dir = File.join(opscode_erchef_log_dir, "sasl")
   end
 end
 
-link "/opt/opscode/embedded/service/opscode-erchef/log" do
+link '/opt/opscode/embedded/service/opscode-erchef/log' do
   to opscode_erchef_log_dir
 end
 
 ldap_authentication_enabled = helper.ldap_authentication_enabled?
- # These values are validated and managed in libraries/private_chef.rb#gen_ldap
+# These values are validated and managed in libraries/private_chef.rb#gen_ldap
 enable_ssl = ldap_authentication_enabled ? node['private_chef']['ldap']['enable_ssl'] : nil
 ldap_encryption_type = ldap_authentication_enabled ? node['private_chef']['ldap']['encryption_type'] : nil
 
-erchef_config = File.join(opscode_erchef_dir, "sys.config")
+erchef_config = File.join(opscode_erchef_dir, 'sys.config')
 
 rabbitmq = helper.rabbitmq_configuration
 
@@ -53,21 +53,21 @@ actions_vhost = rabbitmq['actions_vhost']
 actions_exchange = rabbitmq['actions_exchange']
 
 template erchef_config do
-  source "oc_erchef.config.erb"
+  source 'oc_erchef.config.erb'
   owner helper.ownership['owner']
   group helper.ownership['group']
-  mode "644"
+  mode '644'
   variables lazy {
-    node['private_chef']['opscode-erchef'].to_hash.merge(:ldap_enabled => ldap_authentication_enabled,
-                                                         :enable_ssl => enable_ssl,
-                                                         :actions_vip => actions_vip,
-                                                         :actions_port => actions_port,
-                                                         :actions_user => actions_user,
-                                                         :actions_vhost => actions_vhost,
-                                                         :actions_exchange => actions_exchange,
-                                                         :ldap_encryption_type => ldap_encryption_type,
-                                                         :solr_elasticsearch_major_version => helper.elastic_search_major_version,
-                                                         :helper => helper)
+    node['private_chef']['opscode-erchef'].to_hash.merge(ldap_enabled: ldap_authentication_enabled,
+                                                         enable_ssl: enable_ssl,
+                                                         actions_vip: actions_vip,
+                                                         actions_port: actions_port,
+                                                         actions_user: actions_user,
+                                                         actions_vhost: actions_vhost,
+                                                         actions_exchange: actions_exchange,
+                                                         ldap_encryption_type: ldap_encryption_type,
+                                                         solr_elasticsearch_major_version: helper.elastic_search_major_version,
+                                                         helper: helper)
   }
   notifies :run, 'execute[remove_erchef_siz_files]', :immediately
   notifies :restart, 'component_runit_service[opscode-erchef]'
@@ -84,28 +84,28 @@ end
 # configuration.
 #
 # [1]: http://erlang.org/doc/man/disk_log.html
-execute "remove_erchef_siz_files" do
-  command "rm -f *.siz"
+execute 'remove_erchef_siz_files' do
+  command 'rm -f *.siz'
   cwd node['private_chef']['opscode-erchef']['log_directory']
   action :nothing
 end
 
-link "/opt/opscode/embedded/service/opscode-erchef/sys.config" do
+link '/opt/opscode/embedded/service/opscode-erchef/sys.config' do
   to erchef_config
 end
 
-vmargs_config = File.join(opscode_erchef_dir, "vm.args")
+vmargs_config = File.join(opscode_erchef_dir, 'vm.args')
 
 template vmargs_config do
-  source "oc_erchef.vm.args.erb"
+  source 'oc_erchef.vm.args.erb'
   owner helper.ownership['owner']
   group helper.ownership['group']
-  mode "644"
+  mode '644'
   notifies :restart, 'component_runit_service[opscode-erchef]'
 end
 
-link "/opt/opscode/embedded/service/opscode-erchef/vm.args" do
+link '/opt/opscode/embedded/service/opscode-erchef/vm.args' do
   to vmargs_config
 end
 
-component_runit_service "opscode-erchef"
+component_runit_service 'opscode-erchef'

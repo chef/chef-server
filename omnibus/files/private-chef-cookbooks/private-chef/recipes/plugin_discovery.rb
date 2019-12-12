@@ -15,17 +15,17 @@
 # limitations under the License.
 #
 
-# TODO Does this go away with HA?
-BACKUP_PLUGIN_LOCATIONS = %w(/opt/opscode/chef-server-plugin.rb)
+# TODO: Does this go away with HA?
+BACKUP_PLUGIN_LOCATIONS = %w(/opt/opscode/chef-server-plugin.rb).freeze
 
-node.default['available-plugins'] = EnterprisePluginCollection.from_glob("/var/opt/opscode/plugins/*.rb")
+node.default['available-plugins'] = EnterprisePluginCollection.from_glob('/var/opt/opscode/plugins/*.rb')
 
 #
 # Load plugins from backup locations if we didn't find anything
 # in the plugin directory.
 #
 if node.default['available-plugins'].empty?
-  c = EnterprisePluginCollection.new()
+  c = EnterprisePluginCollection.new
   BACKUP_PLUGIN_LOCATIONS.each do |path|
     if ::File.exist?(path)
       c.load_from_file(path)

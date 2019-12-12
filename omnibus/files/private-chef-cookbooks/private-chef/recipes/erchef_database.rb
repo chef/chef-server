@@ -26,13 +26,13 @@ private_chef_pg_user erchef['sql_ro_user'] do
   superuser false
 end
 
-private_chef_pg_database "opscode_chef" do
+private_chef_pg_database 'opscode_chef' do
   owner erchef['sql_user']
-  notifies :deploy, "private_chef_pg_sqitch[/opt/opscode/embedded/service/opscode-erchef/schema/baseline]", :immediately
+  notifies :deploy, 'private_chef_pg_sqitch[/opt/opscode/embedded/service/opscode-erchef/schema/baseline]', :immediately
 end
 
 # For existing installations, make sure the database owner is set to sql_user
-ruby_block "set opscode_chef ownership" do
+ruby_block 'set opscode_chef ownership' do
   block do
     EcPostgres.with_connection(node, 'opscode_chef') do |connection|
       connection.exec("ALTER DATABASE opscode_chef OWNER TO #{erchef['sql_user']};")
@@ -44,27 +44,26 @@ end
 # At this time, we're using partybus to apply upgrade-related sqitch migrations,
 # so that we can also apply any necessary data migrations (not yet managed through sqitch)
 # at that time.
-private_chef_pg_sqitch "/opt/opscode/embedded/service/opscode-erchef/schema/baseline" do
+private_chef_pg_sqitch '/opt/opscode/embedded/service/opscode-erchef/schema/baseline' do
   hostname  postgres['vip']
   port      postgres['port']
   username  postgres['db_superuser']
   password  PrivateChef.credentials.get('postgresql', 'db_superuser_password')
-  database  "opscode_chef"
+  database  'opscode_chef'
   sslmode   postgres['sslmode']
   action :nothing
-  notifies :deploy, "private_chef_pg_sqitch[/opt/opscode/embedded/service/opscode-erchef/schema]", :immediately
+  notifies :deploy, 'private_chef_pg_sqitch[/opt/opscode/embedded/service/opscode-erchef/schema]', :immediately
 end
 
-private_chef_pg_sqitch "/opt/opscode/embedded/service/opscode-erchef/schema" do
+private_chef_pg_sqitch '/opt/opscode/embedded/service/opscode-erchef/schema' do
   hostname  postgres['vip']
   port      postgres['port']
   username  postgres['db_superuser']
   password  PrivateChef.credentials.get('postgresql', 'db_superuser_password')
-  database "opscode_chef"
-  sslmode   postgres['sslmode']
+  database 'opscode_chef'
+  sslmode postgres['sslmode']
   action :nothing
 end
-
 
 private_chef_pg_user_table_access erchef['sql_user'] do
   database 'opscode_chef'
@@ -81,7 +80,7 @@ private_chef_pg_user_table_access erchef['sql_ro_user'] do
 end
 
 # Cleanup old enterprise-chef-server-schema
-directory "/opt/opscode/embedded/service/enterprise-chef-server-schema" do
+directory '/opt/opscode/embedded/service/enterprise-chef-server-schema' do
   recursive true
   action :delete
 end

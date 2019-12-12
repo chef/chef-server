@@ -20,10 +20,10 @@
 # pg_upgrade will helpfully generate a cleanup script which removes
 # the previous database cluster.  This is nice, because we don't have
 # to worry about keeping track of the location of the old cluster.
-execute "remove_old_postgres_data_directory" do
+execute 'remove_old_postgres_data_directory' do
   cleanup_script = "#{node['private_chef']['postgresql']['data_dir']}/delete_old_cluster.sh"
   command cleanup_script
-  only_if {File.exists? cleanup_script}
+  only_if { File.exist? cleanup_script }
   # The script itself is idempotent; it just runs an 'rm -Rf' on the
   # old $PG_DATA directory
 end

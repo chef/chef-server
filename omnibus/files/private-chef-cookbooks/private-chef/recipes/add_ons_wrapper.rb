@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-require "chef/handler"
+require 'chef/handler'
 
 class AddonInstallHandler < Chef::Handler
   def initialize
@@ -37,9 +37,9 @@ end
 addon_handler = AddonInstallHandler.new
 
 # We notify whether or not the run was successful:
-Chef::Config[:report_handlers].reject! { |i| i.kind_of?(AddonInstallHandler) }
+Chef::Config[:report_handlers].reject! { |i| i.is_a?(AddonInstallHandler) }
 Chef::Config[:report_handlers] << addon_handler
-Chef::Config[:exception_handlers].reject! { |i| i.kind_of?(AddonInstallHandler) }
+Chef::Config[:exception_handlers].reject! { |i| i.is_a?(AddonInstallHandler) }
 Chef::Config[:exception_handlers] << addon_handler
 
 # No way to pass params via notifications, so we just make a resource to notify for
@@ -86,20 +86,20 @@ node['private_chef']['addons']['packages'].each do |pkg|
   # after the `remote_file` above has run.
   ruby_block "locate_addon_package_#{pkg}" do
     block do
-      if ::File.directory?(addon_path)
-        # find the newest package of each name if 'addon_path' is a directory
-        pkg_file = Dir["#{addon_path}/#{pkg}*.#{OmnibusHelper.new(node).platform_package_suffix}"].sort_by{ |f| File.mtime(f) }.last
-      else
-        # use the full path to the package
-        pkg_file = addon_path
-      end
+      pkg_file = if ::File.directory?(addon_path)
+                   # find the newest package of each name if 'addon_path' is a directory
+                   Dir["#{addon_path}/#{pkg}*.#{OmnibusHelper.new(node).platform_package_suffix}"].sort_by { |f| File.mtime(f) }.last
+                 else
+                   # use the full path to the package
+                   addon_path
+                 end
     end
   end
 
   package pkg do
     provider value_for_platform_family(
-      ['debian']       => Chef::Provider::Package::Dpkg,
-      ['rhel', 'suse'] => Chef::Provider::Package::Rpm,
+      ['debian'] => Chef::Provider::Package::Dpkg,
+      %w(rhel suse) => Chef::Provider::Package::Rpm
     )
     source lazy { pkg_file }
     notifies :run, "ruby_block[addon_install_notification_#{pkg}]", :immediate

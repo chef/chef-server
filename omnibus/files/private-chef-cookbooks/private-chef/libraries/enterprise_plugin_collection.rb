@@ -1,5 +1,4 @@
 class EnterprisePluginCollection
-
   attr_reader :plugins
   def initialize
     @plugins = []
@@ -12,11 +11,11 @@ class EnterprisePluginCollection
   end
 
   def plugin_names
-    @plugins.map {|p| p.name }
+    @plugins.map(&:name)
   end
 
   def by_name(name)
-    @plugins.find {|p| p.name == name }
+    @plugins.find { |p| p.name == name }
   end
 
   def load_from_file(filename)
@@ -49,7 +48,7 @@ class EnterprisePluginCollection
   end
 
   def self.from_glob(glob)
-    c = new()
+    c = new
     Dir.glob(glob) do |filename|
       c.load_from_file(filename)
     end

@@ -15,57 +15,55 @@
 # limitations under the License.
 #
 
-
 case node['private_chef']['opscode-erchef']['search_provider']
 when 'solr'
-  Chef::Log.warn("External Solr Support does not include configuring the Solr schema.")
+  Chef::Log.warn('External Solr Support does not include configuring the Solr schema.')
 when 'elasticsearch'
-  elasticsearch_index "chef" do
+  elasticsearch_index 'chef' do
     server_url node['private_chef']['opscode-solr4']['external_url']
-    index_definition({"settings" => {
-                        "analysis" => {
-                          "analyzer" => {
-                            "default" => {
-                              "type" => "whitespace"
-                            }
-                          }
+    index_definition('settings' => {
+                        'analysis' => {
+                          'analyzer' => {
+                            'default' => {
+                              'type' => 'whitespace',
+                            },
+                          },
                         },
-                        "number_of_shards" => node['private_chef']['opscode-solr4']['elasticsearch_shard_count'],
-                        "number_of_replicas" => node['private_chef']['opscode-solr4']['elasticsearch_replica_count']
+                        'number_of_shards' => node['private_chef']['opscode-solr4']['elasticsearch_shard_count'],
+                        'number_of_replicas' => node['private_chef']['opscode-solr4']['elasticsearch_replica_count'],
                       },
-                      "mappings" => {
-                        "object" => {
-                          "_source" => { "enabled" => false },
-                          "_all" => { "enabled" => false },
-                          "properties" => {
-                            "X_CHEF_database_CHEF_X" => { "type" => "string",
-                                                          "index" => "not_analyzed",
-                                                          "norms" => {
-                                                            "enabled" => false
-                                                          }
+                     'mappings' => {
+                        'object' => {
+                          '_source' => { 'enabled' => false },
+                          '_all' => { 'enabled' => false },
+                          'properties' => {
+                            'X_CHEF_database_CHEF_X' => { 'type' => 'string',
+                                                          'index' => 'not_analyzed',
+                                                          'norms' => {
+                                                            'enabled' => false,
+                                                          },
                                                         },
-                            "X_CHEF_type_CHEF_X" => { "type" => "string",
-                                                      "index" => "not_analyzed",
-                                                      "norms" => {
-                                                        "enabled" => false
-                                                      }
+                            'X_CHEF_type_CHEF_X' => { 'type' => 'string',
+                                                      'index' => 'not_analyzed',
+                                                      'norms' => {
+                                                        'enabled' => false,
+                                                      },
                                                     },
-                            "X_CHEF_id_CHEF_X" => { "type" => "string",
-                                                    "index" => "not_analyzed",
-                                                    "norms" => {
-                                                      "enabled" => false
-                                                    }
+                            'X_CHEF_id_CHEF_X' => { 'type' => 'string',
+                                                    'index' => 'not_analyzed',
+                                                    'norms' => {
+                                                      'enabled' => false,
+                                                    },
                                                   },
-                            "data_bag" => { "type" => "string",
-                                            "index" => "not_analyzed",
-                                            "norms" => {
-                                              "enabled" => false
-                                            }
+                            'data_bag' => { 'type' => 'string',
+                                            'index' => 'not_analyzed',
+                                            'norms' => {
+                                              'enabled' => false,
+                                            },
                                           },
-                            "content" => { "type" => "string", "index" => "analyzed"}
-                          }
-                        }
-                      }
-                     })
+                            'content' => { 'type' => 'string', 'index' => 'analyzed' },
+                          },
+                        },
+                      })
   end
 end

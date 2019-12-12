@@ -18,8 +18,7 @@ require 'restclient'
 require 'json'
 
 class ChefServerDataBootstrap
-
-  GLOBAL_ORG_ID = "00000000000000000000000000000000"
+  GLOBAL_ORG_ID = '00000000000000000000000000000000'.freeze
   attr_reader :bifrost, :superuser_authz_id, :bootstrap_time, :node, :server_admins_authz_id
 
   def initialize(node)
@@ -28,9 +27,8 @@ class ChefServerDataBootstrap
     @bifrost = node['private_chef']['oc_bifrost']
   end
 
-
   def bifrost_superuser_id
-      @superuser_id ||= PrivateChef.credentials.get('oc_bifrost', 'superuser_id')
+    @superuser_id ||= PrivateChef.credentials.get('oc_bifrost', 'superuser_id')
   end
 
   def bootstrap
@@ -52,13 +50,13 @@ class ChefServerDataBootstrap
     username = node['private_chef']['opscode-erchef']['sql_user']
     password = PrivateChef.credentials.get('opscode_erchef', 'sql_password')
     EcPostgres.with_connection(node, 'opscode_chef',
-                               'db_superuser' => username,
-                               'db_superuser_password' => password) do |conn|
-      create_superuser_in_erchef(conn)
-      create_server_admins_global_group_in_erchef(conn)
-      create_global_container_in_erchef(conn, 'organizations', orgs_authz_id)
-      create_global_container_in_erchef(conn, 'users', users_authz_id)
-    end
+      'db_superuser' => username,
+      'db_superuser_password' => password) do |conn|
+        create_superuser_in_erchef(conn)
+        create_server_admins_global_group_in_erchef(conn)
+        create_global_container_in_erchef(conn, 'organizations', orgs_authz_id)
+        create_global_container_in_erchef(conn, 'users', users_authz_id)
+      end
   end
 
   private
@@ -66,32 +64,32 @@ class ChefServerDataBootstrap
   # Create and set up permissions for the server admins group.
   def create_server_admins_global_group_in_bifrost(users_authz_id)
     @server_admins_authz_id = create_group_in_authz(bifrost_superuser_id)
-    %w{create read update delete}.each do |permission|
+    %w(create read update delete).each do |permission|
       # grant server admins group permission on the users container,
       # as the erchef superuser.
-      grant_authz_object_permission(permission, "groups", "containers", users_authz_id,
-                                    server_admins_authz_id, superuser_authz_id)
+      grant_authz_object_permission(permission, 'groups', 'containers', users_authz_id,
+        server_admins_authz_id, superuser_authz_id)
       # grant superuser actor permissions on the server admin group,
       # as the bifrost superuser
-      grant_authz_object_permission(permission, "actors", "groups", server_admins_authz_id,
-                                    superuser_authz_id, bifrost_superuser_id)
+      grant_authz_object_permission(permission, 'actors', 'groups', server_admins_authz_id,
+        superuser_authz_id, bifrost_superuser_id)
     end
 
     # Grant server-admins read permissions on itself as the bifrost superuser.
-    grant_authz_object_permission("read", "groups", "groups", server_admins_authz_id,
-                                  server_admins_authz_id, bifrost_superuser_id)
+    grant_authz_object_permission('read', 'groups', 'groups', server_admins_authz_id,
+      server_admins_authz_id, bifrost_superuser_id)
   end
 
   # Insert the server admins global group into the erchef groups table.
   def create_server_admins_global_group_in_erchef(conn)
     simple_insert(conn, 'groups',
-                  id: SecureRandom.uuid.gsub("-", ""),
-                  org_id: GLOBAL_ORG_ID,
-                  authz_id: server_admins_authz_id,
-                  name: 'server-admins',
-                  last_updated_by: superuser_authz_id,
-                  created_at: bootstrap_time,
-                  updated_at: bootstrap_time)
+      id: SecureRandom.uuid.gsub('-', ''),
+      org_id: GLOBAL_ORG_ID,
+      authz_id: server_admins_authz_id,
+      name: 'server-admins',
+      last_updated_by: superuser_authz_id,
+      created_at: bootstrap_time,
+      updated_at: bootstrap_time)
   end
 
   # insert the erchef superuser's key into the erchef keys table,
@@ -102,75 +100,74 @@ class ChefServerDataBootstrap
     raw_key = PrivateChef.credentials.get('chef-server', 'superuser_key')
     public_key = OpenSSL::PKey::RSA.new(raw_key).public_key.to_s
 
-    user_id = SecureRandom.uuid.gsub("-", "")
+    user_id = SecureRandom.uuid.gsub('-', '')
     simple_insert(conn, 'keys',
-                    id: user_id,
-                    key_name: 'default',
-                    public_key: public_key,
-                    key_version: 0,
-                    created_at: bootstrap_time,
-                    expires_at: "infinity")
+      id: user_id,
+      key_name: 'default',
+      public_key: public_key,
+      key_version: 0,
+      created_at: bootstrap_time,
+      expires_at: 'infinity')
 
     simple_insert(conn, 'users',
-                    id: user_id,
-                    username: 'pivotal',
-                    email: 'root@localhost.localdomain',
-                    authz_id: @superuser_authz_id,
-                    created_at: bootstrap_time,
-                    updated_at: bootstrap_time,
-                    last_updated_by: bifrost_superuser_id,
-                    pubkey_version: 0, # Old constrant requires it to be not-null
-                    serialized_object: JSON.generate(
-                      first_name: "Chef",
-                      last_name: "Server",
-                      display_name: "Chef Server Superuser"))
+      id: user_id,
+      username: 'pivotal',
+      email: 'root@localhost.localdomain',
+      authz_id: @superuser_authz_id,
+      created_at: bootstrap_time,
+      updated_at: bootstrap_time,
+      last_updated_by: bifrost_superuser_id,
+      pubkey_version: 0, # Old constrant requires it to be not-null
+      serialized_object: JSON.generate(
+        first_name: 'Chef',
+        last_name: 'Server',
+        display_name: 'Chef Server Superuser'
+      ))
   end
 
   def create_global_container_in_erchef(conn, name, authz_id)
     simple_insert(conn, 'containers',
-                    id: authz_id, # TODO is this right?
-                    name: name,
-                    authz_id: authz_id,
-                    org_id: GLOBAL_ORG_ID,
-                    last_updated_by: superuser_authz_id,
-                    created_at: bootstrap_time,
-                    updated_at: bootstrap_time)
+      id: authz_id, # TODO: is this right?
+      name: name,
+      authz_id: authz_id,
+      org_id: GLOBAL_ORG_ID,
+      last_updated_by: superuser_authz_id,
+      created_at: bootstrap_time,
+      updated_at: bootstrap_time)
   end
 
   # db helper to construct and execute a simple insert statement
   def simple_insert(conn, table, fields)
     placeholders = []
     1.upto(fields.length) { |x| placeholders << "$#{x}" }
-    placeholders.join(", ")
-    conn.exec_params("INSERT INTO #{table} (#{fields.keys.join(", ")}) VALUES (#{placeholders.join(", ")})",
-                     fields.values) # confirm ordering
-
-
+    placeholders.join(', ')
+    conn.exec_params("INSERT INTO #{table} (#{fields.keys.join(', ')}) VALUES (#{placeholders.join(', ')})",
+      fields.values) # confirm ordering
   end
 
   ## Bifrost access helpers.
 
   def create_group_in_authz(requestor_id)
-    create_object_in_authz("groups", requestor_id)
+    create_object_in_authz('groups', requestor_id)
   end
 
   def create_actor_in_authz(requestor_id)
-    create_object_in_authz("actors", requestor_id)
+    create_object_in_authz('actors', requestor_id)
   end
 
   def create_container_in_authz(requestor_id)
-    create_object_in_authz("containers", requestor_id)
+    create_object_in_authz('containers', requestor_id)
   end
 
   def create_object_in_authz(object_name, requestor_id)
-    result = bifrost_request(:post, "#{object_name}", "{}", requestor_id)
-    JSON.parse(result)["id"]
+    result = bifrost_request(:post, object_name.to_s, '{}', requestor_id)
+    JSON.parse(result)['id']
   end
 
   # Tells bifrost that an actor is a member of a group.
   # Group membership is managed through bifrost, and not via erchef.
   def insert_authz_actor_into_group(group_id, actor_id)
-    bifrost_request(:put, "/groups/#{group_id}/actors/#{actor_id}", "{}", superuser_authz_id)
+    bifrost_request(:put, "/groups/#{group_id}/actors/#{actor_id}", '{}', superuser_authz_id)
   end
 
   def grant_authz_object_permission(permission_type, granted_to_object_type, granted_on_object_type, granted_on_id, granted_to_id, requestor_id)
@@ -189,14 +186,14 @@ class ChefServerDataBootstrap
     headers = {
       :content_type => :json,
       :accept => :json,
-      'X-Ops-Requesting-Actor-Id' => requestor_id
+      'X-Ops-Requesting-Actor-Id' => requestor_id,
     }
     retries = 5
     begin
       if method == :get
         RestClient.get("http://#{bifrost['vip']}:#{bifrost['port']}/#{rel_path}", headers)
       else
-        RestClient.send(method, "http://#{bifrost['vip']}:#{bifrost['port']}/#{rel_path}",  body, headers)
+        RestClient.send(method, "http://#{bifrost['vip']}:#{bifrost['port']}/#{rel_path}", body, headers)
       end
     rescue RestClient::Exception, Errno::ECONNREFUSED => e
       error = e.respond_to?(:response) ? e.response.chomp : e.message

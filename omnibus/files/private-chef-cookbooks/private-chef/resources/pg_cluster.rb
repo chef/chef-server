@@ -17,5 +17,5 @@
 default_action :init
 
 attribute :data_dir,
-:kind_of => String,
-:name_attribute => true
+  kind_of: String,
+  name_attribute: true

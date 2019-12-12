@@ -17,7 +17,7 @@
 
 node['available-plugins'].each do |p|
   if p.config_extension_path && ::File.exist?(p.config_extension_path)
-    Chef::Log.warn("Configuration extensions not yet implemented")
+    Chef::Log.warn('Configuration extensions not yet implemented')
     eval(::File.read(p.config_extension_path))
   end
 end

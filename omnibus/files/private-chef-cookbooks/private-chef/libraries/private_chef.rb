@@ -16,21 +16,21 @@
 # limitations under the License.
 #
 
-require "mixlib/config"
-require "chef/mash"
-require "chef/json_compat"
-require "chef/mixin/deep_merge"
-require "veil"
-require_relative "./warnings.rb"
+require 'mixlib/config'
+require 'chef/mash'
+require 'chef/json_compat'
+require 'chef/mixin/deep_merge'
+require 'veil'
+require_relative './warnings.rb'
 
 module PrivateChef
   extend(Mixlib::Config)
 
   # options are 'standalone', 'manual', 'ha', and 'tier'
-  topology "standalone"
+  topology 'standalone'
 
   # options are 'ipv4' 'ipv6'
-  ip_version "ipv4"
+  ip_version 'ipv4'
 
   # Set this for default org mode
   default_orgname nil
@@ -41,38 +41,38 @@ module PrivateChef
   addons Mash.new
   rabbitmq Mash.new
   external_rabbitmq Mash.new
-  rabbitmq["log_rotation"] ||= Mash.new
+  rabbitmq['log_rotation'] ||= Mash.new
   opscode_solr4 Mash.new
-  opscode_solr4["log_rotation"] ||= Mash.new
+  opscode_solr4['log_rotation'] ||= Mash.new
   elasticsearch Mash.new
   opscode_expander Mash.new
-  opscode_expander["log_rotation"] ||= Mash.new
+  opscode_expander['log_rotation'] ||= Mash.new
   opscode_erchef Mash.new
-  opscode_erchef["log_rotation"] ||= Mash.new
+  opscode_erchef['log_rotation'] ||= Mash.new
   oc_chef_authz Mash.new
   # Need old path for cookbook migration:
   opscode_chef Mash.new
 
   lb Mash.new
-  lb["xdl_defaults"] ||= Mash.new
+  lb['xdl_defaults'] ||= Mash.new
   lb_internal Mash.new
   haproxy Mash.new
   haproxy['log_rotation'] ||= Mash.new
   postgresql Mash.new
-  postgresql["log_rotation"] ||= Mash.new
+  postgresql['log_rotation'] ||= Mash.new
   redis_lb Mash.new
-  redis_lb["log_rotation"] ||= Mash.new
+  redis_lb['log_rotation'] ||= Mash.new
   oc_bifrost Mash.new
-  oc_bifrost["log_rotation"] ||= Mash.new
+  oc_bifrost['log_rotation'] ||= Mash.new
   oc_id Mash.new
-  oc_id["log_rotation"] ||= Mash.new
+  oc_id['log_rotation'] ||= Mash.new
   bookshelf Mash.new
-  bookshelf["log_rotation"] ||= Mash.new
+  bookshelf['log_rotation'] ||= Mash.new
   bootstrap Mash.new
   drbd Mash.new # For DRBD specific settings
   estatsd Mash.new
   nginx Mash.new
-  nginx["log_rotation"] ||= Mash.new
+  nginx['log_rotation'] ||= Mash.new
   log_retention Mash.new
   log_rotation Mash.new
   dark_launch Mash.new
@@ -101,7 +101,7 @@ module PrivateChef
   enabled_plugins []
 
   backup Mash.new
-  backup["strategy"] = "tar"
+  backup['strategy'] = 'tar'
 
   data_collector Mash.new
   required_recipe Mash.new
@@ -128,16 +128,15 @@ module PrivateChef
       # recipes is failing to evaluate the loaded file (in the case of what
       # originally triggered this, private_chef.rb), what we care about is which
       # line in the loaded file is causing the error.
-      begin
-        self.instance_eval(IO.read(filename), filename, 1)
-      rescue
-        raise "Error loading file: #{$!.backtrace[0]}: #{$!.message}"
-      end
+
+      instance_eval(IO.read(filename), filename, 1)
+    rescue
+      raise "Error loading file: #{$ERROR_INFO.backtrace[0]}: #{$ERROR_INFO.message}"
     end
 
     def import_legacy_service_config(old_service_key, new_service_key, keys)
       keys.each do |configkey|
-        if PrivateChef[old_service_key].has_key? configkey
+        if PrivateChef[old_service_key].key? configkey
           PrivateChef[new_service_key][configkey] ||= PrivateChef[old_service_key][configkey]
           PrivateChef[old_service_key].delete configkey
         end
@@ -145,14 +144,14 @@ module PrivateChef
     end
 
     def deprecated_postgresql_settings
-      [ 'shmmax', 'shmall'].each do |setting|
-        if PrivateChef['postgresql'][setting]
-          ChefServer::Warnings.warn <<EOF
-The configuration parameter postgresql['#{setting}'] is no longer used
-by Chef Server. To limit the amount of shared memory used by
-postgresql use postgresql['shared_buffers'] instead.
-EOF
-        end
+      %w(shmmax shmall).each do |setting|
+        next unless PrivateChef['postgresql'][setting]
+
+        ChefServer::Warnings.warn <<~EOF
+          The configuration parameter postgresql['#{setting}'] is no longer used
+          by Chef Server. To limit the amount of shared memory used by
+          postgresql use postgresql['shared_buffers'] instead.
+        EOF
       end
     end
 
@@ -164,7 +163,7 @@ EOF
       end
     end
 
-    VALID_EXTENSION_CONFIGS = %i{server_config_required config_values gen_backend gen_frontend gen_secrets gen_api_fqdn} unless defined?(VALID_EXTENSION_CONFIGS)
+    VALID_EXTENSION_CONFIGS = %i(server_config_required config_values gen_backend gen_frontend gen_secrets gen_api_fqdn).freeze unless defined?(VALID_EXTENSION_CONFIGS)
     def register_extension(name, extension)
       bad_keys = extension.keys - VALID_EXTENSION_CONFIGS
 
@@ -173,11 +172,11 @@ EOF
         extension.delete(key) # delete mutates extension
       end
 
-      PrivateChef["registered_extensions"][name] = extension
+      PrivateChef['registered_extensions'][name] = extension
       if extension.key?(:config_values)
         extension[:config_values].each do |k, v|
           # TODO(ssd): Should we even allow this? Perhaps we should just exit?
-          if PrivateChef.has_key?(k)
+          if PrivateChef.key?(k)
             Chef::Log.warn("Extension #{name} attempted to register configuration default for #{k}, but it already exists!")
           end
           PrivateChef[k] = v
@@ -187,115 +186,115 @@ EOF
 
     def server(name = nil, opts = {})
       if name
-        PrivateChef["servers"] ||= Mash.new
-        PrivateChef["servers"][name] = Mash.new(opts)
+        PrivateChef['servers'] ||= Mash.new
+        PrivateChef['servers'][name] = Mash.new(opts)
       end
-      PrivateChef["servers"]
+      PrivateChef['servers']
     end
 
     def backend_vip(name = nil, opts = {})
       if name
-        PrivateChef["backend_vips"] ||= Mash.new
-        PrivateChef["backend_vips"]["fqdn"] = name
+        PrivateChef['backend_vips'] ||= Mash.new
+        PrivateChef['backend_vips']['fqdn'] = name
         opts.each do |k, v|
-          PrivateChef["backend_vips"][k] = v
+          PrivateChef['backend_vips'][k] = v
         end
 
         # Keepalived needs an address with network to properly configure an IPv6 vip
-        if PrivateChef["backend_vips"]["ipaddress"] =~ /(.*)\/(\d+)/
+        if PrivateChef['backend_vips']['ipaddress'] =~ %r{(.*)/(\d+)}
           # If we have an address of the form addr/mask, split it out
-          PrivateChef["backend_vips"]["ipaddress"] = $1
-          PrivateChef["backend_vips"]["ipaddress_with_netmask"] = "#{$1}/#{$2}"
-        elsif PrivateChef["backend_vips"]["ipaddress"] =~ /\:/
+          PrivateChef['backend_vips']['ipaddress'] = Regexp.last_match(1)
+          PrivateChef['backend_vips']['ipaddress_with_netmask'] = "#{Regexp.last_match(1)}/#{Regexp.last_match(2)}"
+        elsif PrivateChef['backend_vips']['ipaddress'] =~ /\:/
           # IPv6 addresses must have the mask
-          Chef::Log.fatal("backend_vip ipaddress field appears to be a IPv6 address without a netmask  (e.g /64, /48)")
+          Chef::Log.fatal('backend_vip ipaddress field appears to be a IPv6 address without a netmask  (e.g /64, /48)')
           exit 66
         else
           # bare addresses (IPv4) can not have a mask (to preserve backwards compatibility)
-          PrivateChef["backend_vips"]["ipaddress_with_netmask"] = PrivateChef["backend_vips"]["ipaddress"]
+          PrivateChef['backend_vips']['ipaddress_with_netmask'] = PrivateChef['backend_vips']['ipaddress']
         end
       end
-      PrivateChef["backend_vips"]
+      PrivateChef['backend_vips']
     end
 
     def generate_hash
-      results = { "private_chef" => {} }
+      results = { 'private_chef' => {} }
       default_keys = [
-        "opscode_chef",
-        "redis_lb",
-        "addons",
-        "rabbitmq",
-        "external_rabbitmq",
-        "opscode_solr4",
-        "elasticsearch",
-        "opscode_expander",
-        "opscode_erchef",
-        "oc_chef_authz",
-        "folsom_graphite",
-        "profiles",
-        "lb",
-        "lb_internal",
-        "postgresql",
-        "oc_bifrost",
-        "oc_id",
-        "opscode_chef_mover",
-        "bookshelf",
-        "bootstrap",
-        "drbd",
-        "estatsd",
-        "nginx",
-        "ldap",
-        "user",
-        "ha",
-        "haproxy",
-        "use_chef_backend",
-        "chef_backend_members",
-        "disabled_plugins",
-        "enabled_plugins",
-        "license",
-        "backup",
-        "data_collector",
-        "required_recipe",
+        'opscode_chef',
+        'redis_lb',
+        'addons',
+        'rabbitmq',
+        'external_rabbitmq',
+        'opscode_solr4',
+        'elasticsearch',
+        'opscode_expander',
+        'opscode_erchef',
+        'oc_chef_authz',
+        'folsom_graphite',
+        'profiles',
+        'lb',
+        'lb_internal',
+        'postgresql',
+        'oc_bifrost',
+        'oc_id',
+        'opscode_chef_mover',
+        'bookshelf',
+        'bootstrap',
+        'drbd',
+        'estatsd',
+        'nginx',
+        'ldap',
+        'user',
+        'ha',
+        'haproxy',
+        'use_chef_backend',
+        'chef_backend_members',
+        'disabled_plugins',
+        'enabled_plugins',
+        'license',
+        'backup',
+        'data_collector',
+        'required_recipe',
 
         # keys for cleanup and back-compat
-        "couchdb",
-        "opscode_solr"]
+        'couchdb',
+        'opscode_solr']
 
       (default_keys | keys_from_extensions).each do |key|
         # @todo: Just pick a naming convention and adhere to it
         # consistently
-        rkey = if key =~ /^oc_/ || %w{
+        rkey = if key =~ /^oc_/ || %w(
           redis_lb
           use_chef_backend
           chef_backend_members
           data_collector
           required_recipe
-        }.include?(key)
-          key
-        else
-          key.gsub("_", "-")
-        end
-        results["private_chef"][rkey] = PrivateChef[key]
+        ).include?(key)
+                 key
+               else
+                 key.gsub('_', '-')
+               end
+        results['private_chef'][rkey] = PrivateChef[key]
       end
       #
       # Before Chef Client 15 deep merge of attributes dropped 'nil' even if it was higher precedence.
       #
-      set_target_array_if_not_nil(results["private_chef"], "default_orgname", PrivateChef["default_orgname"])
-      set_target_array_if_not_nil(results["private_chef"], "oc-chef-pedant", PrivateChef["oc_chef_pedant"])
-      set_target_array_if_not_nil(results["private_chef"], "notification_email", PrivateChef["notification_email"])
-      set_target_array_if_not_nil(results["private_chef"], "from_email", PrivateChef["from_email"])
-      set_target_array_if_not_nil(results["private_chef"], "fips_enabled", PrivateChef["fips"])
-      set_target_array_if_not_nil(results["private_chef"], "role", PrivateChef["role"])
-      set_target_array_if_not_nil(results["private_chef"], "topology", PrivateChef["topology"])
-      set_target_array_if_not_nil(results["private_chef"], "servers", PrivateChef["servers"])
-      set_target_array_if_not_nil(results["private_chef"], "backend_vips", PrivateChef["backend_vips"])
-      results["private_chef"]["logs"] = {}
-      set_target_array_if_not_nil(results["private_chef"]["logs"], "log_retention", PrivateChef["log_retention"])
-      set_target_array_if_not_nil(results["private_chef"], "dark_launch", PrivateChef["dark_launch"])
-      set_target_array_if_not_nil(results["private_chef"]["opscode-erchef"], "max_request_size", PrivateChef["opscode_erchef"]["max_request_size"])
-      set_target_array_if_not_nil(results["private_chef"], "folsom_graphite", PrivateChef["folsom_graphite"])
-      set_target_array_if_not_nil(results["private_chef"], "profiles", PrivateChef["profiles"])
-      set_target_array_if_not_nil(results["private_chef"], "insecure_addon_compat", PrivateChef["insecure_addon_compat"])
+      set_target_array_if_not_nil(results['private_chef'], 'default_orgname', PrivateChef['default_orgname'])
+      set_target_array_if_not_nil(results['private_chef'], 'oc-chef-pedant', PrivateChef['oc_chef_pedant'])
+      set_target_array_if_not_nil(results['private_chef'], 'notification_email', PrivateChef['notification_email'])
+      set_target_array_if_not_nil(results['private_chef'], 'from_email', PrivateChef['from_email'])
+      set_target_array_if_not_nil(results['private_chef'], 'fips_enabled', PrivateChef['fips'])
+      set_target_array_if_not_nil(results['private_chef'], 'role', PrivateChef['role'])
+      set_target_array_if_not_nil(results['private_chef'], 'topology', PrivateChef['topology'])
+      set_target_array_if_not_nil(results['private_chef'], 'servers', PrivateChef['servers'])
+      set_target_array_if_not_nil(results['private_chef'], 'backend_vips', PrivateChef['backend_vips'])
+      results['private_chef']['logs'] = {}
+      set_target_array_if_not_nil(results['private_chef']['logs'], 'log_retention', PrivateChef['log_retention'])
+      set_target_array_if_not_nil(results['private_chef'], 'dark_launch', PrivateChef['dark_launch'])
+      set_target_array_if_not_nil(results['private_chef']['opscode-erchef'], 'max_request_size', PrivateChef['opscode_erchef']['max_request_size'])
+      set_target_array_if_not_nil(results['private_chef'], 'folsom_graphite', PrivateChef['folsom_graphite'])
+      set_target_array_if_not_nil(results['private_chef'], 'profiles', PrivateChef['profiles'])
+      set_target_array_if_not_nil(results['private_chef'], 'insecure_addon_compat', PrivateChef['insecure_addon_compat'])
       results
     end
 
@@ -305,9 +304,9 @@ EOF
     # configuration
     #
     def keys_from_extensions
-      PrivateChef["registered_extensions"].map do |name, ext|
+      PrivateChef['registered_extensions'].map do |_name, ext|
         if ext[:config_values]
-          ext[:config_values].keys.map { |k| k.to_s }
+          ext[:config_values].keys.map(&:to_s)
         end
       end.flatten.compact
     end
@@ -331,7 +330,7 @@ EOF
     #
     def gen_frontend
       callback = callback_for(:gen_frontend)
-      if ! callback.nil?
+      if !callback.nil?
         instance_exec(&callback)
       else
         gen_frontend_default
@@ -340,7 +339,7 @@ EOF
 
     def gen_backend(bootstrap = false)
       callback = callback_for(:gen_backend)
-      if ! callback.nil?
+      if !callback.nil?
         instance_exec(bootstrap, &callback)
       else
         gen_backend_default(bootstrap)
@@ -349,7 +348,7 @@ EOF
 
     def gen_secrets(node_name)
       callback = callback_for(:gen_secrets)
-      if ! callback.nil?
+      if !callback.nil?
         instance_exec(node_name, &callback)
       else
         gen_secrets_default(node_name)
@@ -358,7 +357,7 @@ EOF
 
     def gen_api_fqdn
       callback = callback_for(:gen_api_fqdn)
-      if ! callback.nil?
+      if !callback.nil?
         instance_exec(&callback)
       else
         gen_api_fqdn_default
@@ -366,11 +365,9 @@ EOF
     end
 
     def callback_for(name)
-      extension = PrivateChef["registered_extensions"][PrivateChef["topology"]]
+      extension = PrivateChef['registered_extensions'][PrivateChef['topology']]
       if extension
         extension[name]
-      else
-        nil
       end
     end
 
@@ -382,96 +379,96 @@ EOF
     # plugin
     #
     def gen_backend_default(bootstrap)
-      PrivateChef[:role] = "backend" #mixlib-config wants a symbol :(
-      PrivateChef["bookshelf"]["listen"] ||= PrivateChef["default_listen_address"]
-      PrivateChef["rabbitmq"]["node_ip_address"] ||= PrivateChef["default_listen_address"]
-      PrivateChef["redis_lb"]["listen"] ||= PrivateChef["default_listen_address"]
-      PrivateChef["opscode_solr4"]["ip_address"] ||= PrivateChef["default_listen_address"]
-      PrivateChef["postgresql"]["listen_address"] ||= "*" #PrivateChef["default_listen_address"]
+      PrivateChef[:role] = 'backend' # mixlib-config wants a symbol :(
+      PrivateChef['bookshelf']['listen'] ||= PrivateChef['default_listen_address']
+      PrivateChef['rabbitmq']['node_ip_address'] ||= PrivateChef['default_listen_address']
+      PrivateChef['redis_lb']['listen'] ||= PrivateChef['default_listen_address']
+      PrivateChef['opscode_solr4']['ip_address'] ||= PrivateChef['default_listen_address']
+      PrivateChef['postgresql']['listen_address'] ||= '*' # PrivateChef["default_listen_address"]
 
       authaddr = []
-      authaddr << "0.0.0.0/0" # if PrivateChef["use_ipv4"]
-      authaddr << "::/0" if PrivateChef["use_ipv6"]
-      PrivateChef["postgresql"]["md5_auth_cidr_addresses"] ||= authaddr
+      authaddr << '0.0.0.0/0' # if PrivateChef["use_ipv4"]
+      authaddr << '::/0' if PrivateChef['use_ipv6']
+      PrivateChef['postgresql']['md5_auth_cidr_addresses'] ||= authaddr
 
-      PrivateChef["opscode_chef_mover"]["enable"] = !!bootstrap
-      PrivateChef["bootstrap"]["enable"] = !!bootstrap
+      PrivateChef['opscode_chef_mover']['enable'] = !!bootstrap
+      PrivateChef['bootstrap']['enable'] = !!bootstrap
     end
 
     def gen_frontend_default
-      PrivateChef[:role] = "frontend"
-      PrivateChef["bookshelf"]["enable"] ||= false
-      PrivateChef["bookshelf"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-      PrivateChef["rabbitmq"]["enable"] ||= false
-      PrivateChef["rabbitmq"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-      PrivateChef["redis_lb"]["enable"] ||= false
-      PrivateChef["redis_lb"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-      PrivateChef["opscode_solr4"]["enable"] ||= false
-      PrivateChef["opscode_solr4"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-      PrivateChef["opscode_expander"]["enable"] ||= false
-      PrivateChef["postgresql"]["enable"] ||= false
-      PrivateChef["postgresql"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
-      PrivateChef["lb"]["upstream"] ||= Mash.new
-      if PrivateChef["use_ipv6"] && PrivateChef["backend_vips"]["ipaddress"].include?(":")
-        PrivateChef["lb"]["upstream"]["bookshelf"] ||= [ "[#{PrivateChef["backend_vips"]["ipaddress"]}]" ]
-      else
-        PrivateChef["lb"]["upstream"]["bookshelf"] ||= [ PrivateChef["backend_vips"]["ipaddress"] ]
-      end
-      PrivateChef["opscode_chef_mover"]["enable"] = false
-      PrivateChef["bootstrap"]["enable"] = false
+      PrivateChef[:role] = 'frontend'
+      PrivateChef['bookshelf']['enable'] ||= false
+      PrivateChef['bookshelf']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
+      PrivateChef['rabbitmq']['enable'] ||= false
+      PrivateChef['rabbitmq']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
+      PrivateChef['redis_lb']['enable'] ||= false
+      PrivateChef['redis_lb']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
+      PrivateChef['opscode_solr4']['enable'] ||= false
+      PrivateChef['opscode_solr4']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
+      PrivateChef['opscode_expander']['enable'] ||= false
+      PrivateChef['postgresql']['enable'] ||= false
+      PrivateChef['postgresql']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
+      PrivateChef['lb']['upstream'] ||= Mash.new
+      PrivateChef['lb']['upstream']['bookshelf'] ||= if PrivateChef['use_ipv6'] && PrivateChef['backend_vips']['ipaddress'].include?(':')
+                                                       [ "[#{PrivateChef['backend_vips']['ipaddress']}]" ]
+                                                     else
+                                                       [ PrivateChef['backend_vips']['ipaddress'] ]
+                                                     end
+      PrivateChef['opscode_chef_mover']['enable'] = false
+      PrivateChef['bootstrap']['enable'] = false
     end
 
     def gen_api_fqdn_default
-      PrivateChef["lb"]["api_fqdn"] ||= PrivateChef["api_fqdn"]
-      PrivateChef["lb"]["web_ui_fqdn"] ||= PrivateChef["api_fqdn"]
-      PrivateChef["nginx"]["server_name"] ||= PrivateChef["api_fqdn"]
-      PrivateChef["nginx"]["url"] ||= "https://#{PrivateChef['api_fqdn']}"
+      PrivateChef['lb']['api_fqdn'] ||= PrivateChef['api_fqdn']
+      PrivateChef['lb']['web_ui_fqdn'] ||= PrivateChef['api_fqdn']
+      PrivateChef['nginx']['server_name'] ||= PrivateChef['api_fqdn']
+      PrivateChef['nginx']['url'] ||= "https://#{PrivateChef['api_fqdn']}"
     end
 
-    # TODO 2017-02-28 mp:  configurable location:
+    # TODO: 2017-02-28 mp:  configurable location:
     def secrets_json
-      "/etc/opscode/private-chef-secrets.json"
+      '/etc/opscode/private-chef-secrets.json'
     end
 
     def credentials
       @credentials ||= Veil::CredentialCollection::ChefSecretsFile.new(path: secrets_json)
     end
 
-    def gen_secrets_default(node_name)
+    def gen_secrets_default(_node_name)
       # TODO
       # Transition from erchef's sql_user/password etc living under 'postgresql'
       # in older versions to 'opscode_erchef' in newer versions
-      if credentials["postgresql"] && credentials["postgresql"]["sql_password"]
-        credentials.delete("opscode_erchef", "sql_password")
-        credentials.add("opscode_erchef", "sql_password", value: credentials["postgresql"]["sql_password"].value)
-        credentials.delete("postgresql", "sql_password")
-        credentials.delete("postgresql", "sql_user")
+      if credentials['postgresql'] && credentials['postgresql']['sql_password']
+        credentials.delete('opscode_erchef', 'sql_password')
+        credentials.add('opscode_erchef', 'sql_password', value: credentials['postgresql']['sql_password'].value)
+        credentials.delete('postgresql', 'sql_password')
+        credentials.delete('postgresql', 'sql_user')
       end
 
       required_secrets = [
-        {group: "postgresql", name: "db_superuser_password", length: 100, set_command: "set-db-superuser-password"},
-        {group: "redis_lb", name: "password", length: 100},
-        {group: "rabbitmq", name: "password", length: 100},
-        {group: "rabbitmq", name: "management_password", length: 100},
-        {group: "drbd", name: "shared_secret", length: 60},
-        {group: "opscode_erchef", name: "sql_password", length: 60},
-        {group: "opscode_erchef", name: "sql_ro_password", length: 60},
-        {group: "opscode_erchef", name: "stats_password", lendth: 100},
-        {group: "oc_bifrost", name: "superuser_id", length: 32, frozen: true},
-        {group: "oc_bifrost", name: "sql_password", length: 100},
-        {group: "oc_bifrost", name: "sql_ro_password", length: 100},
-        {group: "oc_id", name: "secret_key_base", length: 100},
-        {group: "oc_id", name: "sql_password", length: 100},
-        {group: "oc_id", name: "sql_ro_password", length: 100},
-        {group: "bookshelf", name: "access_key_id", length: 40},
-        {group: "bookshelf", name: "secret_access_key", length: 80},
-        {group: "bookshelf", name: "sql_password", length: 80},
-        {group: "bookshelf", name: "sql_ro_password", length: 80}
+        { group: 'postgresql', name: 'db_superuser_password', length: 100, set_command: 'set-db-superuser-password' },
+        { group: 'redis_lb', name: 'password', length: 100 },
+        { group: 'rabbitmq', name: 'password', length: 100 },
+        { group: 'rabbitmq', name: 'management_password', length: 100 },
+        { group: 'drbd', name: 'shared_secret', length: 60 },
+        { group: 'opscode_erchef', name: 'sql_password', length: 60 },
+        { group: 'opscode_erchef', name: 'sql_ro_password', length: 60 },
+        { group: 'opscode_erchef', name: 'stats_password', lendth: 100 },
+        { group: 'oc_bifrost', name: 'superuser_id', length: 32, frozen: true },
+        { group: 'oc_bifrost', name: 'sql_password', length: 100 },
+        { group: 'oc_bifrost', name: 'sql_ro_password', length: 100 },
+        { group: 'oc_id', name: 'secret_key_base', length: 100 },
+        { group: 'oc_id', name: 'sql_password', length: 100 },
+        { group: 'oc_id', name: 'sql_ro_password', length: 100 },
+        { group: 'bookshelf', name: 'access_key_id', length: 40 },
+        { group: 'bookshelf', name: 'secret_access_key', length: 80 },
+        { group: 'bookshelf', name: 'sql_password', length: 80 },
+        { group: 'bookshelf', name: 'sql_ro_password', length: 80 },
       ]
 
       optional_secrets = [
-        {group: "ldap", name: "bind_password"},
-        {group: "data_collector", name: "token"}
+        { group: 'ldap', name: 'bind_password' },
+        { group: 'data_collector', name: 'token' },
       ]
 
       optional_secrets.each do |secret|
@@ -484,7 +481,7 @@ EOF
 
       generate_rabbit_actions_password
 
-      save_credentials_to_config if (PrivateChef["insecure_addon_compat"])
+      save_credentials_to_config if PrivateChef['insecure_addon_compat']
       credentials.save
     end
 
@@ -505,7 +502,7 @@ EOF
     def warn_if_cred_mismatch(opts)
       group = opts[:group]
       name = opts[:name]
-      return if !credentials.exist?(group, name)
+      return unless credentials.exist?(group, name)
 
       pass_in_config = opts[:config_value] || PrivateChef[group][name]
       pass_in_secrets = opts[:secrets_value] || credentials.get(group, name)
@@ -513,26 +510,26 @@ EOF
       config_key_desc = opts[:config_key_desc] || "#{group}['#{name}']"
 
       if pass_in_secrets != pass_in_config
-        warning = <<WARN
-#{config_key_desc} in secrets store does not match the value
-configured in chef-server.rb -- overriding secrets store password with
-configuration file password.
-WARN
+        warning = <<~WARN
+          #{config_key_desc} in secrets store does not match the value
+          configured in chef-server.rb -- overriding secrets store password with
+          configuration file password.
+        WARN
         if command_name
-          warning << <<WARN2
-If this is unexpected, consider removing the secret from
-chef-server.rb and setting the correct value with:
+          warning << <<~WARN2
+            If this is unexpected, consider removing the secret from
+            chef-server.rb and setting the correct value with:
 
-    chef-server-ctl #{command_name}
-WARN2
+                chef-server-ctl #{command_name}
+          WARN2
         end
       elsif pass_in_config
-        unless PrivateChef["insecure_addon_compat"]
-          warning = <<WARN
-#{config_key_desc} has been saved to the secrets store
-but is also still in chef-server.rb. Please remove this from
-chef-server.rb.
-WARN
+        unless PrivateChef['insecure_addon_compat']
+          warning = <<~WARN
+            #{config_key_desc} has been saved to the secrets store
+            but is also still in chef-server.rb. Please remove this from
+            chef-server.rb.
+          WARN
         end
       end
 
@@ -548,6 +545,7 @@ WARN
       credentials.legacy_credentials_hash.each do |service, creds|
         # Ignore secrets added by add-ons and the keys
         next if PrivateChef[service].nil?
+
         creds.each do |name, value|
           PrivateChef[service][name] ||= value
         end
@@ -560,32 +558,32 @@ WARN
     # RabbitMQ information in the external_rabbitmq configuration key.
     #
     def generate_rabbit_actions_password
-      if PrivateChef["external_rabbitmq"]["enable"] && PrivateChef["external_rabbitmq"]["actions_password"]
-        warn_if_cred_mismatch(group: "rabbitmq",
-                              name: "actions_password",
-                              command_name: "set-actions-password",
-                              config_value: PrivateChef["external_rabbitmq"]["actions_password"],
+      if PrivateChef['external_rabbitmq']['enable'] && PrivateChef['external_rabbitmq']['actions_password']
+        warn_if_cred_mismatch(group: 'rabbitmq',
+                              name: 'actions_password',
+                              command_name: 'set-actions-password',
+                              config_value: PrivateChef['external_rabbitmq']['actions_password'],
                               config_key_desc: "external_rabbitmq['actions_password']")
 
         # NOTE: This is stored under the rabbitmq (rather than
         # external_rabbitmq) section so that applications don't need
         # to know whether they are talking to a local or remote
         # rabbitmq for the actions queue.
-        credentials.add("rabbitmq", "actions_password",
-                        value: PrivateChef["external_rabbitmq"]["actions_password"],
-                        frozen: true, force: true)
+        credentials.add('rabbitmq', 'actions_password',
+          value: PrivateChef['external_rabbitmq']['actions_password'],
+          frozen: true, force: true)
       else
-        credentials.add("rabbitmq", "actions_password", length: 100)
+        credentials.add('rabbitmq', 'actions_password', length: 100)
       end
     end
 
-    def gen_redundant(node_name, topology)
-      me = PrivateChef["servers"][node_name]
-      case me["role"]
-      when "backend"
-        gen_backend(me["bootstrap"])
+    def gen_redundant(node_name, _topology)
+      me = PrivateChef['servers'][node_name]
+      case me['role']
+      when 'backend'
+        gen_backend(me['bootstrap'])
         gen_api_fqdn
-      when "frontend"
+      when 'frontend'
         gen_frontend
         gen_api_fqdn
       else
@@ -595,25 +593,25 @@ WARN
 
     def ensure_bind_password
       # if bind_dn is not set, don't care if there's a bind_password
-      return unless PrivateChef["ldap"].key?("bind_dn")
+      return unless PrivateChef['ldap'].key?('bind_dn')
 
-      has_in_secrets = credentials.exist?("ldap", "bind_password")
+      has_in_secrets = credentials.exist?('ldap', 'bind_password')
 
       # gen_secrets takes care of moving the secret from config to bind_password
       # (if it's not already in the secrets store, having been put there
       # manually)
       unless has_in_secrets
-        raise "Missing required LDAP config value bind_password (required when configuring bind_dn)"
+        raise 'Missing required LDAP config value bind_password (required when configuring bind_dn)'
       end
     end
 
     def gen_ldap
-      required_ldap_config_values = %w{ host base_dn }
+      required_ldap_config_values = %w( host base_dn )
       ensure_bind_password
 
-      PrivateChef["ldap"]["system_adjective"] ||= "AD/LDAP"
+      PrivateChef['ldap']['system_adjective'] ||= 'AD/LDAP'
       required_ldap_config_values.each do |val|
-        unless PrivateChef["ldap"].key?(val)
+        unless PrivateChef['ldap'].key?(val)
           # ensure all values have been set
           raise "Missing required LDAP config value '#{val}'. Required values include [#{required_ldap_config_values.join(', ')}]"
         end
@@ -630,9 +628,9 @@ WARN
       # to use either 'ssl_enabled' or 'tls_enabled'. The ability to directly set 'encryption' is
       # deprecated.
       #
-      ldap_encryption = PrivateChef["ldap"]["encryption"]
-      ssl_enabled = PrivateChef["ldap"]["ssl_enabled"]
-      tls_enabled = PrivateChef["ldap"]["tls_enabled"]
+      ldap_encryption = PrivateChef['ldap']['encryption']
+      ssl_enabled = PrivateChef['ldap']['ssl_enabled']
+      tls_enabled = PrivateChef['ldap']['tls_enabled']
 
       # Some edge case checks, tell them if they set more than one value and which one we're using.
       # This can go away once ldap_encryption support is removed
@@ -649,48 +647,48 @@ WARN
         Chef::Log.warn("Please note that the ldap 'encryption' setting is deprecated as of Chef Server 12.0. Use either "\
                        "ldap['ssl_enabled'] = true or ldap['tls_enabled'] = true.")
         case ldap_encryption.to_s
-        when "simple_tls"
+        when 'simple_tls'
           ssl_enabled = true
-        when "start_tls"
+        when 'start_tls'
           tls_enabled = true
-        when "none"
-          Chef::Log.info("Configuring ldap without encryption.")
+        when 'none'
+          Chef::Log.info('Configuring ldap without encryption.')
         else
           raise "Invalid ldap configuration: unknown value #{ldap_encryption} for deprecated ldap['encryption'] option. "\
                 "Please set ldap['ssl_enabled'] = true or ldap['tls_enabled'] = true instead"
         end
       else
-        if ssl_enabled and tls_enabled
+        if ssl_enabled && tls_enabled
           raise "Invalid ldap configuration: ldap['ssl_enabled'] and ldap['tls_enabled'] are mutually exclusive."
         end
       end
-      PrivateChef["ldap"]["ssl_enabled"] = ssl_enabled
-      PrivateChef["ldap"]["tls_enabled"] = tls_enabled
-      PrivateChef["ldap"]["encryption_type"] = if ssl_enabled
-                                                 "simple_tls"
+      PrivateChef['ldap']['ssl_enabled'] = ssl_enabled
+      PrivateChef['ldap']['tls_enabled'] = tls_enabled
+      PrivateChef['ldap']['encryption_type'] = if ssl_enabled
+                                                 'simple_tls'
                                                elsif tls_enabled
-                                                 "start_tls"
+                                                 'start_tls'
                                                else
-                                                 "none"
+                                                 'none'
                                                end
     end
 
     # True if the given topology requires per-server config via `server` blocks
     def server_config_required?
-      PrivateChef["topology"] == "tier" ||
-        (PrivateChef["registered_extensions"][PrivateChef["topology"]] &&
-         PrivateChef["registered_extensions"][PrivateChef["topology"]][:server_config_required])
+      PrivateChef['topology'] == 'tier' ||
+        (PrivateChef['registered_extensions'][PrivateChef['topology']] &&
+         PrivateChef['registered_extensions'][PrivateChef['topology']][:server_config_required])
     end
 
     def assert_server_config(node_name)
-      unless PrivateChef["servers"].key?(node_name)
-        Chef::Log.fatal <<-EOF
-No server configuration found for "#{node_name}" in /etc/opscode/chef-server.rb.
-Server configuration exists for the following hostnames:
+      unless PrivateChef['servers'].key?(node_name)
+        Chef::Log.fatal <<~EOF
+          No server configuration found for "#{node_name}" in /etc/opscode/chef-server.rb.
+          Server configuration exists for the following hostnames:
 
-  #{PrivateChef["servers"].keys.sort.join("\n  ")}
+            #{PrivateChef['servers'].keys.sort.join("\n  ")}
 
-EOF
+        EOF
         exit!(1)
       end
     end
@@ -699,40 +697,40 @@ EOF
       # TODO(ssd): This can be cleaned up once the "default"
       # topologies are also implemented using registered extensions
       case topology
-      when "ha"
-        Chef::Log.fatal <<-EOF
-DRBD_HA_002: Topology "ha" no longer supported.
-The DRBD/keepalived based HA subsystem was deprecated as of Chef Server
-12.9, and officially reached end of life on 2019-03-31. It has been
-disabled in Chef Server 13.
+      when 'ha'
+        Chef::Log.fatal <<~EOF
+          DRBD_HA_002: Topology "ha" no longer supported.
+          The DRBD/keepalived based HA subsystem was deprecated as of Chef Server
+          12.9, and officially reached end of life on 2019-03-31. It has been
+          disabled in Chef Server 13.
 
-See this post for more details:
-https://blog.chef.io/2018/10/02/end-of-life-announcement-for-drbd-based-ha-support-in-chef-server/
+          See this post for more details:
+          https://blog.chef.io/2018/10/02/end-of-life-announcement-for-drbd-based-ha-support-in-chef-server/
 
-What are my options?
+          What are my options?
 
-Chef Backend was announced over two years ago and is the recommended solution
-for all customers. It is a licensed product and available under the terms
-of a Chef Infra License.
+          Chef Backend was announced over two years ago and is the recommended solution
+          for all customers. It is a licensed product and available under the terms
+          of a Chef Infra License.
 
-For more information on migrating from DRBD HA to Chef Backend or other HA, see this blog
-post and webinar: Best Practices for Migrating your Chef Server at
-https://blog.chef.io/2018/04/06/best-practices-for-migrating-your-chef-server/
+          For more information on migrating from DRBD HA to Chef Backend or other HA, see this blog
+          post and webinar: Best Practices for Migrating your Chef Server at
+          https://blog.chef.io/2018/04/06/best-practices-for-migrating-your-chef-server/
 
-Customers in cloud environments are also encouraged to look at AWS OpsWorks
-and the Chef Automate Managed Service for Azure.
+          Customers in cloud environments are also encouraged to look at AWS OpsWorks
+          and the Chef Automate Managed Service for Azure.
 
-EOF
+        EOF
         exit!(1)
-      when "standalone", "manual"
+      when 'standalone', 'manual'
         PrivateChef[:api_fqdn] ||= node_name
         gen_api_fqdn
-      when "tier"
+      when 'tier'
         gen_redundant(node_name, topology)
       else
-        if PrivateChef["registered_extensions"].key?(topology) && server_config_required?
+        if PrivateChef['registered_extensions'].key?(topology) && server_config_required?
           gen_redundant(node_name, topology)
-        elsif PrivateChef["registered_extensions"].key?(topology) && !server_config_required?
+        elsif PrivateChef['registered_extensions'].key?(topology) && !server_config_required?
           PrivateChef[:api_fqdn] ||= node_name
           gen_api_fqdn
         else
@@ -753,8 +751,8 @@ EOF
 
     # If known private keys are on disk, add them to Veil and commit them.
     def migrate_keys
-      did_something = add_key_from_file_if_present("chef-server", "superuser_key", "/etc/opscode/pivotal.pem")
-      did_something |= add_key_from_file_if_present("chef-server", "webui_key", "/etc/opscode/webui_priv.pem")
+      did_something = add_key_from_file_if_present('chef-server', 'superuser_key', '/etc/opscode/pivotal.pem')
+      did_something |= add_key_from_file_if_present('chef-server', 'webui_key', '/etc/opscode/webui_priv.pem')
       # Ensure these are committed to disk before continuing -
       # the secrets recipe will delete the old files.
       credentials.save if did_something
@@ -767,7 +765,7 @@ EOF
     # been removed. This function is called before the secrets merge
     # allowing us to detect whether the user wants ldap or not.
     def set_ldap_enabled
-      PrivateChef["ldap"]["enabled"] = !PrivateChef["ldap"].empty?
+      PrivateChef['ldap']['enabled'] = !PrivateChef['ldap'].empty?
     end
 
     def generate_config(node_name)
@@ -779,34 +777,34 @@ EOF
       # Under ipv4 default to 0.0.0.0 in order to ensure that
       # any service that needs to listen externally on back-end
       # does so.
-      PrivateChef["default_listen_address"] = "0.0.0.0"
+      PrivateChef['default_listen_address'] = '0.0.0.0'
       # 'ipv4, ipv6, maybe add both
-      case PrivateChef["ip_version"]
-      when "ipv4", nil
-        PrivateChef["use_ipv4"] = true
-        PrivateChef["use_ipv6"] = false
-        PrivateChef["default_listen_address"] = "0.0.0.0"
-      when "ipv6"
-        PrivateChef["use_ipv4"] = false
-        PrivateChef["use_ipv6"] = true
-        PrivateChef["default_listen_address"] = "::"
+      case PrivateChef['ip_version']
+      when 'ipv4', nil
+        PrivateChef['use_ipv4'] = true
+        PrivateChef['use_ipv6'] = false
+        PrivateChef['default_listen_address'] = '0.0.0.0'
+      when 'ipv6'
+        PrivateChef['use_ipv4'] = false
+        PrivateChef['use_ipv6'] = true
+        PrivateChef['default_listen_address'] = '::'
       end
 
       # Transition Solr memory and JVM settings from OSC11 to Chef 12.
-      import_legacy_service_config("opscode_solr", "opscode_solr4", ["heap_size", "new_size", "java_opts"])
+      import_legacy_service_config('opscode_solr', 'opscode_solr4', %w(heap_size new_size java_opts))
       deprecated_postgresql_settings
       transform_to_consistent_types
 
-      PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
+      PrivateChef['nginx']['enable_ipv6'] ||= PrivateChef['use_ipv6']
 
-      generate_config_for_topology(PrivateChef["topology"], node_name)
+      generate_config_for_topology(PrivateChef['topology'], node_name)
 
-      gen_ldap if PrivateChef["ldap"]["enabled"]
+      gen_ldap if PrivateChef['ldap']['enabled']
       generate_hash
     end
 
     def set_target_array_if_not_nil(target_array, key, value)
-      if !value.nil?
+      unless value.nil?
         target_array[key] = value
       end
     end

@@ -24,8 +24,8 @@ action :create do
     result = connection.exec("SELECT datname FROM pg_database WHERE datname='#{new_resource.database}'")
     if result.ntuples == 0
       converge_by("Create database #{new_resource.database}") do
-          owner = "WITH OWNER #{new_resource.owner}" if new_resource.owner
-          connection.exec("CREATE DATABASE \"#{new_resource.database}\" #{owner} TEMPLATE #{new_resource.template} ENCODING '#{new_resource.encoding}';")
+        owner = "WITH OWNER #{new_resource.owner}" if new_resource.owner
+        connection.exec("CREATE DATABASE \"#{new_resource.database}\" #{owner} TEMPLATE #{new_resource.template} ENCODING '#{new_resource.encoding}';")
       end
     end
   end

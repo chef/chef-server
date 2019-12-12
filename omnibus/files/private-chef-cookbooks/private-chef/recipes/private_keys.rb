@@ -27,10 +27,10 @@
 unless PrivateChef.credentials.exist?('chef-server', 'superuser_key')
   pivotal_key = OpenSSL::PKey::RSA.generate(2048)
   PrivateChef.credentials.add('chef-server', 'superuser_key',
-                              value: pivotal_key.to_pem,
-                              frozen: true)
+    value: pivotal_key.to_pem,
+    frozen: true)
 
-  # TODO 2017-02-28 mp: let's consider making this the default behavior
+  # TODO: 2017-02-28 mp: let's consider making this the default behavior
   # of any write to CredentialsCollection -
   PrivateChef.credentials.save
 end
@@ -38,45 +38,45 @@ end
 if !PrivateChef.credentials.exist?('chef-server', 'webui_key')
   webui_key = OpenSSL::PKey::RSA.generate(2048)
   PrivateChef.credentials.add('chef-server', 'webui_key',
-                              value: webui_key.to_pem,
-                              frozen: true)
+    value: webui_key.to_pem,
+    frozen: true)
   # Store the public key in its own key for easy access
   PrivateChef.credentials.add('chef-server', 'webui_pub_key',
-                              value: webui_key.public_key.to_s,
-                              frozen: true)
+    value: webui_key.public_key.to_s,
+    frozen: true)
   PrivateChef.credentials.save
 elsif !PrivateChef.credentials.exist?('chef-server', 'webui_pub_key')
   webui_string = PrivateChef.credentials.get('chef-server', 'webui_key')
   webui_key = OpenSSL::PKey::RSA.new(webui_string)
   PrivateChef.credentials.add('chef-server', 'webui_pub_key',
-                              value: webui_key.public_key.to_s,
-                              frozen: true)
+    value: webui_key.public_key.to_s,
+    frozen: true)
   PrivateChef.credentials.save
 end
 
 webui_key = OpenSSL::PKey::RSA.new(PrivateChef.credentials.get('chef-server', 'webui_key'))
 
 if node['private_chef']['insecure_addon_compat']
-  file "/etc/opscode/pivotal.pem"  do
+  file '/etc/opscode/pivotal.pem'  do
     owner OmnibusHelper.new(node).ownership['owner']
-    group "root"
-    mode "0600"
+    group 'root'
+    mode '0600'
     sensitive true
     content PrivateChef.credentials.get('chef-server', 'superuser_key')
   end
 
-  file "/etc/opscode/webui_priv.pem" do
+  file '/etc/opscode/webui_priv.pem' do
     owner OmnibusHelper.new(node).ownership['owner']
-    group "root"
-    mode "0600"
+    group 'root'
+    mode '0600'
     sensitive true
     content webui_key.to_pem
   end
 
-  file "/etc/opscode/webui_pub.pem" do
-    owner "root"
-    group "root"
-    mode "0644"
+  file '/etc/opscode/webui_pub.pem' do
+    owner 'root'
+    group 'root'
+    mode '0644'
     sensitive true
     content webui_key.public_key.to_s unless webui_key.nil?
   end

@@ -27,7 +27,7 @@ if is_data_master?
     end
   end
 
-  directory "/etc/opscode-analytics" do
+  directory '/etc/opscode-analytics' do
     owner OmnibusHelper.new(node).ownership['owner']
     group OmnibusHelper.new(node).ownership['group']
     mode '0775'
@@ -37,30 +37,30 @@ if is_data_master?
   # Write out the config files for actions to load in order to interface with this EC
   # instance
   #
-  file "/etc/opscode-analytics/webui_priv.pem" do
+  file '/etc/opscode-analytics/webui_priv.pem' do
     owner OmnibusHelper.new(node).ownership['owner']
-    group "root"
-    mode "0600"
-    content lazy {::File.open('/etc/opscode/webui_priv.pem').read}
+    group 'root'
+    mode '0600'
+    content lazy { ::File.open('/etc/opscode/webui_priv.pem').read }
   end
 
   rabbitmq = OmnibusHelper.new(node).rabbitmq_configuration
 
-  file "/etc/opscode-analytics/actions-source.json" do
+  file '/etc/opscode-analytics/actions-source.json' do
     owner 'root'
     mode '0600'
     sensitive true
     content lazy {
       Chef::JSONCompat.to_json_pretty(
         private_chef: {
-          api_fqdn:           node['private_chef']['lb']['api_fqdn'],
-          oc_id_application:  oc_id_app.call,
-          rabbitmq_host:      rabbitmq['vip'],
-          rabbitmq_port:      rabbitmq['node_port'],
-          rabbitmq_vhost:     rabbitmq['actions_vhost'],
-          rabbitmq_exchange:  rabbitmq['actions_exchange'],
-          rabbitmq_user:      rabbitmq['actions_user'],
-          rabbitmq_password:  rabbitmq['actions_password']
+          api_fqdn: node['private_chef']['lb']['api_fqdn'],
+          oc_id_application: oc_id_app.call,
+          rabbitmq_host: rabbitmq['vip'],
+          rabbitmq_port: rabbitmq['node_port'],
+          rabbitmq_vhost: rabbitmq['actions_vhost'],
+          rabbitmq_exchange: rabbitmq['actions_exchange'],
+          rabbitmq_user: rabbitmq['actions_user'],
+          rabbitmq_password: rabbitmq['actions_password'],
         }
       )
     }

@@ -18,20 +18,20 @@
 
 # When we're running a new standalone install and are configured
 # to install addons, do so now from the package repositories.
-if (!OmnibusHelper.has_been_bootstrapped? &&
-    node['private_chef']['topology'] == "standalone" &&
-    node['private_chef']['addons']['install'])
-  include_recipe "private-chef::add_ons_wrapper"
+if !OmnibusHelper.has_been_bootstrapped? &&
+   node['private_chef']['topology'] == 'standalone' &&
+   node['private_chef']['addons']['install']
+  include_recipe 'private-chef::add_ons_wrapper'
 end
 
 # These should always be running by this point, but let's be certain.
-%w{postgresql oc_bifrost}.each do |service|
+%w(postgresql oc_bifrost).each do |service|
   execute "/opt/opscode/bin/chef-server-ctl start #{service}" do
     not_if { OmnibusHelper.has_been_bootstrapped? }
   end
 end
 
-ruby_block "bootstrap-chef-server-data" do
+ruby_block 'bootstrap-chef-server-data' do
   block do
     ChefServerDataBootstrap.new(node).bootstrap
   end
@@ -40,8 +40,8 @@ ruby_block "bootstrap-chef-server-data" do
 end
 
 file OmnibusHelper.bootstrap_sentinel_file do
-  owner "root"
-  group "root"
-  mode "0600"
-  content "bootstrapped on #{DateTime.now} (you punk)" unless File.exists?(OmnibusHelper.bootstrap_sentinel_file)
+  owner 'root'
+  group 'root'
+  mode '0600'
+  content "bootstrapped on #{DateTime.now} (you punk)" unless File.exist?(OmnibusHelper.bootstrap_sentinel_file)
 end

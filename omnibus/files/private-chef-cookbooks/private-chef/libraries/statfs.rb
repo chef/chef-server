@@ -9,7 +9,7 @@ class Statfs
   extend FFI::Library
   ffi_lib FFI::Library::LIBC
 
-  attach_function(:statvfs, [:string, :pointer], :int)
+  attach_function(:statvfs, %i(string pointer), :int)
   attach_function(:strerror, [:int], :string)
 
   FSBLKCNT_T = if RbConfig::CONFIG['host_os'] =~ /darwin|osx|mach/i
@@ -63,7 +63,7 @@ class Statfs
     # Since we are running as root we could report f_bfree but will
     # stick with f_bavail since it will typically be more
     # conservative.
-    (@statvfs[:f_frsize] * @statvfs[:f_bavail])/1024
+    (@statvfs[:f_frsize] * @statvfs[:f_bavail]) / 1024
   end
 
   private
@@ -73,6 +73,7 @@ class Statfs
     if statvfs(path, statvfs.to_ptr) != 0
       raise 'statvfs: ' + strerror(FFI.errno)
     end
+
     statvfs
   end
 end

@@ -63,8 +63,8 @@
 
 action :upgrade do
   if upgrade_required?
-    converge_by("Upgrading database cluster") do
-      check_required_disk_space unless ENV['CS_SKIP_PG_DISK_CHECK'] == "1"
+    converge_by('Upgrading database cluster') do
+      check_required_disk_space unless ENV['CS_SKIP_PG_DISK_CHECK'] == '1'
       shutdown_postgres
       initialize_new_cluster
       update_to_latest_version
@@ -81,10 +81,10 @@ def old_data_dir
   # Cheat and use gem's version parsing and comparison operators.
   # Note we're doing a reverse sort to put the highest version at 0,
   # and we're not checking '==' because we can't have two paths of the same name.
-  ::Dir.glob(::File.join(::File.expand_path("../..", new_data_dir, ), "*/data"))
+  ::Dir.glob(::File.join(::File.expand_path('../..', new_data_dir), '*/data'))
        .reject { |dir| dir == new_data_dir } # ignore the new one
        .map { |dir| [dir, version_from_data_dir(dir)] }
-       .reject { |dir, vsn| !vsn } # filter those with no PG_VERSION
+       .reject { |_dir, vsn| !vsn } # filter those with no PG_VERSION
        .sort { |a, b| Gem::Version.new(a[1]) > Gem::Version.new(b[1]) ? -1 : 1 }
        .map(&:first) # drop the versions again
        .first
@@ -96,7 +96,7 @@ end
 
 # If this file exists, assume that the upgrade has succeeded
 def sentinel_file
-  ::File.join(new_data_dir, "upgraded.sentinel")
+  ::File.join(new_data_dir, 'upgraded.sentinel')
 end
 
 # @return [Boolean] Whether or not an upgrade is needed, and the
@@ -107,17 +107,17 @@ def upgrade_required?
     # This will only happen if we've never successfully completed a
     # Private Chef installation on this machine before.  In that case,
     # there is (by definition) nothing to upgrade
-    Chef::Log.debug "No prior database cluster detected; nothing to upgrade"
+    Chef::Log.debug 'No prior database cluster detected; nothing to upgrade'
     false
   elsif old_data_dir == new_data_dir
     # If the directories are the same, then we're not changing anything
     # (since we keep data directories in version-scoped
     # directories); i.e., this is just another garden-variety chef run
-    Chef::Log.debug "Database cluster is unchanged; nothing to upgrade"
+    Chef::Log.debug 'Database cluster is unchanged; nothing to upgrade'
     false
-  elsif Dir.exists?(new_data_dir) &&
-      cluster_initialized?(new_data_dir) &&
-      ::File.exists?(sentinel_file)
+  elsif Dir.exist?(new_data_dir) &&
+        cluster_initialized?(new_data_dir) &&
+        ::File.exist?(sentinel_file)
     # If the directories are different, we may need to do an upgrade,
     # but only if all the steps along the way haven't been completed
     # yet.  We'll look for a sentinel file (which we'll write out
@@ -126,7 +126,7 @@ def upgrade_required?
     # If we then make it all the way through the chef run, then the next
     # time through, the old_data_dir will be the same as our
     # new_data_dir
-    Chef::Log.debug "Database cluster already upgraded from previous installation; nothing to do"
+    Chef::Log.debug 'Database cluster already upgraded from previous installation; nothing to do'
     false
   else
     # Hmm, looks like we need to upgrade after all
@@ -148,19 +148,19 @@ def check_required_disk_space
   if old_data_dir_size < (free_disk_space * 0.90)
     Chef::Log.debug("Old data dir size: #{old_data_dir_size}")
     Chef::Log.debug("  Free disk space: #{free_disk_space}")
-    Chef::Log.debug("Free space is sufficient to start upgrade")
+    Chef::Log.debug('Free space is sufficient to start upgrade')
     true
   else
-    Chef::Log.fatal("Insufficient free space on disk to complete upgrade.")
+    Chef::Log.fatal('Insufficient free space on disk to complete upgrade.')
     Chef::Log.fatal("The current postgresql data directory contains #{old_data_dir_size} KB of data but only #{free_disk_space} KB is available on disk.")
-    Chef::Log.fatal("The upgrade process requires at least #{old_data_dir_size/0.90} KB.")
-    raise "Insufficient Disk Space to Upgrade"
+    Chef::Log.fatal("The upgrade process requires at least #{old_data_dir_size / 0.90} KB.")
+    raise 'Insufficient Disk Space to Upgrade'
   end
 end
 
 def dir_or_existing_parent(dir)
   return dir if ::File.exist?(dir)
-  return dir if ::File.expand_path(dir) == "/"
+  return dir if ::File.expand_path(dir) == '/'
 
   dir_or_existing_parent(::File.expand_path("#{dir}/.."))
 end
@@ -168,12 +168,12 @@ end
 # If a pre-existing postgres service exists it will need to be shut
 # down prior to running the upgrade step.
 def shutdown_postgres
-  component_runit_service "postgresql" do
+  component_runit_service 'postgresql' do
     action :nothing # can this just be 'action :stop'?
   end
 
-  log "Shutting down PostgreSQL for update" do
-    notifies :stop, "component_runit_service[postgresql]", :immediately
+  log 'Shutting down PostgreSQL for update' do
+    notifies :stop, 'component_runit_service[postgresql]', :immediately
   end
 end
 
@@ -184,11 +184,11 @@ end
 # Use the existence of a PG_VERSION file in a cluster's data directory
 # as an indicator of it having been already set up.
 def cluster_initialized?(data_dir)
-  ::File.exists?(version_file_for(data_dir))
+  ::File.exist?(version_file_for(data_dir))
 end
 
 def version_file_for(data_dir)
-  ::File.join(data_dir, "PG_VERSION")
+  ::File.join(data_dir, 'PG_VERSION')
 end
 
 # Postgres stores version information inside a cluster's data
@@ -202,7 +202,7 @@ end
 #   `data_dir`, or `nil` if the directory does not exist, or if a
 #   cluster has not yet been initialized in it
 def version_from_data_dir(data_dir)
-  if Dir.exists?(data_dir)
+  if Dir.exist?(data_dir)
     if cluster_initialized?(data_dir)
       # Might not be initialized yet if a prior Chef run failed between
       # creating the directory and initializing a cluster in it
@@ -229,7 +229,7 @@ def binary_path_for(version)
 end
 
 def update_to_latest_version
-  execute "upgrade_postgres_cluster" do
+  execute 'upgrade_postgres_cluster' do
     command lazy {
       old_version = version_from_data_dir(old_data_dir)
 
@@ -240,7 +240,7 @@ def update_to_latest_version
       old_bins = binary_path_for(old_version)
       new_bins = binary_path_for(new_version)
 
-      <<-EOM.gsub(/\s+/," ").strip!
+      <<-EOM.gsub(/\s+/, ' ').strip!
       #{new_bins}/pg_upgrade
         --old-datadir=#{old_data_dir}
         --new-datadir=#{new_data_dir}

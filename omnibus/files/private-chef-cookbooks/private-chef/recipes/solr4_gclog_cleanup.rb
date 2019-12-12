@@ -18,12 +18,12 @@
 #
 # Delete old rotated log files for opscode-solr4
 #
-::Dir.glob(::File.join(node['private_chef']['opscode-solr4']['log_directory'], "gclog.log.*.gz")).each do |filename|
+::Dir.glob(::File.join(node['private_chef']['opscode-solr4']['log_directory'], 'gclog.log.*.gz')).each do |filename|
   file filename do
     action :delete
   end
 end
 
-file ::File.join(node['private_chef']['opscode-solr4']['log_directory'], "gclog.log") do
+file ::File.join(node['private_chef']['opscode-solr4']['log_directory'], 'gclog.log') do
   action :delete
 end

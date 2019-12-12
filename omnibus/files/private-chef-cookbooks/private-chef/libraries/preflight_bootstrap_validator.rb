@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require_relative "preflight_checks"
+require_relative 'preflight_checks'
 
 class BootstrapPreflightValidator < PreflightValidator
   def initialize(node)
@@ -70,7 +70,7 @@ class BootstrapPreflightValidator < PreflightValidator
   # backend components, allow data bootstrapping to be bypassed when
   # no chef-server-running.json is present but a secrets file is present.
   def bypass_bootstrap?
-    first_run? && all_creds_exist? && PrivateChef["postgresql"]["external"]
+    first_run? && all_creds_exist? && PrivateChef['postgresql']['external']
   end
 
   private
@@ -80,7 +80,7 @@ class BootstrapPreflightValidator < PreflightValidator
   end
 
   def pivotal_pem_exists?
-    ::File.exist?("/etc/opscode/pivotal.pem")
+    ::File.exist?('/etc/opscode/pivotal.pem')
   end
 
   def secrets_contains_pivotal?
@@ -95,7 +95,7 @@ class BootstrapPreflightValidator < PreflightValidator
     connect_as(:superuser, 'silent' => true) do |conn|
       return false unless named_db_exists?(conn, 'opscode_chef')
     end
-    connect_as(:superuser, 'silent' => true,'db_name' => 'opscode_chef') do |conn|
+    connect_as(:superuser, 'silent' => true, 'db_name' => 'opscode_chef') do |conn|
       begin
         r = conn.exec("select count(*) result from  users where username = 'pivotal'")
         return r[0]['result'] == '1'
@@ -108,99 +108,98 @@ class BootstrapPreflightValidator < PreflightValidator
     end
   end
 
-
-  #TODO:
-  #These error messages and condition will need further refinement, details, and validation.
+  # TODO:
+  # These error messages and condition will need further refinement, details, and validation.
   def err_BOOT001_missing_pivotal_key
-<<EOM
-BOOT001: Your configuration indicates that you are starting this node
-         as part of a cluster, but the required file
-         /etc/opscode/pivotal.pem is missing.
+    <<~EOM
+      BOOT001: Your configuration indicates that you are starting this node
+               as part of a cluster, but the required file
+               /etc/opscode/pivotal.pem is missing.
 
-         Pending: remediation walkthrough.
-EOM
+               Pending: remediation walkthrough.
+    EOM
   end
 
   def err_BOOT002_pivotal_key_exists
-<<EOM
-BOOT002: Your configuration indicates that you are running an initial reconfigure
-         to bring your Chef Server online, but the file /etc/opscode/pivotal.pem
-         already exists.
+    <<~EOM
+      BOOT002: Your configuration indicates that you are running an initial reconfigure
+               to bring your Chef Server online, but the file /etc/opscode/pivotal.pem
+               already exists.
 
-         Pending: remediation walkthrough.
-EOM
+               Pending: remediation walkthrough.
+    EOM
   end
 
   def err_BOOT003_missing_pivotal_user
-<<EOM
-BOOT003: Your configuration indicates that you are starting this node
-         as part of a cluster and that initial reconfigure has been performed
-         on another node, but the pivotal user does not exist.
+    <<~EOM
+      BOOT003: Your configuration indicates that you are starting this node
+               as part of a cluster and that initial reconfigure has been performed
+               on another node, but the pivotal user does not exist.
 
-         Pending: remediation  walkthrough
-EOM
+               Pending: remediation  walkthrough
+    EOM
   end
 
   def err_BOOT004_pivotal_user_exists
-<<EOM
-BOOT004: You're attempting to run an initial reconfigure, but I see that
-         the user 'pivotal' already exists.
+    <<~EOM
+      BOOT004: You're attempting to run an initial reconfigure, but I see that
+               the user 'pivotal' already exists.
 
-         Pending: remediation  walkthrough
-EOM
+               Pending: remediation  walkthrough
+    EOM
   end
 
   def err_BOOT005_missing_pivotal_user
-<<EOM
-BOOT005: Your configuration indicates that you may be starting this node
-         as part of a cluster.  However, the superuser `pivotal` does not exist
-         within Chef Server.
+    <<~EOM
+      BOOT005: Your configuration indicates that you may be starting this node
+               as part of a cluster.  However, the superuser `pivotal` does not exist
+               within Chef Server.
 
-         Pending: remediation  walkthrough
-EOM
+               Pending: remediation  walkthrough
+    EOM
   end
 
   def err_BOOT008_pivotal_public_key_mismatch
-<<EOM
-BOOT008: The pivotal key in /etc/opscode/private-chef-secrets.json exists, but its public key
-         does not match the key for the pivotal user in chef-server.
+    <<~EOM
+      BOOT008: The pivotal key in /etc/opscode/private-chef-secrets.json exists, but its public key
+               does not match the key for the pivotal user in chef-server.
 
-         Critical maintenance operations cannot be performed.
+               Critical maintenance operations cannot be performed.
 
-         Pending: remediation walkthrough.
-EOM
+               Pending: remediation walkthrough.
+    EOM
   end
 
   def err_BOOT009_pivotal_key_expired
-<<EOM
-BOOT009: The pivotal superuser account key is expired.
+    <<~EOM
+      BOOT009: The pivotal superuser account key is expired.
 
-         Critical maintenance operations cannot be performed.
+               Critical maintenance operations cannot be performed.
 
-         Pending: remediation walkthrough.
-EOM
+               Pending: remediation walkthrough.
+    EOM
   end
 
   def err_BOOT010_pivotal_user_exists
-<<EOM
-BOOT010: Unable to configure this node because the superuser 'pivotal'
-         already exists in the database.
+    <<~EOM
+      BOOT010: Unable to configure this node because the superuser 'pivotal'
+               already exists in the database.
 
-         Please ensure that you have copied the files 'pivotal.pem' and
-         'private-chef-secrets.json' from the node to be reconfigured
-         into '/etc/opscode/' on this node before attempting to run
-         reconfigure again.
-EOM
+               Please ensure that you have copied the files 'pivotal.pem' and
+               'private-chef-secrets.json' from the node to be reconfigured
+               into '/etc/opscode/' on this node before attempting to run
+               reconfigure again.
+    EOM
   end
 
   def err_BOOT011_pivotal_user_does_not_exist
-<<EOM
-BOOT011: Unable to configure this node because the superuser 'pivotal'
-         does not exist in the database.
+    <<~EOM
+      BOOT011: Unable to configure this node because the superuser 'pivotal'
+               does not exist in the database.
 
-         If this is the first node you're attempting to reconfigure,
-         please remove the file 'private-chef-secrets.json'
-         from '/etc/opscode' before attempting to run reconfigure again.
-EOM
+               If this is the first node you're attempting to reconfigure,
+               please remove the file 'private-chef-secrets.json'
+               from '/etc/opscode' before attempting to run reconfigure again.
+    EOM
   end
 end

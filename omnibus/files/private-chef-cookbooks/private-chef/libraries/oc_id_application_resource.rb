@@ -7,9 +7,9 @@ class Chef
       resource_name :oc_id_application
       default_action :create
 
-      attribute :name, :kind_of => String, :name_attribute => true
-      attribute :write_to_disk, :kind_of => [TrueClass, FalseClass], :default => false
-      attribute :redirect_uri, :kind_of => String, :required => true
+      attribute :name, kind_of: String, name_attribute: true
+      attribute :write_to_disk, kind_of: [TrueClass, FalseClass], default: false
+      attribute :redirect_uri, kind_of: String, required: true
     end
   end
 end

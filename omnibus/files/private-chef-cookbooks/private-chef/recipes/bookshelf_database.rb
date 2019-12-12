@@ -32,7 +32,7 @@ private_chef_pg_database 'bookshelf' do
   owner bookshelf_attrs['sql_user']
   # This is used to trigger creation of the schema during install.
   # For upgrades, create a partybus migration to perform any schema changes.
-  notifies :deploy, "private_chef_pg_sqitch[/opt/opscode/embedded/service/bookshelf/schema]", :immediately
+  notifies :deploy, 'private_chef_pg_sqitch[/opt/opscode/embedded/service/bookshelf/schema]', :immediately
 end
 
 private_chef_pg_user_table_access bookshelf_attrs['sql_user'] do
@@ -50,12 +50,12 @@ end
 # Note that these migrations are only deployed during an initial install via the
 # :deploy notification above.  Upgrades to existing installations must be managed
 # via partybus migrations.
-private_chef_pg_sqitch "/opt/opscode/embedded/service/bookshelf/schema" do
+private_chef_pg_sqitch '/opt/opscode/embedded/service/bookshelf/schema' do
   hostname postgres_attrs['vip']
   port     postgres_attrs['port']
-  username  postgres_attrs['db_superuser']
+  username postgres_attrs['db_superuser']
   password PrivateChef.credentials.get('postgresql', 'db_superuser_password')
-  database "bookshelf"
+  database 'bookshelf'
   sslmode postgres_attrs['sslmode']
   action :nothing
 end

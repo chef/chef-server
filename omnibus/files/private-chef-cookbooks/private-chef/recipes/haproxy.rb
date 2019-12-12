@@ -15,12 +15,12 @@
 #
 
 haproxy_dir = node['private_chef']['haproxy']['dir']
-haproxy_socket = ::File.join(haproxy_dir, "haproxy.sock")
+haproxy_socket = ::File.join(haproxy_dir, 'haproxy.sock')
 haproxy_log_dir = node['private_chef']['haproxy']['log_directory']
 
 [
   haproxy_dir,
-  haproxy_log_dir
+  haproxy_log_dir,
 ].each do |dir_name|
   directory dir_name do
     owner OmnibusHelper.new(node).ownership['owner']
@@ -46,38 +46,38 @@ def get_chef_backend_cluster_members
     rescue StandardError => e
       Chef::Log.warn("Error attempting to get cluster members from #{member}:")
       Chef::Log.warn("  #{e}")
-      Chef::Log.warn("Trying next configured chef_backend member.")
+      Chef::Log.warn('Trying next configured chef_backend member.')
     end
   end
   members
 end
 
 chef_backend_members = begin
-                         Chef::Log.info("Attempting Chef Backend Member Discovery")
+                         Chef::Log.info('Attempting Chef Backend Member Discovery')
                          if members = get_chef_backend_cluster_members
-                           Chef::Log.info("Using Chef Backend members discovered via etcd")
+                           Chef::Log.info('Using Chef Backend members discovered via etcd')
                            members
                          else
-                           Chef::Log.warn("Member discovery failed")
-                           Chef::Log.warn("Using statically configured member list")
+                           Chef::Log.warn('Member discovery failed')
+                           Chef::Log.warn('Using statically configured member list')
                            ChefBackend.configured_members(node)
                          end
                        rescue StandardError => e
                          Chef::Log.warn("member discoverry failed: #{e}")
-                         Chef::Log.warn("Using statically configured member list")
+                         Chef::Log.warn('Using statically configured member list')
                          ChefBackend.configured_members(node)
                        end
 
-template File.join(haproxy_dir, "haproxy.cfg") do
-  source "haproxy.cfg.erb"
+template File.join(haproxy_dir, 'haproxy.cfg') do
+  source 'haproxy.cfg.erb'
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
-  mode "600"
+  mode '600'
   variables(node['private_chef']['haproxy'].to_hash.merge(chef_backend_members: chef_backend_members))
   notifies :restart, 'component_runit_service[haproxy]'
 end
 
-component_runit_service "haproxy"
+component_runit_service 'haproxy'
 
 # On startup, all backend servers will be marked as UP.
 #
@@ -89,7 +89,7 @@ component_runit_service "haproxy"
 # Here, we wait for the HAProxy stats output to confirm that only one
 # server in each backend group (the leader) is marked as up to avoid
 # trying to bootstrap against the read-only follower.
-ruby_block "wait for haproxy status socket" do
+ruby_block 'wait for haproxy status socket' do
   block do
     connected = false
     10.times do
@@ -107,16 +107,16 @@ ruby_block "wait for haproxy status socket" do
       end
     end
 
-    if !connected
-      Chef::Log.fatal("HAProxy status socket never appeared properly!")
-      Chef::Log.fatal("See /var/log/opscode/haproxy/current for more information")
+    unless connected
+      Chef::Log.fatal('HAProxy status socket never appeared properly!')
+      Chef::Log.fatal('See /var/log/opscode/haproxy/current for more information')
       Kernel.exit! 1
     end
   end
   notifies :start, 'component_runit_service[haproxy]', :before
 end
 
-ruby_block "wait for backend leader to stabilize" do
+ruby_block 'wait for backend leader to stabilize' do
   block do
     stable = false
     10.times do
@@ -124,44 +124,44 @@ ruby_block "wait for backend leader to stabilize" do
         require 'socket'
         s = HAProxyStatus.new(UNIXSocket.new(haproxy_socket))
         active_servers = {
-          "chef_backend_elasticsearch" => [],
-          "chef_backend_postgresql" => []
+          'chef_backend_elasticsearch' => [],
+          'chef_backend_postgresql' => [],
         }
 
         s.server_stats.each do |server|
-          active_servers[server[:pxname]] << server[:svname] if server[:status] == "UP"
+          active_servers[server[:pxname]] << server[:svname] if server[:status] == 'UP'
         end
 
         # We expect the status checks to fail on all but 1 backend
         # (the current leader) thus we wait for that to be the case.
-        if active_servers["chef_backend_elasticsearch"].count == 1 &&
-           active_servers["chef_backend_postgresql"].count == 1
+        if active_servers['chef_backend_elasticsearch'].count == 1 &&
+           active_servers['chef_backend_postgresql'].count == 1
           stable = true
           break
         else
-          Chef::Log.warn("HAProxy still inconsistent:")
-          Chef::Log.warn("  Postgresql servers UP:")
-          active_servers["chef_backend_postgresql"].each do |server_name|
+          Chef::Log.warn('HAProxy still inconsistent:')
+          Chef::Log.warn('  Postgresql servers UP:')
+          active_servers['chef_backend_postgresql'].each do |server_name|
             Chef::Log.warn("   -#{server_name}")
           end
-          Chef::Log.warn("  Elasticsearch servers UP:")
-          active_servers["chef_backend_elasticsearch"].each do |server_name|
+          Chef::Log.warn('  Elasticsearch servers UP:')
+          active_servers['chef_backend_elasticsearch'].each do |server_name|
             Chef::Log.warn("   -#{server_name}")
           end
-          Chef::Log.warn("Retrying in 2 seconds")
+          Chef::Log.warn('Retrying in 2 seconds')
           sleep 2
         end
       rescue StandardError => e
-        Chef::Log.warn("Error attempting to verify HAProxy State:")
+        Chef::Log.warn('Error attempting to verify HAProxy State:')
         Chef::Log.warn("   #{e}")
-        Chef::Log.warn("Retrying in 2 seconds")
+        Chef::Log.warn('Retrying in 2 seconds')
         sleep 2
       end
     end
 
-    if !stable
-      Chef::Log.fatal("HAProxy still showing multiple active backends")
-      Chef::Log.fatal("Please check /var/log/opscode/haproxy/current locally for problems.")
+    unless stable
+      Chef::Log.fatal('HAProxy still showing multiple active backends')
+      Chef::Log.fatal('Please check /var/log/opscode/haproxy/current locally for problems.')
       Chef::Log.fatal("Please check your backend cluster's status for problems.")
       Kernel.exit! 1
     end

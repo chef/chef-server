@@ -27,8 +27,7 @@ private_chef_pg_user id_attrs['sql_ro_user'] do
   password PrivateChef.credentials.get('oc_id', 'sql_ro_password')
 end
 
-
-private_chef_pg_database "oc_id" do
+private_chef_pg_database 'oc_id' do
   owner id_attrs['sql_user']
 end
 

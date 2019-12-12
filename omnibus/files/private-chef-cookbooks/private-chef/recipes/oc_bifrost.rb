@@ -21,29 +21,29 @@
 # replaces.
 #
 
-execute "/opt/opscode/bin/private-chef-ctl stop opscode-authz" do
+execute '/opt/opscode/bin/private-chef-ctl stop opscode-authz' do
   retries 20
 end
 
-runit_service "opscode-authz" do
+runit_service 'opscode-authz' do
   action :disable
 end
 
-directory "/opt/opscode/sv/opscode-authz" do
+directory '/opt/opscode/sv/opscode-authz' do
   action :delete
   recursive true
 end
 # END AUTHZ CLEANUP
 
 oc_bifrost_dir = node['private_chef']['oc_bifrost']['dir']
-oc_bifrost_bin_dir = File.join(oc_bifrost_dir, "bin")
+oc_bifrost_bin_dir = File.join(oc_bifrost_dir, 'bin')
 oc_bifrost_log_dir = node['private_chef']['oc_bifrost']['log_directory']
-oc_bifrost_sasl_log_dir = File.join(oc_bifrost_log_dir, "sasl")
+oc_bifrost_sasl_log_dir = File.join(oc_bifrost_log_dir, 'sasl')
 [
   oc_bifrost_dir,
   oc_bifrost_bin_dir,
   oc_bifrost_log_dir,
-  oc_bifrost_sasl_log_dir
+  oc_bifrost_sasl_log_dir,
 ].each do |dir_name|
   directory dir_name do
     owner OmnibusHelper.new(node).ownership['owner']
@@ -53,37 +53,37 @@ oc_bifrost_sasl_log_dir = File.join(oc_bifrost_log_dir, "sasl")
   end
 end
 
-link "/opt/opscode/embedded/service/oc_bifrost/log" do
+link '/opt/opscode/embedded/service/oc_bifrost/log' do
   to oc_bifrost_log_dir
 end
 
-oc_bifrost_config = File.join(oc_bifrost_dir, "sys.config")
+oc_bifrost_config = File.join(oc_bifrost_dir, 'sys.config')
 
 template oc_bifrost_config do
-  source "oc_bifrost.config.erb"
+  source 'oc_bifrost.config.erb'
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
-  mode "644"
-  variables(node['private_chef']['oc_bifrost'].to_hash.merge :helper => OmnibusHelper.new(node))
+  mode '644'
+  variables(node['private_chef']['oc_bifrost'].to_hash.merge(helper: OmnibusHelper.new(node)))
   notifies :restart, 'component_runit_service[oc_bifrost]'
 end
 
-link "/opt/opscode/embedded/service/oc_bifrost/sys.config" do
+link '/opt/opscode/embedded/service/oc_bifrost/sys.config' do
   to oc_bifrost_config
 end
 
-vmargs_config = File.join(oc_bifrost_dir, "vm.args")
+vmargs_config = File.join(oc_bifrost_dir, 'vm.args')
 
 template vmargs_config do
-  source "oc_bifrost.vm.args.erb"
+  source 'oc_bifrost.vm.args.erb'
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
-  mode "644"
+  mode '644'
   notifies :restart, 'component_runit_service[oc_bifrost]'
 end
 
-link "/opt/opscode/embedded/service/oc_bifrost/vm.args" do
+link '/opt/opscode/embedded/service/oc_bifrost/vm.args' do
   to vmargs_config
 end
 
-component_runit_service "oc_bifrost"
+component_runit_service 'oc_bifrost'

@@ -9,18 +9,18 @@ module ChefServer
     def self.print_warnings
       return if @@warnings.empty?
 
-      puts "\n" + "-"*70 + "\n"
-      puts <<EOF
+      puts "\n" + '-' * 70 + "\n"
+      puts <<~EOF
 
-The following warnings were encountered during the reconfiguration of
-your Chef server:
+        The following warnings were encountered during the reconfiguration of
+        your Chef server:
 
-EOF
+      EOF
       @@warnings.each do |msg|
         puts "#{msg}\n"
       end
 
-      puts "\n" + "-"*70 + "\n"
+      puts "\n" + '-' * 70 + "\n"
     end
   end
 end

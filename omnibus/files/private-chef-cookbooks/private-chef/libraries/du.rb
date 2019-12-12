@@ -17,9 +17,9 @@ module Du
     else
       Chef::Log.error("du -sk #{path} failed with exit status: #{command.exitstatus}")
       Chef::Log.error("du stderr: #{command.stderr}")
-      raise "du failed"
+      raise 'du failed'
     end
   rescue Errno::ENOENT
-    raise "The du utility is not available. Unable to check disk usage"
+    raise 'The du utility is not available. Unable to check disk usage'
   end
 end
