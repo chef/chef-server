@@ -79,6 +79,8 @@ copying files back from the dev-vm to the host.
       around rails upgrades. We should either fix that debt or find
       another library for the Chef Server API.
 
+    - src/chef-server-ctl/Gemfile.local
+
 - Build Chef Server, and do a chef-server-ctl reconfigure. Fix any new
   warnings about deprecations and the like.
 
