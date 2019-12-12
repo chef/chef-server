@@ -10,7 +10,7 @@ override :bundler, version: "1.17.2"  # pin to avoid double bundle error
 override :'omnibus-ctl', version: "master"
 override :chef, version: "v15.5.17"
 override :ohai, version: "v15.3.1"
-override :ruby, version: "2.6.3"
+override :ruby, version: "2.6.5"
 
 
 # This SHA is the last commit before the 6.0 release
