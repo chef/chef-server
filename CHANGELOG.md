@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.20 -->
-## [13.1.20](https://github.com/chef/chef-server/tree/13.1.20) (2019-12-12)
+<!-- latest_release 13.1.21 -->
+## [13.1.21](https://github.com/chef/chef-server/tree/13.1.21) (2019-12-13)
 
 #### Merged Pull Requests
-- Apply cookstyle to the cookbooks [#1852](https://github.com/chef/chef-server/pull/1852) ([tas50](https://github.com/tas50))
+- Update RELEASE_NOTES for 13.1.13 promotion [#1855](https://github.com/chef/chef-server/pull/1855) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Update RELEASE_NOTES for 13.1.13 promotion [#1855](https://github.com/chef/chef-server/pull/1855) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.21 -->
 - Apply cookstyle to the cookbooks [#1852](https://github.com/chef/chef-server/pull/1852) ([tas50](https://github.com/tas50)) <!-- 13.1.20 -->
 - Update Ruby from 2.6.3 to 2.6.5 [#1851](https://github.com/chef/chef-server/pull/1851) ([tas50](https://github.com/tas50)) <!-- 13.1.19 -->
 - Refactor external postgresql scenarios for consistency [#1858](https://github.com/chef/chef-server/pull/1858) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.18 -->
