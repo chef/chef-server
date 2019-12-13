@@ -107,10 +107,9 @@ steps:
 
 - label: oc-id
   command:
-    - apt-get update -y && apt-get install -y libsqlite3-dev
     - /workdir/scripts/bk_tests/bk_install.sh
-    - cd /workdir/src/oc-id; make install
-    - make ci
+    - cd /workdir/src/oc-id
+    - make install ci
   expeditor:
     executor:
       docker:
