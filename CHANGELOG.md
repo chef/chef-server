@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.24 -->
-## [13.1.24](https://github.com/chef/chef-server/tree/13.1.24) (2019-12-13)
+<!-- latest_release 13.1.25 -->
+## [13.1.25](https://github.com/chef/chef-server/tree/13.1.25) (2019-12-13)
 
 #### Merged Pull Requests
-- ci: disable microsoft mirror, exit bk_install script on first error [#1865](https://github.com/chef/chef-server/pull/1865) ([stevendanna](https://github.com/stevendanna))
+- Add scenario for chef-backend [#1860](https://github.com/chef/chef-server/pull/1860) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Add scenario for chef-backend [#1860](https://github.com/chef/chef-server/pull/1860) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.25 -->
 - ci: disable microsoft mirror, exit bk_install script on first error [#1865](https://github.com/chef/chef-server/pull/1865) ([stevendanna](https://github.com/stevendanna)) <!-- 13.1.24 -->
 - point to master branch of omnibus-software [#1861](https://github.com/chef/chef-server/pull/1861) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.1.23 -->
 - Pin perl to 5.18.1 [#1864](https://github.com/chef/chef-server/pull/1864) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.22 -->
