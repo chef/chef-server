@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.22 -->
-## [13.1.22](https://github.com/chef/chef-server/tree/13.1.22) (2019-12-13)
+<!-- latest_release 13.1.23 -->
+## [13.1.23](https://github.com/chef/chef-server/tree/13.1.23) (2019-12-13)
 
 #### Merged Pull Requests
-- Pin perl to 5.18.1 [#1864](https://github.com/chef/chef-server/pull/1864) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- point to master branch of omnibus-software [#1861](https://github.com/chef/chef-server/pull/1861) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- point to master branch of omnibus-software [#1861](https://github.com/chef/chef-server/pull/1861) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.1.23 -->
 - Pin perl to 5.18.1 [#1864](https://github.com/chef/chef-server/pull/1864) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.22 -->
 - Update RELEASE_NOTES for 13.1.13 promotion [#1855](https://github.com/chef/chef-server/pull/1855) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.21 -->
 - Apply cookstyle to the cookbooks [#1852](https://github.com/chef/chef-server/pull/1852) ([tas50](https://github.com/tas50)) <!-- 13.1.20 -->
