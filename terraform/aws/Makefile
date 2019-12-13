@@ -41,6 +41,12 @@ ifneq ($(UPGRADE_VERSION),)
 	export TF_VAR_upgrade_version_url ?= $(shell platform=$(TF_VAR_platform); for channel in unstable current stable; do mixlib-install download chef-server --url -c $$channel -a x86_64 -p $$(echo $${platform%-*} | sed 's/rhel/el/') -l $${platform\#\#*-} -v $(UPGRADE_VERSION) 2>/dev/null && break; done | head -n1)
 endif
 
+ifneq ($(BACKEND_VERSION),)
+	export TF_VAR_backend_version_url ?= $(shell platform=$(TF_VAR_platform); for channel in unstable current stable; do mixlib-install download chef-backend --url -c $$channel -a x86_64 -p $$(echo $${platform%-*} | sed 's/rhel/el/') -l $${platform\#\#*-} -v $(BACKEND_VERSION) 2>/dev/null && break; done | head -n1)
+else
+	export TF_VAR_backend_version_url ?= $(shell platform=$(TF_VAR_platform); mixlib-install download chef-backend --url -c current -a x86_64 -p $$(echo $${platform%-*} | sed 's/rhel/el/') -l $${platform\#\#*-} 2>/dev/null)
+endif
+
 ifneq ($(ENABLE_IPV6),)
 	export TF_VAR_enable_ipv6 ?= $(ENABLE_IPV6)
 else
