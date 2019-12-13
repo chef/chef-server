@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.21 -->
-## [13.1.21](https://github.com/chef/chef-server/tree/13.1.21) (2019-12-13)
+<!-- latest_release 13.1.22 -->
+## [13.1.22](https://github.com/chef/chef-server/tree/13.1.22) (2019-12-13)
 
 #### Merged Pull Requests
-- Update RELEASE_NOTES for 13.1.13 promotion [#1855](https://github.com/chef/chef-server/pull/1855) ([christopher-snapp](https://github.com/christopher-snapp))
+- Pin perl to 5.18.1 [#1864](https://github.com/chef/chef-server/pull/1864) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Pin perl to 5.18.1 [#1864](https://github.com/chef/chef-server/pull/1864) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.22 -->
 - Update RELEASE_NOTES for 13.1.13 promotion [#1855](https://github.com/chef/chef-server/pull/1855) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.21 -->
 - Apply cookstyle to the cookbooks [#1852](https://github.com/chef/chef-server/pull/1852) ([tas50](https://github.com/tas50)) <!-- 13.1.20 -->
 - Update Ruby from 2.6.3 to 2.6.5 [#1851](https://github.com/chef/chef-server/pull/1851) ([tas50](https://github.com/tas50)) <!-- 13.1.19 -->
