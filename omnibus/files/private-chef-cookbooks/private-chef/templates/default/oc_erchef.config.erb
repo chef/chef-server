@@ -145,7 +145,6 @@
             chef_<%= node['private_chef']['opscode-erchef']['search_provider'] %>
         ]},
         {base_resource_url, <%= @helper.erl_atom_or_string(node['private_chef']['opscode-erchef']['base_resource_url']) %>},
-        {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
         {strict_search_result_acls, <%= @strict_search_result_acls %>},
 
         {rabbitmq, [
