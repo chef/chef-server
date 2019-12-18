@@ -112,7 +112,7 @@ resource "null_resource" "backend1_config" {
       "sudo cat /etc/chef-backend/chef-backend-secrets.json | ssh -o 'UserKnownHostsFile=/dev/null' -o 'StrictHostKeyChecking=no' ${module.backend2.ssh_username}@${module.backend2.public_ipv4_dns} 'cat > /tmp/chef-backend-secrets.json'",
       "sudo cat /etc/chef-backend/chef-backend-secrets.json | ssh -o 'UserKnownHostsFile=/dev/null' -o 'StrictHostKeyChecking=no' ${module.backend3.ssh_username}@${module.backend3.public_ipv4_dns} 'cat > /tmp/chef-backend-secrets.json'",
       "sudo chef-backend-ctl gen-server-config chefserver.internal > /tmp/chef-server.rb",
-      "echo -e \"\nprofiles['root_url'] = 'http://chefserver.internal:9998'\" | sudo tee -a /tmp/chef-server.rb",
+      "echo \"profiles['root_url'] = 'http://chefserver.internal:9998'\" | sudo tee -a /tmp/chef-server.rb",
       "scp -o 'UserKnownHostsFile=/dev/null' -o 'StrictHostKeyChecking=no' /tmp/chef-server.rb ${module.chef_server.ssh_username}@${module.chef_server.public_ipv4_dns}:/tmp",
       "echo -e '\nEND INSTALL CHEF BACKEND1\n'",
     ]
