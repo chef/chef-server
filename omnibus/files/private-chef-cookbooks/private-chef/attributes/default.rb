@@ -846,7 +846,7 @@ default['private_chef']['dark_launch']['private-chef'] = true
 default['private_chef']['dark_launch']['sql_users'] = true
 default['private_chef']['dark_launch']['add_type_and_bag_to_items'] = true
 default['private_chef']['dark_launch']['reporting'] = true
-default['private_chef']['dark_launch']['actions'] = true
+default['private_chef']['dark_launch']['actions'] = false
 
 ###
 # Chef Mover

@@ -50,6 +50,17 @@ include_recipe 'private-chef::plugin_discovery'
 include_recipe 'private-chef::plugin_config_extensions'
 include_recipe 'private-chef::config'
 
+# disable rabbitmq and... elasticsearch?
+directory '/opt/opscode/sv/rabbitmq' do
+  recursive true
+  action :delete
+end
+
+directory '/opt/opscode/sv/opscode-expander' do
+  recursive true
+  action :delete
+end
+
 if node['private_chef']['fips_enabled']
   include_recipe 'private-chef::fips'
 end
