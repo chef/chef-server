@@ -46,6 +46,12 @@ variable "arm_instance_type" {
   default     = "Standard_D2_v3"
 }
 
+variable "build_prefix" {
+  type        = "string"
+  description = "Optional build identifier for differentiating scenario runs."
+  default     = ""
+}
+
 variable "platform" {
   type        = "string"
   description = "Operating System of the instance to be created."

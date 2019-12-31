@@ -52,7 +52,7 @@ resource "aws_security_group" "default" {
   }
 
   tags = {
-    Name      = "${var.name}-${local.vpc_name}"
+    Name      = "${var.build_prefix}${var.name}-${local.vpc_name}"
     X-Dept    = "${var.aws_department}"
     X-Contact = "${var.aws_contact}"
   }
@@ -76,7 +76,7 @@ resource "aws_instance" "default" {
   ]
 
   tags = {
-    Name      = "${var.name}-${local.vpc_name}"
+    Name      = "${var.build_prefix}${var.name}-${local.vpc_name}"
     X-Dept    = "${var.aws_department}"
     X-Contact = "${var.aws_contact}"
   }

@@ -37,6 +37,12 @@ variable "aws_instance_type" {
   default     = "t2.medium"
 }
 
+variable "build_prefix" {
+  type        = "string"
+  description = "Optional build identifier for differentiating scenario runs."
+  default     = ""
+}
+
 variable "enable_ipv6" {
   type        = "string"
   description = "Allocate an IPv6 address in addition to IPv4 address."

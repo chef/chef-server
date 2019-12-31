@@ -10,6 +10,7 @@ module "back_end" {
   aws_instance_type = "${var.aws_instance_type}"
   enable_ipv6       = "${var.enable_ipv6}"
   platform          = "${var.platform}"
+  build_prefix      = "${var.build_prefix}"
   name              = "backend-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
@@ -25,6 +26,7 @@ module "front_end" {
   aws_instance_type = "${var.aws_instance_type}"
   enable_ipv6       = "${var.enable_ipv6}"
   platform          = "${var.platform}"
+  build_prefix      = "${var.build_prefix}"
   name              = "frontend-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
