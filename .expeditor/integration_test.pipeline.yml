@@ -5,3 +5,87 @@ expeditor:
       timeout_in_minutes: 90
 
 steps:
+
+  - label: ':terraform: omnibus-chef-backend-ipv4'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-chef-backend
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: omnibus-standalone-upgrade-ipv4'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-standalone-upgrade
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: omnibus-tiered-fresh-install-ipv4'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-fresh-install
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: omnibus-tiered-fresh-install-ipv6'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-fresh-install
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: omnibus-tiered-upgrade-ipv4'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-upgrade
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: omnibus-tiered-upgrade-ipv6'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-upgrade
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - wait: ~
+    continue_on_failure: true
+      
+  - label: ':terraform: destroy-all'
+    command:
+      - asdf plugin-add consul
+      - asdf install consul 1.6.2
+      - asdf local consul 1.6.2
+      - .expeditor/integration_test.pipeline.sh destroy-all
+    env:
+      ACTION: destroy-all
+      CONSUL_HTTP_ADDR: http://consul.chef.co
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
