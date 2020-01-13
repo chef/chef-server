@@ -20,7 +20,7 @@ require 'pg'
 
 PLACEHOLDER_GLOBAL_ORG_ID = "00000000000000000000000000000000"
 
-add_command_under_category "grant-server-admin-permissions", "server-admins", "Grant a user the ability to create other users by added the user to the server-admins group.", 2 do
+add_command_under_category "grant-server-admin-permissions", "server-admins", "Grant a user the ability to create other users by adding the user to the server-admins group.", 2 do
 
   cmd_args = ARGV[1..-1]
   if cmd_args.length != 1
@@ -118,7 +118,7 @@ add_command_under_category "list-server-admins", "server-admins", "List users th
   db = setup_erchef_db
   server_admins_authz_id = get_server_admins_authz_id(db)
 
-  # get all the user authz_ids for all memebers of the server-admins authz group
+  # get all the user authz_ids for all members of the server-admins authz group
   req_params = {
     method: :get,
     url: "#{::ChefServerCtl::Config.bifrost_url}/groups/#{server_admins_authz_id}",
