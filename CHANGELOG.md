@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.26 -->
-## [13.1.26](https://github.com/chef/chef-server/tree/13.1.26) (2019-12-31)
+<!-- latest_release 13.1.27 -->
+## [13.1.27](https://github.com/chef/chef-server/tree/13.1.27) (2020-01-13)
 
 #### Merged Pull Requests
-- Fix chef-backend scenario to work on ubuntu [#1868](https://github.com/chef/chef-server/pull/1868) ([christopher-snapp](https://github.com/christopher-snapp))
+- Fix two small chef-server-ctl typos [#1875](https://github.com/chef/chef-server/pull/1875) ([ehershey](https://github.com/ehershey))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Fix two small chef-server-ctl typos [#1875](https://github.com/chef/chef-server/pull/1875) ([ehershey](https://github.com/ehershey)) <!-- 13.1.27 -->
 - Fix chef-backend scenario to work on ubuntu [#1868](https://github.com/chef/chef-server/pull/1868) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.26 -->
 - Add scenario for chef-backend [#1860](https://github.com/chef/chef-server/pull/1860) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.25 -->
 - ci: disable microsoft mirror, exit bk_install script on first error [#1865](https://github.com/chef/chef-server/pull/1865) ([stevendanna](https://github.com/stevendanna)) <!-- 13.1.24 -->
