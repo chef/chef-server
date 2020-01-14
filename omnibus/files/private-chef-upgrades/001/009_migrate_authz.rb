@@ -13,9 +13,7 @@ define_upgrade do
                      'opscode-certificate',
                      'opscode-erchef',
                      'opscode-expander',
-                     'opscode-expander-reindexer',
-                     'opscode-solr4',
-                     'opscode-rabbitmq']
+                     'opscode-expander-reindexer']
 
     # Shut down everything but couch & postgres
     down_services.each{|s| run_command("private-chef-ctl stop #{s}")}

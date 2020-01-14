@@ -50,7 +50,7 @@ include_recipe 'private-chef::plugin_discovery'
 include_recipe 'private-chef::plugin_config_extensions'
 include_recipe 'private-chef::config'
 
-# disable rabbitmq and... elasticsearch?
+# disable rabbitmq
 directory '/opt/opscode/sv/rabbitmq' do
   recursive true
   action :delete
@@ -137,7 +137,6 @@ include_recipe 'private-chef::fix_permissions'
   postgresql
   oc_bifrost
   oc_id
-  opscode-solr4
   opscode-expander
   bookshelf
   opscode-erchef
@@ -145,7 +144,6 @@ include_recipe 'private-chef::fix_permissions'
   opscode-chef-mover
   redis_lb
   nginx
-  rabbitmq
   elasticsearch
 ).each do |service|
   if node['private_chef'][service]['external']

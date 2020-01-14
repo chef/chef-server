@@ -21,28 +21,5 @@ describe 'running configs required by Analytics Server', :config do
       expect(config['oc_id_application'].class).to eq(Hash)
     end
 
-    it 'rabbitmq_host' do
-      expect(config['rabbitmq_host'].to_s).to_not eq('')
-    end
-
-    it 'rabbitmq_port' do
-      expect(config['rabbitmq_port'].to_i).to_not eq(0)
-    end
-
-    it 'rabbitmq_vhost' do
-      expect(config['rabbitmq_vhost'].to_s).to_not eq('')
-    end
-
-    it 'rabbitmq_exchange' do
-      expect(config['rabbitmq_exchange'].to_s).to_not eq('')
-    end
-
-    it 'rabbitmq_user' do
-      expect(config['rabbitmq_user'].to_s).to_not eq('')
-    end
-
-    it 'rabbitmq_password' do
-      expect(config['rabbitmq_password'].to_s).to_not eq('')
-    end
   end
 end

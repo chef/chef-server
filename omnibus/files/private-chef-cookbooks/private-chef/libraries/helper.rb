@@ -28,15 +28,6 @@ class OmnibusHelper
   end
 
   def rabbitmq_configuration
-    external = node['private_chef']['external-rabbitmq']['enable']
-    config = if external
-               node['private_chef']['external-rabbitmq'].to_hash
-             else
-               node['private_chef']['rabbitmq'].to_hash
-             end
-
-    config['actions_password'] = PrivateChef.credentials.get('rabbitmq', 'actions_password')
-    config
   end
 
   def self.is_ip?(addr)

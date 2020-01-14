@@ -33,20 +33,6 @@ describe "running configs required by chef-server-ctl", :config do
     end
   end
 
-  context "migration 31" do
-    it "rabbitmq/user" do
-      expect(config["rabbitmq"]["user"].to_s).to_not eq('')
-    end
-
-    it "rabbitmq/actions_user" do
-      expect(config["rabbitmq"]["actions_user"].to_s).to_not eq('')
-    end
-
-    it "rabbitmq/management_user" do
-      expect(config["rabbitmq"]["management_user"].to_s).to_not eq('')
-    end
-  end
-
   context "password" do
     it "ldap/enabled" do
       expect(config["ldap"]["enabled"]).to be(true).or be(false).or be(nil)
@@ -87,10 +73,6 @@ describe "running configs required by chef-server-ctl", :config do
     #
     it "bookshelf/storage_type" do
       expect(config["bookshelf"]["storage_type"]).to eq("filesystem").or eq("sql")
-    end
-
-    it "opscode-solr4/external" do
-      expect(config["opscode-solr4"]["external"]).to eq(true).or eq(false)
     end
 
     it "postgresql/external" do

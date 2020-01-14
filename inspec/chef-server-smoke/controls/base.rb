@@ -11,8 +11,6 @@ title 'Chef Server Smoke Tests'
   oc_bifrost
   opscode-chef-mover
   opscode-expander
-  opscode-solr4
-  rabbitmq
   nginx
   oc_id
   opscode-erchef

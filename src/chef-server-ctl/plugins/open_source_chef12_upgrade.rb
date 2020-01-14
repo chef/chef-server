@@ -67,8 +67,6 @@ class OpenSourceChef11Upgrade
   def download_chef11_data_setup
     stop_chef12
 
-    fix_rabbit_wait_script
-
     start_chef11
   end
 
@@ -268,36 +266,6 @@ EOF
   end
 
   def fix_rabbit_wait_script
-    # The wait-for-rabbit script is an open source chef server script that was
-    # supposed to wait for rabbitmq to start before starting erchef.
-    # It was supposed to look for rabbitmq on an open source system, but due to
-    # a mistake looks for rabbit on an enterprise system instead. It has a bail
-    # option if it doesn't find enterprise chef server installed, so this hasn't
-    # affected open source systems, until now, since the upgrade process puts
-    # both the open source and enterprise chef servers on the same system.
-    #
-    # The assumption has to be that this file will be wrong on any system
-    # undergoing an upgrade, because even if fixed, it can't be assumed that the
-    # system will be running an up-to-date open source chef server with the fix
-    # applied.
-    #
-    # If the open source server is reconfigured it will restore the bad script
-    # and this fix will need to re-applied.
-    # If the bad script is on the system, the symptom that shows up is that
-    # erchef will log that it is waiting for rabbit to start. This will only
-    # happen if enterprise chef has been installed and configured on the system,
-    # because the script will look for the enterprise rabbit install.
-    # The script is kicked off when the open source server tries to start erchef,
-    # as the script is hooked into the runit start process for erchef.
-    #
-    # This sed command was written to be as portable as possible and to leave no
-    # tmp file behind. See:
-    # https://stackoverflow.com/questions/5171901/sed-command-find-and-replace-in-file-and-overwrite-file-doesnt-work-it-empties
-    # The copy is done to ensure we keep the permissions of the original file
-    script = "/opt/chef-server/bin/wait-for-rabbit"
-    sed = "sed 's/opscode/chef-server/g' #{script} > #{script}.tmp && cp --no-preserve=mode,ownership #{script}.tmp #{script} && rm #{script}.tmp"
-    msg = "Failed to write fix to wait-for-rabbit script"
-    check_status(run_command(sed), msg)
   end
 
   def wait_for_ready_server(server_version)

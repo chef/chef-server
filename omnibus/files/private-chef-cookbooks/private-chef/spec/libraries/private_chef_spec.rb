@@ -47,11 +47,6 @@ describe PrivateChef do
   "redis_lb": {
     "password": "a24799bbeecee698792c6c9a26b453700bd52b709868a61f184cd9a0fdb32619cdeb494ddc98ce814aa14eda01fcc06cb335"
   },
-  "rabbitmq": {
-    "password": "a866861140c2c7bc2dc67c9f7696be2b2108321e18acb08922c28a075a8dbb8e773d82142e9cc52c96fdf6928c901c3ab360",
-    "actions_password": "80ee6755aa6b4051aa99837ae213668f67f8941b6bb06142e0d9c99d9a4cd4210a07d30e430b49b41903b76554e01be11401",
-    "management_password":"82ee6755aa6b4051aa99837ae213668f68f8941b6bb06142e0d9c99d9a4cd4210a07d30e430b49b41903b76554e01be11401"
-  },
   "postgresql": {
     "db_superuser_password": "43e6fc68d8888764a7bea802a12be66b542f384b24469c6fc11a5d9c7c833b22962d8dd636ed2c5826a0aaeb056d49180391"
   },
@@ -156,17 +151,6 @@ EOF
         topology "standalone"
       EOF
     end
-
-    it 'generates secrets' do
-      rendered_config = config_for('api.chef.io')
-      expect(PrivateChef.credentials.exist?('rabbitmq', 'password')).to eq(true)
-    end
-
-    it 'does not regenerate a secret if it already exists' do
-      expect_existing_secrets
-      config_for('api.chef.io')
-      expect(PrivateChef.credentials.get('rabbitmq', 'password')).to eq('a866861140c2c7bc2dc67c9f7696be2b2108321e18acb08922c28a075a8dbb8e773d82142e9cc52c96fdf6928c901c3ab360')
-    end
   end
 
   # HA is deprecated
@@ -230,11 +214,6 @@ EOF
       allow(File).to receive(:exists?).with('/etc/opscode/private-chef-secrets.json').and_return false
     end
 
-    it 'generates secrets on the bootstrap node' do
-      config_for('backend.chef.io')
-      expect(PrivateChef.credentials.exist?('rabbitmq', 'password')).to eq(true)
-    end
-
     it 'enables opscode-chef-mover on the bootstrap node' do
       rendered_config = config_for('backend.chef.io')
       expect(rendered_config['private_chef']['opscode-chef-mover']['enable']).to eq(true)
@@ -259,10 +238,8 @@ EOF
 
     it 'sets backend services to listen on INADDR_ANY if the machine is a backend' do
       rendered_config = config_for('backend.chef.io')
-      expect(rendered_config['private_chef']['rabbitmq']['node_ip_address']).to eq('0.0.0.0')
       expect(rendered_config['private_chef']['bookshelf']['listen']).to eq('0.0.0.0')
       expect(rendered_config['private_chef']['redis_lb']['listen']).to eq('0.0.0.0')
-      expect(rendered_config['private_chef']['opscode-solr4']['ip_address']).to eq('0.0.0.0')
       expect(rendered_config['private_chef']['postgresql']['listen_address']).to eq('*')
     end
 
@@ -272,8 +249,6 @@ EOF
       expect(rendered_config['private_chef']['postgresql']['vip']).to eq('10.0.0.1')
       expect(rendered_config['private_chef']['bookshelf']['vip']).to eq('10.0.0.1')
       expect(rendered_config['private_chef']['redis_lb']['vip']).to eq('10.0.0.1')
-      expect(rendered_config['private_chef']['rabbitmq']['vip']).to eq('10.0.0.1')
-      expect(rendered_config['private_chef']['opscode-solr4']['vip']).to eq('10.0.0.1')
     end
 
     it 'disables backend services on the frontend' do
@@ -282,8 +257,6 @@ EOF
       expect(rendered_config['private_chef']['postgresql']['enable']).to eq(false)
       expect(rendered_config['private_chef']['bookshelf']['enable']).to eq(false)
       expect(rendered_config['private_chef']['redis_lb']['enable']).to eq(false)
-      expect(rendered_config['private_chef']['rabbitmq']['enable']).to eq(false)
-      expect(rendered_config['private_chef']['opscode-solr4']['enable']).to eq(false)
     end
   end
 

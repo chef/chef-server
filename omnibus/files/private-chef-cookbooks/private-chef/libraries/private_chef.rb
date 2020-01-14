@@ -39,11 +39,6 @@ module PrivateChef
   chef_backend_members []
 
   addons Mash.new
-  rabbitmq Mash.new
-  external_rabbitmq Mash.new
-  rabbitmq['log_rotation'] ||= Mash.new
-  opscode_solr4 Mash.new
-  opscode_solr4['log_rotation'] ||= Mash.new
   elasticsearch Mash.new
   opscode_expander Mash.new
   opscode_expander['log_rotation'] ||= Mash.new
@@ -111,7 +106,6 @@ module PrivateChef
   # set for these projects in an older version of private-chef/chef-server.rb
   # then we do not error out during the reconfigure
   opscode_webui Mash.new
-  opscode_solr Mash.new
   couchdb Mash.new
   opscode_account Mash.new
   opscode_org_creator Mash.new
@@ -223,9 +217,6 @@ module PrivateChef
         'opscode_chef',
         'redis_lb',
         'addons',
-        'rabbitmq',
-        'external_rabbitmq',
-        'opscode_solr4',
         'elasticsearch',
         'opscode_expander',
         'opscode_erchef',
@@ -257,8 +248,7 @@ module PrivateChef
         'required_recipe',
 
         # keys for cleanup and back-compat
-        'couchdb',
-        'opscode_solr']
+        'couchdb']
 
       (default_keys | keys_from_extensions).each do |key|
         # @todo: Just pick a naming convention and adhere to it
@@ -381,9 +371,7 @@ module PrivateChef
     def gen_backend_default(bootstrap)
       PrivateChef[:role] = 'backend' # mixlib-config wants a symbol :(
       PrivateChef['bookshelf']['listen'] ||= PrivateChef['default_listen_address']
-      PrivateChef['rabbitmq']['node_ip_address'] ||= PrivateChef['default_listen_address']
       PrivateChef['redis_lb']['listen'] ||= PrivateChef['default_listen_address']
-      PrivateChef['opscode_solr4']['ip_address'] ||= PrivateChef['default_listen_address']
       PrivateChef['postgresql']['listen_address'] ||= '*' # PrivateChef["default_listen_address"]
 
       authaddr = []
@@ -399,12 +387,8 @@ module PrivateChef
       PrivateChef[:role] = 'frontend'
       PrivateChef['bookshelf']['enable'] ||= false
       PrivateChef['bookshelf']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
-      PrivateChef['rabbitmq']['enable'] ||= false
-      PrivateChef['rabbitmq']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
       PrivateChef['redis_lb']['enable'] ||= false
       PrivateChef['redis_lb']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
-      PrivateChef['opscode_solr4']['enable'] ||= false
-      PrivateChef['opscode_solr4']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
       PrivateChef['opscode_expander']['enable'] ||= false
       PrivateChef['postgresql']['enable'] ||= false
       PrivateChef['postgresql']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
@@ -448,8 +432,6 @@ module PrivateChef
       required_secrets = [
         { group: 'postgresql', name: 'db_superuser_password', length: 100, set_command: 'set-db-superuser-password' },
         { group: 'redis_lb', name: 'password', length: 100 },
-        { group: 'rabbitmq', name: 'password', length: 100 },
-        { group: 'rabbitmq', name: 'management_password', length: 100 },
         { group: 'drbd', name: 'shared_secret', length: 60 },
         { group: 'opscode_erchef', name: 'sql_password', length: 60 },
         { group: 'opscode_erchef', name: 'sql_ro_password', length: 60 },
@@ -478,8 +460,6 @@ module PrivateChef
       required_secrets.each do |secret|
         add_secret(secret)
       end
-
-      generate_rabbit_actions_password
 
       save_credentials_to_config if PrivateChef['insecure_addon_compat']
       credentials.save
@@ -549,31 +529,6 @@ module PrivateChef
         creds.each do |name, value|
           PrivateChef[service][name] ||= value
         end
-      end
-    end
-
-    #
-    # The actions queue can be hosted on an external RabbitMQ instance
-    # managed by analytics. In this case, the user provides the
-    # RabbitMQ information in the external_rabbitmq configuration key.
-    #
-    def generate_rabbit_actions_password
-      if PrivateChef['external_rabbitmq']['enable'] && PrivateChef['external_rabbitmq']['actions_password']
-        warn_if_cred_mismatch(group: 'rabbitmq',
-                              name: 'actions_password',
-                              command_name: 'set-actions-password',
-                              config_value: PrivateChef['external_rabbitmq']['actions_password'],
-                              config_key_desc: "external_rabbitmq['actions_password']")
-
-        # NOTE: This is stored under the rabbitmq (rather than
-        # external_rabbitmq) section so that applications don't need
-        # to know whether they are talking to a local or remote
-        # rabbitmq for the actions queue.
-        credentials.add('rabbitmq', 'actions_password',
-          value: PrivateChef['external_rabbitmq']['actions_password'],
-          frozen: true, force: true)
-      else
-        credentials.add('rabbitmq', 'actions_password', length: 100)
       end
     end
 
@@ -790,8 +745,6 @@ module PrivateChef
         PrivateChef['default_listen_address'] = '::'
       end
 
-      # Transition Solr memory and JVM settings from OSC11 to Chef 12.
-      import_legacy_service_config('opscode_solr', 'opscode_solr4', %w(heap_size new_size java_opts))
       deprecated_postgresql_settings
       transform_to_consistent_types
 

@@ -44,8 +44,6 @@ if is_data_master?
     content lazy { ::File.open('/etc/opscode/webui_priv.pem').read }
   end
 
-  rabbitmq = OmnibusHelper.new(node).rabbitmq_configuration
-
   file '/etc/opscode-analytics/actions-source.json' do
     owner 'root'
     mode '0600'
@@ -55,12 +53,6 @@ if is_data_master?
         private_chef: {
           api_fqdn: node['private_chef']['lb']['api_fqdn'],
           oc_id_application: oc_id_app.call,
-          rabbitmq_host: rabbitmq['vip'],
-          rabbitmq_port: rabbitmq['node_port'],
-          rabbitmq_vhost: rabbitmq['actions_vhost'],
-          rabbitmq_exchange: rabbitmq['actions_exchange'],
-          rabbitmq_user: rabbitmq['actions_user'],
-          rabbitmq_password: rabbitmq['actions_password'],
         }
       )
     }

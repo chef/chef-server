@@ -84,20 +84,8 @@ module Pedant
 
     # queues are not readable (e.g. there's no rabbitmq) OR empty
     def self.queues_empty?(opts = {quiet: true})
-      ENV['PATH'] = "/opt/opscode/embedded/bin:#{ENV['PATH']}"
-      output = `/opt/opscode/embedded/service/rabbitmq/sbin/rabbitmqctl list_queues -p /chef | awk '{sum += $2} END {print sum}'`
-      status = $?
-      unless opts[:quiet]
-        STDERR.puts "Command exitstatus: #{status.exitstatus}"
-        STDERR.puts "Command output: #{output}"
-      end
-
-      if !status.success?
-        puts "Command failed, assuming rabbitmq not in use and returning true" unless opts[:quiet]
-        true
-      else
-        output.to_i == 0
-      end
+      puts "Command failed, assuming rabbitmq not in use and returning true" unless opts[:quiet]
+      true
     end
 
     def self.wait_until_queues_are_empty(i = 10, opts = {safety_sleep: true,

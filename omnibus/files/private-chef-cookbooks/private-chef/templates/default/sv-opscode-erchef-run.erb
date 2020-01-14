@@ -1,9 +1,5 @@
 #!/bin/sh
 exec 2>&1
 
-<% if node['private_chef']['rabbitmq']['enable'] -%>
-/opt/opscode/init/rabbitmq -w <%= node['private_chef']['rabbitmq']['startup_timeout'] %> start
-
-<% end -%>
 export PATH=/opt/opscode/embedded/bin:$PATH
-exec veil-env-helper --use-file -s chef-server.webui_pub_key -s opscode_erchef.sql_password -s bookshelf.access_key_id -s bookshelf.secret_access_key -s rabbitmq.password -s rabbitmq.management_password -s rabbitmq.actions_password -s oc_bifrost.superuser_id -o data_collector.token -o ldap.bind_password -- chpst -P <%= "-d #{node['private_chef']['opscode-erchef']['memory_maxbytes']}" if node['private_chef']['opscode-erchef']['memory_maxbytes'] %> -u <%= node['private_chef']['user']['username'] %> -U <%= node['private_chef']['user']['username'] %> env ERL_EPMD_ADDRESS=127.0.0.1 HOME=<%= node['private_chef']['opscode-erchef']['dir'] %> <%= "OPENSSL_FIPS=1" if node['private_chef']['fips_enabled'] %> /opt/opscode/embedded/service/opscode-erchef/bin/oc_erchef foreground
+exec veil-env-helper --use-file -s chef-server.webui_pub_key -s opscode_erchef.sql_password -s bookshelf.access_key_id -s bookshelf.secret_access_key -s oc_bifrost.superuser_id -o data_collector.token -o ldap.bind_password -- chpst -P <%= "-d #{node['private_chef']['opscode-erchef']['memory_maxbytes']}" if node['private_chef']['opscode-erchef']['memory_maxbytes'] %> -u <%= node['private_chef']['user']['username'] %> -U <%= node['private_chef']['user']['username'] %> env ERL_EPMD_ADDRESS=127.0.0.1 HOME=<%= node['private_chef']['opscode-erchef']['dir'] %> <%= "OPENSSL_FIPS=1" if node['private_chef']['fips_enabled'] %> /opt/opscode/embedded/service/opscode-erchef/bin/oc_erchef foreground
