@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+# Perform necessary chef-server setup steps after package is installed.
+#
+
+PROGNAME=$(basename $0)
+
+function error_exit
+{
+	echo "${PROGNAME}: ${1:-"Unknown Error"}" 1>&2
+	exit 1
+}
+
+version=$(awk '/chef-server/{ split($2,a,"+");print a[1];exit }' /opt/opscode/version-manifest.txt)
+
+confirm () {
+  read -r -p "Do you want to continue [y/n]" response
+  case "$response" in
+        [yY][eE][sS]|[yY])
+            echo "Putting Chef-Infra-Server in maintenance mode for reindex."
+            ;;
+        *)
+            echo "Doing nothing. You can continue using your previous Chef-Infra-Server."
+            exit
+            ;;
+  esac
+}
+
+first_elasticsearch_internal_install () {
+  IFS=. read -r major minor patch <<< "$version"
+  # change minor to 1 when doing the actual promotion
+  if [ $major -ge 13 -a $minor -ge 0 ]; then
+    echo "Installing internal elasticsearch."
+    if [ -e /opt/opscode/sv/opscode-solr4 ]; then
+      echo "This install will replace solr with elasticsearch."
+      echo "There will be a full reindex of data for elasticsearch."
+      echo "Please take a full backup before proceeding."
+      confirm
+    else
+      echo "You are already using internal elasticsearch for search."
+    fi
+    else
+      echo "version is major: $major and minor: $minor and patch: $patch"
+      echo "search will still continue to use solr."
+  fi
+}
+
+first_elasticsearch_internal_install
+
+exit 0

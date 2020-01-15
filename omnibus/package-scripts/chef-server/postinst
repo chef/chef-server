@@ -11,6 +11,10 @@ function error_exit
 	exit 1
 }
 
+# If we have progressed from the preinst script
+# It implies that the user has agreed to proceed with the reindexing
+touch /tmp/first_time_internal_elasticsearch_install
+
 ln -sf /opt/opscode/bin/private-chef-ctl /usr/bin || error_exit "Cannot link private-chef-ctl in /usr/bin"
 ln -sf /opt/opscode/bin/chef-server-ctl /usr/bin || error_exit "Cannot link chef-server-ctl in /usr/bin"
 mkdir -p /var/opt/opscode/plugins
@@ -36,6 +40,10 @@ if [ -e /etc/opscode/chef-server-running.json ]; then
   echo
   echo -e "\033[1;31mchef-server-ctl upgrade\033[0m"
   echo
+  if [ -e /tmp/first_time_internal_elasticsearch_install  ]; then
+      echo "This will be a downtime operation. Upgrade will add indexes"
+      echo "to elasticsearch and solr will be unavailable to use even after upgrade."
+  fi
   echo "After the upgrade command completes, your Chef services will"
   echo "remain in a down state. To bring them back up run:"
   echo

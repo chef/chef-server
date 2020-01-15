@@ -49,6 +49,33 @@ end.run_action(:create)
 include_recipe 'private-chef::plugin_discovery'
 include_recipe 'private-chef::plugin_config_extensions'
 include_recipe 'private-chef::config'
+# this implies it is the firsttime elasticsearch is being installed internally.
+# do not enable opscode-solr4 and rabbitmq services
+# TODO: (prajakta) delete the runsv files for opscode-solr4 and rabbitmq if they exist
+directory '/opt/opscode/sv/opscode-solr4' do
+  recursive true
+  action :delete
+  only_if { File.exist?('/tmp/first_time_internal_elasticsearch_install') }
+end
+
+directory '/opt/opscode/sv/rabbitmq' do
+  recursive true
+  action :delete
+  only_if { File.exist?('/tmp/first_time_internal_elasticsearch_install') }
+end
+
+directory '/opt/opscode/sv/opscode-expander' do
+  recursive true
+  action :delete
+  only_if { File.exist?('/tmp/first_time_internal_elasticsearch_install') }
+end
+
+file '/tmp/first_time_internal_elasticsearch_install' do
+  node.override['private_chef']['opscode-solr4']['enable'] = false
+  node.override['private_chef']['rabbitmq']['enable'] = false
+  node.override['private_chef']['elasticsearch']['first_internal_install'] = true
+  action :delete
+end
 
 if node['private_chef']['fips_enabled']
   include_recipe 'private-chef::fips'
@@ -126,6 +153,7 @@ include_recipe 'private-chef::fix_permissions'
   postgresql
   oc_bifrost
   oc_id
+  elasticsearch
   opscode-solr4
   opscode-expander
   bookshelf
@@ -147,6 +175,11 @@ include_recipe 'private-chef::fix_permissions'
     # is an externally managed version. Given that bootstrap and
     # opscode-expander are not externalizable, don't need special
     # handling for them as we do in the normal disable case below.
+    component_runit_service service do
+      action :disable
+    end
+  elsif node['private_chef']['opscode-solr4']['external'] &&
+        service.eql?('opscode-expander')
     component_runit_service service do
       action :disable
     end
