@@ -103,13 +103,133 @@ class OmnibusHelper
         # Decorate any JSON parsing exception or numeric exceptions when accessing and parsing the version field.
         raise "Unable to parse elasticsearch response #{e}"
       end
-      raise "Unsupported elasticsearch version of #{version}. There is current support for the major versions of 2 and 5." if version != 5 && version != 2
-
+      raise "Unsupported elasticsearch version of #{version}. There is current support for the major versions of 2, 5 and 6." if version != 6 && version != 5 && version != 2
       version
     else
       # Elasticsearch is disabled - this configuration setting should never be used in erlang.
       0
     end
+  end
+
+  def create_elasticsearch_index
+    if node['private_chef']['elasticsearch']['first_internal_install'] == true
+      es_6_index
+    else
+      es_version = elastic_search_major_version
+      if es_version == 6
+        es_6_index
+      elsif [2, 5].include?(es_version)
+        es_5_or_2_index
+      end
+    end
+  end
+
+  def es_6_index
+    {
+      'settings' => {
+        'analysis' => {
+          'analyzer' => {
+            'default' => {
+              'type' => 'whitespace'
+            }
+          }
+        },
+        'number_of_shards' =>
+          node['private_chef']['opscode-solr4']['elasticsearch_shard_count'],
+        'number_of_replicas' =>
+          node['private_chef']['opscode-solr4']['elasticsearch_replica_count']
+      },
+      'mappings' => {
+        'object' => {
+          '_source' => { 'enabled' => false },
+          '_all' => { 'enabled' => false },
+          'properties' => {
+            'X_CHEF_database_CHEF_X' => {
+              'type' => 'keyword',
+              'norms' => {
+                'enabled' => false
+              }
+            },
+            'X_CHEF_type_CHEF_X' => {
+              'type' => 'keyword',
+              'norms' => {
+                'enabled' => false
+              }
+            },
+            'X_CHEF_id_CHEF_X' => {
+              'type' => 'keyword',
+              'norms' => {
+                'enabled' => false
+              }
+            },
+            'data_bag' => {
+              'type' => 'keyword',
+              'norms' => {
+                'enabled' => false
+              }
+            },
+            'content' => {
+              'type' => 'text'
+            }
+          }
+        }
+      }
+    }
+  end
+
+  def es_5_or_2_index
+    {
+      'settings' => {
+        'analysis' => {
+          'analyzer' => {
+            'default' => {
+              'type' => 'whitespace'
+            }
+          }
+        },
+        'number_of_shards' =>
+          node['private_chef']['opscode-solr4']['elasticsearch_shard_count'],
+        'number_of_replicas' =>
+          node['private_chef']['opscode-solr4']['elasticsearch_replica_count']
+      },
+      'mappings' => {
+        'object' => {
+          '_source' => { 'enabled' => false },
+          '_all' => { 'enabled' => false },
+          'properties' => {
+            'X_CHEF_database_CHEF_X' => {
+              'type' => 'string',
+              'index' => 'not_analyzed',
+              'norms' => {
+                'enabled' => false
+              }
+            },
+            'X_CHEF_type_CHEF_X' => {
+              'type' => 'string',
+              'index' => 'not_analyzed',
+              'norms' => {
+                'enabled' => false
+              }
+            },
+            'X_CHEF_id_CHEF_X' => {
+              'type' => 'string',
+              'index' => 'not_analyzed',
+              'norms' => {
+                'enabled' => false
+              }
+            },
+            'data_bag' => {
+              'type' => 'string',
+              'index' => 'not_analyzed',
+              'norms' => {
+                'enabled' => false
+              }
+            },
+            'content' => { 'type' => 'string', 'index' => 'analyzed' }
+          }
+        }
+      }
+    }
   end
 
   def solr_url

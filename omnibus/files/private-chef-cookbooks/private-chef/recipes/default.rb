@@ -135,7 +135,6 @@ include_recipe 'private-chef::fix_permissions'
   redis_lb
   nginx
   rabbitmq
-  elasticsearch
 ).each do |service|
   if node['private_chef'][service]['external']
     begin
