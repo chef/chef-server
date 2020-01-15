@@ -7,11 +7,15 @@ add_command_under_category "set-db-superuser-password", "Secrets Management", "A
 end
 
 add_command_under_category "set-actions-password", "Secrets Management", "Add or change the rabbitmq actions queue password", 2 do
+  confirm_continue!("WARN: Manually setting the actions password is only supported for external rabbitmq instances")
+  password = capture_secret_value("ACTIONS_PASSWORD", "actions queue password", ARGV[1])
+  set_secret_("rabbitmq", "actions_password", password)
 end
 
 KNOWN_CREDENTIALS = {
   "ldap" => ["bind_password"],
   "data_collector" => ["token"],
+  "rabbitmq" => ["password", "management_password"],
   "redis_lb" => ["password"],
   "drbd" => ["shared_secret"],
   "keepalived" => ["vrrp_instance_password"],
@@ -22,6 +26,7 @@ KNOWN_CREDENTIALS = {
   "manage" => ["secret_key_base", "secret_token"],
   "saml" => ["client_id", "client_secret"],
   "push-jobs-server" => ["pushy_priv_key", "pushy_pub_key", "sql_password", "sql_ro_password"],
+  "opscode-reporting" => ["rabbitmq_password", "sql_password", "sql_ro_password"],
 }
 
 SERVICES_REQUIRING_RESTART = {
@@ -39,11 +44,14 @@ SERVICES_REQUIRING_RESTART = {
   "oc_bifrost.superuser_id" => ["opscode-erchef", "oc_bifrost", "opscode-chef-mover"],
   "oc_id.secret_key_base" => ["oc_id"],
   "oc_id.sql_password" => ["oc_id"],
+  "opscode-reporting.rabbitmq_password" => ["opscode-reporting"],
   "opscode-reporting.sql_password" => ["opscode-reporting"],
   "opscode_erchef.sql_password" => ["opscode-erchef", "opscode-chef-mover"],
   "push-jobs-server.pushy_priv_key" => ["opscode-push-jobs-server"],
   "push-jobs-server.pushy_pub_key" => ["opscode-push-jobs-server"],
   "push-jobs-server.sql_password" => ["opscode-push-jobs-server"],
+  "rabbitmq.management_password" => ["opscode-erchef"],
+  "rabbitmq.password" => ["opscode-erchef", "opscode-expander"],
   "redis_lb.password" => ["opscode-chef-mover", "nginx", "redis_lb"],
   "saml.client_id" => ["chef-manage"],
   "saml.client_secret" => ["chef-manage"],

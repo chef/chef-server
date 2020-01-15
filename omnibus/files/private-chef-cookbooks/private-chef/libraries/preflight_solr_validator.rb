@@ -65,6 +65,15 @@ class SolrPreflightValidator < PreflightValidator
   end
 
   def verify_external_url
+    if cs_solr_attr['external'] & !cs_solr_attr['external_url']
+      fail_with <<~EOM
+
+        No external url specified for Solr depsite opscode_solr4['external']
+        being set to true. To use an external solr instance, please set
+        opscode_solr4['external_url'] to the external solr endpoint.
+
+      EOM
+    end
   end
 
   def verify_erchef_config

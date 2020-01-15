@@ -17,6 +17,29 @@ describe "running configs required by Chef Server and plugins", :config do
     end
   end
 
+  context "opscode-solr" do
+
+    it "opscode-solr4/external" do
+      expect(config['opscode-solr4']['external']).to be(true).or be(false)
+    end
+
+    it "opscode-solr4/external_url" do
+      if config['opscode-solr4']['external']
+        expect(config['opscode-solr4']['external_url'].to_s).not_to eq ''
+      else
+        skip "not using external solr"
+      end
+    end
+
+    it "opscode-solr4/vip" do
+      expect(config['opscode-solr4']['vip'].to_s).not_to eq ''
+    end
+
+    it "opscode-solr4/port" do
+      expect(config['opscode-solr4']['port'].to_i).not_to eq 0
+    end
+  end
+
   context "postgresql" do
 
     it "postgresql/vip" do
@@ -56,6 +79,17 @@ describe "running configs required by Chef Server and plugins", :config do
 
     it "postgresql/username" do
       expect(config['postgresql']['username'].to_s).to_not eq ''
+    end
+  end
+
+  context "rabbitmq" do
+
+    it "user/username" do
+      expect(config['user']['username'].to_s).to_not eq ''
+    end
+
+    it "rabbitmq/actions_vhost" do
+      expect(config['rabbitmq']['actions_vhost'].to_s).to_not eq ''
     end
   end
 
@@ -102,6 +136,34 @@ describe "running configs required by Chef Server and plugins", :config do
 
     it "opscode-erchef/search_provider" do
       expect(config['opscode-erchef']['search_provider'].to_s).to eq('solr').or eq('elasticsearch')
+    end
+
+    it "opscode-erchef/solr_timeout" do
+      expect(config['opscode-erchef']['solr_timeout'].to_i).not_to eq 0
+    end
+
+    it "opscode-erchef/solr_http_init_count" do
+      expect(config['opscode-erchef']['solr_http_init_count'].to_i).not_to eq 0
+    end
+
+    it "opscode-erchef/solr_http_max_count" do
+      expect(config['opscode-erchef']['solr_http_max_count'].to_i).not_to eq 0
+    end
+
+    it "opscode-erchef/solr_http_cull_interval" do
+      expect(config['opscode-erchef']['solr_http_cull_interval'].to_s).not_to eq ''
+    end
+
+    it "opscode-erchef/solr_http_max_age" do
+      expect(config['opscode-erchef']['solr_http_max_age'].to_s).not_to eq ''
+    end
+
+    it "opscode-erchef/solr_http_max_connection_duration" do
+      expect(config['opscode-erchef']['solr_http_max_connection_duration'].to_s).not_to eq ''
+    end
+
+    it "opscode-erchef/solr_ibrowse_options" do
+      expect(config['opscode-erchef']['solr_ibrowse_options'].to_s).not_to eq ''
     end
 
     it "lb/api_fqdn" do

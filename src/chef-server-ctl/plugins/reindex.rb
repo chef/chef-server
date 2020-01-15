@@ -25,7 +25,14 @@ def all_orgs
 end
 
 def expander_queue_size
-  exit 0
+  output = `#{::ChefServerCtl::Config.rabbitmqctl_bin} list_queues -p /chef | awk '{sum += $2} END {print sum}'`
+  status = $?
+  if !status.success?
+    $stderr.puts "Failed to get queue size!"
+    exit 1
+  else
+    output.to_i
+  end
 end
 
 def wait_for_empty_queue

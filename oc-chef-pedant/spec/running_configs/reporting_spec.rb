@@ -36,6 +36,17 @@ describe "running configs required by Reporting", :config do
     end
   end
 
+  context "rabbitmq" do
+
+    it "user/username" do
+      expect(config['user']['username'].to_s).to_not eq ''
+    end
+
+    it "rabbitmq/actions_vhost" do
+      expect(config['rabbitmq']['actions_vhost'].to_s).to_not eq ''
+    end
+  end
+
   context "pedant-config" do
 
     it "lb/api_fqdn" do
@@ -79,6 +90,34 @@ describe "running configs required by Reporting", :config do
 
     it "opscode-erchef/search_provider" do
       expect(config['opscode-erchef']['search_provider'].to_s).to eq('solr').or eq('elasticsearch')
+    end
+
+    it "opscode-erchef/solr_timeout" do
+      expect(config['opscode-erchef']['solr_timeout'].to_i).not_to eq 0
+    end
+
+    it "opscode-erchef/solr_http_init_count" do
+      expect(config['opscode-erchef']['solr_http_init_count'].to_i).not_to eq 0
+    end
+
+    it "opscode-erchef/solr_http_max_count" do
+      expect(config['opscode-erchef']['solr_http_max_count'].to_i).not_to eq 0
+    end
+
+    it "opscode-erchef/solr_http_cull_interval" do
+      expect(config['opscode-erchef']['solr_http_cull_interval'].to_s).not_to eq ''
+    end
+
+    it "opscode-erchef/solr_http_max_age" do
+      expect(config['opscode-erchef']['solr_http_max_age'].to_s).not_to eq ''
+    end
+
+    it "opscode-erchef/solr_http_max_connection_duration" do
+      expect(config['opscode-erchef']['solr_http_max_connection_duration'].to_s).not_to eq ''
+    end
+
+    it "opscode-erchef/solr_ibrowse_options" do
+      expect(config['opscode-erchef']['solr_ibrowse_options'].to_s).not_to eq ''
     end
 
     it "lb/api_fqdn" do
