@@ -231,8 +231,8 @@ default['private_chef']['opscode-solr4']['enable'] = true
 # Set this to point at a solr/cloudsearch installation
 # not controlled by chef-server
 #
-default['private_chef']['opscode-solr4']['external'] = false
-default['private_chef']['opscode-solr4']['external_url'] = nil
+default['private_chef']['opscode-solr4']['external'] = true
+default['private_chef']['opscode-solr4']['external_url'] = "http://localhost:9200"
 default['private_chef']['opscode-solr4']['ha'] = false
 default['private_chef']['opscode-solr4']['dir'] = '/var/opt/opscode/opscode-solr4'
 default['private_chef']['opscode-solr4']['data_dir'] = '/var/opt/opscode/opscode-solr4/data'
@@ -285,7 +285,8 @@ default['private_chef']['opscode-expander']['retry_wait'] = 1
 var_base = '/var/opt/opscode'
 log_base = '/var/log/opscode'
 
-default['private_chef']['elasticsearch']['enable'] = false
+default['private_chef']['elasticsearch']['enable'] = true
+default['private_chef']['elasticsearch']['first_internal_install'] = false
 elasticsearch = default['private_chef']['elasticsearch']
 
 # These attributes cannot be overridden in chef-server.rb
@@ -443,10 +444,10 @@ default['private_chef']['opscode-erchef']['depsolver_timeout'] = 5000
 default['private_chef']['opscode-erchef']['ibrowse_max_sessions'] = 256
 default['private_chef']['opscode-erchef']['ibrowse_max_pipeline_size'] = 1
 # general search settings used to set up chef_index
-default['private_chef']['opscode-erchef']['search_provider'] = 'solr' # solr, elasticsearch
-default['private_chef']['opscode-erchef']['search_queue_mode'] = 'rabbitmq' # rabbitmq, batch, or inline
-default['private_chef']['opscode-erchef']['search_batch_max_size'] = '5000000'
-default['private_chef']['opscode-erchef']['search_batch_max_wait'] = '10'
+default['private_chef']['opscode-erchef']['search_provider'] = "elasticsearch" # solr, elasticsearch
+default['private_chef']['opscode-erchef']['search_queue_mode'] = "batch" # rabbitmq, batch, or inline
+default['private_chef']['opscode-erchef']['search_batch_max_size'] = "5000000"
+default['private_chef']['opscode-erchef']['search_batch_max_wait'] = "10"
 # solr_service configuration for erchef. These are used to configure an opscoderl_httpc pool
 # of HTTP connecton workers.
 default['private_chef']['opscode-erchef']['solr_timeout'] = 30000
