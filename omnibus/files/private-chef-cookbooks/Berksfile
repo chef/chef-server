@@ -1,4 +1,4 @@
 source 'https://supermarket.chef.io'
 
-cookbook 'enterprise', git: 'https://github.com/chef-cookbooks/enterprise-chef-common', tag: 'v0.15.1'
+cookbook 'enterprise', git: 'https://github.com/chef-cookbooks/enterprise-chef-common', branch: 'praj/create_and_enable_should_both_create_log_templates'
 cookbook 'private-chef', path: './private-chef'
