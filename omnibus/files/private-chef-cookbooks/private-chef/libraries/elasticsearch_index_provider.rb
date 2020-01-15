@@ -8,7 +8,7 @@ class Chef
       action :create do
         unless index_exists?
           converge_by "Creating elasticsearch index #{new_resource.index_name}" do
-            solr_server.put(new_resource.index_name, Chef::JSONCompat.to_json(new_resource.index_definition))
+            solr_server.put(new_resource.index_name, new_resource.index_definition)
           end
         end
       end
@@ -24,7 +24,7 @@ class Chef
       def index_exists?
         solr_server.get("/#{new_resource.index_name}")
         true
-      rescue Net::HTTPServerException => e
+      rescue Net::HTTPClientException => e
         if e.response && e.response.code == '404'
           false
         else
@@ -33,7 +33,7 @@ class Chef
       end
 
       def solr_server
-        @solr_server ||= Chef::HTTP.new(new_resource.server_url)
+        @solr_server ||= Chef::HTTP::SimpleJSON.new(new_resource.server_url)
       end
     end
   end
