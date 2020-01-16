@@ -35,8 +35,8 @@ cp /workdir/scripts/bk_tests/pb_hba.conf /etc/postgresql/9.6/main/pg_hba.conf
 # erlang software definition lives in: /omnibus-software/config/software/erlang.rb
 # this is needed until the erlang version is installed in the docker container
 echo "Installing erlang"
-asdf install erlang 22.1.8
-asdf local erlang 22.1.8
+asdf install erlang 22.2
+asdf local erlang 22.2
 erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell
 
 echo "Installing Bundler"
