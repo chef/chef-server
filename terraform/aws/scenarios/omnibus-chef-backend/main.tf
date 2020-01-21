@@ -10,6 +10,7 @@ module "chef_server" {
   aws_instance_type = "${var.aws_instance_type}"
   enable_ipv6       = "${var.enable_ipv6}"
   platform          = "${var.platform}"
+  build_prefix      = "${var.build_prefix}"
   name              = "chefserver-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
@@ -25,6 +26,7 @@ module "backend1" {
   aws_instance_type = "${var.aws_instance_type}"
   enable_ipv6       = "${var.enable_ipv6}"
   platform          = "${var.platform}"
+  build_prefix      = "${var.build_prefix}"
   name              = "backend1-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
@@ -40,6 +42,7 @@ module "backend2" {
   aws_instance_type = "${var.aws_instance_type}"
   enable_ipv6       = "${var.enable_ipv6}"
   platform          = "${var.platform}"
+  build_prefix      = "${var.build_prefix}"
   name              = "backend2-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
@@ -55,6 +58,7 @@ module "backend3" {
   aws_instance_type = "${var.aws_instance_type}"
   enable_ipv6       = "${var.enable_ipv6}"
   platform          = "${var.platform}"
+  build_prefix      = "${var.build_prefix}"
   name              = "backend3-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 

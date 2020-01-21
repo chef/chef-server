@@ -45,6 +45,12 @@ variable "platform" {
   description = "Operating System of the instance to be created."
 }
 
+variable "build_prefix" {
+  type        = "string"
+  description = "Optional build identifier for differentiating scenario runs."
+  default     = ""
+}
+
 #########################################################################
 # Chef Server
 #########################################################################

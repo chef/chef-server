@@ -110,6 +110,12 @@ subscriptions:
           post_commit: true
       - bash:.expeditor/purge_cdn.sh:
           post_commit: true
+  - workload: buildkite_build_canceled:{{agent_id}}:integration_test:*
+    actions:
+      - bash:.expeditor/integration_test.pipeline.sh
+  - workload: buildkite_build_failed:{{agent_id}}:integration_test:*
+    actions:
+      - bash:.expeditor/integration_test.pipeline.sh
 
 promote:
   actions:

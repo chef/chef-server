@@ -23,7 +23,7 @@ resource "azurerm_network_security_group" "default" {
   resource_group_name = "${data.azurerm_resource_group.chef_resource_group.name}"
   location            = "${data.azurerm_resource_group.chef_resource_group.location}"
 
-  name = "${var.name}-${local.arm_resource_group_name}"
+  name = "${var.build_prefix}${var.name}-${local.arm_resource_group_name}"
 
   security_rule {
     name                       = "All_From_${var.arm_contact}"
@@ -49,7 +49,7 @@ resource "azurerm_public_ip" "default" {
   resource_group_name = "${data.azurerm_resource_group.chef_resource_group.name}"
   location            = "${data.azurerm_resource_group.chef_resource_group.location}"
 
-  name = "${var.name}-${local.arm_resource_group_name}"
+  name = "${var.build_prefix}${var.name}-${local.arm_resource_group_name}"
 
   allocation_method = "Dynamic"
 
@@ -66,10 +66,10 @@ resource "azurerm_network_interface" "default" {
   location                  = "${data.azurerm_resource_group.chef_resource_group.location}"
   network_security_group_id = "${azurerm_network_security_group.default.id}"
 
-  name = "${var.name}-${local.arm_resource_group_name}"
+  name = "${var.build_prefix}${var.name}-${local.arm_resource_group_name}"
 
   ip_configuration {
-    name                          = "${var.name}-${local.arm_resource_group_name}"
+    name                          = "${var.build_prefix}${var.name}-${local.arm_resource_group_name}"
     subnet_id                     = "${data.azurerm_subnet.chef_subnet.id}"
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = "${azurerm_public_ip.default.id}"
@@ -87,13 +87,13 @@ resource "azurerm_virtual_machine" "default" {
   resource_group_name = "${data.azurerm_resource_group.chef_resource_group.name}"
   location            = "${data.azurerm_resource_group.chef_resource_group.location}"
 
-  name                          = "${var.name}-${local.arm_resource_group_name}"
+  name                          = "${var.build_prefix}${var.name}-${local.arm_resource_group_name}"
   vm_size                       = "${var.arm_instance_type}"
   network_interface_ids         = ["${azurerm_network_interface.default.id}"]
   delete_os_disk_on_termination = true
 
   storage_os_disk {
-    name              = "${var.name}-${local.arm_resource_group_name}"
+    name              = "${var.build_prefix}${var.name}-${local.arm_resource_group_name}"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
@@ -107,7 +107,7 @@ resource "azurerm_virtual_machine" "default" {
   }
 
   os_profile {
-    computer_name  = "${var.name}"
+    computer_name  = "${var.build_prefix}${var.name}"
     admin_username = "azure"
   }
 

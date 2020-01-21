@@ -5,3 +5,693 @@ expeditor:
       timeout_in_minutes: 90
 
 steps:
+
+  - label: ':terraform: chef-backend-ipv4-rhel-6'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-chef-backend
+      PLATFORM: rhel-6
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: chef-backend-ipv4-rhel-7'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-chef-backend
+      PLATFORM: rhel-7
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: chef-backend-ipv4-rhel-8'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-chef-backend
+      PLATFORM: rhel-8
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: chef-backend-ipv4-ubuntu-16.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-chef-backend
+      PLATFORM: ubuntu-16.04
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: chef-backend-ipv4-ubuntu-18.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-chef-backend
+      PLATFORM: ubuntu-18.04
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-openldap-ipv4-rhel-6'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-openldap
+      PLATFORM: rhel-6
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-openldap-ipv4-rhel-7'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-openldap
+      PLATFORM: rhel-7
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-openldap-ipv4-rhel-8'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-openldap
+      PLATFORM: rhel-8
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-openldap-ipv4-ubuntu-16.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-openldap
+      PLATFORM: ubuntu-16.04
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-openldap-ipv4-ubuntu-18.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-openldap
+      PLATFORM: ubuntu-18.04
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-postgresql-ipv4-rhel-6'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-postgresql
+      PLATFORM: rhel-6
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-postgresql-ipv4-rhel-7'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-postgresql
+      PLATFORM: rhel-7
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-postgresql-ipv4-rhel-8'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-postgresql
+      PLATFORM: rhel-8
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-postgresql-ipv4-ubuntu-16.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-postgresql
+      PLATFORM: ubuntu-16.04
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-postgresql-ipv4-ubuntu-18.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-postgresql
+      PLATFORM: ubuntu-18.04
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: standalone-upgrade-ipv4-rhel-6'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-standalone-upgrade
+      PLATFORM: rhel-6
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: standalone-upgrade-ipv4-rhel-7'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-standalone-upgrade
+      PLATFORM: rhel-7
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: standalone-upgrade-ipv4-ubuntu-16.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-standalone-upgrade
+      PLATFORM: ubuntu-16.04
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: standalone-upgrade-ipv4-ubuntu-18.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-standalone-upgrade
+      PLATFORM: ubuntu-18.04
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: tiered-fresh-install-ipv4-rhel-6'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-fresh-install
+      PLATFORM: rhel-6
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: tiered-fresh-install-ipv4-rhel-7'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-fresh-install
+      PLATFORM: rhel-7
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: tiered-fresh-install-ipv4-rhel-8'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-fresh-install
+      PLATFORM: rhel-8
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: tiered-fresh-install-ipv4-ubuntu-16.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-fresh-install
+      PLATFORM: ubuntu-16.04
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: tiered-fresh-install-ipv4-ubuntu-18.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-fresh-install
+      PLATFORM: ubuntu-18.04
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: tiered-upgrade-ipv4-rhel-6'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-upgrade
+      PLATFORM: rhel-6
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: tiered-upgrade-ipv4-rhel-7'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-upgrade
+      PLATFORM: rhel-7
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: tiered-upgrade-ipv4-ubuntu-16.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-upgrade
+      PLATFORM: ubuntu-16.04
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: tiered-upgrade-ipv4-ubuntu-18.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-upgrade
+      PLATFORM: ubuntu-18.04
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: chef-backend-ipv6-rhel-6'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-chef-backend
+      PLATFORM: rhel-6
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: chef-backend-ipv6-rhel-7'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-chef-backend
+      PLATFORM: rhel-7
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: chef-backend-ipv6-rhel-8'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-chef-backend
+      PLATFORM: rhel-8
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: chef-backend-ipv6-ubuntu-16.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-chef-backend
+      PLATFORM: ubuntu-16.04
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: chef-backend-ipv6-ubuntu-18.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-chef-backend
+      PLATFORM: ubuntu-18.04
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-openldap-ipv6-rhel-6'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-openldap
+      PLATFORM: rhel-6
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-openldap-ipv6-rhel-7'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-openldap
+      PLATFORM: rhel-7
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-openldap-ipv6-rhel-8'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-openldap
+      PLATFORM: rhel-8
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-openldap-ipv6-ubuntu-16.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-openldap
+      PLATFORM: ubuntu-16.04
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-openldap-ipv6-ubuntu-18.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-openldap
+      PLATFORM: ubuntu-18.04
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-postgresql-ipv6-rhel-6'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-postgresql
+      PLATFORM: rhel-6
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-postgresql-ipv6-rhel-7'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-postgresql
+      PLATFORM: rhel-7
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-postgresql-ipv6-rhel-8'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-postgresql
+      PLATFORM: rhel-8
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-postgresql-ipv6-ubuntu-16.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-postgresql
+      PLATFORM: ubuntu-16.04
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: external-postgresql-ipv6-ubuntu-18.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-external-postgresql
+      PLATFORM: ubuntu-18.04
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: standalone-upgrade-ipv6-rhel-6'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-standalone-upgrade
+      PLATFORM: rhel-6
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: standalone-upgrade-ipv6-rhel-7'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-standalone-upgrade
+      PLATFORM: rhel-7
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: standalone-upgrade-ipv6-ubuntu-16.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-standalone-upgrade
+      PLATFORM: ubuntu-16.04
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: standalone-upgrade-ipv6-ubuntu-18.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-standalone-upgrade
+      PLATFORM: ubuntu-18.04
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: tiered-fresh-install-ipv6-rhel-6'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-fresh-install
+      PLATFORM: rhel-6
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: tiered-fresh-install-ipv6-rhel-7'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-fresh-install
+      PLATFORM: rhel-7
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: tiered-fresh-install-ipv6-rhel-8'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-fresh-install
+      PLATFORM: rhel-8
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: tiered-fresh-install-ipv6-ubuntu-16.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-fresh-install
+      PLATFORM: ubuntu-16.04
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: tiered-fresh-install-ipv6-ubuntu-18.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-fresh-install
+      PLATFORM: ubuntu-18.04
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: tiered-upgrade-ipv6-rhel-6'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-upgrade
+      PLATFORM: rhel-6
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: tiered-upgrade-ipv6-rhel-7'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-upgrade
+      PLATFORM: rhel-7
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: tiered-upgrade-ipv6-ubuntu-16.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-upgrade
+      PLATFORM: ubuntu-16.04
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: tiered-upgrade-ipv6-ubuntu-18.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-tiered-upgrade
+      PLATFORM: ubuntu-18.04
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - wait: ~
+    continue_on_failure: true
+
+  - label: ':terraform: destroy-all'
+    command:
+      - asdf plugin-add consul
+      - asdf install consul 1.6.2
+      - asdf local consul 1.6.2
+      - .expeditor/integration_test.pipeline.sh destroy-all
+    env:
+      ACTION: destroy-all
+      CONSUL_HTTP_ADDR: http://consul.chef.co
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:

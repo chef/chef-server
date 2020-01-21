@@ -10,6 +10,7 @@ module "chef_server" {
   arm_ssh_key_file        = "${var.arm_ssh_key_file}"
   arm_instance_type       = "${var.arm_instance_type}"
   platform                = "${var.platform}"
+  build_prefix            = "${var.build_prefix}"
   name                    = "chefserver-${var.scenario}-${replace(var.platform, ".", "")}"
 }
 

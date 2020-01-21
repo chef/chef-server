@@ -10,6 +10,7 @@ module "chef_server" {
   aws_instance_type = "${var.aws_instance_type}"
   enable_ipv6       = "${var.enable_ipv6}"
   platform          = "${var.platform}"
+  build_prefix      = "${var.build_prefix}"
   name              = "chef_server-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
@@ -25,6 +26,7 @@ module "postgresql" {
   aws_instance_type = "${var.aws_instance_type}"
   enable_ipv6       = "${var.enable_ipv6}"
   platform          = "ubuntu-16.04"
+  build_prefix      = "${var.build_prefix}"
   name              = "postgresql-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
