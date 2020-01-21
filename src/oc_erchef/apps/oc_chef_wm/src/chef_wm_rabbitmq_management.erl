@@ -173,9 +173,10 @@ parse_max_length_response(Message) ->
 sync_check_queue_at_capacity(PoolNameAtom, Vhost, Queue) ->
     Result = check_current_queue_state(PoolNameAtom, Vhost, Queue, 0),
     case Result of
-      skipped  -> {0, 0, false};
-      {MaxLength, reset_dropped_since_last_check} -> {MaxLength, 0, false};
-      {MaxLength, N, QueueAtCapacity} -> {MaxLength, N, QueueAtCapacity}
+      skipped  -> {0, 0, false}
+      %% rabbitmq is disabled, so Result always = skipped ?
+      %{MaxLength, reset_dropped_since_last_check} -> {MaxLength, 0, false};
+      %{MaxLength, N, QueueAtCapacity} -> {MaxLength, N, QueueAtCapacity}
     end.
 
 
