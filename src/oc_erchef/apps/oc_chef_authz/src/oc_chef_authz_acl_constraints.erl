@@ -48,8 +48,8 @@ acl_checks() ->
     fun check_admins_group_removal_from_grant_ace/5
   ].
 
--spec check_admins_group_removal_from_grant_ace(binary(),binary(), atom(),binary(),tuple())
-      -> false | {true, attempted_admin_group_removal_grant_ace}.
+-spec check_admins_group_removal_from_grant_ace(binary(), binary(), atom(), binary(), tuple())
+      -> error | false | {true, attempted_admin_group_removal_grant_ace}.
 check_admins_group_removal_from_grant_ace(OrgId, AuthzId, Type, AclPerm, NewAce) ->
   %% It is necessary to pull the current ace and compare to the new ace.
   %% This is because there are some groups that don't have the admin
@@ -60,12 +60,19 @@ check_admins_group_removal_from_grant_ace(OrgId, AuthzId, Type, AclPerm, NewAce)
     <<"grant">> ->
       NewGroups = extract_acl_groups(AclPerm, NewAce),
       CurrentAce = oc_chef_authz_acl:fetch(Type, OrgId, AuthzId),
-      CurrentGroups = extract_acl_groups(AclPerm, CurrentAce),
-      case check_admins_group_removal(CurrentGroups, NewGroups) of
-        not_removed ->
-          false;
-        removed ->
-          {true, attempted_admin_group_removal_grant_ace}
+      %% CurrentAce always = {error, _} ?
+      case CurrentAce of
+          {error, _} ->
+              error
+          % Dialyzer says this will never match
+%          _ ->
+%              CurrentGroups = extract_acl_groups(AclPerm, CurrentAce),
+%              case check_admins_group_removal(CurrentGroups, NewGroups) of
+%                not_removed ->
+%                  false;
+%                removed ->
+%                  {true, attempted_admin_group_removal_grant_ace}
+%              end
       end;
     _Other ->
       %% Needs to return false here, which means all is okay, so this can
@@ -73,31 +80,33 @@ check_admins_group_removal_from_grant_ace(OrgId, AuthzId, Type, AclPerm, NewAce)
       false
   end.
 
--spec check_admins_group_removal([binary()], [binary()]) -> 'not_removed' | 'removed'.
-check_admins_group_removal(CurrentGroups, NewGroups) ->
-  %% Check if the CurrentGroups contains the admin group. If it doesn't, there
-  %% is nothing to do. If it does, then check if the admin group is present in
-  %% the new group.
-  case contains_admins_group(CurrentGroups) of
-    false ->
-      not_removed;
-    true ->
-      case contains_admins_group(NewGroups) of
-        true ->
-          not_removed;
-        false ->
-          removed
-      end
-  end.
+%% Dialyzer says this will never be called
+%-spec check_admins_group_removal([binary()], [binary()]) -> 'not_removed' | 'removed'.
+%check_admins_group_removal(CurrentGroups, NewGroups) ->
+%  %% Check if the CurrentGroups contains the admin group. If it doesn't, there
+%  %% is nothing to do. If it does, then check if the admin group is present in
+%  %% the new group.
+%  case contains_admins_group(CurrentGroups) of
+%    false ->
+%      not_removed;
+%    true ->
+%      case contains_admins_group(NewGroups) of
+%        true ->
+%          not_removed;
+%        false ->
+%          removed
+%      end
+%  end.
 
--spec contains_admins_group([binary()]) -> boolean().
-contains_admins_group(Groups) ->
-  case lists:filter(fun(X) -> X =:= <<"admins">> end, Groups) of
-    [] ->
-        false;
-    _NonEmpty ->
-        true
-    end.
+%% Dialyzer says this will never be called
+%-spec contains_admins_group([binary()]) -> boolean().
+%contains_admins_group(Groups) ->
+%  case lists:filter(fun(X) -> X =:= <<"admins">> end, Groups) of
+%    [] ->
+%        false;
+%    _NonEmpty ->
+%        true
+%    end.
 
 %% json_object is a type defined in ej;
 -spec extract_acl_groups(binary(), json_object()) -> [binary()].
