@@ -211,6 +211,7 @@ EOF
 # destroy the terraform scenario
 destroy () {
   local workspace="$1"
+  local ret=0
   
   if [[ -n "$workspace" ]]; then
     # extract values from workspace name
@@ -244,9 +245,18 @@ destroy () {
   export TF_VAR_upgrade_version_url='NULL'
   export TF_VAR_backend_version_url='NULL'
 
-  terraform destroy -auto-approve || echo 'ERROR: terraform destroy failed! Manual cleanup of resources may be required'
-  terraform workspace select default || echo 'ERROR: terraform failed to switch to the "default" workspace!'
-  terraform workspace delete "$workspace" || echo "ERROR: terraform failed to delete the $workspace workspace! Manual cleanup of resources may be required"
+  if terraform destroy -auto-approve; then
+    terraform workspace select default || echo 'ERROR: terraform failed to switch to the "default" workspace!'
+    if terraform workspace delete "$workspace"; then
+      echo "ERROR: terraform failed to delete the $workspace workspace! Manual cleanup of resources may be required"
+      ret=1
+    fi
+  else
+    echo 'ERROR: terraform destroy failed! Manual cleanup of resources may be required'
+    ret=1
+  fi
+
+  return $ret
 }
 
 # destroy all terraform scenarios
