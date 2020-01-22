@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.30 -->
-## [13.1.30](https://github.com/chef/chef-server/tree/13.1.30) (2020-01-21)
+<!-- latest_release 13.1.31 -->
+## [13.1.31](https://github.com/chef/chef-server/tree/13.1.31) (2020-01-22)
 
 #### Merged Pull Requests
-- Add buildkite steps to the `integration_test` pipeline [#1874](https://github.com/chef/chef-server/pull/1874) ([christopher-snapp](https://github.com/christopher-snapp))
+- Minor integration_test pipeline tweaks [#1883](https://github.com/chef/chef-server/pull/1883) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Minor integration_test pipeline tweaks [#1883](https://github.com/chef/chef-server/pull/1883) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.31 -->
 - Add buildkite steps to the `integration_test` pipeline [#1874](https://github.com/chef/chef-server/pull/1874) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.30 -->
 - Bump rack from 2.0.7 to 2.0.8 in /oc-chef-pedant [#1872](https://github.com/chef/chef-server/pull/1872) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 13.1.29 -->
 - Bump rack from 1.6.11 to 1.6.12 in /src/oc-id [#1873](https://github.com/chef/chef-server/pull/1873) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 13.1.28 -->
