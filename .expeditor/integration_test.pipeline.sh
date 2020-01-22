@@ -203,8 +203,6 @@ EOF
 
 EOF
 
-  destroy "$TERRAFORM_WORKSPACE"
-
   exit $ret
 }
 
