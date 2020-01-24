@@ -6,10 +6,6 @@ action=
 # verify command dependencies
 [[ "$(command -v terraform)" ]] || error 'terraform command is not available'
 
-# verify environment variables
-[[ -z "$BUILDKITE_BUILD_NUMBER" ]] && error 'BUILDKITE_BUILD_NUMBER environment variable is required!'
-[[ -z "$BUILDKITE_LABEL" ]] && error 'BUILDKITE_LABEL environment variable is required!'
-
 # allow for environment override of build number
 [[ -z "$BUILD_NUMBER" ]] && BUILD_NUMBER="${EXPEDITOR_BUILD_NUMBER}"
 [[ -z "$BUILD_NUMBER" ]] && BUILD_NUMBER="${BUILDKITE_BUILD_NUMBER}"
