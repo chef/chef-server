@@ -241,7 +241,7 @@ destroy () {
 
   if terraform destroy -auto-approve; then
     terraform workspace select default || echo 'ERROR: terraform failed to switch to the "default" workspace!'
-    if terraform workspace delete "$workspace"; then
+    if ! terraform workspace delete "$workspace"; then
       echo "ERROR: terraform failed to delete the $workspace workspace! Manual cleanup of resources may be required"
       ret=1
     fi
