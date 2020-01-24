@@ -274,7 +274,7 @@ destroy-all () {
 echo '--- Verifying environment'
 
 # allow expeditor to override ACTION when a cancellation or failure occurred
-[[ "$EXPEDITOR_BUILD_STATE" =~ ^(canceled|failed)$ ]] && ACTION='destroy'
+[[ "$EXPEDITOR_BUILD_STATE" =~ ^(canceled|failed)$ ]] && ACTION='destroy-all'
 
 # allow for environment override of action
 case "$ACTION" in
