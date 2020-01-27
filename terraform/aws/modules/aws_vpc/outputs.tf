@@ -13,3 +13,7 @@ output "ipv4_cidr_block" {
 output "ipv6_cidr_block" {
   value = "${cidrsubnet(aws_vpc.default.ipv6_cidr_block, 8, 1)}"
 }
+
+output "region" {
+  value = "${var.aws_region}"
+}

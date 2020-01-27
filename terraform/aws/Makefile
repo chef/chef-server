@@ -27,6 +27,10 @@ ifneq ($(AWS_DEFAULT_INSTANCE_TYPE),)
 	export TF_VAR_aws_instance_type ?= $(AWS_DEFAULT_INSTANCE_TYPE)
 endif
 
+ifneq ($(CHEF_SERVER_BACKUP_LOCATION),)
+	export TF_VAR_backup_location ?= $(CHEF_SERVER_BACKUP_LOCATION)
+endif
+
 ifneq ($(PLATFORM),)
 	export TF_VAR_platform ?= $(PLATFORM)
 else
@@ -37,6 +41,7 @@ ifneq ($(INSTALL_VERSION),)
 	export TF_VAR_install_version_url ?= $(shell platform=$(TF_VAR_platform); for channel in unstable current stable; do mixlib-install download chef-server --url -c $$channel -a x86_64 -p $$(echo $${platform%-*} | sed 's/rhel/el/') -l $${platform\#\#*-} -v $(INSTALL_VERSION) 2>/dev/null && break; done | head -n1)
 endif
 
+export UPGRADE_VERSION ?= $(INSTALL_VERSION)
 ifneq ($(UPGRADE_VERSION),)
 	export TF_VAR_upgrade_version_url ?= $(shell platform=$(TF_VAR_platform); for channel in unstable current stable; do mixlib-install download chef-server --url -c $$channel -a x86_64 -p $$(echo $${platform%-*} | sed 's/rhel/el/') -l $${platform\#\#*-} -v $(UPGRADE_VERSION) 2>/dev/null && break; done | head -n1)
 endif
