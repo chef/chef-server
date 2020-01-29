@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.33 -->
-## [13.1.33](https://github.com/chef/chef-server/tree/13.1.33) (2020-01-28)
+<!-- latest_release 13.1.34 -->
+## [13.1.34](https://github.com/chef/chef-server/tree/13.1.34) (2020-01-29)
 
 #### Merged Pull Requests
-- Add fail-over test to chef-backend scenario [#1885](https://github.com/chef/chef-server/pull/1885) ([christopher-snapp](https://github.com/christopher-snapp))
+- Add external elasticsearch terraform scenario [#1894](https://github.com/chef/chef-server/pull/1894) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Add external elasticsearch terraform scenario [#1894](https://github.com/chef/chef-server/pull/1894) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.34 -->
 - Add fail-over test to chef-backend scenario [#1885](https://github.com/chef/chef-server/pull/1885) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.33 -->
 - More fixes to integration_test script [#1889](https://github.com/chef/chef-server/pull/1889) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.32 -->
 - Minor integration_test pipeline tweaks [#1883](https://github.com/chef/chef-server/pull/1883) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.31 -->
