@@ -4,9 +4,9 @@ opscode_erchef['keygen_cache_size'] = 60
 
 nginx['ssl_dhparam'] = '/etc/opscode/dhparam.pem'
 
-data_collector['token'] = 'foobar'
+data_collector['token'] = 'foobar' unless data_collector.nil?
 
-profiles['root_url'] = 'http://localhost:9998'
+profiles['root_url'] = 'http://localhost:9998' unless profiles.nil?
 
 postgresql['external'] = true
 

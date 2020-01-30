@@ -32,6 +32,6 @@ nginx['ssl_dhparam'] = '/etc/opscode/dhparam.pem'
 
 insecure_addon_compat = false
 
-data_collector['token'] = 'foobar'
+data_collector['token'] = 'foobar' unless data_collector.nil?
 
 nginx['enable_ipv6'] = ${enable_ipv6}
