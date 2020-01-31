@@ -3,7 +3,7 @@ pkg_origin=chef
 pkg_license=('Apache-2.0')
 pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_deps=(
-  core/erlang18
+  core/erlang20
   core/cacerts
   core/coreutils
   core/gcc-libs
