@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.36 -->
-## [13.1.36](https://github.com/chef/chef-server/tree/13.1.36) (2020-01-31)
+<!-- latest_release 13.1.37 -->
+## [13.1.37](https://github.com/chef/chef-server/tree/13.1.37) (2020-02-03)
 
 #### Merged Pull Requests
-- fix habitat db config for external database [#1903](https://github.com/chef/chef-server/pull/1903) ([uwej711](https://github.com/uwej711))
+- Point to Chef-owned Hoax repo [#1892](https://github.com/chef/chef-server/pull/1892) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Point to Chef-owned Hoax repo [#1892](https://github.com/chef/chef-server/pull/1892) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.1.37 -->
 - fix habitat db config for external database [#1903](https://github.com/chef/chef-server/pull/1903) ([uwej711](https://github.com/uwej711)) <!-- 13.1.36 -->
 - fix erlang dependency for habitat build [#1902](https://github.com/chef/chef-server/pull/1902) ([uwej711](https://github.com/uwej711)) <!-- 13.1.35 -->
 - Add external elasticsearch terraform scenario [#1894](https://github.com/chef/chef-server/pull/1894) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.34 -->
