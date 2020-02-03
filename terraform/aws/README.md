@@ -46,7 +46,7 @@ Environment variables are used to control how the scenarios are executed and can
 | `SCENARIO` | The name of the sub-directory within `scenarios` containing the test you'd like to run. | omnibus-tiered-fresh-install |
 | `INSTALL_VERSION` | The version number of the artifact you want to install first. | 12.19.31 |
 | `UPGRADE_VERSION` | The version number of the artifact you want to upgrade to. | 13.0.40+20190923060037 |
-| `CHEF_SERVER_BACKUP_LOCATION` | Location of the backup if running the omnibus-rest-rebackup scenario | /tmp/chef-backup-2019-12-27-16-54-38.tgz |
+| `CHEF_SERVER_BACKUP_LOCATION` | Location of the backup if running the omnibus-restore-backup scenario | /tmp/chef-backup-2019-12-27-16-54-38.tgz |
 
 ### Optional Environment Variables
 | Environment Variable | Description | Example |
