@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.38 -->
-## [13.1.38](https://github.com/chef/chef-server/tree/13.1.38) (2020-02-04)
+<!-- latest_release 13.1.39 -->
+## [13.1.39](https://github.com/chef/chef-server/tree/13.1.39) (2020-02-04)
 
 #### Merged Pull Requests
-- Adding scenario for restoring from a local backup [#1891](https://github.com/chef/chef-server/pull/1891) ([tyler-ball](https://github.com/tyler-ball))
+- Remove encouragement to install deprecated Manage plugin [#1906](https://github.com/chef/chef-server/pull/1906) ([moutons](https://github.com/moutons))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Remove encouragement to install deprecated Manage plugin [#1906](https://github.com/chef/chef-server/pull/1906) ([moutons](https://github.com/moutons)) <!-- 13.1.39 -->
 - Adding scenario for restoring from a local backup [#1891](https://github.com/chef/chef-server/pull/1891) ([tyler-ball](https://github.com/tyler-ball)) <!-- 13.1.38 -->
 - Point to Chef-owned Hoax repo [#1892](https://github.com/chef/chef-server/pull/1892) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.1.37 -->
 - fix habitat db config for external database [#1903](https://github.com/chef/chef-server/pull/1903) ([uwej711](https://github.com/uwej711)) <!-- 13.1.36 -->
