@@ -1,3 +1,7 @@
+output "id" {
+  value = "${aws_instance.default.id}"
+}
+
 output "public_ipv4_address" {
   value = "${aws_instance.default.public_ip}"
 }
