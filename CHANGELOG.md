@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.37 -->
-## [13.1.37](https://github.com/chef/chef-server/tree/13.1.37) (2020-02-03)
+<!-- latest_release 13.1.38 -->
+## [13.1.38](https://github.com/chef/chef-server/tree/13.1.38) (2020-02-04)
 
 #### Merged Pull Requests
-- Point to Chef-owned Hoax repo [#1892](https://github.com/chef/chef-server/pull/1892) ([lbakerchef](https://github.com/lbakerchef))
+- Adding scenario for restoring from a local backup [#1891](https://github.com/chef/chef-server/pull/1891) ([tyler-ball](https://github.com/tyler-ball))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Adding scenario for restoring from a local backup [#1891](https://github.com/chef/chef-server/pull/1891) ([tyler-ball](https://github.com/tyler-ball)) <!-- 13.1.38 -->
 - Point to Chef-owned Hoax repo [#1892](https://github.com/chef/chef-server/pull/1892) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.1.37 -->
 - fix habitat db config for external database [#1903](https://github.com/chef/chef-server/pull/1903) ([uwej711](https://github.com/uwej711)) <!-- 13.1.36 -->
 - fix erlang dependency for habitat build [#1902](https://github.com/chef/chef-server/pull/1902) ([uwej711](https://github.com/uwej711)) <!-- 13.1.35 -->
