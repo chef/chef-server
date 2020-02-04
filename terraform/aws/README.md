@@ -46,6 +46,7 @@ Environment variables are used to control how the scenarios are executed and can
 | `SCENARIO` | The name of the sub-directory within `scenarios` containing the test you'd like to run. | omnibus-tiered-fresh-install |
 | `INSTALL_VERSION` | The version number of the artifact you want to install first. | 12.19.31 |
 | `UPGRADE_VERSION` | The version number of the artifact you want to upgrade to. | 13.0.40+20190923060037 |
+| `CHEF_SERVER_BACKUP_LOCATION` | Location of the backup if running the omnibus-restore-backup scenario | /tmp/chef-backup-2019-12-27-16-54-38.tgz |
 
 ### Optional Environment Variables
 | Environment Variable | Description | Example |
@@ -87,5 +88,5 @@ To destroy all active scenarios you may run either the `make destroy-all` or `ma
 ## Adding a new Scenario
 
 1. Duplicate an existing scenario directory that is similar to the one you desire. For example, if you wanted to add a
-   `omnibus-tiered-upgrade`, you could start with the `omnibus-tiered-fresh-install` scenario file.   
+   `omnibus-tiered-upgrade`, you could start with the `omnibus-tiered-fresh-install` scenario file.
 2. Update the `main.tf` file to reflect the scenario name as well as any additional test changes you require.
