@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.40 -->
-## [13.1.40](https://github.com/chef/chef-server/tree/13.1.40) (2020-02-05)
+<!-- latest_release 13.1.41 -->
+## [13.1.41](https://github.com/chef/chef-server/tree/13.1.41) (2020-02-05)
 
 #### Merged Pull Requests
-- Replace self-signed certs in external postgresql scenario [#1907](https://github.com/chef/chef-server/pull/1907) ([christopher-snapp](https://github.com/christopher-snapp))
+- Add FIPS scenario to integration tests [#1909](https://github.com/chef/chef-server/pull/1909) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Add FIPS scenario to integration tests [#1909](https://github.com/chef/chef-server/pull/1909) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.41 -->
 - Replace self-signed certs in external postgresql scenario [#1907](https://github.com/chef/chef-server/pull/1907) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.40 -->
 - Remove encouragement to install deprecated Manage plugin [#1906](https://github.com/chef/chef-server/pull/1906) ([moutons](https://github.com/moutons)) <!-- 13.1.39 -->
 - Adding scenario for restoring from a local backup [#1891](https://github.com/chef/chef-server/pull/1891) ([tyler-ball](https://github.com/tyler-ball)) <!-- 13.1.38 -->
