@@ -126,6 +126,42 @@ steps:
       executor:
         docker:
 
+  - label: ':terraform: fips-ipv4-rhel-6'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-fips
+      PLATFORM: rhel-6
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: fips-ipv4-rhel-7'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-fips
+      PLATFORM: rhel-7
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: fips-ipv4-rhel-8'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-fips
+      PLATFORM: rhel-8
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
   - label: ':terraform: external-postgresql-ipv4-rhel-6'
     command: .expeditor/integration_test.pipeline.sh apply
     env:
@@ -515,6 +551,42 @@ steps:
     env:
       SCENARIO: omnibus-external-openldap
       PLATFORM: ubuntu-18.04
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: fips-ipv6-rhel-6'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-fips
+      PLATFORM: rhel-6
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: fips-ipv6-rhel-7'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-fips
+      PLATFORM: rhel-7
+      ENABLE_IPV6: true
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
+  - label: ':terraform: fips-ipv6-rhel-8'
+    command: .expeditor/integration_test.pipeline.sh apply
+    env:
+      SCENARIO: omnibus-fips
+      PLATFORM: rhel-8
       ENABLE_IPV6: true
     expeditor:
       accounts:
