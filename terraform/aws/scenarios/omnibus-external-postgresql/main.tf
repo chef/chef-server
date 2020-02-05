@@ -63,9 +63,20 @@ resource "null_resource" "postgresql_config" {
     destination = "/tmp/hosts"
   }
 
+  # upload private.key if running from buildkite
+  provisioner "local-exec" {
+    command = "[ -n \"$BUILDKITE\" ] && { vault read -field=private.key secret/chef-server | ssh -o 'UserKnownHostsFile=/dev/null' -o 'StrictHostKeyChecking=no' ${module.postgresql.ssh_username}@${module.postgresql.public_ipv4_dns} 'cat > /tmp/private.key'; } || true"
+  }
+
+  # upload certificate.pem if running from buildkite
+  provisioner "local-exec" {
+    command = "[ -n \"$BUILDKITE\" ] && { vault read -field=certificate.pem secret/chef-server | ssh -o 'UserKnownHostsFile=/dev/null' -o 'StrictHostKeyChecking=no' ${module.postgresql.ssh_username}@${module.postgresql.public_ipv4_dns} 'cat > /tmp/certificate.pem'; } || true"
+  }
+
   provisioner "remote-exec" {
     inline = [
       "set -evx",
+      "echo -e '\nBEGIN INSTALL POSTGRESQL SERVER\n'",
       "sudo chown root:root /tmp/hosts",
       "sudo mv /tmp/hosts /etc/hosts",
       "sleep 30",
@@ -74,10 +85,13 @@ resource "null_resource" "postgresql_config" {
       "sudo apt-key add ACCC4CF8.asc",
       "sudo apt-get update",
       "sudo apt-get install -y ssl-cert sysstat postgresql-9.6",
+      "[ -f /tmp/private.key ] && cat /tmp/private.key | sudo tee /etc/ssl/private/ssl-cert-snakeoil.key >/dev/null",
+      "[ -f /tmp/certificate.pem ] && cat /tmp/certificate.pem | sudo tee /etc/ssl/certs/ssl-cert-snakeoil.pem >/dev/null",
       "echo 'host    all             all            ${var.enable_ipv6 == true ? module.chef_server.public_ipv6_address : module.chef_server.private_ipv4_address}/${var.enable_ipv6 == "true" ? 64 : 32}         md5' | sudo tee -a /etc/postgresql/9.6/main/pg_hba.conf",
       "echo \"listen_addresses='*'\" | sudo tee -a /etc/postgresql/9.6/main/postgresql.conf",
       "sudo systemctl restart postgresql",
       "sudo -u postgres psql -c \"CREATE USER bofh SUPERUSER ENCRYPTED PASSWORD 'i1uvd3v0ps';\"",
+      "echo -e '\nEND INSTALL POSTGRESQL SERVER\n'",
     ]
   }
 }
@@ -131,15 +145,54 @@ resource "null_resource" "chef_server_config" {
   provisioner "remote-exec" {
     script = "${path.module}/../../../common/files/add_user.sh"
   }
+
+  # run smoke test
+  provisioner "remote-exec" {
+    script = "${path.module}/../../../common/files/test_chef_server-smoke.sh"
+  }
+}
+
+# enable ssl enforcement postgres server
+resource "null_resource" "postgresql_sslconfig" {
+  depends_on = ["null_resource.chef_server_config"]
+
+  # provide some connection info
+  connection {
+    type = "ssh"
+    user = "${module.postgresql.ssh_username}"
+    host = "${module.postgresql.public_ipv4_dns}"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "set -evx",
+      "echo -e '\nBEGIN ENABLE SSL MODE ON POSTGRESQL SERVER\n'",
+      "sudo sed -i '$ s/host/hostssl/' /etc/postgresql/9.6/main/pg_hba.conf",
+      "sudo systemctl restart postgresql",
+      "echo -e '\nEND ENABLE SSL MODE ON POSTGRESQL SERVER\n'",
+    ]
+  }
 }
 
 resource "null_resource" "chef_server_test" {
-  depends_on = ["null_resource.chef_server_config"]
+  depends_on = ["null_resource.postgresql_sslconfig"]
 
   connection {
     type = "ssh"
     user = "${module.chef_server.ssh_username}"
     host = "${module.chef_server.public_ipv4_dns}"
+  }
+
+  # install chef-server
+  provisioner "remote-exec" {
+    inline = [
+      "set -evx",
+      "echo -e '\nBEGIN ENABLE SSL MODE ON CHEF SERVER\n'",
+      "sudo sed -i '/sslmode/{s/disable/require/;}' /etc/opscode/chef-server.rb",
+      "sudo chef-server-ctl reconfigure --chef-license=accept",
+      "sleep 120",
+      "echo -e '\nEND ENABLE SSL MODE ON CHEF SERVER\n'",
+    ]
   }
 
   # run smoke test
