@@ -56,7 +56,8 @@ validate_args([]) ->
     halt(1);
 validate_args([Command]) when Command =:= "reindex";
                               Command =:= "drop";
-                              Command =:= "complete" ->
+                              Command =:= "complete";
+                              Command =:= "partial" ->
     io:format("Must supply an organization name for this command~n"),
     halt(1);
 validate_args([Command]) ->
@@ -67,8 +68,9 @@ validate_args([Command, OrgName]) when Command =:= "reindex";
                                 Command =:= "complete" ->
     validate_args([Command, OrgName, "https://127.0.0.1"]);
 validate_args([Command, OrgName, IntLB]) when Command =:= "reindex";
-                                       Command =:= "drop";
-                                       Command =:= "complete" ->
+                                              Command =:= "drop";
+                                              Command =:= "complete";
+                                              Command =:= "partial"  ->
     Context = make_context(OrgName, IntLB),
     OrgBin = list_to_binary(OrgName), %% We use binaries around here...
 
@@ -109,7 +111,9 @@ perform(reindex, Context, {_OrgId, OrgName}=OrgInfo) ->
 perform(complete, Context, OrgInfo) ->
     %% Just do everything
     perform(drop, Context, OrgInfo),
-    perform(reindex, Context, OrgInfo).
+    perform(reindex, Context, OrgInfo);
+perform(partial, Context, OrgInfo, ) ->
+
 
 print_errors(Failed, OrgName) ->
     io:format(standard_error, "Reindexing the organization \"~s\" has failed.~n", [OrgName]),

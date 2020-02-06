@@ -10,33 +10,21 @@
 -define(ERCHEF, 'erchef@127.0.0.1').
 -define(ERCHEF_COOKIE, 'erchef').
 
-%% @doc Perform server-side reindexing of an individual organization on Private Chef Server.
-%% Pre-Chef 11 servers provided a REST API endpoint to perform reindexing via knife, but
-%% this is more properly thought of as an administrative task, rather than a "user" task.
-%%
-%% Currently, three commands are accepted:
-%%
-%%     drop: Removes all the organization's entries from the index.  Information in the database is untouched.
-%%     reindex: Sends the organization's information from the database to the index again.
-%%     complete: same as "drop" followed by "reindex"
-%%
-%% In most cases, 'complete' is desired, but the option to perform the individual steps is
-%% made avilable for POWER USERS!
-%%
-%% Supplying commands other than those listed above, omitting an organization name, or
-%% providing a non-existent organization name are errors.
+%% @doc 
 %%
 %% Examples:
 %%
-%% Perform a complete reindexing of the 'mycompany-engineering' organization:
+%% Perform a partial reindexing of the 'mycompany-engineering' organization by :
 %%     reindex-opc-piecewise mycompany-engineering nodes <nodes..>
+%%
+%% Indices are node, role, environment, client, or DATABAG_NAME
 %%
 %% Exit Codes:
 %%
 %%   0 - Success
 %%   1 - Incorrect arguments given
 %%   2 - Invalid organization name given
-%%
+%%   3 - Failure reindexing
 main(Args) ->
     init_network(),
     [OrgInfo, Context, Index, Items] = validate_args(Args),
@@ -49,12 +37,14 @@ main(Args) ->
 %%
 %% If the arguments are invalid for any reason, print a message and halt.
 validate_args([]) ->
-    io:format("You didn't specify a command!  Use either 'drop', 'reindex', or 'complete'~n"),
+    io:format("Need to specify an organization, and index and a list of names~n"),
     halt(1);
-validate_args(Args) when length(Args) <= 3 ->
+validate_args(Args) when length(Args) < 3 ->
     io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME ITEM1 ITEM2> ~n"),
     halt(1);
 validate_args([OrgName, IndexName | Items]) when length(Items) > 0 ->
+    %% TODO make configurable
+    IntLB =  "https://127.0.0.1",
     Context = make_context(OrgName, IntLB),
     OrgBin = list_to_binary(OrgName), %% We use binaries around here...
 
@@ -66,11 +56,11 @@ validate_args([OrgName, IndexName | Items]) when length(Items) > 0 ->
             halt(2);
         OrgId when is_binary(OrgId)->
             %% Everything checks out!  Let's do some reindexing!
-            [{OrgId, OrgBin}, Context, Index, Items];
+            [{OrgId, OrgBin}, Context, IndexName, Items];
         OtherError ->
             io:format("Other error occured ~p~n", [OtherError]),
             halt(3)
-    end;
+    end.
 
 %% @doc Actually do the reindexing.
 -spec perform(Context :: term(),
@@ -86,7 +76,7 @@ perform(Context, {_OrgId, OrgName}=OrgInfo, Index, Items) ->
         {error, Failed, Missing} ->
             print_missing(Missing, OrgName, Index),
             print_errors(Failed, OrgName, Index),
-            halt(1)
+            halt(3)
     end.
 
 print_errors(Failed, OrgName, Index) ->
@@ -94,7 +84,7 @@ print_errors(Failed, OrgName, Index) ->
     io:format(standard_error, "The following objects failed to be reindexed in the last batch:~n~n", []),
     [io:format(standard_error, "\t~s[~s]: ~s~n", [Type, Id, Reason]) || {{Type, Id, _Db}, Reason} <- Failed].
 
-print_missing([], _OrgName, Index) ->
+print_missing([], _OrgName, _Index) ->
     ok;
 print_missing(Missing, OrgName, Index) ->
     io:format(standard_error, "~nThe following objects in organization \"~s\" index \"~s\" were not sent for indexing:~n~n", [OrgName, Index]),
