@@ -195,4 +195,6 @@ exceptions:
       reason: Exception made by Chef Legal
     - name: core/sqitch_pg
       reason: Exception made by Chef Legal
+    - name: core/nss-myhostname
+      reason: Exception made by Chef Legal
 
