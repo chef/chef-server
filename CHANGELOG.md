@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.42 -->
-## [13.1.42](https://github.com/chef/chef-server/tree/13.1.42) (2020-02-06)
+<!-- latest_release 13.1.43 -->
+## [13.1.43](https://github.com/chef/chef-server/tree/13.1.43) (2020-02-07)
 
 #### Merged Pull Requests
-- Fix integration test check for FIPS being enabled [#1912](https://github.com/chef/chef-server/pull/1912) ([christopher-snapp](https://github.com/christopher-snapp))
+- Add license exception for nss-myhostname [#1913](https://github.com/chef/chef-server/pull/1913) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Add license exception for nss-myhostname [#1913](https://github.com/chef/chef-server/pull/1913) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.43 -->
 - Fix integration test check for FIPS being enabled [#1912](https://github.com/chef/chef-server/pull/1912) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.42 -->
 - Add FIPS scenario to integration tests [#1909](https://github.com/chef/chef-server/pull/1909) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.41 -->
 - Replace self-signed certs in external postgresql scenario [#1907](https://github.com/chef/chef-server/pull/1907) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.40 -->
