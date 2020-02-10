@@ -15,9 +15,10 @@ postgresql['sslmode']='require'
 postgresql['vip']='${postgresql_fqdn}'
 postgresql['db_superuser']='bofh'
 postgresql['db_superuser_password']='i1uvd3v0ps!'
-opscode_erchef['db_pool_size']=10
-oc_id['db_pool_size']=10
-oc_bifrost['db_pool_size']=10
+postgresql['max_connections']=350
+opscode_erchef['db_pool_size']=20
+oc_id['db_pool_size']=20
+oc_bifrost['db_pool_size']=20
 
 postgresql['db_connection_superuser']='bofh@${postgresql_fqdn}'
 
