@@ -23,6 +23,7 @@
 -module(chef_s3_tests).
 
 -include_lib("eunit/include/eunit.hrl").
+-include_lib("erlcloud/include/erlcloud_aws.hrl").
 
 base64_checksum_test_() ->
     TestData = [{<<"00ba0db453b47c4c0bb530cf8e481a70">>, <<"ALoNtFO0fEwLtTDPjkgacA==">>},
@@ -43,16 +44,6 @@ make_key_test() ->
 
     ?assertEqual(chef_s3:make_key(OrgId, Checksum),
                  "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb").
-
-%% There are no public API functions in mini_s3 for deserializing
-%% AWS config information
--record(config, {
-          s3_url="http://s3.amazonaws.com"::string(),
-          access_key_id::string(),
-          secret_access_key::string(),
-          bucket_access_type=virtual_hosted::mini_s3:bucket_access_type(),
-          ssl_options=[]::proplists:proplist()
-}).
 
 setup_chef_secrets() ->
     application:set_env(chef_secrets, provider, chef_secrets_mock_provider),
@@ -75,19 +66,37 @@ setup_s3(InternalS3Url, ExternalS3Url) ->
     meck:expect(mini_s3, new, 3, mock_mini_s3_ctx),
     meck:expect(mini_s3, get_object_metadata, 4, mock_metadata).
 
+choose_url_style(InternalS3Url, ExternalS3Url) ->
+    case {InternalS3Url, ExternalS3Url} of
+        {_, host_header} ->
+            fun mini_s3:get_url_port/1;
+%        {Same, Same} ->
+%            fun mini_s3:get_url_noport/1;
+        _ ->
+            fun mini_s3:get_url_noport/1
+    end.
+
 generate_presigned_url_uses_configured_s3_url_test_() ->
     MockedModules = [mini_s3, chef_secrets_mock_provider],
     HostHeaderUrl = "https://api.example.com:443",
     OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
     Checksum = <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
     Lifetime = 3600,
+%    Config = mini_s3:new("", "", "http://s3.amazonaws.com"),
     Expect_s3_url = fun(ExpectMethod, ExpectUrl, ExpectLifetime) ->
                             meck:expect(mini_s3, s3_url,
                                         fun(HTTPMethod, Bucket, _Key, MyLifetime, _ContentMD5,
-                                            #config{s3_url = S3Url}) ->
+                                            Config) ->
                                                 ?assertEqual(ExpectMethod, HTTPMethod),
                                                 ?assertEqual("testbucket", Bucket),
                                                 ?assertEqual(ExpectLifetime, MyLifetime),
+                                                {ok, InternalS3Url} = application:get_env(chef_objects, s3_url),
+                                                {ok, ExternalS3Url} = application:get_env(chef_objects, s3_external_url),
+                                                % is this still necessary? possibly only need to pass host with port
+                                                F = choose_url_style(InternalS3Url, ExternalS3Url),
+                                                %F = choose_url_style(InternalS3Url, ExternalS3Url),
+                                                S3Url = F(Config),
+                                                %S3Url = mini_s3:get_url_port(Config),
                                                 ?assertEqual(ExpectUrl, S3Url),
                                                 stub_s3_url_response
                                         end)
