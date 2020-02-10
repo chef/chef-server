@@ -23,7 +23,6 @@
 -export([get_bucket/1,
          get_object_and_bucket/1,
          file/1,
-         to_integer/1,
          to_string/1,
          to_binary/1]).
 
@@ -32,10 +31,6 @@
 %%===================================================================
 file(Path) ->
     filename:join(code:priv_dir(bookshelf), Path).
-
--spec to_integer(string() | binary()) -> integer().
-to_integer(Val) ->
-    erlang:list_to_integer(to_string(Val)).
 
 -spec to_string(binary() | string()) -> string().
 to_string(Val) when is_binary(Val) ->

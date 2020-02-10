@@ -118,6 +118,8 @@ delete_file(OrgId, AwsConfig, Bucket, Checksum) ->
             {error, Checksum}
     end.
 
+%-include_lib("erlcloud/include/erlcloud_aws.hrl").
+
 %% @doc See if the file represented by the given `Checksum' exists in S3.
 -spec check_file(OrgId :: object_id(),
                  AwsConfig :: mini_s3:config(),
@@ -159,7 +161,6 @@ check_file(OrgId, AwsConfig, Bucket, Checksum) ->
                      TimeoutMsgTemplate :: string()) ->
                             bulk_op_return().
 s3_checksum_op(OrgId, Checksums, Fun, TimeoutMsgTemplate) ->
-
     Bucket = chef_s3:bucket(),
     AwsConfig = chef_s3:get_internal_config(),
     Timeout = chef_config:config_option(chef_objects, s3_parallel_ops_timeout, pos_integer),
@@ -176,7 +177,6 @@ s3_checksum_op(OrgId, Checksums, Fun, TimeoutMsgTemplate) ->
                      end,
 
     Results = chef_parallel:parallelize_all_with_timeout(Checksums, RequestFun, Fanout, Timeout, TimeoutHandler),
-
     %% Now we need to consolidate our results based on:
     %%
     %%   Did the operation succeed?
