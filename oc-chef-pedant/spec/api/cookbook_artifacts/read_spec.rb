@@ -217,7 +217,10 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
             http.ca_file     = Pedant::Config.ssl_ca_file     if Pedant::Config.ssl_ca_file
           end
 
-          response = http.get(uri.request_uri, {})
+          # Chef::ServerAPI always sets the Host
+          # header to HOSTNAME:PORT. We do the same here to avoid sigv4
+          # signing issues.
+          response = http.get(uri.request_uri, {"Host" => "#{uri.hostname}:#{uri.port}"})
           response.body.should == recipe_content
         end
 
