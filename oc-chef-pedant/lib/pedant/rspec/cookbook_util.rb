@@ -330,7 +330,10 @@ module Pedant
           http.ca_file     = Pedant::Config.ssl_ca_file     if Pedant::Config.ssl_ca_file
         end
 
-        response = http.get(uri.request_uri, {})
+        # NOTE(ssd) 2020-06-15: Chef::ServerAPI always sets the Host
+        # header to HOSTNAME:PORT. We do the same here to avoid v4
+        # signing issues.
+        response = http.get(uri.request_uri, {"Host" => "#{uri.hostname}:#{uri.port}"})
 
         begin
           response.code.should eq expected_reponse_code.to_s
