@@ -303,7 +303,9 @@ bucket_basic(doc) ->
 bucket_basic(suite) ->
     [];
 bucket_basic(Config) when is_list(Config) ->
-    S3Conf = proplists:get_value(s3_conf, Config),
+S3Conf0 = proplists:get_value(s3_conf, Config),
+S3Conf = setelement(8, setelement(7, S3Conf0, "http://127.0.0.1"), 4321),
+?debugFmt("~n~nbucket_basic: ~p~n", [S3Conf]),
     BucketName = "testbucket",
     ?assertEqual(ok, mini_s3:create_bucket(BucketName, public_read_write, none, S3Conf)),
     ?assert(bucket_exists(BucketName, S3Conf)),
@@ -681,7 +683,9 @@ test_data(Size) ->
 test_data_text(Size) ->
     random_string(Size, " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\n" ).
 
-bucket_list(S3Conf) ->
+bucket_list(S3Conf0) -> %% <--- change this back to S3Conf
+S3Conf = setelement(8, setelement(7, S3Conf0, "http://127.0.0.1"), 4321),
+?debugFmt("~n~nbucket_list: ~p~n", [S3Conf]),
     [{buckets, Details}] = mini_s3:list_buckets(S3Conf),
     lists:map(fun(Opts) -> proplists:get_value(name, Opts) end, Details).
 bucket_exists(Name, S3Conf) ->
