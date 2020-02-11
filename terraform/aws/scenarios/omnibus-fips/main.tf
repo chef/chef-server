@@ -37,7 +37,7 @@ resource "null_resource" "chef_server_fips" {
 
   # reboot instance for fips to take effect
   provisioner "local-exec" {
-    command = "aws ec2 reboot-instances --instance-ids ${module.chef_server.id}"
+    command = "AWS_PROFILE=${var.aws_profile} AWS_DEFAULT_REGION=${var.aws_region} aws ec2 reboot-instances --instance-ids ${module.chef_server.id}; sleep 60;"
   }
 }
 
