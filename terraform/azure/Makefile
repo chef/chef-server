@@ -51,6 +51,34 @@ else
 	export TF_VAR_enable_ipv6 ?= "true"
 endif
 
+ifneq ($(ENABLE_SMOKE_TEST),)
+    export TF_VAR_enable_smoke_test ?= $(ENABLE_SMOKE_TEST)
+endif
+
+ifneq ($(ENABLE_PEDANT_TEST),)
+    export TF_VAR_enable_pedant_test ?= $(ENABLE_PEDANT_TEST)
+endif
+
+ifneq ($(ENABLE_PSQL_TEST),)
+    export TF_VAR_enable_psql_test ?= $(ENABLE_PSQL_TEST)
+endif
+
+ifneq ($(ENABLE_GATHER_LOGS_TEST),)
+    export TF_VAR_enable_gather_logs_test ?= $(ENABLE_GATHER_LOGS_TEST)
+endif
+
+ifneq ($(ENABLE_ADDON_PUSH_JOBS),)
+    export TF_VAR_enable_addon_push_jobs ?= $(ENABLE_ADDON_PUSH_JOBS)
+endif
+
+ifneq ($(ENABLE_ADDON_CHEF_MANAGE),)
+    export TF_VAR_enable_addon_chef_manage ?= $(ENABLE_ADDON_CHEF_MANAGE)
+endif
+
+ifneq ($(ENABLE_CHEF_BACKEND_DEMOTION),)
+    export TF_VAR_enable_chef_backend_demotion ?= $(ENABLE_CHEF_BACKEND_DEMOTION)
+endif
+
 ifneq ($(SCENARIO),)
 	export TF_VAR_scenario ?= $(SCENARIO)
 endif

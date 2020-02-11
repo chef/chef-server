@@ -12,6 +12,7 @@ steps:
       SCENARIO: omnibus-chef-backend
       PLATFORM: rhel-6
       ENABLE_IPV6: false
+      ENABLE_CHEF_BACKEND_DEMOTION: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -24,6 +25,7 @@ steps:
       SCENARIO: omnibus-chef-backend
       PLATFORM: rhel-7
       ENABLE_IPV6: false
+      ENABLE_CHEF_BACKEND_DEMOTION: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -36,6 +38,7 @@ steps:
       SCENARIO: omnibus-chef-backend
       PLATFORM: rhel-8
       ENABLE_IPV6: false
+      ENABLE_CHEF_BACKEND_DEMOTION: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -48,6 +51,7 @@ steps:
       SCENARIO: omnibus-chef-backend
       PLATFORM: ubuntu-16.04
       ENABLE_IPV6: false
+      ENABLE_CHEF_BACKEND_DEMOTION: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -60,6 +64,7 @@ steps:
       SCENARIO: omnibus-chef-backend
       PLATFORM: ubuntu-18.04
       ENABLE_IPV6: false
+      ENABLE_CHEF_BACKEND_DEMOTION: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -168,6 +173,7 @@ steps:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: rhel-6
       ENABLE_IPV6: false
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -180,6 +186,7 @@ steps:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: rhel-7
       ENABLE_IPV6: false
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -192,6 +199,7 @@ steps:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: rhel-8
       ENABLE_IPV6: false
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -204,6 +212,7 @@ steps:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: ubuntu-16.04
       ENABLE_IPV6: false
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -216,6 +225,7 @@ steps:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: ubuntu-18.04
       ENABLE_IPV6: false
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -444,6 +454,7 @@ steps:
       SCENARIO: omnibus-chef-backend
       PLATFORM: rhel-6
       ENABLE_IPV6: true
+      ENABLE_CHEF_BACKEND_DEMOTION: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -456,6 +467,7 @@ steps:
       SCENARIO: omnibus-chef-backend
       PLATFORM: rhel-7
       ENABLE_IPV6: true
+      ENABLE_CHEF_BACKEND_DEMOTION: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -468,6 +480,7 @@ steps:
       SCENARIO: omnibus-chef-backend
       PLATFORM: rhel-8
       ENABLE_IPV6: true
+      ENABLE_CHEF_BACKEND_DEMOTION: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -480,6 +493,7 @@ steps:
       SCENARIO: omnibus-chef-backend
       PLATFORM: ubuntu-16.04
       ENABLE_IPV6: true
+      ENABLE_CHEF_BACKEND_DEMOTION: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -492,6 +506,7 @@ steps:
       SCENARIO: omnibus-chef-backend
       PLATFORM: ubuntu-18.04
       ENABLE_IPV6: true
+      ENABLE_CHEF_BACKEND_DEMOTION: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -600,6 +615,7 @@ steps:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: rhel-6
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -612,6 +628,7 @@ steps:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: rhel-7
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -624,6 +641,7 @@ steps:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: rhel-8
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -636,6 +654,7 @@ steps:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: ubuntu-16.04
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -648,6 +667,7 @@ steps:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: ubuntu-18.04
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd

@@ -112,38 +112,89 @@ resource "null_resource" "chef_server_test" {
     host = "${module.chef_server.public_ipv4_address}"
   }
 
+  # upload test scripts
+  provisioner "file" {
+    source      = "${path.module}/../../../common/files/test_chef_server-smoke.sh"
+    destination = "/tmp/test_chef_server-smoke.sh"
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/../../../common/files/install_addon_push_jobs.sh"
+    destination = "/tmp/install_addon_push_jobs.sh"
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/../../../common/files/test_addon_push_jobs.sh"
+    destination = "/tmp/test_addon_push_jobs.sh"
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/../../../common/files/install_addon_chef_manage.sh"
+    destination = "/tmp/install_addon_chef_manage.sh"
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/../../../common/files/test_chef_server-pedant.sh"
+    destination = "/tmp/test_chef_server-pedant.sh"
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/../../../common/files/test_psql.sh"
+    destination = "/tmp/test_psql.sh"
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/../../../common/files/test_gather_logs.sh"
+    destination = "/tmp/test_gather_logs.sh"
+  }
+
   # run smoke test
   provisioner "remote-exec" {
-    script = "${path.module}/../../../common/files/test_chef_server-smoke.sh"
+    inline = [
+      "chmod +x /tmp/test_chef_server-smoke.sh",
+      "ENABLE_SMOKE_TEST=${var.enable_smoke_test} /tmp/test_chef_server-smoke.sh",
+    ]
   }
 
-  # install push jobs addon
+  # install + test push jobs addon
   provisioner "remote-exec" {
-    script = "${path.module}/../../../common/files/install_addon_push_jobs.sh"
+    inline = [
+      "chmod +x /tmp/install_addon_push_jobs.sh",
+      "ENABLE_ADDON_PUSH_JOBS=${var.enable_addon_push_jobs} /tmp/install_addon_push_jobs.sh",
+      "chmod +x /tmp/test_addon_push_jobs.sh",
+      "ENABLE_ADDON_PUSH_JOBS=${var.enable_addon_push_jobs} /tmp/test_addon_push_jobs.sh",
+    ]
   }
 
-  # test push jobs addon
+  # install + test chef manage addon
   provisioner "remote-exec" {
-    script = "${path.module}/../../../common/files/test_addon_push_jobs.sh"
-  }
-
-  # install chef manage addon
-  provisioner "remote-exec" {
-    script = "${path.module}/../../../common/files/install_addon_chef_manage.sh"
+    inline = [
+      "chmod +x /tmp/install_addon_chef_manage.sh",
+      "ENABLE_ADDON_CHEF_MANAGE=${var.enable_addon_chef_manage} /tmp/install_addon_chef_manage.sh",
+    ]
   }
 
   # run pedant test
   provisioner "remote-exec" {
-    script = "${path.module}/../../../common/files/test_chef_server-pedant.sh"
+    inline = [
+      "chmod +x /tmp/test_chef_server-pedant.sh",
+      "ENABLE_PEDANT_TEST=${var.enable_pedant_test} /tmp/test_chef_server-pedant.sh",
+    ]
   }
 
   # run psql test
   provisioner "remote-exec" {
-    script = "${path.module}/../../../common/files/test_psql.sh"
+    inline = [
+      "chmod +x /tmp/test_psql.sh",
+      "ENABLE_PSQL_TEST=${var.enable_psql_test} /tmp/test_psql.sh",
+    ]
   }
 
   # run gather-logs test
   provisioner "remote-exec" {
-    script = "${path.module}/../../../common/files/test_gather_logs.sh"
+    inline = [
+      "chmod +x /tmp/test_gather_logs.sh",
+      "ENABLE_GATHER_LOGS_TEST=${var.enable_gather_logs_test} /tmp/test_gather_logs.sh",
+    ]
   }
 }
