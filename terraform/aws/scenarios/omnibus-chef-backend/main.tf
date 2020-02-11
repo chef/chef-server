@@ -79,7 +79,8 @@ data "template_file" "backend_config" {
   template = "${file("${path.module}/templates/chef-backend.rb.tpl")}"
 
   vars {
-    backend1_ip = "${var.enable_ipv6 == true ? module.backend1.public_ipv6_address : module.backend1.private_ipv4_address}"
+    ip_version = "${var.enable_ipv6 == true ? "ipv6" : "ipv4"}"
+    backend_ip = "${var.enable_ipv6 == true ? module.backend1.public_ipv6_address : module.backend1.private_ipv4_address}"
   }
 }
 

@@ -1,1 +1,2 @@
-publish_address '${backend1_ip}'
+publish_address = '${backend_ip}'
+ip_version = '${ip_version}'
