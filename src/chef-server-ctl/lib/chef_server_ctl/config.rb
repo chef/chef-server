@@ -123,7 +123,7 @@ module ChefServerCtl
                               ENV['CSC_BIFROST_DB_URI']
                             else
                               pg_config = @@ctl.running_service_config('postgresql')
-                              user = pg_config['db_superuser']
+                              user = pg_config['db_connection_superuser'] || pg_config['db_superuser']
                               password = @@ctl.credentials.get('postgresql', 'db_superuser_password')
                               make_connection_string('bifrost', user, password)
                             end
@@ -137,7 +137,7 @@ module ChefServerCtl
                              ENV['CSC_ERCHEF_DB_URI']
                            else
                              erchef_config = @@ctl.running_service_config('opscode-erchef')
-                             user = erchef_config['sql_user']
+                             user = erchef_config['sql_connection_user'] || erchef_config['sql_user']
                              password = @@ctl.credentials.get('opscode_erchef', 'sql_password')
                              make_connection_string('opscode_chef', user, password)
                            end
@@ -164,7 +164,7 @@ module ChefServerCtl
       pg_config = @@ctl.running_service_config('postgresql')
       host = pg_config['vip']
       port = pg_config['port']
-      "postgresql://#{db_user}:#{db_password}@#{host}:#{port}/#{db_name}"
+      "postgresql:///#{db_name}?user=#{db_user}&password=#{db_password}&host=#{host}&port=#{port}"
     end
 
     def self.ssl_params

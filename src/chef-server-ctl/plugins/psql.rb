@@ -34,7 +34,6 @@ add_command_under_category "psql", "Database", "Launches an interactive psql ses
 
   service_name = ARGV[1]
   write_arg = '--write'
-  ro = ARGV.include?(write_arg) ? '' : 'ro_'
   options_arg = '--options'
   if (ARGV.include?(options_arg))
     psql_options = " #{ARGV[ARGV.index(options_arg) + 1]}"
@@ -62,25 +61,30 @@ add_command_under_category "psql", "Database", "Launches an interactive psql ses
     db_config.merge!(JSON.parse(File.read("/etc/opscode-reporting/opscode-reporting-running.json")))
   end
 
-  seed=known_dbs[service_name]["hashseed"]
-  db_hash_key=known_dbs[service_name]["config_key"]
-  db_name=known_dbs[service_name]["dbname"]
+  seed =        known_dbs[service_name]["hashseed"]
+  db_hash_key = known_dbs[service_name]["config_key"]
+  db_name =     known_dbs[service_name]["dbname"]
+  db_host =     db_config[seed]['postgresql']['vip']
+  db_port =     db_config[seed]['postgresql']['port']
 
   # undocumented, but available. Intended for use primarily for
   # gather-logs to be able to do its thing correctly.
-  if (ARGV.include? "--as-admin")
+  if ARGV.include? '--as-admin'
     cfg = running_service_config('postgresql')
-    db_username=cfg['db_superuser']
-    db_password=credentials.get('postgresql', 'db_superuser_password')
+    db_username = cfg['db_connection_superuser'] || cfg['db_superuser']
+    db_password = credentials.get('postgresql', 'db_superuser_password')
   else
-    db_username=db_config[seed][db_hash_key]["sql_#{ro}user"]
+    if ARGV.include? write_arg
+      db_username = db_config[seed][db_hash_key]['sql_connection_user'] || db_config[seed][db_hash_key]['sql_user']
+      db_password_string = 'sql_password'
+    else
+      db_username = db_config[seed][db_hash_key]['sql_ro_user'] + (db_config[seed][db_hash_key]['sql_connection_user'] ? '@'+db_host : '')
+      db_password_string = 'sql_ro_password'
+    end
     # Sorry.
-    db_hash_key = "opscode_erchef" if db_hash_key == "opscode-erchef"
-    db_password=credentials.get(db_hash_key, "sql_#{ro}password")
+    db_hash_key = 'opscode_erchef' if db_hash_key == 'opscode-erchef'
+    db_password = credentials.get(db_hash_key, db_password_string)
   end
-
-  db_host = db_config[seed]['postgresql']['vip']
-  db_port = db_config[seed]['postgresql']['port']
 
   if ARGV.include?('--debug') || ARGV.include?('-vv')
     STDOUT.puts "Host: #{db_host}"

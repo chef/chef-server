@@ -6,18 +6,22 @@ vm:
   # to use it as an externally managed postgres instance.
   postgresql:
     # enable a separate postgres vm but do not use it unless
-    # use-vm-for-external is set.
+    # use-external is set.
     start: false
     # When this is set true, and start is true,
     # the chef-server node will be configured to use
     # this vm as an external postgresql server from the start.
     use-external: true
+    # When this is set true, and start is true, and use-external is true,
+    # the chef-server node will be configured to use
+    # this vm as an external azure postgresql server from the start.
+    use-azure: false
   # Override this in config.yml if you want to bring up a separate reporting
   # postgres box, and if you want to automatically configure chef-server
   # to use it as an externally managed reporting postgres instance.
   reporting_postgresql:
     # enable a separate postgres vm but do not use it unless
-    # use-vm-for-external is set.
+    # use-external is set.
     start: false
     # When this is set true, and start is true,
     # chef reporting will be configured to use

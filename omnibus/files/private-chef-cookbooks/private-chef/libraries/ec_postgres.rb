@@ -19,12 +19,12 @@ class EcPostgres
     end
     max_retries = retries
     begin
-      connection = PG::Connection.open('user' => postgres['db_superuser'],
-                                       'host' => postgres['vip'],
+      connection = PG::Connection.open('user' =>     postgres['db_connection_superuser'] || postgres['db_superuser'],
+                                       'host' =>     postgres['vip'],
                                        'password' => postgres['db_superuser_password'],
-                                       'port' => postgres['port'],
-                                       'sslmode' => postgres['sslmode'],
-                                       'dbname' => database)
+                                       'port' =>     postgres['port'],
+                                       'sslmode' =>  postgres['sslmode'],
+                                       'dbname' =>   database)
     rescue => e
       if retries > 0
         sleep_time = 2**((max_retries - retries))
