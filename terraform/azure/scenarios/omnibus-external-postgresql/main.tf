@@ -18,7 +18,7 @@ resource "azurerm_postgresql_server" "default" {
   resource_group_name = "${module.chef_server.resource_group_name}"
   location            = "${module.chef_server.location}"
 
-  name                         = "${var.scenario}-${replace(var.platform, ".", "")}"
+  name                         = "${var.scenario}-${replace(var.platform, ".", "")}-${var.arm_contact}"
   administrator_login          = "bofh"
   administrator_login_password = "i1uvd3v0ps!"
   version                      = "9.6"
