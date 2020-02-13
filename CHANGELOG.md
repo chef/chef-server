@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.44 -->
-## [13.1.44](https://github.com/chef/chef-server/tree/13.1.44) (2020-02-11)
+<!-- latest_release 13.1.45 -->
+## [13.1.45](https://github.com/chef/chef-server/tree/13.1.45) (2020-02-13)
 
 #### Merged Pull Requests
-- Lbaker/zanecodes connection user [#1728](https://github.com/chef/chef-server/pull/1728) ([lbakerchef](https://github.com/lbakerchef))
+- Fixes and improvements to the integration_test pipeline [#1917](https://github.com/chef/chef-server/pull/1917) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Fixes and improvements to the integration_test pipeline [#1917](https://github.com/chef/chef-server/pull/1917) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.45 -->
 - Lbaker/zanecodes connection user [#1728](https://github.com/chef/chef-server/pull/1728) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.1.44 -->
 - Add license exception for nss-myhostname [#1913](https://github.com/chef/chef-server/pull/1913) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.43 -->
 - Fix integration test check for FIPS being enabled [#1912](https://github.com/chef/chef-server/pull/1912) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.42 -->
