@@ -11,3 +11,4 @@ profiles['root_url'] = 'http://localhost:9998'
 opscode_solr4['external'] = true
 opscode_solr4['external_url'] = 'http://elasticsearch.internal:9200'
 opscode_erchef['search_provider'] = 'elasticsearch'
+opscode_erchef['search_queue_mode'] = 'batch'

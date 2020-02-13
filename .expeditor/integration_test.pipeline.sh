@@ -3,6 +3,10 @@
 prog='integration_test.pipeline.sh'
 action=
 
+# number of seconds before AWS token expires
+AWS_TOKEN_TIMEOUT=3600
+export AWS_TOKEN_TIMEOUT
+
 # verify command dependencies
 [[ "$(command -v terraform)" ]] || error 'terraform command is not available'
 
@@ -198,6 +202,12 @@ EOF
         Status: $( [[ "$ret" -eq 0 ]] && echo 'SUCCESS' || echo 'FAIL' )
 
 EOF
+
+  # destroy terraform scenario if aws token has not expired
+  if [[ $SECONDS -lt $AWS_TOKEN_TIMEOUT ]]; then
+    # allow destroy to fail
+    destroy "$TERRAFORM_WORKSPACE" || true
+  fi
 
   exit $ret
 }

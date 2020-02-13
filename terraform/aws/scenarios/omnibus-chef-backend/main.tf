@@ -79,7 +79,8 @@ data "template_file" "backend_config" {
   template = "${file("${path.module}/templates/chef-backend.rb.tpl")}"
 
   vars {
-    backend1_ip = "${var.enable_ipv6 == true ? module.backend1.public_ipv6_address : module.backend1.private_ipv4_address}"
+    ip_version = "${var.enable_ipv6 == true ? "ipv6" : "ipv4"}"
+    backend_ip = "${var.enable_ipv6 == true ? module.backend1.public_ipv6_address : module.backend1.private_ipv4_address}"
   }
 }
 
@@ -115,9 +116,6 @@ resource "null_resource" "backend1_config" {
       "sudo chef-backend-ctl create-cluster --accept-license --yes --quiet",
       "sudo cat /etc/chef-backend/chef-backend-secrets.json | ssh -o 'UserKnownHostsFile=/dev/null' -o 'StrictHostKeyChecking=no' ${module.backend2.ssh_username}@${module.backend2.public_ipv4_dns} 'cat > /tmp/chef-backend-secrets.json'",
       "sudo cat /etc/chef-backend/chef-backend-secrets.json | ssh -o 'UserKnownHostsFile=/dev/null' -o 'StrictHostKeyChecking=no' ${module.backend3.ssh_username}@${module.backend3.public_ipv4_dns} 'cat > /tmp/chef-backend-secrets.json'",
-      "sudo chef-backend-ctl gen-server-config chefserver.internal > /tmp/chef-server.rb",
-      "echo \"profiles['root_url'] = 'http://chefserver.internal:9998'\" | sudo tee -a /tmp/chef-server.rb",
-      "scp -o 'UserKnownHostsFile=/dev/null' -o 'StrictHostKeyChecking=no' /tmp/chef-server.rb ${module.chef_server.ssh_username}@${module.chef_server.public_ipv4_dns}:/tmp",
       "echo -e '\nEND INSTALL CHEF BACKEND1\n'",
     ]
   }
@@ -178,6 +176,9 @@ resource "null_resource" "backend3_config" {
       "curl -vo /tmp/${replace(var.backend_version_url, "/^.*\\//", "")} ${var.backend_version_url}",
       "sudo ${replace(var.backend_version_url, "rpm", "") != var.backend_version_url ? "rpm -U" : "dpkg -iEG"} /tmp/${replace(var.backend_version_url, "/^.*\\//", "")}",
       "sudo chef-backend-ctl join-cluster --accept-license --yes --quiet ${var.enable_ipv6 == true ? module.backend1.public_ipv6_address : module.backend1.private_ipv4_address} -p ${var.enable_ipv6 == true ? module.backend3.public_ipv6_address : module.backend3.private_ipv4_address} -s /tmp/chef-backend-secrets.json",
+      "sudo chef-backend-ctl gen-server-config chefserver.internal > /tmp/chef-server.rb",
+      "echo \"profiles['root_url'] = 'http://chefserver.internal:9998'\" | sudo tee -a /tmp/chef-server.rb",
+      "scp -o 'UserKnownHostsFile=/dev/null' -o 'StrictHostKeyChecking=no' /tmp/chef-server.rb ${module.chef_server.ssh_username}@${module.chef_server.public_ipv4_dns}:/tmp",
       "echo -e '\nEND INSTALL CHEF BACKEND3\n'",
     ]
   }

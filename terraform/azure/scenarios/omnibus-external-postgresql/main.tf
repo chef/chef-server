@@ -18,18 +18,13 @@ resource "azurerm_postgresql_server" "default" {
   resource_group_name = "${module.chef_server.resource_group_name}"
   location            = "${module.chef_server.location}"
 
-  name                         = "${var.scenario}-${replace(var.platform, ".", "")}"
+  name                         = "${var.scenario}-${replace(var.platform, ".", "")}-${var.arm_contact}"
   administrator_login          = "bofh"
   administrator_login_password = "i1uvd3v0ps!"
   version                      = "9.6"
   ssl_enforcement              = "Enabled"
 
-  sku {
-    name     = "B_Gen5_2"
-    capacity = 2
-    tier     = "Basic"
-    family   = "Gen5"
-  }
+  sku_name = "GP_Gen5_8"
 
   storage_profile {
     storage_mb            = 5120
@@ -114,7 +109,7 @@ resource "null_resource" "chef_server_test" {
   connection {
     type = "ssh"
     user = "${module.chef_server.ssh_username}"
-    host = "${module.chef_server.public_ipv4_dns}"
+    host = "${module.chef_server.public_ipv4_address}"
   }
 
   # run smoke test
