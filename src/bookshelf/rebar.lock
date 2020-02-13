@@ -25,7 +25,7 @@
   0},
  {<<"erlware_commons">>,
   {git,"git://github.com/chef/erlware_commons.git",
-       {ref,"e15195cd6be824715f66eb1bbfab1bef33f11086"}},
+       {ref,"20c611d8c457edfc84a915cf1026f22980a83e00"}},
   0},
  {<<"goldrush">>,
   {git,"git://github.com/basho/goldrush.git",
