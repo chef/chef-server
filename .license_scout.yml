@@ -74,6 +74,9 @@ fallbacks:
     - name: epgsql
       license_id: BSD-3-Clause
       license_content: https://github.com/chef/epgsql-1/blob/master/LICENSE
+    - name: erlcloud
+      license_id: BSD-2-Clause
+      liense_content: https://github.com/erlcloud/erlcloud/blob/master/COPYRIGHT
     - name: erlsom
       license_id: LGPL-3.0
       license_content: https://github.com/willemdj/erlsom/blob/master/COPYING
@@ -147,8 +150,6 @@ exceptions:
   erlang:
     - name: amqp_client
       reason: Historic exception made by Chef Legal (unmodified library, used as-is)
-    - name: erlcloud
-      reason: Exception made by Chef Legal
     - name: erlsom
       reason: Historic exception made by Chef Legal (unmodified library, used as-is)
     - name: rabbit_common
