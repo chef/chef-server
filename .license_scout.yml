@@ -147,8 +147,6 @@ exceptions:
   erlang:
     - name: amqp_client
       reason: Historic exception made by Chef Legal (unmodified library, used as-is)
-    - name: erlcloud
-      reason: Exception made by Chef Legal
     - name: erlsom
       reason: Historic exception made by Chef Legal (unmodified library, used as-is)
     - name: rabbit_common
