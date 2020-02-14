@@ -34,7 +34,7 @@ variable "aws_ssh_key_id" {
 variable "aws_instance_type" {
   type        = "string"
   description = "Name of the AWS instance type used to determine size of instances."
-  default     = "t2.medium"
+  default     = "t3.medium"
 }
 
 variable "build_prefix" {

@@ -49,7 +49,7 @@ Environment variables are used to control how the scenarios are executed and can
 | `ARM_TENANT_ID` | The name of the Azure tenant used to authenticate. | a2b2d6bc-afe1-4696-9c37-f97a7ac416d7 (default) |
 | `ARM_SUBSCRIPTION_ID` | The Azure subscription used for billing. |  (default) |
 | `ARM_DEFAULT_LOCATION` | Name of the Azure location to create instances in. | westus2 (default) |
-| `ARM_DEFAULT_INSTANCE_TYPE` | The Azure instance type that determines the amount of resources server instances are allocated. | t2.medium (default) |
+| `ARM_DEFAULT_INSTANCE_TYPE` | The Azure instance type that determines the amount of resources server instances are allocated. | Standard_D2_v3 (default) |
 | `PLATFORM` | The operating system used by server instances. | rhel-6, rhel-7, rhel-8, ubuntu-16.04, ubuntu-18.04, sles-12 |
 | `ENABLE_SMOKE_TEST` | Enable Chef Infra Server smoke test. | true (default) |
 | `ENABLE_PEDANT_TEST` | Enable full Chef Infra Server pedant test. | true (default) |
