@@ -60,7 +60,7 @@ resource "aws_security_group" "default" {
 
 resource "aws_instance" "default" {
   ami           = "${local.ami_ids[var.platform]}"
-  instance_type = "${var.aws_instance_type}"
+  instance_type = "${var.aws_instance_type == "t3.medium" && var.platform == "rhel-6" ? "t2.medium" : var.aws_instance_type}"
   key_name      = "${var.aws_ssh_key_id}"
 
   root_block_device {
