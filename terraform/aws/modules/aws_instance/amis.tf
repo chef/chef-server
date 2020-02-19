@@ -8,6 +8,11 @@ data "aws_ami" "rhel_6" {
   }
 
   filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
     name   = "virtualization-type"
     values = ["hvm"]
   }
@@ -22,6 +27,11 @@ data "aws_ami" "rhel_7" {
   filter {
     name   = "name"
     values = ["RHEL-7*"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
   }
 
   filter {
@@ -42,6 +52,11 @@ data "aws_ami" "rhel_8" {
   }
 
   filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
     name   = "virtualization-type"
     values = ["hvm"]
   }
@@ -56,6 +71,11 @@ data "aws_ami" "ubuntu_1404" {
   filter {
     name   = "name"
     values = ["ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
   }
 
   filter {
@@ -76,6 +96,11 @@ data "aws_ami" "ubuntu_1604" {
   }
 
   filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
     name   = "virtualization-type"
     values = ["hvm"]
   }
@@ -90,6 +115,11 @@ data "aws_ami" "ubuntu_1804" {
   filter {
     name   = "name"
     values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
   }
 
   filter {
@@ -109,6 +139,11 @@ data "aws_ami" "sles_12" {
   filter {
     name   = "name"
     values = ["suse-sles-12-sp?-v????????-hvm-ssd-x86_64"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
   }
 
   filter {
