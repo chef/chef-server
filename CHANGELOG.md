@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.46 -->
-## [13.1.46](https://github.com/chef/chef-server/tree/13.1.46) (2020-02-13)
+<!-- latest_release 13.1.47 -->
+## [13.1.47](https://github.com/chef/chef-server/tree/13.1.47) (2020-02-19)
 
 #### Merged Pull Requests
-- Update pointers to erlware_commons [#1919](https://github.com/chef/chef-server/pull/1919) ([lbakerchef](https://github.com/lbakerchef))
+- Allow for disabling specific tests in scenarios [#1918](https://github.com/chef/chef-server/pull/1918) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Allow for disabling specific tests in scenarios [#1918](https://github.com/chef/chef-server/pull/1918) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.47 -->
 - Update pointers to erlware_commons [#1919](https://github.com/chef/chef-server/pull/1919) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.1.46 -->
 - Fixes and improvements to the integration_test pipeline [#1917](https://github.com/chef/chef-server/pull/1917) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.45 -->
 - Lbaker/zanecodes connection user [#1728](https://github.com/chef/chef-server/pull/1728) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.1.44 -->
