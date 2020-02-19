@@ -147,6 +147,15 @@ apply () {
   [[ -z "$TF_VAR_platform" ]] && TF_VAR_platform="${PLATFORM:-ubuntu-18.04}"
   export TF_VAR_platform
 
+  # apply optional test overrides if necessary
+  [[ -n "$ENABLE_SMOKE_TEST" ]] && export TF_VAR_enable_smoke_test="$ENABLE_SMOKE_TEST"
+  [[ -n "$ENABLE_PEDANT_TEST" ]] && export TF_VAR_enable_pedant_test="$ENABLE_PEDANT_TEST"
+  [[ -n "$ENABLE_PSQL_TEST" ]] && export TF_VAR_enable_psql_test="$ENABLE_PSQL_TEST"
+  [[ -n "$ENABLE_GATHER_LOGS_TEST" ]] && export TF_VAR_enable_gather_logs_test="$ENABLE_GATHER_LOGS_TEST"
+  [[ -n "$ENABLE_ADDON_PUSH_JOBS" ]] && export TF_VAR_enable_addon_push_jobs="$ENABLE_ADDON_PUSH_JOBS"
+  [[ -n "$ENABLE_ADDON_CHEF_MANAGE" ]] && export TF_VAR_enable_addon_chef_manage="$ENABLE_ADDON_CHEF_MANAGE"
+  [[ -n "$ENABLE_CHEF_BACKEND_DEMOTION" ]] && export TF_VAR_enable_chef_backend_demotion="$ENABLE_CHEF_BACKEND_DEMOTION"
+
   # setup the terraform workspace
   setup "$TF_VAR_scenario" "$TF_VAR_enable_ipv6" "${TF_VAR_platform}"
 

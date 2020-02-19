@@ -68,3 +68,43 @@ variable "enable_ipv6" {
   type        = "string"
   description = "Use IPv6 in the chef-server.rb config and /etc/hosts."
 }
+
+#########################################################################
+# Optional Tests
+#########################################################################
+
+variable "enable_smoke_test" {
+  type        = "string"
+  description = "Enable Chef Infra Server smoke test."
+  default     = "true"
+}
+
+variable "enable_pedant_test" {
+  type        = "string"
+  description = "Enable full Chef Infra Server pedant test."
+  default     = "true"
+}
+
+variable "enable_psql_test" {
+  type        = "string"
+  description = "Enable testing of Chef Infra Server PostgreSQL database."
+  default     = "true"
+}
+
+variable "enable_gather_logs_test" {
+  type        = "string"
+  description = "Enable testing of Chef Infra Server gathering logs."
+  default     = "true"
+}
+
+variable "enable_addon_push_jobs" {
+  type        = "string"
+  description = "Enable testing of Push Jobs addon."
+  default     = "true"
+}
+
+variable "enable_addon_chef_manage" {
+  type        = "string"
+  description = "Enable testing of Chef Manage addon."
+  default     = "true"
+}
