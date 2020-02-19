@@ -25,7 +25,7 @@ module "elasticsearch" {
   aws_ssh_key_id    = "${var.aws_ssh_key_id}"
   aws_instance_type = "${var.aws_instance_type}"
   enable_ipv6       = "${var.enable_ipv6}"
-  platform          = "ubuntu-16.04"
+  platform          = "ubuntu-18.04"
   build_prefix      = "${var.build_prefix}"
   name              = "elasticsearch-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
