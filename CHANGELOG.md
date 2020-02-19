@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.48 -->
-## [13.1.48](https://github.com/chef/chef-server/tree/13.1.48) (2020-02-19)
+<!-- latest_release 13.1.49 -->
+## [13.1.49](https://github.com/chef/chef-server/tree/13.1.49) (2020-02-19)
 
 #### Merged Pull Requests
-- Update scenarios to default to t3.medium [#1920](https://github.com/chef/chef-server/pull/1920) ([christopher-snapp](https://github.com/christopher-snapp))
+- Add architecture to AMI detection to prevent false matches [#1923](https://github.com/chef/chef-server/pull/1923) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Add architecture to AMI detection to prevent false matches [#1923](https://github.com/chef/chef-server/pull/1923) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.49 -->
 - Update scenarios to default to t3.medium [#1920](https://github.com/chef/chef-server/pull/1920) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.48 -->
 - Allow for disabling specific tests in scenarios [#1918](https://github.com/chef/chef-server/pull/1918) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.47 -->
 - Update pointers to erlware_commons [#1919](https://github.com/chef/chef-server/pull/1919) ([lbakerchef](https://github.com/lbakerchef)) <!-- 13.1.46 -->
