@@ -52,5 +52,10 @@ for dir in "${erlang_install_dirs[@]}"; do
   popd
 done
 
-echo "+++ Running License Scout"
-license_scout --only-show-failures
+echo "+++ Updating License Scout 1.x"
+gem uninstall license_scout --all --executables --force
+gem install license_scout --version "~> 1.1"
+gem list license_scout
+
+echo "+++ Running License Scout 1.x"
+license_scout
