@@ -1,5 +1,7 @@
 global
         stats socket /var/opt/opscode/haproxy/haproxy.sock mode 600
+
+defaults
         # Timeout for connect() calls to the backend servers. This
         # value is likely a bit high but our backends may be far away
         # unfortunately.
