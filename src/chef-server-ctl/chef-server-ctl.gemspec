@@ -47,7 +47,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "omnibus-ctl" # Gemfile has us getting latest from git
   spec.add_runtime_dependency "license-acceptance"
 
-  spec.add_runtime_dependency "chef", "~> 15.5.17"
+  spec.add_runtime_dependency "chef", "~> 15.8.23"
 
   spec.add_runtime_dependency "appbundler"
 
