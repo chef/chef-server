@@ -17,7 +17,7 @@
 name "elasticsearch"
 default_version "6.8.1"
 
-dependency "server-jre"
+dependency "server-open-jre"
 
 license "Apache-2.0"
 license_file "LICENSE.txt"

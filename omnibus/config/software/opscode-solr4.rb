@@ -28,7 +28,7 @@ source url: "http://archive.apache.org/dist/lucene/solr/#{version}/solr-#{versio
 if ppc64? || ppc64le? || s390x?
   dependency "ibm-jre"
 elsif intel? && _64_bit?
-  dependency "server-jre"
+  dependency "server-open-jre"
 elsif armhf?
   dependency "jre-from-jdk"
 else
@@ -42,10 +42,10 @@ service_dir = "#{install_dir}/embedded/service/opscode-solr4"
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
-  embedded_jre_path = "#{install_dir}/embedded/jre/bin"
+  embedded_open_jre_path = "#{install_dir}/embedded/open-jre/bin"
 
   unless @ibm_jre
-    env['PATH'] = "#{env['PATH']}:#{embedded_jre_path}"
+    env['PATH'] = "#{env['PATH']}:#{embedded_open_jre_path}"
   end
 
   # copy over the licenses
