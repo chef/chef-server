@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.50 -->
-## [13.1.50](https://github.com/chef/chef-server/tree/13.1.50) (2020-02-19)
+<!-- latest_release 13.1.51 -->
+## [13.1.51](https://github.com/chef/chef-server/tree/13.1.51) (2020-02-20)
 
 #### Merged Pull Requests
-- Update Chef Infra Client from 15.5.17 to 15.8.23 [#1921](https://github.com/chef/chef-server/pull/1921) ([tas50](https://github.com/tas50))
+- Update jre path for PATH and JAVA_HOME variables [#1925](https://github.com/chef/chef-server/pull/1925) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Update jre path for PATH and JAVA_HOME variables [#1925](https://github.com/chef/chef-server/pull/1925) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.51 -->
 - Update Chef Infra Client from 15.5.17 to 15.8.23 [#1921](https://github.com/chef/chef-server/pull/1921) ([tas50](https://github.com/tas50)) <!-- 13.1.50 -->
 - Add architecture to AMI detection to prevent false matches [#1923](https://github.com/chef/chef-server/pull/1923) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.49 -->
 - Update scenarios to default to t3.medium [#1920](https://github.com/chef/chef-server/pull/1920) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.48 -->
