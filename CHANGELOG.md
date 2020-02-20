@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.51 -->
-## [13.1.51](https://github.com/chef/chef-server/tree/13.1.51) (2020-02-20)
+<!-- latest_release 13.1.52 -->
+## [13.1.52](https://github.com/chef/chef-server/tree/13.1.52) (2020-02-20)
 
 #### Merged Pull Requests
-- Update jre path for PATH and JAVA_HOME variables [#1925](https://github.com/chef/chef-server/pull/1925) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update HAProxy configuration [#1785](https://github.com/chef/chef-server/pull/1785) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Update HAProxy configuration [#1785](https://github.com/chef/chef-server/pull/1785) ([stevendanna](https://github.com/stevendanna)) <!-- 13.1.52 -->
 - Update jre path for PATH and JAVA_HOME variables [#1925](https://github.com/chef/chef-server/pull/1925) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.51 -->
 - Update Chef Infra Client from 15.5.17 to 15.8.23 [#1921](https://github.com/chef/chef-server/pull/1921) ([tas50](https://github.com/tas50)) <!-- 13.1.50 -->
 - Add architecture to AMI detection to prevent false matches [#1923](https://github.com/chef/chef-server/pull/1923) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.49 -->
