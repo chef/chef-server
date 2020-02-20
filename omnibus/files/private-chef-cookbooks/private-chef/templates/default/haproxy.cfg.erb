@@ -1,6 +1,35 @@
 global
         stats socket /var/opt/opscode/haproxy/haproxy.sock mode 600
 
+defaults
+        # Timeout for connect() calls to the backend servers. This
+        # value is likely a bit high but our backends may be far away
+        # unfortunately.
+        timeout connect 5s
+        # Inactivity timeout for bi-directional communication. This is the
+        # how long a long-lived connection is allowed to stayl idle.  We
+        # likely want to keep this high to avoid unnecessarily killing
+        # long-lived SQL connections used by low-request-rate services.
+        timeout tunnel 300s
+        # Client inactivity connections for where the server has
+        # closed the connection and but the client has not. The
+        # HAProxy documentation recommends setting this whenever
+        # `timeout tunnel` is also set.
+        timeout client-fin 1s
+        # NOTE(ssd) 2019-07-10: The HAProxy documentation says that this
+        # setting should not be needed; however, we have observed that
+        # when a postgresql client disconnects uncleanly, HAProxy does not
+        # immediately close the backend until the connection times out. If
+        # a service is failing in a loop, this can quickly lead to the
+        # exhaustion of available ports.
+        timeout server-fin 1s
+        # Client and server inactivity timeouts. Per the HAProxy
+        # documentation, the tunnel timeout above superceeds these once
+        # bidirection communication is established.
+        timeout client 50s
+        timeout server 50s
+
+
 frontend postgresql
          bind <%= @listen %>:<%= @local_postgresql_port %>
          mode tcp
@@ -14,7 +43,7 @@ frontend elasticsearch
 backend chef_backend_postgresql
         mode tcp
         option httpchk GET /leader HTTP/1.1\r\nHost:localhost:<%= @leaderl_healthcheck_port %>\r\n\r\n
-        default-server inter 2s rise 1 fall 1
+        default-server inter 2s rise 1 fall 1 on-marked-down shutdown-sessions
         <% @chef_backend_members.each do |name, ip| -%>
         server <%= name %> <%= ip %>:<%= @remote_postgresql_port %> check port <%= @leaderl_healthcheck_port %>
         <% end -%>
