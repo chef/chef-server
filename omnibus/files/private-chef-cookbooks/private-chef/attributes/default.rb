@@ -332,7 +332,7 @@ elasticsearch['jvm_opts'] = []
 # Running this with different values to determine the zero-based
 # compression threshold:
 #
-# $ /opt/opscode/embedded/jre/bin/java -XX:+UnlockDiagnosticVMOptions -XX:+PrintCompressedOopsMode -Xmx28G 2>&1 | grep "ero"
+# $ /opt/opscode/embedded/open-jre/bin/java -XX:+UnlockDiagnosticVMOptions -XX:+PrintCompressedOopsMode -Xmx28G 2>&1 | grep "ero"
 # heap address: 0x00000000c0000000, size: 28672 MB, Compressed Oops mode: Zero based, Oop shift amount: 3
 #
 # ... turns up that our limit is around 28G, which is where the max

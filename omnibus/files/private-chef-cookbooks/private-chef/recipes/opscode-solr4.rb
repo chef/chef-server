@@ -134,8 +134,6 @@ new_size =  if node['private_chef']['opscode-solr4']['new_size']
 
 java_opts = node['private_chef']['opscode-solr4']['java_opts'].dup
 java_opts << " -XX:NewSize=#{new_size}M" unless java_opts =~ /NewSize/
-java_opts << ' -XX:+UseConcMarkSweepGC' unless java_opts =~ /UseConcMarkSweepGC/
-#java_opts << ' -XX:+UseParNewGC' unless java_opts =~ /UseParNewGC/
 
 # Save the values back onto the node attributes
 node.default['private_chef']['opscode-solr4']['java_opts'] = java_opts
@@ -146,12 +144,12 @@ command = "java -Xmx#{solr_mem}M -Xms#{solr_mem}M"
 command << " #{java_opts}" unless java_opts.empty?
 # Enable GC Logging (very useful for debugging issues) to an separate file only works with Oracle JRE
 if node['kernel']['machine'] == 'x86_64'
-  command << " -Xloggc:#{File.join(solr_log_dir, 'gclog.log')}"
+  command << " -Xlog:gc:#{File.join(solr_log_dir, 'gclog.log')}"
 end
 
 # Enable GC Logging (very useful for debugging issues)
 if node['private_chef']['opscode-solr4']['log_gc']
-  command << ' -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCDateStamps -XX:+PrintGCDetails -XX:+PrintGCApplicationStoppedTime -XX:+PrintGCApplicationConcurrentTime -XX:+PrintTenuringDistribution'
+  command << ' -verbose:gc -XX:+PrintGCDateStamps -XX:+PrintGCDetails -XX:+PrintGCApplicationStoppedTime -XX:+PrintGCApplicationConcurrentTime -XX:+PrintTenuringDistribution'
   # have java rotate the gclog.log (to avoid issues around copytruncate and sparse
   # files, see SPOOL-383)
   command << " -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=#{node['private_chef']['opscode-solr4']['log_rotation']['num_to_keep']} -XX:GCLogFileSize=#{node['private_chef']['opscode-solr4']['log_rotation']['file_maxbytes']}"
