@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.53 -->
-## [13.1.53](https://github.com/chef/chef-server/tree/13.1.53) (2020-02-21)
+<!-- latest_release 13.1.54 -->
+## [13.1.54](https://github.com/chef/chef-server/tree/13.1.54) (2020-02-21)
 
 #### Merged Pull Requests
-- Point elasticsearch to OpenJDK [#1927](https://github.com/chef/chef-server/pull/1927) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Fix Elasticsearch scenario failing to consistently install + start elasticsearch [#1922](https://github.com/chef/chef-server/pull/1922) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Fix Elasticsearch scenario failing to consistently install + start elasticsearch [#1922](https://github.com/chef/chef-server/pull/1922) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.54 -->
 - Point elasticsearch to OpenJDK [#1927](https://github.com/chef/chef-server/pull/1927) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.53 -->
 - Update HAProxy configuration [#1785](https://github.com/chef/chef-server/pull/1785) ([stevendanna](https://github.com/stevendanna)) <!-- 13.1.52 -->
 - Update jre path for PATH and JAVA_HOME variables [#1925](https://github.com/chef/chef-server/pull/1925) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.51 -->
