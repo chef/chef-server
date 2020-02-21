@@ -3,4 +3,4 @@ exec 2>&1
 ulimit -n 50000
 
 cd /opt/opscode/embedded/service/opscode-solr4/jetty
-exec chpst -P -o 50000 -U <%= node['private_chef']['user']['username'] %> -u <%= node['private_chef']['user']['username'] %> /usr/bin/env TZ=UTC PATH=/opt/opscode/embedded/bin:/opt/opscode/bin:/opt/opscode/embedded/open-jre/bin:$PATH JAVA_HOME=/opt/opscode/embedded/open-jre <%= node['private_chef']['opscode-solr4']['command'] %>
+exec chpst -P -o 50000 -U <%= node['private_chef']['user']['username'] %> -u <%= node['private_chef']['user']['username'] %> /usr/bin/env TZ=UTC PATH=/opt/opscode/embedded/bin:/opt/opscode/bin:/opt/opscode/embedded/jre/bin:$PATH JAVA_HOME=/opt/opscode/embedded/jre <%= node['private_chef']['opscode-solr4']['command'] %>
