@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.52 -->
-## [13.1.52](https://github.com/chef/chef-server/tree/13.1.52) (2020-02-20)
+<!-- latest_release 13.1.53 -->
+## [13.1.53](https://github.com/chef/chef-server/tree/13.1.53) (2020-02-21)
 
 #### Merged Pull Requests
-- Update HAProxy configuration [#1785](https://github.com/chef/chef-server/pull/1785) ([stevendanna](https://github.com/stevendanna))
+- Point elasticsearch to OpenJDK [#1927](https://github.com/chef/chef-server/pull/1927) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Point elasticsearch to OpenJDK [#1927](https://github.com/chef/chef-server/pull/1927) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.53 -->
 - Update HAProxy configuration [#1785](https://github.com/chef/chef-server/pull/1785) ([stevendanna](https://github.com/stevendanna)) <!-- 13.1.52 -->
 - Update jre path for PATH and JAVA_HOME variables [#1925](https://github.com/chef/chef-server/pull/1925) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.51 -->
 - Update Chef Infra Client from 15.5.17 to 15.8.23 [#1921](https://github.com/chef/chef-server/pull/1921) ([tas50](https://github.com/tas50)) <!-- 13.1.50 -->
