@@ -11,9 +11,25 @@ fi
 
 apt-get update
 
-apt-get install openjdk-8-jdk -y
+apt-get install openjdk-8-jdk openjdk-8-jre openjdk-8-jre-headless openjdk-8-jdk-headless -y
 export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
 
 apt-get install elasticsearch -y
-echo "http.host: 0.0.0.0" > /etc/elasticsearch/elasticsearch.yml
-service elasticsearch start
+
+mkdir -p /var/data/elasticsearch
+chown elasticsearch: /var/data/elasticsearch
+
+cat > /etc/elasticsearch/elasticsearch.yml <<'EOF'
+http.host: 0.0.0.0
+path.data: /var/data/elasticsearch
+path.logs: /var/log/elasticsearch
+EOF
+
+sed -i '/START_DAEMON/{s/^#//;}' /etc/default/elasticsearch
+
+systemctl restart elasticsearch
+
+sleep 30
+
+# check to see that elasticsearch started properly
+netstat -nap | grep -q java || { echo 'ERROR: Elasticsearch is NOT running!'; exit 1; }
