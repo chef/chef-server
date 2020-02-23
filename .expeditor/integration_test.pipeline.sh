@@ -110,7 +110,7 @@ setup () {
 
   export TERRAFORM_WORKSPACE="$workspace"
 
-  echo "--- Initializing $workspace workspace"
+  echo -e "--- :terraform: Initializing \033[38;5;62m\033[1m${workspace}\033[0m workspace"
 
   cd "/workdir/terraform/aws/scenarios/${scenario}" || error "could not find ${scenario} scenario"
 
@@ -159,12 +159,12 @@ apply () {
   # setup the terraform workspace
   setup "$TF_VAR_scenario" "$TF_VAR_enable_ipv6" "${TF_VAR_platform}"
 
-  echo "--- Configure SSH key associated with $TF_VAR_aws_ssh_key_id from vault"
+  echo "--- :chef: Configure SSH key associated with $TF_VAR_aws_ssh_key_id from vault"
   eval "$(ssh-agent)"
   vault read -field=ssh_private_key "account/static/aws/${TF_VAR_aws_profile}/${TF_VAR_aws_ssh_key_id}" | ssh-add -
   [[ $(ssh-add -l | wc -l) -gt 0 ]] || error 'ssh-agent does not have any keys loaded!'
 
-  echo '--- Identify product versions and download URLs'
+  echo '--- :chef: Identify product versions and download URLs'
   [[ -z "$INSTALL_VERSION" ]] && INSTALL_VERSION="$(mixlib-install list-versions chef-server stable | tail -n 1)"
   export INSTALL_VERSION
   [[ -z "$UPGRADE_VERSION" ]] && UPGRADE_VERSION="$(mixlib-install list-versions chef-server current | tail -n 1)"
@@ -172,7 +172,7 @@ apply () {
   [[ -z "$BACKEND_VERSION" ]] && BACKEND_VERSION="$(mixlib-install list-versions chef-backend current | tail -n 1)"
   export BACKEND_VERSION
 
-  echo '--- Identify product download URLs'
+  echo '--- :chef: Identify product download URLs'
   TF_VAR_install_version_url=$(for channel in unstable current stable; do mixlib-install download chef-server --url -c $channel -a x86_64 -p "$(sed 's/rhel/el/' <<<"${TF_VAR_platform%-*}")" -l "${TF_VAR_platform##*-}" -v "$INSTALL_VERSION" 2>/dev/null && break; done | head -n 1)
   export TF_VAR_install_version_url
   TF_VAR_upgrade_version_url=$(for channel in unstable current stable; do mixlib-install download chef-server --url -c $channel -a x86_64 -p "$(sed 's/rhel/el/' <<<"${TF_VAR_platform%-*}")" -l "${TF_VAR_platform##*-}" -v "$UPGRADE_VERSION" 2>/dev/null && break; done | head -n 1)
@@ -180,8 +180,11 @@ apply () {
   TF_VAR_backend_version_url=$(for channel in unstable current stable; do mixlib-install download chef-backend --url -c $channel -a x86_64 -p "$(sed 's/rhel/el/' <<<"${TF_VAR_platform%-*}")" -l "${TF_VAR_platform##*-}" -v "$BACKEND_VERSION" 2>/dev/null && break; done | head -n 1)
   export TF_VAR_backend_version_url
 
-  echo "--- Execute $TF_VAR_scenario scenario"
-  cat <<EOF
+  echo -e "+++ :terraform: Execute \033[38;5;62m\033[1m${TF_VAR_scenario}\033[0m scenario"
+
+  #capture output to /tmp/integration_test.log
+  {
+    cat <<EOF
 
   BEGIN SCENARIO
 
@@ -198,11 +201,11 @@ apply () {
 
 EOF
 
-  # run the terraform scenario
-  terraform apply -auto-approve
-  local ret=$?
+    # run the terraform scenario
+    terraform apply -auto-approve
+    local ret=$?
 
-  cat <<EOF
+    cat <<EOF
 
   END SCENARIO
 
@@ -212,24 +215,27 @@ EOF
 
 EOF
 
-  # destroy terraform scenario if aws token has not expired
-  if [[ $SECONDS -lt $AWS_TOKEN_TIMEOUT ]]; then
-    # allow destroy to fail
-    destroy "$TERRAFORM_WORKSPACE" || true
-  fi
+    # destroy terraform scenario if aws token has not expired
+    if [[ $SECONDS -lt $AWS_TOKEN_TIMEOUT ]]; then
+      # allow destroy to fail
+      destroy "$TERRAFORM_WORKSPACE" || true
+    fi
 
-  exit $ret
+    exit $ret
+  } | tee /tmp/integration_test.log
+
+  exit ${PIPESTATUS[0]}
 }
 
 # destroy the terraform scenario
 destroy () {
   local workspace="$1"
   local ret=0
-  
+
   if [[ -n "$workspace" ]]; then
     # extract values from workspace name
-    TF_VAR_scenario=$(sed 's/^[0-9]*-//;s/-ipv.-.*//' <<<"$workspace") 
-    TF_VAR_enable_ipv6=$(grep -q '\-ipv6-' <<<"$workspace" && echo true || echo false) 
+    TF_VAR_scenario=$(sed 's/^[0-9]*-//;s/-ipv.-.*//' <<<"$workspace")
+    TF_VAR_enable_ipv6=$(grep -q '\-ipv6-' <<<"$workspace" && echo true || echo false)
     TF_VAR_platform="${workspace/*ipv?-/}"
   else
     # read values from environment if workspace was not directly passed in
@@ -239,7 +245,7 @@ destroy () {
 
     if [[ "$TF_VAR_enable_ipv6" = 'true' ]]; then
         workspace="${BUILD_NUMBER}-${TF_VAR_scenario}-ipv6-${TF_VAR_platform}"
-    else 
+    else
         workspace="${BUILD_NUMBER}-${TF_VAR_scenario}-ipv4-${TF_VAR_platform}"
     fi
   fi
@@ -251,7 +257,8 @@ destroy () {
   # ensure the workspace is available
   setup "$TF_VAR_scenario" "$TF_VAR_enable_ipv6" "${TF_VAR_platform}"
 
-  echo "--- Destroying $workspace"
+  echo "^^^ +++"
+  echo -e "--- :terraform: Destroying \033[38;5;62m\033[1m${workspace}\033[0m workspace"
 
   # set bogus values for destroy
   export TF_VAR_install_version_url='NULL'
@@ -289,8 +296,6 @@ destroy-all () {
 
   exit $ret
 }
-
-echo '--- Verifying environment'
 
 # allow expeditor to override ACTION when a cancellation or failure occurred
 [[ "$EXPEDITOR_BUILD_STATE" =~ ^(canceled|failed)$ ]] && ACTION='destroy-all'
