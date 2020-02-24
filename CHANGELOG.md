@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.55 -->
-## [13.1.55](https://github.com/chef/chef-server/tree/13.1.55) (2020-02-23)
+<!-- latest_release 13.1.56 -->
+## [13.1.56](https://github.com/chef/chef-server/tree/13.1.56) (2020-02-24)
 
 #### Merged Pull Requests
-- Update integration tests [#1928](https://github.com/chef/chef-server/pull/1928) ([christopher-snapp](https://github.com/christopher-snapp))
+- Update deprecated Net::HTTPServerException with Net::HttpClientException [#1930](https://github.com/chef/chef-server/pull/1930) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Update deprecated Net::HTTPServerException with Net::HttpClientException [#1930](https://github.com/chef/chef-server/pull/1930) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.56 -->
 - Update integration tests [#1928](https://github.com/chef/chef-server/pull/1928) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.55 -->
 - Fix Elasticsearch scenario failing to consistently install + start elasticsearch [#1922](https://github.com/chef/chef-server/pull/1922) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.54 -->
 - Point elasticsearch to OpenJDK [#1927](https://github.com/chef/chef-server/pull/1927) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.53 -->
