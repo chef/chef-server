@@ -24,7 +24,7 @@ class Chef
       def index_exists?
         solr_server.get("/#{new_resource.index_name}")
         true
-      rescue Net::HTTPServerException => e
+      rescue Net::HTTPClientException => e
         if e.response && e.response.code == '404'
           false
         else
