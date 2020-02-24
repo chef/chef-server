@@ -1,5 +1,5 @@
 #
-# Copyright 2016 Chef Software, Inc.
+# Copyright 2016-2020 Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 name "haproxy"
-default_version "1.6.4"
+default_version "1.6.15"
 
 dependency "zlib"
 dependency "pcre"
@@ -26,7 +26,7 @@ skip_transitive_dependency_licensing true
 
 # HTTPS is available but certificate validation fails on OS X
 source url: "http://www.haproxy.org/download/1.6/src/haproxy-#{version}.tar.gz",
-       sha256: "e5fa3c604f1fe9ecb6974ccda6705c105ebee14b3a913069fb08f00e860cd230"
+       sha256: "8b1a9afe9ad3bb4db36ac9125a6078a0df858088219a1e63e8947c09d46879c2"
 
 relative_path "haproxy-#{version}"
 
@@ -44,29 +44,18 @@ build do
    "USE_PCRE_JIT" => "1",
    "USE_ZLIB" => "1",
    "USE_OPENSSL" => "1",
+   # Required to resolve hostnames to IPv6 addresses
+   # off-by-default because of prolems on older glibc's
+   "USE_GETADDRINFO" => "1",
+   "TARGET" => "linux2628"
   }
-  # Required to resolve hostnames to IPv6 addresses
-  # off-by-default because of prolems on older glibc's
-  # TODO(ssd): Should we turn this off on RHEL5?
-  build_options['USE_GETADDRINFO'] = "1"
+
   if intel?
     build_options["USE_REGPARM"] = "1"
   end
-  build_options['TARGET'] = if ohai["kernel"] && ohai["kernel"]["name"] == "Linux"
-                              version = Gem::Version.new(String(ohai["kernel"]["release"]).split("-").first)
-                              case
-                              when version >= Gem::Version.new("2.6.28")
-                                "linux2628"
-                              when version >= Gem::Version.new("2.6")
-                                "linux26"
-                              else
-                                "linux24e"
-                              end
-                            else
-                              "generic"
-                            end
+
   build_args = ""
   build_options.each { |k,v| build_args << " #{k}=#{v}"}
-  make "haproxy #{build_args}", env: env
+  make "#{build_args}", env: env
   make "install #{build_args}", env: env
 end
