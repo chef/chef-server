@@ -156,6 +156,9 @@ apply () {
   [[ -n "$ENABLE_ADDON_CHEF_MANAGE" ]] && export TF_VAR_enable_addon_chef_manage="$ENABLE_ADDON_CHEF_MANAGE"
   [[ -n "$ENABLE_CHEF_BACKEND_DEMOTION" ]] && export TF_VAR_enable_chef_backend_demotion="$ENABLE_CHEF_BACKEND_DEMOTION"
 
+  # Allow Elasticsearch version to be overriden
+  [[ -n "$ELASTIC_VERSION" ]] && export TF_VAR_elastic_version="$ELASTIC_VERSION"
+
   # setup the terraform workspace
   setup "$TF_VAR_scenario" "$TF_VAR_enable_ipv6" "${TF_VAR_platform}"
 

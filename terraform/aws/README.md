@@ -63,6 +63,7 @@ Environment variables are used to control how the scenarios are executed and can
 | `ENABLE_ADDON_PUSH_JOBS` | Enable testing of Push Jobs addon. | true (default) |
 | `ENABLE_ADDON_CHEF_MANAGE` | Enable testing of Chef Manage addon. | true (default) |
 | `ENABLE_CHEF_BACKEND_DEMOTION` | Enable testing of chef-backend leadership demotion. | true (default) |
+| `ELASTIC_VERSION` | Version of Elasticsearch to install. | 2 or 5 with 6 being the default |
 
 ### Scenario Lifecycle
 

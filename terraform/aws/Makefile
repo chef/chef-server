@@ -86,6 +86,10 @@ ifneq ($(ENABLE_CHEF_BACKEND_DEMOTION),)
     export TF_VAR_enable_chef_backend_demotion ?= $(ENABLE_CHEF_BACKEND_DEMOTION)
 endif
 
+ifneq ($(ELASTIC_VERSION),)
+    export TF_VAR_elastic_version ?= $(ELASTIC_VERSION)
+endif
+
 ifneq ($(SCENARIO),)
 	export TF_VAR_scenario ?= $(SCENARIO)
 endif
