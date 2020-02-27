@@ -69,6 +69,12 @@ variable "enable_ipv6" {
   description = "Use IPv6 in the chef-server.rb config and /etc/hosts."
 }
 
+variable "elastic_version" {
+  type        = "string"
+  description = "Version of Elasticsearch to install (e.g. options are 2 or 5 with 6 being the default)"
+  default     = "6"
+}
+
 #########################################################################
 # Optional Tests
 #########################################################################

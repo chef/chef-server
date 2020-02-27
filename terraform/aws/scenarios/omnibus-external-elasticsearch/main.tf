@@ -65,7 +65,7 @@ resource "null_resource" "elasticsearch_config" {
       "sudo chown root:root /tmp/hosts",
       "sudo mv /tmp/hosts /etc/hosts",
       "sudo chmod 0700 /tmp/provision-elasticsearch.sh",
-      "sudo /tmp/provision-elasticsearch.sh",
+      "sudo ELASTIC_VERSION=${var.elastic_version} /tmp/provision-elasticsearch.sh",
     ]
   }
 }
