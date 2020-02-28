@@ -61,12 +61,11 @@ sleep 120
 
 sudo chef-server-ctl test -J pedant.xml --all --compliance-proxy-tests
 
-if [[ "${OMNIBUS_FIPS_MODE:-false}" == "true" ]]; then
-  echo "fips true" | sudo tee -a /etc/opscode/chef-server.rb
-  sudo chef-server-ctl reconfigure  --chef-license=accept-no-persist
-  echo ""
-  echo "Sleeping 120 seconds to allow the Chef Server to reconfigure in FIPS mode"
-  echo ""
-  sleep 120
-  sudo chef-server-ctl test -J pedant-fips.xml --smoke
-fi
+echo "Running FIPS tests"
+echo "fips true" | sudo tee -a /etc/opscode/chef-server.rb
+sudo chef-server-ctl reconfigure  --chef-license=accept-no-persist
+echo ""
+echo "Sleeping 120 seconds to allow the Chef Server to reconfigure in FIPS mode"
+echo ""
+sleep 120
+sudo chef-server-ctl test -J pedant-fips.xml --smoke
