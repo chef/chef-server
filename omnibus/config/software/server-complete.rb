@@ -28,7 +28,6 @@ dependency "openresty-lpeg"  # lua-based routing
 dependency "runit"
 dependency "chef_backup-gem" # chef-server-ctl backup
 dependency "veil-gem" # chef-server-ctl rotate-credentials
-dependency "erlang-crypto2"
 dependency "openssl-fips-config" if fips_mode? 
 
 # the backend
