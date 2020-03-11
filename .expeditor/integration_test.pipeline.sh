@@ -185,7 +185,7 @@ apply () {
 
   echo -e "+++ :terraform: Execute \033[38;5;62m\033[1m${TF_VAR_scenario}\033[0m scenario"
 
-  #capture output to /tmp/integration_test.log
+  #capture output to /workdir/integration_test.log
   {
     cat <<EOF
 
@@ -225,7 +225,7 @@ EOF
     fi
 
     exit $ret
-  } | tee /tmp/integration_test.log
+  } | tee /workdir/integration_test.log
 
   exit ${PIPESTATUS[0]}
 }
