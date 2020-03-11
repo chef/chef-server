@@ -75,7 +75,7 @@ create_path(Req, #base_state{organization_guid = OrgId,
                              resource_state = SandboxState}=State) ->
     %% there is no name so to help with uniqueness, we take a digest of
     %% the content
-    Name_ish = crypto:hash(md5, wrq:req_body(Req)),
+    Name_ish = erlang:md5(wrq:req_body(Req)),
     Id = chef_object_base:make_org_prefix_id(OrgId, Name_ish),
     SandboxState1 = SandboxState#sandbox_state{id = Id},
     {binary_to_list(Id), Req, State#base_state{resource_state = SandboxState1}}.

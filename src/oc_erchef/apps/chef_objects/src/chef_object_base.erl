@@ -148,8 +148,13 @@ make_org_prefix_id(OrgId, Name) ->
     %% assume couchdb guid where trailing part has uniqueness
     <<_:20/binary, OrgSuffix:12/binary>> = OrgId,
     Bin = iolist_to_binary([OrgId, Name, crypto:strong_rand_bytes(6)]),
-    <<ObjectPart:80, _/binary>> = crypto:hash(md5, Bin),
+    <<ObjectPart:80, _/binary>> = erlang:md5(Bin),
     iolist_to_binary(io_lib:format("~s~20.16.0b", [OrgSuffix, ObjectPart])).
+    %% Object part is expected to be an integer
+%    ObjectPart = crypto:strong_rand_bytes(10),
+%    %% org_id should be a hex coded binary
+%    %% iolist_to_binary([OrgSuffix, ObjectPart]) returns a Binary that is not hex coded.
+%    iolist_to_binary(io_lib:format("~s~20..0s", [OrgSuffix, [io_lib:format("~2.16.0B",[X]) || <<X:8>> <= ObjectPart]])).
 
 make_guid() ->
     Raw = crypto:strong_rand_bytes(16),
