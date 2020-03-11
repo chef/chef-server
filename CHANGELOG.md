@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.58 -->
-## [13.1.58](https://github.com/chef/chef-server/tree/13.1.58) (2020-02-27)
+<!-- latest_release 13.1.59 -->
+## [13.1.59](https://github.com/chef/chef-server/tree/13.1.59) (2020-03-11)
 
 #### Merged Pull Requests
-- Allow ELASTIC_VERSION to be passed in to integration_test pipeline [#1933](https://github.com/chef/chef-server/pull/1933) ([christopher-snapp](https://github.com/christopher-snapp))
+- Disable actions since it was used only for oc_actions, analytics and workflow. [#1929](https://github.com/chef/chef-server/pull/1929) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Disable actions since it was used only for oc_actions, analytics and workflow. [#1929](https://github.com/chef/chef-server/pull/1929) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.59 -->
 - Allow ELASTIC_VERSION to be passed in to integration_test pipeline [#1933](https://github.com/chef/chef-server/pull/1933) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.58 -->
 - Assume modern Linux in our haproxy omnibus builds [#1764](https://github.com/chef/chef-server/pull/1764) ([tas50](https://github.com/tas50)) <!-- 13.1.57 -->
 - Update deprecated Net::HTTPServerException with Net::HttpClientException [#1930](https://github.com/chef/chef-server/pull/1930) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.56 -->
