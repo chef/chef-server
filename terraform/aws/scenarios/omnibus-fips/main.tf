@@ -65,7 +65,7 @@ resource "null_resource" "chef_server_config" {
     inline = [
       "set -evx",
       "echo -e '\nCHECKING FIPS STATUS:\n'",
-      "if sudo sysctl crypto.fips_enabled | grep -q 0; then echo 'SUCCESS: FIPS mode is enabled!'; else echo 'FAIL: FIPS mode is not enabled!; exit 1; fi",
+      "if sudo sysctl crypto.fips_enabled | grep -q 1; then echo 'SUCCESS: FIPS mode is enabled!'; else echo 'FAIL: FIPS mode is not enabled!'; exit 1; fi",
       "echo -e '\nBEGIN INSTALL CHEF SERVER\n'",
       "curl -vo /tmp/${replace(var.upgrade_version_url, "/^.*\\//", "")} ${var.upgrade_version_url}",
       "sudo ${replace(var.upgrade_version_url, "rpm", "") != var.upgrade_version_url ? "rpm -U" : "dpkg -iEG"} /tmp/${replace(var.upgrade_version_url, "/^.*\\//", "")}",
