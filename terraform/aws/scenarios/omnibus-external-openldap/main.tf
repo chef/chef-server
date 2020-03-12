@@ -1,42 +1,42 @@
 module "chef_server" {
   source = "../../modules/aws_instance"
 
-  aws_profile       = "${var.aws_profile}"
-  aws_region        = "${var.aws_region}"
-  aws_vpc_name      = "${var.aws_vpc_name}"
-  aws_department    = "${var.aws_department}"
-  aws_contact       = "${var.aws_contact}"
-  aws_ssh_key_id    = "${var.aws_ssh_key_id}"
-  aws_instance_type = "${var.aws_instance_type}"
-  enable_ipv6       = "${var.enable_ipv6}"
-  platform          = "${var.platform}"
-  build_prefix      = "${var.build_prefix}"
+  aws_profile       = var.aws_profile
+  aws_region        = var.aws_region
+  aws_vpc_name      = var.aws_vpc_name
+  aws_department    = var.aws_department
+  aws_contact       = var.aws_contact
+  aws_ssh_key_id    = var.aws_ssh_key_id
+  aws_instance_type = var.aws_instance_type
+  enable_ipv6       = var.enable_ipv6
+  platform          = var.platform
+  build_prefix      = var.build_prefix
   name              = "chefserver-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 module "ldap" {
   source = "../../modules/aws_instance"
 
-  aws_profile       = "${var.aws_profile}"
-  aws_region        = "${var.aws_region}"
-  aws_vpc_name      = "${var.aws_vpc_name}"
-  aws_department    = "${var.aws_department}"
-  aws_contact       = "${var.aws_contact}"
-  aws_ssh_key_id    = "${var.aws_ssh_key_id}"
-  aws_instance_type = "${var.aws_instance_type}"
-  enable_ipv6       = "${var.enable_ipv6}"
+  aws_profile       = var.aws_profile
+  aws_region        = var.aws_region
+  aws_vpc_name      = var.aws_vpc_name
+  aws_department    = var.aws_department
+  aws_contact       = var.aws_contact
+  aws_ssh_key_id    = var.aws_ssh_key_id
+  aws_instance_type = var.aws_instance_type
+  enable_ipv6       = var.enable_ipv6
   platform          = "ubuntu-16.04"
-  build_prefix      = "${var.build_prefix}"
+  build_prefix      = var.build_prefix
   name              = "ldap-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 # generate static hosts configuration
 data "template_file" "hosts_config" {
-  template = "${file("${path.module}/templates/hosts.tpl")}"
+  template = file("${path.module}/templates/hosts.tpl")
 
-  vars {
-    chef_server_ip = "${var.enable_ipv6 == true ? module.chef_server.public_ipv6_address : module.chef_server.private_ipv4_address}"
-    ldap_ip        = "${var.enable_ipv6 == true ? module.ldap.public_ipv6_address : module.ldap.private_ipv4_address}"
+  vars = {
+    chef_server_ip = var.enable_ipv6 == "true" ? module.chef_server.public_ipv6_address : module.chef_server.private_ipv4_address
+    ldap_ip        = var.enable_ipv6 == "true" ? module.ldap.public_ipv6_address : module.ldap.private_ipv4_address
   }
 }
 
@@ -45,12 +45,12 @@ resource "null_resource" "ldap_config" {
   # provide some connection info
   connection {
     type = "ssh"
-    user = "${module.ldap.ssh_username}"
-    host = "${module.ldap.public_ipv4_dns}"
+    user = module.ldap.ssh_username
+    host = module.ldap.public_ipv4_dns
   }
 
   provisioner "file" {
-    content     = "${data.template_file.hosts_config.rendered}"
+    content     = data.template_file.hosts_config.rendered
     destination = "/tmp/hosts"
   }
 
@@ -65,7 +65,7 @@ resource "null_resource" "ldap_config" {
 
 # install/configure ldap service
 resource "null_resource" "ldap_cookbook" {
-  depends_on = ["null_resource.ldap_config"]
+  depends_on = [null_resource.ldap_config]
 
   provisioner "local-exec" {
     command = "chef-run --user ${module.ldap.ssh_username} ${module.ldap.public_ipv4_dns} ${path.module}/../../../../dev/cookbooks/provisioning/recipes/ldap-server.rb"
@@ -74,17 +74,17 @@ resource "null_resource" "ldap_cookbook" {
 
 # update chef server
 resource "null_resource" "chef_server_config" {
-  depends_on = ["null_resource.ldap_cookbook"]
+  depends_on = [null_resource.ldap_cookbook]
 
   # provide some connection info
   connection {
     type = "ssh"
-    user = "${module.chef_server.ssh_username}"
-    host = "${module.chef_server.public_ipv4_dns}"
+    user = module.chef_server.ssh_username
+    host = module.chef_server.public_ipv4_dns
   }
 
   provisioner "file" {
-    content     = "${data.template_file.hosts_config.rendered}"
+    content     = data.template_file.hosts_config.rendered
     destination = "/tmp/hosts"
   }
 
@@ -130,12 +130,12 @@ resource "null_resource" "chef_server_config" {
 }
 
 resource "null_resource" "chef_server_test" {
-  depends_on = ["null_resource.chef_server_config"]
+  depends_on = [null_resource.chef_server_config]
 
   connection {
     type = "ssh"
-    user = "${module.chef_server.ssh_username}"
-    host = "${module.chef_server.public_ipv4_dns}"
+    user = module.chef_server.ssh_username
+    host = module.chef_server.public_ipv4_dns
   }
 
   # upload test scripts
