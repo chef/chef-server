@@ -54,8 +54,10 @@ module Pedant
           # functions that make use of Tempfile. Since we want the
           # entire contents, rewind before read.
           file.rewind
-          ensure_2xx(put(upload_url, admin_user, :payload => file.read,
-                         :headers => headers))
+          # when using sigv4 presigned urls, this was causing errors of the form:
+          #     There were headers present in the request which were not signed
+          # question: does anything NOT sigv4 presigned url use this?
+          ensure_2xx(put(upload_url, admin_user, :payload => file.read)) #, :headers => headers))
         else
           true
         end
