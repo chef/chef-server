@@ -137,11 +137,11 @@ include_recipe 'private-chef::fix_permissions'
   opscode-expander
   bookshelf
   opscode-erchef
+  nginx
+  rabbitmq
   bootstrap
   opscode-chef-mover
   redis_lb
-  nginx
-  rabbitmq
 ).each do |service|
   if node['private_chef'][service]['external']
     begin
