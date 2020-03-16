@@ -40,7 +40,7 @@ pipelines:
       env:
         - ADHOC: true
   - integration_test:
-      description: Run integration test scenarios
+      description: "Instructions: https://github.com/chef/chef-server/blob/master/.expeditor/README.md"
       definition: .expeditor/integration_test.pipeline.yml
 
 # These actions are taken, in order they are specified, anytime a Pull Request is merged.
