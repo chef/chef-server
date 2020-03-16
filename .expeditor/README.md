@@ -44,6 +44,10 @@ To test an unstable `chef-server` version `13.1.58+20200303212531` upgraded from
    ENABLE_PEDANT_TEST=false
 ```
 
+## Downloading Scenario Logs
+
+Once a pipeline step has completed (success or fail) the log from the scenario run is available for download.  To download the log file you will need to click on the scenario's pipeline step that you want the log from and select the `Artifacts` tab where you should see a link for `integration_test.log` which contains all output for the entire execution of the Terraform run.
+
 ## Cleaning Up Orphaned Instances
 
 In some pipeline runs you may end up with orphaned instances which will need to be cleaned up manually.  If you have access to the `chef-cd` account you can log into the AWS EC2 web interface and find the instances (and their associated security groups) by looking for AWS resources with the prefix matching the Buildkite pipeline build number (e.g. `35`). 
