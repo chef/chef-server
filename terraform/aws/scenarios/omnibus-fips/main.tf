@@ -101,21 +101,6 @@ resource "null_resource" "chef_server_test" {
   }
 
   provisioner "file" {
-    source      = "${path.module}/../../../common/files/install_addon_push_jobs.sh"
-    destination = "/tmp/install_addon_push_jobs.sh"
-  }
-
-  provisioner "file" {
-    source      = "${path.module}/../../../common/files/test_addon_push_jobs.sh"
-    destination = "/tmp/test_addon_push_jobs.sh"
-  }
-
-  provisioner "file" {
-    source      = "${path.module}/../../../common/files/install_addon_chef_manage.sh"
-    destination = "/tmp/install_addon_chef_manage.sh"
-  }
-
-  provisioner "file" {
     source      = "${path.module}/../../../common/files/test_chef_server-pedant.sh"
     destination = "/tmp/test_chef_server-pedant.sh"
   }
@@ -128,32 +113,6 @@ resource "null_resource" "chef_server_test" {
   provisioner "file" {
     source      = "${path.module}/../../../common/files/test_gather_logs.sh"
     destination = "/tmp/test_gather_logs.sh"
-  }
-
-  # run smoke test
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/test_chef_server-smoke.sh",
-      "ENABLE_SMOKE_TEST=${var.enable_smoke_test} /tmp/test_chef_server-smoke.sh",
-    ]
-  }
-
-  # install + test push jobs addon
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/install_addon_push_jobs.sh",
-      "ENABLE_ADDON_PUSH_JOBS=${var.enable_addon_push_jobs} /tmp/install_addon_push_jobs.sh",
-      "chmod +x /tmp/test_addon_push_jobs.sh",
-      "ENABLE_ADDON_PUSH_JOBS=${var.enable_addon_push_jobs} /tmp/test_addon_push_jobs.sh",
-    ]
-  }
-
-  # install + test chef manage addon
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/install_addon_chef_manage.sh",
-      "ENABLE_ADDON_CHEF_MANAGE=${var.enable_addon_chef_manage} /tmp/install_addon_chef_manage.sh",
-    ]
   }
 
   # run pedant test
