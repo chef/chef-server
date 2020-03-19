@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.61 -->
-## [13.1.61](https://github.com/chef/chef-server/tree/13.1.61) (2020-03-19)
+<!-- latest_release 13.1.62 -->
+## [13.1.62](https://github.com/chef/chef-server/tree/13.1.62) (2020-03-19)
 
 #### Merged Pull Requests
-- Update terraform from 0.11 to latest 0.12 [#1938](https://github.com/chef/chef-server/pull/1938) ([christopher-snapp](https://github.com/christopher-snapp))
+- We do not support the addons push-jobs and manage in FIPS mode. [#1939](https://github.com/chef/chef-server/pull/1939) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- We do not support the addons push-jobs and manage in FIPS mode. [#1939](https://github.com/chef/chef-server/pull/1939) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.62 -->
 - Update terraform from 0.11 to latest 0.12 [#1938](https://github.com/chef/chef-server/pull/1938) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.61 -->
 - Document manual cleanup of terraform resources [#1937](https://github.com/chef/chef-server/pull/1937) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.60 -->
 - Disable actions since it was used only for oc_actions, analytics and workflow. [#1929](https://github.com/chef/chef-server/pull/1929) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.59 -->
