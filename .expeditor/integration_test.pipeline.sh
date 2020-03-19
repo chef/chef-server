@@ -127,7 +127,11 @@ setup () {
 EOF
 
   # initialize the terraform scenario
-  [[ -d .terraform ]] || terraform init
+  if [[ ! -d .terraform ]]; then
+	tfenv install min-required
+	tfenv use min-required
+	terraform init
+  fi
 
   # switch terraform workspace
   terraform workspace select "$workspace" || terraform workspace new "$workspace"

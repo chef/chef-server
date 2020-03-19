@@ -1,86 +1,86 @@
 module "chef_server" {
   source = "../../modules/aws_instance"
 
-  aws_profile       = "${var.aws_profile}"
-  aws_region        = "${var.aws_region}"
-  aws_vpc_name      = "${var.aws_vpc_name}"
-  aws_department    = "${var.aws_department}"
-  aws_contact       = "${var.aws_contact}"
-  aws_ssh_key_id    = "${var.aws_ssh_key_id}"
-  aws_instance_type = "${var.aws_instance_type}"
-  enable_ipv6       = "${var.enable_ipv6}"
-  platform          = "${var.platform}"
-  build_prefix      = "${var.build_prefix}"
+  aws_profile       = var.aws_profile
+  aws_region        = var.aws_region
+  aws_vpc_name      = var.aws_vpc_name
+  aws_department    = var.aws_department
+  aws_contact       = var.aws_contact
+  aws_ssh_key_id    = var.aws_ssh_key_id
+  aws_instance_type = var.aws_instance_type
+  enable_ipv6       = var.enable_ipv6
+  platform          = var.platform
+  build_prefix      = var.build_prefix
   name              = "chefserver-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 module "backend1" {
   source = "../../modules/aws_instance"
 
-  aws_profile       = "${var.aws_profile}"
-  aws_region        = "${var.aws_region}"
-  aws_vpc_name      = "${var.aws_vpc_name}"
-  aws_department    = "${var.aws_department}"
-  aws_contact       = "${var.aws_contact}"
-  aws_ssh_key_id    = "${var.aws_ssh_key_id}"
-  aws_instance_type = "${var.aws_instance_type}"
-  enable_ipv6       = "${var.enable_ipv6}"
-  platform          = "${var.platform}"
-  build_prefix      = "${var.build_prefix}"
+  aws_profile       = var.aws_profile
+  aws_region        = var.aws_region
+  aws_vpc_name      = var.aws_vpc_name
+  aws_department    = var.aws_department
+  aws_contact       = var.aws_contact
+  aws_ssh_key_id    = var.aws_ssh_key_id
+  aws_instance_type = var.aws_instance_type
+  enable_ipv6       = var.enable_ipv6
+  platform          = var.platform
+  build_prefix      = var.build_prefix
   name              = "backend1-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 module "backend2" {
   source = "../../modules/aws_instance"
 
-  aws_profile       = "${var.aws_profile}"
-  aws_region        = "${var.aws_region}"
-  aws_vpc_name      = "${var.aws_vpc_name}"
-  aws_department    = "${var.aws_department}"
-  aws_contact       = "${var.aws_contact}"
-  aws_ssh_key_id    = "${var.aws_ssh_key_id}"
-  aws_instance_type = "${var.aws_instance_type}"
-  enable_ipv6       = "${var.enable_ipv6}"
-  platform          = "${var.platform}"
-  build_prefix      = "${var.build_prefix}"
+  aws_profile       = var.aws_profile
+  aws_region        = var.aws_region
+  aws_vpc_name      = var.aws_vpc_name
+  aws_department    = var.aws_department
+  aws_contact       = var.aws_contact
+  aws_ssh_key_id    = var.aws_ssh_key_id
+  aws_instance_type = var.aws_instance_type
+  enable_ipv6       = var.enable_ipv6
+  platform          = var.platform
+  build_prefix      = var.build_prefix
   name              = "backend2-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 module "backend3" {
   source = "../../modules/aws_instance"
 
-  aws_profile       = "${var.aws_profile}"
-  aws_region        = "${var.aws_region}"
-  aws_vpc_name      = "${var.aws_vpc_name}"
-  aws_department    = "${var.aws_department}"
-  aws_contact       = "${var.aws_contact}"
-  aws_ssh_key_id    = "${var.aws_ssh_key_id}"
-  aws_instance_type = "${var.aws_instance_type}"
-  enable_ipv6       = "${var.enable_ipv6}"
-  platform          = "${var.platform}"
-  build_prefix      = "${var.build_prefix}"
+  aws_profile       = var.aws_profile
+  aws_region        = var.aws_region
+  aws_vpc_name      = var.aws_vpc_name
+  aws_department    = var.aws_department
+  aws_contact       = var.aws_contact
+  aws_ssh_key_id    = var.aws_ssh_key_id
+  aws_instance_type = var.aws_instance_type
+  enable_ipv6       = var.enable_ipv6
+  platform          = var.platform
+  build_prefix      = var.build_prefix
   name              = "backend3-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 # generate static hosts configuration
 data "template_file" "hosts_config" {
-  template = "${file("${path.module}/templates/hosts.tpl")}"
+  template = file("${path.module}/templates/hosts.tpl")
 
-  vars {
-    chef_server_ip = "${var.enable_ipv6 == true ? module.chef_server.public_ipv6_address : module.chef_server.private_ipv4_address}"
-    backend1_ip    = "${var.enable_ipv6 == true ? module.backend1.public_ipv6_address : module.backend1.private_ipv4_address}"
-    backend2_ip    = "${var.enable_ipv6 == true ? module.backend2.public_ipv6_address : module.backend2.private_ipv4_address}"
-    backend3_ip    = "${var.enable_ipv6 == true ? module.backend3.public_ipv6_address : module.backend3.private_ipv4_address}"
+  vars = {
+    chef_server_ip = var.enable_ipv6 == "true" ? module.chef_server.public_ipv6_address : module.chef_server.private_ipv4_address
+    backend1_ip    = var.enable_ipv6 == "true" ? module.backend1.public_ipv6_address : module.backend1.private_ipv4_address
+    backend2_ip    = var.enable_ipv6 == "true" ? module.backend2.public_ipv6_address : module.backend2.private_ipv4_address
+    backend3_ip    = var.enable_ipv6 == "true" ? module.backend3.public_ipv6_address : module.backend3.private_ipv4_address
   }
 }
 
 # generate chef-backend configuration
 data "template_file" "backend_config" {
-  template = "${file("${path.module}/templates/chef-backend.rb.tpl")}"
+  template = file("${path.module}/templates/chef-backend.rb.tpl")
 
-  vars {
-    ip_version = "${var.enable_ipv6 == true ? "ipv6" : "ipv4"}"
-    backend_ip = "${var.enable_ipv6 == true ? module.backend1.public_ipv6_address : module.backend1.private_ipv4_address}"
+  vars = {
+    ip_version = var.enable_ipv6 == "true" ? "ipv6" : "ipv4"
+    backend_ip = var.enable_ipv6 == "true" ? module.backend1.public_ipv6_address : module.backend1.private_ipv4_address
   }
 }
 
@@ -89,17 +89,17 @@ resource "null_resource" "backend1_config" {
   # provide some connection info
   connection {
     type = "ssh"
-    user = "${module.backend1.ssh_username}"
-    host = "${module.backend1.public_ipv4_dns}"
+    user = module.backend1.ssh_username
+    host = module.backend1.public_ipv4_dns
   }
 
   provisioner "file" {
-    content     = "${data.template_file.hosts_config.rendered}"
+    content     = data.template_file.hosts_config.rendered
     destination = "/tmp/hosts"
   }
 
   provisioner "file" {
-    content     = "${data.template_file.backend_config.rendered}"
+    content     = data.template_file.backend_config.rendered
     destination = "/tmp/chef-backend.rb"
   }
 
@@ -123,17 +123,17 @@ resource "null_resource" "backend1_config" {
 
 # update backend2 server
 resource "null_resource" "backend2_config" {
-  depends_on = ["null_resource.backend1_config"]
+  depends_on = [null_resource.backend1_config]
 
   # provide some connection info
   connection {
     type = "ssh"
-    user = "${module.backend2.ssh_username}"
-    host = "${module.backend2.public_ipv4_dns}"
+    user = module.backend2.ssh_username
+    host = module.backend2.public_ipv4_dns
   }
 
   provisioner "file" {
-    content     = "${data.template_file.hosts_config.rendered}"
+    content     = data.template_file.hosts_config.rendered
     destination = "/tmp/hosts"
   }
 
@@ -145,7 +145,7 @@ resource "null_resource" "backend2_config" {
       "sudo mv /tmp/hosts /etc/hosts",
       "curl -vo /tmp/${replace(var.backend_version_url, "/^.*\\//", "")} ${var.backend_version_url}",
       "sudo ${replace(var.backend_version_url, "rpm", "") != var.backend_version_url ? "rpm -U" : "dpkg -iEG"} /tmp/${replace(var.backend_version_url, "/^.*\\//", "")}",
-      "sudo chef-backend-ctl join-cluster --accept-license --yes --quiet ${var.enable_ipv6 == true ? module.backend1.public_ipv6_address : module.backend1.private_ipv4_address} -p ${var.enable_ipv6 == true ? module.backend2.public_ipv6_address : module.backend2.private_ipv4_address} -s /tmp/chef-backend-secrets.json",
+      "sudo chef-backend-ctl join-cluster --accept-license --yes --quiet ${var.enable_ipv6 == "true" ? module.backend1.public_ipv6_address : module.backend1.private_ipv4_address} -p ${var.enable_ipv6 == "true" ? module.backend2.public_ipv6_address : module.backend2.private_ipv4_address} -s /tmp/chef-backend-secrets.json",
       "echo -e '\nEND INSTALL CHEF BACKEND2\n'",
     ]
   }
@@ -153,17 +153,17 @@ resource "null_resource" "backend2_config" {
 
 # update backend3 server
 resource "null_resource" "backend3_config" {
-  depends_on = ["null_resource.backend2_config"]
+  depends_on = [null_resource.backend2_config]
 
   # provide some connection info
   connection {
     type = "ssh"
-    user = "${module.backend3.ssh_username}"
-    host = "${module.backend3.public_ipv4_dns}"
+    user = module.backend3.ssh_username
+    host = module.backend3.public_ipv4_dns
   }
 
   provisioner "file" {
-    content     = "${data.template_file.hosts_config.rendered}"
+    content     = data.template_file.hosts_config.rendered
     destination = "/tmp/hosts"
   }
 
@@ -175,7 +175,7 @@ resource "null_resource" "backend3_config" {
       "sudo mv /tmp/hosts /etc/hosts",
       "curl -vo /tmp/${replace(var.backend_version_url, "/^.*\\//", "")} ${var.backend_version_url}",
       "sudo ${replace(var.backend_version_url, "rpm", "") != var.backend_version_url ? "rpm -U" : "dpkg -iEG"} /tmp/${replace(var.backend_version_url, "/^.*\\//", "")}",
-      "sudo chef-backend-ctl join-cluster --accept-license --yes --quiet ${var.enable_ipv6 == true ? module.backend1.public_ipv6_address : module.backend1.private_ipv4_address} -p ${var.enable_ipv6 == true ? module.backend3.public_ipv6_address : module.backend3.private_ipv4_address} -s /tmp/chef-backend-secrets.json",
+      "sudo chef-backend-ctl join-cluster --accept-license --yes --quiet ${var.enable_ipv6 == "true" ? module.backend1.public_ipv6_address : module.backend1.private_ipv4_address} -p ${var.enable_ipv6 == "true" ? module.backend3.public_ipv6_address : module.backend3.private_ipv4_address} -s /tmp/chef-backend-secrets.json",
       "sudo chef-backend-ctl gen-server-config chefserver.internal > /tmp/chef-server.rb",
       "echo \"profiles['root_url'] = 'http://chefserver.internal:9998'\" | sudo tee -a /tmp/chef-server.rb",
       "scp -o 'UserKnownHostsFile=/dev/null' -o 'StrictHostKeyChecking=no' /tmp/chef-server.rb ${module.chef_server.ssh_username}@${module.chef_server.public_ipv4_dns}:/tmp",
@@ -186,17 +186,17 @@ resource "null_resource" "backend3_config" {
 
 # update chef server
 resource "null_resource" "chef_server_config" {
-  depends_on = ["null_resource.backend3_config"]
+  depends_on = [null_resource.backend3_config]
 
   # provide some connection info
   connection {
     type = "ssh"
-    user = "${module.chef_server.ssh_username}"
-    host = "${module.chef_server.public_ipv4_dns}"
+    user = module.chef_server.ssh_username
+    host = module.chef_server.public_ipv4_dns
   }
 
   provisioner "file" {
-    content     = "${data.template_file.hosts_config.rendered}"
+    content     = data.template_file.hosts_config.rendered
     destination = "/tmp/hosts"
   }
 
@@ -224,12 +224,12 @@ resource "null_resource" "chef_server_config" {
 }
 
 resource "null_resource" "chef_server_test1" {
-  depends_on = ["null_resource.chef_server_config"]
+  depends_on = [null_resource.chef_server_config]
 
   connection {
     type = "ssh"
-    user = "${module.chef_server.ssh_username}"
-    host = "${module.chef_server.public_ipv4_dns}"
+    user = module.chef_server.ssh_username
+    host = module.chef_server.public_ipv4_dns
   }
 
   # upload smoke test script
@@ -248,13 +248,13 @@ resource "null_resource" "chef_server_test1" {
 }
 
 resource "null_resource" "chef_backend_test" {
-  depends_on = ["null_resource.chef_server_test1"]
+  depends_on = [null_resource.chef_server_test1]
 
   # provide some connection info
   connection {
     type = "ssh"
-    user = "${module.backend1.ssh_username}"
-    host = "${module.backend1.public_ipv4_dns}"
+    user = module.backend1.ssh_username
+    host = module.backend1.public_ipv4_dns
   }
 
   provisioner "file" {
@@ -272,12 +272,12 @@ resource "null_resource" "chef_backend_test" {
 }
 
 resource "null_resource" "chef_server_test2" {
-  depends_on = ["null_resource.chef_backend_test"]
+  depends_on = [null_resource.chef_backend_test]
 
   connection {
     type = "ssh"
-    user = "${module.chef_server.ssh_username}"
-    host = "${module.chef_server.public_ipv4_dns}"
+    user = module.chef_server.ssh_username
+    host = module.chef_server.public_ipv4_dns
   }
 
   # upload test scripts

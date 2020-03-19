@@ -1,22 +1,22 @@
 module "chef_server" {
   source = "../../modules/arm_instance"
 
-  arm_tenant_id           = "${var.arm_tenant_id}"
-  arm_subscription_id     = "${var.arm_subscription_id}"
-  arm_location            = "${var.arm_location}"
-  arm_resource_group_name = "${var.arm_resource_group_name}"
-  arm_department          = "${var.arm_department}"
-  arm_contact             = "${var.arm_contact}"
-  arm_ssh_key_file        = "${var.arm_ssh_key_file}"
-  arm_instance_type       = "${var.arm_instance_type}"
-  platform                = "${var.platform}"
-  build_prefix            = "${var.build_prefix}"
+  arm_tenant_id           = var.arm_tenant_id
+  arm_subscription_id     = var.arm_subscription_id
+  arm_location            = var.arm_location
+  arm_resource_group_name = var.arm_resource_group_name
+  arm_department          = var.arm_department
+  arm_contact             = var.arm_contact
+  arm_ssh_key_file        = var.arm_ssh_key_file
+  arm_instance_type       = var.arm_instance_type
+  platform                = var.platform
+  build_prefix            = var.build_prefix
   name                    = "chefserver-${var.scenario}-${replace(var.platform, ".", "")}"
 }
 
 resource "azurerm_postgresql_server" "default" {
-  resource_group_name = "${module.chef_server.resource_group_name}"
-  location            = "${module.chef_server.location}"
+  resource_group_name = module.chef_server.resource_group_name
+  location            = module.chef_server.location
 
   name                         = "${var.scenario}-${replace(var.platform, ".", "")}-${var.arm_contact}"
   administrator_login          = "bofh"
@@ -33,45 +33,45 @@ resource "azurerm_postgresql_server" "default" {
   }
 
   tags = {
-    X-Dept    = "${var.arm_department}"
-    X-Contact = "${var.arm_contact}"
+    X-Dept    = var.arm_department
+    X-Contact = var.arm_contact
   }
 }
 
 resource "azurerm_postgresql_firewall_rule" "default" {
-  depends_on = ["module.chef_server"]
+  depends_on = [module.chef_server]
 
-  resource_group_name = "${module.chef_server.resource_group_name}"
-  server_name         = "${azurerm_postgresql_server.default.name}"
+  resource_group_name = module.chef_server.resource_group_name
+  server_name         = azurerm_postgresql_server.default.name
 
   name             = "${var.scenario}-${replace(var.platform, ".", "")}"
-  start_ip_address = "${module.chef_server.public_ipv4_address}"
-  end_ip_address   = "${module.chef_server.public_ipv4_address}"
+  start_ip_address = module.chef_server.public_ipv4_address
+  end_ip_address   = module.chef_server.public_ipv4_address
 }
 
 # generate chef-server.rb configuration
 data "template_file" "chef_server_config" {
-  depends_on = ["azurerm_postgresql_server.default"]
+  depends_on = [azurerm_postgresql_server.default]
 
   template = "${file("${path.module}/templates/chef-server.rb.tpl")}"
 
-  vars {
-    postgresql_fqdn = "${azurerm_postgresql_server.default.fqdn}"
+  vars = {
+    postgresql_fqdn = azurerm_postgresql_server.default.fqdn
   }
 }
 
 resource "null_resource" "chef_server_config" {
-  depends_on = ["azurerm_postgresql_firewall_rule.default"]
+  depends_on = [azurerm_postgresql_firewall_rule.default]
 
   # provide some connection info
   connection {
     type = "ssh"
-    user = "${module.chef_server.ssh_username}"
-    host = "${module.chef_server.public_ipv4_address}"
+    user = module.chef_server.ssh_username
+    host = module.chef_server.public_ipv4_address
   }
 
   provisioner "file" {
-    content     = "${data.template_file.chef_server_config.rendered}"
+    content     = data.template_file.chef_server_config.rendered
     destination = "/tmp/chef-server.rb"
   }
 
@@ -104,12 +104,12 @@ resource "null_resource" "chef_server_config" {
 }
 
 resource "null_resource" "chef_server_test" {
-  depends_on = ["null_resource.chef_server_config"]
+  depends_on = [null_resource.chef_server_config]
 
   connection {
     type = "ssh"
-    user = "${module.chef_server.ssh_username}"
-    host = "${module.chef_server.public_ipv4_address}"
+    user = module.chef_server.ssh_username
+    host = module.chef_server.public_ipv4_address
   }
 
   # upload test scripts

@@ -6,7 +6,7 @@ data "http" "workstation-ipv4" {
 locals {
   workstation-ipv4-cidr = "${chomp(data.http.workstation-ipv4.body)}/32"
 
-  arm_resource_group_name = "${var.arm_resource_group_name != "" ? var.arm_resource_group_name : "${var.arm_contact}-chef_server-test"}"
+  arm_resource_group_name = var.arm_resource_group_name != "" ? var.arm_resource_group_name : "${var.arm_contact}-chef_server-test"
 
   storage_images = {
     rhel-6 = {
@@ -30,14 +30,14 @@ locals {
       version   = "latest"
     }
 
-    ubuntu-16.04 = {
+    "ubuntu-16.04" = {
       publisher = "Canonical"
       offer     = "UbuntuServer"
       sku       = "16.04-LTS"
       version   = "latest"
     }
 
-    ubuntu-18.04 = {
+    "ubuntu-18.04" = {
       publisher = "Canonical"
       offer     = "UbuntuServer"
       sku       = "18.04-LTS"

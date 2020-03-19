@@ -1,24 +1,24 @@
 module "chef_server" {
   source = "../../modules/aws_instance"
 
-  aws_profile       = "${var.aws_profile}"
-  aws_region        = "${var.aws_region}"
-  aws_vpc_name      = "${var.aws_vpc_name}"
-  aws_department    = "${var.aws_department}"
-  aws_contact       = "${var.aws_contact}"
-  aws_ssh_key_id    = "${var.aws_ssh_key_id}"
-  aws_instance_type = "${var.aws_instance_type}"
-  enable_ipv6       = "${var.enable_ipv6}"
-  platform          = "${var.platform}"
-  build_prefix      = "${var.build_prefix}"
+  aws_profile       = var.aws_profile
+  aws_region        = var.aws_region
+  aws_vpc_name      = var.aws_vpc_name
+  aws_department    = var.aws_department
+  aws_contact       = var.aws_contact
+  aws_ssh_key_id    = var.aws_ssh_key_id
+  aws_instance_type = var.aws_instance_type
+  enable_ipv6       = var.enable_ipv6
+  platform          = var.platform
+  build_prefix      = var.build_prefix
   name              = "${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 resource "null_resource" "chef_server_config" {
   connection {
     type = "ssh"
-    user = "${module.chef_server.ssh_username}"
-    host = "${module.chef_server.public_ipv4_dns}"
+    user = module.chef_server.ssh_username
+    host = module.chef_server.public_ipv4_dns
   }
 
   provisioner "file" {
@@ -52,7 +52,7 @@ resource "null_resource" "chef_server_config" {
   # Copy across existing backup. This is very dependent on matching the version of chef-server the backup
   # was generated from.
   provisioner "file" {
-    source      = "${var.backup_location}"
+    source      = var.backup_location
     destination = "/tmp/chef-backup.tgz"
   }
 
