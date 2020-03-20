@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.62 -->
-## [13.1.62](https://github.com/chef/chef-server/tree/13.1.62) (2020-03-19)
+<!-- latest_release 13.1.63 -->
+## [13.1.63](https://github.com/chef/chef-server/tree/13.1.63) (2020-03-20)
 
 #### Merged Pull Requests
-- We do not support the addons push-jobs and manage in FIPS mode. [#1939](https://github.com/chef/chef-server/pull/1939) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Allow version 6 of elasticsearch along with 2 and 5. [#1940](https://github.com/chef/chef-server/pull/1940) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Allow version 6 of elasticsearch along with 2 and 5. [#1940](https://github.com/chef/chef-server/pull/1940) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.63 -->
 - We do not support the addons push-jobs and manage in FIPS mode. [#1939](https://github.com/chef/chef-server/pull/1939) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.62 -->
 - Update terraform from 0.11 to latest 0.12 [#1938](https://github.com/chef/chef-server/pull/1938) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.61 -->
 - Document manual cleanup of terraform resources [#1937](https://github.com/chef/chef-server/pull/1937) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.60 -->
