@@ -87,8 +87,8 @@ query_body(#chef_solr_query{
 
 fields_tag() ->
     case envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer) of
-        5 -> <<"stored_fields">>;
-        _ -> <<"fields">>
+        X when X >= 5 -> <<"stored_fields">>;
+        2 -> <<"fields">>
     end.
 
 query_string_query_ejson(QueryString) ->
