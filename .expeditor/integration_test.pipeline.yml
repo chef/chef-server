@@ -961,7 +961,6 @@ steps:
     command: .expeditor/integration_test.pipeline.sh destroy-all
     env:
       ACTION: destroy-all
-      CONSUL_HTTP_ADDR: http://consul.chef.co
     expeditor:
       accounts:
         - aws/chef-cd

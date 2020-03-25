@@ -7,6 +7,9 @@ action=
 AWS_TOKEN_TIMEOUT=3600
 export AWS_TOKEN_TIMEOUT
 
+# point to consul backend
+export CONSUL_HTTP_ADDR='http://consul.chef.co'
+
 # verify command dependencies
 [[ "$(command -v terraform)" ]] || error 'terraform command is not available'
 
