@@ -15,7 +15,7 @@ data "aws_subnet" "chef_subnet" {
 }
 
 resource "aws_security_group" "default" {
-  name_prefix = "local.vpc_name"
+  name_prefix = local.vpc_name
   vpc_id      = data.aws_vpc.chef_vpc.id
 
   ingress {
