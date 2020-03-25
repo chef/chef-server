@@ -22,13 +22,14 @@ resource "null_resource" "chef_server_fips" {
   }
 
   # enable fips mode
+  # https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/chap-federal_standards_and_regulations
   provisioner "remote-exec" {
     inline = [
       "set -evx",
       "echo -e '\nFIPS STATUS:\n'",
       "sudo sysctl crypto.fips_enabled",
       "echo -e '\nBEGIN ENABLING FIPS MODE\n'",
-      "sudo yum install -y dracut-fips",
+      "sudo yum install -y dracut-fips dracut-fips-aesni",
       "sudo dracut -f",
       "if [ -f /etc/default/grub ]; then sudo sed -i '/GRUB_CMDLINE_LINUX/{s/=\"/=\"fips=1 /;}' /etc/default/grub; sudo grub2-mkconfig -o /boot/grub2/grub.cfg; else sudo sed -i '/^\t.*kernel.*boot/{s/$/ fips=1/;}' /boot/grub/grub.conf; fi",
       "echo -e '\nEND ENABLING FIPS MODE\n'",
@@ -95,11 +96,6 @@ resource "null_resource" "chef_server_test" {
   }
 
   # upload test scripts
-  provisioner "file" {
-    source      = "${path.module}/../../../common/files/test_chef_server-smoke.sh"
-    destination = "/tmp/test_chef_server-smoke.sh"
-  }
-
   provisioner "file" {
     source      = "${path.module}/../../../common/files/test_chef_server-pedant.sh"
     destination = "/tmp/test_chef_server-pedant.sh"
