@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.64 -->
-## [13.1.64](https://github.com/chef/chef-server/tree/13.1.64) (2020-03-25)
+<!-- latest_release 13.1.65 -->
+## [13.1.65](https://github.com/chef/chef-server/tree/13.1.65) (2020-03-25)
 
 #### Merged Pull Requests
-- Fix integration test cancellation [#1942](https://github.com/chef/chef-server/pull/1942) ([christopher-snapp](https://github.com/christopher-snapp))
+- Fix integration test security group prefix and integration test cancellation [#1944](https://github.com/chef/chef-server/pull/1944) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Fix integration test security group prefix and integration test cancellation [#1944](https://github.com/chef/chef-server/pull/1944) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.65 -->
 - Fix integration test cancellation [#1942](https://github.com/chef/chef-server/pull/1942) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.64 -->
 - Allow version 6 of elasticsearch along with 2 and 5. [#1940](https://github.com/chef/chef-server/pull/1940) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.63 -->
 - We do not support the addons push-jobs and manage in FIPS mode. [#1939](https://github.com/chef/chef-server/pull/1939) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.62 -->
