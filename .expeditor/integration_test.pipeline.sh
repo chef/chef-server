@@ -293,8 +293,12 @@ destroy-all () {
 
   echo "--- Destroying all Terraform workspaces associated with build number $BUILD_NUMBER"
 
-  # verify command dependencies
-  [[ "$(command -v consul)" ]] || error 'consul command is not available'
+  # ensure consul is installed
+  if [[ ! "$(command -v consul)" ]]; then
+    asdf plugin-add consul
+    asdf install consul 1.6.2
+    asdf local consul 1.6.2
+  fi
 
   # iterate across workspaces left in consul
   for workspace in $(consul kv get -keys terraform/chef-server/ | sed -n "/${BUILD_NUMBER}/{s/.*:\(${BUILD_NUMBER}-.*$\)/\1/;s/\///;p;}" | sort -u); do

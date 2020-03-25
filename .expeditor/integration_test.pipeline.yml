@@ -958,11 +958,7 @@ steps:
     continue_on_failure: true
 
   - label: ':terraform: destroy-all'
-    command:
-      - asdf plugin-add consul
-      - asdf install consul 1.6.2
-      - asdf local consul 1.6.2
-      - .expeditor/integration_test.pipeline.sh destroy-all
+    command: .expeditor/integration_test.pipeline.sh destroy-all
     env:
       ACTION: destroy-all
       CONSUL_HTTP_ADDR: http://consul.chef.co
