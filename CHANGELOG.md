@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.65 -->
-## [13.1.65](https://github.com/chef/chef-server/tree/13.1.65) (2020-03-25)
+<!-- latest_release 13.1.66 -->
+## [13.1.66](https://github.com/chef/chef-server/tree/13.1.66) (2020-03-26)
 
 #### Merged Pull Requests
-- Fix integration test security group prefix and integration test cancellation [#1944](https://github.com/chef/chef-server/pull/1944) ([christopher-snapp](https://github.com/christopher-snapp))
+- For CPUs with the AES New Instructions add dracut-fips-aesni to turn … [#1943](https://github.com/chef/chef-server/pull/1943) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- For CPUs with the AES New Instructions add dracut-fips-aesni to turn … [#1943](https://github.com/chef/chef-server/pull/1943) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.66 -->
 - Fix integration test security group prefix and integration test cancellation [#1944](https://github.com/chef/chef-server/pull/1944) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.65 -->
 - Fix integration test cancellation [#1942](https://github.com/chef/chef-server/pull/1942) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.1.64 -->
 - Allow version 6 of elasticsearch along with 2 and 5. [#1940](https://github.com/chef/chef-server/pull/1940) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.63 -->
