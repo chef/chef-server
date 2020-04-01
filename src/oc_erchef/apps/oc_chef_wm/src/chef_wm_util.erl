@@ -66,7 +66,8 @@ vhost(Req) ->
     case wrq:get_req_header("host", Req) of
         B when is_binary(B) -> binary_to_list(B);
         S when is_list(S) -> S;
-        undefined -> fqdn_with_port(Req)
+        undefined -> fqdn_with_port(Req),
+io:format("~n~nIN CHEF_WM_UTIL / vhost~nWARNING: host header undefined, using fqdn with port - ~p~n", [fqdn_with_port(Req)])
     end.
 
 %% @doc Returns the host via webmachine

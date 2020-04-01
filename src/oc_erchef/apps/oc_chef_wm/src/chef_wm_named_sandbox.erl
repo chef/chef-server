@@ -96,6 +96,7 @@ from_json(Req, #base_state{reqid = ReqId,
         %% ReqId needed here for chef_s3 instrumentation
         validate_checksums_uploaded(ReqId, Sandbox),
         commit_sandbox(DbContext, Sandbox),
+io:format("~n~nIN CHEF_WM_NAMED_SANDBOX.ERL~nSandbox = ~p~n", [Sandbox]),
         Req1 = chef_wm_util:set_json_body(Req, sandbox_to_ejson(Sandbox)),
         {true, Req1, State}
     catch
