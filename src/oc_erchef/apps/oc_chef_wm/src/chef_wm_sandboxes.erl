@@ -86,6 +86,7 @@ from_json(Req, #base_state{chef_db_context = DbContext,
                            resource_state =
                                #sandbox_state{sandbox_data = SandboxData}} = State) ->
     Checksums = checksums_from_sandbox_ejson(SandboxData),
+io:format("~n~nIN CHEF_WM_SANDBOXES.ERL~nChecksums = ~p~nSandboxData = ~p~n ", [Checksums, SandboxData]),
     case chef_db:make_sandbox(DbContext, OrgId, ActorId, Checksums) of
         #chef_sandbox{} = Sandbox ->
             Response = sandbox_to_response(Req, Sandbox),
