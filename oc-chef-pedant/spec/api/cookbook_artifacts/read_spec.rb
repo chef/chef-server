@@ -1,4 +1,4 @@
-# Copyright: Copyright (c) 2015 Chef Software, Inc.
+# Copyright: Copyright (c) 2015-2020, Chef Software Inc.
 # License: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -195,7 +195,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
           response_data[target].first.delete("url")
           response_data[target].first.delete("checksum")
 
-          expect(response_data).to eq(expected_cookbook_artifact_data)
+          expect_matching_cookbook_artifact(response_data, expected_cookbook_artifact_data)
         end
 
         # These tests verify that the pre-signed URL that comes back

@@ -1,4 +1,4 @@
-# Copyright: Copyright (c) 2015 Chef Software, Inc.
+# Copyright: Copyright (c) 2015-2020, Chef Software Inc.
 # License: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -83,7 +83,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
           get_response = get(request_url, requestor)
 
           expect(get_response.code.to_s).to eq("200")
-          expect(parse(get_response)).to eq(expected_get_response_data)
+          expect_matching_cookbook_artifact(parse(get_response), expected_get_response_data)
         end
       end
 
