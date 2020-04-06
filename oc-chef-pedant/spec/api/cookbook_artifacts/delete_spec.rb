@@ -1,4 +1,4 @@
-# Copyright: Copyright (c) 2015 Chef Software, Inc.
+# Copyright: Copyright (c) 2015-2020, Chef Software Inc.
 # License: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -153,7 +153,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
           it "should respond with 200 (\"OK\") and be deleted" do
             delete_response = delete(request_url, admin_user)
             expect(delete_response.code).to eq(200)
-            expect(parse(delete_response)).to eq(fetched_cookbook)
+            expect_matching_cookbook_artifact(parse(delete_response), fetched_cookbook)
 
             expect(get(request_url, admin_user).code).to eq(404)
           end # it admin user returns 200

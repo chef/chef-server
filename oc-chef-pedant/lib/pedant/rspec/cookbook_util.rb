@@ -1,4 +1,4 @@
-# Copyright: Copyright (c) 2012 Opscode, Inc.
+# Copyright: Copyright (c) 2012-2020, Chef Software Inc.
 # License: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -253,6 +253,18 @@ module Pedant
         else
           new_cookbook_artifact_v0(name, identifier, opts)
         end
+      end
+
+      # comparison operator to use to allow for extensible metadata
+      def expect_matching_cookbook_artifact(got, expected)
+        expected = expected.dup
+        # be strict about the top level keys to start with
+        expect(got.keys.sort).to eql(expected.keys.sort)
+        metadata = expected.delete("metadata")
+        # strict checking of all the top level values other than metadata
+        expect(got).to match(hash_including(expected))
+        # lax checking of the metadata values, since those are allowed to be extensible
+        expect(got["metadata"]).to match(hash_including(metadata))
       end
 
       def delete_cookbook_artifact(requestor, name, identifier)
