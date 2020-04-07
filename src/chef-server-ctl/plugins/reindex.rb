@@ -21,7 +21,7 @@ require 'redis'
 
 def all_orgs
   Chef::Config.from_file(::ChefServerCtl::Config.knife_config_file)
-  Chef::Org.list.keys
+  Chef::Org.list.keys.sort
 end
 
 def expander_queue_size
