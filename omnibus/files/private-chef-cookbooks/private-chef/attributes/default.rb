@@ -286,6 +286,7 @@ var_base = '/var/opt/opscode'
 log_base = '/var/log/opscode'
 
 default['private_chef']['elasticsearch']['enable'] = false
+default['private_chef']['elasticsearch']['first_internal_install'] = false
 elasticsearch = default['private_chef']['elasticsearch']
 
 # These attributes cannot be overridden in chef-server.rb
