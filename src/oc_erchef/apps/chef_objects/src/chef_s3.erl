@@ -26,6 +26,7 @@
 -module(chef_s3).
 
 -include("chef_types.hrl").
+-include_lib("erlcloud/include/erlcloud_aws.hrl").
 
 -export([
          check_checksums/2,
@@ -96,7 +97,7 @@ generate_presigned_url(OrgId, Bucket, Lifetime, Method, Checksum, AwsConfig) ->
 io:format("~n~n-------------------------------------------"),
 io:format(  "~nIN CHEF_S3.ERL - generate_presigned_url/6"),
 io:format(  "~nHeaders   = ~p",  [Headers]),
-io:format(  "~nAwsConfig = ~p0", [AwsConfig]),
+io:format(  "~nAwsConfig scheme=~p host=~p port=~p", [AwsConfig#aws_config.s3_scheme, AwsConfig#aws_config.s3_host, AwsConfig#aws_config.s3_port]),
 io:format(  "~n-------------------------------------------"),
     Expiry = case application:get_env(chef_objects, s3_url_expiry_window_size) of
         {ok, {X, percent}} ->
