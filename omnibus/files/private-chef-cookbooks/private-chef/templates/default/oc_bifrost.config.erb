@@ -16,6 +16,9 @@
          {error_logger_mf_maxbytes, <%= @log_rotation['file_maxbytes'] %>},
          {error_logger_mf_maxfiles, <%= @log_rotation['num_to_keep'] %>}
         ]},
+ {crypto, [
+           {fips_mode, <%= node['private_chef']['fips_enabled'] %>}
+        ]},
  {chef_secrets, [{provider, chef_secrets_fd}]},
  {lager, [
           %% What handlers to install with what arguments

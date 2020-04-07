@@ -31,10 +31,3 @@
 
 ## Increase logfile size to 10M
 -env RUN_ERL_LOG_MAXSIZE 10000000
-
-{{#if cfg.fips_enabled ~}}
-## Runtime switches to enable loading custom crypto module
-## that supports OpenSSL-FIPS
--env ERLANG_CRYPTO2_PATH {{pkg.path}}/lib/erlang-crypto2/priv
--pa {{pkg.path}}/lib/erlang-crypto2/ebin
-{{/if ~}}

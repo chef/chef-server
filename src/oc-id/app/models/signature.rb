@@ -14,7 +14,7 @@ class Signature
 
   # String representation of signature
   def to_s
-    Digest::SHA1.hexdigest(canonical_string)
+    OpenSSL::Digest::SHA1.hexdigest(canonical_string)
   end
 
   # Lets you compare signature == "some string"

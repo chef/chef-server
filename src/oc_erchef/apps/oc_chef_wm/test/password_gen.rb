@@ -10,9 +10,9 @@ class ShaHasher
   def self.encrypt_password(password, salt, type)
     case type
       when "osc"
-        Digest::SHA1.hexdigest("--#{salt}--#{password}--")
+        OpenSSL::Digest::SHA1.hexdigest("--#{salt}--#{password}--")
       when "ec"
-        Digest::SHA1.hexdigest("#{salt}--#{password}--")
+        OpenSSL::Digest::SHA1.hexdigest("#{salt}--#{password}--")
     end
   end
 

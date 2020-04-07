@@ -13,6 +13,10 @@
         {error_logger_mf_maxfiles, <%= @log_rotation['num_to_keep'] %>}
     ]},
 
+    {crypto, [
+              {fips_mode, <%= node['private_chef']['fips_enabled'] %>}
+    ]},
+
     {lager, [
         {handlers, [
             {lager_console_backend, [info, {lager_default_formatter, [ "[", severity, "] ", message, "\n"]}]},

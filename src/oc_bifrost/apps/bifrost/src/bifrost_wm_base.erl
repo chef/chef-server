@@ -142,7 +142,7 @@ finish_request(Req, #base_state{reqid=ReqId,
 %% this request.
 -spec new_request_id() -> request_id().
 new_request_id() ->
-    base64:encode(crypto:hash(md5, term_to_binary(make_ref()))).
+    base64:encode(erlang:md5(term_to_binary(make_ref()))).
 
 
 %% Stats Hero metrics-related functions
