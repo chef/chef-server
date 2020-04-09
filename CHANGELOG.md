@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.1.69 -->
-## [13.1.69](https://github.com/chef/chef-server/tree/13.1.69) (2020-04-07)
+<!-- latest_release 13.1.70 -->
+## [13.1.70](https://github.com/chef/chef-server/tree/13.1.70) (2020-04-09)
 
 #### Merged Pull Requests
-- Praj/fips [#1941](https://github.com/chef/chef-server/pull/1941) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Do not create indexes for elasticsearch at compile time [#1961](https://github.com/chef/chef-server/pull/1961) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- Do not create indexes for elasticsearch at compile time [#1961](https://github.com/chef/chef-server/pull/1961) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.70 -->
 - Praj/fips [#1941](https://github.com/chef/chef-server/pull/1941) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.69 -->
 - Praj/enable internal es [#1946](https://github.com/chef/chef-server/pull/1946) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.68 -->
 - Fix pedant to not be strict about cookbook artifact metadata [#1948](https://github.com/chef/chef-server/pull/1948) ([lamont-granquist](https://github.com/lamont-granquist)) <!-- 13.1.67 -->
