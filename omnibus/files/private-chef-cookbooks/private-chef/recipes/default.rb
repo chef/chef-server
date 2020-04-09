@@ -51,6 +51,7 @@ include_recipe 'private-chef::plugin_config_extensions'
 include_recipe 'private-chef::config'
 
 if node['private_chef']['elasticsearch']['first_internal_install']
+  node.override['private_chef']['elasticsearch']['install_major_verison'] = 6
   node.override['private_chef']['opscode-solr4']['enable'] = false
   node.override['private_chef']['rabbitmq']['enable'] = false
   node.override['private_chef']['opscode-expander']['enable'] = false

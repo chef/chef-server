@@ -112,15 +112,20 @@ class OmnibusHelper
   end
 
   def es_index_definition
-    if node['private_chef']['elasticsearch']['first_internal_install'] == true
-      es_6_index
-    else
-      es_version = elastic_search_major_version
-      if es_version == 6
-        es_6_index
-      elsif [2, 5].include?(es_version)
+    use_version = node['private_chef']['elasticsearch']['install_major_version']
+    # If installing with chef-backend default to the version of chef-backend
+    if node['private_chef']['use_chef_backend'] == true
         es_5_or_2_index
-      end
+    # If install using internal elasticsearch
+    # node['private_chef']['elasticsearch']['install_major_version']
+    # is populated in the default.rb
+    # If install using external elasticsearch
+    # node['private_chef']['elasticsearch']['install_major_version']
+    # should be defined by the user
+    elsif use_version == 6
+        es_6_index
+    elsif [2, 5].include?(use_version)
+        es_5_or_2_index
     end
   end
 
