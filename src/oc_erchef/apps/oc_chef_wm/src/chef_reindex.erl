@@ -234,6 +234,9 @@ send_to_index_queue(OrgName, OrgId, Index, SerializedObjects, NameIdDict) ->
     Res = add_batch(Existing, OrgName),
     {Res, Missing}.
 
+-spec add_batch(
+        Batch :: list(),
+        OrgName :: binary()) -> ok | {error , list()}.
 add_batch(Batch, OrgName) ->
     case oc_chef_object_db:add_batch_to_solr(Batch) of
         ok -> ok;
@@ -252,17 +255,26 @@ log_failures(OrgName, [Failure|Rest]) ->
     lager:error("reindexing[~s] item ~s[~s] failed to reindex: ~s", [OrgName, TypeName, Id, Reason]),
     log_failures(OrgName, Rest).
 
+-spec humanize_failures(list(), list()) -> list().
 humanize_failures([], Acc) ->
     Acc;
 humanize_failures([H|T], Acc) ->
-    {Id, Reason} = H,
-    humanize_failures(T, [{Id, pretty_reason(Reason)} | Acc]).
+    case H of
+        {Id, Reason} -> humanize_failures(T, [{Id, pretty_reason(Reason)} | Acc]);
+        Error -> humanize_failures(T, [{<<"unknown">>, pretty_reason(Error)} | Acc])
+    end.
 
 pretty_reason({error,{error,no_members}}) ->
     "no_members: Ran out of HTTP workers talking to search backend";
 pretty_reason(Other) ->
     io_lib:format("error: ~p", [Other]).
 
+- spec stub_records_for_indexing(
+        SerializedObjects :: [binary()] | [ej:json_object()],
+        NameKey :: binary(),
+        NameIdDict :: dict(),
+        Index :: index(),
+        OrgId :: object_id()) -> {list(), list()}.
 stub_records_for_indexing(SerializedObjects, NameKey, NameIdDict, Index, OrgId) ->
     stub_records_for_indexing(SerializedObjects, NameKey, NameIdDict, Index, OrgId, [], []).
 
@@ -284,6 +296,7 @@ stub_records_for_indexing([SO|Rest], NameKey, NameIdDict, Index, OrgId, Existing
 
 %% @doc Determine the proper key to use to retrieve the unique name of
 %% an object from its EJson representation.
+- spec name_key(atom | index()) -> binary().
 name_key(data_bag_item) -> <<"id">>;
 name_key(_Type)         -> <<"name">>.
 
