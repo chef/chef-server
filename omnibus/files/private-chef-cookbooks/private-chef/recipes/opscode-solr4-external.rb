@@ -22,6 +22,6 @@ when 'solr'
 when 'elasticsearch'
   elasticsearch_index 'chef' do
     server_url node['private_chef']['opscode-solr4']['external_url']
-    index_definition(helper.es_index_definition)
+    index_definition lazy { helper.es_index_definition }
   end
 end

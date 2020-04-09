@@ -115,6 +115,8 @@ class OmnibusHelper
     if node['private_chef']['elasticsearch']['first_internal_install'] == true
       es_6_index
     else
+      # For external elasticsearch or chef-backend elasticsearch will be running
+      # before we try to create the index
       es_version = elastic_search_major_version
       if es_version == 6
         es_6_index
