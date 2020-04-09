@@ -41,16 +41,47 @@ is_authorized(Req0, #context{} = Context) ->
     end.
 
 do_signed_url_authorization(RequestId, Req0, #context{reqid = ReqId} = Context) ->
-    AWSAccessKeyId = wrq:get_qs_value("AWSAccessKeyId", Req0),
-    Expires = wrq:get_qs_value("Expires", Req0),
-    IncomingSignature = wrq:get_qs_value("Signature", Req0),
+io:format("~n~n--------------------------------"),
+io:format("~nin bksw_sec do_signed_url_authorization"),
+io:format("~nquery string: ~p", [wrq:req_qs(Req0)]),
+%    AWSAccessKeyId = wrq:get_qs_value("AWSAccessKeyId", Req0),
+AWSAccessKeyId = "undefined",
+%    Expires = wrq:get_qs_value("Expires", Req0),
+Expires = wrq:get_qs_value("X-Amz-Expires", Req0),
+io:format("~nexpires: ~p", [Expires]),
+%    IncomingSignature = wrq:get_qs_value("Signature", Req0),
+IncomingSignature = wrq:get_qs_value("X-Amz-Signature", Req0),
     RawMethod = wrq:method(Req0),
     Method = string:to_lower(erlang:atom_to_list(RawMethod)),
-    Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
+io:format("~nmethod: ~p", [Method]),
+%    Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
+Headers = [{case is_atom(Key) of true -> atom_to_list(Key); _ -> Key end, Val} || {Key, Val} <- mochiweb_headers:to_list(wrq:req_headers(Req0))],
+io:format("~nheaders: ~p", [Headers]),
+SignedHeaders = wrq:get_qs_value("X-Amz-SignedHeaders", Req0),
+io:format("~nsigned headers: ~p", [SignedHeaders]),
     Path  = wrq:path(Req0),
+io:format("~npath: ~p", [Path]),
+RawPath  = wrq:path(Req0),
+io:format("~nrawpath: ~p", [RawPath]),
+{BucketName, Key} = bucketname_key_from_path(Path),
+io:format("~nbucketname: ~p", [BucketName]),
+io:format("~nkey: ~p", [Key]),
     AccessKey = bksw_conf:access_key_id(Context),
     SecretKey = bksw_conf:secret_access_key(Context),
-    ExpireDiff = expire_diff(Expires),
+io:format("~naccess-key-id: ~p", [AccessKey]),
+io:format("~nsecret-access-key: ~p", [SecretKey]),
+%    ExpireDiff = expire_diff(Expires),
+ExpireDiff = 99999,
+%io:format("~nexpire-diff: ~p", [ExpireDiff]),
+Host = wrq:get_req_header("Host", Req0),
+io:format("~nhost: ~p", [Host]),
+% may need to adjust headers here
+Config = mini_s3:new(AccessKey, SecretKey, Host),
+% don't use Headers here - that's all the headers in this request, not the headers which were used to sign
+% just use the signed ones
+S3Url = mini_s3:s3_url(list_to_atom(Method), BucketName, Key, list_to_integer(Expires), Headers, Config),
+io:format("~ns3url: ~p", [S3Url]),
+io:format("~n--------------------------------"),
     case make_signed_url_authorization(SecretKey,
                                        Method,
                                        Path,
@@ -78,8 +109,16 @@ do_signed_url_authorization(RequestId, Req0, #context{reqid = ReqId} = Context) 
                     end
                 end;
         error ->
+io:format("~nbksw_sec: make_signed_url_authorization failed"),
             encode_access_denied_error_response(RequestId, Req0, Context)
     end.
+
+bucketname_key_from_path(Path0) ->
+    % remove leading /, if any
+    {_, Path} = string:take(Path0, "/"),
+    % assume Path = BucketName/Key, crash on anything else
+    [BucketName, Key] = string:split(Path, "/"),
+    {BucketName, Key}.
 
 make_signed_url_authorization(SecretKey, Method, Path, Expires, Headers) ->
     try
