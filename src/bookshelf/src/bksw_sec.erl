@@ -81,7 +81,6 @@ Config = mini_s3:new(AccessKey, SecretKey, Host),
 % just use the signed ones
 S3Url = mini_s3:s3_url(list_to_atom(Method), BucketName, Key, list_to_integer(Expires), Headers, Config),
 io:format("~ns3url: ~p", [S3Url]),
-io:format("~n--------------------------------"),
     case make_signed_url_authorization(SecretKey,
                                        Method,
                                        Path,
@@ -102,8 +101,12 @@ case true of
                         true ->
                             MaxAge = "max-age=" ++ integer_to_list(ExpireDiff),
                             Req1 = wrq:set_resp_header("Cache-Control", MaxAge, Req0),
+io:format("~ndo_signed_url_authorization succeeded"),
+io:format("~n--------------------------------"),
                             {true, Req1, Context};
                         false ->
+io:format("~ndo_signed_url_authorization failed"),
+io:format("~n--------------------------------"),
                             ?LOG_DEBUG("req_id=~p signing error for ~p", [ReqId, Path]),
                             encode_sign_error_response(AWSAccessKeyId, IncomingSignature, RequestId,
                                                        StringToSign, Req0, Context)
@@ -111,6 +114,7 @@ case true of
                 end;
         error ->
 io:format("~nbksw_sec: make_signed_url_authorization failed"),
+io:format("~n--------------------------------"),
             encode_access_denied_error_response(RequestId, Req0, Context)
     end.
 
