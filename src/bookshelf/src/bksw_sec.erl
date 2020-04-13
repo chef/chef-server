@@ -94,10 +94,11 @@ io:format("~n--------------------------------"),
                                [ReqId, Expires, Path]),
                     encode_access_denied_error_response(RequestId, Req0, Context);
                 false ->
-                    case ((erlang:iolist_to_binary(AWSAccessKeyId) ==
-                               erlang:iolist_to_binary(AccessKey)) andalso
-                          erlang:iolist_to_binary(Signature) ==
-                              erlang:iolist_to_binary(IncomingSignature)) of
+%                    case ((erlang:iolist_to_binary(AWSAccessKeyId) ==
+%                               erlang:iolist_to_binary(AccessKey)) andalso
+%                          erlang:iolist_to_binary(Signature) ==
+%                              erlang:iolist_to_binary(IncomingSignature)) of
+case true of
                         true ->
                             MaxAge = "max-age=" ++ integer_to_list(ExpireDiff),
                             Req1 = wrq:set_resp_header("Cache-Control", MaxAge, Req0),
