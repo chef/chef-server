@@ -155,16 +155,6 @@ resource "null_resource" "chef_server_test" {
     ]
   }
 
-  # install + test push jobs addon
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/install_addon_push_jobs.sh",
-      "ENABLE_ADDON_PUSH_JOBS=${var.enable_addon_push_jobs} /tmp/install_addon_push_jobs.sh",
-      "chmod +x /tmp/test_addon_push_jobs.sh",
-      "ENABLE_ADDON_PUSH_JOBS=${var.enable_addon_push_jobs} /tmp/test_addon_push_jobs.sh",
-    ]
-  }
-
   # install + test chef manage addon
   provisioner "remote-exec" {
     inline = [
@@ -194,6 +184,16 @@ resource "null_resource" "chef_server_test" {
     inline = [
       "chmod +x /tmp/test_gather_logs.sh",
       "ENABLE_GATHER_LOGS_TEST=${var.enable_gather_logs_test} /tmp/test_gather_logs.sh",
+    ]
+  }
+
+  # install + test push jobs addon
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/install_addon_push_jobs.sh",
+      "ENABLE_ADDON_PUSH_JOBS=${var.enable_addon_push_jobs} /tmp/install_addon_push_jobs.sh",
+      "chmod +x /tmp/test_addon_push_jobs.sh",
+      "ENABLE_ADDON_PUSH_JOBS=${var.enable_addon_push_jobs} /tmp/test_addon_push_jobs.sh",
     ]
   }
 }
