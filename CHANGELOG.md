@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 13.2.1 -->
+## [13.2.1](https://github.com/chef/chef-server/tree/13.2.1) (2020-04-15)
+
+#### Merged Pull Requests
+- Update release notes for 13.2.0 [#1964](https://github.com/chef/chef-server/pull/1964) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=13.2.0 -->
+### Changes since 13.2.0 release
+
+#### Merged Pull Requests
+- Update release notes for 13.2.0 [#1964](https://github.com/chef/chef-server/pull/1964) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.1 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
