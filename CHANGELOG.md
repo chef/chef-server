@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.1 -->
-## [13.2.1](https://github.com/chef/chef-server/tree/13.2.1) (2020-04-15)
+<!-- latest_release 13.2.2 -->
+## [13.2.2](https://github.com/chef/chef-server/tree/13.2.2) (2020-04-15)
 
 #### Merged Pull Requests
-- Update release notes for 13.2.0 [#1964](https://github.com/chef/chef-server/pull/1964) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Turn off smart builds [#1965](https://github.com/chef/chef-server/pull/1965) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Turn off smart builds [#1965](https://github.com/chef/chef-server/pull/1965) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.2 -->
 - Update release notes for 13.2.0 [#1964](https://github.com/chef/chef-server/pull/1964) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.1 -->
 <!-- release_rollup -->
 
