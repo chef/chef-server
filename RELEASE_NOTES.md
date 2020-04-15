@@ -8,6 +8,48 @@ This document contains release notes for the current major release and all patch
 For prior releases,
 see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 13.2.0 (2020-4-14)
+
+### Improvements
+- Azure support for external PostgreSQL
+    In the previous release we added support for ssl while connecting to
+    PostgreSQL.
+    With this release we add the ability to be able to connect to external
+    PostgreSQL database in Azure. We would like to thank
+    https://github.com/zanecodes for their contributions.
+- Update HAProxy configuration
+    We have updated the configuration for HAProxy to make it
+    more responsive. The changes include:
+     * Set connect, client, server, and tunnel timeouts to reasonable defaults.
+     * Set client-fin and server-fin to try to mitigate connection pile-ups
+       in the case of failing frontend services.
+     * Set on-marked-down shutdown-session to avoid stale sessions to
+       previous leaders living longer than they need to.
+- Integration testing pipeline
+    We have put a lot of effort into creating a test pipeline with the
+    test infrastructure previously created. This runs multiple scenarios for
+    Chef Infra Server with different configurations and topologies.
+- Chef Infra Server supports Elasticsearch version 6 for external Elasticsearch
+    Chef Infra Server previously supported index creation for ElasticSearch versions
+    2 and 5. We now support index creation for ElasticSearch 6 as well
+- Cookstyle changes applied to the cookbooks
+- Disable actions rabbitmq queue by default.
+- Log all errors triggered due to Elasticsearch reindex.
+
+### Bug Fixes
+- Fix a regression that broke FIPS 140-2 support in Chef Infra Server
+  13.1.13.
+- Fix habitat db config for external database
+  (Thank you https://github.com/uwej711 for your contribution!)
+- Elasticsearch recipes should not create indexes at compile time.
+
+### Updates
+- Chef Infra Client: 15.5.17 -> 15.8.23
+- rack(oc-chef-pedant): 2.0.7 -> 2.0.8
+- Ruby(oc-id): 1.6.11 -> 1.6.12
+- rubyzip(oc-id): 1.2.3 -> 1.3.0 (fixes CVE-2019-16892)
+- Erlang(habitat): 18 -> 20 (Thank you https://github.com/uwej711)
+
 ## 13.1.13 (2019-11-25)
 
 ### General changes
