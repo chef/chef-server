@@ -128,25 +128,26 @@ validate_request('PUT', Req, State) ->
     end.
 
 validate_checksums_uploaded(ReqId, #chef_sandbox{id = _BoxId, checksums = Checksums, org_id = OrgId}) ->
-    %% The flag is for "uploaded"
-    NeedsUpload = [ CSum || {CSum, false} <- Checksums ],
-
-    {{ok, _}, {missing, NotFound}, {timeout, Timeouts}, {error, Errors}}  =
-        ?SH_TIME(ReqId, chef_s3, check_checksums, (OrgId, NeedsUpload)),
-    %% For the time being, we are lumping timeouts in with other errors
-    OverallErrorCount = length(Errors) + length(Timeouts),
-
-    case {NotFound, OverallErrorCount} of
-        {[], 0} ->
-            %% Everything was there!
-            ok;
-        {_, OverallErrorCount} when OverallErrorCount =/= 0 ->
-            %% We had some errors :(
-            throw({checksum_check_error, OverallErrorCount});
-        {Missing, _} ->
-            %% Some checksums were missing :(
-            throw({missing_checksums, Missing})
-    end.
+    ok.
+%    %% The flag is for "uploaded"
+%    NeedsUpload = [ CSum || {CSum, false} <- Checksums ],
+%
+%    {{ok, _}, {missing, NotFound}, {timeout, Timeouts}, {error, Errors}}  =
+%        ?SH_TIME(ReqId, chef_s3, check_checksums, (OrgId, NeedsUpload)),
+%    %% For the time being, we are lumping timeouts in with other errors
+%    OverallErrorCount = length(Errors) + length(Timeouts),
+%
+%    case {NotFound, OverallErrorCount} of
+%        {[], 0} ->
+%            %% Everything was there!
+%            ok;
+%        {_, OverallErrorCount} when OverallErrorCount =/= 0 ->
+%            %% We had some errors :(
+%            throw({checksum_check_error, OverallErrorCount});
+%        {Missing, _} ->
+%            %% Some checksums were missing :(
+%            throw({missing_checksums, Missing})
+%    end.
 
 %% @doc Commits a sandbox.  This marks all checksums as having been uploaded, and removes
 %% all record of the sandbox from the database (it has served its purpose and is no longer
