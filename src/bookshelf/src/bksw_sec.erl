@@ -44,44 +44,70 @@ do_signed_url_authorization(RequestId, Req0, #context{reqid = ReqId} = Context) 
 io:format("~n~n--------------------------------"),
 io:format("~nin bksw_sec do_signed_url_authorization"),
 io:format("~nquery string: ~p", [wrq:req_qs(Req0)]),
-%    AWSAccessKeyId = wrq:get_qs_value("AWSAccessKeyId", Req0),
-AWSAccessKeyId = "undefined",
-%    Expires = wrq:get_qs_value("Expires", Req0),
+
+"AWS4-HMAC-SHA256" = wrq:get_qs_value("X-Amz-Algorithm", Req0),
+
+   % AWSAccessKeyId = wrq:get_qs_value("AWSAccessKeyId", Req0),
+% see https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
+[AWSAccessKeyId | _]  = parse_x_amz_credential(wrq:get_qs_value("X-Amz-Credential", Req0)),
+io:format("~naws-access-key-id: ~p", [AWSAccessKeyId]),
+
+% X-Amz-Date here?
+XAmzDate = wrq:get_qs_value("X-Amz-Date", Req0),
+
+   % Expires = wrq:get_qs_value("Expires", Req0),
+% 1 =< Expires =< 604800
 Expires = wrq:get_qs_value("X-Amz-Expires", Req0),
 io:format("~nexpires: ~p", [Expires]),
-%    IncomingSignature = wrq:get_qs_value("Signature", Req0),
+
+   % IncomingSignature = wrq:get_qs_value("Signature", Req0),
 IncomingSignature = wrq:get_qs_value("X-Amz-Signature", Req0),
+
     RawMethod = wrq:method(Req0),
     Method = string:to_lower(erlang:atom_to_list(RawMethod)),
 io:format("~nmethod: ~p", [Method]),
-%    Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
-Headers = [{case is_atom(Key) of true -> atom_to_list(Key); _ -> Key end, Val} || {Key, Val} <- mochiweb_headers:to_list(wrq:req_headers(Req0))],
+
+   % Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
+Headers = process_headers(mochiweb_headers:to_list(wrq:req_headers(Req0))),
 io:format("~nheaders: ~p", [Headers]),
-SignedHeaders = wrq:get_qs_value("X-Amz-SignedHeaders", Req0),
-io:format("~nsigned headers: ~p", [SignedHeaders]),
+
+SignedHeaderKeys = parse_x_amz_signed_headers(wrq:get_qs_value("X-Amz-SignedHeaders", Req0)),
+io:format("~nsigned headers: ~p", [SignedHeaderKeys]),
+
+SignedHeaders = get_signed_headers(SignedHeaderKeys, Headers),
+
     Path  = wrq:path(Req0),
 io:format("~npath: ~p", [Path]),
-RawPath  = wrq:path(Req0),
+RawPath  = wrq:raw_path(Req0),
 io:format("~nrawpath: ~p", [RawPath]),
+PathTokens  = wrq:path_tokens(Req0),
+io:format("~npath-tokens: ~p", [PathTokens]),
+
 {BucketName, Key} = bucketname_key_from_path(Path),
 io:format("~nbucketname: ~p", [BucketName]),
 io:format("~nkey: ~p", [Key]),
+
     AccessKey = bksw_conf:access_key_id(Context),
     SecretKey = bksw_conf:secret_access_key(Context),
 io:format("~naccess-key-id: ~p", [AccessKey]),
 io:format("~nsecret-access-key: ~p", [SecretKey]),
-%    ExpireDiff = expire_diff(Expires),
+
+   % ExpireDiff = expire_diff(Expires),
 ExpireDiff = 99999,
 %io:format("~nexpire-diff: ~p", [ExpireDiff]),
+
 Host = wrq:get_req_header("Host", Req0),
 io:format("~nhost: ~p", [Host]),
-% may need to adjust headers here
+
+% which key/secret to use?
+% what to use for host value?
 Config = mini_s3:new(AccessKey, SecretKey, Host),
+% may need to adjust headers here
 % don't use Headers here - that's all the headers in this request, not the headers which were used to sign
 % just use the signed ones
-S3Url = mini_s3:s3_url(list_to_atom(Method), BucketName, Key, list_to_integer(Expires), Headers, Config),
+S3Url = mini_s3:s3_url(list_to_atom(Method), BucketName, Key, list_to_integer(Expires), SignedHeaders, XAmzDate, Config),
 io:format("~ns3url: ~p", [S3Url]),
-    case make_signed_url_authorization(SecretKey,
+case make_signed_url_authorization(SecretKey,
                                        Method,
                                        Path,
                                        Expires,
@@ -93,6 +119,7 @@ io:format("~ns3url: ~p", [S3Url]),
                                [ReqId, Expires, Path]),
                     encode_access_denied_error_response(RequestId, Req0, Context);
                 false ->
+% temp hack
 %                    case ((erlang:iolist_to_binary(AWSAccessKeyId) ==
 %                               erlang:iolist_to_binary(AccessKey)) andalso
 %                          erlang:iolist_to_binary(Signature) ==
@@ -118,10 +145,28 @@ io:format("~n--------------------------------"),
             encode_access_denied_error_response(RequestId, Req0, Context)
     end.
 
+get_signed_headers(SignedHeaderKeys, Headers) ->
+    lists:flatten([proplists:lookup_all(SignedHeaderKey, Headers) || SignedHeaderKey <- SignedHeaderKeys]).
+
+% Cred = "<access-key-id>/<date>/<AWS-region>/<AWS-service>/aws4_request"
+parse_x_amz_credential(Cred) ->
+   [_access_key_id, _date, _AWS_region, "s3", "aws4_request"] = string:split(Cred, "%2F", all).
+
+% Headers = "<header1>;<header2>;...<headerN>"
+parse_x_amz_signed_headers(Headers) ->
+   string:split(Headers, "%3B", all).
+
+process_headers(Headers) ->
+    [{string:casefold(
+        case is_atom(Key) of
+            true -> atom_to_list(Key);
+            _    -> Key
+        end), Val} || {Key, Val} <- Headers].
+
+% Path = "<bucketname>/<key>"
 bucketname_key_from_path(Path0) ->
     % remove leading /, if any
     {_, Path} = string:take(Path0, "/"),
-    % assume Path = BucketName/Key, crash on anything else
     [BucketName, Key] = string:split(Path, "/"),
     {BucketName, Key}.
 
