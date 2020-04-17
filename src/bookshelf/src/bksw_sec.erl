@@ -24,7 +24,7 @@
 
 -define(SECONDS_AT_EPOCH, 62167219200).
 -include("internal.hrl").
-
+-compile(export_all).
 %%===================================================================
 %% API functions
 %%===================================================================
@@ -46,9 +46,11 @@ io:format("~nin bksw_sec do_signed_url_authorization"),
 io:format("~nquery string: ~p", [wrq:req_qs(Req0)]),
 
 "AWS4-HMAC-SHA256" = wrq:get_qs_value("X-Amz-Algorithm", Req0),
+%io:format("~nx-amz-algorithm: ~p", [wrq:get_qs_value("X-Amz-Algorithm", Req0)]),
 
    % AWSAccessKeyId = wrq:get_qs_value("AWSAccessKeyId", Req0),
 % see https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
+io:format("~nx-amz-credential: ~p", [wrq:get_qs_value("X-Amz-Credential", Req0)]),
 [AWSAccessKeyId | _]  = parse_x_amz_credential(wrq:get_qs_value("X-Amz-Credential", Req0)),
 io:format("~naws-access-key-id: ~p", [AWSAccessKeyId]),
 
@@ -62,6 +64,7 @@ io:format("~nexpires: ~p", [Expires]),
 
    % IncomingSignature = wrq:get_qs_value("Signature", Req0),
 IncomingSignature = wrq:get_qs_value("X-Amz-Signature", Req0),
+io:format("~nincoming signature: ~p", [IncomingSignature]),
 
     RawMethod = wrq:method(Req0),
     Method = string:to_lower(erlang:atom_to_list(RawMethod)),
@@ -72,12 +75,15 @@ Headers = process_headers(mochiweb_headers:to_list(wrq:req_headers(Req0))),
 io:format("~nheaders: ~p", [Headers]),
 
 SignedHeaderKeys = parse_x_amz_signed_headers(wrq:get_qs_value("X-Amz-SignedHeaders", Req0)),
-io:format("~nsigned headers: ~p", [SignedHeaderKeys]),
+io:format("~nsigned header keys: ~p", [SignedHeaderKeys]),
 
 SignedHeaders = get_signed_headers(SignedHeaderKeys, Headers),
+io:format("~nsigned headers: ~p", [SignedHeaders]),
 
     Path  = wrq:path(Req0),
 io:format("~npath: ~p", [Path]),
+DispPath  = wrq:disp_path(Req0),
+io:format("~ndisp_path: ~p", [DispPath]),
 RawPath  = wrq:raw_path(Req0),
 io:format("~nrawpath: ~p", [RawPath]),
 PathTokens  = wrq:path_tokens(Req0),
@@ -102,11 +108,8 @@ io:format("~nhost: ~p", [Host]),
 % which key/secret to use?
 % what to use for host value?
 Config = mini_s3:new(AccessKey, SecretKey, Host),
-% may need to adjust headers here
-% don't use Headers here - that's all the headers in this request, not the headers which were used to sign
-% just use the signed ones
 S3Url = mini_s3:s3_url(list_to_atom(Method), BucketName, Key, list_to_integer(Expires), SignedHeaders, XAmzDate, Config),
-io:format("~ns3url: ~p", [S3Url]),
+io:format("~ns3url (compare signatures): ~p", [S3Url]),
 case make_signed_url_authorization(SecretKey,
                                        Method,
                                        Path,
@@ -150,11 +153,12 @@ get_signed_headers(SignedHeaderKeys, Headers) ->
 
 % Cred = "<access-key-id>/<date>/<AWS-region>/<AWS-service>/aws4_request"
 parse_x_amz_credential(Cred) ->
-   [_access_key_id, _date, _AWS_region, "s3", "aws4_request"] = string:split(Cred, "%2F", all).
+   [_access_key_id, _date, _AWS_region, "s3", "aws4_request"] = string:split(Cred, "/", all). %string:split(Cred, "%2F", all).
 
 % Headers = "<header1>;<header2>;...<headerN>"
 parse_x_amz_signed_headers(Headers) ->
-   string:split(Headers, "%3B", all).
+   string:split(Headers, ";", all).
+   %string:split(Headers, "%3B", all).
 
 process_headers(Headers) ->
     [{string:casefold(
