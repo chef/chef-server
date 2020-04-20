@@ -26,23 +26,48 @@ pedant before merge.
   aware that this can change, and perhaps consider using core/rubyXX
   instead.
 
-## Updating Ruby Gems
+## Updating Ruby Gems via Dependabot (automated)
+
+Dependabot creates PRs for updating Ruby gems.  Verify pipeline builds
+are kicked-off automatically, but it is necessary to verify that they
+pass.  Any needed adhoc builds must be kicked-off by hand.
+
+Some Dependabot PRs will only need passing verify builds.  Others will
+need both passing verify and adhoc builds.  Look at the title of the PR,
+then consult the lists below to determine what you need to do with the PR.
+
+Needing passing verify builds only:
+- src/oc-id/Gemfile.lock
+- src/oc\_erchef/apps/chef_objects/priv/depselector\_rb/Gemfile.lock
+- src/oc_bifrost/oc-bifrost-pedant/Gemfile.lock
+
+Needing passing verify + adhoc builds:
+- omnibus/Gemfile.lock
+- oc-chef-pedant/Gemfile.lock
+- src/chef-server-ctl/Gemfile.lock
+
+You can rebase the PR's branch onto master by putting:
+`@dependabot rebase`
+in the comment section.
+
+## Updating Ruby Gems by Hand
 
 ### Overview
+
+For personal sanity, remove all .bundle and vendor directories before
+starting and after you complete the updates. 
 
 The following Gemfile.locks need to be updated to do a complete
 sweep. We strongly recommend using bundler 1.17.x until bundler 2.1 is
 out and stable.
 
-For personal sanity, remove all .bundle and vendor directories before
-starting and after you complete the updates. 
-
+- omnibus/Gemfile.lock
 - oc-chef-pedant/Gemfile.lock
 - src/oc-id/Gemfile.lock
-  Due to the rails version, we've locked a lot of dependencies. Make
+  DO NOT update this file unless Rails is upgraded.
+  Due to the Rails version, we've locked a lot of dependencies. Make
   sure we can build and run oc-id before merging to master.
-  You'll need the libsqlite3-dev library if doing this on Ubuntu
-
+  You'll need the libsqlite3-dev library if doing this on Ubuntu.
 - src/oc\_erchef/apps/chef_objects/priv/depselector\_rb/Gemfile.lock
 - src/chef-server-ctl/Gemfile.lock
 - src/oc_bifrost/oc-bifrost-pedant/Gemfile.lock
@@ -142,7 +167,7 @@ done.
 - Latest version for rebar3 can be found at: https://www.rebar3.org/
 - Download and update the current rebar3 executable with it.
 
-## Updating the erlang dependencies using rebar3
+## Updating Erlang Dependencies using rebar3
 
 - There are 2 approaches to updating the dependencies
   - From the dev-vm (Preferred method)
@@ -163,6 +188,13 @@ done.
   - On the host (mac)
     - cp chef-server/dev/dotfiles/rebar.lock chef-server/src/oc_erchef
   - Repeat the above steps for all the erlang apps.
+    - As of 02/21 these are all of the rebar.lock files that need updating:
+```
+chef-server/src/bookshelf/rebar.lock
+chef-server/src/oc_erchef/rebar.lock
+chef-server/src/oc_bifrost/rebar.lock
+chef-server/src/oc_erchef/apps/data_collector/rebar.lock
+```
 - Updating the erlang deps from the host machine
   - cd chef-server/src/oc_erchef
   - rm -fr \_build
@@ -170,3 +202,9 @@ done.
   - rm -fr \_build # not removing this can cause strange build problems where omnibus builds pick up mac architecture libraries
   - The lockfile will be updated in place. .
   - Repeat above steps for all the erlang apps.
+    - As of 02/21 these are all of the rebar.lock files that need updating:
+```
+chef-server/src/bookshelf/rebar.lock
+chef-server/src/oc_erchef/rebar.lock
+chef-server/src/oc_bifrost/rebar.lock
+```
