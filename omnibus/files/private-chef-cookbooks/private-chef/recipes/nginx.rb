@@ -124,7 +124,7 @@ if node['private_chef']['nginx']['ssl_dhparam'].nil?
     generator node['private_chef']['nginx']['dhparam_generator_id']
     owner 'root'
     group 'root'
-    mode '0644'
+    mode '0600'
   end
 
   node.default['private_chef']['nginx']['ssl_dhparam'] = ssl_dhparam
