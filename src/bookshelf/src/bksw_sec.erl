@@ -21,6 +21,10 @@
 -module(bksw_sec).
 
 -export([is_authorized/2]).
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-export([is_expired/2]).
+-endif.
 
 -define(SECONDS_AT_EPOCH, 62167219200).
 -include("internal.hrl").
@@ -58,9 +62,9 @@ io:format("~naws-access-key-id: ~p", [AWSAccessKeyId]),
 XAmzDate = wrq:get_qs_value("X-Amz-Date", Req0),
 
    % Expires = wrq:get_qs_value("Expires", Req0),
-% 1 =< Expires =< 604800
-Expires = wrq:get_qs_value("X-Amz-Expires", Req0),
-io:format("~nexpires: ~p", [Expires]),
+% 1 =< XAmzExpires =< 604800
+XAmzExpires = list_to_integer(wrq:get_qs_value("X-Amz-Expires", Req0)),
+io:format("~nx-amz-expires: ~p", [XAmzExpires]),
 
    % IncomingSignature = wrq:get_qs_value("Signature", Req0),
 IncomingSignature = wrq:get_qs_value("X-Amz-Signature", Req0),
@@ -108,45 +112,83 @@ io:format("~nhost: ~p", [Host]),
 % which key/secret to use?
 % what to use for host value?
 Config = mini_s3:new(AccessKey, SecretKey, Host),
-S3Url = mini_s3:s3_url(list_to_atom(Method), BucketName, Key, list_to_integer(Expires), SignedHeaders, XAmzDate, Config),
-io:format("~ns3url (compare signatures): ~p", [S3Url]),
-case make_signed_url_authorization(SecretKey,
-                                       Method,
-                                       Path,
-                                       Expires,
-                                       Headers) of
-        {StringToSign, Signature} ->
-            case ExpireDiff =< 0 of
-                true ->
-                    ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p",
-                               [ReqId, Expires, Path]),
-                    encode_access_denied_error_response(RequestId, Req0, Context);
-                false ->
-% temp hack
-%                    case ((erlang:iolist_to_binary(AWSAccessKeyId) ==
-%                               erlang:iolist_to_binary(AccessKey)) andalso
-%                          erlang:iolist_to_binary(Signature) ==
-%                              erlang:iolist_to_binary(IncomingSignature)) of
-case true of
-                        true ->
-                            MaxAge = "max-age=" ++ integer_to_list(ExpireDiff),
-                            Req1 = wrq:set_resp_header("Cache-Control", MaxAge, Req0),
-io:format("~ndo_signed_url_authorization succeeded"),
-io:format("~n--------------------------------"),
-                            {true, Req1, Context};
-                        false ->
-io:format("~ndo_signed_url_authorization failed"),
-io:format("~n--------------------------------"),
-                            ?LOG_DEBUG("req_id=~p signing error for ~p", [ReqId, Path]),
-                            encode_sign_error_response(AWSAccessKeyId, IncomingSignature, RequestId,
-                                                       StringToSign, Req0, Context)
-                    end
-                end;
-        error ->
-io:format("~nbksw_sec: make_signed_url_authorization failed"),
-io:format("~n--------------------------------"),
-            encode_access_denied_error_response(RequestId, Req0, Context)
-    end.
+ComparisonURL = mini_s3:s3_url(list_to_atom(Method), BucketName, Key, XAmzExpires, SignedHeaders, XAmzDate, Config),
+io:format("~ns3url: ~p", [ComparisonURL]),
+
+% compare signatures
+[_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", all),
+io:format("~nsig1:  ~p", [IncomingSignature]),
+io:format("~nsig2:  ~p", [ComparisonSig    ]),
+
+case ComparisonSig of
+    IncomingSignature ->
+        case is_expired(XAmzDate, XAmzExpires) of
+            true ->
+                io:format("~nexpired signature"),
+                ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p",
+                           [ReqId, XAmzExpires, Path]),
+                encode_access_denied_error_response(RequestId, Req0, Context);
+            false ->
+                case erlang:iolist_to_binary(AWSAccessKeyId) ==
+                           erlang:iolist_to_binary(AccessKey) of
+                    true ->
+                        MaxAge = "max-age=" ++ integer_to_list(ExpireDiff),
+                        Req1 = wrq:set_resp_header("Cache-Control", MaxAge, Req0),
+                        io:format("~ndo_signed_url_authorization succeeded"),
+                        io:format("~n--------------------------------"),
+                        {true, Req1, Context};
+                    false ->
+                        io:format("~ndo_signed_url_authorization failed"),
+                        io:format("~n--------------------------------"),
+                        ?LOG_DEBUG("req_id=~p signing error for ~p", [ReqId, Path]),
+                        encode_sign_error_response(AWSAccessKeyId, IncomingSignature, RequestId,
+                                                   ComparisonURL, Req0, Context)
+                end
+            end;
+    _ ->
+        io:format("~nbksw_sec: make_signed_url_authorization failed"),
+        io:format("~n--------------------------------"),
+        encode_access_denied_error_response(RequestId, Req0, Context)
+end.
+
+
+%case make_signed_url_authorization(SecretKey,
+%                                       Method,
+%                                       Path,
+%                                       Expires,
+%                                       Headers) of
+%        {StringToSign, Signature} ->
+%            case ExpireDiff =< 0 of
+%                true ->
+%                    ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p",
+%                               [ReqId, Expires, Path]),
+%                    encode_access_denied_error_response(RequestId, Req0, Context);
+%                false ->
+%% temp hack
+%%                    case ((erlang:iolist_to_binary(AWSAccessKeyId) ==
+%%                               erlang:iolist_to_binary(AccessKey)) andalso
+%%                          erlang:iolist_to_binary(Signature) ==
+%%                              erlang:iolist_to_binary(IncomingSignature)) of
+%case true of
+%                        true ->
+%                            MaxAge = "max-age=" ++ integer_to_list(ExpireDiff),
+%                            Req1 = wrq:set_resp_header("Cache-Control", MaxAge, Req0),
+%io:format("~ndo_signed_url_authorization succeeded"),
+%io:format("~n--------------------------------"),
+%                            {true, Req1, Context};
+%                        false ->
+%io:format("~ndo_signed_url_authorization failed"),
+%io:format("~n--------------------------------"),
+%                            ?LOG_DEBUG("req_id=~p signing error for ~p", [ReqId, Path]),
+%                            encode_sign_error_response(AWSAccessKeyId, IncomingSignature, RequestId,
+%                                                       StringToSign, Req0, Context)
+%                    end
+%                end;
+%        error ->
+%io:format("~nbksw_sec: make_signed_url_authorization failed"),
+%io:format("~n--------------------------------"),
+%            encode_access_denied_error_response(RequestId, Req0, Context)
+%    end.
 
 get_signed_headers(SignedHeaderKeys, Headers) ->
     lists:flatten([proplists:lookup_all(SignedHeaderKey, Headers) || SignedHeaderKey <- SignedHeaderKeys]).
@@ -228,6 +270,31 @@ expire_diff(undefined) -> 1;
 expire_diff(Expires) ->
     Now = calendar:datetime_to_gregorian_seconds(erlang:universaltime()),
     bksw_util:to_integer(Expires) - (Now - ?SECONDS_AT_EPOCH).
+
+-spec is_expired(string(), integer()) -> boolean().
+is_expired(DateTimeString, ExpiresInSecondsInt) ->
+    % most ways of getting the date/time seem problematic.  for instance, docs for
+    % calendar:universal_time() and erlang:universaltime() say: 'Returns local time
+    % if universal time is unavailable.'
+    % since it is unknown which time would be used, we could use local time and
+    % convert to universal.  however, local time could be an 'illegal' time wrt
+    % universal time if switching to/from daylight savings time.
+     
+    UniversalTimeInSec = calendar:datetime_to_gregorian_seconds(calendar:now_to_universal_time(os:timestamp())),
+    
+    [Y1, Y2, Y3, Y4, M1, M2, D1, D2, _, H1, H2, N1, N2, S1, S2, _] = DateTimeString,
+    Year 	= list_to_integer([Y1, Y2, Y3, Y4]),
+    Month	= list_to_integer([M1, M2        ]),
+    Day		= list_to_integer([D1, D2		 ]),
+    Hour	= list_to_integer([H1, H2		 ]),
+    Min		= list_to_integer([N1, N2		 ]),
+    Sec		= list_to_integer([S1, S2		 ]),
+
+    % this could be used to check if the date constructed is valid
+    % calendar:valid_date({{Year, Month, Day}, {Hour, Min, Sec}}),
+    
+    DateSeconds = calendar:datetime_to_gregorian_seconds({{Year, Month, Day}, {Hour, Min, Sec}}),
+    DateSeconds + ExpiresInSecondsInt < UniversalTimeInSec.
 
 %% get_bucket([Bucket, _, _]) ->
 %%     Bucket.
