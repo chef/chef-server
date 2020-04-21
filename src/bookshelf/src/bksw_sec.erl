@@ -23,7 +23,12 @@
 -export([is_authorized/2]).
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
--export([is_expired/2]).
+-export([bucketname_key_from_path/1  ]).
+-export([is_expired/2                ]).
+-export([get_signed_headers/2        ]).
+-export([parse_x_amz_credential/1    ]).
+-export([parse_x_amz_signed_headers/1]).
+-export([process_headers/1           ]).
 -endif.
 
 -define(SECONDS_AT_EPOCH, 62167219200).
@@ -190,18 +195,22 @@ end.
 %            encode_access_denied_error_response(RequestId, Req0, Context)
 %    end.
 
+% get the key-value pairs (headers) associated with particular keys
 get_signed_headers(SignedHeaderKeys, Headers) ->
     lists:flatten([proplists:lookup_all(SignedHeaderKey, Headers) || SignedHeaderKey <- SignedHeaderKeys]).
 
+% split-up credentials string into component parts
 % Cred = "<access-key-id>/<date>/<AWS-region>/<AWS-service>/aws4_request"
 parse_x_amz_credential(Cred) ->
    [_access_key_id, _date, _AWS_region, "s3", "aws4_request"] = string:split(Cred, "/", all). %string:split(Cred, "%2F", all).
 
+% split-up signed header list into component parts
 % Headers = "<header1>;<header2>;...<headerN>"
 parse_x_amz_signed_headers(Headers) ->
    string:split(Headers, ";", all).
    %string:split(Headers, "%3B", all).
 
+% convert the keys of key-value pairs to all lowercase strings
 process_headers(Headers) ->
     [{string:casefold(
         case is_atom(Key) of
@@ -209,6 +218,7 @@ process_headers(Headers) ->
             _    -> Key
         end), Val} || {Key, Val} <- Headers].
 
+% split "bucketname/key" or "/bucketname/key" into {"bucketname", "key"}
 % Path = "<bucketname>/<key>"
 bucketname_key_from_path(Path0) ->
     % remove leading /, if any
