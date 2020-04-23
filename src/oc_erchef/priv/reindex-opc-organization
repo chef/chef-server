@@ -151,7 +151,9 @@ find_dl_headers(OrgNameBin, IntLB) when is_binary(OrgNameBin) ->
     find_dl_headers(binary_to_list(OrgNameBin), IntLB);
 find_dl_headers(OrgName, IntLB) when is_list(OrgName) ->
     {ok, "200", _Headers, Body} = rpc:call(?ERCHEF, ibrowse,send_req, [IntLB ++ "/_route/organizations/" ++ OrgName, [], get]),
+    io:format("Body: ~p", [Body]),
     Json = rpc:call(?ERCHEF, jiffy, decode, [Body]),
+    io:format("Json: ~p", [Json]),
     SubJson = rpc:call(?ERCHEF, ej, get, [{<<"config">>, <<"merged">>}, Json]),
     {KVList} = SubJson,
     Headers = string:join(lists:map(fun({Key, Val}) -> binary_to_list(Key) ++ "=" ++ integer_to_list(Val) end, KVList), ";"),
