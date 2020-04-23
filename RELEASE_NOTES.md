@@ -46,7 +46,15 @@ see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 ### Updates
 - Chef Infra Client: 15.5.17 -> 15.8.23
 - rack(oc-chef-pedant): 2.0.7 -> 2.0.8
+- rack(oc-id): 1.6.11 to 1.6.12)
 - Ruby(oc-id): 1.6.11 -> 1.6.12
+- Ruby: 2.6.3 -> 2.6.5 (fixes the following CVEs
+    CVE-2019-16255: A code injection vulnerability of Shell#[] and Shell#test
+    CVE-2019-16254: HTTP response splitting in WEBrick (Additional fix)
+    CVE-2019-15845: A NUL injection vulnerability of File.fnmatch and File.fnmatch?
+    CVE-2019-16201: Regular Expression Denial of Service vulnerability of WEBrick’s Digest access authentication
+    CVE-2012-6708
+    CVE-2015-9251)
 - rubyzip(oc-id): 1.2.3 -> 1.3.0 (fixes CVE-2019-16892)
 - Erlang(habitat): 18 -> 20 (Thank you https://github.com/uwej711)
 
