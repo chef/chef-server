@@ -66,9 +66,10 @@ io:format("~naws-access-key-id: ~p", [AWSAccessKeyId]),
 % X-Amz-Date here?
 XAmzDate = wrq:get_qs_value("X-Amz-Date", Req0),
 
+XAmzExpiresString = wrq:get_qs_value("X-Amz-Expires", Req0),
    % Expires = wrq:get_qs_value("Expires", Req0),
 % 1 =< XAmzExpires =< 604800
-XAmzExpires = list_to_integer(wrq:get_qs_value("X-Amz-Expires", Req0)),
+XAmzExpires = list_to_integer(XAmzExpiresString),
 io:format("~nx-amz-expires: ~p", [XAmzExpires]),
 
    % IncomingSignature = wrq:get_qs_value("Signature", Req0),
@@ -108,7 +109,7 @@ io:format("~naccess-key-id: ~p", [AccessKey]),
 io:format("~nsecret-access-key: ~p", [SecretKey]),
 
    % ExpireDiff = expire_diff(Expires),
-ExpireDiff = 99999,
+%ExpireDiff = 99999,
 %io:format("~nexpire-diff: ~p", [ExpireDiff]),
 
 Host = wrq:get_req_header("Host", Req0),
@@ -137,7 +138,7 @@ case ComparisonSig of
                 case erlang:iolist_to_binary(AWSAccessKeyId) ==
                            erlang:iolist_to_binary(AccessKey) of
                     true ->
-                        MaxAge = "max-age=" ++ integer_to_list(ExpireDiff),
+                        MaxAge = "max-age=" ++ XAmzExpiresString,
                         Req1 = wrq:set_resp_header("Cache-Control", MaxAge, Req0),
                         io:format("~ndo_signed_url_authorization succeeded"),
                         io:format("~n--------------------------------"),
@@ -275,11 +276,11 @@ do_standard_authorization(RequestId, IncomingAuth, Req0, Context) ->
                                        RequestId, StringToSign, Req0, Context)
     end.
 
--spec expire_diff(undefined | binary()) -> integer().
-expire_diff(undefined) -> 1;
-expire_diff(Expires) ->
-    Now = calendar:datetime_to_gregorian_seconds(erlang:universaltime()),
-    bksw_util:to_integer(Expires) - (Now - ?SECONDS_AT_EPOCH).
+%-spec expire_diff(undefined | binary()) -> integer().
+%expire_diff(undefined) -> 1;
+%expire_diff(Expires) ->
+%    Now = calendar:datetime_to_gregorian_seconds(erlang:universaltime()),
+%    bksw_util:to_integer(Expires) - (Now - ?SECONDS_AT_EPOCH).
 
 -spec is_expired(string(), integer()) -> boolean().
 is_expired(DateTimeString, ExpiresInSecondsInt) ->
