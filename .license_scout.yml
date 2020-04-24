@@ -22,6 +22,7 @@ allowed_licenses:
   - Apache-1.1
   - Apache-2.0
   - Artistic-2.0
+  - Artistic-1.0-Perl
   - BSD-1-Clause
   - BSD-2-Clause
   - BSD-3-Clause
@@ -184,6 +185,8 @@ exceptions:
     - name: core/libtool
       reason: Exception made by Chef Legal
     - name: core/linux-headers
+      reason: Exception made by Chef Legal
+    - name: core/perl
       reason: Exception made by Chef Legal
     - name: core/readline
       reason: Exception made by Chef Legal
