@@ -123,11 +123,13 @@ io:format("~ns3url: ~p", [ComparisonURL]),
 
 % compare signatures
 [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", all),
-io:format("~nsig1:  ~p", [IncomingSignature]),
-io:format("~nsig2:  ~p", [ComparisonSig    ]),
+io:format("~nsig1:  ~p", [list_to_binary(IncomingSignature)]),
+io:format("~nsig2:  ~p", [ComparisonSig                    ]),
 
-case ComparisonSig of
-    IncomingSignature ->
+% list_to_binary profiled faster than binary_to_list,
+% so use that for conversion and comparison.
+case list_to_binary(IncomingSignature) of
+    ComparisonSig ->
         case is_expired(XAmzDate, XAmzExpires) of
             true ->
                 io:format("~nexpired signature"),
