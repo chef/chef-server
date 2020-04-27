@@ -199,6 +199,7 @@ batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict) when is_list(Ids)
                               {lists:append(Failures, FailedList), lists:append(NewMissing, MissingList)}
                       end
               end,
+    io:format("DoBatch: ~p ~n", [DoBatch]),
     chefp:batch_fold(DoBatch, Ids, {[], []}, BatchSize).
 
 %% @doc Helper function to retrieve and index objects for a single
