@@ -140,6 +140,7 @@ reindex_by_id(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Ids) ->
                       Names :: [binary()]) -> {list(), list()}.
 reindex_by_name(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Names) ->
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
+    io:format("NameIdDict: ~p", [NameIdDict]),
     Ids = lists:foldl(
             fun(Name, Acc) ->
                     case dict:find(Name, NameIdDict) of
@@ -150,6 +151,7 @@ reindex_by_name(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Names) ->
                             Acc
                     end
             end, [], Names),
+    io:format("Ids: ~p", [Ids]),
     {ok, BatchSize} = application:get_env(oc_chef_wm, reindex_batch_size),
     batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict).
 
@@ -188,6 +190,7 @@ decompress_and_decode(Object) ->
                     Index :: index(),
                     NameIdDict :: dict()) -> {list(), list()}.
 batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict) when is_list(Ids) ->
+    io:format("In Batch reindex", []),
     DoBatch = fun(Batch, {FailedList, MissingList}) ->
                       case index_a_batch(Ctx, Batch, OrgInfo, Index, NameIdDict) of
                           {ok, NewMissing} ->

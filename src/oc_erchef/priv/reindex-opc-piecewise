@@ -56,7 +56,7 @@ validate_args([OrgName, IndexName | Items]) when length(Items) > 0 ->
             halt(2);
         OrgId when is_binary(OrgId)->
             %% Everything checks out!  Let's do some reindexing!
-            [{OrgId, OrgBin}, Context, IndexName, Items];
+            [{OrgId, OrgBin}, Context, list_to_binary(IndexName), Items];
         OtherError ->
             io:format("Other error occured ~p~n", [OtherError]),
             halt(3)
@@ -71,11 +71,13 @@ validate_args([OrgName, IndexName | Items]) when length(Items) > 0 ->
 perform(Context, {_OrgId, OrgName}=OrgInfo, Index, Items) ->
     io:format("Sending all data for organization '~s' to be indexed again.  It may take some time before everything is available via search.~n", [OrgName]),
     case rpc:call(?ERCHEF, chef_reindex, reindex_by_name, [Context, OrgInfo, Index, Items]) of
-        {ok, Missing} ->
-            print_missing(Missing, OrgName, Index);
-        {error, Failed, Missing} ->
-            print_missing(Missing, OrgName, Index),
-            print_errors(Failed, OrgName, Index),
+        {[],[]} ->
+            lager:info("reindexing[~s]: reindex complete!", [OrgName]),
+            print_missing([], OrgName, Index);
+        {FailedList, MissingList} when is_list(FailedList) ->
+            lager:info("reindexing[~s]: reindex FAILED!", [OrgName]),
+            print_missing(MissingList, OrgName, Index),
+            print_errors(FailedList, OrgName, Index),
             halt(3)
     end.
 
