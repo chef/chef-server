@@ -159,7 +159,8 @@ check_file(OrgId, AwsConfig, Bucket, Checksum) ->
                      TimeoutMsgTemplate :: string()) ->
                             bulk_op_return().
 s3_checksum_op(OrgId, Checksums, Fun, TimeoutMsgTemplate) ->
-
+io:format("~n~n-----------------------------------------"),
+io:format("~nin chef_s3_ops:s3_checksum_op"),
     Bucket = chef_s3:bucket(),
     AwsConfig = chef_s3:get_internal_config(),
     Timeout = chef_config:config_option(chef_objects, s3_parallel_ops_timeout, pos_integer),
@@ -175,8 +176,12 @@ s3_checksum_op(OrgId, Checksums, Fun, TimeoutMsgTemplate) ->
                              {timeout, Checksum}
                      end,
 
+io:format("~nBucket=~p", [Bucket]),
+io:format("~nAwsConfig=~p", [AwsConfig]),
+io:format("~nRequestFun=~p", [RequestFun]),
     Results = chef_parallel:parallelize_all_with_timeout(Checksums, RequestFun, Fanout, Timeout, TimeoutHandler),
-
+io:format("~nResults=~p", [Results]),
+io:format("~n-----------------------------------------"),
     %% Now we need to consolidate our results based on:
     %%
     %%   Did the operation succeed?
