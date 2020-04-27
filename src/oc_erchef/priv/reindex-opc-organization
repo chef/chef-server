@@ -111,9 +111,7 @@ perform(reindex, Context, {_OrgId, OrgName}=OrgInfo) ->
 perform(complete, Context, OrgInfo) ->
     %% Just do everything
     perform(drop, Context, OrgInfo),
-    perform(reindex, Context, OrgInfo);
-perform(partial, Context, OrgInfo, ) ->
-
+    perform(reindex, Context, OrgInfo).
 
 print_errors(Failed, OrgName) ->
     io:format(standard_error, "Reindexing the organization \"~s\" has failed.~n", [OrgName]),
