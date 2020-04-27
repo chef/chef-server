@@ -176,7 +176,10 @@ aws_config(S3Url) ->
 %% @doc returns a url for accessing s3 internally. This is used
 %% to contact bookshelf or S3.
 s3_internal_url() ->
-    envy:get(chef_objects, s3_url, string).
+    % FIXME: this was returning "https://api" which was causing an error in bookshelf (checksums check).
+    % hacking this for now.
+    %envy:get(chef_objects, s3_url, string).
+    "https://api.chef-server.dev".
 
 %% @doc returns a url for generating a presigned url to send back
 %% to the requestor. This url will be used by the requestor to
