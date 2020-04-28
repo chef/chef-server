@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.4 -->
-## [13.2.4](https://github.com/chef/chef-server/tree/13.2.4) (2020-04-28)
+<!-- latest_release 13.2.5 -->
+## [13.2.5](https://github.com/chef/chef-server/tree/13.2.5) (2020-04-28)
 
 #### Merged Pull Requests
-- Add information about software updates. [#1971](https://github.com/chef/chef-server/pull/1971) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add an exception for habitat core/binutils [#1975](https://github.com/chef/chef-server/pull/1975) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Add an exception for habitat core/binutils [#1975](https://github.com/chef/chef-server/pull/1975) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.5 -->
 - Add information about software updates. [#1971](https://github.com/chef/chef-server/pull/1971) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.4 -->
 - Add an exception for habitat core/perl licenses. [#1972](https://github.com/chef/chef-server/pull/1972) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.3 -->
 - Turn off smart builds [#1965](https://github.com/chef/chef-server/pull/1965) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.2 -->
