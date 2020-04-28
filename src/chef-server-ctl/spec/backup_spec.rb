@@ -16,7 +16,7 @@
 
 require 'omnibus_ctl_helper'
 
-describe 'chef-server-ctl backup' do
+describe "#{Chef::Dist::Server::SHORT}-ctl backup" do
   before do
     @omnibus_ctl = OmnibusCtlHelper.new(['./plugins/backup.rb'])
     allow(@omnibus_ctl.ctl).to receive(:running_config).and_return(running_config)

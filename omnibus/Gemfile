@@ -4,6 +4,7 @@ gem 'rake'
 gem 'chefspec'
 gem 'berkshelf'
 gem 'bundler', '>1.10'
+gem 'chef-config'
 
 # Install omnibus software
 group :omnibus do

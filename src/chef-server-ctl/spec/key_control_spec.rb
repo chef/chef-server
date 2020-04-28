@@ -19,7 +19,7 @@ require 'chef_server_ctl/helpers/key_ctl_helper'
 require 'chef_server_ctl/config'
 require 'chef/key'
 
-describe "chef-server-ctl *key(s)*" do
+describe "#{Chef::Dist::Server::SHORT}-ctl *key(s)*" do
   before(:all) do
     @helper = OmnibusCtlHelper.new(["./plugins/key_control.rb"])
   end

@@ -55,7 +55,7 @@ class SolrPreflightValidator < PreflightValidator
 
           The value of opscode_solr4['external'] has been changed.  Search
           results against the new external search index may be incorrect. Please
-          run `chef-server-ctl reindex --all` to ensure correct results
+          run `#{Chef::Dist::Server::CTL} reindex --all` to ensure correct results
 
         EOM
       end

@@ -20,10 +20,10 @@ add_command_under_category "chef12-upgrade-download", "open-source-upgrade", "Do
     @options.skip_cleanup = false
     @options.chef11_server_url = "https://localhost"
     @options.chef11_admin_client_name = "admin"
-    @options.chef11_admin_client_key = "/etc/chef-server/admin.pem"
+    @options.chef11_admin_client_key = "/etc/#{Chef::Dist::Server::SHORT}/admin.pem"
 
     opt_parser = OptionParser.new do |opts|
-      opts.banner = "Usage: chef-server-ctl chef12-upgrade-download [options]"
+      opts.banner = "Usage: #{Chef::Dist::Server::SHORT}-ctl chef12-upgrade-download [options]"
 
       opts.on("-d", "--chef11-data-dir [directory]", String, "Directory to store open source Chef 11 server data. Defaults to a created tmp dir.") do |chef11_dir|
         @options.chef11_data_dir = chef11_dir

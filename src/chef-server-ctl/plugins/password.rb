@@ -31,7 +31,7 @@ add_command_under_category "password", "organization-and-user-management", "Set 
       exit 1
     end
     if password == '' && ldap_authentication_enabled?
-      example_cmd = "'chef-server-ctl password #{username} --enable-external-auth'"
+      example_cmd = "'#{Chef::Dist::Server::CTL} password #{username} --enable-external-auth'"
       STDERR.puts "You entered a blank password. If you were trying to enable ldap try #{example_cmd}?"
       exit 1
     end

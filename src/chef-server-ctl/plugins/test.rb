@@ -5,8 +5,8 @@
 #
 
 add_command_under_category "test", "general", "Run the API test suite against localhost.", 2 do
-  ENV['SUPERUSER_KEY'] = credentials.get("chef-server", "superuser_key")
-  ENV['WEBUI_KEY'] = credentials.get("chef-server", "webui_key")
+  ENV['SUPERUSER_KEY'] = credentials.get("#{Chef::Dist::Server::SHORT}", "superuser_key")
+  ENV['WEBUI_KEY'] = credentials.get("#{Chef::Dist::Server::SHORT}", "webui_key")
   ENV['STATS_PASSWORD'] = credentials.get('opscode_erchef', 'stats_password')
 
   pedant_args = ARGV[1..-1]

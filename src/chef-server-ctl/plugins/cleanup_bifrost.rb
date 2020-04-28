@@ -43,7 +43,7 @@ add_command_under_category "cleanup-bifrost", "cleanup", "Cleanup orphaned bifro
   options = {}
 
   OptionParser.new do |opts|
-    opts.banner = "chef-server-ctl cleanup-bifrost [options]"
+    opts.banner = "#{Chef::Dist::Server::CTL} cleanup-bifrost [options]"
     opts.on("-b SIZE", "--batch-size SIZE", "How many authz actors to delete at a time") do |b|
       options[:batch_size] = b.to_i
     end

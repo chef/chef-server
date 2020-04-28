@@ -31,9 +31,9 @@ describe BootstrapPreflightValidator do
       credentials = double(Object)
       allow(PrivateChef).to receive(:credentials).and_return(credentials)
       allow(credentials).to receive(:length).and_return(secret_count)
-      allow(credentials).to receive(:exist?).with('chef-server', anything).and_return(superuser_key_exists)
-      allow(File).to receive(:exist?).with('/etc/opscode/private-chef-secrets.json').and_return(false)
-      allow(File).to receive(:exist?).with('/etc/opscode/pivotal.pem').and_return(false)
+      allow(credentials).to receive(:exist?).with("#{Chef::Dist::Server::SHORT}", anything).and_return(superuser_key_exists)
+      allow(File).to receive(:exist?).with("/etc/opscode/private-#{ChefConfig::Dist::SHORT}-secrets.json").and_return(false)
+      allow(File).to receive(:exist?).with("/etc/opscode/pivotal.pem").and_return(false)
     end
 
     context 'when a previous run exists' do

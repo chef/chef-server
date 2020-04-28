@@ -27,7 +27,7 @@ module Omnibus
   end
 end
 
-describe "chef-server-ctl rotate credentials" do
+describe "#{Chef::Dist::Server::CTL} rotate credentials" do
   subject do
     OmnibusCtlHelper.new(["./plugins/rotate_credentials.rb"])
   end
@@ -188,7 +188,7 @@ describe "chef-server-ctl rotate credentials" do
           .and_return(true)
       end
 
-      it "allows 'chef-server-ctl rotate-shared-secrets' to be run" do
+      it "allows '#{Chef::Dist::Server::CTL} rotate-shared-secrets' to be run" do
         expect do
           subject.run_global_pre_hooks(%w{omnibus-ctl opscode rotate-shared-secrets})
         end.to_not raise_error

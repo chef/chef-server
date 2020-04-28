@@ -9,7 +9,7 @@ define_upgrade do
     # sql user info will be in one of two places - under 'postgresql' or under 'opscode-erchef' in more
     # recent versions. If someone is upgrading from an earlier versions, it may not yet
     # have been moved to its new location.
-    running_config = JSON.parse(File.read("/etc/opscode/chef-server-running.json"))
+    running_config = JSON.parse(File.read("/etc/opscode/#{Chef::Dist::Server::SHORT}-running.json"))
     pc = running_config['private_chef']
     keyname = pc['opscode-erchef'].has_key?('sql_user') ? 'opscode-erchef' : 'postgresql'
     connection = ::PGconn.open('user' => pc[keyname]['sql_user'],

@@ -21,7 +21,7 @@ add_command_under_category "chef12-upgrade-upload", "open-source-upgrade", "Uplo
       @options.skip_upload = false
 
       opt_parser = OptionParser.new do |opts|
-        opts.banner = "Usage: chef-server-ctl chef12-upgrade-upload [options]"
+        opts.banner = "Usage: #{Chef::Dist::Server::CTL} chef12-upgrade-upload [options]"
 
         opts.on("-e", "--chef12-data-dir [directory]", String, "Directory where data for upload to the Chef 12 server is located (Will ask interactively if not passed)") do |chef12_dir|
           @options.chef12_data_dir = chef12_dir

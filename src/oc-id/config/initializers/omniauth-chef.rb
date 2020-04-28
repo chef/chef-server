@@ -5,7 +5,7 @@ Rails.application.config.middleware.use OmniAuth::Builder do
     config.path_prefix = '/id/auth'
   end
 
-  provider :chef, Settings.chef.to_hash.merge(key_data: Secrets.get("chef-server", "webui_key"))
+  provider :chef, Settings.chef.to_hash.merge(key_data: Secrets.get("#{Chef::Dist::Server::SHORT}", "webui_key"))
 end
 
 OmniAuth.config.on_failure = proc do |env|

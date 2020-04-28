@@ -38,7 +38,7 @@ end
 
 # Bootstrap is now part of the private_chef cookbook itself and is
 # no longer an additional component - remove any traces of it.
-directory '/opt/opscode/embedded/service/chef-server-bootstrap' do
+directory "/opt/opscode/embedded/service/#{Chef::Dist::Server::SHORT}-bootstrap" do
   action :delete
   recursive true
   ignore_failure true

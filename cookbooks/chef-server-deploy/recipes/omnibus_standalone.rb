@@ -17,10 +17,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-node.default['chef-server-deploy']['automate_server_fqdn'] = server_fqdn_for('automate')
-node.default['chef-server-deploy']['chef_server_fqdn'] = server_fqdn_for('chef-server')
-node.default['chef-server-deploy']['supermarket_fqdn'] = server_fqdn_for('supermarket')
-node.default['chef-server-deploy']['enable_liveness_agent'] = environment == 'delivered'
+node.default["#{Chef::Dist::Server::SHORT}-deploy"]['automate_server_fqdn'] = server_fqdn_for('automate')
+node.default["#{Chef::Dist::Server::SHORT}-deploy"]['chef_server_fqdn'] = server_fqdn_for('#{Chef::Dist::Server::SHORT}')
+node.default["#{Chef::Dist::Server::SHORT}-deploy"]['supermarket_fqdn'] = server_fqdn_for('supermarket')
+node.default["#{Chef::Dist::Server::SHORT}-deploy"]['enable_liveness_agent'] = environment == 'delivered'
 
 # By default we daemonize chef-client across all of our infrastructure nodes. We
 # do not want this behavior on the Chef Server instances as we want the pipeline
@@ -33,8 +33,8 @@ end
 # Chef Server
 ################################################################################
 
-cert_filename = "/etc/opscode/#{node['chef-server-deploy']['chef_cert_filename']}"
-key_filename  = "/etc/opscode/#{node['chef-server-deploy']['chef_key_filename']}"
+cert_filename = "/etc/opscode/#{node["#{Chef::Dist::Server::SHORT}-deploy"]['chef_cert_filename']}"
+key_filename  = "/etc/opscode/#{node["#{Chef::Dist::Server::SHORT}-deploy"]['chef_key_filename']}"
 automate_liveness_recipe_path = '/etc/opscode/automate-liveness-recipe.rb'
 
 directory '/etc/opscode' do
@@ -43,41 +43,41 @@ end
 
 file cert_filename do
   mode '0600'
-  content citadel[node['chef-server-deploy']['chef_cert_filename']]
+  content citadel[node["#{Chef::Dist::Server::SHORT}-deploy"]['chef_cert_filename']]
 end
 
 file key_filename do
   mode '0600'
-  content citadel[node['chef-server-deploy']['chef_key_filename']]
+  content citadel[node["#{Chef::Dist::Server::SHORT}-deploy"]['chef_key_filename']]
 end
 
-if node['chef-server-deploy']['enable_liveness_agent']
+if node["#{Chef::Dist::Server::SHORT}-deploy"]['enable_liveness_agent']
   remote_file automate_liveness_recipe_path do
     source liveness_agent_recipe_url
     mode '644'
-    notifies :reconfigure, 'chef_ingredient[chef-server]'
+    notifies :reconfigure, "chef_ingredient[#{Chef::Dist::Server::SHORT}]"
   end
 end
 
-chef_ingredient 'chef-server' do
-  channel omnibus_channel_for_environment('chef-server')
-  version version_for_environment('chef-server')
+chef_ingredient "#{Chef::Dist::Server::SHORT}" do
+  channel omnibus_channel_for_environment("#{Chef::Dist::Server::SHORT}")
+  version version_for_environment("#{Chef::Dist::Server::SHORT}")
   # We need to reconfigure after an install/upgrade
-  notifies :reconfigure, 'chef_ingredient[chef-server]'
+  notifies :reconfigure, "chef_ingredient[#{Chef::Dist::Server::SHORT}]"
 
   action :upgrade
 end
 
-template '/etc/opscode/chef-server.rb' do
-  source 'chef-server.rb.erb'
+template "/etc/opscode/#{Chef::Dist::Server::SHORT}.rb" do
+  source "#{Chef::Dist::Server::SHORT}.rb.erb"
   variables(
-    chef_server_deploy: node['chef-server-deploy'],
+    chef_server_deploy: node["#{Chef::Dist::Server::SHORT}-deploy"],
     chef_cert_filename: cert_filename,
     chef_key_filename: key_filename,
     required_recipe_path: automate_liveness_recipe_path,
     enable_data_collector: environment == 'delivered'
   )
-  notifies :reconfigure, 'chef_ingredient[chef-server]', :immediately
+  notifies :reconfigure, "chef_ingredient[#{Chef::Dist::Server::SHORT}]", :immediately
 end
 
 ################################################################################
@@ -88,8 +88,8 @@ chef_ingredient 'push-jobs-server' do
   platform_version_compatibility_mode true
   action :upgrade
   # We need to reconfigure after an install/upgrade
-  notifies :reconfigure, 'chef_ingredient[push-jobs-server]'
-  notifies :reconfigure, 'chef_ingredient[chef-server]'
+  notifies :reconfigure, "chef_ingredient[push-jobs-server]"
+  notifies :reconfigure, "chef_ingredient[#{Chef::Dist::Server::SHORT}]"
 end
 
 ingredient_config 'push-jobs-server' do
@@ -99,19 +99,19 @@ end
 ################################################################################
 # Chef Manage
 ################################################################################
-node.default['chef-server-deploy']['manage-config']['saml.enabled'] = node['chef-server-deploy']['enable_saml']
-node.default['chef-server-deploy']['manage-config']['saml.issuer_url'] = "'https://#{node['chef-server-deploy']['automate_server_fqdn']}/api/v0'"
+node.default["#{Chef::Dist::Server::SHORT}-deploy"]['manage-config']['saml.enabled'] = node["#{Chef::Dist::Server::SHORT}-deploy"]['enable_saml']
+node.default["#{Chef::Dist::Server::SHORT}-deploy"]['manage-config']['saml.issuer_url'] = "'https://#{node["#{Chef::Dist::Server::SHORT}-deploy"]['automate_server_fqdn']}/api/v0'"
 
 chef_ingredient 'manage' do
   channel :stable
   accept_license true
-  config node['chef-server-deploy']['manage-config'].map { |k, v| "#{k} #{v}" }.join("\n")
+  config node['#{Chef::Dist::Server::SHORT}-deploy']['manage-config'].map { |k, v| "#{k} #{v}" }.join("\n")
   action :upgrade
   # We need to reconfigure after an install/upgrade
   notifies :reconfigure, 'chef_ingredient[manage]'
 end
 
-if node['chef-server-deploy']['enable_saml']
+if node['#{Chef::Dist::Server::SHORT}-deploy']['enable_saml']
   chef_server_secret 'saml.client_id' do
     value 'manage'
   end
@@ -125,7 +125,7 @@ ingredient_config 'manage' do
   notifies :reconfigure, 'chef_ingredient[manage]'
 end
 
-omnibus_service 'chef-server' do
+omnibus_service '#{Chef::Dist::Server::SHORT}' do
   action :nothing
 end
 
@@ -135,7 +135,7 @@ end
 # This is a hack to allow the Supermarket instance to get the oc-id app details
 # via a HTTP call.
 
-omnibus_service 'chef-server/nginx' do
+omnibus_service '#{Chef::Dist::Server::SHORT}/nginx' do
   action :nothing
 end
 
@@ -149,7 +149,7 @@ location /supermarket-credentials {
 }
 EOF
   end)
-  notifies :restart, 'omnibus_service[chef-server/nginx]'
+  notifies :restart, 'omnibus_service[#{Chef::Dist::Server::SHORT}/nginx]'
 end
 
 #########################################################################
@@ -195,8 +195,8 @@ end
 
   # TODO: Do this in resource
   execute "add-#{user_name}-user-key" do
-    command lazy { "chef-server-ctl add-user-key #{user_name} --public-key-path /etc/opscode/users/#{user_name}-2.pem.pub --key-name #{user_name}-2" }
-    not_if "chef-server-ctl list-user-keys #{user_name} | grep #{user_name}-2"
+    command lazy { "#{Chef::Dist::Server::SHORT}-ctl add-user-key #{user_name} --public-key-path /etc/opscode/users/#{user_name}-2.pem.pub --key-name #{user_name}-2" }
+    not_if "#{Chef::Dist::Server::SHORT}-ctl list-user-keys #{user_name} | grep #{user_name}-2"
   end
 end
 

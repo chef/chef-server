@@ -20,8 +20,8 @@
 #
 # TODO: extract this into something that add-ons can use; no sense
 # cargo-culting it around everywhere
-if File.exist?('/etc/opscode/chef-server-running.json')
-  old_config = JSON.parse(IO.read('/etc/opscode/chef-server-running.json'))
+if File.exist?("/etc/opscode/#{Chef::Dist::Server::SHORT}-running.json")
+  old_config = JSON.parse(IO.read("/etc/opscode/#{Chef::Dist::Server::SHORT}-running.json"))
 
   # We're stashing these outside the "private_chef" attributes tree to
   # prevent us from carrying them along forever when we write out the
@@ -38,14 +38,14 @@ if File.exist?('/etc/opscode/chef-server-running.json')
   node.consume_attributes('previous_run' => old_config['private_chef'])
 end
 
-if File.exist?('/etc/opscode/chef-server.json') &&
-   !(File.exist?('/etc/opscode/private-chef.rb') || File.exist?('/etc/opscode/chef-server.rb'))
-  Chef::Log.fatal('Configuration via /etc/opscode/chef-server.json is not supported. Please use /etc/opscode/chef-server.rb')
+if File.exist?("/etc/opscode/#{Chef::Dist::Server::SHORT}.json") &&
+   !(File.exist?('/etc/opscode/private-chef.rb') || File.exist?("/etc/opscode/#{Chef::Dist::Server::SHORT}.rb"))
+  Chef::Log.fatal("Configuration via /etc/opscode/#{Chef::Dist::Server::SHORT}.json is not supported. Please use /etc/opscode/#{Chef::Dist::Server::SHORT}.rb")
   exit!(1)
 else
   PrivateChef[:node] = node
   private_chef_path = '/etc/opscode/private-chef.rb'
-  chef_server_path = '/etc/opscode/chef-server.rb'
+  chef_server_path = "/etc/opscode/#{Chef::Dist::Server::SHORT}.rb"
   private_chef_rb_exists = File.exist?(private_chef_path)
   private_chef_rb_not_symlink = !File.symlink?(private_chef_path)
   chef_server_rb_exists = File.exist?(chef_server_path)
@@ -59,17 +59,17 @@ else
   # chef-server.rb, then copy it over and link back.  Otherwise warn.
   if private_chef_rb_exists && private_chef_rb_not_symlink && chef_server_rb_exists &&
      chef_server_rb_not_empty
-    Chef::Log.warn('/etc/opscode/private-chef.rb is deprecated and should be removed. Using /etc/opscode/chef-server.rb')
+    Chef::Log.warn("/etc/opscode/private-chef.rb is deprecated and should be removed. Using /etc/opscode/#{Chef::Dist::Server::SHORT}.rb")
   elsif private_chef_rb_exists && private_chef_rb_not_symlink
-    Chef::Log.warn('Moving to /etc/opscode/chef-server.rb for configuration - /etc/opscode/private-chef.rb is deprecated.')
+    Chef::Log.warn("Moving to /etc/opscode/#{Chef::Dist::Server::SHORT}.rb for configuration - /etc/opscode/private-chef.rb is deprecated.")
     FileUtils.mv(private_chef_path, chef_server_path)
     FileUtils.ln_s(chef_server_path, private_chef_path)
     chef_server_rb_exists = true
   end
 
-  if File.exist?('/etc/opscode/chef-server.json')
-    Chef::Log.warn('Ignoring unsupported configuration file /etc/opscode/chef-server.json.')
-    Chef::Log.warn('Using /etc/opscode/chef-server.rb instead.')
+  if File.exist?("/etc/opscode/#{Chef::Dist::Server::SHORT}.json")
+    Chef::Log.warn("Ignoring unsupported configuration file /etc/opscode/#{Chef::Dist::Server::SHORT}.json.")
+    Chef::Log.warn("Using /etc/opscode/#{Chef::Dist::Server::SHORT}.rb instead.")
   end
 
   if chef_server_rb_exists

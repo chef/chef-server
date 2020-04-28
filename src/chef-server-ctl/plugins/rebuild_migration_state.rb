@@ -4,7 +4,7 @@ add_command_under_category "rebuild-migration-state", "general", "Attempt to reb
   options = {}
 
   OptionParser.new do |opts|
-    opts.banner = "chef-server-ctl rebuild-migration-state [options]"
+    opts.banner = "#{Chef::Dist::Server::CTL} rebuild-migration-state [options]"
     opts.on("--force", "Overwrite existing migration state.") do |b|
       options[:force] = true
     end

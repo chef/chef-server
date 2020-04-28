@@ -45,7 +45,7 @@ module DVM
     def stop
       raise DVMArgumentError, <<-EOM unless is_running?
 "#{name} does not seem to be running from a loaded instance.
-If you want to stop the global instance, use chef-server-ctl stop #{service['name']}'"
+If you want to stop the global instance, use #{Chef::Dist::Server::CTL} stop #{service['name']}'"
 EOM
       run_command("kill -9 $(cat tmp/pids/server.pid)", "Stopping #{service['name']} Rails Server", cwd: project_dir)
     end
@@ -96,11 +96,11 @@ EOM
     end
 
     def enable_service
-      run_command("chef-server-ctl start #{service['name']}", "Starting #{omnibus_project} #{service['name']}")
+      run_command("#{Chef::Dist::Server::CTL} start #{service['name']}", "Starting #{omnibus_project} #{service['name']}")
     end
 
     def disable_service
-      run_command("chef-server-ctl stop #{service['name']}", "Stopping #{omnibus_project} #{service['name']}")
+      run_command("#{Chef::Dist::Server::CTL} stop #{service['name']}", "Stopping #{omnibus_project} #{service['name']}")
     end
 
     def is_running?

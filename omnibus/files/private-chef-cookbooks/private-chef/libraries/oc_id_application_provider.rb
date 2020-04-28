@@ -32,7 +32,7 @@ class Chef
 
       def create!
         @attributes ||= begin
-                          env_helper = 'veil-env-helper --use-file -s chef-server.webui_key -s oc_id.sql_password -s oc_id.secret_key_base'
+                          env_helper = "veil-env-helper --use-file -s #{Chef::Dist::Server::SHORT}.webui_key -s oc_id.sql_password -s oc_id.secret_key_base"
                           rails_script = <<~EOF
                             app = Doorkeeper::Application.find_or_create_by(:name => "#{new_resource.name}");
                             app.update_attributes(:redirect_uri => "#{new_resource.redirect_uri}");

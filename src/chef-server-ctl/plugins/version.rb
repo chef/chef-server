@@ -24,9 +24,9 @@ add_command_under_category "version", "general", "Display current version of Che
     # isn't appropriate in all cases.  One option would be to ask the
     # LB for our version, but then the version command won't work when
     # we are offline.
-    if File.exist?('/hab/svc/chef-server-ctl/PID')
+    if File.exist?("/hab/svc/#{Chef::Dist::Server::SHORT}-ctl/PID")
       ident_file = File.read('../IDENT')
-      version = "chef-server #{ident_file.split('/')[2]}"
+      version = "#{Chef::Dist::Server::SHORT} #{ident_file.split('/')[2]}"
     else
       version = JSON.parse(File.read('/opt/opscode/version-manifest.json'))['build_version']
     end

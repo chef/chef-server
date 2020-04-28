@@ -80,7 +80,7 @@ private_chef_pg_user_table_access erchef['sql_ro_user'] do
 end
 
 # Cleanup old enterprise-chef-server-schema
-directory '/opt/opscode/embedded/service/enterprise-chef-server-schema' do
+directory "/opt/opscode/embedded/service/enterprise-#{Chef::Dist::Server::SHORT}-schema" do
   recursive true
   action :delete
 end
