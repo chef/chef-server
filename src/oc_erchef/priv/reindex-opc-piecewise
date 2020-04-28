@@ -10,6 +10,9 @@
 -define(ERCHEF, 'erchef@127.0.0.1').
 -define(ERCHEF_COOKIE, 'erchef').
 
+%% A binary() index is taken to be a data bag name.
+-type index() :: client | environment | node | role | binary().
+
 %% @doc 
 %%
 %% Examples:
@@ -47,7 +50,7 @@ validate_args([OrgName, IndexName | Items]) when length(Items) > 0 ->
     IntLB =  "https://127.0.0.1",
     Context = make_context(OrgName, IntLB),
     OrgBin = list_to_binary(OrgName), %% We use binaries around here...
-
+    IndexNameBin = list_to_binary(IndexName),
     %% Some operations require the organization's ID.  This also serves as a convenient
     %% check for organization existence.
     case get_org_id(Context, OrgBin) of
@@ -55,8 +58,9 @@ validate_args([OrgName, IndexName | Items]) when length(Items) > 0 ->
             io:format("Could not find an organization named '~s'~n", [OrgBin]),
             halt(2);
         OrgId when is_binary(OrgId)->
+            BinItemsList = [ list_to_binary(X) || X <- Items ],
             %% Everything checks out!  Let's do some reindexing!
-            [{OrgId, OrgBin}, Context, list_to_binary(IndexName), Items];
+            [{OrgId, OrgBin}, Context, IndexNameBin, BinItemsList];
         OtherError ->
             io:format("Other error occured ~p~n", [OtherError]),
             halt(3)
@@ -65,17 +69,17 @@ validate_args([OrgName, IndexName | Items]) when length(Items) > 0 ->
 %% @doc Actually do the reindexing.
 -spec perform(Context :: term(),
               {OrgId::binary(), OrgName::binary()},
-              Index::binary(),
+              Index::index(),
               Items::[binary()]
              ) -> term().
 perform(Context, {_OrgId, OrgName}=OrgInfo, Index, Items) ->
     io:format("Sending all data for organization '~s' to be indexed again.  It may take some time before everything is available via search.~n", [OrgName]),
     case rpc:call(?ERCHEF, chef_reindex, reindex_by_name, [Context, OrgInfo, Index, Items]) of
         {[],[]} ->
-            lager:info("reindexing[~s]: reindex complete!", [OrgName]),
+            io:format("reindexing[~s]: reindex complete!~p", [OrgName]),
             print_missing([], OrgName, Index);
         {FailedList, MissingList} when is_list(FailedList) ->
-            lager:info("reindexing[~s]: reindex FAILED!", [OrgName]),
+            io:format("reindexing[~s]: reindex FAILED!~p", [OrgName]),
             print_missing(MissingList, OrgName, Index),
             print_errors(FailedList, OrgName, Index),
             halt(3)
