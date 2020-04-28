@@ -2,7 +2,7 @@ require 'json'
 require 'pedant/rspec/common'
 
 describe "running configs required by Pushy Server", :config do
-  let (:complete_config) { JSON.parse(IO.read("/etc/opscode/chef-server-running.json")) }
+  let (:complete_config) { JSON.parse(IO.read("/etc/opscode/#{Chef::Dist::Server::SHORT}-running.json")) }
   let (:config) { complete_config['private_chef'] }
 
   it "role" do

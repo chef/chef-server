@@ -228,7 +228,7 @@ EOF
 
     # Open in append mode. The file shouldn't exist yet, but if it does don't
     # overwrite what is there. This will also create the file if it doesn't exist.
-    file_open("/etc/opscode/chef-server.rb", "a"){ |file| file.write(content) }
+    file_open("/etc/opscode/#{Chef::Dist::Server::SHORT}.rb", "a"){ |file| file.write(content) }
 
     # This is applied with the next reconfigure, which in a normal
     # run will happen during set_server_state_for_upload
@@ -294,8 +294,8 @@ EOF
     # tmp file behind. See:
     # https://stackoverflow.com/questions/5171901/sed-command-find-and-replace-in-file-and-overwrite-file-doesnt-work-it-empties
     # The copy is done to ensure we keep the permissions of the original file
-    script = "/opt/chef-server/bin/wait-for-rabbit"
-    sed = "sed 's/opscode/chef-server/g' #{script} > #{script}.tmp && cp --no-preserve=mode,ownership #{script}.tmp #{script} && rm #{script}.tmp"
+    script = "/opt/#{Chef::Dist::Server::SHORT}/bin/wait-for-rabbit"
+    sed = "sed 's/opscode/#{Chef::Dist::Server::SHORT}/g' #{script} > #{script}.tmp && cp --no-preserve=mode,ownership #{script}.tmp #{script} && rm #{script}.tmp"
     msg = "Failed to write fix to wait-for-rabbit script"
     check_status(run_command(sed), msg)
   end
@@ -321,7 +321,7 @@ EOF
     # Assumption is Chef 12 isn't running, since we detected open source Chef 11 on the system
     log 'Ensuring the open source Chef 11 server is started'
     msg = "Unable to start the open source Chef 11 server, which is needed to complete the upgrade"
-    check_status(run_command("/opt/chef-server/bin/chef-server-ctl start"), msg)
+    check_status(run_command("/opt/#{Chef::Dist::Server::SHORT}/bin/#{Chef::Dist::Server::CTL} start"), msg)
     wait_for_ready_server("Chef 11")
   end
 
@@ -370,12 +370,12 @@ EOF
   def pull_chef11_db_credentials
     # This code pulled from knife-ec-backup and adapted
     log "Pulling open source Chef 11 database credentials"
-    if !File.exists?("/etc/chef-server/chef-server-running.json")
-      log "Failed to find /etc/chef-server/chef-server-running.json"
+    if !File.exists?("/etc/#{Chef::Dist::Server::SHORT}/#{Chef::Dist::Server::SHORT}-running.json")
+      log "Failed to find /etc/#{Chef::Dist::Server::SHORT}/#{Chef::Dist::Server::SHORT}-running.json"
       exit 1
     end
 
-    running_config = JSON.parse(File.read("/etc/chef-server/chef-server-running.json"))
+    running_config = JSON.parse(File.read("/etc/#{Chef::Dist::Server::SHORT}/#{Chef::Dist::Server::SHORT}-running.json"))
     # Note that the location of sql_user/sql_password has changed to 'opscode-erchef'
     # but for this upgrade we would still expect it to be in 'postgresql'
     sql_host = running_config['chef_server']['postgresql']['vip']
@@ -416,7 +416,7 @@ EOF
   def stop_chef11
     log 'Ensuring open source Chef 11 server is stopped'
     msg = "Unable to stop open souce Chef 11 server, which is needed to complete the upgrade"
-    status = run_command("/opt/chef-server/bin/chef-server-ctl stop")
+    status = run_command("/opt/#{Chef::Dist::Server::SHORT}/bin/#{Chef::Dist::Server::CTL} stop")
     check_status(status, msg)
   end
 
@@ -513,7 +513,7 @@ EOF
     secrets_file = ENV['SECRETS_FILE'] || "/etc/opscode/private-chef-secrets.json"
     credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file)
     key = Tempfile.new("latovip")
-    key.puts credentials.get("chef-server", "superuser_key")
+    key.puts credentials.get("#{Chef::Dist::Server::SHORT}", "superuser_key")
     key.flush
     key.close
 
@@ -551,8 +551,8 @@ EOF
     # Ensure a new line is present to make this message stand out more
     log ""
     log "Open source Chef 11 server successfully upgraded to Chef 12."
-    log "The Chef 12 server package (chef-server-core) has been successfully setup."
-    log "The Chef 11 server package (chef-server) is still present on the system and can now be safely removed."
+    log "The Chef 12 server package (#{Chef::Dist::Server::SHORT}-core) has been successfully setup."
+    log "The Chef 11 server package (#{Chef::Dist::Server::SHORT}) is still present on the system and can now be safely removed."
     log "Downloaded Chef 11 data is still on disk, located at #{chef11_data_dir}."
     log "Transformed data uploaded to Chef 12 server is still on disk, located at #{chef12_data_dir}."
     log "These directories can be backed up or removed as desired."

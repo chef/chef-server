@@ -69,7 +69,7 @@ module DVM
 
     def load(build)
       if (external and !File.exists?(project_dir))
-        say(HighLine.color("Please check out or symlink #{name} into chef-server/external-deps on your host before attempting to load it.", :yellow))
+        say(HighLine.color("Please check out or symlink #{name} into #{Chef::Dist::Server::SHORT}/external-deps on your host before attempting to load it.", :yellow))
       end
       do_load(build)
     end

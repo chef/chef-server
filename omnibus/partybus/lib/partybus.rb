@@ -11,7 +11,7 @@ module Partybus
   class Config
 
     SECRETS_FILE = "/etc/opscode/private-chef-secrets.json"
-    RUNNING_CONFIG_FILE = "/etc/opscode/chef-server-running.json"
+    RUNNING_CONFIG_FILE = "/etc/opscode/#{Chef::Dist::Server::SHORT}-running.json"
 
     attr_accessor :database_connection_string
     attr_accessor :database_unix_user
@@ -37,7 +37,7 @@ module Partybus
 ***
 ERROR: Cannot find #{RUNNING_CONFIG_FILE}
 ***
-Try running `chef-server-ctl reconfigure` first.
+Try running `#{Chef::Dist::Server::CTL} reconfigure` first.
 
 EOF
         exit(1)
@@ -50,7 +50,7 @@ EOF
 ***
 ERROR: Cannot find or access #{SECRETS_FILE}
 ***
-Try running `chef-server-ctl reconfigure` first.
+Try running `#{Chef::Dist::Server::CTL} reconfigure` first.
 
 EOF
         exit(1)

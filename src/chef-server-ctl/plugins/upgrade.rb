@@ -20,10 +20,10 @@ add_command_under_category "upgrade", "general", "Upgrade your private chef inst
     @options.chef12_server_url = "https://localhost"
     @options.upload_threads = 10
     @options.chef11_admin_client_name = "admin"
-    @options.chef11_admin_client_key = "/etc/chef-server/admin.pem"
+    @options.chef11_admin_client_key = "/etc/#{Chef::Dist::Server::SHORT}/admin.pem"
 
     opt_parser = OptionParser.new do |opts|
-      opts.banner = "Usage: chef-server-ctl upgrade [options]"
+      opts.banner = "Usage: #{Chef::Dist::Server::CTL} upgrade [options]"
       opts.banner = opts.banner << "\n Options only apply to open source Chef 11 server to Chef 12 server upgrades."
       opts.banner = opts.banner << "\n If upgrading from Enterprise Chef 11 server to Chef 12 server no options are needed."
 
@@ -82,7 +82,7 @@ add_command_under_category "upgrade", "general", "Upgrade your private chef inst
 
   def detect_chef11
     # Is this reliable enough?
-    File.directory?("/opt/chef-server")
+    File.directory?("/opt/#{Chef::Dist::Server::SHORT}")
   end
 
   def upgrade?

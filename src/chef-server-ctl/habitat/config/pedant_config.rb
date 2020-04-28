@@ -17,7 +17,7 @@
 # on multiple nodes of the same chef server when the generated pedant
 # config file could have been copied across during the setup of that
 # chef server.
-chef_server_uid = "chef-server_#{Process.pid}".downcase
+chef_server_uid = "#{Chef::Dist::Server::SHORT}_#{Process.pid}".downcase
 
 # Specify a testing organization if you are testing a multi-tenant
 # instance of a Chef Server (e.g., Private Chef, Hosted Chef).  If you

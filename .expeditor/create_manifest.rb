@@ -63,12 +63,12 @@ manifest["packages"] = []
 
 pkg_origin = "chef"
 
-%w{
+%W{
   openresty-noroot
   oc_id
-  chef-server-nginx
+  #{Chef::Dist::Server::SHORT}-nginx
   bookshelf
-  chef-server-ctl
+  #{Chef::Dist::Server::CTL}
   oc_bifrost
   oc_erchef
 }.each do |pkg_name|

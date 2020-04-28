@@ -85,8 +85,8 @@ module Pedant
   end
 
   def self.create_platform
-    superuser_key = ENV['CHEF_SECRET_CHEF-SERVER.SUPERUSER_KEY'] || ENV['SUPERUSER_KEY']
-    webui_key = ENV['CHEF_SECRET_CHEF-SERVER.WEBUI_KEY'] || ENV['WEBUI_KEY']
+    superuser_key = ENV["#{ChefConfig::Dist::SHORT.upcase}_SECRET_#{ChefConfig::Dist::SERVER.upcase}.SUPERUSER_KEY"] || ENV['SUPERUSER_KEY']
+    webui_key = ENV["#{ChefConfig::Dist::SHORT.upcase}_SECRET_#{ChefConfig::Dist::SERVER.upcase}.WEBUI_KEY"] || ENV['WEBUI_KEY']
     stats_password = ENV['CHEF_SECRET_OPSCODE_ERCHEF.STATS_PASSWORD'] || ENV['STATS_PASSWORD']
     config.pedant_platform = Pedant::Platform.new(config.chef_server,
                                                   superuser_key,

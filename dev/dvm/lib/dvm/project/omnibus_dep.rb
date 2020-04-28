@@ -10,7 +10,7 @@ module DVM
       @path = @source_path
       @reconfigure_on_load = config['reconfigure_on_load']
       @available = true
-      @ctl_name  = config['ctl-name'] || 'chef-server-ctl'
+      @ctl_name  = config['ctl-name'] || Chef::Dist::Server::CTL
       @bundler = config['bundler']
     end
     def unload

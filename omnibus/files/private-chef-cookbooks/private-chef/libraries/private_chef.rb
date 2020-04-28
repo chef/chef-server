@@ -526,7 +526,7 @@ module PrivateChef
             If this is unexpected, consider removing the secret from
             chef-server.rb and setting the correct value with:
 
-                chef-server-ctl #{command_name}
+                #{Chef::Dist::Server::CTL} #{command_name}
           WARN2
         end
       elsif pass_in_config
@@ -757,8 +757,8 @@ module PrivateChef
 
     # If known private keys are on disk, add them to Veil and commit them.
     def migrate_keys
-      did_something = add_key_from_file_if_present('chef-server', 'superuser_key', '/etc/opscode/pivotal.pem')
-      did_something |= add_key_from_file_if_present('chef-server', 'webui_key', '/etc/opscode/webui_priv.pem')
+      did_something = add_key_from_file_if_present("#{Chef::Dist::Server::SHORT}", 'superuser_key', '/etc/opscode/pivotal.pem')
+      did_something |= add_key_from_file_if_present("#{Chef::Dist::Server::SHORT}", 'webui_key', '/etc/opscode/webui_priv.pem')
       # Ensure these are committed to disk before continuing -
       # the secrets recipe will delete the old files.
       credentials.save if did_something

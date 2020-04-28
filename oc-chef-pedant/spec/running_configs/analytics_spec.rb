@@ -6,7 +6,7 @@ describe 'running configs required by Analytics Server', :config do
   # The analyics add-on reads from actions-source.json which is only
   # written out in some configurations.
   #
-  running_config = JSON.parse(IO.read('/etc/opscode/chef-server-running.json'))
+  running_config = JSON.parse(IO.read("/etc/opscode/#{Chef::Dist::Server::SHORT}-running.json"))
   if !(running_config['private_chef']['insecure_addon_compat'] && running_config['private_chef']['dark_launch']['actions'])
     skip 'Analytics config is only written when insecure_addon_compat = true && dark_launch["actions"] = true'
   else

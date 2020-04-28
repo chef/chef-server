@@ -111,7 +111,7 @@ if is_data_master?
         Chef::Log.fatal <<~ERR
 
           Could not connect to the postgresql database.
-          Please check 'chef-server-ctl tail postgresql' for more information.
+          Please check '#{Chef::Dist::Server::CTL} tail postgresql' for more information.
 
         ERR
         exit!(1)

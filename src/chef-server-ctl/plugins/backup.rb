@@ -12,7 +12,7 @@ add_command_under_category 'backup', 'general', 'Backup the Chef Server', 2 do
   options.config_only = false
 
   OptionParser.new do |opts|
-    opts.banner = 'Usage: chef-server-ctl backup [options]'
+    opts.banner = "Usage: #{Chef::Dist::Server::CTL} backup [options]"
 
     opts.on('-y', '--yes', 'Agree to go offline during tar based backups') do
       options.agree_to_go_offline = true
@@ -56,7 +56,7 @@ add_command_under_category 'restore', 'general', 'Restore the Chef Server from b
   options.restore_dir = nil
 
   OptionParser.new do |opts|
-    opts.banner = 'Usage: chef-server-ctl restore $PATH_TO_BACKUP_TARBALL [options]'
+    opts.banner = "Usage: #{Chef::Dist::Server::CTL} restore $PATH_TO_BACKUP_TARBALL [options]"
 
     opts.on('-d', '--staging-dir [directory]', String, 'The path to an empty directory for use in restoration.  Ensure it has enough available space for all expanded data in the backup archive') do |staging_directory|
       options.restore_dir = File.expand_path(staging_directory)
@@ -82,7 +82,7 @@ add_command_under_category 'restore', 'general', 'Restore the Chef Server from b
 
   unless ARGV.length >= 2
     log('Invalid command', :error)
-    log('USAGE: chef-server-ctl restore $PATH_TO_BACKUP_TARBALL [options]', :error)
+    log("USAGE: #{Chef::Dist::Server::CTL} restore $PATH_TO_BACKUP_TARBALL [options]", :error)
     exit(1)
   end
 

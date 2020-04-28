@@ -22,7 +22,7 @@ require 'openssl'
 # Because these symlinks get removed during the postrm
 # of the chef-server and private-chef packages, we should
 # ensure that they're always here.
-%w(private-chef-ctl chef-server-ctl).each do |bin|
+%W(private-#{ChefConfig::Dist::SHORT}-ctl #{Chef::Dist::Server::SHORT}-ctl).each do |bin|
   link "/usr/bin/#{bin}" do
     to "/opt/opscode/bin/#{bin}"
   end
@@ -125,7 +125,7 @@ end
 include_recipe 'private-chef::fix_permissions'
 
 # Configure Services
-%w(
+%W(
   postgresql
   oc_bifrost
   oc_id
@@ -137,7 +137,7 @@ include_recipe 'private-chef::fix_permissions'
   nginx
   rabbitmq
   bootstrap
-  opscode-chef-mover
+  opscode-#{ChefConfig::Dist::SHORT}-mover
   redis_lb
 ).each do |service|
   if node['private_chef'][service]['external']
@@ -184,7 +184,7 @@ include_recipe 'private-chef::partybus'
 include_recipe 'private-chef::ctl_config'
 include_recipe 'private-chef::disable_chef_server_11'
 
-file '/etc/opscode/chef-server-running.json' do
+file "/etc/opscode/#{Chef::Dist::Server::SHORT}-running.json" do
   owner OmnibusHelper.new(node).ownership['owner']
   group 'root'
   mode '0600'

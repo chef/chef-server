@@ -56,7 +56,7 @@ describe PreflightChecks do
     let(:credentials) { double('Credentials') }
 
     before do
-      allow(credentials).to receive(:exist?).with('chef-server', anything).and_return keys_exist
+      allow(credentials).to receive(:exist?).with("#{Chef::Dist::Server::SHORT}", anything).and_return keys_exist
       allow(credentials).to receive(:length).and_return secret_count
       allow(PrivateChef).to receive(:credentials).and_return credentials
     end

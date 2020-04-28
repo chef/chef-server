@@ -52,8 +52,8 @@ class PreflightValidator
   # we'll be able to make this better...
   def secrets_exists?
     len = PrivateChef.credentials.length
-    len -= 1 if PrivateChef.credentials.exist?('chef-server', 'webui_key')
-    len -= 1 if PrivateChef.credentials.exist?('chef-server', 'superuser_key')
+    len -= 1 if PrivateChef.credentials.exist?("#{Chef::Dist::Server::SHORT}", 'webui_key')
+    len -= 1 if PrivateChef.credentials.exist?("#{Chef::Dist::Server::SHORT}", 'superuser_key')
     len > 0
   end
 

@@ -70,7 +70,7 @@ module DVM
     end
 
     def clone(name, uri)
-      run_command("git clone '#{uri}' '#{name}'", "Cloning #{name} to host. For future reference, you may also symlink it into chef-server/external-deps from another location on the host.",
+      run_command("git clone '#{uri}' '#{name}'", "Cloning #{name} to host. For future reference, you may also symlink it into #{Chef::Dist::Server::SHORT}/external-deps from another location on the host.",
                   cwd: host_external_deps_dir)
     end
 

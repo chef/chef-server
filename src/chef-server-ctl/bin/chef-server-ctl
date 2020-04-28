@@ -4,6 +4,7 @@ require 'rubygems'
 gem 'omnibus-ctl'
 require 'omnibus-ctl'
 require 'veil'
+require 'dist'
 require 'chef_server_ctl/log'
 require 'chef_server_ctl/config'
 require "license_acceptance/acceptor"
