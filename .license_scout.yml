@@ -164,6 +164,8 @@ exceptions:
       reason: Exception made by Chef Legal
     - name: core/bash
       reason: Exception made by Chef Legal
+    - name: core/binutils
+      reason: Exception made by Chef Legal
     - name: core/busybox-static
       reason: Exception made by Chef Legal
     - name: core/coreutils
