@@ -141,9 +141,20 @@ validate_checksums_uploaded(ReqId, #chef_sandbox{id = _BoxId, checksums = Checks
             %% Everything was there!
             ok;
         {_, OverallErrorCount} when OverallErrorCount =/= 0 ->
+io:format("~nin chef_wm_named_sandbox validate_checksums_uploaded..."),
+io:format("~nReqId:       ~p", [ReqId]),
+io:format("~nChecksums:   ~p", [Checksums]),
+io:format("~nOrgId:       ~p", [OrgId]),
+io:format("~nNeedsUpload: ~p", [NeedsUpload]),
             %% We had some errors :(
             throw({checksum_check_error, OverallErrorCount});
         {Missing, _} ->
+io:format("~nin chef_wm_named_sandbox validate_checksums_uploaded..."),
+io:format("~nReqId:       ~p", [ReqId]),
+io:format("~nChecksums:   ~p", [Checksums]),
+io:format("~nOrgId:       ~p", [OrgId]),
+io:format("~nNeedsUpload: ~p", [NeedsUpload]),
+io:format("~nMissing:     ~p", [Missing]),
             %% Some checksums were missing :(
             throw({missing_checksums, Missing})
     end.
