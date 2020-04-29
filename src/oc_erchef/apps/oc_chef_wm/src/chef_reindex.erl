@@ -49,9 +49,13 @@ reindex(Ctx, {OrgId, OrgName}=OrgInfo) ->
     lager:info("reindexing[~s]: reindex requested for ~s", [OrgName, OrgName]),
     AllIndexes = fetch_org_indexes(Ctx, OrgId),
     Results = [reindex(Ctx, OrgInfo, Index) || Index <- AllIndexes ],
+    io:format("Results: ~p ~n", [Results]),
     {FailedList, MissingList} = lists:unzip(Results),
+    io:format("FailedList: ~p and ~n MissingList: ~p", [FailedList, MissingList]),
     FlatFailures = lists:flatten(FailedList),
+    io:format("FlatFailures: ~p ~n", [FlatFailures]),
     FlatMissing = lists:flatten(MissingList),
+    io:format("FlatMissing: ~p ~n", [FlatMissing]),
     case FlatFailures of
         [] ->
             lager:info("reindexing[~s]: reindex complete!", [OrgName]),
@@ -140,7 +144,7 @@ reindex_by_id(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Ids) ->
                       Names :: [binary()]) -> {list(), list()}.
 reindex_by_name(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Names) ->
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
-    io:format("NameIdDict: ~p", [NameIdDict]),
+    io:format("NameIdDict: ~p ~n", [NameIdDict]),
     Ids = lists:foldl(
             fun(Name, Acc) ->
                     case dict:find(Name, NameIdDict) of
@@ -151,7 +155,7 @@ reindex_by_name(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Names) ->
                             Acc
                     end
             end, [], Names),
-    io:format("Ids: ~p", [Ids]),
+    io:format("Ids: ~p ~n", [Ids]),
     {ok, BatchSize} = application:get_env(oc_chef_wm, reindex_batch_size),
     batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict).
 
