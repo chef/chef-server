@@ -59,12 +59,21 @@ validate_args([OrgName, IndexName | Items]) when length(Items) > 0 ->
             halt(2);
         OrgId when is_binary(OrgId)->
             BinItemsList = [ list_to_binary(X) || X <- Items ],
+            CorrectTypeIndexName = bin_or_atom_index_name(IndexName),
             %% Everything checks out!  Let's do some reindexing!
-            [{OrgId, OrgBin}, Context, IndexNameBin, BinItemsList];
+            [{OrgId, OrgBin}, Context, CorrectTypeIndexName, BinItemsList];
         OtherError ->
             io:format("Other error occured ~p~n", [OtherError]),
             halt(3)
     end.
+
+bin_or_atom_index_name(IndexName) when IndexName =:= ["node"];
+				       IndexName =:= ["role"];
+				       IndexName =:= ["environement"];
+				       IndexName =:= ["client"] ->
+	list_to_atom(IndexName);
+bin_or_atom_index_name(IndexName) ->
+	list_to_binary(IndexName).
 
 %% @doc Actually do the reindexing.
 -spec perform(Context :: term(),
