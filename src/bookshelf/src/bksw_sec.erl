@@ -50,6 +50,8 @@ is_authorized(Req0, #context{} = Context) ->
     end.
 
 do_signed_url_authorization(RequestId, Req0, #context{reqid = ReqId} = Context) ->
+try
+
 io:format("~n~n--------------------------------"),
 io:format("~nin bksw_sec do_signed_url_authorization"),
 io:format("~nquery string: ~p", [wrq:req_qs(Req0)]),
@@ -152,11 +154,17 @@ case list_to_binary(IncomingSignature) of
                         encode_sign_error_response(AWSAccessKeyId, IncomingSignature, RequestId,
                                                    ComparisonURL, Req0, Context)
                 end
-            end;
+        end;
     _ ->
         io:format("~nbksw_sec: make_signed_url_authorization failed"),
         io:format("~n--------------------------------"),
         encode_access_denied_error_response(RequestId, Req0, Context)
+end
+
+of Success -> Success
+catch
+    TypeOfErr:ExceptionPattern -> io:format("~nbksw_sec: crash! ~p", [{TypeOfErr, ExceptionPattern}]),
+                                  1/0
 end.
 
 
