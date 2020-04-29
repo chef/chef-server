@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.6 -->
-## [13.2.6](https://github.com/chef/chef-server/tree/13.2.6) (2020-04-29)
+<!-- latest_release 13.2.7 -->
+## [13.2.7](https://github.com/chef/chef-server/tree/13.2.7) (2020-04-29)
 
 #### Merged Pull Requests
-- Restrict access to dhparams.pem (used by Nginx). [#1977](https://github.com/chef/chef-server/pull/1977) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update listen_port for newer nginx.conf syntax. [#1978](https://github.com/chef/chef-server/pull/1978) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Update listen_port for newer nginx.conf syntax. [#1978](https://github.com/chef/chef-server/pull/1978) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.7 -->
 - Restrict access to dhparams.pem (used by Nginx). [#1977](https://github.com/chef/chef-server/pull/1977) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.6 -->
 - Add an exception for habitat core/binutils [#1975](https://github.com/chef/chef-server/pull/1975) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.5 -->
 - Add information about software updates. [#1971](https://github.com/chef/chef-server/pull/1971) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.4 -->
