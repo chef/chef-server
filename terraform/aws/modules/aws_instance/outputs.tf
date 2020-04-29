@@ -23,5 +23,5 @@ output "public_ipv6_address" {
 }
 
 output "ssh_username" {
-  value = replace(var.platform, "/ubuntu-.*/", "ubuntu") == "ubuntu" ? "ubuntu" : "ec2-user"
+  value = local.ssh_username
 }

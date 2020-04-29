@@ -11,6 +11,7 @@ module "back_end" {
   enable_ipv6       = var.enable_ipv6
   platform          = var.platform
   build_prefix      = var.build_prefix
+  capture_paths     = ["/etc/opscode", "/var/log/opscode"]
   name              = "backend-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
@@ -27,6 +28,7 @@ module "front_end" {
   enable_ipv6       = var.enable_ipv6
   platform          = var.platform
   build_prefix      = var.build_prefix
+  capture_paths     = ["/etc/opscode", "/var/log/opscode"]
   name              = "frontend-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 

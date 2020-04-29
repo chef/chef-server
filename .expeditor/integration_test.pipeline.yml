@@ -80,6 +80,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-openldap
       PLATFORM: rhel-6
@@ -94,6 +95,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-openldap
       PLATFORM: rhel-7
@@ -108,6 +110,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-openldap
       PLATFORM: rhel-8
@@ -122,6 +125,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-openldap
       PLATFORM: ubuntu-16.04
@@ -136,6 +140,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-openldap
       PLATFORM: ubuntu-18.04
@@ -150,6 +155,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-fips
       PLATFORM: rhel-6
@@ -164,6 +170,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-fips
       PLATFORM: rhel-7
@@ -178,6 +185,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-fips
       PLATFORM: rhel-8
@@ -192,6 +200,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: rhel-6
@@ -207,6 +216,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: rhel-7
@@ -222,6 +232,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: rhel-8
@@ -237,6 +248,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: ubuntu-16.04
@@ -252,6 +264,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: ubuntu-18.04
@@ -267,6 +280,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-standalone-upgrade
       PLATFORM: rhel-6
@@ -281,6 +295,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-standalone-upgrade
       PLATFORM: rhel-7
@@ -295,6 +310,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-standalone-upgrade
       PLATFORM: ubuntu-16.04
@@ -309,6 +325,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-standalone-upgrade
       PLATFORM: ubuntu-18.04
@@ -323,6 +340,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-tiered-fresh-install
       PLATFORM: rhel-6
@@ -337,6 +355,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-tiered-fresh-install
       PLATFORM: rhel-7
@@ -351,6 +370,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-tiered-fresh-install
       PLATFORM: rhel-8
@@ -365,6 +385,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-tiered-fresh-install
       PLATFORM: ubuntu-16.04
@@ -379,6 +400,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-tiered-fresh-install
       PLATFORM: ubuntu-18.04
@@ -393,6 +415,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-tiered-upgrade
       PLATFORM: rhel-6
@@ -407,6 +430,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-tiered-upgrade
       PLATFORM: rhel-7
@@ -421,6 +445,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-tiered-upgrade
       PLATFORM: ubuntu-16.04
@@ -435,6 +460,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-tiered-upgrade
       PLATFORM: ubuntu-18.04
@@ -449,6 +475,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-elasticsearch
       PLATFORM: rhel-6
@@ -463,6 +490,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-elasticsearch
       PLATFORM: rhel-7
@@ -477,6 +505,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-elasticsearch
       PLATFORM: rhel-8
@@ -491,6 +520,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-elasticsearch
       PLATFORM: ubuntu-16.04
@@ -505,6 +535,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-elasticsearch
       PLATFORM: ubuntu-18.04
@@ -519,6 +550,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-openldap
       PLATFORM: rhel-6
@@ -533,6 +565,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-openldap
       PLATFORM: rhel-7
@@ -547,6 +580,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-openldap
       PLATFORM: rhel-8
@@ -561,6 +595,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-openldap
       PLATFORM: ubuntu-16.04
@@ -575,6 +610,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-openldap
       PLATFORM: ubuntu-18.04
@@ -589,6 +625,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-fips
       PLATFORM: rhel-6
@@ -603,6 +640,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-fips
       PLATFORM: rhel-7
@@ -617,6 +655,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-fips
       PLATFORM: rhel-8
@@ -631,6 +670,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: rhel-6
@@ -646,6 +686,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: rhel-7
@@ -661,6 +702,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: rhel-8
@@ -676,6 +718,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: ubuntu-16.04
@@ -691,6 +734,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-postgresql
       PLATFORM: ubuntu-18.04
@@ -706,6 +750,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-standalone-upgrade
       PLATFORM: rhel-6
@@ -720,6 +765,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-standalone-upgrade
       PLATFORM: rhel-7
@@ -734,6 +780,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-standalone-upgrade
       PLATFORM: ubuntu-16.04
@@ -748,6 +795,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-standalone-upgrade
       PLATFORM: ubuntu-18.04
@@ -762,6 +810,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-tiered-fresh-install
       PLATFORM: rhel-6
@@ -776,6 +825,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-tiered-fresh-install
       PLATFORM: rhel-7
@@ -790,6 +840,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-tiered-fresh-install
       PLATFORM: rhel-8
@@ -804,6 +855,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-tiered-fresh-install
       PLATFORM: ubuntu-16.04
@@ -818,6 +870,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-tiered-fresh-install
       PLATFORM: ubuntu-18.04
@@ -832,6 +885,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-tiered-upgrade
       PLATFORM: rhel-6
@@ -846,6 +900,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-tiered-upgrade
       PLATFORM: rhel-7
@@ -860,6 +915,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-tiered-upgrade
       PLATFORM: ubuntu-16.04
@@ -874,6 +930,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-tiered-upgrade
       PLATFORM: ubuntu-18.04
@@ -888,6 +945,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-elasticsearch
       PLATFORM: rhel-6
@@ -902,6 +960,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-elasticsearch
       PLATFORM: rhel-7
@@ -916,6 +975,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-elasticsearch
       PLATFORM: rhel-8
@@ -930,6 +990,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-elasticsearch
       PLATFORM: ubuntu-16.04
@@ -944,6 +1005,7 @@ steps:
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
       - ./integration_test.log
+      - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-external-elasticsearch
       PLATFORM: ubuntu-18.04
