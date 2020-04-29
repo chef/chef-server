@@ -72,29 +72,29 @@ class NginxErb
   end
 
   def listen_port(proto, options = {})
-    listen_port = ''
-    listen_port << case proto
-                   when 'http'
-                     node['private_chef']['nginx']['non_ssl_port'].to_s || '80'
-                   when 'https'
-                     node['private_chef']['nginx']['ssl_port'].to_s
-                   else
-                     proto.to_s
-                   end
-
+    listen_opts = ''
+    listen_port = case proto
+                  when 'http'
+                    node['private_chef']['nginx']['non_ssl_port'].to_s || '80'
+                  when 'https'
+                    listen_opts << ' ssl'
+                    node['private_chef']['nginx']['ssl_port'].to_s
+                  else
+                    proto.to_s
+                  end
+    listen_addr = ''
     if node['private_chef']['nginx']['enable_ipv6']
-      # In some cases, we're serving as a front-end for a service that's already
-      # listening on the same port in ipv4 - this prevents a conflict in that situation.
+      listen_addr = '[::]:'
       if options[:ipv6_only]
-        "listen [::]:#{listen_port} ipv6only=on;"
+        # Listen on IPv6 only, leaving IPv4 addresses alone.
+        listen_opts << ' ipv6only=on'
       else
-        # Listen to the same port on both v6 and v4
-        "listen [::]:#{listen_port} ipv6only=off;"
+        # Listen on both IPv4, and IPv6.
+        listen_opts << ' ipv6only=off'
       end
-    else
-      # default behavior to listen only on v4
-      "listen #{listen_port};"
     end
+    # Listen on IPv4 only.
+    "listen #{listen_addr}#{listen_port}#{listen_opts};"
   end
 
   def access_log(proto)
