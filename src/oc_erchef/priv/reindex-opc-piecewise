@@ -43,14 +43,13 @@ validate_args([]) ->
     io:format("Need to specify an organization, and index and a list of names~n"),
     halt(1);
 validate_args(Args) when length(Args) < 3 ->
-    io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME ITEM1 ITEM2> ~n"),
+    io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME ITEM1 ITEM2.. ~n"),
     halt(1);
 validate_args([OrgName, IndexName | Items]) when length(Items) > 0 ->
     %% TODO make configurable
     IntLB =  "https://127.0.0.1",
     Context = make_context(OrgName, IntLB),
     OrgBin = list_to_binary(OrgName), %% We use binaries around here...
-    IndexNameBin = list_to_binary(IndexName),
     %% Some operations require the organization's ID.  This also serves as a convenient
     %% check for organization existence.
     case get_org_id(Context, OrgBin) of
@@ -58,22 +57,30 @@ validate_args([OrgName, IndexName | Items]) when length(Items) > 0 ->
             io:format("Could not find an organization named '~s'~n", [OrgBin]),
             halt(2);
         OrgId when is_binary(OrgId)->
-            BinItemsList = [ list_to_binary(X) || X <- Items ],
-            CorrectTypeIndexName = bin_or_atom_index_name(IndexName),
             %% Everything checks out!  Let's do some reindexing!
-            [{OrgId, OrgBin}, Context, CorrectTypeIndexName, BinItemsList];
+            [{OrgId, OrgBin}, Context, bin_or_atom_index_name(IndexName), bin_items_list(Items)];
         OtherError ->
             io:format("Other error occured ~p~n", [OtherError]),
             halt(3)
     end.
 
-bin_or_atom_index_name(IndexName) when IndexName =:= ["node"];
-				       IndexName =:= ["role"];
-				       IndexName =:= ["environement"];
-				       IndexName =:= ["client"] ->
+%% Massaging the input to match expectations
+-spec bin_or_atom_index_name(IndexName :: "client" |
+                                          "environment" |
+                                          "node" |
+                                          "role" |
+                                          binary() ) -> atom() | binary().
+bin_or_atom_index_name(IndexName) when IndexName =:= "client";
+				                       IndexName =:= "environment";
+				                       IndexName =:= "node";
+				                       IndexName =:= "role" ->
 	list_to_atom(IndexName);
 bin_or_atom_index_name(IndexName) ->
 	list_to_binary(IndexName).
+
+-spec bin_items_list(Items :: list()) -> [binary()].
+bin_items_list(Items) ->
+    [ list_to_binary(X) || X <- Items ].
 
 %% @doc Actually do the reindexing.
 -spec perform(Context :: term(),
@@ -82,13 +89,14 @@ bin_or_atom_index_name(IndexName) ->
               Items::[binary()]
              ) -> term().
 perform(Context, {_OrgId, OrgName}=OrgInfo, Index, Items) ->
-    io:format("Sending all data for organization '~s' to be indexed again.  It may take some time before everything is available via search.~n", [OrgName]),
+    io:format("Sending items ~p in index ~p for organization '~s' to be indexed again.  It may take some time before everything is available via search.~n", [Items, Index, OrgName]),
     case rpc:call(?ERCHEF, chef_reindex, reindex_by_name, [Context, OrgInfo, Index, Items]) of
         {[],[]} ->
-            io:format("reindexing[~s]: reindex complete!~p", [OrgName]),
+            io:format("reindexing[~s]: reindex complete!~n", [OrgName]),
+            %% Fix print missing in case of an non existing item.
             print_missing([], OrgName, Index);
         {FailedList, MissingList} when is_list(FailedList) ->
-            io:format("reindexing[~s]: reindex FAILED!~p", [OrgName]),
+            io:format("reindexing[~s]: reindex FAILED!~n", [OrgName]),
             print_missing(MissingList, OrgName, Index),
             print_errors(FailedList, OrgName, Index),
             halt(3)
