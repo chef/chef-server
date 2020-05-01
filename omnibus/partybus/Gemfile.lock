@@ -1,8 +1,8 @@
 GIT
   remote: https://github.com/chef/chef_secrets
-  revision: 58373899212a23e4f37070aaa6d3a751b1281492
+  revision: 2875f29d82c528edd89cb614955e214f3aa4be0c
   specs:
-    veil (0.3.0)
+    veil (0.3.3)
       bcrypt (~> 3.1)
       pbkdf2
 
@@ -23,4 +23,4 @@ DEPENDENCIES
   veil!
 
 BUNDLED WITH
-   1.17.3
+   1.17.2
