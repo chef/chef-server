@@ -98,7 +98,6 @@ io:format("~n~n-------------------------------------------"),
 io:format(  "~nIN CHEF_S3.ERL - generate_presigned_url/6"),
 io:format(  "~nHeaders   = ~p",  [Headers]),
 io:format(  "~nAwsConfig scheme=~p host=~p port=~p", [AwsConfig#aws_config.s3_scheme, AwsConfig#aws_config.s3_host, AwsConfig#aws_config.s3_port]),
-io:format(  "~n-------------------------------------------"),
     Expiry = case application:get_env(chef_objects, s3_url_expiry_window_size) of
         {ok, {X, percent}} ->
             Interval = round((X / 100) * Lifetime),
@@ -109,7 +108,8 @@ io:format(  "~n-------------------------------------------"),
         _ ->
             Lifetime
     end,
-
+io:format(  "~nExpiry   = ~p",  [Expiry]),
+io:format(  "~n-------------------------------------------"),
     mini_s3:s3_url(Method,
                    as_string(Bucket),
                    make_key(OrgId, Checksum),

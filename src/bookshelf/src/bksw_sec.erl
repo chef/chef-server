@@ -253,6 +253,7 @@ make_signed_url_authorization(SecretKey, Method, Path, Expires, Headers) ->
     end.
 
 do_standard_authorization(RequestId, IncomingAuth, Req0, Context) ->
+io:format("~nDOING STANDARD AUTHORIZATION"),
     Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
     AmzHeaders = amz_headers(Headers),
     RawMethod = wrq:method(Req0),
