@@ -11,6 +11,7 @@ module "chef_server" {
   enable_ipv6       = var.enable_ipv6
   platform          = var.platform
   build_prefix      = var.build_prefix
+  capture_paths     = ["/etc/opscode", "/var/log/opscode"]
   name              = "chefserver-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
 }
 

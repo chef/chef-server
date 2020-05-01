@@ -57,3 +57,9 @@ variable "name" {
   type        = string
   description = "Name of the instance to be created."
 }
+
+variable "capture_paths" {
+	type    = list(string)
+  description = "List of paths to be extracted from the instance when scenario completes."
+	default = []
+}

@@ -8,6 +8,8 @@ locals {
 
   vpc_name = var.aws_vpc_name != "" ? var.aws_vpc_name : "${var.aws_contact}-chef_server-test"
 
+  ssh_username = replace(var.platform, "/ubuntu-.*/", "ubuntu") == "ubuntu" ? "ubuntu" : "ec2-user"
+
   ami_ids = {
     rhel-6       = data.aws_ami.rhel_6.id
     rhel-7       = data.aws_ami.rhel_7.id

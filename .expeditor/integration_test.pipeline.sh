@@ -225,6 +225,28 @@ EOF
 
 EOF
 
+    # capture paths from instances on failure for upload to buildkite
+    if [[ $ret -ne 0 ]]; then
+      echo -e "--- :chef: Gather content from instance for upload to Buildkite due to scenario failure"
+
+      for f in /tmp/*connection_info.txt; do
+        local target_dir="/workdir/$(sed 's_^/tmp/__;s_-connection.*$__;' <<<"$f")"
+
+        mkdir -p "$target_dir"
+
+        for capture_path in $(sed -n '2{s_[]\[,]_ _g;p;}' "$f"); do
+          echo "Capturing $capture_path"
+
+          tar -xzf <(ssh -o 'UserKnownHostsFile=/dev/null' -o 'StrictHostKeyChecking=no' "$(sed -n 1p "$f")" "sudo tar -czf - $capture_path") -C "$target_dir"
+        done
+
+        echo "Compressing captured content in $target_dir for upload to Buildkite."
+
+        tar czf "${target_dir}.capture_paths.tar.gz" --transform 's/^workdir\///' "$target_dir"
+        rm -rf "${target_dir}"
+      done
+    fi
+
     # destroy terraform scenario if aws token has not expired
     if [[ $SECONDS -lt $AWS_TOKEN_TIMEOUT ]]; then
       # allow destroy to fail
