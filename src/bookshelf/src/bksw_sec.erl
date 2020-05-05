@@ -23,12 +23,13 @@
 -export([is_authorized/2]).
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
--export([bucketname_key_from_path/1  ]).
--export([is_expired/2                ]).
--export([get_signed_headers/2        ]).
--export([parse_x_amz_credential/1    ]).
--export([parse_x_amz_signed_headers/1]).
--export([process_headers/1           ]).
+-compile(export_all).
+%-export([bucketname_key_from_path/1  ]).
+%-export([is_expired/2                ]).
+%-export([get_signed_headers/2        ]).
+%-export([parse_x_amz_credential/1    ]).
+%-export([parse_x_amz_signed_headers/1]).
+%-export([process_headers/1           ]).
 -endif.
 
 -define(SECONDS_AT_EPOCH, 62167219200).
@@ -44,12 +45,12 @@ is_authorized(Req0, #context{} = Context) ->
     {RequestId, Req1} = bksw_req:with_amz_request_id(Req0),
     case proplists:get_value('Authorization', Headers, undefined) of
         undefined ->
-            do_signed_url_authorization(RequestId, Req1, Context);
+            do_signed_url_authorization(RequestId, Req1, Context, Headers);
         IncomingAuth ->
-            do_standard_authorization(RequestId, IncomingAuth, Req1, Context)
+            do_standard_authorization(RequestId, IncomingAuth, Req1, Context, Headers)
     end.
 
-do_signed_url_authorization(RequestId, Req0, #context{reqid = ReqId} = Context) ->
+do_signed_url_authorization(RequestId, Req0, #context{reqid = ReqId} = Context, Headers0) ->
 try
 
 io:format("~n~n--------------------------------"),
@@ -62,14 +63,17 @@ io:format("~nquery string: ~p", [wrq:req_qs(Req0)]),
    % AWSAccessKeyId = wrq:get_qs_value("AWSAccessKeyId", Req0),
 % see https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
 io:format("~nx-amz-credential: ~p", [wrq:get_qs_value("X-Amz-Credential", Req0)]),
-[AWSAccessKeyId | _]  = parse_x_amz_credential(wrq:get_qs_value("X-Amz-Credential", Req0)),
+[AWSAccessKeyId, CredentialDate | _]  = parse_x_amz_credential(wrq:get_qs_value("X-Amz-Credential", Req0)),
 io:format("~naws-access-key-id: ~p", [AWSAccessKeyId]),
 
-% X-Amz-Date here?
+% date needs more work
 XAmzDate = wrq:get_qs_value("X-Amz-Date", Req0),
 
-XAmzExpiresString = wrq:get_qs_value("X-Amz-Expires", Req0),
    % Expires = wrq:get_qs_value("Expires", Req0),
+
+% only used with query string (presigned url)
+% authentication, not with authorization header
+XAmzExpiresString = wrq:get_qs_value("X-Amz-Expires", Req0),
 % 1 =< XAmzExpires =< 604800
 XAmzExpires = list_to_integer(XAmzExpiresString),
 io:format("~nx-amz-expires: ~p", [XAmzExpires]),
@@ -83,7 +87,7 @@ io:format("~nincoming signature: ~p", [IncomingSignature]),
 io:format("~nmethod: ~p", [Method]),
 
    % Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
-Headers = process_headers(mochiweb_headers:to_list(wrq:req_headers(Req0))),
+Headers = process_headers(Headers0),
 io:format("~nheaders: ~p", [Headers]),
 
 SignedHeaderKeys = parse_x_amz_signed_headers(wrq:get_qs_value("X-Amz-SignedHeaders", Req0)),
@@ -119,11 +123,13 @@ io:format("~nhost: ~p", [Host]),
 
 % which key/secret to use?
 % what to use for host value?
+% make sure to set the region and service here? or check defaults
 Config = mini_s3:new(AccessKey, SecretKey, Host),
 ComparisonURL = mini_s3:s3_url(list_to_atom(Method), BucketName, Key, XAmzExpires, SignedHeaders, XAmzDate, Config),
 io:format("~ns3url: ~p", [ComparisonURL]),
 
 % compare signatures
+% assumes X-Amz-Signature is always on the end?
 [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", all),
 io:format("~nsig1:  ~p", [list_to_binary(IncomingSignature)]),
 io:format("~nsig2:  ~p", [ComparisonSig                    ]),
@@ -156,7 +162,7 @@ case list_to_binary(IncomingSignature) of
                 end
         end;
     _ ->
-        io:format("~nbksw_sec: make_signed_url_authorization failed"),
+        io:format("~nbksw_sec: do_signed_url_authorization failed"),
         io:format("~n--------------------------------"),
         encode_access_denied_error_response(RequestId, Req0, Context)
 end
@@ -206,29 +212,6 @@ end.
 %            encode_access_denied_error_response(RequestId, Req0, Context)
 %    end.
 
-% get the key-value pairs (headers) associated with particular keys
-get_signed_headers(SignedHeaderKeys, Headers) ->
-    lists:flatten([proplists:lookup_all(SignedHeaderKey, Headers) || SignedHeaderKey <- SignedHeaderKeys]).
-
-% split-up credentials string into component parts
-% Cred = "<access-key-id>/<date>/<AWS-region>/<AWS-service>/aws4_request"
-parse_x_amz_credential(Cred) ->
-   [_access_key_id, _date, _AWS_region, "s3", "aws4_request"] = string:split(Cred, "/", all). %string:split(Cred, "%2F", all).
-
-% split-up signed header list into component parts
-% Headers = "<header1>;<header2>;...<headerN>"
-parse_x_amz_signed_headers(Headers) ->
-   string:split(Headers, ";", all).
-   %string:split(Headers, "%3B", all).
-
-% convert the keys of key-value pairs to all lowercase strings
-process_headers(Headers) ->
-    [{string:casefold(
-        case is_atom(Key) of
-            true -> atom_to_list(Key);
-            _    -> Key
-        end), Val} || {Key, Val} <- Headers].
-
 % split "bucketname/key" or "/bucketname/key" into {"bucketname", "key"}
 % Path = "<bucketname>/<key>"
 bucketname_key_from_path(Path0) ->
@@ -236,6 +219,35 @@ bucketname_key_from_path(Path0) ->
     {_, Path} = string:take(Path0, "/"),
     [BucketName, Key] = string:split(Path, "/"),
     {BucketName, Key}.
+
+% get the key-value pairs (headers) associated with particular keys
+get_signed_headers(SignedHeaderKeys, Headers) ->
+    lists:flatten([proplists:lookup_all(SignedHeaderKey, Headers) || SignedHeaderKey <- SignedHeaderKeys]).
+
+% split up the authorization header into component parts
+% https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
+parse_authorization(Auth) ->
+   [_, "AWS4-HMAC-SHA256", "Credential="++Cred, "SignedHeaders="++SigHead, "Signature="++Signature] = string:split(Auth, " ", all),
+   [string:trim(Cred, trailing, ","), string:trim(SigHead, trailing, ","), Signature].
+
+% split-up credentials string into component parts
+% Cred = "<access-key-id>/<date>/<AWS-region>/<AWS-service>/aws4_request"
+parse_x_amz_credential(Cred) ->
+   [_access_key_id, _date, _aws_region, "s3", "aws4_request"] = string:split(Cred, "/", all).
+
+% split-up signed header string into component parts
+% Headers = "<header1>;<header2>;...<headerN>"
+parse_x_amz_signed_headers(Headers) ->
+   string:split(Headers, ";", all).
+   %string:split(Headers, "%3B", all).
+
+% convert the keys of key-value pairs to lowercase strings
+process_headers(Headers) ->
+    [{string:casefold(
+        case is_atom(Key) of
+            true -> atom_to_list(Key);
+            _    -> Key
+        end), Val} || {Key, Val} <- Headers].
 
 make_signed_url_authorization(SecretKey, Method, Path, Expires, Headers) ->
     try
@@ -252,11 +264,28 @@ make_signed_url_authorization(SecretKey, Method, Path, Expires, Headers) ->
             error
     end.
 
-do_standard_authorization(RequestId, IncomingAuth, Req0, Context) ->
+do_standard_authorization(RequestId, IncomingAuth, Req0, Context, Headers) ->
 io:format("~nDOING STANDARD AUTHORIZATION"),
-    Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
-    AmzHeaders = amz_headers(Headers),
-    RawMethod = wrq:method(Req0),
+
+    [Credential, SignedHeaderKeys, IncomingSignature] = parse_authorization(IncomingAuth),
+    io:format("~nAuthorization: ~p ~p ~p", [Credential, SignedHeaderKeys, IncomingSignature]),
+    [AWSAccessKeyId, CredentialDate | _]  = parse_x_amz_credential(Credential),
+    io:format("~naws-access-key-id: ~p", [AWSAccessKeyId]),
+ 
+    %https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
+    XAmzDate = case wrq:get_req_header("x-amz-date", Req0) of
+                   undefined -> 
+                       wrq:get_req_header("date", Req0);
+                   Date ->
+                       Date
+               end,
+    CredentialDate ++ _ = XAmzDate,
+
+
+
+    %Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
+    %AmzHeaders = amz_headers(Headers),
+    RawMethod = wrq:method(Req0)
     Method = string:to_lower(erlang:atom_to_list(RawMethod)),
     ContentMD5 = proplists:get_value('Content-Md5', Headers, ""),
     ContentType = proplists:get_value('Content-Type', Headers, ""),
@@ -274,11 +303,13 @@ io:format("~nDOING STANDARD AUTHORIZATION"),
                                    bksw_util:to_string(ContentMD5),
                                    bksw_util:to_string(ContentType),
                                    bksw_util:to_string(Date),
-                                   AmzHeaders, bksw_util:to_string(Bucket),
+                                   %AmzHeaders,
+                                   "blah",
+                                   bksw_util:to_string(Bucket),
                                    "/" ++ bksw_util:to_string(Resource),
                                    ""),
     CheckedAuth = erlang:iolist_to_binary(RawCheckedAuth),
-    [AccessKeyId, Signature] = split_authorization(IncomingAuth),
+    [AccessKeyId, Signature] = ["x", "x"], %split_authorization(IncomingAuth),
     case erlang:iolist_to_binary(IncomingAuth) of
         CheckedAuth ->
             {true, Req0, Context};
@@ -338,20 +369,20 @@ encode_access_denied_error_response(RequestId, Req0, Context) ->
     Req2 = wrq:set_resp_body(Body, Req1),
     {{halt, 403}, Req2, Context}.
 
-split_authorization([$A, $W, $S, $\s, $: | Rest]) ->
-    [<<>>, Rest];
-split_authorization([$A, $W, $S, $\s  | Rest]) ->
-    string:tokens(Rest, ":").
+%split_authorization([$A, $W, $S, $\s, $: | Rest]) ->
+%    [<<>>, Rest];
+%split_authorization([$A, $W, $S, $\s  | Rest]) ->
+%    string:tokens(Rest, ":").
+%
+%is_amz([$X, $-, $A, $m, $z, $-, $A, $c, $l | _]) ->
+%    true;
+%is_amz([$x, $-, $a, $m, $z, $-, $a, $c, $l | _]) ->
+%    true;
+%is_amz(_) ->
+%    false.
 
-is_amz([$X, $-, $A, $m, $z, $-, $A, $c, $l | _]) ->
-    true;
-is_amz([$x, $-, $a, $m, $z, $-, $a, $c, $l | _]) ->
-    true;
-is_amz(_) ->
-    false.
+%amz_headers(Headers) ->
+%    [{process_header(K), V} || {K,V} <- Headers, is_amz(K)].
 
-amz_headers(Headers) ->
-    [{process_header(K), V} || {K,V} <- Headers, is_amz(K)].
-
-process_header(Key) ->
-    string:to_lower(bksw_util:to_string(Key)).
+%process_header(Key) ->
+%    string:to_lower(bksw_util:to_string(Key)).

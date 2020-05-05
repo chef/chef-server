@@ -15,6 +15,12 @@ is_expired_true_test() ->
 get_signed_headers_test() ->
     [{a, 1}, {b, 2}, {c, 3}] = bksw_sec:get_signed_headers([a, b, c], [{a, 1}, {x, y}, {b, 2}, {x, y}, {c, 3}, {x, y}]).
 
+% split up authorization header into component parts
+% https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
+parse_authorization_test() ->
+    Auth = "Authorization: AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request, SignedHeaders=host;range;x-amz-date, Signature=fe5f80f77d5fa3beca038a248ff027d0445342fe2855ddc963176630326f1024",
+    ["AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request", "host;range;x-amz-date", "fe5f80f77d5fa3beca038a248ff027d0445342fe2855ddc963176630326f1024"] = bksw_sec:parse_authorization(Auth).
+
 % split-up credentials string into component parts
 parse_x_amz_credential_test() ->
     Cred = "access-key-id/date/AWS-region/s3/aws4_request",
