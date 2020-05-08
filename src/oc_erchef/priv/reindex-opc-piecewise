@@ -29,7 +29,7 @@
 %%   2 - Invalid organization name given
 %%   3 - Failure reindexing
 %%   Prajakta ToDo: check if the script can reindex by type like node, role etc
-%%   Prajakta TODO: check if chef-serverctl reindex can call into this script
+%%   Prajakta TODO: check if chef-server-ctl reindex can call into this script
 main(Args) ->
     init_network(),
     [OrgInfo, Context, Index, Items] = validate_args(Args),
@@ -42,11 +42,15 @@ main(Args) ->
 %%
 %% If the arguments are invalid for any reason, print a message and halt.
 validate_args([]) ->
-    io:format("Need to specify an organization, and index and a list of names~n"),
-    halt(1);
-validate_args(Args) when length(Args) < 3 ->
+    io:format("Need to specify: ~n an organization, index and a list of names or~n an organization and an index.~n"),
     io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME ITEM1 ITEM2.. ~n"),
+    io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME~n"),
     halt(1);
+validate_args([OrgName, IndexName]=Args) when length(Args) =:= 2 ->
+    validate_args([OrgName, IndexName, []]);
+%validate_args(Args) when length(Args) < 3 ->
+%    io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME ITEM1 ITEM2.. ~n"),
+%    halt(1);
 validate_args([OrgName, IndexName | Items]) when length(Items) > 0 ->
     %% TODO make configurable
     IntLB =  "https://127.0.0.1",
@@ -60,11 +64,16 @@ validate_args([OrgName, IndexName | Items]) when length(Items) > 0 ->
             halt(2);
         OrgId when is_binary(OrgId)->
             %% Everything checks out!  Let's do some reindexing!
-            [{OrgId, OrgBin}, Context, bin_or_atom_index_name(IndexName), bin_items_list(Items)];
+            args_for_reindexing(OrgId, OrgBin, Context, IndexName, Items);
         OtherError ->
             io:format("Other error occured ~p~n", [OtherError]),
             halt(3)
     end.
+
+args_for_reindexing(OrgId, OrgBin, Context, IndexName, []) ->
+    [{OrgId, OrgBin}, Context, bin_or_atom_index_name(IndexName)];
+args_for_reindexing(OrgId, OrgBin, Context, IndexName, Items)->
+    [{OrgId, OrgBin}, Context, bin_or_atom_index_name(IndexName), bin_items_list(Items)];
 
 %% Massaging the input to match expectations
 %-spec bin_or_atom_index_name(IndexName :: "client" |
@@ -92,17 +101,24 @@ bin_items_list(Items) ->
              ) -> term().
 perform(Context, {_OrgId, OrgName}=OrgInfo, Index, Items) ->
     io:format("Sending items ~p in index ~p for organization '~s' to be indexed again.  It may take some time before everything is available via search.~n", [Items, Index, OrgName]),
-    case rpc:call(?ERCHEF, chef_reindex, reindex_by_name, [Context, OrgInfo, Index, Items]) of
+    Response = rpc_reindex(Context, OrgInfo, Index),
+    case Response of
         {[],[]} ->
             io:format("reindexing[~s]: reindex complete!~n", [OrgName]),
-            %% Fix print missing in case of an non existing item.
-            print_missing([], OrgName, Index);
+        {[], MissingList} ->
+            io:format("reindexing[~s]: reindex complete but the following items were not found~n", [OrgName]),
+            print_missing(MissingList, OrgName, Index);
         {FailedList, MissingList} when is_list(FailedList) ->
             io:format("reindexing[~s]: reindex FAILED!~n", [OrgName]),
             print_missing(MissingList, OrgName, Index),
             print_errors(FailedList, OrgName, Index),
             halt(3)
     end.
+
+rpc_reindex()->
+    rpc:call(?ERCHEF, chef_reindex, reindex, [Context, OrgInfo, Index]);
+rpc_reindex() ->
+    rpc:call(?ERCHEF, chef_reindex, reindex_by_name, [Context, OrgInfo, Index, Items]).
 
 print_errors(Failed, OrgName, Index) ->
     io:format(standard_error, "Reindexing the organization \"~s\" index \"~s\" has failed.~n", [OrgName, Index]),

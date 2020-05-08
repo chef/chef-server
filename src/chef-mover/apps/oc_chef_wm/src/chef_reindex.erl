@@ -128,16 +128,19 @@ reindex_by_id(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Ids) ->
                       Names :: [binary()]) -> ok.
 reindex_by_name(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Names) ->
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
-    Ids = lists:foldl(
-            fun(Name, Acc) ->
-                    case dict:find(Name, NameIdDict) of
-                        {ok, Id} ->
-                            [Id | Acc];
-                        error ->
-                            lager:warning("skipping: no id found for name ~p", [Name]),
-                            Acc
-                    end
-            end, [], Names),
+    MissingIds = [],
+    {Ids, MissingIds} = lists:foldl(
+                          fun(Name, Acc) ->
+                            case dict:find(Name, NameIdDict) of
+                              {ok, Id} ->
+                                {[Id | Acc], MissingIds};
+                            error ->
+                              lager:warning("skipping: no id found for name ~p", [Name]),
+                              %% The lager warning does not print anything on the console
+                              io:format("skipping, no id found for name ~p", [Name]),
+                              {Acc, lists:append([Name], MissingIds)}
+                            end
+                          end, [], Names),
     {ok, BatchSize} = application:get_env(oc_chef_wm, bulk_fetch_batch_size),
     batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict).
 
@@ -189,6 +192,7 @@ batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict) when is_list(Ids)
                     Index :: index(),
                     NameIdDict :: dict()) -> ok.
 index_a_batch(Ctx, BatchOfIds, {OrgId, OrgName}, Index, NameIdDict) ->
+    lager:info("reindexing[~s] indexing batch of ~p ~ss", [OrgName, length(BatchOfIds), Index]),
     SerializedObjects = chef_db:bulk_get(Ctx, OrgName, chef_object_type(Index), BatchOfIds),
     ok = send_to_index_queue(OrgId, Index, SerializedObjects, NameIdDict),
     ok.
