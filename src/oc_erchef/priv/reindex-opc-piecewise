@@ -49,9 +49,9 @@ validate_args([OrgName, IndexName]) when IndexName =:= "clients" ->
     validate_args([OrgName, "client", []]);
 validate_args([OrgName, IndexName]) when IndexName =:= "environments" ->
     validate_args([OrgName, "environment", []]);
-validate_args([OrgName, IndexName]) when IndexName =:= "node" ->
+validate_args([OrgName, IndexName]) when IndexName =:= "nodes" ->
     validate_args([OrgName, "node", []]);
-validate_args([OrgName, IndexName]) when IndexName =:= "role" ->
+validate_args([OrgName, IndexName]) when IndexName =:= "roles" ->
     validate_args([OrgName, "role", []]);
 validate_args([OrgName, IndexName]) when IndexName =:= "client";
 				                         IndexName =:= "environment";
