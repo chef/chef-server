@@ -28,6 +28,8 @@
 %%   1 - Incorrect arguments given
 %%   2 - Invalid organization name given
 %%   3 - Failure reindexing
+%%   Prajakta ToDo: check if the script can reindex by type like node, role etc
+%%   Prajakta TODO: check if chef-serverctl reindex can call into this script
 main(Args) ->
     init_network(),
     [OrgInfo, Context, Index, Items] = validate_args(Args),
