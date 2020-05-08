@@ -65,11 +65,11 @@ validate_args([OrgName, IndexName | Items]) when length(Items) > 0 ->
     end.
 
 %% Massaging the input to match expectations
--spec bin_or_atom_index_name(IndexName :: "client" |
-                                          "environment" |
-                                          "node" |
-                                          "role" |
-                                          binary() ) -> atom() | binary().
+%-spec bin_or_atom_index_name(IndexName :: "client" |
+%                                          "environment" |
+%                                          "node" |
+%                                          "role" |
+%                                          binary() ) -> atom() | binary().
 bin_or_atom_index_name(IndexName) when IndexName =:= "client";
 				                       IndexName =:= "environment";
 				                       IndexName =:= "node";
