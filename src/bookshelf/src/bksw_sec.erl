@@ -169,14 +169,15 @@ try
                     case erlang:iolist_to_binary(AWSAccessKeyId) ==
                                erlang:iolist_to_binary(AccessKey) of
                         true ->
-                            MaxAge = "max-age=" ++ XAmzExpiresString,
-                            Req1 = wrq:set_resp_header("Cache-Control", MaxAge, Req0),
+                            %MaxAge = "max-age=" ++ XAmzExpiresString,
+                            %Req1 = wrq:set_resp_header("Cache-Control", MaxAge, Req0),
                             io:format("~ndo_signed_url_authorization succeeded"),
-                            io:format("~n--------------------------------"),
-                            {true, Req1, Context};
+                            io:format("~n-------------------------------------"),
+                            %{true, Req1, Context};
+                            {true, Req0, Context};
                         false ->
                             io:format("~ndo_signed_url_authorization failed"),
-                            io:format("~n--------------------------------"),
+                            io:format("~n----------------------------------"),
                             ?LOG_DEBUG("req_id=~p signing error for ~p", [ReqId, Path]),
                             encode_sign_error_response(AWSAccessKeyId, IncomingSignature, RequestId,
                                                        ComparisonURL, Req0, Context)
@@ -184,7 +185,7 @@ try
             end;
         _ ->
             io:format("~nbksw_sec: do_signed_url_authorization failed"),
-            io:format("~n--------------------------------"),
+            io:format("~n--------------------------------------------"),
             encode_access_denied_error_response(RequestId, Req0, Context)
     end
  
