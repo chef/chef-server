@@ -145,17 +145,21 @@ reindex_by_id(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Ids) ->
 reindex_by_name(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Names) ->
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
     io:format("NameIdDict: ~p ~n", [NameIdDict]),
-    Ids = lists:foldl(
-            fun(Name, Acc) ->
-                    case dict:find(Name, NameIdDict) of
-                        {ok, Id} ->
-                            [Id | Acc];
-                        error ->
-                            lager:warning("skipping: no id found for name ~p", [Name]),
-                            Acc
-                    end
-            end, [], Names),
+    MissingIds = [],
+    {Ids, MissingIds} = lists:foldl(
+                          fun(Name, Acc) ->
+                            case dict:find(Name, NameIdDict) of
+                              {ok, Id} ->
+                                {[Id | Acc], MissingIds};
+                            error ->
+                              lager:warning("skipping: no id found for name ~p", [Name]),
+                              %% The lager warning does not print anything on the console
+                              io:format("skipping, no id found for name ~p", [Name]),
+                              {Acc, lists:append([Name], MissingIds)}
+                            end
+                          end, [], Names),
     io:format("Ids: ~p ~n", [Ids]),
+    io:format("MissingIds: ~p ~n", [MissingIds]),
     {ok, BatchSize} = application:get_env(oc_chef_wm, reindex_batch_size),
     batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict).
 
@@ -214,7 +218,7 @@ batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict) when is_list(Ids)
                     Index :: index(),
                     NameIdDict :: dict()) -> {ok, list()} | {{error, list()}, list()}.
 index_a_batch(Ctx, BatchOfIds, {OrgId, OrgName}, Index, NameIdDict) ->
-    lager:debug("reindexing[~s] indexing batch of ~p ~ss", [OrgName, length(BatchOfIds), Index]),
+    lager:info("reindexing[~s] indexing batch of ~p ~ss", [OrgName, length(BatchOfIds), Index]),
     SerializedObjects = chef_db:bulk_get(Ctx, OrgName, chef_object_type(Index), BatchOfIds),
     send_to_index_queue(OrgName, OrgId, Index, SerializedObjects, NameIdDict).
 

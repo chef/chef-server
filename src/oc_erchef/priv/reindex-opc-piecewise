@@ -28,7 +28,6 @@
 %%   1 - Incorrect arguments given
 %%   2 - Invalid organization name given
 %%   3 - Failure reindexing
-%%   Prajakta ToDo: check if the script can reindex by type like node, role etc
 %%   Prajakta TODO: check if chef-server-ctl reindex can call into this script
 main(Args) ->
     init_network(),
@@ -51,7 +50,7 @@ validate_args([OrgName, IndexName]=Args) when length(Args) =:= 2 ->
 %validate_args(Args) when length(Args) < 3 ->
 %    io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME ITEM1 ITEM2.. ~n"),
 %    halt(1);
-validate_args([OrgName, IndexName | Items]) when length(Items) > 0 ->
+validate_args([OrgName, IndexName | Items]) ->
     %% TODO make configurable
     IntLB =  "https://127.0.0.1",
     Context = make_context(OrgName, IntLB),
@@ -64,16 +63,12 @@ validate_args([OrgName, IndexName | Items]) when length(Items) > 0 ->
             halt(2);
         OrgId when is_binary(OrgId)->
             %% Everything checks out!  Let's do some reindexing!
-            args_for_reindexing(OrgId, OrgBin, Context, IndexName, Items);
+            [{OrgId, OrgBin}, Context, bin_or_atom_index_name(IndexName), bin_items_list(Items)];
         OtherError ->
             io:format("Other error occured ~p~n", [OtherError]),
             halt(3)
     end.
 
-args_for_reindexing(OrgId, OrgBin, Context, IndexName, []) ->
-    [{OrgId, OrgBin}, Context, bin_or_atom_index_name(IndexName)];
-args_for_reindexing(OrgId, OrgBin, Context, IndexName, Items)->
-    [{OrgId, OrgBin}, Context, bin_or_atom_index_name(IndexName), bin_items_list(Items)];
 
 %% Massaging the input to match expectations
 %-spec bin_or_atom_index_name(IndexName :: "client" |
@@ -97,11 +92,11 @@ bin_items_list(Items) ->
 -spec perform(Context :: term(),
               {OrgId::binary(), OrgName::binary()},
               Index::index(),
-              Items::[binary()]
+              Items::[] | [binary()]
              ) -> term().
 perform(Context, {_OrgId, OrgName}=OrgInfo, Index, Items) ->
     io:format("Sending items ~p in index ~p for organization '~s' to be indexed again.  It may take some time before everything is available via search.~n", [Items, Index, OrgName]),
-    Response = rpc_reindex(Context, OrgInfo, Index),
+    Response = rpc_reindex(Context, OrgInfo, Index, Items),
     case Response of
         {[],[]} ->
             io:format("reindexing[~s]: reindex complete!~n", [OrgName]),
@@ -115,9 +110,9 @@ perform(Context, {_OrgId, OrgName}=OrgInfo, Index, Items) ->
             halt(3)
     end.
 
-rpc_reindex()->
+rpc_reindex(Context, OrgInfo, Index, [])->
     rpc:call(?ERCHEF, chef_reindex, reindex, [Context, OrgInfo, Index]);
-rpc_reindex() ->
+rpc_reindex(Context, OrgInfo, Index, Items) ->
     rpc:call(?ERCHEF, chef_reindex, reindex_by_name, [Context, OrgInfo, Index, Items]).
 
 print_errors(Failed, OrgName, Index) ->
