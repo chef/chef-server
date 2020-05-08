@@ -35,6 +35,7 @@
 -export([
          make_context/0,
          reindex/2,
+         reindex/3,
          reindex_by_id/4,
          reindex_by_name/4
         ]).

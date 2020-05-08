@@ -45,8 +45,22 @@ validate_args([]) ->
     io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME ITEM1 ITEM2.. ~n"),
     io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME~n"),
     halt(1);
-validate_args([OrgName, IndexName]=Args) when length(Args) =:= 2 ->
+validate_args([OrgName, IndexName]) when IndexName =:= "clients" ->
+    validate_args([OrgName, "client", []]);
+validate_args([OrgName, IndexName]) when IndexName =:= "environments" ->
+    validate_args([OrgName, "environment", []]);
+validate_args([OrgName, IndexName]) when IndexName =:= "node" ->
+    validate_args([OrgName, "node", []]);
+validate_args([OrgName, IndexName]) when IndexName =:= "role" ->
+    validate_args([OrgName, "role", []]);
+validate_args([OrgName, IndexName]) when IndexName =:= "client";
+				                         IndexName =:= "environment";
+				                         IndexName =:= "node";
+				                         IndexName =:= "role"  ->
     validate_args([OrgName, IndexName, []]);
+%% Assume that user sent a databag
+validate_args([OrgName, IndexName]) ->
+    validate_args([OrgName, list_to_binary(IndexName), []]);
 %validate_args(Args) when length(Args) < 3 ->
 %    io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME ITEM1 ITEM2.. ~n"),
 %    halt(1);
@@ -99,7 +113,7 @@ perform(Context, {_OrgId, OrgName}=OrgInfo, Index, Items) ->
     Response = rpc_reindex(Context, OrgInfo, Index, Items),
     case Response of
         {[],[]} ->
-            io:format("reindexing[~s]: reindex complete!~n", [OrgName]),
+            io:format("reindexing[~s]: reindex complete!~n", [OrgName]);
         {[], MissingList} ->
             io:format("reindexing[~s]: reindex complete but the following items were not found~n", [OrgName]),
             print_missing(MissingList, OrgName, Index);
@@ -110,7 +124,7 @@ perform(Context, {_OrgId, OrgName}=OrgInfo, Index, Items) ->
             halt(3)
     end.
 
-rpc_reindex(Context, OrgInfo, Index, [])->
+rpc_reindex(Context, OrgInfo, Index, [<<>>])->
     rpc:call(?ERCHEF, chef_reindex, reindex, [Context, OrgInfo, Index]);
 rpc_reindex(Context, OrgInfo, Index, Items) ->
     rpc:call(?ERCHEF, chef_reindex, reindex_by_name, [Context, OrgInfo, Index, Items]).
