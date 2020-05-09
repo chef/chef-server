@@ -305,7 +305,8 @@ es_api_test_() ->
     JsonContentType = [{"Content-Type", "application/json"}],
     {foreach,
      fun() ->
-             application:set_env(chef_index, search_provider, elasticsearch)
+             application:set_env(chef_index, search_provider, elasticsearch),
+             chef_elasticsearch:declare_metrics()
      end,
      fun(_) ->
              meck:unload()

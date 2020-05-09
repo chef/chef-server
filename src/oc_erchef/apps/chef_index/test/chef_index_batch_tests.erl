@@ -22,6 +22,7 @@ chef_index_batch_test_() ->
     {foreach,
      fun() ->
              application:set_env(chef_index, search_batch_max_wait, 10000000),
+             application:ensure_all_started(prometheus),
              meck:new(chef_index, [passthrough]),
              {ok, Pid} = chef_index_batch:start_link(),
              Pid

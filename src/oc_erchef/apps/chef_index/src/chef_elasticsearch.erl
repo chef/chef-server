@@ -8,7 +8,8 @@
          delete_search_db/1,
          delete_search_db_by_type/2,
          %% Document Building Helpers
-         transform_data/1
+         transform_data/1,
+         declare_metrics/0
         ]).
 
 -include("chef_solr.hrl").
@@ -21,10 +22,43 @@ ping() ->
         _Error -> pang
     end.
 
+declare_metrics() ->
+    prometheus_counter:declare([{name, chef_elasticsearch_update_count},
+                                {help, "Total calls to chef_elasticsearch:update"}]),
+    prometheus_counter:declare([{name, chef_elasticsearch_search_count},
+                                {help, "Total calls to chef_elasticsearch:search"}]),
+    prometheus_counter:declare([{name, chef_elasticsearch_delete_search_db_count},
+                                {help, "Total calls to chef_elasticsearch:delete_es_search_db"}]),
+    prometheus_counter:declare([{name, chef_elasticsearch_delete_search_db_by_type_count},
+                                {help, "Total calls to chef_elasticsearch:delete_search_db_by_type"}]),
+    prometheus_counter:declare([{name, chef_elasticsearch_search_with_scroll_count},
+                                {help, "Total calls to search_with_scroll/scroll (used internally by delete_search_db)"}]),
+
+    %% TODO(ssd) 2020-05-15: Right now we don't actually check the
+    %% responses for these calls.  We should fix this but I'm trying
+    %% to limit the number of logic changes introduced by adding the
+    %% metrics.
+    %% prometheus_counter:declare([{name, chef_elasticsearch_update_resp_count},
+    %%                             {help, "Calls to chef_elasticsearch:update by response code"},
+    %%                             {labels, [resp_code]}]),
+    %% prometheus_counter:declare([{name, chef_elasticsearch_delete_search_db_resp_count},
+    %%                             {help, "Calls to chef_elasticsearch:delete_es_search_db by response code"},
+    %%                             {labels, [resp_code]}]),
+    %% prometheus_counter:declare([{name, chef_elasticsearch_delete_search_db_by_type_resp_count},
+    %%                             {help, "Calls to chef_elasticsearch:delete_search_db_by_type by response code"},
+    %%                             {labels, [resp_code]}]),
+    prometheus_counter:declare([{name, chef_elasticsearch_search_resp_count},
+                                {help, "Calls to chef_elasticsearch:search by response code"},
+                                {labels, [resp_code]}]),
+    prometheus_counter:declare([{name, chef_elasticsearch_search_with_scroll_resp_count},
+                                {help, "Calls to search_with_scroll/scroll (used internally by delete_search_db) by response code"},
+                                {labels, [resp_code]}]).
+
 -spec update(iolist() | binary()) -> ok | {error, term()}.
 update(Body) when is_list(Body) ->
     update(iolist_to_binary(Body));
 update(Body) ->
+    prometheus_counter:inc(chef_elasticsearch_update_count),
     chef_index_http:post("/_bulk", Body, ?JSON_HEADER).
 
 -spec search(#chef_solr_query{}) ->
@@ -33,7 +67,14 @@ update(Body) ->
                     {error, {solr_500, string()}}.
 search(#chef_solr_query{} = Query) ->
     Url = "/chef/_search",
+    prometheus_counter:inc(chef_elasticsearch_search_count),
+    %% NOTE(ssd,praj) 2020-05-15: We held off on adding a histogram
+    %% here since we have a histogram a layer lower in
+    %% chef_index_http.
     {ok, Code, _Head, Body} = chef_index_http:request(Url, get, query_body(Query), ?JSON_HEADER),
+    prometheus_counter:inc(chef_elasticsearch_search_resp_count, [Code]),
+    %% TODO(ssd) 2020-05-15: I'm surprised we don't get case_clause
+    %% errors here regularly as we only handle 3 HTTP status codes.
     case Code of
         "200" ->
             handle_successful_search(Body);
@@ -97,7 +138,6 @@ query_string_query_ejson(QueryString) ->
         {<<"query">>, list_to_binary(QueryString)}
     ]}}.
 
-%%
 %% A note on deleting
 %%
 %% The delete-by-query API was removed from Elasticsearch in 2.0, and is only
@@ -120,13 +160,14 @@ delete_search_db_by_type(OrgId, Type)
        Type == environment orelse Type == node orelse
        Type == role ->
     QueryString = chef_index_query:search_db_from_orgid(OrgId) ++
-                                "AND" ++ chef_index_query:search_type_constraint(Type),
+        "AND" ++ chef_index_query:search_type_constraint(Type),
     Query = #chef_solr_query{
                              rows = 1000,
                              start = 0,
                              search_provider = elasticsearch,
                              query_string = QueryString
                             },
+    prometheus_counter:inc(chef_elasticsearch_delete_search_db_by_type_count),
     case envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer) of
         X when X >= 5 ->
             chef_index_http:post("/chef/_delete_by_query", delete_query_body(QueryString), ?JSON_HEADER),
@@ -146,8 +187,10 @@ delete_search_db(OrgId) ->
                              search_provider = elasticsearch,
                              query_string = QueryString
                             },
+    prometheus_counter:inc(chef_elasticsearch_delete_search_db_count),
     case envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer) of
         X when X >= 5 ->
+            %% TODO(ssd) 2020-05-15: Why don't we check the return value here?
             chef_index_http:post("/chef/_delete_by_query", delete_query_body(QueryString), ?JSON_HEADER),
             commit(),
             ok;
@@ -168,8 +211,10 @@ delete_query_body(QueryString) ->
                     {error, {solr_400, string()}} |
                     {error, {solr_500, string()}}.
 search_with_scroll(#chef_solr_query{} = Query) ->
+    prometheus_counter:inc(chef_elasticsearch_search_with_scroll_count),
     Url = "/chef/_search?scroll=1m",
     {ok, Code, _Head, Body} = chef_index_http:request(Url, get, query_body(Query), ?JSON_HEADER),
+    prometheus_counter:inc(chef_elasticsearch_search_with_scroll_resp_count, [Code]),
     case Code of
         "200" ->
             EjsonBody = jiffy:decode(Body),
@@ -191,8 +236,10 @@ scroll(ScrollIds, NumFound, NumFound, Ids) ->
     ok = chef_index_http:delete("/_search/scroll/", scroll_body(ScrollIds), ?JSON_HEADER),
     {ok, undefined, NumFound, Ids};
 scroll([ScrollIdHead | _] = ScrollIds, NumFound, _, Ids) ->
+    prometheus_counter:inc(chef_elasticsearch_search_with_scroll_count),
     Url = "/_search/scroll?scroll=1m",
     {ok, Code, _Head, Body} = chef_index_http:request(Url, get, ScrollIdHead, ?JSON_HEADER),
+    prometheus_counter:inc(chef_elasticsearch_search_with_scroll_resp_count, [Code]),
     case Code of
         "200" ->
             DocList = ej:get({<<"hits">>, <<"hits">>}, jiffy:decode(Body)),

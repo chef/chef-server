@@ -31,7 +31,8 @@
          add_batch/1,
          search_provider/0,
          ping/0,
-         status/0
+         status/0,
+         histogram_buckets/0
         ]).
 
 -include("chef_solr.hrl").
@@ -40,6 +41,9 @@
 
 search_provider() ->
     envy:get(chef_index, search_provider, solr, envy:one_of([solr, elasticsearch])).
+
+histogram_buckets() ->
+    [0.1, 0.5, 1, 5, 10, 25, 50, 100, 250, 500, 1000, 2000, 5000, 10000].
 
 -spec search(#chef_solr_query{}) ->
                     {ok, non_neg_integer(), non_neg_integer(), [binary()]} |
