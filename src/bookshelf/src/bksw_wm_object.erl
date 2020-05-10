@@ -90,6 +90,7 @@ resource_exists(Rq0, Ctx) ->
     %% Buckets always exist for writes since we create them on the fly
     case wrq:method(Rq0) of
         'PUT' ->
+            io:format("~nbksw_wm_object: ok, resource exists for PUT"),
             {true, Rq0, Ctx};
         _ ->
             %% determine if the entry exists by opening it. This way, we can cache the fd
@@ -98,8 +99,10 @@ resource_exists(Rq0, Ctx) ->
             %% Note that there is still a possible discrepency when we read the meta data.
             case bksw_io:open_for_read(Bucket, Path) of
                 {error, enoent} ->
+                    io:format("~nbksw_wm_object: error enoent"),
                     {false, Rq0, Ctx};
                 {ok, Ref} ->
+                    io:format("~nbksw_wm_object: ok, resource exists"),
                     {true, Rq0, Ctx#context{entry_ref = Ref}}
             end
     end.
@@ -121,12 +124,15 @@ generate_etag(Rq0, Ctx) ->
     end.
 
 delete_resource(Rq0, Ctx) ->
+    io:format("~nbksw_wm_object:delete_resource ..."),
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     Res = bksw_io:entry_delete(Bucket, Path),
     case Res of
-        true ->
+        true -> 
+            io:format("~nbksw_wm_object:delete_resource successful"),
             {true, Rq0, Ctx};
         Other ->
+            io:format("~nbksw_wm_object:delete_resource ERROR - ~p", [Other]),
             {Other, Rq0, Ctx}
     end.
 
@@ -153,13 +159,16 @@ download(Rq0, #context{entry_ref = Ref, stream_download = false} = Ctx) ->
     {fully_read(Ref, []), Rq0, Ctx}.
 
 upload(Rq0, Ctx) ->
+    io:format("~nbksw_wm_object:upload"),
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     case bksw_io:open_for_write(Bucket, Path) of
         {ok, Ref} ->
             Resp = write_streamed_body(wrq:stream_req_body(Rq0, ?BLOCK_SIZE), Ref, Rq0, Ctx),
+            io:format("~nbksw_wm_object:upload finished"),
             Resp;
         Error ->
             error_logger:error_msg("Erroring opening ~p/~p for writing: ~p~n", [Bucket, Path, Error]),
+            io:format("~nbksw_wm_object:upload ERROR = ~p Bucket = ~p Path = ~p", [Error, Bucket, Path]),
             {false, Rq0, Ctx}
     end.
 
