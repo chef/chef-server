@@ -158,7 +158,7 @@ reindex_by_name(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Names) ->
                                 io:format("skipping, no id found for name ~p", [Name]),
                                 {Acc, lists:append([Name], MissingAcc)}
                             end
-                          end, [], Names),
+                          end, {[],[]}, Names),
     io:format("Ids: ~p ~n", [Ids]),
     io:format("MissingIds: ~p ~n", [Missing]),
     {ok, BatchSize} = application:get_env(oc_chef_wm, reindex_batch_size),
@@ -168,6 +168,7 @@ reindex_by_name(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Names) ->
         _ ->
             {ExistingIds, _MissingIds} =
                 batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict),
+            io:format("Existing: ~p and Missing:~p",[ExistingIds, Missing]),
             {ExistingIds, Missing}
     end.
 
