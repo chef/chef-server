@@ -142,6 +142,7 @@ try
  
             % compare signatures
             % assumes X-Amz-Signature is always on the end?
+            Sig1 = list_to_binary(IncomingSignature),
             [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", all);
         authorization_header ->
             io:format("~nverification type: authorization_header"),
@@ -151,15 +152,16 @@ try
             SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Url, Config, Headers, "UNSIGNED-PAYLOAD", Region, "s3", QueryParams, Date),
             io:format("~nsigv4headers: ~p", [SigV4Headers]),
 
+            Sig1 = IncomingSignature,
             [_, _, ComparisonSig] = parse_authorization(proplists:get_value("Authorization", SigV4Headers))
     end,
 
-    io:format("~nsig1: ~p", [list_to_binary(IncomingSignature)]),
-    io:format("~nsig2: ~p", [ComparisonSig                    ]),
+    io:format("~nsig1: ~p", [Sig1         ]),
+    io:format("~nsig2: ~p", [ComparisonSig]),
  
     % list_to_binary profiled faster than binary_to_list,
     % so use that for conversion and comparison.
-    case list_to_binary(IncomingSignature) of
+    case Sig1 of
         ComparisonSig ->
             case is_expired(XAmzDate, XAmzExpires) of
                 true ->
