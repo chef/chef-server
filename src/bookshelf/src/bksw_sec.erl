@@ -128,8 +128,9 @@ try
     io:format("~nerlcloud_s3:get_object_url: ~p", [Url]),
     io:format("~nTODO: this path needs to be escaped ^^^"),
 
-    Payload = wrq:req_body(Req0),
-    io:format("~nbody (payload?): ~p", [Payload]),
+%    This (below) may have caused a big webmachine error
+%    Payload = wrq:req_body(Req0),
+%    io:format("~nbody (payload?): ~p", [Payload]),
 
     XAmzExpires = list_to_integer(XAmzExpiresString),
 
@@ -146,7 +147,8 @@ try
             io:format("~nverification type: authorization_header"),
             ComparisonURL = "blah",
             QueryParams = wrq:req_qs(Req0),
-            SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Url, Config, Headers, Payload, Region, "s3", QueryParams, Date),
+            %SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Url, Config, Headers, Payload, Region, "s3", QueryParams, Date),
+            SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Url, Config, Headers, "UNSIGNED-PAYLOAD", Region, "s3", QueryParams, Date),
             io:format("~nsigv4headers: ~p", [SigV4Headers]),
 
             [_, _, ComparisonSig] = parse_authorization(proplists:get_value("Authorization", SigV4Headers))
