@@ -295,3 +295,23 @@ Notes:
 the back.
 - The upgrade path after Phase2 rollout will include upgrading to a release with
 Phase1 first.
+
+## Where do secrets get generated from for erchef and bookshelf.
+
+Private-chef.rb specifys the required keys.
+https://github.com/chef/chef-server/blob/master/omnibus/files/private-chef-cookbooks/private-chef/libraries/private_chef.rb#L463-L464
+
+This will create the secret in credential collection.
+https://github.com/chef/chef-server/blob/af7b5e73f15aff508a528b394f9b26adfde08d2f/omnibus/files/private-chef-cookbooks/private-chef/libraries/private_chef.rb#L498
+
+That will add it to the credential collection
+https://github.com/chef/chef_secrets/blob/58373899212a23e4f37070aaa6d3a751b1281492/lib/veil/credential_collection/base.rb#L134
+
+Actually add the parameters:
+https://github.com/chef/chef_secrets/blob/58373899212a23e4f37070aaa6d3a751b1281492/lib/veil/credential_collection/base.rb#L220
+
+Depending on the chosen hasher, encryption will take place at:
+https://github.com/chef/chef_secrets/blob/master/lib/veil/hasher/pbkdf2.rb#L29
+
+And the hash is truncated to match the length specified
+https://github.com/chef/chef_secrets/blob/58373899212a23e4f37070aaa6d3a751b1281492/lib/veil/credential.rb#L20
