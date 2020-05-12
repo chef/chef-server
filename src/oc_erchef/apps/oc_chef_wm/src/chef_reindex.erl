@@ -80,7 +80,7 @@ fetch_org_indexes(Ctx, OrgId) ->
 %%
 %% The object placed on the queue is in most cases identical to the
 %% JSON that is submitted to the Chef API (and stored in the
-%% 'serialized_object' column in the appropriate database table).
+%% '[serialized_object' column in the appropriate database table).
 %% Some object types (namely nodes and data bag items) must be
 %% processed further, however, so we must take that into account.
 %%
@@ -151,12 +151,14 @@ reindex_by_name(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Names) ->
                           fun(Name, Acc) ->
                             case dict:find(Name, NameIdDict) of
                               {ok, Id} ->
+                                io:format("Id: ~p, Acc: ~p, MissingAcc: ~p~n", [Id, Acc, MissingAcc]),
                                 {[Id | Acc], MissingAcc};
                               error ->
                                 lager:warning("skipping: no id found for name ~p", [Name]),
                                 %% The lager warning does not print anything on the console
                                 io:format("skipping, no id found for name ~p", [Name]),
-                                {Acc, lists:append([Name], MissingAcc)}
+                                io:format("Acc: ~p, Name: ~p, MissingAcc: ~p~n", [Acc, Name, MissingAcc]),
+                                {Acc, [Name | MissingAcc]}
                             end
                           end, {[],[]}, Names),
     io:format("Ids: ~p ~n", [Ids]),
