@@ -150,7 +150,9 @@ try
             QueryParams = wrq:req_qs(Req0),
             io:format("~nQueryParams: ~p", [QueryParams]),
             %SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Url, Config, Headers, Payload, Region, "s3", QueryParams, Date),
-            SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Url, Config, SignedHeaders, "UNSIGNED-PAYLOAD", Region, "s3", QueryParams, XAmzDate),
+            %SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Url, Config, SignedHeaders, "UNSIGNED-PAYLOAD", Region, "s3", QueryParams, XAmzDate),
+            % removed payload (replaced with <<>>), signedheaders = host: api, changed Url for Path
+            SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Path, Config, [{"host", "api"}], <<>>, Region, "s3", QueryParams, XAmzDate),
             io:format("~nsigv4headers: ~p", [SigV4Headers]),
 
             Sig1 = IncomingSignature,
