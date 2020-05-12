@@ -35,6 +35,7 @@
 -export([
          make_context/0,
          reindex/2,
+         reindex/3,
          reindex_by_id/4,
          reindex_by_name/4
         ]).
@@ -138,20 +139,31 @@ reindex_by_id(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Ids) ->
                       OrgInfo :: org_info(),
                       Index :: index(),
                       Names :: [binary()]) -> {list(), list()}.
-reindex_by_name(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Names) ->
+reindex_by_name(Ctx, {OrgId, OrgName} = OrgInfo, Index, Names) ->
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
-    Ids = lists:foldl(
-            fun(Name, Acc) ->
-                    case dict:find(Name, NameIdDict) of
-                        {ok, Id} ->
-                            [Id | Acc];
-                        error ->
-                            lager:warning("skipping: no id found for name ~p", [Name]),
-                            Acc
-                    end
-            end, [], Names),
+    lager:debug("NameIdDict in reindex_by_name for Org: ~p Index: ~p is ~p ~n", [OrgName, Index, NameIdDict]),
+    {Ids, MissingList} = lists:foldl(
+                          fun(Name, {Acc, Missing}) ->
+                            case dict:find(Name, NameIdDict) of
+                              {ok, Id} ->
+                                {[Id | Acc], Missing};
+                              error ->
+                                lager:warning("skipping: no id found for name ~p", [Name]),
+                                %% The lager warning does not print anything on the console
+                                {Acc, [Name | Missing]}
+                            end
+                          end, {[],[]}, Names),
+    lager:debug("Ids that will be reindexed: ~p ~n", [Ids]),
+    lager:debug("Ids that are missing: ~p ~n", [MissingList]),
     {ok, BatchSize} = application:get_env(oc_chef_wm, reindex_batch_size),
-    batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict).
+    case MissingList of
+        [] ->
+            batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict);
+        _ ->
+            {ExistingIds, _MissingIds} =
+                batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict),
+            {ExistingIds, MissingList}
+    end.
 
 all_ids_from_name_id_dict(NameIdDict) ->
     dict:fold(fun(_K, V, Acc) -> [V|Acc] end,
