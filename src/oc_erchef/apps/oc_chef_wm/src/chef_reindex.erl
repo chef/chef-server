@@ -146,32 +146,31 @@ reindex_by_id(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Ids) ->
 reindex_by_name(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Names) ->
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
     io:format("NameIdDict: ~p ~n", [NameIdDict]),
-    MissingAcc = [],
-    {Ids, Missing} = lists:foldl(
-                          fun(Name, Acc) ->
+    {Ids, MissingList} = lists:foldl(
+                          fun(Name, {Acc, Missing}) ->
                             case dict:find(Name, NameIdDict) of
                               {ok, Id} ->
-                                io:format("Id: ~p, Acc: ~p, MissingAcc: ~p~n", [Id, Acc, MissingAcc]),
-                                {[Id | Acc], MissingAcc};
+                                io:format("Id: ~p, Acc: ~p, Missing: ~p~n", [Id, Acc, Missing]),
+                                {[Id | Acc], Missing};
                               error ->
                                 lager:warning("skipping: no id found for name ~p", [Name]),
                                 %% The lager warning does not print anything on the console
                                 io:format("skipping, no id found for name ~p", [Name]),
-                                io:format("Acc: ~p, Name: ~p, MissingAcc: ~p~n", [Acc, Name, MissingAcc]),
-                                {Acc, [Name | MissingAcc]}
+                                io:format("Acc: ~p, Name: ~p, Missing: ~p~n", [Acc, Name, Missing]),
+                                {Acc, [Name | Missing]}
                             end
                           end, {[],[]}, Names),
     io:format("Ids: ~p ~n", [Ids]),
-    io:format("MissingIds: ~p ~n", [Missing]),
+    io:format("MissingIds: ~p ~n", [MissingList]),
     {ok, BatchSize} = application:get_env(oc_chef_wm, reindex_batch_size),
-    case Missing of
+    case MissingList of
         [] ->
             batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict);
         _ ->
             {ExistingIds, _MissingIds} =
                 batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict),
-            io:format("Existing: ~p and Missing:~p",[ExistingIds, Missing]),
-            {ExistingIds, Missing}
+            io:format("Existing: ~p and MissingList:~p",[ExistingIds, MissingList]),
+            {ExistingIds, MissingList}
     end.
 
 all_ids_from_name_id_dict(NameIdDict) ->
