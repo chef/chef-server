@@ -22,7 +22,7 @@ pkg_prefix=$(cat /hab/svc/chef-server-ctl/config/pkg_path)
 cd "$pkg_prefix/omnibus-ctl"
 
 BUNDLE_BIN_DIR=$(hab pkg path "core/bundler")/bin
-RUBY_BIN_DIR=$(hab pkg path "core/ruby")/bin
+RUBY_BIN_DIR=$(hab pkg path "core/ruby26")/bin
 
 export PATH=$PATH:$BUNDLE_BIN_DIR:$RUBY_BIN_DIR
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(hab pkg path "core/libffi")/lib

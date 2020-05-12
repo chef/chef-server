@@ -6,7 +6,7 @@ pkg_deps=(
   core/coreutils
   core/curl
   core/jq-static
-  core/ruby
+  core/ruby26
   core/bundler
   core/postgresql-client
 )
