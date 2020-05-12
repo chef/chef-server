@@ -41,29 +41,21 @@ main(Args) ->
 %%
 %% If the arguments are invalid for any reason, print a message and halt.
 validate_args([]) ->
-    io:format("Need to specify: ~n an organization, index and a list of names or~n an organization and an index.~n"),
-    io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME ITEM1 ITEM2.. ~n"),
-    io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME~n"),
+    print_usage(),
     halt(1);
-validate_args([OrgName, IndexName]) when IndexName =:= "clients" ->
-    validate_args([OrgName, "client", []]);
-validate_args([OrgName, IndexName]) when IndexName =:= "environments" ->
-    validate_args([OrgName, "environment", []]);
-validate_args([OrgName, IndexName]) when IndexName =:= "nodes" ->
-    validate_args([OrgName, "node", []]);
-validate_args([OrgName, IndexName]) when IndexName =:= "roles" ->
-    validate_args([OrgName, "role", []]);
-validate_args([OrgName, IndexName]) when IndexName =:= "client";
-				                         IndexName =:= "environment";
-				                         IndexName =:= "node";
-				                         IndexName =:= "role"  ->
-    validate_args([OrgName, IndexName, []]);
-%% Assume that user sent a databag
-validate_args([OrgName, IndexName]) ->
-    validate_args([OrgName, list_to_binary(IndexName), []]);
-%validate_args(Args) when length(Args) < 3 ->
-%    io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME ITEM1 ITEM2.. ~n"),
-%    halt(1);
+ validate_args([_Help]) ->
+    print_usage(),
+    halt(1);
+validate_args([OrgName, IndexName | Items]) when IndexName =:= "clients" ->
+    validate_args([OrgName, "client" | Items]);
+validate_args([OrgName, IndexName | Items]) when IndexName =:= "environments" ->
+    validate_args([OrgName, "environment" | Items]);
+validate_args([OrgName, IndexName | Items]) when IndexName =:= "nodes" ->
+    validate_args([OrgName, "node"| Items]);
+validate_args([OrgName, IndexName | Items]) when IndexName =:= "roles" ->
+    validate_args([OrgName, "role" | Items]);
+%% We just assume that the given index is a databag and reindex items
+%% TODO (Prajakta) : Check if the databag exists.
 validate_args([OrgName, IndexName | Items]) ->
     %% TODO make configurable
     IntLB =  "https://127.0.0.1",
@@ -82,25 +74,6 @@ validate_args([OrgName, IndexName | Items]) ->
             io:format("Other error occured ~p~n", [OtherError]),
             halt(3)
     end.
-
-
-%% Massaging the input to match expectations
-%-spec bin_or_atom_index_name(IndexName :: "client" |
-%                                          "environment" |
-%                                          "node" |
-%                                          "role" |
-%                                          binary() ) -> atom() | binary().
-bin_or_atom_index_name(IndexName) when IndexName =:= "client";
-				                       IndexName =:= "environment";
-				                       IndexName =:= "node";
-				                       IndexName =:= "role" ->
-	list_to_atom(IndexName);
-bin_or_atom_index_name(IndexName) ->
-	list_to_binary(IndexName).
-
--spec bin_items_list(Items :: list()) -> [binary()].
-bin_items_list(Items) ->
-    [ list_to_binary(X) || X <- Items ].
 
 %% @doc Actually do the reindexing.
 -spec perform(Context :: term(),
@@ -124,6 +97,31 @@ perform(Context, {_OrgId, OrgName}=OrgInfo, Index, Items) ->
             halt(3)
     end.
 
+print_usage() ->
+    io:format("Need to specify: ~n an organization, index and a list of names or~n an organization and an index.~n"),
+    io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME ITEM1 ITEM2.. ~n"),
+    io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME~n").
+
+%% Massaging the input to match expectations
+%-spec bin_or_atom_index_name(IndexName :: "client" |
+%                                          "environment" |
+%                                          "node" |
+%                                          "role" |
+%                                          binary() ) -> atom() | binary().
+bin_or_atom_index_name(IndexName) when IndexName =:= "client";
+				                       IndexName =:= "environment";
+				                       IndexName =:= "node";
+				                       IndexName =:= "role" ->
+	list_to_atom(IndexName);
+bin_or_atom_index_name(IndexName) ->
+	list_to_binary(IndexName).
+
+-spec bin_items_list(Items :: list()) -> [binary()].
+bin_items_list([]) ->
+    [<<>>];
+bin_items_list(Items) ->
+    [ list_to_binary(X) || X <- Items ].
+
 rpc_reindex(Context, OrgInfo, Index, [<<>>])->
     rpc:call(?ERCHEF, chef_reindex, reindex, [Context, OrgInfo, Index]);
 rpc_reindex(Context, OrgInfo, Index, Items) ->
@@ -138,7 +136,7 @@ print_missing([], _OrgName, _Index) ->
     ok;
 print_missing(Missing, OrgName, Index) ->
     io:format(standard_error, "~nThe following objects in organization \"~s\" index \"~s\" were not sent for indexing:~n~n", [OrgName, Index]),
-    [io:format(standard_error, "\t~s ~s~n", [Type, Name]) || {Type, Name} <- Missing],
+    [io:format(standard_error, "\t~p ~n", [binary_to_list(Name)]) || Name <- Missing],
     io:format(standard_error, "~n", []).
 
 make_context(OrgName, IntLB) ->
