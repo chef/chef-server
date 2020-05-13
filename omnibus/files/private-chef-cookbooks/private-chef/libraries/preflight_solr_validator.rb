@@ -16,23 +16,36 @@
 require_relative './preflight_checks.rb'
 
 class SolrPreflightValidator < PreflightValidator
-  attr_reader :cs_solr_attr, :node_solr_attr, :cs_erchef_attr, :node_erchef_attr
+  # The cs_*attr variables hold the user-defined configuration
+  attr_reader :cs_solr_attr, :cs_erchef_attr,
+              :cs_elasticsearch_attr, :cs_rabbitmq_attr,
+              :cs_opscode_expander_attr
+
+  # The node_*attr variables hold the default configuration
+  attr_reader :node_solr_attr, :node_elasticsearch_attr, :node_erchef_attr
 
   def initialize(node)
     super
+
     @cs_solr_attr = PrivateChef['opscode_solr4']
     @cs_erchef_attr = PrivateChef['opscode_erchef']
     @cs_elasticsearch_attr = PrivateChef['elasticsearch']
     @cs_rabbitmq_attr = PrivateChef['rabbitmq']
-    @cs_opscode_expander_attr = PrivateChef['opscode-expander']
+    @cs_opscode_expander_attr = PrivateChef['opscode_expander']
+
     @node_erchef_attr = node['private_chef']['opscode-erchef']
     @node_solr_attr = node['private_chef']['opscode-solr4']
+    @node_elasticsearch_attr = node['private_chef']['elasticsearch']
   end
 
   def run!
     verify_consistent_reindex_sleep_times
+
+    verify_one_search_index
     verify_es_disabled_if_user_set_external_solr
     verify_unused_services_are_disabled_if_using_internal_es
+    verify_no_explicit_external_disable_when_es_enabled
+
     warn_unchanged_external_flag
     verify_external_url
     verify_erchef_config
@@ -53,69 +66,170 @@ class SolrPreflightValidator < PreflightValidator
     end
   end
 
-  # External_solr could point to either of es or solr
-  # To test: installstandalone with es then upgrade to external es (or solr)
-  def verify_es_disabled_if_user_set_external_solr
-    if cs_solr_attr['external'] && cs_elasticsearch_attr['enable']
+  def verify_one_search_index
+    if elasticsearch_enabled? && solr_enabled?
       fail_with <<~EOM
 
-      You have configured an external search provider
-      but have not disabled the built-in Elasticsearch. Please add the
-      following to your configuration file:
+      The #{CHEF_SERVER_NAME} is configured to enable both
+      Elasticsearch and Solr. This is an unsupported configuration.
+
+      Please update #{CHEF_SERVER_CONFIG_FILE} such that only one
+      search index is enabled.
+      EOM
+    end
+  end
+
+  # If an external search provider (ES or Solr) was explicitly enabled
+  # by the user, then we expect that both internal search services
+  # should be disabled.
+  def verify_es_disabled_if_user_set_external_solr
+    # NOTE(ssd) 2020-05-13: This might impact the people who we gave
+    # pre-release access to.
+    if cs_solr_attr['external'] && elasticsearch_enabled?
+      fail_with <<~EOM
+
+      The #{CHEF_SERVER_NAME} is configured to use an external search
+      index but the internal Elasticsearch is still enabled. This is
+      an unsupported configuration.
+
+      To disable the internal Elasticsearch, add the following to #{CHEF_SERVER_CONFIG_FILE}:
 
           elasticsearch['enable'] = false
+
+      To use the internal Elasticsearch, consider removing the configuration
+      entry for opscode_solr4['external'].
+
+      EOM
+    end
+
+    if solr_enabled? && external?
+      fail_with <<~EOM
+
+      The #{CHEF_SERVER_NAME} is configured to use an external search
+      index but the internal Solr is still enabled. This is an
+      unsupported configuration.
+
+      To disable the internal Solr, add the following to #{CHEF_SERVER_CONFIG_FILE}:
+
+          opscode_solr4['enable'] = false
+
+      Alternatively, if you are attempting to use the internal Solr,
+      add the following to #{CHEF_SERVER_CONFIG_FILE}:
+
+          opscode_solr4['enable'] = true
+          opscode_solr4['external'] = false
 
       EOM
     end
   end
 
-  # The user might have either or a combination of solr, rabbitmq
-  # or opscode-expander enabled in config.
-  # This needs to be disabled to install internal es
+  # The user might have a combination of solr, rabbitmq or
+  # opscode-expander explicitly enabled in their config.
+  #
+  # If we are using the new internal elasticsearch, this is an
+  # unsupported configuration.
+  #
   # To test: setup standalone cs with 13.2.0 add
   # opscode_solr4['enable'] = true
   # rabbitmq['enable'] = true
   # opscode_expander['enable'] = true to chef-server.rb
   # then upgrade to 13.3
   def verify_unused_services_are_disabled_if_using_internal_es
-    if !cs_solr_attr['external'] && cs_solr_attr['enable']
-      # Should we fail here or a warning is sufficient?
-      Chef::Log.warn <<~EOM
+    if elasticsearch_enabled?
+      if cs_solr_attr['enable']
+        fail_with <<~EOM
 
-      This build will install elasticsearch for search.
-      But you have set opscode_solr4['enable'] = true
-      in your config. Please update your config file to
-      set that to false:
+      The #{CHEF_SERVER_NAME} is configured to use its internal
+      Elasticsearch installation, but opscode_solr4 has been manually
+      enabled. This is an unsupported configuration.
+
+      Please update #{CHEF_SERVER_CONFIG_FILE} to ensure that
+      opscode_solr4 is disabled:
 
           opscode_solr4['enable'] = false
 
       EOM
+      end
 
-      if !cs_solr_attr['external'] && cs_rabbitmq_attr['enable']
-      # Should we fail here or a warning is sufficient?
-      Chef::Log.warn <<~EOM
+      if cs_rabbitmq_attr['enable']
+        fail_with <<~EOM
 
-      This build will install elasticsearch for search.
-      But you have set rabbitmq['enable'] = true
-      in your config. Please update your config file to
-      set that to false:
+      The #{CHEF_SERVER_NAME} is configured to use its internal
+      Elasticsearch installation, but RabbitMQ has been manually
+      enabled. This is an unsupported configuration.
+
+      Please update #{CHEF_SERVER_CONFIG_FILE} to ensure that
+      rabbitmq is disabled:
 
           rabbitmq['enable'] = false
 
       EOM
+      end
 
-      if !cs_solr_attr['external'] && cs_opscode_expander_attr['enable']
-      # Should we fail here or a warning is sufficient?
-      Chef::Log.warn <<~EOM
+      if cs_opscode_expander_attr['enable']
+        fail_with <<~EOM
 
-      This build will install elasticsearch for search.
-      But you have set opscode_expander['enable'] = true
-      in your config. Please update your config file to
-      set that to false:
+      The #{CHEF_SERVER_NAME} is configured to use its internal
+      Elasticsearch installation, but opscode-expander has been
+      manually enabled. This is an unsupported configuration.
+
+      Please update #{CHEF_SERVER_CONFIG_FILE} to ensure that
+      opscode-expander is disabled:
 
           opscode_expander['enable'] = false
 
       EOM
+      end
+    end
+  end
+
+  def verify_no_explicit_external_disable_when_es_enabled
+    return if cs_solr_attr['external'].nil?
+
+    # TODO(ssd) 2020-05-13: Rather than this check, we could just
+    # ignore that configuration when parsing the configuration.
+    if !cs_solr_attr['external'] && elasticsearch_enabled?
+      fail_with <<~EOM
+
+      The #{CHEF_SERVER_NAME} is configured with
+
+          opscode_solr4['external'] = false
+
+      but this is incompatible with elasticsearch being enabled.
+
+      Please remove this line from #{CHEF_SERVER_CONFIG_FILE}.
+      EOM
+    end
+  end
+
+  def external?
+    if cs_solr_attr['external'].nil?
+      node_solr_attr['external']
+    else
+      cs_solr_attr['external']
+    end
+  end
+
+  def elasticsearch_enabled?
+    # TODO(ssd) 2020-05-13: This currently lives in another PR, but to
+    # facilitate updates for chef-backend users without a
+    # configuration change, we are going to explicitly set
+    # elasticsearch to disabled at runtime.
+    return false if PrivateChef['use_chef_backend']
+
+    if cs_elasticsearch_attr['enable'].nil?
+      node_elasticsearch_attr['enable']
+    else
+      cs_elasticsearch_attr['enable']
+    end
+  end
+
+  def solr_enabled?
+    if cs_solr_attr['enable'].nil?
+      node_solr_attr['enable']
+    else
+      cs_solr_attr['enable']
+    end
   end
 
   def warn_unchanged_external_flag
@@ -160,7 +274,7 @@ class SolrPreflightValidator < PreflightValidator
 
           opscode_erchef['search_queue_mode'] = 'batch'
 
-          in /etc/opscode/chef-server.rb
+          in #{CHEF_SERVER_CONFIG_FILE}
 
         EOM
       end
