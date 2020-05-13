@@ -51,8 +51,8 @@ build do
     File.open("#{install_dir}/embedded/cookbooks/check-config.json", "w") do |f|
       f.write FFI_Yajl::Encoder.encode(
         run_list: [
-          'recipe[private-chef::plugin_discovery]'
-          'recipe[private-chef::plugin_config_extensions]'
+          'recipe[private-chef::plugin_discovery]',
+          'recipe[private-chef::plugin_config_extensions]',
           'recipe[private-chef::config]'
         ]
       )
