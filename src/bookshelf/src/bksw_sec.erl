@@ -60,7 +60,8 @@ do_signed_url_authorization(RequestId, Req0, Context, Headers0) ->
     Credential = wrq:get_qs_value("X-Amz-Credential", Req0),
     io:format("~nx-amz-credential:  ~p", [wrq:get_qs_value("X-Amz-Credential", Req0)]),
 
-    Date = wrq:get_qs_value("X-Amz-Date", Req0),
+    XAmzDate = wrq:get_qs_value("X-Amz-Date", Req0),
+    io:format("~nXAmzDate: ~p", [XAmzDate]),
 
     SignedHeaderKeysString = wrq:get_qs_value("X-Amz-SignedHeaders", Req0),
     io:format("~nsigned header keys string: ~p", [SignedHeaderKeysString]),
@@ -74,9 +75,9 @@ do_signed_url_authorization(RequestId, Req0, Context, Headers0) ->
     XAmzExpiresString = wrq:get_qs_value("X-Amz-Expires", Req0),
     io:format("~nx-amz-expires: ~p", [XAmzExpiresString]),
 
-    presigned_url_verification(RequestId, Req0, Context, Credential, Date, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, presigned_url).
+    presigned_url_verification(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, presigned_url).
 
-presigned_url_verification(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, Date, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, VerificationType) ->
+presigned_url_verification(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, VerificationType) ->
 try
     [AWSAccessKeyId, CredentialScopeDate, Region | _]  = parse_x_amz_credential(Credential),
     io:format("~naws-access-key-id: ~p", [AWSAccessKeyId]),
@@ -88,8 +89,9 @@ try
 
     %AccessKey = AWSAccessKeyId,
 
+    % https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
     DateIfUndefined = fun() -> wrq:get_req_header("date", Req0) end,
-    XAmzDate = get_check_date(Date, DateIfUndefined, CredentialScopeDate),
+    Date = get_check_date(XAmzDate, DateIfUndefined, CredentialScopeDate),
 
     Headers = process_headers(Headers0),
     io:format("~nheaders: ~p", [Headers]),
@@ -139,7 +141,7 @@ try
             SignedHeaders = get_signed_headers(SignedHeaderKeys, Headers, []),
             io:format("~nsigned headers: ~p", [SignedHeaders]),
 
-            ComparisonURL = mini_s3:s3_url(list_to_atom(Method), BucketName, Key, XAmzExpires, SignedHeaders, XAmzDate, Config),
+            ComparisonURL = mini_s3:s3_url(list_to_atom(Method), BucketName, Key, XAmzExpires, SignedHeaders, Date, Config),
             io:format("~ncomparison url: ~p", [ComparisonURL]),
             % compare signatures
             % assumes X-Amz-Signature is always on the end?
@@ -155,10 +157,10 @@ try
             QueryParams = wrq:req_qs(Req0),
             io:format("~nQueryParams: ~p", [QueryParams]),
             %SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Url, Config, Headers, Payload, Region, "s3", QueryParams, Date),
-            %SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Url, Config, SignedHeaders, "UNSIGNED-PAYLOAD", Region, "s3", QueryParams, XAmzDate),
+            %SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Url, Config, SignedHeaders, "UNSIGNED-PAYLOAD", Region, "s3", QueryParams, Date),
             % removed payload (replaced with <<>>), signedheaders = host: api, changed Url for Path
             % unsigned payload
-            SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Path, Config, [{"host", "api"}], <<>>, Region, "s3", QueryParams, XAmzDate),
+            SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Path, Config, [{"host", "api"}], <<>>, Region, "s3", QueryParams, Date),
             io:format("~nsigv4headers: ~p", [SigV4Headers]),
 
             Sig1 = IncomingSignature,
@@ -172,7 +174,7 @@ try
     % so use that for conversion and comparison.
     case Sig1 of
         ComparisonSig ->
-            case is_expired(XAmzDate, XAmzExpires) of
+            case is_expired(Date, XAmzExpires) of
                 true ->
                     io:format("~nexpired signature"),
                     ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p",
@@ -218,11 +220,11 @@ do_standard_authorization(RequestId, IncomingAuth, Req0, Context, Headers0) ->
 %    [AWSAccessKeyId, CredentialScopeDate | _]  = parse_x_amz_credential(Credential),
 %    io:format("~naws-access-key-id: ~p~nCredentialScopeDate: ~p", [AWSAccessKeyId, CredentialScopeDate]),
 
-    Date = wrq:get_req_header("x-amz-date", Req0),
-    io:format("~nDate: ~p", [Date]),
+    XAmzDate = wrq:get_req_header("x-amz-date", Req0),
+    io:format("~nXAmzDate: ~p", [XAmzDate]),
 
     io:format("~ncalling presigned_url_verification"),
-    presigned_url_verification(RequestId, Req0, Context, Credential, Date, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header).
+    presigned_url_verification(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header).
 
 
 %    %Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
@@ -306,7 +308,7 @@ bucketname_key_from_path(Path0) ->
     [BucketName, Key] = string:split(Path, "/"),
     {BucketName, Key}.
 
-%https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
+% https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
 get_check_date(ISO8601Date, DateIfUndefined, [A, B, C, D, E, F, G, H]) ->
     Date = case ISO8601Date of
                undefined -> 
