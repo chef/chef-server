@@ -78,6 +78,23 @@ do_signed_url_authorization(RequestId, Req0, Context, Headers0) ->
     io:format("~ncalling do_common_authorization"),
     do_common_authorization(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, presigned_url).
 
+% https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
+do_standard_authorization(RequestId, IncomingAuth, Req0, Context, Headers0) ->
+    io:format("~nDOING STANDARD AUTHORIZATION"),
+    io:format("~nIncomingAuth: ~p", [IncomingAuth]),
+
+    [Credential, SignedHeaderKeysString, IncomingSignature] = parse_authorization(IncomingAuth),
+    io:format("~nAuthorization:~n~p~n~p~n~p", [Credential, SignedHeaderKeysString, IncomingSignature]),
+
+%    [AWSAccessKeyId, CredentialScopeDate | _]  = parse_x_amz_credential(Credential),
+%    io:format("~naws-access-key-id: ~p~nCredentialScopeDate: ~p", [AWSAccessKeyId, CredentialScopeDate]),
+
+    XAmzDate = wrq:get_req_header("x-amz-date", Req0),
+    io:format("~nXAmzDate: ~p", [XAmzDate]),
+
+    io:format("~ncalling do_common_authorization"),
+    do_common_authorization(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header).
+
 do_common_authorization(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, VerificationType) ->
 try
     [AWSAccessKeyId, CredentialScopeDate, Region | _]  = parse_x_amz_credential(Credential),
@@ -97,7 +114,11 @@ try
     Headers = process_headers(Headers0),
     io:format("~nheaders: ~p", [Headers]),
     io:format("~nENSURE HOST HEADER ^^^"),
- 
+
+    SignedHeaderKeys = parse_x_amz_signed_headers(SignedHeaderKeysString),
+    SignedHeaders = get_signed_headers(SignedHeaderKeys, Headers, []),
+    io:format("~nsigned headers: ~p", [SignedHeaders]),
+
     RawMethod = wrq:method(Req0),
     Method = string:to_lower(erlang:atom_to_list(RawMethod)),
     io:format("~nmethod: ~p", [Method]),
@@ -133,14 +154,11 @@ try
 
     XAmzExpires = list_to_integer(XAmzExpiresString),
 
-    SignedHeaderKeys = parse_x_amz_signed_headers(SignedHeaderKeysString),
-
     case VerificationType of
         presigned_url ->
             io:format("~nverification type: presigned_url"),
 
-            SignedHeaders = get_signed_headers(SignedHeaderKeys, Headers, []),
-            io:format("~nsigned headers: ~p", [SignedHeaders]),
+            true = check_signed_headers_common(SignedHeaders, Headers),
 
             ComparisonURL = mini_s3:s3_url(list_to_atom(Method), BucketName, Key, XAmzExpires, SignedHeaders, Date, Config),
             io:format("~ncomparison url: ~p", [ComparisonURL]),
@@ -151,17 +169,21 @@ try
         authorization_header ->
             io:format("~nverification type: authorization_header"),
 
-            SignedHeaders = get_signed_headers(SignedHeaderKeys, Headers, []),
-            io:format("~nsigned headers: ~p", [SignedHeaders]),
-
             ComparisonURL = "blah",
             QueryParams = wrq:req_qs(Req0),
             io:format("~nQueryParams: ~p", [QueryParams]),
+
+            true = check_signed_headers_authhead(SignedHeaders, Headers),
+
+            % this header will be calculated and should not be passed-in
+            SignedHeadersNo256 = lists:keydelete("x-amz-content-sha256", 1, SignedHeaders),
+
             %SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Url, Config, Headers, Payload, Region, "s3", QueryParams, Date),
             %SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Url, Config, SignedHeaders, "UNSIGNED-PAYLOAD", Region, "s3", QueryParams, Date),
             % removed payload (replaced with <<>>), signedheaders = host: api, changed Url for Path
+            %SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Path, Config, [{"host", "api"}], <<>>, Region, "s3", QueryParams, Date),
             % unsigned payload
-            SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Path, Config, [{"host", "api"}], <<>>, Region, "s3", QueryParams, Date),
+            SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Path, Config, SignedHeadersNo256, <<>>, Region, "s3", QueryParams, Date),
             io:format("~nsigv4headers: ~p", [SigV4Headers]),
 
             Sig1 = IncomingSignature,
@@ -210,22 +232,6 @@ try
         TypeOfErr:ExceptionPattern -> io:format("~nbksw_sec: crash! ~p", [{TypeOfErr, ExceptionPattern}]),
                                       1/0
     end.
-
-do_standard_authorization(RequestId, IncomingAuth, Req0, Context, Headers0) ->
-    io:format("~nDOING STANDARD AUTHORIZATION"),
-    io:format("~nIncomingAuth: ~p", [IncomingAuth]),
-
-    [Credential, SignedHeaderKeysString, IncomingSignature] = parse_authorization(IncomingAuth),
-    io:format("~nAuthorization:~n~p~n~p~n~p", [Credential, SignedHeaderKeysString, IncomingSignature]),
-
-%    [AWSAccessKeyId, CredentialScopeDate | _]  = parse_x_amz_credential(Credential),
-%    io:format("~naws-access-key-id: ~p~nCredentialScopeDate: ~p", [AWSAccessKeyId, CredentialScopeDate]),
-
-    XAmzDate = wrq:get_req_header("x-amz-date", Req0),
-    io:format("~nXAmzDate: ~p", [XAmzDate]),
-
-    io:format("~ncalling do_common_authorization"),
-    do_common_authorization(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header).
 
 
 %    %Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
@@ -301,8 +307,38 @@ do_standard_authorization(RequestId, IncomingAuth, Req0, Context, Headers0) ->
 %            encode_access_denied_error_response(RequestId, Req0, Context)
 %    end.
 
+% https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
+%-spec check_signed_headers_authhead(proplist(), proplist()) -> boolean(). % for erlang20+
+-spec check_signed_headers_authhead([tuple()], [tuple()]) -> boolean().
+check_signed_headers_authhead(SignedHeaders, Headers) ->
+    check_signed_headers_common(SignedHeaders, Headers) andalso
+
+    % x-amz-content-sha256 header is required
+    proplists:is_defined("x-amz-content-sha256", SignedHeaders) andalso
+
+    % if content-type header is present in request, it is required
+    case proplists:is_defined("content-type", Headers) of
+        true ->
+            proplists:is_defined("content-type", SignedHeaders);
+        _ ->
+            true
+    end.
+
+% signed headers check common to both authorization header verification
+% and presigned url verification.
+% https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
+%-spec check_signed_headers_common(proplist(), proplist()) -> boolean(). % for erlang20+
+-spec check_signed_headers_common([tuple()], [tuple()]) -> boolean().
+check_signed_headers_common(SignedHeaders, Headers) ->
+    % host header is required
+    proplists:is_defined("host", SignedHeaders) andalso
+
+    % any x-amz-* headers present in request are required
+    [] == [Key || {Key, _} <- Headers, is_amz(Key), not proplists:is_defined(Key, SignedHeaders)].
+
 % split "bucketname/key" or "/bucketname/key" into {"bucketname", "key"}
 % Path = "<bucketname>/<key>"
+-spec bucketname_key_from_path(string()) -> tuple().
 bucketname_key_from_path(Path0) ->
     % remove leading /, if any
     {_, Path} = string:take(Path0, "/"),
@@ -310,6 +346,7 @@ bucketname_key_from_path(Path0) ->
     {BucketName, Key}.
 
 % https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
+-spec get_check_date(string(), string(), string()) -> string().
 get_check_date(ISO8601Date, DateIfUndefined, [A, B, C, D, E, F, G, H]) ->
     Date = case ISO8601Date of
                undefined -> 
@@ -327,6 +364,8 @@ get_check_date(ISO8601Date, DateIfUndefined, [A, B, C, D, E, F, G, H]) ->
 % for each key, get first occurance of key-value. for duplicated
 % keys, get corresponding key-value pairs. results are undefined
 % for nonexistent key(s).
+%-spec get_signed_headers(proplist(), proplist(), proplist()) -> proplist(). % for erlang20+
+-spec get_signed_headers([tuple()], [tuple()], [tuple()]) -> [tuple()].
 get_signed_headers([], _, SignedHeaders) -> lists:reverse(SignedHeaders);
 get_signed_headers(_, [], SignedHeaders) -> lists:reverse(SignedHeaders);
 get_signed_headers([Key | SignedHeaderKeys], Headers0, SignedHeaders) ->
@@ -335,21 +374,26 @@ get_signed_headers([Key | SignedHeaderKeys], Headers0, SignedHeaders) ->
 
 % split authorization header into component parts
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
+- spec parse_authorization(string()) -> [string()].
 parse_authorization(Auth) ->
    ["AWS4-HMAC-SHA256", "Credential="++Cred, "SignedHeaders="++SigHead, "Signature="++Signature] = string:split(Auth, " ", all),
    [string:trim(Cred, trailing, ","), string:trim(SigHead, trailing, ","), Signature].
 
 % split credentials string into component parts
 % Cred = "<access-key-id>/<date>/<AWS-region>/<AWS-service>/aws4_request"
+- spec parse_x_amz_credential(string()) -> [string()].
 parse_x_amz_credential(Cred) ->
    [_access_key_id, _date, _aws_region, "s3", "aws4_request"] = string:split(Cred, "/", all).
 
 % split signed header string into component parts
 % Headers = "<header1>;<header2>;...<headerN>"
+- spec parse_x_amz_signed_headers(string()) -> [string()].
 parse_x_amz_signed_headers(Headers) ->
    string:split(Headers, ";", all).
 
 % convert the keys of key-value pairs to lowercase strings
+%-spec process_headers([proplist()]) -> [proplist()]. % for erlang20+
+-spec process_headers([tuple()]) -> [tuple()].
 process_headers(Headers) ->
     [{string:casefold(
         case is_atom(Key) of
@@ -423,17 +467,18 @@ encode_access_denied_error_response(RequestId, Req0, Context) ->
     Req2 = wrq:set_resp_body(Body, Req1),
     {{halt, 403}, Req2, Context}.
 
+-spec is_amz(string()) -> boolean().
+is_amz([$x, $-, $a, $m, $z, $- | _]) ->
+    true;
+is_amz([$X, $-, $A, $m, $z, $- | _]) ->
+    true;
+is_amz(_) ->
+    false.
+
 %split_authorization([$A, $W, $S, $\s, $: | Rest]) ->
 %    [<<>>, Rest];
 %split_authorization([$A, $W, $S, $\s  | Rest]) ->
 %    string:tokens(Rest, ":").
-%
-%is_amz([$X, $-, $A, $m, $z, $-, $A, $c, $l | _]) ->
-%    true;
-%is_amz([$x, $-, $a, $m, $z, $-, $a, $c, $l | _]) ->
-%    true;
-%is_amz(_) ->
-%    false.
 
 %amz_headers(Headers) ->
 %    [{process_header(K), V} || {K,V} <- Headers, is_amz(K)].
