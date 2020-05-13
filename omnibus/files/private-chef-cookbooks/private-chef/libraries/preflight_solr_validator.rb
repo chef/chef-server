@@ -129,15 +129,11 @@ class SolrPreflightValidator < PreflightValidator
   # If we are using the new internal elasticsearch, this is an
   # unsupported configuration.
   #
-  # To test: setup standalone cs with 13.2.0 add
-  # opscode_solr4['enable'] = true
-  # rabbitmq['enable'] = true
-  # opscode_expander['enable'] = true to chef-server.rb
-  # then upgrade to 13.3
   def verify_unused_services_are_disabled_if_using_internal_es
     if elasticsearch_enabled?
+      msg = []
       if cs_solr_attr['enable']
-        fail_with <<~EOM
+        msg << <<~EOM
 
       The #{CHEF_SERVER_NAME} is configured to use its internal
       Elasticsearch installation, but opscode_solr4 has been manually
@@ -152,7 +148,7 @@ class SolrPreflightValidator < PreflightValidator
       end
 
       if cs_rabbitmq_attr['enable']
-        fail_with <<~EOM
+        msg << <<~EOM
 
       The #{CHEF_SERVER_NAME} is configured to use its internal
       Elasticsearch installation, but RabbitMQ has been manually
@@ -167,7 +163,7 @@ class SolrPreflightValidator < PreflightValidator
       end
 
       if cs_opscode_expander_attr['enable']
-        fail_with <<~EOM
+        msg << <<~EOM
 
       The #{CHEF_SERVER_NAME} is configured to use its internal
       Elasticsearch installation, but opscode-expander has been
@@ -179,6 +175,9 @@ class SolrPreflightValidator < PreflightValidator
           opscode_expander['enable'] = false
 
       EOM
+      end
+      unless msg.empty?
+        fail_with msg.join("\n")
       end
     end
   end
