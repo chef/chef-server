@@ -18,9 +18,13 @@ get_check_date_test() ->
     ISO8601Date =          bksw_sec:get_check_date(ISO8601Date, Impossible,      CredentialScopeDate),
     ISO8601Date =          bksw_sec:get_check_date(undefined,   DateIfUndefined, CredentialScopeDate).
 
-% get key-value pairs associated with specified keys
+% get key-value pairs (headers) associated with specified keys.
+% for each key, get first occurance of key-value. for duplicated
+% keys, get corresponding key-value pairs. results are undefined
+% for nonexistent key(s).
 get_signed_headers_test() ->
-    [{a, 1}, {b, 2}, {c, 3}] = bksw_sec:get_signed_headers([a, b, c], [{a, 1}, {x, y}, {b, 2}, {x, y}, {c, 3}, {x, y}]).
+    [{a, 1}, {b, 2}, {b, 3}, {c, 3}] =
+        bksw_sec:get_signed_headers([a, b, b, c], [{a, 1}, {x, y}, {b, 2}, {x, y}, {b, 3}, {x, y}, {c, 3}, {x, y}, {a, 2}, {b, 4}, {c, 4}], []).
 
 % 100 seconds into the future from now should not be expired.
 is_expired_false_test() ->

@@ -95,10 +95,6 @@ try
     io:format("~nheaders: ~p", [Headers]),
     io:format("~nENSURE HOST HEADER ^^^"),
  
-    SignedHeaderKeys = parse_x_amz_signed_headers(SignedHeaderKeysString),
-    SignedHeaders = get_signed_headers(SignedHeaderKeys, Headers),
-    io:format("~nsigned headers: ~p", [SignedHeaders]),
-
     RawMethod = wrq:method(Req0),
     Method = string:to_lower(erlang:atom_to_list(RawMethod)),
     io:format("~nmethod: ~p", [Method]),
@@ -134,24 +130,34 @@ try
 
     XAmzExpires = list_to_integer(XAmzExpiresString),
 
+    SignedHeaderKeys = parse_x_amz_signed_headers(SignedHeaderKeysString),
+
     case VerificationType of
         presigned_url ->
             io:format("~nverification type: presigned_url"),
+
+            SignedHeaders = get_signed_headers(SignedHeaderKeys, Headers, []),
+            io:format("~nsigned headers: ~p", [SignedHeaders]),
+
             ComparisonURL = mini_s3:s3_url(list_to_atom(Method), BucketName, Key, XAmzExpires, SignedHeaders, XAmzDate, Config),
             io:format("~ncomparison url: ~p", [ComparisonURL]),
- 
             % compare signatures
             % assumes X-Amz-Signature is always on the end?
             Sig1 = list_to_binary(IncomingSignature),
             [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", all);
         authorization_header ->
             io:format("~nverification type: authorization_header"),
+
+            SignedHeaders = get_signed_headers(SignedHeaderKeys, Headers, []),
+            io:format("~nsigned headers: ~p", [SignedHeaders]),
+
             ComparisonURL = "blah",
             QueryParams = wrq:req_qs(Req0),
             io:format("~nQueryParams: ~p", [QueryParams]),
             %SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Url, Config, Headers, Payload, Region, "s3", QueryParams, Date),
             %SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Url, Config, SignedHeaders, "UNSIGNED-PAYLOAD", Region, "s3", QueryParams, XAmzDate),
             % removed payload (replaced with <<>>), signedheaders = host: api, changed Url for Path
+            % unsigned payload
             SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Path, Config, [{"host", "api"}], <<>>, Region, "s3", QueryParams, XAmzDate),
             io:format("~nsigv4headers: ~p", [SigV4Headers]),
 
@@ -310,9 +316,19 @@ get_check_date(ISO8601Date, DateIfUndefined, [A, B, C, D, E, F, G, H]) ->
                end,
     [A, B, C, D, E, F, G, H, $T, _, _, _, _, _, _, $Z] = Date.
 
-% get key-value pairs (headers) associated with specified keys
-get_signed_headers(SignedHeaderKeys, Headers) ->
-    lists:flatten([proplists:lookup_all(SignedHeaderKey, Headers) || SignedHeaderKey <- SignedHeaderKeys]).
+%% get key-value pairs (headers) associated with specified keys
+%get_signed_headers(SignedHeaderKeys, Headers) ->
+%    lists:flatten([proplists:lookup_all(SignedHeaderKey, Headers) || SignedHeaderKey <- SignedHeaderKeys]).
+
+% get key-value pairs (headers) associated with specified keys.
+% for each key, get first occurance of key-value. for duplicated
+% keys, get corresponding key-value pairs. results are undefined
+% for nonexistent key(s).
+get_signed_headers([], _, SignedHeaders) -> lists:reverse(SignedHeaders);
+get_signed_headers(_, [], SignedHeaders) -> lists:reverse(SignedHeaders);
+get_signed_headers([Key | SignedHeaderKeys], Headers0, SignedHeaders) ->
+    {_, SignedHeader, Headers} = lists:keytake(Key, 1, Headers0),
+    get_signed_headers(SignedHeaderKeys, Headers, [SignedHeader | SignedHeaders]).
 
 % split authorization header into component parts
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
