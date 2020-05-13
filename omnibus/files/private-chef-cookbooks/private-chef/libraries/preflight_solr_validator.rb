@@ -30,15 +30,15 @@ class SolrPreflightValidator < PreflightValidator
   end
 
   def run!
-    verify_sane_reindex_sleep_times
-    verify_es_disabled_if_user_set_external_solri
+    verify_consistent_reindex_sleep_times
+    verify_es_disabled_if_user_set_external_solr
     verify_unused_services_are_disabled_if_using_internal_es
     warn_unchanged_external_flag
     verify_external_url
     verify_erchef_config
   end
 
-  def verify_sane_reindex_sleep_times
+  def verify_consistent_reindex_sleep_times
     final_min = cs_erchef_attr['reindex_sleep_min_ms'] || node_erchef_attr['reindex_sleep_min_ms']
     final_max = cs_erchef_attr['reindex_sleep_max_ms'] || node_erchef_attr['reindex_sleep_max_ms']
     if final_min > final_max
