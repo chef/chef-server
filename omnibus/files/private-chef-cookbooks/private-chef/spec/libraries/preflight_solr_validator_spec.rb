@@ -29,10 +29,16 @@ describe SolrPreflightValidator do
     s
   end
 
+  before(:each) do
+    allow(PrivateChef).to receive(:[]).with('postgresql').and_return({})
+    allow(PrivateChef).to receive(:[]).with('opscode_solr4').and_return({})
+    allow(PrivateChef).to receive(:[]).with('elasticsearch').and_return({})
+    allow(PrivateChef).to receive(:[]).with('rabbitmq').and_return({})
+    allow(PrivateChef).to receive(:[]).with('opscode_expander').and_return({})
+  end
+
   context 'when min and max sleep time has been given in the config' do
     before(:each) do
-      allow(PrivateChef).to receive(:[]).with('postgresql').and_return({})
-      allow(PrivateChef).to receive(:[]).with('opscode_solr4').and_return({})
       allow(PrivateChef).to receive(:[]).with('opscode_erchef').and_return(
         'reindex_sleep_min_ms' => min_sleep_time,
         'reindex_sleep_max_ms' => max_sleep_time
@@ -44,15 +50,13 @@ describe SolrPreflightValidator do
       let(:max_sleep_time) { 2 }
 
       it 'raises an error' do
-        expect(solr_preflight.verify_sane_reindex_sleep_times).to eq(:i_failed)
+        expect(solr_preflight.verify_consistent_reindex_sleep_times).to eq(:i_failed)
       end
     end
   end
 
   context 'when only min sleep time has been given in the config' do
     before(:each) do
-      allow(PrivateChef).to receive(:[]).with('postgresql').and_return({})
-      allow(PrivateChef).to receive(:[]).with('opscode_solr4').and_return({})
       allow(PrivateChef).to receive(:[]).with('opscode_erchef').and_return(
         'reindex_sleep_min_ms' => min_sleep_time
       )
@@ -62,15 +66,13 @@ describe SolrPreflightValidator do
       let(:min_sleep_time) { 2001 }
 
       it 'raises an error' do
-        expect(solr_preflight.verify_sane_reindex_sleep_times).to eq(:i_failed)
+        expect(solr_preflight.verify_consistent_reindex_sleep_times).to eq(:i_failed)
       end
     end
   end
 
   context 'when only max sleep time has been given in the config' do
     before(:each) do
-      allow(PrivateChef).to receive(:[]).with('postgresql').and_return({})
-      allow(PrivateChef).to receive(:[]).with('opscode_solr4').and_return({})
       allow(PrivateChef).to receive(:[]).with('opscode_erchef').and_return(
         'reindex_sleep_max_ms' => max_sleep_time
       )
@@ -80,7 +82,7 @@ describe SolrPreflightValidator do
       let(:max_sleep_time) { 499 }
 
       it 'raises an error' do
-        expect(solr_preflight.verify_sane_reindex_sleep_times).to eq(:i_failed)
+        expect(solr_preflight.verify_consistent_reindex_sleep_times).to eq(:i_failed)
       end
     end
   end

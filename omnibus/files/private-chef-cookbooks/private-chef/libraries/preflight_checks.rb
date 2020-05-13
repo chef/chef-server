@@ -19,6 +19,9 @@ class PreflightValidationFailed < StandardError
 end
 
 class PreflightValidator
+  CHEF_SERVER_NAME = "Chef Infra Server"
+  CHEF_SERVER_CONFIG_FILE = "/etc/opscode/chef-server.rb"
+
   attr_reader :node, :previous_run, :helper
   attr_reader :cs_pg_attr, :node_pg_attr
   def initialize(node)
