@@ -1,0 +1,55 @@
+#!/bin/bash
+#
+# Perform necessary chef-server setup steps after package is installed.
+#
+
+PROGNAME=$(basename $0)
+
+function error_exit
+{
+	echo "${PROGNAME}: ${1:-"Unknown Error"}" 1>&2
+	exit 1
+}
+
+version=$(awk '/chef-server/{ split($2,a,"+");print a[1];exit }' /opt/opscode/version-manifest.txt)
+
+confirm () {
+  read -r -p "Do you want to continue [y/n]" response
+  case "$response" in
+        [yY][eE][sS]|[yY])
+            echo "Putting Chef Infra Server in maintenance mode for reindex."
+            ;;
+        *)
+            echo "Doing nothing. You can continue using your existing Chef Infra Server."
+            exit
+            ;;
+  esac
+}
+
+first_elasticsearch_internal_install () {
+  IFS=. read -r major minor patch <<< "$version"
+  # Installing the version of Chef Infra Server with internal es.
+  # Installing 13.3 or 13.4
+  if [ $major -ge 13 -a $minor -ge 3 ]
+  then
+    #fresh install
+    if [-f /etc/opscode/chef-server-running.json]
+    then
+      if [ -d /opt/opscode/sv/opscode-solr4 && ! -d /opt/opscode/sv/elasticsearch]
+      then
+        echo "############################ NOTICE ##################################"
+        echo "This install will replace internal solr with elasticsearch for search.\n"
+        echo "There will be a full reindex of data for elasticsearch.\n"
+        echo "It can take anywhere between a few seconds to a couple of hours\n"
+        echo "for the reindex to complete.\n"
+        echo "Services will be down for the duration of the reindex.\n"
+        echo "Please take a full backup before proceeding.\n"
+        confirm
+      fi
+    fi
+  fi
+}
+
+first_elasticsearch_internal_install
+
+exit 0
