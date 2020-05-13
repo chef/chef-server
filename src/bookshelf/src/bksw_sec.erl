@@ -75,9 +75,10 @@ do_signed_url_authorization(RequestId, Req0, Context, Headers0) ->
     XAmzExpiresString = wrq:get_qs_value("X-Amz-Expires", Req0),
     io:format("~nx-amz-expires: ~p", [XAmzExpiresString]),
 
-    presigned_url_verification(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, presigned_url).
+    io:format("~ncalling do_common_authorization"),
+    do_common_authorization(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, presigned_url).
 
-presigned_url_verification(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, VerificationType) ->
+do_common_authorization(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, VerificationType) ->
 try
     [AWSAccessKeyId, CredentialScopeDate, Region | _]  = parse_x_amz_credential(Credential),
     io:format("~naws-access-key-id: ~p", [AWSAccessKeyId]),
@@ -223,8 +224,8 @@ do_standard_authorization(RequestId, IncomingAuth, Req0, Context, Headers0) ->
     XAmzDate = wrq:get_req_header("x-amz-date", Req0),
     io:format("~nXAmzDate: ~p", [XAmzDate]),
 
-    io:format("~ncalling presigned_url_verification"),
-    presigned_url_verification(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header).
+    io:format("~ncalling do_common_authorization"),
+    do_common_authorization(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header).
 
 
 %    %Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
