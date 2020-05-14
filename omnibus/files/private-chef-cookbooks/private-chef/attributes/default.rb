@@ -299,6 +299,7 @@ elasticsearch['temp_directory'] = "#{var_base}/elasticsearch/tmp"
 elasticsearch['log_directory'] = "#{log_base}/elasticsearch"
 elasticsearch['log_rotation']['file_maxbytes'] = 104857600
 elasticsearch['log_rotation']['num_to_keep'] = 10
+elasticsearch['listen'] = '127.0.0.1'
 elasticsearch['port'] = 9200
 elasticsearch['enable_gc_log'] = false
 elasticsearch['initial_cluster_join_timeout'] = 90
@@ -858,7 +859,7 @@ default['private_chef']['dark_launch']['private-chef'] = true
 default['private_chef']['dark_launch']['sql_users'] = true
 default['private_chef']['dark_launch']['add_type_and_bag_to_items'] = true
 default['private_chef']['dark_launch']['reporting'] = true
-# It appears that actions rabbitmq was used for oc_actions and analytics. 
+# It appears that actions rabbitmq was used for oc_actions and analytics.
 default['private_chef']['dark_launch']['actions'] = false
 
 ###
