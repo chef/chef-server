@@ -3,6 +3,13 @@
 
 MAX_MAP_COUNT = 262_144
 
+cluster_name = if node['previous_run'] && node['previous_run']['elasticsearch'] && node['previous_run']['elasticsearch']['cluster_name']
+                 node['previous_run']['elasticsearch']['cluster_name']
+               else
+                 "ChefInfraServer-#{SecureRandom.hex(4)}"
+               end
+
+node.override['private_chef']['elasticsearch']['cluster_name'] = cluster_name
 elasticsearch = node['private_chef']['elasticsearch']
 
 elasticsearch_dir              = elasticsearch['dir']                   # /var/opt/opscode/elasticsearch
@@ -71,9 +78,6 @@ sysctl 'vm.max_map_count' do
   notifies :run, 'execute[sysctl-reload]', :immediately
 end
 
-cluster_name = "ChefInfraServer-#{SecureRandom.hex(4)}"
-
-# No discovery settings since we will have only one chef-server backend node.
 
 # Remove the old env config to ensre it's not left over after an upgrade.
 directory '/opt/opscode/service/elasticsearch/env' do
@@ -85,7 +89,7 @@ template config_file do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode '0644'
-  variables (lazy { elasticsearch.to_hash.merge(cluster_name: cluster_name) })
+  variables (lazy { elasticsearch.to_hash })
   force_unlink true
   notifies :restart, 'component_runit_service[elasticsearch]', :delayed
 end
