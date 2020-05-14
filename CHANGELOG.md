@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.12 -->
-## [13.2.12](https://github.com/chef/chef-server/tree/13.2.12) (2020-05-13)
+<!-- latest_release 13.2.13 -->
+## [13.2.13](https://github.com/chef/chef-server/tree/13.2.13) (2020-05-14)
 
 #### Merged Pull Requests
-- Fix the runlist [#1987](https://github.com/chef/chef-server/pull/1987) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add preflight checks [#1984](https://github.com/chef/chef-server/pull/1984) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Add preflight checks [#1984](https://github.com/chef/chef-server/pull/1984) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.13 -->
 - Fix the runlist [#1987](https://github.com/chef/chef-server/pull/1987) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.12 -->
 - [chef-server-ctl] Add new check-config command [#1985](https://github.com/chef/chef-server/pull/1985) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.11 -->
 - Fix markdown formatting, punctuation, grammar in release notes [#1981](https://github.com/chef/chef-server/pull/1981) ([IanMadd](https://github.com/IanMadd)) <!-- 13.2.10 -->
