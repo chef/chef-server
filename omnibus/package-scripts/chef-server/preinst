@@ -1,0 +1,52 @@
+#!/bin/bash
+#
+# Perform necessary chef-server setup steps after package is installed.
+#
+
+PROGNAME=$(basename $0)
+
+function error_exit
+{
+    echo "${PROGNAME}: ${1:-"Unknown Error"}" 1>&2
+    exit 1
+}
+
+confirm () {
+    read -r -p "Do you want to continue [y/n]" response
+    case "$response" in
+        [yY][eE][sS]|[yY])
+            exit 0
+            ;;
+        *)
+            error_exit "Doing nothing. You can continue using your existing Chef Infra Server."
+            ;;
+    esac
+}
+
+warn_about_search_reindex() {
+    # If this is a fresh install, we don't need to worry about the
+    # solr migration
+    if [ ! -e /etc/opscode/chef-server-running.json ]; then
+        return
+    fi
+
+    if [ -d /opt/opscode/sv/opscode-solr4 ]; then
+        echo "############################ NOTICE ##################################"
+        echo ""
+        echo "It appears that this Chef Infra Server has Solr enabled."
+        echo ""
+        echo "By default, Chef Infra Server now uses Elasticsearch. To migrate to elasticsearch"
+        echo "requires a full data reindex."
+        echo ""
+        echo "The reindex can take a long time if you have a large amount of data. Your chef server"
+        echo "will be down for the duration of the reindex."
+        echo ""
+        echo "We recommend taking a full backend before proceeding."
+        echo ""
+        echo "############################ NOTICE ##################################"
+        confirm
+    fi
+}
+
+warn_about_search_reindex
+exit 0

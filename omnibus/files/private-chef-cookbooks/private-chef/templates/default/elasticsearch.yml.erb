@@ -10,7 +10,7 @@ cluster.name: <%= @cluster_name %>
 node.name: <%= node['fqdn'] %>
 path.data:  <%= @data_dir %>
 path.logs: <%= @log_directory %>
-network.host: <%= node['private_chef']['opscode-erchef']['vip']  %>
+network.host: <%= @listen  %>
 # Reference: http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-network.html
 #            http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-gateway.html
 #            http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-discovery.html

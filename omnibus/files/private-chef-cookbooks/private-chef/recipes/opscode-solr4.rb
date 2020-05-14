@@ -165,6 +165,11 @@ command << " -jar '#{solr_jetty_dir}/start.jar'"
 
 node.default['private_chef']['opscode-solr4']['command'] = command
 
+directory '/opt/opscode/sv/elasticsearch' do
+  recursive true
+  action :delete
+end
+
 component_runit_service 'opscode-solr4'
 
 # log rotation is now handled by java

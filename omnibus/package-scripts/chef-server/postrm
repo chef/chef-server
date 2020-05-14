@@ -1,7 +1,13 @@
 #!/bin/bash
 
+# dpkg will call us with abort-upgrade if the preinst script failed.
+# Our preinst script purposefully fails based on user input.
+if [[ "$1" = "abort-upgrade" ]]; then
+    exit 0
+fi
+
 # rpm calls `postrm 0` if this is package removal; and `postrm 1` if this is an
-# upgrade. dpkg calls postrm only if it's a removal.
+# upgrade.
 # So we want to execute the rm if we're NOT rhel-ish, OR the argument is correct.
 # (See also: http://tickets.opscode.com/browse/CHEF-3022)
 if [[ ! ( -e /etc/redhat-release || -e /etc/system-release ) || "$1" == "0" ]]; then

@@ -50,12 +50,6 @@ include_recipe 'private-chef::plugin_discovery'
 include_recipe 'private-chef::plugin_config_extensions'
 include_recipe 'private-chef::config'
 
-if node['private_chef']['elasticsearch']['first_internal_install']
-  node.override['private_chef']['opscode-solr4']['enable'] = false
-  node.override['private_chef']['rabbitmq']['enable'] = false
-  node.override['private_chef']['opscode-expander']['enable'] = false
-end
-
 if node['private_chef']['fips_enabled']
   include_recipe 'private-chef::fips'
 end
@@ -122,6 +116,9 @@ include_recipe 'private-chef::sysctl-updates'
 include_recipe 'private-chef::plugin_chef_run'
 
 if node['private_chef']['use_chef_backend']
+  # Ensure internal elasticsearch is not enabled
+  # if we are in the chef_backend configuration
+  node.override['private-chef']['elasticsearch']['enable'] = false
   include_recipe 'private-chef::haproxy'
 end
 
