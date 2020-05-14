@@ -96,8 +96,11 @@ generate_presigned_url(OrgId, Bucket, Lifetime, Method, Checksum, AwsConfig) ->
     Headers = headers_for_type(Method, Checksum),
 io:format("~n~n-------------------------------------------"),
 io:format(  "~nIN CHEF_S3.ERL - generate_presigned_url/6"),
+io:format(  "~nOrgId     = ~p",  [OrgId]),
+io:format(  "~nBucket    = ~p",  [Bucket]),
+io:format(  "~nMethod    = ~p",  [Method]),
 io:format(  "~nHeaders   = ~p",  [Headers]),
-io:format(  "~nAwsConfig scheme=~p host=~p port=~p", [AwsConfig#aws_config.s3_scheme, AwsConfig#aws_config.s3_host, AwsConfig#aws_config.s3_port]),
+io:format(  "~nAwsConfig scheme=~p~nhost=~p~nport=~p", [AwsConfig#aws_config.s3_scheme, AwsConfig#aws_config.s3_host, AwsConfig#aws_config.s3_port]),
     Expiry = case application:get_env(chef_objects, s3_url_expiry_window_size) of
         {ok, {X, percent}} ->
             Interval = round((X / 100) * Lifetime),
