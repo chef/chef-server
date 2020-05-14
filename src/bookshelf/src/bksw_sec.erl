@@ -148,7 +148,7 @@ try
     io:format("~nerlcloud_s3:get_object_url: ~p", [Url]),
     io:format("~nTODO: this path needs to be escaped ^^^"),
 
-%    This (below) may have caused a big webmachine error
+%    This (below) caused a big webmachine error
 %    Payload = wrq:req_body(Req0),
 %    io:format("~nbody (payload?): ~p", [Payload]),
 
@@ -324,9 +324,9 @@ check_signed_headers_authhead(SignedHeaders, Headers) ->
             true
     end.
 
-% signed headers check common to both authorization header verification
+% required signed headers common to both authorization header verification
 % and presigned url verification.
-% https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
+% https://docs.amazonaws.cn/en_us/AmazonS3/latest/API/sigv4-query-string-auth.html
 %-spec check_signed_headers_common(proplist(), proplist()) -> boolean(). % for erlang20+
 -spec check_signed_headers_common([tuple()], [tuple()]) -> boolean().
 check_signed_headers_common(SignedHeaders, Headers) ->
