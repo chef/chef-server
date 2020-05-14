@@ -81,6 +81,32 @@ else
     PrivateChef.from_file(chef_server_path)
   end
 
+  # Add support for the external search case
+  if PrivateChef['opscode_solr4']['external']
+    # Disable internal elasticsearch
+    node.default['private_chef']['rabbitmq']['enable'] = false
+    node.default['private_chef']['opscode-solr4']['enable'] = false
+    node.default['private_chef']['opscode-expander']['enable'] = false
+    node.default['private_chef']['elasticsearch']['enable'] = false
+
+    node.default['private_chef']['opscode-solr4']['external'] = false
+    node.default['private_chef']['opscode-solr4']['external_url'] = nil
+    node.default['private_chef']['opscode-erchef']['search_provider'] = 'solr' # solr, elasticsearch
+    node.default['private_chef']['opscode-erchef']['search_queue_mode'] = 'rabbitmq' # rabbitmq, batch, or inline
+  else
+    # The user does not have an external install for search;
+    # Enable internal elasticsearch
+    node.default['private_chef']['rabbitmq']['enable'] = false
+    node.default['private_chef']['opscode-solr4']['enable'] = false
+    node.default['private_chef']['opscode-expander']['enable'] = false
+    node.default['private_chef']['elasticsearch']['enable'] = true
+
+    node.default['private_chef']['opscode-solr4']['external'] = true
+    node.default['private_chef']['opscode-solr4']['external_url'] = "http://localhost:9200"
+    node.default['private_chef']['opscode-erchef']['search_provider'] = 'elasticsearch' # solr, elasticsearch
+    node.default['private_chef']['opscode-erchef']['search_queue_mode'] = 'batch' # rabbitmq, batch, or inline
+  end
+
   # Bail out if something is wrong in our configuration.
   # NOTE: Over time, we can move the validation done in private_chef.rb
   #       here as well.
