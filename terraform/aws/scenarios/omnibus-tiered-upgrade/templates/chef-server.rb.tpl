@@ -1,4 +1,4 @@
-topology = "tier"
+topology "tier"
 
 server "backend.internal",
   :ipaddress => "${back_end_ip}/${cidr}",
@@ -12,7 +12,7 @@ server "frontend.internal",
   :ipaddress => "${front_end_ip}/${cidr}",
   :role => "frontend"
 
-api_fqdn = "frontend.internal"
+api_fqdn "frontend.internal"
 
 # The public IPV6 address is not bound to the network interface of the machine.
 # rhel-7 and rhel-8 are able to resolve this but the older rhel-6 is not.
