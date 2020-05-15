@@ -43,7 +43,7 @@ registry_collect_callback(Registry, Collector) ->
 %% @private
 mf_to_erl(#'MetricFamily'{name = Name, help = Help, type = Type, metric = Metrics}) ->
     {[
-      {name, Name},
+      {name, iolist_to_binary(Name)},
       {type, string_type(Type)},
       {help, list_to_binary(Help)},
       {metrics, [metric_to_erl(Metric) || Metric <- Metrics]}
@@ -61,11 +61,30 @@ emit_metric(#'Metric'{gauge=#'Gauge'{value=Value}}) ->
     [
      {value, as_binary(Value)}
     ];
+%as a bonus what is the json representation of a histogram?
+emit_metric(#'Metric'{histogram=#'Histogram'{
+                                   sample_sum = SampleSum,
+                                   sample_count = SampleCount,
+                                   bucket = Buckets}}) ->
+    [
+     {sample_sum, as_binary(SampleSum)},
+     {sample_count, as_binary(SampleCount)},
+     {bucket, emit_histogram_buckets(Buckets)}
+    ];
 emit_metric(#'Metric'{untyped=#'Untyped'{value=Value}}) ->
     [
      {value, as_binary(Value)}
     ].
-%% TODO(jaym) 08/27/17: Histogram and Summary types
+
+emit_histogram_buckets(Buckets) ->
+    Fun = fun (#'Bucket'{cumulative_count = CumulativeCount,
+                         upper_bound = UpperBound}) ->
+                  {[{cumulative_count, as_binary(CumulativeCount)},
+                    {upper_bound, as_binary(UpperBound)}]}
+          end,
+    lists:map(Fun, Buckets).
+
+%% TODO(jaym) 08/27/17: Summary types
 
 maybe_prepend_labels([], EJson) ->
     EJson;
@@ -95,6 +114,7 @@ string_type('COUNTER') ->
     <<"COUNTER">>;
 string_type('GAUGE') ->
     <<"GAUGE">>;
+string_type('HISTOGRAM') ->
+    <<"HISTOGRAM">>;
 string_type('UNTYPED') ->
     <<"UNTYPED">>.
-

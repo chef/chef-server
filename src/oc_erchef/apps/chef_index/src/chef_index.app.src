@@ -25,7 +25,8 @@
                   stdlib,
                   gen_bunny,
                   ibrowse,
-                  chef_secrets
+                  chef_secrets,
+                  prometheus
                  ]},
   {env, []}
  ]}.

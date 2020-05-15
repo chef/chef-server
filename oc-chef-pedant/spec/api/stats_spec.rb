@@ -31,15 +31,39 @@ describe "/_stats API endpoint", :stats do
     "erlang_vm_statistics_context_switches" => "COUNTER",
     "erlang_vm_memory_system_bytes_total" => "GAUGE",
     "erlang_vm_memory_processes_bytes_total" => "GAUGE",
-    "erlang_vm_ets_tables" => "GAUGE",
-    "erlang_vm_dets_tables" => "GAUGE",
+    "erlang_vm_memory_ets_tables" => "GAUGE",
+    "erlang_vm_memory_dets_tables" => "GAUGE",
     "erlang_vm_memory_bytes_total" => "GAUGE",
     "erlang_vm_memory_atom_bytes_total" => "GAUGE",
     "erchef_pooler_queued_requestors_max" => "GAUGE",
     "erchef_pooler_queued_requestors" => "GAUGE",
     "erchef_pooler_members_max" => "GAUGE",
     "erchef_pooler_members_free" => "GAUGE",
-    "erchef_pooler_members_in_use" => "GAUGE"
+    "erchef_pooler_members_in_use" => "GAUGE",
+    "erlang_vm_allocators" => "GAUGE",
+    "erlang_vm_atom_count" => "GAUGE",
+    "erlang_vm_atom_limit" => "GAUGE",
+    "erlang_vm_dirty_cpu_schedulers" => "GAUGE",
+    "erlang_vm_dirty_cpu_schedulers_online" => "GAUGE",
+    "erlang_vm_dirty_io_schedulers" => "GAUGE",
+    "erlang_vm_msacc_aux_seconds_total" => "COUNTER",
+    "erlang_vm_msacc_check_io_seconds_total" => "COUNTER",
+    "erlang_vm_msacc_emulator_seconds_total" => "COUNTER",
+    "erlang_vm_msacc_gc_seconds_total" => "COUNTER",
+    "erlang_vm_msacc_other_seconds_total" => "COUNTER",
+    "erlang_vm_msacc_port_seconds_total" => "COUNTER",
+    "erlang_vm_msacc_sleep_seconds_total" => "COUNTER",
+    # "erlang_vm_msacc_alloc_seconds_total" => "COUNTER",
+    # "erlang_vm_msacc_bif_seconds_total" => "COUNTER",
+    # "erlang_vm_msacc_busy_wait_seconds_total" => "COUNTER",
+    # "erlang_vm_msacc_ets_seconds_total" => "COUNTER",
+    # "erlang_vm_msacc_gc_full_seconds_total" => "COUNTER",
+    # "erlang_vm_msacc_nif_seconds_total" => "COUNTER",
+    # "erlang_vm_msacc_send_seconds_total" => "COUNTER",
+    # "erlang_vm_msacc_timers_seconds_total" => "COUNTER",
+    "erlang_vm_statistics_dirty_cpu_run_queue_length" => "GAUGE",
+    "erlang_vm_statistics_dirty_io_run_queue_length" => "GAUGE",
+    "erlang_vm_wordsize_bytes" => "GAUGE",
   }
 
   PGSTATS_RESPONSE_TYPE_MAP = {
@@ -61,7 +85,7 @@ describe "/_stats API endpoint", :stats do
     "pg_stat_tup_fetch" => "COUNTER",
     "pg_stat_idx_scan" => "COUNTER",
     "pg_stat_seq_tup_read" => "COUNTER",
-    "pg_stat_seq_scan" => "COUNTER"
+    "pg_stat_seq_scan" => "COUNTER",
   }
 
   MNESIA_RESPONSE_TYPE_MAP = {
@@ -75,12 +99,55 @@ describe "/_stats API endpoint", :stats do
     "erlang_mnesia_restarted_transactions" => "COUNTER"
   }
 
+  CHEF_INDEX_TYPE_MAP = {
+    "chef_elasticsearch_update_count" => "COUNTER",
+    "chef_elasticsearch_search_count" => "COUNTER",
+    "chef_elasticsearch_delete_search_db_count" => "COUNTER",
+    "chef_elasticsearch_delete_search_db_by_type_count" => "COUNTER",
+    "chef_elasticsearch_search_with_scroll_count" => "COUNTER",
+    # These counters have labels and thus prometheus doesn't output
+    # data for them unless we actually increment the counter with a
+    # label. Our tests don't seem to hit these code paths currently.
+    #
+    # "chef_index_http_req_failure_total" => "COUNTER"
+    # "chef_elasticsearch_search_with_scroll_resp_count" => "COUNTER",
+    "chef_elasticsearch_search_resp_count" => "COUNTER",
+    "chef_index_batch_current_batch_size_bytes" => "GAUGE",
+    "chef_index_batch_current_batch_doc_count" => "GAUGE",
+    "chef_index_batch_inflight_flushes_count" => "GAUGE",
+    "chef_index_batch_mailbox_size" => "GAUGE",
+    "chef_index_batch_successful_docs_total" => "COUNTER",
+    "chef_index_batch_failed_docs_total" => "COUNTER",
+    "chef_index_http_req_success_total" => "COUNTER",
+  }
+
+  CHEF_INDEX_JSON_TYPE_MAP = {
+    "chef_index_batch_queue_latency_ms" => "HISTOGRAM",
+    "chef_index_batch_completed_latency_ms" => "HISTOGRAM",
+    "chef_index_http_req_duration_ms" => "HISTOGRAM",
+  }
+
+  CHEF_INDEX_PROMETHEUS_TYPE_MAP = {
+    "chef_index_batch_queue_latency_ms_bucket" => "HISTOGRAM",
+    "chef_index_batch_queue_latency_ms_count" => "HISTOGRAM",
+    "chef_index_batch_queue_latency_ms_sum" => "HISTOGRAM",
+
+    "chef_index_batch_completed_latency_ms_bucket" => "HISTOGRAM",
+    "chef_index_batch_completed_latency_ms_count" => "HISTOGRAM",
+    "chef_index_batch_completed_latency_ms_sum" => "HISTOGRAM",
+
+    "chef_index_http_req_duration_ms_bucket" => "HISTOGRAM",
+    "chef_index_http_req_duration_ms_count" => "HISTOGRAM",
+    "chef_index_http_req_duration_ms_sum" => "HISTOGRAM",
+  }
+
+  SHARED_TYPE_MAP = ERLANG_RESPONSE_TYPE_MAP.merge(CHEF_INDEX_TYPE_MAP)
+  RESPONSE_TYPE_MAP = SHARED_TYPE_MAP.merge(CHEF_INDEX_JSON_TYPE_MAP)
+  PROMETHEUS_RESPONSE_TYPE_MAP = SHARED_TYPE_MAP.merge(MNESIA_RESPONSE_TYPE_MAP).merge(CHEF_INDEX_PROMETHEUS_TYPE_MAP)
+
   if Pedant::Config.chef_pgsql_collector
-    RESPONSE_TYPE_MAP = ERLANG_RESPONSE_TYPE_MAP.merge(PGSTATS_RESPONSE_TYPE_MAP)
-    PROMETHEUS_RESPONSE_TYPE_MAP = RESPONSE_TYPE_MAP.merge(MNESIA_RESPONSE_TYPE_MAP)
-  else
-    RESPONSE_TYPE_MAP = ERLANG_RESPONSE_TYPE_MAP
-    PROMETHEUS_RESPONSE_TYPE_MAP = RESPONSE_TYPE_MAP.merge(MNESIA_RESPONSE_TYPE_MAP)
+    RESPONSE_TYPE_MAP = RESPONSE_TYPE_MAP.merge(PGSTATS_RESPONSE_TYPE_MAP)
+    PROMETHEUS_RESPONSE_TYPE_MAP = PROMETHEUS_RESPONSE_TYPE_MAP.merge(PGSTATS_RESPONSE_TYPE_MAP)
   end
 
   let(:request_url) { "#{platform.server}/_stats" }
@@ -118,7 +185,7 @@ describe "/_stats API endpoint", :stats do
     it "returns prometheus output ?format=text", :smoke do
       response = get(request_url + "?format=text", nil, auth_headers: auth_headers,
           headers: { "Accept" => "*/*" })
-      names = response.split("\n").reduce([]) do |acc, str|
+      names = response.body.split("\n").reduce([]) do |acc, str|
         m = str.strip.match(/^\w+/)
         acc << m[0] if m
         acc
@@ -130,21 +197,9 @@ describe "/_stats API endpoint", :stats do
       it "returns metrics for #{name} typed as #{type}" do
         response = JSON.parse(get(request_url, nil, auth_headers: auth_headers))
         stat = response.find { |s| s["name"] == name }
+        expect(stat).not_to be_nil
         expect(stat["metrics"]).not_to be_empty
-        stat["metrics"].each do |metric|
-          expect(metric).to have_key("value")
-          case type
-          when "GAUGE"
-            expect(Float(metric["value"])).to be_a(Numeric)
-          when "COUNTER"
-            expect(Integer(metric["value"])).to be_a(Integer)
-          when "UNTYPED"
-            expect(boolean_stats).to include(name)
-            expect(metric["value"]).to eq("1").or eq("0")
-          else
-            raise "Unimplemented test for metric type #{type}"
-          end
-        end
+        expect(stat["type"]).to eq(type)
       end
     end
   end

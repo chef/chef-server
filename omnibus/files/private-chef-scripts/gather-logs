@@ -125,6 +125,17 @@ fi
 
 $ctl_cmd status > "$tmpdir/$ctl_cmd"_status.txt
 
+if [[ $type == 'CS' ]];
+then
+    STATSPW=$($ctl_cmd show-secret opscode_erchef stats_password)
+    if [ -n "$STATSPW" ];
+    then
+        curl -k -s -X GET "https://statsuser:$STATSPW@localhost/_stats?format=text" status > "$tmpdir/chef_server_stats_endpoint.txt"
+    else
+        curl -k -s -X GET "https://localhost/_stats?format=text" status > "$tmpdir/chef_server_stats_endpoint.txt"
+    fi
+fi
+
 # Try to determine with /tmp/.s.PGSQL.5432 if postgresql is running before gathering psql logs
 # There are two cases in which this could fail:
 # 1) We've configure postgresql to listen on a different local socket. Most users don't do this, but it is possible.

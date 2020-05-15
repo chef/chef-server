@@ -48,6 +48,12 @@ start_link() ->
 init([]) ->
     error_logger:info_msg("Starting chef_index_sup.~n", []),
     error_logger:info_msg("Creating HTTP pool for Solr.~n"),
+    Provider = envy:get(chef_index, search_provider, solr, envy:one_of([solr, elasticsearch])),
+    case Provider of
+        elasticsearch ->
+            chef_elasticsearch:declare_metrics();
+        _ -> ok
+    end,
     chef_index_http:create_pool(),
     maybe_rabbitmq_monitoring(),
     Children = child_spec(),
