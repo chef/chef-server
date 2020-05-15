@@ -1,0 +1,176 @@
+#!/usr/bin/env escript
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
+%% ex: ts=4 sw=4 et
+
+%% Copyright (c) 2020 Chef Software, Inc.
+%% All Rights Reserved
+
+%% TODO: The cookie used by erchef should be part of config
+-define(SELF, 'reindexer@127.0.0.1').
+-define(ERCHEF, 'erchef@127.0.0.1').
+-define(ERCHEF_COOKIE, 'erchef').
+
+%% A binary() index is taken to be a data bag name.
+-type index() :: client | environment | node | role | binary().
+
+%% @doc 
+%%
+%% Examples:
+%%
+%% Perform a partial reindexing of the 'mycompany-engineering' organization by :
+%%     reindex-opc-piecewise mycompany-engineering nodes <nodes..>
+%%
+%% Indices are node, role, environment, client, or DATABAG_NAME
+%%
+%% Exit Codes:
+%%
+%%   0 - Success
+%%   1 - Incorrect arguments given
+%%   2 - Invalid organization name given
+%%   3 - Failure reindexing
+%%   Prajakta TODO: check if chef-server-ctl reindex can call into this script
+main(Args) ->
+    init_network(),
+    [OrgInfo, Context, Index, Items] = validate_args(Args),
+    perform(Context, OrgInfo, Index, Items).
+
+%% @doc Ensure that the arguments are all valid, meaning a recognized action is specified,
+%% and the given organization name actually exists.  If everything checks out, return the
+%% expanded arguments (we need to get the corresponding organization ID as well), with
+%% proper type conversions performed.
+%%
+%% If the arguments are invalid for any reason, print a message and halt.
+validate_args([]) ->
+    print_usage(),
+    halt(1);
+ validate_args([_Help]) ->
+    print_usage(),
+    halt(1);
+validate_args([OrgName, IndexName | Items]) when IndexName =:= "clients" ->
+    validate_args([OrgName, "client" | Items]);
+validate_args([OrgName, IndexName | Items]) when IndexName =:= "environments" ->
+    validate_args([OrgName, "environment" | Items]);
+validate_args([OrgName, IndexName | Items]) when IndexName =:= "nodes" ->
+    validate_args([OrgName, "node"| Items]);
+validate_args([OrgName, IndexName | Items]) when IndexName =:= "roles" ->
+    validate_args([OrgName, "role" | Items]);
+%% We just assume that the given index is a databag and reindex items
+%% TODO (Prajakta) : Check if the databag exists.
+validate_args([OrgName, IndexName | Items]) ->
+    %% TODO make configurable
+    IntLB =  "https://127.0.0.1",
+    Context = make_context(OrgName, IntLB),
+    OrgBin = list_to_binary(OrgName), %% We use binaries around here...
+    %% Some operations require the organization's ID.  This also serves as a convenient
+    %% check for organization existence.
+    case get_org_id(Context, OrgBin) of
+        not_found ->
+            io:format("Could not find an organization named '~s'~n", [OrgBin]),
+            halt(2);
+        OrgId when is_binary(OrgId)->
+            %% Everything checks out!  Let's do some reindexing!
+            [{OrgId, OrgBin}, Context, bin_or_atom_index_name(IndexName), bin_items_list(Items)];
+        OtherError ->
+            io:format("Other error occured ~p~n", [OtherError]),
+            halt(3)
+    end.
+
+perform(Context, {_OrgId, OrgName}=OrgInfo, Index, [<<>>]) ->
+    io:format("~nSending all items in index '~p' in organization '~s' to be indexed.", [Index, OrgName]),
+    perform_reindex(Context, {_OrgId, OrgName}=OrgInfo, Index, [<<>>]);
+perform(Context, {_OrgId, OrgName}=OrgInfo, Index, Items) ->
+    io:format("~nSending items ~p in index '~p' in organization '~s' to be indexed.", [Items, Index, OrgName]),
+    perform_reindex(Context, {_OrgId, OrgName}=OrgInfo, Index, Items).
+
+%% @doc Actually do the reindexing.
+-spec perform(Context :: term(),
+              {OrgId::binary(), OrgName::binary()},
+              Index::index(),
+              Items::[] | [binary()]
+             ) -> term().
+perform_reindex(Context, {_OrgId, OrgName}=OrgInfo, Index, Items) ->
+    io:format("~nIt may take some time before everything is available via search.~n", []),
+    Response = rpc_reindex(Context, OrgInfo, Index, Items),
+    case Response of
+        {[],[]} ->
+            io:format("~nreindexing[~s]: reindex complete!~n", [OrgName]);
+        {[], MissingList} ->
+            io:format("~nreindexing[~s]: reindex complete but someitems were not found.~n", [OrgName]),
+            print_missing(MissingList);
+        {FailedList, MissingList} when is_list(FailedList) ->
+            io:format("~nreindexing[~s]: reindex FAILED!~n", [OrgName]),
+            print_missing(MissingList),
+            print_errors(FailedList, OrgName, Index),
+            halt(3)
+    end.
+
+print_usage() ->
+    io:format("Need to specify: ~n an organization, index and a list of names or~n an organization and an index.~n"),
+    io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME ITEM1 ITEM2.. ~n"),
+    io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME~n").
+
+%% Massaging the input to match expectations
+%-spec bin_or_atom_index_name(IndexName :: "client" |
+%                                          "environment" |
+%                                          "node" |
+%                                          "role" |
+%                                          binary() ) -> atom() | binary().
+bin_or_atom_index_name(IndexName) when IndexName =:= "client";
+				                       IndexName =:= "environment";
+				                       IndexName =:= "node";
+				                       IndexName =:= "role" ->
+	list_to_atom(IndexName);
+bin_or_atom_index_name(IndexName) ->
+	list_to_binary(IndexName).
+
+-spec bin_items_list(Items :: list()) -> [binary()].
+bin_items_list([]) ->
+    [<<>>];
+bin_items_list(Items) ->
+    [ list_to_binary(X) || X <- Items ].
+
+rpc_reindex(Context, OrgInfo, Index, [<<>>])->
+    rpc:call(?ERCHEF, chef_reindex, reindex, [Context, OrgInfo, Index]);
+rpc_reindex(Context, OrgInfo, Index, Items) ->
+    rpc:call(?ERCHEF, chef_reindex, reindex_by_name, [Context, OrgInfo, Index, Items]).
+
+print_errors(Failed, OrgName, Index) ->
+    io:format(standard_error, "Reindexing the organization \"~s\" index \"~s\" has failed.~n", [OrgName, Index]),
+    io:format(standard_error, "The following objects failed to be reindexed in the last batch:~n~n", []),
+    [io:format(standard_error, "\t~s[~s]: ~s~n", [Type, Id, Reason]) || {{Type, Id, _Db}, Reason} <- Failed].
+
+print_missing([]) ->
+    ok;
+print_missing(Missing) ->
+    [io:format(standard_error, "\t~p ~n", [binary_to_list(Name)]) || Name <- Missing],
+    io:format(standard_error, "~n", []).
+
+make_context(OrgName, IntLB) ->
+    {ok, ServerAPIMinVersion} = rpc:call(?ERCHEF, oc_erchef_app, server_api_version, [min]),
+    ReqId = base64:encode(crypto:hash(md5, (term_to_binary(make_ref())))),
+    % TODO api versioning to be handled when we move this into an omnibus template
+    rpc:call(?ERCHEF, chef_db, make_context, [ServerAPIMinVersion, ReqId, find_dl_headers(OrgName, IntLB)]).
+
+%% @doc Verify that the given `OrgName' actually corresponds to a real
+%% organization.  Returns the organization's ID if so; 'not_found' otherwise.
+-spec get_org_id(Context :: term(), OrgName :: binary()) -> OrgId::binary() | not_found.
+get_org_id(Context, OrgName) ->
+    {OrgId, _} = rpc:call(?ERCHEF, chef_db, fetch_org_metadata, [Context, OrgName]),
+    OrgId.
+
+%% @doc Connect to the node actually running Erchef.  Kind of hard to do RPC calls
+%% otherwise....
+init_network() ->
+    {ok, _} = net_kernel:start([?SELF, longnames]),
+    true = erlang:set_cookie(node(), ?ERCHEF_COOKIE),
+    pong = net_adm:ping(?ERCHEF).
+
+find_dl_headers(OrgNameBin, IntLB) when is_binary(OrgNameBin) ->
+    find_dl_headers(binary_to_list(OrgNameBin), IntLB);
+find_dl_headers(OrgName, IntLB) when is_list(OrgName) ->
+    {ok, "200", _Headers, Body} = rpc:call(?ERCHEF, ibrowse,send_req, [IntLB ++ "/_route/organizations/" ++ OrgName, [], get]),
+    Json = rpc:call(?ERCHEF, jiffy, decode, [Body]),
+    SubJson = rpc:call(?ERCHEF, ej, get, [{<<"config">>, <<"merged">>}, Json]),
+    {KVList} = SubJson,
+    Headers = string:join(lists:map(fun({Key, Val}) -> binary_to_list(Key) ++ "=" ++ integer_to_list(Val) end, KVList), ";"),
+    rpc:call(?ERCHEF, xdarklaunch_req,parse_header, [ fun(_) -> Headers end]).
