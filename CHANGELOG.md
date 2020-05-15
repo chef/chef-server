@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.15 -->
-## [13.2.15](https://github.com/chef/chef-server/tree/13.2.15) (2020-05-15)
+<!-- latest_release 13.2.16 -->
+## [13.2.16](https://github.com/chef/chef-server/tree/13.2.16) (2020-05-15)
 
 #### Merged Pull Requests
-- fix the chef-server.rb template for tiered setups [#1990](https://github.com/chef/chef-server/pull/1990) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- [reindex] Handle more reindexing failure cases [#1991](https://github.com/chef/chef-server/pull/1991) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- [reindex] Handle more reindexing failure cases [#1991](https://github.com/chef/chef-server/pull/1991) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.16 -->
 - fix the chef-server.rb template for tiered setups [#1990](https://github.com/chef/chef-server/pull/1990) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.15 -->
 - Praj/solr to es [#1876](https://github.com/chef/chef-server/pull/1876) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.14 -->
 - Add preflight checks [#1984](https://github.com/chef/chef-server/pull/1984) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.13 -->
