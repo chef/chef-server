@@ -251,8 +251,12 @@ add_batch(Batch, OrgName) ->
 log_failures(_OrgName, []) ->
     ok;
 log_failures(OrgName, [Failure|Rest]) ->
-    {{TypeName, Id, _DbName}, Reason} = Failure,
-    lager:error("reindexing[~s] item ~s[~s] failed to reindex: ~s", [OrgName, TypeName, Id, Reason]),
+    case Failure of
+        {{TypeName, Id, _DbName}, Reason} ->
+            lager:error("reindexing[~s] item ~s[~s] failed to reindex: ~s", [OrgName, TypeName, Id, Reason]);
+        Other ->
+            lager:error("reindexing[~s] unexpected reindexing failure: ~w", [OrgName, Other])
+    end,
     log_failures(OrgName, Rest).
 
 -spec humanize_failures(list(), list()) -> list().
@@ -266,6 +270,8 @@ humanize_failures([H|T], Acc) ->
 
 pretty_reason({error,{error,no_members}}) ->
     "no_members: Ran out of HTTP workers talking to search backend";
+pretty_reason({exit, {timeout, _}}) ->
+    "timeout";
 pretty_reason(Other) ->
     io_lib:format("error: ~p", [Other]).
 
