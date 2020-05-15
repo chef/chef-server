@@ -141,6 +141,10 @@ link '/opt/opscode/embedded/elasticsearch/config' do
   to elasticsearch_conf_dir
 end
 
+component_runit_service 'opscode-solr4' do
+  action :disable
+end
+
 directory '/opt/opscode/sv/opscode-solr4' do
   recursive true
   action :delete
@@ -148,3 +152,5 @@ end
 
 # Define resource for elasticsearch component_runit_service
 component_runit_service 'elasticsearch'
+
+include_recipe 'private-chef::elasticsearch_index'

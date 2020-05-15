@@ -165,6 +165,10 @@ command << " -jar '#{solr_jetty_dir}/start.jar'"
 
 node.default['private_chef']['opscode-solr4']['command'] = command
 
+component_runit_service 'elasticsearch' do
+  action :disable
+end
+
 directory '/opt/opscode/sv/elasticsearch' do
   recursive true
   action :delete

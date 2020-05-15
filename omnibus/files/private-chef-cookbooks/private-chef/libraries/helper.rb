@@ -67,28 +67,18 @@ class OmnibusHelper
     normalize_host(node['private_chef'][service]['vip'])
   end
 
-  # Returns scheme://host:port without any path
-  def solr_root
-    url = URI.parse(solr_url)
-    host = url.scheme + '://' + url.host
-    if url.port
-      host += ':' + url.port.to_s
-    end
-    host
-  end
-
   def elastic_search_major_version
     max_requests = 5
     current_request = 1
 
-    if node['private_chef']['opscode-solr4']['external'] && node['private_chef']['opscode-erchef']['search_provider'] == 'elasticsearch'
+    if node['private_chef']['opscode-erchef']['search_provider'] == 'elasticsearch'
       begin
-        client = Chef::HTTP.new(node['private_chef']['opscode-solr4']['external_url'])
+        client = Chef::HTTP.new(solr_url)
         response = client.get('')
       rescue => e
         # Perform a blind rescue because Net:HTTP throws a variety of exceptions - some of which are platform specific.
         if current_request == max_requests
-          raise "Failed to connect to elasticsearch service. Ensure node['private_chef']['opscode-solr4']['external_url'] is correct.\n#{e}"
+          raise "Failed to connect to elasticsearch service at #{solr_url}: #{e}"
         else
           # Chef HTTP logs the details in the debug log.
           Chef::Log.error "Failed to connect to elasticsearch service #{current_request}/#{max_requests}. Retrying."
@@ -231,9 +221,21 @@ class OmnibusHelper
   def solr_url
     if node['private_chef']['opscode-solr4']['external']
       node['private_chef']['opscode-solr4']['external_url']
-    else
+    elsif node['private_chef']['deprecated_solr_indexing']
       "http://#{vip_for_uri('opscode-solr4')}:#{node['private_chef']['opscode-solr4']['port']}/solr"
+    else
+      "http://#{vip_for_uri('elasticsearch')}:#{node['private_chef']['elasticsearch']['port']}/"
     end
+  end
+
+  # Returns scheme://host:port without any path
+  def solr_root
+    url = URI.parse(solr_url)
+    host = url.scheme + '://' + url.host
+    if url.port
+      host += ':' + url.port.to_s
+    end
+    host
   end
 
   def bookshelf_s3_url
