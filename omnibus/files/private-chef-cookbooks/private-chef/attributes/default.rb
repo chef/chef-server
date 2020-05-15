@@ -230,8 +230,8 @@ default['private_chef']['jetty']['log_directory'] = '/var/opt/opscode/opscode-so
 # Set this to point at a solr/cloudsearch installation
 # not controlled by chef-server
 #
-# default['private_chef']['opscode-solr4']['external'] defined in recipes/config.rb
-# default['private_chef']['opscode-solr4']['external_url'] defined in recipes/config.rb
+default['private_chef']['opscode-solr4']['external'] = false
+default['private_chef']['opscode-solr4']['external_url'] = nil
 default['private_chef']['opscode-solr4']['ha'] = false
 default['private_chef']['opscode-solr4']['dir'] = '/var/opt/opscode/opscode-solr4'
 default['private_chef']['opscode-solr4']['data_dir'] = '/var/opt/opscode/opscode-solr4/data'
@@ -298,6 +298,7 @@ elasticsearch['temp_directory'] = "#{var_base}/elasticsearch/tmp"
 elasticsearch['log_directory'] = "#{log_base}/elasticsearch"
 elasticsearch['log_rotation']['file_maxbytes'] = 104857600
 elasticsearch['log_rotation']['num_to_keep'] = 10
+elasticsearch['vip'] = '127.0.0.1'
 elasticsearch['listen'] = '127.0.0.1'
 elasticsearch['port'] = 9200
 elasticsearch['enable_gc_log'] = false

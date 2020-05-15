@@ -121,6 +121,8 @@ module PrivateChef
 
   insecure_addon_compat true
 
+  deprecated_solr_indexing false
+
   class << self
     def from_file(filename)
       # We're overriding this here so that we can get more meaningful errors from
@@ -295,6 +297,7 @@ module PrivateChef
       set_target_array_if_not_nil(results['private_chef'], 'folsom_graphite', PrivateChef['folsom_graphite'])
       set_target_array_if_not_nil(results['private_chef'], 'profiles', PrivateChef['profiles'])
       set_target_array_if_not_nil(results['private_chef'], 'insecure_addon_compat', PrivateChef['insecure_addon_compat'])
+      set_target_array_if_not_nil(results['private_chef'], 'deprecated_solr_indexing', PrivateChef['deprecated_solr_indexing'])
       results
     end
 

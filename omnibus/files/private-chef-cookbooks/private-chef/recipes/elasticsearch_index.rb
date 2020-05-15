@@ -1,5 +1,5 @@
 # Author:: Steven Danna
-# Copyright:: 2015-2018 Chef Software, Inc.
+# Copyright:: 2020 Chef Software, Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 helper = OmnibusHelper.new(node)
-case node['private_chef']['opscode-erchef']['search_provider']
-when 'solr'
-  Chef::Log.warn('External Solr Support does not include configuring the Solr schema.')
-when 'elasticsearch'
-  include_recipe 'private-chef::elasticsearch_index'
+elasticsearch_index 'chef' do
+  server_url lazy { helper.solr_url }
+  index_definition lazy { helper.es_index_definition }
 end

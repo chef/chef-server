@@ -44,9 +44,10 @@ class SolrPreflightValidator < PreflightValidator
     verify_one_search_provider
     verify_es_disabled_if_user_set_external_solr
     verify_unused_services_are_disabled_if_using_internal_es
-    verify_no_explicit_external_disable_when_es_enabled
 
     warn_unchanged_external_flag
+    warn_on_deprecated_solr
+    warn_deprecated_indexing_change
     verify_external_url
     verify_erchef_config
   end
@@ -106,16 +107,6 @@ class SolrPreflightValidator < PreflightValidator
     end
   end
 
-  def verify_no_explicit_external_disable_when_es_enabled
-    return if cs_solr_attr['external'].nil?
-
-    # TODO(ssd) 2020-05-13: Rather than this check, we could just
-    # ignore that configuration when parsing the configuration.
-    if !cs_solr_attr['external'] && elasticsearch_enabled?
-      fail_with err_SOLR008_failed_validation
-    end
-  end
-
   def external?
     if cs_solr_attr['external'].nil?
       node_solr_attr['external']
@@ -149,10 +140,19 @@ class SolrPreflightValidator < PreflightValidator
   def warn_unchanged_external_flag
     if OmnibusHelper.has_been_bootstrapped? && backend? && previous_run
       if cs_solr_attr.key?('external') && (cs_solr_attr['external'] != previous_run['opscode-solr4']['external'])
-        Chef::Log.warn err_SOLR009_warn_validation
+        ChefServer::Warnings.warn err_SOLR009_warn_validation
       end
-    else
-      true
+    end
+  end
+
+  def warn_deprecated_indexing_change
+    return if cs_solr_attr['external']
+    return if !previous_run
+
+    old_value = previous_run['deprecated_solr_indexing']
+    new_value = PrivateChef['deprecated_solr_indexing']
+    if old_value != new_value
+      ChefServer::Warnings.warn err_SOLR014_warn_validation
     end
   end
 
@@ -175,6 +175,10 @@ class SolrPreflightValidator < PreflightValidator
     else
       fail_with err_SOLR012_failed_validation
     end
+  end
+
+  def warn_on_deprecated_solr
+    ChefServer::Warnings.warn err_SOLR013_warn_validation if PrivateChef['deprecated_solr_indexing']
   end
 
   def err_SOLR001_failed_validation(final_min, final_max)
@@ -281,19 +285,6 @@ class SolrPreflightValidator < PreflightValidator
     EOM
   end
 
-  def err_SOLR008_failed_validation
-    <<~EOM
-
-      SOLR008: The #{CHEF_SERVER_NAME} is configured with
-
-                   opscode_solr4['external'] = false
-
-               but this is incompatible with elasticsearch being enabled.
-
-               Please remove this line from #{CHEF_SERVER_CONFIG_FILE}.
-    EOM
-  end
-
   def err_SOLR009_warn_validation
     <<~EOM
 
@@ -334,6 +325,28 @@ class SolrPreflightValidator < PreflightValidator
 
                solr
                elasticsearch
+    EOM
+  end
+
+  def err_SOLR013_warn_validation
+    <<~EOM
+      SOLR013: You have configured
+
+                  deprecated_solr_indexing true
+
+               Please note that solr indexing will be removed in a
+               future Chef Server release.
+
+               Please contact Chef Support for help moving to the
+               Elasticsearch indexing pipeline.
+    EOM
+  end
+
+  def err_SOLR014_warn_validation
+    <<~EOM
+       SOLR014: The value of deprecated_solr_indexing has been changed. Search
+                results against the new search index may be incorrect. Please
+                run `chef-server-ctl reindex --all` to ensure correct results.
     EOM
   end
 end
