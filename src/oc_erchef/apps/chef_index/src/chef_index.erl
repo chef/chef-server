@@ -122,7 +122,7 @@ add_batch(Batch) ->
                 R -> {error, R}
             end;
         {error, Results, FailedJobs} ->
-            {error, [not_ok(Results)|FailedJobs]}
+            {error, lists:append(not_ok(Results), FailedJobs)}
     end.
 
 add_batch_item_with_retries(Item) ->
