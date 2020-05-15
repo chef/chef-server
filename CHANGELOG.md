@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.17 -->
-## [13.2.17](https://github.com/chef/chef-server/tree/13.2.17) (2020-05-15)
+<!-- latest_release 13.2.18 -->
+## [13.2.18](https://github.com/chef/chef-server/tree/13.2.18) (2020-05-15)
 
 #### Merged Pull Requests
-- Add an escript to enable piecewise-reindex [#1983](https://github.com/chef/chef-server/pull/1983) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add prometheus metrics to chef_index [#1982](https://github.com/chef/chef-server/pull/1982) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Add prometheus metrics to chef_index [#1982](https://github.com/chef/chef-server/pull/1982) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.18 -->
 - Add an escript to enable piecewise-reindex [#1983](https://github.com/chef/chef-server/pull/1983) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.17 -->
 - [reindex] Handle more reindexing failure cases [#1991](https://github.com/chef/chef-server/pull/1991) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.16 -->
 - fix the chef-server.rb template for tiered setups [#1990](https://github.com/chef/chef-server/pull/1990) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.15 -->
