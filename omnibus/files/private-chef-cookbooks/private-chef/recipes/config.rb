@@ -87,8 +87,8 @@ else
     # more or less the same as they were before the change-over to
     # Elasticsearch.
     node.default['private_chef']['rabbitmq']['enable'] = true
-    node.default['private_chef']['opscode-solr4']['enable'] = true
     node.default['private_chef']['opscode-expander']['enable'] = true
+    node.default['private_chef']['opscode-solr4']['enable'] = false
     node.default['private_chef']['elasticsearch']['enable'] = false
 
     node.default['private_chef']['opscode-erchef']['search_provider'] = 'solr' # solr, elasticsearch
