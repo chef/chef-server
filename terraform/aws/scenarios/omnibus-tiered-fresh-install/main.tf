@@ -39,6 +39,8 @@ data "template_file" "hosts_config" {
   vars = {
     back_end_ip  = var.enable_ipv6 == "true" ? module.back_end.public_ipv6_address : module.back_end.private_ipv4_address
     front_end_ip = var.enable_ipv6 == "true" ? module.front_end.public_ipv6_address : module.front_end.private_ipv4_address
+    back_end_node_fqdn  = var.enable_ipv6 == "true" ? module.back_end.public_ipv6_address : module.back_end.private_ipv4_dns
+    front_end_node_fqdn = var.enable_ipv6 == "true" ? module.front_end.public_ipv6_address : module.front_end.private_ipv4_dns
   }
 }
 
@@ -50,6 +52,8 @@ data "template_file" "chef_server_config" {
     enable_ipv6  = var.enable_ipv6
     back_end_ip  = var.enable_ipv6 == "true" ? module.back_end.public_ipv6_address : module.back_end.private_ipv4_address
     front_end_ip = var.enable_ipv6 == "true" ? module.front_end.public_ipv6_address : module.front_end.private_ipv4_address
+    back_end_node_fqdn  = var.enable_ipv6 == "true" ? module.back_end.public_ipv6_address : module.back_end.private_ipv4_dns
+    front_end_node_fqdn = var.enable_ipv6 == "true" ? module.front_end.public_ipv6_address : module.front_end.private_ipv4_dns
     cidr         = var.enable_ipv6 == "true" ? 64 : 32
   }
 }
