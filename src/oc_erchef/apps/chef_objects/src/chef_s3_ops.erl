@@ -149,11 +149,11 @@ io:format("~nchef_s3_ops check_file~nCONFIG"
 "s3_bucket_access_method: ~p~n"
 "s3_bucket_after_host: ~p~n", [
 AwsConfig#aws_config.access_key_id,
-AwsConfig#aws_config.secret_access_key, 
-AwsConfig#aws_config.s3_scheme, 
-AwsConfig#aws_config.s3_host, 
-AwsConfig#aws_config.s3_port, 
-AwsConfig#aws_config.s3_bucket_access_method, 
+AwsConfig#aws_config.secret_access_key,
+AwsConfig#aws_config.s3_scheme,
+AwsConfig#aws_config.s3_host,
+AwsConfig#aws_config.s3_port,
+AwsConfig#aws_config.s3_bucket_access_method,
 AwsConfig#aws_config.s3_bucket_after_host]),
                      %% Something unanticipated happened.  We should log the specific reason
                      %% for later analysis, but as far as the overall checking operation is
