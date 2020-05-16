@@ -39,14 +39,14 @@ init(Config) ->
 
 is_authorized(Rq, Ctx) ->
     X = bksw_sec:is_authorized(Rq, Ctx),
-    io:format("~nbksw_wm_base:is_authorized - RESULT = ~p", [X]),
+    %io:format("~nbksw_wm_base:is_authorized - RESULT = ~p", [X]),
     X.
 
 finish_request(Rq0, Ctx) ->
     try
         case wrq:response_code(Rq0) of
             500 ->
-                io:format("~nbksw_wm_base:finish_request got 500 error - ~p", [Rq0]),
+                %io:format("~nbksw_wm_base:finish_request got 500 error - ~p", [Rq0]),
                 Rq1 = create_500_response(Rq0, Ctx),
                 {true, Rq1, Ctx};
             %% Ensure we don't tell upstream servers to cache 404s

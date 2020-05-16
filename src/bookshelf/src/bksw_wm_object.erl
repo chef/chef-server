@@ -90,7 +90,7 @@ resource_exists(Rq0, Ctx) ->
     %% Buckets always exist for writes since we create them on the fly
     case wrq:method(Rq0) of
         'PUT' ->
-            io:format("~nbksw_wm_object: ok, resource exists for PUT"),
+            %io:format("~nbksw_wm_object: ok, resource exists for PUT"),
             {true, Rq0, Ctx};
         _ ->
             %% determine if the entry exists by opening it. This way, we can cache the fd
@@ -99,10 +99,10 @@ resource_exists(Rq0, Ctx) ->
             %% Note that there is still a possible discrepency when we read the meta data.
             case bksw_io:open_for_read(Bucket, Path) of
                 {error, enoent} ->
-                    io:format("~nbksw_wm_object: error enoent"),
+                    %io:format("~nbksw_wm_object: error enoent"),
                     {false, Rq0, Ctx};
                 {ok, Ref} ->
-                    io:format("~nbksw_wm_object: ok, resource exists"),
+                    %io:format("~nbksw_wm_object: ok, resource exists"),
                     {true, Rq0, Ctx#context{entry_ref = Ref}}
             end
     end.
@@ -124,15 +124,15 @@ generate_etag(Rq0, Ctx) ->
     end.
 
 delete_resource(Rq0, Ctx) ->
-    io:format("~nbksw_wm_object:delete_resource ..."),
+    %io:format("~nbksw_wm_object:delete_resource ..."),
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Rq0),
     Res = bksw_io:entry_delete(Bucket, Path),
     case Res of
-        true -> 
-            io:format("~nbksw_wm_object:delete_resource successful"),
+        true ->
+            %io:format("~nbksw_wm_object:delete_resource successful"),
             {true, Rq0, Ctx};
         Other ->
-            io:format("~nbksw_wm_object:delete_resource ERROR - ~p", [Other]),
+            %io:format("~nbksw_wm_object:delete_resource ERROR - ~p", [Other]),
             {Other, Rq0, Ctx}
     end.
 
@@ -159,24 +159,24 @@ download(Rq0, #context{entry_ref = Ref, stream_download = false} = Ctx) ->
     {fully_read(Ref, []), Rq0, Ctx}.
 
 upload(Rq0, Ctx) ->
-    io:format("~nbksw_wm_object:upload attempting bksw_util:get_object_and_bucket..."),
+    %io:format("~nbksw_wm_object:upload attempting bksw_util:get_object_and_bucket..."),
 X = bksw_util:get_object_and_bucket(Rq0),
-io:format("~nget_object_and_bucket result = ~p", [X]),
+%io:format("~nget_object_and_bucket result = ~p", [X]),
     {ok, Bucket, Path} = X,
     case bksw_io:open_for_write(Bucket, Path) of
         {ok, Ref} ->
-io:format("~nbksw_wm_object:upload - attempting write_streamed_body"),
-io:format("~nRq0: ~p", [Rq0]),
-io:format("~n?BLOCK_SIZE:: ~p", [?BLOCK_SIZE]),
+%io:format("~nbksw_wm_object:upload - attempting write_streamed_body"),
+%io:format("~nRq0: ~p", [Rq0]),
+%io:format("~n?BLOCK_SIZE:: ~p", [?BLOCK_SIZE]),
             % BLOWS UP HERE AT WEBMACHINE
             Resp = write_streamed_body(wrq:stream_req_body(Rq0, ?BLOCK_SIZE), Ref, Rq0, Ctx),
             % NEVER GETS HERE!
-            io:format("~nbksw_wm_object:upload finished"),
+            %io:format("~nbksw_wm_object:upload finished"),
             Resp;
         Error ->
             % NEVER GETS HERE!
             error_logger:error_msg("Error opening ~p/~p for writing: ~p~n", [Bucket, Path, Error]),
-            io:format("~nbksw_wm_object:upload ERROR = ~p Bucket = ~p Path = ~p", [Error, Bucket, Path]),
+            %io:format("~nbksw_wm_object:upload ERROR = ~p Bucket = ~p Path = ~p", [Error, Bucket, Path]),
             {false, Rq0, Ctx}
     end.
 
@@ -216,12 +216,12 @@ fully_read(Ref, Accum) ->
     end.
 
 write_streamed_body({Data, done}, Ref, Rq0, Ctx) ->
-io:format("~nbksw_wm_object:write_streamed_body (done)..."),
-io:format("~nbksw_wm_object: attempting bksw_io:write"),
+%io:format("~nbksw_wm_object:write_streamed_body (done)..."),
+%io:format("~nbksw_wm_object: attempting bksw_io:write"),
     {ok, Ref1} = bksw_io:write(Ref, Data),
-io:format("~nbksw_wm_object: bksw_io:write successful, attemping bksw_io:finish_write"),
+%io:format("~nbksw_wm_object: bksw_io:write successful, attemping bksw_io:finish_write"),
     {ok, Digest} = bksw_io:finish_write(Ref1),
-io:format("~nbksw_wm_object: bksw_io:finish_write successful"),
+%io:format("~nbksw_wm_object: bksw_io:finish_write successful"),
     case get_header('Content-MD5', Rq0) of
         undefined ->
             Rq1 = bksw_req:with_etag(base64:encode(Digest), Rq0),
@@ -237,10 +237,10 @@ io:format("~nbksw_wm_object: bksw_io:finish_write successful"),
             end
     end;
 write_streamed_body({Data, Next}, Ref, Rq0, Ctx) ->
-io:format("~nbksw_wm_object:write_streamed_body (chunk)..."),
-io:format("~nbksw_wm_object: attempting bksw_io:write"),
+%io:format("~nbksw_wm_object:write_streamed_body (chunk)..."),
+%io:format("~nbksw_wm_object: attempting bksw_io:write"),
     {ok, Ref1} = bksw_io:write(Ref, Data),
-io:format("~nbksw_wm_object: bksw_io:write successful"),
+%io:format("~nbksw_wm_object: bksw_io:write successful"),
     write_streamed_body(Next(), Ref1, Rq0, Ctx).
 
 get_header(Header, Rq) ->

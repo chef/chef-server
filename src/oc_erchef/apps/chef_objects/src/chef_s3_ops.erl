@@ -140,21 +140,6 @@ check_file(OrgId, AwsConfig, Bucket, Checksum) ->
                                             [Checksum, OrgId, Bucket, Key]),
                      {missing, Checksum};
                  ExceptionClass:Reason->
-io:format("~nchef_s3_ops check_file~nCONFIG"
-"~naccess_key_id: ~p~n"
-"secret_access_key: ~p~n"
-"s3_scheme: ~p~n"
-"s3_host: ~p~n"
-"s3_port: ~p~n"
-"s3_bucket_access_method: ~p~n"
-"s3_bucket_after_host: ~p~n", [
-AwsConfig#aws_config.access_key_id,
-AwsConfig#aws_config.secret_access_key,
-AwsConfig#aws_config.s3_scheme,
-AwsConfig#aws_config.s3_host,
-AwsConfig#aws_config.s3_port,
-AwsConfig#aws_config.s3_bucket_access_method,
-AwsConfig#aws_config.s3_bucket_after_host]),
                      %% Something unanticipated happened.  We should log the specific reason
                      %% for later analysis, but as far as the overall checking operation is
                      %% concerned, this is "just an error", and we can continue along.
@@ -176,8 +161,6 @@ AwsConfig#aws_config.s3_bucket_after_host]),
                      TimeoutMsgTemplate :: string()) ->
                             bulk_op_return().
 s3_checksum_op(OrgId, Checksums, Fun, TimeoutMsgTemplate) ->
-io:format("~n~n-----------------------------------------"),
-io:format("~nin chef_s3_ops:s3_checksum_op"),
     Bucket = chef_s3:bucket(),
     AwsConfig = chef_s3:get_internal_config(),
     Timeout = chef_config:config_option(chef_objects, s3_parallel_ops_timeout, pos_integer),
@@ -193,12 +176,7 @@ io:format("~nin chef_s3_ops:s3_checksum_op"),
                              {timeout, Checksum}
                      end,
 
-io:format("~nBucket=~p", [Bucket]),
-io:format("~nAwsConfig=~p", [AwsConfig]),
-io:format("~nRequestFun=~p", [RequestFun]),
     Results = chef_parallel:parallelize_all_with_timeout(Checksums, RequestFun, Fanout, Timeout, TimeoutHandler),
-io:format("~nResults=~p", [Results]),
-io:format("~n-----------------------------------------"),
     %% Now we need to consolidate our results based on:
     %%
     %%   Did the operation succeed?

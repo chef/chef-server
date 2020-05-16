@@ -77,22 +77,22 @@ bucket_exists(Bucket) ->
 
 -spec bucket_create(binary()) -> boolean().
 bucket_create(Bucket) ->
-    io:format("~nbksw_io:bucket_create(~p)", [Bucket]),
+    %io:format("~nbksw_io:bucket_create(~p)", [Bucket]),
     case bucket_exists(Bucket) of
         false ->
             BucketPath = bksw_io_names:bucket_path(Bucket),
             case file:make_dir(BucketPath) of
                 ok ->
                     ?LOG_DEBUG("created bucket '~p' at '~p'", [Bucket, BucketPath]),
-                    io:format("~nbksw_io: created bucket '~p' at '~p'", [Bucket, BucketPath]),
+     %               io:format("~nbksw_io: created bucket '~p' at '~p'", [Bucket, BucketPath]),
                     true;
                 {error, Reason} ->
                     ?LOG_ERROR("Error creating bucket ~p on path ~p: ~p~n", [Bucket, BucketPath, Reason]),
-                    io:format("~nbksw_io: ERROR creating bucket '~p' on path ~p: ~p~n", [Bucket, BucketPath, Reason]),
+      %              io:format("~nbksw_io: ERROR creating bucket '~p' on path ~p: ~p~n", [Bucket, BucketPath, Reason]),
                     false
             end;
         true ->
-            io:format("~nbksw_io:bucket_create - already exists"),
+       %     io:format("~nbksw_io:bucket_create - already exists"),
             true
     end.
 
@@ -101,15 +101,15 @@ bucket_delete(Bucket) ->
     delete_bucket_dir(Bucket).
 
 delete_bucket_dir(Bucket) ->
-    io:format("~nbksw_io:bucket_delete(~p)", [Bucket]),
+    %io:format("~nbksw_io:bucket_delete(~p)", [Bucket]),
     case os:cmd("rm -rf " ++ bksw_io_names:bucket_path(binary_to_list(Bucket))) of
         [] ->
             ?LOG_DEBUG("deleted bucket ~p", [Bucket]),
-            io:format("~nbksw_io:bucket_delete - deleted bucket ~p", [Bucket]),
+     %       io:format("~nbksw_io:bucket_delete - deleted bucket ~p", [Bucket]),
             true;
         Why ->
             ?LOG_ERROR("bucket delete failed for bucket ~p: ~p", [Bucket, Why]),
-            io:format("~nbksw_io:bucket_delete - failed for bucket ~p: ~p", [Bucket, Why]),
+     %       io:format("~nbksw_io:bucket_delete - failed for bucket ~p: ~p", [Bucket, Why]),
             false
     end.
 
@@ -130,61 +130,61 @@ entry_delete(FullPath) ->
 
 -spec open_for_write(binary(), binary()) -> {ok, #entryref{}} | {error, term()}.
 open_for_write(Bucket, Entry) ->
-    io:format("~nbksw_io:open_for_write ..."),
-    io:format("~nBucket = ~p", [Bucket]),
-    io:format("~nEntry  = ~p", [Entry]),
+%    io:format("~nbksw_io:open_for_write ..."),
+%    io:format("~nBucket = ~p", [Bucket]),
+%    io:format("~nEntry  = ~p", [Entry]),
     FileName = bksw_io_names:write_path(Bucket, Entry),
-    io:format("~nFileName  = ~p", [FileName]),
-    io:format("~nensure_dir: ~p", [filelib:ensure_dir(FileName)]),
+%    io:format("~nFileName  = ~p", [FileName]),
+%    io:format("~nensure_dir: ~p", [filelib:ensure_dir(FileName)]),
     case file:open(FileName, [exclusive, write, binary, raw]) of
         {ok, Fd} ->
             ?LOG_DEBUG("open_for_write ~p ~p at ~p", [Bucket, Entry, FileName]),
-            io:format("~nfile:open successful"),
+%            io:format("~nfile:open successful"),
             %% Magic number to guard against file corruption
             case file:write(Fd, ?MAGIC_NUMBER) of
                 ok ->
                     {ok, ?TOTAL_HEADER_SIZE_BYTES} = file:position(Fd, {bof, ?TOTAL_HEADER_SIZE_BYTES}),
-                    io:format("~nbksw_io:open_for_write successful"),
+%                    io:format("~nbksw_io:open_for_write successful"),
                     {ok, #entryref{fd=Fd, path=FileName,
                                    bucket=Bucket, entry=Entry,
                                    ctx=erlang:md5_init()}};
                 Error ->
                     ?LOG_ERROR("header write failed ~p ~p at ~p: ~p",
                                [Bucket, Entry, FileName, Error]),
-                    io:format("~nbksw_io: header write failed ~p ~p at ~p: ~p", [Bucket, Entry, FileName, Error]),
+%                    io:format("~nbksw_io: header write failed ~p ~p at ~p: ~p", [Bucket, Entry, FileName, Error]),
                     file:close(Fd),
                     Error
             end;
         Error ->
             ?LOG_ERROR("open_for_write failed ~p ~p at ~p: ~p",
                        [Bucket, Entry, FileName, Error]),
-            io:format("bksw_io:open_for_write failed ~p ~p at ~p: ~p", [Bucket, Entry, FileName, Error]),
+%            io:format("bksw_io:open_for_write failed ~p ~p at ~p: ~p", [Bucket, Entry, FileName, Error]),
             Error
     end.
 
 -spec open_for_read(binary(), binary()) -> {ok, #entryref{}} | {error, term()}.
 open_for_read(Bucket, Entry) ->
-    io:format("~nbksw_io:open_for_read ..."),
-    io:format("~nBucket = ~p", [Bucket]),
-    io:format("~nEntry  = ~p", [Entry]),
+%    io:format("~nbksw_io:open_for_read ..."),
+%    io:format("~nBucket = ~p", [Bucket]),
+%    io:format("~nEntry  = ~p", [Entry]),
     FileName = bksw_io_names:entry_path(Bucket, Entry),
-    io:format("~nFileName  = ~p", [FileName]),
+%    io:format("~nFileName  = ~p", [FileName]),
     case file:open(FileName, [read, binary, raw]) of
         {ok, Fd} ->
             ?LOG_DEBUG("open_for_read entry ~p ~p at ~p",
                        [Bucket, Entry, FileName]),
-            io:format("~nfile:open successful"),
+%            io:format("~nfile:open successful"),
             case file:read(Fd, 2) of
                 %% Verify magic number is intact
                 {ok, ?MAGIC_NUMBER} ->
                     %% Skip past checksum data for now
                     {ok, ?TOTAL_HEADER_SIZE_BYTES} = file:position(Fd, {bof, ?TOTAL_HEADER_SIZE_BYTES}),
-                    io:format("~nbksw_io:open_for_read successful, file ok"),
+%                    io:format("~nbksw_io:open_for_read successful, file ok"),
                     {ok, #entryref{fd=Fd, path=FileName, bucket=Bucket, entry=Entry}};
                 ReadError ->
                     ?LOG_ERROR("open_for_read corrupt file ~p ~p at ~p",
                                [Bucket, Entry, FileName, ReadError]),
-                    io:format(":nbksw_io:open_for_read ERROR corrupt file ~p ~p ~p at ~p", [Bucket, Entry, FileName, ReadError]),
+%                    io:format(":nbksw_io:open_for_read ERROR corrupt file ~p ~p ~p at ~p", [Bucket, Entry, FileName, ReadError]),
                     file:close(Fd),
                     {error, corrupt_file}
             end;
@@ -243,13 +243,13 @@ finish_read(#entryref{fd=Fd, bucket=Bucket, entry=Entry}) ->
 
 -spec write(#entryref{}, binary()) -> {ok, #entryref{}} | {error, file:posix() | badarg | terminated}.
 write(#entryref{fd=Fd, ctx=Ctx, bucket=Bucket, entry=Entry}=ERef, Data) when is_binary(Data) ->
-io:format("~nbksw_io:write... "),
+%io:format("~nbksw_io:write... "),
     case file:write(Fd, Data) of
         ok ->
-io:format("~nbksw_io:write succeeded"),
+%io:format("~nbksw_io:write succeeded"),
             {ok, ERef#entryref{ctx=erlang:md5_update(Ctx, Data)}};
         Error ->
-io:format("~nbksw_io:write failed ~p ~p: ~p", [Bucket, Entry, Error]),
+%io:format("~nbksw_io:write failed ~p ~p: ~p", [Bucket, Entry, Error]),
             ?LOG_ERROR("write failed ~p ~p: ~p",
                        [Bucket, Entry, Error]),
             Error
@@ -257,10 +257,10 @@ io:format("~nbksw_io:write failed ~p ~p: ~p", [Bucket, Entry, Error]),
 
 -spec finish_write(#entryref{}) -> {ok, binary()} | {error, file:posix() | badarg}.
 finish_write(#entryref{fd=Fd, path=Path, bucket=Bucket, entry=Entry, ctx=Ctx}) ->
-io:format("~nbksw_io:finish_write..."),
+%io:format("~nbksw_io:finish_write..."),
     case file:sync(Fd) of
         ok ->
-io:format("~nbksw_io:finish_write file:sync succeeded"),
+%io:format("~nbksw_io:finish_write file:sync succeeded"),
             Digest = erlang:md5_final(Ctx),
             %% Seek to metadata section of file
             {ok, ?MAGIC_NUMBER_SIZE_BYTES} = file:position(Fd, {bof, ?MAGIC_NUMBER_SIZE_BYTES}),
@@ -271,23 +271,23 @@ io:format("~nbksw_io:finish_write file:sync succeeded"),
                 ok ->
                     case file:rename(Path, FinalPath) of
                         ok ->
-io:format("~nbksw_io:finish_write completed ~p ~p", [Bucket, Entry]),
+%io:format("~nbksw_io:finish_write completed ~p ~p", [Bucket, Entry]),
                             ?LOG_DEBUG("write completed ~p ~p", [Bucket, Entry]),
                             {ok, Digest};
                         Error ->
-io:format("~nbksw_io:finish_write rename failed  ~p ~p (~p > ~p): ~p", [Bucket, Entry, Path, FinalPath, Error]),
+%io:format("~nbksw_io:finish_write rename failed  ~p ~p (~p > ~p): ~p", [Bucket, Entry, Path, FinalPath, Error]),
                             ?LOG_ERROR("rename failed ~p ~p (~p > ~p): ~p",
                                        [Bucket, Entry, Path, FinalPath, Error]),
                             Error
                     end;
                 DirError ->
-io:format("~nbksw_io:finish_write mkdir failed  ~p ~p (~p): ~p", [Bucket, Entry, FinalPath, DirError]),
+%io:format("~nbksw_io:finish_write mkdir failed  ~p ~p (~p): ~p", [Bucket, Entry, FinalPath, DirError]),
                     ?LOG_ERROR("mkdir failed ~p ~p (~p): ~p",
                                [Bucket, Entry, FinalPath, DirError]),
                     DirError
             end;
         Error ->
-io:format("~nbksw_io:finish_write sync failed  ~p ~p: ~p", [Bucket, Entry, Error]),
+%io:format("~nbksw_io:finish_write sync failed  ~p ~p: ~p", [Bucket, Entry, Error]),
             ?LOG_ERROR("sync failed ~p ~p: ~p", [Bucket, Entry, Error]),
             file:close(Fd),
             Error
