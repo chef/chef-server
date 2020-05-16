@@ -8,6 +8,6 @@ ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 ff02::3 ip6-allhosts
 
-${back_end_ip} backend.internal
+${back_end_ip} ${back_end_node_fqdn} #backend.internal
 
-${front_end_ip} frontend.internal
+${front_end_ip} ${front_end_node_fqdn} #frontend.internal
