@@ -53,9 +53,14 @@ start_link() ->
 
 -spec add_item(iolist()) -> term().
 add_item(Doc) ->
-    AddedTime = erlang:monotonic_time(),
-    Size = byte_size(iolist_to_binary(Doc)),
-    gen_server:call(?MODULE, {add_item, Doc, Size, AddedTime}).
+    case chef_index_limiter:take_ticket() of
+        ok ->
+            AddedTime = erlang:monotonic_time(),
+            Size = byte_size(iolist_to_binary(Doc)),
+            gen_server:call(?MODULE, {add_item, Doc, Size, AddedTime});
+        E ->
+            E
+    end.
 
 flush() ->
     gen_server:cast(?MODULE, flush).
@@ -114,7 +119,6 @@ init([]) ->
             WrapperSize = wrapper_size(#chef_idx_batch_state{search_provider=SearchProvider}),
             CurrentSize = 0,
 
-
             prometheus_gauge:declare([{name, chef_index_batch_current_batch_size_bytes},
                                       {help, "The size (in bytes) of the batch currently being constructed"}]),
             prometheus_gauge:declare([{name, chef_index_batch_current_batch_doc_count},
@@ -143,6 +147,7 @@ init([]) ->
                                           {help, "The amount of time (in ms) that a document took to be processed (includes the queue time)"},
                                           {buckets, chef_index:histogram_buckets()}]),
             collect_process_info(),
+            chef_index_limiter:setup(),
             spawn_flusher(MaxWait),
             {ok, #chef_idx_batch_state{wrapper_size = WrapperSize,
                                        current_size = CurrentSize,
@@ -266,6 +271,7 @@ handle_cast({stats_update, TotalDocs, {AvgQueueLatency,AvgSuccessLatency}, Resp}
                                           total_docs_queued = TQ,
                                           total_docs_success = TS
                                          }) ->
+    chef_index_limiter:return_tickets(TotalDocs),
     collect_process_info(),
     TotalDocsQueuedUpdated = TQ + TotalDocs,
     AvgQueueLatencyUpdated = ((AvgQueueLatency*TotalDocs)+(OQL*TQ))/(TQ+TotalDocs),

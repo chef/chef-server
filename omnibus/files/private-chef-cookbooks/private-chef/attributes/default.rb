@@ -448,6 +448,7 @@ default['private_chef']['opscode-erchef']['ibrowse_max_pipeline_size'] = 1
 # default['private_chef']['opscode-erchef']['search_queue_mode'] defined in recipes/config.rb
 default['private_chef']['opscode-erchef']['search_batch_max_size'] = '5000000'
 default['private_chef']['opscode-erchef']['search_batch_max_wait'] = '10'
+default['private_chef']['opscode-erchef']['search_batch_max_inflight_updates'] = 128
 # solr_service configuration for erchef. These are used to configure an opscoderl_httpc pool
 # of HTTP connecton workers.
 default['private_chef']['opscode-erchef']['solr_timeout'] = 30000
