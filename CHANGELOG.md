@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.20 -->
-## [13.2.20](https://github.com/chef/chef-server/tree/13.2.20) (2020-05-16)
+<!-- latest_release 13.2.21 -->
+## [13.2.21](https://github.com/chef/chef-server/tree/13.2.21) (2020-05-16)
 
 #### Merged Pull Requests
-- [terraform] Fix creating tiered setup. [#1996](https://github.com/chef/chef-server/pull/1996) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- [pedant] Add new stats to stats test [#1997](https://github.com/chef/chef-server/pull/1997) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- [pedant] Add new stats to stats test [#1997](https://github.com/chef/chef-server/pull/1997) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.21 -->
 - [terraform] Fix creating tiered setup. [#1996](https://github.com/chef/chef-server/pull/1996) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.20 -->
 - Add auto support for external search in migration for external elasticsearch [#1989](https://github.com/chef/chef-server/pull/1989) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.19 -->
 - Add prometheus metrics to chef_index [#1982](https://github.com/chef/chef-server/pull/1982) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.18 -->
