@@ -128,6 +128,7 @@ describe "/_stats API endpoint", :stats do
     "chef_index_batch_queue_latency_ms" => "HISTOGRAM",
     "chef_index_batch_completed_latency_ms" => "HISTOGRAM",
     "chef_index_http_req_duration_ms" => "HISTOGRAM",
+    "chef_index_expand_make_doc_for_index_duration_ms" => "HISTOGRAM",
   }
 
   CHEF_INDEX_PROMETHEUS_TYPE_MAP = {
@@ -142,6 +143,10 @@ describe "/_stats API endpoint", :stats do
     "chef_index_http_req_duration_ms_bucket" => "HISTOGRAM",
     "chef_index_http_req_duration_ms_count" => "HISTOGRAM",
     "chef_index_http_req_duration_ms_sum" => "HISTOGRAM",
+
+    "chef_index_expand_make_doc_for_index_duration_ms_bucket" => "HISTOGRAM",
+    "chef_index_expand_make_doc_for_index_duration_ms_count" => "HISTOGRAM",
+    "chef_index_expand_make_doc_for_index_duration_ms_sum" => "HISTOGRAM",
   }
 
   SHARED_TYPE_MAP = ERLANG_RESPONSE_TYPE_MAP.merge(CHEF_INDEX_TYPE_MAP)

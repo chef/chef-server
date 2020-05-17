@@ -54,6 +54,7 @@ init([]) ->
             chef_elasticsearch:declare_metrics();
         _ -> ok
     end,
+    chef_index_expand:declare_metrics(),
     chef_index_http:create_pool(),
     maybe_rabbitmq_monitoring(),
     Children = child_spec(),
