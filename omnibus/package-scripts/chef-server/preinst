@@ -11,18 +11,6 @@ function error_exit
     exit 1
 }
 
-confirm () {
-    read -r -p "Do you want to continue [y/n]" response
-    case "$response" in
-        [yY][eE][sS]|[yY])
-            exit 0
-            ;;
-        *)
-            error_exit "Doing nothing. You can continue using your existing Chef Infra Server."
-            ;;
-    esac
-}
-
 warn_about_search_reindex() {
     # If this is a fresh install, we don't need to worry about the
     # solr migration
@@ -44,7 +32,6 @@ warn_about_search_reindex() {
         echo "We recommend taking a full backend before proceeding."
         echo ""
         echo "############################ NOTICE ##################################"
-        confirm
     fi
 }
 
