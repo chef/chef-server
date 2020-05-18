@@ -8,6 +8,32 @@ This document contains release notes for the current major release and all patch
 For prior releases,
 see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 13.x.x (2020-5-xx)
+
+### Improvements
+
+- Elasticsearch:
+
+	Replaced Apache Solr with Elasticsearch as the default internal search [service/engine/mechanism].
+
+	Migration to Chef Infra Server 13.3 with an external Elasticsearch [setup/topology] is now automatically configured.
+
+    Added additional Prometheus metrics, including HTTP latency, request counts, error counts, and batch insight.
+
+- Chef Infra Server:
+
+	Added new `check-config` command to `chef-server-ctl` which only runs the configuration portion of the reconfigure cookbooks and preflight checks (see [INSERT DOCS LINK]).
+
+    Added `reindex-opc-piecewise` escript which allows the user to reindex a list of items or all items in a chef-object.
+
+### Bug Fixes
+
+- Handle reindexing failure cases.
+
+### Updates
+
+- Veil: 0.3.0 -> 0.3.3.
+
 ## 13.2.0 (2020-4-14)
 
 ### Improvements
