@@ -44,7 +44,7 @@ warn_about_search_reindex() {
         echo "We recommend taking a full backend before proceeding."
         echo ""
         echo "############################ NOTICE ##################################"
-        confirm
+        #confirm
     fi
 }
 
