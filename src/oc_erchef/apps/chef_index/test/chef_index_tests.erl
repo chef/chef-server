@@ -43,6 +43,8 @@ chef_index_test_() ->
      fun() ->
              chef_index_test_utils:start_stats_hero(),
              application:set_env(chef_index, rabbitmq_vhost, <<"testvhost">>),
+             application:ensure_all_started(prometheus),
+             chef_index_expand:declare_metrics(),
              meck:new([chef_index_queue, chef_index_expand, chef_index_batch], [passthrough])
      end,
      fun(_) ->
@@ -120,10 +122,10 @@ ping_test_() ->
      fun(_) ->
              meck:unload(chef_wm_rabbitmq_management)
      end,
-     [{"When rabbitmq is not used, the check returns pong", 
+     [{"When rabbitmq is not used, the check returns pong",
        % This is not a requirement, there's just nothing else that
        % is currently checked.
-       fun() -> 
+       fun() ->
                application:set_env(chef_index, search_queue_mode, batch),
                meck:expect(chef_wm_rabbitmq_management, check_aliveness,
                            fun(_, "/testvhost") ->
@@ -167,4 +169,3 @@ ping_test_() ->
        end
       }
      ]}.
-

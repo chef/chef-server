@@ -167,6 +167,7 @@ doc_construction_test_() ->
     {setup,
      fun() ->
              meck:new(chef_index_http, []),
+             chef_index_expand:declare_metrics(),
              application:set_env(chef_index, search_provider, solr)
      end,
      fun(_) ->
@@ -263,6 +264,7 @@ solr_api_test_() ->
     {foreach,
      fun() ->
              application:set_env(chef_index, search_provider, solr),
+             chef_index_expand:declare_metrics(),
              meck:new(chef_index_http, [])
 
      end,
@@ -306,6 +308,7 @@ es_api_test_() ->
     {foreach,
      fun() ->
              application:set_env(chef_index, search_provider, elasticsearch),
+             chef_index_expand:declare_metrics(),
              chef_elasticsearch:declare_metrics()
      end,
      fun(_) ->

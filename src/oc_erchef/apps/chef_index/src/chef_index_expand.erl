@@ -28,7 +28,8 @@
 -export([send_item/1,
          send_delete/1,
          doc_for_index/4,
-         doc_for_delete/3]).
+         doc_for_delete/3,
+         declare_metrics/0]).
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
@@ -51,6 +52,10 @@
 -define(DOC_S, <<"<doc>">>).
 -define(DOC_E, <<"</doc>">>).
 
+declare_metrics() ->
+    prometheus_histogram:declare([{name, chef_index_expand_make_doc_for_index_duration_ms},
+                                  {help, "Duration of document expansion in ms"},
+                                  {buckets, chef_index:histogram_buckets()}]).
 %%
 %% Synchronous API
 %%
@@ -63,7 +68,11 @@
 %% addition. This document will need to be wrapped in
 %% <update><add>DOC_HERE</add></update> before it is sent to solr.
 doc_for_index(Index, Id, OrgId, Ejson) ->
-    make_doc_for_add(make_record(Index, Id, OrgId, Ejson)).
+    Start = erlang:monotonic_time(),
+    Ret = make_doc_for_add(make_record(Index, Id, OrgId, Ejson)),
+    TimeTakenMS = erlang:convert_time_unit(erlang:monotonic_time() - Start, native, microsecond)/1000.0,
+    prometheus_histogram:observe(chef_index_expand_make_doc_for_index_duration_ms, TimeTakenMS),
+    Ret.
 
 doc_for_delete(_Index, Id, _OrgId) ->
     make_doc_for_del(chef_index:search_provider(), Id).
