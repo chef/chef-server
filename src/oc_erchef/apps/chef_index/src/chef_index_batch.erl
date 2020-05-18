@@ -285,6 +285,8 @@ handle_cast({stats_update, TotalDocs, {AvgQueueLatency,AvgSuccessLatency}, Resp}
             prometheus_counter:inc(chef_index_batch_failed_docs_total, TotalDocs),
             {noreply, State1}
     end;
+handle_cast(flush, State = #chef_idx_batch_state{item_queue = []}) ->
+    {noreply, State};
 handle_cast(flush, State) ->
     State1 = flush(State),
     prometheus_gauge:set(chef_index_batch_current_batch_size_bytes, 0),
