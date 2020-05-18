@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.23 -->
-## [13.2.23](https://github.com/chef/chef-server/tree/13.2.23) (2020-05-18)
+<!-- latest_release 13.2.24 -->
+## [13.2.24](https://github.com/chef/chef-server/tree/13.2.24) (2020-05-18)
 
 #### Merged Pull Requests
-- [erchef] small optimization in chef_index_batch [#1998](https://github.com/chef/chef-server/pull/1998) ([stevendanna](https://github.com/stevendanna))
+- [erchef] Add histogram for expansion time [#2000](https://github.com/chef/chef-server/pull/2000) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- [erchef] Add histogram for expansion time [#2000](https://github.com/chef/chef-server/pull/2000) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.24 -->
 - [erchef] small optimization in chef_index_batch [#1998](https://github.com/chef/chef-server/pull/1998) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.23 -->
 - [cookbooks] Don&#39;t generate trailing comma in solr_url [#1999](https://github.com/chef/chef-server/pull/1999) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.22 -->
 - [pedant] Add new stats to stats test [#1997](https://github.com/chef/chef-server/pull/1997) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.21 -->
