@@ -221,16 +221,6 @@ resource "null_resource" "chef_server_test" {
   }
 
   provisioner "file" {
-    source      = "${path.module}/../../../common/files/install_addon_push_jobs.sh"
-    destination = "/tmp/install_addon_push_jobs.sh"
-  }
-
-  provisioner "file" {
-    source      = "${path.module}/../../../common/files/test_addon_push_jobs.sh"
-    destination = "/tmp/test_addon_push_jobs.sh"
-  }
-
-  provisioner "file" {
     source      = "${path.module}/../../../common/files/install_addon_chef_manage.sh"
     destination = "/tmp/install_addon_chef_manage.sh"
   }
@@ -255,16 +245,6 @@ resource "null_resource" "chef_server_test" {
     inline = [
       "chmod +x /tmp/test_chef_server-smoke.sh",
       "ENABLE_SMOKE_TEST=${var.enable_smoke_test} /tmp/test_chef_server-smoke.sh",
-    ]
-  }
-
-  # install + test push jobs addon
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/install_addon_push_jobs.sh",
-      "ENABLE_ADDON_PUSH_JOBS=${var.enable_addon_push_jobs} /tmp/install_addon_push_jobs.sh",
-      "chmod +x /tmp/test_addon_push_jobs.sh",
-      "ENABLE_ADDON_PUSH_JOBS=${var.enable_addon_push_jobs} /tmp/test_addon_push_jobs.sh",
     ]
   }
 
@@ -299,4 +279,33 @@ resource "null_resource" "chef_server_test" {
       "ENABLE_GATHER_LOGS_TEST=${var.enable_gather_logs_test} /tmp/test_gather_logs.sh",
     ]
   }
+}
+resource "null_resource" "chef_server_install_push" {
+  depends_on = [null_resource.back_end_config]
+
+  connection {
+    type = "ssh"
+    user = module.back_end.ssh_username
+    host = module.back_end.public_ipv4_dns
+   }
+
+   provisioner "file" {
+    source      = "${path.module}/../../../common/files/install_addon_push_jobs.sh"
+    destination = "/tmp/install_addon_push_jobs.sh"
+   }
+
+   provisioner "file" {
+    source      = "${path.module}/../../../common/files/test_addon_push_jobs.sh"
+    destination = "/tmp/test_addon_push_jobs.sh"
+   }
+
+   # install + test push jobs addon
+   provisioner "remote-exec" {
+     inline = [
+       "chmod +x /tmp/install_addon_push_jobs.sh",
+       "ENABLE_ADDON_PUSH_JOBS=${var.enable_addon_push_jobs} /tmp/install_addon_push_jobs.sh",
+       "chmod +x /tmp/test_addon_push_jobs.sh",
+       "ENABLE_ADDON_PUSH_JOBS=${var.enable_addon_push_jobs} /tmp/test_addon_push_jobs.sh",
+     ]
+   }
 }
