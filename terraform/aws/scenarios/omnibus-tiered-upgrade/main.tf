@@ -229,12 +229,12 @@ resource "null_resource" "front_end_upgrade" {
     host = module.front_end.public_ipv4_dns
   }
 
-  # upgrade chef-server
+  # reconfigure on frontend chef-server
   provisioner "remote-exec" {
     inline = [
       "set -evx",
       "echo -e '\nEND UPGRADE CHEF SERVER (FRONT-END)\n'",
-      "sudo CHEF_LICENSE='accept' chef-server-ctl upgrade",
+      "sudo CHEF_LICENSE='accept' chef-server-ctl reconfigure",
       "sudo chef-server-ctl start",
       "sudo chef-server-ctl cleanup",
       "sleep 30",
