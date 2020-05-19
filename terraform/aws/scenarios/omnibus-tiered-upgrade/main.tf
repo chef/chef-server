@@ -58,7 +58,7 @@ data "template_file" "chef_server_config" {
   }
 }
 
-# install back-end chef server
+# STEP 1: install back-end Chef Infra Server
 resource "null_resource" "back_end_config" {
   # provide some connection info
   connection {
@@ -106,7 +106,7 @@ resource "null_resource" "back_end_config" {
     script = "${path.module}/../../../common/files/add_user.sh"
   }
 
-  # copy configuration to front-end
+  # STEP2: copy configuration to front-end
   provisioner "remote-exec" {
     inline = [
       "set -evx",
@@ -118,7 +118,7 @@ resource "null_resource" "back_end_config" {
   }
 }
 
-# install front-end chef server
+# STEP3: unzip and install front-end Chef Infra Server
 resource "null_resource" "front_end_config" {
   depends_on = [null_resource.back_end_config]
 
@@ -152,8 +152,8 @@ resource "null_resource" "front_end_config" {
 }
 
 # Start upgrade process
-# stop services on front-end server
-# install front-end chef server
+# STEP4: stop services on front-end server
+#        install front-end chef server
 resource "null_resource" "front_end_stop_before_upgrade" {
   depends_on = [null_resource.front_end_config]
 
@@ -164,7 +164,7 @@ resource "null_resource" "front_end_stop_before_upgrade" {
     host = module.front_end.public_ipv4_dns
   }
 
-  # stop chef-server front-end
+  # stop Chef Infra Server front-end and install the package.
   provisioner "remote-exec" {
     inline = [
       "set -evx",
@@ -180,9 +180,10 @@ resource "null_resource" "front_end_stop_before_upgrade" {
   }
 }
 
-# upgrade back-end chef server
+# STEP5: upgrade back-end chef server and
+#        copy the config to the front end.
 resource "null_resource" "back_end_upgrade" {
-  depends_on = [null_resource.front_end_config]
+  depends_on = [null_resource.front_end_stop_before_upgrade]
 
   # provide some connection info
   connection {
@@ -191,7 +192,7 @@ resource "null_resource" "back_end_upgrade" {
     host = module.back_end.public_ipv4_dns
   }
 
-  # upgrade chef-server
+  # upgrade Chef Infra Server
   provisioner "remote-exec" {
     inline = [
       "set -evx",
@@ -218,7 +219,7 @@ resource "null_resource" "back_end_upgrade" {
   }
 }
 
-# upgrade front-end chef server
+# STEP6: unzip and reconfigure front-end chef server
 resource "null_resource" "front_end_upgrade" {
   depends_on = [null_resource.back_end_upgrade]
 
@@ -230,15 +231,22 @@ resource "null_resource" "front_end_upgrade" {
   }
 
   # reconfigure on frontend chef-server
+  # The current instructions in upgrade ask user to run
+  # chef-server-ctl upgrade on the frontends.
+  # https://docs.chef.io/upgrade_server/#tiered
+  # But that would not work since the partybus migrations
+  # would run only on the machine where the bootstrap
+  # attribute was enabled. It is not enabled on the frontend.
   provisioner "remote-exec" {
     inline = [
       "set -evx",
-      "echo -e '\nEND UPGRADE CHEF SERVER (FRONT-END)\n'",
+      "echo -e '\nBEGIN UNZIP AND UPGRADE CHEF SERVER (FRONT-END)\n'",
+      "sudo tar -C /etc -xzf /tmp/opscode.tgz",
       "sudo CHEF_LICENSE='accept' chef-server-ctl reconfigure",
       "sudo chef-server-ctl start",
       "sudo chef-server-ctl cleanup",
       "sleep 30",
-      "echo -e '\nEND UPGRADE CHEF SERVER (FRONT-END)\n'",
+      "echo -e '\nEND UNZIP AND UPGRADE CHEF SERVER (FRONT-END)\n'",
     ]
   }
 }
