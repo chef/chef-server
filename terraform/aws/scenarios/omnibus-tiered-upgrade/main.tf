@@ -101,11 +101,6 @@ resource "null_resource" "back_end_config" {
     ]
   }
 
-  # add user + organization
-  provisioner "remote-exec" {
-    script = "${path.module}/../../../common/files/add_user.sh"
-  }
-
   # STEP2: copy configuration to front-end
   provisioner "remote-exec" {
     inline = [
@@ -258,6 +253,11 @@ resource "null_resource" "chef_server_test"{
     type = "ssh"
     user = module.front_end.ssh_username
     host = module.front_end.public_ipv4_dns
+  }
+
+  # add user + organization
+  provisioner "remote-exec" {
+    script = "${path.module}/../../../common/files/add_user.sh"
   }
 
   # upload test scripts
