@@ -81,9 +81,9 @@ url_function(InternalS3Url, ExternalS3Url) ->
         {_, host_header} ->
             fun mini_s3:get_url_port/1;
 %        {Same, Same} ->
-%            fun mini_s3:get_url/1;
+%            fun mini_s3:get_url_noport/1;
         _ ->
-            fun mini_s3:get_url/1
+            fun mini_s3:get_url_noport/1
     end.
 
 generate_presigned_url_uses_configured_s3_url_test_() ->
