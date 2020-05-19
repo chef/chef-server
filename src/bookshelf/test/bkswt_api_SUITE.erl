@@ -298,14 +298,19 @@ signed_url_fail_sql(Arg) ->
 at_the_same_time_sql(Arg) ->
     at_the_same_time(Arg).
 
+-include_lib("erlcloud/include/erlcloud_aws.hrl").
 bucket_basic(doc) ->
     ["should create, view, and delete a bucket"];
 bucket_basic(suite) ->
     [];
 bucket_basic(Config) when is_list(Config) ->
+?debugFmt("~nin bkswt_api_SUITE:bucket_basic", []),
     S3Conf = proplists:get_value(s3_conf, Config),
+?debugFmt("~nConfig: ~0p", [Config]),
     BucketName = "testbucket",
-    ?assertEqual(ok, mini_s3:create_bucket(BucketName, public_read_write, none, S3Conf)),
+Z = mini_s3:create_bucket(BucketName, public_read_write, none, S3Conf),
+?debugFmt("~ncreate_bucket result: ~p", [Z]),
+    ?assertEqual(ok, Z),
     ?assert(bucket_exists(BucketName, S3Conf)),
 
     ?assertEqual(ok, mini_s3:delete_bucket(BucketName, S3Conf)),
@@ -347,14 +352,20 @@ bucket_encoding(doc) ->
 bucket_encoding(suite) ->
     [];
 bucket_encoding(Config) ->
+?debugFmt("~nin bkswt_api_SUITE:bucket_encoding", []),
+?debugFmt("~nConfig: ~0p", [Config]),
     S3Conf = proplists:get_value(s3_conf, Config),
+?debugFmt("~nS3Conf: ~0p", [S3Conf]),
 
     OddBucket = "a bucket",
     OddBucketEnc = "a%20bucket",
-    mini_s3:create_bucket(OddBucketEnc, public_read_write, none, S3Conf),
+Z = mini_s3:create_bucket(OddBucketEnc, public_read_write, none, S3Conf),
+?debugFmt("~nbucket_encoding create_bucket result: ~p", [Z]),
+?debugFmt("~nbucket_encoding bucket_exists: ~p", [bucket_exists(OddBucket, S3Conf)]),
     ?assert(bucket_exists(OddBucket, S3Conf)),
 
     OddResult = mini_s3:list_objects(OddBucketEnc, [], S3Conf),
+?debugFmt("~nOddResult: ~p", [OddResult]),
     ?assertEqual(OddBucket, ?config(name, OddResult)),
     ?assertEqual([], ?config(contents, OddResult)),
     mini_s3:delete_bucket(OddBucketEnc, S3Conf).
@@ -364,6 +375,7 @@ head_object(doc) ->
 head_object(suite) ->
     [];
 head_object(Config) when is_list(Config) ->
+?debugFmt("~nin bkswt_api_SUITE:head_object", []),
     S3Conf = proplists:get_value(s3_conf, Config),
     Bucket = "head-put-tests",
 
@@ -396,7 +408,10 @@ put_object(doc) ->
 put_object(suite) ->
     [];
 put_object(Config) when is_list(Config) ->
+?debugFmt("~nin bkswt_api_SUITE:put_object", []),
+?debugFmt("~nConfig: ~0p", [Config]),
     S3Conf = proplists:get_value(s3_conf, Config),
+?debugFmt("~nS3Conf: ~p", [S3Conf]),
     Bucket = random_bucket(),
     ensure_bucket(Bucket, S3Conf),
 
@@ -438,8 +453,12 @@ cache_control(doc) ->
 cache_control(suite) ->
     [];
 cache_control(Config) when is_list(Config) ->
+?debugFmt("~nin bkswt_api_SUITE:cache_control", []),
+?debugFmt("~nConfig: ~0p", [Config]),
     S3Conf = proplists:get_value(s3_conf, Config),
+?debugFmt("~nS3Conf: ~p", [S3Conf]),
     Bucket = random_bucket(),
+?debugFmt("~ncalling ensure_bucket (should break here)", []),
     ensure_bucket(Bucket, S3Conf),
 
     NameExists = random_path(),
@@ -464,8 +483,12 @@ object_roundtrip(doc) ->
 object_roundtrip(suite) ->
     [];
 object_roundtrip(Config) when is_list(Config) ->
+?debugFmt("~nin bkswt_api_SUITE:object_roundtrip", []),
+?debugFmt("~nConfig: ~0p", [Config]),
     S3Conf = proplists:get_value(s3_conf, Config),
+?debugFmt("~nS3Conf: ~p", [S3Conf]),
     Bucket = random_bucket(),
+?debugFmt("~ncalling ensure bucket (will probably break here)", []),
     ensure_bucket(Bucket,S3Conf),
     Name = random_path(),
     Data = erlang:iolist_to_binary(test_data_text(128*1024)),
@@ -479,9 +502,12 @@ object_delete(doc) ->
 object_delete(suite) ->
     [];
 object_delete(Config) when is_list(Config) ->
+?debugFmt("~nin bkswt_api_SUITE:object_delete", []),
+?debugFmt("~nConfig: ~0p", [Config]),
     S3Conf = proplists:get_value(s3_conf, Config),
 
     Bucket = random_bucket(),
+?debugFmt("~ncalling ensure_bucket (should break here)", []),
     ensure_bucket(Bucket,S3Conf),
     Name = random_path(),
     Data = "TestData\nMore test data",
@@ -526,6 +552,8 @@ sec_fail(doc) ->
 sec_fail(suite) ->
     [];
 sec_fail(Config) when is_list(Config) ->
+?debugFmt("~nin bkswt_api_SUITE:sec_fail", []),
+?debugFmt("~nConfig: ~0p", [Config]),
     BogusS3Conf = {config,
                    "http://127.0.0.1:4321",
                    <<"nopenope">>,
@@ -533,6 +561,7 @@ sec_fail(Config) when is_list(Config) ->
                    path,
                    []},
     Bucket = "thisshouldfail",
+?debugFmt("~ncalling create_bucket with incompatible config (should be an aws_config) - should fail", []),
     ?assertError({aws_error, {http_error, 403, _}},
                  mini_s3:create_bucket(Bucket, public_read_write, none, BogusS3Conf)),
     %% also verify that unsigned URL requests don't crash
@@ -546,9 +575,12 @@ signed_url(doc) ->
 signed_url(suite) ->
     [];
 signed_url(Config) when is_list(Config) ->
+?debugFmt("~nin bkswt_api_SUITE:signed_url", []),
+?debugFmt("~nConfig: ~0p", [Config]),
     S3Conf = proplists:get_value(s3_conf, Config),
     Bucket = random_binary(),
     ensure_bucket(Bucket, S3Conf),
+?debugFmt("~ncalling ensure_bucket (should break here)", []),
     Content = "<x>Super Foo</x>",
     Headers = [{"content-type", "text/xml"},
                {"content-md5",
@@ -574,8 +606,11 @@ signed_url_fail(doc) ->
 signed_url_fail(suite) ->
     [];
 signed_url_fail(Config) when is_list(Config) ->
+?debugFmt("~nin bkswt_api_SUITE:signed_url_fail", []),
+?debugFmt("~nConfig: ~0p", [Config]),
     S3Conf = proplists:get_value(s3_conf, Config),
     Bucket = random_binary(),
+?debugFmt("~ncalling ensure_bucket (should break here)", []),
     ensure_bucket(Bucket, S3Conf),
 
     Content = "<x>Super Foo</x>",
@@ -595,9 +630,12 @@ at_the_same_time(doc) ->
     ["should handle concurrent reads and writes"];
 at_the_same_time(suite) -> [];
 at_the_same_time(Config) when is_list(Config) ->
+?debugFmt("~nin bkswt_api_SUITE:at_the_same_time", []),
+?debugFmt("~nConfig: ~0p", [Config]),
     S3Conf = proplists:get_value(s3_conf, Config),
     Bucket = "bukkit",
 
+?debugFmt("~ncalling ensure_bucket (should break here)", []),
     ensure_bucket(Bucket, S3Conf),
     BucketContents = mini_s3:list_objects(Bucket, [], S3Conf),
     ?assertEqual(Bucket, proplists:get_value(name, BucketContents)),
@@ -630,6 +668,8 @@ upgrade_from_v0(doc) ->
     ["Upgrades from version 0 disk format to current version"];
 upgrade_from_v0(suite) -> [];
 upgrade_from_v0(Config) ->
+?debugFmt("~nin bkswt_api_SUITE:upgrade_from_v0", []),
+?debugFmt("~nConfig: ~0p", [Config]),
     ShouldExist = [
                    {"bucket-1", "xjbrpodcionabrzhikgliowdzvbvbc/kqvfgzhnlkizzvbidsxwavrktxcasx"},
                    {"bucket-1", "zrcsghibdgwjghkqsdajycrjwitntu/ahnsvorjeauuwusthkdunsslzffkfn"},
@@ -655,6 +695,11 @@ upgrade_from_v0(Config) ->
     [ mini_s3:get_object(Bucket, Key, [], S3Conf) || {Bucket, Key} <- ShouldExist ],
     ok.
 
+%?debugFmt("~nin bkswt_api_SUITE:bucket_basic", []),
+%?debugFmt("~nConfig: ~0p", [Config]),
+%?debugFmt("~ncreate_bucket result: ~p", [Z]),
+%?debugFmt("~nS3Conf: ~p", [S3Conf]),
+%?debugFmt("~ncalling ensure_bucket (should break here)", []),
 
 %%====================================================================
 %% Utility Functions
@@ -682,18 +727,34 @@ test_data_text(Size) ->
     random_string(Size, " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\n" ).
 
 bucket_list(S3Conf) ->
-    [{buckets, Details}] = mini_s3:list_buckets(S3Conf),
+?debugFmt("~nin bkswt_api_SUITE:bucket_list", []),
+?debugFmt("~nS3Conf: ~0p", [S3Conf]),
+Z = mini_s3:list_buckets(S3Conf),
+?debugFmt("~nlist_buckets result: ~p", [Z]),
+[{buckets, Details}] = Z,
+%    [{buckets, Details}] = mini_s3:list_buckets(S3Conf),
     lists:map(fun(Opts) -> proplists:get_value(name, Opts) end, Details).
 bucket_exists(Name, S3Conf) ->
     BucketNames = bucket_list(S3Conf),
     lists:member(Name, BucketNames).
 
 ensure_bucket(Bucket, Config) ->
+?debugFmt("~nin bkswt_api_SUITE:ensure_bucket", []),
+?debugFmt("~nBucket: ~p", [Bucket]),
+?debugFmt("~nConfig: ~0p", [Config]),
     case bucket_exists(Bucket, Config) of
-        true -> ?assertEqual(ok, mini_s3:delete_bucket(Bucket, Config));
-        _ -> ok
+        true ->
+?debugFmt("~nbucket exists", []),
+Z = mini_s3:delete_bucket(Bucket, Config),
+?debugFmt("~nensure_bucket delete_bucket result: ~p", [Z]),
+            ?assertEqual(ok, Z);
+        _ -> 
+?debugFmt("~nbucket doesnt exist", []),
+ok
     end,
-    ?assertEqual(ok, mini_s3:create_bucket(Bucket, public_read_write, none, Config)).
+X = mini_s3:create_bucket(Bucket, public_read_write, none, Config),
+?debugFmt("~nensure_bucket create_bucket result: ~p", [X]),
+    ?assertEqual(ok, X).
 
 file_exists(Bucket, Name, S3Conf) ->
     List = mini_s3:list_objects(Bucket, [], S3Conf),
