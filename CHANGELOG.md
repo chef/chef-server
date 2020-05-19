@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.26 -->
-## [13.2.26](https://github.com/chef/chef-server/tree/13.2.26) (2020-05-18)
+<!-- latest_release 13.2.27 -->
+## [13.2.27](https://github.com/chef/chef-server/tree/13.2.27) (2020-05-19)
 
 #### Merged Pull Requests
-- Add only a warning to the preinst script. Do not wait for user input. [#2002](https://github.com/chef/chef-server/pull/2002) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- [cookbooks/elasticsearch] Bind to correct address and fix other warnings [#2007](https://github.com/chef/chef-server/pull/2007) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- [cookbooks/elasticsearch] Bind to correct address and fix other warnings [#2007](https://github.com/chef/chef-server/pull/2007) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.27 -->
 - Add only a warning to the preinst script. Do not wait for user input. [#2002](https://github.com/chef/chef-server/pull/2002) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.26 -->
 - Install push-jobs on the tiered backend [#2003](https://github.com/chef/chef-server/pull/2003) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.25 -->
 - [erchef] Add histogram for expansion time [#2000](https://github.com/chef/chef-server/pull/2000) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.24 -->
