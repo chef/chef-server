@@ -102,6 +102,9 @@ describe "running configs required by chef-server-ctl", :config do
 
       if config["postgresql"]["external"]
         skip "not used for external postgresql"
+      # These tests should not run on the frontend of a tiered setup.
+      elsif (Pedant::Config.topology == "tiered" && Pedant::Config.role == "frontend")
+        skip "no postgresql installed on front-end of a tiered server"
       else
         expect(File.exist?(config["postgresql"]["data_dir"])).to eq(true)
       end
