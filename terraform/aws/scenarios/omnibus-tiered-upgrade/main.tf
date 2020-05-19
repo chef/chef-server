@@ -58,7 +58,7 @@ data "template_file" "chef_server_config" {
   }
 }
 
-# update back-end chef server
+# install back-end chef server
 resource "null_resource" "back_end_config" {
   # provide some connection info
   connection {
@@ -118,7 +118,7 @@ resource "null_resource" "back_end_config" {
   }
 }
 
-# update front-end chef server
+# install front-end chef server
 resource "null_resource" "front_end_config" {
   depends_on = [null_resource.back_end_config]
 
@@ -151,6 +151,35 @@ resource "null_resource" "front_end_config" {
   }
 }
 
+# Start upgrade process
+# stop services on front-end server
+# install front-end chef server
+resource "null_resource" "front_end_stop_before_upgrade" {
+  depends_on = [null_resource.front_end_config]
+
+  # provide some connection info
+  connection {
+    type = "ssh"
+    user = module.front_end.ssh_username
+    host = module.front_end.public_ipv4_dns
+  }
+
+  # stop chef-server front-end
+  provisioner "remote-exec" {
+    inline = [
+      "set -evx",
+      "echo -e '\nBEGIN STOP SERVICES CHEF SERVER (FRONT-END)\n'",
+      "sudo chef-server-ctl stop",
+      "sleep 120",
+      "echo -e '\nEND STOP SERVICES CHEF SERVER (FRONT-END)\n'",
+      "echo -e '\nBEGIN INSTALL UPGRADE PACKAGE CHEF SERVER (FRONT-END)\n'",
+      "curl -vo /tmp/${replace(var.upgrade_version_url, "/^.*\\//", "")} ${var.upgrade_version_url}",
+      "sudo ${replace(var.upgrade_version_url, "rpm", "") != var.upgrade_version_url ? "rpm -U" : "dpkg -iEG"} /tmp/${replace(var.upgrade_version_url, "/^.*\\//", "")}",
+      "echo -e '\nEND INSTALL UPGRADE PACKAGE CHEF SERVER (FRONT-END)\n'",
+    ]
+  }
+}
+
 # upgrade back-end chef server
 resource "null_resource" "back_end_upgrade" {
   depends_on = [null_resource.front_end_config]
@@ -176,6 +205,17 @@ resource "null_resource" "back_end_upgrade" {
       "echo -e '\nEND UPGRADE CHEF SERVER (BACK-END)\n'",
     ]
   }
+
+ # copy configuration to front-end
+  provisioner "remote-exec" {
+    inline = [
+      "set -evx",
+      "echo -e '\nBEGIN COPY CONFIGURATION TO FRONT-END\n'",
+      "sudo tar -C /etc -czf /tmp/opscode.tgz opscode",
+      "scp -o 'UserKnownHostsFile=/dev/null' -o 'StrictHostKeyChecking=no' /tmp/opscode.tgz ${module.back_end.ssh_username}@${module.front_end.public_ipv4_dns}:/tmp",
+      "echo -e '\nEND COPY CONFIGURATION TO FRONT-END\n'",
+    ]
+  }
 }
 
 # upgrade front-end chef server
@@ -193,9 +233,7 @@ resource "null_resource" "front_end_upgrade" {
   provisioner "remote-exec" {
     inline = [
       "set -evx",
-      "echo -e '\nBEGIN UPGRADE CHEF SERVER (FRONT-END)\n'",
-      "curl -vo /tmp/${replace(var.upgrade_version_url, "/^.*\\//", "")} ${var.upgrade_version_url}",
-      "sudo ${replace(var.upgrade_version_url, "rpm", "") != var.upgrade_version_url ? "rpm -U" : "dpkg -iEG"} /tmp/${replace(var.upgrade_version_url, "/^.*\\//", "")}",
+      "echo -e '\nEND UPGRADE CHEF SERVER (FRONT-END)\n'",
       "sudo CHEF_LICENSE='accept' chef-server-ctl upgrade",
       "sudo chef-server-ctl start",
       "sudo chef-server-ctl cleanup",
@@ -205,7 +243,7 @@ resource "null_resource" "front_end_upgrade" {
   }
 }
 
-resource "null_resource" "chef_server_test" {
+resource "null_resource" "chef_server_test"{
   depends_on = [null_resource.front_end_upgrade]
 
   connection {
