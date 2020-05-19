@@ -386,7 +386,7 @@ module PrivateChef
       PrivateChef['bookshelf']['listen'] ||= PrivateChef['default_listen_address']
       PrivateChef['rabbitmq']['node_ip_address'] ||= PrivateChef['default_listen_address']
       PrivateChef['redis_lb']['listen'] ||= PrivateChef['default_listen_address']
-      PrivateChef['elasticsearch']['ip_address'] ||= PrivateChef['default_listen_address']
+      PrivateChef['elasticsearch']['listen'] ||= PrivateChef['default_listen_address']
       PrivateChef['opscode_solr4']['ip_address'] ||= PrivateChef['default_listen_address']
       PrivateChef['postgresql']['listen_address'] ||= '*' # PrivateChef["default_listen_address"]
 
