@@ -327,7 +327,7 @@ resource "null_resource" "chef_server_test"{
   }
 }
 resource "null_resource" "chef_server_install_push" {
-  depends_on = [null_resource.back_end_config]
+  depends_on = [null_resource.back_end_upgrade]
 
   connection {
     type = "ssh"
