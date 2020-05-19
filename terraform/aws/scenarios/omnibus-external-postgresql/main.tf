@@ -12,7 +12,7 @@ module "chef_server" {
   platform          = var.platform
   build_prefix      = var.build_prefix
   capture_paths     = ["/etc/opscode", "/var/log/opscode"]
-  name              = "chef_server-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
+  name              = "chef_server-${var.scenario}-${var.enable_ipv6 == "true" ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 module "postgresql" {
@@ -28,7 +28,7 @@ module "postgresql" {
   enable_ipv6       = var.enable_ipv6
   platform          = "ubuntu-16.04"
   build_prefix      = var.build_prefix
-  name              = "postgresql-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
+  name              = "postgresql-${var.scenario}-${var.enable_ipv6 == "true" ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 # generate static hosts configuration

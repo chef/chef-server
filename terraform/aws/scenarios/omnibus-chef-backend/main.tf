@@ -12,7 +12,7 @@ module "chef_server" {
   platform          = var.platform
   build_prefix      = var.build_prefix
   capture_paths     = ["/etc/opscode", "/var/log/opscode"]
-  name              = "chefserver-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
+  name              = "chefserver-${var.scenario}-${var.enable_ipv6 == "true" ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 module "backend1" {
@@ -29,7 +29,7 @@ module "backend1" {
   platform          = var.platform
   build_prefix      = var.build_prefix
   capture_paths     = ["/etc/chef-backend", "/var/log/chef-backend"]
-  name              = "backend1-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
+  name              = "backend1-${var.scenario}-${var.enable_ipv6 == "true" ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 module "backend2" {
@@ -46,7 +46,7 @@ module "backend2" {
   platform          = var.platform
   build_prefix      = var.build_prefix
   capture_paths     = ["/etc/chef-backend", "/var/log/chef-backend"]
-  name              = "backend2-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
+  name              = "backend2-${var.scenario}-${var.enable_ipv6 == "true" ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 module "backend3" {
@@ -63,7 +63,7 @@ module "backend3" {
   platform          = var.platform
   build_prefix      = var.build_prefix
   capture_paths     = ["/etc/chef-backend", "/var/log/chef-backend"]
-  name              = "backend3-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
+  name              = "backend3-${var.scenario}-${var.enable_ipv6 == "true" ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 # generate static hosts configuration

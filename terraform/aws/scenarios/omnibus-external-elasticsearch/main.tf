@@ -12,7 +12,7 @@ module "chef_server" {
   platform          = var.platform
   build_prefix      = var.build_prefix
   capture_paths     = ["/etc/opscode", "/var/log/opscode"]
-  name              = "chefserver-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
+  name              = "chefserver-${var.scenario}-${var.enable_ipv6 == "true" ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 module "elasticsearch" {
@@ -29,7 +29,7 @@ module "elasticsearch" {
   platform          = "ubuntu-18.04"
   build_prefix      = var.build_prefix
   capture_paths     = ["/etc/elasticsearch"]
-  name              = "elasticsearch-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
+  name              = "elasticsearch-${var.scenario}-${var.enable_ipv6 == "true" ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 # generate static hosts configuration

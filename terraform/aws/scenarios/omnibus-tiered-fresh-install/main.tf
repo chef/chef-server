@@ -12,7 +12,7 @@ module "back_end" {
   platform          = var.platform
   build_prefix      = var.build_prefix
   capture_paths     = ["/etc/opscode", "/var/log/opscode"]
-  name              = "backend-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
+  name              = "backend-${var.scenario}-${var.enable_ipv6 == "true" ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 module "front_end" {
@@ -29,7 +29,7 @@ module "front_end" {
   platform          = var.platform
   build_prefix      = var.build_prefix
   capture_paths     = ["/etc/opscode", "/var/log/opscode"]
-  name              = "frontend-${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
+  name              = "frontend-${var.scenario}-${var.enable_ipv6 == "true" ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 # generate static hosts configuration
