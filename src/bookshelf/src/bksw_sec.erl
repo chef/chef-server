@@ -134,6 +134,7 @@ try
     PathTokens  = wrq:path_tokens(Req0),
     ?debugFmt("~npath-tokens: ~p", [PathTokens]),
 
+    % TODO: THIS CRASHES ON Path = "/" (e.g. with mini_s3:list_buckets)
     {BucketName, Key} = bucketname_key_from_path(Path),
     ?debugFmt("~nbucketname: ~p", [BucketName]),
     ?debugFmt("~nkey: ~p", [Key]),
@@ -363,6 +364,7 @@ check_signed_headers_common(SignedHeaders, Headers) ->
 
 % split "bucketname/key" or "/bucketname/key" into {"bucketname", "key"}
 % Path = "<bucketname>/<key>"
+% TODO: THIS CRASHES ON Path = "/"
 -spec bucketname_key_from_path(string()) -> tuple().
 bucketname_key_from_path(Path0) ->
     % remove leading /, if any
