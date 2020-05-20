@@ -82,6 +82,11 @@ resource "null_resource" "back_end_config" {
     destination = "/tmp/dhparam.pem"
   }
 
+  provisioner "file" {
+    source      = "${path.module}/../../../common/files/install_addon_push_jobs.sh"
+    destination = "/tmp/install_addon_push_jobs.sh"
+  }
+
   # install chef-server
   provisioner "remote-exec" {
     inline = [
@@ -98,6 +103,14 @@ resource "null_resource" "back_end_config" {
       "sudo chef-server-ctl reconfigure --chef-license=accept",
       "sleep 120",
       "echo -e '\nEND INSTALL CHEF SERVER (BACK-END)\n'",
+    ]
+  }
+
+  # install push-jobs
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/install_addon_push_jobs.sh",
+      "ENABLE_ADDON_PUSH_JOBS=${var.enable_addon_push_jobs} /tmp/install_addon_push_jobs.sh",
     ]
   }
 
@@ -134,6 +147,16 @@ resource "null_resource" "front_end_config" {
     destination = "/tmp/hosts"
   }
 
+  provisioner "file" {
+    source      = "${path.module}/../../../common/files/install_addon_push_jobs.sh"
+    destination = "/tmp/install_addon_push_jobs.sh"
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/../../../common/files/install_addon_chef_manage.sh"
+    destination = "/tmp/install_addon_chef_manage.sh"
+  }
+
   # install chef-server
   provisioner "remote-exec" {
     inline = [
@@ -149,9 +172,25 @@ resource "null_resource" "front_end_config" {
       "echo -e '\nEND INSTALL CHEF SERVER (FRONT-END)\n'",
     ]
   }
+
+  # install chef manage addon
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/install_addon_chef_manage.sh",
+      "ENABLE_ADDON_CHEF_MANAGE=${var.enable_addon_chef_manage} /tmp/install_addon_chef_manage.sh",
+    ]
+  }
+
+  # install push-jobs
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/install_addon_push_jobs.sh",
+      "ENABLE_ADDON_PUSH_JOBS=${var.enable_addon_push_jobs} /tmp/install_addon_push_jobs.sh",
+    ]
+  }
 }
 
-resource "null_resource" "chef_server_test" {
+resource "null_resource" "chef_server_front_end_test" {
   depends_on = [null_resource.front_end_config]
 
   connection {
@@ -167,13 +206,13 @@ resource "null_resource" "chef_server_test" {
   }
 
   provisioner "file" {
-    source      = "${path.module}/../../../common/files/install_addon_chef_manage.sh"
-    destination = "/tmp/install_addon_chef_manage.sh"
+    source      = "${path.module}/../../../common/files/test_chef_server-pedant.sh"
+    destination = "/tmp/test_chef_server-pedant.sh"
   }
 
   provisioner "file" {
-    source      = "${path.module}/../../../common/files/test_chef_server-pedant.sh"
-    destination = "/tmp/test_chef_server-pedant.sh"
+    source      = "${path.module}/../../../common/files/test_addon_push_jobs.sh"
+    destination = "/tmp/test_addon_push_jobs.sh"
   }
 
   provisioner "file" {
@@ -194,19 +233,19 @@ resource "null_resource" "chef_server_test" {
     ]
   }
 
-  # install + test chef manage addon
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/install_addon_chef_manage.sh",
-      "ENABLE_ADDON_CHEF_MANAGE=${var.enable_addon_chef_manage} /tmp/install_addon_chef_manage.sh",
-    ]
-  }
-
   # run pedant test
   provisioner "remote-exec" {
     inline = [
       "chmod +x /tmp/test_chef_server-pedant.sh",
       "ENABLE_PEDANT_TEST=${var.enable_pedant_test} /tmp/test_chef_server-pedant.sh",
+    ]
+  }
+
+  # test push jobs addon
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/test_addon_push_jobs.sh",
+      "ENABLE_ADDON_PUSH_JOBS=${var.enable_addon_push_jobs} /tmp/test_addon_push_jobs.sh",
     ]
   }
 
@@ -225,33 +264,4 @@ resource "null_resource" "chef_server_test" {
       "ENABLE_GATHER_LOGS_TEST=${var.enable_gather_logs_test} /tmp/test_gather_logs.sh",
     ]
   }
-}
-resource "null_resource" "chef_server_install_push" {
-  depends_on = [null_resource.back_end_config]
-
-  connection {
-    type = "ssh"
-    user = module.back_end.ssh_username
-    host = module.back_end.public_ipv4_dns
-   }
-
-   provisioner "file" {
-    source      = "${path.module}/../../../common/files/install_addon_push_jobs.sh"
-    destination = "/tmp/install_addon_push_jobs.sh"
-   }
-
-   provisioner "file" {
-    source      = "${path.module}/../../../common/files/test_addon_push_jobs.sh"
-    destination = "/tmp/test_addon_push_jobs.sh"
-   }
-
-   # install + test push jobs addon
-   provisioner "remote-exec" {
-     inline = [
-       "chmod +x /tmp/install_addon_push_jobs.sh",
-       "ENABLE_ADDON_PUSH_JOBS=${var.enable_addon_push_jobs} /tmp/install_addon_push_jobs.sh",
-       "chmod +x /tmp/test_addon_push_jobs.sh",
-       "ENABLE_ADDON_PUSH_JOBS=${var.enable_addon_push_jobs} /tmp/test_addon_push_jobs.sh",
-     ]
-   }
 }

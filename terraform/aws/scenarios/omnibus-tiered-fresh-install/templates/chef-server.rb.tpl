@@ -21,7 +21,7 @@ require 'ipaddr'
 if IPAddr.new("${front_end_ip}/${cidr}").ipv6?
   profiles['root_url'] = 'http://[::1]:9998'
 else
-  profiles['root_url'] = 'http://${front_end_node_fqdn}:9998'
+  profiles['root_url'] = 'http://localhost:9998'
 end
 
 opscode_erchef['keygen_start_size'] = 30
@@ -34,4 +34,9 @@ insecure_addon_compat = false
 
 data_collector['token'] = 'foobar' unless data_collector.nil?
 
-nginx['enable_ipv6'] = ${enable_ipv6}
+# TODO(ssd) 2020-05-20: We explicitly check that this is a boolean in
+# our configuration pedant, but don't seem to have a preflight check
+# for this. It may be too late to add a preflight check without
+# breaking some people.  We could alternatively look at making the
+# pedant tests more liberal.
+nginx['enable_ipv6'] = ${enable_ipv6} == "true"
