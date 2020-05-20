@@ -151,7 +151,7 @@ resource "null_resource" "front_end_config" {
   }
 }
 
-resource "null_resource" "chef_server_test" {
+resource "null_resource" "chef_server_front_end_test" {
   depends_on = [null_resource.front_end_config]
 
   connection {
@@ -169,11 +169,6 @@ resource "null_resource" "chef_server_test" {
   provisioner "file" {
     source      = "${path.module}/../../../common/files/install_addon_chef_manage.sh"
     destination = "/tmp/install_addon_chef_manage.sh"
-  }
-
-  provisioner "file" {
-    source      = "${path.module}/../../../common/files/test_chef_server-pedant.sh"
-    destination = "/tmp/test_chef_server-pedant.sh"
   }
 
   provisioner "file" {
@@ -202,14 +197,6 @@ resource "null_resource" "chef_server_test" {
     ]
   }
 
-  # run pedant test
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/test_chef_server-pedant.sh",
-      "ENABLE_PEDANT_TEST=${var.enable_pedant_test} /tmp/test_chef_server-pedant.sh",
-    ]
-  }
-
   # run psql test
   provisioner "remote-exec" {
     inline = [
@@ -226,13 +213,18 @@ resource "null_resource" "chef_server_test" {
     ]
   }
 }
-resource "null_resource" "chef_server_install_push" {
+resource "null_resource" "chef_server_backend_tests" {
   depends_on = [null_resource.front_end_config]
 
   connection {
     type = "ssh"
     user = module.back_end.ssh_username
     host = module.back_end.public_ipv4_dns
+   }
+
+   provisioner "file" {
+     source      = "${path.module}/../../../common/files/test_chef_server-pedant.sh"
+     destination = "/tmp/test_chef_server-pedant.sh"
    }
 
    provisioner "file" {
@@ -244,6 +236,14 @@ resource "null_resource" "chef_server_install_push" {
     source      = "${path.module}/../../../common/files/test_addon_push_jobs.sh"
     destination = "/tmp/test_addon_push_jobs.sh"
    }
+
+  # run pedant test
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/test_chef_server-pedant.sh",
+      "ENABLE_PEDANT_TEST=${var.enable_pedant_test} /tmp/test_chef_server-pedant.sh",
+    ]
+  }
 
    # install + test push jobs addon
    provisioner "remote-exec" {

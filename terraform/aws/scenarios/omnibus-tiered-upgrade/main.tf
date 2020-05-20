@@ -272,11 +272,6 @@ resource "null_resource" "chef_server_test"{
   }
 
   provisioner "file" {
-    source      = "${path.module}/../../../common/files/test_chef_server-pedant.sh"
-    destination = "/tmp/test_chef_server-pedant.sh"
-  }
-
-  provisioner "file" {
     source      = "${path.module}/../../../common/files/test_psql.sh"
     destination = "/tmp/test_psql.sh"
   }
@@ -299,14 +294,6 @@ resource "null_resource" "chef_server_test"{
     inline = [
       "chmod +x /tmp/install_addon_chef_manage.sh",
       "ENABLE_ADDON_CHEF_MANAGE=${var.enable_addon_chef_manage} /tmp/install_addon_chef_manage.sh",
-    ]
-  }
-
-  # run pedant test
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/test_chef_server-pedant.sh",
-      "ENABLE_PEDANT_TEST=${var.enable_pedant_test} /tmp/test_chef_server-pedant.sh",
     ]
   }
 
@@ -336,6 +323,11 @@ resource "null_resource" "chef_server_install_push" {
    }
 
    provisioner "file" {
+     source      = "${path.module}/../../../common/files/test_chef_server-pedant.sh"
+     destination = "/tmp/test_chef_server-pedant.sh"
+   }
+
+   provisioner "file" {
     source      = "${path.module}/../../../common/files/install_addon_push_jobs.sh"
     destination = "/tmp/install_addon_push_jobs.sh"
    }
@@ -344,6 +336,15 @@ resource "null_resource" "chef_server_install_push" {
     source      = "${path.module}/../../../common/files/test_addon_push_jobs.sh"
     destination = "/tmp/test_addon_push_jobs.sh"
    }
+
+   # run pedant test
+   provisioner "remote-exec" {
+     inline = [
+       "chmod +x /tmp/test_chef_server-pedant.sh",
+       "ENABLE_PEDANT_TEST=${var.enable_pedant_test} /tmp/test_chef_server-pedant.sh",
+     ]
+   }
+
 
    # install + test push jobs addon
    provisioner "remote-exec" {
