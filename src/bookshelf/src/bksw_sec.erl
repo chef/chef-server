@@ -113,12 +113,7 @@ try
     DateIfUndefined = fun() -> wrq:get_req_header("date", Req0) end,
     Date = get_check_date(XAmzDate, DateIfUndefined, CredentialScopeDate),
 
-% a blank content-type header is showing up in ct tests, potentially causing errors
-% removing any blank headers to test if this is the issue
-% might need to do this on construction of presigned urls also
-    %Headers = process_headers(Headers0),
-Headers1 = process_headers(Headers0),
-Headers = [{K, V} || {K, V} <- Headers1, V /= ""],
+    Headers = process_headers(Headers0),
     ?debugFmt("~nheaders: ~p", [Headers]),
     ?debugFmt("~nENSURE HOST HEADER ^^^", []),
 
