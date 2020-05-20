@@ -36,9 +36,9 @@ describe "running configs required by Pushy Server", :config do
   it "postgresql/data_dir" do
     if config['postgresql']['external']
       skip "not used for external postgresql"
-    # These tests should not run on the frontend of a tiered setup.
-    elsif (Pedant::Config.topology == "tiered" && Pedant::Config.role == "frontend")
-      skip "no postgresql installed on frontend of a tiered install"
+    # These tests should not run on the frontend of a tier setup.
+    elsif (Pedant::Config.topology == "tier" && Pedant::Config.role == "frontend")
+      skip "no postgresql installed on frontend of a tier install"
     else
       expect(File.exists?(config['postgresql']['data_dir'])).to be true
     end
