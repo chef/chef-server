@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.33 -->
-## [13.2.33](https://github.com/chef/chef-server/tree/13.2.33) (2020-05-20)
+<!-- latest_release 13.2.34 -->
+## [13.2.34](https://github.com/chef/chef-server/tree/13.2.34) (2020-05-20)
 
 #### Merged Pull Requests
-- More fixes for the tier terraform scenarios [#2006](https://github.com/chef/chef-server/pull/2006) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Praj/limit integration test cases [#2011](https://github.com/chef/chef-server/pull/2011) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Praj/limit integration test cases [#2011](https://github.com/chef/chef-server/pull/2011) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.34 -->
 - More fixes for the tier terraform scenarios [#2006](https://github.com/chef/chef-server/pull/2006) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.33 -->
 - [chef-server-ctl] Add root check [#2012](https://github.com/chef/chef-server/pull/2012) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.32 -->
 - [pedant] Use the correct topology in checks (&#39;tier&#39;, not &#39;tiered&#39;)  [#2013](https://github.com/chef/chef-server/pull/2013) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.31 -->
