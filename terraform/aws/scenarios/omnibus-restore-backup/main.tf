@@ -11,7 +11,7 @@ module "chef_server" {
   enable_ipv6       = var.enable_ipv6
   platform          = var.platform
   build_prefix      = var.build_prefix
-  name              = "${var.scenario}-${var.enable_ipv6 ? "ipv6" : "ipv4"}-${var.platform}"
+  name              = "${var.scenario}-${var.enable_ipv6 == "true" ? "ipv6" : "ipv4"}-${var.platform}"
 }
 
 resource "null_resource" "chef_server_config" {
