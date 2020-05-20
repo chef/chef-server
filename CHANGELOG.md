@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.31 -->
-## [13.2.31](https://github.com/chef/chef-server/tree/13.2.31) (2020-05-20)
+<!-- latest_release 13.2.32 -->
+## [13.2.32](https://github.com/chef/chef-server/tree/13.2.32) (2020-05-20)
 
 #### Merged Pull Requests
-- [pedant] Use the correct topology in checks (&#39;tier&#39;, not &#39;tiered&#39;)  [#2013](https://github.com/chef/chef-server/pull/2013) ([stevendanna](https://github.com/stevendanna))
+- [chef-server-ctl] Add root check [#2012](https://github.com/chef/chef-server/pull/2012) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- [chef-server-ctl] Add root check [#2012](https://github.com/chef/chef-server/pull/2012) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.32 -->
 - [pedant] Use the correct topology in checks (&#39;tier&#39;, not &#39;tiered&#39;)  [#2013](https://github.com/chef/chef-server/pull/2013) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.31 -->
 - [terraform] Fix terraform syntax problem [#2008](https://github.com/chef/chef-server/pull/2008) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.30 -->
 - Skip checking for the presence of the postgres data dir on the front end of a tier install [#2010](https://github.com/chef/chef-server/pull/2010) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.29 -->
