@@ -253,6 +253,11 @@ EOM
   end
 end
 
+if Process.euid != 0
+  puts "This command must be run as root"
+  exit 1
+end
+
 # This replaces the default bin/omnibus-ctl command
 require 'pathname'
 file_path = Pathname.new(__FILE__)
