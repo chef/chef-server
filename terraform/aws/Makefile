@@ -34,7 +34,7 @@ endif
 ifneq ($(PLATFORM),)
 	export TF_VAR_platform ?= $(PLATFORM)
 else
-	export TF_VAR_platform ?= "ubuntu-18.04"
+	export TF_VAR_platform ?= ubuntu-18.04
 endif
 
 ifneq ($(INSTALL_VERSION),)
@@ -55,7 +55,7 @@ endif
 ifneq ($(ENABLE_IPV6),)
 	export TF_VAR_enable_ipv6 ?= $(ENABLE_IPV6)
 else
-	export TF_VAR_enable_ipv6 ?= "true"
+	export TF_VAR_enable_ipv6 ?= true
 endif
 
 ifneq ($(ENABLE_SMOKE_TEST),)

@@ -34,9 +34,4 @@ insecure_addon_compat = false
 
 data_collector['token'] = 'foobar' unless data_collector.nil?
 
-# TODO(ssd) 2020-05-20: We explicitly check that this is a boolean in
-# our configuration pedant, but don't seem to have a preflight check
-# for this. It may be too late to add a preflight check without
-# breaking some people.  We could alternatively look at making the
-# pedant tests more liberal.
-nginx['enable_ipv6'] = ${enable_ipv6} == "true"
+nginx['enable_ipv6'] = ${enable_ipv6}
