@@ -21,7 +21,7 @@ require 'ipaddr'
 if IPAddr.new("${front_end_ip}/${cidr}").ipv6?
   profiles['root_url'] = 'http://[::1]:9998'
 else
-  profiles['root_url'] = 'http://${front_end_node_fqdn}:9998'
+  profiles['root_url'] = 'http://localhost:9998'
 end
 
 opscode_erchef['keygen_start_size'] = 30
