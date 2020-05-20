@@ -42,6 +42,10 @@ pipelines:
   - integration_test:
       description: "Instructions: https://github.com/chef/chef-server/blob/master/.expeditor/README.md"
       definition: .expeditor/integration_test.pipeline.yml
+  - integration_test_full:
+      description: "Instructions: https://github.com/chef/chef-server/blob/master/.expeditor/README.md"
+      definition: .expeditor/integration_test_full.pipeline.yml
+
 
 # These actions are taken, in order they are specified, anytime a Pull Request is merged.
 merge_actions:
