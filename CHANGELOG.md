@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.38 -->
-## [13.2.38](https://github.com/chef/chef-server/tree/13.2.38) (2020-05-21)
+<!-- latest_release 13.2.39 -->
+## [13.2.39](https://github.com/chef/chef-server/tree/13.2.39) (2020-05-21)
 
 #### Merged Pull Requests
-- [terraform] More Makefile fixes [#2018](https://github.com/chef/chef-server/pull/2018) ([stevendanna](https://github.com/stevendanna))
+- Fix the ipv6 scenario [#2015](https://github.com/chef/chef-server/pull/2015) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Fix the ipv6 scenario [#2015](https://github.com/chef/chef-server/pull/2015) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.39 -->
 - [terraform] More Makefile fixes [#2018](https://github.com/chef/chef-server/pull/2018) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.38 -->
 - [cookbook] Quote ES host in template [#2017](https://github.com/chef/chef-server/pull/2017) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.37 -->
 - [terraform/pedant] Hopefully fix LDAP integration tests [#2016](https://github.com/chef/chef-server/pull/2016) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.36 -->
