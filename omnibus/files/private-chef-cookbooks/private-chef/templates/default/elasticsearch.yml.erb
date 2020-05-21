@@ -10,7 +10,9 @@ cluster.name: <%= @cluster_name %>
 node.name: <%= node['fqdn'] %>
 path.data:  <%= @data_dir %>
 path.logs: <%= @log_directory %>
-network.host: <%= @listen  %>
+# NOTE(ssd) 2020-05-21: This value must be quoted to handle values
+# such as ::
+network.host: "<%= @listen %>"
 # Reference: http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-network.html
 #            http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-gateway.html
 #            http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-discovery.html
