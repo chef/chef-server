@@ -195,6 +195,7 @@ steps:
       SCENARIO: omnibus-tiered-fresh-install
       PLATFORM: ubuntu-18.04
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -212,6 +213,7 @@ steps:
       SCENARIO: omnibus-tiered-upgrade
       PLATFORM: rhel-7
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
