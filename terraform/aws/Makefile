@@ -95,7 +95,7 @@ ifneq ($(SCENARIO),)
 endif
 
 ifeq ($(WORKSPACE),)
-    ifeq ($(TF_VAR_enable_ipv6), "true")
+    ifeq ($(TF_VAR_enable_ipv6),true)
         export WORKSPACE = "$(TF_VAR_scenario)-ipv6-$(TF_VAR_platform)"
     else
         export WORKSPACE = "$(TF_VAR_scenario)-ipv4-$(TF_VAR_platform)"
@@ -164,6 +164,7 @@ plan: init
 
 show: init
 	@set -e; \
+	echo -e "\n\nShowing state for $(WORKSPACE)\n" && \
 	cd scenarios/$(TF_VAR_scenario) && \
 	terraform workspace select "$(WORKSPACE)" && \
 	terraform show
