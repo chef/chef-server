@@ -34,4 +34,7 @@ insecure_addon_compat = false
 
 data_collector['token'] = 'foobar' unless data_collector.nil?
 
+if ${enable_ipv6}
+  ip_version "ipv6"
+end
 nginx['enable_ipv6'] = ${enable_ipv6}

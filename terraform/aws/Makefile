@@ -74,10 +74,6 @@ ifneq ($(ENABLE_GATHER_LOGS_TEST),)
     export TF_VAR_enable_gather_logs_test ?= $(ENABLE_GATHER_LOGS_TEST)
 endif
 
-ifneq ($(ENABLE_ADDON_PUSH_JOBS),)
-    export TF_VAR_enable_addon_push_jobs ?= $(ENABLE_ADDON_PUSH_JOBS)
-endif
-
 ifneq ($(ENABLE_ADDON_CHEF_MANAGE),)
     export TF_VAR_enable_addon_chef_manage ?= $(ENABLE_ADDON_CHEF_MANAGE)
 endif
@@ -106,6 +102,17 @@ else
 	export TF_VAR_platform = $(shell sed 's/.*-ipv.-//' <<<$(WORKSPACE))
 endif
 
+ifeq ($(ENABLE_ADDON_PUSH_JOBS),)
+    SCENARIO_IS_TIER = $(shell grep -q '\-tiered-' <<<$(WORKSPACE) && echo true || echo false)
+    ifeq ($(TF_VAR_enable_ipv6)$(SCENARIO_IS_TIER),truetrue)
+        export TF_VAR_enable_addon_push_jobs ?= false
+    else
+        export TF_VAR_enable_addon_push_jobs ?= true
+    endif
+else
+    export TF_VAR_enable_addon_push_jobs ?= $(ENABLE_ADDON_PUSH_JOBS)
+endif
+
 verify-aws:
 ifeq ($(TF_VAR_aws_department),)
 	$(error The department that owns the resources must be provided via the "AWS_DEPT" environment variable.)
@@ -114,6 +121,15 @@ endif
 ifeq ($(TF_VAR_aws_contact),)
 	$(error The primary contact for the resources must be provided via the "AWS_CONTACT" environment variable.)
 endif
+
+describe-workspace:
+	@echo "           SCENARIO: $(TF_VAR_scenario)"
+	@echo "           PLATFORM: $(TF_VAR_platform)"
+	@echo "INSTALL VERSION URL: $(TF_VAR_install_version_url)"
+	@echo "UPGRADE VERSION URL: $(TF_VAR_upgrade_version_url)"
+	@echo "               IPv6: $(TF_VAR_enable_ipv6)"
+	@echo "              PUSHY: $(TF_VAR_enable_addon_push_jobs)"
+	@echo "             MANAGE: $(TF_VAR_enable_addon_chef_manage)"
 
 create-vpc: verify-aws
 	@set -e; \
@@ -169,7 +185,7 @@ show: init
 	terraform workspace select "$(WORKSPACE)" && \
 	terraform show
 
-apply: init
+apply: init describe-workspace
 	@set -e; \
 	echo -e "\n\nApplying $(WORKSPACE)\n" && \
 	cd scenarios/$(TF_VAR_scenario) && \
