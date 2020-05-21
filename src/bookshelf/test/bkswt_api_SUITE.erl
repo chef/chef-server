@@ -27,11 +27,15 @@
 
 -include_lib("common_test/include/ct.hrl").
 -include_lib("eunit/include/eunit.hrl").
+-include_lib("erlcloud/include/erlcloud_aws.hrl").
 -include("../src/internal.hrl").
 
 -define(STANDALONE_BOOKSHELF, false).
 
 -define(STR_CHARS, "abcdefghijklmnopqrstuvwxyz").
+
+-define(accesskeyid,     "e1efc99729beb175").
+-define(secretaccesskey, "fc683cd9ed1990ca").
 
 %% Loads the environment from a config file
 load_default_config() ->
@@ -210,7 +214,9 @@ init_per_testcase(Casename, Config0) ->
 
     Port = bksw_conf:port(),
     Ip = bksw_conf:ip(),
-    {AccessKeyID, SecretAccessKey} = bksw_conf:keys(),
+%    {AccessKeyID, SecretAccessKey} = bksw_conf:keys(),
+AccessKeyID = "e1efc99729beb175",
+SecretAccessKey = "fc683cd9ed1990ca",
     S3State = mini_s3:new(AccessKeyID, SecretAccessKey,
                           lists:flatten(io_lib:format("http://~s:~p", [Ip, Port])),
                           path),
@@ -298,14 +304,15 @@ signed_url_fail_sql(Arg) ->
 at_the_same_time_sql(Arg) ->
     at_the_same_time(Arg).
 
--include_lib("erlcloud/include/erlcloud_aws.hrl").
 bucket_basic(doc) ->
     ["should create, view, and delete a bucket"];
 bucket_basic(suite) ->
     [];
 bucket_basic(Config) when is_list(Config) ->
 ?debugFmt("~nin bkswt_api_SUITE:bucket_basic", []),
-    S3Conf = proplists:get_value(s3_conf, Config),
+    %S3Conf = proplists:get_value(s3_conf, Config),
+S3Conf0 = proplists:get_value(s3_conf, Config),
+S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey},
 ?debugFmt("~nConfig: ~0p", [Config]),
     BucketName = "testbucket",
 Z = mini_s3:create_bucket(BucketName, public_read_write, none, S3Conf),
@@ -322,7 +329,9 @@ bucket_many(doc) ->
 bucket_many(suite) ->
     [];
 bucket_many(Config) ->
-    S3Conf = proplists:get_value(s3_conf, Config),
+    %S3Conf = proplists:get_value(s3_conf, Config),
+S3Conf0 = proplists:get_value(s3_conf, Config),
+S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey},
 
     BucketsBefore = bucket_list(S3Conf),
     Buckets = [random_binary() || _ <- lists:seq(1, 50)],
@@ -354,7 +363,9 @@ bucket_encoding(suite) ->
 bucket_encoding(Config) ->
 ?debugFmt("~nin bkswt_api_SUITE:bucket_encoding", []),
 ?debugFmt("~nConfig: ~0p", [Config]),
-    S3Conf = proplists:get_value(s3_conf, Config),
+    %S3Conf = proplists:get_value(s3_conf, Config),
+S3Conf0 = proplists:get_value(s3_conf, Config),
+S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey},
 ?debugFmt("~nS3Conf: ~0p", [S3Conf]),
 
     OddBucket = "a bucket",
@@ -376,7 +387,9 @@ head_object(suite) ->
     [];
 head_object(Config) when is_list(Config) ->
 ?debugFmt("~nin bkswt_api_SUITE:head_object", []),
-    S3Conf = proplists:get_value(s3_conf, Config),
+    %S3Conf = proplists:get_value(s3_conf, Config),
+S3Conf0 = proplists:get_value(s3_conf, Config),
+S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey},
     Bucket = "head-put-tests",
 
     ensure_bucket(Bucket, S3Conf),
@@ -410,7 +423,9 @@ put_object(suite) ->
 put_object(Config) when is_list(Config) ->
 ?debugFmt("~nin bkswt_api_SUITE:put_object", []),
 ?debugFmt("~nConfig: ~0p", [Config]),
-    S3Conf = proplists:get_value(s3_conf, Config),
+    %S3Conf = proplists:get_value(s3_conf, Config),
+S3Conf0 = proplists:get_value(s3_conf, Config),
+S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey},
 ?debugFmt("~nS3Conf: ~p", [S3Conf]),
     Bucket = random_bucket(),
     ensure_bucket(Bucket, S3Conf),
@@ -455,7 +470,9 @@ cache_control(suite) ->
 cache_control(Config) when is_list(Config) ->
 ?debugFmt("~nin bkswt_api_SUITE:cache_control", []),
 ?debugFmt("~nConfig: ~0p", [Config]),
-    S3Conf = proplists:get_value(s3_conf, Config),
+    %S3Conf = proplists:get_value(s3_conf, Config),
+S3Conf0 = proplists:get_value(s3_conf, Config),
+S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey},
 ?debugFmt("~nS3Conf: ~p", [S3Conf]),
     Bucket = random_bucket(),
 ?debugFmt("~ncalling ensure_bucket (should break here)", []),
@@ -485,7 +502,9 @@ object_roundtrip(suite) ->
 object_roundtrip(Config) when is_list(Config) ->
 ?debugFmt("~nin bkswt_api_SUITE:object_roundtrip", []),
 ?debugFmt("~nConfig: ~0p", [Config]),
-    S3Conf = proplists:get_value(s3_conf, Config),
+    %S3Conf = proplists:get_value(s3_conf, Config),
+S3Conf0 = proplists:get_value(s3_conf, Config),
+S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey},
 ?debugFmt("~nS3Conf: ~p", [S3Conf]),
     Bucket = random_bucket(),
 ?debugFmt("~ncalling ensure bucket (will probably break here)", []),
@@ -504,7 +523,9 @@ object_delete(suite) ->
 object_delete(Config) when is_list(Config) ->
 ?debugFmt("~nin bkswt_api_SUITE:object_delete", []),
 ?debugFmt("~nConfig: ~0p", [Config]),
-    S3Conf = proplists:get_value(s3_conf, Config),
+    %S3Conf = proplists:get_value(s3_conf, Config),
+S3Conf0 = proplists:get_value(s3_conf, Config),
+S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey},
 
     Bucket = random_bucket(),
 ?debugFmt("~ncalling ensure_bucket (should break here)", []),
@@ -524,7 +545,9 @@ bucket_delete(doc) ->
 bucket_delete(suite) ->
     [];
 bucket_delete(Config) when is_list(Config) ->
-    S3Conf = proplists:get_value(s3_conf, Config),
+    %S3Conf = proplists:get_value(s3_conf, Config),
+S3Conf0 = proplists:get_value(s3_conf, Config),
+S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey},
 
     Bucket = random_bucket(),
     ensure_bucket(Bucket,S3Conf),
@@ -577,7 +600,9 @@ signed_url(suite) ->
 signed_url(Config) when is_list(Config) ->
 ?debugFmt("~nin bkswt_api_SUITE:signed_url", []),
 ?debugFmt("~nConfig: ~0p", [Config]),
-    S3Conf = proplists:get_value(s3_conf, Config),
+    %S3Conf = proplists:get_value(s3_conf, Config),
+S3Conf0 = proplists:get_value(s3_conf, Config),
+S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey},
     Bucket = random_binary(),
     ensure_bucket(Bucket, S3Conf),
 ?debugFmt("~ncalling ensure_bucket (should break here)", []),
@@ -608,7 +633,9 @@ signed_url_fail(suite) ->
 signed_url_fail(Config) when is_list(Config) ->
 ?debugFmt("~nin bkswt_api_SUITE:signed_url_fail", []),
 ?debugFmt("~nConfig: ~0p", [Config]),
-    S3Conf = proplists:get_value(s3_conf, Config),
+    %S3Conf = proplists:get_value(s3_conf, Config),
+S3Conf0 = proplists:get_value(s3_conf, Config),
+S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey},
     Bucket = random_binary(),
 ?debugFmt("~ncalling ensure_bucket (should break here)", []),
     ensure_bucket(Bucket, S3Conf),
@@ -632,7 +659,9 @@ at_the_same_time(suite) -> [];
 at_the_same_time(Config) when is_list(Config) ->
 ?debugFmt("~nin bkswt_api_SUITE:at_the_same_time", []),
 ?debugFmt("~nConfig: ~0p", [Config]),
-    S3Conf = proplists:get_value(s3_conf, Config),
+    %S3Conf = proplists:get_value(s3_conf, Config),
+S3Conf0 = proplists:get_value(s3_conf, Config),
+S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey},
     Bucket = "bukkit",
 
 ?debugFmt("~ncalling ensure_bucket (should break here)", []),
@@ -678,7 +707,9 @@ upgrade_from_v0(Config) ->
                    {"bucket%20space", "xjbrpodcionabrzhikgliowdzvbvbc/kqvfgzhnlkizzvbidsxwavrktxcasx"}
                   ],
 
-    S3Conf = ?config(s3_conf, Config),
+    %S3Conf = ?config(s3_conf, Config),
+S3Conf0 = proplists:get_value(s3_conf, Config),
+S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey},
 
     AssertCount = fun(Bucket, Count) ->
                            Res = mini_s3:list_objects(Bucket, [], S3Conf),
@@ -726,7 +757,10 @@ test_data(Size) ->
 test_data_text(Size) ->
     random_string(Size, " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\n" ).
 
-bucket_list(S3Conf) ->
+bucket_list(S3Conf0) ->
+    %S3Conf = proplists:get_value(s3_conf, Config),
+%S3Conf0 = proplists:get_value(s3_conf, Config),
+S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey},
 ?debugFmt("~nin bkswt_api_SUITE:bucket_list", []),
 ?debugFmt("~nS3Conf: ~0p", [S3Conf]),
 Z = mini_s3:list_buckets(S3Conf),
@@ -756,7 +790,9 @@ X = mini_s3:create_bucket(Bucket, public_read_write, none, Config),
 ?debugFmt("~nensure_bucket create_bucket result: ~p", [X]),
     ?assertEqual(ok, X).
 
-file_exists(Bucket, Name, S3Conf) ->
+file_exists(Bucket, Name, S3Conf0) ->
+%S3Conf0 = proplists:get_value(s3_conf, Config),
+S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey},
     List = mini_s3:list_objects(Bucket, [], S3Conf),
     Files = [ proplists:get_value(key, I) || I <- proplists:get_value(contents, List)],
     lists:member(Name, Files).
