@@ -134,7 +134,7 @@ try
     PathTokens  = wrq:path_tokens(Req0),
     ?debugFmt("~npath-tokens: ~p", [PathTokens]),
 
-    % TODO: THIS CRASHES ON Path = "/" (e.g. with mini_s3:list_buckets)
+    % TODO: THIS CRASHES ON Path = "/" (e.g. with mini_s3:list_buckets) - attempting to fix
     {BucketName, Key} = bucketname_key_from_path(Path),
     ?debugFmt("~nbucketname: ~p", [BucketName]),
     ?debugFmt("~nkey: ~p", [Key]),
@@ -365,12 +365,20 @@ check_signed_headers_common(SignedHeaders, Headers) ->
 % split "bucketname/key" or "/bucketname/key" into {"bucketname", "key"}
 % Path = "<bucketname>/<key>"
 % TODO: THIS CRASHES ON Path = "/"
+%-spec bucketname_key_from_path(string()) -> tuple().
+%bucketname_key_from_path(Path0) ->
+%    % remove leading /, if any
+%    {_, Path} = string:take(Path0, "/"),
+%    [BucketName, Key] = string:split(Path, "/"),
+%    {BucketName, Key}.
 -spec bucketname_key_from_path(string()) -> tuple().
-bucketname_key_from_path(Path0) ->
-    % remove leading /, if any
-    {_, Path} = string:take(Path0, "/"),
-    [BucketName, Key] = string:split(Path, "/"),
-    {BucketName, Key}.
+bucketname_key_from_path(Path) ->
+    case string:lexemes(Path, "/") of % for erlang 22+
+    %case string:tokens(  Path) of
+        [               ] -> {"",          ""};
+        [BucketName     ] -> {BucketName,  ""};
+        [BucketName, Key] -> {BucketName, Key}
+    end.
 
 % https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
 -spec get_check_date(string(), string(), string()) -> string().

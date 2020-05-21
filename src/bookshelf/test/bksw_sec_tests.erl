@@ -1,14 +1,16 @@
 -module(bksw_sec_tests).
 -include_lib("eunit/include/eunit.hrl").
 
-% split "string1/string2" or "/string1/string2" into {"string1", "string2"}
 bucketname_key_from_path_test() ->
-    Path1 = "/bucketname/key",
-    Path2 =  "bucketname/key",
-    Result = {"bucketname", "key"},
-    Result = bksw_sec:bucketname_key_from_path(Path1),
-    Result = bksw_sec:bucketname_key_from_path(Path2).
-
+    {"",               ""}  = bksw_sec:bucketname_key_from_path(""                  ),
+    {"",               ""}  = bksw_sec:bucketname_key_from_path("/"                 ),
+    {"bucketname",     ""}  = bksw_sec:bucketname_key_from_path("/bucketname"       ),
+    {"bucketname",     ""}  = bksw_sec:bucketname_key_from_path("bucketname/"       ),
+    {"bucketname",     ""}  = bksw_sec:bucketname_key_from_path("/bucketname/"      ),
+    {"bucketname",  "key"}  = bksw_sec:bucketname_key_from_path("bucketname/key"    ),
+    {"bucketname",  "key"}  = bksw_sec:bucketname_key_from_path("/bucketname/key"   ),
+    {"bucketname",  "key"}  = bksw_sec:bucketname_key_from_path("bucketname/key/"   ),
+    {"bucketname",  "key"}  = bksw_sec:bucketname_key_from_path("/bucketname/key/"  ).
 
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
 % host header is required
