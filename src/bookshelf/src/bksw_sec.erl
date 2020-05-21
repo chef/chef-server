@@ -97,14 +97,27 @@ do_standard_authorization(RequestId, IncomingAuth, Req0, Context, Headers0) ->
     ?debugFmt("~ncalling do_common_authorization", []),
     do_common_authorization(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header).
 
+-ifdef(TEST).
+% tests sometimes use the following credentials:
+% AccessKey = "e1efc99729beb175"
+% SecretKey = "fc683cd9ed1990ca"
+getkeys("e1efc99729beb175", _) ->
+    {"e1efc99729beb175", "fc683cd9ed1990ca"};
+getkeys(_, Context) ->
+    {bksw_conf:access_key_id(Context), bksw_conf:secret_access_key(Context)}.
+-else.
+getkeys(_, Context) ->
+    {bksw_conf:access_key_id(Context), bksw_conf:secret_access_key(Context)}.
+-endif.
+
 do_common_authorization(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, VerificationType) ->
 try
     [AWSAccessKeyId, CredentialScopeDate, Region | _]  = parse_x_amz_credential(Credential),
     ?debugFmt("~naws-access-key-id: ~p", [AWSAccessKeyId]),
 
-    AccessKey = bksw_conf:access_key_id(Context),
-    SecretKey = bksw_conf:secret_access_key(Context),
-    ?debugFmt("~naccess-key-id: ~p", [AccessKey]),
+    {AccessKey, SecretKey} = getkeys(AWSAccessKeyId, Context),
+
+    ?debugFmt("~naccess-key-id: ~p",     [AccessKey]),
     ?debugFmt("~nsecret-access-key: ~p", [SecretKey]),
 
     %AccessKey = AWSAccessKeyId,
