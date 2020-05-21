@@ -37,7 +37,10 @@ data "template_file" "hosts_config" {
 
   vars = {
     chef_server_ip = var.enable_ipv6 == "true" ? module.chef_server.public_ipv6_address : module.chef_server.private_ipv4_address
-    ldap_ip        = var.enable_ipv6 == "true" ? module.ldap.public_ipv6_address : module.ldap.private_ipv4_address
+    # TODO(ssd) 2020-05-21: As far as I can tell, the erlang eldap
+    # library has a bug in it that prevents us from connecting to IPv6
+    # LDAP servers.
+    ldap_ip        = module.ldap.private_ipv4_address
   }
 }
 
@@ -104,6 +107,11 @@ resource "null_resource" "chef_server_config" {
     destination = "/tmp/pedant_config.rb"
   }
 
+  provisioner "file" {
+    source      = "${path.module}/../../../common/files/install_addon_chef_manage.sh"
+    destination = "/tmp/install_addon_chef_manage.sh"
+  }
+
   # install chef-server
   provisioner "remote-exec" {
     inline = [
@@ -124,6 +132,14 @@ resource "null_resource" "chef_server_config" {
     ]
   }
 
+  # install chef manage addon
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/install_addon_chef_manage.sh",
+      "ENABLE_ADDON_CHEF_MANAGE=${var.enable_addon_chef_manage} /tmp/install_addon_chef_manage.sh",
+    ]
+  }
+
   # add user + organization
   provisioner "remote-exec" {
     script = "${path.module}/../../../common/files/add_user.sh"
@@ -139,32 +155,6 @@ resource "null_resource" "chef_server_test" {
     host = module.chef_server.public_ipv4_dns
   }
 
-  # upload test scripts
-  provisioner "file" {
-    source      = "${path.module}/../../../common/files/test_chef_server-smoke.sh"
-    destination = "/tmp/test_chef_server-smoke.sh"
-  }
-
-  provisioner "file" {
-    source      = "${path.module}/../../../common/files/install_addon_push_jobs.sh"
-    destination = "/tmp/install_addon_push_jobs.sh"
-  }
-
-  provisioner "file" {
-    source      = "${path.module}/../../../common/files/test_addon_push_jobs.sh"
-    destination = "/tmp/test_addon_push_jobs.sh"
-  }
-
-  provisioner "file" {
-    source      = "${path.module}/../../../common/files/install_addon_chef_manage.sh"
-    destination = "/tmp/install_addon_chef_manage.sh"
-  }
-
-  provisioner "file" {
-    source      = "${path.module}/../../../common/files/test_chef_server-pedant.sh"
-    destination = "/tmp/test_chef_server-pedant.sh"
-  }
-
   provisioner "file" {
     source      = "${path.module}/../../../common/files/test_psql.sh"
     destination = "/tmp/test_psql.sh"
@@ -175,37 +165,13 @@ resource "null_resource" "chef_server_test" {
     destination = "/tmp/test_gather_logs.sh"
   }
 
-  # run smoke test
+  # run LDAP smoke test
+  #
+  # NOTE(ssd) 2020-05-21: It appears not all of our tests really work
+  # well with LDAP set up.
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /tmp/test_chef_server-smoke.sh",
-      "ENABLE_SMOKE_TEST=${var.enable_smoke_test} /tmp/test_chef_server-smoke.sh",
-    ]
-  }
-
-  # install + test push jobs addon
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/install_addon_push_jobs.sh",
-      "ENABLE_ADDON_PUSH_JOBS=${var.enable_addon_push_jobs} /tmp/install_addon_push_jobs.sh",
-      "chmod +x /tmp/test_addon_push_jobs.sh",
-      "ENABLE_ADDON_PUSH_JOBS=${var.enable_addon_push_jobs} /tmp/test_addon_push_jobs.sh",
-    ]
-  }
-
-  # install + test chef manage addon
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/install_addon_chef_manage.sh",
-      "ENABLE_ADDON_CHEF_MANAGE=${var.enable_addon_chef_manage} /tmp/install_addon_chef_manage.sh",
-    ]
-  }
-
-  # run pedant test
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/test_chef_server-pedant.sh",
-      "ENABLE_PEDANT_TEST=${var.enable_pedant_test} /tmp/test_chef_server-pedant.sh",
+      "sudo chef-server-ctl test -J pedant.xml --focus ldap",
     ]
   }
 

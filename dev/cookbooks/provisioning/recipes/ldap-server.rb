@@ -1,7 +1,8 @@
-
 #
 # Install Packages
 #
+apt_update if node['platform'] == 'ubuntu'
+
 package 'ldap-utils' do
   action :install
 end

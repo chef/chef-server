@@ -2,7 +2,7 @@
 require 'pedant/rspec/common'
 require 'json'
 
-describe 'authenticate_user', :users do
+describe 'authenticate_user', :users, :ldap do
   let(:username) {
     if platform.ldap_testing
       platform.ldap[:account_name]
