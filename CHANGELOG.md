@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.35 -->
-## [13.2.35](https://github.com/chef/chef-server/tree/13.2.35) (2020-05-20)
+<!-- latest_release 13.2.36 -->
+## [13.2.36](https://github.com/chef/chef-server/tree/13.2.36) (2020-05-21)
 
 #### Merged Pull Requests
-- [terraform] Don&#39;t use quotes in the makefile [#2014](https://github.com/chef/chef-server/pull/2014) ([stevendanna](https://github.com/stevendanna))
+- [terraform/pedant] Hopefully fix LDAP integration tests [#2016](https://github.com/chef/chef-server/pull/2016) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- [terraform/pedant] Hopefully fix LDAP integration tests [#2016](https://github.com/chef/chef-server/pull/2016) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.36 -->
 - [terraform] Don&#39;t use quotes in the makefile [#2014](https://github.com/chef/chef-server/pull/2014) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.35 -->
 - Praj/limit integration test cases [#2011](https://github.com/chef/chef-server/pull/2011) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.34 -->
 - More fixes for the tier terraform scenarios [#2006](https://github.com/chef/chef-server/pull/2006) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.33 -->
