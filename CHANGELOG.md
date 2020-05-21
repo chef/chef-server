@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.39 -->
-## [13.2.39](https://github.com/chef/chef-server/tree/13.2.39) (2020-05-21)
+<!-- latest_release 13.2.40 -->
+## [13.2.40](https://github.com/chef/chef-server/tree/13.2.40) (2020-05-21)
 
 #### Merged Pull Requests
-- Fix the ipv6 scenario [#2015](https://github.com/chef/chef-server/pull/2015) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Disable push jobs tests in tiered ipv6 pipeline [#2020](https://github.com/chef/chef-server/pull/2020) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Disable push jobs tests in tiered ipv6 pipeline [#2020](https://github.com/chef/chef-server/pull/2020) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.40 -->
 - Fix the ipv6 scenario [#2015](https://github.com/chef/chef-server/pull/2015) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.39 -->
 - [terraform] More Makefile fixes [#2018](https://github.com/chef/chef-server/pull/2018) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.38 -->
 - [cookbook] Quote ES host in template [#2017](https://github.com/chef/chef-server/pull/2017) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.37 -->
