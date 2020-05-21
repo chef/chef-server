@@ -103,9 +103,13 @@ do_standard_authorization(RequestId, IncomingAuth, Req0, Context, Headers0) ->
 % SecretKey = "fc683cd9ed1990ca"
 getkeys("e1efc99729beb175", _) ->
     {"e1efc99729beb175", "fc683cd9ed1990ca"};
-getkeys(_, _) ->
-    %{bksw_conf:access_key_id(Context), bksw_conf:secret_access_key(Context)}.
-    bksw_conf:keys().
+getkeys(<<"e1efc99729beb175">>, _) ->
+    {<<"e1efc99729beb175">>, <<"fc683cd9ed1990ca">>};
+getkeys("ASIAXXFRTNDYFRUTH6NY", _) ->
+    {"ASIAXXFRTNDYFRUTH6NY", "ogxnfFC1rjltSjQI6boQ5tBg4mMG5wydPilkgQzU"};
+getkeys(_, Context) ->
+    {bksw_conf:access_key_id(Context), bksw_conf:secret_access_key(Context)}.
+    %bksw_conf:keys().
 -else.
 getkeys(_, Context) ->
     {bksw_conf:access_key_id(Context), bksw_conf:secret_access_key(Context)}.
