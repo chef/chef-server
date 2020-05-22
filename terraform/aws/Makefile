@@ -103,8 +103,7 @@ else
 endif
 
 ifeq ($(ENABLE_ADDON_PUSH_JOBS),)
-    SCENARIO_IS_TIER = $(shell grep -q '\-tiered-' <<<$(WORKSPACE) && echo true || echo false)
-    ifeq ($(TF_VAR_enable_ipv6)$(SCENARIO_IS_TIER),truetrue)
+    ifeq ($(TF_VAR_enable_ipv6),true)
         export TF_VAR_enable_addon_push_jobs ?= false
     else
         export TF_VAR_enable_addon_push_jobs ?= true

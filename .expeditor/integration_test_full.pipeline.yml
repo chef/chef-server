@@ -555,6 +555,7 @@ steps:
       SCENARIO: omnibus-external-openldap
       PLATFORM: rhel-6
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -570,6 +571,7 @@ steps:
       SCENARIO: omnibus-external-openldap
       PLATFORM: rhel-7
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -585,6 +587,7 @@ steps:
       SCENARIO: omnibus-external-openldap
       PLATFORM: rhel-8
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -600,6 +603,7 @@ steps:
       SCENARIO: omnibus-external-openldap
       PLATFORM: ubuntu-16.04
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -615,6 +619,7 @@ steps:
       SCENARIO: omnibus-external-openldap
       PLATFORM: ubuntu-18.04
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -630,6 +635,7 @@ steps:
       SCENARIO: omnibus-fips
       PLATFORM: rhel-6
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -645,6 +651,7 @@ steps:
       SCENARIO: omnibus-fips
       PLATFORM: rhel-7
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -660,6 +667,7 @@ steps:
       SCENARIO: omnibus-fips
       PLATFORM: rhel-8
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -755,6 +763,7 @@ steps:
       SCENARIO: omnibus-standalone-upgrade
       PLATFORM: rhel-6
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -770,6 +779,7 @@ steps:
       SCENARIO: omnibus-standalone-upgrade
       PLATFORM: rhel-7
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -785,6 +795,7 @@ steps:
       SCENARIO: omnibus-standalone-upgrade
       PLATFORM: ubuntu-16.04
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -800,6 +811,7 @@ steps:
       SCENARIO: omnibus-standalone-upgrade
       PLATFORM: ubuntu-18.04
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -959,6 +971,7 @@ steps:
       SCENARIO: omnibus-external-elasticsearch
       PLATFORM: rhel-6
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -974,6 +987,7 @@ steps:
       SCENARIO: omnibus-external-elasticsearch
       PLATFORM: rhel-7
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -989,6 +1003,7 @@ steps:
       SCENARIO: omnibus-external-elasticsearch
       PLATFORM: rhel-8
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -1004,6 +1019,7 @@ steps:
       SCENARIO: omnibus-external-elasticsearch
       PLATFORM: ubuntu-16.04
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
@@ -1019,6 +1035,7 @@ steps:
       SCENARIO: omnibus-external-elasticsearch
       PLATFORM: ubuntu-18.04
       ENABLE_IPV6: true
+      ENABLE_ADDON_PUSH_JOBS: false
     expeditor:
       accounts:
         - aws/chef-cd
