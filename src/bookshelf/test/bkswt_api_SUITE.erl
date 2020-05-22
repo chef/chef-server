@@ -770,8 +770,21 @@ Z = mini_s3:list_buckets(S3Conf),
     lists:map(fun(Opts) -> proplists:get_value(name, Opts) end, Details).
 
 bucket_exists(Name, S3Conf) ->
+?debugFmt("~nin bkswt_api_SUITE:bucket_exists", []),
     BucketNames = bucket_list(S3Conf),
-    lists:member(Name, BucketNames).
+?debugFmt("~nlooking for ~p in ~p", [Name, BucketNames]),
+    %X = lists:member(Name, BucketNames),
+    % http_uri deprecated since OTP 23. Use the module uri_string for 21+
+    X = lists:member(Name, BucketNames) orelse lists:member(http_uri:encode(Name), BucketNames),
+%X = [] /= [true || BucketName <- BucketNames, Name <- [http_uri:decode(BucketName)]],
+?debugFmt("~nbucket_exists result: ~p", [X]),
+    X.
+
+%bucket_exists(Name, S3Conf) ->
+%    %BucketNames = bucket_list(S3Conf),
+%[{buckets, ListOfLists}] = bucket_list(S3Conf),
+%    %lists:member(Name, BucketNames).
+%[] /= [true || List <- ListOfLists, true <- lists:member({name, Name}, List)].
 
 ensure_bucket(Bucket, Config) ->
 ?debugFmt("~nin bkswt_api_SUITE:ensure_bucket", []),
