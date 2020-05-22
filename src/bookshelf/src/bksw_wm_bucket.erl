@@ -46,11 +46,8 @@ allowed_methods(Rq, Ctx) ->
 content_types_accepted(Rq, Ctx) ->
     CType =
         case wrq:get_req_header("Content-Type", Rq) of
-            "" ->
-                "application/octet-stream";
             undefined ->
-                %"text/xml";
-                "application/octet-stream";
+                "text/xml";
             C ->
                 C
         end,
@@ -59,11 +56,8 @@ content_types_accepted(Rq, Ctx) ->
 content_types_provided(Rq, Ctx) ->
     CType =
         case wrq:get_req_header("accept", Rq) of
-            "" ->
-                "application/octet-stream";
             undefined ->
-                %"text/xml";
-                "application/octet-stream";
+                "text/xml";
             C ->
                 C
         end,

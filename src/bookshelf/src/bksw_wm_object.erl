@@ -66,8 +66,6 @@ allowed_methods(Rq, Ctx) ->
 content_types_provided(Rq, Ctx) ->
     CType =
     case wrq:get_req_header("accept", Rq) of
-        "" ->
-            "application/octet-stream";
         undefined ->
             "application/octet-stream";
         "*/*" ->
@@ -79,8 +77,6 @@ content_types_provided(Rq, Ctx) ->
 
 content_types_accepted(Rq, Ctx) ->
     CT = case wrq:get_req_header("content-type", Rq) of
-             "" ->
-                 "application/octet-stream";
              undefined ->
                  "application/octet-stream";
              X ->
