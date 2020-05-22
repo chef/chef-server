@@ -768,6 +768,7 @@ Z = mini_s3:list_buckets(S3Conf),
 [{buckets, Details}] = Z,
 %    [{buckets, Details}] = mini_s3:list_buckets(S3Conf),
     lists:map(fun(Opts) -> proplists:get_value(name, Opts) end, Details).
+
 bucket_exists(Name, S3Conf) ->
     BucketNames = bucket_list(S3Conf),
     lists:member(Name, BucketNames).
