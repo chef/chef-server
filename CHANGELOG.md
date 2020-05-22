@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.40 -->
-## [13.2.40](https://github.com/chef/chef-server/tree/13.2.40) (2020-05-21)
+<!-- latest_release 13.2.41 -->
+## [13.2.41](https://github.com/chef/chef-server/tree/13.2.41) (2020-05-22)
 
 #### Merged Pull Requests
-- Disable push jobs tests in tiered ipv6 pipeline [#2020](https://github.com/chef/chef-server/pull/2020) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Modify security group name to include build_prefix and scenario [#2021](https://github.com/chef/chef-server/pull/2021) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Modify security group name to include build_prefix and scenario [#2021](https://github.com/chef/chef-server/pull/2021) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.2.41 -->
 - Disable push jobs tests in tiered ipv6 pipeline [#2020](https://github.com/chef/chef-server/pull/2020) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.40 -->
 - Fix the ipv6 scenario [#2015](https://github.com/chef/chef-server/pull/2015) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.39 -->
 - [terraform] More Makefile fixes [#2018](https://github.com/chef/chef-server/pull/2018) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.38 -->
