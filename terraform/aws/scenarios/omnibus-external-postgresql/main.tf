@@ -46,6 +46,7 @@ data "template_file" "chef_server_rb" {
   template = file("${path.module}/templates/chef-server.rb.tpl")
 
   vars = {
+    enable_ipv6 = var.enable_ipv6
     postgresql_ip = var.enable_ipv6 == "true" ? module.postgresql.public_ipv6_address : module.postgresql.private_ipv4_address
   }
 }

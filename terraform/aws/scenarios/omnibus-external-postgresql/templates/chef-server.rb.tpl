@@ -20,3 +20,8 @@ postgresql['max_connections']=350
 opscode_erchef['db_pool_size']=20
 oc_id['db_pool_size']=20
 oc_bifrost['db_pool_size']=20
+
+if ${enable_ipv6}
+  ip_version "ipv6"
+end
+nginx['enable_ipv6'] = ${enable_ipv6}

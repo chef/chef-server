@@ -179,6 +179,7 @@ steps:
     env:
       SCENARIO: omnibus-standalone-upgrade
       PLATFORM: ubuntu-18.04
+      ENABLE_ADDON_PUSH_JOBS: false
       ENABLE_IPV6: true
     expeditor:
       accounts:
@@ -228,6 +229,7 @@ steps:
     env:
       SCENARIO: omnibus-external-elasticsearch
       PLATFORM: ubuntu-18.04
+      ENABLE_ADDON_PUSH_JOBS: false
       ENABLE_IPV6: true
     expeditor:
       accounts:
