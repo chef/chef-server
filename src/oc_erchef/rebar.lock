@@ -77,7 +77,7 @@
   1},
  {<<"ibrowse">>,
   {git,"git://github.com/chef/ibrowse.git",
-       {ref,"7b2b0bfd5e15e57706beb2ef0360cdc7f24b37c5"}},
+       {ref,"e6a0c366fc8fc982d7981087c1e9d1e28e2a235a"}},
   0},
  {<<"jiffy">>,
   {git,"https://github.com/davisp/jiffy.git",
