@@ -34,6 +34,10 @@
 %%===================================================================
 %% API functions
 %%===================================================================
+-ifdef(TEST).
+is_authorized(Req, Context) ->
+    {true, Req, Context}.
+-else.
 is_authorized(Req0, #context{auth_check_disabled=true} = Context) ->
     {true, Req0, Context};
 is_authorized(Req0, #context{} = Context) ->
@@ -46,6 +50,7 @@ is_authorized(Req0, #context{} = Context) ->
             ?debugFmt("~ndoing standard authorization", []),
             do_standard_authorization(RequestId, IncomingAuth, Req1, Context, Headers)
     end.
+-endif.
 
 % presigned url verification
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
@@ -97,23 +102,23 @@ do_standard_authorization(RequestId, IncomingAuth, Req0, Context, Headers0) ->
     ?debugFmt("~ncalling do_common_authorization", []),
     do_common_authorization(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header).
 
--ifdef(TESTxxx).
-% tests sometimes use the following credentials:
-% AccessKey = "e1efc99729beb175"
-% SecretKey = "fc683cd9ed1990ca"
-getkeys("e1efc99729beb175", _) ->
-    {"e1efc99729beb175", "fc683cd9ed1990ca"};
-getkeys(<<"e1efc99729beb175">>, _) ->
-    {<<"e1efc99729beb175">>, <<"fc683cd9ed1990ca">>};
-getkeys("ASIAXXFRTNDYFRUTH6NY", _) ->
-    {"ASIAXXFRTNDYFRUTH6NY", "ogxnfFC1rjltSjQI6boQ5tBg4mMG5wydPilkgQzU"};
+%-ifdef(TESTxxx).
+%% tests sometimes use the following credentials:
+%% AccessKey = "e1efc99729beb175"
+%% SecretKey = "fc683cd9ed1990ca"
+%getkeys("e1efc99729beb175", _) ->
+%    {"e1efc99729beb175", "fc683cd9ed1990ca"};
+%getkeys(<<"e1efc99729beb175">>, _) ->
+%    {<<"e1efc99729beb175">>, <<"fc683cd9ed1990ca">>};
+%getkeys("ASIAXXFRTNDYFRUTH6NY", _) ->
+%    {"ASIAXXFRTNDYFRUTH6NY", "ogxnfFC1rjltSjQI6boQ5tBg4mMG5wydPilkgQzU"};
+%getkeys(_, Context) ->
+%    {bksw_conf:access_key_id(Context), bksw_conf:secret_access_key(Context)}.
+%    %bksw_conf:keys().
+%-else.
 getkeys(_, Context) ->
     {bksw_conf:access_key_id(Context), bksw_conf:secret_access_key(Context)}.
-    %bksw_conf:keys().
--else.
-getkeys(_, Context) ->
-    {bksw_conf:access_key_id(Context), bksw_conf:secret_access_key(Context)}.
--endif.
+%-endif.
 
 do_common_authorization(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, VerificationType) ->
 try
