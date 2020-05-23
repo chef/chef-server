@@ -42,6 +42,15 @@ data "template_file" "hosts_config" {
   }
 }
 
+# generate chef-server.rb configuration
+data "template_file" "chef_server_config" {
+  template = file("${path.module}/templates/chef-server.rb.tpl")
+
+  vars = {
+    enable_ipv6 = var.enable_ipv6
+  }
+}
+
 # update elasticsearch server
 resource "null_resource" "elasticsearch_config" {
   # provide some connection info
@@ -88,8 +97,8 @@ resource "null_resource" "chef_server_config" {
     destination = "/tmp/hosts"
   }
 
-  provisioner "file" {
-    source      = "${path.module}/files/chef-server.rb"
+ provisioner "file" {
+    content     = data.template_file.chef_server_config.rendered
     destination = "/tmp/chef-server.rb"
   }
 
