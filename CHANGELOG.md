@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.42 -->
-## [13.2.42](https://github.com/chef/chef-server/tree/13.2.42) (2020-05-22)
+<!-- latest_release 13.2.43 -->
+## [13.2.43](https://github.com/chef/chef-server/tree/13.2.43) (2020-05-23)
 
 #### Merged Pull Requests
-- [terraform] Set ip_version in postgresql-ipv6 tests, disable pushy [#2022](https://github.com/chef/chef-server/pull/2022) ([stevendanna](https://github.com/stevendanna))
+- [erchef] Upgrade chef_authn [#2025](https://github.com/chef/chef-server/pull/2025) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- [erchef] Upgrade chef_authn [#2025](https://github.com/chef/chef-server/pull/2025) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.43 -->
 - [terraform] Set ip_version in postgresql-ipv6 tests, disable pushy [#2022](https://github.com/chef/chef-server/pull/2022) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.42 -->
 - Modify security group name to include build_prefix and scenario [#2021](https://github.com/chef/chef-server/pull/2021) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.2.41 -->
 - Disable push jobs tests in tiered ipv6 pipeline [#2020](https://github.com/chef/chef-server/pull/2020) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.40 -->
