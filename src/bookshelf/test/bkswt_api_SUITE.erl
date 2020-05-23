@@ -469,7 +469,7 @@ cache_control(suite) ->
     [];
 cache_control(Config) when is_list(Config) ->
 ?debugFmt("~nin bkswt_api_SUITE:cache_control", []),
-?debugFmt("~nConfig: ~0p", [Config]),
+%?debugFmt("~nConfig: ~0p", [Config]),
     %S3Conf = proplists:get_value(s3_conf, Config),
 S3Conf0 = proplists:get_value(s3_conf, Config),
 S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey},
@@ -522,7 +522,7 @@ object_delete(suite) ->
     [];
 object_delete(Config) when is_list(Config) ->
 ?debugFmt("~nin bkswt_api_SUITE:object_delete", []),
-?debugFmt("~nConfig: ~0p", [Config]),
+%?debugFmt("~nConfig: ~0p", [Config]),
     %S3Conf = proplists:get_value(s3_conf, Config),
 S3Conf0 = proplists:get_value(s3_conf, Config),
 S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey},
@@ -762,7 +762,7 @@ bucket_list(S3Conf0) ->
 %S3Conf0 = proplists:get_value(s3_conf, Config),
 S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey},
 ?debugFmt("~nin bkswt_api_SUITE:bucket_list", []),
-?debugFmt("~nS3Conf: ~0p", [S3Conf]),
+%?debugFmt("~nS3Conf: ~0p", [S3Conf]),
 Z = mini_s3:list_buckets(S3Conf),
 ?debugFmt("~nlist_buckets result: ~p", [Z]),
 [{buckets, Details}] = Z,
@@ -789,7 +789,7 @@ bucket_exists(Name, S3Conf) ->
 ensure_bucket(Bucket, Config) ->
 ?debugFmt("~nin bkswt_api_SUITE:ensure_bucket", []),
 ?debugFmt("~nBucket: ~p", [Bucket]),
-?debugFmt("~nConfig: ~0p", [Config]),
+%?debugFmt("~nConfig: ~0p", [Config]),
     case bucket_exists(Bucket, Config) of
         true ->
 ?debugFmt("~nbucket exists", []),
