@@ -97,7 +97,7 @@ do_standard_authorization(RequestId, IncomingAuth, Req0, Context, Headers0) ->
     ?debugFmt("~ncalling do_common_authorization", []),
     do_common_authorization(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header).
 
--ifdef(TEST).
+-ifdef(TESTxxx).
 % tests sometimes use the following credentials:
 % AccessKey = "e1efc99729beb175"
 % SecretKey = "fc683cd9ed1990ca"
