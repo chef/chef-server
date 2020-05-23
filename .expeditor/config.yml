@@ -6,10 +6,6 @@ product_key: chef-server
 slack:
   notify_channel: chef-server-notify
 
-automate:
-  organization: products
-  project: chef-server
-
 github:
   delete_branch_on_merge: true
   # The file where the MAJOR.MINOR.PATCH version is kept. The version in this file

@@ -40,6 +40,7 @@ This repository contains the core services that make up the Chef Server.
     |-- oc-id: OAuth2 provider for extensions like Analytics or Supermarket
     |-- oc_bifrost: Chef Server's authorization service
     |-- oc_erchef: The core REST API server
+    |-- chef-server-ctl: The Chef Server's command line management utility
     `-- opscode-expander: a service that transforms Chef data before sending it to Solr for indexing
 ```
 
@@ -106,6 +107,7 @@ docker-compose exec chef-server-ctl chef-server-ctl command (subcommands)
 - RabbitMQ
 - Redis
 - Solr4
+- Elasticsearch
 - Nginx (openresty with lpeg library addition)
 - Runit for service supervision
 
@@ -115,13 +117,11 @@ If you're looking to contribute to certain parts of the Chef server, familiarity
 - sqitch (database migrations)
 - lua (routing rules in openresty)
 
-## ACC Pipeline & Chef Expeditor
+## Chef Expeditor
 
-Chef Software, Inc. leverages an internal Chef Automate installation, commonly referred to as ACC, to "drink our own champagne" and easily test and leverage builds of our products as they are created. The `chef/chef-server` repository, like many other Chef Software repositories, leverages an internal utility called Chef Expeditor to create a pub-sub model of actions across our various CI/CD utilities.
-
-One of those actions is creating a change in our internal Chef Automate instance every time we successfully generate an omnibus build of Chef Server. This change allows us to easily perform a complex matrix of test suites, followed by a deployment to our internal Chef Server that we use to drive our internal infrastructure. While there is code to support this pipeline in the repository (`.delivery/**`, `terraform/**`, and `cookbooks/chef-server-deploy/**`), this repository does not depend on Chef Automate to handle pull requests.
-
-The resources listed above that drive this pipeline, while open source, are not intended or supported for use outside of ACC as they have dependencies that are unique to Chef Software. However, please feel free to reference them for your own implementations. If you have any questions about these resources, please feel free to reach out in the [Chef Community Slack](http://community-slack.chef.io/).
+The `chef/chef-server` repository, like many other Chef Software
+repositories, leverages an internal utility called Chef Expeditor to
+create a pub-sub model of actions across our various CI/CD utilities.
 
 ## Contributing
 

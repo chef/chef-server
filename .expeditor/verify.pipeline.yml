@@ -23,14 +23,6 @@ steps:
     executor:
       docker:
 
-- label: lint-chef-server-deploy-cookbook-cookstyle
-  command:
-    - cd /workdir/cookbooks/chef-server-deploy
-    - chef exec cookstyle
-  expeditor:
-    executor:
-      docker:
-
 - label: license-scout
   command:
     - .expeditor/license_scout.sh
