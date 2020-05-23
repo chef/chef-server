@@ -1,16 +1,25 @@
 -module(bksw_sec_tests).
 -include_lib("eunit/include/eunit.hrl").
 
-bucketname_key_from_path_test() ->
-    {"",               ""}  = bksw_sec:bucketname_key_from_path(""                  ),
-    {"",               ""}  = bksw_sec:bucketname_key_from_path("/"                 ),
-    {"bucketname",     ""}  = bksw_sec:bucketname_key_from_path("/bucketname"       ),
-    {"bucketname",     ""}  = bksw_sec:bucketname_key_from_path("bucketname/"       ),
-    {"bucketname",     ""}  = bksw_sec:bucketname_key_from_path("/bucketname/"      ),
-    {"bucketname",  "key"}  = bksw_sec:bucketname_key_from_path("bucketname/key"    ),
-    {"bucketname",  "key"}  = bksw_sec:bucketname_key_from_path("/bucketname/key"   ),
-    {"bucketname",  "key"}  = bksw_sec:bucketname_key_from_path("bucketname/key/"   ),
-    {"bucketname",  "key"}  = bksw_sec:bucketname_key_from_path("/bucketname/key/"  ).
+% split "<bucketname>/<key>" (possibly leading-trailing /) into {"bucketname", "key"}
+get_bucket_key_test() ->
+    {"",                      ""} = bksw_sec:get_bucket_key(""                      ),
+    {"",                      ""} = bksw_sec:get_bucket_key("/"                     ),
+    {"bucket",                ""} = bksw_sec:get_bucket_key("/bucket"               ),
+    {"bucket",                ""} = bksw_sec:get_bucket_key("bucket/"               ),
+    {"bucket",                ""} = bksw_sec:get_bucket_key("/bucket/"              ),
+    {"bucket",             "key"} = bksw_sec:get_bucket_key("bucket/key"            ),
+    {"bucket",             "key"} = bksw_sec:get_bucket_key("/bucket/key"           ),
+    {"bucket",             "key"} = bksw_sec:get_bucket_key("bucket/key/"           ),
+    {"bucket",             "key"} = bksw_sec:get_bucket_key("/bucket/key/"          ),
+    {"bucket",        "key/more"} = bksw_sec:get_bucket_key("bucket/key/more"       ),
+    {"bucket",        "key/more"} = bksw_sec:get_bucket_key("/bucket/key/more"      ),
+    {"bucket",        "key/more"} = bksw_sec:get_bucket_key("bucket/key/more/"      ),
+    {"bucket",        "key/more"} = bksw_sec:get_bucket_key("/bucket/key/more/"     ),
+    {"bucket",   "key/more/moar"} = bksw_sec:get_bucket_key("bucket/key/more/moar"  ),
+    {"bucket",   "key/more/moar"} = bksw_sec:get_bucket_key("/bucket/key/more/moar" ),
+    {"bucket",   "key/more/moar"} = bksw_sec:get_bucket_key("bucket/key/more/moar/" ),
+    {"bucket",   "key/more/moar"} = bksw_sec:get_bucket_key("/bucket/key/more/moar/").
 
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
 % host header is required
