@@ -23,5 +23,6 @@ oc_bifrost['db_pool_size']=20
 
 if ${enable_ipv6}
   ip_version "ipv6"
+  opscode_erchef['solr_ibrowse_options'] = '[{connect_timeout, 10000}, {prefer_ipv6, true}]'
 end
 nginx['enable_ipv6'] = ${enable_ipv6}
