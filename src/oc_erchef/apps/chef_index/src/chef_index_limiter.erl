@@ -38,12 +38,10 @@ tickets() ->
 -spec take_ticket() -> ok | {error, chef_index_update_limit_reached}.
 take_ticket() ->
     Limit = tickets(),
-    Count =  ets:update_counter(?TABLE_NAME, ?KEY_NAME, 1, {2, 0}),
-    case Count of
-        C when C > Limit ->
-            return_ticket(),
+    case ets:update_counter(?TABLE_NAME, ?KEY_NAME, [{2, 0}, {2, 1, Limit, Limit}], {2, 0}) of
+        [Limit, Limit] ->
             {error, chef_index_update_limit_reached};
-        _ ->
+        [_OldCount, _NewCount] ->
             ok
     end.
 
