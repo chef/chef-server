@@ -236,12 +236,11 @@ check_signed_headers_authhead(SignedHeaders, Headers),
                     case erlang:iolist_to_binary(AWSAccessKeyId) ==
                                erlang:iolist_to_binary(AccessKey) of
                         true ->
-                            %MaxAge = "max-age=" ++ XAmzExpiresString,
-                            %Req1 = wrq:set_resp_header("Cache-Control", MaxAge, Req0),
+                            MaxAge = "max-age=" ++ XAmzExpiresString,
+                            Req1 = wrq:set_resp_header("Cache-Control", MaxAge, Req0),
                             ?debugFmt("~ndo_signed_url_authorization succeeded", []),
                             ?debugFmt("~n-------------------------------------", []),
-                            %{true, Req1, Context};
-                            {true, Req0, Context};
+                            {true, Req1, Context};
                         false ->
                             ?debugFmt("~ndo_signed_url_authorization failed", []),
                             ?debugFmt("~n----------------------------------", []),
