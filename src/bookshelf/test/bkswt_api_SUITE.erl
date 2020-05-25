@@ -116,6 +116,13 @@ start_bookshelf() ->
     %% see messages in common test output.
     lager_common_test_backend:bounce(error),
 
+case application:ensure_all_started(ibrowse) of
+    {ok, _a} ->
+        {ok, _a};
+    {error, _b} ->
+        erlang:error({application_start_failed, _b})
+end,
+
     case application:ensure_all_started(bookshelf) of
         {ok, Apps} ->
             {ok, Apps};
@@ -599,11 +606,12 @@ BogusS3Conf = mini_s3:new(<<"nopenope">>, <<"evenmorenope">>, "http://127.0.0.1:
     Bucket = "thisshouldfail",
 % this should work when auth is turned back on?
 ?debugFmt("~ncalling create_bucket with incompatible config (should be an aws_config) - should fail", []),
-    ?assertError({aws_error, {http_error, 403, _}},
+    ?assertError({aws_error, {http_error, 403, _, _}},
                  mini_s3:create_bucket(Bucket, public_read_write, none, BogusS3Conf)),
     %% also verify that unsigned URL requests don't crash
     {ok, Status, _H, Body} = ibrowse:send_req("http://127.0.0.1:4321/foobar", [],
                                               get),
+?debugFmt("~nStatus: ~p~n_H: ~p~nBody: ~p", [Status, _H, Body]),
     ?assertEqual("403", Status),
     ?assert(string:str(Body, "<Message>Access Denied</Message>") > 0).
 
