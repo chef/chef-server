@@ -589,8 +589,15 @@ sec_fail(Config) when is_list(Config) ->
 %                   <<"evenmorenope">>,
 %                   path,
 %                   []},
+%-record(config, {
+%          s3_url="http://s3.amazonaws.com"::string(),
+%          access_key_id::string(),
+%          secret_access_key::string(),
+%          bucket_access_type=virtual_hosted::mini_s3:bucket_access_type(),
+%          ssl_options=[]::proplists:proplist()}).
 BogusS3Conf = mini_s3:new(<<"nopenope">>, <<"evenmorenope">>, "http://127.0.0.1:4321", path, []),
     Bucket = "thisshouldfail",
+% this should work when auth is turned back on?
 ?debugFmt("~ncalling create_bucket with incompatible config (should be an aws_config) - should fail", []),
     ?assertError({aws_error, {http_error, 403, _}},
                  mini_s3:create_bucket(Bucket, public_read_write, none, BogusS3Conf)),
