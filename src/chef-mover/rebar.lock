@@ -109,7 +109,7 @@
   1},
  {<<"mini_s3">>,
   {git,"git://github.com/chef/mini_s3.git",
-       {ref,"df0c68ea901343b8e0c647142d88d7f3aae27e7b"}},
+       {ref,"097921308c854810c7c4a34d5d245fb4470827d7"}},
   0},
  {<<"mixer">>,
   {git,"git://github.com/opscode/mixer.git",
