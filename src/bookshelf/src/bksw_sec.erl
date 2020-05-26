@@ -62,8 +62,6 @@ do_signed_url_authorization(RequestId, Req0, Context, Headers0) ->
     QueryParams = wrq:req_qs(Req0),
     ?debugFmt("~nquery string: ~p", [QueryParams]),
 
-    "AWS4-HMAC-SHA256" = wrq:get_qs_value("X-Amz-Algorithm", Req0),
-
     Credential = wrq:get_qs_value("X-Amz-Credential", Req0),
     ?debugFmt("~nx-amz-credential:  ~p", [wrq:get_qs_value("X-Amz-Credential", Req0)]),
 
@@ -73,7 +71,7 @@ do_signed_url_authorization(RequestId, Req0, Context, Headers0) ->
     SignedHeaderKeysString = wrq:get_qs_value("X-Amz-SignedHeaders", Req0),
     ?debugFmt("~nsigned header keys string: ~p", [SignedHeaderKeysString]),
 
-    IncomingSignature = wrq:get_qs_value("X-Amz-Signature", Req0),
+    (IncomingSignature = wrq:get_qs_value("X-Amz-Signature", Req0)) ,
     ?debugFmt("~nincoming signature: ~p", [IncomingSignature]),
 
     % only used with query string (presigned url)
@@ -82,25 +80,38 @@ do_signed_url_authorization(RequestId, Req0, Context, Headers0) ->
     XAmzExpiresString = wrq:get_qs_value("X-Amz-Expires", Req0),
     ?debugFmt("~nx-amz-expires: ~p", [XAmzExpiresString]),
 
+    % maybe factor this out into common
+    % maybe don't need throw
+    [X /= undefined orelse throw({RequestId, Req0, Context}) || X <- [Credential, SignedHeaderKeysString, IncomingSignature, XAmzDate, XAmzExpiresString]],
+
     ?debugFmt("~ncalling do_common_authorization", []),
     do_common_authorization(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, presigned_url).
 
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
 do_standard_authorization(RequestId, IncomingAuth, Req0, Context, Headers0) ->
+    try
     ?debugFmt("~nDOING STANDARD AUTHORIZATION", []),
     ?debugFmt("~nIncomingAuth: ~p", [IncomingAuth]),
 
-    [Credential, SignedHeaderKeysString, IncomingSignature] = parse_authorization(IncomingAuth),
+    (ParseAuth = parse_authorization(IncomingAuth)) /= err orelse throw({RequestId, Req0, Context}),
+    [Credential, SignedHeaderKeysString, IncomingSignature] = ParseAuth,
     ?debugFmt("~nAuthorization:~n~p~n~p~n~p", [Credential, SignedHeaderKeysString, IncomingSignature]),
-
 %    [AWSAccessKeyId, CredentialScopeDate | _]  = parse_x_amz_credential(Credential),
 %    %?debugFmt("~naws-access-key-id: ~p~nCredentialScopeDate: ~p", [AWSAccessKeyId, CredentialScopeDate]),
 
     XAmzDate = wrq:get_req_header("x-amz-date", Req0),
     ?debugFmt("~nXAmzDate: ~p", [XAmzDate]),
 
+    % maybe factor this out into common
+    % maybe don't need throw
+    [X /= undefined orelse throw({RequestId, Req0, Context}) || X <- [Credential, SignedHeaderKeysString, IncomingSignature, XAmzDate]],
+
     ?debugFmt("~ncalling do_common_authorization", []),
-    do_common_authorization(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header).
+    do_common_authorization(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header)
+
+    catch
+        {RequestId, Req0, Context} -> encode_access_denied_error_response(RequestId, Req0, Context)
+    end.
 
 %%-ifdef(TESTxxx).
 %%% tests sometimes use the following credentials:
@@ -121,8 +132,9 @@ do_standard_authorization(RequestId, IncomingAuth, Req0, Context, Headers0) ->
 %%-endif.
 
 do_common_authorization(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, VerificationType) ->
-try
-    [AWSAccessKeyId, CredentialScopeDate, Region | _]  = parse_x_amz_credential(Credential),
+    try
+    (ParseCred = parse_x_amz_credential(Credential)) /= err orelse throw({RequestId, Req0, Context}),
+    [AWSAccessKeyId, CredentialScopeDate, Region | _] = ParseCred,
     ?debugFmt("~naws-access-key-id: ~p", [AWSAccessKeyId]),
 
     %{AccessKey, SecretKey} = getkeys(AWSAccessKeyId, Context),
@@ -135,7 +147,7 @@ try
 
     % https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
     DateIfUndefined = fun() -> wrq:get_req_header("date", Req0) end,
-    Date = get_check_date(XAmzDate, DateIfUndefined, CredentialScopeDate),
+    (Date = get_check_date(XAmzDate, DateIfUndefined, CredentialScopeDate)) /= err orelse throw({RequestId, Req0, Context}),
 
     Headers = process_headers(Headers0),
     ?debugFmt("~nheaders: ~p", [Headers]),
@@ -184,9 +196,11 @@ try
         presigned_url ->
             ?debugFmt("~nverification type: presigned_url", []),
 
-% temporarily disabling this - should be re-enabled later
-%            true = check_signed_headers_common(SignedHeaders, Headers),
-check_signed_headers_common(SignedHeaders, Headers),
+            "AWS4-HMAC-SHA256" == wrq:get_qs_value("X-Amz-Algorithm", Req0) orelse throw({RequestId, Req0, Context}),
+
+            % temporarily disabling this - should be re-enabled later
+            %true == check_signed_headers_common(SignedHeaders, Headers) orelse throw({RequestId, Req0, Context}),
+            check_signed_headers_common(SignedHeaders, Headers),
 
             ComparisonURL = mini_s3:s3_url(list_to_atom(Method), BucketName, Key, XAmzExpires, SignedHeaders, Date, Config),
             ?debugFmt("~ncomparison url: ~p", [ComparisonURL]),
@@ -201,9 +215,9 @@ check_signed_headers_common(SignedHeaders, Headers),
             QueryParams = wrq:req_qs(Req0),
             ?debugFmt("~nQueryParams: ~p", [QueryParams]),
 
-% temporarily disabling this - should be re-enabled later
-%            true = check_signed_headers_authhead(SignedHeaders, Headers),
-check_signed_headers_authhead(SignedHeaders, Headers),
+            % temporarily disabling this - should be re-enabled later
+            %true == check_signed_headers_authhead(SignedHeaders, Headers) orelse throw({RequestId, Req0, Context}),
+            check_signed_headers_authhead(SignedHeaders, Headers),
 
             % this header will be calculated and should not be passed-in
             SignedHeadersNo256 = lists:keydelete("x-amz-content-sha256", 1, SignedHeaders),
@@ -217,7 +231,9 @@ check_signed_headers_authhead(SignedHeaders, Headers),
             ?debugFmt("~nsigv4headers: ~p", [SigV4Headers]),
 
             Sig1 = IncomingSignature,
-            [_, _, ComparisonSig] = parse_authorization(proplists:get_value("Authorization", SigV4Headers))
+
+            (ParseAuth = parse_authorization(proplists:get_value("Authorization", SigV4Headers, ""))) /= err orelse throw({RequestId, Req0, Context}),
+            [_, _, ComparisonSig] = ParseAuth
     end,
 
     ?debugFmt("~nsig1: ~p", [Sig1         ]),
@@ -256,10 +272,8 @@ check_signed_headers_authhead(SignedHeaders, Headers),
             encode_access_denied_error_response(RequestId, Req0, Context)
     end
 
-    of Success -> Success
     catch
-        TypeOfErr:ExceptionPattern -> ?debugFmt("~nbksw_sec: crash! ~p", [{TypeOfErr, ExceptionPattern}]),
-                                      1/0
+        {RequestId, Req0, Context} -> encode_access_denied_error_response(RequestId, Req0, Context)
     end.
 
 
@@ -384,7 +398,7 @@ check_signed_headers_common(SignedHeaders, Headers) ->
 % any x-amz-* headers present in request are required
 [] == [Key || {Key, _} <- Headers, is_amz(Key), not proplists:is_defined(Key, SignedHeaders)].
 
-% split "<bucketname>/<key>" (possibly leading-trailing /) into {"bucketname", "key"}
+% split  "<bucketname>/<key>" (possibly leading-trailing /) into {"bucketname", "key"}
 % Path = "<bucketname>/<key>"
 -spec get_bucket_key(string()) -> {string(), string()}.
 get_bucket_key(Path) ->
@@ -396,15 +410,16 @@ get_bucket_key(Path) ->
     end.
 
 % https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
--spec get_check_date(string(), string(), string()) -> string().
+-spec get_check_date(string(), string(), string()) -> string() | err.
 get_check_date(ISO8601Date, DateIfUndefined, [A, B, C, D, E, F, G, H]) ->
-    Date = case ISO8601Date of
-               undefined ->
-                       DateIfUndefined();
-                   _ ->
-                       ISO8601Date
-               end,
-    [A, B, C, D, E, F, G, H, $T, _, _, _, _, _, _, $Z] = Date.
+    Date =  case ISO8601Date of
+                undefined -> DateIfUndefined();
+                _         -> ISO8601Date
+            end,
+    case Date of
+        [A, B, C, D, E, F, G, H, $T, _, _, _, _, _, _, $Z] -> Date;
+        _                                                  -> err
+    end.
 
 %% get key-value pairs (headers) associated with specified keys
 %get_signed_headers(SignedHeaderKeys, Headers) ->
@@ -424,16 +439,24 @@ get_signed_headers([Key | SignedHeaderKeys], Headers0, SignedHeaders) ->
 
 % split authorization header into component parts
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
-- spec parse_authorization(string()) -> [string()].
+- spec parse_authorization(string()) -> [string()] | err.
 parse_authorization(Auth) ->
-   ["AWS4-HMAC-SHA256", "Credential="++Cred, "SignedHeaders="++SigHead, "Signature="++Signature] = string:split(Auth, " ", all),
-   [string:trim(Cred, trailing, ","), string:trim(SigHead, trailing, ","), Signature].
+    case string:split(Auth, " ", all) of
+        ["AWS4-HMAC-SHA256", "Credential="++Cred, "SignedHeaders="++SigHead, "Signature="++Signature] ->
+            [string:trim(Cred, trailing, ","), string:trim(SigHead, trailing, ","), Signature];
+        _ ->
+            err
+    end.
 
 % split credentials string into component parts
 % Cred = "<access-key-id>/<date>/<AWS-region>/<AWS-service>/aws4_request"
 - spec parse_x_amz_credential(string()) -> [string()].
 parse_x_amz_credential(Cred) ->
-   [_access_key_id, _date, _aws_region, "s3", "aws4_request"] = string:split(Cred, "/", all).
+    X = string:split(Cred, "/", all),
+    case X of
+        [_access_key_id, _date, _aws_region, "s3", "aws4_request"] -> X;
+        _                                                          -> err
+    end.
 
 % split signed header string into component parts
 % Headers = "<header1>;<header2>;...<headerN>"
