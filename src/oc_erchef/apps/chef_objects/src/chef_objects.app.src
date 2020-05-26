@@ -109,6 +109,11 @@
          %%
          %% Of course, you could also just set it to 'off' if you want
          %% every URL to be unique
-         {s3_url_expiry_window_size, {15, percent}}
+         {s3_url_expiry_window_size, {15, percent}},
+
+         %% Ssl Options used for mini_s3 connecting to ibrowse
+         %% Default the IPv6 mode to false; this should be changed to true
+         %% in IPV6 mode
+         {s3_ssl_opts, [{connect_timeout, 10000}, {prefer_ipv6, false}]}
         ]}
  ]}.

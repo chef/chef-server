@@ -282,6 +282,7 @@
         {s3_url_expiry_window_size, <%= @helper.s3_url_caching(node['private_chef']['opscode-erchef']['s3_url_expiry_window_size']) %>},
         {s3_parallel_ops_timeout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_timeout'] %>},
         {s3_parallel_ops_fanout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_fanout'] %>},
+        {s3_ssl_opts, <%= @solr_ibrowse_options %>},
         {depsolver_timeout, <%= @depsolver_timeout %>},
         {depsolver_pooler_timeout, <%= @depsolver_pooler_timeout %>}
     ]},
