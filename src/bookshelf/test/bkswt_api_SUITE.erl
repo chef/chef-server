@@ -118,9 +118,7 @@ start_bookshelf() ->
 
 case application:ensure_all_started(ibrowse) of
     {ok, _a} ->
-        {ok, _a};
-    {error, _b} ->
-        erlang:error({application_start_failed, _b})
+        {ok, _a}
 end,
 
     case application:ensure_all_started(bookshelf) of
