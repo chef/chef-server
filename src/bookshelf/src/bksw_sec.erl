@@ -212,14 +212,15 @@ do_common_authorization(RequestId, Req0, #context{reqid = ReqId} = Context, Cred
             check_signed_headers_authhead(SignedHeaders, Headers),
 
             % this header will be calculated and should not be passed-in
-            SignedHeadersNo256 = lists:keydelete("x-amz-content-sha256", 1, SignedHeaders),
+%            SignedHeadersNo256 = lists:keydelete("x-amz-content-sha256", 1, SignedHeaders),
 
             %SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Url, Config, Headers, Payload, Region, "s3", QueryParams, Date),
             %SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Url, Config, SignedHeaders, "UNSIGNED-PAYLOAD", Region, "s3", QueryParams, Date),
             % removed payload (replaced with <<>>), signedheaders = host: api, changed Url for Path
             %SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Path, Config, [{"host", "api"}], <<>>, Region, "s3", QueryParams, Date),
             % unsigned payload
-            SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Path, Config, SignedHeadersNo256, <<>>, Region, "s3", QueryParams, Date),
+%            SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Path, Config, SignedHeadersNo256, <<>>, Region, "s3", QueryParams, Date),
+            SigV4Headers = erlcloud_aws:sign_v4(list_to_atom(Method), Path, Config, SignedHeaders, <<>>, Region, "s3", QueryParams, Date),
             ?debugFmt("~nsigv4headers: ~p", [SigV4Headers]),
 
             Sig1 = IncomingSignature,
