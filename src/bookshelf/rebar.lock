@@ -49,7 +49,7 @@
   0},
  {<<"mini_s3">>,
   {git,"git://github.com/chef/mini_s3.git",
-       {ref,"097921308c854810c7c4a34d5d245fb4470827d7"}},
+       {ref,"cb3619ef3a156cddd0656284364e750b83a43049"}},
   0},
  {<<"mixer">>,
   {git,"git://github.com/chef/mixer.git",
