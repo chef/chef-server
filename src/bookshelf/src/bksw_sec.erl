@@ -62,34 +62,30 @@ do_signed_url_authorization(RequestId, Req0, Context, Headers0) ->
     QueryParams = wrq:req_qs(Req0),
     ?debugFmt("~nquery string: ~p", [QueryParams]),
 
-    Credential = wrq:get_qs_value("X-Amz-Credential", Req0),
-    ?debugFmt("~nx-amz-credential:  ~p", [wrq:get_qs_value("X-Amz-Credential", Req0)]),
+    Credential = wrq:get_qs_value("X-Amz-Credential", "", Req0),
+    ?debugFmt("~nx-amz-credential:  ~p", [wrq:get_qs_value("X-Amz-Credential", "", Req0)]),
 
-    XAmzDate = wrq:get_qs_value("X-Amz-Date", Req0),
+    % can be undefined
+    XAmzDate = wrq:get_qs_value("X-Amz-Date", "", Req0),
     ?debugFmt("~nXAmzDate: ~p", [XAmzDate]),
 
-    SignedHeaderKeysString = wrq:get_qs_value("X-Amz-SignedHeaders", Req0),
+    SignedHeaderKeysString = wrq:get_qs_value("X-Amz-SignedHeaders", "", Req0),
     ?debugFmt("~nsigned header keys string: ~p", [SignedHeaderKeysString]),
 
-    (IncomingSignature = wrq:get_qs_value("X-Amz-Signature", Req0)) ,
+    IncomingSignature = wrq:get_qs_value("X-Amz-Signature", "", Req0),
     ?debugFmt("~nincoming signature: ~p", [IncomingSignature]),
 
     % only used with query string (presigned url)
     % authentication, not with authorization header
     % 1 =< XAmzExpires =< 604800
-    XAmzExpiresString = wrq:get_qs_value("X-Amz-Expires", Req0),
+    XAmzExpiresString = wrq:get_qs_value("X-Amz-Expires", "", Req0),
     ?debugFmt("~nx-amz-expires: ~p", [XAmzExpiresString]),
-
-    % maybe factor this out into common
-    % maybe don't need throw
-    [X /= undefined orelse throw({RequestId, Req0, Context}) || X <- [Credential, SignedHeaderKeysString, IncomingSignature, XAmzDate, XAmzExpiresString]],
 
     ?debugFmt("~ncalling do_common_authorization", []),
     do_common_authorization(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, presigned_url).
 
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
 do_standard_authorization(RequestId, IncomingAuth, Req0, Context, Headers0) ->
-    try
     ?debugFmt("~nDOING STANDARD AUTHORIZATION", []),
     ?debugFmt("~nIncomingAuth: ~p", [IncomingAuth]),
 
@@ -99,19 +95,12 @@ do_standard_authorization(RequestId, IncomingAuth, Req0, Context, Headers0) ->
 %    [AWSAccessKeyId, CredentialScopeDate | _]  = parse_x_amz_credential(Credential),
 %    %?debugFmt("~naws-access-key-id: ~p~nCredentialScopeDate: ~p", [AWSAccessKeyId, CredentialScopeDate]),
 
+    % can be undefined
     XAmzDate = wrq:get_req_header("x-amz-date", Req0),
     ?debugFmt("~nXAmzDate: ~p", [XAmzDate]),
 
-    % maybe factor this out into common
-    % maybe don't need throw
-    [X /= undefined orelse throw({RequestId, Req0, Context}) || X <- [Credential, SignedHeaderKeysString, IncomingSignature, XAmzDate]],
-
     ?debugFmt("~ncalling do_common_authorization", []),
-    do_common_authorization(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header)
-
-    catch
-        {RequestId, Req0, Context} -> encode_access_denied_error_response(RequestId, Req0, Context)
-    end.
+    do_common_authorization(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header).
 
 %%-ifdef(TESTxxx).
 %%% tests sometimes use the following credentials:
@@ -133,21 +122,27 @@ do_standard_authorization(RequestId, IncomingAuth, Req0, Context, Headers0) ->
 
 do_common_authorization(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, VerificationType) ->
     try
+
+    % handle undefined, err
+
+    (Host = wrq:get_req_header("Host", Req0)) /= undefined orelse throw({RequestId, Req0, Context}),
+    ?debugFmt("~nhost: ~p", [Host]),
+
     (ParseCred = parse_x_amz_credential(Credential)) /= err orelse throw({RequestId, Req0, Context}),
     [AWSAccessKeyId, CredentialScopeDate, Region | _] = ParseCred,
-    ?debugFmt("~naws-access-key-id: ~p", [AWSAccessKeyId]),
-
-    %{AccessKey, SecretKey} = getkeys(AWSAccessKeyId, Context),
-    {AccessKey, SecretKey} = {"e1efc99729beb175", "fc683cd9ed1990ca"},
-
-    ?debugFmt("~naccess-key-id: ~p",     [AccessKey]),
-    ?debugFmt("~nsecret-access-key: ~p", [SecretKey]),
-
-    %AccessKey = AWSAccessKeyId,
 
     % https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
     DateIfUndefined = fun() -> wrq:get_req_header("date", Req0) end,
     (Date = get_check_date(XAmzDate, DateIfUndefined, CredentialScopeDate)) /= err orelse throw({RequestId, Req0, Context}),
+
+
+
+    %{AccessKey, SecretKey} = getkeys(AWSAccessKeyId, Context),
+    {AccessKey, SecretKey} = {"e1efc99729beb175", "fc683cd9ed1990ca"},
+
+    ?debugFmt("~naws-access-key-id: ~p", [AWSAccessKeyId]),
+    ?debugFmt("~naccess-key-id: ~p",     [AccessKey]),
+    ?debugFmt("~nsecret-access-key: ~p", [SecretKey]),
 
     Headers = process_headers(Headers0),
     ?debugFmt("~nheaders: ~p", [Headers]),
@@ -173,9 +168,6 @@ do_common_authorization(RequestId, Req0, #context{reqid = ReqId} = Context, Cred
     {BucketName, Key} = get_bucket_key(Path),
     ?debugFmt("~nbucketname: ~p", [BucketName]),
     ?debugFmt("~nkey: ~p", [Key]),
-
-    Host = wrq:get_req_header("Host", Req0),
-    ?debugFmt("~nhost: ~p", [Host]),
 
     % which key/secret to use?
     % what to use for host value?
@@ -412,10 +404,10 @@ get_bucket_key(Path) ->
 % https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
 -spec get_check_date(string(), string(), string()) -> string() | err.
 get_check_date(ISO8601Date, DateIfUndefined, [A, B, C, D, E, F, G, H]) ->
-    Date =  case ISO8601Date of
-                undefined -> DateIfUndefined();
-                _         -> ISO8601Date
-            end,
+    Date = case ISO8601Date of
+               undefined -> DateIfUndefined();
+               _         -> ISO8601Date
+           end,
     case Date of
         [A, B, C, D, E, F, G, H, $T, _, _, _, _, _, _, $Z] -> Date;
         _                                                  -> err

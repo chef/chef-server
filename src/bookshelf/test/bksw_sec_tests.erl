@@ -42,12 +42,13 @@ get_bucket_key_test() ->
 
 %https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
 get_check_date_test() ->
-    ISO8601Date =         "20151014T235959Z",
+    ISO8601Date         = "20151014T235959Z",
     CredentialScopeDate = "20151014",
-    DateIfUndefined =      fun() -> ISO8601Date end,
-    Impossible =           fun() -> impossible  end,
-    ISO8601Date =          bksw_sec:get_check_date(ISO8601Date, Impossible,      CredentialScopeDate),
-    ISO8601Date =          bksw_sec:get_check_date(undefined,   DateIfUndefined, CredentialScopeDate).
+    DateIfUndefined     =  fun() -> ISO8601Date end,
+    Impossible          =  fun() -> impossible  end,
+    ISO8601Date         =  bksw_sec:get_check_date(ISO8601Date, Impossible,             CredentialScopeDate),
+    ISO8601Date         =  bksw_sec:get_check_date(undefined,   DateIfUndefined,        CredentialScopeDate),
+    err                 =  bksw_sec:get_check_date(undefined,   fun() -> undefined end, CredentialScopeDate).
 
 % get key-value pairs (headers) associated with specified keys.
 % for each key, get first occurance of key-value. for duplicated
