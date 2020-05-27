@@ -165,7 +165,8 @@ aws_config(S3Url) ->
     {ok, S3AccessKeyId} = chef_secrets:get(<<"bookshelf">>, <<"access_key_id">>),
     {ok, S3SecretKeyId} = chef_secrets:get(<<"bookshelf">>, <<"secret_access_key">>),
     SslOpts = envy:get(chef_objects, s3_ssl_opts, [], list),
-    mini_s3:new(erlang:binary_to_list(S3AccessKeyId), erlang:binary_to_list(S3SecretKeyId), S3Url, path, SslOpts).
+    IbrowseOpts = envy:get(chef_objects, s3_ibrowse_opts, [], list),
+    mini_s3:new(erlang:binary_to_list(S3AccessKeyId), erlang:binary_to_list(S3SecretKeyId), S3Url, path, SslOpts, IbrowseOpts).
 
 %% @doc returns a url for accessing s3 internally. This is used
 %% to contact bookshelf or S3.
