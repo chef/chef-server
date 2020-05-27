@@ -491,6 +491,7 @@ S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?s
     mini_s3:put_object(Bucket, NameExists, Data, [], [], S3Conf),
 
     SignedUrl = mini_s3:s3_url('get', Bucket, NameMissing, 1000, [], S3Conf),
+?debugFmt("~nbkswt_api_SUITE:cache_control - SignedUrl = : ~p", [SignedUrl]),
     {ok, Result} = httpc:request(erlang:binary_to_list(SignedUrl)),
     {{_, 404, _}, HeadersMissing, _} = Result,
 ?debugFmt("~nbkswt_api_SUITE:cache_control - ~nHeadersMissing: ~p", [HeadersMissing]),
