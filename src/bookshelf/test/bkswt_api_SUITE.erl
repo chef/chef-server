@@ -361,6 +361,16 @@ S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?s
     % sanity check
     ?assertEqual(BucketsBefore, bucket_list(S3Conf)).
 
+% i don't understand this test:
+% 1) from what i've seen, erlcloud url-encodes things before sending them off
+% 2) if so, then if this test is sending a url-encoded bucket name, we would then
+%    eventually be url-encoding something that is already url-encoded
+% 3) if this test instead wants to test whether an 'odd' but non url-encoded name works,
+%    the '%' character in the bucket name violates s3 object and bucket naming guidelines:
+%    https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html
+%    https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-s3-bucket-naming-requirements.html
+%    https://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html
+%    for now, changing this test until more clarification is forthcoming.
 bucket_encoding(doc) ->
     ["should be able to create buckets with URL encoding"];
 bucket_encoding(suite) ->
@@ -374,7 +384,7 @@ S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?s
 ?debugFmt("~nS3Conf: ~0p", [S3Conf]),
 
     OddBucket = "a bucket",
-    OddBucketEnc = "a%20bucket",
+    OddBucketEnc = OddBucket, %"a%20bucket",
 Z = mini_s3:create_bucket(OddBucketEnc, public_read_write, none, S3Conf),
 ?debugFmt("~nbucket_encoding create_bucket result: ~p", [Z]),
 ?debugFmt("~nbucket_encoding bucket_exists: ~p", [bucket_exists(OddBucket, S3Conf)]),
@@ -798,7 +808,7 @@ bucket_exists(Name, S3Conf) ->
     %X = lists:member(Name, BucketNames),
     % http_uri deprecated since OTP 23. Use the module uri_string for 21+
     % what's with the orelse clause here? revisit this (bucket_list prob needs to return url-decoded).
-    X = lists:member(Name, BucketNames) orelse lists:member(http_uri:encode(Name), BucketNames),
+    X = lists:member(Name, BucketNames), % orelse lists:member(http_uri:encode(Name), BucketNames),
 %X = [] /= [true || BucketName <- BucketNames, Name <- [http_uri:decode(BucketName)]],
 ?debugFmt("~nbucket_exists result: ~p", [X]),
     X.
