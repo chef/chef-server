@@ -116,8 +116,8 @@ do_standard_authorization(RequestId, IncomingAuth, Req0, Context, Headers0) ->
 %%    {bksw_conf:access_key_id(Context), bksw_conf:secret_access_key(Context)}.
 %%    %bksw_conf:keys().
 %%-else.
-%getkeys(_, Context) ->
-%    {bksw_conf:access_key_id(Context), bksw_conf:secret_access_key(Context)}.
+getkeys(_, Context) ->
+    {bksw_conf:access_key_id(Context), bksw_conf:secret_access_key(Context)}.
 %%-endif.
 
 do_common_authorization(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, VerificationType) ->
@@ -137,8 +137,8 @@ do_common_authorization(RequestId, Req0, #context{reqid = ReqId} = Context, Cred
 
 
 
-    %{AccessKey, SecretKey} = getkeys(AWSAccessKeyId, Context),
-    {AccessKey, SecretKey} = {"e1efc99729beb175", "fc683cd9ed1990ca"},
+    {AccessKey, SecretKey} = getkeys(AWSAccessKeyId, Context),
+    %{AccessKey, SecretKey} = {"e1efc99729beb175", "fc683cd9ed1990ca"},
 
     ?debugFmt("~naws-access-key-id: ~p", [AWSAccessKeyId]),
     ?debugFmt("~naccess-key-id: ~p",     [AccessKey]),
