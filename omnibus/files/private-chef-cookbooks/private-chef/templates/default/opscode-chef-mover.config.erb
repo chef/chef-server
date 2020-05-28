@@ -97,8 +97,7 @@
                   {s3_platform_bucket_name, "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>"},
                   {s3_url_ttl, <%= node['private_chef']['opscode-erchef']['s3_url_ttl'] %>},
                   {s3_parallel_ops_timeout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_timeout'] %>},
-                  {s3_parallel_ops_fanout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_fanout'] %>},
-                  {s3_ssl_opts, <%= @solr_ibrowse_options %>}
+                  {s3_parallel_ops_fanout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_fanout'] %>}
                  ]},
   {stats_hero, [
                {udp_socket_pool_size, <%= @udp_socket_pool_size || @db_pool_size %> },

@@ -112,7 +112,7 @@
          {s3_url_expiry_window_size, {15, percent}},
 
          %% Ssl Options used for mini_s3 connecting to ibrowse
-         {s3_ssl_opts, [{connect_timeout, 10000}]},
+         {s3_ssl_opts, []},
 
          %% Ibrowse Options used for mini_s3 connecting to ibrowse
          %% Default the IPv6 mode to false; this should be changed to true
