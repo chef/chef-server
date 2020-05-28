@@ -86,6 +86,8 @@ do_signed_url_authorization(RequestId, Req0, Context, Headers0) ->
 
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
 do_standard_authorization(RequestId, IncomingAuth, Req0, Context, Headers0) ->
+%TODO:
+% ADD TRY CATCH!!!!!!!!
     ?debugFmt("~nDOING STANDARD AUTHORIZATION", []),
     ?debugFmt("~nIncomingAuth: ~p", [IncomingAuth]),
 
@@ -131,6 +133,7 @@ do_common_authorization(RequestId, Req0, #context{reqid = ReqId} = Context, Cred
     (ParseCred = parse_x_amz_credential(Credential)) /= err orelse throw({RequestId, Req0, Context}),
     [AWSAccessKeyId, CredentialScopeDate, Region | _] = ParseCred,
 
+    % TODO: explain rationale for doing it this way (ease of unit testing)
     % https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
     DateIfUndefined = fun() -> wrq:get_req_header("date", Req0) end,
     (Date = get_check_date(XAmzDate, DateIfUndefined, CredentialScopeDate)) /= err orelse throw({RequestId, Req0, Context}),
@@ -169,9 +172,14 @@ do_common_authorization(RequestId, Req0, #context{reqid = ReqId} = Context, Cred
     ?debugFmt("~nbucketname: ~p", [BucketName]),
     ?debugFmt("~nkey: ~p", [Key]),
 
+%TODO:
+% would be nice when flagging errors to flag more specific errors than signing error or forbidden,
+% and write pedant tests to check those errors.
+
     % which key/secret to use?
     % what to use for host value?
     % make sure to set the region and service here? or check defaults
+    % TODO: new may eventually need to support ipv6, entailing passing in options.
     Config = mini_s3:new(AccessKey, SecretKey, Host),
 
     Url = erlcloud_s3:get_object_url(BucketName, Key, Config),
@@ -179,6 +187,7 @@ do_common_authorization(RequestId, Req0, #context{reqid = ReqId} = Context, Cred
     ?debugFmt("~nTODO: this path needs to be escaped ^^^", []),
 
 %    This (below) caused a big webmachine error
+%    if you reference as full body vs chunked, you can't reference it the other way and vice versa
 %    Payload = wrq:req_body(Req0),
 %    %?debugFmt("~nbody (payload?): ~p", [Payload]),
 
@@ -402,6 +411,7 @@ get_bucket_key(Path) ->
         [Bucket | Key] -> {Bucket, filename:join(Key)}
     end.
 
+% TODO: change A,B,C etc to Y1, Y2, M1, M2, etc...
 % https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
 -spec get_check_date(string(), string(), string()) -> string() | err.
 get_check_date(ISO8601Date, DateIfUndefined, [A, B, C, D, E, F, G, H]) ->
@@ -418,6 +428,10 @@ get_check_date(ISO8601Date, DateIfUndefined, [A, B, C, D, E, F, G, H]) ->
 %get_signed_headers(SignedHeaderKeys, Headers) ->
 %    lists:flatten([proplists:lookup_all(SignedHeaderKey, Headers) || SignedHeaderKey <- SignedHeaderKeys]).
 
+%TODO: change spec to parameter::type (or whatever it is - look it up)
+%TODO: possibly simplify logic since efficiency should not be a concern.
+%TODO: look at 434, test to see if that 2nd empty list can actually happen.
+%TODO: look at the unit test, consider integration test (pedant test).
 % get key-value pairs (headers) associated with specified keys.
 % for each key, get first occurance of key-value. for duplicated
 % keys, get corresponding key-value pairs. results are undefined
@@ -451,6 +465,7 @@ parse_x_amz_credential(Cred) ->
         _                                                          -> err
     end.
 
+%TODO: explain rationale
 % split signed header string into component parts
 % Headers = "<header1>;<header2>;...<headerN>"
 - spec parse_x_amz_signed_headers(string()) -> [string()].
@@ -488,6 +503,10 @@ process_headers(Headers) ->
 %    Now = calendar:datetime_to_gregorian_seconds(erlang:universaltime()),
 %    bksw_util:to_integer(Expires) - (Now - ?SECONDS_AT_EPOCH).
 
+%TODO: praj says os:timestamp() may not be recommended.  look into alternative.
+% maybe erlang:monotonic_time?
+% make sure everything is timewarp safe.
+% https://erlang.org/doc/apps/erts/time_correction.html
 -spec is_expired(string(), integer()) -> boolean().
 is_expired(DateTimeString, ExpiresInSecondsInt) ->
     % most ways of getting the date/time seem problematic.  for instance, docs for
