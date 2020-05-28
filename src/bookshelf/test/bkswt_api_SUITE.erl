@@ -797,7 +797,7 @@ bucket_exists(Name, S3Conf) ->
 ?debugFmt("~nlooking for ~p in ~p", [Name, BucketNames]),
     %X = lists:member(Name, BucketNames),
     % http_uri deprecated since OTP 23. Use the module uri_string for 21+
-    % what's with the orelse clause here? revisit this.
+    % what's with the orelse clause here? revisit this (bucket_list prob needs to return url-decoded).
     X = lists:member(Name, BucketNames) orelse lists:member(http_uri:encode(Name), BucketNames),
 %X = [] /= [true || BucketName <- BucketNames, Name <- [http_uri:decode(BucketName)]],
 ?debugFmt("~nbucket_exists result: ~p", [X]),
