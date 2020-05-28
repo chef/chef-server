@@ -6,13 +6,15 @@ pkg_deps=(
   core/sqitch_pg
   core/curl
   core/node
-  core/bundler
-  core/ruby
+  core/ruby26
   core/rsync
   core/sed
   core/libffi
   core/sqlite
   core/tzdata
+  core/openssl
+  core/gcc-libs
+  core/glibc
 )
 pkg_build_deps=(
   core/git
@@ -86,9 +88,14 @@ _tar_pipe_app_cp_to() {
 }
 
 do_install() {
-  _bundler_dir="$(pkg_path_for bundler)"
   export HOME="${pkg_prefix}/oc_id"
   mkdir $HOME
+
+  export GEM_HOME="${pkg_prefix}/vendor/bundle"
+  mkdir -p "$GEM_HOME"
+  gem install bundler:1.17.2
+
+
   { git ls-files; git ls-files --exclude-standard --others; } \
       | _tar_pipe_app_cp_to "$HOME"
   bundle config path ${HOME}/vendor/bundle

@@ -16,18 +16,16 @@
 #
 export SVWAIT=30
 
-# This uses a config file to find ourselves (and not hardcode our own package name)
-# Could do relative to $0, but that can be messy sometimes
-pkg_prefix=$(cat /hab/svc/chef-server-ctl/config/pkg_path)
+pkg_prefix=__PKG_PATH__
 cd "$pkg_prefix/omnibus-ctl"
 
-BUNDLE_BIN_DIR=$(hab pkg path "core/bundler")/bin
-RUBY_BIN_DIR=$(hab pkg path "core/ruby")/bin
+RUBY_BIN_DIR=__RUBY_PATH__/bin
 
-export PATH=$PATH:$BUNDLE_BIN_DIR:$RUBY_BIN_DIR
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(hab pkg path "core/libffi")/lib
-export CHEF_SECRETS_DATA=$(cat /hab/svc/chef-server-ctl/config/hab-secrets-config.json)
+export PATH=$PATH:$RUBY_BIN_DIR
+export GEM_PATH="$pkg_prefix/vendor/bundle"
+CHEF_SECRETS_DATA=$(cat /hab/svc/chef-server-ctl/config/hab-secrets-config.json)
+export CHEF_SECRETS_DATA
 export CSC_KNIFE_CONFIG_FILE=/hab/svc/chef-server-ctl/config/pivotal.rb
-export CSC_KNIFE_BIN="${BUNDLE_BIN_DIR}/bundle exec ${pkg_prefix}/chef/bin/knife"
+export CSC_KNIFE_BIN="${RUBY_BIN_DIR}/bundle exec ${pkg_prefix}/chef/bin/knife"
 
 bundle exec binstubs/chef-server-ctl "$@"

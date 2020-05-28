@@ -1,4 +1,4 @@
-#!{{pkgPathFor "core/ruby"}}/bin/ruby
+#!{{pkgPathFor "core/ruby26"}}/bin/ruby
 
 require 'toml'
 require 'openssl'
