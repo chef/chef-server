@@ -736,7 +736,14 @@ upgrade_from_v0(Config) ->
                    {"bucket-1", "zrcsghibdgwjghkqsdajycrjwitntu/ahnsvorjeauuwusthkdunsslzffkfn"},
                    {"bucket-2", "drniwxjwkasvovjjoafthnoqgtlung/lhfivdpsosyjybnmfpxkgplycrclmz"},
                    {"bucket-2", "nbmxbspdkbubastgtzzkhtunqznkcg/afbtmzfyyftrdxfbnmkslckewisxns"},
-                   {"bucket%20space", "xjbrpodcionabrzhikgliowdzvbvbc/kqvfgzhnlkizzvbidsxwavrktxcasx"}
+
+                   % 1) see bucket naming conventions
+                   % 2) erlcloud url-encodes before sending
+                   % https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html
+                   % https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-s3-bucket-naming-requirements.html
+                   % https://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html
+                   %{"bucket%20space", "xjbrpodcionabrzhikgliowdzvbvbc/kqvfgzhnlkizzvbidsxwavrktxcasx"}
+                   {"bucket space", "xjbrpodcionabrzhikgliowdzvbvbc/kqvfgzhnlkizzvbidsxwavrktxcasx"}
                   ],
 
     %S3Conf = ?config(s3_conf, Config),
@@ -753,7 +760,13 @@ S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?s
     AssertCount("bucket-2", 45),
     AssertCount("bucket-3", 1),
     AssertCount("bucket-4", 0),
-    AssertCount("bucket%20space", 2),
+    % see bucket naming conventions
+    % 2) erlcloud url-encodes before sending
+    % https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html
+    % https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-s3-bucket-naming-requirements.html
+    % https://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html
+    %AssertCount("bucket%20space", 2),
+    AssertCount("bucket space", 2),
 
     [ mini_s3:get_object(Bucket, Key, [], S3Conf) || {Bucket, Key} <- ShouldExist ],
     ok.
