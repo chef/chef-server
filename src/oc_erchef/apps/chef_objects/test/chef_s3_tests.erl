@@ -103,7 +103,10 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                                                 {ok, InternalS3Url} = application:get_env(chef_objects, s3_url),
                                                 {ok, ExternalS3Url} = application:get_env(chef_objects, s3_external_url),
                                                 F = url_function(InternalS3Url, ExternalS3Url),
+                                                ?debugFmt("F = ~p", [F]),
+                                                ?debugFmt("Config = ~p", [Config]),
                                                 S3Url = F(Config),
+                                                ?debugFmt("S3Url = ~p", [S3Url]),
                                                 ?assertEqual(ExpectUrl, S3Url),
                                                 stub_s3_url_response
                                         end)
