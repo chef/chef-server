@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.43 -->
-## [13.2.43](https://github.com/chef/chef-server/tree/13.2.43) (2020-05-23)
+<!-- latest_release 13.2.44 -->
+## [13.2.44](https://github.com/chef/chef-server/tree/13.2.44) (2020-05-29)
 
 #### Merged Pull Requests
-- [erchef] Upgrade chef_authn [#2025](https://github.com/chef/chef-server/pull/2025) ([stevendanna](https://github.com/stevendanna))
+- Remove legacy ACC configuration [#2026](https://github.com/chef/chef-server/pull/2026) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Remove legacy ACC configuration [#2026](https://github.com/chef/chef-server/pull/2026) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.44 -->
 - [erchef] Upgrade chef_authn [#2025](https://github.com/chef/chef-server/pull/2025) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.43 -->
 - [terraform] Set ip_version in postgresql-ipv6 tests, disable pushy [#2022](https://github.com/chef/chef-server/pull/2022) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.42 -->
 - Modify security group name to include build_prefix and scenario [#2021](https://github.com/chef/chef-server/pull/2021) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.2.41 -->
