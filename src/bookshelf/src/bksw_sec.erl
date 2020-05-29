@@ -86,8 +86,7 @@ do_signed_url_authorization(RequestId, Req0, Context, Headers0) ->
 
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
 do_standard_authorization(RequestId, IncomingAuth, Req0, Context, Headers0) ->
-%TODO:
-% ADD TRY CATCH!!!!!!!!
+    try
     ?debugFmt("~nDOING STANDARD AUTHORIZATION", []),
     ?debugFmt("~nIncomingAuth: ~p", [IncomingAuth]),
 
@@ -102,7 +101,11 @@ do_standard_authorization(RequestId, IncomingAuth, Req0, Context, Headers0) ->
     ?debugFmt("~nXAmzDate: ~p", [XAmzDate]),
 
     ?debugFmt("~ncalling do_common_authorization", []),
-    do_common_authorization(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header).
+    do_common_authorization(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header)
+
+    catch
+        {RequestId, Req0, Context} -> encode_access_denied_error_response(RequestId, Req0, Context)
+    end.
 
 %%-ifdef(TESTxxx).
 %%% tests sometimes use the following credentials:
