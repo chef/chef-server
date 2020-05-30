@@ -1,7 +1,11 @@
 source 'https://rubygems.org'
 
 gem 'rake'
+
 gem 'chefspec'
+# chef-cli >=3.0.4 requires Ruby version >= 2.7 which chef-server isn't ready for
+gem 'chef-cli', '=3.0.1'
+
 gem 'berkshelf'
 gem 'bundler', '>1.10'
 
