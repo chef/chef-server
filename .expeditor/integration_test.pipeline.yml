@@ -80,6 +80,21 @@ steps:
       executor:
         docker:
 
+  - label: ':terraform: standalone-fresh-install-ipv4-ubuntu-18.04'
+    command: .expeditor/integration_test.pipeline.sh apply
+    artifact_paths:
+      - ./integration_test.log
+      - ./*capture_paths.tar.gz
+    env:
+      SCENARIO: omnibus-standalone-fresh-install
+      PLATFORM: ubuntu-18.04
+      ENABLE_IPV6: false
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
   - label: ':terraform: standalone-upgrade-ipv4-rhel-7'
     command: .expeditor/integration_test.pipeline.sh apply
     artifact_paths:
