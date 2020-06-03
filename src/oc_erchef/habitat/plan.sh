@@ -9,10 +9,11 @@ pkg_deps=(
   core/curl
   core/openssl
   core/gcc-libs
-  core/ruby
+  core/ruby26
   core/sqitch_pg
   core/gecode
-  core/bundler
+  core/libffi
+  core/glibc
 )
 pkg_build_deps=(core/make core/git core/gcc)
 pkg_bin_dirs=(bin)
@@ -74,19 +75,24 @@ do_prepare() {
 
 
 do_build() {
-  _bundler_dir="$(pkg_path_for bundler)"
+  _ruby_dir="$(pkg_path_for core/ruby26)"
   export REL_VERSION=$pkg_version
   export USE_SYSTEM_GECODE=1
   export GEM_HOME="${pkg_path}/vendor/bundle"
-  export GEM_PATH="${_bundler_dir}:${GEM_HOME}"
+  export GEM_PATH="${_ruby_dir}:${GEM_HOME}"
   export LIBRARY_PATH="$(pkg_path_for core/gecode)/lib"
   export LD_LIBRARY_PATH="$(pkg_path_for core/gecode)/lib"
   export CPLUS_INCLUDE_PATH="$(pkg_path_for core/gecode)/include"
+  mkdir -p "$GEM_HOME"
+  gem install bundler:1.17.2
+
   make omnibus
 }
 
 do_install() {
   export HOME="${pkg_prefix}"
+  export GEM_HOME="${pkg_prefix}/vendor/bundle"
+
   cp Gemfile_habitat ${pkg_prefix}/Gemfile
   cp Gemfile_habitat.lock ${pkg_prefix}/Gemfile.lock
   bundle install --gemfile ${pkg_prefix}/Gemfile --path "${pkg_prefix}/vendor/bundle" && bundle config path ${pkg_prefix}/vendor/bundle
