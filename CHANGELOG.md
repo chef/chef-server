@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.46 -->
-## [13.2.46](https://github.com/chef/chef-server/tree/13.2.46) (2020-06-03)
+<!-- latest_release 13.2.47 -->
+## [13.2.47](https://github.com/chef/chef-server/tree/13.2.47) (2020-06-03)
 
 #### Merged Pull Requests
-- [habitat] Explicitly install ruby 1.17 [#2029](https://github.com/chef/chef-server/pull/2029) ([stevendanna](https://github.com/stevendanna))
+- Add the scenario for standalone fresh install [#2028](https://github.com/chef/chef-server/pull/2028) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Add the scenario for standalone fresh install [#2028](https://github.com/chef/chef-server/pull/2028) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.47 -->
 - [habitat] Explicitly install ruby 1.17 [#2029](https://github.com/chef/chef-server/pull/2029) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.46 -->
 - Pin to chef-cli 3.0.1 [#2030](https://github.com/chef/chef-server/pull/2030) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.2.45 -->
 - Remove legacy ACC configuration [#2026](https://github.com/chef/chef-server/pull/2026) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.44 -->
