@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.45 -->
-## [13.2.45](https://github.com/chef/chef-server/tree/13.2.45) (2020-05-30)
+<!-- latest_release 13.2.46 -->
+## [13.2.46](https://github.com/chef/chef-server/tree/13.2.46) (2020-06-03)
 
 #### Merged Pull Requests
-- Pin to chef-cli 3.0.1 [#2030](https://github.com/chef/chef-server/pull/2030) ([christopher-snapp](https://github.com/christopher-snapp))
+- [habitat] Explicitly install ruby 1.17 [#2029](https://github.com/chef/chef-server/pull/2029) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- [habitat] Explicitly install ruby 1.17 [#2029](https://github.com/chef/chef-server/pull/2029) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.46 -->
 - Pin to chef-cli 3.0.1 [#2030](https://github.com/chef/chef-server/pull/2030) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.2.45 -->
 - Remove legacy ACC configuration [#2026](https://github.com/chef/chef-server/pull/2026) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.44 -->
 - [erchef] Upgrade chef_authn [#2025](https://github.com/chef/chef-server/pull/2025) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.43 -->
