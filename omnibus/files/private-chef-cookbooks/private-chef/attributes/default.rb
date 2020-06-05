@@ -20,6 +20,13 @@
 ###
 default['enterprise']['name'] = 'private_chef'
 
+default['wordmarks']['short'] = "chef"
+default['wordmarks']['server']['product'] = "Chef Infra Server"
+default['wordmarks']['server']['short'] = "chef-server"
+default['wordmarks']['server']['website'] = "https://github.com/chef/chef-server"
+default['wordmarks']['server']['conf_dir'] = "/etc/chef-server"
+default['wordmarks']['server']['ctl'] = "chef-server-ctl"
+
 default['private_chef']['removed_services'] = %w(
 opscode-webui
 opscode-solr

@@ -32,7 +32,7 @@ describe BootstrapPreflightValidator do
       allow(PrivateChef).to receive(:credentials).and_return(credentials)
       allow(credentials).to receive(:length).and_return(secret_count)
       allow(credentials).to receive(:exist?).with("#{Chef::Dist::Server::SHORT}", anything).and_return(superuser_key_exists)
-      allow(File).to receive(:exist?).with("/etc/opscode/private-#{ChefConfig::Dist::SHORT}-secrets.json").and_return(false)
+      allow(File).to receive(:exist?).with("/etc/opscode/private-#{node['wordmarks']['short']}-secrets.json").and_return(false)
       allow(File).to receive(:exist?).with("/etc/opscode/pivotal.pem").and_return(false)
     end
 
