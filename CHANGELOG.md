@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.1 -->
-## [14.0.1](https://github.com/chef/chef-server/tree/14.0.1) (2020-06-22)
+<!-- latest_release 14.0.2 -->
+## [14.0.2](https://github.com/chef/chef-server/tree/14.0.2) (2020-06-22)
 
 #### Merged Pull Requests
-- Add sleep and license acceptance to chef-run in openldap scenario [#2037](https://github.com/chef/chef-server/pull/2037) ([christopher-snapp](https://github.com/christopher-snapp))
+- Fix azure scenario to retrieve public ip on first run [#2039](https://github.com/chef/chef-server/pull/2039) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Fix azure scenario to retrieve public ip on first run [#2039](https://github.com/chef/chef-server/pull/2039) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.2 -->
 - Add sleep and license acceptance to chef-run in openldap scenario [#2037](https://github.com/chef/chef-server/pull/2037) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.1 -->
 - Praj/update to 14 [#2034](https://github.com/chef/chef-server/pull/2034) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.0 -->
 - Currently fails to post to es due to an nxdomain error. [#2032](https://github.com/chef/chef-server/pull/2032) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.49 -->
