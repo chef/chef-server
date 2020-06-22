@@ -39,8 +39,6 @@ resource "azurerm_network_security_group" "default" {
 }
 
 resource "azurerm_public_ip" "default" {
-  depends_on = [azurerm_network_security_group.default]
-
   resource_group_name = data.azurerm_resource_group.chef_resource_group.name
   location            = data.azurerm_resource_group.chef_resource_group.location
 
@@ -55,8 +53,6 @@ resource "azurerm_public_ip" "default" {
 }
 
 resource "azurerm_network_interface" "default" {
-  depends_on = [azurerm_public_ip.default]
-
   resource_group_name       = data.azurerm_resource_group.chef_resource_group.name
   location                  = data.azurerm_resource_group.chef_resource_group.location
 
@@ -76,8 +72,6 @@ resource "azurerm_network_interface" "default" {
 }
 
 resource "azurerm_virtual_machine" "default" {
-  depends_on = [azurerm_network_interface.default]
-
   resource_group_name = data.azurerm_resource_group.chef_resource_group.name
   location            = data.azurerm_resource_group.chef_resource_group.location
 
@@ -118,4 +112,13 @@ resource "azurerm_virtual_machine" "default" {
     X-Dept    = var.arm_department
     X-Contact = var.arm_contact
   }
+}
+
+# obtain the ip address after the public ip has been assigned to the virtual machine
+data "azurerm_public_ip" "default" {
+	depends_on = [azurerm_virtual_machine.default]
+
+  resource_group_name = data.azurerm_resource_group.chef_resource_group.name
+
+  name                = "${var.build_prefix}${var.name}-${local.arm_resource_group_name}"
 }
