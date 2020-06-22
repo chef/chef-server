@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.0 -->
-## [14.0.0](https://github.com/chef/chef-server/tree/14.0.0) (2020-06-08)
+<!-- latest_release 14.0.1 -->
+## [14.0.1](https://github.com/chef/chef-server/tree/14.0.1) (2020-06-22)
 
 #### Merged Pull Requests
-- Praj/update to 14 [#2034](https://github.com/chef/chef-server/pull/2034) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add sleep and license acceptance to chef-run in openldap scenario [#2037](https://github.com/chef/chef-server/pull/2037) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Add sleep and license acceptance to chef-run in openldap scenario [#2037](https://github.com/chef/chef-server/pull/2037) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.1 -->
 - Praj/update to 14 [#2034](https://github.com/chef/chef-server/pull/2034) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.0 -->
 - Currently fails to post to es due to an nxdomain error. [#2032](https://github.com/chef/chef-server/pull/2032) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.49 -->
 - Automatically announce release on promotion to stable [#2005](https://github.com/chef/chef-server/pull/2005) ([schisamo](https://github.com/schisamo)) <!-- 13.2.48 -->
