@@ -22,11 +22,11 @@ The test scenarios require the `ARM_SSH_KEY_FILE` environment variable to be pop
 
 ### Azure Resource Manager
 
-Scenarios require that they are run against a compatible resource manager.
+Scenarios require that they are run against a compatible resource group.
 
-You may generate a compatible resource manager using the `ARM_DEPT=Eng ARM_CONTACT=csnapp make create-resource-manager` command.
+You may generate a compatible resource group using the `ARM_DEPT=Eng ARM_CONTACT=csnapp make create-resource-group` command.
 
-***NOTE:*** **There is no automatic reaping of the resource manager.  Make sure you destroy your resource manager using the** `ARM_DEPT=Eng ARM_CONTACT=csnapp make destroy-resource-manager` **command once you are finished testing scenarios and ALL server instances have been destroyed.**
+***NOTE:*** **There is no automatic reaping of the resource group.  Make sure you destroy your resource group using the** `ARM_DEPT=Eng ARM_CONTACT=csnapp make destroy-resource-group` **command once you are finished testing scenarios and ALL server instances have been destroyed.**
 
 ## Running a Scenario
 Environment variables are used to control how the scenarios are executed and can either be passed on the command line before the `make` command or set in the shell's environment (e.g. `$HOME/.bashrc`)

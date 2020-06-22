@@ -7,7 +7,7 @@ output "location" {
 }
 
 output "public_ipv4_address" {
-  value = azurerm_public_ip.default.ip_address
+  value = data.azurerm_public_ip.default.ip_address
 }
 
 output "private_ipv4_address" {
