@@ -95,7 +95,7 @@ resource "azurerm_virtual_machine" "default" {
   }
 
   os_profile {
-    computer_name  = "${var.name}"
+    computer_name  = var.name
     admin_username = "azure"
   }
 
