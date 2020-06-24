@@ -27,6 +27,10 @@ schedules:
     description: "Run a nightly build in the omnibus/adhoc pipeline"
     cronline: "0 6 * * *"
 
+  - name: cleanup_orphaned_test_resources
+    description: Cleanup orphaned test resources
+    cronline: "0 2 * * *" # every day at 2am
+
 pipelines:
   - verify
   - habitat/build
@@ -112,12 +116,9 @@ subscriptions:
           post_commit: true
       - bash:.expeditor/purge_cdn.sh:
           post_commit: true
-  - workload: buildkite_build_canceled:{{agent_id}}:integration_test:*
+  - workload: schedule_triggered:{{agent_id}}:cleanup_orphaned_test_resources:*
     actions:
-      - bash:.expeditor/integration_test.pipeline.sh
-  - workload: buildkite_build_failed:{{agent_id}}:integration_test:*
-    actions:
-      - bash:.expeditor/integration_test.pipeline.sh
+      - bash:.expeditor/cleanup_orphaned_test_resources.sh
 
 promote:
   actions:
