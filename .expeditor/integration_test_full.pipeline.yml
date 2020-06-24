@@ -7,7 +7,7 @@ expeditor:
 steps:
 
   - label: ':terraform: chef-backend-ipv4-rhel-6'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
     env:
@@ -21,7 +21,7 @@ steps:
         docker:
 
   - label: ':terraform: chef-backend-ipv4-rhel-7'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
     env:
@@ -35,7 +35,7 @@ steps:
         docker:
 
   - label: ':terraform: chef-backend-ipv4-rhel-8'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
     env:
@@ -49,7 +49,7 @@ steps:
         docker:
 
   - label: ':terraform: chef-backend-ipv4-ubuntu-16.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
     env:
@@ -63,7 +63,7 @@ steps:
         docker:
 
   - label: ':terraform: chef-backend-ipv4-ubuntu-18.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
     env:
@@ -77,7 +77,7 @@ steps:
         docker:
 
   - label: ':terraform: external-openldap-ipv4-rhel-6'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -92,7 +92,7 @@ steps:
         docker:
 
   - label: ':terraform: external-openldap-ipv4-rhel-7'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -107,7 +107,7 @@ steps:
         docker:
 
   - label: ':terraform: external-openldap-ipv4-rhel-8'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -122,7 +122,7 @@ steps:
         docker:
 
   - label: ':terraform: external-openldap-ipv4-ubuntu-16.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -137,7 +137,7 @@ steps:
         docker:
 
   - label: ':terraform: external-openldap-ipv4-ubuntu-18.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -152,7 +152,7 @@ steps:
         docker:
 
   - label: ':terraform: fips-ipv4-rhel-6'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -167,7 +167,7 @@ steps:
         docker:
 
   - label: ':terraform: fips-ipv4-rhel-7'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -182,7 +182,7 @@ steps:
         docker:
 
   - label: ':terraform: fips-ipv4-rhel-8'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -197,7 +197,7 @@ steps:
         docker:
 
   - label: ':terraform: external-postgresql-ipv4-rhel-6'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -213,7 +213,7 @@ steps:
         docker:
 
   - label: ':terraform: external-postgresql-ipv4-rhel-7'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -229,7 +229,7 @@ steps:
         docker:
 
   - label: ':terraform: external-postgresql-ipv4-rhel-8'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -245,7 +245,7 @@ steps:
         docker:
 
   - label: ':terraform: external-postgresql-ipv4-ubuntu-16.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -261,7 +261,7 @@ steps:
         docker:
 
   - label: ':terraform: external-postgresql-ipv4-ubuntu-18.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -277,7 +277,7 @@ steps:
         docker:
 
   - label: ':terraform: standalone-fresh-install-ipv4-ubuntu-18.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -292,7 +292,7 @@ steps:
         docker:
 
   - label: ':terraform: standalone-upgrade-ipv4-rhel-6'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -307,7 +307,7 @@ steps:
         docker:
 
   - label: ':terraform: standalone-upgrade-ipv4-rhel-7'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -322,7 +322,7 @@ steps:
         docker:
 
   - label: ':terraform: standalone-upgrade-ipv4-ubuntu-16.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -337,7 +337,7 @@ steps:
         docker:
 
   - label: ':terraform: standalone-upgrade-ipv4-ubuntu-18.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -352,7 +352,7 @@ steps:
         docker:
 
   - label: ':terraform: tiered-fresh-install-ipv4-rhel-6'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -367,7 +367,7 @@ steps:
         docker:
 
   - label: ':terraform: tiered-fresh-install-ipv4-rhel-7'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -382,7 +382,7 @@ steps:
         docker:
 
   - label: ':terraform: tiered-fresh-install-ipv4-rhel-8'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -397,7 +397,7 @@ steps:
         docker:
 
   - label: ':terraform: tiered-fresh-install-ipv4-ubuntu-16.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -412,7 +412,7 @@ steps:
         docker:
 
   - label: ':terraform: tiered-fresh-install-ipv4-ubuntu-18.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -427,7 +427,7 @@ steps:
         docker:
 
   - label: ':terraform: tiered-upgrade-ipv4-rhel-6'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -442,7 +442,7 @@ steps:
         docker:
 
   - label: ':terraform: tiered-upgrade-ipv4-rhel-7'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -457,7 +457,7 @@ steps:
         docker:
 
   - label: ':terraform: tiered-upgrade-ipv4-ubuntu-16.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -472,7 +472,7 @@ steps:
         docker:
 
   - label: ':terraform: tiered-upgrade-ipv4-ubuntu-18.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -487,7 +487,7 @@ steps:
         docker:
 
   - label: ':terraform: external-elasticsearch-ipv4-rhel-6'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -502,7 +502,7 @@ steps:
         docker:
 
   - label: ':terraform: external-elasticsearch-ipv4-rhel-7'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -517,7 +517,7 @@ steps:
         docker:
 
   - label: ':terraform: external-elasticsearch-ipv4-rhel-8'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -532,7 +532,7 @@ steps:
         docker:
 
   - label: ':terraform: external-elasticsearch-ipv4-ubuntu-16.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -547,7 +547,7 @@ steps:
         docker:
 
   - label: ':terraform: external-elasticsearch-ipv4-ubuntu-18.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -561,8 +561,128 @@ steps:
       executor:
         docker:
 
+  - label: ':terraform: azure-postgresql-rhel-6'
+    command: .expeditor/integration_test.pipeline.sh azure apply
+    artifact_paths:
+      - ./integration_test.log
+      - ./*capture_paths.tar.gz
+    env:
+      SCENARIO: omnibus-external-postgresql
+      PLATFORM: rhel-6
+      ENABLE_IPV6: false
+      ENABLE_ADDON_PUSH_JOBS: false
+    expeditor:
+      executor:
+        docker:
+      secrets:
+        ARM_TENANT_ID:
+          account: azure/engineering-dev-test
+          field: tenant_id
+        ARM_CLIENT_ID:
+          account: azure/engineering-dev-test
+          field: client_id
+        ARM_CLIENT_SECRET:
+          account: azure/engineering-dev-test
+          field: client_secret
+
+  - label: ':terraform: azure-postgresql-rhel-7'
+    command: .expeditor/integration_test.pipeline.sh azure apply
+    artifact_paths:
+      - ./integration_test.log
+      - ./*capture_paths.tar.gz
+    env:
+      SCENARIO: omnibus-external-postgresql
+      PLATFORM: rhel-7
+      ENABLE_IPV6: false
+      ENABLE_ADDON_PUSH_JOBS: false
+    expeditor:
+      executor:
+        docker:
+      secrets:
+        ARM_TENANT_ID:
+          account: azure/engineering-dev-test
+          field: tenant_id
+        ARM_CLIENT_ID:
+          account: azure/engineering-dev-test
+          field: client_id
+        ARM_CLIENT_SECRET:
+          account: azure/engineering-dev-test
+          field: client_secret
+
+  - label: ':terraform: azure-postgresql-rhel-8'
+    command: .expeditor/integration_test.pipeline.sh azure apply
+    artifact_paths:
+      - ./integration_test.log
+      - ./*capture_paths.tar.gz
+    env:
+      SCENARIO: omnibus-external-postgresql
+      PLATFORM: rhel-8
+      ENABLE_IPV6: false
+      ENABLE_ADDON_PUSH_JOBS: false
+    expeditor:
+      executor:
+        docker:
+      secrets:
+        ARM_TENANT_ID:
+          account: azure/engineering-dev-test
+          field: tenant_id
+        ARM_CLIENT_ID:
+          account: azure/engineering-dev-test
+          field: client_id
+        ARM_CLIENT_SECRET:
+          account: azure/engineering-dev-test
+          field: client_secret
+
+  - label: ':terraform: azure-postgresql-ubuntu-16.04'
+    command: .expeditor/integration_test.pipeline.sh azure apply
+    artifact_paths:
+      - ./integration_test.log
+      - ./*capture_paths.tar.gz
+    env:
+      SCENARIO: omnibus-external-postgresql
+      PLATFORM: ubuntu-16.04
+      ENABLE_IPV6: false
+      ENABLE_ADDON_PUSH_JOBS: false
+    expeditor:
+      executor:
+        docker:
+      secrets:
+        ARM_TENANT_ID:
+          account: azure/engineering-dev-test
+          field: tenant_id
+        ARM_CLIENT_ID:
+          account: azure/engineering-dev-test
+          field: client_id
+        ARM_CLIENT_SECRET:
+          account: azure/engineering-dev-test
+          field: client_secret
+
+  - label: ':terraform: azure-postgresql-ubuntu-18.04'
+    command: .expeditor/integration_test.pipeline.sh azure apply
+    artifact_paths:
+      - ./integration_test.log
+      - ./*capture_paths.tar.gz
+    env:
+      SCENARIO: omnibus-external-postgresql
+      PLATFORM: ubuntu-18.04
+      ENABLE_IPV6: false
+      ENABLE_ADDON_PUSH_JOBS: false
+    expeditor:
+      executor:
+        docker:
+      secrets:
+        ARM_TENANT_ID:
+          account: azure/engineering-dev-test
+          field: tenant_id
+        ARM_CLIENT_ID:
+          account: azure/engineering-dev-test
+          field: client_id
+        ARM_CLIENT_SECRET:
+          account: azure/engineering-dev-test
+          field: client_secret
+
   - label: ':terraform: external-openldap-ipv6-rhel-6'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -578,7 +698,7 @@ steps:
         docker:
 
   - label: ':terraform: external-openldap-ipv6-rhel-7'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -594,7 +714,7 @@ steps:
         docker:
 
   - label: ':terraform: external-openldap-ipv6-rhel-8'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -610,7 +730,7 @@ steps:
         docker:
 
   - label: ':terraform: external-openldap-ipv6-ubuntu-16.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -626,7 +746,7 @@ steps:
         docker:
 
   - label: ':terraform: external-openldap-ipv6-ubuntu-18.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -642,7 +762,7 @@ steps:
         docker:
 
   - label: ':terraform: fips-ipv6-rhel-6'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -658,7 +778,7 @@ steps:
         docker:
 
   - label: ':terraform: fips-ipv6-rhel-7'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -674,7 +794,7 @@ steps:
         docker:
 
   - label: ':terraform: fips-ipv6-rhel-8'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -690,7 +810,7 @@ steps:
         docker:
 
   - label: ':terraform: external-postgresql-ipv6-rhel-6'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -706,7 +826,7 @@ steps:
         docker:
 
   - label: ':terraform: external-postgresql-ipv6-rhel-7'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -722,7 +842,7 @@ steps:
         docker:
 
   - label: ':terraform: external-postgresql-ipv6-rhel-8'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -738,7 +858,7 @@ steps:
         docker:
 
   - label: ':terraform: external-postgresql-ipv6-ubuntu-16.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -754,7 +874,7 @@ steps:
         docker:
 
   - label: ':terraform: external-postgresql-ipv6-ubuntu-18.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -770,7 +890,7 @@ steps:
         docker:
 
   - label: ':terraform: standalone-upgrade-ipv6-rhel-6'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -786,7 +906,7 @@ steps:
         docker:
 
   - label: ':terraform: standalone-upgrade-ipv6-rhel-7'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -802,7 +922,7 @@ steps:
         docker:
 
   - label: ':terraform: standalone-upgrade-ipv6-ubuntu-16.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -818,7 +938,7 @@ steps:
         docker:
 
   - label: ':terraform: standalone-upgrade-ipv6-ubuntu-18.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -834,7 +954,7 @@ steps:
         docker:
 
   - label: ':terraform: tiered-fresh-install-ipv6-rhel-6'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -850,7 +970,7 @@ steps:
         docker:
 
   - label: ':terraform: tiered-fresh-install-ipv6-rhel-7'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -866,7 +986,7 @@ steps:
         docker:
 
   - label: ':terraform: tiered-fresh-install-ipv6-rhel-8'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -882,7 +1002,7 @@ steps:
         docker:
 
   - label: ':terraform: tiered-fresh-install-ipv6-ubuntu-16.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -898,7 +1018,7 @@ steps:
         docker:
 
   - label: ':terraform: tiered-fresh-install-ipv6-ubuntu-18.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -914,7 +1034,7 @@ steps:
         docker:
 
   - label: ':terraform: tiered-upgrade-ipv6-rhel-6'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -930,7 +1050,7 @@ steps:
         docker:
 
   - label: ':terraform: tiered-upgrade-ipv6-rhel-7'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -946,7 +1066,7 @@ steps:
         docker:
 
   - label: ':terraform: tiered-upgrade-ipv6-ubuntu-16.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -962,7 +1082,7 @@ steps:
         docker:
 
   - label: ':terraform: tiered-upgrade-ipv6-ubuntu-18.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -978,7 +1098,7 @@ steps:
         docker:
 
   - label: ':terraform: external-elasticsearch-ipv6-rhel-6'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -994,7 +1114,7 @@ steps:
         docker:
 
   - label: ':terraform: external-elasticsearch-ipv6-rhel-7'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -1010,7 +1130,7 @@ steps:
         docker:
 
   - label: ':terraform: external-elasticsearch-ipv6-rhel-8'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -1026,7 +1146,7 @@ steps:
         docker:
 
   - label: ':terraform: external-elasticsearch-ipv6-ubuntu-16.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -1042,7 +1162,7 @@ steps:
         docker:
 
   - label: ':terraform: external-elasticsearch-ipv6-ubuntu-18.04'
-    command: .expeditor/integration_test.pipeline.sh apply
+    command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
@@ -1069,3 +1189,13 @@ steps:
         - aws/chef-cd
       executor:
         docker:
+      secrets:
+        ARM_TENANT_ID:
+          account: azure/engineering-dev-test
+          field: tenant_id
+        ARM_CLIENT_ID:
+          account: azure/engineering-dev-test
+          field: client_id
+        ARM_CLIENT_SECRET:
+          account: azure/engineering-dev-test
+          field: client_secret

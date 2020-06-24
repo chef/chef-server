@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
 prog='integration_test.pipeline.sh'
+cloud=
 action=
 
 # number of seconds before AWS token expires
-AWS_TOKEN_TIMEOUT=3600
+AWS_TOKEN_TIMEOUT=7200
 export AWS_TOKEN_TIMEOUT
 
 # point to consul backend
@@ -33,6 +34,20 @@ export TF_VAR_aws_region
 export TF_VAR_aws_ssh_key_id
 [[ -z "$TF_VAR_aws_vpc_name" ]] && TF_VAR_aws_vpc_name="${AWS_VPC_NAME:-chef-eng-team-chef_server-test}"
 export TF_VAR_aws_vpc_name
+[[ -z "$TF_VAR_arm_contact" ]] && TF_VAR_arm_contact="${ARM_CONTACT:-chef-eng-team}"
+export TF_VAR_arm_contact
+[[ -z "$TF_VAR_arm_department" ]] && TF_VAR_arm_department="${ARM_DEPARTMENT:-CoreEng}"
+export TF_VAR_arm_department
+[[ -z "$TF_VAR_arm_tenant_id" ]] && TF_VAR_arm_tenant_id="${ARM_TENANT_ID:-a2b2d6bc-afe1-4696-9c37-f97a7ac416d7}"
+export TF_VAR_arm_tenant_id
+[[ -z "$TF_VAR_arm_subscription_id" ]] && TF_VAR_arm_subscription_id="${ARM_SUBSCRIPTION_ID:-80b824de-ec53-4116-9868-3deeab10b0cd}"
+export TF_VAR_arm_subscription_id
+[[ -z "$TF_VAR_arm_location" ]] && TF_VAR_arm_location="${ARM_LOCATION:-westus2}"
+export TF_VAR_arm_location
+[[ -z "$TF_VAR_arm_ssh_key_file" ]] && TF_VAR_arm_ssh_key_file="${ARM_SSH_KEY_FILE:-/workdir/id_rsa.pub}"
+export TF_VAR_arm_ssh_key_file
+[[ -z "$TF_VAR_arm_resource_group_name" ]] && TF_VAR_arm_resource_group_name="${ARM_RESOURCE_GROUP_NAME:-${BUILD_NUMBER}-chef-eng-team-chef_server-test}"
+export TF_VAR_arm_resource_group_name
 
 # print command usage
 print_usage () {
@@ -95,15 +110,44 @@ for arg in "$@"; do
     destroy-all)
       action='destroy-all'
       ;;
+    aws)
+      cloud='aws'
+      ;;
+    azure)
+      cloud='azure'
+      ;;
   esac
 done
 
 # setup the terraform workspace
 setup () {
-  local scenario=$1
-  local enable_ipv6=$2
-  local platform=$3
+  local cloud=$1
+  local scenario=$2
+  local enable_ipv6=$3
+  local platform=$4
   local workspace
+
+  if [[ "$cloud" = 'azure' ]]; then
+    echo "--- :azure: Setup Azure credentials"
+
+    # this allows time for the new service-principal to become available
+    sleep 60
+
+    az login --service-principal --tenant "$ARM_TENANT_ID" --username "$ARM_CLIENT_ID" --password "$ARM_CLIENT_SECRET"
+
+    if [[ -z "$(az group list --query "[?contains(name, '${TF_VAR_arm_resource_group_name}')].name" --output tsv)" ]]; then
+      echo -e "--- :azure: Setup \033[38;5;62m\033[1m${TF_VAR_arm_resource_group_name}\033[0m resource group"
+
+      cd "/workdir/terraform/azure/modules/arm_resource_group"
+      if [[ ! -d .terraform ]]; then
+      tfenv install min-required
+      tfenv use min-required
+      terraform init
+      terraform apply -auto-approve
+      fi
+      cd "/workdir"
+    fi
+  fi
 
   if [[ "$enable_ipv6" = 'true' ]]; then
       workspace="${BUILD_NUMBER}-${scenario}-ipv6-${platform}"
@@ -115,10 +159,10 @@ setup () {
 
   echo -e "--- :terraform: Initializing \033[38;5;62m\033[1m${workspace}\033[0m workspace"
 
-  cd "/workdir/terraform/aws/scenarios/${scenario}" || error "could not find ${scenario} scenario"
+  cd "/workdir/terraform/${cloud}/scenarios/${scenario}" || error "could not find ${scenario} scenario"
 
   # override terraform backend to use shared consul
-  cat > "/workdir/terraform/aws/scenarios/${scenario}/backend.tf" <<EOF
+  cat > "/workdir/terraform/${cloud}/scenarios/${scenario}/backend.tf" <<EOF
   terraform {
     backend "consul" {
       address = "http://consul.chef.co"
@@ -167,12 +211,23 @@ apply () {
   [[ -n "$ELASTIC_VERSION" ]] && export TF_VAR_elastic_version="$ELASTIC_VERSION"
 
   # setup the terraform workspace
-  setup "$TF_VAR_scenario" "$TF_VAR_enable_ipv6" "${TF_VAR_platform}"
+  setup "$cloud" "$TF_VAR_scenario" "$TF_VAR_enable_ipv6" "${TF_VAR_platform}"
 
-  echo "--- :chef: Configure SSH key associated with $TF_VAR_aws_ssh_key_id from vault"
-  eval "$(ssh-agent)"
-  vault read -field=ssh_private_key "account/static/aws/${TF_VAR_aws_profile}/${TF_VAR_aws_ssh_key_id}" | ssh-add -
-  [[ $(ssh-add -l | wc -l) -gt 0 ]] || error 'ssh-agent does not have any keys loaded!'
+  case "$cloud" in
+    aws)
+      echo "--- :chef: Configure SSH key associated with $TF_VAR_aws_ssh_key_id from vault"
+      eval "$(ssh-agent)"
+      vault read -field=ssh_private_key "account/static/aws/${TF_VAR_aws_profile}/${TF_VAR_aws_ssh_key_id}" | ssh-add -
+      [[ $(ssh-add -l | wc -l) -gt 0 ]] || error 'ssh-agent does not have any keys loaded!'
+      ;;
+    azure)
+      echo "--- :chef: Configure SSH key from vault"
+      vault read -field=ssh_public_key "account/static/aws/chef-cd/cd-infrastructure" > /workdir/id_rsa.pub
+      eval "$(ssh-agent)"
+      vault read -field=ssh_private_key "account/static/aws/chef-cd/cd-infrastructure" | ssh-add -
+      [[ $(ssh-add -l | wc -l) -gt 0 ]] || error 'ssh-agent does not have any keys loaded!'
+      ;;
+  esac
 
   echo '--- :chef: Identify product versions and download URLs'
   [[ -z "$INSTALL_VERSION" ]] && INSTALL_VERSION="$(mixlib-install list-versions chef-server stable | tail -n 1)"
@@ -250,7 +305,7 @@ EOF
     # destroy terraform scenario if aws token has not expired
     if [[ $SECONDS -lt $AWS_TOKEN_TIMEOUT ]]; then
       # allow destroy to fail
-      destroy "$TERRAFORM_WORKSPACE" || true
+      destroy "$cloud" "$TERRAFORM_WORKSPACE" || true
     fi
 
     exit $ret
@@ -261,7 +316,8 @@ EOF
 
 # destroy the terraform scenario
 destroy () {
-  local workspace="$1"
+  local cloud="$1"
+  local workspace="$2"
   local ret=0
 
   if [[ -n "$workspace" ]]; then
@@ -287,7 +343,7 @@ destroy () {
   export TF_VAR_platform
 
   # ensure the workspace is available
-  setup "$TF_VAR_scenario" "$TF_VAR_enable_ipv6" "${TF_VAR_platform}"
+  setup "$cloud" "$TF_VAR_scenario" "$TF_VAR_enable_ipv6" "${TF_VAR_platform}"
 
   echo "^^^ +++"
   echo -e "--- :terraform: Destroying \033[38;5;62m\033[1m${workspace}\033[0m workspace"
@@ -327,7 +383,8 @@ destroy-all () {
 
   # iterate across workspaces left in consul
   for workspace in $(consul kv get -keys terraform/chef-server/ | sed -n "/${BUILD_NUMBER}/{s/.*:\(${BUILD_NUMBER}-.*$\)/\1/;s/\///;p;}" | sort -u); do
-    destroy "$workspace" || ret=1
+    local cloud="$(consul kv get terraform/chef-server/test-scenario-env:${workspace} | gunzip 2>/dev/null | grep -q aws && echo 'aws' || echo 'azure')"
+    destroy "$cloud" "$workspace" || ret=1
   done
 
   exit $ret
