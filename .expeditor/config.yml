@@ -29,7 +29,7 @@ schedules:
 
   - name: cleanup_orphaned_test_resources
     description: Cleanup orphaned test resources
-    cronline: "0 2 * * *" # every day at 2am
+    cronline: "0 5 * * *" # every day at 5am
 
 pipelines:
   - verify
