@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.3 -->
-## [14.0.3](https://github.com/chef/chef-server/tree/14.0.3) (2020-06-24)
+<!-- latest_release 14.0.4 -->
+## [14.0.4](https://github.com/chef/chef-server/tree/14.0.4) (2020-06-26)
 
 #### Merged Pull Requests
-- Implement reaper for orphaned integration-test instances [#2038](https://github.com/chef/chef-server/pull/2038) ([christopher-snapp](https://github.com/christopher-snapp))
+- Add azure test scenarios to the integration_test pipeline [#2043](https://github.com/chef/chef-server/pull/2043) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Add azure test scenarios to the integration_test pipeline [#2043](https://github.com/chef/chef-server/pull/2043) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.4 -->
 - Implement reaper for orphaned integration-test instances [#2038](https://github.com/chef/chef-server/pull/2038) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.3 -->
 - Fix azure scenario to retrieve public ip on first run [#2039](https://github.com/chef/chef-server/pull/2039) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.2 -->
 - Add sleep and license acceptance to chef-run in openldap scenario [#2037](https://github.com/chef/chef-server/pull/2037) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.1 -->
