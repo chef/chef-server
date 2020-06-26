@@ -348,16 +348,14 @@ process_headers(Headers) ->
 % maybe erlang:monotonic_time?
 % make sure everything is timewarp safe.
 % https://erlang.org/doc/apps/erts/time_correction.html
--spec is_expired(DateTimeString::string(), ExpiresInSecondsInt::integer()) -> boolean().
-is_expired(DateTimeString, ExpiresInSecondsInt) ->
+-spec is_expired(DateTimeString::string(), ExpiresSec::integer()) -> boolean().
+is_expired(DateTimeString, ExpiresSec) ->
     % most ways of getting the date/time seem problematic.  for instance, docs for
     % calendar:universal_time() and erlang:universaltime() say: 'Returns local time
     % if universal time is unavailable.'
     % since it is unknown which time would be used, we could use local time and
     % convert to universal.  however, local time could be an 'illegal' time wrt
     % universal time if switching to/from daylight savings time.
-
-    UniversalTimeInSec = calendar:datetime_to_gregorian_seconds(calendar:now_to_universal_time(os:timestamp())),
 
     [Y1, Y2, Y3, Y4, M1, M2, D1, D2, _, H1, H2, N1, N2, S1, S2, _] = DateTimeString,
     Year    = list_to_integer([Y1, Y2, Y3, Y4]),
@@ -371,7 +369,8 @@ is_expired(DateTimeString, ExpiresInSecondsInt) ->
     % calendar:valid_date({{Year, Month, Day}, {Hour, Min, Sec}}),
 
     DateSeconds = calendar:datetime_to_gregorian_seconds({{Year, Month, Day}, {Hour, Min, Sec}}),
-    DateSeconds + ExpiresInSecondsInt < UniversalTimeInSec.
+    UniversalTimeSec = calendar:datetime_to_gregorian_seconds(calendar:now_to_universal_time(os:timestamp())),
+    DateSeconds + ExpiresSec < UniversalTimeSec.
 
 encode_sign_error_response(AccessKeyId, Signature,
                            RequestId, StringToSign, Req0,
