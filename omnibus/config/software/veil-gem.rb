@@ -1,11 +1,12 @@
 #
-# Copyright 2012-2014 Chef Software, Inc.
+# Copyright:: Copyright (c) 2016 Chef Software, Inc.
+# License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,9 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-name "oc-chef-pedant"
-source path: "#{project.files_path}/../../oc-chef-pedant"
+name "veil-gem"
+default_version "praj/delete_Gemfile_lock"
+source git: "https://github.com/chef/chef_secrets.git"
 
 license "Apache-2.0"
 license_file "LICENSE"
@@ -23,11 +24,12 @@ license_file "LICENSE"
 dependency "ruby"
 
 build do
+  delete "veil-*.gem"
+
   env = with_standard_compiler_flags(with_embedded_path)
 
-  bundle "install --path=#{install_dir}/embedded/service/gem", env: env
+  bundle "install --without development", env: env
 
-  command "mkdir -p #{install_dir}/embedded/service/oc-chef-pedant"
-
-  sync project_dir, "#{install_dir}/embedded/service/oc-chef-pedant/"
+  gem "build veil.gemspec", env: env
+  gem "install veil*.gem --no-document  --without development", env: env
 end

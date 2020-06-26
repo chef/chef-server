@@ -23,7 +23,6 @@ license_file "LICENSE"
 source git: "https://github.com/chef/mixlib-install.git"
 
 dependency "ruby"
-dependency "rubygems"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
