@@ -22,15 +22,14 @@ resource "azurerm_postgresql_server" "default" {
   administrator_login          = "bofh"
   administrator_login_password = "i1uvd3v0ps!"
   version                      = "9.6"
-  ssl_enforcement              = "Enabled"
+  ssl_enforcement_enabled      = true
 
   sku_name = "GP_Gen5_8"
 
-  storage_profile {
-    storage_mb            = 5120
-    backup_retention_days = 7
-    geo_redundant_backup  = "Disabled"
-  }
+  storage_mb                   = 5120
+  backup_retention_days        = 7
+  geo_redundant_backup_enabled = false
+  auto_grow_enabled            = false
 
   tags = {
     X-Dept    = var.arm_department
