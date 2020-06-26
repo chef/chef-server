@@ -20,7 +20,6 @@ source path: "#{project.files_path}/../../src/opscode-expander"
 license :project_license
 
 dependency "ruby"
-dependency "bundler"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)

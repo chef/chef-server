@@ -5,17 +5,17 @@
 override :rabbitmq, version: "3.6.15"
 override :erlang, version: "20.3.8.9"
 override :lua, version: "5.1.5"
-override :rubygems, version: "3.0.3"
-override :bundler, version: "1.17.2"  # pin to avoid double bundle error
+override :rubygems, version: "3.1.2"
+#override :bundler, version: "2.1.4"
 override :'omnibus-ctl', version: "master"
-override :chef, version: "v15.8.23"
-override :ohai, version: "v15.7.4"
-override :ruby, version: "2.6.5"
+override :chef, version: "v16.2.50"
+override :ohai, version: "v16.2.1"
+override :ruby, version: "2.7.1"
 override :perl, version: "5.18.1"
 
 
 # This SHA is the last commit before the 6.0 release
-override :'berkshelf-no-depselector', version: '6016ca10b2f46508b1b107264228668776f505d9'
+#override :'berkshelf-no-depselector', version: '6016ca10b2f46508b1b107264228668776f505d9'
 
 # Note 2018/02/01 (sr): This is related to issue #1417:
 # 1.11.2.1 was the last version that supports --with-lua51=PATH, which allows us to

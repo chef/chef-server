@@ -10,7 +10,7 @@ gem 'rake'
 # We require chef internally to get the version in
 # lib/pedant/request.rb. It's really strange code and it should be
 # revisited.
-gem 'chef', '~>15.5'
+gem 'chef', '~>16.2'
 
 # For "rake chef_zero_spec"
 #gem 'chef-zero', github: 'chef/chef-zero'
