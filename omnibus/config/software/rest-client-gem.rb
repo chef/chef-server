@@ -23,7 +23,6 @@ license_file "https://github.com/rest-client/rest-client/blob/master/LICENSE"
 source git: "https://github.com/rest-client/rest-client.git"
 
 dependency "ruby"
-dependency "rubygems"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)

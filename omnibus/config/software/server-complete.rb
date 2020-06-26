@@ -28,7 +28,7 @@ dependency "openresty-lpeg"  # lua-based routing
 dependency "runit"
 dependency "chef_backup-gem" # chef-server-ctl backup
 dependency "veil-gem" # chef-server-ctl rotate-credentials
-dependency "openssl-fips-config" if fips_mode? 
+dependency "openssl-fips-config" if fips_mode?
 
 # the backend
 dependency "postgresql92-bin" # for upgrading 9.2 -> 9.6
@@ -40,6 +40,7 @@ dependency "haproxy"
 dependency "opscode-expander"
 dependency "pg-gem" # used by private-chef-ctl reconfigure
 dependency "elasticsearch" # used by search
+dependency "gecode" # used by oc_erchef
 
 # moved earlier because it is external to this repo and pinned, so should change infrequently
 dependency "chef" # for embedded chef-client -z runs (built from master - build last)
