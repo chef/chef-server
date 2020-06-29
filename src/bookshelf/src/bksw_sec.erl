@@ -20,14 +20,11 @@
 
 -module(bksw_sec).
 
--include_lib("eunit/include/eunit.hrl").
-
 -export([is_authorized/2]).
 -ifdef(TEST).
 -compile([export_all, nowarn_export_all]).
 -endif.
 
--define(SECONDS_AT_EPOCH, 62167219200).
 -include("internal.hrl").
 
 %%===================================================================
@@ -48,18 +45,12 @@ is_authorized(Req0, #context{} = Context) ->
 % presigned url verification
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
 presigned_auth(RequestId, Req0, Context, Headers0) ->
-
     Credential = wrq:get_qs_value("X-Amz-Credential", "", Req0),
-
     XAmzDate = wrq:get_qs_value("X-Amz-Date", "", Req0),
-
     SignedHeaderKeysString = wrq:get_qs_value("X-Amz-SignedHeaders", "", Req0),
-
     IncomingSignature = wrq:get_qs_value("X-Amz-Signature", "", Req0),
-
     % 1 =< XAmzExpires =< 604800
     XAmzExpiresString = wrq:get_qs_value("X-Amz-Expires", "", Req0),
-
     common_auth(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, presigned_url).
 
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
@@ -67,158 +58,122 @@ header_auth(RequestId, IncomingAuth, Req0, Context, Headers0) ->
     try
         (ParseAuth = parse_authorization(IncomingAuth)) /= err orelse throw({RequestId, Req0, Context}),
         [Credential, SignedHeaderKeysString, IncomingSignature] = ParseAuth,
-
-        % case of undefined handled later
         XAmzDate = wrq:get_req_header("x-amz-date", Req0),
-
         common_auth(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header)
     catch
         _ -> encode_access_denied_error_response(RequestId, Req0, Context)
     end.
 
-%%-ifdef(TESTxxx).
-%%% tests sometimes use the following credentials:
-%%% AccessKey = "e1efc99729beb175"
-%%% SecretKey = "fc683cd9ed1990ca"
-%%getkeys("e1efc99729beb175", _) ->
-%%    {"e1efc99729beb175", "fc683cd9ed1990ca"};
-%%getkeys(<<"e1efc99729beb175">>, _) ->
-%%    {<<"e1efc99729beb175">>, <<"fc683cd9ed1990ca">>};
-%%getkeys("ASIAXXFRTNDYFRUTH6NY", _) ->
-%%    {"ASIAXXFRTNDYFRUTH6NY", "ogxnfFC1rjltSjQI6boQ5tBg4mMG5wydPilkgQzU"};
-getkeys(_, Context) ->
-    {bksw_conf:access_key_id(Context), bksw_conf:secret_access_key(Context)}.
-%%    %bksw_conf:keys().
-%%-else.
-%getkeys(_, Context) ->
-%    {bksw_conf:access_key_id(Context), bksw_conf:secret_access_key(Context)}.
-%%-endif.
-
 common_auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, VerificationType) ->
     try
+        (Host = wrq:get_req_header("Host", Req0)) /= undefined orelse throw({RequestId, Req0, Context}),
 
-    (Host = wrq:get_req_header("Host", Req0)) /= undefined orelse throw({RequestId, Req0, Context}),
+        (ParseCred = parse_x_amz_credential(Credential)) /= err orelse throw({RequestId, Req0, Context}),
+        [AWSAccessKeyId, CredentialScopeDate, Region | _] = ParseCred,
 
-    (ParseCred = parse_x_amz_credential(Credential)) /= err orelse throw({RequestId, Req0, Context}),
-    [AWSAccessKeyId, CredentialScopeDate, Region | _] = ParseCred,
+        % https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
+        DateIfUndefined = wrq:get_req_header("date", Req0),
+        (Date = get_check_date(XAmzDate, DateIfUndefined, CredentialScopeDate)) /= err orelse throw({RequestId, Req0, Context}),
 
-    % https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
-    DateIfUndefined = wrq:get_req_header("date", Req0),
-    (Date = get_check_date(XAmzDate, DateIfUndefined, CredentialScopeDate)) /= err orelse throw({RequestId, Req0, Context}),
+        AccessKey = bksw_conf:access_key_id(Context),
+        SecretKey = bksw_conf:secret_access_key(Context),
 
-    {AccessKey, SecretKey} = getkeys(AWSAccessKeyId, Context),
-    %{AccessKey, SecretKey} = {"e1efc99729beb175", "fc683cd9ed1990ca"},
+        Headers = process_headers(Headers0),
 
-    Headers = process_headers(Headers0),
+        SignedHeaderKeys = parse_x_amz_signed_headers(SignedHeaderKeysString),
+        SignedHeaders = get_signed_headers(SignedHeaderKeys, Headers, []),
 
-    SignedHeaderKeys = parse_x_amz_signed_headers(SignedHeaderKeysString),
-    SignedHeaders = get_signed_headers(SignedHeaderKeys, Headers, []),
+        RawMethod = wrq:method(Req0),
+        Method = list_to_atom(string:to_lower(erlang:atom_to_list(RawMethod))),
 
-    RawMethod = wrq:method(Req0),
-    Method = list_to_atom(string:to_lower(erlang:atom_to_list(RawMethod))),
+        Path  = wrq:path(Req0),
 
-    Path  = wrq:path(Req0),
+        {BucketName, Key} = get_bucket_key(Path),
 
-    {BucketName, Key} = get_bucket_key(Path),
+        Config = mini_s3:new(AccessKey, SecretKey, Host),
+        AltHost = mini_s3:get_host_toggleport(Host, Config),
+        AltSignedHeaders = [case {K, V} of {"host", _} -> {"host", AltHost}; _ -> {K, V} end || {K, V} <- SignedHeaders],
+        XAmzExpires = list_to_integer(XAmzExpiresString),
 
-    % which key/secret to use?
-    % what to use for host value?
-    % make sure to set the region and service here? or check defaults
-    % TODO: new may eventually need to support ipv6, which would entail passing in options
-    Config = mini_s3:new(AccessKey, SecretKey, Host),
-    AltHost = mini_s3:get_host_toggleport(Host, Config),
-    AltSignedHeaders = [case {K, V} of {"host", _} -> {"host", AltHost}; _ -> {K, V} end || {K, V} <- SignedHeaders],
+        Sig1 = case VerificationType of
+            presigned_url ->
 
-%    This (below) caused a big webmachine error
-%    if you reference as full body vs chunked, you can't reference it the other way and vice versa
-%    Payload = wrq:req_body(Req0),
-%    %?debugFmt("~nbody (payload?): ~p", [Payload]),
+                "AWS4-HMAC-SHA256" == wrq:get_qs_value("X-Amz-Algorithm", Req0) orelse throw({RequestId, Req0, Context}),
 
-    XAmzExpires = list_to_integer(XAmzExpiresString),
+                % temporarily disabling this - should be re-enabled later
+                %true == check_signed_headers_common(SignedHeaders, Headers) orelse throw({RequestId, Req0, Context}),
+                check_signed_headers_common(SignedHeaders, Headers),
 
-    Sig1 = case VerificationType of
-        presigned_url ->
+                ComparisonURL = mini_s3:s3_url(Method, BucketName, Key, XAmzExpires, SignedHeaders, Date, Config),
 
-            "AWS4-HMAC-SHA256" == wrq:get_qs_value("X-Amz-Algorithm", Req0) orelse throw({RequestId, Req0, Context}),
+                % list_to_binary profiled faster than binary_to_list,
+                % so use that for conversion and comparison.
+                IncomingSig = list_to_binary(IncomingSignature),
 
-            % temporarily disabling this - should be re-enabled later
-            %true == check_signed_headers_common(SignedHeaders, Headers) orelse throw({RequestId, Req0, Context}),
-            check_signed_headers_common(SignedHeaders, Headers),
+                [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", trailing),
 
-            ComparisonURL = mini_s3:s3_url(Method, BucketName, Key, XAmzExpires, SignedHeaders, Date, Config),
-
-            % list_to_binary profiled faster than binary_to_list,
-            % so use that for conversion and comparison.
-            IncomingSig = list_to_binary(IncomingSignature),
-
-            % compare signatures.  assumes X-Amz-Signature is always on the end?
-            [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", trailing),
-
-            case IncomingSig of
-                ComparisonSig ->
-                    %AltComparisonSig = "not computed",
-                    IncomingSig;
-                _ ->
-                    AltComparisonURL = mini_s3:s3_url(Method, BucketName, Key, XAmzExpires, AltSignedHeaders, Date, Config),
-                    [_, AltComparisonSig] = string:split(AltComparisonURL, "&X-Amz-Signature=", all),
-                    AltComparisonSig
-            end;
+                case IncomingSig of
+                    ComparisonSig ->
+                        %AltComparisonSig = "not computed",
+                        IncomingSig;
+                    _ ->
+                        AltComparisonURL = mini_s3:s3_url(Method, BucketName, Key, XAmzExpires, AltSignedHeaders, Date, Config),
+                        [_, AltComparisonSig] = string:split(AltComparisonURL, "&X-Amz-Signature=", all),
+                        AltComparisonSig
+                end;
 
 
-        authorization_header ->
+            authorization_header ->
 
-            ComparisonURL = "blah",
-            QueryParams = wrq:req_qs(Req0),
+                ComparisonURL = "blah",
+                QueryParams = wrq:req_qs(Req0),
 
-            % temporarily disabling this - should be re-enabled later
-            %true == check_signed_headers_authhead(SignedHeaders, Headers) orelse throw({RequestId, Req0, Context}),
-            check_signed_headers_authhead(SignedHeaders, Headers),
+                % temporarily disabling this - should be re-enabled later
+                %true == check_signed_headers_authhead(SignedHeaders, Headers) orelse throw({RequestId, Req0, Context}),
+                check_signed_headers_authhead(SignedHeaders, Headers),
 
-            % this header will be calculated and should not be passed-in
-            % SignedHeadersNo256 = lists:keydelete("x-amz-content-sha256", 1, SignedHeaders),
+                SigV4Headers = erlcloud_aws:sign_v4(Method, Path, Config, SignedHeaders, <<>>, Region, "s3", QueryParams, Date),
 
-            SigV4Headers = erlcloud_aws:sign_v4(Method, Path, Config, SignedHeaders, <<>>, Region, "s3", QueryParams, Date),
+                IncomingSig = IncomingSignature,
 
-            IncomingSig = IncomingSignature,
+                (ParseAuth = parse_authorization(proplists:get_value("Authorization", SigV4Headers, ""))) /= err orelse throw({RequestId, Req0, Context}),
+                [_, _, ComparisonSig] = ParseAuth,
 
-            (ParseAuth = parse_authorization(proplists:get_value("Authorization", SigV4Headers, ""))) /= err orelse throw({RequestId, Req0, Context}),
-            [_, _, ComparisonSig] = ParseAuth,
-
-            case IncomingSig of
-                ComparisonSig ->
-                    %AltComparisonSig = "not computed",
-                    IncomingSig;
-                _ ->
-                    AltSigV4Headers = erlcloud_aws:sign_v4(Method, Path, Config, AltSignedHeaders, <<>>, Region, "s3", QueryParams, Date),
-                    (AltParseAuth = parse_authorization(proplists:get_value("Authorization", AltSigV4Headers, ""))) /= err orelse throw({RequestId, Req0, Context}),
-                    [_, _, AltComparisonSig] = AltParseAuth,
-                    AltComparisonSig
+                case IncomingSig of
+                    ComparisonSig ->
+                        %AltComparisonSig = "not computed",
+                        IncomingSig;
+                    _ ->
+                        AltSigV4Headers = erlcloud_aws:sign_v4(Method, Path, Config, AltSignedHeaders, <<>>, Region, "s3", QueryParams, Date),
+                        (AltParseAuth = parse_authorization(proplists:get_value("Authorization", AltSigV4Headers, ""))) /= err orelse throw({RequestId, Req0, Context}),
+                        [_, _, AltComparisonSig] = AltParseAuth,
+                        AltComparisonSig
                 end
-    end,
+        end,
 
-    case IncomingSig of
-        Sig1 ->
-            case is_expired(Date, XAmzExpires) of
-                true ->
-                    ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p",
-                               [ReqId, XAmzExpires, Path]),
-                    encode_access_denied_error_response(RequestId, Req0, Context);
-                false ->
-                    case erlang:iolist_to_binary(AWSAccessKeyId) ==
-                               erlang:iolist_to_binary(AccessKey) of
-                        true ->
-                            MaxAge = "max-age=" ++ XAmzExpiresString,
-                            Req1 = wrq:set_resp_header("Cache-Control", MaxAge, Req0),
-                            {true, Req1, Context};
-                        false ->
-                            ?LOG_DEBUG("req_id=~p signing error for ~p", [ReqId, Path]),
-                            encode_sign_error_response(AWSAccessKeyId, IncomingSignature, RequestId,
-                                                       ComparisonURL, Req0, Context)
-                    end
-            end;
-        _ ->
-            encode_access_denied_error_response(RequestId, Req0, Context)
-    end
+        case IncomingSig of
+            Sig1 ->
+                case is_expired(Date, XAmzExpires) of
+                    true ->
+                        ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p",
+                                   [ReqId, XAmzExpires, Path]),
+                        encode_access_denied_error_response(RequestId, Req0, Context);
+                    false ->
+                        case erlang:iolist_to_binary(AWSAccessKeyId) ==
+                                   erlang:iolist_to_binary(AccessKey) of
+                            true ->
+                                MaxAge = "max-age=" ++ XAmzExpiresString,
+                                Req1 = wrq:set_resp_header("Cache-Control", MaxAge, Req0),
+                                {true, Req1, Context};
+                            false ->
+                                ?LOG_DEBUG("req_id=~p signing error for ~p", [ReqId, Path]),
+                                encode_sign_error_response(AWSAccessKeyId, IncomingSignature, RequestId,
+                                                           ComparisonURL, Req0, Context)
+                        end
+                end;
+            _ ->
+                encode_access_denied_error_response(RequestId, Req0, Context)
+        end
 
     catch
         {RequestId, Req0, Context} -> encode_access_denied_error_response(RequestId, Req0, Context)
@@ -240,17 +195,7 @@ check_signed_headers_authhead(SignedHeaders, Headers) ->
 %        _ ->
 %            true
 %    end.
-check_signed_headers_common(SignedHeaders, Headers),
-
-% x-amz-content-sha256 header is required
-
-% if content-type header is present in request, it is required
-case proplists:is_defined("content-type", Headers) of
-    true ->
-        ?debugFmt("~ncontent-type header present in request AND signed: ~p", [proplists:is_defined("content-type", SignedHeaders)]);
-    _ ->
-        true
-end.
+    check_signed_headers_common(SignedHeaders, Headers).
 
 % required signed headers common to both authorization header verification
 % and presigned url verification.
@@ -294,7 +239,6 @@ get_check_date(ISO8601Date, DateIfUndefined, [Y1, Y2, Y3, Y4, M1, M2, D1, D2]) -
 %get_signed_headers(SignedHeaderKeys, Headers) ->
 %    lists:flatten([proplists:lookup_all(SignedHeaderKey, Headers) || SignedHeaderKey <- SignedHeaderKeys]).
 
-%TODO: look at the unit test
 % get key-value pairs (headers) associated with specified keys.
 % for each key, get first occurance of key-value. for duplicated
 % keys, get corresponding key-value pairs. results are undefined
@@ -344,9 +288,6 @@ process_headers(Headers) ->
             _    -> Key
         end), Val} || {Key, Val} <- Headers].
 
-%TODO: praj says os:timestamp() may not be recommended.  look into alternative.
-% maybe erlang:monotonic_time?
-% make sure everything is timewarp safe.
 % https://erlang.org/doc/apps/erts/time_correction.html
 -spec is_expired(DateTimeString::string(), ExpiresSec::integer()) -> boolean().
 is_expired(DateTimeString, ExpiresSec) ->
