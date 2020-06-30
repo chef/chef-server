@@ -6,15 +6,15 @@ DEPENDENCIES
   zip
 
 GRAPH
-  apt (7.2.0)
+  apt (7.3.0)
   build-essential (8.2.1)
     mingw (>= 1.1)
     seven_zip (>= 0.0.0)
-  chef-ingredient (3.1.2)
+  chef-ingredient (3.1.3)
   chef-sugar (5.1.8)
   git (10.0.0)
-  homebrew (5.0.8)
-  mingw (2.1.0)
+  homebrew (5.1.0)
+  mingw (2.1.1)
     seven_zip (>= 0.0.0)
   omnibus (5.7.2)
     build-essential (>= 6.0.0)
@@ -28,7 +28,7 @@ GRAPH
   remote_install (2.0.0)
   seven_zip (3.1.2)
     windows (>= 0.0.0)
-  windows (6.0.1)
+  windows (7.0.0)
   wix (5.0.0)
     windows (>= 2.0)
   yum-centos (3.2.0)
