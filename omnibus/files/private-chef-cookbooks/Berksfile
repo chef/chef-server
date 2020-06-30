@@ -1,4 +1,4 @@
 source 'https://supermarket.chef.io'
 
-cookbook 'enterprise', git: 'https://github.com/chef-cookbooks/enterprise-chef-common', tag: 'v0.15.1'
+cookbook 'enterprise', git: 'https://github.com/chef-cookbooks/enterprise-chef-common', branch: 'praj/update_runit'
 cookbook 'private-chef', path: './private-chef'
