@@ -58,11 +58,11 @@ header_auth(RequestId, IncomingAuth, Req0, Context, Headers0) ->
     try
         (ParseAuth = parse_authorization(IncomingAuth)) /= err orelse throw({RequestId, Req0, Context}),
         [Credential, SignedHeaderKeysString, IncomingSignature] = ParseAuth,
-        XAmzDate = wrq:get_req_header("x-amz-date", Req0),
-        common_auth(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header)
+        XAmzDate = wrq:get_req_header("x-amz-date", Req0)
     catch
         _ -> encode_access_denied_error_response(RequestId, Req0, Context)
-    end.
+    end,
+    common_auth(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header).
 
 common_auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, VerificationType) ->
     try
@@ -121,8 +121,6 @@ common_auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmz
                         [_, AltComparisonSig] = string:split(AltComparisonURL, "&X-Amz-Signature=", all),
                         AltComparisonSig
                 end;
-
-
             authorization_header ->
 
                 ComparisonURL = "blah",
