@@ -27,6 +27,10 @@ schedules:
     description: "Run a nightly build in the omnibus/adhoc pipeline"
     cronline: "0 6 * * *"
 
+  - name: cleanup_orphaned_test_resources
+    description: Cleanup orphaned test resources
+    cronline: "0 5 * * *" # every day at 5am
+
 pipelines:
   - verify
   - habitat/build
@@ -90,14 +94,16 @@ subscriptions:
     actions:
       - bash:.expeditor/promote_harts_and_containers.sh:
           post_commit: true
-      - bash:.expeditor/purge_cdn.sh:
-          post_commit: true
+      - purge_packages_chef_io_fastly:{{target_channel}}/chef-server/latest
   - workload: artifact_published:stable:chef-server:*
     actions:
       - built_in:rollover_changelog
       - bash:.expeditor/promote_harts_and_containers.sh:
           post_commit: true
-      - bash:.expeditor/purge_cdn.sh:
+      - bash:.expeditor/publish-release-notes.sh:
+          post_commit: true
+      - purge_packages_chef_io_fastly:{{target_channel}}/chef-server/latest
+      - bash:.expeditor/announce-release.sh:
           post_commit: true
       - built_in:notify_chefio_slack_channels
   - workload: schedule_triggered:chef/chef-server:master:nightly_build:*
@@ -110,12 +116,9 @@ subscriptions:
           post_commit: true
       - bash:.expeditor/purge_cdn.sh:
           post_commit: true
-  - workload: buildkite_build_canceled:{{agent_id}}:integration_test:*
+  - workload: schedule_triggered:{{agent_id}}:cleanup_orphaned_test_resources:*
     actions:
-      - bash:.expeditor/integration_test.pipeline.sh
-  - workload: buildkite_build_failed:{{agent_id}}:integration_test:*
-    actions:
-      - bash:.expeditor/integration_test.pipeline.sh
+      - bash:.expeditor/cleanup_orphaned_test_resources.sh
 
 promote:
   actions:

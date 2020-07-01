@@ -72,7 +72,7 @@ resource "null_resource" "ldap_cookbook" {
   depends_on = [null_resource.ldap_config]
 
   provisioner "local-exec" {
-    command = "chef-run --user ${module.ldap.ssh_username} ${module.ldap.public_ipv4_dns} ${path.module}/../../../../dev/cookbooks/provisioning/recipes/ldap-server.rb"
+    command = "sleep 30; chef-run --chef-license=accept --user ${module.ldap.ssh_username} ${module.ldap.public_ipv4_dns} ${path.module}/../../../../dev/cookbooks/provisioning/recipes/ldap-server.rb"
   }
 }
 

@@ -1,16 +1,23 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.47 -->
-## [13.2.47](https://github.com/chef/chef-server/tree/13.2.47) (2020-06-03)
+<!-- latest_release 14.0.4 -->
+## [14.0.4](https://github.com/chef/chef-server/tree/14.0.4) (2020-06-26)
 
 #### Merged Pull Requests
-- Add the scenario for standalone fresh install [#2028](https://github.com/chef/chef-server/pull/2028) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add azure test scenarios to the integration_test pipeline [#2043](https://github.com/chef/chef-server/pull/2043) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Add azure test scenarios to the integration_test pipeline [#2043](https://github.com/chef/chef-server/pull/2043) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.4 -->
+- Implement reaper for orphaned integration-test instances [#2038](https://github.com/chef/chef-server/pull/2038) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.3 -->
+- Fix azure scenario to retrieve public ip on first run [#2039](https://github.com/chef/chef-server/pull/2039) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.2 -->
+- Add sleep and license acceptance to chef-run in openldap scenario [#2037](https://github.com/chef/chef-server/pull/2037) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.1 -->
+- Praj/update to 14 [#2034](https://github.com/chef/chef-server/pull/2034) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.0 -->
+- Currently fails to post to es due to an nxdomain error. [#2032](https://github.com/chef/chef-server/pull/2032) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.49 -->
+- Automatically announce release on promotion to stable [#2005](https://github.com/chef/chef-server/pull/2005) ([schisamo](https://github.com/schisamo)) <!-- 13.2.48 -->
 - Add the scenario for standalone fresh install [#2028](https://github.com/chef/chef-server/pull/2028) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.47 -->
 - [habitat] Explicitly install ruby 1.17 [#2029](https://github.com/chef/chef-server/pull/2029) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.46 -->
 - Pin to chef-cli 3.0.1 [#2030](https://github.com/chef/chef-server/pull/2030) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.2.45 -->
