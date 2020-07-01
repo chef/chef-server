@@ -12,7 +12,7 @@ gem 'bundler', '>1.10'
 # Install omnibus software
 group :omnibus do
   gem 'omnibus', git: 'https://github.com/chef/omnibus'
-  gem 'omnibus-software', git: 'https://github.com/chef/omnibus-software'
+  gem 'omnibus-software', git: 'https://github.com/chef/omnibus-software', branch: 'praj/update_default_open_jre_version'
   gem 'artifactory'
 end
 
