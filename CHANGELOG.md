@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.4 -->
-## [14.0.4](https://github.com/chef/chef-server/tree/14.0.4) (2020-06-26)
+<!-- latest_release 14.0.5 -->
+## [14.0.5](https://github.com/chef/chef-server/tree/14.0.5) (2020-07-02)
 
 #### Merged Pull Requests
-- Add azure test scenarios to the integration_test pipeline [#2043](https://github.com/chef/chef-server/pull/2043) ([christopher-snapp](https://github.com/christopher-snapp))
+- Move the push jobs scenario to the end of the tests. [#1967](https://github.com/chef/chef-server/pull/1967) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Move the push jobs scenario to the end of the tests. [#1967](https://github.com/chef/chef-server/pull/1967) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.5 -->
 - Add azure test scenarios to the integration_test pipeline [#2043](https://github.com/chef/chef-server/pull/2043) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.4 -->
 - Implement reaper for orphaned integration-test instances [#2038](https://github.com/chef/chef-server/pull/2038) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.3 -->
 - Fix azure scenario to retrieve public ip on first run [#2039](https://github.com/chef/chef-server/pull/2039) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.2 -->
