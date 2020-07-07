@@ -19,7 +19,7 @@ provides :chef_run
 property :run_list, name_property: true
 property :cookbook_path
 property :included_attrs, default: []
-property :show_run, [TrueClass, FalseClass], default: true
+property :show_run, [true, false], default: true
 
 action :run do
   converge_by "Running chef-run with run list #{new_resource.run_list}" do

@@ -19,8 +19,8 @@ class PreflightValidationFailed < StandardError
 end
 
 class PreflightValidator
-  CHEF_SERVER_NAME = "Chef Infra Server"
-  CHEF_SERVER_CONFIG_FILE = "/etc/opscode/chef-server.rb"
+  CHEF_SERVER_NAME = 'Chef Infra Server'.freeze
+  CHEF_SERVER_CONFIG_FILE = '/etc/opscode/chef-server.rb'.freeze
 
   attr_reader :node, :previous_run, :helper
   attr_reader :cs_pg_attr, :node_pg_attr
@@ -99,10 +99,10 @@ class PreflightValidator
                                                            'port' => port,
                                                            'sslmode' => sslmode,
                                                            'silent' => options['silent'],
-                                                           'retries' => options['retries']}) do |conn|
-       if block_given?
-         yield(conn)
-       end
+                                                           'retries' => options['retries'] }) do |conn|
+      if block_given?
+        yield(conn)
+      end
     end
   end
 

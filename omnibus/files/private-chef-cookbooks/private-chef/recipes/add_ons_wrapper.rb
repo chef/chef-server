@@ -102,6 +102,6 @@ node['private_chef']['addons']['packages'].each do |pkg|
       %w(rhel suse) => Chef::Provider::Package::Rpm
     )
     source lazy { pkg_file }
-    notifies :run, "ruby_block[addon_install_notification_#{pkg}]", :immediate
+    notifies :run, "ruby_block[addon_install_notification_#{pkg}]", :immediately
   end
 end

@@ -51,7 +51,7 @@ end
 execute 'cookbook migration' do
   command cookbook_migration
   user OmnibusHelper.new(node).ownership['owner']
-  not_if { File.exist?("#{data_path}/_%_BOOKSHELF_DISK_FORMAT") }
+  not_if { ::File.exist?("#{data_path}/_%_BOOKSHELF_DISK_FORMAT") }
 end
 
 link '/opt/opscode/embedded/service/bookshelf/log' do

@@ -3,8 +3,6 @@ require 'chef/provider/lwrp_base'
 class Chef
   class Provider
     class OcIdApplication < Chef::Provider::LWRPBase
-      include Chef::Mixin::ShellOut
-
       provides :oc_id_application
 
       action :create do

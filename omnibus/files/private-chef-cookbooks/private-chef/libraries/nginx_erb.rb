@@ -85,13 +85,13 @@ class NginxErb
     listen_addr = ''
     if node['private_chef']['nginx']['enable_ipv6']
       listen_addr = '[::]:'
-      if options[:ipv6_only]
-        # Listen on IPv6 only, leaving IPv4 addresses alone.
-        listen_opts << ' ipv6only=on'
-      else
-        # Listen on both IPv4, and IPv6.
-        listen_opts << ' ipv6only=off'
-      end
+      listen_opts << if options[:ipv6_only]
+                       # Listen on IPv6 only, leaving IPv4 addresses alone.
+                       ' ipv6only=on'
+                     else
+                       # Listen on both IPv4, and IPv6.
+                       ' ipv6only=off'
+                     end
     end
     # Listen on IPv4 only.
     "listen #{listen_addr}#{listen_port}#{listen_opts};"

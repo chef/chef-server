@@ -50,7 +50,7 @@ end
 file '/etc/sysctl.conf' do
   user 'root'
   action :touch
-  not_if { File.exist?('/etc/sysctl.conf') }
+  not_if { ::File.exist?('/etc/sysctl.conf') }
 end
 
 sysctl 'vm.max_map_count' do
@@ -78,7 +78,6 @@ sysctl 'vm.max_map_count' do
   notifies :run, 'execute[sysctl-reload]', :immediately
 end
 
-
 # Remove the old env config to ensre it's not left over after an upgrade.
 directory '/opt/opscode/service/elasticsearch/env' do
   action :delete
@@ -89,7 +88,7 @@ template config_file do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode '0644'
-  variables (lazy { elasticsearch.to_hash })
+  variables(lazy { elasticsearch.to_hash })
   force_unlink true
   notifies :restart, 'component_runit_service[elasticsearch]', :delayed
 end

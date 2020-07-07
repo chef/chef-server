@@ -147,7 +147,7 @@ class SolrPreflightValidator < PreflightValidator
 
   def warn_deprecated_indexing_change
     return if cs_solr_attr['external']
-    return if !previous_run
+    return unless previous_run
 
     old_value = previous_run['deprecated_solr_indexing']
     new_value = PrivateChef['deprecated_solr_indexing']
