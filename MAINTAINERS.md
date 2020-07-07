@@ -11,7 +11,6 @@ If undertaking a large change, ping the @chef/chef-server-maintainers group for 
 - [Nolan Davidson](https://github.com/nsdavidson)
 - [Prajakta Purohit](https://github.com/prajaktapurohit)
 - [Ryan Cragun](https://github.com/ryancragun)
-- [Stephan Renatus](https://github.com/srenatus)
 - [Stephen Delano](https://github.com/sdelano)
 - [Steven Danna](https://github.com/stevendanna)
 - [Tyler Cloke](https://github.com/tylercloke)
