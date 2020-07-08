@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.7 -->
-## [14.0.7](https://github.com/chef/chef-server/tree/14.0.7) (2020-07-08)
+<!-- latest_release 14.0.8 -->
+## [14.0.8](https://github.com/chef/chef-server/tree/14.0.8) (2020-07-08)
 
 #### Merged Pull Requests
-- Build packages for Ubuntu 20.04 [#2050](https://github.com/chef/chef-server/pull/2050) ([tas50](https://github.com/tas50))
+- Build packages for SLES 15 [#2051](https://github.com/chef/chef-server/pull/2051) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Build packages for SLES 15 [#2051](https://github.com/chef/chef-server/pull/2051) ([tas50](https://github.com/tas50)) <!-- 14.0.8 -->
 - Build packages for Ubuntu 20.04 [#2050](https://github.com/chef/chef-server/pull/2050) ([tas50](https://github.com/tas50)) <!-- 14.0.7 -->
 - MAINTAINERS: drop me [#2048](https://github.com/chef/chef-server/pull/2048) ([srenatus](https://github.com/srenatus)) <!-- 14.0.6 -->
 - Move the push jobs scenario to the end of the tests. [#1967](https://github.com/chef/chef-server/pull/1967) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.5 -->
