@@ -27,6 +27,10 @@ schedules:
     description: "Run a nightly build in the omnibus/adhoc pipeline"
     cronline: "0 6 * * *"
 
+  - name: nightly_integration_test
+    description: "Run a nightly integration test against latest current"
+    cronline: "0 9 * * *"
+
   - name: cleanup_orphaned_test_resources
     description: Cleanup orphaned test resources
     cronline: "0 5 * * *" # every day at 5am
@@ -109,6 +113,9 @@ subscriptions:
   - workload: schedule_triggered:chef/chef-server:master:nightly_build:*
     actions:
       - trigger_pipeline:omnibus/adhoc
+  - workload: schedule_triggered:chef/chef-server:master:nightly_integration_test:*
+    actions:
+      - trigger_pipeline:integration_test
   # Run these actions when the freshly built Habitat packages have been uploaded to Depot
   - workload: buildkite_hab_build_group_published:{{agent_id}}:*
     actions:
