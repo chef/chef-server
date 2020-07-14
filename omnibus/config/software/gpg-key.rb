@@ -30,9 +30,9 @@ version "1.0.1" do
   source md5: "369efc3a19b9118cdf51c7e87a34f266"
 end
 
-source url: "https://downloads.chef.io/packages-chef-io-public.key"
+source url: "https://packages.chef.io/chef.asc"
 
 build do
   mkdir "#{install_dir}/embedded/keys"
-  copy "#{project_dir}/packages-chef-io-public.key", "#{install_dir}/embedded/keys/packages-chef-io-public.key"
+  copy "#{project_dir}/chef.asc", "#{install_dir}/embedded/keys/packages-chef-io-public.key"
 end
