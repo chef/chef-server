@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.8 -->
-## [14.0.8](https://github.com/chef/chef-server/tree/14.0.8) (2020-07-08)
+<!-- latest_release 14.0.9 -->
+## [14.0.9](https://github.com/chef/chef-server/tree/14.0.9) (2020-07-16)
 
 #### Merged Pull Requests
-- Build packages for SLES 15 [#2051](https://github.com/chef/chef-server/pull/2051) ([tas50](https://github.com/tas50))
+- Add nightly integration test run [#2052](https://github.com/chef/chef-server/pull/2052) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Add nightly integration test run [#2052](https://github.com/chef/chef-server/pull/2052) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.9 -->
 - Build packages for SLES 15 [#2051](https://github.com/chef/chef-server/pull/2051) ([tas50](https://github.com/tas50)) <!-- 14.0.8 -->
 - Build packages for Ubuntu 20.04 [#2050](https://github.com/chef/chef-server/pull/2050) ([tas50](https://github.com/tas50)) <!-- 14.0.7 -->
 - MAINTAINERS: drop me [#2048](https://github.com/chef/chef-server/pull/2048) ([srenatus](https://github.com/srenatus)) <!-- 14.0.6 -->
