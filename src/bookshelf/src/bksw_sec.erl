@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Eric B Merritt <ericbmerritt@gmail.com>
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% @author Eric B Merritt <ericbmerritt@gmail.com>          <-- this was (entirely?) rewritten.  who is author now?
+%% Copyright 2012 Opscode, Inc. All Rights Reserved.            and why license?
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
