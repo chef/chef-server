@@ -100,9 +100,7 @@ common_auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmz
 
                 "AWS4-HMAC-SHA256" == wrq:get_qs_value("X-Amz-Algorithm", Req0) orelse throw({RequestId, Req0, Context}),
 
-                % temporarily disabling this - should be re-enabled later
-                %true == check_signed_headers_common(SignedHeaders, Headers) orelse throw({RequestId, Req0, Context}),
-                check_signed_headers_common(SignedHeaders, Headers),
+                true == check_signed_headers_common(SignedHeaders, Headers) orelse throw({RequestId, Req0, Context}),
 
                 ComparisonURL = mini_s3:s3_url(Method, BucketName, Key, XAmzExpires, SignedHeaders, Date, Config),
 
@@ -126,9 +124,7 @@ common_auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmz
                 ComparisonURL = "blah",
                 QueryParams = wrq:req_qs(Req0),
 
-                % temporarily disabling this - should be re-enabled later
-                %true == check_signed_headers_authhead(SignedHeaders, Headers) orelse throw({RequestId, Req0, Context}),
-                check_signed_headers_authhead(SignedHeaders, Headers),
+                true == check_signed_headers_authhead(SignedHeaders, Headers) orelse throw({RequestId, Req0, Context}),
 
                 SigV4Headers = erlcloud_aws:sign_v4(Method, Path, Config, SignedHeaders, <<>>, Region, "s3", QueryParams, Date),
 
@@ -181,19 +177,18 @@ common_auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmz
 %-spec check_signed_headers_authhead(proplist(), proplist()) -> boolean(). % for erlang20+
 -spec check_signed_headers_authhead(SignedHeaders::[tuple()], Headers::[tuple()]) -> boolean().
 check_signed_headers_authhead(SignedHeaders, Headers) ->
-%    check_signed_headers_common(SignedHeaders, Headers) andalso
-%
-%    % x-amz-content-sha256 header is required
-%    proplists:is_defined("x-amz-content-sha256", SignedHeaders) andalso
-%
-%    % if content-type header is present in request, it is required
-%    case proplists:is_defined("content-type", Headers) of
-%        true ->
-%            proplists:is_defined("content-type", SignedHeaders);
-%        _ ->
-%            true
-%    end.
-    check_signed_headers_common(SignedHeaders, Headers).
+    check_signed_headers_common(SignedHeaders, Headers) andalso
+
+    % x-amz-content-sha256 header is required
+    proplists:is_defined("x-amz-content-sha256", SignedHeaders) andalso
+
+    % if content-type header is present in request, it is required
+    case proplists:is_defined("content-type", Headers) of
+        true ->
+            proplists:is_defined("content-type", SignedHeaders);
+        _ ->
+            true
+    end.
 
 % required signed headers common to both authorization header verification
 % and presigned url verification.
@@ -201,14 +196,11 @@ check_signed_headers_authhead(SignedHeaders, Headers) ->
 %-spec check_signed_headers_common(proplist(), proplist()) -> boolean(). % for erlang20+
 -spec check_signed_headers_common(SignedHeaders::[tuple()], Headers::[tuple()]) -> boolean().
 check_signed_headers_common(SignedHeaders, Headers) ->
-%    % host header is required
-%    proplists:is_defined("host", SignedHeaders) andalso
-%
-%    % any x-amz-* headers present in request are required
-%    [] == [Key || {Key, _} <- Headers, is_amz(Key), not proplists:is_defined(Key, SignedHeaders)].
+    % host header is required
+    proplists:is_defined("host", SignedHeaders) andalso
 
-% any x-amz-* headers present in request are required
-[] == [Key || {Key, _} <- Headers, is_amz(Key), not proplists:is_defined(Key, SignedHeaders)].
+    % any x-amz-* headers present in request are required
+    [] == [Key || {Key, _} <- Headers, is_amz(Key), not proplists:is_defined(Key, SignedHeaders)].
 
 % split  "<bucketname>/<key>" (possibly leading and/or trailing /) into {"bucketname", "key"}
 % Path = "<bucketname>/<key>"
