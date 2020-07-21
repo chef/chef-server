@@ -26,18 +26,18 @@ get_bucket_key_test() ->
 % x-amz-content-sha256 header is required
 % if content-type header is present in request, it is required
 % any x-amz-* headers present in request are required
-%check_signed_headers_test() ->
-%    % no host
-%    false = bksw_sec:check_signed_headers_authhead([], []),
-%    % no x-amz-content-sha256
-%    false = bksw_sec:check_signed_headers_authhead([{"host", x}], []),
-%    % no content-type
-%    false = bksw_sec:check_signed_headers_authhead([{"host", x}, {"x-amz-content-sha256", x}], [{"content-type", x}]),
-%    % no x-amz-*
-%    false = bksw_sec:check_signed_headers_authhead([{"host", x}, {"x-amz-content-sha256", x}, {"content-type", x}], [{"content-type", x}, {"x-amz-blah", x}]),
-%
-%    true =  bksw_sec:check_signed_headers_authhead([{"host", x}, {"x-amz-content-sha256", x}, {"content-type", x}, {"x-amz-blah", x}], [{"content-type", x}, {"x-amz-blah", x}]),
-%    true =  bksw_sec:check_signed_headers_authhead([{"host", x}, {"x-amz-content-sha256", x}], []).
+check_signed_headers_test() ->
+    % no host
+    false = bksw_sec:check_signed_headers_authhead([], []),
+    % no x-amz-content-sha256
+    false = bksw_sec:check_signed_headers_authhead([{"host", x}], []),
+    % no content-type
+    false = bksw_sec:check_signed_headers_authhead([{"host", x}, {"x-amz-content-sha256", x}], [{"content-type", x}]),
+    % no x-amz-*
+    false = bksw_sec:check_signed_headers_authhead([{"host", x}, {"x-amz-content-sha256", x}, {"content-type", x}], [{"content-type", x}, {"x-amz-blah", x}]),
+
+    true =  bksw_sec:check_signed_headers_authhead([{"host", x}, {"x-amz-content-sha256", x}, {"content-type", x}, {"x-amz-blah", x}], [{"content-type", x}, {"x-amz-blah", x}]),
+    true =  bksw_sec:check_signed_headers_authhead([{"host", x}, {"x-amz-content-sha256", x}], []).
 
 
 %https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
