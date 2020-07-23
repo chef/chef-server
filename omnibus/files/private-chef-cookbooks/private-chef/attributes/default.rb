@@ -66,12 +66,12 @@ default['private_chef']['addons']['path'] = nil
 default['private_chef']['addons']['packages'] =
   %w(opscode-reporting opscode-manage opscode-analytics opscode-push-jobs-server chef-ha)
 default['private_chef']['addons']['ubuntu_supported_codenames'] =
-  %w(lucid precise trusty)
+  %w(xenial bionic focal)
 default['private_chef']['addons']['ubuntu_distribution'] =
   if node['private_chef']['addons']['ubuntu_supported_codenames'].include?(node['lsb']['codename'])
     node['lsb']['codename']
   else
-    'lucid'
+    'bionic'
   end
 
 ####
