@@ -226,7 +226,7 @@ init_transfer_state() ->
     #file_transfer_state{
        size = 0,
        next_chunk = 0,
-       hash_context_md5 = crypto:hash_init(md5),
+       hash_context_md5 = erlang:md5_init(),
        hash_context_sha256 = crypto:hash_init(sha256),
        hash_context_sha512 = crypto:hash_init(sha512)
       }.
@@ -244,7 +244,7 @@ update_transfer_state(#file_transfer_state{
 
     TransferState#file_transfer_state{size = Size1,
                                       next_chunk = NextChunk + ChunkIncr,
-                                      hash_context_md5 = crypto:hash_update(ContextMd5, Data),
+                                      hash_context_md5 = erlang:md5_update(ContextMd5, Data),
                                       hash_context_sha256 = crypto:hash_update(ContextSha256, Data),
                                       hash_context_sha512 = crypto:hash_update(ContextSha512, Data)
                                      }.
@@ -257,7 +257,7 @@ finalize_transfer_state(#file_transfer_state{
                           },
                         #db_file{} = File) ->
 
-    HashMd5    = crypto:hash_final(ContextMd5),
+    HashMd5    = erlang:md5_final(ContextMd5),
     HashSha256 = crypto:hash_final(ContextSha256),
     HashSha512 = crypto:hash_final(ContextSha512),
 
