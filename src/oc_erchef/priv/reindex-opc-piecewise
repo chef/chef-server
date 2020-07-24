@@ -147,7 +147,7 @@ print_missing(Missing) ->
 
 make_context(OrgName, IntLB) ->
     {ok, ServerAPIMinVersion} = rpc:call(?ERCHEF, oc_erchef_app, server_api_version, [min]),
-    ReqId = base64:encode(crypto:hash(md5, (term_to_binary(make_ref())))),
+    ReqId = base64:encode(erlang:md5(term_to_binary(make_ref()))),
     % TODO api versioning to be handled when we move this into an omnibus template
     rpc:call(?ERCHEF, chef_db, make_context, [ServerAPIMinVersion, ReqId, find_dl_headers(OrgName, IntLB)]).
 
