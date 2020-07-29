@@ -1,0 +1,16 @@
+/*doc
+---
+title: Label
+name: label
+category: Label
+---
+
+```html_example
+<span class="label radius">So-So</span>
+<span class="label radius alert">Not Good</span>
+<span class="label success radius">Awesome</span>
+```
+*/
+
+@import '../settings';
+@import 'foundation/components/labels';

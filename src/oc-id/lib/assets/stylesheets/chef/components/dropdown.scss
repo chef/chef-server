@@ -1,0 +1,35 @@
+/*doc
+---
+title: Dropdown
+name: dropdown
+category: Dropdown
+---
+
+```html_example
+<button class="button" data-dropdown="dropdown-profile" aria-controls="dropdown-profile" aria-expanded="false">Click Me</button>
+
+<ul id="dropdown-profile" class="f-dropdown" data-dropdown-content aria-hidden="true" tabindex="-1">
+  <li><a href="#">View Profile</a></li>
+  <li><a href="#">Manage Profile</a></li>
+  <li><a href="#">Sign Out</a></li>
+</ul>
+```
+
+## Import and Customization
+
+```
+@import 'chef/components/dropdown'
+```
+
+<div data-alert class="alert-box secondary radius">
+  The Dropdown component also requires a JavaScript module to work properly. Be sure to include 
+  chef.js in your page, along with whatever additional scripts you might need. See the 
+  <a href="/getting-started">Getting Started</a> section for more information.
+</div>
+
+## More Information
+  * [Foundation Tabs documentation](http://foundation.zurb.com/docs/components/tabs.html)
+*/
+
+@import '../settings';
+@import 'foundation/components/dropdown';

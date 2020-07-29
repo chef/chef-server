@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+<g id="workstation">
+</g>
+<g id="user">
+</g>
+<g id="search">
+	<g>
+		<g>
+			<path d="M43.7,85.8c-23.6,0-42.9-19.2-42.9-42.9C0.8,19.3,20.1,0,43.7,0c23.6,0,42.9,19.2,42.9,42.9
+				C86.6,66.6,67.4,85.8,43.7,85.8L43.7,85.8z M43.7,8.6C24.8,8.6,9.4,24,9.4,42.9c0,18.9,15.4,34.3,34.3,34.3
+				C62.6,77.2,78,61.8,78,42.9C78,24,62.6,8.6,43.7,8.6L43.7,8.6z"/>
+		</g>
+		<g>
+			<path d="M19.6,42.9h-4.3c0-15.7,12.8-28.4,28.4-28.4v4.3C30.4,18.8,19.6,29.6,19.6,42.9L19.6,42.9z"/>
+		</g>
+		<g>
+			<path d="M94.9,100c-1.1,0-2.2-0.4-3-1.3l-24-24c-1.7-1.7-1.7-4.4,0-6.1c1.7-1.7,4.4-1.7,6.1,0l24,24c1.7,1.7,1.7,4.4,0,6.1
+				C97.1,99.6,96,100,94.9,100L94.9,100z"/>
+		</g>
+	</g>
+</g>
+<g id="run-list">
+</g>
+<g id="role">
+</g>
+<g id="policy">
+</g>
+<g id="organization">
+</g>
+<g id="node">
+</g>
+<g id="group">
+</g>
+<g id="environment">
+</g>
+<g id="data-bag">
+</g>
+<g id="cookbook">
+</g>
+<g id="client">
+</g>
+<g id="api">
+</g>
+</svg>

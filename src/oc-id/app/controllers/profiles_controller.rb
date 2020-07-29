@@ -21,13 +21,13 @@ class ProfilesController < ApplicationController
     # Note that if an email address is provided, don't update it right away.
     # Instead send a confirmation email and let that email link update the
     # email address.
-    if params[:user].key?(:email) && @user.email != params[:user][:email]
-      EmailVerifyMailer.email_verify(@user, params[:user][:email]).deliver_now
-      params[:user].delete(:email)
+    if user_params.key?(:email) && @user.email != user_params[:email]
+      EmailVerifyMailer.email_verify(@user, user_params[:email]).deliver_now
+      user_params.delete(:email)
       updated_email = true
     end
 
-    if @user.update_attributes(params[:user])
+    if @user.update_attributes(user_params)
       message = I18n.t('profile.update_successful')
       message << "\n" + I18n.t('profile.email_change_sent') if updated_email
       redirect_to profile_path, :notice => message
@@ -117,5 +117,9 @@ class ProfilesController < ApplicationController
       Settings.secret_key_base,
       params[:email],
     ).valid_for?(params[:signature])
+  end
+
+  def user_params
+    params.require(:user).permit(:username,:first_name,:last_name,:middle_name,:email,:public_key,:private_key,:display_name,:password)
   end
 end

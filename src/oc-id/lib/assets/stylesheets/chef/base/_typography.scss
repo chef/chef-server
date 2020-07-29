@@ -1,0 +1,34 @@
+/*doc
+---
+title: Typography
+name: typography
+category: Typography
+---
+
+```html_example
+<div>
+  <h1>Heading 1</h1>
+  <h2>Heading 2</h2>
+  <h3>Heading 3</h3>
+  <h4>Heading 4</h4>
+  <h5>Heading 5</h5>
+  <h6>Heading 6</h6>
+  <p>Some paragraph text.</p>
+</div>
+``` 
+*/
+
+@if variable-exists(chef-type-font-urls) {
+  @each $url in $chef-type-font-urls {
+    @import url($url);
+  }
+}
+
+$h1-font-size: rem-calc(36);
+$h2-font-size: rem-calc(28);
+$h3-font-size: rem-calc(24);
+$h4-font-size: rem-calc(18);
+$h5-font-size: rem-calc(16);
+$h6-font-size: 1rem;
+
+@import 'foundation/components/type';

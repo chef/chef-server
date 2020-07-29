@@ -1,0 +1,21 @@
+/*doc
+---
+title: Color
+name: color
+category: Color
+---
+
+We try to keep to as few colors as possible, and to calculate the variations we need based on them. Here's
+what we're using currently.
+
+Swatch                                      | Hex         | RGB         | CMYK        | Sass
+----------------------------------------    | ----------- | ----------- | ----------- | ----
+<div class="panel swatch orange"></div>     | `#f18b21`   | 241 139 33  | 2 54 100 0  |`$chef-orange`
+<div class="panel swatch dark-blue"></div>  | `#3f5364`   | 63 83 100   | 78 60 44 25 | `$chef-dark-blue`
+<div class="panel swatch light-blue"></div> | `#6bb2e2`   | 107 178 226 | 54 16 0 0   | `$chef-light-blue`
+<div class="panel swatch green"></div>      | `#5ab7b2`   | 90 183 178   | 63 7 34 0   | `$chef-green`
+<div class="panel swatch yellow"></div>     | `#fdb714`   | 253 183 20  | 0 31 99 0   | `$chef-yellow`
+<div class="panel swatch grey"></div>       | `#7d868c`   | 125 134 140  | 54 41 38 4  | `$chef-grey`
+<div class="panel swatch dark-grey"></div>  | `#3e4346`   | 62 67 70    | 71 61 57 43 | `$chef-dark-grey`
+<div class="panel swatch white"></div>      | `#ffffff`   | 255 255 255 | 0 0 0 0     | `$chef-white`
+*/
