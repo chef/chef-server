@@ -1,0 +1,33 @@
+/*doc
+---
+title: Accordion
+name: accordion
+category: Accordion
+---
+
+```html_example
+<dl class="accordion" data-accordion>
+  <dd class="accordion-navigation">
+    <a href="#panel-1">Thing 1</a>
+    <div id="panel-1" class="content active">
+      Thing 1 is awesome.
+    </div>
+  </dd>
+  <dd class="accordion-navigation">
+    <a href="#panel-2">Thing 2</a>
+    <div id="panel-2" class="content">
+      Thing 3 is awesomer.
+    </div>
+  </dd>
+  <dd class="accordion-navigation">
+    <a href="#panel-3">Thing 3</a>
+    <div id="panel-3" class="content">
+      Thing 3 is awesomest.
+    </div>
+  </dd>
+</dl>
+```
+*/
+
+@import '../settings';
+@import 'foundation/components/accordion';

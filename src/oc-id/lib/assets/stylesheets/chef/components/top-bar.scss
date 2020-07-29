@@ -1,0 +1,143 @@
+/*doc
+---
+title: Top Bar
+name: top-bar
+category: Top Bar
+---
+
+The Top Bar is the primary navigational component of a site. It offers a
+site name, links, and [Chef logo](../logo).
+
+Use the Top Bar to provide access to your site's top-level resources: your home
+page, the main sections of your site, etc. Don't use the top-bar logo or its primary links
+to point to other Chef or third-party sites; instead, link to those resources from within the
+bodies of your pages.
+
+```html_example
+<nav class="top-bar" role="navigation">
+  <h1>
+    <a href="/"><span class="chef">Chef</span> Thing</span></a>
+  </h1>
+  <i class="nav-icon fi-list"></i>
+  <ul>
+    <li><a href="#">Link</a></li>
+    <li><a class="active" href="#">Active Link</a></li>
+    <li><a href="#">Link</a></li>
+  </ul>
+  <a href="/" class="logo mark"></a>
+</nav>
+```
+
+## Import and Customization
+
+```
+@import 'chef/components/top-bar'
+```
+
+<div data-alert class="alert-box secondary radius">
+  The Top Bar component also requires a JavaScript module in order for the
+  mobile menu dropdown to work properly. Be sure to include
+  chef.js in your page, along with whatever additional scripts you might need. See the
+  <a href="/getting-started">Getting Started</a> section for more information.
+</div>
+
+*/
+
+@import "../settings";
+
+.top-bar {
+  line-height: 1;
+  margin-bottom: 20px;
+  min-height: 50px;
+  padding: 11px 0.9375rem;
+  position: relative;
+  white-space: nowrap;
+
+  ul, h1 {
+    display: inline;
+    font-family: Montserrat, "Helvetica Neue", sans-serif;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-size: 18px;
+    margin: 0;
+    padding: 5px 0;
+
+    a {
+      color: $chef-orange;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .chef {
+      color: $chef-dark-blue;
+    }
+  }
+
+  ul {
+    display: inline;
+    list-style: none;
+    margin: 7px 0 0 26px;
+
+    li {
+      display: inline-block;
+      margin-left: 20px;
+
+      a {
+        border-bottom: 3px solid transparent;
+        color: $chef-grey;
+        font-size: 14px;
+        font-weight: normal;
+        transition: all 0.4s ease;
+      }
+
+      a:hover, a.active {
+        border-bottom: 3px solid $chef-dark-grey;
+        color: $chef-dark-grey;
+      }
+
+      a.active {
+        cursor: default;
+      }
+
+      &:first-child {
+        margin: 0;
+      }
+    }
+  }
+
+  .nav-icon {
+    color: $chef-dark-blue;
+    cursor: pointer;
+    display: none;
+    font-size: 22px;
+    position: absolute;
+    right: 60px;
+    top: 14px;
+  }
+
+  .logo {
+    position: absolute;
+    height: 45px;
+    width: 45px;
+    top: 11px;
+    right: 8px;
+  }
+
+  @media #{$small-only} {
+    ul {
+      display: none;
+      margin-left: 0;
+
+      li {
+        display: block;
+        margin-left: 0;
+      }
+    }
+
+    .nav-icon {
+      display: inline-block;
+    }
+  }
+}

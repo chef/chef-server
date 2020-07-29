@@ -1,0 +1,44 @@
+/*doc
+---
+title: Default Theme
+name: _default
+category: Themes
+---
+
+The default theme.
+
+```
+@import 'chef/themes/default'; // optional
+@import 'chef';
+```
+*/
+
+@import '../settings';
+
+$chef-palette-link-color:           $chef-dark-blue !default;
+$logo-base-color:                   $chef-dark-blue !default;
+$logo-accent-color:                 $chef-orange !default;
+
+// Alert
+$alert-border-style:                none;
+$info-color:                        #81A9CC;
+$warning-color:                     $chef-yellow;
+
+// Type
+$chef-type-font-urls:               '//fonts.googleapis.com/css?family=Montserrat:400';
+$chef-type-label:                   Montserrat, "Helvetica Neue", Helvetica, Arial, sans-serif !default;
+$chef-type-code:                    Consolas, Liberation Mono, Courier, monospace !default;
+$code-font-family:                  $chef-type-code !default;
+
+// Top Bar
+$topbar-link-color:                 $chef-grey !default;
+$topbar-link-font-size:             14px !default;
+$topbar-link-weight:                normal;
+$topbar-bg:                         $chef-white !default;
+$topbar-logo-base-color:            $logo-base-color !default;
+$topbar-logo-accent-color:          $logo-accent-color !default;
+
+// Footer
+$footer-bg:                         $chef-white !default;
+$footer-font-size:                  rem-calc(13) !default;
+$footer-color:                      $chef-grey !default;

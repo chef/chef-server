@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+<g id="public_x5F_key">
+</g>
+<g id="private_x5F_key">
+</g>
+<g id="chef_x5F_user">
+</g>
+<g id="chef_x5F_role">
+</g>
+<g id="chef_x5F_organization">
+</g>
+<g id="chef_x5F_node">
+</g>
+<g id="chef_x5F_mirror">
+</g>
+<g id="chef_x5F_group">
+</g>
+<g id="chef_x5F_environment">
+</g>
+<g id="chef_x5F_data_x5F_bag">
+	<g>
+		<g>
+			<path d="M91.1,95.3H8.9c-4.9,0-8.9-4-8.9-8.9V29c0-4.9,4-8.9,8.9-8.9h82.3c4.9,0,8.9,4,8.9,8.9v57.4C100,91.4,96,95.3,91.1,95.3
+				L91.1,95.3z M8.9,28.6c-0.2,0-0.4,0.2-0.4,0.4v57.4c0,0.2,0.2,0.4,0.4,0.4h82.3c0.2,0,0.4-0.2,0.4-0.4V29c0-0.2-0.2-0.4-0.4-0.4
+				H8.9L8.9,28.6z"/>
+		</g>
+		<g>
+			<path d="M66.9,28.2c-2.3,0-4.2-1.9-4.2-4.2V13.5c0-0.2-0.2-0.4-0.5-0.4H37.8c-0.2,0-0.4,0.2-0.4,0.4V24c0,2.3-1.9,4.2-4.2,4.2
+				c-2.3,0-4.2-1.9-4.2-4.2V13.5c0-4.9,4-8.9,8.9-8.9h24.4c4.9,0,8.9,4,8.9,8.9V24C71.1,26.3,69.2,28.2,66.9,28.2L66.9,28.2z"/>
+		</g>
+		<g>
+			<path d="M40.9,54H6c-1.2,0-2.1-0.9-2.1-2.1c0-1.2,0.9-2.1,2.1-2.1h34.9c1.2,0,2.1,0.9,2.1,2.1C43,53.1,42,54,40.9,54L40.9,54z"/>
+		</g>
+		<g>
+			<path d="M92.6,54H57.7c-1.2,0-2.1-0.9-2.1-2.1c0-1.2,0.9-2.1,2.1-2.1h34.9c1.2,0,2.1,0.9,2.1,2.1C94.7,53.1,93.8,54,92.6,54
+				L92.6,54z"/>
+		</g>
+		<g>
+			<path d="M55.8,65.7H44.2c-1.2,0-2.1-0.9-2.1-2.1V46.1c0-1.2,0.9-2.1,2.1-2.1h11.6c1.2,0,2.1,0.9,2.1,2.1v17.5
+				C57.9,64.7,57,65.7,55.8,65.7L55.8,65.7z M46.3,61.5h7.4V48.2h-7.4V61.5L46.3,61.5z"/>
+		</g>
+	</g>
+</g>
+<g id="chef_x5F_container">
+</g>
+<g id="chef_x5F_client">
+</g>
+<g id="chef_x5F_acl">
+</g>
+<g id="machine_x5F_image">
+</g>
+<g id="machine_x5F_file">
+</g>
+<g id="machine_x5F_execute">
+</g>
+<g id="machine_x5F_batch">
+</g>
+<g id="machine">
+</g>
+<g id="load_x5F_balancer">
+</g>
+</svg>

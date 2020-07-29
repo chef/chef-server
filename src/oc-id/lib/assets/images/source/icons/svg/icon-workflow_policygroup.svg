@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+<g id="deliver">
+</g>
+<g id="rehearse">
+</g>
+<g id="union">
+</g>
+<g id="publish">
+</g>
+<g id="accept">
+</g>
+<g id="build">
+</g>
+<g id="approve">
+</g>
+<g id="verify">
+</g>
+<g id="workstation">
+</g>
+<g id="tests">
+</g>
+<g id="secrets">
+</g>
+<g id="rules">
+</g>
+<g id="ruby_1_">
+</g>
+<g id="rubocop">
+</g>
+<g id="resources">
+</g>
+<g id="reports">
+</g>
+<g id="recipes">
+</g>
+<g id="recipe">
+</g>
+<g id="recipe_x5F_dsl">
+</g>
+<g id="policygroup">
+	<g>
+		<g>
+			<path d="M89,21.4h-3.7V93c0,0.9-0.7,1.6-1.6,1.6h-53v3.7c0,0.9,0.7,1.6,1.6,1.6h0l0,0H89c0.9,0,1.6-0.7,1.6-1.6V23
+				C90.7,22.1,89.9,21.4,89,21.4z"/>
+			<path d="M80,87.7V12.3c0-0.9-0.7-1.6-1.6-1.6h-3.7v71.7c0,0.9-0.7,1.6-1.6,1.6H20v3.7c0,0.9,0.7,1.6,1.6,1.6l0,0h56.7
+				C79.3,89.3,80,88.6,80,87.7z"/>
+		</g>
+		<g>
+			<g>
+				<g>
+					<path d="M47.2,56.3c0,1.8-1.4,3.2-3.2,3.2h-9.6c-1.8,0-3.2-1.4-3.2-3.2v-0.7H24v8.1h30.4v-8.1h-7.2V56.3z"/>
+					<path d="M34.4,54.1v2.3H44v-2.3c0-0.9,0.7-1.6,1.6-1.6h7v-9.9H26.2v9.9h6.6C33.7,52.5,34.4,53.2,34.4,54.1z"/>
+					<path d="M67.7,0H11c-0.9,0-1.6,0.7-1.6,1.6V77c0,0.9,0.7,1.6,1.6,1.6h56.7c0.9,0,1.6-0.7,1.6-1.6V1.6C69.3,0.7,68.6,0,67.7,0z
+						 M28,33h22.8c0.4,0,0.8,0.4,0.8,0.8c0,0.4-0.4,0.8-0.8,0.8H28c-0.4,0-0.8-0.4-0.8-0.8C27.2,33.4,27.5,33,28,33z M26.5,36.2
+						h25.9c0.4,0,0.8,0.4,0.8,0.8c0,0.4-0.4,0.8-0.8,0.8H26.5c-0.4,0-0.8-0.4-0.8-0.8C25.7,36.6,26,36.2,26.5,36.2z M57.6,65.4
+						c0,0.9-0.7,1.6-1.6,1.6H22.4c-0.9,0-1.6-0.7-1.6-1.6V54.1c0-0.9,0.7-1.6,1.6-1.6H23V41c0-0.9,0.7-1.6,1.6-1.6h29.6
+						c0.9,0,1.6,0.7,1.6,1.6v11.5H56c0.9,0,1.6,0.7,1.6,1.6V65.4z"/>
+				</g>
+			</g>
+		</g>
+	</g>
+</g>
+<g id="policyfile">
+</g>
+<g id="knife">
+</g>
+<g id="kitchen">
+</g>
+<g id="foodcritic">
+</g>
+<g id="development_x5F_kit">
+</g>
+<g id="cookbooks">
+</g>
+<g id="controls">
+</g>
+<g id="config-rb">
+</g>
+<g id="ci">
+</g>
+<g id="chef_x5F_repo">
+</g>
+<g id="chefspec">
+</g>
+<g id="cd">
+</g>
+</svg>

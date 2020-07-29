@@ -1,0 +1,249 @@
+/*doc
+---
+title: Logo
+name: logo
+category: Logo
+---
+
+Logos are delivered as CSS-configurable SVG graphics. The default orientation is vertical, 
+but you can also specify horizontal, provided you also supply a site name. Available 
+for both the default and inverse [themes](../themes).
+
+```html_example
+<!-- Default -->
+<div class="logo"></div>
+
+<!-- Inverse (for dark backgrounds) -->
+<div class="logo inverse"></div>
+
+<!-- Grayscale -->
+<div class="logo grayscale"></div>
+
+<!-- Just the mark -->
+<div class="logo mark"></div>
+```
+
+### Animating the Logo
+
+If you'd like to animate the logo (for example, as a loading spinner), you can use the 
+`animate` and `deaminate` classes:
+
+```html_example
+<div id="animate-example" class="logo mark animate"></div>
+```  
+
+The `deanimate` class simply returns the logo to its original position.
+
+Applying and removing these classes manually certainly works, but doesn't guarantee that 
+a running animation finishes smoothly. To do that, use the jQuery `logo` plugin:
+
+```
+$(selector).logo('animate');     // Start animating
+$(selector).logo('deanimate');   // Go one last time, then stop
+```
+
+Give it a try with the logo above:
+
+<button id="animate" class="small button secondary">Animate!</button>
+<button id="deanimate" class="small button secondary">Stop</button>
+
+<script>
+  document.querySelector('#animate').onclick = function() { $('#animate-example').logo('animate') };
+  document.querySelector('#deanimate').onclick = function() { $('#animate-example').logo('deanimate') };
+</script>
+
+### Using Ruby? Have a Helper
+
+The methods above use JavaScript to retrieve the logo and place it into the DOM. If you'd 
+rather the logo be rendered into your document, you can use a Ruby helper instead. Just 
+include the `AssetHelpers` module (in Rails, that's typically done in `application_helper.rb`):
+
+```
+require 'chef/web/core/asset_helpers'
+
+module ApplicationHelper
+  include Chef::Web::Core::AssetHelpers
+  ...
+end
+```
+
+Then use it in your templates:
+
+```html_example
+<!-- Just the logo in a div -->
+<%= chef_logo %>
+
+<!-- As a link, horizontal, with site name -->
+<%= chef_logo :a, :class => 'horizontal inverse', :href => '/', :data => { :'tag-line' => 'Style Guide' } %>
+```
+
+Be sure to use one of these two methods, as the content of the logo will likely change 
+with future versions of this component.
+
+<style>
+  .logo {
+    margin: 0 12px 12px 0;
+  }
+  .logo.inverse {
+    background-color: #3f5364;
+    padding: 4px 8px;
+  }
+</style>
+*/
+
+@import '../settings';
+@import '../themes/default';
+@import '../layouts/default'; 
+
+@import 'compass/css3/transform';
+@import 'compass/css3/animation';
+
+@mixin logo($scale: 1, $width: $logo-width-vertical, $height: $logo-height-vertical, $base-color: $logo-base-color, $accent-color: $logo-accent-color) {
+  display: inline-block;
+  font-size: 0;
+  width: $width;
+  height: $height;
+
+  .base {
+    fill: $base-color;
+  }
+
+  .accent {
+    fill: $accent-color;
+  }
+
+  &.inverse {
+    .base {
+      fill: scale-color($base-color, $lightness: 100%);
+    }
+  }
+
+  &.grayscale {
+    .base {
+      fill: grayscale($base-color);
+    }
+    .accent {
+      fill: grayscale($accent-color);
+    }
+  }
+
+  &.mark {
+    .type {
+      display: none;
+    }
+    .mark {
+      width: $height * $scale;
+      height: auto;
+
+      svg.vertical {
+        display: none;
+      }
+
+      svg.mark {
+        display: block;
+      }
+    }
+  }
+
+  .tag-line {
+    display: none;
+    text {
+      font-family: $chef-type-label;
+      text-transform: uppercase;
+      letter-spacing: rem-calc(1.4);
+      font-size: rem-calc(13);
+    }
+  }
+
+  &[data-tag-line] {
+    &.horizontal {
+      width: $logo-width-horizontal;
+      height: $logo-height-horizontal;
+
+      svg.vertical {
+        display: none;
+      }
+
+      svg.horizontal {
+        display: block;
+      }
+
+      .tag-line {
+        display: block;
+      }
+    }
+  }
+
+  .mark g {
+    transition: opacity 1s;
+    @include transform-origin(223px, 150px);
+  }
+  
+  &.animate .mark g {
+    @include transform-origin(223px, 150px); 
+    opacity: 0.7;
+  }
+
+  &.deanimate .mark g {
+    @include transform(rotate(0deg));
+    opacity: 1;
+  }
+
+  &.horizontal .mark g { 
+    @include transform-origin(30px, 30px); 
+  }
+  
+  &.horizontal .animate .mark g {
+    @include transform-origin(30px, 30px); 
+  }
+
+  &.animate .band-0 {
+    @include animation(rotate-band-0 1.5s infinite ease-in-out);
+  }
+
+  &.animate .band-1 {
+    @include animation(rotate-band-1 1.5s infinite ease-in-out);
+  }
+
+  &.animate .band-2 {
+    @include animation(rotate-band-2 1.5s infinite ease-in-out);
+  }
+
+  &.animate .band-3 {
+    @include animation(rotate-band-3 1.5s infinite ease-in-out);
+  }
+
+  @include keyframes(rotate-band-0) {
+    50% { @include transform(translateZ(0) rotate(360deg)); }
+    100% { @include transform(rotate(360deg)); }
+  }
+
+  @include keyframes(rotate-band-1) {
+    60% { @include transform(translateZ(0) rotate(360deg)); }
+    100% { @include transform(rotate(360deg)); }
+  }
+
+  @include keyframes(rotate-band-2) {
+    80% { @include transform(translateZ(0) rotate(360deg)); }
+    100% { @include transform(rotate(360deg)); }
+  }
+
+  @include keyframes(rotate-band-3) {
+    90% { @include transform(translateZ(0) rotate(360deg)); }
+    100% { @include transform(rotate(360deg)); }
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+}
+
+.logo {
+  @include logo;
+
+  &.horizontal {
+    @include logo($width: $logo-width-horizontal, $height: $logo-height-horizontal);
+  }
+}

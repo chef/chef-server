@@ -1,0 +1,21 @@
+/*doc
+---
+title: Wide Layout
+name: wide
+category: Layouts
+---
+
+A full-screen layout with horizontally oriented logo and left-aligned navigation.
+
+```
+@import 'chef/layouts/wide';
+@import 'chef';
+```
+*/
+
+@import '../settings'; 
+
+$row-width:                   100%;
+$logo-width:                  $logo-width-horizontal;
+$logo-height:                 $logo-height-horizontal;
+$topbar-section-main-float:   left !important;
