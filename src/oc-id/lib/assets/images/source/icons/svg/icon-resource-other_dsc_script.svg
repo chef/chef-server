@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+<g id="yum">
+</g>
+<g id="windows_x5F_service">
+</g>
+<g id="windows">
+</g>
+<g id="subversion">
+</g>
+<g id="solaris">
+</g>
+<g id="smartos">
+</g>
+<g id="ruby">
+</g>
+<g id="rpm">
+</g>
+<g id="route">
+</g>
+<g id="registry_x5F_key">
+</g>
+<g id="reboot">
+</g>
+<g id="python">
+</g>
+<g id="powershell">
+</g>
+<g id="portage">
+</g>
+<g id="perl">
+</g>
+<g id="paludis">
+</g>
+<g id="pacman">
+</g>
+<g id="openbsd">
+</g>
+<g id="ohai">
+</g>
+<g id="mount">
+</g>
+<g id="mdadm">
+</g>
+<g id="macports">
+</g>
+<g id="ips">
+</g>
+<g id="ifconfig">
+</g>
+<g id="http_x5F_request">
+</g>
+<g id="homebrew">
+</g>
+<g id="git">
+</g>
+<g id="freebsd">
+</g>
+<g id="erlang_x5F_call">
+</g>
+<g id="env">
+</g>
+<g id="easy_x5F_install">
+</g>
+<g id="dsc_x5F_script">
+	<g>
+		<g>
+			<path d="M95.8,100H4.2C1.9,100,0,98.1,0,95.8V4.2C0,1.9,1.9,0,4.2,0h91.6c2.3,0,4.2,1.9,4.2,4.2v91.6C100,98.1,98.1,100,95.8,100
+				L95.8,100z M8.4,91.6h83.2V8.4H8.4V91.6L8.4,91.6z"/>
+		</g>
+		<g>
+			<g>
+				<g>
+					<path d="M75.6,70.4H48.5c-2.3,0-4.2-1.9-4.2-4.2c0-2.3,1.9-4.2,4.2-4.2h27.1c2.3,0,4.2,1.9,4.2,4.2
+						C79.8,68.5,77.9,70.4,75.6,70.4L75.6,70.4z"/>
+				</g>
+			</g>
+			<g>
+				<g>
+					<path d="M24.6,70.4c-1.1,0-2.2-0.4-3-1.2c-1.7-1.7-1.7-4.3,0-6L34,50.7L21.6,38.3c-1.7-1.7-1.7-4.3,0-6c1.7-1.7,4.3-1.7,6,0
+						L43,47.7c1.7,1.7,1.7,4.3,0,6L27.6,69.1C26.8,70,25.7,70.4,24.6,70.4L24.6,70.4z"/>
+				</g>
+			</g>
+		</g>
+	</g>
+</g>
+<g id="dsc_x5F_resource">
+</g>
+<g id="dpkg">
+</g>
+<g id="csh">
+</g>
+<g id="chef_x5F_handler">
+</g>
+<g id="breakpoint">
+</g>
+<g id="bff">
+</g>
+<g id="batch">
+</g>
+<g id="apt">
+</g>
+</svg>

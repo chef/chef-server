@@ -1,0 +1,22 @@
+/*doc
+---
+title: Default Layout
+name: default
+category: Layouts
+---
+
+The default 12-column layout with vertically oriented logo an right-aligned navigation.
+
+```
+@import 'chef/layouts/default'; // optional
+@import 'chef';
+```
+*/
+
+@import '../settings'; 
+
+$logo-width:                  $logo-width-vertical !default;
+$logo-height:                 $logo-height-vertical !default;
+$topbar-section-main-float:   right !important !default;
+$hr-margin:                   rem-calc(20);
+$footer-margin:               $hr-margin !default;
