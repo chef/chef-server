@@ -286,7 +286,6 @@ process_headers(Headers) ->
             _    -> Key
         end), Val} || {Key, Val} <- Headers].
 
-% https://erlang.org/doc/apps/erts/time_correction.html
 -spec is_expired(DateTimeString::string(), ExpiresSec::integer()) -> boolean().
 is_expired(DateTimeString, ExpiresSec) ->
     % most ways of getting the date/time seem problematic.  for instance, docs for
@@ -295,6 +294,11 @@ is_expired(DateTimeString, ExpiresSec) ->
     % since it is unknown which time would be used, we could use local time and
     % convert to universal.  however, local time could be an 'illegal' time wrt
     % universal time if switching to/from daylight savings time.
+    %
+    % note that we are neither measuring an elapsed time, nor determining an order
+    % of events, nor creating a unique name, so time correction should not be an
+    % issue.
+    % https://erlang.org/doc/apps/erts/time_correction.html
 
     [Y1, Y2, Y3, Y4, M1, M2, D1, D2, _, H1, H2, N1, N2, S1, S2, _] = DateTimeString,
     Year    = list_to_integer([Y1, Y2, Y3, Y4]),
