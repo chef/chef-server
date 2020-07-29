@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+<g id="user">
+	<g>
+		<g>
+			<path d="M50.4,46.5c-11.4,0-20.7-10.4-20.7-23.2C29.6,10.4,38.9,0,50.4,0c11.4,0,20.7,10.4,20.7,23.2
+				C71.1,36.1,61.8,46.5,50.4,46.5L50.4,46.5z M50.4,8.6c-6.7,0-12.1,6.6-12.1,14.6c0,8.1,5.4,14.6,12.1,14.6
+				c6.7,0,12.1-6.5,12.1-14.6C62.5,15.2,57,8.6,50.4,8.6L50.4,8.6z"/>
+		</g>
+		<g>
+			<path d="M81.6,100H18.4c-2.3,0-4.2-1.8-4.3-4l-1.4-20.4c-0.5-7.5,5.3-16.2,12.7-18.9c15.9-5.7,33.3-5.7,49.1,0
+				c7.5,2.7,13.3,11.4,12.8,18.9L85.9,96C85.8,98.2,83.9,100,81.6,100L81.6,100z M22.4,91.4h55.2L78.7,75c0.2-3.4-2.9-8.7-7.1-10.2
+				c-13.8-5-29.3-5-43.2,0c-4.2,1.5-7.3,6.8-7.1,10.2L22.4,91.4L22.4,91.4z"/>
+		</g>
+	</g>
+</g>
+<g id="template">
+</g>
+<g id="service">
+</g>
+<g id="script">
+</g>
+<g id="ruby_x5F_block">
+</g>
+<g id="remote_x5F_file">
+</g>
+<g id="remote_x5F_directory_1_">
+</g>
+<g id="package">
+</g>
+<g id="log">
+</g>
+<g id="link">
+</g>
+<g id="group">
+</g>
+<g id="gem">
+</g>
+<g id="file">
+</g>
+<g id="execute">
+</g>
+<g id="directory">
+</g>
+<g id="deploy">
+</g>
+<g id="cron">
+</g>
+<g id="cookbook_x5F_file">
+</g>
+<g id="chef_x5F_gem">
+</g>
+<g id="bash">
+</g>
+</svg>

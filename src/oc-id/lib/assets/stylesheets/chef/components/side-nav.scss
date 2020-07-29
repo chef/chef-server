@@ -1,0 +1,80 @@
+/*doc
+---
+title: Side Nav
+name: side-nav
+category: Side Nav
+---
+
+The Side Nav is useful for navigating, like, from the side, or something. You'll find one your left, there.
+
+<script type="text/jsx">
+  var SideNavItem = React.createClass({
+    render: function() {
+      return (
+        <li><a href={this.props.href}>{this.props.text}</a></li> 
+      );
+    }
+  });
+
+  var SideNav = React.createClass({
+    render: function() {
+      var listItems = [];
+
+      this.props.items.forEach(function(item, i) {
+        listItems.push(
+          <SideNavItem text={item.text + ' ' + i} href={item.href} />
+        );
+      });
+
+      return (
+        <ul className="side-nav"> 
+          {listItems}
+        </ul>
+      );
+    }
+  });
+</script>
+
+```jsx_example
+var items = [
+  { text: 'Link', href: '#' },
+  { text: 'Link', href: '#' },
+  { text: 'Link', href: '#' }
+];
+
+React.render(
+  <SideNav items={items} />,
+  document.getElementById('jsx-example')
+);
+```
+*/
+
+@import '../settings';
+
+$side-nav-background-color:     $chef-grey !default;
+$side-nav-link-color:           $chef-grey !default;
+$side-nav-padding:              rem-calc(0) !default;
+$side-nav-font-size:            rem-calc(13) !default;
+
+@import 'foundation/components/side-nav';
+
+// Structure
+
+.side-nav {
+  border-radius: $global-radius;
+}
+
+// Skins
+
+.side-nav {
+  
+  background-color: scale-color($side-nav-background-color, $lightness: 92%);
+  li.active {
+    background-color: scale-color($side-nav-background-color, $lightness: 80%);
+  }
+
+  &.ugly {
+    border: solid 20px #000;
+    background-color: aqua;
+  }  
+}
