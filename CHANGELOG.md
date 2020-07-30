@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.10 -->
-## [14.0.10](https://github.com/chef/chef-server/tree/14.0.10) (2020-07-24)
+<!-- latest_release 14.0.11 -->
+## [14.0.11](https://github.com/chef/chef-server/tree/14.0.11) (2020-07-30)
 
 #### Merged Pull Requests
-- Update gpg key URL [#2054](https://github.com/chef/chef-server/pull/2054) ([rjhornsby](https://github.com/rjhornsby))
+- Tag omniauth version, later tags of omniauth use the latest chef 16 [#2063](https://github.com/chef/chef-server/pull/2063) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Tag omniauth version, later tags of omniauth use the latest chef 16 [#2063](https://github.com/chef/chef-server/pull/2063) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.11 -->
 - Update gpg key URL [#2054](https://github.com/chef/chef-server/pull/2054) ([rjhornsby](https://github.com/rjhornsby)) <!-- 14.0.10 -->
 - Add nightly integration test run [#2052](https://github.com/chef/chef-server/pull/2052) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.9 -->
 - Build packages for SLES 15 [#2051](https://github.com/chef/chef-server/pull/2051) ([tas50](https://github.com/tas50)) <!-- 14.0.8 -->
