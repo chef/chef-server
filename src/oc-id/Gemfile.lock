@@ -1,13 +1,4 @@
 GIT
-  remote: git://github.com/rails/sprockets-rails.git
-  revision: c269f5e01fdffa5c41350e855183d94ff33d318a
-  specs:
-    sprockets-rails (3.2.1)
-      actionpack (>= 4.0)
-      activesupport (>= 4.0)
-      sprockets (>= 3.0.0)
-
-GIT
   remote: https://github.com/chef/chef_secrets
   revision: 2875f29d82c528edd89cb614955e214f3aa4be0c
   specs:
@@ -31,6 +22,15 @@ GIT
     foundation-rails (5.5.3.2)
       railties (>= 3.1.0)
       sass (>= 3.3.0, < 3.5)
+
+GIT
+  remote: https://github.com/rails/sprockets-rails.git
+  revision: c269f5e01fdffa5c41350e855183d94ff33d318a
+  specs:
+    sprockets-rails (3.2.1)
+      actionpack (>= 4.0)
+      activesupport (>= 4.0)
+      sprockets (>= 3.0.0)
 
 GEM
   remote: https://rubygems.org/
@@ -516,8 +516,5 @@ DEPENDENCIES
   unicorn-rails (~> 2.2, >= 2.2.1)
   veil!
 
-RUBY VERSION
-   ruby 2.7.0p0
-
 BUNDLED WITH
-   2.1.2
+   2.1.4
