@@ -129,13 +129,11 @@ include_recipe 'private-chef::fix_permissions'
   postgresql
   oc_bifrost
   oc_id
-  elasticsearch
   opscode-solr4
-  opscode-expander
+  elasticsearch
   bookshelf
   opscode-erchef
   nginx
-  rabbitmq
   bootstrap
   opscode-chef-mover
   redis_lb
