@@ -37,6 +37,7 @@ GIT
 GIT
   remote: https://github.com/chef/omniauth-chef
   revision: 5bae8dd3e5f6afd2356672b745f29da210698d7d
+  tag: v0.3.0
   specs:
     omniauth-chef (0.3.0)
       chef (~> 12)
