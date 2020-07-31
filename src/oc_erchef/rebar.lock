@@ -117,7 +117,7 @@
   0},
  {<<"opscoderl_httpc">>,
   {git,"git://github.com/chef/opscoderl_httpc.git",
-       {ref,"bab889e9165b662c2c23ae3cd5449d6875e7507c"}},
+       {ref,"d9578f44726ca69af5bdadaa602756692d3b1460"}},
   0},
  {<<"opscoderl_wm">>,
   {git,"git://github.com/chef/opscoderl_wm.git",
