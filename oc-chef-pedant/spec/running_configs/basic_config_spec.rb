@@ -165,6 +165,10 @@ describe "running configs required by Chef Server and plugins", :config do
       expect(config['opscode-erchef']['solr_http_max_connection_duration'].to_s).not_to eq ''
     end
 
+    it "opscode-erchef/solr_retry_on_conn_closed" do
+      expect(config['opscode-erchef']['solr_retry_on_conn_closed'].to_s).not_to eq ''
+    end
+
     it "opscode-erchef/solr_ibrowse_options" do
       expect(config['opscode-erchef']['solr_ibrowse_options'].to_s).not_to eq ''
     end

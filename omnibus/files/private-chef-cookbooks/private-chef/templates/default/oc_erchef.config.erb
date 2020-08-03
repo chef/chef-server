@@ -208,6 +208,7 @@
             {cull_interval, <%= node['private_chef']['oc_chef_authz']['http_cull_interval'] %>},
             {max_age, <%= node['private_chef']['oc_chef_authz']['http_max_age'] %>},
             {max_connection_duration, <%= node['private_chef']['oc_chef_authz']['http_max_connection_duration'] %>},
+            {retry_on_conn_closed, <%= node['private_chef']['oc_chef_authz']['http_retry_on_conn_closed']=%>},
             {ibrowse_options, <%= node['private_chef']['oc_chef_authz']['ibrowse_options'] %>}
         ]},
         {cleanup_batch_size, <%= node['private_chef']['opscode-erchef']['cleanup_batch_size'] %>}
@@ -240,6 +241,7 @@
             {cull_interval, <%= @solr_http_cull_interval %>},
             {max_age, <%= @solr_http_max_age %>},
             {max_connection_duration, <%= @solr_http_max_connection_duration %>},
+            {retry_on_conn_closed, <%= @solr_retry_on_conn_closed  %>},
             {ibrowse_options, <%= @solr_ibrowse_options %>}
         ]},
         {rabbitmq_index_management_service, [
@@ -295,6 +297,7 @@
         {cull_interval,           <%= node['private_chef']['data_collector']['http_cull_interval'] %>},
         {max_age,                 <%= node['private_chef']['data_collector']['http_max_age'] %>},
         {max_connection_duration, <%= node['private_chef']['data_collector']['http_max_connection_duration'] %>},
+        {retry_on_conn_closed,    <%= node['private_chef']['data_collector']['http_retry_on_conn_closed']%>},
         {ibrowse_options,         <%= node['private_chef']['data_collector']['ibrowse_options'] %>}
     ]},
     <% end %>

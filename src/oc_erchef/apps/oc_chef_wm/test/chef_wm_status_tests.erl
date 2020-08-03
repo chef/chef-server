@@ -151,6 +151,7 @@ default_config() ->
             {cull_interval, {60, sec}},
             {max_age, {70, sec}},
             {max_connection_duration, {70, sec}},
+            {retry_on_conn_closed, true},
             {ibrowse_options,
             [{connect_timeout, 10000},
                 {basic_auth,
