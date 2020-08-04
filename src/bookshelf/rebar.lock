@@ -70,7 +70,7 @@
   0},
  {<<"opscoderl_wm">>,
   {git,"git://github.com/chef/opscoderl_wm.git",
-       {ref,"e86bc8d718ac161ba7ec7aa6e518117f69007ed9"}},
+       {branch,"lbaker/update-erlang22"}},
   0},
  {<<"pooler">>,
   {git,"git://github.com/seth/pooler.git",
