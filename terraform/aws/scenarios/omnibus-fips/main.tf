@@ -32,7 +32,11 @@ resource "null_resource" "chef_server_fips" {
       "echo -e '\nBEGIN ENABLING FIPS MODE\n'",
       "sudo yum install -y dracut-fips dracut-fips-aesni",
       "sudo dracut -f",
-      "if [ -f /etc/default/grub ]; then sudo sed -i '/GRUB_CMDLINE_LINUX/{s/=\"/=\"fips=1 /;}' /etc/default/grub; sudo grub2-mkconfig -o /boot/grub2/grub.cfg; else sudo sed -i '/^\t.*kernel.*boot/{s/$/ fips=1/;}' /boot/grub/grub.conf; fi",
+      "case $(sed 's/.*release //;s/\\..*//;' /etc/redhat-release) in\n",
+      "8) sudo fips-mode-setup --enable ;;\n",
+      "7) sudo sed -i '/GRUB_CMDLINE_LINUX/{s/=\"/=\"fips=1 /;}' /etc/default/grub; sudo grub2-mkconfig -o /boot/grub2/grub.cfg ;;\n",
+      "6) sudo sed -i '/^\t.*kernel.*boot/{s/$/ fips=1/;}' /boot/grub/grub.conf ;;\n",
+      "esac",
       "echo -e '\nEND ENABLING FIPS MODE\n'",
     ]
   }
