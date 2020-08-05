@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.13 -->
-## [14.0.13](https://github.com/chef/chef-server/tree/14.0.13) (2020-08-03)
+<!-- latest_release 14.0.14 -->
+## [14.0.14](https://github.com/chef/chef-server/tree/14.0.14) (2020-08-05)
 
 #### Merged Pull Requests
-- Sel conn closed [#2064](https://github.com/chef/chef-server/pull/2064) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add Chef Server 13 release branch [#2065](https://github.com/chef/chef-server/pull/2065) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Add Chef Server 13 release branch [#2065](https://github.com/chef/chef-server/pull/2065) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.14 -->
 - Sel conn closed [#2064](https://github.com/chef/chef-server/pull/2064) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.13 -->
 - Remove the dependency for solr, rabbitmq and opscode-expander [#2058](https://github.com/chef/chef-server/pull/2058) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.12 -->
 - Tag omniauth version, later tags of omniauth use the latest chef 16 [#2063](https://github.com/chef/chef-server/pull/2063) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.11 -->
