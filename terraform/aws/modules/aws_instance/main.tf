@@ -78,10 +78,10 @@ resource "aws_instance" "default" {
 }
 
 resource "local_file" "connection_info" {
-	# only output connection info if this instance has paths we want to capture
-	count = length(var.capture_paths) > 0 ? 1 : 0
+  # only output connection info if this instance has paths we want to capture
+  count = length(var.capture_paths) > 0 ? 1 : 0
 
-	# write a file containing ssh connection information on the first line with the remaining lines being the list of paths to capture
-  content = format("%s@%s\n%v\n", local.ssh_username, aws_instance.default.public_dns, var.capture_paths)
+  # write a file containing ssh connection information on the first line with the remaining lines being the list of paths to capture
+  content  = format("%s@%s\n%v\n", local.ssh_username, aws_instance.default.public_dns, var.capture_paths)
   filename = "/tmp/${var.build_prefix}${var.name}-connection_info.txt"
 }
