@@ -49,14 +49,14 @@ steps:
       executor:
        docker:
 
-  - label: ':terraform: fips-ipv4-rhel-8'
+  - label: ':terraform: fips-ipv4-rhel-7'
     command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
       - ./integration_test.log
       - ./*capture_paths.tar.gz
     env:
       SCENARIO: omnibus-fips
-      PLATFORM: rhel-8
+      PLATFORM: rhel-7
       ENABLE_IPV6: false
     expeditor:
       accounts:
