@@ -11,12 +11,12 @@ locals {
   ssh_username = replace(var.platform, "/ubuntu-.*/", "ubuntu") == "ubuntu" ? "ubuntu" : "ec2-user"
 
   ami_ids = {
-    rhel-6       = data.aws_ami.rhel_6.id
-    rhel-7       = data.aws_ami.rhel_7.id
-    rhel-8       = data.aws_ami.rhel_8.id
+    rhel-6         = data.aws_ami.rhel_6.id
+    rhel-7         = data.aws_ami.rhel_7.id
+    rhel-8         = data.aws_ami.rhel_8.id
     "ubuntu-14.04" = data.aws_ami.ubuntu_1404.id
     "ubuntu-16.04" = data.aws_ami.ubuntu_1604.id
     "ubuntu-18.04" = data.aws_ami.ubuntu_1804.id
-    sles-12      = data.aws_ami.sles_12.id
+    sles-12        = data.aws_ami.sles_12.id
   }
 }
