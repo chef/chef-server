@@ -15,7 +15,10 @@ github:
   # details from the Pull Request via the `built_in:update_changelog` merge_action.
   changelog_file: "CHANGELOG.md"
   release_branch:
-    - master
+    - master:
+        version_constraint: 14*
+    - chef-server-13:
+        version_constraint: 13*
 
 # Habitat + Docker exporting
 
