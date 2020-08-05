@@ -238,7 +238,7 @@ list-active-workspaces:
 # returns anything in order to determine if lint fails
 lint:
 	@set -e; \
-	LINT_OUTPUT=$$(terraform fmt --diff --list --write=false ./); \
+	LINT_OUTPUT=$$(terraform fmt --recursive --diff --list --write=false ./); \
 	if test -n "$$LINT_OUTPUT"; then \
 		echo "$$LINT_OUTPUT"; \
 		exit 1; \
