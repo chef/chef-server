@@ -18,6 +18,8 @@ require 'optparse'
 require 'chef/config'
 require 'chef/org'
 require 'redis'
+require "chef-config/dist"
+require "chef"
 
 def all_orgs
   Chef::Config.from_file(::ChefServerCtl::Config.knife_config_file)
@@ -66,12 +68,12 @@ def redis
 end
 
 def disable_api
-  puts "- Disabling the Chef API."
+  puts "- Disabling the #{Chef::Dist::SERVER_PRODUCT} API."
   redis.hset("dl_default", "503_mode", true)
 end
 
 def enable_api
-  puts "- Re-enabling the Chef API"
+  puts "- Re-enabling the #{Chef::Dist::SERVER_PRODUCT} API"
   redis.hdel("dl_default", "503_mode")
 end
 

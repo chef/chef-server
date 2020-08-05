@@ -6,6 +6,7 @@
 
 require 'highline/import'
 require 'shellwords'
+require "chef-config/dist"
 
 knife_config = ::ChefServerCtl::Config.knife_config_file
 knife_cmd    = "#{::ChefServerCtl::Config.knife_bin} opc user password"
@@ -14,7 +15,7 @@ add_command_under_category "password", "organization-and-user-management", "Set 
   # changed arg to turn on ldap to --enable-external-auth since that makes more sense to new users, but left in
   # --disable for older users.
   unless ARGV.length == 2 || (ARGV.length == 3 && (ARGV[2] == "--disable" || ARGV[2] == "--enable-external-auth"))
-    STDERR.puts "Usage: private-chef-ctl password <username> [--enable-external-auth]"
+    STDERR.puts "Usage: private-#{ChefConfig::Dist::SHORT}-ctl password <username> [--enable-external-auth]"
     exit 1
   end
 
@@ -31,7 +32,7 @@ add_command_under_category "password", "organization-and-user-management", "Set 
       exit 1
     end
     if password == '' && ldap_authentication_enabled?
-      example_cmd = "'chef-server-ctl password #{username} --enable-external-auth'"
+      example_cmd = "'#{ChefConfig::Dist::SHORT}-server-ctl password #{username} --enable-external-auth'"
       STDERR.puts "You entered a blank password. If you were trying to enable ldap try #{example_cmd}?"
       exit 1
     end

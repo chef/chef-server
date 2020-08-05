@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 require 'json'
+require "chef"
 
-add_command_under_category "version", "general", "Display current version of Chef Server.", 2 do
+add_command_under_category "version", "general", "Display current version of #{Chef::Dist::SERVER_PRODUCT}.", 2 do
 
   begin
     # detect if running as a habitat service

@@ -7,6 +7,8 @@ require 'veil'
 require 'chef_server_ctl/log'
 require 'chef_server_ctl/config'
 require "license_acceptance/acceptor"
+require "chef-config/dist"
+require "chef"
 
 module Omnibus
   # This implements callbacks for handling commands related to the
@@ -70,13 +72,13 @@ module Omnibus
           last = exec_list.shift
           connection.exec(last)
         end
-        puts "Chef Server databases and roles have been successsfully deleted from #{postgres['vip']}"
+        puts "#{Chef::Dist::SERVER_PRODUCT} databases and roles have been successfully deleted from #{postgres['vip']}"
       rescue StandardError => e
         exec_list.insert(0, last) unless last.nil?
         if exec_list.empty?
           path = nil
         else
-          path = Time.now.strftime('/root/%FT%R-chef-server-manual-postgresql-cleanup.sql')
+          path = Time.now.strftime("/root/%FT%R-#{ChefConfig::Dist::SHORT}-server-manual-postgresql-cleanup.sql")
           dump_exec_list_to_file(path, exec_list)
         end
         # Note - we're just showing the error and not exiting, so that
@@ -159,8 +161,8 @@ EOM
 
     def err_CLEANSE001_postgres_failed(postgres, path, last, message)
       msg = <<EOM
-CLEANSE001: While local cleanse of Chef Server succeeded, an error
-            occurred while deleting Chef Server data from the external
+CLEANSE001: While local cleanse of #{Chef::Dist::SERVER_PRODUCT} succeeded, an error
+            occurred while deleting #{Chef::Dist::SERVER_PRODUCT} data from the external
             PostgreSQL server at #{postgres['vip']}.
 
             The error reported was:
@@ -190,11 +192,11 @@ EOM
     end
     def warn_CLEANSE002_no_postgres_delete(sql_path, postgres)
       <<EOM
-CLEANSE002: Note that Chef Server data was not removed from your
+CLEANSE002: Note that #{Chef::Dist::SERVER_PRODUCT} data was not removed from your
             remote PostgreSQL server because you did not specify
             the '--with-external' option.
 
-            If you do wish to purge Chef Server data from PostgreSQL,
+            If you do wish to purge #{Chef::Dist::SERVER_PRODUCT} data from PostgreSQL,
             you can do by logging into PostgreSQL on
             #{postgres['vip']}:#{postgres['port']}
             and executing the appropriate SQL staements manually.
@@ -274,7 +276,7 @@ log_level = if ENV['CSC_LOG_LEVEL']
 
 ChefServerCtl::Log.level = log_level
 
-ctl = Omnibus::ChefServerCtl.new(cmd_name, true, "Chef Server")
+ctl = Omnibus::ChefServerCtl.new(cmd_name, true, "#{Chef::Dist::SERVER_PRODUCT}")
 
 #Initialize global configuration
 ChefServerCtl::Config.init(ctl)

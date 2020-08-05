@@ -1,10 +1,12 @@
+require "chef-config/dist"
+
 add_command_under_category "rebuild-migration-state", "general", "Attempt to rebuild the migration-state file before upgrade.", 2 do
   require 'optparse'
   rebuild_args = ARGV[1..-1]
   options = {}
 
   OptionParser.new do |opts|
-    opts.banner = "chef-server-ctl rebuild-migration-state [options]"
+    opts.banner = "#{ChefConfig::Dist::SHORT}-server-ctl rebuild-migration-state [options]"
     opts.on("--force", "Overwrite existing migration state.") do |b|
       options[:force] = true
     end

@@ -17,6 +17,7 @@
 require 'restclient'
 require 'json'
 require 'pg'
+require "chef"
 
 PLACEHOLDER_GLOBAL_ORG_ID = "00000000000000000000000000000000"
 
@@ -48,7 +49,7 @@ add_command_under_category "grant-server-admin-permissions", "server-admins", "G
   }.merge(::ChefServerCtl::Config.ssl_params)
   RestClient::Request.execute(req_params)
 
-  puts "User #{username} was added to server-admins. This user can now list, read, create, and delete users (even for orgs they are not members of) for this Chef Server."
+  puts "User #{username} was added to server-admins. This user can now list, read, create, and delete users (even for orgs they are not members of) for this #{Chef::Dist::SERVER_PRODUCT}."
 end
 
 add_command_under_category "remove-server-admin-permissions", "server-admins", "Remove all special permission granted to a user from being a server-admin.", 2 do
@@ -103,7 +104,7 @@ add_command_under_category "remove-server-admin-permissions", "server-admins", "
   req_params[:url] = "#{::ChefServerCtl::Config.bifrost_url}/groups/#{server_admins_authz_id}/actors/#{user_authz_id}"
   RestClient::Request.execute(req_params)
 
-  puts "User #{username} was removed from server-admins. This user can no longer list, read, create, and delete users for this Chef Server except for where they have default permissions (such as within an org)."
+  puts "User #{username} was removed from server-admins. This user can no longer list, read, create, and delete users for this #{Chef::Dist::SERVER_PRODUCT} except for where they have default permissions (such as within an org)."
 
 end
 
@@ -151,7 +152,7 @@ def get_server_admins_authz_id(db)
   server_admins_erchef_group = db.exec_params("SELECT authz_id FROM groups WHERE name='server-admins' AND org_id='#{PLACEHOLDER_GLOBAL_ORG_ID}'")
 
   if server_admins_erchef_group.ntuples == 0
-    msg = "The server-admins global group was not found. Please finish upgrading your Chef Server by following the documentation before using Server Admins related commands."
+    msg = "The server-admins global group was not found. Please finish upgrading your #{Chef::Dist::SERVER_PRODUCT} by following the documentation before using Server Admins related commands."
     STDERR.puts msg
     raise SystemExit.new(1, msg)
   end

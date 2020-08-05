@@ -18,6 +18,7 @@ require "openssl"
 require "optparse"
 require "ostruct"
 require "chef/key"
+require "chef-config/dist"
 
 # Due to how things are being exec'ed, the CWD will be all wrong,
 # so we want to use the full path when loaded from omnibus-ctl,
@@ -31,7 +32,7 @@ add_command_under_category "add-client-key", "key-rotation", "Create a new clien
   @options = OpenStruct.new
   @options.expiration_date = "infinity"
   @key = nil
-  @usage = "Usage: chef-server-ctl add-client-key ORGNAME CLIENTNAME [-p, --public-key-path, -e, --expiration-date DATE, -k, --key-name NAME]."
+  @usage = "Usage: #{ChefConfig::Dist::SHORT}-server-ctl add-client-key ORGNAME CLIENTNAME [-p, --public-key-path, -e, --expiration-date DATE, -k, --key-name NAME]."
   @usage = @usage << @helper.add_key_usage
   @arg_list = ["-e", "--expiration-date", "-k", "--key-name", "-p", "--public-key-path"]
 
@@ -101,7 +102,7 @@ add_command_under_category "add-user-key", "key-rotation", "Create a new user ke
   @options = OpenStruct.new
   @options.expiration_date = "infinity"
   @key = nil
-  @usage = "Usage: chef-server-ctl add-user-key USERNAME [-p, --public-key-path, -e, --expiration-date DATE, -k, --key-name NAME]"
+  @usage = "Usage: #{ChefConfig::Dist::SHORT}-server-ctl add-user-key USERNAME [-p, --public-key-path, -e, --expiration-date DATE, -k, --key-name NAME]"
   @usage = @usage << @helper.add_key_usage
   @arg_list = ["-e", "--expiration-date", "-k", "--key-name", "-p", "--public-key-path"]
   opt_parser = OptionParser.new do |opts|
@@ -166,7 +167,7 @@ add_command_under_category "list-client-keys", "key-rotation", "List keys for a 
   @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
   @options = OpenStruct.new
   @options.show_public_keys = false
-  @usage = "Usage: chef-server-ctl list-client-keys ORGNAME CLIENTNAME [-v, --verbose]"
+  @usage = "Usage: #{ChefConfig::Dist::SHORT}-server-ctl list-client-keys ORGNAME CLIENTNAME [-v, --verbose]"
   @arg_list = ["-v", "--verbose"]
 
   opt_parser = OptionParser.new do |opts|
@@ -208,7 +209,7 @@ add_command_under_category "list-user-keys", "key-rotation", "List keys for a us
 
   @options = OpenStruct.new
   @options.show_public_keys = false
-  @usage = "Usage: chef-server-ctl list-user-keys USERNAME [-v, --verbose]"
+  @usage = "Usage: #{ChefConfig::Dist::SHORT}-server-ctl list-user-keys USERNAME [-v, --verbose]"
   @arg_list = ["-v", "--verbose"]
 
   opt_parser = OptionParser.new do |opts|
@@ -246,7 +247,7 @@ add_command_under_category "delete-user-key", "key-rotation", "Delete a key", 2 
   cmd_args = ARGV[1..-1]
   @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
   @options = OpenStruct.new
-  @usage = "Usage: chef-server-ctl delete-user-key USERNAME KEYNAME"
+  @usage = "Usage: #{ChefConfig::Dist::SHORT}-server-ctl delete-user-key USERNAME KEYNAME"
 
   @helper.get_required_arg!(@options, cmd_args, @usage, :username, "USERNAME", 1)
   @helper.get_required_arg!(@options, cmd_args, @usage, :key_name, "KEYNAME", 2)
@@ -268,7 +269,7 @@ add_command_under_category "delete-client-key", "key-rotation", "Delete a key", 
   cmd_args = ARGV[1..-1]
   @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
   @options = OpenStruct.new
-  @usage = "Usage: chef-server-ctl delete-client-key ORGNAME CLIENTNAME KEYNAME"
+  @usage = "Usage: #{ChefConfig::Dist::SHORT}-server-ctl delete-client-key ORGNAME CLIENTNAME KEYNAME"
 
   @helper.get_required_arg!(@options, cmd_args, @usage, :orgname, "ORGNAME", 1)
   @helper.get_required_arg!(@options, cmd_args, @usage, :clientname, "CLIENTNAME", 2)
