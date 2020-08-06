@@ -796,9 +796,9 @@ finish_request(Req, #base_state{reqid = ReqId,
                 {true, AnnotatedReq1, State}
         end
     catch
-        X:Y ->
+        X:Y:Stacktrace ->
             lager:error("Error: ~p:~p. Stack trace follows.", [X, Y]),
-            lager:error("Stack Trace: ~p",  [erlang:get_stacktrace()]),
+            lager:error("Stack Trace: ~p",  [Stacktrace]),
             % If a failure occurs anywhere above, the request is completed (and changes
             % potentially made) but our bookkeeping has failed. Let's not crash the request
             % resulting in a 500 - which would indicate that the request should be retried.
@@ -1252,9 +1252,9 @@ select_user_or_webui_key(Req, Requestors) ->
                         catch
                             %% The proplist for webui_pub_key_list has been parsed, so the
                             %% key should exist as an atom
-                            throw:badarg ->
+                            throw:badarg:Stacktrace ->
                                 lager:error({"unknown webkey tag", Tag,
-                                                           erlang:get_stacktrace()}),
+                                                           Stacktrace}),
                                 %% alternately, we could just use the default key instead of failing;
                                 %% but I prefer noisy errors
                                 throw({badarg, "unknown webkey tag", Tag})
@@ -1268,7 +1268,7 @@ select_user_or_webui_key(Req, Requestors) ->
                     PublicKey;
                 {error, unknown_key} ->
                     Msg = io_lib:format("Failed finding key ~w", [WebKeyTag]),
-                    lager:error({no_such_key, Msg, erlang:get_stacktrace()}),
+                    lager:error({no_such_key, Msg, [?MODULE, ?LINE]}),
                     throw({no_such_key, WebKeyTag})
             end,
             % The query in chef_sql:fetch_actors_by_name (whence we get Requestors) sorts
