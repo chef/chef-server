@@ -49,10 +49,12 @@ pipelines:
   - integration_test:
       description: "Instructions: https://github.com/chef/chef-server/blob/master/.expeditor/README.md"
       definition: .expeditor/integration_test.pipeline.yml
+  - post-promote:
+      description: "Generate and upload release manifest"
+      definition: .expeditor/post-promote.pipeline.yml
   - integration_test_full:
       description: "Instructions: https://github.com/chef/chef-server/blob/master/.expeditor/README.md"
       definition: .expeditor/integration_test_full.pipeline.yml
-
 
 # These actions are taken, in order they are specified, anytime a Pull Request is merged.
 merge_actions:
@@ -122,10 +124,11 @@ subscriptions:
   # Run these actions when the freshly built Habitat packages have been uploaded to Depot
   - workload: buildkite_hab_build_group_published:{{agent_id}}:*
     actions:
-      - bash:.expeditor/upload_files.sh:
+      - trigger_pipeline:post-promote:
           post_commit: true
-      - bash:.expeditor/purge_cdn.sh:
-          post_commit: true
+  - workload: buildkite_build_passed:{{agent_id}}:post-promote:*
+    actions:
+      - purge_packages_chef_io_fastly:{{target_channel}}/chef-server/latest
   - workload: schedule_triggered:{{agent_id}}:cleanup_orphaned_test_resources:*
     actions:
       - bash:.expeditor/cleanup_orphaned_test_resources.sh

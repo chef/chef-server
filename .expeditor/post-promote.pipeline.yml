@@ -1,0 +1,15 @@
+steps:
+  - command:
+      - .expeditor/upload_files.sh
+    label: "Manifest Upload"
+    concurrency: 1
+    concurrency_group: chef-server-master/deploy/$CHANNEL
+    expeditor:
+      secrets:
+        GITHUB_TOKEN:
+          account: github/chef
+          field: token
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
