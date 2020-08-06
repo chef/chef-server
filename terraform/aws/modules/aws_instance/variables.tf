@@ -59,7 +59,7 @@ variable "name" {
 }
 
 variable "capture_paths" {
-	type    = list(string)
+  type        = list(string)
   description = "List of paths to be extracted from the instance when scenario completes."
-	default = []
+  default     = []
 }

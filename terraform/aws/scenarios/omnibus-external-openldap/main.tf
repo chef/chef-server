@@ -40,7 +40,7 @@ data "template_file" "hosts_config" {
     # TODO(ssd) 2020-05-21: As far as I can tell, the erlang eldap
     # library has a bug in it that prevents us from connecting to IPv6
     # LDAP servers.
-    ldap_ip        = module.ldap.private_ipv4_address
+    ldap_ip = module.ldap.private_ipv4_address
   }
 }
 
