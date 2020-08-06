@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.15 -->
-## [14.0.15](https://github.com/chef/chef-server/tree/14.0.15) (2020-08-06)
+<!-- latest_release 14.0.16 -->
+## [14.0.16](https://github.com/chef/chef-server/tree/14.0.16) (2020-08-06)
 
 #### Merged Pull Requests
-- Fix RHEL8 FIPS enablement in integration test [#2071](https://github.com/chef/chef-server/pull/2071) ([christopher-snapp](https://github.com/christopher-snapp))
+- Fix Terraform lint errors [#2072](https://github.com/chef/chef-server/pull/2072) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Fix Terraform lint errors [#2072](https://github.com/chef/chef-server/pull/2072) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.16 -->
 - Fix RHEL8 FIPS enablement in integration test [#2071](https://github.com/chef/chef-server/pull/2071) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.15 -->
 - Add Chef Server 13 release branch [#2065](https://github.com/chef/chef-server/pull/2065) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.14 -->
 - Sel conn closed [#2064](https://github.com/chef/chef-server/pull/2064) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.13 -->
