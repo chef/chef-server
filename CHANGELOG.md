@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.16 -->
-## [14.0.16](https://github.com/chef/chef-server/tree/14.0.16) (2020-08-06)
+<!-- latest_release 14.0.17 -->
+## [14.0.17](https://github.com/chef/chef-server/tree/14.0.17) (2020-08-06)
 
 #### Merged Pull Requests
-- Fix Terraform lint errors [#2072](https://github.com/chef/chef-server/pull/2072) ([christopher-snapp](https://github.com/christopher-snapp))
+- ci: move upload_files.sh to buildkite pipeline [#2074](https://github.com/chef/chef-server/pull/2074) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- ci: move upload_files.sh to buildkite pipeline [#2074](https://github.com/chef/chef-server/pull/2074) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.17 -->
 - Fix Terraform lint errors [#2072](https://github.com/chef/chef-server/pull/2072) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.16 -->
 - Fix RHEL8 FIPS enablement in integration test [#2071](https://github.com/chef/chef-server/pull/2071) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.15 -->
 - Add Chef Server 13 release branch [#2065](https://github.com/chef/chef-server/pull/2065) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.14 -->
