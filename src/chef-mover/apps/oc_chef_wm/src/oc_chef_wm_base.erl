@@ -647,8 +647,8 @@ finish_request(Req, #base_state{reqid = ReqId,
                  {true, AnnotatedReq1, State}
         end
     catch
-        X:Y ->
-            lager:error({X, Y, erlang:get_stacktrace()})
+        X:Y:Stacktrace ->
+            lager:error({X, Y, Stacktrace})
     end;
 finish_request(_Req, Anything) ->
     lager:error("chef_wm:finish_request/2 did not receive #base_state{}~nGot: ~p~n", [Anything]).
@@ -1021,9 +1021,9 @@ select_user_or_webui_key(Req, Requestor) ->
                         catch
                             %% The proplist for webui_pub_key_list has been parsed, so the
                             %% key should exist as an atom
-                            throw:badarg ->
+                            throw:badarg:Stacktrace ->
                                 lager:error({"unknown webkey tag", Tag,
-                                                           erlang:get_stacktrace()}),
+                                                           Stacktrace}),
                                 %% alternately, we could just use the default key instead of failing;
                                 %% but I prefer noisy errors
                                 throw({badarg, "unknown webkey tag", Tag})
@@ -1037,7 +1037,7 @@ select_user_or_webui_key(Req, Requestor) ->
                     PublicKey;
                 {error, unknown_key} ->
                     Msg = io_lib:format("Failed finding key ~w", [WebKeyTag]),
-                    lager:error({no_such_key, Msg, erlang:get_stacktrace()}),
+                    lager:error({no_such_key, Msg, [?MODULE, ?LINE]}),
                     throw({no_such_key, WebKeyTag})
             end;
         _Else ->
