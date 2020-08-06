@@ -54,8 +54,8 @@ finish_request(Rq0, Ctx) ->
                 {true, Rq0, Ctx}
         end
     catch
-        X:Y ->
-            error_logger:error_report({X, Y, erlang:get_stacktrace()})
+        X:Y:Stacktrace ->
+            error_logger:error_report({X, Y, Stacktrace})
     end.
 
 service_available(Req, #context{reqid_header_name = HeaderName} = State) ->
