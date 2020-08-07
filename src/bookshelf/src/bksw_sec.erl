@@ -1,7 +1,8 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Eric B Merritt <ericbmerritt@gmail.com>          <-- this was (entirely?) rewritten.  who is author now?
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.            and why license?
+%% @author Eric B Merritt <ericbmerritt@gmail.com> 
+%% @author Lincoln Baker <lbaker@chef.io> 
+%% Copyright 2020 Chef Software, Inc.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -95,62 +96,21 @@ common_auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmz
         AltSignedHeaders = [case {K, V} of {"host", _} -> {"host", AltHost}; _ -> {K, V} end || {K, V} <- SignedHeaders],
         XAmzExpires = list_to_integer(XAmzExpiresString),
 
-        Sig1 = case VerificationType of
+        ComputedSig = case VerificationType of
             presigned_url ->
-
-                "AWS4-HMAC-SHA256" == wrq:get_qs_value("X-Amz-Algorithm", Req0) orelse throw({RequestId, Req0, Context}),
-
-                % temporarily disabling this - should be re-enabled later
-                %true == check_signed_headers_common(SignedHeaders, Headers) orelse throw({RequestId, Req0, Context}),
-                check_signed_headers_common(SignedHeaders, Headers),
-
-                ComparisonURL = mini_s3:s3_url(Method, BucketName, Key, XAmzExpires, SignedHeaders, Date, Config),
-
-                % list_to_binary profiled faster than binary_to_list,
-                % so use that for conversion and comparison.
-                IncomingSig = list_to_binary(IncomingSignature),
-
-                [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", trailing),
-
-                case IncomingSig of
-                    ComparisonSig ->
-                        %AltComparisonSig = "not computed",
-                        IncomingSig;
-                    _ ->
-                        AltComparisonURL = mini_s3:s3_url(Method, BucketName, Key, XAmzExpires, AltSignedHeaders, Date, Config),
-                        [_, AltComparisonSig] = string:split(AltComparisonURL, "&X-Amz-Signature=", all),
-                        AltComparisonSig
-                end;
+                compute_sig_presigned_url(AltSignedHeaders, BucketName, Config,
+                                          Context, Date, Headers, IncomingSignature,
+                                          Key, Method, Req0, RequestId, SignedHeaders,
+                                          XAmzExpires);
             authorization_header ->
-
-                ComparisonURL = "blah",
-                QueryParams = wrq:req_qs(Req0),
-
-                % temporarily disabling this - should be re-enabled later
-                %true == check_signed_headers_authhead(SignedHeaders, Headers) orelse throw({RequestId, Req0, Context}),
-                check_signed_headers_authhead(SignedHeaders, Headers),
-
-                SigV4Headers = erlcloud_aws:sign_v4(Method, Path, Config, SignedHeaders, <<>>, Region, "s3", QueryParams, Date),
-
-                IncomingSig = IncomingSignature,
-
-                (ParseAuth = parse_authorization(proplists:get_value("Authorization", SigV4Headers, ""))) /= err orelse throw({RequestId, Req0, Context}),
-                [_, _, ComparisonSig] = ParseAuth,
-
-                case IncomingSig of
-                    ComparisonSig ->
-                        %AltComparisonSig = "not computed",
-                        IncomingSig;
-                    _ ->
-                        AltSigV4Headers = erlcloud_aws:sign_v4(Method, Path, Config, AltSignedHeaders, <<>>, Region, "s3", QueryParams, Date),
-                        (AltParseAuth = parse_authorization(proplists:get_value("Authorization", AltSigV4Headers, ""))) /= err orelse throw({RequestId, Req0, Context}),
-                        [_, _, AltComparisonSig] = AltParseAuth,
-                        AltComparisonSig
-                end
+                compute_sig_authorization_header(AltSignedHeaders, Config, Context,
+                                                 Date, Headers, IncomingSignature,
+                                                 Method, Path, Region, Req0, RequestId,
+                                                 SignedHeaders)
         end,
 
         case IncomingSig of
-            Sig1 ->
+            ComputedSig ->
                 case is_expired(Date, XAmzExpires) of
                     true ->
                         ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p",
@@ -175,6 +135,63 @@ common_auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmz
 
     catch
         {RequestId, Req0, Context} -> encode_access_denied_error_response(RequestId, Req0, Context)
+    end.
+
+compute_sig_authorization_header(AltSignedHeaders, Config, Context,
+                                 Date, Headers, IncomingSignature,
+                                 Method, Path, Region, Req0, RequestId,
+                                 SignedHeaders) ->
+                ComparisonURL = "blah",
+                QueryParams = wrq:req_qs(Req0),
+
+                % temporarily disabling this - should be re-enabled later
+                %true == check_signed_headers_authhead(SignedHeaders, Headers) orelse throw({RequestId, Req0, Context}),
+                check_signed_headers_authhead(SignedHeaders, Headers),
+
+                SigV4Headers = erlcloud_aws:sign_v4(Method, Path, Config, SignedHeaders, <<>>, Region, "s3", QueryParams, Date),
+
+                IncomingSig = IncomingSignature,
+
+                (ParseAuth = parse_authorization(proplists:get_value("Authorization", SigV4Headers, ""))) /= err orelse throw({RequestId, Req0, Context}),
+                [_, _, ComparisonSig] = ParseAuth,
+
+                case IncomingSig of
+                    ComparisonSig ->
+                        %AltComparisonSig = "not computed",
+                        IncomingSig;
+                    _ ->
+                        AltSigV4Headers = erlcloud_aws:sign_v4(Method, Path, Config, AltSignedHeaders, <<>>, Region, "s3", QueryParams, Date),
+                        (AltParseAuth = parse_authorization(proplists:get_value("Authorization", AltSigV4Headers, ""))) /= err orelse throw({RequestId, Req0, Context}),
+                        [_, _, AltComparisonSig] = AltParseAuth,
+                        AltComparisonSig
+                end.
+
+compute_sig_presigned_url(AltSignedHeaders, BucketName, Config,
+                          Context, Date, Headers, IncomingSignature,
+                          Key, Method, Req0, RequestId, SignedHeaders,
+                          XAmzExpires) ->
+    "AWS4-HMAC-SHA256" == wrq:get_qs_value("X-Amz-Algorithm", Req0) orelse throw({RequestId, Req0, Context}),
+    
+    % temporarily disabling this - should be re-enabled later
+    %true == check_signed_headers_common(SignedHeaders, Headers) orelse throw({RequestId, Req0, Context}),
+    check_signed_headers_common(SignedHeaders, Headers),
+    
+    ComparisonURL = mini_s3:s3_url(Method, BucketName, Key, XAmzExpires, SignedHeaders, Date, Config),
+    
+    % list_to_binary profiled faster than binary_to_list,
+    % so use that for conversion and comparison.
+    IncomingSig = list_to_binary(IncomingSignature),
+    
+    [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", trailing),
+    
+    case IncomingSig of
+        ComparisonSig ->
+            %AltComparisonSig = "not computed",
+            IncomingSig;
+        _ ->
+            AltComparisonURL = mini_s3:s3_url(Method, BucketName, Key, XAmzExpires, AltSignedHeaders, Date, Config),
+            [_, AltComparisonSig] = string:split(AltComparisonURL, "&X-Amz-Signature=", all),
+            AltComparisonSig
     end.
 
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
