@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% @author Eric B Merritt <ericbmerritt@gmail.com> 
-%% @author Lincoln Baker <lbaker@chef.io> 
+%% @author Eric B Merritt <ericbmerritt@gmail.com>
+%% @author Lincoln Baker <lbaker@chef.io>
 %% Copyright 2020 Chef Software, Inc.
 %%
 %% This file is provided to you under the Apache License,
@@ -171,19 +171,19 @@ compute_sig_presigned_url(AltSignedHeaders, BucketName, Config,
                           Key, Method, Req0, RequestId, SignedHeaders,
                           XAmzExpires) ->
     "AWS4-HMAC-SHA256" == wrq:get_qs_value("X-Amz-Algorithm", Req0) orelse throw({RequestId, Req0, Context}),
-    
+
     % temporarily disabling this - should be re-enabled later
     %true == check_signed_headers_common(SignedHeaders, Headers) orelse throw({RequestId, Req0, Context}),
     check_signed_headers_common(SignedHeaders, Headers),
-    
+
     ComparisonURL = mini_s3:s3_url(Method, BucketName, Key, XAmzExpires, SignedHeaders, Date, Config),
-    
+
     % list_to_binary profiled faster than binary_to_list,
     % so use that for conversion and comparison.
     IncomingSig = list_to_binary(IncomingSignature),
-    
+
     [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", trailing),
-    
+
     case IncomingSig of
         ComparisonSig ->
             %AltComparisonSig = "not computed",
