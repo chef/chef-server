@@ -30,7 +30,6 @@ steps:
     executor:
       docker:
         environment:
-          - EXPEDITOR=true
           - OCTOKIT_ACCESS_TOKEN
 
 #########################################################################
