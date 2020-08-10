@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.20 -->
-## [14.0.20](https://github.com/chef/chef-server/tree/14.0.20) (2020-08-10)
+<!-- latest_release 14.0.21 -->
+## [14.0.21](https://github.com/chef/chef-server/tree/14.0.21) (2020-08-10)
 
 #### Merged Pull Requests
-- ci: don&#39;t promote docker containers for now [#2077](https://github.com/chef/chef-server/pull/2077) ([stevendanna](https://github.com/stevendanna))
+- Tagging omnibus-ctl to v0.6.0 [#2068](https://github.com/chef/chef-server/pull/2068) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Tagging omnibus-ctl to v0.6.0 [#2068](https://github.com/chef/chef-server/pull/2068) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.21 -->
 - ci: don&#39;t promote docker containers for now [#2077](https://github.com/chef/chef-server/pull/2077) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.20 -->
 - ci: make hab auth token available to promotion script [#2076](https://github.com/chef/chef-server/pull/2076) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.19 -->
 - ci: guard on BUILDKITE rather than EXPEDITOR env var [#2075](https://github.com/chef/chef-server/pull/2075) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.18 -->
