@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.18 -->
-## [14.0.18](https://github.com/chef/chef-server/tree/14.0.18) (2020-08-10)
+<!-- latest_release 14.0.19 -->
+## [14.0.19](https://github.com/chef/chef-server/tree/14.0.19) (2020-08-10)
 
 #### Merged Pull Requests
-- ci: guard on BUILDKITE rather than EXPEDITOR env var [#2075](https://github.com/chef/chef-server/pull/2075) ([stevendanna](https://github.com/stevendanna))
+- ci: make hab auth token available to promotion script [#2076](https://github.com/chef/chef-server/pull/2076) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- ci: make hab auth token available to promotion script [#2076](https://github.com/chef/chef-server/pull/2076) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.19 -->
 - ci: guard on BUILDKITE rather than EXPEDITOR env var [#2075](https://github.com/chef/chef-server/pull/2075) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.18 -->
 - ci: move upload_files.sh to buildkite pipeline [#2074](https://github.com/chef/chef-server/pull/2074) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.17 -->
 - Fix Terraform lint errors [#2072](https://github.com/chef/chef-server/pull/2072) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.16 -->
