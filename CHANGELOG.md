@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 13.2.0 -->
-## [13.2.0](https://github.com/chef/chef-server/tree/13.2.0) (2020-04-10)
+<!-- latest_release 13.3.1 -->
+## [13.3.1](https://github.com/chef/chef-server/tree/13.3.1) (2020-08-10)
 
 #### Merged Pull Requests
-- Update version to 13.2 [#1963](https://github.com/chef/chef-server/pull/1963) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- chef-server-13: add version-constraints to artifact_published sub. [#2078](https://github.com/chef/chef-server/pull/2078) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.1.13 -->
 ### Changes since 13.1.13 release
 
 #### Merged Pull Requests
+- chef-server-13: add version-constraints to artifact_published sub. [#2078](https://github.com/chef/chef-server/pull/2078) ([stevendanna](https://github.com/stevendanna)) <!-- 13.3.1 -->
 - Update version to 13.2 [#1963](https://github.com/chef/chef-server/pull/1963) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.0 -->
 - Praj/1901 [#1945](https://github.com/chef/chef-server/pull/1945) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.71 -->
 - Do not create indexes for elasticsearch at compile time [#1961](https://github.com/chef/chef-server/pull/1961) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.1.70 -->
