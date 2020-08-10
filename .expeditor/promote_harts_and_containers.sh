@@ -8,6 +8,10 @@ then
   exit 1
 fi
 
+# Export the HAB_AUTH_TOKEN for use of promoting habitat packages to {{TARGET_CHANNE}}
+HAB_AUTH_TOKEN=$(vault kv get -field auth_token account/static/habitat/chef-ci)
+export HAB_AUTH_TOKEN
+
 # EXPEDITOR_VERSION and EXPEDITOR_CHANNEL are passed in via Expeditor when an omnibus package of
 # version EXPEDITOR_VERSION is promoted to EXPEDITOR_CHANNEL
 
