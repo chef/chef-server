@@ -99,12 +99,12 @@ subscriptions:
       - trigger_pipeline:omnibus/adhoc:
           only_if_modified:
             - config/software/*
-  - workload: artifact_published:current:chef-server:*
+  - workload: artifact_published:current:chef-server:{{version_constraint}}
     actions:
       - bash:.expeditor/promote_harts_and_containers.sh:
           post_commit: true
       - purge_packages_chef_io_fastly:{{target_channel}}/chef-server/latest
-  - workload: artifact_published:stable:chef-server:*
+  - workload: artifact_published:stable:chef-server:{{version_constraint}}
     actions:
       - built_in:rollover_changelog
       - bash:.expeditor/promote_harts_and_containers.sh:
