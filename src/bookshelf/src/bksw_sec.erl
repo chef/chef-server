@@ -66,33 +66,45 @@ header_auth(RequestId, IncomingAuth, Req0, Context, Headers0) ->
 
 common_auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, VerificationType) ->
     try
+        % CODE REVIEW: Host is used in the generation of Config which is used in both verification types
         (Host = wrq:get_req_header("Host", Req0)) /= undefined orelse throw({RequestId, Req0, Context}),
 
+        % CODE REVIEW: Used in obtaining CredentialScopeDate, which is used for Date, which is used in both verification types
         (ParseCred = parse_x_amz_credential(Credential)) /= err orelse throw({RequestId, Req0, Context}),
         [AWSAccessKeyId, CredentialScopeDate, Region | _] = ParseCred,
 
+        % CODE REVIEW: Used in getting the Date which is used in both verification types
         % https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
         DateIfUndefined = wrq:get_req_header("date", Req0),
         (Date = get_check_date(XAmzDate, DateIfUndefined, CredentialScopeDate)) /= err orelse throw({RequestId, Req0, Context}),
 
+        % CODE REVIEW: Used in generating Config which is used in both verification types
         AccessKey = bksw_conf:access_key_id(Context),
         SecretKey = bksw_conf:secret_access_key(Context),
 
+        % CODE REVIEW: used in both verification types
         Headers = process_headers(Headers0),
 
+        % CODE REVIEW: used in both verification types
         SignedHeaderKeys = parse_x_amz_signed_headers(SignedHeaderKeysString),
         SignedHeaders = get_signed_headers(SignedHeaderKeys, Headers, []),
 
+        % CODE REVIEW: used in both verification types
         RawMethod = wrq:method(Req0),
         Method = list_to_atom(string:to_lower(erlang:atom_to_list(RawMethod))),
 
+        % CODE REVIEW: Path used in one verification type, BucketName/Key used in the others
         Path  = wrq:path(Req0),
-
         {BucketName, Key} = get_bucket_key(Path),
 
+        % CODE REVIEW: used in both verification types
         Config = mini_s3:new(AccessKey, SecretKey, Host),
+
+        % CODE REVIEW: AltSignedHeaders used in both verification types
         AltHost = mini_s3:get_host_toggleport(Host, Config),
         AltSignedHeaders = [case {K, V} of {"host", _} -> {"host", AltHost}; _ -> {K, V} end || {K, V} <- SignedHeaders],
+
+        % CODE REVIEW: used in both verification types
         XAmzExpires = list_to_integer(XAmzExpiresString),
 
         Sig1 = case VerificationType of
