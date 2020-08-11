@@ -19,7 +19,11 @@
 
     {lager, [
         {handlers, [
-            {lager_console_backend, [info, {lager_default_formatter, [ "[", severity, "] ", message, "\n"]}]},
+            {lager_console_backend, [
+                {level, info},
+                {formatter, lager_default_formatter},
+                {formatter_config, [ "[", severity, "] ", message, "\n"]}
+            ]},
             {lager_file_backend, [
                 {file, "<%= File.join(@log_directory, 'erchef.log') %>"},
                 {level, info},
