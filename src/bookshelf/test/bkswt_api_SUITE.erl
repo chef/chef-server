@@ -219,10 +219,10 @@ init_per_testcase(Casename, Config0) ->
 
     Port = bksw_conf:port(),
     Ip = bksw_conf:ip(),
-% NOTES FOR CODE REVIEW: lets look at this
+% NOTES FOR CODE REVIEW: this didn't work for some reason?
 %    {AccessKeyID, SecretAccessKey} = bksw_conf:keys(),
-AccessKeyID = "e1efc99729beb175",
-SecretAccessKey = "fc683cd9ed1990ca",
+    AccessKeyID = ?accesskeyid,
+    SecretAccessKey = ?secretaccesskey,
     S3State = mini_s3:new(AccessKeyID, SecretAccessKey,
                           lists:flatten(io_lib:format("http://~s:~p", [Ip, Port])),
                           path),
@@ -354,16 +354,16 @@ bucket_many(Config) ->
     % sanity check
     ?assertEqual(BucketsBefore, bucket_list(S3Conf)).
 
-% NOTES FOR CODE REVIEW: i don't understand this test
-% 1) from what i've seen, erlcloud url-encodes things before sending them off
+% NOTES FOR CODE REVIEW:
+% 1) from what i've seen, erlcloud url-encodes things before sending them off.
 % 2) if so, then *if* this test is sending a url-encoded bucket name, we would then
-%    eventually be url-encoding something that is already url-encoded
+%    eventually be url-encoding something that is already url-encoded.
 % 3) if this test *instead* wants to test whether an 'odd' but non url-encoded name works,
 %    then the '%' character in the bucket name violates s3 object and bucket naming guidelines:
 %    https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html
 %    https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-s3-bucket-naming-requirements.html
 %    https://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html
-%    for now, changing this test until more clarification is forthcoming.
+% for now, changing this test until more clarification is forthcoming.
 bucket_encoding(doc) ->
     ["should be able to create buckets with URL encoding"];
 bucket_encoding(suite) ->

@@ -89,13 +89,13 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                                             Config) ->
                                                 ?assertEqual(ExpectMethod, HTTPMethod),
                                                 ?assertEqual("testbucket", Bucket),
-                                                % expiry window temporarily disabled
-%                                                ?assertEqual(ExpectLifetime, MyLifetime),
+                                                % CODE REVIEW: disable expiry window. expiry windows were redone,
+                                                % and are tested elsewhere
+%                                               ?assertEqual(ExpectLifetime, MyLifetime),
                                                 {ok, InternalS3Url} = application:get_env(chef_objects, s3_url),
                                                 {ok, ExternalS3Url} = application:get_env(chef_objects, s3_external_url),
                                                 % is this still necessary? possibly only need to pass host with port
                                                 F = choose_url_style(InternalS3Url, ExternalS3Url),
-                                                %F = choose_url_style(InternalS3Url, ExternalS3Url),
                                                 S3Url = F(Config),
                                                 %S3Url = mini_s3:get_url_port(Config),
                                                 ?assertEqual(ExpectUrl, S3Url),
