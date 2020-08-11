@@ -67,11 +67,11 @@ post(Url, Body, Headers) when is_list(Body) ->
 post(Url, Body, Headers) ->
     request_with_caught_errors(Url, post, Body, Headers).
 
--spec delete(list(), iolist() | binary()) -> ok | {error, term()}.
+-spec delete(iolist(), iolist() | binary()) -> ok | {error, term()}.
 delete(Url, Body) ->
     delete(Url, Body, ?DEFAULT_HEADERS).
 
--spec delete(list(), iolist() | binary(), list()) -> ok | {error, term()}.
+-spec delete(iolist(), iolist() | binary(), list()) -> ok | {error, term()}.
 delete(Url, Body, Headers) when is_list(Body) ->
     delete(Url, iolist_to_binary(Body), Headers);
 delete(Url, Body, Headers) ->
