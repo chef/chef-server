@@ -91,7 +91,7 @@ service_available(Req, #base_state{reqid_header_name = HeaderName} = State) ->
 %% and reply with it as or reply with error if it's not valid.
 %%
 %% If X-Ops-Server-API-Version is not sent, the server assumes an API version of 0.
--spec server_api_version(undefined|string()) -> api_version() | {error| string()}.
+-spec server_api_version(undefined|string()) -> api_version() | {error, string()}.
 server_api_version(undefined) ->
     0;
 server_api_version(RequestedVersion) ->

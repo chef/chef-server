@@ -174,7 +174,7 @@ delete_search_db_by_type(OrgId, Type)
             commit(),
             ok;
         _ ->
-            {ok, _, _, Ids} = search_with_scroll(Query),
+            {ok, _, Ids} = search_with_scroll(Query),
             delete_ids(Ids)
     end.
 
@@ -195,7 +195,7 @@ delete_search_db(OrgId) ->
             commit(),
             ok;
         _ ->
-            {ok, _, _, Ids} = search_with_scroll(Query),
+            {ok, _, Ids} = search_with_scroll(Query),
             delete_ids(Ids)
     end.
 
@@ -207,7 +207,7 @@ delete_query_body(QueryString) ->
 %% Do a search query using the Elasticsearch Scroll API. We only use this when
 %% doing the search used for reindexing.
 -spec search_with_scroll(#chef_solr_query{}) ->
-                    {ok, non_neg_integer(), non_neg_integer(), [binary()]} |
+                    {ok, non_neg_integer(), [binary()]} |
                     {error, {solr_400, string()}} |
                     {error, {solr_500, string()}}.
 search_with_scroll(#chef_solr_query{} = Query) ->
@@ -232,9 +232,13 @@ search_with_scroll(#chef_solr_query{} = Query) ->
             {error, {solr_500, Url}}
     end.
 
+-spec scroll(list(), non_neg_integer(), non_neg_integer(), [binary()]) ->
+                    {ok, non_neg_integer(), [binary()]} |
+                    {error, {solr_400, string()}} |
+                    {error, {solr_500, string()}}.
 scroll(ScrollIds, NumFound, NumFound, Ids) ->
     ok = chef_index_http:delete("/_search/scroll/", scroll_body(ScrollIds), ?JSON_HEADER),
-    {ok, undefined, NumFound, Ids};
+    {ok, NumFound, Ids};
 scroll([ScrollIdHead | _] = ScrollIds, NumFound, _, Ids) ->
     prometheus_counter:inc(chef_elasticsearch_search_with_scroll_count),
     Url = "/_search/scroll?scroll=1m",

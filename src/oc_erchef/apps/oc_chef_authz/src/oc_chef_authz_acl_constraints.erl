@@ -48,8 +48,9 @@ acl_checks() ->
     fun check_admins_group_removal_from_grant_ace/5
   ].
 
--spec check_admins_group_removal_from_grant_ace(binary(),binary(), atom(),binary(),tuple())
-      -> false | {true, attempted_admin_group_removal_grant_ace}.
+
+-spec check_admins_group_removal_from_grant_ace(binary(), binary(), atom(), binary(), tuple())
+      -> error | false | {true, attempted_admin_group_removal_grant_ace}.
 check_admins_group_removal_from_grant_ace(OrgId, AuthzId, Type, AclPerm, NewAce) ->
   %% It is necessary to pull the current ace and compare to the new ace.
   %% This is because there are some groups that don't have the admin

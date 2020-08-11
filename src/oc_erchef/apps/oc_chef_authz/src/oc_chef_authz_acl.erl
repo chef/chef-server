@@ -211,7 +211,7 @@ fetch_cookbook_id(DbContext, Name, OrgId) ->
             AuthzId
     end.
 
--spec fetch(chef_type(), binary(), id()) -> list() | {error, term()}.
+-spec fetch(chef_type(), binary(), id()) -> ejson_term() | {error, term()} | forbidden.
 fetch(Type, OrgId, AuthzId) ->
     fetch(Type, OrgId, AuthzId, undefined).
 
