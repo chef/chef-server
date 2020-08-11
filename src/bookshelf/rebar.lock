@@ -70,7 +70,7 @@
   0},
  {<<"opscoderl_wm">>,
   {git,"git://github.com/chef/opscoderl_wm.git",
-       {ref,"572d968f7f9f9f49fe155efa7e46dbfc78383ead"}},
+       {ref,"7b222296b2f0eecd86f3c858f2185d21d55e8fa4"}},
   0},
  {<<"pooler">>,
   {git,"git://github.com/seth/pooler.git",
@@ -87,7 +87,7 @@
   0},
  {<<"webmachine">>,
   {git,"git://github.com/chef/webmachine",
-       {ref,"6f1819d6c035b6c1aa05002a81d1d6d17f232c99"}},
+       {ref,"1389b01a9fbc25d36aad8956e08d2d0db242625f"}},
   1}]}.
 [
 {pkg_hash,[
