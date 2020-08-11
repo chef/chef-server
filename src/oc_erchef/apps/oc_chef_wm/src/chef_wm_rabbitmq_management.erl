@@ -44,7 +44,7 @@
 
 -type max_length() :: integer().
 -type current_length() :: integer().
--type queue_at_capacity() :: boolean.
+-type queue_at_capacity() :: boolean().
 
 
 % NOTE: oc_httpc client is configured to prepend /api
@@ -233,7 +233,7 @@ check_current_queue_length(PoolNameAtom, Vhost, Queue, MaxLength, DroppedSinceLa
     end.
 
 
--spec parse_integer(any()) -> integer | undefined.
+-spec parse_integer(any()) -> integer() | undefined.
 parse_integer(Val) when is_integer(Val) ->
     Val;
 parse_integer(Val) when is_list(Val) ->

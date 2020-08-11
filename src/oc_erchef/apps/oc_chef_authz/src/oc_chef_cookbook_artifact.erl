@@ -136,7 +136,7 @@ fields_for_insert(#oc_chef_cookbook_artifact{}) ->
     erlang:error(not_supported).
 
 %% @doc Checks if a cookbook artifact with the given `AuthzId' exists
--spec exists_by_authz_id(AuthzId :: object_id()) -> boolean | {error, _Why}.
+-spec exists_by_authz_id(AuthzId :: object_id()) -> boolean() | {error, _Why}.
 exists_by_authz_id(AuthzId) ->
     case chef_sql:select_rows({check_cookbook_artifact_exists_by_authz_id,
                                [AuthzId]}) of
