@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.22 -->
-## [14.0.22](https://github.com/chef/chef-server/tree/14.0.22) (2020-08-12)
+<!-- latest_release 14.0.23 -->
+## [14.0.23](https://github.com/chef/chef-server/tree/14.0.23) (2020-08-12)
 
 #### Merged Pull Requests
-- erchef,bifrost,bookshelf: update sqerl [#2081](https://github.com/chef/chef-server/pull/2081) ([stevendanna](https://github.com/stevendanna))
+- Add build_prefix to azure postgresql [#2084](https://github.com/chef/chef-server/pull/2084) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Add build_prefix to azure postgresql [#2084](https://github.com/chef/chef-server/pull/2084) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.23 -->
 - erchef,bifrost,bookshelf: update sqerl [#2081](https://github.com/chef/chef-server/pull/2081) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.22 -->
 - Tagging omnibus-ctl to v0.6.0 [#2068](https://github.com/chef/chef-server/pull/2068) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.21 -->
 - ci: don&#39;t promote docker containers for now [#2077](https://github.com/chef/chef-server/pull/2077) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.20 -->
