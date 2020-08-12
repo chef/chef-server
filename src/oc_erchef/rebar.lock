@@ -142,7 +142,7 @@
  {<<"recon">>,{pkg,<<"recon">>,<<"2.5.0">>},1},
  {<<"sqerl">>,
   {git,"git://github.com/chef/sqerl.git",
-       {ref,"80800bf4304156783b0cf9e65f92e1a2367b79c3"}},
+       {ref,"1ae3a1ff2a82c1a94c19b02f636776f744e749f4"}},
   0},
  {<<"stats_hero">>,
   {git,"git://github.com/chef/stats_hero.git",
