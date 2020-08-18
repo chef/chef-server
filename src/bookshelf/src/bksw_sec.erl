@@ -142,10 +142,6 @@ is_authorized(Req0, #context{} = Context) ->
 auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, VerificationType) ->
     try
         % CODE REVIEW: Host is used in the generation of Config which is used in both verification types.
-        %
-        % we could convert to this style instead (the one-liner is slightly shorter).
-        %
-        % (Host = wrq:get_req_header("Host", Req0)) /= undefined orelse throw({RequestId, Req0, Context}),
 
         case Host = wrq:get_req_header("Host", Req0) of
             undefined -> throw({RequestId, Req0, Context});
@@ -153,11 +149,6 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
         end,
 
         % CODE REVIEW: Used in obtaining CredentialScopeDate, which is used for Date, which is used in both verification types
-        %
-        % we could do this style instead:
-        %
-        % ({_, ParseCred} = parse_x_amz_credential(Credential)) /= {error, parse_x_amz_credential} orelse throw({RequestId, Req0, Context}),
-        % [AWSAccessKeyId, CredentialScopeDate, Region | _] = ParseCred,
 
         [AWSAccessKeyId, CredentialScopeDate, Region | _] = case parse_x_amz_credential(Credential) of
             {error, _}      -> throw({RequestId, Req0, Context});
@@ -165,12 +156,6 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
         end,
 
         % CODE REVIEW: Date is used in both verification types.
-        %
-        % we could do this style instead:
-        %
-        % https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
-        % DateIfUndefined = wrq:get_req_header("date", Req0),
-        % ({_, Date} = get_check_date(XAmzDate, DateIfUndefined, CredentialScopeDate)) /= {error, get_check_date} orelse throw({RequestId, Req0, Context}),
 
         % https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
         DateIfUndefined = wrq:get_req_header("date", Req0),
@@ -212,20 +197,12 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
         CalculatedSig = case VerificationType of
             presigned_url ->
 
-                % CODE REVIEW: we could do this style instead:
-                % 
-                % "AWS4-HMAC-SHA256" == wrq:get_qs_value("X-Amz-Algorithm", Req0) orelse throw({RequestId, Req0, Context}),
-
                 case wrq:get_qs_value("X-Amz-Algorithm", Req0) of
                     "AWS4-HMAC-SHA256" ->
                         ok;
                     _ ->
                         throw({RequestId, Req0, Context})
                 end,
-
-                % CODE REVIEW: we could do this style instead:
-                %
-                % true == check_signed_headers_common(SignedHeaders, Headers) orelse throw({RequestId, Req0, Context}),
 
                 case check_signed_headers_common(SignedHeaders, Headers) of
                     true ->
@@ -243,7 +220,7 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
                 [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", trailing),
 
                 % TODO: try to remove alt sig computation and see what happens
-                % FYI - this was tried, and caused compilation and test errors.
+                % NOTE: this was tried, and caused compilation and test errors.
 
                 case IncomingSig of
                     ComparisonSig ->
@@ -259,10 +236,6 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
                 ComparisonURL = "not-applicable",
                 QueryParams = wrq:req_qs(Req0),
 
-                % CODE REVIEW: we could do this style instead:
-                %
-                % true == check_signed_headers_authhead(SignedHeaders, Headers) orelse throw({RequestId, Req0, Context}),
-
                 case check_signed_headers_authhead(SignedHeaders, Headers) of
                     true ->
                         ok;
@@ -277,7 +250,7 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
                 ComparisonSig = parseauth_or_throw(proplists:get_value("Authorization", SigV4Headers, ""), {RequestId, Req0, Context}),
 
                 % TODO: try to remove alt sig computation and see what happens
-                % FYI - this was tried, and caused compilation and test errors.
+                % NOTE: this was tried, and caused compilation and test errors.
 
                 case IncomingSig of
                     ComparisonSig ->
@@ -318,10 +291,10 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
     end.
 
 
-% ---------------------------------------------------------------
+% -------------------------------------------------------------------
 % CODE REVIEW: i reworked several functions below to return the style
 % of {ok, Result} or {error, Condition}.
-% ---------------------------------------------------------------
+% -------------------------------------------------------------------
 
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
 -spec check_signed_headers_authhead(proplists:proplist(), proplists:proplist()) -> boolean().
@@ -372,14 +345,12 @@ get_check_date(ISO8601Date, DateIfUndefined, [Y1, Y2, Y3, Y4, M1, M2, D1, D2]) -
         _                                                          -> {error, get_check_date}
     end.
 
-%% get key-value pairs (headers) associated with specified keys
-%get_signed_headers(SignedHeaderKeys, Headers) ->
-%    lists:flatten([proplists:lookup_all(SignedHeaderKey, Headers) || SignedHeaderKey <- SignedHeaderKeys]).
-
-% get key-value pairs (headers) associated with specified keys.
+% @doc get key-value pairs (headers) associated with specified keys.
 % for each key, get first occurance of key-value. for duplicated
 % keys, get corresponding key-value pairs. results are undefined
-% for nonexistent key(s). SignedHeaders is an accumulator.
+% for nonexistent key(s).
+% @end
+% SignedHeaders is an accumulator.
 %-spec get_signed_headers(proplist(), proplist(), proplist()) -> proplist(). % for erlang20+
 -spec get_signed_headers(SignedHeaderKeys::[string()], Headers::[tuple()], SignedHeaders::[tuple()]) -> [tuple()].
 get_signed_headers([], _, SignedHeaders) -> lists:reverse(SignedHeaders);
@@ -388,9 +359,9 @@ get_signed_headers([Key | SignedHeaderKeys], Headers0, SignedHeaders) ->
     {_, SignedHeader, Headers} = lists:keytake(Key, 1, Headers0),
     get_signed_headers(SignedHeaderKeys, Headers, [SignedHeader | SignedHeaders]).
 
-% split authorization header into component parts
+% @doc split authorization header into component parts
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
-- spec parse_authorization(string()) -> {ok, [string()]} | {error, parse_authorization}.
+-spec parse_authorization(string()) -> {ok, [string()]} | {error, parse_authorization}.
 parse_authorization(Auth) ->
     case string:split(Auth, " ", all) of
         ["AWS4-HMAC-SHA256", "Credential="++Cred, "SignedHeaders="++SigHead, "Signature="++Signature] ->
@@ -406,9 +377,9 @@ parseauth_or_throw(Auth, Throw) ->
         _                 -> throw(Throw)
     end.
 
-% split credentials string into component parts
+% @doc split credentials string into component parts
 % Cred = "<access-key-id>/<date>/<AWS-region>/<AWS-service>/aws4_request"
-- spec parse_x_amz_credential(string()) -> {ok, [string()]} | {error, parse_x_amz_credential}.
+-spec parse_x_amz_credential(string()) -> {ok, [string()]} | {error, parse_x_amz_credential}.
 parse_x_amz_credential(Cred) ->
     Parse = string:split(Cred, "/", all),
     case Parse of
@@ -416,13 +387,13 @@ parse_x_amz_credential(Cred) ->
         _                                                          -> {error, parse_x_amz_credential}
     end.
 
-% split signed header string into component parts. returns empty string on empty string.
+% @doc split signed header string into component parts. returns empty string on empty string.
 % Headers = "<header1>;<header2>;...<headerN>"
-- spec parse_x_amz_signed_headers(string()) -> [string()].
+-spec parse_x_amz_signed_headers(string()) -> [string()].
 parse_x_amz_signed_headers(Headers) ->
    string:split(Headers, ";", all).
 
-% convert the keys of key-value pairs to lowercase strings
+% @doc convert the keys of key-value pairs to lowercase strings
 -spec process_headers(Headers::[tuple()]) -> [tuple()].
 process_headers(Headers) ->
     [{string:casefold(
