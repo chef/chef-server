@@ -159,9 +159,9 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
 
         % https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
         DateIfUndefined = wrq:get_req_header("date", Req0),
-        Date = case get_check_date(XAmzDate, DateIfUndefined, CredentialScopeDate) of
+        case {_,  Date} = get_check_date(XAmzDate, DateIfUndefined, CredentialScopeDate) of
             {error,  _} -> throw({RequestId, Req0, Context});
-            {ok, _Date} -> _Date
+            {ok,     _} -> ok
         end,
 
         % CODE REVIEW: Used in generating Config which is used in both verification types
