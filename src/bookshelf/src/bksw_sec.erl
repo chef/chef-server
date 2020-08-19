@@ -96,12 +96,12 @@ is_authorized(Req0, #context{} = Context) ->
 % WHERE HANDLED:    at the bottom of the function where the throws are occuring, within this module.
 %
 % Letting things crash upon errors would be nice here (i tried it), but it results in status code 500,
-% which causes failing tests.  It seems that In general, errors in processing here, e.g. no host or date header,
-% should return status code 403 vs. 500, or at least that's what various pre-existing tests want, anyway. The
+% which causes failing tests.  It seems that in general, errors in processing here, e.g. no host or date header,
+% should return status code 403 vs. 500... or at least that's what various pre-existing tests want, anyway. The
 % throw is really just a way to bail on further processing and jump to a location in the code which returns a status 403.
 % Near as I can tell from the docs, that is what the purpose of throws are in Erlang.  Although
 % they are frequently associated with error handling, docs say they are for 'nonlocal returns'
-% or 'control flow.'
+% or 'control flow' (or at least can be used that way).
 %
 % From: https://docs.oracle.com/cd/E88353_01/html/E37845/erlang-3erl.html
 %   throw(Any) -> no_return()
@@ -119,9 +119,8 @@ is_authorized(Req0, #context{} = Context) ->
 % me a simple throw is better. The catch which returns status code 403 is at the bottom of the auth
 % function.
 %
-% Assuming thows are undesirable, I'm open to ideas or suggestions on how to eliminate them,
-% while hopefully not having to perform extreme code gymnastics in order
-% to do it :)
+% Having said all of that, if throws are undesirable, I'm totally open eliminate them if we can figure out
+% how to do it.
 %
 % Perhaps one option is to rewrite the spec and say that 500s are ok.  This changes
 % specs and forces rewriting of tests, but avoids throws.
@@ -179,14 +178,14 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
         RawMethod = wrq:method(Req0),
         Method = list_to_atom(string:to_lower(erlang:atom_to_list(RawMethod))),
 
-        % CODE REVIEW: Path used in one verification type, BucketName/Key used in the others
+        % CODE REVIEW: used in both verification types
         Path = wrq:path(Req0),
-        {BucketName, Key} = get_bucket_key(Path),
 
         % CODE REVIEW: used in both verification types
         Config = mini_s3:new(AccessKey, SecretKey, Host),
 
         % CODE REVIEW: AltSignedHeaders used in both verification types
+
         % replace host header with alternate host header
         AltHost = mini_s3:get_host_toggleport(Host, Config),
         AltSignedHeaders = [case {K, V} of {"host", _} -> {"host", AltHost}; _ -> {K, V} end || {K, V} <- SignedHeaders],
@@ -211,7 +210,9 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
                         throw({RequestId, Req0, Context})
                 end,
 
-                ComparisonURL = mini_s3:s3_url(Method, BucketName, Key, XAmzExpires, SignedHeaders, Date, Config),
+                {Bucketname, Key} = get_bucket_key(Path),
+
+                ComparisonURL = mini_s3:s3_url(Method, Bucketname, Key, XAmzExpires, SignedHeaders, Date, Config),
 
                 % list_to_binary profiled faster than binary_to_list,
                 % so use that for conversion and comparison.
@@ -227,7 +228,7 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
                         %AltComparisonSig = "not computed",
                         IncomingSig;
                     _ ->
-                        AltComparisonURL = mini_s3:s3_url(Method, BucketName, Key, XAmzExpires, AltSignedHeaders, Date, Config),
+                        AltComparisonURL = mini_s3:s3_url(Method, Bucketname, Key, XAmzExpires, AltSignedHeaders, Date, Config),
                         [_, AltComparisonSig] = string:split(AltComparisonURL, "&X-Amz-Signature=", all),
                         AltComparisonSig
                 end;
