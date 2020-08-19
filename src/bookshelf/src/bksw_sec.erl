@@ -40,11 +40,13 @@ is_authorized(Req0, #context{                        } = Context) ->
         undefined ->
             % presigned url verification
             % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
-            Credential =             wrq:get_qs_value("X-Amz-Credential", "", Req1),
-            XAmzDate =               wrq:get_qs_value("X-Amz-Date", "", Req1),
-            SignedHeaderKeysString = wrq:get_qs_value("X-Amz-SignedHeaders", "", Req1),
-            IncomingSignature =      wrq:get_qs_value("X-Amz-Signature", "", Req1),
-            XAmzExpiresString =      wrq:get_qs_value("X-Amz-Expires", "", Req1),
+%            Credential =             wrq:get_qs_value("X-Amz-Credential", "", Req1),
+%            XAmzDate =               wrq:get_qs_value("X-Amz-Date", "", Req1),
+%            SignedHeaderKeysString = wrq:get_qs_value("X-Amz-SignedHeaders", "", Req1),
+%            IncomingSignature =      wrq:get_qs_value("X-Amz-Signature", "", Req1),
+%            XAmzExpiresString =      wrq:get_qs_value("X-Amz-Expires", "", Req1),
+            [Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString] =
+                [wrq:get_qs_value(X, "", Req1) || X <- ["X-Amz-Credential", "X-Amz-Date", "X-Amz-SignedHeaders", "X-Amz-Signature", "X-Amz-Expires"]],
             auth(RequestId, Req1, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers, presigned_url);
         IncomingAuth ->
             % authorization header verification
@@ -149,7 +151,7 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
         % CODE REVIEW: Used in obtaining CredentialScopeDate, which is used for Date, which is used in both verification types
 
         [AWSAccessKeyId, CredentialScopeDate, Region | _] = case parse_x_amz_credential(Credential) of
-            {error, _}      -> throw({RequestId, Req0, Context});
+            {error,      _} -> throw({RequestId, Req0, Context});
             {ok, ParseCred} -> ParseCred
         end,
 
@@ -200,17 +202,13 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
             presigned_url ->
 
                 case wrq:get_qs_value("X-Amz-Algorithm", Req0) of
-                    "AWS4-HMAC-SHA256" ->
-                        ok;
-                    _ ->
-                        throw({RequestId, Req0, Context})
+                    "AWS4-HMAC-SHA256" -> ok;
+                    _                  -> throw({RequestId, Req0, Context})
                 end,
 
                 case check_signed_headers_common(SignedHeaders, Headers) of
-                    true ->
-                        ok;
-                    _ ->
-                        throw({RequestId, Req0, Context})
+                    true -> ok;
+                    _    -> throw({RequestId, Req0, Context})
                 end,
 
                 {Bucketname, Key} = get_bucket_key(Path),
@@ -241,10 +239,8 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
                 QueryParams = wrq:req_qs(Req0),
 
                 case check_signed_headers_authhead(SignedHeaders, Headers) of
-                    true ->
-                        ok;
-                    _ ->
-                        throw({RequestId, Req0, Context})
+                    true -> ok;
+                    _    -> throw({RequestId, Req0, Context})
                 end,
 
                 SigV4Headers = erlcloud_aws:sign_v4(Method, Path, Config, SignedHeaders, <<>>, Region, "s3", QueryParams, Date),
@@ -270,12 +266,10 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
             CalculatedSig ->
                 case is_expired(Date, XAmzExpires) of
                     true ->
-                        ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p",
-                                   [ReqId, XAmzExpires, Path]),
+                        ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p", [ReqId, XAmzExpires, Path]),
                         encode_access_denied_error_response(RequestId, Req0, Context);
                     false ->
-                        case erlang:iolist_to_binary(AWSAccessKeyId) ==
-                                   erlang:iolist_to_binary(AccessKey) of
+                        case erlang:iolist_to_binary(AWSAccessKeyId) == erlang:iolist_to_binary(AccessKey) of
                             true ->
                                 MaxAge = "max-age=" ++ XAmzExpiresString,
                                 Req1 = wrq:set_resp_header("Cache-Control", MaxAge, Req0),
@@ -310,10 +304,8 @@ check_signed_headers_authhead(SignedHeaders, Headers) ->
 
     % if content-type header is present in request, it is required
     case proplists:is_defined("content-type", Headers) of
-        true ->
-            proplists:is_defined("content-type", SignedHeaders);
-        _ ->
-            true
+        true -> proplists:is_defined("content-type", SignedHeaders);
+        _    -> true
     end.
 
 % required signed headers common to both authorization header verification
