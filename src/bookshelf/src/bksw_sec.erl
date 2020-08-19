@@ -31,21 +31,20 @@
 %%===================================================================
 %% API functions
 %%===================================================================
-is_authorized(Req, #context{auth_check_disabled=true} = Context) ->
+is_authorized(Req,  #context{auth_check_disabled=true} = Context) ->
     {true, Req, Context};
-is_authorized(Req0, #context{} = Context) ->
+is_authorized(Req0, #context{                        } = Context) ->
     Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
     {RequestId, Req1} = bksw_req:with_amz_request_id(Req0),
     case proplists:get_value('Authorization', Headers, undefined) of
         undefined ->
             % presigned url verification
             % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
-            Credential = wrq:get_qs_value("X-Amz-Credential", "", Req1),
-            XAmzDate = wrq:get_qs_value("X-Amz-Date", "", Req1),
+            Credential =             wrq:get_qs_value("X-Amz-Credential", "", Req1),
+            XAmzDate =               wrq:get_qs_value("X-Amz-Date", "", Req1),
             SignedHeaderKeysString = wrq:get_qs_value("X-Amz-SignedHeaders", "", Req1),
-            IncomingSignature = wrq:get_qs_value("X-Amz-Signature", "", Req1),
-            % 1 =< XAmzExpires =< 604800
-            XAmzExpiresString = wrq:get_qs_value("X-Amz-Expires", "", Req1),
+            IncomingSignature =      wrq:get_qs_value("X-Amz-Signature", "", Req1),
+            XAmzExpiresString =      wrq:get_qs_value("X-Amz-Expires", "", Req1),
             auth(RequestId, Req1, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers, presigned_url);
         IncomingAuth ->
             % authorization header verification
@@ -192,6 +191,10 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
 
         % CODE REVIEW: used in both verification types
         XAmzExpires = list_to_integer(XAmzExpiresString),
+        case XAmzExpires > 1 andalso XAmzExpires < 604800 of
+            true -> ok;
+            _    -> throw({RequestId, Req0, Context})
+        end,
 
         CalculatedSig = case VerificationType of
             presigned_url ->
@@ -414,6 +417,7 @@ process_headers(Headers) ->
 % of events, nor creating a unique name, so time correction should not be an
 % issue.
 % https://erlang.org/doc/apps/erts/time_correction.html
+% 1 =< ExpiresSec =< 604800
 -spec is_expired(DateTimeString::string(), ExpiresSec::integer()) -> boolean().
 is_expired(DateTimeString, ExpiresSec) ->
     [Y1, Y2, Y3, Y4, M1, M2, D1, D2, _, H1, H2, N1, N2, S1, S2, _] = DateTimeString,
