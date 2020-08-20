@@ -25,6 +25,41 @@
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("erlcloud/include/erlcloud_aws.hrl").
 
+% construct url (scheme://host) from config
+-spec get_host_noport(aws_config()) -> string().
+get_host_noport(Config) ->
+    UrlRaw  = get_host_port(Config),
+    UrlTemp = string:trim(UrlRaw, trailing, "1234568790"),
+    string:trim(UrlTemp, trailing, ":").
+
+% construct url (scheme://host:port) from config
+-spec get_host_port(aws_config()) -> string().
+get_host_port(Config) ->
+    Url0 = erlcloud_s3:get_object_url("", "", Config),
+    Url1 = string:trim(Url0, trailing, "/"),
+    case Config#aws_config.s3_port of
+        80 ->
+            % won't contain port if port == 80, so add it
+            Url1 ++ ":80";
+        _ ->
+            Url1
+    end.
+
+% construct url from config
+get_host_test() ->
+    Config0 = mini_s3:new("", "", "http://1.2.3.4"),
+    "http://1.2.3.4"      = get_host_noport(Config0),
+    "http://1.2.3.4:80"   = get_host_port(  Config0),
+    Config1 = mini_s3:new("", "", "https://1.2.3.4"),
+    "https://1.2.3.4"     = get_host_noport(Config1),
+    "https://1.2.3.4:443" = get_host_port(  Config1),
+    Config2 = mini_s3:new("", "", "http://1.2.3.4:443"),
+    "http://1.2.3.4"      = get_host_noport(Config2),
+    "http://1.2.3.4:443"  = get_host_port(  Config2),
+    Config3 = mini_s3:new("", "", "https://1.2.3.4:80"),
+    "https://1.2.3.4"     = get_host_noport(Config3),
+    "https://1.2.3.4:80"  = get_host_port(  Config3).
+
 base64_checksum_test_() ->
     TestData = [{<<"00ba0db453b47c4c0bb530cf8e481a70">>, <<"ALoNtFO0fEwLtTDPjkgacA==">>},
                 {<<"25480201827ba22eef212617006c1491">>, <<"JUgCAYJ7oi7vISYXAGwUkQ==">>}],
@@ -69,11 +104,11 @@ setup_s3(InternalS3Url, ExternalS3Url) ->
 choose_url_style(InternalS3Url, ExternalS3Url) ->
     case {InternalS3Url, ExternalS3Url} of
         {_, host_header} ->
-            fun mini_s3:get_url_port/1;
+            fun get_host_port/1;
 %        {Same, Same} ->
-%            fun mini_s3:get_url_noport/1;
+%            fun get_host_noport/1;
         _ ->
-            fun mini_s3:get_url_noport/1
+            fun get_host_noport/1
     end.
 
 generate_presigned_url_uses_configured_s3_url_test_() ->
@@ -97,7 +132,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                                                 % is this still necessary? possibly only need to pass host with port
                                                 F = choose_url_style(InternalS3Url, ExternalS3Url),
                                                 S3Url = F(Config),
-                                                %S3Url = mini_s3:get_url_port(Config),
+                                                %S3Url = get_host_port(Config),
                                                 ?assertEqual(ExpectUrl, S3Url),
                                                 stub_s3_url_response
                                         end)
