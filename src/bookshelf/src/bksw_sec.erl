@@ -26,6 +26,7 @@
 -compile([export_all, nowarn_export_all]).
 -endif.
 
+% is the necessary?  try removing.
 -include("internal.hrl").
 
 %%===================================================================
@@ -40,11 +41,6 @@ is_authorized(Req0, #context{                        } = Context) ->
         undefined ->
             % presigned url verification
             % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
-%            Credential =             wrq:get_qs_value("X-Amz-Credential", "", Req1),
-%            XAmzDate =               wrq:get_qs_value("X-Amz-Date", "", Req1),
-%            SignedHeaderKeysString = wrq:get_qs_value("X-Amz-SignedHeaders", "", Req1),
-%            IncomingSignature =      wrq:get_qs_value("X-Amz-Signature", "", Req1),
-%            XAmzExpiresString =      wrq:get_qs_value("X-Amz-Expires", "", Req1),
             [Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString] =
                 [wrq:get_qs_value(X, "", Req1) || X <- ["X-Amz-Credential", "X-Amz-Date", "X-Amz-SignedHeaders", "X-Amz-Signature", "X-Amz-Expires"]],
             auth(RequestId, Req1, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers, presigned_url);
@@ -92,7 +88,7 @@ is_authorized(Req0, #context{                        } = Context) ->
 % If the throws are the best way to handle errors here, then let's also organize the calling code in a way that it makes it
 % very clear where the throws from this function and only this function are handled.>>
 %
-% WHAT GETS THROWN: well, a tuple... but it resutls in a 403 status code being returned.
+% WHAT GETS THROWN: well, a tuple... but it results in a 403 status code being returned.
 % WHY:              see explanation below.
 % WHERE HANDLED:    at the bottom of the function where the throws are occuring, within this module.
 %
@@ -120,7 +116,7 @@ is_authorized(Req0, #context{                        } = Context) ->
 % me a simple throw is better. The catch which returns status code 403 is at the bottom of the auth
 % function.
 %
-% Having said all of that, if throws are undesirable, I'm totally open eliminate them if we can figure out
+% Having said all of that, if throws are undesirable, I'm totally open to eliminating them if we can figure out
 % how to do it.
 %
 % Perhaps one option is to rewrite the spec and say that 500s are ok.  This changes
@@ -150,10 +146,11 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
 
         % CODE REVIEW: Used in obtaining CredentialScopeDate, which is used for Date, which is used in both verification types
 
-        [AWSAccessKeyId, CredentialScopeDate, Region | _] = case parse_x_amz_credential(Credential) of
-            {error,      _} -> throw({RequestId, Req0, Context});
-            {ok, ParseCred} -> ParseCred
-        end,
+        [AWSAccessKeyId, CredentialScopeDate, Region | _] =
+            case parse_x_amz_credential(Credential) of
+                {error,      _} -> throw({RequestId, Req0, Context});
+                {ok, ParseCred} -> ParseCred
+            end,
 
         % CODE REVIEW: Date is used in both verification types.
 
@@ -165,7 +162,7 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
         end,
 
         % CODE REVIEW: Used in generating Config which is used in both verification types
-        AccessKey = bksw_conf:access_key_id(Context),
+        AccessKey = bksw_conf:access_key_id(    Context),
         SecretKey = bksw_conf:secret_access_key(Context),
 
         % CODE REVIEW: used in both verification types
@@ -222,7 +219,7 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
                 [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", trailing),
 
                 % TODO: try to remove alt sig computation and see what happens
-                % NOTE: this was tried, and caused compilation and test errors.
+                % NOTE: this was tried, and caused compilation and test failures.
 
                 case IncomingSig of
                     ComparisonSig ->
@@ -250,7 +247,7 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
                 ComparisonSig = parseauth_or_throw(proplists:get_value("Authorization", SigV4Headers, ""), {RequestId, Req0, Context}),
 
                 % TODO: try to remove alt sig computation and see what happens
-                % NOTE: this was tried, and caused compilation and test errors.
+                % NOTE: this was tried, and caused compilation and test failures.
 
                 case IncomingSig of
                     ComparisonSig ->
@@ -345,8 +342,6 @@ get_check_date(ISO8601Date, DateIfUndefined, [Y1, Y2, Y3, Y4, M1, M2, D1, D2]) -
 % for each key, get first occurance of key-value. for duplicated
 % keys, get corresponding key-value pairs. results are undefined
 % for nonexistent key(s).
-% @end
-% SignedHeaders is an accumulator.
 %-spec get_signed_headers(proplist(), proplist(), proplist()) -> proplist(). % for erlang20+
 -spec get_signed_headers(SignedHeaderKeys::[string()], Headers::[tuple()], SignedHeaders::[tuple()]) -> [tuple()].
 get_signed_headers([], _, SignedHeaders) -> lists:reverse(SignedHeaders);
@@ -383,7 +378,7 @@ parse_x_amz_credential(Cred) ->
         _                                                          -> {error, parse_x_amz_credential}
     end.
 
-% @doc split signed header string into component parts. returns empty string on empty string.
+% @doc split signed header string into component parts. return empty string on empty string.
 % Headers = "<header1>;<header2>;...<headerN>"
 -spec parse_x_amz_signed_headers(string()) -> [string()].
 parse_x_amz_signed_headers(Headers) ->
