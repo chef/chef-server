@@ -41,6 +41,9 @@ schedules:
 pipelines:
   - verify
   - habitat/build
+  - habitat/test:
+      definition: .expeditor/habitat-test.pipeline.yml
+      trigger: default
   - omnibus/release
   - omnibus/adhoc:
       definition: .expeditor/release.omnibus.yml
