@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.24 -->
-## [14.0.24](https://github.com/chef/chef-server/tree/14.0.24) (2020-08-27)
+<!-- latest_release 14.0.25 -->
+## [14.0.25](https://github.com/chef/chef-server/tree/14.0.25) (2020-08-28)
 
 #### Merged Pull Requests
-- Add habitat-test pipeline [#2091](https://github.com/chef/chef-server/pull/2091) ([christopher-snapp](https://github.com/christopher-snapp))
+- erchef: upgrade opscoderl_httpc [#2093](https://github.com/chef/chef-server/pull/2093) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- erchef: upgrade opscoderl_httpc [#2093](https://github.com/chef/chef-server/pull/2093) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.25 -->
 - Add habitat-test pipeline [#2091](https://github.com/chef/chef-server/pull/2091) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.24 -->
 - Add build_prefix to azure postgresql [#2084](https://github.com/chef/chef-server/pull/2084) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.23 -->
 - erchef,bifrost,bookshelf: update sqerl [#2081](https://github.com/chef/chef-server/pull/2081) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.22 -->
