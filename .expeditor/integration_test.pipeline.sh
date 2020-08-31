@@ -245,6 +245,20 @@ apply () {
   TF_VAR_backend_version_url=$(for channel in unstable current stable; do mixlib-install download chef-backend --url -c $channel -a x86_64 -p "$(sed 's/rhel/el/' <<<"${TF_VAR_platform%-*}")" -l "${TF_VAR_platform##*-}" -v "$BACKEND_VERSION" 2>/dev/null && break; done | head -n 1)
   export TF_VAR_backend_version_url
 
+  # update buildkite annotations
+  if [[ "$(command -v buildkite-agent)" ]]; then
+    echo '--- :buildkite: Update Buildkite annotations to include test versions.'
+    buildkite-agent annotate --style 'info' <<EOF
+* *Chef Server (Install):*  **${INSTALL_VERSION}**
+
+* *Chef Server (Upgrade):*  **${UPGRADE_VERSION}**
+
+* *Chef Backend:*  **${BACKEND_VERSION}**
+
+* *Elastic Search:*  **${ELASTIC_VERSION}**
+EOF
+  fi
+
   echo -e "+++ :terraform: Execute \033[38;5;62m\033[1m${TF_VAR_scenario}\033[0m scenario"
 
   #capture output to /workdir/integration_test.log
