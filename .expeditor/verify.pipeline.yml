@@ -39,6 +39,7 @@ steps:
 - label: omnibus
   command:
     - /workdir/scripts/bk_tests/bk_install.sh
+    - gem uninstall bundler -v '>= 2.0.1' -a
     - cd /workdir/omnibus; make install
     - make ci
   expeditor:
