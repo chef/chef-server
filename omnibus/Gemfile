@@ -1,7 +1,6 @@
 source 'https://rubygems.org'
 
 gem 'rake'
-gem 'bundler', '=1.17.3'
 # chef-cli pulls chef >= 15.0 which is 16.1.16 at the time of failure.
 # https://github.com/chef/chef/commit/003fbc132935961e93667f11c3f45ce4914b83ac
 gem 'chef', '=15.12.22'
