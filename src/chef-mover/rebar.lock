@@ -107,7 +107,7 @@
   1},
  {<<"mini_s3">>,
   {git,"git://github.com/chef/mini_s3.git",
-       {branch,"lbaker/erlang22"}},
+       {branch,"lbaker/presigned-headers"}},
   0},
  {<<"mixer">>,
   {git,"git://github.com/opscode/mixer.git",
