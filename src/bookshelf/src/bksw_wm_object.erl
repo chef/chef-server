@@ -23,6 +23,7 @@
 -include_lib("mixer/include/mixer.hrl").
 -mixin([{bksw_wm_base, [init/1,
                         is_authorized/2,
+                        malformed_request/2,
                         finish_request/2,
                         service_available/2]}]).
 
@@ -159,7 +160,7 @@ upload(Rq0, Ctx) ->
             Resp = write_streamed_body(wrq:stream_req_body(Rq0, ?BLOCK_SIZE), Ref, Rq0, Ctx),
             Resp;
         Error ->
-            error_logger:error_msg("Erroring opening ~p/~p for writing: ~p~n", [Bucket, Path, Error]),
+            error_logger:error_msg("Error opening ~p/~p for writing: ~p~n", [Bucket, Path, Error]),
             {false, Rq0, Ctx}
     end.
 
