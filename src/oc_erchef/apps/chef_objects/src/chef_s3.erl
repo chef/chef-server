@@ -26,6 +26,8 @@
 -module(chef_s3).
 
 -include("chef_types.hrl").
+% is this needed?
+%-include_lib("erlcloud/include/erlcloud_aws.hrl").
 
 -export([
          check_checksums/2,
@@ -103,7 +105,6 @@ generate_presigned_url(OrgId, Bucket, Lifetime, Method, Checksum, AwsConfig) ->
         _ ->
             Lifetime
     end,
-
     mini_s3:s3_url(Method,
                    as_string(Bucket),
                    make_key(OrgId, Checksum),
