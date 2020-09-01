@@ -330,7 +330,7 @@ module Pedant
           http.ca_file     = Pedant::Config.ssl_ca_file     if Pedant::Config.ssl_ca_file
         end
 
-        response = http.get(uri.request_uri, {})
+        response = Pedant::Utility.get_host_port http, uri
 
         begin
           response.code.should eq expected_reponse_code.to_s
