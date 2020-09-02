@@ -50,7 +50,7 @@ make_key_test() ->
           s3_url="http://s3.amazonaws.com"::string(),
           access_key_id::string(),
           secret_access_key::string(),
-          bucket_access_type=virtual_hosted::mini_s3:bucket_access_type()
+          bucket_access_type=vhost
 
 }).
 setup_s3(InternalS3Url, ExternalS3Url) ->
