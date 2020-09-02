@@ -70,9 +70,6 @@ do_install() {
   cp -pr ${pedant_src_dir} ${pkg_prefix}
   export pedant_dir="${pkg_prefix}/oc-chef-pedant"
 
-  # TODO: declare chef gem dependency in oc-chef-pedant
-  cp Gemfile.local "${pedant_dir}/Gemfile.local"
-
   # in pedant dir bundle install
   pushd ${pedant_dir}
   bundle update
@@ -88,7 +85,7 @@ do_install() {
 
   cat > Gemfile << EOF
 source 'https://rubygems.org'
-gem 'chef', '~>14.5.0'
+gem 'chef', '~>15.12.22'
 gem 'knife-opc'
 EOF
 
