@@ -54,7 +54,7 @@
   0},
  {<<"mini_s3">>,
   {git,"git://github.com/chef/mini_s3.git",
-       {ref,"73c1be787dfe590113419091c531564e58592478"}},
+       {branch,"lbaker/presigned-headers"}},
   0},
  {<<"mixer">>,
   {git,"git://github.com/chef/mixer.git",
