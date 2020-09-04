@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.27 -->
-## [14.0.27](https://github.com/chef/chef-server/tree/14.0.27) (2020-09-02)
+<!-- latest_release 14.0.28 -->
+## [14.0.28](https://github.com/chef/chef-server/tree/14.0.28) (2020-09-04)
 
 #### Merged Pull Requests
-- Pin to a single version of chef client consistently in omnibus [#2035](https://github.com/chef/chef-server/pull/2035) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Upgrade to OTP 22 [#2099](https://github.com/chef/chef-server/pull/2099) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Upgrade to OTP 22 [#2099](https://github.com/chef/chef-server/pull/2099) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.28 -->
 - Pin to a single version of chef client consistently in omnibus [#2035](https://github.com/chef/chef-server/pull/2035) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.27 -->
 - add version annotations to integration_test pipeline [#2090](https://github.com/chef/chef-server/pull/2090) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.26 -->
 - erchef: upgrade opscoderl_httpc [#2093](https://github.com/chef/chef-server/pull/2093) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.25 -->
