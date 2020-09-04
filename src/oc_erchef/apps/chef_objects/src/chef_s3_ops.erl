@@ -124,8 +124,12 @@ delete_file(OrgId, AwsConfig, Bucket, Checksum) ->
                  Bucket :: string(),
                  Checksum :: binary()) -> individual_op_return().
 check_file(OrgId, AwsConfig, Bucket, Checksum) ->
-    Key = chef_s3:make_key(OrgId, Checksum),
+    check_file(OrgId, AwsConfig, Bucket, Checksum, 2).
 
+check_file(_, _, _, Checksum, 0) ->
+    {error, Checksum};
+check_file(OrgId, AwsConfig, Bucket, Checksum, AttemptsLeft) ->
+    Key = chef_s3:make_key(OrgId, Checksum),
     Result = try mini_s3:get_object_metadata(Bucket, Key, [], AwsConfig) of
                  _Response ->
                      %% Actual return value doesn't matter, just that the call didn't throw
@@ -137,6 +141,11 @@ check_file(OrgId, AwsConfig, Bucket, Checksum) ->
                      error_logger:error_msg("Checking presence of file (checksum: ~p) for org ~p from bucket ~p (key: ~p) failed because the file was not found~n",
                                             [Checksum, OrgId, Bucket, Key]),
                      {missing, Checksum};
+                 %% TODO(ssd) 2020-09-03: should likely remove this case when we move to erlcloud
+                 error:{aws_error, {socket_error,retry_later}} ->
+                     error_logger:error_msg("Checking presence of file (checksum: ~p) for org ~p from bucket ~p (key: ~p) returned retry_later (retries left: ~p)~n",
+                                            [Checksum, OrgId, Bucket, Key, AttemptsLeft - 1]),
+                     check_file(OrgId, AwsConfig, Bucket, Checksum, AttemptsLeft - 1);
                  ExceptionClass:Reason->
                      %% Something unanticipated happened.  We should log the specific reason
                      %% for later analysis, but as far as the overall checking operation is

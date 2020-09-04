@@ -19,7 +19,11 @@
 
     {lager, [
         {handlers, [
-            {lager_console_backend, [info, {lager_default_formatter, [ "[", severity, "] ", message, "\n"]}]},
+            {lager_console_backend, [
+                {level, info},
+                {formatter, lager_default_formatter},
+                {formatter_config, [ "[", severity, "] ", message, "\n"]}
+            ]},
             {lager_file_backend, [
                 {file, "<%= File.join(@log_directory, 'erchef.log') %>"},
                 {level, info},
@@ -145,7 +149,6 @@
             chef_<%= node['private_chef']['opscode-erchef']['search_provider'] %>
         ]},
         {base_resource_url, <%= @helper.erl_atom_or_string(node['private_chef']['opscode-erchef']['base_resource_url']) %>},
-        {bulk_fetch_batch_size, <%= @bulk_fetch_batch_size %>},
         {strict_search_result_acls, <%= @strict_search_result_acls %>},
 
         {rabbitmq, [

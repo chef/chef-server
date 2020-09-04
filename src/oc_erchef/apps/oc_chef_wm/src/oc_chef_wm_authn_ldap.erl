@@ -21,6 +21,8 @@
 
 -export([auth_method/1, authenticate/2]).
 
+-include("chef_types.hrl").
+
 -ifdef(TEST).
 -compile(export_all).
 -compile(nowarn_export_all).
@@ -47,7 +49,7 @@ auth_method_for_config(_Other) ->
 %% with credentials provided. Note that it connects to the LDAP server at time of request
 %% and does not maintain an open connection. This is the same method used previously
 %% by opscode-account and is something we might wish to revisit.
--spec authenticate(string(), string()) -> {ok, term()} |
+-spec authenticate(binary(), string()) -> {binary(), ejson_term()} |
                                           {error, connection} |
                                           {error, unauthorized}.
 authenticate(User, Password) ->

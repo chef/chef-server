@@ -172,7 +172,7 @@ open_for_read(Bucket, Entry) ->
             Error
     end.
 
--spec entry_md(binary(), binary()) -> {ok, #object{}} | {error, term()}.
+-spec entry_md(binary(), binary()) -> {ok, #object{}} | error.
 entry_md(Bucket, Entry) ->
     {ok, Ref} = open_for_read(Bucket, bksw_io_names:decode(Entry)),
     Result = entry_md(Ref),

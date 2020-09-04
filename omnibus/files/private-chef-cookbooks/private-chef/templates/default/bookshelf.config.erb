@@ -29,7 +29,11 @@
           %% and the rotation time to "", or instead specify a 2-tuple that only
           %% consists of {Logfile, Level}.
           {handlers, [
-              {lager_console_backend, [info, {lager_default_formatter, [ "[", severity, "] ", message, "\n"]}]},
+              {lager_console_backend, [
+                {level, info},
+                {formatter, lager_default_formatter},
+                {formatter_config, [ "[", severity, "] ", message, "\n"]}
+              ]},
               {lager_file_backend, [
                                     {file, "<%= File.join(@log_directory, 'error.log') %>"},
                                     {level, error},
