@@ -46,8 +46,6 @@ directory '/etc/opscode/logrotate.d' do
   action :nothing
 end.run_action(:create)
 
-include_recipe 'private-chef::plugin_discovery'
-include_recipe 'private-chef::plugin_config_extensions'
 include_recipe 'private-chef::config'
 
 if node['private_chef']['fips_enabled']
@@ -112,8 +110,6 @@ end
 
 include_recipe 'enterprise::runit'
 include_recipe 'private-chef::sysctl-updates'
-# Run plugins first, mostly for ha
-include_recipe 'private-chef::plugin_chef_run'
 
 if node['private_chef']['use_chef_backend']
   # Ensure internal elasticsearch is not enabled
