@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.30 -->
-## [14.0.30](https://github.com/chef/chef-server/tree/14.0.30) (2020-09-05)
+<!-- latest_release 14.0.31 -->
+## [14.0.31](https://github.com/chef/chef-server/tree/14.0.31) (2020-09-06)
 
 #### Merged Pull Requests
-- Fix fips errors in RHEL smoke tests [#2098](https://github.com/chef/chef-server/pull/2098) ([lbakerchef](https://github.com/lbakerchef))
+- Remove unreachable cookbook assets [#2101](https://github.com/chef/chef-server/pull/2101) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Remove unreachable cookbook assets [#2101](https://github.com/chef/chef-server/pull/2101) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.31 -->
 - Fix fips errors in RHEL smoke tests [#2098](https://github.com/chef/chef-server/pull/2098) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.30 -->
 - oc-chef-pedant: remove wait_until_queues_are_empty [#2100](https://github.com/chef/chef-server/pull/2100) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.29 -->
 - Upgrade to OTP 22 [#2099](https://github.com/chef/chef-server/pull/2099) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.28 -->
