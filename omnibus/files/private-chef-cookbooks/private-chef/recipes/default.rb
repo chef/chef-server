@@ -145,10 +145,10 @@ include_recipe 'private-chef::fix_permissions'
     rescue Chef::Exceptions::RecipeNotFound
       raise "#{service} has the 'external' attribute set true, but does not currently support being run externally."
     end
-    # Disable the actual local service since what is enabled
-    # is an externally managed version. Given that bootstrap and
-    # opscode-expander are not externalizable, don't need special
-    # handling for them as we do in the normal disable case below.
+    # Disable the actual local service since what is enabled is an
+    # externally managed version. Given that bootstrap isn't
+    # externalizable, we don't need special handling for it as we do
+    # in the normal disable case below.
     component_runit_service service do
       action :disable
     end

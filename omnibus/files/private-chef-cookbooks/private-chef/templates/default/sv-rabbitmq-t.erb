@@ -1,4 +1,0 @@
-#!/bin/sh
-exec 2>&1
-echo "received TERM from runit, invoking rabbitmqctl stop"
-exec chpst -P -u <%= node['private_chef']['user']['username'] %> -U <%= node['private_chef']['user']['username'] %> /usr/bin/env ERL_EPMD_ADDRESS=127.0.0.1 HOME=<%= node['private_chef']['rabbitmq']['dir'] %> /opt/opscode/embedded/bin/rabbitmqctl stop
