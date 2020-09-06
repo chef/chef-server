@@ -24,35 +24,12 @@ def all_orgs
   Chef::Org.list.keys.sort
 end
 
-def expander_queue_size
-  output = `#{::ChefServerCtl::Config.rabbitmqctl_bin} list_queues -p /chef | awk '{sum += $2} END {print sum}'`
-  status = $?
-  if !status.success?
-    $stderr.puts "Failed to get queue size!"
-    exit 1
-  else
-    output.to_i
-  end
-end
-
-def wait_for_empty_queue
-  loop do
-    size = expander_queue_size
-    if size == 0
-      break
-    else
-      puts "\t#{size} objects remaining in queue"
-      sleep 1
-    end
-  end
-end
-
-def enqueue_data_for_org(org)
+def reindex_data_for_org(org)
   reindex_script = ::ChefServerCtl::Config.erchef_reindex_script
   lb_url = ::ChefServerCtl::Config.lb_url
   status = run_command("#{reindex_script} complete #{org} #{lb_url}")
   if !status.success?
-    $stderr.puts "Failed to enqueue data for #{org}!"
+    $stderr.puts "Failed to reindex data for #{org}!"
   end
 end
 
@@ -78,14 +55,9 @@ end
 def do_reindex(orgs_to_reindex, options)
   disable_api if options[:disable_api]
 
-  puts "- Enqueueing data for indexing."
+  puts "- Reindexing."
   orgs_to_reindex.each do |org|
-    enqueue_data_for_org(org)
-  end
-
-  if options[:wait]
-    puts "- Waiting for reindexing to complete"
-    wait_for_empty_queue
+    reindex_data_for_org(org)
   end
 ensure
   enable_api if options[:disable_api]
@@ -100,18 +72,9 @@ add_command_under_category "reindex", "general", "Reindex all server data for a 
     # NOTE(ssd) 2018-08-09: --wait and --disable-api aren't currently
     # supported in either of the Habitat packages we offer.
     if !::ChefServerCtl::Config.habitat_mode
-      opts.on("-w", "--wait", "Wait for reindex queue to clear before exiting") do |w|
-        # Don't attempt to wait if the search_queue_mode is "batch"
-        search_queue_mode = running_config["private_chef"]["opscode-erchef"]["search_queue_mode"]
-        if search_queue_mode == "batch"
-          $stderr.puts <<-EOF
-The search queue mode is currently configured to be "#{search_queue_mode}."
-Ignoring "wait" option.
-EOF
-          options[:wait] = false
-        else
-          options[:wait] = w
-        end
+      opts.on("-w", "--wait", "Legacy option to wait for indexing queue to empty. This option does nothing.") do |w|
+        $stderr.puts "Ignoring wait option as rabbitmq-based indexing is no longer supported"
+        options[:wait] = false
       end
 
       opts.on("-d", "--disable-api", "Disable writes during reindexing") do |n|

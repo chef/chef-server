@@ -64,7 +64,7 @@ default['private_chef']['sysvinit_id'] = 'SV'
 default['private_chef']['addons']['install'] = false
 default['private_chef']['addons']['path'] = nil
 default['private_chef']['addons']['packages'] =
-  %w(opscode-reporting opscode-manage opscode-analytics opscode-push-jobs-server chef-ha)
+  %w(opscode-reporting opscode-manage opscode-push-jobs-server)
 default['private_chef']['addons']['ubuntu_supported_codenames'] =
   %w(lucid precise trusty)
 default['private_chef']['addons']['ubuntu_distribution'] =
@@ -125,93 +125,6 @@ default['private_chef']['haproxy']['local_elasticsearch_port'] = 9200
 default['private_chef']['haproxy']['remote_elasticsearch_port'] = 9200
 default['private_chef']['haproxy']['leaderl_healthcheck_port'] = 7331
 default['private_chef']['haproxy']['etcd_port'] = 2379
-
-####
-# RabbitMQ
-####
-# default['private_chef']['rabbitmq']['enable'] defined in recipes/config.rb
-default['private_chef']['rabbitmq']['dir'] = '/var/opt/opscode/rabbitmq'
-default['private_chef']['rabbitmq']['data_dir'] = '/var/opt/opscode/rabbitmq/db'
-default['private_chef']['rabbitmq']['log_directory'] = '/var/log/opscode/rabbitmq'
-default['private_chef']['rabbitmq']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['rabbitmq']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['rabbitmq']['vhost'] = '/chef'
-default['private_chef']['rabbitmq']['user'] = 'chef'
-default['private_chef']['rabbitmq']['actions_user'] = 'actions'
-default['private_chef']['rabbitmq']['actions_vhost'] = '/analytics'
-default['private_chef']['rabbitmq']['actions_exchange'] = 'actions'
-default['private_chef']['rabbitmq']['node_ip_address'] = '127.0.0.1'
-default['private_chef']['rabbitmq']['node_port'] = '5672'
-default['private_chef']['rabbitmq']['nodename'] = 'rabbit@localhost'
-default['private_chef']['rabbitmq']['vip'] = '127.0.0.1'
-default['private_chef']['rabbitmq']['consumer_id'] = 'hotsauce'
-default['private_chef']['rabbitmq']['env_path'] = '/opt/opscode/bin:/opt/opscode/embedded/bin:/usr/bin:/bin'
-default['private_chef']['rabbitmq']['startup_timeout'] = 100
-
-default['private_chef']['rabbitmq']['ssl_versions'] = ['tlsv1.2', 'tlsv1.1']
-
-####
-# RabbitMQ Management Plugin
-####
-default['private_chef']['rabbitmq']['management_user'] = 'rabbitmgmt'
-default['private_chef']['rabbitmq']['management_port'] = 15672
-default['private_chef']['rabbitmq']['management_enabled'] = true
-
-# RabbitMQ max-length policy
-default['private_chef']['rabbitmq']['analytics_max_length'] = 10000
-default['private_chef']['rabbitmq']['queue_length_monitor_vhost'] = '/analytics'
-default['private_chef']['rabbitmq']['queue_length_monitor_queue'] = 'alaska'
-default['private_chef']['rabbitmq']['queue_length_monitor_enabled'] = true
-# does a full queue set overall_status to fail at \_status
-default['private_chef']['rabbitmq']['queue_at_capacity_affects_overall_status'] = false
-
-####
-# RabbitMQ Queue Monitor
-####
-# how often to run the queue monitor
-default['private_chef']['rabbitmq']['queue_length_monitor_millis'] = 30000
-# if the queue monitor is busy and this timeout has been exceeded,
-# assume that rabbit is in a bad state and don't send messages to it
-# 5000 is the default of gen_server:call()
-default['private_chef']['rabbitmq']['queue_length_monitor_timeout_millis'] = 5000
-
-# don't send messages to rabbitmq if it has reached it's configured max_length
-default['private_chef']['rabbitmq']['drop_on_full_capacity'] = true
-
-# prevent erchef from starting if queue is at capacity
-default['private_chef']['rabbitmq']['prevent_erchef_startup_on_full_capacity'] = false
-
-# rabbit_mgmt_service configuration for erchef. These are used to configure an opscoderl_httpc pool
-# of HTTP connecton workers.
-default['private_chef']['rabbitmq']['rabbit_mgmt_timeout'] = 30000
-default['private_chef']['rabbitmq']['rabbit_mgmt_http_init_count'] = 25
-default['private_chef']['rabbitmq']['rabbit_mgmt_http_max_count'] = 100
-# cull interval specified in seconds
-default['private_chef']['rabbitmq']['rabbit_mgmt_http_cull_interval'] = 60
-# max age specified in seconds
-default['private_chef']['rabbitmq']['rabbit_mgmt_http_max_age'] = 70
-# max connection duration specified in seconds
-default['private_chef']['rabbitmq']['rabbit_mgmt_http_max_connection_duration'] = 70
-
-# comma sep list of tuples, without surrounding []'s
-# rendered as a list in oc_erchef.config.erb, including basic_auth info
-default['private_chef']['rabbitmq']['rabbit_mgmt_ibrowse_options'] = '{connect_timeout, 10000}'
-
-####
-# External RabbitMQ
-#
-# When enabled, the "external-rabbitmq" manages the *actions* queue.
-# The expander queue is still on the local expander installation. This
-# option is used for Analytics installations which host their own
-# rabbitmq queue.
-#
-####
-default['private_chef']['external-rabbitmq']['enable'] = false
-default['private_chef']['external-rabbitmq']['actions_user'] = 'actions'
-default['private_chef']['external-rabbitmq']['actions_vhost'] = '/analytics'
-default['private_chef']['external-rabbitmq']['actions_exchange'] = 'actions'
-default['private_chef']['external-rabbitmq']['node_port'] = '5672'
-default['private_chef']['external-rabbitmq']['vip'] = '127.0.0.1'
 
 ####
 # Jetty dummy for logs
@@ -849,8 +762,6 @@ default['private_chef']['dark_launch']['private-chef'] = true
 default['private_chef']['dark_launch']['sql_users'] = true
 default['private_chef']['dark_launch']['add_type_and_bag_to_items'] = true
 default['private_chef']['dark_launch']['reporting'] = true
-# It appears that actions rabbitmq was used for oc_actions and analytics.
-default['private_chef']['dark_launch']['actions'] = false
 
 ###
 # Chef Mover

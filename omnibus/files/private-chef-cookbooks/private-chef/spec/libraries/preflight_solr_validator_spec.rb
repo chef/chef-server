@@ -31,9 +31,9 @@ describe SolrPreflightValidator do
 
   before(:each) do
     allow(PrivateChef).to receive(:[]).with('postgresql').and_return({})
+    allow(PrivateChef).to receive(:[]).with('rabbitmq').and_return({})
     allow(PrivateChef).to receive(:[]).with('opscode_solr4').and_return({})
     allow(PrivateChef).to receive(:[]).with('elasticsearch').and_return({})
-    allow(PrivateChef).to receive(:[]).with('rabbitmq').and_return({})
     allow(PrivateChef).to receive(:[]).with('opscode_expander').and_return({})
   end
 

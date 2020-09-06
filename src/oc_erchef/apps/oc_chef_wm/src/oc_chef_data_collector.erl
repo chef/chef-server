@@ -33,7 +33,7 @@ notify(Req, #base_state{reqid = ReqId, resource_state = ResourceState, resource_
             {_, true, _} ->
                 case stats_hero:ctime(ReqId, {data_collector, notify},
                                       fun() ->
-                                              Msg = oc_chef_action:create_message(Req, State, true),
+                                              Msg = oc_chef_action:create_message(Req, State),
                                               data_collector_http:post("/", Msg)
                                       end) of
                     ok ->

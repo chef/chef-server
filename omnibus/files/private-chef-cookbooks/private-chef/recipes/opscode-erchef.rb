@@ -44,14 +44,6 @@ ldap_encryption_type = ldap_authentication_enabled ? node['private_chef']['ldap'
 
 erchef_config = File.join(opscode_erchef_dir, 'sys.config')
 
-rabbitmq = helper.rabbitmq_configuration
-
-actions_vip = rabbitmq['vip']
-actions_port = rabbitmq['node_port']
-actions_user = rabbitmq['actions_user']
-actions_vhost = rabbitmq['actions_vhost']
-actions_exchange = rabbitmq['actions_exchange']
-
 template erchef_config do
   source 'oc_erchef.config.erb'
   owner helper.ownership['owner']
@@ -60,11 +52,6 @@ template erchef_config do
   variables lazy {
     node['private_chef']['opscode-erchef'].to_hash.merge(ldap_enabled: ldap_authentication_enabled,
                                                          enable_ssl: enable_ssl,
-                                                         actions_vip: actions_vip,
-                                                         actions_port: actions_port,
-                                                         actions_user: actions_user,
-                                                         actions_vhost: actions_vhost,
-                                                         actions_exchange: actions_exchange,
                                                          ldap_encryption_type: ldap_encryption_type,
                                                          solr_elasticsearch_major_version: helper.elastic_search_major_version,
                                                          helper: helper)

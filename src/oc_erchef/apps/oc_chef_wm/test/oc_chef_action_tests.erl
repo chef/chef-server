@@ -57,87 +57,6 @@ msg_with_payload(Task) ->
     {<<"data">>, {[{<<"name">>,<<"db">>}]}}
    ]}.
 
-oc_chef_action_test_() ->
-    MockedModules = [bunnyc],
-    {foreach,
-     fun() -> oc_chef_wm_test_utils:setup(MockedModules) end,
-     fun(_) -> oc_chef_wm_test_utils:cleanup(MockedModules) end,
-     [
-      {"add a msg to the queue",
-       fun() ->
-            %% format is always: expected, actual
-            AssertPublishDataCorrect = fun(_ServerName, RoutingKey, _Data) ->
-                ?assertEqual(<<"erchef.node.create">>, RoutingKey)
-            end,
-            meck:expect(bunny_util, new_message, fun(Data) ->
-                  ?assertEqual(msg(<<"create">>), chef_json:decode(Data)),
-                  msg
-              end),
-            meck:expect(bunny_util, set_delivery_mode, fun(msg, 2) -> undefined end),
-            meck:expect(bunnyc, publish, AssertPublishDataCorrect),
-            oc_chef_action_queue:publish(<<"erchef.node.create">>, iolist_to_binary(chef_json:encode(msg(<<"create">>))))
-       end
-      }
-      ]}.
-
-
-log_action_unsupported_state_test_() ->
-    States = [{"search", #search_state{}},
-              {"principal", #principal_state{}},
-              {"depsolver", #depsolver_state{}},
-              {"sandbox", #sandbox_state{}},
-              {"chef_role", #chef_role{}},
-              {"chef_environment", #chef_environment{}}],
-    [{"checking state " ++ ResourceName,
-      fun() -> State = #base_state{resource_state=ResourceState},
-                    Ret = oc_chef_action:log_action(req, State),
-                    ?assertEqual(ok, Ret)
-            end
-     } || {ResourceName, ResourceState} <- States ].
-
-log_action_unknown_state_test() ->
-    State = #base_state{resource_state = foo},
-    Ret = oc_chef_action:log_action(req, State),
-    ?assertEqual(ok, Ret).
-
-log_action_routing_test_() ->
-    MockedModules = [wrq],
-    State = make_state(),
-    {foreach,
-     fun() -> oc_chef_wm_test_utils:setup(MockedModules) end,
-     fun(_) -> oc_chef_wm_test_utils:cleanup(MockedModules) end,
-     [
-            {"logging action for GET /clients doesn't log",
-             fun() ->
-                        meck:expect(wrq, method,
-                                    fun(req) -> 'GET' end),
-                        Ret = oc_chef_action:log_action(req, State),
-                        ?assertEqual(ok, Ret)
-                end
-            },
-            {"logging action for non-200/201 POST /clients doesn't log",
-             fun() ->
-                        meck:expect(wrq, method,
-                                    fun(req) -> 'POST' end),
-                        meck:expect(wrq, response_code,
-                                    fun(req) -> 400 end),
-                        Ret = oc_chef_action:log_action(req, State),
-                        ?assertEqual(ok, Ret)
-                end
-            },
-            {"logging action for non-200/201 POST /clients doesn't log",
-             fun() ->
-                        meck:expect(wrq, method,
-                                    fun(req) -> 'POST' end),
-                        meck:expect(wrq, response_code,
-                                    fun(req) -> 300 end),
-                        Ret = oc_chef_action:log_action(req, State),
-                        ?assertEqual(ok, Ret)
-                end
-            }
-            ]
-    }.
-
 task_for_cookbooks_test_() ->
     MockedModules = [wrq],
     State = #base_state{resource_state=#cookbook_state{}},
@@ -287,31 +206,6 @@ extract_entity_info_test_() ->
      ]
     }.
 
-routing_key_test() ->
-    MockedModules = [wrq, chef_wm_util],
-    {foreach,
-     fun() -> oc_chef_wm_test_utils:setup(MockedModules) end,
-     fun(_) -> oc_chef_wm_test_utils:cleanup(MockedModules) end,
-     [{"Node routing",
-       fun() ->
-            meck:expect(chef_wm_util, object_name, fun(node, req) -> undefined end),
-            meck:expect(wrq, method, fun(req) -> 'PUT' end),
-            meck:expect(wrq, response_code, fun(req) -> 201 end),
-            State = #base_state{resource_state = #node_state{node_data = {[{<<"name">>, <<"foo">>}]}}},
-            Ret = oc_chef_action:routing_key(req, State),
-            ?assertEqual(<<"erchef.node.update">>, Ret)
-       end},
-      {"Role routing",
-       fun() ->
-            meck:expect(chef_wm_util, object_name, fun(role, req) -> undefined end),
-            meck:expect(wrq, method, fun(req) -> 'DELETE' end),
-            meck:expect(wrq, response_code, fun(req) -> 200 end),
-            State = #role_state{role_data = {[{<<"name">>,<<"webserver">> }]}},
-            Ret = oc_chef_action:routing_key(req, State),
-            ?assertEqual(<<"erchef.role.delete">>, Ret)
-        end
-    }]}.
-
 hostname_test_() ->
   HostFQDN = <<"hostname.example.com">>,
   ok = application:set_env(oc_chef_wm, actions_fqdn, HostFQDN),
@@ -359,15 +253,14 @@ maybe_add_data_test() ->
    }
   ].
 
-end_to_end_test_() ->
+create_message_test_() ->
     HostFQDN = <<"hostname.example.com">>,
-    MockedModules = [chef_wm_util, wrq, bunnyc],
+    MockedModules = [chef_wm_util, wrq],
     State = #base_state{requestor = #chef_requestor{name = <<"rob">>, type = <<"user">>},
                         reqid = <<"Xfh5mCQvjRgWDdlevrdyGt8M4lecXmN3gpGXrKKiUYqKdeD3">>,
                         organization_name = <<"cmwest">>,
                         resource_state=#node_state{node_data = {[{<<"name">>,<<"db">>}]} }},
     ok = application:set_env(oc_chef_wm, actions_fqdn, HostFQDN),
-    ok = application:set_env(oc_chef_wm, rabbitmq_queue_length_monitor_enabled, false),
     {foreach,
      fun() -> oc_chef_wm_test_utils:setup(MockedModules),
               meck:expect(chef_wm_util,object_name, fun(node, req) -> undefined end),
@@ -385,116 +278,24 @@ end_to_end_test_() ->
                           end)
      end,
      fun(_) -> oc_chef_wm_test_utils:cleanup(MockedModules) end,
-     [{"end to end client test, action create with no payload",
-       fun() -> ExpectedMsg = msg(<<"create">>),
-                meck:expect(wrq, method, fun(req) -> 'POST' end),
-                AssertPublishDataCorrect =
-                   fun(_ServerName, RoutingKey, _Message) ->
-                       ?assertEqual(<<"erchef.node.create">>, RoutingKey),
-                       ok
-                   end,
-               meck:expect(bunny_util, new_message, fun(Data) ->
-                  ?assertEqual(ExpectedMsg, chef_json:decode(Data)),
-                  msg
-               end),
-               meck:expect(bunny_util, set_delivery_mode, fun(msg, 2) -> undefined end),
-               meck:expect(bunnyc, publish, AssertPublishDataCorrect),
-               application:set_env(oc_chef_wm, enable_actions_body, false),
-               Ret = oc_chef_action:log_action(req, State),
-               ?assertEqual(ok, Ret)
+     [{"end to end client test, action create with payload",
+       fun() ->
+               ExpectedMsg = msg_with_payload(<<"create">>),
+               meck:expect(wrq, method, fun(req) -> 'POST' end),
+               Data = oc_chef_action:create_message(req, State),
+               ?assertEqual(ExpectedMsg, chef_json:decode(Data))
        end
-     },
-     {"end to end client test, action create with payload",
-       fun() -> ExpectedMsg = msg_with_payload(<<"create">>),
-                meck:expect(wrq, method, fun(req) -> 'POST' end),
-                AssertPublishDataCorrect =
-                    fun(_ServerName, RoutingKey, _Message) ->
-                        ?assertEqual(<<"erchef.node.create">>, RoutingKey),
-                        ok
-                    end,
-                meck:expect(bunny_util, new_message, fun(Data) ->
-                  ?assertEqual(ExpectedMsg, chef_json:decode(Data)),
-                  msg
-                end),
-                meck:expect(bunny_util, set_delivery_mode, fun(msg, 2) -> undefined end ),
-                meck:expect(bunnyc, publish, AssertPublishDataCorrect),
-                application:set_env(oc_chef_wm, enable_actions_body, true),
-                Ret = oc_chef_action:log_action(req, State),
-                ?assertEqual(ok, Ret)
-        end
       },
-      {"end to end client test, action delete with no payload",
-       fun() -> ExpectedMsg = msg(<<"delete">>),
-                meck:expect(wrq, method, fun(req) -> 'DELETE' end),
-                AssertPublishDataCorrect =
-                   fun(_ServerName, RoutingKey, _Message) ->
-                       ?assertEqual(<<"erchef.node.delete">>, RoutingKey),
-                       ok
-                   end,
-                meck:expect(bunny_util, new_message, fun(Data) ->
-                  ?assertEqual(ExpectedMsg, chef_json:decode(Data)),
-                  msg
-                end),
-               meck:expect(bunny_util, set_delivery_mode, fun(msg, 2) -> undefined end ),
-               meck:expect(bunnyc, publish, AssertPublishDataCorrect),
-               application:set_env(oc_chef_wm, enable_actions_body, false),
-               Ret = oc_chef_action:log_action(req, State),
-               ?assertEqual(ok, Ret)
-        end
-       },
       {"end to end client test, action delete with data",
-       fun() -> ExpectedMsg = msg_with_payload(<<"delete">>),
-                meck:expect(wrq, method, fun(req) -> 'DELETE' end),
-                AssertPublishDataCorrect =
-                    fun(_ServerName, RoutingKey, _Message) ->
-                        ?assertEqual(<<"erchef.node.delete">>, RoutingKey),
-                        ok
-                    end,
-                 meck:expect(bunny_util, new_message, fun(Data) ->
-                  ?assertEqual(ExpectedMsg, chef_json:decode(Data)),
-                  msg
-                end),
-                meck:expect(bunny_util, set_delivery_mode, fun(msg, 2) -> undefined end ),
-                meck:expect(bunnyc, publish, AssertPublishDataCorrect),
-                application:set_env(oc_chef_wm, enable_actions_body, true),
-                Ret = oc_chef_action:log_action(req, State),
-                ?assertEqual(ok, Ret)
-        end
+       fun() ->
+               ExpectedMsg = msg_with_payload(<<"delete">>),
+               meck:expect(wrq, method, fun(req) -> 'DELETE' end),
+               Data = oc_chef_action:create_message(req, State),
+               ?assertEqual(ExpectedMsg, chef_json:decode(Data))
+       end
       }
      ]
     }.
-
-ping_test_() ->
-    {foreach,
-     fun() ->
-             application:set_env(oc_chef_wm, actions_vhost, <<"/actions">>),
-             meck:new(chef_wm_rabbitmq_management)
-     end,
-     fun(_) ->
-             meck:unload(chef_wm_rabbitmq_management)
-     end,
-     [{"Aliveness returns true causes pong", 
-       fun() -> 
-               meck:expect(chef_wm_rabbitmq_management, check_aliveness,
-                           fun(_, "/actions") ->
-                                   true
-                           end),
-               Status = oc_chef_action:ping(),
-               ?assertEqual(pong, Status)
-       end
-      },
-      {"Not Aliveness causes pang",
-       fun() -> 
-               meck:expect(chef_wm_rabbitmq_management, check_aliveness,
-                           fun(_, "/actions") ->
-                                   false
-                           end),
-               Status = oc_chef_action:ping(),
-               ?assertEqual(pang, Status)
-       end
-      }]
-    }.
-
 
 %%
 %% Internal helper functions

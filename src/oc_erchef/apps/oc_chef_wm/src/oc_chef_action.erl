@@ -24,11 +24,7 @@
 
 -include("oc_chef_wm.hrl").
 
--export([
-         log_action/2,
-         create_message/3,
-         ping/0
-        ]).
+-export([create_message/2]).
 
 -ifdef(TEST).
 -compile([export_all, nowarn_export_all]).
@@ -36,94 +32,15 @@
 
 -define(CHEF_ACTIONS_MESSAGE_VERSION, <<"0.1.1">>).
 
--spec log_action(Req :: wm_req(),
-                 State :: #base_state{}) -> ok.
-log_action(_Req, #base_state{resource_state = ResourceState}) when
-        is_record(ResourceState, search_state);
-        is_record(ResourceState, principal_state);
-        is_record(ResourceState, depsolver_state) ->
-    %% We skip this endpoints since they are read-only
-    ok;
-log_action(_Req, #base_state{resource_state = ResourceState}) when
-        is_record(ResourceState, sandbox_state) ->
-    %% TODO How do we handle sandbox upload ?
-    ok;
-log_action(_Req, #base_state{resource_state = ResourceState}) when
-        is_record(ResourceState, chef_role);
-        is_record(ResourceState, chef_environment) ->
-    %% TODO - chef_wm_roles endpoint puts a chef_role{} directly
-    %% into the resource_state record
-    %% TODO - chef_wm_environments endpoint puts a chef_environment{} directly
-    %% into the resource_state record
-    ok;
-log_action(Req, #base_state{resource_state = ResourceState,
-                            resource_mod = ResourceMod} = State) when
-        is_record(ResourceState, acl_state);
-        is_record(ResourceState, association_state);
-        is_record(ResourceState, client_state);
-        is_record(ResourceState, cookbook_state);
-        is_record(ResourceState, data_state);
-        is_record(ResourceState, environment_state);
-        is_record(ResourceState, group_state);
-        is_record(ResourceState, organization_state);
-        is_record(ResourceState, node_state);
-        is_record(ResourceState, role_state);
-        is_record(ResourceState, user_state);
-        is_record(ResourceState, key_state) ->
-    case wrq:method(Req) of
-        'GET' ->
-            ok;
-        'HEAD' ->
-            ok;
-        _ElseMethod -> %% POST, PUT, DELETE
-            case ResourceMod of
-                oc_chef_wm_authenticate_user ->  %% POST to authenticate_user should not be an action.
-                    ok;
-                _ElseMod ->
-                    case wrq:response_code(Req) of
-                        Code when Code =:= 200; Code =:= 201 ->
-                            log_action0(Req, State);
-                        _ElseStatus ->
-                            ok
-                    end
-            end
-    end;
-log_action(Req, #base_state{resource_state = ResourceState} = State) ->
-    ShouldLogUnEnabledActions = envy:get(oc_chef_wm, log_unenabled_actions, false, boolean),
-    case ShouldLogUnEnabledActions of
-        true -> Task = task(Req, State),
-            lager:info("Action ~p not enabled for ~p\n", [Task, ResourceState]);
-        false -> ok
-    end.
-
--spec  log_action0(Req :: wm_req(),
-                   State :: #base_state{}) -> ok.
-log_action0(Req, State) ->
-    ShouldSendBody = envy:get(oc_chef_wm, enable_actions_body, true, boolean),
-    Msg = create_message(Req, State, ShouldSendBody),
-    RoutingKey = routing_key(Req, State),
-    publish(RoutingKey, Msg).
-
--spec create_message(Req :: wm_req(), State :: #base_state{}, SendFullPayload :: boolean()) -> binary().
-create_message(Req, #base_state{resource_state = ResourceState} = State, SendFullPayload) ->
-    {FullPayload, _EntityType, EntitySpecificPayload} = extract_entity_info(Req, ResourceState),
-    Payload = case SendFullPayload of
-        true -> FullPayload;
-        false -> []
-    end,
+-spec create_message(Req :: wm_req(), State :: #base_state{}) -> binary().
+create_message(Req, #base_state{resource_state = ResourceState} = State) ->
+    {Payload, _EntityType, EntitySpecificPayload} = extract_entity_info(Req, ResourceState),
     Task = task(Req, State),
     construct_payload(Payload, Task, Req, State, EntitySpecificPayload).
 
 %%
 %% Internal functions
 %%
-
--spec routing_key(Req :: wm_req(), State :: #base_state{}) -> binary().
-routing_key(Req, #base_state{resource_state = ResourceState} = State) ->
-    {_FullPayload, EntityType, _EntitySpecificPayload} = extract_entity_info(Req, ResourceState),
-    Method = task(Req, State),
-    iolist_to_binary([<<"erchef.">>, EntityType, <<".">>, Method]).
-
 -spec construct_payload(FullActionPayload :: [{binary(), binary()},...],
                         Task :: binary(),
                         Req :: wm_req(),
@@ -171,29 +88,6 @@ maybe_add_remote_request_id(Msg, undefined) ->
     Msg;
 maybe_add_remote_request_id(Msg, RemoteRequestId) ->
     ej:set({<<"remote_request_id">>}, Msg, RemoteRequestId).
-
--spec publish(RoutingKey :: binary(),
-              Msg :: binary()) -> ok.
-publish(RoutingKey, Msg)->
-    QueueMonitorEnabled =
-      oc_chef_action_queue_config:get_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false),
-    publish(RoutingKey, Msg, QueueMonitorEnabled).
-
-
--spec publish(RoutingKey :: binary(),
-              Msg :: binary(),
-              QueueMonitoringEnabled :: boolean()) -> ok.
-publish(RoutingKey, Msg, false) ->
-      oc_chef_action_queue:publish(RoutingKey, Msg);
-publish(RoutingKey, Msg, true) ->
-    DropOnCapacity =
-      oc_chef_action_queue_config:get_rabbit_queue_monitor_setting(drop_on_full_capacity, true),
-    case DropOnCapacity andalso chef_wm_actions_queue_monitoring:is_queue_at_capacity() of
-        true ->
-            chef_wm_actions_queue_monitoring:message_dropped();
-        false ->
-            oc_chef_action_queue:publish(RoutingKey, Msg)
-    end.
 
 maybe_add_data(Msg, []) ->
     Msg;
@@ -386,7 +280,6 @@ req_or_data_name(Name, _Data) when is_binary(Name) ->
 hostname() ->
     envy:get(oc_chef_wm, actions_fqdn, binary).
 
-
 get_cookbook_version({Major, Minor, Patch} = Version) when Major >=0, Minor >=0, Patch >=0 ->
     chef_cookbook_version:version_to_binary(Version).
 
@@ -396,13 +289,4 @@ req_header(Name, Req) ->
             undefined;
         Header ->
             iolist_to_binary(Header)
-    end.
-
--spec ping() -> pong | pang.
-ping() ->
-    VHost = envy:get(oc_chef_wm, actions_vhost, binary),
-    case chef_wm_rabbitmq_management:check_aliveness(
-           oc_chef_action_queue_config:get_rabbit_management_pool_name(), binary_to_list(VHost)) of
-        true -> pong;
-        _ -> pang
     end.

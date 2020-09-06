@@ -39,9 +39,6 @@ module PrivateChef
   chef_backend_members []
 
   addons Mash.new
-  rabbitmq Mash.new
-  external_rabbitmq Mash.new
-  rabbitmq['log_rotation'] ||= Mash.new
   opscode_solr4 Mash.new
   opscode_solr4['log_rotation'] ||= Mash.new
   elasticsearch Mash.new
@@ -114,6 +111,9 @@ module PrivateChef
   opscode_certificate Mash.new
   disabled_plugins []
   enabled_plugins []
+  rabbitmq Mash.new
+  rabbitmq['log_rotation'] ||= Mash.new
+  external_rabbitmq Mash.new
   registered_extensions Mash.new
   ha Mash.new # For all other HA settings
   drbd Mash.new # For DRBD specific settings
@@ -204,8 +204,6 @@ module PrivateChef
         'opscode_chef',
         'redis_lb',
         'addons',
-        'rabbitmq',
-        'external_rabbitmq',
         'opscode_solr4',
         'elasticsearch',
         'opscode_expander',
@@ -294,7 +292,6 @@ module PrivateChef
     def gen_backend(bootstrap)
       PrivateChef[:role] = 'backend' # mixlib-config wants a symbol :(
       PrivateChef['bookshelf']['listen'] ||= PrivateChef['default_listen_address']
-      PrivateChef['rabbitmq']['node_ip_address'] ||= PrivateChef['default_listen_address']
       PrivateChef['redis_lb']['listen'] ||= PrivateChef['default_listen_address']
       PrivateChef['elasticsearch']['listen'] ||= PrivateChef['default_listen_address']
       PrivateChef['opscode_solr4']['ip_address'] ||= PrivateChef['default_listen_address']
@@ -313,8 +310,6 @@ module PrivateChef
       PrivateChef[:role] = 'frontend'
       PrivateChef['bookshelf']['enable'] ||= false
       PrivateChef['bookshelf']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
-      PrivateChef['rabbitmq']['enable'] ||= false
-      PrivateChef['rabbitmq']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
       PrivateChef['redis_lb']['enable'] ||= false
       PrivateChef['redis_lb']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
       PrivateChef['opscode_solr4']['enable'] ||= false
@@ -364,8 +359,6 @@ module PrivateChef
       required_secrets = [
         { group: 'postgresql', name: 'db_superuser_password', length: 100, set_command: 'set-db-superuser-password' },
         { group: 'redis_lb', name: 'password', length: 100 },
-        { group: 'rabbitmq', name: 'password', length: 100 },
-        { group: 'rabbitmq', name: 'management_password', length: 100 },
         { group: 'opscode_erchef', name: 'sql_password', length: 60 },
         { group: 'opscode_erchef', name: 'sql_ro_password', length: 60 },
         { group: 'opscode_erchef', name: 'stats_password', lendth: 100 },
@@ -393,8 +386,6 @@ module PrivateChef
       required_secrets.each do |secret|
         add_secret(secret)
       end
-
-      generate_rabbit_actions_password
 
       save_credentials_to_config if PrivateChef['insecure_addon_compat']
       credentials.save
@@ -464,31 +455,6 @@ module PrivateChef
         creds.each do |name, value|
           PrivateChef[service][name] ||= value
         end
-      end
-    end
-
-    #
-    # The actions queue can be hosted on an external RabbitMQ instance
-    # managed by analytics. In this case, the user provides the
-    # RabbitMQ information in the external_rabbitmq configuration key.
-    #
-    def generate_rabbit_actions_password
-      if PrivateChef['external_rabbitmq']['enable'] && PrivateChef['external_rabbitmq']['actions_password']
-        warn_if_cred_mismatch(group: 'rabbitmq',
-                              name: 'actions_password',
-                              command_name: 'set-actions-password',
-                              config_value: PrivateChef['external_rabbitmq']['actions_password'],
-                              config_key_desc: "external_rabbitmq['actions_password']")
-
-        # NOTE: This is stored under the rabbitmq (rather than
-        # external_rabbitmq) section so that applications don't need
-        # to know whether they are talking to a local or remote
-        # rabbitmq for the actions queue.
-        credentials.add('rabbitmq', 'actions_password',
-          value: PrivateChef['external_rabbitmq']['actions_password'],
-          frozen: true, force: true)
-      else
-        credentials.add('rabbitmq', 'actions_password', length: 100)
       end
     end
 

@@ -104,9 +104,7 @@ docker-compose exec chef-server-ctl chef-server-ctl command (subcommands)
 
 - Erlang
 - PostgreSQL
-- RabbitMQ
 - Redis
-- Solr4
 - Elasticsearch
 - Nginx (openresty with lpeg library addition)
 - Runit for service supervision

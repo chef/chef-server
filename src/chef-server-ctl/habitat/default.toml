@@ -29,11 +29,6 @@ db_superuser_password = ""
 [secrets.redis_lb]
 password = ""
 
-[secrets.rabbitmq]
-password = ""
-management_password = ""
-actions_password = ""
-
 [secrets.keepalived]
 vrrp_instance_password = ""
 

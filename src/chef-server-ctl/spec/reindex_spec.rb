@@ -50,30 +50,10 @@ describe "chef-server-ctl reindex" do
   end
 
   context "with the -w flag" do
-    context "when the search queue mode is 'batch'" do
-      let(:config) do
-        {
-          "private_chef" => {
-            "opscode-erchef" => {
-              "search_queue_mode" => "batch",
-            },
-          },
-        }
-      end
-
-      let(:args) { %w( -w --all-orgs ) }
-
-      it "does not wait" do
-        expect($stdout).to_not receive(:puts).with(
-          "- Waiting for reindexing to complete"
-        )
-        reindex
-      end
-
-      it "logs a message" do
-        expect($stderr).to receive(:puts).with(/batch/)
-        reindex
-      end
+    let(:args) { %w( -w --all-orgs ) }
+    it "does nothing but logs a message" do
+      expect($stderr).to receive(:puts).with(/no longer supported/)
+      reindex
     end
   end
 end

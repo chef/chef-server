@@ -21,14 +21,12 @@ module ChefServerCtl
     DEFAULT_KNIFE_BIN = "/opt/opscode/embedded/bin/knife".freeze
     DEFAULT_LB_URL = "https://127.0.0.1".freeze
     DEFAULT_FIPS_LB_URL = "http://127.0.0.1".freeze
-    DEFAULT_RABBITMQCTL_BIN = "/opt/opscode/embedded/service/rabbitmq/sbin/rabbitmqctl".freeze
     DEFAULT_ERCHEF_REINDEX_SCRIPT = "/opt/opscode/embedded/service/opscode-erchef/bin/reindex-opc-organization".freeze
 
     def self.init(ctl)
       @@ctl = ctl
       Log.debug("Using KNIFE_CONFIG_FILE=#{self.knife_config_file}")
       Log.debug("Using KNIFE_BIN=#{self.knife_bin}")
-      Log.debug("Using RABBITMQCTL_BIN=#{self.rabbitmqctl_bin}")
       Log.debug("Using ERCHEF_REINDEX_SCRIPT=#{self.erchef_reindex_script}")
       Log.debug("Using HABITAT_MODE=#{self.habitat_mode}")
       # We don't always get run with a full chef-server-running.json
@@ -54,16 +52,6 @@ module ChefServerCtl
         ENV['CSC_KNIFE_BIN']
       else
         DEFAULT_KNIFE_BIN
-      end
-    end
-
-    # rabbitmqctl_bin is the command used to execute rabbitmqctl. This
-    # is used for the --wait flag of the reindex command.
-    def self.rabbitmqctl_bin
-      if ENV['CSC_RABBITMQCTL_BIN']
-        ENV['CSC_RABBITMQCTL_BIN']
-      else
-        DEFAULT_RABBITMQCTL_BIN
       end
     end
 

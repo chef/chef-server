@@ -39,17 +39,6 @@ describe "running configs required by Reporting", :config do
     end
   end
 
-  context "rabbitmq" do
-
-    it "user/username" do
-      expect(config['user']['username'].to_s).to_not eq ''
-    end
-
-    it "rabbitmq/actions_vhost" do
-      expect(config['rabbitmq']['actions_vhost'].to_s).to_not eq ''
-    end
-  end
-
   context "pedant-config" do
 
     it "lb/api_fqdn" do

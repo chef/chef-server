@@ -100,7 +100,6 @@ The following should be installed on the development system and in your path.
 + bundler  1.7.6
 + postgres 9.3.5
 + pg_ctl   9.3.5
-+ rabbitmq 3.3.4+
 
 #### Compiling
 
@@ -111,15 +110,6 @@ make
 #### Running Tests
 
 ##### Running Integration Tests
-The queue monitor integration tests require RabbitMQ + Management plugins.
-
-Start RabbitMQ via:
-`rabbitmq-server`
-
-and enable the management plugin:
-`rabbitmq-plugins enable rabbitmq_management`
-
-
 Run the integration tests with the following:
 
 `make ct`
