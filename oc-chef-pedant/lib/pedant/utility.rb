@@ -81,5 +81,12 @@ module Pedant
       end
       return nil # Cannot find the fixture. Raise an error?
     end
+
+    # Chef::ServerAPI always sets the Host header to HOSTNAME:PORT.
+    # We do the same thing here since the Version 4 AWS Signature
+    # scheme uses the Host header as part of the canonically signed content.
+    def self.get_host_port http, uri
+        http.get uri.request_uri, {"Host" => "#{uri.hostname}:#{uri.port}"}
+    end
   end
 end
