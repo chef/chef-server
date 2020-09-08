@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.32 -->
-## [14.0.32](https://github.com/chef/chef-server/tree/14.0.32) (2020-09-07)
+<!-- latest_release 14.0.33 -->
+## [14.0.33](https://github.com/chef/chef-server/tree/14.0.33) (2020-09-08)
 
 #### Merged Pull Requests
-- Remove support for plugins/extensions including ha-aws [#2102](https://github.com/chef/chef-server/pull/2102) ([stevendanna](https://github.com/stevendanna))
+- Harmonize Treatment of Host Header in Pedant [#2096](https://github.com/chef/chef-server/pull/2096) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Harmonize Treatment of Host Header in Pedant [#2096](https://github.com/chef/chef-server/pull/2096) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.33 -->
 - Remove support for plugins/extensions including ha-aws [#2102](https://github.com/chef/chef-server/pull/2102) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.32 -->
 - Remove unreachable cookbook assets [#2101](https://github.com/chef/chef-server/pull/2101) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.31 -->
 - Fix fips errors in RHEL smoke tests [#2098](https://github.com/chef/chef-server/pull/2098) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.30 -->
