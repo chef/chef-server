@@ -18,6 +18,6 @@
        {ref,"d9578f44726ca69af5bdadaa602756692d3b1460"}},
   0},
  {<<"pooler">>,
-  {git,"git://github.com/seth/pooler.git",
-       {ref,"9c28fb479f9329e2a1644565a632bc222780f1b7"}},
+  {git,"git://github.com/chef/pooler.git",
+       {ref,"681c355abaacc5487ddf41a84b9ed53151a765fe"}},
   0}].
