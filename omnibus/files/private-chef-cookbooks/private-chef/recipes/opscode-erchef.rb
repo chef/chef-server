@@ -95,4 +95,6 @@ link '/opt/opscode/embedded/service/opscode-erchef/vm.args' do
   to vmargs_config
 end
 
-component_runit_service 'opscode-erchef'
+component_runit_service 'opscode-erchef' do
+  control ['t']
+end

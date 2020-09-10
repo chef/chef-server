@@ -70,5 +70,6 @@ end
 
 # We want the service defined, but dead
 component_runit_service 'opscode-chef-mover' do
+  control ['t']
   action :down
 end
