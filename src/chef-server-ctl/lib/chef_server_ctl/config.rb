@@ -23,6 +23,12 @@ module ChefServerCtl
     DEFAULT_FIPS_LB_URL = "http://127.0.0.1".freeze
     DEFAULT_RABBITMQCTL_BIN = "/opt/opscode/embedded/service/rabbitmq/sbin/rabbitmqctl".freeze
     DEFAULT_ERCHEF_REINDEX_SCRIPT = "/opt/opscode/embedded/service/opscode-erchef/bin/reindex-opc-organization".freeze
+    DOC_PATENT_MSG = <<-DOC.freeze
+
+Documentation: https://docs.chef.io/server_overview/
+Patents:       https://www.chef.io/patents
+
+    DOC
 
     def self.init(ctl)
       @@ctl = ctl

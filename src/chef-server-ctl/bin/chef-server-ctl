@@ -13,6 +13,12 @@ module Omnibus
   # external services supported by Chef Server. As additional services
   # are external-enabled, controls/configuration will need to be added here.
   class ChefServerCtl < Omnibus::Ctl
+
+    def help(*args)
+      puts ::ChefServerCtl::Config::DOC_PATENT_MSG
+      super
+    end
+
     def db_data
       d = [%w{oc_bifrost bifrost},
            %w{opscode-erchef opscode_chef},
@@ -237,6 +243,8 @@ EOM
 
     # Override reconfigure to skip license checking
     def reconfigure(*args)
+
+      puts ::ChefServerCtl::Config::DOC_PATENT_MSG
 
       LicenseAcceptance::Acceptor.check_and_persist!("infra-server", ChefServerCtl::VERSION.to_s)
 
