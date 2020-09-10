@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.34 -->
-## [14.0.34](https://github.com/chef/chef-server/tree/14.0.34) (2020-09-08)
+<!-- latest_release 14.0.35 -->
+## [14.0.35](https://github.com/chef/chef-server/tree/14.0.35) (2020-09-10)
 
 #### Merged Pull Requests
-- Add Erlcloud Dep and Requisite License Scout Fixes [#2095](https://github.com/chef/chef-server/pull/2095) ([lbakerchef](https://github.com/lbakerchef))
+- Display patent information for every chef-server-ctl command [#2104](https://github.com/chef/chef-server/pull/2104) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Display patent information for every chef-server-ctl command [#2104](https://github.com/chef/chef-server/pull/2104) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.35 -->
 - Add Erlcloud Dep and Requisite License Scout Fixes [#2095](https://github.com/chef/chef-server/pull/2095) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.34 -->
 - Harmonize Treatment of Host Header in Pedant [#2096](https://github.com/chef/chef-server/pull/2096) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.33 -->
 - Remove support for plugins/extensions including ha-aws [#2102](https://github.com/chef/chef-server/pull/2102) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.32 -->
