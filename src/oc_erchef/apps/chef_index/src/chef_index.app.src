@@ -23,7 +23,6 @@
   {applications, [
                   kernel,
                   stdlib,
-                  gen_bunny,
                   ibrowse,
                   chef_secrets,
                   prometheus

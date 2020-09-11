@@ -11,11 +11,6 @@ REQUIRED_SECRETS = {
   redis_lb: {
     password: { length: 100 }
   },
-  rabbitmq: {
-    password: { length: 100 },
-    management_password: { length: 100 },
-    actions_password: { length: 100 }
-  },
   keepalived: {
     vrrp_instance_password: { length: 100 }
   },

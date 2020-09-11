@@ -141,9 +141,6 @@ projects:
           - opscode_erchef.sql_password
           - bookshelf.access_key_id
           - bookshelf.secret_access_key
-          - rabbitmq.password
-          - rabbitmq.management_password
-          - rabbitmq.actions_password
           - oc_bifrost.superuser_id
         optional:
           - data_collector.token

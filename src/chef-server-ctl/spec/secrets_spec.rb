@@ -89,21 +89,21 @@ describe "chef-server-ctl set-secret" do
   # Also unlikely that we'd change a secret for a not-enabled service.
   context "when only non-enabled services depend on the changed secret" do
     before do
-      allow(veil_creds).to receive(:add).with("opscode-reporting", "rabbitmq_password", {:value=>"new_key", :frozen=>true, :force=>true})
-      allow(subject.ctl).to receive(:service_enabled?).with("opscode-reporting").and_return(false)
+      allow(veil_creds).to receive(:add).with("manage", "secret_token", {:value=>"new_key", :frozen=>true, :force=>true})
+      allow(subject.ctl).to receive(:service_enabled?).with("chef-manage").and_return(false)
     end
 
     it "does not prompt user to restart services" do
       expect(subject.ctl).to_not receive(:run_sv_command_for_service)
       expect {
-        subject.run_test_omnibus_command("set-secret", ['opscode-reporting', 'rabbitmq_password', 'new_key'])
+        subject.run_test_omnibus_command("set-secret", ['manage', 'secret_token', 'new_key'])
       }.to_not output.to_stdout
     end
 
     it "does not restart services with --with-restart flag" do
       expect(subject.ctl).to_not receive(:run_sv_command_for_service)
       expect {
-        subject.run_test_omnibus_command("set-secret", ['opscode-reporting', 'rabbitmq_password', 'new_key', '--with-restart'])
+        subject.run_test_omnibus_command("set-secret", ['manage', 'secret_token', 'new_key', '--with-restart'])
       }.to_not output.to_stdout
     end
   end

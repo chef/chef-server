@@ -49,20 +49,10 @@ init_resource_state(_Config) ->
     {ok, #control_state{}}.
 
 service_available(Req, State) ->
-    case oc_chef_wm_base:service_available(Req, State) of
-        {true, Req1, State1} ->
-            ActionsEnabled = envy:get(oc_chef_wm, enable_actions, false, boolean),
-            case ActionsEnabled of
-                true -> {true, Req1, State1};
-                false ->
-                    Msg = <<"Resource gone, analytics unavailable in the current server configuration">>,
-                    Req2 = wrq:set_resp_header("Content-type", "application/json", Req1),
-                    Req3 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, Msg}]}), Req2),
-                    {{halt, 410}, Req3, State1#base_state{log_msg = rabbitmq_disabled}}
-            end;
-        Other ->
-          Other
-    end.
+    Msg = <<"Resource gone, analytics is no longer supported by Chef Server">>,
+    Req1 = wrq:set_resp_header("Content-type", "application/json", Req),
+    Req2 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, Msg}]}), Req1),
+    {{halt, 410}, Req2, State#base_state{log_msg = rabbitmq_disabled}}.
 
 request_type() ->
     "controls".
@@ -113,64 +103,11 @@ create_path(Req, #base_state{resource_state = #control_state{} = ControlGroupSta
     ControlGroupState1 = ControlGroupState#control_state{control_group_id=Id},
     {binary_to_list(Id), Req, State#base_state{resource_state=ControlGroupState1}}.
 
-from_json(Req, #base_state{resource_state = #control_state{control_data = ControlData,
-                                                           control_group_id=Id}} = State) ->
-    RoutingKey = routing_key(),
-    Msg = construct_payload(ControlData, Id, Req, State),
-    publish(RoutingKey, Msg),
+from_json(Req, State) ->
     %% return an empty response so knife raw doesn't throw an exception
     Out = chef_json:encode(""),
     Req2 = wrq:set_resp_body(Out, Req),
     {true, Req2, State}.
-
--spec construct_payload(FullControlGroupPayload :: {[{binary(), binary()}]},
-                        Id   :: binary(),
-                        Req :: wm_req(),
-                        State :: #base_state{}) -> binary().
-construct_payload(FullControlGroupPayload,
-                  Id,
-                  Req, #base_state{reqid = RequestId,
-                                   organization_name = OrgName}
-                                   ) ->
-    MsgVersion = req_header("x-ops-audit-report-protocol-version", Req),
-    {FullControlGroupNode} = FullControlGroupPayload,
-    Msg = {[{<<"message_type">>, <<"control_groups">>},
-            {<<"message_version">>, MsgVersion},
-            {<<"organization_name">>, OrgName},
-            {<<"chef_server_fqdn">>, hostname()},
-            {<<"recorded_at">>, req_header("x-ops-timestamp", Req)},
-            {<<"remote_hostname">>, req_header("x-forwarded-for", Req)},
-            {<<"request_id">>, RequestId},
-            {<<"id">>, Id}
-              | FullControlGroupNode]},
-    Msg1 = maybe_add_remote_request_id(Msg, req_header("x-remote-request-id", Req)),
-    iolist_to_binary(chef_json:encode(Msg1)).
-
-maybe_add_remote_request_id(Msg, undefined) ->
-    Msg;
-maybe_add_remote_request_id(Msg, RemoteRequestId) ->
-    ej:set({<<"remote_request_id">>}, Msg, RemoteRequestId).
-
--spec hostname() -> binary().
-hostname() ->
-    envy:get(oc_chef_wm, actions_fqdn, binary).
-
-req_header(Name, Req) ->
-    case wrq:get_req_header(Name, Req) of
-        undefined ->
-            undefined;
-        Header ->
-            iolist_to_binary(Header)
-    end.
-
--spec publish(RoutingKey :: binary(),
-              Msg :: binary()) -> ok.
-publish(RoutingKey, Msg)->
-    oc_chef_action_queue:publish(RoutingKey, Msg).
-
--spec routing_key() -> binary().
-routing_key() ->
-    iolist_to_binary([<<"control_group">>]).
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).

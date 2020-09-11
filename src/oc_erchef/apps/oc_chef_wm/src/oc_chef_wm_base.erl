@@ -808,15 +808,7 @@ finish_request(_Req, Anything) ->
     lager:error("chef_wm:finish_request/2 did not receive #base_state{}~nGot: ~p~n", [Anything]).
 
 log_action(Req, State) ->
-    ActionEnabled = envy:get(oc_chef_wm, enable_actions, false, boolean),
-    DataCollectorEnabled = data_collector:is_enabled(),
-    maybe_log_action(ActionEnabled, Req, State),
-    maybe_notify_data_collector(DataCollectorEnabled, Req, State).
-
-maybe_log_action(true, Req, State) ->
-    oc_chef_action:log_action(Req, State);
-maybe_log_action(false, _Req, _State) ->
-    ok.
+    maybe_notify_data_collector(data_collector:is_enabled(), Req, State).
 
 maybe_notify_data_collector(true, Req, State) ->
     oc_chef_data_collector:notify(Req, State);

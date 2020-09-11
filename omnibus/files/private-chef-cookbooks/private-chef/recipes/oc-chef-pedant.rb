@@ -53,7 +53,6 @@ template pedant_config do
   group 'root'
   mode  '0755'
   variables({
-    actions_enabled: node['private_chef']['dark_launch']['actions'],
     api_url: node['private_chef']['oc-chef-pedant']['chef_server'] || OmnibusHelper.new(node).nginx_ssl_url,
     base_resource_url: node['private_chef']['opscode-erchef']['base_resource_url'],
     solr_url: OmnibusHelper.new(node).solr_url,
