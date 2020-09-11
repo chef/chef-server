@@ -1,6 +1,4 @@
 Partybus.configure do |c|
-  c.database_connection_string   = "mysql2://root@127.0.0.1/partybus_test"
-  c.database_migration_directory = "/Users/stephen/opscode/dev/chef-sql-schema/db/migrate"
   c.partybus_migration_directory = "/Users/stephen/opscode/dev/opscode-omnibus/files/upgrades"
   c.migration_state_file         = "/tmp/partybus-state"
 end

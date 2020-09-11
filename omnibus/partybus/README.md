@@ -6,7 +6,7 @@ Making Omnibus better, one step at a time.
 
 The upgrade level is independent of the Private Chef version number. Upgrades are either classified as a "major" upgrade or a "minor" one.
 
-**major:** Requiring either a change in schema, a database migration, or a restart to runit or keepalived 
+**major:** Requiring either a change in schema, a database migration, or a restart to runit or keepalived
 
 **minor:** Not major, e.g. single service restarts, document fixes
 
@@ -35,7 +35,6 @@ Upgrades are defined and checked into source control in the`files/private-chef-u
 define_upgrade 'its_a_party' do
   maintencance_mode do
 
-    upgrade_schema_to 42
     migrate 'migrate_to_mongodb'
     migrate 'convert_lead_to_gold'
 
@@ -45,7 +44,7 @@ end
 
 ### Considerations
 
-The reason for adding a top-level DSL around upgrades is to future proof the API. If some change is required for one of the DSL methods (e.g. upgrade_schema_to), we need the ability to support both old versions of the upgrade syntax as well as newer versions. For example:
+The reason for adding a top-level DSL around upgrades is to future proof the API. If some change is required for one of the DSL methods, we need the ability to support both old versions of the upgrade syntax as well as newer versions. For example:
 
 ```ruby
 define_upgrade 'its_a_futurama_party', :api_version => 2 do
@@ -87,16 +86,6 @@ Multiple methods have been added to help you start, stop, and restart services:
 + `start_services(["service1", "services2", ...])` will start multiple services, and then sleep for 15 seconds.
 + `stop_service("service")` will stop a service, and then sleep for 10 seconds.
 + `stop_services(["service1", "service2", ...])` will stop multiple services, and then sleep for 10 seconds.
-
-
-## Schema Upgrades
-
-### Example
-
-```ruby
-upgrade_schema_to 10
-upgrade_schema_to 11
-```
 
 ### Implementation Details
 
