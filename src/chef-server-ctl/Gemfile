@@ -4,5 +4,5 @@ gemspec
 
 gem "chef_backup"
 gem "omnibus-ctl", git: "https://github.com/chef/omnibus-ctl.git", tag: "v0.6.0"
-gem install veil -v '0.3.0' #veil version override
+gem 'veil', '~> 0.3.0'
 gem "toml" # for habitat-land
