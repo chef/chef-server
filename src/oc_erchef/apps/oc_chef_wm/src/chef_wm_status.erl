@@ -61,63 +61,30 @@ check_health() ->
     Pings = spawn_health_checks(),
     Status = overall_status(Pings),
 
-    QueueMonStatus =
-        case oc_chef_action_queue_config:get_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false) of
-            false -> % chef_wm_actions_queue_monitoring isn't running, skip it
-                    [];
-            true -> AnalyticsQ = chef_wm_actions_queue_monitoring:status(),
-                    [{<<"analytics_queue">>, {AnalyticsQ}}]
-        end,
-
-    log_failure(Status, Pings, QueueMonStatus),
+    log_failure(Status, Pings),
     KeyGen = chef_keygen_cache:status_for_json(),
     Indexing = chef_index:status(),
 
     StatList = [{<<"status">>, ?A2B(Status)},
                 {<<"upstreams">>, {Pings}},
                 {<<"keygen">>, {KeyGen}},
-                {<<"indexing">>, {Indexing}}
-                ] ++ QueueMonStatus,
-
+                {<<"indexing">>, {Indexing}}],
     {Status, chef_json:encode({StatList})}.
 
 overall_status(Pings) ->
     case [ Pang || {_, <<"fail">>}=Pang <- Pings ] of
         [] ->
-            case is_analytics_queue_at_capacity() andalso queue_at_capacity_affects_overall_status() of
-                true -> fail;
-                _ -> pong %% no fails, we're good
-            end;
+            pong;
         _Failure ->
             fail
     end.
 
--spec is_analytics_queue_at_capacity() -> boolean().
-is_analytics_queue_at_capacity() ->
-    case oc_chef_action_queue_config:get_rabbit_queue_monitor_setting(queue_length_monitor_enabled, false) of
-        % don't try to connect to the queue monitor if it isn't running
-        true -> chef_wm_actions_queue_monitoring:is_queue_at_capacity();
-        false -> false
-    end.
-
--spec queue_at_capacity_affects_overall_status() -> boolean().
-queue_at_capacity_affects_overall_status() ->
-    oc_chef_action_queue_config:get_rabbit_queue_monitor_setting(queue_at_capacity_affects_overall_status, false).
-
-
--spec log_failure(fail | pong, [{binary(), <<_:32>>}], list()) -> ok.
-log_failure(fail, Pings, []) ->
-    % queue monitor isn't active
+-spec log_failure(fail | pong, [{binary(), <<_:32>>}]) -> ok.
+log_failure(fail, Pings) ->
     FailureData = {{status, fail}, {upstreams, {Pings}}},
     lager:error("/_status~n~p~n", [FailureData]),
     ok;
-log_failure(fail, Pings, [QueueMonStatus]) ->
-    % QueueMonStatus is ALWAYS a list, as it's hardcoded in the queue_length_monitor_enabled
-    % check in check_health/0
-    FailureData = {{status, fail}, {upstreams, {Pings}}, QueueMonStatus},
-    lager:error("/_status~n~p~n", [FailureData]),
-    ok;
-log_failure(_,_,_) ->
+log_failure(_,_) ->
     ok.
 
 %% Execute health checks in parallel such that no check will exceed `ping_timeout()'

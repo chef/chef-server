@@ -7,8 +7,6 @@
 
 -behaviour(supervisor).
 
--include_lib("amqp_client/include/amqp_client.hrl").
-
 %% External exports
 -export([start_link/0]).
 
@@ -16,8 +14,6 @@
 -export([init/1]).
 
 -include("oc_chef_wm.hrl").
-
--define(QUEUE_MONITOR_SETTING(Key, Default), oc_chef_action_queue_config:get_rabbit_queue_monitor_setting(Key, Default)).
 
 %% @spec start_link() -> ServerRet
 %% @doc API for starting the supervisor.
@@ -28,8 +24,6 @@ start_link() ->
 %% @doc ervisor callback.
 init([]) ->
     ok = load_ibrowse_config(),
-
-    Action = envy:get(oc_chef_wm, enable_actions, false, boolean),
 
     Ip = envy:get(oc_chef_wm, ip, string),
     Port = envy:get(oc_chef_wm, port, pos_integer),
@@ -64,60 +58,8 @@ init([]) ->
              {chef_index_sup, start_link, []},
              permanent, 5000, supervisor, [chef_index_sup]},
 
-    {ok, { {one_for_one, 10, 10}, maybe_start_action(Action, [KeyRing,
-                                                              Index,
-                                                              KeyGenWorkerSup,
-                                                              KeyCache,
-                                                              Web])}}.
-
-
-maybe_start_action(true, Workers) ->
-    lager:info("Starting oc_chef_action", []),
-    Vhost = ?QUEUE_MONITOR_SETTING(queue_length_monitor_vhost, "/analytics"),
-    Queue = ?QUEUE_MONITOR_SETTING(queue_length_monitor_queue, "alaska"),
-    QMEnabled = ?QUEUE_MONITOR_SETTING(queue_length_monitor_enabled, false),
-
-    case QMEnabled of
-        true ->
-            {PoolNameAtom, PoolConfig} = oc_chef_action_queue_config:get_rabbit_management_pool_setting(),
-            chef_wm_rabbitmq_management:create_pool(PoolNameAtom, PoolConfig),
-            {MaxLength, CurrentLength} = check_actions_queue_at_capacity(PoolNameAtom, Vhost, Queue),
-            ActionQueueMonitoringSpec = {chef_wm_actions_queue_monitoring,
-                    {chef_wm_actions_queue_monitoring, start_link,
-                     [Vhost, Queue, MaxLength, CurrentLength]},
-                        permanent, 5000, worker, [chef_wm_actions_queue_monitoring]},
-            lager:info("Starting actions queue monitoring for vhost ~p and queue ~p", [Vhost, Queue]),
-            [ActionQueueMonitoringSpec | [ amqp_child_spec() | Workers]];
-        false ->
-            [ amqp_child_spec() | Workers]
-    end;
-
-maybe_start_action(false, Workers) ->
-    lager:info("Not starting Actionlog supervisor since actionlog is disabled."),
-    Workers.
-
-
-check_actions_queue_at_capacity(PoolNameAtom, Vhost, Queue) ->
-    PreventStartupOnCap = ?QUEUE_MONITOR_SETTING(prevent_erchef_startup_on_full_capacity, false),
-    {MaxLength, CurrentLength, QueueAtCapacity} =
-        chef_wm_rabbitmq_management:sync_check_queue_at_capacity(PoolNameAtom, Vhost, Queue),
-    case QueueAtCapacity of
-        true ->
-            case PreventStartupOnCap of
-                true ->
-                    lager:critical("Vhost ~p, queue ~p at capacity, cannot start", [Vhost, Queue]),
-                    erlang:error(analytics_queue_at_capacity);
-                false ->
-                    lager:warning("Vhost ~p, queue ~p at capacity", [Vhost, Queue]),
-                    {MaxLength, CurrentLength}
-            end;
-        false ->
-            lager:info("Vhost ~p, queue ~p not at capacity or RabbitMQ Management Plugin unavailable",
-                        [Vhost, Queue]),
-            {MaxLength, CurrentLength}
-    end.
-
-
+    {ok, { {one_for_one, 10, 10}, [KeyRing, Index, KeyGenWorkerSup,
+                                   KeyCache, Web]}}.
 
 load_ibrowse_config() ->
     %% FIXME: location of the ibrowse.config should be itself configurable. Also need to
@@ -235,20 +177,3 @@ default_resource_init() ->
         _ ->
             Defaults
     end.
-
-amqp_child_spec() ->
-    Host = envy_parse:host_to_ip(oc_chef_wm, actions_host),
-    Port = envy:get(oc_chef_wm, actions_port, non_neg_integer),
-    User = envy:get(oc_chef_wm, actions_user, binary),
-    {ok, Password} = chef_secrets:get(<<"rabbitmq">>, <<"actions_password">>),
-    VHost = envy:get(oc_chef_wm, actions_vhost, binary),
-    ExchgName = envy:get(oc_chef_wm, actions_exchange, binary),
-    Exchange = {#'exchange.declare'{exchange=ExchgName,
-                                    type= <<"topic">>,
-                                    durable=true
-                                   }
-               },
-    Network = {network, Host, Port, {User, Password}, VHost},
-    lager:info("Chef Actions: Connecting to RabbitMQ at ~p:~p~s (exchange: ~p)", [Host, Port, VHost, ExchgName]),
-    {oc_chef_action_queue, {bunnyc, start_link, [oc_chef_action_queue, Network, Exchange, []]},
-      permanent, 5000, worker, dynamic}.

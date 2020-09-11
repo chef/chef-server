@@ -83,7 +83,6 @@ for i in /opt/{chef,$path}*/version-manifest.txt \
               /etc/{chef,$path}*/*-running.json \
               /var/opt/$path*/etc/*-running.json \
               /etc/{chef,$path,opscode-manage}*/*.rb \
-              /var/opt/$path/rabbitmq/log/*.log \
               /var/log/syslog \
               /var/log/messages; do
     if [[ -e "$i" ]]; then
@@ -223,15 +222,6 @@ then
     ss -ontap > "$tmpdir/ss_ontap.txt"
 else
     netstat -alntp > "$tmpdir/netstat_alntp.txt"
-fi
-
-if grep ':5672 .* LISTEN .*beam.smp' "$tmpdir/netstat_alntp.txt" > /dev/null 2>&1 || \
-       grep -q 'LISTEN .*:5672 .*beam.smp' "$tmpdir/ss_ontap.txt" > /dev/null 2>&1;
-then
-    mkdir -p "$tmpdir/rabbitmq_vhosts"
-    for i in $(rabbitmqctl list_vhosts -q | grep -v '^/$'); do
-        rabbitmqctl list_queues -p $i > "$tmpdir/rabbitmq_vhosts/`basename $i`"
-    done
 fi
 
 sysctl -a > "$tmpdir/sysctl_a.txt" 2>&1

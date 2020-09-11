@@ -45,12 +45,12 @@ migrate(timeout, #state{processor_args = ProcessorArgs, callback_module = Callba
         Error ->
             stop_with_failure(State#state{results = Error}, Error, migrate)
     catch
-        ErrorType:Reason ->
+        ErrorType:Reason:Stacktrace ->
             HeadlineIoList = io_lib:fwrite("Error in ~p:migration_action", [CallbackModule]),
             Headline = lists:flatten(HeadlineIoList),
             error_logger:error_report({migration_action, Headline}),
             error_logger:error_msg("migration_action args~n~p~n", [ProcessorArgs]),
-            error_logger:error_msg("~p~n~p~n~p~n", [ErrorType, Reason, erlang:get_stacktrace()]),
+            error_logger:error_msg("~p~n~p~n~p~n", [ErrorType, Reason, Stacktrace]),
             stop_with_failure(State#state{results = Reason}, Reason, migrate)
     end.
 

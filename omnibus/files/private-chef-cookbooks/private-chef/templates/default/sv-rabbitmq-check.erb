@@ -1,2 +1,0 @@
-#!/bin/sh
-/usr/bin/env ERL_EPMD_ADDRESS=127.0.0.1 HOME=/root /opt/opscode/embedded/bin/rabbitmqctl wait "<%= node['private_chef']['rabbitmq']['data_dir'] %>/<%= node['private_chef']['rabbitmq']['nodename'] %>.pid"

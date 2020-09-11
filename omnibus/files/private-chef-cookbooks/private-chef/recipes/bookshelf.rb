@@ -90,4 +90,6 @@ link '/opt/opscode/embedded/service/bookshelf/vm.args' do
   to vmargs_config
 end
 
-component_runit_service 'bookshelf'
+component_runit_service 'bookshelf' do
+  control ['t']
+end

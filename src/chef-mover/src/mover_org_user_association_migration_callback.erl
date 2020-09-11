@@ -31,7 +31,7 @@ migration_action(Object, _AcctInfo) ->
     try
         moser_org_converter:insert_org_user_association(UserGuid, OrgGuid, LastUpdatedBy, UserBody)
     catch
-        Exception:Reason ->
+        Exception:Reason:Stacktrace ->
             % only warn when foreign_key is thrown, this just means either the user_id or org_id cannot be found,
             % meaning this is an invite for a user or org that no longer exists, so we can safely ignore it.
             case Reason of
@@ -43,7 +43,7 @@ migration_action(Object, _AcctInfo) ->
                                   [OrgGuid, UserGuid, Reason]);
                 _ ->
                     lager:error("org_user_association_failure org_id: ~p user_id: ~p Exception: ~p Reason: ~p Stacktrace: ~p ~n",
-                                [OrgGuid, UserGuid, Exception, Reason, erlang:get_stacktrace()])
+                                [OrgGuid, UserGuid, Exception, Reason, Stacktrace])
             end
     end,
     ok.

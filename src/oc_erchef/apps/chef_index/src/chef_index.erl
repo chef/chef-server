@@ -30,7 +30,6 @@
          add/5,
          add_batch/1,
          search_provider/0,
-         ping/0,
          status/0,
          histogram_buckets/0
         ]).
@@ -97,23 +96,14 @@ transform_data(solr, Data) ->
     chef_solr:transform_data(Data).
 
 add(TypeName, Id, DbName, IndexEjson, ReqId) ->
-    QueueMode = queue_mode(),
-    case QueueMode of
-        rabbitmq ->
-            stats_hero:ctime(ReqId, {index_queue, update},
-                             fun() ->
-                                     ok = chef_index_queue:set(get_vhost(), TypeName, Id, DbName, IndexEjson)
-                             end);
-        _ -> %% else batch or inline, create doc
-            TypeName2 = case TypeName of
-                            data_bag_item ->
-                                ej:get({<<"data_bag">>}, IndexEjson);
-                            T ->
-                                T
-                        end,
-            Doc = chef_index_expand:doc_for_index(TypeName2, Id, DbName, IndexEjson),
-            send_to_solr(QueueMode, Doc, ReqId)
-    end.
+    TypeName2 = case TypeName of
+                    data_bag_item ->
+                        ej:get({<<"data_bag">>}, IndexEjson);
+                    T ->
+                        T
+                end,
+    Doc = chef_index_expand:doc_for_index(TypeName2, Id, DbName, IndexEjson),
+    send_to_solr(queue_mode(), Doc, ReqId).
 
 -spec add_batch(list()) -> ok | {error, list()}.
 add_batch(Batch) ->
@@ -170,22 +160,14 @@ not_ok(Results) ->
     lists:filter(NotOk, Results).
 
 delete(TypeName, Id, DbName, ReqId) ->
-    case queue_mode() of
-        rabbitmq ->
-            stats_hero:ctime(ReqId, {index_queue, delete},
-                             fun() ->
-                                     ok = chef_index_queue:delete(get_vhost(), TypeName, Id, DbName)
-                             end);
-        _ -> %% batch mode not implemented for delete, always use inline if not rabbitmq
-            stats_hero:ctime(ReqId, {chef_solr, delete},
-                             fun() ->
-                                     Doc = chef_index_expand:doc_for_delete(TypeName, Id, DbName),
-                                     chef_index_expand:send_delete(Doc)
-                             end)
-    end.
+    stats_hero:ctime(ReqId, {chef_solr, delete},
+                     fun() ->
+                             Doc = chef_index_expand:doc_for_delete(TypeName, Id, DbName),
+                             chef_index_expand:send_delete(Doc)
+                     end).
 
 queue_mode() ->
-    envy:get(chef_index, search_queue_mode, rabbitmq, envy:one_of([rabbitmq, batch, inline])).
+    envy:get(chef_index, search_queue_mode, batch, envy:one_of([batch, inline])).
 
 send_to_solr(QueueMode, Doc, none) ->
     send_to_solr(QueueMode, Doc);
@@ -198,29 +180,5 @@ send_to_solr(batch, Doc) ->
 send_to_solr(inline, Doc) ->
     chef_index_expand:send_item(Doc).
 
-get_vhost() ->
-    envy:get(chef_index, rabbitmq_vhost, binary).
-
-ping() ->
-    case queue_mode() of
-        rabbitmq ->
-            Config = envy:get(chef_index, rabbitmq_index_management_service, [], any),
-            Enabled = proplists:get_value(enabled, Config),
-            case Enabled of
-                true ->
-                    chef_index_queue:ping(get_vhost());
-                _ ->
-                    pong
-            end;
-        _ ->
-            pong
-    end.
-
 status() ->
-    case queue_mode() of
-        rabbitmq->
-            [{mode, rabbitmq},
-             {indexer_message_queue_length, chef_index_queue:message_queue_len(get_vhost())}];
-        Mode ->
-            [{mode, Mode}]
-    end.
+    [{mode, queue_mode()}].

@@ -211,10 +211,11 @@ fetch_cookbook_id(DbContext, Name, OrgId) ->
             AuthzId
     end.
 
--spec fetch(chef_type(), binary(), id()) -> list() | {error, term()}.
+-spec fetch(chef_type(), binary(), id()) -> ejson_term() | {error, term()} | forbidden.
 fetch(Type, OrgId, AuthzId) ->
     fetch(Type, OrgId, AuthzId, undefined).
 
+-spec fetch(chef_type(), binary(), id(), granular|undefined) -> ejson_term() | {error, term()} | forbidden.
 fetch(Type, OrgId, AuthzId, Granular) ->
     Path = acl_path(Type, AuthzId),
     Result = oc_chef_authz_http:request(Path, get, ?DEFAULT_HEADERS, [], superuser_id()),

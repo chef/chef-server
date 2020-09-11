@@ -34,9 +34,9 @@ migration_action(OrgName, AcctInfo) ->
         moser_org_converter:insert_org(Guid, AuthzId, LastUpdatedBy, RawObject),
         ok
     catch
-        Exception:Reason ->
+        Exception:Reason:Stacktrace ->
 	    lager:error("org_migration_failure org_name: ~p Exception: ~p Reason: ~p Stacktrace: ~p ~n",
-			[OrgName, Exception, Reason, erlang:get_stacktrace()]),
+			[OrgName, Exception, Reason, Stacktrace]),
             ok
     end.
 

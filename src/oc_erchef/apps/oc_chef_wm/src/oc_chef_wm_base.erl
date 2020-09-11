@@ -91,7 +91,7 @@ service_available(Req, #base_state{reqid_header_name = HeaderName} = State) ->
 %% and reply with it as or reply with error if it's not valid.
 %%
 %% If X-Ops-Server-API-Version is not sent, the server assumes an API version of 0.
--spec server_api_version(undefined|string()) -> api_version() | {error| string()}.
+-spec server_api_version(undefined|string()) -> api_version() | {error, string()}.
 server_api_version(undefined) ->
     0;
 server_api_version(RequestedVersion) ->
@@ -796,9 +796,9 @@ finish_request(Req, #base_state{reqid = ReqId,
                 {true, AnnotatedReq1, State}
         end
     catch
-        X:Y ->
+        X:Y:Stacktrace ->
             lager:error("Error: ~p:~p. Stack trace follows.", [X, Y]),
-            lager:error("Stack Trace: ~p",  [erlang:get_stacktrace()]),
+            lager:error("Stack Trace: ~p",  [Stacktrace]),
             % If a failure occurs anywhere above, the request is completed (and changes
             % potentially made) but our bookkeeping has failed. Let's not crash the request
             % resulting in a 500 - which would indicate that the request should be retried.
@@ -808,15 +808,7 @@ finish_request(_Req, Anything) ->
     lager:error("chef_wm:finish_request/2 did not receive #base_state{}~nGot: ~p~n", [Anything]).
 
 log_action(Req, State) ->
-    ActionEnabled = envy:get(oc_chef_wm, enable_actions, false, boolean),
-    DataCollectorEnabled = data_collector:is_enabled(),
-    maybe_log_action(ActionEnabled, Req, State),
-    maybe_notify_data_collector(DataCollectorEnabled, Req, State).
-
-maybe_log_action(true, Req, State) ->
-    oc_chef_action:log_action(Req, State);
-maybe_log_action(false, _Req, _State) ->
-    ok.
+    maybe_notify_data_collector(data_collector:is_enabled(), Req, State).
 
 maybe_notify_data_collector(true, Req, State) ->
     oc_chef_data_collector:notify(Req, State);
@@ -1252,9 +1244,9 @@ select_user_or_webui_key(Req, Requestors) ->
                         catch
                             %% The proplist for webui_pub_key_list has been parsed, so the
                             %% key should exist as an atom
-                            throw:badarg ->
+                            throw:badarg:Stacktrace ->
                                 lager:error({"unknown webkey tag", Tag,
-                                                           erlang:get_stacktrace()}),
+                                                           Stacktrace}),
                                 %% alternately, we could just use the default key instead of failing;
                                 %% but I prefer noisy errors
                                 throw({badarg, "unknown webkey tag", Tag})
@@ -1268,7 +1260,7 @@ select_user_or_webui_key(Req, Requestors) ->
                     PublicKey;
                 {error, unknown_key} ->
                     Msg = io_lib:format("Failed finding key ~w", [WebKeyTag]),
-                    lager:error({no_such_key, Msg, erlang:get_stacktrace()}),
+                    lager:error({no_such_key, Msg, [?MODULE, ?LINE]}),
                     throw({no_such_key, WebKeyTag})
             end,
             % The query in chef_sql:fetch_actors_by_name (whence we get Requestors) sorts

@@ -13,7 +13,6 @@ function error_exit
 
 ln -sf /opt/opscode/bin/private-chef-ctl /usr/bin || error_exit "Cannot link private-chef-ctl in /usr/bin"
 ln -sf /opt/opscode/bin/chef-server-ctl /usr/bin || error_exit "Cannot link chef-server-ctl in /usr/bin"
-mkdir -p /var/opt/opscode/plugins
 
 if [ -L /var/opt/opscode/plugins/chef-ha-drbd.rb ]; then
   rm -f /var/opt/opscode/plugins/chef-ha-drbd.rb

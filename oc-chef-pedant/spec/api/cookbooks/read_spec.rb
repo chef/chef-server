@@ -325,7 +325,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
               http.ca_file     = Pedant::Config.ssl_ca_file     if Pedant::Config.ssl_ca_file
             end
 
-            response = http.get(uri.request_uri, {})
+            response = Pedant::Utility.get_host_port http, uri
             response.body.should == recipe_content
           end
 

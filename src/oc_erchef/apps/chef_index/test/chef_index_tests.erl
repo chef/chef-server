@@ -42,23 +42,14 @@ chef_index_test_() ->
     {foreach,
      fun() ->
              chef_index_test_utils:start_stats_hero(),
-             application:set_env(chef_index, rabbitmq_vhost, <<"testvhost">>),
              application:ensure_all_started(prometheus),
              chef_index_expand:declare_metrics(),
-             meck:new([chef_index_queue, chef_index_expand, chef_index_batch], [passthrough])
+             meck:new([chef_index_expand, chef_index_batch], [passthrough])
      end,
      fun(_) ->
-             meck:unload([chef_index_queue, chef_index_expand, chef_index_batch])
+             meck:unload([chef_index_expand, chef_index_batch])
      end,
-     [{"add calls chef_index_queue:set when search_queue_mode is rabbitmq",
-       fun() ->
-               application:set_env(chef_index, search_queue_mode, rabbitmq),
-               meck:expect(chef_index_queue, set, fun(<<"testvhost">>, role, <<"a1">>, <<"db1">>, [{}]) -> ok end),
-               chef_index:add(role, <<"a1">>, <<"db1">>, [{}], <<"abcde">>),
-               ?assert(meck:validate(chef_index_queue))
-       end
-      },
-      {"add calls chef_index_batch:add_item when search_queue_mode is batch",
+     [{"add calls chef_index_batch:add_item when search_queue_mode is batch",
        fun() ->
                application:set_env(chef_index, search_queue_mode, batch),
                meck:expect(chef_index_batch, add_item, fun(?EXPECTED_DOC) -> ok end),
@@ -84,14 +75,6 @@ chef_index_test_() ->
                ?assertEqual(3, meck:num_calls(chef_index_expand, send_item, '_'))
        end
       },
-      {"delete calls chef_index_queue:delete when search_queue_mode is rabbitmq",
-       fun() ->
-               application:set_env(chef_index, search_queue_mode, rabbitmq),
-               meck:expect(chef_index_queue, delete, fun(<<"testvhost">>, role, <<"a1">>, <<"db1">>) -> ok end),
-               chef_index:delete(role, <<"a1">>, <<"db1">>, <<"undefined">>),
-               ?assert(meck:validate(chef_index_queue))
-       end
-      },
       {"delete calls chef_index_expand:send_delete when search_queue_mode is inline",
       fun() ->
               application:set_env(chef_index, search_queue_mode, inline),
@@ -110,62 +93,3 @@ delete_assertion() ->
     meck:expect(chef_index_expand, send_delete, fun(?EXPECTED_DELETE_DOC) -> ok end),
     chef_index:delete(role, <<"a1">>, <<"db1">>, <<"abcd">>),
     ?assert(meck:validate(chef_index_expand)).
-
-ping_test_() ->
-    {foreach,
-     fun() ->
-             application:set_env(chef_index, rabbitmq_vhost, <<"/testvhost">>),
-             application:set_env(chef_index, search_queue_mode, rabbitmq),
-             application:set_env(chef_index, rabbitmq_index_management_service, [{enabled, true}]),
-             meck:new(chef_wm_rabbitmq_management)
-     end,
-     fun(_) ->
-             meck:unload(chef_wm_rabbitmq_management)
-     end,
-     [{"When rabbitmq is not used, the check returns pong",
-       % This is not a requirement, there's just nothing else that
-       % is currently checked.
-       fun() ->
-               application:set_env(chef_index, search_queue_mode, batch),
-               meck:expect(chef_wm_rabbitmq_management, check_aliveness,
-                           fun(_, "/testvhost") ->
-                                   throw(shouldnt_be_called)
-                           end),
-               Status = chef_index:ping(),
-               ?assertEqual(pong, Status)
-       end
-      },
-      {"When rabbitmq is enabled but management is not, the check returns pong",
-       % This is not a requirement, there's just nothing else that
-       % is currently checked.
-       fun() ->
-               application:set_env(chef_index, rabbitmq_index_management_service, [{enabled, false}]),
-               meck:expect(chef_wm_rabbitmq_management, check_aliveness,
-                           fun(_, "/testvhost") ->
-                                   throw(shouldnt_be_called)
-                           end),
-               Status = chef_index:ping(),
-               ?assertEqual(pong, Status)
-       end
-      },
-      {"When rabbitmq and management are enabled, and rabbit is alive, returns pong",
-       fun() ->
-               meck:expect(chef_wm_rabbitmq_management, check_aliveness,
-                           fun(_, "/testvhost") ->
-                                   true
-                           end),
-               Status = chef_index:ping(),
-               ?assertEqual(pong, Status)
-       end
-      },
-      {"When rabbitmq and management are enabled, and rabbit is not alive, returns pang",
-       fun() ->
-               meck:expect(chef_wm_rabbitmq_management, check_aliveness,
-                           fun(_, "/testvhost") ->
-                                   false
-                           end),
-               Status = chef_index:ping(),
-               ?assertEqual(pang, Status)
-       end
-      }
-     ]}.

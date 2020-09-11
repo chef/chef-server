@@ -137,11 +137,9 @@ module Pedant
       auth_headers = opts[:auth_headers] || requestor.signing_headers(method, url, payload)
 
       uri = URI.parse(url)
-      if (uri.scheme == 'http' && uri.port == 80) || (uri.scheme == 'https' && uri.port == 443)
-        host = uri.host
-      else
-        host = "#{uri.host}:#{uri.port}"
-      end
+
+      # for further details, see: get_host_port in oc-chef-pedant/lib/pedant/utility.rb
+      host = "#{uri.host}:#{uri.port}"
 
       final_headers = standard_headers.
         merge(auth_headers).

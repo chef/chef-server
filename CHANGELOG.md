@@ -1,16 +1,27 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.26 -->
-## [14.0.26](https://github.com/chef/chef-server/tree/14.0.26) (2020-08-31)
+<!-- latest_release 14.0.37 -->
+## [14.0.37](https://github.com/chef/chef-server/tree/14.0.37) (2020-09-11)
 
 #### Merged Pull Requests
-- add version annotations to integration_test pipeline [#2090](https://github.com/chef/chef-server/pull/2090) ([christopher-snapp](https://github.com/christopher-snapp))
+- Remove RabbitMQ from erchef and omnibus cookbooks [#2103](https://github.com/chef/chef-server/pull/2103) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Remove RabbitMQ from erchef and omnibus cookbooks [#2103](https://github.com/chef/chef-server/pull/2103) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.37 -->
+- Standardize usage of webmachine dependency [#2094](https://github.com/chef/chef-server/pull/2094) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.36 -->
+- Display patent information for every chef-server-ctl command [#2104](https://github.com/chef/chef-server/pull/2104) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.35 -->
+- Add Erlcloud Dep and Requisite License Scout Fixes [#2095](https://github.com/chef/chef-server/pull/2095) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.34 -->
+- Harmonize Treatment of Host Header in Pedant [#2096](https://github.com/chef/chef-server/pull/2096) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.33 -->
+- Remove support for plugins/extensions including ha-aws [#2102](https://github.com/chef/chef-server/pull/2102) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.32 -->
+- Remove unreachable cookbook assets [#2101](https://github.com/chef/chef-server/pull/2101) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.31 -->
+- Fix fips errors in RHEL smoke tests [#2098](https://github.com/chef/chef-server/pull/2098) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.30 -->
+- oc-chef-pedant: remove wait_until_queues_are_empty [#2100](https://github.com/chef/chef-server/pull/2100) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.29 -->
+- Upgrade to OTP 22 [#2099](https://github.com/chef/chef-server/pull/2099) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.28 -->
+- Pin to a single version of chef client consistently in omnibus [#2035](https://github.com/chef/chef-server/pull/2035) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.27 -->
 - add version annotations to integration_test pipeline [#2090](https://github.com/chef/chef-server/pull/2090) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.26 -->
 - erchef: upgrade opscoderl_httpc [#2093](https://github.com/chef/chef-server/pull/2093) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.25 -->
 - Add habitat-test pipeline [#2091](https://github.com/chef/chef-server/pull/2091) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.24 -->

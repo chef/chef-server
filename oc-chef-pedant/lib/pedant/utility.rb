@@ -82,42 +82,11 @@ module Pedant
       return nil # Cannot find the fixture. Raise an error?
     end
 
-    # queues are not readable (e.g. there's no rabbitmq) OR empty
-    def self.queues_empty?(opts = {quiet: true})
-      ENV['PATH'] = "/opt/opscode/embedded/bin:#{ENV['PATH']}"
-      output = `/opt/opscode/embedded/service/rabbitmq/sbin/rabbitmqctl list_queues -p /chef | awk '{sum += $2} END {print sum}'`
-      status = $?
-      unless opts[:quiet]
-        STDERR.puts "Command exitstatus: #{status.exitstatus}"
-        STDERR.puts "Command output: #{output}"
-      end
-
-      if !status.success?
-        puts "Command failed, assuming rabbitmq not in use and returning true" unless opts[:quiet]
-        true
-      else
-        output.to_i == 0
-      end
-    end
-
-    def self.wait_until_queues_are_empty(i = 10, opts = {safety_sleep: true,
-                                                         quiet: true})
-      return if i <= 0
-      if queues_empty?
-        puts "RabbitMQ queue is empty (or failed to call rabbitmqctl list_queues)" unless opts[:quiet]
-        if opts[:safety_sleep]
-          # Why? It may be that expander has pulled the item from the
-          # queue but hasn't posted it to Solr. This is a very small
-          # window so we skip it in some places to avoid sleeping too
-          # often.
-          puts "Waiting an additional second" unless opts[:quiet]
-          sleep 1
-        end
-      else
-        puts "Waiting for RabbitMQ queue to be empty (#{i} tries remaining)" unless opts[:quiet]
-        sleep 1
-        wait_until_queues_are_empty(i - 1)
-      end
+    # Chef::ServerAPI always sets the Host header to HOSTNAME:PORT.
+    # We do the same thing here since the Version 4 AWS Signature
+    # scheme uses the Host header as part of the canonically signed content.
+    def self.get_host_port http, uri
+        http.get uri.request_uri, {"Host" => "#{uri.hostname}:#{uri.port}"}
     end
   end
 end

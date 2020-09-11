@@ -15,7 +15,7 @@
 #
 
 name "chef_fixie"
-default_version "0.4.0"
+default_version "master"
 
 license "Apache"
 license_file "https://github.com/chef/fixie/blob/master/LICENSE"

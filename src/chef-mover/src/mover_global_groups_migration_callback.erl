@@ -35,9 +35,9 @@ migration_action(Object, _AcctInfo) ->
     try
         moser_global_object_converter:insert_group(Guid, AuthzId, RequesterId, Data)
     catch
-        Exception:Reason ->
+        Exception:Reason:Stacktrace ->
 	    lager:error("global_groups_error guid: ~p Exception: ~p Reason: ~p Stacktrace: ~p ~n",
-			[Guid, Exception, Reason, erlang:get_stacktrace()])
+			[Guid, Exception, Reason, Stacktrace])
     end,
     ok.
 
