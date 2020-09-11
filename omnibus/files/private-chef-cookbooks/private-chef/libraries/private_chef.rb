@@ -117,11 +117,10 @@ module PrivateChef
   registered_extensions Mash.new
   ha Mash.new # For all other HA settings
   drbd Mash.new # For DRBD specific settings
+  deprecated_solr_indexing false
   # - end legacy config mashed -
 
   insecure_addon_compat true
-
-  deprecated_solr_indexing false
 
   class << self
     def from_file(filename)
@@ -270,7 +269,6 @@ module PrivateChef
       set_target_array_if_not_nil(results['private_chef'], 'folsom_graphite', PrivateChef['folsom_graphite'])
       set_target_array_if_not_nil(results['private_chef'], 'profiles', PrivateChef['profiles'])
       set_target_array_if_not_nil(results['private_chef'], 'insecure_addon_compat', PrivateChef['insecure_addon_compat'])
-      set_target_array_if_not_nil(results['private_chef'], 'deprecated_solr_indexing', PrivateChef['deprecated_solr_indexing'])
       results
     end
 

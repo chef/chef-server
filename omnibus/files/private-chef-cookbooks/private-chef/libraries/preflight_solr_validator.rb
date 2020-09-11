@@ -39,25 +39,13 @@ class SolrPreflightValidator < PreflightValidator
   end
 
   def run!
-    verify_consistent_reindex_sleep_times
-
     verify_one_search_provider
     verify_es_disabled_if_user_set_external_solr
     verify_unused_services_are_disabled_if_using_internal_es
 
     warn_unchanged_external_flag
-    warn_on_deprecated_solr
-    warn_deprecated_indexing_change
     verify_external_url
     verify_erchef_config
-  end
-
-  def verify_consistent_reindex_sleep_times
-    final_min = cs_erchef_attr['reindex_sleep_min_ms'] || node_erchef_attr['reindex_sleep_min_ms']
-    final_max = cs_erchef_attr['reindex_sleep_max_ms'] || node_erchef_attr['reindex_sleep_max_ms']
-    if final_min > final_max
-      fail_with err_SOLR001_failed_validation(final_min, final_max)
-    end
   end
 
   def verify_one_search_provider
@@ -145,17 +133,6 @@ class SolrPreflightValidator < PreflightValidator
     end
   end
 
-  def warn_deprecated_indexing_change
-    return if cs_solr_attr['external']
-    return if !previous_run
-
-    old_value = previous_run['deprecated_solr_indexing']
-    new_value = PrivateChef['deprecated_solr_indexing']
-    if old_value != new_value
-      ChefServer::Warnings.warn err_SOLR014_warn_validation
-    end
-  end
-
   def verify_external_url
     if cs_solr_attr['external'] & !cs_solr_attr['external_url']
       fail_with err_SOLR010_failed_validation
@@ -175,21 +152,6 @@ class SolrPreflightValidator < PreflightValidator
     else
       fail_with err_SOLR012_failed_validation
     end
-  end
-
-  def warn_on_deprecated_solr
-    ChefServer::Warnings.warn err_SOLR013_warn_validation if PrivateChef['deprecated_solr_indexing']
-  end
-
-  def err_SOLR001_failed_validation(final_min, final_max)
-    <<~EOM
-
-      SOLR001: opscode_erchef['reindex_sleep_min_ms'] (#{final_min}) is greater than
-               opscode_erchef['reindex_sleep_max_ms'] (#{final_max})
-
-               The maximum sleep time should be greater or equal to the minimum sleep
-               time.
-    EOM
   end
 
   def err_SOLR002_failed_validation
@@ -325,28 +287,6 @@ class SolrPreflightValidator < PreflightValidator
 
                solr
                elasticsearch
-    EOM
-  end
-
-  def err_SOLR013_warn_validation
-    <<~EOM
-      SOLR013: You have configured
-
-                  deprecated_solr_indexing true
-
-               Please note that solr indexing will be removed in a
-               future Chef Server release.
-
-               Please contact Chef Support for help moving to the
-               Elasticsearch indexing pipeline.
-    EOM
-  end
-
-  def err_SOLR014_warn_validation
-    <<~EOM
-       SOLR014: The value of deprecated_solr_indexing has been changed. Search
-                results against the new search index may be incorrect. Please
-                run `chef-server-ctl reindex --all` to ensure correct results.
     EOM
   end
 end
