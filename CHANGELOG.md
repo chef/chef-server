@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.36 -->
-## [14.0.36](https://github.com/chef/chef-server/tree/14.0.36) (2020-09-10)
+<!-- latest_release 14.0.37 -->
+## [14.0.37](https://github.com/chef/chef-server/tree/14.0.37) (2020-09-11)
 
 #### Merged Pull Requests
-- Standardize usage of webmachine dependency [#2094](https://github.com/chef/chef-server/pull/2094) ([lbakerchef](https://github.com/lbakerchef))
+- Remove RabbitMQ from erchef and omnibus cookbooks [#2103](https://github.com/chef/chef-server/pull/2103) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Remove RabbitMQ from erchef and omnibus cookbooks [#2103](https://github.com/chef/chef-server/pull/2103) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.37 -->
 - Standardize usage of webmachine dependency [#2094](https://github.com/chef/chef-server/pull/2094) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.36 -->
 - Display patent information for every chef-server-ctl command [#2104](https://github.com/chef/chef-server/pull/2104) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.35 -->
 - Add Erlcloud Dep and Requisite License Scout Fixes [#2095](https://github.com/chef/chef-server/pull/2095) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.34 -->
