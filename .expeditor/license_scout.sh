@@ -28,7 +28,6 @@ fi
 bundle_install_dirs=(
   chef-server-ctl
   oc-id
-  opscode-expander
 )
 
 for dir in "${bundle_install_dirs[@]}"; do

@@ -41,7 +41,6 @@ starting and after you complete the updates.
   sure we can build and run oc-id before merging to master.
   You'll need the libsqlite3-dev library if doing this on Ubuntu
 
-- src/opscode-expander/Gemfile.lock
 - src/oc\_erchef/apps/chef_objects/priv/depselector\_rb/Gemfile.lock
 - src/chef-server-ctl/Gemfile.lock
 - src/oc_bifrost/oc-bifrost-pedant/Gemfile.lock
@@ -53,8 +52,8 @@ Note:
 
 Note:
 - It's best to run
-    bundle install --binstubs --path=vendor/bundle
-    bundle update
+    - bundle install --binstubs --path=vendor/bundle
+    - bundle update
   in the appropriate directories to keep your main ruby install
   clean. However do not forget to clean those up before doing an
   omnibus build, as the files there (especially .so files) can cause
