@@ -17,6 +17,7 @@ locals {
     "ubuntu-14.04" = data.aws_ami.ubuntu_1404.id
     "ubuntu-16.04" = data.aws_ami.ubuntu_1604.id
     "ubuntu-18.04" = data.aws_ami.ubuntu_1804.id
+    "ubuntu-20.04" = data.aws_ami.ubuntu_2004.id
     sles-12        = data.aws_ami.sles_12.id
   }
 }
