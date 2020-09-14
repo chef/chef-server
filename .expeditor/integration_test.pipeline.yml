@@ -95,6 +95,22 @@ steps:
       executor:
         docker:
 
+  - label: ':terraform: standalone-upgrade-ipv4-ubuntu-20.04-from-12.17.15'
+    command: .expeditor/integration_test.pipeline.sh aws apply
+    artifact_paths:
+      - ./integration_test.log
+      - ./*capture_paths.tar.gz
+    env:
+      SCENARIO: omnibus-standalone-upgrade
+      PLATFORM: ubuntu-20.04
+      ENABLE_IPV6: false
+      INSTALL_VERSION: 12.17.15
+    expeditor:
+      accounts:
+        - aws/chef-cd
+      executor:
+        docker:
+
   - label: ':terraform: standalone-upgrade-ipv4-rhel-7'
     command: .expeditor/integration_test.pipeline.sh aws apply
     artifact_paths:
