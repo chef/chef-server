@@ -185,7 +185,7 @@ execute 'oc_id_schema' do
   environment('RAILS_ENV' => 'production',
               'VERSION' => `ls -1 /opt/opscode/embedded/service/oc_id/db/migrate | tail -n 1 | sed -e "s/_.*//g"`.chomp,
               'PATH' => '/opt/opscode/embedded/bin')
-  sensitive true
+  sensitive false
   only_if { is_data_master? }
 end
 
