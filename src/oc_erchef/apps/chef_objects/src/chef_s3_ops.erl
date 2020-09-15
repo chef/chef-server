@@ -118,8 +118,6 @@ delete_file(OrgId, AwsConfig, Bucket, Checksum) ->
             {error, Checksum}
     end.
 
-%-include_lib("erlcloud/include/erlcloud_aws.hrl").
-
 %% @doc See if the file represented by the given `Checksum' exists in S3.
 -spec check_file(OrgId :: object_id(),
                  AwsConfig :: mini_s3:config(),
