@@ -32,8 +32,8 @@
 %%===================================================================
 %% API functions
 %%===================================================================
-is_authorized(Req,  #context{auth_check_disabled=true} = Context) ->
-    {true, Req, Context};
+is_authorized(Req0, #context{auth_check_disabled=true} = Context) ->
+    {true, Req0, Context};
 is_authorized(Req0, #context{                        } = Context) ->
     Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
     {RequestId, Req1} = bksw_req:with_amz_request_id(Req0),
