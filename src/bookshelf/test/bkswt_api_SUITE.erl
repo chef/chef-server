@@ -116,11 +116,6 @@ start_bookshelf() ->
     %% see messages in common test output.
     lager_common_test_backend:bounce(error),
 
-_ = case application:ensure_all_started(ibrowse) of
-    {ok, _} ->
-        ok
-end,
-
     case application:ensure_all_started(bookshelf) of
         {ok, Apps} ->
             {ok, Apps};
@@ -184,10 +179,6 @@ init_per_testcase(upgrade_from_v0, Config) ->
     application:set_env(bookshelf, stream_download, true),
     {ok, Apps} = start_bookshelf(),
     bksw_conf:reset_dispatch(),
-    %% increase max sessions per server for ibrowse
-    application:set_env(ibrowse, default_max_sessions, 256),
-    %% disable request pipelining for ibrowse.
-    application:set_env(ibrowse, default_max_pipeline_size, 1),
     Port = 4321,
     S3State = mini_s3:new(AccessKeyID, SecretAccessKey,
                           lists:flatten(io_lib:format("http://127.0.0.1:~p",
@@ -202,7 +193,7 @@ init_per_testcase(Casename, Config0) ->
                true ->
                    application:start(sasl),
                    application:ensure_all_started(mini_s3),
-                   [xmerl,mochiweb,webmachine,erlsom,ibrowse,mini_s3,envy,epgsql,pooler,sqerl,
+                   [xmerl,mochiweb,webmachine,erlsom,mini_s3,envy,epgsql,pooler,sqerl,
                     opscoderl_wm,iso8601,runtime_tools,tools,bookshelf];
                false ->
                    {ok, Apps0} = start_bookshelf(),
@@ -211,11 +202,6 @@ init_per_testcase(Casename, Config0) ->
                    bksw_conf:reset_dispatch(),
                    Apps0
            end,
-
-    %% increase max sessions per server for ibrowse
-    application:set_env(ibrowse, default_max_sessions, 256),
-    %% disable request pipelining for ibrowse.
-    application:set_env(ibrowse, default_max_pipeline_size, 1),
 
     Port = bksw_conf:port(),
     Ip = bksw_conf:ip(),
@@ -560,9 +546,8 @@ sec_fail(Config) when is_list(Config) ->
     ?assertError({aws_error, {http_error, 403, _, _}},
                  mini_s3:create_bucket(Bucket, public_read_write, none, BogusS3Conf)),
     %% also verify that unsigned URL requests don't crash
-    {ok, Status, _H, Body} = ibrowse:send_req("http://127.0.0.1:4321/foobar", [],
-                                              get),
-    ?assertEqual("403", Status),
+    {ok, {{_Version, Status, _ReasonPhrase}, _Headers, Body}} = httpc:request("http://127.0.0.1:4321/foobar"),
+    ?assertEqual(403, Status),
     ?assert(string:str(Body, "<Message>Access Denied</Message>") > 0).
 
 signed_url(doc) ->
