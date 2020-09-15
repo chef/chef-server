@@ -26,8 +26,6 @@
 -module(chef_s3).
 
 -include("chef_types.hrl").
-% is this needed?
-%-include_lib("erlcloud/include/erlcloud_aws.hrl").
 
 -export([
          check_checksums/2,
