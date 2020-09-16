@@ -1,5 +1,6 @@
 {"1.1.0",
-[{<<"bcrypt">>,
+[{<<"base16">>,{pkg,<<"base16">>,<<"1.0.0">>},1},
+ {<<"bcrypt">>,
   {git,"git://github.com/abhay/erlang-bcrypt.git",
        {ref,"f6ff677ac73872a3ce477fda5ab4143cfc3a5f91"}},
   0},
@@ -31,6 +32,7 @@
   {git,"git://github.com/chef/efast_xs.git",
        {ref,"c2a6b925ed94ab8a28ff49375782834033919190"}},
   0},
+ {<<"eini">>,{pkg,<<"eini">>,<<"1.2.6">>},1},
  {<<"ej">>,
   {git,"git://github.com/chef/ej.git",
        {ref,"85bbf475ec533447d244be50f7f450f41cbc1adf"}},
@@ -47,6 +49,10 @@
   {git,"git://github.com/chef/epgsql-1.git",
        {ref,"34b4182f0e21f9189ddd7b2e290f01a9e7d93bf1"}},
   1},
+ {<<"erlcloud">>,
+  {git,"git://github.com/chef/erlcloud.git",
+       {ref,"f6f8d10c7efd7dbb97f3fa3e243bf9db2064b677"}},
+  0},
  {<<"erlware_commons">>,
   {git,"git://github.com/chef/erlware_commons.git",
        {ref,"20c611d8c457edfc84a915cf1026f22980a83e00"}},
@@ -68,10 +74,12 @@
   {git,"git://github.com/davisp/jiffy.git",
        {ref,"051a74338c089c39f09532188bc82cf1adedbdc8"}},
   0},
+ {<<"jsx">>,{pkg,<<"jsx">>,<<"2.9.0">>},1},
  {<<"lager">>,
   {git,"git://github.com/erlang-lager/lager.git",
        {ref,"f26a8ea0f4c2ed6506a54e0b9890edd8148b9500"}},
   0},
+ {<<"lhttpc">>,{pkg,<<"lhttpc">>,<<"1.6.2">>},1},
  {<<"meck">>,
   {git,"git://github.com/eproxus/meck.git",
        {ref,"558e925b48ce257b12e381080c851dc49c87d7bb"}},
@@ -143,6 +151,10 @@
   1}]}.
 [
 {pkg_hash,[
+ {<<"base16">>, <<"283644E2B21BD5915ACB7178BED7851FB07C6E5749B8FAD68A53C501092176D9">>},
+ {<<"eini">>, <<"DFFA48476FD89FB6E41CEEA0ADFA1BC6E7862CCD6584417442F8BB37E5D34715">>},
  {<<"goldrush">>, <<"F06E5D5F1277DA5C413E84D5A2924174182FB108DABB39D5EC548B27424CD106">>},
+ {<<"jsx">>, <<"D2F6E5F069C00266CAD52FB15D87C428579EA4D7D73A33669E12679E203329DD">>},
+ {<<"lhttpc">>, <<"044F16F0018C7AA7E945E9E9406C7F6035E0B8BC08BF77B00C78CE260E1071E3">>},
  {<<"recon">>, <<"2F7FCBEC2C35034BADE2F9717F77059DC54EB4E929A3049CA7BA6775C0BD66CD">>}]}
 ].
