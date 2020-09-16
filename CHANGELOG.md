@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.40 -->
-## [14.0.40](https://github.com/chef/chef-server/tree/14.0.40) (2020-09-16)
+<!-- latest_release 14.0.41 -->
+## [14.0.41](https://github.com/chef/chef-server/tree/14.0.41) (2020-09-16)
 
 #### Merged Pull Requests
-- cookbooks: remove deprecrated_solr_indexing [#2107](https://github.com/chef/chef-server/pull/2107) ([stevendanna](https://github.com/stevendanna))
+- erchef,bookshelf: update erlcloud hashes [#2117](https://github.com/chef/chef-server/pull/2117) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- erchef,bookshelf: update erlcloud hashes [#2117](https://github.com/chef/chef-server/pull/2117) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.41 -->
 - cookbooks: remove deprecrated_solr_indexing [#2107](https://github.com/chef/chef-server/pull/2107) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.40 -->
 - upgrades: Remove unsupported partybus migrations [#2108](https://github.com/chef/chef-server/pull/2108) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.39 -->
 - Add erlcloud library to rebar.lock files [#2114](https://github.com/chef/chef-server/pull/2114) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.38 -->
