@@ -1,5 +1,5 @@
 #
-# Copyright:: 2017-2018 Chef Software, Inc.
+# Copyright:: 2020 Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,13 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-require_relative '../../libraries/preflight_solr_validator.rb'
+require_relative '../../libraries/preflight_indexing_validator.rb'
 require_relative '../../libraries/private_chef.rb'
 require_relative '../../libraries/helper.rb'
 
-describe SolrPreflightValidator do
-  let(:solr_preflight) do
-    s = SolrPreflightValidator.new('private_chef' => {
+describe IndexingPreflightValidator do
+  let(:indexing_preflight) do
+    s = IndexingPreflightValidator.new('private_chef' => {
       'opscode-erchef' => {
         'reindex_sleep_min_ms' => 500,
         'reindex_sleep_max_ms' => 2000,
@@ -31,10 +31,6 @@ describe SolrPreflightValidator do
 
   before(:each) do
     allow(PrivateChef).to receive(:[]).with('postgresql').and_return({})
-    allow(PrivateChef).to receive(:[]).with('rabbitmq').and_return({})
-    allow(PrivateChef).to receive(:[]).with('opscode_solr4').and_return({})
-    allow(PrivateChef).to receive(:[]).with('elasticsearch').and_return({})
-    allow(PrivateChef).to receive(:[]).with('opscode_expander').and_return({})
   end
 
   context 'when min and max sleep time has been given in the config' do
@@ -50,7 +46,7 @@ describe SolrPreflightValidator do
       let(:max_sleep_time) { 2 }
 
       it 'raises an error' do
-        expect(solr_preflight.verify_consistent_reindex_sleep_times).to eq(:i_failed)
+        expect(indexing_preflight.verify_consistent_reindex_sleep_times).to eq(:i_failed)
       end
     end
   end
@@ -66,7 +62,7 @@ describe SolrPreflightValidator do
       let(:min_sleep_time) { 2001 }
 
       it 'raises an error' do
-        expect(solr_preflight.verify_consistent_reindex_sleep_times).to eq(:i_failed)
+        expect(indexing_preflight.verify_consistent_reindex_sleep_times).to eq(:i_failed)
       end
     end
   end
@@ -82,7 +78,7 @@ describe SolrPreflightValidator do
       let(:max_sleep_time) { 499 }
 
       it 'raises an error' do
-        expect(solr_preflight.verify_consistent_reindex_sleep_times).to eq(:i_failed)
+        expect(indexing_preflight.verify_consistent_reindex_sleep_times).to eq(:i_failed)
       end
     end
   end

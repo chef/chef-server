@@ -209,8 +209,6 @@ class OmnibusHelper
   def solr_url
     if node['private_chef']['opscode-solr4']['external']
       node['private_chef']['opscode-solr4']['external_url']
-    elsif node['private_chef']['deprecated_solr_indexing']
-      "http://#{vip_for_uri('opscode-solr4')}:#{node['private_chef']['opscode-solr4']['port']}/solr"
     else
       "http://#{vip_for_uri('elasticsearch')}:#{node['private_chef']['elasticsearch']['port']}"
     end
