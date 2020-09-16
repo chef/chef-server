@@ -1,7 +1,4 @@
 Partybus.configure do |c|
-  c.database_connection_string    = "<%= @connection_string %>"
-  c.database_unix_user            = "<%= @as_user %>"
-  c.database_migration_directory  = "/opt/opscode/embedded/service/chef-sql-schema/db/migrate"
   c.partybus_migration_directory  = "/opt/opscode/embedded/upgrades"
   c.migration_state_file          = "/var/opt/opscode/upgrades/migration-level"
   c.private_chef_role             = "<%= @node_role %>"

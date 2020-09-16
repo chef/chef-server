@@ -44,9 +44,7 @@ template partybus_config do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode '0644'
-  variables(connection_string: 'postgres:/opscode_chef',
-            as_user: node['private_chef']['postgresql']['username'],
-            node_role: node_role,
+  variables(node_role: node_role,
             db_service_name: db_service_name,
             is_data_master: is_data_master?,
             bootstrap_server: is_bootstrap_server?)

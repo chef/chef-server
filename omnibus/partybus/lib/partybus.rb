@@ -13,9 +13,6 @@ module Partybus
     SECRETS_FILE = "/etc/opscode/private-chef-secrets.json"
     RUNNING_CONFIG_FILE = "/etc/opscode/chef-server-running.json"
 
-    attr_accessor :database_connection_string
-    attr_accessor :database_unix_user
-    attr_accessor :database_migration_directory
     attr_accessor :database_service_name
     attr_accessor :partybus_migration_directory
     attr_accessor :migration_state_file

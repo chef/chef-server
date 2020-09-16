@@ -31,7 +31,6 @@ Gem::Specification.new do |spec|
   # investigate what it would take to upgrade this...
   spec.add_runtime_dependency "pg", "~> 0.17", ">= 0.17.1"
 
-  spec.add_runtime_dependency "sequel"
   spec.add_runtime_dependency "redis"
   # TODO
   # chef-server-ctl server-admins commands dep, will be removed in server-admins V2

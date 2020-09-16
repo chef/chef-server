@@ -3,7 +3,6 @@
 # All Rights Reserved
 #
 
-require_relative 'open_source_chef12_upgrade'
 require 'optparse'
 require 'ostruct'
 
