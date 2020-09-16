@@ -51,7 +51,7 @@
   1},
  {<<"erlcloud">>,
   {git,"git://github.com/chef/erlcloud.git",
-       {ref,"f6f8d10c7efd7dbb97f3fa3e243bf9db2064b677"}},
+       {ref,"83f4291c3ad6e72e237e49fb42b301236a997f08"}},
   0},
  {<<"erlware_commons">>,
   {git,"git://github.com/chef/erlware_commons.git",
