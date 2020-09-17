@@ -41,7 +41,6 @@ This repository contains the core services that make up the Chef Server.
     |-- oc_bifrost: Chef Server's authorization service
     |-- oc_erchef: The core REST API server
     |-- chef-server-ctl: The Chef Server's command line management utility
-    `-- opscode-expander: a service that transforms Chef data before sending it to Solr for indexing
 ```
 
 ## Working on the Chef Server

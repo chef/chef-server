@@ -84,10 +84,8 @@ else
   if PrivateChef['opscode_solr4']['external']
     node.default['private_chef']['elasticsearch']['enable'] = false
     # TODO(ssd) 2020-09-11: We don't think anyone was actually using
-    # external solr and thus this conditional is probably unnecessary.
+    # external solr and thus this is probably unnecessary.
     node.default['private_chef']['opscode-erchef']['search_provider'] = 'solr'
-  else
-    node.default['private_chef']['opscode-erchef']['search_provider'] = 'elasticsearch'
   end
 
   # Bail out if something is wrong in our configuration.

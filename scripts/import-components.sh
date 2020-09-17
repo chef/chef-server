@@ -5,7 +5,7 @@
 #
 set -e
 
-PROJECTS="bookshelf chef-mover chef-server-bootstrap oc-chef-pedant oc-id oc_bifrost oc_erchef opscode-expander"
+PROJECTS="bookshelf chef-mover chef-server-bootstrap oc-chef-pedant oc-id oc_bifrost oc_erchef"
 
 # Enable dotglob and extglob to enable generating git mv commands more
 # easily

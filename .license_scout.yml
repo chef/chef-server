@@ -10,7 +10,6 @@ directories:
   - ./src/oc_erchef
   - ./src/oc-id
   - ./src/openresty-noroot
-  - ./src/opscode-expander
 
 habitat:
   channel_for_origin:

@@ -14,48 +14,25 @@ search index.
 This section describes how data gets from erchef to the search index.
 For how we query this data later, see Search Queries.
 
-Chef Server supports two backends for the search index:
+Chef Server 14 uses Elasticsearch as its search index. Previous
+versions of Chef Server supported both Elasticsearch and Solr.
 
-- Solr, and
-- Elasticsearch
+Chef Server 14 has 2 different "search_queue_mode"s:
 
-Solr is the default and is shipped inside the Chef Server package.. It
-has been supported for longer and is more battle tested. ElasticSearch
-is the default for Chef Backend because of its easy-to-use replication
-clustering.
-
-Chef Server has 3 different "search_queue_mode"s:
-
-- rabbitmq (Solr-only)
-- batch (Solr or ES)
-- inline (Solr or ES)
+- batch
+- inline
 
 This configurable controls how the chef_index module sends requests to
-the search index. The default is `rabbitmq`.
+the search index. The default is `batch`.
 
-### Rabbitmq
-
-```
-  +--------+    +----------+    +------------------+    +------+
-  | erchef | -> | rabbitmq | <- | opscode-expander | -> | Solr |
-  +--------+    +----------+    +------------------+    +------+
-```
-
-In the rabbitmq search_queue_mode, erchef places the object to be
-indexed on a rabbitmq queue. It them moves forward with the request
-and returns a response to the user.  Another service named
-`opscode-expander` reads the object from the queue, expands it (see
-Document Expansion for details), and posts it to solr. Note that a
-failure to write to the search index will not trigger a failure of the
-API request that wrote the data since it happens asynchronously via a
-queue. However, a failure to place the item on rabbitmq will cause a
-500 error.
+Previous versions of Chef Server used a RabbitMQ-based search
+pipeline.
 
 ### Batch
 ```
-  +--------+    +------+
-  | erchef | -> | Solr |
-  +--------+    +------+
+  +--------+    +-------+
+  | erchef | -> | Index |
+  +--------+    +-------+
 
   Inside Erchef:
 
@@ -70,9 +47,8 @@ queue. However, a failure to place the item on rabbitmq will cause a
                            +------------------+
 ```
 
-In `batch` mode, documents are sent directly from erchef to Solr or
-ElasticSearch.  This is the default mode used when a user is
-configured to use Chef Backend.  Inside erchef, it works as follows:
+In `batch` mode, documents are sent directly from erchef to
+ElasticSearch.  Inside erchef, it works as follows:
 
 1. Documents are expanded by the process handling the request (via
    code in chef_index_expand).
@@ -91,16 +67,13 @@ configured to use Chef Backend.  Inside erchef, it works as follows:
    pool and then sends the response to all waiting webmachine request
    handler processes whose request are in its batch.
 
-Thus, unlike in `rabbitmq` mode, the request to the search index
-happens synchronously and the API request will fail if the search
-index update fails.
 
 ### Inline
 
 ```
-  +--------+    +------+
-  | erchef | -> | Solr |
-  +--------+    +------+
+  +--------+    +-------+
+  | erchef | -> | Index |
+  +--------+    +-------+
 
   Inside Erchef:
 
@@ -110,7 +83,7 @@ index update fails.
   +-------------------+
 ```
 
-In `inline` mode, documents are sent directly from erchef to Solr or
+In `inline` mode, documents are sent directly from erchef to
 ElasticSearch. This mode can be useful for debugging. It is fairly
 straightforward:
 
@@ -121,10 +94,30 @@ straightforward:
    (via the search index HTTP connection pool) and waits for it to
    return.
 
-Thus, unlike in `rabbitmq` mode, the request to the search index
-happens synchronously and the API request will fail if the search
-index update fails.  Unlike `batch`, each write request to erchef will
-generate an immediate inline request to the search index.
+Unlike `batch`, each write request to erchef will generate an
+immediate inline request to the search index.
+
+### Rabbitmq
+
+```
+  +--------+    +----------+    +------------------+    +------+
+  | erchef | -> | rabbitmq | <- | opscode-expander | -> | Solr |
+  +--------+    +----------+    +------------------+    +------+
+```
+
+Previous versions of Chef Server supported a RabbitMQ based indexing
+pipeline.  This was removed in Chef Server 14.
+
+In the rabbitmq search_queue_mode, erchef places the object to be
+indexed on a rabbitmq queue. It them moves forward with the request
+and returns a response to the user.  Another service named
+`opscode-expander` reads the object from the queue, expands it (see
+Document Expansion for details), and posts it to solr. Note that a
+failure to write to the search index will not trigger a failure of the
+API request that wrote the data since it happens asynchronously via a
+queue. However, a failure to place the item on rabbitmq will cause a
+500 error.
+
 
 ### Document Expansion
 
@@ -138,9 +131,10 @@ some historical details on this design, see:
 https://blog.chef.io/2012/01/20/post-hoc-index-design-from-regex-to-peg/
 
 The result of the expansion is that the JSON body of the object is
-flattened into a single field in the document we post to solr.  This
-field is structured in such a way that we can later search against
-it to produce the illusion of having many separate fields.
+flattened into a single field in the document we post to the search
+index.  This field is structured in such a way that we can later
+search against it to produce the illusion of having many separate
+fields.
 
 An example: Suppose we have a node object with a body like:
 

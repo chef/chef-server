@@ -173,19 +173,6 @@ default['private_chef']['opscode-solr4']['elasticsearch_shard_count'] = 5
 default['private_chef']['opscode-solr4']['elasticsearch_replica_count'] = 1
 
 ####
-# Chef Expander
-####
-default['private_chef']['opscode-expander']['enable'] = false
-default['private_chef']['opscode-expander']['dir'] = '/var/opt/opscode/opscode-expander'
-default['private_chef']['opscode-expander']['log_directory'] = '/var/log/opscode/opscode-expander'
-default['private_chef']['opscode-expander']['log_rotation']['file_maxbytes'] = 104857600
-default['private_chef']['opscode-expander']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['opscode-expander']['consumer_id'] = 'default'
-default['private_chef']['opscode-expander']['nodes'] = 2
-default['private_chef']['opscode-expander']['max_retries'] = 1
-default['private_chef']['opscode-expander']['retry_wait'] = 1
-
-####
 # Elasticsearch
 ####
 var_base = '/var/opt/opscode'
@@ -277,11 +264,6 @@ default['private_chef']['opscode-erchef']['enable_request_logging'] = true
 
 #
 # Reindex configurables
-#
-# NOTE: The semantics of reindexing are very different between
-# ElasticSearch and Solr. Solr reindexing is only placing an item on a
-# queue, thus it is unlikely to fail at the erchef level.  Rather, you
-# will want to tune opscode-expander.
 #
 # These configuration items are consulted during reindex requests.
 # Such requests originate from users running chef-server-ctl reindex.
