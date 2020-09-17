@@ -51,7 +51,7 @@
   1},
  {<<"erlcloud">>,
   {git,"git://github.com/chef/erlcloud.git",
-       {branch,"lbaker/presigned"}},
+       {branch,"lbaker/presigned-headers"}},
   0},
  {<<"erlware_commons">>,
   {git,"git://github.com/chef/erlware_commons.git",
