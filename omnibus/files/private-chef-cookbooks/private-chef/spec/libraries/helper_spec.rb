@@ -85,6 +85,7 @@ describe OmnibusHelper do
     let(:node) do
       {
         'private_chef' => {
+          'elasticsearch' => {},
           'opscode-solr4' => {
             'external' => external,
             'external_url' => external_url,

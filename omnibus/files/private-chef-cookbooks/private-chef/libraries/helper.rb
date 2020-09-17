@@ -206,9 +206,19 @@ class OmnibusHelper
     }
   end
 
+  def external_elasticsearch?
+    if node['private_chef']['elasticsearch'].key?('external')
+      node['private_chef']['elasticsearch']['external']
+    elsif node['private_chef']['opscode-solr4'].key?('external')
+      node['private_chef']['opscode-solr4']['external']
+    else
+      false
+    end
+  end
+
   def solr_url
-    if node['private_chef']['opscode-solr4']['external']
-      node['private_chef']['opscode-solr4']['external_url']
+    if external_elasticsearch?
+      node['private_chef']['elasticsearch']['external_url'] || node['private_chef']['opscode-solr4']['external_url']
     else
       "http://#{vip_for_uri('elasticsearch')}:#{node['private_chef']['elasticsearch']['port']}"
     end

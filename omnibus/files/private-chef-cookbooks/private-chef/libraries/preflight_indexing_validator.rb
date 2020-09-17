@@ -14,24 +14,35 @@
 # limitations under the License.
 
 require_relative './preflight_checks.rb'
+require_relative './elasticsearch.rb'
 
 class IndexingPreflightValidator < PreflightValidator
   # The cs_*attr variables hold the user-defined configuration
-  attr_reader :cs_erchef_attr
+  attr_reader :cs_elasticsearch_attr, :cs_solr_attr, :cs_erchef_attr
 
   # The node_*attr variables hold the default configuration
-  attr_reader :node_erchef_attr
+  attr_reader :node_elasticsearch_attr, :node_erchef_attr
 
   def initialize(node)
     super
-
+    @cs_elasticsearch_attr = PrivateChef['elasticsearch']
+    @cs_solr_attr = PrivateChef['opscode_solr4']
     @cs_erchef_attr = PrivateChef['opscode_erchef']
+
+    @node_elasticsearch_attr = node['private_chef']['elasticsearch']
     @node_erchef_attr = node['private_chef']['opscode-erchef']
   end
 
   def run!
+    warn_unchanged_external_flag
+
+    verify_system_memory
+    verify_heap_size
     verify_consistent_reindex_sleep_times
     verify_no_deprecated_indexing_options
+    verify_es_disabled_if_user_set_external_solr
+    verify_external_url
+    verify_erchef_config
   end
 
   def verify_consistent_reindex_sleep_times
@@ -44,6 +55,107 @@ class IndexingPreflightValidator < PreflightValidator
 
   def verify_no_deprecated_indexing_options
     fail_with err_INDEX002_failed_validation if PrivateChef['deprecated_solr_indexing']
+  end
+
+  # checks that system has atleast 4GB memory
+  def verify_system_memory
+    system_memory_mb = Elasticsearch.node_memory_in_units(node, :total, :mb)
+    required_memory_mb = 3900 # 4 GB less some headroom
+    if system_memory_mb < required_memory_mb
+      fail_with err_INDEX003_insufficient_system_memory(system_memory_mb, required_memory_mb)
+    end
+  end
+
+  # checks that system specifys a heap size between 1GB and 26GB
+  def verify_heap_size
+    es_heap_size = cs_elasticsearch_attr['heap_size'] || node_elasticsearch_attr['heap_size']
+    solr_heap_size = cs_solr_attr['heap_size'] || 0
+
+    using_sorl = false
+    heap_size = if solr_heap_size > es_heap_size
+                  using_solr = true
+                  solr_heap_size
+                else
+                  es_heap_size
+                end
+
+    min_heap = 1024
+    # https://www.elastic.co/guide/en/elasticsearch/reference/current/heap-size.html
+    max_heap = 26 * 1024
+
+    if heap_size < min_heap || heap_size > max_heap
+      fail_with err_INDEX004_invalid_elasticsearch_heap_size(using_solr)
+    end
+  end
+
+  # If an external search provider was explicitly enabled by the user,
+  # then we expect that both internal search services should be
+  # disabled.
+  def verify_es_disabled_if_user_set_external_solr
+    if external? && elasticsearch_enabled?
+      fail_with err_INDEX005_should_dsiable_es
+    end
+  end
+
+  def external?
+    cs_elasticsearch_attr['external'] || cs_solr_attr['external']
+  end
+
+  def elasticsearch_enabled?
+    return false if PrivateChef['use_chef_backend']
+
+    if cs_elasticsearch_attr['enable'].nil?
+      node_elasticsearch_attr['enable']
+    else
+      cs_elasticsearch_attr['enable']
+    end
+  end
+
+  def warn_unchanged_external_flag
+    if OmnibusHelper.has_been_bootstrapped? && backend? && previous_run
+      # ES configuration is preferred everywhere so we check that first
+      previous_external_setting = if previous_run['elasticsearch'].key?('external')
+                                    !!previous_run['elasticsearch']['external']
+                                  elsif previous_run['opscode-solr4'].key?('external')
+                                    !!previous_run['opscode-solr4']['external']
+                                  else
+                                    # The default external setting has
+                                    # always been a falsy value except
+                                    # for a couple of commits that
+                                    # never went out.
+                                    false
+                                  end
+
+      current_external_setting = if cs_elasticsearch_attr.key?('external')
+                                   cs_elasticsearch_attr['external']
+                                 elsif cs_solr_attr.key?('external')
+                                   cs_solr_attr['external']
+                                 else
+                                   false
+                                 end
+
+      if current_external_setting != previous_external_setting
+        ChefServer::Warnings.warn err_INDEX006_external_changed
+      end
+    end
+  end
+
+  def verify_external_url
+    if cs_elasticsearch_attr['external'] && !cs_elasticsearch_attr['external_url']
+      fail_with err_INDEX007_bad_external_config(false)
+    end
+    if cs_solr_attr['external'] && !cs_solr_attr['external_url']
+      fail_with err_INDEX007_bad_external_config(true)
+    end
+  end
+
+  def verify_erchef_config
+    provider = @cs_erchef_attr['search_provider']
+    return true if provider.nil? # default provider
+
+    unless %w(batch inline).include?(@cs_erchef_attr['search_queue_mode'])
+      fail_with err_INDEX008_bad_queue_mode
+    end
   end
 
   def err_INDEX001_failed_validation(final_min, final_max)
@@ -59,14 +171,130 @@ class IndexingPreflightValidator < PreflightValidator
 
   def err_INDEX002_failed_validation
     <<~EOM
-      INDEX001: You have configured
+      INDEX002: Deprecated Solr Indexing
 
-                  deprecated_solr_indexing true
+                You have configured
 
-               The Solr 4-based indexing pipeline is no longer supported.
+                    deprecated_solr_indexing true
 
-               Please contact Chef Support for help moving to the
-               Elasticsearch indexing pipeline.
+                The Solr 4-based indexing pipeline is no longer supported.
+
+                Please contact Chef Support for help moving to the
+                Elasticsearch indexing pipeline.
+    EOM
+  end
+
+  def err_INDEX003_insufficient_system_memory(system_memory, required_memory)
+    <<~EOM
+
+      INDEX003: Insufficient system memory
+
+                System has #{system_memory} MB of memory,
+                but #{required_memory} MB is required.
+
+    EOM
+  end
+
+  def err_INDEX004_invalid_elasticsearch_heap_size(using_solr)
+    if using_solr
+      <<~EOM
+        INDEX004: Invalid elasticsearch heap size
+
+                      opscode_solr4['heap_size'] is #{heap_size}MB
+
+                  This value from the Solr search index configuration cannot
+                  be safely used for the new Elasticsearch search index.
+
+                  The recommended heap_size is between 1GB and 26GB. Refer to
+                  https://www.elastic.co/guide/en/elasticsearch/reference/6.8/heap-size.html
+                  for more information.
+
+                  Consider removing this configuration and adding a new value
+                  for
+                        elasticsearch['heap_size']
+
+                  within the allowed range to #{CHEF_SERVER_CONFIG_FILE}.
+
+      EOM
+    else
+      <<~EOM
+        INDEX004: Invalid elasticsearch heap size
+
+                      elasticsearch['heap_size'] is #{heap_size}MB
+
+                  The recommended heap_size is between 1GB and 26GB. Refer to
+                  https://www.elastic.co/guide/en/elasticsearch/reference/6.8/heap-size.html
+                  for more information.
+      EOM
+    end
+  end
+
+  def err_INDEX005_should_disable_es
+    <<~EOM
+
+      INDEX005: The #{CHEF_SERVER_NAME} is configured to use an external search
+                index but the internal Elasticsearch is still enabled. This is
+                an unsupported configuration.
+
+                To disable the internal Elasticsearch, add the following to #{CHEF_SERVER_CONFIG_FILE}:
+
+                    elasticsearch['enable'] = false
+
+                To use the internal Elasticsearch, consider removing the configuration
+                entry for opscode_solr4['external'].
+
+     EOM
+  end
+
+  def err_INDEX006_external_changed
+    <<~EOM
+
+      INDEX006: The value of opscode_solr4['external'] or elasticsearch['external'] has been changed. Search
+                results against the new external search index may be incorrect. Please
+                run `chef-server-ctl reindex --all` to ensure correct results
+
+    EOM
+  end
+
+  def err_INDEX007_bad_external_config(was_solr)
+    if was_solr
+      <<~EOM
+
+        INDEX007: No external url specified for Elasticsearch depsite opscode_solr4['external']
+                  being set to true.
+
+                  To use an external Elasticsearch instance, please set:
+
+                      elasticsearch['external'] = true
+                      elasticsearch['external_url'] = YOUR_ELASTICSEARCH_URL
+
+                  in #{CHEF_SERVER_CONFIG_FILE}
+       EOM
+    else
+      <<~EOM
+
+        INDEX007: No external url specified for Elasticsearch depsite elasticsearch['external']
+                  being set to true.
+
+                  To use an external Elasticsearch instance, please set:
+
+                      elasticsearch['external'] = true
+                      elasticsearch['external_url'] = YOUR_ELASTICSEARCH_URL
+
+                  in #{CHEF_SERVER_CONFIG_FILE}
+      EOM
+    end
+  end
+
+  def err_INDEX008_bad_queue_mode
+    <<~EOM
+
+      INDEX008: The elasticsearch provider is only supported by the batch or inline
+                queue modes. To use the elasticsearch provider, please also set:
+
+                    opscode_erchef['search_queue_mode'] = 'batch'
+
+                in #{CHEF_SERVER_CONFIG_FILE}
     EOM
   end
 end

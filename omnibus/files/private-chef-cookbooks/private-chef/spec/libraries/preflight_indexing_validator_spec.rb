@@ -30,6 +30,8 @@ describe IndexingPreflightValidator do
   end
 
   before(:each) do
+    allow(PrivateChef).to receive(:[]).with('elasticsearch').and_return({})
+    allow(PrivateChef).to receive(:[]).with('opscode_solr4').and_return({})
     allow(PrivateChef).to receive(:[]).with('postgresql').and_return({})
   end
 
