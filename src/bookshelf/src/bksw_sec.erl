@@ -21,7 +21,15 @@
 
 -module(bksw_sec).
 
--export([is_authorized/2]).
+-export([encode_access_denied_error_response/3]).
+-export([get_check_date/3                     ]).
+-export([get_signed_headers/3                 ]).
+-export([is_authorized/2                      ]).
+-export([parse_authorization/1                ]).
+-export([parse_x_amz_credential/1             ]).
+-export([parse_x_amz_signed_headers/1         ]).
+-export([process_headers/1                    ]).
+
 -ifdef(TEST).
 -compile([export_all, nowarn_export_all]).
 -endif.
