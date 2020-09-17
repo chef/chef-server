@@ -136,8 +136,8 @@ verbose_user(#chef_user{username = UserName, email = EMail, serialized_object = 
     EJ = chef_json:decode(SerializedObject),
     {UserName, {[ {<<"email">>, EMail},
                   {<<"first_name">>, ej:get({<<"first_name">>}, EJ, "")},
-                  {<<"last_name">>, ej:get({<<"last_name">>}, EJ, "")} ]},
-                  {<<"display_name">>, ej:get({<<"display_name">>}, EJ, "")} }.
+                  {<<"last_name">>, ej:get({<<"last_name">>}, EJ, "")},
+                  {<<"display_name">>, ej:get({<<"display_name">>}, EJ, "")} ]} }.
 
 conflict_message(_Name) ->
     {[{<<"error">>, [<<"Username or email address already in use.">>]}]}.
