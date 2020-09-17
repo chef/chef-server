@@ -19,6 +19,7 @@
 -include_lib("mixer/include/mixer.hrl").
 -mixin([{bksw_wm_base, [init/1,
                         is_authorized/2,
+                        malformed_request/2,
                         finish_request/2,
                         service_available/2]}]).
 
