@@ -58,7 +58,7 @@ is_authorized(Req0, #context{                        } = Context) ->
             case parse_authorization(IncomingAuth) of
                 {ok, [Credential, SignedHeaderKeysString, IncomingSignature]} ->
                     XAmzDate = wrq:get_req_header("x-amz-date", Req1),
-                    auth(RequestId, Req1, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers, authorization_header);
+                    auth(RequestId, Req1, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers, auth_header);
                 _ ->
                     encode_access_denied_error_response(RequestId, Req1, Context)
             end
@@ -83,11 +83,11 @@ is_authorized(Req0, #context{                        } = Context) ->
 %%   (ParseAuth = parse_authorization(IncomingAuth)) /= err orelse throw({RequestId, Req0, Context}),
 %%   [Credential, SignedHeaderKeysString, IncomingSignature] = ParseAuth,
 %%   XAmzDate = wrq:get_req_header("x-amz-date", Req0),
-%%   common_auth(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header)
+%%   common_auth(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, auth_header)
 %    case parse_authorization(IncomingAuth) of
 %        {ok, [Credential, SignedHeaderKeysString, IncomingSignature]} ->
 %            XAmzDate = wrq:get_req_header("x-amz-date", Req0),
-%            common_auth(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, authorization_header);
+%            common_auth(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, auth_header);
 %        _ ->
 %            encode_access_denied_error_response(RequestId, Req0, Context)
 %    end.
@@ -238,7 +238,7 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
                         [_, AltComparisonSig] = string:split(AltComparisonURL, "&X-Amz-Signature=", all),
                         AltComparisonSig
                 end;
-            authorization_header ->
+            auth_header ->
 
                 ComparisonURL = "not-applicable",
                 QueryParams = wrq:req_qs(Req0),
