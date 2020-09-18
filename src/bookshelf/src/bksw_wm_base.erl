@@ -68,15 +68,11 @@ malformed_request(Req0, Context) ->
             _         -> ok
         end,
 
-        % CODE REVIEW: Used in obtaining CredentialScopeDate, which is used for Date, which is used in both verification types
-
         [AWSAccessKeyId, CredentialScopeDate, Region | _] =
         case bksw_sec:parse_x_amz_credential(Credential) of
-                {error,      _} -> throw({RequestId, Req1, Context});
-                {ok, ParseCred} -> ParseCred
+            {error,      _} -> throw({RequestId, Req1, Context});
+            {ok, ParseCred} -> ParseCred
         end,
-
-        % CODE REVIEW: Date is used in both verification types.
 
         % https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
         DateIfUndefined = wrq:get_req_header("date", Req1),
@@ -89,12 +85,10 @@ malformed_request(Req0, Context) ->
 %       AccessKey = bksw_conf:access_key_id(    Context),
 %       SecretKey = bksw_conf:secret_access_key(Context),
 
-        % CODE REVIEW: used in both verification types
         Headers          = bksw_sec:process_headers(Headers0),
         SignedHeaderKeys = bksw_sec:parse_x_amz_signed_headers(SignedHeaderKeysString),
         SignedHeaders    = bksw_sec:get_signed_headers(SignedHeaderKeys, Headers, []),
 
-%       % CODE REVIEW: used in both verification types
 %       RawMethod = wrq:method(Req1),
 %       Method    = list_to_atom(string:to_lower(erlang:atom_to_list(RawMethod))),
 
@@ -104,13 +98,10 @@ malformed_request(Req0, Context) ->
 %       % CODE REVIEW: used in both verification types
 %       Config = mini_s3:new(AccessKey, SecretKey, Host),
 
-        % CODE REVIEW: AltSignedHeaders used in both verification types
-
 %       % replace host header with alternate host header
 %       AltHost = mini_s3:get_host_toggleport(Host, Config),
 %       AltSignedHeaders = [case {K, V} of {"host", _} -> {"host", AltHost}; _ -> {K, V} end || {K, V} <- SignedHeaders],
 
-        % CODE REVIEW: used in both verification types
         XAmzExpires = list_to_integer(XAmzExpiresString),
         case XAmzExpires > 1 andalso XAmzExpires < 604800 of
             true -> ok;
