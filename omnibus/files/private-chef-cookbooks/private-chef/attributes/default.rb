@@ -132,8 +132,8 @@ default['private_chef']['haproxy']['etcd_port'] = 2379
 #
 # These options are still accepted in the hopes of expanding
 # compatibility with old configuration files.
-# default['private_chef']['opscode-solr4']['external'] = nil
-# default['private_chef']['opscode-solr4']['external_url'] = nil
+default['private_chef']['opscode-solr4']['external'] = false
+default['private_chef']['opscode-solr4']['external_url'] = nil
 default['private_chef']['opscode-solr4']['heap_size'] = nil
 default['private_chef']['opscode-solr4']['log_directory'] = '/var/log/opscode/opscode-solr4'
 default['private_chef']['opscode-solr4']['elasticsearch_shard_count'] = 5

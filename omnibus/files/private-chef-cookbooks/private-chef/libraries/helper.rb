@@ -391,12 +391,12 @@ class OmnibusHelper
       attrs['ldap'] = {}
     end
 
-    # back-compat fixes for opscode-reporting
-    # reporting uses the opscode-solr key for determining the location of the
-    # solr host, so we'll copy the contents over from opscode-solr4
-    attrs['opscode-solr'] ||= {}
-    attrs['opscode-solr']['vip'] = attrs['opscode-solr4']['vip']
-    attrs['opscode-solr']['port'] = attrs['opscode-solr4']['port']
+    # back-compat fixes for opscode-reporting opscode-reporting still
+    # won't work with non-external Elasticsearch until reporting is
+    # updated.
+    attrs['opscode-solr4'] ||= {}
+    attrs['opscode-solr4']['external'] = !!attrs['elasticsearch']['external']
+    attrs['opscode-solr4']['external_url'] = attrs['elasticsearch']['external_url']
 
     content = {
       'private_chef' => attrs,
