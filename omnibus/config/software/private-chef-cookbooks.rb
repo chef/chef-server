@@ -61,7 +61,8 @@ build do
           'recipe[private-chef::post_11_upgrade_cleanup]',
           'recipe[private-chef::post_12_upgrade_cleanup]',
           'recipe[private-chef::solr4_gclog_cleanup]',
-          'recipe[private-chef::postgres_upgrade_cleanup]'
+          'recipe[private-chef::postgres_upgrade_cleanup]',
+          'recipe[private-chef::post_14_upgrade_cleanup]'
         ]
       )
     end

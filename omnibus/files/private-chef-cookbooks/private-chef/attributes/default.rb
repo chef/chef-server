@@ -94,9 +94,17 @@ default['private_chef']['couchdb']['vip'] = '127.0.0.1'
 default['private_chef']['couchdb']['port'] = 5984
 
 ####
-# Opscode Solr (legacy required for upgrade cleanup to work)
+# Legacy attributes required for cleanup
 ####
 default['private_chef']['opscode-solr']['data_dir'] = '/var/opt/opscode/opscode-solr/data'
+default['private_chef']['rabbitmq']['dir'] = '/var/opt/opscode/rabbitmq'
+default['private_chef']['rabbitmq']['data_dir'] = '/var/opt/opscode/rabbitmq/db'
+default['private_chef']['rabbitmq']['log_directory'] = '/var/log/opscode/rabbitmq'
+default['private_chef']['opscode-solr4']['dir'] = '/var/opt/opscode/opscode-solr4'
+default['private_chef']['opscode-solr4']['data_dir'] = '/var/opt/opscode/opscode-solr4/data'
+default['private_chef']['opscode-solr4']['log_directory'] = '/var/log/opscode/opscode-solr4'
+default['private_chef']['opscode-expander']['dir'] = '/var/opt/opscode/opscode-expander'
+default['private_chef']['opscode-expander']['log_directory'] = '/var/log/opscode/opscode-expander'
 
 ####
 # Server API Version - is not used in server configuration, but rather in the configuration
@@ -135,7 +143,6 @@ default['private_chef']['haproxy']['etcd_port'] = 2379
 default['private_chef']['opscode-solr4']['external'] = false
 default['private_chef']['opscode-solr4']['external_url'] = nil
 default['private_chef']['opscode-solr4']['heap_size'] = nil
-default['private_chef']['opscode-solr4']['log_directory'] = '/var/log/opscode/opscode-solr4'
 default['private_chef']['opscode-solr4']['elasticsearch_shard_count'] = 5
 default['private_chef']['opscode-solr4']['elasticsearch_replica_count'] = 1
 
