@@ -60,7 +60,10 @@ class IndexingPreflightValidator < PreflightValidator
   # checks that system has atleast 4GB memory
   def verify_system_memory
     system_memory_mb = Elasticsearch.node_memory_in_units(node, :total, :mb)
-    required_memory_mb = 3900 # 4 GB less some headroom
+    # Ideally our max would be 4192 but in a lot of virtualized
+    # environments the OS ends up reporting much less than 4GB of RAM
+    # to userspace even if the VM is started with 4GB.
+    required_memory_mb = 3072
     if system_memory_mb < required_memory_mb
       fail_with err_INDEX003_insufficient_system_memory(system_memory_mb, required_memory_mb)
     end
