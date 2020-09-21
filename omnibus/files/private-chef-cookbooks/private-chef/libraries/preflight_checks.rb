@@ -144,7 +144,6 @@ class PreflightChecks
       PostgresqlPreflightValidator.new(node).run!
     end
     AuthPreflightValidator.new(node).run!
-    SolrPreflightValidator.new(node).run!
     IndexingPreflightValidator.new(node).run!
     if PrivateChef['elasticsearch']['enable']
       ElasticsearchPreflightValidator.new(node).run!

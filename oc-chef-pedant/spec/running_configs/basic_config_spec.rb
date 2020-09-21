@@ -18,7 +18,6 @@ describe "running configs required by Chef Server and plugins", :config do
   end
 
   context "opscode-solr" do
-
     it "opscode-solr4/external" do
       expect(config['opscode-solr4']['external']).to be(true).or be(false)
     end
@@ -29,14 +28,6 @@ describe "running configs required by Chef Server and plugins", :config do
       else
         skip "not using external solr"
       end
-    end
-
-    it "opscode-solr4/vip" do
-      expect(config['opscode-solr4']['vip'].to_s).not_to eq ''
-    end
-
-    it "opscode-solr4/port" do
-      expect(config['opscode-solr4']['port'].to_i).not_to eq 0
     end
   end
 

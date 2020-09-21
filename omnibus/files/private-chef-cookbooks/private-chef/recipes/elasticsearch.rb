@@ -103,6 +103,17 @@ template logging_config_file do
   force_unlink true
   notifies :restart, 'component_runit_service[elasticsearch]', :delayed
 end
+
+# If the user has configured a solr4 heap-size, we'll still honor it
+# if it is larger than our recommended.
+heap_size = if node['private_chef']['opscode-solr4'] &&
+               node['private_chef']['opscode-solr4']['heap_size'] &&
+               node['private_chef']['opscode-solr4']['heap_size'] > elasticsearch['heap_size']
+              node['private_chef']['opscode-solr4']['heap_size']
+            else
+              elasticsearch['heap_size']
+            end
+
 jvm_config_file = File.join(elasticsearch_conf_dir, 'jvm.options')
 template jvm_config_file do
   source 'elasticsearch_jvm.opts.erb'
@@ -111,7 +122,7 @@ template jvm_config_file do
   mode '0644'
   variables(jvm_opts: elasticsearch['jvm_opts'],
             log_dir: elasticsearch['log_diriectory'],
-            heap_size: elasticsearch['heap_size'],
+            heap_size: heap_size,
             new_size: elasticsearch['new_size'],
             enable_gc_log: elasticsearch['enable_gc_log'],
             tmp_dir: elasticsearch['temp_directory'])

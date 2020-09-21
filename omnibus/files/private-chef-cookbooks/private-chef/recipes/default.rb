@@ -125,7 +125,6 @@ include_recipe 'private-chef::fix_permissions'
   postgresql
   oc_bifrost
   oc_id
-  opscode-solr4
   elasticsearch
   bookshelf
   opscode-erchef

@@ -206,9 +206,19 @@ class OmnibusHelper
     }
   end
 
+  def external_elasticsearch?
+    if node['private_chef']['elasticsearch'].key?('external')
+      node['private_chef']['elasticsearch']['external']
+    elsif node['private_chef']['opscode-solr4'].key?('external')
+      node['private_chef']['opscode-solr4']['external']
+    else
+      false
+    end
+  end
+
   def solr_url
-    if node['private_chef']['opscode-solr4']['external']
-      node['private_chef']['opscode-solr4']['external_url']
+    if external_elasticsearch?
+      node['private_chef']['elasticsearch']['external_url'] || node['private_chef']['opscode-solr4']['external_url']
     else
       "http://#{vip_for_uri('elasticsearch')}:#{node['private_chef']['elasticsearch']['port']}"
     end
@@ -381,12 +391,12 @@ class OmnibusHelper
       attrs['ldap'] = {}
     end
 
-    # back-compat fixes for opscode-reporting
-    # reporting uses the opscode-solr key for determining the location of the
-    # solr host, so we'll copy the contents over from opscode-solr4
-    attrs['opscode-solr'] ||= {}
-    attrs['opscode-solr']['vip'] = attrs['opscode-solr4']['vip']
-    attrs['opscode-solr']['port'] = attrs['opscode-solr4']['port']
+    # back-compat fixes for opscode-reporting opscode-reporting still
+    # won't work with non-external Elasticsearch until reporting is
+    # updated.
+    attrs['opscode-solr4'] ||= {}
+    attrs['opscode-solr4']['external'] = !!attrs['elasticsearch']['external']
+    attrs['opscode-solr4']['external_url'] = attrs['elasticsearch']['external_url']
 
     content = {
       'private_chef' => attrs,

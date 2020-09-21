@@ -166,10 +166,10 @@
           % If dry_run is true, eredis host and port will be ignored.
           {eredis_host, "127.0.0.1"},
           {eredis_port, 16379},
-          {solr_url, "<%= node['private_chef']['opscode-solr4']['url'] %>"}
+          {solr_url, "<%= @helper.solr_url() %>"}
          ]},
  {chef_reindex, [
-          {solr_service, [{root_url, "<%= node['private_chef']['opscode-solr4']['url'] %>"},
+          {solr_service, [{root_url, "<%= @helper.solr_url() %>"},
                           {timeout, <%= @solr_timeout %>},
                           {init_count, <%= @solr_http_init_count %>},
                           {max_count, <%= @solr_http_max_count %>},
