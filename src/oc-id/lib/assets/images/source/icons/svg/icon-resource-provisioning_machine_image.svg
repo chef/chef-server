@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+<g id="public_x5F_key">
+</g>
+<g id="private_x5F_key">
+</g>
+<g id="chef_x5F_user">
+</g>
+<g id="chef_x5F_role">
+</g>
+<g id="chef_x5F_organization">
+</g>
+<g id="chef_x5F_node">
+</g>
+<g id="chef_x5F_mirror">
+</g>
+<g id="chef_x5F_group">
+</g>
+<g id="chef_x5F_environment">
+</g>
+<g id="chef_x5F_data_x5F_bag">
+</g>
+<g id="chef_x5F_container">
+</g>
+<g id="chef_x5F_client">
+</g>
+<g id="chef_x5F_acl">
+</g>
+<g id="machine_x5F_image">
+	<g>
+		<g>
+			<g>
+				<path d="M73.7,73.1H26.8c-2.6,0-4.7-2.1-4.7-4.7V31.9c0-2.6,2.1-4.7,4.7-4.7h46.9c2.6,0,4.7,2.1,4.7,4.7v36.6
+					C78.4,71,76.3,73.1,73.7,73.1L73.7,73.1z M26.8,31.9v36.6h46.9l0-36.6H26.8L26.8,31.9z"/>
+			</g>
+			<g>
+				<g>
+					<polygon points="70.6,35.4 65.6,35.4 65.6,39.8 70.6,39.8 70.6,35.4 					"/>
+					<polygon points="70.6,43.8 65.6,43.8 65.6,48.2 70.6,48.2 70.6,43.8 					"/>
+					<polygon points="70.6,52.1 65.6,52.1 65.6,56.5 70.6,56.5 70.6,52.1 					"/>
+					<polygon points="70.6,60.5 65.6,60.5 65.6,64.9 70.6,64.9 70.6,60.5 					"/>
+				</g>
+				<g>
+					<polygon points="35,35.4 30,35.4 30,39.8 35,39.8 35,35.4 					"/>
+					<polygon points="35,43.8 30,43.8 30,48.2 35,48.2 35,43.8 					"/>
+					<polygon points="35,52.1 30,52.1 30,56.5 35,56.5 35,52.1 					"/>
+					<polygon points="35,60.5 30,60.5 30,64.9 35,64.9 35,60.5 					"/>
+				</g>
+			</g>
+			<g>
+				<path d="M24.5,79.5c-1.3,0-2.3-1-2.3-2.3V23.2c0-1.3,1-2.3,2.3-2.3c1.3,0,2.3,1,2.3,2.3v53.9C26.8,78.4,25.8,79.5,24.5,79.5
+					L24.5,79.5z"/>
+			</g>
+			<g>
+				<path d="M76.1,79.5c-1.3,0-2.3-1-2.3-2.3V23.2c0-1.3,1-2.3,2.3-2.3c1.3,0,2.3,1,2.3,2.3v53.9C78.4,78.4,77.4,79.5,76.1,79.5
+					L76.1,79.5z"/>
+			</g>
+		</g>
+		<g>
+			<path d="M93.1,96.3H6.9c-2.2,0-4-1.8-4-4V7.6c0-2.2,1.8-4,4-4h86.3c2.2,0,4,1.8,4,4v84.7C97.1,94.6,95.3,96.3,93.1,96.3
+				L93.1,96.3z M10.8,88.4h78.3V11.6H10.8V88.4L10.8,88.4z"/>
+		</g>
+	</g>
+</g>
+<g id="machine_x5F_file">
+</g>
+<g id="machine_x5F_execute">
+</g>
+<g id="machine_x5F_batch">
+</g>
+<g id="machine">
+</g>
+<g id="load_x5F_balancer">
+</g>
+</svg>
