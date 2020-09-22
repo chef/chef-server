@@ -1,0 +1,31 @@
+/*doc
+---
+title: Panel
+name: panel
+category: Panel
+---
+
+Panels are useful for calling attention to content, often in the form of a sidebar. 
+Use them in conjunction with the grid to have them lay out well and behave responsively.
+
+```html_example
+<div class="row">
+  <div class="medium-4 columns end">
+
+    <div class="panel">
+      Words go nicely in here.
+      <a href="#">Links</a> do, too.
+    </div>
+  
+  </div>
+</div>
+```
+*/
+
+@import '../settings';
+
+$panel-bg:              scale-color($chef-white, $lightness: -5%);
+$panel-border-style:    none;
+$panel-padding:         $column-gutter / 2;
+
+@import 'foundation/components/panels';

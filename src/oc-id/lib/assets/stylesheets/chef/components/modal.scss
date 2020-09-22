@@ -1,0 +1,35 @@
+/*doc
+---
+title: Modal
+name: modal
+category: Modal
+---
+
+```html_example
+<button class="button" data-reveal-id="modal-confirmation">Show Me the Modal</button>
+
+<div id="modal-confirmation" class="reveal-modal" data-reveal>
+  <h2>Ohai!</h2>
+  <p>Lovely to see you.</p>
+  <a class="close-reveal-modal">&#215;</a>
+</div>
+```
+
+## Import and Customization
+
+```
+@import 'chef/components/modal'
+```
+
+<div data-alert class="alert-box secondary radius">
+  The Modals component also requires a JavaScript module to work properly. Be sure to include 
+  chef.js in your page, along with whatever additional scripts you might need. See the 
+  <a href="/getting-started">Getting Started</a> section for more information.
+</div>
+
+## More Information
+  * [Foundation Reveal documentation](http://foundation.zurb.com/docs/components/reveal.html)
+*/
+
+@import '../settings';
+@import 'foundation/components/reveal';
