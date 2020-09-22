@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.44 -->
-## [14.0.44](https://github.com/chef/chef-server/tree/14.0.44) (2020-09-21)
+<!-- latest_release 14.0.45 -->
+## [14.0.45](https://github.com/chef/chef-server/tree/14.0.45) (2020-09-22)
 
 #### Merged Pull Requests
-- cookbooks: improve solr4 configuration handling [#2120](https://github.com/chef/chef-server/pull/2120) ([stevendanna](https://github.com/stevendanna))
+- chef-server-ctl: add cleanups for 14 upgrade [#2121](https://github.com/chef/chef-server/pull/2121) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- chef-server-ctl: add cleanups for 14 upgrade [#2121](https://github.com/chef/chef-server/pull/2121) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.45 -->
 - cookbooks: improve solr4 configuration handling [#2120](https://github.com/chef/chef-server/pull/2120) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.44 -->
 - Praj/minus opscode expander [#2111](https://github.com/chef/chef-server/pull/2111) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.43 -->
 - update to latest available openresty build [#2116](https://github.com/chef/chef-server/pull/2116) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.42 -->
