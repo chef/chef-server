@@ -143,8 +143,6 @@ default['private_chef']['haproxy']['etcd_port'] = 2379
 default['private_chef']['opscode-solr4']['external'] = false
 default['private_chef']['opscode-solr4']['external_url'] = nil
 default['private_chef']['opscode-solr4']['heap_size'] = nil
-default['private_chef']['opscode-solr4']['elasticsearch_shard_count'] = 5
-default['private_chef']['opscode-solr4']['elasticsearch_replica_count'] = 1
 
 ####
 # Elasticsearch
@@ -173,6 +171,8 @@ elasticsearch['listen'] = '127.0.0.1'
 elasticsearch['port'] = 9200
 elasticsearch['enable_gc_log'] = false
 elasticsearch['initial_cluster_join_timeout'] = 90
+elasticsearch['shard_count'] = 5
+elasticsearch['replica_count'] = 1
 
 # each item in this list will be placed as-is into java_opts config file.
 # entries are set in chef-server.rb as

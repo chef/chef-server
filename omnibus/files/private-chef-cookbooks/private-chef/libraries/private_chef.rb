@@ -294,7 +294,6 @@ module PrivateChef
       PrivateChef['bookshelf']['listen'] ||= PrivateChef['default_listen_address']
       PrivateChef['redis_lb']['listen'] ||= PrivateChef['default_listen_address']
       PrivateChef['elasticsearch']['listen'] ||= PrivateChef['default_listen_address']
-      PrivateChef['opscode_solr4']['ip_address'] ||= PrivateChef['default_listen_address']
       PrivateChef['postgresql']['listen_address'] ||= '*' # PrivateChef["default_listen_address"]
 
       authaddr = []
@@ -312,8 +311,6 @@ module PrivateChef
       PrivateChef['bookshelf']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
       PrivateChef['redis_lb']['enable'] ||= false
       PrivateChef['redis_lb']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
-      PrivateChef['opscode_solr4']['enable'] ||= false
-      PrivateChef['opscode_solr4']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
       PrivateChef['elasticsearch']['enable'] ||= false
       PrivateChef['elasticsearch']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
       PrivateChef['postgresql']['enable'] ||= false
@@ -618,6 +615,24 @@ module PrivateChef
       end
     end
 
+    def migrate_solr4_settings
+      # Many users were previously using external Elasticsearch by setting
+      # the `opscode_solr4` configuration keys.  We don't want those
+      # customers to have to update their configuration, so we copy over
+      # opscode_solr4 external configuration if it exists.
+      keys_to_migrate = {
+        "external" => "external",
+        "external_url" => "external_url",
+        "elasticsearch_shard_count" => "shard_count",
+        "elasticsearch_replica_count" => "replica_count"
+      }
+      keys_to_migrate.each do |old, new|
+        if opscode_solr4.key?(old) && !elasticsearch.key?(new)
+          elasticsearch[new] = opscode_solr4[old]
+        end
+      end
+    end
+
     # If known private keys are on disk, add them to Veil and commit them.
     def migrate_keys
       did_something = add_key_from_file_if_present('chef-server', 'superuser_key', '/etc/opscode/pivotal.pem')
@@ -662,6 +677,7 @@ module PrivateChef
       # Transition Solr memory and JVM settings from OSC11 to Chef 12.
       import_legacy_service_config('opscode_solr', 'opscode_solr4', %w(heap_size new_size java_opts))
       deprecated_postgresql_settings
+      migrate_solr4_settings
       transform_to_consistent_types
 
       PrivateChef['nginx']['enable_ipv6'] ||= PrivateChef['use_ipv6']
