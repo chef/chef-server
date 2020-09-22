@@ -152,33 +152,6 @@ link '/opt/opscode/embedded/elasticsearch/config' do
   to elasticsearch_conf_dir
 end
 
-component_runit_service 'opscode-expander' do
-  action :disable
-end
-
-directory '/opt/opscode/sv/opscode-expander' do
-  recursive true
-  action :delete
-end
-
-component_runit_service 'opscode-solr4' do
-  action :disable
-end
-
-directory '/opt/opscode/sv/opscode-solr4' do
-  recursive true
-  action :delete
-end
-
-component_runit_service 'rabbitmq' do
-  action :disable
-end
-
-directory '/opt/opscode/sv/rabbitmq' do
-  recursive true
-  action :delete
-end
-
 # Define resource for elasticsearch component_runit_service
 component_runit_service 'elasticsearch'
 
