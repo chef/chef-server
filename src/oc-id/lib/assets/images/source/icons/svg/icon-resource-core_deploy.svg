@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+<g id="user">
+</g>
+<g id="template">
+</g>
+<g id="service">
+</g>
+<g id="script">
+</g>
+<g id="ruby_x5F_block">
+</g>
+<g id="remote_x5F_file">
+</g>
+<g id="remote_x5F_directory_1_">
+</g>
+<g id="package">
+</g>
+<g id="log">
+</g>
+<g id="link">
+</g>
+<g id="group">
+</g>
+<g id="gem">
+</g>
+<g id="file">
+</g>
+<g id="execute">
+</g>
+<g id="directory">
+</g>
+<g id="deploy">
+	<g>
+		<g>
+			<path d="M50,95.9c-0.6,0-1.3-0.1-1.8-0.4L2.6,74.8C1,74,0,72.5,0,70.7V29.3c0-1.7,1-3.3,2.6-4.1L48.2,4.5c1.2-0.5,2.5-0.5,3.7,0
+				l45.5,20.7c1.6,0.7,2.6,2.3,2.6,4.1v41.4c0,1.7-1,3.3-2.6,4.1L51.8,95.5C51.2,95.7,50.6,95.9,50,95.9L50,95.9z M8.9,67.8L50,86.5
+				l41.1-18.7V32.2L50,13.5L8.9,32.2V67.8L8.9,67.8z"/>
+		</g>
+		<g>
+			<path d="M50,55.6c-0.6,0-1.3-0.1-1.8-0.4L2.6,34.5c-2.2-1-3.2-3.7-2.2-5.9c1-2.2,3.6-3.2,5.9-2.2L50,46.2l43.7-19.9
+				c2.3-1,4.9,0,5.9,2.2c1,2.2,0,4.9-2.2,5.9L51.8,55.2C51.2,55.4,50.6,55.6,50,55.6L50,55.6z"/>
+		</g>
+		<g>
+			<path d="M74.5,43.3c-0.3,0-0.6-0.1-0.9-0.2L28.1,22.4c-1.1-0.5-1.6-1.8-1.1-3c0.5-1.1,1.8-1.6,3-1.1L75.5,39
+				c1.1,0.5,1.6,1.8,1.1,3C76.2,42.8,75.4,43.3,74.5,43.3L74.5,43.3z"/>
+		</g>
+		<g>
+			<path d="M50,94.3c-2.5,0-4.5-2-4.5-4.5V55.5c0-2.5,2-4.5,4.5-4.5c2.5,0,4.5,2,4.5,4.5v34.3C54.5,92.3,52.5,94.3,50,94.3L50,94.3z
+				"/>
+		</g>
+	</g>
+</g>
+<g id="cron">
+</g>
+<g id="cookbook_x5F_file">
+</g>
+<g id="chef_x5F_gem">
+</g>
+<g id="bash">
+</g>
+</svg>

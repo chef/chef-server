@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+<g id="public_x5F_key">
+</g>
+<g id="private_x5F_key">
+</g>
+<g id="chef_x5F_user">
+</g>
+<g id="chef_x5F_role">
+</g>
+<g id="chef_x5F_organization">
+</g>
+<g id="chef_x5F_node">
+</g>
+<g id="chef_x5F_mirror">
+</g>
+<g id="chef_x5F_group">
+</g>
+<g id="chef_x5F_environment">
+</g>
+<g id="chef_x5F_data_x5F_bag">
+</g>
+<g id="chef_x5F_container">
+</g>
+<g id="chef_x5F_client">
+</g>
+<g id="chef_x5F_acl">
+</g>
+<g id="machine_x5F_image">
+</g>
+<g id="machine_x5F_file">
+</g>
+<g id="machine_x5F_execute">
+</g>
+<g id="machine_x5F_batch">
+	<g>
+		<g>
+			<path d="M72.2,99H4c-2.2,0-4-1.8-4-4v-67c0-2.2,1.8-4,4-4h68.2c2.2,0,4,1.8,4,4v67C76.3,97.2,74.5,99,72.2,99L72.2,99z M8.1,90.9
+				h60.2V32H8.1V90.9L8.1,90.9z"/>
+		</g>
+		<g>
+			<path d="M85.8,53.7H72.2c-1.1,0-2-0.9-2-2c0-1.1,0.9-2,2-2h11.5V17.2H40v10.7c0,1.1-0.9,2-2,2c-1.1,0-2-0.9-2-2V15.2
+				c0-1.1,0.9-2,2-2h47.9c1.1,0,2,0.9,2,2v36.5C87.8,52.8,86.9,53.7,85.8,53.7L85.8,53.7z"/>
+		</g>
+		<g>
+			<path d="M96,76.1H72.2V68h19.7v-59H31.8v18.9h-8.1V5.1c0-2.2,1.8-4,4-4H96c2.2,0,4,1.8,4,4v67C100,74.3,98.2,76.1,96,76.1
+				L96,76.1z"/>
+		</g>
+		<g>
+			<path d="M62.1,76.6H14.2c-1.1,0-2-0.9-2-2V38.1c0-1.1,0.9-2,2-2h47.9c1.1,0,2,0.9,2,2v36.5C64.1,75.7,63.2,76.6,62.1,76.6
+				L62.1,76.6z M16.2,72.6H60V40.1H16.2V72.6L16.2,72.6z"/>
+		</g>
+	</g>
+</g>
+<g id="machine">
+</g>
+<g id="load_x5F_balancer">
+</g>
+</svg>

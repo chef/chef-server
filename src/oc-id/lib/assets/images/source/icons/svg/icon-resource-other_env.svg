@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+<g id="yum">
+</g>
+<g id="windows_x5F_service">
+</g>
+<g id="windows">
+</g>
+<g id="subversion">
+</g>
+<g id="solaris">
+</g>
+<g id="smartos">
+</g>
+<g id="ruby">
+</g>
+<g id="rpm">
+</g>
+<g id="route">
+</g>
+<g id="registry_x5F_key">
+</g>
+<g id="reboot">
+</g>
+<g id="python">
+</g>
+<g id="powershell">
+</g>
+<g id="portage">
+</g>
+<g id="perl">
+</g>
+<g id="paludis">
+</g>
+<g id="pacman">
+</g>
+<g id="openbsd">
+</g>
+<g id="ohai">
+</g>
+<g id="mount">
+</g>
+<g id="mdadm">
+</g>
+<g id="macports">
+</g>
+<g id="ips">
+</g>
+<g id="ifconfig">
+</g>
+<g id="http_x5F_request">
+</g>
+<g id="homebrew">
+</g>
+<g id="git">
+</g>
+<g id="freebsd">
+</g>
+<g id="erlang_x5F_call">
+</g>
+<g id="env">
+	<g>
+		<g>
+			<path d="M85.7,37.4L85.7,37.4l-65-0.2c-1.1,0-2.2-0.5-3-1.2c-0.8-0.8-1.2-1.9-1.2-3l0.1-21.3c0-2.3,1.9-4.2,4.2-4.2c0,0,0,0,0,0
+				l65,0.2c1.2,0,2.3,0.5,3.1,1.4l9.7,10.7c1.5,1.6,1.5,4.1,0,5.7L88.8,36C88,36.9,86.9,37.4,85.7,37.4L85.7,37.4z M25,28.8
+				l58.9,0.2l5.9-6.4l-5.9-6.4L25,15.9L25,28.8L25,28.8z"/>
+		</g>
+		<g>
+			<path d="M79.2,71.1L79.2,71.1l-65-0.2c-1.2,0-2.3-0.5-3.1-1.4L1.4,58.9c-1.5-1.6-1.5-4.1,0-5.7l9.8-10.6c0.8-0.9,1.9-1.4,3.1-1.4
+				h0l65,0.2c2.3,0,4.2,1.9,4.2,4.2l-0.1,21.3c0,1.1-0.4,2.2-1.2,3C81.4,70.7,80.3,71.1,79.2,71.1L79.2,71.1z M16.1,62.5L75,62.7
+				l0-12.8l-58.9-0.2l-5.9,6.4L16.1,62.5L16.1,62.5z"/>
+		</g>
+		<g>
+			<path d="M47,100L47,100c-2.3,0-4.2-1.9-4.2-4.2l0.1-28.7c0-2.3,1.9-4.2,4.2-4.2c0,0,0,0,0,0c2.3,0,4.2,1.9,4.2,4.2l-0.1,28.7
+				C51.3,98.1,49.4,100,47,100L47,100z"/>
+		</g>
+		<g>
+			<path d="M47.3,12.9L47.3,12.9c-2.3,0-4.2-1.9-4.2-4.2l0-4.5C43.1,1.9,45,0,47.3,0h0c2.3,0,4.2,1.9,4.2,4.2l0,4.5
+				C51.5,11,49.6,12.9,47.3,12.9L47.3,12.9z"/>
+		</g>
+		<g>
+			<path d="M47.2,47.2L47.2,47.2c-2.3,0-4.2-1.9-4.2-4.2l0-7c0-2.3,1.9-4.2,4.2-4.2h0c2.3,0,4.2,1.9,4.2,4.2l0,7
+				C51.4,45.3,49.5,47.2,47.2,47.2L47.2,47.2z"/>
+		</g>
+	</g>
+</g>
+<g id="easy_x5F_install">
+</g>
+<g id="dsc_x5F_script">
+</g>
+<g id="dsc_x5F_resource">
+</g>
+<g id="dpkg">
+</g>
+<g id="csh">
+</g>
+<g id="chef_x5F_handler">
+</g>
+<g id="breakpoint">
+</g>
+<g id="bff">
+</g>
+<g id="batch">
+</g>
+<g id="apt">
+</g>
+</svg>
