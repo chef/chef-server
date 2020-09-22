@@ -51,20 +51,24 @@ malformed_request(Req0, Context) ->
             undefined ->
                 % presigned url verification
                 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
-                [Credential, XAmzDate, SignedHeaderKeysString, XAmzExpiresString] =
-                    [wrq:get_qs_value(X, "", Req1) || X <- ["X-Amz-Credential", "X-Amz-Date", "X-Amz-SignedHeaders", "X-Amz-Expires"]];
+                AuthType = presigned_url,
+                [Credential, XAmzDate, SignedHeaderKeysString, XAmzExpiresString, IncomingSignature] =
+                    [wrq:get_qs_value(X, "", Req1) || X <- ["X-Amz-Credential", "X-Amz-Date", "X-Amz-SignedHeaders", "X-Amz-Expires", "X-Amz-Signature"]];
             IncomingAuth ->
                 % authorization header verification
                 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
                 case bksw_sec:parse_authorization(IncomingAuth) of
-                    {ok, [Credential, SignedHeaderKeysString, _]} ->
+                    {ok, [Credential, SignedHeaderKeysString, IncomingSignature]} ->
+                        AuthType = auth_header,
                         XAmzDate = wrq:get_req_header("x-amz-date", Req1),
                         XAmzExpiresString = ?MIN5;
                     _ ->
-                        {Credential, XAmzDate, SignedHeaderKeysString, XAmzExpiresString} = {err, err, err, err},
+                        {Authtype, Credential, XAmzDate, SignedHeaderKeysString, XAmzExpiresString, IncomingSignature} =
+                            {err, err, err, err, err, err},
                         throw({RequestId, Req1, Context})
                 end
         end,
+
         case wrq:get_req_header("Host", Req1) of
             undefined -> throw({RequestId, Req1, Context});
             _         -> ok
@@ -90,12 +94,14 @@ malformed_request(Req0, Context) ->
         end,
 
         {false, Req1, Context#context{
-           aws_access_key_id=AWSAccessKeyId,
-           date=Date,
-           region=Region,
-           signed_header_keys_str=SignedHeaderKeysString,
-           x_amz_expires_int=XAmzExpiresInt,
-           x_amz_expires_str=XAmzExpiresString}}
+           aws_access_key_id      = AWSAccessKeyId,
+           auth_type              = AuthType,
+           date                   = Date,
+           incoming_sig           = IncomingSignature,
+           region                 = Region,
+           signed_header_keys_str = SignedHeaderKeysString,
+           x_amz_expires_int      = XAmzExpiresInt,
+           x_amz_expires_str      = XAmzExpiresString}}
     catch
         throw:{RequestId, Req1, Context} ->
             bksw_sec:encode_access_denied_error_response(RequestId, Req1, Context)

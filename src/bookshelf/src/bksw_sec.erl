@@ -40,9 +40,8 @@
 %%===================================================================
 %% API functions
 %%===================================================================
--include_lib("eunit/include/eunit.hrl").
-is_authorized(Req0, #context{auth_check_disabled=true} = Context) ->
-    {true, Req0, Context};
+
+is_authorized(Req0, #context{auth_check_disabled=true} = Context) -> {true, Req0, Context};
 is_authorized(Req0, #context{                        } = Context) ->
     Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
     {RequestId, Req1} = bksw_req:with_amz_request_id(Req0),
@@ -66,6 +65,7 @@ is_authorized(Req0, #context{                        } = Context) ->
 auth(RequestId, Req0, #context{reqid                  = ReqId,
                                aws_access_key_id      = AWSAccessKeyId,
                                date                   = Date,
+                               incoming_sig           = IncomingSignature,
                                region                 = Region,
                                signed_header_keys_str = SignedHeaderKeysString,
                                x_amz_expires_int      = XAmzExpiresInt,
