@@ -1,0 +1,53 @@
+/*doc
+---
+title: Layout and Grid
+name: layout
+category: Grid
+---
+
+We use a 12-column, full-width layout built on the [Foundation 5 grid system](http://foundation.zurb.com/docs/components/grid.html).
+In general, we target mobile first, then work up from there. For example, in the snippet below: 
+
+  * On large screens, each `div` occupies two columns, so should appear on one row.
+  * On medium screens, the first two `div`s occupy six columns each (comprising one row), and the latter 
+    four columns should wrap to the next line and span three columns each (giving us two rows of 12 columns each).
+  * On small screens, all `div`s appear stacked (so six rows).
+
+In other words, small is the default, so the `divs` in given a `row` without any column classes will simply be stacked.
+
+```html_example
+<div class="row">
+  <div class="medium-6 large-2 columns">1</div>
+  <div class="medium-6 large-2 columns">2</div>
+  <div class="medium-3 large-2 columns">3</div>
+  <div class="medium-3 large-2 columns">4</div>
+  <div class="medium-3 large-2 columns">5</div>
+  <div class="medium-3 large-2 columns">6</div>
+</div>
+```
+
+For more examples, see the [Foundation grid docs](http://foundation.zurb.com/docs/components/grid.html).
+
+### Handy Media-Query Helpers
+
+Foundation provides [some very helpful helpers](http://foundation.zurb.com/docs/media-queries.html) 
+for working with media queries:
+
+```
+@media #{\$large-up} { 
+  // These rules will apply to large screens and above 
+}
+
+@media #{\$large-only} { 
+  // These to large only
+}
+
+@media #{\$medium-up} { 
+  // These to medium and above 
+}
+```
+
+... and so on. In general, if you find yourself writing media queries by hand, there's a good chance you should be
+using a helper.
+*/
+
