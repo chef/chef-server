@@ -1,0 +1,29 @@
+/*doc 
+---
+title: Footer
+name: footer
+category: Footer
+---
+
+Footers are positioned at the bottom of the page, offset slightly from the 
+content above them and aligned to match to your specified [layout](../layouts).
+
+```html_example
+<footer>
+  &copy; <%= Time.now.year %> Chef Software, Inc.  
+</footer>
+```
+*/
+
+@import '../settings';
+
+footer {
+  width: 100%;
+  max-width: $row-width;
+  margin: $footer-margin auto;
+  padding: 0 ($column-gutter / 2);
+  background: $footer-bg;
+  font-size: $footer-font-size;
+  color: $footer-color;
+  overflow: auto;
+}

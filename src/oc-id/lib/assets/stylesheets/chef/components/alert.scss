@@ -1,0 +1,46 @@
+/*doc
+---
+title: Alert
+name: alert
+category: Alert
+---
+
+```html_example
+<div data-alert class="alert-box radius success">
+  Well done!
+  <a href="#" class="close">&times;</a>
+</div>
+
+<div data-alert class="alert-box radius info">
+  Just FYI.
+  <a href="#" class="close">&times;</a>
+</div>
+
+<div data-alert class="alert-box radius secondary">
+  Keep this in mind.
+  <a href="#" class="close">&times;</a>
+</div>
+
+<div data-alert class="alert-box radius warning">
+  Careful...
+  <a href="#" class="close">&times;</a>
+</div>
+
+<div data-alert class="alert-box radius alert">
+  Ouch.
+  <a href="#" class="close">&times;</a>
+</div>
+```
+*/
+
+@import '../settings';
+@import 'foundation/components/alert-boxes';
+
+.alert-box.info {
+  a {
+    color: scale-color($info-color, $lightness: 70%);
+    &:hover {
+      color: scale-color($info-color, $lightness: 90%);
+    }
+  }
+}
