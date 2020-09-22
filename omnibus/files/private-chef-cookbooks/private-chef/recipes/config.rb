@@ -84,9 +84,6 @@ else
 
   if PrivateChef['opscode_solr4']['external']
     node.default['private_chef']['elasticsearch']['enable'] = false
-    # TODO(ssd) 2020-09-11: We don't think anyone was actually using
-    # external solr and thus this is probably unnecessary.
-    node.default['private_chef']['opscode-erchef']['search_provider'] = 'solr'
   end
 
   # Bail out if something is wrong in our configuration.
@@ -100,20 +97,6 @@ else
   # If preflight checks fail, they will abort immediately with a detailed error
   # message, and without a stacktrace to clutter the screen.
   PreflightChecks.new(node).run!
-
-  #
-  # Many users were previously using external Elasticsearch by setting
-  # the `opscode_solr4` configuration keys.  We don't want those
-  # customers to have to update their configuration, so we copy over
-  # opscode_solr4 external configuration if it exists.
-  #
-  if PrivateChef['opscode_solr4'].key?('external') && !PrivateChef['elasticsearch'].key('external')
-    PrivateChef['elasticsearch']['external'] = PrivateChef['opscode_solr4']['external']
-  end
-
-  if PrivateChef['opscode_solr4'].key?('external_url') && !PrivateChef['elasticsearch'].key('external_url')
-    PrivateChef['elasticsearch']['external_url'] = PrivateChef['opscode_solr4']['external_url']
-  end
 
   node.consume_attributes(PrivateChef.generate_config(node['fqdn']))
 end

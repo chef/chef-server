@@ -253,7 +253,6 @@ EOF
       rendered_config = config_for('backend.chef.io')
       expect(rendered_config['private_chef']['bookshelf']['listen']).to eq('0.0.0.0')
       expect(rendered_config['private_chef']['redis_lb']['listen']).to eq('0.0.0.0')
-      expect(rendered_config['private_chef']['opscode-solr4']['ip_address']).to eq('0.0.0.0')
       expect(rendered_config['private_chef']['postgresql']['listen_address']).to eq('*')
     end
 
@@ -263,7 +262,6 @@ EOF
       expect(rendered_config['private_chef']['postgresql']['vip']).to eq('10.0.0.1')
       expect(rendered_config['private_chef']['bookshelf']['vip']).to eq('10.0.0.1')
       expect(rendered_config['private_chef']['redis_lb']['vip']).to eq('10.0.0.1')
-      expect(rendered_config['private_chef']['opscode-solr4']['vip']).to eq('10.0.0.1')
     end
 
     it 'disables backend services on the frontend' do
@@ -272,7 +270,6 @@ EOF
       expect(rendered_config['private_chef']['postgresql']['enable']).to eq(false)
       expect(rendered_config['private_chef']['bookshelf']['enable']).to eq(false)
       expect(rendered_config['private_chef']['redis_lb']['enable']).to eq(false)
-      expect(rendered_config['private_chef']['opscode-solr4']['enable']).to eq(false)
     end
   end
 
