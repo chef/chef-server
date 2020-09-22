@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+<g id="workstation">
+</g>
+<g id="user">
+</g>
+<g id="search">
+</g>
+<g id="run-list">
+</g>
+<g id="role">
+	<g>
+		<g>
+			<path d="M42.9,47.2H4.3c-2.4,0-4.3-1.9-4.3-4.3V4.3C0,1.9,1.9,0,4.3,0h38.6c2.4,0,4.3,1.9,4.3,4.3v38.6
+				C47.1,45.2,45.2,47.2,42.9,47.2L42.9,47.2z M8.5,38.6h30.1V8.5H8.5V38.6L8.5,38.6z"/>
+		</g>
+		<g>
+			<path d="M95.7,47.2H57.1c-2.4,0-4.3-1.9-4.3-4.3V4.3c0-2.4,1.9-4.3,4.3-4.3h38.6c2.4,0,4.3,1.9,4.3,4.3v38.6
+				C100,45.2,98.1,47.2,95.7,47.2L95.7,47.2z M61.4,38.6h30.1V8.5H61.4V38.6L61.4,38.6z"/>
+		</g>
+		<g>
+			<path d="M42.9,100H4.3C1.9,100,0,98.1,0,95.7V57.1c0-2.4,1.9-4.3,4.3-4.3h38.6c2.4,0,4.3,1.9,4.3,4.3v38.6
+				C47.1,98.1,45.2,100,42.9,100L42.9,100z M8.5,91.5h30.1V61.4H8.5V91.5L8.5,91.5z"/>
+		</g>
+		<g>
+			<path d="M95.7,100H57.1c-2.4,0-4.3-1.9-4.3-4.3V57.1c0-2.4,1.9-4.3,4.3-4.3h38.6c2.4,0,4.3,1.9,4.3,4.3v38.6
+				C100,98.1,98.1,100,95.7,100L95.7,100z M61.4,91.5h30.1V61.4H61.4V91.5L61.4,91.5z"/>
+		</g>
+	</g>
+</g>
+<g id="policy">
+</g>
+<g id="organization">
+</g>
+<g id="node">
+</g>
+<g id="group">
+</g>
+<g id="environment">
+</g>
+<g id="data-bag">
+</g>
+<g id="cookbook">
+</g>
+<g id="client">
+</g>
+<g id="api">
+</g>
+</svg>
