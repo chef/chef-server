@@ -579,7 +579,7 @@ describe 'Search API endpoint', :search do
 
 
 
-  describe "Index Deletion" do
+  describe "Index Deletion", :search_index_deletion do
     context "Roles" do
       it_should_behave_like "Deletes from Solr Index" do
         let(:index_name) { "role" }
