@@ -63,32 +63,24 @@ is_authorized(Req0, #context{                        } = Context) ->
             end
     end.
 
-auth(RequestId, Req0, #context{reqid = ReqId,
-                               aws_access_key_id=AWSAccessKeyId,
-                               date=Date,
-                               region=Region,
-                               signed_header_keys_str=SignedHeaderKeysString,
-                               x_amz_expires_int=XAmzExpiresInt,
-                               x_amz_expires_str=XAmzExpiresString} = Context, IncomingSignature, Headers0, VerificationType) ->
+auth(RequestId, Req0, #context{reqid                  = ReqId,
+                               aws_access_key_id      = AWSAccessKeyId,
+                               date                   = Date,
+                               region                 = Region,
+                               signed_header_keys_str = SignedHeaderKeysString,
+                               x_amz_expires_int      = XAmzExpiresInt,
+                               x_amz_expires_str      = XAmzExpiresString} = Context, IncomingSignature, Headers0, VerificationType) ->
     try
-        Headers          = process_headers(Headers0),
-        SignedHeaderKeys = parse_x_amz_signed_headers(SignedHeaderKeysString),   % signed_header_keys(SignedHeaderKeysString)
-        SignedHeaders    = get_signed_headers(SignedHeaderKeys, Headers, []),
-
-        AccessKey = bksw_conf:access_key_id(    Context),
-        SecretKey = bksw_conf:secret_access_key(Context),
-
-        Host      = wrq:get_req_header("Host", Req0),           % host(Req0)
-        Config    = mini_s3:new(AccessKey, SecretKey, Host),
+        AccessKey     = bksw_conf:access_key_id(Context),
+        SecretKey     = bksw_conf:secret_access_key(Context),
+        Config        = mini_s3:new(AccessKey, SecretKey, host(Req0)),
+        Headers       = process_headers(Headers0),
+        SignedHeaders = get_signed_headers(parse_x_amz_signed_headers(SignedHeaderKeysString), Headers, []),
+        Method        = list_to_atom(string:to_lower(erlang:atom_to_list(wrq:method(Req0)))),
+        Path          = wrq:path(Req0),
 
         % replace host header with alternate host header
-        AltHost = mini_s3:get_host_toggleport(Host, Config),    % althost(Req0, Config)
-        AltSignedHeaders = [case {K, V} of {"host", _} -> {"host", AltHost}; _ -> {K, V} end || {K, V} <- SignedHeaders],
-
-        RawMethod = wrq:method(Req0),                           % raw_method(Req0)
-        Method    = list_to_atom(string:to_lower(erlang:atom_to_list(RawMethod))),
-
-        Path = wrq:path(Req0),
+        AltSignedHeaders = [case {K, V} of {"host", _} -> {"host", alt_host(host(Req0), Config)}; _ -> {K, V} end || {K, V} <- SignedHeaders],
 
         CalculatedSig = case VerificationType of
             presigned_url ->
@@ -149,8 +141,8 @@ auth(RequestId, Req0, #context{reqid = ReqId,
                         %AltComparisonSig = "not computed",
                         IncomingSig;
                     _ ->
-                        AltSigV4Headers   = erlcloud_aws:sign_v4(Method, Path, Config, AltSignedHeaders, <<>>, Region, "s3", QueryParams, Date), % <- put into function
-                        _AltComparisonSig = parseauth_or_throw(proplists:get_value("Authorization", AltSigV4Headers, ""), {RequestId, Req0, Context}),
+                        AltSigV4Headers   = erlcloud_aws:sign_v4(Method, Path, Config, AltSignedHeaders, <<>>, Region, "s3", QueryParams, Date),
+                        _AltComparisonSig = parseauth_or_throw(proplists:get_value("Authorization", AltSigV4Headers, ""), {RequestId, Req0, Context})
                 end
         end,
 
@@ -177,8 +169,12 @@ auth(RequestId, Req0, #context{reqid = ReqId,
         end
 
     catch
-        {RequestId, Req, Context} -> encode_access_denied_error_response(RequestId, Req, Context)
+        throw:{RequestId, Req, Context} -> encode_access_denied_error_response(RequestId, Req, Context)
     end.
+
+-spec alt_host(string(), tuple()) -> string().
+alt_host(Host, Config) ->
+    mini_s3:get_host_toggleport(Host, Config).
 
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
 -spec check_signed_headers_authhead(proplists:proplist(), proplists:proplist()) -> boolean().
@@ -238,6 +234,10 @@ get_signed_headers(_, [], SignedHeaders) -> lists:reverse(SignedHeaders);
 get_signed_headers([Key | SignedHeaderKeys], Headers0, SignedHeaders) ->
     {_, SignedHeader, Headers} = lists:keytake(Key, 1, Headers0),
     get_signed_headers(SignedHeaderKeys, Headers, [SignedHeader | SignedHeaders]).
+
+-spec host(tuple()) -> list().
+host(Req0) ->
+    wrq:get_req_header("Host", Req0).
 
 % @doc split authorization header into component parts
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
