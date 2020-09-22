@@ -215,30 +215,37 @@ CLEANSE002: Note that Chef Server data was not removed from your
 EOM
     end
 
-    # External Solr/ElasticSearch Commands
-    def external_status_opscode_solr4(_detail_level)
-      solr = external_services['opscode-solr4']['external_url']
+    # External ElasticSearch Commands
+    def external_status_elasticsearch(_detail_level)
+      elasticsearch = external_services['elasticsearch']['external_url']
       begin
-        Chef::HTTP.new(solr).get(solr_status_url)
-        puts "run: opscode-solr4: connected OK to #{solr}"
+        Chef::HTTP.new(elasticsearch).get(elasticsearch_status_url)
+        puts "run: elasticsearch: connected OK to #{elasticsearch}"
       rescue StandardError => e
-        puts "down: opscode-solr4: failed to connect to #{solr}: #{e.message.split("\n")[0]}"
+        puts "down: elasticsearch: failed to connect to #{elasticsearch}: #{e.message.split("\n")[0]}"
       end
     end
 
-    def external_cleanse_opscode_solr4(perform_delete)
+    def external_cleanse_elasticsearch(perform_delete)
       log <<-EOM
-Cleansing data in a remote Sol4 instance is not currently supported.
+Cleansing data in a remote Elasticsearch instance is not currently supported.
 EOM
     end
 
-    def solr_status_url
+    def elasticsearch_status_url
       case running_service_config('opscode-erchef')['search_provider']
       when "elasticsearch"
         "/chef"
       else
         "/admin/ping?wt=json"
       end
+    end
+
+    # External Solr Status callback needs to be implemented.
+    # opscode-solr4['external'] is set to true un chef-server-running-json
+    # to support backward compatibility with reporting.
+    def external_status_opscode_solr4(_detail_level)
+      #opscode-solr4 status is seen as elasticsearch status"
     end
 
     # Override reconfigure to skip license checking
