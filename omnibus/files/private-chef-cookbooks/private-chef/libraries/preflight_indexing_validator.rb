@@ -34,8 +34,6 @@ class IndexingPreflightValidator < PreflightValidator
   end
 
   def run!
-    warn_unchanged_external_flag
-
     verify_system_memory
     verify_heap_size
     verify_consistent_reindex_sleep_times
@@ -224,7 +222,7 @@ class IndexingPreflightValidator < PreflightValidator
     if was_solr
       <<~EOM
 
-        INDEX007: No external url specified for Elasticsearch depsite opscode_solr4['external']
+        INDEX006: No external url specified for Elasticsearch depsite opscode_solr4['external']
                   being set to true.
 
                   To use an external Elasticsearch instance, please set:
@@ -237,7 +235,7 @@ class IndexingPreflightValidator < PreflightValidator
     else
       <<~EOM
 
-        INDEX007: No external url specified for Elasticsearch depsite elasticsearch['external']
+        INDEX006: No external url specified for Elasticsearch depsite elasticsearch['external']
                   being set to true.
 
                   To use an external Elasticsearch instance, please set:
@@ -253,7 +251,7 @@ class IndexingPreflightValidator < PreflightValidator
   def err_INDEX007_bad_queue_mode
     <<~EOM
 
-      INDEX008: The elasticsearch provider is only supported by the batch or inline
+      INDEX007: The elasticsearch provider is only supported by the batch or inline
                 queue modes. To use the elasticsearch provider, please also set:
 
                     opscode_erchef['search_queue_mode'] = 'batch'
