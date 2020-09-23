@@ -11,13 +11,11 @@ define_upgrade do
 
       # Make sure API is down
       stop_services(["nginx", "opscode-erchef"])
-      # Not including postgres in services here
-      # since external postgres cannot be managed
-      # via chef-server-ctl
       start_services(["elasticsearch",
                       "nginx",
                       "oc_bifrost",
                       "opscode-erchef",
+                      "postgresql",
                       "redis_lb"])
 
       sleep 30
@@ -26,6 +24,9 @@ define_upgrade do
       log "Migrating indexed search data..."
       run_command("chef-server-ctl reindex -a -d -t")
 
+      # Not including postgres in services here
+      # since external postgres cannot be managed
+      # via chef-server-ctl
       stop_services(["elasticsearch",
                      "nginx",
                      "oc_bifrost",
