@@ -47,7 +47,7 @@ describe ProfilesController do
     before { get :show }
 
     it 'succeeds' do
-      expect(response).to be_success
+      expect(response).to have_http_status(:success)
     end
 
     it 'renders the show template' do
@@ -68,14 +68,14 @@ describe ProfilesController do
     end
 
     it 'redirects to the profile page if the update succeeded' do
-      put :update, user: put_user
+      put :update, params: { user: put_user }
 
       expect(response).to redirect_to(profile_path)
     end
 
     it 'renders the show template if the update failed' do
       allow(logged_in_user).to receive(:chef).and_raise(StandardError)
-      put :update, user: put_user
+      put :update, params: { user: put_user }
 
       expect(response).to render_template('show')
     end
@@ -89,31 +89,31 @@ describe ProfilesController do
     describe 'when logged in as user' do
       describe 'invalid params' do
         it 'requires a username' do
-          get :change_email, email: new_email, signature: signature, expires: expires
+          get :change_email, params: { email: new_email, signature: signature, expires: expires }
           expect(response).to render_template('show')
           expect(flash[:alert]).to match /not a valid username/
         end
 
         it 'requires a new email' do
-          get :change_email, username: username, signature: signature, expires: expires
+          get :change_email, params: { username: username, signature: signature, expires: expires }
           expect(response).to render_template('show')
           expect(flash[:alert]).to match /invalid signature/
         end
 
         it 'requires an expiration date' do
-          get :change_email, username: username, email: new_email, signature: signature
+          get :change_email, params: { username: username, email: new_email, signature: signature }
           expect(response).to render_template('show')
           expect(flash[:alert]).to match /invalid signature/
         end
 
         it 'requires a signature' do
-          get :change_email, username: username, email: new_email, expires: expires
+          get :change_email, params: { username: username, email: new_email, expires: expires }
           expect(response).to render_template('show')
           expect(flash[:alert]).to match /invalid signature/
         end
 
         it 'requires a valid signature - signing the new email address' do
-          get :change_email, username: username, email: new_email, expires: expires, signature: 'foo'
+          get :change_email, params: { username: username, email: new_email, expires: expires, signature: 'foo' }
           expect(response).to render_template('show')
           expect(flash[:alert]).to match /invalid signature/
         end
@@ -123,7 +123,7 @@ describe ProfilesController do
         let(:expires) { 1.day.ago.to_i }
 
         it 'rejects the link' do
-          get :change_email, username: username, email: new_email, expires: expires, signature: signature
+          get :change_email, params: { username: username, email: new_email, expires: expires, signature: signature }
           expect(response).to render_template('show')
           expect(flash[:alert]).to match /invalid signature/
         end
@@ -135,7 +135,7 @@ describe ProfilesController do
         let(:signature) { Signature.new(username, old_email, expires, Settings.secret_key_base, new_email) }
 
         it 'rejects the link' do
-          get :change_email, username: username, email: new_email, expires: expires, signature: signature
+          get :change_email, params: { username: username, email: new_email, expires: expires, signature: signature }
           expect(response).to render_template('show')
           expect(flash[:alert]).to match /invalid signature/
         end
@@ -143,7 +143,7 @@ describe ProfilesController do
 
       describe 'valid params' do
         before do
-          get :change_email, username: username, email: new_email, expires: expires, signature: signature
+          get :change_email, params: { username: username, email: new_email, expires: expires, signature: signature }
         end
 
         it 'redirects to the profile page' do
@@ -161,27 +161,27 @@ describe ProfilesController do
 
       describe 'invalid params' do
         it 'requires a username' do
-          get :change_email, email: new_email, signature: signature, expires: expires
+          get :change_email, params: { email: new_email, signature: signature, expires: expires }
           expect(response).to redirect_to(signin_path)
         end
 
         it 'requires a new email' do
-          get :change_email, username: username, signature: signature, expires: expires
+          get :change_email, params: { username: username, signature: signature, expires: expires }
           expect(response).to redirect_to(signin_path)
         end
 
         it 'requires an expiration date' do
-          get :change_email, username: username, email: new_email, signature: signature
+          get :change_email, params: { username: username, email: new_email, signature: signature }
           expect(response).to redirect_to(signin_path)
         end
 
         it 'requires a signature' do
-          get :change_email, username: username, email: new_email, expires: expires
+          get :change_email, params: { username: username, email: new_email, expires: expires }
           expect(response).to redirect_to(signin_path)
         end
 
         it 'requires a valid signature - signing the new email address' do
-          get :change_email, username: username, email: new_email, expires: expires, signature: 'foo'
+          get :change_email, params: { username: username, email: new_email, expires: expires, signature: 'foo' }
           expect(response).to redirect_to(signin_path)
         end
       end
@@ -190,7 +190,7 @@ describe ProfilesController do
         let(:expires) { 1.day.ago.to_i }
 
         it 'rejects the link' do
-          get :change_email, username: username, email: new_email, expires: expires, signature: signature
+          get :change_email, params: { username: username, email: new_email, expires: expires, signature: signature }
           expect(response).to redirect_to(signin_path)
         end
 
@@ -200,14 +200,14 @@ describe ProfilesController do
         let(:signature) { Signature.new(username, 'myfirstemail@email.org', expires, Settings.secret_key_base, new_email) }
 
         it 'rejects the link' do
-          get :change_email, username: username, email: new_email, expires: expires, signature: signature
+          get :change_email, params: { username: username, email: new_email, expires: expires, signature: signature }
           expect(response).to redirect_to(signin_path)
         end
       end
 
       describe 'valid params' do
         before do
-          get :change_email, username: username, email: new_email, expires: expires, signature: signature
+          get :change_email, params: { username: username, email: new_email, expires: expires, signature: signature }
         end
 
         it 'redirects to the signin page' do
@@ -227,7 +227,7 @@ describe ProfilesController do
         let(:signature) { Signature.new(username, user2.email, expires, Settings.secret_key_base, new_email) }
 
         it 'rejects the link' do
-          get :change_email, username: username, email: new_email, expires: expires, signature: signature
+          get :change_email, params: { username: username, email: new_email, expires: expires, signature: signature }
           expect(response).to render_template('show')
           expect(flash[:alert]).to match /invalid signature/
         end
@@ -235,7 +235,7 @@ describe ProfilesController do
 
       describe 'valid params' do
         before do
-          get :change_email, username: username, email: new_email, expires: expires, signature: signature
+          get :change_email, params: { username: username, email: new_email, expires: expires, signature: signature }
         end
 
         it 'redirects to the profile page' do
@@ -251,9 +251,10 @@ describe ProfilesController do
 
   describe 'PUT #change_password' do
     it 'redirects to the profile page if the update succeeded' do
-      put :change_password, :current_password => 'haha',
-                            :new_password => 'password',
-                            :password_confirmation => 'password'
+      put :change_password, params: { :current_password => 'haha',
+                              :new_password => 'password',
+                              :password_confirmation => 'password'
+                            }
 
       expect(response).to redirect_to(profile_path)
     end
@@ -283,7 +284,7 @@ describe ProfilesController do
     end
 
     it 'succeeds' do
-      expect(response).to be_success
+      expect(response).to have_http_status(:success)
     end
 
     context 'pem file' do
