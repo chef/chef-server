@@ -2,7 +2,7 @@ class ZendesksController < ApplicationController
   include SessionsHelper
   include ZendesksHelper
 
-  before_filter :not_found_if_zendesk_not_enabled
+  before_action :not_found_if_zendesk_not_enabled
 
   def show
     if signed_in?
