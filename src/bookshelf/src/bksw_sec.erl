@@ -42,16 +42,15 @@
 %%===================================================================
 
 is_authorized(Req0, #context{auth_check_disabled=true} = Context) -> {true, Req0, Context};
-is_authorized(Req0, #context{reqid                  = ReqId,
-                             aws_access_key_id      = AWSAccessKeyId,
-                             auth_type              = AuthType,
-                             date                   = Date,
-                             incoming_sig           = IncomingSignature,
-                             region                 = Region,
-                             signed_header_keys_str = SignedHeaderKeysString,
-                             x_amz_expires_int      = XAmzExpiresInt,
-                             x_amz_expires_str      = XAmzExpiresString} = Context) ->
-    Headers0 = mochiweb_headers:to_list(wrq:req_headers(Req0)),
+is_authorized(Req0, #context{reqid                     = ReqId,
+                             aws_access_key_id         = AWSAccessKeyId,
+                             auth_type                 = AuthType,
+                             date                      = Date,
+                             incoming_sig              = IncomingSignature,
+                             region                    = Region,
+                             signed_header_keys_str    = SignedHeaderKeysString,
+                             x_amz_expires_int         = XAmzExpiresInt,
+                             x_amz_expires_str         = XAmzExpiresString} = Context) ->
     {RequestId, Req1} = bksw_req:with_amz_request_id(Req0),
 %   case proplists:get_value('Authorization', Headers, undefined) of
 %       undefined ->
@@ -83,7 +82,7 @@ is_authorized(Req0, #context{reqid                  = ReqId,
         AccessKey     = bksw_conf:access_key_id(Context),
         SecretKey     = bksw_conf:secret_access_key(Context),
         Config        = mini_s3:new(AccessKey, SecretKey, host(Req0)),
-        Headers       = process_headers(Headers0),
+        Headers       = process_headers(mochiweb_headers:to_list(wrq:req_headers(Req0))),
         SignedHeaders = get_signed_headers(parse_x_amz_signed_headers(SignedHeaderKeysString), Headers, []),
         Method        = list_to_atom(string:to_lower(erlang:atom_to_list(wrq:method(Req0)))),
         Path          = wrq:path(Req0),

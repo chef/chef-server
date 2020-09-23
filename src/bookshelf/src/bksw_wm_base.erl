@@ -43,9 +43,8 @@ init(Config) ->
 -define(MIN5, "300"  ).
 -define(WEEK1, 604800).
 
-malformed_request(Req0, #context{auth_check_disabled=true} = Context) ->
-    {false, Req0, Context};
-malformed_request(Req0, Context) ->
+malformed_request(Req0, #context{auth_check_disabled=true} = Context) -> {false, Req0, Context};
+malformed_request(Req0, #context{                        } = Context) ->
     Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
     {RequestId, Req1} = bksw_req:with_amz_request_id(Req0),
     try
