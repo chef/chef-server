@@ -42,34 +42,43 @@
 %%===================================================================
 
 is_authorized(Req0, #context{auth_check_disabled=true} = Context) -> {true, Req0, Context};
-is_authorized(Req0, #context{                        } = Context) ->
-    Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
+is_authorized(Req0, #context{reqid                  = ReqId,
+                             aws_access_key_id      = AWSAccessKeyId,
+                             auth_type              = AuthType,
+                             date                   = Date,
+                             incoming_sig           = IncomingSignature,
+                             region                 = Region,
+                             signed_header_keys_str = SignedHeaderKeysString,
+                             x_amz_expires_int      = XAmzExpiresInt,
+                             x_amz_expires_str      = XAmzExpiresString} = Context) ->
+    Headers0 = mochiweb_headers:to_list(wrq:req_headers(Req0)),
     {RequestId, Req1} = bksw_req:with_amz_request_id(Req0),
-    case proplists:get_value('Authorization', Headers, undefined) of
-        undefined ->
-            % presigned url verification
-            % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
-            IncomingSignature = wrq:get_qs_value("X-Amz-Signature", "", Req0),
-            auth(RequestId, Req1, Context, IncomingSignature, Headers, presigned_url);
-        IncomingAuth ->
-            % authorization header verification
-            % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
-            case parse_authorization(IncomingAuth) of
-                {ok, [_Credential, _SignedHeaderKeysString, IncomingSignature]} ->
-                    auth(RequestId, Req1, Context, IncomingSignature, Headers, auth_header);
-                _ ->
-                    encode_access_denied_error_response(RequestId, Req1, Context)
-            end
-    end.
+%   case proplists:get_value('Authorization', Headers, undefined) of
+%       undefined ->
+%           % presigned url verification
+%           % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
+%           IncomingSignature = wrq:get_qs_value("X-Amz-Signature", "", Req0),
+%           auth(RequestId, Req1, Context, IncomingSignature, Headers, presigned_url);
+%       IncomingAuth ->
+%           % authorization header verification
+%           % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
+%           case parse_authorization(IncomingAuth) of
+%               {ok, [_Credential, _SignedHeaderKeysString, IncomingSignature]} ->
+%                   auth(RequestId, Req1, Context, IncomingSignature, Headers, auth_header);
+%               _ ->
+%                   encode_access_denied_error_response(RequestId, Req1, Context)
+%           end
+%   end.
 
-auth(RequestId, Req0, #context{reqid                  = ReqId,
-                               aws_access_key_id      = AWSAccessKeyId,
-                               date                   = Date,
-                               incoming_sig           = IncomingSignature,
-                               region                 = Region,
-                               signed_header_keys_str = SignedHeaderKeysString,
-                               x_amz_expires_int      = XAmzExpiresInt,
-                               x_amz_expires_str      = XAmzExpiresString} = Context, IncomingSignature, Headers0, VerificationType) ->
+%uth(RequestId, Req0, #context{reqid                  = ReqId,
+%                              aws_access_key_id      = AWSAccessKeyId,
+%                              auth_type              = AuthType,
+%                              date                   = Date,
+%                              incoming_sig           = IncomingSignature,
+%                              region                 = Region,
+%                              signed_header_keys_str = SignedHeaderKeysString,
+%                              x_amz_expires_int      = XAmzExpiresInt,
+%                              x_amz_expires_str      = XAmzExpiresString} = Context, IncomingSignature, Headers0, AuthType) ->
     try
         AccessKey     = bksw_conf:access_key_id(Context),
         SecretKey     = bksw_conf:secret_access_key(Context),
@@ -82,7 +91,7 @@ auth(RequestId, Req0, #context{reqid                  = ReqId,
         % replace host header with alternate host header
         AltSignedHeaders = [case {K, V} of {"host", _} -> {"host", alt_host(host(Req0), Config)}; _ -> {K, V} end || {K, V} <- SignedHeaders],
 
-        CalculatedSig = case VerificationType of
+        CalculatedSig = case AuthType of
             presigned_url ->
 
                 case wrq:get_qs_value("X-Amz-Algorithm", Req0) of
@@ -156,8 +165,8 @@ auth(RequestId, Req0, #context{reqid                  = ReqId,
                         case erlang:iolist_to_binary(AWSAccessKeyId) == erlang:iolist_to_binary(AccessKey) of
                             true ->
                                 MaxAge = "max-age=" ++ XAmzExpiresString,
-                                Req1 = wrq:set_resp_header("Cache-Control", MaxAge, Req0),
-                                {true, Req1, Context};
+                                Req2 = wrq:set_resp_header("Cache-Control", MaxAge, Req1),
+                                {true, Req2, Context};
                             false ->
                                 ?LOG_DEBUG("req_id=~p signing error for ~p", [ReqId, Path]),
                                 encode_sign_error_response(AWSAccessKeyId, IncomingSignature, RequestId,
