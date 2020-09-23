@@ -114,41 +114,12 @@ class IndexingPreflightValidator < PreflightValidator
     end
   end
 
-  def warn_unchanged_external_flag
-    if OmnibusHelper.has_been_bootstrapped? && backend? && previous_run
-      # ES configuration is preferred everywhere so we check that first
-      previous_external_setting = if previous_run['elasticsearch'].key?('external')
-                                    !!previous_run['elasticsearch']['external']
-                                  elsif previous_run['opscode-solr4'].key?('external')
-                                    !!previous_run['opscode-solr4']['external']
-                                  else
-                                    # The default external setting has
-                                    # always been a falsy value except
-                                    # for a couple of commits that
-                                    # never went out.
-                                    false
-                                  end
-
-      current_external_setting = if cs_elasticsearch_attr.key?('external')
-                                   cs_elasticsearch_attr['external']
-                                 elsif cs_solr_attr.key?('external')
-                                   cs_solr_attr['external']
-                                 else
-                                   false
-                                 end
-
-      if current_external_setting != previous_external_setting
-        ChefServer::Warnings.warn err_INDEX006_external_changed
-      end
-    end
-  end
-
   def verify_external_url
     if cs_elasticsearch_attr['external'] && !cs_elasticsearch_attr['external_url']
-      fail_with err_INDEX007_bad_external_config(false)
+      fail_with err_INDEX006_bad_external_config(false)
     end
     if cs_solr_attr['external'] && !cs_solr_attr['external_url']
-      fail_with err_INDEX007_bad_external_config(true)
+      fail_with err_INDEX006_bad_external_config(true)
     end
   end
 
@@ -157,7 +128,7 @@ class IndexingPreflightValidator < PreflightValidator
     return true if provider.nil? # default provider
 
     unless %w(batch inline).include?(@cs_erchef_attr['search_queue_mode'])
-      fail_with err_INDEX008_bad_queue_mode
+      fail_with err_INDEX007_bad_queue_mode
     end
   end
 
@@ -249,17 +220,7 @@ class IndexingPreflightValidator < PreflightValidator
      EOM
   end
 
-  def err_INDEX006_external_changed
-    <<~EOM
-
-      INDEX006: The value of opscode_solr4['external'] or elasticsearch['external'] has been changed. Search
-                results against the new external search index may be incorrect. Please
-                run `chef-server-ctl reindex --all` to ensure correct results
-
-    EOM
-  end
-
-  def err_INDEX007_bad_external_config(was_solr)
+  def err_INDEX006_bad_external_config(was_solr)
     if was_solr
       <<~EOM
 
@@ -289,7 +250,7 @@ class IndexingPreflightValidator < PreflightValidator
     end
   end
 
-  def err_INDEX008_bad_queue_mode
+  def err_INDEX007_bad_queue_mode
     <<~EOM
 
       INDEX008: The elasticsearch provider is only supported by the batch or inline
