@@ -21,7 +21,7 @@ describe V1::HealthController do
       end
 
       it 'succeeds' do
-        expect(response).to be_success
+        expect(response).to have_http_status(:success)
       end
 
       it 'has a health variable' do
