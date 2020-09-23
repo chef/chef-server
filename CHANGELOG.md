@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.48 -->
-## [14.0.48](https://github.com/chef/chef-server/tree/14.0.48) (2020-09-23)
+<!-- latest_release 14.0.49 -->
+## [14.0.49](https://github.com/chef/chef-server/tree/14.0.49) (2020-09-23)
 
 #### Merged Pull Requests
-- fix external elasticsearch scenario on upgrade [#2126](https://github.com/chef/chef-server/pull/2126) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Elasticsearch options will not exist for versions before 13.2.0 of chef-server [#2127](https://github.com/chef/chef-server/pull/2127) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Elasticsearch options will not exist for versions before 13.2.0 of chef-server [#2127](https://github.com/chef/chef-server/pull/2127) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.49 -->
 - fix external elasticsearch scenario on upgrade [#2126](https://github.com/chef/chef-server/pull/2126) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.48 -->
 - cookbooks: move shard/index configuration into elasticsearch config [#2122](https://github.com/chef/chef-server/pull/2122) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.47 -->
 - Tag the index deletion search specs [#2124](https://github.com/chef/chef-server/pull/2124) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.46 -->
