@@ -51,7 +51,7 @@ describe "oc_id API", :oc_id do
 
   def signin(with_callback = true)
     response = get("#{platform.server}/id/signin", oc_id_user, headers: {"Accept" => "text/html"})
-    cookie = response.headers[:set_cookie][1].split(";").first
+    cookie = response.headers[:set_cookie][0].split(";").first
     # I KNOW. I'll leave it up to reviewers whether we should pull
     # in nokogiri or hpricot just do to this
     re = /<meta name="csrf-token" content="(.*)" \/>/
@@ -61,7 +61,7 @@ describe "oc_id API", :oc_id do
     # Now sign in
     if with_callback
       response = post("#{platform.server}/id/auth/chef/callback", oc_id_user, headers: headers, payload: body)
-      cookie = response.headers[:set_cookie][1].split(";").first
+      cookie = response.headers[:set_cookie][0].split(";").first
     end
     { cookie: cookie, token: token}
   end
