@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.51 -->
-## [14.0.51](https://github.com/chef/chef-server/tree/14.0.51) (2020-09-23)
+<!-- latest_release 14.0.52 -->
+## [14.0.52](https://github.com/chef/chef-server/tree/14.0.52) (2020-09-23)
 
 #### Merged Pull Requests
-- Update migration to exclude managing postgres services, since chef-server-ctl cannot manage external postgres [#2128](https://github.com/chef/chef-server/pull/2128) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Start postgres, int the even that it might be down. This is a no-op for external postgres. [#2130](https://github.com/chef/chef-server/pull/2130) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Start postgres, int the even that it might be down. This is a no-op for external postgres. [#2130](https://github.com/chef/chef-server/pull/2130) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.52 -->
 - Update migration to exclude managing postgres services, since chef-server-ctl cannot manage external postgres [#2128](https://github.com/chef/chef-server/pull/2128) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.51 -->
 - Small fixes: remove unused functions and match error code with function names [#2129](https://github.com/chef/chef-server/pull/2129) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.50 -->
 - Elasticsearch options will not exist for versions before 13.2.0 of chef-server [#2127](https://github.com/chef/chef-server/pull/2127) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.49 -->
