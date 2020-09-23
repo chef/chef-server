@@ -1,3 +1,5 @@
+require "health_check"
+
 module V1
   class HealthController < ApplicationController
     respond_to :json
