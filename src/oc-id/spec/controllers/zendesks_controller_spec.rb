@@ -22,7 +22,7 @@ describe ZendesksController do
 
         context 'when a return_to param is present' do
           it 'includes it in the session variable' do
-            get 'show', return_to: 'testreturnto'
+            get 'show', params: { return_to: 'testreturnto' }
             expect(session[:return_to]).to eq '/id/zendesk?return_to=testreturnto'
           end
         end
@@ -37,7 +37,7 @@ describe ZendesksController do
 
         it 'redirects to the zendesk SSO URL' do
           expect(controller).to receive(:zendesk_sso_url).with('testuser', 'testreturnto')
-          get 'show', return_to: 'testreturnto'
+          get 'show', params: { return_to: 'testreturnto' }
         end
       end
     end
