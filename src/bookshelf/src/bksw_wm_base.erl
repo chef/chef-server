@@ -43,6 +43,8 @@ init(Config) ->
 -define(MIN5, "300"  ).
 -define(WEEK1, 604800).
 
+malformed_request(Req0, #context{auth_check_disabled=true} = Context) ->
+    {false, Req0, Context};
 malformed_request(Req0, Context) ->
     Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
     {RequestId, Req1} = bksw_req:with_amz_request_id(Req0),
@@ -63,7 +65,7 @@ malformed_request(Req0, Context) ->
                         XAmzDate = wrq:get_req_header("x-amz-date", Req1),
                         XAmzExpiresString = ?MIN5;
                     _ ->
-                        {Authtype, Credential, XAmzDate, SignedHeaderKeysString, XAmzExpiresString, IncomingSignature} =
+                        {AuthType, Credential, XAmzDate, SignedHeaderKeysString, XAmzExpiresString, IncomingSignature} =
                             {err, err, err, err, err, err},
                         throw({RequestId, Req1, Context})
                 end

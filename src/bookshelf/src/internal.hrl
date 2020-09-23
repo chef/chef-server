@@ -115,7 +115,7 @@
                   aws_access_key_id         :: string()      | undefined,
                   auth_type                 :: auth_header   | presigned_url | undefined,
                   date                      :: string()      | undefined,     
-                  incoming_sig              :: list(),
+                  incoming_sig              :: list()        | undefined,
                   region                    :: string()      | undefined,
                   signed_header_keys_str    :: string()      | undefined,
                   x_amz_expires_int         :: pos_integer() | undefined,
