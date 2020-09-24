@@ -99,7 +99,13 @@ class IndexingPreflightValidator < PreflightValidator
   end
 
   def external?
-    cs_elasticsearch_attr['external'] || cs_solr_attr['external']
+    if cs_elasticsearch_attr.key?('external')
+      cs_elasticsearch_attr['external']
+    elsif cs_solr_attr.key?('external')
+      cs_solr_attr['external']
+    else
+      false
+    end
   end
 
   def elasticsearch_enabled?
