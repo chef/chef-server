@@ -152,7 +152,8 @@ link '/opt/opscode/embedded/elasticsearch/config' do
   to elasticsearch_conf_dir
 end
 
-# Define resource for elasticsearch component_runit_service
-component_runit_service 'elasticsearch'
+component_runit_service 'elasticsearch' do
+  action [:enable, :start]
+end
 
 include_recipe 'private-chef::elasticsearch_index'
