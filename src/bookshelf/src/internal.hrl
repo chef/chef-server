@@ -118,6 +118,7 @@
                   incoming_sig              :: list()        | undefined,
                   region                    :: string()      | undefined,
                   signed_header_keys_str    :: string()      | undefined,
+                  signed_headers            :: list()        | undefined,
                   x_amz_expires_int         :: pos_integer() | undefined,
                   x_amz_expires_str         :: string()      | undefined
               }).

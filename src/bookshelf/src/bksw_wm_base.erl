@@ -43,18 +43,29 @@ init(Config) ->
 -define(MIN5, "300"  ).
 -define(WEEK1, 604800).
 
+% TODO: write a test confirming that auth_check_disabled=true works (assuming one doesn't exist)
 malformed_request(Req0, #context{auth_check_disabled=true} = Context) -> {false, Req0, Context};
 malformed_request(Req0, #context{                        } = Context) ->
-    Headers = mochiweb_headers:to_list(wrq:req_headers(Req0)),
+    HeadersRaw = mochiweb_headers:to_list(wrq:req_headers(Req0)),
+    Headers    = bksw_sec:process_headers(HeadersRaw),
     {RequestId, Req1} = bksw_req:with_amz_request_id(Req0),
     try
-        case proplists:get_value('Authorization', Headers, undefined) of
+        case proplists:get_value('Authorization', HeadersRaw, undefined) of
             undefined ->
                 % presigned url verification
                 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
                 AuthType = presigned_url,
-                [Credential, XAmzDate, SignedHeaderKeysString, XAmzExpiresString, IncomingSignature] =
-                    [wrq:get_qs_value(X, "", Req1) || X <- ["X-Amz-Credential", "X-Amz-Date", "X-Amz-SignedHeaders", "X-Amz-Expires", "X-Amz-Signature"]];
+                [XAmzAlgorithm, Credential, XAmzDate, SignedHeaderKeysString, XAmzExpiresString, IncomingSignature] =
+                    [wrq:get_qs_value(X, "", Req1) || X <- ["X-Amz-Algorithm", "X-Amz-Credential", "X-Amz-Date", "X-Amz-SignedHeaders", "X-Amz-Expires", "X-Amz-Signature"]],
+                case XAmzAlgorithm of
+                    "AWS4-HMAC-SHA256" -> ok;
+                    _                  -> throw({RequestId, Req1, Context})
+                end,
+                SignedHeaders = bksw_sec:get_signed_headers(bksw_sec:parse_x_amz_signed_headers(SignedHeaderKeysString), Headers, []),
+                case bksw_sec:check_signed_headers_common(SignedHeaders, Headers) of
+                    true -> ok;
+                    _    -> throw({RequestId, Req1, Context})
+                end;
             IncomingAuth ->
                 % authorization header verification
                 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
@@ -62,9 +73,14 @@ malformed_request(Req0, #context{                        } = Context) ->
                     {ok, [Credential, SignedHeaderKeysString, IncomingSignature]} ->
                         AuthType = auth_header,
                         XAmzDate = wrq:get_req_header("x-amz-date", Req1),
-                        XAmzExpiresString = ?MIN5;
+                        XAmzExpiresString = ?MIN5,
+                        SignedHeaders = bksw_sec:get_signed_headers(bksw_sec:parse_x_amz_signed_headers(SignedHeaderKeysString), Headers, []),
+                        case bksw_sec:check_signed_headers_authhead(SignedHeaders, Headers) of
+                            true -> ok;
+                            _    -> throw({RequestId, Req1, Context})
+                        end;
                     _ ->
-                        {AuthType, Credential, XAmzDate, SignedHeaderKeysString, XAmzExpiresString, IncomingSignature} =
+                        {AuthType, Credential, XAmzDate, SignedHeaders, XAmzExpiresString, IncomingSignature} =
                             {err, err, err, err, err, err},
                         throw({RequestId, Req1, Context})
                 end
@@ -100,7 +116,7 @@ malformed_request(Req0, #context{                        } = Context) ->
            date                   = Date,
            incoming_sig           = IncomingSignature,
            region                 = Region,
-           signed_header_keys_str = SignedHeaderKeysString,
+           signed_headers         = SignedHeaders,
            x_amz_expires_int      = XAmzExpiresInt,
            x_amz_expires_str      = XAmzExpiresString}}
     catch
