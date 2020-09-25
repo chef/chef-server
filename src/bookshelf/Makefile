@@ -28,7 +28,7 @@ include Makefile.db
 
 ## TODO: put 'ct' back in here
 all: $(REBAR3) elvis
-	@$(REBAR3) do clean, compile, eunit, dialyzer, xref
+	@$(REBAR3) do clean, compile, eunit, dialyzer #, xref
 
 rel: all
 	@$(REBAR3) release
