@@ -40,6 +40,7 @@
 %%===================================================================
 %% API functions
 %%===================================================================
+-include_lib("eunit/include/eunit.hrl").
 is_authorized(Req0, #context{auth_check_disabled=true} = Context) ->
     {true, Req0, Context};
 is_authorized(Req0, #context{                        } = Context) ->
@@ -49,159 +50,45 @@ is_authorized(Req0, #context{                        } = Context) ->
         undefined ->
             % presigned url verification
             % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
-            [Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString] =
-                [wrq:get_qs_value(X, "", Req1) || X <- ["X-Amz-Credential", "X-Amz-Date", "X-Amz-SignedHeaders", "X-Amz-Signature", "X-Amz-Expires"]],
-            auth(RequestId, Req1, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers, presigned_url);
+            IncomingSignature = wrq:get_qs_value("X-Amz-Signature", "", Req0),
+            auth(RequestId, Req1, Context, IncomingSignature, Headers, presigned_url);
         IncomingAuth ->
             % authorization header verification
             % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
             case parse_authorization(IncomingAuth) of
-                {ok, [Credential, SignedHeaderKeysString, IncomingSignature]} ->
-                    XAmzDate = wrq:get_req_header("x-amz-date", Req1),
-                    auth(RequestId, Req1, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers, auth_header);
+                {ok, [_Credential, _SignedHeaderKeysString, IncomingSignature]} ->
+                    auth(RequestId, Req1, Context, IncomingSignature, Headers, auth_header);
                 _ ->
                     encode_access_denied_error_response(RequestId, Req1, Context)
             end
     end.
 
-% CODE REVIEW: i refactored the two commented-out functions below (presigned_auth and header_auth)
-% into is_authorized above.  the commented-out code below will be deleted after code review.
-
-% presigned url verification
-% https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
-%presigned_auth(RequestId, Req0, Context, Headers0) ->
-%    Credential = wrq:get_qs_value("X-Amz-Credential", "", Req0),
-%    XAmzDate = wrq:get_qs_value("X-Amz-Date", "", Req0),
-%    SignedHeaderKeysString = wrq:get_qs_value("X-Amz-SignedHeaders", "", Req0),
-%    IncomingSignature = wrq:get_qs_value("X-Amz-Signature", "", Req0),
-%    % 1 =< XAmzExpires =< 604800
-%    XAmzExpiresString = wrq:get_qs_value("X-Amz-Expires", "", Req0),
-%    common_auth(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, presigned_url).
-
-% https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
-%header_auth(RequestId, IncomingAuth, Req0, Context, Headers0) ->
-%%   (ParseAuth = parse_authorization(IncomingAuth)) /= err orelse throw({RequestId, Req0, Context}),
-%%   [Credential, SignedHeaderKeysString, IncomingSignature] = ParseAuth,
-%%   XAmzDate = wrq:get_req_header("x-amz-date", Req0),
-%%   common_auth(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, auth_header)
-%    case parse_authorization(IncomingAuth) of
-%        {ok, [Credential, SignedHeaderKeysString, IncomingSignature]} ->
-%            XAmzDate = wrq:get_req_header("x-amz-date", Req0),
-%            common_auth(RequestId, Req0, Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, "300", Headers0, auth_header);
-%        _ ->
-%            encode_access_denied_error_response(RequestId, Req0, Context)
-%    end.
-
-% CODE REVIEW: <<@ssd: Either let's try to avoid the throws or clearly document what gets thrown and why in a comment above the function head.
-% If the throws are the best way to handle errors here, then let's also organize the calling code in a way that it makes it
-% very clear where the throws from this function and only this function are handled.>>
-%
-% WHAT GETS THROWN: well, a tuple... but it results in a 403 status code being returned.
-% WHY:              see explanation below.
-% WHERE HANDLED:    at the bottom of the function where the throws are occuring, within this module.
-%
-% Letting things crash upon errors would be nice here (i tried it), but it results in status code 500,
-% which causes failing tests.  It seems that in general, errors in processing here, e.g. no host or date header,
-% should return status code 403 vs. 500... or at least that's what various pre-existing tests want, anyway. The
-% throw is really just a way to bail on further processing and jump to a location in the code which returns a status 403.
-% Near as I can tell from the docs, that is what the purpose of throws are in Erlang.  Although
-% they are frequently associated with error handling, docs say they are for 'nonlocal returns'
-% or 'control flow' (or at least can be used that way).
-%
-% From: https://docs.oracle.com/cd/E88353_01/html/E37845/erlang-3erl.html
-%   throw(Any) -> no_return()
-%    A non-local return from a function. If evaluated within a catch,
-%    catch returns value Any. Example:
-%
-%    > catch throw({hello, there}).
-%    {hello,there}
-%
-% From: http://www.kuaidingyue.com/ebook/erl/errors-and-exceptions.html
-%   In comparison with exits and errors, they don't really carry any 'crash that process!' intent behind them,
-%   but rather control flow.
-%
-% Anyway, we could accomplish the same thing with a complicated nest or staircase of case statements, but to
-% me a simple throw is better. The catch which returns status code 403 is at the bottom of the auth
-% function.
-%
-% Having said all of that, if throws are undesirable, I'm totally open to eliminating them if we can figure out
-% how to do it.
-%
-% Perhaps one option is to rewrite the spec and say that 500s are ok.  This changes
-% specs and forces rewriting of tests, but avoids throws.
-%
-% Perhaps another option is to set variables to 'sentinel' values on error conditions,
-% which would allow the flow to continue, and hopefully the failures could be caught
-% later on in processing. An example might be setting Host (in auth/10 directly below
-% these comments) to "" if get_req_header is undefined, and letting things continue.
-% This might make things harder to debug, vs. an early bail with a throw (or who knows,
-% maybe early bails with throws are harder to debug?), but it avoids
-% throws if that is desirable.
-%
-% Or heck, maybe structuring case statements to eliminate throws wouldn't be as bad
-% as I am assuming. Or maybe I'm missing something.
-%
-% Anyway, I'm flexible.  For now, assuming throws until we get things sorted out.
-
-auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, SignedHeaderKeysString, IncomingSignature, XAmzExpiresString, Headers0, VerificationType) ->
+auth(RequestId, Req0, #context{reqid = ReqId,
+                               aws_access_key_id=AWSAccessKeyId,
+                               date=Date,
+                               region=Region,
+                               signed_header_keys_str=SignedHeaderKeysString,
+                               x_amz_expires_int=XAmzExpiresInt,
+                               x_amz_expires_str=XAmzExpiresString} = Context, IncomingSignature, Headers0, VerificationType) ->
     try
-        % CODE REVIEW: Host is used in the generation of Config which is used in both verification types.
+        Headers          = process_headers(Headers0),
+        SignedHeaderKeys = parse_x_amz_signed_headers(SignedHeaderKeysString),   % signed_header_keys(SignedHeaderKeysString)
+        SignedHeaders    = get_signed_headers(SignedHeaderKeys, Headers, []),
 
-        case Host = wrq:get_req_header("Host", Req0) of
-            undefined -> throw({RequestId, Req0, Context});
-            _         -> ok
-        end,
-
-        % CODE REVIEW: Used in obtaining CredentialScopeDate, which is used for Date, which is used in both verification types
-
-        [AWSAccessKeyId, CredentialScopeDate, Region | _] =
-            case parse_x_amz_credential(Credential) of
-                {error,      _} -> throw({RequestId, Req0, Context});
-                {ok, ParseCred} -> ParseCred
-            end,
-
-        % CODE REVIEW: Date is used in both verification types.
-
-        % https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
-        DateIfUndefined = wrq:get_req_header("date", Req0),
-        case {_,  Date} = get_check_date(XAmzDate, DateIfUndefined, CredentialScopeDate) of
-            {error,  _} -> throw({RequestId, Req0, Context});
-            {ok,     _} -> ok
-        end,
-
-        % CODE REVIEW: Used in generating Config which is used in both verification types
         AccessKey = bksw_conf:access_key_id(    Context),
         SecretKey = bksw_conf:secret_access_key(Context),
 
-        % CODE REVIEW: used in both verification types
-        Headers = process_headers(Headers0),
-
-        % CODE REVIEW: used in both verification types
-        SignedHeaderKeys = parse_x_amz_signed_headers(SignedHeaderKeysString),
-        SignedHeaders = get_signed_headers(SignedHeaderKeys, Headers, []),
-
-        % CODE REVIEW: used in both verification types
-        RawMethod = wrq:method(Req0),
-        Method = list_to_atom(string:to_lower(erlang:atom_to_list(RawMethod))),
-
-        % CODE REVIEW: used in both verification types
-        Path = wrq:path(Req0),
-
-        % CODE REVIEW: used in both verification types
-        Config = mini_s3:new(AccessKey, SecretKey, Host),
-
-        % CODE REVIEW: AltSignedHeaders used in both verification types
+        Host      = wrq:get_req_header("Host", Req0),           % host(Req0)
+        Config    = mini_s3:new(AccessKey, SecretKey, Host),
 
         % replace host header with alternate host header
-        AltHost = mini_s3:get_host_toggleport(Host, Config),
+        AltHost = mini_s3:get_host_toggleport(Host, Config),    % althost(Req0, Config)
         AltSignedHeaders = [case {K, V} of {"host", _} -> {"host", AltHost}; _ -> {K, V} end || {K, V} <- SignedHeaders],
 
-        % CODE REVIEW: used in both verification types
-        XAmzExpires = list_to_integer(XAmzExpiresString),
-        case XAmzExpires > 1 andalso XAmzExpires < 604800 of
-            true -> ok;
-            _    -> throw({RequestId, Req0, Context})
-        end,
+        RawMethod = wrq:method(Req0),                           % raw_method(Req0)
+        Method    = list_to_atom(string:to_lower(erlang:atom_to_list(RawMethod))),
+
+        Path = wrq:path(Req0),
 
         CalculatedSig = case VerificationType of
             presigned_url ->
@@ -218,7 +105,7 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
 
                 {Bucketname, Key} = get_bucket_key(Path),
 
-                ComparisonURL = mini_s3:s3_url(Method, Bucketname, Key, XAmzExpires, SignedHeaders, Date, Config),
+                ComparisonURL = mini_s3:s3_url(Method, Bucketname, Key, XAmzExpiresInt, SignedHeaders, Date, Config),
 
                 % list_to_binary profiled faster than binary_to_list,
                 % so use that for conversion and comparison.
@@ -234,7 +121,7 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
                         %AltComparisonSig = "not computed",
                         IncomingSig;
                     _ ->
-                        AltComparisonURL = mini_s3:s3_url(Method, Bucketname, Key, XAmzExpires, AltSignedHeaders, Date, Config),
+                        AltComparisonURL = mini_s3:s3_url(Method, Bucketname, Key, XAmzExpiresInt, AltSignedHeaders, Date, Config),
                         [_, AltComparisonSig] = string:split(AltComparisonURL, "&X-Amz-Signature=", all),
                         AltComparisonSig
                 end;
@@ -262,16 +149,16 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
                         %AltComparisonSig = "not computed",
                         IncomingSig;
                     _ ->
-                        AltSigV4Headers   = erlcloud_aws:sign_v4(Method, Path, Config, AltSignedHeaders, <<>>, Region, "s3", QueryParams, Date),
-                        _AltComparisonSig = parseauth_or_throw(proplists:get_value("Authorization", AltSigV4Headers, ""), {RequestId, Req0, Context})
+                        AltSigV4Headers   = erlcloud_aws:sign_v4(Method, Path, Config, AltSignedHeaders, <<>>, Region, "s3", QueryParams, Date), % <- put into function
+                        _AltComparisonSig = parseauth_or_throw(proplists:get_value("Authorization", AltSigV4Headers, ""), {RequestId, Req0, Context}),
                 end
         end,
 
         case IncomingSig of
             CalculatedSig ->
-                case is_expired(Date, XAmzExpires) of
+                case is_expired(Date, XAmzExpiresInt) of
                     true ->
-                        ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p", [ReqId, XAmzExpires, Path]),
+                        ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p", [ReqId, XAmzExpiresInt, Path]),
                         encode_access_denied_error_response(RequestId, Req0, Context);
                     false ->
                         case erlang:iolist_to_binary(AWSAccessKeyId) == erlang:iolist_to_binary(AccessKey) of
@@ -292,12 +179,6 @@ auth(RequestId, Req0, #context{reqid = ReqId} = Context, Credential, XAmzDate, S
     catch
         {RequestId, Req, Context} -> encode_access_denied_error_response(RequestId, Req, Context)
     end.
-
-
-% -------------------------------------------------------------------
-% CODE REVIEW: i reworked several functions below to return the style
-% of {ok, Result} or {error, Condition}.
-% -------------------------------------------------------------------
 
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
 -spec check_signed_headers_authhead(proplists:proplist(), proplists:proplist()) -> boolean().
