@@ -38,7 +38,7 @@ end
 
 app_settings = {
   'chef' => {
-    'endpoint' => "https://#{node['private_chef']['lb_internal']['vip']}",
+    'endpoint' => "https://#{node['private_chef']['lb_internal']['vip']}:#{node['private_chef']['nginx']['ssl_port']}",
     'superuser' => 'pivotal',
     #
     # Why is this verify_none?
