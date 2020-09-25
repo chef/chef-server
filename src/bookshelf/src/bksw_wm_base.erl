@@ -35,9 +35,7 @@
 %% Complete webmachine callbacks
 %%
 
-% why is this here?
 -include_lib("eunit/include/eunit.hrl").
-
 init(Config) ->
     {ok, bksw_conf:get_context(Config)}.
 
