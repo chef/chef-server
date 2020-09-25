@@ -46,6 +46,9 @@
 -define(METHOD(Auth),             maps:get(method,             Auth)).
 -define(PATH(Auth),               maps:get(path,               Auth)).
 
+% for instrumentation - REMOVE
+-include_lib("eunit/include/eunit.hrl").
+
 %%===================================================================
 %% API functions
 %%===================================================================
@@ -56,6 +59,7 @@ is_authorized(Req0, #context{auth_type                 = presigned_url,
                              incoming_sig              = IncomingSignature,
                              signed_headers            = SignedHeaders,
                              x_amz_expires_int         = XAmzExpiresInt} = Context) ->
+?debugFmt("~nIN is_authorized presigned_url", []),
     {RequestId, Req1} = bksw_req:with_amz_request_id(Req0),
     try
         Auth               = auth_init(Req1, Context, SignedHeaders),
@@ -63,7 +67,17 @@ is_authorized(Req0, #context{auth_type                 = presigned_url,
         ComparisonURL      = mini_s3:s3_url(?METHOD(Auth), Bucketname, Key, XAmzExpiresInt, SignedHeaders, Date, ?CONFIG(Auth)),
         IncomingSig        = list_to_binary(IncomingSignature),
         [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", trailing),
-
+?debugFmt("~nauth_type: presigned_url", []),
+?debugFmt("~nDate: ~p", [Date]),
+?debugFmt("~nIncomingSignature: ~p", [IncomingSignature]),
+?debugFmt("~nSignedHeaders: ~p", [SignedHeaders]),
+?debugFmt("~nXAmzExpiresInt: ~p", [XAmzExpiresInt]),
+?debugFmt("~nAuth: ~p", [Auth]),
+?debugFmt("~nBucketname: ~p", [Bucketname]),
+?debugFmt("~nKey: ~p", [Key]),
+?debugFmt("~nComparisonURL: ~p", [ComparisonURL]),
+?debugFmt("~nIncomingSig: ~p", [IncomingSig]),
+?debugFmt("~nComparisonSig: ~p", [ComparisonSig]),
         % TODO: try to remove alt sig computation and see what happens
         % NOTE: this was tried, and caused compilation and test failures.
 
@@ -77,6 +91,7 @@ is_authorized(Req0, #context{auth_type                 = presigned_url,
                     [_, AltComparisonSig] = string:split(AltComparisonURL, "&X-Amz-Signature=", all),
                     AltComparisonSig
             end,
+?debugFmt("~nCalculatedSig: ~p", [CalculatedSig]),
     auth_finish(RequestId, Req1, Context, Auth, ComparisonURL, IncomingSig, CalculatedSig)
     catch
         throw:{RequestId, Req, Context} -> encode_access_denied_error_response(RequestId, Req, Context)
@@ -86,6 +101,7 @@ is_authorized(Req0, #context{auth_type                 = auth_header,
                              incoming_sig              = IncomingSignature,
                              region                    = Region,
                              signed_headers            = SignedHeaders} = Context) ->
+?debugFmt("~nIN is_authorized auth_header", []),
     {RequestId, Req1} = bksw_req:with_amz_request_id(Req0),
     try
         Auth          = auth_init(Req1, Context, SignedHeaders),
@@ -94,7 +110,17 @@ is_authorized(Req0, #context{auth_type                 = auth_header,
         SigV4Headers  = erlcloud_aws:sign_v4(?METHOD(Auth), ?PATH(Auth), ?CONFIG(Auth), SignedHeaders, <<>>, Region, "s3", QueryParams, Date),
         IncomingSig   = IncomingSignature,
         ComparisonSig = parseauth_or_throw(proplists:get_value("Authorization", SigV4Headers, ""), {RequestId, Req1, Context}),
-
+?debugFmt("~nauth_type: auth_header", []),
+?debugFmt("~nDate: ~p", [Date]),
+?debugFmt("~nIncomingSignature: ~p", [IncomingSignature]),
+?debugFmt("~nRegion: ~p", [Region]),
+?debugFmt("~nSignedHeaders: ~p", [SignedHeaders]),
+?debugFmt("~nAuth: ~p", [Auth]),
+?debugFmt("~nComparisonURL: ~p", [ComparisonURL]),
+?debugFmt("~nQueryParams: ~p", [QueryParams]),
+?debugFmt("~nSigV4Headers: ~p", [SigV4Headers]),
+?debugFmt("~nIncomingSig: ~p", [IncomingSig]),
+?debugFmt("~nComparisonSig: ~p", [ComparisonSig]),
         % TODO: try to remove alt sig computation and see what happens
         % NOTE: this was tried, and caused compilation and test failures.
 
@@ -107,10 +133,12 @@ is_authorized(Req0, #context{auth_type                 = auth_header,
                     AltSigV4Headers   = erlcloud_aws:sign_v4(?METHOD(Auth), ?PATH(Auth), ?CONFIG(Auth), ?ALT_SIGNED_HEADERS(Auth), <<>>, Region, "s3", QueryParams, Date),
                     _AltComparisonSig = parseauth_or_throw(proplists:get_value("Authorization", AltSigV4Headers, ""), {RequestId, Req1, Context})
             end,
+?debugFmt("~nCalculatedSig: ~p", [CalculatedSig]),
     auth_finish(RequestId, Req1, Context, Auth, ComparisonURL, IncomingSig, CalculatedSig)
     catch
         throw:{RequestId, Req, Context} -> encode_access_denied_error_response(RequestId, Req, Context)
-    end.
+    end;
+is_authorized(Req0, Context) -> ?debugFmt("~nbksw_sec:is_authorized NO MATCHING CLAUSE!", []), {true, Req0, Context}.
 
 % TODO: relocate this
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
@@ -269,7 +297,10 @@ auth_finish(RequestId, Req1, #context{
             end;
         _ ->
             encode_access_denied_error_response(RequestId, Req1, Context)
-    end.
+    end;
+auth_finish(_, Req, Context, _, _, _, _) ->
+?debugFmt("~nbksw_sec:auth_finish NO MATCHING CLAUSE!", []),
+    {{halt, 500}, Req, Context}.
 
 % split  "<bucketname>/<key>" (possibly leading and/or trailing /) into {"bucketname", "key"}
 % Path = "<bucketname>/<key>"
