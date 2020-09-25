@@ -49,6 +49,19 @@ get_check_date_test() ->
     {ok, ISO8601Date}       = bksw_sec:get_check_date(undefined,   DateIfUndefined,    CredentialScopeDate),
     {error, get_check_date} = bksw_sec:get_check_date(undefined,   undefined,          CredentialScopeDate).
 
+% get host and toggle the port (add port or remove it)
+get_host_toggleport_test() ->
+    Config0 = mini_s3:new("", "", "host"),
+    "host:443" = get_host_toggleport("host", Config0),
+    Config1 = mini_s3:new("", "", "host:123"),
+    "host" = get_host_toggleport("host:123", Config1),
+    Config2 = mini_s3:new("", "", "http://host"),
+    "http://host:80" = get_host_toggleport("http://host", Config2),
+    Config3 = mini_s3:new("", "", "http://host:123"),
+    "http://host" = get_host_toggleport("http://host:123", Config3),
+    Config4 = mini_s3:new("", "", "https://host:123"),
+    "https://host" = get_host_toggleport("https://host:123", Config4).
+
 % get key-value pairs (headers) associated with specified keys.
 % for each key, get first occurance of key-value. for duplicated
 % keys, get corresponding key-value pairs. results are undefined

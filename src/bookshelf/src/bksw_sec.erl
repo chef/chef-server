@@ -225,10 +225,6 @@ encode_access_denied_error_response(RequestId, Req0, Context) ->
 % local functions, helpers, etc.
 %%===================================================================
 
--spec alt_host(string(), tuple()) -> string().
-alt_host(Host, Config) ->
-    mini_s3:get_host_toggleport(Host, Config).
-
 % common setup, init
 -spec auth_init(any(), tuple(), string()) -> map().
 auth_init(Req0, Context, SignedHeaders) ->
@@ -236,7 +232,7 @@ auth_init(Req0, Context, SignedHeaders) ->
     Config    = mini_s3:new(AccessKey, bksw_conf:secret_access_key(Context), host(Req0)),
     #{accesskey          => AccessKey,
       config             => Config,
-      alt_signed_headers => [case {K, V} of {"host", _} -> {"host", alt_host(host(Req0), Config)}; _ -> {K, V} end || {K, V} <- SignedHeaders],
+      alt_signed_headers => [case {K, V} of {"host", _} -> {"host", get_host_toggleport(host(Req0), Config)}; _ -> {K, V} end || {K, V} <- SignedHeaders],
       method             => list_to_atom(string:to_lower(erlang:atom_to_list(wrq:method(Req0)))),
       path               => wrq:path(Req0)}.
 
@@ -279,6 +275,23 @@ get_bucket_key(Path) ->
         [            ] -> {"",     ""};
         [Bucket      ] -> {Bucket, ""};
         [Bucket | Key] -> {Bucket, filename:join(Key)}
+    end.
+
+% get host and toggle the port (add port or remove it)
+-spec get_host_toggleport(string(), aws_config()) -> string().
+get_host_toggleport(Host, Config) ->
+    case string:split(Host, ":", trailing) of
+        [Host      ] ->
+            Port = integer_to_list(Config#aws_config.s3_port),
+            string:join([Host, Port], ":");
+        ["http",  _] ->
+            Port = integer_to_list(Config#aws_config.s3_port),
+            string:join([Host, Port], ":");
+        ["https", _] ->
+            Port = integer_to_list(Config#aws_config.s3_port),
+            string:join([Host, Port], ":");
+        [H,       _] ->
+            H
     end.
 
 -spec host(tuple()) -> list().
