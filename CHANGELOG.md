@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.53 -->
-## [14.0.53](https://github.com/chef/chef-server/tree/14.0.53) (2020-09-24)
+<!-- latest_release 14.0.54 -->
+## [14.0.54](https://github.com/chef/chef-server/tree/14.0.54) (2020-09-25)
 
 #### Merged Pull Requests
-- cookbooks: ensure ES is started [#2131](https://github.com/chef/chef-server/pull/2131) ([stevendanna](https://github.com/stevendanna))
+- erchef: new ibrowse to address spurious 500s [#2132](https://github.com/chef/chef-server/pull/2132) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- erchef: new ibrowse to address spurious 500s [#2132](https://github.com/chef/chef-server/pull/2132) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.54 -->
 - cookbooks: ensure ES is started [#2131](https://github.com/chef/chef-server/pull/2131) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.53 -->
 - Start postgres, int the even that it might be down. This is a no-op for external postgres. [#2130](https://github.com/chef/chef-server/pull/2130) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.52 -->
 - Update migration to exclude managing postgres services, since chef-server-ctl cannot manage external postgres [#2128](https://github.com/chef/chef-server/pull/2128) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.51 -->
