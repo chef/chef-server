@@ -35,7 +35,9 @@
 %% Complete webmachine callbacks
 %%
 
+% why is this here?
 -include_lib("eunit/include/eunit.hrl").
+
 init(Config) ->
     {ok, bksw_conf:get_context(Config)}.
 
@@ -43,7 +45,6 @@ init(Config) ->
 -define(MIN5, "300"  ).
 -define(WEEK1, 604800).
 
-% TODO: write a test confirming that auth_check_disabled=true works (assuming one doesn't exist)
 malformed_request(Req0, #context{auth_check_disabled=true} = Context) -> {false, Req0, Context};
 malformed_request(Req0, #context{                        } = Context) ->
     HeadersRaw = mochiweb_headers:to_list(wrq:req_headers(Req0)),
