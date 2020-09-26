@@ -21,16 +21,9 @@
 
 -module(bksw_sec).
 
--export([check_signed_headers_authhead/2      ]).
--export([check_signed_headers_common/2        ]).
 -export([encode_access_denied_error_response/3]).
--export([get_check_date/3                     ]).
--export([get_signed_headers/3                 ]).
 -export([is_authorized/2                      ]).
 -export([parse_authorization/1                ]).
--export([parse_x_amz_credential/1             ]).
--export([parse_x_amz_signed_headers/1         ]).
--export([process_headers/1                    ]).
 
 -ifdef(TEST).
 -compile([export_all, nowarn_export_all]).
@@ -112,59 +105,6 @@ is_authorized(Req0, #context{auth_type                 = auth_header,
         throw:{RequestId, Req, Context} -> encode_access_denied_error_response(RequestId, Req, Context)
     end.
 
-% TODO: relocate this
-% https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
--spec check_signed_headers_authhead(proplists:proplist(), proplists:proplist()) -> boolean().
-check_signed_headers_authhead(SignedHeaders, Headers) ->
-    check_signed_headers_common(SignedHeaders, Headers) andalso
-
-    % x-amz-content-sha256 header is required
-    proplists:is_defined("x-amz-content-sha256", SignedHeaders) andalso
-
-    % if content-type header is present in request, it is required
-    case proplists:is_defined("content-type", Headers) of
-        true -> proplists:is_defined("content-type", SignedHeaders);
-        _    -> true
-    end.
-
-% TODO: relocate this
-% required signed headers common to both authorization header verification
-% and presigned url verification.
-% https://docs.amazonaws.cn/en_us/AmazonS3/latest/API/sigv4-query-string-auth.html
--spec check_signed_headers_common(proplists:proplist(), proplists:proplist()) -> boolean().
-check_signed_headers_common(SignedHeaders, Headers) ->
-    % host header is required
-    proplists:is_defined("host", SignedHeaders) andalso
-
-    % any x-amz-* headers present in request are required
-    [] == [Key || {Key, _} <- Headers, is_amz(Key), not proplists:is_defined(Key, SignedHeaders)].
-
-% TODO: relocate this
-% https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
--spec get_check_date(ISO8601Date::string() | undefined, DateIfUndefined::string(), string()) -> {ok, string()} | {error, get_check_date}.
-get_check_date(ISO8601Date, DateIfUndefined, [Y1, Y2, Y3, Y4, M1, M2, D1, D2]) ->
-    Date = case ISO8601Date of
-               undefined -> DateIfUndefined;
-               _         -> ISO8601Date
-           end,
-    case Date of
-        [Y1, Y2, Y3, Y4, M1, M2, D1, D2, $T, _, _, _, _, _, _, $Z] -> {ok, Date};
-        _                                                          -> {error, get_check_date}
-    end.
-
-% TODO: relocate this
-% @doc get key-value pairs (headers) associated with specified keys.
-% for each key, get first occurance of key-value. for duplicated
-% keys, get corresponding key-value pairs. results are undefined
-% for nonexistent key(s).
-%-spec get_signed_headers(proplist(), proplist(), proplist()) -> proplist(). % for erlang20+
--spec get_signed_headers(SignedHeaderKeys::[string()], Headers::[tuple()], SignedHeaders::[tuple()]) -> [tuple()].
-get_signed_headers([], _, SignedHeaders) -> lists:reverse(SignedHeaders);
-get_signed_headers(_, [], SignedHeaders) -> lists:reverse(SignedHeaders);
-get_signed_headers([Key | SignedHeaderKeys], Headers0, SignedHeaders) ->
-    {_, SignedHeader, Headers} = lists:keytake(Key, 1, Headers0),
-    get_signed_headers(SignedHeaderKeys, Headers, [SignedHeader | SignedHeaders]).
-
 % @doc split authorization header into component parts
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
 -spec parse_authorization(string()) -> {ok, [string()]} | {error, parse_authorization}.
@@ -175,34 +115,6 @@ parse_authorization(Auth) ->
         _ ->
             {error, parse_authorization}
     end.
-
-% TODO: relocate this
-% @doc split credentials string into component parts
-% Cred = "<access-key-id>/<date>/<AWS-region>/<AWS-service>/aws4_request"
--spec parse_x_amz_credential(string()) -> {ok, [string()]} | {error, parse_x_amz_credential}.
-parse_x_amz_credential(Cred) ->
-    Parse = string:split(Cred, "/", all),
-    case Parse of
-        [_access_key_id, _date, _aws_region, "s3", "aws4_request"] -> {ok, Parse};
-        _                                                          -> {error, parse_x_amz_credential}
-    end.
-
-% TODO: relocate this
-% @doc split signed header string into component parts. return empty string on empty string.
-% Headers = "<header1>;<header2>;...<headerN>"
--spec parse_x_amz_signed_headers(string()) -> [string()].
-parse_x_amz_signed_headers(Headers) ->
-   string:split(Headers, ";", all).
-
-% TODO: relocate this
-% @doc convert the keys of key-value pairs to lowercase strings
--spec process_headers(Headers::[tuple()]) -> [tuple()].
-process_headers(Headers) ->
-    [{string:casefold(
-        case is_atom(Key) of
-            true -> atom_to_list(Key);
-            _    -> Key
-        end), Val} || {Key, Val} <- Headers].
 
 encode_sign_error_response(AccessKeyId, Signature,
                            RequestId, StringToSign, Req0,
