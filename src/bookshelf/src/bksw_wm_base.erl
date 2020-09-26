@@ -216,6 +216,14 @@ get_signed_headers([Key | SignedHeaderKeys], Headers0, SignedHeaders) ->
     {_, SignedHeader, Headers} = lists:keytake(Key, 1, Headers0),
     get_signed_headers(SignedHeaderKeys, Headers, [SignedHeader | SignedHeaders]).
 
+-spec is_amz(string()) -> boolean().
+is_amz([$x, $-, $a, $m, $z, $- | _]) ->
+    true;
+is_amz([$X, $-, $A, $m, $z, $- | _]) ->
+    true;
+is_amz(_) ->
+    false.
+
 % @doc split credentials string into component parts
 % Cred = "<access-key-id>/<date>/<AWS-region>/<AWS-service>/aws4_request"
 -spec parse_x_amz_credential(string()) -> {ok, [string()]} | {error, parse_x_amz_credential}.

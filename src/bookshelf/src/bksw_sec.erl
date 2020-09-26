@@ -210,14 +210,6 @@ get_host_toggleport(Host, Config) ->
 host(Req0) ->
     wrq:get_req_header("Host", Req0).
 
--spec is_amz(string()) -> boolean().
-is_amz([$x, $-, $a, $m, $z, $- | _]) ->
-    true;
-is_amz([$X, $-, $A, $m, $z, $- | _]) ->
-    true;
-is_amz(_) ->
-    false.
-
 % most ways of getting the date/time seem problematic.  for instance, docs for
 % calendar:universal_time() and erlang:universaltime() say: 'Returns local time
 % if universal time is unavailable.'
