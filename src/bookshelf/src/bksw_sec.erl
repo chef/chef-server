@@ -32,6 +32,8 @@
 % is the necessary?  try removing.
 -include("internal.hrl").
 
+-include_lib("erlcloud/include/erlcloud_aws.hrl").
+
 % until erlang gets a shorthand way to access a key's value
 -define(ACCESSKEY(Auth),          maps:get(accesskey,          Auth)).
 -define(CONFIG(Auth),             maps:get(config,             Auth)).
