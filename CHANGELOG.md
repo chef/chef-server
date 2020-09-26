@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.54 -->
-## [14.0.54](https://github.com/chef/chef-server/tree/14.0.54) (2020-09-25)
+<!-- latest_release 14.0.55 -->
+## [14.0.55](https://github.com/chef/chef-server/tree/14.0.55) (2020-09-26)
 
 #### Merged Pull Requests
-- erchef: new ibrowse to address spurious 500s [#2132](https://github.com/chef/chef-server/pull/2132) ([stevendanna](https://github.com/stevendanna))
+- Interpolate Port for oc-id Endpoint URL [#2119](https://github.com/chef/chef-server/pull/2119) ([bdwyertech](https://github.com/bdwyertech))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Interpolate Port for oc-id Endpoint URL [#2119](https://github.com/chef/chef-server/pull/2119) ([bdwyertech](https://github.com/bdwyertech)) <!-- 14.0.55 -->
 - erchef: new ibrowse to address spurious 500s [#2132](https://github.com/chef/chef-server/pull/2132) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.54 -->
 - cookbooks: ensure ES is started [#2131](https://github.com/chef/chef-server/pull/2131) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.53 -->
 - Start postgres, int the even that it might be down. This is a no-op for external postgres. [#2130](https://github.com/chef/chef-server/pull/2130) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.52 -->
