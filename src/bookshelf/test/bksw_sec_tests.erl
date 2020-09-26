@@ -22,7 +22,7 @@ get_bucket_key_test() ->
     {"bucket",   "key/more/moar"} = bksw_sec:get_bucket_key("/bucket/key/more/moar/").
 
 % get host and toggle the port (add port or remove it)
-bksw_sec:get_host_toggleport_test() ->
+get_host_toggleport_test() ->
     Config0 = mini_s3:new("", "", "host"),
     "host:443" = bksw_sec:get_host_toggleport("host", Config0),
     Config1 = mini_s3:new("", "", "host:123"),
