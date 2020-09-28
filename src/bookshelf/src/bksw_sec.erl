@@ -26,10 +26,10 @@
 -export([parse_authorization/1                ]).
 
 -ifdef(TEST).
--compile([export_all, nowarn_export_all]).
+-compile([export_all, nowarn_export_all       ]).
 -endif.
 
-% is the necessary?  try removing.
+% is this necessary?  try removing.
 -include("internal.hrl").
 
 -include_lib("erlcloud/include/erlcloud_aws.hrl").
@@ -45,16 +45,16 @@
 %% API functions
 %%===================================================================
 
-is_authorized(Req0, #context{auth_check_disabled=true} = Context) -> {true, Req0, Context};
-is_authorized(Req0, #context{auth_type                 = presigned_url,
-                             date                      = Date,
-                             incoming_sig              = IncomingSignature,
-                             signed_headers            = SignedHeaders,
-                             x_amz_expires_int         = XAmzExpiresInt} = Context) ->
-    {RequestId, Req1} = bksw_req:with_amz_request_id(Req0),
+is_authorized(Req0, #context{auth_check_disabled = true          } = Context) -> {true, Req0, Context};
+is_authorized(Req0, #context{auth_type           = presigned_url,
+                             date                = Date,
+                             incoming_sig        = IncomingSignature,
+                             signed_headers      = SignedHeaders,
+                             x_amz_expires_int   = XAmzExpiresInt} = Context) ->
+    {RequestId, Req1}      = bksw_req:with_amz_request_id(Req0),
     try
         Auth               = auth_init(Req1, Context, SignedHeaders),
-        {Bucketname, Key}  = get_bucket_key(?PATH(Auth)),
+        {Bucketname, Key } = get_bucket_key(?PATH(Auth)),
         ComparisonURL      = mini_s3:s3_url(?METHOD(Auth), Bucketname, Key, XAmzExpiresInt, SignedHeaders, Date, ?CONFIG(Auth)),
         IncomingSig        = list_to_binary(IncomingSignature),
         [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", trailing),
@@ -76,11 +76,11 @@ is_authorized(Req0, #context{auth_type                 = presigned_url,
     catch
         throw:{RequestId, Req, Context} -> encode_access_denied_error_response(RequestId, Req, Context)
     end;
-is_authorized(Req0, #context{auth_type                 = auth_header,
-                             date                      = Date,
-                             incoming_sig              = IncomingSignature,
-                             region                    = Region,
-                             signed_headers            = SignedHeaders} = Context) ->
+is_authorized(Req0, #context{auth_type           = auth_header,
+                             date                = Date,
+                             incoming_sig        = IncomingSignature,
+                             region              = Region,
+                             signed_headers      = SignedHeaders} = Context) ->
     {RequestId, Req1} = bksw_req:with_amz_request_id(Req0),
     try
         Auth          = auth_init(Req1, Context, SignedHeaders),
@@ -237,7 +237,7 @@ is_expired(DateTimeString, ExpiresSec) ->
     % this could be used to check if the date constructed is valid
     % calendar:valid_date({{Year, Month, Day}, {Hour, Min, Sec}}),
 
-    DateSeconds = calendar:datetime_to_gregorian_seconds({{Year, Month, Day}, {Hour, Min, Sec}}),
+    DateSeconds      = calendar:datetime_to_gregorian_seconds({{Year, Month, Day}, {Hour, Min, Sec}}),
     UniversalTimeSec = calendar:datetime_to_gregorian_seconds(calendar:now_to_universal_time(os:timestamp())),
     DateSeconds + ExpiresSec < UniversalTimeSec.
 
