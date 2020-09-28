@@ -18,7 +18,9 @@
 %% Examples:
 %%
 %% Perform a partial reindexing of the 'mycompany-engineering' organization by :
-%%     reindex-opc-piecewise mycompany-engineering nodes <nodes..>
+%%     reindex-opc-piecewise mycompany-engineering nodes
+%%     reindex-opc-piecewise mycompany-engineering nodes <node_names..>
+%%     reindex-opc-piecewise mycompany-engineering nodes <node_ids..> --ids
 %%
 %% Indices are node, role, environment, client, or DATABAG_NAME
 %%
@@ -31,8 +33,19 @@
 %%   Prajakta TODO: check if chef-server-ctl reindex can call into this script
 main(Args) ->
     init_network(),
-    [OrgInfo, Context, Index, Items] = validate_args(Args),
-    perform(Context, OrgInfo, Index, Items).
+    {Args1, NameOrId} = check_for_options(Args),
+    [OrgInfo, Context, Index, Items] = validate_args(Args1),
+    perform(Context, OrgInfo, Index, Items, NameOrId).
+
+check_for_options(Args) ->
+    check_for_options(Args, [], names).
+
+check_for_options([], Acc, NameOrId) ->
+    {lists:reverse(Acc), NameOrId};
+check_for_options(["--ids" | RestArgs], Acc, _NameOrId) ->
+    check_for_options(RestArgs, Acc, ids);
+check_for_options([Head | RestArgs], Acc, NameOrId) ->
+    check_for_options(RestArgs, [Head | Acc], NameOrId).
 
 %% @doc Ensure that the arguments are all valid, meaning a recognized action is specified,
 %% and the given organization name actually exists.  If everything checks out, return the
@@ -75,22 +88,23 @@ validate_args([OrgName, IndexName | Items]) ->
             halt(3)
     end.
 
-perform(Context, {_OrgId, OrgName}=OrgInfo, Index, [<<>>]) ->
+perform(Context, {_OrgId, OrgName}=OrgInfo, Index, [<<>>], NameOrId) ->
     io:format("~nSending all items in index '~p' in organization '~s' to be indexed.", [Index, OrgName]),
-    perform_reindex(Context, {_OrgId, OrgName}=OrgInfo, Index, [<<>>]);
-perform(Context, {_OrgId, OrgName}=OrgInfo, Index, Items) ->
+    perform_reindex(Context, {_OrgId, OrgName}=OrgInfo, Index, [<<>>], NameOrId);
+perform(Context, {_OrgId, OrgName}=OrgInfo, Index, Items, NameOrId) ->
     io:format("~nSending items ~p in index '~p' in organization '~s' to be indexed.", [Items, Index, OrgName]),
-    perform_reindex(Context, {_OrgId, OrgName}=OrgInfo, Index, Items).
+    perform_reindex(Context, {_OrgId, OrgName}=OrgInfo, Index, Items, NameOrId).
 
 %% @doc Actually do the reindexing.
--spec perform(Context :: term(),
-              {OrgId::binary(), OrgName::binary()},
-              Index::index(),
-              Items::[] | [binary()]
-             ) -> term().
-perform_reindex(Context, {_OrgId, OrgName}=OrgInfo, Index, Items) ->
+-spec perform_reindex(Context :: term(),
+                      {OrgId::binary(), OrgName::binary()},
+                      Index::index(),
+                      Items::[] | [binary()],
+                      NameOrId::id | name
+                     )-> term().
+perform_reindex(Context, {_OrgId, OrgName}=OrgInfo, Index, Items, NameOrId) ->
     io:format("~nIt may take some time before everything is available via search.~n", []),
-    Response = rpc_reindex(Context, OrgInfo, Index, Items),
+    Response = rpc_reindex(Context, OrgInfo, Index, Items, NameOrId),
     case Response of
         {[],[]} ->
             io:format("~nreindexing[~s]: reindex complete!~n", [OrgName]);
@@ -106,7 +120,8 @@ perform_reindex(Context, {_OrgId, OrgName}=OrgInfo, Index, Items) ->
 
 print_usage() ->
     io:format("Need to specify: ~n an organization, index and a list of names or~n an organization and an index.~n"),
-    io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME ITEM1 ITEM2.. ~n"),
+    io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME ITEM1_ID ITEM2_ID.. --ids ~n"),
+    io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME ITEM1_NAME ITEM2_NAME.. ~n"),
     io:format("Usage: reindex-opc-piecewise ORGNAME INDEXNAME~n").
 
 %% Massaging the input to match expectations
@@ -129,10 +144,12 @@ bin_items_list([]) ->
 bin_items_list(Items) ->
     [ list_to_binary(X) || X <- Items ].
 
-rpc_reindex(Context, OrgInfo, Index, [<<>>])->
+rpc_reindex(Context, OrgInfo, Index, [<<>>], _)->
     rpc:call(?ERCHEF, chef_reindex, reindex, [Context, OrgInfo, Index]);
-rpc_reindex(Context, OrgInfo, Index, Items) ->
-    rpc:call(?ERCHEF, chef_reindex, reindex_by_name, [Context, OrgInfo, Index, Items]).
+rpc_reindex(Context, OrgInfo, Index, Items, names) ->
+    rpc:call(?ERCHEF, chef_reindex, reindex_by_name, [Context, OrgInfo, Index, Items]);
+rpc_reindex(Context, OrgInfo, Index, Items, ids) ->
+    rpc:call(?ERCHEF, chef_reindex, reindex_by_id, [Context, OrgInfo, Index, Items]).
 
 print_errors(Failed, OrgName, Index) ->
     io:format(standard_error, "Reindexing the organization \"~s\" index \"~s\" has failed.~n", [OrgName, Index]),
