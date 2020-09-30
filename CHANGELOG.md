@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.57 -->
-## [14.0.57](https://github.com/chef/chef-server/tree/14.0.57) (2020-09-29)
+<!-- latest_release 14.0.58 -->
+## [14.0.58](https://github.com/chef/chef-server/tree/14.0.58) (2020-09-30)
 
 #### Merged Pull Requests
-- Update dependency for pooler to chef/pooler [#2105](https://github.com/chef/chef-server/pull/2105) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Wait and retry index_exists? check while Elasticsearch starts and stabilizes [#2134](https://github.com/chef/chef-server/pull/2134) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=13.2.0 -->
 ### Changes since 13.2.0 release
 
 #### Merged Pull Requests
+- Wait and retry index_exists? check while Elasticsearch starts and stabilizes [#2134](https://github.com/chef/chef-server/pull/2134) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.58 -->
 - Update dependency for pooler to chef/pooler [#2105](https://github.com/chef/chef-server/pull/2105) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.57 -->
 - Add option --ids to enable reindexing an index by ids [#2133](https://github.com/chef/chef-server/pull/2133) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.56 -->
 - Interpolate Port for oc-id Endpoint URL [#2119](https://github.com/chef/chef-server/pull/2119) ([bdwyertech](https://github.com/bdwyertech)) <!-- 14.0.55 -->
