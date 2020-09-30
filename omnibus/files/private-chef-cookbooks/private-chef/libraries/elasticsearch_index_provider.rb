@@ -6,7 +6,7 @@ class Chef
       provides :elasticsearch_index
 
       action :create do
-        unless index_exists?
+        unless retry_index_exists?(4)
           converge_by "Creating elasticsearch index #{new_resource.index_name}" do
             solr_server.put(new_resource.index_name, new_resource.index_definition)
           end
@@ -21,14 +21,22 @@ class Chef
         end
       end
 
-      def index_exists?
+      ## We check if the elasticsearch index exists before creating it.
+      ## But Elasticsearch returns 404 for a short duration during startup before it stabilizes and can return a 200.
+      ## As a result, we incorrectly try to recreate an index when it actually exists in the system.
+      ## Re-creating an existing index is a 400 "Bad Request" error.
+      def retry_index_exists?(count)
         solr_server.get("/#{new_resource.index_name}")
         true
       rescue Net::HTTPClientException => e
-        if e.response && e.response.code == '404'
-          false
+        raise unless (e.response && e.response.code == '404')
+
+        if count.positive?
+          Chef::Log.debug("Elasticsearch returned 404 for /#{new_resource.index_name}, retrying in 5 second")
+          sleep 5
+          retry_index_exists?(count - 1)
         else
-          raise
+          false
         end
       end
 
