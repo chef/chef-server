@@ -6,7 +6,7 @@ class Chef
       provides :elasticsearch_index
 
       action :create do
-        unless retry_index_exists?
+        unless retry_index_exists?(4)
           converge_by "Creating elasticsearch index #{new_resource.index_name}" do
             solr_server.put(new_resource.index_name, new_resource.index_definition)
           end
@@ -29,9 +29,10 @@ class Chef
         solr_server.get("/#{new_resource.index_name}")
         true
       rescue Net::HTTPClientException => e
-        raise unless (e.response && e.response.code) == '404'
+        raise unless (e.response && e.response.code == '404')
 
         if count.positive?
+          Chef::Log.debug("Elasticsearch returned 404 for /#{new_resource.index_name}, retrying in 5 second")
           sleep 5
           retry_index_exists?(count - 1)
         else
