@@ -110,17 +110,6 @@ parse_authorization(Auth) ->
             {error, parse_authorization}
     end.
 
-encode_sign_error_response(AccessKeyId, Signature,
-                           RequestId, StringToSign, Req0,
-                          Context) ->
-    Req1 = bksw_req:with_amz_id_2(Req0),
-    Body = bksw_xml:signature_does_not_match_error(
-             RequestId, bksw_util:to_string(Signature),
-             bksw_util:to_string(StringToSign),
-             bksw_util:to_string(AccessKeyId)),
-    Req2 = wrq:set_resp_body(Body, Req1),
-    {{halt, 403}, Req2, Context}.
-
 encode_access_denied_error_response(RequestId, Req0, Context) ->
     Req1 = bksw_req:with_amz_id_2(Req0),
     Body = bksw_xml:access_denied_error(RequestId),
@@ -172,6 +161,17 @@ auth_finish(RequestId, Req1, #context{
         _ ->
             encode_access_denied_error_response(RequestId, Req1, Context)
     end.
+
+encode_sign_error_response(AccessKeyId, Signature,
+                           RequestId, StringToSign, Req0,
+                          Context) ->
+    Req1 = bksw_req:with_amz_id_2(Req0),
+    Body = bksw_xml:signature_does_not_match_error(
+             RequestId, bksw_util:to_string(Signature),
+             bksw_util:to_string(StringToSign),
+             bksw_util:to_string(AccessKeyId)),
+    Req2 = wrq:set_resp_body(Body, Req1),
+    {{halt, 403}, Req2, Context}.
 
 % split  "<bucketname>/<key>" (possibly leading and/or trailing /) into {"bucketname", "key"}
 % Path = "<bucketname>/<key>"
