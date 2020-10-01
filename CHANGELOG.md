@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 14.0.59 -->
+## [14.0.59](https://github.com/chef/chef-server/tree/14.0.59) (2020-10-01)
+
+#### Merged Pull Requests
+- Included display_name in verbose GET /users response [#2112](https://github.com/chef/chef-server/pull/2112) ([antima-gupta](https://github.com/antima-gupta))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=14.0.58 -->
+### Changes since 14.0.58 release
+
+#### Merged Pull Requests
+- Included display_name in verbose GET /users response [#2112](https://github.com/chef/chef-server/pull/2112) ([antima-gupta](https://github.com/antima-gupta)) <!-- 14.0.59 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
