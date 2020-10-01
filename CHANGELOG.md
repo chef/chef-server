@@ -1,127 +1,125 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.58 -->
-## [14.0.58](https://github.com/chef/chef-server/tree/14.0.58) (2020-09-30)
-
-#### Merged Pull Requests
-- Wait and retry index_exists? check while Elasticsearch starts and stabilizes [#2134](https://github.com/chef/chef-server/pull/2134) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=13.2.0 -->
-### Changes since 13.2.0 release
-
-#### Merged Pull Requests
-- Wait and retry index_exists? check while Elasticsearch starts and stabilizes [#2134](https://github.com/chef/chef-server/pull/2134) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.58 -->
-- Update dependency for pooler to chef/pooler [#2105](https://github.com/chef/chef-server/pull/2105) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.57 -->
-- Add option --ids to enable reindexing an index by ids [#2133](https://github.com/chef/chef-server/pull/2133) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.56 -->
-- Interpolate Port for oc-id Endpoint URL [#2119](https://github.com/chef/chef-server/pull/2119) ([bdwyertech](https://github.com/bdwyertech)) <!-- 14.0.55 -->
-- erchef: new ibrowse to address spurious 500s [#2132](https://github.com/chef/chef-server/pull/2132) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.54 -->
-- cookbooks: ensure ES is started [#2131](https://github.com/chef/chef-server/pull/2131) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.53 -->
-- Start postgres, int the even that it might be down. This is a no-op for external postgres. [#2130](https://github.com/chef/chef-server/pull/2130) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.52 -->
-- Update migration to exclude managing postgres services, since chef-server-ctl cannot manage external postgres [#2128](https://github.com/chef/chef-server/pull/2128) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.51 -->
-- Small fixes: remove unused functions and match error code with function names [#2129](https://github.com/chef/chef-server/pull/2129) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.50 -->
-- Elasticsearch options will not exist for versions before 13.2.0 of chef-server [#2127](https://github.com/chef/chef-server/pull/2127) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.49 -->
-- fix external elasticsearch scenario on upgrade [#2126](https://github.com/chef/chef-server/pull/2126) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.48 -->
-- cookbooks: move shard/index configuration into elasticsearch config [#2122](https://github.com/chef/chef-server/pull/2122) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.47 -->
-- Tag the index deletion search specs [#2124](https://github.com/chef/chef-server/pull/2124) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.46 -->
-- chef-server-ctl: add cleanups for 14 upgrade [#2121](https://github.com/chef/chef-server/pull/2121) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.45 -->
-- cookbooks: improve solr4 configuration handling [#2120](https://github.com/chef/chef-server/pull/2120) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.44 -->
-- Praj/minus opscode expander [#2111](https://github.com/chef/chef-server/pull/2111) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.43 -->
-- update to latest available openresty build [#2116](https://github.com/chef/chef-server/pull/2116) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.42 -->
-- erchef,bookshelf: update erlcloud hashes [#2117](https://github.com/chef/chef-server/pull/2117) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.41 -->
-- cookbooks: remove deprecrated_solr_indexing [#2107](https://github.com/chef/chef-server/pull/2107) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.40 -->
-- upgrades: Remove unsupported partybus migrations [#2108](https://github.com/chef/chef-server/pull/2108) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.39 -->
-- Add erlcloud library to rebar.lock files [#2114](https://github.com/chef/chef-server/pull/2114) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.38 -->
-- Remove RabbitMQ from erchef and omnibus cookbooks [#2103](https://github.com/chef/chef-server/pull/2103) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.37 -->
-- Standardize usage of webmachine dependency [#2094](https://github.com/chef/chef-server/pull/2094) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.36 -->
-- Display patent information for every chef-server-ctl command [#2104](https://github.com/chef/chef-server/pull/2104) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.35 -->
-- Add Erlcloud Dep and Requisite License Scout Fixes [#2095](https://github.com/chef/chef-server/pull/2095) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.34 -->
-- Harmonize Treatment of Host Header in Pedant [#2096](https://github.com/chef/chef-server/pull/2096) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.33 -->
-- Remove support for plugins/extensions including ha-aws [#2102](https://github.com/chef/chef-server/pull/2102) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.32 -->
-- Remove unreachable cookbook assets [#2101](https://github.com/chef/chef-server/pull/2101) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.31 -->
-- Fix fips errors in RHEL smoke tests [#2098](https://github.com/chef/chef-server/pull/2098) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.30 -->
-- oc-chef-pedant: remove wait_until_queues_are_empty [#2100](https://github.com/chef/chef-server/pull/2100) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.29 -->
-- Upgrade to OTP 22 [#2099](https://github.com/chef/chef-server/pull/2099) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.28 -->
-- Pin to a single version of chef client consistently in omnibus [#2035](https://github.com/chef/chef-server/pull/2035) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.27 -->
-- add version annotations to integration_test pipeline [#2090](https://github.com/chef/chef-server/pull/2090) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.26 -->
-- erchef: upgrade opscoderl_httpc [#2093](https://github.com/chef/chef-server/pull/2093) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.25 -->
-- Add habitat-test pipeline [#2091](https://github.com/chef/chef-server/pull/2091) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.24 -->
-- Add build_prefix to azure postgresql [#2084](https://github.com/chef/chef-server/pull/2084) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.23 -->
-- erchef,bifrost,bookshelf: update sqerl [#2081](https://github.com/chef/chef-server/pull/2081) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.22 -->
-- Tagging omnibus-ctl to v0.6.0 [#2068](https://github.com/chef/chef-server/pull/2068) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.21 -->
-- ci: don&#39;t promote docker containers for now [#2077](https://github.com/chef/chef-server/pull/2077) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.20 -->
-- ci: make hab auth token available to promotion script [#2076](https://github.com/chef/chef-server/pull/2076) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.19 -->
-- ci: guard on BUILDKITE rather than EXPEDITOR env var [#2075](https://github.com/chef/chef-server/pull/2075) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.18 -->
-- ci: move upload_files.sh to buildkite pipeline [#2074](https://github.com/chef/chef-server/pull/2074) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.17 -->
-- Fix Terraform lint errors [#2072](https://github.com/chef/chef-server/pull/2072) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.16 -->
-- Fix RHEL8 FIPS enablement in integration test [#2071](https://github.com/chef/chef-server/pull/2071) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.15 -->
-- Add Chef Server 13 release branch [#2065](https://github.com/chef/chef-server/pull/2065) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.14 -->
-- Sel conn closed [#2064](https://github.com/chef/chef-server/pull/2064) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.13 -->
-- Remove the dependency for solr, rabbitmq and opscode-expander [#2058](https://github.com/chef/chef-server/pull/2058) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.12 -->
-- Tag omniauth version, later tags of omniauth use the latest chef 16 [#2063](https://github.com/chef/chef-server/pull/2063) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.11 -->
-- Update gpg key URL [#2054](https://github.com/chef/chef-server/pull/2054) ([rjhornsby](https://github.com/rjhornsby)) <!-- 14.0.10 -->
-- Add nightly integration test run [#2052](https://github.com/chef/chef-server/pull/2052) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.9 -->
-- Build packages for SLES 15 [#2051](https://github.com/chef/chef-server/pull/2051) ([tas50](https://github.com/tas50)) <!-- 14.0.8 -->
-- Build packages for Ubuntu 20.04 [#2050](https://github.com/chef/chef-server/pull/2050) ([tas50](https://github.com/tas50)) <!-- 14.0.7 -->
-- MAINTAINERS: drop me [#2048](https://github.com/chef/chef-server/pull/2048) ([srenatus](https://github.com/srenatus)) <!-- 14.0.6 -->
-- Move the push jobs scenario to the end of the tests. [#1967](https://github.com/chef/chef-server/pull/1967) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.5 -->
-- Add azure test scenarios to the integration_test pipeline [#2043](https://github.com/chef/chef-server/pull/2043) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.4 -->
-- Implement reaper for orphaned integration-test instances [#2038](https://github.com/chef/chef-server/pull/2038) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.3 -->
-- Fix azure scenario to retrieve public ip on first run [#2039](https://github.com/chef/chef-server/pull/2039) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.2 -->
-- Add sleep and license acceptance to chef-run in openldap scenario [#2037](https://github.com/chef/chef-server/pull/2037) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.1 -->
-- Praj/update to 14 [#2034](https://github.com/chef/chef-server/pull/2034) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.0 -->
-- Currently fails to post to es due to an nxdomain error. [#2032](https://github.com/chef/chef-server/pull/2032) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.49 -->
-- Automatically announce release on promotion to stable [#2005](https://github.com/chef/chef-server/pull/2005) ([schisamo](https://github.com/schisamo)) <!-- 13.2.48 -->
-- Add the scenario for standalone fresh install [#2028](https://github.com/chef/chef-server/pull/2028) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.47 -->
-- [habitat] Explicitly install ruby 1.17 [#2029](https://github.com/chef/chef-server/pull/2029) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.46 -->
-- Pin to chef-cli 3.0.1 [#2030](https://github.com/chef/chef-server/pull/2030) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.2.45 -->
-- Remove legacy ACC configuration [#2026](https://github.com/chef/chef-server/pull/2026) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.44 -->
-- [erchef] Upgrade chef_authn [#2025](https://github.com/chef/chef-server/pull/2025) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.43 -->
-- [terraform] Set ip_version in postgresql-ipv6 tests, disable pushy [#2022](https://github.com/chef/chef-server/pull/2022) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.42 -->
-- Modify security group name to include build_prefix and scenario [#2021](https://github.com/chef/chef-server/pull/2021) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.2.41 -->
-- Disable push jobs tests in tiered ipv6 pipeline [#2020](https://github.com/chef/chef-server/pull/2020) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.40 -->
-- Fix the ipv6 scenario [#2015](https://github.com/chef/chef-server/pull/2015) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.39 -->
-- [terraform] More Makefile fixes [#2018](https://github.com/chef/chef-server/pull/2018) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.38 -->
-- [cookbook] Quote ES host in template [#2017](https://github.com/chef/chef-server/pull/2017) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.37 -->
-- [terraform/pedant] Hopefully fix LDAP integration tests [#2016](https://github.com/chef/chef-server/pull/2016) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.36 -->
-- [terraform] Don&#39;t use quotes in the makefile [#2014](https://github.com/chef/chef-server/pull/2014) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.35 -->
-- Praj/limit integration test cases [#2011](https://github.com/chef/chef-server/pull/2011) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.34 -->
-- More fixes for the tier terraform scenarios [#2006](https://github.com/chef/chef-server/pull/2006) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.33 -->
-- [chef-server-ctl] Add root check [#2012](https://github.com/chef/chef-server/pull/2012) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.32 -->
-- [pedant] Use the correct topology in checks (&#39;tier&#39;, not &#39;tiered&#39;)  [#2013](https://github.com/chef/chef-server/pull/2013) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.31 -->
-- [terraform] Fix terraform syntax problem [#2008](https://github.com/chef/chef-server/pull/2008) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.30 -->
-- Skip checking for the presence of the postgres data dir on the front end of a tier install [#2010](https://github.com/chef/chef-server/pull/2010) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.29 -->
-- [integration] temporarily remove openldap scenarios [#2009](https://github.com/chef/chef-server/pull/2009) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.28 -->
-- [cookbooks/elasticsearch] Bind to correct address and fix other warnings [#2007](https://github.com/chef/chef-server/pull/2007) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.27 -->
-- Add only a warning to the preinst script. Do not wait for user input. [#2002](https://github.com/chef/chef-server/pull/2002) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.26 -->
-- Install push-jobs on the tiered backend [#2003](https://github.com/chef/chef-server/pull/2003) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.25 -->
-- [erchef] Add histogram for expansion time [#2000](https://github.com/chef/chef-server/pull/2000) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.24 -->
-- [erchef] small optimization in chef_index_batch [#1998](https://github.com/chef/chef-server/pull/1998) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.23 -->
-- [cookbooks] Don&#39;t generate trailing comma in solr_url [#1999](https://github.com/chef/chef-server/pull/1999) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.22 -->
-- [pedant] Add new stats to stats test [#1997](https://github.com/chef/chef-server/pull/1997) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.21 -->
-- [terraform] Fix creating tiered setup. [#1996](https://github.com/chef/chef-server/pull/1996) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.20 -->
-- Add auto support for external search in migration for external elasticsearch [#1989](https://github.com/chef/chef-server/pull/1989) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.19 -->
-- Add prometheus metrics to chef_index [#1982](https://github.com/chef/chef-server/pull/1982) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.18 -->
-- Add an escript to enable piecewise-reindex [#1983](https://github.com/chef/chef-server/pull/1983) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.17 -->
-- [reindex] Handle more reindexing failure cases [#1991](https://github.com/chef/chef-server/pull/1991) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.16 -->
-- fix the chef-server.rb template for tiered setups [#1990](https://github.com/chef/chef-server/pull/1990) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.15 -->
-- Praj/solr to es [#1876](https://github.com/chef/chef-server/pull/1876) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.14 -->
-- Add preflight checks [#1984](https://github.com/chef/chef-server/pull/1984) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.13 -->
-- Fix the runlist [#1987](https://github.com/chef/chef-server/pull/1987) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.12 -->
-- [chef-server-ctl] Add new check-config command [#1985](https://github.com/chef/chef-server/pull/1985) ([stevendanna](https://github.com/stevendanna)) <!-- 13.2.11 -->
-- Fix markdown formatting, punctuation, grammar in release notes [#1981](https://github.com/chef/chef-server/pull/1981) ([IanMadd](https://github.com/IanMadd)) <!-- 13.2.10 -->
-- Add chef-server logs to buildkite [#1980](https://github.com/chef/chef-server/pull/1980) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 13.2.9 -->
-- Update veil from 0.3.0 to 0.3.3 [#1979](https://github.com/chef/chef-server/pull/1979) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.8 -->
-- Update listen_port for newer nginx.conf syntax. [#1978](https://github.com/chef/chef-server/pull/1978) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.7 -->
-- Restrict access to dhparams.pem (used by Nginx). [#1977](https://github.com/chef/chef-server/pull/1977) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.6 -->
-- Add an exception for habitat core/binutils [#1975](https://github.com/chef/chef-server/pull/1975) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.5 -->
-- Add information about software updates. [#1971](https://github.com/chef/chef-server/pull/1971) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.4 -->
-- Add an exception for habitat core/perl licenses. [#1972](https://github.com/chef/chef-server/pull/1972) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.3 -->
-- Turn off smart builds [#1965](https://github.com/chef/chef-server/pull/1965) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.2 -->
-- Update release notes for 13.2.0 [#1964](https://github.com/chef/chef-server/pull/1964) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 13.2.1 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [14.0.58](https://github.com/chef/chef-server/tree/14.0.58) (2020-10-01)
+
+#### Merged Pull Requests
+- Update release notes for 13.2.0 [#1964](https://github.com/chef/chef-server/pull/1964) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Turn off smart builds [#1965](https://github.com/chef/chef-server/pull/1965) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add an exception for habitat core/perl licenses. [#1972](https://github.com/chef/chef-server/pull/1972) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add information about software updates. [#1971](https://github.com/chef/chef-server/pull/1971) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add an exception for habitat core/binutils [#1975](https://github.com/chef/chef-server/pull/1975) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Restrict access to dhparams.pem (used by Nginx). [#1977](https://github.com/chef/chef-server/pull/1977) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update listen_port for newer nginx.conf syntax. [#1978](https://github.com/chef/chef-server/pull/1978) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update veil from 0.3.0 to 0.3.3 [#1979](https://github.com/chef/chef-server/pull/1979) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add chef-server logs to buildkite [#1980](https://github.com/chef/chef-server/pull/1980) ([christopher-snapp](https://github.com/christopher-snapp))
+- Fix markdown formatting, punctuation, grammar in release notes [#1981](https://github.com/chef/chef-server/pull/1981) ([IanMadd](https://github.com/IanMadd))
+- [chef-server-ctl] Add new check-config command [#1985](https://github.com/chef/chef-server/pull/1985) ([stevendanna](https://github.com/stevendanna))
+- Fix the runlist [#1987](https://github.com/chef/chef-server/pull/1987) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add preflight checks [#1984](https://github.com/chef/chef-server/pull/1984) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Praj/solr to es [#1876](https://github.com/chef/chef-server/pull/1876) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- fix the chef-server.rb template for tiered setups [#1990](https://github.com/chef/chef-server/pull/1990) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- [reindex] Handle more reindexing failure cases [#1991](https://github.com/chef/chef-server/pull/1991) ([stevendanna](https://github.com/stevendanna))
+- Add an escript to enable piecewise-reindex [#1983](https://github.com/chef/chef-server/pull/1983) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add prometheus metrics to chef_index [#1982](https://github.com/chef/chef-server/pull/1982) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add auto support for external search in migration for external elasticsearch [#1989](https://github.com/chef/chef-server/pull/1989) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- [terraform] Fix creating tiered setup. [#1996](https://github.com/chef/chef-server/pull/1996) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- [pedant] Add new stats to stats test [#1997](https://github.com/chef/chef-server/pull/1997) ([stevendanna](https://github.com/stevendanna))
+- [cookbooks] Don&#39;t generate trailing comma in solr_url [#1999](https://github.com/chef/chef-server/pull/1999) ([stevendanna](https://github.com/stevendanna))
+- [erchef] small optimization in chef_index_batch [#1998](https://github.com/chef/chef-server/pull/1998) ([stevendanna](https://github.com/stevendanna))
+- [erchef] Add histogram for expansion time [#2000](https://github.com/chef/chef-server/pull/2000) ([stevendanna](https://github.com/stevendanna))
+- Install push-jobs on the tiered backend [#2003](https://github.com/chef/chef-server/pull/2003) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add only a warning to the preinst script. Do not wait for user input. [#2002](https://github.com/chef/chef-server/pull/2002) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- [cookbooks/elasticsearch] Bind to correct address and fix other warnings [#2007](https://github.com/chef/chef-server/pull/2007) ([stevendanna](https://github.com/stevendanna))
+- [integration] temporarily remove openldap scenarios [#2009](https://github.com/chef/chef-server/pull/2009) ([stevendanna](https://github.com/stevendanna))
+- Skip checking for the presence of the postgres data dir on the front end of a tier install [#2010](https://github.com/chef/chef-server/pull/2010) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- [terraform] Fix terraform syntax problem [#2008](https://github.com/chef/chef-server/pull/2008) ([stevendanna](https://github.com/stevendanna))
+- [pedant] Use the correct topology in checks (&#39;tier&#39;, not &#39;tiered&#39;)  [#2013](https://github.com/chef/chef-server/pull/2013) ([stevendanna](https://github.com/stevendanna))
+- [chef-server-ctl] Add root check [#2012](https://github.com/chef/chef-server/pull/2012) ([stevendanna](https://github.com/stevendanna))
+- More fixes for the tier terraform scenarios [#2006](https://github.com/chef/chef-server/pull/2006) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Praj/limit integration test cases [#2011](https://github.com/chef/chef-server/pull/2011) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- [terraform] Don&#39;t use quotes in the makefile [#2014](https://github.com/chef/chef-server/pull/2014) ([stevendanna](https://github.com/stevendanna))
+- [terraform/pedant] Hopefully fix LDAP integration tests [#2016](https://github.com/chef/chef-server/pull/2016) ([stevendanna](https://github.com/stevendanna))
+- [cookbook] Quote ES host in template [#2017](https://github.com/chef/chef-server/pull/2017) ([stevendanna](https://github.com/stevendanna))
+- [terraform] More Makefile fixes [#2018](https://github.com/chef/chef-server/pull/2018) ([stevendanna](https://github.com/stevendanna))
+- Fix the ipv6 scenario [#2015](https://github.com/chef/chef-server/pull/2015) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Disable push jobs tests in tiered ipv6 pipeline [#2020](https://github.com/chef/chef-server/pull/2020) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Modify security group name to include build_prefix and scenario [#2021](https://github.com/chef/chef-server/pull/2021) ([christopher-snapp](https://github.com/christopher-snapp))
+- [terraform] Set ip_version in postgresql-ipv6 tests, disable pushy [#2022](https://github.com/chef/chef-server/pull/2022) ([stevendanna](https://github.com/stevendanna))
+- [erchef] Upgrade chef_authn [#2025](https://github.com/chef/chef-server/pull/2025) ([stevendanna](https://github.com/stevendanna))
+- Remove legacy ACC configuration [#2026](https://github.com/chef/chef-server/pull/2026) ([stevendanna](https://github.com/stevendanna))
+- Pin to chef-cli 3.0.1 [#2030](https://github.com/chef/chef-server/pull/2030) ([christopher-snapp](https://github.com/christopher-snapp))
+- [habitat] Explicitly install ruby 1.17 [#2029](https://github.com/chef/chef-server/pull/2029) ([stevendanna](https://github.com/stevendanna))
+- Add the scenario for standalone fresh install [#2028](https://github.com/chef/chef-server/pull/2028) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Automatically announce release on promotion to stable [#2005](https://github.com/chef/chef-server/pull/2005) ([schisamo](https://github.com/schisamo))
+- Currently fails to post to es due to an nxdomain error. [#2032](https://github.com/chef/chef-server/pull/2032) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Praj/update to 14 [#2034](https://github.com/chef/chef-server/pull/2034) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add sleep and license acceptance to chef-run in openldap scenario [#2037](https://github.com/chef/chef-server/pull/2037) ([christopher-snapp](https://github.com/christopher-snapp))
+- Fix azure scenario to retrieve public ip on first run [#2039](https://github.com/chef/chef-server/pull/2039) ([christopher-snapp](https://github.com/christopher-snapp))
+- Implement reaper for orphaned integration-test instances [#2038](https://github.com/chef/chef-server/pull/2038) ([christopher-snapp](https://github.com/christopher-snapp))
+- Add azure test scenarios to the integration_test pipeline [#2043](https://github.com/chef/chef-server/pull/2043) ([christopher-snapp](https://github.com/christopher-snapp))
+- Move the push jobs scenario to the end of the tests. [#1967](https://github.com/chef/chef-server/pull/1967) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- MAINTAINERS: drop me [#2048](https://github.com/chef/chef-server/pull/2048) ([srenatus](https://github.com/srenatus))
+- Build packages for Ubuntu 20.04 [#2050](https://github.com/chef/chef-server/pull/2050) ([tas50](https://github.com/tas50))
+- Build packages for SLES 15 [#2051](https://github.com/chef/chef-server/pull/2051) ([tas50](https://github.com/tas50))
+- Add nightly integration test run [#2052](https://github.com/chef/chef-server/pull/2052) ([christopher-snapp](https://github.com/christopher-snapp))
+- Update gpg key URL [#2054](https://github.com/chef/chef-server/pull/2054) ([rjhornsby](https://github.com/rjhornsby))
+- Tag omniauth version, later tags of omniauth use the latest chef 16 [#2063](https://github.com/chef/chef-server/pull/2063) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Remove the dependency for solr, rabbitmq and opscode-expander [#2058](https://github.com/chef/chef-server/pull/2058) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Sel conn closed [#2064](https://github.com/chef/chef-server/pull/2064) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add Chef Server 13 release branch [#2065](https://github.com/chef/chef-server/pull/2065) ([stevendanna](https://github.com/stevendanna))
+- Fix RHEL8 FIPS enablement in integration test [#2071](https://github.com/chef/chef-server/pull/2071) ([christopher-snapp](https://github.com/christopher-snapp))
+- Fix Terraform lint errors [#2072](https://github.com/chef/chef-server/pull/2072) ([christopher-snapp](https://github.com/christopher-snapp))
+- ci: move upload_files.sh to buildkite pipeline [#2074](https://github.com/chef/chef-server/pull/2074) ([stevendanna](https://github.com/stevendanna))
+- ci: guard on BUILDKITE rather than EXPEDITOR env var [#2075](https://github.com/chef/chef-server/pull/2075) ([stevendanna](https://github.com/stevendanna))
+- ci: make hab auth token available to promotion script [#2076](https://github.com/chef/chef-server/pull/2076) ([stevendanna](https://github.com/stevendanna))
+- ci: don&#39;t promote docker containers for now [#2077](https://github.com/chef/chef-server/pull/2077) ([stevendanna](https://github.com/stevendanna))
+- Tagging omnibus-ctl to v0.6.0 [#2068](https://github.com/chef/chef-server/pull/2068) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- erchef,bifrost,bookshelf: update sqerl [#2081](https://github.com/chef/chef-server/pull/2081) ([stevendanna](https://github.com/stevendanna))
+- Add build_prefix to azure postgresql [#2084](https://github.com/chef/chef-server/pull/2084) ([christopher-snapp](https://github.com/christopher-snapp))
+- Add habitat-test pipeline [#2091](https://github.com/chef/chef-server/pull/2091) ([christopher-snapp](https://github.com/christopher-snapp))
+- erchef: upgrade opscoderl_httpc [#2093](https://github.com/chef/chef-server/pull/2093) ([stevendanna](https://github.com/stevendanna))
+- add version annotations to integration_test pipeline [#2090](https://github.com/chef/chef-server/pull/2090) ([christopher-snapp](https://github.com/christopher-snapp))
+- Pin to a single version of chef client consistently in omnibus [#2035](https://github.com/chef/chef-server/pull/2035) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Upgrade to OTP 22 [#2099](https://github.com/chef/chef-server/pull/2099) ([stevendanna](https://github.com/stevendanna))
+- oc-chef-pedant: remove wait_until_queues_are_empty [#2100](https://github.com/chef/chef-server/pull/2100) ([stevendanna](https://github.com/stevendanna))
+- Fix fips errors in RHEL smoke tests [#2098](https://github.com/chef/chef-server/pull/2098) ([lbakerchef](https://github.com/lbakerchef))
+- Remove unreachable cookbook assets [#2101](https://github.com/chef/chef-server/pull/2101) ([stevendanna](https://github.com/stevendanna))
+- Remove support for plugins/extensions including ha-aws [#2102](https://github.com/chef/chef-server/pull/2102) ([stevendanna](https://github.com/stevendanna))
+- Harmonize Treatment of Host Header in Pedant [#2096](https://github.com/chef/chef-server/pull/2096) ([lbakerchef](https://github.com/lbakerchef))
+- Add Erlcloud Dep and Requisite License Scout Fixes [#2095](https://github.com/chef/chef-server/pull/2095) ([lbakerchef](https://github.com/lbakerchef))
+- Display patent information for every chef-server-ctl command [#2104](https://github.com/chef/chef-server/pull/2104) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Standardize usage of webmachine dependency [#2094](https://github.com/chef/chef-server/pull/2094) ([lbakerchef](https://github.com/lbakerchef))
+- Remove RabbitMQ from erchef and omnibus cookbooks [#2103](https://github.com/chef/chef-server/pull/2103) ([stevendanna](https://github.com/stevendanna))
+- Add erlcloud library to rebar.lock files [#2114](https://github.com/chef/chef-server/pull/2114) ([lbakerchef](https://github.com/lbakerchef))
+- upgrades: Remove unsupported partybus migrations [#2108](https://github.com/chef/chef-server/pull/2108) ([stevendanna](https://github.com/stevendanna))
+- cookbooks: remove deprecrated_solr_indexing [#2107](https://github.com/chef/chef-server/pull/2107) ([stevendanna](https://github.com/stevendanna))
+- erchef,bookshelf: update erlcloud hashes [#2117](https://github.com/chef/chef-server/pull/2117) ([stevendanna](https://github.com/stevendanna))
+- update to latest available openresty build [#2116](https://github.com/chef/chef-server/pull/2116) ([stevendanna](https://github.com/stevendanna))
+- Praj/minus opscode expander [#2111](https://github.com/chef/chef-server/pull/2111) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- cookbooks: improve solr4 configuration handling [#2120](https://github.com/chef/chef-server/pull/2120) ([stevendanna](https://github.com/stevendanna))
+- chef-server-ctl: add cleanups for 14 upgrade [#2121](https://github.com/chef/chef-server/pull/2121) ([stevendanna](https://github.com/stevendanna))
+- Tag the index deletion search specs [#2124](https://github.com/chef/chef-server/pull/2124) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- cookbooks: move shard/index configuration into elasticsearch config [#2122](https://github.com/chef/chef-server/pull/2122) ([stevendanna](https://github.com/stevendanna))
+- fix external elasticsearch scenario on upgrade [#2126](https://github.com/chef/chef-server/pull/2126) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Elasticsearch options will not exist for versions before 13.2.0 of chef-server [#2127](https://github.com/chef/chef-server/pull/2127) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Small fixes: remove unused functions and match error code with function names [#2129](https://github.com/chef/chef-server/pull/2129) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update migration to exclude managing postgres services, since chef-server-ctl cannot manage external postgres [#2128](https://github.com/chef/chef-server/pull/2128) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Start postgres, int the even that it might be down. This is a no-op for external postgres. [#2130](https://github.com/chef/chef-server/pull/2130) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- cookbooks: ensure ES is started [#2131](https://github.com/chef/chef-server/pull/2131) ([stevendanna](https://github.com/stevendanna))
+- erchef: new ibrowse to address spurious 500s [#2132](https://github.com/chef/chef-server/pull/2132) ([stevendanna](https://github.com/stevendanna))
+- Interpolate Port for oc-id Endpoint URL [#2119](https://github.com/chef/chef-server/pull/2119) ([bdwyertech](https://github.com/bdwyertech))
+- Add option --ids to enable reindexing an index by ids [#2133](https://github.com/chef/chef-server/pull/2133) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update dependency for pooler to chef/pooler [#2105](https://github.com/chef/chef-server/pull/2105) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Wait and retry index_exists? check while Elasticsearch starts and stabilizes [#2134](https://github.com/chef/chef-server/pull/2134) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+<!-- latest_stable_release -->
+
 ## [13.2.0](https://github.com/chef/chef-server/tree/13.2.0) (2020-04-14)
 
 #### Merged Pull Requests
@@ -184,7 +182,6 @@
 - Do not create indexes for elasticsearch at compile time [#1961](https://github.com/chef/chef-server/pull/1961) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 - Praj/1901 [#1945](https://github.com/chef/chef-server/pull/1945) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 - Update version to 13.2 [#1963](https://github.com/chef/chef-server/pull/1963) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
-<!-- latest_stable_release -->
 
 ## [13.1.13](https://github.com/chef/chef-server/tree/13.1.13) (2019-11-25)
 
