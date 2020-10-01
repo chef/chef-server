@@ -35,6 +35,7 @@
 -include_lib("erlcloud/include/erlcloud_aws.hrl").
 
 % CODE REVIEW - choose accessor style: 1) longer style (this one) or 2) shorter style (below).
+% alternatively, these could be functions.
 %
 % until erlang gets a shorthand way to access a key's value
 %-define(ACCESSKEY(Auth),          maps:get(accesskey,          Auth)).
