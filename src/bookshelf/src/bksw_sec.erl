@@ -43,6 +43,8 @@
 %-define(ALT_SIGNED_HEADERS(Auth), maps:get(alt_signed_headers, Auth)).
 %-define(METHOD(Auth),             maps:get(method,             Auth)).
 %-define(PATH(Auth),               maps:get(path,               Auth)).
+%-define(REQ(Auth),                maps:get(req,                Auth)).
+%-define(REQID(Auth),              maps:get(reqid,              Auth)).
 
 % CODE REVIEW - choose accessor style: 1) longer style (above) or 2) shorter style (this one).
 %
@@ -52,6 +54,8 @@
 -define(ALT_SIGNED_HEADERS, maps:get(alt_signed_headers, Auth)).
 -define(METHOD,             maps:get(method,             Auth)).
 -define(PATH,               maps:get(path,               Auth)).
+-define(REQ,                maps:get(req,                Auth)).
+-define(REQID,              maps:get(reqid,              Auth)).
 
 %%===================================================================
 %% API functions
@@ -63,8 +67,7 @@ is_authorized(Req0, #context{auth_type           = presigned_url,
                              incoming_sig        = IncomingSignature,
                              signed_headers      = SignedHeaders,
                              x_amz_expires_int   = XAmzExpiresInt} = Context) ->
-    {RequestId, Req1}  = bksw_req:with_amz_request_id(Req0),
-    Auth               = auth_init(Req1, Context, SignedHeaders),
+    Auth               = auth_init(Req0, Context, SignedHeaders),
     {Bucketname, Key } = get_bucket_key(?PATH),
     ComparisonURL      = mini_s3:s3_url(?METHOD, Bucketname, Key, XAmzExpiresInt, SignedHeaders, Date, ?CONFIG),
     IncomingSig        = list_to_binary(IncomingSignature),
@@ -83,19 +86,18 @@ is_authorized(Req0, #context{auth_type           = presigned_url,
                 [_, AltComparisonSig] = string:split(AltComparisonURL, "&X-Amz-Signature=", all),
                 AltComparisonSig
         end,
-    auth_finish(RequestId, Req1, Context, Auth, ComparisonURL, IncomingSig, CalculatedSig);
+    auth_finish(Auth, Context, ComparisonURL, IncomingSig, CalculatedSig);
 is_authorized(Req0, #context{auth_type           = auth_header,
                              date                = Date,
                              incoming_sig        = IncomingSignature,
                              region              = Region,
                              signed_headers      = SignedHeaders} = Context) ->
-    {RequestId, Req1} = bksw_req:with_amz_request_id(Req0),
-    Auth              = auth_init(Req1, Context, SignedHeaders),
+    Auth              = auth_init(Req0, Context, SignedHeaders),
     ComparisonURL     = "not-applicable",
-    QueryParams       = wrq:req_qs(Req1),
+    QueryParams       = wrq:req_qs(?REQ),
     SigV4Headers      = erlcloud_aws:sign_v4(?METHOD, ?PATH, ?CONFIG, SignedHeaders, <<>>, Region, "s3", QueryParams, Date),
     IncomingSig       = IncomingSignature,
-    ComparisonSig     = parseauth_or_throw(proplists:get_value("Authorization", SigV4Headers, ""), {RequestId, Req1, Context}),
+    ComparisonSig     = parseauth_or_throw(proplists:get_value("Authorization", SigV4Headers, ""), {?REQID, ?REQ, Context}),
 
     % TODO: try to remove alt sig computation and see what happens
     % NOTE: this was tried, and caused compilation and test failures.
@@ -107,15 +109,15 @@ is_authorized(Req0, #context{auth_type           = auth_header,
                 IncomingSig;
             _ ->
                 AltSigV4Headers   = erlcloud_aws:sign_v4(?METHOD, ?PATH, ?CONFIG, ?ALT_SIGNED_HEADERS, <<>>, Region, "s3", QueryParams, Date),
-                _AltComparisonSig = parseauth_or_throw(proplists:get_value("Authorization", AltSigV4Headers, ""), {RequestId, Req1, Context})
+                _AltComparisonSig = parseauth_or_throw(proplists:get_value("Authorization", AltSigV4Headers, ""), {?REQID, ?REQ, Context})
         end,
-    auth_finish(RequestId, Req1, Context, Auth, ComparisonURL, IncomingSig, CalculatedSig).
+    auth_finish(Auth, Context, ComparisonURL, IncomingSig, CalculatedSig).
 
 % @doc split authorization header into component parts
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
 -spec parse_authorization(string()) -> {ok, [string()]} | {error, parse_authorization}.
-parse_authorization(Auth) ->
-    case string:split(Auth, " ", all) of
+parse_authorization(Authorization) ->
+    case string:split(Authorization, " ", all) of
         ["AWS4-HMAC-SHA256", "Credential="++Cred, "SignedHeaders="++SigHead, "Signature="++Signature] ->
             {ok, [string:trim(Cred, trailing, ","), string:trim(SigHead, trailing, ","), Signature]};
         _ ->
@@ -135,43 +137,46 @@ encode_access_denied_error_response(RequestId, Req0, Context) ->
 % common setup, init
 -spec auth_init(any(), tuple(), string()) -> map().
 auth_init(Req0, Context, SignedHeaders) ->
-    AccessKey = bksw_conf:access_key_id(Context),
-    Config    = mini_s3:new(AccessKey, bksw_conf:secret_access_key(Context), host(Req0)),
+    AccessKey            =  bksw_conf:access_key_id(Context),
+    {RequestId, Req1}    =  bksw_req:with_amz_request_id(Req0),
+    Config    = mini_s3:new(AccessKey, bksw_conf:secret_access_key(Context), host(Req1)),
     #{accesskey          => AccessKey,
       config             => Config,
-      alt_signed_headers => [case {K, V} of {"host", _} -> {"host", get_host_toggleport(host(Req0), Config)}; _ -> {K, V} end || {K, V} <- SignedHeaders],
-      method             => list_to_atom(string:to_lower(erlang:atom_to_list(wrq:method(Req0)))),
-      path               => wrq:path(Req0)}.
+      alt_signed_headers => [case {K, V} of {"host", _} -> {"host", get_host_toggleport(host(Req1), Config)}; _ -> {K, V} end || {K, V} <- SignedHeaders],
+      method             => list_to_atom(string:to_lower(erlang:atom_to_list(wrq:method(Req1)))),
+      path               => wrq:path(Req1),
+      req                => Req1,
+      reqid              => RequestId}.
 
 % TODO: spec
-auth_finish(RequestId, Req1, #context{
-                                aws_access_key_id = AWSAccessKeyId,
-                                date              = Date,
-                                reqid             = ReqId,
-                                x_amz_expires_int = XAmzExpiresInt,
-                                x_amz_expires_str = XAmzExpiresString
-                               } = Context, Auth, ComparisonURL, IncomingSig, CalculatedSig) ->
+auth_finish(Auth, #context{
+                     aws_access_key_id = AWSAccessKeyId,
+                     date              = Date,
+                     reqid             = ReqId,
+                     x_amz_expires_int = XAmzExpiresInt,
+                     x_amz_expires_str = XAmzExpiresString
+                  } = Context, ComparisonURL, IncomingSig, CalculatedSig) ->
     case IncomingSig of
         CalculatedSig ->
             case is_expired(Date, XAmzExpiresInt) of
                 true ->
                     ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p", [ReqId, XAmzExpiresInt, ?PATH]),
-                    encode_access_denied_error_response(RequestId, Req1, Context);
+                    encode_access_denied_error_response(?REQID, ?REQ, Context);
                 false ->
                     case erlang:iolist_to_binary(AWSAccessKeyId) == erlang:iolist_to_binary(?ACCESSKEY) of
                         true ->
                             MaxAge = "max-age=" ++ XAmzExpiresString,
-                            Req2 = wrq:set_resp_header("Cache-Control", MaxAge, Req1),
+                            Req2 = wrq:set_resp_header("Cache-Control", MaxAge, ?REQ),
                             {true, Req2, Context};
                         false ->
                             ?LOG_DEBUG("req_id=~p signing error for ~p", [ReqId, ?PATH]),
                             %encode_sign_error_response(AWSAccessKeyId, IncomingSignature, RequestId,
-                            encode_sign_error_response(AWSAccessKeyId, IncomingSig, RequestId,
-                                                       ComparisonURL, Req1, Context)
+                            encode_sign_error_response(AWSAccessKeyId, IncomingSig, ?REQID,
+                                                       ComparisonURL, ?REQ, Context)
                     end
             end;
         _ ->
-            encode_access_denied_error_response(RequestId, Req1, Context)
+            encode_access_denied_error_response(?REQID, ?REQ, Context)
     end.
 
 encode_sign_error_response(AccessKeyId, Signature,
@@ -247,12 +252,12 @@ is_expired(DateTimeString, ExpiresSec) ->
 
 % TODO: export and test this
 -spec parseauth_or_throw(string(), tuple()) -> string() | no_return().
-parseauth_or_throw(Auth, Throw) ->
+parseauth_or_throw(Authorization, Throw) ->
     try
-        case parse_authorization(Auth) of
+        case parse_authorization(Authorization) of
             {ok, [_, _, Sig]} -> Sig;
             _                 -> throw(Throw)
         end
     catch
-        throw:{RequestId, Req, Context} -> encode_access_denied_error_response(RequestId, Req, Context)
+        throw:{?REQID, Req, Context} -> encode_access_denied_error_response(?REQID, Req, Context)
     end.
