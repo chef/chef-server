@@ -82,7 +82,7 @@ is_authorized(Req0, #context{auth_type           = presigned_url,
                 %AltComparisonSig = "not computed",
                 IncomingSig;
             _ ->
-                AltComparisonURL = mini_s3:s3_url(?METHOD, Bucketname, Key, XAmzExpiresInt, ?ALT_SIGNED_HEADERS, Date, ?CONFIG),
+                AltComparisonURL      = mini_s3:s3_url(?METHOD, Bucketname, Key, XAmzExpiresInt, ?ALT_SIGNED_HEADERS, Date, ?CONFIG),
                 [_, AltComparisonSig] = string:split(AltComparisonURL, "&X-Amz-Signature=", all),
                 AltComparisonSig
         end,
@@ -166,7 +166,7 @@ auth_finish(Auth, #context{
                     case erlang:iolist_to_binary(AWSAccessKeyId) == erlang:iolist_to_binary(?ACCESSKEY) of
                         true ->
                             MaxAge = "max-age=" ++ XAmzExpiresString,
-                            Req2 = wrq:set_resp_header("Cache-Control", MaxAge, ?REQ),
+                            Req2   = wrq:set_resp_header("Cache-Control", MaxAge, ?REQ),
                             {true, Req2, Context};
                         false ->
                             ?LOG_DEBUG("req_id=~p signing error for ~p", [ReqId, ?PATH]),
