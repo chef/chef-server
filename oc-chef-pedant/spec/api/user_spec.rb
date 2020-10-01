@@ -115,6 +115,7 @@ describe "users", :users do
           [ platform.non_admin_user.name, platform.admin_user.name, platform.superuser.name ].each do |name|
             data = body[name]
             data.should_not be nil
+            data.key?("display_name").should be true
             data.key?("first_name").should be true
             data.key?("last_name").should be true
             data.key?("email").should be true

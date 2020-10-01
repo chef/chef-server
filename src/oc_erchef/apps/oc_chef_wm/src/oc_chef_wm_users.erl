@@ -107,7 +107,7 @@ finalize_create_body(Req, State, _Client, BodyEJ) ->
 
 to_json(Req, State) ->
     %% In the case of verbose, we cannot  use standard chef_wm_base behavior -
-    %% the client expects the fields email, first_name, last_name - while
+    %% the client expects the fields email, first_name, last_name, display_name - while
     %% the standard response tries to give us a URI.
     %% Secondary note: the original interface in opscode-account supported the combination of
     %% both email filter and verbose option, but this was unused
@@ -136,7 +136,8 @@ verbose_user(#chef_user{username = UserName, email = EMail, serialized_object = 
     EJ = chef_json:decode(SerializedObject),
     {UserName, {[ {<<"email">>, EMail},
                   {<<"first_name">>, ej:get({<<"first_name">>}, EJ, "")},
-                  {<<"last_name">>, ej:get({<<"last_name">>}, EJ, "")} ]} }.
+                  {<<"last_name">>, ej:get({<<"last_name">>}, EJ, "")},
+                  {<<"display_name">>, ej:get({<<"display_name">>}, EJ, "")} ]} }.
 
 conflict_message(_Name) ->
     {[{<<"error">>, [<<"Username or email address already in use.">>]}]}.
