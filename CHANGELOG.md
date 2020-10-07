@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.61 -->
-## [14.0.61](https://github.com/chef/chef-server/tree/14.0.61) (2020-10-01)
+<!-- latest_release 14.0.62 -->
+## [14.0.62](https://github.com/chef/chef-server/tree/14.0.62) (2020-10-07)
 
 #### Merged Pull Requests
-- Add retry to Elasticsearch index creation if the service is not up yet [#2137](https://github.com/chef/chef-server/pull/2137) ([btm](https://github.com/btm))
+- cookbooks: fix bug in heap_size validator [#2138](https://github.com/chef/chef-server/pull/2138) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.58 -->
 ### Changes since 14.0.58 release
 
 #### Merged Pull Requests
+- cookbooks: fix bug in heap_size validator [#2138](https://github.com/chef/chef-server/pull/2138) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.62 -->
 - Add retry to Elasticsearch index creation if the service is not up yet [#2137](https://github.com/chef/chef-server/pull/2137) ([btm](https://github.com/btm)) <!-- 14.0.61 -->
 - Fix up the warning on upgrades a little [#2136](https://github.com/chef/chef-server/pull/2136) ([btm](https://github.com/btm)) <!-- 14.0.60 -->
 - Included display_name in verbose GET /users response [#2112](https://github.com/chef/chef-server/pull/2112) ([antima-gupta](https://github.com/antima-gupta)) <!-- 14.0.59 -->
