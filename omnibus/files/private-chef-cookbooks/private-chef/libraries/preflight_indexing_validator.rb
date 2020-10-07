@@ -85,7 +85,7 @@ class IndexingPreflightValidator < PreflightValidator
     max_heap = 26 * 1024
 
     if heap_size < min_heap || heap_size > max_heap
-      fail_with err_INDEX004_invalid_elasticsearch_heap_size(using_solr)
+      fail_with err_INDEX004_invalid_elasticsearch_heap_size(heap_size, using_solr)
     end
   end
 
@@ -167,7 +167,7 @@ class IndexingPreflightValidator < PreflightValidator
     EOM
   end
 
-  def err_INDEX004_invalid_elasticsearch_heap_size(using_solr)
+  def err_INDEX004_invalid_elasticsearch_heap_size(heap_size, using_solr)
     if using_solr
       <<~EOM
         INDEX004: Invalid elasticsearch heap size
