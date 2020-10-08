@@ -64,9 +64,9 @@ prune: prune_deb
 clear_pkg_cache: clear_pkg_cache_deb
 
 clear_pkg_cache_%:
-	cd .kitchen/kitchen-vagrant/kitchen-omnibus-default-$(DEV_PLATFORM) \
+	cd .kitchen/kitchen-vagrant/default-$(DEV_PLATFORM) \
 	&& vagrant ssh -c 'rm -v -f /var/cache/omnibus/pkg/*.$*'
-	cd .kitchen/kitchen-vagrant/kitchen-omnibus-default-$(DEV_PLATFORM) \
+	cd .kitchen/kitchen-vagrant/default-$(DEV_PLATFORM) \
 	&& vagrant ssh -c 'rm -v -f /var/cache/omnibus/pkg/*.$*.metadata.json'
 
 prune_%:
