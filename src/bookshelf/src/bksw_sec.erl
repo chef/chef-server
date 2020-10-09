@@ -252,12 +252,12 @@ is_expired(DateTimeString, ExpiresSec) ->
 
 % TODO: export and test this
 -spec parseauth_or_throw(string(), tuple()) -> string() | no_return().
-parseauth_or_throw(Authorization, Throw) ->
+parseauth_or_throw(Auth, Throw) ->
     try
-        case parse_authorization(Authorization) of
+        case parse_authorization(Auth) of
             {ok, [_, _, Sig]} -> Sig;
             _                 -> throw(Throw)
         end
     catch
-        throw:{?REQID, Req, Context} -> encode_access_denied_error_response(?REQID, Req, Context)
+        throw:{ReqId, Req, Context} -> encode_access_denied_error_response(ReqId, Req, Context)
     end.
