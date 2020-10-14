@@ -145,9 +145,6 @@ class PreflightChecks
     end
     AuthPreflightValidator.new(node).run!
     IndexingPreflightValidator.new(node).run!
-    if PrivateChef['elasticsearch']['enable']
-      ElasticsearchPreflightValidator.new(node).run!
-    end
     SslPreflightValidator.new(node).run!
     BookshelfPreflightValidator.new(node).run!
     RequiredRecipePreflightValidator.new(node).run!
