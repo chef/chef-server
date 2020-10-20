@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.64 -->
-## [14.0.64](https://github.com/chef/chef-server/tree/14.0.64) (2020-10-15)
+<!-- latest_release 14.0.65 -->
+## [14.0.65](https://github.com/chef/chef-server/tree/14.0.65) (2020-10-20)
 
 #### Merged Pull Requests
-- cookbooks: set explicit TMPDIR for elasticsearch [#2146](https://github.com/chef/chef-server/pull/2146) ([stevendanna](https://github.com/stevendanna))
+- Upgrade to Elasticsearch 6.8.12 [#2142](https://github.com/chef/chef-server/pull/2142) ([stevendanna](https://github.com/stevendanna))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.58 -->
 ### Changes since 14.0.58 release
 
 #### Merged Pull Requests
+- Upgrade to Elasticsearch 6.8.12 [#2142](https://github.com/chef/chef-server/pull/2142) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.65 -->
 - cookbooks: set explicit TMPDIR for elasticsearch [#2146](https://github.com/chef/chef-server/pull/2146) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.64 -->
 - cookbooks: remove reference to ElasticsearchPreflightValidator [#2145](https://github.com/chef/chef-server/pull/2145) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.63 -->
 - cookbooks: fix bug in heap_size validator [#2138](https://github.com/chef/chef-server/pull/2138) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.62 -->
