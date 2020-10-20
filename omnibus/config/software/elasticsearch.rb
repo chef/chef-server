@@ -15,7 +15,7 @@
 #
 
 name "elasticsearch"
-default_version "6.8.1"
+default_version "6.8.12"
 
 dependency "server-open-jre"
 
@@ -25,9 +25,9 @@ skip_transitive_dependency_licensing true
 
 relative_path "elasticsearch-#{version}"
 
-version "6.8.1" do
-  source url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-#{version}.tar.gz",
-         sha512: "1d484287e9b67b16c28f1a4d2267e7ceb5a4438a18b26b3a46d4a176bb3f2f6fcadcbda617a7a91418293880d38c027266cb81a4e8893a28adee9fa693b2318b"
+version "6.8.12" do
+  source url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-#{version}.tar.gz",
+         sha512: "9f6179ee49baa48b49c5328b88ddf2f0ef868f49c1f04d77975622120749725c48ac09cd565c05f6033eb227eaff905aff9f881a85efcf2fa75cc586cb8c45cb"
 end
 
 target_path = "#{install_dir}/embedded/elasticsearch"
