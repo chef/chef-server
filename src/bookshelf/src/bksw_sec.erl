@@ -139,7 +139,7 @@ encode_access_denied_error_response(RequestId, Req0, Context) ->
 auth_init(Req0, Context, SignedHeaders) ->
     AccessKey            =  bksw_conf:access_key_id(Context),
     {RequestId, Req1}    =  bksw_req:with_amz_request_id(Req0),
-    Config    = mini_s3:new(AccessKey, bksw_conf:secret_access_key(Context), host(Req1)),
+    Config               =  mini_s3:new(AccessKey, bksw_conf:secret_access_key(Context), host(Req1)),
     #{accesskey          => AccessKey,
       config             => Config,
       alt_signed_headers => [case {K, V} of {"host", _} -> {"host", get_host_toggleport(host(Req1), Config)}; _ -> {K, V} end || {K, V} <- SignedHeaders],
