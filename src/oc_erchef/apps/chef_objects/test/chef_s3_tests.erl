@@ -125,8 +125,8 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                                                 ?assertEqual(ExpectMethod, HTTPMethod),
                                                 ?assertEqual("testbucket", Bucket),
                                                 % CODE REVIEW: disable expiry window. expiry windows were redone,
-                                                % and are tested elsewhere
-%                                               ?assertEqual(ExpectLifetime, MyLifetime),
+                                                % and are now tested at: src/oc_erchef/apps/chef_objects/test/chef_s3_tests.erl 
+                                                %?assertEqual(ExpectLifetime, MyLifetime),
                                                 {ok, InternalS3Url} = application:get_env(chef_objects, s3_url),
                                                 {ok, ExternalS3Url} = application:get_env(chef_objects, s3_external_url),
                                                 % is this still necessary? possibly only need to pass host with port
