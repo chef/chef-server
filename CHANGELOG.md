@@ -1,26 +1,24 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.65 -->
-## [14.0.65](https://github.com/chef/chef-server/tree/14.0.65) (2020-10-20)
-
-#### Merged Pull Requests
-- Upgrade to Elasticsearch 6.8.12 [#2142](https://github.com/chef/chef-server/pull/2142) ([stevendanna](https://github.com/stevendanna))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=14.0.58 -->
-### Changes since 14.0.58 release
-
-#### Merged Pull Requests
-- Upgrade to Elasticsearch 6.8.12 [#2142](https://github.com/chef/chef-server/pull/2142) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.65 -->
-- cookbooks: set explicit TMPDIR for elasticsearch [#2146](https://github.com/chef/chef-server/pull/2146) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.64 -->
-- cookbooks: remove reference to ElasticsearchPreflightValidator [#2145](https://github.com/chef/chef-server/pull/2145) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.63 -->
-- cookbooks: fix bug in heap_size validator [#2138](https://github.com/chef/chef-server/pull/2138) ([stevendanna](https://github.com/stevendanna)) <!-- 14.0.62 -->
-- Add retry to Elasticsearch index creation if the service is not up yet [#2137](https://github.com/chef/chef-server/pull/2137) ([btm](https://github.com/btm)) <!-- 14.0.61 -->
-- Fix up the warning on upgrades a little [#2136](https://github.com/chef/chef-server/pull/2136) ([btm](https://github.com/btm)) <!-- 14.0.60 -->
-- Included display_name in verbose GET /users response [#2112](https://github.com/chef/chef-server/pull/2112) ([antima-gupta](https://github.com/antima-gupta)) <!-- 14.0.59 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [14.0.65](https://github.com/chef/chef-server/tree/14.0.65) (2020-10-26)
+
+#### Merged Pull Requests
+- Included display_name in verbose GET /users response [#2112](https://github.com/chef/chef-server/pull/2112) ([antima-gupta](https://github.com/antima-gupta))
+- Fix up the warning on upgrades a little [#2136](https://github.com/chef/chef-server/pull/2136) ([btm](https://github.com/btm))
+- Add retry to Elasticsearch index creation if the service is not up yet [#2137](https://github.com/chef/chef-server/pull/2137) ([btm](https://github.com/btm))
+- cookbooks: fix bug in heap_size validator [#2138](https://github.com/chef/chef-server/pull/2138) ([stevendanna](https://github.com/stevendanna))
+- cookbooks: remove reference to ElasticsearchPreflightValidator [#2145](https://github.com/chef/chef-server/pull/2145) ([stevendanna](https://github.com/stevendanna))
+- cookbooks: set explicit TMPDIR for elasticsearch [#2146](https://github.com/chef/chef-server/pull/2146) ([stevendanna](https://github.com/stevendanna))
+- Upgrade to Elasticsearch 6.8.12 [#2142](https://github.com/chef/chef-server/pull/2142) ([stevendanna](https://github.com/stevendanna))
+<!-- latest_stable_release -->
+
 ## [14.0.58](https://github.com/chef/chef-server/tree/14.0.58) (2020-10-01)
 
 #### Merged Pull Requests
@@ -132,7 +130,6 @@
 - Add option --ids to enable reindexing an index by ids [#2133](https://github.com/chef/chef-server/pull/2133) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 - Update dependency for pooler to chef/pooler [#2105](https://github.com/chef/chef-server/pull/2105) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 - Wait and retry index_exists? check while Elasticsearch starts and stabilizes [#2134](https://github.com/chef/chef-server/pull/2134) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
-<!-- latest_stable_release -->
 
 ## [13.2.0](https://github.com/chef/chef-server/tree/13.2.0) (2020-04-14)
 
