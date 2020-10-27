@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # A class that knows about Elasticsearch configuration and usage.
 class Elasticsearch
   KB = 1024
@@ -24,8 +26,15 @@ class Elasticsearch
   # https://www.elastic.co/guide/en/elasticsearch/reference/current/heap-size.html
   def self.heap_size_default(node)
     memory = node_memory_in_units(node, :total, :mb)
-    # Note: Preflight check will error if the system memory is less than 4GB.
-    [memory / 4, 1024].max
+    maxvalue = 26_000
+    minvalue = 1000
+    value = [memory / 4, 1024].max
+    if value > 26_000
+      value = maxvalue
+    elsif value < 1000
+      value = minvalue
+    end
+    value
   end
 
   # Defaults to the larger of 1/16th of heap_size,

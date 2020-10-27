@@ -207,7 +207,7 @@ elasticsearch['jvm_opts'] = []
 # heap address: 0x00000000c0000000, size: 28672 MB, Compressed Oops mode: Zero based, Oop shift amount: 3
 #
 # ... turns up that our limit is around 28G, which is where the max
-# should be set. (TODO)
+# should be set. 
 #
 #
 elasticsearch['heap_size'] = Elasticsearch.heap_size_default(node)
