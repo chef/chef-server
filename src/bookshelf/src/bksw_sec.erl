@@ -34,29 +34,6 @@
 
 -include_lib("erlcloud/include/erlcloud_aws.hrl").
 
-% CODE REVIEW - choose accessor style: 1) longer style (this one) or 2) shorter style (below).
-% alternatively, these could be functions.
-%
-% until erlang gets a shorthand way to access a key's value
-%-define(ACCESSKEY(Auth),          maps:get(accesskey,          Auth)).
-%-define(CONFIG(Auth),             maps:get(config,             Auth)).
-%-define(ALT_SIGNED_HEADERS(Auth), maps:get(alt_signed_headers, Auth)).
-%-define(METHOD(Auth),             maps:get(method,             Auth)).
-%-define(PATH(Auth),               maps:get(path,               Auth)).
-%-define(REQ(Auth),                maps:get(req,                Auth)).
-%-define(REQID(Auth),              maps:get(reqid,              Auth)).
-
-% CODE REVIEW - choose accessor style: 1) longer style (above) or 2) shorter style (this one).
-%
-% until erlang gets a shorthand way to access a key's value
--define(ACCESSKEY,          maps:get(accesskey,          Auth)).
--define(CONFIG,             maps:get(config,             Auth)).
--define(ALT_SIGNED_HEADERS, maps:get(alt_signed_headers, Auth)).
--define(METHOD,             maps:get(method,             Auth)).
--define(PATH,               maps:get(path,               Auth)).
--define(REQ,                maps:get(req,                Auth)).
--define(REQID,              maps:get(reqid,              Auth)).
-
 %%===================================================================
 %% API functions
 %%===================================================================
@@ -68,8 +45,8 @@ is_authorized(Req0, #context{auth_type           = presigned_url,
                              signed_headers      = SignedHeaders,
                              x_amz_expires_int   = XAmzExpiresInt} = Context) ->
     Auth               = auth_init(Req0, Context, SignedHeaders),
-    {Bucketname, Key } = get_bucket_key(?PATH),
-    ComparisonURL      = mini_s3:s3_url(?METHOD, Bucketname, Key, XAmzExpiresInt, SignedHeaders, Date, ?CONFIG),
+    {Bucketname, Key } = get_bucket_key(path(Auth)),
+    ComparisonURL      = mini_s3:s3_url(method(Auth), Bucketname, Key, XAmzExpiresInt, SignedHeaders, Date, config(Auth)),
     IncomingSig        = list_to_binary(IncomingSignature),
     [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", trailing),
 
@@ -82,7 +59,7 @@ is_authorized(Req0, #context{auth_type           = presigned_url,
                 %AltComparisonSig = "not computed",
                 IncomingSig;
             _ ->
-                AltComparisonURL      = mini_s3:s3_url(?METHOD, Bucketname, Key, XAmzExpiresInt, ?ALT_SIGNED_HEADERS, Date, ?CONFIG),
+                AltComparisonURL      = mini_s3:s3_url(method(Auth), Bucketname, Key, XAmzExpiresInt, alt_signed_headers(Auth), Date, config(Auth)),
                 [_, AltComparisonSig] = string:split(AltComparisonURL, "&X-Amz-Signature=", all),
                 AltComparisonSig
         end,
@@ -94,10 +71,10 @@ is_authorized(Req0, #context{auth_type           = auth_header,
                              signed_headers      = SignedHeaders} = Context) ->
     Auth              = auth_init(Req0, Context, SignedHeaders),
     ComparisonURL     = "not-applicable",
-    QueryParams       = wrq:req_qs(?REQ),
-    SigV4Headers      = erlcloud_aws:sign_v4(?METHOD, ?PATH, ?CONFIG, SignedHeaders, <<>>, Region, "s3", QueryParams, Date),
+    QueryParams       = wrq:req_qs(req(Auth)),
+    SigV4Headers      = erlcloud_aws:sign_v4(method(Auth), path(Auth), config(Auth), SignedHeaders, <<>>, Region, "s3", QueryParams, Date),
     IncomingSig       = IncomingSignature,
-    ComparisonSig     = parseauth_or_throw(proplists:get_value("Authorization", SigV4Headers, ""), {?REQID, ?REQ, Context}),
+    ComparisonSig     = parseauth_or_throw(proplists:get_value("Authorization", SigV4Headers, ""), {reqid(Auth), req(Auth), Context}),
 
     % TODO: try to remove alt sig computation and see what happens
     % NOTE: this was tried, and caused compilation and test failures.
@@ -108,8 +85,8 @@ is_authorized(Req0, #context{auth_type           = auth_header,
                 %AltComparisonSig = "not computed",
                 IncomingSig;
             _ ->
-                AltSigV4Headers   = erlcloud_aws:sign_v4(?METHOD, ?PATH, ?CONFIG, ?ALT_SIGNED_HEADERS, <<>>, Region, "s3", QueryParams, Date),
-                _AltComparisonSig = parseauth_or_throw(proplists:get_value("Authorization", AltSigV4Headers, ""), {?REQID, ?REQ, Context})
+                AltSigV4Headers   = erlcloud_aws:sign_v4(method(Auth), path(Auth), config(Auth), alt_signed_headers(Auth), <<>>, Region, "s3", QueryParams, Date),
+                _AltComparisonSig = parseauth_or_throw(proplists:get_value("Authorization", AltSigV4Headers, ""), {reqid(Auth), req(Auth), Context})
         end,
     auth_finish(Auth, Context, ComparisonURL, IncomingSig, CalculatedSig).
 
@@ -160,22 +137,22 @@ auth_finish(Auth, #context{
         CalculatedSig ->
             case is_expired(Date, XAmzExpiresInt) of
                 true ->
-                    ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p", [ReqId, XAmzExpiresInt, ?PATH]),
-                    encode_access_denied_error_response(?REQID, ?REQ, Context);
+                    ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p", [ReqId, XAmzExpiresInt, path(Auth)]),
+                    encode_access_denied_error_response(reqid(Auth), req(Auth), Context);
                 false ->
-                    case erlang:iolist_to_binary(AWSAccessKeyId) == erlang:iolist_to_binary(?ACCESSKEY) of
+                    case erlang:iolist_to_binary(AWSAccessKeyId) == erlang:iolist_to_binary(accesskey(Auth)) of
                         true ->
                             MaxAge = "max-age=" ++ XAmzExpiresString,
-                            Req2   = wrq:set_resp_header("Cache-Control", MaxAge, ?REQ),
+                            Req2   = wrq:set_resp_header("Cache-Control", MaxAge, req(Auth)),
                             {true, Req2, Context};
                         false ->
-                            ?LOG_DEBUG("req_id=~p signing error for ~p", [ReqId, ?PATH]),
-                            encode_sign_error_response(AWSAccessKeyId, IncomingSig, ?REQID,
-                                                       ComparisonURL, ?REQ, Context)
+                            ?LOG_DEBUG("req_id=~p signing error for ~p", [ReqId, path(Auth)]),
+                            encode_sign_error_response(AWSAccessKeyId, IncomingSig, reqid(Auth),
+                                                       ComparisonURL, req(Auth), Context)
                     end
             end;
         _ ->
-            encode_access_denied_error_response(?REQID, ?REQ, Context)
+            encode_access_denied_error_response(reqid(Auth), req(Auth), Context)
     end.
 
 encode_sign_error_response(AccessKeyId, Signature,
@@ -260,3 +237,13 @@ parseauth_or_throw(Auth, Throw) ->
     catch
         throw:{ReqId, Req, Context} -> encode_access_denied_error_response(ReqId, Req, Context)
     end.
+
+% accessors
+accesskey(Auth)          -> maps:get(accesskey,          Auth).
+alt_signed_headers(Auth) -> maps:get(alt_signed_headers, Auth).
+config(Auth)             -> maps:get(config,             Auth).
+method(Auth)             -> maps:get(method,             Auth).
+path(Auth)               -> maps:get(path,               Auth).
+req(Auth)                -> maps:get(req,                Auth).
+reqid(Auth)              -> maps:get(reqid,              Auth).
+
