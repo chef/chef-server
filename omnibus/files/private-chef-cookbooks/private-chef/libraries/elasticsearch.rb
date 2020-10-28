@@ -5,8 +5,8 @@ class Elasticsearch
   KB = 1024
   MB = KB * KB
   GB = MB * KB
-  MINMEMORY = 1 * KB
-  MAXMEMORY = 26 * KB
+  MIN_HEAP_SIZE = 1 * 1024 # in mb
+  MAX_HEAP_SIZE = 26 * 1024 # in mb
 
   def self.node_memory_in_units(node, _which, unit)
     node[:memory][:total] =~ /^(\d+)kB/
@@ -28,11 +28,11 @@ class Elasticsearch
   # https://www.elastic.co/guide/en/elasticsearch/reference/current/heap-size.html
   def self.heap_size_default(node)
     memory = node_memory_in_units(node, :total, :mb)
-    value = [memory / 4, 1024].max
-    if value > MAXMEMORY
-      value = MAXMEMORY
-    elsif value < MINMEMORY
-      value = MINMEMORY
+    value = memory / 4
+    if value > MAX_HEAP_SIZE
+      value = MAX_HEAP_SIZE
+    elsif value < MIN_HEAP_SIZE
+      value = MIN_HEAP_SIZE
     end
     value
   end
