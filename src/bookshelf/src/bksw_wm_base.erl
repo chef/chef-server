@@ -15,7 +15,8 @@
 %% under the License.
 %%
 %% @author Ho-Sheng Hsiao <hosh@chef.io>
-%% @author Tim Dysinger <dysinger@chef.io>
+%% @author Tim Dysinger   <dysinger@chef.io>
+%% @author Lincoln Baker  <lbaker@chef.io>
 
 -module(bksw_wm_base).
 
@@ -46,7 +47,7 @@ init(Config) ->
     {ok, bksw_conf:get_context(Config)}.
 
 % seconds in 5 minutes and 1 week
--define(MIN5, "300"  ).
+-define(MIN5, "300"  ). % need a note around what this is. https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
 -define(WEEK1, 604800).
 
 malformed_request(Req0, #context{auth_check_disabled=true} = Context) -> {false, Req0, Context};
