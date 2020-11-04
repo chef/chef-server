@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.66 -->
-## [14.0.66](https://github.com/chef/chef-server/tree/14.0.66) (2020-11-04)
+<!-- latest_release 14.0.67 -->
+## [14.0.67](https://github.com/chef/chef-server/tree/14.0.67) (2020-11-04)
 
 #### Merged Pull Requests
-- maintainers: remove Ryan Cragun [#2144](https://github.com/chef/chef-server/pull/2144) ([ryancragun](https://github.com/ryancragun))
+- Remove Terraform Integration Tests [#2135](https://github.com/chef/chef-server/pull/2135) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.65 -->
 ### Changes since 14.0.65 release
 
 #### Merged Pull Requests
+- Remove Terraform Integration Tests [#2135](https://github.com/chef/chef-server/pull/2135) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.67 -->
 - maintainers: remove Ryan Cragun [#2144](https://github.com/chef/chef-server/pull/2144) ([ryancragun](https://github.com/ryancragun)) <!-- 14.0.66 -->
 <!-- release_rollup -->
 
