@@ -30,14 +30,6 @@ schedules:
     description: "Run a nightly build in the omnibus/adhoc pipeline"
     cronline: "0 6 * * *"
 
-  - name: nightly_integration_test
-    description: "Run a nightly integration test against latest current"
-    cronline: "0 9 * * *"
-
-  - name: cleanup_orphaned_test_resources
-    description: Cleanup orphaned test resources
-    cronline: "0 5 * * *" # every day at 5am
-
 pipelines:
   - verify
   - habitat/build
@@ -49,15 +41,9 @@ pipelines:
       definition: .expeditor/release.omnibus.yml
       env:
         - ADHOC: true
-  - integration_test:
-      description: "Instructions: https://github.com/chef/chef-server/blob/master/.expeditor/README.md"
-      definition: .expeditor/integration_test.pipeline.yml
   - post-promote:
       description: "Generate and upload release manifest"
       definition: .expeditor/post-promote.pipeline.yml
-  - integration_test_full:
-      description: "Instructions: https://github.com/chef/chef-server/blob/master/.expeditor/README.md"
-      definition: .expeditor/integration_test_full.pipeline.yml
 
 # These actions are taken, in order they are specified, anytime a Pull Request is merged.
 merge_actions:
@@ -121,9 +107,6 @@ subscriptions:
   - workload: schedule_triggered:chef/chef-server:master:nightly_build:*
     actions:
       - trigger_pipeline:omnibus/adhoc
-  - workload: schedule_triggered:chef/chef-server:master:nightly_integration_test:*
-    actions:
-      - trigger_pipeline:integration_test
   # Run these actions when the freshly built Habitat packages have been uploaded to Depot
   - workload: buildkite_hab_build_group_published:{{agent_id}}:*
     actions:
@@ -132,9 +115,6 @@ subscriptions:
   - workload: buildkite_build_passed:{{agent_id}}:post-promote:*
     actions:
       - purge_packages_chef_io_fastly:{{target_channel}}/chef-server/latest
-  - workload: schedule_triggered:{{agent_id}}:cleanup_orphaned_test_resources:*
-    actions:
-      - bash:.expeditor/cleanup_orphaned_test_resources.sh
 
 promote:
   actions:
