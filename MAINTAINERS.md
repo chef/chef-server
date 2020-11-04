@@ -10,7 +10,6 @@ If undertaking a large change, ping the @chef/chef-server-maintainers group for 
 - [Mark Anderson](https://github.com/markan)
 - [Nolan Davidson](https://github.com/nsdavidson)
 - [Prajakta Purohit](https://github.com/prajaktapurohit)
-- [Ryan Cragun](https://github.com/ryancragun)
 - [Stephen Delano](https://github.com/sdelano)
 - [Steven Danna](https://github.com/stevendanna)
 - [Tyler Cloke](https://github.com/tylercloke)
