@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.68 -->
-## [14.0.68](https://github.com/chef/chef-server/tree/14.0.68) (2020-11-04)
+<!-- latest_release 14.0.69 -->
+## [14.0.69](https://github.com/chef/chef-server/tree/14.0.69) (2020-11-05)
 
 #### Merged Pull Requests
-- remove postgres92 [#2158](https://github.com/chef/chef-server/pull/2158) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Tehlers320/max memory es [#2159](https://github.com/chef/chef-server/pull/2159) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.65 -->
 ### Changes since 14.0.65 release
 
 #### Merged Pull Requests
+- Tehlers320/max memory es [#2159](https://github.com/chef/chef-server/pull/2159) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.69 -->
 - remove postgres92 [#2158](https://github.com/chef/chef-server/pull/2158) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.68 -->
 - Remove Terraform Integration Tests [#2135](https://github.com/chef/chef-server/pull/2135) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.67 -->
 - maintainers: remove Ryan Cragun [#2144](https://github.com/chef/chef-server/pull/2144) ([ryancragun](https://github.com/ryancragun)) <!-- 14.0.66 -->
