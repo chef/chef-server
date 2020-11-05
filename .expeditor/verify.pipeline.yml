@@ -10,19 +10,6 @@ steps:
   # Lint Tests
 #########################################################################
 
-- label: lint-terraform
-  command:
-    - cd /workdir/terraform/aws/modules/aws_vpc
-    - tfenv install min-required
-    - tfenv use min-required
-    - cd /workdir/terraform/aws
-    - make lint
-    - cd /workdir/terraform/azure
-    - make lint
-  expeditor:
-    executor:
-      docker:
-
 - label: license-scout
   command:
     - .expeditor/license_scout.sh
