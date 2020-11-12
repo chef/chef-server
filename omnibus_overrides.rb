@@ -6,7 +6,7 @@ override :rabbitmq, version: "3.6.15"
 override :erlang, version: "20.3.8.9"
 override :lua, version: "5.1.5"
 override :rubygems, version: "3.0.3"
-override :bundler, version: "1.17.2"  # pin to avoid double bundle error
+override :bundler, version: "1.17.3"  # pin to avoid double bundle error
 override :'omnibus-ctl', version: "master"
 override :chef, version: "v15.8.23"
 override :ohai, version: "v15.7.4"
