@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.70 -->
-## [14.0.70](https://github.com/chef/chef-server/tree/14.0.70) (2020-11-05)
+<!-- latest_release 14.0.71 -->
+## [14.0.71](https://github.com/chef/chef-server/tree/14.0.71) (2020-11-13)
 
 #### Merged Pull Requests
-- Remove lint tests for terraform, since terraform integration tests live in umbrella repository [#2160](https://github.com/chef/chef-server/pull/2160) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Removed chef-web-core library dependency [#2125](https://github.com/chef/chef-server/pull/2125) ([antima-gupta](https://github.com/antima-gupta))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.65 -->
 ### Changes since 14.0.65 release
 
 #### Merged Pull Requests
+- Removed chef-web-core library dependency [#2125](https://github.com/chef/chef-server/pull/2125) ([antima-gupta](https://github.com/antima-gupta)) <!-- 14.0.71 -->
 - Remove lint tests for terraform, since terraform integration tests live in umbrella repository [#2160](https://github.com/chef/chef-server/pull/2160) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.70 -->
 - Tehlers320/max memory es [#2159](https://github.com/chef/chef-server/pull/2159) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.69 -->
 - remove postgres92 [#2158](https://github.com/chef/chef-server/pull/2158) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.68 -->
