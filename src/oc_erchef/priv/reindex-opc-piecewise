@@ -106,16 +106,19 @@ perform_reindex(Context, {_OrgId, OrgName}=OrgInfo, Index, Items, NameOrId) ->
     io:format("~nIt may take some time before everything is available via search.~n", []),
     Response = rpc_reindex(Context, OrgInfo, Index, Items, NameOrId),
     case Response of
-        {[],[]} ->
+        {ok, {[],[]}} ->
             io:format("~nreindexing[~s]: reindex complete!~n", [OrgName]);
-        {[], MissingList} ->
+        {ok, {[], MissingList}} ->
             io:format("~nreindexing[~s]: reindex complete but someitems were not found.~n", [OrgName]),
             print_missing(MissingList);
-        {FailedList, MissingList} when is_list(FailedList) ->
+        {ok, {FailedList, MissingList}} when is_list(FailedList) ->
             io:format("~nreindexing[~s]: reindex FAILED!~n", [OrgName]),
             print_missing(MissingList),
             print_errors(FailedList, OrgName, Index),
-            halt(3)
+            halt(3);
+        {error, Error} ->
+            io:format("~nreindexing[~s]: reindex FAILED!~n ~p", [OrgName, Error]),
+            halt(1)
     end.
 
 print_usage() ->
