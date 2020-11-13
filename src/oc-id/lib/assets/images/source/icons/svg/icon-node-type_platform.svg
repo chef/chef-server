@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+<g id="virtual-platform">
+</g>
+<g id="virtual-machine">
+</g>
+<g id="storage-device">
+</g>
+<g id="server_1_">
+</g>
+<g id="public-cloud">
+</g>
+<g id="private-cloud">
+</g>
+<g id="platform">
+	<g>
+		<g>
+			<path d="M76.6,80.8H23.4c-2.3,0-4.2-1.9-4.2-4.2V23.4c0-2.3,1.9-4.2,4.2-4.2h53.2c2.3,0,4.2,1.9,4.2,4.2v53.2
+				C80.8,78.9,78.9,80.8,76.6,80.8L76.6,80.8z M27.6,72.4h44.7V27.6H27.6V72.4L27.6,72.4z"/>
+		</g>
+		<g>
+			<g>
+				<path d="M2.1,86.8c-1.2,0-2.1-0.9-2.1-2.1V15.3c0-1.2,0.9-2.1,2.1-2.1c1.2,0,2.1,0.9,2.1,2.1v69.4C4.2,85.9,3.3,86.8,2.1,86.8
+					L2.1,86.8z"/>
+			</g>
+			<g>
+				<path d="M11.6,82.2c-1.2,0-2.1-0.9-2.1-2.1V20c0-1.2,0.9-2.1,2.1-2.1c1.2,0,2.1,0.9,2.1,2.1V80C13.7,81.2,12.8,82.2,11.6,82.2
+					L11.6,82.2z"/>
+			</g>
+			<g>
+				<path d="M97.9,86.8c-1.2,0-2.1-0.9-2.1-2.1V15.3c0-1.2,0.9-2.1,2.1-2.1c1.2,0,2.1,0.9,2.1,2.1v69.4
+					C100,85.9,99.1,86.8,97.9,86.8L97.9,86.8z"/>
+			</g>
+			<g>
+				<path d="M88.4,82.2c-1.2,0-2.1-0.9-2.1-2.1V20c0-1.2,0.9-2.1,2.1-2.1c1.2,0,2.1,0.9,2.1,2.1V80C90.5,81.2,89.6,82.2,88.4,82.2
+					L88.4,82.2z"/>
+			</g>
+		</g>
+	</g>
+</g>
+<g id="network-device">
+</g>
+<g id="middleware">
+</g>
+<g id="container">
+</g>
+<g id="bare-metal">
+</g>
+<g id="application">
+</g>
+<g id="node">
+</g>
+</svg>

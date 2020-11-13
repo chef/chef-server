@@ -1,0 +1,84 @@
+/*doc
+---
+title: Form
+name: form
+category: Form
+---
+
+## Sign-In Form
+
+```html_example
+<div class="row">
+  <div class="medium-6 columns">
+    <form>
+      <div>
+        <label>
+          Username
+          <input type="text" class="radius" required>
+        </label>
+      </div>
+      <div>
+        <label>
+          Password
+          <input type="password" class="radius" required>
+        </label>
+      </div>
+      <div>
+        <button type="submit" class="button">Sign In</button>
+      </div>
+      <div>
+        <a href="#">Forgot your password?</a>
+      </div>
+    </form>
+  </div>
+</div>
+```
+
+## Search Form
+
+```html_example
+<form>
+  <div class="row">
+    <div class="large-6 columns">
+      <div class="row collapse postfix-radius">
+        <div class="small-9 columns">
+          <input type="text" placeholder="Search">
+        </div>
+        <div class="small-3 columns">
+          <a href="#" class="button secondary postfix inline">
+            <i class="fi-magnifying-glass"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+```
+
+*/
+
+@import '../settings';
+
+$input-border-radius:                 $global-radius;
+$input-error-message-font-color:      $white;
+$input-error-message-font-style:      normal;
+$input-error-message-bg-color:        #fff;
+$input-error-message-font-color-alt:  $alert-color;
+$input-error-message-padding:         0;
+$input-border-width:                  1px;
+$form-label-bottom-margin:            rem-calc(8);
+$form-label-font-weight:              $font-weight-bold;
+
+$form-element-font-size:              rem-calc(14);
+$input-font-size:                     $form-element-font-size;
+$form-label-font-size:                $form-element-font-size;
+$form-link-font-size:                 $form-element-font-size;
+
+form {
+  a, button {
+    font-size: $form-link-font-size;
+  }
+}
+
+@import 'button';
+@import 'foundation/components/forms';

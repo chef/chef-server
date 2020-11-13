@@ -1,0 +1,26 @@
+/*doc
+---
+title: Inverse Theme
+name: inverse
+category: Themes
+---
+
+The Inverse theme is the one used in this guide. To use it, just import its settings before
+importing any other components.
+
+```
+@import 'chef/themes/inverse';
+@import 'chef';
+```
+*/
+
+@import '../settings';
+
+$chef-palette-link-color:         $chef-dark-blue;
+$topbar-link-color:               $chef-white;
+$topbar-link-color-hover:         scale-color($topbar-link-color, $lightness: -20%);
+$topbar-link-font-size:           14px;
+$topbar-link-weight:              normal;
+$topbar-bg:                       $chef-dark-blue;
+$topbar-logo-base-color:          $chef-white;
+$topbar-logo-accent-color:        $chef-orange;

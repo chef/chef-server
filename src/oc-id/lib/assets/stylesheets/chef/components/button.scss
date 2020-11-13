@@ -1,0 +1,46 @@
+/*doc
+---
+title: Button
+name: button
+category: Button
+---
+
+Use a button to capture an in-place action. While button styles may be applied to any
+element, typically you'll want to apply them to `a`, `button`, or `input` elements.
+
+```html_example
+<input type="submit" class="button" value="Primary" />
+<a class="button secondary">Secondary</a>
+<button class="button alert">Alert</button>
+<a class="button disabled">Disabled</a>
+```
+
+## Button Sizes
+
+Buttons are available in several standard sizes:
+
+<button class="button secondary tiny">Submit</button>
+<button class="button">Submit</button>
+<button class="button alert large">
+  <i class="fi-x"></i>
+  Delete
+</button>
+
+In general, use the default size, and reserve smaller and larger buttons for situations that require them &mdash; for example, with inline or nested components, lists or the like.
+*/
+
+@import '../settings';
+@import 'foundation/components/buttons';
+
+// Structure
+
+// The forms component messes with the border-radius on input elements, so we
+// add the submit button specifically to make sure all buttons look the same.
+.button, input[type=submit].button {
+  @include button(
+    $padding: rem-calc(11),
+    $radius: true
+  );
+}
+
+// Skins

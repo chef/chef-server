@@ -1,0 +1,66 @@
+@import 'chef/settings';
+@import 'chef/base/typography';
+@import 'foundation/components/type';
+
+$code-padding: 12px;
+
+.swatch {
+  margin-bottom: 0;
+  border: 0;
+  min-width: 80px;
+  min-height: 45px;
+  padding: $code-padding;
+  &.orange {
+    background-color: $chef-orange;
+  }
+  &.dark-blue {
+    background-color: $chef-dark-blue;
+  }
+  &.light-blue {
+    background-color: $chef-light-blue;
+  }
+  &.green {
+    background-color: $chef-green;
+  }
+  &.yellow {
+    background-color: $chef-yellow;
+  }
+  &.grey {
+    background-color: $chef-grey;
+  }
+  &.dark-grey {
+    background-color: $chef-dark-grey;
+  }
+  &.white {
+    background-color: $chef-white;
+    border: 1px solid #e8e8e8;
+  }
+}
+
+.example h6 {
+  font-size: rem-calc(12);
+  text-transform: uppercase;
+  font-weight: bold;
+  border-bottom: 1px solid #eee;
+}
+
+.example-rendered {
+  margin-bottom: $paragraph-margin-bottom;
+}
+
+pre, code {
+  font-family: $code-font-family;
+  font-size: rem-calc(13);
+  padding: $code-padding;
+  background: $code-background-color;
+  border-radius: $global-radius;
+  // border: $code-border-size $code-border-style $code-border-color;
+  overflow: auto;
+  margin-bottom: $paragraph-margin-bottom;
+}
+
+p, li {
+  code {
+    padding: 4px;
+  }
+}
