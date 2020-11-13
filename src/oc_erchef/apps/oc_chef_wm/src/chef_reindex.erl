@@ -45,27 +45,44 @@
 %% reindexing.  Does not drop existing index entries beforehand; this
 %% is explicitly a separate step.
 -spec reindex(Ctx :: chef_db:db_context(), OrgInfo :: org_info()) ->
-                     {ok, list()} | {error, list(), list()}.
+                     {ok, list()} | {error, term()}.
 reindex(Ctx, {OrgId, OrgName}=OrgInfo) ->
     lager:info("reindexing[~s]: reindex requested for ~s", [OrgName, OrgName]),
     AllIndexes = fetch_org_indexes(Ctx, OrgId),
-    Results = [reindex(Ctx, OrgInfo, Index) || Index <- AllIndexes ],
-    {FailedList, MissingList} = lists:unzip(Results),
-    FlatFailures = lists:flatten(FailedList),
-    FlatMissing = lists:flatten(MissingList),
-    case FlatFailures of
-        [] ->
+    %Results = [reindex(Ctx, OrgInfo, Index) || Index <- AllIndexes ],
+    %{FailedList, MissingList} = lists:unzip(Results),
+    %FlatFailures = lists:flatten(FailedList),
+    %FlatMissing = lists:flatten(MissingList),
+    case reindex_indexes(Ctx, OrgInfo, AllIndexes, {[], []}) of
+        {ok, {[], Missing}} ->
             lager:info("reindexing[~s]: reindex complete!", [OrgName]),
-            {ok, FlatMissing};
-        F ->
+            {ok, Missing};
+        {ok, {Failed, Missing}} ->
             lager:info("reindexing[~s]: reindex FAILED!", [OrgName]),
-            {error, F, FlatMissing}
+            {error, {Failed, Missing}};
+        {error, Error} ->
+            lager:info("reindexing[~s]: reindex FAILED!", [OrgName]),
+            {error, Error}
     end.
 
 fetch_org_indexes(Ctx, OrgId) ->
     BuiltInIndexes = [node, role, environment, client],
     DataBags = chef_db:list(#chef_data_bag{org_id = OrgId}, Ctx),
     BuiltInIndexes ++ DataBags.
+
+-spec reindex_indexes(Ctx:: chef_db:db_context(),
+                      OrgInfo :: org_info(),
+                      list(),
+                      {list(), list()}) -> {ok, {list(), list()}} | {error, term()}.
+reindex_indexes(_Ctx, _OrgInfo, [], {Failed, Missing}) ->
+    {ok, {lists:flatten(Failed), lists:flatten(Missing)}};
+reindex_indexes(Ctx, OrgInfo, [Index|RestIndexes], {FailedListAccum, MissingListAccum}) ->
+    case reindex(Ctx, OrgInfo, Index) of
+        {ok, {Failed, Missing}} ->
+            reindex_indexes(Ctx, OrgInfo, RestIndexes, {[Failed | FailedListAccum], [Missing | MissingListAccum]});
+        {error, Error} ->
+            {error, Error}
+    end.
 
 %% A note about our approach to reindexing:
 %%
@@ -115,14 +132,17 @@ fetch_org_indexes(Ctx, OrgId) ->
 %% the given indexable type.
 -spec reindex(DbContext :: chef_db:db_context(),
               OrgInfo :: org_info(),
-              Index :: index()) -> {list(), list()}.
+              Index :: index()) -> {ok, {list(), list()}} | {error, term()}.
 reindex(Ctx, {OrgId, OrgName}=OrgInfo, Index) ->
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
-    %% Grab all the database IDs to do batch retrieval on
-    AllIds = all_ids_from_name_id_dict(NameIdDict),
-    BatchSize = envy:get(oc_chef_wm, reindex_batch_size, pos_integer),
-    lager:info("reindexing[~s]: ~p items of type ~p to reindex", [OrgName, length(AllIds), Index]),
-    batch_reindex(Ctx, AllIds, BatchSize, OrgInfo, Index, NameIdDict).
+    case NameIdDict of
+        {error, Error} -> {error, Error};
+        _ -> %% Grab all the database IDs to do batch retrieval on
+              AllIds = all_ids_from_name_id_dict(NameIdDict),
+              BatchSize = envy:get(oc_chef_wm, reindex_batch_size, pos_integer),
+              lager:info("reindexing[~s]: ~p items of type ~p to reindex", [OrgName, length(AllIds), Index]),
+              {ok, batch_reindex(Ctx, AllIds, BatchSize, OrgInfo, Index, NameIdDict)}
+    end.
 
 %% @doc Reindex the objects with the specified `Ids' in the given `Index'.
 -spec reindex_by_id(DbContext :: chef_db:db_context(),
