@@ -60,16 +60,16 @@ port_or_no_port(InternalS3Url, ExternalS3Url) ->
 
 % construct url from aws_config record
 get_host_test() ->
-    Config0 = mini_s3:new("", "", "http://1.2.3.4" ),
+    Config0 = mini_s3:new("", "", "http://1.2.3.4",     path),
     "http://1.2.3.4"      = get_host_noport(Config0),
     "http://1.2.3.4:80"   = get_host_port(  Config0),
-    Config1 = mini_s3:new("", "", "https://1.2.3.4"),
+    Config1 = mini_s3:new("", "", "https://1.2.3.4",    path),
     "https://1.2.3.4"     = get_host_noport(Config1),
     "https://1.2.3.4:443" = get_host_port(  Config1),
-    Config2 = mini_s3:new("", "", "http://1.2.3.4:443"),
+    Config2 = mini_s3:new("", "", "http://1.2.3.4:443", path),
     "http://1.2.3.4"      = get_host_noport(Config2),
     "http://1.2.3.4:443"  = get_host_port(  Config2),
-    Config3 = mini_s3:new("", "", "https://1.2.3.4:80"),
+    Config3 = mini_s3:new("", "", "https://1.2.3.4:80", path),
     "https://1.2.3.4"     = get_host_noport(Config3),
     "https://1.2.3.4:80"  = get_host_port(  Config3).
 
@@ -119,20 +119,17 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
     OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
     Checksum = <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
     Lifetime = 3600,
-    Expect_s3_url = fun(ExpectMethod, ExpectUrl, _ExpectLifetime) ->
+    Expect_s3_url = fun(ExpectMethod, ExpectUrl, ExpectLifetime) ->
                             meck:expect(mini_s3, s3_url,
-                                        fun(HTTPMethod, Bucket, _Key, _MyLifetime, _ContentMD5,
+                                        fun(HTTPMethod, Bucket, _Key, MyLifetime, _ContentMD5,
                                             Config) ->
                                                 ?assertEqual(ExpectMethod, HTTPMethod),
                                                 ?assertEqual("testbucket", Bucket),
-                                                % CODE REVIEW: disable expiry window. expiry windows were redone,
-                                                % and are now tested at: mini_s3 test/mini_s3_tests.erl
-                                                % NOTE: now using prajakta's expwins - revisit this
-                                                %?assertEqual(ExpectLifetime, MyLifetime),
+                                                ?assertEqual(ExpectLifetime, MyLifetime),
                                                 {ok, InternalS3Url} = application:get_env(chef_objects, s3_url),
                                                 {ok, ExternalS3Url} = application:get_env(chef_objects, s3_external_url),
                                                 PortOrNoPort = port_or_no_port(InternalS3Url, ExternalS3Url),
-                                                S3Url = PortOrNoPort(Config),
+                                                S3Url = PortOrNoPort(Config#aws_config{s3_bucket_after_host=true, s3_bucket_access_method=path}),
                                                 ?assertEqual(ExpectUrl, S3Url),
                                                 stub_s3_url_response
                                         end)
