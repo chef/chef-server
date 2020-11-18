@@ -140,7 +140,7 @@ fallbacks:
       license_content: https://raw.githubusercontent.com/samuelkadolph/unicorn-rails/master/LICENSE
     - name: ruby2_keywords
       license_id: BSD-2-Clause
-      license_content: https://raw.githubusercontent.com/ruby/ruby2_keywords/master/README.md
+      license_content: https://github.com/ruby/ruby2_keywords/blob/master/README.md
   habitat:
     - name: core/bundler
       license_id: MIT
