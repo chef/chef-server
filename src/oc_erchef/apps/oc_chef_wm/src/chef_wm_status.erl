@@ -36,6 +36,7 @@
 
 -include_lib("webmachine/include/webmachine.hrl").
 -define(A2B(X), erlang:atom_to_binary(X, utf8)).
+-define(VERSION_PATH, '/opt/opscode/version-manifest.txt').
 
 init(_Any) ->
     {ok, <<"{}">>}.
@@ -58,6 +59,8 @@ to_json(Req, State) ->
 
 -spec check_health() -> {pong | fail, binary()}.
 check_health() ->
+    Version = get_version(),
+
     Pings = spawn_health_checks(),
     Status = overall_status(Pings),
 
@@ -65,11 +68,23 @@ check_health() ->
     KeyGen = chef_keygen_cache:status_for_json(),
     Indexing = chef_index:status(),
 
-    StatList = [{<<"status">>, ?A2B(Status)},
+    StatList = [{<<"version">>, Version},
+                {<<"status">>, ?A2B(Status)},
                 {<<"upstreams">>, {Pings}},
                 {<<"keygen">>, {KeyGen}},
                 {<<"indexing">>, {Indexing}}],
     {Status, chef_json:encode({StatList})}.
+
+get_version() ->
+    {ok, Device} = file:open(?VERSION_PATH, [read]),
+    %% Assuming that the first line of the file will have the version.
+    Version =
+        case file:read_line(Device) of
+            {ok, Data} -> list_to_binary(lists:subtract(Data,"chef-server \n"));
+            _ -> <<"error">>
+        end,
+    file:close(Device),
+    Version.
 
 overall_status(Pings) ->
     case [ Pang || {_, <<"fail">>}=Pang <- Pings ] of
