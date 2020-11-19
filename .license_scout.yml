@@ -49,6 +49,9 @@ allowed_licenses:
   - Unlicense
   - WTFPL
   - Zlib
+  - GPL-1.0-or-later
+  - GPL-2.0-or-later
+  - Artistic-1.0-Perl
 
 fallbacks:
   # These erlang overrides are temporary. We may be able to remove some of them once chef/license_scout#194 is resolved
@@ -197,4 +200,7 @@ exceptions:
       reason: Exception made by Chef Legal
     - name: core/nss-myhostname
       reason: Exception made by Chef Legal
-
+    - name: core/binutils
+      reason: Exception made by Chef Legal
+    - name: core/perl
+      reason: Exception made by Chef Legal
