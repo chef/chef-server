@@ -1,4 +1,5 @@
 resource_name :chef_server_secret
+provides :chef_server_secret
 
 # Secret spec in group.name format (e.g. saml.client_id)
 property :secret_spec, String, name_property: true
