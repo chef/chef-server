@@ -14,6 +14,6 @@ module ChefOpsDCC
   end
 end
 
-Chef::Node.send(:include, ChefOpsDCC::Helpers)
-Chef::Recipe.send(:include, ChefOpsDCC::Helpers)
-Chef::Resource.send(:include, ChefOpsDCC::Helpers)
+Chef::Node.include ChefOpsDCC::Helpers
+Chef::DSL::Recipe.include ChefOpsDCC::Helpers
+Chef::Resource.include ChefOpsDCC::Helpers
