@@ -30,15 +30,21 @@
 -endif.
 
 -export([init/1,
+         init_resource_state/1,
          allowed_methods/2,
          content_types_provided/2,
          to_json/2]).
 
--include_lib("webmachine/include/webmachine.hrl").
+-include("oc_chef_wm.hrl").
+%-include_lib("webmachine/include/webmachine.hrl").
 -define(A2B(X), erlang:atom_to_binary(X, utf8)).
 
-init(_Any) ->
-    {ok, <<"{}">>}.
+init(Config) ->
+    oc_chef_wm_base:init(?MODULE, Config).
+
+init_resource_state(_Config) ->
+   {ok, {}}.
+%  {ok, #status_state{chef_infra_server_version = get_version()}}.
 
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
@@ -47,7 +53,7 @@ content_types_provided(Req, State) ->
     {[{"application/json", to_json}], Req, State}.
 
 to_json(Req, State) ->
-    case check_health() of
+    case check_health(State) of
         {fail, Body} ->
             {{halt, 500}, wrq:set_resp_body(Body, Req), State};
         {pong, Body} ->
@@ -55,9 +61,8 @@ to_json(Req, State) ->
     end.
 
 %% private functions
-
--spec check_health() -> {pong | fail, binary()}.
-check_health() ->
+%% 
+check_health(#base_state{version = Version}) ->
     Pings = spawn_health_checks(),
     Status = overall_status(Pings),
 
@@ -68,7 +73,8 @@ check_health() ->
     StatList = [{<<"status">>, ?A2B(Status)},
                 {<<"upstreams">>, {Pings}},
                 {<<"keygen">>, {KeyGen}},
-                {<<"indexing">>, {Indexing}}],
+                {<<"indexing">>, {Indexing}},
+                {<<"version">>, Version}],
     {Status, chef_json:encode({StatList})}.
 
 overall_status(Pings) ->

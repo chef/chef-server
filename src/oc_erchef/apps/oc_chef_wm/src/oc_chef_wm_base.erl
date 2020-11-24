@@ -841,7 +841,8 @@ init_base_state(ResourceMod, InitParams) ->
                 metrics_config = ?gv(metrics_config, InitParams),
 
                 resource_args = ?gv(resource_args, InitParams),
-                resource_mod = ResourceMod}.
+                resource_mod = ResourceMod,
+                version = ?gv(version, InitParams)}.
 
 validate_request(_Verb, Req, State) ->
     {Req, State}.

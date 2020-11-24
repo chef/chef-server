@@ -196,11 +196,16 @@
 
           % Multiple resources may create a key at time of object creation.  Expose it
           % in base_state so that it's available for common handling.
-          key_context :: #key_context{} | undefined
+          key_context :: #key_context{} | undefined,
+          version :: atom()
 
          }).
 
 -type chef_wm_create_update_response() :: {true | {halt, 403 | 500 | 409}, wm_req(), #base_state{}}.
+
+-record(status_state, {
+          chef_infra_server_version :: binary() 
+         }).
 
 -record(client_state, {
           client_data,

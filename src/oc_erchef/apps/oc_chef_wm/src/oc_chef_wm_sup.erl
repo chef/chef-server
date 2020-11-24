@@ -11,9 +11,12 @@
 -export([start_link/0]).
 
 %% supervisor callbacks
--export([init/1]).
+-export([init/1,
+         default_resource_init/0]).
 
 -include("oc_chef_wm.hrl").
+-define(VERSION_PATH, '/opt/opscode/version-manifest.txt').
+
 
 %% @spec start_link() -> ServerRet
 %% @doc API for starting the supervisor.
@@ -158,7 +161,7 @@ default_resource_init() ->
 
                 %% This is set if default_orgname mode is enabled
                 {default_orgname, oc_chef_wm_routes:default_orgname()},
-
+                {version, get_version()},
                 %% metrics and stats_hero config. We organize these into a proplist which
                 %% will end up in the base_state record rather than having a key for each of
                 %% these in base state.
@@ -177,3 +180,14 @@ default_resource_init() ->
         _ ->
             Defaults
     end.
+
+get_version() ->
+    {ok, Device} = file:open(?VERSION_PATH, [read]),
+    %% Assuming that the first line of the file will have the version.
+    Version =
+        case file:read_line(Device) of
+            {ok, Data} -> list_to_binary(lists:subtract(Data,"chef-server \n"));
+            _ -> <<"error">>
+        end,
+    file:close(Device),
+    Version.
