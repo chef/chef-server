@@ -346,4 +346,17 @@ To create a separate solr vm create a `config.yml` file with the following conte
   external_solr:
     start: true
 ```
+## To use the reindex related escripts
 
+Ideally the process loading in the dev-vm should be done using longnames,
+but until that gets done use the following to run the reindex escript from the host into the dev-vm
+
+Steup should also link the reindex escripts on the host to /opt/opscode/embedded/service/opscode-erchef/bin/reindex-opc-organization in the dvm on loading oc_erchef
+
+Chef the macros based on the cookies and the supported shortnames:
+-define(SELF, 'reindexer@api').
+-define(ERCHEF, 'oc_erchef@api').
+-define(ERCHEF_COOKIE, 'oc_erchef').
+
+Connect using:
+{ok, _} = net_kernel:start([?SELF, shortnames]),
