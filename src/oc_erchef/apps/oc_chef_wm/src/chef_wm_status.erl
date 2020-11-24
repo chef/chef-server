@@ -32,14 +32,18 @@
 -export([init/1,
          allowed_methods/2,
          content_types_provided/2,
-         to_json/2]).
+         to_json/2,
+         init_resource_state/1]).
 
--include_lib("webmachine/include/webmachine.hrl").
+-include("oc_chef_wm.hrl").
 -define(A2B(X), erlang:atom_to_binary(X, utf8)).
--define(VERSION_PATH, '/opt/opscode/version-manifest.txt').
 
-init(_Any) ->
-    {ok, <<"{}">>}.
+init(Config) ->
+    oc_chef_wm_base:init(?MODULE, Config).
+
+init_resource_state(_) ->
+    % We're as simple as it gets, no state here.
+    {ok, undefined}.
 
 allowed_methods(Req, State) ->
     {['GET'], Req, State}.
@@ -48,7 +52,7 @@ content_types_provided(Req, State) ->
     {[{"application/json", to_json}], Req, State}.
 
 to_json(Req, State) ->
-    case check_health() of
+    case check_health(State) of
         {fail, Body} ->
             {{halt, 500}, wrq:set_resp_body(Body, Req), State};
         {pong, Body} ->
@@ -57,10 +61,9 @@ to_json(Req, State) ->
 
 %% private functions
 
--spec check_health() -> {pong | fail, binary()}.
-check_health() ->
-    Version = get_version(),
-
+-spec check_health(ServerVersion :: binary()) -> {pong | fail, binary()}.
+check_health(#base_state{otp_info = {_, ServerVersion}} = _State) ->
+    ServerVersionBinary = list_to_binary(ServerVersion),
     Pings = spawn_health_checks(),
     Status = overall_status(Pings),
 
@@ -68,23 +71,13 @@ check_health() ->
     KeyGen = chef_keygen_cache:status_for_json(),
     Indexing = chef_index:status(),
 
-    StatList = [{<<"version">>, Version},
+    StatList = [{<<"server_version">>, ServerVersionBinary},
                 {<<"status">>, ?A2B(Status)},
                 {<<"upstreams">>, {Pings}},
                 {<<"keygen">>, {KeyGen}},
                 {<<"indexing">>, {Indexing}}],
     {Status, chef_json:encode({StatList})}.
 
-get_version() ->
-    {ok, Device} = file:open(?VERSION_PATH, [read]),
-    %% Assuming that the first line of the file will have the version.
-    Version =
-        case file:read_line(Device) of
-            {ok, Data} -> list_to_binary(lists:subtract(Data,"chef-server \n"));
-            _ -> <<"error">>
-        end,
-    file:close(Device),
-    Version.
 
 overall_status(Pings) ->
     case [ Pang || {_, <<"fail">>}=Pang <- Pings ] of
