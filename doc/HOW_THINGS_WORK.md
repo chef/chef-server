@@ -289,3 +289,63 @@ Notes:
 the back.
 - The upgrade path after Phase2 rollout will include upgrading to a release with
 Phase1 first.
+
+## Buildkite
+
+Buildkite is a platform for running fast, secure, and scalable continuous integration pipelines on your own infrastructure.
+Pipelines contain unit, integration, and other tests to help assess and validate your build.
+The first step to investigating errors is to check the build logs.
+
+The main pipelines for this repository are:
+* `[chef/chef-server:master] verify`
+* `[chef/chef-server:master] omnibus/adhoc`
+* `[chef/umbrella:master] chef-server`
+
+### [chef/chef-server:master] verify
+Verify pipeline runs all the unit tests. 
+A verify build is automatically triggered when changes to the branch are pushed and there is a pull request linked to it.
+The results of an automatically-triggerd verify build are linked to the pull request. If the build fails the pull request will be blocked.
+This build can also be triggered manually.
+
+### [chef/chef-server:master] omnibus/adhoc
+omnibus/adhoc pipeline runs the integration tests on different builds. Integration test covers the API endpoints of the project.
+The pipeline creates different build for different supported OS/environment and pushes the builds to jfrog artifactory.
+The integration tests scripts are tested against each of the different builds created.
+This is pipeline is automatically triggered every night to make sure that the master is always ready to ship.
+
+### [chef/umbrella:master] chef-server
+This pipeline is for end to end testing and creates different builds integrating with other projects of chef.
+These builds are packaged to replicate the different environment in which chef-server will be used by the customers.
+This pipeline is run on a nightly basis using the latest build from the current omnibus pipeline.
+
+## Using S3 instead of Bookshelf
+
+If you would like to configure chef-server to use S3 instead of Bookshelf, you can
+type the following into the bash shell of your chef-server.  This assumes you are
+using a root login.  Make obvious substitutions as needed, e.g. s3_bucket,
+access_key_id, etc:
+
+```
+# copies this into the bottom of /etc/opscode/chef-server.rb
+echo "
+bookshelf['enable'] =               false
+bookshelf['vip'] =                  's3.us-east-2.amazonaws.com'         # alter to taste
+bookshelf['external_url'] =         'https://s3.us-east-2.amazonaws.com' # alter to taste
+opscode_erchef['s3_bucket'] =       'YOUR-BUCKET-HERE'
+bookshelf['access_key_id'] =        'YOUR-ID-HERE'
+bookshelf['secret_access_key'] =    'YOUR-SECRET-HERE'">>/etc/opscode/chef-server.rb
+
+# puts these values into /etc/environment
+echo '
+AWS_ACCESS_KEY_ID="YOUR-ID-HERE"
+AWS_SECRET_ACCESS_KEY="YOUR-SECRET-HERE"'>>/etc/environment
+
+# reconfigures the system
+chef-server-ctl set-secret bookshelf access_key_id YOUR-ID-HERE
+chef-server-ctl set-secret bookshelf secret_access_key YOUR-SECRET-HERE
+exit
+sudo -i
+chef-server-ctl reconfigure
+chef-server-ctl stop opscode-erchef
+chef-server-ctl start opscode-erchef
+```
