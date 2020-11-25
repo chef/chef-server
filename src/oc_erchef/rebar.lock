@@ -86,7 +86,7 @@
   1},
  {<<"mini_s3">>,
   {git,"git://github.com/chef/mini_s3.git",
-       {branch,"lbaker/presigned-headers"}},
+       {branch,"praj/add_day_boundaries_to_expiration_time"}},
   0},
  {<<"mixer">>,
   {git,"git://github.com/chef/mixer.git",
