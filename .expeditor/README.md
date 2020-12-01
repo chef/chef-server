@@ -32,7 +32,7 @@ Environment variables are used to control how the scenarios are executed and all
 |-----------------------------|-----------------------------------------------------------------------------------------------|--------------------------------------------|
 | `INSTALL_VERSION` | The version number of the artifact you want to install first. | e.g. 12.19.31 |
 | `UPGRADE_VERSION` | The version number of the artifact you want to upgrade to. | e.g. 13.1.58+20200303212531 |
-| `ELASTIC_VERSION` | Version of Elasticsearch to install. | 2 or 5 with 6 being the default |
+| `ELASTIC_VERSION` | Version of Elasticsearch to install. | 2, 5, 6, or 7 with 6 being the default |
 | `ENABLE_SMOKE_TEST` | Enable Chef Infra Server smoke test. | true (default) |
 | `ENABLE_PEDANT_TEST` | Enable full Chef Infra Server pedant test. | true (default) |
 | `ENABLE_PSQL_TEST` | Enable testing of Chef Infra Server PostgreSQL database. | true (default) |
