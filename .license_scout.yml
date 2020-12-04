@@ -138,6 +138,9 @@ fallbacks:
     - name: pry-remote
       license_id: MIT
       license_content: https://raw.githubusercontent.com/emerose/pbkdf2-ruby/master/LICENSE.TXT
+    - name: sqlite3-ruby
+      license_id: BSD-3-Clause
+      license_content: https://raw.githubusercontent.com/sparklemotion/sqlite3-ruby/master/LICENSE
     - name: syslog-logger
       license_id: MIT
       license_content: https://raw.githubusercontent.com/ngmoco/syslog_logger/master/README.rdoc
@@ -164,6 +167,8 @@ exceptions:
       reason: Exception made by Chef Legal (unmodified library, used as-is)
     - name: raindrops
       reason: Exception made by Chef Legal (unmodified library, used as-is)
+    - name: thin
+      reason: Exception made by Chef Legal (unmodified library, used as-is and only in development environment)
   habitat:
     - name: core/attr
       reason: Exception made by Chef Legal
