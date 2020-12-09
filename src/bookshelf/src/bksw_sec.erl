@@ -139,6 +139,7 @@ auth_init(Req0, Context, SignedHeaders) ->
 
 % TODO: spec
 auth_finish(Auth, #context{
+                     auth_type         = AuthType,
                      aws_access_key_id = AWSAccessKeyId,
                      date              = Date,
                      reqid             = ReqId,
@@ -164,7 +165,13 @@ auth_finish(Auth, #context{
                     end
             end;
         _ ->
-            encode_access_denied_error_response(reqid(Auth), req(Auth), Context)
+            case AuthType of
+                presigned_url ->
+                    encode_access_denied_error_response(reqid(Auth), req(Auth), Context);
+                auth_header ->
+                    encode_sign_error_response(AWSAccessKeyId, IncomingSig, reqid(Auth),
+                                               ComparisonURL, req(Auth), Context)
+            end
     end.
 
 encode_sign_error_response(AccessKeyId, Signature,
