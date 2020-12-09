@@ -48,7 +48,7 @@ is_authorized(Req0, #context{auth_type           = presigned_url,
     {Bucketname, Key } = get_bucket_key(path(Auth)),
     ComparisonURL      = mini_s3:s3_url(method(Auth), Bucketname, Key, XAmzExpiresInt, SignedHeaders, Date, config(Auth)),
     IncomingSig        = list_to_binary(IncomingSignature),
-    [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", trailing),
+    [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", all),
 
     % If the signature computation and comparison fails, this
     % implementation attempts an alternative signature computation/comparison
