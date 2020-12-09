@@ -315,7 +315,11 @@ bucket_many(suite) ->
     [];
 bucket_many(Config) ->
     S3Conf0 = proplists:get_value(s3_conf, Config),
-    S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey},
+    S3Conf = S3Conf0#aws_config{access_key_id = ?accesskeyid, secret_access_key = ?secretaccesskey}, %, s3_port = 4321},
+
+?debugFmt("~n~nscheme: ~p", [S3Conf#aws_config.s3_scheme]),
+?debugFmt("~nhost:   ~p", [S3Conf#aws_config.s3_host]),
+?debugFmt("~nport:   ~p", [S3Conf#aws_config.s3_port]),
 
     BucketsBefore = bucket_list(S3Conf),
     Buckets = [random_binary() || _ <- lists:seq(1, 50)],

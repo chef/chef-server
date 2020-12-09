@@ -22,17 +22,35 @@ get_bucket_key_test() ->
     {"bucket",   "key/more/moar"} = bksw_sec:get_bucket_key("/bucket/key/more/moar/").
 
 % get host and toggle the port (add port or remove it)
-get_host_toggleport_test() ->
+add_port_to_host_test() ->
+
+Blah1 = mini_s3:new("", "", "127.0.0.1"),
+"127.0.0.1:443" = bksw_sec:add_port_to_host("127.0.0.1", Blah1),
+Blah2 = mini_s3:new("", "", "127.0.0.1:4321"),
+"127.0.0.1:4321" = bksw_sec:add_port_to_host("127.0.0.1:4321", Blah2),
+Blah3 = mini_s3:new("", "", "http://127.0.0.1"),
+"http://127.0.0.1:80" = bksw_sec:add_port_to_host("http://127.0.0.1", Blah3),
+Blah4 = mini_s3:new("", "", "http://127.0.0.1:4321"),
+"http://127.0.0.1:4321" = bksw_sec:add_port_to_host("http://127.0.0.1:4321", Blah4),
+
     Config0 = mini_s3:new("", "", "host"),
-    "host:443" = bksw_sec:get_host_toggleport("host", Config0),
+    "host:443" = bksw_sec:add_port_to_host("host", Config0),
+
     Config1 = mini_s3:new("", "", "host:123"),
-    "host" = bksw_sec:get_host_toggleport("host:123", Config1),
+    "host:123" = bksw_sec:add_port_to_host("host:123", Config1),
+
     Config2 = mini_s3:new("", "", "http://host"),
-    "http://host:80" = bksw_sec:get_host_toggleport("http://host", Config2),
+?debugFmt("~n~nbksw_sec:add_port_to_host('http://host') - ~p~n", [bksw_sec:add_port_to_host("http://host", Config2)]),
+    "http://host:80" = bksw_sec:add_port_to_host("http://host", Config2),
+
     Config3 = mini_s3:new("", "", "http://host:123"),
-    "http://host" = bksw_sec:get_host_toggleport("http://host:123", Config3),
-    Config4 = mini_s3:new("", "", "https://host:123"),
-    "https://host" = bksw_sec:get_host_toggleport("https://host:123", Config4).
+    "http://host:123" = bksw_sec:add_port_to_host("http://host:123", Config3),
+
+    Config4 = mini_s3:new("", "", "https://host"),
+    "https://host:443" = bksw_sec:add_port_to_host("https://host", Config4),
+
+    Config5 = mini_s3:new("", "", "https://host:123"),
+    "https://host:123" = bksw_sec:add_port_to_host("https://host:123", Config5).
 
 % 100 seconds into the future from now should not be expired.
 is_expired_false_test() ->

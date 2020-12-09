@@ -46,30 +46,11 @@ is_authorized(Req0, #context{auth_type           = presigned_url,
                              x_amz_expires_int   = XAmzExpiresInt} = Context) ->
     Auth               = auth_init(Req0, Context, SignedHeaders),
     {Bucketname, Key } = get_bucket_key(path(Auth)),
-    ComparisonURL      = mini_s3:s3_url(method(Auth), Bucketname, Key, XAmzExpiresInt, SignedHeaders, Date, config(Auth)),
+    ComparisonURL      = mini_s3:s3_url(method(Auth), Bucketname, Key, XAmzExpiresInt, signed_headers(Auth), Date, config(Auth)),
     IncomingSig        = list_to_binary(IncomingSignature),
     [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", trailing),
 
-    % If the signature computation and comparison fails, this
-    % implementation attempts an alternative signature computation/comparison
-    % which adds or removes the port from the host header depending on whether
-    % the port is present or absent. At the time this was put in, there were
-    % problems with signature failures due to inconsistent treatment of host
-    % headers by various chef clients (present or missing ports).  Determining
-    % whether this capability is still necessary would require some investigation
-    % and testing.
-
-    CalculatedSig =
-        case IncomingSig of
-            ComparisonSig ->
-                %AltComparisonSig = "not computed",
-                IncomingSig;
-            _ ->
-                AltComparisonURL      = mini_s3:s3_url(method(Auth), Bucketname, Key, XAmzExpiresInt, alt_signed_headers(Auth), Date, config(Auth)),
-                [_, AltComparisonSig] = string:split(AltComparisonURL, "&X-Amz-Signature=", all),
-                AltComparisonSig
-        end,
-    auth_finish(Auth, Context, ComparisonURL, IncomingSig, CalculatedSig);
+    auth_finish(Auth, Context, ComparisonURL, IncomingSig, ComparisonSig);
 is_authorized(Req0, #context{auth_type           = auth_header,
                              date                = Date,
                              incoming_sig        = IncomingSignature,
@@ -78,29 +59,11 @@ is_authorized(Req0, #context{auth_type           = auth_header,
     Auth              = auth_init(Req0, Context, SignedHeaders),
     ComparisonURL     = "not-applicable",
     QueryParams       = wrq:req_qs(req(Auth)),
-    SigV4Headers      = erlcloud_aws:sign_v4(method(Auth), path(Auth), config(Auth), SignedHeaders, <<>>, Region, "s3", QueryParams, Date),
+    SigV4Headers      = erlcloud_aws:sign_v4(method(Auth), path(Auth), config(Auth), signed_headers(Auth), <<>>, Region, "s3", QueryParams, Date),
     IncomingSig       = IncomingSignature,
     ComparisonSig     = parseauth_or_throw(proplists:get_value("Authorization", SigV4Headers, ""), {reqid(Auth), req(Auth), Context}),
 
-    % If the signature computation and comparison fails, this
-    % implementation attempts an alternative signature computation/comparison
-    % which adds or removes the port from the host header depending on whether
-    % the port is present or absent. At the time this was put in, there were
-    % problems with signature failures due to inconsistent treatment of host
-    % headers by various chef clients (present or missing ports).  Determining
-    % whether this capability is still necessary would require some investigation
-    % and testing.
-
-    CalculatedSig =
-        case IncomingSig of
-            ComparisonSig ->
-                %AltComparisonSig = "not computed",
-                IncomingSig;
-            _ ->
-                AltSigV4Headers   = erlcloud_aws:sign_v4(method(Auth), path(Auth), config(Auth), alt_signed_headers(Auth), <<>>, Region, "s3", QueryParams, Date),
-                _AltComparisonSig = parseauth_or_throw(proplists:get_value("Authorization", AltSigV4Headers, ""), {reqid(Auth), req(Auth), Context})
-        end,
-    auth_finish(Auth, Context, ComparisonURL, IncomingSig, CalculatedSig).
+    auth_finish(Auth, Context, ComparisonURL, IncomingSig, ComparisonSig).
 
 % @doc split authorization header into component parts
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
@@ -123,19 +86,35 @@ encode_access_denied_error_response(RequestId, Req0, Context) ->
 % local functions, helpers, etc.
 %%===================================================================
 
+% apparently host headers arrive without ports attached to them
+-spec add_port_to_host(string(), aws_config()) -> string().
+add_port_to_host(Host, Config) ->
+    Port     = integer_to_list(Config#aws_config.s3_port),
+    HostPort = string:join([Host, Port], ":"),
+    case string:split(Host, ":", trailing) of
+        [Host      ] ->
+            HostPort;
+        ["http",  _] ->
+            HostPort;
+        ["https", _] ->
+            HostPort;
+        [_,       _] ->
+            Host
+    end.
+
 % common setup, init
 -spec auth_init(any(), tuple(), string()) -> map().
 auth_init(Req0, Context, SignedHeaders) ->
-    AccessKey            =  bksw_conf:access_key_id(Context),
-    {RequestId, Req1}    =  bksw_req:with_amz_request_id(Req0),
-    Config               =  mini_s3:new(AccessKey, bksw_conf:secret_access_key(Context), host(Req1)),
-    #{accesskey          => AccessKey,
-      config             => Config,
-      alt_signed_headers => [case {K, V} of {"host", _} -> {"host", get_host_toggleport(host(Req1), Config)}; _ -> {K, V} end || {K, V} <- SignedHeaders],
-      method             => list_to_atom(string:to_lower(erlang:atom_to_list(wrq:method(Req1)))),
-      path               => wrq:path(Req1),
-      req                => Req1,
-      reqid              => RequestId}.
+    AccessKey         =  bksw_conf:access_key_id(Context),
+    {RequestId, Req1} =  bksw_req:with_amz_request_id(Req0),
+    Config            =  mini_s3:new(AccessKey, bksw_conf:secret_access_key(Context), host(Req1)),
+    #{accesskey       => AccessKey,
+      config          => Config,
+      signed_headers  => [case {K, V} of {"host", _} -> {"host", add_port_to_host(host(Req1), Config)}; _ -> {K, V} end || {K, V} <- SignedHeaders],
+      method          => list_to_atom(string:to_lower(erlang:atom_to_list(wrq:method(Req1)))),
+      path            => wrq:path(Req1),
+      req             => Req1,
+      reqid           => RequestId}.
 
 % TODO: spec
 auth_finish(Auth, #context{
@@ -144,9 +123,9 @@ auth_finish(Auth, #context{
                      reqid             = ReqId,
                      x_amz_expires_int = XAmzExpiresInt,
                      x_amz_expires_str = XAmzExpiresString
-                  } = Context, ComparisonURL, IncomingSig, CalculatedSig) ->
+                  } = Context, ComparisonURL, IncomingSig, ComparisonSig) ->
     case IncomingSig of
-        CalculatedSig ->
+        ComparisonSig ->
             case is_expired(Date, XAmzExpiresInt) of
                 true ->
                     ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p", [ReqId, XAmzExpiresInt, path(Auth)]),
@@ -186,23 +165,6 @@ get_bucket_key(Path) ->
         [            ] -> {"",     ""};
         [Bucket      ] -> {Bucket, ""};
         [Bucket | Key] -> {Bucket, filename:join(Key)}
-    end.
-
-% get host and toggle the port (add port or remove it)
--spec get_host_toggleport(string(), aws_config()) -> string().
-get_host_toggleport(Host, Config) ->
-    case string:split(Host, ":", trailing) of
-        [Host      ] ->
-            Port = integer_to_list(Config#aws_config.s3_port),
-            string:join([Host, Port], ":");
-        ["http",  _] ->
-            Port = integer_to_list(Config#aws_config.s3_port),
-            string:join([Host, Port], ":");
-        ["https", _] ->
-            Port = integer_to_list(Config#aws_config.s3_port),
-            string:join([Host, Port], ":");
-        [H,       _] ->
-            H
     end.
 
 -spec host(tuple()) -> list().
@@ -251,10 +213,10 @@ parseauth_or_throw(Auth, Throw) ->
     end.
 
 % accessors
-accesskey(Auth)          -> maps:get(accesskey,          Auth).
-alt_signed_headers(Auth) -> maps:get(alt_signed_headers, Auth).
-config(Auth)             -> maps:get(config,             Auth).
-method(Auth)             -> maps:get(method,             Auth).
-path(Auth)               -> maps:get(path,               Auth).
-req(Auth)                -> maps:get(req,                Auth).
-reqid(Auth)              -> maps:get(reqid,              Auth).
+accesskey(     Auth) -> maps:get(accesskey,      Auth).
+signed_headers(Auth) -> maps:get(signed_headers, Auth).
+config(        Auth) -> maps:get(config,         Auth).
+method(        Auth) -> maps:get(method,         Auth).
+path(          Auth) -> maps:get(path,           Auth).
+req(           Auth) -> maps:get(req,            Auth).
+reqid(         Auth) -> maps:get(reqid,          Auth).
