@@ -59,16 +59,7 @@ is_authorized(Req0, #context{auth_type           = presigned_url,
     % whether this capability is still necessary would require some investigation
     % and testing.
 
-    CalculatedSig =
-        case IncomingSig of
-            ComparisonSig ->
-                %AltComparisonSig = "not computed",
-                IncomingSig;
-            _ ->
-                AltComparisonURL      = mini_s3:s3_url(method(Auth), Bucketname, Key, XAmzExpiresInt, alt_signed_headers(Auth), Date, config(Auth)),
-                [_, AltComparisonSig] = string:split(AltComparisonURL, "&X-Amz-Signature=", all),
-                AltComparisonSig
-        end,
+    CalculatedSig = ComparisonSig,
     auth_finish(Auth, Context, ComparisonURL, IncomingSig, CalculatedSig);
 is_authorized(Req0, #context{auth_type           = auth_header,
                              date                = Date,
@@ -91,15 +82,7 @@ is_authorized(Req0, #context{auth_type           = auth_header,
     % whether this capability is still necessary would require some investigation
     % and testing.
 
-    CalculatedSig =
-        case IncomingSig of
-            ComparisonSig ->
-                %AltComparisonSig = "not computed",
-                IncomingSig;
-            _ ->
-                AltSigV4Headers   = erlcloud_aws:sign_v4(method(Auth), path(Auth), config(Auth), alt_signed_headers(Auth), <<>>, Region, "s3", QueryParams, Date),
-                _AltComparisonSig = parseauth_or_throw(proplists:get_value("Authorization", AltSigV4Headers, ""), {reqid(Auth), req(Auth), Context})
-        end,
+    CalculatedSig = ComparisonSig,
     auth_finish(Auth, Context, ComparisonURL, IncomingSig, CalculatedSig).
 
 % @doc split authorization header into component parts
@@ -252,7 +235,6 @@ parseauth_or_throw(Auth, Throw) ->
 
 % accessors
 accesskey(Auth)          -> maps:get(accesskey,          Auth).
-alt_signed_headers(Auth) -> maps:get(alt_signed_headers, Auth).
 config(Auth)             -> maps:get(config,             Auth).
 method(Auth)             -> maps:get(method,             Auth).
 path(Auth)               -> maps:get(path,               Auth).
