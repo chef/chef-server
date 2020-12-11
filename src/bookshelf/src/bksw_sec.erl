@@ -48,7 +48,6 @@ is_authorized(Req0, #context{auth_type           = presigned_url,
     {Bucketname, Key } = get_bucket_key(path(Auth)),
     ComparisonURL      = mini_s3:s3_url(method(Auth), Bucketname, Key, XAmzExpiresInt, SignedHeaders, Date, config(Auth)),
     IncomingSig        = list_to_binary(IncomingSignature),
-    [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", trailing),
 
     % If the signature computation and comparison fails, this
     % implementation attempts an alternative signature computation/comparison
@@ -60,11 +59,7 @@ is_authorized(Req0, #context{auth_type           = presigned_url,
     % and testing.
 
     CalculatedSig =
-        case IncomingSig of
-            ComparisonSig ->
-                %AltComparisonSig = "not computed",
-                IncomingSig;
-            _ ->
+        begin
                 AltComparisonURL      = mini_s3:s3_url(method(Auth), Bucketname, Key, XAmzExpiresInt, alt_signed_headers(Auth), Date, config(Auth)),
                 [_, AltComparisonSig] = string:split(AltComparisonURL, "&X-Amz-Signature=", all),
                 AltComparisonSig
@@ -78,9 +73,7 @@ is_authorized(Req0, #context{auth_type           = auth_header,
     Auth              = auth_init(Req0, Context, SignedHeaders),
     ComparisonURL     = "not-applicable",
     QueryParams       = wrq:req_qs(req(Auth)),
-    SigV4Headers      = erlcloud_aws:sign_v4(method(Auth), path(Auth), config(Auth), SignedHeaders, <<>>, Region, "s3", QueryParams, Date),
     IncomingSig       = IncomingSignature,
-    ComparisonSig     = parseauth_or_throw(proplists:get_value("Authorization", SigV4Headers, ""), {reqid(Auth), req(Auth), Context}),
 
     % If the signature computation and comparison fails, this
     % implementation attempts an alternative signature computation/comparison
@@ -92,11 +85,7 @@ is_authorized(Req0, #context{auth_type           = auth_header,
     % and testing.
 
     CalculatedSig =
-        case IncomingSig of
-            ComparisonSig ->
-                %AltComparisonSig = "not computed",
-                IncomingSig;
-            _ ->
+        begin
                 AltSigV4Headers   = erlcloud_aws:sign_v4(method(Auth), path(Auth), config(Auth), alt_signed_headers(Auth), <<>>, Region, "s3", QueryParams, Date),
                 _AltComparisonSig = parseauth_or_throw(proplists:get_value("Authorization", AltSigV4Headers, ""), {reqid(Auth), req(Auth), Context})
         end,
