@@ -49,16 +49,6 @@ is_authorized(Req0, #context{auth_type           = presigned_url,
     ComparisonURL      = mini_s3:s3_url(method(Auth), Bucketname, Key, XAmzExpiresInt, SignedHeaders, Date, config(Auth)),
     IncomingSig        = list_to_binary(IncomingSignature),
     [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", trailing),
-
-    % If the signature computation and comparison fails, this
-    % implementation attempts an alternative signature computation/comparison
-    % which adds or removes the port from the host header depending on whether
-    % the port is present or absent. At the time this was put in, there were
-    % problems with signature failures due to inconsistent treatment of host
-    % headers by various chef clients (present or missing ports).  Determining
-    % whether this capability is still necessary would require some investigation
-    % and testing.
-
     CalculatedSig = ComparisonSig,
     auth_finish(Auth, Context, ComparisonURL, IncomingSig, CalculatedSig);
 is_authorized(Req0, #context{auth_type           = auth_header,
@@ -72,16 +62,6 @@ is_authorized(Req0, #context{auth_type           = auth_header,
     SigV4Headers      = erlcloud_aws:sign_v4(method(Auth), path(Auth), config(Auth), SignedHeaders, <<>>, Region, "s3", QueryParams, Date),
     IncomingSig       = IncomingSignature,
     ComparisonSig     = parseauth_or_throw(proplists:get_value("Authorization", SigV4Headers, ""), {reqid(Auth), req(Auth), Context}),
-
-    % If the signature computation and comparison fails, this
-    % implementation attempts an alternative signature computation/comparison
-    % which adds or removes the port from the host header depending on whether
-    % the port is present or absent. At the time this was put in, there were
-    % problems with signature failures due to inconsistent treatment of host
-    % headers by various chef clients (present or missing ports).  Determining
-    % whether this capability is still necessary would require some investigation
-    % and testing.
-
     CalculatedSig = ComparisonSig,
     auth_finish(Auth, Context, ComparisonURL, IncomingSig, CalculatedSig).
 
@@ -112,13 +92,17 @@ auth_init(Req0, Context, SignedHeaders) ->
     AccessKey            =  bksw_conf:access_key_id(Context),
     {RequestId, Req1}    =  bksw_req:with_amz_request_id(Req0),
     Config               =  mini_s3:new(AccessKey, bksw_conf:secret_access_key(Context), host(Req1)),
-    #{accesskey          => AccessKey,
+Z = #{accesskey          => AccessKey,
       config             => Config,
       alt_signed_headers => [case {K, V} of {"host", _} -> {"host", get_host_toggleport(host(Req1), Config)}; _ -> {K, V} end || {K, V} <- SignedHeaders],
       method             => list_to_atom(string:to_lower(erlang:atom_to_list(wrq:method(Req1)))),
       path               => wrq:path(Req1),
       req                => Req1,
-      reqid              => RequestId}.
+      reqid              => RequestId},
+io:format("~n~nbksw_sec:auth_init", []),
+io:format(  "~nhost:    ~p",   [proplists:lookup("host", SignedHeaders)]),
+io:format(  "~nalthost: ~p~n", [proplists:lookup("host", maps:get(alt_signed_headers, Z))]),
+Z.
 
 % TODO: spec
 auth_finish(Auth, #context{
