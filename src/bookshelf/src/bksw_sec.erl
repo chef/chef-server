@@ -42,9 +42,10 @@ is_authorized(Req0, #context{auth_check_disabled = true          } = Context) ->
 is_authorized(Req0, #context{auth_type           = presigned_url,
                              date                = Date,
                              incoming_sig        = IncomingSignature,
-                             signed_headers      = SignedHeaders,
+                             signed_headers      = SignedHeaders0,
                              x_amz_expires_int   = XAmzExpiresInt} = Context) ->
-    Auth               = auth_init(Req0, Context, SignedHeaders),
+    Auth               = auth_init(Req0, Context, SignedHeaders0),
+    SignedHeaders      = maps:get(signed_headers, Auth),
     {Bucketname, Key } = get_bucket_key(path(Auth)),
     ComparisonURL      = mini_s3:s3_url(method(Auth), Bucketname, Key, XAmzExpiresInt, SignedHeaders, Date, config(Auth)),
     IncomingSig        = list_to_binary(IncomingSignature),
@@ -55,8 +56,9 @@ is_authorized(Req0, #context{auth_type           = auth_header,
                              date                = Date,
                              incoming_sig        = IncomingSignature,
                              region              = Region,
-                             signed_headers      = SignedHeaders} = Context) ->
-    Auth              = auth_init(Req0, Context, SignedHeaders),
+                             signed_headers      = SignedHeaders0} = Context) ->
+    Auth              = auth_init(Req0, Context, SignedHeaders0),
+    SignedHeaders     = maps:get(signed_headers, Auth),
     ComparisonURL     = "not-applicable",
     QueryParams       = wrq:req_qs(req(Auth)),
     SigV4Headers      = erlcloud_aws:sign_v4(method(Auth), path(Auth), config(Auth), SignedHeaders, <<>>, Region, "s3", QueryParams, Date),
@@ -94,14 +96,14 @@ auth_init(Req0, Context, SignedHeaders) ->
     Config               =  mini_s3:new(AccessKey, bksw_conf:secret_access_key(Context), host(Req1)),
 Z = #{accesskey          => AccessKey,
       config             => Config,
-      alt_signed_headers => [case {K, V} of {"host", _} -> {"host", get_host_toggleport(host(Req1), Config)}; _ -> {K, V} end || {K, V} <- SignedHeaders],
+      signed_headers     => [case {K, V} of {"host", _} -> {"host", get_host_toggleport(host(Req1), Config)}; _ -> {K, V} end || {K, V} <- SignedHeaders],
       method             => list_to_atom(string:to_lower(erlang:atom_to_list(wrq:method(Req1)))),
       path               => wrq:path(Req1),
       req                => Req1,
       reqid              => RequestId},
 io:format("~n~nbksw_sec:auth_init", []),
 io:format(  "~nhost:    ~p",   [proplists:lookup("host", SignedHeaders)]),
-io:format(  "~nalthost: ~p~n", [proplists:lookup("host", maps:get(alt_signed_headers, Z))]),
+io:format(  "~nalthost: ~p~n", [proplists:lookup("host", maps:get(signed_headers, Z))]),
 Z.
 
 % TODO: spec
