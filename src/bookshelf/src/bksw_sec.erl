@@ -96,14 +96,19 @@ auth_init(Req0, Context, SignedHeaders) ->
     Config               =  mini_s3:new(AccessKey, bksw_conf:secret_access_key(Context), host(Req1)),
 Z = #{accesskey          => AccessKey,
       config             => Config,
-      signed_headers     => [case {K, V} of {"host", _} -> {"host", get_host_toggleport(host(Req1), Config)}; _ -> {K, V} end || {K, V} <- SignedHeaders],
+      signed_headers     => 
+        case Config#aws_config.s3_port of
+            80  -> SignedHeaders;
+            443 -> SignedHeaders;
+            _   -> [case {K, V} of {"host", _} -> {"host", get_host_toggleport(host(Req1), Config)}; _ -> {K, V} end || {K, V} <- SignedHeaders]
+        end,
       method             => list_to_atom(string:to_lower(erlang:atom_to_list(wrq:method(Req1)))),
       path               => wrq:path(Req1),
       req                => Req1,
       reqid              => RequestId},
 io:format("~n~nbksw_sec:auth_init", []),
-io:format(  "~nhost:    ~p",   [proplists:lookup("host", SignedHeaders)]),
-io:format(  "~nalthost: ~p~n", [proplists:lookup("host", maps:get(signed_headers, Z))]),
+io:format(  "~nSignedHeaders:  ~p",   [proplists:lookup("host", SignedHeaders)]),
+io:format(  "~nsigned_headers: ~p~n", [proplists:lookup("host", maps:get(signed_headers, Z))]),
 Z.
 
 % TODO: spec
