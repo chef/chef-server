@@ -43,8 +43,10 @@
 % why is this here?
 -include_lib("eunit/include/eunit.hrl").
 
--define(CACHE_CTRL_MAXAGE, "300"  ).
--define(WEEK,               604800).    % number of seconds in 1 week
+% number of seconds in 1 week
+-define(WEEK, 604800).
+
+-define(NOT_APPLICABLE, "1").
 
 init(Config) ->
     {ok, bksw_conf:get_context(Config)}.
@@ -79,9 +81,8 @@ malformed_request(Req0, #context{                        } = Context) ->
                         AuthType = auth_header,
                         XAmzDate = wrq:get_req_header("x-amz-date", Req1),
                         % X-Amz-Expires is not used for authorization header-style authentication,
-                        % but is still used to set cache-control max-age.
                         % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
-                        XAmzExpiresString = ?CACHE_CTRL_MAXAGE,
+                        XAmzExpiresString = ?NOT_APPLICABLE,
                         SignedHeaders = get_signed_headers(parse_x_amz_signed_headers(SignedHeaderKeysString), Headers, []),
                         case check_signed_headers_authhead(SignedHeaders, Headers) of
                             true -> ok;
@@ -113,7 +114,7 @@ malformed_request(Req0, #context{                        } = Context) ->
         end,
 
         XAmzExpiresInt = list_to_integer(XAmzExpiresString),
-        case XAmzExpiresInt > 1 andalso XAmzExpiresInt < ?WEEK of
+        case XAmzExpiresInt > 0 andalso XAmzExpiresInt =< ?WEEK of
             true -> ok;
             _    -> throw({RequestId, Req1, Context})
         end,
