@@ -40,9 +40,12 @@
 
 is_authorized(Req0, #context{auth_check_disabled = true          } = Context) -> {true, Req0, Context};
 is_authorized(Req0, #context{auth_type           = presigned_url,
+                             aws_access_key_id   = AWSAccessKeyId,
                              date                = Date,
                              incoming_sig        = IncomingSignature,
+                             reqid               = ReqId,
                              signed_headers      = SignedHeaders,
+                             x_amz_expires_str   = XAmzExpiresString,
                              x_amz_expires_int   = XAmzExpiresInt} = Context) ->
     Auth               = auth_init(Req0, Context, SignedHeaders),
     {Bucketname, Key } = get_bucket_key(path(Auth)),
@@ -69,8 +72,31 @@ is_authorized(Req0, #context{auth_type           = presigned_url,
                 [_, AltComparisonSig] = string:split(AltComparisonURL, "&X-Amz-Signature=", all),
                 AltComparisonSig
         end,
-    auth_finish(Auth, Context, ComparisonURL, IncomingSig, CalculatedSig);
+
+    % TODO: remove relevant code in bksw_wm_base.erl
+    case IncomingSig of
+        CalculatedSig ->
+            case is_expired(Date, XAmzExpiresInt) of
+                true ->
+                    ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p", [ReqId, XAmzExpiresInt, path(Auth)]),
+                    encode_access_denied_error_response(reqid(Auth), req(Auth), Context);
+                false ->
+                    case erlang:iolist_to_binary(AWSAccessKeyId) == erlang:iolist_to_binary(accesskey(Auth)) of
+                        true ->
+                            MaxAge = "max-age=" ++ XAmzExpiresString,
+                            Req2   = wrq:set_resp_header("Cache-Control", MaxAge, req(Auth)),
+                            {true, Req2, Context};
+                        false ->
+                            ?LOG_DEBUG("req_id=~p signing error for ~p", [ReqId, path(Auth)]),
+                            encode_sign_error_response(AWSAccessKeyId, IncomingSig, reqid(Auth),
+                                                       ComparisonURL, req(Auth), Context)
+                    end
+            end;
+        _ ->
+            encode_access_denied_error_response(reqid(Auth), req(Auth), Context)
+    end;
 is_authorized(Req0, #context{auth_type           = auth_header,
+                             aws_access_key_id   = AWSAccessKeyId,
                              date                = Date,
                              incoming_sig        = IncomingSignature,
                              region              = Region,
@@ -100,7 +126,14 @@ is_authorized(Req0, #context{auth_type           = auth_header,
                 AltSigV4Headers   = erlcloud_aws:sign_v4(method(Auth), path(Auth), config(Auth), alt_signed_headers(Auth), <<>>, Region, "s3", QueryParams, Date),
                 _AltComparisonSig = parseauth_or_throw(proplists:get_value("Authorization", AltSigV4Headers, ""), {reqid(Auth), req(Auth), Context})
         end,
-    auth_finish(Auth, Context, ComparisonURL, IncomingSig, CalculatedSig).
+
+    case IncomingSig of
+        CalculatedSig ->
+            {true, req(Auth), Context};
+        _ ->
+            encode_sign_error_response(AWSAccessKeyId, IncomingSig, reqid(Auth),
+                                       ComparisonURL, req(Auth), Context)
+    end.
 
 % @doc split authorization header into component parts
 % https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
@@ -137,42 +170,43 @@ auth_init(Req0, Context, SignedHeaders) ->
       req                => Req1,
       reqid              => RequestId}.
 
-% TODO: spec
-auth_finish(Auth, #context{
-                     auth_type         = AuthType,
-                     aws_access_key_id = AWSAccessKeyId,
-                     date              = Date,
-                     reqid             = ReqId,
-                     x_amz_expires_int = XAmzExpiresInt,
-                     x_amz_expires_str = XAmzExpiresString
-                  } = Context, ComparisonURL, IncomingSig, CalculatedSig) ->
-    case IncomingSig of
-        CalculatedSig ->
-            case is_expired(Date, XAmzExpiresInt) of
-                true ->
-                    ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p", [ReqId, XAmzExpiresInt, path(Auth)]),
-                    encode_access_denied_error_response(reqid(Auth), req(Auth), Context);
-                false ->
-                    case erlang:iolist_to_binary(AWSAccessKeyId) == erlang:iolist_to_binary(accesskey(Auth)) of
-                        true ->
-                            MaxAge = "max-age=" ++ XAmzExpiresString,
-                            Req2   = wrq:set_resp_header("Cache-Control", MaxAge, req(Auth)),
-                            {true, Req2, Context};
-                        false ->
-                            ?LOG_DEBUG("req_id=~p signing error for ~p", [ReqId, path(Auth)]),
-                            encode_sign_error_response(AWSAccessKeyId, IncomingSig, reqid(Auth),
-                                                       ComparisonURL, req(Auth), Context)
-                    end
-            end;
-        _ ->
-            case AuthType of
-                presigned_url ->
-                    encode_access_denied_error_response(reqid(Auth), req(Auth), Context);
-                auth_header ->
-                    encode_sign_error_response(AWSAccessKeyId, IncomingSig, reqid(Auth),
-                                               ComparisonURL, req(Auth), Context)
-            end
-    end.
+%% TODO: spec
+%auth_finish(Auth, #context{
+%                     auth_type         = AuthType,
+%                     aws_access_key_id = AWSAccessKeyId,
+%                     date              = Date,
+%                     reqid             = ReqId,
+%                     x_amz_expires_int = XAmzExpiresInt,
+%                     x_amz_expires_str = XAmzExpiresString
+%                  } = Context, ComparisonURL, IncomingSig, CalculatedSig) ->
+%    % TODO: if this works, perhaps remove auth_finish and refactor above somewhere.
+%    % also, remove relevant code in bksw_wm_base.erl
+%    case {IncomingSig, AuthType} of
+%        {CalculatedSig, presigned_url} ->
+%            case is_expired(Date, XAmzExpiresInt) of
+%                true ->
+%                    ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p", [ReqId, XAmzExpiresInt, path(Auth)]),
+%                    encode_access_denied_error_response(reqid(Auth), req(Auth), Context);
+%                false ->
+%                    case erlang:iolist_to_binary(AWSAccessKeyId) == erlang:iolist_to_binary(accesskey(Auth)) of
+%                        true ->
+%                            MaxAge = "max-age=" ++ XAmzExpiresString,
+%                            Req2   = wrq:set_resp_header("Cache-Control", MaxAge, req(Auth)),
+%                            {true, Req2, Context};
+%                        false ->
+%                            ?LOG_DEBUG("req_id=~p signing error for ~p", [ReqId, path(Auth)]),
+%                            encode_sign_error_response(AWSAccessKeyId, IncomingSig, reqid(Auth),
+%                                                       ComparisonURL, req(Auth), Context)
+%                    end
+%            end;
+%        {_, presigned_url} ->
+%            encode_access_denied_error_response(reqid(Auth), req(Auth), Context);
+%        {CalculatedSig, auth_header} ->
+%            {true, req(Auth), Context};
+%        {_, auth_header} ->
+%            encode_sign_error_response(AWSAccessKeyId, IncomingSig, reqid(Auth),
+%                                       ComparisonURL, req(Auth), Context)
+%    end.
 
 encode_sign_error_response(AccessKeyId, Signature,
                            RequestId, StringToSign, Req0,
@@ -253,6 +287,7 @@ parseauth_or_throw(Auth, Throw) ->
             {ok, [_, _, Sig]} -> Sig;
             _                 -> throw(Throw)
         end
+    % have a look at this.  i think the catch needs to be up in the calling function(s)
     catch
         throw:{ReqId, Req, Context} -> encode_access_denied_error_response(ReqId, Req, Context)
     end.
