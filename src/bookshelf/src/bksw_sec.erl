@@ -106,7 +106,7 @@ is_authorized(Req0, #context{auth_type           = auth_header,
     QueryParams       = wrq:req_qs(req(Auth)),
     SigV4Headers      = erlcloud_aws:sign_v4(method(Auth), path(Auth), config(Auth), SignedHeaders, <<>>, Region, "s3", QueryParams, Date),
     IncomingSig       = IncomingSignature,
-    ComparisonSig     = parseauth_or_throw(proplists:get_value("Authorization", SigV4Headers, ""), {reqid(Auth), req(Auth), Context}),
+    ComparisonSig     = parseauth(proplists:get_value("Authorization", SigV4Headers, "")),
 
     % If the signature computation and comparison fails, this
     % implementation attempts an alternative signature computation/comparison
@@ -124,7 +124,7 @@ is_authorized(Req0, #context{auth_type           = auth_header,
                 IncomingSig;
             _ ->
                 AltSigV4Headers   = erlcloud_aws:sign_v4(method(Auth), path(Auth), config(Auth), alt_signed_headers(Auth), <<>>, Region, "s3", QueryParams, Date),
-                _AltComparisonSig = parseauth_or_throw(proplists:get_value("Authorization", AltSigV4Headers, ""), {reqid(Auth), req(Auth), Context})
+                _AltComparisonSig = parseauth(proplists:get_value("Authorization", AltSigV4Headers, ""))
         end,
 
     case IncomingSig of
@@ -279,17 +279,11 @@ is_expired(DateTimeString, ExpiresSec) ->
     UniversalTimeSec = calendar:datetime_to_gregorian_seconds(calendar:now_to_universal_time(os:timestamp())),
     DateSeconds + ExpiresSec < UniversalTimeSec.
 
-% TODO: export and test this
--spec parseauth_or_throw(string(), tuple()) -> string() | no_return().
-parseauth_or_throw(Auth, Throw) ->
-    try
-        case parse_authorization(Auth) of
-            {ok, [_, _, Sig]} -> Sig;
-            _                 -> throw(Throw)
-        end
-    % have a look at this.  i think the catch needs to be up in the calling function(s)
-    catch
-        throw:{ReqId, Req, Context} -> encode_access_denied_error_response(ReqId, Req, Context)
+-spec parseauth(string()) -> string() | err.
+parseauth(Auth) ->
+    case parse_authorization(Auth) of
+        {ok, [_, _, Sig]} -> Sig;
+        _                 -> err
     end.
 
 % accessors
