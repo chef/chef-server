@@ -11,7 +11,6 @@ If undertaking a large change, ping the @chef/chef-server-maintainers group for 
 - [Nolan Davidson](https://github.com/nsdavidson)
 - [Prajakta Purohit](https://github.com/prajaktapurohit)
 - [Stephen Delano](https://github.com/sdelano)
-- [Steven Danna](https://github.com/stevendanna)
 - [Tyler Cloke](https://github.com/tylercloke)
 
 # Past Maintainers
@@ -19,3 +18,4 @@ If undertaking a large change, ping the @chef/chef-server-maintainers group for 
 This is kept as a 'thank you' for the contributions of past maintainers.   You may not be active in this project, but you're not forgotten.
 
 - [Oliver Ferrigni](https://github.com/oferrigni)
+- [Steven Danna](https://github.com/stevendanna)
