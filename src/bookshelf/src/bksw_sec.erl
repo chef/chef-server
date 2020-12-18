@@ -21,15 +21,14 @@
 
 -module(bksw_sec).
 
--export([encode_access_denied_error_response/3]).
--export([is_authorized/2                      ]).
--export([parse_authorization/1                ]).
+-export([encode_access_denied_error_response/3] ).
+-export([is_authorized/2                      ] ).
+-export([parse_authorization/1                ] ).
 
 -ifdef(TEST).
--compile([export_all, nowarn_export_all       ]).
+-compile([export_all, nowarn_export_all       ] ).
 -endif.
 
-% is this necessary?  try removing.
 -include("internal.hrl").
 
 -include_lib("erlcloud/include/erlcloud_aws.hrl").
@@ -38,7 +37,7 @@
 %% API functions
 %%===================================================================
 
-is_authorized(Req0, #context{auth_check_disabled = true          } = Context) -> {true, Req0, Context};
+is_authorized(Req0, #context{auth_check_disabled = true} = Context) -> {true, Req0, Context};
 is_authorized(Req0, #context{auth_type           = presigned_url,
                              aws_access_key_id   = AWSAccessKeyId,
                              date                = Date,
@@ -50,30 +49,29 @@ is_authorized(Req0, #context{auth_type           = presigned_url,
     Auth               = auth_init(Req0, Context, SignedHeaders),
     {Bucketname, Key } = get_bucket_key(path(Auth)),
     ComparisonURL      = mini_s3:s3_url(method(Auth), Bucketname, Key, XAmzExpiresInt, SignedHeaders, Date, config(Auth)),
-    IncomingSig        = list_to_binary(IncomingSignature),
     [_, ComparisonSig] = string:split(ComparisonURL, "&X-Amz-Signature=", all),
 
-    % If the signature computation and comparison fails, this
-    % implementation attempts an alternative signature computation/comparison
-    % which adds or removes the port from the host header depending on whether
-    % the port is present or absent. At the time this was put in, there were
-    % problems with signature failures due to inconsistent treatment of host
-    % headers by various chef clients (present or missing ports).  Determining
-    % whether this capability is still necessary would require some investigation
+    % If the signature comparison fails, we attempt an alternate signature
+    % calculation and comparison which adds or removes the port from the host
+    % header depending on whether the port is present or absent. At the time
+    % this was put in, there were problems with signature failures due to
+    % inconsistent treatment of host headers by various chef clients
+    % (present or missing ports).  Determining whether alt sig comparison is
+    % still necessary would require some investigation
     % and testing.
 
     CalculatedSig =
-        case IncomingSig of
-            ComparisonSig ->
-                IncomingSig;
+        case const_time_compare(IncomingSignature, ComparisonSig, true) of
+            true ->
+                IncomingSignature;
             _ ->
                 AltComparisonURL      = mini_s3:s3_url(method(Auth), Bucketname, Key, XAmzExpiresInt, alt_signed_headers(Auth), Date, config(Auth)),
                 [_, AltComparisonSig] = string:split(AltComparisonURL, "&X-Amz-Signature=", all),
                 AltComparisonSig
         end,
 
-    case IncomingSig of
-        CalculatedSig ->
+    case const_time_compare(IncomingSignature, CalculatedSig, true) of
+        true ->
             case is_expired(Date, XAmzExpiresInt) of
                 true ->
                     ?LOG_DEBUG("req_id=~p expired signature (~p) for ~p", [ReqId, XAmzExpiresInt, path(Auth)]),
@@ -86,7 +84,7 @@ is_authorized(Req0, #context{auth_type           = presigned_url,
                             {true, Req2, Context};
                         false ->
                             ?LOG_DEBUG("req_id=~p signing error for ~p", [ReqId, path(Auth)]),
-                            encode_sign_error_response(AWSAccessKeyId, IncomingSig, reqid(Auth),
+                            encode_sign_error_response(AWSAccessKeyId, IncomingSignature, reqid(Auth),
                                                        CalculatedSig, req(Auth), Context)
                     end
             end;
@@ -102,32 +100,31 @@ is_authorized(Req0, #context{auth_type           = auth_header,
     Auth          = auth_init(Req0, Context, SignedHeaders),
     QueryParams   = wrq:req_qs(req(Auth)),
     SigV4Headers  = erlcloud_aws:sign_v4(method(Auth), path(Auth), config(Auth), SignedHeaders, <<>>, Region, "s3", QueryParams, Date),
-    IncomingSig   = IncomingSignature,
     ComparisonSig = parseauth(proplists:get_value("Authorization", SigV4Headers, "")),
 
-    % If the signature computation and comparison fails, this
-    % implementation attempts an alternative signature computation/comparison
-    % which adds or removes the port from the host header depending on whether
-    % the port is present or absent. At the time this was put in, there were
-    % problems with signature failures due to inconsistent treatment of host
-    % headers by various chef clients (present or missing ports).  Determining
-    % whether this capability is still necessary would require some investigation
+    % If the signature comparison fails, we attempt an alternate signature
+    % calculation and comparison which adds or removes the port from the host
+    % header depending on whether the port is present or absent. At the time
+    % this was put in, there were problems with signature failures due to
+    % inconsistent treatment of host headers by various chef clients
+    % (present or missing ports).  Determining whether alt sig comparison is
+    % still necessary would require some investigation
     % and testing.
 
     CalculatedSig =
-        case IncomingSig of
-            ComparisonSig ->
-                IncomingSig;
+        case const_time_compare(IncomingSignature, ComparisonSig, true) of
+            true ->
+                IncomingSignature;
             _ ->
                 AltSigV4Headers   = erlcloud_aws:sign_v4(method(Auth), path(Auth), config(Auth), alt_signed_headers(Auth), <<>>, Region, "s3", QueryParams, Date),
                 _AltComparisonSig = parseauth(proplists:get_value("Authorization", AltSigV4Headers, ""))
-        end,
+            end,
 
-    case IncomingSig of
-        CalculatedSig ->
+    case const_time_compare(IncomingSignature, CalculatedSig, true) of
+        true ->
             {true, req(Auth), Context};
         _ ->
-            encode_sign_error_response(AWSAccessKeyId, IncomingSig, reqid(Auth),
+            encode_sign_error_response(AWSAccessKeyId, IncomingSignature, reqid(Auth),
                                        CalculatedSig, req(Auth), Context)
     end.
 
@@ -135,7 +132,7 @@ is_authorized(Req0, #context{auth_type           = auth_header,
 % local functions, helpers, etc.
 %%===================================================================
 
-% common setup, init
+% common setup and init
 -spec auth_init(any(), tuple(), string()) -> map().
 auth_init(Req0, Context, SignedHeaders) ->
     AccessKey            =  bksw_conf:access_key_id(Context),
@@ -149,6 +146,26 @@ auth_init(Req0, Context, SignedHeaders) ->
       req                => Req1,
       reqid              => RequestId}.
 
+% due to a security vulnerability described by Mark Anderson, we should compare signatures
+% in constant time, and not 'early out' on the first mismatched character.  this means we
+% are purposefully using a 'deoptimized' string compare function.
+-spec const_time_compare(string() | binary() | atom(), string() | binary() | atom(), boolean()) -> boolean().
+const_time_compare(S1, S2, IsEqual) when is_binary(S1) ->
+    const_time_compare(binary_to_list(S1), S2, IsEqual);
+const_time_compare(S1, S2, IsEqual) when is_binary(S2) ->
+    const_time_compare(S1, binary_to_list(S2), IsEqual);
+const_time_compare(S1, S2, IsEqual) when is_list(S1), is_list(S2) ->
+    ctcomp(S1, S2, IsEqual);
+const_time_compare(_, _, _) ->
+    false.
+
+-spec ctcomp(string(), string(), boolean()) -> boolean().
+ctcomp([    ], [    ], IsEqual) -> IsEqual;
+ctcomp([    ], [_|S2],       _) -> ctcomp([], S2, false  );
+ctcomp([_|S1], [    ],       _) -> ctcomp(S1, [], false  );
+ctcomp([X|S1], [X|S2], IsEqual) -> ctcomp(S1, S2, IsEqual);
+ctcomp([_|S1], [_|S2],       _) -> ctcomp(S1, S2, false  ).
+
 encode_access_denied_error_response(RequestId, Req0, Context) ->
     Req1 = bksw_req:with_amz_id_2(Req0),
     Body = bksw_xml:access_denied_error(RequestId),
@@ -157,7 +174,7 @@ encode_access_denied_error_response(RequestId, Req0, Context) ->
 
 encode_sign_error_response(AccessKeyId, Signature,
                            RequestId, StringToSign, Req0,
-                          Context) ->
+                           Context) ->
     Req1 = bksw_req:with_amz_id_2(Req0),
     Body = bksw_xml:signature_does_not_match_error(
              RequestId, bksw_util:to_string(Signature),
@@ -219,7 +236,7 @@ is_expired(DateTimeString, ExpiresSec) ->
     Min     = list_to_integer([N1, N2        ]),
     Sec     = list_to_integer([S1, S2        ]),
 
-    % this could be used to check if the date constructed is valid
+    % this could be used to check if the date constructed is valid:
     % calendar:valid_date({{Year, Month, Day}, {Hour, Min, Sec}}),
 
     DateSeconds      = calendar:datetime_to_gregorian_seconds({{Year, Month, Day}, {Hour, Min, Sec}}),
