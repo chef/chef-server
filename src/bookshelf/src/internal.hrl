@@ -112,13 +112,13 @@
                   transfer_state :: #file_transfer_state{} | undefined,
 
                   %% sigv4 authentication
-                  aws_access_key_id         :: string()      | undefined,
-                  auth_type                 :: auth_header   | presigned_url | undefined,
-                  date                      :: string()      | undefined,     
-                  incoming_sig              :: list()        | undefined,
-                  region                    :: string()      | undefined,
-                  signed_header_keys_str    :: string()      | undefined,
-                  signed_headers            :: list()        | undefined,
-                  x_amz_expires_int         :: pos_integer() | undefined,
-                  x_amz_expires_str         :: string()      | undefined
+                  aws_access_key_id         :: undefined | string(),
+                  auth_type                 :: undefined | auth_header | presigned_url,
+                  date                      :: undefined | string(),
+                  incoming_sig              :: undefined | binary()    | list(),
+                  region                    :: undefined | string(),
+                  signed_header_keys_str    :: undefined | string(),
+                  signed_headers            :: undefined | list(),
+                  x_amz_expires_int         :: undefined | pos_integer(),
+                  x_amz_expires_str         :: undefined | string()
               }).
