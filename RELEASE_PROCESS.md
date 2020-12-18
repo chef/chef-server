@@ -76,7 +76,7 @@ The git SHA of the build you are testing can be found in
 
         /expeditor promote chef/chef-server:master VERSION
 
-  Please do this in the `#chef-server-notify` room. Once this is
+  Please do this in the `#chef-server` room. Once this is
   done, the release is available to the public via the APT and YUM
   repositories and downloads.chef.io.
 
