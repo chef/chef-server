@@ -1,6 +1,65 @@
 -module(bksw_sec_tests).
 -include_lib("eunit/include/eunit.hrl").
 
+% due to a security vulnerability described by Mark Anderson, we should compare signatures
+% in constant time, and not 'early out' on the first mismatched character.  this means we
+% are purposefully using a 'deoptimized' string compare function.
+const_time_compare_test() ->
+    % atom arguments return false
+    false = bksw_sec:const_time_compare(a,      "test", true ),
+    false = bksw_sec:const_time_compare(a,      "test", false),
+    false = bksw_sec:const_time_compare("test", a,      true ),
+    false = bksw_sec:const_time_compare("test", a,      false),
+
+    % ensure that binaries are properly dealt with
+    true  = bksw_sec:const_time_compare(<<"test">>, "test", true ),
+    true  = bksw_sec:const_time_compare("test", <<"test">>, true ),
+    true  = bksw_sec:const_time_compare(<<"test">>, <<"test">>, true ),
+
+    % basic sanity checks, edge cases, etc.
+    true  = bksw_sec:const_time_compare([],    [],    true ),
+    false = bksw_sec:const_time_compare([],    [],    false),
+
+    false = bksw_sec:const_time_compare([],    [x],   true ),
+    false = bksw_sec:const_time_compare([],    [x],   false),
+    false = bksw_sec:const_time_compare([x],   [],    true ),
+    false = bksw_sec:const_time_compare([x],   [],    false),
+
+    true  = bksw_sec:const_time_compare([x],   [x],   true ),
+    false = bksw_sec:const_time_compare([x],   [x],   false),
+
+    false = bksw_sec:const_time_compare([x],   [y],   true ),
+    false = bksw_sec:const_time_compare([x],   [y],   false),
+
+    true  = bksw_sec:const_time_compare([x,x], [x,x], true ),
+    false = bksw_sec:const_time_compare([x,x], [x,x], false),
+    false = bksw_sec:const_time_compare([x,x], [x,y], true ),
+    false = bksw_sec:const_time_compare([x,x], [x,y], false),
+    false = bksw_sec:const_time_compare([x,y], [x,x], true ),
+    false = bksw_sec:const_time_compare([x,y], [x,x], false),
+    true  = bksw_sec:const_time_compare([x,y], [x,y], true ),
+    false = bksw_sec:const_time_compare([x,y], [x,y], false),
+    false = bksw_sec:const_time_compare([x,y], [z,a], true ),
+    false = bksw_sec:const_time_compare([x,y], [z,a], false),
+
+    % same length equal strings
+    true   = bksw_sec:const_time_compare("this is a test", "this is a test", true  ),
+    false  = bksw_sec:const_time_compare("this is a test", "this is a test", false ),
+
+    % same length unequal strings
+    false  = bksw_sec:const_time_compare("garbage blah blah sihiufiusadfgfihu",  "garbage blah blah abc123jcyhfoiahfx", true ),
+    false  = bksw_sec:const_time_compare("garbage blah blah sihiufiusadfgfihu",  "garbage blah blah abc123jcyhfoiahfx", false),
+
+    % different length unequal strings
+    false  = bksw_sec:const_time_compare("garbage blah blah sihiufiusadfgfihu",  "garbage blah blah abc123jcyhfoiahfx1", true),
+    false  = bksw_sec:const_time_compare("garbage blah blah sihiufiusadfgfihu",  "garbage blah blah abc123jcyhfoiahfx1", false),
+    false  = bksw_sec:const_time_compare("garbage blah blah sihiufiusadfgfihu1", "garbage blah blah abc123jcyhfoiahfx",  true ),
+    false  = bksw_sec:const_time_compare("garbage blah blah sihiufiusadfgfihu1", "garbage blah blah abc123jcyhfoiahfx",  false),
+    false  = bksw_sec:const_time_compare("garbage", "garbage blah blah abc123jcyhfoiahfx", true),
+    false  = bksw_sec:const_time_compare("garbage", "garbage blah blah abc123jcyhfoiahfx", false),
+    false  = bksw_sec:const_time_compare("garbage blah blah abc123jcyhfoiahfx", "garbage", true),
+    false  = bksw_sec:const_time_compare("garbage blah blah abc123jcyhfoiahfx", "garbage", false).
+
 % split "<bucketname>/<key>" (possibly leading-trailing /) into {"bucketname", "key"}
 get_bucket_key_test() ->
     {"",                      ""} = bksw_sec:get_bucket_key(""                      ),
