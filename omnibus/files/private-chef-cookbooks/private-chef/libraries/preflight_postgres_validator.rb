@@ -20,8 +20,12 @@ class PostgresqlPreflightValidator < PreflightValidator
   # we ship. When we bumped the version we ship to 9.6, we haven't yet
   # introduced any changes that _require_ 9.6. So, these constants reflect the
   # actually required PG version.
-  REQUIRED_MAJOR = 9
-  REQUIRED_MINOR = 2
+  REQUIRED_MAJOR   = 9
+  REQUIRED_MINOR   = 2
+  REQUIRED_VERSION = 9.2
+
+  # supported PG version
+  SUPPORTED_VERSION = 13.3
 
   def run!
     warn_about_removed_attribute('checkpoint_segments')
@@ -184,15 +188,21 @@ class PostgresqlPreflightValidator < PreflightValidator
   def backend_verify_postgres_version(connection)
     # Make sure the server is a supported version.
     r = connection.exec('SHOW server_version;')
-    v = r[0]['server_version']
-    major, minor = v.split('.').map(&:to_i)
+    v = r[0]['server_version'].to_f
 
     # Note that we're looking for the same major, and using our minor as the minimum version
     # This provides compatibility with external databases that use < 9.6 before we make use
     # of any features available in > 9.2.
-    unless (major == REQUIRED_MAJOR) && (minor >= REQUIRED_MINOR)
-      fail_with err_CSPG014_bad_postgres_version(v)
+
+    case
+    when v == REQUIRED_VERSION || v == SUPPORTED_VERSION
+        :ok
+    when v <  REQUIRED_VERSION || v > SUPPORTED_VERSION
+        fail_with err_CSPG014_bad_postgres_version(v)
+    when v <  SUPPORTED_VERSION
+        ChefServer::Warnings.warn err_unsupported_postgres_version(v)
     end
+
   end
 
   # Throws CSPG017 if any of the reserved usernames we
@@ -360,6 +370,15 @@ EOM
 
       is no longer supported by the version of PostgreSQL included in Chef
       Server. Please check the release notes for details.
+    EOM
+  end
+
+  def err_unsupported_postgres_version(ver)
+    <<~EOM
+      Chef Server currently supports PostgreSQL version: #{SUPPORTED_VERSION}.
+      The database you have provided is running version #{ver}.
+
+      Please check the release notes for details.
     EOM
   end
 end

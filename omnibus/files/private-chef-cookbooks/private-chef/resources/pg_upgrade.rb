@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-# That's right folks, there are no attributes.
-
 # NOTE: Uses the value of certain node attributes in the course of execution.
 #
 # * node['previous_run']['postgresql']['data_dir']: the PostgreSQL
@@ -237,7 +235,7 @@ action_class do
 
         # The new data directory may have just been created; that's why
         # this needs to be evaluated lazily
-        new_version = version_from_data_dir(new_data_dir)
+        new_version = node['private_chef']['postgresql']['version']
 
         old_bins = binary_path_for(old_version)
         new_bins = binary_path_for(new_version)
