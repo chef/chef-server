@@ -523,7 +523,7 @@ default['private_chef']['nginx']['ssl_verify_depth'] = 2
 # PostgreSQL
 ###
 # For now, we're hardcoding the version directory suffix here:
-default['private_chef']['postgresql']['version'] = '9.6'
+default['private_chef']['postgresql']['version'] = '12.0'
 # In the future, we're probably going to want to do something more elegant so we
 # don't accidentally overwrite this directory if we upgrade PG to 9.3: keeping these
 # directories straight is important because in the distant future (the year 2000)
