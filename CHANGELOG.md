@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.72 -->
-## [14.0.72](https://github.com/chef/chef-server/tree/14.0.72) (2020-12-01)
+<!-- latest_release 14.0.73 -->
+## [14.0.73](https://github.com/chef/chef-server/tree/14.0.73) (2020-12-21)
 
 #### Merged Pull Requests
-- Update dev provision-elasticsearch.sh to support version 7 [#2178](https://github.com/chef/chef-server/pull/2178) ([christopher-snapp](https://github.com/christopher-snapp))
+- Minor formatting updates to the release docs [#2187](https://github.com/chef/chef-server/pull/2187) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.65 -->
 ### Changes since 14.0.65 release
 
 #### Merged Pull Requests
+- Minor formatting updates to the release docs [#2187](https://github.com/chef/chef-server/pull/2187) ([tas50](https://github.com/tas50)) <!-- 14.0.73 -->
 - Update dev provision-elasticsearch.sh to support version 7 [#2178](https://github.com/chef/chef-server/pull/2178) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.72 -->
 - Removed chef-web-core library dependency [#2125](https://github.com/chef/chef-server/pull/2125) ([antima-gupta](https://github.com/antima-gupta)) <!-- 14.0.71 -->
 - Remove lint tests for terraform, since terraform integration tests live in umbrella repository [#2160](https://github.com/chef/chef-server/pull/2160) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.70 -->
