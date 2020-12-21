@@ -3,12 +3,11 @@
 ## Document Purpose
 
 The purpose of this document is to describe the *current* release
-process such that any member of the team can do a release.  As we
-improve the automation around the release process, the document should
-be updated such that it always has the exact steps required to release
+process such that any member of the team can do a release. As we
+improve the automation around the release process, the document should be updated such that it always has the exact steps required to release
 Chef Server.
 
-This document is NOT aspirational.  We have a number of automation
+This document is NOT aspirational. We have a number of automation
 tools that we intend to use to improve the release release process;
 however, many are not fully integrated with our process yet. Do not
 add them to this document until they are ready to be part of the
@@ -28,11 +27,11 @@ In order to release, you will need the following accounts/permissions:
 
 ## THE PROCESS
 
-### Informing everyone of a pending release.
+### Informing everyone of a pending release
 
 - [ ] Announce your intention to drive the release to #cft-announce and #chef-server on slack.
 
-### Getting the build to be released into current with a minor/major version bump.
+### Getting the build to be released into current with a minor/major version bump
 
 - Update the version file to the version to be released if minor version needs to be bumped rather than just the patch.
 - Update the release notes with the version, date and context.
@@ -72,13 +71,12 @@ The git SHA of the build you are testing can be found in
 
 ### Building and Releasing the Release
 
-- [ ] Select a version from the `current` channel that you wish to promote to `stable`.
-  Make sure that this version has gone through the upgrade testing. 
+- [ ] Select a version from the `current` channel that you wish to promote to `stable`. Make sure that this version has gone through the upgrade testing.
 - [ ] Use expeditor to promote the build:
 
         /expeditor promote chef/chef-server:master VERSION
 
-  Please do this in the `#chef-server-notify` room.  Once this is
+  Please do this in the `#chef-server` room. Once this is
   done, the release is available to the public via the APT and YUM
   repositories and downloads.chef.io.
 
@@ -97,4 +95,4 @@ The git SHA of the build you are testing can be found in
   Discourse can be found on the wiki under the Engineering section ->
   Policy and Processes -> Release Announcements and Security Alerts
 
-Chef Server is now released.
+Chef Infra Server is now released.
