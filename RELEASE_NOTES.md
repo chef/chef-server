@@ -8,6 +8,81 @@ This document contains release notes for the current major release and all patch
 For prior releases,
 see [PRIOR\_RELEASE\_NOTES.md](PRIOR_RELEASE_NOTES.md).
 
+## 14.0.65 (2020-10-26)
+
+## #New Features
+
+  - The verbose option for the user list API now also includes the display_name attribute.
+
+### Bug Fixes
+  - A bug in our pre-flight validation for Elasticsearch heap_size that resulted in a confusing error rather than a helpful validation warning has been fixed.
+
+  - We now explicitly set TMPDIR during Elasticsearch startup. This should resolve Elasticsearch startup failures for some users who have temporary filesystems mounted with the noexec option and are using SELinux.
+
+  - We now retry in more cases when attempting to create the Elasticsearch index which should prevent upgrade failures for some users.
+
+### Components
+
+ * Updated Components
+
+    - elasticsearch (6.8.1 -> 6.8.12)
+
+## 14.0.58 (2020-9-30)
+
+### Upgrade Notes
+
+  Upgrading to Chef Infra Server 14 will require a reindexing operation for users not currently using elasticsearch. We expect this reindexing operation to take an estimated 2 minutes for each 1000 nodes. However, this estimate can be substantially impacted by your server hardware and the complexity of your Chef data. Generally the size of Elasticsearch indices is observed to be 1/10th of the Postgres database size. To be safe we would recommend that the filesystem containing the /var/opt/opscode directory should have at least 20% free space before upgrade. Learn more about upgrading to Chef Infra Server 14 18.
+
+  ### Improvements
+
+  - Elasticsearch-based search indexing: Chef Infra Server now uses Elasticsearch as its search index. Solr RabbitMQ and opscode-expander, which supported the older search indexing pipeline, have been removed. Hosted Chef and some of Chef Infra Server's largest customers are already using the Elasticsearch-based search indexing. The simplified indexing pipeline should reduce the operational complexity of Chef Infra Server.
+  - Oracle Java is now removed and fully replaced with OpenJDK. This removal resolves a number of CVEs in Oracle Java by switching to a newer, compatible build, which does not have the license restrictions that Oracla Java releases after 8u202 have.
+  - Erlang 22: All Erlang components now run on Erlang 22. This upgrade sets the groundwork for new features and bug fixes currently in development.
+  - Improved Indexing Metrics: The /_stats API endpoint now returns metrics about search indexing. These new metrics should allow us to more easily investigate problems that users report with search indexing.
+  - Integration Testing: In Chef Infra Server 13.2, we added a new integration testing pipeline. We've further improved this pipeline, expanding the testing scenarios and improving the fidelity of the existing scenarios.
+  - New Command: chef-server-ctl now features the check-config command, which runs only the configuration portion of the reconfigure cookbooks and preflight checks.
+
+### Bug Fixes
+
+  - Reduced API errors caused by a change to the HTTP library used in Erchef.
+  - Expanded the cases where we gracefully report errors that result from a chef-server-ctl reindex command instead of failing early.
+  - Fixed a bug that prevented API Signing version 1.2 from working with FIPS-enabled Chef Infra Servers.
+  - Updated NginX SSL configuration format to avoid warnings in the log.
+  - Restricted permissions on the dhparams.pem file used by NginX.
+
+### Incompatibilities
+
+- The /controls API endpoint now always returns HTTP 410 Gone. This endpoint was disabled as it requires RabbitMQ to work. The /controls API endpoint was used by Chef Infra Client's audit mode. In Chef Infra Client 14, this change will produce a non-fatal error that results in the audit log being written to disk. This feature was removed in Chef Infra Client 15. The main consumer of this endpoint was Chef Analytics, which has been end-of-life since December 31, 2018.
+  - Chef Infra Server no longer sends data to Chef Analytics. Chef Analytics was declared end-of-life on December 31, 2018.
+  - Chef Reporting is not supported. Chef Reporting was declared end-of-life on December 31, 2018.
+  - Chef Infra Server will no longer send data to Chef Automate 1.x via the Actions queue. Chef Infra Server still sends data to Chef Automate 2 and Chef Automate 1.x via the data-collector endpoint. Chef Automate 1.x was declared end-of-life on December 31, 2019.
+
+### Component Version Changes
+
+  * Updated Components
+    - libiconv (1.15 -> 1.16)
+    - pcre (8.38 -> 8.44)
+    - cacerts (2019-10 -> 2020-07)
+    - openssl (1.0.2u -> 1.0.2w)
+    - openresty (1.15.8.1 -> 1.17.8.2)
+    - veil-gem (58373899 -> 2875f29d)
+    - erlang (20.3.8.9 -> 22.2)
+    - server-open-jre (11.0.4+1 -> 11.0.7+1)
+    - ohai (d78fd24c -> 0b8b5ccf)
+    - liblzma (5.2.4 -> 5.2.5)
+    - libarchive (3.4.2 -> 3.4.3)
+    - chef (3fe96500 -> 20230f04)
+    - knife-opc (5a3a804b -> dd17d445)
+    - knife-ec-backup (61b8c43f -> 1f397622)
+    - chef_fixie (04c686ac -> e445b2d7)
+    
+  * Removed Components
+    
+    - rabbitmq (3.6.15)
+    - server-jre (8u202)
+    - opscode-solr4 (4.10.4)
+    - opscode-expander
+
 ## 13.2.0 (2020-4-14)
 
 ### Improvements
