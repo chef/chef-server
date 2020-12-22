@@ -1,5 +1,6 @@
 # Documentation available at https://expeditor.chef.io/docs/getting-started/
 ---
+# The name of the product keys for this product (from mixlib-install)
 product_key: chef-server
 
 # Slack channel in Chef Software slack to send notifications about build failures, etc
@@ -50,28 +51,32 @@ merge_actions:
   - built_in:bump_version:
       post_commit: false
       ignore_labels:
-        - "Version: Skip Bump"
+        - "Expeditor: Skip Version Bump"
         - "Expeditor: Skip All"
         - "Expeditor: ACC Only"
+        - "Aspect: Documentation"
   - built_in:update_changelog:
       post_commit: false
       ignore_labels:
-        - "Changelog: Skip Update"
+        - "Expeditor: Skip Changelog"
         - "Expeditor: Skip All"
         - "Expeditor: ACC Only"
+        - "Aspect: Documentation"
   - trigger_pipeline:omnibus/release:
       post_commit: true
       ignore_labels:
-        - "Omnibus: Skip Build"
+        - "Expeditor: Skip Omnibus"
         - "Expeditor: Skip All"
         - "Expeditor: ACC Only"
+        - "Aspect: Documentation"
       only_if: built_in:bump_version
   - trigger_pipeline:habitat/build:
       post_commit: true
       ignore_labels:
-        - "Omnibus: Skip Build"
+        - "Expeditor: Skip Habitat"
         - "Expeditor: Skip All"
         - "Expeditor: ACC Only"
+        - "Aspect: Documentation"
       only_if: built_in:bump_version
 
 # These actions are taken, in the order specified, when an Omnibus artifact is promoted
