@@ -289,3 +289,31 @@ Notes:
 the back.
 - The upgrade path after Phase2 rollout will include upgrading to a release with
 Phase1 first.
+
+## Buildkite
+
+Buildkite is a platform for running fast, secure, and scalable continuous integration pipelines on your own infrastructure.
+Pipelines contain unit, integration, and other tests to help assess and validate your build.
+The first step to investigating errors is to check the build logs.
+
+The main pipelines for this repository are:
+* `[chef/chef-server:master] verify`
+* `[chef/chef-server:master] omnibus/adhoc`
+* `[chef/umbrella:master] chef-server`
+
+### [chef/chef-server:master] verify
+Verify pipeline runs all the unit tests. 
+A verify build is automatically triggered when changes to the branch are pushed and there is a pull request linked to it.
+The results of an automatically-triggerd verify build are linked to the pull request. If the build fails the pull request will be blocked.
+This build can also be triggered manually.
+
+### [chef/chef-server:master] omnibus/adhoc
+omnibus/adhoc pipeline runs the integration tests on different builds. Integration test covers the API endpoints of the project.
+The pipeline creates different build for different supported OS/environment and pushes the builds to jfrog artifactory.
+The integration tests scripts are tested against each of the different builds created.
+This is pipeline is automatically triggered every night to make sure that the master is always ready to ship.
+
+### [chef/umbrella:master] chef-server
+This pipeline is for end to end testing and creates different builds integrating with other projects of chef.
+These builds are packaged to replicate the different environment in which chef-server will be used by the customers.
+This pipeline is run on a nightly basis using the latest build from the current omnibus pipeline.
