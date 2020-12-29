@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.78 -->
-## [14.0.78](https://github.com/chef/chef-server/tree/14.0.78) (2020-12-29)
+<!-- latest_release unreleased -->
+## Unreleased
 
 #### Merged Pull Requests
-- Migrate server docs [#2195](https://github.com/chef/chef-server/pull/2195) ([IanMadd](https://github.com/IanMadd))
+- Update the label configuration in the Expeditor config [#2199](https://github.com/chef/chef-server/pull/2199) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.65 -->
 ### Changes since 14.0.65 release
 
 #### Merged Pull Requests
+- Update the label configuration in the Expeditor config [#2199](https://github.com/chef/chef-server/pull/2199) ([tas50](https://github.com/tas50)) <!-- 14.0.78 -->
 - Migrate server docs [#2195](https://github.com/chef/chef-server/pull/2195) ([IanMadd](https://github.com/IanMadd)) <!-- 14.0.78 -->
 - Zei/version in status/2172 [#2190](https://github.com/chef/chef-server/pull/2190) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.0.77 -->
 - zei/update ruby/2191 [#2196](https://github.com/chef/chef-server/pull/2196) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.0.76 -->
