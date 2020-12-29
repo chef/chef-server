@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.77 -->
-## [14.0.77](https://github.com/chef/chef-server/tree/14.0.77) (2020-12-22)
+<!-- latest_release 14.0.78 -->
+## [14.0.78](https://github.com/chef/chef-server/tree/14.0.78) (2020-12-29)
 
 #### Merged Pull Requests
-- Zei/version in status/2172 [#2190](https://github.com/chef/chef-server/pull/2190) ([vinay-satish](https://github.com/vinay-satish))
+- Migrate server docs [#2195](https://github.com/chef/chef-server/pull/2195) ([IanMadd](https://github.com/IanMadd))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.65 -->
 ### Changes since 14.0.65 release
 
 #### Merged Pull Requests
+- Migrate server docs [#2195](https://github.com/chef/chef-server/pull/2195) ([IanMadd](https://github.com/IanMadd)) <!-- 14.0.78 -->
 - Zei/version in status/2172 [#2190](https://github.com/chef/chef-server/pull/2190) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.0.77 -->
 - zei/update ruby/2191 [#2196](https://github.com/chef/chef-server/pull/2196) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.0.76 -->
 - Update the release notes for releases 14.0.58 and 14.0.65 [#2184](https://github.com/chef/chef-server/pull/2184) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.75 -->
