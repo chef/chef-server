@@ -106,4 +106,14 @@ class NginxErb
       '/var/log/opscode/nginx/access.log'
     end
   end
+
+  def time_format
+    time_format = node['private_chef']['nginx']['time_format']
+    unless( time_format == 'time_iso8601' or time_format == 'time_local')
+        'time_iso8601'
+    else
+        time_format
+    end
+  end
+
 end
