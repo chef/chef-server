@@ -297,15 +297,13 @@ To regenerate SSL certificates:
 
 ## Chef Infra Server Credentials Management
 
-**New in Chef Server 12.14:** Chef Infra Server limits where it writes
-service passwords and keys to disk. In the default configuration,
-credentials are only written to files in `/etc/opscode`.
+Chef Infra Server limits where it writes service passwords and keys to disk.
+In the default configuration, credentials are only written to files in `/etc/opscode`.
 
 By default, Chef Infra Server still writes service credentials to
 multiple locations inside `/etc/opscode`. This is designed to maintain
-compatibility with add-ons. Chef Server 12.14 introduces the
-`insecure_addon_compat` configuration option in
-`/etc/opscode/chef-server.rb`, which allows you to further restrict
+compatibility with add-ons. The `insecure_addon_compat` configuration option in
+`/etc/opscode/chef-server.rb`, allows you to further restrict
 where credentials are written. `insecure_addon_compat` can be used if
 you are not using add-ons, or if you are using the latest add-on
 versions. Setting `insecure_addon_compat` to `false` writes credentials
@@ -321,8 +319,8 @@ including them in your configuration file.
 ### Add-on Compatibility
 
 The following table lists which add-on versions support the more
-restrictive `insecure_addon_compat false` setting. These version also
-now **require** Chef Server 12.14.0 or greater:
+restrictive `insecure_addon_compat false` setting.
+These version **require** Chef Server 12.14.0 or greater:
 
 <table>
 <colgroup>

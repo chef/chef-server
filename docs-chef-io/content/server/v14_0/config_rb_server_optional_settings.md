@@ -122,17 +122,13 @@ This configuration file has the following settings for `bookshelf`:
 
 `bookshelf['access_key_id']`
 
-:   The access key identifier. This may point at an external storage
-    location, such as Amazon EC2. See [AWS external bookshelf
-    settings](/server/#aws-settings) for
-    more information on configuring external bookshelf. Default value:
-    **generated**. As of Chef Infra Server 12.14, this is no longer the
-    preferred command.
-
-    Please use `chef-server-ctl set-secret bookshelf access_key_id` from
-    the [Secrets
-    Management](/ctl_chef_server/#ctl-chef-server-secrets-management)
+:   Deprecated. Use `chef-server-ctl set-secret bookshelf access_key_id` from
+    the [Secrets Management](/ctl_chef_server/#ctl-chef-server-secrets-management)
     commands.
+
+    The access key identifier. This may point at an external storage
+    location, such as Amazon EC2. See [AWS external bookshelf
+    settings](/server/#aws-settings) for more information on configuring external bookshelf. Default value: **generated**.
 
 `bookshelf['data_dir']`
 
@@ -153,8 +149,6 @@ This configuration file has the following settings for `bookshelf`:
 
 :   Use to configure request logging for the bookshelf service. Default
     value: `false`.
-
-    New in Chef Server 12.17.15.
 
 `bookshelf['external_url']`
 
@@ -189,17 +183,15 @@ This configuration file has the following settings for `bookshelf`:
 
 `bookshelf['secret_access_key']`
 
-:   The secret key. This may point at an external storage location, such
+:   Deprecated. Use `chef-server-ctl set-secret bookshelf secret_access_key`
+    from the [Secrets Management](/ctl_chef_server/#ctl-chef-server-secrets-management)
+    commands.
+
+    The secret key. This may point at an external storage location, such
     as Amazon EC2. See [AWS external bookshelf
     settings](/server/#aws-settings) for
     more information on configuring external bookshelf. Default value:
-    **generated**. As of Chef Infra Server 12.14, this is no longer the
-    preferred command.
-
-    Please use `chef-server-ctl set-secret bookshelf secret_access_key`
-    from the [Secrets
-    Management](/ctl_chef_server/#ctl-chef-server-secrets-management)
-    commands.
+    **generated**.
 
 `bookshelf['storage_type']`
 
@@ -323,16 +315,14 @@ This configuration file has the following settings for `data_collector`:
 
 `data_collector['token']`
 
-:   Legacy configuration for shared data collector security token. When
+:   Deprecated. Use `chef-server-ctl set-secret data_collector token` from
+    the [Secrets Management](/ctl_chef_server/#ctl-chef-server-secrets-management)
+    commands.
+
+    Legacy configuration for shared data collector security token. When
     configured, the token will be passed as an HTTP header named
     `x-data-collector-token` which the server can choose to accept or
-    reject. As of Chef Infra Server 12.14, this is no longer the preferred
-    command.
-
-    Please use `chef-server-ctl set-secret data_collector token` from
-    the [Secrets
-    Management](/ctl_chef_server/#ctl-chef-server-secrets-management)
-    commands.
+    reject.
 
 `data_collector['timeout']`
 
@@ -753,8 +743,6 @@ This configuration file has the following settings for `nginx`:
 :   Whether nginx should only respond to requests where the Host header
     matches one of the configured FQDNs. Default value: `false`.
 
-    New in Chef Server 12.17
-
 `nginx['stub_status']['allow_list']`
 
 :   The IP address on which accessing the `stub_status` endpoint is
@@ -794,14 +782,10 @@ This configuration file has the following settings for `nginx`:
     local IP addresses to the configured FQDNs. Useful in combination
     with `nginx['strict_host_header']`. Default value: `true`.
 
-    New in Chef Server 12.17
-
 `nginx['show_welcome_page']`
 
 :   Determines whether or not the default nginx welcome page is shown.
     Default value: `true`.
-
-    New in Chef Server 12.17.15.
 
 `nginx['worker_connections']`
 
@@ -850,8 +834,6 @@ This configuration file has the following settings for `oc_bifrost`:
 
 :   Use to configure request logging for the `oc_bifrost` service.
     Default value: `true`.
-
-    New in Chef Server 12.17.15.
 
 `oc_bifrost['extended_perf_log']`
 
@@ -1034,9 +1016,7 @@ This configuration file has the following settings for `oc-id`:
 
 `oc_id['email_from_address']`
 
-:   New in Chef Infra Server 12.12.
-
-    Outbound email address. Defaults to the `'from_email'` value.
+:   Outbound email address. Defaults to the `'from_email'` value.
 
 `oc_id['log_directory']`
 
@@ -1055,9 +1035,7 @@ This configuration file has the following settings for `oc-id`:
 
 `oc_id['origin']`
 
-:   New in Chef Infra Server 12.12.
-
-    The FQDN for the server that is sending outbound email. Defaults to
+:   The FQDN for the server that is sending outbound email. Defaults to
     the `'api_fqdn'` value, which is the FQDN for the Chef Infra Server.
 
 `oc_id['num_to_keep']`
@@ -1279,8 +1257,6 @@ This configuration file has the following settings for `opscode-erchef`:
 
 :   Use to configure request logging for the `opscode_erchef` service.
     Default value: `true`.
-
-    New in Chef Server 12.17.15.
 
 `opscode_erchef['ibrowse_max_pipeline_size']`
 

@@ -72,15 +72,6 @@ Server:
 
 ### org-user-add
 
-{{< warning >}}
-
-Early RC candidates for the Chef Server 12 release named this command
-`org-associate`. This is the same command, with the exception of the
-`--admin` flag, which is added to the command (along with the rename)
-for the upcoming final release of Chef Server 12.
-
-{{< /warning >}}
-
 {{% ctl_chef_server_org_user_add %}}
 
 **Syntax**

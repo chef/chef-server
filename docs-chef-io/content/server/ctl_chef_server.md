@@ -413,8 +413,6 @@ It should be owned and readable only by `root`.
 The `set-secret` subcommand allows storing shared secrets and service
 credentials. Only secrets known to Chef Infra Server can be stored.
 
-*New in Chef Server 12.14*
-
 **Syntax**
 
 This subcommand has the following syntax:
@@ -461,8 +459,6 @@ This subcommand has the following options:
 The `remove-secret` subcommand allows removing a stored shared secret
 and service credential.
 
-*New in Chef Server 12.14*
-
 **Syntax**
 
 This subcommand has the following syntax:
@@ -482,8 +478,6 @@ chef-server-ctl remove-secret ldap bind_password
 The `show-secret` subcommand allows viewing a stored shared secret and
 service credential.
 
-*New in Chef Server 12.14*
-
 **Syntax**
 
 This subcommand has the following syntax:
@@ -496,8 +490,6 @@ chef-server-ctl show-secret GROUP NAME
 
 The `set-db-superuser-password` subcommand allows storing the database
 superuser password.
-
-*New in Chef Server 12.14*
 
 **Syntax**
 
@@ -514,8 +506,6 @@ the environment variable `DB_PASSWORD`.
 
 The `set-actions-password` subcommand allows storing the RabbitMQ
 Actions password.
-
-*New in Chef Server 12.14*
 
 **Syntax**
 
@@ -534,8 +524,6 @@ The `oc-id-show-app` subcommand allows for retrieving the client ID and
 client secret for applications known to **oc-id**. Note that with
 `insecure_addon_compat` [disabled](/runbook/server_security/#chef-infra-server-credentials-management),
 this data will no longer be written to `/etc/opscode/oc-id-applications/APP.json`.
-
-*New in Chef Server 12.14*
 
 **Syntax**
 
@@ -575,8 +563,6 @@ uploaded.
 
 {{< /note >}}
 
-*New in Chef Server 12.7*
-
 **Syntax**
 
 This subcommand has the following syntax:
@@ -602,8 +588,6 @@ number and creating a new hash value. You can choose whether to copy the
 updated secrets file to each node in the cluster and reconfiguring or by
 running this subcommand on all the nodes.
 
-*New in Chef Server 12.7*
-
 **Syntax**
 
 This subcommand has the following syntax:
@@ -619,8 +603,6 @@ all credentials for a given service by incrementing the value and
 creating a new hash value. You can choose whether to copy the updated
 secrets file to each node in the cluster and reconfiguring or by running
 this subcommand for that specific service on all the nodes.
-
-*New in Chef Server 12.7*
 
 **Syntax**
 
@@ -640,8 +622,6 @@ copy the secrets file to each Chef Infra Server and run
 `sudo chef-server-ctl reconfigure` on them to complete the rotation
 process.
 
-*New in Chef Server 12.7*
-
 **Syntax**
 
 This subcommand has the following syntax:
@@ -654,8 +634,6 @@ chef-server-ctl rotate-shared-secrets
 
 The `show-service-credentials` subcommand shows all of the service
 credentials for services running on the local Chef Infra Server.
-
-*New in Chef Server 12.7*
 
 **Syntax**
 
@@ -674,8 +652,6 @@ creation requests. For most users, the unused authorization objects do
 not substantially affect the performance of Chef Infra Server; however
 in certain situations it can be helpful to clean them up. This command
 is primarily intended for use by Chef support.
-
-New in Chef Server 12.16.9
 
 **Syntax**
 
@@ -1151,8 +1127,6 @@ This subcommand has the following options:
 
 :   Removes a user who is in one or more 'admin' groups unless that user
     is the only member of the 'admin' group(s).
-
-    New in Chef Server 12.9.
 
 ### user-edit
 

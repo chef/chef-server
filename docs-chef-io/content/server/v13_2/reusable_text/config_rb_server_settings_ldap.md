@@ -73,16 +73,14 @@ This configuration file has the following settings for `ldap`:
 
 `ldap['bind_password']`
 
-:   Legacy configuration for the password of the binding user. The
+:   Deprecated. Use `chef-server-ctl set-secret ldap bind_password` from the
+    [Secrets Management](/ctl_chef_server.html#ctl-chef-server-secrets-management)
+    commands.
+
+    Legacy configuration for the password of the binding user. The
     password for the user specified by `ldap['bind_dn']`. Leave this
     value and `ldap['bind_dn']` unset if anonymous bind is sufficient.
-    Default value: `nil`. As of Chef Server 12.14, this is no longer the
-    preferred command.
-
-    Please use `chef-server-ctl set-secret ldap bind_password` from the
-    [Secrets
-    Management](/ctl_chef_server.html#ctl-chef-server-secrets-management)
-    commands.
+    Default value: `nil`.
 
     ```bash
     chef-server-ctl set-secret ldap bind_password
