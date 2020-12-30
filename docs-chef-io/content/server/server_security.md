@@ -344,10 +344,6 @@ now **require** Chef Server 12.14.0 or greater:
 <td>Chef Manage</td>
 <td>2.5.0</td>
 </tr>
-<tr class="odd">
-<td>Push Jobs Server</td>
-<td>2.2.0</td>
-</tr>
 </tbody>
 </table>
 

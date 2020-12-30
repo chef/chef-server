@@ -33,7 +33,7 @@ This configuration file has the following general settings:
 :   Default value:
 
     ```ruby
-    %w{chef-manage opscode-push-jobs-server}
+    %w{chef-manage}
     ```
 
 `api_version`

@@ -104,7 +104,7 @@ chef-server-ctl help
 
 The `install` subcommand is used to install premium features of the Chef
 Infra Server: Chef management console and Chef Infra Client run
-reporting, high availability configurations, Chef Push Jobs, and Chef
+reporting, high availability configurations, and Chef
 Infra Server replication.
 
 {{< warning >}}
