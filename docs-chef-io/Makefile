@@ -7,15 +7,9 @@ preview_netlify: chef_web_docs
 	cp -R static/* chef-web-docs/_vendor/github.com/chef/chef-server/docs-chef-io/static
 	pushd chef-web-docs && make assets; hugo --buildFuture --gc --minify && popd
 
-# serve: chef_web_docs
-# 	echo "replace github.com/chef/chef-server/docs-chef-io => ../" >> chef-web-docs/go.mod
-# 	pushd chef-web-docs && make assets; hugo server --buildDrafts --buildFuture --noHTTPCache --ignoreVendorPaths "github.com/chef/automate/**" && popd
-
 serve: chef_web_docs
-	cp -R content/* chef-web-docs/content
-	cp -R static/* chef-web-docs/static
-	cp config.toml chef-web-docs/config.toml
-	pushd chef-web-docs && make assets; hugo server --buildDrafts --noHTTPCache --buildFuture && popd
+	echo "replace github.com/chef/chef-server/docs-chef-io => ../" >> chef-web-docs/go.mod
+	pushd chef-web-docs && make assets; hugo server --buildDrafts --buildFuture --noHTTPCache --ignoreVendorPaths "github.com/chef/chef-server/**" && popd
 
 chef_web_docs:
 	if [ -d "chef-web-docs/" ]; then \
