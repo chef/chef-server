@@ -24,18 +24,18 @@ aliases = ["/upgrade_server.html", "/upgrade_server/"]
 | 11 | 12.3.0 | No | No |
 
 License
-: Chef Infra Server 13 and 14 are governed by the [Chef License](https://docs.chef.io/chef_license_accept/#chef-infra-server). You will be required to accept these terms when using Chef Infra Server 13 or 14 for the first time by entering `Yes` when prompted.
+: Chef Infra Server 13 and 14 are governed by the [Chef License]({{< relref "chef_license_accept#chef-infra-server" >}}). You will be required to accept these terms when using Chef Infra Server 13 or 14 for the first time by entering `Yes` when prompted.
 
 Version Support
-: Chef Infra Server 13 and 14 are supported Chef Software distributions. Earlier versions are no longer supported. For more information about supported Chef Software see the [Supported Versions](https://docs.chef.io/versions/#supported-commercial-distributions) documentation.
+: Chef Infra Server 13 and 14 are supported Chef Software distributions. Earlier versions are no longer supported. For more information about supported Chef Software see the [Supported Versions]({{< relref "versions#supported-commercial-distributions" >}}) documentation.
 
 ## Upgrading to Chef Infra Server
 
 Three upgrade scenarios exist for upgrades from Chef Infra Server 12.17.15 to Chef Infra Server 13 or 14:
 
-- [Standalone](/upgrade_server/#standalone-upgrade)
-- [Chef Backend (HA)](/upgrade_server/#chef-backend-upgrade)
-- [Tiered](/upgrade_server/#tiered-upgrade)
+- [Standalone]({{< relref "#standalone-upgrade" >}})
+- [Chef Backend (HA)]({{< relref "#chef-backend-upgrade" >}})
+- [Tiered]({{< relref "#tiered-upgrade" >}})
 
 ### Chef Infra Server 14
 
@@ -60,7 +60,7 @@ As of version 12.14, Chef Infra Server renders passwords inside of the `/etc/ops
 If you are using Chef Infra Server without add-ons, or if you are using the latest add-ons versions, you can set `insecure_addon_compat` to `false` in `/etc/opscode/chef-server.rb.
 and Chef Infra Server will write all credentials to a single location.
 
-For more information on password generation, including a list of supported add-on versions, see [Chef Infra Server Credentials Management](/server_security/#chef-infra-server-credentials-management).
+For more information on password generation, including a list of supported add-on versions, see [Chef Infra Server Credentials Management]({{< relref "server_security/#chef-infra-server-credentials-management" >}}).
 
 ## Standalone Upgrade
 
@@ -116,7 +116,7 @@ For more information on password generation, including a list of supported add-o
     chef-server-ctl start
     ```
 
-1. [Upgrade](#upgrading-add-ons) any Chef Infra Server add-ons.
+1. [Upgrade]({{< relref "#upgrading-add-ons" >}}) any Chef Infra Server add-ons.
 
 1. After the upgrade process is complete, test and verify that the server works properly.
 
@@ -130,7 +130,7 @@ For more information on password generation, including a list of supported add-o
 
 The Chef Infra Server can operate in a high availability configuration that provides automated load balancing and failover for stateful components in the system architecture.
 
-To upgrade your Chef Backend installation, see [High Availability: Upgrade to Chef Backend 2](/upgrade_server_ha_v2/).
+To upgrade your Chef Backend installation, see [High Availability: Upgrade to Chef Backend 2]({{< relref "upgrade_server_ha_v2" >}}).
 
 ## Tiered Upgrade
 
@@ -141,7 +141,7 @@ This section describes the upgrade process from a tiered server configuration.
 {{< note >}}
 
 These instructions are intended for users of the Chef Infra Server `tier` topology.
-For the latest information on setting up a highly-available server cluster, see [High Availability: Backend Cluster](/install_server_ha/).
+For the latest information on setting up a highly-available server cluster, see [High Availability: Backend Cluster]({{< relref "install_server_ha" >}}).
 
 {{< /note >}}
 
@@ -215,7 +215,7 @@ To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do 
     chef-server-ctl start
     ```
 
-1. [Upgrade](#upgrading-add-ons) any Chef Infra Server add-ons.
+1. [Upgrade]({{< relref "#upgrading-add-ons" >}}) any Chef Infra Server add-ons.
 
 1. After the upgrade process is complete, test and verify that the server works properly.
 
@@ -227,10 +227,10 @@ To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do 
 
 ## Upgrading Add-ons
 
-Chef Infra Server 13 and 14 support Chef Manage. This add-on is [deprecated](https://docs.chef.io/versions/#deprecated-products-and-versions). Chef Manage will reach EOL on December 31, 2021. After upgrading Chef Infra Server, reinstall the add-on and then reconfigure Chef Infra Server and the add-on.
+Chef Infra Server 13 and 14 support Chef Manage. This add-on is [deprecated]({{< relref "versions#deprecated-products-and-versions" >}}). Chef Manage will reach EOL on December 31, 2021. After upgrading Chef Infra Server, reinstall the add-on and then reconfigure Chef Infra Server and the add-on.
 
 Chef Manage
-: Chef Manage is deprecated and will reach [EOL](https://docs.chef.io/versions/#deprecated-products-and-versions) on December 31, 2021. Chef Manage is a management console for  data bags, attributes, run-lists, roles, environments, and cookbooks from a web user interface
+: Chef Manage is deprecated and will reach [EOL]({{< relref "versions#deprecated-products-and-versions" >}}) on December 31, 2021. Chef Manage is a management console for data bags, attributes, run-lists, roles, environments, and cookbooks from a web user interface
 
 ### Use Downloads
 

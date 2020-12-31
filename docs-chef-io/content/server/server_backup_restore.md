@@ -102,7 +102,7 @@ To restore a Chef Backend-based Chef Infra Server cluster:
     (See step 2 in the backup instructions above). Alternatively, you
     can generate new configuration for this node and reconfigure it
     using the steps found in [the installation
-    instructions.](/install_server_ha/#step-5-install-and-configure-first-frontend).
+    instructions.]({{< relref "install_server_ha/#step-5-install-and-configure-first-frontend" >}}).
 
     ```bash
     chef-server-ctl restore /path/to/chef-server-backup.tar.gz

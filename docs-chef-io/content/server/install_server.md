@@ -16,11 +16,11 @@ aliases = ["/install_server.html", "/install_server/"]
 
 There are three configuration scenarios for the Chef Infra Server:
 
-- [Standalone](#standalone) (everything on a single machine)
-- [High availability](#high-availability) (machines configured for front-end and
+- [Standalone]({{< relref "#standalone" >}}) (everything on a single machine)
+- [High availability]({{< relref "#high-availability" >}}) (machines configured for front-end and
   back-end, allowing for failover on the
   back-end and load-balancing on the front-end, as required)
-- [Tiered](#tiered-single-backend) (machines configured for front-end and back-end,
+- [Tiered]({{< relref "#tiered-single-backend" >}}) (machines configured for front-end and back-end,
   with a single back-end and
   load-balancing on the front-end, as required)
 
@@ -39,23 +39,23 @@ The Chef Infra Server has the following prerequisites:
 -   A connection to Network Time Protocol (NTP) to prevent clock drift
 -   If host-based firewalls (iptables, ufw, etc.) are being used, ensure
     that ports 80 and 443 are open. See the
-    [firewalls](/install_server_pre/#firewalls) section of the
+    [firewalls]({{< relref "install_server_pre/#firewalls" >}}) section of the
     install prerequisites for additional details.
 -   A local mail transfer agent that allows the Chef Infra Server to
     send email notifications
 -   Using cron and the `/etc/cron.d` directory for periodic maintenance
     tasks
 -   Disabling the Apache Qpid daemon on CentOS and Red Hat systems. See
-    the [Apache Qpid](/install_server_pre/#apache-qpid) of the
+    the [Apache Qpid]({{< relref "install_server_pre/#apache-qpid" >}}) of the
     prerequisite documentation for detailed steps.
 -   Optional. A local user account under which services will run, a
     local user account for PostgreSQL, and a group account under which
     services will run. See [UIDs and
-    GIDs](/install_server_pre/#uids-and-gids) for more information.
+    GIDs]({{< relref "install_server_pre/#uids-and-gids" >}}) for more information.
 
 {{< note >}}
 
-See the [expanded list of prerequisites](/install_server_pre/) for a
+See the [expanded list of prerequisites]({{< relref "install_server_pre" >}}) for a
 detailed list of software and hardware requirements.
 
 {{< /note >}}
@@ -136,8 +136,8 @@ your `/etc/opscode/chef-server.rb` file by following the process below:
     ```
 
 For more information on configuring your Chef Infra Server, see
-[chef-server.rb Settings](/server/config_rb_server/) and [chef-server.rb
-Optional Settings](/server/config_rb_server_optional_settings/).
+[chef-server.rb Settings]({{< relref "config_rb_server" >}}) and [chef-server.rb
+Optional Settings]({{< relref "config_rb_server_optional_settings" >}}).
 
 ## High Availability
 
@@ -145,13 +145,13 @@ The following links describe how to configure the Chef Infra Server for
 high availability. The **Backend Cluster** setup is strongly recommended
 for new installations:
 
--   [High Availability using Backend Cluster](/install_server_ha/)
+-   [High Availability using Backend Cluster]({{< relref "install_server_ha" >}})
 
 ## Tiered (Single Backend)
 
 The following link describes how to configure the Chef Infra Server with
 a single backend machine and multiple frontend machines. Note that this
 process has been deprecated in favor of a [Backend
-Cluster](/install_server_ha/) setup:
+Cluster]({{< relref "install_server_ha" >}}) setup:
 
--   [Tiered Installation](/install_server_tiered/)
+-   [Tiered Installation]({{< relref "install_server_tiered" >}})

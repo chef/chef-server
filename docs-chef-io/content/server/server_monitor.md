@@ -299,7 +299,7 @@ System-level checks should be done for the ports and services status.
 
 The `chef-backend-ctl status` subcommand is used to check the status of
 services running in the [Chef Backend server
-topology](/install_server_ha/). This command will verify the status
+topology]({{< relref "install_server_ha" >}}). This command will verify the status
 of the following services on the node it is run on:
 
 -   `leaderl`

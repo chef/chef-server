@@ -67,7 +67,7 @@ This configuration file has the following general settings:
     files. Default value: `true`.
 
     See [Add-on
-    Compatibility](/server_security/#add-on-compatibility) for the
+    Compatibility]({{< relref "/server/server_security#add-on-compatibility" >}}) for the
     minimum add-on versions supporting `insecure_addon_compat false`.
 
 `install_path`
@@ -123,12 +123,12 @@ This configuration file has the following settings for `bookshelf`:
 `bookshelf['access_key_id']`
 
 :   Deprecated. Use `chef-server-ctl set-secret bookshelf access_key_id` from
-    the [Secrets Management](/ctl_chef_server/#ctl-chef-server-secrets-management)
+    the [Secrets Management]({{< relref "/server/ctl_chef_server#secrets-management" >}})
     commands.
 
     The access key identifier. This may point at an external storage
     location, such as Amazon EC2. See [AWS external bookshelf
-    settings](/server/#aws-settings) for more information on configuring external bookshelf. Default value: **generated**.
+    settings]({{< relref "/server#aws-settings" >}}) for more information on configuring external bookshelf. Default value: **generated**.
 
 `bookshelf['data_dir']`
 
@@ -184,12 +184,12 @@ This configuration file has the following settings for `bookshelf`:
 `bookshelf['secret_access_key']`
 
 :   Deprecated. Use `chef-server-ctl set-secret bookshelf secret_access_key`
-    from the [Secrets Management](/ctl_chef_server/#ctl-chef-server-secrets-management)
+    from the [Secrets Management]({{< relref "/server/ctl_chef_server#secrets-management" >}})
     commands.
 
     The secret key. This may point at an external storage location, such
     as Amazon EC2. See [AWS external bookshelf
-    settings](/server/#aws-settings) for
+    settings]({{< relref "/server#aws-settings" >}}) for
     more information on configuring external bookshelf. Default value:
     **generated**.
 
@@ -228,7 +228,7 @@ This configuration file has the following settings for `bookshelf`:
 
 :   The virtual IP address. This may point at an external storage
     location, such as Amazon EC2. See [AWS external bookshelf
-    settings](/server/#aws-settings) for
+    settings]({{< relref "/server#aws-settings" >}}) for
     more information on configuring external bookshelf. Default value:
     `127.0.0.1`.
 
@@ -316,7 +316,7 @@ This configuration file has the following settings for `data_collector`:
 `data_collector['token']`
 
 :   Deprecated. Use `chef-server-ctl set-secret data_collector token` from
-    the [Secrets Management](/ctl_chef_server/#ctl-chef-server-secrets-management)
+    the [Secrets Management]({{< relref "/server/ctl_chef_server#secrets-management" >}})
     commands.
 
     Legacy configuration for shared data collector security token. When
@@ -880,7 +880,7 @@ This configuration file has the following settings for `oc_bifrost`:
 :   The password for the `sql_user`. Default value: **generated**.
 
     To override the default value, use the [Secrets
-    Management](/ctl_chef_server/#ctl-chef-server-secrets-management)
+    Management]({{< relref "/server/ctl_chef_server#secrets-management" >}})
     command: `chef-server-ctl set-secret oc_bifrost sql_password`.
 
 `oc_bifrost['sql_ro_password']`
@@ -888,7 +888,7 @@ This configuration file has the following settings for `oc_bifrost`:
 :   The password for the `sql_ro_user`. Default value: **generated**.
 
     To override the default value, use the [Secrets
-    Management](/ctl_chef_server/#ctl-chef-server-secrets-management)
+    Management]({{< relref "/server/ctl_chef_server#secrets-management" >}})
     command: `chef-server-ctl set-secret oc_bifrost sql_ro_password`.
 
 `oc_bifrost['sql_ro_user']`
@@ -1066,7 +1066,7 @@ This configuration file has the following settings for `oc-id`:
 :   The password for the `sql_user`. Default value: **generated**.
 
     To override the default value, use the [Secrets
-    Management](/ctl_chef_server/#ctl-chef-server-secrets-management)
+    Management]({{< relref "/server/ctl_chef_server#secrets-management" >}})
     command: `chef-server-ctl set-secret oc_id sql_password`.
 
 `oc_id['sql_user']`
@@ -1341,7 +1341,7 @@ This configuration file has the following settings for `opscode-erchef`:
 :   The name of the Amazon Simple Storage Service (S3) bucket. This may
     point at external storage locations, such as Amazon EC2. See [AWS
     external bookshelf
-    settings](/server/#aws-settings) for
+    settings]({{< relref "/server#aws-settings" >}}) for
     more information on configuring external bookshelf.
 
 `opscode_erchef['s3_parallel_ops_fanout']`
@@ -1554,7 +1554,7 @@ This configuration file has the following settings for `postgresql`:
 :   Password for the DB superuser. Default value: **generated**.
 
     To override the default value, use the [Secrets
-    Management](/ctl_chef_server/#ctl-chef-server-secrets-management)
+    Management]({{< relref "/server/ctl_chef_server#secrets-management" >}})
     command: `chef-server-ctl set-db-superuser-password`.
 
 `postgresql['dir']`
@@ -1824,7 +1824,7 @@ This configuration file has the following settings for `redis_lb`:
     **generated**.
 
     To override the default value, use the [Secrets
-    Management](/ctl_chef_server/#ctl-chef-server-secrets-management)
+    Management]({{< relref "/server/ctl_chef_server#secrets-management" >}})
     command: `chef-server-ctl set-secret redis_lb password`.
 
 ### upgrades
