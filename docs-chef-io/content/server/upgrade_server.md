@@ -227,7 +227,7 @@ To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do 
 
 ## Upgrading Add-ons
 
-Chef Infra Server 13 and 14 supports Chef Manage. This add-ons is [deprecated](https://docs.chef.io/versions/#deprecated-products-and-versions). Chef Manage will reach EOL on December 31, 2021. After upgrading Chef Infra Server, reinstall the add-on and then reconfigure Chef Infra Server and the add-on.
+Chef Infra Server 13 and 14 support Chef Manage. This add-ons is [deprecated](https://docs.chef.io/versions/#deprecated-products-and-versions). Chef Manage will reach EOL on December 31, 2021. After upgrading Chef Infra Server, reinstall the add-on and then reconfigure Chef Infra Server and the add-on.
 
 Chef Manage
 : Chef Manage is deprecated and will reach [EOL](https://docs.chef.io/versions/#deprecated-products-and-versions) on December 31, 2021. Chef Manage is a management console for  data bags, attributes, run-lists, roles, environments, and cookbooks from a web user interface
