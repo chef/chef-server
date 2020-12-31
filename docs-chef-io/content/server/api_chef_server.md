@@ -1077,8 +1077,6 @@ As an example, to retrieve users whos `external_authentication_uid` is
 GET /users?external_authentication_uid=jane%40doe.com
 ```
 
-*New in Chef Server 12.7.*
-
 #### POST
 
 The `POST` method is used to create a user on the Chef Infra Server.

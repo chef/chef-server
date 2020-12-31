@@ -480,13 +480,6 @@ local user and group accounts that will prevent these accounts from
 being created automatically during setup, you will need to create these
 accounts.
 
-{{< note >}}
-
-The Chef Push Jobs feature of the Chef Infra Server use the same user
-and group accounts as the Chef Infra Server.
-
-{{< /note >}}
-
 #### Group Accounts
 
 The following group accounts are required:

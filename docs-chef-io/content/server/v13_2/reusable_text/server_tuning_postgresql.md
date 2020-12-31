@@ -12,7 +12,6 @@ The following setting is often modified from the default as part of the tuning e
     -   Each front end machine always runs the **oc_bifrost** and
         **opscode-erchef** services.
     -   The Reporting add-on adds the **reporting** service.
-    -   The Chef Push Jobs service adds the **push_jobs** service.
 
     Each of these services requires 25 connections, above the default
     value.

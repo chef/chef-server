@@ -227,13 +227,10 @@ To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do 
 
 ## Upgrading Add-ons
 
-Chef Infra Server 13 and 14 supports Chef Manage and Push Jobs. Both of these add-ons are [deprecated](https://docs.chef.io/versions/#deprecated-products-and-versions). Push Jobs will reach EOL on December 31, 2020 and Chef Manage will reach EOL on December 31, 2021. After upgrading Chef Infra Server, reinstall the add-on and then reconfigure Chef Infra Server and the add-on.
+Chef Infra Server 13 and 14 support Chef Manage. This add-on is [deprecated](https://docs.chef.io/versions/#deprecated-products-and-versions). Chef Manage will reach EOL on December 31, 2021. After upgrading Chef Infra Server, reinstall the add-on and then reconfigure Chef Infra Server and the add-on.
 
 Chef Manage
 : Chef Manage is deprecated and will reach [EOL](https://docs.chef.io/versions/#deprecated-products-and-versions) on December 31, 2021. Chef Manage is a management console for  data bags, attributes, run-lists, roles, environments, and cookbooks from a web user interface
-
-Push Jobs
-: Push Jobs deprecated and will reach [EOL](https://docs.chef.io/versions/#deprecated-products-and-versions) on December 31, 2020. Chef Push Jobs is an extension of the Chef Infra Server that allows for running jobs against nodes independently of a Chef Infra Client run.
 
 ### Use Downloads
 
