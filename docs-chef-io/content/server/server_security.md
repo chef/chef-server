@@ -320,7 +320,7 @@ including them in your configuration file.
 
 The following table lists which add-on versions support the more
 restrictive `insecure_addon_compat false` setting.
-These version **require** Chef Server 12.14.0 or greater:
+These versions **require** Chef Server 12.14.0 or greater:
 
 <table>
 <colgroup>
