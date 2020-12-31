@@ -818,6 +818,8 @@ This configuration file has the following settings for `nginx`:
     `nginx['worker_connections']` to determine the maximum number of
     allowed clients. Default value: `node['cpu']['total'].to_i`.
 
+`nginx['x_forwarded_proto']`
+
 :   The protocol used to connect to the server. Possible values: `http`
     and `https`. This is the protocol used to connect to the Chef Infra
     Server by a Chef Infra Client or a workstation. Default value:
