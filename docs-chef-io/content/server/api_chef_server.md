@@ -14,8 +14,6 @@ aliases = ["/api_chef_server.html", "/api_chef_server/"]
     weight = 30
 +++
 
-[\[edit on GitHub\]](https://github.com/chef/chef-web-docs/blob/master/content/api_chef_server.md)
-
 The Chef Infra Server API is a REST API that provides access to objects
 on the Chef Infra Server, including nodes, environments, roles, users, organizations,
 cookbooks (and cookbook versions), and is used to manage an API client list and

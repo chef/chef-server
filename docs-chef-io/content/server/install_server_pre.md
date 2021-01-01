@@ -35,7 +35,7 @@ The following platforms are not tested by Chef Software:
 ## Capacity Planning
 
 Read the [guidance around capacity
-planning](/server/#capacity-planning) for information about
+planning]({{< relref "server/#capacity-planning" >}}) for information about
 how to choose the right topology for the Chef Infra Server.
 
 ## Hardware Requirements

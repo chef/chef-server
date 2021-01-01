@@ -54,7 +54,7 @@ replaced:
 1. Run `chef-backend-ctl join-cluster LEADER_IP --recovery`
 
 See the [installation
-instructions](/install_server_ha/#step-3-install-and-configure-remaining-backend-nodes)
+instructions]({{< relref "install_server_ha/#step-3-install-and-configure-remaining-backend-nodes" >}})
 for more details on joining nodes to the cluster.
 
 ### Two-node Failure
@@ -66,7 +66,7 @@ election requires a quorum of two nodes.
 This procedure assumes that the remaining node has the most up-to-date
 copy of the data. If that is not the case it is advised that you restore
 the existing node from a backup before proceeding. See the [Backup and
-Restore](/server_backup_restore/#backup-and-restore-a-chef-backend-install)
+Restore]({{< relref "server_backup_restore/#backup-and-restore-a-chef-backend-install" >}})
 documentation for details.
 
 1.  On the surviving node, run the following command:
@@ -83,7 +83,7 @@ documentation for details.
     ```
 
     See the [installation
-    instructions](/install_server_ha/#step-3-install-and-configure-remaining-backend-nodes)
+    instructions]({{< relref "install_server_ha/#step-3-install-and-configure-remaining-backend-nodes" >}})
     for more details on joining nodes to the cluster.
 
 ## Partitions
@@ -258,12 +258,12 @@ the scenarios and tools shown above to assist in the recovery steps:
     demotes a leader
     `/var/opt/chef-backend/leaderl/data/no-start-pgsql`. Refer to the
     [Promoting a Previous Leader
-    section](#promoting-a-previous-leader)
+    section]({{< relref "#promoting-a-previous-leader" >}})
     for more details.
 
 3.  If necessary, promote what is thought as the most recent leader.
     Refer to the [Promoting a Previous Leader
-    section](/backend_failure_recovery/#promoting-a-previous-leader)
+    section]({{< relref "#promoting-a-previous-leader" >}})
     for more detail.
 
 4.  Sync the followers from the leader using a full basebackup because
@@ -276,8 +276,6 @@ the scenarios and tools shown above to assist in the recovery steps:
     follower to sync and rejoin while in this state because it doesn't
     have current enough info. Below is an example error message
     highlighting followers being unable to rejoin:
-
-<!-- -->
 
 ```none
 2018-04-25_16:36:29.42242 FATAL:  the database system is starting up

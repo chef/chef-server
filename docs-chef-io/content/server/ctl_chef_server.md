@@ -522,7 +522,7 @@ the environment variable `ACTIONS_PASSWORD`.
 
 The `oc-id-show-app` subcommand allows for retrieving the client ID and
 client secret for applications known to **oc-id**. Note that with
-`insecure_addon_compat` [disabled](/runbook/server_security/#chef-infra-server-credentials-management),
+`insecure_addon_compat` [disabled]({{< relref "server_security/#chef-infra-server-credentials-management" >}}),
 this data will no longer be written to `/etc/opscode/oc-id-applications/APP.json`.
 
 **Syntax**

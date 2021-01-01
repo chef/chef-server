@@ -44,7 +44,7 @@ steps:
 -   The hostname for the Chef Infra Server must be an FQDN, including
     the domain suffix, and must be resolvable by the backend and
     frontend servers. See [Hostnames,
-    FQDNs](/install_server_pre/#hostnames) for more information.
+    FQDNs]({{< relref "install_server_pre/#hostnames" >}}) for more information.
 -   `chef-server-ctl reconfigure` will not bind the `backend_vip` to the
     backend server. The easiest thing to do is just define `backend_vip`
     as the already configured main IP address of the backend system. If
@@ -295,7 +295,7 @@ Chef Manage
     chef-manage-ctl reconfigure
     ```
 
-    To accept the [Chef MLSA](/chef_license/):
+    To accept the [Chef MLSA]({{< relref "chef_license" >}}):
 
     ```bash
     sudo chef-manage-ctl reconfigure --accept-license

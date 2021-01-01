@@ -166,12 +166,12 @@ cluster downtime.
     chef-server-ctl reconfigure
     ```
 
-8. To continue the upgrades on Chef Infra Server frontend nodes using this backend cluster, see [Upgrade Frontends Associated with a Chef Backend Cluster](/install_server_ha/#upgrading-chef-infra-server-on-the-frontend-machines).
+8. To continue the upgrades on Chef Infra Server frontend nodes using this backend cluster, see [Upgrade Frontends Associated with a Chef Backend Cluster]({{< relref "install_server_ha/#upgrading-chef-infra-server-on-the-frontend-machines" >}}).
 
 ## DRBD/Keepalived HA to Chef Backend 2.x
 
 DRBD configurations are no longer supported. See [End of Life
-Products](/versions/#end-of-life-eol).
+Products]({{< relref "versions#end-of-life-eol" >}}).
 
 For a guide to migrating to Chef Backend from DRBD see the [Best Best Practices for Migrating Your Chef Server](https://blog.chef.io/2018/04/06/best-practices-for-migrating-your-chef-server/)
 webinar from the [Chef Blog](https://blog.chef.io/).

@@ -243,7 +243,7 @@ find if deploying Chef Backend to various cloud providers.
 `etcd.ionice.class`
 : etcd must be able to write to disk with minimal
   latency. If your cluster does not meet the
-  [disk requirements](/install_server_ha/#hardware-requirements), e.g. you
+  [disk requirements]({{< relref "install_server_ha/#hardware-requirements" >}}), e.g. you
   are running Chef Backend on virtual machines with shared disks, this
   settings should be changed to '1' (real-time scheduling) to mitigate
   unnecessary failovers under high latency conditions.
@@ -474,4 +474,4 @@ The Chef Infra Server backend HA cluster includes a command-line utility
 named chef-backend-ctl. This command-line tool is used to manage the
 Chef Infra Server backend HA cluster, start and stop individual
 services, and tail Chef Infra Server log files. For more information,
-see the [chef-backend-ctl documentation](/ctl_chef_backend/).
+see the [chef-backend-ctl documentation]({{< relref "ctl_chef_backend" >}}).
