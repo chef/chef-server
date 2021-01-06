@@ -71,7 +71,7 @@ allowed_methods(Req, #base_state{resource_args = user} = State) ->
            {['GET', 'DELETE', 'PUT'], Req, State};
         %% For /orgs/:org/users/:user/keys/:key, we've only implemented GET so far.
         _ ->
-            {['GET'], Req, State}
+            {['GET', 'DELETE'], Req, State}
     end;
 %% /organizations/:org/clients/:client/keys/:key
 allowed_methods(Req, State) ->
