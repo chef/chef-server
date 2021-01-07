@@ -6,6 +6,7 @@
     set_by_lua $data_collector_token 'return os.getenv("DATA_COLLECTOR_TOKEN")';
 
     access_log <%= @helper.access_log(@server_proto) %> opscode;
+
     <% if @server_proto == "https" %>
       ssl_certificate <%= @ssl_certificate %>;
       ssl_certificate_key <%= @ssl_certificate_key %>;
@@ -16,7 +17,14 @@
       ssl_protocols <%= @ssl_protocols %>;
       ssl_ciphers <%= @ssl_ciphers %>;
       ssl_prefer_server_ciphers on;
+
+      <% if node['private_chef']['nginx']['ssl_client_ca'] -%>
+        ssl_verify_client on;
+        ssl_client_certificate <%= node['private_chef']['nginx']['ssl_client_ca'] %>
+        ssl_verify_depth <%= node['private_chef']['nginx']['ssl_verify_depth'] %>
+      <% end -%>
     <% end %>
+
     root <%= File.join(@dir, "html") %>;
     client_max_body_size <%= @client_max_body_size %>;
 
