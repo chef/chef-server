@@ -207,7 +207,7 @@ elasticsearch['jvm_opts'] = []
 # heap address: 0x00000000c0000000, size: 28672 MB, Compressed Oops mode: Zero based, Oop shift amount: 3
 #
 # ... turns up that our limit is around 28G, which is where the max
-# should be set. 
+# should be set.
 #
 #
 elasticsearch['heap_size'] = Elasticsearch.heap_size_default(node)
@@ -512,6 +512,11 @@ default['private_chef']['nginx']['strict_host_header'] = false
 default['private_chef']['nginx']['use_implicit_hosts'] = false
 
 default['private_chef']['nginx']['show_welcome_page'] = true
+
+# Set to a path to a CA certificate to enable mutual TLS checking of the client SSL/TLS certificate
+default['private_chef']['nginx']['ssl_client_ca'] = false
+# default['private_chef']['nginx']['ssl_client_ca'] = "/etc/something/foo.ca.pem"
+default['private_chef']['nginx']['ssl_verify_depth'] = 2
 
 ###
 # PostgreSQL
