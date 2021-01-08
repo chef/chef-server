@@ -21,7 +21,7 @@ aliases = ["/runbook/"]
 The following diagram shows the various components that are part of a
 Chef Infra Server deployment and how they relate to one another.
 
-<img src="/images/server_components_14.svg" width="500" alt="Diagram of Chef Infra Server deployment" />
+<img src="/images/server/server_components_14.svg" width="500" alt="Diagram of Chef Infra Server deployment" />
 
 <table style="width:99%;">
 <colgroup>
