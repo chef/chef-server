@@ -406,6 +406,8 @@ parse_version(Version) when is_binary(Version) ->
     end.
 
 
+normalize_version([X]) ->
+    [X, 0, 0];
 normalize_version([X, Y]) ->
     [X, Y, 0];
 normalize_version([_, _, _] = V) ->
