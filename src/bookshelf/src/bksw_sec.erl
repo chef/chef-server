@@ -24,14 +24,12 @@
 -export([encode_access_denied_error_response/3] ).
 -export([is_authorized/2                      ] ).
 -export([parse_authorization/1                ] ).
+-include("internal.hrl"                         ).
+-include_lib("erlcloud/include/erlcloud_aws.hrl").
 
 -ifdef(TEST).
 -compile([export_all, nowarn_export_all       ] ).
 -endif.
-
--include("internal.hrl").
-
--include_lib("erlcloud/include/erlcloud_aws.hrl").
 
 %%===================================================================
 %% API functions
@@ -57,8 +55,7 @@ is_authorized(Req0, #context{auth_type           = presigned_url,
     % this was put in, there were problems with signature failures due to
     % inconsistent treatment of host headers by various chef clients
     % (present or missing ports).  Determining whether alt sig comparison is
-    % still necessary would require some investigation
-    % and testing.
+    % still necessary would require investigation and testing.
 
     CalculatedSig =
         case const_time_compare(IncomingSignature, ComparisonSig, true) of
@@ -108,8 +105,7 @@ is_authorized(Req0, #context{auth_type           = auth_header,
     % this was put in, there were problems with signature failures due to
     % inconsistent treatment of host headers by various chef clients
     % (present or missing ports).  Determining whether alt sig comparison is
-    % still necessary would require some investigation
-    % and testing.
+    % still necessary would require investigation and testing.
 
     CalculatedSig =
         case const_time_compare(IncomingSignature, ComparisonSig, true) of
