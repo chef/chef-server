@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.80 -->
-## [14.0.80](https://github.com/chef/chef-server/tree/14.0.80) (2021-01-19)
+<!-- latest_release 14.0.81 -->
+## [14.0.81](https://github.com/chef/chef-server/tree/14.0.81) (2021-01-19)
 
 #### Merged Pull Requests
-- Fix link and markdown warnings in the readme [#2212](https://github.com/chef/chef-server/pull/2212) ([tas50](https://github.com/tas50))
+- zei/major versions constraint/1576 [#2210](https://github.com/chef/chef-server/pull/2210) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.65 -->
 ### Changes since 14.0.65 release
 
 #### Merged Pull Requests
+- zei/major versions constraint/1576 [#2210](https://github.com/chef/chef-server/pull/2210) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.0.81 -->
 - Fix link and markdown warnings in the readme [#2212](https://github.com/chef/chef-server/pull/2212) ([tas50](https://github.com/tas50)) <!-- 14.0.80 -->
 - The version of ruby on the builder was updated from 2.6.0 to 2.7.0. [#2216](https://github.com/chef/chef-server/pull/2216) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.79 -->
 - Update the label configuration in the Expeditor config [#2199](https://github.com/chef/chef-server/pull/2199) ([tas50](https://github.com/tas50)) <!-- 14.0.78 -->
