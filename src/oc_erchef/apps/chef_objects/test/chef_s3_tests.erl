@@ -25,13 +25,6 @@
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("erlcloud/include/erlcloud_aws.hrl").
 
-% construct url (scheme://host) from config
--spec get_host_noport(aws_config()) -> string().
-get_host_noport(Config) ->
-    UrlRaw  = get_host_port(Config),
-    UrlTemp = string:trim(UrlRaw, trailing, "1234568790"),
-    string:trim(UrlTemp, trailing, ":").
-
 % construct url (scheme://host:port) from config
 -spec get_host_port(aws_config()) -> string().
 get_host_port(Config) ->
@@ -48,16 +41,12 @@ get_host_port(Config) ->
 % construct url from config
 get_host_test() ->
     Config0 = mini_s3:new("", "", "http://1.2.3.4"),
-    "http://1.2.3.4"      = get_host_noport(Config0),
     "http://1.2.3.4:80"   = get_host_port(  Config0),
     Config1 = mini_s3:new("", "", "https://1.2.3.4"),
-    "https://1.2.3.4"     = get_host_noport(Config1),
     "https://1.2.3.4:443" = get_host_port(  Config1),
     Config2 = mini_s3:new("", "", "http://1.2.3.4:443"),
-    "http://1.2.3.4"      = get_host_noport(Config2),
     "http://1.2.3.4:443"  = get_host_port(  Config2),
     Config3 = mini_s3:new("", "", "https://1.2.3.4:80"),
-    "https://1.2.3.4"     = get_host_noport(Config3),
     "https://1.2.3.4:80"  = get_host_port(  Config3).
 
 base64_checksum_test_() ->
@@ -101,23 +90,12 @@ setup_s3(InternalS3Url, ExternalS3Url) ->
     meck:expect(mini_s3, new, 3, mock_mini_s3_ctx),
     meck:expect(mini_s3, get_object_metadata, 4, mock_metadata).
 
-choose_url_style(InternalS3Url, ExternalS3Url) ->
-    case {InternalS3Url, ExternalS3Url} of
-        {_, host_header} ->
-            fun get_host_port/1;
-%        {Same, Same} ->
-%            fun get_host_noport/1;
-        _ ->
-            fun get_host_noport/1
-    end.
-
 generate_presigned_url_uses_configured_s3_url_test_() ->
     MockedModules = [mini_s3, chef_secrets_mock_provider],
     HostHeaderUrl = "https://api.example.com:443",
     OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
     Checksum = <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
     Lifetime = 3600,
-%    Config = mini_s3:new("", "", "http://s3.amazonaws.com"),
     Expect_s3_url = fun(ExpectMethod, ExpectUrl, _ExpectLifetime) ->
                             meck:expect(mini_s3, s3_url,
                                         fun(HTTPMethod, Bucket, _Key, _MyLifetime, _ContentMD5,
@@ -127,12 +105,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                                                 % CODE REVIEW: disable expiry window. expiry windows were redone,
                                                 % and are now tested at: src/oc_erchef/apps/chef_objects/test/chef_s3_tests.erl 
                                                 %?assertEqual(ExpectLifetime, MyLifetime),
-                                                {ok, InternalS3Url} = application:get_env(chef_objects, s3_url),
-                                                {ok, ExternalS3Url} = application:get_env(chef_objects, s3_external_url),
-                                                % is this still necessary? possibly only need to pass host with port
-                                                F = choose_url_style(InternalS3Url, ExternalS3Url),
-                                                S3Url = F(Config),
-                                                %S3Url = get_host_port(Config),
+                                                S3Url = get_host_port(Config),
                                                 ?assertEqual(ExpectUrl, S3Url),
                                                 stub_s3_url_response
                                         end)
