@@ -2,7 +2,7 @@
 
 [![Build Status](https://badge.buildkite.com/ccdefb69f938db51cb23f092e54030aa41608e6472cfe4aa7e.svg)](https://buildkite.com/chef/chef-chef-server-master-omnibus-adhoc)
 
-**Umbrella Project**: [Chef Infra](https://github.com/chef/chef-oss-practices/blob/master/projects/chef-server-infra.md)
+**Umbrella Project**: [Chef Infra](https://github.com/chef/chef-oss-practices/blob/master/projects/chef-infra-server.md)
 
 **Project State**: [Active](https://github.com/chef/chef-oss-practices/blob/master/repo-management/repo-states.md#active)
 
@@ -23,8 +23,8 @@ If you need to file an issue against another Chef project, you can find a list o
 
 We use GitHub issues to track bugs and feature requests. If you need help please post to our Mailing List or join the Chef Community Slack.
 
- * Chef Community Slack at http://community-slack.chef.io/.
- * Chef Mailing List https://discourse.chef.io/
+* Chef Community Slack at http://community-slack.chef.io/.
+* Chef Mailing List https://discourse.chef.io/
 
 ## Components of the Chef Server
 
@@ -49,7 +49,7 @@ The quickest way to get a Chef Server development environment is to
 follow the [instructions](https://github.com/chef/chef-server/blob/master/dev/README.md) in the `dev` directory.
 This environment is based on Vagrant and features hot reloading of code.
 
-## Building a Chef Server package locally:
+## Building a Chef Server package locally
 
 You can build a Chef Server package locally with vagrant and test-kitchen.
 
@@ -63,12 +63,13 @@ Once the build is complete, the package should be in omnibus/pkg. By default the
 ## Habitized Chef Server
 
 The following components now exist as Habitat packages and are available [here](https://bldr.habitat.sh/#/origins/chef-server/packages):
-- nginx
-- bookshelf
-- oc_id
-- oc_erchef
-- oc_bifrost
-- chef-server-ctl
+
+* nginx
+* bookshelf
+* oc_id
+* oc_erchef
+* oc_bifrost
+* chef-server-ctl
 
 To build the packages locally:
 
@@ -96,29 +97,27 @@ docker-compose exec chef-server-ctl chef-server-ctl command (subcommands)
 
 ## Dependencies contained in other repositories
 
-- [knife-ec-backup](https://www.github.com/chef/knife-ec-backup), used to ease migrations from Open Source Chef Server 11 (and below)
-- [knife-opc](https://www.github.com/chef/knife-opc), used to provide administrative command-line control to the Chef Server from the console
+* [knife-ec-backup](https://www.github.com/chef/knife-ec-backup), used to ease migrations from Open Source Chef Server 11 (and below)
+* [knife-opc](https://www.github.com/chef/knife-opc), used to provide administrative command-line control to the Chef Infra Server from the console
 
-## Major Technologies used in Chef Server
+## Major Technologies used in Chef Infra Server
 
-- Erlang
-- PostgreSQL
-- Redis
-- Elasticsearch
-- Nginx (openresty with lpeg library addition)
-- Runit for service supervision
+* Erlang
+* PostgreSQL
+* Redis
+* Elasticsearch
+* Nginx (openresty with lpeg library addition)
+* Runit for service supervision
 
-If you're looking to contribute to certain parts of the Chef server, familiarity with the following related tools is also beneficial, depending on the area.
+If you're looking to contribute to certain parts of the Chef Infra Server, familiarity with the following related tools is also beneficial, depending on the area.
 
-- rebar (used for dependency management in Erlang)
-- sqitch (database migrations)
-- lua (routing rules in openresty)
+* rebar (used for dependency management in Erlang)
+* sqitch (database migrations)
+* lua (routing rules in openresty)
 
 ## Chef Expeditor
 
-The `chef/chef-server` repository, like many other Chef Software
-repositories, leverages an internal utility called Chef Expeditor to
-create a pub-sub model of actions across our various CI/CD utilities.
+The `chef/chef-server` repository, like many other Chef Software repositories, leverages an internal utility called Chef Expeditor to create a pub-sub model of actions across our various CI/CD utilities.
 
 ## Contributing
 
@@ -126,7 +125,7 @@ For information on contributing to this project see <https://github.com/chef/che
 
 ## License & Authors
 
-**Copyright:** 2008-2018, Chef Software, Inc.
+**Copyright:** 2008-2021, Chef Software, Inc.
 
 ```text
 Licensed under the Apache License, Version 2.0 (the "License");
