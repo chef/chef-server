@@ -1457,6 +1457,10 @@ This configuration file has the following settings for `elasticsearch`:
 
 : Default value: `90`
 
+`elasticsearch['java_home']`
+
+: `JAVA_HOME`. Default value: `/opt/opscode/embedded/open-jre`.
+
 `elasticsearch['jvm_opts']`
 
 : Default values are set based on [JVM configuration options](https://github.com/elastic/elasticsearch/blob/6.8/distribution/src/config/jvm.options).

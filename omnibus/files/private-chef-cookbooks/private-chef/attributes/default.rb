@@ -174,6 +174,10 @@ elasticsearch['initial_cluster_join_timeout'] = 90
 elasticsearch['shard_count'] = 5
 elasticsearch['replica_count'] = 1
 
+# Chef includes a bundled version of OpenJDK
+# To use your own version of Java, set the JAVA_HOME environment variable.
+elasticsearch['java_home'] = "#{node['private_chef']['user']['home']}/open-jre"
+
 # each item in this list will be placed as-is into java_opts config file.
 # entries are set in chef-server.rb as
 # elasticsearch.jvm_opts = [
