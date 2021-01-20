@@ -592,8 +592,8 @@ describe "User keys endpoint", :keys, :user_keys do
     end
 
     context "DELETE /orgs/org/users/user/keys/key" do
-     it "should return a 405" do
-        delete("#{platform.server}/organizations/#{org_name}/users/#{org_user_name}/keys/some_key", superuser, payload: {}).should look_like(status: 405)
+     it "should return a 200 ------SHAHID" do
+        delete("#{platform.server}/organizations/#{org_name}/users/#{org_user_name}/keys/some_key", superuser, payload: {}).should look_like(status: 200)
       end
     end
 
