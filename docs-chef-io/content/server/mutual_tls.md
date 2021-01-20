@@ -7,15 +7,14 @@ draft = true
 [menu]
   [menu.server]
     title = "Mutual TLS"
-    identifier = "server/Mutual TLS"
-    parent = "server"
-    weight = 10
+    identifier = "server/configure/mutual_tls"
+    parent = "server/configure"
 
 +++
 
 ## Configuring Mutual TLS (mTLS) for Chef Server
 
-Transport layer security (or “TLS”) provides a mechanism by which a client can be assured that it is talking to a server in a secure fashion. The server provides a certificate and public key which the client can use to encrypt and decrypt traffic to and from the server with.
+Transport layer security (or "TLS") provides a mechanism by which a client can be assured that it is talking to a server in a secure fashion. The server provides a certificate and public key which the client can use to encrypt and decrypt traffic to and from the server with.
 
 But that only covers the server to client traffic - the client is able to verify the server but not the other way around. The client does not have to provide any type of identity details to the server. And that's fine, that's how HTTPS traffic mostly works.
 
