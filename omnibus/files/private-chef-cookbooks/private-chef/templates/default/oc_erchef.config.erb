@@ -210,6 +210,10 @@
         <% else -%>
         {s3_url, "<%= @helper.bookshelf_s3_url %>"},
         <% end %>
+        %% temporary aws security credentials for use in testing
+        %% try moving these to mini_s3/erlcloud or oc-erchefs app.config or ...
+        {aws_session_token,  <%= ENV['AWS_SESSION_TOKEN']  ? '"' ++ ENV['AWS_SESSION_TOKEN']  ++ '"' : 'undefined' %>},
+        {aws_default_region, <%= ENV['AWS_DEFAULT_REGION'] ? '"' ++ ENV['AWS_DEFAULT_REGION'] ++ '"' : 'undefined' %>},
         {s3_external_url, <%= @helper.erl_atom_or_string(node['private_chef']['bookshelf']['external_url']) %>},
         {s3_platform_bucket_name, "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>"},
         {s3_url_ttl, <%= node['private_chef']['opscode-erchef']['s3_url_ttl'] %>},

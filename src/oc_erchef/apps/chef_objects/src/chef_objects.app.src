@@ -34,6 +34,11 @@
          %% S3 Access credentials for Bookshelf operations
          {s3_access_key_id, undefined},
          {s3_secret_key_id, undefined},
+         %% temporary S3 aws security credentials for use in testing
+         %% alternatively, could try the {cmd, "..."} approach as above to retrieve these,
+         %% but not sure it would work
+         {aws_session_token, undefined},
+         {aws_default_region, undefined},
 
          %% s3_url is the URL that Chef Server uses to make S3
          %% requests itself, which is different from the URL it tells
