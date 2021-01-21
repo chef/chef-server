@@ -166,7 +166,8 @@ aws_config(S3Url) ->
     SslOpts = envy:get(chef_objects, s3_ssl_opts, [], list),
 AwsSessionToken  = envy:get(chef_objects, aws_session_token,  undefined, [atom, list]),
 AwsDefaultRegion = envy:get(chef_objects, aws_default_region, undefined, [atom, list]),
-io:format("~n~nchef_s3: url style = ~p~n", [PathOrVhost]),
+io:format("~n~nchef_s3: aws session token  = ~p",   [AwsSessionToken]),
+io:format("~n~nchef_s3: aws default region = ~p~n", [AwsDefaultRegion]),
     mini_s3:new(erlang:binary_to_list(S3AccessKeyId), erlang:binary_to_list(S3SecretKeyId), S3Url, path, SslOpts).
 
 %% @doc returns a url for accessing s3 internally. This is used
