@@ -164,6 +164,8 @@ aws_config(S3Url) ->
     {ok, S3AccessKeyId} = chef_secrets:get(<<"bookshelf">>, <<"access_key_id">>),
     {ok, S3SecretKeyId} = chef_secrets:get(<<"bookshelf">>, <<"secret_access_key">>),
     SslOpts = envy:get(chef_objects, s3_ssl_opts, [], list),
+AwsSessionToken  = envy:get(chef_objects, aws_session_token,  undefined, [atom, list]),
+AwsDefaultRegion = envy:get(chef_objects, aws_default_region, undefined, [atom, list]),
 io:format("~n~nchef_s3: url style = ~p~n", [PathOrVhost]),
     mini_s3:new(erlang:binary_to_list(S3AccessKeyId), erlang:binary_to_list(S3SecretKeyId), S3Url, path, SslOpts).
 
