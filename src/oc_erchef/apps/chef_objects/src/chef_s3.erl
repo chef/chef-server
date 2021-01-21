@@ -26,6 +26,7 @@
 -module(chef_s3).
 
 -include("chef_types.hrl").
+-include_lib("erlcloud/include/erlcloud_aws.hrl").
 
 -export([
          check_checksums/2,
@@ -166,9 +167,21 @@ aws_config(S3Url) ->
     SslOpts = envy:get(chef_objects, s3_ssl_opts, [], list),
 AwsSessionToken  = envy:get(chef_objects, aws_session_token,  undefined, [atom, list]),
 AwsDefaultRegion = envy:get(chef_objects, aws_default_region, undefined, [atom, list]),
+%% may or may not be needed
+%% possibly could or should be moved somewhere else, eg mini_s3/erlcloud
+%    case is_list(AwsSessionToken) of
+%        true -> application:set_env(erlcloud, aws_security_token, AwsSessionToken);
+%        _    -> ok
+%    end,
+%    case is_list(AwsDefaultRegion) of
+%        true -> application:set_env(erlcloud, aws_region,         AwsDefaultRegion);
+%        _    -> ok
+%    end,
+
 io:format("~n~nchef_s3: aws session token  = ~p",   [AwsSessionToken]),
 io:format("~n~nchef_s3: aws default region = ~p~n", [AwsDefaultRegion]),
-    mini_s3:new(erlang:binary_to_list(S3AccessKeyId), erlang:binary_to_list(S3SecretKeyId), S3Url, path, SslOpts).
+Config = mini_s3:new(erlang:binary_to_list(S3AccessKeyId), erlang:binary_to_list(S3SecretKeyId), S3Url, path, SslOpts),
+Config#aws_config{security_token = AwsSessionToken, aws_region = AwsDefaultRegion}.
 
 %% @doc returns a url for accessing s3 internally. This is used
 %% to contact bookshelf or S3.
