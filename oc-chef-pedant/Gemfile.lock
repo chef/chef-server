@@ -1,6 +1,6 @@
 GIT
-  remote: https://github.com/chef/chef.git
-  revision: ba79bcd396b4a370e4e84cce16afbad703fd610d
+  remote: https://github.com/chef/chef
+  revision: 625db34cb609002c7a2d215b344bca6cb89d95ea
   branch: chef-15
   specs:
     chef (15.15.1)
