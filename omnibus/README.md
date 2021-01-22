@@ -1,11 +1,7 @@
 Chef Server Omnibus Project
 ============================
 
-[![Build Status Master](https://travis-ci.org/chef/opscode-omnibus.svg?branch=master)](https://travis-ci.org/chef/opscode-omnibus)
-
-
-This project creates full-stack platform-specific packages for
-`chef-server`!
+This project creates full-stack platform-specific packages for `chef-server`!
 
 ## License
 
@@ -13,7 +9,7 @@ All files in the repository are licensed under the Apache 2.0 license. If any
 file is missing the License header it should assume the following is attached;
 
 ```
-Copyright 2014 Chef Software Inc
+Copyright 2014-2021 Chef Software Inc
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -35,8 +31,7 @@ Please follow the [contribution guidelines](CONTRIBUTING.md) when submitting pul
 
 Installation
 ------------
-You must have a sane Ruby 1.9+ environment with Bundler installed. Ensure all
-the required gems are installed:
+You must have a working Ruby environment. Ensure all the required gems are installed:
 
 ```shell
 $ bundle install --binstubs
