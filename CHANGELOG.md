@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.82 -->
-## [14.0.82](https://github.com/chef/chef-server/tree/14.0.82) (2021-01-21)
+<!-- latest_release 14.0.83 -->
+## [14.0.83](https://github.com/chef/chef-server/tree/14.0.83) (2021-01-22)
 
 #### Merged Pull Requests
-- Bump nokogiri from 1.10.4 to 1.10.8 in /src/oc-id [#1932](https://github.com/chef/chef-server/pull/1932) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Praj/test fix chef 15 branch [#2228](https://github.com/chef/chef-server/pull/2228) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.65 -->
 ### Changes since 14.0.65 release
 
 #### Merged Pull Requests
+- Praj/test fix chef 15 branch [#2228](https://github.com/chef/chef-server/pull/2228) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.83 -->
 - Bump nokogiri from 1.10.4 to 1.10.8 in /src/oc-id [#1932](https://github.com/chef/chef-server/pull/1932) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.0.82 -->
 - zei/major versions constraint/1576 [#2210](https://github.com/chef/chef-server/pull/2210) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.0.81 -->
 - Fix link and markdown warnings in the readme [#2212](https://github.com/chef/chef-server/pull/2212) ([tas50](https://github.com/tas50)) <!-- 14.0.80 -->
