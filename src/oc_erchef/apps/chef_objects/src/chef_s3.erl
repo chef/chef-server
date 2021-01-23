@@ -169,14 +169,14 @@ AwsSessionToken  = envy:get(chef_objects, aws_session_token,  undefined, [atom, 
 AwsDefaultRegion = envy:get(chef_objects, aws_default_region, undefined, [atom, list]),
 %% may or may not be needed
 %% possibly could or should be moved somewhere else, eg mini_s3/erlcloud
-%    case is_list(AwsSessionToken) of
-%        true -> application:set_env(erlcloud, aws_security_token, AwsSessionToken);
-%        _    -> ok
-%    end,
-%    case is_list(AwsDefaultRegion) of
-%        true -> application:set_env(erlcloud, aws_region,         AwsDefaultRegion);
-%        _    -> ok
-%    end,
+    case is_list(AwsSessionToken) of
+        true -> application:set_env(erlcloud, aws_security_token, AwsSessionToken);
+        _    -> ok
+    end,
+    case is_list(AwsDefaultRegion) of
+        true -> application:set_env(erlcloud, aws_region,         AwsDefaultRegion);
+        _    -> ok
+    end,
 
 io:format("~n~nchef_s3: aws session token  = ~p",   [AwsSessionToken]),
 io:format("~n~nchef_s3: aws default region = ~p~n", [AwsDefaultRegion]),
