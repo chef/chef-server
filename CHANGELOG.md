@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.85 -->
-## [14.0.85](https://github.com/chef/chef-server/tree/14.0.85) (2021-01-25)
+<!-- latest_release 14.0.86 -->
+## [14.0.86](https://github.com/chef/chef-server/tree/14.0.86) (2021-01-25)
 
 #### Merged Pull Requests
-- Add HighLevel Diagrams  [#2218](https://github.com/chef/chef-server/pull/2218) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Remove EOL RHEL 6 builds [#2230](https://github.com/chef/chef-server/pull/2230) ([christopher-snapp](https://github.com/christopher-snapp))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.65 -->
 ### Changes since 14.0.65 release
 
 #### Merged Pull Requests
+- Remove EOL RHEL 6 builds [#2230](https://github.com/chef/chef-server/pull/2230) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.86 -->
 - Add HighLevel Diagrams  [#2218](https://github.com/chef/chef-server/pull/2218) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.85 -->
 - Add configuration to allow for Mutual TLS (mTLS) [#2207](https://github.com/chef/chef-server/pull/2207) ([johnmccrae](https://github.com/johnmccrae)) <!-- 14.0.84 -->
 - Praj/test fix chef 15 branch [#2228](https://github.com/chef/chef-server/pull/2228) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.83 -->
