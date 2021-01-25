@@ -72,11 +72,10 @@ may have.
 - [ ] Will this change work on all of our supported platforms and
       browsers?
 
-      Supported platforms (architectures) are:
-      - el-5, el-6, el-7, sles-11, sles-12, ubuntu 12.04, ubuntu 14.04 (x86_64)
-      - el-7 (ppc64)
-      - el-7, ubuntu 14.04 (ppc64le)
-      - el-6, el-7, sles-11, sles-12 (s390x)
+      Supported platforms are:
+      - el-7, el-8, sles-12, sles-15 ubuntu 16.04, ubuntu 18.04, ubuntu 20.04
+      - el-7, el-8, ubuntu 16.04, ubuntu 18.04, ubuntu 20.04
+      - el-7, el-8, sles-12, sles-15
 
       Note: For outside contributors, it is impossible to verify that.
       A Chef employee with access to our internal CI infrastructure
