@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.84 -->
-## [14.0.84](https://github.com/chef/chef-server/tree/14.0.84) (2021-01-22)
+<!-- latest_release 14.0.85 -->
+## [14.0.85](https://github.com/chef/chef-server/tree/14.0.85) (2021-01-25)
 
 #### Merged Pull Requests
-- Add configuration to allow for Mutual TLS (mTLS) [#2207](https://github.com/chef/chef-server/pull/2207) ([johnmccrae](https://github.com/johnmccrae))
+- Add HighLevel Diagrams  [#2218](https://github.com/chef/chef-server/pull/2218) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.65 -->
 ### Changes since 14.0.65 release
 
 #### Merged Pull Requests
+- Add HighLevel Diagrams  [#2218](https://github.com/chef/chef-server/pull/2218) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.85 -->
 - Add configuration to allow for Mutual TLS (mTLS) [#2207](https://github.com/chef/chef-server/pull/2207) ([johnmccrae](https://github.com/johnmccrae)) <!-- 14.0.84 -->
 - Praj/test fix chef 15 branch [#2228](https://github.com/chef/chef-server/pull/2228) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.83 -->
 - Bump nokogiri from 1.10.4 to 1.10.8 in /src/oc-id [#1932](https://github.com/chef/chef-server/pull/1932) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.0.82 -->
