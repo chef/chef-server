@@ -6,8 +6,6 @@ test-path: omnibus/omnibus-test.sh
 fips-platforms:
   - el-*-x86_64
 builder-to-testers-map:
-  el-6-x86_64:
-    - el-6-x86_64
   el-7-x86_64:
     - el-7-x86_64
     - el-8-x86_64
