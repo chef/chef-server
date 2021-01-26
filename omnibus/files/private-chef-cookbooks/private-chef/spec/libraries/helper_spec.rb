@@ -190,6 +190,28 @@ describe OmnibusHelper do
       end
     end
 
+    context 'when elastic search is version 6' do
+      let(:elastic_version) { '6.8.12' }
+
+      it 'should return 6' do
+        helper = described_class.new(node)
+        expect(Chef::HTTP).to receive(:new).with(external_url).and_return(client)
+        expect(client).to receive(:get).with('').and_return(response)
+        expect(helper.elastic_search_major_version).to eq(6)
+      end
+    end
+
+    context 'when elastic search is version 7' do
+      let(:elastic_version) { '7.9.1' }
+
+      it 'should return 7' do
+        helper = described_class.new(node)
+        expect(Chef::HTTP).to receive(:new).with(external_url).and_return(client)
+        expect(client).to receive(:get).with('').and_return(response)
+        expect(helper.elastic_search_major_version).to eq(7)
+      end
+    end
+
     context 'when elastic search is version unsupported' do
       let(:elastic_version) { '200.50.35' }
 
@@ -197,7 +219,7 @@ describe OmnibusHelper do
         helper = described_class.new(node)
         expect(Chef::HTTP).to receive(:new).with(external_url).and_return(client)
         expect(client).to receive(:get).with('').and_return(response)
-        expect { helper.elastic_search_major_version }.to raise_error(/Unsupported elasticsearch version/)
+        expect { helper.elastic_search_major_version }.to raise_error(/Unsupported Elasticsearch version/)
       end
     end
 

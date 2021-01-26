@@ -88,7 +88,12 @@ search(#chef_solr_query{} = Query) ->
 
 handle_successful_search(ResponseBody) ->
     Response = ej:get({<<"hits">>}, jiffy:decode(ResponseBody)),
-    NumFound = ej:get({<<"total">>}, Response),
+    NumFound = case ej:get({<<"total">>}, Response) of
+                    Total when is_tuple(Total) ->
+                        ej:get({<<"value">>}, Total);
+                    Else ->
+                        Else
+               end,
     DocList  = ej:get({<<"hits">>}, Response),
     Ids = [ ej:get({<<"_id">>}, Doc) || Doc <- DocList ],
     {ok, undefined, NumFound, Ids}.
@@ -133,10 +138,13 @@ fields_tag() ->
     end.
 
 query_string_query_ejson(QueryString) ->
-    {<<"query_string">>,{[
-        {<<"lowercase_expanded_terms">>, false},
-        {<<"query">>, list_to_binary(QueryString)}
-    ]}}.
+    QueryEjson = [{<<"query">>, list_to_binary(QueryString)}],
+    QueryEjson1 =
+    case envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer) of
+        7 -> QueryEjson;
+        _ -> [{<<"lowercase_expanded_terms">>, false}| QueryEjson]
+    end,
+    {<<"query_string">>,{QueryEjson1}}.
 
 %% A note on deleting
 %%
@@ -266,5 +274,9 @@ delete_ids([]) ->
     ok = commit(),
     ok;
 delete_ids([Id | Ids]) ->
-    ok = chef_index_http:delete("/chef/object/" ++ Id, [], ?JSON_HEADER),
+    URI = case envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer) of
+            7 -> "/chef/_doc/";
+            _ -> "/chef/object/"
+        end,
+    ok = chef_index_http:delete(URI ++ Id, [], ?JSON_HEADER),
     delete_ids(Ids).

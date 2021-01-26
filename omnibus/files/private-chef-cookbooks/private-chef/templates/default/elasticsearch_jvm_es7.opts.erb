@@ -1,0 +1,63 @@
+## JVM Configuration
+
+<% # Wants: log_dir, enable_gc_log, heap_size, new_size, jvm_opts, tmp_dir %>
+
+<% @jvm_opts.each do |opt| %>
+<%=opt%>
+<% end %>
+# Do not override xmx/xms/newsize in
+# jvm_options - instead set the attributes in chef-server.rb
+-Xmx<%=@heap_size%>m
+-Xms<%=@heap_size%>m
+-XX:NewSize=<%= @new_size %>M
+
+# These are defaulted based on what 7.9 ships with.
+# https://github.com/elastic/elasticsearch/blob/7.9/distribution/src/config/jvm.options
+
+## GC configuration
+8-13:-XX:+UseConcMarkSweepGC
+8-13:-XX:CMSInitiatingOccupancyFraction=75
+8-13:-XX:+UseCMSInitiatingOccupancyOnly
+
+## G1GC Configuration
+# NOTE: G1 GC is only supported on JDK version 10 or later
+# to use G1GC, uncomment the next two lines and update the version on the
+# following three lines to your version of the JDK
+# 10-13:-XX:-UseConcMarkSweepGC
+# 10-13:-XX:-UseCMSInitiatingOccupancyOnly
+14-:-XX:+UseG1GC
+14-:-XX:G1ReservePercent=25
+14-:-XX:InitiatingHeapOccupancyPercent=30
+
+## JVM temporary directory
+-Djava.io.tmpdir=<%= @tmp_dir %>
+
+## heap dumps
+
+# generate a heap dump when an allocation from the Java heap fails
+# heap dumps are created in the working directory of the JVM
+-XX:+HeapDumpOnOutOfMemoryError
+
+# specify an alternative path for heap dumps; ensure the directory exists and
+# has sufficient space
+-XX:HeapDumpPath=<%= @tmp_dir %>
+
+# specify an alternative path for JVM fatal error logs
+-XX:ErrorFile=<%= @tmp_dir %>
+
+## GC logging
+<% if @enable_gc_log %>
+  ## JDK 8 GC logging
+  8:-XX:+PrintGCDetails
+  8:-XX:+PrintGCDateStamps
+  8:-XX:+PrintTenuringDistribution
+  8:-XX:+PrintGCApplicationStoppedTime
+  8:-Xloggc:${loggc}
+  8:-XX:+UseGCLogFileRotation
+  8:-XX:NumberOfGCLogFiles=32
+  8:-XX:GCLogFileSize=64m
+
+  
+  # JDK 9+ GC logging
+  9-:-Xlog:gc*,gc+age=trace,safepoint:file=${loggc}:utctime,pid,tags:filecount=32,filesize=64m
+<% end %>

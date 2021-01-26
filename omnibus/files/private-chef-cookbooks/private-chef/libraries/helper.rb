@@ -81,7 +81,7 @@ class OmnibusHelper
         # Decorate any JSON parsing exception or numeric exceptions when accessing and parsing the version field.
         raise "Unable to parse elasticsearch response #{e}"
       end
-      raise "Unsupported elasticsearch version of #{version}. There is current support for the major versions of 2, 5 and 6." if version != 6 && version != 5 && version != 2
+      raise "Unsupported Elasticsearch version of #{version}. There is currently support for the major versions of 2, 5, 6 and 7." unless [2, 5, 6, 7].include?(version)
       version
     else
       # Elasticsearch is disabled - this configuration setting should never be used in erlang.
@@ -91,11 +91,62 @@ class OmnibusHelper
 
   def es_index_definition
     es_version = elastic_search_major_version
-    if elastic_search_major_version == 6
+    if elastic_search_major_version == 7
+      es_7_index
+    elsif elastic_search_major_version == 6
       es_6_index
     elsif [2, 5].include?(es_version)
       es_5_or_2_index
     end
+  end
+
+  def es_7_index
+    {
+      'settings': {
+        'analysis': {
+          'analyzer': {
+            'default': {
+              'type': 'whitespace'
+            }
+          }
+        },
+        'number_of_shards':
+          node['private_chef']['elasticsearch']['shard_count'],
+        'number_of_replicas':
+          node['private_chef']['elasticsearch']['replica_count']
+      },
+      'mappings': {
+        '_source': {
+          'enabled': false
+        },
+        'properties': {
+          'X_CHEF_database_CHEF_X': {
+            'type': 'keyword',
+            'index': true,
+            'norms': false
+          },
+          'X_CHEF_type_CHEF_X': {
+            'type': 'keyword',
+            'index': true,
+            'norms': false
+          },
+          'X_CHEF_id_CHEF_X': {
+            'type': 'keyword',
+            'index': true,
+            'norms': false
+          },
+          'data_bag': {
+            'type': 'keyword',
+            'index': true,
+            'norms': false
+          },
+          'content': {
+            'type': 'text',
+            'index': true
+          }
+        }
+      }
+    }
   end
 
   def es_6_index

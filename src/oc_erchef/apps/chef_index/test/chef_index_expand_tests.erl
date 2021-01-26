@@ -326,7 +326,19 @@ es_api_test_() ->
                                             ok
                                     end),
                         AddDoc = chef_index_expand:doc_for_index(role, <<"a1">>, <<"db1">>, MinItem),
-                        ?assertEqual(ok, chef_index_expand:send_item(AddDoc))
+                        ?assertEqual(ok, chef_index_expand:send_item(AddDoc)),
+
+                        application:set_env(chef_index, solr_elasticsearch_major_version, 7),
+                        Expect1 = es_send_item_json_expect(es7),
+                        meck:expect(chef_index_http, post,
+                                    fun("/_bulk", Doc, Headers) ->
+                                            ?assertEqual(JsonContentType, Headers),
+                                            ?assertEqual(Expect1, Doc),
+                                            ok
+                                    end),
+                        AddDoc1 = chef_index_expand:doc_for_index(role, <<"a2">>, <<"db2">>, MinItem),
+                        ?assertEqual(ok, chef_index_expand:send_item(AddDoc1)),
+                        application:set_env(chef_index, solr_elasticsearch_major_version, 6)
                 end},
                {"send_delete",
                 fun() ->
@@ -339,7 +351,18 @@ es_api_test_() ->
                                             ok
                                     end),
                         DelDoc = chef_index_expand:doc_for_delete(role, <<"a5">>, <<"db3">>),
-                        ?assertEqual(ok, chef_index_expand:send_delete(DelDoc))
+                        ?assertEqual(ok, chef_index_expand:send_delete(DelDoc)),
+
+                        application:set_env(chef_index, solr_elasticsearch_major_version, 7),
+                        Expect1 = es_send_delete_json_expect(es7),
+                        meck:expect(chef_index_http, post,
+                                    fun("/_bulk", Doc, Headers) ->
+                                            ?assertEqual(JsonContentType, Headers),
+                                            ?assertEqual(Expect1, Doc),
+                                            ok
+                                    end),
+                        DelDoc1 = chef_index_expand:doc_for_delete(role, <<"a2">>, <<"db2">>),
+                        ?assertEqual(ok, chef_index_expand:send_delete(DelDoc1))
                 end
                }
               ]
@@ -374,7 +397,15 @@ send_item_xml_expect() ->
 es_send_delete_json_expect() ->
     <<"{\"delete\":{\"_index\":\"chef\",\"_type\":\"object\",\"_id\":\"a5\" }}\n">>.
 
+es_send_delete_json_expect(es7) ->
+    <<"{\"delete\":{\"_index\":\"chef\",\"_id\":\"a2\" }}\n">>.
+
 es_send_item_json_expect() ->
-    <<"{\"index\":{\"_index\":\"chef\",\"_type\":\"object\",\"_id\":\"a1\"}}\n"
+    <<"{\"index\":{\"_type\":\"object\",\"_index\":\"chef\",\"_id\":\"a1\"}}\n"
       "{\"content\":\"X_CHEF_database_CHEF_X__=__chef_db1 X_CHEF_id_CHEF_X__=__a1 X_CHEF_type_CHEF_X__=__role key1__=__value1 key2__=__value-2 \","
       "\"X_CHEF_id_CHEF_X\":\"a1\",\"X_CHEF_database_CHEF_X\":\"chef_db1\",\"X_CHEF_type_CHEF_X\":\"role\"}\n">>.
+
+es_send_item_json_expect(es7) ->
+    <<"{\"index\":{\"_index\":\"chef\",\"_id\":\"a2\"}}\n"
+      "{\"content\":\"X_CHEF_database_CHEF_X__=__chef_db2 X_CHEF_id_CHEF_X__=__a2 X_CHEF_type_CHEF_X__=__role key1__=__value1 key2__=__value-2 \","
+      "\"X_CHEF_id_CHEF_X\":\"a2\",\"X_CHEF_database_CHEF_X\":\"chef_db2\",\"X_CHEF_type_CHEF_X\":\"role\"}\n">>.

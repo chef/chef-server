@@ -30,6 +30,11 @@ version "6.8.12" do
          sha512: "9f6179ee49baa48b49c5328b88ddf2f0ef868f49c1f04d77975622120749725c48ac09cd565c05f6033eb227eaff905aff9f881a85efcf2fa75cc586cb8c45cb"
 end
 
+version "7.9.1" do
+  source url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-#{version}-linux-x86_64.tar.gz",
+         sha512: "e24aab0fbeb0b53cc386bb0ca1fc84c457851c5d80d147324bf97ff42f063332a93dec3c693550662393a72c7a0522a100181dd9a7d50b3e487a0f2a2a9bbcc0"
+end
+
 target_path = "#{install_dir}/embedded/elasticsearch"
 
 build do
@@ -38,7 +43,9 @@ build do
   delete "#{project_dir}/lib/sigar/*sparc*"
   delete "#{project_dir}/lib/sigar/*freebsd*"
   delete "#{project_dir}/config"
+  delete "#{project_dir}/jdk"
   delete "#{project_dir}/modules/x-pack-ml"
+  delete "#{project_dir}/modules/ingest-geoip"
   mkdir  "#{project_dir}/plugins"
   # by default RPMs will not include empty directories in the final package
   # ES will fail to start if this dir is not present.

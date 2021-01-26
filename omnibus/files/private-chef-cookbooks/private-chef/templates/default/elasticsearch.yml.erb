@@ -19,6 +19,17 @@ network.host: "<%= @listen %>"
 http.port: <%= @port %>
 
 <%
+  # ES7 mandatory configuration.These settings are applicable only for the users using standalone or tiered configurations. 
+  # For BYOD(external elasticsearch) none of the omnibus configs are applicable.
+  # Note: we have not enabled bootstrap checks, so failing bootstrap checks will appear as warnings in the es logs.
+  if node['private_chef']['elasticsearch']['es_version'].to_f > 7.0
+%>
+discovery.type: single-node
+<%
+  end
+%>
+
+<%
   # ES uses secomp in production mode. This is not supported in RHEL <  7
   # Reference:
   # https://www.elastic.co/guide/en/elasticsearch/reference/master/_system_call_filter_check.html
@@ -32,3 +43,5 @@ bootstrap.system_call_filter: false
     end
   end
 %>
+
+
