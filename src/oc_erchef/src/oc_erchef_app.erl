@@ -16,12 +16,32 @@ start(_StartType, _StartArgs) ->
     %% this reverts to previous working SIGTERM behavior.
     os:set_signal(sigterm, default),
 
+AwsAccessKeyId     = envy:get(chef_objects, aws_access_key_id,      undefined, [atom, list]),
+AwsSecretAccessKey = envy:get(chef_objects, aws_secret_access_key,  undefined, [atom, list]),
+AwsSessionToken    = envy:get(chef_objects, aws_session_token,      undefined, [atom, list]),
+AwsDefaultRegion   = envy:get(chef_objects, aws_default_region,     undefined, [atom, list]),
+
+io:format("~n~noc_erchef_app: aws_access_key_id     - ~p", [AwsAccessKeyId]),
+io:format(  "~noc_erchef_app: aws_secret_access_key - ~p", [AwsSecretAccessKey]),
+io:format(  "~noc_erchef_app: aws_access_key_id     - ~p", [AwsSessionToken]),
+io:format(  "~noc_erchef_app: aws_access_key_id     - ~p", [AwsDefaultRegion]),
+
     %% When start is invoked, any non-included apps are already started.
     %% This means that chef_secrets is started - so it's safe to start
     %% pooler and any other included apps that needed to wait for pooler.
     %% See comment in app.src for details.
     { ok, AppList } =  application:get_key(oc_erchef, included_applications),
     [ application:ensure_all_started(App, permanent) || App <- AppList ],
+
+% not sure if erlcloud is included in list of applications
+io:format("~noc_erchef_app: erlcloud is included in list? ~p~n", [lists:member(erlcloud, AppList)]),
+application:ensure_all_started(erlcloud, permanent),
+
+% dunno if this should be before or after start_link()
+application:set_env(erlcloud, aws_access_key_id,     AwsAccessKeyId),
+application:set_env(erlcloud, aws_secret_access_key, AwsSecretAccessKey),
+application:set_env(erlcloud, aws_security_token,    AwsSessionToken),
+application:set_env(erlcloud, aws_region,            AwsDefaultRegion),
 
     %% If we're in a dev vm environment, start the code sync & compile tools
     case os:getenv("DEVVM") of
