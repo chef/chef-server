@@ -451,6 +451,7 @@ default['private_chef']['nginx']['log_directory'] = '/var/log/opscode/nginx'
 default['private_chef']['nginx']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['nginx']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['nginx']['log_x_forwarded_for'] = false
+default['private_chef']['nginx']['time_format'] = 'time_iso8601'
 default['private_chef']['nginx']['ssl_port'] = 443
 default['private_chef']['nginx']['enable_non_ssl'] = false
 default['private_chef']['nginx']['non_ssl_port'] = 80
