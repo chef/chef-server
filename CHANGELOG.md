@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.86 -->
-## [14.0.86](https://github.com/chef/chef-server/tree/14.0.86) (2021-01-25)
+<!-- latest_release 14.0.87 -->
+## [14.0.87](https://github.com/chef/chef-server/tree/14.0.87) (2021-01-28)
 
 #### Merged Pull Requests
-- Remove EOL RHEL 6 builds [#2230](https://github.com/chef/chef-server/pull/2230) ([christopher-snapp](https://github.com/christopher-snapp))
+- Zei/Add configurable timestamp for access.log [#2211](https://github.com/chef/chef-server/pull/2211) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.65 -->
 ### Changes since 14.0.65 release
 
 #### Merged Pull Requests
+- Zei/Add configurable timestamp for access.log [#2211](https://github.com/chef/chef-server/pull/2211) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.0.87 -->
 - Remove EOL RHEL 6 builds [#2230](https://github.com/chef/chef-server/pull/2230) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.86 -->
 - Add HighLevel Diagrams  [#2218](https://github.com/chef/chef-server/pull/2218) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.85 -->
 - Add configuration to allow for Mutual TLS (mTLS) [#2207](https://github.com/chef/chef-server/pull/2207) ([johnmccrae](https://github.com/johnmccrae)) <!-- 14.0.84 -->
