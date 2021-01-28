@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.87 -->
-## [14.0.87](https://github.com/chef/chef-server/tree/14.0.87) (2021-01-28)
+<!-- latest_release 14.0.88 -->
+## [14.0.88](https://github.com/chef/chef-server/tree/14.0.88) (2021-01-28)
 
 #### Merged Pull Requests
-- Zei/Add configurable timestamp for access.log [#2211](https://github.com/chef/chef-server/pull/2211) ([vinay-satish](https://github.com/vinay-satish))
+- Bump nokogiri from 1.10.8 to 1.11.0 in /src/oc-id [#2224](https://github.com/chef/chef-server/pull/2224) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.65 -->
 ### Changes since 14.0.65 release
 
 #### Merged Pull Requests
+- Bump nokogiri from 1.10.8 to 1.11.0 in /src/oc-id [#2224](https://github.com/chef/chef-server/pull/2224) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.0.88 -->
 - Zei/Add configurable timestamp for access.log [#2211](https://github.com/chef/chef-server/pull/2211) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.0.87 -->
 - Remove EOL RHEL 6 builds [#2230](https://github.com/chef/chef-server/pull/2230) ([christopher-snapp](https://github.com/christopher-snapp)) <!-- 14.0.86 -->
 - Add HighLevel Diagrams  [#2218](https://github.com/chef/chef-server/pull/2218) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.85 -->
