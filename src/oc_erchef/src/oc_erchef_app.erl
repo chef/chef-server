@@ -38,10 +38,15 @@ application:set_env(erlcloud, aws_secret_access_key, AwsSecretAccessKey),
 application:set_env(erlcloud, aws_security_token,    AwsSessionToken),
 application:set_env(erlcloud, aws_region,            AwsDefaultRegion),
 
-io:format("~n~noc_erchef_app: aws_access_key_id     - ~p", [application:get_env(erlcloud, aws_access_key_id)]),
-io:format(  "~noc_erchef_app: aws_secret_access_key - ~p", [application:get_env(erlcloud, aws_secret_access_key)]),
-io:format(  "~noc_erchef_app: aws_session_token     - ~p", [application:get_env(erlcloud, aws_security_token)]),
-io:format(  "~noc_erchef_app: aws_default_region    - ~p", [application:get_env(erlcloud, aws_region)]),
+{_, A} = application:get_env(erlcloud, aws_access_key_id),
+{_, B} = application:get_env(erlcloud, aws_secret_access_key),
+{_, C} = application:get_env(erlcloud, aws_security_token),
+{_, D} = application:get_env(erlcloud, aws_region),
+
+io:format("~n~noc_erchef_app: aws_access_key_id     - ~p", [A]),
+io:format(  "~noc_erchef_app: aws_secret_access_key - ~p", [B]),
+io:format(  "~noc_erchef_app: aws_session_token     - ~p", [C]),
+io:format(  "~noc_erchef_app: aws_default_region    - ~p", [D]),
 
 
     %% If we're in a dev vm environment, start the code sync & compile tools
