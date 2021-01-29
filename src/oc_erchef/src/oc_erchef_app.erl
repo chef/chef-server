@@ -27,21 +27,21 @@ start(_StartType, _StartArgs) ->
 io:format("~noc_erchef_app: erlcloud is included in list? ~p~n", [lists:member(erlcloud, AppList)]),
 application:ensure_all_started(erlcloud, permanent),
 
-AwsAccessKeyId     = os:getenv("AWS_ACCESS_KEY_ID"    ),
-AwsSecretAccessKey = os:getenv("AWS_SECRET_ACCESS_KEY"),
-AwsSessionToken    = os:getenv("AWS_SESSION_TOKEN"    ),
-AwsDefaultRegion   = os:getenv("AWS_DEFAULT_REGION"   ),
+AwsAccessKeyId     = envy:get(chef_objects, aws_access_key_id,      undefined, [atom, list]),
+AwsSecretAccessKey = envy:get(chef_objects, aws_secret_access_key,  undefined, [atom, list]),
+AwsSessionToken    = envy:get(chef_objects, aws_session_token,      undefined, [atom, list]),
+AwsDefaultRegion   = envy:get(chef_objects, aws_default_region,     undefined, [atom, list]),
 
-io:format("~n~noc_erchef_app: AWS_ACCESS_KEY_ID     = ~p", [AwsAccessKeyId]),
-io:format(  "~noc_erchef_app: AWS_SECRET_ACCESS_KEY = ~p", [AwsSecretAccessKey]),
-io:format(  "~noc_erchef_app: AWS_SESSION_TOKEN     = ~p", [AwsSessionToken]),
-io:format(  "~noc_erchef_app: AWS_DEFAULT_REGION    = ~p", [AwsDefaultRegion]),
+io:format("~n~noc_erchef_app: aws_access_key_id     - ~p", [AwsAccessKeyId]),
+io:format(  "~noc_erchef_app: aws_secret_access_key - ~p", [AwsSecretAccessKey]),
+io:format(  "~noc_erchef_app: aws_session_token     - ~p", [AwsSessionToken]),
+io:format(  "~noc_erchef_app: aws_default_region    - ~p", [AwsDefaultRegion]),
 
 % dunno if this should be before or after start_link()
-%os:putenv("AWS_ACCESS_KEY_ID",     AwsAccessKeyId),
-%os:putenv("AWS_SECRET_ACCESS_KEY", AwsSecretAccessKey),
-%os:putenv("AWS_SESSION_TOKEN",    AwsSessionToken),
-%os:putenv("AWS_DEFAULT_REGION",    AwsDefaultRegion),
+application:set_env(erlcloud, aws_access_key_id,     AwsAccessKeyId),
+application:set_env(erlcloud, aws_secret_access_key, AwsSecretAccessKey),
+application:set_env(erlcloud, aws_security_token,    AwsSessionToken),
+application:set_env(erlcloud, aws_region,            AwsDefaultRegion),
 
     %% If we're in a dev vm environment, start the code sync & compile tools
     case os:getenv("DEVVM") of

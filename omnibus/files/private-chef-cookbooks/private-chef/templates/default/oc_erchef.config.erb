@@ -211,10 +211,10 @@
         {s3_url, "<%= @helper.bookshelf_s3_url %>"},
         <% end %>
         %% temporary aws security credentials for use in testing
-%%       {aws_access_key_id,      <%= ENV['AWS_ACCESS_KEY_ID']      ? '"' ++ ENV['AWS_ACCESS_KEY_ID']      ++ '"' : 'undefined' %>},
-%%       {aws_secret_access_key,  <%= ENV['AWS_SECRET_ACCESS_KEY']  ? '"' ++ ENV['AWS_SECRET_ACCESS_KEY']  ++ '"' : 'undefined' %>},
-%%       {aws_session_token,      <%= ENV['AWS_SESSION_TOKEN']      ? '"' ++ ENV['AWS_SESSION_TOKEN']      ++ '"' : 'undefined' %>},
-%%       {aws_default_region,     <%= ENV['AWS_DEFAULT_REGION']     ? '"' ++ ENV['AWS_DEFAULT_REGION']     ++ '"' : 'undefined' %>},
+        {aws_access_key_id,      <%= ENV['AWS_ACCESS_KEY_ID']      ? '"' ++ ENV['AWS_ACCESS_KEY_ID']      ++ '"' : 'undefined' %>},
+        {aws_secret_access_key,  <%= ENV['AWS_SECRET_ACCESS_KEY']  ? '"' ++ ENV['AWS_SECRET_ACCESS_KEY']  ++ '"' : 'undefined' %>},
+        {aws_session_token,      <%= ENV['AWS_SESSION_TOKEN']      ? '"' ++ ENV['AWS_SESSION_TOKEN']      ++ '"' : 'undefined' %>},
+        {aws_default_region,     <%= ENV['AWS_DEFAULT_REGION']     ? '"' ++ ENV['AWS_DEFAULT_REGION']     ++ '"' : 'undefined' %>},
 
         {s3_external_url, <%= @helper.erl_atom_or_string(node['private_chef']['bookshelf']['external_url']) %>},
         {s3_platform_bucket_name, "<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>"},
