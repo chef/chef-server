@@ -27,21 +27,22 @@ start(_StartType, _StartArgs) ->
 io:format("~noc_erchef_app: erlcloud is included in list? ~p~n", [lists:member(erlcloud, AppList)]),
 application:ensure_all_started(erlcloud, permanent),
 
-AwsAccessKeyId     = envy:get(chef_objects, aws_access_key_id,      undefined, [atom, list]),
-AwsSecretAccessKey = envy:get(chef_objects, aws_secret_access_key,  undefined, [atom, list]),
-AwsSessionToken    = envy:get(chef_objects, aws_session_token,      undefined, [atom, list]),
-AwsDefaultRegion   = envy:get(chef_objects, aws_default_region,     undefined, [atom, list]),
-
-io:format("~n~noc_erchef_app: aws_access_key_id     - ~p", [AwsAccessKeyId]),
-io:format(  "~noc_erchef_app: aws_secret_access_key - ~p", [AwsSecretAccessKey]),
-io:format(  "~noc_erchef_app: aws_session_token     - ~p", [AwsSessionToken]),
-io:format(  "~noc_erchef_app: aws_default_region    - ~p", [AwsDefaultRegion]),
+AwsAccessKeyId     = envy:get(chef_objects, aws_access_key_id,     undefined, [atom, list]),
+AwsSecretAccessKey = envy:get(chef_objects, aws_secret_access_key, undefined, [atom, list]),
+AwsSessionToken    = envy:get(chef_objects, aws_session_token,     undefined, [atom, list]),
+AwsDefaultRegion   = envy:get(chef_objects, aws_default_region,    undefined, [atom, list]),
 
 % dunno if this should be before or after start_link()
 application:set_env(erlcloud, aws_access_key_id,     AwsAccessKeyId),
 application:set_env(erlcloud, aws_secret_access_key, AwsSecretAccessKey),
 application:set_env(erlcloud, aws_security_token,    AwsSessionToken),
 application:set_env(erlcloud, aws_region,            AwsDefaultRegion),
+
+io:format("~n~noc_erchef_app: aws_access_key_id     - ~p", [application:get_env(erlcloud, aws_access_key_id)]),
+io:format(  "~noc_erchef_app: aws_secret_access_key - ~p", [application:get_env(erlcloud, aws_secret_access_key)]),
+io:format(  "~noc_erchef_app: aws_session_token     - ~p", [application:get_env(erlcloud, aws_security_token)]),
+io:format(  "~noc_erchef_app: aws_default_region    - ~p", [application:get_env(erlcloud, aws_region)]),
+
 
     %% If we're in a dev vm environment, start the code sync & compile tools
     case os:getenv("DEVVM") of
