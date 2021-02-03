@@ -28,6 +28,8 @@ pedant before merge.
 
 ## Updating Ruby Gems
 
+### Overview
+
 The following Gemfile.locks need to be updated to do a complete
 sweep. We strongly recommend using bundler 1.17.x until bundler 2.1 is
 out and stable.
@@ -63,6 +65,50 @@ Note:
 - On the dev-vm /dotfiles dir is mounted from your host. It is useful for
 copying files back from the dev-vm to the host.
 - The ./sync utility is used to copy files from the host into dev-vm.
+
+### For Erlangers
+
+Gems are like rebar dependencies, Gemfiles are like rebar.config files,
+and Gemfile.lock files are like rebar.lock files. They are located in
+directories for particular services the same way rebar config files are.
+
+### Basic Steps to Update a Gem
+
+1) `cd` to the directory containing the Gemfile which needs updating.
+
+2) Rename or otherwise backup and delete the Gemfile.lock.
+
+3) Edit the Gemfile and/or the .gemspec file to update the gem(s).
+
+4) If gems in other directories need updating, go back to step 1,
+otherwise proceed.
+
+5) `ssh` into a dev vm.  Do not `sudo -i` or otherwise login as root.
+
+6) `cd` to the directory containing the edited Gemfile and/or .gemspec
+file, using /host as the root directory, e.g. /host/src/chef-server-ctl.
+
+7) Remove all .bundle and vendor directories before starting and after you
+complete the update:
+```
+rm -rf vendor
+sudo rm -rf .bundle
+```
+8) Copy over your edited Gemfile and/or .gemspec file(s) (from step 3),
+or otherwise make the same edits. chef-server/dev/dotfiles can be used
+from your host to copy over files, and /dotfiles on your vm.
+
+9) Run the following to generate a new Gemfile.lock:
+```
+bundle install --binstubs --path=vendor/bundle
+bundle update
+```
+
+10) Copy the newly-generated Gemfile.lock back to the appropriate host
+directory.
+
+11) If other gems need updating, go back to step 6, otherwise you are
+done.
 
 ## Updating Chef Client
 
