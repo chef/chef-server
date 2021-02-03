@@ -347,6 +347,7 @@ default['private_chef']['opscode-erchef']['ssl_session_caching']['enabled'] = fa
 # the /_status endpoint.
 
 default['private_chef']['opscode-erchef']['health_ping_timeout'] = 400
+default['private_chef']['opscode-erchef']['include_version_in_status'] = false
 
 # Stats endpoint
 default['private_chef']['opscode-erchef']['stats_auth_enable'] = true
