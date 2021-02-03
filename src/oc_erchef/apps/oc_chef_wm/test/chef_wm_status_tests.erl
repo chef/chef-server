@@ -21,6 +21,8 @@
 -include("oc_chef_wm.hrl").
 
 -define(CHECK_MODS, [chef_sql, chef_solr]).
+-define(INCLUDE_VERSION, [true, false, error]).
+-define(SERVER_VERSION, <<"test_version">>).
 
 %% totally made up data, used for mocks
 -define(KEYGEN_STATUS, [{keys, 10}, {max, 10},
@@ -32,13 +34,17 @@
 -define(SLOW_CHECK_SLEEP, 100).
 
 setup_env() ->
+    setup_env(false).
+setup_env(Include_version) ->
     application:set_env(oc_chef_wm, health_ping_timeout, ?PING_TIMEOUT),
     application:set_env(oc_chef_wm, health_ping_modules, ?CHECK_MODS),
+    application:set_env(oc_chef_wm, include_version_in_status, Include_version),
     ok.
 
 cleanup_env() ->
     application:unset_env(oc_chef_wm, health_ping_timeout),
     application:unset_env(oc_chef_wm, health_ping_modules),
+    application:unset_env(oc_chef_wm, include_version_in_status),
     ok.
 
 check_health_all_ok_test_() ->
@@ -59,7 +65,7 @@ check_health_all_ok_test_() ->
      end,
      [
       fun() ->
-              {Status, Json} = chef_wm_status:check_health(<<"test_version">>),
+              {Status, Json} = chef_wm_status:check_health(?SERVER_VERSION),
               ?assertEqual(pong, Status),
               Ejson = chef_json:decode(Json),
               ?assertEqual(<<"pong">>, ej:get({<<"status">>}, Ejson)),
@@ -82,7 +88,7 @@ check_health_one_crash_no_module_test_() ->
      end,
      [
       fun() ->
-              {Status, _Json} = chef_wm_status:check_health(<<"test_version">>),
+              {Status, _Json} = chef_wm_status:check_health(?SERVER_VERSION),
               ?assertEqual(fail, Status)
       end]}.
 
@@ -118,9 +124,38 @@ check_health_mod_fails(BadMod, How) ->
      end,
      [{"handles failure of " ++ a2s(BadMod),
       fun() ->
-              {Status, _Json} = chef_wm_status:check_health(<<"test_version">>),
+              {Status, _Json} = chef_wm_status:check_health(?SERVER_VERSION),
               ?assertEqual(fail, Status)
       end}]}.
+
+check_health_server_version_test_() ->
+    [ check_health_server_version(Include_version) || Include_version <- ?INCLUDE_VERSION ].
+
+check_health_server_version(Include_version) ->
+    {setup,
+        fun() ->
+            setup_env(Include_version),
+            [ begin
+                  meck:new(Mod),
+                  meck:expect(Mod, ping, fun() -> pong end)
+              end || Mod <- ?CHECK_MODS ],
+            meck:new(chef_keygen_cache),
+            meck:expect(chef_keygen_cache, status_for_json, fun() -> ?KEYGEN_STATUS end)
+        end,
+        fun(_) ->
+            [ meck:unload(Mod) || Mod <- ?CHECK_MODS ],
+            meck:unload(chef_keygen_cache),
+            cleanup_env()
+        end,
+        [fun() ->
+            {_Status, Json} = chef_wm_status:check_health(?SERVER_VERSION),
+            Ejson = chef_json:decode(Json),
+            case Include_version of
+                true -> ?assertEqual(?SERVER_VERSION, ej:get({<<"server_version">>}, Ejson, null));
+                _ -> ?assertEqual(null, ej:get({<<"server_version">>}, Ejson, null))
+            end
+         end]
+    }.
 
 a2b(A) ->
     erlang:atom_to_binary(A, utf8).
