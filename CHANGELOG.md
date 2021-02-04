@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.89 -->
-## [14.0.89](https://github.com/chef/chef-server/tree/14.0.89) (2021-01-28)
+<!-- latest_release 14.0.90 -->
+## [14.0.90](https://github.com/chef/chef-server/tree/14.0.90) (2021-02-04)
 
 #### Merged Pull Requests
-- fixing the path [#2232](https://github.com/chef/chef-server/pull/2232) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update gems to point to chef-15 [#2236](https://github.com/chef/chef-server/pull/2236) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.65 -->
 ### Changes since 14.0.65 release
 
 #### Merged Pull Requests
+- Update gems to point to chef-15 [#2236](https://github.com/chef/chef-server/pull/2236) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.90 -->
 - fixing the path [#2232](https://github.com/chef/chef-server/pull/2232) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.89 -->
 - Bump nokogiri from 1.10.8 to 1.11.0 in /src/oc-id [#2224](https://github.com/chef/chef-server/pull/2224) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.0.88 -->
 - Zei/Add configurable timestamp for access.log [#2211](https://github.com/chef/chef-server/pull/2211) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.0.87 -->
