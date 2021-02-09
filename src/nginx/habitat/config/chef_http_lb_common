@@ -77,6 +77,7 @@
     location ~ "^/organizations/([^/]+)/data-collector$" {
       set $request_org $1;
       access_by_lua_block { validator.validate("POST") }
+      proxy_set_header Host $proxy_host;
       proxy_set_header x-data-collector-token $data_collector_token;
       proxy_set_header x-data-collector-auth "version=1.0";
       rewrite ^ /data-collector/v0/ break;
@@ -90,6 +91,7 @@
     location ~ (?:/compliance)?/organizations/([^/]+)/owners/([^/]+)/compliance(.*) {
       set $request_org $1;
       access_by_lua_block { validator.validate("GET") }
+      proxy_set_header Host $proxy_host;
       proxy_set_header x-data-collector-token $data_collector_token;
       proxy_set_header x-data-collector-auth "version=1.0";
       rewrite ^(?:/compliance)?/organizations/([^/]+)/owners/([^/]+)/compliance(.*) /compliance/profiles/$2$3 break;
