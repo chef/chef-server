@@ -543,7 +543,7 @@ default['private_chef']['postgresql']['db_superuser'] = 'opscode-pgsql'
 # for connection establishment from the username as it exists in the database.
 # This will default to the db_superuser value if left nil.
 default['private_chef']['postgresql']['db_connection_superuser'] = nil
-default['private_chef']['postgresql']['shell'] = '/usr/sbin/nologin'
+default['private_chef']['postgresql']['shell'] = '/bin/sh'
 default['private_chef']['postgresql']['home'] = '/var/opt/opscode/postgresql'
 default['private_chef']['postgresql']['user_path'] = '/opt/opscode/embedded/bin:/opt/opscode/bin:$PATH'
 default['private_chef']['postgresql']['vip'] = '127.0.0.1'
