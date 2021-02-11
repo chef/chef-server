@@ -22,7 +22,7 @@ license_file "LICENSES/artistic.txt"
 
 dependency "perl"
 dependency "cpanminus"
-dependency "postgresql96"
+dependency "postgresql12"
 
 source url: "http://search.cpan.org/CPAN/authors/id/T/TU/TURNSTEP/DBD-Pg-#{version}.tar.gz",
        md5: "547de1382a47d66872912fe64282ff55"
