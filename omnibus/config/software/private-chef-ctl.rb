@@ -21,7 +21,7 @@ source path: "#{project.files_path}/../../src/chef-server-ctl"
 license :project_license
 skip_transitive_dependency_licensing true
 
-dependency "postgresql96" # for libpq
+dependency "postgresql12" # for libpq
 dependency "omnibus-ctl"
 # Used by `chef-server-ctl install` to resolve download urls
 dependency "mixlib-install"

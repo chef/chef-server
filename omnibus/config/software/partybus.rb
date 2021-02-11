@@ -21,7 +21,7 @@ source path: "#{Omnibus::Config.project_root}/#{name}"
 license :project_license
 
 dependency "bundler"
-dependency "postgresql96"
+dependency "postgresql12"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)

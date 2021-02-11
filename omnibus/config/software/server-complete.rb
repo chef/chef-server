@@ -31,7 +31,7 @@ dependency "veil-gem" # chef-server-ctl rotate-credentials
 dependency "openssl-fips-config" if fips_mode?
 
 # the backend
-dependency "postgresql96"
+dependency "postgresql12"
 dependency "redis" # dynamic routing controls
 dependency "haproxy"
 dependency "pg-gem" # used by private-chef-ctl reconfigure
