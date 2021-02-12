@@ -10,6 +10,7 @@ override :chef, version: "chef-15"
 override :ohai, version: "v15.12.0"
 override :ruby, version: "2.6.6"
 override :perl, version: "5.18.1"
+override :postgres, version: "12.5"
 
 # This SHA is the last commit before the 6.0 release
 override :'berkshelf-no-depselector', version: '6016ca10b2f46508b1b107264228668776f505d9'
