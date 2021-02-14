@@ -1,7 +1,6 @@
 Gem::Specification.new do |s|
   s.name          = 'oc-chef-pedant'
   s.version       = '2.2.0'
-  s.date          = '2015-04-17'
   s.summary       = "Chef Infra Server API Testing Framework"
   s.authors       = ["Chef Software Engineering"]
   s.email         = 'dev@chef.io'
