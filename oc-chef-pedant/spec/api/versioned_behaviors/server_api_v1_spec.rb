@@ -1,4 +1,5 @@
 require 'pedant/rspec/common'
+require 'get_process_mem'
 
 # Captures behaviors introduced in server api v1 that are not easily
 # handled elsewhere.  As v1 becomes the min suppported version, we'll
@@ -114,7 +115,13 @@ describe "Server API v1 Behaviors", :api_v1 do
         get("#{named_resource_url}/keys/default", superuser).should have_status_code 200
       end
 
+      puts "-------------------------------------------------------------------------"
+      mem = GetProcessMem.new
+      puts "Memory used : #{mem.mb.round(0)} MB"
+      puts "-------------------------------------------------------------------------"
+
       it "should allow allow public_key to be provided and respond with its location" do
+
         result = post(resource_url, superuser,
                       payload: create_payload.with('public_key', valid_pubkey))
         result.should look_like({status: 201,
@@ -125,11 +132,21 @@ describe "Server API v1 Behaviors", :api_v1 do
                                                                "expiration_date" => "infinity" }  } })
       end
 
+      puts "-------------------------------------------------------------------------"
+      mem = GetProcessMem.new
+      puts "Memory used : #{mem.mb.round(0)} MB"
+      puts "-------------------------------------------------------------------------"
+
       it "should reply with an error if both create_key:true and public_key are specified", :validation do
         result = post(resource_url, superuser,
                       payload: create_payload.with('public_key', valid_pubkey).with("create_key", true))
         result.should have_status_code 400
       end
+
+      puts "-------------------------------------------------------------------------"
+      mem = GetProcessMem.new
+      puts "Memory used : #{mem.mb.round(0)} MB"
+      puts "-------------------------------------------------------------------------"
 
       it "should accept the public key if both create_key:false and public_key are specified" do
         result = post(resource_url, superuser,
@@ -169,6 +186,11 @@ describe "Server API v1 Behaviors", :api_v1 do
       it "should not allow create_key:true", :validation do
         put(named_resource_url, superuser, payload: create_payload.with('create_key', true)).should have_status_code 400
       end
+
+      puts "-------------------------------------------------------------------------"
+      mem = GetProcessMem.new
+      puts "Memory used : #{mem.mb.round(0)} MB"
+      puts "-------------------------------------------------------------------------"
 
       it "should not allow public_key to be provided", :validation do
         put(named_resource_url, superuser, payload: create_payload.with('public_key', valid_pubkey)).should have_status_code 400

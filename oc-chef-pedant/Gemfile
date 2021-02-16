@@ -6,6 +6,7 @@ gem 'pry'
 gem 'pry-byebug'
 gem 'pry-stack_explorer'
 gem 'rake'
+gem 'get_process_mem'
 
 # We require chef internally to get the version in
 # lib/pedant/request.rb. It's really strange code and it should be
