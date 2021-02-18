@@ -20,8 +20,8 @@
 
       <% if node['private_chef']['nginx']['ssl_client_ca'] -%>
         ssl_verify_client on;
-        ssl_client_certificate <%= node['private_chef']['nginx']['ssl_client_ca'] %>
-        ssl_verify_depth <%= node['private_chef']['nginx']['ssl_verify_depth'] %>
+        ssl_client_certificate <%= node['private_chef']['nginx']['ssl_client_ca'] %>;
+        ssl_verify_depth <%= node['private_chef']['nginx']['ssl_verify_depth'] %>;
       <% end -%>
     <% end %>
 
