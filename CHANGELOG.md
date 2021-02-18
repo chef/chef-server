@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.92 -->
-## [14.0.92](https://github.com/chef/chef-server/tree/14.0.92) (2021-02-11)
+<!-- latest_release 14.0.93 -->
+## [14.0.93](https://github.com/chef/chef-server/tree/14.0.93) (2021-02-18)
 
 #### Merged Pull Requests
-- zei/Configurable status endpoint [#2234](https://github.com/chef/chef-server/pull/2234) ([vinay-satish](https://github.com/vinay-satish))
+- Increase the default timeout [#2249](https://github.com/chef/chef-server/pull/2249) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.65 -->
 ### Changes since 14.0.65 release
 
 #### Merged Pull Requests
+- Increase the default timeout [#2249](https://github.com/chef/chef-server/pull/2249) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.93 -->
 - zei/Configurable status endpoint [#2234](https://github.com/chef/chef-server/pull/2234) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.0.92 -->
 - Add step-by-step instructions for updating ruby gems. [#2237](https://github.com/chef/chef-server/pull/2237) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.91 -->
 - Update gems to point to chef-15 [#2236](https://github.com/chef/chef-server/pull/2236) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.90 -->
