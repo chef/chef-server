@@ -9,9 +9,9 @@ Gem::Specification.new do |spec|
   spec.version       = ChefServerCtl::VERSION
   spec.authors       = ["Mark Anderson"]
   spec.email         = ["mark@chef.io"]
-  spec.description   = %q{Commands to control Chef Server}
+  spec.description   = "Commands to control Chef Infra Server"
   spec.summary       = spec.description
-  spec.licenses      = "Apache-2.0"
+  spec.license       = "Apache-2.0"
 
   spec.files         = %w{LICENSE README.md} + Dir.glob("{bin,doc,helpers,lib,plugins,spec}/**/*")
   spec.bindir        = "bin"
