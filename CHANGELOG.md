@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.93 -->
-## [14.0.93](https://github.com/chef/chef-server/tree/14.0.93) (2021-02-18)
+<!-- latest_release 14.0.94 -->
+## [14.0.94](https://github.com/chef/chef-server/tree/14.0.94) (2021-02-18)
 
 #### Merged Pull Requests
-- Increase the default timeout [#2249](https://github.com/chef/chef-server/pull/2249) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- mTLS: Fix missing line terminating semi-colons in the nginx config [#2251](https://github.com/chef/chef-server/pull/2251) ([johnmccrae](https://github.com/johnmccrae))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.65 -->
 ### Changes since 14.0.65 release
 
 #### Merged Pull Requests
+- mTLS: Fix missing line terminating semi-colons in the nginx config [#2251](https://github.com/chef/chef-server/pull/2251) ([johnmccrae](https://github.com/johnmccrae)) <!-- 14.0.94 -->
 - Increase the default timeout [#2249](https://github.com/chef/chef-server/pull/2249) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.93 -->
 - zei/Configurable status endpoint [#2234](https://github.com/chef/chef-server/pull/2234) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.0.92 -->
 - Add step-by-step instructions for updating ruby gems. [#2237](https://github.com/chef/chef-server/pull/2237) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.0.91 -->
