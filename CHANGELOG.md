@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.94 -->
-## [14.0.94](https://github.com/chef/chef-server/tree/14.0.94) (2021-02-18)
+<!-- latest_release 14.0.95 -->
+## [14.0.95](https://github.com/chef/chef-server/tree/14.0.95) (2021-02-18)
 
 #### Merged Pull Requests
-- mTLS: Fix missing line terminating semi-colons in the nginx config [#2251](https://github.com/chef/chef-server/pull/2251) ([johnmccrae](https://github.com/johnmccrae))
+- Make sure ctl and pedant have licenses in the gemspec [#2248](https://github.com/chef/chef-server/pull/2248) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.65 -->
 ### Changes since 14.0.65 release
 
 #### Merged Pull Requests
+- Make sure ctl and pedant have licenses in the gemspec [#2248](https://github.com/chef/chef-server/pull/2248) ([tas50](https://github.com/tas50)) <!-- 14.0.95 -->
 - mTLS: Fix missing line terminating semi-colons in the nginx config [#2251](https://github.com/chef/chef-server/pull/2251) ([johnmccrae](https://github.com/johnmccrae)) <!-- 14.0.94 -->
 - Increase the default timeout [#2249](https://github.com/chef/chef-server/pull/2249) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.93 -->
 - zei/Configurable status endpoint [#2234](https://github.com/chef/chef-server/pull/2234) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.0.92 -->
