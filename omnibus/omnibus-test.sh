@@ -37,7 +37,7 @@ opscode_erchef['keygen_cache_size']=60
 nginx['ssl_dhparam']='/etc/opscode/dhparam.pem'
 insecure_addon_compat false
 data_collector['token'] = 'foobar'
-profiles['root_url'] = 'http://localhost:9998'
+profiles['root_url'] = 'https://localhost:9998'
 " | sudo tee /etc/opscode/chef-server.rb
 
 printf -- "-----BEGIN DH PARAMETERS-----
