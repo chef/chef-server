@@ -14,7 +14,15 @@ chef_server_url "<%= @prefix %>://<%= @vip %>"
 chef_server_root "<%= @prefix %>://<%= @vip %>"
 no_proxy "<%= node['private_chef']['lb']['vip'] %>"
 client_key key.path
+
+ <% if node['private_chef']['nginx']['ssl_client_ca'] -%>
+ssl_ca_file = <%= node['private_chef']['nginx']['ssl_client_ca'] %>
+ssl_client_cert = <%= node['private_chef']['nginx']['pivotal_ssl_client_cert'] %>
+ssl_client_key = <%= node['private_chef']['nginx']['pivotal_ssl_client_key'] %>
+ssl_verify_mode :verify_peer
+<% else -%>
 ssl_verify_mode :verify_none
+<% end -%>
 
 at_exit do
   # By holding onto key to reference it in at_exit,
