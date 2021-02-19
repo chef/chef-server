@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.96 -->
-## [14.0.96](https://github.com/chef/chef-server/tree/14.0.96) (2021-02-19)
+<!-- latest_release 14.0.97 -->
+## [14.0.97](https://github.com/chef/chef-server/tree/14.0.97) (2021-02-19)
 
 #### Merged Pull Requests
-- Add mtls support for the pivotal user [#2252](https://github.com/chef/chef-server/pull/2252) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Increase the pipeline timeout to 30. [#2256](https://github.com/chef/chef-server/pull/2256) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.65 -->
 ### Changes since 14.0.65 release
 
 #### Merged Pull Requests
+- Increase the pipeline timeout to 30. [#2256](https://github.com/chef/chef-server/pull/2256) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.97 -->
 - Add mtls support for the pivotal user [#2252](https://github.com/chef/chef-server/pull/2252) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.96 -->
 - Make sure ctl and pedant have licenses in the gemspec [#2248](https://github.com/chef/chef-server/pull/2248) ([tas50](https://github.com/tas50)) <!-- 14.0.95 -->
 - mTLS: Fix missing line terminating semi-colons in the nginx config [#2251](https://github.com/chef/chef-server/pull/2251) ([johnmccrae](https://github.com/johnmccrae)) <!-- 14.0.94 -->
