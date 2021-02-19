@@ -238,7 +238,7 @@ def update_to_latest_version
       new_version = version_from_data_dir(new_data_dir)
 
       old_bins = binary_path_for(old_version)
-      new_bins = binary_path_for(new_version)
+new_bins = binary_path_for(new_version.to_i < 12 ? new_version : node['private_chef']['postgresql']['version'])
 
       <<-EOM.gsub(/\s+/, ' ').strip!
       #{new_bins}/pg_upgrade
