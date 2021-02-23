@@ -6,7 +6,7 @@ gem 'rake'
 gem 'chef', '=15.12.22'
 gem 'chefspec'
 # chef-cli >=3.0.4 requires Ruby version >= 2.7 which chef-server isn't ready for
-gem 'chef-cli', '=3.0.1'
+gem 'chef-cli', '3.1.1'
 gem 'berkshelf'
 
 # Install omnibus software
