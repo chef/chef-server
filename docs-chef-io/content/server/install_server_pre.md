@@ -15,9 +15,8 @@ aliases = ["/install_server_pre.html", "/install_server_pre/"]
 +++
 
 The following is a detailed discussion of the prerequisites for every
-installation of the Chef Infra Server. See <span
-class="title-ref">Install Chef Infra Server
-\</install_server.html\></span> for installation instructions.
+installation of the Chef Infra Server. See [Install Chef Infra Server]({{< relref "install_server" >}})
+for installation instructions.
 
 ## Platforms
 
