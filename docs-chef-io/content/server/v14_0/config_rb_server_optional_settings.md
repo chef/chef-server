@@ -106,6 +106,14 @@ This configuration file has the following general settings:
 :   The topology of the Chef Infra Server. Possible values: `manual`,
     `standalone`, and `tier`. Default value: `'standalone'`.
 
+`opscode_erchef["include_version_in_status"]`
+
+:   Set to `true` if you want to include `server_version` as part of the `/_status` endpoint. Default value : `false`. Available with 14.1 release
+
+`nginx["time_format"]`
+
+:   The time format of nginx `access.log`. Possible values : `"time_iso8601"` (ex: [2020-10-21T07:22:00+00:00]), `"time_local"` (ex: [07/Jun/2018:01:05:11 +0900]). Default value : `"time_iso8601"`.  Available with 14.1 release
+
 </div>
 
 ### bookshelf
