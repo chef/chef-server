@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.0.99 -->
-## [14.0.99](https://github.com/chef/chef-server/tree/14.0.99) (2021-02-23)
+<!-- latest_release 14.1.0 -->
+## [14.1.0](https://github.com/chef/chef-server/tree/14.1.0) (2021-02-25)
 
 #### Merged Pull Requests
-- Add Gemfile.lock for omnibus [#2255](https://github.com/chef/chef-server/pull/2255) ([tas50](https://github.com/tas50))
+- Bump version to 14.1 [#2265](https://github.com/chef/chef-server/pull/2265) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.0.65 -->
 ### Changes since 14.0.65 release
 
 #### Merged Pull Requests
+- Bump version to 14.1 [#2265](https://github.com/chef/chef-server/pull/2265) ([tas50](https://github.com/tas50)) <!-- 14.1.0 -->
 - Add Gemfile.lock for omnibus [#2255](https://github.com/chef/chef-server/pull/2255) ([tas50](https://github.com/tas50)) <!-- 14.0.99 -->
 - Path as strings [#2257](https://github.com/chef/chef-server/pull/2257) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.98 -->
 - Increase the pipeline timeout to 30. [#2256](https://github.com/chef/chef-server/pull/2256) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.0.97 -->
