@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 14.1.1 -->
+## [14.1.1](https://github.com/chef/chef-server/tree/14.1.1) (2021-02-26)
+
+#### Merged Pull Requests
+- Zei/add pedant for status endpoint/2214 [#2247](https://github.com/chef/chef-server/pull/2247) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=14.1.0 -->
+### Changes since 14.1.0 release
+
+#### Merged Pull Requests
+- Zei/add pedant for status endpoint/2214 [#2247](https://github.com/chef/chef-server/pull/2247) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.1.1 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
