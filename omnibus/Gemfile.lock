@@ -1,6 +1,7 @@
 GIT
   remote: https://github.com/chef/omnibus
   revision: fb2a0058e37d4bede556d085714d54a5ded99f58
+  branch: master
   specs:
     omnibus (8.1.1)
       aws-sdk-s3 (~> 1)
@@ -17,7 +18,8 @@ GIT
 
 GIT
   remote: https://github.com/chef/omnibus-software
-  revision: fb0fa049edd5d1c5109ef22b8c974bf3d12c81a8
+  revision: ca6fc777489ccae9849fd4cab02c86d6a0ac1074
+  branch: bump_perl
   specs:
     omnibus-software (4.0.0)
       omnibus (>= 8.0.0)
@@ -39,7 +41,7 @@ GEM
     aws-sdk-kms (1.42.0)
       aws-sdk-core (~> 3, >= 3.112.0)
       aws-sigv4 (~> 1.1)
-    aws-sdk-s3 (1.88.1)
+    aws-sdk-s3 (1.89.0)
       aws-sdk-core (~> 3, >= 3.112.0)
       aws-sdk-kms (~> 1)
       aws-sigv4 (~> 1.1)
@@ -264,7 +266,7 @@ GEM
     toml-rb (2.0.1)
       citrus (~> 3.0, > 3.0)
     tomlrb (1.3.0)
-    train-core (3.4.9)
+    train-core (3.5.2)
       addressable (~> 2.5)
       ffi (!= 1.13.0)
       json (>= 1.8, < 3.0)
