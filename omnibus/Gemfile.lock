@@ -17,7 +17,7 @@ GIT
 
 GIT
   remote: https://github.com/chef/omnibus-software
-  revision: fb0fa049edd5d1c5109ef22b8c974bf3d12c81a8
+  revision: a1e9c90875f9a6267bdbf9742881178245411c52
   specs:
     omnibus-software (4.0.0)
       omnibus (>= 8.0.0)
@@ -30,7 +30,7 @@ GEM
     artifactory (3.0.15)
     awesome_print (1.8.0)
     aws-eventstream (1.1.0)
-    aws-partitions (1.429.0)
+    aws-partitions (1.430.0)
     aws-sdk-core (3.112.0)
       aws-eventstream (~> 1, >= 1.0.2)
       aws-partitions (~> 1, >= 1.239.0)
@@ -39,7 +39,7 @@ GEM
     aws-sdk-kms (1.42.0)
       aws-sdk-core (~> 3, >= 3.112.0)
       aws-sigv4 (~> 1.1)
-    aws-sdk-s3 (1.88.1)
+    aws-sdk-s3 (1.89.0)
       aws-sdk-core (~> 3, >= 3.112.0)
       aws-sdk-kms (~> 1)
       aws-sigv4 (~> 1.1)
@@ -93,17 +93,17 @@ GEM
       tty-screen (~> 0.6)
       uuidtools (~> 2.1.5)
     chef-cleanroom (1.0.2)
-    chef-cli (3.0.1)
+    chef-cli (3.1.1)
       addressable (>= 2.3.5, < 2.8)
       chef (>= 15.0)
       cookbook-omnifetch (~> 0.5)
-      diff-lcs (~> 1.0)
+      diff-lcs (>= 1.0, < 1.4)
       ffi-yajl (>= 1.0, < 3.0)
-      license-acceptance (~> 1.0, >= 1.0.11)
+      license-acceptance (>= 1.0.11, < 3)
       minitar (~> 0.6)
       mixlib-cli (>= 1.7, < 3.0)
       mixlib-shellout (>= 2.0, < 4.0)
-      paint (>= 1, < 3)
+      pastel (~> 0.7)
       solve (> 2.0, < 5.0)
     chef-config (15.15.0)
       addressable
@@ -130,7 +130,7 @@ GEM
     concurrent-ruby (1.1.8)
     cookbook-omnifetch (0.11.1)
       mixlib-archive (>= 0.4, < 2.0)
-    diff-lcs (1.4.4)
+    diff-lcs (1.3)
     ed25519 (1.2.4)
     erubi (1.10.0)
     erubis (2.7.0)
@@ -213,7 +213,6 @@ GEM
       plist (~> 3.1)
       systemu (~> 2.6.4)
       wmi-lite (~> 1.0)
-    paint (2.2.1)
     pastel (0.8.0)
       tty-color (~> 0.5)
     pedump (0.6.2)
@@ -322,7 +321,7 @@ DEPENDENCIES
   artifactory
   berkshelf
   chef (= 15.15.0)
-  chef-cli (= 3.0.1)
+  chef-cli
   chefspec
   omnibus!
   omnibus-software!
