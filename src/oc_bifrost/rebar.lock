@@ -23,6 +23,7 @@
   {git,"git://github.com/chef/epgsql-1.git",
        {ref,"34b4182f0e21f9189ddd7b2e290f01a9e7d93bf1"}},
   1},
+ {<<"fs">>,{pkg,<<"fs">>,<<"6.1.1">>},1},
  {<<"goldrush">>,{pkg,<<"goldrush">>,<<"0.1.9">>},1},
  {<<"jiffy">>,
   {git,"git://github.com/davisp/jiffy.git",
@@ -75,6 +76,7 @@
   1}]}.
 [
 {pkg_hash,[
+ {<<"fs">>, <<"9D147B944D60CFA48A349F12D06C8EE71128F610C90870BDF9A6773206452ED0">>},
  {<<"goldrush">>, <<"F06E5D5F1277DA5C413E84D5A2924174182FB108DABB39D5EC548B27424CD106">>},
  {<<"recon">>, <<"2F7FCBEC2C35034BADE2F9717F77059DC54EB4E929A3049CA7BA6775C0BD66CD">>}]}
 ].
