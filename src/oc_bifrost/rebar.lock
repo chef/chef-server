@@ -67,7 +67,7 @@
   0},
  {<<"sync">>,
   {git,"git://github.com/rustyio/sync.git",
-       {ref,"9106be75883d7646dae72d4ac80c6ea88464a5ca"}},
+       {ref,"7c9367e73b7dbb01a788f8d0120d747330112f6f"}},
   0},
  {<<"webmachine">>,
   {git,"git://github.com/chef/webmachine",
