@@ -10,21 +10,16 @@ driver:
 provisioner:
   name: chef_zero
   product_name: chef
-  product_version: 14.13.11
 
 platforms:
-  - name: ubuntu-18.04
-    run_list: apt::default
   - name: ubuntu-16.04
     run_list: apt::default
-  - name: ubuntu-14.04
+  - name: ubuntu-18.04
     run_list: apt::default
-  - name: centos-6
   - name: centos-7
     run_list:  yum-centos::default
-  - name: sles-11
-    driver:
-      box: chef/sles11-sp2-x86_64
+  - name: centos-8
+    run_list:  yum-centos::default
   - name: sles-12
     driver:
       box: chef/sles-12-sp1-x86_64

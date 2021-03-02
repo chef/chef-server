@@ -5,7 +5,6 @@ source 'https://supermarket.chef.io'
 cookbook 'apt'
 
 cookbook 'omnibus'
-cookbook 'yum-epel'
 cookbook 'yum-centos'
 cookbook 'zip'
 

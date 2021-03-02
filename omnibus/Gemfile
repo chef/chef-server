@@ -1,13 +1,5 @@
 source 'https://rubygems.org'
 
-gem 'rake'
-# chef-cli pulls chef >= 15.0 which is 16.1.16 at the time of failure.
-# https://github.com/chef/chef/commit/003fbc132935961e93667f11c3f45ce4914b83ac
-gem 'chef', '15.15.0'
-gem 'chefspec'
-gem 'chef-cli'
-gem 'berkshelf'
-
 # Install omnibus software
 group :omnibus do
   gem 'omnibus', git: 'https://github.com/chef/omnibus'
@@ -16,5 +8,8 @@ group :omnibus do
 end
 
 group :test do
-  gem 'rspec'
+  gem 'test-kitchen' # for Test Kitchen testing of the omnibus builds
+  gem 'berkshelf' # depsolving the Test Kitchen suite
+  gem 'rake'
+  gem 'chefspec' # for cookbook chefspec tests
 end
