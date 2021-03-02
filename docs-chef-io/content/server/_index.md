@@ -2,7 +2,7 @@
 title = "Chef Infra Server Overview"
 draft = false
 gh_repo = "chef-server"
-aliases = ["/server_overview.html", "/server_components.html", "/server_overview/"]
+aliases = ["/server_overview.html", "/server_components.html", "/server_overview/", "/server/runbook/", "/runbook/"]
 
 [cascade]
   product = ["server"]
