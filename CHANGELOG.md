@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.1.2 -->
-## [14.1.2](https://github.com/chef/chef-server/tree/14.1.2) (2021-02-26)
+<!-- latest_release 14.1.3 -->
+## [14.1.3](https://github.com/chef/chef-server/tree/14.1.3) (2021-03-02)
 
 #### Merged Pull Requests
-- Cache gem installs for License Scout [#2268](https://github.com/chef/chef-server/pull/2268) ([tas50](https://github.com/tas50))
+- Bump chef from 15.12.22 to 15.15.0 in /omnibus [#2263](https://github.com/chef/chef-server/pull/2263) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.1.0 -->
 ### Changes since 14.1.0 release
 
 #### Merged Pull Requests
+- Bump chef from 15.12.22 to 15.15.0 in /omnibus [#2263](https://github.com/chef/chef-server/pull/2263) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.3 -->
 - Cache gem installs for License Scout [#2268](https://github.com/chef/chef-server/pull/2268) ([tas50](https://github.com/tas50)) <!-- 14.1.2 -->
 - Zei/add pedant for status endpoint/2214 [#2247](https://github.com/chef/chef-server/pull/2247) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.1.1 -->
 <!-- release_rollup -->
