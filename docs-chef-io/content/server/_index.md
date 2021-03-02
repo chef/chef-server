@@ -1,10 +1,11 @@
 +++
 title = "Chef Infra Server Overview"
 draft = false
-
 gh_repo = "chef-server"
-
 aliases = ["/server_overview.html", "/server_components.html", "/server_overview/"]
+
+[cascade]
+  product = ["server"]
 
 [menu]
   [menu.server]
@@ -106,7 +107,7 @@ at an external location:
 <tbody>
 <tr class="odd">
 <td>Clients</td>
-<td>The Chef Infra Server will provide signed URLs for cookbook requests made by the various clients (individual users, knife requests, and from the Chef Infra Client that is installed on nodes under management by Chef).</td>
+<td>The Chef Infra Server will provide signed URLs for cookbook requests made by the various clients (individual users, knife requests, and from the Chef Infra Client that is installed on nodes under management by Chef Infra).</td>
 </tr>
 <tr class="even">
 <td>Load Balancer</td>

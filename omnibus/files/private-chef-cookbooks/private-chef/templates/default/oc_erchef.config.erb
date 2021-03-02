@@ -139,7 +139,8 @@
             chef_<%= node['private_chef']['opscode-erchef']['search_provider'] %>
         ]},
         {base_resource_url, <%= @helper.erl_atom_or_string(node['private_chef']['opscode-erchef']['base_resource_url']) %>},
-        {strict_search_result_acls, <%= @strict_search_result_acls %>}
+        {strict_search_result_acls, <%= @strict_search_result_acls %>},
+        {include_version_in_status, <%= node['private_chef']['opscode-erchef']['include_version_in_status'] %>}
     ]},
 
     {chef_authn, [

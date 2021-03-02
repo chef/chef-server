@@ -3,6 +3,7 @@ steps:
       - .expeditor/upload_files.sh
     label: "Manifest Upload"
     concurrency: 1
+    timeout_in_minutes: 30
     concurrency_group: chef-server-master/deploy/$CHANNEL
     expeditor:
       secrets:

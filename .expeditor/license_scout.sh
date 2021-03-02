@@ -33,7 +33,7 @@ bundle_install_dirs=(
 for dir in "${bundle_install_dirs[@]}"; do
   echo "--- Installing gem dependencies for $dir"
   pushd "src/$dir"
-    bundle install
+    bundle install --jobs=3 --retry=3 --path=/workdir/vendor/bundle
   popd
 done
 

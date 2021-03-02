@@ -347,6 +347,7 @@ default['private_chef']['opscode-erchef']['ssl_session_caching']['enabled'] = fa
 # the /_status endpoint.
 
 default['private_chef']['opscode-erchef']['health_ping_timeout'] = 400
+default['private_chef']['opscode-erchef']['include_version_in_status'] = false
 
 # Stats endpoint
 default['private_chef']['opscode-erchef']['stats_auth_enable'] = true
@@ -516,6 +517,8 @@ default['private_chef']['nginx']['show_welcome_page'] = true
 
 # Set to a path to a CA certificate to enable mutual TLS checking of the client SSL/TLS certificate
 default['private_chef']['nginx']['ssl_client_ca'] = false
+default['private_chef']['nginx']['pivotal_ssl_client_cert'] = false
+default['private_chef']['nginx']['pivotal_ssl_client_key'] = false
 # default['private_chef']['nginx']['ssl_client_ca'] = "/etc/something/foo.ca.pem"
 default['private_chef']['nginx']['ssl_verify_depth'] = 2
 

@@ -71,12 +71,14 @@ check_health(ServerVersion) ->
     KeyGen = chef_keygen_cache:status_for_json(),
     Indexing = chef_index:status(),
 
-    StatList = [{<<"server_version">>, ServerVersion},
-                {<<"status">>, ?A2B(Status)},
+    StatList1 = [{<<"status">>, ?A2B(Status)},
                 {<<"upstreams">>, {Pings}},
                 {<<"keygen">>, {KeyGen}},
                 {<<"indexing">>, {Indexing}}],
-    {Status, chef_json:encode({StatList})}.
+
+    StatList2 = maybe_include_version(StatList1, ServerVersion),
+
+    {Status, chef_json:encode({StatList2})}.
 
 overall_status(Pings) ->
     case [ Pang || {_, <<"fail">>}=Pang <- Pings ] of
@@ -167,6 +169,15 @@ gather_health_workers([{{Pid, Ref}, Mod} | Rest] = List, Acc) ->
     end;
 gather_health_workers([], Acc) ->
     Acc.
+
+maybe_include_version(StatList, ServerVersion) ->
+    IncludeVersion = envy:get(oc_chef_wm, include_version_in_status, false, any),
+    maybe_include_version(IncludeVersion, StatList, ServerVersion).
+
+maybe_include_version(true, StatList, ServerVersion) ->
+    [{<<"server_version">>, ServerVersion} | StatList];
+maybe_include_version(_Others, StatList, _ServerVersion) ->
+    StatList.
 
 ping_timeout() ->
     envy:get(oc_chef_wm, health_ping_timeout, pos_integer).
