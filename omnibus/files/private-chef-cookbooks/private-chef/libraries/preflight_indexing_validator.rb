@@ -36,6 +36,7 @@ class IndexingPreflightValidator < PreflightValidator
   def run!
     verify_system_memory
     verify_heap_size
+    verify_disk_space
     verify_consistent_reindex_sleep_times
     verify_no_deprecated_indexing_options
     verify_es_disabled_if_user_set_external_solr
@@ -86,6 +87,27 @@ class IndexingPreflightValidator < PreflightValidator
 
     if heap_size < min_heap || heap_size > max_heap
       fail_with err_INDEX004_invalid_elasticsearch_heap_size(heap_size, using_solr)
+    end
+  end
+
+  # Disk space verification for running reindex 
+  # It needs enough disk space to hold a second copy of the data plus whatever change in size the new index might need if the schema has changed.
+  # Required Disk Space = (2 * size of ES data directory)
+  def verify_disk_space
+    data_dir = node_elasticsearch_attr["data_dir"]
+    if Dir.exist?(data_dir)
+      data_dir_size = Du.du(data_dir)
+      free_disk_space = Statfs.new("#{data_dir}/..").free_space
+      if (2* data_dir_size) < free_disk_space #The minimum space should be double the existing data size
+        Chef::Log.debug("Free space is sufficient to start Elasticsearch reindex")
+      else
+        Chef::Log.fatal("Insufficient free space on disk to complete reindex.")
+        Chef::Log.fatal("The current elasticsearch data directory contains #{data_dir_size} KB of data but only #{free_disk_space} KB is available on disk.")
+        Chef::Log.fatal("The reindex process requires at least #{2*data_dir_size} KB.")
+        fail_with err_INDEX008_insufficient_disk_space(free_disk_space, 2*data_dir_size)
+      end
+    else
+      Chef::Log.fatal("Elasticserach data path does not exist, so skipping the disk space preflight validations: #{data_dir}")
     end
   end
 
@@ -257,6 +279,17 @@ class IndexingPreflightValidator < PreflightValidator
                     opscode_erchef['search_queue_mode'] = 'batch'
 
                 in #{CHEF_SERVER_CONFIG_FILE}
+    EOM
+  end
+
+  def err_INDEX008_insufficient_disk_space(system_space, required_space)
+    <<~EOM
+
+      INDEX003: Insufficient disk space
+
+                System has #{system_space} MB of space,
+                but #{required_space} MB is required.
+
     EOM
   end
 end
