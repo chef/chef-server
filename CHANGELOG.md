@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.1.5 -->
-## [14.1.5](https://github.com/chef/chef-server/tree/14.1.5) (2021-03-02)
+<!-- latest_release 14.1.6 -->
+## [14.1.6](https://github.com/chef/chef-server/tree/14.1.6) (2021-03-03)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `fb0fa04` to `a1e9c90` in /omnibus [#2278](https://github.com/chef/chef-server/pull/2278) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Bump omnibus-software from `a1e9c90` to `a7ed951` in /omnibus [#2285](https://github.com/chef/chef-server/pull/2285) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.1.0 -->
 ### Changes since 14.1.0 release
 
 #### Merged Pull Requests
+- Bump omnibus-software from `a1e9c90` to `a7ed951` in /omnibus [#2285](https://github.com/chef/chef-server/pull/2285) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.6 -->
 - Bump omnibus-software from `fb0fa04` to `a1e9c90` in /omnibus [#2278](https://github.com/chef/chef-server/pull/2278) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.5 -->
 - Unpin chef-cli in omnibus [#2281](https://github.com/chef/chef-server/pull/2281) ([tas50](https://github.com/tas50)) <!-- 14.1.4 -->
 - Bump chef from 15.12.22 to 15.15.0 in /omnibus [#2263](https://github.com/chef/chef-server/pull/2263) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.3 -->
