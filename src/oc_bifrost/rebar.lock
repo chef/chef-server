@@ -1,7 +1,7 @@
 {"1.1.0",
 [{<<"chef_secrets">>,
   {git,"git://github.com/chef/chef_secrets.git",
-       {ref,"58373899212a23e4f37070aaa6d3a751b1281492"}},
+       {ref,"2875f29d82c528edd89cb614955e214f3aa4be0c"}},
   0},
  {<<"edown">>,
   {git,"git://github.com/uwiger/edown.git",
