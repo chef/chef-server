@@ -77,7 +77,7 @@ default['private_chef']['addons']['ubuntu_distribution'] =
 # The username for the chef services user
 default['private_chef']['user']['username'] = 'opscode'
 # The shell for the chef services user
-default['private_chef']['user']['shell'] = '/bin/sh'
+default['private_chef']['user']['shell'] = '/usr/sbin/nologin'
 # The home directory for the chef services user
 default['private_chef']['user']['home'] = '/opt/opscode/embedded'
 
