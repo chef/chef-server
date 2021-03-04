@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.1.7 -->
-## [14.1.7](https://github.com/chef/chef-server/tree/14.1.7) (2021-03-04)
+<!-- latest_release 14.1.8 -->
+## [14.1.8](https://github.com/chef/chef-server/tree/14.1.8) (2021-03-04)
 
 #### Merged Pull Requests
-- Let the Chef dep in omnibus float to the latest [#2283](https://github.com/chef/chef-server/pull/2283) ([tas50](https://github.com/tas50))
+- Update Ruby Gems [#2271](https://github.com/chef/chef-server/pull/2271) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.1.0 -->
 ### Changes since 14.1.0 release
 
 #### Merged Pull Requests
+- Update Ruby Gems [#2271](https://github.com/chef/chef-server/pull/2271) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.1.8 -->
 - Let the Chef dep in omnibus float to the latest [#2283](https://github.com/chef/chef-server/pull/2283) ([tas50](https://github.com/tas50)) <!-- 14.1.7 -->
 - Bump omnibus-software from `a1e9c90` to `a7ed951` in /omnibus [#2285](https://github.com/chef/chef-server/pull/2285) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.6 -->
 - Bump omnibus-software from `fb0fa04` to `a1e9c90` in /omnibus [#2278](https://github.com/chef/chef-server/pull/2278) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.5 -->
