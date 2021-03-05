@@ -155,7 +155,7 @@ steps:
     - /workdir/scripts/bk_tests/bk_install.sh
     - gem uninstall bundler -v '>= 2.0.1' -a
     - cp scripts/bk_tests/chef_zero-Gemfile oc-chef-pedant/Gemfile
-    - bundle install
+    - bundle install --jobs=3 --retry=3 --path=/workdir/vendor/bundle
     - cd /workdir/oc-chef-pedant
     - bundle exec rake chef_zero_spec
   expeditor:
@@ -173,7 +173,7 @@ steps:
     - /workdir/scripts/bk_tests/bk_install.sh
     - gem uninstall bundler -v '>= 2.0.1' -a
     - cp scripts/bk_tests/chef_zero-Gemfile oc-chef-pedant/Gemfile
-    - bundle install
+    - bundle install --jobs=3 --retry=3 --path=/workdir/vendor/bundle
     - cd /workdir/oc-chef-pedant
     - bundle exec rake chef_zero_spec
   expeditor:
