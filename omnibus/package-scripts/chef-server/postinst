@@ -51,7 +51,7 @@ if [ -e /etc/opscode/chef-server-running.json ]; then
   echo "this command)"
   echo
   echo "For detailed upgrade instructions please see:"
-  echo "https://docs.chef.io/upgrade_server.html"
+  echo "https://docs.chef.io/server/upgrades/"
 fi
 
 exit 0

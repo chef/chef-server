@@ -352,13 +352,13 @@ To restore a backup to this system, follow the [chef-server-ctl]({{< relref "ser
 ### Upgrading Chef Infra Server on the Frontend Machines
 
 1.  On one frontend server, follow the [standalone upgrade
-    process]({{< relref "upgrade_server/#standalone" >}}).
+    process]({{< relref "upgrades/#standalone" >}}).
 2.  Copy `/var/opt/opscode/upgrades/migration-level` from the first
     upgraded frontend to `/var/opt/opscode/upgrades/migration-level` on
     each of the remaining frontends.
 3.  Once the updated file has been copied to each of the remaining
     frontends, perform the [standalone upgrade
-    process]({{< relref "upgrade_server/#standalone" >}}) on each of the frontend
+    process]({{< relref "upgrades/#standalone" >}}) on each of the frontend
     servers.
 
 ### Configuring Frontend and Backend Members on Different Networks
