@@ -35,7 +35,7 @@ To view logs for a specific service:
 chef-server-ctl tail SERVICENAME
 ```
 
-where `SERVICENAME` should be replaced with name of the service for
+where `SERVICENAME` should be replaced with the name of the service for
 which log files will be viewed.
 
 ### tail Log Files
@@ -60,13 +60,13 @@ rotated logs have a filename starting with `@` followed by a precise
 
 Supervisor logs are available for the following services:
 
--   bifrost
--   bookshelf
--   elasticsearch
--   nginx
--   opscode-erchef
--   postgresql
--   redis
+- bifrost
+- bookshelf
+- elasticsearch
+- nginx
+- opscode-erchef
+- postgresql
+- redis
 
 ### nginx, access
 
@@ -88,12 +88,12 @@ x86_64-linux; +https://chef.io)" "127.0.0.1:9460" "200"
 
 where important fields in this log include:
 
--   The HTTP status code (`200`)
--   The IP address of the requesting client (`175.185.9.6`)
--   The timestamp (`[12/Jul/2013:15:56:54 +0000]`)
--   The total request time (`"0.850"`)
--   The request method (`GET`)
--   The request URL (`/organizations/exampleorg/data/firewall/nova_api`)
+- The HTTP status code (`200`)
+- The IP address of the requesting client (`175.185.9.6`)
+- The timestamp (`[12/Jul/2013:15:56:54 +0000]`)
+- The total request time (`"0.850"`)
+- The request method (`GET`)
+- The request URL (`/organizations/exampleorg/data/firewall/nova_api`)
 
 ### opscode-erchef, current
 
@@ -119,20 +119,20 @@ The following is an example log entry:
 
 where important fields in this log include:
 
--   The HTTP method (`POST`)
--   The HTTP path (`/organizations/srwjedoqqoypgmvafmoi/environments`)
--   The message (`{created,<<"_default">>}`)
--   The organization name (`org_name=srwjedoqqoypgmvafmoi`)
--   The timestamp (`2013-08-06T08:54:32Z`)
--   The name of the user and/or Chef Infra Client which made the request
+- The HTTP method (`POST`)
+- The HTTP path (`/organizations/srwjedoqqoypgmvafmoi/environments`)
+- The message (`{created,<<"_default">>}`)
+- The organization name (`org_name=srwjedoqqoypgmvafmoi`)
+- The timestamp (`2013-08-06T08:54:32Z`)
+- The name of the user and/or Chef Infra Client which made the request
     (`pivotal`)
 
 In addition, the log file may contain additional entries that detail the
 amounts of time spent interacting with other services:
 
--   `rdbms_time` (the time spent talking to the **postgresql** service)
--   `req_time` (the request time)
--   `solr_time` (the time spent talking to the **opscode-solr** service)
+- `rdbms_time` (the time spent talking to the **postgresql** service)
+- `req_time` (the request time)
+- `solr_time` (the time spent talking to the **opscode-solr** service)
 
 ## Application
 

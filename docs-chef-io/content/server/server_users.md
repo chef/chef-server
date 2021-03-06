@@ -17,12 +17,12 @@ aliases = ["/server_users.html", "/server_users/"]
 The following tasks are available for user management in Chef Infra
 Server:
 
--   Creating users
--   Editing a user's profile
--   Changing a password
--   Recovering a password
--   Regenerating a private key
--   Viewing a user's profile
+- Creating users
+- Editing a user's profile
+- Changing a password
+- Recovering a password
+- Regenerating a private key
+- Viewing a user's profile
 
 ## chef-server-ctl
 
