@@ -8,7 +8,6 @@ slack:
   notify_channel: chef-server-notify
 
 github:
-  delete_branch_on_merge: true
   # The file where the MAJOR.MINOR.PATCH version is kept. The version in this file
   # is bumped automatically via the `built_in:bump_version` merge_action.
   version_file: "VERSION"
@@ -18,14 +17,9 @@ github:
   release_branch:
     - master:
         version_constraint: 14*
-    - chef-server-13:
-        version_constraint: 13*
-
-# Habitat + Docker exporting
-
 
 # At the given time, trigger the following scheduled workloads
-# https://expeditor.chef.io/docs/getting-started/subscriptions/#scheduling-workloads
+# https://expeditor.chef.io/docs/patterns/scheduled-action-sets/
 schedules:
   - name: nightly_build
     description: "Run a nightly build in the omnibus/adhoc pipeline"
