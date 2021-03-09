@@ -4,7 +4,7 @@ draft = false
 
 gh_repo = "chef-server"
 
-aliases = ["/upgrade_server.html", "/upgrade_server/"]
+aliases = ["/upgrade_server.html", "/upgrade_server/", "/upgrades/"]
 
 [menu]
   [menu.server]
@@ -58,7 +58,7 @@ For more information on password generation, including a list of supported add-o
 
 ### Upgrading to 12.3.0
 
-If you are running a Chef Infra Server relese prior to 12.3.0 please contact Chef Support for additional guidance on upgrading your Chef Infra Server installation.
+If you are running a Chef Infra Server release prior to 12.3.0 please contact Chef Support for additional guidance on upgrading your Chef Infra Server installation.
 
 ## Chef Infra Server 14 Upgrade Process
 
@@ -227,7 +227,7 @@ To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do 
 
 ### Upgrading Manage Add-On
 
-Chef Manage is a management console for  data bags, attributes, run-lists, roles, environments, and cookbooks from a web user interface.
+Chef Manage is a management console for data bags, attributes, run-lists, roles, environments, and cookbooks from a web user interface.
 
 Chef Infra Server 13 and 14 support the Chef Manage add-on. This add-on is [deprecated](https://docs.chef.io/versions/#deprecated-products-and-versions) and will reach [EOL](https://docs.chef.io/versions/#deprecated-products-and-versions) on December 31, 2021. After upgrading Chef Infra Server, reinstall the add-on and then reconfigure Chef Infra Server and the add-on.
 

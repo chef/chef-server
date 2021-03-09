@@ -31,7 +31,7 @@ warn_about_search_reindex() {
         echo ""
         echo "We recommend taking a full backup before proceeding."
         echo ""
-        echo "See https://docs.chef.io/upgrade_server/ for additional information on backups and upgrading."
+        echo "See https://docs.chef.io/server/upgrades/ for additional information on backups and upgrading."
         echo ""
         echo "############################ NOTICE ##################################"
     fi
