@@ -74,13 +74,13 @@ given time. The supervisor starts two processes per service.
 
 The following services are part of the Chef Infra Server:
 
--   bifrost
--   bookshelf
--   elasticsearch
--   nginx
--   opscode-erchef
--   postgresql
--   redis-lb
+- bifrost
+- bookshelf
+- elasticsearch
+- nginx
+- opscode-erchef
+- postgresql
+- redis-lb
 
 ### bifrost
 

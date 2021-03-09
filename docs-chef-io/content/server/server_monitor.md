@@ -129,9 +129,9 @@ then enter `q`, and then hit `ENTER` to exit the shell.
 Some commands should not be entered when interacting with a running
 service while using the command shell, including:
 
--   `q()` kills the Erlang node
--   `init:stop()`
--   `exit` or `exit()` does nothing
+- `q()` kills the Erlang node
+- `init:stop()`
+- `exit` or `exit()` does nothing
 
 #### `eper` tools
 
@@ -366,8 +366,8 @@ which will return something similar to:
 For each of the upstream services, `pong` or `fail` is returned. The
 possible upstream names are:
 
--   `chef_sql` (for the **postgresql** service)
--   `oc_chef_authz` (for the **opscode-authz** service)
+- `chef_sql` (for the **postgresql** service)
+- `oc_chef_authz` (for the **opscode-authz** service)
 
 If any of the status values return `fail`, this typically means the Chef
 Infra Server is unavailable for that service.

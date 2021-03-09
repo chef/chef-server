@@ -67,8 +67,8 @@ cluster or for a point-in-time rollback of an existing cluster.
 Restoring your data in the case of an emergency depends on having
 previously made backups of:
 
--   the data in your Chef Backend cluster
--   the configuration from your Chef server
+- the data in your Chef Backend cluster
+- the configuration from your Chef server
 
 To make backups for future use in disaster scenarios:
 
