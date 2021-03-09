@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.1.10 -->
-## [14.1.10](https://github.com/chef/chef-server/tree/14.1.10) (2021-03-09)
+<!-- latest_release 14.1.11 -->
+## [14.1.11](https://github.com/chef/chef-server/tree/14.1.11) (2021-03-09)
 
 #### Merged Pull Requests
-- Install raml2html if the string is empty; it is not installed. [#2310](https://github.com/chef/chef-server/pull/2310) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update rspec_junit_formatter requirement from ~&gt; 0.1.1 to &gt;= 0.1.1, &lt; 0.5.0 in /src/oc_bifrost/oc-bifrost-pedant [#2298](https://github.com/chef/chef-server/pull/2298) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.1.0 -->
 ### Changes since 14.1.0 release
 
 #### Merged Pull Requests
+- Update rspec_junit_formatter requirement from ~&gt; 0.1.1 to &gt;= 0.1.1, &lt; 0.5.0 in /src/oc_bifrost/oc-bifrost-pedant [#2298](https://github.com/chef/chef-server/pull/2298) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.11 -->
 - Install raml2html if the string is empty; it is not installed. [#2310](https://github.com/chef/chef-server/pull/2310) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.1.10 -->
 - Removed Login shell for opscode chef service [#2286](https://github.com/chef/chef-server/pull/2286) ([jashaik](https://github.com/jashaik)) <!-- 14.1.9 -->
 - Update Ruby Gems [#2271](https://github.com/chef/chef-server/pull/2271) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.1.8 -->
