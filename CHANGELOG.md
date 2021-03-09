@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.1.9 -->
-## [14.1.9](https://github.com/chef/chef-server/tree/14.1.9) (2021-03-04)
+<!-- latest_release 14.1.10 -->
+## [14.1.10](https://github.com/chef/chef-server/tree/14.1.10) (2021-03-09)
 
 #### Merged Pull Requests
-- Removed Login shell for opscode chef service [#2286](https://github.com/chef/chef-server/pull/2286) ([jashaik](https://github.com/jashaik))
+- Install raml2html if the string is empty; it is not installed. [#2310](https://github.com/chef/chef-server/pull/2310) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.1.0 -->
 ### Changes since 14.1.0 release
 
 #### Merged Pull Requests
+- Install raml2html if the string is empty; it is not installed. [#2310](https://github.com/chef/chef-server/pull/2310) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.1.10 -->
 - Removed Login shell for opscode chef service [#2286](https://github.com/chef/chef-server/pull/2286) ([jashaik](https://github.com/jashaik)) <!-- 14.1.9 -->
 - Update Ruby Gems [#2271](https://github.com/chef/chef-server/pull/2271) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.1.8 -->
 - Let the Chef dep in omnibus float to the latest [#2283](https://github.com/chef/chef-server/pull/2283) ([tas50](https://github.com/tas50)) <!-- 14.1.7 -->
