@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.1.20 -->
-## [14.1.20](https://github.com/chef/chef-server/tree/14.1.20) (2021-03-10)
+<!-- latest_release 14.1.21 -->
+## [14.1.21](https://github.com/chef/chef-server/tree/14.1.21) (2021-03-10)
 
 #### Merged Pull Requests
-- Bump chefstyle from 1.7.1 to 1.7.2 in /src/chef-server-ctl [#2315](https://github.com/chef/chef-server/pull/2315) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Update omnibus-ctl requirement from &gt;= 0 to &gt;= 0 in /src/chef-server-ctl [#2293](https://github.com/chef/chef-server/pull/2293) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.1.0 -->
 ### Changes since 14.1.0 release
 
 #### Merged Pull Requests
+- Update omnibus-ctl requirement from &gt;= 0 to &gt;= 0 in /src/chef-server-ctl [#2293](https://github.com/chef/chef-server/pull/2293) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.21 -->
 - Bump chefstyle from 1.7.1 to 1.7.2 in /src/chef-server-ctl [#2315](https://github.com/chef/chef-server/pull/2315) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.20 -->
 - Clean-up data_collector/rebar.config [#2312](https://github.com/chef/chef-server/pull/2312) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.1.19 -->
 - Update mixlib-authentication requirement from &gt; 1.4, &lt; 3.0 to &gt; 1.4, &lt; 4.0 in /oc-chef-pedant [#2292](https://github.com/chef/chef-server/pull/2292) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.18 -->
