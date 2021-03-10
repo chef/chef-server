@@ -17,5 +17,5 @@ Gem::Specification.new do |s|
   s.add_dependency('rest-client', '~> 1.8.0')
   s.add_dependency('rspec_junit_formatter', '>= 0.1.1', '< 0.5.0')
   s.add_dependency('net-http-spy', '~> 0.2.1')
-  s.add_dependency('rspec-rerun', '= 0.1.1')
+  s.add_dependency('rspec-rerun', '= 0.3.1')
 end
