@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.1.12 -->
-## [14.1.12](https://github.com/chef/chef-server/tree/14.1.12) (2021-03-10)
+<!-- latest_release 14.1.13 -->
+## [14.1.13](https://github.com/chef/chef-server/tree/14.1.13) (2021-03-10)
 
 #### Merged Pull Requests
-- Update mixlib-config requirement from ~&gt; 2.0 to &gt;= 2, &lt; 4 in /oc-chef-pedant [#2291](https://github.com/chef/chef-server/pull/2291) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Update rspec-rerun requirement from = 0.1.1 to = 0.3.1 in /src/oc_bifrost/oc-bifrost-pedant [#2309](https://github.com/chef/chef-server/pull/2309) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.1.0 -->
 ### Changes since 14.1.0 release
 
 #### Merged Pull Requests
+- Update rspec-rerun requirement from = 0.1.1 to = 0.3.1 in /src/oc_bifrost/oc-bifrost-pedant [#2309](https://github.com/chef/chef-server/pull/2309) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.13 -->
 - Update mixlib-config requirement from ~&gt; 2.0 to &gt;= 2, &lt; 4 in /oc-chef-pedant [#2291](https://github.com/chef/chef-server/pull/2291) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.12 -->
 - Update rspec_junit_formatter requirement from ~&gt; 0.1.1 to &gt;= 0.1.1, &lt; 0.5.0 in /src/oc_bifrost/oc-bifrost-pedant [#2298](https://github.com/chef/chef-server/pull/2298) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.11 -->
 - Install raml2html if the string is empty; it is not installed. [#2310](https://github.com/chef/chef-server/pull/2310) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.1.10 -->
