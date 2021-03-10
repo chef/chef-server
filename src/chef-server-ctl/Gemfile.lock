@@ -52,13 +52,6 @@ GIT
       bcrypt (~> 3.1)
       pbkdf2
 
-GIT
-  remote: https://github.com/chef/omnibus-ctl.git
-  revision: c82dbb47b73860799866f6eaf69590775b8bf7a8
-  tag: v0.6.0
-  specs:
-    omnibus-ctl (0.6.0)
-
 PATH
   remote: .
   specs:
@@ -178,6 +171,7 @@ GEM
       plist (~> 3.1)
       systemu (~> 2.6.4)
       wmi-lite (~> 1.0)
+    omnibus-ctl (0.6.0)
     parallel (1.20.1)
     parser (3.0.0.0)
       ast (~> 2.4.1)
@@ -303,7 +297,7 @@ DEPENDENCIES
   chef-server-ctl!
   chef_backup
   chefstyle
-  omnibus-ctl!
+  omnibus-ctl
   rake
   rspec
   toml
