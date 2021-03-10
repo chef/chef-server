@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.1.15 -->
-## [14.1.15](https://github.com/chef/chef-server/tree/14.1.15) (2021-03-10)
+<!-- latest_release 14.1.16 -->
+## [14.1.16](https://github.com/chef/chef-server/tree/14.1.16) (2021-03-10)
 
 #### Merged Pull Requests
-- Update rest-client requirement from ~&gt; 1.8.0 to &gt;= 1.8, &lt; 2.2 in /src/oc_bifrost/oc-bifrost-pedant [#2295](https://github.com/chef/chef-server/pull/2295) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Update activesupport requirement from &gt;= 4.2.7.1, &lt; 6.0 to &gt;= 4.2.7.1, &lt; 7.0 in /oc-chef-pedant [#2290](https://github.com/chef/chef-server/pull/2290) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.1.0 -->
 ### Changes since 14.1.0 release
 
 #### Merged Pull Requests
+- Update activesupport requirement from &gt;= 4.2.7.1, &lt; 6.0 to &gt;= 4.2.7.1, &lt; 7.0 in /oc-chef-pedant [#2290](https://github.com/chef/chef-server/pull/2290) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.16 -->
 - Update rest-client requirement from ~&gt; 1.8.0 to &gt;= 1.8, &lt; 2.2 in /src/oc_bifrost/oc-bifrost-pedant [#2295](https://github.com/chef/chef-server/pull/2295) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.15 -->
 - Update mixlib-config requirement from ~&gt; 1.1.2 to &gt;= 1.1.2, &lt; 3.1.0 in /src/oc_bifrost/oc-bifrost-pedant [#2297](https://github.com/chef/chef-server/pull/2297) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.14 -->
 - Update rspec-rerun requirement from = 0.1.1 to = 0.3.1 in /src/oc_bifrost/oc-bifrost-pedant [#2309](https://github.com/chef/chef-server/pull/2309) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.13 -->
