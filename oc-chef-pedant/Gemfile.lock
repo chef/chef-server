@@ -50,7 +50,7 @@ PATH
     oc-chef-pedant (2.2.0)
       activesupport (>= 4.2.7.1, < 7.0)
       erubis (~> 2.7)
-      mixlib-authentication (> 1.4, < 3.0)
+      mixlib-authentication (> 1.4, < 4.0)
       mixlib-config (>= 2, < 4)
       mixlib-shellout (>= 1.1)
       net-http-spy (~> 0.2)
@@ -130,7 +130,7 @@ GEM
     minitest (5.14.4)
     mixlib-archive (1.1.7)
       mixlib-log
-    mixlib-authentication (2.1.1)
+    mixlib-authentication (3.0.7)
     mixlib-cli (2.1.8)
     mixlib-config (3.0.9)
       tomlrb
