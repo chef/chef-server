@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.add_dependency('rspec', '~> 3.2')
   s.add_dependency('activesupport', '>= 4.2.7.1', '< 6.0') # For active_support/concern
   s.add_dependency('mixlib-authentication', '> 1.4', '< 3.0')
-  s.add_dependency('mixlib-config', '~> 2.0')
+  s.add_dependency('mixlib-config', '>= 2', '< 4')
   s.add_dependency('mixlib-shellout', '>= 1.1')
   s.add_dependency('rest-client', '>= 1.6')
   s.add_dependency('rspec_junit_formatter', '~> 0.2')
