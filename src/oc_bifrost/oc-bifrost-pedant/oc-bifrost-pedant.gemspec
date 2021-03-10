@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.executables   = ['oc-bifrost-pedant']
 
   s.add_dependency('rspec', '~> 2.11.0')
-  s.add_dependency('activesupport', '~> 3.2.8') # For active_support/concern
+  s.add_dependency('activesupport', '>= 3.2.8', '< 6.2.0') # For active_support/concern
   s.add_dependency('mixlib-config', '>= 1.1.2', '< 3.1.0')
   s.add_dependency('rest-client', '>= 1.8', '< 2.2')
   s.add_dependency('rspec_junit_formatter', '>= 0.1.1', '< 0.5.0')
