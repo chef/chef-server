@@ -23,4 +23,5 @@ Gem::Specification.new do |s|
   s.add_dependency('uuidtools', '~> 2.0')
   s.add_dependency('erubis', '~> 2.7')
   s.add_dependency('rspec-rerun', '~> 1.0')
+  s.add_dependency('addressable')
 end
