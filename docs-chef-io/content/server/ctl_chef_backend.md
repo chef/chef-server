@@ -551,8 +551,8 @@ This subcommand has the following options:
 
 `-s PATH`, `--secrets-file-path PATH`
 
-:   The path to the location of the `secrets.json` file on the
-    bootstrapping node. Default value: `/etc/chef-backend/secrets.json`.
+:   The ABSOLUTE path to the location of the `secrets.json` file on the
+    bootstrapping node. The path should begin with a "/". Default value: `/etc/chef-backend/secrets.json`.
 
 `-y`, `--yes`
 
