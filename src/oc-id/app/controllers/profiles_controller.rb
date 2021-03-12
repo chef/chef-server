@@ -70,12 +70,13 @@ class ProfilesController < ApplicationController
   # to the signin page.
   #
   def change_email
+
     @user = User.find(URI.escape(params[:username])) if params[:username].present?
     return goto_forbidden('errors.emails.invalid_username', name: params[:username]) if @user.nil?
     return goto_forbidden('errors.emails.invalid_signature') unless valid_signature?
 
-    @user.update_attributes('email' => params[:email])
-    return goto_forbidden('errors.emails.problem') unless @user.errors.empty?
+   # @user.update_attributes('email' => params[:email])
+   # return goto_forbidden('errors.emails.problem') unless @user.errors.empty?
 
     target_path = signed_in? ? profile_path : signin_path
     redirect_to target_path, :notice => I18n.t('profile.email_changed', name: params[:username])
