@@ -18,6 +18,8 @@ require 'optparse'
 require 'chef/config'
 require 'chef/org'
 require 'redis'
+require 'chef_server_ctl/helpers/du'
+require 'chef_server_ctl/helpers/statfs'
 
 def all_orgs
   Chef::Config.from_file(::ChefServerCtl::Config.knife_config_file)
@@ -61,6 +63,31 @@ def do_reindex(orgs_to_reindex, options)
   end
 ensure
   enable_api if options[:disable_api]
+end
+
+# Disk space verification for running reindex 
+# It needs enough disk space to hold a second copy of the data plus whatever change in size the new index might need if the schema has changed.
+# Required Disk Space = (2 * size of ES data directory)
+def verify_disk_space
+  begin
+    data_dir = running_config['private_chef']['elasticsearch']['data_dir']
+    if Dir.exist?(data_dir)
+      data_dir_size = Du.du(data_dir)
+      free_disk_space = Statfs.new("#{data_dir}/..").free_space
+      if (2.2* data_dir_size) < free_disk_space #The minimum space should be double the existing data size
+        puts "Free space is sufficient to start Elasticsearch reindex"
+      else
+        $stderr.puts "Insufficient free space on disk to complete reindex."
+        $stderr.puts "The current elasticsearch data directory contains #{data_dir_size} KB of data but only #{free_disk_space} KB is available on disk."
+        $stderr.puts "The reindex process requires at least #{2.2*data_dir_size} KB."
+        exit 1
+      end
+    else
+      puts "Elasticsearch data path does not exist, so skipping the disk space verification: #{data_dir}"
+    end
+  rescue => exception
+    puts "Skipping the disk space verification due to #{exception.message}"
+  end
 end
 
 add_command_under_category "reindex", "general", "Reindex all server data for a given organization", 2 do
@@ -111,6 +138,9 @@ add_command_under_category "reindex", "general", "Reindex all server data for a 
     $stderr.puts "Please specify an organization to reindex or use the --all-orgs flag"
     exit 1
   end
+  
+  # Checking free disk space before proceeding to reindex
+  verify_disk_space
 
   do_reindex(orgs_to_reindex, options)
 
