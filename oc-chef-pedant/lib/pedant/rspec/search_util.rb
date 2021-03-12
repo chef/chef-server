@@ -1,4 +1,4 @@
-# Copyright: Copyright (c) 2012-2016 Chef Software, Inc.
+# Copyright:: Copyright (c) Chef Software Inc.
 # License: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@ require 'pedant/concern'
 require 'pedant/request'
 require 'pedant/utility'
 require 'rspec/core/shared_context'
-require 'uri'
+require 'addressable/uri'
 
 module Pedant
   module RSpec
@@ -781,7 +781,7 @@ module Pedant
       end
 
       def search_result(index, query)
-        search_url = api_url(URI::encode("/search/#{index}?q=#{query}"))
+        search_url = api_url(Addressable::URI.encode("/search/#{index}?q=#{query}"))
         get(search_url, admin_user)
       end
 
