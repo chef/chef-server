@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.1.26 -->
-## [14.1.26](https://github.com/chef/chef-server/tree/14.1.26) (2021-03-15)
+<!-- latest_release 14.1.27 -->
+## [14.1.27](https://github.com/chef/chef-server/tree/14.1.27) (2021-03-15)
 
 #### Merged Pull Requests
-- Disable updating email from oc-id [#2329](https://github.com/chef/chef-server/pull/2329) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Bump omnibus-software from `a7ed951` to `daeb384` in /omnibus [#2320](https://github.com/chef/chef-server/pull/2320) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.1.0 -->
 ### Changes since 14.1.0 release
 
 #### Merged Pull Requests
+- Bump omnibus-software from `a7ed951` to `daeb384` in /omnibus [#2320](https://github.com/chef/chef-server/pull/2320) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.27 -->
 - Disable updating email from oc-id [#2329](https://github.com/chef/chef-server/pull/2329) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.1.26 -->
 - Update Elasticsearch to 7.9.1 [#2231](https://github.com/chef/chef-server/pull/2231) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.1.25 -->
 - Bump chef from `392785b` to `f7616ee` in /src/chef-server-ctl [#2322](https://github.com/chef/chef-server/pull/2322) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.24 -->
