@@ -191,7 +191,7 @@ describe OmnibusHelper do
     end
 
     context 'when elastic search is version 6' do
-      let(:elastic_version) { '6.8.12' }
+      let(:elastic_version) { '6.8.14' }
 
       it 'should return 6' do
         helper = described_class.new(node)

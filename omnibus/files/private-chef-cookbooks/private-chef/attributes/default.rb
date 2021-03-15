@@ -173,7 +173,7 @@ elasticsearch['enable_gc_log'] = false
 elasticsearch['initial_cluster_join_timeout'] = 90
 elasticsearch['shard_count'] = 5
 elasticsearch['replica_count'] = 1
-#elasticsearch['es_version'] = '6.8.12'
+#elasticsearch['es_version'] = '6.8.14'
 
 # each item in this list will be placed as-is into java_opts config file.
 # entries are set in chef-server.rb as
