@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.1.24 -->
-## [14.1.24](https://github.com/chef/chef-server/tree/14.1.24) (2021-03-12)
+<!-- latest_release 14.1.25 -->
+## [14.1.25](https://github.com/chef/chef-server/tree/14.1.25) (2021-03-15)
 
 #### Merged Pull Requests
-- Bump chef from `392785b` to `f7616ee` in /src/chef-server-ctl [#2322](https://github.com/chef/chef-server/pull/2322) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Update Elasticsearch to 7.9.1 [#2231](https://github.com/chef/chef-server/pull/2231) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.1.0 -->
 ### Changes since 14.1.0 release
 
 #### Merged Pull Requests
+- Update Elasticsearch to 7.9.1 [#2231](https://github.com/chef/chef-server/pull/2231) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.1.25 -->
 - Bump chef from `392785b` to `f7616ee` in /src/chef-server-ctl [#2322](https://github.com/chef/chef-server/pull/2322) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.24 -->
 - Update pedant test suite to run on Ruby 3 [#2324](https://github.com/chef/chef-server/pull/2324) ([lamont-granquist](https://github.com/lamont-granquist)) <!-- 14.1.23 -->
 - Add a post install message to the packages [#2314](https://github.com/chef/chef-server/pull/2314) ([tas50](https://github.com/tas50)) <!-- 14.1.22 -->
