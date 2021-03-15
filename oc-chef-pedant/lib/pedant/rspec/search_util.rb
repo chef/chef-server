@@ -718,7 +718,9 @@ module Pedant
       end
 
       def get_response_count(r)
-        if r["response"].nil?
+        if (r["response"].nil?) and (r["hits"]["total"].is_a? Hash)
+          r["hits"]["total"]["value"]
+        elsif r["response"].nil?
           r["hits"]["total"]
         else
           r["response"]["numFound"]

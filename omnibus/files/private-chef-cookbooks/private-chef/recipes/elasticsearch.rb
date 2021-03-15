@@ -2,7 +2,6 @@
 # All Rights Reserved
 
 MAX_MAP_COUNT = 262_144
-
 cluster_name = if node['previous_run'] && node['previous_run']['elasticsearch'] && node['previous_run']['elasticsearch']['cluster_name']
                  node['previous_run']['elasticsearch']['cluster_name']
                else
@@ -115,8 +114,15 @@ heap_size = if node['private_chef']['opscode-solr4'] &&
             end
 
 jvm_config_file = File.join(elasticsearch_conf_dir, 'jvm.options')
+
+jvm_source = if node['private_chef']['elasticsearch']['es_version'].to_f > 7.0 
+              'elasticsearch_jvm_es7.opts.erb'
+            else
+              'elasticsearch_jvm.opts.erb'
+            end
+
 template jvm_config_file do
-  source 'elasticsearch_jvm.opts.erb'
+  source jvm_source
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode '0644'
