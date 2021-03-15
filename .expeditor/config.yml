@@ -1,5 +1,6 @@
 # Documentation available at https://expeditor.chef.io/docs/getting-started/
 ---
+
 # The name of the product keys for this product (from mixlib-install)
 product_key: chef-server
 
@@ -14,6 +15,12 @@ github:
   # The file where our CHANGELOG is kept. This file is updated automatically with
   # details from the Pull Request via the `built_in:update_changelog` merge_action.
   changelog_file: "CHANGELOG.md"
+  # allow bumping the minor release via label
+  minor_bump_labels:
+    - "Expeditor: Bump Version Minor"
+  # allow bumping the major release via label
+  major_bump_labels:
+    - "Expeditor: Bump Version Major"
   release_branch:
     - master:
         version_constraint: 14*
