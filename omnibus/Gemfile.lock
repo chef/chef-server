@@ -17,7 +17,7 @@ GIT
 
 GIT
   remote: https://github.com/chef/omnibus-software
-  revision: a7ed951108689cad13b1ad29293bfe1a0b9e5271
+  revision: daeb384f6a55f10e20581dcd466973d43f9a9886
   specs:
     omnibus-software (4.0.0)
       omnibus (>= 8.0.0)
@@ -28,22 +28,22 @@ GEM
     addressable (2.7.0)
       public_suffix (>= 2.0.2, < 5.0)
     artifactory (3.0.15)
-    awesome_print (1.8.0)
-    aws-eventstream (1.1.0)
-    aws-partitions (1.430.0)
-    aws-sdk-core (3.112.0)
+    awesome_print (1.9.2)
+    aws-eventstream (1.1.1)
+    aws-partitions (1.432.0)
+    aws-sdk-core (3.113.0)
       aws-eventstream (~> 1, >= 1.0.2)
       aws-partitions (~> 1, >= 1.239.0)
       aws-sigv4 (~> 1.1)
       jmespath (~> 1.0)
-    aws-sdk-kms (1.42.0)
+    aws-sdk-kms (1.43.0)
       aws-sdk-core (~> 3, >= 3.112.0)
       aws-sigv4 (~> 1.1)
-    aws-sdk-s3 (1.89.0)
+    aws-sdk-s3 (1.91.0)
       aws-sdk-core (~> 3, >= 3.112.0)
       aws-sdk-kms (~> 1)
       aws-sigv4 (~> 1.1)
-    aws-sigv4 (1.2.2)
+    aws-sigv4 (1.2.3)
       aws-eventstream (~> 1, >= 1.0.2)
     bcrypt_pbkdf (1.1.0.rc2)
     berkshelf (7.2.0)
@@ -153,7 +153,7 @@ GEM
       faraday (~> 1.0)
     fauxhai-ng (8.7.0)
       net-ssh
-    ffi (1.14.2)
+    ffi (1.15.0)
     ffi-libarchive (1.0.17)
       ffi (~> 1.0)
     ffi-yajl (2.3.4)
