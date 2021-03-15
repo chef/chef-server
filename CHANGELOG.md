@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.1.28 -->
-## [14.1.28](https://github.com/chef/chef-server/tree/14.1.28) (2021-03-15)
+<!-- latest_release 14.1.29 -->
+## [14.1.29](https://github.com/chef/chef-server/tree/14.1.29) (2021-03-15)
 
 #### Merged Pull Requests
-- Bump omnibus from `fb2a005` to `dd57896` in /omnibus [#2327](https://github.com/chef/chef-server/pull/2327) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- MTLS server issue: knife config need spaces [#2325](https://github.com/chef/chef-server/pull/2325) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.1.0 -->
 ### Changes since 14.1.0 release
 
 #### Merged Pull Requests
+- MTLS server issue: knife config need spaces [#2325](https://github.com/chef/chef-server/pull/2325) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.1.29 -->
 - Bump omnibus from `fb2a005` to `dd57896` in /omnibus [#2327](https://github.com/chef/chef-server/pull/2327) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.28 -->
 - Bump omnibus-software from `a7ed951` to `daeb384` in /omnibus [#2320](https://github.com/chef/chef-server/pull/2320) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.27 -->
 - Disable updating email from oc-id [#2329](https://github.com/chef/chef-server/pull/2329) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.1.26 -->
