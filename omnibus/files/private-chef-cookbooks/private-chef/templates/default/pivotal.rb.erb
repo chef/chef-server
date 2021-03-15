@@ -16,9 +16,9 @@ no_proxy "<%= node['private_chef']['lb']['vip'] %>"
 client_key key.path
 
  <% if node['private_chef']['nginx']['ssl_client_ca'] -%>
-ssl_ca_file = "<%= node['private_chef']['nginx']['ssl_client_ca'] %>"
-ssl_client_cert = "<%= node['private_chef']['nginx']['pivotal_ssl_client_cert'] %>"
-ssl_client_key = "<%= node['private_chef']['nginx']['pivotal_ssl_client_key'] %>"
+ssl_ca_file "<%= node['private_chef']['nginx']['ssl_client_ca'] %>"
+ssl_client_cert "<%= node['private_chef']['nginx']['pivotal_ssl_client_cert'] %>"
+ssl_client_key "<%= node['private_chef']['nginx']['pivotal_ssl_client_key'] %>"
 ssl_verify_mode :verify_peer
 <% else -%>
 ssl_verify_mode :verify_none
