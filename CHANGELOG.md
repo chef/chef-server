@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.1.29 -->
-## [14.1.29](https://github.com/chef/chef-server/tree/14.1.29) (2021-03-15)
+<!-- latest_release 14.1.30 -->
+## [14.1.30](https://github.com/chef/chef-server/tree/14.1.30) (2021-03-15)
 
 #### Merged Pull Requests
-- MTLS server issue: knife config need spaces [#2325](https://github.com/chef/chef-server/pull/2325) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add minor/major bump label config in Expeditor [#2331](https://github.com/chef/chef-server/pull/2331) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.1.0 -->
 ### Changes since 14.1.0 release
 
 #### Merged Pull Requests
+- Add minor/major bump label config in Expeditor [#2331](https://github.com/chef/chef-server/pull/2331) ([tas50](https://github.com/tas50)) <!-- 14.1.30 -->
 - MTLS server issue: knife config need spaces [#2325](https://github.com/chef/chef-server/pull/2325) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.1.29 -->
 - Bump omnibus from `fb2a005` to `dd57896` in /omnibus [#2327](https://github.com/chef/chef-server/pull/2327) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.28 -->
 - Bump omnibus-software from `a7ed951` to `daeb384` in /omnibus [#2320](https://github.com/chef/chef-server/pull/2320) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.27 -->
