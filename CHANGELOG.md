@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.2.0 -->
-## [14.2.0](https://github.com/chef/chef-server/tree/14.2.0) (2021-03-16)
+<!-- latest_release 14.2.1 -->
+## [14.2.1](https://github.com/chef/chef-server/tree/14.2.1) (2021-03-16)
 
 #### Merged Pull Requests
-- Update Elasticsearch to 6.8.14 [#2332](https://github.com/chef/chef-server/pull/2332) ([tas50](https://github.com/tas50))
+- Prevent chef.io/progress.com emails from using ZenDesk SSO [#2326](https://github.com/chef/chef-server/pull/2326) ([btm](https://github.com/btm))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.1.0 -->
 ### Changes since 14.1.0 release
 
 #### Merged Pull Requests
+- Prevent chef.io/progress.com emails from using ZenDesk SSO [#2326](https://github.com/chef/chef-server/pull/2326) ([btm](https://github.com/btm)) <!-- 14.2.1 -->
 - Update Elasticsearch to 6.8.14 [#2332](https://github.com/chef/chef-server/pull/2332) ([tas50](https://github.com/tas50)) <!-- 14.2.0 -->
 - Add minor/major bump label config in Expeditor [#2331](https://github.com/chef/chef-server/pull/2331) ([tas50](https://github.com/tas50)) <!-- 14.1.30 -->
 - MTLS server issue: knife config need spaces [#2325](https://github.com/chef/chef-server/pull/2325) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.1.29 -->
