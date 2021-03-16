@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Chef Software, Inc.
+# Copyright:: Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 #
 
 name "elasticsearch"
-default_version "6.8.12"
+default_version "6.8.14"
 
 dependency "server-open-jre"
 
@@ -25,9 +25,9 @@ skip_transitive_dependency_licensing true
 
 relative_path "elasticsearch-#{version}"
 
-version "6.8.12" do
+version "6.8.14" do
   source url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-#{version}.tar.gz",
-         sha512: "9f6179ee49baa48b49c5328b88ddf2f0ef868f49c1f04d77975622120749725c48ac09cd565c05f6033eb227eaff905aff9f881a85efcf2fa75cc586cb8c45cb"
+         sha512: "c0372969ec9e5f7aff551bc0aa13684fdaccd5a553e8ee896979488ab2f13181642222ab4eca4dc799181bce1405200b5aea4866c830483ce1e484fa6a714998"
 end
 
 version "7.9.1" do
