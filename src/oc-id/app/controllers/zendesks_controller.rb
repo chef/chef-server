@@ -6,7 +6,11 @@ class ZendesksController < ApplicationController
 
   def show
     if signed_in?
-      redirect_to zendesk_sso_url(current_user, params[:return_to])
+      if (current_user.email =~ /@chef.io$/i || current_user.email =~ /@progress.com$/i)
+        render json: {message: "This account is not permitted for ZenDesk SSO"}, status: :forbidden
+      else
+        redirect_to zendesk_sso_url(current_user, params[:return_to])
+      end
       return
     end
 
