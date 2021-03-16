@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.1.30 -->
-## [14.1.30](https://github.com/chef/chef-server/tree/14.1.30) (2021-03-15)
+<!-- latest_release 14.2.0 -->
+## [14.2.0](https://github.com/chef/chef-server/tree/14.2.0) (2021-03-16)
 
 #### Merged Pull Requests
-- Add minor/major bump label config in Expeditor [#2331](https://github.com/chef/chef-server/pull/2331) ([tas50](https://github.com/tas50))
+- Update Elasticsearch to 6.8.14 [#2332](https://github.com/chef/chef-server/pull/2332) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.1.0 -->
 ### Changes since 14.1.0 release
 
 #### Merged Pull Requests
+- Update Elasticsearch to 6.8.14 [#2332](https://github.com/chef/chef-server/pull/2332) ([tas50](https://github.com/tas50)) <!-- 14.2.0 -->
 - Add minor/major bump label config in Expeditor [#2331](https://github.com/chef/chef-server/pull/2331) ([tas50](https://github.com/tas50)) <!-- 14.1.30 -->
 - MTLS server issue: knife config need spaces [#2325](https://github.com/chef/chef-server/pull/2325) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.1.29 -->
 - Bump omnibus from `fb2a005` to `dd57896` in /omnibus [#2327](https://github.com/chef/chef-server/pull/2327) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.28 -->
