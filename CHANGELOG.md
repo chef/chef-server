@@ -1,52 +1,50 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.2.2 -->
-## [14.2.2](https://github.com/chef/chef-server/tree/14.2.2) (2021-03-16)
-
-#### Merged Pull Requests
-- Fix title for disabling email update [#2338](https://github.com/chef/chef-server/pull/2338) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=14.1.0 -->
-### Changes since 14.1.0 release
-
-#### Merged Pull Requests
-- Fix title for disabling email update [#2338](https://github.com/chef/chef-server/pull/2338) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.2.2 -->
-- Prevent chef.io/progress.com emails from using ZenDesk SSO [#2326](https://github.com/chef/chef-server/pull/2326) ([btm](https://github.com/btm)) <!-- 14.2.1 -->
-- Update Elasticsearch to 6.8.14 [#2332](https://github.com/chef/chef-server/pull/2332) ([tas50](https://github.com/tas50)) <!-- 14.2.0 -->
-- Add minor/major bump label config in Expeditor [#2331](https://github.com/chef/chef-server/pull/2331) ([tas50](https://github.com/tas50)) <!-- 14.1.30 -->
-- MTLS server issue: knife config need spaces [#2325](https://github.com/chef/chef-server/pull/2325) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.1.29 -->
-- Bump omnibus from `fb2a005` to `dd57896` in /omnibus [#2327](https://github.com/chef/chef-server/pull/2327) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.28 -->
-- Bump omnibus-software from `a7ed951` to `daeb384` in /omnibus [#2320](https://github.com/chef/chef-server/pull/2320) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.27 -->
-- Disable updating email from oc-id [#2329](https://github.com/chef/chef-server/pull/2329) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.1.26 -->
-- Update Elasticsearch to 7.9.1 [#2231](https://github.com/chef/chef-server/pull/2231) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.1.25 -->
-- Bump chef from `392785b` to `f7616ee` in /src/chef-server-ctl [#2322](https://github.com/chef/chef-server/pull/2322) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.24 -->
-- Update pedant test suite to run on Ruby 3 [#2324](https://github.com/chef/chef-server/pull/2324) ([lamont-granquist](https://github.com/lamont-granquist)) <!-- 14.1.23 -->
-- Add a post install message to the packages [#2314](https://github.com/chef/chef-server/pull/2314) ([tas50](https://github.com/tas50)) <!-- 14.1.22 -->
-- Update omnibus-ctl requirement from &gt;= 0 to &gt;= 0 in /src/chef-server-ctl [#2293](https://github.com/chef/chef-server/pull/2293) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.21 -->
-- Bump chefstyle from 1.7.1 to 1.7.2 in /src/chef-server-ctl [#2315](https://github.com/chef/chef-server/pull/2315) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.20 -->
-- Clean-up data_collector/rebar.config [#2312](https://github.com/chef/chef-server/pull/2312) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.1.19 -->
-- Update mixlib-authentication requirement from &gt; 1.4, &lt; 3.0 to &gt; 1.4, &lt; 4.0 in /oc-chef-pedant [#2292](https://github.com/chef/chef-server/pull/2292) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.18 -->
-- [Security] Update activesupport requirement from ~&gt; 3.2.8 to &gt;= 3.2.8, &lt; 6.2.0 in /src/oc_bifrost/oc-bifrost-pedant [#2308](https://github.com/chef/chef-server/pull/2308) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.17 -->
-- Update activesupport requirement from &gt;= 4.2.7.1, &lt; 6.0 to &gt;= 4.2.7.1, &lt; 7.0 in /oc-chef-pedant [#2290](https://github.com/chef/chef-server/pull/2290) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.16 -->
-- Update rest-client requirement from ~&gt; 1.8.0 to &gt;= 1.8, &lt; 2.2 in /src/oc_bifrost/oc-bifrost-pedant [#2295](https://github.com/chef/chef-server/pull/2295) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.15 -->
-- Update mixlib-config requirement from ~&gt; 1.1.2 to &gt;= 1.1.2, &lt; 3.1.0 in /src/oc_bifrost/oc-bifrost-pedant [#2297](https://github.com/chef/chef-server/pull/2297) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.14 -->
-- Update rspec-rerun requirement from = 0.1.1 to = 0.3.1 in /src/oc_bifrost/oc-bifrost-pedant [#2309](https://github.com/chef/chef-server/pull/2309) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.13 -->
-- Update mixlib-config requirement from ~&gt; 2.0 to &gt;= 2, &lt; 4 in /oc-chef-pedant [#2291](https://github.com/chef/chef-server/pull/2291) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.12 -->
-- Update rspec_junit_formatter requirement from ~&gt; 0.1.1 to &gt;= 0.1.1, &lt; 0.5.0 in /src/oc_bifrost/oc-bifrost-pedant [#2298](https://github.com/chef/chef-server/pull/2298) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.11 -->
-- Install raml2html if the string is empty; it is not installed. [#2310](https://github.com/chef/chef-server/pull/2310) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.1.10 -->
-- Removed Login shell for opscode chef service [#2286](https://github.com/chef/chef-server/pull/2286) ([jashaik](https://github.com/jashaik)) <!-- 14.1.9 -->
-- Update Ruby Gems [#2271](https://github.com/chef/chef-server/pull/2271) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.1.8 -->
-- Let the Chef dep in omnibus float to the latest [#2283](https://github.com/chef/chef-server/pull/2283) ([tas50](https://github.com/tas50)) <!-- 14.1.7 -->
-- Bump omnibus-software from `a1e9c90` to `a7ed951` in /omnibus [#2285](https://github.com/chef/chef-server/pull/2285) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.6 -->
-- Bump omnibus-software from `fb0fa04` to `a1e9c90` in /omnibus [#2278](https://github.com/chef/chef-server/pull/2278) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.5 -->
-- Unpin chef-cli in omnibus [#2281](https://github.com/chef/chef-server/pull/2281) ([tas50](https://github.com/tas50)) <!-- 14.1.4 -->
-- Bump chef from 15.12.22 to 15.15.0 in /omnibus [#2263](https://github.com/chef/chef-server/pull/2263) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.1.3 -->
-- Cache gem installs for License Scout [#2268](https://github.com/chef/chef-server/pull/2268) ([tas50](https://github.com/tas50)) <!-- 14.1.2 -->
-- Zei/add pedant for status endpoint/2214 [#2247](https://github.com/chef/chef-server/pull/2247) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.1.1 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [14.2.2](https://github.com/chef/chef-server/tree/14.2.2) (2021-03-17)
+
+#### Merged Pull Requests
+- Zei/add pedant for status endpoint/2214 [#2247](https://github.com/chef/chef-server/pull/2247) ([vinay-satish](https://github.com/vinay-satish))
+- Cache gem installs for License Scout [#2268](https://github.com/chef/chef-server/pull/2268) ([tas50](https://github.com/tas50))
+- Bump chef from 15.12.22 to 15.15.0 in /omnibus [#2263](https://github.com/chef/chef-server/pull/2263) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Unpin chef-cli in omnibus [#2281](https://github.com/chef/chef-server/pull/2281) ([tas50](https://github.com/tas50))
+- Bump omnibus-software from `fb0fa04` to `a1e9c90` in /omnibus [#2278](https://github.com/chef/chef-server/pull/2278) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Bump omnibus-software from `a1e9c90` to `a7ed951` in /omnibus [#2285](https://github.com/chef/chef-server/pull/2285) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Let the Chef dep in omnibus float to the latest [#2283](https://github.com/chef/chef-server/pull/2283) ([tas50](https://github.com/tas50))
+- Update Ruby Gems [#2271](https://github.com/chef/chef-server/pull/2271) ([lbakerchef](https://github.com/lbakerchef))
+- Removed Login shell for opscode chef service [#2286](https://github.com/chef/chef-server/pull/2286) ([jashaik](https://github.com/jashaik))
+- Install raml2html if the string is empty; it is not installed. [#2310](https://github.com/chef/chef-server/pull/2310) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update rspec_junit_formatter requirement from ~&gt; 0.1.1 to &gt;= 0.1.1, &lt; 0.5.0 in /src/oc_bifrost/oc-bifrost-pedant [#2298](https://github.com/chef/chef-server/pull/2298) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Update mixlib-config requirement from ~&gt; 2.0 to &gt;= 2, &lt; 4 in /oc-chef-pedant [#2291](https://github.com/chef/chef-server/pull/2291) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Update rspec-rerun requirement from = 0.1.1 to = 0.3.1 in /src/oc_bifrost/oc-bifrost-pedant [#2309](https://github.com/chef/chef-server/pull/2309) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Update mixlib-config requirement from ~&gt; 1.1.2 to &gt;= 1.1.2, &lt; 3.1.0 in /src/oc_bifrost/oc-bifrost-pedant [#2297](https://github.com/chef/chef-server/pull/2297) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Update rest-client requirement from ~&gt; 1.8.0 to &gt;= 1.8, &lt; 2.2 in /src/oc_bifrost/oc-bifrost-pedant [#2295](https://github.com/chef/chef-server/pull/2295) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Update activesupport requirement from &gt;= 4.2.7.1, &lt; 6.0 to &gt;= 4.2.7.1, &lt; 7.0 in /oc-chef-pedant [#2290](https://github.com/chef/chef-server/pull/2290) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- [Security] Update activesupport requirement from ~&gt; 3.2.8 to &gt;= 3.2.8, &lt; 6.2.0 in /src/oc_bifrost/oc-bifrost-pedant [#2308](https://github.com/chef/chef-server/pull/2308) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Update mixlib-authentication requirement from &gt; 1.4, &lt; 3.0 to &gt; 1.4, &lt; 4.0 in /oc-chef-pedant [#2292](https://github.com/chef/chef-server/pull/2292) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Clean-up data_collector/rebar.config [#2312](https://github.com/chef/chef-server/pull/2312) ([lbakerchef](https://github.com/lbakerchef))
+- Bump chefstyle from 1.7.1 to 1.7.2 in /src/chef-server-ctl [#2315](https://github.com/chef/chef-server/pull/2315) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Update omnibus-ctl requirement from &gt;= 0 to &gt;= 0 in /src/chef-server-ctl [#2293](https://github.com/chef/chef-server/pull/2293) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Add a post install message to the packages [#2314](https://github.com/chef/chef-server/pull/2314) ([tas50](https://github.com/tas50))
+- Update pedant test suite to run on Ruby 3 [#2324](https://github.com/chef/chef-server/pull/2324) ([lamont-granquist](https://github.com/lamont-granquist))
+- Bump chef from `392785b` to `f7616ee` in /src/chef-server-ctl [#2322](https://github.com/chef/chef-server/pull/2322) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Update Elasticsearch to 7.9.1 [#2231](https://github.com/chef/chef-server/pull/2231) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Disable updating email from oc-id [#2329](https://github.com/chef/chef-server/pull/2329) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Bump omnibus-software from `a7ed951` to `daeb384` in /omnibus [#2320](https://github.com/chef/chef-server/pull/2320) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Bump omnibus from `fb2a005` to `dd57896` in /omnibus [#2327](https://github.com/chef/chef-server/pull/2327) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- MTLS server issue: knife config need spaces [#2325](https://github.com/chef/chef-server/pull/2325) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Add minor/major bump label config in Expeditor [#2331](https://github.com/chef/chef-server/pull/2331) ([tas50](https://github.com/tas50))
+- Update Elasticsearch to 6.8.14 [#2332](https://github.com/chef/chef-server/pull/2332) ([tas50](https://github.com/tas50))
+- Prevent chef.io/progress.com emails from using ZenDesk SSO [#2326](https://github.com/chef/chef-server/pull/2326) ([btm](https://github.com/btm))
+- Fix title for disabling email update [#2338](https://github.com/chef/chef-server/pull/2338) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+<!-- latest_stable_release -->
+
 ## [14.1.0](https://github.com/chef/chef-server/tree/14.1.0) (2021-02-26)
 
 #### Merged Pull Requests
@@ -86,7 +84,6 @@
 - Path as strings [#2257](https://github.com/chef/chef-server/pull/2257) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 - Add Gemfile.lock for omnibus [#2255](https://github.com/chef/chef-server/pull/2255) ([tas50](https://github.com/tas50))
 - Bump version to 14.1 [#2265](https://github.com/chef/chef-server/pull/2265) ([tas50](https://github.com/tas50))
-<!-- latest_stable_release -->
 
 ## [14.0.65](https://github.com/chef/chef-server/tree/14.0.65) (2020-10-26)
 
