@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 14.2.3 -->
+## [14.2.3](https://github.com/chef/chef-server/tree/14.2.3) (2021-03-22)
+
+#### Merged Pull Requests
+- Added Amazon Linux 2 support [#2345](https://github.com/chef/chef-server/pull/2345) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=14.2.2 -->
+### Changes since 14.2.2 release
+
+#### Merged Pull Requests
+- Added Amazon Linux 2 support [#2345](https://github.com/chef/chef-server/pull/2345) ([jashaik](https://github.com/jashaik)) <!-- 14.2.3 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
