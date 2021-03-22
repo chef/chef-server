@@ -476,7 +476,7 @@ default['private_chef']['nginx']['stub_status']['allow_list'] = ['127.0.0.1']
 # - AES added for pushy-server 1.x compatibility
 # - TLS1 and TLSv1.1 added for pushy-server 1.x compatibility
 #
-default['private_chef']['nginx']['ssl_protocols'] = 'TLSv1 TLSv1.1 TLSv1.2'
+default['private_chef']['nginx']['ssl_protocols'] = 'TLSv1.2'
 default['private_chef']['nginx']['ssl_ciphers'] = 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:AES256-GCM-SHA384:AES:!aNULL:!eNULL:!EXPORT'
 #
 # The SSL Certificate and DH Param will be automatically generated if
