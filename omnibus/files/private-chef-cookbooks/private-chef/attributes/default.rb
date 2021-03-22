@@ -424,7 +424,6 @@ default['private_chef']['lb_internal']['enable'] = true
 default['private_chef']['lb_internal']['vip'] = '127.0.0.1'
 default['private_chef']['lb_internal']['chef_port'] = 9680
 default['private_chef']['lb_internal']['account_port'] = 9685
-default['private_chef']['lb_internal']['oc_bifrost_port'] = 9683
 default['private_chef']['lb']['redis_connection_timeout'] = 1000
 default['private_chef']['lb']['redis_keepalive_timeout'] = 2000
 default['private_chef']['lb']['redis_connection_pool_size'] = 250
