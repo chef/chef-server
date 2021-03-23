@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.2.3 -->
-## [14.2.3](https://github.com/chef/chef-server/tree/14.2.3) (2021-03-22)
+<!-- latest_release 14.2.4 -->
+## [14.2.4](https://github.com/chef/chef-server/tree/14.2.4) (2021-03-23)
 
 #### Merged Pull Requests
-- Added Amazon Linux 2 support [#2345](https://github.com/chef/chef-server/pull/2345) ([jashaik](https://github.com/jashaik))
+- Bump chef from `f7616ee` to `a936b0a` in /oc-chef-pedant [#2344](https://github.com/chef/chef-server/pull/2344) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.2.2 -->
 ### Changes since 14.2.2 release
 
 #### Merged Pull Requests
+- Bump chef from `f7616ee` to `a936b0a` in /oc-chef-pedant [#2344](https://github.com/chef/chef-server/pull/2344) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.2.4 -->
 - Added Amazon Linux 2 support [#2345](https://github.com/chef/chef-server/pull/2345) ([jashaik](https://github.com/jashaik)) <!-- 14.2.3 -->
 <!-- release_rollup -->
 
