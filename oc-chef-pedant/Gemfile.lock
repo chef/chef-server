@@ -1,14 +1,14 @@
 GIT
   remote: https://github.com/chef/chef.git
-  revision: 413867a31ce7c0fce66dadc85f9c2a0ae48a313a
+  revision: f96888be32499eeb75b5bf63faa8b523f4cb5542
   branch: chef-15
   specs:
-    chef (15.15.5)
+    chef (15.16.2)
       addressable
       bcrypt_pbkdf (~> 1.0)
       bundler (>= 1.10)
-      chef-config (= 15.15.5)
-      chef-utils (= 15.15.5)
+      chef-config (= 15.16.2)
+      chef-utils (= 15.16.2)
       chef-zero (>= 14.0.11)
       diff-lcs (>= 1.2.4, < 1.4.0)
       ed25519 (~> 1.2)
@@ -16,7 +16,7 @@ GIT
       ffi (~> 1.9, >= 1.9.25)
       ffi-libarchive (~> 1.0, >= 1.0.3)
       ffi-yajl (~> 2.2)
-      highline (>= 1.6.9, < 2)
+      highline (>= 1.6.9, < 3)
       iniparse (~> 1.4)
       license-acceptance (>= 1.0.5, < 3)
       mixlib-archive (>= 0.4, < 2.0)
@@ -35,14 +35,14 @@ GIT
       train-winrm (>= 0.2.5)
       tty-screen (~> 0.6)
       uuidtools (>= 2.1.5, < 3.0)
-    chef-config (15.15.5)
+    chef-config (15.16.2)
       addressable
-      chef-utils (= 15.15.5)
+      chef-utils (= 15.16.2)
       fuzzyurl
       mixlib-config (>= 2.2.12, < 4.0)
       mixlib-shellout (>= 2.0, < 4.0)
       tomlrb (~> 1.2)
-    chef-utils (15.15.5)
+    chef-utils (15.16.2)
 
 PATH
   remote: .
@@ -104,7 +104,7 @@ GEM
     gyoku (1.3.1)
       builder (>= 2.1.2)
     hashie (4.1.0)
-    highline (1.7.10)
+    highline (2.0.3)
     http-accept (1.7.0)
     http-cookie (1.0.3)
       domain_name (~> 0.5)
