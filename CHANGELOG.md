@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.2.8 -->
-## [14.2.8](https://github.com/chef/chef-server/tree/14.2.8) (2021-03-25)
+<!-- latest_release 14.2.9 -->
+## [14.2.9](https://github.com/chef/chef-server/tree/14.2.9) (2021-03-25)
 
 #### Merged Pull Requests
-- Bump omnibus and chef-server-ctl deps [#2367](https://github.com/chef/chef-server/pull/2367) ([tas50](https://github.com/tas50))
+- Update the docs / rally link in the getting started page [#2350](https://github.com/chef/chef-server/pull/2350) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.2.2 -->
 ### Changes since 14.2.2 release
 
 #### Merged Pull Requests
+- Update the docs / rally link in the getting started page [#2350](https://github.com/chef/chef-server/pull/2350) ([tas50](https://github.com/tas50)) <!-- 14.2.9 -->
 - Bump omnibus and chef-server-ctl deps [#2367](https://github.com/chef/chef-server/pull/2367) ([tas50](https://github.com/tas50)) <!-- 14.2.8 -->
 - Bump omnibus-software from `daeb384` to `f6aa2ed` in /omnibus [#2360](https://github.com/chef/chef-server/pull/2360) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.2.7 -->
 - Bump chefstyle from 1.7.2 to 1.7.4 in /src/chef-server-ctl [#2361](https://github.com/chef/chef-server/pull/2361) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.2.6 -->
