@@ -17,7 +17,8 @@ GIT
 
 GIT
   remote: https://github.com/jashaik/omnibus-software
-  revision: 82b6a4c01939c2176fcf7710c3d48764233b2f0e
+  revision: 0b656edbddf63c37e94df8a6d631d7173e13082e
+  branch: shahid/openresty-update
   specs:
     omnibus-software (4.0.0)
       omnibus (>= 8.0.0)
