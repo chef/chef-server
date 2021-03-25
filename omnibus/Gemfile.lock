@@ -16,8 +16,8 @@ GIT
       thor (>= 0.18, < 2.0)
 
 GIT
-  remote: https://github.com/chef/omnibus-software
-  revision: daeb384f6a55f10e20581dcd466973d43f9a9886
+  remote: https://github.com/jashaik/omnibus-software
+  revision: 82b6a4c01939c2176fcf7710c3d48764233b2f0e
   specs:
     omnibus-software (4.0.0)
       omnibus (>= 8.0.0)

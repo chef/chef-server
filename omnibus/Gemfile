@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 # Install omnibus software
 group :omnibus do
   gem 'omnibus', git: 'https://github.com/chef/omnibus'
-  gem 'omnibus-software', git: 'https://github.com/chef/omnibus-software'
+  gem 'omnibus-software', git: 'https://github.com/jashaik/omnibus-software', :branch => 'shahid/openresty-update' 
   gem 'artifactory'
 end
 
