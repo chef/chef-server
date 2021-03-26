@@ -141,7 +141,7 @@ def safety_check(db)
                           WHERE tablename='cleanup_tracking_auth_actors'")
   if res.ntuples > 0
     puts "ERROR: cleanup_tracking_auth_actors already exists.  cleanup-bifrost may be running."
-    puts "ERROR: If you are sure cleanup-bifrost is not running, you can clean up the tracking tables with: chef-backend-ctl cleanup-bifrost --force-cleanup"
+    puts "ERROR: If you are sure cleanup-bifrost is not running, you can clean up the tracking tables with: chef-server-ctl cleanup-bifrost --force-cleanup"
     exit(1)
   end
 end
