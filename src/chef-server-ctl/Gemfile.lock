@@ -1,8 +1,43 @@
 GIT
-  remote: https://github.com/chef/chef.git
-  revision: f96888be32499eeb75b5bf63faa8b523f4cb5542
-  branch: chef-15
+  remote: https://github.com/chef/chef_secrets.git
+  revision: 2875f29d82c528edd89cb614955e214f3aa4be0c
   specs:
+    veil (0.3.3)
+      bcrypt (~> 3.1)
+      pbkdf2
+
+PATH
+  remote: .
+  specs:
+    chef-server-ctl (1.1.0)
+      appbundler
+      chef_backup
+      ffi-yajl (>= 1.2.0)
+      highline (~> 1.6, >= 1.6.9)
+      knife-opc
+      license-acceptance
+      mixlib-log
+      omnibus-ctl
+      pg (~> 0.17, >= 0.17.1)
+      pry
+      rb-readline
+      redis
+      rest-client
+      uuidtools (~> 2.1, >= 2.1.3)
+      veil
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    addressable (2.7.0)
+      public_suffix (>= 2.0.2, < 5.0)
+    appbundler (0.13.2)
+      mixlib-cli (>= 1.4, < 3.0)
+      mixlib-shellout (>= 2.0, < 4.0)
+    ast (2.4.2)
+    bcrypt (3.1.16)
+    bcrypt_pbkdf (1.1.0)
+    builder (3.2.4)
     chef (15.16.2)
       addressable
       bcrypt_pbkdf (~> 1.0)
@@ -43,47 +78,6 @@ GIT
       mixlib-shellout (>= 2.0, < 4.0)
       tomlrb (~> 1.2)
     chef-utils (15.16.2)
-
-GIT
-  remote: https://github.com/chef/chef_secrets.git
-  revision: 2875f29d82c528edd89cb614955e214f3aa4be0c
-  specs:
-    veil (0.3.3)
-      bcrypt (~> 3.1)
-      pbkdf2
-
-PATH
-  remote: .
-  specs:
-    chef-server-ctl (1.1.0)
-      appbundler
-      chef_backup
-      ffi-yajl (>= 1.2.0)
-      highline (~> 1.6, >= 1.6.9)
-      knife-opc
-      license-acceptance
-      mixlib-log
-      omnibus-ctl
-      pg (~> 0.17, >= 0.17.1)
-      pry
-      rb-readline
-      redis
-      rest-client
-      uuidtools (~> 2.1, >= 2.1.3)
-      veil
-
-GEM
-  remote: https://rubygems.org/
-  specs:
-    addressable (2.7.0)
-      public_suffix (>= 2.0.2, < 5.0)
-    appbundler (0.13.2)
-      mixlib-cli (>= 1.4, < 3.0)
-      mixlib-shellout (>= 2.0, < 4.0)
-    ast (2.4.2)
-    bcrypt (3.1.16)
-    bcrypt_pbkdf (1.1.0)
-    builder (3.2.4)
     chef-zero (15.0.4)
       ffi-yajl (~> 2.2)
       hashie (>= 2.0, < 5.0)
@@ -293,7 +287,7 @@ PLATFORMS
 
 DEPENDENCIES
   bundler
-  chef!
+  chef (= 15.16.2)
   chef-server-ctl!
   chef_backup
   chefstyle
@@ -304,4 +298,4 @@ DEPENDENCIES
   veil!
 
 BUNDLED WITH
-   1.17.2
+   1.17.3
