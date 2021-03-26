@@ -14,4 +14,4 @@ override :perl, version: "5.18.1"
 # This SHA is the last commit before the 6.0 release
 override :'berkshelf-no-depselector', version: '6016ca10b2f46508b1b107264228668776f505d9'
 
-override :openresty, version: "1.17.8.2"
+override :openresty, version: "1.19.3.1"
