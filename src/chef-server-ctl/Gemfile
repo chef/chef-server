@@ -2,7 +2,7 @@ source "https://rubygems.org"
 
 gemspec
 
-gem 'chef', git: 'https://github.com/chef/chef.git', branch: 'chef-15'
+gem 'chef', "= 15.16.2"
 gem "chef_backup"
 gem "omnibus-ctl"
 gem "veil", git: "https://github.com/chef/chef_secrets.git"
