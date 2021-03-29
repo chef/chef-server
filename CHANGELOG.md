@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.2.11 -->
-## [14.2.11](https://github.com/chef/chef-server/tree/14.2.11) (2021-03-26)
+<!-- latest_release 14.2.12 -->
+## [14.2.12](https://github.com/chef/chef-server/tree/14.2.12) (2021-03-29)
 
 #### Merged Pull Requests
-- Pin to a released Chef Infra Client again [#2370](https://github.com/chef/chef-server/pull/2370) ([tas50](https://github.com/tas50))
+- Fix command name typo in clean-bifrost error output [#2373](https://github.com/chef/chef-server/pull/2373) ([teknofire](https://github.com/teknofire))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.2.2 -->
 ### Changes since 14.2.2 release
 
 #### Merged Pull Requests
+- Fix command name typo in clean-bifrost error output [#2373](https://github.com/chef/chef-server/pull/2373) ([teknofire](https://github.com/teknofire)) <!-- 14.2.12 -->
 - Pin to a released Chef Infra Client again [#2370](https://github.com/chef/chef-server/pull/2370) ([tas50](https://github.com/tas50)) <!-- 14.2.11 -->
 - Require TLSv1.2 on Chef Infra Clients by default [#2346](https://github.com/chef/chef-server/pull/2346) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.2.10 -->
 - Update the docs / rally link in the getting started page [#2350](https://github.com/chef/chef-server/pull/2350) ([tas50](https://github.com/tas50)) <!-- 14.2.9 -->
