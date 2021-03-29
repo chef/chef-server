@@ -23,8 +23,6 @@ license_file "https://github.com/chef/fixie/blob/master/LICENSE"
 source git: "https://github.com/chef/fixie.git"
 
 dependency "ruby"
-dependency "rubygems"
-dependency "bundler"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)

@@ -21,7 +21,6 @@ license "Apache-2.0"
 license_file "LICENSE"
 
 dependency "ruby"
-dependency "bundler"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)

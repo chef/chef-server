@@ -29,7 +29,6 @@ license_file "LICENSE"
 dependency "nokogiri"
 dependency "postgresql96" # for libpq
 dependency "ruby"
-dependency "bundler"
 
 relative_path "oc-id"
 

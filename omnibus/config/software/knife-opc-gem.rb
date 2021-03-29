@@ -23,8 +23,6 @@ license_file "https://github.com/chef/knife-opc/blob/master/LICENSE"
 source git: "git://github.com/opscode/knife-opc.git"
 
 dependency "ruby"
-dependency "rubygems"
-dependency "bundler"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
