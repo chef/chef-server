@@ -289,6 +289,7 @@ DEPENDENCIES
   bundler
   chef (= 15.16.2)
   chef-server-ctl!
+  chef-utils (= 15.16.2)
   chef_backup
   chefstyle
   omnibus-ctl
