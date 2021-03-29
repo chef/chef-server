@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.2.13 -->
-## [14.2.13](https://github.com/chef/chef-server/tree/14.2.13) (2021-03-29)
+<!-- latest_release 14.2.14 -->
+## [14.2.14](https://github.com/chef/chef-server/tree/14.2.14) (2021-03-29)
 
 #### Merged Pull Requests
-- Pinning chef-server-ctl to 15.16.2 of chef-utils.  [#2378](https://github.com/chef/chef-server/pull/2378) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Removed publicly exposed bifrost port [#2352](https://github.com/chef/chef-server/pull/2352) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.2.2 -->
 ### Changes since 14.2.2 release
 
 #### Merged Pull Requests
+- Removed publicly exposed bifrost port [#2352](https://github.com/chef/chef-server/pull/2352) ([jashaik](https://github.com/jashaik)) <!-- 14.2.14 -->
 - Pinning chef-server-ctl to 15.16.2 of chef-utils.  [#2378](https://github.com/chef/chef-server/pull/2378) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.2.13 -->
 - Fix command name typo in clean-bifrost error output [#2373](https://github.com/chef/chef-server/pull/2373) ([teknofire](https://github.com/teknofire)) <!-- 14.2.12 -->
 - Pin to a released Chef Infra Client again [#2370](https://github.com/chef/chef-server/pull/2370) ([tas50](https://github.com/tas50)) <!-- 14.2.11 -->
