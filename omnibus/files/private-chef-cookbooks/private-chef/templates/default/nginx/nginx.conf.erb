@@ -191,31 +191,6 @@ http {
     }
   }
 
-  # internal service access for oc_bifrost
-  server {
-    <%= @helper.listen_port(node['private_chef']['lb_internal']['oc_bifrost_port']) %>
-    server_name <%= @helper.server_name %>;
-    more_clear_headers Server;
-
-    client_max_body_size <%= @client_max_body_size %>;
-    proxy_set_header        Host            $host;
-    proxy_set_header        X-Real-IP       $remote_addr;
-    proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header        X-Forwarded-Proto http;
-    proxy_set_header        X-Forwarded-Host $http_host;
-    proxy_pass_request_headers on;
-
-    proxy_connect_timeout   90;
-    proxy_send_timeout      90;
-    proxy_read_timeout      90;
-
-    access_log /var/log/opscode/nginx/internal-authz.access.log opscode;
-    error_log  /var/log/opscode/nginx/internal-authz.error.log<%= node['private_chef']['lb']['debug'] ? " debug" : "" %>;
-
-    location / {
-      proxy_pass http://oc_bifrost;
-    }
-  }
   <%- end -%>
 
   include <%= node['private_chef']['nginx']['dir'] %>/etc/nginx.d/*.conf;
