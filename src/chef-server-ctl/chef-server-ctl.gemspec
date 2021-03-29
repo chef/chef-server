@@ -48,10 +48,11 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "appbundler"
 
+  spec.add_runtime_dependency "chef"
+
   spec.add_development_dependency "chefstyle"
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec"
-
 
 end
