@@ -7,7 +7,7 @@ override :'omnibus-ctl', version: "main"
 override :chef, version: "v16.17.4"
 override :ohai, version: "v16.17.0"
 override :ruby, version: "2.7.5"
-override :perl, version: "5.18.1"
+override :perl, version: "5.30.0"
 override :redis, version: "5.0.14"
 
 override :cpanminus, version: "1.7004" # 1.9019 breaks installs currently
