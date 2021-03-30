@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.2.15 -->
-## [14.2.15](https://github.com/chef/chef-server/tree/14.2.15) (2021-03-30)
+<!-- latest_release 14.2.16 -->
+## [14.2.16](https://github.com/chef/chef-server/tree/14.2.16) (2021-03-30)
 
 #### Merged Pull Requests
-- Bump activesupport from 6.1.3 to 6.1.3.1 in /oc-chef-pedant [#2377](https://github.com/chef/chef-server/pull/2377) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Bump activesupport from 6.1.3 to 6.1.3.1 in /src/oc_bifrost/oc-bifrost-pedant [#2375](https://github.com/chef/chef-server/pull/2375) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.2.2 -->
 ### Changes since 14.2.2 release
 
 #### Merged Pull Requests
+- Bump activesupport from 6.1.3 to 6.1.3.1 in /src/oc_bifrost/oc-bifrost-pedant [#2375](https://github.com/chef/chef-server/pull/2375) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.2.16 -->
 - Bump activesupport from 6.1.3 to 6.1.3.1 in /oc-chef-pedant [#2377](https://github.com/chef/chef-server/pull/2377) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.2.15 -->
 - Removed publicly exposed bifrost port [#2352](https://github.com/chef/chef-server/pull/2352) ([jashaik](https://github.com/jashaik)) <!-- 14.2.14 -->
 - Pinning chef-server-ctl to 15.16.2 of chef-utils.  [#2378](https://github.com/chef/chef-server/pull/2378) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.2.13 -->
