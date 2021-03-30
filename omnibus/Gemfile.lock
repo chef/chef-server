@@ -16,8 +16,9 @@ GIT
       thor (>= 0.18, < 2.0)
 
 GIT
-  remote: https://github.com/chef/omnibus-software
-  revision: f6aa2edd80c4b896738f843d9e613212c8510481
+  remote: https://github.com/jashaik/omnibus-software
+  revision: fceb1049d7b36b7d32ba82e0e91d9adf772366e1
+  branch: shahid/perl-update
   specs:
     omnibus-software (4.0.0)
       omnibus (>= 8.0.0)
