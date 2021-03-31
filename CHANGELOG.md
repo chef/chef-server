@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.2.18 -->
-## [14.2.18](https://github.com/chef/chef-server/tree/14.2.18) (2021-03-30)
+<!-- latest_release 14.2.19 -->
+## [14.2.19](https://github.com/chef/chef-server/tree/14.2.19) (2021-03-31)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `f6aa2ed` to `142e76b` in /omnibus [#2381](https://github.com/chef/chef-server/pull/2381) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Update openresty to 1.19.3.1 [#2382](https://github.com/chef/chef-server/pull/2382) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.2.2 -->
 ### Changes since 14.2.2 release
 
 #### Merged Pull Requests
+- Update openresty to 1.19.3.1 [#2382](https://github.com/chef/chef-server/pull/2382) ([jashaik](https://github.com/jashaik)) <!-- 14.2.19 -->
 - Bump omnibus-software from `f6aa2ed` to `142e76b` in /omnibus [#2381](https://github.com/chef/chef-server/pull/2381) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.2.18 -->
 - Bump chef from 15.16.2 to 16.11.7 in /oc-chef-pedant [#2371](https://github.com/chef/chef-server/pull/2371) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.2.17 -->
 - Bump activesupport from 6.1.3 to 6.1.3.1 in /src/oc_bifrost/oc-bifrost-pedant [#2375](https://github.com/chef/chef-server/pull/2375) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.2.16 -->
