@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.2.21 -->
-## [14.2.21](https://github.com/chef/chef-server/tree/14.2.21) (2021-04-05)
+<!-- latest_release 14.2.22 -->
+## [14.2.22](https://github.com/chef/chef-server/tree/14.2.22) (2021-04-05)
 
 #### Merged Pull Requests
-- Added disk space warning if not enough for ES reindex [#2333](https://github.com/chef/chef-server/pull/2333) ([jashaik](https://github.com/jashaik))
+- Bump omnibus-software from `a0e7438` to `f745eed` in /omnibus [#2394](https://github.com/chef/chef-server/pull/2394) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.2.2 -->
 ### Changes since 14.2.2 release
 
 #### Merged Pull Requests
+- Bump omnibus-software from `a0e7438` to `f745eed` in /omnibus [#2394](https://github.com/chef/chef-server/pull/2394) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.2.22 -->
 - Added disk space warning if not enough for ES reindex [#2333](https://github.com/chef/chef-server/pull/2333) ([jashaik](https://github.com/jashaik)) <!-- 14.2.21 -->
 - Bump omnibus-software from `142e76b` to `a0e7438` in /omnibus [#2386](https://github.com/chef/chef-server/pull/2386) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.2.20 -->
 - Update openresty to 1.19.3.1 [#2382](https://github.com/chef/chef-server/pull/2382) ([jashaik](https://github.com/jashaik)) <!-- 14.2.19 -->
