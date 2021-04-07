@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.2.24 -->
-## [14.2.24](https://github.com/chef/chef-server/tree/14.2.24) (2021-04-07)
+<!-- latest_release 14.2.25 -->
+## [14.2.25](https://github.com/chef/chef-server/tree/14.2.25) (2021-04-07)
 
 #### Merged Pull Requests
-- WIP Update Erlang Deps (rebar3) [#2289](https://github.com/chef/chef-server/pull/2289) ([lbakerchef](https://github.com/lbakerchef))
+- Bump ffi-yajl from 2.3.4 to 2.4.0 in /src/chef-server-ctl [#2402](https://github.com/chef/chef-server/pull/2402) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.2.2 -->
 ### Changes since 14.2.2 release
 
 #### Merged Pull Requests
+- Bump ffi-yajl from 2.3.4 to 2.4.0 in /src/chef-server-ctl [#2402](https://github.com/chef/chef-server/pull/2402) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.2.25 -->
 - WIP Update Erlang Deps (rebar3) [#2289](https://github.com/chef/chef-server/pull/2289) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.2.24 -->
 - Bump chef from 16.11.7 to 16.12.3 in /oc-chef-pedant [#2391](https://github.com/chef/chef-server/pull/2391) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.2.23 -->
 - Bump omnibus-software from `a0e7438` to `f745eed` in /omnibus [#2394](https://github.com/chef/chef-server/pull/2394) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.2.22 -->
