@@ -44,6 +44,9 @@
   {git,"git://github.com/uwiger/edown.git",
        {ref,"754be25f71a04099c83f3ffdff268e70beeb0021"}},
   0},
+ % normally we don't update mover. however a chef/ej PR was
+ % merged and the branch this was pointing to was subsequently
+ % deleted. so, pinning to master, same SHA.
  {<<"ej">>,
   {git,"git://github.com/chef/ej.git",
        {ref,"85bbf475ec533447d244be50f7f450f41cbc1adf"}},
