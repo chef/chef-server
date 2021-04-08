@@ -17,7 +17,7 @@ GIT
 
 GIT
   remote: https://github.com/chef/omnibus-software
-  revision: f745eed68f60b2a0a7e6b90dc8a504f5f720e34a
+  revision: 0dcaeb1940283bcb98c00dcfe9bb2821726ffa0a
   specs:
     omnibus-software (4.0.0)
       omnibus (>= 8.0.0)
@@ -30,7 +30,7 @@ GEM
     artifactory (3.0.15)
     awesome_print (1.9.2)
     aws-eventstream (1.1.1)
-    aws-partitions (1.441.0)
+    aws-partitions (1.442.0)
     aws-sdk-core (3.113.1)
       aws-eventstream (~> 1, >= 1.0.2)
       aws-partitions (~> 1, >= 1.239.0)
@@ -156,8 +156,8 @@ GEM
     ffi (1.15.0)
     ffi-libarchive (1.0.17)
       ffi (~> 1.0)
-    ffi-yajl (2.3.4)
-      libyajl2 (~> 1.2)
+    ffi-yajl (2.4.0)
+      libyajl2 (>= 1.2)
     fuzzyurl (0.9.0)
     gssapi (1.3.1)
       ffi (>= 1.0.1)
@@ -194,7 +194,7 @@ GEM
     ipaddress (0.8.3)
     jmespath (1.4.0)
     json (2.5.1)
-    libyajl2 (1.2.0)
+    libyajl2 (2.1.0)
     license-acceptance (2.1.13)
       pastel (~> 0.7)
       tomlrb (>= 1.2, < 3.0)
@@ -326,7 +326,7 @@ GEM
     toml-rb (2.0.1)
       citrus (~> 3.0, > 3.0)
     tomlrb (1.3.0)
-    train-core (3.5.5)
+    train-core (3.6.0)
       addressable (~> 2.5)
       ffi (!= 1.13.0)
       json (>= 1.8, < 3.0)
