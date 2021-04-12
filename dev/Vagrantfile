@@ -58,9 +58,9 @@ Vagrant.configure("2") do |config|
   attributes = load_settings
 
   config.vm.network 'public_network' if USE_AZURE
-  # Use the official Ubuntu 16.04 box
+  # Use the official Ubuntu 18.04 box
   # Vagrant will auto resolve the url to download from Atlas
-  config.vm.box = "bento/ubuntu-16.04"
+  config.vm.box = "bento/ubuntu-18.04"
   config.ssh.forward_agent = true
 
   # This plugin allows for a much more efficient sync than the vanilla rsync-auto command
