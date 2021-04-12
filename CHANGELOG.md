@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.3.0 -->
-## [14.3.0](https://github.com/chef/chef-server/tree/14.3.0) (2021-04-12)
+<!-- latest_release 14.3.1 -->
+## [14.3.1](https://github.com/chef/chef-server/tree/14.3.1) (2021-04-12)
 
 #### Merged Pull Requests
-- Remove support for Ubuntu 16.04 + add Ubuntu FIPS [#2408](https://github.com/chef/chef-server/pull/2408) ([tas50](https://github.com/tas50))
+- Bump chef from 16.12.3 to 16.13.16 in /oc-chef-pedant [#2409](https://github.com/chef/chef-server/pull/2409) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.2.2 -->
 ### Changes since 14.2.2 release
 
 #### Merged Pull Requests
+- Bump chef from 16.12.3 to 16.13.16 in /oc-chef-pedant [#2409](https://github.com/chef/chef-server/pull/2409) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.3.1 -->
 - Remove support for Ubuntu 16.04 + add Ubuntu FIPS [#2408](https://github.com/chef/chef-server/pull/2408) ([tas50](https://github.com/tas50)) <!-- 14.3.0 -->
 - Bump ffi-yajl from 2.3.4 to 2.4.0 in /src/chef-server-ctl [#2402](https://github.com/chef/chef-server/pull/2402) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.2.25 -->
 - WIP Update Erlang Deps (rebar3) [#2289](https://github.com/chef/chef-server/pull/2289) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.2.24 -->
