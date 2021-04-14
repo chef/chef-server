@@ -23,15 +23,11 @@ the associated RSA public key-pairs.
 
 The Chef Infra Server API has the following requirements:
 
--   The `Accept` header must be set to `application/json`.
--   For `PUT` and `POST` requests, the `Content-Type` header must be set
-    to `application/json`.
--   The `X-Chef-Version` header must be set to the version of the Chef
-    Infra Server API that is being used.
--   A request must be signed by adding authentication headers.
-    'Mixlib::Authentication' may be used to sign requests.
--   A request must be well-formatted. The easiest way to ensure a
-    well-formatted request is to use the `Chef::ServerAPI` library.
+- The `Accept` header must be set to `application/json`.
+- For `PUT` and `POST` requests, the `Content-Type` header must be set to `application/json`.
+- The `X-Chef-Version` header must be set to the version of the Chef Infra Server API that is being used.
+- A request must be signed by adding authentication headers. 'Mixlib::Authentication' may be used to sign requests.
+- A request must be well-formatted. The easiest way to ensure a well-formatted request is to use the `Chef::ServerAPI` library.
 
 ## Authentication Headers
 

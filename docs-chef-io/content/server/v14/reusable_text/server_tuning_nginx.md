@@ -31,9 +31,9 @@ Infra Server to use SSL certificates:
     Starting with Chef Infra Server 14.3, this value defaults to `'TLSv1.2'` for
     enhanced security. Previous releases defaulted to `'TLSv1 TLSv1.1 TLSv1.2'`,
     which allowed for less secure SSL connections. TLS 1.2 is supported on
-    Chef Infra Client 10.16.4 and later on Linux, Unix, and macOS, and on Chef 
-    Infra Client 12.8 and later on Windows. If it is necessary to support these older end-of-life
-    Chef Infra Client releases, set this value to `'TLSv1.1 TLSv1.2'`.
+    Chef Infra Client 10.16.4 and later on Linux, Unix, and macOS, and on Chef
+    Infra Client 12.8 and later on Windows. If it is necessary to support these
+    older end-of-life Chef Infra Client releases, set this value to `'TLSv1.1 TLSv1.2'`.
 
     ```ruby
     nginx['ssl_protocols'] = 'TLSv1.2'
