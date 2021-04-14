@@ -27,18 +27,16 @@ Infra Server to use SSL certificates:
 
 `nginx['ssl_protocols']`
 
-:   The SSL protocol versions that are enabled. SSL 3.0 is supported by
-    the Chef Infra Server; however, SSL 3.0 is an obsolete and insecure
-    protocol. Transport Layer Security (TLS)---TLS 1.0, TLS 1.1, and TLS
-    1.2---has effectively replaced SSL 3.0, which provides for
-    authenticated version negotiation between Chef Infra Client and Chef
-    Infra Server, which ensures the latest version of the TLS protocol
-    is used. For the highest possible security, it is recommended to
-    disable SSL 3.0 and allow all versions of the TLS protocol. For
-    example:
+:   The SSL protocol versions that are enabled for the Chef Infra Server API.
+    Starting with Chef Infra Server 14.3 this value defaults to `'TLSv1.2'` for
+    enhanced security. Previous releases defaulted to `'TLSv1 TLSv1.1 TLSv1.2'`,
+    which allowed for less secure SSL connections. TLS 1.2 is supported on
+    Chef Infra Client releases 10.16.4 and later on Linux/Unix/macOS and 12.8
+    or later on Windows. If it is necessary to support these older end-of-life
+    Chef Infra Client releases this value can be set to `'TLSv1.1 TLSv1.2'`.
 
     ```ruby
-    nginx['ssl_protocols'] = 'TLSv1 TLSv1.1 TLSv1.2'
+    nginx['ssl_protocols'] = 'TLSv1.2'
     ```
 
 <div class="admonition-note">
@@ -50,8 +48,6 @@ Infra Server to use SSL certificates:
 See <https://www.openssl.org/docs/man1.0.2/man1/ciphers.html> for more
 information about the values used with the `nginx['ssl_ciphers']` and
 `nginx['ssl_protocols']` settings.
-
-
 
 </div>
 
@@ -68,5 +64,5 @@ hardness for the Chef Infra Server:
 nginx['ssl_certificate'] = '/etc/pki/tls/private/name.of.pem'
 nginx['ssl_certificate_key'] = '/etc/pki/tls/private/name.of.key'
 nginx['ssl_ciphers'] = 'HIGH:MEDIUM:!LOW:!kEDH:!aNULL:!ADH:!eNULL:!EXP:!SSLv2:!SEED:!CAMELLIA:!PSK'
-nginx['ssl_protocols'] = 'TLSv1 TLSv1.1 TLSv1.2'
+nginx['ssl_protocols'] = 'TLSv1.2'
 ```
