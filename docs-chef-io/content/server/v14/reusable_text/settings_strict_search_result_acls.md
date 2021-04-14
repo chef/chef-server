@@ -21,8 +21,6 @@ this could affect search results returned during a Chef Infra Client
 runs if a Chef Infra Client does not have permission to read the
 information.
 
-
-
 </div>
 
 </div>

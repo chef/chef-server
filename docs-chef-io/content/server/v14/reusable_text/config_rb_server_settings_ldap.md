@@ -10,10 +10,10 @@
 The following settings **MUST** be in the config file for LDAP
 authentication to Active Directory to work:
 
--   `base_dn`
--   `bind_dn`
--   `group_dn`
--   `host`
+- `base_dn`
+- `bind_dn`
+- `group_dn`
+- `host`
 
 If those settings are missing, you will get authentication errors and be
 unable to proceed.
