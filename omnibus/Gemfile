@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 # Install omnibus software
 group :omnibus do
   gem 'omnibus', git: 'https://github.com/chef/omnibus'
-  gem 'omnibus-software', git: 'https://github.com/chef/omnibus-software'
+  gem 'omnibus-software', git: 'https://github.com/chef/omnibus-software', branch: 'skeshari/update-cpanminus-from-1.7004-to-1.9019'
   gem 'artifactory'
 end
 
