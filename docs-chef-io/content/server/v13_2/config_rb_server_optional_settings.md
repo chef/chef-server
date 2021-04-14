@@ -742,11 +742,14 @@ This configuration file has the following settings for `nginx`:
 
 `nginx['ssl_protocols']`
 
-:   The SSL protocol versions that are enabled. For the highest possible
-    security, disable SSL 3.0 and allow only TLS:
+:   The SSL protocol versions that are enabled. For enhanced security set
+    this value to `'TLSv1.2'`. TLS 1.2 is supported on Chef Infra Client 10.16.4 
+    and later on Linux, Unix, and macOS, and on Chef Infra Client 12.8 and later on
+    Windows. If it is necessary to support these older end-of-life
+    Chef Infra Client releases, set this value to `'TLSv1.1 TLSv1.2'`.
 
     ```ruby
-    nginx['ssl_protocols'] = 'TLSv1 TLSv1.1 TLSv1.2'
+    nginx['ssl_protocols'] = 'TLSv1.2'
     ```
 
     Default value: `TLSv1 TLSv1.1 TLSv1.2`.
