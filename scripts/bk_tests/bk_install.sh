@@ -45,8 +45,12 @@ gem install bundler --version '~> 1.17' --no-document
 
 echo "Installing Lua"
 export LUALIB=~/.luarocks/lib/lua/5.2
+# this is an option in case of future intermittent failures or flaky behavior
+# luarocks install --server=http://rocks.moonscript.org --local lpeg
+# luarocks install --server=http://rocks.moonscript.org --local lua-cjson
 luarocks install --local lpeg
 luarocks install --local lua-cjson
+
 eval $(luarocks path)
 
 echo "Installing sqitch"
