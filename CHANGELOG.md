@@ -1,9 +1,10 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release unreleased -->
-## Unreleased
+<!-- latest_release 14.3.3 -->
+## [14.3.3](https://github.com/chef/chef-server/tree/14.3.3) (2021-04-15)
 
 #### Merged Pull Requests
+- Update RELEASE_PROCESS.md to include integration pipeline testing. [#1968](https://github.com/chef/chef-server/pull/1968) ([lbakerchef](https://github.com/lbakerchef))
 - Update our TLS configuration docs [#2414](https://github.com/chef/chef-server/pull/2414) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
@@ -11,6 +12,7 @@
 ### Changes since 14.2.2 release
 
 #### Merged Pull Requests
+- Update RELEASE_PROCESS.md to include integration pipeline testing. [#1968](https://github.com/chef/chef-server/pull/1968) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.3.3 -->
 - Update our TLS configuration docs [#2414](https://github.com/chef/chef-server/pull/2414) ([tas50](https://github.com/tas50)) <!-- 14.3.2 -->
 - Providing a server to download the rock from. [#2413](https://github.com/chef/chef-server/pull/2413) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.3.2 -->
 - Bump chef from 16.12.3 to 16.13.16 in /oc-chef-pedant [#2409](https://github.com/chef/chef-server/pull/2409) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.3.1 -->
