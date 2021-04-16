@@ -4,12 +4,17 @@ set -ueo pipefail
 channel="${CHANNEL:-unstable}"
 product="${PRODUCT:-chef-server}"
 version="${VERSION:-latest}"
+package_file=${PACKAGE_FILE:-""}
 
 export PATH="/opt/opscode/bin:/opt/opscode/embedded/bin:$PATH"
 export INSTALL_DIR="/opt/opscode"
 
 echo "--- Installing $channel $product $version"
-package_file="$(/opt/omnibus-toolchain/bin/install-omnibus-product -c "$channel" -P "$product" -v "$version" -i "$INSTALL_DIR" | tail -n 1)"
+if [[ -z $package_file ]]; then
+  package_file="$(.omnibus-buildkite-plugin/install-omnibus-product.sh -c "$channel" -P "$product" -v "$version" -i "$INSTALL_DIR"  | tail -1)"
+else
+  .omnibus-buildkite-plugin/install-omnibus-product.sh -f "$package_file" -P "$product" -v "$version" -i "$INSTALL_DIR"  &> /dev/null
+fi
 
 echo "--- Verifying omnibus package is signed"
 /opt/omnibus-toolchain/bin/check-omnibus-package-signed "$package_file"
