@@ -1,3 +1,5 @@
+require_relative './warnings.rb'
+
 class NginxErb
   attr_reader :node
 
@@ -116,4 +118,18 @@ class NginxErb
     end
   end
 
+
+  def get_max_age_for_hsts
+    max_age = node['private_chef']['nginx']['sts_max_age']
+    unless( max_age.is_a? Numeric and max_age >= 31536000 and max_age <= 63072000)
+        ChefServer::Warnings.warn <<~EOF
+          The HSTS max_age parameter should be a Numeric value in seconds
+          greater than or equal to 1 year (31536000) and less than or equal to 2 years (63072000)
+          setting the max-age to 31536000
+          EOF
+        31536000
+    else
+        max_age
+    end
+  end
 end

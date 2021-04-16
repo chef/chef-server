@@ -42,7 +42,7 @@
       add_header X-Content-Type-Options nosniff;
       add_header X-XSS-Protection 1;
       <% if @server_proto == 'https' %>
-      add_header Strict-Transport-Security max-age=<%= node['private_chef']['nginx']['sts_max_age'] %>;
+      add_header Strict-Transport-Security "max-age=<%= @helper.get_max_age_for_hsts %>; includeSubDomains";
       <% end %>
     <% end %>
 
