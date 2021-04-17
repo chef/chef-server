@@ -19,7 +19,7 @@ PATH
       license-acceptance
       mixlib-log
       omnibus-ctl
-      pg (~> 0.17, >= 0.17.1)
+      pg (>= 0.17.1, < 2.0)
       pry
       rb-readline
       redis
@@ -174,7 +174,7 @@ GEM
     pastel (0.8.0)
       tty-color (~> 0.5)
     pbkdf2 (0.1.0)
-    pg (0.21.0)
+    pg (1.2.3)
     plist (3.6.0)
     proxifier (1.0.3)
     pry (0.14.1)

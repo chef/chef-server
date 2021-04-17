@@ -29,7 +29,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "rb-readline"
 
   # investigate what it would take to upgrade this...
-  spec.add_runtime_dependency "pg", "~> 0.17", ">= 0.17.1"
+  spec.add_runtime_dependency "pg", ">= 0.17.1", "< 2.0"
 
   spec.add_runtime_dependency "redis"
   # TODO
