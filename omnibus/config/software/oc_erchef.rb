@@ -27,7 +27,6 @@ dependency "perl_pg_driver"
 
 # RUBY DEPSOLVER - REMOVE FOR ROLLBACK #
 dependency "ruby"
-dependency "bundler"
 # END RUBY DEPSOLVER #
 
 build do

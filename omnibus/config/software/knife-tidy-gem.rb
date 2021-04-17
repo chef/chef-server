@@ -24,7 +24,6 @@ license_file "https://github.com/chef/knife-tidy/blob/master/LICENSE"
 skip_transitive_dependency_licensing true
 
 dependency "ruby"
-dependency "rubygems"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
