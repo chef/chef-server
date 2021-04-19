@@ -35,6 +35,7 @@ describe ZendesksController do
             :email => 'jim.kirk@federation-captains.org',
           })
         end
+
         before :each do
           allow(controller).to receive(:signed_in?).and_return(true)
           allow(controller).to receive(:current_user).and_return(testuser)
@@ -42,7 +43,7 @@ describe ZendesksController do
         end
 
         it 'redirects to the zendesk SSO URL' do
-          expect(controller).to receive(:zendesk_sso_url).with('testuser', 'testreturnto')
+          expect(controller).to receive(:zendesk_sso_url).with(testuser, 'testreturnto')
           get 'show', params: { return_to: 'testreturnto' }
         end
       end
