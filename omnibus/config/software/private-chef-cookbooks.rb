@@ -1,5 +1,5 @@
 #
-# Copyright 2012-2014 Chef Software, Inc.
+# Copyright 2012-2021 Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,14 +20,10 @@ source path: "#{project.files_path}/#{name}"
 
 license :project_license
 
-dependency "berkshelf-no-depselector"
+dependency "berkshelf"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
-
-  gem "install uuidtools " \
-      " -v 2.1.3" \
-      " --no-document", env: env
 
   command "berks vendor #{install_dir}/embedded/cookbooks", env: env
 
