@@ -3,7 +3,6 @@ lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "chef_server_ctl/version"
 
-
 Gem::Specification.new do |spec|
   spec.name          = "chef-server-ctl"
   spec.version       = ChefServerCtl::VERSION
@@ -54,5 +53,4 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec"
-
 end
