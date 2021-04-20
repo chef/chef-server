@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.3.4 -->
-## [14.3.4](https://github.com/chef/chef-server/tree/14.3.4) (2021-04-17)
+<!-- latest_release 14.3.5 -->
+## [14.3.5](https://github.com/chef/chef-server/tree/14.3.5) (2021-04-20)
 
 #### Merged Pull Requests
-- Update Chef to 15.17.4 and Ruby to 2.6.7 [#2427](https://github.com/chef/chef-server/pull/2427) ([tas50](https://github.com/tas50))
+- Remove bundler/rubygems omnibus defs [#2428](https://github.com/chef/chef-server/pull/2428) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.2.2 -->
 ### Changes since 14.2.2 release
 
 #### Merged Pull Requests
+- Remove bundler/rubygems omnibus defs [#2428](https://github.com/chef/chef-server/pull/2428) ([tas50](https://github.com/tas50)) <!-- 14.3.5 -->
 - Update Chef to 15.17.4 and Ruby to 2.6.7 [#2427](https://github.com/chef/chef-server/pull/2427) ([tas50](https://github.com/tas50)) <!-- 14.3.4 -->
 - Update RELEASE_PROCESS.md to include integration pipeline testing. [#1968](https://github.com/chef/chef-server/pull/1968) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.3.3 -->
 - Update our TLS configuration docs [#2414](https://github.com/chef/chef-server/pull/2414) ([tas50](https://github.com/tas50)) <!-- 14.3.2 -->
