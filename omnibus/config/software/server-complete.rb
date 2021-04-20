@@ -26,8 +26,6 @@ dependency "rb-readline" # a replacement for readline due to
 dependency "redis-gem" # gem for interacting with redis
 dependency "openresty-lpeg"  # lua-based routing
 dependency "runit"
-dependency "chef_backup-gem" # chef-server-ctl backup
-dependency "veil-gem" # chef-server-ctl rotate-credentials
 dependency "openssl-fips-config" if fips_mode?
 
 # the backend

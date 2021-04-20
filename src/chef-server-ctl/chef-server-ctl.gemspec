@@ -3,7 +3,6 @@ lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "chef_server_ctl/version"
 
-
 Gem::Specification.new do |spec|
   spec.name          = "chef-server-ctl"
   spec.version       = ChefServerCtl::VERSION
@@ -40,10 +39,10 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "mixlib-log"
 
   spec.add_runtime_dependency "uuidtools", "~> 2.1", ">= 2.1.3"
-  spec.add_runtime_dependency "veil" # todo get latest from https://github.com/chef/chef_secrets.git
+  spec.add_runtime_dependency "veil"
 
-  spec.add_runtime_dependency "chef_backup" # Gemfile has us getting latest from git
-  spec.add_runtime_dependency "omnibus-ctl" # Gemfile has us getting latest from git
+  spec.add_runtime_dependency "chef_backup"
+  spec.add_runtime_dependency "omnibus-ctl"
   spec.add_runtime_dependency "license-acceptance"
 
   spec.add_runtime_dependency "appbundler"
@@ -54,5 +53,4 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec"
-
 end
