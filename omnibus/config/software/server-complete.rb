@@ -40,11 +40,6 @@ dependency "chef" # for embedded chef-client -z runs (built from master - build 
 
 dependency "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
 
-# Pull in knife-opc which is wrapped by chef-server-ctl to
-# allow user to create users and orgs, and handle org associations
-# without manage installed.
-dependency "knife-opc-gem"
-
 # download the gpg-key beforehand for rhel systems to
 # use when verifying add ons
 dependency "gpg-key"
