@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.3.8 -->
-## [14.3.8](https://github.com/chef/chef-server/tree/14.3.8) (2021-04-20)
+<!-- latest_release 14.3.9 -->
+## [14.3.9](https://github.com/chef/chef-server/tree/14.3.9) (2021-04-20)
 
 #### Merged Pull Requests
-- Avoid duplicate chef_backup and veil definitions [#2435](https://github.com/chef/chef-server/pull/2435) ([tas50](https://github.com/tas50))
+- Add a configuration option to set the max-age of HSTS [#2362](https://github.com/chef/chef-server/pull/2362) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.2.2 -->
 ### Changes since 14.2.2 release
 
 #### Merged Pull Requests
+- Add a configuration option to set the max-age of HSTS [#2362](https://github.com/chef/chef-server/pull/2362) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.3.9 -->
 - Avoid duplicate chef_backup and veil definitions [#2435](https://github.com/chef/chef-server/pull/2435) ([tas50](https://github.com/tas50)) <!-- 14.3.8 -->
 - Update postresql from 9.6.15 to 9.6.21 [#2438](https://github.com/chef/chef-server/pull/2438) ([tas50](https://github.com/tas50)) <!-- 14.3.7 -->
 - Update to enterprise-chef-common 1.0 cookbook [#2437](https://github.com/chef/chef-server/pull/2437) ([tas50](https://github.com/tas50)) <!-- 14.3.6 -->
