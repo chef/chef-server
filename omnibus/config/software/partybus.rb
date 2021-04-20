@@ -20,7 +20,7 @@ source path: "#{Omnibus::Config.project_root}/#{name}"
 
 license :project_license
 
-dependency "bundler"
+dependency "ruby"
 dependency "postgresql96"
 
 build do

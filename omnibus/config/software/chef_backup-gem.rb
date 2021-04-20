@@ -22,7 +22,6 @@ license "Apache-2.0"
 license_file "https://github.com/chef/chef_backup/blob/master/LICENSE"
 
 dependency 'ruby'
-dependency 'rubygems'
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
