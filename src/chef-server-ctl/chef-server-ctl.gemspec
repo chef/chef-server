@@ -49,6 +49,11 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "chef"
 
+  # tools we bundle in the chef-server install and include here so we can have a single Gemfile.lock
+  # for the overall chef-server "app"
+  spec.add_runtime_dependency "knife-ec-backup"
+  spec.add_runtime_dependency "chef_fixie"
+
   spec.add_development_dependency "chefstyle"
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"

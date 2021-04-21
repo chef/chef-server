@@ -56,12 +56,6 @@ dependency "logrotate"
 # partybus and upgrade scripts
 dependency "partybus"
 
-# used in osc to ec upgrade path
-dependency "knife-ec-backup-gem"
-
-# Fixie tool for fixing server
-dependency "fixie-gem"
-
 # most frequently changed dependencies
 # by placing these deps at the end of the build, we can take
 # advantage of the git caching and increase build times
