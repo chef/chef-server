@@ -52,13 +52,21 @@
     # Whitelist the docs necessary to serve up error pages and friendly
     # html to non-chef clients hitting this host.
     location ~ "^/[0-9]{3,3}\.(json|html)|favicon.ico|index.html$" {
+      add_header Content-Security-Policy "default-src 'self';";
+      add_header X-Frame-Options DENY;
     }
     location "/css/" {
+      add_header Content-Security-Policy "default-src 'self';";
+      add_header X-Frame-Options DENY;
     }
     location "/images/" {
+      add_header Content-Security-Policy "default-src 'self';";
+      add_header X-Frame-Options DENY;
     }
 
     location /version {
+      add_header Content-Security-Policy "default-src 'self';";
+      add_header X-Frame-Options DENY;
       types { }
       default_type text/plain;
       alias /opt/opscode/version-manifest.txt;

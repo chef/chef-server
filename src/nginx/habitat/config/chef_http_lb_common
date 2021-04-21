@@ -48,7 +48,7 @@
     error_page 404 =404 /404.html;
     error_page 503 =503 /503.json;
 
-    # Whitelist the docs necessary to serve up error pages and friendly
+    # Allow the docs necessary to serve up error pages and friendly
     # html to non-chef clients hitting this host.
     location ~ "^/[0-9]{3,3}\.(json|html)|favicon.ico|index.html$" {
     }
