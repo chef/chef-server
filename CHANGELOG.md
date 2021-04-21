@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.3.12 -->
-## [14.3.12](https://github.com/chef/chef-server/tree/14.3.12) (2021-04-21)
+<!-- latest_release 14.3.13 -->
+## [14.3.13](https://github.com/chef/chef-server/tree/14.3.13) (2021-04-21)
 
 #### Merged Pull Requests
--  Move chef-fixie and knife-ec-backup to chef-server-ctl deps  [#2442](https://github.com/chef/chef-server/pull/2442) ([tas50](https://github.com/tas50))
+- Add Content-Security-Policy and X-Frame-Options headers to our static content [#2407](https://github.com/chef/chef-server/pull/2407) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.2.2 -->
 ### Changes since 14.2.2 release
 
 #### Merged Pull Requests
+- Add Content-Security-Policy and X-Frame-Options headers to our static content [#2407](https://github.com/chef/chef-server/pull/2407) ([tas50](https://github.com/tas50)) <!-- 14.3.13 -->
 -  Move chef-fixie and knife-ec-backup to chef-server-ctl deps  [#2442](https://github.com/chef/chef-server/pull/2442) ([tas50](https://github.com/tas50)) <!-- 14.3.12 -->
 - Remove duplicate knife-opc omnibus definition [#2440](https://github.com/chef/chef-server/pull/2440) ([tas50](https://github.com/tas50)) <!-- 14.3.11 -->
 - Use the current version of berkshelf [#2436](https://github.com/chef/chef-server/pull/2436) ([tas50](https://github.com/tas50)) <!-- 14.3.10 -->
