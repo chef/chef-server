@@ -94,7 +94,7 @@ class IndexingPreflightValidator < PreflightValidator
   # disabled.
   def verify_es_disabled_if_user_set_external_solr
     if external? && elasticsearch_enabled?
-      fail_with err_INDEX005_should_dsiable_es
+      fail_with err_INDEX005_should_disable_es
     end
   end
 
