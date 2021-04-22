@@ -815,6 +815,12 @@ This configuration file has the following settings for `nginx`:
     Server by a Chef Infra Client or a workstation. Default value:
     `'https'`.
 
+`nginx['hsts_max_age']`
+
+:   Time duration in seconds till which the browser caches the `HSTS` information.
+    Possible values: greater than or equal to `31536000` and less than or equal to `63072000`.
+    Default value: `31536000` (1 year).
+
 ### oc_bifrost
 
 {{< reusable_text_versioned file="server_services_bifrost" >}}

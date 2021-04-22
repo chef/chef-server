@@ -120,7 +120,7 @@ class NginxErb
 
 
   def get_max_age_for_hsts
-    max_age = node['private_chef']['nginx']['sts_max_age']
+    max_age = node['private_chef']['nginx']['hsts_max_age']
     unless( max_age.is_a? Numeric and max_age >= 31536000 and max_age <= 63072000)
         ChefServer::Warnings.warn <<~EOF
           The HSTS max_age parameter should be a Numeric value in seconds
