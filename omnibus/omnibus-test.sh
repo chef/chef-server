@@ -1,38 +1,9 @@
 #!/bin/bash
 set -ueo pipefail
 
-channel="${CHANNEL:-unstable}"
-product="${PRODUCT:-chef-server}"
-version="${VERSION:-latest}"
-package_file=${PACKAGE_FILE:-""}
-
 export PATH="/opt/opscode/bin:/opt/opscode/embedded/bin:$PATH"
-export INSTALL_DIR="/opt/opscode"
 
-echo "--- Installing $channel $product $version"
-if [[ -z $package_file ]]; then
-  package_file="$(.omnibus-buildkite-plugin/install-omnibus-product.sh -c "$channel" -P "$product" -v "$version" -i "$INSTALL_DIR"  | tail -1)"
-else
-  .omnibus-buildkite-plugin/install-omnibus-product.sh -f "$package_file" -P "$product" -v "$version" -i "$INSTALL_DIR"  &> /dev/null
-fi
-
-echo "--- Verifying omnibus package is signed"
-/opt/omnibus-toolchain/bin/check-omnibus-package-signed "$package_file"
-
-sudo rm -f "$package_file"
-
-echo "--- Verifying ownership of package files"
-
-NONROOT_FILES="$(find "$INSTALL_DIR" ! -user 0 -print)"
-if [[ "$NONROOT_FILES" == "" ]]; then
-  echo "Packages files are owned by root.  Continuing verification."
-else
-  echo "Exiting with an error because the following files are not owned by root:"
-  echo "$NONROOT_FILES"
-  exit 1
-fi
-
-echo "--- Reconfiguring $channel $product $version"
+echo "--- Reconfiguring chef-server"
 
 sudo mkdir -p /etc/opscode
 
@@ -59,7 +30,7 @@ y/8SReCpC71R+Vl6d4+Dw6GFdL+6k6W558dPfq3UeV8HPWQEaM7/jXDUKJZ0tB6a
 sudo chef-server-ctl reconfigure --chef-license=accept-no-persist
 sleep 120
 
-echo "--- Running verification for $channel $product $version"
+echo "--- Running 'chef-server-ctl test'"
 
 echo "Sleeping even longer (120 seconds) to let the system settle"
 sleep 120
