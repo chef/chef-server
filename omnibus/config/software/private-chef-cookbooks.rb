@@ -20,14 +20,12 @@ source path: "#{project.files_path}/#{name}"
 
 license :project_license
 
-dependency "berkshelf"
-
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
-  command "berks vendor #{install_dir}/embedded/cookbooks", env: env
-
   block do
+    shellout!("berks vendor #{install_dir}/embedded/cookbooks")
+
     File.open("#{install_dir}/embedded/cookbooks/dna.json", "w") do |f|
       run_list = Array.new.tap do |r|
         r << 'recipe[private-chef::default]'

@@ -47,7 +47,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "appbundler"
 
-  spec.add_runtime_dependency "chef"
+  spec.add_runtime_dependency "chef", "~> 16.0"
 
   # tools we bundle in the chef-server install and include here so we can have a single Gemfile.lock
   # for the overall chef-server "app"

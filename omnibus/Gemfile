@@ -5,11 +5,11 @@ group :omnibus do
   gem 'omnibus', git: 'https://github.com/chef/omnibus'
   gem 'omnibus-software', git: 'https://github.com/chef/omnibus-software'
   gem 'artifactory'
+  gem 'berkshelf' # we use berks to install the cookbooks into the chef-server-ctl command
 end
 
 group :test do
   gem 'test-kitchen' # for Test Kitchen testing of the omnibus builds
-  gem 'berkshelf' # depsolving the Test Kitchen suite
   gem 'rake'
   gem 'chefspec' # for cookbook chefspec tests
 end
