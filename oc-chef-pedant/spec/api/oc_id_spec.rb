@@ -50,7 +50,13 @@ describe "oc_id API", :oc_id do
   end
 
   def signin(with_callback = true)
+    sleep 20
+    time_start = Time.new
+    puts "Start Time : " + time_start.inspect
     response = get("#{platform.server}/id/signin", oc_id_user, headers: {"Accept" => "text/html"})
+    time_end = Time.new
+    puts "End Time : " + time_end.inspect
+    puts "Response : " + response.inspect
     cookie = response.headers[:set_cookie][0].split(";").first
     # I KNOW. I'll leave it up to reviewers whether we should pull
     # in nokogiri or hpricot just do to this
