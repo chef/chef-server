@@ -20,8 +20,6 @@ source path: "#{project.files_path}/#{name}"
 
 license :project_license
 
-dependency "berkshelf"
-
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
