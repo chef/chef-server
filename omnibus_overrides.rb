@@ -9,4 +9,6 @@ override :ohai, version: "v15.12.0"
 override :ruby, version: "2.6.7"
 override :perl, version: "5.18.1"
 
+override :cpanminus, version: "1.7004" # 1.9019 breaks installs currently
+
 override :openresty, version: "1.19.3.1"
