@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.3.17 -->
-## [14.3.17](https://github.com/chef/chef-server/tree/14.3.17) (2021-04-23)
+<!-- latest_release 14.3.18 -->
+## [14.3.18](https://github.com/chef/chef-server/tree/14.3.18) (2021-05-06)
 
 #### Merged Pull Requests
-- Bump chef_fixie from 0.4.0 to 0.5.0 in /src/chef-server-ctl [#2448](https://github.com/chef/chef-server/pull/2448) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Add berkshelf as a dep in chef-server-ctl [#2468](https://github.com/chef/chef-server/pull/2468) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.3.14 -->
 ### Changes since 14.3.14 release
 
 #### Merged Pull Requests
+- Add berkshelf as a dep in chef-server-ctl [#2468](https://github.com/chef/chef-server/pull/2468) ([tas50](https://github.com/tas50)) <!-- 14.3.18 -->
 - Bump chef_fixie from 0.4.0 to 0.5.0 in /src/chef-server-ctl [#2448](https://github.com/chef/chef-server/pull/2448) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.3.17 -->
 - Bump omnibus from `0780fb3` to `79c80e0` in /omnibus [#2443](https://github.com/chef/chef-server/pull/2443) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.3.16 -->
 - Bump omnibus-software from `810a6c4` to `3ac1dbe` in /omnibus [#2444](https://github.com/chef/chef-server/pull/2444) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.3.15 -->
