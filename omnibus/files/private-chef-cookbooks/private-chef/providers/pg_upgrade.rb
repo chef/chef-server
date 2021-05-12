@@ -235,7 +235,7 @@ def update_to_latest_version
 
       # The new data directory may have just been created; that's why
       # this needs to be evaluated lazily
-      new_version = version_from_data_dir(new_data_dir)
+      new_version = node['private_chef']['postgresql']['version']
 
       old_bins = binary_path_for(old_version)
       new_bins = binary_path_for(new_version)
