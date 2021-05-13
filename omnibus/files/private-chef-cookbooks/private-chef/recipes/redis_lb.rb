@@ -21,6 +21,8 @@ redis_etc_dir = File.join(redis_dir, 'etc')
 redis_data_dir = redis['data_dir']
 redis_data_dir_symlink = File.join(redis_dir, 'data')
 redis_log_dir = redis['log_directory']
+redis_service = "/opt/opscode/service/redis_lb"
+runit_sv_path = "/opt/opscode/embedded/bin/sv"
 
 [
   redis_dir,
@@ -80,9 +82,26 @@ end
 component_runit_service 'redis_lb'
 
 # Restart the redis_lb runit service.
-runit_service 'redis_lb' do
-  action :restart
-  only_if { is_data_master? }
+ruby_block 'restarting redis_lb' do
+  block do
+    started = false
+    10.times do
+        command = Mixlib::ShellOut.new("#{runit_sv_path} restart #{redis_service}")
+        command.run_command
+        if !command.status.success? 
+          sleep 1
+        else
+          started = true
+          break
+        end
+      end
+
+      unless started
+        Chef::Log.fatal('Failed to restart redis_lb runit service')
+        Kernel.exit! 1
+      end
+  end
+  notifies :restart, 'component_runit_service[redis_lb]'
 end
 
 # log rotation

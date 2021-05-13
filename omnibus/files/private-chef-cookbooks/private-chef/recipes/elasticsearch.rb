@@ -18,7 +18,8 @@ elasticsearch_plugins_dir      = elasticsearch['plugins_directory']     # /var/o
 elasticsearch_scripts_dir      = elasticsearch['scripts_directory']     # /var/opt/opscode/elasticsearch/scripts
 elasticsearch_temp_dir         = elasticsearch['temp_directory']        # /var/log/opscode/elasticsearch/tmp
 elasticsearch_log_dir          = elasticsearch['log_directory']         # /var/log/opscode/elasticsearch
-
+elasticsearch_service          = "/opt/opscode/service/elasticsearch"
+runit_sv_path                  = "/opt/opscode/embedded/bin/sv"
 config_file = File.join(elasticsearch_conf_dir, 'elasticsearch.yml')
 logging_config_file = File.join(elasticsearch_conf_dir, 'logging.yml')
 
@@ -159,7 +160,30 @@ link '/opt/opscode/embedded/elasticsearch/config' do
 end
 
 component_runit_service 'elasticsearch' do
-  action [:enable, :start]
+  action :enable
+end
+
+# start the elasticsearch runit service.
+ruby_block 'starting elasticsearch' do
+  block do
+    started = false
+    10.times do
+        command = Mixlib::ShellOut.new("#{runit_sv_path} start #{elasticsearch_service}")
+        command.run_command
+        if !command.status.success?
+          sleep 1
+        else
+          started = true
+          break
+        end
+      end
+
+      unless started
+        Chef::Log.fatal('Failed to start elasticsearch runit service')
+        Kernel.exit! 1
+      end
+  end
+  notifies :start, 'component_runit_service[elasticsearch]'
 end
 
 include_recipe 'private-chef::elasticsearch_index'
