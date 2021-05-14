@@ -55,7 +55,7 @@ describe "oc_id API", :oc_id do
     puts "Start Time : " + time_start.inspect
     response = get("#{platform.server}/id/signin", oc_id_user, headers: {"Accept" => "text/html"})
     sleep 20
-    puts "response: #{response}"
+    puts "response: response.headers ? #{response.headers} : No headers"
     time_end = Time.new
     puts "End Time : " + time_end.inspect
     puts "Response : " + response.inspect
