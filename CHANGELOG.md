@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.3.23 -->
-## [14.3.23](https://github.com/chef/chef-server/tree/14.3.23) (2021-05-18)
+<!-- latest_release 14.3.24 -->
+## [14.3.24](https://github.com/chef/chef-server/tree/14.3.24) (2021-05-18)
 
 #### Merged Pull Requests
-- WIP: chef zero automatically requires latest client. [#2474](https://github.com/chef/chef-server/pull/2474) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Start a document about build failure patterns [#2464](https://github.com/chef/chef-server/pull/2464) ([btm](https://github.com/btm))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.3.14 -->
 ### Changes since 14.3.14 release
 
 #### Merged Pull Requests
+- Start a document about build failure patterns [#2464](https://github.com/chef/chef-server/pull/2464) ([btm](https://github.com/btm)) <!-- 14.3.24 -->
 - WIP: chef zero automatically requires latest client. [#2474](https://github.com/chef/chef-server/pull/2474) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.3.23 -->
 - Bump veil from `2875f29` to `ac0a762` in /src/oc_bifrost/oc-bifrost-pedant [#2451](https://github.com/chef/chef-server/pull/2451) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.3.22 -->
 - Update all omnibus deps to the latest + pin a few omnibus deps [#2470](https://github.com/chef/chef-server/pull/2470) ([tas50](https://github.com/tas50)) <!-- 14.3.21 -->
