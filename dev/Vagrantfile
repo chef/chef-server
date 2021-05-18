@@ -574,6 +574,7 @@ def set_chef_zero_provisioning(config, opts)
     chef.binary_path = opts[:chef_path] if opts.has_key?(:chef_path)
     opts[:recipes].each { |recipe| chef.add_recipe(recipe) }
     chef.json = opts[:json]
+    chef.install = false
   end
 end
 
