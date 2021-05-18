@@ -158,10 +158,6 @@ Example:
   done, the release is available to the public via the APT and YUM
   repositories and downloads.chef.io.
 
-3. Chef employees should already know a release is coming; however, as a
-  courtesy, drop a message in the #cft-announce slack channel that the release
-  is coming. Provide the release number and any highlights of the release.
-
 ### Announce the release post-promote to the following channels:
     - #a2-release-coordinate
     - #chef-server
