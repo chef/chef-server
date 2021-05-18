@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.3.24 -->
-## [14.3.24](https://github.com/chef/chef-server/tree/14.3.24) (2021-05-18)
+<!-- latest_release 14.3.25 -->
+## [14.3.25](https://github.com/chef/chef-server/tree/14.3.25) (2021-05-18)
 
 #### Merged Pull Requests
-- Start a document about build failure patterns [#2464](https://github.com/chef/chef-server/pull/2464) ([btm](https://github.com/btm))
+- Delete redundant step in the release process. [#2439](https://github.com/chef/chef-server/pull/2439) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.3.14 -->
 ### Changes since 14.3.14 release
 
 #### Merged Pull Requests
+- Delete redundant step in the release process. [#2439](https://github.com/chef/chef-server/pull/2439) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.3.25 -->
 - Start a document about build failure patterns [#2464](https://github.com/chef/chef-server/pull/2464) ([btm](https://github.com/btm)) <!-- 14.3.24 -->
 - WIP: chef zero automatically requires latest client. [#2474](https://github.com/chef/chef-server/pull/2474) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.3.23 -->
 - Bump veil from `2875f29` to `ac0a762` in /src/oc_bifrost/oc-bifrost-pedant [#2451](https://github.com/chef/chef-server/pull/2451) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.3.22 -->
