@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.4.3 -->
-## [14.4.3](https://github.com/chef/chef-server/tree/14.4.3) (2021-05-19)
+<!-- latest_release 14.4.4 -->
+## [14.4.4](https://github.com/chef/chef-server/tree/14.4.4) (2021-05-19)
 
 #### Merged Pull Requests
-- Bump Elasticsearch 6.8.14 -&gt; 6.8.15 / 7.9.1 -&gt; 7.9.3 [#2481](https://github.com/chef/chef-server/pull/2481) ([tas50](https://github.com/tas50))
+- Disable nginx server tokens everywhere [#2463](https://github.com/chef/chef-server/pull/2463) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.3.14 -->
 ### Changes since 14.3.14 release
 
 #### Merged Pull Requests
+- Disable nginx server tokens everywhere [#2463](https://github.com/chef/chef-server/pull/2463) ([tas50](https://github.com/tas50)) <!-- 14.4.4 -->
 - Bump Elasticsearch 6.8.14 -&gt; 6.8.15 / 7.9.1 -&gt; 7.9.3 [#2481](https://github.com/chef/chef-server/pull/2481) ([tas50](https://github.com/tas50)) <!-- 14.4.3 -->
 - Update PostgreSQL 9.6.21 -&gt; 9.6.22 [#2482](https://github.com/chef/chef-server/pull/2482) ([tas50](https://github.com/tas50)) <!-- 14.4.2 -->
 - Update haproxy 1.6.15 -&gt; 1.6.16 [#2483](https://github.com/chef/chef-server/pull/2483) ([tas50](https://github.com/tas50)) <!-- 14.4.1 -->
