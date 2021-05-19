@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.4.1 -->
-## [14.4.1](https://github.com/chef/chef-server/tree/14.4.1) (2021-05-19)
+<!-- latest_release 14.4.2 -->
+## [14.4.2](https://github.com/chef/chef-server/tree/14.4.2) (2021-05-19)
 
 #### Merged Pull Requests
-- Update haproxy 1.6.15 -&gt; 1.6.16 [#2483](https://github.com/chef/chef-server/pull/2483) ([tas50](https://github.com/tas50))
+- Update PostgreSQL 9.6.21 -&gt; 9.6.22 [#2482](https://github.com/chef/chef-server/pull/2482) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.3.14 -->
 ### Changes since 14.3.14 release
 
 #### Merged Pull Requests
+- Update PostgreSQL 9.6.21 -&gt; 9.6.22 [#2482](https://github.com/chef/chef-server/pull/2482) ([tas50](https://github.com/tas50)) <!-- 14.4.2 -->
 - Update haproxy 1.6.15 -&gt; 1.6.16 [#2483](https://github.com/chef/chef-server/pull/2483) ([tas50](https://github.com/tas50)) <!-- 14.4.1 -->
 - Upgrade to GitHub-native Dependabot [#2454](https://github.com/chef/chef-server/pull/2454) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.4.0 -->
 - Bump nokogiri from 1.11.0 to 1.11.4 in /src/oc-id [#2485](https://github.com/chef/chef-server/pull/2485) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.3.29 -->
