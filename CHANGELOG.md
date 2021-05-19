@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.3.29 -->
-## [14.3.29](https://github.com/chef/chef-server/tree/14.3.29) (2021-05-18)
+<!-- latest_release 14.4.0 -->
+## [14.4.0](https://github.com/chef/chef-server/tree/14.4.0) (2021-05-19)
 
 #### Merged Pull Requests
-- Bump nokogiri from 1.11.0 to 1.11.4 in /src/oc-id [#2485](https://github.com/chef/chef-server/pull/2485) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Upgrade to GitHub-native Dependabot [#2454](https://github.com/chef/chef-server/pull/2454) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.3.14 -->
 ### Changes since 14.3.14 release
 
 #### Merged Pull Requests
+- Upgrade to GitHub-native Dependabot [#2454](https://github.com/chef/chef-server/pull/2454) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.4.0 -->
 - Bump nokogiri from 1.11.0 to 1.11.4 in /src/oc-id [#2485](https://github.com/chef/chef-server/pull/2485) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.3.29 -->
 - Bump activesupport from 6.1.3.1 to 6.1.3.2 in /src/oc_bifrost/oc-bifrost-pedant [#2471](https://github.com/chef/chef-server/pull/2471) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.3.28 -->
 - Bump activesupport from 6.1.3.1 to 6.1.3.2 in /oc-chef-pedant [#2472](https://github.com/chef/chef-server/pull/2472) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.3.27 -->
