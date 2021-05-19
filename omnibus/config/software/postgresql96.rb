@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Chef Software, Inc.
+# Copyright:: Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 name "postgresql96"
 
-default_version "9.6.21"
+default_version "9.6.22"
 
 license "PostgreSQL"
 license_file "COPYRIGHT"
@@ -30,7 +30,7 @@ dependency "libossp-uuid"
 dependency "config_guess"
 
 source url: "https://ftp.postgresql.org/pub/source/v#{version}/postgresql-#{version}.tar.bz2"
-version("9.6.21") { source sha256: "930feaef28885c97ec40c26ab6221903751eeb625de92b22602706d7d47d1634" }
+version("9.6.22") { source sha256: "3d32cd101025a0556813397c69feff3df3d63736adb8adeaf365c522f39f2930" }
 
 relative_path "postgresql-#{version}"
 
