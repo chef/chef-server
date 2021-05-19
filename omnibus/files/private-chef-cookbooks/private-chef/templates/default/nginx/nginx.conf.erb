@@ -12,6 +12,7 @@ events {
 }
 
 http {
+  server_tokens off;
 
 <% if node['private_chef']['nginx']['log_x_forwarded_for'] -%>
   log_format opscode ' $http_x_forwarded_for- $remote_user [$<%= @helper.time_format %>]  '
@@ -115,7 +116,6 @@ http {
       <%- if @non_ssl_port %>
     server {
       listen <%= @non_ssl_port %> default_server;
-      server_tokens off;
       server_name _;
       return 404;
     }
@@ -123,7 +123,6 @@ http {
 
     server {
       listen <%= @ssl_port %> ssl;
-      server_tokens off;
 
       ssl_certificate <%= @ssl_certificate %>;
       ssl_certificate_key <%= @ssl_certificate_key %>;
