@@ -35,6 +35,8 @@ dependency "haproxy"
 dependency "pg-gem" # used by private-chef-ctl reconfigure
 dependency "elasticsearch" # used by search
 
+# make sure we have the bundler necessary for the chef install we're using
+dependency "bundler"
 # moved earlier because it is external to this repo and pinned, so should change infrequently
 dependency "chef" # for embedded chef-client -z runs (built from master - build last)
 

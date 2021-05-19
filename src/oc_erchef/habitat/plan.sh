@@ -84,7 +84,7 @@ do_build() {
   export LD_LIBRARY_PATH="$(pkg_path_for core/gecode)/lib"
   export CPLUS_INCLUDE_PATH="$(pkg_path_for core/gecode)/include"
   mkdir -p "$GEM_HOME"
-  gem install bundler:1.17.2
+  gem install bundler:2.1.4
 
   make omnibus
 }

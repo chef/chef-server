@@ -59,7 +59,7 @@ do_install() {
   mkdir -p "$RUBY_VENDOR"
 
   export GEM_HOME="$RUBY_VENDOR"
-  gem install bundler:1.17.2
+  gem install bundler:2.1.4
 
   # install oc-chef-pedant in its own directory under $pkg_prefix
   echo "====== BUILDING OC-CHEF-PEDANT ==== "
