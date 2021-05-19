@@ -1,5 +1,5 @@
 #
-# Copyright 2016-2020 Chef Software, Inc.
+# Copyright:: Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 name "haproxy"
-default_version "1.6.15"
+default_version "1.6.16"
 
 dependency "zlib"
 dependency "pcre"
@@ -26,7 +26,7 @@ skip_transitive_dependency_licensing true
 
 # HTTPS is available but certificate validation fails on OS X
 source url: "http://www.haproxy.org/download/1.6/src/haproxy-#{version}.tar.gz",
-       sha256: "8b1a9afe9ad3bb4db36ac9125a6078a0df858088219a1e63e8947c09d46879c2"
+       sha256: "c129f85364aca047339f839aefe20151635bc8142e7e342a6797579b54019e11"
 
 relative_path "haproxy-#{version}"
 
