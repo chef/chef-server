@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 14.4.5 -->
+## [14.4.5](https://github.com/chef/chef-server/tree/14.4.5) (2021-05-20)
+
+#### Merged Pull Requests
+- Build and test on RHEL 8 [#2495](https://github.com/chef/chef-server/pull/2495) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=14.4.4 -->
+### Changes since 14.4.4 release
+
+#### Merged Pull Requests
+- Build and test on RHEL 8 [#2495](https://github.com/chef/chef-server/pull/2495) ([tas50](https://github.com/tas50)) <!-- 14.4.5 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
