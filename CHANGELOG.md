@@ -1,39 +1,37 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.4.4 -->
-## [14.4.4](https://github.com/chef/chef-server/tree/14.4.4) (2021-05-19)
-
-#### Merged Pull Requests
-- Disable nginx server tokens everywhere [#2463](https://github.com/chef/chef-server/pull/2463) ([tas50](https://github.com/tas50))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=14.3.14 -->
-### Changes since 14.3.14 release
-
-#### Merged Pull Requests
-- Disable nginx server tokens everywhere [#2463](https://github.com/chef/chef-server/pull/2463) ([tas50](https://github.com/tas50)) <!-- 14.4.4 -->
-- Bump Elasticsearch 6.8.14 -&gt; 6.8.15 / 7.9.1 -&gt; 7.9.3 [#2481](https://github.com/chef/chef-server/pull/2481) ([tas50](https://github.com/tas50)) <!-- 14.4.3 -->
-- Update PostgreSQL 9.6.21 -&gt; 9.6.22 [#2482](https://github.com/chef/chef-server/pull/2482) ([tas50](https://github.com/tas50)) <!-- 14.4.2 -->
-- Update haproxy 1.6.15 -&gt; 1.6.16 [#2483](https://github.com/chef/chef-server/pull/2483) ([tas50](https://github.com/tas50)) <!-- 14.4.1 -->
-- Upgrade to GitHub-native Dependabot [#2454](https://github.com/chef/chef-server/pull/2454) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.4.0 -->
-- Bump nokogiri from 1.11.0 to 1.11.4 in /src/oc-id [#2485](https://github.com/chef/chef-server/pull/2485) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.3.29 -->
-- Bump activesupport from 6.1.3.1 to 6.1.3.2 in /src/oc_bifrost/oc-bifrost-pedant [#2471](https://github.com/chef/chef-server/pull/2471) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.3.28 -->
-- Bump activesupport from 6.1.3.1 to 6.1.3.2 in /oc-chef-pedant [#2472](https://github.com/chef/chef-server/pull/2472) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.3.27 -->
-- Bump omnibus-software from `541a148` to `a13ce9b` in /omnibus [#2479](https://github.com/chef/chef-server/pull/2479) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.3.26 -->
-- Delete redundant step in the release process. [#2439](https://github.com/chef/chef-server/pull/2439) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.3.25 -->
-- Start a document about build failure patterns [#2464](https://github.com/chef/chef-server/pull/2464) ([btm](https://github.com/btm)) <!-- 14.3.24 -->
-- WIP: chef zero automatically requires latest client. [#2474](https://github.com/chef/chef-server/pull/2474) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.3.23 -->
-- Bump veil from `2875f29` to `ac0a762` in /src/oc_bifrost/oc-bifrost-pedant [#2451](https://github.com/chef/chef-server/pull/2451) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.3.22 -->
-- Update all omnibus deps to the latest + pin a few omnibus deps [#2470](https://github.com/chef/chef-server/pull/2470) ([tas50](https://github.com/tas50)) <!-- 14.3.21 -->
-- Fix typo in error handler name [#2447](https://github.com/chef/chef-server/pull/2447) ([pdohertybcov](https://github.com/pdohertybcov)) <!-- 14.3.20 -->
-- Update Hugo version and fix Netlify build commands [#2465](https://github.com/chef/chef-server/pull/2465) ([IanMadd](https://github.com/IanMadd)) <!-- 14.3.19 -->
-- Add berkshelf as a dep in chef-server-ctl [#2468](https://github.com/chef/chef-server/pull/2468) ([tas50](https://github.com/tas50)) <!-- 14.3.18 -->
-- Bump chef_fixie from 0.4.0 to 0.5.0 in /src/chef-server-ctl [#2448](https://github.com/chef/chef-server/pull/2448) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.3.17 -->
-- Bump omnibus from `0780fb3` to `79c80e0` in /omnibus [#2443](https://github.com/chef/chef-server/pull/2443) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.3.16 -->
-- Bump omnibus-software from `810a6c4` to `3ac1dbe` in /omnibus [#2444](https://github.com/chef/chef-server/pull/2444) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot])) <!-- 14.3.15 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [14.4.4](https://github.com/chef/chef-server/tree/14.4.4) (2021-05-20)
+
+#### Merged Pull Requests
+- Bump omnibus-software from `810a6c4` to `3ac1dbe` in /omnibus [#2444](https://github.com/chef/chef-server/pull/2444) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Bump omnibus from `0780fb3` to `79c80e0` in /omnibus [#2443](https://github.com/chef/chef-server/pull/2443) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Bump chef_fixie from 0.4.0 to 0.5.0 in /src/chef-server-ctl [#2448](https://github.com/chef/chef-server/pull/2448) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Add berkshelf as a dep in chef-server-ctl [#2468](https://github.com/chef/chef-server/pull/2468) ([tas50](https://github.com/tas50))
+- Update Hugo version and fix Netlify build commands [#2465](https://github.com/chef/chef-server/pull/2465) ([IanMadd](https://github.com/IanMadd))
+- Fix typo in error handler name [#2447](https://github.com/chef/chef-server/pull/2447) ([pdohertybcov](https://github.com/pdohertybcov))
+- Update all omnibus deps to the latest + pin a few omnibus deps [#2470](https://github.com/chef/chef-server/pull/2470) ([tas50](https://github.com/tas50))
+- Bump veil from `2875f29` to `ac0a762` in /src/oc_bifrost/oc-bifrost-pedant [#2451](https://github.com/chef/chef-server/pull/2451) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- WIP: chef zero automatically requires latest client. [#2474](https://github.com/chef/chef-server/pull/2474) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Start a document about build failure patterns [#2464](https://github.com/chef/chef-server/pull/2464) ([btm](https://github.com/btm))
+- Delete redundant step in the release process. [#2439](https://github.com/chef/chef-server/pull/2439) ([lbakerchef](https://github.com/lbakerchef))
+- Bump omnibus-software from `541a148` to `a13ce9b` in /omnibus [#2479](https://github.com/chef/chef-server/pull/2479) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Bump activesupport from 6.1.3.1 to 6.1.3.2 in /oc-chef-pedant [#2472](https://github.com/chef/chef-server/pull/2472) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Bump activesupport from 6.1.3.1 to 6.1.3.2 in /src/oc_bifrost/oc-bifrost-pedant [#2471](https://github.com/chef/chef-server/pull/2471) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Bump nokogiri from 1.11.0 to 1.11.4 in /src/oc-id [#2485](https://github.com/chef/chef-server/pull/2485) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Upgrade to GitHub-native Dependabot [#2454](https://github.com/chef/chef-server/pull/2454) ([dependabot-preview[bot]](https://github.com/dependabot-preview[bot]))
+- Update haproxy 1.6.15 -&gt; 1.6.16 [#2483](https://github.com/chef/chef-server/pull/2483) ([tas50](https://github.com/tas50))
+- Update PostgreSQL 9.6.21 -&gt; 9.6.22 [#2482](https://github.com/chef/chef-server/pull/2482) ([tas50](https://github.com/tas50))
+- Bump Elasticsearch 6.8.14 -&gt; 6.8.15 / 7.9.1 -&gt; 7.9.3 [#2481](https://github.com/chef/chef-server/pull/2481) ([tas50](https://github.com/tas50))
+- Disable nginx server tokens everywhere [#2463](https://github.com/chef/chef-server/pull/2463) ([tas50](https://github.com/tas50))
+<!-- latest_stable_release -->
+
 ## [14.3.14](https://github.com/chef/chef-server/tree/14.3.14) (2021-04-22)
 
 #### Merged Pull Requests
@@ -76,7 +74,6 @@
 -  Move chef-fixie and knife-ec-backup to chef-server-ctl deps  [#2442](https://github.com/chef/chef-server/pull/2442) ([tas50](https://github.com/tas50))
 - Add Content-Security-Policy and X-Frame-Options headers to our static content [#2407](https://github.com/chef/chef-server/pull/2407) ([tas50](https://github.com/tas50))
 - Adding HSTS docs [#2445](https://github.com/chef/chef-server/pull/2445) ([vinay-satish](https://github.com/vinay-satish))
-<!-- latest_stable_release -->
 
 ## [14.2.2](https://github.com/chef/chef-server/tree/14.2.2) (2021-03-17)
 
