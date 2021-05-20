@@ -190,7 +190,7 @@ class PostgresqlPreflightValidator < PreflightValidator
     # Note that we're looking for the same major, and using our minor as the minimum version
     # This provides compatibility with external databases that use < 9.6 before we make use
     # of any features available in > 9.2.
-    unless (major == REQUIRED_MAJOR) && (minor >= REQUIRED_MINOR)
+    unless major == 12 || ((major == REQUIRED_MAJOR) && (minor >= REQUIRED_MINOR))
       fail_with err_CSPG014_bad_postgres_version(v)
     end
   end
