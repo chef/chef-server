@@ -70,7 +70,7 @@ Umbrella Testing Step-by-Step:
 1. Optionally, fill-in the 'Message' field with something descriptive.
 1. Select 'Create Build'.
 
-Currently (02/21), the Umbrella pipeline does not perform a test login to Chef Manage, so this should be done manually.  One method is to run representative AWS and Azure Umbrella scenarios locally to get running server instances to test.
+Currently (05/21), the Umbrella pipeline does not perform a test login to Chef Manage, so this should be done manually.  One method is to run representative AWS and Azure Umbrella scenarios locally to get running server instances to test.Chef Manage should be verified on IPV4 and IPV6 setup.'chef-server-ctl install chef-manage' on the local setup will install the latest stable release of chef-manage. Where as umbrella if a version for chef-manage is not defined will pick the latest current (unstable) version.
 
 Typical scenario for AWS, where _version_ is the version number of the release candidate you are testing:
 ```
@@ -82,6 +82,10 @@ $ make create-vpc
 Initializing modules...
 Downloading terraform-aws-modules/vpc/aws 2.77.0 for vpc...
 ...
+IPV4 Scenario:
+$ PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=standalone-fresh-install ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false ENABLE_IPV6=false make apply
+
+IPV6 Scenario:
 $ PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=standalone-fresh-install ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false ENABLE_IPV6=true make apply
 ```
 9. Obtain the DNS name of the ephemeral machine by observing the output of the boot-up.  A sample output is shown below:
@@ -101,7 +105,7 @@ null_resource.chef_server_config (remote-exec): BEGIN INSTALL CHEF SERVER
 ```
 10. Navigate to `http://<hostname>` via web browser where _hostname_ is the DNS name of the emphemeral machine obtained in the previous step.
 11. Enter the username and password to test the login.  The username and password are stored in the following script:  
-    https://github.com/chef/chef-server/blob/master/terraform/common/files/add_user.sh.  
+    https://github.com/chef/umbrella/blob/master/chef-server/common/files/add_user.sh.  
 12. Verify that the login is successful.
 13. Navigate to `http://<hostname>/id` via web browser where _hostname_ is the DNS name of the emphemeral machine obtained in the previous step.
 14. Login with the same user/password as the previous login step above.
@@ -115,11 +119,20 @@ Typical scenario for Azure, where _version_ is the version number of the release
 $ cd umbrella/chef-server/scenarios/azure
 $ ARM_DEPT=Eng ARM_CONTACT=your_login_here make create-resource-group
 ...
+IPV4 Scenario:
+$ PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=external-postgresql ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false ENABLE_IPV6=false make apply
+
+IPV6 Scenario:
 $ PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=external-postgresql ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false ENABLE_IPV6=true make apply
 ```
 17. Perform the same login processes specified above for AWS.
 18. Clean-up:
+
 ```
+IPV4 Scenario:
+PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=external-postgresql ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false ENABLE_IPV6=false make destroy
+
+IPV6 Scenario:
 PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=external-postgresql ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false ENABLE_IPV6=true make destroy
 ```
 
