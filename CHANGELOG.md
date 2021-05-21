@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.4.6 -->
-## [14.4.6](https://github.com/chef/chef-server/tree/14.4.6) (2021-05-20)
+<!-- latest_release 14.4.7 -->
+## [14.4.7](https://github.com/chef/chef-server/tree/14.4.7) (2021-05-21)
 
 #### Merged Pull Requests
-- Revert &quot;Build and test on RHEL 8&quot; [#2497](https://github.com/chef/chef-server/pull/2497) ([tas50](https://github.com/tas50))
+- Chef Manage should be verified on ipv4 &amp; ipv6 setup [#2478](https://github.com/chef/chef-server/pull/2478) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.4.4 -->
 ### Changes since 14.4.4 release
 
 #### Merged Pull Requests
+- Chef Manage should be verified on ipv4 &amp; ipv6 setup [#2478](https://github.com/chef/chef-server/pull/2478) ([jashaik](https://github.com/jashaik)) <!-- 14.4.7 -->
 - Revert &quot;Build and test on RHEL 8&quot; [#2497](https://github.com/chef/chef-server/pull/2497) ([tas50](https://github.com/tas50)) <!-- 14.4.6 -->
 - Build and test on RHEL 8 [#2495](https://github.com/chef/chef-server/pull/2495) ([tas50](https://github.com/tas50)) <!-- 14.4.5 -->
 <!-- release_rollup -->
