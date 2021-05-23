@@ -67,3 +67,6 @@ dependency "oc_erchef"
 dependency "oc-chef-pedant"
 dependency "private-chef-upgrades"
 dependency "private-chef-cookbooks"
+
+# ruby cleanup that's specific to how oc-id is installed in server
+dependency "more-ruby-cleanup-server"
