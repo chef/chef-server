@@ -23,8 +23,6 @@ skip_transitive_dependency_licensing true
 
 dependency "postgresql96" # for libpq
 dependency "omnibus-ctl"
-# Used by `chef-server-ctl install` to resolve download urls
-dependency "mixlib-install"
 
 build do
 

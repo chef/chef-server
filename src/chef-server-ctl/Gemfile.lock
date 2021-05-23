@@ -11,6 +11,7 @@ PATH
       knife-ec-backup
       knife-opc
       license-acceptance
+      mixlib-install
       mixlib-log
       omnibus-ctl
       pg (~> 0.17, >= 0.17.1)
@@ -172,9 +173,14 @@ GEM
     mixlib-cli (2.1.8)
     mixlib-config (3.0.9)
       tomlrb
+    mixlib-install (3.12.11)
+      mixlib-shellout
+      mixlib-versioning
+      thor
     mixlib-log (3.0.9)
     mixlib-shellout (3.2.5)
       chef-utils
+    mixlib-versioning (1.2.12)
     molinillo (0.7.0)
     multi_json (1.15.0)
     multipart-post (2.1.1)

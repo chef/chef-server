@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.required_ruby_version = ">= 2.4.0"
+  spec.required_ruby_version = ">= 2.6.0"
 
   spec.add_runtime_dependency "highline", "~> 1.6", ">= 1.6.9"
 
@@ -53,6 +53,9 @@ Gem::Specification.new do |spec|
   # for the overall chef-server "app"
   spec.add_runtime_dependency "knife-ec-backup"
   spec.add_runtime_dependency "chef_fixie"
+
+  # Used to resolve download urls
+  spec.add_runtime_dependency "mixlib-install"
 
   spec.add_development_dependency "chefstyle"
   spec.add_development_dependency "bundler"
